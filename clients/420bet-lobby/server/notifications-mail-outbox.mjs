@@ -3,7 +3,7 @@
 import {mkdir,open,readFile,rename,rm,stat,chmod} from 'node:fs/promises';
 import {dirname,basename,join} from 'node:path';
 import {randomBytes} from 'node:crypto';
-import {makeBetDelivery} from './notifications-mail-adapters.mjs';
+import {makeBetDelivery,makeReorgCorrection} from './notifications-mail-adapters.mjs';
 const assert=(v,m)=>{if(!v)throw Error('420Bet outbox: '+m);};
 const STATES=new Set(['pending','dispatching','retry','pending_receipt','delivered','dead_letter','cancelled']);
 const CHANNELS=['mail','notifications'];
@@ -87,7 +87,8 @@ export async function openBetDeliveryOutbox({
   return Object.freeze({
    key:item.delivery.deliveryKey,channel:item.delivery.channel,status:item.status,
    attempts:item.attempts,nextAttemptAt:item.nextAttemptAt,
-   retracted:item.retracted===true,
+   retracted:item.retracted===true,correctionOf:item.delivery.correctionOf??null,
+   remoteCancellationPending:item.remoteCancellationPending===true,
    receipt:item.receipt?{provider:item.receipt.provider,externalId:item.receipt.externalId,
     status:item.receipt.status}:null
   });
@@ -228,6 +229,55 @@ export async function openBetDeliveryOutbox({
  async function haltForReorg(){
   return withWrite(async state=>{state.halted=true;return {halted:true};});
  }
+ function enqueueCorrectionInState(state,original){
+  assert(original.status==='delivered'&&original.receipt?.status==='delivered',
+   'compensation requires delivered receipt');
+  const correction=makeReorgCorrection(original.delivery);
+  const existing=state.items[correction.deliveryKey];
+  if(existing){
+   assert(existing.delivery.correctionOf===original.delivery.deliveryKey,
+    'correction idempotency conflict');
+   return false;
+  }
+  assert(Object.keys(state.items).length<10000,'outbox capacity exceeded');
+  const t=clock();
+  state.items[correction.deliveryKey]={delivery:correction,status:'pending',
+   attempts:0,nextAttemptAt:t,receipt:null,createdAt:t,updatedAt:t};
+  return true;
+ }
+ // Only an independently approved, fully completed canonical replay can
+ // supersede the reorganization halt and declare prior deliveries orphaned.
+ async function reconcileCanonicalReplay({canonicalEventIds,verifyCanonicalRebuild}={}){
+  assert(Array.isArray(canonicalEventIds)&&canonicalEventIds.length<=200000&&
+   canonicalEventIds.every(x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x)),
+   'invalid complete canonical event set');
+  assert(typeof verifyCanonicalRebuild==='function'&&
+   (await verifyCanonicalRebuild())===true,
+   'canonical rebuild not independently verified');
+  const canonical=new Set(canonicalEventIds);
+  return withWrite(async state=>{
+   assert(state.halted,'reorganization recovery requires halted outbox');
+   let orphaned=0,corrections=0,cancelPending=0;
+   for(const item of Object.values(state.items)){
+    const d=item.delivery;
+    if(d.source!=='420Indexer-finalized'||canonical.has(d.eventId)||item.reorgRetracted)continue;
+    item.reorgRetracted=true;orphaned++;
+    if(item.status==='delivered'){
+     item.retracted=true;
+     if(enqueueCorrectionInState(state,item))corrections++;
+    }else if(item.status!=='cancelled'&&item.status!=='dead_letter'){
+     item.status='cancelled';item.nextAttemptAt=null;
+     item.remoteCancellationPending=Boolean(item.receipt);
+     if(item.remoteCancellationPending)cancelPending++;
+    }else if(item.receipt?.status==='pending'){
+     item.remoteCancellationPending=true;cancelPending++;
+    }
+    item.updatedAt=clock();
+   }
+   state.halted=false;
+   return {halted:false,orphaned,corrections,cancelPending};
+  });
+ }
  async function resumeAfterCanonicalReplay(verifyCanonicalRebuild){
   assert(typeof verifyCanonicalRebuild==='function','trusted rebuild verification required');
   assert((await verifyCanonicalRebuild())===true,'canonical rebuild not independently verified');
@@ -296,5 +346,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

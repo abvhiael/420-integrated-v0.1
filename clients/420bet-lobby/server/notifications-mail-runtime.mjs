@@ -39,13 +39,17 @@ export async function createBetNotificationsMailRuntime({
  const consent=checkConsent??(env.BET_NOTIFICATIONS_CONSENT_URL&&env.BET_NOTIFICATIONS_CONSENT_TOKEN?
   create420NotificationsConsentAuthority({origin:env.BET_NOTIFICATIONS_CONSENT_URL,
    bearerToken:env.BET_NOTIFICATIONS_CONSENT_TOKEN,fetcher}):null);
- const mailBroker=authorizeMailActor??(env.BET_MAIL_SENDER_ID&&env.BET_MAIL_ACTOR_TOKEN?
-  createVerified420MailActorBroker({origin:env.BET_MAIL_URL,
-   sender:env.BET_MAIL_SENDER_ID,serviceToken:env.BET_MAIL_ACTOR_TOKEN,fetcher}).authorizeActor:null);
+ const verifiedMail=authorizeMailActor?null:
+  (env.BET_MAIL_SENDER_ID&&env.BET_MAIL_ACTOR_TOKEN?
+   createVerified420MailActorBroker({origin:env.BET_MAIL_URL,
+    sender:env.BET_MAIL_SENDER_ID,serviceToken:env.BET_MAIL_ACTOR_TOKEN,fetcher}):null);
+ const mailBroker=authorizeMailActor??verifiedMail?.authorizeActor??null;
  fail(typeof ownership==='function'&&typeof consent==='function'&&
   typeof mailBroker==='function'&&notifications&&
   ['deliverAuthenticated','readReceipt','cancelDelivery'].every(k=>typeof notifications[k]==='function'),
   'qualified Identity, Notifications, consent and Mail providers required');
+ // Verify the actual authenticated 420Mail actor before opening delivery state.
+ if(verifiedMail)await verifiedMail.checkReadiness();
  const manifest=JSON.parse(await readFile(env.BET_INDEXER_EVENT_MANIFEST,'utf8'));
  const registry=await verifyRegistry({env,indexerManifest:manifest});
  fail(registry?.result?.qualified===true,'verified Registry unavailable');

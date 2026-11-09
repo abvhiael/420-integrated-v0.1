@@ -51,11 +51,16 @@ export async function openBetDeliveryOutbox({
     'invalid durable outbox');
   }catch(error){
    if(error?.code!=='ENOENT')throw error;
-   data={schema:1,items:{},halted:false};
+   data={schema:1,items:{},halted:false,revocationCursor:0,revokedSubscriptions:{}};
    await atomicWrite(path,data);
   }
   assert(data.halted===undefined||typeof data.halted==='boolean','invalid durable halt state');
   if(data.halted===undefined)data.halted=false;
+  if(data.revocationCursor===undefined)data.revocationCursor=0;
+  if(data.revokedSubscriptions===undefined)data.revokedSubscriptions={};
+  assert(Number.isSafeInteger(data.revocationCursor)&&data.revocationCursor>=0&&
+   data.revokedSubscriptions&&typeof data.revokedSubscriptions==='object'&&
+   !Array.isArray(data.revokedSubscriptions),'invalid durable revocation state');
   for(const [key,item] of Object.entries(data.items)){
    assert(key===item.delivery?.deliveryKey&&STATES.has(item.status),
     'invalid durable delivery item');
@@ -105,6 +110,8 @@ export async function openBetDeliveryOutbox({
   assert(await ensureConsent(d),'consent denied or withdrawn');
   return withWrite(async state=>{
    assert(!state.halted,'canonical reorg halt active');
+   assert(!state.revokedSubscriptions[JSON.stringify([d.tenant,d.userId,d.subscriptionId])],
+    'subscription withdrawn');
    const previous=state.items[d.deliveryKey];
    if(previous){
     assert(JSON.stringify(previous.delivery)===JSON.stringify(d),'idempotency conflict');
@@ -134,30 +141,38 @@ export async function openBetDeliveryOutbox({
   }
   return {...(result?.record??result),remoteCancellationConfirmed:false};
  }
- async function revokeSubscription({tenant,userId,subscriptionId}={}){
-  assert(typeof tenant==='string'&&typeof userId==='string'&&typeof subscriptionId==='string',
-   'invalid subscription revocation scope');
-  const pending=await withWrite(async state=>{
-   const list=[];
+ async function revokeSubscription({tenant,userId,subscriptionId,sequence=null}={}){
+  assert(tenant==='420bet'&&typeof userId==='string'&&userId.length>0&&
+   typeof subscriptionId==='string'&&subscriptionId.length>0,'invalid subscription revocation scope');
+  if(sequence!==null)assert(Number.isSafeInteger(sequence)&&sequence>0,'invalid revocation sequence');
+  const result=await withWrite(async state=>{
+   if(sequence!==null){
+    if(sequence<=state.revocationCursor)return {duplicate:true,affected:[]};
+    assert(sequence===state.revocationCursor+1,'revocation feed sequence gap');
+   }
+   const id=JSON.stringify([tenant,userId,subscriptionId]);
+   state.revokedSubscriptions[id]=true;
+   const affected=[];
    for(const item of Object.values(state.items)){
     const d=item.delivery;
-    if(d.tenant===tenant&&d.userId===userId&&d.subscriptionId===subscriptionId&&
-     item.status!=='cancelled'){
-     if(item.status==='delivered')item.retracted=true;
-     else{item.status='cancelled';item.nextAttemptAt=null;}
-     item.updatedAt=clock();
-     list.push({delivery:clone(d),receipt:clone(item.receipt)});
-    }
+    if(d.tenant!==tenant||d.userId!==userId||d.subscriptionId!==subscriptionId)continue;
+    if(item.status==='delivered'){item.retracted=true;}
+    else{item.status='cancelled';item.nextAttemptAt=null;}
+    item.updatedAt=clock();
+    if(item.receipt)affected.push({delivery:clone(d),receipt:clone(item.receipt)});
    }
-   return list;
+   if(sequence!==null)state.revocationCursor=sequence;
+   return {duplicate:false,affected};
   });
   let confirmations=0;
-  for(const item of pending)if(item.receipt){
-   try{if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmations++;}catch{}
-  }
-  return {locallyCancelled:pending.length,remoteCancellationConfirmed:confirmations,
-   remoteCancellationUnconfirmed:pending.filter(x=>x.receipt).length-confirmations};
+  for(const item of result.affected)try{
+   if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmations++;
+  }catch{/* an unconfirmed remote cancellation is never reported as success */}
+  return {duplicate:result.duplicate,locallyCancelled:result.affected.length,
+   remoteCancellationConfirmed:confirmations,
+   remoteCancellationUnconfirmed:result.affected.length-confirmations};
  }
+ async function getRevocationCursor(){await operation;return data.revocationCursor;}
  async function retractEvent(eventId){
   const affected=await withWrite(async state=>{
    assert(typeof eventId==='string'&&/^[a-f0-9]{64}$/.test(eventId),'invalid event key');
@@ -251,5 +266,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

@@ -9,6 +9,7 @@ const KINDS=new Set(['wager-accepted','wager-settled','wager-voided','game-pause
  'poker-hand-settled','poker-hand-cancelled','fantasy-entry-accepted','fantasy-pool-settled',
  'fantasy-pool-cancelled','sports-ticket-funded','sports-ticket-settled','sports-ticket-finalized']);
 const CHANNELS=new Set(['notifications','mail']);
+const MAIL_STATUSES=new Set(['QUEUED','SENDING','RETRYING','DELIVERED','FAILED','CANCELLED']);
 const err=(reason)=>{throw Error('420Bet delivery: '+reason);};
 const requireValid=(ok,reason)=>{if(!ok)err(reason);};
 const digest=(v)=>createHash('sha256').update(v).digest('hex');
@@ -90,7 +91,7 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
   const credential=await authorizeActor({tenant:delivery.tenant,userId:delivery.userId,
    recipient:delivery.recipient,channel:'mail'});
   requireValid(credential&&typeof credential.authorization==='string'&&
-   credential.authorization.length>=16&&credential.authorization.length<=4096&&
+   /^Bearer [A-Za-z0-9._~+/-]{16,4096}$/.test(credential.authorization)&&
    typeof credential.sender==='string'&&ID.test(credential.sender),
    'no verified sender identity');
   return credential;
@@ -106,13 +107,15 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
    const queued=await req('/v1/outbox','POST',actor.authorization,payload);
    requireValid(typeof queued.id==='string'&&ID.test(queued.id)&&
     queued.idempotency_key===d.deliveryKey&&queued.owner===actor.sender&&
-    queued.recipient===d.recipient,'Mail queue receipt mismatch');
+    queued.recipient===d.recipient&&MAIL_STATUSES.has(queued.status),
+    'Mail queue receipt mismatch');
    let result=queued;
    if(!['DELIVERED','CANCELLED'].includes(queued.status)){
     result=await req('/v1/outbox/'+encodeURIComponent(queued.id)+'/process','POST',actor.authorization);
    }
    requireValid(result.id===queued.id&&result.owner===actor.sender&&
-    result.idempotency_key===d.deliveryKey,'Mail process receipt mismatch');
+    result.idempotency_key===d.deliveryKey&&MAIL_STATUSES.has(result.status),
+    'Mail process receipt mismatch');
    if(result.status==='FAILED'||result.status==='CANCELLED')err('Mail delivery failed');
    // SENDING/RETRYING are not receipt-level proof of delivery.
    return {provider:'420Mail',externalId:result.id,
@@ -132,7 +135,8 @@ export function create420MailProvider({origin,authorizeActor,fetcher=fetch,timeo
    const result=await req('/v1/outbox/'+encodeURIComponent(receipt.externalId),
     'GET',actor.authorization);
    requireValid(result.id===receipt.externalId&&result.idempotency_key===d.deliveryKey&&
-    result.owner===actor.sender,'Mail receipt scope mismatch');
+    result.owner===actor.sender&&MAIL_STATUSES.has(result.status),
+    'Mail receipt scope mismatch');
    return {provider:'420Mail',externalId:result.id,
     status:result.status==='DELIVERED'?'delivered':
      result.status==='CANCELLED'?'cancelled':

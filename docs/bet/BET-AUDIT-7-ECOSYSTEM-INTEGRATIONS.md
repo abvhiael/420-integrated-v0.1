@@ -73,3 +73,8 @@ Added `clients/420bet-lobby/server/ownership-resolver.mjs` and `tests/ownership-
 ## Consent persistence implementation — 2026-11-09
 
 Added a private `420Notifications` BET subscription store, fsynced single-writer persistence, explicit revision controls, permanent revocation tombstones and separate reader/writer credentials. Integrated the existing service runtime's private routes and connected `clients/420bet-lobby/server/notifications-consent-authority.mjs` to the BET outbox enqueue and dispatch gate using exact tenant/subject/route/channel/policy checks. Unknown or revoked subscriptions deny. The service-native protocol is implemented **locally**, not deployed or independently authorized. Genuine user-initiated consent provisioning, secure subject enrollment, trusted revocation push/cancellation, production DB and end-to-end evidence remain pending; see `BET-AUDIT-7-NOTIFICATIONS-MAIL.md` and `TN-BET-7-NOTIFY-MAIL`.
+
+
+## Consent revocation event integration increment
+
+Implemented ordered durable subscription-withdrawal events in the actual 420Notifications runtime, a read-token authenticated revocation feed, strict 420Bet consumer, atomic outbox revocation cursor and local cancellation tombstones, replay suppression and pre-publish/pre-drain reconciliation. This is *implemented source*, not a live real-time notification pipeline. Remaining always-on deployment, in-flight provider races, exact-SHA passing qualification, legal consent provisioning and operational acceptance are tracked in `TN-BET-7-CONSENT` without treating pre-testnet engineering as completed or blocked by the network.

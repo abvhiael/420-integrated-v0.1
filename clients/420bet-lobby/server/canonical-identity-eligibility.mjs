@@ -16,7 +16,7 @@ function rpcOrigin(value){
 }
 export function createCanonicalIdentityEligibility({
  rpcUrl,chainId,identityAddress,credentialTypes,resolveSubjectId,
- verifyPolicy,fetcher=fetch,timeoutMs=10000
+ verifyPolicy,expectedRuntimeHash,hashRuntimeCode,fetcher=fetch,timeoutMs=10000
 }={}){
  const url=rpcOrigin(rpcUrl);
  ensure(typeof chainId==='string'&&CHAIN.test(chainId),'invalid Identity chain');
@@ -25,6 +25,7 @@ export function createCanonicalIdentityEligibility({
  const required=credentialTypes.map(normalize32);
  ensure(new Set(required).size===required.length,'duplicate credential type');
  ensure(typeof resolveSubjectId==='function'&&typeof verifyPolicy==='function','trusted subject and independent eligibility policy required');
+ if(expectedRuntimeHash!==undefined){normalize32(expectedRuntimeHash);ensure(typeof hashRuntimeCode==='function','runtime code hash provider required');}
  ensure(Number.isSafeInteger(timeoutMs)&&timeoutMs>=100&&timeoutMs<=60000,'invalid RPC timeout');
  const dest=identityAddress.toLowerCase();
  async function rpc(method,params){
@@ -44,6 +45,7 @@ export function createCanonicalIdentityEligibility({
   ensure(/^0x[0-9a-fA-F]+$/.test(liveChain)&&BigInt(liveChain)===BigInt(chainId),'Identity wrong chain');
   const code=await rpc('eth_getCode',[dest,'latest']);
   ensure(/^0x(?:[0-9a-fA-F]{2})+$/.test(code)&&code!=='0x00','Identity contract not deployed');
+  if(expectedRuntimeHash!==undefined)ensure(normalize32(await hashRuntimeCode(code))===normalize32(expectedRuntimeHash),'Identity runtime hash mismatch');
   const subject=normalize32(await resolveSubjectId({account:wallet,chainId}));
   for(const kind of required){
    const out=await rpc('eth_call',[{to:dest,data:SELECTOR+subject.slice(2)+kind.slice(2)},'latest']);

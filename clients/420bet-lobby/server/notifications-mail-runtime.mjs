@@ -81,6 +81,7 @@ export async function createBetNotificationsMailRuntime({
  const revocationConsumer=createBetRevocationConsumer({readRevocations:revocations,outbox});
  const publisher=createFinalizedBetNotificationPublisher({
   reader,checkpointPath:env.BET_INDEXER_EVENT_CHECKPOINT,
+  persistCheckpoint:reader.persistCheckpoint,
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),
   resolveAudience:ownership,outbox});
  const interval=Number(env.BET_REVOCATION_POLL_MS??1000);

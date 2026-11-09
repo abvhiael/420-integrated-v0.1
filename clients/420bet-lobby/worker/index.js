@@ -59,6 +59,8 @@ async function sessionProxy(request,env,fetcher=fetch){
  if(body.length>4096)return apiError(413,'session_payload_too_large');
  const headers={'Content-Type':'application/json','Accept':'application/json','Origin':sourceOrigin,
   'X-Bet-Edge-Secret':env.BET_SESSION_BACKEND_TOKEN};
+ const sourceIp=request.headers.get('CF-Connecting-IP');
+ if(sourceIp&&sourceIp.length<=64&&/^[0-9a-fA-F.:]+$/.test(sourceIp))headers['X-Bet-Client-IP']=sourceIp;
  for(const [input,output] of [['Authorization','Authorization'],['X-Bet-Account','X-Bet-Account'],
    ['X-Bet-Chain-Id','X-Bet-Chain-Id']]){
   const value=request.headers.get(input);

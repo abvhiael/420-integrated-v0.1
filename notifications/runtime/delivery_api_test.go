@@ -86,7 +86,7 @@ func TestNativeDeliveryIdempotencyConflictAndDurableRestart(t *testing.T){
  r:=readNativeReceipt(t,first)
  again:=callNative(s,"POST","/v1/deliveries",token,testDelivery())
  if again.Code!=200||readNativeReceipt(t,again).ID!=r.ID{t.Fatal("duplicate not suppressed")}
- changed:=testDelivery();changed.Event.BlockNumber="24"
+ changed:=testDelivery();changed.PolicyVersion="policy-3"
  conflict:=callNative(s,"POST","/v1/deliveries",token,changed)
  if conflict.Code!=409{t.Fatalf("conflicting key status %d",conflict.Code)}
  path:=store.file

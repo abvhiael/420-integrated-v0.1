@@ -151,3 +151,20 @@ func TestNativeDeliveryRequiresRealQualifiedDependencies(t *testing.T){
  w:=callNative(base,"POST","/v1/deliveries","bad",testDelivery())
  if w.Code!=404{t.Fatalf("unconfigured delivery endpoint exposed: %d",w.Code)}
 }
+
+func TestNativeDeliveryExternalWorkerCannotOverrideTerminalReceipt(t *testing.T){
+ s,store,_:=testNativeAPI(t)
+ if err:=s.Qualify(context.Background());err!=nil{t.Fatal(err)}
+ key:=strings.Repeat("n",64)
+ made:=callNative(s,"POST","/v1/deliveries",key,testDelivery())
+ if made.Code!=201{t.Fatalf("create status %d",made.Code)}
+ rec:=readNativeReceipt(t,made)
+ delivered,err:=store.MarkDelivered(rec.ID)
+ if err!=nil||delivered.Status!="delivered"{t.Fatalf("verified provider result: %v",err)}
+ after:=callNative(s,"POST","/v1/deliveries/"+rec.ID+"/cancel",key,nil)
+ if after.Code!=409{t.Fatalf("cancelled already delivered receipt: %d",after.Code)}
+ checked:=callNative(s,"GET","/v1/deliveries/"+rec.ID,key,nil)
+ if checked.Code!=200||readNativeReceipt(t,checked).Status!="delivered"{
+  t.Fatal("delivered receipt was rewritten")
+ }
+}

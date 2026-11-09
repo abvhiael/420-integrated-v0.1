@@ -6,9 +6,13 @@ import {create420NotificationsRevocationReader,createBetRevocationConsumer} from
 import {createIndexerEventReader} from './indexer-event-reader.mjs';
 import {verifyConfiguredRegistry} from './verify-registry.mjs';
 import {openBetDeliveryOutbox} from './notifications-mail-outbox.mjs';
-import {create420MailProvider,create420NotificationsProvider} from './notifications-mail-adapters.mjs';
+import {create420MailProvider,create420NotificationsProvider,canonicalBetEventId} from './notifications-mail-adapters.mjs';
+import {assertIndexerRegistryBinding} from './registry-verifier.mjs';
 import {createFinalizedBetNotificationPublisher} from './notifications-mail-source.mjs';
 const fail=(v,m)=>{if(!v)throw Error('420Bet Notifications/Mail runtime: '+m);};
+const VERTICAL={'casino-router':'casino','casino-settlement':'casino',
+ 'poker-ledger':'poker','poker-canonical':'poker','fantasy-contest':'fantasy',
+ 'sports-tickets':'sportsbook'};
 const TYPE_NAMES={WAGER_ACCEPTED:'wager-accepted',WAGER_SETTLED:'wager-settled',
  WAGER_VOIDED:'wager-voided',POKER_HAND_SETTLED:'poker-hand-settled',
  POKER_HAND_CANCELLED:'poker-hand-cancelled',FANTASY_ENTRY_ACCEPTED:'fantasy-entry-accepted',
@@ -107,11 +111,69 @@ export async function createBetNotificationsMailRuntime({
   lastRevocationFailure=true;
  });},interval);
  timer.unref?.();
+ // Recover from finalized-source reorganization by independently rebuilding
+ // the complete verified canonical event set before releasing the outbox.
+ async function recoverReorganization(){
+  const state=await outbox.summary();
+  fail(state.halted||state.replayPending,'no canonical recovery required');
+  fail(typeof reader.persistCheckpoint==='function','durable canonical checkpoint writer required');
+  const fresh=await verifyRegistry({env,indexerManifest:manifest});
+  fail(fresh?.result?.qualified===true&&fresh.config,'unqualified recovery Registry');
+  assertIndexerRegistryBinding(reader.config,fresh.config);
+  let canonical=await reader.readCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT);
+  let complete=false;
+  for(let i=0;i<512;i++){
+   const scanned=await reader.poll(canonical,{maxBlocks:64});
+   canonical=scanned.state;
+   if(scanned.complete===true){complete=true;break;}
+   fail(scanned.scanned>0,'canonical replay did not progress');
+  }
+  fail(complete,'canonical replay incomplete; deliveries remain halted');
+  const reconfirm=await verifyRegistry({env,indexerManifest:manifest});
+  fail(reconfirm?.result?.qualified===true&&reconfirm.config,
+   'recovery Registry approval changed');
+  assertIndexerRegistryBinding(reader.config,reconfirm.config);
+  fail(JSON.stringify(fresh.config)===JSON.stringify(reconfirm.config),
+   'recovery Registry identity changed during replay');
+  const canonicalIds=new Set();
+  for(const event of canonical.events){
+   const source=reader.config.contracts.find(x=>x.address===event.contract&&x.role===event.role);
+   const kind=TYPE_NAMES[event.type],vertical=VERTICAL[event.role];
+   if(!source||!kind||!vertical)continue;
+   const games=reconfirm.config.games.filter(game=>game.vertical===vertical&&
+    (!event.gameVersionId||game.gameVersionId===event.gameVersionId));
+   for(const game of games)canonicalIds.add(canonicalBetEventId({
+    chainId:event.chainId,gameId:game.id,transactionHash:event.transactionHash,
+    logIndex:event.logIndex,type:kind,blockHash:event.blockHash
+   }));
+  }
+  // The durable cursor is advanced first while outbox remains halted/pending.
+  // If the process dies before full reprojection, replayPending survives.
+  await reader.persistCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT,canonical);
+  const reconciliation=await outbox.reconcileCanonicalReplay({
+   canonicalEventIds:[...canonicalIds],
+   verifyCanonicalRebuild:async()=>true
+  });
+  const projected=await publisher.replayCanonicalEvents(canonical.events);
+  await outbox.finishCanonicalReplay();
+  return Object.freeze({...reconciliation,projected:projected.queued,
+   skipped:projected.skipped,canonicalEvents:canonical.events.length});
+ }
  return Object.freeze({outbox,
   revocationHealth:()=>({failed:lastRevocationFailure,stopped}),
   // Always catch up revoked subscriptions before publishing or dispatching.
   syncRevocations:args=>sync(args),
-  publish:async args=>{await sync();return publisher.publish(args);},
+  recoverReorganization,
+  publish:async args=>{
+   await sync();
+   const status=await outbox.summary();
+   if(status.halted||status.replayPending){const r=await recoverReorganization();
+    return {reorganized:true,halted:false,queued:r.projected,recovered:true};}
+   const published=await publisher.publish(args);
+   if(published.reorganized){const r=await recoverReorganization();
+    return {reorganized:true,halted:false,queued:r.projected,recovered:true};}
+   return published;
+  },
   drain:async args=>{await sync();return outbox.drain(args);},
   // Invoke only from a trusted, authenticated 420Notifications revocation controller.
   revokeSubscription:scope=>outbox.revokeSubscription(scope),

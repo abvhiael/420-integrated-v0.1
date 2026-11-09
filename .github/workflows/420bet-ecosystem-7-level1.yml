@@ -1,0 +1,25 @@
+name: BET-AUDIT-7 ecosystem reconciliation Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/server/ecosystem.mjs'
+      - 'clients/420bet-lobby/tests/ecosystem.test.mjs'
+      - 'docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md'
+      - '.github/workflows/420bet-ecosystem-7-level1.yml'
+  workflow_dispatch:
+jobs:
+  ecosystem-reconciliation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Focused event reconciliation tests
+        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs
+      - name: Syntax validation
+        run: |
+          node --check clients/420bet-lobby/server/ecosystem.mjs
+          node --check clients/420bet-lobby/tests/ecosystem.test.mjs

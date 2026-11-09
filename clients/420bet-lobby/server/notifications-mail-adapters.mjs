@@ -5,7 +5,9 @@ const HEX=/^0x[0-9a-fA-F]{64}$/;
 const ACCT=/^0x[0-9a-fA-F]{40}$/;
 const ID=/^[a-zA-Z0-9._:-]{1,128}$/;
 const TENANT=/^[a-z0-9][a-z0-9-]{1,39}$/;
-const KINDS=new Set(['wager-accepted','wager-settled','wager-voided','game-paused','game-resumed','reorg-retracted']);
+const KINDS=new Set(['wager-accepted','wager-settled','wager-voided','game-paused','game-resumed','reorg-retracted',
+ 'poker-hand-settled','poker-hand-cancelled','fantasy-entry-accepted','fantasy-pool-settled',
+ 'fantasy-pool-cancelled','sports-ticket-funded','sports-ticket-settled','sports-ticket-finalized']);
 const CHANNELS=new Set(['notifications','mail']);
 const err=(reason)=>{throw Error('420Bet delivery: '+reason);};
 const requireValid=(ok,reason)=>{if(!ok)err(reason);};
@@ -50,7 +52,15 @@ export function makeBetDelivery({tenant,userId,channel,subscriptionId,recipient,
   'wager-voided':'A game record was voided.',
   'game-paused':'A game is paused.',
   'game-resumed':'A game resumed.',
-  'reorg-retracted':'A previous game notification was retracted.'
+  'reorg-retracted':'A previous game notification was retracted.',
+  'poker-hand-settled':'A poker hand result was finalized.',
+  'poker-hand-cancelled':'A poker hand was cancelled.',
+  'fantasy-entry-accepted':'A fantasy entry was recorded.',
+  'fantasy-pool-settled':'A fantasy contest was settled.',
+  'fantasy-pool-cancelled':'A fantasy contest was cancelled.',
+  'sports-ticket-funded':'A sports ticket was funded.',
+  'sports-ticket-settled':'A sports ticket result was recorded.',
+  'sports-ticket-finalized':'A sports ticket outcome was finalized.'
  };
  return Object.freeze({deliveryKey,tenant,userId,channel,subscriptionId,recipient,
   policyVersion,source,eventId,kind:verified.type,event:publicEvent,

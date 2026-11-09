@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"strconv"
 	"time"
 
@@ -53,7 +55,20 @@ func main() {
 	}
 	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5 * time.Second}
 	log.Printf("420Notifications listening on %s", cfg.ListenAddr)
-	log.Fatal(server.ListenAndServe())
+	// Graceful stop releases the exclusive delivery writer lock and avoids
+	// abandoning active receipt files during supervised container shutdown.
+	stopCtx,stop := signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM)
+	defer stop()
+	go func(){
+		<-stopCtx.Done()
+		shutdownCtx,done:=context.WithTimeout(context.Background(),5*time.Second)
+		defer done()
+		_ =server.Shutdown(shutdownCtx)
+	}()
+	if err:=server.ListenAndServe();err!=nil&&err!=http.ErrServerClosed {
+		log.Printf("420Notifications server failed: %v",err)
+		return
+	}
 }
 
 func mustEnv(name string) string {

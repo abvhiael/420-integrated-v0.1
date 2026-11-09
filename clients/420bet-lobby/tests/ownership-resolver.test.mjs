@@ -22,7 +22,7 @@ function fixture(role,{account=A(8),eventVersion=H(10),bad=null,backendFailure=f
  if(bad==='stale')response.verifiedAt=time-31000;
  if(bad==='wrong-chain')response.chainId='421';
  if(bad==='wrong-object')response.objectId=H(88);
- if(bad==='wrong-vertical')response.vertical='casino';
+ if(bad==='wrong-vertical')response.vertical='poker';
  if(bad==='unverified')owner.ownershipVerified=false;
  if(bad==='revoked')owner.revoked=true;
  if(bad==='duplicate')response.owners.push({...owner});

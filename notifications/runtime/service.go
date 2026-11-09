@@ -52,8 +52,8 @@ func (s *Service) Qualify(ctx context.Context) error {
 }
 
 // EnableBetConsent installs the private HTTP boundary; absent configuration leaves it disabled.
-func (s *Service) EnableBetConsent(store *betconsent.Store, token string) error {
- handler,err:=betconsent.Handler(store,token)
+func (s *Service) EnableBetConsent(store *betconsent.Store, readToken,writeToken string) error {
+ handler,err:=betconsent.Handler(store,readToken,writeToken)
  if err!=nil{return err}
  s.consent=handler
  return nil

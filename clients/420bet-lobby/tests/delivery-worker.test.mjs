@@ -117,3 +117,22 @@ test('reorg halt never reports successful worker cycle',async()=>{
   assert.equal(worker.health().lastErrorCode,'CANONICAL_HALT');
  }finally{if(worker)await worker.stop();await rm(dir,{recursive:true,force:true});}
 });
+
+test('worker excludes standalone Indexer cursor writers and releases file lock on shutdown',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'bet-worker-'));let worker;
+ try{
+  const indexerPath=join(dir,'indexer.json'),statePath=join(dir,'worker.json');
+  worker=await openBetOperationalDeliveryWorker({
+   runtime:fakeRuntime(),statePath,indexerCheckpointPath:indexerPath,intervalMs:100
+  });
+  const {open}=await import('node:fs/promises');
+  await assert.rejects(open(indexerPath+'.lock','wx',0o600),/EEXIST/);
+  await worker.stop();worker=null;
+  const file=await open(indexerPath+'.lock','wx',0o600);await file.close();
+  const reopen=await openBetOperationalDeliveryWorker({
+   runtime:fakeRuntime(),statePath,indexerCheckpointPath:indexerPath,intervalMs:100
+  }).then(()=>false,()=>true);
+  assert.equal(reopen,true,'worker started with competing Indexer checkpoint writer');
+  const {unlink}=await import('node:fs/promises');await unlink(indexerPath+'.lock');
+ }finally{if(worker)await worker.stop();await rm(dir,{recursive:true,force:true});}
+});

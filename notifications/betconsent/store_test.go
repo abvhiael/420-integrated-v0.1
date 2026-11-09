@@ -44,7 +44,8 @@ func TestConsentFailClosedForCrossScopeAndMute(t *testing.T){
 func TestPrivateHTTPAuthenticationAndDurableRevocation(t *testing.T){
  s,err:=Open(filepath.Join(t.TempDir(),"c.json"));if err!=nil{t.Fatal(err)}
  token:="test-service-credential-with-more-than-32-characters"
- h,err:=Handler(s,token);if err!=nil{t.Fatal(err)}
+ writeToken:="independent-mutation-credential-with-more-than-32-chars"
+ h,err:=Handler(s,token,writeToken);if err!=nil{t.Fatal(err)}
  invoke:=func(path string,body any,authorization string)*httptest.ResponseRecorder{
   b,_:=json.Marshal(body)
   req:=httptest.NewRequest(http.MethodPost,path,bytes.NewReader(b))
@@ -52,8 +53,9 @@ func TestPrivateHTTPAuthenticationAndDurableRevocation(t *testing.T){
   w:=httptest.NewRecorder();h.ServeHTTP(w,req);return w
  }
  if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"");w.Code!=403{t.Fatalf("unauthorized write %d",w.Code)}
- if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"Bearer "+token);w.Code!=200{t.Fatalf("apply %d %s",w.Code,w.Body)}
+ if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"Bearer "+writeToken);w.Code!=200{t.Fatalf("apply %d %s",w.Code,w.Body)}
+ if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":1},"Bearer "+token);w.Code!=403{t.Fatalf("read token can mutate %d",w.Code)}
  if w:=invoke("/v1/420bet/subscriptions/check",query(),"Bearer "+token);w.Code!=200||!bytes.Contains(w.Body.Bytes(),[]byte(`"consent":true`)){t.Fatalf("check %d %s",w.Code,w.Body)}
- if w:=invoke("/v1/420bet/subscriptions/revoke",map[string]any{"check":query(),"expectedRevision":1},"Bearer "+token);w.Code!=200{t.Fatalf("revoke %d %s",w.Code,w.Body)}
+ if w:=invoke("/v1/420bet/subscriptions/revoke",map[string]any{"check":query(),"expectedRevision":1},"Bearer "+writeToken);w.Code!=200{t.Fatalf("revoke %d %s",w.Code,w.Body)}
  if w:=invoke("/v1/420bet/subscriptions/check",query(),"Bearer "+token);w.Code!=200||!bytes.Contains(w.Body.Bytes(),[]byte(`"revoked":true`)){t.Fatalf("revoked check %d %s",w.Code,w.Body)}
 }

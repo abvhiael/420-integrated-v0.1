@@ -21,7 +21,7 @@ function fixture(){
    calls.push({url,options});
    const input=JSON.parse(options.body);
    let result;
-   if(url==='https://rpc.example/'){
+   if(new URL(url).origin==='https://rpc.example'&&new URL(url).pathname==='/'){
     result=input.method==='eth_chainId'?'0x1a4':
       input.method==='eth_getCode'?'0x6001':'0x'+'0'.repeat(63)+'1';
     return {ok:true,text:async()=>JSON.stringify({jsonrpc:'2.0',id:1,result})};

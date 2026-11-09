@@ -27,6 +27,7 @@ func main() {
 	if path:=os.Getenv("NOTIFICATIONS_BET_CONSENT_PATH");path!="" {
   token:=mustEnv("NOTIFICATIONS_BET_CONSENT_TOKEN")
   store,e:=betconsent.Open(path);if e!=nil{log.Fatal(e)}
+  defer store.Close()
   if e=service.EnableBetConsent(store,token);e!=nil{log.Fatal(e)}
  }
  ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)

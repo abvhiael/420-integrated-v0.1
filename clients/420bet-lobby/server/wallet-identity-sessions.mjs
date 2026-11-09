@@ -57,6 +57,7 @@ export function createBetWalletSessions({
   check(policy?.authorized===true&&policy?.revoked===false&&
     typeof policy.authorizationVersion==='string'&&policy.authorizationVersion.length>0,
     'canonical identity denied');
+  check(c.epoch===epoch&&c.expiresAt>now(),'challenge revoked during verification');
   clean(now());check(sessions.size<10000,'session capacity exceeded');
   const key=nonce(),expiresAt=Math.min(t+sessionTtlMs,Number.isSafeInteger(policy.expiresAt)?policy.expiresAt:t+sessionTtlMs);
   check(expiresAt>now(),'identity expired');
@@ -72,6 +73,7 @@ export function createBetWalletSessions({
   check(policy?.authorized===true&&policy?.revoked===false&&
     policy.authorizationVersion===stored.version&&
     (!Number.isSafeInteger(policy.expiresAt)||policy.expiresAt>now()),'identity revoked or changed');
+  check(sessions.get(token)===stored&&stored.epoch===epoch&&stored.expiresAt>now(),'session revoked during verification');
   return Object.freeze({account:a,chainId,expiresAt:stored.expiresAt,readOnly:true});
  }
  function revoke({token,account,requestedChainId}){

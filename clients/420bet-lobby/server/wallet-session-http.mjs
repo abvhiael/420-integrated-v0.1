@@ -2,9 +2,9 @@
 // Caller must inject independently qualified signature and Identity policy providers.
 // Not a production route, bearer store, gambling authorization, or a wallet signer.
 const PATH='/api/420bet/session/';
-const METHODS={challenge:'POST',authenticate:'POST',status:'POST',revoke:'POST'};
+const METHODS={ready:'GET',challenge:'POST',authenticate:'POST',status:'POST',revoke:'POST'};
 const MAX_BODY=4096;
-export function createBetSessionHttpHandler({sessions,origin}={}){
+export function createBetSessionHttpHandler({sessions,origin,readiness}={}){
  if(!sessions||!['challenge','authenticate','authorize','revoke'].every(k=>typeof sessions[k]==='function')||
   typeof origin!=='string'||new URL(origin).origin!==origin)throw Error('session server prerequisites missing');
  const send=(res,code,data)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8',
@@ -21,6 +21,12 @@ export function createBetSessionHttpHandler({sessions,origin}={}){
    const contentSize=Number(req.headers['content-length']??0);
    if(req.method==='POST'&&(content!=='application/json'||!Number.isSafeInteger(contentSize)||contentSize<0||contentSize>MAX_BODY))
     return send(res,400,{error:'invalid content'});
+   if(route==='ready'){
+    if(typeof readiness!=='function')return send(res,503,{ready:false});
+    try{if(await readiness()===true)return send(res,200,{ready:true});}
+    catch{/* fail closed; never include provider details */}
+    return send(res,503,{ready:false});
+   }
    let body={};
    if(req.method==='POST'){
     let size=0,chunks=[];

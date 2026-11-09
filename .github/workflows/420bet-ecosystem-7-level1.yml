@@ -1,0 +1,106 @@
+name: BET-AUDIT-7 ecosystem reconciliation Level 1
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/server/ecosystem.mjs'
+      - 'clients/420bet-lobby/server/wallet-identity-sessions.mjs'
+      - 'clients/420bet-lobby/server/wallet-signature-verifier.mjs'
+      - 'clients/420bet-lobby/server/identity-runtime.mjs'
+      - 'clients/420bet-lobby/server/registry-verifier.mjs'
+      - 'clients/420bet-lobby/server/notifications-mail-adapters.mjs'
+      - 'clients/420bet-lobby/server/notifications-mail-outbox.mjs'
+      - 'clients/420bet-lobby/server/notifications-mail-source.mjs'
+      - 'clients/420bet-lobby/server/notifications-mail-runtime.mjs'
+      - 'clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs'
+      - 'clients/420bet-lobby/tests/notifications-mail-source.test.mjs'
+      - 'clients/420bet-lobby/tests/notifications-mail-integration.test.mjs'
+      - 'clients/420bet-lobby/server/verify-registry.mjs'
+      - 'clients/420bet-lobby/tests/registry-verifier.test.mjs'
+      - 'clients/420bet-lobby/server/identity-authority-provider.mjs'
+      - 'clients/420bet-lobby/server/serve-identity.mjs'
+      - 'clients/420bet-lobby/worker/index.js'
+      - 'clients/420bet-lobby/wrangler.jsonc'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/tests/identity-authority-provider.test.mjs'
+      - 'clients/420bet-lobby/tests/identity-runtime.test.mjs'
+      - 'clients/420bet-lobby/tests/wallet-session-worker.test.mjs'
+      - 'clients/420bet-lobby/tests/sportsbook-worker.test.mjs'
+      - 'clients/420bet-lobby/server/wallet-session-http.mjs'
+      - 'clients/420bet-lobby/src/wallet-session.js'
+      - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs'
+      - 'clients/420bet-lobby/server/canonical-identity-eligibility.mjs'
+      - 'clients/420bet-lobby/tests/wallet-identity-integration.test.mjs'
+      - 'clients/420bet-lobby/server/indexer-event-*.mjs'
+      - 'clients/420bet-lobby/server/sync-indexer-events.mjs'
+      - 'clients/420bet-lobby/tests/indexer-event-reader.test.mjs'
+      - 'clients/420bet-lobby/package.json'
+      - 'clients/420bet-lobby/tests/ecosystem.test.mjs'
+      - 'docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md'
+      - 'docs/bet/BET-AUDIT-7-INDEXER-WORKSTREAM.md'
+      - 'docs/bet/BET-AUDIT-7-WALLET-IDENTITY.md'
+      - 'docs/bet/BET-AUDIT-7-REGISTRY-INTEGRATION.md'
+      - 'docs/bet/BET-AUDIT-7-NOTIFICATIONS-MAIL.md'
+      - 'docs/420BET-TESTNET-WORK-ROADMAP.md'
+      - '.github/workflows/420bet-ecosystem-7-level1.yml'
+  workflow_dispatch:
+jobs:
+  ecosystem-reconciliation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install scoped dependencies for real cryptographic signature tests
+        working-directory: clients/420bet-lobby
+        run: npm install --no-audit --no-fund
+      - name: Focused Indexer and live-provider-equivalent Identity tests
+        run: |
+          node --test \
+            clients/420bet-lobby/tests/ecosystem.test.mjs \
+            clients/420bet-lobby/tests/indexer-event-reader.test.mjs \
+            clients/420bet-lobby/tests/history-service.test.mjs \
+            clients/420bet-lobby/tests/wallet-identity-integration.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-http.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-worker.test.mjs \
+            clients/420bet-lobby/tests/identity-authority-provider.test.mjs \
+            clients/420bet-lobby/tests/identity-runtime.test.mjs \
+            clients/420bet-lobby/tests/registry-verifier.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-integration.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-source.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
+            clients/420bet-lobby/tests/sportsbook-worker.test.mjs
+      - name: Production Vite build
+        working-directory: clients/420bet-lobby
+        run: npm run build
+      - name: Syntax validation
+        run: |
+          node --check clients/420bet-lobby/server/ecosystem.mjs
+          node --check clients/420bet-lobby/server/wallet-identity-sessions.mjs
+          node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
+          node --check clients/420bet-lobby/server/identity-runtime.mjs
+          node --check clients/420bet-lobby/server/registry-verifier.mjs
+          node --check clients/420bet-lobby/server/notifications-mail-adapters.mjs
+          node --check clients/420bet-lobby/server/notifications-mail-outbox.mjs
+          node --check clients/420bet-lobby/server/notifications-mail-source.mjs
+          node --check clients/420bet-lobby/server/notifications-mail-runtime.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-integration.test.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-source.test.mjs
+          node --check clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs
+          node --check clients/420bet-lobby/server/verify-registry.mjs
+          node --check clients/420bet-lobby/server/identity-authority-provider.mjs
+          node --check clients/420bet-lobby/server/serve-identity.mjs
+          node --check clients/420bet-lobby/worker/index.js
+          node --check clients/420bet-lobby/src/main.js
+          node --check clients/420bet-lobby/server/wallet-session-http.mjs
+          node --check clients/420bet-lobby/src/wallet-session.js
+          node --check clients/420bet-lobby/tests/wallet-session-http.test.mjs
+          node --check clients/420bet-lobby/server/canonical-identity-eligibility.mjs
+          node --check clients/420bet-lobby/tests/wallet-identity-integration.test.mjs
+          node --check clients/420bet-lobby/server/indexer-event-abi.mjs
+          node --check clients/420bet-lobby/server/indexer-event-reader.mjs
+          node --check clients/420bet-lobby/server/sync-indexer-events.mjs
+          node --check clients/420bet-lobby/tests/indexer-event-reader.test.mjs
+          node --check clients/420bet-lobby/tests/ecosystem.test.mjs

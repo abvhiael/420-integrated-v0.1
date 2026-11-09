@@ -1,8 +1,14 @@
 import {createServer} from 'node:http';
 import {createGameHistoryLookup,createGameHistoryHandler} from './history.mjs';
+import {verifyConfiguredRegistry} from './verify-registry.mjs';
+import {assertHistoryRegistryBinding} from './registry-verifier.mjs';
 const chainId=Number(process.env.BET_HISTORY_CHAIN_ID);
 let bindings;
 try{bindings=JSON.parse(process.env.BET_HISTORY_GAME_CONTRACTS||'null');}catch{throw Error('invalid game contract binding JSON');}
+// Production-like history must not trust a bare environment-address list.
+// A signed Registry approval and live finalized-chain check are mandatory.
+const approved=await verifyConfiguredRegistry();
+assertHistoryRegistryBinding({chainId,gameContracts:bindings},approved.config);
 const lookup=createGameHistoryLookup({indexerUrl:process.env.BET_HISTORY_INDEXER_URL,chainId,gameContracts:bindings});
 const port=Number(process.env.BET_HISTORY_PORT||8787);
 if(!Number.isSafeInteger(port)||port<1||port>65535)throw Error('invalid history port');

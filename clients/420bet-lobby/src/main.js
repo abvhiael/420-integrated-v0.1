@@ -18,6 +18,7 @@ import {createSlotsLobby,slotMachineFromHash,slotMachinePath} from './slots-lobb
 import {createCannabisCowboyShell} from './cannabis-cowboy-ui.js';
 import {createCannabisCowboyPractice} from './cannabis-cowboy-game.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
+import {createWalletSessionClient} from './wallet-session.js';
 import './style.css';
 import './mary-jane-concept.css';
 import './dads-secret-stash.css';
@@ -42,7 +43,35 @@ const historyEndpoint=config.historyEndpoint===undefined?'/api/420bet/player-his
 const catalogue=resolveCatalogue(config);
 let filter='All Games',term='',active=null,selectedSlotMachine=null,activePractice=null;
 let walletState={account:null,chainId:null},historyItems=[],historyError='',historyNonce=0,historyGame='dice';
-const wallet=new WalletIdentity(window.ethereum,state=>{walletState=state;historyItems=[];historyError='';void refreshHistory();if(!active)render();});
+let identityEnabled=false,identityStatus='',identityClient=null,identityAccount=null,identityGeneration=0;
+if(window.ethereum&&typeof createWalletSessionClient==='function'&&typeof fetch==='function'){
+ identityClient=createWalletSessionClient({provider:window.ethereum,fetcher:fetch});
+ void fetch('/api/420bet/session/capabilities',{method:'GET',credentials:'omit',cache:'no-store',redirect:'error',
+  headers:{Accept:'application/json'}}).then(async response=>{
+   if(!response.ok)throw Error('identity service unavailable');
+   const data=await response.json();
+   identityEnabled=data?.readOnlyIdentityAvailable===true;
+   if(!active)render();
+ }).catch(()=>{identityEnabled=false;});
+}
+async function signInReadOnly(){
+ if(!identityClient||!identityEnabled)return;
+ const gen=++identityGeneration;identityStatus='';
+ try{
+  const result=await identityClient.connect();
+  if(gen!==identityGeneration||!identityClient.authenticated)return;
+  identityAccount=result.account;identityStatus='Read-only identity verified';
+ }catch{if(gen===identityGeneration){identityAccount=null;identityStatus='Identity verification unavailable';}}
+ if(!active)render();
+}
+async function signOutReadOnly(){
+ if(!identityClient)return;
+ ++identityGeneration;identityAccount=null;identityStatus='';
+ try{await identityClient.disconnect();}catch{identityStatus='Remote sign-out unconfirmed; session will expire';}
+ if(!active)render();
+}
+
+const wallet=new WalletIdentity(window.ethereum,state=>{if(identityAccount&&(identityAccount!==state.account||!state.chainId)){identityAccount=null;identityStatus='';++identityGeneration;}walletState=state;historyItems=[];historyError='';void refreshHistory();if(!active)render();});
 async function refreshHistory(){const serial=++historyNonce,account=walletState.account,chainId=walletState.chainId;historyItems=[];if(!account||!chainId||!historyEndpoint)return;try{const items=await loadHistory(historyEndpoint,account,chainId,historyGame);if(serial===historyNonce&&walletState.account===account&&walletState.chainId===chainId){historyItems=items;historyError='';if(!active)render();}}catch{if(serial===historyNonce){historyError='Transaction history unavailable';if(!active)render();}}}
 
 const statusText={'coming-soon':'Coming Soon',preview:'Preview',testing:'Testing',available:'Available',unavailable:'Temporarily Unavailable'};
@@ -108,7 +137,12 @@ function render(){
     else {const nativePreview=createNativePreview(active.id);if(nativePreview){const wrap=node('div','view-scroll');wrap.append(nativePreview);main.append(wrap);}else{const preview=node('section','preview-screen');preview.append(node('p','eyebrow','420BET GAME PREVIEW'),node('div','preview-glyph',({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[active.category]),node('h1','',active.title),node('p','','This game screen is being prepared. Its dedicated interface is not yet connected.'),node('p','preview-warning','Viewing only — wagering, wallet transactions and payouts are not enabled here.'));preview.append(button('Return to Lobby',close,'return'));main.append(preview);}}
     const foot=node('footer','game-footer');foot.append(brandLink('footer-brand'),node('span','','420Bet · Practice and previews only — no wagering enabled.'));app.append(main);if(!['fantasy','sportsbook'].includes(active.id))app.append(foot);return;
   }
-  const header=node('header','top');const brand=brandLink();header.append(brand,node('span','strap','THE GAME LOBBY'));const walletBar=node('div','wallet-bar');walletBar.setAttribute('aria-label','Wallet identity');if(walletState.account){walletBar.append(node('span','wallet-account',walletState.account.slice(0,6)+'…'+walletState.account.slice(-4)+' · chain '+(walletState.chainId??'unknown')));walletBar.append(button('Refresh history',()=>{void refreshHistory();},'wallet-action'));}else walletBar.append(button('Connect wallet',()=>{void wallet.connect().catch(()=>{historyError='Wallet connection was rejected or unavailable';render();});},'wallet-action'));header.append(walletBar);app.append(header);
+  const header=node('header','top');const brand=brandLink();header.append(brand,node('span','strap','THE GAME LOBBY'));const walletBar=node('div','wallet-bar');walletBar.setAttribute('aria-label','Wallet identity');if(walletState.account){walletBar.append(node('span','wallet-account',walletState.account.slice(0,6)+'…'+walletState.account.slice(-4)+' · chain '+(walletState.chainId??'unknown')));walletBar.append(button('Refresh history',()=>{void refreshHistory();},'wallet-action'));}else walletBar.append(button('Connect wallet',()=>{void wallet.connect().catch(()=>{historyError='Wallet connection was rejected or unavailable';render();});},'wallet-action'));if(identityEnabled&&identityClient&&walletState.account){
+   if(identityAccount&&identityClient.authenticated)walletBar.append(node('span','wallet-session-label','Read-only identity verified'),button('Sign out',()=>{void signOutReadOnly();},'wallet-action'));
+   else walletBar.append(button('Verify identity',()=>{void signInReadOnly();},'wallet-action identity-action'));
+ }
+ if(identityStatus&&!identityAccount)walletBar.append(node('span','wallet-session-error',identityStatus));
+ header.append(walletBar);app.append(header);
   const main=node('main','lobby');const hero=node('section','hero');hero.append(node('p','eyebrow','WELCOME TO 420BET'),node('h1','', 'Pick your game. Find your groove.'),node('p','','Casino classics, poker, fantasy and sports — all in one place.'));main.append(hero);
   const accountPanel=node('section','account-panel');accountPanel.setAttribute('aria-label','Player transaction history');accountPanel.append(node('h2','','Game transaction history'));const gamePicker=node('select','history-game');gamePicker.setAttribute('aria-label','History game');for(const g of catalogue){const option=node('option','',g.title);option.value=g.id;if(g.id===historyGame)option.selected=true;gamePicker.append(option);}gamePicker.value=historyGame;gamePicker.addEventListener('change',()=>{historyGame=gamePicker.value;historyNonce++;historyItems=[];historyError='';void refreshHistory();render();});accountPanel.append(gamePicker);if(historyError)accountPanel.append(node('p','history-error',historyError));if(!walletState.account)accountPanel.append(node('p','','Connect your wallet to view records for the selected game only. Browsing does not require a wallet.'));else if(!historyEndpoint)accountPanel.append(node('p','','Verified history service is not configured. No transaction records are being displayed.'));else if(!historyItems.length)accountPanel.append(node('p','','No verified transactions returned for this game, wallet and chain.'));else{const list=node('ul','history-list');for(const item of historyItems){const li=node('li','history-entry');const hash=node('code','',item.hash.slice(0,10)+'…'+item.hash.slice(-6));hash.title=item.hash;li.append(node('span','',item.game+' · '+item.status),node('time','',new Date(item.timestamp*1000).toLocaleString()),hash);list.append(li);}accountPanel.append(list);}main.append(accountPanel);
   const controls=node('section','controls');controls.setAttribute('aria-label','Game discovery');

@@ -47,3 +47,36 @@ test('reorganization automatically halts outgoing deliveries before accepting ne
  assert.equal(f.outbox.halted,true);
  assert.equal(f.requests.length,0);
 });
+
+test('event cursor commits after durable enqueue and crash before cursor commit replays idempotently',async()=>{
+ const sources=['casino-router','casino-settlement','poker-ledger','fantasy-contest','sports-tickets']
+  .map((role,i)=>({id:'source-'+i,role,address:A(i+1),fromBlock:'1'}));
+ const event={chainId:'420',gameId:'source-0',type:'WAGER_ACCEPTED',
+  contract:A(1),role:'casino-router',gameVersionId:H(10),objectId:H(11),
+  account:A(12),blockNumber:'99',blockHash:H(99),transactionHash:H(98),logIndex:'0'};
+ let checkpoint={events:[]},commitCount=0,enqueued=new Set(),failCommit=true;
+ const reader={config:{chainId:'420',contracts:sources},
+  readCheckpoint:async()=>checkpoint,
+  poll:async()=>({reorganized:false,scanned:1,state:{events:[event],nextBlock:'100'}}),
+  persistCheckpoint:async(_path,state)=>{if(failCommit)throw Error('simulated disk fault');
+   checkpoint=structuredClone(state);commitCount++;}};
+ const pub=createFinalizedBetNotificationPublisher({
+  reader,checkpointPath:'/private/canonical.json',
+  verifyRegistry:async()=>({result:{qualified:true},config:{chainId:'420',sources,
+   games:[{id:'casino-dice',vertical:'casino',gameVersionId:H(10)}]}}),
+  resolveAudience:async()=>[{ownershipVerified:true,account:A(12),gameVersionId:H(10),
+   tenant:'420bet',userId:'subject-1',subscriptions:[{id:'sub-1',channel:'mail',
+    recipient:'recipient-1',policyVersion:'p1'}]}],
+  outbox:{enqueue:async request=>{const key=JSON.stringify([request.subscriptionId,request.event.transactionHash]);
+   const created=!enqueued.has(key);enqueued.add(key);return {created};},
+   haltForReorg:async()=>{}}
+ });
+ await assert.rejects(pub.publish(),/simulated disk fault/);
+ assert.equal(checkpoint.events.length,0);
+ failCommit=false;
+ const success=await pub.publish();
+ assert.equal(success.queued,0,'replayed event was not idempotent');
+ assert.equal(checkpoint.events.length,1);
+ assert.equal(checkpoint.nextBlock,'100');
+ assert.equal(commitCount,1);
+});

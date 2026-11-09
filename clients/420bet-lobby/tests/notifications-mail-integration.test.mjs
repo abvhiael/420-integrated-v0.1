@@ -194,9 +194,12 @@ test('persisted reorg halt prevents dispatch and survives restart until canonica
   await a.close();
   const b=await openBetDeliveryOutbox({path,...options});
   assert.equal((await b.summary()).halted,true);
-  await assert.rejects(b.resumeAfterCanonicalReplay(async()=>false),/not independently verified/);
+  await assert.rejects(b.resumeAfterCanonicalReplay({canonicalEventIds:[],verifyCanonicalRebuild:async()=>false}),/not independently verified/);
   assert.equal((await b.summary()).halted,true);
-  assert.deepEqual(await b.resumeAfterCanonicalReplay(async()=>true),{halted:false});
+  const recovery=await b.resumeAfterCanonicalReplay({
+   canonicalEventIds:[makeBetDelivery(request()).eventId],verifyCanonicalRebuild:async()=>true});
+  assert.equal(recovery.halted,false);
+  await b.finishCanonicalReplay();
   assert.equal((await b.drain()).delivered,1);
   await b.close();
  });

@@ -33,7 +33,9 @@ export function createWalletSessionClient({
    !challenge.message.includes('Account: '+account+'\n')||
    !challenge.message.includes('Chain ID: '+chain+'\n'))throw Error('invalid wallet challenge');
   // The player explicitly initiates this login request; never sign on page load.
-  const signature=await provider.request({method:'personal_sign',params:[challenge.message,account]});
+  const messageBytes=new TextEncoder().encode(challenge.message);
+  const messageHex='0x'+Array.from(messageBytes,x=>x.toString(16).padStart(2,'0')).join('');
+  const signature=await provider.request({method:'personal_sign',params:[messageHex,account]});
   if(disposed||generation!==mine)throw Error('wallet identity changed');
   const session=await request('authenticate',{account,chainId:chain,nonce:challenge.nonce,signature});
   if(disposed||generation!==mine||session.account!==account||session.chainId!==chain||

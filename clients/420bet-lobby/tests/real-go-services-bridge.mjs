@@ -45,7 +45,15 @@ function request(channel){
    blockNumber:'24',blockHash:H(25),transactionHash:H(26),logIndex:'0'}};
 }
 const outboxArgs={path:config.LOCAL_GO_OUTBOX_PATH,verifyEvent:async()=>true,
- checkConsent:consent,providers:{mail,notifications},baseBackoffMs:50};
+ checkConsent:consent,providers:{mail:{
+  ...mail,deliver:async d=>{
+   try{return await mail.deliver(d);}
+   catch(error){
+    process.stderr.write('Go Mail adapter rejected receipt: '+String(error?.message).slice(0,150)+'\\n');
+    throw error;
+   }
+  }
+ },notifications},baseBackoffMs:50};
 let outbox;
 try{
  await mailBroker.checkReadiness();

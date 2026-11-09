@@ -106,7 +106,7 @@ function secureOrigin(value){
 // Verify the public deterministic receipt ID instead of requesting that secret.
 function expectedMailMessageId(sender,recipient,idempotencyKey){
  return 'mail_'+createHash('sha256').update(
-  '420/MAIL/MESSAGE/V1\\0'+sender+'\\0'+recipient+'\\0'+idempotencyKey
+  '420/MAIL/MESSAGE/V1\0'+sender+'\0'+recipient+'\0'+idempotencyKey
  ).digest('hex').slice(0,32);
 }
 function receiptMatchesDelivery(result,d,sender){

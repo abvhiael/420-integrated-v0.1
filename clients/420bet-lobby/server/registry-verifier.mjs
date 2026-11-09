@@ -1,6 +1,6 @@
 // BET-AUDIT-7 — canonical 420Bet registry verifier.
 // Read-only; no game activation, transaction signing, settlement or wallet permissions.
-import {keccak256,encodeAbiParameters} from 'viem';
+import {keccak256,toHex} from 'viem';
 const ADDR=/^0x[0-9a-fA-F]{40}$/;
 const HASH=/^0x[0-9a-fA-F]{64}$/;
 const UINT=/^[1-9][0-9]*$/;
@@ -82,8 +82,10 @@ export function validateBetRegistryManifest(raw){
  const genesisHash=normHash(raw.genesisHash,'genesis hash');
  const revision=uint(raw.revision,'manifest revision');
  const manifestApproval=normHash(raw.approvalDigest,'approval digest');
- requireValid(raw.approved===true&&typeof raw.approvalAuthority==='string'&&
-  raw.approvalAuthority.length>=8&&raw.approvalAuthority.length<=256,'independent approval absent');
+ requireValid(raw.approved===true,'independent approval absent');
+ const approvalAuthority=normAddress(raw.approvalAuthority,'independent approval authority');
+ requireValid(typeof raw.approvalSignature==='string'&&
+  /^0x[0-9a-fA-F]{130}$/.test(raw.approvalSignature),'signed approval missing');
  requireValid(raw.contracts&&typeof raw.contracts==='object','missing registry bindings');
  const required=['gameRegistry','moduleRegistry','profileRegistry','operatorRegistry','authorization','capabilityRegistry'];
  const contracts={};
@@ -155,8 +157,8 @@ export function validateBetRegistryManifest(raw){
     version:protocolService.version,manifestHash:protocolService.manifestHash.toLowerCase()}:null};
  });
  const result={schema:raw.schema,chainId:chainId.toString(),genesisHash,revision:revision.toString(),
-  approvalDigest:manifestApproval,approvalAuthority:raw.approvalAuthority,
-  contracts,games};
+  approvalDigest:manifestApproval,approvalAuthority,
+  approvalSignature:raw.approvalSignature.toLowerCase(),contracts,games};
  return Object.freeze(result);
 }
 function fieldsMatch(actual,expected,names){
@@ -165,11 +167,32 @@ function fieldsMatch(actual,expected,names){
    typeof expected[name]==='bigint'?BigInt(actual?.[name])===expected[name]:
    actual?.[name]===expected[name],'registry '+name+' mismatch');
 }
-export function createBetRegistryVerifier({manifest,client}={}){
+function stableStringify(value){
+ if(Array.isArray(value))return '['+value.map(stableStringify).join(',')+']';
+ if(value&&typeof value==='object')
+  return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableStringify(value[k])).join(',')+'}';
+ return JSON.stringify(value);
+}
+export function registryManifestDigest(config){
+ const {approvalDigest,approvalAuthority,approvalSignature,...body}=config;
+ return keccak256(toHex(stableStringify(body)));
+}
+export function createBetRegistryVerifier({manifest,client,trustedApprover}={}){
  const config=validateBetRegistryManifest(manifest);
+ const signer=normAddress(trustedApprover,'trusted approver');
+ requireValid(config.approvalAuthority===signer,'manifest approved by wrong authority');
+ requireValid(registryManifestDigest(config)===config.approvalDigest,
+  'signed approval digest does not match configuration');
  requireValid(client&&typeof client.getChainId==='function'&&typeof client.getBlock==='function'&&
-  typeof client.getCode==='function'&&typeof client.readContract==='function','qualified read-only public client required');
+  typeof client.getCode==='function'&&typeof client.readContract==='function'&&
+  typeof client.verifyMessage==='function','qualified read-only public client required');
  async function verify(){
+  // Approval binds every contract address, ruleset, operator, runtime and
+  // required capability role. The trust anchor comes from outside the manifest.
+  const approved=await client.verifyMessage({address:signer,
+   message:'420Bet registry manifest v1\\n'+config.approvalDigest,
+   signature:config.approvalSignature});
+  requireValid(approved===true,'independent manifest signature not verified');
   // Every call is pinned to exactly ONE finalized block, preventing mixed-version reads.
   const liveChain=await client.getChainId();
   requireValid(BigInt(liveChain)===BigInt(config.chainId),'wrong chain');

@@ -29,11 +29,14 @@ jobs:
         with:
           node-version: '22'
       - name: Focused event reconciliation tests
-        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs clients/420bet-lobby/tests/indexer-event-reader.test.mjs clients/420bet-lobby/tests/history-service.test.mjs clients/420bet-lobby/tests/wallet-identity-integration.test.mjs
+        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs clients/420bet-lobby/tests/indexer-event-reader.test.mjs clients/420bet-lobby/tests/history-service.test.mjs clients/420bet-lobby/tests/wallet-identity-integration.test.mjs clients/420bet-lobby/tests/wallet-session-http.test.mjs
       - name: Syntax validation
         run: |
           node --check clients/420bet-lobby/server/ecosystem.mjs
           node --check clients/420bet-lobby/server/wallet-identity-sessions.mjs
+          node --check clients/420bet-lobby/server/wallet-session-http.mjs
+          node --check clients/420bet-lobby/src/wallet-session.js
+          node --check clients/420bet-lobby/tests/wallet-session-http.test.mjs
           node --check clients/420bet-lobby/server/canonical-identity-eligibility.mjs
           node --check clients/420bet-lobby/tests/wallet-identity-integration.test.mjs
           node --check clients/420bet-lobby/server/indexer-event-abi.mjs

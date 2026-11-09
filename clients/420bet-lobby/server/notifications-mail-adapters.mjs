@@ -67,6 +67,35 @@ export function makeBetDelivery({tenant,userId,channel,subscriptionId,recipient,
   policyVersion,source,eventId,kind:verified.type,event:publicEvent,
   title:'420Bet game update',body:safeText[verified.type]});
 }
+// Corrections are generated only after independently verified canonical replay.
+// The original recipient and subscription remain fixed; no new destination is inferred.
+export function makeReorgCorrection(original){
+ requireValid(original?.tenant==='420bet'&&original?.source==='420Indexer-finalized'&&
+  typeof original.deliveryKey==='string'&&/^[a-f0-9]{64}$/.test(original.deliveryKey)&&
+  typeof original.eventId==='string'&&/^[a-f0-9]{64}$/.test(original.eventId)&&
+  CHANNELS.has(original.channel),'invalid delivered original for correction');
+ const deliveryKey=digest('420bet-reorg-correction-v1|'+original.deliveryKey);
+ return Object.freeze({
+  deliveryKey,tenant:original.tenant,userId:original.userId,channel:original.channel,
+  subscriptionId:original.subscriptionId,recipient:original.recipient,
+  policyVersion:original.policyVersion,source:'420Indexer-reorg-correction',
+  eventId:original.eventId,kind:'reorg-retracted',
+  correctionOf:original.deliveryKey,
+  event:Object.freeze({schema:'420bet-notification-v1',kind:'reorg-retracted',
+   game:original.event.game,chainId:original.event.chainId,
+   blockNumber:original.event.blockNumber,eventId:original.eventId,finality:'retracted'}),
+  title:'420Bet correction',
+  body:'A previously delivered game update was affected by a chain reorganization. Please refer to current account records.'
+ });
+}
+export function canonicalBetEventId({chainId,gameId,transactionHash,logIndex,type,blockHash}={}){
+ requireValid(typeof chainId==='string'&&/^[1-9][0-9]*$/.test(chainId)&&
+  typeof gameId==='string'&&/^[a-z][a-z0-9-]{0,49}$/.test(gameId)&&
+  typeof logIndex==='string'&&/^(0|[1-9][0-9]*)$/.test(logIndex)&&
+  typeof type==='string'&&KINDS.has(type),'invalid canonical event identity');
+ return digest([chainId,gameId,hex(transactionHash,'transaction'),logIndex,
+  type,hex(blockHash,'block')].join('|'));
+}
 function secureOrigin(value){
  const u=new URL(value);
  requireValid(u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash&&

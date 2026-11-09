@@ -170,8 +170,9 @@ export async function openBetDeliveryOutbox({
     const d=item.delivery;
     if(d.tenant!==tenant||d.userId!==userId||d.subscriptionId!==subscriptionId)continue;
     if(item.status==='delivered'){
-     item.retracted=true;
-     item.remoteCancellationPending=false; // Already delivered cannot be unsent.
+     // Unsubscribing does not invalidate a correctly delivered historical
+     // notice, and must never generate an unsolicited correction.
+     item.remoteCancellationPending=false;
     }else{
      item.status='cancelled';item.nextAttemptAt=null;
      item.remoteCancellationPending=Boolean(item.receipt);
@@ -352,7 +353,7 @@ export async function openBetDeliveryOutbox({
    }
    return out;
   });
-  let delivered=0,failed=0,cancelled=0,pending=0;
+  let delivered=0,deliveredLate=0,failed=0,cancelled=0,pending=0;
   for(const candidate of items){
    const d=candidate.delivery,key=d.deliveryKey;
    let outcome=null,error=false;
@@ -377,7 +378,7 @@ export async function openBetDeliveryOutbox({
       }else item.remoteCancellationPending=true;
       item.updatedAt=clock();
      }
-     return {status:'cancelled'};
+     return {status:item.status==='delivered'?'delivered_late':'cancelled'};
     }
     if(outcome?.status==='cancelled'){
      item.status='cancelled';item.nextAttemptAt=null;
@@ -406,6 +407,7 @@ export async function openBetDeliveryOutbox({
     return {status:item.status};
    });
    if(result?.status==='delivered')delivered++;
+   else if(result?.status==='delivered_late')deliveredLate++;
    else if(result?.status==='cancelled'){cancelled++;
     if(candidate.receipt)try{
      if((await providers[d.channel].cancel(d,candidate.receipt))?.cancelled===true)
@@ -417,7 +419,7 @@ export async function openBetDeliveryOutbox({
    else if(result?.status==='pending_receipt')pending++;
    else if(error||result?.status==='retry'||result?.status==='dead_letter')failed++;
   }
-  return Object.freeze({processed:items.length,delivered,failed,cancelled,pending});
+  return Object.freeze({processed:items.length,delivered,deliveredLate,failed,cancelled,pending});
  }
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted,replayPending:data.replayPending,remoteCancellationPending:Object.values(data.items).filter(i=>i.remoteCancellationPending).length,correctionPending:Object.values(data.items).filter(i=>i.delivery.correctionOf&&i.status!=='delivered'&&i.status!=='cancelled').length};}

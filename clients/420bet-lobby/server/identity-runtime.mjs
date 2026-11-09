@@ -54,7 +54,24 @@ export function createBetIdentityRuntime({settings,fetcher=fetch,publicClient}={
  const sessions=createBetWalletSessions({origin:settings.origin,chainId:settings.chainId,
   verifySignature:createWalletSignatureVerifier({publicClient:client,chainId:settings.chainId}),
   verifyIdentity:canonical.verifyIdentity});
- const handler=createBetSessionHttpHandler({origin:settings.origin,sessions});
+ async function readiness(){
+  const chain=await client.getChainId();
+  if(!Number.isSafeInteger(chain)||BigInt(chain)!==BigInt(settings.chainId))return false;
+  const response=await fetcher(settings.rpcUrl,{method:'POST',redirect:'error',
+   credentials:'omit',cache:'no-store',
+   headers:{'Content-Type':'application/json',Accept:'application/json'},
+   body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getCode',
+    params:[settings.identityAddress.toLowerCase(),'latest']}),
+   signal:AbortSignal.timeout(8000)});
+  if(!response?.ok)return false;
+  const text=await response.text();if(text.length>100000)return false;
+  const data=JSON.parse(text);
+  if(data?.jsonrpc!=='2.0'||data.id!==1||typeof data.result!=='string'||
+    !/^0x(?:[0-9a-fA-F]{2})+$/.test(data.result)||data.result==='0x00'|| 
+    keccak256(data.result).toLowerCase()!==settings.runtimeHash)return false;
+  return remote.checkReadiness();
+ }
+ const handler=createBetSessionHttpHandler({origin:settings.origin,sessions,readiness});
  // Cloudflare proxy authentication is mandatory before exposing this handler.
  function authorized(request){
   const token=request.headers['x-bet-edge-secret'];

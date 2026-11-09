@@ -38,6 +38,8 @@ func testNativeAPI(t *testing.T)(*Service,*DeliveryStore,*bool){
   return DeliveryDecision{Owner:p.Tenant==r.Tenant&&r.UserID=="subject-1"&&
    r.SubscriptionID=="subscription-1"&&r.Recipient=="opaque-recipient",
    Consent:consent},nil
+ },func(_ context.Context,r DeliverySubmit)(bool,error){
+  return r.Event.BlockNumber=="23",nil
  })
  if err!=nil{t.Fatal(err)}
  service,err:=NewService(validConfig(),fakeProbe{chainID:420})
@@ -130,13 +132,17 @@ func TestNativeDeliveryRejectsCrossTenantCrossOwnerAndMalformedPayload(t *testin
   w:=callNative(s,"POST","/v1/deliveries",token,req)
   if w.Code!=403{t.Fatalf("expected denial: %d %s",w.Code,w.Body.String())}
  }
+ forged:=testDelivery();forged.Event.BlockNumber="99"
+ if got:=callNative(s,"POST","/v1/deliveries",token,forged);got.Code!=403{
+  t.Fatalf("unverified finalized event accepted: %d",got.Code)
+ }
  w:=callNative(s,"POST","/v1/deliveries?unexpected=true",token,testDelivery())
  if w.Code!=400{t.Fatalf("query accepted: %d",w.Code)}
  w=callNative(s,"GET","/healthz","",nil)
  if w.Code!=200{t.Fatal("original health endpoint changed")}
 }
 func TestNativeDeliveryRequiresRealQualifiedDependencies(t *testing.T){
- if _,e:=NewDeliveryAPI(nil,nil,nil);e==nil{t.Fatal("nil dependencies accepted")}
+ if _,e:=NewDeliveryAPI(nil,nil,nil,nil);e==nil{t.Fatal("nil dependencies accepted")}
  if _,e:=BearerServiceAuthenticator("short",DeliveryPrincipal{ServiceID:"service",Tenant:"420bet"});e==nil{
   t.Fatal("weak bearer accepted")
  }

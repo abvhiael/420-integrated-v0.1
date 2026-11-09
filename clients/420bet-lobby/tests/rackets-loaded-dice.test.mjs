@@ -26,7 +26,7 @@ test('Racket uses presentation-only reactions and accessible practice UI',()=>{
  assert(root.querySelector('.racket-dialogue'));
  assert.equal(root.querySelector('.nd-big-number').textContent,'—');
  for(let i=0;i<5;i++)root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
- assert.match(root.querySelector('.nd-big-number').textContent,/^\\d{4}$/);
+ assert.match(root.querySelector('.nd-big-number').textContent,/^\d{4}$/);
  assert.equal(root.querySelectorAll('.nd-pill').length,5);
  assert.match(root.textContent,/No wallet connection/);
 });

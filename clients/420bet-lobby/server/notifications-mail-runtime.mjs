@@ -1,6 +1,7 @@
 import {readFile} from 'node:fs/promises';
 import {createRemoteBetOwnershipResolver} from './ownership-resolver.mjs';
 import {create420NotificationsConsentAuthority} from './notifications-consent-authority.mjs';
+import {create420NotificationsRevocationReader,createBetRevocationConsumer} from './notifications-revocation-consumer.mjs';
 import {createIndexerEventReader} from './indexer-event-reader.mjs';
 import {verifyConfiguredRegistry} from './verify-registry.mjs';
 import {openBetDeliveryOutbox} from './notifications-mail-outbox.mjs';
@@ -22,7 +23,7 @@ const TYPE_NAMES={WAGER_ACCEPTED:'wager-accepted',WAGER_SETTLED:'wager-settled',
  * Unconfigured service MUST fail before running any outbound transport.
  */
 export async function createBetNotificationsMailRuntime({
- env=process.env,resolveAudience,checkConsent,authorizeMailActor,notifications,
+ env=process.env,resolveAudience,checkConsent,readRevocations,authorizeMailActor,notifications,
  fetcher=fetch,verifyRegistry=verifyConfiguredRegistry,
  readerFactory=createIndexerEventReader
 }={}){
@@ -65,12 +66,20 @@ export async function createBetNotificationsMailRuntime({
  };
  const outbox=await openBetDeliveryOutbox({path:env.BET_DELIVERY_OUTBOX_PATH,
   verifyEvent,checkConsent:consent,providers});
+ const revocations=readRevocations??(env.BET_NOTIFICATIONS_CONSENT_URL&&env.BET_NOTIFICATIONS_CONSENT_TOKEN?
+  create420NotificationsRevocationReader({origin:env.BET_NOTIFICATIONS_CONSENT_URL,
+   bearerToken:env.BET_NOTIFICATIONS_CONSENT_TOKEN,fetcher}):null);
+ fail(typeof revocations==='function','trusted revocation feed required');
+ const revocationConsumer=createBetRevocationConsumer({readRevocations:revocations,outbox});
  const publisher=createFinalizedBetNotificationPublisher({
   reader,checkpointPath:env.BET_INDEXER_EVENT_CHECKPOINT,
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),
   resolveAudience:ownership,outbox});
- return Object.freeze({outbox,publish:publisher.publish,
-  drain:args=>outbox.drain(args),
+ return Object.freeze({outbox,
+  // Always catch up revoked subscriptions before publishing or dispatching.
+  syncRevocations:args=>revocationConsumer.sync(args),
+  publish:async args=>{await revocationConsumer.sync();return publisher.publish(args);},
+  drain:async args=>{await revocationConsumer.sync();return outbox.drain(args);},
   // Invoke only from a trusted, authenticated 420Notifications revocation controller.
   revokeSubscription:scope=>outbox.revokeSubscription(scope),
   stop:()=>outbox.close()});

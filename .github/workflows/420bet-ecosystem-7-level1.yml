@@ -7,6 +7,13 @@ on:
       - 'clients/420bet-lobby/server/wallet-signature-verifier.mjs'
       - 'clients/420bet-lobby/server/identity-runtime.mjs'
       - 'clients/420bet-lobby/server/registry-verifier.mjs'
+      - 'notifications/betconsent/**'
+      - 'notifications/runtime/**'
+      - 'notifications/cmd/notifications420/**'
+      - 'clients/420bet-lobby/server/ownership-resolver.mjs'
+      - 'clients/420bet-lobby/tests/ownership-resolver.test.mjs'
+      - 'clients/420bet-lobby/server/notifications-consent-authority.mjs'
+      - 'clients/420bet-lobby/tests/notifications-consent-authority.test.mjs'
       - 'clients/420bet-lobby/server/notifications-mail-adapters.mjs'
       - 'clients/420bet-lobby/server/notifications-mail-outbox.mjs'
       - 'clients/420bet-lobby/server/notifications-mail-source.mjs'
@@ -71,7 +78,16 @@ jobs:
             clients/420bet-lobby/tests/notifications-mail-integration.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-source.test.mjs \
             clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
+            clients/420bet-lobby/tests/ownership-resolver.test.mjs \
+            clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
             clients/420bet-lobby/tests/sportsbook-worker.test.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - name: Durable 420Notifications consent and private runtime Go tests
+        run: |
+          go test -count=1 ./notifications/betconsent ./notifications/runtime
+          go vet ./notifications/betconsent ./notifications/runtime
       - name: Production Vite build
         working-directory: clients/420bet-lobby
         run: npm run build
@@ -82,6 +98,10 @@ jobs:
           node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
           node --check clients/420bet-lobby/server/identity-runtime.mjs
           node --check clients/420bet-lobby/server/registry-verifier.mjs
+          node --check clients/420bet-lobby/server/ownership-resolver.mjs
+          node --check clients/420bet-lobby/tests/ownership-resolver.test.mjs
+          node --check clients/420bet-lobby/server/notifications-consent-authority.mjs
+          node --check clients/420bet-lobby/tests/notifications-consent-authority.test.mjs
           node --check clients/420bet-lobby/server/notifications-mail-adapters.mjs
           node --check clients/420bet-lobby/server/notifications-mail-outbox.mjs
           node --check clients/420bet-lobby/server/notifications-mail-source.mjs

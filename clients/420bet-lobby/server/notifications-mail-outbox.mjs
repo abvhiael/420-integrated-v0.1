@@ -158,6 +158,7 @@ export async function openBetDeliveryOutbox({
     if(d.tenant!==tenant||d.userId!==userId||d.subscriptionId!==subscriptionId)continue;
     if(item.status==='delivered'){item.retracted=true;}
     else{item.status='cancelled';item.nextAttemptAt=null;}
+    item.remoteCancellationPending=Boolean(item.receipt);
     item.updatedAt=clock();
     if(item.receipt)affected.push({delivery:clone(d),receipt:clone(item.receipt)});
    }
@@ -166,13 +167,38 @@ export async function openBetDeliveryOutbox({
   });
   let confirmations=0;
   for(const item of result.affected)try{
-   if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmations++;
-  }catch{/* an unconfirmed remote cancellation is never reported as success */}
+   if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true){
+    confirmations++;
+    await withWrite(async state=>{
+     const active=state.items[item.delivery.deliveryKey];
+     if(active?.remoteCancellationPending===true)active.remoteCancellationPending=false;
+    });
+   }
+  }catch{/* durable remote cancellation retry remains pending */}
   return {duplicate:result.duplicate,locallyCancelled:result.affected.length,
    remoteCancellationConfirmed:confirmations,
    remoteCancellationUnconfirmed:result.affected.length-confirmations};
  }
  async function getRevocationCursor(){await operation;return data.revocationCursor;}
+ async function retryRemoteCancellations({limit=20}={}){
+  assert(Number.isInteger(limit)&&limit>=1&&limit<=100,'invalid cancellation retry batch');
+  await operation;
+  const selected=Object.values(data.items).filter(x=>x.remoteCancellationPending===true).slice(0,limit)
+   .map(x=>({delivery:clone(x.delivery),receipt:clone(x.receipt)}));
+  let confirmed=0;
+  for(const item of selected){
+   try{
+    if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true){
+     await withWrite(async state=>{
+      const current=state.items[item.delivery.deliveryKey];
+      if(current?.remoteCancellationPending===true)current.remoteCancellationPending=false;
+     });
+     confirmed++;
+    }
+   }catch{/* keep durable pending marker for next reconciliation */}
+  }
+  return {attempted:selected.length,confirmed,unconfirmed:selected.length-confirmed};
+ }
  async function retractEvent(eventId){
   const affected=await withWrite(async state=>{
    assert(typeof eventId==='string'&&/^[a-f0-9]{64}$/.test(eventId),'invalid event key');
@@ -266,5 +292,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

@@ -80,8 +80,16 @@ export function createFinalizedBetNotificationPublisher({
    const approval=await verifyRegistry();
    demand(approval?.result?.qualified===true&&approval.config,'unqualified Registry');
    assertIndexerRegistryBinding(reader.config,approval.config);
-   const prior=await reader.readCheckpoint(checkpointPath);
-   const result=await reader.poll(prior,{maxBlocks});
+   let prior,result;
+   try{
+    prior=await reader.readCheckpoint(checkpointPath);
+    result=await reader.poll(prior,{maxBlocks});
+   }catch(error){
+    // A reorg can surface as an Indexer integrity exception during scanning
+    // rather than as an orderly `reorganized` result. Freeze every transport.
+    await outbox.haltForReorg();
+    throw error;
+   }
    if(result.reorganized){
     await outbox.haltForReorg();
     return {reorganized:true,queued:0,halted:true};

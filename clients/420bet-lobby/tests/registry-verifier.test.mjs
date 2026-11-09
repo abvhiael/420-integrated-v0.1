@@ -7,14 +7,14 @@ const CODE='0x6001600055',RUNTIME=keccak256(CODE),chain='420';
 function fixture(){
  const contracts=Object.fromEntries([
   'gameRegistry','moduleRegistry','profileRegistry','operatorRegistry',
-  'authorization','capabilityRegistry','protocolRegistry'
+  'authorization','capabilityRegistry','wagerRegistry','protocolRegistry'
  ].map((name,i)=>[name,{address:A(i+1),runtimeHash:RUNTIME}]));
  const profiles=Object.fromEntries(['randomness','risk','settlement','access'].map((name,i)=>[
   name,{id:H(100+i),type:H(110+i),manifestHash:H(120+i),artifactHash:H(130+i)}]));
  const game={id:'casino-dice',vertical:'casino',gameId:H(31),gameVersionId:H(32),
   moduleId:H(33),moduleVersionId:H(34),rulesetId:H(35),manifestHash:H(36),
   moduleManifestHash:H(37),implementation:A(50),implementationCodeHash:RUNTIME,
-  settlement:{address:A(51),runtimeHash:RUNTIME},operatorId:H(38),operatorAccount:A(52),
+  settlement:{address:A(71),runtimeHash:RUNTIME},operatorId:H(38),operatorAccount:A(52),
   operatorManifestHash:H(39),gameMode:1,profiles,
   authorizedRoles:[{action:'game-activate',scope:'game',principal:A(53)},
    {action:'wager-record',scope:'vault',scopeId:H(55),principal:A(54)}]};
@@ -56,6 +56,9 @@ function fixture(){
    if(functionName==='profiles')return contracts.profileRegistry.address;
    if(functionName==='authorization')return contracts.authorization.address;
    if(functionName==='capabilityRegistry')return contracts.capabilityRegistry.address;
+   if(functionName==='games')return contracts.gameRegistry.address;
+   if(functionName==='operators')return contracts.operatorRegistry.address;
+   if(functionName==='betRegistry'||functionName==='registry')return contracts.wagerRegistry.address;
    if(functionName==='getGame')return states.getGame;
    if(functionName==='getModule')return states.getModule;
    if(functionName==='getOperator')return states.getOperator;
@@ -161,4 +164,14 @@ test('Indexer event source bindings require exact role/address/deployment height
  assert.throws(()=>assertIndexerRegistryBinding({...indexer,contracts:indexer.contracts.map((x,i)=>
   i===3?{...x,address:A(900)}:x)},validateBetRegistryManifest(f.manifest)),/not in approved/);
  assert.throws(()=>createBetRegistryVerifier({manifest:f.manifest,client:f.client,trustedApprover:A(90)}),/missing required game vertical/);
+});
+
+test('wrong casino settlement source, incorrect wager ledger dependencies fail closed',async()=>{
+ const f=fixture();
+ const old=f.client.readContract;
+ f.client.readContract=async arg=>arg.functionName==='registry'?A(900):old(arg);
+ await assert.rejects(f.verified().verify(),/settlement wager Registry mismatch/);
+ f.client.readContract=old;
+ f.game.settlement.address=A(200);
+ assert.throws(()=>f.verified(),/approval digest/);
 });

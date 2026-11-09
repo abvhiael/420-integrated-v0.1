@@ -12,6 +12,8 @@ on:
       - 'notifications/cmd/notifications420/**'
       - 'clients/420bet-lobby/server/ownership-resolver.mjs'
       - 'clients/420bet-lobby/tests/ownership-resolver.test.mjs'
+      - 'clients/420bet-lobby/server/notifications-revocation-consumer.mjs'
+      - 'clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs'
       - 'clients/420bet-lobby/server/notifications-consent-authority.mjs'
       - 'clients/420bet-lobby/tests/notifications-consent-authority.test.mjs'
       - 'clients/420bet-lobby/server/notifications-mail-adapters.mjs'
@@ -80,6 +82,7 @@ jobs:
             clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
             clients/420bet-lobby/tests/ownership-resolver.test.mjs \
             clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
+            clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs \
             clients/420bet-lobby/tests/sportsbook-worker.test.mjs
       - uses: actions/setup-go@v5
         with:
@@ -100,6 +103,8 @@ jobs:
           node --check clients/420bet-lobby/server/registry-verifier.mjs
           node --check clients/420bet-lobby/server/ownership-resolver.mjs
           node --check clients/420bet-lobby/tests/ownership-resolver.test.mjs
+          node --check clients/420bet-lobby/server/notifications-revocation-consumer.mjs
+          node --check clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs
           node --check clients/420bet-lobby/server/notifications-consent-authority.mjs
           node --check clients/420bet-lobby/tests/notifications-consent-authority.test.mjs
           node --check clients/420bet-lobby/server/notifications-mail-adapters.mjs

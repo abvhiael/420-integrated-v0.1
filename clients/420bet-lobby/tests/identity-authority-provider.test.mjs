@@ -11,7 +11,8 @@ function provider(options={}){
    requests.push({url,opts});
    const data=JSON.parse(opts.body);
    let result;
-   if(url.endsWith('/v1/wallet-subject'))
+   if(url.endsWith('/v1/420bet/health'))result={ready:options.healthy??true,chainId:'420',policyVersion:options.version??'bet-v1',policyApprovalDigest:options.digest??D};
+   else if(url.endsWith('/v1/wallet-subject'))
     result={account:data.account,chainId:'420',subjectId:S,revoked:options.revoked??false};
    else result={account:data.account,subjectId:data.subjectId,chainId:'420',
     policyVersion:options.version??'bet-v1',
@@ -25,12 +26,13 @@ function provider(options={}){
 test('remote subject and policy adapter checks authority, binding, version, signed-off digest and revocation',async()=>{
  const {authority,requests}=provider();
  assert.equal(await authority.resolveSubjectId({account:A,chainId:'420'}),S);
+ assert.equal(await authority.checkReadiness(),true);
  const result=await authority.verifyPolicy({account:A,subjectId:S,chainId:'420',
   requiredCredentialTypes:[T],mode:'read-only'});
  assert.equal(result.authorized,true);assert.equal(result.authorizationVersion,'bet-v1:decision-4');
  assert.equal(requests[0].opts.headers.Authorization,'Bearer '+TOKEN);
  assert.equal(requests[1].opts.headers.Authorization,'Bearer '+TOKEN);
- assert.equal(JSON.parse(requests[1].opts.body).expectedPolicyApprovalDigest,D);
+ assert.equal(JSON.parse(requests[2].opts.body).expectedPolicyApprovalDigest,D);
  assert(!requests[0].url.includes(A));
  await assert.rejects(authority.resolveSubjectId({account:B,chainId:'421'}));
 });

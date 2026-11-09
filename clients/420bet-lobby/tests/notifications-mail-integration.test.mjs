@@ -183,3 +183,36 @@ test('same-origin delivery idempotency is per tenant and subscription, not globa
  assert.notEqual(a.deliveryKey,b.deliveryKey);assert.notEqual(a.deliveryKey,c.deliveryKey);
  assert.equal(a.eventId,b.eventId);
 });
+
+test('persisted reorg halt prevents dispatch and survives restart until canonical replay approval',async()=>{
+ await withOutbox(async({path,options})=>{
+  const a=await openBetDeliveryOutbox({path,...options});
+  await a.enqueue(request());
+  await a.haltForReorg();
+  await assert.rejects(a.drain(),/reorg halt/);
+  await assert.rejects(a.enqueue(request()),/reorg halt/);
+  await a.close();
+  const b=await openBetDeliveryOutbox({path,...options});
+  assert.equal((await b.summary()).halted,true);
+  await assert.rejects(b.resumeAfterCanonicalReplay(async()=>false),/not independently verified/);
+  assert.equal((await b.summary()).halted,true);
+  assert.deepEqual(await b.resumeAfterCanonicalReplay(async()=>true),{halted:false});
+  assert.equal((await b.drain()).delivered,1);
+  await b.close();
+ });
+});
+test('retracted delivered messages retain delivery receipts and report remote undo as unconfirmed',async()=>{
+ await withOutbox(async({path,options})=>{
+  options.providers.notifications.cancel=async()=>({cancelled:false});
+  const a=await openBetDeliveryOutbox({path,...options});
+  const first=await a.enqueue(request());
+  await a.drain();
+  const outcome=await a.retractEvent(makeBetDelivery(request()).eventId);
+  assert.equal(outcome.affected,1);
+  assert.equal(outcome.remoteCancellationUnconfirmed,1);
+  const record=await a.get(first.key);
+  assert.equal(record.status,'delivered');
+  assert.equal(record.retracted,true);
+  await a.close();
+ });
+});

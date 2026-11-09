@@ -65,7 +65,7 @@ export async function openBetOperationalDeliveryWorker({
  const lock=statePath+'.lock';
  await mkdir(lock,{mode:0o700}); // Fail closed on orphaned/active writer lock.
  let state,closed=false,stopping=false,started=false,timer=null,inFlight=null;
- let indexerLockFile=null;
+ let indexerLockFile=null,ownsIndexerLock=false;
  try{
   if(indexerCheckpointPath!==null){
    const cpdir=dirname(indexerCheckpointPath);
@@ -74,6 +74,7 @@ export async function openBetOperationalDeliveryWorker({
    // Other Indexer writers already use this same .lock path.
    indexerLockFile=indexerCheckpointPath+'.lock';
    const guard=await open(indexerLockFile,'wx',0o600);
+   ownsIndexerLock=true;
    await guard.close();
   }
   try{
@@ -92,7 +93,7 @@ export async function openBetOperationalDeliveryWorker({
    state.lastSuccessAt=null; // prior health cannot authorize dispatch after crash
    await persist(statePath,state);
   }
- }catch(error){if(indexerLockFile)await rm(indexerLockFile,{force:true});
+ }catch(error){if(ownsIndexerLock)await rm(indexerLockFile,{force:true});
   await rm(lock,{recursive:true,force:true});throw error;}
  const snapshot=()=>structuredClone(state);
  function health(){
@@ -166,7 +167,7 @@ export async function openBetOperationalDeliveryWorker({
   closed=true;
   // The outbox must close before the worker lock is released.
   try{await runtime.stop();}finally{
-   if(indexerLockFile)await rm(indexerLockFile,{force:true});
+   if(ownsIndexerLock)await rm(indexerLockFile,{force:true});
    await rm(lock,{recursive:true,force:true});
   }
  }

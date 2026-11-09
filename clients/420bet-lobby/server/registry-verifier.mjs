@@ -18,6 +18,7 @@ const ROLE_ACTIONS={
  'wager-settle-record':'BET_WAGER_SETTLE_RECORD'
 };
 const requireValid=(condition,message)=>{if(!condition)throw Error('420Registry: '+message);};
+function deepFreeze(value){if(value&&typeof value==='object'){for(const child of Object.values(value))deepFreeze(child);Object.freeze(value);}return value;}
 const normAddress=(v,label='address')=>{requireValid(typeof v==='string'&&ADDR.test(v)&&v.toLowerCase()!==ZERO_ADDR,'invalid '+label);return v.toLowerCase();};
 const normHash=(v,label='bytes32')=>{requireValid(typeof v==='string'&&HASH.test(v)&&v.toLowerCase()!==ZERO,'invalid '+label);return v.toLowerCase();};
 const uint=(v,label)=>{requireValid(typeof v==='string'&&UINT.test(v),'invalid '+label);return BigInt(v);};
@@ -192,13 +193,7 @@ export function validateBetRegistryManifest(raw){
  const result={schema:raw.schema,chainId:chainId.toString(),genesisHash,revision:revision.toString(),
   approvalDigest:manifestApproval,approvalAuthority,
   approvalSignature:raw.approvalSignature.toLowerCase(),contracts,sources,games};
- return Object.freeze(result);
-}
-function fieldsMatch(actual,expected,names){
- for(const name of names)requireValid(
-  typeof expected[name]==='string'?String(actual?.[name]).toLowerCase()===expected[name]:
-   typeof expected[name]==='bigint'?BigInt(actual?.[name])===expected[name]:
-   actual?.[name]===expected[name],'registry '+name+' mismatch');
+ return deepFreeze(result);
 }
 function stableStringify(value){
  if(Array.isArray(value))return '['+value.map(stableStringify).join(',')+']';

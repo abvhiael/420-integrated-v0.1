@@ -44,7 +44,7 @@ type Check struct {
  PolicyVersion string `json:"policyVersion"`
 }
 type state struct { Schema int `json:"schema"`; Items map[string]Subscription `json:"items"` }
-type Store struct { mu sync.Mutex; path string; data state }
+type Store struct { mu sync.Mutex; path string; lock string; closed bool; data state }
 func key(tenant,user,sub string) string { return tenant+"|"+user+"|"+sub }
 func valid(s Subscription) bool {
  return s.Tenant=="420bet"&&id.MatchString(s.UserID)&&id.MatchString(s.SubscriptionID)&&
@@ -59,7 +59,11 @@ func Open(path string)(*Store,error){
  if err:=os.MkdirAll(dir,0700);err!=nil{return nil,err}
  info,err:=os.Stat(dir);if err!=nil{return nil,err}
  if info.Mode().Perm()&0022!=0{return nil,errors.New("unsafe consent directory permissions")}
- s:=&Store{path:path,data:state{Schema:1,Items:map[string]Subscription{}}}
+ lock:=path+".lock"
+ if err:=os.Mkdir(lock,0700);err!=nil{return nil,fmt.Errorf("exclusive subscription writer lock unavailable: %w",err)}
+ success:=false
+ defer func(){if !success {_=os.Remove(lock)}}()
+ s:=&Store{path:path,lock:lock,data:state{Schema:1,Items:map[string]Subscription{}}}
  b,err:=os.ReadFile(path)
  if err==nil {
   fi,e:=os.Stat(path);if e!=nil{return nil,e}
@@ -69,8 +73,10 @@ func Open(path string)(*Store,error){
   for k,v:=range s.data.Items {if !valid(v)||k!=key(v.Tenant,v.UserID,v.SubscriptionID)||v.Revision==0{return nil,errors.New("invalid stored subscription")}}
  }else if !os.IsNotExist(err){return nil,err
  }else if err=s.persist(s.data);err!=nil{return nil,err}
+ success=true
  return s,nil
 }
+func(s *Store)Close()error{s.mu.Lock();defer s.mu.Unlock();if s.closed{return nil};s.closed=true;return os.Remove(s.lock)}
 func (s *Store) persist(data state) error {
  b,err:=json.Marshal(data);if err!=nil{return err}
  dir:=filepath.Dir(s.path)
@@ -88,6 +94,7 @@ func (s *Store) persist(data state) error {
 func (s *Store) Apply(v Subscription,expectedRevision uint64)(Subscription,error){
  if !valid(v){return Subscription{},errors.New("invalid subscription scope")}
  s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return Subscription{},errors.New("subscription store closed")}
  k:=key(v.Tenant,v.UserID,v.SubscriptionID)
  prior,exists:=s.data.Items[k]
  if !exists&&expectedRevision!=0||exists&&prior.Revision!=expectedRevision{return Subscription{},ErrConflict}
@@ -104,6 +111,7 @@ func (s *Store) Apply(v Subscription,expectedRevision uint64)(Subscription,error
 func (s *Store) Revoke(c Check,expectedRevision uint64)(Subscription,error){
  if !validCheck(c){return Subscription{},errors.New("invalid revocation scope")}
  s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return Subscription{},errors.New("subscription store closed")}
  k:=key(c.Tenant,c.UserID,c.SubscriptionID)
  prior,ok:=s.data.Items[k]
  if !ok{return Subscription{},ErrMissing}
@@ -119,6 +127,7 @@ func (s *Store) Check(c Check) Subscription {
  denied:=Subscription{Tenant:c.Tenant,UserID:c.UserID,SubscriptionID:c.SubscriptionID,Recipient:c.Recipient,Channel:c.Channel,PolicyVersion:c.PolicyVersion,Revoked:true}
  if !validCheck(c){return denied}
  s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return denied}
  x,ok:=s.data.Items[key(c.Tenant,c.UserID,c.SubscriptionID)]
  if !ok||x.Recipient!=c.Recipient||x.Channel!=c.Channel||x.PolicyVersion!=c.PolicyVersion{return denied}
  return x

@@ -2,7 +2,7 @@
 // Caller must inject independently qualified signature and Identity policy providers.
 // Not a production route, bearer store, gambling authorization, or a wallet signer.
 const PATH='/api/420bet/session/';
-const METHODS={challenge:'POST',authenticate:'POST',status:'GET',revoke:'POST'};
+const METHODS={challenge:'POST',authenticate:'POST',status:'POST',revoke:'POST'};
 const MAX_BODY=4096;
 export function createBetSessionHttpHandler({sessions,origin}={}){
  if(!sessions||!['challenge','authenticate','authorize','revoke'].every(k=>typeof sessions[k]==='function')||

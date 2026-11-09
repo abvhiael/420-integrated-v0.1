@@ -43,7 +43,7 @@ function validate(state){
   'invalid monitored failure');
 }
 export async function openBetOperationalDeliveryWorker({
- runtime,statePath,intervalMs=5000,retryMaxMs=60000,staleAfterMs=30000,
+ runtime,statePath,indexerCheckpointPath=null,intervalMs=5000,retryMaxMs=60000,staleAfterMs=30000,
  maxBlocks=64,drainLimit=20,clock=Date.now
 }={}){
  requireValid(runtime&&typeof runtime.publish==='function'&&typeof runtime.drain==='function'&&
@@ -56,13 +56,26 @@ export async function openBetOperationalDeliveryWorker({
  [staleAfterMs,intervalMs,86400000,'staleness'],[maxBlocks,1,64,'block batch'],
  [drainLimit,1,100,'delivery batch']])requireValid(isInt(value,min,max),'invalid '+label);
  requireValid(typeof clock==='function','clock required');
+ requireValid(indexerCheckpointPath===null||(typeof indexerCheckpointPath==='string'&&
+  isAbsolute(indexerCheckpointPath)&&indexerCheckpointPath!==statePath&&!indexerCheckpointPath.includes('\0')),
+  'invalid separate Indexer checkpoint path');
  const parent=dirname(statePath);
  await mkdir(parent,{recursive:true,mode:0o700});
  requireValid(((await stat(parent)).mode&0o022)===0,'monitoring directory unsafe');
  const lock=statePath+'.lock';
  await mkdir(lock,{mode:0o700}); // Fail closed on orphaned/active writer lock.
  let state,closed=false,stopping=false,started=false,timer=null,inFlight=null;
+ let indexerLockFile=null;
  try{
+  if(indexerCheckpointPath!==null){
+   const cpdir=dirname(indexerCheckpointPath);
+   await mkdir(cpdir,{recursive:true,mode:0o700});
+   requireValid(((await stat(cpdir)).mode&0o022)===0,'Indexer checkpoint directory unsafe');
+   // Other Indexer writers already use this same .lock path.
+   indexerLockFile=indexerCheckpointPath+'.lock';
+   const guard=await open(indexerLockFile,'wx',0o600);
+   await guard.close();
+  }
   try{
    const info=await stat(statePath);
    requireValid(info.isFile()&&(info.mode&0o077)===0&&info.size<=65536,
@@ -76,9 +89,11 @@ export async function openBetOperationalDeliveryWorker({
    state.recoveryCount++;
    state.inFlight=false;
    state.lastErrorCode='WORKER_FAILURE';
+   state.lastSuccessAt=null; // prior health cannot authorize dispatch after crash
    await persist(statePath,state);
   }
- }catch(error){await rm(lock,{recursive:true,force:true});throw error;}
+ }catch(error){if(indexerLockFile)await rm(indexerLockFile,{force:true});
+  await rm(lock,{recursive:true,force:true});throw error;}
  const snapshot=()=>structuredClone(state);
  function health(){
   const time=clock();
@@ -150,7 +165,10 @@ export async function openBetOperationalDeliveryWorker({
   if(inFlight)await inFlight.catch(()=>{});
   closed=true;
   // The outbox must close before the worker lock is released.
-  try{await runtime.stop();}finally{await rm(lock,{recursive:true,force:true});}
+  try{await runtime.stop();}finally{
+   if(indexerLockFile)await rm(indexerLockFile,{force:true});
+   await rm(lock,{recursive:true,force:true});
+  }
  }
  return Object.freeze({start,runOnce:execute,health,checkpoint:()=>snapshot(),stop});
 }

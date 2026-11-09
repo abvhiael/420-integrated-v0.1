@@ -45,7 +45,7 @@ export function createBetIdentityRuntime({settings,fetcher=fetch,publicClient}={
  need(settings&&typeof settings==='object','identity settings required');
  const client=publicClient??createPublicClient({transport:http(settings.rpcUrl,{timeout:10000,retryCount:0})});
  const remote=createRemoteBetIdentityAuthority({origin:settings.authorityUrl,
-  bearerToken:settings.authorityToken,chainId:settings.chainId,policyVersion:settings.policyVersion,fetcher});
+  bearerToken:settings.authorityToken,chainId:settings.chainId,policyVersion:settings.policyVersion,policyApprovalDigest:settings.approvalDigest,fetcher});
  const canonical=createCanonicalIdentityEligibility({rpcUrl:settings.rpcUrl,
   chainId:settings.chainId,identityAddress:settings.identityAddress,
   expectedRuntimeHash:settings.runtimeHash,hashRuntimeCode:code=>keccak256(code),

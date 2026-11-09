@@ -75,16 +75,36 @@ export async function createBetNotificationsMailRuntime({
   reader,checkpointPath:env.BET_INDEXER_EVENT_CHECKPOINT,
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),
   resolveAudience:ownership,outbox});
- return Object.freeze({outbox,
-  // Always catch up revoked subscriptions before publishing or dispatching.
-  syncRevocations:async args=>{
+ const interval=Number(env.BET_REVOCATION_POLL_MS??1000);
+ fail(Number.isSafeInteger(interval)&&interval>=250&&interval<=60000,
+  'invalid revocation poll interval');
+ // Startup must catch up before any new recipient delivery. Thereafter the
+ // monitor independently reconciles revocations, even while traffic is idle.
+ await revocationConsumer.sync();
+ let polling=null,stopped=false,lastRevocationFailure=false;
+ const sync=async args=>{
+  if(polling)return polling;
+  polling=(async()=>{
    const result=await revocationConsumer.sync(args);
-   const cancellation=await outbox.retryRemoteCancellations();
-   return {...result,remoteRetry:cancellation};
-  },
-  publish:async args=>{await revocationConsumer.sync();await outbox.retryRemoteCancellations();return publisher.publish(args);},
-  drain:async args=>{await revocationConsumer.sync();await outbox.retryRemoteCancellations();return outbox.drain(args);},
+   const remoteRetry=await outbox.retryRemoteCancellations();
+   lastRevocationFailure=false;
+   return {...result,remoteRetry};
+  })();
+  try{return await polling;}catch(error){lastRevocationFailure=true;throw error;}
+  finally{polling=null;}
+ };
+ const timer=setInterval(()=>{if(!stopped)void sync().catch(()=>{
+  // Preserve fail-closed state and retry at the next poll without logging secrets.
+  lastRevocationFailure=true;
+ });},interval);
+ timer.unref?.();
+ return Object.freeze({outbox,
+  revocationHealth:()=>({failed:lastRevocationFailure,stopped}),
+  // Always catch up revoked subscriptions before publishing or dispatching.
+  syncRevocations:args=>sync(args),
+  publish:async args=>{await sync();return publisher.publish(args);},
+  drain:async args=>{await sync();return outbox.drain(args);},
   // Invoke only from a trusted, authenticated 420Notifications revocation controller.
   revokeSubscription:scope=>outbox.revokeSubscription(scope),
-  stop:()=>outbox.close()});
+  stop:async()=>{stopped=true;clearInterval(timer);if(polling)await polling.catch(()=>{});await outbox.close();}});
 }

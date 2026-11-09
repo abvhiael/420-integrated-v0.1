@@ -13,7 +13,7 @@ This workstream is separate from 420Wallet, Registry, Notifications, Mail, Searc
 
 ## Launch and checkpointing
 
-Run from `clients/420bet-lobby` in a trusted backend environment, not in a browser:
+Run from `clients/420bet-lobby` in a trusted backend environment, not in a browser. **Registry qualification is now mandatory** before any Indexer scan: the operator must also configure `BET_REGISTRY_MANIFEST`, `BET_REGISTRY_TRUSTED_APPROVER`, and `BET_REGISTRY_RPC_URL`. All five configured Indexer source contracts and deployment heights must match the independently signed Registry manifest (see `BET-AUDIT-7-REGISTRY-INTEGRATION.md`).
 
 ```sh
 BET_INDEXER_EVENT_MANIFEST=/secure/bet-indexer-events.json \

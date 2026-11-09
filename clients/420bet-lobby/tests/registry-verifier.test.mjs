@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {keccak256,verifyMessage} from 'viem';
 import {privateKeyToAccount} from 'viem/accounts';
-import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest,assertIndexerRegistryBinding} from '../server/registry-verifier.mjs';
+import {createBetRegistryVerifier,validateBetRegistryManifest,registryManifestDigest,assertIndexerRegistryBinding,assertHistoryRegistryBinding} from '../server/registry-verifier.mjs';
 const H=n=>'0x'+n.toString(16).padStart(64,'0'),A=n=>'0x'+n.toString(16).padStart(40,'0');
 const CODE='0x6001600055',RUNTIME=keccak256(CODE),chain='420';
 function fixture(){
@@ -235,4 +235,16 @@ test('all four product classes require their own actual registered version/rules
  };
  await assert.rejects(createBetRegistryVerifier({manifest:f.manifest,client:f.client,
   trustedApprover:A(90)}).verify(),/vertical\/mode mismatch/);
+});
+
+test('history service binds to approved versioned game implementation, never unapproved router or alias',()=>{
+ const f=fixture(),config=validateBetRegistryManifest(f.manifest);
+ assert.equal(assertHistoryRegistryBinding({chainId:420,
+  gameContracts:{'casino-dice':[f.game.implementation]}},config),true);
+ assert.throws(()=>assertHistoryRegistryBinding({chainId:421,
+  gameContracts:{'casino-dice':[f.game.implementation]}},config),/chain mismatch/);
+ assert.throws(()=>assertHistoryRegistryBinding({chainId:420,
+  gameContracts:{'casino-dice':[f.manifest.sources[0].address]}},config),/unapproved/);
+ assert.throws(()=>assertHistoryRegistryBinding({chainId:420,
+  gameContracts:{'unknown':[f.game.implementation]}},config),/unapproved/);
 });

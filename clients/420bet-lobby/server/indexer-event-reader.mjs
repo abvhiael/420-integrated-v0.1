@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto';
-import {readFile,writeFile,rename,open,mkdir} from 'node:fs/promises';
+import {readFile,rename,open,mkdir} from 'node:fs/promises';
 import {dirname} from 'node:path';
 import {EVENT_SPECS,decodeKnownEvent} from './indexer-event-abi.mjs';
 
@@ -22,15 +22,16 @@ export function verifyIndexerManifest(config){
   (url.protocol==='https:'||(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname))),
   'indexer URL must be HTTPS or local HTTP');
  demand(Array.isArray(config.contracts)&&config.contracts.length>0&&config.contracts.length<=32,'invalid contracts');
- const ids=new Set(),addresses=new Set();
+ const ids=new Set(),addresses=new Set(),roles=new Set();
  const contracts=config.contracts.map(item=>{
   demand(item&&typeof item==='object'&&typeof item.id==='string'&&/^[a-z][a-z0-9-]{0,48}$/.test(item.id),'invalid binding id');
   demand(Object.hasOwn(EVENT_SPECS,item.role),'unsupported contract role');
   const addr=address(item.address);
   demand(!ids.has(item.id)&&!addresses.has(addr),'duplicate contract binding');
-  ids.add(item.id);addresses.add(addr);
+  ids.add(item.id);addresses.add(addr);roles.add(item.role);
   return Object.freeze({id:item.id,role:item.role,address:addr,fromBlock:uint(item.fromBlock).toString()});
  });
+ for(const role of ['casino-router','casino-settlement','poker-ledger','fantasy-contest','sports-tickets'])demand(roles.has(role),'missing required engine event binding: '+role);
  return Object.freeze({chainId:config.chainId,indexerUrl:url.origin+url.pathname,contracts});
 }
 const digest=config=>createHash('sha256').update(canonical(config)).digest('hex');
@@ -167,6 +168,7 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   const observedAgain=await status();
   demand(uint(observedAgain.finality.safeHead)>=end&&same((await block(end.toString())).hash,prior),'indexer reorg during scan');
   snapshot.tipHash=prior;snapshot.nextBlock=(end+1n).toString();snapshot.anchors=anchors;
+  demand(snapshot.events.length<=200000,'checkpoint event retention limit reached');
   snapshot.events.sort((a,b)=>{
    const n=BigInt(a.blockNumber)-BigInt(b.blockNumber);
    if(n!==0n)return n<0n?-1:1;

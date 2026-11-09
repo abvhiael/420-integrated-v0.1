@@ -9,6 +9,7 @@ on:
       - 'clients/420bet-lobby/package.json'
       - 'clients/420bet-lobby/tests/ecosystem.test.mjs'
       - 'docs/bet/BET-AUDIT-7-ECOSYSTEM-INTEGRATIONS.md'
+      - 'docs/bet/BET-AUDIT-7-INDEXER-WORKSTREAM.md'
       - '.github/workflows/420bet-ecosystem-7-level1.yml'
   workflow_dispatch:
 jobs:
@@ -22,7 +23,7 @@ jobs:
         with:
           node-version: '22'
       - name: Focused event reconciliation tests
-        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs clients/420bet-lobby/tests/indexer-event-reader.test.mjs
+        run: node --test clients/420bet-lobby/tests/ecosystem.test.mjs clients/420bet-lobby/tests/indexer-event-reader.test.mjs clients/420bet-lobby/tests/history-service.test.mjs
       - name: Syntax validation
         run: |
           node --check clients/420bet-lobby/server/ecosystem.mjs

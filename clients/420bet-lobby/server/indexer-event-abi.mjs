@@ -33,7 +33,7 @@ export function eventTopic(signature){
 }
 const specs={
  'casino-router':[
-  ['WAGER_ACCEPTED','WagerAcceptanceCompleted(bytes32,address,bytes32,bytes32,uint256,uint256,uint256,uint256)',4,3,1,2],
+  ['WAGER_ACCEPTED','WagerAcceptanceCompleted(bytes32,address,bytes32,bytes32,uint256,uint256,uint256,uint256)',5,3,1,2],
  ],
  'casino-settlement':[
   ['WAGER_SETTLED','SettlementCompleted(bytes32,uint8,uint256,uint256)',3,1,1,null],

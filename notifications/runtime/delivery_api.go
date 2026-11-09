@@ -25,6 +25,9 @@ type DeliveryPrincipal struct {
 type DeliveryAuthenticate func(context.Context, string) (DeliveryPrincipal, error)
 type DeliveryDecision struct { Owner bool; Consent bool }
 type DeliveryConsent func(context.Context, DeliveryPrincipal, DeliverySubmit) (DeliveryDecision, error)
+// DeliveryProvenance must independently check the canonical Indexer receipt,
+// Registry game version and finalized block hash, not trust a client flag.
+type DeliveryProvenance func(context.Context, DeliverySubmit) (bool, error)
 
 type DeliverySubmit struct {
  Tenant string `json:"tenant"`
@@ -202,10 +205,11 @@ type DeliveryAPI struct{
  store *DeliveryStore
  authenticate DeliveryAuthenticate
  consent DeliveryConsent
+ provenance DeliveryProvenance
 }
-func NewDeliveryAPI(store *DeliveryStore,authenticate DeliveryAuthenticate,consent DeliveryConsent)(*DeliveryAPI,error){
- if store==nil||authenticate==nil||consent==nil{return nil,errors.New("authenticated delivery store and private consent authority required")}
- return &DeliveryAPI{store:store,authenticate:authenticate,consent:consent},nil
+func NewDeliveryAPI(store *DeliveryStore,authenticate DeliveryAuthenticate,consent DeliveryConsent,provenance DeliveryProvenance)(*DeliveryAPI,error){
+ if store==nil||authenticate==nil||consent==nil||provenance==nil{return nil,errors.New("authenticated delivery store, private consent and canonical provenance authorities required")}
+ return &DeliveryAPI{store:store,authenticate:authenticate,consent:consent,provenance:provenance},nil
 }
 // Constant-time bearer authentication helper for a single trusted service
 // identity. Production callers still need a real scoped consent authority.
@@ -249,6 +253,8 @@ func (a *DeliveryAPI) ServeHTTP(w http.ResponseWriter,r *http.Request){
   }
   decision,e:=a.consent(r.Context(),p,req)
   if e!=nil||!decision.Owner||!decision.Consent{apiReply(w,403,map[string]string{"error":"consent_denied"});return}
+  canonical,verifyErr:=a.provenance(r.Context(),req)
+  if verifyErr!=nil||!canonical{apiReply(w,403,map[string]string{"error":"provenance_denied"});return}
   receipt,code,e:=a.store.Enqueue(req)
   if e!=nil{
    if e.Error()=="idempotency conflict"{apiReply(w,409,map[string]string{"error":"idempotency_conflict"})

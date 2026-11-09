@@ -33,6 +33,19 @@ function sessionBackendUrl(env){
   return u.origin;
  }catch{return null;}
 }
+async function approvedIdentityReady(request,env,fetcher){
+ const backend=sessionBackendUrl(env);
+ if(!sessionConfigured(env)||!backend)return false;
+ try{
+  const response=await fetcher(backend+SESSION_BASE+'ready',{method:'GET',redirect:'manual',
+   headers:{Origin:new URL(request.url).origin,Accept:'application/json',
+    'X-Bet-Edge-Secret':env.BET_SESSION_BACKEND_TOKEN},
+   signal:AbortSignal.timeout(5000)});
+  if(response.status!==200||!response.headers.get('content-type')?.toLowerCase().startsWith('application/json'))return false;
+  const body=await response.text();
+  return body.length<=1024&&JSON.parse(body).ready===true;
+ }catch{return false;}
+}
 async function sessionProxy(request,env,fetcher=fetch){
  const url=new URL(request.url);
  const route=url.pathname.slice(SESSION_BASE.length);
@@ -91,7 +104,7 @@ export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee
  if(url.pathname.startsWith(SESSION_BASE)){
   if(url.pathname===SESSION_BASE+'capabilities'){
    if(request.method!=='GET'||url.search)return apiError(405,'invalid_session_capabilities_request');
-   return new Response(JSON.stringify({readOnlyIdentityAvailable:Boolean(sessionConfigured(env)&&sessionBackendUrl(env))}),{
+   return new Response(JSON.stringify({readOnlyIdentityAvailable:await approvedIdentityReady(request,env,sessionFetch)}),{
     status:200,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   }
   return sessionProxy(request,env,sessionFetch);

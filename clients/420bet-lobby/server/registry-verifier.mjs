@@ -80,6 +80,21 @@ export const BET_REGISTRY_ABI=[
   inputs:[{type:'bytes32'}],outputs:[{type:'bytes32'}]}
 ];
 export const BET_REGISTRY_COMPONENT='registry-verifier-v1';
+export function assertHistoryRegistryBinding({chainId,gameContracts},registryConfig){
+ requireValid(String(chainId)===registryConfig.chainId,'player history chain mismatch');
+ requireValid(gameContracts&&typeof gameContracts==='object'&&!Array.isArray(gameContracts),
+  'player history contract list missing');
+ const entries=Object.entries(gameContracts);
+ requireValid(entries.length>0,'player history contract list empty');
+ const approved=new Map(registryConfig.games.map(g=>[g.id,g.implementation]));
+ for(const [gameId,addresses] of entries){
+  const implementation=approved.get(gameId);
+  requireValid(implementation&&Array.isArray(addresses)&&addresses.length===1&&
+   typeof addresses[0]==='string'&&addresses[0].toLowerCase()===implementation,
+   'unapproved player history game contract: '+gameId);
+ }
+ return true;
+}
 export function assertIndexerRegistryBinding(indexerManifest,registryConfig){
  requireValid(indexerManifest?.chainId===registryConfig.chainId,'Indexer chain mismatch');
  requireValid(Array.isArray(indexerManifest.contracts),'Indexer sources missing');

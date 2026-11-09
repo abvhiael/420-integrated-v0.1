@@ -51,11 +51,13 @@ export async function openBetDeliveryOutbox({
     'invalid durable outbox');
   }catch(error){
    if(error?.code!=='ENOENT')throw error;
-   data={schema:1,items:{},halted:false,revocationCursor:0,revokedSubscriptions:{}};
+   data={schema:1,items:{},halted:false,replayPending:false,revocationCursor:0,revokedSubscriptions:{}};
    await atomicWrite(path,data);
   }
   assert(data.halted===undefined||typeof data.halted==='boolean','invalid durable halt state');
   if(data.halted===undefined)data.halted=false;
+  if(data.replayPending===undefined)data.replayPending=false;
+  assert(typeof data.replayPending==='boolean','invalid replay recovery state');
   if(data.revocationCursor===undefined)data.revocationCursor=0;
   if(data.revokedSubscriptions===undefined)data.revokedSubscriptions={};
   assert(Number.isSafeInteger(data.revocationCursor)&&data.revocationCursor>=0&&
@@ -283,7 +285,7 @@ export async function openBetDeliveryOutbox({
    'canonical rebuild not independently verified');
   const canonical=new Set(canonicalEventIds);
   return withWrite(async state=>{
-   assert(state.halted,'reorganization recovery requires halted outbox');
+   assert(state.halted||state.replayPending,'reorganization recovery requires halted or pending replay');
    let orphaned=0,corrections=0,cancelPending=0;
    for(const item of Object.values(state.items)){
     const d=item.delivery;
@@ -301,8 +303,15 @@ export async function openBetDeliveryOutbox({
     }
     item.updatedAt=clock();
    }
-   state.halted=false;
-   return {halted:false,orphaned,corrections,cancelPending};
+   state.halted=false;state.replayPending=true;
+   return {halted:false,replayPending:true,orphaned,corrections,cancelPending};
+  });
+ }
+ async function finishCanonicalReplay(){
+  return withWrite(async state=>{
+   assert(!state.halted&&state.replayPending,'no verified replay awaiting completion');
+   state.replayPending=false;
+   return {replayPending:false};
   });
  }
  async function resumeAfterCanonicalReplay(recovery){
@@ -311,7 +320,7 @@ export async function openBetDeliveryOutbox({
  async function drain({limit=20}={}){
   assert(Number.isInteger(limit)&&limit>0&&limit<=100,'invalid delivery batch');
   const items=await withWrite(async state=>{
-   assert(!state.halted,'canonical reorg halt active');
+   assert(!state.halted&&!state.replayPending,'canonical reorg halt or replay pending');
    const t=clock(),out=[];
    for(const item of Object.values(state.items)){
     if(out.length>=limit)break;
@@ -381,7 +390,7 @@ export async function openBetDeliveryOutbox({
   return Object.freeze({processed:items.length,delivered,failed,cancelled,pending});
  }
  async function get(key){await operation;return scrub(data.items[key]);}
- async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted};}
+ async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted,replayPending:data.replayPending,remoteCancellationPending:Object.values(data.items).filter(i=>i.remoteCancellationPending).length,correctionPending:Object.values(data.items).filter(i=>i.delivery.correctionOf&&i.status!=='delivered'&&i.status!=='cancelled').length};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,finishCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

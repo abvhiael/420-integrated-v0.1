@@ -59,3 +59,37 @@ func TestPrivateHTTPAuthenticationAndDurableRevocation(t *testing.T){
  if w:=invoke("/v1/420bet/subscriptions/revoke",map[string]any{"check":query(),"expectedRevision":1},"Bearer "+writeToken);w.Code!=200{t.Fatalf("revoke %d %s",w.Code,w.Body)}
  if w:=invoke("/v1/420bet/subscriptions/check",query(),"Bearer "+token);w.Code!=200||!bytes.Contains(w.Body.Bytes(),[]byte(`"revoked":true`)){t.Fatalf("revoked check %d %s",w.Code,w.Body)}
 }
+
+func TestRevocationEventsPersistAndRetainOrder(t *testing.T){
+ path:=filepath.Join(t.TempDir(),"revocations.json")
+ s,err:=Open(path);if err!=nil{t.Fatal(err)}
+ v,err:=s.Apply(fixture(),0);if err!=nil{t.Fatal(err)}
+ v.Muted=true
+ if _,err=s.Apply(v,1);err!=nil{t.Fatal(err)}
+ events,err:=s.Revocations(0,10);if err!=nil{t.Fatal(err)}
+ if len(events)!=1||events[0].Sequence!=1||events[0].Reason!="consent_withdrawn"{t.Fatalf("bad mute feed: %#v",events)}
+ v.Muted=false
+ if _,err=s.Apply(v,2);err!=nil{t.Fatal(err)}
+ if _,err=s.Revoke(query(),3);err!=nil{t.Fatal(err)}
+ events,err=s.Revocations(1,10);if err!=nil{t.Fatal(err)}
+ if len(events)!=1||events[0].Sequence!=2||events[0].Reason!="revoked"{t.Fatalf("bad revoke feed: %#v",events)}
+ if _,err=s.Revocations(100,10);err==nil{t.Fatal("future cursor accepted")}
+ if err=s.Close();err!=nil{t.Fatal(err)}
+ restarted,err:=Open(path);if err!=nil{t.Fatal(err)};defer restarted.Close()
+ events,err=restarted.Revocations(0,10);if err!=nil{t.Fatal(err)}
+ if len(events)!=2||events[1].Sequence!=2{t.Fatalf("restarted feed wrong: %#v",events)}
+}
+func TestRevocationFeedSeparateReadCredential(t *testing.T){
+ s,err:=Open(filepath.Join(t.TempDir(),"consent.json"));if err!=nil{t.Fatal(err)};defer s.Close()
+ read:="reader-credential-which-is-longer-than-32-bytes"
+ writeToken:="writer-credential-which-is-longer-than-32-bytes"
+ h,err:=Handler(s,read,writeToken);if err!=nil{t.Fatal(err)}
+ b:=[]byte(`{"after":0,"limit":10}`)
+ ask:=func(token string)int{
+  req:=httptest.NewRequest(http.MethodPost,"/v1/420bet/subscriptions/revocations",bytes.NewReader(b))
+  req.Header.Set("Authorization","Bearer "+token)
+  w:=httptest.NewRecorder();h.ServeHTTP(w,req);return w.Code
+ }
+ if ask(writeToken)!=403{t.Fatal("writer token can read revocation feed")}
+ if ask(read)!=200{t.Fatal("reader cannot access revocation feed")}
+}

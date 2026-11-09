@@ -115,13 +115,42 @@ export async function openBetDeliveryOutbox({
   });
  }
  async function cancel(key){
-  return withWrite(async state=>{
+  const result=await withWrite(async state=>{
    const item=state.items[key];assert(item,'unknown delivery');
    if(item.status==='cancelled'||item.status==='dead_letter')return scrub(item);
    // Cancel BEFORE any external calls and retain cancellation tombstone.
    item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
-   return scrub(item);
+   return {record:scrub(item),delivery:clone(item.delivery),receipt:clone(item.receipt)};
   });
+  if(result?.receipt){
+   try{
+    const cancelled=await providers[result.delivery.channel].cancel(result.delivery,result.receipt);
+    return {...result.record,remoteCancellationConfirmed:cancelled?.cancelled===true};
+   }catch{return {...result.record,remoteCancellationConfirmed:false};}
+  }
+  return {...(result?.record??result),remoteCancellationConfirmed:false};
+ }
+ async function revokeSubscription({tenant,userId,subscriptionId}={}){
+  assert(typeof tenant==='string'&&typeof userId==='string'&&typeof subscriptionId==='string',
+   'invalid subscription revocation scope');
+  const pending=await withWrite(async state=>{
+   const list=[];
+   for(const item of Object.values(state.items)){
+    const d=item.delivery;
+    if(d.tenant===tenant&&d.userId===userId&&d.subscriptionId===subscriptionId&&
+     item.status!=='cancelled'){
+     item.status='cancelled';item.nextAttemptAt=null;item.updatedAt=clock();
+     list.push({delivery:clone(d),receipt:clone(item.receipt)});
+    }
+   }
+   return list;
+  });
+  let confirmations=0;
+  for(const item of pending)if(item.receipt){
+   try{if((await providers[item.delivery.channel].cancel(item.delivery,item.receipt))?.cancelled===true)confirmations++;}catch{}
+  }
+  return {locallyCancelled:pending.length,remoteCancellationConfirmed:confirmations,
+   remoteCancellationUnconfirmed:pending.filter(x=>x.receipt).length-confirmations};
  }
  async function retractEvent(eventId){
   return withWrite(async state=>{
@@ -197,5 +226,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data)};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,retractEvent,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,retractEvent,drain,get,summary,close});
 }

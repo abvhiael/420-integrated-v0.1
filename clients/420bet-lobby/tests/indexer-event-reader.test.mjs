@@ -116,3 +116,43 @@ test('rejects forged receipts, unstable finality and incorrect manifest',async()
  await assert.rejects(other.poll(await other.readCheckpoint('/not/a/checkpoint')),/finality/);
  assert.throws(()=>verifyIndexerManifest({...manifest,contracts:[contracts[0],{...contracts[1],address:contracts[0].address}]}));
 });
+
+test('opaque-cursor pagination delivers more than 200 real-indexer-shaped events without duplicates',async()=>{
+ const logs=Array.from({length:206},(_,i)=>makeLog(contracts[4],'SPORTS_TICKET_FUNDED',1,1000+i,i));
+ const src=service({logs,head:1});
+ const reader=createIndexerEventReader({manifest,fetcher:src.fetcher});
+ const one=await reader.poll(await reader.readCheckpoint('/not/a/checkpoint'),{maxBlocks:1});
+ assert.equal(one.state.events.length,206);
+ const twoSrc=service({logs:[...logs,makeLog(contracts[4],'SPORTS_TICKET_FUNDED',2,2000,0)],head:2});
+ const resumed=createIndexerEventReader({manifest,fetcher:twoSrc.fetcher});
+ const two=await resumed.poll(one.state,{maxBlocks:1});
+ assert.equal(two.state.events.length,207);
+ assert.equal(new Set(two.state.events.map(e=>e.transactionHash+':'+e.logIndex)).size,207);
+});
+test('wrong canonical parent and stale operational metadata abort before checkpoint advancement',async()=>{
+ const src=service({head:2});
+ src.blocks.get('2').parentHash=h(999);
+ const reader=createIndexerEventReader({manifest,fetcher:src.fetcher});
+ await assert.rejects(reader.poll(await reader.readCheckpoint('/not/a/checkpoint'),{maxBlocks:2}),/parent mismatch/);
+ const stale=service({head:1});
+ const original=stale.fetcher;
+ stale.fetcher=async(u,o)=>{
+  const response=await original(u,o);
+  if(new URL(u).pathname!=='/v1/status')return response;
+  const data=JSON.parse(await response.text());data.data.runtime.stale=true;
+  return {ok:true,text:async()=>JSON.stringify(data)};
+ };
+ const fail=createIndexerEventReader({manifest,fetcher:stale.fetcher});
+ await assert.rejects(fail.poll(await fail.readCheckpoint('/not/a/checkpoint')),/stale indexer/);
+});
+test('manifest must bind every engine family and checkpoint cannot silently migrate',async()=>{
+ assert.throws(()=>verifyIndexerManifest({...manifest,contracts:contracts.slice(0,-1)}),/missing required engine/);
+ const src=service({head:1}),dir=await mkdtemp(join(tmpdir(),'bet7-version-'));
+ try{
+  const checkpointPath=join(dir,'events.json');
+  await synchronizeIndexerEvents({manifest,checkpointPath,fetcher:src.fetcher,maxBlocks:1});
+  const changed={...manifest,contracts:contracts.map((c,i)=>i?c:{...c,fromBlock:'2'})};
+  const altered=createIndexerEventReader({manifest:changed,fetcher:src.fetcher});
+  await assert.rejects(altered.readCheckpoint(checkpointPath),/manifest mismatch/);
+ }finally{await rm(dir,{recursive:true,force:true});}
+});

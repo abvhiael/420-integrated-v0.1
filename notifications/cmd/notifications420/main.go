@@ -25,10 +25,11 @@ func main() {
 	service, err := notifyruntime.NewService(cfg, probe)
 	if err != nil { log.Fatal(err) }
 	if path:=os.Getenv("NOTIFICATIONS_BET_CONSENT_PATH");path!="" {
-  token:=mustEnv("NOTIFICATIONS_BET_CONSENT_TOKEN")
+  readToken:=mustEnv("NOTIFICATIONS_BET_CONSENT_READ_TOKEN")
+  writeToken:=mustEnv("NOTIFICATIONS_BET_CONSENT_WRITE_TOKEN")
   store,e:=betconsent.Open(path);if e!=nil{log.Fatal(e)}
   defer store.Close()
-  if e=service.EnableBetConsent(store,token);e!=nil{log.Fatal(e)}
+  if e=service.EnableBetConsent(store,readToken,writeToken);e!=nil{log.Fatal(e)}
  }
  ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)
 	defer cancel()

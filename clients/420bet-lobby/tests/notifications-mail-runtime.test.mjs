@@ -26,7 +26,8 @@ test('full Registry/Indexer/ownership/consent and authenticated Mail outbox comp
  const env={BET_INDEXER_EVENT_MANIFEST:manifestPath,
   BET_INDEXER_EVENT_CHECKPOINT:join(dir,'indexer-checkpoint.json'),
   BET_DELIVERY_OUTBOX_PATH:join(dir,'delivery.json'),
-  BET_MAIL_URL:'https://mail.example/'};
+  BET_MAIL_URL:'https://mail.example/',
+  BET_MAIL_SENDER_ID:'sender-id',BET_MAIL_ACTOR_TOKEN:'a'.repeat(48)};
  try{
   const runtime=await createBetNotificationsMailRuntime({
    env,verifyRegistry:async()=>fx.registry,readerFactory:()=>fx.reader,
@@ -38,24 +39,26 @@ test('full Registry/Indexer/ownership/consent and authenticated Mail outbox comp
    checkConsent:async req=>({tenant:req.tenant,userId:req.userId,
     subscriptionId:req.subscriptionId,recipient:req.recipient,channel:req.channel,
     active:true,muted:false,revoked:false,consent:true,policyVersion:req.policyVersion}),
-   authorizeMailActor:async()=>({sender:'sender-id',authorization:'Bearer '+'a'.repeat(48)}),
    notifications:{deliverAuthenticated:async()=>{throw Error('unreachable')},
     readReceipt:async()=>{throw Error('unreachable')},cancelDelivery:async()=>({cancelled:true})},
    fetcher:async(url,opts)=>{
     sent.push({url,opts});
+    if(url.endsWith('/v1/auth/actor'))return {ok:true,text:async()=>JSON.stringify({
+     actor:'sender-id',service:'420/service/mail/v1',verified:true})};
     const body=opts.body?JSON.parse(opts.body):null;
     return {ok:true,text:async()=>JSON.stringify(
      url.endsWith('/v1/outbox')?{id:'mail-delivery',owner:'sender-id',
       recipient:'recipient-1',status:'QUEUED',idempotency_key:body.idempotency_key}:
       {id:'mail-delivery',owner:'sender-id',status:'DELIVERED',
-       idempotency_key:body?.idempotency_key??JSON.parse(sent[0].opts.body).idempotency_key}
+       idempotency_key:body?.idempotency_key??JSON.parse(sent.find(x=>x.url.endsWith('/v1/outbox')).opts.body).idempotency_key}
     )};
    }
   });
   assert.equal((await runtime.publish()).queued,1);
   assert.equal((await runtime.drain()).delivered,1);
   assert.equal((await runtime.outbox.summary()).byStatus.delivered,1);
-  assert.equal(sent[0].url,'https://mail.example/v1/outbox');
+  assert.equal(sent[0].url,'https://mail.example/v1/auth/actor');
+  assert.equal(sent[1].url,'https://mail.example/v1/outbox');
   await runtime.stop();
  }finally{await rm(dir,{recursive:true,force:true});}
 });

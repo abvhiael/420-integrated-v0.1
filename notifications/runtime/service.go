@@ -18,6 +18,7 @@ type Service struct {
 	cfg   Config
 	probe IndexerProbe
 	ready atomic.Bool
+ deliveryAPI *DeliveryAPI
 }
 
 func NewService(cfg Config, probe IndexerProbe) (*Service, error) {
@@ -48,8 +49,19 @@ func (s *Service) Qualify(ctx context.Context) error {
 	return nil
 }
 
+// ConfigureDeliveryAPI is startup-only. A nil or unqualified API is never mounted.
+func (s *Service) ConfigureDeliveryAPI(api *DeliveryAPI) error {
+ if api==nil { return errors.New("qualified delivery API required") }
+ if s.deliveryAPI!=nil { return errors.New("delivery API already configured") }
+ s.deliveryAPI=api
+ return nil
+}
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
+ if s.deliveryAPI!=nil {
+  mux.Handle("/v1/deliveries",s.readyDeliveryHandler())
+  mux.Handle("/v1/deliveries/",s.readyDeliveryHandler())
+ }
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"service":   "420Notifications",
@@ -77,4 +89,14 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+func (s *Service) readyDeliveryHandler() http.Handler {
+ return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request){
+  if !s.ready.Load(){
+   apiReply(w,http.StatusServiceUnavailable,map[string]string{"error":"not_ready"})
+   return
+  }
+  s.deliveryAPI.ServeHTTP(w,r)
+ })
 }

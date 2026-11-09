@@ -70,5 +70,8 @@ export async function createBetNotificationsMailRuntime({
   verifyRegistry:()=>verifyRegistry({env,indexerManifest:manifest}),
   resolveAudience:ownership,outbox});
  return Object.freeze({outbox,publish:publisher.publish,
-  drain:args=>outbox.drain(args),stop:()=>outbox.close()});
+  drain:args=>outbox.drain(args),
+  // Invoke only from a trusted, authenticated 420Notifications revocation controller.
+  revokeSubscription:scope=>outbox.revokeSubscription(scope),
+  stop:()=>outbox.close()});
 }

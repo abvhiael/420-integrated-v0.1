@@ -148,7 +148,8 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   const start=uint(snapshot.nextBlock);
   if(start>head)return {state:snapshot,scanned:0,reorganized,complete:true};
   const end=start+BigInt(maxBlocks)-1n>head?head:start+BigInt(maxBlocks)-1n;
-  const blockCache=new Map(),anchors=snapshot.anchors.slice(),prior=snapshot.tipHash;
+  const blockCache=new Map(),anchors=snapshot.anchors.slice();
+  let prior=snapshot.tipHash;
   for(let n=start;n<=end;n++){
    const b=await block(n.toString());
    if(prior!==null)demand(b.parentHash===prior,'canonical block parent mismatch');

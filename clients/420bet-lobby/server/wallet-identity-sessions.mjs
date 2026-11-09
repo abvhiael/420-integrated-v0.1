@@ -61,7 +61,8 @@ export function createBetWalletSessions({
   clean(now());check(sessions.size<10000,'session capacity exceeded');
   const key=nonce(),expiresAt=Math.min(t+sessionTtlMs,Number.isSafeInteger(policy.expiresAt)?policy.expiresAt:t+sessionTtlMs);
   check(expiresAt>now(),'identity expired');
-  sessions.set(key,{account:a,chainId,version:policy.authorizationVersion,expiresAt,epoch});
+  sessions.set(key,{account:a,chainId,version:policy.authorizationVersion,
+    subjectId:policy.subjectId??null,expiresAt,epoch});
   return {token:key,expiresAt,account:a,chainId};
  }
  async function authorize({token,account,requestedChainId}){
@@ -72,6 +73,7 @@ export function createBetWalletSessions({
   const policy=await verifyIdentity({account:a,chainId,mode:'read-only'});
   check(policy?.authorized===true&&policy?.revoked===false&&
     policy.authorizationVersion===stored.version&&
+    (policy.subjectId??null)===stored.subjectId&&
     (!Number.isSafeInteger(policy.expiresAt)||policy.expiresAt>now()),'identity revoked or changed');
   check(sessions.get(token)===stored&&stored.epoch===epoch&&stored.expiresAt>now(),'session revoked during verification');
   return Object.freeze({account:a,chainId,expiresAt:stored.expiresAt,readOnly:true});

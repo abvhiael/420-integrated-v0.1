@@ -156,11 +156,15 @@ export async function openBetDeliveryOutbox({
    for(const item of Object.values(state.items)){
     const d=item.delivery;
     if(d.tenant!==tenant||d.userId!==userId||d.subscriptionId!==subscriptionId)continue;
-    if(item.status==='delivered'){item.retracted=true;}
-    else{item.status='cancelled';item.nextAttemptAt=null;}
-    item.remoteCancellationPending=Boolean(item.receipt);
+    if(item.status==='delivered'){
+     item.retracted=true;
+     item.remoteCancellationPending=false; // Already delivered cannot be unsent.
+    }else{
+     item.status='cancelled';item.nextAttemptAt=null;
+     item.remoteCancellationPending=Boolean(item.receipt);
+     if(item.receipt)affected.push({delivery:clone(d),receipt:clone(item.receipt)});
+    }
     item.updatedAt=clock();
-    if(item.receipt)affected.push({delivery:clone(d),receipt:clone(item.receipt)});
    }
    if(sequence!==null)state.revocationCursor=sequence;
    return {duplicate:false,affected};

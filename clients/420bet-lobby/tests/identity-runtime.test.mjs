@@ -57,7 +57,7 @@ test('runtime refuses implicit or unapproved Identity credentials and policy set
  assert.throws(()=>approvedSessionSettings({...inputs,BET_SESSION_BACKEND_TOKEN:'short'}),/backend/);
 });
 test('real EIP-191 signature, canonical on-chain read and policy authority create read-only session end-to-end',async()=>{
- const {http,calls}=fixture();
+ const {runtime,http,calls}=fixture();
  const denied=await http('challenge',{account:account.address.toLowerCase(),chainId:CHAIN},'wrong');
  assert.equal(denied.status,403);
  const a=account.address.toLowerCase();
@@ -66,6 +66,13 @@ test('real EIP-191 signature, canonical on-chain read and policy authority creat
  const signature=await account.signMessage({message:challenge.output.message});
  const auth=await http('authenticate',{account:a,chainId:CHAIN,
   nonce:challenge.output.nonce,signature});
+ if(auth.status!==200){
+  // A second challenge exercises the underlying qualified providers directly
+  // so failures aren't hidden by the intentionally generic HTTP 401 response.
+  const retry=runtime.sessions.challenge({account:a,requestedChainId:CHAIN});
+  const secondSignature=await account.signMessage({message:retry.message});
+  await runtime.sessions.authenticate({account:a,requestedChainId:CHAIN,nonce:retry.nonce,signature:secondSignature});
+ }
  assert.equal(auth.status,200);
  assert.equal(auth.output.account,a);
  assert(calls.some(x=>JSON.parse(x.options.body).method==='eth_call'));

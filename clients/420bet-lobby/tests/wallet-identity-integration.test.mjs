@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createBetWalletSessions} from '../server/wallet-identity-sessions.mjs';
 import {createCanonicalIdentityEligibility} from '../server/canonical-identity-eligibility.mjs';
+import {createWalletSignatureVerifier} from '../server/wallet-signature-verifier.mjs';
 import {eventTopic} from '../server/indexer-event-abi.mjs';
 
 const A='0x'+'a'.repeat(40),B='0x'+'b'.repeat(40),TYPE='0x'+'c'.repeat(64),SUBJECT='0x'+'d'.repeat(64);
@@ -92,4 +93,16 @@ test('Identity denial, RPC wrong-chain and independent policy denial all fail cl
  assert.equal(denied.authorized,false);
  const policyDenied=await build({chain:'0x1a4',credential:'0x'+'0'.repeat(63)+'1'},async()=>({authorized:false})).verifyIdentity({account:A,chainId:'420',mode:'read-only'});
  assert.equal(policyDenied.authorized,false);
+});
+
+test('qualified signature adapter binds EOA or contract-wallet verifier to chain and signed message',async()=>{
+ let seen;
+ const client={getChainId:async()=>420,verifyMessage:async args=>{seen=args;return true;}};
+ const verify=createWalletSignatureVerifier({publicClient:client,chainId:'420'});
+ assert.equal(await verify({account:A,chainId:'420',message:'420Bet read-only session',signature:SIGNATURE}),true);
+ assert.deepEqual(seen,{address:A,message:'420Bet read-only session',signature:SIGNATURE});
+ assert.equal(await verify({account:A,chainId:'421',message:'420Bet read-only session',signature:SIGNATURE}),false);
+ assert.equal(await createWalletSignatureVerifier({publicClient:{...client,getChainId:async()=>421},chainId:'420'})({account:A,chainId:'420',message:'a',signature:SIGNATURE}),false);
+ assert.equal(await createWalletSignatureVerifier({publicClient:{...client,verifyMessage:async()=>false},chainId:'420'})({account:A,chainId:'420',message:'a',signature:SIGNATURE}),false);
+ assert.throws(()=>createWalletSignatureVerifier({chainId:'420'}));
 });

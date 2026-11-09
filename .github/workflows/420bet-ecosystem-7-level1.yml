@@ -12,6 +12,10 @@ on:
       - 'clients/420bet-lobby/server/registry-verifier.mjs'
       - 'mail/http.go'
       - 'mail/auth_actor_test.go'
+      - 'notifications/betdelivery/**'
+      - 'integration/betaudit7/**'
+      - 'clients/420bet-lobby/server/notifications-go-provider*.mjs'
+      - 'clients/420bet-lobby/tests/real-go-services-bridge.mjs'
       - 'notifications/betconsent/**'
       - 'notifications/runtime/**'
       - 'notifications/cmd/notifications420/**'
@@ -103,10 +107,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-      - name: Durable 420Notifications consent and private runtime Go tests
+      - name: Actual Go 420Mail/Notifications HTTP and Node worker Level 2 integration
         run: |
-          go test -count=1 ./notifications/betconsent ./notifications/runtime ./mail
-          go vet ./notifications/betconsent ./notifications/runtime ./mail
+          go test -count=1 -timeout=120s -v ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./mail ./integration/betaudit7
+          go vet ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./mail ./integration/betaudit7
       - name: Production Vite build
         working-directory: clients/420bet-lobby
         run: npm run build
@@ -117,6 +121,9 @@ jobs:
           node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs
           node --check clients/420bet-lobby/server/identity-runtime.mjs
           node --check clients/420bet-lobby/server/registry-verifier.mjs
+          node --check clients/420bet-lobby/server/notifications-go-provider.mjs
+          node --check clients/420bet-lobby/server/notifications-go-provider-entry.mjs
+          node --check clients/420bet-lobby/tests/real-go-services-bridge.mjs
           node --check clients/420bet-lobby/server/delivery-worker.mjs
           node --check clients/420bet-lobby/server/run-delivery-worker.mjs
           node --check clients/420bet-lobby/tests/delivery-worker.test.mjs

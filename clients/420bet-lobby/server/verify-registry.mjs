@@ -1,5 +1,6 @@
 // Trusted read-only 420Registry verification, never a betting authorization.
 import {readFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
 import {createPublicClient,http} from 'viem';
 import {createBetRegistryVerifier,assertIndexerRegistryBinding} from './registry-verifier.mjs';
 
@@ -28,7 +29,7 @@ export async function verifyConfiguredRegistry({
  if(indexerManifest)assertIndexerRegistryBinding(indexerManifest,verifier.config);
  return {result,config:verifier.config};
 }
-if(process.argv[1]&&import.meta.url===new URL('file://'+process.argv[1]).href){
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const outcome=await verifyConfiguredRegistry();
  console.log(JSON.stringify({
   kind:'bet-registry-check',qualified:outcome.result.qualified,chainId:outcome.result.chainId,

@@ -66,7 +66,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   cell.append(picture);reels.append(cell);frameNodes.push(cell);frameImages.push(picture);
  }
  const side=el(doc,'aside','cj-side');
- const heading=el(doc,'h2','', 'CAT'S GOT NINE LIVES');
+ const heading=el(doc,'h2','', "CAT\'S GOT NINE LIVES");
  const info=el(doc,'p','cj-rules','8 paylines · Nine independent reels. Five bells in positions 2, 4, 5, 6, 8 start Nine Lives.');
  const counters=el(doc,'div','cj-counters');
  const balanceText=el(doc,'strong','', '1000.00');

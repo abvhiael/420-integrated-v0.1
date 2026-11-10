@@ -5,7 +5,7 @@ import {timingSafeEqual} from 'node:crypto';
 import {createPublicClient,http} from 'viem';
 import {createWalletSignatureVerifier} from './wallet-signature-verifier.mjs';
 import {createPrivateOwnerDirectories} from './ownership-directories.mjs';
-import {createBetConsentEnrollmentBroker,createGoConsentCommit} from './consent-enrollment-broker.mjs';
+import {createBetConsentEnrollmentBroker,createGoConsentCommit,createVerifiedConsentRouteAuthority} from './consent-enrollment-broker.mjs';
 const need=name=>{const s=process.env[name];if(!s)throw Error('420Bet consent enrollment: missing '+name);return s;};
 const env=process.env;
 const chainId=need('BET_CONSENT_CHAIN_ID');
@@ -25,6 +25,8 @@ const broker=createBetConsentEnrollmentBroker({
  origin,chainId,challengeKey:need('BET_CONSENT_CHALLENGE_KEY'),
  assertionKey:need('BET_CONSENT_BROKER_KEY'),
  verifySignature:wallet,resolveSubject:directory.resolveIdentity,
+ verifyRoute:createVerifiedConsentRouteAuthority({origin:need('BET_CONSENT_ROUTE_AUTHORITY_URL'),
+  bearerToken:need('BET_CONSENT_ROUTE_AUTHORITY_TOKEN')}),
  commit:createGoConsentCommit({origin:need('BET_NOTIFICATIONS_CONSENT_URL'),
   bearerToken:need('BET_CONSENT_BROKER_TOKEN')})
 });

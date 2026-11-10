@@ -61,7 +61,7 @@ test('durable alert journal retries webhook after restart without leaking recipi
   journal=await openDeliveryAlertJournal({path,worker,outbox,clock:()=>at,
    retryMs:100,send,cancellationAgeMs:100,pendingAgeMs:100});
   const retry=await journal.poll();
-  assert.equal(retry.sent,7;
+  assert.equal(retry.sent,7);
   assert.deepEqual((await journal.snapshot()).pendingCodes,[]);
   for(const event of sent){
    assert.match(event.id,/^[a-f0-9]{64}$/);
@@ -73,7 +73,7 @@ test('durable alert journal retries webhook after restart without leaking recipi
    oldestCancellationAgeMs:0,oldestPendingAgeMs:0,byStatus:{dead_letter:0}};
   worker.health=()=>({stale:false,consecutiveFailures:0,revocationFailed:false});
   const clear=await journal.poll();
-  assert.equal(clear.sent,7;
+  assert.equal(clear.sent,7);
   assert.equal(sent.filter(x=>x.status==='resolved').length,7);
  }finally{if(journal)await journal.close();await rm(dir,{recursive:true,force:true});}
 });

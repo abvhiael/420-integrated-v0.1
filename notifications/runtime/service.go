@@ -24,6 +24,7 @@ type Service struct {
  consent http.Handler
  enrollment http.Handler
  delivery http.Handler
+ providerReceipts http.Handler
 }
 
 func NewService(cfg Config, probe IndexerProbe) (*Service, error) {
@@ -68,6 +69,12 @@ func (s *Service) EnableBetEnrollment(store *betconsent.Store,token,sharedKey st
  s.enrollment=handler
  return nil
 }
+func (s *Service) EnableBetProviderReceipts(store *betdelivery.Store,token,secret string)error{
+ handler,err:=betdelivery.ProviderReceiptHandler(store,token,secret)
+ if err!=nil{return err}
+ s.providerReceipts=handler
+ return nil
+}
 func (s *Service) EnableBetDelivery(store *betdelivery.Store,consent *betconsent.Store,token string)error{
  handler,err:=betdelivery.Handler(store,consent,token)
  if err!=nil{return err}
@@ -79,6 +86,7 @@ func (s *Service) Handler() http.Handler {
  if s.consent!=nil {mux.Handle("/v1/420bet/subscriptions/",s.consent)}
  if s.enrollment!=nil {mux.Handle("/v1/420bet/enrollments/",s.enrollment)}
  if s.delivery!=nil {mux.Handle("/v1/420bet/deliveries/",s.delivery)}
+ if s.providerReceipts!=nil {mux.Handle("/v1/420bet/provider-receipts/",s.providerReceipts)}
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{
 			"service":   "420Notifications",

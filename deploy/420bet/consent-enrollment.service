@@ -1,0 +1,29 @@
+[Unit]
+Description=420Bet private wallet-authorized consent broker
+After=network-online.target notifications420.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=420bet
+Group=420bet
+WorkingDirectory=/opt/420integrated/clients/420bet-lobby
+EnvironmentFile=/etc/420integrated/consent-enrollment.env
+ExecStart=/usr/bin/node server/serve-consent-enrollment.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

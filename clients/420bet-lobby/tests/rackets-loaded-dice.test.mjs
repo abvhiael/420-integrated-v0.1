@@ -47,7 +47,12 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  assert(images.some(img=>img.getAttribute('src')===base+'characters/character_racket_idle_smug.png'));
  assert(images.some(img=>img.getAttribute('src')===base+'machine/machine_full_dice_rig.png'));
  assert(images.some(img=>img.getAttribute('src')===base+'ui/ui_racketometer_stage_1_low.png'));
- assert.match(root.querySelector('.racket-slider-art').style.backgroundImage,/ui_threshold_slider_blank/);
+ assert(root.querySelector('.racket-scene .racket-character-png'));
+ assert(root.querySelector('.racket-scene .racket-machine-png'));
+ assert.equal(root.querySelector('.racket-slider-art input.nd-slider')?.getAttribute('type'),'range');
+ assert.equal(root.querySelectorAll('.racket-toggle .nd-choice').length,2);
+ assert.match(root.querySelector('.racket-toggle').textContent,/BET UNDER/);
+ assert.match(root.querySelector('.racket-toggle').textContent,/BET OVER/);
  assert.match(root.querySelector('.racket-result-display').style.backgroundImage,/ui_roll_result_panel_blank/);
  assert.match(root.querySelector('.racket-win-chance').style.backgroundImage,/ui_win_chance_panel_blank/);
  assert.match(root.querySelector('.racket-potential-haul').style.backgroundImage,/ui_potential_haul_panel_blank/);
@@ -58,6 +63,11 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  slider.dispatchEvent(new window.Event('input'));
  assert.equal(root.querySelector('.nd-threshold-number').textContent,'4,200');
  assert.equal(root.querySelector('.nd-chance-number').textContent,'42.00%');
+ assert.equal(root.querySelector('.nd-slider').getAttribute('aria-valuetext'),'4,200');
+ assert.match(root.querySelector('.nd-slider').style.getPropertyValue('--racket-range-progress'),/41\\.99|42\\.00/);
+ root.querySelectorAll('.nd-choice')[1].dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.nd-choice')[1].getAttribute('aria-pressed'),'true');
+ assert.equal(root.querySelector('.nd-chance-number').textContent,'58.00%');
  root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.nd-big-number').textContent,/^\d{4}$/);
  assert.equal(root.querySelectorAll('.racket-history .nd-pill').length,1);

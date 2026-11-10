@@ -8,7 +8,7 @@ const now=1762790400000;
 const account='0x'+'a'.repeat(40);
 const input={tenant:'420bet',account,action:'enroll',subscriptionId:'sub-1',
  recipient:'route-1',channel:'notifications',policyVersion:'policy-1',expectedRevision:0};
-function harness({verified=true,user='subject-1',identityAccount=account}={}){
+function harness({verified=true,user='subject-1',identityAccount=account,routeVerified=true}={}){
  const seen=[];
  const b=createBetConsentEnrollmentBroker({origin:'https://bet.example/',
   chainId:'420',challengeKey,assertionKey,now:()=>now,
@@ -16,6 +16,7 @@ function harness({verified=true,user='subject-1',identityAccount=account}={}){
   verifySignature:async p=>verified&&p.signature==='0x'+'12'.repeat(65)&&
    p.account===account&&p.message.includes('Policy version: policy-1'),
   resolveSubject:async()=>({verified:true,active:true,userId:user,account:identityAccount}),
+  verifyRoute:async scope=>({...scope,verified:routeVerified,active:true,expiresAt:now+60000}),
   commit:async a=>{seen.push(a);return {accepted:true};}});
  return {b,seen};
 }
@@ -42,6 +43,15 @@ test('wallet rejection, forged challenge, cross-subject account and route tamper
   walletSignature:'0x'+'12'.repeat(65)}),/not issued/);
  f=harness({identityAccount:'0x'+'b'.repeat(40)});proof=f.b.challenge(input);
  await assert.rejects(f.b.confirm({...proof,walletSignature:'0x'+'12'.repeat(65)}),/binding/);
+});
+test('unverified recipient route cannot enroll another user; revocation remains possible',async()=>{
+ const f=harness({routeVerified:false});
+ const proof=f.b.challenge(input);
+ await assert.rejects(f.b.confirm({...proof,walletSignature:'0x'+'12'.repeat(65)}),/route ownership/);
+ assert.equal(f.seen.length,0);
+ const revoke=f.b.challenge({...input,action:'revoke',expectedRevision:1});
+ const out=await f.b.confirm({...revoke,walletSignature:'0x'+'12'.repeat(65)});
+ assert.equal(out.accepted,true,'wallet owner must be able to revoke even after losing route');
 });
 test('private Go commit refuses unverified receipt, bare HTTP and unknown scope',async()=>{
  assert.throws(()=>createGoConsentCommit({origin:'http://local.test/',bearerToken:'a'.repeat(40)}),/HTTPS/);

@@ -7,6 +7,9 @@ import(
  "encoding/hex"
  "errors"
  "net/http"
+ "sort"
+
+ "github.com/420integrated/420-integrated/notifications/betconsent"
  "strconv"
  "strings"
  "time"
@@ -61,11 +64,55 @@ func(s *Store) ConfirmProvider(v ProviderEvidence,secret []byte,now time.Time)(r
  s.state=next
  return prior.Receipt,nil
 }
-func ProviderReceiptHandler(store *Store,token,secret string)(http.Handler,error){
- if store==nil||len(token)<32||len(secret)<32||token==secret{
+// ClaimPending hands out only consent-eligible notifications, using a durable
+// lease and idempotency key. A crashed provider may reclaim after expiry.
+// A provider MUST independently recheck current consent immediately before send.
+func(s *Store) ClaimPending(consent *betconsent.Store,limit int,now time.Time)([]Delivery,error){
+ if consent==nil||limit<1||limit>50{return nil,errors.New("invalid provider claim")}
+ s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return nil,errors.New("delivery ledger closed")}
+ keys:=make([]string,0,len(s.state.Items))
+ for k:=range s.state.Items{keys=append(keys,k)}
+ sort.Strings(keys)
+ selected:=make([]Delivery,0,limit)
+ next:=snapshot{Schema:1,Items:make(map[string]entry,len(s.state.Items))}
+ for k,x:=range s.state.Items{next.Items[k]=x}
+ for _,key:=range keys{
+  if len(selected)>=limit{break}
+  x:=next.Items[key]
+  if x.Receipt.Status!="pending"||x.NextClaimAt>now.UnixMilli()||
+   x.ClaimAttempts>=100{continue}
+  d:=x.Request
+  c:=consent.Check(betconsent.Check{Tenant:d.Tenant,UserID:d.UserID,
+   SubscriptionID:d.SubscriptionID,Recipient:d.Recipient,Channel:"notifications",
+   PolicyVersion:d.PolicyVersion,Kind:d.Event.Kind})
+  if !c.Active||!c.Consent||c.Revoked||c.Muted{continue}
+  x.NextClaimAt=now.Add(30*time.Second).UnixMilli()
+  x.ClaimAttempts++
+  next.Items[key]=x
+  selected=append(selected,d)
+ }
+ if len(selected)>0{
+  if err:=s.persist(next);err!=nil{return nil,err}
+  s.state=next
+ }
+ return selected,nil
+}
+func ProviderReceiptHandler(store *Store,consent *betconsent.Store,token,secret string)(http.Handler,error){
+ if store==nil||consent==nil||len(token)<32||len(secret)<32||token==secret{
   return nil,errors.New("separate downstream provider credentials required")
  }
  mux:=http.NewServeMux()
+ mux.HandleFunc("POST /v1/420bet/provider-receipts/claim",func(w http.ResponseWriter,r *http.Request){
+  if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")),[]byte("Bearer "+token))!=1{
+   send(w,403,map[string]string{"error":"access denied"});return
+  }
+  var q struct{Limit int `json:"limit"`}
+  if e:=body(r,&q);e!=nil{send(w,400,map[string]string{"error":"invalid claim"});return}
+  pending,e:=store.ClaimPending(consent,q.Limit,time.Now())
+  if e!=nil{send(w,503,map[string]string{"error":"provider claim unavailable"});return}
+  send(w,200,map[string]any{"deliveries":pending})
+ })
  mux.HandleFunc("POST /v1/420bet/provider-receipts/confirm",func(w http.ResponseWriter,r *http.Request){
   if subtle.ConstantTimeCompare([]byte(r.Header.Get("Authorization")),[]byte("Bearer "+token))!=1{
    send(w,403,map[string]string{"error":"access denied"});return

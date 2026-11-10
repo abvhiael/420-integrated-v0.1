@@ -97,3 +97,22 @@ test('Double Trouble UI shows virtual credits, ready animation and one doubled w
  assert(root.querySelector('.racket-virtual-payout').textContent.includes('38.40'));
  assert(root.querySelector('.nd-potential-credits').textContent.includes('19.20 credits'));
 });
+
+test('Evidence Locker uses ten stable positions, shows exact 4-digit results newest first and caps at ten',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const outcomes=[0,9999,42,5000,1234,5555,8765,17,420,9001,3690];
+ let index=0;
+ const root=createNeonDice(document,()=>outcomes[index++]/10000);
+ const slots=()=>[...root.querySelectorAll('.racket-history-slot')];
+ const rolls=()=>[...root.querySelectorAll('.racket-history-slot .nd-pill')];
+ assert.equal(slots().length,10);
+ assert.equal(rolls().length,0);
+ for(let i=0;i<outcomes.length;i++)root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
+ assert.equal(slots().length,10);
+ assert.equal(rolls().length,10);
+ assert.equal(rolls()[0].textContent,'3690');
+ assert.equal(rolls()[9].textContent,'9999');
+ assert.equal(rolls()[0].getAttribute('aria-label'),'Roll 3690, win');
+ assert.equal(rolls()[9].getAttribute('aria-label'),'Roll 9999, loss');
+ assert(!root.querySelector('.racket-history-slot .nd-pill')?.textContent.includes('0000'));
+});

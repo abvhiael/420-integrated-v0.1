@@ -69,3 +69,61 @@
  .cj-reference{grid-column:1;grid-row:auto;}
  .cj-line-list{grid-template-columns:repeat(4,minmax(0,1fr));}
 }
+
+/* JACK'S COMIC-BOOK POSTERS: live HTML text and exact game artwork, not flattened graphics. */
+.cj-layout{grid-template-columns:minmax(295px,560px) minmax(215px,285px) minmax(215px,285px) minmax(255px,320px);width:min(100%,1570px);gap:clamp(9px,1.2vw,20px);align-items:start;}
+.cj-poster{position:relative;isolation:isolate;overflow:hidden;border:4px solid #16101d;border-radius:6px;background:linear-gradient(137deg,#fff2bd 0%,#f8d789 58%,#eec276 100%);color:#241126;box-shadow:5px 6px 0 #9c1e91,10px 11px 0 #16091d,0 0 24px #fd4af866;padding:12px;}
+.cj-poster::before{content:'';pointer-events:none;position:absolute;inset:0;z-index:-1;opacity:.22;background-image:radial-gradient(#722a61 1px,transparent 1.1px);background-size:7px 7px;mix-blend-mode:multiply;}
+.cj-poster::after{content:'';pointer-events:none;position:absolute;inset:4px;border:2px dashed #7d4160;opacity:.27;}
+.cj-poster-title{position:relative;margin:0 0 15px!important;padding:11px 6px!important;line-height:1.02!important;color:#fff343!important;font-family:Impact,'Arial Black',system-ui,sans-serif;font-size:clamp(20px,2vw,30px)!important;letter-spacing:.02em!important;font-style:italic;text-align:center;-webkit-text-stroke:.65px #1d0b18;text-shadow:2px 3px 0 #180b1c,4px 5px 0 #b62665!important;background:linear-gradient(112deg,#8014a5,#d02374 80%);border:3px solid #1a071f;transform:rotate(-1deg);clip-path:polygon(1% 0,99% 2%,100% 94%,2% 100%);}
+.cj-reference h3{font-family:Impact,'Arial Black',system-ui,sans-serif;letter-spacing:.05em;color:#2c1234;font-size:15px;text-shadow:none;background:#ffda46;border:2px solid #27142f;transform:rotate(.5deg);padding:6px 2px;margin:10px 0;}
+.cj-reference .cj-pay-row{grid-template-columns:44px minmax(0,1fr) auto;border:2px solid #25122a;background:#ffedc6;min-height:47px;margin:4px 0;padding:2px 6px 2px 2px;box-shadow:2px 2px 0 #c8488f;}
+.cj-reference .cj-pay-symbol{width:40px;height:40px;}
+.cj-reference .cj-pay-name{font-weight:900;color:#2a172b;font-size:11px;}
+.cj-reference .cj-pay-value{font-family:Impact,'Arial Black',sans-serif;font-size:22px;color:#c6233a;text-shadow:1px 1px #ffce55;}
+.cj-reference .cj-pay-note{color:#381834;background:#ffd960a8;border-left:4px solid #bd2d69;padding:5px 7px;font-weight:750;}
+.cj-reference .cj-line-list{gap:6px;}
+.cj-reference .cj-line-item{background:#fbebcc;border:2px solid #291326;border-radius:3px;box-shadow:2px 2px 0 #be4396;}
+.cj-reference .cj-line-number{color:#ba2154;font-family:Impact,'Arial Black',sans-serif;font-size:15px;}
+.cj-reference .cj-line-off{background:#cdaec9;}
+.cj-reference .cj-line-on{background:#ffe12a;border-color:#ba2a58;box-shadow:0 0 3px #f97b22;}
+.cj-bonus-guide{min-width:0;}
+.cj-poster-intro{text-align:center;font-size:11px;font-weight:1000;color:#512247;letter-spacing:.04em;line-height:1.3;margin:-5px 2px 12px;}
+.cj-bonus-list{display:grid;gap:12px;}
+.cj-bonus-card{position:relative;isolation:isolate;border:3px solid #1d0d25;background:linear-gradient(140deg,#f7e4b9,#e9bcd3);padding:11px 8px 9px;box-shadow:3px 4px 0 #b93687;transform:rotate(-.4deg);}
+.cj-bonus-card:nth-child(2){background:linear-gradient(145deg,#eff3a2,#c3e0ac);transform:rotate(.5deg);}
+.cj-bonus-card:nth-child(3){background:linear-gradient(135deg,#ffcf98,#ffaf9e);transform:rotate(-.3deg);}
+.cj-bonus-number{position:absolute;right:-5px;top:-9px;border:2px solid #170a22;background:#f5ef44;color:#1b0b1b;padding:3px 5px;font-size:10px;font-weight:1000;transform:rotate(6deg);}
+.cj-bonus-name{font-family:Impact,'Arial Black',sans-serif;font-style:italic;font-size:clamp(15px,1.25vw,20px);line-height:1.05;margin:0 24px 10px 0;color:#e52b57;-webkit-text-stroke:.3px #210a25;text-shadow:1.4px 2px #270c28;}
+.cj-bonus-body{display:grid;grid-template-columns:76px minmax(0,1fr);gap:8px;align-items:start;}
+.cj-trigger-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:4px;background:#301337;border:2px solid #16101d;aspect-ratio:1;box-shadow:2px 2px 0 #e22f77;}
+.cj-trigger-cell{display:flex;align-items:center;justify-content:center;min-width:0;background:#a57ba1;color:#f7ecdf;font-size:8px;font-weight:800;border:1px solid #532849;}
+.cj-trigger-active{background:#ffe64c;border-color:#f16f31;box-shadow:inset 0 0 5px #ff8933;}
+.cj-trigger-symbol{width:100%;height:100%;object-fit:contain;}
+.cj-bonus-details{min-width:0;}
+.cj-trigger-label{display:inline-block;background:#ffdb33;color:#281025;border:2px solid #2b0d24;font-family:Impact,'Arial Black',sans-serif;font-size:12px;transform:rotate(-2deg);padding:2px 5px;}
+.cj-bonus-trigger{font-size:11px;font-weight:900;line-height:1.25;color:#2f162b;margin:4px 0;}
+.cj-bonus-award{display:block;font-family:Impact,'Arial Black',sans-serif;font-size:15px;color:#d21850;text-shadow:1px 1px #fff2a8;margin:4px 0;}
+.cj-bonus-small{font-size:10px;line-height:1.3;color:#462547;font-weight:700;margin:4px 0 0;}
+.cj-bonus-art{position:absolute;right:0;bottom:0;width:52px;height:46px;overflow:hidden;opacity:.22;pointer-events:none;}
+.cj-bonus-art-img{width:100%;height:100%;object-fit:contain;}
+.cj-poster-footnote{margin:16px 0 0;padding:7px;background:#291127;color:#ffe54a;border:2px solid #fdc549;font-size:10px;letter-spacing:.04em;text-align:center;font-weight:900;transform:rotate(1deg);}
+@media(max-width:1350px) and (min-width:801px){
+ .cj-layout{grid-template-columns:minmax(290px,1.3fr) minmax(220px,1fr) minmax(235px,1fr);max-width:1150px;}
+ .cj-reels{grid-column:1;grid-row:1 / span 2;}
+ .cj-side{grid-column:2;grid-row:1;}
+ .cj-reference{grid-column:3;grid-row:1 / span 2;}
+ .cj-bonus-guide{grid-column:2;grid-row:2;}
+}
+@media(max-width:1000px) and (min-width:801px){
+ .cj-layout{grid-template-columns:minmax(280px,1.2fr) minmax(235px,1fr);max-width:860px;}
+ .cj-reels{grid-column:1;grid-row:1 / span 3;}
+ .cj-side{grid-column:2;grid-row:1;}
+ .cj-reference{grid-column:2;grid-row:2;}
+ .cj-bonus-guide{grid-column:2;grid-row:3;}
+}
+@media(max-width:800px){
+ .cj-layout{grid-template-columns:minmax(0,1fr);max-width:540px;}
+ .cj-reels,.cj-side,.cj-reference,.cj-bonus-guide{grid-column:1;grid-row:auto;}
+ .cj-bonus-body{grid-template-columns:82px minmax(0,1fr);}
+}

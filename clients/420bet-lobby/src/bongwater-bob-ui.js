@@ -3,7 +3,8 @@ const ROOT='/assets/420bet/bongwater-bob-bad-decisions/';
 const img=(folder,name)=>ROOT+folder+'/'+name+'.png';
 const icons={pizza:'symbol-leftover-pizza',bill:'symbol-unpaid-bill',burrito:'symbol-flaming-microwave-burrito',bag:'symbol-suspicious-weed-bag',lighter:'symbol-lighter',ashtray:'symbol-ashtray-roaches',papers:'symbol-rolling-papers',snack:'symbol-moldy-snack',couch:'symbol-couch-on-fire',wild:'symbol-bob-wild',pick:'symbol-pick-bonus-trigger',free:'symbol-free-spins-trigger'};
 const names={pizza:'Leftover Pizza',bill:'Unpaid Bill',burrito:'Flaming Burrito',bag:'Suspicious Weed Bag',lighter:'Lighter',ashtray:'Ashtray',papers:'Rolling Papers',snack:'Moldy Snack',couch:'Couch on Fire',wild:'Bob WILD',pick:'Bad Decisions',free:'One More Hit'};
-const pays={pizza:6,bill:5,burrito:30,bag:20,lighter:10,ashtray:6,papers:5,snack:8,couch:12,wild:75};
+// Calibrated line-pay adjustment: +70% to every ordinary and WILD combination.
+const pays={pizza:10.2,bill:8.5,burrito:51,bag:34,lighter:17,ashtray:10.2,papers:8.5,snack:13.6,couch:20.4,wild:127.5};
 const bonusObjects=['backpack','bathroom-cabinet','filthy-couch-cushion','laundry-hamper','microwave','mini-fridge','pizza-box','snack-cupboard','tool-box'];
 const paylines=[[0,0,0],[1,1,1],[2,2,2],[0,1,0],[2,1,2]];
 // Deliberately provisional strips: this is NOT a calibrated RTP or certified game.
@@ -172,7 +173,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
    wallpaper('free');face('free');message('JUST ONE MORE HIT! 8 FREE SPINS · 2× LINE WINS');
    displaySplash('bob-free-spins-start',()=>{message('FREE SPINS: '+freeRemaining+' REMAINING · 2× WINS');});
   }else{const additional=Math.min(8,24-freeGranted);freeGranted+=additional;freeRemaining+=additional;message(additional?'BOB FOUND '+additional+' MORE FREE SPINS!':'24 FREE SPINS MAXIMUM');}}
-  else if(mode==='free'&&freeRemaining===0)finishFeature();
+  if(mode==='free'&&freeRemaining===0)finishFeature();
   busy=false;meters();
  }
  function drawSpin(){

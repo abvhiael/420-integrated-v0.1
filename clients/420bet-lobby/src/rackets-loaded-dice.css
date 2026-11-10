@@ -1,96 +1,165 @@
-/* Racket's Loaded Dice: presentation-only overrides, scoped to practice dice. */
-.racket-dice{--lime:#b4ff53;background:radial-gradient(ellipse at 70% 20%,#3b2a1960,transparent 52%),linear-gradient(110deg,#090e0be8,#1f170ee0),url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png') center/cover fixed,#0e150e}
-.racket-dice .racket-hero{min-height:205px;padding:14px 14px 18px;border-bottom:3px dashed #b8ac5366;margin-bottom:23px}
-.racket-dice .nd-intro{max-width:750px}
-.racket-dice .nd-intro h1{font-family:Impact,'Arial Black',system-ui,sans-serif;font-size:clamp(2.6rem,6vw,5.3rem);letter-spacing:.018em;line-height:1;text-transform:uppercase;color:#e8ff8d;text-shadow:4px 5px #3a2419,0 0 32px #77ef3499;transform:rotate(-1deg)}
-.racket-dice .nd-intro p{font-size:clamp(.9rem,1.6vw,1.3rem);font-weight:800;color:#f6e8bd}
-.racket-dice .nd-kicker{color:#eccc5b}
-.racket-dice .nd-mode{font-size:.7rem;top:2px;right:4px;background:#1b281b;border:1px solid #c4cb4e}
-.racket-dice .racket-character{position:absolute;left:0;top:8px;width:clamp(85px,15vw,170px);height:170px;opacity:1;filter:drop-shadow(2px 8px 0 #110b06);mix-blend-mode:normal;display:flex;align-items:center;justify-content:center}
-.racket-face{font-size:clamp(5rem,10vw,8rem);transform:rotate(-10deg);filter:drop-shadow(0 0 12px #aafa4e88)}
-.racket-can{position:absolute;bottom:-6px;right:-16px;font-size:clamp(3rem,6vw,5rem);transform:rotate(23deg)}
-.racket-dice .racket-board{border:3px solid #aa8746;background:linear-gradient(145deg,#192119ef,#0d1b13f0);box-shadow:0 14px 0 #0e100c,0 0 32px #8ee93122}
-.racket-dice .racket-toggle{border:2px solid #5a5837;background:#1d2217;border-radius:12px}
-.racket-dice .nd-choice{border-radius:9px;letter-spacing:.035em}
-.racket-dice .nd-choice.active{background:linear-gradient(180deg,#d9f68a,#75c83a);box-shadow:inset 0 3px #fcffcd,0 3px #234521;color:#16210e}
-.racket-dice .racket-roll{border-radius:15px;background:linear-gradient(#eb6656,#ac2e29);border:3px solid #ffb68b;color:#fff7d7;text-shadow:0 2px #55211c;box-shadow:0 6px #5c1a16,0 0 22px #ffb04c44;font-family:Impact,system-ui,sans-serif;letter-spacing:.035em}
-.racket-dice .racket-roll:hover{filter:brightness(1.1)}
-.racket-dice .racket-result{background:radial-gradient(ellipse at center,#26371d,#11170d 78%);border:2px dashed #bcaa6a;gap:13px}
-.racket-dice .nd-big-number{color:#f0feaf;text-shadow:0 0 22px #9de82e88;border-color:#d8b969}
-.racket-dice .nd-stat{background:#202d1d;border-color:#7e8944}
-.racket-dice .nd-stat span{font-size:.68rem}
-.racket-dice .nd-stat strong{font-size:clamp(1.25rem,2.4vw,1.9rem)}
-.racket-dice .racket-dice-stage{display:flex;gap:12px;align-items:center;justify-content:center}
-.racket-dice .racket-die{font-size:clamp(2.5rem,5vw,4.1rem);color:#f7e2b0;text-shadow:0 0 14px #adf75a55;transform:rotate(-12deg)}
-.racket-dice .racket-die+ .racket-die{transform:rotate(16deg)}
-.racket-dice .racket-dialogue{background:#f7ebbf;color:#3d2a19;border-radius:18px 18px 18px 3px;padding:12px 16px;font-size:clamp(.95rem,1.5vw,1.16rem);font-weight:850;max-width:350px;box-shadow:4px 4px #564127}
-.racket-temper{padding:12px 15px;border:1px solid #8b7d47;background:#1c2319;border-radius:12px}
-.racket-temper-label{font-size:.75rem;font-weight:900;color:#e4e8a2;letter-spacing:.06em;margin-bottom:8px}
-.racket-temper-track{height:13px;background:#4a3727;border-radius:99px;overflow:hidden;border:1px solid #928047}
-.racket-temper-fill{height:100%;background:linear-gradient(90deg,#76d54b 0%,#e9ca47 55%,#ed5142 100%);border-radius:99px;transition:width .25s ease}
-.racket-dice .nd-history{border-color:#ad914d;background:#161d14ee}
-.racket-dice .nd-rules{border-color:#a59457;background:#202318ee}
-@media(max-width:950px){.racket-dice .racket-character{left:0;top:22px;opacity:.45}.racket-dice .nd-mode{top:0;right:0;bottom:auto}.racket-dice .racket-hero{padding-top:55px}}
-@media(max-width:560px){.racket-dice{background-attachment:scroll}.racket-dice .racket-hero{min-height:205px;padding-top:62px}.racket-dice .nd-intro h1{font-size:2.8rem}.racket-dice .racket-character{left:0;top:48px;width:100px;opacity:.3}.racket-dice .nd-mode{font-size:.57rem}.racket-dice .racket-board{padding:14px}.racket-dice .racket-roll{font-size:.95rem}}
-@media(prefers-reduced-motion:reduce){.racket-temper-fill{transition:none}}
-
-/* Uploaded transparent artwork: DOM text remains authoritative for every dynamic value. */
-.racket-dice .racket-hero{min-height:clamp(205px,24vw,270px);padding:14px 15px 22px}
-.racket-dice .racket-character{left:clamp(0px,2vw,34px);top:10px;width:clamp(120px,17vw,230px);height:clamp(190px,22vw,270px);opacity:1;filter:none;mix-blend-mode:normal;z-index:2;pointer-events:none}
-.racket-dice .racket-character-png{width:100%;height:100%;object-fit:contain;object-position:bottom center;filter:drop-shadow(0 8px 12px #0008)}
-.racket-dice .nd-intro{max-width:min(64vw,790px);margin:auto;position:relative}
-.racket-dice .racket-brands{display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:570px;margin:0 auto -8px}
-.racket-dice .racket-brand-logo{width:clamp(95px,13vw,160px);height:54px;object-fit:contain}
-.racket-dice .racket-title{font-size:clamp(1.3rem,3vw,2.3rem);line-height:1;margin:0;filter:drop-shadow(0 10px 8px #0009);transform:none}
-.racket-dice .racket-title-png{width:min(100%,625px);height:clamp(100px,14vw,170px);object-fit:contain}
-.racket-dice .nd-mode{background-repeat:no-repeat;background-size:100% 100%;background-position:center;border:0;border-radius:0;box-shadow:none;padding:10px 20px;text-shadow:0 2px #000;font-size:.64rem}
-.racket-dice .racket-board{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);padding-left:clamp(155px,23vw,310px);min-height:510px}
-.racket-dice .racket-machine{pointer-events:none;position:absolute;left:clamp(-24px,-1.5vw,0px);top:17px;width:clamp(160px,23vw,315px);height:clamp(355px,42vw,520px);z-index:0}
-.racket-dice .racket-machine-png{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 12px 8px #000a)}
-.racket-dice .nd-controls,.racket-dice .nd-result{position:relative;z-index:1}
-.racket-dice .racket-toggle{padding:0;gap:8px;background:transparent;border:0;border-radius:0}
-.racket-dice .nd-choice{background-repeat:no-repeat;background-position:center;background-size:100% 100%;border:0;color:transparent !important;font-size:0;min-height:62px;box-shadow:none !important;border-radius:0;transition:transform .15s,filter .15s}
-.racket-dice .nd-choice.active{filter:brightness(1.17) drop-shadow(0 0 10px #a5fd5388)}
-.racket-dice .nd-choice:not(.active){filter:saturate(.66) brightness(.75)}
-.racket-dice .nd-choice:focus-visible,.racket-dice .racket-roll:focus-visible{outline:3px solid #fff;outline-offset:3px}
-.racket-dice .nd-threshold-label{margin:0;font-size:.8rem;color:#cfe3b0}
-.racket-dice .racket-slider-art{position:relative;height:clamp(70px,9vw,110px);background-repeat:no-repeat;background-size:100% 100%;background-position:center}
-.racket-dice .racket-slider-art .nd-threshold-number{position:absolute;right:5%;top:34%;z-index:1;margin:0;min-width:0;background:transparent;border:0;color:#e5ff87;font-size:clamp(.9rem,1.8vw,1.35rem);padding:2px 6px}
-.racket-dice .nd-slider{position:relative;margin:-48px auto 10px;width:72%;height:30px;opacity:.015;z-index:2;cursor:pointer;display:block}
-.racket-dice .nd-slider:focus-visible{opacity:.7;outline:3px solid #e3ffab;outline-offset:3px}
-.racket-dice .nd-range-ends{margin-top:-2px}
-.racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{min-height:110px;background-size:100% 100%;background-position:center;background-repeat:no-repeat;background-color:transparent;border:0;border-radius:0;justify-content:end;align-items:center;padding:48px 8px 12px}
-.racket-dice .racket-hidden-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{font-size:clamp(.95rem,2vw,1.45rem);line-height:1.2;text-align:center;color:#b6ff63;text-shadow:0 2px #001c07}
-.racket-dice .racket-roll{width:100%;min-height:110px;border:0;box-shadow:none;background-size:100% 100%;background-position:center;background-repeat:no-repeat;color:transparent !important;text-shadow:none;font-size:0}
-.racket-dice .racket-roll:hover{filter:brightness(1.16)}
-.racket-dice .racket-temper{background:none;border:0;padding:0;text-align:center}
-.racket-dice .racket-meter-png{display:block;width:100%;max-height:145px;object-fit:contain}
-.racket-dice .racket-temper-track{display:none}
-.racket-dice .racket-temper-label{margin:0;font-size:.67rem}
-.racket-dice .racket-result{gap:9px}
-.racket-dice .racket-dice-stage{height:74px}
-.racket-dice .racket-dice-png{height:75px;max-width:110px;object-fit:contain}
-.racket-dice .racket-result-display{width:100%;min-height:clamp(130px,17vw,210px);display:flex;align-items:center;justify-content:center;background-repeat:no-repeat;background-position:center;background-size:100% 100%}
-.racket-dice .racket-result-display .nd-big-number{border:0;box-shadow:none;background:none;min-width:0;padding:0;margin:12px 0 0;font-size:clamp(2.4rem,5vw,5rem);letter-spacing:.02em}
-.racket-dice .racket-history{min-height:142px;background-repeat:no-repeat;background-size:100% 100%;background-position:center;border:0;background-color:transparent;padding:58px 25px 14px}
-.racket-dice .racket-history h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-.racket-dice .racket-history .nd-pills{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:2px;justify-content:stretch;align-items:center}
-.racket-dice .racket-history .nd-pill{background:none;border:0;text-align:center;padding:5px 0;font-size:clamp(.55rem,.9vw,.85rem);overflow:hidden;text-overflow:clip}
-.racket-dice .racket-history .nd-pill.win{color:#c8ff95}
-.racket-dice .racket-history .nd-pill.lose{color:#ffbb9d}
-@media(max-width:1100px){.racket-dice .racket-board{padding-left:195px;gap:12px}.racket-dice .racket-machine{width:220px}.racket-dice .racket-history .nd-pill{font-size:.64rem}}
-@media(max-width:950px){.racket-dice .racket-hero{padding-top:55px}.racket-dice .racket-character{left:0;top:37px;opacity:.7}.racket-dice .racket-board{grid-template-columns:1fr;padding-left:185px}.racket-dice .racket-machine{width:190px}.racket-dice .racket-result{min-height:260px}.racket-dice .racket-history .nd-pills{grid-template-columns:repeat(5,minmax(0,1fr))}}
-@media(max-width:650px){.racket-dice .racket-hero{min-height:230px}.racket-dice .nd-intro{max-width:100%}.racket-dice .racket-character{width:110px;height:150px;top:95px;opacity:.6}.racket-dice .racket-board{padding:15px;display:flex;flex-direction:column}.racket-dice .racket-machine{position:relative;left:auto;top:auto;align-self:center;width:190px;height:245px}.racket-dice .nd-mode{top:0}.racket-dice .racket-history{padding:62px 16px 14px}.racket-dice .racket-history .nd-pills{grid-template-columns:repeat(5,minmax(0,1fr))}.racket-dice .racket-title-png{height:120px}}
-@media(prefers-reduced-motion:reduce){.racket-dice .nd-choice{transition:none}}
-
-/* Racket's uploaded Danksville Junkyard Lab wallpaper: behind all interactive game layers. */
+/* Racket's Loaded Dice — full-bleed wallpaper with floating character and UI assets.
+   Scoped to this game; the browser-only practice engine remains unchanged. */
 .racket-dice.neon-dice-page{
- background-image:linear-gradient(110deg,rgba(4,8,5,.64),rgba(12,8,12,.46)),url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png');
- background-size:cover;
- background-position:center center;
- background-repeat:no-repeat;
- background-attachment:fixed;
- background-color:#0e150e;
+ --lime:#b4ff53;
+ width:100%;min-height:100vh;overflow:visible;isolation:isolate;
+ padding:clamp(12px,2vw,28px);
+ color:#fff;
+ background-color:#120f13;
+ background-image:linear-gradient(90deg,rgba(4,7,6,.36),rgba(6,7,8,.20)),
+ url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png');
+ background-size:cover;background-repeat:no-repeat;background-position:center center;background-attachment:fixed;
 }
-@media(max-width:720px){.racket-dice.neon-dice-page{background-attachment:scroll;background-position:center top}}
+.racket-dice.neon-dice-page::before{display:none}
+.view-scroll:has(> .racket-dice){background:#120f13;overflow-x:hidden}
+.racket-dice .racket-hero{
+ display:flex;align-items:center;justify-content:center;position:relative;
+ min-height:clamp(155px,15vw,235px);margin:0 0 8px;padding:6px 16px 16px;
+ border:0;background:transparent;
+}
+.racket-dice .nd-intro{position:relative;z-index:2;max-width:min(72vw,890px);text-align:center;margin:auto}
+.racket-dice .racket-brands{display:flex;justify-content:space-between;gap:20px;max-width:590px;margin:0 auto -6px}
+.racket-dice .racket-brand-logo{width:clamp(105px,12vw,160px);height:50px;object-fit:contain}
+.racket-dice .racket-title{margin:0;line-height:1;font-size:clamp(1.5rem,3vw,2.8rem);color:#e5ff9a;text-shadow:0 4px 16px #020702}
+.racket-dice .racket-title-png{display:block;width:100%;height:clamp(95px,12vw,150px);object-fit:contain;filter:drop-shadow(0 5px 10px #000b)}
+.racket-dice .nd-intro>p{margin:0;font-size:clamp(.8rem,1.2vw,1rem);font-weight:800;color:#e9e7c5;text-shadow:0 2px 5px #000}
+.racket-dice .nd-mode{position:absolute;right:0;top:0;bottom:auto;background:#142211dd;border:1px solid #adcb68;border-radius:9px;box-shadow:0 3px 12px #0008;padding:10px 12px;font-size:clamp(.6rem,.8vw,.8rem);color:#efffac}
+.racket-dice .racket-board{
+ display:grid;grid-template-columns:minmax(300px,43%) minmax(340px,57%);
+ grid-template-rows:auto auto;align-items:start;gap:10px clamp(10px,1.4vw,26px);
+ width:100%;min-height:clamp(680px,64vw,930px);padding:0;margin:0;
+ background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;
+}
+.racket-dice .racket-scene{
+ position:relative;grid-column:1;grid-row:1 / span 2;
+ align-self:stretch;min-height:clamp(540px,58vw,810px);
+ pointer-events:none;
+}
+.racket-dice .racket-character{
+ position:absolute;z-index:2;left:-2%;top:3%;width:60%;height:83%;
+ max-width:none;opacity:1;filter:none;mix-blend-mode:normal;
+ display:block;pointer-events:none;
+}
+.racket-dice .racket-character-png{
+ display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;
+ filter:drop-shadow(0 16px 13px #000b);
+}
+.racket-dice .racket-machine{
+ position:absolute;z-index:1;left:47%;top:14%;width:53%;height:72%;
+ pointer-events:none;
+}
+.racket-dice .racket-machine-png{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 13px 12px #000b)}
+.racket-dice .nd-controls,.racket-dice .racket-result{position:relative;z-index:3;min-width:0}
+.racket-dice .nd-controls{grid-column:2;grid-row:1;display:flex;flex-direction:column;gap:10px;padding:0 5px}
+.racket-dice .racket-toggle{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:none;border:0;padding:0;border-radius:0}
+.racket-dice .nd-choice{
+ display:flex;align-items:center;justify-content:center;
+ min-height:clamp(56px,5vw,78px);padding:12px 8px;
+ background:linear-gradient(180deg,#1a5e24,#092612)!important;
+ border:3px solid #56fe4d;border-radius:15px;box-shadow:inset 0 2px #c7ff8b,0 5px 15px #0009!important;
+ color:#f8ffe5!important;font-size:clamp(.95rem,1.65vw,1.4rem)!important;
+ font-weight:1000;letter-spacing:.035em;text-shadow:0 2px 4px #001f09;
+ transition:filter .15s,transform .15s;
+}
+.racket-dice .nd-choice:nth-child(2){background:linear-gradient(180deg,#633065,#30113d)!important;border-color:#edac39}
+.racket-dice .nd-choice.active{filter:brightness(1.25) drop-shadow(0 0 10px #77f76a);transform:translateY(-2px)}
+.racket-dice .nd-choice:not(.active){filter:saturate(.8) brightness(.86)}
+.racket-dice .nd-choice:focus-visible,.racket-dice .racket-roll:focus-visible{outline:3px solid white;outline-offset:4px}
+.racket-dice .nd-threshold-label{margin:2px 0 0;font-size:.9rem;font-weight:900;color:#eafaaf;text-shadow:0 2px 4px #000}
+.racket-dice .racket-slider-art{
+ display:flex;align-items:center;gap:12px;position:relative;
+ width:100%;height:auto;min-height:90px;padding:18px 15px;
+ border:3px solid #a68d6a;border-radius:14px;
+ background:linear-gradient(180deg,rgba(31,25,33,.96),rgba(16,17,19,.95))!important;
+ box-shadow:0 8px 18px #0009,inset 0 1px #e8c59a;
+}
+.racket-dice .racket-slider-art .nd-threshold-number{
+ position:relative;top:auto;right:auto;order:2;display:block;flex:0 0 90px;
+ margin:0;padding:7px 5px;min-width:0;text-align:center;
+ border:2px solid #a1cf5c;border-radius:9px;background:#101e12;
+ color:#d1ff86;font-size:clamp(1rem,1.7vw,1.35rem);font-weight:900;
+}
+.racket-dice input.nd-slider{
+ appearance:none;-webkit-appearance:none;display:block;position:relative;
+ order:1;flex:1 1 auto;min-width:0;width:100%;height:18px;min-height:18px;
+ margin:0;padding:0;opacity:1;z-index:4;cursor:pointer;border:1px solid #b4cc7f;
+ border-radius:50px;outline-offset:7px;
+ background:linear-gradient(90deg,#99fb48 0%,#eac24f var(--racket-range-progress,50%),#49204c var(--racket-range-progress,50%),#a94fcb 100%)!important;
+}
+.racket-dice input.nd-slider::-webkit-slider-thumb{
+ appearance:none;-webkit-appearance:none;width:38px;height:38px;
+ border:3px solid #fff5a1;border-radius:50%;background:radial-gradient(circle at 34% 28%,#fff6a0,#e8a41f 67%,#794216);
+ box-shadow:0 3px 10px #000c;cursor:grab;
+}
+.racket-dice input.nd-slider::-moz-range-thumb{
+ width:34px;height:34px;border:3px solid #fff5a1;border-radius:50%;
+ background:radial-gradient(circle at 34% 28%,#fff6a0,#e8a41f 67%,#794216);
+ box-shadow:0 3px 10px #000c;cursor:grab;
+}
+.racket-dice input.nd-slider:active::-webkit-slider-thumb{cursor:grabbing}
+.racket-dice .nd-range-ends{display:flex;justify-content:space-between;margin:0 0 3px;padding:0 4px;color:#e3e0c0;font-weight:800;text-shadow:0 1px 4px #000}
+.racket-dice .nd-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-height:clamp(105px,11vw,145px);
+ padding:clamp(48px,6vw,75px) 10px 14px;background-repeat:no-repeat;background-position:center;background-size:100% 100%;
+ border:0;border-radius:0;background-color:transparent;box-shadow:none;position:relative;
+}
+.racket-dice .racket-hidden-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{font-size:clamp(.95rem,2vw,1.65rem);line-height:1.1;color:#c4ff7a;text-shadow:0 2px 4px #000}
+.racket-dice .racket-roll{
+ display:block;width:100%;min-height:clamp(98px,11vw,140px);padding:0;
+ border:0;border-radius:0;box-shadow:none;background-repeat:no-repeat;background-size:100% 100%;background-position:center;
+ background-color:transparent;color:transparent!important;font-size:0;text-shadow:none;
+}
+.racket-dice .racket-roll:hover{filter:brightness(1.12)}
+.racket-dice .racket-temper{padding:0;background:none;border:0;text-align:center}
+.racket-dice .racket-meter-png{display:block;width:100%;height:clamp(82px,10vw,128px);object-fit:contain}
+.racket-dice .racket-temper-label{font-size:.75rem;font-weight:900;color:#f0efca;text-shadow:0 2px 5px #000}
+.racket-dice .racket-temper-track{display:none}
+.racket-dice .racket-result{
+ grid-column:2;grid-row:2;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:8px;min-height:310px;padding:0 10px 18px;
+ border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;
+ text-shadow:0 2px 5px #000;
+}
+.racket-dice .nd-result-heading{font-size:.85rem;color:#f2f7cf;font-weight:900}
+.racket-dice .racket-dice-stage{height:55px}
+.racket-dice .racket-dice-png{max-width:90px;height:55px;object-fit:contain}
+.racket-dice .racket-result-display{display:flex;align-items:center;justify-content:center;width:min(100%,660px);min-height:clamp(135px,14vw,190px);background-size:100% 100%;background-position:center;background-repeat:no-repeat}
+.racket-dice .racket-result-display .nd-big-number{padding:0;margin:8px 0 0;min-width:0;background:none;border:0;box-shadow:none;color:#c8ff84;font-size:clamp(3.4rem,6vw,5rem);line-height:1}
+.racket-dice .racket-dialogue{max-width:85%;padding:10px 18px;border-radius:19px;background:#f6ebc1;color:#362718;font-size:clamp(.86rem,1.2vw,1.1rem);font-weight:900;text-shadow:none;box-shadow:3px 4px #241a15}
+.racket-dice .nd-bottom{display:flex;gap:15px;align-items:start;width:100%;margin:0;padding:0 1vw;position:relative}
+.racket-dice .racket-history{width:100%;min-height:140px;flex:1;background-size:100% 100%;background-position:center;background-repeat:no-repeat;background-color:transparent;border:0;padding:55px 24px 15px;position:relative}
+.racket-dice .racket-history h2{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.racket-dice .racket-history .nd-pills{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;align-items:center}
+.racket-dice .racket-history .nd-pill{padding:4px 0;min-width:0;background:none;border:0;text-align:center;font-size:clamp(.59rem,.94vw,.9rem);white-space:nowrap}
+.racket-dice .racket-history .nd-pill.win{color:#c4ff94}
+.racket-dice .racket-history .nd-pill.lose{color:#ffc1a7}
+.racket-dice .nd-rules{width:240px;max-width:240px;background:#081b14d9;border:1px solid #8da06b;border-radius:13px;padding:12px}
+.racket-dice .nd-disclaimer{margin:12px 0 0;color:#ebf3d3;text-align:center;text-shadow:0 2px 5px #000}
+@media(max-width:1050px){
+ .racket-dice .racket-board{grid-template-columns:minmax(260px,42%) minmax(320px,58%)}
+ .racket-dice .racket-scene{min-height:600px}
+ .racket-dice .racket-character{width:63%;left:-3%}
+ .racket-dice .racket-machine{width:53%;left:48%}
+ .racket-dice .nd-bottom{flex-direction:column}
+ .racket-dice .nd-rules{width:100%;max-width:none}
+}
+@media(max-width:720px){
+ .racket-dice.neon-dice-page{background-attachment:scroll;background-position:center top;padding:12px}
+ .racket-dice .racket-hero{padding-top:65px;min-height:210px}
+ .racket-dice .nd-intro{max-width:100%}
+ .racket-dice .racket-board{display:flex;flex-direction:column;min-height:0;gap:12px}
+ .racket-dice .racket-scene{width:100%;min-height:clamp(270px,74vw,470px)}
+ .racket-dice .racket-character{width:58%;height:100%;top:0;left:0;opacity:1}
+ .racket-dice .racket-machine{width:51%;height:94%;top:2%;left:48%}
+ .racket-dice .nd-controls,.racket-dice .racket-result{width:100%}
+ .racket-dice .racket-toggle{gap:7px}
+ .racket-dice .nd-choice{font-size:clamp(.8rem,3vw,1.1rem)!important;padding:8px 3px}
+ .racket-dice .racket-slider-art{padding:15px 10px;gap:8px}
+ .racket-dice .racket-slider-art .nd-threshold-number{flex-basis:75px}
+ .racket-dice .nd-bottom{padding:0}
+ .racket-dice .racket-history .nd-pills{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .racket-dice .racket-history{padding:55px 12px 12px}
+}
+@media(prefers-reduced-motion:reduce){.racket-dice .nd-choice{transition:none}}

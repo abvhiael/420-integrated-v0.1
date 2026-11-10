@@ -39,6 +39,10 @@ func main() {
    ledger,e:=betdelivery.Open(deliveryPath);if e!=nil{log.Fatal(e)}
    defer ledger.Close()
    if e=service.EnableBetDelivery(ledger,store,mustEnv("NOTIFICATIONS_BET_DELIVERY_TOKEN"));e!=nil{log.Fatal(e)}
+   if os.Getenv("NOTIFICATIONS_BET_PROVIDER_TOKEN")!=""||os.Getenv("NOTIFICATIONS_BET_PROVIDER_KEY")!=""{
+    if e=service.EnableBetProviderReceipts(ledger,
+     mustEnv("NOTIFICATIONS_BET_PROVIDER_TOKEN"),mustEnv("NOTIFICATIONS_BET_PROVIDER_KEY"));e!=nil{log.Fatal(e)}
+   }
   }
  }
  ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)

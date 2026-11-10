@@ -25,6 +25,7 @@ type Service struct {
  enrollment http.Handler
  delivery http.Handler
  providerReceipts http.Handler
+ routes http.Handler
 }
 
 func NewService(cfg Config, probe IndexerProbe) (*Service, error) {
@@ -69,6 +70,14 @@ func (s *Service) EnableBetEnrollment(store *betconsent.Store,token,sharedKey st
  s.enrollment=handler
  return nil
 }
+func (s *Service) EnableBetRoutes(store *betconsent.Store,
+ readToken,providerToken,providerKey string)error{
+ handler,err:=betconsent.RouteHandler(store,readToken,providerToken,providerKey)
+ if err!=nil{return err}
+ store.RequireRoutes()
+ s.routes=handler
+ return nil
+}
 func (s *Service) EnableBetProviderReceipts(store *betdelivery.Store,consent *betconsent.Store,token,secret string)error{
  handler,err:=betdelivery.ProviderReceiptHandler(store,consent,token,secret)
  if err!=nil{return err}
@@ -85,6 +94,7 @@ func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
  if s.consent!=nil {mux.Handle("/v1/420bet/subscriptions/",s.consent)}
  if s.enrollment!=nil {mux.Handle("/v1/420bet/enrollments/",s.enrollment)}
+ if s.routes!=nil {mux.Handle("/v1/420bet/routes/",s.routes)}
  if s.delivery!=nil {mux.Handle("/v1/420bet/deliveries/",s.delivery)}
  if s.providerReceipts!=nil {mux.Handle("/v1/420bet/provider-receipts/",s.providerReceipts)}
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {

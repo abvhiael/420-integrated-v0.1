@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {
  createCatastropheJack,JACK_STOP_ORDER,JACK_STOP_DELAY_MS,JACK_LINES,JACK_CROSS,
- jackSpin,jackFeature,jackEvaluate,jackBellAward,JACK_PAY,JACK_BASE_REELS
+ jackSpin,jackFeature,jackEvaluate,jackBellAward,JACK_PAY,JACK_BELL_PAY,JACK_BASE_REELS,JACK_FREE_POOL
 } from '../src/catastrophe-jack.js';
 import {SLOT_MACHINES,slotMachinePath,slotMachineFromHash,createSlotsLobby} from '../src/slots-lobby.js';
 import {readFileSync} from 'node:fs';
@@ -35,9 +35,9 @@ test('four-bell diamond and either insurance diagonal are mutually prioritized',
 test('line wins, bonus bell counts and feature modifiers have finite credit awards',()=>{
  const board=Array(9).fill('TICKET');
  assert.equal(jackEvaluate(board,1).total,64);
- assert.equal(jackBellAward(Array(9).fill('BELL'),1,9).amount,1250);
- assert.equal(jackBellAward(Array(9).fill('BELL'),1,6).amount,750);
- assert.equal(jackBellAward(Array(9).fill('BELL'),1,3).amount,500);
+ assert.equal(jackBellAward(Array(9).fill('BELL'),1,9).amount,300);
+ assert.equal(jackBellAward(Array(9).fill('BELL'),1,6).amount,180);
+ assert.equal(jackBellAward(Array(9).fill('BELL'),1,3).amount,120);
  const sample=jackSpin('base',()=>0);
  assert.deepEqual(sample,['TICKET','BELL','TICKET','BELL','TICKET','BELL','TICKET','BELL','TICKET']);
 });
@@ -194,4 +194,58 @@ test('bell diamond does not require centre position 5 to match',()=>{
  assert.equal(jackFeature(diamond),'free','bonus takes priority over central ANVIL');
  const missing=diamond.slice();missing[7]='FISH';
  assert.equal(jackFeature(missing),'reversal');
+});
+
+test('Nine Lives retains nine spins, escalating catastrophe multipliers, and revised prize ladder',()=>{
+ assert.deepEqual(JACK_BELL_PAY,[0,.15,.4,.9,1.8,3.7,7.2,15,30,60]);
+ const board=['BELL','BELL','BELL','BELL','BELL','FISH','FISH','FISH','FISH'];
+ const prizes=Array.from({length:9},(_,n)=>jackBellAward(board,1,n+1));
+ assert.deepEqual(prizes.map(x=>x.multiplier),[1,1,2,1,1,3,1,1,5]);
+ assert.equal(prizes.reduce((sum,x)=>sum+x.amount,0),3.7*16);
+ assert.deepEqual(JACK_CROSS,[1,3,5,7]);
+});
+
+test('exact theoretical RTP is 94–96%, independently enumerating all base lines and conditional feature probabilities',()=>{
+ // The test is deterministic: sum the finite symbol distributions, not a noisy Monte Carlo.
+ const probabilities=JACK_BASE_REELS.map(reel=>{
+  const distribution=new Map();
+  for(const symbol of reel)distribution.set(symbol,(distribution.get(symbol)||0)+1/reel.length);
+  return [...distribution];
+ });
+ function expectedLine(indices){
+  const [a,b,c]=indices;
+  let expected=0;
+  for(const [x,px] of probabilities[a])
+   for(const [y,py] of probabilities[b])
+    for(const [z,pz] of probabilities[c]){
+     // Use the same paylines' three-position evaluation to avoid manufacturing
+     // wins elsewhere; the remaining six positions use a non-paying sentinel.
+     const board=Array(9).fill('NONE');
+     board[a]=x;board[b]=y;board[c]=z;
+     expected+=px*py*pz*jackEvaluate(board,1).total;
+    }
+  return expected;
+ }
+ const base=JACK_LINES.reduce((sum,line)=>sum+expectedLine(line),0);
+ const frequency=JACK_CROSS.reduce((v,i)=>v*(probabilities[i].find(([s])=>s==='BELL')?.[1]||0),1);
+ const p=(index,symbol)=>probabilities[index].find(([s])=>s===symbol)?.[1]||0;
+ const insuranceOne=p(0,'CLAIM')*p(4,'CLAIM')*p(8,'CLAIM');
+ const insuranceTwo=p(2,'CLAIM')*p(4,'CLAIM')*p(6,'CLAIM');
+ const insuranceOverlap=p(0,'CLAIM')*p(2,'CLAIM')*p(4,'CLAIM')*p(6,'CLAIM')*p(8,'CLAIM');
+ // Four-bell and insurance patterns can co-occur, in which case Nine Lives has priority.
+ const insurance=(insuranceOne+insuranceTwo-insuranceOverlap)*(1-frequency);
+ const insuranceAward=2*3*([.5,1,1.5,2,3,4,5,6,8].reduce((a,b)=>a+b,0)/9);
+ // The centre ANVIL is suppressed by a simultaneous diamond trigger.
+ const reversal=p(4,'ANVIL')*(1-frequency);
+ const after=['WILD','PIZZA','BUD','CASH','WILD','FISH','DYNAMITE','PIZZA','WILD'];
+ const reversalAward=jackEvaluate(after,1).total;
+ const bellProbability=JACK_FREE_POOL.filter(x=>x==='BELL').length/JACK_FREE_POOL.length;
+ const choose=(n,k)=>{let v=1;for(let i=1;i<=k;i++)v=v*(n-i+1)/i;return v;};
+ const freeSpinEV=JACK_BELL_PAY.reduce((ev,pay,k)=>ev+pay*choose(9,k)*bellProbability**k*(1-bellProbability)**(9-k),0);
+ const freeBonus=frequency*freeSpinEV*(6+2+3+5);
+ const rtp=base+insurance*insuranceAward+reversal*reversalAward+freeBonus;
+ assert.ok(rtp>=.94&&rtp<=.96,`RTP ${(rtp*100).toFixed(5)}% outside 94–96% range`);
+ assert.ok(Math.abs(rtp-.950775279406124)<.000001,`unexpected RTP ${rtp}`);
+ assert.ok(Math.abs(frequency-.26**4)<.000000000001);
+ assert.equal(reversalAward,9.5);
 });

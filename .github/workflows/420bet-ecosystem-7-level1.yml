@@ -122,8 +122,8 @@ jobs:
           go-version: '1.23'
       - name: Actual Go 420Mail/Notifications HTTP and Node worker Level 2 integration
         run: |
-          go test -count=1 -timeout=120s -v ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./mail ./integration/betaudit7
-          go vet ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./mail ./integration/betaudit7
+          go test -count=1 -timeout=120s -v ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./notifications/cmd/notifications420 ./mail ./integration/betaudit7
+          go vet ./notifications/betconsent ./notifications/betdelivery ./notifications/runtime ./notifications/cmd/notifications420 ./mail ./integration/betaudit7
       - name: Production Vite build
         working-directory: clients/420bet-lobby
         run: npm run build

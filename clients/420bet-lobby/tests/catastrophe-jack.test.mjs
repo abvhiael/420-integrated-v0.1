@@ -113,3 +113,48 @@ test('comic bonus poster illustrates the exact three game triggers',()=>{
  assert.match(poster.textContent,/WILDS FROM DISASTER/);
  stage.stopAnimation();
 });
+
+test('insurance bonus uses nine uploaded claim folder images ON the playboard, with entry and dynamic completion splashes',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const stage=createCatastropheJack(document,{rng:()=>0});
+ document.body.append(stage);
+ const insuranceTest=[...stage.querySelectorAll('.cj-test')][1];
+ insuranceTest.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(stage.dataset.mode,'insurance');
+ const board=stage.querySelector('.cj-playfield');
+ assert.ok(board.contains(stage.querySelector('.cj-insurance-play')));
+ assert.equal(stage.querySelector('.cj-side .cj-folder'),null,'folders must not appear in side controls');
+ const splash=stage.querySelector('.cj-splash');
+ assert.equal(splash.hidden,false);
+ assert.match(splash.querySelector('img').src,/catastrophe-jack-insurance-claim-start\.png$/);
+ const dismiss=stage.querySelector('.cj-splash-button');
+ dismiss.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(splash.hidden,true);
+ const folders=[...board.querySelectorAll('.cj-insurance-grid .cj-folder')];
+ assert.equal(folders.length,9);
+ assert.equal(new Set(folders.map(b=>b.querySelector('img').src)).size,9);
+ assert.ok(folders.every(b=>/insurance-claim\/folders\/claim-/.test(b.querySelector('img').src)));
+ for(let i=0;i<3;i++)folders[i].dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(splash.hidden,false);
+ assert.match(splash.querySelector('img').src,/catastrophe-jack-insurance-claim-complete\.png$/);
+ assert.equal(splash.querySelector('.cj-splash-total').textContent,'3.00 CREDITS');
+ dismiss.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(stage.dataset.mode,'base');
+ stage.stopAnimation();
+});
+
+test('Nine Lives test displays the uploaded entry splash before allowing free spins',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const stage=createCatastropheJack(document,{rng:()=>0});
+ document.body.append(stage);
+ [...stage.querySelectorAll('.cj-test')][0].dispatchEvent(new window.Event('click',{bubbles:true}));
+ const splash=stage.querySelector('.cj-splash');
+ assert.equal(splash.hidden,false);
+ assert.match(splash.querySelector('img').src,/catastrophe-jack-nine-lives-start\.png$/);
+ const spin=stage.querySelector('.cj-spin');
+ assert.equal(spin.disabled,true);
+ stage.querySelector('.cj-splash-button').dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(splash.hidden,true);
+ assert.equal(spin.disabled,false);
+ stage.stopAnimation();
+});

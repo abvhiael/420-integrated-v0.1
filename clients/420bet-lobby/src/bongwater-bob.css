@@ -15,3 +15,14 @@
 @media(max-width:850px){.bob-scene{grid-template-columns:minmax(0,1.4fr) minmax(155px,.7fr);min-height:490px;padding:8px;gap:7px}.bob-paytable{padding:7px}.bob-pay-row{grid-template-columns:25px minmax(0,1fr);font-size:10px;min-height:28px}.bob-pay-row img{height:24px;width:24px}.bob-pay-row strong{grid-column:2;font-size:9px}.bob-side .bob-hero{height:170px;max-height:31%}.bob-machine{margin:0;padding:6px}.bob-board{grid-template-rows:repeat(3,minmax(75px,1fr))}.bob-cell img{height:80px}}
 @media(max-width:530px){.bob-scene{grid-template-columns:minmax(0,1fr) 120px;min-height:355px;gap:5px;padding:5px}.bob-machine{padding:3px;border-width:3px}.bob-board{grid-template-rows:repeat(3,62px);gap:2px;padding:3px}.bob-cell img{height:62px}.bob-paytable{padding:5px;border-width:2px}.bob-paytable h2{font-size:11px}.bob-pay-row{min-height:20px;grid-template-columns:19px 1fr;gap:2px;font-size:8px}.bob-pay-row img{width:18px;height:18px}.bob-pay-row strong{font-size:8px}.bob-paytable p{font-size:8px}.bob-side .bob-hero{height:116px}.bob-reel-caption{font-size:9px}.bob-status{font-size:10px}.bob-panel .bob-test{font-size:10px;padding:7px}}
 @media(prefers-reduced-motion:reduce){.bob-cell.bob-reel-landed{animation:none}.bob-reels-spinning .bob-cell img{filter:none}}
+
+/* Wide wallpaper canvas + machine-mounted spin control */
+.bob-slot{width:min(100%,1800px);max-width:1800px;box-sizing:border-box;margin-inline:auto}
+.bob-scene{width:100%;box-sizing:border-box;min-height:660px;grid-template-columns:minmax(0,1.65fr) minmax(280px,.82fr);background-size:cover;background-position:50% 50%;background-repeat:no-repeat}
+.bob-machine{align-self:center}
+.bob-spin-dock{display:flex;align-items:center;justify-content:center;width:100%;padding:14px 0 4px}
+.bob-spin-dock .bob-spin{background:linear-gradient(#61d32f,#247b19);border:3px solid #caff7b;box-shadow:0 3px 0 #12330e,0 0 16px #5aff40a0;color:#fff;font-weight:900;font-size:clamp(20px,2vw,30px);letter-spacing:.06em;min-width:clamp(155px,20vw,260px);min-height:58px;border-radius:14px;cursor:pointer}
+.bob-spin-dock .bob-spin:hover:not(:disabled){filter:brightness(1.13)}
+.bob-spin-dock .bob-spin:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:850px){.bob-scene{min-height:490px;grid-template-columns:minmax(0,1.4fr) minmax(155px,.7fr)}.bob-spin-dock{padding:9px 0 3px}.bob-spin-dock .bob-spin{min-height:46px;min-width:115px;font-size:19px}}
+@media(max-width:530px){.bob-scene{min-height:355px;grid-template-columns:minmax(0,1fr) 120px}.bob-spin-dock{padding:5px 0 1px}.bob-spin-dock .bob-spin{min-width:90px;min-height:36px;font-size:15px;border-radius:8px}}

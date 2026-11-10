@@ -95,7 +95,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  const footer=el(doc,'p','cj-disclaimer','Practice simulation only. Bonus odds and RTP have not been certified.');
  surface.append(top,notice,center,footer);stage.append(surface);
  function schedule(fn,ms){const id=setTimeout(()=>{pending=pending.filter(x=>x!==id);if(!ended)fn();},ms);pending.push(id);}
- function setMode(next){mode=next;stage.dataset.mode=next;stage.style.setProperty('--cj-wallpaper','url("'+JACK_ROOT+'backgrounds/'+backgrounds[next]+'")');heading.textContent=next==='base'?"CAT'S GOT NINE LIVES":next==='free'?'NINE LIVES FREE SPINS':next==='insurance'?'INSURANCE CLAIM BONUS':'CATASTROPHIC REVERSAL';spin.textContent=next==='free'?'NEXT FREE SPIN':'SPIN';spin.disabled=next==='insurance'||next==='reversal';}
+ function setMode(next){mode=next;stage.dataset.mode=next;stage.style.setProperty('--cj-wallpaper','url("'+JACK_ROOT+'backgrounds/'+backgrounds[next]+'")');stage.closest('.immersive')?.style.setProperty('--cj-wallpaper','url("'+JACK_ROOT+'backgrounds/'+backgrounds[next]+'")');heading.textContent=next==='base'?"CAT'S GOT NINE LIVES":next==='free'?'NINE LIVES FREE SPINS':next==='insurance'?'INSURANCE CLAIM BONUS':'CATASTROPHIC REVERSAL';spin.textContent=next==='free'?'NEXT FREE SPIN':'SPIN';spin.disabled=next==='insurance'||next==='reversal';}
  function showBoard(next){
   next.forEach((symbol,i)=>{board[i]=symbol;frameImages[i].src=JACK_ROOT+JACK_SYMBOLS[symbol];frameImages[i].alt=symbol;frameNodes[i].classList.remove('cj-moving');});
  }

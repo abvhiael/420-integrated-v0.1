@@ -94,6 +94,9 @@ function limitsCheck(policy){
  }
  requireTrue(positive(policy.ticketStakeMax)>0n&&positive(policy.ticketGrossMax)>0n,
   'risk caps must be positive');
+ requireTrue(Number.isSafeInteger(policy.challengeWindowMs)&&
+  policy.challengeWindowMs>=3600000&&policy.challengeWindowMs<=30*86400000,
+  'approved nonzero challenge window required');
  return policy;
 }
 function initial({chainId,assetId,vaultId,operatorId,capital,policy}){
@@ -275,6 +278,13 @@ export function createLocalSportsbookEngine({
     'incomplete event');
    if(facts.status==='FINAL')resultFor(m,{selection:m.selections[0]},facts);
    const previous=m.result;
+   requireTrue(!previous||previous.state!=='FINAL',
+    'finalized result cannot be revised or redirected');
+   if(previous?.state==='DISPUTED')requireTrue(
+    authority?.disputeResolutionApproved===true&&
+    authority.disputeRole==='independentResolver'&&
+    authority.disputeDigest===previous.digest,
+    'independent dispute disposition required');
    const sequence=(previous?.sequence??0)+1;
    requireTrue(authority.sequence===sequence,'result sequence mismatch');
    requireTrue(authority.previousDigest===(previous?.digest??null),
@@ -282,7 +292,7 @@ export function createLocalSportsbookEngine({
    const digestValue=digest({marketId,termsHash:m.termsHash,sequence,facts,
     sourceDigest:authority.sourceDigest});
    m.result={state:'PROPOSED',sequence,digest:digestValue,facts:clone(facts),
-    challengeEndsAt:clock()+86400000,sourceDigest:authority.sourceDigest,
+    challengeEndsAt:clock()+s.policy.challengeWindowMs,sourceDigest:authority.sourceDigest,
     challenged:false};
    audit(s,'RESULT_PROPOSE',m.id);return clone(m.result);
   });

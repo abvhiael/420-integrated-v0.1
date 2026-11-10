@@ -44,7 +44,6 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  const root=el(doc,'section','bob-slot');root.setAttribute('aria-label',"Bongwater Bob's Bad Decisions — practice slot");
  const header=el(doc,'header','bob-slot-title');const logo=el(doc,'img');logo.src=img('branding','bongwater-bobs-bad-decisions-logo');logo.alt="Bongwater Bob's Bad Decisions";header.append(logo);
  const scene=el(doc,'div','bob-scene');
- const right=el(doc,'aside','bob-side');
  const paytable=el(doc,'section','bob-paytable');
  const payHeading=el(doc,'h2','','BOB\'S TERRIBLE PAYTABLE');paytable.append(payHeading);
  for(const [symbol,value] of Object.entries(pays)){
@@ -53,8 +52,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  }
  const payFoot=el(doc,'p','','Five fixed paylines · WILD substitutes · 3 matching symbols to win');
  paytable.append(payFoot);
- const hero=el(doc,'img','bob-hero');hero.alt='Bongwater Bob';
- right.append(paytable,hero);scene.append(right);
+ // Keep the wallpaper's illustrated Bob unobstructed; no duplicate foreground character.
  const machine=el(doc,'div','bob-machine');const title=el(doc,'div','bob-reel-caption','THREE REELS · FIVE FIXED LINES');
  const board=el(doc,'div','bob-board');const tiles=[];for(let row=0;row<3;row++){for(let c=0;c<3;c++){const cell=el(doc,'div','bob-cell');const picture=el(doc,'img');picture.alt='';cell.append(picture);board.append(cell);tiles.push(picture);}}
  // Overlay only: never adds an extra grid cell or affects reel evaluation.
@@ -64,7 +62,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  paylineSvg.setAttribute('class','bob-payline-overlay');
  paylineSvg.setAttribute('aria-hidden','true');
  board.append(paylineSvg);
- const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,status);scene.append(machine);
+ const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,paytable,status);scene.append(machine);
  const bonus=el(doc,'div','bob-bonus');bonus.hidden=true;scene.append(bonus);
  const panel=el(doc,'div','bob-panel');const creditLabel=el(doc,'div','bob-meter'),betLabel=el(doc,'div','bob-meter'),winLabel=el(doc,'div','bob-meter');
  const smaller=el(doc,'button','','BET −'),larger=el(doc,'button','','BET +'),spin=el(doc,'button','bob-spin','SPIN'),info=el(doc,'button','','INFO'),testPick=el(doc,'button','bob-test','TEST PICK BONUS'),testFree=el(doc,'button','bob-test','TEST FREE SPINS');
@@ -74,7 +72,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  const details=el(doc,'div','bob-rules');details.hidden=true;details.textContent='Practice credits only. 3×3 reels, five fixed paylines. Three matching symbols on a line pay; Bob WILD substitutes for ordinary symbols. Three BAD DECISIONS symbols anywhere trigger a pick bonus: three different objects are sampled from nine, and the prize is chosen independently of the object artwork. Three ONE MORE HIT symbols anywhere award 8 free spins with 2× line wins. Retriggers award 8 more, with a maximum of 24 awarded spins. Reel strips and RTP are provisional and not certified.';
  root.append(header,scene,panel,details);
  const money=n=>n.toFixed(2);
- function face(key){hero.src=img('characters',faces[key]??faces.idle);}
+ function face(key){root.dataset.bobReaction=key;}
  function wallpaper(kind){scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
  function paintColumn(col,values){for(let row=0;row<3;row++){const symbol=values[row],picture=tiles[row*3+col];picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];}}
  function paint(grid){for(let c=0;c<3;c++)paintColumn(c,grid[c]);}

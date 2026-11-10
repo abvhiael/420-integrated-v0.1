@@ -78,21 +78,22 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  assert.match(root.textContent,/VIRTUAL CREDITS/);
 });
 
-test('Double Trouble UI exposes real virtual-credit values, charge and ready feedback',()=>{
+test('Double Trouble UI shows virtual credits, ready animation and one doubled winning roll',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
- const root=createNeonDice(document);
- assert.match(root.querySelector('.racket-credit-balance').textContent,/1,000\\.00/);
- assert.match(root.querySelector('.racket-credit-stake').textContent,/10\\.00/);
- assert.match(root.querySelector('.nd-potential-credits').textContent,/19\\.20 credits/);
+ const root=createNeonDice(document,()=>0); // Always roll 0000 in test. Production randomness is unchanged.
+ assert(root.querySelector('.racket-credit-balance').textContent.includes('1,000.00'));
+ assert(root.querySelector('.racket-credit-stake').textContent.includes('10.00'));
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('19.20 credits'));
  assert.equal(root.querySelector('.racket-double-trouble-banner'),null);
  const roll=()=>root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
- for(let i=0;i<10;i++)roll();
- // At least ten rolls, no matter the outcomes, fill the 100% meter.
+ for(let i=0;i<7;i++)roll(); // Seven wins at 15% each fill the meter.
  assert(root.querySelector('.double-trouble-ready'));
  assert(root.querySelector('.racket-double-trouble-banner'));
- assert.match(root.querySelector('.nd-potential-credits').textContent,/credits/);
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('38.40 credits'));
  roll();
  assert.equal(root.querySelector('.double-trouble-ready'),null);
- assert(root.querySelector('.racket-double-trouble-hit')||root.querySelector('.racket-double-trouble-miss'));
- assert.match(root.querySelector('.racket-virtual-payout').textContent,/DOUBLE TROUBLE/);
+ assert(root.querySelector('.racket-double-trouble-hit'));
+ assert(root.querySelector('.racket-virtual-payout').textContent.includes('DOUBLE TROUBLE'));
+ assert(root.querySelector('.racket-virtual-payout').textContent.includes('38.40'));
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('19.20 credits'));
 });

@@ -107,7 +107,8 @@ test('win settlement exactly once, freezes accepted odds and conserves escrow/re
  const receipt=await e.settleTicket(ticket.ticketId,auth);
  assert.equal(receipt.outcome,'WIN');assert.equal(receipt.payout,'190');
  assert.equal(e.view().operatorReserved,'0');assert.equal(e.view().playerEscrow,'0');
- assert.equal(e.view().freeCapital,'16000');
+ assert.equal(e.view().freeCapital,'15910');
+ assert.equal(e.view().capital,'15910');
  assert.equal(e.view().operatorPL,'-90');
  assert.deepEqual(await e.settleTicket(ticket.ticketId,auth),receipt);
  await assert.rejects(e.settleTicket(ticket.ticketId,{...auth,finalDigest:'other'}),/conflicting settlement replay/);

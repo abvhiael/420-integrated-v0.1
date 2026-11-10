@@ -10,7 +10,7 @@ import {openLocalSportsbookJournal} from '../server/sportsbook-journal.mjs';
 const sig=makeLocalQuoteSigner('approved-local-test-signing-key-not-production');
 const basePolicy={ticketStakeMax:'1000',ticketGrossMax:'4000',
  playerGrossMax:'7000',marketGrossMax:'10000',eventGrossMax:'12000',
- correlationGrossMax:'12000',operatorGrossMax:'15000',
+ correlationGrossMax:'12000',competitionGrossMax:'15000',operatorGrossMax:'15000',
  vaultGrossMax:'15000',playerDailyStakeMax:'2500',
  playerDailyLossMax:'2500',capitalSafetyReserve:'1000',challengeWindowMs:86400000};
 let time=1762790400000;
@@ -20,6 +20,9 @@ const args=(override={})=>({chainId:'420',assetId:'test-420',vaultId:'vault-1',
  authorizePlayer:async({quote,authorization})=>authorization?.signature==='player-approved'&&
   authorization.playerId===quote.playerId&&authorization.quoteHash===quote.nonce,
  checkEligibility:async()=>true,
+ verifyMarketHealth:async({market})=>({verified:true,status:'SCHEDULED',
+  eventId:market.eventId,scheduleRevision:market.scheduleRevision,startAt:market.startsAt,
+  observedAt:time}),
  verifyResult:async({authority})=>authority.sourceDigest==='a'.repeat(64),
  clock:()=>time,...override});
 const terms=(id='moneyline',type='moneyline2',selection=['home','away'],extras={})=>({
@@ -27,7 +30,7 @@ const terms=(id='moneyline',type='moneyline2',selection=['home','away'],extras={
  competitionId:'nhl',correlationGroup:'event-1',rulesVersion:'approved-v1',type,
  period:'REGULATION',overtime:'EXCLUDE',tiePolicy:'PUSH',
  line2:type==='spread'||type==='total'?'0':null,
- selections:selection,startsAt:time+86400000,cutoffAt:time+3600000,state:'DRAFT',
+ selections:selection,scheduleRevision:'1',startsAt:time+86400000,cutoffAt:time+3600000,state:'DRAFT',
  ...extras
 });
 const approved=m=>({role:'marketController',approved:true,termsHash:m.termsHash,
@@ -86,6 +89,29 @@ test('correlated cross-market cap, player daily cap and zero partial mutation on
  const before=JSON.stringify(e.view());
  await assert.rejects(place(e,'spread','player-2','100','nonce-2'),/correlation group exposure cap/);
  assert.equal(JSON.stringify(e.view()),before,'failed acceptance partially reserved');
+});
+test('event source suspension, stale observation and earlier start deny placement atomically',async()=>{
+ for(const variation of [
+  {status:'SUSPENDED'},
+  {observedAt:time-60000},
+  {startAt:time-1},
+  {scheduleRevision:'2'}
+ ]){
+  const e=createLocalSportsbookEngine(args({verifyMarketHealth:async({market})=>({
+   verified:true,status:'SCHEDULED',eventId:market.eventId,
+   scheduleRevision:market.scheduleRevision,startAt:market.startsAt,
+   observedAt:time,...variation})}));
+  await openMarket(e,terms());
+  const before=JSON.stringify(e.view());
+  await assert.rejects(place(e,'moneyline'),/unverified, stale or revised event schedule/);
+  assert.equal(JSON.stringify(e.view()),before);
+ }
+});
+test('V1 disallows evading event-correlated exposure through a new risk group',async()=>{
+ const e=createLocalSportsbookEngine(args());
+ await assert.rejects(e.registerMarket(terms('leak','spread',['home','away'],
+  {correlationGroup:'unrelated-market',line2:'-1'}),{role:'registrar',approved:true}),
+ /correlated event markets/);
 });
 test('insufficient independently funded operator capital refuses player escrow consumption',async()=>{
  const e=createLocalSportsbookEngine(args({capital:'1000'}));

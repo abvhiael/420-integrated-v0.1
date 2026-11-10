@@ -179,3 +179,35 @@
  .bob-trigger-copy span{font-size:8px}
  .bob-reaction-character{height:110px}
 }
+
+/* Reel-symbol fit correction: no clipping at any responsive frame size. */
+.bob-scene .bob-board .bob-cell{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ overflow:hidden;
+ min-width:0;
+ min-height:0;
+ box-sizing:border-box;
+}
+.bob-scene .bob-board .bob-cell > img{
+ display:block;
+ flex:0 0 auto;
+ width:76%;
+ height:76%;
+ max-width:76%;
+ max-height:76%;
+ min-width:0;
+ min-height:0;
+ object-fit:contain;
+ object-position:center;
+ box-sizing:border-box;
+}
+@media(max-width:720px){
+ .bob-scene .bob-board .bob-cell > img{
+  width:72%;
+  height:72%;
+  max-width:72%;
+  max-height:72%;
+ }
+}

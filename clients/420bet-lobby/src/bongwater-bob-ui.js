@@ -40,7 +40,7 @@ const awards=[5,10,20,35,50];
 const faces={idle:'bongwater-bob-01-default',loss:'bongwater-bob-06-side-eye',win:'bongwater-bob-04-laughing',big:'bongwater-bob-17-mind-blown',pick:'bongwater-bob-22-mischievous',free:'bongwater-bob-12-dizzy',end:'bongwater-bob-18-celebration'};
 export {evaluate,gridFrom,sample,pickThree,paylines,pays,base,freeStrips,bonusObjects};
 export function createBongwaterBobPractice(doc=globalThis.document){
- let credits=10000,bet=2,totalWin=0,mode='base',freeRemaining=0,freeGranted=0,freeTotal=0,busy=false,disposed=false;let pendingPick=null,testingMode=false;const spinTimers=new Set();let spinInterval=null;
+ let credits=10000,bet=2,totalWin=0,mode='base',freeRemaining=0,freeGranted=0,freeTotal=0,busy=false,disposed=false;let pendingPick=null,testingMode=false,activeSplash=false;const spinTimers=new Set();let spinInterval=null;
  const root=el(doc,'section','bob-slot');root.setAttribute('aria-label',"Bongwater Bob's Bad Decisions — practice slot");
  const header=el(doc,'header','bob-slot-title');const logo=el(doc,'img');logo.src=img('branding','bongwater-bobs-bad-decisions-logo');logo.alt="Bongwater Bob's Bad Decisions";header.append(logo);
  const scene=el(doc,'div','bob-scene');
@@ -64,6 +64,31 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  board.append(paylineSvg);
  const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,paytable,status);scene.append(machine);
  const bonus=el(doc,'div','bob-bonus');bonus.hidden=true;scene.append(bonus);
+ // Full-art splash layer takes clicks itself, preventing accidental SPIN or prop selection.
+ const splash=el(doc,'div','bob-splash');splash.hidden=true;
+ splash.setAttribute('role','button');splash.setAttribute('tabindex','0');splash.setAttribute('aria-label','Continue bonus');
+ const splashArt=el(doc,'img','bob-splash-art');splashArt.alt='';
+ const splashObject=el(doc,'img','bob-splash-object');splashObject.alt='';splashObject.hidden=true;
+ const splashAmount=el(doc,'div','bob-splash-amount');splashAmount.hidden=true;
+ splash.append(splashArt,splashObject,splashAmount);scene.append(splash);
+ let splashNext=null;
+ function closeSplash(){
+  if(!activeSplash||disposed)return;
+  activeSplash=false;splash.hidden=true;splashObject.hidden=true;splashAmount.hidden=true;
+  const next=splashNext;splashNext=null;if(next)next();meters();
+ }
+ splash.addEventListener('click',closeSplash);
+ splash.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();closeSplash();}});
+ function displaySplash(filename,next,{selected='',amount=null}={}){
+  bonus.hidden=true;activeSplash=true;splashNext=next;
+  splashArt.src=img('bonus-splashes',filename);splashArt.alt=filename.replaceAll('-',' ').replace('.png','');
+  splashObject.hidden=!selected;
+  if(selected){splashObject.src=img('bonus-objects','bonus-'+selected);splashObject.alt=selected.replaceAll('-',' ');}
+  splashAmount.hidden=amount===null;
+  if(amount!==null)splashAmount.textContent=Number(amount).toFixed(2);
+  splash.dataset.variant=selected?'pick-result':amount!==null?'total':'start';
+  splash.hidden=false;meters();splash.focus({preventScroll:true});
+ }
  const panel=el(doc,'div','bob-panel');const creditLabel=el(doc,'div','bob-meter'),betLabel=el(doc,'div','bob-meter'),winLabel=el(doc,'div','bob-meter');
  const smaller=el(doc,'button','','BET −'),larger=el(doc,'button','','BET +'),spin=el(doc,'button','bob-spin','SPIN'),info=el(doc,'button','','INFO'),testPick=el(doc,'button','bob-test','TEST PICK BONUS'),testFree=el(doc,'button','bob-test','TEST FREE SPINS');
  [smaller,larger,spin,info,testPick,testFree].forEach(b=>b.type='button');
@@ -102,21 +127,37 @@ export function createBongwaterBobPractice(doc=globalThis.document){
    if(col===2){clearSpin();finished();}
   },duration));
  }
- function meters(){creditLabel.textContent='CREDITS '+money(credits);betLabel.textContent='BET '+money(bet);winLabel.textContent='WIN '+money(totalWin);spin.textContent=mode==='free'?'FREE SPIN ('+freeRemaining+')':'SPIN';spin.disabled=busy||mode==='pick';smaller.disabled=larger.disabled=busy||mode!=='base';testPick.disabled=testFree.disabled=busy||mode!=='base';}
+ function meters(){creditLabel.textContent='CREDITS '+money(credits);betLabel.textContent='BET '+money(bet);winLabel.textContent='WIN '+money(totalWin);spin.textContent=mode==='free'?'FREE SPIN ('+freeRemaining+')':'SPIN';spin.disabled=busy||activeSplash||mode==='pick';smaller.disabled=larger.disabled=busy||activeSplash||mode!=='base';testPick.disabled=testFree.disabled=busy||activeSplash||mode!=='base';}
  function message(s){status.textContent=s;}
- function finishFeature(){mode='base';freeRemaining=0;freeGranted=0;wallpaper('base');face('end');message('FREE SPINS COMPLETE! TOTAL '+money(freeTotal)+(testingMode?' · DEMO ONLY':''));testingMode=false;meters();}
+ function finishFeature(){
+  const won=freeTotal,wasTest=testingMode;
+  message('FREE SPINS COMPLETE! TOTAL '+money(won)+(wasTest?' · DEMO ONLY':''));
+  face('end');
+  displaySplash('bob-free-spins-finish',()=>{
+   mode='base';freeRemaining=0;freeGranted=0;testingMode=false;
+   wallpaper('base');face('end');meters();
+  },{amount:won});
+ }
  function settle(result){
   showWinningPaylines(result.winners);
   totalWin=result.total;if(!testingMode)credits+=result.total;if(mode==='free')freeTotal+=result.total;
   face(result.total>=bet*20?'big':result.total>0?'win':'loss');
   message(result.winners.length?result.winners.map(w=>'LINE '+w.line+' '+money(w.amount)).join(' · '):'BOB MADE ANOTHER BAD DECISION');
-  if(mode==='base'&&result.pick){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();}
-  else if(result.free){if(mode==='base'){mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('JUST ONE MORE HIT! 8 FREE SPINS · 2× LINE WINS');}else{const additional=Math.min(8,24-freeGranted);freeGranted+=additional;freeRemaining+=additional;message(additional?'BOB FOUND '+additional+' MORE FREE SPINS!':'24 FREE SPINS MAXIMUM');}}
+  if(mode==='base'&&result.pick){
+   pendingPick={options:pickThree(),award:choice(awards)*bet};
+   mode='pick';wallpaper('pick');face('pick');
+   displaySplash('bob-pick-bonus-start',()=>showPick());
+  }
+  else if(result.free){if(mode==='base'){
+   mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;
+   wallpaper('free');face('free');message('JUST ONE MORE HIT! 8 FREE SPINS · 2× LINE WINS');
+   displaySplash('bob-free-spins-start',()=>{message('FREE SPINS: '+freeRemaining+' REMAINING · 2× WINS');});
+  }else{const additional=Math.min(8,24-freeGranted);freeGranted+=additional;freeRemaining+=additional;message(additional?'BOB FOUND '+additional+' MORE FREE SPINS!':'24 FREE SPINS MAXIMUM');}}
   else if(mode==='free'&&freeRemaining===0)finishFeature();
   busy=false;meters();
  }
  function drawSpin(){
-  if(disposed||busy||mode==='pick')return;
+  if(disposed||busy||activeSplash||mode==='pick')return;
   if(mode==='base'&&credits<bet){message('NOT ENOUGH PRACTICE CREDITS');return;}
   if(mode==='base')credits-=bet;
   if(mode==='free')freeRemaining--;
@@ -125,20 +166,40 @@ export function createBongwaterBobPractice(doc=globalThis.document){
   animate(result,()=>settle(result));
  }
  function startTest(kind){
-  if(disposed||busy||mode!=='base')return;
+  if(disposed||busy||activeSplash||mode!=='base')return;
   testingMode=true;totalWin=0;clearPaylines();
-  if(kind==='pick'){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();message('TEST MODE: PICK ANY ONE OF THE THREE RANDOM PROPS');}
-  else {mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('TEST MODE: EIGHT FREE SPINS, NO CREDIT CHANGES');}
+  if(kind==='pick'){
+   pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';
+   wallpaper('pick');face('pick');message('TEST MODE: PICK ANY ONE OF THE THREE RANDOM PROPS');
+   displaySplash('bob-pick-bonus-start',()=>showPick());
+  }
+  else {
+   mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;
+   wallpaper('free');face('free');message('TEST MODE: EIGHT FREE SPINS, NO CREDIT CHANGES');
+   displaySplash('bob-free-spins-start',()=>{message('TEST FREE SPINS · '+freeRemaining+' REMAINING');});
+  }
   meters();
  }
  function showPick(){
  bonus.replaceChildren();bonus.hidden=false;const branding=el(doc,'img','bob-bonus-logo');branding.src=img('branding','whats-the-worst-that-could-happen-logo');branding.alt="What's the Worst That Could Happen?";
- const heading=el(doc,'p','','PICK ONE TERRIBLE DECISION');const choices=el(doc,'div','bob-choices');for(const name of pendingPick.options){const b=el(doc,'button','bob-object');b.type='button';const picture=el(doc,'img');picture.src=img('bonus-objects','bonus-'+name);picture.alt=name.replaceAll('-',' ');b.append(picture);b.setAttribute('aria-label','Pick '+name.replaceAll('-',' '));b.addEventListener('click',()=>{if(mode!=='pick')return;const award=pendingPick.award;pendingPick=null;if(!testingMode)credits+=award;totalWin+=award;bonus.hidden=true;mode='base';wallpaper('base');face('big');message('WHAT COULD GO WRONG? '+money(award)+(testingMode?' TEST CREDITS (DEMO ONLY)':' PRACTICE CREDITS!'));testingMode=false;meters();});choices.append(b);}bonus.append(branding,heading,choices);
+ const heading=el(doc,'p','','PICK ONE TERRIBLE DECISION');const choices=el(doc,'div','bob-choices');for(const name of pendingPick.options){const b=el(doc,'button','bob-object');b.type='button';const picture=el(doc,'img');picture.src=img('bonus-objects','bonus-'+name);picture.alt=name.replaceAll('-',' ');b.append(picture);b.setAttribute('aria-label','Pick '+name.replaceAll('-',' '));b.addEventListener('click',()=>{
+   if(mode!=='pick'||activeSplash||!pendingPick)return;
+   const award=pendingPick.award,selected=name,wasTest=testingMode;
+   pendingPick=null;bonus.hidden=true;
+   if(!wasTest)credits+=award;totalWin+=award;
+   face('big');message('YOU PICKED '+selected.replaceAll('-',' ').toUpperCase()+' · WON '+money(award));
+   displaySplash('bob-pick-bonus-result',()=>{
+    displaySplash('bob-pick-bonus-finish',()=>{
+     mode='base';testingMode=false;wallpaper('base');face('end');
+     message('WHAT COULD GO WRONG? YOU WON '+money(award)+(wasTest?' · DEMO ONLY':' PRACTICE CREDITS!'));meters();
+    },{amount:award});
+   },{selected,amount:award});
+  });choices.append(b);}bonus.append(branding,heading,choices);
  }
  smaller.addEventListener('click',()=>{bet=Math.max(.5,bet/2);meters();});
  larger.addEventListener('click',()=>{bet=Math.min(20,bet*2);meters();});
  spin.addEventListener('click',drawSpin);testPick.addEventListener('click',()=>startTest('pick'));testFree.addEventListener('click',()=>startTest('free'));info.addEventListener('click',()=>{details.hidden=!details.hidden;});
  wallpaper('base');face('idle');paint(gridFrom([0,5,10],base));message('ONE MORE HIT. WHAT COULD POSSIBLY GO WRONG?');meters();
- root.stopAnimation=()=>{disposed=true;clearSpin();};
+ root.stopAnimation=()=>{disposed=true;clearSpin();splashNext=null;};
  return root;
 }

@@ -53,8 +53,9 @@ function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersio
   calls.push({method,params});
   let result;
   if(method==='eth_chainId')result='0x1a4';
-  else if(method==='eth_getTransactionReceipt')result={
-   status:'0x1',blockHash:reorg?H(99):BLOCK,blockNumber:'0x64',logs:[log]};
+  else if(method==='eth_getTransactionReceipt')result=
+   params[0]===H(55)?{status:'0x1',blockHash:H(96),blockNumber:'0x60',logs:[reservation]}:
+    {status:'0x1',blockHash:reorg?H(99):BLOCK,blockNumber:'0x64',logs:[log]};
   else if(method==='eth_getBlockByNumber'){
    result=params[0]==='finalized'?{number:'0x70',hash:H(112)}:
     params[0]==='0x60'?{number:'0x60',hash:H(96)}:

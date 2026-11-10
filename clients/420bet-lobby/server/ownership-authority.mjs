@@ -140,7 +140,8 @@ export function createRpcCanonicalOwnershipSource({
    members=[{account:addr(field(wager,'player',1))}];
   }else if(e.vertical==='poker'){
    const table=hash(log.topics[1]),hand=hash(log.topics[2]);
-   fail(hand===e.objectId,'wrong poker hand');
+   // Notification ABI indexes the table as objectId; the hand is a second topic.
+   fail(table===e.objectId,'wrong poker table');
    const ledger=sources.find(s=>s.role==='poker-ledger');
    fail(ledger,'approved poker seat ledger missing');
    const reservedTopic=eventTopic('HandReserved(bytes32,bytes32,uint256,bytes32)');

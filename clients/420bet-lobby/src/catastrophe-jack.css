@@ -1,8 +1,8 @@
 
 /* Catastrophe Jack #9 – full-bleed comic-noir artwork and independent 3x3 reels. */
-.immersive:has(.cj-stage){position:relative;min-height:100dvh;background:#160d25;}
+.immersive:has(.cj-stage){position:relative;min-height:100dvh;--cj-wallpaper:url('/assets/420bet/slots/catastrophe-jack/backgrounds/background-main.png');background-color:#160d25;background-image:var(--cj-wallpaper);background-position:center;background-size:100% 100%;background-repeat:no-repeat;}
 .immersive:has(.cj-stage)>.gamebar{position:relative;z-index:5;background:rgba(11,9,19,.52);border-bottom:1px solid rgba(255,213,65,.48);backdrop-filter:blur(5px);}
-.immersive:has(.cj-stage) .view-scroll{background:#160d25;overflow:auto;}
+ .immersive:has(.cj-stage) .view-scroll{background:transparent;overflow:auto;}
 .cj-stage{--cj-wallpaper:url('/assets/420bet/slots/catastrophe-jack/backgrounds/background-main.png');position:relative;min-height:calc(100dvh - 60px);isolation:isolate;color:#fff4d4;font-family:system-ui,Arial,sans-serif;}
 .cj-stage::before{content:'';position:absolute;inset:-60px 0 0;background-image:linear-gradient(90deg,rgba(16,5,29,.25),rgba(13,4,24,.12),rgba(18,4,26,.18)),var(--cj-wallpaper);background-size:100% 100%;background-position:center;z-index:-2;}
 .cj-stage::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,5,24,.06),rgba(9,4,16,.22) 82%,rgba(9,4,16,.55));z-index:-1;pointer-events:none;}
@@ -38,3 +38,6 @@
 .cj-disclaimer{font-size:11px;text-align:center;color:#fff6d5;text-shadow:0 2px 3px black;padding:16px;margin:0;}
 @media(max-width:800px){.cj-layout{grid-template-columns:minmax(0,1fr);max-width:540px;gap:18px}.cj-side{max-width:540px}.cj-title{height:130px}.cj-stage::before{background-size:cover;}.cj-reels{width:100%}.cj-surface{padding-bottom:35px}}
 @media(prefers-reduced-motion:reduce){.cj-cell.cj-moving .cj-symbol{animation:none;filter:none;}}
+
+/* The immersive container owns the wallpaper so it continues beneath the gamebar. */
+.cj-stage::before{display:none;}

@@ -69,8 +69,8 @@ func (s *Service) EnableBetEnrollment(store *betconsent.Store,token,sharedKey st
  s.enrollment=handler
  return nil
 }
-func (s *Service) EnableBetProviderReceipts(store *betdelivery.Store,token,secret string)error{
- handler,err:=betdelivery.ProviderReceiptHandler(store,token,secret)
+func (s *Service) EnableBetProviderReceipts(store *betdelivery.Store,consent *betconsent.Store,token,secret string)error{
+ handler,err:=betdelivery.ProviderReceiptHandler(store,consent,token,secret)
  if err!=nil{return err}
  s.providerReceipts=handler
  return nil

@@ -5,7 +5,7 @@ import {
  createCatastropheJack,JACK_STOP_ORDER,JACK_STOP_DELAY_MS,JACK_LINES,JACK_CROSS,
  jackSpin,jackFeature,jackEvaluate,jackBellAward
 } from '../src/catastrophe-jack.js';
-import {SLOT_MACHINES,slotMachinePath,slotMachineFromHash} from '../src/slots-lobby.js';
+import {SLOT_MACHINES,slotMachinePath,slotMachineFromHash,createSlotsLobby} from '../src/slots-lobby.js';
 import {readFileSync} from 'node:fs';
 
 test('Catastrophe Jack is ninth lobby machine with a direct playable practice route',()=>{
@@ -54,4 +54,16 @@ test('game screen shows nine reel images, all three bonus test buttons and full 
  assert.equal(stage.dataset.mode,'free');
  assert.match(stage.style.getPropertyValue('--cj-wallpaper'),/background-nine-lives\.png/);
  stage.stopAnimation();
+});
+
+test('slot #9 has an immediately visible lobby launch link before the carousel, even without cabinet art',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ let selected=null;
+ const lobby=createSlotsLobby(document,machine=>{selected=machine;});
+ const featured=lobby.querySelector('header .slots-featured-launch');
+ assert.ok(featured,'featured slot #9 launch link must be present above carousel');
+ assert.equal(featured.getAttribute('href'),'#game=slots&machine=catastrophe-jack');
+ assert.match(featured.textContent,/PLAY CATASTROPHE JACK/);
+ featured.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
+ assert.equal(selected?.id,'catastrophe-jack');
 });

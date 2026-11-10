@@ -36,11 +36,11 @@ export const JACK_BASE_REELS=Object.freeze(Array.from({length:9},(_,i)=>{
  ]);
  return Object.freeze(BASE_POOL.slice());
 }));
-const FREE_POOL=['BELL','BELL','BELL','BELL','BELL','FISH','BUD','CASH','PIZZA','DUMPSTER','TICKET'];
+export const JACK_FREE_POOL=Object.freeze(['BELL','BELL','BELL','BELL','BELL','FISH','BUD','CASH','PIZZA','DUMPSTER','TICKET']);
 const labels={base:'Regular play',free:'Nine Lives Free Spins',insurance:'Insurance Claim Bonus',reversal:'Catastrophic Reversal'};
 const backgrounds={base:'background-main.png',free:'background-nine-lives.png',insurance:'background-insurance-claim.png',reversal:'background-catastrophic-reversal.png'};
 const random=(pool,rng)=>pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
-export function jackSpin(mode='base',rng=Math.random){return Array.from({length:9},(_,i)=>random(mode==='free'?FREE_POOL:JACK_BASE_REELS[i],rng));}
+export function jackSpin(mode='base',rng=Math.random){return Array.from({length:9},(_,i)=>random(mode==='free'?JACK_FREE_POOL:JACK_BASE_REELS[i],rng));}
 export function jackEvaluate(board,bet=1){
  let total=0;const lines=[];
  JACK_LINES.forEach((line,i)=>{

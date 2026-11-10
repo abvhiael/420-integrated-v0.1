@@ -57,7 +57,7 @@ type state struct {
  Schema int `json:"schema"`
  Items map[string]Subscription `json:"items"`
  Revocations []Revocation `json:"revocations,omitempty"`
- EnrollmentNonces map[string]bool `json:"enrollmentNonces,omitempty"`
+ EnrollmentNonces map[string]int64 `json:"enrollmentNonces,omitempty"`
 }
 type Store struct { mu sync.Mutex; path string; lock string; closed bool; data state }
 func key(tenant,user,sub string) string { return tenant+"|"+user+"|"+sub }
@@ -86,7 +86,7 @@ func Open(path string)(*Store,error){
   if e=json.Unmarshal(b,&s.data);e!=nil{return nil,e}
   if s.data.Schema!=1||s.data.Items==nil{return nil,errors.New("invalid subscription schema")}
   for k,v:=range s.data.Items {if !valid(v)||k!=key(v.Tenant,v.UserID,v.SubscriptionID)||v.Revision==0{return nil,errors.New("invalid stored subscription")}}
-  for nonce,used:=range s.data.EnrollmentNonces {if !used||!nonceDigest.MatchString(nonce){return nil,errors.New("invalid enrollment nonce state")}}
+  for nonce,expiry:=range s.data.EnrollmentNonces {if expiry<=0||!nonceDigest.MatchString(nonce){return nil,errors.New("invalid enrollment nonce state")}}
   for i,e:=range s.data.Revocations {
    if e.Sequence!=uint64(i+1)||e.Tenant!="420bet"||!id.MatchString(e.UserID)||!id.MatchString(e.SubscriptionID)||e.Revision==0||e.Reason=="" {return nil,errors.New("invalid revocation log")}
   }

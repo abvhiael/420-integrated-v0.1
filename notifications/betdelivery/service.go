@@ -41,6 +41,7 @@ type receipt struct {
  DeliveryID string `json:"deliveryId"`
  IdempotencyKey string `json:"idempotencyKey"`
  Status string `json:"status"`
+ ProviderReceiptID string `json:"providerReceiptId,omitempty"`
 }
 type entry struct {
  Request Delivery `json:"request"`
@@ -71,7 +72,8 @@ func Open(path string)(*Store,error){
   if s.state.Schema!=1||s.state.Items==nil{return nil,errors.New("invalid delivery schema")}
   for id,x:=range s.state.Items{
    if id!=x.Receipt.DeliveryID||!valid(x.Request)||x.Receipt.IdempotencyKey!=x.Request.IdempotencyKey||
-    (x.Receipt.Status!="pending"&&x.Receipt.Status!="cancelled"){return nil,errors.New("invalid stored delivery")}
+    (x.Receipt.Status!="pending"&&x.Receipt.Status!="cancelled"&&
+     x.Receipt.Status!="delivered"&&x.Receipt.Status!="failed"){return nil,errors.New("invalid stored delivery")}
   }
  }else if !os.IsNotExist(e){return nil,e
  }else if e=s.persist(s.state);e!=nil{return nil,e}

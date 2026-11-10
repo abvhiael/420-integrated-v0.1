@@ -102,3 +102,30 @@ func TestPrivateProviderClaimLeaseConsentAndRestart(t *testing.T){
  withheld,e:=ledger.ClaimPending(subs,10,now.Add(62*time.Second))
  if e!=nil||len(withheld)!=0{t.Fatal("muted audience leaked to provider")}
 }
+
+func TestProviderClaimHTTPNeverExposesWorkToDeliveryWorkerToken(t *testing.T){
+ dir:=t.TempDir()
+ subs,e:=betconsent.Open(filepath.Join(dir,"sub.json"));if e!=nil{t.Fatal(e)};defer subs.Close()
+ if _,e=subs.Apply(betconsent.Subscription{Tenant:"420bet",UserID:"subject-1",
+  SubscriptionID:"sub-1",Recipient:"route-1",Channel:"notifications",PolicyVersion:"p1",
+  Active:true,Consent:true},0);e!=nil{t.Fatal(e)}
+ ledger,e:=Open(filepath.Join(dir,"delivery.json"));if e!=nil{t.Fatal(e)};defer ledger.Close()
+ if _,e=ledger.Send(sample(),subs);e!=nil{t.Fatal(e)}
+ token:="provider-claim-token-xxxxxxxxxxxxxxxxxxxxxxxx"
+ h,e:=ProviderReceiptHandler(ledger,subs,token,"provider-key-xxxxxxxxxxxxxxxxxxxxxxxx")
+ if e!=nil{t.Fatal(e)}
+ request:=func(auth string)*httptest.ResponseRecorder{
+  req:=httptest.NewRequest(http.MethodPost,"/v1/420bet/provider-receipts/claim",
+   bytes.NewBufferString(`{"limit":10}`))
+  req.Header.Set("Authorization","Bearer "+auth)
+  response:=httptest.NewRecorder();h.ServeHTTP(response,req);return response
+ }
+ if r:=request("delivery-app-token-xxxxxxxxxxxxxxxxxx");r.Code!=403{
+  t.Fatal("420Bet worker enumerated private pending delivery")}
+ if r:=request(token);r.Code!=200||
+  !bytes.Contains(r.Body.Bytes(),[]byte(`"deliveryId":"delivery-`)){
+  t.Fatalf("qualified provider claim rejected: %d %s",r.Code,r.Body.String())}
+ if r:=request(token);r.Code!=200||
+  !bytes.Contains(r.Body.Bytes(),[]byte(`"deliveries":[]`)){
+  t.Fatal("provider lease not honored")}
+}

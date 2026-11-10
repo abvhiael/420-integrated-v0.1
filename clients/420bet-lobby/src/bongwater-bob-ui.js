@@ -63,6 +63,22 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  paylineSvg.setAttribute('aria-hidden','true');
  board.append(paylineSvg);
  const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,paytable,status);scene.append(machine);
+ // Comic-rule guide and reactive mascot, independent of the wallpaper art.
+ const reactions=el(doc,'aside','bob-reaction-zone');
+ const guide=el(doc,'section','bob-trigger-comic');guide.setAttribute('aria-label','Bonus trigger rules');
+ const caption=el(doc,'h2','bob-trigger-title',"BOB'S BONUS CHAOS!");
+ guide.append(caption);
+ const addTrigger=(symbol,heading,description)=>{
+  const row=el(doc,'div','bob-trigger-row');
+  const picture=el(doc,'img','bob-trigger-icon');picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];
+  const copy=el(doc,'div','bob-trigger-copy');
+  copy.append(el(doc,'strong','',heading),el(doc,'span','',description));
+  row.append(picture,copy);guide.append(row);
+ };
+ addTrigger('pick','3 BAD DECISIONS','Anywhere → pick 1 of 3 random objects!');
+ addTrigger('free','3 ONE MORE HITS','Anywhere → 8 free spins · 2× wins!');
+ const mascot=el(doc,'img','bob-reaction-character');mascot.alt='Bongwater Bob reacting to gameplay';
+ reactions.append(guide,mascot);scene.append(reactions);
  const bonus=el(doc,'div','bob-bonus');bonus.hidden=true;scene.append(bonus);
  // Full-art splash layer takes clicks itself, preventing accidental SPIN or prop selection.
  const splash=el(doc,'div','bob-splash');splash.hidden=true;
@@ -97,7 +113,10 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  const details=el(doc,'div','bob-rules');details.hidden=true;details.textContent='Practice credits only. 3×3 reels, five fixed paylines. Three matching symbols on a line pay; Bob WILD substitutes for ordinary symbols. Three BAD DECISIONS symbols anywhere trigger a pick bonus: three different objects are sampled from nine, and the prize is chosen independently of the object artwork. Three ONE MORE HIT symbols anywhere award 8 free spins with 2× line wins. Retriggers award 8 more, with a maximum of 24 awarded spins. Reel strips and RTP are provisional and not certified.';
  root.append(header,scene,panel,details);
  const money=n=>n.toFixed(2);
- function face(key){root.dataset.bobReaction=key;}
+ function face(key){
+  root.dataset.bobReaction=key;
+  mascot.src=img('characters',faces[key]??faces.idle);
+}
  function wallpaper(kind){scene.dataset.bobMode=kind;scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
  function paintColumn(col,values){for(let row=0;row<3;row++){const symbol=values[row],picture=tiles[row*3+col];picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];}}
  function paint(grid){for(let c=0;c<3;c++)paintColumn(c,grid[c]);}

@@ -336,10 +336,11 @@ export function createLocalSportsbookEngine({
  async function expireNoAction(marketId){
   return change('timeout-no-action',async s=>{
    const m=s.markets[valueId(marketId,'market ID')];
-   requireTrue(m?.state==='CLOSED'&&clock()>=m.finalDeadlineAt,
+   requireTrue(['OPEN','SUSPENDED','CLOSED'].includes(m?.state)&&clock()>=m.finalDeadlineAt,
     'no-action refund deadline has not elapsed');
    requireTrue(m.result?.state!=='FINAL',
     'final sportsbook result cannot be overridden by timeout');
+   m.state='CLOSED';m.quoteEpoch++;
    const digestValue=digest({domain:'420bet-timeout-void-v1',
     marketId:m.id,termsHash:m.termsHash,deadline:m.finalDeadlineAt});
    const sequence=(m.result?.sequence??0)+1;

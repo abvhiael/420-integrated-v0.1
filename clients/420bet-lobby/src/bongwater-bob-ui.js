@@ -98,7 +98,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  root.append(header,scene,panel,details);
  const money=n=>n.toFixed(2);
  function face(key){root.dataset.bobReaction=key;}
- function wallpaper(kind){scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
+ function wallpaper(kind){scene.dataset.bobMode=kind;scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
  function paintColumn(col,values){for(let row=0;row<3;row++){const symbol=values[row],picture=tiles[row*3+col];picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];}}
  function paint(grid){for(let c=0;c<3;c++)paintColumn(c,grid[c]);}
  function clearPaylines(){paylineSvg.replaceChildren();}

@@ -1,0 +1,41 @@
+# BET-AUDIT-7 — Delivery recovery, large-history reorganization and incident operations
+
+**Local implementation, 2026-11-10. Not permission to activate live betting or outbound messaging.**
+
+## Scope and safety invariants
+
+- Delivery transports are halted as soon as a source reorganization or proof failure is detected. Resume is never authorized by a boolean or an operator's manually edited checkpoint.
+- Full-history reconstruction starts at the **original approved Indexer contract start block**, not the potentially orphaned persisted checkpoint. The verified reader scans 64-block windows with no accumulation of entire historical event arrays. Every window is bound into a deterministic SHA-256 digest of its cursor, final block hash and complete verified event records.
+- The first pass computes only the canonical IDs relevant to the at-most-10,000 existing outbox items and atomically marks orphans, cancellations, and compensating notifications. While `replayPending`, a second independently verified scan reprojects each canonical event in bounded windows. Dispatch remains held until both passes agree on complete history digests, event count, canonical head and the signed Registry manifest. A changed block with **zero qualifying events** still changes the digest and cannot be ignored.
+- The configured maximum of 250,000 windows (16 million blocks at 64 blocks/window) is a **safety budget**, not a claim of unlimited history or guaranteed recovery within one worker cycle. If it is exceeded, or the RPC/Indexer/Registry fails, the replay marker stays active and requires escalation. Normal scanning still retains a bounded recent event window in the durable checkpoint.
+- A crash between Indexer checkpoint persistence, outbox orphan reconciliation and replay re-projection leaves either `halted` or `replayPending` durable. Restart always performs a full independent replay before transport. Repeated notifications use deterministic idempotency keys; cancellation and correction records survive.
+- Previously delivered Mail/push cannot be unsent. Existing compensations apply only to independently verified chain reorg orphans, not mere user consent withdrawal; a late provider receipt triggers durable reconciliation.
+
+## Single-writer and multi-process controls
+
+- Worker checkpoint, Indexer checkpoint, outbox and alert journal all use exclusive `.lock` ownership. Worker/outbox/alerts store a 0600 `owner.json` with a random 256-bit lease token, PID, host and timestamp. Every mutation checks current lock-directory inode and owner token before writing. A replaced lock **fences the original process**. A second OS process cannot take over a live or orphaned lock.
+- These are **single-host filesystem safeguards**. They do not provide safe multi-host fencing over NFS/SMB or split-brain Kubernetes volumes. Multiple replicas need a reviewed transactional lease/monotonic fencing token or one active writer with an independently enforced orchestration election. Do not deploy multiple writers against the same JSON files.
+- Never remove a `.lock` automatically. For a suspected orphan: disable all worker/service restarts, verify the service PID and executable, confirm all writers have stopped, take immutable read-only backups of outbox, worker state, Indexer cursor and revocation cursor, verify file ownership/permissions and chain head; only then remove the specific stale lock *under independent change approval*, restart exactly one writer, and validate restored replay before enabling dispatch. If you cannot prove the writer is dead, **do not take over**.
+
+## Health, monitoring and operational alerting
+
+- The delivery monitor remains loopback only, exposing `/healthz`, `/readyz` and `/metrics`. Metrics include sanitized worker cycle/failure status, reorg/replay flags, per-status queue counts, oldest pending age, and oldest unconfirmed cancellation age. No user identifiers, addresses, email contents, game amounts, receipts, secret tokens or message text are emitted.
+- Optional **durable alert journal** is enabled only when all of `BET_DELIVERY_ALERT_URL` (approved HTTPS), `BET_DELIVERY_ALERT_SECRET` (32+ byte private signing key), and `BET_DELIVERY_ALERT_STATE_PATH` (absolute private path) are configured. Optional `BET_DELIVERY_ALERT_POLL_MS` (default 15000), `BET_DELIVERY_ALERT_CANCELLATION_AGE_MS` (default 60000) and `BET_DELIVERY_ALERT_PENDING_AGE_MS` (default 180000) specify service thresholds. Check that the monitoring backend verifies `X-420Bet-Alert-Signature` HMAC-SHA256 on the raw request body and uses `X-420Bet-Alert-Id` for deduplication.
+- Supported incidents are `REORG_HALT`, `REPLAY_PENDING`, `WORKER_STALE`, `WORKER_FAILURES` (3 consecutive), `REVOCATION_UNAVAILABLE`, `REMOTE_CANCELLATION_BACKLOG`, `DEAD_LETTERS`, `PENDING_TOO_OLD`. Firing and resolved edges have independent durable entries. The webhook is retried after outages and restarts with a stable incident ID; a lost acknowledgement may lead to **duplicate alert delivery**, and must not be interpreted as two separate incidents.
+- Alert system failures do not silently mark outbox work successful. Operators must independently monitor the alert sender and missing heartbeat; successful local tests do not prove an external paging integration or on-call coverage.
+
+## Failure response and controlled recovery
+
+1. **Triage**: Confirm alert code and `/readyz` locally. For a canonical halt or reorg replay, stop external dispatch; never toggle the halt bit or edit JSON to bypass it. Preserve error codes and event/checkpoint digests, not sensitive user content.
+2. **Contain**: Check approved Registry/Indexer chain ID and finality, Mail sender authority, Notifications consent and revocation feed, private provider connectivity and service credentials. If consent or revocation verification fails, fail closed on delivery; check for queued remote cancellations and late receipts.
+3. **Collect evidence**: Record exact Git SHA, deploy manifest digest, service PID/host, unmodified checkpoint file hashes, affected reorg height, Indexer logs and receipt provenance. Restrict access to encrypted backups.
+4. **Recover**: Re-establish a single writer and independently qualified Indexer + Registry, then allow the worker's full two-pass canonical replay to run. It may require substantial network reads for long histories. Only release the transport after both passes match and `replayPending=false`. Recheck live revocation before any outbound send.
+5. **Reconcile**: Inspect pending provider cancellations, late-delivered receipts and compensation IDs. Externally delivered messages must receive the appropriate privacy-redacted correction only when independently justified by a chain reorg and still authorized by current user consent.
+6. **Verify**: Confirm exact current chain/finality and provider receipt; run negative, duplicate, cross-owner, reorg mid-replay, crash-after-checkpoint and webhook outage tests. Validate alert firing and resolution, service readiness and single-writer locks.
+7. **Release**: Require an independently approved incident report, privacy/security review and documented testnet/production change control before restoring any outbound notification traffic.
+
+## Qualification and unfinished deployment gates
+
+Scoped unit/CI tests exercise 530 windows (33,920 blocks, beyond the previous 32,768-block limit), injection of Indexer failure beyond window 512, reorganization of a block with no events during the second pass, cross-process lease denial and stolen-lock fencing, durable alert retries and resolution, existing Go/Node sender/consent/notification integration, and production Vite build. Those tests use controlled fixtures, not actual testnet finality or real downstream provider delivery.
+
+**Still open:** actual long-history service performance benchmarking; archival Indexer scaling and checkpoint storage under unbounded event histories; multi-host transactional fencing; independent deployed alert webhook and on-call escalation; durable backups/restore validation; provider-side cancellation vs send race acceptance; provider transport receipts; genuine official-testnet reorg/orphan/late-delivery proof and security/privacy sign-off. No operational approval is inferred from a green local CI.

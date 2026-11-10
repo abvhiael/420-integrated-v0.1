@@ -30,7 +30,7 @@ test('Racket uses presentation-only reactions and accessible practice UI',()=>{
  for(let i=0;i<5;i++)root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.nd-big-number').textContent,/^\d{4}$/);
  assert.equal(root.querySelectorAll('.nd-pill').length,5);
- assert.match(root.textContent,/No wallet connection/);
+ assert.match(root.textContent,/No funds, real wagering/);
 });
 test('Racket meter and dialogue are deterministic derived decorations',()=>{
  assert.equal(racketTemper([]),35);
@@ -48,7 +48,7 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  assert(images.some(img=>img.getAttribute('src')===base+'logos/logo_rackets_loaded_dice.png'));
  assert(images.some(img=>img.getAttribute('src')===base+'characters/character_racket_idle_smug.png'));
  assert(images.some(img=>img.getAttribute('src')===base+'machine/machine_full_dice_rig.png'));
- assert(images.some(img=>img.getAttribute('src')===base+'ui/ui_racketometer_stage_1_low.png'));
+ assert(images.some(img=>img.getAttribute('src')===base+'ui/ui_racketometer_stage_0_empty.png'));
  assert(root.querySelector('.racket-scene .racket-character-png'));
  assert(root.querySelector('.racket-scene .racket-machine-png'));
  assert(root.querySelector('.racket-scene .racket-temper .racket-meter-png'));
@@ -68,12 +68,32 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  assert.equal(root.querySelector('.nd-threshold-number').textContent,'4,200');
  assert.equal(root.querySelector('.nd-chance-number').textContent,'42.00%');
  assert.equal(root.querySelector('.nd-slider').getAttribute('aria-valuetext'),'4,200');
- assert.match(root.querySelector('.nd-slider').style.getPropertyValue('--racket-range-progress'),/41\\.99|42\\.00/);
+ assert.match(root.querySelector('.nd-slider').style.getPropertyValue('--racket-range-progress'),/41\.99|42\.00/);
  root.querySelectorAll('.nd-choice')[1].dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.nd-choice')[1].getAttribute('aria-pressed'),'true');
  assert.equal(root.querySelector('.nd-chance-number').textContent,'58.00%');
  root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.nd-big-number').textContent,/^\d{4}$/);
  assert.equal(root.querySelectorAll('.racket-history .nd-pill').length,1);
- assert.match(root.textContent,/Practice only/);
+ assert.match(root.textContent,/VIRTUAL CREDITS/);
+});
+
+test('Double Trouble UI shows virtual credits, ready animation and one doubled winning roll',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createNeonDice(document,()=>0); // Always roll 0000 in test. Production randomness is unchanged.
+ assert(root.querySelector('.racket-credit-balance').textContent.includes('1,000.00'));
+ assert(root.querySelector('.racket-credit-stake').textContent.includes('10.00'));
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('19.20 credits'));
+ assert.equal(root.querySelector('.racket-double-trouble-banner'),null);
+ const roll=()=>root.querySelector('.nd-roll').dispatchEvent(new window.Event('click'));
+ for(let i=0;i<7;i++)roll(); // Seven wins at 15% each fill the meter.
+ assert(root.querySelector('.double-trouble-ready'));
+ assert(root.querySelector('.racket-double-trouble-banner'));
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('38.40 credits'));
+ roll();
+ assert.equal(root.querySelector('.double-trouble-ready'),null);
+ assert(root.querySelector('.racket-double-trouble-hit'));
+ assert(root.querySelector('.racket-virtual-payout').textContent.includes('DOUBLE TROUBLE'));
+ assert(root.querySelector('.racket-virtual-payout').textContent.includes('38.40'));
+ assert(root.querySelector('.nd-potential-credits').textContent.includes('19.20 credits'));
 });

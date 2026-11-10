@@ -65,6 +65,28 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   const picture=img(doc,JACK_SYMBOLS[board[n]],board[n],'cj-symbol');
   cell.append(picture);reels.append(cell);frameNodes.push(cell);frameImages.push(picture);
  }
+ const playfield=el(doc,'div','cj-playfield');
+ playfield.append(reels);
+ const insurancePlay=el(doc,'div','cj-insurance-play');
+ insurancePlay.hidden=true;
+ insurancePlay.setAttribute('aria-label','Insurance Claim pick three folders');
+ const insuranceHeader=el(doc,'div','cj-insurance-head','PICK 3 CLAIM FILES!');
+ const insuranceCount=el(doc,'div','cj-insurance-count','0 / 3 PICKED');
+ const insuranceGrid=el(doc,'div','cj-insurance-grid');
+ insurancePlay.append(insuranceHeader,insuranceGrid,insuranceCount);
+ playfield.append(insurancePlay);
+ const splash=el(doc,'div','cj-splash');
+ splash.hidden=true;
+ splash.setAttribute('role','dialog');
+ splash.setAttribute('aria-modal','true');
+ splash.setAttribute('aria-label','Bonus splash screen');
+ const splashButton=button(doc,'',()=>{},'cj-splash-button');
+ const splashArt=el(doc,'img','cj-splash-art');
+ splashArt.alt='';
+ const splashTotal=el(doc,'strong','cj-splash-total');
+ const splashHint=el(doc,'span','cj-splash-hint','CLICK TO CONTINUE');
+ splashButton.append(splashArt,splashTotal,splashHint);
+ splash.append(splashButton);
  const side=el(doc,'aside','cj-side');
  const heading=el(doc,'h2','', "CAT\'S GOT NINE LIVES");
  const info=el(doc,'p','cj-rules','8 paylines · Nine independent reels. Five bells in positions 2, 4, 5, 6, 8 start Nine Lives.');
@@ -177,9 +199,23 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
    [4],'ANVIL','Falling anvil in centre position 5')
  );
  bonusGuide.append(bonusList,el(doc,'p','cj-poster-footnote','PRACTICE ONLY! FEATURE CHANCES NOT YET RTP-QUALIFIED.'));
- center.append(reels,side,reference,bonusGuide);
+ center.append(playfield,side,reference,bonusGuide);
  const footer=el(doc,'p','cj-disclaimer','Practice simulation only. Bonus odds and RTP have not been certified.');
- surface.append(top,notice,center,footer);stage.append(surface);
+ surface.append(top,notice,center,footer);stage.append(surface,splash);
+ let splashAction=null;
+ splashButton.addEventListener('click',()=>{if(splash.hidden)return;const next=splashAction;splashAction=null;splash.hidden=true;splashTotal.textContent='';if(next)next();});
+ function showSplash(name,amount,onContinue){
+  splashAction=onContinue;splash.dataset.splash=name;
+  splashArt.src=JACK_ROOT+'splashes/catastrophe-jack-'+name+'.png';
+  splashTotal.textContent=amount===null?'':money(amount)+' CREDITS';
+  splashTotal.hidden=amount===null;
+  splash.setAttribute('aria-label',name.includes('complete')?'Bonus complete':'Bonus starting');
+  splash.hidden=false;
+  splashButton.focus();
+ }
+ function hideInsuranceBoard(){insurancePlay.hidden=true;insuranceGrid.replaceChildren();}
+ function showInsuranceBoard(){insurancePlay.hidden=false;}
+
  function schedule(fn,ms){const id=setTimeout(()=>{pending=pending.filter(x=>x!==id);if(!ended)fn();},ms);pending.push(id);}
  function setMode(next){mode=next;stage.dataset.mode=next;stage.style.setProperty('--cj-wallpaper','url("'+JACK_ROOT+'backgrounds/'+backgrounds[next]+'")');stage.closest('.immersive')?.style.setProperty('--cj-wallpaper','url("'+JACK_ROOT+'backgrounds/'+backgrounds[next]+'")');heading.textContent=next==='base'?"CAT'S GOT NINE LIVES":next==='free'?'NINE LIVES FREE SPINS':next==='insurance'?'INSURANCE CLAIM BONUS':'CATASTROPHIC REVERSAL';spin.textContent=next==='free'?'NEXT FREE SPIN':'SPIN';spin.disabled=next==='insurance'||next==='reversal';}
  function showBoard(next){
@@ -220,10 +256,13 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   });
  }
  function startFree(test){
-  if(busy||ended)return;setMode('free');freeRemaining=9;freeNumber=0;freeBet=bet;freeTotal=0;totalWin=0;redraw();
+  if(busy||ended)return;
+  hideInsuranceBoard();
+  setMode('free');freeRemaining=9;freeNumber=0;freeBet=bet;freeTotal=0;totalWin=0;redraw();
   showBoard(['FISH','BELL','CASH','BELL','BELL','BELL','PIZZA','BELL','BUD']);
   help.replaceChildren();message.textContent=(test?'TEST MODE · ':'')+'Nine Lives activated: nine free spins. Every third spin has an escalating catastrophe multiplier.';
-  spin.disabled=false;
+  spin.disabled=true;
+  showSplash('nine-lives-start',null,()=>{spin.disabled=false;});
  }
  function runFree(){
   if(busy||mode!=='free'||freeRemaining<=0)return;
@@ -234,34 +273,48 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
    pay(award.amount);message.textContent='Free spin '+n+'/9 · '+award.count+' bells · ×'+award.multiplier+' · +'+money(award.amount)+' credits · bonus total '+money(freeTotal);
    if(!freeRemaining){
     spin.disabled=true;message.textContent+=' · NINE LIVES COMPLETE!';
-    schedule(()=>resetBase(),2600);
+    showSplash('nine-lives-complete',freeTotal,()=>resetBase());
    }
   });
  }
  function startInsurance(test){
-  if(busy||ended)return;setMode('insurance');
+  if(busy||ended)return;
+  setMode('insurance');spin.disabled=true;
   showBoard(['CLAIM','BUD','FISH','PIZZA','CLAIM','CASH','TICKET','BUD','CLAIM']);
-  claimsPicked=[];claimValues=Array.from({length:9},()=>[.5,1,1.5,2,3,4,5,6,8][Math.floor(rng()*9)]);
-  claimFactor=2;help.replaceChildren();
-  const folders=el(doc,'div','cj-claims');
+  claimsPicked=[];
+  claimValues=Array.from({length:9},()=>[.5,1,1.5,2,3,4,5,6,8][Math.floor(rng()*9)]);
+  claimFactor=2;
+  help.replaceChildren();insuranceGrid.replaceChildren();insuranceCount.textContent='0 / 3 PICKED';
+  const assets=[
+   'claim-a-7713-jack.png','claim-b-4049-property-damage.png','claim-c-9907-wrecked-car.png',
+   'claim-d-1186-dumpster-disaster.png','claim-e-6093-falling-anvil.png','claim-f-7730-dynamite.png',
+   'claim-g-2218-almost-cash.png','claim-h-5584-safe.png','claim-i-8842-money-bag.png'
+  ];
+  insuranceGrid.replaceChildren();
   for(let i=0;i<9;i++){
-   const b=button(doc,'CLAIM '+(i+1),()=>{
-    if(ended||claimsPicked.includes(i)||claimsPicked.length>=3)return;
-    claimsPicked.push(i);b.textContent=claimValues[i]+'×';b.disabled=true;
+   const b=button(doc,'',()=>{
+    if(ended||mode!=='insurance'||!splash.hidden||claimsPicked.includes(i)||claimsPicked.length>=3)return;
+    claimsPicked.push(i);b.disabled=true;b.classList.add('cj-folder-picked');
+    b.append(el(doc,'strong','cj-folder-reveal',claimValues[i]+'×'));
     const sum=claimsPicked.reduce((v,k)=>v+claimValues[k],0);
+    insuranceCount.textContent=claimsPicked.length+' / 3 PICKED';
     message.textContent='Claim '+claimsPicked.length+'/3 · '+money(sum*claimFactor*bet)+' practice credits pending';
     if(claimsPicked.length===3){
-     const amount=sum*claimFactor*bet;pay(amount);message.textContent='INSURANCE APPROVED! '+money(amount)+' credits. Returning to regular play.';
-     schedule(()=>resetBase(),3000);
+     const amount=sum*claimFactor*bet;pay(amount);
+     message.textContent='INSURANCE APPROVED! '+money(amount)+' credits.';
+     hideInsuranceBoard();
+     showSplash('insurance-claim-complete',amount,()=>resetBase());
     }
    },'cj-folder');
-   folders.append(b);
+   b.setAttribute('aria-label','Open insurance claim '+(i+1));
+   b.append(img(doc,'features/insurance-claim/folders/'+assets[i],'Insurance claim '+(i+1),'cj-folder-image'));
+   insuranceGrid.append(b);
   }
-  help.append(folders);
-  message.textContent=(test?'TEST MODE · ':'')+'Pick three insurance claims. Their total is doubled.';
+  message.textContent=(test?'TEST MODE · ':'')+'Pick three insurance claims on the gameboard. Their total is doubled.';
+  showSplash('insurance-claim-start',null,()=>showInsuranceBoard());
  }
  function startReversal(test){
-  if(busy||ended)return;setMode('reversal');help.replaceChildren();
+  if(busy||ended)return;hideInsuranceBoard();setMode('reversal');help.replaceChildren();
   const before=['FISH','PIZZA','BUD','CASH','ANVIL','FISH','DYNAMITE','PIZZA','BUD'];
   showBoard(before);message.textContent=(test?'TEST MODE · ':'')+'OF COURSE IT DID! An anvil falls on Jack...';
   schedule(()=>{
@@ -273,8 +326,9 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  }
  function resetBase(){
   if(ended)return;stopRolling();pending.forEach(clearTimeout);pending=[];busy=false;setMode('base');
+  hideInsuranceBoard();splash.hidden=true;splashAction=null;
   help.replaceChildren();spin.disabled=false;message.textContent='Jack survives another round. Ready to spin.';
  }
- stage.stopAnimation=()=>{ended=true;stopRolling();pending.forEach(clearTimeout);pending=[];};
+ stage.stopAnimation=()=>{ended=true;stopRolling();pending.forEach(clearTimeout);pending=[];splash.hidden=true;splashAction=null;};
  setMode('base');redraw();return stage;
 }

@@ -52,7 +52,8 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  const panel=el(doc,'div','bob-panel');const creditLabel=el(doc,'div','bob-meter'),betLabel=el(doc,'div','bob-meter'),winLabel=el(doc,'div','bob-meter');
  const smaller=el(doc,'button','','BET −'),larger=el(doc,'button','','BET +'),spin=el(doc,'button','bob-spin','SPIN'),info=el(doc,'button','','INFO'),testPick=el(doc,'button','bob-test','TEST PICK BONUS'),testFree=el(doc,'button','bob-test','TEST FREE SPINS');
  [smaller,larger,spin,info,testPick,testFree].forEach(b=>b.type='button');
- panel.append(creditLabel,smaller,betLabel,larger,spin,winLabel,info,testPick,testFree);
+ panel.append(creditLabel,smaller,betLabel,larger,winLabel,info,testPick,testFree);
+ const spinDock=el(doc,'div','bob-spin-dock');spinDock.append(spin);machine.append(spinDock);
  const details=el(doc,'div','bob-rules');details.hidden=true;details.textContent='Practice credits only. 3×3 reels, five fixed paylines. Three matching symbols on a line pay; Bob WILD substitutes for ordinary symbols. Three BAD DECISIONS symbols anywhere trigger a pick bonus: three different objects are sampled from nine, and the prize is chosen independently of the object artwork. Three ONE MORE HIT symbols anywhere award 8 free spins with 2× line wins. Retriggers award 8 more, with a maximum of 24 awarded spins. Reel strips and RTP are provisional and not certified.';
  root.append(header,scene,panel,details);
  const money=n=>n.toFixed(2);

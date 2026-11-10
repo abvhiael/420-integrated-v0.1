@@ -24,6 +24,11 @@ on:
       - 'clients/420bet-lobby/tests/delivery-worker.test.mjs'
       - 'clients/420bet-lobby/server/mail-auth-broker.mjs'
       - 'clients/420bet-lobby/tests/mail-auth-broker.test.mjs'
+      - 'clients/420bet-lobby/server/ownership-authority.mjs'
+      - 'clients/420bet-lobby/server/ownership-directories.mjs'
+      - 'clients/420bet-lobby/server/ownership-http.mjs'
+      - 'clients/420bet-lobby/server/serve-ownership.mjs'
+      - 'clients/420bet-lobby/tests/ownership-authority.test.mjs'
       - 'clients/420bet-lobby/server/ownership-resolver.mjs'
       - 'clients/420bet-lobby/tests/ownership-resolver.test.mjs'
       - 'clients/420bet-lobby/server/notifications-revocation-consumer.mjs'
@@ -101,6 +106,7 @@ jobs:
             clients/420bet-lobby/tests/delivery-worker.test.mjs \
             clients/420bet-lobby/tests/mail-auth-broker.test.mjs \
             clients/420bet-lobby/tests/ownership-resolver.test.mjs \
+            clients/420bet-lobby/tests/ownership-authority.test.mjs \
             clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
             clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs \
             clients/420bet-lobby/tests/sportsbook-worker.test.mjs
@@ -129,6 +135,11 @@ jobs:
           node --check clients/420bet-lobby/tests/delivery-worker.test.mjs
           node --check clients/420bet-lobby/server/mail-auth-broker.mjs
           node --check clients/420bet-lobby/tests/mail-auth-broker.test.mjs
+          node --check clients/420bet-lobby/server/ownership-authority.mjs
+          node --check clients/420bet-lobby/server/ownership-directories.mjs
+          node --check clients/420bet-lobby/server/ownership-http.mjs
+          node --check clients/420bet-lobby/server/serve-ownership.mjs
+          node --check clients/420bet-lobby/tests/ownership-authority.test.mjs
           node --check clients/420bet-lobby/server/ownership-resolver.mjs
           node --check clients/420bet-lobby/tests/ownership-resolver.test.mjs
           node --check clients/420bet-lobby/server/notifications-revocation-consumer.mjs

@@ -86,15 +86,16 @@ export function createRpcCanonicalOwnershipSource({
  fail(ticketAuthority===null||typeof ticketAuthority==='function','invalid approved ticket reader');
  let number=0;
  async function rpc(method,params){
+  const callId=++number;
   const response=await fetcher(url.origin,{method:'POST',cache:'no-store',
    redirect:'error',credentials:'omit',
    headers:{Accept:'application/json','Content-Type':'application/json'},
-   body:JSON.stringify({jsonrpc:'2.0',id:++number,method,params}),
+   body:JSON.stringify({jsonrpc:'2.0',id:callId,method,params}),
    signal:AbortSignal.timeout(timeoutMs)});
   fail(response?.ok,'approved RPC unavailable');
   const raw=await response.text();fail(raw.length>0&&raw.length<=1500000,'RPC response oversized');
   const payload=JSON.parse(raw);
-  fail(payload&&payload.jsonrpc==='2.0'&&payload.id===number&&
+  fail(payload&&payload.jsonrpc==='2.0'&&payload.id===callId&&
    !payload.error&&payload.result!=null,'unqualified canonical RPC result');
   return payload.result;
  }
@@ -200,7 +201,8 @@ export function createRpcCanonicalOwnershipSource({
  return Object.freeze({canonicalOwners,verifiedEvent});
 }
 export function createBetOwnershipAuthority({
- chainId,sources,canonicalSource,verifyRegistry,resolveIdentity,subscriptions,now=Date.now
+ chainId,sources,canonicalSource,verifyRegistry,resolveIdentity,subscriptions,
+ betRegistryAddress=null,now=Date.now
 }={}){
  fail(typeof canonicalSource?.canonicalOwners==='function'&&
   typeof verifyRegistry==='function'&&typeof resolveIdentity==='function'&&
@@ -213,6 +215,9 @@ export function createBetOwnershipAuthority({
    'Registry not qualified');
   for(const x of sources)fail(approved.config.sources?.some(s=>s.id===x.id&&
    s.address===x.address&&s.role===x.role),'source no longer approved by Registry');
+  if(e.vertical==='casino')fail(betRegistryAddress!==null&&
+   approved.config.contracts?.wagerRegistry?.address===betRegistryAddress,
+   'WagerRegistry address not signed in approved Registry');
   const canonical=await canonicalSource.canonicalOwners(e);
   fail(canonical?.event?.transactionHash===e.transactionHash&&
    canonical.event.blockHash===e.blockHash&&Array.isArray(canonical.members),

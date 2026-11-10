@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {
  createCatastropheJack,JACK_STOP_ORDER,JACK_STOP_DELAY_MS,JACK_LINES,JACK_CROSS,
- jackSpin,jackFeature,jackEvaluate,jackBellAward,JACK_PAY
+ jackSpin,jackFeature,jackEvaluate,jackBellAward,JACK_PAY,JACK_BASE_REELS
 } from '../src/catastrophe-jack.js';
 import {SLOT_MACHINES,slotMachinePath,slotMachineFromHash,createSlotsLobby} from '../src/slots-lobby.js';
 import {readFileSync} from 'node:fs';
@@ -22,10 +22,10 @@ test('nine individually animated positions follow 4, 5, 6, 1, 2, 3, 7, 8, 9 with
  assert.deepEqual(JACK_STOP_ORDER,[4,5,6,1,2,3,7,8,9]);
  assert.equal(JACK_STOP_DELAY_MS,500);
  assert.equal(JACK_LINES.length,8);
- assert.deepEqual(JACK_CROSS,[1,3,4,5,7]);
+ assert.deepEqual(JACK_CROSS,[1,3,5,7]);
 });
-test('five-bell cross and either insurance diagonal are mutually prioritized',()=>{
- const bells=['FISH','BELL','FISH','BELL','BELL','BELL','FISH','BELL','FISH'];
+test('four-bell diamond and either insurance diagonal are mutually prioritized',()=>{
+ const bells=['FISH','BELL','FISH','BELL','FISH','BELL','FISH','BELL','FISH'];
  assert.equal(jackFeature(bells),'free');
  const insurance=['CLAIM','BUD','FISH','PIZZA','CLAIM','CASH','TICKET','BUD','CLAIM'];
  assert.equal(jackFeature(insurance),'insurance');
@@ -39,7 +39,7 @@ test('line wins, bonus bell counts and feature modifiers have finite credit awar
  assert.equal(jackBellAward(Array(9).fill('BELL'),1,6).amount,750);
  assert.equal(jackBellAward(Array(9).fill('BELL'),1,3).amount,500);
  const sample=jackSpin('base',()=>0);
- assert.deepEqual(sample,Array(9).fill('TICKET'));
+ assert.deepEqual(sample,['TICKET','BELL','TICKET','BELL','TICKET','BELL','TICKET','BELL','TICKET']);
 });
 test('game screen shows nine reel images, all three bonus test buttons and full bleed stage',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -102,11 +102,11 @@ test('comic bonus poster illustrates the exact three game triggers',()=>{
  assert.ok(poster);
  assert.equal(poster.querySelectorAll('.cj-bonus-card').length,3);
  const cards=[...poster.querySelectorAll('.cj-bonus-card')];
- assert.match(cards[0].textContent,/2 · 4 · 5 · 6 · 8/);
+ assert.match(cards[0].textContent,/2 · 4 · 6 · 8/);
  assert.match(cards[1].textContent,/1-5-9 or 3-5-7/);
  assert.match(cards[2].textContent,/position 5/);
  const grids=cards.map(card=>card.querySelector('.cj-trigger-grid'));
- assert.deepEqual(grids.map(grid=>grid.querySelectorAll('.cj-trigger-active').length),[5,3,1]);
+ assert.deepEqual(grids.map(grid=>grid.querySelectorAll('.cj-trigger-active').length),[4,3,1]);
  assert.deepEqual([...grids[0].children].flatMap((cell,i)=>cell.className.includes('cj-trigger-active')?[i]:[]),JACK_CROSS);
  assert.match(poster.textContent,/9 FREE SPINS/);
  assert.match(poster.textContent,/PICK 3 FOLDERS/);
@@ -165,7 +165,7 @@ test('two of any symbol including Bells and WILD pay nothing',()=>{
  assert.equal(jackEvaluate(['TICKET','WILD','FISH','CLAIM','ANVIL','CLAIM','CLAIM','ANVIL','CLAIM'],1).total,0);
  assert.equal(JACK_PAY.BELL,3);
 });
-test('three bells pay while the five-bell cross still triggers Nine Lives',()=>{
+test('three bells pay while the four-bell diamond still triggers Nine Lives',()=>{
  const board=['BELL','BELL','BELL','BELL','BELL','BELL','FISH','BELL','FISH'];
  const result=jackEvaluate(board,1);
  assert.ok(result.lines.some(x=>x.line===1&&x.symbol==='BELL'&&x.count===3&&x.amount===3));
@@ -177,4 +177,21 @@ test('wilds substitute for triple regular symbols but never Golden Bells',()=>{
  const triple=['TICKET','WILD','TICKET','CLAIM','ANVIL','CLAIM','CLAIM','ANVIL','CLAIM'];
  const result=jackEvaluate(triple,1);
  assert.ok(result.lines.some(x=>x.line===1&&x.symbol==='TICKET'&&x.count===3&&x.amount===8));
+});
+
+test('four dedicated positions land bells with exactly 26 of 100 stops',()=>{
+ assert.equal(JACK_BASE_REELS.length,9);
+ for(const i of JACK_CROSS){
+  assert.equal(JACK_BASE_REELS[i].length,100);
+  assert.equal(JACK_BASE_REELS[i].filter(s=>s==='BELL').length,26);
+ }
+ assert.equal(JACK_BASE_REELS[4].length,160);
+ assert.equal(JACK_BASE_REELS[4].filter(s=>s==='ANVIL').length,1);
+ assert.equal(JACK_BASE_REELS[4].filter(s=>s==='BELL').length,10);
+});
+test('bell diamond does not require centre position 5 to match',()=>{
+ const diamond=['FISH','BELL','FISH','BELL','ANVIL','BELL','FISH','BELL','FISH'];
+ assert.equal(jackFeature(diamond),'free','bonus takes priority over central ANVIL');
+ const missing=diamond.slice();missing[7]='FISH';
+ assert.equal(jackFeature(missing),'reversal');
 });

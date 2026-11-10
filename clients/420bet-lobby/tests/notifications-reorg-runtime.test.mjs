@@ -15,13 +15,16 @@ test('runtime detects reorg, rebuilds signed canonical set and sends correction 
  const dir=await mkdtemp(join(tmpdir(),'bet-reorg-runtime-')),sent=[];
  let cursor={events:[]},reorg=false,announced=false,runtime=null;
  const reader={config:{chainId:'420',contracts:sources},
+  initialState:()=>({firstBlock:'1',nextBlock:'1',tipHash:null,events:[]}),
   readCheckpoint:async()=>structuredClone(cursor),
   persistCheckpoint:async(_file,state)=>{cursor=structuredClone(state);},
-  poll:async()=>{
-   if(reorg&&!announced){announced=true;return {reorganized:true,scanned:1,complete:true,
-    state:{events:[replacement],nextBlock:'21'}};}
-   return {reorganized:false,scanned:1,complete:true,
-    state:{events:[reorg?replacement:old],nextBlock:reorg?'21':'11'}};
+  poll:async(state)=>{
+   const event=reorg?replacement:old;
+   const snapshot={...state,events:[event],
+    nextBlock:reorg?'21':'11',tipHash:event.blockHash};
+   if(reorg&&!announced){announced=true;
+    return {reorganized:true,scanned:1,complete:true,state:snapshot};}
+   return {reorganized:false,scanned:1,complete:true,state:snapshot};
   }
  };
  const path=join(dir,'indexer.json');

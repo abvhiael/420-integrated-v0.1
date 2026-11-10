@@ -53,7 +53,8 @@ func TestPrivateHTTPAuthenticationAndDurableRevocation(t *testing.T){
   w:=httptest.NewRecorder();h.ServeHTTP(w,req);return w
  }
  if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"");w.Code!=403{t.Fatalf("unauthorized write %d",w.Code)}
- if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"Bearer "+writeToken);w.Code!=200{t.Fatalf("apply %d %s",w.Code,w.Body)}
+ if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":0},"Bearer "+writeToken);w.Code!=403{t.Fatalf("unsolicited operator enrollment accepted %d %s",w.Code,w.Body)}
+ if _,err:=s.Apply(fixture(),0);err!=nil{t.Fatal(err)} // internal fixture, not HTTP authorization
  if w:=invoke("/v1/420bet/subscriptions/apply",map[string]any{"subscription":fixture(),"expectedRevision":1},"Bearer "+token);w.Code!=403{t.Fatalf("read token can mutate %d",w.Code)}
  if w:=invoke("/v1/420bet/subscriptions/check",query(),"Bearer "+token);w.Code!=200||!bytes.Contains(w.Body.Bytes(),[]byte(`"consent":true`)){t.Fatalf("check %d %s",w.Code,w.Body)}
  if w:=invoke("/v1/420bet/subscriptions/revoke",map[string]any{"check":query(),"expectedRevision":1},"Bearer "+writeToken);w.Code!=200{t.Fatalf("revoke %d %s",w.Code,w.Body)}

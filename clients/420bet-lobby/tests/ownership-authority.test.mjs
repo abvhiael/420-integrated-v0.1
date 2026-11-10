@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {encodeAbiParameters,toFunctionSelector} from 'viem';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
-import {EVENT_SPECS} from '../server/indexer-event-abi.mjs';
+import {EVENT_SPECS,eventTopic} from '../server/indexer-event-abi.mjs';
 import {createRpcCanonicalOwnershipSource,createBetOwnershipAuthority} from '../server/ownership-authority.mjs';
 import {createPrivateOwnerDirectories} from '../server/ownership-directories.mjs';
 import {createOwnershipHTTPHandler} from '../server/ownership-http.mjs';
@@ -45,7 +45,7 @@ function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersio
   logIndex:'0x2',topics,data};
  const reservation={address:manifest[2].address,transactionHash:H(55),
   blockHash:H(96),blockNumber:'0x60',logIndex:'0x1',
-  topics:[EVENT_SPECS['poker-ledger'].find(x=>x.signature.startsWith('HandReserved(')).topic0,H(45),H(41)],
+  topics:[eventTopic('HandReserved(bytes32,bytes32,uint256,bytes32)'),H(45),H(41)],
   data:'0x'+'0'.repeat(64*2)};
  const calls=[];
  async function fetcher(_,options){

@@ -4,6 +4,7 @@ import {mkdir,open,readFile,rename,rm,stat,chmod} from 'node:fs/promises';
 import {dirname,basename,join} from 'node:path';
 import {randomBytes} from 'node:crypto';
 import {makeBetDelivery,makeReorgCorrection} from './notifications-mail-adapters.mjs';
+import {acquireDeliveryWriterLease} from './delivery-writer-lease.mjs';
 const assert=(v,m)=>{if(!v)throw Error('420Bet outbox: '+m);};
 const STATES=new Set(['pending','dispatching','retry','pending_receipt','delivered','dead_letter','cancelled']);
 const CHANNELS=['mail','notifications'];
@@ -37,7 +38,7 @@ export async function openBetDeliveryOutbox({
  const parentStat=await stat(parent);
  assert((parentStat.mode&0o022)===0,'outbox parent is writable by group or others');
  const lock=path+'.lock';
- await mkdir(lock,{mode:0o700}); // Existing lock: fail closed; requires independent recovery.
+ const lease=await acquireDeliveryWriterLease(lock); // Never takeover.
  let closed=false,data;
  let operation=Promise.resolve();
  try{
@@ -71,12 +72,14 @@ export async function openBetDeliveryOutbox({
    }
   }
   await atomicWrite(path,data);
- }catch(e){await rm(lock,{recursive:true,force:true});throw e;}
+ }catch(e){await lease.release();throw e;}
  const withWrite=fn=>{
   const result=operation.then(async()=>{
    assert(!closed,'outbox closed');
+   await lease.assertOwner();
    const snapshot=clone(data);
    const out=await fn(snapshot);
+   await lease.assertOwner();
    await atomicWrite(path,snapshot);
    data=snapshot;
    return out;
@@ -428,6 +431,6 @@ export async function openBetDeliveryOutbox({
  }
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted,replayPending:data.replayPending,remoteCancellationPending:Object.values(data.items).filter(i=>i.remoteCancellationPending).length,correctionPending:Object.values(data.items).filter(i=>i.delivery.correctionOf&&i.status!=='delivered'&&i.status!=='cancelled').length};}
- async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
+ async function close(){await operation;closed=true;await lease.release();}
  return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,recoveryEventIds,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,finishCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

@@ -1,6 +1,6 @@
 // Discovery metadata only. The authoritative game implementations remain in their existing clients.
 export const games = Object.freeze([
-  ['dice','Dice','Casino','clients/420bet-dice-v1'],
+  ['dice',"Racket's Loaded Dice",'Casino','clients/420bet-dice-v1'],
   ['keno','Keno','Casino',null],['plinko','Plinko','Casino',null],
   ['slots','Slots','Casino',null],['roulette','Roulette','Casino',null],
   ['blackjack','Blackjack','Casino',null],['mines','Pest Control','Casino',null],

@@ -121,7 +121,7 @@ test('regulation three-way draw pays draw; spread/total ties push without fees',
    scores:scores(7,4),outcome:'PUSH',payout:'100'},
   {type:'total',selections:['over','under'],selection:'over',line2:'9',
    scores:scores(2,2),outcome:'LOSS',payout:'0'},
-  {type:'total',selections:['over','under'],selection:'over',line2:'8',
+  {type:'total',selections:['over','under'],selection:'over',line2:'4',
    scores:scores(2,2),outcome:'PUSH',payout:'100'}
  ]){
   const e=createLocalSportsbookEngine(args()),m=await openMarket(e,

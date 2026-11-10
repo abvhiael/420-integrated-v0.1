@@ -18,6 +18,27 @@ import (
 )
 
 var id = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
+var nonceDigest = regexp.MustCompile(`^[a-f0-9]{64}// Package betconsent provides a private persistent BET-AUDIT-7 opt-in policy
+// boundary for 420Notifications. It never grants betting or wallet authority.
+package betconsent
+
+import (
+ "crypto/subtle"
+ "encoding/json"
+ "errors"
+ "fmt"
+ "io"
+ "net/http"
+ "os"
+ "path/filepath"
+ "regexp"
+ "sort"
+ "sync"
+ "time"
+)
+
+var id = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
+)
 var ErrConflict = errors.New("subscription version conflict")
 var ErrMissing = errors.New("subscription not found")
 
@@ -56,6 +77,7 @@ type state struct {
  Schema int `json:"schema"`
  Items map[string]Subscription `json:"items"`
  Revocations []Revocation `json:"revocations,omitempty"`
+ EnrollmentNonces map[string]bool `json:"enrollmentNonces,omitempty"`
 }
 type Store struct { mu sync.Mutex; path string; lock string; closed bool; data state }
 func key(tenant,user,sub string) string { return tenant+"|"+user+"|"+sub }
@@ -84,6 +106,7 @@ func Open(path string)(*Store,error){
   if e=json.Unmarshal(b,&s.data);e!=nil{return nil,e}
   if s.data.Schema!=1||s.data.Items==nil{return nil,errors.New("invalid subscription schema")}
   for k,v:=range s.data.Items {if !valid(v)||k!=key(v.Tenant,v.UserID,v.SubscriptionID)||v.Revision==0{return nil,errors.New("invalid stored subscription")}}
+  for nonce,used:=range s.data.EnrollmentNonces {if !used||!nonceDigest.MatchString(nonce){return nil,errors.New("invalid enrollment nonce state")}}
   for i,e:=range s.data.Revocations {
    if e.Sequence!=uint64(i+1)||e.Tenant!="420bet"||!id.MatchString(e.UserID)||!id.MatchString(e.SubscriptionID)||e.Revision==0||e.Reason=="" {return nil,errors.New("invalid revocation log")}
   }
@@ -119,7 +142,7 @@ func (s *Store) Apply(v Subscription,expectedRevision uint64)(Subscription,error
  if exists&&(prior.Recipient!=v.Recipient||prior.Channel!=v.Channel){return Subscription{},errors.New("subscription destination immutable")}
  v.Revision=expectedRevision+1;v.UpdatedAt=time.Now().UnixMilli()
  if v.Revoked {v.Active=false;v.Consent=false}
- next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),Revocations:append([]Revocation(nil),s.data.Revocations...)}
+ next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),Revocations:append([]Revocation(nil),s.data.Revocations...),EnrollmentNonces:s.data.EnrollmentNonces}
  for k,x:=range s.data.Items {next.Items[k]=x};next.Items[k]=v
  if exists && prior.Active && prior.Consent && !prior.Muted &&
   (!v.Active || !v.Consent || v.Muted || v.Revoked) {
@@ -228,6 +251,16 @@ func Handler(store *Store,readToken,writeToken string) (http.Handler,error){
  mux.HandleFunc("POST /v1/420bet/subscriptions/apply",func(w http.ResponseWriter,r *http.Request){
   if !authenticated(w,r,writeToken){return}
   var m mutation;if err:=decode(r,&m);err!=nil{write(w,400,map[string]string{"error":"invalid request"});return}
+  // The operator mutation credential is not user consent authority.
+  // Legacy management can only reduce a preexisting opt-in's permissions.
+  prior:=store.Check(Check{Tenant:m.Subscription.Tenant,UserID:m.Subscription.UserID,
+   SubscriptionID:m.Subscription.SubscriptionID,Recipient:m.Subscription.Recipient,
+   Channel:m.Subscription.Channel,PolicyVersion:m.Subscription.PolicyVersion,Kind:"account-update"})
+  if !prior.Consent||!prior.Active||prior.Revoked||!m.Subscription.Consent||
+   !m.Subscription.Active||m.Subscription.PolicyVersion!=prior.PolicyVersion||
+   (prior.Muted&&!m.Subscription.Muted){
+   write(w,403,map[string]string{"error":"user authorization required"});return
+  }
   v,err:=store.Apply(m.Subscription,m.ExpectedRevision)
   if err!=nil{write(w,409,map[string]string{"error":fmt.Sprint(err)});return};write(w,200,v)
  })

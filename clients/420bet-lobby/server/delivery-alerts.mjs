@@ -53,8 +53,10 @@ export async function openDeliveryAlertJournal({
    state=JSON.parse(await readFile(path,'utf8'));
    demand(state.schema===1&&state.active&&typeof state.active==='object'&&
     state.pending&&typeof state.pending==='object','invalid alert checkpoint');
-   for(const k of [...Object.keys(state.active),...Object.keys(state.pending)])
-    demand(codeList.has(k),'unapproved alert code');
+   for(const k of Object.keys(state.active))demand(codeList.has(k),'unapproved alert code');
+   for(const event of Object.values(state.pending))demand(codeList.has(event?.code)&&
+    ['firing','resolved'].includes(event.status)&&/^[a-f0-9]{64}$/.test(event.id),
+    'unapproved pending alert event');
   }catch(e){
    if(e?.code!=='ENOENT')throw e;
    state={schema:1,active:{},pending:{}};
@@ -78,27 +80,27 @@ export async function openDeliveryAlertJournal({
    for(const code of active)if(!next.active[code]){
     const firstSeenAt=t,id=createHash('sha256').update(code+'|'+firstSeenAt).digest('hex');
     next.active[code]={id,firstSeenAt};
-    next.pending[code]={id,code,status:'firing',at:firstSeenAt,nextAttemptAt:0};
+    next.pending[id+':firing']={id,code,status:'firing',at:firstSeenAt,nextAttemptAt:0};
    }
    for(const code of Object.keys(next.active))if(!active.has(code)){
     const prior=next.active[code];
-    next.pending[code]={id:prior.id,code,status:'resolved',at:t,nextAttemptAt:0};
+    next.pending[prior.id+':resolved']={id:prior.id,code,status:'resolved',at:t,nextAttemptAt:0};
     delete next.active[code];
    }
   });
   let sent=0,failed=0;
-  for(const pending of Object.values(state.pending)){
+  for(const [key,pending] of Object.entries(state.pending)){
    if(pending.nextAttemptAt>t)continue;
    // Save next retry BEFORE external request, so a crash cannot lose the alert.
-   await write(next=>{if(next.pending[pending.code]?.id===pending.id)
-    next.pending[pending.code].nextAttemptAt=t+retryMs;});
+   await write(next=>{if(next.pending[key]?.id===pending.id)
+    next.pending[key].nextAttemptAt=t+retryMs;});
    try{
     await send(Object.freeze({schema:'420bet-delivery-alert-v1',
      id:pending.id,code:pending.code,status:pending.status,at:pending.at}));
     await write(next=>{
-     if(next.pending[pending.code]?.id===pending.id&&
-      next.pending[pending.code]?.status===pending.status)
-      delete next.pending[pending.code];
+     if(next.pending[key]?.id===pending.id&&
+      next.pending[key]?.status===pending.status)
+      delete next.pending[key];
     });
     sent++;
    }catch{failed++;}

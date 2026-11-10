@@ -222,8 +222,12 @@ export function createBetOwnershipAuthority({
   fail(canonical?.event?.transactionHash===e.transactionHash&&
    canonical.event.blockHash===e.blockHash&&Array.isArray(canonical.members),
    'unverified finalized provenance');
-  const version=hash(canonical.version);
-  fail(approved.config.games?.some(g=>g.gameVersionId===version&&g.vertical===e.vertical),
+  const candidates=approved.config.games?.filter(g=>g.vertical===e.vertical)??[];
+  // Account-free poker/fantasy events do not encode a game version. Only a
+  // UNIQUE independently approved version can be used; never guess among games.
+  const version=canonical.version?hash(canonical.version):
+   (candidates.length===1?hash(candidates[0].gameVersionId):null);
+  fail(version!==null&&candidates.some(g=>g.gameVersionId===version),
    'unapproved game version');
   if(e.gameVersionId!==null)fail(version===e.gameVersionId,'game version contradiction');
   const owners=[];

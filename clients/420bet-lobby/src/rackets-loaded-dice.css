@@ -1,5 +1,5 @@
 /* Racket's Loaded Dice: presentation-only overrides, scoped to practice dice. */
-.racket-dice{--lime:#b4ff53;background:radial-gradient(ellipse at 70% 20%,#3b2a1960,transparent 52%),linear-gradient(110deg,#090e0be8,#1f170ee0),url('/assets/420bet/dice/420Bet_Dice_Wallpaper_FRESH_2026-11-01.webp') center/cover fixed,#0e150e}
+.racket-dice{--lime:#b4ff53;background:radial-gradient(ellipse at 70% 20%,#3b2a1960,transparent 52%),linear-gradient(110deg,#090e0be8,#1f170ee0),url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png') center/cover fixed,#0e150e}
 .racket-dice .racket-hero{min-height:205px;padding:14px 14px 18px;border-bottom:3px dashed #b8ac5366;margin-bottom:23px}
 .racket-dice .nd-intro{max-width:750px}
 .racket-dice .nd-intro h1{font-family:Impact,'Arial Black',system-ui,sans-serif;font-size:clamp(2.6rem,6vw,5.3rem);letter-spacing:.018em;line-height:1;text-transform:uppercase;color:#e8ff8d;text-shadow:4px 5px #3a2419,0 0 32px #77ef3499;transform:rotate(-1deg)}
@@ -83,3 +83,14 @@
 @media(max-width:950px){.racket-dice .racket-hero{padding-top:55px}.racket-dice .racket-character{left:0;top:37px;opacity:.7}.racket-dice .racket-board{grid-template-columns:1fr;padding-left:185px}.racket-dice .racket-machine{width:190px}.racket-dice .racket-result{min-height:260px}.racket-dice .racket-history .nd-pills{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:650px){.racket-dice .racket-hero{min-height:230px}.racket-dice .nd-intro{max-width:100%}.racket-dice .racket-character{width:110px;height:150px;top:95px;opacity:.6}.racket-dice .racket-board{padding:15px;display:flex;flex-direction:column}.racket-dice .racket-machine{position:relative;left:auto;top:auto;align-self:center;width:190px;height:245px}.racket-dice .nd-mode{top:0}.racket-dice .racket-history{padding:62px 16px 14px}.racket-dice .racket-history .nd-pills{grid-template-columns:repeat(5,minmax(0,1fr))}.racket-dice .racket-title-png{height:120px}}
 @media(prefers-reduced-motion:reduce){.racket-dice .nd-choice{transition:none}}
+
+/* Racket's uploaded Danksville Junkyard Lab wallpaper: behind all interactive game layers. */
+.racket-dice.neon-dice-page{
+ background-image:linear-gradient(110deg,rgba(4,8,5,.64),rgba(12,8,12,.46)),url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png');
+ background-size:cover;
+ background-position:center center;
+ background-repeat:no-repeat;
+ background-attachment:fixed;
+ background-color:#0e150e;
+}
+@media(max-width:720px){.racket-dice.neon-dice-page{background-attachment:scroll;background-position:center top}}

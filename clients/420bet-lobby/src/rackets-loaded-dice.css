@@ -11,7 +11,9 @@
  background-size:cover;background-repeat:no-repeat;background-position:center center;background-attachment:fixed;
 }
 .racket-dice.neon-dice-page::before{display:none}
-.view-scroll:has(> .racket-dice){background:#120f13;overflow-x:hidden}
+.immersive:has(.racket-dice){background:#120f13 url('/assets/420bet/dice/rackets-loaded-dice/backgrounds/background_rackets_loaded_dice_wallpaper.png') center center/cover fixed}
+.immersive:has(.racket-dice) .gamebar{position:relative;z-index:5;background:rgba(8,16,10,.45);border-color:rgba(186,245,112,.24)}
+.view-scroll:has(> .racket-dice){background:transparent;overflow-x:hidden}
 .racket-dice .racket-hero{
  display:flex;align-items:center;justify-content:center;position:relative;
  min-height:clamp(155px,15vw,235px);margin:0 0 8px;padding:6px 16px 16px;

@@ -81,7 +81,7 @@ function resultFor(m,t,facts){
  }
  if(m.type==='spread'){
   const adjusted=d+(selection==='home'?signed(m.line2):-signed(m.line2));
-  return adjusted===0n?'PUSH':adjusted>0n?'WIN':'LOSS';
+  return adjusted===0n?'PUSH':(selection==='home'?adjusted>0n:adjusted<0n)?'WIN':'LOSS';
  }
  const comparison=home+away-signed(m.line2);
  return comparison===0n?'PUSH':(comparison>0n?'over':'under')===selection?'WIN':'LOSS';
@@ -322,8 +322,12 @@ export function createLocalSportsbookEngine({
    const payout=outcome==='WIN'?uint(t.gross):
     outcome==='PUSH'||outcome==='VOID'?uint(t.stake):0n;
    const stake=uint(t.stake),gross=uint(t.gross);
+   const delta=stake-payout;
+   requireTrue(BigInt(s.capital)+delta>=0n&&
+    BigInt(s.freeCapital)+gross+delta>=0n,'operator settlement insolvency');
    s.operatorReserved=fmt(uint(s.operatorReserved)-gross);
-   s.freeCapital=fmt(uint(s.freeCapital)+gross);
+   s.capital=fmt(BigInt(s.capital)+delta);
+   s.freeCapital=fmt(BigInt(s.freeCapital)+gross+delta);
    s.playerEscrow=fmt(uint(s.playerEscrow)-stake);
    s.playerPaid=fmt(uint(s.playerPaid)+payout);
    // Accrual: player stake is already escrowed, so returned escrow less

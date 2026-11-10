@@ -1,0 +1,30 @@
+[Unit]
+Description=420Bet Notifications/Mail durable delivery worker
+After=network-online.target notifications420.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=420bet
+Group=420bet
+WorkingDirectory=/opt/420integrated/clients/420bet-lobby
+EnvironmentFile=/etc/420integrated/420bet-delivery.env
+ExecStart=/usr/bin/node server/run-delivery-worker.mjs
+Restart=on-failure
+RestartSec=8
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/420integrated/bet
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

@@ -12,6 +12,7 @@
     "serve:identity": "node server/serve-identity.mjs",
     "worker:delivery": "node server/run-delivery-worker.mjs",
     "serve:ownership": "node server/serve-ownership.mjs",
+    "serve:consent": "node server/serve-consent-enrollment.mjs",
     "verify:registry": "node server/verify-registry.mjs"
   },
   "devDependencies": {

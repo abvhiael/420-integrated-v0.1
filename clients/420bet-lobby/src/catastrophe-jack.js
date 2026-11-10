@@ -211,7 +211,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   splashTotal.hidden=amount===null;
   splash.setAttribute('aria-label',name.includes('complete')?'Bonus complete':'Bonus starting');
   splash.hidden=false;
-  splashButton.focus();
+  splashButton.focus?.();
  }
  function hideInsuranceBoard(){insurancePlay.hidden=true;insuranceGrid.replaceChildren();}
  function showInsuranceBoard(){insurancePlay.hidden=false;}
@@ -290,7 +290,6 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
    'claim-d-1186-dumpster-disaster.png','claim-e-6093-falling-anvil.png','claim-f-7730-dynamite.png',
    'claim-g-2218-almost-cash.png','claim-h-5584-safe.png','claim-i-8842-money-bag.png'
   ];
-  insuranceGrid.replaceChildren();
   for(let i=0;i<9;i++){
    const b=button(doc,'',()=>{
     if(ended||mode!=='insurance'||!splash.hidden||claimsPicked.includes(i)||claimsPicked.length>=3)return;

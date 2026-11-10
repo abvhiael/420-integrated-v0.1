@@ -19,7 +19,9 @@ test('Racket uses presentation-only reactions and accessible practice UI',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const root=createNeonDice(document);
  assert.equal(root.dataset.practiceGame,'dice');
- assert.match(root.textContent,/RACKET'S LOADED DICE/);
+ assert(root.querySelector('.racket-scene .racket-scene-title .racket-title-png'));
+ assert.equal(root.querySelector('.racket-hero h1'),null);
+ assert.equal(root.querySelectorAll('.racket-scene-title').length,1);
  assert.match(root.textContent,/NO WALLET/);
  assert.equal(root.querySelectorAll('.nd-choice').length,2);
  assert(root.querySelector('.racket-temper-fill'));

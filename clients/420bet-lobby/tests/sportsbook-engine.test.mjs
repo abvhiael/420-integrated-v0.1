@@ -30,7 +30,8 @@ const terms=(id='moneyline',type='moneyline2',selection=['home','away'],extras={
  competitionId:'nhl',correlationGroup:'event-1',rulesVersion:'approved-v1',type,
  period:'REGULATION',overtime:'EXCLUDE',tiePolicy:'PUSH',
  line2:type==='spread'||type==='total'?'0':null,
- selections:selection,scheduleRevision:'1',startsAt:time+86400000,cutoffAt:time+3600000,state:'DRAFT',
+ selections:selection,scheduleRevision:'1',startsAt:time+86400000,
+ finalDeadlineAt:time+10*86400000,cutoffAt:time+3600000,state:'DRAFT',
  ...extras
 });
 const approved=m=>({role:'marketController',approved:true,termsHash:m.termsHash,
@@ -175,6 +176,21 @@ test('cancelled event voids and refunds full stake, no unilateral operator winne
   approved:true,finalDigest:p.digest});
  assert.equal(r.outcome,'VOID');assert.equal(r.payout,'100');
  assert.equal(e.view().operatorPL,'0');
+});
+test('postponed or missing facts have a permissionless bounded no-action refund',async()=>{
+ const e=createLocalSportsbookEngine(args()),m=await openMarket(e,terms());
+ const {ticket}=await place(e,m.id);
+ await e.transition(m.id,'close',approved(e.view().markets[m.id]));
+ await assert.rejects(e.expireNoAction(m.id),/deadline has not elapsed/);
+ time=m.finalDeadlineAt+1;
+ const final=await e.expireNoAction(m.id);
+ assert.equal(final.state,'FINAL');assert.equal(final.timeout,true);
+ const receipt=await e.settleTicket(ticket.ticketId,{
+  role:'settlementExecutor',approved:true,finalDigest:final.digest});
+ assert.equal(receipt.outcome,'VOID');assert.equal(receipt.payout,'100');
+ assert.equal(e.view().operatorReserved,'0');assert.equal(e.view().playerEscrow,'0');
+ assert.equal(e.view().operatorPL,'0');
+ await assert.rejects(e.expireNoAction(m.id),/final sportsbook result cannot be overridden/);
 });
 test('dispute blocks finalization; stale signed quote after suspension cannot bypass epoch',async()=>{
  const e=createLocalSportsbookEngine(args()),m=await openMarket(e,terms());

@@ -32,12 +32,16 @@ function marketCheck(m){
  valueId(m.rulesVersion,'rules version');valueId(m.competitionId,'competition');
  valueId(m.correlationGroup,'correlation group');
  requireTrue(types.has(m.type),'unsupported market type');
+ requireTrue(m.correlationGroup===m.eventId,
+  'V1 correlated event markets must share one risk group');
  requireTrue(m.period==='REGULATION'||m.period==='FULL_GAME','unsupported period');
  requireTrue(['INCLUDE','EXCLUDE'].includes(m.overtime),'overtime policy required');
  requireTrue(['PUSH','VOID'].includes(m.tiePolicy),'two-way tie policy required');
  requireTrue(Number.isSafeInteger(m.startsAt)&&m.startsAt>0&&
   Number.isSafeInteger(m.cutoffAt)&&m.cutoffAt>0&&m.cutoffAt<m.startsAt,
   'start and cutoff required');
+ requireTrue(typeof m.scheduleRevision==='string'&&INTEGER.test(m.scheduleRevision),
+  'frozen schedule revision required');
  requireTrue(Array.isArray(m.selections)&&m.selections.length===(m.type==='moneyline3'?3:2)&&
   new Set(m.selections).size===m.selections.length&&
   m.selections.every(s=>['home','away','draw','over','under'].includes(s)),
@@ -88,7 +92,7 @@ function resultFor(m,t,facts){
 }
 function limitsCheck(policy){
  for(const k of ['ticketStakeMax','ticketGrossMax','playerGrossMax','marketGrossMax',
-  'eventGrossMax','correlationGrossMax','operatorGrossMax','vaultGrossMax',
+  'eventGrossMax','correlationGrossMax','competitionGrossMax','operatorGrossMax','vaultGrossMax',
   'playerDailyStakeMax','playerDailyLossMax','capitalSafetyReserve']){
   uint(policy[k],k);
  }
@@ -133,7 +137,7 @@ function audit(s,operation,id){
 }
 export function createLocalSportsbookEngine({
  chainId,assetId,vaultId,operatorId,capital,policy,
- signQuote,verifyQuote,authorizePlayer,checkEligibility,
+ signQuote,verifyQuote,authorizePlayer,checkEligibility,verifyMarketHealth,
  verifyResult,clock=Date.now,preloaded=null,persistState=async()=>{}
 }={}){
  for(const [name,fn] of Object.entries({signQuote,verifyQuote,authorizePlayer,
@@ -232,6 +236,12 @@ export function createLocalSportsbookEngine({
     ticketId,authorization:auth}))===true,'player did not authorize exact quote');
    requireTrue((await checkEligibility({playerId:expected.playerId,market:m,quote:expected,
     action:'place'}))===true,'player ineligible or over responsible-play controls');
+   const source=await verifyMarketHealth({market:clone(m),quote:expected});
+   requireTrue(source?.verified===true&&source?.status==='SCHEDULED'&&
+    source.eventId===m.eventId&&source.scheduleRevision===m.scheduleRevision&&
+    source.startAt===m.startsAt&&source.startAt>clock()&&
+    source.observedAt<=clock()&&clock()-source.observedAt<=30000,
+    'unverified, stale or revised event schedule');
    const stake=uint(expected.stake),gross=uint(expected.gross),p=s.policy;
    const cap=(amount,limit,what)=>requireTrue(amount<=uint(p[limit]),what+' exposure cap');
    cap(stake,'ticketStakeMax','ticket');cap(gross,'ticketGrossMax','ticket');
@@ -240,6 +250,7 @@ export function createLocalSportsbookEngine({
    cap(active(t=>t.marketId===m.id),'marketGrossMax','market');
    cap(active(t=>t.eventId===m.eventId),'eventGrossMax','event');
    cap(active(t=>t.correlationGroup===m.correlationGroup),'correlationGrossMax','correlation group');
+   cap(active(t=>t.competitionId===m.competitionId),'competitionGrossMax','competition');
    cap(active(t=>t.operatorId===m.operatorId),'operatorGrossMax','operator');
    cap(active(t=>t.vaultId===m.vaultId),'vaultGrossMax','vault');
    const day=Math.floor(clock()/86400000),id=key(expected.playerId,day);
@@ -256,7 +267,8 @@ export function createLocalSportsbookEngine({
    s.playerDays[id]={stake:fmt(uint(usage.stake)+stake),loss:fmt(uint(usage.loss)+stake)};
    s.nonces[nonceId]=ticketId;
    s.tickets[ticketId]={id:ticketId,marketId:m.id,eventId:m.eventId,
-    correlationGroup:m.correlationGroup,operatorId:m.operatorId,vaultId:m.vaultId,
+    correlationGroup:m.correlationGroup,competitionId:m.competitionId,
+    operatorId:m.operatorId,vaultId:m.vaultId,
     playerId:expected.playerId,selection:expected.selection,stake:expected.stake,
     gross:expected.gross,termsHash:m.termsHash,quoteHash:digest(expected),
     state:'ACCEPTED',acceptedAt:clock(),outcome:null,receiptId:null};

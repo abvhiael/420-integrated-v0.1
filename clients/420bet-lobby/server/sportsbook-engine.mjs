@@ -210,6 +210,9 @@ export function createLocalSportsbookEngine({
   return change('accept',async s=>{
    requireTrue(quote&&typeof quote==='object','signed quote required');
    const {signature,...raw}=quote;
+   const currentMarket=s.markets[raw?.marketId];
+   requireTrue(currentMarket?.state==='OPEN'&&currentMarket.quoteEpoch===raw.epoch,
+    'market suspended or quote stale');
    const expected=quoteTerms(raw);
    requireTrue(JSON.stringify(expected)===JSON.stringify(raw),
     'quote altered or incomplete');

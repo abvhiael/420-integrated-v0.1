@@ -56,14 +56,18 @@ test('game screen shows nine reel images, all three bonus test buttons and full 
  stage.stopAnimation();
 });
 
-test('slot #9 has an immediately visible lobby launch link before the carousel, even without cabinet art',()=>{
+test('slot #9 appears only in the normal carousel and launches correctly',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  let selected=null;
  const lobby=createSlotsLobby(document,machine=>{selected=machine;});
- const featured=lobby.querySelector('header .slots-featured-launch');
- assert.ok(featured,'featured slot #9 launch link must be present above carousel');
- assert.equal(featured.getAttribute('href'),'#game=slots&machine=catastrophe-jack');
- assert.match(featured.textContent,/PLAY CATASTROPHE JACK/);
- featured.dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
+ assert.equal(lobby.querySelector('.slots-featured-launch'),null);
+ const cards=[...lobby.querySelectorAll('.slots-machine-card')];
+ assert.equal(cards.length,9);
+ const last=cards[8];
+ assert.equal(last.querySelector('a').getAttribute('href'),'#game=slots&machine=catastrophe-jack');
+ const next=lobby.querySelectorAll('.slots-carousel-arrow')[1];
+ for(let i=0;i<6;i++)next.dispatchEvent(new window.Event('click',{bubbles:true}));
+ assert.equal(last.hidden,false);
+ last.querySelector('a').dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
  assert.equal(selected?.id,'catastrophe-jack');
 });

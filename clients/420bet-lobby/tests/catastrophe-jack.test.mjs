@@ -77,9 +77,10 @@ test('right-hand reference panel shows every exact base pay and all eight paylin
  const stage=createCatastropheJack(document,{rng:()=>0});
  document.body.append(stage);
  const columns=stage.querySelector('.cj-layout').children;
- assert.equal(columns.length,3);
+ assert.equal(columns.length,4);
  assert.equal(columns[1].className,'cj-side');
- assert.equal(columns[2].className,'cj-reference');
+ assert.equal(columns[2].className,'cj-reference cj-poster');
+ assert.equal(columns[3].className,'cj-bonus-guide cj-poster');
  const rows=[...stage.querySelectorAll('.cj-pay-row')];
  assert.equal(rows.length,8);
  const displayed=rows.map(row=>row.querySelector('.cj-pay-value').textContent);
@@ -90,5 +91,25 @@ test('right-hand reference panel shows every exact base pay and all eight paylin
   const selected=[...diagrams[i].children].flatMap((cell,p)=>cell.className==='cj-line-on'?[p]:[]);
   assert.deepEqual(selected,[...JACK_LINES[i]].sort((a,b)=>a-b));
  }
+ stage.stopAnimation();
+});
+
+test('comic bonus poster illustrates the exact three game triggers',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const stage=createCatastropheJack(document,{rng:()=>0});
+ document.body.append(stage);
+ const poster=stage.querySelector('.cj-bonus-guide');
+ assert.ok(poster);
+ assert.equal(poster.querySelectorAll('.cj-bonus-card').length,3);
+ const cards=[...poster.querySelectorAll('.cj-bonus-card')];
+ assert.match(cards[0].textContent,/2 · 4 · 5 · 6 · 8/);
+ assert.match(cards[1].textContent,/1-5-9 or 3-5-7/);
+ assert.match(cards[2].textContent,/position 5/);
+ const grids=cards.map(card=>card.querySelector('.cj-trigger-grid'));
+ assert.deepEqual(grids.map(grid=>grid.querySelectorAll('.cj-trigger-active').length),[5,3,1]);
+ assert.deepEqual([...grids[0].children].flatMap((cell,i)=>cell.className.includes('cj-trigger-active')?[i]:[]),JACK_CROSS);
+ assert.match(poster.textContent,/9 FREE SPINS/);
+ assert.match(poster.textContent,/PICK 3 FOLDERS/);
+ assert.match(poster.textContent,/WILDS FROM DISASTER/);
  stage.stopAnimation();
 });

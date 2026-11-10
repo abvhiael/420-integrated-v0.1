@@ -52,7 +52,7 @@ export function createNeonDice(doc=globalThis.document){
   roll.addEventListener('click',()=>{state=next(state,{type:'play'});rolls.unshift({value:state.result[0],win:state.message.includes('winning side')});if(rolls.length>10)rolls.pop();render();});left.append(roll);
   const temp=racketTemper(rolls);
   const meter=el('div','racket-temper');meter.append(artImage('racket-meter-png','ui','ui_racketometer_stage_'+meterStage(temp)+'_'+['empty','low','medium','high','full'][meterStage(temp)]+'.png','Racket-O-Meter level '+(meterStage(temp)+1)+' of 5'));meter.append(el('div','racket-temper-label','RACKET-O-METER • '+(temp>75?'ABSOLUTELY FERAL':temp>45?'GETTING IRRITATED':'SUSPICIOUSLY CALM')));
-  const track=el('div','racket-temper-track'),fill=el('div','racket-temper-fill');fill.style.width=temp+'%';track.append(fill);meter.append(track);left.append(meter);
+  const track=el('div','racket-temper-track'),fill=el('div','racket-temper-fill');fill.style.width=temp+'%';track.append(fill);meter.append(track);scene.append(meter);
   right.append(el('div','nd-result-heading','THE CAN HAS SPOKEN'));
   const diceStage=el('div','racket-dice-stage');diceStage.append(artImage('racket-dice-png','icons','icon_dice_pair.png','Decorative dice'));right.append(diceStage);
   const resultDisplay=el('div','racket-result-display');resultDisplay.style.backgroundImage="url('"+asset('ui','ui_roll_result_panel_blank.png')+"')";resultDisplay.append(el('div','nd-big-number',state.result.length?String(state.result[0]).padStart(4,'0'):'—'));right.append(resultDisplay);

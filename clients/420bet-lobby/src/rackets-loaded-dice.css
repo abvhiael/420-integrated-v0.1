@@ -185,3 +185,73 @@
  .racket-dice .racket-scene-title{left:0;top:-5%;width:65%;height:clamp(95px,25vw,145px)}
  .racket-dice .racket-character{top:19%;height:77%}
 }
+
+/* Compact desktop composition: artwork, play controls, result and evidence visible together.
+   Decorative meter moved into left artwork scene; never affects underlying rolls. */
+@media(min-width:900px){
+ .racket-dice.neon-dice-page{padding:8px clamp(12px,1.5vw,22px) 12px}
+ .racket-dice .racket-hero{min-height:52px;height:52px;padding:0 12px;margin:0}
+ .racket-dice .racket-brand-logo{height:34px;max-width:125px}
+ .racket-dice .racket-board{
+  grid-template-columns:minmax(0,43%) minmax(0,57%);
+  grid-template-rows:auto auto;
+  gap:2px 10px;min-height:0;align-content:start;
+ }
+ .racket-dice .racket-scene{
+  min-height:clamp(440px,38vw,560px);
+  height:100%;grid-row:1 / span 2;
+ }
+ .racket-dice .racket-scene-title{top:-4%;height:clamp(112px,11vw,165px)}
+ .racket-dice .racket-character{top:15%;height:74%;width:58%}
+ .racket-dice .racket-machine{top:13%;height:74%;left:46%;width:55%}
+ .racket-dice .nd-controls{gap:5px;padding:0 8px}
+ .racket-dice .nd-choice{min-height:49px;padding:7px 5px;font-size:clamp(.85rem,1.3vw,1.1rem)!important}
+ .racket-dice .nd-threshold-label{font-size:.73rem;margin:0}
+ .racket-dice .racket-slider-art{min-height:57px;height:57px;padding:8px 12px}
+ .racket-dice .racket-slider-art .nd-threshold-number{padding:4px;flex-basis:75px}
+ .racket-dice .nd-range-ends{font-size:.68rem;margin:0;padding:0 8px}
+ .racket-dice .nd-stats{gap:8px}
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{
+  min-height:88px;height:88px;padding:43px 8px 8px;
+ }
+ .racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{font-size:clamp(.9rem,1.45vw,1.3rem)}
+ .racket-dice .racket-roll{min-height:82px;height:82px}
+ .racket-dice .racket-temper{
+  position:absolute;z-index:5;left:1%;bottom:0;width:64%;
+  display:flex;flex-direction:column;align-items:center;
+ }
+ .racket-dice .racket-meter-png{width:100%;height:76px;object-fit:fill}
+ .racket-dice .racket-temper-label{display:none}
+ .racket-dice .racket-result{gap:4px;min-height:175px;padding:0 10px 4px;justify-content:start}
+ .racket-dice .nd-result-heading{font-size:.65rem}
+ .racket-dice .racket-dice-stage{height:20px}
+ .racket-dice .racket-dice-png{height:24px;max-width:36px}
+ .racket-dice .racket-result-display{min-height:100px;height:105px;max-width:530px}
+ .racket-dice .racket-result-display .nd-big-number{font-size:clamp(2.5rem,4.2vw,4rem)}
+ .racket-dice .nd-win,.racket-dice .nd-lose,.racket-dice .nd-wait{font-size:.88rem}
+ .racket-dice .racket-dialogue{font-size:.78rem;padding:6px 12px;margin:1px 0}
+ .racket-dice .nd-result-sub{display:none}
+ .racket-dice .nd-bottom{gap:8px;margin:0;padding:0}
+ .racket-dice .racket-history{
+  min-height:99px;height:99px;padding:45px 22px 9px;
+ }
+ .racket-dice .racket-history .nd-pills{gap:2px;align-items:center}
+ .racket-dice .racket-history .nd-pill{font-size:clamp(.5rem,.82vw,.75rem)}
+ .racket-dice .nd-rules{max-width:165px;width:165px;font-size:.7rem;padding:8px}
+ .racket-dice .nd-disclaimer{margin:4px 0 0;font-size:.63rem}
+}
+@media(min-width:721px) and (max-width:899px){
+ .racket-dice .racket-board{min-height:0}
+ .racket-dice .racket-scene{min-height:550px}
+ .racket-dice .racket-temper{position:absolute;left:2%;bottom:0;width:68%;z-index:5}
+ .racket-dice .racket-meter-png{height:95px}
+ .racket-dice .nd-controls{gap:7px}
+ .racket-dice .racket-roll{min-height:90px}
+ .racket-dice .racket-result{min-height:230px}
+ .racket-dice .racket-history{min-height:112px}
+}
+@media(max-width:720px){
+ .racket-dice .racket-temper{position:absolute;z-index:5;left:1%;bottom:0;width:57%}
+ .racket-dice .racket-meter-png{height:75px}
+ .racket-dice .racket-temper-label{display:none}
+}

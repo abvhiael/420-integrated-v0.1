@@ -93,6 +93,7 @@ contract WagerRouter420 is I420System {
     error MinesCanonicalWagerRequired();
     error MinesResolverAlreadyBound();
     error CrashCanonicalWagerRequired();
+    error SportsbookCanonicalWagerRequired();
     error CrashResolverAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
@@ -407,6 +408,9 @@ contract WagerRouter420 is I420System {
         ) revert InvalidRequest();
 
         BetGameRegistry420.GameVersion memory game = games.getGame(request.gameVersionId);
+        // A sportsbook product cannot bypass a future quote/market/facts
+        // authority by presenting a generic maximum payout or paramsHash.
+        if (game.productClass == BetTypes420.ProductClass.SPORTSBOOK) revert SportsbookCanonicalWagerRequired();
         if (game.status != BetGameRegistry420.GameStatus.ACTIVE) revert InactiveGame();
         if (!modules.isApproved(game.moduleVersionId)) revert InactiveModule();
         if (!operators.isActive(request.operatorId)) revert InactiveOperator();

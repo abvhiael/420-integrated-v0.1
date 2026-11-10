@@ -96,3 +96,6 @@
 .bob-splash-amount{position:absolute;top:69%;left:72%;transform:translate(-50%,-50%);color:#38104d;font-family:system-ui,sans-serif;font-weight:1000;font-size:clamp(30px,5.2vw,88px);text-shadow:0 2px #fff,0 0 15px #fff;background:#fff8;padding:0 .3em;border-radius:8px;pointer-events:none;white-space:nowrap}
 .bob-splash[data-variant=total] .bob-splash-amount{left:52%;top:75%;font-size:clamp(33px,6.5vw,100px)}
 @media(max-width:700px){.bob-bonus{padding:8px;gap:6px}.bob-bonus-logo{height:76px}.bob-choices{gap:6px}.bob-object{height:clamp(100px,22vw,170px)}.bob-splash-amount{font-size:clamp(18px,5vw,45px)}.bob-splash[data-variant=total] .bob-splash-amount{font-size:clamp(24px,6vw,60px)}}
+
+/* Pick mode presents the chosen props against their own wallpaper, never beneath a darkened reel grid. */
+.bob-scene[data-bob-mode='pick'] .bob-machine{visibility:hidden}

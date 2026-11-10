@@ -41,3 +41,31 @@
 
 /* The immersive container owns the wallpaper so it continues beneath the gamebar. */
 .cj-stage::before{display:none;}
+
+/* Slot #9: the paytable occupies its own column immediately right of the spin box. */
+.cj-layout{grid-template-columns:minmax(310px,600px) minmax(230px,300px) minmax(235px,300px);width:min(100%,1480px);gap:clamp(10px,1.8vw,28px);}
+.cj-reference{min-width:0;background:linear-gradient(160deg,rgba(21,8,33,.95),rgba(36,11,35,.92));border:2px solid #dfa84a;border-radius:15px;padding:14px;box-shadow:0 7px 25px #000b,0 0 15px #af29c777;}
+.cj-reference-title{margin:0 0 10px;color:#ffe153;text-align:center;font-size:clamp(16px,1.5vw,20px);letter-spacing:.04em;text-shadow:2px 2px #a02976;}
+.cj-reference h3{margin:9px 0;font-size:12px;color:#ffdc71;letter-spacing:.07em;text-align:center;}
+.cj-pay-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:7px;align-items:center;padding:3px 0;border-bottom:1px solid #ffffff26;min-height:45px;}
+.cj-pay-symbol{width:41px;height:41px;object-fit:contain;filter:drop-shadow(0 2px 3px #000);}
+.cj-pay-name{font-size:11px;line-height:1.2;color:#fff5e6;}
+.cj-pay-value{font-size:16px;white-space:nowrap;color:#ffe153;}
+.cj-pay-note{font-size:11px;line-height:1.45;color:#e9c8e8;margin:9px 0;}
+.cj-line-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;}
+.cj-line-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:#210f2eaa;border:1px solid #9c6d46;border-radius:7px;padding:5px 3px;}
+.cj-line-number{font-weight:900;color:#ffe15c;font-size:11px;}
+.cj-line-mini{width:100%;max-width:47px;aspect-ratio:1;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.cj-line-mini span{border-radius:2px;border:1px solid #7f6095;}
+.cj-line-on{background:#ffdb43;box-shadow:0 0 3px #ffcc2f;}
+.cj-line-off{background:#412750;}
+@media(max-width:1100px) and (min-width:801px){
+ .cj-layout{grid-template-columns:minmax(280px,1.2fr) minmax(220px,1fr);max-width:920px;}
+ .cj-reference{grid-column:2;grid-row:2;}
+ .cj-reels{grid-row:1 / span 2;}
+}
+@media(max-width:800px){
+ .cj-layout{grid-template-columns:minmax(0,1fr);max-width:540px;}
+ .cj-reference{grid-column:1;grid-row:auto;}
+ .cj-line-list{grid-template-columns:repeat(4,minmax(0,1fr));}
+}

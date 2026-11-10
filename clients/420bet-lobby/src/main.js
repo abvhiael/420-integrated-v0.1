@@ -76,7 +76,7 @@ function render(){
   app.replaceChildren();
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':active.id==='fantasy'?'immersive fantasy-immersive':active.id==='sportsbook'?'immersive sportsbook-immersive':'immersive');const bar=node('header','gamebar');
-    if(!['fantasy','sportsbook'].includes(active.id))bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'),node('strong','',selectedSlotMachine?.title??active.title));
+    if(!['fantasy','sportsbook'].includes(active.id))bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'));if(active.id!=='dice')bar.append(node('strong','',selectedSlotMachine?.title??active.title));
     const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);if(!['fantasy','sportsbook'].includes(active.id)){bar.append(note);main.append(bar);}
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');

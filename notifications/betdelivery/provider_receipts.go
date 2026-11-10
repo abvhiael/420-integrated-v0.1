@@ -67,14 +67,18 @@ func(s *Store) ConfirmProvider(v ProviderEvidence,secret []byte,now time.Time)(r
 // ClaimPending hands out only consent-eligible notifications, using a durable
 // lease and idempotency key. A crashed provider may reclaim after expiry.
 // A provider MUST independently recheck current consent immediately before send.
-func(s *Store) ClaimPending(consent *betconsent.Store,limit int,now time.Time)([]Delivery,error){
+type ProviderClaim struct{
+ DeliveryID string `json:"deliveryId"`
+ Delivery Delivery `json:"delivery"`
+}
+func(s *Store) ClaimPending(consent *betconsent.Store,limit int,now time.Time)([]ProviderClaim,error){
  if consent==nil||limit<1||limit>50{return nil,errors.New("invalid provider claim")}
  s.mu.Lock();defer s.mu.Unlock()
  if s.closed{return nil,errors.New("delivery ledger closed")}
  keys:=make([]string,0,len(s.state.Items))
  for k:=range s.state.Items{keys=append(keys,k)}
  sort.Strings(keys)
- selected:=make([]Delivery,0,limit)
+ selected:=make([]ProviderClaim,0,limit)
  next:=snapshot{Schema:1,Items:make(map[string]entry,len(s.state.Items))}
  for k,x:=range s.state.Items{next.Items[k]=x}
  for _,key:=range keys{
@@ -90,7 +94,7 @@ func(s *Store) ClaimPending(consent *betconsent.Store,limit int,now time.Time)([
   x.NextClaimAt=now.Add(30*time.Second).UnixMilli()
   x.ClaimAttempts++
   next.Items[key]=x
-  selected=append(selected,d)
+  selected=append(selected,ProviderClaim{DeliveryID:x.Receipt.DeliveryID,Delivery:d})
  }
  if len(selected)>0{
   if err:=s.persist(next);err!=nil{return nil,err}

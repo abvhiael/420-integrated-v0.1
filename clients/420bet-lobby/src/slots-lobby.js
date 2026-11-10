@@ -44,22 +44,7 @@ export function createSlotsLobby(doc=globalThis.document,onSelect=()=>{}){
  const eyebrow=doc.createElement('p');eyebrow.className='slots-lobby-eyebrow';eyebrow.textContent='420BET SLOT COLLECTION';
  const title=doc.createElement('h1');title.textContent='Slots Lobby';
  const note=doc.createElement('p');note.textContent='Choose your machine. Each slot has its own cabinet, rules and bonus features. Practice only — no real wagers or payouts.';
- intro.append(eyebrow,title,note);
- // Slot #9 has no finished cabinet yet. Keep its launch action visible without
- // forcing players to advance six carousel pages to find it.
- const featured=SLOT_MACHINES.find(machine=>machine.id==='catastrophe-jack');
- if(featured){
-  const launch=doc.createElement('a');launch.className='slots-featured-launch';
-  launch.href=slotMachinePath(featured.id);
-  launch.setAttribute('aria-label','Play slot number 9 Catastrophe Jack in practice mode');
-  launch.textContent='NEW · SLOT #9 — PLAY CATASTROPHE JACK · PRACTICE BETA →';
-  launch.addEventListener('click',event=>{
-   if(event.defaultPrevented||(event.button!==undefined&&event.button!==0)||event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
-   event.preventDefault();onSelect(featured);
-  });
-  intro.append(launch);
- }
- root.append(intro);
+ intro.append(eyebrow,title,note);root.append(intro);
  const carousel=doc.createElement('div');carousel.className='slots-carousel';
  const prev=doc.createElement('button');prev.type='button';prev.className='slots-carousel-arrow';prev.textContent='‹';prev.setAttribute('aria-label','Previous slot cabinets');
  const next=doc.createElement('button');next.type='button';next.className='slots-carousel-arrow';next.textContent='›';next.setAttribute('aria-label','Next slot cabinets');

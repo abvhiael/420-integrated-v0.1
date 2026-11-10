@@ -75,3 +75,8 @@ nonce
 expectedRevision
 ```
 `action` is `bind` or `revoke`, `issuedAt` and `expiresAt` are Unix epoch milliseconds, `nonce` is a unique 64-character lowercase hex value, and `expectedRevision` is a monotonic uint64. A provider must independently authenticate/verify the real destination before signing any `bind` assertion. Go preserves a single active owner per channel/route and refuses a competing subject, stale scope or replay. The broker's private read token checks the actual store and never grants or transfers route ownership.
+
+
+**Route-withdrawal propagation:** A provider `revoke` attestation, or an approved transfer of an expired route to a new subject, is committed atomically with permanent tombstones for all active subscriptions still targeting the prior route. Each tombstone increments the subscription revision and emits an ordered `route_withdrawn` event for 420Bet's cancellation consumer; future delivery and provider-claim attempts fail current-consent checks. A claim lease cannot unsend a message already handed to an external provider. Actual provider-side consent rechecking and signed receipt reconciliation remain operational acceptance gates.
+
+**Local coverage:** Scoped CI tests the Go consent, route, provider leases and receipts; Node wallet challenge; Cloudflare same-origin proxy; 420Mail authenticated actors; and existing Go/Node service transport. Local test identities and recipient attestations are controlled fixtures, not real registered external destinations.

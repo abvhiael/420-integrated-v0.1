@@ -4,6 +4,7 @@
 import {mkdir,open,readFile,rename,rm,stat,chmod} from 'node:fs/promises';
 import {dirname,basename,join,isAbsolute} from 'node:path';
 import {randomBytes} from 'node:crypto';
+import {acquireDeliveryWriterLease} from './delivery-writer-lease.mjs';
 
 const requireValid=(value,message)=>{if(!value)throw Error('420Bet delivery worker: '+message);};
 const isInt=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
@@ -63,7 +64,7 @@ export async function openBetOperationalDeliveryWorker({
  await mkdir(parent,{recursive:true,mode:0o700});
  requireValid(((await stat(parent)).mode&0o022)===0,'monitoring directory unsafe');
  const lock=statePath+'.lock';
- await mkdir(lock,{mode:0o700}); // Fail closed on orphaned/active writer lock.
+ const lease=await acquireDeliveryWriterLease(lock); // Fail closed on orphaned lock.
  let state,closed=false,stopping=false,started=false,timer=null,inFlight=null;
  let indexerLockFile=null,ownsIndexerLock=false;
  try{
@@ -94,7 +95,7 @@ export async function openBetOperationalDeliveryWorker({
    await persist(statePath,state);
   }
  }catch(error){if(ownsIndexerLock)await rm(indexerLockFile,{force:true});
-  await rm(lock,{recursive:true,force:true});throw error;}
+  await lease.release().catch(()=>{});throw error;}
  const snapshot=()=>structuredClone(state);
  function health(){
   const time=clock();
@@ -107,7 +108,9 @@ export async function openBetOperationalDeliveryWorker({
    inFlight:state.inFlight,lastSuccessAt:state.lastSuccessAt,
    lastFailureAt:state.lastFailureAt,lastErrorCode:state.lastErrorCode});
  }
- async function checkpoint(next){validate(next);await persist(statePath,next);state=next;}
+ async function checkpoint(next){
+  validate(next);await lease.assertOwner();await persist(statePath,next);state=next;
+ }
  async function execute(){
   requireValid(!stopping&&!closed,'worker stopped');
   requireValid(!inFlight,'delivery cycle already running');
@@ -170,7 +173,7 @@ export async function openBetOperationalDeliveryWorker({
   // The outbox must close before the worker lock is released.
   try{await runtime.stop();}finally{
    if(ownsIndexerLock)await rm(indexerLockFile,{force:true});
-   await rm(lock,{recursive:true,force:true});
+   await lease.release();
   }
  }
  return Object.freeze({start,runOnce:execute,health,checkpoint:()=>snapshot(),stop});

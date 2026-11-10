@@ -91,7 +91,42 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  const back=button(doc,'Return to base game',()=>resetBase(),'cj-reset');
  testing.append(tTitle,testFree,testClaim,testReverse,back);
  side.append(heading,info,counters,message,help,controls,testing);
- center.append(reels,side);
+ // Fixed help panel uses the same constants as the game engine, so payouts
+ // and the displayed eight line paths remain synchronized.
+ const reference=el(doc,'aside','cj-reference');
+ reference.setAttribute('aria-label','Paytable and eight paylines');
+ reference.append(el(doc,'h2','cj-reference-title','PAYTABLE & PAYLINES'));
+ const payTable=el(doc,'div','cj-paytable');
+ const payTitle=el(doc,'h3','','3 MATCHING · TOTAL BET ×');
+ payTable.append(payTitle);
+ const payNames={TICKET:'Lucky Lottery Ticket',DUMPSTER:'Golden Dumpster',CASH:'Almost Cash',DYNAMITE:'Disaster Dynamite',BUD:'Bud Jar',PIZZA:'Suspicious Pizza',FISH:'Dumpster Fish',WILD:'Jack Wild'};
+ for(const [symbol,award] of Object.entries(JACK_PAY)){
+  const row=el(doc,'div','cj-pay-row');
+  row.append(img(doc,JACK_SYMBOLS[symbol],payNames[symbol],'cj-pay-symbol'));
+  row.append(el(doc,'span','cj-pay-name',payNames[symbol]));
+  row.append(el(doc,'strong','cj-pay-value',award+'×'));
+  payTable.append(row);
+ }
+ const wildNote=el(doc,'p','cj-pay-note','Jack WILD substitutes for regular symbols. Three WILDs pay 8×.');
+ payTable.append(wildNote);
+ const lineSection=el(doc,'div','cj-line-section');
+ lineSection.append(el(doc,'h3','','8 FIXED PAYLINES'));
+ const lineGrid=el(doc,'div','cj-line-list');
+ JACK_LINES.forEach((line,i)=>{
+  const item=el(doc,'div','cj-line-item');
+  item.setAttribute('aria-label','Payline '+(i+1)+' positions '+line.map(p=>p+1).join(', '));
+  item.append(el(doc,'span','cj-line-number',String(i+1)));
+  const mini=el(doc,'div','cj-line-mini');
+  for(let p=0;p<9;p++){
+   const cell=el(doc,'span',line.includes(p)?'cj-line-on':'cj-line-off');
+   mini.append(cell);
+  }
+  item.append(mini);lineGrid.append(item);
+ });
+ lineSection.append(lineGrid);
+ const featuresNote=el(doc,'p','cj-pay-note','NINE LIVES: bells in 2, 4, 5, 6, 8. INSURANCE: three claim folders on either diagonal.');
+ reference.append(payTable,lineSection,featuresNote);
+ center.append(reels,side,reference);
  const footer=el(doc,'p','cj-disclaimer','Practice simulation only. Bonus odds and RTP have not been certified.');
  surface.append(top,notice,center,footer);stage.append(surface);
  function schedule(fn,ms){const id=setTimeout(()=>{pending=pending.filter(x=>x!==id);if(!ended)fn();},ms);pending.push(id);}

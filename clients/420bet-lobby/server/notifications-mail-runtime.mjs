@@ -156,6 +156,8 @@ export async function createBetNotificationsMailRuntime({
     const result=await reader.poll(snapshot,{maxBlocks:64,retainEvents:false});
     fail(result.reorganized!==true,'canonical history changed during full replay');
     snapshot=result.state;windows++;
+    // Bind every traversed window, including blocks with no qualifying logs.
+    digest.update(snapshot.nextBlock+'|'+(snapshot.tipHash??'null')+'\n');
     const windowEvents=snapshot.events;
     // Chain-bound event digest prevents a different second-pass event set from
     // silently reprojection or releasing the dispatch halt.

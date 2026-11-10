@@ -430,7 +430,18 @@ export async function openBetDeliveryOutbox({
   return Object.freeze({processed:items.length,delivered,deliveredLate,failed,cancelled,pending});
  }
  async function get(key){await operation;return scrub(data.items[key]);}
- async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted,replayPending:data.replayPending,remoteCancellationPending:Object.values(data.items).filter(i=>i.remoteCancellationPending).length,correctionPending:Object.values(data.items).filter(i=>i.delivery.correctionOf&&i.status!=='delivered'&&i.status!=='cancelled').length};}
+ async function summary(){
+  await operation;
+  const items=Object.values(data.items),time=clock();
+  const oldest=list=>list.length?Math.max(0,time-Math.min(...list.map(i=>i.updatedAt))):0;
+  return {total:items.length,byStatus:counts(data),halted:data.halted,
+   replayPending:data.replayPending,
+   remoteCancellationPending:items.filter(i=>i.remoteCancellationPending).length,
+   oldestCancellationAgeMs:oldest(items.filter(i=>i.remoteCancellationPending)),
+   oldestPendingAgeMs:oldest(items.filter(i=>['pending','retry','pending_receipt'].includes(i.status))),
+   correctionPending:items.filter(i=>i.delivery.correctionOf&&
+    i.status!=='delivered'&&i.status!=='cancelled').length};
+ }
  async function close(){await operation;closed=true;await lease.release();}
  return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,recoveryEventIds,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,finishCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

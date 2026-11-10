@@ -41,3 +41,43 @@
 .bob-payline-core{stroke:#c9ff74;stroke-width:4;filter:drop-shadow(0 0 4px #7eff27)}
 @media(max-width:850px){.bob-scene{min-height:490px;grid-template-columns:minmax(0,1.4fr) minmax(155px,.7fr);padding-inline:10px}.bob-slot-title,.bob-slot-title img{height:75px}}
 @media(max-width:530px){.bob-scene{min-height:355px;grid-template-columns:minmax(0,1fr) 120px;padding-inline:5px}.bob-panel{margin-inline:4px}.bob-payline-glow{stroke-width:10}.bob-payline-core{stroke-width:3}}
+
+/* Layout recovery: show the wallpaper's built-in Bob on the left; compact game to right. */
+.bob-slot{width:100%;max-width:none;left:auto;transform:none;position:relative;overflow-x:clip}
+.bob-scene{display:flex;flex-direction:row;align-items:center;justify-content:flex-end;box-sizing:border-box;width:100%;min-height:clamp(560px,49vw,780px);padding:22px clamp(20px,4vw,76px) 22px 36%;background-size:cover;background-position:center center;background-repeat:no-repeat;gap:0}
+.bob-machine{display:flex;flex-direction:column;align-self:center;flex:0 1 790px;min-width:0;max-width:790px;width:100%;height:auto;min-height:0;margin:0;padding:12px;border-width:5px;background:#210e2bdf;box-sizing:border-box}
+.bob-reel-caption{flex:none;margin-bottom:6px}
+.bob-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,clamp(72px,7vw,108px));grid-auto-rows:0;flex:none;align-content:start;height:auto;min-height:0;max-height:none;overflow:hidden;padding:5px;gap:4px;box-sizing:border-box}
+.bob-cell{min-height:0;min-width:0;height:100%;box-sizing:border-box}
+.bob-cell img{height:100%;max-height:100%;width:100%;object-fit:contain}
+.bob-paytable{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;flex:none;align-self:stretch;width:100%;margin-top:9px;padding:8px 10px;box-sizing:border-box}
+.bob-paytable h2{grid-column:1/-1;font-size:clamp(13px,1.25vw,18px);margin:0 0 5px}
+.bob-pay-row{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:4px;min-height:27px;font-size:clamp(10px,.85vw,12px)}
+.bob-pay-row img{height:24px;width:24px}
+.bob-pay-row strong{grid-column:auto;font-size:clamp(9px,.7vw,11px)}
+.bob-paytable p{grid-column:1/-1;font-size:10px;margin:5px 0 0}
+.bob-status{flex:none;min-height:24px;padding:6px 0 0;font-size:clamp(12px,1vw,16px)}
+.bob-spin-dock{flex:none;padding:8px 0 2px}
+.bob-spin-dock .bob-spin{min-height:46px}
+@media(max-width:900px){
+ .bob-scene{padding:12px 12px 12px 28%;min-height:460px}
+ .bob-machine{padding:7px}
+ .bob-board{grid-template-rows:repeat(3,clamp(58px,8vw,88px))}
+ .bob-paytable{padding:5px;gap:0 5px}
+ .bob-pay-row{grid-template-columns:19px minmax(0,1fr) auto;min-height:22px;font-size:9px}
+ .bob-pay-row img{height:19px;width:19px}
+ .bob-pay-row strong{grid-column:auto;font-size:9px}
+}
+@media(max-width:600px){
+ .bob-scene{padding:7px 7px 7px 18%;min-height:340px;background-position:30% center}
+ .bob-machine{padding:5px;border-width:3px}
+ .bob-board{grid-template-rows:repeat(3,clamp(50px,13vw,73px));gap:2px;padding:3px}
+ .bob-paytable{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 3px}
+ .bob-paytable h2{font-size:11px}
+ .bob-pay-row{grid-template-columns:16px minmax(0,1fr);font-size:8px;min-height:22px}
+ .bob-pay-row img{height:16px;width:16px}
+ .bob-pay-row strong{grid-column:2;font-size:8px}
+ .bob-paytable p{font-size:8px}
+ .bob-spin-dock{padding:5px 0 0}
+ .bob-spin-dock .bob-spin{min-height:34px}
+}

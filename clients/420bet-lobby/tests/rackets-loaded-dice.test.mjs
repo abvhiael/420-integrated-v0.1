@@ -51,6 +51,8 @@ test('uploaded image paths are wired to the UI and numeric overlays come from th
  assert(images.some(img=>img.getAttribute('src')===base+'ui/ui_racketometer_stage_1_low.png'));
  assert(root.querySelector('.racket-scene .racket-character-png'));
  assert(root.querySelector('.racket-scene .racket-machine-png'));
+ assert(root.querySelector('.racket-scene .racket-temper .racket-meter-png'));
+ assert.equal(root.querySelector('.nd-controls .racket-temper'),null);
  assert.equal(root.querySelector('.racket-slider-art input.nd-slider')?.getAttribute('type'),'range');
  assert.equal(root.querySelectorAll('.racket-toggle .nd-choice').length,2);
  assert.match(root.querySelector('.racket-toggle').textContent,/BET UNDER/);

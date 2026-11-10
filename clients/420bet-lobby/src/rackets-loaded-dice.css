@@ -401,3 +401,16 @@
  .racket-dice .racket-history .racket-history-slot .nd-pill{font-size:clamp(.44rem,1.7vw,.72rem)!important}
  .racket-dice .racket-history-status,.racket-dice .racket-history-bonus{display:none}
 }
+
+/* Numerals belong in the artwork's black display windows, not below the frame. */
+.racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{
+ justify-content:center!important;align-items:center!important;padding:12px 10px 0!important;
+}
+.racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{
+ margin:0!important;transform:translateY(10px);font-variant-numeric:tabular-nums;
+}
+.racket-dice .racket-potential-haul strong{margin-left:12%!important;font-size:clamp(.85rem,1.4vw,1.25rem)}
+@media(min-width:900px){
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{padding:9px 10px 0!important}
+ .racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{transform:translateY(7px)}
+}

@@ -61,7 +61,7 @@ export async function createBetNotificationsMailRuntime({
  const reader=readerFactory({manifest,fetcher});
  let trustedReplayWindow=null;
  const proofKey=e=>[e.chainId,e.blockNumber,e.blockHash,e.transactionHash,e.logIndex,
-  e.account?.toLowerCase()??'',e.type].join('|');
+  e.type].join('|');
  const verifyEvent=async request=>{
   if(trustedReplayWindow!==null)return trustedReplayWindow.has(proofKey({...request.event,type:Object.entries(TYPE_NAMES).find(([,k])=>k===request.kind)?.[0]}));
   try{

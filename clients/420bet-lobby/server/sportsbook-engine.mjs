@@ -131,10 +131,10 @@ function audit(s,operation,id){
 export function createLocalSportsbookEngine({
  chainId,assetId,vaultId,operatorId,capital,policy,
  signQuote,verifyQuote,authorizePlayer,checkEligibility,
- verifyResult,clock=Date.now,preloaded=null
+ verifyResult,clock=Date.now,preloaded=null,persistState=async()=>{}
 }={}){
  for(const [name,fn] of Object.entries({signQuote,verifyQuote,authorizePlayer,
-  checkEligibility,verifyResult,clock}))requireTrue(typeof fn==='function','missing '+name);
+  checkEligibility,verifyResult,clock,persistState}))requireTrue(typeof fn==='function','missing '+name);
  let state=preloaded?clone(preloaded):initial({chainId,assetId,vaultId,operatorId,capital,policy});
  requireTrue(state.schema==='420bet-sportsbook-local-v1','invalid sportsbook schema');
  requireTrue(state.chainId===chainId&&state.assetId===assetId&&state.vaultId===vaultId&&
@@ -144,7 +144,7 @@ export function createLocalSportsbookEngine({
  function change(operation,fn){
   const result=mutation.then(async()=>{
    const next=clone(state),result=await fn(next);
-   invariant(next);state=next;return result;
+   invariant(next);await persistState(clone(next));state=next;return result;
   });
   mutation=result.catch(()=>{});return result;
  }

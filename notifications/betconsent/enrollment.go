@@ -48,6 +48,10 @@ func (s *Store) VerifiedEnrollment(a EnrollmentAssertion,sharedKey []byte,now ti
  s.mu.Lock();defer s.mu.Unlock()
  if s.closed{return Subscription{},errors.New("consent store closed")}
  if s.data.EnrollmentNonces[a.Nonce]>now.UnixMilli(){return Subscription{},errors.New("enrollment replay")}
+ if s.requireRoutes&&a.Action=="enroll"&&
+  !s.routeValid(a.UserID,a.Channel,a.Recipient,now.UnixMilli()){
+  return Subscription{},errors.New("provider route ownership not attested")
+ }
  k:=key(v.Tenant,v.UserID,v.SubscriptionID)
  prior,exists:=s.data.Items[k]
  if exists&&prior.Revoked{return Subscription{},errors.New("permanently revoked subscription")}
@@ -64,7 +68,8 @@ func (s *Store) VerifiedEnrollment(a EnrollmentAssertion,sharedKey []byte,now ti
  v.Revision=a.ExpectedRevision+1;v.UpdatedAt=now.UnixMilli()
  next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),
   Revocations:append([]Revocation(nil),s.data.Revocations...),
-  EnrollmentNonces:make(map[string]int64,len(s.data.EnrollmentNonces)+1)}
+  EnrollmentNonces:make(map[string]int64,len(s.data.EnrollmentNonces)+1),
+  Routes:s.data.Routes,RouteNonces:s.data.RouteNonces}
  for k,x:=range s.data.Items{next.Items[k]=x}
  for k,x:=range s.data.EnrollmentNonces{if x>now.UnixMilli(){next.EnrollmentNonces[k]=x}}
  if len(next.EnrollmentNonces)>=10000{return Subscription{},errors.New("enrollment nonce capacity exceeded")}

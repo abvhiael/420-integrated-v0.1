@@ -22,7 +22,7 @@ const message=p=>['420Bet Notification Consent','Action: '+p.action,
  'Signing only controls 420Bet notifications; it does not authorize wagering or payments.'].join('\n');
 export function createBetConsentEnrollmentBroker({
  origin,chainId,challengeKey,assertionKey,verifySignature,resolveSubject,
- commit,now=Date.now,random=()=>randomBytes(32).toString('hex')
+ verifyRoute,commit,now=Date.now,random=()=>randomBytes(32).toString('hex')
 }={}){
  const u=new URL(origin);
  check(u.protocol==='https:'&&!u.username&&!u.password&&!u.hash&&!u.search&&
@@ -31,7 +31,8 @@ export function createBetConsentEnrollmentBroker({
  check(TOKEN.test(challengeKey)&&TOKEN.test(assertionKey)&&challengeKey!==assertionKey,
   'separate challenge and broker keys required');
  check(typeof verifySignature==='function'&&typeof resolveSubject==='function'&&
-  typeof commit==='function','qualified wallet, Identity and Go commit providers required');
+  typeof verifyRoute==='function'&&typeof commit==='function',
+  'qualified wallet, Identity, route and Go commit authorities required');
  function scoped(raw){
   check(raw&&typeof raw==='object'&&!Array.isArray(raw),'scope required');
   check(raw.tenant==='420bet'&&['enroll','revoke'].includes(raw.action)&&
@@ -68,6 +69,15 @@ export function createBetConsentEnrollmentBroker({
    identity.account?.toLowerCase()===p.account&&
    typeof identity.userId==='string'&&ID.test(identity.userId),
    'independent 420Identity binding unavailable');
+  if(p.action==='enroll'){
+   const route=await verifyRoute({tenant:'420bet',userId:identity.userId,
+    channel:p.channel,recipient:p.recipient});
+   check(route?.verified===true&&route.active===true&&route.tenant==='420bet'&&
+    route.userId===identity.userId&&route.channel===p.channel&&
+    route.recipient===p.recipient&&Number.isSafeInteger(route.expiresAt)&&
+    route.expiresAt>now()&&route.expiresAt<=now()+300000,
+    'independent recipient route ownership not approved');
+  }
   const assertion={action:p.action,tenant:p.tenant,userId:identity.userId,
    subscriptionId:p.subscriptionId,recipient:p.recipient,channel:p.channel,
    policyVersion:p.policyVersion,nonce:digest(p.nonce),expiresAt:p.expiresAt,
@@ -75,6 +85,20 @@ export function createBetConsentEnrollmentBroker({
   return commit({...assertion,signature:hmac(assertionKey,lines(assertion))});
  }
  return Object.freeze({challenge,confirm});
+}
+export function createVerifiedConsentRouteAuthority({origin,bearerToken,fetcher=fetch}={}){
+ const url=new URL(origin);
+ check(url.protocol==='https:'&&!url.username&&!url.password&&!url.search&&!url.hash&&
+  url.pathname==='/'&&TOKEN.test(bearerToken),'independent provider route authority required');
+ return async scope=>{
+  const res=await fetcher(url.origin+'/v1/420bet/routes/verify',{
+   method:'POST',redirect:'error',credentials:'omit',cache:'no-store',
+   headers:{Authorization:'Bearer '+bearerToken,'Content-Type':'application/json',
+    Accept:'application/json'},body:JSON.stringify(scope),signal:AbortSignal.timeout(8000)});
+  check(res?.ok,'provider route attestation unavailable');
+  const raw=await res.text();check(raw.length>0&&raw.length<=4096,'invalid route attestation');
+  return JSON.parse(raw);
+ };
 }
 export function createGoConsentCommit({origin,bearerToken,fetcher=fetch}={}){
  const url=new URL(origin);

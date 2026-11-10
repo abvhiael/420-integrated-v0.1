@@ -65,8 +65,15 @@ export function createNeonDice(doc=globalThis.document,random){
   right.append(el('p','nd-result-sub practice-message','Browser-only virtual credits · no wallet, funds or withdrawable winnings'));
   board.append(left,right);root.append(board);
   const bottom=el('div','nd-bottom');const history=el('div','nd-history racket-history');history.style.backgroundImage="url('"+asset('ui','ui_evidence_locker_blank.png')+"')";history.append(el('h2','','↻ RACKET\'S EVIDENCE LOCKER · RECENT ROLLS'));
-  const pills=el('div','nd-pills');if(!rolls.length)pills.append(el('p','','The evidence locker is empty. Shake the can.'));
-  for(const item of rolls)pills.append(el('span',item.win?'nd-pill win':'nd-pill lose',String(item.value).padStart(4,'0')+(item.bonus?' ⚡':item.win?' ✓':' ×')));history.append(pills);bottom.append(history);
+  const pills=el('div','nd-pills racket-history-slots');pills.setAttribute('aria-label','Ten most recent dice rolls, newest first');
+  for(let i=0;i<10;i++){const slot=el('div','racket-history-slot'+(rolls[i]?'':' racket-history-empty'));const item=rolls[i];
+   if(item){const value=String(item.value).padStart(4,'0');const outcome=item.bonus?'Double Trouble '+(item.win?'win':'loss'):item.win?'win':'loss';
+    const valueEl=el('span',item.win?'nd-pill win':'nd-pill lose',value);valueEl.setAttribute('aria-label','Roll '+value+', '+outcome);valueEl.title='Roll '+value+' · '+outcome;
+    slot.append(valueEl);if(item.bonus)slot.append(el('span','racket-history-bonus','⚡'));
+    else slot.append(el('span',item.win?'racket-history-status win':'racket-history-status lose',item.win?'✓':'×'));
+   }else{slot.setAttribute('aria-hidden','true');}pills.append(slot);
+  }
+  history.append(pills);bottom.append(history);
   const rules=el('details','nd-rules');rules.append(el('summary','','ⓘ THE HOUSE RULES'),el('p','','Dice draws one simulated result from 0000 to 9999. Under wins below threshold; Over wins at or above it. Every roll costs 10.00 virtual credits; ordinary winning virtual returns are based on 96% divided by the exact win probability. The Racket-O-Meter charges 10% each roll, plus 5% for a win. Once full, the NEXT roll consumes Double Trouble: if it wins, the virtual credit return is doubled; otherwise no return. The meter resets to zero after either outcome. All numbers are browser-only practice: no funds, wagering, withdrawable prizes or change to the dice outcome engine.'));bottom.append(rules);root.append(bottom);
   root.append(el('p','nd-disclaimer','Browser-only simulated credits. No funds, real wagering, withdrawal, wallet connection or canonical random/settlement.'));
  };

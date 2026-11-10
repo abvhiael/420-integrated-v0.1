@@ -308,3 +308,109 @@
  .racket-dice .racket-double-trouble-hit,
  .racket-dice .racket-double-trouble-miss{animation:none}
 }
+
+/* Screen-fit refinement: keep illustrated controls at their native aspect ratio.
+   The art is not a panel-sized background to stretch across the whole column. */
+.racket-dice.neon-dice-page{min-height:calc(100dvh - 110px);padding:clamp(8px,1vw,16px)}
+.racket-dice .racket-board{width:100%;max-width:none;grid-template-columns:minmax(0,42%) minmax(0,58%);column-gap:clamp(8px,1.25vw,24px)}
+.racket-dice .nd-controls{width:100%;min-width:0;align-items:stretch}
+.racket-dice .racket-toggle{width:100%;gap:clamp(8px,1vw,15px)}
+.racket-dice .nd-choice{border-radius:12px;letter-spacing:.015em;min-width:0;min-height:clamp(50px,5.5vh,66px);box-shadow:0 3px 11px #0009!important}
+.racket-dice .racket-slider-art{width:100%;border-radius:12px}
+.racket-dice .nd-stats{gap:clamp(6px,1.2vw,20px);justify-items:center}
+.racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{
+ width:100%;max-width:430px;min-width:0;min-height:104px;height:clamp(104px,12vh,126px);
+ padding:64px 10px 12px;
+ background-size:contain!important;background-repeat:no-repeat;background-position:center;
+}
+.racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{
+ display:block;max-width:76%;line-height:1.2;margin:0 auto;
+ font-size:clamp(1rem,1.6vw,1.45rem);text-align:center;
+}
+.racket-dice .racket-roll{
+ width:min(100%,600px);height:clamp(105px,14vh,138px);min-height:105px;
+ margin-inline:auto;align-self:center;flex-shrink:0;
+ background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;
+}
+.racket-dice .racket-result-display{
+ width:min(100%,630px);height:clamp(112px,14vh,145px);min-height:112px;
+ background-size:contain!important;background-position:center!important;background-repeat:no-repeat!important;
+}
+.racket-dice .racket-result-display .nd-big-number{font-size:clamp(3rem,4.4vw,4.8rem)}
+.racket-dice .racket-meter-png{object-fit:contain!important}
+.racket-dice .nd-bottom{width:100%;align-items:center}
+.racket-dice .racket-history{
+ width:100%;flex:1 1 auto;min-width:0;
+ position:relative;min-height:clamp(112px,14vh,142px);height:clamp(112px,14vh,142px);
+ padding:0!important;background-size:100% 100%!important;
+ background-position:center center!important;background-repeat:no-repeat;
+}
+.racket-dice .racket-history .racket-history-slots{
+ position:absolute;display:grid!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;
+ gap:0!important;left:6.4%;right:5.8%;top:54%;height:27%;bottom:auto;
+ align-items:center;justify-items:stretch;margin:0;padding:0;
+}
+.racket-dice .racket-history .racket-history-slot{
+ min-width:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+ gap:2px;position:relative;overflow:hidden;
+}
+.racket-dice .racket-history .racket-history-slot .nd-pill{
+ display:block;min-width:0;width:auto;max-width:100%;
+ overflow:visible;padding:0;margin:0;background:none!important;border:0!important;
+ color:#eaffd2;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+ font-size:clamp(.72rem,1.12vw,1.2rem)!important;font-weight:1000;
+ letter-spacing:0;line-height:1;text-shadow:0 0 4px #000,0 0 5px #7efc2c;
+ text-align:center;
+}
+.racket-dice .racket-history .racket-history-slot .nd-pill.lose{color:#fff3d9}
+.racket-dice .racket-history-status,.racket-dice .racket-history-bonus{
+ font-size:clamp(.52rem,.65vw,.85rem);font-weight:900;line-height:1;
+}
+.racket-dice .racket-history-status.win{color:#a5ff5c}
+.racket-dice .racket-history-status.lose{color:#ffc291}
+.racket-dice .racket-history-bonus{color:#fce84c}
+@media(min-width:900px){
+ .racket-dice .racket-board{grid-template-columns:minmax(0,42%) minmax(0,58%);min-height:0}
+ .racket-dice .racket-scene{min-height:clamp(470px,61vh,610px)}
+ .racket-dice .racket-character{height:77%;top:14%;width:59%}
+ .racket-dice .racket-machine{height:77%;top:12%;left:46%;width:55%}
+ .racket-dice .racket-scene-title{width:68%}
+ .racket-dice .nd-controls{gap:clamp(5px,.85vh,10px)}
+ .racket-dice .racket-credit-bar{min-height:28px}
+ .racket-dice .racket-result{min-height:clamp(177px,23vh,210px);gap:3px}
+ .racket-dice .racket-history{min-height:clamp(112px,14vh,140px);height:clamp(112px,14vh,140px)}
+ .racket-dice .racket-temper{bottom:0}
+ .racket-dice .racket-meter-png{height:clamp(75px,10vh,100px)}
+ .racket-dice .racket-roll{height:clamp(105px,14vh,135px)}
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{height:clamp(104px,12vh,126px);min-height:104px}
+}
+@media(min-width:721px) and (max-width:899px){
+ .racket-dice .racket-history .racket-history-slots{top:54%;height:26%}
+ .racket-dice .racket-history .racket-history-slot .nd-pill{font-size:.68rem!important}
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{height:95px;min-height:95px;padding-top:52px}
+ .racket-dice .racket-roll{height:115px}
+}
+@media(max-width:720px){
+ .racket-dice .nd-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{height:104px;min-height:104px;padding-top:56px}
+ .racket-dice .racket-roll{width:100%;height:115px}
+ .racket-dice .racket-result-display{height:126px}
+ .racket-dice .racket-history{height:110px;min-height:110px}
+ .racket-dice .racket-history .racket-history-slots{grid-template-columns:repeat(10,minmax(0,1fr))!important;top:52%;height:29%;left:6%;right:6%}
+ .racket-dice .racket-history .racket-history-slot{gap:0}
+ .racket-dice .racket-history .racket-history-slot .nd-pill{font-size:clamp(.44rem,1.7vw,.72rem)!important}
+ .racket-dice .racket-history-status,.racket-dice .racket-history-bonus{display:none}
+}
+
+/* Numerals belong in the artwork's black display windows, not below the frame. */
+.racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{
+ justify-content:center!important;align-items:center!important;padding:12px 10px 0!important;
+}
+.racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{
+ margin:0!important;transform:translateY(10px);font-variant-numeric:tabular-nums;
+}
+.racket-dice .racket-potential-haul strong{margin-left:12%!important;font-size:clamp(.85rem,1.4vw,1.25rem)}
+@media(min-width:900px){
+ .racket-dice .racket-win-chance,.racket-dice .racket-potential-haul{padding:9px 10px 0!important}
+ .racket-dice .racket-win-chance strong,.racket-dice .racket-potential-haul strong{transform:translateY(7px)}
+}

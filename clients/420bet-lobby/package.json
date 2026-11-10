@@ -11,6 +11,7 @@
     "sync:indexer:events": "node server/sync-indexer-events.mjs",
     "serve:identity": "node server/serve-identity.mjs",
     "worker:delivery": "node server/run-delivery-worker.mjs",
+    "serve:ownership": "node server/serve-ownership.mjs",
     "verify:registry": "node server/verify-registry.mjs"
   },
   "devDependencies": {

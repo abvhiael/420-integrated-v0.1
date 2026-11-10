@@ -12,7 +12,17 @@ const base=[
 ['bill','pizza','free','bag','snack','ashtray','papers','pick','burrito','lighter','wild','couch','bill','bag','pizza','snack','free','ashtray','papers','burrito','lighter','pick','couch','bill','bag','snack','pizza','wild','papers','ashtray','lighter','free','burrito','couch','bag','bill','pizza','snack','pick','papers','lighter','ashtray'],
 ['snack','papers','bill','bag','wild','pizza','couch','pick','lighter','ashtray','free','burrito','snack','papers','bill','bag','pizza','couch','ashtray','free','lighter','pick','snack','burrito','papers','bill','bag','wild','pizza','lighter','ashtray','couch','free','snack','papers','bill','bag','pick','burrito','pizza','lighter','ashtray']
 ];
-const freeStrips=base.map(strip=>strip.map((s,i)=>s==='pick'?(i%2===0?'wild':'bag'):s));
+// Preserve the existing free-spin strips, then double their WILD counts exactly.
+const freeWildSource=base.map(strip=>strip.map((s,i)=>s==='pick'?(i%2===0?'wild':'bag'):s));
+const freeStrips=freeWildSource.map((strip,reel)=>{
+ const original=strip.filter(symbol=>symbol==='wild').length;
+ const result=[...strip];
+ const candidates=[...result.keys()].filter(i=>!['wild','free','pick'].includes(result[i]));
+ // Fixed, reproducible distribution around each circular strip, not arbitrary per-spin substitutions.
+ for(let n=0;n<original;n++){const at=Math.floor((n+.5)*candidates.length/original);result[candidates[(at+reel)%candidates.length]]='wild';}
+ if(result.filter(symbol=>symbol==='wild').length!==original*2)throw new Error('Free-spin WILD distribution failed');
+ return Object.freeze(result);
+});
 const rand=n=>Math.floor(Math.random()*n);
 const choice=a=>a[rand(a.length)];
 const el=(d,tag,cls='',value)=>{const n=d.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=value;return n;};
@@ -28,7 +38,7 @@ function sample(stake,freeMode=false){const strips=freeMode?freeStrips:base;cons
 function pickThree(){const pool=[...bonusObjects];const result=[];for(let i=0;i<3;i++)result.push(pool.splice(rand(pool.length),1)[0]);return result;}
 const awards=[5,10,20,35,50];
 const faces={idle:'bongwater-bob-01-default',loss:'bongwater-bob-06-side-eye',win:'bongwater-bob-04-laughing',big:'bongwater-bob-17-mind-blown',pick:'bongwater-bob-22-mischievous',free:'bongwater-bob-12-dizzy',end:'bongwater-bob-18-celebration'};
-export {evaluate,gridFrom,sample,pickThree,paylines,pays,base,bonusObjects};
+export {evaluate,gridFrom,sample,pickThree,paylines,pays,base,freeStrips,bonusObjects};
 export function createBongwaterBobPractice(doc=globalThis.document){
  let credits=10000,bet=2,totalWin=0,mode='base',freeRemaining=0,freeGranted=0,freeTotal=0,busy=false,disposed=false;let pendingPick=null,testingMode=false;const spinTimers=new Set();let spinInterval=null;
  const root=el(doc,'section','bob-slot');root.setAttribute('aria-label',"Bongwater Bob's Bad Decisions — practice slot");
@@ -47,6 +57,13 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  right.append(paytable,hero);scene.append(right);
  const machine=el(doc,'div','bob-machine');const title=el(doc,'div','bob-reel-caption','THREE REELS · FIVE FIXED LINES');
  const board=el(doc,'div','bob-board');const tiles=[];for(let row=0;row<3;row++){for(let c=0;c<3;c++){const cell=el(doc,'div','bob-cell');const picture=el(doc,'img');picture.alt='';cell.append(picture);board.append(cell);tiles.push(picture);}}
+ // Overlay only: never adds an extra grid cell or affects reel evaluation.
+ const paylineSvg=doc.createElementNS('http://www.w3.org/2000/svg','svg');
+ paylineSvg.setAttribute('viewBox','0 0 300 300');
+ paylineSvg.setAttribute('preserveAspectRatio','none');
+ paylineSvg.setAttribute('class','bob-payline-overlay');
+ paylineSvg.setAttribute('aria-hidden','true');
+ board.append(paylineSvg);
  const status=el(doc,'div','bob-status');status.setAttribute('aria-live','polite');machine.append(title,board,status);scene.append(machine);
  const bonus=el(doc,'div','bob-bonus');bonus.hidden=true;scene.append(bonus);
  const panel=el(doc,'div','bob-panel');const creditLabel=el(doc,'div','bob-meter'),betLabel=el(doc,'div','bob-meter'),winLabel=el(doc,'div','bob-meter');
@@ -61,6 +78,20 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  function wallpaper(kind){scene.style.backgroundImage='url("'+img('backgrounds',kind==='pick'?'bob-pick-bonus-wallpaper':kind==='free'?'bob-free-spins-wallpaper':'bob-base-game-wallpaper')+'")';}
  function paintColumn(col,values){for(let row=0;row<3;row++){const symbol=values[row],picture=tiles[row*3+col];picture.src=img('symbols',icons[symbol]);picture.alt=names[symbol];}}
  function paint(grid){for(let c=0;c<3;c++)paintColumn(c,grid[c]);}
+ function clearPaylines(){paylineSvg.replaceChildren();}
+ function showWinningPaylines(winners){
+  clearPaylines();
+  for(const {line} of winners){
+   const rows=paylines[line-1];if(!rows)continue;
+   const points=[[0,50+100*rows[0]],...rows.map((row,col)=>[50+100*col,50+100*row]),[300,50+100*rows[2]]];
+   const d=points.map(([x,y],i)=>(i===0?'M':'L')+x+' '+y).join(' ');
+   const glow=doc.createElementNS('http://www.w3.org/2000/svg','path');
+   glow.setAttribute('d',d);glow.setAttribute('class','bob-payline-glow');
+   const core=doc.createElementNS('http://www.w3.org/2000/svg','path');
+   core.setAttribute('d',d);core.setAttribute('class','bob-payline-core');
+   paylineSvg.append(glow,core);
+  }
+ }
  function schedule(fn,ms){const id=setTimeout(()=>{spinTimers.delete(id);if(!disposed)fn();},ms);spinTimers.add(id);}
  function clearSpin(){if(spinInterval!==null){clearInterval(spinInterval);spinInterval=null;}for(const id of spinTimers)clearTimeout(id);spinTimers.clear();board.classList.remove('bob-reels-spinning');}
  function animate(result,finished){
@@ -77,6 +108,7 @@ export function createBongwaterBobPractice(doc=globalThis.document){
  function message(s){status.textContent=s;}
  function finishFeature(){mode='base';freeRemaining=0;freeGranted=0;wallpaper('base');face('end');message('FREE SPINS COMPLETE! TOTAL '+money(freeTotal)+(testingMode?' · DEMO ONLY':''));testingMode=false;meters();}
  function settle(result){
+  showWinningPaylines(result.winners);
   totalWin=result.total;if(!testingMode)credits+=result.total;if(mode==='free')freeTotal+=result.total;
   face(result.total>=bet*20?'big':result.total>0?'win':'loss');
   message(result.winners.length?result.winners.map(w=>'LINE '+w.line+' '+money(w.amount)).join(' · '):'BOB MADE ANOTHER BAD DECISION');
@@ -90,13 +122,13 @@ export function createBongwaterBobPractice(doc=globalThis.document){
   if(mode==='base'&&credits<bet){message('NOT ENOUGH PRACTICE CREDITS');return;}
   if(mode==='base')credits-=bet;
   if(mode==='free')freeRemaining--;
-  busy=true;meters();
+  busy=true;clearPaylines();meters();
   const result=sample(bet,mode==='free');
   animate(result,()=>settle(result));
  }
  function startTest(kind){
   if(disposed||busy||mode!=='base')return;
-  testingMode=true;totalWin=0;
+  testingMode=true;totalWin=0;clearPaylines();
   if(kind==='pick'){pendingPick={options:pickThree(),award:choice(awards)*bet};mode='pick';wallpaper('pick');face('pick');showPick();message('TEST MODE: PICK ANY ONE OF THE THREE RANDOM PROPS');}
   else {mode='free';freeGranted=8;freeRemaining=8;freeTotal=0;wallpaper('free');face('free');message('TEST MODE: EIGHT FREE SPINS, NO CREDIT CHANGES');}
   meters();

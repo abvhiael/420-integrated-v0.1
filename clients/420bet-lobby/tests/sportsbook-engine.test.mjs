@@ -12,7 +12,7 @@ const basePolicy={ticketStakeMax:'1000',ticketGrossMax:'4000',
  playerGrossMax:'7000',marketGrossMax:'10000',eventGrossMax:'12000',
  correlationGrossMax:'12000',operatorGrossMax:'15000',
  vaultGrossMax:'15000',playerDailyStakeMax:'2500',
- playerDailyLossMax:'2500',capitalSafetyReserve:'1000'};
+ playerDailyLossMax:'2500',capitalSafetyReserve:'1000',challengeWindowMs:86400000};
 let time=1762790400000;
 const args=(override={})=>({chainId:'420',assetId:'test-420',vaultId:'vault-1',
  operatorId:'operator-1',capital:'16000',policy:basePolicy,
@@ -164,9 +164,24 @@ test('dispute blocks finalization; stale signed quote after suspension cannot by
  time+=86400001;
  await assert.rejects(e.finalizeResult(m.id,{role:'independentFinalizer',approved:true,
   digest:p.digest}),/challenge hold/);
+ await assert.rejects(e.proposeResult(m.id,scores(1,1),{role:'factReporter',
+  approved:true,sourceDigest:'a'.repeat(64),sequence:2,previousDigest:p.digest}),
+  /independent dispute disposition required/);
  const revised=await e.proposeResult(m.id,scores(1,1),{role:'factReporter',
-  approved:true,sourceDigest:'a'.repeat(64),sequence:2,previousDigest:p.digest});
+  approved:true,sourceDigest:'a'.repeat(64),sequence:2,previousDigest:p.digest,
+  disputeRole:'independentResolver',disputeResolutionApproved:true,
+  disputeDigest:p.digest});
  assert.equal(revised.sequence,2);
+});
+test('final result is immutable even to the original authorized fact reporter',async()=>{
+ const e=createLocalSportsbookEngine(args());
+ await openMarket(e,terms());
+ const r=await result(e,'moneyline',scores(7,2));
+ time+=86400001;
+ await e.finalizeResult('moneyline',{role:'independentFinalizer',approved:true,digest:r.digest});
+ await assert.rejects(e.proposeResult('moneyline',scores(0,9),{
+  role:'factReporter',approved:true,sourceDigest:'a'.repeat(64),
+  sequence:2,previousDigest:r.digest}),/finalized result cannot be revised/);
 });
 test('journal reopens with same ticket reservation and exact-once terminal receipt; second writer barred',async()=>{
  const dir=await mkdtemp(join(tmpdir(),'book-v1-'));

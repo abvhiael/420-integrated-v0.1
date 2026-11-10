@@ -93,9 +93,9 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  side.append(heading,info,counters,message,help,controls,testing);
  // Fixed help panel uses the same constants as the game engine, so payouts
  // and the displayed eight line paths remain synchronized.
- const reference=el(doc,'aside','cj-reference');
+ const reference=el(doc,'aside','cj-reference cj-poster');
  reference.setAttribute('aria-label','Paytable and eight paylines');
- reference.append(el(doc,'h2','cj-reference-title','PAYTABLE & PAYLINES'));
+ reference.append(el(doc,'h2','cj-reference-title cj-poster-title','PAYTABLE & PAYLINES'));
  const payTable=el(doc,'div','cj-paytable');
  const payTitle=el(doc,'h3','','3 MATCHING · TOTAL BET ×');
  payTable.append(payTitle);
@@ -126,7 +126,58 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  lineSection.append(lineGrid);
  const featuresNote=el(doc,'p','cj-pay-note','NINE LIVES: bells in 2, 4, 5, 6, 8. INSURANCE: three claim folders on either diagonal.');
  reference.append(payTable,lineSection,featuresNote);
- center.append(reels,side,reference);
+ // Comic-style illustrated bonus poster. Triggers share engine constants.
+ const bonusGuide=el(doc,'aside','cj-bonus-guide cj-poster');
+ bonusGuide.setAttribute('aria-label','How to trigger the three bonus features');
+ bonusGuide.append(el(doc,'h2','cj-poster-title','HOW TO GET UNLUCKY!'));
+ bonusGuide.append(el(doc,'p','cj-poster-intro','THREE WAYS FOR JACK TO STRIKE IT RICH... OR GET FLATTENED.'));
+ const bonusList=el(doc,'div','cj-bonus-list');
+ const miniPattern=(positions,symbol,caption)=>{
+  const wrap=el(doc,'div','cj-trigger-wrap');
+  const grid=el(doc,'div','cj-trigger-grid');
+  grid.setAttribute('role','img');
+  grid.setAttribute('aria-label',caption);
+  for(let p=0;p<9;p++){
+   const active=positions.includes(p);
+   const tile=el(doc,'span','cj-trigger-cell'+(active?' cj-trigger-active':''));
+   if(active)tile.append(img(doc,JACK_SYMBOLS[symbol],'','cj-trigger-symbol'));
+   else tile.textContent=String(p+1);
+   grid.append(tile);
+  }
+  wrap.append(grid);return wrap;
+ };
+ const bonusCard=(number,title,artPath,trigger,award,note,positions,symbol,caption)=>{
+  const card=el(doc,'section','cj-bonus-card');
+  card.append(el(doc,'span','cj-bonus-number','CASE #'+number));
+  card.append(el(doc,'h3','cj-bonus-name',title));
+  const body=el(doc,'div','cj-bonus-body');
+  body.append(miniPattern(positions,symbol,caption));
+  const details=el(doc,'div','cj-bonus-details');
+  details.append(el(doc,'strong','cj-trigger-label','TRIGGER!'));
+  details.append(el(doc,'p','cj-bonus-trigger',trigger));
+  details.append(el(doc,'strong','cj-bonus-award',award));
+  details.append(el(doc,'p','cj-bonus-small',note));
+  body.append(details);card.append(body);
+  const burst=el(doc,'div','cj-bonus-art');
+  burst.append(img(doc,artPath,'','cj-bonus-art-img'));
+  card.append(burst);return card;
+ };
+ bonusList.append(
+  bonusCard(1,'NINE LIVES!','characters/jack_nine_lives_shocked.png',
+   '5 DISASTER BELLS on the cross: 2 · 4 · 5 · 6 · 8','9 FREE SPINS!',
+   'Catastrophe multipliers: spin 3 ×2 · spin 6 ×3 · spin 9 ×5.',
+   JACK_CROSS,'BELL','Bells in positions 2, 4, 5, 6 and 8'),
+  bonusCard(2,'INSURANCE CLAIM!','characters/jack_insurance_claim.png',
+   '3 CLAIM FOLDERS on either diagonal: 1-5-9 or 3-5-7','PICK 3 FOLDERS!',
+   'The current practice game doubles the sum of the revealed prizes.',
+   [0,4,8],'CLAIM','Claim folders in positions 1, 5 and 9; positions 3, 5 and 7 also trigger'),
+  bonusCard(3,'CATASTROPHIC REVERSAL!','features/symbol_falling_anvil.png',
+   'FALLING ANVIL in the centre: position 5','WILDS FROM DISASTER!',
+   'Jack gets flattened and the transformed symbols are re-evaluated for line wins.',
+   [4],'ANVIL','Falling anvil in centre position 5')
+ );
+ bonusGuide.append(bonusList,el(doc,'p','cj-poster-footnote','PRACTICE ONLY! FEATURE CHANCES NOT YET RTP-QUALIFIED.'));
+ center.append(reels,side,reference,bonusGuide);
  const footer=el(doc,'p','cj-disclaimer','Practice simulation only. Bonus odds and RTP have not been certified.');
  surface.append(top,notice,center,footer);stage.append(surface);
  function schedule(fn,ms){const id=setTimeout(()=>{pending=pending.filter(x=>x!==id);if(!ended)fn();},ms);pending.push(id);}

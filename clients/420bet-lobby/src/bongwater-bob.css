@@ -99,3 +99,83 @@
 
 /* Pick mode presents the chosen props against their own wallpaper, never beneath a darkened reel grid. */
 .bob-scene[data-bob-mode='pick'] .bob-machine{visibility:hidden}
+
+/* Layout v4: game/payouts centered; bonus rules and live Bob on the right. */
+.bob-scene{
+ position:relative;display:block;min-height:clamp(630px,49vw,790px);
+ padding:16px;background-size:cover;background-position:center center;
+}
+.bob-scene .bob-machine{
+ position:relative;left:50%;transform:translateX(-50%);margin:0;
+ width:min(43vw,690px);max-width:690px;min-width:0;
+ padding:10px;min-height:0;height:auto;
+}
+.bob-scene .bob-board{
+ grid-template-rows:repeat(3,clamp(66px,6.2vw,100px));
+}
+.bob-scene .bob-reaction-zone{
+ position:absolute;right:1.25%;top:5%;bottom:1%;
+ display:flex;flex-direction:column;align-items:center;
+ justify-content:space-between;width:clamp(210px,19vw,295px);
+ z-index:3;pointer-events:none;
+}
+.bob-trigger-comic{
+ width:100%;box-sizing:border-box;transform:rotate(-1deg);
+ border:4px solid #161020;border-radius:11px;
+ padding:10px 10px 12px;background:#ffe66b;
+ box-shadow:5px 6px 0 #171020,0 0 0 3px #abff20;
+ color:#23112c;pointer-events:auto;
+ background-image:radial-gradient(#d1aa3b66 1px,transparent 1px);
+ background-size:8px 8px;
+}
+.bob-trigger-title{
+ margin:0 0 10px;text-align:center;font-weight:1000;
+ font-size:clamp(16px,1.45vw,23px);line-height:1;
+ font-family:Impact,'Arial Black',system-ui,sans-serif;
+ letter-spacing:.03em;color:#fff;text-shadow:2px 2px 0 #180b20,-2px -2px 0 #180b20,-2px 2px 0 #180b20,2px -2px 0 #180b20,3px 4px 0 #a51ab1;
+}
+.bob-trigger-row{display:flex;align-items:center;gap:8px;padding:7px 3px;border-top:2px dashed #642366}
+.bob-trigger-icon{width:58px;height:62px;object-fit:contain;flex-shrink:0;filter:drop-shadow(2px 3px #2f112750)}
+.bob-trigger-copy{display:flex;flex-direction:column;gap:3px;line-height:1.15}
+.bob-trigger-copy strong{font-family:Impact,'Arial Black',system-ui,sans-serif;font-size:clamp(13px,1.05vw,17px);color:#86229f;text-shadow:1px 1px #fff}
+.bob-trigger-copy span{font-size:clamp(11px,.88vw,14px);font-weight:800;color:#25132b}
+.bob-reaction-character{
+ display:block;width:100%;height:min(33vh,280px);min-height:135px;
+ object-fit:contain;object-position:center bottom;
+ filter:drop-shadow(0 10px 7px #0009);
+}
+.bob-scene[data-bob-mode='pick'] .bob-reaction-zone{visibility:hidden}
+.bob-scene .bob-splash,.bob-scene .bob-bonus{z-index:30}
+@media(max-width:1100px){
+ .bob-scene .bob-machine{left:49%;width:min(48vw,620px)}
+ .bob-scene .bob-reaction-zone{width:21%;right:1%;top:4%}
+ .bob-trigger-comic{padding:6px;border-width:3px}
+ .bob-trigger-icon{height:43px;width:40px}
+ .bob-trigger-title{font-size:15px;margin-bottom:5px}
+ .bob-trigger-copy strong{font-size:12px}
+ .bob-trigger-copy span{font-size:10px}
+ .bob-reaction-character{height:200px}
+}
+@media(max-width:720px){
+ .bob-scene{min-height:500px;padding:6px}
+ .bob-scene .bob-machine{left:44%;width:57%;padding:5px}
+ .bob-scene .bob-board{grid-template-rows:repeat(3,clamp(53px,10vw,75px))}
+ .bob-scene .bob-reaction-zone{right:1%;top:5%;bottom:2%;width:23%}
+ .bob-trigger-title{font-size:12px}
+ .bob-trigger-row{gap:2px;padding:4px 1px}
+ .bob-trigger-icon{width:27px;height:30px}
+ .bob-trigger-copy strong{font-size:10px}
+ .bob-trigger-copy span{font-size:9px}
+ .bob-reaction-character{min-height:95px;height:140px}
+}
+@media(max-width:450px){
+ .bob-scene{min-height:440px}
+ .bob-scene .bob-machine{left:40%;width:61%;border-width:3px}
+ .bob-scene .bob-board{grid-template-rows:repeat(3,50px)}
+ .bob-scene .bob-reaction-zone{width:26%;right:.5%}
+ .bob-trigger-comic{padding:3px}
+ .bob-trigger-title{font-size:10px}
+ .bob-trigger-icon{width:23px;height:25px}
+ .bob-trigger-copy span{font-size:8px}
+ .bob-reaction-character{height:110px}
+}

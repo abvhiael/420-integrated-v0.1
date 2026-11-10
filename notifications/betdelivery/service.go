@@ -46,6 +46,8 @@ type receipt struct {
 type entry struct {
  Request Delivery `json:"request"`
  Receipt receipt `json:"receipt"`
+ NextClaimAt int64 `json:"nextClaimAt,omitempty"`
+ ClaimAttempts uint32 `json:"claimAttempts,omitempty"`
 }
 type snapshot struct {
  Schema int `json:"schema"`

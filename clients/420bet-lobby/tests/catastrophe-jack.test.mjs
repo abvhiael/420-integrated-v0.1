@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {parseHTML} from 'linkedom';
 import {
  createCatastropheJack,JACK_STOP_ORDER,JACK_STOP_DELAY_MS,JACK_LINES,JACK_CROSS,
- jackSpin,jackFeature,jackEvaluate,jackBellAward
+ jackSpin,jackFeature,jackEvaluate,jackBellAward,JACK_PAY,JACK_PAY_TWO
 } from '../src/catastrophe-jack.js';
 import {SLOT_MACHINES,slotMachinePath,slotMachineFromHash,createSlotsLobby} from '../src/slots-lobby.js';
 import {readFileSync} from 'node:fs';
@@ -82,9 +82,9 @@ test('right-hand reference panel shows every exact base pay and all eight paylin
  assert.equal(columns[2].className,'cj-reference cj-poster');
  assert.equal(columns[3].className,'cj-bonus-guide cj-poster');
  const rows=[...stage.querySelectorAll('.cj-pay-row')];
- assert.equal(rows.length,8);
+ assert.equal(rows.length,9);
  const displayed=rows.map(row=>row.querySelector('.cj-pay-value').textContent);
- assert.deepEqual(displayed,['8×','6×','4×','3×','2×','1.5×','1×','8×']);
+ assert.deepEqual(displayed,['1× / 8×','.75× / 6×','.5× / 4×','.4× / 3×','.3× / 2×','.25× / 1.5×','.2× / 1×','1× / 8×','.5× / 3×']);
  const diagrams=[...stage.querySelectorAll('.cj-line-mini')];
  assert.equal(diagrams.length,8);
  for(let i=0;i<8;i++){
@@ -157,4 +157,28 @@ test('Nine Lives test displays the uploaded entry splash before allowing free sp
  assert.equal(splash.hidden,true);
  assert.equal(spin.disabled,false);
  stage.stopAnimation();
+});
+
+test('two matching symbols on any two cells of a payline pay, even separated, but only once per line',()=>{
+ const board=['BELL','FISH','BELL','CLAIM','ANVIL','CLAIM','CLAIM','ANVIL','CLAIM'];
+ const result=jackEvaluate(board,2);
+ assert.ok(result.lines.some(x=>x.line===1&&x.symbol==='BELL'&&x.count===2&&x.amount===1));
+ assert.equal(result.lines.filter(x=>x.line===1).length,1);
+ assert.equal(JACK_PAY_TWO.BELL,.5);
+ assert.equal(JACK_PAY.BELL,3);
+});
+test('three bells pay the full payline value, and all five cross bells still trigger Nine Lives',()=>{
+ const board=['BELL','BELL','BELL','BELL','BELL','BELL','FISH','BELL','FISH'];
+ const result=jackEvaluate(board,1);
+ assert.ok(result.lines.some(x=>x.line===1&&x.symbol==='BELL'&&x.count===3&&x.amount===3));
+ assert.equal(jackFeature(board),'free');
+});
+test('wild substitutes for a normal pair, not for bell pairs, and three matches supersede two',()=>{
+ const board=['BELL','WILD','FISH','CLAIM','ANVIL','CLAIM','CLAIM','ANVIL','CLAIM'];
+ const result=jackEvaluate(board,1);
+ assert.equal(result.lines.some(x=>x.symbol==='BELL'),false);
+ assert.ok(result.lines.some(x=>x.line===1&&x.symbol==='FISH'&&x.count===2));
+ const triple=['TICKET','WILD','TICKET','CLAIM','ANVIL','CLAIM','CLAIM','ANVIL','CLAIM'];
+ const full=jackEvaluate(triple,1);
+ assert.ok(full.lines.some(x=>x.line===1&&x.symbol==='TICKET'&&x.count===3&&x.amount===8));
 });

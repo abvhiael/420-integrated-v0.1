@@ -136,7 +136,7 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   demand(stop,'indexer log scan exceeded safety page limit');
   return {events,cursor:latestCursor};
  }
- async function poll(state,{maxBlocks=MAX_BLOCKS}={}){
+ async function poll(state,{maxBlocks=MAX_BLOCKS,retainEvents=true}={}){
   demand(Number.isSafeInteger(maxBlocks)&&maxBlocks>0&&maxBlocks<=MAX_BLOCKS,'invalid poll window');
   const observed=await status(),head=uint(observed.finality.safeHead);
   let snapshot=structuredClone(state),reorganized=false;
@@ -169,6 +169,11 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   demand(uint(observedAgain.finality.safeHead)>=end&&same((await block(end.toString())).hash,prior),'indexer reorg during scan');
   snapshot.tipHash=prior;snapshot.nextBlock=(end+1n).toString();snapshot.anchors=anchors;
   demand(snapshot.events.length<=200000,'checkpoint event retention limit reached');
+  if(!retainEvents){
+   // Replay scans keep only the current window instead of accumulating every
+   // historical event in RAM or serializing a massive checkpoint.
+   snapshot.events=snapshot.events.filter(e=>BigInt(e.blockNumber)>=start);
+  }
   snapshot.events.sort((a,b)=>{
    const n=BigInt(a.blockNumber)-BigInt(b.blockNumber);
    if(n!==0n)return n<0n?-1:1;
@@ -176,7 +181,7 @@ export function createIndexerEventReader({manifest,fetcher=fetch,timeoutMs=12000
   });
   return {state:snapshot,scanned:Number(end-start+1n),reorganized,complete:end>=uint(observedAgain.finality.safeHead)};
  }
- return {config,poll,readCheckpoint:file=>readCheckpoint(file,config),
+ return {config,poll,initialState:()=>empty(config),readCheckpoint:file=>readCheckpoint(file,config),
   persistCheckpoint:async(file,state)=>{
    demand(state?.schema==='bet-indexer-checkpoint-v1'&&state.manifestHash===digest(config)&&
     state.chainId===config.chainId,'refuse checkpoint from unverified manifest');

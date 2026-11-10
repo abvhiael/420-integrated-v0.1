@@ -44,6 +44,9 @@ func TestProviderOwnedRouteRequiredForWalletEnrollmentAndRevocation(t *testing.T
  if _,e=s.AttestRoute(revoked,[]byte(key),now);e!=nil{t.Fatal(e)}
  if found:=s.Check(query());found.Consent||!found.Revoked{t.Fatal("delivery remained active after route revocation")}
  if _,e=s.VerifyRoute("subject-1","notifications","route-1",now);e==nil{t.Fatal("revoked route verified")}
+ events,e:=s.Revocations(0,10)
+ if e!=nil||len(events)!=1||events[0].Reason!="route_withdrawn"||
+  events[0].SubscriptionID!="sub-1"{t.Fatalf("route revoke not broadcast to outbox: %#v %v",events,e)}
  if e=s.Close();e!=nil{t.Fatal(e)}
  s,e=Open(path);if e!=nil{t.Fatal(e)};defer s.Close();s.RequireRoutes()
  if found:=s.Check(query());found.Consent||!found.Revoked{t.Fatal("restart restored revoked route")}

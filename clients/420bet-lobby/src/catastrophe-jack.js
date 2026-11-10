@@ -4,7 +4,7 @@ export const JACK_ROOT='/assets/420bet/slots/catastrophe-jack/';
 export const JACK_STOP_ORDER=Object.freeze([4,5,6,1,2,3,7,8,9]);
 export const JACK_STOP_DELAY_MS=500;
 export const JACK_LINES=Object.freeze([[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]);
-export const JACK_CROSS=Object.freeze([1,3,4,5,7]);
+export const JACK_CROSS=Object.freeze([1,3,5,7]); // Positions 2, 4, 6 and 8.
 export const JACK_SYMBOLS=Object.freeze({
  TICKET:'symbols/symbol_lucky_lottery_ticket.png',DUMPSTER:'symbols/symbol_golden_dumpster.png',
  CASH:'symbols/symbol_almost_cash.png',DYNAMITE:'symbols/symbol_disaster_dynamite.png',
@@ -14,15 +14,31 @@ export const JACK_SYMBOLS=Object.freeze({
  ANVIL:'features/symbol_falling_anvil.png'
 });
 // Multipliers of total bet. Exactly THREE matching positions are required on a line.
-// Bells pay on base-game lines without using WILD substitution; the five-bell cross remains a separate trigger.
+// Bells pay on base-game lines without WILD substitution; the four-bell diamond is a separate trigger.
 export const JACK_PAY=Object.freeze({TICKET:8,DUMPSTER:6,CASH:4,DYNAMITE:3,BUD:2,PIZZA:1.5,FISH:1,WILD:8,BELL:3});
 export const JACK_BELL_PAY=Object.freeze([0,.5,1.5,3,6,12,25,50,100,250]);
 const BASE_POOL=['TICKET','DUMPSTER','CASH','DYNAMITE','BUD','BUD','PIZZA','PIZZA','FISH','FISH','FISH','FISH','WILD','BELL','CLAIM','ANVIL'];
+// Four marked positions have exactly 26% Golden Bell probability, independently.
+// Centre position 5 has one ANVIL in 160 stops (0.625%), down from 6.25%.
+// Existing symbol proportions are otherwise retained as closely as integer strips allow.
+const CROSS_NON_BELLS=BASE_POOL.filter(symbol=>symbol!=='BELL');
+const CENTER_NON_ANVILS=BASE_POOL.filter(symbol=>symbol!=='ANVIL');
+export const JACK_BASE_REELS=Object.freeze(Array.from({length:9},(_,i)=>{
+ if(JACK_CROSS.includes(i))return Object.freeze([
+  ...Array(26).fill('BELL'),
+  ...Array.from({length:74},(_,n)=>CROSS_NON_BELLS[n%CROSS_NON_BELLS.length])
+ ]);
+ if(i===4)return Object.freeze([
+  ...Array.from({length:159},(_,n)=>CENTER_NON_ANVILS[n%CENTER_NON_ANVILS.length]),
+  'ANVIL'
+ ]);
+ return Object.freeze(BASE_POOL.slice());
+}));
 const FREE_POOL=['BELL','BELL','BELL','BELL','BELL','FISH','BUD','CASH','PIZZA','DUMPSTER','TICKET'];
 const labels={base:'Regular play',free:'Nine Lives Free Spins',insurance:'Insurance Claim Bonus',reversal:'Catastrophic Reversal'};
 const backgrounds={base:'background-main.png',free:'background-nine-lives.png',insurance:'background-insurance-claim.png',reversal:'background-catastrophic-reversal.png'};
 const random=(pool,rng)=>pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
-export function jackSpin(mode='base',rng=Math.random){return Array.from({length:9},()=>random(mode==='free'?FREE_POOL:BASE_POOL,rng));}
+export function jackSpin(mode='base',rng=Math.random){return Array.from({length:9},(_,i)=>random(mode==='free'?FREE_POOL:JACK_BASE_REELS[i],rng));}
 export function jackEvaluate(board,bet=1){
  let total=0;const lines=[];
  JACK_LINES.forEach((line,i)=>{
@@ -97,7 +113,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  splash.append(splashButton);
  const side=el(doc,'aside','cj-side');
  const heading=el(doc,'h2','', "CAT\'S GOT NINE LIVES");
- const info=el(doc,'p','cj-rules','8 paylines · 3 matching symbols pay on any line (including Golden Bells). Five bells in positions 2, 4, 5, 6, 8 start Nine Lives.');
+ const info=el(doc,'p','cj-rules','8 paylines · 3 matching symbols pay on any line (including Golden Bells). Four bells in positions 2, 4, 6, 8 start Nine Lives.');
  const counters=el(doc,'div','cj-counters');
  const balanceText=el(doc,'strong','', '1000.00');
  const betText=el(doc,'strong','', '1.00');
@@ -154,7 +170,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   item.append(mini);lineGrid.append(item);
  });
  lineSection.append(lineGrid);
- const featuresNote=el(doc,'p','cj-pay-note','NINE LIVES: bells in 2, 4, 5, 6, 8. INSURANCE: three claim folders on either diagonal.');
+ const featuresNote=el(doc,'p','cj-pay-note','NINE LIVES: bells in 2, 4, 6, 8. INSURANCE: three claim folders on either diagonal.');
  reference.append(payTable,lineSection,featuresNote);
  // Comic-style illustrated bonus poster. Triggers share engine constants.
  const bonusGuide=el(doc,'aside','cj-bonus-guide cj-poster');
@@ -194,9 +210,9 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  };
  bonusList.append(
   bonusCard(1,'NINE LIVES!','characters/jack_nine_lives_shocked.png',
-   '5 DISASTER BELLS on the cross: 2 · 4 · 5 · 6 · 8','9 FREE SPINS!',
+   '4 DISASTER BELLS on the diamond: 2 · 4 · 6 · 8','9 FREE SPINS!',
    'Catastrophe multipliers: spin 3 ×2 · spin 6 ×3 · spin 9 ×5.',
-   JACK_CROSS,'BELL','Bells in positions 2, 4, 5, 6 and 8'),
+   JACK_CROSS,'BELL','Bells in positions 2, 4, 6 and 8'),
   bonusCard(2,'INSURANCE CLAIM!','characters/jack_insurance_claim.png',
    '3 CLAIM FOLDERS on either diagonal: 1-5-9 or 3-5-7','PICK 3 FOLDERS!',
    'The current practice game doubles the sum of the revealed prizes.',
@@ -267,7 +283,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
   if(busy||ended)return;
   hideInsuranceBoard();
   setMode('free');freeRemaining=9;freeNumber=0;freeBet=bet;freeTotal=0;totalWin=0;redraw();
-  showBoard(['FISH','BELL','CASH','BELL','BELL','BELL','PIZZA','BELL','BUD']);
+  showBoard(['FISH','BELL','CASH','BELL','FISH','BELL','PIZZA','BELL','BUD']);
   help.replaceChildren();message.textContent=(test?'TEST MODE · ':'')+'Nine Lives activated: nine free spins. Every third spin has an escalating catastrophe multiplier.';
   spin.disabled=true;
   showSplash('nine-lives-start',null,()=>{spin.disabled=false;});

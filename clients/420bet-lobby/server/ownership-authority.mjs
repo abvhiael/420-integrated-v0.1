@@ -157,6 +157,14 @@ export function createRpcCanonicalOwnershipSource({
    const canonicalReservation=await rpc('eth_getBlockByNumber',['0x'+reservedHeight.toString(16),false]);
    fail(canonicalReservation.hash?.toLowerCase()===original.blockHash?.toLowerCase(),
     'orphaned hand reservation');
+   const reservedReceipt=await rpc('eth_getTransactionReceipt',[original.transactionHash]);
+   fail(reservedReceipt?.status==='0x1'&&
+    reservedReceipt.blockHash?.toLowerCase()===original.blockHash?.toLowerCase()&&
+    reservedReceipt.logs?.some(x=>x.address?.toLowerCase()===ledger.address&&
+     x.transactionHash?.toLowerCase()===original.transactionHash?.toLowerCase()&&
+     x.logIndex===original.logIndex&&x.topics?.[0]?.toLowerCase()===reservedTopic&&
+     x.topics?.[1]?.toLowerCase()===table&&x.topics?.[2]?.toLowerCase()===hand),
+    'unverified reserved-hand transaction receipt');
    const mask=BigInt(await call(ledger.address,POKER_ABI,'lockedMask',[table],reservedHeight));
    fail(mask>0n&&mask<512n,'invalid locked poker seat mask');
    for(let seat=0;seat<9;seat++)if((mask&(1n<<BigInt(seat)))!==0n){
@@ -192,6 +200,9 @@ export function createRpcCanonicalOwnershipSource({
    version=hash(record.gameVersionId);
    members=[{account:addr(record.beneficiary)}];
   }
+  // Detect canonical lineage changes while performing historical contract reads.
+  const finalBlock=await rpc('eth_getBlockByNumber',['0x'+at.toString(16),false]);
+  fail(finalBlock.hash?.toLowerCase()===e.blockHash,'canonical event changed during owner resolution');
   fail(members.length>0&&members.length<=50,'missing canonical beneficiaries');
   fail(!e.account||members.every(m=>m.account===e.account),
    'indexed account and authoritative beneficiaries disagree');

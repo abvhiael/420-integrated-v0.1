@@ -40,6 +40,9 @@ function marketCheck(m){
  requireTrue(Number.isSafeInteger(m.startsAt)&&m.startsAt>0&&
   Number.isSafeInteger(m.cutoffAt)&&m.cutoffAt>0&&m.cutoffAt<m.startsAt,
   'start and cutoff required');
+ requireTrue(Number.isSafeInteger(m.finalDeadlineAt)&&
+  m.finalDeadlineAt>m.startsAt&&m.finalDeadlineAt<=m.startsAt+30*86400000,
+  'frozen bounded no-action refund deadline required');
  requireTrue(typeof m.scheduleRevision==='string'&&INTEGER.test(m.scheduleRevision),
   'frozen schedule revision required');
  requireTrue(Array.isArray(m.selections)&&m.selections.length===(m.type==='moneyline3'?3:2)&&
@@ -330,6 +333,23 @@ export function createLocalSportsbookEngine({
    m.result.state='FINAL';audit(s,'RESULT_FINAL',marketId);return clone(m.result);
   });
  }
+ async function expireNoAction(marketId){
+  return change('timeout-no-action',async s=>{
+   const m=s.markets[valueId(marketId,'market ID')];
+   requireTrue(m?.state==='CLOSED'&&clock()>=m.finalDeadlineAt,
+    'no-action refund deadline has not elapsed');
+   requireTrue(m.result?.state!=='FINAL',
+    'final sportsbook result cannot be overridden by timeout');
+   const digestValue=digest({domain:'420bet-timeout-void-v1',
+    marketId:m.id,termsHash:m.termsHash,deadline:m.finalDeadlineAt});
+   const sequence=(m.result?.sequence??0)+1;
+   m.result={state:'FINAL',sequence,digest:digestValue,
+    facts:{status:'NO_CONTEST'},sourceDigest:null,timeout:true,
+    challengeEndsAt:m.finalDeadlineAt,challenged:false};
+   audit(s,'RESULT_TIMEOUT_VOID',marketId);
+   return clone(m.result);
+  });
+ }
  async function settleTicket(ticketId,approval){
   return change('settlement',async s=>{
    const prior=s.receipts[ticketId];if(prior){
@@ -368,7 +388,7 @@ export function createLocalSportsbookEngine({
   });
  }
  return Object.freeze({view,registerMarket,transition,issueQuote,acceptTicket,
-  proposeResult,challengeResult,finalizeResult,settleTicket});
+  proposeResult,challengeResult,finalizeResult,expireNoAction,settleTicket});
 }
 export function makeLocalQuoteSigner(secret){
  requireTrue(typeof secret==='string'&&secret.length>=32,'signer secret required');

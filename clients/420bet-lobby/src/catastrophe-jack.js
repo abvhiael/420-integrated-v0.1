@@ -16,7 +16,9 @@ export const JACK_SYMBOLS=Object.freeze({
 // Multipliers of total bet. Exactly THREE matching positions are required on a line.
 // Bells pay on base-game lines without WILD substitution; the four-bell diamond is a separate trigger.
 export const JACK_PAY=Object.freeze({TICKET:8,DUMPSTER:6,CASH:4,DYNAMITE:3,BUD:2,PIZZA:1.5,FISH:1,WILD:8,BELL:3});
-export const JACK_BELL_PAY=Object.freeze([0,.5,1.5,3,6,12,25,50,100,250]);
+// Nine Lives: calibrated to ~95.08% total RTP with 26% bells on the four trigger reels.
+// Nine FREE spins; catastrophe multipliers on spins 3/6/9 remain ×2/×3/×5.
+export const JACK_BELL_PAY=Object.freeze([0,.15,.4,.9,1.8,3.7,7.2,15,30,60]);
 const BASE_POOL=['TICKET','DUMPSTER','CASH','DYNAMITE','BUD','BUD','PIZZA','PIZZA','FISH','FISH','FISH','FISH','WILD','BELL','CLAIM','ANVIL'];
 // Four marked positions have exactly 26% Golden Bell probability, independently.
 // Centre position 5 has one ANVIL in 160 stops (0.625%), down from 6.25%.

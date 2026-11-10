@@ -54,14 +54,14 @@ test('durable alert journal retries webhook after restart without leaking recipi
   journal=await openDeliveryAlertJournal({path,worker,outbox,clock:()=>at,
    retryMs:100,send,cancellationAgeMs:100,pendingAgeMs:100});
   const first=await journal.poll();
-  assert.equal(first.failed,6);
-  assert.equal((await journal.snapshot()).pendingCodes.length,6);
+  assert.equal(first.failed,7);
+  assert.equal((await journal.snapshot()).pendingCodes.length,7);
   await journal.close();journal=null;
   delivered=true;at+=101;
   journal=await openDeliveryAlertJournal({path,worker,outbox,clock:()=>at,
    retryMs:100,send,cancellationAgeMs:100,pendingAgeMs:100});
   const retry=await journal.poll();
-  assert.equal(retry.sent,6);
+  assert.equal(retry.sent,7;
   assert.deepEqual((await journal.snapshot()).pendingCodes,[]);
   for(const event of sent){
    assert.match(event.id,/^[a-f0-9]{64}$/);
@@ -73,8 +73,8 @@ test('durable alert journal retries webhook after restart without leaking recipi
    oldestCancellationAgeMs:0,oldestPendingAgeMs:0,byStatus:{dead_letter:0}};
   worker.health=()=>({stale:false,consecutiveFailures:0,revocationFailed:false});
   const clear=await journal.poll();
-  assert.equal(clear.sent,6);
-  assert.equal(sent.filter(x=>x.status==='resolved').length,6);
+  assert.equal(clear.sent,7;
+  assert.equal(sent.filter(x=>x.status==='resolved').length,7);
  }finally{if(journal)await journal.close();await rm(dir,{recursive:true,force:true});}
 });
 test('alert callback uses an authenticated HMAC envelope and never redirects',async()=>{

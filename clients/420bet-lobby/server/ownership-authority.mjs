@@ -157,7 +157,7 @@ export function createRpcCanonicalOwnershipSource({
    const canonicalReservation=await rpc('eth_getBlockByNumber',['0x'+reservedHeight.toString(16),false]);
    fail(canonicalReservation.hash?.toLowerCase()===original.blockHash?.toLowerCase(),
     'orphaned hand reservation');
-   const mask=await call(ledger.address,POKER_ABI,'lockedMask',[table],reservedHeight);
+   const mask=BigInt(await call(ledger.address,POKER_ABI,'lockedMask',[table],reservedHeight));
    fail(mask>0n&&mask<512n,'invalid locked poker seat mask');
    for(let seat=0;seat<9;seat++)if((mask&(1n<<BigInt(seat)))!==0n){
     const record=await call(ledger.address,POKER_ABI,'seatOf',[table,seat],reservedHeight);

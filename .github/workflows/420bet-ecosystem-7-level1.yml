@@ -24,6 +24,9 @@ on:
       - 'clients/420bet-lobby/tests/delivery-worker.test.mjs'
       - 'clients/420bet-lobby/server/mail-auth-broker.mjs'
       - 'clients/420bet-lobby/tests/mail-auth-broker.test.mjs'
+      - 'clients/420bet-lobby/server/consent-enrollment-broker.mjs'
+      - 'clients/420bet-lobby/server/serve-consent-enrollment.mjs'
+      - 'clients/420bet-lobby/tests/consent-enrollment-broker.test.mjs'
       - 'clients/420bet-lobby/server/ownership-authority.mjs'
       - 'clients/420bet-lobby/server/ownership-directories.mjs'
       - 'clients/420bet-lobby/server/ownership-http.mjs'
@@ -107,6 +110,7 @@ jobs:
             clients/420bet-lobby/tests/mail-auth-broker.test.mjs \
             clients/420bet-lobby/tests/ownership-resolver.test.mjs \
             clients/420bet-lobby/tests/ownership-authority.test.mjs \
+            clients/420bet-lobby/tests/consent-enrollment-broker.test.mjs \
             clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
             clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs \
             clients/420bet-lobby/tests/sportsbook-worker.test.mjs
@@ -135,6 +139,9 @@ jobs:
           node --check clients/420bet-lobby/tests/delivery-worker.test.mjs
           node --check clients/420bet-lobby/server/mail-auth-broker.mjs
           node --check clients/420bet-lobby/tests/mail-auth-broker.test.mjs
+          node --check clients/420bet-lobby/server/consent-enrollment-broker.mjs
+          node --check clients/420bet-lobby/server/serve-consent-enrollment.mjs
+          node --check clients/420bet-lobby/tests/consent-enrollment-broker.test.mjs
           node --check clients/420bet-lobby/server/ownership-authority.mjs
           node --check clients/420bet-lobby/server/ownership-directories.mjs
           node --check clients/420bet-lobby/server/ownership-http.mjs

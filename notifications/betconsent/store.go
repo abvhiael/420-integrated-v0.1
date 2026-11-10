@@ -12,6 +12,7 @@ import (
  "os"
  "path/filepath"
  "regexp"
+ "sort"
  "sync"
  "time"
 )
@@ -155,6 +156,23 @@ func (s *Store) Check(c Check) Subscription {
  return x
 }
 
+// Audience returns active, explicitly consented owner-scoped subscriptions.
+// Caller must be a trusted service with the private READ token; no public listing.
+func (s *Store) Audience(tenant,userID string)([]Subscription,error){
+ if tenant!="420bet"||!id.MatchString(userID){return nil,errors.New("invalid private audience")}
+ s.mu.Lock();defer s.mu.Unlock()
+ if s.closed{return nil,errors.New("subscription store closed")}
+ result:=make([]Subscription,0)
+ for _,v:=range s.data.Items{
+  if v.Tenant==tenant&&v.UserID==userID&&v.Active&&v.Consent&&!v.Muted&&!v.Revoked{
+   result=append(result,v)
+   if len(result)>16{return nil,errors.New("subscription limit exceeded")}
+  }
+ }
+ sort.Slice(result,func(i,j int)bool{return result[i].SubscriptionID<result[j].SubscriptionID})
+ return result,nil
+}
+
 // Revocations returns strictly ordered, retained events. A consumer must persist
 // its own acknowledged cursor only after cancelling local deliveries.
 func (s *Store) Revocations(after uint64,limit int)([]Revocation,error){
@@ -192,6 +210,14 @@ func Handler(store *Store,readToken,writeToken string) (http.Handler,error){
   if err!=nil{write(w,409,map[string]string{"error":"invalid cursor"});return}
   if events==nil{events=[]Revocation{}}
   write(w,200,map[string]any{"events":events})
+ })
+ mux.HandleFunc("POST /v1/420bet/subscriptions/audience",func(w http.ResponseWriter,r *http.Request){
+  if !authenticated(w,r,readToken){return}
+  var request struct{ Tenant string `json:"tenant"`;UserID string `json:"userId"` }
+  if err:=decode(r,&request);err!=nil{write(w,400,map[string]string{"error":"invalid scope"});return}
+  records,err:=store.Audience(request.Tenant,request.UserID)
+  if err!=nil{write(w,409,map[string]string{"error":"audience unavailable"});return}
+  write(w,200,map[string]any{"subscriptions":records})
  })
  mux.HandleFunc("POST /v1/420bet/subscriptions/check",func(w http.ResponseWriter,r *http.Request){
   if !authenticated(w,r,readToken){return}

@@ -1,0 +1,34 @@
+name: 420Bet slot lobby and Catastrophe Jack build check
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'clients/420bet-lobby/src/catastrophe-jack.js'
+      - 'clients/420bet-lobby/src/catastrophe-jack.css'
+      - 'clients/420bet-lobby/src/slots-lobby.js'
+      - 'clients/420bet-lobby/src/main.js'
+      - 'clients/420bet-lobby/src/style.css'
+      - 'clients/420bet-lobby/tests/catastrophe-jack.test.mjs'
+      - 'clients/420bet-lobby/tests/slots-lobby.test.mjs'
+      - '.github/workflows/420bet-slot9-build.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: clients/420bet-lobby
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run slot lobby and Catastrophe Jack tests
+        run: node --test tests/slots-lobby.test.mjs tests/catastrophe-jack.test.mjs
+      - name: Build production Worker assets
+        run: npm run build

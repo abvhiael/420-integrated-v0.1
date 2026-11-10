@@ -31,6 +31,10 @@ func main() {
   store,e:=betconsent.Open(path);if e!=nil{log.Fatal(e)}
   defer store.Close()
   if e=service.EnableBetConsent(store,readToken,writeToken);e!=nil{log.Fatal(e)}
+  if os.Getenv("NOTIFICATIONS_BET_ENROLL_TOKEN")!=""||os.Getenv("NOTIFICATIONS_BET_ENROLL_KEY")!=""{
+   if e=service.EnableBetEnrollment(store,mustEnv("NOTIFICATIONS_BET_ENROLL_TOKEN"),
+    mustEnv("NOTIFICATIONS_BET_ENROLL_KEY"));e!=nil{log.Fatal(e)}
+  }
   if deliveryPath:=os.Getenv("NOTIFICATIONS_BET_DELIVERY_PATH");deliveryPath!="" {
    ledger,e:=betdelivery.Open(deliveryPath);if e!=nil{log.Fatal(e)}
    defer ledger.Close()

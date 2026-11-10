@@ -2,7 +2,7 @@
 // ownership from independently fetched canonical contract state, NEVER from
 // an HTTP client's claimed subject, recipient, or ownershipVerified flag.
 import {encodeFunctionData,decodeFunctionResult} from 'viem';
-import {EVENT_SPECS,decodeKnownEvent} from './indexer-event-abi.mjs';
+import {EVENT_SPECS,decodeKnownEvent,eventTopic} from './indexer-event-abi.mjs';
 
 const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 const HASH=/^0x[0-9a-fA-F]{64}$/;
@@ -143,13 +143,13 @@ export function createRpcCanonicalOwnershipSource({
    fail(hand===e.objectId,'wrong poker hand');
    const ledger=sources.find(s=>s.role==='poker-ledger');
    fail(ledger,'approved poker seat ledger missing');
-   const reserved=EVENT_SPECS['poker-ledger'].find(x=>x.signature.startsWith('HandReserved('));
+   const reservedTopic=eventTopic('HandReserved(bytes32,bytes32,uint256,bytes32)');
    // The authoritative hand membership is the LOCKED seat mask at reservation,
    // not current occupants at settlement.
    const logs=await rpc('eth_getLogs',[{address:ledger.address,
     fromBlock:'0x'+uint(ledger.fromBlock).toString(16),
     toBlock:'0x'+at.toString(16),
-    topics:[reserved.topic0,table,hand]}]);
+    topics:[reservedTopic,table,hand]}]);
    fail(Array.isArray(logs)&&logs.length===1,'missing unique canonical hand reservation');
    const original=logs[0],reservedHeight=BigInt(original.blockNumber);
    fail(reservedHeight<=at&&hash(original.topics[2])===hand,'invalid hand reservation');

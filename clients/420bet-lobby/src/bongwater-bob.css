@@ -26,3 +26,18 @@
 .bob-spin-dock .bob-spin:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:850px){.bob-scene{min-height:490px;grid-template-columns:minmax(0,1.4fr) minmax(155px,.7fr)}.bob-spin-dock{padding:9px 0 3px}.bob-spin-dock .bob-spin{min-height:46px;min-width:115px;font-size:19px}}
 @media(max-width:530px){.bob-scene{min-height:355px;grid-template-columns:minmax(0,1fr) 120px}.bob-spin-dock{padding:5px 0 1px}.bob-spin-dock .bob-spin{min-width:90px;min-height:36px;font-size:15px;border-radius:8px}}
+
+/* Full-viewport wallpaper, preserving the three-reel board on the left and Bob at right. */
+.bob-slot{width:100%;width:100dvw;max-width:none;position:relative;left:50%;transform:translateX(-50%);padding:0 0 12px;margin:0;overflow-x:clip}
+.bob-scene{width:100%;max-width:none;min-height:clamp(560px,45vw,880px);border-left:0;border-right:0;border-radius:0;background-position:center;background-repeat:no-repeat;background-size:cover;grid-template-columns:minmax(0,1.65fr) minmax(280px,.82fr);padding-inline:clamp(18px,3vw,60px)}
+.bob-panel{margin:12px clamp(12px,3vw,60px) 0}
+.bob-slot-title{height:110px}
+.bob-slot-title img{height:108px}
+/* Neon winning paylines are SVG overlays, not extra reel symbols. */
+.bob-board{position:relative}
+.bob-payline-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;overflow:visible}
+.bob-payline-glow,.bob-payline-core{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.bob-payline-glow{stroke:#6bff18;stroke-width:15;opacity:.85;filter:drop-shadow(0 0 9px #45ff00) drop-shadow(0 0 5px #baff5d)}
+.bob-payline-core{stroke:#c9ff74;stroke-width:4;filter:drop-shadow(0 0 4px #7eff27)}
+@media(max-width:850px){.bob-scene{min-height:490px;grid-template-columns:minmax(0,1.4fr) minmax(155px,.7fr);padding-inline:10px}.bob-slot-title,.bob-slot-title img{height:75px}}
+@media(max-width:530px){.bob-scene{min-height:355px;grid-template-columns:minmax(0,1fr) 120px;padding-inline:5px}.bob-panel{margin-inline:4px}.bob-payline-glow{stroke-width:10}.bob-payline-core{stroke-width:3}}

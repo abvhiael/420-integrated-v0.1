@@ -103,7 +103,8 @@ export async function openBetOperationalDeliveryWorker({
   return Object.freeze({service:'420Bet delivery worker',running:started&&!stopping&&!closed,
    ready:started&&!stopping&&!closed&&!stale&&state.consecutiveFailures===0&&
     runtime.revocationHealth?.().failed!==true,
-   stale,cycles:state.cycles,completed:state.completed,failures:state.failures,
+   stale,revocationFailed:runtime.revocationHealth?.().failed===true,
+   cycles:state.cycles,completed:state.completed,failures:state.failures,
    consecutiveFailures:state.consecutiveFailures,recoveryCount:state.recoveryCount,
    inFlight:state.inFlight,lastSuccessAt:state.lastSuccessAt,
    lastFailureAt:state.lastFailureAt,lastErrorCode:state.lastErrorCode});

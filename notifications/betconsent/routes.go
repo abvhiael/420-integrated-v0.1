@@ -83,13 +83,32 @@ func(s *Store)AttestRoute(a RouteAssertion,secret []byte,now time.Time)(RouteBin
  }
  candidate.Active=a.Action=="bind";candidate.Revision=a.ExpectedRevision+1
  candidate.ExpiresAt=a.ExpiresAt
- next:=state{Schema:1,Items:s.data.Items,Revocations:s.data.Revocations,
+ next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)),
+  Revocations:append([]Revocation(nil),s.data.Revocations...),
   EnrollmentNonces:s.data.EnrollmentNonces,
   Routes:make(map[string]RouteBinding,len(s.data.Routes)+1),
   RouteNonces:make(map[string]int64,len(s.data.RouteNonces)+1)}
  for key,value:=range s.data.Routes{next.Routes[key]=value}
+ for key,value:=range s.data.Items{next.Items[key]=value}
  for key,expiry:=range s.data.RouteNonces{if expiry>now.UnixMilli(){next.RouteNonces[key]=expiry}}
  if len(next.RouteNonces)>=10000{return RouteBinding{},errors.New("route attestation capacity exceeded")}
+ // Provider removal or a transfer to a different subject must atomically
+ // tombstone all eligible subscriptions for the old route, emitting the same
+ // ordered cancellation feed consumed by 420Bet's persistent outbox.
+ if exists&&(a.Action=="revoke"||previous.UserID!=a.UserID){
+  for itemKey,sub:=range next.Items{
+   if sub.UserID==previous.UserID&&sub.Channel==previous.Channel&&
+    sub.Recipient==previous.Recipient&&sub.Active&&sub.Consent&&!sub.Revoked{
+    sub.Active=false;sub.Consent=false;sub.Revoked=true
+    sub.Revision++;sub.UpdatedAt=now.UnixMilli()
+    next.Items[itemKey]=sub
+    next.Revocations=append(next.Revocations,Revocation{
+     Sequence:uint64(len(next.Revocations)+1),Tenant:sub.Tenant,
+     UserID:sub.UserID,SubscriptionID:sub.SubscriptionID,
+     Revision:sub.Revision,Reason:"route_withdrawn"})
+   }
+  }
+ }
  next.Routes[k]=candidate;next.RouteNonces[a.Nonce]=now.Add(2*time.Minute).UnixMilli()
  if e:=s.persist(next);e!=nil{return RouteBinding{},e}
  s.data=next

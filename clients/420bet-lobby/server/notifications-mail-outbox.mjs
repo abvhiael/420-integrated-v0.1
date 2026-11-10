@@ -198,6 +198,11 @@ export async function openBetDeliveryOutbox({
    remoteCancellationUnconfirmed:result.affected.length-confirmations};
  }
  async function getRevocationCursor(){await operation;return data.revocationCursor;}
+ async function recoveryEventIds(){
+  await operation;
+  return [...new Set(Object.values(data.items).filter(i=>i.delivery.source==='420Indexer-finalized')
+   .map(i=>i.delivery.eventId))];
+ }
  async function retryRemoteCancellations({limit=20}={}){
   assert(Number.isInteger(limit)&&limit>=1&&limit<=100,'invalid cancellation retry batch');
   await operation;
@@ -424,5 +429,5 @@ export async function openBetDeliveryOutbox({
  async function get(key){await operation;return scrub(data.items[key]);}
  async function summary(){await operation;return {total:Object.keys(data.items).length,byStatus:counts(data),halted:data.halted,replayPending:data.replayPending,remoteCancellationPending:Object.values(data.items).filter(i=>i.remoteCancellationPending).length,correctionPending:Object.values(data.items).filter(i=>i.delivery.correctionOf&&i.status!=='delivered'&&i.status!=='cancelled').length};}
  async function close(){await operation;closed=true;await rm(lock,{recursive:true});}
- return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,finishCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
+ return Object.freeze({enqueue,cancel,revokeSubscription,getRevocationCursor,recoveryEventIds,retryRemoteCancellations,retractEvent,haltForReorg,reconcileCanonicalReplay,finishCanonicalReplay,resumeAfterCanonicalReplay,drain,get,summary,close});
 }

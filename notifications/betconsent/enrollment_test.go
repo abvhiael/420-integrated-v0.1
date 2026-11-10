@@ -70,3 +70,22 @@ func TestEnrollmentHandlerTokenSeparationAndOperatorCannotGrantOptIn(t *testing.
  if w:=ask(privileged,"/v1/420bet/enrollments/commit",brokerToken,a);w.Code!=409{
   t.Fatal("same enrollment signed twice")}
 }
+
+func TestConsumedEnrollmentNonceRetentionIsBoundedByChallengeExpiry(t *testing.T){
+ store,e:=Open(filepath.Join(t.TempDir(),"nonce-retention.json"));if e!=nil{t.Fatal(e)};defer store.Close()
+ now:=time.Now()
+ key:="approved-challenge-secret-00000000000000000"
+ first:=signed(EnrollmentAssertion{Tenant:"420bet",UserID:"subject-1",
+  SubscriptionID:"sub-a",Recipient:"route-1",Channel:"notifications",
+  PolicyVersion:"policy-1",Action:"enroll",Nonce:strings.Repeat("d",64),
+  ExpiresAt:now.Add(40*time.Second).UnixMilli()},key)
+ if _,e=store.VerifiedEnrollment(first,[]byte(key),now);e!=nil{t.Fatal(e)}
+ later:=now.Add(50*time.Second)
+ second:=signed(EnrollmentAssertion{Tenant:"420bet",UserID:"subject-1",
+  SubscriptionID:"sub-b",Recipient:"route-1",Channel:"notifications",
+  PolicyVersion:"policy-1",Action:"enroll",Nonce:strings.Repeat("e",64),
+  ExpiresAt:later.Add(40*time.Second).UnixMilli()},key)
+ if _,e=store.VerifiedEnrollment(second,[]byte(key),later);e!=nil{t.Fatal(e)}
+ if len(store.data.EnrollmentNonces)!=1{t.Fatalf("expired challenge record retained: %d",len(store.data.EnrollmentNonces))}
+ if _,e=store.VerifiedEnrollment(first,[]byte(key),later);e==nil{t.Fatal("expired original proof reused")}
+}

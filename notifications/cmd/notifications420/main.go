@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"log"
+ "net"
+ "os/signal"
+ "syscall"
+ "errors"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,10 +22,16 @@ func main() {
 	cfg := notifyruntime.Config{
 		ChainID:        mustUint64("NOTIFICATIONS_CHAIN_ID"),
 		IndexerURL:     mustEnv("NOTIFICATIONS_INDEXER_URL"),
-		ListenAddr:     envOr("NOTIFICATIONS_LISTEN_ADDR", ":8421"),
+		ListenAddr:     envOr("NOTIFICATIONS_LISTEN_ADDR", "127.0.0.1:8421"),
 		RequestTimeout: durationOr("NOTIFICATIONS_REQUEST_TIMEOUT", 5*time.Second),
 	}
-	probe, err := notifyruntime.NewHTTPIndexerProbe(cfg.IndexerURL, cfg.RequestTimeout)
+	host,_,addrErr:=net.SplitHostPort(cfg.ListenAddr)
+ if addrErr!=nil{log.Fatal("invalid notification listener address")}
+ loopback:=host=="localhost"||(net.ParseIP(host)!=nil&&net.ParseIP(host).IsLoopback())
+ if !loopback&&os.Getenv("NOTIFICATIONS_APPROVED_PRIVATE_NETWORK")!="true"{
+  log.Fatal("Notifications may bind publicly only behind an approved private-network gateway")
+ }
+ probe, err := notifyruntime.NewHTTPIndexerProbe(cfg.IndexerURL, cfg.RequestTimeout)
 	if err != nil { log.Fatal(err) }
 	service, err := notifyruntime.NewService(cfg, probe)
 	if err != nil { log.Fatal(err) }
@@ -48,9 +58,32 @@ func main() {
  ctx, cancel := context.WithTimeout(context.Background(), cfg.RequestTimeout)
 	defer cancel()
 	if err := service.Qualify(ctx); err != nil { log.Fatalf("notifications startup qualification failed: %v", err) }
-	server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(), ReadHeaderTimeout: 5 * time.Second}
-	log.Printf("420Notifications listening on %s", cfg.ListenAddr)
-	log.Fatal(server.ListenAndServe())
+ server := &http.Server{Addr: cfg.ListenAddr, Handler: service.Handler(),
+  ReadHeaderTimeout:5*time.Second,ReadTimeout:12*time.Second,
+  WriteTimeout:15*time.Second,IdleTimeout:30*time.Second,MaxHeaderBytes:16<<10}
+ lifecycle,stop:=signal.NotifyContext(context.Background(),syscall.SIGINT,syscall.SIGTERM)
+ defer stop()
+ go func(){
+  ticker:=time.NewTicker(30*time.Second);defer ticker.Stop()
+  for{
+   select{
+   case <-lifecycle.Done():
+    ctx,cancel:=context.WithTimeout(context.Background(),10*time.Second)
+    if err:=server.Shutdown(ctx);err!=nil{log.Printf("notification shutdown failed: %v",err)}
+    cancel()
+    return
+   case <-ticker.C:
+    ctx,cancel:=context.WithTimeout(lifecycle,cfg.RequestTimeout)
+    if err:=service.Qualify(ctx);err!=nil{log.Printf("notification readiness recheck failed: %v",err)}
+    cancel()
+   }
+  }
+ }()
+ log.Printf("420Notifications private service listening on %s",cfg.ListenAddr)
+ if err:=server.ListenAndServe();err!=nil&&!errors.Is(err,http.ErrServerClosed){
+  log.Printf("notification server terminated unexpectedly: %v",err)
+  os.Exit(1)
+ }
 }
 
 func mustEnv(name string) string {

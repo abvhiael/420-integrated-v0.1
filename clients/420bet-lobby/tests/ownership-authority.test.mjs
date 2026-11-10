@@ -26,13 +26,13 @@ function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersio
  identitySubject=H(33),ticketAuthority=null}={}){
  const role=roles[vertical],type=types[vertical],kind=kinds[vertical],source=manifest.find(x=>x.role===role);
  const spec=EVENT_SPECS[role].find(x=>x.type===type);
- const objectId=vertical==='casino'?WP:vertical==='poker'?H(41):vertical==='fantasy'?H(42):H(43);
+ const objectId=vertical==='casino'?WP:vertical==='poker'?H(45):vertical==='fantasy'?H(42):H(43);
  let topics=[spec.topic0],data='0x';
  if(vertical==='casino'){
   topics.push(objectId,'0x'+'0'.repeat(24)+OWNER.slice(2),VER);
   data+='0'.repeat(64*5);
  }else if(vertical==='poker'){
-  topics.push(H(45),objectId);
+  topics.push(objectId,H(41));
   data+='0'.repeat(64*2);
  }else if(vertical==='fantasy'){
   topics.push(objectId,H(1),identitySubject);
@@ -89,7 +89,7 @@ function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersio
   verifyRegistry:async()=>({result:{qualified:true},config:{chainId:'420',sources:manifest,
    contracts:{wagerRegistry:{address:REGISTRY}},
    games:[{vertical,gameVersionId:VER}]}}),
-  resolveIdentity:async({account,subject})=>({verified:true,active:true,account,
+  resolveIdentity:async({account,subject})=>({verified:account===OWNER||vertical==='poker',active:true,account,
    userId:'subject-1',subject:subject??identitySubject}),
   subscriptions:async({tenant,userId})=>[{
    tenant,userId,id:'sub-1',channel:'notifications',recipient:'route-1',

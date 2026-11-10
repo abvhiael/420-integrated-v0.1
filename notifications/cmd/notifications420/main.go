@@ -40,7 +40,7 @@ func main() {
    defer ledger.Close()
    if e=service.EnableBetDelivery(ledger,store,mustEnv("NOTIFICATIONS_BET_DELIVERY_TOKEN"));e!=nil{log.Fatal(e)}
    if os.Getenv("NOTIFICATIONS_BET_PROVIDER_TOKEN")!=""||os.Getenv("NOTIFICATIONS_BET_PROVIDER_KEY")!=""{
-    if e=service.EnableBetProviderReceipts(ledger,
+    if e=service.EnableBetProviderReceipts(ledger,store,
      mustEnv("NOTIFICATIONS_BET_PROVIDER_TOKEN"),mustEnv("NOTIFICATIONS_BET_PROVIDER_KEY"));e!=nil{log.Fatal(e)}
    }
   }

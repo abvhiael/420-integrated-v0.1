@@ -1,6 +1,6 @@
 import {initial,next} from './practice-engine.js';
 import {initialRacketSession,settleRacketRoll,racketPotentialPayoutCents,formatRacketCredits,RACKET_STAKE_CENTS} from './racket-double-trouble.js';
-// Racket's Loaded Dice is presentation only. The existing practice engine resolves every roll.
+// Racket's Loaded Dice reads authoritative practice roll outcomes; virtual credits and bonus never influence the dice RNG.
 // Never derive, replace, or bias the simulated outcome using this character layer.
 const LINES={
   idle:['The house always wins. Unless Racket built it.'],
@@ -26,7 +26,7 @@ export function racketLine(rolls,chance){
 const ASSET='/assets/420bet/dice/rackets-loaded-dice/';
 const asset=(folder,file)=>ASSET+folder+'/'+file;
 const meterStage=value=>Math.max(0,Math.min(4,Math.floor(value/20)));
-export function createNeonDice(doc=globalThis.document){
+export function createNeonDice(doc=globalThis.document,random){
  let state=initial('dice');let virtual=initialRacketSession();const rolls=[];
  const root=doc.createElement('section');root.className='neon-dice-page racket-dice practice';root.dataset.practiceGame='dice';
  const el=(tag,cls,txt)=>{const n=doc.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
@@ -52,7 +52,7 @@ export function createNeonDice(doc=globalThis.document){
   const creditBar=el('div','racket-credit-bar');creditBar.append(el('span','racket-credit-balance','VIRTUAL CREDITS: '+formatRacketCredits(virtual.balanceCents)),el('span','racket-credit-stake','STAKE: '+formatRacketCredits(RACKET_STAKE_CENTS)));left.append(creditBar);
   if(virtual.balanceCents<RACKET_STAKE_CENTS){const restart=el('button','racket-credit-restart','RESET PRACTICE CREDITS');restart.type='button';restart.addEventListener('click',()=>{virtual=initialRacketSession();render();});left.append(restart);}
   const roll=el('button','nd-roll racket-roll','SHAKE THE CAN! · Roll practice dice');roll.type='button';roll.disabled=virtual.balanceCents<RACKET_STAKE_CENTS;roll.style.backgroundImage="url('"+asset('ui','ui_shake_the_can_button.png')+"')";
-  roll.addEventListener('click',()=>{if(virtual.balanceCents<RACKET_STAKE_CENTS)return;const previous=state;state=next(state,{type:'play'});virtual=settleRacketRoll(virtual,{roll:state.result[0],choice:previous.choice,threshold:previous.threshold});rolls.unshift({value:state.result[0],win:virtual.lastWin,bonus:virtual.lastBonus});if(rolls.length>10)rolls.pop();render();});left.append(roll);
+  roll.addEventListener('click',()=>{if(virtual.balanceCents<RACKET_STAKE_CENTS)return;const previous=state;state=next(state,{type:'play'},random);virtual=settleRacketRoll(virtual,{roll:state.result[0],choice:previous.choice,threshold:previous.threshold});rolls.unshift({value:state.result[0],win:virtual.lastWin,bonus:virtual.lastBonus});if(rolls.length>10)rolls.pop();render();});left.append(roll);
   const temp=virtual.charge;
   const meter=el('div',virtual.charge===100?'racket-temper double-trouble-ready':'racket-temper');meter.append(artImage('racket-meter-png','ui','ui_racketometer_stage_'+meterStage(temp)+'_'+['empty','low','medium','high','full'][meterStage(temp)]+'.png','Racket-O-Meter level '+(meterStage(temp)+1)+' of 5'));meter.append(el('div','racket-temper-label','RACKET-O-METER • '+(temp===100?'DOUBLE TROUBLE READY!':temp>=75?'ALMOST THERE!':temp>=40?'BUILDING CHAOS':'CHARGING UP')));
   const track=el('div','racket-temper-track'),fill=el('div','racket-temper-fill');fill.style.width=temp+'%';track.append(fill);meter.append(track);if(virtual.charge===100){const ready=el('div','racket-double-trouble-banner','⚡ DOUBLE TROUBLE READY! NEXT WIN PAYS 2× ⚡');ready.setAttribute('role','status');meter.append(ready);}scene.append(meter);

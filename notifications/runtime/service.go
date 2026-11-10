@@ -22,6 +22,7 @@ type Service struct {
 	probe IndexerProbe
 	ready atomic.Bool
  consent http.Handler
+ enrollment http.Handler
  delivery http.Handler
 }
 
@@ -61,6 +62,12 @@ func (s *Service) EnableBetConsent(store *betconsent.Store, readToken,writeToken
  return nil
 }
 
+func (s *Service) EnableBetEnrollment(store *betconsent.Store,token,sharedKey string)error{
+ handler,err:=betconsent.EnrollmentHandler(store,token,sharedKey)
+ if err!=nil{return err}
+ s.enrollment=handler
+ return nil
+}
 func (s *Service) EnableBetDelivery(store *betdelivery.Store,consent *betconsent.Store,token string)error{
  handler,err:=betdelivery.Handler(store,consent,token)
  if err!=nil{return err}
@@ -70,6 +77,7 @@ func (s *Service) EnableBetDelivery(store *betdelivery.Store,consent *betconsent
 func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
  if s.consent!=nil {mux.Handle("/v1/420bet/subscriptions/",s.consent)}
+ if s.enrollment!=nil {mux.Handle("/v1/420bet/enrollments/",s.enrollment)}
  if s.delivery!=nil {mux.Handle("/v1/420bet/deliveries/",s.delivery)}
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]any{

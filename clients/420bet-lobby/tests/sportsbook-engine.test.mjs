@@ -180,11 +180,12 @@ test('cancelled event voids and refunds full stake, no unilateral operator winne
 test('postponed or missing facts have a permissionless bounded no-action refund',async()=>{
  const e=createLocalSportsbookEngine(args()),m=await openMarket(e,terms());
  const {ticket}=await place(e,m.id);
- await e.transition(m.id,'close',approved(e.view().markets[m.id]));
+ // The operator intentionally never closes the market: timeout refund remains callable.
  await assert.rejects(e.expireNoAction(m.id),/deadline has not elapsed/);
  time=m.finalDeadlineAt+1;
  const final=await e.expireNoAction(m.id);
  assert.equal(final.state,'FINAL');assert.equal(final.timeout,true);
+ assert.equal(e.view().markets[m.id].state,'CLOSED');
  const receipt=await e.settleTicket(ticket.ticketId,{
   role:'settlementExecutor',approved:true,finalDigest:final.digest});
  assert.equal(receipt.outcome,'VOID');assert.equal(receipt.payout,'100');

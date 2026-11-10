@@ -109,3 +109,42 @@ func TestExhaustedRevocationFeedReturnsEmptyArrayNotNull(t *testing.T){
   t.Fatalf("empty feed not an array: %s",response.Body.String())
  }
 }
+
+func TestPrivateSubjectAudienceRejectsCrossTenantAndWithdrawnSubscriptions(t *testing.T){
+ s,e:=Open(filepath.Join(t.TempDir(),"subjects.json"));if e!=nil{t.Fatal(e)};defer s.Close()
+ sub:=fixture()
+ if _,e=s.Apply(sub,0);e!=nil{t.Fatal(e)}
+ records,e:=s.Audience("420bet","subject-1")
+ if e!=nil||len(records)!=1||records[0].SubscriptionID!="sub-1"{t.Fatalf("valid audience missing: %#v %v",records,e)}
+ if _,e=s.Audience("outside","subject-1");e==nil{t.Fatal("foreign tenant enumerated")}
+ records,e=s.Audience("420bet","another-person")
+ if e!=nil||len(records)!=0{t.Fatal("other subject leaked subscription")}
+ sub.Muted=true
+ if _,e=s.Apply(sub,1);e!=nil{t.Fatal(e)}
+ records,e=s.Audience("420bet","subject-1")
+ if e!=nil||len(records)!=0{t.Fatal("muted consent enumerated")}
+ sub.Muted=false;sub.Consent=true
+ if _,e=s.Apply(sub,2);e!=nil{t.Fatal(e)}
+ if _,e=s.Revoke(query(),3);e!=nil{t.Fatal(e)}
+ records,e=s.Audience("420bet","subject-1")
+ if e!=nil||len(records)!=0{t.Fatal("revoked subscription leaked")}
+}
+func TestPrivateAudienceHTTPReadTokenAndScope(t *testing.T){
+ s,e:=Open(filepath.Join(t.TempDir(),"subjects.json"));if e!=nil{t.Fatal(e)};defer s.Close()
+ _,e=s.Apply(fixture(),0);if e!=nil{t.Fatal(e)}
+ readToken:="reader-for-private-audience-credential-00000"
+ writeToken:="writer-for-private-audience-credential-00000"
+ h,e:=Handler(s,readToken,writeToken);if e!=nil{t.Fatal(e)}
+ invoke:=func(token,body string)*httptest.ResponseRecorder{
+  req:=httptest.NewRequest(http.MethodPost,"/v1/420bet/subscriptions/audience",bytes.NewBufferString(body))
+  req.Header.Set("Authorization","Bearer "+token)
+  w:=httptest.NewRecorder();h.ServeHTTP(w,req);return w
+ }
+ body:=`{"tenant":"420bet","userId":"subject-1"}`
+ if w:=invoke(writeToken,body);w.Code!=403{t.Fatal("write credential can enumerate private audience")}
+ if w:=invoke(readToken,body);w.Code!=200||!bytes.Contains(w.Body.Bytes(),[]byte(`"subscriptionId":"sub-1"`)){
+  t.Fatalf("reader failed: %d %s",w.Code,w.Body.String())
+ }
+ if w:=invoke(readToken,`{"tenant":"other","userId":"subject-1"}`);w.Code==200{
+  t.Fatal("untrusted tenant enumerated")}
+}

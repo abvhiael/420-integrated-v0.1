@@ -64,6 +64,9 @@ on:
       - 'clients/420bet-lobby/tests/identity-runtime.test.mjs'
       - 'clients/420bet-lobby/tests/wallet-session-worker.test.mjs'
       - 'clients/420bet-lobby/tests/sportsbook-worker.test.mjs'
+      - 'clients/420bet-lobby/server/sportsbook-engine.mjs'
+      - 'clients/420bet-lobby/server/sportsbook-journal.mjs'
+      - 'clients/420bet-lobby/tests/sportsbook-engine.test.mjs'
       - 'clients/420bet-lobby/server/wallet-session-http.mjs'
       - 'clients/420bet-lobby/src/wallet-session.js'
       - 'clients/420bet-lobby/tests/wallet-session-http.test.mjs'
@@ -122,7 +125,8 @@ jobs:
             clients/420bet-lobby/tests/delivery-recovery-operations.test.mjs \
             clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
             clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs \
-            clients/420bet-lobby/tests/sportsbook-worker.test.mjs
+            clients/420bet-lobby/tests/sportsbook-worker.test.mjs \
+            clients/420bet-lobby/tests/sportsbook-engine.test.mjs
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
@@ -135,6 +139,9 @@ jobs:
         run: npm run build
       - name: Syntax validation
         run: |
+          node --check clients/420bet-lobby/server/sportsbook-engine.mjs
+          node --check clients/420bet-lobby/server/sportsbook-journal.mjs
+          node --check clients/420bet-lobby/tests/sportsbook-engine.test.mjs
           node --check clients/420bet-lobby/server/ecosystem.mjs
           node --check clients/420bet-lobby/server/wallet-identity-sessions.mjs
           node --check clients/420bet-lobby/server/wallet-signature-verifier.mjs

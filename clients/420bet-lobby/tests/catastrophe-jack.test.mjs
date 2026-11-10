@@ -201,7 +201,7 @@ test('Nine Lives retains nine spins, escalating catastrophe multipliers, and rev
  const board=['BELL','BELL','BELL','BELL','BELL','FISH','FISH','FISH','FISH'];
  const prizes=Array.from({length:9},(_,n)=>jackBellAward(board,1,n+1));
  assert.deepEqual(prizes.map(x=>x.multiplier),[1,1,2,1,1,3,1,1,5]);
- assert.equal(prizes.reduce((sum,x)=>sum+x.amount,0),3.7*16);
+ assert.ok(Math.abs(prizes.reduce((sum,x)=>sum+x.amount,0)-3.7*16)<1e-9);
  assert.deepEqual(JACK_CROSS,[1,3,5,7]);
 });
 

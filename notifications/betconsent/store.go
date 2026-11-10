@@ -58,8 +58,10 @@ type state struct {
  Items map[string]Subscription `json:"items"`
  Revocations []Revocation `json:"revocations,omitempty"`
  EnrollmentNonces map[string]int64 `json:"enrollmentNonces,omitempty"`
+ Routes map[string]RouteBinding `json:"routes,omitempty"`
+ RouteNonces map[string]int64 `json:"routeNonces,omitempty"`
 }
-type Store struct { mu sync.Mutex; path string; lock string; closed bool; data state }
+type Store struct { mu sync.Mutex; path string; lock string; closed bool; requireRoutes bool; data state }
 func key(tenant,user,sub string) string { return tenant+"|"+user+"|"+sub }
 func valid(s Subscription) bool {
  return s.Tenant=="420bet"&&id.MatchString(s.UserID)&&id.MatchString(s.SubscriptionID)&&
@@ -86,6 +88,8 @@ func Open(path string)(*Store,error){
   if e=json.Unmarshal(b,&s.data);e!=nil{return nil,e}
   if s.data.Schema!=1||s.data.Items==nil{return nil,errors.New("invalid subscription schema")}
   for k,v:=range s.data.Items {if !valid(v)||k!=key(v.Tenant,v.UserID,v.SubscriptionID)||v.Revision==0{return nil,errors.New("invalid stored subscription")}}
+  for nonce,expiry:=range s.data.RouteNonces {if expiry<=0||!nonceDigest.MatchString(nonce){return nil,errors.New("invalid route nonce state")}}
+  for k,r:=range s.data.Routes {if k!=routeKey(r.Channel,r.Recipient)||!validRouteBinding(r){return nil,errors.New("invalid route binding state")}}
   for nonce,expiry:=range s.data.EnrollmentNonces {if expiry<=0||!nonceDigest.MatchString(nonce){return nil,errors.New("invalid enrollment nonce state")}}
   for i,e:=range s.data.Revocations {
    if e.Sequence!=uint64(i+1)||e.Tenant!="420bet"||!id.MatchString(e.UserID)||!id.MatchString(e.SubscriptionID)||e.Revision==0||e.Reason=="" {return nil,errors.New("invalid revocation log")}
@@ -122,7 +126,7 @@ func (s *Store) Apply(v Subscription,expectedRevision uint64)(Subscription,error
  if exists&&(prior.Recipient!=v.Recipient||prior.Channel!=v.Channel){return Subscription{},errors.New("subscription destination immutable")}
  v.Revision=expectedRevision+1;v.UpdatedAt=time.Now().UnixMilli()
  if v.Revoked {v.Active=false;v.Consent=false}
- next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),Revocations:append([]Revocation(nil),s.data.Revocations...),EnrollmentNonces:s.data.EnrollmentNonces}
+ next:=state{Schema:1,Items:make(map[string]Subscription,len(s.data.Items)+1),Revocations:append([]Revocation(nil),s.data.Revocations...),EnrollmentNonces:s.data.EnrollmentNonces,Routes:s.data.Routes,RouteNonces:s.data.RouteNonces}
  for k,x:=range s.data.Items {next.Items[k]=x};next.Items[k]=v
  if exists && prior.Active && prior.Consent && !prior.Muted &&
   (!v.Active || !v.Consent || v.Muted || v.Revoked) {
@@ -156,6 +160,7 @@ func (s *Store) Check(c Check) Subscription {
  if s.closed{return denied}
  x,ok:=s.data.Items[key(c.Tenant,c.UserID,c.SubscriptionID)]
  if !ok||x.Recipient!=c.Recipient||x.Channel!=c.Channel||x.PolicyVersion!=c.PolicyVersion{return denied}
+ if s.requireRoutes&&!s.routeValid(x.UserID,x.Channel,x.Recipient,time.Now().UnixMilli()){return denied}
  return x
 }
 
@@ -167,7 +172,8 @@ func (s *Store) Audience(tenant,userID string)([]Subscription,error){
  if s.closed{return nil,errors.New("subscription store closed")}
  result:=make([]Subscription,0)
  for _,v:=range s.data.Items{
-  if v.Tenant==tenant&&v.UserID==userID&&v.Active&&v.Consent&&!v.Muted&&!v.Revoked{
+  if v.Tenant==tenant&&v.UserID==userID&&v.Active&&v.Consent&&!v.Muted&&!v.Revoked&&
+   (!s.requireRoutes||s.routeValid(v.UserID,v.Channel,v.Recipient,time.Now().UnixMilli())){
    result=append(result,v)
    if len(result)>16{return nil,errors.New("subscription limit exceeded")}
   }

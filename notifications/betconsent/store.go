@@ -18,27 +18,7 @@ import (
 )
 
 var id = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
-var nonceDigest = regexp.MustCompile(`^[a-f0-9]{64}// Package betconsent provides a private persistent BET-AUDIT-7 opt-in policy
-// boundary for 420Notifications. It never grants betting or wallet authority.
-package betconsent
-
-import (
- "crypto/subtle"
- "encoding/json"
- "errors"
- "fmt"
- "io"
- "net/http"
- "os"
- "path/filepath"
- "regexp"
- "sort"
- "sync"
- "time"
-)
-
-var id = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$`)
-)
+var nonceDigest = regexp.MustCompile(`^[a-f0-9]{64}$`)
 var ErrConflict = errors.New("subscription version conflict")
 var ErrMissing = errors.New("subscription not found")
 

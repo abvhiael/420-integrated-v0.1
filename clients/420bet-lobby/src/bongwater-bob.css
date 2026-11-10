@@ -81,3 +81,18 @@
  .bob-spin-dock{padding:5px 0 0}
  .bob-spin-dock .bob-spin{min-height:34px}
 }
+
+/* Bonus presentation: do not dim or obscure the dedicated bonus wallpaper. */
+.bob-bonus{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:transparent;backdrop-filter:none;padding:20px;box-sizing:border-box}
+.bob-bonus[hidden],.bob-splash[hidden],.bob-splash-object[hidden],.bob-splash-amount[hidden]{display:none!important}
+.bob-bonus-logo{height:clamp(90px,15vh,150px);max-width:65%;object-fit:contain;filter:drop-shadow(0 6px 14px #000b)}
+.bob-bonus p{font-size:clamp(18px,2.5vw,30px);font-weight:1000;text-shadow:2px 3px 5px #000,0 0 12px #220728;color:#fff}
+.bob-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,1200px);gap:clamp(8px,2vw,24px);padding:0}
+.bob-object{width:100%;height:clamp(145px,24vw,290px);max-height:none;background:#2d1245b8;box-shadow:0 10px 26px #000a}
+.bob-object img{max-height:100%;height:100%;object-fit:contain}
+.bob-splash{position:absolute;inset:0;z-index:30;display:block;cursor:pointer;outline-offset:-8px;background:#210a32}
+.bob-splash-art{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.bob-splash-object{position:absolute;left:28%;top:58%;transform:translate(-50%,-50%);width:20%;height:34%;object-fit:contain;filter:drop-shadow(0 0 10px #dcff23);pointer-events:none}
+.bob-splash-amount{position:absolute;top:69%;left:72%;transform:translate(-50%,-50%);color:#38104d;font-family:system-ui,sans-serif;font-weight:1000;font-size:clamp(30px,5.2vw,88px);text-shadow:0 2px #fff,0 0 15px #fff;background:#fff8;padding:0 .3em;border-radius:8px;pointer-events:none;white-space:nowrap}
+.bob-splash[data-variant=total] .bob-splash-amount{left:52%;top:75%;font-size:clamp(33px,6.5vw,100px)}
+@media(max-width:700px){.bob-bonus{padding:8px;gap:6px}.bob-bonus-logo{height:76px}.bob-choices{gap:6px}.bob-object{height:clamp(100px,22vw,170px)}.bob-splash-amount{font-size:clamp(18px,5vw,45px)}.bob-splash[data-variant=total] .bob-splash-amount{font-size:clamp(24px,6vw,60px)}}

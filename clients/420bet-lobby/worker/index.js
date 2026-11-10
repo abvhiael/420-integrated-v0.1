@@ -79,6 +79,49 @@ async function sessionProxy(request,env,fetcher=fetch){
  }catch{return apiError(503,'identity_provider_unavailable');}
 }
 
+// Explicit user consent proxy. No wallet key, service bearer or provider token
+// leaves the trusted backend. This is gated off until an approved deployment.
+const CONSENT_BASE='/api/420bet/consent/';
+function consentBackend(env){
+ if(env?.BET_CONSENT_ENABLED!=='true'||typeof env.BET_CONSENT_BACKEND_TOKEN!=='string'||
+  env.BET_CONSENT_BACKEND_TOKEN.length<32)return null;
+ try{
+  const u=new URL(env.BET_CONSENT_BACKEND_URL);
+  if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash||
+   u.pathname!=='/'||!u.hostname)return null;
+  return u.origin;
+ }catch{return null;}
+}
+async function consentProxy(request,env,fetcher=fetch){
+ const url=new URL(request.url),action=url.pathname.slice(CONSENT_BASE.length);
+ if(!['challenge','confirm'].includes(action)||url.search)return apiError(404,'unknown_consent_endpoint');
+ if(request.method!=='POST')return apiError(405,'method_not_allowed');
+ if(request.headers.get('Origin')!==url.origin||request.headers.has('Cookie')||
+  request.headers.has('Authorization'))return apiError(403,'consent_origin_denied');
+ if(request.headers.get('Content-Type')!=='application/json')return apiError(415,'invalid_consent_content');
+ const backend=consentBackend(env);
+ if(!backend)return apiError(503,'consent_unavailable');
+ const body=await request.text();
+ if(body.length>8192)return apiError(413,'consent_payload_too_large');
+ const headers={'Content-Type':'application/json',Accept:'application/json',
+  Origin:url.origin,'X-Bet-Edge-Secret':env.BET_CONSENT_BACKEND_TOKEN};
+ const ip=request.headers.get('CF-Connecting-IP');
+ if(ip&&ip.length<=64&&/^[0-9a-fA-F.:]+$/.test(ip))headers['X-Bet-Client-IP']=ip;
+ try{
+  const upstream=await fetcher(backend+'/v1/420bet/consent/'+action,{
+   method:'POST',redirect:'manual',credentials:'omit',cache:'no-store',
+   headers,body,signal:AbortSignal.timeout(12000)});
+  if(![200,400,403,409,413,415,429,503].includes(upstream.status)||
+   !upstream.headers.get('content-type')?.toLowerCase().startsWith('application/json'))
+   return apiError(503,'consent_backend_unavailable');
+  const text=await upstream.text();if(text.length>8192)return apiError(503,'consent_response_too_large');
+  JSON.parse(text);
+  return new Response(text,{status:upstream.status,headers:{
+   'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',
+   'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}});
+ }catch{return apiError(503,'consent_backend_unavailable');}
+}
+
 const BASE='/api/420bet/sportsbook/';
 export const SPORTSBOOK_WORKER_BUILD='sportsbook-worker-diagnostics-2026-11-08';
 function diagnostics(env){
@@ -101,8 +144,9 @@ const apiError=(status,error)=>new Response(JSON.stringify({error}),{
  'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',
  'Referrer-Policy':'no-referrer'}
 });
-export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee,linesHandler=fetchBudgetedLines,sessionFetch=fetch}={}){
+export async function handle420BetWorker(request,env,ctx,{marqueeHandler=marquee,linesHandler=fetchBudgetedLines,sessionFetch=fetch,consentFetch=fetch}={}){
  const url=new URL(request.url);
+ if(url.pathname.startsWith(CONSENT_BASE))return consentProxy(request,env,consentFetch);
  if(url.pathname.startsWith(SESSION_BASE)){
   if(url.pathname===SESSION_BASE+'capabilities'){
    if(request.method!=='GET'||url.search)return apiError(405,'invalid_session_capabilities_request');

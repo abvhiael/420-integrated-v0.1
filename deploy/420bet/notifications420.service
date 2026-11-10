@@ -1,0 +1,31 @@
+[Unit]
+Description=420Notifications private BET consent and delivery service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=420notify
+Group=420notify
+WorkingDirectory=/opt/420integrated
+EnvironmentFile=/etc/420integrated/notifications.env
+ExecStart=/opt/420integrated/bin/notifications420
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/420integrated/notifications
+StateDirectory=420integrated/notifications
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+LockPersonality=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

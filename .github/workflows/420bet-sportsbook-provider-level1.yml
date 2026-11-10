@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - 'clients/420bet-lobby/server/sportsbook-provider.mjs'
+      - 'clients/420bet-lobby/server/sportsbook-engine.mjs'
+      - 'clients/420bet-lobby/server/sportsbook-journal.mjs'
+      - 'clients/420bet-lobby/server/delivery-writer-lease.mjs'
+      - 'clients/420bet-lobby/tests/sportsbook-engine.test.mjs'
       - 'clients/420bet-lobby/worker/index.js'
       - 'clients/420bet-lobby/worker/odds-budget.js'
       - 'clients/420bet-lobby/wrangler.jsonc'
@@ -32,16 +36,20 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Provider adapter, privacy and Game Lines qualification
         working-directory: clients/420bet-lobby
-        run: node --test tests/sportsbook-provider.test.mjs tests/sportsbook-worker.test.mjs tests/sportsbook-odds-budget.test.mjs tests/sportsbook-ui.test.mjs
+        run: node --test tests/sportsbook-provider.test.mjs tests/sportsbook-worker.test.mjs tests/sportsbook-odds-budget.test.mjs tests/sportsbook-ui.test.mjs tests/sportsbook-engine.test.mjs
       - name: Validate Cloudflare Function entrypoints
         working-directory: clients/420bet-lobby
         run: |
           node --check functions/api/420bet/sportsbook/marquee.js
           node --check functions/api/420bet/sportsbook/lines.js
           node --check server/sportsbook-provider.mjs
+          node --check server/sportsbook-engine.mjs
+          node --check server/sportsbook-journal.mjs
+          node --check tests/sportsbook-engine.test.mjs
       - name: Validate Worker script syntax
         working-directory: clients/420bet-lobby
-        run: node --check worker/index.js
+        run: |
+          node --check worker/index.js
           node --check worker/odds-budget.js
       - name: Vite lobby build
         working-directory: clients/420bet-lobby

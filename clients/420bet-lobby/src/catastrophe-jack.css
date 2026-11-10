@@ -1,0 +1,43 @@
+
+/* Catastrophe Jack #9 – full-bleed comic-noir artwork and independent 3x3 reels. */
+.immersive:has(.cj-stage){position:relative;min-height:100dvh;--cj-wallpaper:url('/assets/420bet/slots/catastrophe-jack/backgrounds/background-main.png');background-color:#160d25;background-image:var(--cj-wallpaper);background-position:center;background-size:100% 100%;background-repeat:no-repeat;}
+.immersive:has(.cj-stage)>.gamebar{position:relative;z-index:5;background:rgba(11,9,19,.52);border-bottom:1px solid rgba(255,213,65,.48);backdrop-filter:blur(5px);}
+ .immersive:has(.cj-stage) .view-scroll{background:transparent;overflow:auto;}
+.cj-stage{--cj-wallpaper:url('/assets/420bet/slots/catastrophe-jack/backgrounds/background-main.png');position:relative;min-height:calc(100dvh - 60px);isolation:isolate;color:#fff4d4;font-family:system-ui,Arial,sans-serif;}
+.cj-stage::before{content:'';position:absolute;inset:-60px 0 0;background-image:linear-gradient(90deg,rgba(16,5,29,.25),rgba(13,4,24,.12),rgba(18,4,26,.18)),var(--cj-wallpaper);background-size:100% 100%;background-position:center;z-index:-2;}
+.cj-stage::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,5,24,.06),rgba(9,4,16,.22) 82%,rgba(9,4,16,.55));z-index:-1;pointer-events:none;}
+.cj-surface{width:100%;min-height:calc(100dvh - 60px);margin:0;padding:0 clamp(12px,2.8vw,48px) 35px;display:flex;flex-direction:column;align-items:center;}
+.cj-title{height:clamp(106px,16vw,195px);display:flex;justify-content:center;align-items:center;max-width:100%;}
+.cj-logo{display:block;width:min(560px,80vw);height:100%;object-fit:contain;filter:drop-shadow(0 5px 9px #0b0319);}
+.cj-notice{font-size:clamp(10px,.95vw,13px);font-weight:800;letter-spacing:.09em;text-align:center;text-shadow:0 2px 5px #000;color:#ffe67b;margin:0 0 9px;}
+.cj-layout{display:grid;grid-template-columns:minmax(270px,600px) minmax(235px,305px);gap:clamp(14px,3vw,45px);width:min(100%,1090px);align-items:start;justify-content:center;padding-top:4px;margin:auto 0;}
+.cj-reels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));aspect-ratio:1;gap:clamp(3px,.55vw,8px);padding:clamp(7px,1vw,15px);background:linear-gradient(145deg,#ffc742,#4f2876 35%,#220821 50%,#efab3c);border:6px ridge #dfaf54;border-radius:18px;box-shadow:0 0 0 5px #260826,0 0 30px #b537e988,inset 0 0 18px #000;}
+.cj-cell{min-width:0;min-height:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#411e5e,#140b20 78%);border:2px solid #d69a43;border-radius:7px;box-shadow:inset 0 0 9px #000c;}
+.cj-symbol{display:block;width:94%;height:94%;object-fit:contain;user-select:none;pointer-events:none;filter:drop-shadow(0 2px 4px #000);}
+.cj-cell.cj-moving .cj-symbol{animation:cj-spin-blur 100ms linear infinite;opacity:.72;}
+@keyframes cj-spin-blur{0%{transform:translateY(-22%);filter:blur(2px)}100%{transform:translateY(22%);filter:blur(2px)}}
+.cj-side{background:linear-gradient(160deg,rgba(21,8,33,.94),rgba(36,11,35,.90));border:2px solid #dfa84a;border-radius:15px;padding:15px;box-shadow:0 7px 25px #000b,0 0 15px #af29c777;}
+.cj-side h2{font-size:clamp(16px,1.6vw,21px);line-height:1.1;letter-spacing:.04em;text-align:center;margin:0 0 10px;color:#ffe153;text-shadow:2px 2px #a02976;}
+.cj-rules{margin:0 0 12px;font-size:12px;line-height:1.4;color:#f6d9ef;}
+.cj-counters{display:grid;gap:5px;border-top:1px solid #80614b;border-bottom:1px solid #80614b;padding:8px 0;}
+.cj-stat{display:flex;justify-content:space-between;align-items:center;font-size:13px;gap:8px;}
+.cj-stat strong{font-size:18px;color:#ffdc4f;font-variant-numeric:tabular-nums;}
+.cj-message{min-height:58px;font-size:12px;line-height:1.4;color:#ffe4b9;}
+.cj-controls{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 16px;}
+.cj-controls button,.cj-test,.cj-reset,.cj-folder{border:2px solid #f7be42;border-radius:11px;font-weight:900;}
+.cj-bet{width:40px;height:46px;background:#401a48;color:white;font-size:24px;}
+.cj-spin{background:linear-gradient(#c3ff64,#32ba3e);color:#071e0c;min-height:53px;flex:1;font-size:21px;box-shadow:0 0 11px #40cf5599;}
+.cj-controls button:disabled,.cj-test:disabled{opacity:.55;cursor:not-allowed;}
+.cj-testing{display:grid;gap:7px;border-top:1px dashed #9b7c9d;padding-top:12px;}
+.cj-testing strong{text-align:center;font-size:12px;letter-spacing:.06em;color:#ffdd51;}
+.cj-test,.cj-reset{background:#51245d;color:#fff6d5;padding:8px;font-size:12px;}
+.cj-reset{background:#312231;}
+.cj-claims{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:9px 0;}
+.cj-folder{background:#c69b60;color:#26141b;padding:7px 2px;min-height:42px;font-size:11px;}
+.cj-folder:disabled{background:#9efa75;}
+.cj-disclaimer{font-size:11px;text-align:center;color:#fff6d5;text-shadow:0 2px 3px black;padding:16px;margin:0;}
+@media(max-width:800px){.cj-layout{grid-template-columns:minmax(0,1fr);max-width:540px;gap:18px}.cj-side{max-width:540px}.cj-title{height:130px}.cj-stage::before{background-size:cover;}.cj-reels{width:100%}.cj-surface{padding-bottom:35px}}
+@media(prefers-reduced-motion:reduce){.cj-cell.cj-moving .cj-symbol{animation:none;filter:none;}}
+
+/* The immersive container owns the wallpaper so it continues beneath the gamebar. */
+.cj-stage::before{display:none;}

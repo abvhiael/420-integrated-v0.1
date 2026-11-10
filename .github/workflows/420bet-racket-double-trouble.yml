@@ -1,0 +1,38 @@
+name: Racket Double Trouble practice qualification
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/src/dice-neon.js'
+      - 'clients/420bet-lobby/src/racket-double-trouble.js'
+      - 'clients/420bet-lobby/src/rackets-loaded-dice.css'
+      - 'clients/420bet-lobby/tests/racket-double-trouble.test.mjs'
+      - 'clients/420bet-lobby/tests/rackets-loaded-dice.test.mjs'
+      - '.github/workflows/420bet-racket-double-trouble.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'clients/420bet-lobby/src/dice-neon.js'
+      - 'clients/420bet-lobby/src/racket-double-trouble.js'
+      - 'clients/420bet-lobby/src/rackets-loaded-dice.css'
+      - 'clients/420bet-lobby/tests/racket-double-trouble.test.mjs'
+      - 'clients/420bet-lobby/tests/rackets-loaded-dice.test.mjs'
+      - '.github/workflows/420bet-racket-double-trouble.yml'
+permissions:
+  contents: read
+jobs:
+  racket-double-trouble:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: clients/420bet-lobby
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - name: Qualify Dice RNG boundaries, virtual credit ledger, and bonus UI
+        run: node --test tests/racket-double-trouble.test.mjs tests/rackets-loaded-dice.test.mjs
+      - name: Build actual lobby assets
+        run: npm run build

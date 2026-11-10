@@ -71,3 +71,24 @@ test('slot #9 appears only in the normal carousel and launches correctly',()=>{
  last.querySelector('a').dispatchEvent(new window.Event('click',{bubbles:true,cancelable:true}));
  assert.equal(selected?.id,'catastrophe-jack');
 });
+
+test('right-hand reference panel shows every exact base pay and all eight paylines',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const stage=createCatastropheJack(document,{rng:()=>0});
+ document.body.append(stage);
+ const columns=stage.querySelector('.cj-layout').children;
+ assert.equal(columns.length,3);
+ assert.equal(columns[1].className,'cj-side');
+ assert.equal(columns[2].className,'cj-reference');
+ const rows=[...stage.querySelectorAll('.cj-pay-row')];
+ assert.equal(rows.length,8);
+ const displayed=rows.map(row=>row.querySelector('.cj-pay-value').textContent);
+ assert.deepEqual(displayed,['8×','6×','4×','3×','2×','1.5×','1×','8×']);
+ const diagrams=[...stage.querySelectorAll('.cj-line-mini')];
+ assert.equal(diagrams.length,8);
+ for(let i=0;i<8;i++){
+  const selected=[...diagrams[i].children].flatMap((cell,p)=>cell.className==='cj-line-on'?[p]:[]);
+  assert.deepEqual(selected,[...JACK_LINES[i]].sort((a,b)=>a-b));
+ }
+ stage.stopAnimation();
+});

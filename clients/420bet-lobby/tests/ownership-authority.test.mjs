@@ -23,20 +23,34 @@ const wagerValues=[WP,OWNER,H(1),H(2),VER,A(6),1n,2n,H(3),H(4),H(5),H(6),H(7),H(
 const poolTypes=['uint8','bytes32','address','uint64','uint64','uint64','uint64','uint64','uint256','uint256','uint256','bytes32'];
 const entryTypes=['bytes32','bytes32','address','bytes32','uint64','bool','bool','uint32[7]'];
 function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersion=false,
- identitySubject=H(33),ticketAuthority=null}={}){
- const role=roles[vertical],type=types[vertical],kind=kinds[vertical],source=manifest.find(x=>x.role===role);
+ identitySubject=H(33),ticketAuthority=null,eventType=null}={}){
+ const type=eventType??types[vertical];
+ const role=vertical==='casino'&&type==='WAGER_SETTLED'?'casino-settlement':roles[vertical];
+ const kind=type==='WAGER_SETTLED'?'wager-settled':
+  type==='FANTASY_POOL_SETTLED'?'fantasy-pool-settled':kinds[vertical];
+ const source=manifest.find(x=>x.role===role);
  const spec=EVENT_SPECS[role].find(x=>x.type===type);
  const objectId=vertical==='casino'?WP:vertical==='poker'?H(45):vertical==='fantasy'?H(42):H(43);
  let topics=[spec.topic0],data='0x';
  if(vertical==='casino'){
-  topics.push(objectId,'0x'+'0'.repeat(24)+OWNER.slice(2),VER);
-  data+='0'.repeat(64*5);
+  if(type==='WAGER_ACCEPTED'){
+   topics.push(objectId,'0x'+'0'.repeat(24)+OWNER.slice(2),VER);
+   data+='0'.repeat(64*5);
+  }else{
+   topics.push(objectId);
+   data+='0'.repeat(64*3);
+  }
  }else if(vertical==='poker'){
   topics.push(objectId,H(41));
   data+='0'.repeat(64*2);
  }else if(vertical==='fantasy'){
-  topics.push(objectId,H(1),identitySubject);
-  data='0x'+H(1).slice(2)+H(2).slice(2)+H(96).slice(2)+H(0).slice(2);
+  if(type==='FANTASY_ENTRY_ACCEPTED'){
+   topics.push(objectId,H(1),identitySubject);
+   data='0x'+H(1).slice(2)+H(2).slice(2)+H(96).slice(2)+H(0).slice(2);
+  }else{
+   topics.push(objectId);
+   data+='0'.repeat(64*3);
+  }
  }else{
   topics.push(objectId,H(47),'0x'+'0'.repeat(24)+OWNER.slice(2));
   data+='0'.repeat(64*3);
@@ -80,8 +94,8 @@ function fixture(vertical,{forged=false,reorg=false,wrongOwner=false,wrongVersio
   return {ok:true,text:async()=>JSON.stringify({jsonrpc:'2.0',id,result})};
  }
  const e={chainId:'420',vertical,role,sourceId:source.id,sourceAddress:source.address,
-  gameVersionId:vertical==='casino'?VER:null,objectId,
-  account:['casino','sportsbook'].includes(vertical)?OWNER:null,kind,
+  gameVersionId:vertical==='casino'&&type==='WAGER_ACCEPTED'?VER:null,objectId,
+  account:(vertical==='casino'&&type==='WAGER_ACCEPTED')||vertical==='sportsbook'?OWNER:null,kind,
   blockNumber:'100',blockHash:BLOCK,transactionHash:TX,logIndex:'2'};
  const rpc=createRpcCanonicalOwnershipSource({chainId:'420',sources:manifest,
   rpcUrl:'https://rpc.example/',betRegistryAddress:REGISTRY,fetcher,ticketAuthority});
@@ -109,6 +123,21 @@ test('real canonical RPC receipt + WagerRegistry owner, exact Identity and conse
  assert.equal(response.owners[0].proof.transactionHash,TX);
  assert.equal(f.calls.some(x=>x.method==='eth_call'),true);
  assert.equal(f.calls.some(x=>x.method==='eth_getTransactionReceipt'),true);
+});
+test('casino settlement without an indexed player resolves historical owner via signed WagerRegistry',async()=>{
+ const f=fixture('casino',{eventType:'WAGER_SETTLED'});
+ assert.equal(f.e.account,null);
+ const response=await f.authority.resolve(f.e);
+ assert.equal(response.owners[0].account,OWNER);
+ assert.equal(response.owners[0].gameVersionId,VER);
+ assert.equal(response.gameVersionId,null);
+});
+test('fantasy settled pool independently enumerates its bounded canonical beneficiary entries',async()=>{
+ const f=fixture('fantasy',{eventType:'FANTASY_POOL_SETTLED'});
+ const response=await f.authority.resolve(f.e);
+ assert.equal(response.owners.length,1);
+ assert.equal(response.owners[0].account,OWNER);
+ assert.equal(response.gameVersionId,null);
 });
 test('poker hand participants recovered from original canonical locked reservation seats',async()=>{
  const f=fixture('poker');

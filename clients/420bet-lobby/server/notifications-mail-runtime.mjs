@@ -1,4 +1,5 @@
 import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {createRemoteBetOwnershipResolver} from './ownership-resolver.mjs';
 import {createVerified420MailActorBroker} from './mail-auth-broker.mjs';
 import {create420NotificationsConsentAuthority} from './notifications-consent-authority.mjs';
@@ -58,7 +59,11 @@ export async function createBetNotificationsMailRuntime({
  const registry=await verifyRegistry({env,indexerManifest:manifest});
  fail(registry?.result?.qualified===true,'verified Registry unavailable');
  const reader=readerFactory({manifest,fetcher});
+ let trustedReplayWindow=null;
+ const proofKey=e=>[e.chainId,e.blockNumber,e.blockHash,e.transactionHash,e.logIndex,
+  e.account?.toLowerCase()??'',e.type].join('|');
  const verifyEvent=async request=>{
+  if(trustedReplayWindow!==null)return trustedReplayWindow.has(proofKey({...request.event,type:Object.entries(TYPE_NAMES).find(([,k])=>k===request.kind)?.[0]}));
   try{
    const before=await reader.readCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT);
    const observed=await reader.poll(before,{maxBlocks:64});
@@ -121,49 +126,90 @@ export async function createBetNotificationsMailRuntime({
  async function recoverReorganization(){
   const state=await outbox.summary();
   fail(state.halted||state.replayPending,'no canonical recovery required');
-  fail(typeof reader.persistCheckpoint==='function','durable canonical checkpoint writer required');
-  const fresh=await verifyRegistry({env,indexerManifest:manifest});
-  fail(fresh?.result?.qualified===true&&fresh.config,'unqualified recovery Registry');
-  assertIndexerRegistryBinding(reader.config,fresh.config);
-  let canonical=await reader.readCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT);
-  let complete=false;
-  for(let i=0;i<512;i++){
-   const scanned=await reader.poll(canonical,{maxBlocks:64});
-   canonical=scanned.state;
-   if(scanned.complete===true){complete=true;break;}
-   fail(scanned.scanned>0,'canonical replay did not progress');
+  fail(typeof reader.initialState==='function'&&
+   typeof outbox.recoveryEventIds==='function'&&
+   typeof reader.persistCheckpoint==='function',
+   'full replay and durable canonical checkpoint interfaces required');
+  // Full-history replay from the original signed manifest start. It cannot be
+  // resumed from a checkpoint whose branch may already be orphaned.
+  const first=await verifyRegistry({env,indexerManifest:manifest});
+  fail(first?.result?.qualified===true&&first.config,'unqualified recovery Registry');
+  assertIndexerRegistryBinding(reader.config,first.config);
+  const outstanding=new Set(await outbox.recoveryEventIds());
+  fail(outstanding.size<=10000,'unbounded recovery orphan candidates');
+  const verified=new Set();
+  const sources=new Map(reader.config.contracts.map(x=>[x.address,x]));
+  function keysFor(event){
+   const source=sources.get(event.contract),kind=TYPE_NAMES[event.type],vertical=VERTICAL[event.role];
+   if(!source||source.role!==event.role||!kind||!vertical)return [];
+   const games=first.config.games.filter(g=>g.vertical===vertical&&
+    (!event.gameVersionId||g.gameVersionId===event.gameVersionId));
+   return games.map(g=>canonicalBetEventId({chainId:event.chainId,gameId:g.id,
+    transactionHash:event.transactionHash,logIndex:event.logIndex,
+    type:kind,blockHash:event.blockHash}));
   }
-  fail(complete,'canonical replay incomplete; deliveries remain halted');
-  const reconfirm=await verifyRegistry({env,indexerManifest:manifest});
-  fail(reconfirm?.result?.qualified===true&&reconfirm.config,
-   'recovery Registry approval changed');
-  assertIndexerRegistryBinding(reader.config,reconfirm.config);
-  fail(JSON.stringify(fresh.config)===JSON.stringify(reconfirm.config),
-   'recovery Registry identity changed during replay');
-  const canonicalIds=new Set();
-  for(const event of canonical.events){
-   const source=reader.config.contracts.find(x=>x.address===event.contract&&x.role===event.role);
-   const kind=TYPE_NAMES[event.type],vertical=VERTICAL[event.role];
-   if(!source||!kind||!vertical)continue;
-   const games=reconfirm.config.games.filter(game=>game.vertical===vertical&&
-    (!event.gameVersionId||game.gameVersionId===event.gameVersionId));
-   for(const game of games)canonicalIds.add(canonicalBetEventId({
-    chainId:event.chainId,gameId:game.id,transactionHash:event.transactionHash,
-    logIndex:event.logIndex,type:kind,blockHash:event.blockHash
-   }));
+  const MAX_WINDOWS=250000;
+  async function walk(onWindow){
+   let snapshot=reader.initialState(),windows=0,events=0;
+   const digest=createHash('sha256');
+   while(windows<MAX_WINDOWS){
+    const result=await reader.poll(snapshot,{maxBlocks:64,retainEvents:false});
+    fail(result.reorganized!==true,'canonical history changed during full replay');
+    snapshot=result.state;windows++;
+    const windowEvents=snapshot.events;
+    // Chain-bound event digest prevents a different second-pass event set from
+    // silently reprojection or releasing the dispatch halt.
+    for(const event of windowEvents){
+     digest.update(JSON.stringify(event));digest.update('\n');events++;
+    }
+    await onWindow(windowEvents);
+    if(result.complete===true){
+     return {snapshot,events,windows,sha256:digest.digest('hex'),
+      nextBlock:snapshot.nextBlock,tipHash:snapshot.tipHash};
+    }
+    fail(result.scanned>0,'canonical replay stalled before finalized head');
+   }
+   throw Error('canonical replay budget exceeded; outbox remains halted');
   }
-  // The durable cursor is advanced first while outbox remains halted/pending.
-  // If the process dies before full reprojection, replayPending survives.
-  await reader.persistCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT,canonical);
-  const reconciliation=await outbox.reconcileCanonicalReplay({
-   canonicalEventIds:[...canonicalIds],
+  const scanned=await walk(async events=>{
+   for(const event of events)for(const id of keysFor(event))
+    if(outstanding.has(id))verified.add(id);
+  });
+  const secondApproval=await verifyRegistry({env,indexerManifest:manifest});
+  fail(secondApproval?.result?.qualified===true&&secondApproval.config&&
+   JSON.stringify(first.config)===JSON.stringify(secondApproval.config),
+   'Registry approval changed during canonical replay');
+  assertIndexerRegistryBinding(reader.config,secondApproval.config);
+  // Durable canonical cursor is saved only after a full independent scan.
+  await reader.persistCheckpoint(env.BET_INDEXER_EVENT_CHECKPOINT,scanned.snapshot);
+  const reconciled=await outbox.reconcileCanonicalReplay({
+   canonicalEventIds:[...verified],
    verifyCanonicalRebuild:async()=>true
   });
-  const projected=await publisher.replayCanonicalEvents(canonical.events);
+  // A second full pass reprojects in small, individually canonical-verified
+  // windows; there is never a 200,000-event all-history in-memory accumulator.
+  let projected=0,skipped=0;
+  const replayed=await walk(async events=>{
+   trustedReplayWindow=new Set(events.map(proofKey));
+   try{
+    const result=await publisher.replayCanonicalEvents(events);
+    projected+=result.queued;skipped+=result.skipped;
+   }finally{trustedReplayWindow=null;}
+  });
+  fail(scanned.events===replayed.events&&
+   scanned.sha256===replayed.sha256&&
+   scanned.nextBlock===replayed.nextBlock&&scanned.tipHash===replayed.tipHash,
+   'canonical history changed between recovery passes');
+  const finalApproval=await verifyRegistry({env,indexerManifest:manifest});
+  fail(finalApproval?.result?.qualified===true&&finalApproval.config&&
+   JSON.stringify(first.config)===JSON.stringify(finalApproval.config),
+   'Registry changed during replay projection');
   await outbox.finishCanonicalReplay();
-  return Object.freeze({...reconciliation,projected:projected.queued,
-   skipped:projected.skipped,canonicalEvents:canonical.events.length});
+  return Object.freeze({...reconciled,projected,skipped,
+   canonicalEvents:scanned.events,windows:scanned.windows,
+   historyDigest:scanned.sha256});
  }
+
  return Object.freeze({outbox,
   revocationHealth:()=>({failed:lastRevocationFailure,stopped}),
   // Always catch up revoked subscriptions before publishing or dispatching.

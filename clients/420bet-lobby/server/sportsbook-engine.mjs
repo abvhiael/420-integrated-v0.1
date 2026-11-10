@@ -141,7 +141,7 @@ export function createLocalSportsbookEngine({
  verifyResult,clock=Date.now,preloaded=null,persistState=async()=>{}
 }={}){
  for(const [name,fn] of Object.entries({signQuote,verifyQuote,authorizePlayer,
-  checkEligibility,verifyResult,clock,persistState}))requireTrue(typeof fn==='function','missing '+name);
+  checkEligibility,verifyMarketHealth,verifyResult,clock,persistState}))requireTrue(typeof fn==='function','missing '+name);
  let state=preloaded?clone(preloaded):initial({chainId,assetId,vaultId,operatorId,capital,policy});
  requireTrue(state.schema==='420bet-sportsbook-local-v1','invalid sportsbook schema');
  requireTrue(state.chainId===chainId&&state.assetId===assetId&&state.vaultId===vaultId&&

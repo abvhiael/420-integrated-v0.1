@@ -13,10 +13,9 @@ export const JACK_SYMBOLS=Object.freeze({
  BELL:'features/symbol_disaster_bell.png',CLAIM:'features/symbol_insurance_folder.png',
  ANVIL:'features/symbol_falling_anvil.png'
 });
-// Multiplier of total bet. Each line awards its highest eligible 3-of-kind or 2-of-kind result.
+// Multipliers of total bet. Exactly THREE matching positions are required on a line.
 // Bells pay on base-game lines without using WILD substitution; the five-bell cross remains a separate trigger.
 export const JACK_PAY=Object.freeze({TICKET:8,DUMPSTER:6,CASH:4,DYNAMITE:3,BUD:2,PIZZA:1.5,FISH:1,WILD:8,BELL:3});
-export const JACK_PAY_TWO=Object.freeze({TICKET:1,DUMPSTER:.75,CASH:.5,DYNAMITE:.4,BUD:.3,PIZZA:.25,FISH:.2,WILD:1,BELL:.5});
 export const JACK_BELL_PAY=Object.freeze([0,.5,1.5,3,6,12,25,50,100,250]);
 const BASE_POOL=['TICKET','DUMPSTER','CASH','DYNAMITE','BUD','BUD','PIZZA','PIZZA','FISH','FISH','FISH','FISH','WILD','BELL','CLAIM','ANVIL'];
 const FREE_POOL=['BELL','BELL','BELL','BELL','BELL','FISH','BUD','CASH','PIZZA','DUMPSTER','TICKET'];
@@ -30,19 +29,15 @@ export function jackEvaluate(board,bet=1){
   const symbols=line.map(p=>board[p]);
   const candidates=[];
   for(const symbol of Object.keys(JACK_PAY)){
-   // Golden Bells never use wild substitutions; other symbols do.
-   const matches=symbols.filter(s=>s===symbol||(symbol!=='BELL'&&symbol!=='WILD'&&s==='WILD')).length;
-   const count=symbol==='WILD'?symbols.filter(s=>s==='WILD').length:matches;
-   if(count>=2){
-    const matched=Math.min(count,3);
-    const multiplier=matched===3?JACK_PAY[symbol]:JACK_PAY_TWO[symbol];
-    candidates.push({symbol,count:matched,amount:Math.round(multiplier*bet*100)/100});
+   // Golden Bells do not accept WILD substitutions.
+   const count=symbols.filter(s=>s===symbol||(symbol!=='BELL'&&symbol!=='WILD'&&s==='WILD')).length;
+   if(count===3){
+    candidates.push({symbol,count:3,amount:Math.round(JACK_PAY[symbol]*bet*100)/100});
    }
   }
-  // Exactly one prize per payline; a three-match beats every two-match.
-  candidates.sort((a,b)=>b.count-a.count||b.amount-a.amount);
-  const best=candidates[0];
-  if(best){total+=best.amount;lines.push({line:i+1,...best});}
+  // Exactly one winning symbol per line, even for a full-WILD combination.
+  candidates.sort((a,b)=>b.amount-a.amount);
+  if(candidates.length){const best=candidates[0];total+=best.amount;lines.push({line:i+1,...best});}
  });
  return {total:Math.round(total*100)/100,lines};
 }
@@ -102,7 +97,7 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  splash.append(splashButton);
  const side=el(doc,'aside','cj-side');
  const heading=el(doc,'h2','', "CAT\'S GOT NINE LIVES");
- const info=el(doc,'p','cj-rules','8 paylines · 2 or 3 matching symbols pay on any line (including Golden Bells). Five bells in positions 2, 4, 5, 6, 8 start Nine Lives.');
+ const info=el(doc,'p','cj-rules','8 paylines · 3 matching symbols pay on any line (including Golden Bells). Five bells in positions 2, 4, 5, 6, 8 start Nine Lives.');
  const counters=el(doc,'div','cj-counters');
  const balanceText=el(doc,'strong','', '1000.00');
  const betText=el(doc,'strong','', '1.00');
@@ -132,17 +127,17 @@ export function createCatastropheJack(doc=globalThis.document,{rng=Math.random}=
  reference.setAttribute('aria-label','Paytable and eight paylines');
  reference.append(el(doc,'h2','cj-reference-title cj-poster-title','PAYTABLE & PAYLINES'));
  const payTable=el(doc,'div','cj-paytable');
- const payTitle=el(doc,'h3','','2 OR 3 MATCHING · TOTAL BET ×');
+ const payTitle=el(doc,'h3','','3 MATCHING · TOTAL BET ×');
  payTable.append(payTitle);
  const payNames={TICKET:'Lucky Lottery Ticket',DUMPSTER:'Golden Dumpster',CASH:'Almost Cash',DYNAMITE:'Disaster Dynamite',BUD:'Bud Jar',PIZZA:'Suspicious Pizza',FISH:'Dumpster Fish',WILD:'Jack Wild',BELL:'Golden Disaster Bell'};
  for(const [symbol,award] of Object.entries(JACK_PAY)){
   const row=el(doc,'div','cj-pay-row');
   row.append(img(doc,JACK_SYMBOLS[symbol],payNames[symbol],'cj-pay-symbol'));
   row.append(el(doc,'span','cj-pay-name',payNames[symbol]));
-  row.append(el(doc,'strong','cj-pay-value',JACK_PAY_TWO[symbol]+'× / '+award+'×'));
+  row.append(el(doc,'strong','cj-pay-value',award+'×'));
   payTable.append(row);
  }
- const wildNote=el(doc,'p','cj-pay-note','Values show 2 matches / 3 matches on any of 8 lines, even non-adjacent. One highest prize per line. Jack WILD substitutes for regular symbols, never Bells. Bells also trigger Nine Lives in the five-position cross.');
+ const wildNote=el(doc,'p','cj-pay-note','Three matching symbols required on any of 8 lines. No two-symbol payouts. One prize per line. Jack WILD substitutes for regular symbols, never Bells. Bells also trigger Nine Lives in the five-position cross.');
  payTable.append(wildNote);
  const lineSection=el(doc,'div','cj-line-section');
  lineSection.append(el(doc,'h3','','8 FIXED PAYLINES'));

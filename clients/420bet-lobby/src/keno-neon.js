@@ -213,7 +213,7 @@ export function createNeonKeno(doc=globalThis.document){
   const recent=element('div','ls-recent');
   recent.textContent=history.length?'RECENT: '+history.slice(0,3).map(item=>item.hits+'/'+item.picks+(item.bonus?' ×2':'')).join(' · '):'20 RANDOM NUMBERS · 80-NUMBER BOARD';
   extras.append(recent);root.append(extras);
-  root.append(element('p','ls-disclaimer','PRACTICE ONLY · Simulated draws and virtual credits. No real wagering, verified randomness, or on-chain payout.'));
+  root.append(element('p','ls-disclaimer','PRACTICE ONLY · No funds or real wagers. Simulated draws and virtual credits; no verified randomness or on-chain payout.'));
  };
  render();return root;
 }

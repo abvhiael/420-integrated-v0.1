@@ -63,7 +63,7 @@ test('Keno INFO button reveals complete ten-spot paytable, rules and bonus mecha
  root.querySelector('.ls-info-button').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.ls-paytable tr').length,12);
  assert.match(root.querySelector('.ls-info-dialog').textContent,/next draw with a paying result/i);
- assert.match(root.querySelector('.ls-info-dialog').textContent,/not approved for live wagers/i);
+ assert.match(root.querySelector('.ls-info-dialog').textContent,/NOT APPROVED FOR WAGERING/i);
  assert.equal(root.querySelector('.ls-pick-select').getAttribute('aria-label'),'Number of Keno spots');
  root.querySelector('.ls-info-close').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelector('.ls-info-dialog'),null);

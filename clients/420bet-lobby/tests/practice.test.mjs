@@ -59,8 +59,9 @@ test('Lucky Strays Keno quick pick, clear, draw, virtual credit and meter UI are
 test('Lucky Strays payout disclosure shows ten-spot candidate without presenting live payouts',()=>{
  const {document}=parseHTML('<html><body></body></html>');
  const root=createPractice('keno',document);
+ root.querySelector('.ls-info-button').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.ls-paytable tr').length,12);
- assert.match(root.querySelector('.ls-info-content').textContent,/Not approved for live wagers/i);
+ assert.match(root.querySelector('.ls-info-dialog').textContent,/Not approved for live wagers/i);
  assert.equal(root.querySelector('.ls-pick-select').getAttribute('aria-label'),'Number of Keno spots');
 });
 

@@ -582,3 +582,24 @@
  .ls-pick{justify-content:center}
 }
 @media(prefers-reduced-motion:reduce){.ls-number{transition:none}}
+
+
+/* Approved illustrated controls, loaded from the uploaded individual asset PNGs. */
+.ls-keno .ls-action.ls-quick{
+ background:transparent url('/assets/420bet/keno/catastrophe-jack/ui/btn_lucky_claws.png') center/100% 100% no-repeat;
+ border:0;box-shadow:none;font-size:0;color:transparent;text-shadow:none;
+}
+.ls-keno .ls-action.ls-quick small{font-size:0;color:transparent}
+.ls-keno .ls-action.ls-draw{
+ background:transparent url('/assets/420bet/keno/catastrophe-jack/ui/btn_draw_20.png') center/100% 100% no-repeat;
+ border:0;box-shadow:0 0 14px #54ff3c50;font-size:0;color:transparent;text-shadow:none;
+}
+.ls-keno .ls-action.ls-clear{
+ background:transparent url('/assets/420bet/keno/catastrophe-jack/ui/btn_clear.png') center/100% 100% no-repeat;
+ border:0;box-shadow:none;font-size:0;color:transparent;text-shadow:none;
+}
+.ls-keno .ls-action.ls-auto:not([data-running="true"]){
+ background:transparent url('/assets/420bet/keno/catastrophe-jack/ui/btn_auto.png') center/100% 100% no-repeat;
+ border:0;box-shadow:none;font-size:0;color:transparent;text-shadow:none;
+}
+.ls-keno .ls-action:focus-visible,.ls-keno .ls-number:focus-visible{outline:3px solid #cfff7b;outline-offset:3px}

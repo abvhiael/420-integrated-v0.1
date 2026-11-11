@@ -241,7 +241,7 @@ export function createNeonKeno(doc=globalThis.document,options={}){
    overlay.addEventListener('click',event=>{if(event.target===overlay){infoOpen=false;render();}});
    overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){infoOpen=false;render();}});
    root.append(overlay);
-   close.focus();
+   close.focus?.();
   }
   root.append(element('p','ls-disclaimer','PRACTICE ONLY · No funds or real wagers. Simulated draws and virtual credits; no verified randomness or on-chain payout.'));
  };

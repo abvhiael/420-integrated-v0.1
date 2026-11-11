@@ -176,6 +176,7 @@ export function createNeonKeno(doc=globalThis.document){
   go.disabled=state.picks.length!==pickTarget||credits<bet||autoTimer!==null;controls.append(go);
   const clear=button('↶ CLEAR',clearPicks,'ls-action ls-clear');controls.append(clear);
   const auto=button(autoTimer!==null?'■ STOP AUTO':'▶ AUTO',toggleAuto,'ls-action ls-auto');
+  auto.dataset.running=String(autoTimer!==null);
   auto.disabled=autoTimer===null&&(state.picks.length!==pickTarget||credits<bet);controls.append(auto);
   root.append(controls);
 

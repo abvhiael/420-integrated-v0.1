@@ -25,12 +25,75 @@ test('source never invokes external authority, wallet or transaction API',()=>{f
 
 test('neon dice page preserves functional practice controls and history without wallet access',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('dice',document);assert(root.classList.contains('neon-dice-page'));assert(root.querySelector('.nd-dice-art'));assert.equal(root.querySelectorAll('.nd-choice').length,2);const roll=root.querySelector('.nd-roll');assert(roll);roll.dispatchEvent(new window.Event('click'));assert.match(root.querySelector('.nd-big-number').textContent,/^[0-9]{4}$/);assert.equal(root.querySelectorAll('.nd-pill').length,1);assert.equal(root.querySelectorAll('iframe').length,0);assert.match(root.textContent,/No wallet connection/i);});
 
-test('neon Keno selection, quick pick, complete draw and matched ball display',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('keno',document);assert(root.classList.contains('neon-keno-page'));assert.equal(root.querySelectorAll('.nk-number').length,80);assert.equal(root.querySelectorAll('.nk-ball.empty').length,20);const first=root.querySelector('.nk-number');first.dispatchEvent(new window.Event('click'));assert.equal(root.querySelector('.nk-counter').textContent,'1 / 5 SELECTED');const quick=[...root.querySelectorAll('button')].find(x=>x.textContent.includes('QUICK PICK'));quick.dispatchEvent(new window.Event('click'));assert.equal(root.querySelector('.nk-counter').textContent,'5 / 5 SELECTED');assert.equal(root.querySelectorAll('.nk-number.picked').length,5);root.querySelector('.nk-draw').dispatchEvent(new window.Event('click'));assert.equal(root.querySelectorAll('.nk-ball').length,20);assert.equal(root.querySelectorAll('.nk-ball.empty').length,0);assert.equal(root.querySelectorAll('.nk-past-entry').length,1);assert.match(root.textContent,/No funds/);});
+test('Lucky Strays Keno renders approved cabinet layout and uploaded artwork without duplicate Jack',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('keno',document);
+ assert(root.classList.contains('ls-keno'));
+ assert.equal(root.querySelectorAll('.ls-number').length,80);
+ assert.equal(root.querySelectorAll('.ls-ball.empty').length,20);
+ assert(root.querySelector('.ls-logo').getAttribute('src').includes('/catastrophe-jack/logo.png'));
+ assert(root.querySelector('.ls-machine').getAttribute('src').includes('/catastrophe-jack/machine/'));
+ assert.equal(root.querySelectorAll('.ls-jack-character').length,0);
+ assert.equal(root.querySelectorAll('.ls-life-icon').length,9);
+ assert.match(root.textContent,/NO WALLET/);
+ assert.match(root.textContent,/No funds/);
+});
+test('Lucky Strays Keno quick pick, clear, draw, virtual credit and meter UI are functional',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const root=createPractice('keno',document);
+ const first=root.querySelector('.ls-number');
+ first.dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.ls-number.picked').length,1);
+ [...root.querySelectorAll('button')].find(x=>x.textContent.includes('LUCKY CLAWS')).dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.ls-number.picked').length,10);
+ assert.equal(root.querySelector('.ls-draw').disabled,false);
+ root.querySelector('.ls-draw').dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.ls-ball').length,20);
+ assert.equal(root.querySelectorAll('.ls-ball.empty').length,0);
+ assert.match(root.querySelector('.ls-recent').textContent,/RECENT:/);
+ assert.match(root.querySelector('.ls-win').textContent,/VIRTUAL/);
+ assert.equal(root.querySelectorAll('.ls-life-icon').length,9);
+ [...root.querySelectorAll('button')].find(x=>x.textContent.includes('CLEAR')).dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.ls-number.picked').length,0);
+});
+test('Lucky Strays payout disclosure shows ten-spot candidate without presenting live payouts',()=>{
+ const {document}=parseHTML('<html><body></body></html>');
+ const root=createPractice('keno',document);
+ assert.equal(root.querySelectorAll('.ls-paytable tr').length,12);
+ assert.match(root.querySelector('.ls-info-content').textContent,/Not approved for live wagers/i);
+ assert.equal(root.querySelector('.ls-pick-select').getAttribute('aria-label'),'Number of Keno spots');
+});
 
-test('Keno payout table is complete for selection count without fabricated multipliers',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('keno',document);assert.equal(root.querySelectorAll('.nk-pay-grid tbody tr').length,6);assert.match(root.querySelector('.nk-paytable').textContent,/independent approval/i);assert.equal(root.querySelectorAll('.nk-pay-zero strong').length,2);assert([...root.querySelectorAll('.nk-pay-zero strong')].every(x=>x.textContent==='0'));assert.equal(root.querySelector('.nk-pick-count').getAttribute('aria-label'),'Choose number of Keno picks');const pick=root.querySelector('.nk-number');pick.dispatchEvent(new window.Event('click'));assert.equal(root.querySelector('.nk-counter').textContent,'1 / 5 SELECTED');});
-
-test('Keno candidate payout schedule displays exact unapproved values for 1-10 picks',()=>{assert.equal(proposedGrossMultiplier(1,1),'3.6');assert.equal(proposedGrossMultiplier(5,3),'3');assert.equal(proposedGrossMultiplier(5,4),'25');assert.equal(proposedGrossMultiplier(5,5),'550');assert.equal(proposedGrossMultiplier(10,10),'20000');assert.equal(proposedGrossMultiplier(10,0),'0');assert.match(KENO_CANDIDATE_STATUS,/NOT APPROVED/);const {document}=parseHTML('<html><body></body></html>');const page=createPractice('keno',document);assert.equal(page.querySelectorAll('.nk-pay-grid tbody tr').length,6);assert.match(page.querySelector('.nk-pay-grid').textContent,/550×/);assert.match(page.querySelector('.nk-pay-status').textContent,/NOT APPROVED/);});
-test('Keno matched results use cannabis leaf markers in board and draw',()=>{const {document,window}=parseHTML('<html><body></body></html>');const page=createPractice('keno',document);const quick=[...page.querySelectorAll('button')].find(x=>x.textContent.includes('QUICK PICK'));quick.dispatchEvent(new window.Event('click'));let leafFound=false;for(let i=0;i<25;i++){page.querySelector('.nk-draw').dispatchEvent(new window.Event('click'));if(page.querySelector('.nk-ball.matched')){assert(page.querySelector('.nk-ball.matched svg.nk-cannabis-hit')!==null);assert(page.querySelector('.nk-number.match svg.nk-cannabis-hit')!==null);leafFound=true;break;}}assert(leafFound);});
+test('Keno unapproved canonical candidate stays separate from Jack’s visual practice schedule',()=>{
+ assert.equal(proposedGrossMultiplier(1,1),'3.6');
+ assert.equal(proposedGrossMultiplier(5,3),'3');
+ assert.equal(proposedGrossMultiplier(5,4),'25');
+ assert.equal(proposedGrossMultiplier(5,5),'550');
+ assert.equal(proposedGrossMultiplier(10,10),'20000');
+ assert.equal(proposedGrossMultiplier(10,0),'0');
+ assert.match(KENO_CANDIDATE_STATUS,/NOT APPROVED/);
+ const {document}=parseHTML('<html><body></body></html>');
+ const page=createPractice('keno',document);
+ assert.equal(page.querySelectorAll('.ls-paytable tr').length,12);
+ assert.match(page.querySelector('.ls-info-content').textContent,/not approved for live wagers/i);
+});
+test('Lucky Strays highlights selected drawn matches and preserves all twenty results',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const page=createPractice('keno',document);
+ const quick=[...page.querySelectorAll('button')].find(x=>x.textContent.includes('LUCKY CLAWS'));
+ quick.dispatchEvent(new window.Event('click'));
+ let found=false;
+ for(let i=0;i<25;i++){
+  page.querySelector('.ls-draw').dispatchEvent(new window.Event('click'));
+  if(page.querySelector('.ls-ball.matched')){
+   assert(page.querySelector('.ls-number.hit'));
+   assert(page.querySelector('.ls-number.hit .ls-hit-paw'));
+   assert.equal(page.querySelectorAll('.ls-ball').length,20);
+   found=true;break;
+  }
+ }
+ assert(found);
+});
 
 test('Plinko renders 78 pegs, thirteen landing buckets and follows a twelve-step simulated path',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('plinko',document);assert.equal(root.querySelectorAll('.plinko-peg').length,78);assert.equal(root.querySelectorAll('.plinko-bucket').length,13);const button=root.querySelector('.plinko-drop');assert(button);button.dispatchEvent(new window.Event('click'));assert.equal(root.querySelectorAll('.plinko-trace').length,0);assert.equal(root.querySelectorAll('.plinko-ball').length,1);assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,1);assert.match(root.textContent,/No wager/);});
 

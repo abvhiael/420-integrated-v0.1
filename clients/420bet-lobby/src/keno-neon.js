@@ -116,7 +116,6 @@ export function createNeonKeno(doc=globalThis.document,options={}){
   infoButton.setAttribute('aria-haspopup','dialog');status.append(infoButton);
   header.append(status);root.append(header);
 
-  const tagline=element('p','ls-tagline','Every number has nine lives. Your luck doesn’t.');root.append(tagline);
   const stage=element('div','ls-stage');
   const left=element('aside','ls-left');
   // The wallpaper already includes the full-sized orange tabby. Do not render a duplicate Jack.

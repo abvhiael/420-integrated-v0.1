@@ -413,3 +413,28 @@
 .cowboy-preview-page p{line-height:1.7}
 @media(max-width:760px){.slots-carousel .slots-machine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.slots-carousel .slots-machine-card[data-carousel-position="2"]{display:none}.slots-machine-art{min-height:185px}.slots-machine-body{padding:13px}.slots-machine-body h2{font-size:1.25rem}}
 @media(max-width:520px){.slots-carousel .slots-machine-grid{grid-template-columns:minmax(0,1fr)}.slots-carousel .slots-machine-card[data-carousel-position="1"]{display:none}.slots-carousel-arrow{flex-basis:32px;height:55px}}
+
+
+/* Catastrophe Jack: Lucky Strays Keno — presentation only, canonical play rules unchanged. */
+.neon-keno-page{max-width:none;min-height:100vh;background:#100d19 url('/assets/420bet/keno/catastrophe-jack/wallpaper.png') center center/cover fixed no-repeat;padding:clamp(14px,2vw,28px);--nk-lime:#b3ff29;--nk-gold:#ffbe64}
+.neon-keno-page:before{background:linear-gradient(90deg,#09071116,#090711aa 35%,#090711b0)}
+.neon-keno-page .nk-heading{position:relative;z-index:2;margin-left:min(27vw,370px);margin-bottom:12px}
+.neon-keno-page .nk-jack-logo{display:block;width:min(640px,100%);height:auto;max-height:180px;object-fit:contain;object-position:left}
+.neon-keno-page .nk-layout{position:relative;z-index:2;margin-left:min(27vw,370px);grid-template-columns:minmax(0,1.55fr) minmax(270px,.9fr)}
+.neon-keno-page .nk-jack-host{position:absolute;z-index:1;left:0;top:135px;width:min(27vw,370px);pointer-events:none}
+.neon-keno-page .nk-jack-character{display:block;width:100%;height:auto;filter:drop-shadow(0 8px 22px #140819)}
+.neon-keno-page .nk-jack-machine{display:block;position:relative;margin:-35px 0 0 auto;width:65%;filter:drop-shadow(0 0 12px #bd42c355)}
+.neon-keno-page .nk-panel{background:linear-gradient(145deg,#190d26f2,#0f0917ed);border-color:#be8755;box-shadow:0 0 22px #ba3aff30}
+.neon-keno-page .nk-number{border-radius:8px;background:linear-gradient(145deg,#322034,#1a1024);border-color:#835581;color:#f7e3c4}
+.neon-keno-page .nk-number.picked{background:#702aa2;color:white;border-color:#f188ff;box-shadow:0 0 14px #e500ff77}
+.neon-keno-page .nk-number.match{background:#1e9a48;color:white;border-color:#baff7d;box-shadow:0 0 18px #6aff49bb}
+.neon-keno-page .nk-tool{background:#421d52;border-color:#b459db;color:white}
+.neon-keno-page .nk-nine-lives{margin:14px 0;padding:12px;background:#240d32dd;border:1px solid #c98d58;border-radius:12px}
+.neon-keno-page .nk-nine-lives h3{font-size:.95rem;color:#ffca6b;margin:0 0 5px}
+.neon-keno-page .nk-nine-lives p{font-size:.82rem;line-height:1.4;margin:0 0 9px;color:#f7d7ff}
+.neon-keno-page .nk-life-icons{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:3px}
+.neon-keno-page .nk-life-icon{width:100%;height:auto;aspect-ratio:1;object-fit:contain;min-width:0}
+.neon-keno-page .nk-bonus-status{color:#d5ff8b;background:#301642;border:1px solid #c69b57;border-radius:9px;padding:10px;font-size:.87rem;font-weight:800}
+.neon-keno-page .nk-draw{background:linear-gradient(#d6ff93,#8ae833 65%,#42b72a)}
+@media(max-width:1100px){.neon-keno-page .nk-layout{grid-template-columns:1fr;margin-left:min(25vw,250px)}.neon-keno-page .nk-heading{margin-left:min(25vw,250px)}.neon-keno-page .nk-jack-host{width:min(25vw,250px)}}
+@media(max-width:720px){.neon-keno-page{background-attachment:scroll}.neon-keno-page .nk-layout,.neon-keno-page .nk-heading{margin-left:0}.neon-keno-page .nk-jack-host{display:none}.neon-keno-page .nk-jack-logo{max-height:125px}.neon-keno-page .nk-practice-chip{padding:8px}.neon-keno-page .nk-life-icons{gap:1px}}

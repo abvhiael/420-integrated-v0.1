@@ -48,8 +48,9 @@ library WebAuthnClientData420 {
                 if (!_literal(data, pos, "false")) return false;
                 pos += 5;
             } else {
-                (pos, bool ok) = _value(data, pos, 0);
+                (uint256 afterValue, bool ok) = _value(data, pos, 0);
                 if (!ok) return false;
+                pos = afterValue;
             }
 
             pos = _ws(data, pos);

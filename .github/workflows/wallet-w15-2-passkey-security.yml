@@ -1,0 +1,38 @@
+name: 420Wallet W15.2 WebAuthn Security Regression
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/accounts/WebAuthnClientData420.sol'
+      - 'contracts/src/accounts/P256WebAuthnVerifier420.sol'
+      - 'contracts/test/P256WebAuthnVerifier420.t.sol'
+      - 'contracts/test/SmartAccountPasskey420.t.sol'
+      - '.github/workflows/wallet-w15-2-passkey-security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  passkey-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Verify WebAuthn parser and adversarial P-256 fixture tests
+        working-directory: contracts
+        run: forge test --match-path 'test/P256WebAuthnVerifier420.t.sol' -vv
+      - name: Retain Smart Account passkey lifecycle and EntryPoint regressions
+        working-directory: contracts
+        run: forge test --match-path 'test/SmartAccountPasskey420.t.sol' -vv

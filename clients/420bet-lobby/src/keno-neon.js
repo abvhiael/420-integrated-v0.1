@@ -111,7 +111,7 @@ export function createNeonKeno(doc=globalThis.document){
   header.append(title);
   const status=element('div','ls-top-status');
   status.append(element('span','ls-balance','Practice Credits: '+credits.toLocaleString('en-CA')),
-   element('span','ls-practice-label','PRACTICE · NO REAL WAGERS'));
+   element('span','ls-practice-label','PRACTICE · NO WALLET · NO REAL WAGERS'));
   header.append(status);root.append(header);
 
   const tagline=element('p','ls-tagline','Every number has nine lives. Your luck doesn’t.');root.append(tagline);

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "./IPasskeyVerifier420.sol";
+import "./WebAuthnClientData420.sol";
 
 /// @notice Strict WebAuthn assertion verifier used by SmartAccount420 passkey mode.
 /// @dev The assertion envelope is abi.encode(
@@ -60,14 +61,9 @@ contract P256WebAuthnVerifier420 is IPasskeyVerifier420 {
         if (originBytes.length == 0 || keccak256(originBytes) != expectedOriginHash) return false;
         if (!_validP256Scalar(r) || !_validP256Scalar(s)) return false;
 
-        bytes memory expectedChallenge = bytes.concat(
-            bytes('"challenge":"'), _base64url32(userOpHash), bytes('"')
-        );
-        bytes memory expectedOrigin = bytes.concat(bytes('"origin":"'), originBytes, bytes('"'));
-        if (!_contains(clientDataJSON, bytes('"type":"webauthn.get"'))) return false;
-        if (!_contains(clientDataJSON, expectedChallenge)) return false;
-        if (!_contains(clientDataJSON, expectedOrigin)) return false;
-        if (_contains(clientDataJSON, bytes('"crossOrigin":true'))) return false;
+        // Parse the *top-level* signed JSON values with duplicate-field and
+        // malformed-input rejection, rather than matching untrusted substrings.
+        if (!WebAuthnClientData420.verify(clientDataJSON, _base64url32(userOpHash), originBytes)) return false;
 
         bytes32 clientDataHash = sha256(clientDataJSON);
         bytes32 signedDigest = sha256(abi.encodePacked(authenticatorData, clientDataHash));
@@ -88,22 +84,6 @@ contract P256WebAuthnVerifier420 is IPasskeyVerifier420 {
         assembly {
             word := mload(add(add(data, 32), offset))
         }
-    }
-
-    function _contains(bytes memory haystack, bytes memory needle) private pure returns (bool) {
-        if (needle.length == 0 || needle.length > haystack.length) return false;
-        uint256 last = haystack.length - needle.length;
-        for (uint256 i = 0; i <= last; ++i) {
-            bool match_ = true;
-            for (uint256 j = 0; j < needle.length; ++j) {
-                if (haystack[i + j] != needle[j]) {
-                    match_ = false;
-                    break;
-                }
-            }
-            if (match_) return true;
-        }
-        return false;
     }
 
     function _base64url32(bytes32 input) private pure returns (bytes memory result) {

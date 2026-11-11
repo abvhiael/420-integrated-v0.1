@@ -56,15 +56,19 @@ test('Lucky Strays Keno quick pick, clear, draw, virtual credit and meter UI are
  [...root.querySelectorAll('button')].find(x=>x.textContent.includes('CLEAR')).dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.ls-number.picked').length,0);
 });
-test('Lucky Strays payout disclosure shows ten-spot candidate without presenting live payouts',()=>{
- const {document}=parseHTML('<html><body></body></html>');
+test('Keno INFO button reveals complete ten-spot paytable, rules and bonus mechanics',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
  const root=createPractice('keno',document);
+ assert.equal(root.querySelector('.ls-info-dialog'),null);
+ root.querySelector('.ls-info-button').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.ls-paytable tr').length,12);
- assert.match(root.querySelector('.ls-info-content').textContent,/Not approved for live wagers/i);
+ assert.match(root.querySelector('.ls-info-dialog').textContent,/next draw with a paying result/i);
+ assert.match(root.querySelector('.ls-info-dialog').textContent,/NOT APPROVED FOR WAGERING/i);
  assert.equal(root.querySelector('.ls-pick-select').getAttribute('aria-label'),'Number of Keno spots');
+ root.querySelector('.ls-info-close').dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelector('.ls-info-dialog'),null);
 });
-
-test('Keno unapproved canonical candidate stays separate from Jack’s visual practice schedule',()=>{
+test('Keno unapproved canonical paytable stays separate from Jack practice schedule',()=>{
  assert.equal(proposedGrossMultiplier(1,1),'3.6');
  assert.equal(proposedGrossMultiplier(5,3),'3');
  assert.equal(proposedGrossMultiplier(5,4),'25');
@@ -72,11 +76,8 @@ test('Keno unapproved canonical candidate stays separate from Jack’s visual pr
  assert.equal(proposedGrossMultiplier(10,10),'20000');
  assert.equal(proposedGrossMultiplier(10,0),'0');
  assert.match(KENO_CANDIDATE_STATUS,/NOT APPROVED/);
- const {document}=parseHTML('<html><body></body></html>');
- const page=createPractice('keno',document);
- assert.equal(page.querySelectorAll('.ls-paytable tr').length,12);
- assert.match(page.querySelector('.ls-info-content').textContent,/not approved for live wagers/i);
 });
+
 test('Lucky Strays highlights selected drawn matches and preserves all twenty results',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  const page=createPractice('keno',document);

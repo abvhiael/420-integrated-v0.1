@@ -7,7 +7,7 @@ export const NINE_LIVES_RTP_TARGET=0.95;
 // Factors rounded to six decimals; calculated using exact hypergeometric hit probabilities.
 export const NINE_LIVES_SCALES=Object.freeze({
   1:0.959596,2:0.713191,3:0.781890,4:0.809573,5:0.662866,
-  6:0.715326,7:0.606766,8:0.676040,9:0.660881,10:0.588899
+  6:0.715326,7:0.606766,8:0.630586,9:0.660881,10:0.588899
 });
 export function nineLivesCandidateMultiplier(picks,hits){
  const base=Number(proposedGrossMultiplier(picks,hits));

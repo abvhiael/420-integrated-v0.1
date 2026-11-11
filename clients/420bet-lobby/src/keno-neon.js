@@ -1,5 +1,5 @@
 import {cannabisHitIcon} from './keno-cannabis-icon.js';
-import {proposedGrossMultiplier,KENO_CANDIDATE_STATUS} from './keno-candidate-paytable.js';
+import {KENO_CANDIDATE_STATUS} from './keno-candidate-paytable.js';
 import {initial,next} from './practice-engine.js';
 import {nineLivesRound,nineLivesCandidateMultiplier} from './keno-nine-lives.js';
 export function createNeonKeno(doc=globalThis.document){

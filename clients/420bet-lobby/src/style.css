@@ -603,3 +603,25 @@
  border:0;box-shadow:none;font-size:0;color:transparent;text-shadow:none;
 }
 .ls-keno .ls-action:focus-visible,.ls-keno .ls-number:focus-visible{outline:3px solid #cfff7b;outline-offset:3px}
+
+
+/* Visible Keno information control and full accessible rules/paytable overlay. */
+.ls-keno .ls-info-button{padding:7px 13px;border:2px solid #b37b45;border-radius:9px;color:#fff5ce;font:900 clamp(11px,1vw,15px) system-ui;background:linear-gradient(145deg,#52215d,#260e35);box-shadow:0 0 12px #da40f970;cursor:pointer}
+.ls-keno .ls-info-button:hover,.ls-keno .ls-info-button:focus-visible{border-color:#caff59;box-shadow:0 0 15px #aaff5d88}
+.ls-keno .ls-info-overlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#07040bd9;padding:clamp(8px,2vw,25px);backdrop-filter:blur(6px)}
+.ls-keno .ls-info-dialog{width:min(760px,100%);max-height:min(90vh,850px);overflow:auto;padding:clamp(15px,2vw,27px);background:linear-gradient(145deg,#27122e,#110c1d 85%);border:4px ridge #c38a46;border-radius:17px;color:#f6e6cb;box-shadow:0 0 45px #c32de16b,0 10px 55px #000}
+.ls-keno .ls-info-heading{display:flex;align-items:start;justify-content:space-between;gap:12px;border-bottom:1px solid #8a596d;padding-bottom:10px}
+.ls-keno .ls-info-heading h2{font:1000 clamp(20px,2.6vw,30px) system-ui;line-height:1.15;margin:0;color:#c2ff48;text-shadow:0 0 10px #64ff2872}
+.ls-keno .ls-info-close{flex-shrink:0;padding:8px 12px;background:#591b62;border:2px solid #d882d5;color:#fff;font-weight:950;border-radius:8px;cursor:pointer}
+.ls-keno .ls-info-rules h3,.ls-keno .ls-info-table-heading h3{color:#ffca6a;font:950 16px system-ui;margin:15px 0 5px}
+.ls-keno .ls-info-rules p{font-size:13px;line-height:1.47;margin:5px 0 9px}
+.ls-keno .ls-info-table-heading{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.ls-keno .ls-info-table-heading span{color:#cbb3d0;font-size:11px}
+.ls-keno .ls-paytable{width:100%;border-collapse:collapse;margin:8px 0 12px}
+.ls-keno .ls-paytable th,.ls-keno .ls-paytable td{padding:7px 9px;border-bottom:1px solid #704469;font-size:13px;text-align:right}
+.ls-keno .ls-paytable th:first-child,.ls-keno .ls-paytable td:first-child{text-align:left}
+.ls-keno .ls-paytable th{background:#42204b;color:#baff69;font-weight:900}
+.ls-keno .ls-paytable tr:not(.ls-pay-zero-row) td:last-child{color:#c0ff6d;font-weight:900}
+.ls-keno .ls-pay-zero-row{opacity:.68}
+.ls-keno .ls-info-warning{border:1px solid #ae7440;border-radius:8px;padding:10px;background:#4b291e66;color:#f9d9a7;font-size:11px;line-height:1.5}
+@media(max-width:680px){.ls-keno .ls-info-button{font-size:11px;padding:6px 9px}.ls-keno .ls-info-dialog{max-height:92vh}.ls-keno .ls-info-heading h2{font-size:19px}.ls-keno .ls-info-rules p{font-size:12px}}

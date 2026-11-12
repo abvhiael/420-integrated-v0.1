@@ -13,6 +13,9 @@ const sourceFiles = [
   'popup.html',
   'popup.css',
   'popup.js',
+  'wallet.html',
+  'wallet.css',
+  'wallet.js',
   'authority.html',
   'authority.js',
 ];
@@ -22,6 +25,8 @@ export async function buildExtension420() {
   await mkdir(dist, { recursive: true });
   for (const file of sourceFiles) await cp(join(extensionRoot, file), join(dist, file));
   await cp(join(walletRoot, 'web', 'core'), join(dist, 'core'), { recursive: true });
+  await cp(join(extensionRoot, 'core'), join(dist, 'core'), { recursive: true });
+  await cp(join(extensionRoot, 'vendor'), join(dist, 'vendor'), { recursive: true });
   return { dist, files: await readdir(dist) };
 }
 

@@ -42,6 +42,9 @@ jobs:
       - name: Render actual popup; verify navigation, permissions, assets, send review and blocked states
         working-directory: wallet/extension
         run: node scripts/qualify-popup.mjs
+      - name: Qualify encrypted vault creation, restore and unlock in real Chromium
+        working-directory: wallet/extension
+        run: node scripts/qualify-onboarding.mjs
       - name: Save actual popup screenshots
         if: always()
         uses: actions/upload-artifact@v4

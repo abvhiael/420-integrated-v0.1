@@ -2,9 +2,17 @@
   "manifest_version": 3,
   "name": "420 Wallet",
   "version": "0.1.0",
-  "description": "420 Integrated browser wallet provider and approval surface.",
-  "permissions": ["storage", "tabs", "windows"],
-  "host_permissions": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"],
+  "description": "420 Wallet self-custodial EVM wallet with encrypted local vault, SmartAccount420 provider and permission approvals.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
   "background": {
     "service_worker": "service-worker.js",
     "type": "module"
@@ -15,19 +23,32 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"],
-      "js": ["content-script.js"],
+      "matches": [
+        "https://*/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
       "run_at": "document_start",
       "all_frames": false
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["inpage.js"],
-      "matches": ["https://*/*", "http://localhost/*", "http://127.0.0.1/*"]
+      "resources": [
+        "inpage.js"
+      ],
+      "matches": [
+        "https://*/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ]
     }
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none'"
-  }
+  },
+  "options_page": "wallet.html"
 }

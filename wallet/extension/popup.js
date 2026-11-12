@@ -41,6 +41,10 @@ function renderAccount(){
     for(const address of w.config.accounts)select.add(new Option(shortExtensionAddress420(address),address));
     select.value=w.selectedAccount||w.config.accounts[0];select.disabled=false;
   }
+  const vault=w.vault||{exists:false,unlocked:false};
+  $('vault-title').textContent=!vault.exists?'Create or import wallet':vault.unlocked?'Local wallet unlocked':'Encrypted wallet locked';
+  $('vault-description').textContent=!vault.exists?'Set up self-custodial accounts.':vault.unlocked?'Manage your accounts and encrypted backups.':'Unlock to manage keys and restore accounts.';
+  $('open-wallet').textContent=!vault.exists?'Set up':'Manage';
   const address=extensionReceiveAddress420(w);
   $('account-address').textContent=address?shortExtensionAddress420(address):'No verified wallet address';
   $('account-address').title=address||'';
@@ -51,9 +55,11 @@ function renderAccount(){
   $('quick-send').disabled=!extensionCanSend420(w);
   $('native-balance').textContent=w.assets.native?extensionBalanceText420(w.assets.native.raw,w.assets.native.decimals):'—';
   $('balance-note').textContent=w.network.status==='matched'&&address?'Chain-derived balance. No fiat value is inferred.':'Connect to the approved chain and verify your SmartAccount to display balances.';
-  const status=w.network.status==='matched'?
-    w.account.deployed?(w.account.ownerVerified?'Deployed account owner confirmed; verify deployment provenance independently.':'Owner verification failed; sends blocked.'):'SmartAccount not deployed; sending disabled.':
-    w.network.message||'Network unconfigured. Open Settings to set your approved RPC and chain.';
+  const status=w.account.kind==='eoa' ?
+    (w.network.status==='matched'?'Local EOA balance displayed. EOA send/signing requires dedicated local authority.':'Set up your verified EVM network to display local EOA balances.') :
+    w.network.status==='matched'?
+      w.account.deployed?(w.account.ownerVerified?'Deployed account owner confirmed; verify deployment provenance independently.':'Owner verification failed; sends blocked.'):'SmartAccount not deployed; sending disabled.':
+      w.network.message||'Network unconfigured. Open Settings to set your approved RPC and chain.';
   tell(status,w.network.status==='matched'?'':w.network.status==='wrong-chain'?'error':'warn');
 }
 function renderAssets(){
@@ -224,6 +230,7 @@ async function approval(){
 function setup(){
   for(const nav of document.querySelectorAll('[data-screen]'))nav.addEventListener('click',()=>screen(nav.dataset.screen));
   $('header-settings').addEventListener('click',()=>screen('settings-view'));
+  $('open-wallet').addEventListener('click',()=>chrome.tabs.create({url:chrome.runtime.getURL('wallet.html')}));
   $('quick-activity').addEventListener('click',()=>screen('activity-view'));
   $('quick-send').addEventListener('click',()=>{populateSend();resetReview();screen('send-view');});
   $('quick-receive').addEventListener('click',()=>{renderReceive();screen('receive-view');});

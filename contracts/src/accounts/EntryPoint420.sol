@@ -206,6 +206,9 @@ contract EntryPoint420 is IEntryPoint420 {
             revert InvalidOperationGasLimits();
         }
 
+        // The verification allowance is shared by account and paymaster
+        // verification. It must not be reusable in full for each external call.
+        uint256 verificationGasAtStart = gasleft();
         uint256 accountValidationData;
         if (verificationGasLimit == 0) {
             accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
@@ -217,7 +220,7 @@ contract EntryPoint420 is IEntryPoint420 {
 
         SponsorshipExecution memory sponsorship;
         if (userOp.paymasterAndData.length != 0) {
-            sponsorship = _validatePaymaster(userOp, userOpHash);
+            sponsorship = _validatePaymaster(userOp, userOpHash, verificationGasLimit, verificationGasAtStart);
             _reserveSponsorship(sponsorship.paymaster, sponsorship.authorizationId, sponsorship.reservedCostWei);
         }
 
@@ -240,9 +243,12 @@ contract EntryPoint420 is IEntryPoint420 {
         emit UserOperationHandled(userOpHash, userOp.sender, key, sequence, success);
     }
 
-    function _validatePaymaster(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
-        private
-        returns (SponsorshipExecution memory execution)
+    function _validatePaymaster(
+        PackedUserOperation420 calldata userOp,
+        bytes32 userOpHash,
+        uint256 verificationGasLimit,
+        uint256 verificationGasAtStart
+    ) private returns (SponsorshipExecution memory execution)
     {
         PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
 
@@ -260,12 +266,15 @@ contract EntryPoint420 is IEntryPoint420 {
             revert SponsorshipCostExceeded(maxCostWei, sponsorship.maxSponsoredCostWei);
         }
 
-        // Cap untrusted sponsor validation to the signed verification allowance.
-        // This prevents a hostile paymaster from consuming all relayer gas before
-        // reservation/nonce handling.
-        uint256 verificationGasLimit = uint256(userOp.accountGasLimits) >> 128;
+        // Deduct account-validation and EntryPoint verification work before
+        // forwarding the remaining signed verification allowance to the sponsor.
+        // Without sharing the budget, both callbacks could each spend the full
+        // amount even though the reservation accounts for it only once.
+        uint256 verificationUsed = verificationGasAtStart - gasleft();
+        if (verificationUsed >= verificationGasLimit) revert InvalidOperationGasLimits();
+        uint256 remainingVerificationGas = verificationGasLimit - verificationUsed;
         (bytes memory context, uint256 paymasterValidationData) =
-            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp{gas: verificationGasLimit}(
+            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp{gas: remainingVerificationGas}(
                 userOp, userOpHash, maxCostWei
             );
         _enforcePaymasterValidationData(paymasterValidationData);

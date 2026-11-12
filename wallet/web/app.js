@@ -240,7 +240,10 @@ $('#create-account').addEventListener('click', async () => {
     const submitted = await sendSmartAccountCreation(state.provider, state.controller, { ...state.config.smartAccount, expectedChainId: state.config.network.chainId });
     if (!submitted.submitted) { await refreshConnectedState(); $('#status').textContent = 'Smart Account was already deployed; canonical state refreshed.'; return; }
     $('#status').textContent = `Creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId });
+    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId,
+      onStatus: ({ status, confirmations }) => {
+        $('#status').textContent = `Creation ${status}: waiting for canonical receipt (${confirmations} confirmations).`;
+      } });
     await refreshConnectedState();
     $('#status').textContent = `SmartAccount420 created and owner verified: ${state.smartAccount.smartAccount}`;
   } catch (error) { $('#status').textContent = error.message; }
@@ -269,7 +272,10 @@ $('#send-execution').addEventListener('click', async () => {
   try {
     const submitted = await sendSmartAccountExecution(state.provider, state.controller, state.smartAccount, request);
     $('#status').textContent = `Execution submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId });
+    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId,
+      onStatus: ({ status, confirmations }) => {
+        $('#status').textContent = `Execution ${status}: waiting for canonical receipt (${confirmations} confirmations).`;
+      } });
     await refreshConnectedState();
     $('#execute-simulation').textContent = 'Not simulated';
     $('#status').textContent = `SmartAccount420 execution confirmed: ${submitted.txHash}`;

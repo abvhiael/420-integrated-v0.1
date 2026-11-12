@@ -116,7 +116,7 @@ test('send execution re-simulates, re-verifies owner, then requests explicit pro
   assert.equal(submitted.txHash, txHash);
   assert.equal(sent.to, account);
   assert.equal(sent.from, controller);
-  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_sendTransaction']);
+  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_call', 'eth_estimateGas', 'eth_sendTransaction']);
 });
 
 test('owner drift after simulation blocks broadcast', async () => {

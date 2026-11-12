@@ -21,6 +21,7 @@ import {createCannabisCowboyShell} from './cannabis-cowboy-ui.js';
 import {createCannabisCowboyPractice} from './cannabis-cowboy-game.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
+import './prickly-pete-plinko.css';
 import './rackets-loaded-dice.css';
 import './mary-jane-concept.css';
 import './dads-secret-stash.css';

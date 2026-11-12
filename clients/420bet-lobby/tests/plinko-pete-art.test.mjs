@@ -12,6 +12,10 @@ test('Pete Plinko renders the approved artwork, dynamic board and compact solo-h
  document.body.append(root);
  assert.equal(root.querySelector('.pete-plinko-fullbody').getAttribute('src'),'/assets/420bet/prickly-pete-plinko/characters/pete_fullbody.png');
  assert.equal(root.querySelector('.pete-plinko-logo').getAttribute('src'),'/assets/420bet/prickly-pete-plinko/branding/logo.png');
+ assert.equal(root.querySelectorAll('.pete-plinko-logo').length,1);
+ assert.equal(root.querySelector('.pete-plinko-logo').parentElement,root.querySelector('.pete-plinko-host'));
+ assert.equal(root.querySelector('.pete-plinko-logo').nextElementSibling,root.querySelector('.pete-plinko-fullbody'));
+ assert.equal(root.querySelector('.pete-plinko-header .pete-plinko-logo'),null);
  assert.equal(root.querySelector('.pete-plinko-reaction-image').getAttribute('src'),'/assets/420bet/prickly-pete-plinko/reactions/reaction_bored.png');
  assert.equal(root.querySelectorAll('.plinko-peg').length,136);
  assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
@@ -22,6 +26,8 @@ test('Pete Plinko renders the approved artwork, dynamic board and compact solo-h
  const css=readFileSync(new URL('../src/prickly-pete-plinko.css',import.meta.url),'utf8');
  assert.match(css,/punk_stage_wallpaper\.png/);
  assert.match(css,/button_drop\.png/);
+ assert.match(css,/max-height:118px/);
+ assert.match(css,/max-height:51vh/);
 });
 
 test('Pete Plinko visible risk and row controls reconfigure the actual paytable',()=>{

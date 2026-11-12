@@ -42,15 +42,16 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
  const branding=el('div','pete-plinko-branding');
  const practiceMarker=el('span','pete-plinko-visually-hidden','PRACTICE ONLY · NO WALLET · NO FUNDS');
  branding.append(el('span','pete-plinko-brand-icon','☘'),el('strong','','420Bet'),el('small','','LITTLE CRITTERS'));
- header.append(practiceMarker,branding,el('h1','pete-plinko-visually-hidden','PRICKLY PETE’S PUNK-ROCK PLINKO PANDEMONIUM'),img('pete-plinko-logo','branding/logo.png',"Prickly Pete's Punk-Rock Plinko Pandemonium"));
+ header.append(practiceMarker,branding,el('h1','pete-plinko-visually-hidden','PRICKLY PETE’S PUNK-ROCK PLINKO PANDEMONIUM'));
  const balance=el('div','pete-plinko-balance');balance.append(el('span','','PRACTICE CREDITS'),el('strong','pete-balance-value','10,000.00'));
  header.append(balance);root.append(header);
  const layout=el('div','plinko-machine');
  const host=el('aside','plinko-info pete-plinko-host');
+ const peteLogo=img('pete-plinko-logo','branding/logo.png',"Prickly Pete's Punk-Rock Plinko Pandemonium");
  const peteFull=img('pete-plinko-fullbody','characters/pete_fullbody.png','Prickly Pete, the punk-rock porcupine');
  const peteReaction=img('pete-plinko-reaction-image','reactions/'+REACTIONS.idle,'Prickly Pete: bored');
  const speech=el('p','pete-plinko-reaction','“Let’s drop some chaos!”');
- host.append(peteFull,peteReaction,speech);
+ host.append(peteLogo,peteFull,peteReaction,speech);
  const stage=el('div','plinko-stage');
  stage.setAttribute('aria-label','Prickly Pete Plinko board');
  const frame=el('div','pete-board-frame');

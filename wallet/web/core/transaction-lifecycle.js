@@ -22,8 +22,9 @@ export async function readWalletTransactionStatus420(provider,hash,options={}){
   if(!r)return {txHash:hash,status:'pending',receipt:null,confirmations:0n};
   if(r.transactionHash!=null&&normalizeTransactionHash420(r.transactionHash)!==hash)throw Error('receipt transaction hash mismatch');
   if(r.status!=='0x1'&&r.status!=='0x0')throw Error('invalid transaction receipt status');
-  if(r.status==='0x0')return {txHash:hash,status:'reverted',receipt:r,confirmations:0n};
-  if(options.canonical!==true)return {txHash:hash,status:'confirmed',receipt:r,confirmations:1n};
+  if(options.canonical!==true)return {
+    txHash:hash,status:r.status==='0x0'?'reverted':'confirmed',receipt:r,confirmations:1n
+  };
   if(typeof r.blockNumber!=='string'||!QTY.test(r.blockNumber)||typeof r.blockHash!=='string'||!HASH.test(r.blockHash))throw Error('canonical receipt missing block metadata');
   const [block,tip]=await Promise.all([provider.request('eth_getBlockByNumber',[r.blockNumber,false]),provider.request('eth_blockNumber')]);
   if(typeof tip!=='string'||!QTY.test(tip))throw Error('invalid chain tip');
@@ -33,8 +34,12 @@ export async function readWalletTransactionStatus420(provider,hash,options={}){
   if(minimum<1n||minimum>1024n)throw Error('invalid confirmation count');
   if(count<minimum)return {txHash:hash,status:'confirming',receipt:r,confirmations:count};
   const latest=await provider.request('eth_getTransactionReceipt',[hash]);
-  if(!latest||latest.blockHash?.toLowerCase()!==r.blockHash.toLowerCase()||latest.status!=='0x1')return {txHash:hash,status:'reorganized',receipt:latest,confirmations:0n};
-  return {txHash:hash,status:'confirmed',receipt:latest,confirmations:count};
+  if(!latest||latest.blockHash?.toLowerCase()!==r.blockHash.toLowerCase()
+      || latest.status!==r.status || (latest.transactionHash != null
+      && normalizeTransactionHash420(latest.transactionHash)!==hash))
+    return {txHash:hash,status:'reorganized',receipt:latest,confirmations:0n};
+  await assertWalletChain420(provider,options.expectedChainId);
+  return {txHash:hash,status:latest.status==='0x0'?'reverted':'confirmed',receipt:latest,confirmations:count};
 }
 export async function waitForWalletReceipt420(provider,hash,options={}){
   hash=normalizeTransactionHash420(hash);

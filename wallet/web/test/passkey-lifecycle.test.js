@@ -16,6 +16,7 @@ import {
 import { base64urlEncode, buildPasskeyChallenge } from '../core/passkeys.js';
 import { keccak256Hex } from '../core/keccak.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const owner = '0x2222222222222222222222222222222222222222';
 const recoveredOwner = '0x6666666666666666666666666666666666666666';
@@ -136,7 +137,9 @@ function makeProvider() {
       state.calls.push({ method, params });
       if (method === 'personal_sign') throw new Error('personal_sign must never be used by passkey lifecycle');
       if (method === 'eth_getCode') return '0x6001';
-      if (method === 'eth_getTransactionReceipt') return { status: '0x1' };
+      if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: `0x${state.txCounter.toString(16).padStart(64, '0')}`, blockNumber: '0x10', blockHash: canonicalBlockHash };
+      if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+      if (method === 'eth_blockNumber') return '0x10';
       if (method === 'eth_estimateGas') return '0x5208';
       if (method === 'eth_sendTransaction') {
         const data = params[0]?.data || '';

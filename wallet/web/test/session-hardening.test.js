@@ -7,6 +7,7 @@ import {
 } from '../core/entrypoint-transport.js';
 import { SESSION_EXECUTE_CAPABILITY_420 } from '../core/capabilities.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const signer = '0x2222222222222222222222222222222222222222';
 const owner = '0x3333333333333333333333333333333333333333';
@@ -123,7 +124,9 @@ test('receipt confirmation rejects ambiguous duplicate UserOperationHandled evid
     data: `0x${word(0)}${word(1)}`,
   };
   const provider = { request: async (method) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', logs: [log, { ...log }] };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash, logs: [log, { ...log }] };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     throw new Error(method);
   } };
   await assert.rejects(confirmEntryPointUserOperation(provider, prepared(), { attempts: 1 }), /ambiguous duplicate/i);
@@ -132,13 +135,15 @@ test('receipt confirmation rejects ambiguous duplicate UserOperationHandled evid
 test('receipt confirmation rejects malformed execution-success words instead of guessing', async () => {
   const provider = { request: async (method) => {
     if (method === 'eth_getTransactionReceipt') return {
-      status: '0x1',
+      status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
       logs: [{
         address: entryPoint,
         topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
         data: `0x${word(0)}${word(2)}`,
       }],
     };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     throw new Error(method);
   } };
   await assert.rejects(confirmEntryPointUserOperation(provider, prepared(), { attempts: 1 }), /malformed EntryPoint420 UserOperationHandled success value/i);

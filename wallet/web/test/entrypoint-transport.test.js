@@ -9,6 +9,7 @@ import {
   prepareEntryPointTransport,
 } from '../core/entrypoint-transport.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const signer = '0x2222222222222222222222222222222222222222';
 const entryPoint = '0x3333333333333333333333333333333333333333';
@@ -206,7 +207,7 @@ test('confirmation requires canonical UserOperationHandled success and exact non
     broadcastReady: true,
   };
   const receipt = {
-    status: '0x1',
+    status: '0x1', transactionHash: submitted.txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
     logs: [{
       address: entryPoint,
       topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
@@ -215,6 +216,8 @@ test('confirmation requires canonical UserOperationHandled success and exact non
   };
   const provider = { request: async (method, params = []) => {
     if (method === 'eth_getTransactionReceipt') return receipt;
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_call' && params[0].data.startsWith('0xd86f2b3c')) return `0x${word(nonce + 1n)}`;
     throw new Error(method);
   } };
@@ -234,7 +237,7 @@ test('confirmation surfaces execution failure even though EntryPoint420 consumed
     broadcastReady: true,
   };
   const receipt = {
-    status: '0x1',
+    status: '0x1', transactionHash: submitted.txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
     logs: [{
       address: entryPoint,
       topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
@@ -243,6 +246,8 @@ test('confirmation surfaces execution failure even though EntryPoint420 consumed
   };
   const provider = { request: async (method, params = []) => {
     if (method === 'eth_getTransactionReceipt') return receipt;
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_call' && params[0].data.startsWith('0xd86f2b3c')) return `0x${word(nonce + 1n)}`;
     throw new Error(method);
   } };

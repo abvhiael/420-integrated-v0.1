@@ -435,6 +435,48 @@ contract BetPlinkoV2VerticalSlice420Test {
         require(s.accounting.getVault(VAULT).activeReservedLiability == 0, "accounting reserve changed");
     }
 
+    function testV2AllRowCountsAndPartialPayouts() public {
+        PlinkoV2420 p = new PlinkoV2420(address(1), address(2), GAME, GAME_V2, RULESET);
+        for (uint8 rows = 7; rows <= 16; ++rows) {
+            PlinkoV2420.Params memory params;
+            params.rows = rows;
+            params.risk = 0;
+            params.grossPayoutByBucket[0] = 500 ether;
+            params.grossPayoutByBucket[rows] = 500 ether;
+            params.grossPayoutByBucket[rows / 2] = 50 ether; // 0.5x payout is valid for V2.
+            require(p.requiredMaxGrossPayout(100 ether, params) == 500 ether, "max mismatch");
+            require(p.hashParams(params) != bytes32(0), "hash invalid");
+            if (rows < 16) {
+                params.grossPayoutByBucket[rows + 1] = 1;
+                bool reverted;
+                try p.hashParams(params) returns (bytes32) {} catch { reverted = true; }
+                require(reverted, "inactive payout accepted");
+            }
+        }
+    }
+
+    function testV2AuthorityRejectsUnapprovedAndImmutableSchedules() public {
+        Suite memory s = _deploy();
+        PlinkoPaytableAuthorityV2420 a = new PlinkoPaytableAuthorityV2420(
+            address(s.auth), GAME_V2, RULESET, keccak256("plinko/v2/immutable"),
+            keccak256("plinko/v2/schedules"));
+        uint256[17] memory m;
+        m[0] = 50_000;
+        m[16] = 50_000;
+        m[8] = 5_000;
+        bool reverted;
+        try a.activate(16, 0, m) {} catch { reverted = true; }
+        require(reverted, "unprivileged activation");
+        vm.prank(ADMIN);
+        a.activate(16, 0, m);
+        require(a.multiplier(16, 0, 8) == 5_000, "partial return not approved");
+        vm.prank(ADMIN);
+        vm.expectRevert(PlinkoPaytableAuthorityV2420.AlreadyActivated.selector);
+        a.activate(16, 0, m);
+        require(a.scheduleHash(16, 0) == keccak256(abi.encode(uint8(16), uint8(0), m)), "schedule hash");
+        require(!a.activated(15, 0), "other configuration activated");
+    }
+
     function testV2BoundsAndHashBindRiskAndRows() public {
         PlinkoV2420 p = new PlinkoV2420(address(1), address(2), GAME, GAME_V2, RULESET);
         PlinkoV2420.Params memory config = _params();

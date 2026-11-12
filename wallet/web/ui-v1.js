@@ -74,7 +74,7 @@ function initNavigation() {
     const button = event.target.closest?.('[data-scroll-target]');
     if (!button || button.disabled) return;
     const selector=button.dataset.scrollTarget;
-    if (!/^#[A-Za-z][\\w:-]*$/.test(selector || '')) return;
+    if (!/^#[A-Za-z][\w:-]*$/.test(selector || '')) return;
     const target=document.querySelector(selector);
     if (!target || target.hidden || target.closest('[hidden]')) return;
     // Moving focus with scroll is essential for keyboard and screen-reader users.

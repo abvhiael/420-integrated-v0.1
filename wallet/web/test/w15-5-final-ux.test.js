@@ -20,6 +20,7 @@ test('Keyboard navigation updates focus, handles dynamic controls and respects r
  assert.match(nav,/aria-current','location'/);
  assert.match(ui,/document\.addEventListener\('click'/);
  assert.match(ui,/target\.focus\(\{preventScroll:true\}\)/);
+ assert.match(ui,/\^#\[A-Za-z\]\[\\w:-\]/);
  assert.match(ui,/prefers-reduced-motion: reduce/);
  assert.match(html,/class="skip-link"/);
  assert.match(html,/id="wallet-main" class="shell" tabindex="-1"/);

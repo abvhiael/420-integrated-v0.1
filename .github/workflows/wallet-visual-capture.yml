@@ -1,0 +1,130 @@
+name: 420Wallet Actual Application Screenshots
+on:
+  push:
+    paths:
+      - ".github/workflows/wallet-visual-capture.yml"
+      - "wallet/mobile/ios/Wallet420UITests/Wallet420UITests.swift"
+      - "wallet/mobile/android/scripts/capture-screens.py"
+      - "wallet/extension/scripts/capture-popup.mjs"
+  pull_request:
+    paths:
+      - ".github/workflows/wallet-visual-capture.yml"
+      - "wallet/mobile/ios/Wallet420UITests/Wallet420UITests.swift"
+      - "wallet/mobile/android/scripts/capture-screens.py"
+      - "wallet/extension/scripts/capture-popup.mjs"
+  workflow_dispatch:
+jobs:
+  android-screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+      - name: Allow simulator screenshot capture only (production FLAG_SECURE is unchanged)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('wallet/mobile/android/app/src/main/java/io/fourtwenty/wallet/MainActivity.kt')
+          data=p.read_text()
+          target='AndroidDeviceSecurity420.enablePrivacyShield(this)'
+          assert data.count(target)==1
+          data=data.replace(target,'if (false) AndroidDeviceSecurity420.enablePrivacyShield(this) // screenshot-only CI build')
+          # Screenshot-only debug build starts at the normal Wallet tab; production onboarding is unchanged.
+          data=data.replace('onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)', 'onboardingActive = false // capture-only emulator test\n        /* onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)')
+          data=data.replace('.getBoolean("completed", false)\n        if (onboardingActive)', '.getBoolean("completed", false) */\n        if (onboardingActive)')
+          p.write_text(data)
+          PY
+      - name: Compile screenshot-only debug build
+        working-directory: wallet/mobile/android
+        run: gradle :app:assembleDebug --no-daemon
+      - name: Capture native Android screens in emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          working-directory: wallet/mobile/android
+          script: python3 scripts/capture-screens.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wallet420-actual-android-screens
+          path: wallet/mobile/android/visual-captures/*.png
+          if-no-files-found: warn
+          retention-days: 7
+  ios-screenshots:
+    runs-on: macos-15
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate Xcode project
+        working-directory: wallet/mobile/ios
+        run: xcodegen generate
+      - name: Boot available iOS simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          RUNTIME_ID="$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if x.get("isAvailable") and x.get("platform")=="iOS"];r.sort(key=lambda x:tuple(int(y) for y in x.get("version","0").split(".")),reverse=True);print(r[0]["identifier"])')"
+          DEVICE_TYPE_ID="$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys;d=json.load(sys.stdin)["devicetypes"]; print(next(x["identifier"] for x in d if x["name"] in ("iPhone 16 Pro","iPhone 16","iPhone 15 Pro","iPhone 15")))')"
+          UDID="$(xcrun simctl create Wallet420-Visual "$DEVICE_TYPE_ID" "$RUNTIME_ID")"
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          echo "WALLET_IOS_UDID=$UDID" >> "$GITHUB_ENV"
+      - name: Capture real SwiftUI tabs through XCTest
+        working-directory: wallet/mobile/ios
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Wallet420.xcodeproj -scheme Wallet420 -sdk iphonesimulator \
+            -destination "platform=iOS Simulator,id=$WALLET_IOS_UDID" \
+            -resultBundlePath "$RUNNER_TEMP/wallet420-screens.xcresult" \
+            -only-testing:Wallet420UITests/Wallet420UITests/testCaptureWalletSurfaces \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Export raw XCTest screenshots
+        if: always()
+        run: |
+          mkdir -p wallet/mobile/ios/visual-captures
+          xcrun xcresulttool export attachments --path "$RUNNER_TEMP/wallet420-screens.xcresult" --output-path wallet/mobile/ios/visual-captures
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wallet420-actual-ios-screens
+          path: wallet/mobile/ios/visual-captures/**
+          if-no-files-found: warn
+          retention-days: 7
+  extension-screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright
+        working-directory: wallet/extension
+        run: npm install --no-save --no-package-lock playwright
+      - name: Install Chromium
+        working-directory: wallet/extension
+        run: npx playwright install --with-deps chromium
+      - name: Capture real extension popup
+        working-directory: wallet/extension
+        run: node scripts/capture-popup.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wallet420-actual-extension-screens
+          path: wallet/extension/visual-captures/*.png
+          if-no-files-found: warn
+          retention-days: 7

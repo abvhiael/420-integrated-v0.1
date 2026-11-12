@@ -40,8 +40,8 @@ jobs:
           assert data.count(target)==1
           data=data.replace(target,'if (false) AndroidDeviceSecurity420.enablePrivacyShield(this) // screenshot-only CI build')
           # Screenshot-only debug build starts at the normal Wallet tab; production onboarding is unchanged.
-          data=data.replace('onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)', 'onboardingActive = false // capture-only emulator test\\n        /* onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)')
-          data=data.replace('.getBoolean("completed", false)\\n        if (onboardingActive)', '.getBoolean("completed", false) */\\n        if (onboardingActive)')
+          data=data.replace('onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)', 'onboardingActive = false // capture-only emulator test\n        /* onboardingActive = !getSharedPreferences("wallet420_onboarding_v1", MODE_PRIVATE)')
+          data=data.replace('.getBoolean("completed", false)\n        if (onboardingActive)', '.getBoolean("completed", false) */\n        if (onboardingActive)')
           p.write_text(data)
           PY
       - name: Compile screenshot-only debug build

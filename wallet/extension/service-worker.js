@@ -1,3 +1,6 @@
+import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
+import {discoverSmartAccount} from './core/accounts.js';
+import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
 const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
@@ -142,7 +145,170 @@ async function handleApprovalMethod(request, context) {
   return executeWithLocalAuthority(request, { ...context, accounts: granted });
 }
 
+
+/* The popup owns presentation only. The service worker revalidates every read and
+   action. No popup-origin message is accepted from content scripts or web pages. */
+function trustedWalletPopup420(sender) {
+  if(sender?.id!==chrome.runtime.id||typeof sender.url!=='string')return false;
+  try {
+    const url=new URL(sender.url);
+    return url.href.split('?')[0]===chrome.runtime.getURL('popup.html') && !url.hash;
+  }catch{return false;}
+}
+async function readWalletUiActivity420() {
+  const value=(await chrome.storage.local.get(EXTENSION_ACTIVITY_KEY_420))?.[EXTENSION_ACTIVITY_KEY_420];
+  return Array.isArray(value)?value.slice(0,40).filter(x=>x&&typeof x==='object'):[];
+}
+async function rememberWalletUiActivity420(entry) {
+  const current=await readWalletUiActivity420();
+  const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
+  await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
+}
+async function walletUiState420() {
+  const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+  const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const selected=config.accounts.includes(prefs.selectedAccount)?prefs.selectedAccount:config.accounts[0]||null;
+  const permissions=await readObject(PERMISSIONS_KEY);
+  const sites=Object.entries(permissions).filter(([origin,x])=>{
+    try {normalizeOrigin(origin);return Array.isArray(x?.accounts)&&x.accounts.length>0;}catch{return false;}
+  }).map(([origin,x])=>({origin,accounts:x.accounts.filter(a=>typeof a==='string'&&/^0x[0-9a-fA-F]{40}$/.test(a))})).sort((a,b)=>a.origin.localeCompare(b.origin));
+  const state={
+    config:{rpcUrl:config.rpcUrl,chainId:config.chainId,explorerUrl:config.explorerUrl,networkName:config.networkName,
+      accounts:config.accounts,trackedAssets:config.trackedAssets.slice(0,25),
+      factoryAddress:config.smartAccountConfig?.factoryAddress||null},
+    selectedAccount:selected,sites,activity:await readWalletUiActivity420(),
+    network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null},
+    account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
+    assets:{native:null,tokens:[]},
+  };
+  if(!config.rpcUrl||!config.chainId)return state;
+  let expected;
+  try {expected=validateExtensionNetwork420(config);}catch(e){state.network={...state.network,status:'error',message:e.message};return state;}
+  try {
+    const chain=normalizeExtensionChain420(await rpcRequest('eth_chainId',[]));
+    state.network.observedChainId=chain;
+    if(chain!==expected.chainId){
+      state.network.status='wrong-chain';
+      state.network.message='RPC chain does not match the configured expected chain';
+      return state;
+    }
+    state.network.status='matched';
+    if(!selected){state.account.reason='No controller account provisioned by Wallet Core';return state;}
+    if(!config.smartAccountConfig?.factoryAddress){
+      state.account.reason='SmartAccountFactory420 not provisioned';return state;
+    }
+    const provider={request:(method,params)=>rpcRequest(method,params)};
+    const discovered=await discoverSmartAccount(provider,selected,config.smartAccountConfig);
+    state.account={
+      controller:selected,smartAccount:discovered.smartAccount,
+      deployed:discovered.deployed===true,ownerVerified:discovered.controllerIsOwner===true,
+      reason:discovered.deployed?(discovered.controllerIsOwner?'Deployed SmartAccount discovered; controller matches owner. Deployment provenance requires approved configuration.':'Controller is not the current account owner'):'Counterfactual account; not yet deployed',
+    };
+    const native=await readNativeBalance(provider,discovered.smartAccount);
+    state.assets.native={raw:native.raw.toString(),decimals:native.decimals,symbol:native.symbol};
+    for(const asset of config.trackedAssets.slice(0,25)){
+      try {
+        const token=await readErc20Balance(provider,asset,discovered.smartAccount);
+        state.assets.tokens.push({address:token.address,raw:token.raw.toString(),decimals:token.decimals,symbol:token.symbol});
+      }catch(error){
+        state.assets.tokens.push({address:asset.address,symbol:asset.symbol||'Token',error:'Token balance unavailable: '+error.message});
+      }
+    }
+    return state;
+  }catch(error){
+    state.network.status='error';
+    state.network.message='Wallet discovery or RPC verification failed: '+error.message;
+    state.account.smartAccount=null;
+    state.assets={native:null,tokens:[]};
+    return state;
+  }
+}
+async function notifyDisconnectedSite420(origin) {
+  if(!chrome.tabs?.query)return;
+  const tabs=await chrome.tabs.query({});
+  await Promise.all(tabs.filter(tab=>Number.isInteger(tab.id)).map(async tab=>{
+    try {
+      if(normalizeOrigin(tab.url)===origin) await chrome.tabs.sendMessage(tab.id,{
+        source:'420-wallet-service-worker',channel:CHANNEL,kind:'event',event:'accountsChanged',data:[]
+      });
+    }catch{}
+  }));
+}
+async function handleWalletUi420(message) {
+  const kind=message.kind;
+  if(kind==='get-state')return walletUiState420();
+  if(kind==='set-account'){
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const account=normalizeExtensionAddress420(message.account);
+    if(!config.accounts.includes(account))throw Object.assign(new Error('Account is not provisioned in this wallet'),{code:4100});
+    await chrome.storage.local.set({[EXTENSION_UI_KEY_420]:{selectedAccount:account}});
+    return walletUiState420();
+  }
+  if(kind==='disconnect-site'){
+    const origin=normalizeOrigin(message.origin);
+    const permissions=await readObject(PERMISSIONS_KEY);
+    if(!Object.prototype.hasOwnProperty.call(permissions,origin))return walletUiState420();
+    delete permissions[origin];
+    await chrome.storage.local.set({[PERMISSIONS_KEY]:permissions});
+    await notifyDisconnectedSite420(origin);
+    return walletUiState420();
+  }
+  if(kind==='save-network'){
+    const rpcUrl=normalizeExtensionRpc420(message.rpcUrl);
+    const chainId=normalizeExtensionChain420(message.chainId);
+    let explorerUrl=null;
+    if(message.explorerUrl){
+      const url=new URL(message.explorerUrl);
+      if(url.protocol!=='https:'&&!(url.protocol==='http:'&&['localhost','127.0.0.1'].includes(url.hostname)))throw new Error('Explorer must use HTTPS');
+      if(url.username||url.password)throw new Error('Explorer credentials cannot be stored');
+      explorerUrl=url.href;
+    }
+    const previous=await readObject(EXTENSION_CONFIG_KEY_420);
+    await chrome.storage.local.set({[EXTENSION_CONFIG_KEY_420]:{...previous,rpcUrl,chainId,explorerUrl}});
+    return walletUiState420();
+  }
+  if(kind==='send'){
+    if(message.confirmed!==true)throw Object.assign(new Error('Explicit transaction confirmation required'),{code:4001});
+    const state=await walletUiState420();
+    if(!extensionCanSend420(state))throw Object.assign(new Error('Verified deployed SmartAccount owner and matching chain required'),{code:4100});
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const request=buildExtensionSend420({
+      from:state.account.controller,recipient:message.recipient,amount:message.amount,
+      asset:message.asset,trackedAssets:config.trackedAssets,
+    });
+    const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+    const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
+      controller:state.account.controller,smartAccount:state.account.smartAccount,
+      recipient:request.summary.recipient,amount:request.summary.amount,
+      symbol:request.summary.symbol,status:'pending',hash:null};
+    await rememberWalletUiActivity420(entry);
+    try {
+      const hash=await executeWithLocalAuthority(
+        {method:'eth_sendTransaction',params:[request.transaction]},
+        {origin:chrome.runtime.getURL('popup.html'),accounts:[state.account.controller],tabId:null}
+      );
+      await rememberWalletUiActivity420({...entry,status:'confirmed',hash});
+      return {hash,status:'confirmed'};
+    }catch(error){
+      await rememberWalletUiActivity420({...entry,status:'failed',error:error?.message||'Authorization failed'});
+      throw error;
+    }
+  }
+  throw Object.assign(new Error('Unsupported wallet popup action'),{code:4200});
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if(message?.source==='420-wallet-popup-ui'){
+    (async()=>{
+      try {
+        if(!trustedWalletPopup420(sender))throw Object.assign(new Error('Untrusted wallet UI caller'),{code:4100});
+        sendResponse({result:await handleWalletUi420(message)});
+      }catch(error){sendResponse({error:serializeError(error)});}
+    })();
+    return true;
+  }
+
+
   if (message?.source === '420-wallet-authority-ui' && message.kind === 'authority-rpc') {
     (async () => {
       try {

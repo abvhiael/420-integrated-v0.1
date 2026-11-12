@@ -1,0 +1,52 @@
+name: 420 Wallet Extension Popup UX Qualification
+on:
+  push:
+    paths:
+      - "wallet/extension/**"
+      - "wallet/web/core/extension-wallet-ui.js"
+      - ".github/workflows/wallet-extension-popup.yml"
+  pull_request:
+    paths:
+      - "wallet/extension/**"
+      - "wallet/web/core/extension-wallet-ui.js"
+      - ".github/workflows/wallet-extension-popup.yml"
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify-extension-popup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Package extension and qualify security boundaries
+        working-directory: wallet/extension
+        run: node scripts/check-release.mjs
+      - name: Install Chromium UI test dependency
+        working-directory: wallet/extension
+        run: npm install --no-save --no-package-lock playwright
+      - name: Install Chromium browser
+        working-directory: wallet/extension
+        run: npx playwright install --with-deps chromium
+      - name: Render actual popup; verify navigation, permissions, assets, send review and blocked states
+        working-directory: wallet/extension
+        run: node scripts/qualify-popup.mjs
+      - name: Save actual popup screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet420-extension-premium-popup-${{ github.sha }}
+          path: wallet/extension/visual-evidence/*.png
+          if-no-files-found: warn
+          retention-days: 7

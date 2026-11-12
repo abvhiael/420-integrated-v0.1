@@ -1,7 +1,7 @@
 import {plinkoPath,plinkoSchedule,plinkoExpectedReturn,PLINKO_BUCKET_CHOICES,PLINKO_RISKS,PLINKO_DROP_CHOICES} from './plinko-practice-paytable.js';
 const NS='http://www.w3.org/2000/svg', WIDTH=720, HEIGHT=680, DX=42, TOP=36, LAST=592;
 export function plinkoWaypoints(bits){
- if(!Array.isArray(bits)||bits.length<7||bits.length>15||bits.some(x=>x!==0&&x!==1))throw Error('Invalid Plinko path');
+ if(!Array.isArray(bits)||bits.length<7||bits.length>16||bits.some(x=>x!==0&&x!==1))throw Error('Invalid Plinko path');
  let rights=0;const points=[{x:WIDTH/2,y:10}],step=(LAST-TOP)/(bits.length-1);
  for(let i=0;i<bits.length;i++){rights+=bits[i];points.push({x:WIDTH/2+(rights-(i+1)/2)*DX,y:TOP+i*step+16});}
  points.push({x:WIDTH/2+(rights-bits.length/2)*DX,y:645});return points;
@@ -87,7 +87,7 @@ export function createPlinkoBoard(doc=globalThis.document){
   frameId=raf(tick);
  }
  panel.append(
-  field('Buckets (8–16)',PLINKO_BUCKET_CHOICES,bucketsCount,value=>{bucketsCount=Number(value);last=[];update();}),
+  field('Buckets (8–17)',PLINKO_BUCKET_CHOICES,bucketsCount,value=>{bucketsCount=Number(value);last=[];update();}),
   field('Risk',PLINKO_RISKS,risk,value=>{risk=value;last=[];update();}),
   field('Multi-ball',[...PLINKO_DROP_CHOICES],dropCount,value=>{dropCount=Number(value);update();}),
   dropButton,stopButton,status,totals,record,warning);

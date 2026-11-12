@@ -19,6 +19,7 @@ const smartAccountState = {
   owner,
   smartAccount: account,
   capabilityRegistry: registry,
+  verifiedCapabilityRegistry: registry,
 };
 
 const request = {

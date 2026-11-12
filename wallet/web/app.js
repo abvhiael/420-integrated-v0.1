@@ -19,6 +19,13 @@ import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
 import { selectNativeAccountBalance420 } from './core/dashboard.js';
 import { getCanonicalReceiveAddress420 } from './core/receive.js';
 import { resolveServices } from './core/services.js';
+function publishWalletVerificationState420(phase='idle',error=null) {
+  document.dispatchEvent(new CustomEvent('wallet:verification-state',{detail:{
+    config:state.config, network:state.network, controller:state.controller,
+    smartAccount:state.smartAccount, phase, error
+  }}));
+}
+
 
 const state = {
   provider: null,
@@ -228,6 +235,7 @@ function render() {
   renderCapabilityInspection();
   renderPortfolio();
   renderReceive();
+  publishWalletVerificationState420();
 
   const list = $('#services');
   list.replaceChildren();
@@ -292,6 +300,7 @@ async function connectInjectedWallet() {
 
 $('#connect').addEventListener('click', async () => {
   $('#status').textContent = 'Authorizing wallet access…';
+  publishWalletVerificationState420('connecting');
   try {
     await connectInjectedWallet();
     $('#status').textContent = !state.smartAccount
@@ -299,7 +308,13 @@ $('#connect').addEventListener('click', async () => {
       : state.smartAccount.deployed
         ? 'Canonical Smart Account loaded. Guarded owner execution, capability management, and session-key administration are available.'
         : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
-  } catch (error) { $('#status').textContent = error.message; }
+  } catch (error) {
+    state.smartAccount = null;
+    state.portfolio = { native: [], tokens: [] };
+    $('#status').textContent = error.message;
+    render();
+    publishWalletVerificationState420('failure',error.message);
+  }
 });
 
 $('#create-account').addEventListener('click', async () => {
@@ -444,4 +459,8 @@ $('#create-session-grant').addEventListener('click', async () => {
   finally { state.managingSession = false; render(); }
 });
 
-loadConfig().catch((error) => { $('#status').textContent = `Configuration warning: ${error.message}`; }).finally(render);
+loadConfig().catch((error) => {
+  $('#status').textContent = `Configuration warning: ${error.message}`;
+  render();
+  publishWalletVerificationState420('failure',error.message);
+}).then(() => { render(); });

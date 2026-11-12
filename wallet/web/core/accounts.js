@@ -16,7 +16,7 @@ async function call(provider, to, data) {
 
 export async function hasCode(provider, address) {
   const code = await provider.request('eth_getCode', [normalizeAddress(address), 'latest']);
-  return typeof code === 'string' && code !== '0x' && !/^0x0*$/.test(code);
+  return typeof code === 'string' && /^0x(?:[0-9a-fA-F]{2})+$/.test(code) && !/^0x0*$/i.test(code);
 }
 
 export async function readDeployedSmartAccountState(provider, smartAccount, metadata = {}) {

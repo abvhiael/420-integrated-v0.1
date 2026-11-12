@@ -12,6 +12,7 @@ import "./BetTypes420.sol";
 import "./RiskManager420.sol";
 import "./KenoV1420.sol";
 import "./PlinkoV1420.sol";
+import "./PlinkoV2420.sol";
 import "./ReferenceSlotV1420.sol";
 import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
@@ -32,6 +33,7 @@ contract SettlementEngine420 is I420System {
     mapping(bytes32 => address) public kenoResolver;
     bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
     mapping(bytes32 => address) public plinkoResolver;
+    mapping(bytes32 => address) public plinkoV2Resolver;
     bytes32 private constant SLOT_GAME_ID = keccak256("420BET.GAME.SLOT");
     mapping(bytes32 => address) public slotResolver;
     bytes32 private constant ROULETTE_GAME_ID = keccak256("420BET.GAME.ROULETTE");
@@ -146,7 +148,7 @@ contract SettlementEngine420 is I420System {
 
     function bindPlinkoResolver(bytes32 gameVersionId, address resolver) external {
         if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
-        if (plinkoResolver[gameVersionId] != address(0)) revert PlinkoResolverAlreadyBound();
+        if (plinkoResolver[gameVersionId] != address(0) || plinkoV2Resolver[gameVersionId] != address(0)) revert PlinkoResolverAlreadyBound();
         PlinkoV1420 p = PlinkoV1420(resolver);
         if (p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
             address(p.wagerRegistry()) != address(registry)) revert InvalidStatus();
@@ -165,6 +167,31 @@ contract SettlementEngine420 is I420System {
             PlinkoV1420(resolver).rulesetId() != wager.rulesetId)
             revert PlinkoCanonicalSettlementRequired();
         PlinkoV1420.Result memory result = PlinkoV1420(resolver).resolve(wagerId, params);
+        settlement = _settle(wager, result.outcome, result.grossPayout, true);
+    }
+
+    function bindPlinkoV2Resolver(bytes32 gameVersionId, address resolver) external {
+        if (resolver == address(0) || gameVersionId == bytes32(0)) revert ZeroAddress();
+        if (plinkoResolver[gameVersionId] != address(0) ||
+            plinkoV2Resolver[gameVersionId] != address(0)) revert PlinkoResolverAlreadyBound();
+        PlinkoV2420 p = PlinkoV2420(resolver);
+        if (p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
+            address(p.wagerRegistry()) != address(registry)) revert InvalidStatus();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(PLINKO_GAME_ID, gameVersionId), 0)) revert Unauthorized();
+        plinkoV2Resolver[gameVersionId] = resolver;
+    }
+
+    function settlePlinkoV2(bytes32 wagerId, PlinkoV2420.Params calldata params)
+        external nonReentrant returns (BetTypes420.Settlement memory settlement)
+    {
+        BetTypes420.Wager memory wager = registry.getWager(wagerId);
+        if (wager.gameId != PLINKO_GAME_ID) revert InvalidStatus();
+        address resolver = plinkoV2Resolver[wager.gameVersionId];
+        if (resolver == address(0) ||
+            PlinkoV2420(resolver).rulesetId() != wager.rulesetId)
+            revert PlinkoCanonicalSettlementRequired();
+        PlinkoV2420.Result memory result = PlinkoV2420(resolver).resolve(wagerId, params);
         settlement = _settle(wager, result.outcome, result.grossPayout, true);
     }
 

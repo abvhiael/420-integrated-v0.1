@@ -1,3 +1,4 @@
+import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { normalizeAddress, ZERO_ADDRESS } from './abi.js';
 import { readDeployedSmartAccountState } from './accounts.js';
 import { summarizeRecoveryState } from './recovery.js';
@@ -58,19 +59,12 @@ async function submitRecoveryTransaction(provider, prepared) {
 }
 
 async function waitForReceipt(provider, txHash, options = {}) {
-  const normalizedHash = normalizeTxHash(txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-  for (let i = 0; i < attempts; i += 1) {
-    const receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
-    if (receipt) {
-      if (receipt.status !== '0x1') throw new Error('SmartAccount420 recovery transaction reverted');
-      return { txHash: normalizedHash, receipt };
-    }
-    if (i + 1 < attempts) await sleep(delayMs);
+  try {
+    return await waitForCanonicalTransaction420(provider, txHash, options);
+  } catch (error) {
+    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 recovery transaction reverted');
+    throw error;
   }
-  throw new Error('SmartAccount420 recovery transaction was not confirmed');
 }
 
 export async function prepareSetRecoveryAuthority(provider, actor, smartAccountState, newAuthority) {

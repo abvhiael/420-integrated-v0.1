@@ -1,5 +1,6 @@
 import { decodeAddress, decodeUint, encodeAddressGetter, encodeExecute, encodeUintGetter, normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
+import { assertWalletChain420, waitForWalletReceipt420 } from './transaction-lifecycle.js';
 
 const MAX_CALLDATA_BYTES = 4096;
 
@@ -63,6 +64,7 @@ export async function prepareSmartAccountExecution(provider, controller, smartAc
   const data = normalizeCallData(request.data ?? '0x');
 
   assertOwnerExecutionBoundary(owner, smartAccountState, target);
+  await assertWalletChain420(provider, request.expectedChainId ?? smartAccountState.expectedChainId);
 
   const transaction = {
     from: owner,
@@ -100,28 +102,18 @@ export async function prepareSmartAccountExecution(provider, controller, smartAc
 export async function sendSmartAccountExecution(provider, controller, smartAccountState, request = {}) {
   const prepared = await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
   await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
+  await assertWalletChain420(provider, request.expectedChainId ?? smartAccountState.expectedChainId);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [prepared.transaction]));
   return { ...prepared, submitted: true, txHash };
 }
 
 export async function confirmSmartAccountExecution(provider, txHash, controller, config = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-
-  let receipt = null;
-  for (let i = 0; i < attempts; i += 1) {
-    receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
-    if (receipt) break;
-    if (i + 1 < attempts) await sleep(delayMs);
-  }
-  if (!receipt) throw new Error('SmartAccount420 execution transaction was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('SmartAccount420 execution transaction reverted');
+  const { receipt, confirmations } = await waitForWalletReceipt420(provider, normalizedHash, options);
 
   const discovered = await discoverSmartAccount(provider, controller, config);
   if (!discovered.deployed || !discovered.controllerIsOwner) {
     throw new Error('SmartAccount420 owner boundary changed after execution');
   }
-  return { txHash: normalizedHash, receipt, smartAccount: discovered };
+  return { txHash: normalizedHash, receipt, confirmations, smartAccount: discovered };
 }

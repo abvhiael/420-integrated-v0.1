@@ -13,6 +13,7 @@ import {
   sendFinalizeRecovery,
 } from '../core/recovery-management.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const owner = '0x2222222222222222222222222222222222222222';
 const authority = '0x3333333333333333333333333333333333333333';
@@ -46,7 +47,9 @@ function state(overrides = {}) {
 function stateProvider(after, calls = []) {
   return { request: async (method, params) => {
     calls.push([method, params]);
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);

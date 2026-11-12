@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { encodeExecute, ZERO_ADDRESS, ZERO_BYTES32 } from '../core/abi.js';
 import { confirmSmartAccountExecution, normalizeCallData, normalizeNativeValue, prepareSmartAccountExecution, sendSmartAccountExecution } from '../core/execution.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const controller = '0x1111111111111111111111111111111111111111';
 const factory = '0x0000000000000000000000000000000000000420';
 const account = '0x3333333333333333333333333333333333333333';
@@ -115,7 +116,7 @@ test('send execution re-simulates, re-verifies owner, then requests explicit pro
   assert.equal(submitted.txHash, txHash);
   assert.equal(sent.to, account);
   assert.equal(sent.from, controller);
-  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_sendTransaction']);
+  assert.deepEqual(calls, ['eth_call', 'eth_estimateGas', 'eth_call', 'eth_call', 'eth_estimateGas', 'eth_sendTransaction']);
 });
 
 test('owner drift after simulation blocks broadcast', async () => {
@@ -152,7 +153,9 @@ test('authorization epoch drift after simulation blocks broadcast', async () => 
 
 test('confirmed execution re-reads owner boundary after successful receipt', async () => {
   const provider = { request: async (method, params) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);
@@ -166,6 +169,6 @@ test('confirmed execution re-reads owner boundary after successful receipt', asy
 });
 
 test('confirmed execution fails closed on reverted receipt', async () => {
-  const provider = { request: async (method) => method === 'eth_getTransactionReceipt' ? { status: '0x0' } : (() => { throw new Error(method); })() };
+  const provider = { request: async (method) => method === 'eth_getTransactionReceipt' ? { status: '0x0', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash } : method === 'eth_getBlockByNumber' ? { hash: canonicalBlockHash } : method === 'eth_blockNumber' ? '0x10' : (() => { throw new Error(method); })() };
   await assert.rejects(confirmSmartAccountExecution(provider, txHash, controller, { factoryAddress: factory }, { attempts: 1, delayMs: 0 }), /reverted/i);
 });

@@ -101,6 +101,8 @@ export async function prepareSmartAccountExecution(provider, controller, smartAc
 export async function sendSmartAccountExecution(provider, controller, smartAccountState, request = {}) {
   const prepared = await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
   await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
+  // Re-simulate after owner/epoch verification to avoid submitting a stale call.
+  await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [prepared.transaction]));
   return { ...prepared, submitted: true, txHash };
 }

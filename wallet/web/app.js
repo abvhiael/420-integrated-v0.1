@@ -244,7 +244,17 @@ $('#simulate-execution').addEventListener('click', async () => {
 $('#send-execution').addEventListener('click', async () => {
   if (!state.provider || !state.lastSimulation || state.executing) return;
   const request = executionRequest();
-  if (globalThis.confirm && !globalThis.confirm(`Execute through SmartAccount420 to ${request.target}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
+  if (typeof globalThis.confirm !== 'function') { $('#status').textContent = 'Explicit transaction confirmation is unavailable'; return; }
+  let canonicalValue;
+  try { canonicalValue = BigInt(request.value); } catch { invalidateSimulation(); $('#status').textContent = 'Invalid transaction value'; return; }
+  if (state.lastSimulation.target !== request.target.toLowerCase() ||
+      state.lastSimulation.value !== canonicalValue ||
+      state.lastSimulation.data !== request.data.toLowerCase()) {
+    invalidateSimulation();
+    $('#status').textContent = 'Transaction changed after simulation; simulate the exact transaction again.';
+    return;
+  }
+  if (!globalThis.confirm(`Execute through SmartAccount420 to ${request.target}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
   state.executing = true; render();
   $('#status').textContent = 'Re-simulating and requesting explicit owner approval…';
   try {

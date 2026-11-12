@@ -11,6 +11,7 @@ import {
   sendSessionKeyEnablement,
 } from '../core/session-management.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const owner = '0x1111111111111111111111111111111111111111';
 const account = '0x2222222222222222222222222222222222222222';
 const key = '0x3333333333333333333333333333333333333333';
@@ -38,7 +39,7 @@ function smartState(overrides = {}) {
   };
 }
 
-function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = '0x', receipt = { status: '0x1' } } = {}) {
+function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = '0x', receipt = { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash } } = {}) {
   const calls = [];
   return {
     calls,
@@ -56,6 +57,8 @@ function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = 
       if (method === 'eth_estimateGas') return '0x5208';
       if (method === 'eth_sendTransaction') return txHash;
       if (method === 'eth_getTransactionReceipt') return receipt;
+      if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+      if (method === 'eth_blockNumber') return '0x10';
       throw new Error(method);
     },
   };

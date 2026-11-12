@@ -8,6 +8,7 @@ import { discoverSmartAccount } from '../core/accounts.js';
 import { confirmSmartAccountCreation, prepareSmartAccountCreation, sendSmartAccountCreation } from '../core/deployment.js';
 import { formatUnits, readNetwork, readPortfolio } from '../core/portfolio.js';
 
+const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const controller = '0x1111111111111111111111111111111111111111';
 const factory = '0x2222222222222222222222222222222222222222';
 const account = '0x3333333333333333333333333333333333333333';
@@ -164,6 +165,8 @@ test('creation send requires explicit provider transaction approval and returns 
 test('creation is idempotent and does not send when account is already deployed', async () => {
   let sends = 0;
   const provider = { request: async (method, params) => {
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);
@@ -180,7 +183,9 @@ test('creation is idempotent and does not send when account is already deployed'
 
 test('confirmed creation re-reads SmartAccount420 and verifies controller ownership', async () => {
   const provider = { request: async (method, params) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);
@@ -214,7 +219,9 @@ test('confirmed creation fails closed on reverted receipt', async () => {
 test('confirmed creation fails closed when resulting owner differs from controller', async () => {
   const otherOwner = '0x6666666666666666666666666666666666666666';
   const provider = { request: async (method, params) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);

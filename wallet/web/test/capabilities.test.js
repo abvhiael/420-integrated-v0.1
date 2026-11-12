@@ -79,3 +79,16 @@ test('capability inspection fails closed on noncanonical registry binding', asyn
 test('capability inspection rejects malformed grant ids', async () => {
   await assert.rejects(inspectCapabilityGrant(providerFor(), smartAccountState, '0x1234'), /invalid bytes32/);
 });
+
+
+test('capability inspection rejects retired frozen registry even with forged matching binding', async () => {
+  const legacy = '0x0000000000000000000000000000000000000421';
+  await assert.rejects(
+    inspectCapabilityGrant(providerFor(), { ...smartAccountState, capabilityRegistry: legacy, verifiedCapabilityRegistry: legacy }, grantId),
+    /frozen Genesis system address/,
+  );
+});
+test('capability inspection requires a verified registry binding', async () => {
+  const { verifiedCapabilityRegistry, ...unverified } = smartAccountState;
+  await assert.rejects(inspectCapabilityGrant(providerFor(), unverified, grantId), /deployment is unverified/);
+});

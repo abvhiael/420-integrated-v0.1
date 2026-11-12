@@ -7,6 +7,11 @@ export function assertVerifiedCapabilityRegistry420(state) {
   const actual = normalizeAddress(state.capabilityRegistry);
   if (actual !== normalizeAddress(state.verifiedCapabilityRegistry))
     throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  // Step 6.2: 0x0420-0x043c are occupied frozen contracts, not
+  // independently deployed CapabilityRegistry420 (historical 0x0421 is AttentionTreasury).
+  const slot = BigInt(actual);
+  if (slot >= 0x420n && slot <= 0x43cn)
+    throw new Error('canonical CapabilityRegistry420 cannot occupy a frozen Genesis system address');
   return actual;
 }
 export const SESSION_EXECUTE_CAPABILITY_420 = '0x9d4b56157e30269b50ea6c6e4f268e8360bf5565165cd55c66ad0c4d007c9f92';

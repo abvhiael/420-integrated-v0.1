@@ -34,6 +34,10 @@ export async function readDeployedSmartAccountState(provider, smartAccount, meta
     call(provider, account, encodeAddressGetter('capabilityRegistry')).then(decodeAddress),
   ]);
 
+  if (metadata.verifiedEntryPoint && entryPoint !== normalizeAddress(metadata.verifiedEntryPoint))
+    throw new Error('SmartAccount420 EntryPoint binding differs from verified deployment');
+  if (metadata.verifiedCapabilityRegistry && capabilityRegistry !== normalizeAddress(metadata.verifiedCapabilityRegistry))
+    throw new Error('SmartAccount420 CapabilityRegistry binding differs from verified deployment');
   const controller = metadata.controller ? normalizeAddress(metadata.controller) : null;
   return {
     ...metadata,
@@ -73,5 +77,7 @@ export async function discoverSmartAccount(provider, controller, config = {}) {
     controller: owner,
     factoryAddress,
     salt,
+    verifiedEntryPoint: config.verifiedEntryPoint,
+    verifiedCapabilityRegistry: config.verifiedCapabilityRegistry,
   });
 }

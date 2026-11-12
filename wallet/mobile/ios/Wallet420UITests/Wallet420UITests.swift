@@ -35,7 +35,7 @@ final class Wallet420UITests: XCTestCase {
             XCTAssertTrue(app.staticTexts["wallet420.surface.\(surface)"].waitForExistence(timeout: 5))
             let capture = XCTAttachment(screenshot: app.screenshot())
             capture.name = "wallet420-ios-\(surface)"
-            capture.lifetime = .keep
+            capture.lifetime = .keepAlways
             add(capture)
         }
     }

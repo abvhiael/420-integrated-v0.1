@@ -80,18 +80,20 @@ function initNavigation() {
 function initActivityFeed() {
   const status = document.querySelector('#status');
   const list = document.querySelector('#activity-list');
+  const filter = document.querySelector('#activity-filter');
   if (!status || !list || typeof MutationObserver === 'undefined') return;
   const activities = [];
   const render = () => {
     list.replaceChildren();
-    if (!activities.length) {
+    const visible = filter && filter.value !== 'all' ? activities.filter(item => item.state === filter.value) : activities;
+    if (!visible.length) {
       const empty = document.createElement('p');
       empty.className = 'muted';
-      empty.textContent = 'Confirmed wallet actions will appear here for this session.';
+      empty.textContent = activities.length ? 'No session actions match this filter.' : 'Wallet activity observed in this browser session will appear here.';
       list.append(empty);
       return;
     }
-    for (const item of activities) {
+    for (const item of visible) {
       const row = document.createElement('div');
       row.className = 'activity-row';
       const copy = document.createElement('div');
@@ -107,6 +109,7 @@ function initActivityFeed() {
       list.append(row);
     }
   };
+  filter?.addEventListener('change', render);
   render();
   new MutationObserver(() => {
     const message = status.textContent.trim();
@@ -162,7 +165,9 @@ async function initGuidedSend() {
   });
 
   const resetPreview = () => {
-    if (preview) preview.textContent = 'Enter a recipient and amount, then prepare the guarded transaction.';
+    if (preview) preview.textContent = 'Transfer details changed. Prepare the transfer and run a new simulation before executing.';
+    // This UI-only invalidation triggers the existing Wallet Core simulation reset.
+    document.querySelector('#execute-target')?.dispatchEvent(new Event('input', { bubbles: true }));
   };
   recipient.addEventListener('input', resetPreview);
   amount.addEventListener('input', resetPreview);
@@ -180,6 +185,7 @@ async function initGuidedSend() {
       data.value = built.request.data;
       for (const input of [target, value, data]) input.dispatchEvent(new Event('input', { bubbles: true }));
       if (preview) preview.textContent = `${built.summary.amount} ${built.summary.symbol} → ${short(built.summary.recipient)}. Simulation is required before execution.`;
+      document.querySelector('#wallet-advanced-execution')?.removeAttribute('open');
       document.querySelector('#simulate-execution')?.focus();
     } catch (error) {
       if (preview) preview.textContent = error.message;

@@ -23,6 +23,7 @@
         <span class="nav-group-label">Wallet</span>
         <button type="button" class="nav-item active" data-scroll-target="#overview" aria-current="page"><span aria-hidden="true" class="nav-mark">◈</span>Overview</button>
         <button type="button" class="nav-item" data-scroll-target="#wallet-assets"><span aria-hidden="true" class="nav-mark">◉</span>Assets</button>
+        <button type="button" class="nav-item" data-scroll-target="#wallet-receive"><span aria-hidden="true" class="nav-mark">↓</span>Receive</button>
         <button type="button" class="nav-item" data-scroll-target="#execution-panel"><span aria-hidden="true" class="nav-mark">↗</span>Send / Execute</button>
         <button type="button" class="nav-item" data-scroll-target="#wallet-activity"><span aria-hidden="true" class="nav-mark">◷</span>Activity</button>
         <span class="nav-group-label">Ecosystem</span>
@@ -53,6 +54,7 @@
             <p id="dashboard-balance-context" class="wallet-balance-caption">Connect a controller and verify your Smart Account to read its balance.</p>
             <div class="wallet-quick-actions" aria-label="Wallet quick actions">
               <button type="button" class="primary-action" data-scroll-target="#execution-panel">Send 420</button>
+              <button type="button" class="ghost-button" data-scroll-target="#wallet-receive">Receive</button>
               <button type="button" class="ghost-button" data-scroll-target="#wallet-assets">View assets</button>
               <button type="button" class="ghost-button" data-scroll-target="#wallet-activity">Activity</button>
             </div>
@@ -61,7 +63,7 @@
             <p class="eyebrow">Canonical Smart Account</p>
             <h3 id="smart-account">—</h3>
             <p id="owner-line" class="muted">Connect a controller to discover your canonical SmartAccount420.</p>
-            <div class="hero-actions"><button id="create-account" type="button" hidden disabled>Create Smart Account</button><button class="ghost-button" data-copy-source="#smart-account" type="button">Copy address</button></div>
+            <div class="hero-actions"><button id="create-account" type="button" hidden disabled>Create Smart Account</button><button class="ghost-button" data-copy-source="#receive-address" type="button" disabled>Copy address</button></div>
             <div class="network-card"><span class="network-indicator" aria-hidden="true"></span><div><span class="label">Connected network</span><strong id="network">420 Integrated</strong><small id="rpc-status">Not checked</small></div></div>
           </div>
         </div>
@@ -76,29 +78,59 @@
 
       <section id="wallet-assets" class="wallet-assets-section" aria-labelledby="assets-heading">
         <div class="section-heading"><div><p class="eyebrow">Portfolio</p><h2 id="assets-heading">Assets</h2></div><span class="section-kicker">Read-only chain state · balances shown per account</span></div>
+        <p class="wallet-section-help">Balances are displayed separately for your Smart Account and connected controller. No asset prices are assumed.</p>
         <div id="portfolio" class="service-grid asset-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
+      </section>
+      
+      <section id="wallet-receive" class="panel wallet-receive" aria-labelledby="receive-heading">
+        <div class="section-heading"><div><p class="eyebrow">Receiving assets</p><h2 id="receive-heading">Receive 420</h2></div><span class="section-kicker">Exact canonical Smart Account address</span></div>
+        <div class="wallet-receive-grid">
+          <div class="wallet-receive-address-card">
+            <p class="label">Smart Account address</p>
+            <output id="receive-address" class="wallet-address-value" aria-live="polite">Unavailable</output>
+            <p id="receive-status" class="muted" role="status">Connect a controller and verify the network to discover a receiving address.</p>
+            <div class="button-row">
+              <button type="button" class="primary-action" id="copy-receive-address" data-copy-source="#receive-address" disabled>Copy full address</button>
+              <button type="button" class="ghost-button" data-scroll-target="#wallet-assets">View supported assets</button>
+            </div>
+          </div>
+          <aside class="wallet-receive-note" aria-label="Network safety information">
+            <h3>Check the network before receiving</h3>
+            <p>Only send supported assets on the approved 420Integrated network. Sending from another network can permanently lose funds.</p>
+            <p>Contract deployment and account discovery must be verified before we display the receiving address.</p>
+            <p class="wallet-plain-disclaimer">A QR code is not shown until a locally verified QR renderer is qualified. Copy the full address above instead.</p>
+          </aside>
+        </div>
       </section>
 
       <section id="execution-panel" class="panel" hidden>
         <div class="section-heading"><div><p class="eyebrow">Owner authority · simulation required</p><h2>Send / Execute</h2></div><span id="review-state" class="status-pill" data-state="idle">Awaiting simulation</span></div>
+        <p class="wallet-section-help">Prepare an asset transfer, simulate it, review the exact transaction, then approve it with your controller. No transfer occurs when you prepare or simulate.</p>
+        <ol class="wallet-send-steps" aria-label="Transaction steps"><li>1 · Enter transfer</li><li>2 · Simulate and review</li><li>3 · Approve and confirm</li></ol>
 
         <div class="account-card">
           <div class="section-heading"><div><p class="eyebrow">Guided send</p><h3>Send an asset</h3></div><span class="section-kicker">Builds a guarded execution request</span></div>
           <div class="form-grid">
             <label><span class="label">Asset</span><select id="send-asset"><option>420 · native</option></select></label>
-            <label><span class="label">Recipient</span><input id="send-recipient" type="text" autocomplete="off" placeholder="0x…" /></label>
+            <label><span class="label">Recipient (420Integrated address)</span><input id="send-recipient" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="0x…" aria-describedby="send-recipient-help" /><small id="send-recipient-help" class="wallet-field-help">Paste the full 42-character address. The wallet checks its format before preparing a transaction.</small></label>
             <label><span class="label">Amount</span><input id="send-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="4.20" /></label>
           </div>
-          <div class="section-heading"><p id="send-preview" class="muted">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
+          <div class="section-heading"><p id="send-preview" class="muted" role="status" aria-live="polite">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
         </div>
 
         <div class="split-panel">
           <div class="form-card">
-            <p class="eyebrow">Advanced transaction details</p>
-            <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
-            <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
-            <label><span class="label">Calldata</span><textarea id="execute-data" autocomplete="off" rows="5">0x</textarea></label>
+            <p class="eyebrow">Simulate and approve</p>
+            <p class="wallet-section-help">After preparing a transfer, run the required simulation. Review the exact target, value and calldata before executing.</p>
+            <details id="wallet-advanced-execution" class="wallet-advanced-details">
+              <summary>Advanced transaction details</summary>
+              <p class="wallet-field-help">These technical fields are authoritative execution inputs. Editing them invalidates the previous simulation.</p>
+              <label><span class="label">Target address</span><input id="execute-target" type="text" autocomplete="off" placeholder="0x…" /></label>
+              <label><span class="label">Native value (wei)</span><input id="execute-value" type="text" inputmode="numeric" autocomplete="off" value="0" /></label>
+              <label><span class="label">Calldata</span><textarea id="execute-data" autocomplete="off" rows="5">0x</textarea></label>
+            </details>
             <div class="button-row"><button id="simulate-execution" type="button" disabled>Simulate</button><button id="send-execution" class="primary-action" type="button" disabled>Execute</button></div>
+            <p class="wallet-field-help">Execution requires successful simulation, a separate confirmation, controller approval and canonical receipt verification.</p>
           </div>
           <aside class="review-card" aria-label="Transaction review">
             <p class="eyebrow">Transaction review</p>
@@ -152,8 +184,18 @@
         <div class="button-row"><button id="enable-session-key" type="button" disabled>Enable key</button><button id="revoke-session-key" type="button" disabled>Revoke key</button><button id="create-session-grant" type="button" disabled>Create session grant</button></div>
       </section>
 
-      <section id="wallet-activity" class="panel">
-        <div class="section-heading"><div><p class="eyebrow">This browser session</p><h2>Activity</h2></div><span class="section-kicker">No private history storage</span></div>
+      <section id="wallet-activity" class="panel" aria-labelledby="activity-heading">
+        <div class="section-heading"><div><p class="eyebrow">This browser session</p><h2 id="activity-heading">Activity</h2></div><span class="section-kicker">No private history storage</span></div>
+        <p class="wallet-section-help">Only wallet actions observed in this tab are shown. This is not a complete on-chain transaction history.</p>
+        <div class="wallet-activity-toolbar">
+          <label for="activity-filter" class="wallet-filter-label">Filter session activity</label>
+          <select id="activity-filter" aria-controls="activity-list">
+            <option value="all">All activity</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="reorganized">Reorganizations</option>
+          </select>
+        </div>
         <div id="activity-list" class="activity-list" aria-live="polite"></div>
       </section>
 

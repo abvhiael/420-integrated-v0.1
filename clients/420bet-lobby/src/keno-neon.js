@@ -9,7 +9,7 @@ export function createNeonKeno(doc=globalThis.document,options={}){
  root.className='practice neon-keno-page ls-keno';
  root.dataset.practiceGame='keno';
  const ASSET='/assets/420bet/keno/catastrophe-jack/';
- const METER_KEY='420bet:catastrophe-jack:keno:nine-lives:loss-streak:v2';
+ const METER_KEY='420bet:catastrophe-jack:keno:nine-lives:zero-one-hit:v3';
  const PRACTICE_KEY='420bet:catastrophe-jack:keno:practice:v1';
  let state=initial('keno'),pickTarget=10,history=[],lastRound=null,autoTimer=null,autoRemaining=0;
  let meter=0,credits=100000,bet=100,lastWin=0,infoOpen=false;
@@ -79,7 +79,7 @@ export function createNeonKeno(doc=globalThis.document,options={}){
   history=history.slice(0,8);
   state.message=lastRound.bonusApplied?'CAT-ASTROPHE! Jack doubles the winning draw!':
    lastRound.bonusReady?'NINE LIVES CHARGED! The next paying draw earns 2× and resets the meter.':
-   lastRound.baseMultiplier>0?'Jack: “A winner! Back to zero lives.”':'Jack: “Another bust. One life closer to revenge.”';
+   lastRound.baseMultiplier>0?'Jack: “A winner! Back to zero lives.”':hits<=1?'Jack: “Another bust. One life closer to revenge.”':'Jack: “Two or more hits. No payout, no extra life.”';
   render();return true;
  };
  const toggleAuto=()=>{
@@ -126,7 +126,7 @@ export function createNeonKeno(doc=globalThis.document,options={}){
   meterRow.setAttribute('aria-label',meter+' of 9 lives charged');
   for(let i=0;i<9;i++)meterRow.append(image('ui/life_'+(i<meter?'lit':'unlit')+'.png','ls-life-icon',i<meter?'Filled life':'Empty life'));
   meterPanel.append(meterRow);
-  meterPanel.append(element('p','ls-meter-caption',meter===9?'READY: 2× NEXT PAYING DRAW · THEN RESET TO 0':lastRound?.bonusApplied?'BONUS PAID · RESET TO 0 / 9':meter+' / 9 · each losing draw adds one life; any win resets'));
+  meterPanel.append(element('p','ls-meter-caption',meter===9?'READY: 2× NEXT PAYING DRAW · THEN RESET TO 0':lastRound?.bonusApplied?'BONUS PAID · RESET TO 0 / 9':meter+' / 9 · only 0–1 hits charge; any paying win resets'));
   left.append(meterPanel);stage.append(left);
 
   const board=element('section','ls-board');
@@ -215,8 +215,8 @@ export function createNeonKeno(doc=globalThis.document,options={}){
     element('p','','Choose 1–10 numbers from 1 to 80, or use Lucky Claws quick pick. Each draw reveals 20 distinct random numbers. Matches determine the base gross multiplier shown in the table below.'),
     element('p','','Set the virtual bet, then press DRAW 20. Matching numbers turn green, and your virtual win is credited to your practice balance. These are illustrative payouts only.'),
     element('h3','','NINE LIVES · 2× BONUS'),
-    element('p','','Every FAILED draw (one with no base payout) adds exactly ONE life, regardless of the number of matched numbers. Any paying draw resets the meter to 0/9. After nine consecutive non-paying draws the meter is FULL. The next paying draw then receives a 2× gross payout, and the meter resets to 0/9. Further failures leave a full meter charged.'),
-    element('p','','The nine-life losing streak is saved in this browser across rounds and reloads. Changing the number of spots resets the streak. Changing selected numbers or virtual bet does not reset it. This version starts a fresh streak because the rules changed.'),
+    element('p','','Only a non-paying draw with ZERO or ONE matching number adds exactly ONE life. A non-paying draw with TWO or more hits leaves the meter unchanged. ANY paying draw resets the meter to 0/9, even if only one number matched. At 9/9, the NEXT paying draw receives a 2× gross payout before the meter resets. Additional non-paying draws leave a full meter charged.'),
+    element('p','','Your Nine Lives progress is saved in this browser across rounds and reloads. Changing the number of spots resets it. Changing selected numbers or virtual bet does not reset it. Progress starts fresh with this revised 0-or-1-hit rule.'),
     element('h3','','QUICK PICK, AUTO & VIRTUAL CREDITS'),
     element('p','','Lucky Claws replaces your selection with random numbers. CLEAR removes the selection. AUTO plays up to ten practice draws, each using the same 80-number/20-draw rules; STOP AUTO ends the sequence. No wallet or real wagering is involved.')
    );
@@ -235,7 +235,7 @@ export function createNeonKeno(doc=globalThis.document,options={}){
     body.append(tr);
    }
    table.append(body);dialog.append(table);
-   dialog.append(element('p','ls-info-warning','PROPOSED PRACTICE PAYTABLE · '+KENO_CANDIDATE_STATUS+'. The 94–96% theoretical RTP target includes the loss-streak 2× feature, under fixed spot selection. This is not an independently approved on-chain schedule; no real funds, payouts, or wagering.'));
+   dialog.append(element('p','ls-info-warning','PROPOSED PRACTICE PAYTABLE · '+KENO_CANDIDATE_STATUS+'. The 94–96% theoretical RTP target includes the 0-or-1-hit 2× feature, under fixed spot selection. This is not an independently approved on-chain schedule; no real funds, payouts, or wagering.'));
    overlay.append(dialog);
    overlay.addEventListener('click',event=>{if(event.target===overlay){infoOpen=false;render();}});
    overlay.addEventListener('keydown',event=>{if(event.key==='Escape'){infoOpen=false;render();}});

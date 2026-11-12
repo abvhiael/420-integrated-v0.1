@@ -19,6 +19,8 @@ import "./KenoV1420.sol";
 import "./KenoPaytableAuthority420.sol";
 import "./PlinkoV1420.sol";
 import "./PlinkoPaytableAuthority420.sol";
+import "./PlinkoV2420.sol";
+import "./PlinkoPaytableAuthorityV2420.sol";
 import "./ReferenceSlotV1420.sol";
 import "./ReferenceSlotTermsAuthority420.sol";
 import "./RouletteV1420.sol";
@@ -56,6 +58,8 @@ contract WagerRouter420 is I420System {
     bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
     mapping(bytes32 => address) public plinkoAuthority;
     mapping(bytes32 => address) public plinkoResolver;
+    mapping(bytes32 => address) public plinkoV2Authority;
+    mapping(bytes32 => address) public plinkoV2Resolver;
     bytes32 private constant SLOT_GAME_ID = keccak256("420BET.GAME.SLOT");
     mapping(bytes32 => address) public slotTermsAuthority;
     mapping(bytes32 => address) public slotResolver;
@@ -198,7 +202,7 @@ contract WagerRouter420 is I420System {
     function bindPlinkoPaytable(bytes32 gameVersionId, address resolver, address verifier) external {
         if (gameVersionId == bytes32(0) || resolver == address(0) || verifier == address(0))
             revert InvalidRequest();
-        if (plinkoAuthority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
+        if (plinkoAuthority[gameVersionId] != address(0) || plinkoV2Authority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
         BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
         if (g.gameId != PLINKO_GAME_ID ||
             modules.getModule(g.moduleVersionId).implementation != resolver ||
@@ -224,6 +228,41 @@ contract WagerRouter420 is I420System {
         if (verifier == address(0)) revert PlinkoAuthorityRequired();
         PlinkoPaytableAuthority420(verifier).verify(request.stake, request.maxGrossPayout,
             request.paramsHash, params, plinkoResolver[request.gameVersionId]);
+        return _placeWager(request);
+    }
+
+    /// @notice Bind an independently versioned V2 Plinko resolver and configuration authority.
+    function bindPlinkoV2Paytable(bytes32 gameVersionId, address resolver, address verifier) external {
+        if (gameVersionId == bytes32(0) || resolver == address(0) || verifier == address(0))
+            revert InvalidRequest();
+        if (plinkoAuthority[gameVersionId] != address(0) ||
+            plinkoV2Authority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
+        PlinkoV2420 p = PlinkoV2420(resolver);
+        PlinkoPaytableAuthorityV2420 a = PlinkoPaytableAuthorityV2420(verifier);
+        if (g.gameId != PLINKO_GAME_ID ||
+            modules.getModule(g.moduleVersionId).implementation != resolver ||
+            p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
+            p.rulesetId() != g.rulesetId || address(p.wagerRegistry()) != address(betRegistry) ||
+            a.gameVersionId() != gameVersionId || a.rulesetId() != g.rulesetId)
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, gameVersionId), 0)) revert Unauthorized();
+        plinkoV2Authority[gameVersionId] = verifier;
+        plinkoV2Resolver[gameVersionId] = resolver;
+    }
+
+    function placePlinkoV2Wager(AcceptanceRequest calldata request, PlinkoV2420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != PLINKO_GAME_ID) revert InvalidRequest();
+        address verifier = plinkoV2Authority[request.gameVersionId];
+        if (verifier == address(0)) revert PlinkoAuthorityRequired();
+        PlinkoPaytableAuthorityV2420(verifier).verify(
+            request.stake, request.maxGrossPayout, request.paramsHash,
+            params, plinkoV2Resolver[request.gameVersionId]
+        );
         return _placeWager(request);
     }
 

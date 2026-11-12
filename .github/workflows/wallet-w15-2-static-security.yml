@@ -71,26 +71,77 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+
           root = Path("../artifacts/wallet-w15-2-static")
-          summary = []
-          severe = []
-          for path in sorted(root.glob("*.json")):
+          # The only high/medium findings accepted here were individually reviewed
+          # against the Wallet authority and accounting code at W15.2. Every new
+          # signature, contract, issue class or severity remains a hard failure.
+          dispositions = {
+              ("incorrect-equality", "CapabilityRegistry420._currentUsage(", "stored.periodIndex == index"):
+                  "Fixed-period window identity deliberately uses equality; grant consumption enforces limits separately.",
+              ("reentrancy-no-eth", "EntryPoint420.handleOp(", "External calls:"):
+                  "handleOp has nonReentrant guard set before validation, paymaster and execution calls.",
+              ("uninitialized-local", "EntryPoint420._settleSponsorship(", ".callbackSucceeded"):
+                  "Solidity bool defaults false; assigned true only after successful postOp callback.",
+              ("uninitialized-local", "EntryPoint420.handleOp(", ".sponsorship"):
+                  "Memory struct defaults zero; unsponsored operation intentionally skips settlement.",
+              ("uninitialized-local", "WebAuthnClientData420.verify(", ".seen"):
+                  "Solidity uint8 defaults zero; bits set only for parsed unique security keys.",
+              ("uninitialized-local", "P256WebAuthnVerifier420._base64url32(", ".o"):
+                  "New fixed-length bytes allocation initializes contents to zero before encoding.",
+              ("arbitrary-send-eth", "SmartAccount420._call(", "target.call{value: value}"):
+                  "Authorized wallet transfers are intended: owner or EntryPoint-validated scoped session only.",
+              ("uninitialized-local", "SmartAccount420._validatePasskeyUserOp(", ".credentialIdHash"):
+                  "Written through successful external decode helper; catch returns validation failure.",
+              ("uninitialized-local", "SmartAccount420._validatePasskeyUserOp(", ".assertionEnvelope"):
+                  "Written through successful external decode helper; catch returns validation failure.",
+              ("uninitialized-local", "SmartAccount420._authorizeCallSet(", ".uniqueCount"):
+                  "Solidity local uint256 defaults zero; increments for each unique grant.",
+              ("unused-return", "SmartAccount420.executeSession(", "capabilityRegistry.consume("):
+                  "Registry.consume either returns updated period use or reverts; no authorization failure is represented by a return value.",
+          }
+
+          # Verify that the guard and capability consumption semantics underlying
+          # these dispositions have not been removed on the exact reviewed head.
+          entry = Path("src/accounts/EntryPoint420.sol").read_text()
+          smart = Path("src/accounts/SmartAccount420.sol").read_text()
+          registry = Path("src/system/CapabilityRegistry420.sol").read_text()
+          assert "external\\n        nonReentrant\\n        returns" in entry, "EntryPoint guard changed"
+          assert "onlyEntryPoint" in smart and "onlyOwner" in smart, "Wallet authority guard changed"
+          assert "capabilityRegistry.consume(authorization.grantId, authorization.amount)" in smart
+          assert "if (g.revoked) revert GrantRevoked()" in registry
+          assert "if (!_timeActive(g)) revert GrantInactive()" in registry
+          assert "if (u.used > g.periodLimit || amount > g.periodLimit - u.used) revert CapabilityLimitExceeded()" in registry
+
+          summary, reviewed, unknown = [], [], []
+          paths = sorted(root.glob("*.json"))
+          for path in paths:
               data = json.loads(path.read_text())
               if not data.get("success"):
-                  raise SystemExit(f"Static analysis did not complete for {path.name}: {data.get('error')}")
-              detectors = (data.get("results") or {}).get("detectors") or []
-              for d in detectors:
-                  record = {"file":path.name,"check":d.get("check"),"impact":d.get("impact"),
-                            "confidence":d.get("confidence"),"description":d.get("description","")[:1200]}
-                  summary.append(record)
-                  if d.get("impact") in ("High","Medium"):
-                      severe.append(record)
-          (root/"findings.json").write_text(json.dumps({"findings":summary,"high_medium":severe},indent=2))
-          print(f"Analyzed {len(list(root.glob('*.json')))-1} Wallet targets; {len(summary)} findings; {len(severe)} high/medium findings")
-          for item in severe:
-              print(f"{item['file']}: [{item['impact']}/{item['confidence']}] {item['check']}: {item['description'][:250]}")
-          if severe:
-              raise SystemExit("Untriaged Wallet high/medium static-security findings")
+                  raise SystemExit(f"Slither failed for {path.name}: {data.get('error')}")
+              for detector in (data.get("results") or {}).get("detectors") or []:
+                  item = {"file": path.name, "check": detector.get("check"),
+                          "impact": detector.get("impact"), "confidence": detector.get("confidence"),
+                          "description": detector.get("description","")[:1600]}
+                  summary.append(item)
+                  if item["impact"] not in ("High", "Medium"):
+                      continue
+                  candidates = [(key, reason) for key, reason in dispositions.items()
+                                if item["check"] == key[0] and key[1] in item["description"]
+                                and key[2] in item["description"]]
+                  if len(candidates) != 1:
+                      unknown.append(item)
+                  else:
+                      reviewed.append({**item, "disposition": candidates[0][1]})
+          report = {"reviewed": reviewed, "untriaged": unknown, "all_findings": summary,
+                    "target_count": len(paths)}
+          (root/"findings.json").write_text(json.dumps(report, indent=2))
+          print(f"Slither analyzed {len(paths)} source graphs; {len(summary)} total findings;"
+                f" {len(reviewed)} individually triaged high/medium; {len(unknown)} untriaged")
+          for item in unknown:
+              print(f"UNTRIAGED {item['file']} [{item['impact']}] {item['check']}: {item['description'][:500]}")
+          if len(paths) != 8 or len(reviewed) != 17 or unknown:
+              raise SystemExit("Wallet static security disposition count or signatures changed")
           PY
       - name: Preserve static security evidence
         if: always()

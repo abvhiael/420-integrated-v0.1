@@ -1,34 +1,127 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101a14">
   <title>420 Wallet</title>
-  <style>
-    body{font-family:system-ui,sans-serif;margin:0;background:#111;color:#eee;min-width:360px}
-    main{padding:20px}.muted{color:#aaa;font-size:13px}.card{background:#1c1c1c;border:1px solid #333;border-radius:12px;padding:16px;margin:12px 0;word-break:break-word}
-    button{border:0;border-radius:8px;padding:10px 14px;font-weight:600;cursor:pointer}button.primary{background:#eee;color:#111}button.secondary{background:#333;color:#eee}.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
-    select{width:100%;padding:8px;background:#111;color:#eee;border:1px solid #444;border-radius:8px}
-  </style>
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <main>
-    <h2>420 Wallet</h2>
-    <p id="status" class="muted">Loading request…</p>
-    <section id="request" class="card" hidden>
-      <div><strong id="kind"></strong></div>
-      <div class="muted" id="origin"></div>
-      <pre id="details" style="white-space:pre-wrap"></pre>
-      <div id="account-picker" hidden>
-        <label for="account">Account</label>
-        <select id="account"></select>
-      </div>
-    </section>
-    <div class="actions" id="actions" hidden>
-      <button id="reject" class="secondary">Reject</button>
-      <button id="approve" class="primary">Approve</button>
-    </div>
-  </main>
+  <div class="wallet-app">
+    <a class="skip-link" href="#primary-content">Skip to wallet content</a>
+    <header class="app-header">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><b>420</b></span><div><strong>420<span class="brand-green">Wallet</span></strong><small>420 INTEGRATED</small></div></div>
+      <button id="header-settings" class="icon-button" type="button" aria-label="Network and wallet settings" title="Settings">⚙</button>
+    </header>
+
+    <main id="primary-content" tabindex="-1">
+      <section id="dashboard" class="view" aria-labelledby="dashboard-title">
+        <div class="topline"><span class="eyebrow">MY WALLET</span><span id="network-pill" class="network-pill warning"><span class="status-dot"></span><span id="network-label">Checking network</span></span></div>
+        <h1 id="dashboard-title" class="screen-title">Overview</h1>
+        <div class="account-panel">
+          <div class="account-head"><span class="eyebrow">SMART ACCOUNT</span><button id="copy-account" class="quiet-button" type="button" disabled>Copy <span aria-hidden="true">⧉</span></button></div>
+          <label class="sr-only" for="account-select">Controller account</label>
+          <select id="account-select" aria-label="Select controller account" disabled><option>Connect an account</option></select>
+          <div id="account-address" class="account-address" aria-live="polite">No verified wallet address</div>
+          <span id="account-state" class="account-footnote">SmartAccount verification required</span>
+          <div class="balance-label">NATIVE BALANCE</div>
+          <div class="balance-line"><span id="native-balance" class="balance-number">—</span><span class="currency">420</span></div>
+          <p class="balance-detail" id="balance-note">Actual network balances will appear here when your account and chain are verified.</p>
+        </div>
+        <div class="quick-actions" aria-label="Wallet actions">
+          <button id="quick-send" class="action" type="button" disabled><span class="action-icon" aria-hidden="true">↗</span><span>Send</span></button>
+          <button id="quick-receive" class="action" type="button" disabled><span class="action-icon" aria-hidden="true">↙</span><span>Receive</span></button>
+          <button id="quick-activity" class="action" type="button"><span class="action-icon" aria-hidden="true">◷</span><span>Activity</span></button>
+          <button id="quick-refresh" class="action" type="button"><span class="action-icon" aria-hidden="true">↻</span><span>Refresh</span></button>
+        </div>
+        <div class="section-head"><h2>Assets</h2><span class="subtle">On-chain balances</span></div>
+        <div id="asset-list" class="asset-list" aria-live="polite"><p class="empty">Checking your wallet…</p></div>
+        <div class="notice" id="dashboard-notice" role="status">Wallet status will appear here.</div>
+      </section>
+
+      <section id="activity-view" class="view" hidden aria-labelledby="activity-title">
+        <div class="topline"><span class="eyebrow">TRANSACTION HISTORY</span><span class="chip">THIS DEVICE</span></div>
+        <h1 id="activity-title" class="screen-title">Activity</h1>
+        <p class="intro">Transactions initiated by this browser extension. This is not a complete blockchain history.</p>
+        <div id="activity-list" class="stack" aria-live="polite"><p class="empty">No extension transactions yet.</p></div>
+      </section>
+
+      <section id="sites-view" class="view" hidden aria-labelledby="sites-title">
+        <div class="topline"><span class="eyebrow">PERMISSIONS</span><span class="chip">DAPP CONNECTIONS</span></div>
+        <h1 id="sites-title" class="screen-title">Connected sites</h1>
+        <p class="intro">Manage websites permitted to see your account. Disconnecting a site removes browser permission; it does not revoke any independent on-chain capability grant.</p>
+        <div id="site-list" class="stack"><p class="empty">No websites connected.</p></div>
+      </section>
+
+      <section id="settings-view" class="view" hidden aria-labelledby="settings-title">
+        <div class="topline"><span class="eyebrow">PREFERENCES</span><span class="chip">NETWORK</span></div>
+        <h1 id="settings-title" class="screen-title">Settings</h1>
+        <div class="settings-panel">
+          <h2>Network configuration</h2>
+          <p class="intro">Only configure an approved network. The RPC is transport, not an account or signing authority. Incorrect settings block transactions.</p>
+          <form id="network-form">
+            <label for="rpc-url">RPC endpoint</label><input id="rpc-url" type="url" placeholder="https://rpc.example.org" autocomplete="off" spellcheck="false">
+            <label for="expected-chain">Expected chain ID (hex)</label><input id="expected-chain" type="text" placeholder="0x1a4" autocomplete="off" spellcheck="false">
+            <label for="explorer-url">Block explorer URL (optional)</label><input id="explorer-url" type="url" placeholder="https://explorer.example.org" autocomplete="off" spellcheck="false">
+            <button class="primary wide" type="submit">Save &amp; verify network</button>
+          </form>
+          <div class="rule"></div>
+          <h2>Account &amp; security</h2>
+          <div class="config-row"><span>Controller</span><strong id="settings-controller">Not provisioned</strong></div>
+          <div class="config-row"><span>SmartAccountFactory420</span><strong id="settings-factory">Not provisioned</strong></div>
+          <div class="config-row"><span>Passkey authority</span><strong>Device-local only</strong></div>
+          <p class="intro">Controller enrollment and account recovery require the approved Wallet Core provisioning flow. No private-key import or hidden server signer is offered here.</p>
+        </div>
+      </section>
+
+      <section id="receive-view" class="view" hidden aria-labelledby="receive-title">
+        <button type="button" class="back-button" data-back>‹ Wallet</button>
+        <h1 id="receive-title" class="screen-title">Receive</h1>
+        <p class="intro">Send 420 or a supported token to your canonical SmartAccount420 address on the verified network only.</p>
+        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>SmartAccount420</strong><div id="receive-address" class="full-address">Unavailable</div><button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
+        <p id="receive-warning" class="notice">Network and account verification required.</p>
+      </section>
+
+      <section id="send-view" class="view" hidden aria-labelledby="send-title">
+        <button type="button" class="back-button" data-back>‹ Wallet</button>
+        <h1 id="send-title" class="screen-title">Send assets</h1>
+        <p class="intro">Review the recipient, amount and network. The local passkey authority will independently verify ownership and simulate before submission.</p>
+        <form id="send-form" class="settings-panel">
+          <label for="send-asset">Asset</label><select id="send-asset"><option value="native">420 · Native</option></select>
+          <label for="send-recipient">Recipient</label><input id="send-recipient" type="text" placeholder="0x…" autocomplete="off" spellcheck="false" required>
+          <label for="send-amount">Amount</label><input id="send-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" required>
+          <button id="send-review-button" type="submit" class="primary wide">Review transaction</button>
+        </form>
+        <div id="send-review" class="review-box" hidden>
+          <h2>Confirm send</h2>
+          <dl><div><dt>Asset</dt><dd id="review-asset">—</dd></div><div><dt>Amount</dt><dd id="review-amount">—</dd></div><div><dt>Recipient</dt><dd id="review-recipient" class="wrap">—</dd></div><div><dt>Network</dt><dd id="review-chain">—</dd></div><div><dt>From</dt><dd id="review-sender" class="wrap">—</dd></div></dl>
+          <div class="review-actions"><button id="send-edit" class="secondary" type="button">Edit</button><button id="send-confirm" class="primary" type="button">Confirm &amp; authorize</button></div>
+        </div>
+        <p id="send-state" class="notice" role="status" aria-live="polite">No transaction prepared.</p>
+      </section>
+
+      <section id="approval-view" class="view" hidden aria-labelledby="approval-title">
+        <div class="topline"><span class="eyebrow">SECURITY REVIEW</span><span class="chip alert">ACTION REQUESTED</span></div>
+        <h1 id="approval-title" class="screen-title">Review request</h1>
+        <p id="status" class="intro" role="status" aria-live="polite">Loading request…</p>
+        <section id="request" class="review-box" hidden aria-label="Approval request details">
+          <div class="config-row"><span>Method</span><strong id="kind"></strong></div>
+          <div class="config-row"><span>Requesting site</span><strong id="origin" class="wrap"></strong></div>
+          <pre id="details" class="request-details"></pre>
+          <div id="account-picker" hidden><label for="account">Account to share</label><select id="account"></select></div>
+        </section>
+        <div id="actions" class="review-actions approval-actions" hidden><button id="reject" type="button" class="secondary">Reject</button><button id="approve" type="button" class="primary">Approve</button></div>
+      </section>
+    </main>
+    <nav id="bottom-nav" class="bottom-nav" aria-label="Wallet navigation">
+      <button type="button" class="nav-item active" data-screen="dashboard" aria-current="page"><span aria-hidden="true">⌂</span><small>Wallet</small></button>
+      <button type="button" class="nav-item" data-screen="activity-view"><span aria-hidden="true">◷</span><small>Activity</small></button>
+      <button type="button" class="nav-item" data-screen="sites-view"><span aria-hidden="true">◫</span><small>Sites</small></button>
+      <button type="button" class="nav-item" data-screen="settings-view"><span aria-hidden="true">⚙</span><small>Settings</small></button>
+    </nav>
+    <div id="global-status" class="sr-only" role="status" aria-live="polite"></div>
+  </div>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

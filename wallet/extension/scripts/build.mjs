@@ -11,6 +11,7 @@ const sourceFiles = [
   'content-script.js',
   'inpage.js',
   'popup.html',
+  'popup.css',
   'popup.js',
   'authority.html',
   'authority.js',

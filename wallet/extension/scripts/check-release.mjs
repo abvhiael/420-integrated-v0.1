@@ -6,7 +6,7 @@ import { buildExtension420 } from './build.mjs';
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { dist: root } = await buildExtension420();
-const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.js', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
+const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
 const forbiddenPatterns = [
   /\beval\s*\(/,
   /\bnew\s+Function\s*\(/,
@@ -46,6 +46,9 @@ await scan(root);
 
 const serviceWorker = await readFile(join(root, 'service-worker.js'), 'utf8');
 assert.match(serviceWorker, /origin !== senderOrigin/);
+assert.match(serviceWorker, /trustedWalletPopup420/);
+assert.match(serviceWorker, /extensionCanSend420/);
+assert.match(serviceWorker, /walletUiState420/);
 assert.match(serviceWorker, /frameId/);
 assert.match(serviceWorker, /eth_requestAccounts/);
 assert.match(serviceWorker, /LOCAL_AUTHORITY_METHODS/);
@@ -85,6 +88,11 @@ assert.doesNotMatch(localAuthority, /provider\.request\(['"]eth_sendTransaction[
 
 const popup = await readFile(join(root, 'popup.html'), 'utf8');
 const authorityHtml = await readFile(join(root, 'authority.html'), 'utf8');
+assert.match(popup, /id="dashboard"/);
+assert.match(popup, /id="asset-list"/);
+assert.match(popup, /id="sites-view"/);
+assert.match(popup, /id="send-review"/);
+assert.match(popup, /id="settings-view"/);
 for (const html of [popup, authorityHtml]) {
   assert.doesNotMatch(html, /<script[^>]+src=["']https?:/i);
   assert.doesNotMatch(html, /<iframe/i);

@@ -40,8 +40,9 @@ export function createPlinkoBoard(doc=globalThis.document){
  let currentWin=0,sessionWins=0,lastMax=0;
  const header=el('header','pete-plinko-header');
  const branding=el('div','pete-plinko-branding');
+ const practiceMarker=el('span','pete-plinko-visually-hidden','PRACTICE ONLY · NO WALLET · NO FUNDS');
  branding.append(el('span','pete-plinko-brand-icon','☘'),el('strong','','420Bet'),el('small','','LITTLE CRITTERS'));
- header.append(branding,el('h1','pete-plinko-visually-hidden','PRICKLY PETE’S PUNK-ROCK PLINKO PANDEMONIUM'),img('pete-plinko-logo','branding/logo.png',"Prickly Pete's Punk-Rock Plinko Pandemonium"));
+ header.append(practiceMarker,branding,el('h1','pete-plinko-visually-hidden','PRICKLY PETE’S PUNK-ROCK PLINKO PANDEMONIUM'),img('pete-plinko-logo','branding/logo.png',"Prickly Pete's Punk-Rock Plinko Pandemonium"));
  const balance=el('div','pete-plinko-balance');balance.append(el('span','','PRACTICE CREDITS'),el('strong','pete-balance-value','10,000.00'));
  header.append(balance);root.append(header);
  const layout=el('div','plinko-machine');

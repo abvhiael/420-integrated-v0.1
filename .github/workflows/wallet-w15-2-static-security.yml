@@ -22,6 +22,9 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

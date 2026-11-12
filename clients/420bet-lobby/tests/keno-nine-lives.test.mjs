@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {advanceNineLives,nineLivesRound,nineLivesExpectedRtp,nineLivesCandidateMultiplier,hypergeometricProbability} from '../src/keno-nine-lives.js';
 
-test('each non-paying draw adds exactly one life, including a no-pay draw with matches',()=>{
+test('only non-paying 0-hit and 1-hit draws add a life; 2+ hits with no pay hold',()=>{
  assert.deepEqual(advanceNineLives(0,0,false),{progress:1,bonusApplied:false,bonusReady:false});
- assert.deepEqual(advanceNineLives(5,2,false),{progress:6,bonusApplied:false,bonusReady:false});
+ assert.deepEqual(advanceNineLives(5,1,false),{progress:6,bonusApplied:false,bonusReady:false});
+ assert.deepEqual(advanceNineLives(5,2,false),{progress:5,bonusApplied:false,bonusReady:false});
  assert.deepEqual(advanceNineLives(8,0,false),{progress:9,bonusApplied:false,bonusReady:true});
  assert.deepEqual(advanceNineLives(9,0,false),{progress:9,bonusApplied:false,bonusReady:true});
+ assert.deepEqual(advanceNineLives(9,3,false),{progress:9,bonusApplied:false,bonusReady:true});
 });
 test('any paying draw resets, and full meter doubles only the next paying draw',()=>{
  assert.deepEqual(advanceNineLives(5,3,true),{progress:0,bonusApplied:false,bonusReady:false});
@@ -32,15 +34,15 @@ test('exact 80 choose 20 hypergeometric distributions sum to one',()=>{
   assert.ok(Math.abs(sum-1)<1e-10,`picks ${picks}`);
  }
 });
-test('95% long-run RTP including a nine-consecutive-losing-draw 2x bonus across 1-10 picks',()=>{
+test('95% long-run RTP including a nine-qualifying-0-or-1-hit-draw 2x bonus across 1-10 picks',()=>{
  for(let picks=1;picks<=10;picks++){
   const result=nineLivesExpectedRtp(picks);
   assert.ok(result.combined>=0.94&&result.combined<=0.96,`picks ${picks} RTP ${result.combined}`);
-  assert.ok(Math.abs(result.bonusReadyProbability-result.lossProbability**9)<1e-12);
+  assert.ok(Math.abs(result.bonusReadyProbability-(result.chargingProbability/(result.chargingProbability+result.payingProbability))**9)<1e-12);
   assert.ok(result.bonus>=0);
  }
 });
-test('browser UI charges on 9 losses, pays 2x on next win, resets and persists reset',async()=>{
+test('browser UI charges on 9 zero-hit rounds, pays 2x on next win, resets and persists reset',async()=>{
  const {parseHTML}=await import('linkedom');
  const {createNeonKeno}=await import('../src/keno-neon.js');
  const {document,window}=parseHTML('<html><body></body></html>');
@@ -56,7 +58,7 @@ test('browser UI charges on 9 losses, pays 2x on next win, resets and persists r
   assert.equal(root.querySelectorAll('.ls-life-icon[src*="life_lit"]').length,i+1);
  }
  assert.match(root.querySelector('.ls-meter-caption').textContent,/READY/);
- const key='420bet:catastrophe-jack:keno:nine-lives:loss-streak:v2';
+ const key='420bet:catastrophe-jack:keno:nine-lives:zero-one-hit:v3';
  assert.equal(JSON.parse(values.get(key)).progress,9);
  click(root.querySelector('.ls-draw')); // one more failing draw doesn't consume it
  assert.equal(JSON.parse(values.get(key)).progress,9);
@@ -84,4 +86,12 @@ test('paying draw before full meter resets without double payout',async()=>{
  click(root.querySelector('.ls-draw'));
  assert.equal(root.querySelectorAll('.ls-life-icon[src*="life_lit"]').length,0);
  assert.doesNotMatch(root.querySelector('.ls-dialogue').textContent,/doubles the winning draw/i);
+});
+
+test('one matching number charges only when nonpaying; paying one-hit draw resets',()=>{
+ // With five spots, 1 hit is nonpaying; with one spot, 1 hit is a win.
+ assert.equal(nineLivesRound(3,5,1).progress,4);
+ assert.equal(nineLivesRound(3,5,2).progress,3);
+ assert.equal(nineLivesRound(3,1,1).progress,0);
+ assert.equal(nineLivesRound(9,1,1).bonusApplied,true);
 });

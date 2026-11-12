@@ -77,6 +77,7 @@ contract EntryPoint420 is IEntryPoint420 {
     error UnsupportedInitCode();
     error InvalidNonce();
     error ValidationFailed();
+    error InvalidOperationGasLimits();
     error ValidationNotYetValid(uint48 validAfter);
     error ValidationExpired(uint48 validUntil);
     error InvalidPaymasterBinding();
@@ -193,7 +194,24 @@ contract EntryPoint420 is IEntryPoint420 {
 
         bytes32 userOpHash = getUserOpHash(userOp);
 
-        uint256 accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
+        // These user-signed limits must bound the EVM work as well as the maximum
+        // sponsorship reservation. Zero limits remain valid for legacy unsponsored
+        // practice operations; sponsored operations require both nonzero limits.
+        bool sponsored = userOp.paymasterAndData.length != 0;
+        uint256 packedLimits = uint256(userOp.accountGasLimits);
+        uint256 verificationGasLimit = packedLimits >> 128;
+        uint256 callGasLimit = uint128(packedLimits);
+        if (sponsored && (verificationGasLimit == 0 || callGasLimit == 0)) {
+            revert InvalidOperationGasLimits();
+        }
+
+        uint256 accountValidationData;
+        if (verificationGasLimit == 0) {
+            accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
+        } else {
+            accountValidationData =
+                IAccountValidation420(userOp.sender).validateUserOp{gas: verificationGasLimit}(userOp, userOpHash, 0);
+        }
         _enforceValidationData(accountValidationData);
 
         SponsorshipExecution memory sponsorship;
@@ -204,7 +222,14 @@ contract EntryPoint420 is IEntryPoint420 {
 
         unchecked { _sequence[userOp.sender][key] = sequence + 1; }
 
-        (success, returnData) = userOp.sender.call(userOp.callData);
+        // Never let an account execution exceed its signed call-gas budget.
+        // The EntryPoint owns nonce and sponsor settlement even when the
+        // bounded account execution fails or exhausts its call allowance.
+        if (callGasLimit == 0) {
+            (success, returnData) = userOp.sender.call(userOp.callData);
+        } else {
+            (success, returnData) = userOp.sender.call{gas: callGasLimit}(userOp.callData);
+        }
 
         if (sponsorship.paymaster != address(0)) {
             uint256 actualGasCostWei = _actualUserOpCostWei(userOp, gasAtStart);

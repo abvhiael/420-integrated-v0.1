@@ -3,6 +3,7 @@ import {plinkoPath,plinkoSchedule,plinkoExpectedReturn,PLINKO_BUCKET_CHOICES,PLI
 const NS='http://www.w3.org/2000/svg';
 const WIDTH=720, DX=42, TOP=38, LAST=578, FLOOR=638, DURATION=2500, STAGGER=125;
 const ART='/assets/420bet/prickly-pete-plinko/';
+const BALL_SKINS=Object.freeze(['ball_green.png','ball_metal.png','ball_red.png','ball_disco.png','ball_leaf.png','ball_eight.png','ball_smile.png']);
 const REACTIONS=Object.freeze({
  idle:'reaction_bored.png', angry:'reaction_angry_pointing.png',
  suspicious:'reaction_suspicious.png', smug:'reaction_smug_thumbs_up.png',
@@ -82,7 +83,8 @@ export function createPlinkoBoard(doc=globalThis.document){
  info.append(el('p','','Each ball costs its displayed practice bet and awards only virtual credits. The paytable changes with row and risk selections. Displayed RTP is theoretical, not a guarantee for any session. No wallet, funds or real payouts.'));
  const closeInfo=button('pete-info-close','CLOSE',()=>{info.close?.();if(!info.close)info.removeAttribute('open');});
  info.append(closeInfo);root.append(info);
- const infoButton=button('pete-console-icon pete-info-trigger','ⓘ',()=>{if(info.showModal)info.showModal();else info.setAttribute('open','');});
+ const infoButton=button('pete-console-icon pete-info-trigger','',()=>{if(info.showModal)info.showModal();else info.setAttribute('open','');});
+ infoButton.append(img('pete-info-icon','ui/icon_info.png',''));
  infoButton.setAttribute('aria-label','Info — game rules and theoretical odds');
  const stopButton=button('pete-plinko-stop','FINISH ANIMATION',finishNow);stopButton.hidden=true;
  panel.append(riskTitle,riskGroup,rowControl,ballControl,controlRow,stopButton);
@@ -125,14 +127,13 @@ export function createPlinkoBoard(doc=globalThis.document){
   for(let r=0;r<rows;r++){
    for(let c=0;c<=r;c++){
     const cx=WIDTH/2+(c-r/2)*DX,cy=TOP+r*step+16;
-    svg.append(svgEl('circle',{cx,cy,r:7,class:'plinko-peg'}));
+    svg.append(svgEl('image',{href:ART+'pegs/peg_silver.png',x:cx-9,y:cy-9,width:18,height:18,class:'plinko-peg'}));
    }
   }
   runs.forEach((run,index)=>{
    const p=plinkoPosition(run.points,run.fraction);
    const g=svgEl('g',{class:'plinko-ball',transform:'translate('+p.x+' '+p.y+')','aria-label':'Practice ball '+(index+1)});
-   g.append(svgEl('circle',{cx:0,cy:0,r:13,class:'plinko-medallion-base'}));
-   g.append(svgEl('circle',{cx:-4,cy:-4,r:3,fill:'#fffad5',opacity:'.7'}));
+   g.append(svgEl('image',{href:ART+'balls/'+run.skin,x:-15,y:-15,width:30,height:30,class:'plinko-medallion-base'}));
    svg.append(g);
   });
  }
@@ -198,9 +199,9 @@ export function createPlinkoBoard(doc=globalThis.document){
   if(cost>balanceCents){message='Not enough virtual practice credits. Lower the bet or ball count.';update();return;}
   const schedule=plinkoSchedule(bucketsCount,risk);
   // Generate all outcomes before the first animation frame; visual motion cannot change an outcome.
-  const selected=Array.from({length:dropCount},()=>{
+  const selected=Array.from({length:dropCount},(_,selectedIndex)=>{
    const bits=plinkoPath(bucketsCount),bucket=bits.reduce((a,b)=>a+b,0);
-   return {bucket,points:plinkoWaypoints(bits),multiplier:schedule[bucket],fraction:0};
+   return {bucket,points:plinkoWaypoints(bits),multiplier:schedule[bucket],fraction:0,skin:BALL_SKINS[selectedIndex]};
   });
   balanceCents-=cost;
   runs=selected;last=[];active=true;currentWin=0;

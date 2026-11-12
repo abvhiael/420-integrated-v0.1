@@ -202,7 +202,7 @@ async function walletUiState420() {
     state.account={
       controller:selected,smartAccount:discovered.smartAccount,
       deployed:discovered.deployed===true,ownerVerified:discovered.controllerIsOwner===true,
-      reason:discovered.deployed?(discovered.controllerIsOwner?'Verified deployed SmartAccount':'Controller is not the current account owner'):'Counterfactual account; not yet deployed',
+      reason:discovered.deployed?(discovered.controllerIsOwner?'Deployed SmartAccount discovered; controller matches owner. Deployment provenance requires approved configuration.':'Controller is not the current account owner'):'Counterfactual account; not yet deployed',
     };
     const native=await readNativeBalance(provider,discovered.smartAccount);
     state.assets.native={raw:native.raw.toString(),decimals:native.decimals,symbol:native.symbol};

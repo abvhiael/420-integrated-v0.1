@@ -91,7 +91,7 @@ test('W15.6: the background validates extension popup origin and rechecks author
  const worker=read('service-worker.js');
  assert.match(worker,/trustedWalletPopup420\(sender\)/);
  assert.match(worker,/sender\?\.id!==chrome\.runtime\.id/);
- assert.match(worker,/url\.pathname==='\/popup\.html'/);
+ assert.match(worker,/url\.href\.split\('\?'\)\[0\]===chrome\.runtime\.getURL\('popup\.html'\)/);
  assert.match(worker,/confirmed!==true/);
  assert.match(worker,/extensionCanSend420\(state\)/);
  assert.match(worker,/buildExtensionSend420/);

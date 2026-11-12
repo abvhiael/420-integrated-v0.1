@@ -52,7 +52,7 @@ function renderAccount(){
   $('native-balance').textContent=w.assets.native?extensionBalanceText420(w.assets.native.raw,w.assets.native.decimals):'—';
   $('balance-note').textContent=w.network.status==='matched'&&address?'Chain-derived balance. No fiat value is inferred.':'Connect to the approved chain and verify your SmartAccount to display balances.';
   const status=w.network.status==='matched'?
-    w.account.deployed?(w.account.ownerVerified?'Verified SmartAccount owner.':'Owner verification failed; sends blocked.'):'SmartAccount not deployed; sending disabled.':
+    w.account.deployed?(w.account.ownerVerified?'Deployed account owner confirmed; verify deployment provenance independently.':'Owner verification failed; sends blocked.'):'SmartAccount not deployed; sending disabled.':
     w.network.message||'Network unconfigured. Open Settings to set your approved RPC and chain.';
   tell(status,w.network.status==='matched'?'':w.network.status==='wrong-chain'?'error':'warn');
 }

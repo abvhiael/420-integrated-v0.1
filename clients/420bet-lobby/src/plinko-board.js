@@ -1,4 +1,3 @@
-import './prickly-pete-plinko.css';
 import {plinkoPath,plinkoSchedule,plinkoExpectedReturn,PLINKO_BUCKET_CHOICES,PLINKO_RISKS,PLINKO_DROP_CHOICES} from './plinko-practice-paytable.js';
 const NS='http://www.w3.org/2000/svg', WIDTH=720, HEIGHT=680, DX=42, TOP=36, LAST=592;
 export function plinkoWaypoints(bits){

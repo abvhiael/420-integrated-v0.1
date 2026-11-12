@@ -280,9 +280,9 @@ test('Pete Plinko practice schedules are symmetric, risk-sensitive, and near 96%
 });
 test('Pete Plinko prevents overlapping batches, offers cancellation and preserves zero payouts',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
- const frames=[];window.requestAnimationFrame=cb=>{frames.push(cb);return frames.length;};
- window.cancelAnimationFrame=()=>{};
- const root=createPlinkoBoard(document,{view:window});document.body.append(root);
+ const frames=[];
+ const animationView={requestAnimationFrame:cb=>{frames.push(cb);return frames.length;},cancelAnimationFrame:()=>{},matchMedia:()=>({matches:false})};
+ const root=createPlinkoBoard(document,{view:animationView});document.body.append(root);
  root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,0);
  assert(root.querySelector('.plinko-drop').disabled);

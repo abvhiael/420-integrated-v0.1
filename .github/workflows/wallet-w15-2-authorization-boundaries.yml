@@ -1,0 +1,19 @@
+name: 420Wallet W15.2 Authorization Boundaries
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/WalletAuthorizationBoundaries420.t.sol'
+      - 'contracts/src/accounts/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - '.github/workflows/wallet-w15-2-authorization-boundaries.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  authorization-boundaries:
+    uses: ./.github/workflows/reusable-scoped-foundry.yml
+    with:
+      suite_name: wallet-w15-2-authorization-boundaries
+      match_path: test/WalletAuthorizationBoundaries420.t.sol

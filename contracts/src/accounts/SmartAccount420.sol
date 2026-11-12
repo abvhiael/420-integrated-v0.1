@@ -55,6 +55,9 @@ contract SmartAccount420 {
     IPasskeyVerifier420 public passkeyVerifier;
     mapping(bytes32 => PasskeyCredential) public passkeyCredential;
     mapping(address => uint64) public sessionEpoch;
+    // A revoked signer cannot be enabled again while grants from this epoch remain in scope.
+    // The owner may advance the global authorization epoch before re-enrolling the signer.
+    mapping(address => uint64) public sessionKeyRevokedEpoch;
 
     event OwnerChanged(address indexed previousOwner, address indexed newOwner);
     event RecoveryAuthorityChanged(address indexed previousAuthority, address indexed newAuthority);
@@ -251,13 +254,17 @@ contract SmartAccount420 {
     }
 
     function enableSessionKey(address key) external onlyOwner {
-        if (key == address(0) || key == owner || key == recoveryAuthority) revert InvalidSessionKey();
+        if (
+            key == address(0) || key == owner || key == recoveryAuthority
+                || sessionKeyRevokedEpoch[key] == authorizationEpoch
+        ) revert InvalidSessionKey();
         sessionEpoch[key] = authorizationEpoch;
         emit SessionKeyEnabled(key, authorizationEpoch);
     }
 
     function revokeKey(address key) external onlyOwner {
         delete sessionEpoch[key];
+        sessionKeyRevokedEpoch[key] = authorizationEpoch;
         emit SessionKeyRevoked(key);
     }
 

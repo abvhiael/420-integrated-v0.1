@@ -6,8 +6,8 @@ import {demoSlotBreakdown,DEMO_STAKE} from '../src/emerald-practice-paytable.js'
 import {emeraldCelebration} from '../src/emerald-slots.js';
 import {EMERALD_ASSETS} from '../src/emerald-slots-assets.js';
 import {slotWays,slotFeatureEligible,SLOT_SYMBOLS} from '../src/emerald-slots.js';
-import {plinkoMultiplierLabel,plinkoPracticeGrossPayout,PLINKO_PRACTICE_FIXTURE_BPS} from '../src/plinko-practice-paytable.js';
-import {plinkoWaypoints,plinkoPosition} from '../src/plinko-board.js';
+import {plinkoMultiplierLabel,plinkoPracticeGrossPayout,plinkoSchedule,plinkoExpectedReturn,plinkoPath} from '../src/plinko-practice-paytable.js';
+import {plinkoWaypoints,plinkoPosition,createPlinkoBoard} from '../src/plinko-board.js';
 import {proposedGrossMultiplier,KENO_CANDIDATE_STATUS} from '../src/keno-candidate-paytable.js';
 import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {parseHTML} from 'linkedom';import {PRACTICE_GAMES,initial,next,scoreCards} from '../src/practice-engine.js';import {createPractice} from '../src/practice-ui.js';
 const rand=()=>0.1;
@@ -20,7 +20,7 @@ test('Roulette practice has 37 pockets from 0 through 36',()=>{const x=next(init
 test('Blackjack hit and stand terminate without wagering',()=>{let x=next(initial('blackjack'),{type:'play'},rand);assert.equal(x.cards.length,2);if(!x.done){x=next(x,{type:'stand'},rand);assert(x.done);}assert.equal(scoreCards([0,9]),21);});
 test('Mines uses 25 cells, 1–24 mines, unique simulated placement and fail-closed tile index',()=>{let x=next(initial('mines'),{type:'reset'},rand);assert.equal(x.mines.length,3);assert.equal(new Set(x.mines).size,3);x=next(x,{type:'tile',value:25},rand);assert.equal(x.open.length,0);x=next(x,{type:'mine-count',value:24},rand);x=next(x,{type:'reset'},rand);assert.equal(x.mines.length,24);});
 test('Crash is auto-cashout-only and never submits a manual cashout',()=>{let x=next(initial('crash'),{type:'auto',value:3},rand);x=next(x,{type:'play'},rand);assert(x.done);assert.match(x.message,/auto target/);assert.deepEqual(next(x,{type:'cashout'},rand),x);});
-test('all practice UIs render controls, re-render on simulation, and never contact wallet or network',()=>{for(const id of PRACTICE_GAMES){const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice(id,document);assert.equal(root.dataset.practiceGame,id);assert(root.querySelectorAll('button').length);assert.match(root.textContent,/NO WALLET/);assert.match(root.textContent,/No funds|No funds|no funds|No funds|no funds/i);if(id==='slots'){assert(root.querySelector('.es-spin'));assert(root.querySelector('.es-reels'));continue;}const buttons=[...root.querySelectorAll('button')];if(id==='dice'||id==='plinko'||id==='slots'||id==='roulette'||id==='crash'){const play=buttons.find(b=>/Roll practice|Drop practice|Spin practice|Simulate auto/i.test(b.textContent));assert(play);play.dispatchEvent(new window.Event('click'));assert(root.querySelector('.practice-message'));}}});
+test('all practice UIs render controls, re-render on simulation, and never contact wallet or network',()=>{for(const id of PRACTICE_GAMES){const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice(id,document);assert.equal(root.dataset.practiceGame,id);assert(root.querySelectorAll('button').length);assert.match(root.textContent,/NO WALLET/);assert.match(root.textContent,/No funds|No funds|no funds|No funds|no funds/i);if(id==='slots'){assert(root.querySelector('.es-spin'));assert(root.querySelector('.es-reels'));continue;}const buttons=[...root.querySelectorAll('button')];if(id==='dice'||id==='plinko'||id==='slots'||id==='roulette'||id==='crash'){const play=buttons.find(b=>/Roll practice|Drop \d+ ball|Spin practice|Simulate auto/i.test(b.textContent));assert(play);play.dispatchEvent(new window.Event('click'));assert(root.querySelector('.practice-message'));}}});
 test('source never invokes external authority, wallet or transaction API',()=>{for(const file of ['../src/practice-engine.js','../src/practice-ui.js']){const source=readFileSync(new URL(file,import.meta.url),'utf8');for(const banned of [/eth_requestAccounts/,/sendTransaction/,/writeContract/,/fetch\(/,/WebSocket/,/window\.ethereum/,/localStorage/,/sessionStorage/])assert.doesNotMatch(source,banned);}});
 
 test('neon dice page preserves functional practice controls and history without wallet access',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('dice',document);assert(root.classList.contains('neon-dice-page'));assert(root.querySelector('.nd-dice-art'));assert.equal(root.querySelectorAll('.nd-choice').length,2);const roll=root.querySelector('.nd-roll');assert(roll);roll.dispatchEvent(new window.Event('click'));assert.match(root.querySelector('.nd-big-number').textContent,/^[0-9]{4}$/);assert.equal(root.querySelectorAll('.nd-pill').length,1);assert.equal(root.querySelectorAll('iframe').length,0);assert.match(root.textContent,/No wallet connection/i);});
@@ -96,14 +96,6 @@ test('Lucky Strays highlights selected drawn matches and preserves all twenty re
  assert(found);
 });
 
-test('Plinko renders 78 pegs, thirteen landing buckets and follows a twelve-step simulated path',()=>{const {document,window}=parseHTML('<html><body></body></html>');const root=createPractice('plinko',document);assert.equal(root.querySelectorAll('.plinko-peg').length,78);assert.equal(root.querySelectorAll('.plinko-bucket').length,13);const button=root.querySelector('.plinko-drop');assert(button);button.dispatchEvent(new window.Event('click'));assert.equal(root.querySelectorAll('.plinko-trace').length,0);assert.equal(root.querySelectorAll('.plinko-ball').length,1);assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,1);assert.match(root.textContent,/No wager/);});
-
-test('Plinko interpolation follows predetermined 12 decisions to the exact bucket',()=>{for(const bits of [Array(12).fill(0),Array(12).fill(1),Array.from({length:12},(_,i)=>i%2)]){const points=plinkoWaypoints(bits);assert.equal(points.length,14);assert.equal(plinkoPosition(points,0).x,360);assert.equal(plinkoPosition(points,1).x,360+(bits.reduce((a,b)=>a+b,0)-6)*43);assert.equal(plinkoPosition(points,1).y,651);for(let t=0;t<=100;t++)assert(Number.isFinite(plinkoPosition(points,t/100).x));}assert.throws(()=>plinkoWaypoints([0,1]));});
-test('Plinko animated drop hides result until 3.6-second completion, disables repeat drop and supports cancellation',()=>{const {document,window}=parseHTML('<html><body></body></html>');const frames=[];window.requestAnimationFrame=cb=>{frames.push(cb);return frames.length;};window.cancelAnimationFrame=()=>{};const root=createPractice('plinko',document);document.body.append(root);root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));assert(root.querySelector('.plinko-drop').disabled);assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,0);assert.equal(root.querySelector('.plinko-stat').textContent,'—');const first=frames.shift();first(100);assert(root.querySelector('.plinko-drop').disabled);let nextFrame=frames.shift();nextFrame(1900);assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,0);nextFrame=frames.shift();nextFrame(3700);assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,1);assert.equal(root.querySelector('.plinko-drop').disabled,false);root.stopAnimation();});
-
-test('Plinko buckets show exact test fixture multipliers and never credit practice payouts',()=>{assert.deepEqual(PLINKO_PRACTICE_FIXTURE_BPS,[100000,50000,20000,10000,0,0,0,0,0,10000,20000,50000,100000]);const {document,window}=parseHTML('<html><body></body></html>');window.matchMedia=()=>({matches:true});const root=createPractice('plinko',document);const buckets=[...root.querySelectorAll('.plinko-bucket')];assert.equal(buckets.length,13);assert.deepEqual(buckets.map(x=>x.textContent),['10×','5×','2×','1×','0×','0×','0×','0×','0×','1×','2×','5×','10×']);assert.match(root.textContent,/NOT an approved live payout schedule/);assert.match(root.textContent,/Practice wager0/);root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,1);assert.equal(root.querySelector('.plinko-financial-row:nth-child(3) strong').textContent,'0');for(let n=0;n<13;n++)assert.equal(plinkoPracticeGrossPayout(n),0);assert.equal(plinkoMultiplierLabel(12),'10×');});
-
-test('Plinko medallion has seven cannabis leaflets and keeps animation path unchanged',()=>{const {document,window}=parseHTML('<html><body></body></html>');window.matchMedia=()=>({matches:true});const root=createPractice('plinko',document);root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));const chip=root.querySelector('g.plinko-ball');assert(chip);assert.equal(chip.querySelectorAll('.plinko-medallion-leaf path').length,8);assert(chip.querySelector('.plinko-medallion-base'));assert(chip.querySelector('.plinko-medallion-rim'));assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,1);});
 test('Plinko uses approved Dice wallpaper path without affecting transaction-free simulation',()=>{const css=readFileSync(new URL('../src/style.css',import.meta.url),'utf8');assert(css.includes('420Bet_Dice_Wallpaper_FRESH_2026-11-01.webp'));const js=readFileSync(new URL('../src/plinko-board.js',import.meta.url),'utf8');assert.doesNotMatch(js,/eth_sendTransaction|eth_requestAccounts|fetch\(/);});
 
 test('Emerald Slots practice cabinet renders 5×4 reels, 1024-ways header and no wager flow',()=>{const {document}=parseHTML('<html><body></body></html>');const root=createPractice('slots',document);assert.equal(root.querySelectorAll('.es-symbol').length,20);assert.match(root.textContent,/1024 WAYS TO WIN/);assert.match(root.textContent,/DEMO STAKE10/);assert(root.querySelector('.es-spin'));assert.equal(SLOT_SYMBOLS.length,7);});
@@ -247,4 +239,57 @@ test('Emerald cabinet screenshot calibration keeps INFO over painted icon and re
  root.querySelector('[data-hotspot="info"]').dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('[role="dialog"]').textContent,/HOW TO PLAY/);
  assert(root.querySelector('.es-paytable'));
+});
+
+test('Pete Plinko supports 8–17 landing buckets, selectable risk and multi-ball',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ window.matchMedia=()=>({matches:true});
+ const root=createPractice('plinko',document);
+ assert.match(root.textContent,/PRICKLY PETE/);
+ assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
+ const selects=[...root.querySelectorAll('.pete-plinko-controls select')];
+ assert.equal(selects.length,3);
+ assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
+ assert.equal(root.querySelectorAll('.plinko-peg').length,136);
+ root.querySelectorAll('.pete-risk-button')[2].dispatchEvent(new window.Event('click'));
+ root.querySelectorAll('.pete-ball-button')[3].dispatchEvent(new window.Event('click'));
+ assert.match(root.querySelector('.plinko-drop').textContent,/25 BALLS/);
+ root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));
+ assert.match(root.textContent,/25 simulated balls landed/);
+ assert.match(root.textContent,/Total practice balls25/);
+ assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
+ assert.match(root.textContent,/NOT approved for live settlement/);
+ assert.equal(plinkoPracticeGrossPayout(16,17,'riot'),0);
+});
+test('Pete Plinko practice schedules are symmetric, risk-sensitive, and near 96% across bucket counts',()=>{
+ for(let buckets=8;buckets<=17;buckets++){
+  const low=plinkoSchedule(buckets,'soundcheck'),medium=plinkoSchedule(buckets,'showtime'),high=plinkoSchedule(buckets,'riot');
+  for(const schedule of [low,medium,high]){
+   assert.equal(schedule.length,buckets);
+   for(let i=0;i<buckets;i++)assert.equal(schedule[i],schedule[buckets-i-1]);
+  }
+  assert(high[0]>medium[0]&&medium[0]>low[0]);
+  const c=Math.floor((buckets-1)/2);
+  assert(high[c]<medium[c]&&medium[c]<low[c]);
+  for(const risk of ['soundcheck','showtime','riot'])assert(Math.abs(plinkoExpectedReturn(buckets,risk)-.96)<0.0001);
+ }
+ assert.equal(plinkoPath(17,()=>0).length,16);
+ assert.throws(()=>plinkoPath(18));
+ assert.equal(plinkoWaypoints(Array(16).fill(1)).length,18);
+ assert.equal(plinkoPosition(plinkoWaypoints(Array(12).fill(0)),1).y,638);
+});
+test('Pete Plinko prevents overlapping batches, offers cancellation and preserves zero payouts',()=>{
+ const {document,window}=parseHTML('<html><body></body></html>');
+ const frames=[];
+ const animationView={requestAnimationFrame:cb=>{frames.push(cb);return frames.length;},cancelAnimationFrame:()=>{},matchMedia:()=>({matches:false})};
+ const root=createPlinkoBoard(document,{view:animationView});document.body.append(root);
+ root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,0);
+ assert(root.querySelector('.plinko-drop').disabled);
+ frames.shift()(100);
+ assert(root.querySelector('.plinko-drop').disabled);
+ root.querySelector('.pete-plinko-stop').dispatchEvent(new window.Event('click'));
+ assert.equal(root.querySelector('.plinko-drop').disabled,false);
+ assert(root.querySelectorAll('.plinko-bucket.landed').length>=1);
+ root.stopAnimation();
 });

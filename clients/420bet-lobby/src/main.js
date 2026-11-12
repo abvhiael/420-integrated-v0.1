@@ -21,6 +21,7 @@ import {createCannabisCowboyShell} from './cannabis-cowboy-ui.js';
 import {createCannabisCowboyPractice} from './cannabis-cowboy-game.js';
 import {WalletIdentity,loadHistory} from './wallet.js';
 import './style.css';
+import './prickly-pete-plinko.css';
 import './rackets-loaded-dice.css';
 import './mary-jane-concept.css';
 import './dads-secret-stash.css';
@@ -77,7 +78,7 @@ function render(){
   if(active){
     const main=node('main',active.id==='roulette'?'immersive roulette-immersive':active.id==='blackjack'?'immersive blackjack-immersive':active.id==='video-poker'?'immersive royal-kush-immersive':active.id==='fantasy'?'immersive fantasy-immersive':active.id==='sportsbook'?'immersive sportsbook-immersive':'immersive');const bar=node('header','gamebar');
     if(!['fantasy','sportsbook'].includes(active.id))bar.append(button(selectedSlotMachine?'← Slots Lobby':'← Return to Lobby',close,'return'),brandLink('game-brand'));if(active.id!=='dice')bar.append(node('strong','',selectedSlotMachine?.title??active.title));
-    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker'].includes(active.id)?'Practice available':statusText[active.status]);if(!['fantasy','sportsbook'].includes(active.id)){bar.append(note);main.append(bar);}
+    const note=node('span','game-status',selectedSlotMachine?.practiceBeta?'Base game · Practice beta':selectedSlotMachine?.preview?'Preview · In development':active.id==='live-poker'?'Verified state required':active.id==='poker-tournaments'?'Testnet preview · no registration':['slots','roulette','blackjack','mines','crash','video-poker','plinko'].includes(active.id)?'Practice available':statusText[active.status]);if(!['fantasy','sportsbook'].includes(active.id)){bar.append(note);main.append(bar);}
     if(active.id==='slots'){
       const wrap=node('div','view-scroll');
       if(selectedSlotMachine?.id==='cannabis-cowboy'){
@@ -127,9 +128,9 @@ function updateGrid(){
   const matched=filterGames(catalogue,filter,term);
   if(!matched.length){grid.append(node('p','empty','No games match your search.'));return;}
   matched.forEach(g=>{
-    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':g.id==='poker-tournaments'?' art-poker-tournaments':g.id==='fantasy'?' art-fantasy-lounge':g.id==='sportsbook'?' art-bud-ball-sportsbook':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':g.id==='poker-tournaments'?'♛':g.id==='fantasy'?'🏒':g.id==='sportsbook'?'🏈':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
-    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker'].includes(g.id)?'Practice available':g.id==='poker-tournaments'?'Testnet preview':g.id==='fantasy'?'Fantasy preview':g.id==='sportsbook'?'Sportsbook preview':statusText[g.status]));
-    details.append(button(g.id==='slots'?'Browse Slots':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.id==='poker-tournaments'?'Explore Tournaments':g.id==='fantasy'?'Explore Fantasy Sports':g.id==='sportsbook'?'Enter Sportsbook':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
+    const card=node('article','card');const art=node('div','art art-'+g.category.toLowerCase().replace(' ','-')+(g.id==='mines'?' art-pest-control':g.id==='crash'?' art-buzzkill':g.id==='video-poker'?' art-royal-kush':g.id==='live-poker'?' art-live-poker':g.id==='poker-tournaments'?' art-poker-tournaments':g.id==='fantasy'?' art-fantasy-lounge':g.id==='sportsbook'?' art-bud-ball-sportsbook':g.id==='plinko'?' art-prickly-plinko':''));art.setAttribute('aria-hidden','true');art.textContent=g.id==='mines'?'🌿':g.id==='crash'?'☮':g.id==='video-poker'?'♛':g.id==='live-poker'?'♠':g.id==='poker-tournaments'?'♛':g.id==='fantasy'?'🏒':g.id==='sportsbook'?'🏈':({'Casino':'✦','Poker':'♠','Fantasy':'★','Sportsbook':'◆'})[g.category];card.append(art);
+    const details=node('div','details');details.append(node('small','category',g.category),node('h2','',g.title),node('span','status',['slots','mines','crash','video-poker','plinko'].includes(g.id)?'Practice available':g.id==='poker-tournaments'?'Testnet preview':g.id==='fantasy'?'Fantasy preview':g.id==='sportsbook'?'Sportsbook preview':statusText[g.status]));
+    details.append(button(g.id==='slots'?'Browse Slots':g.id==='plinko'?'Play Plinko':g.id==='mines'?'Play Pest Control':g.id==='crash'?'Play BUZZKILL!':g.id==='video-poker'?'Play Royal Kush':g.id==='live-poker'?'View Poker Room':g.id==='poker-tournaments'?'Explore Tournaments':g.id==='fantasy'?'Explore Fantasy Sports':g.id==='sportsbook'?'Enter Sportsbook':g.route?'Enter game':'View preview',()=>launch(g),'open'));card.append(details);grid.append(card);
   });
 }
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&active&&!document.querySelector('.es-info-overlay'))close();});

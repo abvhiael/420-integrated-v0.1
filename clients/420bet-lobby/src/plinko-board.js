@@ -18,9 +18,9 @@ export function createPlinkoBoard(doc=globalThis.document){
  const el=(tag,cls,text)=>{const x=doc.createElement(tag);x.className=cls||'';if(text!==undefined)x.textContent=text;return x;};
  const svgEl=(tag,attrs)=>{const x=doc.createElementNS(NS,tag);for(const [key,value] of Object.entries(attrs))x.setAttribute(key,String(value));return x;};
  let bucketsCount=13,risk='showtime',dropCount=1,active=false,frameId=null,runs=[],last=[],total=0,history=[],message='Choose your risk, buckets and multi-ball count.';
- const icon=el('div','pete-plinko-portrait','♠');icon.setAttribute('aria-label','Prickly Pete — punk porcupine host');
+ const icon=el('div','pete-plinko-portrait','🦔');icon.setAttribute('aria-label','Prickly Pete — punk porcupine host');
  const heading=el('header','plinko-heading');
- heading.append(el('p','practice-label','420BET · LITTLE CRITTERS · SIMULATED PRACTICE'),el('h1','','PRICKLY PETE’S PLINKO PANIC'),el('p','','More buckets. More balls. More ways for Pete to be disappointed.'));
+ heading.append(el('p','practice-label','420BET · LITTLE CRITTERS · SIMULATED PRACTICE · NO WALLET'),el('h1','','PRICKLY PETE’S PLINKO PANIC'),el('p','','More buckets. More balls. More ways for Pete to be disappointed.'));
  root.append(heading);
  const layout=el('div','plinko-machine');
  const stage=el('div','plinko-stage');
@@ -38,7 +38,7 @@ export function createPlinkoBoard(doc=globalThis.document){
  const dropButton=el('button','plinko-drop','DROP 1 BALL');dropButton.type='button';
  const stopButton=el('button','pete-plinko-stop','STOP ANIMATION');stopButton.type='button';stopButton.hidden=true;
  const status=el('p','practice-message',message);
- const totals=el('div','plinko-financials'),warning=el('p','plinko-schedule-warning','Illustrative 96% expected return practice schedules only — NOT approved for live settlement. No stakes, wallet access or payouts.');
+ const totals=el('div','plinko-financials'),warning=el('p','plinko-schedule-warning','Illustrative 96% expected return practice schedules only — NOT approved for live settlement. No funds, stakes, wallet access or payouts.');
  const record=el('div','pete-plinko-history');
  const reaction=host.querySelector('.pete-plinko-reaction');
  function face(text,expression){reaction.textContent='“'+text+'”';icon.textContent=expression;}
@@ -62,8 +62,8 @@ export function createPlinkoBoard(doc=globalThis.document){
  function end(){
   active=false;frameId=null;last=runs.map(r=>r.bucket);total+=runs.length;history.push(...last);
   const max=Math.max(...runs.map(r=>r.multiplier));message=runs.length+' simulated ball'+(runs.length===1?'':'s')+' landed. Highest '+max.toFixed(2)+'×. No payout.';
-  if(max>=plinkoSchedule(bucketsCount,risk)[0]*0.8)face('Well, would you look at that.','★');
-  else if(max<1)face('Typical.','✕');else face('Coulda been worse.','♠');
+  if(max>=plinkoSchedule(bucketsCount,risk)[0]*0.8)face('Well, would you look at that.','🦔');
+  else if(max<1)face('Typical.','🦔');else face('Coulda been worse.','🦔');
   runs=[];setControlsDisabled(false);update();
  }
  function stop(){if(frameId!==null&&cancel)cancel(frameId);frameId=null;if(active){runs.forEach(r=>r.fraction=1);end();}}
@@ -72,7 +72,7 @@ export function createPlinkoBoard(doc=globalThis.document){
    const bits=plinkoPath(bucketsCount),bucket=bits.reduce((a,b)=>a+b,0);
    return {bits,bucket,points:plinkoWaypoints(bits),multiplier:plinkoSchedule(bucketsCount,risk)[bucket],fraction:0};
   });
-  face('Here we go again.','♠');message='Dropping '+dropCount+' practice ball'+(dropCount===1?'':'s')+'…';
+  face('Here we go again.','🦔');message='Dropping '+dropCount+' practice ball'+(dropCount===1?'':'s')+'…';
   setControlsDisabled(true);update();
   if(!raf||reduced()){runs.forEach(r=>r.fraction=1);end();return;}
   let started=null;

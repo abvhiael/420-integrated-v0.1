@@ -263,3 +263,14 @@ test('portfolio reads native balances for controller and smart account', async (
 test('ABI address decoder rejects malformed responses', () => {
   assert.throws(() => decodeAddress('0x1234'));
 });
+
+test('remote JSON-RPC transport cannot become a server-side signing or broadcasting authority', async () => {
+  let called = 0;
+  const provider = new JsonRpcProvider420({ rpcUrl: 'https://rpc.example/',
+    fetchImpl: async () => { called++; throw Error('remote must not receive wallet authorization methods'); } });
+  for (const method of ['eth_sendTransaction','eth_sendRawTransaction','personal_sign','eth_sign',
+    'eth_signTypedData_v4','eth_requestAccounts','wallet_requestPermissions','eth_sendUserOperation']) {
+    await assert.rejects(provider.request(method, []), /read-only/);
+  }
+  assert.equal(called, 0);
+});

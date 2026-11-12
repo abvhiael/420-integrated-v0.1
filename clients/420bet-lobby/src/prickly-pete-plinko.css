@@ -1,21 +1,65 @@
-.pete-plinko{max-width:none;min-height:100%;padding:clamp(14px,2.2vw,30px);background:radial-gradient(ellipse at 50% 0%,#433044,#171c1b 65%,#0e1211);color:#f8efda}
-.pete-plinko .plinko-heading{text-align:center;margin:0 auto 18px}.pete-plinko .plinko-heading h1{font-size:clamp(1.7rem,3.8vw,3.5rem);margin:.2em 0;color:#e5c56c;text-shadow:3px 3px #542339;letter-spacing:.02em}
-.pete-plinko .plinko-heading p:last-child{color:#d3c3a8;margin:6px}
-.pete-plinko .plinko-machine{display:grid;grid-template-columns:minmax(0,1fr) 200px minmax(220px,290px);gap:clamp(10px,1.8vw,25px);align-items:start;max-width:1500px;margin:auto}
-.pete-plinko .plinko-stage{background:linear-gradient(#20242b,#2e2526);border:10px ridge #806f58;border-radius:12px;box-shadow:0 12px 34px #0008;overflow:hidden}
-.pete-plinko .plinko-svg{width:100%;height:auto;display:block;max-height:70vh;overflow:visible}
-.pete-plinko .plinko-peg{fill:#c7c1ac;stroke:#625c54;stroke-width:2}.pete-plinko .plinko-medallion-base{fill:#c5ed63;stroke:#fff6ca;stroke-width:3;filter:drop-shadow(0 0 8px #d3f66a)}
-.pete-plinko .plinko-buckets{display:grid;grid-template-columns:repeat(var(--plinko-bucket-count,13),minmax(0,1fr));gap:1px;padding:7px 0 0}.pete-plinko .plinko-bucket{min-width:0;font-size:clamp(7px,.9vw,12px);text-align:center;padding:10px 0;color:#fff0bc;background:#723c42;overflow:hidden}.pete-plinko .plinko-bucket:nth-child(2n){background:#586338}.pete-plinko .plinko-bucket.landed{background:#eaba49;color:#141713;font-weight:900}
-.pete-plinko .pete-plinko-host{display:flex;flex-direction:column;align-items:center;text-align:center;background:transparent;border:0;padding:10px}
-.pete-plinko .pete-plinko-portrait{display:grid;place-items:center;font-size:6rem;font-weight:900;width:min(100%,190px);aspect-ratio:3/4;border:6px ridge #706057;background:linear-gradient(145deg,#6c3c43,#282526);border-radius:13px;text-shadow:3px 3px #131414}
-.pete-plinko .pete-plinko-host h2{color:#efcc74;margin:16px 0 2px}.pete-plinko .pete-plinko-reaction{font-style:italic;color:#e7e0c3}
-.pete-plinko .pete-plinko-controls{padding:17px;border:2px solid #867256;border-radius:13px;background:#211f22;display:flex;flex-direction:column;gap:11px;box-shadow:0 8px 26px #0006}
-.pete-plinko .pete-plinko-field{display:grid;gap:5px;font-size:13px;font-weight:750;color:#e6c877}
-.pete-plinko .pete-plinko-field select{width:100%;background:#363038;color:#f8eed3;padding:11px;border:1px solid #9e8660;border-radius:7px;font:inherit}
-.pete-plinko .plinko-drop{border:0;background:#a9c94c;color:#171c15;font-size:1.1rem;font-weight:900;padding:14px;border-radius:9px}
-.pete-plinko .pete-plinko-stop{border:1px solid #a7a093;background:#4b3440;color:white;padding:10px;border-radius:7px}
-.pete-plinko .plinko-drop:disabled{opacity:.6}.pete-plinko .plinko-financials{display:grid;gap:4px}.pete-plinko .plinko-financial-row{display:flex;justify-content:space-between;gap:12px;font-size:12px;border-bottom:1px solid #565052;padding:4px 0}
-.pete-plinko .plinko-schedule-warning{font-size:11px;line-height:1.4;color:#e3c998}.pete-plinko .pete-plinko-history{font-size:11px;color:#d6ccb0;line-height:1.6}
-@media(max-width:1100px){.pete-plinko .plinko-machine{grid-template-columns:minmax(0,1fr) 220px}.pete-plinko .pete-plinko-host{grid-column:1 / -1;grid-row:2;flex-direction:row;gap:15px;justify-content:center}.pete-plinko .pete-plinko-portrait{width:75px;aspect-ratio:1;font-size:3rem}}
-@media(max-width:700px){.pete-plinko .plinko-machine{grid-template-columns:1fr}.pete-plinko .pete-plinko-host{grid-row:auto;grid-column:auto}.pete-plinko .plinko-svg{max-height:none}.pete-plinko .plinko-bucket{font-size:9px}.pete-plinko .pete-plinko-controls{grid-row:2}}
-@media(prefers-reduced-motion:reduce){.pete-plinko *{transition:none!important;animation:none!important}}
+/* Prickly Pete's Punk-Rock Plinko Pandemonium — approved layered 420Bet concept.
+   Static artwork is decorative. Peg positions, ball paths and payouts remain calculated in JS. */
+.pete-plinko{--pp-art:url('/assets/420bet/prickly-pete-plinko/environment/punk_stage_wallpaper.png');--pp-panel:url('/assets/420bet/prickly-pete-plinko/ui/panel_plain.png');--pp-hazard:url('/assets/420bet/prickly-pete-plinko/decals/hazard_stripes.png');box-sizing:border-box;max-width:none;width:100%;min-height:calc(100dvh - 60px);padding:8px clamp(9px,1.3vw,24px) 12px;background:linear-gradient(180deg,#110f18b0 0%,#130c19a8 65%,#170f17bf 100%),var(--pp-art) center center/cover no-repeat;color:#fbf2de;font-family:Impact,'Arial Narrow',system-ui,sans-serif;isolation:isolate;overflow-x:hidden}
+.pete-plinko *{box-sizing:border-box}
+.pete-plinko button,.pete-plinko select{font:inherit}
+.pete-plinko button:disabled{cursor:default;opacity:.55}
+.pete-plinko button:focus-visible,.pete-plinko select:focus-visible{outline:3px solid #bbff3b;outline-offset:3px}
+.pete-plinko-header{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr) minmax(155px,225px);gap:1.5vw;align-items:center;height:clamp(92px,13vh,139px);position:relative;z-index:2}
+.pete-plinko-branding{display:grid;grid-template-columns:30px auto;align-content:center;line-height:1;gap:0 3px;text-shadow:2px 3px #050609}
+.pete-plinko-branding .pete-plinko-brand-icon{grid-row:span 2;color:#aaff31;font-size:1.9rem}.pete-plinko-branding strong{color:#b0ff50;font-size:clamp(1.2rem,2.3vw,2rem);letter-spacing:-.07em}.pete-plinko-branding small{color:#e8ff83;font-size:.65rem;letter-spacing:1.2px}
+.pete-plinko-logo{height:100%;width:100%;max-width:790px;object-fit:contain;object-position:center;justify-self:center;filter:drop-shadow(0 5px 4px #0c050e)}
+.pete-plinko-balance{justify-self:end;min-width:145px;display:flex;flex-direction:column;align-items:center;padding:10px 15px;border:2px solid #a7b1c8;border-radius:16px;background:linear-gradient(#13151d,#030307);box-shadow:0 0 0 2px #1e2024,0 4px 8px #0009;text-align:center}
+.pete-plinko-balance span{font-size:clamp(10px,1.1vw,16px);letter-spacing:.05em}.pete-plinko-balance strong{font-size:clamp(18px,2.1vw,31px);color:#f7df84;white-space:nowrap}
+.pete-plinko .plinko-machine{width:100%;display:grid;grid-template-columns:minmax(150px,20%) minmax(0,1fr) minmax(205px,22%);gap:clamp(4px,.8vw,14px);align-items:end;max-width:1800px;margin:auto}
+.pete-plinko .pete-plinko-host{position:relative;display:flex;flex-direction:column;justify-content:end;align-items:center;min-height:0;height:100%;border:0;background:transparent;padding:0;overflow:visible}
+.pete-plinko-fullbody{width:115%;max-width:380px;max-height:69vh;object-fit:contain;object-position:bottom;filter:drop-shadow(0 10px 8px #000b)}
+.pete-plinko-reaction-image{position:absolute;left:0;bottom:11%;width:50%;max-width:150px;filter:drop-shadow(0 4px 4px #000b);display:none}
+.pete-plinko-host .pete-plinko-reaction{position:absolute;top:3%;left:25%;width:76%;margin:0;background:#f8eccd;color:#111016;border:3px solid #14101a;border-radius:45% 38% 42% 48%;padding:14px 11px;font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(10px,1.3vw,19px);line-height:1.2;text-align:center;transform:rotate(-6deg);box-shadow:2px 4px 1px #0007;pointer-events:none;z-index:2}
+.pete-plinko .plinko-stage{align-self:stretch;min-width:0;padding:0 6px 4px;border:0;background:transparent;position:relative;box-shadow:none;overflow:visible}
+.pete-board-frame{position:relative;width:100%;padding:10px clamp(10px,1.6vw,22px) 4px;background:linear-gradient(160deg,#3c1e2b 0%,#241b25 40%,#3b2236 100%);border:9px ridge #7b6667;border-top:13px solid #a77537;border-radius:12px 12px 5px 5px;box-shadow:0 0 0 2px #110b0f,0 9px 28px #000b;overflow:hidden}
+.pete-board-frame:before,.pete-board-frame:after{position:absolute;content:'';top:-15%;width:13px;height:125%;z-index:1;pointer-events:none;background:repeating-linear-gradient(135deg,#f2b829 0 9px,#211a1e 9px 18px);border-left:2px solid #d3a46a;border-right:2px solid #ad7337}
+.pete-board-frame:before{left:0;transform:rotate(12deg);transform-origin:bottom}.pete-board-frame:after{right:0;transform:rotate(-12deg);transform-origin:bottom}
+.pete-plinko .plinko-svg{display:block;width:100%;height:auto;max-height:min(64vh,710px);aspect-ratio:720/668;overflow:visible;filter:drop-shadow(0 1px 0 #0006);background:radial-gradient(circle at 50% 44%,#602c5f4d,transparent 55%),linear-gradient(#251b29d0,#372127d0),url('/assets/420bet/prickly-pete-plinko/decals/metal_trim.png') center/cover}
+.pete-plinko .plinko-peg{fill:#f5e5cd;stroke:#65505a;stroke-width:2.5;filter:drop-shadow(1px 2px 1px #000b)}
+.pete-plinko .plinko-ball .plinko-medallion-base{fill:#8dfb0c;stroke:#f5ff6e;stroke-width:3;filter:drop-shadow(0 0 7px #a9fc23)}
+.pete-plinko .plinko-buckets{position:relative;display:grid;grid-template-columns:repeat(var(--plinko-bucket-count,17),minmax(0,1fr));gap:1px;margin:0 -8px;padding:0 0 5px;min-height:clamp(40px,5vw,67px)}
+.pete-plinko .plinko-bucket{min-width:0;display:grid;place-items:center;text-align:center;border:1px solid #f3d3aa;border-radius:5px 5px 2px 2px;background:linear-gradient(#ed4488aa,#572044),url('/assets/420bet/prickly-pete-plinko/ui/buckets_17.png') center/cover;box-shadow:inset 0 4px 9px #fff4,inset 0 -5px 8px #0008,0 0 5px #f955bf;color:white;font-family:Impact,system-ui,sans-serif;font-size:clamp(9px,1vw,17px);text-shadow:1px 2px 2px #000;white-space:nowrap;overflow:hidden}
+.pete-plinko .plinko-bucket:nth-child(4n+2){background-color:#c55b22}.pete-plinko .plinko-bucket:nth-child(4n+3){background-color:#30687a}.pete-plinko .plinko-bucket:nth-child(4n){background-color:#275b32}
+.pete-plinko .plinko-bucket.landed{background:#fff36c;color:#160c16;text-shadow:none;box-shadow:0 0 12px #e7ff5a,inset 0 0 7px #fff9}
+.pete-plinko .pete-plinko-controls{align-self:stretch;display:flex;flex-direction:column;justify-content:center;gap:clamp(9px,1.4vh,20px);padding:10px 5px;background:transparent;border:0;box-shadow:none}
+.pete-plinko .pete-plinko-controls h2{font-size:clamp(20px,2.1vw,33px);text-align:center;line-height:1.1;color:#13101d;text-shadow:1px 2px #fff6;background:#f7dcb0;padding:12px 8px 6px;clip-path:polygon(3% 3%,100% 0%,95% 96%,1% 100%);transform:rotate(-3deg);margin:0}
+.pete-risk-choices{display:grid;gap:6px}
+.pete-plinko .pete-risk-button{width:100%;display:flex;flex-direction:column;align-items:start;text-align:left;position:relative;padding:9px 12px 9px 37px;min-height:58px;border:3px solid #f427a5;border-radius:3px;background:linear-gradient(#19151fdd,#05050bea),url('/assets/420bet/prickly-pete-plinko/ui/panel_wide.png') center/100% 100%;color:#f7f2e9;font-size:clamp(14px,1.5vw,23px);line-height:1.05;letter-spacing:.02em}
+.pete-plinko .pete-risk-button:before{position:absolute;content:'';left:10px;top:50%;transform:translateY(-50%);width:16px;height:16px;border:3px solid #aaa9b7;border-radius:50%;box-shadow:0 1px 4px #000}
+.pete-plinko .pete-risk-button.selected:before{background:#b4ff18;border-color:#b4ff18;box-shadow:0 0 13px #acff21}
+.pete-plinko .pete-risk-button.selected{border-color:#b4ff18;box-shadow:0 0 11px #98f92c}
+.pete-plinko .pete-risk-button small{margin-top:5px;font-family:system-ui,sans-serif;font-size:clamp(8px,.75vw,11px);font-weight:700}
+.pete-option{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:2px;padding:7px;border:3px ridge #a48b79;border-radius:6px;background:linear-gradient(180deg,#2b2831,#15161e);box-shadow:0 3px 8px #0009}
+.pete-option h3{grid-column:1/-1;text-align:center;font-size:clamp(13px,1.2vw,18px);margin:0 0 5px;color:#fff}
+.pete-step,.pete-ball-button,.pete-bet-step{border:2px solid #898992;border-radius:6px;background:linear-gradient(#35333c,#0e1117);color:white;box-shadow:inset 0 2px 2px #fff3,0 2px 4px #0009;padding:7px 2px;font-size:clamp(15px,2vw,25px)}
+.pete-rows-value{text-align:center;font-size:clamp(18px,2vw,32px)}
+.pete-ball-choices{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.pete-plinko .pete-ball-button{font-size:clamp(13px,1.7vw,24px);padding:6px 0}
+.pete-plinko .pete-ball-button.selected{border-color:#b5ff1c;box-shadow:0 0 9px #afff29;color:#caff4b}
+.pete-plinko .pete-advanced-selects{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
+.pete-plinko .pete-plinko-stop{padding:9px;background:#5e3345;color:white;border:1px solid #fff;border-radius:5px}
+.pete-plinko-console{margin:12px auto 0;max-width:1800px;display:grid;grid-template-columns:minmax(160px,1.4fr) minmax(70px,.55fr) minmax(70px,.55fr) minmax(90px,.65fr) minmax(190px,1.55fr) minmax(125px,1.1fr);gap:clamp(4px,.7vw,12px);align-items:stretch}
+.pete-console-field{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:82px;padding:26px 6px 6px;border:4px ridge #786e70;border-radius:10px;background:linear-gradient(#0d101ac9,#101119f5),url('/assets/420bet/prickly-pete-plinko/ui/panel_plain.png') center/100% 100%;box-shadow:0 4px 8px #0008}
+.pete-console-field>span:first-child{position:absolute;top:4px;font-size:clamp(10px,.95vw,14px);white-space:nowrap;font-family:Impact,system-ui,sans-serif}
+.pete-console-field>strong{color:white;font-size:clamp(16px,2vw,29px);white-space:nowrap;text-shadow:1px 2px #000}
+.pete-console-field .pete-bet-step{padding:4px 7px}
+.pete-plinko .plinko-drop{min-width:0;min-height:80px;padding:9px 6px;border:4px ridge #8ddc35;border-radius:15px;background:#a5ff15 url('/assets/420bet/prickly-pete-plinko/ui/button_drop.png') center/100% 100% no-repeat;color:#142011;font-size:clamp(17px,2.1vw,33px);font-weight:900;letter-spacing:-.02em;text-shadow:1px 1px #bfff69;box-shadow:0 0 16px #b5ff327d;cursor:pointer}
+.pete-plinko .pete-history-panel{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;padding:28px 4px 5px;gap:3px}
+.pete-plinko-history{display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;font-family:system-ui,sans-serif;font-size:12px}
+.pete-history-chip{background:#1a2831;border:1px solid #a8b6be;border-radius:5px;padding:3px 4px;color:#f4ecaf;font-weight:800}
+.pete-plinko-footer{display:flex;gap:13px;align-items:center;flex-wrap:wrap;max-width:1800px;margin:5px auto 0;font-family:system-ui,sans-serif}
+.pete-footer-icons{display:flex;gap:5px}.pete-plinko .pete-console-icon{border:2px solid #8b96a2;border-radius:50%;width:33px;height:33px;background:#14151a;color:white;font-weight:900}
+.pete-plinko-summary{font-size:clamp(10px,1vw,15px);margin:0;color:#f3ead2}.pete-plinko .plinko-schedule-warning{font-size:10px;margin:0;color:#d8d1be}
+.pete-plinko .pete-plinko-status{max-width:1800px;margin:4px auto 0;padding:5px 9px;min-height:auto;font-size:11px;color:#ebefdd;background:#161119b0;border:1px solid #766077;border-radius:4px}
+.pete-plinko .pete-plinko-financials{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.pete-plinko .pete-plinko-dialog{color:#f9f4e9;border:4px ridge #9ca873;border-radius:12px;background:#1c1820;max-width:min(95vw,600px);padding:25px;box-shadow:0 12px 32px #000e}
+.pete-plinko .pete-plinko-dialog::backdrop{background:#000b}.pete-plinko .pete-info-close{border:0;background:#adf538;color:#191c16;padding:11px 24px;border-radius:6px}
+@media(max-width:1150px){.pete-plinko .plinko-machine{grid-template-columns:18% minmax(0,1fr) 23%}.pete-plinko .pete-risk-button{min-height:52px;padding:8px 7px 8px 29px}.pete-plinko .pete-risk-button:before{left:6px;width:13px;height:13px}.pete-plinko-console{grid-template-columns:1.3fr .5fr .5fr .7fr 1.3fr}.pete-plinko .pete-history-panel{grid-column:1/-1;min-height:46px}.pete-plinko .plinko-svg{max-height:58vh}}
+@media(max-width:750px){.pete-plinko-header{grid-template-columns:100px minmax(0,1fr);height:96px}.pete-plinko-logo{max-width:100%}.pete-plinko-balance{grid-column:1/-1;justify-self:stretch;min-height:44px;flex-direction:row;justify-content:space-between;padding:6px 12px}.pete-plinko .plinko-machine{grid-template-columns:minmax(0,1fr)}.pete-plinko .pete-plinko-host{height:180px;grid-row:1;align-items:start;flex-direction:row}.pete-plinko-fullbody{height:180px;width:auto}.pete-plinko-host .pete-plinko-reaction{width:40%;left:45%;top:26px}.pete-plinko .plinko-stage{grid-row:2}.pete-plinko .pete-plinko-controls{grid-row:3}.pete-risk-choices{grid-template-columns:repeat(3,minmax(0,1fr))}.pete-plinko .pete-risk-button{font-size:13px;padding:9px 5px 7px 22px;min-height:69px}.pete-plinko .pete-risk-button small{font-size:9px}.pete-option{max-width:none}.pete-plinko-console{grid-template-columns:repeat(2,minmax(0,1fr))}.pete-plinko .plinko-drop{grid-column:1/-1}.pete-plinko .pete-history-panel{grid-column:1/-1}.pete-plinko .plinko-bucket{font-size:clamp(8px,2vw,13px)}}
+@media(prefers-reduced-motion:reduce){.pete-plinko *{animation:none!important;transition:none!important}}

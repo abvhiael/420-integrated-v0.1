@@ -238,7 +238,8 @@ export async function initBatchExecutionUi() {
       const submitted = await sendPreparedSmartAccountBatch(local.provider, local.prepared, local.account);
       setStatus(`Batch submitted: ${submitted.txHash}. Waiting for confirmation…`);
       await confirmSmartAccountBatch(local.provider, submitted.txHash, controller, local.config.smartAccount,
-        { canonical: true, expectedChainId: local.config.network.chainId });
+        { canonical: true, expectedChainId: local.config.network.chainId,
+          onStatus: ({ status, confirmations }) => setStatus(`Batch ${status}: ${confirmations} canonical confirmations.`) });
       setStatus(`Batch confirmed atomically with ${submitted.calls.length} calls.`);
       local.prepared = null;
     } catch (error) {

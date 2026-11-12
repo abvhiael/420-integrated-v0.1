@@ -1,3 +1,4 @@
+import './prickly-pete-plinko.css';
 import {plinkoPath,plinkoSchedule,plinkoExpectedReturn,PLINKO_BUCKET_CHOICES,PLINKO_RISKS,PLINKO_DROP_CHOICES} from './plinko-practice-paytable.js';
 const NS='http://www.w3.org/2000/svg', WIDTH=720, HEIGHT=680, DX=42, TOP=36, LAST=592;
 export function plinkoWaypoints(bits){
@@ -49,7 +50,7 @@ export function createPlinkoBoard(doc=globalThis.document){
   runs.forEach((run,index)=>{const p=plinkoPosition(run.points,run.fraction),ball=svgEl('circle',{cx:p.x,cy:p.y,r:10,class:'plinko-medallion-base','aria-label':'practice ball '+(index+1)});svg.append(ball);});
  }
  function update(){
-  const schedule=plinkoSchedule(bucketsCount,risk);bucketBar.replaceChildren();
+  const schedule=plinkoSchedule(bucketsCount,risk);bucketBar.style.setProperty('--plinko-bucket-count',String(bucketsCount));bucketBar.replaceChildren();
   for(let i=0;i<bucketsCount;i++){const b=el('span','plinko-bucket'+(last.includes(i)?' landed':''),schedule[i].toFixed(2)+'×');b.title='Landing bucket '+(i+1);bucketBar.append(b);}
   totals.replaceChildren();
   for(const [label,value] of [['Risk',risk.toUpperCase()],['Buckets',String(bucketsCount)],['Balls this drop',String(dropCount)],['Total practice balls',String(total)],['Theoretical RTP',(plinkoExpectedReturn(bucketsCount,risk)*100).toFixed(2)+'%'],['Practice stake / payout','0 / 0']]){

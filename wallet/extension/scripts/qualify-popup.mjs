@@ -4,9 +4,11 @@ import {mkdirSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import {buildExtension420} from './build.mjs';
 
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const screenshots=resolve(root,'visual-evidence');
+const sourceRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const {dist:root}=await buildExtension420();
+const screenshots=resolve(sourceRoot,'visual-evidence');
 mkdirSync(screenshots,{recursive:true});
 const controller='0x1111111111111111111111111111111111111111';
 const factory='0x2222222222222222222222222222222222222222';

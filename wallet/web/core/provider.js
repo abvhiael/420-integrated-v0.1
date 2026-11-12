@@ -1,3 +1,5 @@
+import { classifyProviderMethod420 } from './signing-policy.js';
+
 export class JsonRpcProvider420 {
   constructor({ rpcUrl, fetchImpl = globalThis.fetch } = {}) {
     if (!rpcUrl) throw new Error('rpcUrl required');
@@ -9,6 +11,7 @@ export class JsonRpcProvider420 {
 
   async request(method, params = []) {
     if (typeof method !== 'string' || !method) throw new TypeError('method required');
+    if (classifyProviderMethod420(method) !== 'read-only') throw new Error('JsonRpcProvider420 is read-only; signing and broadcasting require user-approved device authority');
     const response = await this.fetchImpl(this.rpcUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },

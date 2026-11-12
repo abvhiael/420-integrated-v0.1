@@ -44,7 +44,7 @@
 .pete-plinko .pete-ball-button.selected{border-color:#b5ff1c;box-shadow:0 0 9px #afff29;color:#caff4b}
 .pete-plinko .pete-advanced-selects{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden;white-space:nowrap}
 .pete-plinko .pete-plinko-stop{padding:9px;background:#5e3345;color:white;border:1px solid #fff;border-radius:5px}
-.pete-plinko-console{margin:12px auto 0;max-width:1800px;display:grid;grid-template-columns:minmax(160px,1.4fr) minmax(70px,.55fr) minmax(70px,.55fr) minmax(90px,.65fr) minmax(190px,1.55fr) minmax(125px,1.1fr);gap:clamp(4px,.7vw,12px);align-items:stretch}
+.pete-plinko-console{margin:12px auto 0;max-width:1800px;display:grid;grid-template-columns:minmax(140px,1.3fr) minmax(70px,.55fr) minmax(70px,.55fr) minmax(85px,.65fr) minmax(95px,.85fr) minmax(95px,.85fr) minmax(160px,1.45fr) minmax(115px,1fr);gap:clamp(4px,.7vw,12px);align-items:stretch}
 .pete-console-field{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;min-height:82px;padding:26px 6px 6px;border:4px ridge #786e70;border-radius:10px;background:linear-gradient(#0d101ac9,#101119f5),url('/assets/420bet/prickly-pete-plinko/ui/panel_plain.png') center/100% 100%;box-shadow:0 4px 8px #0008}
 .pete-console-field>span:first-child{position:absolute;top:4px;font-size:clamp(10px,.95vw,14px);white-space:nowrap;font-family:Impact,system-ui,sans-serif}
 .pete-console-field>strong{color:white;font-size:clamp(16px,2vw,29px);white-space:nowrap;text-shadow:1px 2px #000}
@@ -71,3 +71,15 @@
 /* Official Plinko lobby tile */
 .art-prickly-plinko{position:relative;overflow:hidden;color:transparent!important;background:linear-gradient(90deg,#08091166,#0b081448),url('/assets/420bet/prickly-pete-plinko/environment/punk_stage_wallpaper.png') center/cover no-repeat!important}
 .art-prickly-plinko:after{content:'';position:absolute;inset:9px;background:url('/assets/420bet/prickly-pete-plinko/branding/logo.png') center/contain no-repeat;filter:drop-shadow(0 3px 3px #000)}
+
+/* Clear per-drop economics at all viewport sizes. Values are virtual credits. */
+.pete-plinko .pete-total-cost{border-color:#e2a348}
+.pete-plinko .pete-total-cost>strong{color:#ffe0a0}
+.pete-plinko .pete-total-win{border-color:#91be57}
+.pete-plinko .pete-total-win>strong{color:#bafa74}
+.pete-plinko .pete-total-win.settled{box-shadow:0 0 9px #a7ff4544,0 4px 8px #0008}
+@media(max-width:1150px) and (min-width:751px){
+ .pete-plinko-console{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .pete-plinko .plinko-drop{grid-column:span 2}
+ .pete-plinko .pete-history-panel{grid-column:span 2;min-height:70px}
+}

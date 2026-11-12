@@ -1,7 +1,7 @@
 // Discovery metadata only. The authoritative game implementations remain in their existing clients.
 export const games = Object.freeze([
   ['dice',"Racket's Loaded Dice",'Casino','clients/420bet-dice-v1'],
-  ['keno','Keno','Casino',null],['plinko','Plinko','Casino',null],
+  ['keno','Keno','Casino',null],['plinko',"Prickly Pete's Punk-Rock Plinko Pandemonium",'Casino',null],
   ['slots','Slots','Casino',null],['roulette','Roulette','Casino',null],
   ['blackjack','Blackjack','Casino',null],['mines','Pest Control','Casino',null],
   ['crash','BUZZKILL!','Casino',null],['video-poker','Royal Kush Video Poker','Poker',null],

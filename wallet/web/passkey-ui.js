@@ -1,4 +1,5 @@
 import { discoverSmartAccount } from './core/accounts.js';
+import { assertWalletChain420 } from './core/transaction-lifecycle.js';
 import { createPasskeyCredentialBinding } from './core/passkey-metadata.js';
 import { registerP256Passkey } from './core/passkey-p256-browser.js';
 import {
@@ -87,7 +88,16 @@ async function context() {
   const response = await fetch('./runtime-config.json', { cache: 'no-store' });
   if (!response.ok) throw new Error(`runtime config ${response.status}`);
   const config = await response.json();
-  const smartAccount = await discoverSmartAccount(provider, controller, config.smartAccount);
+  if (!config.network?.chainId || !config.smartAccount?.factoryAddress
+      || !config.deployment?.entryPointAddress || !config.deployment?.capabilityRegistryAddress)
+    throw new Error('Passkey execution requires verified Wallet contract and chain bindings');
+  await assertWalletChain420(provider, config.network.chainId);
+  const smartAccount = await discoverSmartAccount(provider, controller, {
+    ...config.smartAccount,
+    verifiedEntryPoint: config.deployment.entryPointAddress,
+    verifiedCapabilityRegistry: config.deployment.capabilityRegistryAddress
+  });
+  smartAccount.expectedChainId = config.network.chainId;
   return { provider, controller, config, smartAccount };
 }
 

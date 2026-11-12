@@ -11,13 +11,12 @@ import {
   sendSessionKeyEnablement,
 } from '../core/session-management.js';
 
-const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const owner = '0x1111111111111111111111111111111111111111';
 const account = '0x2222222222222222222222222222222222222222';
 const key = '0x3333333333333333333333333333333333333333';
 const target = '0x4444444444444444444444444444444444444444';
 const factory = '0x0000000000000000000000000000000000000420';
-const registry = '0x0000000000000000000000000000000000000421';
+const registry = '0x0000000000000000000000000000000000000447';
 const entryPoint = '0x000000000000000000000000000000000000041f';
 const scope = `0x${'aa'.repeat(32)}`;
 const grantId = `0x${'bb'.repeat(32)}`;
@@ -32,6 +31,7 @@ function smartState(overrides = {}) {
     smartAccount: account,
     factoryAddress: factory,
     capabilityRegistry: registry,
+    verifiedCapabilityRegistry: registry,
     entryPoint,
     recoveryAuthority: '0x5555555555555555555555555555555555555555',
     authorizationEpoch: 7n,
@@ -39,7 +39,7 @@ function smartState(overrides = {}) {
   };
 }
 
-function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = '0x', receipt = { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash } } = {}) {
+function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = '0x', receipt = { status: '0x1' } } = {}) {
   const calls = [];
   return {
     calls,
@@ -57,8 +57,6 @@ function providerFor({ sessionEpoch = 0n, scopeHash = scope, simulationResult = 
       if (method === 'eth_estimateGas') return '0x5208';
       if (method === 'eth_sendTransaction') return txHash;
       if (method === 'eth_getTransactionReceipt') return receipt;
-      if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-      if (method === 'eth_blockNumber') return '0x10';
       throw new Error(method);
     },
   };

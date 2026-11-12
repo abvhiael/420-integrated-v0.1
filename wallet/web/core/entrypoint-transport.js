@@ -1,4 +1,3 @@
-import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData } from './execution.js';
 import { prepareSessionExecution, readSessionNonce } from './session-execution.js';
@@ -151,7 +150,10 @@ async function simulateSignedUserOperation(provider, signer, entryPoint, userOpe
 }
 
 export async function revalidatePreparedSession(provider, prepared) {
-  const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender);
+  const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender, {
+    verifiedEntryPoint: prepared.entryPoint,
+    verifiedCapabilityRegistry: prepared.verifiedCapabilityRegistry,
+  });
   if (normalizeAddress(live.entryPoint) !== normalizeAddress(prepared.entryPoint)) throw new Error('SmartAccount420 EntryPoint changed after user operation preparation');
   if (BigInt(live.authorizationEpoch) !== BigInt(prepared.authorizationEpoch)) throw new Error('authorization epoch changed after user operation preparation');
 
@@ -183,6 +185,9 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   if (!sessionPreflight || sessionPreflight.broadcastReady !== false) throw new Error('qualified session execution preflight required before EntryPoint420 transport');
   const signer = normalizeAddress(sessionKey);
   if (normalizeAddress(sessionPreflight.signer) !== signer) throw new Error('session preflight signer mismatch');
+  if (!smartAccountState?.verifiedCapabilityRegistry ||
+      normalizeAddress(smartAccountState.verifiedCapabilityRegistry) !== normalizeAddress(smartAccountState.capabilityRegistry))
+    throw new Error('verified CapabilityRegistry420 binding required before session UserOperation signing');
   const entryPoint = normalizeAddress(smartAccountState?.entryPoint);
   const unsigned = normalizePackedUserOperation(sessionPreflight.userOperation);
   if (unsigned.sender !== normalizeAddress(smartAccountState.smartAccount)) throw new Error('session user operation sender mismatch');
@@ -209,6 +214,7 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   return {
     ...sessionPreflight,
     entryPoint,
+    verifiedCapabilityRegistry: smartAccountState.verifiedCapabilityRegistry,
     userOpHash,
     userOperation,
     signature,
@@ -283,13 +289,17 @@ function findHandledEvent(receipt, prepared) {
 
 export async function confirmEntryPointUserOperation(provider, submitted, options = {}) {
   const txHash = normalizeTxHash(submitted?.txHash);
-  let receipt;
-  try {
-    ({ receipt } = await waitForCanonicalTransaction420(provider, txHash, options));
-  } catch (error) {
-    if (/transaction reverted/.test(error.message)) throw new Error('EntryPoint420 transaction reverted');
-    throw error;
+  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
+  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
+  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  let receipt = null;
+  for (let index = 0; index < attempts; index += 1) {
+    receipt = await provider.request('eth_getTransactionReceipt', [txHash]);
+    if (receipt) break;
+    if (index + 1 < attempts) await sleep(delayMs);
   }
+  if (!receipt) throw new Error('EntryPoint420 user operation was not confirmed');
+  if (receipt.status !== '0x1') throw new Error('EntryPoint420 transaction reverted');
 
   const handled = findHandledEvent(receipt, submitted);
   const expectedSequence = BigInt(submitted.userOperation.nonce) & ((1n << 64n) - 1n);

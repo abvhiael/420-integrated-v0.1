@@ -19,12 +19,12 @@ function readyInventory420(environment = 'testnet') {
     readyForLiveTestnet: true,
     network: { environment, expectedChainId: '420' },
     walletAuthority: {
-      entryPoint420: { address: '0x000000000000000000000000000000000000041f', status: 'BOUND' },
-      smartAccountFactory420: { address: '0x0000000000000000000000000000000000000420', status: 'BOUND' },
-      capabilityRegistry420: { address: '0x0000000000000000000000000000000000000421', status: 'BOUND' },
-      protocolRegistry: { address: '0x0000000000000000000000000000000000000422', status: 'BOUND' },
-      names420: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND' },
-      identity420: { address: '0x0000000000000000000000000000000000000424', status: 'BOUND' },
+      entryPoint420: { address: '0x000000000000000000000000000000000000041f', status: 'BOUND', deploymentVerified: true },
+      smartAccountFactory420: { address: '0x0000000000000000000000000000000000000446', status: 'BOUND', deploymentVerified: true },
+      capabilityRegistry420: { address: '0x0000000000000000000000000000000000000447', status: 'BOUND', deploymentVerified: true },
+      protocolRegistry: { address: '0x0000000000000000000000000000000000000434', status: 'BOUND', deploymentVerified: true },
+      names420: { address: '0x0000000000000000000000000000000000000435', status: 'BOUND', deploymentVerified: true },
+      identity420: { address: '0x0000000000000000000000000000000000000436', status: 'BOUND', deploymentVerified: true },
     },
     appAuthority: {
       stake420: { address: '0x000000000000000000000000000000000000043a', status: 'BOUND', deploymentVerified: true },
@@ -73,9 +73,9 @@ test('W14.2 builds deterministic live-testnet runtime config from qualified inpu
   assert.equal(config.network.chainId, '0x1a4');
   assert.equal(config.network.rpcUrl, 'https://rpc.testnet.example.org');
   assert.equal(config.network.explorerUrl, 'https://explorer.testnet.example.org');
-  assert.equal(config.smartAccount.factoryAddress, '0x0000000000000000000000000000000000000420');
+  assert.equal(config.smartAccount.factoryAddress, '0x0000000000000000000000000000000000000446');
   assert.equal(config.deployment.entryPointAddress, '0x000000000000000000000000000000000000041f');
-  assert.equal(config.deployment.capabilityRegistryAddress, '0x0000000000000000000000000000000000000421');
+  assert.equal(config.deployment.capabilityRegistryAddress, '0x0000000000000000000000000000000000000447');
   assert.equal(config.deployment.stakeAddress, '0x000000000000000000000000000000000000043a');
   assert.equal(config.deployment.validatorRegistryAddress, '0x0000000000000000000000000000000000000423');
   assert.equal(config.deployment.rewardControllerAddress, '0x0000000000000000000000000000000000000420');
@@ -150,4 +150,25 @@ test('W14.2 refuses live Stake runtime binding when frozen app addresses are not
     () => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }),
     /stake420 is not chain-verified/,
   );
+});
+
+test('qualified runtime generator rejects retired Wallet factory authority', async () => {
+  const baseConfig = await readJson('wallet/web/runtime-config.json');
+  const inventory = readyInventory420();
+  inventory.walletAuthority.smartAccountFactory420.address = '0x0000000000000000000000000000000000000420';
+  assert.throws(() => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }), /retired Genesis/);
+});
+
+test('qualified runtime generator rejects fake unverified Wallet deployment', async () => {
+  const baseConfig = await readJson('wallet/web/runtime-config.json');
+  const inventory = readyInventory420();
+  inventory.walletAuthority.capabilityRegistry420.deploymentVerified = false;
+  assert.throws(() => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }), /not chain-verified/);
+});
+
+test('qualified runtime generator preserves canonical Registry, Names and Identity', async () => {
+  const baseConfig = await readJson('wallet/web/runtime-config.json');
+  const inventory = readyInventory420();
+  inventory.walletAuthority.protocolRegistry.address = '0x0000000000000000000000000000000000000422';
+  assert.throws(() => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }), /frozen Genesis namespace/);
 });

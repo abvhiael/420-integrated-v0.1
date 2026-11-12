@@ -21,7 +21,6 @@ const newOwner = '0x5555555555555555555555555555555555555555';
 const entryPoint = '0x6666666666666666666666666666666666666666';
 const registry = '0x0000000000000000000000000000000000000421';
 const txHash = `0x${'ab'.repeat(32)}`;
-const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 
 const wordAddress = (value) => `0x${'0'.repeat(24)}${value.slice(2)}`;
 const wordUint = (value) => `0x${BigInt(value).toString(16).padStart(64, '0')}`;
@@ -47,9 +46,7 @@ function state(overrides = {}) {
 function stateProvider(after, calls = []) {
   return { request: async (method, params) => {
     calls.push([method, params]);
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
-    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-    if (method === 'eth_blockNumber') return '0x10';
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash };
     if (method === 'eth_getCode') return '0x6001';
     if (method === 'eth_call') {
       const selector = params[0].data.slice(0, 10);

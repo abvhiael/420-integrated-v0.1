@@ -27,8 +27,8 @@ export async function readNetwork(provider, expectedChainId = null) {
     provider.request('eth_blockNumber'),
   ]);
   if (typeof chainId !== 'string' || !/^0x[0-9a-fA-F]+$/.test(chainId)) throw new Error('invalid chain id');
-  const normalizedChainId = chainId.toLowerCase();
-  const expected = expectedChainId?.toLowerCase() || null;
+  const normalizedChainId = '0x' + BigInt(chainId).toString(16);
+  const expected = expectedChainId == null ? null : '0x' + BigInt(expectedChainId).toString(16);
   return {
     healthy: true,
     chainId: normalizedChainId,

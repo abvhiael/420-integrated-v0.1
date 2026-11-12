@@ -1,4 +1,3 @@
-import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { normalizeAddress, ZERO_ADDRESS } from './abi.js';
 import { readDeployedSmartAccountState } from './accounts.js';
 import { validatePasskeyCredentialBinding } from './passkey-metadata.js';
@@ -103,12 +102,19 @@ async function simulateManagementTransaction(provider, from, to, data) {
 }
 
 async function waitForReceipt(provider, txHash, options = {}) {
-  try {
-    return await waitForCanonicalTransaction420(provider, txHash, options);
-  } catch (error) {
-    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 passkey management transaction reverted');
-    throw error;
+  const normalizedHash = normalizeTxHash(txHash);
+  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
+  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
+  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  for (let index = 0; index < attempts; index += 1) {
+    const receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
+    if (receipt) {
+      if (receipt.status !== '0x1') throw new Error('SmartAccount420 passkey management transaction reverted');
+      return { txHash: normalizedHash, receipt };
+    }
+    if (index + 1 < attempts) await sleep(delayMs);
   }
+  throw new Error('SmartAccount420 passkey management transaction was not confirmed');
 }
 
 function assertStoredMaterial(credential, validated, hashes, expectedEpoch = null) {

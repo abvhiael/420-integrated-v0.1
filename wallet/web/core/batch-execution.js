@@ -1,7 +1,7 @@
-import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { decodeAddress, decodeUint, encodeAddressGetter, encodeUintGetter, normalizeAddress } from './abi.js';
 import { normalizeCallData, normalizeNativeValue } from './execution.js';
 import { discoverSmartAccount } from './accounts.js';
+import { assertWalletChain420, waitForWalletReceipt420 } from './transaction-lifecycle.js';
 
 const SELECTOR_EXECUTE_BATCH = '34fcd5be';
 export const MAX_BATCH_CALLS = 8;
@@ -117,6 +117,7 @@ export async function prepareSmartAccountBatch(provider, controller, smartAccoun
   if (!smartAccountState?.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== owner) {
     throw new Error('connected controller is not the on-chain SmartAccount420 owner');
   }
+  await assertWalletChain420(provider, smartAccountState.expectedChainId);
   const normalized = normalizeBatchCalls(smartAccountState, calls);
   const account = normalizeAddress(smartAccountState.smartAccount);
   const transaction = { from: owner, to: account, value: '0x0', data: encodeExecuteBatch(normalized.calls) };
@@ -152,6 +153,7 @@ export async function sendPreparedSmartAccountBatch(provider, prepared, smartAcc
   }
 
   await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
+  await assertWalletChain420(provider, smartAccountState.expectedChainId);
   const resimulation = await simulateBatchTransaction(provider, prepared.transaction);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [{ ...prepared.transaction }]));
   return { ...prepared, simulation: resimulation, submitted: true, txHash };
@@ -164,15 +166,9 @@ export async function sendSmartAccountBatch(provider, controller, smartAccountSt
 
 export async function confirmSmartAccountBatch(provider, txHash, controller, config = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  let receipt;
-  try {
-    ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
-  } catch (error) {
-    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 batch transaction reverted atomically; no batch call was committed');
-    throw error;
-  }
+  const { receipt, confirmations } = await waitForWalletReceipt420(provider, normalizedHash, options);
 
   const discovered = await discoverSmartAccount(provider, controller, config);
   if (!discovered.deployed || !discovered.controllerIsOwner) throw new Error('SmartAccount420 owner boundary changed after batch execution');
-  return { txHash: normalizedHash, receipt, smartAccount: discovered };
+  return { txHash: normalizedHash, receipt, confirmations, smartAccount: discovered };
 }

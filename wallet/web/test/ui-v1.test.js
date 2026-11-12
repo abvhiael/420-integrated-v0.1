@@ -32,3 +32,12 @@ test('classifyWalletActivity only records security-relevant wallet actions', () 
   );
   assert.equal(classifyWalletActivity('Ready.'), null);
 });
+
+test('activity feed differentiates pending, confirmations and reorganizations from success', () => {
+  assert.deepEqual(classifyWalletActivity('Execution reorganized: waiting for canonical receipt (0 confirmations).'),
+    {kind:'execution',state:'reorganized',label:'Smart Account execution reorganization'});
+  assert.deepEqual(classifyWalletActivity('Creation confirming: waiting for canonical receipt (1 confirmations).'),
+    {kind:'account',state:'pending',label:'Smart Account creation awaiting finality'});
+  assert.deepEqual(classifyWalletActivity('Batch pending: 0 canonical confirmations.'),
+    {kind:'batch',state:'pending',label:'Smart Account batch awaiting finality'});
+});

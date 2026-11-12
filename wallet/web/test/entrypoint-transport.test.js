@@ -9,7 +9,6 @@ import {
   prepareEntryPointTransport,
 } from '../core/entrypoint-transport.js';
 
-const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const signer = '0x2222222222222222222222222222222222222222';
 const entryPoint = '0x3333333333333333333333333333333333333333';
@@ -83,7 +82,7 @@ test('qualified transport obtains canonical hash, requests session-key signature
     if (method === 'eth_estimateGas') return '0x5208';
     throw new Error(method);
   } };
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight());
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight());
   assert.equal(prepared.userOpHash, hash);
   assert.equal(prepared.signature, signature);
   assert.equal(prepared.userOperation.signature, signature);
@@ -133,7 +132,7 @@ test('GAS-7 verifies EntryPoint sponsorship digest before canonical hashing and 
     throw new Error(method);
   } };
 
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight(), {
     now: new Date('2026-09-14T23:00:00.000Z'),
     discoverGasQuote: async (request) => {
       discovered = true;
@@ -179,7 +178,7 @@ test('GAS-7 quote unavailability preserves self-funded transport without changin
     if (method === 'eth_estimateGas') return '0x5208';
     throw new Error(method);
   } };
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight(), {
     discoverGasQuote: async () => null,
   });
   assert.equal(prepared.userOperation.paymasterAndData, '0x');
@@ -192,7 +191,7 @@ test('GAS-7 quote unavailability preserves self-funded transport without changin
 test('transport fails closed when the session signer is not exposed by the connected wallet', async () => {
   const provider = { request: async (method) => method === 'eth_accounts' ? [] : (() => { throw new Error(method); })() };
   await assert.rejects(
-    prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight()),
+    prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight()),
     /session signer is not available/i,
   );
 });
@@ -207,7 +206,7 @@ test('confirmation requires canonical UserOperationHandled success and exact non
     broadcastReady: true,
   };
   const receipt = {
-    status: '0x1', transactionHash: submitted.txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
+    status: '0x1',
     logs: [{
       address: entryPoint,
       topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
@@ -216,8 +215,6 @@ test('confirmation requires canonical UserOperationHandled success and exact non
   };
   const provider = { request: async (method, params = []) => {
     if (method === 'eth_getTransactionReceipt') return receipt;
-    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_call' && params[0].data.startsWith('0xd86f2b3c')) return `0x${word(nonce + 1n)}`;
     throw new Error(method);
   } };
@@ -237,7 +234,7 @@ test('confirmation surfaces execution failure even though EntryPoint420 consumed
     broadcastReady: true,
   };
   const receipt = {
-    status: '0x1', transactionHash: submitted.txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
+    status: '0x1',
     logs: [{
       address: entryPoint,
       topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
@@ -246,8 +243,6 @@ test('confirmation surfaces execution failure even though EntryPoint420 consumed
   };
   const provider = { request: async (method, params = []) => {
     if (method === 'eth_getTransactionReceipt') return receipt;
-    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-    if (method === 'eth_blockNumber') return '0x10';
     if (method === 'eth_call' && params[0].data.startsWith('0xd86f2b3c')) return `0x${word(nonce + 1n)}`;
     throw new Error(method);
   } };

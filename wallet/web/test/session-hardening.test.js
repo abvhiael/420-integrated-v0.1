@@ -7,13 +7,12 @@ import {
 } from '../core/entrypoint-transport.js';
 import { SESSION_EXECUTE_CAPABILITY_420 } from '../core/capabilities.js';
 
-const canonicalBlockHash = `0x${'dd'.repeat(32)}`;
 const account = '0x1111111111111111111111111111111111111111';
 const signer = '0x2222222222222222222222222222222222222222';
 const owner = '0x3333333333333333333333333333333333333333';
 const target = '0x4444444444444444444444444444444444444444';
 const entryPoint = '0x5555555555555555555555555555555555555555';
-const registry = '0x0000000000000000000000000000000000000421';
+const registry = '0x0000000000000000000000000000000000000447';
 const scope = `0x${'66'.repeat(32)}`;
 const grantId = `0x${'77'.repeat(32)}`;
 const otherGrantId = `0x${'88'.repeat(32)}`;
@@ -41,6 +40,7 @@ function prepared(overrides = {}) {
     nonce,
     nonceKey,
     entryPoint,
+    verifiedCapabilityRegistry: registry,
     userOpHash: hash,
     txHash,
     userOperation: {
@@ -123,9 +123,7 @@ test('receipt confirmation rejects ambiguous duplicate UserOperationHandled evid
     data: `0x${word(0)}${word(1)}`,
   };
   const provider = { request: async (method) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash, logs: [log, { ...log }] };
-    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-    if (method === 'eth_blockNumber') return '0x10';
+    if (method === 'eth_getTransactionReceipt') return { status: '0x1', logs: [log, { ...log }] };
     throw new Error(method);
   } };
   await assert.rejects(confirmEntryPointUserOperation(provider, prepared(), { attempts: 1 }), /ambiguous duplicate/i);
@@ -134,15 +132,13 @@ test('receipt confirmation rejects ambiguous duplicate UserOperationHandled evid
 test('receipt confirmation rejects malformed execution-success words instead of guessing', async () => {
   const provider = { request: async (method) => {
     if (method === 'eth_getTransactionReceipt') return {
-      status: '0x1', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash,
+      status: '0x1',
       logs: [{
         address: entryPoint,
         topics: [USER_OPERATION_HANDLED_TOPIC, hash, addressTopic(account), `0x${word(nonceKey)}`],
         data: `0x${word(0)}${word(2)}`,
       }],
     };
-    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
-    if (method === 'eth_blockNumber') return '0x10';
     throw new Error(method);
   } };
   await assert.rejects(confirmEntryPointUserOperation(provider, prepared(), { attempts: 1 }), /malformed EntryPoint420 UserOperationHandled success value/i);

@@ -38,6 +38,9 @@ export function validateRuntimeConfig(config) {
   if (config.network.chainId != null && !/^0x[0-9a-fA-F]+$/.test(config.network.chainId)) throw new Error('chainId must be hex');
   if (!config.smartAccount || typeof config.smartAccount !== 'object') throw new TypeError('smartAccount config required');
   optionalAddress(config.smartAccount.factoryAddress, 'smartAccount.factoryAddress');
+  // Step 6.2 froze 0x0420 for RewardController, not SmartAccountFactory.
+  if (config.smartAccount.factoryAddress?.toLowerCase() === '0x0000000000000000000000000000000000000420')
+    throw new Error('retired SmartAccountFactory420 address cannot be used');
   optionalAddress(config.smartAccount.recoveryAuthority, 'smartAccount.recoveryAuthority');
   if (config.smartAccount.salt != null && !/^0x[0-9a-fA-F]{64}$/.test(config.smartAccount.salt)) throw new Error('smartAccount.salt must be bytes32');
   validateGasQuoteConfig420(config.gasQuote);

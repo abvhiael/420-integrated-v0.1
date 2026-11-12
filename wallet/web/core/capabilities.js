@@ -1,7 +1,19 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { hasCode } from './accounts.js';
 
-export const CANONICAL_CAPABILITY_REGISTRY_420 = '0x0000000000000000000000000000000000000421';
+// Registry is independently deployed: historical 0x0421 belongs to AttentionTreasury.
+export function assertVerifiedCapabilityRegistry420(state) {
+  if (!state?.verifiedCapabilityRegistry) throw new Error('canonical CapabilityRegistry420 deployment is unverified');
+  const actual = normalizeAddress(state.capabilityRegistry);
+  if (actual !== normalizeAddress(state.verifiedCapabilityRegistry))
+    throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  // Step 6.2: 0x0420-0x043c are occupied frozen contracts, not
+  // independently deployed CapabilityRegistry420 (historical 0x0421 is AttentionTreasury).
+  const slot = BigInt(actual);
+  if (slot >= 0x420n && slot <= 0x43cn)
+    throw new Error('canonical CapabilityRegistry420 cannot occupy a frozen Genesis system address');
+  return actual;
+}
 export const SESSION_EXECUTE_CAPABILITY_420 = '0x9d4b56157e30269b50ea6c6e4f268e8360bf5565165cd55c66ad0c4d007c9f92';
 const SELECTOR_GRANT = '918e9de3';
 const SELECTOR_USAGE = '4a8f2a54';
@@ -37,8 +49,7 @@ export async function readAccountComponentId(provider, smartAccount) {
 
 export async function inspectCapabilityGrant(provider, smartAccountState, grantId) {
   if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before permission inspection');
-  const registry = normalizeAddress(smartAccountState.capabilityRegistry);
-  if (registry !== CANONICAL_CAPABILITY_REGISTRY_420) throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  const registry = assertVerifiedCapabilityRegistry420(smartAccountState);
   if (!(await hasCode(provider, registry))) throw new Error('canonical CapabilityRegistry420 has no deployed code');
 
   const normalizedGrantId = normalizeBytes32(grantId);
@@ -68,8 +79,7 @@ export async function inspectCapabilityGrant(provider, smartAccountState, grantI
 
 export async function readActiveGrantId(provider, smartAccountState, principal, capabilityId, scopeHash) {
   if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before authorization inspection');
-  const registry = normalizeAddress(smartAccountState.capabilityRegistry);
-  if (registry !== CANONICAL_CAPABILITY_REGISTRY_420) throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  const registry = assertVerifiedCapabilityRegistry420(smartAccountState);
   const componentId = await readAccountComponentId(provider, smartAccountState.smartAccount);
   const data = `0x${SELECTOR_ACTIVE_GRANT_ID}${addressWord(principal)}${componentId.slice(2)}${normalizeBytes32(capabilityId).slice(2)}${normalizeBytes32(scopeHash).slice(2)}`;
   return decodeBytes32Word(wordAt(await call(provider, registry, data), 0));
@@ -77,8 +87,7 @@ export async function readActiveGrantId(provider, smartAccountState, principal, 
 
 export async function readCapabilityAuthorization(provider, smartAccountState, principal, capabilityId, scopeHash, amount) {
   if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before authorization inspection');
-  const registry = normalizeAddress(smartAccountState.capabilityRegistry);
-  if (registry !== CANONICAL_CAPABILITY_REGISTRY_420) throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
+  const registry = assertVerifiedCapabilityRegistry420(smartAccountState);
   const componentId = await readAccountComponentId(provider, smartAccountState.smartAccount);
   const data = `0x${SELECTOR_IS_AUTHORIZED}${addressWord(principal)}${componentId.slice(2)}${normalizeBytes32(capabilityId).slice(2)}${normalizeBytes32(scopeHash).slice(2)}${uintWord(amount)}`;
   return decodeBoolWord(wordAt(await call(provider, registry, data), 0));

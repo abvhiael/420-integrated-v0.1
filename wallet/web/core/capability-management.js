@@ -1,6 +1,5 @@
-import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
-import { inspectCapabilityGrant, CANONICAL_CAPABILITY_REGISTRY_420 } from './capabilities.js';
+import { inspectCapabilityGrant, assertVerifiedCapabilityRegistry420 } from './capabilities.js';
 
 const SELECTOR_CREATE_GAS_SPONSOR_GRANT = '297945e0';
 const SELECTOR_REVOKE_CAPABILITY_GRANT = 'be737654';
@@ -27,9 +26,7 @@ function assertOwnerBoundary(controller, smartAccountState) {
   if (!smartAccountState.controllerIsOwner || normalizeAddress(smartAccountState.owner) !== owner) {
     throw new Error('connected controller is not the on-chain SmartAccount420 owner');
   }
-  if (normalizeAddress(smartAccountState.capabilityRegistry) !== CANONICAL_CAPABILITY_REGISTRY_420) {
-    throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
-  }
+  assertVerifiedCapabilityRegistry420(smartAccountState);
   return owner;
 }
 function encodeCreateGasSponsorGrant(request) {
@@ -109,13 +106,17 @@ export async function sendCapabilityGrantRevocation(provider, controller, smartA
 
 export async function confirmCapabilityManagementTransaction(provider, txHash, smartAccountState, expected = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  let receipt;
-  try {
-    ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
-  } catch (error) {
-    if (/transaction reverted/.test(error.message)) throw new Error('capability management transaction reverted');
-    throw error;
+  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
+  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
+  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+  let receipt = null;
+  for (let i = 0; i < attempts; i += 1) {
+    receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
+    if (receipt) break;
+    if (i + 1 < attempts) await sleep(delayMs);
   }
+  if (!receipt) throw new Error('capability management transaction was not confirmed');
+  if (receipt.status !== '0x1') throw new Error('capability management transaction reverted');
 
   if (expected.createdGrantId) {
     const inspection = await inspectCapabilityGrant(provider, smartAccountState, expected.createdGrantId);

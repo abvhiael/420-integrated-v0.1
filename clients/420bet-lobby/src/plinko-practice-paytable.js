@@ -1,5 +1,5 @@
 // Browser-only illustrative Plinko schedules; NOT approved for on-chain settlement.
-export const PLINKO_BUCKET_CHOICES=Object.freeze([8,9,10,11,12,13,14,15,16]);
+export const PLINKO_BUCKET_CHOICES=Object.freeze([8,9,10,11,12,13,14,15,16,17]);
 export const PLINKO_RISKS=Object.freeze(['soundcheck','showtime','riot']);
 export const PLINKO_DROP_CHOICES=Object.freeze([1,5,10,25]);
 const TARGET=0.96;

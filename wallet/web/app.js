@@ -16,6 +16,7 @@ import {
 import { confirmSmartAccountCreation, sendSmartAccountCreation } from './core/deployment.js';
 import { confirmSmartAccountExecution, prepareSmartAccountExecution, sendSmartAccountExecution } from './core/execution.js';
 import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
+import { selectNativeAccountBalance420 } from './core/dashboard.js';
 import { resolveServices } from './core/services.js';
 
 const state = {
@@ -78,10 +79,29 @@ function invalidateSimulation() {
 function renderPortfolio() {
   const list = $('#portfolio');
   list.replaceChildren();
+  const smartAddress = state.smartAccount?.smartAccount || null;
+  const nativeSmart = selectNativeAccountBalance420(state.portfolio, smartAddress);
+  const nativeController = selectNativeAccountBalance420(state.portfolio, state.controller);
+  $('#dashboard-native-balance').textContent = nativeSmart ? `${formatUnits(nativeSmart.raw, nativeSmart.decimals)} 420` : 'Unavailable';
+  $('#dashboard-controller-balance').textContent = nativeController ? `${formatUnits(nativeController.raw, nativeController.decimals)} 420` : 'Unavailable';
+  $('#dashboard-balance-context').textContent = nativeSmart
+    ? 'Read-only native balance for this Smart Account. Token balances are listed separately below.'
+    : 'Connect a controller and verify your Smart Account to read its balance.';
   for (const balance of [...state.portfolio.native, ...state.portfolio.tokens]) {
     const item = document.createElement('div');
-    item.className = 'service-card';
-    item.textContent = `${balance.symbol}: ${formatUnits(balance.raw, balance.decimals)} · ${shortAddress(balance.address || balance.account)}`;
+    item.className = 'service-card wallet-asset-row';
+    const symbol = document.createElement('strong');
+    symbol.textContent = balance.symbol;
+    const amount = document.createElement('span');
+    amount.textContent = `${formatUnits(balance.raw, balance.decimals)} ${balance.symbol}`;
+    const detail = document.createElement('small');
+    const holder = balance.account || balance.address;
+    detail.textContent = smartAddress && holder?.toLowerCase() === smartAddress.toLowerCase()
+      ? 'Smart Account'
+      : state.controller && holder?.toLowerCase() === state.controller.toLowerCase()
+        ? 'Controller'
+        : shortAddress(holder);
+    item.append(symbol, amount, detail);
     list.append(item);
   }
   if (!list.children.length) list.textContent = 'Connect a wallet to load read-only balances.';
@@ -121,7 +141,13 @@ function render() {
   $('#owner').textContent = state.smartAccount?.owner ? shortAddress(state.smartAccount.owner) : '—';
   $('#network').textContent = state.network?.chainId || state.config?.network?.name || '420 Integrated';
   $('#block').textContent = state.network ? state.network.blockNumber.toString() : '—';
-  $('#rpc-status').textContent = state.network?.chainMismatch ? 'Wrong network' : state.network?.healthy ? 'Healthy' : 'Not checked';
+  $('#rpc-status').textContent = state.network?.chainMismatch ? 'Wrong network' : state.network?.healthy ? 'RPC reachable · contract verification separate' : 'Not checked';
+  const dashboardState = $('#dashboard-account-state');
+  dashboardState.textContent = state.smartAccount?.deployed
+    ? 'Deployed Smart Account'
+    : state.smartAccount ? 'Counterfactual Smart Account'
+      : state.controller ? 'Account authority unavailable' : 'Not connected';
+  dashboardState.dataset.state = state.smartAccount?.deployed ? 'passed' : 'idle';
   $('#connect').textContent = state.controller ? 'Connected' : 'Connect wallet';
   $('#connect').disabled = Boolean(state.controller);
 

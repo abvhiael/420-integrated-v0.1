@@ -1,0 +1,27 @@
+/* W15.5 hybrid premium-fintech design tokens. Legacy aliases preserve existing screens. */
+:root {
+  --wallet-canvas: #0b100d;
+  --wallet-sidebar: #0d1510;
+  --wallet-surface: #17221b;
+  --wallet-surface-raised: #213026;
+  --wallet-border: #334639;
+  --wallet-accent: #b8ff4f;
+  --wallet-text: #f4f8f3;
+  --wallet-text-secondary: #b2c3b6;
+  --wallet-positive: #8ce4ac;
+  --wallet-warning: #ffd58a;
+  --wallet-danger: #ff9b9b;
+  --wallet-space-1: 4px;
+  --wallet-space-2: 8px;
+  --wallet-space-3: 12px;
+  --wallet-space-4: 16px;
+  --wallet-space-6: 24px;
+  --wallet-space-8: 32px;
+  --wallet-radius-control: 12px;
+  --wallet-radius-card: 16px;
+  --wallet-radius-hero: 20px;
+  --wallet-content-max: 1440px;
+  --wallet-sidebar-width: 248px;
+  --wallet-focus-ring: 0 0 0 3px #b8ff4f;
+  color-scheme: dark;
+}

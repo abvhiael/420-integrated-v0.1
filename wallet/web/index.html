@@ -28,6 +28,7 @@
         <button type="button" class="nav-item" data-scroll-target="#wallet-activity"><span aria-hidden="true" class="nav-mark">◷</span>Activity</button>
         <span class="nav-group-label">Ecosystem</span>
         <button type="button" class="nav-item" data-scroll-target="#services-section"><span aria-hidden="true" class="nav-mark">▦</span>420 Apps</button>
+        <button type="button" class="nav-item" data-scroll-target="#network-verification"><span aria-hidden="true" class="nav-mark">◎</span>Network &amp; Services</button>
         <button type="button" class="nav-item" data-scroll-target="#names-management-panel"><span aria-hidden="true" class="nav-mark">#</span>420 Names</button>
         <button type="button" class="nav-item" data-scroll-target="#identity-management-panel"><span aria-hidden="true" class="nav-mark">◎</span>Identity</button>
         <button type="button" class="nav-item" data-scroll-target="#governance-management-panel"><span aria-hidden="true" class="nav-mark">◇</span>Governance</button>
@@ -213,8 +214,30 @@
         <div id="activity-list" class="activity-list" aria-live="polite"></div>
       </section>
 
+      <section id="network-verification" class="wallet-verification-section" aria-labelledby="verification-heading">
+        <div class="section-heading"><div>
+          <p class="eyebrow">420Integrated · Runtime evidence</p>
+          <h2 id="verification-heading">Network &amp; contract status</h2>
+          <p class="wallet-section-help">Connection, configured addresses, contract discovery and ecosystem manifest acceptance are separate checks. A configured address is not proof of a deployed, verified contract.</p>
+        </div></div>
+        <div id="verification-banner" class="wallet-verification-banner" role="status" data-state="loading">
+          <strong id="verification-banner-title">Checking wallet configuration</strong>
+          <span id="verification-banner-detail">Wallet Core must load approved runtime configuration before any network or contract status can be established.</span>
+        </div>
+        <div class="wallet-verification-grid" aria-label="Wallet runtime evidence">
+          <article class="wallet-verification-card"><p class="label">Wallet connection</p><strong id="verification-wallet">Checking</strong><small id="verification-wallet-detail">Waiting for wallet state</small></article>
+          <article class="wallet-verification-card"><p class="label">Expected chain and RPC</p><strong id="verification-network">Checking</strong><small id="verification-network-detail">Not verified</small></article>
+          <article class="wallet-verification-card"><p class="label">SmartAccountFactory420</p><strong id="verification-factory">Checking</strong><small id="verification-factory-detail">Deployment not verified</small></article>
+          <article class="wallet-verification-card"><p class="label">EntryPoint420</p><strong id="verification-entrypoint">Checking</strong><small id="verification-entrypoint-detail">Deployment not verified</small></article>
+          <article class="wallet-verification-card"><p class="label">CapabilityRegistry420</p><strong id="verification-registry">Checking</strong><small id="verification-registry-detail">Deployment not verified</small></article>
+          <article class="wallet-verification-card"><p class="label">Canonical Smart Account</p><strong id="verification-account">Checking</strong><small id="verification-account-detail">Discovery unavailable until configured</small></article>
+          <article class="wallet-verification-card"><p class="label">420Integrated ecosystem</p><strong id="verification-services">Checking</strong><small id="verification-services-detail">Waiting for manifest resolver</small></article>
+        </div>
+        <p class="wallet-verification-footnote">Live contract bytecode, deployment manifests, and network service readiness require their own authoritative qualification. No status on this page replaces Wallet Core safety checks.</p>
+      </section>
+
       <section id="services-section">
-        <div class="section-heading"><div><p class="eyebrow">Verified ecosystem gateway</p><h2>Explore 420</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">420Integrated ecosystem navigation</p><h2>Explore 420</h2></div></div>
         <div id="services" class="service-grid" aria-live="polite"></div>
       </section>
 
@@ -231,6 +254,7 @@
   <script type="module" src="./ui-v1.js"></script>
   <script type="module" src="./wallet-shell.js"></script>
   <script type="module" src="./security-centre.js"></script>
+  <script type="module" src="./network-verification.js"></script>
   <script type="module" src="./session-execution-ui.js"></script>
   <script type="module" src="./batch-execution-ui.js"></script>
   <script type="module" src="./passkey-ui.js"></script>

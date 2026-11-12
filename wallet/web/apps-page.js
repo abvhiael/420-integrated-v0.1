@@ -69,6 +69,17 @@ function ensurePage(section) {
     filters.append(button);
   }
   controls.append(search, filters);
+  const gateway = el('div','wallet-ecosystem-gateway');
+  gateway.append(el('p','wallet-ecosystem-caption','Browse by verified service category. Unpublished services remain disabled.'));
+  const quick = el('div','wallet-ecosystem-shortcuts');
+  for (const category of APP_CATEGORIES.filter(value => value !== 'all')) {
+    const button=el('button','wallet-ecosystem-shortcut',category[0].toUpperCase()+category.slice(1));
+    button.type='button';
+    button.dataset.categoryJump=category;
+    button.setAttribute('aria-label','Show '+category+' applications');
+    quick.append(button);
+  }
+  gateway.append(quick);
 
   const featuredHeading = el('div', 'section-heading compact-heading');
   featuredHeading.append(el('div', null), el('span', 'section-kicker', 'Featured verified services'));
@@ -86,7 +97,7 @@ function ensurePage(section) {
   const note = el('div', 'apps-verification-note');
   note.innerHTML = '<strong>Verified service discovery</strong><span>Launch links are enabled only after the configured ecosystem manifest passes schema, verification and safe-protocol checks.</span>';
 
-  section.append(heading, controls, featuredHeading, featured, allHeading, grid, note);
+  section.append(heading, gateway, controls, featuredHeading, featured, allHeading, grid, note);
 }
 
 export async function loadVerifiedApps(fetchImpl = globalThis.fetch) {
@@ -137,12 +148,17 @@ export async function initAppsPage() {
   const search = section.querySelector('#apps-search');
   const refresh = () => renderApps(section, apps, { query: search.value, category, trust });
   search.addEventListener('input', refresh);
+  const chooseCategory=(value)=>{
+    category=value;
+    for(const peer of section.querySelectorAll('.app-filter')) peer.classList.toggle('active',peer.dataset.category===value);
+    for(const peer of section.querySelectorAll('[data-category-jump]')) peer.setAttribute('aria-pressed',String(peer.dataset.categoryJump===value));
+    refresh();
+  };
   for (const button of section.querySelectorAll('.app-filter')) {
-    button.addEventListener('click', () => {
-      category = button.dataset.category;
-      for (const peer of section.querySelectorAll('.app-filter')) peer.classList.toggle('active', peer === button);
-      refresh();
-    });
+    button.addEventListener('click', () => chooseCategory(button.dataset.category));
+  }
+  for (const button of section.querySelectorAll('[data-category-jump]')) {
+    button.addEventListener('click', () => chooseCategory(button.dataset.categoryJump));
   }
   refresh();
 

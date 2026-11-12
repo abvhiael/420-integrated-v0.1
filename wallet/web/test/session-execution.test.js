@@ -139,6 +139,11 @@ test('ERC20 amount parsing prevents native-plus-token spend ambiguity', async ()
 });
 
 test('broadcast is fail-closed until production EntryPoint420 transport and hashing are frozen', async () => {
-  const prepared = await prepareSessionExecution(providerFor(), smartState(), key, { target, data: '0x12345678' });
+  const prepared = await prepareSessionExecution(providerFor(), smartState(), key, { target, value: '1', data: '0x12345678' });
   assert.throws(() => assertSessionBroadcastDisabled(prepared), /broadcast is disabled/i);
+});
+
+test('session client blocks unmetered asset calldata under a quota',async()=>{
+  await assert.rejects(prepareSessionExecution(providerFor(),smartState(),key,{target,data:'0x12345678'}),/cannot meter/);
+  await assert.rejects(prepareSessionExecution(providerFor(),smartState(),key,{target,value:'1',data:'0x1234567801020304'}),/cannot meter/);
 });

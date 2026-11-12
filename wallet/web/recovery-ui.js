@@ -1,4 +1,5 @@
 import { discoverSmartAccount, readDeployedSmartAccountState } from './core/accounts.js';
+import { assertWalletChain420 } from './core/transaction-lifecycle.js';
 import { validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
 import { recoveryActionAvailability, summarizeRecoveryState } from './core/recovery.js';
@@ -153,11 +154,23 @@ export async function initRecoveryUi() {
       render();
       return;
     }
+    if (!local.config?.network?.chainId || !local.config?.deployment?.entryPointAddress
+        || !local.config?.deployment?.capabilityRegistryAddress)
+      throw new Error('Recovery requires verified Wallet contract and chain bindings');
+    await assertWalletChain420(local.provider, local.config.network.chainId);
+    const verifiedConfig = {
+      ...local.config.smartAccount,
+      verifiedEntryPoint: local.config.deployment.entryPointAddress,
+      verifiedCapabilityRegistry: local.config.deployment.capabilityRegistryAddress
+    };
     const typed = $('#recovery-account').value.trim();
     if (typed) {
-      local.smartAccount = await readDeployedSmartAccountState(local.provider, typed, { controller: local.actor });
+      local.smartAccount = await readDeployedSmartAccountState(local.provider, typed, {
+        controller: local.actor, verifiedEntryPoint: verifiedConfig.verifiedEntryPoint,
+        verifiedCapabilityRegistry: verifiedConfig.verifiedCapabilityRegistry
+      });
     } else if (allowOwnerDiscovery) {
-      const discovered = await discoverSmartAccount(local.provider, local.actor, local.config.smartAccount);
+      const discovered = await discoverSmartAccount(local.provider, local.actor, verifiedConfig);
       if (!discovered.deployed) throw new Error('Enter the deployed SmartAccount420 address. Recovery authorities cannot derive another owner’s account from their own address.');
       local.smartAccount = discovered;
       $('#recovery-account').value = discovered.smartAccount;

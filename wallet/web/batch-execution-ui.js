@@ -1,5 +1,6 @@
 import { discoverSmartAccount } from './core/accounts.js';
 import { validateRuntimeConfig } from './core/config.js';
+import { assertWalletChain420 } from './core/transaction-lifecycle.js';
 import { InjectedProvider420 } from './core/provider.js';
 import {
   MAX_BATCH_CALLS,
@@ -184,8 +185,11 @@ export async function initBatchExecutionUi() {
     $('#batch-review-duplicates').textContent = String(review.duplicateCalls);
     $('#batch-review-gas').textContent = review.gas || '—';
     $('#batch-review-account').textContent = short(review.transactionTarget);
-    $('#batch-prepare').disabled = local.busy;
-    $('#batch-submit').disabled = local.busy || !review.ready || local.config?.features?.batchExecution !== true;
+    $('#batch-prepare').disabled = local.busy || !local.config?.network?.chainId
+      || !local.config?.smartAccount?.factoryAddress || !local.config?.deployment?.entryPointAddress
+      || !local.config?.deployment?.capabilityRegistryAddress;
+    $('#batch-submit').disabled = local.busy || !review.ready || local.config?.features?.batchExecution !== true
+      || !local.config?.network?.chainId || !local.config?.deployment?.capabilityRegistryAddress;
     $('#batch-add').disabled = local.busy || local.calls.length >= MAX_BATCH_CALLS;
   };
 
@@ -203,7 +207,15 @@ export async function initBatchExecutionUi() {
       const exposed = await local.provider.request('eth_accounts', []);
       if (!Array.isArray(exposed) || exposed.length === 0) throw new Error('Connect the owner wallet before batch execution');
       const controller = exposed[0];
-      local.account = await discoverSmartAccount(local.provider, controller, local.config.smartAccount);
+      if (!local.config.network.chainId || !local.config.smartAccount.factoryAddress
+          || !local.config.deployment?.entryPointAddress || !local.config.deployment?.capabilityRegistryAddress)
+        throw new Error('Wallet authority deployment and chain identity are not verified');
+      await assertWalletChain420(local.provider, local.config.network.chainId);
+      const verifiedConfig = { ...local.config.smartAccount,
+        verifiedEntryPoint: local.config.deployment.entryPointAddress,
+        verifiedCapabilityRegistry: local.config.deployment.capabilityRegistryAddress };
+      local.account = await discoverSmartAccount(local.provider, controller, verifiedConfig);
+      local.account.expectedChainId = local.config.network.chainId;
       if (!local.account.deployed || !local.account.controllerIsOwner) throw new Error('Connected wallet does not control a deployed canonical SmartAccount420');
       setStatus('Validating calls and simulating the complete atomic SmartAccount420 batch…');
       local.prepared = await prepareSmartAccountBatch(local.provider, controller, local.account, local.calls);
@@ -218,14 +230,15 @@ export async function initBatchExecutionUi() {
 
   $('#batch-submit').addEventListener('click', async () => {
     if (local.busy || !local.prepared || local.config?.features?.batchExecution !== true) return;
-    if (globalThis.confirm && !globalThis.confirm(`Submit the exact simulated snapshot: ${local.prepared.calls.length} atomic calls with total native value ${local.prepared.totalValue} wei?`)) return;
+    if (!globalThis.confirm?.(`Submit the exact simulated snapshot: ${local.prepared.calls.length} atomic calls with total native value ${local.prepared.totalValue} wei?`)) return;
     local.busy = true; renderReview();
     try {
       const controller = local.prepared.controller;
       setStatus('Revalidating owner and authorization epoch, re-simulating the exact prepared batch snapshot, then requesting transaction approval…');
       const submitted = await sendPreparedSmartAccountBatch(local.provider, local.prepared, local.account);
       setStatus(`Batch submitted: ${submitted.txHash}. Waiting for confirmation…`);
-      await confirmSmartAccountBatch(local.provider, submitted.txHash, controller, local.config.smartAccount);
+      await confirmSmartAccountBatch(local.provider, submitted.txHash, controller, local.config.smartAccount,
+        { canonical: true, expectedChainId: local.config.network.chainId });
       setStatus(`Batch confirmed atomically with ${submitted.calls.length} calls.`);
       local.prepared = null;
     } catch (error) {

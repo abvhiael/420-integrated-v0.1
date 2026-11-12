@@ -17,6 +17,7 @@ import { confirmSmartAccountCreation, sendSmartAccountCreation } from './core/de
 import { confirmSmartAccountExecution, prepareSmartAccountExecution, sendSmartAccountExecution } from './core/execution.js';
 import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
 import { selectNativeAccountBalance420 } from './core/dashboard.js';
+import { getCanonicalReceiveAddress420 } from './core/receive.js';
 import { resolveServices } from './core/services.js';
 
 const state = {
@@ -87,24 +88,63 @@ function renderPortfolio() {
   $('#dashboard-balance-context').textContent = nativeSmart
     ? 'Read-only native balance for this Smart Account. Token balances are listed separately below.'
     : 'Connect a controller and verify your Smart Account to read its balance.';
-  for (const balance of [...state.portfolio.native, ...state.portfolio.tokens]) {
-    const item = document.createElement('div');
-    item.className = 'service-card wallet-asset-row';
-    const symbol = document.createElement('strong');
-    symbol.textContent = balance.symbol;
-    const amount = document.createElement('span');
-    amount.textContent = `${formatUnits(balance.raw, balance.decimals)} ${balance.symbol}`;
-    const detail = document.createElement('small');
-    const holder = balance.account || balance.address;
-    detail.textContent = smartAddress && holder?.toLowerCase() === smartAddress.toLowerCase()
-      ? 'Smart Account'
-      : state.controller && holder?.toLowerCase() === state.controller.toLowerCase()
-        ? 'Controller'
-        : shortAddress(holder);
-    item.append(symbol, amount, detail);
-    list.append(item);
+
+  const balances = [...state.portfolio.native.map(balance => ({ ...balance, kind: 'native', holder: balance.address })),
+    ...state.portfolio.tokens.map(balance => ({ ...balance, kind: 'token', holder: balance.account }))];
+  const groups = [
+    { address: smartAddress, label: 'Smart Account assets' },
+    { address: state.controller?.toLowerCase() === smartAddress?.toLowerCase() ? null : state.controller, label: 'Controller assets' },
+  ];
+  for (const group of groups) {
+    if (!group.address) continue;
+    const matching = balances.filter(balance => balance.holder?.toLowerCase() === group.address.toLowerCase());
+    if (!matching.length) continue;
+    const section = document.createElement('section');
+    section.className = 'wallet-asset-group';
+    const heading = document.createElement('h3');
+    heading.textContent = group.label;
+    const caption = document.createElement('p');
+    caption.className = 'wallet-field-help wallet-address-break';
+    caption.textContent = group.address;
+    const cards = document.createElement('div');
+    cards.className = 'wallet-asset-cards';
+    for (const balance of matching) {
+      const item = document.createElement('div');
+      item.className = 'service-card wallet-asset-row';
+      const symbol = document.createElement('strong');
+      symbol.textContent = balance.symbol;
+      const amount = document.createElement('span');
+      amount.textContent = `${formatUnits(balance.raw, balance.decimals)} ${balance.symbol}`;
+      const detail = document.createElement('small');
+      detail.className = 'wallet-address-break';
+      detail.textContent = balance.kind === 'native' ? 'Native 420 · network asset'
+        : `ERC-20 · ${balance.address}`;
+      item.append(symbol, amount, detail);
+      cards.append(item);
+    }
+    section.append(heading, caption, cards);
+    list.append(section);
   }
-  if (!list.children.length) list.textContent = 'Connect a wallet to load read-only balances.';
+  if (!list.children.length) list.textContent = state.controller
+    ? 'No supported balances available for the connected accounts.'
+    : 'Connect a wallet to load read-only balances.';
+}
+
+function renderReceive() {
+  const address = getCanonicalReceiveAddress420({
+    smartAccount: state.smartAccount,
+    network: state.network,
+    expectedChainId: state.config?.network?.chainId,
+  });
+  $('#receive-address').textContent = address || 'Unavailable';
+  $('#copy-receive-address').disabled = !address;
+  const copyFromOverview = document.querySelector('.wallet-identity-card [data-copy-source="#receive-address"]');
+  if (copyFromOverview) copyFromOverview.disabled = !address;
+  $('#receive-status').textContent = address
+    ? 'Deployed Smart Account found on the configured network. Confirm the destination with the sender.'
+    : state.smartAccount && !state.smartAccount.deployed
+      ? 'Account is counterfactual and has not been deployed. Receive address sharing is blocked until deployment.'
+      : 'A deployed Smart Account and the expected network are required before receiving.';
 }
 
 function renderCapabilityInspection() {
@@ -187,6 +227,7 @@ function render() {
 
   renderCapabilityInspection();
   renderPortfolio();
+  renderReceive();
 
   const list = $('#services');
   list.replaceChildren();
@@ -217,6 +258,10 @@ async function loadConfig() {
 }
 
 async function refreshConnectedState() {
+  state.network = null;
+  state.smartAccount = null;
+  state.portfolio = { native: [], tokens: [] };
+  renderReceive();
   state.network = await readNetwork(state.provider, state.config.network.chainId);
   if (state.network.chainMismatch) throw new Error(`Wrong network: expected ${state.network.expectedChainId}, received ${state.network.chainId}`);
   if (state.config.network.chainId && state.config.smartAccount.factoryAddress

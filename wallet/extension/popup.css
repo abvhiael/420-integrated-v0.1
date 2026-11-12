@@ -20,3 +20,5 @@ button{cursor:pointer;font-family:inherit;transition:filter .15s}.primary,.secon
 
 /* Programmatically focused view headings are not keyboard tab stops. */
 .screen-title[tabindex="-1"]:focus{outline:none}
+
+.vault-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 13px;margin:0 0 13px;background:#1a2b20;border:1px solid #48664d;border-radius:13px}.vault-banner div{min-width:0;display:grid;gap:4px}.vault-banner strong{font-size:12px}.vault-banner span{font-size:10px;line-height:1.4;color:#b9cbb9}.vault-banner button{flex-shrink:0;padding:8px;min-height:36px;font-size:11px}

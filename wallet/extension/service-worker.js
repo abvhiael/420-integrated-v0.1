@@ -10,6 +10,22 @@ const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOpera
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
+const VAULT_KEY = '420-wallet-encrypted-vault-v1';
+const VAULT_LEASE_KEY = '420-wallet-vault-lease-v1';
+async function vaultLockState420() {
+  const vault = (await chrome.storage.local.get(VAULT_KEY))?.[VAULT_KEY];
+  if (!vault) return { exists: false, unlocked: false };
+  const lease=(await chrome.storage.session.get(VAULT_LEASE_KEY))?.[VAULT_LEASE_KEY];
+  return {exists:true,unlocked:typeof lease?.expiresAt==='number' && lease.expiresAt > Date.now() && lease.expiresAt<=Date.now()+30*60*1000};
+}
+async function accountVisibility420(accounts){
+  const lock=await vaultLockState420();
+  if (!lock.exists || lock.unlocked) return accounts;
+  const config=await readObject('420-wallet-extension-config-v1');
+  const vaultAccounts=new Set((config.vaultAccounts||[]).map(x=>String(x).toLowerCase()));
+  return accounts.filter(a=>!vaultAccounts.has(String(a).toLowerCase()));
+}
+
 
 function normalizeOrigin(value) {
   const url = new URL(value);
@@ -30,7 +46,8 @@ async function readObject(key) {
 
 async function accountsFor(origin) {
   const permissions = await readObject(PERMISSIONS_KEY);
-  return Array.isArray(permissions[origin]?.accounts) ? permissions[origin].accounts : [];
+  const granted=Array.isArray(permissions[origin]?.accounts) ? permissions[origin].accounts : [];
+  return accountVisibility420(granted);
 }
 
 async function setAccounts(origin, accounts) {
@@ -131,7 +148,7 @@ async function handleApprovalMethod(request, context) {
     const existing = await accountsFor(origin);
     if (existing.length) return existing;
     const config = await readObject('420-wallet-extension-config-v1');
-    const available = Array.isArray(config.accounts) ? config.accounts : [];
+    const available = await accountVisibility420(Array.isArray(config.accounts) ? config.accounts : []);
     if (!available.length) throw Object.assign(new Error('no wallet accounts available'), { code: 4100 });
     const decision = await createApproval({ ...request, availableAccounts: available }, context);
     const selected = Array.isArray(decision.accounts) && decision.accounts.length ? decision.accounts : available;
@@ -175,8 +192,10 @@ async function walletUiState420() {
   const state={
     config:{rpcUrl:config.rpcUrl,chainId:config.chainId,explorerUrl:config.explorerUrl,networkName:config.networkName,
       accounts:config.accounts,trackedAssets:config.trackedAssets.slice(0,25),
+      vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
     selectedAccount:selected,sites,activity:await readWalletUiActivity420(),
+    vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null},
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
     assets:{native:null,tokens:[]},
@@ -194,6 +213,28 @@ async function walletUiState420() {
     }
     state.network.status='matched';
     if(!selected){state.account.reason='No controller account provisioned by Wallet Core';return state;}
+    if(state.config.vaultAccounts.some(a=>typeof a==='string'&&a.toLowerCase()===selected.toLowerCase())){
+      const provider={request:(method,params)=>rpcRequest(method,params)};
+      state.account={kind:'eoa',controller:selected,smartAccount:null,receiveAddress:selected,
+        deployed:false,ownerVerified:false,
+        reason:'Self-custodial EOA. Signing and sending need a local EOA authority; SmartAccount passkeys are not interchangeable.'};
+      try{
+        const native=await readNativeBalance(provider,selected);
+        state.assets.native={raw:native.raw.toString(),decimals:native.decimals,symbol:native.symbol};
+        for(const token of config.trackedAssets.slice(0,25)){
+          try{
+            const balance=await readErc20Balance(provider,token,selected);
+            state.assets.tokens.push({address:balance.address,raw:balance.raw.toString(),decimals:balance.decimals,symbol:balance.symbol});
+          }catch(error){
+            state.assets.tokens.push({address:token.address,symbol:token.symbol||'Token',error:'Token balance unavailable: '+error.message});
+          }
+        }
+      }catch(error){
+        state.assets={native:null,tokens:[]};
+        state.account.reason='EOA balance read failed: '+error.message;
+      }
+      return state;
+    }
     if(!config.smartAccountConfig?.factoryAddress){
       state.account.reason='SmartAccountFactory420 not provisioned';return state;
     }

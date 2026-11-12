@@ -75,8 +75,10 @@ export function extensionCanSend420(state){
   return Boolean(state?.network?.status==='matched'&&state?.account?.deployed===true&&state?.account?.ownerVerified===true&&state?.account?.controller&&state?.account?.smartAccount);
 }
 export function extensionReceiveAddress420(state){
-  if(state?.network?.status!=='matched'||!state?.account?.smartAccount)return null;
-  try{return normalizeExtensionAddress420(state.account.smartAccount)}catch{return null}
+  if(state?.network?.status!=='matched')return null;
+  const address=state?.account?.kind==='eoa'?state?.account?.receiveAddress:state?.account?.smartAccount;
+  if(!address)return null;
+  try{return normalizeExtensionAddress420(address)}catch{return null}
 }
 export function extensionNetworkLabel420(state){
   if(state?.network?.status==='wrong-chain')return 'Wrong network';

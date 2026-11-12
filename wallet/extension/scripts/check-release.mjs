@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,7 +7,7 @@ import { buildExtension420 } from './build.mjs';
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { dist: root } = await buildExtension420();
-const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
+const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'wallet.html', 'wallet.css', 'wallet.js', 'core/vault.js', 'vendor/ethers-6.17.0.min.js', 'vendor/ETHERS-LICENSE.md', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
 const forbiddenPatterns = [
   /\beval\s*\(/,
   /\bnew\s+Function\s*\(/,
@@ -38,11 +39,16 @@ async function scan(directory) {
       continue;
     }
     if (!/\.(?:js|mjs|html|json)$/.test(entry.name)) continue;
+    if (full.endsWith('ethers-6.17.0.min.js')) continue; // Exact upstream blob is separately authenticated below.
     const text = await readFile(full, 'utf8');
     for (const pattern of forbiddenPatterns) assert.equal(pattern.test(text), false, `${full} violates release code policy: ${pattern}`);
   }
 }
 await scan(root);
+const canonicalEthers = await readFile(join(root, 'vendor/ethers-6.17.0.min.js'));
+const upstreamGitBlob = createHash('sha1').update('blob ' + canonicalEthers.length + '\0').update(canonicalEthers).digest('hex');
+assert.equal(upstreamGitBlob, '8b1bb8fb32192a266cbe2cf27983c71a69ba7d4c', 'vendored ethers 6.17.0 blob must match pinned upstream release');
+
 
 const serviceWorker = await readFile(join(root, 'service-worker.js'), 'utf8');
 assert.match(serviceWorker, /origin !== senderOrigin/);
@@ -88,12 +94,17 @@ assert.doesNotMatch(localAuthority, /provider\.request\(['"]eth_sendTransaction[
 
 const popup = await readFile(join(root, 'popup.html'), 'utf8');
 const authorityHtml = await readFile(join(root, 'authority.html'), 'utf8');
+const walletHtml = await readFile(join(root, 'wallet.html'), 'utf8');
+assert.match(walletHtml, /id="welcome"/);
+assert.match(walletHtml, /id="confirm-phrase"/);
+assert.match(walletHtml, /id="unlock"/);
+assert.match(walletHtml, /id="accounts"/);
 assert.match(popup, /id="dashboard"/);
 assert.match(popup, /id="asset-list"/);
 assert.match(popup, /id="sites-view"/);
 assert.match(popup, /id="send-review"/);
 assert.match(popup, /id="settings-view"/);
-for (const html of [popup, authorityHtml]) {
+for (const html of [popup, authorityHtml, walletHtml]) {
   assert.doesNotMatch(html, /<script[^>]+src=["']https?:/i);
   assert.doesNotMatch(html, /<iframe/i);
 }

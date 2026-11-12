@@ -34,6 +34,7 @@ function smartState(overrides = {}) {
     smartAccount: account,
     factoryAddress: factory,
     capabilityRegistry: registry,
+    verifiedCapabilityRegistry: registry,
     entryPoint,
     recoveryAuthority: null,
     authorizationEpoch: 7n,

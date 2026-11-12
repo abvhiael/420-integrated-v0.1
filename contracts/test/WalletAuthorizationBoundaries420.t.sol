@@ -8,6 +8,7 @@ import "../src/system/CapabilityRegistry420.sol";
 import "../src/apps/Names420.sol";
 import "../src/apps/Identity420.sol";
 import "../src/apps/ProtocolRegistry.sol";
+import "../src/libraries/CapabilityIds420.sol";
 
 interface VmWalletBoundary420 {
     function addr(uint256 privateKey) external returns (address);
@@ -106,6 +107,43 @@ contract WalletAuthorizationBoundaries420Test {
         require(!ok, "account B inherited account A grant");
         require(entryPoint.getNonce(address(b), lane) == uint256(lane) << 64, "rejected op spent nonce");
         require(capabilities.componentAuthority(a.accountComponentId()) == address(a), "authority drift");
+    }
+
+    function testRevokedSessionCannotResurrectExistingSameEpochGrant() public {
+        vm.prank(owner); a.enableSessionKey(session);
+        vm.prank(owner);
+        bytes32 grantId = a.createSessionGrant(
+            session, address(target), WalletBoundaryTarget420.set.selector, 0, 0, 0, 0, 0
+        );
+        uint192 lane = uint192(uint160(session));
+        PackedUserOperation420 memory original = _op(address(a), entryPoint.getNonce(address(a), lane), _sessionCall(55));
+        original.signature = _sign(SESSION_PK, entryPoint.getUserOpHash(original));
+
+        vm.prank(owner); a.revokeKey(session);
+        require(a.sessionEpoch(session) != a.authorizationEpoch(), "session still active after revocation");
+
+        vm.prank(owner);
+        (bool enabled,) = address(a).call(
+            abi.encodeWithSelector(SmartAccount420.enableSessionKey.selector, session)
+        );
+        require(!enabled, "old session was re-enabled in its revoked epoch");
+
+        (bool accepted,) = address(entryPoint).call(abi.encodeWithSelector(EntryPoint420.handleOp.selector, original));
+        require(!accepted && target.stored() == 0, "revoked session executed old grant");
+
+        vm.prank(owner); a.revokeAllAuthorizations();
+        vm.prank(owner); a.enableSessionKey(session);
+        require(a.sessionEpoch(session) == a.authorizationEpoch(), "new-epoch enrollment failed");
+        require(
+            !capabilities.isAuthorized(
+                session, a.accountComponentId(), CapabilityIds420.SESSION_EXECUTE,
+                a.sessionScope(address(target), WalletBoundaryTarget420.set.selector), 0
+            ),
+            "old epoch grant was restored"
+        );
+        require(capabilities.grant(grantId).principal == session, "historic grant was mutated");
+        (accepted,) = address(entryPoint).call(abi.encodeWithSelector(EntryPoint420.handleOp.selector, original));
+        require(!accepted && target.stored() == 0, "old session proof worked after epoch rotation");
     }
 
     function testAccountSignatureCannotReplayAcrossAccountOrChain() public {

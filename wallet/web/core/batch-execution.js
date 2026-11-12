@@ -168,7 +168,7 @@ export async function confirmSmartAccountBatch(provider, txHash, controller, con
   try {
     ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
   } catch (error) {
-    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 batch transaction reverted');
+    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 batch transaction reverted atomically; no batch call was committed');
     throw error;
   }
 

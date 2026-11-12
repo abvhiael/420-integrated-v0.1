@@ -19,7 +19,7 @@
         <img class="brand-logo" src="./assets/420wallet-logo.svg?v=2" alt="" width="44" height="44" />
         <div><strong>420Wallet</strong><small>420Integrated</small></div>
       </div>
-      <nav aria-label="Wallet sections">
+      <nav id="wallet-section-nav" aria-label="Wallet sections" tabindex="0" aria-describedby="wallet-nav-hint">
         <span class="nav-group-label">Wallet</span>
         <button type="button" class="nav-item active" data-scroll-target="#overview" aria-current="page"><span aria-hidden="true" class="nav-mark">◈</span>Overview</button>
         <button type="button" class="nav-item" data-scroll-target="#wallet-assets"><span aria-hidden="true" class="nav-mark">◉</span>Assets</button>
@@ -38,6 +38,7 @@
         <button type="button" class="nav-item" data-scroll-target="#capability-panel"><span aria-hidden="true" class="nav-mark">◇</span>Permissions</button>
         <button type="button" class="nav-item" data-scroll-target="#session-panel"><span aria-hidden="true" class="nav-mark">⌘</span>Sessions</button>
       </nav>
+      <p id="wallet-nav-hint" class="wallet-nav-hint">Use Tab to reach wallet sections. On a small screen, scroll this navigation horizontally to reveal more sections.</p>
       <div class="sidebar-note"><span class="status-dot" aria-hidden="true"></span><span>Canonical account authority enforced by Wallet Core</span></div>
     </aside>
 
@@ -81,7 +82,7 @@
       <section id="wallet-assets" class="wallet-assets-section" aria-labelledby="assets-heading">
         <div class="section-heading"><div><p class="eyebrow">Portfolio</p><h2 id="assets-heading">Assets</h2></div><span class="section-kicker">Read-only chain state · balances shown per account</span></div>
         <p class="wallet-section-help">Balances are displayed separately for your Smart Account and connected controller. No asset prices are assumed.</p>
-        <div id="portfolio" class="service-grid asset-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
+        <div id="portfolio" class="service-grid asset-grid" aria-live="polite" aria-atomic="false">Connect a wallet to load read-only balances.</div>
       </section>
       
       <section id="wallet-receive" class="panel wallet-receive" aria-labelledby="receive-heading">
@@ -90,7 +91,7 @@
           <div class="wallet-receive-address-card">
             <p class="label">Smart Account address</p>
             <output id="receive-address" class="wallet-address-value" aria-live="polite">Unavailable</output>
-            <p id="receive-status" class="muted" role="status">Connect a controller and verify the network to discover a receiving address.</p>
+            <p id="receive-status" class="muted" role="status" aria-live="polite" aria-atomic="true">Connect a controller and verify the network to discover a receiving address.</p>
             <div class="button-row">
               <button type="button" class="primary-action" id="copy-receive-address" data-copy-source="#receive-address" disabled>Copy full address</button>
               <button type="button" class="ghost-button" data-scroll-target="#wallet-assets">View supported assets</button>
@@ -117,7 +118,7 @@
             <label><span class="label">Recipient (420Integrated address)</span><input id="send-recipient" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="0x…" aria-describedby="send-recipient-help" /><small id="send-recipient-help" class="wallet-field-help">Paste the full 42-character address. The wallet checks its format before preparing a transaction.</small></label>
             <label><span class="label">Amount</span><input id="send-amount" type="text" inputmode="decimal" autocomplete="off" placeholder="4.20" /></label>
           </div>
-          <div class="section-heading"><p id="send-preview" class="muted" role="status" aria-live="polite">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
+          <div class="section-heading"><p id="send-preview" class="muted" role="status" aria-live="polite" aria-atomic="true">Enter a recipient and amount, then prepare the guarded transaction.</p><button id="prepare-send" type="button">Prepare send</button></div>
         </div>
 
         <div class="split-panel">
@@ -211,7 +212,7 @@
             <option value="reorganized">Reorganizations</option>
           </select>
         </div>
-        <div id="activity-list" class="activity-list" aria-live="polite"></div>
+        <div id="activity-list" class="activity-list" aria-live="polite" aria-atomic="false"></div>
       </section>
 
       <section id="network-verification" class="wallet-verification-section" aria-labelledby="verification-heading">
@@ -243,7 +244,7 @@
 
       <section class="security-note"><h2>Wallet Core security boundary</h2><p>Account creation is routed only through canonical SmartAccountFactory420. Guided sends and guarded owner batches compile into SmartAccount420 execution paths with mandatory simulation, authority-contract target blocking and canonical owner-state re-verification. Recovery mutation is guarded and timelocked. Scoped session execution is transported through EntryPoint420 with nonce, grant and authorization-epoch hardening.</p></section>
 
-      <p id="status" class="status" role="status">Ready.</p>
+      <p id="status" class="status" role="status" aria-live="polite" aria-atomic="true">Ready.</p>
     </main>
   </div>
   <script type="module" src="./app.js"></script>

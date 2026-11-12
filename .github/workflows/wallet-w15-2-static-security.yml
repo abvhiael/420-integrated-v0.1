@@ -106,7 +106,7 @@ jobs:
           entry = Path("src/accounts/EntryPoint420.sol").read_text()
           smart = Path("src/accounts/SmartAccount420.sol").read_text()
           registry = Path("src/system/CapabilityRegistry420.sol").read_text()
-          assert "external\\n        nonReentrant\\n        returns" in entry, "EntryPoint guard changed"
+          assert "external\n        nonReentrant\n        returns" in entry, "EntryPoint guard changed"
           assert "onlyEntryPoint" in smart and "onlyOwner" in smart, "Wallet authority guard changed"
           assert "capabilityRegistry.consume(authorization.grantId, authorization.amount)" in smart
           assert "if (g.revoked) revert GrantRevoked()" in registry

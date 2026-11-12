@@ -21,7 +21,10 @@ contract PolicyEntryPointMock420 {
     }
 }
 contract PolicyTarget420 { function sink() external payable {} }
-contract MockERC20Policy420 { function transfer(address, uint256) external pure returns (bool) { return true; } }
+contract MockERC20Policy420 {
+    function transfer(address, uint256) external pure returns (bool) { return true; }
+    function transferCustom(address, uint256) external pure returns (bool) { return true; }
+}
 
 contract SmartAccountPolicyFuzz420Test {
     VmPolicy420 internal constant vm = VmPolicy420(address(uint160(uint256(keccak256("hevm cheat code")))));
@@ -118,6 +121,56 @@ contract SmartAccountPolicyFuzz420Test {
         bytes32 hash = keccak256(abi.encode("token-limit", amount));
         uint256 result = entryPoint.validate(account, _op(callData, hash), hash);
         require((result == 0) == (amount <= 100), "token boundary");
+    }
+
+    function testFuzzCappedGrantRejectsUnmeteredCustomTokenSelector(uint128 rawAmount) public {
+        _enable();
+        bytes4 custom = MockERC20Policy420.transferCustom.selector;
+        bytes32 grantId = _grant(address(token), custom, 100, 200, 1 days);
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(token), value: 0,
+            data: abi.encodeWithSelector(custom, address(0x420), uint256(rawAmount))
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
+        bytes32 hash = keccak256(abi.encode("custom-token-capped", rawAmount));
+        PackedUserOperation420 memory op = _op(callData, hash);
+        require(entryPoint.validate(account, op, hash) == 1, "unknown token amount bypassed quota");
+        require(!entryPoint.execute(account, callData), "unknown token call executed under capped grant");
+        require(capabilities.usage(grantId).used == 0, "rejected call consumed quota");
+    }
+
+    function testCappedGrantRejectsNativeValueWithUnknownEncodedAssetAmount() public {
+        _enable();
+        bytes4 custom = MockERC20Policy420.transferCustom.selector;
+        bytes32 grantId = _grant(address(token), custom, 1 ether, 2 ether, 1 days);
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(token), value: 0.1 ether,
+            data: abi.encodeWithSelector(custom, address(0x420), uint256(50 ether))
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
+        bytes32 hash = keccak256("unknown-asset-plus-native");
+        require(entryPoint.validate(account, _op(callData, hash), hash) == 1,
+            "unknown token payload misclassified as native-only spend");
+        require(capabilities.usage(grantId).used == 0, "mixed asset amount consumed quota");
+    }
+
+    function testExplicitlyUnlimitedGrantRetainsCustomSelectorExecution() public {
+        _enable();
+        bytes4 custom = MockERC20Policy420.transferCustom.selector;
+        bytes32 grantId = _grant(address(token), custom, 0, 0, 0);
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(token), value: 0,
+            data: abi.encodeWithSelector(custom, address(0x420), uint256(99))
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
+        bytes32 hash = keccak256("explicit-uncapped-custom-token");
+        require(entryPoint.validate(account, _op(callData, hash), hash) == 0,
+            "owner-approved unlimited selector unexpectedly blocked");
+        require(entryPoint.execute(account, callData), "unlimited selector execution failed");
+        require(capabilities.grant(grantId).principal == session, "unlimited grant identity changed");
     }
 
     function _enable() internal { vm.prank(owner); account.enableSessionKey(session); }

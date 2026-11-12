@@ -596,6 +596,17 @@ contract SmartAccount420 {
         }
 
         ICapabilityRegistry420.CapabilityGrant memory grant_ = capabilityRegistry.grant(authorization.grantId);
+        // An owner-approved exact target and selector does not make an arbitrary
+        // ABI's asset amount measurable. Never treat an unknown selector with
+        // encoded arguments as a zero-cost, quota-metered token operation.
+        // Capped grants accept canonical ERC20 amounts or native-only calls
+        // (empty data or a four-byte selector with explicit msg.value).
+        // Other calls require an explicitly unmetered grant (both limits zero).
+        bool canonicalTokenSpend = targetSelector == _ERC20_TRANSFER
+            || targetSelector == _ERC20_APPROVE || targetSelector == _ERC20_TRANSFER_FROM;
+        if ((grant_.perCallLimit != 0 || grant_.periodLimit != 0) && !canonicalTokenSpend) {
+            if (call_.value == 0 || call_.data.length > 4) return (false, authorization);
+        }
         authorization.validAfter = uint48(grant_.validFrom);
         authorization.validUntil = uint48(grant_.validUntil);
         return (true, authorization);

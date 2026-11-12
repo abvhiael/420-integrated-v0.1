@@ -48,7 +48,7 @@ jobs:
       - name: Compile eight scoped Wallet contract artifacts
         working-directory: contracts
         run: |
-          forge build src/accounts/EntryPoint420.sol src/system/CapabilityRegistry420.sol src/accounts/SmartAccountFactory420.sol src/accounts/SmartAccount420.sol src/accounts/SponsorshipPolicy420.sol src/accounts/Paymaster420.sol src/accounts/Rip7212P256Verifier420.sol src/accounts/P256WebAuthnVerifier420.sol
+          forge build --extra-output storageLayout src/accounts/EntryPoint420.sol src/system/CapabilityRegistry420.sol src/accounts/SmartAccountFactory420.sol src/accounts/SmartAccount420.sol src/accounts/SponsorshipPolicy420.sol src/accounts/Paymaster420.sol src/accounts/Rip7212P256Verifier420.sol src/accounts/P256WebAuthnVerifier420.sol
       - name: Generate and independently verify deterministic offline bundle
         run: |
           python scripts/prepare-wallet-w15-3.py --output artifacts/wallet-w15-3

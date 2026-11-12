@@ -119,3 +119,23 @@ section { scroll-margin-top: 36px; }
 .wallet-activity-toolbar select { padding: 9px 12px; color: var(--wallet-text); background: var(--wallet-canvas); border: 1px solid var(--wallet-border); border-radius: 10px; min-width: 190px; }
 @media(max-width: 900px) { .wallet-receive-grid { grid-template-columns: 1fr; } }
 @media(max-width: 640px) { .wallet-receive-address-card,.wallet-receive-note { padding: 17px; } .wallet-send-steps { flex-direction: column; } .wallet-activity-toolbar { align-items: stretch; flex-direction: column; } .wallet-activity-toolbar select { width: 100%; } }
+
+/* W15.5 Security Centre, premium fintech with restrained neon accents. */
+.wallet-security-centre { margin: 38px 0 22px; scroll-margin-top: 32px; }
+.wallet-security-centre .section-heading { margin-bottom: 18px; }
+.wallet-security-centre .wallet-section-help { max-width: 78ch; }
+.wallet-security-overview { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; padding: 20px; margin-bottom: 16px; background: linear-gradient(125deg,#1c3221,#15231a 70%); border: 1px solid var(--wallet-border); border-radius: var(--wallet-radius-hero); }
+.wallet-security-overview strong { display: block; overflow-wrap: anywhere; }
+.wallet-security-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.wallet-security-card { display: flex; flex-direction: column; min-width: 0; padding: 24px; background: var(--wallet-surface); border: 1px solid var(--wallet-border); border-radius: var(--wallet-radius-card); }
+.wallet-security-card h3 { margin: 13px 0 10px; font-size: 1.2rem; }
+.wallet-security-card p { color: var(--wallet-text-secondary); line-height: 1.65; font-size: .94rem; }
+.wallet-security-card-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+.wallet-security-glyph { display: inline-grid; place-items: center; background: var(--wallet-surface-raised); color: var(--wallet-accent); width: 42px; height: 42px; border: 1px solid var(--wallet-border); border-radius: 12px; font-size: 1.3rem; }
+.wallet-security-availability { display: inline-flex; align-items: center; border: 1px solid var(--wallet-border); border-radius: 999px; padding: 6px 10px; color: var(--wallet-text-secondary); font-size: .75rem; font-weight: 700; }
+.wallet-security-availability[data-state="available"] { border-color: #596d4e; color: #d5efbe; }
+.wallet-security-card > button { align-self: flex-start; margin-top: auto; min-height: 44px; }
+.wallet-security-connected-apps { grid-column: 1/-1; }
+.wallet-security-centre ~ .panel .danger-button { color: var(--wallet-danger); border-color: #855251; }
+@media(max-width: 900px) { .wallet-security-overview { grid-template-columns: 1fr 1fr; } }
+@media(max-width: 760px) { .wallet-security-grid,.wallet-security-overview { grid-template-columns: 1fr; } .wallet-security-connected-apps { grid-column: auto; } .wallet-security-card { padding: 20px; } }

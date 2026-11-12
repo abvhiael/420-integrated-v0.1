@@ -33,6 +33,7 @@
         <button type="button" class="nav-item" data-scroll-target="#governance-management-panel"><span aria-hidden="true" class="nav-mark">◇</span>Governance</button>
         <button type="button" class="nav-item" data-scroll-target="#stake-management-panel"><span aria-hidden="true" class="nav-mark">✦</span>420 Stake</button>
         <span class="nav-group-label">Security</span>
+        <button type="button" class="nav-item" data-scroll-target="#security-centre"><span aria-hidden="true" class="nav-mark">✧</span>Security Centre</button>
         <button type="button" class="nav-item" data-scroll-target="#capability-panel"><span aria-hidden="true" class="nav-mark">◇</span>Permissions</button>
         <button type="button" class="nav-item" data-scroll-target="#session-panel"><span aria-hidden="true" class="nav-mark">⌘</span>Sessions</button>
       </nav>
@@ -141,8 +142,21 @@
         </div>
       </section>
 
+      <section id="security-centre" class="wallet-security-centre" aria-labelledby="security-centre-heading">
+        <div class="section-heading"><div><p class="eyebrow">420Wallet · Account protection</p><h2 id="security-centre-heading">Security Centre</h2><p class="wallet-section-help">Review existing Wallet Core security features from one place. Availability is not proof of contract deployment or permission validity.</p></div></div>
+        <div class="wallet-security-overview" role="note"><div><p class="label">Controller</p><strong id="security-controller">Not connected</strong></div><div><p class="label">Smart Account</p><strong id="security-account">Not discovered</strong></div><div><p class="label">Account state</p><strong id="security-authority-status">Not verified</strong></div></div>
+        <div class="wallet-security-grid">
+          <article class="wallet-security-card"><div class="wallet-security-card-top"><span class="wallet-security-glyph" aria-hidden="true">◇</span><span id="security-capabilities-status" class="wallet-security-availability">Unavailable</span></div><h3>Capability permissions</h3><p>Review a known on-chain grant by ID, principal, scope, limits, usage and revocation state. A website connection is not the same as a grant.</p><button class="ghost-button" type="button" data-scroll-target="#capability-panel">Inspect capability</button></article>
+          <article class="wallet-security-card"><div class="wallet-security-card-top"><span class="wallet-security-glyph" aria-hidden="true">⌘</span><span id="security-sessions-status" class="wallet-security-availability">Unavailable</span></div><h3>Sessions and delegation</h3><p>Manage scoped session signers and the limits, period and expiry of their on-chain authorization. Execution remains nonce-, scope- and epoch-gated.</p><button class="ghost-button" type="button" data-scroll-target="#session-panel">Manage sessions</button></article>
+          <article class="wallet-security-card"><div class="wallet-security-card-top"><span class="wallet-security-glyph" aria-hidden="true">✦</span><span id="security-passkeys-status" class="wallet-security-availability">Unavailable</span></div><h3>Passkey security</h3><p>Review device credential enrollment and binding for this authorization epoch. Passkey operations still require their established WebAuthn and EntryPoint checks.</p><button class="ghost-button" type="button" data-scroll-target="#passkey-panel">Manage passkeys</button></article>
+          <article class="wallet-security-card"><div class="wallet-security-card-top"><span class="wallet-security-glyph" aria-hidden="true">↺</span><span id="security-recovery-status" class="wallet-security-availability">Unavailable</span></div><h3>Account recovery</h3><p>Inspect the recovery authority, pending ownership change and safety timelock. Confirm, cancel or finalize only through Wallet Core.</p><button class="ghost-button" type="button" data-scroll-target="#recovery-panel">Manage recovery</button></article>
+          <article id="security-connected-apps" class="wallet-security-card wallet-security-connected-apps"><div class="wallet-security-card-top"><span class="wallet-security-glyph" aria-hidden="true">▦</span><span class="wallet-security-availability">Inventory unavailable</span></div><h3>Connected applications</h3><p>This wallet web interface does not currently provide an authoritative inventory of connected website origins. No website is shown as authorized or disconnected without evidence.</p><p>Disconnecting a website does not revoke its separate on-chain capability grant. Inspect and revoke a known grant in Capability permissions.</p><button type="button" class="ghost-button" data-scroll-target="#services-section">Explore verified 420 apps</button></article>
+        </div>
+        <p id="security-centre-status" class="wallet-section-help" role="status">Security controls are shown when their feature gates permit them. Actions remain subject to canonical Wallet Core authorization.</p>
+      </section>
+
       <section id="capability-panel" class="panel" hidden>
-        <div class="section-heading"><div><p class="eyebrow">Canonical permissions</p><h2>Capability inspector</h2></div></div>
+        <div class="section-heading"><div><p class="eyebrow">Security Centre / Canonical permissions</p><h2>Capability inspector</h2><p class="wallet-section-help">Grant inspection requires an exact ID. Revocation is an independently confirmed on-chain operation.</p></div></div>
         <div class="account-card permission-grid">
           <label><span class="label">Grant ID (bytes32)</span><input id="capability-grant-id" type="text" autocomplete="off" placeholder="0x…64 hex chars" /></label>
           <div><p class="label">Capability Registry</p><strong id="capability-registry">—</strong></div>
@@ -170,7 +184,7 @@
       </section>
 
       <section id="session-panel" class="panel" hidden>
-        <div class="section-heading"><div><p class="eyebrow">Owner-controlled delegation</p><h2>Session key administration</h2></div><span class="status-pill">Execution enabled through scoped EntryPoint420 transport</span></div>
+        <div class="section-heading"><div><p class="eyebrow">Security Centre / Delegated authorization</p><h2>Session key administration</h2><p class="wallet-section-help">Grant and revoke session authorization only within canonical epoch, target and spending policies.</p></div><span class="status-pill">Policy-gated EntryPoint420 transport</span></div>
         <div class="form-grid account-card">
           <label><span class="label">Session key address</span><input id="session-key" type="text" autocomplete="off" placeholder="0x…" /></label>
           <label><span class="label">Scoped target</span><input id="session-target" type="text" autocomplete="off" placeholder="0x…" /></label>
@@ -216,6 +230,7 @@
   <script type="module" src="./stake-management-ui.js"></script>
   <script type="module" src="./ui-v1.js"></script>
   <script type="module" src="./wallet-shell.js"></script>
+  <script type="module" src="./security-centre.js"></script>
   <script type="module" src="./session-execution-ui.js"></script>
   <script type="module" src="./batch-execution-ui.js"></script>
   <script type="module" src="./passkey-ui.js"></script>

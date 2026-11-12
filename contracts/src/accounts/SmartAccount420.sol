@@ -599,15 +599,16 @@ contract SmartAccount420 {
         // An owner-approved exact target and selector does not make an arbitrary
         // ABI's asset amount measurable. Never treat an unknown selector with
         // encoded arguments as a zero-cost, quota-metered token operation.
-        // Capped grants accept canonical ERC20 amounts or native-only ABI
-        // calls with no encoded arguments (empty data or a four-byte selector).
-        // Native ETH value, including zero, is metered as msg.value; any
-        // arbitrary selector with encoded arguments requires an explicitly
-        // unmetered grant (both limits zero).
+        // Capped grants accept canonical ERC20 amounts, or native-only ABI
+        // calls with an explicit nonzero ETH value and no encoded arguments
+        // (empty data or a four-byte selector). A zero-value custom selector
+        // can still move tokens as a side effect and MUST NOT count as zero
+        // quota consumption. Other selectors require an explicitly unlimited
+        // grant (both limits zero).
         bool canonicalTokenSpend = targetSelector == _ERC20_TRANSFER
             || targetSelector == _ERC20_APPROVE || targetSelector == _ERC20_TRANSFER_FROM;
         if ((grant_.perCallLimit != 0 || grant_.periodLimit != 0) && !canonicalTokenSpend) {
-            if (call_.data.length > 4) return (false, authorization);
+            if (call_.value == 0 || call_.data.length > 4) return (false, authorization);
         }
         authorization.validAfter = uint48(grant_.validFrom);
         authorization.validUntil = uint48(grant_.validUntil);

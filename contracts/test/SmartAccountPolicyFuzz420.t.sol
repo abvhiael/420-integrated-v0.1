@@ -55,7 +55,7 @@ contract SmartAccountPolicyFuzz420Test {
         _grant(address(target), PolicyTarget420.sink.selector, 0.5 ether, 1 ether, 1 days);
         bytes32 hash = keccak256(abi.encode("native-limit", amount));
         uint256 result = entryPoint.validate(account, _nativeOp(amount, hash), hash);
-        require((result == 0) == (amount <= 0.5 ether), "per-call boundary");
+        require((result == 0) == (amount != 0 && amount <= 0.5 ether), "native-only per-call boundary");
     }
 
     function testValidationDoesNotConsumeAllowance() public {
@@ -138,6 +138,22 @@ contract SmartAccountPolicyFuzz420Test {
         require(entryPoint.validate(account, op, hash) == 1, "unknown token amount bypassed quota");
         require(!entryPoint.execute(account, callData), "unknown token call executed under capped grant");
         require(capabilities.usage(grantId).used == 0, "rejected call consumed quota");
+    }
+
+    function testCappedGrantRejectsUnmeteredZeroValueNoArgumentSelector() public {
+        _enable();
+        bytes32 grantId = _grant(address(target), PolicyTarget420.sink.selector, 1 ether, 2 ether, 1 days);
+        SmartAccount420.Call[] memory calls = new SmartAccount420.Call[](1);
+        calls[0] = SmartAccount420.Call({
+            target: address(target), value: 0,
+            data: abi.encodeWithSelector(PolicyTarget420.sink.selector)
+        });
+        bytes memory callData = abi.encodeWithSelector(SmartAccount420.executeSession.selector, session, calls);
+        bytes32 hash = keccak256("unmetered-zero-value-no-args");
+        require(entryPoint.validate(account, _op(callData, hash), hash) == 1,
+            "zero-value unknown selector bypassed capped grant");
+        require(!entryPoint.execute(account, callData), "unmetered zero-value selector executed");
+        require(capabilities.usage(grantId).used == 0, "invalid zero-value operation spent quota");
     }
 
     function testCappedGrantRejectsNativeValueWithUnknownEncodedAssetAmount() public {

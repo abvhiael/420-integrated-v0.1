@@ -18,6 +18,7 @@ interface IAccountValidation420 {
 ///      accounting only: callback failure cannot undo EntryPoint settlement or mutate account authority.
 contract EntryPoint420 is IEntryPoint420 {
     bytes32 public constant USER_OPERATION_DOMAIN = keccak256("420/ENTRY_POINT/USER_OPERATION/V1");
+    uint256 private constant _POST_OP_GAS_LIMIT = 100_000;
 
     struct SponsorshipReservation {
         uint256 amountWei;
@@ -259,8 +260,14 @@ contract EntryPoint420 is IEntryPoint420 {
             revert SponsorshipCostExceeded(maxCostWei, sponsorship.maxSponsoredCostWei);
         }
 
+        // Cap untrusted sponsor validation to the signed verification allowance.
+        // This prevents a hostile paymaster from consuming all relayer gas before
+        // reservation/nonce handling.
+        uint256 verificationGasLimit = uint256(userOp.accountGasLimits) >> 128;
         (bytes memory context, uint256 paymasterValidationData) =
-            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp(userOp, userOpHash, maxCostWei);
+            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp{gas: verificationGasLimit}(
+                userOp, userOpHash, maxCostWei
+            );
         _enforcePaymasterValidationData(paymasterValidationData);
 
         emit PaymasterValidated(
@@ -325,7 +332,11 @@ contract EntryPoint420 is IEntryPoint420 {
 
         PostOpMode420 mode = executionSucceeded ? PostOpMode420.OpSucceeded : PostOpMode420.OpReverted;
         bool callbackSucceeded;
-        try IPaymaster420(sponsorship.paymaster).postOp(mode, sponsorship.context, chargedWei) {
+        // postOp is advisory: even a malicious gas-burning callback must not
+        // exhaust the relayer and roll back already-recorded settlement.
+        try IPaymaster420(sponsorship.paymaster).postOp{gas: _POST_OP_GAS_LIMIT}(
+            mode, sponsorship.context, chargedWei
+        ) {
             callbackSucceeded = true;
         } catch {
             callbackSucceeded = false;

@@ -425,6 +425,17 @@ contract SmartAccount420 {
         return abi.decode(encoded, (bytes32, bytes));
     }
 
+    /// @notice ABI decode helper used with an external self-call to fail closed on
+    ///         malformed signed session envelopes without bubbling a decoder revert.
+    /// @dev This pure utility cannot grant authorization or consume an allowance.
+    function decodeSessionEnvelope(bytes calldata encoded)
+        external
+        pure
+        returns (address signer, Call[] memory calls)
+    {
+        return abi.decode(encoded, (address, Call[]));
+    }
+
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
         // ERC-1271 remains deliberately ECDSA-owner-only in this milestone. Passkey
         // ERC-1271 semantics will only be added after the UserOperation path qualifies.
@@ -506,9 +517,12 @@ contract SmartAccount420 {
         bytes4 selector = bytes4(callData[:4]);
         if (selector != this.executeSession.selector) return (false, 0, 0);
 
-        (address encodedSigner, Call[] memory calls) = abi.decode(callData[4:], (address, Call[]));
-        if (encodedSigner != signer) return (false, 0, 0);
-        return _authorizeCallSet(signer, calls);
+        try this.decodeSessionEnvelope(callData[4:]) returns (address encodedSigner, Call[] memory calls) {
+            if (encodedSigner != signer) return (false, 0, 0);
+            return _authorizeCallSet(signer, calls);
+        } catch {
+            return (false, 0, 0);
+        }
     }
 
     function _authorizeCallSet(address signer, Call[] memory calls)

@@ -36,6 +36,7 @@ try{
    await page.keyboard.press('Enter');
    const focus=await page.evaluate(()=>document.activeElement?.id);
    if(focus!=='security-centre')failures.push(width+': keyboard destination focus '+focus);
+   await page.waitForFunction(()=>document.querySelector('#verification-banner-title')?.textContent !== 'Checking wallet state',null,{timeout:12000});
    const banner=await page.locator('#verification-banner-title').textContent();
    if(!/unconfigured|disconnected|not verified|check failed/i.test(banner||''))failures.push(width+': unverified chain banner '+banner);
    if(!await page.locator('#copy-receive-address').isDisabled())failures.push(width+': Receive enabled without deployment');

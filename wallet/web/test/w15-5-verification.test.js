@@ -30,6 +30,7 @@ test('UI preserves existing core controls and verified ecosystem service resolve
  const html=read('index.html'),app=read('app.js'),apps=read('apps-page.js');
  for(const id of ['connect','smart-account','network','rpc-status','send-execution','simulate-execution','capability-panel','security-centre','services-section','network-verification','verification-banner','verification-factory','verification-entrypoint','verification-registry','verification-services']) assert.ok(html.includes('id="'+id+'"'),id);
  assert.match(html,/src=".\/network-verification.js"/);
+ assert.ok(html.indexOf('src="./network-verification.js"') < html.indexOf('src="./app.js"'), "verification listeners must register before initial config event");
  assert.match(app,/confirmSmartAccountExecution/);
  assert.match(app,/wallet:verification-state/);
  assert.match(app,/loadConfig\(\)\.then\(\(\) => \{/);

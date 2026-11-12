@@ -280,5 +280,5 @@ test('RPC transport rejects mismatched JSON-RPC ids and malformed code assertion
     fetchImpl:async()=>({ok:true,json:async()=>({jsonrpc:'2.0',id:987,result:'0x1a4'})})});
   await assert.rejects(provider.request('eth_chainId'),/response identity mismatch/);
   const invalid={request:async(method)=>method==='eth_getCode'?'0xZZ':'0x'};
-  await assert.rejects(discoverSmartAccount(invalid,controller,{factoryAddress:factory,salt:ZERO_BYTES32}),/factory420 is not deployed/);
+  await assert.rejects(discoverSmartAccount(invalid,controller,{factoryAddress:factory,salt:ZERO_BYTES32}),/factory420 is not deployed/i);
 });

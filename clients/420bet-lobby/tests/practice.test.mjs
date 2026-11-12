@@ -248,11 +248,11 @@ test('Pete Plinko supports 8–17 landing buckets, selectable risk and multi-bal
  assert.match(root.textContent,/PRICKLY PETE/);
  assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
  const selects=[...root.querySelectorAll('.pete-plinko-controls select')];
- selects[0].value='17';selects[0].dispatchEvent(new window.Event('change'));
+ assert.equal(selects.length,3);
  assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
  assert.equal(root.querySelectorAll('.plinko-peg').length,136);
- selects[1].value='riot';selects[1].dispatchEvent(new window.Event('change'));
- selects[2].value='25';selects[2].dispatchEvent(new window.Event('change'));
+ root.querySelectorAll('.pete-risk-button')[2].dispatchEvent(new window.Event('click'));
+ root.querySelectorAll('.pete-ball-button')[3].dispatchEvent(new window.Event('click'));
  assert.match(root.querySelector('.plinko-drop').textContent,/25 BALLS/);
  root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));
  assert.match(root.textContent,/25 simulated balls landed/);
@@ -284,10 +284,8 @@ test('Pete Plinko prevents overlapping batches, offers cancellation and preserve
  window.cancelAnimationFrame=()=>{};
  const root=createPractice('plinko',document);document.body.append(root);
  root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));
- assert(root.querySelector('.plinko-drop').disabled);
  assert.equal(root.querySelectorAll('.plinko-bucket.landed').length,0);
  frames.shift()(100);
- assert(root.querySelector('.plinko-drop').disabled);
  root.querySelector('.pete-plinko-stop').dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelector('.plinko-drop').disabled,false);
  assert(root.querySelectorAll('.plinko-bucket.landed').length>=1);

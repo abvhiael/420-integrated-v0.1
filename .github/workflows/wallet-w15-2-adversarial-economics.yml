@@ -1,0 +1,44 @@
+name: 420Wallet W15.2 Adversarial Economics
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/accounts/EntryPoint420.sol'
+      - 'contracts/src/accounts/SmartAccount420.sol'
+      - 'contracts/test/WalletAdversarialEconomics420.t.sol'
+      - '.github/workflows/wallet-w15-2-adversarial-economics.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  economic-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: New adversarial economics, gas and malformed-ABI regressions
+        working-directory: contracts
+        run: forge test --match-path test/WalletAdversarialEconomics420.t.sol -vv
+      - name: Retained settlement, hostile callbacks, replay and atomicity
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge test --match-path 'test/EntryPointPaymaster*420.t.sol' -vv
+          forge test --match-path 'test/SmartAccountPolicyFuzz420.t.sol' -vv
+          forge test --match-path 'test/SmartAccountInvariant420.t.sol' -vv
+          forge test --match-path 'test/SmartAccountPasskey420.t.sol' -vv
+          forge test --match-path 'test/SmartAccountEntryPointIntegration420.t.sol' -vv

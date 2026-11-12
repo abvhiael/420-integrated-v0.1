@@ -241,16 +241,16 @@ test('Emerald cabinet screenshot calibration keeps INFO over painted icon and re
  assert(root.querySelector('.es-paytable'));
 });
 
-test('Pete Plinko supports 8–16 landing buckets, selectable risk and multi-ball',()=>{
+test('Pete Plinko supports 8–17 landing buckets, selectable risk and multi-ball',()=>{
  const {document,window}=parseHTML('<html><body></body></html>');
  window.matchMedia=()=>({matches:true});
  const root=createPractice('plinko',document);
  assert.match(root.textContent,/PRICKLY PETE/);
  assert.equal(root.querySelectorAll('.plinko-bucket').length,13);
  const selects=[...root.querySelectorAll('.pete-plinko-controls select')];
- selects[0].value='16';selects[0].dispatchEvent(new window.Event('change'));
- assert.equal(root.querySelectorAll('.plinko-bucket').length,16);
- assert.equal(root.querySelectorAll('.plinko-peg').length,120);
+ selects[0].value='17';selects[0].dispatchEvent(new window.Event('change'));
+ assert.equal(root.querySelectorAll('.plinko-bucket').length,17);
+ assert.equal(root.querySelectorAll('.plinko-peg').length,136);
  selects[1].value='riot';selects[1].dispatchEvent(new window.Event('change'));
  selects[2].value='25';selects[2].dispatchEvent(new window.Event('change'));
  assert.match(root.querySelector('.plinko-drop').textContent,/25 BALLS/);
@@ -259,10 +259,10 @@ test('Pete Plinko supports 8–16 landing buckets, selectable risk and multi-bal
  assert.match(root.textContent,/Total practice balls25/);
  assert.equal(root.querySelectorAll('.plinko-bucket').length,16);
  assert.match(root.textContent,/NOT approved for live settlement/);
- assert.equal(plinkoPracticeGrossPayout(15,16,'riot'),0);
+ assert.equal(plinkoPracticeGrossPayout(16,17,'riot'),0);
 });
 test('Pete Plinko practice schedules are symmetric, risk-sensitive, and near 96% across bucket counts',()=>{
- for(let buckets=8;buckets<=16;buckets++){
+ for(let buckets=8;buckets<=17;buckets++){
   const low=plinkoSchedule(buckets,'soundcheck'),medium=plinkoSchedule(buckets,'showtime'),high=plinkoSchedule(buckets,'riot');
   for(const schedule of [low,medium,high]){
    assert.equal(schedule.length,buckets);
@@ -273,9 +273,9 @@ test('Pete Plinko practice schedules are symmetric, risk-sensitive, and near 96%
   assert(high[c]<medium[c]&&medium[c]<low[c]);
   for(const risk of ['soundcheck','showtime','riot'])assert(Math.abs(plinkoExpectedReturn(buckets,risk)-.96)<0.0001);
  }
- assert.equal(plinkoPath(16,()=>0).length,15);
- assert.throws(()=>plinkoPath(17));
- assert.equal(plinkoWaypoints(Array(15).fill(1)).length,17);
+ assert.equal(plinkoPath(17,()=>0).length,16);
+ assert.throws(()=>plinkoPath(18));
+ assert.equal(plinkoWaypoints(Array(16).fill(1)).length,18);
  assert.equal(plinkoPosition(plinkoWaypoints(Array(12).fill(0)),1).y,645);
 });
 test('Pete Plinko prevents overlapping batches, offers cancellation and preserves zero payouts',()=>{

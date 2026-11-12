@@ -42,6 +42,20 @@ try{
  const initial=await page.locator('.account-row code').first().textContent();
  assert.match(initial,/^0x[0-9a-f]{40}$/);
  await page.screenshot({path:resolve(shots,'onboarding-02-account-manager.png')});
+ // Chromium virtual authenticator supplies real ES256/WebAuthn browser ceremony semantics.
+ const cdp=await browser.newCDPSession(page);
+ await cdp.send('WebAuthn.enable');
+ await cdp.send('WebAuthn.addVirtualAuthenticator',{options:{
+   protocol:'ctap2',transport:'internal',hasResidentKey:true,
+   hasUserVerification:true,isUserVerified:true,automaticPresenceSimulation:true,
+ }});
+ await page.locator('#prepare-passkey').click();
+ await page.locator('#passkey-register').click();
+ await page.waitForFunction(()=>document.querySelector('#passkey-status')?.textContent?.includes('Device passkey credential prepared'),{timeout:30000});
+ await page.screenshot({path:resolve(shots,'onboarding-02b-pending-passkey.png')});
+ const pendingRecord=await page.evaluate(async()=>(await chrome.storage.local.get('420-wallet-encrypted-vault-v1'))['420-wallet-encrypted-vault-v1']);
+ assert.ok(!JSON.stringify(pendingRecord).includes('pending-onchain-enrollment'),'Public passkey binding metadata must be inside encrypted ciphertext');
+
  const sealed=await page.evaluate(async()=>(await chrome.storage.local.get('420-wallet-encrypted-vault-v1'))['420-wallet-encrypted-vault-v1']);
  assert.equal(sealed.schema,'420-wallet-encrypted-vault-v1');
  assert.equal(sealed.kdf.iterations>=600000,true);
@@ -81,6 +95,11 @@ try{
  await page.locator('#unlock-form button').click();
  await page.locator('#accounts').waitFor({state:'visible'});
  assert.deepEqual(await page.locator('.account-row code').allTextContents(),addresses);
+ await page.locator('#prepare-passkey').click();
+ assert.match(await page.locator('#passkey-status').textContent(),/staged only|credential/);
+ await page.locator('#passkey-back').click();
+ assert.match(await page.locator('#account-list').textContent(),/NOT enrolled \/ NOT authorized/);
+
  await page.screenshot({path:resolve(shots,'onboarding-04-restored-accounts.png')});
  const popup=await browser.newPage();
  await popup.goto(rootUrl+'popup.html',{waitUntil:'load'});

@@ -1,4 +1,5 @@
 import {Wallet} from './vendor/ethers-6.17.0.min.js';
+import {registerPendingExtensionPasskey420} from './core/passkey-onboarding.js';
 import {VAULT_STORAGE_KEY,createVault420,unlockVault420,hasVault420,restoreEncryptedBackup420,normalizeMnemonic420,generateMnemonic420,validatePrivateKey420,decryptVault420,deriveMnemonicAccount420} from './core/vault.js';
 
 const $=id=>document.getElementById(id);
@@ -98,6 +99,15 @@ function renderAccounts(){
     area.append(group);
   }
   if(!wallets.length){const empty=document.createElement('p');empty.className='hint';empty.textContent='This vault contains no accounts. Use Import another wallet.';area.append(empty);}
+  const pending=session.pendingPasskeys();
+  if(pending.length){
+    const heading=document.createElement('h3');heading.textContent='Device passkeys pending on-chain enrollment';area.append(heading);
+    for(const credential of pending){
+      const row=document.createElement('p');row.className='hint';
+      row.textContent=credential.credentialId.slice(0,16)+'… · '+credential.rpId+' · NOT enrolled / NOT authorized';
+      area.append(row);
+    }
+  }
   $('autolock-minutes').value=String(session.policy());
   $('lock-policy').textContent='Lock after '+session.policy()+' minute(s) without activity. Closing this page discards all decrypted key material from page memory.';
 }
@@ -259,7 +269,7 @@ listen('welcome-create','click',()=>{$('setup-mode').value='create';setupMode();
 listen('welcome-import','click',()=>{$('setup-mode').value='mnemonic';setupMode();show('setup');});
 listen('welcome-passkey','click',()=>{show('passkey-info');message('Passkey SmartAccount enrollment requires verified deployed contract authority.');});
 listen('welcome-hardware','click',()=>{show('hardware-info');message('Hardware wallet connection requires a supported hardware signing integration.');});
-listen('passkey-back','click',initialize);listen('hardware-back','click',initialize);listen('setup-back','click',()=>{clearStaging();show('welcome');});
+listen('passkey-back','click',()=>{if(session){renderAccounts();show('accounts');}else initialize();});listen('hardware-back','click',initialize);listen('setup-back','click',()=>{clearStaging();show('welcome');});
 listen('setup-mode','change',setupMode);
 listen('setup-form','submit',setup);listen('confirm-form','submit',confirmPhrase);
 listen('unlock-form','submit',async ev=>{ev.preventDefault();const pass=$('unlock-password').value;await opened(await unlockVault420(chrome.storage.local,pass),pass);});
@@ -273,6 +283,21 @@ listen('add-form','submit',addWallet);
 listen('backup-export','click',backup);
 listen('reveal-recovery','click',()=>beginSecure('reveal'));
 listen('password-change','click',()=>beginSecure('change'));
+listen('prepare-passkey','click',()=>{show('passkey-info');$('passkey-status').textContent='This credential will be staged only; it cannot sign on-chain until the canonical SmartAccount420 enrollment is confirmed.';});
+listen('passkey-controller','click',()=>{if(session){show('accounts');}else{show('setup');$('setup-mode').value='create';setupMode();}});
+listen('passkey-register','click',async()=>{
+  if(!session)throw new Error('Create or unlock a password-encrypted vault before registering a device passkey');
+  const button=$('passkey-register');button.disabled=true;
+  $('passkey-status').textContent='Requesting device-bound WebAuthn ES256 credential…';
+  try{
+    const pending=await registerPendingExtensionPasskey420(navigator);
+    await session.stagePasskey(sessionPassword,pending);
+    await lease();
+    $('passkey-status').textContent='Device passkey credential prepared: '+pending.credentialId.slice(0,16)+'…. No SmartAccount420 authority exists until verified on-chain enrollment.';
+    message('Local passkey metadata encrypted. The authenticator retains its private key. On-chain enrollment and recovery remain required.','warn');
+  }catch(error){$('passkey-status').textContent='Passkey registration failed without changing wallet authority: '+error.message;throw error;}
+  finally{button.disabled=false;}
+});
 listen('secure-back','click',()=>{zeroSecretFields();$('recovery-output').textContent='';show('accounts');});
 listen('secure-form','submit',passwordAction);
 listen('autolock-minutes','change',async()=>{await session.setAutoLock(sessionPassword,Number($('autolock-minutes').value));await lease();renderAccounts();message('Autolock policy updated.','success');});

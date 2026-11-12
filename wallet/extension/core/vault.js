@@ -51,6 +51,17 @@ function accountId(){return randHex(16);}
 function validVaultPayload(payload){
   assert(payload?.schema==='420-wallet-secret-payload-v1'&&Array.isArray(payload.wallets),'Invalid wallet vault content');
   assert(payload.wallets.length<=100,'Vault contains too many wallets');
+  assert(payload.pendingPasskeys==null||Array.isArray(payload.pendingPasskeys),'Invalid pending passkey inventory');
+  assert((payload.pendingPasskeys||[]).length<=20,'Pending passkey inventory limit');
+  for(const binding of payload.pendingPasskeys||[]){
+    assert(binding.status==='pending-onchain-enrollment'&&typeof binding.credentialId==='string'&&
+      /^[A-Za-z0-9_-]{8,1400}$/.test(binding.credentialId),'Invalid pending passkey credential');
+    assert(typeof binding.origin==='string'&&/^chrome-extension:\/\/[a-p]{32}$/.test(binding.origin),'Invalid pending passkey origin');
+    assert(binding.rpId===binding.origin.slice('chrome-extension://'.length),'Pending passkey RP ID mismatch');
+    for(const coordinate of ['publicKeyX','publicKeyY']){
+      assert(/^0x[0-9a-f]{64}$/i.test(binding[coordinate]||''),'Invalid pending P-256 public key');
+    }
+  }
   for(const wallet of payload.wallets){
     assert(typeof wallet.id==='string'&&/^[0-9a-f]{32}$/.test(wallet.id),'Invalid wallet identifier');
     assert(['mnemonic','private-key'].includes(wallet.type),'Unsupported wallet secret type');
@@ -138,6 +149,19 @@ export class VaultSession420{
     return this.payload.wallets.map(w=>({id:w.id,type:w.type,accounts:w.accounts.map(a=>({...a})),label:w.label}));
   }
   policy(){this.ensureActive();return this.payload.autoLockMinutes??5;}
+  pendingPasskeys(){
+    this.ensureActive();
+    return (this.payload.pendingPasskeys||[]).map(x=>({...x}));
+  }
+  async stagePasskey(password,binding){
+    this.ensureActive();
+    return this.mutate(password,payload=>{
+      const list=payload.pendingPasskeys||[];
+      assert(!list.some(x=>x.credentialId===binding.credentialId),'Passkey credential already staged');
+      payload.pendingPasskeys=[...list,{...binding}];
+      return {credentialId:binding.credentialId,status:'pending-onchain-enrollment'};
+    });
+  }
   async mutate(password,fn){
     return serializedVaultWrite420(async()=>{
     this.ensureActive();

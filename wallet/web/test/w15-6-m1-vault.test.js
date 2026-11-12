@@ -153,3 +153,22 @@ test('M1: concurrent edit protection, lock and inactivity policy',async()=>{
  assert.throws(()=>v.accounts(),/auto-locked/);
  assert.throws(()=>v.accounts(),/locked/);
 });
+
+test('M1: device-bound passkey metadata is staged only, encrypted and never claims on-chain authority',async()=>{
+ const storage=new MemoryStorage();const vault=await createVault420(storage,PASSWORD);
+ await vault.importMnemonic(PASSWORD,PHRASE);
+ const pending={
+   status:'pending-onchain-enrollment',credentialId:'Y3JlZGVudGlhbC1leGFtcGxl',
+   publicKeyX:'0x'+'11'.repeat(32),publicKeyY:'0x'+'22'.repeat(32),
+   origin:'chrome-extension://'+'a'.repeat(32),rpId:'a'.repeat(32),createdAt:Date.now(),
+ };
+ await vault.stagePasskey(PASSWORD,pending);
+ assert.equal(vault.pendingPasskeys().length,1);
+ assert.equal(vault.pendingPasskeys()[0].status,'pending-onchain-enrollment');
+ assert.ok(!JSON.stringify(storage.data).includes(pending.credentialId));
+ await assert.rejects(()=>vault.stagePasskey(PASSWORD,pending),/already staged/);
+ vault.lock();
+ const restored=await unlockVault420(storage,PASSWORD);
+ assert.deepEqual(restored.pendingPasskeys(),[pending]);
+ assert.deepEqual(restored.accounts()[0].address,ADDRESS);
+});

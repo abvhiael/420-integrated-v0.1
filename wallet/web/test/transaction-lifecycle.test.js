@@ -31,7 +31,7 @@ test('second receipt disappearing is a reorg',async()=>{
 });
 test('reject receipt hash mismatch and missing canonical metadata',async()=>{
   await assert.rejects(readWalletTransactionStatus420({request:async()=>({status:'0x1',transactionHash:'0x'+'ff'.repeat(32)})},hash),/hash mismatch/);
-  await assert.rejects(readWalletTransactionStatus420({request:async()=>({status:'0x1'})},hash,{canonical:true}),/missing block/);
+  await assert.rejects(readWalletTransactionStatus420({request:async()=>({status:'0x1',transactionHash:hash})},hash,{canonical:true}),/missing block/);
 });
 test('polling cancellation is not chain cancellation',async()=>{
   await assert.rejects(waitForWalletReceipt420({request:async()=>{throw Error('unexpected rpc')}},hash,{cancelled:()=>true}),e=>e instanceof PendingWalletTransaction420&&/may still be mined/.test(e.message));

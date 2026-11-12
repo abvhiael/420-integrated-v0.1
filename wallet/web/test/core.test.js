@@ -207,7 +207,9 @@ test('confirmed creation re-reads SmartAccount420 and verifies controller owners
 
 test('confirmed creation fails closed on reverted receipt', async () => {
   const provider = { request: async (method) => {
-    if (method === 'eth_getTransactionReceipt') return { status: '0x0', transactionHash: txHash };
+    if (method === 'eth_getTransactionReceipt') return { status: '0x0', transactionHash: txHash, blockNumber: '0x10', blockHash: canonicalBlockHash };
+    if (method === 'eth_getBlockByNumber') return { hash: canonicalBlockHash };
+    if (method === 'eth_blockNumber') return '0x10';
     throw new Error(method);
   } };
   await assert.rejects(

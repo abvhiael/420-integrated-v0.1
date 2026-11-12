@@ -1,9 +1,10 @@
 import {plinkoPath,plinkoSchedule,plinkoExpectedReturn,PLINKO_BUCKET_CHOICES,PLINKO_RISKS,PLINKO_DROP_CHOICES} from './plinko-practice-paytable.js';
 
 const NS='http://www.w3.org/2000/svg';
-const WIDTH=720, DX=42, TOP=38, LAST=578, FLOOR=638, DURATION=2500, STAGGER=125;
+const WIDTH=720, DX=42, TOP=38, LAST=578, FLOOR=638, DURATION=3600, STAGGER=170;
 const ART='/assets/420bet/prickly-pete-plinko/';
 const BALL_SKINS=Object.freeze(['ball_green.png','ball_metal.png','ball_red.png','ball_disco.png','ball_leaf.png','ball_eight.png','ball_smile.png']);
+export function plinkoBallSkin(index){if(!Number.isInteger(index)||index<0)throw Error('Invalid ball index');return BALL_SKINS[index%BALL_SKINS.length];}
 const REACTIONS=Object.freeze({
  idle:'reaction_bored.png', angry:'reaction_angry_pointing.png',
  suspicious:'reaction_suspicious.png', smug:'reaction_smug_thumbs_up.png',
@@ -37,7 +38,7 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
  const button=(cls,label,handler)=>click(el('button',cls,label),handler);
  let bucketsCount=17,risk='showtime',dropCount=10,betCents=1000,balanceCents=1000000;
  let active=false,frameId=null,runs=[],last=[],total=0,history=[],message='Drop some chaos! No funds or wallet required.';
- let currentWin=0,sessionWins=0,lastMax=0;
+ let currentWin=0,sessionWins=0,sessionCost=0,lastCost=0,lastMax=0;
  const header=el('header','pete-plinko-header');
  const branding=el('div','pete-plinko-branding');
  const practiceMarker=el('span','pete-plinko-visually-hidden','PRACTICE ONLY · NO WALLET · NO FUNDS');
@@ -100,11 +101,13 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
  const ballsSummary=el('div','pete-console-field');ballsSummary.append(el('span','','TOTAL BALLS'),el('strong','pete-total-balls','10'));
  const rowsSummary=el('div','pete-console-field');rowsSummary.append(el('span','','ROWS'),el('strong','pete-row-count','16'));
  const riskSummary=el('div','pete-console-field');riskSummary.append(el('span','','RISK'),el('strong','pete-risk-name','SHOWTIME'));
+ const costSummary=el('div','pete-console-field pete-total-cost');costSummary.append(el('span','','TOTAL COST'),el('strong','pete-total-cost-value','100.00'));
+ const winSummary=el('div','pete-console-field pete-total-win');winSummary.append(el('span','','TOTAL WINS'),el('strong','pete-total-win-value','0.00'));
  const dropButton=button('plinko-drop','▶ DROP BALLS!',drop);
  const historyBox=el('div','pete-console-field pete-history-panel');
  const record=el('div','pete-plinko-history','HISTORY (LAST 10)');
  historyBox.append(el('span','','HISTORY (LAST 10)'),record);
- consoleBar.append(betBox,ballsSummary,rowsSummary,riskSummary,dropButton,historyBox);root.append(consoleBar);
+ consoleBar.append(betBox,ballsSummary,rowsSummary,riskSummary,costSummary,winSummary,dropButton,historyBox);root.append(consoleBar);
  const footer=el('footer','pete-plinko-footer');
  const footerIcons=el('div','pete-footer-icons');footerIcons.append(infoButton);
  const disclosure=el('p','plinko-schedule-warning','Practice credits only. No funds, wallet or real payouts. Illustrative schedules — NOT approved for live settlement.');
@@ -153,6 +156,9 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
   rowsSummary.querySelector('strong').textContent=String(bucketsCount-1);
   riskSummary.querySelector('strong').textContent=risk.toUpperCase();
   betDisplay.textContent=currency(betCents);
+  costSummary.querySelector('strong').textContent=currency(active?lastCost:betCents*dropCount);
+  winSummary.querySelector('strong').textContent=currency(currentWin);
+  winSummary.classList.toggle('settled',!active&&total>0);
   balance.querySelector('strong').textContent=currency(balanceCents);
   betMinus.disabled=active||betCents<=100;betPlus.disabled=active||betCents>=100000;
   riskGroup.replaceChildren();
@@ -172,7 +178,7 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
   if(!history.length)record.append(el('span','','—'));
   summary.textContent='BUCKETS: '+bucketsCount+'  |  MAX WIN (PER BALL): '+Math.max(...schedule).toFixed(2)+'×  |  EST. RTP: '+(plinkoExpectedReturn(bucketsCount,risk)*100).toFixed(2)+'%';
   totals.replaceChildren();
-  for(const [label,value] of [['Risk',risk.toUpperCase()],['Buckets',String(bucketsCount)],['Balls this drop',String(dropCount)],['Total practice balls',String(total)],['Theoretical RTP',(plinkoExpectedReturn(bucketsCount,risk)*100).toFixed(2)+'%'],['Practice credits',currency(balanceCents)],['Last virtual payout',currency(currentWin)]]){
+  for(const [label,value] of [['Risk',risk.toUpperCase()],['Buckets',String(bucketsCount)],['Balls this drop',String(dropCount)],['Total practice balls',String(total)],['Theoretical RTP',(plinkoExpectedReturn(bucketsCount,risk)*100).toFixed(2)+'%'],['Practice credits',currency(balanceCents)],['Last virtual payout',currency(currentWin)],['Last batch cost',currency(lastCost)],['Session cost',currency(sessionCost)],['Session wins',currency(sessionWins)]]){
    const row=el('div','plinko-financial-row');row.append(el('span','',label),el('strong','',value));totals.append(row);
   }
   status.textContent=message;paint();
@@ -184,7 +190,7 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
   balanceCents+=currentWin;sessionWins+=currentWin;
   history.push(...runs.map(r=>({bucket:r.bucket,multiplier:r.multiplier})));
   lastMax=Math.max(...runs.map(r=>r.multiplier));
-  message=runs.length+' simulated ball'+(runs.length===1?'':'s')+' landed. Highest '+lastMax.toFixed(2)+'×. Virtual payout '+currency(currentWin)+' credits.';
+  message=runs.length+' simulated ball'+(runs.length===1?'':'s')+' landed. Cost '+currency(lastCost)+' credits. Total wins '+currency(currentWin)+' credits. Highest '+lastMax.toFixed(2)+'×.';
   if(lastMax>=plinkoSchedule(bucketsCount,risk)[0]*0.8)face('triumph','NO WAY! DON’T TOUCH ANYTHING!');
   else if(currentWin<betCents*runs.length)face('facepalm','Yeah. Figures.');
   else if(currentWin>betCents*runs.length*2)face('excited','NOW we’re talking!');
@@ -203,9 +209,10 @@ export function createPlinkoBoard(doc=globalThis.document,options={}){
   // Generate all outcomes before the first animation frame; visual motion cannot change an outcome.
   const selected=Array.from({length:dropCount},(_,selectedIndex)=>{
    const bits=plinkoPath(bucketsCount),bucket=bits.reduce((a,b)=>a+b,0);
-   return {bucket,points:plinkoWaypoints(bits),multiplier:schedule[bucket],fraction:0,skin:BALL_SKINS[selectedIndex]};
+   return {bucket,points:plinkoWaypoints(bits),multiplier:schedule[bucket],fraction:0,skin:plinkoBallSkin(selectedIndex)};
   });
   balanceCents-=cost;
+  lastCost=cost;sessionCost+=cost;
   runs=selected;last=[];active=true;currentWin=0;
   face('suspicious','Here we go again.');
   message='Dropping '+dropCount+' practice ball'+(dropCount===1?'':'s')+'…';

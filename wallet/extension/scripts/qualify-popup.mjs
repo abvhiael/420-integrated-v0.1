@@ -70,12 +70,12 @@ try{
   await page.waitForFunction(()=>document.querySelector('#native-balance')?.textContent!=='—',{timeout:15000});
   assert.equal(await page.locator('#quick-send').isDisabled(),false);
   assert.equal(await page.locator('#quick-receive').isDisabled(),false);
-  assert.match(await page.locator('#account-address').textContent(),/0x333333/);
+  assert.match(await page.locator('#account-address').textContent(),/0x33333/);
   await page.screenshot({path:resolve(screenshots,'03-verified-local-fixture-wallet.png')});
   await page.locator('#quick-receive').click();
   assert.equal(await page.locator('#receive-address').textContent(),account);
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
-  await page.locator('[data-back]').last().click();
+  await page.locator('#receive-view [data-back]').click();
   await page.locator('#quick-send').click();
   await page.locator('#send-recipient').fill('0x4444444444444444444444444444444444444444');
   await page.locator('#send-amount').fill('1.25');

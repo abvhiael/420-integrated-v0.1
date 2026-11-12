@@ -42,7 +42,9 @@ function renderAccount(){
     select.value=w.selectedAccount||w.config.accounts[0];select.disabled=false;
   }
   const address=extensionReceiveAddress420(w);
-  $('account-address').textContent=address||'No verified wallet address';
+  $('account-address').textContent=address?shortExtensionAddress420(address):'No verified wallet address';
+  $('account-address').title=address||'';
+  $('account-address').setAttribute('aria-label',address?'SmartAccount address '+address:'No verified wallet address');
   $('account-state').textContent=w.account.reason||'SmartAccount verification required';
   $('copy-account').disabled=!address;
   $('quick-receive').disabled=!address;

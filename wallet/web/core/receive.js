@@ -10,7 +10,10 @@ export function getCanonicalReceiveAddress420({ smartAccount, network, expectedC
     expected = BigInt(expectedChainId);
   } catch { return null; }
   if (actual !== expected) return null;
-  if (smartAccount.expectedChainId && BigInt(smartAccount.expectedChainId) !== expected) return null;
+  if (smartAccount.expectedChainId) {
+    try { if (BigInt(smartAccount.expectedChainId) !== expected) return null; }
+    catch { return null; }
+  }
   if (smartAccount.deployed !== true) return null;
   return address;
 }

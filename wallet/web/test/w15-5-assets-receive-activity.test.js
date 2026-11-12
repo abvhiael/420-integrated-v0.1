@@ -17,6 +17,7 @@ test('Receive only exposes valid deployed Smart Account on exact expected networ
  assert.equal(getCanonicalReceiveAddress420({...config,network:{...config.network,healthy:false}}),null);
  assert.equal(getCanonicalReceiveAddress420({...config,expectedChainId:null}),null);
  assert.equal(getCanonicalReceiveAddress420({...config,smartAccount:null}),null);
+ assert.equal(getCanonicalReceiveAddress420({...config,smartAccount:{...config.smartAccount,expectedChainId:'nonsense'}}),null);
 });
 test('Assets, Receive and Activity are separate anchored views without replacing existing wallet controls',()=>{
  for(const id of ['wallet-assets','wallet-receive','wallet-activity','portfolio','receive-address','copy-receive-address','send-preview','send-recipient','send-amount','send-asset','execute-target','execute-value','execute-data','simulate-execution','send-execution','activity-list','activity-filter']) assert.ok(html.includes('id="'+id+'"'),id);

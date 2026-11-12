@@ -152,8 +152,7 @@ function trustedWalletPopup420(sender) {
   if(sender?.id!==chrome.runtime.id||typeof sender.url!=='string')return false;
   try {
     const url=new URL(sender.url);
-    return url.origin===new URL(chrome.runtime.getURL('popup.html')).origin &&
-      url.pathname==='/popup.html' && !sender.tab;
+    return url.href.split('?')[0]===chrome.runtime.getURL('popup.html') && !url.hash;
   }catch{return false;}
 }
 async function readWalletUiActivity420() {

@@ -459,8 +459,10 @@ $('#create-session-grant').addEventListener('click', async () => {
   finally { state.managingSession = false; render(); }
 });
 
-loadConfig().catch((error) => {
+loadConfig().then(() => {
+  render();
+}).catch((error) => {
   $('#status').textContent = `Configuration warning: ${error.message}`;
   render();
   publishWalletVerificationState420('failure',error.message);
-}).then(() => { render(); });
+});

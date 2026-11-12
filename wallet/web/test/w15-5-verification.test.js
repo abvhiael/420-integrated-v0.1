@@ -32,6 +32,8 @@ test('UI preserves existing core controls and verified ecosystem service resolve
  assert.match(html,/src=".\/network-verification.js"/);
  assert.match(app,/confirmSmartAccountExecution/);
  assert.match(app,/wallet:verification-state/);
+ assert.match(app,/loadConfig\(\)\.then\(\(\) => \{/);
+ assert.match(app,/publishWalletVerificationState420\('failure',error.message\)/);
  assert.match(apps,/resolveServices\(await manifestResponse.json\(\), APP_SERVICES\)/);
  assert.match(apps,/data-category-jump/);
 });

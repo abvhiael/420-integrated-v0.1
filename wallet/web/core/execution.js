@@ -1,3 +1,4 @@
+import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { decodeAddress, decodeUint, encodeAddressGetter, encodeExecute, encodeUintGetter, normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
 
@@ -106,18 +107,13 @@ export async function sendSmartAccountExecution(provider, controller, smartAccou
 
 export async function confirmSmartAccountExecution(provider, txHash, controller, config = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-
-  let receipt = null;
-  for (let i = 0; i < attempts; i += 1) {
-    receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
-    if (receipt) break;
-    if (i + 1 < attempts) await sleep(delayMs);
+  let receipt;
+  try {
+    ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
+  } catch (error) {
+    if (/transaction reverted/.test(error.message)) throw new Error('SmartAccount420 execution transaction reverted');
+    throw error;
   }
-  if (!receipt) throw new Error('SmartAccount420 execution transaction was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('SmartAccount420 execution transaction reverted');
 
   const discovered = await discoverSmartAccount(provider, controller, config);
   if (!discovered.deployed || !discovered.controllerIsOwner) {

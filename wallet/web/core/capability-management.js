@@ -1,3 +1,4 @@
+import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { inspectCapabilityGrant, CANONICAL_CAPABILITY_REGISTRY_420 } from './capabilities.js';
 
@@ -108,17 +109,13 @@ export async function sendCapabilityGrantRevocation(provider, controller, smartA
 
 export async function confirmCapabilityManagementTransaction(provider, txHash, smartAccountState, expected = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-  let receipt = null;
-  for (let i = 0; i < attempts; i += 1) {
-    receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
-    if (receipt) break;
-    if (i + 1 < attempts) await sleep(delayMs);
+  let receipt;
+  try {
+    ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
+  } catch (error) {
+    if (/transaction reverted/.test(error.message)) throw new Error('capability management transaction reverted');
+    throw error;
   }
-  if (!receipt) throw new Error('capability management transaction was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('capability management transaction reverted');
 
   if (expected.createdGrantId) {
     const inspection = await inspectCapabilityGrant(provider, smartAccountState, expected.createdGrantId);

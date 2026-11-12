@@ -1,3 +1,4 @@
+import { waitForCanonicalTransaction420 } from './transaction-status.js';
 import { ZERO_ADDRESS, ZERO_BYTES32, encodeCreateAccount, normalizeAddress, normalizeBytes32 } from './abi.js';
 import { discoverSmartAccount, hasCode } from './accounts.js';
 
@@ -43,19 +44,13 @@ export async function sendSmartAccountCreation(provider, controller, config = {}
 
 export async function confirmSmartAccountCreation(provider, txHash, controller, config = {}, options = {}) {
   const normalizedHash = normalizeTxHash(txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-
-  let receipt = null;
-  for (let i = 0; i < attempts; i += 1) {
-    receipt = await provider.request('eth_getTransactionReceipt', [normalizedHash]);
-    if (receipt) break;
-    if (i + 1 < attempts) await sleep(delayMs);
+  let receipt;
+  try {
+    ({ receipt } = await waitForCanonicalTransaction420(provider, normalizedHash, options));
+  } catch (error) {
+    if (/transaction reverted/.test(error.message)) throw new Error('smart account creation transaction reverted');
+    throw error;
   }
-
-  if (!receipt) throw new Error('smart account creation transaction was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('smart account creation transaction reverted');
 
   const discovered = await discoverSmartAccount(provider, controller, config);
   if (!discovered.deployed) throw new Error('SmartAccount420 code missing after confirmed creation');

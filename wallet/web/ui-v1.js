@@ -25,6 +25,12 @@ export function summarizeExecutionReview(request = {}, simulation = null) {
 export function classifyWalletActivity(message = '') {
   const text = String(message).trim();
   if (!text) return null;
+  if (/creation reorganized:/i.test(text)) return { kind: 'account', state: 'reorganized', label: 'Smart Account creation reorganization' };
+  if (/execution reorganized:/i.test(text)) return { kind: 'execution', state: 'reorganized', label: 'Smart Account execution reorganization' };
+  if (/batch reorganized:/i.test(text)) return { kind: 'batch', state: 'reorganized', label: 'Smart Account batch reorganization' };
+  if (/creation (pending|confirming):/i.test(text)) return { kind: 'account', state: 'pending', label: 'Smart Account creation awaiting finality' };
+  if (/execution (pending|confirming):/i.test(text)) return { kind: 'execution', state: 'pending', label: 'Smart Account execution awaiting finality' };
+  if (/batch (pending|confirming):/i.test(text)) return { kind: 'batch', state: 'pending', label: 'Smart Account batch awaiting finality' };
   if (/created and owner verified/i.test(text)) return { kind: 'account', state: 'confirmed', label: 'Smart Account created' };
   if (/creation submitted:/i.test(text)) return { kind: 'account', state: 'pending', label: 'Smart Account creation submitted' };
   if (/execution confirmed:/i.test(text)) return { kind: 'execution', state: 'confirmed', label: 'Smart Account execution confirmed' };

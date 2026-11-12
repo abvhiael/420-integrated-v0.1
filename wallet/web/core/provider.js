@@ -1,3 +1,5 @@
+import { classifyProviderMethod420 } from './signing-policy.js';
+
 export class JsonRpcProvider420 {
   constructor({ rpcUrl, fetchImpl = globalThis.fetch } = {}) {
     if (!rpcUrl) throw new Error('rpcUrl required');
@@ -9,13 +11,16 @@ export class JsonRpcProvider420 {
 
   async request(method, params = []) {
     if (typeof method !== 'string' || !method) throw new TypeError('method required');
+    if (classifyProviderMethod420(method) !== 'read-only') throw new Error('JsonRpcProvider420 is read-only; signing and broadcasting require user-approved device authority');
+    const requestId = this.nextId++;
     const response = await this.fetchImpl(this.rpcUrl, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: this.nextId++, method, params }),
+      body: JSON.stringify({ jsonrpc: '2.0', id: requestId, method, params }),
     });
     if (!response.ok) throw new Error(`rpc http ${response.status}`);
     const payload = await response.json();
+    if (!payload || payload.jsonrpc !== '2.0' || payload.id !== requestId) throw new Error('JSON-RPC response identity mismatch');
     if (payload.error) throw new Error(payload.error.message || 'rpc error');
     return payload.result;
   }

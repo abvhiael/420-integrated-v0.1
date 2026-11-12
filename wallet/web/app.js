@@ -43,6 +43,7 @@ function executionRequest() {
     target: $('#execute-target').value.trim(),
     value: $('#execute-value').value.trim() || '0',
     data: $('#execute-data').value.trim() || '0x',
+    expectedChainId: state.config?.network?.chainId,
   };
 }
 function gasSponsorRequest() {
@@ -108,6 +109,12 @@ function renderCapabilityInspection() {
     : '—';
 }
 
+function runtimeAuthorityReady420() {
+  const c = state.config;
+  return Boolean(c?.network?.chainId && c?.smartAccount?.factoryAddress
+    && c?.deployment?.entryPointAddress && c?.deployment?.capabilityRegistryAddress
+    && state.network && !state.network.chainMismatch);
+}
 function render() {
   $('#account').textContent = shortAddress(state.controller);
   $('#smart-account').textContent = state.smartAccount ? `${shortAddress(state.smartAccount.smartAccount)} (${state.smartAccount.deployed ? 'deployed' : 'counterfactual'})` : '—';
@@ -118,13 +125,13 @@ function render() {
   $('#connect').textContent = state.controller ? 'Connected' : 'Connect wallet';
   $('#connect').disabled = Boolean(state.controller);
 
-  const creationEnabled = state.config?.features?.smartAccountCreation === true;
+  const creationEnabled = runtimeAuthorityReady420() && state.config?.features?.smartAccountCreation === true;
   const canCreate = creationEnabled && state.controller && state.smartAccount && !state.smartAccount.deployed && !state.creatingAccount;
   $('#create-account').hidden = !creationEnabled || state.smartAccount?.deployed === true;
   $('#create-account').disabled = !canCreate;
   $('#create-account').textContent = state.creatingAccount ? 'Creating…' : 'Create Smart Account';
 
-  const executionEnabled = state.config?.features?.smartAccountExecution === true;
+  const executionEnabled = runtimeAuthorityReady420() && state.config?.features?.smartAccountExecution === true;
   const canUseExecution = executionEnabled && state.smartAccount?.deployed && state.smartAccount?.controllerIsOwner && !state.executing;
   $('#execution-panel').hidden = !executionEnabled;
   $('#simulate-execution').disabled = !canUseExecution;
@@ -132,8 +139,8 @@ function render() {
   $('#send-execution').textContent = state.executing ? 'Executing…' : 'Execute';
   $('#execution-authority').textContent = canUseExecution ? 'Verified on-chain owner' : 'Unavailable';
 
-  const capabilityEnabled = state.config?.features?.capabilityInspection === true;
-  const mutationEnabled = state.config?.features?.capabilityMutation === true;
+  const capabilityEnabled = runtimeAuthorityReady420() && state.config?.features?.capabilityInspection === true;
+  const mutationEnabled = runtimeAuthorityReady420() && state.config?.features?.capabilityMutation === true;
   const sponsorEnabled = state.config?.features?.gasSponsorGrantManagement === true;
   const canInspect = capabilityEnabled && state.smartAccount?.deployed;
   const canManage = mutationEnabled && sponsorEnabled && state.smartAccount?.deployed && state.smartAccount?.controllerIsOwner && !state.managingCapability;
@@ -186,8 +193,18 @@ async function loadConfig() {
 async function refreshConnectedState() {
   state.network = await readNetwork(state.provider, state.config.network.chainId);
   if (state.network.chainMismatch) throw new Error(`Wrong network: expected ${state.network.expectedChainId}, received ${state.network.chainId}`);
-  state.smartAccount = await discoverSmartAccount(state.provider, state.controller, state.config.smartAccount);
-  state.portfolio = await readPortfolio(state.provider, [state.controller, state.smartAccount.smartAccount], state.config.trackedAssets);
+  if (state.config.network.chainId && state.config.smartAccount.factoryAddress
+      && state.config.deployment?.entryPointAddress && state.config.deployment?.capabilityRegistryAddress) {
+    const config = { ...state.config.smartAccount,
+      verifiedEntryPoint: state.config.deployment.entryPointAddress,
+      verifiedCapabilityRegistry: state.config.deployment.capabilityRegistryAddress };
+    state.smartAccount = await discoverSmartAccount(state.provider, state.controller, config);
+    state.smartAccount.expectedChainId = state.config.network.chainId;
+    state.smartAccount.verifiedCapabilityRegistry = config.verifiedCapabilityRegistry;
+    state.smartAccount.verifiedEntryPoint = config.verifiedEntryPoint;
+  } else state.smartAccount = null;
+  state.portfolio = await readPortfolio(state.provider,
+    [state.controller, state.smartAccount?.smartAccount], state.config.trackedAssets);
   state.lastSimulation = null;
   state.capabilityInspection = null;
   render();
@@ -206,22 +223,27 @@ $('#connect').addEventListener('click', async () => {
   $('#status').textContent = 'Authorizing wallet access…';
   try {
     await connectInjectedWallet();
-    $('#status').textContent = state.smartAccount.deployed
-      ? 'Canonical Smart Account loaded. Guarded owner execution, capability management, and session-key administration are available.'
-      : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
+    $('#status').textContent = !state.smartAccount
+      ? 'Wallet connected read-only. Verified network, EntryPoint, Factory and CapabilityRegistry are not configured.'
+      : state.smartAccount.deployed
+        ? 'Canonical Smart Account loaded. Guarded owner execution, capability management, and session-key administration are available.'
+        : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
   } catch (error) { $('#status').textContent = error.message; }
 });
 
 $('#create-account').addEventListener('click', async () => {
   if (!state.provider || !state.controller || state.smartAccount?.deployed) return;
-  if (globalThis.confirm && !globalThis.confirm(`Create SmartAccount420 at ${state.smartAccount.smartAccount}? Your connected wallet must approve the factory transaction.`)) return;
+  if (!globalThis.confirm?.(`Create SmartAccount420 at ${state.smartAccount.smartAccount}? Your connected wallet must approve the factory transaction.`)) return;
   state.creatingAccount = true; render();
   $('#status').textContent = 'Requesting explicit approval for SmartAccountFactory420 creation…';
   try {
-    const submitted = await sendSmartAccountCreation(state.provider, state.controller, state.config.smartAccount);
+    const submitted = await sendSmartAccountCreation(state.provider, state.controller, { ...state.config.smartAccount, expectedChainId: state.config.network.chainId });
     if (!submitted.submitted) { await refreshConnectedState(); $('#status').textContent = 'Smart Account was already deployed; canonical state refreshed.'; return; }
     $('#status').textContent = `Creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount);
+    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId,
+      onStatus: ({ status, confirmations }) => {
+        $('#status').textContent = `Creation ${status}: waiting for canonical receipt (${confirmations} confirmations).`;
+      } });
     await refreshConnectedState();
     $('#status').textContent = `SmartAccount420 created and owner verified: ${state.smartAccount.smartAccount}`;
   } catch (error) { $('#status').textContent = error.message; }
@@ -244,13 +266,16 @@ $('#simulate-execution').addEventListener('click', async () => {
 $('#send-execution').addEventListener('click', async () => {
   if (!state.provider || !state.lastSimulation || state.executing) return;
   const request = executionRequest();
-  if (globalThis.confirm && !globalThis.confirm(`Execute through SmartAccount420 to ${request.target}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
+  if (!globalThis.confirm?.(`Execute through SmartAccount420 to ${request.target}, value ${request.value} wei, calldata ${request.data}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
   state.executing = true; render();
   $('#status').textContent = 'Re-simulating and requesting explicit owner approval…';
   try {
     const submitted = await sendSmartAccountExecution(state.provider, state.controller, state.smartAccount, request);
     $('#status').textContent = `Execution submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount);
+    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId,
+      onStatus: ({ status, confirmations }) => {
+        $('#status').textContent = `Execution ${status}: waiting for canonical receipt (${confirmations} confirmations).`;
+      } });
     await refreshConnectedState();
     $('#execute-simulation').textContent = 'Not simulated';
     $('#status').textContent = `SmartAccount420 execution confirmed: ${submitted.txHash}`;

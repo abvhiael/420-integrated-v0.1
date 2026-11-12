@@ -56,7 +56,20 @@ function assertInventoryAuthority420(inventory) {
     const state = String(item.status || '');
     assert420(!state.includes('CONFLICTED'), `wallet authority ${key} remains conflicted`);
     assert420(!state.includes('PENDING'), `wallet authority ${key} remains pending`);
+    if (key === 'smartAccountFactory420' || key === 'capabilityRegistry420') {
+      const retired = new Set(['0x0000000000000000000000000000000000000420',
+        '0x0000000000000000000000000000000000000421',
+        '0x0000000000000000000000000000000000000422',
+        '0x0000000000000000000000000000000000000424']);
+      assert420(!retired.has(item.address.toLowerCase()), `wallet authority ${key} reuses retired Genesis placement`);
+    }
+    assert420(item.deploymentVerified === true, `wallet authority ${key} is not chain-verified`);
   }
+  for (const [key, fixed] of Object.entries({
+    protocolRegistry: '0x0000000000000000000000000000000000000434',
+    names420: '0x0000000000000000000000000000000000000435',
+    identity420: '0x0000000000000000000000000000000000000436'
+  })) assert420(authority[key].address.toLowerCase() === fixed, `wallet authority ${key} violates frozen Genesis namespace`);
   return authority;
 }
 

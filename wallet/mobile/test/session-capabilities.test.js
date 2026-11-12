@@ -10,7 +10,7 @@ import {
 const OWNER = '0x1111111111111111111111111111111111111111';
 const OTHER = '0x2222222222222222222222222222222222222222';
 const ACCOUNT = '0x3333333333333333333333333333333333333333';
-const REGISTRY = '0x0000000000000000000000000000000000000421';
+const REGISTRY = '0x0000000000000000000000000000000000000447';
 
 function runtime() {
   return { request: async () => { throw new Error('unexpected RPC'); } };
@@ -24,6 +24,7 @@ function state(overrides = {}) {
     controllerIsOwner: true,
     authorizationEpoch: 7n,
     capabilityRegistry: REGISTRY,
+    verifiedCapabilityRegistry: REGISTRY,
     recoveryAuthority: '0x4444444444444444444444444444444444444444',
     ...overrides,
   };

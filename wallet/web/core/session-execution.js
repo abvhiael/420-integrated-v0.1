@@ -1,7 +1,7 @@
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData, normalizeNativeValue } from './execution.js';
 import {
-  CANONICAL_CAPABILITY_REGISTRY_420,
+  assertVerifiedCapabilityRegistry420,
   SESSION_EXECUTE_CAPABILITY_420,
   inspectCapabilityGrant,
   readActiveGrantId,
@@ -48,9 +48,7 @@ function tokenSpend(data) {
 }
 function assertSessionState(smartAccountState, sessionKey) {
   if (!smartAccountState?.deployed) throw new Error('SmartAccount420 must be deployed before session execution preparation');
-  if (normalizeAddress(smartAccountState.capabilityRegistry) !== CANONICAL_CAPABILITY_REGISTRY_420) {
-    throw new Error('SmartAccount420 is not bound to the canonical CapabilityRegistry420');
-  }
+  assertVerifiedCapabilityRegistry420(smartAccountState);
   const key = normalizeAddress(sessionKey);
   if (key === normalizeAddress(smartAccountState.owner)) throw new Error('owner is not a delegated session signer');
   return key;
@@ -111,6 +109,10 @@ export async function prepareSessionExecution(provider, smartAccountState, sessi
   if (inspection.grant.principal !== signer) throw new Error('active session execution grant principal mismatch');
   if (inspection.grant.capabilityId !== SESSION_EXECUTE_CAPABILITY_420) throw new Error('active grant is not SESSION_EXECUTE');
   if (inspection.grant.scopeHash !== scopeHash) throw new Error('active session execution grant scope mismatch');
+  const canonicalToken = [ERC20_TRANSFER, ERC20_APPROVE, ERC20_TRANSFER_FROM].includes(selector.slice(2));
+  if (!canonicalToken && (inspection.grant.perCallLimit !== 0n || inspection.grant.periodLimit !== 0n)
+      && (value === 0n || data.length > 10))
+    throw new Error('capped session grant cannot meter nonstandard asset calldata');
 
   const authorized = await readCapabilityAuthorization(provider, smartAccountState, signer, SESSION_EXECUTE_CAPABILITY_420, scopeHash, spendAmount);
   if (!authorized) throw new Error('session execution exceeds capability limits or validity window');

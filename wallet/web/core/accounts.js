@@ -16,7 +16,7 @@ async function call(provider, to, data) {
 
 export async function hasCode(provider, address) {
   const code = await provider.request('eth_getCode', [normalizeAddress(address), 'latest']);
-  return typeof code === 'string' && code !== '0x' && !/^0x0*$/.test(code);
+  return typeof code === 'string' && /^0x(?:[0-9a-fA-F]{2})+$/.test(code) && !/^0x0*$/i.test(code);
 }
 
 export async function readDeployedSmartAccountState(provider, smartAccount, metadata = {}) {
@@ -34,6 +34,10 @@ export async function readDeployedSmartAccountState(provider, smartAccount, meta
     call(provider, account, encodeAddressGetter('capabilityRegistry')).then(decodeAddress),
   ]);
 
+  if (metadata.verifiedEntryPoint && entryPoint !== normalizeAddress(metadata.verifiedEntryPoint))
+    throw new Error('SmartAccount420 EntryPoint binding differs from verified deployment');
+  if (metadata.verifiedCapabilityRegistry && capabilityRegistry !== normalizeAddress(metadata.verifiedCapabilityRegistry))
+    throw new Error('SmartAccount420 CapabilityRegistry binding differs from verified deployment');
   const controller = metadata.controller ? normalizeAddress(metadata.controller) : null;
   return {
     ...metadata,
@@ -73,5 +77,7 @@ export async function discoverSmartAccount(provider, controller, config = {}) {
     controller: owner,
     factoryAddress,
     salt,
+    verifiedEntryPoint: config.verifiedEntryPoint,
+    verifiedCapabilityRegistry: config.verifiedCapabilityRegistry,
   });
 }

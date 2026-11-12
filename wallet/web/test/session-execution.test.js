@@ -13,7 +13,7 @@ const owner = '0x1111111111111111111111111111111111111111';
 const account = '0x2222222222222222222222222222222222222222';
 const key = '0x3333333333333333333333333333333333333333';
 const target = '0x4444444444444444444444444444444444444444';
-const registry = '0x0000000000000000000000000000000000000421';
+const registry = '0x0000000000000000000000000000000000000447';
 const entryPoint = '0x000000000000000000000000000000000000041f';
 const factory = '0x0000000000000000000000000000000000000420';
 const component = `0x${'55'.repeat(32)}`;
@@ -34,6 +34,7 @@ function smartState(overrides = {}) {
     smartAccount: account,
     factoryAddress: factory,
     capabilityRegistry: registry,
+    verifiedCapabilityRegistry: registry,
     entryPoint,
     recoveryAuthority: null,
     authorizationEpoch: 7n,
@@ -138,6 +139,11 @@ test('ERC20 amount parsing prevents native-plus-token spend ambiguity', async ()
 });
 
 test('broadcast is fail-closed until production EntryPoint420 transport and hashing are frozen', async () => {
-  const prepared = await prepareSessionExecution(providerFor(), smartState(), key, { target, data: '0x12345678' });
+  const prepared = await prepareSessionExecution(providerFor(), smartState(), key, { target, value: '1', data: '0x12345678' });
   assert.throws(() => assertSessionBroadcastDisabled(prepared), /broadcast is disabled/i);
+});
+
+test('session client blocks unmetered asset calldata under a quota',async()=>{
+  await assert.rejects(prepareSessionExecution(providerFor(),smartState(),key,{target,data:'0x12345678'}),/cannot meter/);
+  await assert.rejects(prepareSessionExecution(providerFor(),smartState(),key,{target,value:'1',data:'0x1234567801020304'}),/cannot meter/);
 });

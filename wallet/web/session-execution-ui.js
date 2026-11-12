@@ -1,4 +1,5 @@
 import { readDeployedSmartAccountState } from './core/accounts.js';
+import { assertWalletChain420 } from './core/transaction-lifecycle.js';
 import { validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
 import { walletGasSponsorshipReview420 } from './core/gas-sponsorship.js';
@@ -188,7 +189,15 @@ export async function initSessionExecutionUi() {
       const smartAccount = $('#session-exec-account').value.trim();
       const signer = $('#session-exec-signer').value.trim();
       if (!smartAccount || !signer) throw new Error('SmartAccount420 address and session signer are required');
-      local.account = await readDeployedSmartAccountState(local.provider, smartAccount);
+      if (!local.config?.network?.chainId || !local.config?.deployment?.entryPointAddress
+          || !local.config?.deployment?.capabilityRegistryAddress)
+        throw new Error('Session execution requires verified Wallet contract and chain bindings');
+      await assertWalletChain420(local.provider, local.config.network.chainId);
+      local.account = await readDeployedSmartAccountState(local.provider, smartAccount, {
+        verifiedEntryPoint: local.config.deployment.entryPointAddress,
+        verifiedCapabilityRegistry: local.config.deployment.capabilityRegistryAddress
+      });
+      local.account.expectedChainId = local.config.network.chainId;
       const discoverGasQuote = resolveGasQuoteDiscovery420(globalThis.wallet420GasQuoteProvider);
       setStatus(discoverGasQuote
         ? 'Checking session authority and requesting a bounded 420Gas quote before signing…'
@@ -211,10 +220,11 @@ export async function initSessionExecutionUi() {
   $('#session-exec-submit').addEventListener('click', async () => {
     if (local.busy || !local.prepared) return;
     const review = buildSessionExecutionReview(local.prepared);
-    if (globalThis.confirm && !globalThis.confirm(`Submit this signed session operation to EntryPoint420? ${review.fundingTitle}. Nonce ${local.prepared.nonce}.`)) return;
+    if (!globalThis.confirm?.(`Submit this signed session operation to EntryPoint420? ${review.fundingTitle}. Nonce ${local.prepared.nonce}.`)) return;
     local.busy = true; render();
     try {
       setStatus('Rechecking the session nonce, re-simulating EntryPoint420.handleOp and requesting transaction approval…');
+      await assertWalletChain420(local.provider, local.config.network.chainId);
       const submitted = await sendPreparedEntryPointUserOperation(local.provider, local.prepared);
       setStatus(`Session operation submitted: ${submitted.txHash}. Waiting for EntryPoint420 confirmation…`);
       await confirmEntryPointUserOperation(local.provider, submitted);

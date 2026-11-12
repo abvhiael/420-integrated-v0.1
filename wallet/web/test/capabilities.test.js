@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { inspectCapabilityGrant, CANONICAL_CAPABILITY_REGISTRY_420 } from '../core/capabilities.js';
+import { inspectCapabilityGrant, assertVerifiedCapabilityRegistry420 } from '../core/capabilities.js';
 
 const account = '0x3333333333333333333333333333333333333333';
 const principal = '0x7777777777777777777777777777777777777777';
@@ -41,7 +41,8 @@ function providerFor({ component = componentId, revoked = false } = {}) {
 const smartAccountState = {
   deployed: true,
   smartAccount: account,
-  capabilityRegistry: CANONICAL_CAPABILITY_REGISTRY_420,
+  capabilityRegistry: '0x0000000000000000000000000000000000000447',
+  verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447',
 };
 
 test('capability inspection decodes canonical grant and usage state', async () => {
@@ -77,4 +78,17 @@ test('capability inspection fails closed on noncanonical registry binding', asyn
 
 test('capability inspection rejects malformed grant ids', async () => {
   await assert.rejects(inspectCapabilityGrant(providerFor(), smartAccountState, '0x1234'), /invalid bytes32/);
+});
+
+
+test('capability inspection rejects retired frozen registry even with forged matching binding', async () => {
+  const legacy = '0x0000000000000000000000000000000000000421';
+  await assert.rejects(
+    inspectCapabilityGrant(providerFor(), { ...smartAccountState, capabilityRegistry: legacy, verifiedCapabilityRegistry: legacy }, grantId),
+    /frozen Genesis system address/,
+  );
+});
+test('capability inspection requires a verified registry binding', async () => {
+  const { verifiedCapabilityRegistry, ...unverified } = smartAccountState;
+  await assert.rejects(inspectCapabilityGrant(providerFor(), unverified, grantId), /deployment is unverified/);
 });

@@ -18,12 +18,16 @@ async function vaultLockState420() {
   const lease=(await chrome.storage.session.get(VAULT_LEASE_KEY))?.[VAULT_LEASE_KEY];
   return {exists:true,unlocked:typeof lease?.expiresAt==='number' && lease.expiresAt > Date.now() && lease.expiresAt<=Date.now()+30*60*1000};
 }
+async function accountMetadata420(){
+  const config=await readObject('420-wallet-extension-config-v1');
+  return config.accountMeta&&typeof config.accountMeta==='object'&&!Array.isArray(config.accountMeta)?config.accountMeta:{};
+}
 async function accountVisibility420(accounts){
   const lock=await vaultLockState420();
-  if (!lock.exists || lock.unlocked) return accounts;
   const config=await readObject('420-wallet-extension-config-v1');
   const vaultAccounts=new Set((config.vaultAccounts||[]).map(x=>String(x).toLowerCase()));
-  return accounts.filter(a=>!vaultAccounts.has(String(a).toLowerCase()));
+  const metadata=await accountMetadata420();
+  return accounts.filter(a=>metadata[a]?.hidden!==true&&(!lock.exists||lock.unlocked||!vaultAccounts.has(String(a).toLowerCase())));
 }
 
 
@@ -47,7 +51,9 @@ async function readObject(key) {
 async function accountsFor(origin) {
   const permissions = await readObject(PERMISSIONS_KEY);
   const granted=Array.isArray(permissions[origin]?.accounts) ? permissions[origin].accounts : [];
-  return accountVisibility420(granted);
+  const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const allowed=await accountVisibility420(granted);
+  return allowed.filter(a=>a===prefs.selectedAccount);
 }
 
 async function setAccounts(origin, accounts) {
@@ -71,6 +77,18 @@ async function rpcRequest(method, params) {
 }
 
 async function executeWithLocalAuthority(request, context) {
+  const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const address=prefs.selectedAccount;
+  const listed=await accountVisibility420(normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420)).accounts);
+  const metadata=await accountMetadata420();
+  if(!address||!listed.includes(address)||!context.accounts?.includes(address))
+    throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
+  if(['watch-only','hardware','eoa'].includes(metadata[address]?.type))
+    throw Object.assign(new Error('This account has no verified SmartAccount passkey signing authority in this flow'),{code:4100});
+  const requestedFrom=request.method==='eth_sendTransaction'?request.params?.[0]?.from:
+    request.method==='personal_sign'?request.params?.[1]:request.method==='eth_signTypedData_v4'?request.params?.[0]:null;
+  if(typeof requestedFrom!=='string'||requestedFrom.toLowerCase()!==address)
+    throw Object.assign(new Error('Requested signer is not the currently selected authorized account'),{code:4100});
   if (!LOCAL_AUTHORITY_METHODS.has(request.method)) {
     throw Object.assign(new Error(`unsupported local authority method: ${request.method}`), { code: 4200 });
   }
@@ -148,10 +166,15 @@ async function handleApprovalMethod(request, context) {
     const existing = await accountsFor(origin);
     if (existing.length) return existing;
     const config = await readObject('420-wallet-extension-config-v1');
-    const available = await accountVisibility420(Array.isArray(config.accounts) ? config.accounts : []);
+    const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+    const available = (await accountVisibility420(Array.isArray(config.accounts) ? config.accounts : [])).filter(a=>a===prefs.selectedAccount);
     if (!available.length) throw Object.assign(new Error('no wallet accounts available'), { code: 4100 });
     const decision = await createApproval({ ...request, availableAccounts: available }, context);
-    const selected = Array.isArray(decision.accounts) && decision.accounts.length ? decision.accounts : available;
+    const selected = Array.isArray(decision.accounts)&&decision.accounts.length?decision.accounts:available;
+    if(selected.length!==1||selected[0]!==prefs.selectedAccount)
+      throw Object.assign(new Error('Approval account no longer matches the selection'),{code:4100});
+    const after=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+    if(after.selectedAccount!==prefs.selectedAccount)throw Object.assign(new Error('Account changed during approval'),{code:4100});
     await setAccounts(origin, selected);
     chrome.tabs.sendMessage(context.tabId, { source: '420-wallet-service-worker', channel: CHANNEL, kind: 'event', event: 'accountsChanged', data: selected }).catch(() => {});
     return selected;
@@ -159,7 +182,9 @@ async function handleApprovalMethod(request, context) {
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
   await createApproval(request, { ...context, accounts: granted });
-  return executeWithLocalAuthority(request, { ...context, accounts: granted });
+  const current=await accountsFor(origin);
+  if(current.length!==1||current[0]!==granted[0])throw Object.assign(new Error('Account was changed or disconnected during approval'),{code:4100});
+  return executeWithLocalAuthority(request, { ...context, accounts: current });
 }
 
 
@@ -184,17 +209,19 @@ async function rememberWalletUiActivity420(entry) {
 async function walletUiState420() {
   const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
-  const selected=config.accounts.includes(prefs.selectedAccount)?prefs.selectedAccount:config.accounts[0]||null;
+  const available=await accountVisibility420(config.accounts);
+  const selected=available.includes(prefs.selectedAccount)?prefs.selectedAccount:available[0]||null;
+  const accountMeta=await accountMetadata420();
   const permissions=await readObject(PERMISSIONS_KEY);
   const sites=Object.entries(permissions).filter(([origin,x])=>{
     try {normalizeOrigin(origin);return Array.isArray(x?.accounts)&&x.accounts.length>0;}catch{return false;}
   }).map(([origin,x])=>({origin,accounts:x.accounts.filter(a=>typeof a==='string'&&/^0x[0-9a-fA-F]{40}$/.test(a))})).sort((a,b)=>a.origin.localeCompare(b.origin));
   const state={
     config:{rpcUrl:config.rpcUrl,chainId:config.chainId,explorerUrl:config.explorerUrl,networkName:config.networkName,
-      accounts:config.accounts,trackedAssets:config.trackedAssets.slice(0,25),
+      accounts:available,accountMeta,trackedAssets:config.trackedAssets.slice(0,25),
       vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
-    selectedAccount:selected,sites,activity:await readWalletUiActivity420(),
+    selectedAccount:selected,sites,activity:(await readWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
     vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null},
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
@@ -213,11 +240,14 @@ async function walletUiState420() {
     }
     state.network.status='matched';
     if(!selected){state.account.reason='No controller account provisioned by Wallet Core';return state;}
-    if(state.config.vaultAccounts.some(a=>typeof a==='string'&&a.toLowerCase()===selected.toLowerCase())){
+    if(accountMeta[selected]?.type==='watch-only'||accountMeta[selected]?.type==='hardware'||state.config.vaultAccounts.some(a=>typeof a==='string'&&a.toLowerCase()===selected.toLowerCase())){
       const provider={request:(method,params)=>rpcRequest(method,params)};
-      state.account={kind:'eoa',controller:selected,smartAccount:null,receiveAddress:selected,
+      const kind=accountMeta[selected]?.type||'eoa';
+      state.account={kind,controller:selected,smartAccount:null,receiveAddress:selected,
         deployed:false,ownerVerified:false,
-        reason:'Self-custodial EOA. Signing and sending need a local EOA authority; SmartAccount passkeys are not interchangeable.'};
+        reason:kind==='watch-only'?'Read-only account. Sending and signing are permanently disabled.':
+          kind==='hardware'?'Hardware signature requires verified external device transport; unavailable.':
+          'Locally encrypted EOA. No SmartAccount passkey authority is inherited.'};
       try{
         const native=await readNativeBalance(provider,selected);
         state.assets.native={raw:native.raw.toString(),decimals:native.decimals,symbol:native.symbol};
@@ -275,15 +305,30 @@ async function notifyDisconnectedSite420(origin) {
     }catch{}
   }));
 }
+async function switchSelectedAccount420(value){
+  const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+  const account=normalizeExtensionAddress420(value);
+  if(!(await accountVisibility420(config.accounts)).includes(account))
+    throw Object.assign(new Error('Account is hidden, locked or not provisioned'),{code:4100});
+  const previous=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420)).selectedAccount;
+  await chrome.storage.local.set({[EXTENSION_UI_KEY_420]:{selectedAccount:account}});
+  if(previous!==account){
+    const permissions=await readObject(PERMISSIONS_KEY);
+    for(const [origin,grant] of Object.entries(permissions)){
+      if(!Array.isArray(grant?.accounts))continue;
+      // Every account switch invalidates prior website grants. Reconnection is explicit.
+      delete permissions[origin];
+      await notifyDisconnectedSite420(origin);
+    }
+    await chrome.storage.local.set({[PERMISSIONS_KEY]:permissions});
+  }
+  return walletUiState420();
+}
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
   if(kind==='set-account'){
-    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
-    const account=normalizeExtensionAddress420(message.account);
-    if(!config.accounts.includes(account))throw Object.assign(new Error('Account is not provisioned in this wallet'),{code:4100});
-    await chrome.storage.local.set({[EXTENSION_UI_KEY_420]:{selectedAccount:account}});
-    return walletUiState420();
+    return switchSelectedAccount420(message.account);
   }
   if(kind==='disconnect-site'){
     const origin=normalizeOrigin(message.origin);
@@ -350,6 +395,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
 
+  if(message?.source==='420-wallet-manager-ui'&&message.kind==='set-account'){
+    (async()=>{try{
+      if(sender?.id!==chrome.runtime.id||sender?.url!==chrome.runtime.getURL('wallet.html'))throw Object.assign(new Error('Untrusted account manager'),{code:4100});
+      sendResponse({result:await switchSelectedAccount420(message.account)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
   if (message?.source === '420-wallet-authority-ui' && message.kind === 'authority-rpc') {
     (async () => {
       try {

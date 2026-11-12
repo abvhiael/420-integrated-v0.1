@@ -38,7 +38,10 @@ function renderAccount(){
   if(!w.config.accounts.length){
     select.add(new Option('No accounts provisioned',''));select.disabled=true;
   }else{
-    for(const address of w.config.accounts)select.add(new Option(shortExtensionAddress420(address),address));
+    for(const address of w.config.accounts){
+      const meta=w.config.accountMeta?.[address]||{};
+      select.add(new Option((meta.label||shortExtensionAddress420(address))+' · '+(meta.type==='watch-only'?'Watch only':meta.type==='eoa'?'EOA':meta.type==='hardware'?'Hardware':'SmartAccount'),address));
+    }
     select.value=w.selectedAccount||w.config.accounts[0];select.disabled=false;
   }
   const vault=w.vault||{exists:false,unlocked:false};
@@ -48,15 +51,15 @@ function renderAccount(){
   const address=extensionReceiveAddress420(w);
   $('account-address').textContent=address?shortExtensionAddress420(address):'No verified wallet address';
   $('account-address').title=address||'';
-  $('account-address').setAttribute('aria-label',address?'SmartAccount address '+address:'No verified wallet address');
+  $('account-address').setAttribute('aria-label',address?'Selected account address '+address:'No verified wallet address');
   $('account-state').textContent=w.account.reason||'SmartAccount verification required';
   $('copy-account').disabled=!address;
   $('quick-receive').disabled=!address;
   $('quick-send').disabled=!extensionCanSend420(w);
   $('native-balance').textContent=w.assets.native?extensionBalanceText420(w.assets.native.raw,w.assets.native.decimals):'—';
   $('balance-note').textContent=w.network.status==='matched'&&address?'Chain-derived balance. No fiat value is inferred.':'Connect to the approved chain and verify your SmartAccount to display balances.';
-  const status=w.account.kind==='eoa' ?
-    (w.network.status==='matched'?'Local EOA balance displayed. EOA send/signing requires dedicated local authority.':'Set up your verified EVM network to display local EOA balances.') :
+  const status=['eoa','watch-only','hardware'].includes(w.account.kind) ?
+    (w.network.status==='matched'?w.account.reason:'Set up your verified EVM network to display address balances.') :
     w.network.status==='matched'?
       w.account.deployed?(w.account.ownerVerified?'Deployed account owner confirmed; verify deployment provenance independently.':'Owner verification failed; sends blocked.'):'SmartAccount not deployed; sending disabled.':
       w.network.message||'Network unconfigured. Open Settings to set your approved RPC and chain.';
@@ -127,7 +130,7 @@ function renderReceive(){
   const address=extensionReceiveAddress420(state.wallet);
   $('receive-address').textContent=address||'Unavailable';
   $('copy-receive').disabled=!address;
-  $('receive-warning').textContent=address?'Confirm the exact chain before transferring funds. This is your canonical SmartAccount address.':'A matching chain and verified SmartAccount discovery are required before a receive address can be shown.';
+  $('receive-warning').textContent=address?'Confirm the exact network and account address before transferring funds.':'A matching chain and an available account are required before receiving.';
   $('receive-warning').className='notice'+(address?'':' warn');
 }
 function renderAll(){
@@ -179,10 +182,10 @@ function populateSend(){
   }
 }
 async function copy(value){
-  if(!value)throw new Error('Verified SmartAccount address unavailable');
+  if(!value)throw new Error('No available account address');
   if(!navigator.clipboard?.writeText)throw new Error('Clipboard is unavailable in this browser');
   await navigator.clipboard.writeText(value);
-  tell('SmartAccount address copied.');
+  tell('Account address copied.');
 }
 function prettyRequest(request){
   if(!request)return '';
@@ -239,7 +242,7 @@ function setup(){
   $('copy-account').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>tell('Copy failed: '+e.message,'error')));
   $('copy-receive').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>{$('receive-warning').textContent=e.message;$('receive-warning').className='notice error';}));
   $('account-select').addEventListener('change',async event=>{
-    try{state.wallet=await command('set-account',{account:event.target.value});renderAll();}
+    try{resetReview();state.wallet=await command('set-account',{account:event.target.value});renderAll();}
     catch(e){tell('Account change blocked: '+e.message,'error');}
   });
   $('network-form').addEventListener('submit',async event=>{

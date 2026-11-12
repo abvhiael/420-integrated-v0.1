@@ -72,11 +72,11 @@ export function buildExtensionSend420({from,recipient,amount,asset='native',trac
   return {transaction:{from:controller,to:request.target,value:'0x'+BigInt(request.value).toString(16),data:request.data},summary:{kind:summary.kind,symbol:summary.symbol,recipient:summary.recipient,amount:summary.amount}};
 }
 export function extensionCanSend420(state){
-  return Boolean(state?.network?.status==='matched'&&state?.account?.deployed===true&&state?.account?.ownerVerified===true&&state?.account?.controller&&state?.account?.smartAccount);
+  return Boolean(!['eoa','watch-only','hardware'].includes(state?.account?.kind)&&state?.network?.status==='matched'&&state?.account?.deployed===true&&state?.account?.ownerVerified===true&&state?.account?.controller&&state?.account?.smartAccount);
 }
 export function extensionReceiveAddress420(state){
   if(state?.network?.status!=='matched')return null;
-  const address=state?.account?.kind==='eoa'?state?.account?.receiveAddress:state?.account?.smartAccount;
+  const address=['eoa','watch-only','hardware'].includes(state?.account?.kind)?state?.account?.receiveAddress:state?.account?.smartAccount;
   if(!address)return null;
   try{return normalizeExtensionAddress420(address)}catch{return null}
 }

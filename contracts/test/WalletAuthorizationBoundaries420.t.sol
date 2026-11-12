@@ -166,11 +166,13 @@ contract WalletAuthorizationBoundaries420Test {
         vm.prank(ATTACKER); names.register(label, 8, ATTACKER, 30 days, salt);
         vm.prank(ATTACKER); names.setResolution(label, address(a), profile, bytes32(0));
         vm.prank(ATTACKER); identity.setPrimaryName(profile, label);
-        require(names.resolve(label).resolvedAddress == address(a), "name record not resolved");
+        Names420.Record memory resolvedName = names.resolve(label);
+        require(resolvedName.resolvedAddress == address(a), "name record not resolved");
         require(names.nameClaimsProfile(label, profile), "identity binding absent");
         bytes32 serviceId = keccak256("420/service/names/v1");
         registry.publishService(serviceId, address(a), keccak256("code"), keccak256("meta"), 1, true);
-        require(registry.resolveActive(serviceId) == address(a), "discovery record absent");
+        (address discovered,) = registry.resolveActive(serviceId);
+        require(discovered == address(a), "discovery record absent");
 
         vm.prank(ATTACKER);
         (bool ok,) = address(a).call(abi.encodeWithSelector(SmartAccount420.execute.selector, address(target), 0,

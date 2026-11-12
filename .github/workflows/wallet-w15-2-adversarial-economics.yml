@@ -14,7 +14,7 @@ permissions:
 jobs:
   economic-security:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 45
     env:
       FOUNDRY_PROFILE: pr
     steps:
@@ -29,16 +29,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.8.6
-      - name: New adversarial economics, gas and malformed-ABI regressions
-        working-directory: contracts
-        run: forge test --match-path test/WalletAdversarialEconomics420.t.sol -vv
-      - name: Retained settlement, hostile callbacks, replay and atomicity
+      - name: Qualify affected Wallet economics, replay, atomicity, fuzz and invariant suites
         working-directory: contracts
         shell: bash
         run: |
           set -euo pipefail
-          forge test --match-path 'test/EntryPointPaymaster*420.t.sol' -vv
-          forge test --match-path 'test/SmartAccountPolicyFuzz420.t.sol' -vv
-          forge test --match-path 'test/SmartAccountInvariant420.t.sol' -vv
-          forge test --match-path 'test/SmartAccountPasskey420.t.sol' -vv
-          forge test --match-path 'test/SmartAccountEntryPointIntegration420.t.sol' -vv
+          # One Foundry invocation: match only the twelve affected test
+          # contracts so solc does not recompile 829 files for every suite.
+          forge test --match-contract '^(WalletAdversarialEconomics420Test|EntryPointPaymaster420Test|EntryPointPaymasterAccounting420Test|EntryPointPaymasterHostileAccounting420Test|EntryPointPaymasterSettlement420Test|SmartAccountPolicyFuzz420Test|SmartAccountInvariant420Test|SmartAccountPasskey420Test|SmartAccountEntryPointIntegration420Test|EntryPoint420Test|SmartAccountSignature420Test|SmartAccount420Test)$' -vv

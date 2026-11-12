@@ -63,7 +63,7 @@ requireStrings('core/batch-execution.js', [
   'sendPreparedSmartAccountBatch','prepared batch calldata changed after simulation','prepared batch transaction envelope changed after simulation','prepared batch authorization epoch changed',
   'eth_call','eth_estimateGas','eth_sendTransaction','owner changed after batch simulation','authorization epoch changed after batch simulation','reverted atomically; no batch call was committed'
 ], 'guarded batch execution/hardening control');
-requireStrings('core/capabilities.js', ['0x0000000000000000000000000000000000000421','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
+requireStrings('core/capabilities.js', ['assertVerifiedCapabilityRegistry420','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization'], 'capability inspection guard');
 requireStrings('core/session-management.js', ['8d08b1a4','5ae7ab32','388c930c','d557e335','fdb3c749','authorizationEpoch','post-confirmation verification'], 'session administration guard');
 
 const sessionExecution = requireStrings('core/session-execution.js', ['efff7e19','d86f2b3c','SESSION_EXECUTE_CAPABILITY_420','readActiveGrantId','readCapabilityAuthorization','authorizationEpoch','nonce lane','wallet authority contract','broadcastReady: false','EntryPoint420'], 'session execution preflight guard');

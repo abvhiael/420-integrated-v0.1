@@ -28,11 +28,11 @@ function inventory420() {
     conflicts: [],
     walletAuthority: {
       entryPoint420: { address: '0x000000000000000000000000000000000000041f', status: 'BOUND' },
-      smartAccountFactory420: { address: '0x0000000000000000000000000000000000000420', status: 'BOUND' },
-      capabilityRegistry420: { address: '0x0000000000000000000000000000000000000421', status: 'BOUND' },
-      protocolRegistry: { address: '0x0000000000000000000000000000000000000422', status: 'BOUND' },
-      names420: { address: '0x0000000000000000000000000000000000000423', status: 'BOUND' },
-      identity420: { address: '0x0000000000000000000000000000000000000424', status: 'BOUND' },
+      smartAccountFactory420: { address: '0x0000000000000000000000000000000000000446', status: 'BOUND' },
+      capabilityRegistry420: { address: '0x0000000000000000000000000000000000000447', status: 'BOUND' },
+      protocolRegistry: { address: '0x0000000000000000000000000000000000000434', status: 'BOUND' },
+      names420: { address: '0x0000000000000000000000000000000000000435', status: 'BOUND' },
+      identity420: { address: '0x0000000000000000000000000000000000000436', status: 'BOUND' },
     },
   };
 }
@@ -47,7 +47,7 @@ function runtime420() {
       explorerUrl: 'https://explorer.testnet.example.org',
     },
     smartAccount: {
-      factoryAddress: '0x0000000000000000000000000000000000000420',
+      factoryAddress: '0x0000000000000000000000000000000000000446',
       recoveryAuthority: null,
       salt: '0x' + '00'.repeat(32),
     },
@@ -59,10 +59,10 @@ function runtime420() {
     deployment: {
       environment: 'testnet',
       entryPointAddress: '0x000000000000000000000000000000000000041f',
-      capabilityRegistryAddress: '0x0000000000000000000000000000000000000421',
-      protocolRegistryAddress: '0x0000000000000000000000000000000000000422',
-      namesAddress: '0x0000000000000000000000000000000000000423',
-      identityAddress: '0x0000000000000000000000000000000000000424',
+      capabilityRegistryAddress: '0x0000000000000000000000000000000000000447',
+      protocolRegistryAddress: '0x0000000000000000000000000000000000000434',
+      namesAddress: '0x0000000000000000000000000000000000000435',
+      identityAddress: '0x0000000000000000000000000000000000000436',
       faucetUrl: 'https://faucet.testnet.example.org',
     },
   };
@@ -75,9 +75,9 @@ function extensionConfig420() {
     rpcUrl: 'https://rpc.testnet.example.org',
     accounts: ['0x0000000000000000000000000000000000000abc'],
     smartAccountConfig: {
-      factoryAddress: '0x0000000000000000000000000000000000000420',
+      factoryAddress: '0x0000000000000000000000000000000000000446',
       entryPointAddress: '0x000000000000000000000000000000000000041f',
-      capabilityRegistryAddress: '0x0000000000000000000000000000000000000421',
+      capabilityRegistryAddress: '0x0000000000000000000000000000000000000447',
       recoveryAuthority: '0x0000000000000000000000000000000000000000',
       salt: '0x' + '00'.repeat(32),
     },

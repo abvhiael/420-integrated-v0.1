@@ -44,7 +44,7 @@ test('owner cannot broadcast when chain switches after simulation',async()=>{
   const provider={request:async(m,params)=>{
     if(m==='eth_chainId')return ++chains===1?'0x1a4':'0x1a5';
     if(m==='eth_estimateGas')return '0x5208';
-    if(m==='eth_call')return params[0]?.data==='0x8da5cb5b'?wordAddress(owner):'0x';
+    if(m==='eth_call')return params[0]?.data==='0x8da5cb5b'?wordAddress(owner):params[0]?.data==='0x6d5f87be'?wordUint(7):'0x';
     if(m==='eth_sendTransaction'){submitted++;return '0x'+'ab'.repeat(32);}
     throw Error(m);
   }};

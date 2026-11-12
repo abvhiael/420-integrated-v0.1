@@ -12,7 +12,7 @@ const signer = '0x2222222222222222222222222222222222222222';
 const owner = '0x3333333333333333333333333333333333333333';
 const target = '0x4444444444444444444444444444444444444444';
 const entryPoint = '0x5555555555555555555555555555555555555555';
-const registry = '0x0000000000000000000000000000000000000421';
+const registry = '0x0000000000000000000000000000000000000447';
 const scope = `0x${'66'.repeat(32)}`;
 const grantId = `0x${'77'.repeat(32)}`;
 const otherGrantId = `0x${'88'.repeat(32)}`;
@@ -40,6 +40,7 @@ function prepared(overrides = {}) {
     nonce,
     nonceKey,
     entryPoint,
+    verifiedCapabilityRegistry: registry,
     userOpHash: hash,
     txHash,
     userOperation: {

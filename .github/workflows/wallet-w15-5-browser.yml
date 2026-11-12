@@ -1,0 +1,43 @@
+name: 420Wallet W15.5 Browser Accessibility Qualification
+on:
+  push:
+    paths: ["wallet/web/**", ".github/workflows/wallet-w15-5-browser.yml"]
+  pull_request:
+    paths: ["wallet/web/**", ".github/workflows/wallet-w15-5-browser.yml"]
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-accessibility:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install browser test dependencies
+        working-directory: wallet/web
+        run: npm install --no-save --no-package-lock playwright axe-core
+      - name: Install Chromium
+        working-directory: wallet/web
+        run: npx playwright install --with-deps chromium
+      - name: Rendered Chromium responsive and accessibility acceptance
+        working-directory: wallet/web
+        run: node scripts/qualify-browser.mjs
+      - name: Upload viewport screenshots and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet-w15-5-browser-${{ github.sha }}
+          path: wallet/web/browser-qualification-artifacts/**
+          if-no-files-found: ignore
+          retention-days: 14

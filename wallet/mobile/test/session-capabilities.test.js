@@ -24,6 +24,7 @@ function state(overrides = {}) {
     controllerIsOwner: true,
     authorizationEpoch: 7n,
     capabilityRegistry: REGISTRY,
+    verifiedCapabilityRegistry: REGISTRY,
     recoveryAuthority: '0x4444444444444444444444444444444444444444',
     ...overrides,
   };

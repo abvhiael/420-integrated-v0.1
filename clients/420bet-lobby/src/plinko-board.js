@@ -72,8 +72,8 @@ export function createPlinkoBoard(doc=globalThis.document){
  const riskField=field('Risk',PLINKO_RISKS,risk,value=>{risk=value;last=[];update();});
  const ballsField=field('Multi-ball',PLINKO_DROP_CHOICES,dropCount,value=>{dropCount=Number(value);update();});
  controlRow.append(rowsField.wrap,riskField.wrap,ballsField.wrap);
- const rowMinus=button('pete-step','−',()=>{if(bucketsCount>8){bucketsCount--;rowsField.select.value=String(bucketsCount);last=[];update();}});
- const rowPlus=button('pete-step','+',()=>{if(bucketsCount<17){bucketsCount++;rowsField.select.value=String(bucketsCount);last=[];update();}});
+ const rowMinus=button('pete-step','−',()=>{if(bucketsCount>8){bucketsCount--;last=[];update();}});
+ const rowPlus=button('pete-step','+',()=>{if(bucketsCount<17){bucketsCount++;last=[];update();}});
  const rowValue=el('strong','pete-rows-value','16');
  rowControl.append(el('h3','','ROWS (PEGS)'),rowMinus,rowValue,rowPlus);
  const ballButtons=el('div','pete-ball-choices');
@@ -156,12 +156,12 @@ export function createPlinkoBoard(doc=globalThis.document){
   betMinus.disabled=active||betCents<=100;betPlus.disabled=active||betCents>=100000;
   riskGroup.replaceChildren();
   for(const [value,label,subtitle] of [['soundcheck','SOUNDCHECK','LOW RISK · SMOOTHER PAYOUTS'],['showtime','SHOWTIME','BALANCED RISK & REWARDS'],['riot','RIOT','HIGH RISK · BIG EDGE REWARDS']]){
-   const b=button('pete-risk-button'+(risk===value?' selected':''),label,()=>{risk=value;riskField.select.value=value;last=[];update();});
+   const b=button('pete-risk-button'+(risk===value?' selected':''),label,()=>{risk=value;last=[];update();});
    b.append(el('small','',subtitle));b.setAttribute('aria-pressed',String(risk===value));b.disabled=active;riskGroup.append(b);
   }
   ballButtons.replaceChildren();
   for(const quantity of PLINKO_DROP_CHOICES){
-   const b=button('pete-ball-button'+(dropCount===quantity?' selected':''),String(quantity),()=>{dropCount=quantity;ballsField.select.value=String(quantity);update();});
+   const b=button('pete-ball-button'+(dropCount===quantity?' selected':''),String(quantity),()=>{dropCount=quantity;update();});
    b.setAttribute('aria-pressed',String(dropCount===quantity));b.disabled=active;ballButtons.append(b);
   }
   dropButton.textContent='▶ DROP '+dropCount+' '+(dropCount===1?'BALL!':'BALLS!');

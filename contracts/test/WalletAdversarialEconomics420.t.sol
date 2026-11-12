@@ -34,9 +34,11 @@ contract WalletEconomicsSponsor420 is IPaymaster420 {
     uint256 public charged;
     PostOpMode420 public lastMode;
     bool public revertPostOp;
+    bool public exhaustPostOpGas;
 
     constructor(EntryPoint420 entryPoint_) { entryPoint = entryPoint_; }
     function setRevertPostOp(bool value) external { revertPostOp = value; }
+    function setExhaustPostOpGas(bool value) external { exhaustPostOpGas = value; }
     function validatePaymasterUserOp(PackedUserOperation420 calldata, bytes32, uint256)
         external pure returns (bytes memory context, uint256 validationData)
     {
@@ -45,6 +47,9 @@ contract WalletEconomicsSponsor420 is IPaymaster420 {
     function postOp(PostOpMode420 mode, bytes calldata, uint256 actualGasCostWei) external {
         require(msg.sender == address(entryPoint), "not entrypoint");
         if (revertPostOp) revert("postOp revert");
+        if (exhaustPostOpGas) {
+            while (true) { assembly { pop(gas()) } }
+        }
         calls += 1;
         charged = actualGasCostWei;
         lastMode = mode;
@@ -158,6 +163,23 @@ contract WalletAdversarialEconomics420Test {
         require(entryPoint.balanceOf(address(sponsor)) < before, "postop restored deposit");
         require(entryPoint.reservedOf(address(sponsor)) == 0, "postop left reservation");
         require(entryPoint.getNonce(address(probe), 0) == 1, "postop rolled back nonce");
+    }
+
+    function testGasExhaustingPostOpCannotRollbackSponsorshipOrReplayState() public {
+        sponsor.setExhaustPostOpGas(true);
+        bytes32 authorization = keccak256("wallet/economics/postop-oog");
+        PackedUserOperation420 memory op = _sponsoredProbe(
+            authorization, abi.encodeWithSelector(WalletGasProbe420.cheap.selector), 100_000
+        );
+        uint256 before = entryPoint.balanceOf(address(sponsor));
+        (bool success,) = entryPoint.handleOp(op);
+        require(success && probe.executions() == 1, "hostile postop rolled back target");
+        require(entryPoint.reservedOf(address(sponsor)) == 0, "hostile postop stranded reserve");
+        require(entryPoint.balanceOf(address(sponsor)) < before, "hostile postop undid charge");
+        require(entryPoint.authorizationConsumed(address(sponsor), authorization), "authorization reverted");
+        require(entryPoint.getNonce(address(probe), 0) == 1, "hostile postop undid nonce");
+        (bool replay,) = address(entryPoint).call(abi.encodeWithSelector(EntryPoint420.handleOp.selector, op));
+        require(!replay, "hostile postop permitted replay");
     }
 
     function testMalformedSessionEnvelopeFailsClosedPreservingNonceAndGrants() public {

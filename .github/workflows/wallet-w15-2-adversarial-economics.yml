@@ -6,6 +6,8 @@ on:
       - 'contracts/src/accounts/EntryPoint420.sol'
       - 'contracts/src/accounts/SmartAccount420.sol'
       - 'contracts/test/WalletAdversarialEconomics420.t.sol'
+      - 'contracts/test/SmartAccountEntryPointIntegration420.t.sol'
+      - 'contracts/test/SmartAccountPolicyFuzz420.t.sol'
       - '.github/workflows/wallet-w15-2-adversarial-economics.yml'
 
 permissions:

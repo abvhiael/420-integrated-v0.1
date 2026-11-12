@@ -17,7 +17,15 @@ interface VmWalletEconomics420 {
 
 contract WalletGasProbe420 is IAccountValidation420 {
     uint256 public executions;
-    function validateUserOp(PackedUserOperation420 calldata, bytes32, uint256) external pure returns (uint256) {
+    uint256 public requestedValidationGas;
+    function setRequestedValidationGas(uint256 amount) external { requestedValidationGas = amount; }
+    function validateUserOp(PackedUserOperation420 calldata, bytes32, uint256) external view returns (uint256) {
+        if (requestedValidationGas != 0) {
+            uint256 start = gasleft();
+            while (start - gasleft() < requestedValidationGas) {
+                assembly { pop(gas()) }
+            }
+        }
         return 0;
     }
     function cheap() external { executions += 1; }
@@ -118,6 +126,27 @@ contract WalletAdversarialEconomics420Test {
         (bool ok,) = address(entryPoint).call(abi.encodeWithSelector(EntryPoint420.handleOp.selector, op));
         require(!ok, "replayed operation accepted");
         require(entryPoint.balanceOf(address(sponsor)) == before - charged, "replay charged twice");
+    }
+
+    function testAccountAndSponsorShareSignedVerificationGasBudget() public {
+        // Account validation consumes most of its signed verification allowance.
+        // Its successful return cannot grant the sponsor the *same* allowance
+        // a second time; the operation must fail before nonce and reservation.
+        probe.setRequestedValidationGas(90_000);
+        bytes32 authorization = keccak256("wallet/economics/verification-budget");
+        PackedUserOperation420 memory op = _sponsoredProbe(
+            authorization, abi.encodeWithSelector(WalletGasProbe420.cheap.selector), 100_000
+        );
+        uint256 before = entryPoint.balanceOf(address(sponsor));
+        (bool ok,) = address(entryPoint).call(
+            abi.encodeWithSelector(EntryPoint420.handleOp.selector, op)
+        );
+        require(!ok, "verification allowance was reused by paymaster");
+        require(probe.executions() == 0, "account executed after verification budget exhausted");
+        require(entryPoint.getNonce(address(probe), 0) == 0, "failed verification consumed nonce");
+        require(!entryPoint.authorizationConsumed(address(sponsor), authorization), "failed verification consumed id");
+        require(entryPoint.reservedOf(address(sponsor)) == 0, "failed verification reserved funds");
+        require(entryPoint.balanceOf(address(sponsor)) == before, "failed verification charged sponsor");
     }
 
     function testZeroSponsoredGasBudgetsRejectWithoutReservationOrNonce() public {

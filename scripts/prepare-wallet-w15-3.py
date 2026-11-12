@@ -87,7 +87,7 @@ def checks(docs):
         errors.append("wallet not using Genesis SmartAccounts")
     if inventory.get("readyForLiveTestnet") is not False:
         errors.append("unverified Wallet promoted to live status")
-    if any(v is not False for v in inventory.get("walletAuthority", {}).get(x, {}).get("deploymentVerified")
+    if any(inventory.get("walletAuthority", {}).get(x, {}).get("deploymentVerified") is not False
            for x in ("entryPoint420", "smartAccountFactory420", "capabilityRegistry420")):
         errors.append("Wallet contract falsely deployment-verified")
     canonical_anchors = canonical.get("anchors", [])

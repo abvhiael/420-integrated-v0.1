@@ -25,10 +25,10 @@ export function plinkoPosition(points,fraction){
  const u=Math.min(1,t*(points.length-1)-step),a=points[step],b=points[step+1];
  return {x:a.x+(b.x-a.x)*(u*u*(3-2*u)),y:a.y+(b.y-a.y)*(u*u*(2-u))};
 }
-export function createPlinkoBoard(doc=globalThis.document){
+export function createPlinkoBoard(doc=globalThis.document,options={}){
  const root=doc.createElement('section');
  root.className='practice plinko-neon pete-plinko';root.dataset.practiceGame='plinko';
- const win=doc.defaultView||{},raf=win.requestAnimationFrame?.bind(win),cancel=win.cancelAnimationFrame?.bind(win);
+ const win=options.view||doc.defaultView||{},raf=win.requestAnimationFrame?.bind(win),cancel=win.cancelAnimationFrame?.bind(win);
  const reduced=()=>Boolean(win.matchMedia?.('(prefers-reduced-motion: reduce)').matches);
  const el=(tag,cls,text)=>{const x=doc.createElement(tag);x.className=cls||'';if(text!==undefined)x.textContent=text;return x;};
  const svgEl=(tag,attrs)=>{const x=doc.createElementNS(NS,tag);for(const [key,value] of Object.entries(attrs))x.setAttribute(key,String(value));return x;};

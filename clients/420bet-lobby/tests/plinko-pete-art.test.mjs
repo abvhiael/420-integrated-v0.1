@@ -28,13 +28,14 @@ test('Pete Plinko visible risk and row controls reconfigure the actual paytable'
  const {document,window}=parseHTML('<html><body></body></html>');
  window.matchMedia=()=>({matches:true});
  const root=createPlinkoBoard(document);
- const s=[...root.querySelectorAll('.pete-plinko-controls select')];
- assert.equal(s.length,3);
- s[0].value='8';s[0].dispatchEvent(new window.Event('change'));
+ const selects=[...root.querySelectorAll('.pete-plinko-controls select')];
+ assert.equal(selects.length,3);
+ const minus=root.querySelectorAll('.pete-step')[0];
+ for(let i=0;i<9;i++)minus.dispatchEvent(new window.Event('click'));
  assert.equal(root.querySelectorAll('.plinko-bucket').length,8);
  assert.equal(root.querySelectorAll('.plinko-peg').length,28);
  const before=root.querySelectorAll('.plinko-bucket')[0].textContent;
- s[1].value='riot';s[1].dispatchEvent(new window.Event('change'));
+ root.querySelectorAll('.pete-risk-button')[2].dispatchEvent(new window.Event('click'));
  assert.notEqual(root.querySelectorAll('.plinko-bucket')[0].textContent,before);
  assert.equal(root.querySelectorAll('.pete-risk-button[aria-pressed="true"]').length,1);
  assert.equal(root.querySelector('.pete-row-count').textContent,'7');
@@ -47,8 +48,7 @@ test('Pete Plinko multi-ball deductions and awards are virtual, bounded, and ind
  window.matchMedia=()=>({matches:true});
  const root=createPlinkoBoard(document);
  document.body.append(root);
- const select=[...root.querySelectorAll('.pete-plinko-controls select')][2];
- select.value='25';select.dispatchEvent(new window.Event('change'));
+ root.querySelectorAll('.pete-ball-button')[3].dispatchEvent(new window.Event('click'));
  const before=root.querySelector('.pete-balance-value').textContent;
  assert.equal(before,'10,000.00');
  root.querySelector('.plinko-drop').dispatchEvent(new window.Event('click'));

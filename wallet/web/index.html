@@ -7,46 +7,75 @@
   <title>420 Wallet</title>
   <link rel="icon" type="image/svg+xml" href="./assets/420wallet-logo.svg?v=2" />
   <link rel="apple-touch-icon" href="./assets/420wallet-logo.svg?v=2" />
+  <link rel="stylesheet" href="./design-tokens.css" />
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./wallet-shell.css" />
 </head>
 <body>
+  <a class="skip-link" href="#wallet-main">Skip to wallet content</a>
   <div class="wallet-layout">
     <aside class="sidebar" aria-label="Wallet navigation">
-      <div class="brand"><img class="brand-logo" src="./assets/420wallet-logo.svg?v=2" alt="420Wallet logo" width="44" height="44" /><div><strong>Wallet</strong><small>Integrated</small></div></div>
-      <nav>
-        <button class="nav-item active" data-scroll-target="#overview">Overview</button>
-        <button class="nav-item" data-scroll-target="#execution-panel">Send / Execute</button>
-        <button class="nav-item" data-scroll-target="#capability-panel">Permissions</button>
-        <button class="nav-item" data-scroll-target="#session-panel">Sessions</button>
-        <button class="nav-item" data-scroll-target="#names-management-panel">420 Names</button>
-        <button class="nav-item" data-scroll-target="#identity-management-panel">Identity</button>
-        <button class="nav-item" data-scroll-target="#governance-management-panel">Governance</button>
-        <button class="nav-item" data-scroll-target="#stake-management-panel">420 Stake</button>
-        <button class="nav-item" data-scroll-target="#services-section">420 Apps</button>
+      <div class="brand">
+        <img class="brand-logo" src="./assets/420wallet-logo.svg?v=2" alt="" width="44" height="44" />
+        <div><strong>420Wallet</strong><small>420Integrated</small></div>
+      </div>
+      <nav aria-label="Wallet sections">
+        <span class="nav-group-label">Wallet</span>
+        <button type="button" class="nav-item active" data-scroll-target="#overview" aria-current="page"><span aria-hidden="true" class="nav-mark">◈</span>Overview</button>
+        <button type="button" class="nav-item" data-scroll-target="#wallet-assets"><span aria-hidden="true" class="nav-mark">◉</span>Assets</button>
+        <button type="button" class="nav-item" data-scroll-target="#execution-panel"><span aria-hidden="true" class="nav-mark">↗</span>Send / Execute</button>
+        <button type="button" class="nav-item" data-scroll-target="#wallet-activity"><span aria-hidden="true" class="nav-mark">◷</span>Activity</button>
+        <span class="nav-group-label">Ecosystem</span>
+        <button type="button" class="nav-item" data-scroll-target="#services-section"><span aria-hidden="true" class="nav-mark">▦</span>420 Apps</button>
+        <button type="button" class="nav-item" data-scroll-target="#names-management-panel"><span aria-hidden="true" class="nav-mark">#</span>420 Names</button>
+        <button type="button" class="nav-item" data-scroll-target="#identity-management-panel"><span aria-hidden="true" class="nav-mark">◎</span>Identity</button>
+        <button type="button" class="nav-item" data-scroll-target="#governance-management-panel"><span aria-hidden="true" class="nav-mark">◇</span>Governance</button>
+        <button type="button" class="nav-item" data-scroll-target="#stake-management-panel"><span aria-hidden="true" class="nav-mark">✦</span>420 Stake</button>
+        <span class="nav-group-label">Security</span>
+        <button type="button" class="nav-item" data-scroll-target="#capability-panel"><span aria-hidden="true" class="nav-mark">◇</span>Permissions</button>
+        <button type="button" class="nav-item" data-scroll-target="#session-panel"><span aria-hidden="true" class="nav-mark">⌘</span>Sessions</button>
       </nav>
-      <div class="sidebar-note"><span class="status-dot"></span><span>Wallet Core security boundary active</span></div>
+      <div class="sidebar-note"><span class="status-dot" aria-hidden="true"></span><span>Canonical account authority enforced by Wallet Core</span></div>
     </aside>
 
-    <main class="shell">
+    <main id="wallet-main" class="shell" tabindex="-1">
       <header class="topbar">
-        <div><p class="eyebrow">420 Integrated</p><h1>420 Wallet</h1><p class="subtitle">Your account, assets, permissions & verified 420 ecosystem access.</p></div>
+        <div><p class="eyebrow">420Integrated / Wallet</p><h1>Your wallet, your control.</h1><p class="subtitle">Manage your assets and canonical Smart Account with confidence.</p></div>
         <button id="connect" class="primary-action" type="button">Connect wallet</button>
       </header>
 
-      <section id="overview" class="hero-card">
-        <div class="hero-copy"><p class="eyebrow">Smart account</p><h2 id="smart-account">—</h2><p id="owner-line" class="muted">Connect a controller to discover your canonical SmartAccount420.</p><div class="hero-actions"><button id="create-account" type="button" hidden disabled>Create Smart Account</button><button class="ghost-button" data-copy-source="#smart-account" type="button">Copy address</button></div></div>
-        <div class="network-card"><span class="status-dot"></span><div><span class="label">Network</span><strong id="network">420 Integrated</strong><small id="rpc-status">Not checked</small></div></div>
+      <section id="overview" class="wallet-overview" aria-labelledby="overview-heading">
+        <div class="wallet-overview-heading"><div><p class="eyebrow">Account overview</p><h2 id="overview-heading">Smart Account dashboard</h2></div><span class="status-pill" id="dashboard-account-state">Not connected</span></div>
+        <div class="wallet-overview-grid">
+          <div class="wallet-balance-card">
+            <p class="eyebrow">Native 420 · Smart Account</p>
+            <p id="dashboard-native-balance" class="wallet-balance-value" aria-live="polite">Unavailable</p>
+            <p id="dashboard-balance-context" class="wallet-balance-caption">Connect a controller and verify your Smart Account to read its balance.</p>
+            <div class="wallet-quick-actions" aria-label="Wallet quick actions">
+              <button type="button" class="primary-action" data-scroll-target="#execution-panel">Send 420</button>
+              <button type="button" class="ghost-button" data-scroll-target="#wallet-assets">View assets</button>
+              <button type="button" class="ghost-button" data-scroll-target="#wallet-activity">Activity</button>
+            </div>
+          </div>
+          <div class="wallet-identity-card">
+            <p class="eyebrow">Canonical Smart Account</p>
+            <h3 id="smart-account">—</h3>
+            <p id="owner-line" class="muted">Connect a controller to discover your canonical SmartAccount420.</p>
+            <div class="hero-actions"><button id="create-account" type="button" hidden disabled>Create Smart Account</button><button class="ghost-button" data-copy-source="#smart-account" type="button">Copy address</button></div>
+            <div class="network-card"><span class="network-indicator" aria-hidden="true"></span><div><span class="label">Connected network</span><strong id="network">420 Integrated</strong><small id="rpc-status">Not checked</small></div></div>
+          </div>
+        </div>
       </section>
 
-      <section class="metric-grid account-card" aria-labelledby="account-heading">
+      <section class="metric-grid account-card wallet-account-metrics" aria-labelledby="account-heading">
         <div><p class="label" id="account-heading">Controller</p><strong id="account">Not connected</strong></div>
         <div><p class="label">On-chain owner</p><strong id="owner">—</strong></div>
         <div><p class="label">Latest block</p><strong id="block">—</strong></div>
-        <div><p class="label">Account state</p><strong>Canonical factory discovery</strong></div>
+        <div><p class="label">Controller native 420</p><strong id="dashboard-controller-balance">Unavailable</strong></div>
       </section>
 
-      <section>
-        <div class="section-heading"><div><p class="eyebrow">Portfolio</p><h2>Assets</h2></div><span class="section-kicker">Read-only chain state</span></div>
+      <section id="wallet-assets" class="wallet-assets-section" aria-labelledby="assets-heading">
+        <div class="section-heading"><div><p class="eyebrow">Portfolio</p><h2 id="assets-heading">Assets</h2></div><span class="section-kicker">Read-only chain state · balances shown per account</span></div>
         <div id="portfolio" class="service-grid asset-grid" aria-live="polite">Connect a wallet to load read-only balances.</div>
       </section>
 
@@ -123,7 +152,7 @@
         <div class="button-row"><button id="enable-session-key" type="button" disabled>Enable key</button><button id="revoke-session-key" type="button" disabled>Revoke key</button><button id="create-session-grant" type="button" disabled>Create session grant</button></div>
       </section>
 
-      <section class="panel">
+      <section id="wallet-activity" class="panel">
         <div class="section-heading"><div><p class="eyebrow">This browser session</p><h2>Activity</h2></div><span class="section-kicker">No private history storage</span></div>
         <div id="activity-list" class="activity-list" aria-live="polite"></div>
       </section>
@@ -144,6 +173,7 @@
   <script type="module" src="./governance-management-ui.js"></script>
   <script type="module" src="./stake-management-ui.js"></script>
   <script type="module" src="./ui-v1.js"></script>
+  <script type="module" src="./wallet-shell.js"></script>
   <script type="module" src="./session-execution-ui.js"></script>
   <script type="module" src="./batch-execution-ui.js"></script>
   <script type="module" src="./passkey-ui.js"></script>

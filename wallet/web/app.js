@@ -43,6 +43,7 @@ function executionRequest() {
     target: $('#execute-target').value.trim(),
     value: $('#execute-value').value.trim() || '0',
     data: $('#execute-data').value.trim() || '0x',
+    expectedChainId: state.config?.network?.chainId,
   };
 }
 function gasSponsorRequest() {
@@ -187,6 +188,7 @@ async function refreshConnectedState() {
   state.network = await readNetwork(state.provider, state.config.network.chainId);
   if (state.network.chainMismatch) throw new Error(`Wrong network: expected ${state.network.expectedChainId}, received ${state.network.chainId}`);
   state.smartAccount = await discoverSmartAccount(state.provider, state.controller, state.config.smartAccount);
+  state.smartAccount.expectedChainId = state.config.network.chainId;
   state.portfolio = await readPortfolio(state.provider, [state.controller, state.smartAccount.smartAccount], state.config.trackedAssets);
   state.lastSimulation = null;
   state.capabilityInspection = null;
@@ -214,14 +216,14 @@ $('#connect').addEventListener('click', async () => {
 
 $('#create-account').addEventListener('click', async () => {
   if (!state.provider || !state.controller || state.smartAccount?.deployed) return;
-  if (globalThis.confirm && !globalThis.confirm(`Create SmartAccount420 at ${state.smartAccount.smartAccount}? Your connected wallet must approve the factory transaction.`)) return;
+  if (!globalThis.confirm?.(`Create SmartAccount420 at ${state.smartAccount.smartAccount}? Your connected wallet must approve the factory transaction.`)) return;
   state.creatingAccount = true; render();
   $('#status').textContent = 'Requesting explicit approval for SmartAccountFactory420 creation…';
   try {
-    const submitted = await sendSmartAccountCreation(state.provider, state.controller, state.config.smartAccount);
+    const submitted = await sendSmartAccountCreation(state.provider, state.controller, { ...state.config.smartAccount, expectedChainId: state.config.network.chainId });
     if (!submitted.submitted) { await refreshConnectedState(); $('#status').textContent = 'Smart Account was already deployed; canonical state refreshed.'; return; }
     $('#status').textContent = `Creation submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount);
+    await confirmSmartAccountCreation(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId });
     await refreshConnectedState();
     $('#status').textContent = `SmartAccount420 created and owner verified: ${state.smartAccount.smartAccount}`;
   } catch (error) { $('#status').textContent = error.message; }
@@ -244,13 +246,13 @@ $('#simulate-execution').addEventListener('click', async () => {
 $('#send-execution').addEventListener('click', async () => {
   if (!state.provider || !state.lastSimulation || state.executing) return;
   const request = executionRequest();
-  if (globalThis.confirm && !globalThis.confirm(`Execute through SmartAccount420 to ${request.target}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
+  if (!globalThis.confirm?.(`Execute through SmartAccount420 to ${request.target}, value ${request.value} wei, calldata ${request.data}? The call will be re-simulated before your wallet is asked to approve it.`)) return;
   state.executing = true; render();
   $('#status').textContent = 'Re-simulating and requesting explicit owner approval…';
   try {
     const submitted = await sendSmartAccountExecution(state.provider, state.controller, state.smartAccount, request);
     $('#status').textContent = `Execution submitted: ${submitted.txHash}. Waiting for confirmation…`;
-    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount);
+    await confirmSmartAccountExecution(state.provider, submitted.txHash, state.controller, state.config.smartAccount, { canonical: true, expectedChainId: state.config.network.chainId });
     await refreshConnectedState();
     $('#execute-simulation').textContent = 'Not simulated';
     $('#status').textContent = `SmartAccount420 execution confirmed: ${submitted.txHash}`;

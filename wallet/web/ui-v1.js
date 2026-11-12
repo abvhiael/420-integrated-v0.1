@@ -69,12 +69,20 @@ function renderExecutionReview() {
 }
 
 function initNavigation() {
-  for (const button of document.querySelectorAll('[data-scroll-target]')) {
-    button.addEventListener('click', () => {
-      const target = document.querySelector(button.dataset.scrollTarget);
-      target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }
+  // Delegation covers dynamic passkey, recovery and session controls as well.
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-scroll-target]');
+    if (!button || button.disabled) return;
+    const selector=button.dataset.scrollTarget;
+    if (!/^#[A-Za-z][\\w:-]*$/.test(selector || '')) return;
+    const target=document.querySelector(selector);
+    if (!target || target.hidden || target.closest('[hidden]')) return;
+    // Moving focus with scroll is essential for keyboard and screen-reader users.
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex','-1');
+    target.focus({preventScroll:true});
+    const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'});
+  });
 }
 
 function initActivityFeed() {
@@ -202,11 +210,20 @@ function initCopyButtons() {
     button.addEventListener('click', async () => {
       const source = document.querySelector(button.dataset.copySource);
       const value = source?.textContent?.trim();
-      if (!value || value === '—' || !navigator.clipboard) return;
-      await navigator.clipboard.writeText(value.replace(/\s*\([^)]*\)$/, ''));
-      const previous = button.textContent;
-      button.textContent = 'Copied';
-      setTimeout(() => { button.textContent = previous; }, 1200);
+      const status=document.querySelector('#status');
+      if (!value || value === '—' || value === 'Unavailable' || !globalThis.navigator?.clipboard?.writeText) {
+        if(status)status.textContent='Copy unavailable. Connect and verify the account before copying its address.';
+        return;
+      }
+      try {
+        await globalThis.navigator.clipboard.writeText(value.replace(/\s*\([^)]*\)$/, ''));
+        if(status) status.textContent='Address copied to clipboard.';
+        const previous=button.textContent;
+        button.textContent='Copied';
+        setTimeout(()=>{button.textContent=previous;},1200);
+      } catch {
+        if(status)status.textContent='Clipboard access was denied. Select and copy the full address manually.';
+      }
     });
   }
 }

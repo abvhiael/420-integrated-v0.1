@@ -150,7 +150,10 @@ async function simulateSignedUserOperation(provider, signer, entryPoint, userOpe
 }
 
 export async function revalidatePreparedSession(provider, prepared) {
-  const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender);
+  const live = await readDeployedSmartAccountState(provider, prepared.userOperation.sender, {
+    verifiedEntryPoint: prepared.entryPoint,
+    verifiedCapabilityRegistry: prepared.verifiedCapabilityRegistry,
+  });
   if (normalizeAddress(live.entryPoint) !== normalizeAddress(prepared.entryPoint)) throw new Error('SmartAccount420 EntryPoint changed after user operation preparation');
   if (BigInt(live.authorizationEpoch) !== BigInt(prepared.authorizationEpoch)) throw new Error('authorization epoch changed after user operation preparation');
 
@@ -182,6 +185,9 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   if (!sessionPreflight || sessionPreflight.broadcastReady !== false) throw new Error('qualified session execution preflight required before EntryPoint420 transport');
   const signer = normalizeAddress(sessionKey);
   if (normalizeAddress(sessionPreflight.signer) !== signer) throw new Error('session preflight signer mismatch');
+  if (!smartAccountState?.verifiedCapabilityRegistry ||
+      normalizeAddress(smartAccountState.verifiedCapabilityRegistry) !== normalizeAddress(smartAccountState.capabilityRegistry))
+    throw new Error('verified CapabilityRegistry420 binding required before session UserOperation signing');
   const entryPoint = normalizeAddress(smartAccountState?.entryPoint);
   const unsigned = normalizePackedUserOperation(sessionPreflight.userOperation);
   if (unsigned.sender !== normalizeAddress(smartAccountState.smartAccount)) throw new Error('session user operation sender mismatch');
@@ -208,6 +214,7 @@ export async function prepareEntryPointTransport(provider, smartAccountState, se
   return {
     ...sessionPreflight,
     entryPoint,
+    verifiedCapabilityRegistry: smartAccountState.verifiedCapabilityRegistry,
     userOpHash,
     userOperation,
     signature,

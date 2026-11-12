@@ -82,7 +82,7 @@ test('qualified transport obtains canonical hash, requests session-key signature
     if (method === 'eth_estimateGas') return '0x5208';
     throw new Error(method);
   } };
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight());
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight());
   assert.equal(prepared.userOpHash, hash);
   assert.equal(prepared.signature, signature);
   assert.equal(prepared.userOperation.signature, signature);
@@ -132,7 +132,7 @@ test('GAS-7 verifies EntryPoint sponsorship digest before canonical hashing and 
     throw new Error(method);
   } };
 
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight(), {
     now: new Date('2026-09-14T23:00:00.000Z'),
     discoverGasQuote: async (request) => {
       discovered = true;
@@ -178,7 +178,7 @@ test('GAS-7 quote unavailability preserves self-funded transport without changin
     if (method === 'eth_estimateGas') return '0x5208';
     throw new Error(method);
   } };
-  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight(), {
+  const prepared = await prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight(), {
     discoverGasQuote: async () => null,
   });
   assert.equal(prepared.userOperation.paymasterAndData, '0x');
@@ -191,7 +191,7 @@ test('GAS-7 quote unavailability preserves self-funded transport without changin
 test('transport fails closed when the session signer is not exposed by the connected wallet', async () => {
   const provider = { request: async (method) => method === 'eth_accounts' ? [] : (() => { throw new Error(method); })() };
   await assert.rejects(
-    prepareEntryPointTransport(provider, { smartAccount: account, entryPoint }, signer, preflight()),
+    prepareEntryPointTransport(provider, { smartAccount: account, entryPoint, capabilityRegistry: '0x0000000000000000000000000000000000000447', verifiedCapabilityRegistry: '0x0000000000000000000000000000000000000447' }, signer, preflight()),
     /session signer is not available/i,
   );
 });

@@ -90,7 +90,7 @@ test('smart account discovery fails closed when canonical factory has no code', 
   const provider = { request: async (method) => method === 'eth_getCode' ? '0x' : (() => { throw new Error(method); })() };
   await assert.rejects(
     discoverSmartAccount(provider, controller, { factoryAddress: factory, recoveryAuthority: ZERO_ADDRESS, salt: ZERO_BYTES32 }),
-    /factory420 is not deployed/i,
+    /factory420 is not deployed/ii,
   );
 });
 

@@ -18,6 +18,7 @@ interface IAccountValidation420 {
 ///      accounting only: callback failure cannot undo EntryPoint settlement or mutate account authority.
 contract EntryPoint420 is IEntryPoint420 {
     bytes32 public constant USER_OPERATION_DOMAIN = keccak256("420/ENTRY_POINT/USER_OPERATION/V1");
+    uint256 private constant _POST_OP_GAS_LIMIT = 100_000;
 
     struct SponsorshipReservation {
         uint256 amountWei;
@@ -77,6 +78,7 @@ contract EntryPoint420 is IEntryPoint420 {
     error UnsupportedInitCode();
     error InvalidNonce();
     error ValidationFailed();
+    error InvalidOperationGasLimits();
     error ValidationNotYetValid(uint48 validAfter);
     error ValidationExpired(uint48 validUntil);
     error InvalidPaymasterBinding();
@@ -193,18 +195,45 @@ contract EntryPoint420 is IEntryPoint420 {
 
         bytes32 userOpHash = getUserOpHash(userOp);
 
-        uint256 accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
+        // These user-signed limits must bound the EVM work as well as the maximum
+        // sponsorship reservation. Zero limits remain valid for legacy unsponsored
+        // practice operations; sponsored operations require both nonzero limits.
+        bool sponsored = userOp.paymasterAndData.length != 0;
+        uint256 packedLimits = uint256(userOp.accountGasLimits);
+        uint256 verificationGasLimit = packedLimits >> 128;
+        uint256 callGasLimit = uint128(packedLimits);
+        if (sponsored && (verificationGasLimit == 0 || callGasLimit == 0)) {
+            revert InvalidOperationGasLimits();
+        }
+
+        // The verification allowance is shared by account and paymaster
+        // verification. It must not be reusable in full for each external call.
+        uint256 verificationGasAtStart = gasleft();
+        uint256 accountValidationData;
+        if (verificationGasLimit == 0) {
+            accountValidationData = IAccountValidation420(userOp.sender).validateUserOp(userOp, userOpHash, 0);
+        } else {
+            accountValidationData =
+                IAccountValidation420(userOp.sender).validateUserOp{gas: verificationGasLimit}(userOp, userOpHash, 0);
+        }
         _enforceValidationData(accountValidationData);
 
         SponsorshipExecution memory sponsorship;
         if (userOp.paymasterAndData.length != 0) {
-            sponsorship = _validatePaymaster(userOp, userOpHash);
+            sponsorship = _validatePaymaster(userOp, userOpHash, verificationGasLimit, verificationGasAtStart);
             _reserveSponsorship(sponsorship.paymaster, sponsorship.authorizationId, sponsorship.reservedCostWei);
         }
 
         unchecked { _sequence[userOp.sender][key] = sequence + 1; }
 
-        (success, returnData) = userOp.sender.call(userOp.callData);
+        // Never let an account execution exceed its signed call-gas budget.
+        // The EntryPoint owns nonce and sponsor settlement even when the
+        // bounded account execution fails or exhausts its call allowance.
+        if (callGasLimit == 0) {
+            (success, returnData) = userOp.sender.call(userOp.callData);
+        } else {
+            (success, returnData) = userOp.sender.call{gas: callGasLimit}(userOp.callData);
+        }
 
         if (sponsorship.paymaster != address(0)) {
             uint256 actualGasCostWei = _actualUserOpCostWei(userOp, gasAtStart);
@@ -214,9 +243,12 @@ contract EntryPoint420 is IEntryPoint420 {
         emit UserOperationHandled(userOpHash, userOp.sender, key, sequence, success);
     }
 
-    function _validatePaymaster(PackedUserOperation420 calldata userOp, bytes32 userOpHash)
-        private
-        returns (SponsorshipExecution memory execution)
+    function _validatePaymaster(
+        PackedUserOperation420 calldata userOp,
+        bytes32 userOpHash,
+        uint256 verificationGasLimit,
+        uint256 verificationGasAtStart
+    ) private returns (SponsorshipExecution memory execution)
     {
         PaymasterData420.V1 memory sponsorship = PaymasterData420.decodeV1(userOp.paymasterAndData);
 
@@ -234,8 +266,17 @@ contract EntryPoint420 is IEntryPoint420 {
             revert SponsorshipCostExceeded(maxCostWei, sponsorship.maxSponsoredCostWei);
         }
 
+        // Deduct account-validation and EntryPoint verification work before
+        // forwarding the remaining signed verification allowance to the sponsor.
+        // Without sharing the budget, both callbacks could each spend the full
+        // amount even though the reservation accounts for it only once.
+        uint256 verificationUsed = verificationGasAtStart - gasleft();
+        if (verificationUsed >= verificationGasLimit) revert InvalidOperationGasLimits();
+        uint256 remainingVerificationGas = verificationGasLimit - verificationUsed;
         (bytes memory context, uint256 paymasterValidationData) =
-            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp(userOp, userOpHash, maxCostWei);
+            IPaymaster420(sponsorship.paymaster).validatePaymasterUserOp{gas: remainingVerificationGas}(
+                userOp, userOpHash, maxCostWei
+            );
         _enforcePaymasterValidationData(paymasterValidationData);
 
         emit PaymasterValidated(
@@ -300,7 +341,11 @@ contract EntryPoint420 is IEntryPoint420 {
 
         PostOpMode420 mode = executionSucceeded ? PostOpMode420.OpSucceeded : PostOpMode420.OpReverted;
         bool callbackSucceeded;
-        try IPaymaster420(sponsorship.paymaster).postOp(mode, sponsorship.context, chargedWei) {
+        // postOp is advisory: even a malicious gas-burning callback must not
+        // exhaust the relayer and roll back already-recorded settlement.
+        try IPaymaster420(sponsorship.paymaster).postOp{gas: _POST_OP_GAS_LIMIT}(
+            mode, sponsorship.context, chargedWei
+        ) {
             callbackSucceeded = true;
         } catch {
             callbackSucceeded = false;

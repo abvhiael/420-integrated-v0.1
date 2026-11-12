@@ -1,0 +1,41 @@
+name: 420Wallet W15.2 Adversarial Economics
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/accounts/EntryPoint420.sol'
+      - 'contracts/src/accounts/SmartAccount420.sol'
+      - 'contracts/test/WalletAdversarialEconomics420.t.sol'
+      - 'contracts/test/SmartAccountEntryPointIntegration420.t.sol'
+      - 'contracts/test/SmartAccountPolicyFuzz420.t.sol'
+      - '.github/workflows/wallet-w15-2-adversarial-economics.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  economic-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - name: Qualify affected Wallet economics, replay, atomicity, fuzz and invariant suites
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          # One Foundry invocation: match only the twelve affected test
+          # contracts so solc does not recompile 829 files for every suite.
+          forge test --match-contract '^(WalletAdversarialEconomics420Test|EntryPointPaymaster420Test|EntryPointPaymasterAccounting420Test|EntryPointPaymasterHostileAccounting420Test|EntryPointPaymasterSettlement420Test|SmartAccountPolicyFuzz420Test|SmartAccountInvariant420Test|SmartAccountPasskey420Test|SmartAccountEntryPointIntegration420Test|EntryPoint420Test|SmartAccountSignature420Test|SmartAccount420Test)$' -vv

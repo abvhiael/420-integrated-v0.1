@@ -425,6 +425,17 @@ contract SmartAccount420 {
         return abi.decode(encoded, (bytes32, bytes));
     }
 
+    /// @notice ABI decode helper used with an external self-call to fail closed on
+    ///         malformed signed session envelopes without bubbling a decoder revert.
+    /// @dev This pure utility cannot grant authorization or consume an allowance.
+    function decodeSessionEnvelope(bytes calldata encoded)
+        external
+        pure
+        returns (address signer, Call[] memory calls)
+    {
+        return abi.decode(encoded, (address, Call[]));
+    }
+
     function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
         // ERC-1271 remains deliberately ECDSA-owner-only in this milestone. Passkey
         // ERC-1271 semantics will only be added after the UserOperation path qualifies.
@@ -506,9 +517,12 @@ contract SmartAccount420 {
         bytes4 selector = bytes4(callData[:4]);
         if (selector != this.executeSession.selector) return (false, 0, 0);
 
-        (address encodedSigner, Call[] memory calls) = abi.decode(callData[4:], (address, Call[]));
-        if (encodedSigner != signer) return (false, 0, 0);
-        return _authorizeCallSet(signer, calls);
+        try this.decodeSessionEnvelope(callData[4:]) returns (address encodedSigner, Call[] memory calls) {
+            if (encodedSigner != signer) return (false, 0, 0);
+            return _authorizeCallSet(signer, calls);
+        } catch {
+            return (false, 0, 0);
+        }
     }
 
     function _authorizeCallSet(address signer, Call[] memory calls)
@@ -582,6 +596,20 @@ contract SmartAccount420 {
         }
 
         ICapabilityRegistry420.CapabilityGrant memory grant_ = capabilityRegistry.grant(authorization.grantId);
+        // An owner-approved exact target and selector does not make an arbitrary
+        // ABI's asset amount measurable. Never treat an unknown selector with
+        // encoded arguments as a zero-cost, quota-metered token operation.
+        // Capped grants accept canonical ERC20 amounts, or native-only ABI
+        // calls with an explicit nonzero ETH value and no encoded arguments
+        // (empty data or a four-byte selector). A zero-value custom selector
+        // can still move tokens as a side effect and MUST NOT count as zero
+        // quota consumption. Other selectors require an explicitly unlimited
+        // grant (both limits zero).
+        bool canonicalTokenSpend = targetSelector == _ERC20_TRANSFER
+            || targetSelector == _ERC20_APPROVE || targetSelector == _ERC20_TRANSFER_FROM;
+        if ((grant_.perCallLimit != 0 || grant_.periodLimit != 0) && !canonicalTokenSpend) {
+            if (call_.value == 0 || call_.data.length > 4) return (false, authorization);
+        }
         authorization.validAfter = uint48(grant_.validFrom);
         authorization.validUntil = uint48(grant_.validUntil);
         return (true, authorization);

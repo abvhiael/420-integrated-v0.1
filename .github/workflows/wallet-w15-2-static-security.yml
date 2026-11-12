@@ -1,0 +1,153 @@
+name: 420Wallet W15.2 Scoped Solidity Static Security
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/accounts/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - '.github/workflows/wallet-w15-2-static-security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  wallet-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact reviewed source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.8.6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned Slither and Solidity compiler
+        run: |
+          python -m pip install --disable-pip-version-check slither-analyzer==0.11.6
+          solc-select install 0.8.24
+          solc-select use 0.8.24
+          slither --version
+          solc --version
+      - name: Analyze focused Wallet authority and gas boundaries
+        shell: bash
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p ../artifacts/wallet-w15-2-static
+          targets=(
+            src/accounts/SmartAccount420.sol
+            src/accounts/SmartAccountFactory420.sol
+            src/accounts/EntryPoint420.sol
+            src/accounts/Paymaster420.sol
+            src/accounts/P256WebAuthnVerifier420.sol
+            src/accounts/Rip7212P256Verifier420.sol
+            src/accounts/SponsorshipPolicy420.sol
+            src/system/CapabilityRegistry420.sol
+          )
+          for target in "${targets[@]}"; do
+            name="$(basename "$target" .sol)"
+            echo "::group::Analyze $target"
+            set +e
+            slither "$target" --compile-force-framework solc \
+              --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' \
+              --json "../artifacts/wallet-w15-2-static/$name.json" \
+              > "../artifacts/wallet-w15-2-static/$name.log" 2>&1
+            result=$?
+            set -e
+            echo "$result" > "../artifacts/wallet-w15-2-static/$name.exit"
+            test -s "../artifacts/wallet-w15-2-static/$name.json" || {
+              tail -100 "../artifacts/wallet-w15-2-static/$name.log"
+              exit 1
+            }
+            echo "::endgroup::"
+          done
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path("../artifacts/wallet-w15-2-static")
+          # The only high/medium findings accepted here were individually reviewed
+          # against the Wallet authority and accounting code at W15.2. Every new
+          # signature, contract, issue class or severity remains a hard failure.
+          dispositions = {
+              ("incorrect-equality", "CapabilityRegistry420._currentUsage(", "stored.periodIndex == index"):
+                  "Fixed-period window identity deliberately uses equality; grant consumption enforces limits separately.",
+              ("reentrancy-no-eth", "EntryPoint420.handleOp(", "External calls:"):
+                  "handleOp has nonReentrant guard set before validation, paymaster and execution calls.",
+              ("uninitialized-local", "EntryPoint420._settleSponsorship(", ".callbackSucceeded"):
+                  "Solidity bool defaults false; assigned true only after successful postOp callback.",
+              ("uninitialized-local", "EntryPoint420.handleOp(", ".sponsorship"):
+                  "Memory struct defaults zero; unsponsored operation intentionally skips settlement.",
+              ("uninitialized-local", "WebAuthnClientData420.verify(", ".seen"):
+                  "Solidity uint8 defaults zero; bits set only for parsed unique security keys.",
+              ("uninitialized-local", "P256WebAuthnVerifier420._base64url32(", ".o"):
+                  "New fixed-length bytes allocation initializes contents to zero before encoding.",
+              ("arbitrary-send-eth", "SmartAccount420._call(", "target.call{value: value}"):
+                  "Authorized wallet transfers are intended: owner or EntryPoint-validated scoped session only.",
+              ("uninitialized-local", "SmartAccount420._validatePasskeyUserOp(", ".credentialIdHash"):
+                  "Written through successful external decode helper; catch returns validation failure.",
+              ("uninitialized-local", "SmartAccount420._validatePasskeyUserOp(", ".assertionEnvelope"):
+                  "Written through successful external decode helper; catch returns validation failure.",
+              ("uninitialized-local", "SmartAccount420._authorizeCallSet(", ".uniqueCount"):
+                  "Solidity local uint256 defaults zero; increments for each unique grant.",
+              ("unused-return", "SmartAccount420.executeSession(", "capabilityRegistry.consume("):
+                  "Registry.consume either returns updated period use or reverts; no authorization failure is represented by a return value.",
+          }
+
+          # Verify that the guard and capability consumption semantics underlying
+          # these dispositions have not been removed on the exact reviewed head.
+          entry = Path("src/accounts/EntryPoint420.sol").read_text()
+          smart = Path("src/accounts/SmartAccount420.sol").read_text()
+          registry = Path("src/system/CapabilityRegistry420.sol").read_text()
+          assert "external\n        nonReentrant\n        returns" in entry, "EntryPoint guard changed"
+          assert "onlyEntryPoint" in smart and "onlyOwner" in smart, "Wallet authority guard changed"
+          assert "capabilityRegistry.consume(authorization.grantId, authorization.amount)" in smart
+          assert "if (g.revoked) revert GrantRevoked()" in registry
+          assert "if (!_timeActive(g)) revert GrantInactive()" in registry
+          assert "if (u.used > g.periodLimit || amount > g.periodLimit - u.used) revert CapabilityLimitExceeded()" in registry
+
+          summary, reviewed, unknown = [], [], []
+          paths = sorted(root.glob("*.json"))
+          for path in paths:
+              data = json.loads(path.read_text())
+              if not data.get("success"):
+                  raise SystemExit(f"Slither failed for {path.name}: {data.get('error')}")
+              for detector in (data.get("results") or {}).get("detectors") or []:
+                  item = {"file": path.name, "check": detector.get("check"),
+                          "impact": detector.get("impact"), "confidence": detector.get("confidence"),
+                          "description": detector.get("description","")[:1600]}
+                  summary.append(item)
+                  if item["impact"] not in ("High", "Medium"):
+                      continue
+                  candidates = [(key, reason) for key, reason in dispositions.items()
+                                if item["check"] == key[0] and key[1] in item["description"]
+                                and key[2] in item["description"]]
+                  if len(candidates) != 1:
+                      unknown.append(item)
+                  else:
+                      reviewed.append({**item, "disposition": candidates[0][1]})
+          report = {"reviewed": reviewed, "untriaged": unknown, "all_findings": summary,
+                    "target_count": len(paths)}
+          (root/"findings.json").write_text(json.dumps(report, indent=2))
+          print(f"Slither analyzed {len(paths)} source graphs; {len(summary)} total findings;"
+                f" {len(reviewed)} individually triaged high/medium; {len(unknown)} untriaged")
+          for item in unknown:
+              print(f"UNTRIAGED {item['file']} [{item['impact']}] {item['check']}: {item['description'][:500]}")
+          if len(paths) != 8 or len(reviewed) != 17 or unknown:
+              raise SystemExit("Wallet static security disposition count or signatures changed")
+          PY
+      - name: Preserve static security evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wallet-w15-2-static-security
+          path: artifacts/wallet-w15-2-static/
+          retention-days: 90
+          if-no-files-found: warn

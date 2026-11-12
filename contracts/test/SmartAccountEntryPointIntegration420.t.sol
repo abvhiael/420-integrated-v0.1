@@ -70,7 +70,11 @@ contract SmartAccountEntryPointIntegration420Test {
 
     function testSessionUserOpUsesIndependentNonceLaneAndConsumesOnExecution() public {
         vm.prank(owner); account.enableSessionKey(session);
-        vm.prank(owner); bytes32 grantId = account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.set.selector, 0, 10, 1 days, 0, 0);
+        // A custom selector with ABI-encoded arguments is deliberately
+        // unmetered; it requires an explicit zero-limits grant. This test
+        // retains nonce-lane and execution qualifications, while the policy
+        // regression suite rejects the same selector under capped grants.
+        vm.prank(owner); bytes32 grantId = account.createSessionGrant(session, address(target), EntryPointExecutionTarget420.set.selector, 0, 0, 0, 0, 0);
         uint192 key = uint192(uint160(session));
         uint256 nonceValue = uint256(key) << 64;
         bytes memory callData = _sessionCall(address(target), 0, abi.encodeWithSelector(EntryPointExecutionTarget420.set.selector, 421));

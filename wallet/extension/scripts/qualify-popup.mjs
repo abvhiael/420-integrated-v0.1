@@ -38,7 +38,15 @@ try{
   if(!worker)worker=await browser.waitForEvent('serviceworker',{timeout:20000});
   const url='chrome-extension://'+new URL(worker.url()).host+'/popup.html';
   const page=await browser.newPage();
+  const diagnostics=[];
+  page.on('console',m=>diagnostics.push('console: '+m.type()+' '+m.text()));
+  page.on('pageerror',e=>diagnostics.push('pageerror: '+e.message));
+  worker.on('console',m=>diagnostics.push('worker: '+m.type()+' '+m.text()));
+  worker.on('pageerror',e=>diagnostics.push('worker error: '+e.message));
   await page.goto(url,{waitUntil:'load'});
+  console.log('extension boot bridge',JSON.stringify(await page.evaluate(async()=>{try{return await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind:'get-state'});}catch(e){return {exception:String(e)};}})));
+  console.log('extension boot DOM',JSON.stringify({label:await page.locator('#network-label').textContent(),notice:await page.locator('#dashboard-notice').textContent(),diagnostics}));
+  await page.screenshot({path:resolve(screenshots,'00-startup.png')});
   await page.waitForFunction(()=>document.querySelector('#network-label')?.textContent==='Not configured');
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   assert.equal(await page.locator('#quick-receive').isDisabled(),true);

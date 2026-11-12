@@ -1,3 +1,4 @@
+import { waitForWalletReceipt420 } from './transaction-lifecycle.js';
 import { normalizeAddress, normalizeBytes32 } from './abi.js';
 import { normalizeCallData } from './execution.js';
 import { prepareSessionExecution, readSessionNonce } from './session-execution.js';
@@ -289,17 +290,13 @@ function findHandledEvent(receipt, prepared) {
 
 export async function confirmEntryPointUserOperation(provider, submitted, options = {}) {
   const txHash = normalizeTxHash(submitted?.txHash);
-  const attempts = Number.isInteger(options.attempts) && options.attempts > 0 ? options.attempts : 30;
-  const delayMs = Number.isInteger(options.delayMs) && options.delayMs >= 0 ? options.delayMs : 1000;
-  const sleep = options.sleep || ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
-  let receipt = null;
-  for (let index = 0; index < attempts; index += 1) {
-    receipt = await provider.request('eth_getTransactionReceipt', [txHash]);
-    if (receipt) break;
-    if (index + 1 < attempts) await sleep(delayMs);
+  let receipt;
+  try {
+    ({ receipt } = await waitForWalletReceipt420(provider, txHash, { ...options, canonical: true }));
+  } catch (error) {
+    if (/transaction reverted/i.test(error.message)) throw new Error('EntryPoint420 transaction reverted');
+    throw error;
   }
-  if (!receipt) throw new Error('EntryPoint420 user operation was not confirmed');
-  if (receipt.status !== '0x1') throw new Error('EntryPoint420 transaction reverted');
 
   const handled = findHandledEvent(receipt, submitted);
   const expectedSequence = BigInt(submitted.userOperation.nonce) & ((1n << 64n) - 1n);

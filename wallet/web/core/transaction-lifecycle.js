@@ -25,6 +25,7 @@ export async function readWalletTransactionStatus420(provider,hash,options={}){
   if(options.canonical!==true)return {
     txHash:hash,status:r.status==='0x0'?'reverted':'confirmed',receipt:r,confirmations:1n
   };
+  if(r.transactionHash==null)throw Error('canonical receipt missing transaction hash');
   if(typeof r.blockNumber!=='string'||!QTY.test(r.blockNumber)||typeof r.blockHash!=='string'||!HASH.test(r.blockHash))throw Error('canonical receipt missing block metadata');
   const [block,tip]=await Promise.all([provider.request('eth_getBlockByNumber',[r.blockNumber,false]),provider.request('eth_blockNumber')]);
   if(typeof tip!=='string'||!QTY.test(tip))throw Error('invalid chain tip');
@@ -35,6 +36,7 @@ export async function readWalletTransactionStatus420(provider,hash,options={}){
   if(count<minimum)return {txHash:hash,status:'confirming',receipt:r,confirmations:count};
   const latest=await provider.request('eth_getTransactionReceipt',[hash]);
   if(!latest||latest.blockHash?.toLowerCase()!==r.blockHash.toLowerCase()
+      || latest.blockNumber!==r.blockNumber || latest.transactionHash==null
       || latest.status!==r.status || (latest.transactionHash != null
       && normalizeTransactionHash420(latest.transactionHash)!==hash))
     return {txHash:hash,status:'reorganized',receipt:latest,confirmations:0n};
@@ -43,6 +45,7 @@ export async function readWalletTransactionStatus420(provider,hash,options={}){
 }
 export async function waitForWalletReceipt420(provider,hash,options={}){
   hash=normalizeTransactionHash420(hash);
+  options={...options,canonical:true};
   const attempts=Number.isInteger(options.attempts)&&options.attempts>0&&options.attempts<=10000?options.attempts:30;
   const delay=Number.isInteger(options.delayMs)&&options.delayMs>=0?options.delayMs:1000;
   const sleep=options.sleep||((ms)=>new Promise(resolve=>setTimeout(resolve,ms)));

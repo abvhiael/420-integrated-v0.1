@@ -102,6 +102,7 @@ export async function prepareSmartAccountExecution(provider, controller, smartAc
 export async function sendSmartAccountExecution(provider, controller, smartAccountState, request = {}) {
   const prepared = await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
   await assertOwnerBoundaryStillCurrent(provider, controller, smartAccountState);
+  await prepareSmartAccountExecution(provider, controller, smartAccountState, request);
   await assertWalletChain420(provider, request.expectedChainId ?? smartAccountState.expectedChainId);
   const txHash = normalizeTxHash(await provider.request('eth_sendTransaction', [prepared.transaction]));
   return { ...prepared, submitted: true, txHash };

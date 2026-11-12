@@ -23,4 +23,21 @@ final class Wallet420UITests: XCTestCase {
             )
         }
     }
+    func testCaptureWalletSurfaces() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["--ui-test"]
+        app.launch()
+
+        for surface in ["wallet", "apps", "activity", "security"] {
+            let tab = app.buttons["wallet420.tab.\(surface)"]
+            XCTAssertTrue(tab.waitForExistence(timeout: 10), "missing tab: \(surface)")
+            tab.tap()
+            XCTAssertTrue(app.staticTexts["wallet420.surface.\(surface)"].waitForExistence(timeout: 5))
+            let capture = XCTAttachment(screenshot: app.screenshot())
+            capture.name = "wallet420-ios-\(surface)"
+            capture.lifetime = .keep
+            add(capture)
+        }
+    }
+
 }

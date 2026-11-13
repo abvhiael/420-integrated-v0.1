@@ -75,7 +75,7 @@ test('Trezor Connect adapter invokes device signing methods and rejects failures
 });
 test('hardware before-broadcast checks nonce, chain, base fee and recipient',async()=>{
  const prepared=prepareHardwareTransaction420(reviewed,chainId,signer.address);
- const p={request:async(m)=>m==='eth_chainId'?chainId:m==='eth_getTransactionCount'?'0x2':{baseFeePerGas:'0x3b9aca00'}};
+ const p={request:async(m)=>m==='eth_chainId'?chainId:m==='eth_getTransactionCount'?'0x2':{baseFeePerGas:'0x1'}};
  await preBroadcastHardware420(p,prepared);
  await assert.rejects(()=>preBroadcastHardware420({request:async m=>m==='eth_chainId'?'0x1':'0x0'},prepared),/network changed/);
  await assert.rejects(()=>preBroadcastHardware420({request:async m=>m==='eth_chainId'?chainId:'0x4'},prepared),/nonce already confirmed/);

@@ -176,7 +176,8 @@ function renderActivity(){
     info.append(node('strong','',entry.amount+' '+entry.symbol),
       node('small','',shortExtensionAddress420(entry.recipient)+' · '+(new Date(entry.at).toLocaleString('en-CA'))));
     const side=node('div','asset-value');
-    side.append(node('strong','',entry.status),node('small','',entry.hash?shortExtensionAddress420(entry.hash):'Extension activity'));
+    side.append(node('strong','',entry.status),node('small','',entry.hash?entry.hash.slice(0,10)+'…'+entry.hash.slice(-8):
+      entry.userOpHash?'UserOp '+entry.userOpHash.slice(0,10)+'…'+entry.userOpHash.slice(-8):'Extension activity'));
     row.append(info,side);list.append(row);
   }
 }

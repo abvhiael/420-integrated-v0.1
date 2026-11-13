@@ -1,3 +1,4 @@
+import {readWalletTransactionStatus420} from './core/transaction-lifecycle.js';
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
 import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
@@ -477,6 +478,35 @@ async function readWalletUiActivity420() {
   const value=(await chrome.storage.local.get(EXTENSION_ACTIVITY_KEY_420))?.[EXTENSION_ACTIVITY_KEY_420];
   return Array.isArray(value)?value.slice(0,40).filter(x=>x&&typeof x==='object'):[];
 }
+// Reconcile only canonical receipts. Missing receipts cannot prove a dropped or failed transaction.
+async function refreshWalletUiActivity420() {
+  const entries=await readWalletUiActivity420();
+  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized'].includes(x.status)&&/^0x[0-9a-fA-F]{64}$/.test(x.hash||'')).slice(0,5);
+  if(!candidates.length)return entries;
+  let chain;
+  try{chain=await effectiveChain420();}catch{return entries;}
+  let changed=false;
+  const updates=new Map();
+  for(const entry of candidates){
+    if(entry.chainId!==chain.chainId)continue;
+    try{
+      const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:entry.chainId})};
+      const result=await readWalletTransactionStatus420(provider,entry.hash,{expectedChainId:entry.chainId,canonical:true,confirmations:2});
+      // 'confirming' means inclusion with fewer than two canonical confirmations.
+      const status=result.status==='confirming'?'included':result.status;
+      if(status!==entry.status){
+        updates.set(entry.id,{...entry,status,confirmations:result.confirmations.toString(),
+          blockNumber:result.receipt?.blockNumber||null,updatedAt:Date.now()});
+        changed=true;
+      }
+    }catch{ /* RPC outages retain the last known status, never fabricate failure. */ }
+  }
+  if(!changed)return entries;
+  const fresh=await readWalletUiActivity420();
+  const next=fresh.map(x=>updates.has(x.id)&&x.hash===updates.get(x.id).hash&&x.status!=='confirmed'?updates.get(x.id):x);
+  await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
+  return next;
+}
 async function rememberWalletUiActivity420(entry) {
   const current=await readWalletUiActivity420();
   const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
@@ -531,7 +561,7 @@ async function walletUiState420() {
       nativeCurrency:active?.network.nativeCurrency||{name:'420',symbol:'420',decimals:18},
       vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
-    selectedAccount:selected,sites,activity:(await readWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
+    selectedAccount:selected,sites,activity:(await refreshWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
     vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null,health:[],epoch:registry.epoch},
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
@@ -812,8 +842,9 @@ async function handleWalletUi420(message) {
       recipient:request.summary.recipient,amount:request.summary.amount,
       symbol:request.summary.symbol,status:'pending',hash:null};
     await rememberWalletUiActivity420(entry);
+    let hash=null;
     try {
-      const hash=await executeWithLocalAuthority(
+      hash=await executeWithLocalAuthority(
         {method:'eth_sendTransaction',params:[request.transaction]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null}
       );
@@ -823,7 +854,8 @@ async function handleWalletUi420(message) {
       await rememberWalletUiActivity420({...entry,status:'submitted',hash});
       return {hash,status:'submitted'};
     }catch(error){
-      await rememberWalletUiActivity420({...entry,status:'failed',error:error?.message||'Authorization failed'});
+      await rememberWalletUiActivity420({...entry,status:hash?'submitted':'failed',hash,
+        error:error?.message||'Authorization failed'});
       throw error;
     }
   }

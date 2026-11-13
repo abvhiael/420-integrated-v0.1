@@ -162,7 +162,7 @@ try{
   assert.equal(providerSnapshot.capabilities['0x1a4']?.atomicBatch?.supported,false,
     'Watch-only EOA cannot claim atomic SmartAccount execution');
   assert.equal(providerSnapshot.connected,true);
-  assert.match(providerSnapshot.icon,/^data:image\\/svg\\+xml,/);
+  assert.ok(providerSnapshot.icon.startsWith('data:image/svg+xml,'));
   const coexistence=await dapp.evaluate(()=>{
     const wallet=window.__wallet420;
     const metamask={isMetaMask:true};

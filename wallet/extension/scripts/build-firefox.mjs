@@ -20,7 +20,16 @@ export async function buildFirefox420(){
  // Trezor Suite's Chromium externally_connectable integration must not be
  // advertised as Firefox-compatible before a device+browser review.
  delete manifest.externally_connectable;
- manifest.browser_specific_settings={gecko:{strict_min_version:'128.0'}};
+ const gecko={strict_min_version:'140.0',data_collection_permissions:{required:['none']}};
+ const addonId=process.env.WALLET_FIREFOX_EXTENSION_ID;
+ if(addonId){
+   assert(/^[a-z0-9][a-z0-9._-]{2,63}@[a-z0-9.-]+$/i.test(addonId),'Invalid explicit Firefox extension identity');
+   gecko.id=addonId;
+ }
+ if(process.env.WALLET_PRODUCTION_RELEASE==='1'){
+   assert(addonId&&!addonId.endsWith('.invalid'),'Firefox production signing requires an approved release extension ID');
+ }
+ manifest.browser_specific_settings={gecko};
  await writeFile(join(firefoxDir,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
  return firefoxDir;
 }

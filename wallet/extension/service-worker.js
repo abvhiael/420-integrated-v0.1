@@ -1,3 +1,5 @@
+import {Transaction} from './vendor/ethers-6.17.0.min.js';
+import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
 import {validateUserOpReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
 import {encodeExecute} from './core/abi.js';
@@ -18,7 +20,7 @@ const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
-const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas']);
+const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
@@ -315,7 +317,11 @@ async function rpcRequest(method,params=[],{origin=null,expectedChainId=null}={}
 async function executeWithLocalAuthority(request, context) {
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
   const effective=await effectiveChain420(context.origin);
-  if(!effective.network.smartAccountApproved)throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
+  const isEoa=request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel==='eoa';
+  if(!isEoa&&!effective.network.smartAccountApproved)
+    throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
+  if(isEoa&&!(await vaultLockState420()).unlocked)
+    throw Object.assign(new Error('Encrypted local EOA vault is locked'),{code:4100});
   if(!context.chainId||effective.chainId!==context.chainId||effective.epoch!==context.epoch)
     throw Object.assign(new Error('Network context changed before signing authority'),{code:4901});
   const address=prefs.selectedAccount;
@@ -323,8 +329,9 @@ async function executeWithLocalAuthority(request, context) {
   const metadata=await accountMetadata420();
   if(!address||!listed.includes(address)||!context.accounts?.includes(address))
     throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
-  if(['watch-only','hardware','eoa'].includes(metadata[address]?.type))
-    throw Object.assign(new Error('This account has no verified SmartAccount passkey signing authority in this flow'),{code:4100});
+  if(['watch-only','hardware'].includes(metadata[address]?.type)||
+     (isEoa?metadata[address]?.type!=='eoa':metadata[address]?.type==='eoa'))
+    throw Object.assign(new Error('Selected account has no authorized local signing authority for this model'),{code:4100});
   const requestedFrom=request.method==='eth_sendTransaction'?request.params?.[0]?.from:
     request.method==='personal_sign'?request.params?.[1]:request.method==='eth_signTypedData_v4'?request.params?.[0]:null;
   if(typeof requestedFrom!=='string'||requestedFrom.toLowerCase()!==address)
@@ -619,6 +626,59 @@ async function refreshWalletUiActivity420() {
   const committed=next.map(x=>byId.get(x.id)||x);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:committed});
   return committed;
+}
+function assertEoaRawMatchesAuthority420(raw,approved){
+  if(typeof raw!=='string'||!/^0x(?:[0-9a-fA-F]{2})+$/.test(raw)||raw.length>262144)
+    throw new Error('Invalid signed EOA transaction');
+  const signed=Transaction.from(raw);
+  if(signed.type!==2||!signed.hash||!validHash420(signed.hash)||
+     signed.from?.toLowerCase()!==approved.from?.toLowerCase()||
+     signed.to?.toLowerCase()!==approved.to?.toLowerCase()||
+     BigInt(signed.chainId)!==BigInt(approved.chainId)||
+     BigInt(signed.nonce)!==BigInt(approved.nonce)||
+     signed.value!==BigInt(approved.value??'0x0')||
+     signed.gasLimit!==BigInt(approved.gasLimit)||
+     signed.maxFeePerGas!==BigInt(approved.maxFeePerGas)||
+     signed.maxPriorityFeePerGas!==BigInt(approved.maxPriorityFeePerGas)||
+     signed.data.toLowerCase()!==(approved.data??'0x').toLowerCase())
+    throw new Error('Signed EOA envelope differs from user-approved exact transaction');
+  return signed.hash.toLowerCase();
+}
+async function recordAuthoritySignedEoa420(sender,requestId,submission){
+  const expected=chrome.runtime.getURL('authority.html');
+  if(sender?.id!==chrome.runtime.id||typeof sender?.url!=='string'||
+    sender.url.split('?')[0]!==expected||
+    new URL(sender.url).searchParams.get('request')!==requestId)
+    throw Object.assign(new Error('Untrusted EOA authority result'),{code:4100});
+  const pending=(await readObject(AUTHORITY_KEY))[requestId];
+  if(!pending||pending.request?.method!=='eth_sendTransaction'||
+     pending.request?.params?.[0]?.executionModel!=='eoa')
+    throw Object.assign(new Error('No pending EOA signing authority'),{code:4100});
+  const tx=pending.request.params[0];
+  const now=await effectiveChain420(pending.context.origin);
+  if(now.chainId!==pending.context.chainId||now.epoch!==pending.context.epoch||
+      tx.chainId!==now.chainId||tx.from?.toLowerCase()!==pending.context.accounts?.[0])
+    throw Object.assign(new Error('EOA signing chain/account changed'),{code:4901});
+  if(!validHash420(submission?.hash)||submission.chainId!==tx.chainId||
+     submission.from!==tx.from?.toLowerCase()||submission.to!==tx.to?.toLowerCase()||
+     submission.nonce!==tx.nonce||
+     submission.value!==tx.value||submission.data!==tx.data?.toLowerCase()||
+     submission.maxFeePerGas!==tx.maxFeePerGas||
+     submission.maxPriorityFeePerGas!==tx.maxPriorityFeePerGas||
+     submission.gasLimit!==tx.gasLimit)
+    throw Object.assign(new Error('EOA signed metadata differs from approved transaction'),{code:4100});
+  const id=pending.context.activityId;
+  if(id){
+    const activities=await readWalletUiActivity420();
+    const existing=activities.find(x=>x.id===id&&x.controller===submission.from&&x.chainId===tx.chainId);
+    if(!existing)throw new Error('Pending EOA activity not found');
+    await rememberWalletUiActivity420({...existing,executionModel:'eoa',status:'submitted',
+      hash:submission.hash,from:submission.from,to:submission.to,
+      nonce:submission.nonce,value:submission.value,data:submission.data,
+      gasLimit:submission.gasLimit,maxFeePerGas:submission.maxFeePerGas,
+      maxPriorityFeePerGas:submission.maxPriorityFeePerGas,submittedAt:Date.now()});
+  }
+  return true;
 }
 async function recordAuthoritySubmission420(sender,requestId,submission){
   const address=chrome.runtime.getURL('authority.html');
@@ -1181,6 +1241,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }catch(error){sendResponse({error:serializeError(error)});}})();
     return true;
   }
+  if(message?.source==='420-wallet-authority-ui'&&message.kind==='authority-eoa-signed'){
+    (async()=>{try{sendResponse({result:await recordAuthoritySignedEoa420(
+      sender,message.authorityRequestId,message.submission)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
   if (message?.source === '420-wallet-authority-ui' && message.kind === 'authority-rpc') {
     (async () => {
       try {
@@ -1195,6 +1261,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const effective=await effectiveChain420(approval?.context?.origin);
         if(!approval?.context?.chainId||effective.chainId!==approval.context.chainId||effective.epoch!==approval.context.epoch)
           throw Object.assign(new Error('Network changed; authority request cancelled'),{code:4901});
+        if(request.method==='eth_sendRawTransaction'){
+          if(approval.request?.method!=='eth_sendTransaction'||
+             approval.request?.params?.[0]?.executionModel!=='eoa')
+            throw Object.assign(new Error('Raw transaction broadcast is restricted to the local EOA authority'),{code:4100});
+          const raw=request.params?.[0];
+          const localHash=assertEoaRawMatchesAuthority420(raw,approval.request.params[0]);
+          const rpcHash=await rpcRequest('eth_sendRawTransaction',[raw],
+            {origin:approval.context.origin,expectedChainId:approval.context.chainId});
+          if(typeof rpcHash!=='string'||rpcHash.toLowerCase()!==localHash)
+            throw new Error('RPC response hash differs from locally signed EOA transaction');
+          sendResponse({result:localHash});
+          return;
+        }
         const result=await rpcRequest(request.method,request.params??[],{origin:approval.context.origin,expectedChainId:approval.context.chainId});
         sendResponse({ result });
       } catch (error) {

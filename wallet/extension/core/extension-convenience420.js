@@ -85,7 +85,9 @@ export function validateMobileInvite420(uri){
  check(!!match,'Only WalletConnect v2 pairing URIs are supported');
  const params=new URLSearchParams(match[2]);
  const relay=params.get('relay-protocol'),symmetricKey=params.get('symKey');
- check(relay==='irn'&&/^[a-f0-9]{64}$/i.test(symmetricKey??'')&&[...params.keys()].every(k=>['relay-protocol','symKey','relay-data'].includes(k)),
+ const keys=[...params.keys()];
+ check(relay==='irn'&&/^[a-f0-9]{64}$/i.test(symmetricKey??'')&&
+   new Set(keys).size===keys.length&&keys.every(k=>['relay-protocol','symKey','relay-data'].includes(k)),
    'Unsupported or invalid WalletConnect v2 relay URI');
  return {topic:match[1],protocol:'irn',uri};
 }

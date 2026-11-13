@@ -232,6 +232,7 @@ function renderNFTDetail420(){
  $('nft-collection-wide').checked=nft.standard==='ERC1155';
  $('nft-collection-wide').disabled=nft.standard==='ERC1155';
  $('nft-action').value='transfer';$('nft-recipient').value='';
+ $('nft-approval-status').textContent='On-chain operator approval has not been inspected.';
  clearNftReview420();
 }
 async function nftWatchVisibility420(field){
@@ -859,6 +860,21 @@ function setup(){
   });
   $('nft-hide').addEventListener('click',()=>nftWatchVisibility420('hidden'));
   $('nft-spam').addEventListener('click',()=>nftWatchVisibility420('spam'));
+  $('nft-inspect-approval').addEventListener('click',async()=>{
+    const button=$('nft-inspect-approval');button.disabled=true;
+    try{
+      const nft=selectedNft420();
+      const operator=$('nft-recipient').value.trim();
+      const response=await command('nft-approval-status',{
+        standard:nft.standard,address:nft.address,tokenId:nft.tokenId,
+        ...(nft.standard==='ERC1155'?{operator}:{})
+      });
+      $('nft-approval-status').textContent=response.scope==='token'?
+        'On-chain ERC-721 token-specific approved address: '+response.approvedOperator:
+        'On-chain ERC-1155 operator '+response.operator+': '+(response.approved?'approved for ALL NFTs in collection':'not approved');
+    }catch(e){$('nft-approval-status').textContent='Cannot inspect approval: '+e.message;}
+    finally{button.disabled=false;}
+  });
   $('nft-action-form').addEventListener('submit',nftReview420);
   for(const id of ['nft-action','nft-recipient','nft-quantity','nft-collection-wide'])
    $(id).addEventListener('input',clearNftReview420);

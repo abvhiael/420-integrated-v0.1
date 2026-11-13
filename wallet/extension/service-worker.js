@@ -1687,7 +1687,8 @@ async function nftMetadata420(message){
 async function nftApprovalStatus420(message){
  const selected=await nftSelection420(message,{allowSpam:true});
  const inspected=await readNftApproval420(selected.provider,{
-  asset:selected.ref,owner:selected.ctx.owner,operator:message.operator??null
+  asset:selected.ref,owner:selected.ctx.owner,operator:message.operator??null,
+  collectionWide:message.collectionWide===true
  });
  const still=await effectiveChain420();
  if(still.epoch!==selected.ctx.epoch)throw Object.assign(new Error('NFT network changed during approval inspection'),{code:4901});
@@ -1732,9 +1733,9 @@ async function nftPrepare420(message){
    approved:action==='approve',collectionWide:message.collectionWide===true});
   if(action==='revoke'){
    const current=await readNftApproval420(provider,{
-     asset:ref,owner:ctx.owner,operator:call.operator
+     asset:ref,owner:ctx.owner,operator:call.operator,collectionWide:call.collectionWide
    });
-   if(!current.approved||ref.standard==='ERC721'&&current.approvedOperator!==call.operator)
+   if(!current.approved||ref.standard==='ERC721'&&!call.collectionWide&&current.approvedOperator!==call.operator)
     throw Object.assign(new Error('Operator no longer holds this exact NFT approval'),{code:4001});
   }
  }

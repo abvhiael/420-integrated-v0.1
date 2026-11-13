@@ -82,12 +82,19 @@ export async function verifyGenesisService420(provider,{registry,entry,chainId:e
 }
 export async function discoverGenesisServices420(provider,{registry,services,chainId:expectedChain,limit=40}){
  if(!registry||!Array.isArray(services)||services.length>60||!Number.isInteger(limit)||limit<1||limit>60)return [];
- const seen=new Set(),output=[];
+ const seen=new Set(),selected=[];
  for(const entry of services){
    if(!entry?.serviceId||seen.has(entry.serviceId))continue;
    seen.add(entry.serviceId);
-   if(output.length>=limit)break;
-   try{output.push(await verifyGenesisService420(provider,{registry,entry,chainId:expectedChain}))}catch{}
+   if(selected.length>=limit)break;
+   selected.push(entry);
+ }
+ const output=[];
+ // Bound RPC concurrency; do not hammer unresponsive Registry endpoints on popup open.
+ for(let offset=0;offset<selected.length;offset+=3){
+   const results=await Promise.allSettled(selected.slice(offset,offset+3).map(
+     entry=>verifyGenesisService420(provider,{registry,entry,chainId:expectedChain})));
+   for(const item of results)if(item.status==='fulfilled')output.push(item.value);
  }
  return output;
 }

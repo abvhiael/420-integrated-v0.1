@@ -113,3 +113,27 @@ test('ERC-4337 cancel outcome requires confirmed verified no-op and proof',async
  }};
  assert.equal((await reconcileUserOpReplacement420(provider,old,replacement)).status,'cancelled');
 });
+
+test('420Names rejects a forged deployment at the canonical address with wrong runtime code',async()=>{
+  const provider={request:async(method)=>{
+    if(method==='eth_chainId')return chainId;
+    if(method==='eth_getCode')return '0x6001600055';
+    throw new Error('Name resolution reached unqualified chain call: '+method);
+  }};
+  const config={schema:'420-wallet-runtime-config-v1',
+    network:{chainId},manifest:{url:'https://manifest.example.test/deployment'},
+    deployment:{namesAddress:'0x0000000000000000000000000000000000000435',
+      environment:'testnet',sourceInventoryPhase:'W15'}};
+  await assert.rejects(resolveExtensionRecipient420(provider,{
+    input:'alice.420',chainId,qualifiedNamesConfig:config
+  }),/runtime hash/);
+});
+test('420Names requires frozen Genesis address, not an alternate lookalike registry',async()=>{
+  const provider={request:async method=>method==='eth_chainId'?chainId:null};
+  const config={schema:'420-wallet-runtime-config-v1',network:{chainId},
+    manifest:{url:'https://manifest.example.test/deployment'},
+    deployment:{namesAddress:to,environment:'testnet',sourceInventoryPhase:'W15'}};
+  await assert.rejects(resolveExtensionRecipient420(provider,{
+    input:'alice.420',chainId,qualifiedNamesConfig:config
+  }),/frozen Genesis/);
+});

@@ -1,3 +1,4 @@
+import {CONVENIENCE_KEY420,normalizeConvenience420,updateAddressLabel420,normalizeServiceDirectory420,portfolioAnalytics420,actionableNotifications420,validateMobileInvite420} from './core/extension-convenience420.js';
 import {financeProviderCatalog420,financeOptions420,financePrepare420,assertFinanceReview420,financeStakeStatus420} from './core/finance-runtime420.js';
 import {bridgeReceiptEvidence420,bridgeDestinationEvidence420,verifyFinanceDeployment420} from './core/finance420.js';
 import {nftId420,normalizedNftRecord420,verifyNftOwnership420,discoverNftTransfers420,nftSpamFlags420,
@@ -2070,8 +2071,99 @@ async function financeCommands420(message){
  throw Object.assign(new Error('Unsupported finance operation'),{code:4200});
 }
 
+
+const NOTIFICATION_DELIVERED_KEY420='420-wallet-notifications-delivered-v1';
+async function convenienceState420(){
+ const wallet=await walletUiState420();
+ const saved=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+ const raw=await readObject(EXTENSION_CONFIG_KEY_420);
+ const directory=saved.privacy.serviceDiscovery?
+    normalizeServiceDirectory420(raw,wallet.network.expectedChainId):[];
+ return {saved,account:wallet.selectedAccount,chainId:wallet.network.expectedChainId,
+   analytics:portfolioAnalytics420(wallet.portfolio,wallet.activity,{enabled:saved.privacy.portfolioAnalytics}),
+   services:directory,labels:saved.labels.filter(x=>x.chainId===wallet.network.expectedChainId),
+   notifications:actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
+      chainId:wallet.network.expectedChainId,after:0})};
+}
+async function convenienceCommand420(message){
+ if(message.kind==='convenience-state')return convenienceState420();
+ if(message.kind==='convenience-privacy'){
+   const before=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   const key=message.setting;
+   if(!Object.hasOwn(before.privacy,key)||typeof message.enabled!=='boolean')
+     throw Object.assign(new Error('Invalid privacy preference'),{code:-32602});
+   if(key==='backupSync'||key==='contactSync')
+     throw Object.assign(new Error('Remote sync requires a verified encrypted sync provider and explicit consent'),{code:4100});
+   const after={...before,privacy:{...before.privacy,[key]:message.enabled}};
+   await chrome.storage.local.set({[CONVENIENCE_KEY420]:after});
+   if(key==='notifications'&&!message.enabled)
+     await chrome.storage.local.remove(NOTIFICATION_DELIVERED_KEY420);
+   return convenienceState420();
+ }
+ if(message.kind==='convenience-label'){
+   const w=await walletUiState420(),before=normalizeConvenience420(
+     (await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   if(message.chainId!==w.network.expectedChainId||!w.selectedAccount)
+     throw Object.assign(new Error('Contact address scope changed'),{code:4901});
+   const next=updateAddressLabel420(before,{chainId:message.chainId,
+     address:message.address,label:message.label},{remove:message.remove===true});
+   await chrome.storage.local.set({[CONVENIENCE_KEY420]:next});
+   return convenienceState420();
+ }
+ if(message.kind==='convenience-import'){
+   if(message.confirmed!==true)throw Object.assign(new Error('Backup restore requires explicit user consent'),{code:4001});
+   const incoming=normalizeConvenience420(message.data);
+   if(message.data?.version!==1)
+     throw Object.assign(new Error('Backup version is not supported'),{code:-32602});
+   // Import only metadata: no key, site grants or spendable balances can be restored.
+   const before=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   const next={...before,labels:incoming.labels,backupUpdatedAt:Date.now(),
+     privacy:{...before.privacy,notifications:false,serviceDiscovery:false,allowDeepLinks:false}};
+   await chrome.storage.local.set({[CONVENIENCE_KEY420]:next});
+   return convenienceState420();
+ }
+ if(message.kind==='convenience-pair-check'){
+   const w=await walletUiState420(),saved=normalizeConvenience420(
+     (await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   if(!saved.privacy.allowDeepLinks||!w.selectedAccount||w.network.status!=='matched')
+     throw Object.assign(new Error('Explicit mobile pairing consent and verified network required'),{code:4100});
+   const invite=validateMobileInvite420(message.uri);
+   return {topic:invite.topic,chainId:w.network.expectedChainId,account:w.selectedAccount,
+     status:'validated-only',reason:'Pairing protocol cannot authorize an account or signing request without connected, qualified WalletConnect transport'};
+ }
+ throw Object.assign(new Error('Unsupported convenience command'),{code:4200});
+}
+async function maybeNotifyWalletActivity420(){
+ const saved=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+ if(!saved.privacy.notifications||!chrome.notifications?.create)return;
+ if(!(await chrome.permissions.contains({permissions:['notifications']})))return;
+ let wallet;try{wallet=await walletUiState420();}catch{return;}
+ if(wallet.network.status!=='matched'||!wallet.selectedAccount)return;
+ const entries=actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
+   chainId:wallet.network.expectedChainId,after:0,limit:12});
+ const previous=await readObject(NOTIFICATION_DELIVERED_KEY420);
+ for(const entry of entries){
+   if(!['confirmed','reverted','reorganized','failed'].includes(entry.status))continue;
+   const key=entry.chainId+':'+entry.id;
+   if(previous[key]===entry.status)continue;
+   // Don't announce old wallet history when permission is first enabled.
+   if(!Object.hasOwn(previous,'initializedAt')){
+     previous.initializedAt=Date.now();
+     for(const observed of entries)previous[observed.id]=observed.status;
+     break;
+   }
+   previous[key]=entry.status;
+   await chrome.notifications.create('420-wallet-'+String(entry.id).slice(0,80),{
+     type:'basic',iconUrl:'icons/icon128.png',title:'420 Wallet transaction update',
+     message:entry.label+': '+entry.status+'. Open the wallet to verify the on-chain receipt.',
+     priority:0});
+ }
+ await chrome.storage.local.set({[NOTIFICATION_DELIVERED_KEY420]:previous});
+}
+
 async function handleWalletUi420(message) {
   const kind=message.kind;
+  if(kind.startsWith('convenience-'))return convenienceCommand420(message);
   if(kind.startsWith('finance-'))return financeCommands420(message);
   if(kind==='get-state')return walletUiState420();
   if(kind==='nft-import')return nftImport420(message);

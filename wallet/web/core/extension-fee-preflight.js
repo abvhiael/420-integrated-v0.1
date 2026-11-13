@@ -48,6 +48,12 @@ export async function quoteExtensionSend420(provider,{chainId,smartAccount,trans
   const maxFeePerGas=mode.level==='custom'?BigInt(mode.maxFeePerGas):base*2n+maxPriorityFeePerGas;
   if(maxFeePerGas>UINT128||maxPriorityFeePerGas>UINT128||maxFeePerGas<base+maxPriorityFeePerGas)
     throw new Error('fee cap does not cover current base fee and selected priority');
+  let indicativeGasUnits=null;
+  try{
+    const estimated=await provider.request('eth_estimateGas',[call]);
+    if(typeof estimated==='string'&&Q.test(estimated)&&BigInt(estimated)>0n)
+      indicativeGasUnits=BigInt(estimated);
+  }catch{ /* Do not convert failure of a target-only gas estimate into a verified AA quote. */ }
   await assertWalletChain420(provider,chainId);
   return Object.freeze({
     chainId,from,to,feeLevel:mode.level,
@@ -56,7 +62,11 @@ export async function quoteExtensionSend420(provider,{chainId,smartAccount,trans
     baseFeePerGas:'0x'+base.toString(16),
     gasFees:packExtensionUserOpFees420({maxFeePerGas:'0x'+maxFeePerGas.toString(16),maxPriorityFeePerGas:'0x'+maxPriorityFeePerGas.toString(16)}),
     simulation:'target-only',entryPointSimulation:'required-after-passkey',
-    estimateStatus:'indicative-only',gasUnits:null,totalFeeWei:null,
+    estimateStatus:indicativeGasUnits===null?'unavailable':'target-call-only',
+    gasUnits:indicativeGasUnits?.toString()??null,
+    indicativeTargetFeeWei:indicativeGasUnits===null?null:
+      (indicativeGasUnits*maxFeePerGas).toString(),
+    totalFeeWei:null,
     blockHash:typeof block?.hash==='string'?block.hash:null
   });
 }

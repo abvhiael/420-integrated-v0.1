@@ -20,7 +20,7 @@ const rpc=createServer(async(req,res)=>{
   const body=JSON.parse(Buffer.concat(parts).toString());
   const method=body.method;
   let result;
-  if(method==='eth_chainId')result='0x1a4';
+  if(method==='eth_chainId')result=req.url==='/secondary'?'0x1':'0x1a4';
   else if(method==='eth_blockNumber')result='0x200';
   else if(method==='eth_getCode')result='0x6001600055';
   else if(method==='eth_getBalance')result='0x16c4abbebea0100000';
@@ -59,31 +59,68 @@ try{
     await chrome.storage.local.set({
       '420-wallet-extension-config-v1':{
         rpcUrl:'http://127.0.0.1:'+port+'/',chainId:'0x1a4',networkName:'420 Integrated',
-        accounts:[controller],smartAccountConfig:{factoryAddress:factory},trackedAssets:[]
+        accounts:[controller],vaultAccounts:[controller],accountMeta:{[controller]:{label:'Watch fixture',type:'watch-only',hidden:false}},
+        smartAccountConfig:{factoryAddress:factory},trackedAssets:[]
       },
+      '420-wallet-ui-preferences-v1':{selectedAccount:controller},
+      '420-wallet-networks-v1':{version:1,epoch:1,selectedChainId:'0x1a4',networks:{
+        '0x1a4':{chainId:'0x1a4',chainName:'420 Integrated',rpcUrls:['http://127.0.0.1:'+port+'/'],
+          blockExplorerUrls:[],enabled:true,trusted:true,smartAccountApproved:false,
+          nativeCurrency:{name:'420',symbol:'420',decimals:18}}
+      }},
       '420-wallet-origin-permissions-v1':{
-        'https://example.test':{accounts:[controller],grantedAt:Date.now()}
+        'https://example.test':{accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()}
       }
     });
   },{controller,factory,port:rpc.address().port});
   await page.reload();
   await page.waitForFunction(()=>document.querySelector('#native-balance')?.textContent!=='—',{timeout:15000});
-  assert.equal(await page.locator('#quick-send').isDisabled(),false);
+  assert.equal(await page.locator('#quick-send').isDisabled(),true,'Unverified SmartAccount cannot execute even with a factory address');
   assert.equal(await page.locator('#quick-receive').isDisabled(),false);
-  assert.match(await page.locator('#account-address').textContent(),/0x33333/);
+  assert.match(await page.locator('#account-address').textContent(),/0x11111/);
   await page.screenshot({path:resolve(screenshots,'03-verified-local-fixture-wallet.png')});
   await page.locator('#quick-receive').click();
-  assert.equal(await page.locator('#receive-address').textContent(),account);
+  assert.equal(await page.locator('#receive-address').textContent(),controller);
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
-  await page.locator('#quick-send').click();
-  await page.locator('#send-recipient').fill('0x4444444444444444444444444444444444444444');
-  await page.locator('#send-amount').fill('1.25');
-  await page.locator('#send-review-button').click();
-  assert.equal(await page.locator('#send-review').isVisible(),true);
-  await page.screenshot({path:resolve(screenshots,'05-send-review-local-fixture.png')});
+  // M3: watch-only and unverified SmartAccount cannot create an executable preview.
+  assert.equal(await page.locator('#quick-send').isDisabled(),true);
+  await page.locator('#header-settings').click();
+  assert.equal(await page.locator('#network-select').inputValue(),'0x1a4');
+  assert.match(await page.locator('#network-health').textContent(),/healthy RPC endpoints/);
+  await page.locator('#new-chain-name').fill('Ethereum local fixture');
+  await page.locator('#new-chain-id').fill('0x1');
+  await page.locator('#new-rpc-urls').fill('http://127.0.0.1:'+rpc.address().port+'/secondary');
+  await page.locator('#new-currency-name').fill('Ether');
+  await page.locator('#new-currency-symbol').fill('ETH');
+  await page.locator('#new-currency-decimals').fill('18');
+  await page.locator('#add-network-form button[type=submit]').click();
+  await page.waitForFunction(()=>[...document.querySelector('#network-select').options].some(o=>o.value==='0x1'));
+  await page.locator('#network-select').selectOption('0x1');
+  await page.locator('#switch-network').click();
+  await page.waitForFunction(()=>document.querySelector('#network-select').value==='0x1'&&document.querySelector('#network-health').textContent.includes('0x1'));
+  assert.equal(await page.locator('#quick-send').isDisabled(),true);
+  await page.locator('[data-screen="dashboard"]').click();
+  assert.equal(await page.locator('#native-symbol').textContent(),'ETH');
+  const epochAfterSwitch=await page.evaluate(async()=>((await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1']).epoch);
+  assert.ok(epochAfterSwitch>1,'chain switch advances context epoch');
+  const replay=await page.evaluate(async controller=>{
+    return await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind:'send',confirmed:true,
+      account:controller,chainId:'0x1a4',epoch:1,recipient:'0x4444444444444444444444444444444444444444',amount:'1',asset:'native'});
+  },controller);
+  assert.match(replay.error?.message||'',/Network or account changed since review/);
+  await page.locator('#header-settings').click();
+  await page.locator('#network-select').selectOption('0x1a4');
+  await page.locator('#switch-network').click();
+  await page.waitForFunction(()=>document.querySelector('#network-select').value==='0x1a4');
+  assert.equal(await page.locator('#native-symbol').textContent(),'420');
+  const epochReturned=await page.evaluate(async()=>((await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1']).epoch);
+  assert.ok(epochReturned>epochAfterSwitch,'A→B→A cannot reuse old preview epoch');
+  await page.locator('[data-screen="dashboard"]').click();
+  await page.screenshot({path:resolve(screenshots,'05-multichain-local-fixture.png')});
   await page.locator('[data-screen="sites-view"]').click();
   assert.match(await page.locator('#site-list').textContent(),/example\.test/);
+  assert.equal(await page.locator('.site-network-select').first().inputValue(),'0x1a4');
   await page.screenshot({path:resolve(screenshots,'06-connected-sites-local-fixture.png')});
   page.once('dialog',dialog=>dialog.accept());
   await page.getByRole('button',{name:'Disconnect https://example.test'}).click();

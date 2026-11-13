@@ -1,4 +1,4 @@
-import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420,buildExtensionSend420} from './core/extension-wallet-ui.js';
+import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420,buildExtensionSend420,formatExtensionUnitsExact420} from './core/extension-wallet-ui.js';
 
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
@@ -483,6 +483,22 @@ function setup(){
       screen('dashboard');
     }catch(e){tell('Network save failed: '+e.message,'error');$('global-status').textContent='Network save failed: '+e.message;}
     finally{button.disabled=false;}
+  });
+  $('send-max').addEventListener('click',()=>{
+    try{
+      const w=state.wallet;
+      if(!extensionCanSend420(w))throw new Error('Unlocked verified account and network are required');
+      if($('send-asset').value==='native')throw new Error('Native Max requires a verified account-abstraction gas and sponsorship quote; unavailable on this chain');
+      const address=$('send-asset').value.toLowerCase();
+      const token=w?.portfolio?.tokens?.find(t=>t.address===address);
+      if(!token?.verified||token.hidden||token.spam||token.balance?.status!=='spendable')
+        throw new Error('Verified spendable token balance unavailable; refresh portfolio');
+      const amount=formatExtensionUnitsExact420(token.balance.spendable,token.decimals);
+      if(BigInt(token.balance.spendable)<=0n)throw new Error('Token balance is zero');
+      $('send-amount').value=amount;
+      resetReview();
+      $('send-state').textContent='Max verified token balance selected. Review before sending; gas and execution remain independently validated.';
+    }catch(e){$('send-state').textContent='Max unavailable: '+e.message;}
   });
   $('send-contact').addEventListener('change',()=>{
     const address=$('send-contact').value;

@@ -14,7 +14,10 @@ export function extensionTransactionStatusLabel420(status){
  */
 export async function reconcileExtensionTransaction420(entry,{provider,chainId,confirmations=2}={}){
   if(!entry||typeof entry!=='object')throw new Error('transaction activity entry required');
-  if(!extensionTransactionInFlight420(entry.status))return entry;
+  // Previously confirmed/reverted receipts must be monitored too: an EVM reorg can
+  // invalidate a receipt that once met the confirmation threshold.
+  if(!extensionTransactionInFlight420(entry.status)&&
+     entry.status!=='confirmed'&&entry.status!=='reverted')return entry;
   if(typeof chainId!=='string'||!/^0x[0-9a-fA-F]+$/.test(chainId)||BigInt(chainId)<=0n)
     throw new Error('verified chain required to track activity');
   if(entry.chainId!==chainId)throw new Error('transaction belongs to another chain');

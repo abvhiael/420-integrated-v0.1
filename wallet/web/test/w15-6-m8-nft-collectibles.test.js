@@ -141,6 +141,12 @@ test('NFT approval separates ERC721 single-id and broad operator grants from ERC
  const a=nftApprovalCall420({standard:'ERC721',contract:erc721,tokenId:42,
   owner,operator,approved:true,collectionWide:false});
  assert.match(a.data,/^0x095ea7b3/);
+ const broad721=nftApprovalCall420({standard:'ERC721',contract:erc721,tokenId:42,
+  owner,operator,approved:true,collectionWide:true});
+ assert.match(broad721.data,/^0xa22cb465/);
+ const revokeBroad721=nftApprovalCall420({standard:'ERC721',contract:erc721,tokenId:42,
+  owner,operator,approved:false,collectionWide:true});
+ assert.equal(revokeBroad721.data.slice(-64),word(0).slice(2));
  const b=nftApprovalCall420({standard:'ERC1155',contract:erc1155,tokenId:7,
   owner,operator,approved:true,collectionWide:true});
  assert.match(b.data,/^0xa22cb465/);
@@ -160,6 +166,9 @@ test('NFT approval separates ERC721 single-id and broad operator grants from ERC
  const single=await readNftApproval420(p,{asset:a.asset,owner});
  assert.equal(single.scope,'token');
  assert.equal(single.approvedOperator,operator);
+ const broadStatus=await readNftApproval420(p,{asset:broad721.asset,owner,operator,collectionWide:true});
+ assert.equal(broadStatus.scope,'collection');
+ assert.equal(broadStatus.approved,true);
  const collection=await readNftApproval420(p,{asset:b.asset,owner,operator});
  assert.equal(collection.scope,'collection');
  assert.equal(collection.approved,true);

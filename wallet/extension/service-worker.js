@@ -718,7 +718,7 @@ async function walletUiState420() {
     const provider={request:(method,params)=>rpcRequest(method,params)};
     const discovered=await discoverSmartAccount(provider,selected,config.smartAccountConfig);
     state.account={
-      controller:selected,smartAccount:discovered.smartAccount,
+      controller:selected,smartAccount:discovered.smartAccount,entryPoint:discovered.entryPoint,
       deployed:discovered.deployed===true,ownerVerified:discovered.controllerIsOwner===true,
       reason:discovered.deployed?(discovered.controllerIsOwner?'Deployed SmartAccount discovered; controller matches owner. Deployment provenance requires approved configuration.':'Controller is not the current account owner'):'Counterfactual account; not yet deployed',
     };
@@ -834,7 +834,9 @@ async function replacementPreview420(message){
     maxPriorityFeePerGas:'0x'+priority.toString(16)};
   const transaction={from:original.controller,to:target,value,data};
   const quote=await quoteExtensionSend420(provider,{
-    chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,transaction,choice});
+    chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
+    entryPoint:state.account.entryPoint,transaction,choice,strictUserOpGas:true,
+    expectedNonce:original.nonce});
   const callData=encodeExecute(target,BigInt(value),data);
   const candidate={executionModel:'erc4337',action:message.action,
     chainId:original.chainId,sender:original.sender,entryPoint:original.entryPoint,
@@ -992,6 +994,9 @@ async function handleWalletUi420(message) {
        provided.epoch!==preview.epoch||provided.account!==preview.account||
        provided.quote?.gasFees!==preview.quote.gasFees||
        provided.quote?.blockHash!==preview.quote.blockHash||
+       provided.quote?.nonce!==preview.quote.nonce||
+       provided.quote?.gasBudget?.accountGasLimits!==preview.quote.gasBudget?.accountGasLimits||
+       provided.quote?.gasBudget?.preVerificationGas!==preview.quote.gasBudget?.preVerificationGas||
        JSON.stringify(provided.transaction)!==JSON.stringify(preview.transaction))
       throw Object.assign(new Error('Replacement fee, nonce, chain or intent changed; review again'),{code:4001});
     const source=(await readWalletUiActivity420()).find(x=>x.id===preview.originalId);
@@ -1006,7 +1011,9 @@ async function handleWalletUi420(message) {
     try{
       hash=await executeWithLocalAuthority({
         method:'eth_sendTransaction',
-        params:[{...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce}]
+        params:[{...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce,
+          accountGasLimits:preview.quote.gasBudget.accountGasLimits,
+          preVerificationGas:preview.quote.gasBudget.preVerificationGas}]
       },{origin:null,chainId:preview.chainId,epoch:preview.epoch,accounts:[preview.account],tabId:null,activityId:id});
       await rememberWalletUiActivity420({...entry,status:'submitted',hash});
       return {status:'submitted',hash,originalId:source.id};
@@ -1034,7 +1041,8 @@ async function handleWalletUi420(message) {
     const quote=await quoteExtensionSend420(
       {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
       {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
-       transaction:transaction.transaction,choice:normalizeExtensionFeeChoice420(message.feeChoice)});
+       entryPoint:state.account.entryPoint,transaction:transaction.transaction,
+       choice:normalizeExtensionFeeChoice420(message.feeChoice),strictUserOpGas:true});
     const current=await effectiveChain420();
     if(current.chainId!==message.chainId||current.epoch!==message.epoch)
       throw Object.assign(new Error('Chain changed during preflight'),{code:4901});
@@ -1059,10 +1067,14 @@ async function handleWalletUi420(message) {
     const quote=await quoteExtensionSend420(
       {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
       {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
-       transaction:request.transaction,choice});
+       entryPoint:state.account.entryPoint,transaction:request.transaction,choice,
+       strictUserOpGas:true});
     if(!message.preflight||message.preflight.chainId!==quote.chainId||
        message.preflight.from!==quote.from||message.preflight.to!==quote.to||
-       message.preflight.gasFees!==quote.gasFees||message.preflight.blockHash!==quote.blockHash)
+       message.preflight.gasFees!==quote.gasFees||message.preflight.blockHash!==quote.blockHash||
+       message.preflight.nonce!==quote.nonce||message.preflight.entryPoint!==quote.entryPoint||
+       message.preflight.gasBudget?.accountGasLimits!==quote.gasBudget?.accountGasLimits||
+       message.preflight.gasBudget?.preVerificationGas!==quote.gasBudget?.preVerificationGas)
       throw Object.assign(new Error('Preflight changed since review; review transaction again'),{code:4001});
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
@@ -1073,7 +1085,11 @@ async function handleWalletUi420(message) {
     let hash=null;
     try {
       hash=await executeWithLocalAuthority(
-        {method:'eth_sendTransaction',params:[{...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level}]},
+        {method:'eth_sendTransaction',params:[{...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level,
+          accountGasLimits:quote.gasBudget.accountGasLimits,
+          preVerificationGas:quote.gasBudget.preVerificationGas,
+          expectedNonce:quote.nonce,
+        }]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null,activityId:id}
       );
       const current=await effectiveChain420();

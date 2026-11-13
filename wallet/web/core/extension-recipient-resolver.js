@@ -4,6 +4,15 @@ import {createNames420Client} from './names-client.js';
 import {validateNamesRecord,normalize420Name} from './names-send.js';
 const ZERO='0x'+'0'.repeat(40);
 const ENS_REGISTRY='0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e';
+const CANONICAL_NAMES420='0x0000000000000000000000000000000000000435';
+const CANONICAL_NAMES420_RUNTIME_HASH='0xa974fffd3a40e7f28db41e4ae30656b33789d2483b18b47c809ce2385de709b7';
+function codeHash420(hex){
+  if(typeof hex!=='string'||!/^0x(?:[0-9a-fA-F]{2})+$/.test(hex)||/^0x0+$/i.test(hex))
+    throw new Error('Names420 deployed bytecode unavailable');
+  const bytes=new Uint8Array((hex.length-2)/2);
+  for(let i=0;i<bytes.length;i++)bytes[i]=Number.parseInt(hex.slice(2+i*2,4+i*2),16);
+  return keccak256Hex(bytes);
+}
 const encoder=new TextEncoder();
 function namehash(name){
   let node=new Uint8Array(32);
@@ -44,7 +53,13 @@ export async function resolveExtensionRecipient420(provider,{input,chainId,quali
       !config?.deployment?.namesAddress||!config?.deployment?.environment||
       !config?.deployment?.sourceInventoryPhase||!config?.manifest?.url)
       throw new Error('420Names requires a qualified chain-specific deployment manifest');
-    const client=createNames420Client({provider,namesAddress:config.deployment.namesAddress,chainId:chain});
+    const canonical=normalizeExtensionAddress420(config.deployment.namesAddress);
+    if(canonical!==CANONICAL_NAMES420)
+      throw new Error('420Names address is not the frozen Genesis namespace');
+    const runtime=await provider.request('eth_getCode',[canonical,'latest']);
+    if(codeHash420(runtime)!==CANONICAL_NAMES420_RUNTIME_HASH)
+      throw new Error('420Names deployed runtime hash is not the independently frozen canonical artifact');
+    const client=createNames420Client({provider,namesAddress:canonical,chainId:chain});
     const lookup=await client.lookup(name);
     const record=validateNamesRecord(lookup.record,{nowSeconds:await client.chainTime(),expectedLabelHash:lookup.labelHash});
     await client.verifyChain();

@@ -4,12 +4,18 @@ on:
   push:
     paths:
       - "wallet/mobile/**"
-      - "wallet/web/**"
+      - "wallet/web/core/**"
+      - "wallet/web/scripts/**"
+      - "wallet/web/package.json"
+      - "wallet/web/package-lock.json"
       - ".github/workflows/wallet-mobile.yml"
   pull_request:
     paths:
       - "wallet/mobile/**"
-      - "wallet/web/**"
+      - "wallet/web/core/**"
+      - "wallet/web/scripts/**"
+      - "wallet/web/package.json"
+      - "wallet/web/package-lock.json"
       - ".github/workflows/wallet-mobile.yml"
   workflow_dispatch:
 

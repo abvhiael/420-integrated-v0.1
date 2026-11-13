@@ -23,12 +23,7 @@ jobs:
           node-version: '22'
       - name: Install pinned browser SDK toolchains
         working-directory: wallet/extension
-        run: |
-          npm install --no-audit --no-fund
-          echo 'M12_LOCK_BEGIN'
-          base64 -w 0 package-lock.json
-          echo
-          echo 'M12_LOCK_END'
+        run: npm ci --no-audit --no-fund
       - name: Byte-reproduce Chromium package, isolate Firefox event page and verify identical source payload
         working-directory: wallet/extension
         env:
@@ -38,4 +33,4 @@ jobs:
         run: node scripts/qualify-reproducible.mjs
       - name: Firefox Manifest V3 browser schema lint only (not live Firefox runtime acceptance)
         working-directory: wallet/extension
-        run: npm exec --yes --package=web-ext@10.8.0 -- web-ext lint --source-dir dist-firefox --self-hosted
+        run: npm exec --yes --package=web-ext@10.8.0 -- web-ext lint --source-dir dist-firefox --self-hosted --warnings-as-errors

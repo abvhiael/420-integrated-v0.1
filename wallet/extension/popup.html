@@ -142,7 +142,10 @@
         <button type="button" class="back-button" data-back>‹ Wallet</button>
         <h1 id="receive-title" class="screen-title">Receive</h1>
         <p class="intro">Receive the selected network's native currency or ERC-20 tokens at this address only after confirming your network.</p>
-        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>Selected account</strong><div id="receive-address" class="full-address">Unavailable</div><button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
+        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>Selected account</strong><div id="receive-address" class="full-address">Unavailable</div>
+          <canvas id="receive-qr" width="264" height="264" aria-label="QR code for the verified receiving address on the selected network" role="img" hidden></canvas>
+          <p id="receive-qr-network" class="intro">QR is unavailable until the network and address are verified.</p>
+          <button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
         <p id="receive-warning" class="notice">Network and account verification required.</p>
       </section>
 

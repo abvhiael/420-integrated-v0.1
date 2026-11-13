@@ -56,6 +56,13 @@ export function extensionBalanceText420(raw,decimals=18,maxPrecision=5){
   const fraction=(n%scale).toString().padStart(decimals,'0').slice(0,maxPrecision).replace(/0+$/,'');
   return whole.toLocaleString('en-US')+(fraction?'.'+fraction:'');
 }
+export function formatExtensionUnitsExact420(raw,decimals=18){
+  if(typeof raw!=='string'||!/^\\d+$/.test(raw))throw new Error('verified raw balance required');
+  if(!Number.isInteger(decimals)||decimals<0||decimals>255)throw new Error('invalid token decimals');
+  const n=BigInt(raw),scale=10n**BigInt(decimals);
+  const fraction=decimals?(n%scale).toString().padStart(decimals,'0').replace(/0+$/,''):'';
+  return (n/scale).toString()+(fraction?'.'+fraction:'');
+}
 export function shortExtensionAddress420(value){
   return typeof value==='string'&&ADDRESS.test(value)?value.slice(0,7)+'…'+value.slice(-5):'Not available';
 }

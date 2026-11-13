@@ -123,6 +123,56 @@ export async function ledgerOpen420(hid=globalThis.navigator?.hid){
       const address=ledgerParseAddress420(await exchange(apdu));
       return {address,path,index,account,provider:'ledger'};
     },
+    async signTransaction(path,unsignedSerialized){
+      const approved=ledgerDerivationPath420(path.index,path.account);
+      const chunks=ledgerTransactionChunks420({index:path.index,account:path.account},unsignedSerialized);
+      let response;for(const chunk of chunks)response=await exchange(chunk);
+      return ledgerSignature420(response);
+    },
+    async signTypedDataHash(path,domainHash,messageHash){
+      // Hash-only EIP-712 does NOT provide clear-signing field verification.
+      // Caller must opt-in to hash signing after showing this distinction.
+      return ledgerSignature420(await exchange(ledgerTypedHashApdu420(path,domainHash,messageHash)));
+    },
     async close(){if(device.opened)await device.close();}
   };
+}
+
+function ledgerStatus420(raw){
+  if(!(raw instanceof Uint8Array)||raw.length<2)fail('Ledger returned no status word');
+  const status=(raw[raw.length-2]<<8)|raw[raw.length-1];
+  if(status!==0x9000)fail('Ledger Ethereum application declined signing (0x'+status.toString(16)+')');
+  return raw.subarray(0,-2);
+}
+export function ledgerSignature420(raw){
+  const body=ledgerStatus420(raw);
+  if(body.length!==65)fail('Malformed Ledger secp256k1 signature');
+  const v=body[0],r='0x'+hex(body.subarray(1,33)),s='0x'+hex(body.subarray(33,65));
+  // EIP-155 legacy 'v' and EIP-1559 parity are both accepted only when
+  // the recovered signer agrees with the reviewed hardware account.
+  return {r,s,yParity:v===27||v===28?v-27:v%2};
+}
+export function ledgerTransactionChunks420(path,unsignedSerialized){
+  const bytes=typeof unsignedSerialized==='string'&&/^0x(?:[0-9a-fA-F]{2})+$/.test(unsignedSerialized)?
+    Uint8Array.from(unsignedSerialized.slice(2).match(/../g),x=>parseInt(x,16)):null;
+  if(!bytes||bytes.length>65536)fail('Invalid unsigned transaction bytes');
+  const p=ledgerDerivationPath420(path.index,path.account).bytes;
+  const blocks=[];let offset=0;let first=true;
+  while(offset<bytes.length){
+    const prefix=first?p:new Uint8Array();
+    const n=Math.min(255-prefix.length,bytes.length-offset);
+    const chunk=new Uint8Array(prefix.length+n);chunk.set(prefix);chunk.set(bytes.subarray(offset,offset+n),prefix.length);
+    blocks.push(Uint8Array.from([0xe0,0x04,first?0x00:0x80,0x00,chunk.length,...chunk]));
+    offset+=n;first=false;
+  }
+  return blocks;
+}
+export function ledgerTypedHashApdu420(path,domainHash,messageHash){
+  if(!/^0x[0-9a-fA-F]{64}$/.test(domainHash)||!/^0x[0-9a-fA-F]{64}$/.test(messageHash))
+    fail('Invalid 32-byte EIP-712 hashes');
+  const prefix=ledgerDerivationPath420(path.index,path.account).bytes;
+  const payload=Uint8Array.from([...prefix,
+    ...domainHash.slice(2).match(/../g).map(x=>parseInt(x,16)),
+    ...messageHash.slice(2).match(/../g).map(x=>parseInt(x,16))]);
+  return Uint8Array.from([0xe0,0x0c,0x00,0x00,payload.length,...payload]);
 }

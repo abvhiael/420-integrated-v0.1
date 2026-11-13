@@ -191,6 +191,28 @@ export async function discoverNftTransfers420(provider,owner,{
  return {nfts:items,fromBlock:from.toString(),toBlock:to.toString(),
   limited:true,eventsInspected:count,warning:'Event-based partial index; balances and owners reverified on chain'};
 }
+/** Deterministic and gap-free bounded historical NFT event windows.
+ * Forward scans follow chain tip; backward scans cover older unknown assets.
+ * Never pretend a sparse transfer log is authoritative ownership proof. */
+export function nftIndexWindow420(latest,{nextForward=null,nextBack=null,older=false}={}){
+ const height=BigInt(latest);
+ requireSafe(height>=0n,'Invalid NFT index height');
+ if(older){
+  const endExclusive=nextBack==null?height+1n:BigInt(nextBack);
+  requireSafe(endExclusive>=0n&&endExclusive<=height+1n,'Invalid NFT backfill checkpoint');
+  if(endExclusive===0n)return {complete:true,older:true,from:0n,to:0n,nextForward,nextBack:'0'};
+  const to=endExclusive-1n,from=to>=2047n?to-2047n:0n;
+  return {complete:false,older:true,from,to,nextForward,nextBack:from.toString()};
+ }
+ const start=nextForward==null?(height>2048n?height-2048n:0n):BigInt(nextForward);
+ requireSafe(start>=0n,'Invalid NFT forward checkpoint');
+ if(start>height)return {complete:true,older:false,from:height,to:height,
+   nextForward:start.toString(),nextBack};
+ const to=start+2048n>height?height:start+2048n;
+ return {complete:false,older:false,from:start,to,
+  nextForward:(to+1n).toString(),
+  nextBack:nextBack==null?start.toString():nextBack};
+}
 export function nftTransferCall420({standard,contract,tokenId,from,to,quantity='1'}={}){
  const asset=normalizedNftRecord420({standard,address:contract,tokenId});
  const owner=normalizeAddress(from),recipient=normalizeAddress(to);

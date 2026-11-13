@@ -8,8 +8,9 @@ let stagedPhrase=null;
 let stagedPassword=null;
 let confirmationIndexes=[];
 let secureTask=null;
+let exportTarget=null;
 let nextTimer=null;
-const views=['welcome','setup','confirm-phrase','unlock','accounts','add-wallet','secure-action','passkey-info','hardware-info'];
+const views=['welcome','setup','confirm-phrase','unlock','accounts','add-wallet','add-watch-view','secure-action','passkey-info','hardware-info'];
 function message(value,kind=''){
   $('message').textContent=value;
   $('message').className='notice '+(kind||'');
@@ -23,18 +24,27 @@ function zeroSecretFields(){
 }
 async function publishAccounts(){
   if(!session)return;
-  const publicAccounts=session.accounts().map(a=>a.address);
+  const allAccounts=session.accounts();
+  const publicAccounts=allAccounts.filter(a=>!a.hidden).map(a=>a.address);
+  const accountMeta=Object.fromEntries(allAccounts.map(a=>[a.address,{label:a.label,type:a.accountClass,hidden:a.hidden}]));
+  const vaultInventory=allAccounts.map(a=>a.address);
   const key='420-wallet-extension-config-v1';
   const value=(await chrome.storage.local.get(key))[key]||{};
   const previous=Array.isArray(value.accounts)?value.accounts:[];
   const previousVault=Array.isArray(value.vaultAccounts)?value.vaultAccounts:[];
   const external=previous.filter(a=>!previousVault.includes(a));
   const unique=[...new Set([...external,...publicAccounts])];
-  await chrome.storage.local.set({[key]:{...value,accounts:unique,vaultAccounts:publicAccounts}});
+  await chrome.storage.local.set({[key]:{...value,accounts:unique,vaultAccounts:vaultInventory,accountMeta:{...(value.accountMeta||{}),...accountMeta}}});
   const prefs='420-wallet-ui-preferences-v1';
   const stored=(await chrome.storage.local.get(prefs))[prefs]||{};
   if(!unique.includes(stored.selectedAccount)){
-    await chrome.storage.local.set({[prefs]:{...stored,selectedAccount:publicAccounts[0]||external[0]||null}});
+    const next=publicAccounts[0]||external[0]||null;
+    if(next){
+      const result=await chrome.runtime.sendMessage({source:'420-wallet-manager-ui',kind:'set-account',account:next});
+      if(result?.error)throw new Error(result.error.message);
+    }else{
+      await chrome.storage.local.set({[prefs]:{...stored,selectedAccount:null}});
+    }
   }
 }
 async function lease(){
@@ -43,7 +53,8 @@ async function lease(){
 }
 async function clearLease(){await chrome.storage.session.remove('420-wallet-vault-lease-v1');}
 async function lock(){
-  session?.lock();session=null;sessionPassword=null;stagedPhrase=null;stagedPassword=null;
+  session?.lock();session=null;sessionPassword=null;stagedPhrase=null;stagedPassword=null;exportTarget=null;
+  $('recovery-output').textContent='';$('recovery-output').hidden=true;
   if(nextTimer){clearInterval(nextTimer);nextTimer=null;}
   await clearLease();zeroSecretFields();show('unlock');message('Wallet locked. Unlock with your local vault password.');
 }
@@ -56,8 +67,8 @@ function manageTimer(){
 async function opened(sessionObject,password){
   session=sessionObject;
   sessionPassword=password;
-  await publishAccounts();
   await lease();
+  await publishAccounts();
   manageTimer();
   renderAccounts();
   show('accounts');
@@ -69,12 +80,35 @@ function accountRow(wallet,account){
   const body=document.createElement('div');body.className='account-details';
   const title=document.createElement('strong');title.textContent=account.label||'Account';
   const address=document.createElement('code');address.textContent=account.address;
-  const derivation=document.createElement('small');derivation.textContent=wallet.type==='mnemonic'?(account.path||'Standard EVM derivation'):'Imported key';
+  const derivation=document.createElement('small');derivation.textContent=wallet.type==='mnemonic'?(account.path||'Standard EVM derivation'):wallet.type==='watch-only'?'Watch only · no signing authority':'Imported EOA key';
   body.append(title,address,derivation);
   card.append(body);
   const copy=document.createElement('button');copy.type='button';copy.className='secondary';copy.textContent='Copy';
   copy.addEventListener('click',()=>navigator.clipboard.writeText(account.address).then(()=>message('Public address copied.','success')).catch(()=>message('Clipboard access unavailable.','error')));
   card.append(copy);
+  const select=document.createElement('button');select.type='button';select.className='secondary';select.textContent='Switch';
+  select.disabled=account.hidden===true;
+  select.addEventListener('click',async()=>{try{
+    const response=await chrome.runtime.sendMessage({source:'420-wallet-manager-ui',kind:'set-account',account:account.address});
+    if(response?.error)throw new Error(response.error.message);
+    message('Selected '+(account.label||account.address)+'. Website permissions are scoped to the selected account.','success');
+  }catch(error){message(error.message,'error');}});
+  card.append(select);
+  const rename=document.createElement('button');rename.type='button';rename.className='secondary';rename.textContent='Rename';
+  rename.addEventListener('click',async()=>{const label=window.prompt('Account name (1–80 characters)',account.label||'Account');if(label===null)return;try{
+    await session.updateAccount(sessionPassword,wallet.id,account.address,{label});await publishAccounts();renderAccounts();message('Account renamed.','success');
+  }catch(error){message(error.message,'error');}});
+  card.append(rename);
+  const hide=document.createElement('button');hide.type='button';hide.className='secondary';hide.textContent=account.hidden?'Show':'Hide';
+  hide.addEventListener('click',async()=>{try{
+    await session.updateAccount(sessionPassword,wallet.id,account.address,{hidden:!account.hidden});await publishAccounts();renderAccounts();message('Visibility updated.','success');
+  }catch(error){message(error.message,'error');}});
+  card.append(hide);
+  if(wallet.type==='mnemonic'||wallet.type==='private-key'){
+    const exportButton=document.createElement('button');exportButton.type='button';exportButton.className='secondary';exportButton.textContent='Export key';
+    exportButton.addEventListener('click',()=>{exportTarget={walletId:wallet.id,address:account.address};beginSecure('export');});
+    card.append(exportButton);
+  }
   return card;
 }
 function renderAccounts(){
@@ -223,6 +257,14 @@ async function passwordAction(event){
     const password=$('new-password').value;
     if(password!==$('new-confirm').value)throw new Error('New passwords do not match');
     await session.changePassword(old,password);sessionPassword=password;show('accounts');message('Vault password changed and all secrets re-encrypted.','success');
+  }else if(secureTask==='export'){
+    if(!exportTarget)throw new Error('Select an account to export');
+    const secret=session.exportPrivateKey(exportTarget.walletId,exportTarget.address);
+    $('recovery-output').textContent='PRIVATE KEY for '+exportTarget.address+'\n'+secret+'\n\nAnyone holding this key can control the account. Never share it.';
+    $('recovery-output').hidden=false;
+    setTimeout(()=>{$('recovery-output').textContent='';$('recovery-output').hidden=true;},60000);
+    exportTarget=null;
+    message('Private key displayed temporarily after password authentication.','warn');
   }else if(secureTask==='reveal'){
     const wallets=session.wallets().filter(w=>w.type==='mnemonic');
     if(!wallets.length)throw new Error('This vault contains no recovery phrase wallet');
@@ -268,6 +310,9 @@ listen('lock-button','click',lock);
 listen('add-derived','click',()=>{const list=session?.wallets().filter(w=>w.type==='mnemonic')||[];if(list.length===1){$('account-list').querySelector('.wallet-group button')?.click();}else message('Choose Derive next BIP-44 account beneath the relevant mnemonic wallet.','warn');});
 listen('scan-accounts','click',()=>message('Choose Discover from network beneath the relevant mnemonic wallet; verify the account gap and scan limit.','warn'));
 listen('add-import','click',()=>{show('add-wallet');});
+listen('add-watch','click',()=>{show('add-watch-view');});
+listen('watch-back','click',()=>show('accounts'));
+listen('watch-form','submit',async event=>{event.preventDefault();if(!session)throw new Error('Vault locked');await session.addWatchOnly(sessionPassword,$('watch-address').value.trim(),{label:$('watch-label').value.trim()||'Watch-only account'});await publishAccounts();renderAccounts();$('watch-form').reset();show('accounts');message('Watch-only address added. It cannot sign or send.','success');});
 listen('add-back','click',()=>{zeroSecretFields();show('accounts');});
 listen('add-form','submit',addWallet);
 listen('backup-export','click',backup);

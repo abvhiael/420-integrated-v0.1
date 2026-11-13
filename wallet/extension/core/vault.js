@@ -53,7 +53,7 @@ function validVaultPayload(payload){
   assert(payload.wallets.length<=100,'Vault contains too many wallets');
   for(const wallet of payload.wallets){
     assert(typeof wallet.id==='string'&&/^[0-9a-f]{32}$/.test(wallet.id),'Invalid wallet identifier');
-    assert(['mnemonic','private-key'].includes(wallet.type),'Unsupported wallet secret type');
+    assert(['mnemonic','private-key','watch-only'].includes(wallet.type),'Unsupported wallet secret type');
     assert(Array.isArray(wallet.accounts)&&wallet.accounts.length>=1&&wallet.accounts.length<=LIMIT,'Invalid derived account inventory');
     if(wallet.type==='mnemonic'){
       normalizeMnemonic420(wallet.mnemonic);
@@ -62,9 +62,15 @@ function validVaultPayload(payload){
         const derived=deriveMnemonicAccount420(wallet.mnemonic,item.index,wallet.passphrase);
         assert(derived.address===item.address?.toLowerCase(),'Stored mnemonic account/address mismatch');
       }
-    }else{
+    }else if(wallet.type==='private-key'){
       const validated=validatePrivateKey420(wallet.privateKey);
       assert(wallet.accounts.length===1&&wallet.accounts[0].address?.toLowerCase()===validated.address,'Private-key account/address mismatch');
+    }else{
+      assert(wallet.accounts.length===1&&ADDRESS.test(wallet.accounts[0].address)&&!/^0x0{40}$/i.test(wallet.accounts[0].address),'Invalid watch-only account');
+    }
+    for(const account of wallet.accounts){
+      assert(typeof account.label==='string'&&account.label.length<=80,'Invalid account label');
+      assert(account.hidden===undefined||typeof account.hidden==='boolean','Invalid account visibility');
     }
   }
   return true;
@@ -131,7 +137,7 @@ export class VaultSession420{
   lock(){this.locked=true;this.payload=null;this.record=null;}
   accounts(){
     this.ensureActive();
-    return this.payload.wallets.flatMap(w=>w.accounts.map(a=>({id:w.id,type:w.type,index:a.index,address:a.address,path:a.path||null,label:a.label||'Account '+(a.index+1)})));
+    return this.payload.wallets.flatMap(w=>w.accounts.map(a=>({id:w.id,type:w.type,index:a.index,address:a.address,path:a.path||null,label:a.label||'Account '+(a.index+1),hidden:a.hidden===true,accountClass:w.type==='watch-only'?'watch-only':'eoa'})));
   }
   wallets(){
     this.ensureActive();
@@ -175,6 +181,37 @@ export class VaultSession420{
       payload.wallets.push({id,type:'private-key',privateKey:validated.privateKey,label,accounts:[{index:0,address:validated.address,label,path:null}]});
       return {id,address:validated.address};
     });
+  }
+  async addWatchOnly(password,address,{label='Watch-only account'}={}){
+    assert(ADDRESS.test(address)&&!/^0x0{40}$/i.test(address),'Invalid watch-only address');
+    const canonical=getAddress(address).toLowerCase();
+    return this.mutate(password,payload=>{
+      assert(payload.wallets.length<100,'Wallet limit reached');
+      assert(!payload.wallets.some(w=>w.accounts.some(a=>a.address===canonical)),'Account already exists in the vault');
+      const id=accountId();
+      payload.wallets.push({id,type:'watch-only',label,accounts:[{index:0,address:canonical,label,hidden:false,path:null}]});
+      return {id,address:canonical};
+    });
+  }
+  async updateAccount(password,walletId,address,{label,hidden}={}){
+    return this.mutate(password,payload=>{
+      const wallet=payload.wallets.find(w=>w.id===walletId);
+      const account=wallet?.accounts.find(a=>a.address===address);
+      assert(account,'Unknown account');
+      if(label!==undefined){assert(typeof label==='string'&&label.trim().length>=1&&label.trim().length<=80,'Account name must be 1–80 characters');account.label=label.trim();}
+      if(hidden!==undefined){assert(typeof hidden==='boolean','Invalid hidden state');account.hidden=hidden;}
+      return {address:account.address,label:account.label,hidden:account.hidden===true};
+    });
+  }
+  exportPrivateKey(walletId,address){
+    this.ensureActive();
+    const wallet=this.payload.wallets.find(w=>w.id===walletId);
+    const account=wallet?.accounts.find(a=>a.address===address);
+    assert(account,'Unknown account');
+    assert(wallet.type==='mnemonic'||wallet.type==='private-key','Watch-only and hardware accounts have no locally exportable private key');
+    const privateKey=wallet.type==='private-key'?wallet.privateKey:HDNodeWallet.fromPhrase(wallet.mnemonic,wallet.passphrase,DERIVATION_PATH_420+'/'+account.index).privateKey;
+    assert(new Wallet(privateKey).address.toLowerCase()===account.address,'Export account derivation mismatch');
+    return privateKey;
   }
   async importEncryptedKeystore(password,json,keystorePassword){
     assert(typeof json==='string'&&json.length<1024*1024,'Encrypted JSON keystore must be smaller than 1 MB');

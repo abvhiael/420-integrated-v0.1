@@ -109,3 +109,11 @@ A canonical service that is absent from the verified manifest remains visible as
 ## Hand-off to W14.6
 
 W14.6 should integrate 420 Names into the Wallet send flow so human-readable names can be resolved through the canonical Names service/contract, with address confirmation and fail-closed anti-spoofing behavior before transaction construction.
+
+## W15.8 — Website shortcuts (noncanonical navigation)
+
+The Wallet Apps page also exposes a separate **420Integrated websites** section for owner-requested product destinations. These links are presentation-only HTTPS navigation and are **not** added to `GENESIS_APP_SERVICES`, the frozen Genesis application inventory, or `ServiceIds420.sol`. This does not alter manifest-verified service discovery, implicitly connect an account, or confer signing/spending permissions.
+
+Source: `wallet/web/core/ecosystem-websites.js`. Each destination is an exact `https://<slug>.420integrated.org/` URL. The directory displays a **Website shortcut · not verified** label; URL deployment and reachability are not qualified by this commit. Requested shortcuts: 420Exchange, BongGoggles, 420Travel, 20Mail, 420TownSquare, 420Media, PuffBuddies, DoobTube, 420Hz, 420Grow, DOOBr, Liftd, 420BnB and 420Bet.
+
+Any future dApp authorization must use the existing explicit connection/permission process and validated canonical service identity, independently of these navigation links.

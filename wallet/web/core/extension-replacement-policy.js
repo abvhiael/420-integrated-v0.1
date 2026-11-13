@@ -102,3 +102,35 @@ export function transitionReplacement420(original,replacement,{canonicalEvidence
   return {...original,status:replacement.action==='cancel'?'cancelled':'replaced',
     replacedBy:replacementHash,updatedAt:canonicalEvidence.checkedAt??null};
 }
+
+/**
+ * A bundler transaction receipt is insufficient to prove an AA replacement.
+ * Require the replacement UserOperation identity, exact EntryPoint nonce, a
+ * canonical confirmed transaction and absence of an included original.
+ */
+export async function reconcileUserOpReplacement420(provider,original,replacement){
+  if(original?.executionModel!=='erc4337'||replacement?.executionModel!=='erc4337')
+    throw new Error('UserOperation replacement evidence requires ERC-4337 records');
+  if(!['submitted','pending','included','reorganized'].includes(original.status)||
+      replacement.status!=='confirmed')
+    throw new Error('replacement is not canonically confirmed');
+  if(!['speed-up','cancel'].includes(replacement.action)||
+      hash(replacement.replaces)!==hash(original.userOpHash)||
+      normChain(original.chainId)!==normChain(replacement.chainId)||
+      normalizeAddress(original.sender)!==normalizeAddress(replacement.sender)||
+      normalizeAddress(original.entryPoint)!==normalizeAddress(replacement.entryPoint)||
+      hex(original.nonce,'old nonce')!==hex(replacement.nonce,'replacement nonce'))
+    throw new Error('replacement sender, chain, EntryPoint or full nonce mismatch');
+  const observed=await provider.request('eth_getUserOperationReceipt',[replacement.userOpHash]);
+  const observedHash=observed?.receipt?.transactionHash??observed?.transactionHash;
+  if(!observed||observed.success!==true||!observedHash||
+      hash(observedHash)!==hash(replacement.hash)||
+      normalizeAddress(observed.sender)!==normalizeAddress(original.sender)||
+      hex(observed.nonce,'observed nonce')!==hex(original.nonce,'original nonce'))
+    throw new Error('replacement UserOperation inclusion evidence missing or mismatched');
+  const originalReceipt=await provider.request('eth_getUserOperationReceipt',[original.userOpHash]);
+  if(originalReceipt)throw new Error('original UserOperation has an inclusion receipt; replacement status ambiguous');
+  return {...original,status:replacement.action==='cancel'?'cancelled':'replaced',
+    replacedBy:hash(replacement.hash),replacementUserOpHash:hash(replacement.userOpHash),
+    replacementIncludedAt:Date.now()};
+}

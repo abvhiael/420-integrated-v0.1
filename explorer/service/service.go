@@ -110,7 +110,7 @@ func (s *Service) NetworkStatus(ctx context.Context) (NetworkStatus, error) {
 		RuntimeIssue:     h.RuntimeIssue,
 		RuntimeIssueAt:   h.RuntimeIssueAt,
 		WrongChain:       h.ChainID != s.requiredChainID,
-		Stale:            h.LastIngestAt.IsZero() || age > s.staleAfter,
+		Stale:            h.LastIngestAt.IsZero() || age > s.staleAfter || h.LastIngestAt.After(now.Add(30*time.Second)),
 		Degraded:         state != "READY" && state != "HEALTHY" && state != "OK",
 		Consistent:       consistent,
 	}

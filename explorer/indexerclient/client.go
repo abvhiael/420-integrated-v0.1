@@ -29,7 +29,7 @@ func New(baseURL string, timeout time.Duration) (*Client, error) {
 	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
 	if baseURL == "" { return nil, errors.New("420Indexer base URL required") }
 	u, err := url.Parse(baseURL)
-	if err != nil || u.Scheme == "" || u.Host == "" { return nil, errors.New("invalid 420Indexer base URL") }
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Hostname() == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" { return nil, errors.New("invalid 420Indexer base URL") }
 	if timeout <= 0 { timeout = 10 * time.Second }
 	return &Client{baseURL: baseURL, http: &http.Client{Timeout: timeout}}, nil
 }

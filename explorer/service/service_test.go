@@ -94,6 +94,19 @@ func TestNetworkStatusDoesNotUnderflowFutureIngestTimestamp(t *testing.T) {
 	if status.IngestAgeSeconds != 0 || !status.Ready { t.Fatalf("unexpected future-timestamp handling: %+v", status) }
 }
 
+func TestNetworkStatusRejectsExcessiveFutureIngestTimestamp(t *testing.T) {
+	now := time.Date(2026, 11, 13, 12, 0, 0, 0, time.UTC)
+	idx := &fakeIndexer{health: indexerapi.HealthResponse{Health: model.Health{
+		ChainID: 420, IndexedHeight: 10, SafeHeight: 9, FinalizedHeight: 8,
+		State: "READY", LastIngestAt: now.Add(2 * time.Minute),
+	}}}
+	svc, _ := New(idx, 420, time.Minute)
+	svc.now = func() time.Time { return now }
+	status, err := svc.NetworkStatus(context.Background())
+	if !errors.Is(err, ErrIndexerStale) { t.Fatalf("expected future timestamp to fail closed, got %v", err) }
+	if !status.Stale || status.Ready { t.Fatalf("expected not-ready status for excessive future timestamp: %+v", status) }
+}
+
 func TestBlockViewPreservesCanonicalProvenance(t *testing.T) {
 	idx := &fakeIndexer{
 		block: model.BlockRecord{ChainID: 420, Number: 12, Hash: "0xblock"},

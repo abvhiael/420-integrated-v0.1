@@ -63,4 +63,8 @@ func TestExplorerRejectsIndexerCanonicalAuthorityClaim(t *testing.T) {
 func TestExplorerIndexerClientRequiresHTTPServiceURL(t *testing.T) {
 	if _, err := New("", time.Second); err == nil { t.Fatal("expected empty indexer URL to fail") }
 	if _, err := New("not-a-url", time.Second); err == nil { t.Fatal("expected malformed indexer URL to fail") }
+	for _, invalid := range []string{"ftp://indexer.example", "file:///etc/passwd", "https://user:pass@indexer.example", "https://indexer.example?token=secret", "https://indexer.example/#fragment"} {
+		if _, err := New(invalid, time.Second); err == nil { t.Fatalf("expected invalid indexer URL %q to fail", invalid) }
+	}
+	if _, err := New("https://indexer.example", time.Second); err != nil { t.Fatalf("expected HTTPS indexer URL to work: %v", err) }
 }

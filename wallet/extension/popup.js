@@ -1045,14 +1045,34 @@ function renderPrivacy420(){
    }
  }
 }
+
+async function walletConnectSessionsUi420(){
+ const result=await command('walletconnect-config');
+ const target=$('walletconnect-sessions');target.replaceChildren();
+ if(!result.configured)target.append(node('p','empty','WalletConnect relay is not configured. Pairing remains disabled.'));
+ else if(!result.sessions.length)target.append(node('p','empty','No WalletConnect sessions authorized.'));
+ for(const session of result.sessions){
+   const wrapper=node('div','asset-row'),detail=node('div','asset-info');
+   detail.append(node('strong','',session.origin),
+     node('small','',session.chainId+' · '+shortExtensionAddress420(session.account)));
+   const revoke=node('button','secondary','Disconnect');revoke.type='button';
+   revoke.addEventListener('click',async()=>{
+     revoke.disabled=true;
+     try{await command('walletconnect-disconnect',{topic:session.topic});await walletConnectSessionsUi420();}
+     catch(e){$('convenience-pair-result').textContent='Disconnect failed: '+e.message;}
+     finally{revoke.disabled=false;}
+   });
+   wrapper.append(detail,revoke);target.append(wrapper);
+ }
+}
 function setupConvenience420(){
  $('convenience-full-page').addEventListener('click',()=>chrome.tabs.create({
    url:chrome.runtime.getURL('popup.html?mode=full')
  }));
  const nav=document.querySelector('#bottom-nav [data-screen="convenience-view"]');
- nav?.addEventListener('click',()=>convenienceRefresh420().catch(e=>{
+ nav?.addEventListener('click',()=>{walletConnectSessionsUi420().catch(()=>{});convenienceRefresh420().catch(e=>{
    $('convenience-status').textContent='Tools unavailable: '+e.message;
- }));
+ });});
  for(const checkbox of document.querySelectorAll('[data-convenience-privacy]')){
    checkbox.addEventListener('change',async()=>{
      const setting=checkbox.dataset.conveniencePrivacy,enabled=checkbox.checked;
@@ -1117,12 +1137,28 @@ function setupConvenience420(){
    }catch(err){$('convenience-status').textContent='Restore declined: '+err.message;}
    finally{$('convenience-backup-pass').value='';$('convenience-backup-file').value='';button.disabled=false;}
  });
- $('convenience-pair-form').addEventListener('submit',async e=>{
-   e.preventDefault();
+ $('walletconnect-project-form').addEventListener('submit',async e=>{
+   e.preventDefault();const button=e.currentTarget.querySelector('button[type=submit]');button.disabled=true;
    try{
-     const preview=await command('convenience-pair-check',{uri:$('convenience-pair-uri').value.trim()});
-     $('convenience-pair-result').textContent=JSON.stringify(preview,null,2);
+     await command('walletconnect-set-project',{projectId:$('walletconnect-project-id').value.trim()});
+     $('convenience-pair-result').textContent='Locally bundled WalletKit configured. No session is active until you approve a pairing proposal.';
+     await walletConnectSessionsUi420();
+   }catch(err){$('convenience-pair-result').textContent='Relay configuration rejected: '+err.message;}
+   finally{$('walletconnect-project-id').value='';button.disabled=false;}
+ });
+ $('convenience-pair-form').addEventListener('submit',async e=>{
+   e.preventDefault();const button=e.currentTarget.querySelector('button[type=submit]');button.disabled=true;
+   try{
+     const uri=$('convenience-pair-uri').value.trim();
+     const preview=await command('convenience-pair-check',{uri});
+     if(!confirm('Pair with this WalletConnect v2 request? Topic: '+preview.topic+
+       '\\nNo account or signing rights are granted until you separately approve the session proposal.'))return;
+     const connected=await command('walletconnect-pair',{uri,confirmed:true});
+     $('convenience-pair-result').textContent=JSON.stringify(connected,null,2);
+     $('convenience-pair-uri').value='';
+     await walletConnectSessionsUi420();
    }catch(err){$('convenience-pair-result').textContent='Pairing unavailable: '+err.message;}
+   finally{button.disabled=false;}
  });
  if(new URLSearchParams(location.search).get('mode')==='full'){
    document.body.classList.add('full-wallet-page');
@@ -1502,4 +1538,4 @@ if(!approvalId){
   });
 }
 if(approvalId)approval().catch(error=>{$('status').textContent=error?.message||'Unable to load approval request.';});
-else {screen('dashboard');refresh();}
+else {screen('dashboard');refresh().then(()=>convenienceRefresh420()).catch(()=>{});}

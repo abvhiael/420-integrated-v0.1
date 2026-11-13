@@ -360,9 +360,6 @@ jobs:
           echo 'original_run=39351176585' >> artifacts/420bet-5a-4/inheritance.txt
           echo 'original_job=118395440926' >> artifacts/420bet-5a-4/inheritance.txt
           echo "current_solidity_sha=$(git rev-parse HEAD)" >> artifacts/420bet-5a-4/inheritance.txt
- -vv
-          rm test/PokerGeneratedStageBProof.t.sol
-          rm test/PokerGeneratedProofAcceptance.t.sol
       - name: Validate genuine initial-deck and selective-card Groth16 verifiers together
         if: steps.cryptoscope.outputs.changed == 'true'
         working-directory: contracts

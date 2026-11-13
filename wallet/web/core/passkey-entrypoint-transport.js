@@ -96,6 +96,8 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
   await assertPasskeyActive(provider, smartAccountState.smartAccount, validated.credentialIdHash);
   const nonce = await readOwnerNonce(provider, smartAccountState.smartAccount);
   if ((nonce >> 64n) !== 0n) throw new Error('passkey owner nonce is not on lane zero');
+  if(request.expectedNonce!=null&&BigInt(request.expectedNonce)!==nonce)
+    throw new Error('UserOperation nonce advanced or changed: replacement is no longer safe');
 
   const unsigned = normalizePackedUserOperation({
     sender: smartAccountState.smartAccount,

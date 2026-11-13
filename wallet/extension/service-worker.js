@@ -565,8 +565,9 @@ async function handleApprovalMethod(request, context) {
       return hash;
     }catch(error){
       const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
-      await rememberWalletUiActivity420({...entry,hash,userOpHash,
-        status:(hash||userOpHash)?'submitted':'failed',
+      const signedHash=validHash420(error?.data?.hash)?error.data.hash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,hash:hash||signedHash,userOpHash,
+        status:(hash||signedHash||userOpHash)?'submitted':'failed',
         error:error?.message||'Site transaction authority unavailable'});
       throw error;
     }

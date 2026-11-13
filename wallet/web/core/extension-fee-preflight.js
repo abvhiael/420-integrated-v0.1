@@ -1,3 +1,4 @@
+import {estimateExtensionUserOpGas420,maxExtensionUserOpFee420} from './extension-userop-gas.js';
 
 import {normalizeAddress} from './abi.js';
 import {assertWalletChain420} from './transaction-lifecycle.js';
@@ -25,7 +26,7 @@ export function packExtensionUserOpFees420({maxFeePerGas,maxPriorityFeePerGas}){
   if(!max||priority>max)throw new Error('invalid UserOperation fee caps');
   return '0x'+priority.toString(16).padStart(32,'0')+max.toString(16).padStart(32,'0');
 }
-export async function quoteExtensionSend420(provider,{chainId,smartAccount,transaction,choice}={}){
+export async function quoteExtensionSend420(provider,{chainId,smartAccount,entryPoint,transaction,choice,strictUserOpGas=false,expectedNonce=null}={}){
   if(!provider||typeof provider.request!=='function')throw new Error('verified RPC required');
   await assertWalletChain420(provider,chainId);
   const mode=normalizeExtensionFeeChoice420(choice);
@@ -54,6 +55,24 @@ export async function quoteExtensionSend420(provider,{chainId,smartAccount,trans
     if(typeof estimated==='string'&&Q.test(estimated)&&BigInt(estimated)>0n)
       indicativeGasUnits=BigInt(estimated);
   }catch{ /* Do not convert failure of a target-only gas estimate into a verified AA quote. */ }
+  let gasBudget=null;
+  if(strictUserOpGas){
+    if(!entryPoint)throw new Error('verified EntryPoint required for complete fee review');
+    let nonce=expectedNonce;
+    if(nonce===null){
+      const ownerNonce=await provider.request('eth_call',[
+        {to:from,data:'0xd86f2b3c'+'0'.repeat(64)},'latest']);
+      if(typeof ownerNonce!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(ownerNonce))
+        throw new Error('verified SmartAccount owner nonce unavailable');
+      nonce='0x'+BigInt(ownerNonce).toString(16);
+    }
+    gasBudget=await estimateExtensionUserOpGas420(provider,{
+      chainId,sender:from,entryPoint,nonce,target:to,value:call.value,data:call.data,
+      gasFees:packExtensionUserOpFees420({
+        maxFeePerGas:'0x'+maxFeePerGas.toString(16),
+        maxPriorityFeePerGas:'0x'+maxPriorityFeePerGas.toString(16)}),
+    });
+  }
   await assertWalletChain420(provider,chainId);
   return Object.freeze({
     chainId,from,to,feeLevel:mode.level,
@@ -66,7 +85,12 @@ export async function quoteExtensionSend420(provider,{chainId,smartAccount,trans
     gasUnits:indicativeGasUnits?.toString()??null,
     indicativeTargetFeeWei:indicativeGasUnits===null?null:
       (indicativeGasUnits*maxFeePerGas).toString(),
-    totalFeeWei:null,
+    totalFeeWei:gasBudget?maxExtensionUserOpFee420(gasBudget,
+      packExtensionUserOpFees420({maxFeePerGas:'0x'+maxFeePerGas.toString(16),
+        maxPriorityFeePerGas:'0x'+maxPriorityFeePerGas.toString(16)})):null,
+    gasBudget,
+    entryPoint:gasBudget?.entryPoint??null,
+    nonce:gasBudget?.nonce??null,
     blockHash:typeof block?.hash==='string'?block.hash:null
   });
 }

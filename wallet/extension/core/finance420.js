@@ -137,7 +137,8 @@ export async function readFinanceValidator420(provider,p,validatorId){
   async function call(fn,args=[]){const data=stake.encodeFunctionData(fn,args);
     return stake.decodeFunctionResult(fn,await provider.request('eth_call',[{to:p.router,data},'latest']));}
   const delegation=(await call('delegationEnabled'))[0];
-  check(delegation===false,'Unexpected validator delegation policy; independently review deployed contract');
+  const weightedVoting=(await call('stakeWeightedVotingEnabled'))[0];
+  check(delegation===false&&weightedVoting===false,'Unexpected genesis staking/governance policy; independently review deployed contract');
   const [status]=await call('validatorStatus',[validatorId]);
   const [owned,credit,effective,slashed]=await call('validatorBondComposition',[validatorId]);
   const [accrued]=await call('validatorRewardAccrued',[validatorId]);
@@ -163,11 +164,13 @@ export function bridgeReceiptEvidence420({receipt,router,routeId,adapterId}){
 }
 export function bridgeStage420(previous,observation){
   const allowed={ 'source-submitted':['source-included','source-reverted','source-reorganized'],
-    'source-included':['source-finalized','source-reorganized'],
-    'source-finalized':['proof-pending','destination-included','source-reorganized'],
+    'source-included':['source-confirmed','source-finalized','source-reorganized'],
+    'source-confirmed':['source-finalized','source-reorganized'],
+    'source-finalized':['proof-pending','destination-included','inbound-accepted','source-reorganized'],
     'proof-pending':['destination-included','source-reorganized'],
     'destination-included':['destination-finalized','destination-reorganized'],
-    'destination-finalized':['beneficiary-settlement-unverified'],
+    'destination-finalized':['inbound-accepted','beneficiary-settlement-unverified'],
+    'inbound-accepted':['beneficiary-settlement-unverified'],
     'destination-reorganized':['destination-included','proof-pending'] };
   check(allowed[previous]?.includes(observation),'Invalid cross-chain state transition');
   return observation;

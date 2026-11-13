@@ -1,0 +1,37 @@
+name: 420Wallet W15.6-M11 WalletKit SDK Packaging
+on:
+  pull_request:
+    paths:
+      - "wallet/extension/package.json"
+      - "wallet/extension/walletconnect-entry.mjs"
+      - "wallet/extension/scripts/build.mjs"
+      - "wallet/extension/core/walletconnect-policy420.js"
+      - ".github/workflows/wallet-convenience-m11.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  walletkit-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned, locally bundled SDK dependencies
+        working-directory: wallet/extension
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Require exact-head bundled WalletKit and existing Trezor SDK
+        working-directory: wallet/extension
+        env:
+          WALLET_CONNECT_RELEASE: '1'
+          WALLET_HARDWARE_RELEASE: '1'
+        run: |
+          node scripts/check-release.mjs
+          test -s dist/vendor/walletconnect-walletkit.bundle.js
+          test -s dist/vendor/trezor-connect-10.bundle.js
+      - name: Check background service-worker syntax
+        working-directory: wallet/extension
+        run: node --check service-worker.js

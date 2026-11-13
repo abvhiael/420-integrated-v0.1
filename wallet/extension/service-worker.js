@@ -172,10 +172,11 @@ async function readAssetPortfolio420(state){
     try{
       const checked=await verifyNftOwnership420(provider,oldNft,balanceAccount);
       if(checked.verified){
-        const spam=nftSpamFlags420({...oldNft.metadata,spam:settings.nftSpam.includes(checked.key)});
+        const signals=nftSpamFlags420({...oldNft.metadata,spam:settings.nftSpam.includes(checked.key)});
+        const spam=!settings.nftTrusted.includes(checked.key)&&signals.spam;
         nfts.push({...checked,metadata:oldNft.metadata||null,
-          hidden:settings.nftHidden.includes(checked.key)||spam.spam,
-          spam:spam.spam,ownership:'verified'});
+          hidden:settings.nftHidden.includes(checked.key)||spam,
+          spam,ownership:'verified'});
       }
     }catch{
       nfts.push({...oldNft,owner:balanceAccount,ownership:'unavailable',verified:false,stale:true,
@@ -1703,6 +1704,11 @@ async function nftVisibility420(message){
    settings[field]=value?[...new Set([...settings[field],ref.key])]:
      settings[field].filter(x=>x!==ref.key);
   }
+ }
+ if(typeof message.spam==='boolean'){
+  settings.nftTrusted=message.spam?
+    settings.nftTrusted.filter(x=>x!==ref.key):
+    [...new Set([...settings.nftTrusted,ref.key])];
  }
  await savePortfolioRecord420(ctx.scope,settings);
  return walletUiState420();

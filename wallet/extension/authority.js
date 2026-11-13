@@ -1,5 +1,5 @@
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
-import {signExtensionEoa420} from './core/eoa-local-signer.js';
+import {signExtensionEoa420,signExtensionEoaMessage420} from './core/eoa-local-signer.js';
 import { createExtensionLocalAuthority420 } from './core/extension-local-authority.js';
 
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
@@ -65,6 +65,44 @@ async function run() {
   $('details').textContent = pending.request.method === 'eth_sendTransaction'
     ? JSON.stringify(pending.request.params?.[0] ?? {}, null, 2)
     : 'This request requires a configured local signing authority.';
+
+  if(['personal_sign','eth_signTypedData_v4'].includes(pending.request.method) &&
+     pending.request.executionModel==='eoa'){
+    const request=pending.request,account=pending.context.accounts?.[0];
+    const params=request.params;
+    $('details').textContent=JSON.stringify({
+      method:request.method,origin:pending.context.origin,chainId:pending.context.chainId,
+      signer:account,request:params
+    },null,2);
+    $('status').textContent='Review the requesting site, chain, signer and full message. The wallet password signs only these exact bytes.';
+    const form=$('eoa-authority');form.hidden=false;
+    $('eoa-authorize').textContent='Sign reviewed message locally';
+    let busy=false;
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();if(busy)return;
+      busy=true;$('eoa-authorize').disabled=true;
+      const password=$('eoa-password').value;$('eoa-password').value='';
+      try{
+        const observed=await provider().request('eth_chainId',[]);
+        if(BigInt(observed)!==BigInt(pending.context.chainId))
+          throw new Error('Network changed before message signing');
+        const vault=(await chrome.storage.local.get('420-wallet-encrypted-vault-v1'))['420-wallet-encrypted-vault-v1'];
+        if(!vault)throw new Error('Encrypted local vault unavailable');
+        const signature=await signExtensionEoaMessage420({
+          vaultRecord:vault,password,account,method:request.method,params,
+          chainId:pending.context.chainId
+        });
+        const after=await provider().request('eth_chainId',[]);
+        if(BigInt(after)!==BigInt(pending.context.chainId))
+          throw new Error('Network changed during message signing');
+        await complete({result:signature});
+      }catch(error){
+        $('status').textContent=error?.message||'Local message signature failed';
+        busy=false;$('eoa-authorize').disabled=false;
+      }
+    });
+    return;
+  }
 
   if(pending.request.method==='eth_sendTransaction'&&
      pending.request.params?.[0]?.executionModel==='eoa'){

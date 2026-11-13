@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
- normalizeSecurityAllowance420,readSecurityAllowance420,encodeSecurityAllowance420,
+ normalizeSecurityAllowance420,readSecurityAllowance420,discoverRecentSecurityAllowances420,ERC20_APPROVAL_TOPIC_420,encodeSecurityAllowance420,
  encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,
  securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420
 } from '../core/extension-security-centre.js';
@@ -148,4 +148,51 @@ test('suspicious signature detection warns about permit typed data, max allowanc
  const opaque=assessSecuritySignature420('personal_sign',['0xfffe',account],{
   chainId,origin:'https://dapp.example'});
  assert.ok(opaque.flags.some(x=>/not readable/.test(x)));
+});
+
+test('recent ERC-20 approval discovery binds chain, token, topic owner/spender and re-reads on-chain allowance',async()=>{
+ const ownerTopic='0x'+account.slice(2).padStart(64,'0'),
+   spenderTopic='0x'+spender.slice(2).padStart(64,'0');
+ const logs=[
+  {address:token,topics:[ERC20_APPROVAL_TOPIC_420,ownerTopic,spenderTopic],data:q(1000)},
+  {address:'0x'+'ff'.repeat(20),topics:[ERC20_APPROVAL_TOPIC_420,ownerTopic,spenderTopic],data:q(MAX)},
+  {address:token,topics:[ERC20_APPROVAL_TOPIC_420,'0x'+'ee'.repeat(32),spenderTopic],data:q(MAX)}
+ ];
+ const calls=[];
+ const p={request:async(m,params)=>{
+  calls.push({m,params});
+  if(m==='eth_chainId')return chainId;
+  if(m==='eth_blockNumber')return '0x4000';
+  if(m==='eth_getLogs')return logs;
+  if(m==='eth_getCode')return '0x6001';
+  if(m==='eth_call')return q(1000);
+  throw Error('unexpected '+m);
+ }};
+ const result=await discoverRecentSecurityAllowances420(p,{
+  chainId,owner:account,tokens:[token],lookbackBlocks:4096,maxSpenders:20});
+ assert.equal(result.entries.length,1);
+ assert.equal(result.entries[0].token,token);
+ assert.equal(result.entries[0].spender,spender);
+ assert.equal(result.entries[0].value,'1000');
+ assert.equal(result.partial,true);
+ assert.equal(result.fromBlock,'0x3000');
+ const query=calls.find(c=>c.m==='eth_getLogs').params[0];
+ assert.equal(query.topics[0],ERC20_APPROVAL_TOPIC_420);
+ assert.equal(query.topics[1],ownerTopic);
+ assert.deepEqual(query.address,[token]);
+ assert.equal(calls.filter(c=>c.m==='eth_call').length,1,'forged log cannot bypass allowance verification');
+});
+test('approval discovery refuses unbounded log results, wrong-chain provider and overlarge lookback',async()=>{
+ await assert.rejects(discoverRecentSecurityAllowances420(provider({wrongChain:true}),{
+  chainId,owner:account,tokens:[token]}),/chain mismatch/);
+ await assert.rejects(discoverRecentSecurityAllowances420(provider(),{
+  chainId,owner:account,tokens:[token],lookbackBlocks:30000}),/Bounded/);
+ const malformed={request:async(m)=>{
+  if(m==='eth_chainId')return chainId;
+  if(m==='eth_blockNumber')return '0x4';
+  if(m==='eth_getLogs')return {};
+  throw Error('Unexpected method');
+ }};
+ await assert.rejects(discoverRecentSecurityAllowances420(malformed,{
+  chainId,owner:account,tokens:[token]}),/Unbounded or malformed/);
 });

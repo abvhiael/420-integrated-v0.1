@@ -321,23 +321,33 @@ function resetReview(){
   state.prepared=null;$('send-review').hidden=true;$('send-confirm').disabled=true;
   $('send-state').textContent='Review required before authorization.';
 }
-function prepareReview(){
+function currentFeeChoice420(){
+  const level=$('send-fee-choice').value;
+  return level==='custom'
+    ?{level,maxFeePerGas:$('send-max-fee').value.trim(),maxPriorityFeePerGas:$('send-priority-fee').value.trim()}
+    :{level};
+}
+async function prepareReview(){
   const w=state.wallet;
   if(!extensionCanSend420(w))throw new Error('Verified account owner and matching network required');
-  const prepared=buildExtensionSend420({
-    from:w.account.controller,
+  const context={chainId:w.network.expectedChainId,epoch:w.network.epoch,account:w.selectedAccount,
     recipient:$('send-recipient').value.trim(),amount:$('send-amount').value.trim(),
-    asset:$('send-asset').value,trackedAssets:w.config.trackedAssets,
-  });
-  state.prepared={...prepared,asset:$('send-asset').value,chainId:w.network.expectedChainId,
-    epoch:w.network.epoch,controller:w.selectedAccount};
-  $('review-asset').textContent=prepared.summary.symbol;
-  $('review-amount').textContent=prepared.summary.amount;
-  $('review-recipient').textContent=prepared.summary.recipient;
-  $('review-chain').textContent=w.network.expectedChainId;
+    asset:$('send-asset').value,feeChoice:currentFeeChoice420()};
+  const {transaction,quote}=await command('send-preflight',context);
+  if(state.wallet!==w||w.network.expectedChainId!==context.chainId||w.network.epoch!==context.epoch)
+    throw new Error('Network/account changed during preflight; restart review');
+  state.prepared={...transaction,...context,controller:w.selectedAccount,quote};
+  $('review-asset').textContent=transaction.summary.symbol;
+  $('review-amount').textContent=transaction.summary.amount;
+  $('review-recipient').textContent=transaction.summary.recipient;
+  $('review-chain').textContent=context.chainId;
   $('review-sender').textContent=w.account.smartAccount;
+  $('review-max-fee').textContent=quote.maxFeePerGas+' wei/gas';
+  $('review-priority-fee').textContent=quote.maxPriorityFeePerGas+' wei/gas';
+  $('review-simulation').textContent='Target call passed; this does NOT prove account-abstraction execution.';
+  $('review-entrypoint').textContent='Requires passkey signing and final EntryPoint simulation before broadcast; fee total not yet verified.';
   $('send-review').hidden=false;$('send-confirm').disabled=false;
-  $('send-state').textContent='Review these exact details before confirming. The next step requires local passkey authority.';
+  $('send-state').textContent='Review target call and fee caps. Fees are indicative; final UserOperation signature, gas validation and EntryPoint simulation are required before submission.';
   $('send-confirm').focus();
 }
 function renderAddressBook420(){
@@ -558,9 +568,16 @@ function setup(){
     }catch(e){tell('Could not remove recipient: '+e.message,'error');}
     finally{button.disabled=false;}
   });
-  for(const id of ['send-asset','send-recipient','send-amount'])$(id).addEventListener('input',resetReview);
-  $('send-form').addEventListener('submit',event=>{
-    event.preventDefault();try{prepareReview();}catch(e){resetReview();$('send-state').textContent='Cannot review: '+e.message;}
+  for(const id of ['send-asset','send-recipient','send-amount','send-fee-choice','send-max-fee','send-priority-fee'])$(id).addEventListener('input',resetReview);
+  $('send-fee-choice').addEventListener('change',()=>{
+    const custom=$('send-fee-choice').value==='custom';
+    $('send-max-fee').disabled=!custom;$('send-priority-fee').disabled=!custom;
+    resetReview();
+  });
+  $('send-form').addEventListener('submit',async event=>{
+    event.preventDefault();$('send-review-button').disabled=true;
+    try{await prepareReview();}catch(e){resetReview();$('send-state').textContent='Cannot review: '+e.message;}
+    finally{$('send-review-button').disabled=false;}
   });
   $('send-edit').addEventListener('click',()=>{$('send-review').hidden=true;resetReview();$('send-recipient').focus();});
   $('send-confirm').addEventListener('click',async()=>{
@@ -574,12 +591,14 @@ function setup(){
         trackedAssets:state.wallet.config.trackedAssets,
       });
       if(JSON.stringify(now)!==JSON.stringify({transaction:before.transaction,summary:before.summary})||
+          JSON.stringify(currentFeeChoice420())!==JSON.stringify(before.feeChoice)||
           before.chainId!==state.wallet.network.expectedChainId||before.epoch!==state.wallet.network.epoch||before.controller!==state.wallet.selectedAccount)
         throw new Error('Network, account or transaction changed; review again');
       state.submitting=true;$('send-confirm').disabled=true;
       $('send-state').textContent='Waiting for local passkey authorization, simulation and transaction receipt. Do not close the approval window.';
       const receipt=await command('send',{confirmed:true,chainId:before.chainId,epoch:before.epoch,account:before.controller,
-        recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset});
+        recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset,
+        feeChoice:before.feeChoice,preflight:before.quote});
       $('send-state').textContent='Transaction submitted: '+receipt.hash+' — awaiting network confirmation.';
       resetReview();
       await refresh();screen('activity-view');

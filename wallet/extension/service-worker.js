@@ -1,5 +1,5 @@
 import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
-import {readSecurityAllowance420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
+import {readSecurityAllowance420,discoverRecentSecurityAllowances420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
 import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
 import {prepareSessionKeyRevocation,readSessionEpoch} from './core/session-management.js';
 import {inspectCapabilityGrant} from './core/capabilities.js';
@@ -1351,6 +1351,17 @@ async function securityState420(){
  catch(error){smartError=error.message;}
  if(smart)passkeys=await securityPasskeys420(ctx,smart);
  watched=await securityWatchEntries420(ctx,smart);
+ let discovered={entries:[],partial:true,note:'No verified ERC-20 contracts in this wallet portfolio to scan'};
+ try{
+  const verified=(ctx.wallet.portfolio?.tokens||[]).filter(t=>t?.verified===true&&t.hidden!==true&&
+    t.spam!==true&&typeof t.address==='string').slice(0,8).map(t=>t.address);
+  if(verified.length){
+   const owner=ctx.wallet.account.kind==='eoa'?ctx.account:smart?.smartAccount;
+   if(owner)discovered=await discoverRecentSecurityAllowances420(ctx.provider,{
+     chainId:ctx.chainId,owner,tokens:verified,lookbackBlocks:4096,maxSpenders:20});
+  }
+ }catch(error){discovered={entries:[],partial:true,error:error.message,
+    note:'Bounded Approval log discovery unavailable; manually inspect exact token and spender'};}
  const signatures=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY];
  const currentSignatures=(Array.isArray(signatures)?signatures:[]).filter(x=>
   x?.account===ctx.account&&x?.chainId===ctx.chainId).slice(0,80);
@@ -1376,7 +1387,7 @@ async function securityState420(){
   }))
  ].slice(0,35);
  return {chainId:ctx.chainId,account:ctx.account,epoch:ctx.epoch,sites,
-  signatures:currentSignatures,watched,alerts,passkeys,
+  signatures:currentSignatures,watched,discovered,alerts,passkeys,
   smart:smart?{
     smartAccount:smart.smartAccount,owner:smart.owner,recoveryAuthority:smart.recoveryAuthority,
     pendingRecoveryOwner:smart.pendingRecoveryOwner,recoveryExecutableAt:String(smart.recoveryExecutableAt),

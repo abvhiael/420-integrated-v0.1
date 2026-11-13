@@ -26,6 +26,31 @@ import {PORTFOLIO_SETTINGS_KEY_420,PORTFOLIO_CACHE_KEY_420,PRICE_CACHE_KEY_420,
   verifiedTokenMetadata420,checkedTokenBalance420,discoverTokens420,
   spamSignals420,classifyBalance420,validatePrice420,fiatValue420} from './core/extension-portfolio.js';
 import {NETWORKS_KEY_420,ORIGIN_NETWORKS_KEY_420,normalizeRegistry420,normalizeNetwork420,networkFromLegacy420,chainId420,probeNetwork420,watchAsset420} from './core/network-registry.js';
+const TREZOR_METHODS_420=new Set(['ethereumGetAddress','ethereumSignTransaction','ethereumSignTypedData','ethereumSignMessage']);
+let trezorSdkPromise420=null;
+async function trezorSdk420(){
+  if(!trezorSdkPromise420)trezorSdkPromise420=(async()=>{
+    // Bundled locally at release build time; no remote runtime scripts, no iframe.
+    const module=await import('./vendor/trezor-connect-10.bundle.js');
+    const sdk=module.default||module.TrezorConnect;
+    if(!sdk?.init)throw new Error('Trezor Connect 10 extension SDK is not installed');
+    const stored=await chrome.storage.local.get('420-wallet-trezor-app-manifest-v1');
+    const manifest=stored['420-wallet-trezor-app-manifest-v1'];
+    if(!manifest||typeof manifest.appName!=='string'||typeof manifest.email!=='string'||
+       typeof manifest.appUrl!=='string'||!manifest.appUrl.startsWith('https://'))
+      throw new Error('Approved Trezor Connect application manifest is missing');
+    await sdk.init({manifest});
+    return sdk;
+  })().catch(e=>{trezorSdkPromise420=null;throw e;});
+  return trezorSdkPromise420;
+}
+async function requestTrezor420(method,params){
+  if(!TREZOR_METHODS_420.has(method))throw Object.assign(new Error('Trezor method not authorized'),{code:4200});
+  const sdk=await trezorSdk420();
+  if(typeof sdk[method]!=='function')throw new Error('Trezor Connect 10 method unavailable');
+  return sdk[method](params);
+}
+
 const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
@@ -2222,6 +2247,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.source==='420-wallet-authority-ui'&&message.kind==='authority-submitted'){
     (async()=>{try{
       sendResponse({result:await recordAuthoritySubmission420(sender,message.authorityRequestId,message.submission)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
+  if(message?.source==='420-wallet-manager-ui'&&message.kind==='hardware-trezor'){
+    (async()=>{try{
+      if(sender?.id!==chrome.runtime.id||sender.url?.split('?')[0]!==chrome.runtime.getURL('wallet.html'))
+        throw Object.assign(new Error('Untrusted Trezor account discovery UI'),{code:4100});
+      if(message.method!=='ethereumGetAddress')
+        throw Object.assign(new Error('Wallet manager may only request device address'),{code:4100});
+      sendResponse({result:await requestTrezor420(message.method,message.params)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
+  if(message?.source==='420-wallet-authority-ui'&&message.kind==='authority-trezor'){
+    (async()=>{try{
+      if(sender?.id!==chrome.runtime.id||sender.url?.split('?')[0]!==chrome.runtime.getURL('authority.html')||
+         new URL(sender.url).searchParams.get('request')!==message.authorityRequestId)
+        throw Object.assign(new Error('Untrusted hardware signing authority'),{code:4100});
+      const pending=(await readObject(AUTHORITY_KEY))[message.authorityRequestId];
+      const account=pending?.context?.accounts?.[0],meta=(await accountMetadata420())[account];
+      const effective=await effectiveChain420(pending?.context?.origin);
+      if(!pending||meta?.type!=='hardware'||meta?.provider!=='trezor'||meta?.signingQualified!==true||
+         !account||effective.chainId!==pending.context.chainId||effective.epoch!==pending.context.epoch)
+        throw Object.assign(new Error('Trezor account or chain is no longer authorized'),{code:4100});
+      const allowed=pending.request.method==='eth_sendTransaction'?'ethereumSignTransaction':
+        pending.request.method==='eth_signTypedData_v4'?'ethereumSignTypedData':
+        pending.request.method==='personal_sign'?'ethereumSignMessage':null;
+      if(!['ethereumGetAddress',allowed].includes(message.method))
+        throw Object.assign(new Error('Trezor method differs from approved request'),{code:4100});
+      sendResponse({result:await requestTrezor420(message.method,message.params)});
     }catch(error){sendResponse({error:serializeError(error)});}})();
     return true;
   }

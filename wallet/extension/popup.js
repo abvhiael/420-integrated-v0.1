@@ -885,7 +885,8 @@ function setup(){
       const operator=$('nft-recipient').value.trim();
       const response=await command('nft-approval-status',{
         standard:nft.standard,address:nft.address,tokenId:nft.tokenId,
-        ...(nft.standard==='ERC1155'?{operator}:{})
+        ...(nft.standard==='ERC1155'||$('nft-collection-wide').checked?{operator}:{}),
+        collectionWide:$('nft-collection-wide').checked
       });
       $('nft-approval-status').textContent=response.scope==='token'?
         'On-chain ERC-721 token-specific approved address: '+response.approvedOperator:

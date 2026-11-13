@@ -446,11 +446,15 @@ function prettyRequest(request){
         '\nTarget: '+preview.normalizedTx.to+
         '\nGas fee cap: '+preview.quote.maxFeePerGas+' wei/gas'+
         '\nPriority fee cap: '+preview.quote.maxPriorityFeePerGas+' wei/gas'+
-        '\nBundler estimated gas: '+preview.quote.gasBudget.callGasLimit+' call, '+
-           preview.quote.gasBudget.verificationGasLimit+' verification, '+
-           preview.quote.gasBudget.preVerificationGas+' pre-verification'+
+        (preview.executionModel==='eoa'?
+          '\nEOA estimated gas limit: '+preview.quote.gasLimit:
+          '\nBundler estimated gas: '+preview.quote.gasBudget.callGasLimit+' call, '+
+             preview.quote.gasBudget.verificationGasLimit+' verification, '+
+             preview.quote.gasBudget.preVerificationGas+' pre-verification')+
         '\nMaximum estimated execution fee: '+preview.quote.totalFeeWei+' wei'+
-        '\nTARGET CALL PASSED. Signed EntryPoint execution must still pass.'+
+        '\nTARGET CALL PASSED. '+(preview.executionModel==='eoa'?
+          'Locally signed EOA envelope will be verified before broadcast.':
+          'Signed EntryPoint execution must still pass.')+
         '\nRisk: '+preview.risk.severity.toUpperCase()+' — '+preview.risk.message:'');
   }
   if(request.method==='personal_sign')return 'Personal signature request\n'+String(request.params?.[0]??'');

@@ -14,8 +14,11 @@ function toB64(bytes){let str='';for(let i=0;i<bytes.length;i++)str+=String.from
 function fromB64(data){assert(typeof data==='string'&&/^[A-Za-z0-9+/]*={0,2}$/.test(data)&&data.length%4===0,'Invalid vault encoding');return Uint8Array.from(atob(data),c=>c.charCodeAt(0));}
 function now(){return Date.now();}
 async function serializedVaultWrite420(action){
-  if(globalThis.navigator?.locks?.request)return globalThis.navigator.locks.request('420-wallet-vault-write',{mode:'exclusive'},action);
-  return action();
+  if(globalThis.navigator?.locks?.request)
+    return globalThis.navigator.locks.request('420-wallet-vault-write',{mode:'exclusive'},action);
+  // Cross-window modifications cannot be made safe by an in-memory mutex.
+  // Never silently execute destructive vault writes without a browser lock.
+  throw new Error('Secure cross-window vault lock unavailable; refusing key-storage mutation');
 }
 function passwordPolicy(password){
   assert(typeof password==='string'&&password.length>=12&&password.length<=1024,'Wallet password must have 12–1024 characters');
@@ -282,11 +285,16 @@ export class VaultSession420{
   }
 }
 export async function createVault420(storage,password){
-  assert(!(await stored(storage)),'A wallet vault already exists. Unlock or restore it; do not overwrite existing keys.');
-  const payload={schema:'420-wallet-secret-payload-v1',wallets:[],autoLockMinutes:5};
-  const record=await encryptVault420(payload,password);
-  await storage.set({[VAULT_STORAGE_KEY]:record});
-  return new VaultSession420(storage,record,payload);
+  return serializedVaultWrite420(async()=>{
+    assert(!(await stored(storage)),'A wallet vault already exists. Unlock or restore it; do not overwrite existing keys.');
+    const payload={schema:'420-wallet-secret-payload-v1',wallets:[],autoLockMinutes:5};
+    const record=await encryptVault420(payload,password);
+    // Recheck after a slow PBKDF2 call even when a caller's storage backend
+    // ignores a lock; a concurrent reinitialization must fail closed.
+    assert(!(await stored(storage)),'A wallet vault already exists. Unlock or restore it; do not overwrite existing keys.');
+    await storage.set({[VAULT_STORAGE_KEY]:record});
+    return new VaultSession420(storage,record,payload);
+  });
 }
 export async function unlockVault420(storage,password){
   const record=await stored(storage);
@@ -296,10 +304,13 @@ export async function unlockVault420(storage,password){
 }
 export async function hasVault420(storage){return Boolean(await stored(storage));}
 export async function restoreEncryptedBackup420(storage,json,password){
-  assert(typeof json==='string'&&json.length<3*1024*1024,'Invalid encrypted backup');
-  assert(!(await stored(storage)),'Existing vault must never be overwritten by an import');
-  const record=JSON.parse(json);
-  await decryptVault420(record,password);
-  await storage.set({[VAULT_STORAGE_KEY]:record});
-  return unlockVault420(storage,password);
+  return serializedVaultWrite420(async()=>{
+    assert(typeof json==='string'&&json.length<3*1024*1024,'Invalid encrypted backup');
+    assert(!(await stored(storage)),'Existing vault must never be overwritten by an import');
+    const record=JSON.parse(json);
+    const payload=await decryptVault420(record,password);
+    assert(!(await stored(storage)),'Existing vault must never be overwritten by an import');
+    await storage.set({[VAULT_STORAGE_KEY]:record});
+    return new VaultSession420(storage,record,payload);
+  });
 }

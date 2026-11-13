@@ -70,6 +70,14 @@ async function run() {
     smartAccountConfig: config.smartAccountConfig,
     // Return a pending UserOperation identity before the worker's 120s approval timeout.
     receiptOptions: {timeoutMs:90000,pollMs:1500},
+    onUserOperationSubmitted:async (submission,context)=>{
+      const response=await chrome.runtime.sendMessage({
+        source:'420-wallet-authority-ui',kind:'authority-submitted',
+        authorityRequestId,submission,
+      });
+      if(response?.error)throw Object.assign(new Error(response.error.message),response.error);
+      if(response?.result!==true)throw new Error('Unable to preserve pending UserOperation identity');
+    },
     loadPasskeyBinding: async ({ account, smartAccount }) => {
       return bindings[smartAccount.toLowerCase()] ?? bindings[account.toLowerCase()] ?? null;
     },

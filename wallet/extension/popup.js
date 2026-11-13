@@ -1022,8 +1022,17 @@ async function convenienceRefresh420(){
  for(const entry of record.services){
    const button=node('button','secondary',entry.name+' · '+entry.type);
    button.type='button';
-   button.setAttribute('aria-label','Open approved service '+entry.name+' in a separate browser tab');
-   button.addEventListener('click',()=>chrome.tabs.create({url:entry.url}));
+   button.setAttribute('aria-label','Verify current Registry service and open '+entry.name+' without connecting a wallet');
+   button.addEventListener('click',async()=>{
+     button.disabled=true;
+     try{
+       const result=await command('convenience-launch-service',{serviceId:entry.serviceId,snapshot:entry});
+       $('convenience-status').textContent='Opened '+entry.name+' on '+result.chainId+
+         '. No account or spending permission granted; the app must request connection separately.';
+     }catch(error){
+       $('convenience-status').textContent='Service launch blocked: '+error.message;
+     }finally{button.disabled=false;}
+   });
    const wrapper=node('div','asset-row');
    wrapper.append(node('span','asset-info',entry.description||entry.origin),button);
    services.append(wrapper);

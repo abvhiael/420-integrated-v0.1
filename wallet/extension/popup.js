@@ -1029,19 +1029,25 @@ async function convenienceRefresh420(){
 function renderPrivacy420(){
  const flags=convenienceUi420.current?.saved?.privacy;
  if(!flags)return;
- if(flags.hideBalances){
-   for(const id of ['native-balance','portfolio-fiat']){
-     const el=$(id);if(!el)continue;
-     if(!el.dataset.privacyValue)el.dataset.privacyValue=el.textContent;
+ const targets=[...document.querySelectorAll('#dashboard .asset-value'),
+   ...['native-balance','portfolio-fiat'].map(id=>$(id)).filter(Boolean)];
+ const hide=flags.hideBalances;
+ for(const el of targets){
+   if(hide){
+     if(!Object.hasOwn(el.dataset,'privacyValue'))el.dataset.privacyValue=el.textContent;
      el.textContent='••••••';
+     el.setAttribute('aria-label','Balance hidden by privacy setting');
+   }else if(Object.hasOwn(el.dataset,'privacyValue')){
+     el.textContent=el.dataset.privacyValue;
+     delete el.dataset.privacyValue;
+     el.removeAttribute('aria-label');
    }
- }else{
-   for(const id of ['native-balance','portfolio-fiat']){
-     const el=$(id);if(el?.dataset.privacyValue){el.textContent=el.dataset.privacyValue;delete el.dataset.privacyValue;}
-   }
-   if(!flags.showFiat){
-     const fiat=$('portfolio-fiat');
-     if(fiat){fiat.dataset.privacyValue=fiat.textContent;fiat.textContent='Fiat valuation hidden by privacy preference';}
+ }
+ if(!hide&&!flags.showFiat){
+   const fiat=$('portfolio-fiat');
+   if(fiat){
+     if(!Object.hasOwn(fiat.dataset,'privacyValue'))fiat.dataset.privacyValue=fiat.textContent;
+     fiat.textContent='Fiat valuation hidden by privacy setting';
    }
  }
 }

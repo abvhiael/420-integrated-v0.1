@@ -20,6 +20,7 @@ export function createTrezorConnect420(connect){
       hardwarePath420(path);
       check(prepared?.tx?.type===2,'Trezor hardware signer only supports reviewed EIP-1559 transactions');
       const c=prepared.tx;
+      check(Number.isSafeInteger(Number(c.chainId))&&Number(c.chainId)>0,'Unsupported Trezor chain ID');
       const response=unwrap(await connect.ethereumSignTransaction({
         path,
         transaction:{
@@ -34,10 +35,11 @@ export function createTrezorConnect420(connect){
           txType:2,
         }
       }),'transaction signing');
-      check(Number.isSafeInteger(Number(c.chainId))&&Number(c.chainId)>0,'Unsupported Trezor chain ID');
       const v=BigInt(response.v);
-      check(v===0n||v===1n||v===27n||v===28n,'Unexpected Trezor signature parity');
-      return {r:response.r,s:response.s,yParity:Number(v===27n||v===28n?v-27n:v)};
+      const eip155=BigInt(c.chainId)*2n+35n;
+      check(v===0n||v===1n||v===27n||v===28n||v===eip155||v===eip155+1n,'Unexpected Trezor signature parity or chain');
+      const parity=v===27n||v===28n?v-27n:v===eip155||v===eip155+1n?v-eip155:v;
+      return {r:response.r,s:response.s,yParity:Number(parity)};
     },
     async signTypedData(path,prepared){
       hardwarePath420(path);

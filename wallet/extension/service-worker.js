@@ -646,7 +646,8 @@ async function handleApprovalMethod(request, context) {
     const tx=request.params?.[0]||{};
     const id='site-send-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:pinned,controller:current[0],
-      executionModel:feePreview.executionModel,
+      executionModel:feePreview.executionModel==='hardware'?'eoa':feePreview.executionModel,
+      signingProvider:feePreview.executionModel==='hardware'?'hardware':null,
       origin,recipient:typeof tx.to==='string'?tx.to.toLowerCase():null,
       amount:typeof tx.value==='string'?tx.value:'0x0',
       symbol:tx.data&&tx.data!=='0x'?'contract call':'native',
@@ -2065,7 +2066,8 @@ async function handleWalletUi420(message) {
       smartAccount:source.smartAccount,recipient:preview.transaction.to,
       amount:preview.action==='cancel'?'0':source.amount,symbol:source.symbol,
       status:'pending',hash:null,action:preview.action,
-      executionModel:preview.executionModel||'erc4337',
+      executionModel:preview.executionModel==='hardware'?'eoa':preview.executionModel||'erc4337',
+      signingProvider:preview.executionModel==='hardware'?'hardware':null,
       replaces:preview.replaces,originalId:preview.originalId};
     await rememberWalletUiActivity420(entry);
     let hash=null;

@@ -1,3 +1,4 @@
+import {discoverGenesisServices420,verifyGenesisService420,assertGenesisNavigationSnapshot420} from './core/genesis-wallet-integration420.js';
 import {walletConnectProject420,walletConnectProposal420,walletConnectRequest420,walletConnectResult420,walletConnectError420} from './core/walletconnect-policy420.js';
 import {CONVENIENCE_KEY420,normalizeConvenience420,updateAddressLabel420,normalizeServiceDirectory420,portfolioAnalytics420,actionableNotifications420,validateMobileInvite420} from './core/extension-convenience420.js';
 import {financeProviderCatalog420,financeOptions420,financePrepare420,assertFinanceReview420,financeStakeStatus420} from './core/finance-runtime420.js';
@@ -2220,20 +2221,57 @@ async function walletConnectCommand420(message){
 }
 
 const NOTIFICATION_DELIVERED_KEY420='420-wallet-notifications-delivered-v1';
+async function verifiedGenesisDirectory420(wallet,config){
+ if(wallet.network.status!=='matched'||!wallet.selectedAccount||!wallet.network.expectedChainId)return [];
+ if(!config?.ecosystemRegistry||!Array.isArray(config.ecosystemServices))return [];
+ const before=await effectiveChain420();
+ if(before.chainId!==wallet.network.expectedChainId||before.epoch!==wallet.network.epoch)return [];
+ const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:before.chainId})};
+ const verified=await discoverGenesisServices420(provider,{
+   registry:config.ecosystemRegistry,services:config.ecosystemServices,chainId:before.chainId});
+ const after=await effectiveChain420();
+ if(after.epoch!==before.epoch||after.chainId!==before.chainId)return [];
+ return verified;
+}
 async function convenienceState420(){
  const wallet=await walletUiState420();
  const saved=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
  const raw=await readObject(EXTENSION_CONFIG_KEY_420);
  const directory=saved.privacy.serviceDiscovery?
-    normalizeServiceDirectory420(raw,wallet.network.expectedChainId):[];
+    await verifiedGenesisDirectory420(wallet,raw):[];
  return {saved,account:wallet.selectedAccount,chainId:wallet.network.expectedChainId,
    analytics:portfolioAnalytics420(wallet.portfolio,wallet.activity,{enabled:saved.privacy.portfolioAnalytics}),
    services:directory,labels:saved.labels.filter(x=>x.chainId===wallet.network.expectedChainId),
-   notifications:actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
-      chainId:wallet.network.expectedChainId,after:0})};
+   notifications:wallet.selectedAccount&&wallet.network.expectedChainId?
+     actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
+       chainId:wallet.network.expectedChainId,after:0}):[]};
 }
 async function convenienceCommand420(message){
  if(message.kind==='convenience-state')return convenienceState420();
+ if(message.kind==='convenience-launch-service'){
+   const before=await walletUiState420();
+   const preferences=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   if(!preferences.privacy.serviceDiscovery||before.network.status!=='matched'||!before.selectedAccount)
+     throw Object.assign(new Error('Genesis service discovery is disabled or wallet context unverified'),{code:4100});
+   const raw=await readObject(EXTENSION_CONFIG_KEY_420);
+   const declared=raw.ecosystemServices?.find(x=>x.serviceId===message.serviceId);
+   if(!declared||!raw.ecosystemRegistry)throw Object.assign(new Error('Genesis service is not published'),{code:4100});
+   const chain=before.network.expectedChainId,epoch=before.network.epoch;
+   const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:chain})};
+   const current=await verifyGenesisService420(provider,{
+     registry:raw.ecosystemRegistry,entry:declared,chainId:chain});
+   const permission=assertGenesisNavigationSnapshot420(message.snapshot,current,{account:before.selectedAccount,chainId:chain});
+   const after=await walletUiState420();
+   const now=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   if(!now.privacy.serviceDiscovery||after.network.status!=='matched'||
+      after.network.expectedChainId!==chain||after.network.epoch!==epoch||after.selectedAccount!==before.selectedAccount)
+     throw Object.assign(new Error('Wallet account or network changed before application launch'),{code:4901});
+   // An external tab alone cannot grant eth_accounts or any signer/capability permission.
+   await chrome.tabs.create({url:permission.url,active:true});
+   return {serviceId:permission.serviceId,origin:permission.origin,chainId:permission.chainId,
+      accountGrant:false,spendingAuthority:false,status:'opened-no-authorization'};
+ }
+
  if(message.kind==='convenience-privacy'){
    const before=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
    const key=message.setting;

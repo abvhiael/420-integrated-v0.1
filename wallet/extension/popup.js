@@ -325,7 +325,7 @@ function renderSecurity420(){
      watch.type='button';
      watch.addEventListener('click',()=>watchSecurity420({
        authorityKind:'allowance',token:found.token,spender:found.spender,
-       owner:sec.smart&&sec.account!==sec.smart.smartAccount?'smart-account':'eoa'
+       owner:sec.discovered?.ownerType==='smart-account'?'smart-account':'eoa'
      }));
      item.append(watch);
    }

@@ -841,6 +841,25 @@ async function approval(){
   $('reject').addEventListener('click',()=>finish(false)); // User rejected request when approved=false.
 }
 function setup(){
+  for(const [id,older] of [['nfts-scan-recent',false],['nfts-scan-older',true]]){
+    $(id).addEventListener('click',async()=>{
+      const button=$(id);button.disabled=true;
+      try{
+        const epoch=++state.epoch;
+        const response=await command('portfolio-discover',{older});
+        if(await applyWalletState420(response.state,epoch)){
+          const d=response.discovery;
+          $('nft-index-status').textContent=d.nftBackfillComplete?
+            'Older NFT event history has reached genesis; currently owned collectibles remain verified on chain.':
+            (older?'Historical backfill':'Recent forward scan')+
+            ' complete for blocks '+d.nftFrom+'–'+d.nftTo+
+            ': '+d.nfts+' NFT holdings verified. Coverage is partial; repeat to scan more blocks.';
+          tell('NFT ownership reverified from contract state, not metadata.');
+        }
+      }catch(e){$('nft-index-status').textContent='NFT scan blocked: '+e.message;}
+      finally{button.disabled=false;}
+    });
+  }
   $('nft-import-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const form=event.currentTarget,button=form.querySelector('button[type=submit]');

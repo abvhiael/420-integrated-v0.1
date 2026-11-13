@@ -1,3 +1,7 @@
+import {ledgerOpen420} from './core/hardware-ledger.js';
+import {createTrezorConnect420} from './core/hardware-trezor.js';
+import {hardwarePath420,assertHardwareAccount420,prepareHardwareTransaction420,acceptHardwareTxSignature420,
+ prepareHardwareTypedData420,acceptHardwareTypedSignature420,acceptHardwarePersonalSignature420,preBroadcastHardware420} from './core/hardware-signing.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {signExtensionEoa420,signExtensionEoaMessage420} from './core/eoa-local-signer.js';
 import { createExtensionLocalAuthority420 } from './core/extension-local-authority.js';
@@ -56,6 +60,127 @@ async function complete(payload) {
   window.close();
 }
 
+
+async function executeHardware420(pending,config) {
+  const request=pending.request,account=pending.context.accounts?.[0];
+  const meta=config?.accountMeta?.[account];
+  const selected=assertHardwareAccount420(meta,account);
+  const tx=request.method==='eth_sendTransaction'?request.params?.[0]:null;
+  if(tx&&tx.executionModel!=='hardware')throw new Error('Hardware transaction approval model changed');
+  if(!['eth_sendTransaction','eth_signTypedData_v4','personal_sign'].includes(request.method))
+    throw new Error('Unsupported hardware authority request');
+  $('hardware-authority').hidden=false;
+  const typed=request.method==='eth_signTypedData_v4'
+    ?prepareHardwareTypedData420(request.params,pending.context.chainId,account):null;
+  const prepared=tx?prepareHardwareTransaction420(tx,pending.context.chainId,account):null;
+  $('details').textContent=JSON.stringify({
+    method:request.method,origin:pending.context.origin,signer:account,
+    chainId:pending.context.chainId,path:selected.path,
+    ...(prepared?{to:prepared.to,value:prepared.value,nonce:prepared.nonce,
+      gasLimit:prepared.gasLimit,maxFeePerGas:prepared.maxFeePerGas,
+      maxPriorityFeePerGas:prepared.maxPriorityFeePerGas,calldata:prepared.data}:{}),
+    ...(typed?{typedData:typed.payload,digest:typed.digest}:{}),
+    ...(request.method==='personal_sign'?{message:request.params?.[0]}:{})
+  },null,2);
+  $('status').textContent='Verify the device, account, chain and exact request before approving. Device approval is required.';
+  const hashed=selected.provider==='ledger'&&!!typed;
+  $('hardware-hash-label').hidden=!hashed;
+  $('hardware-device-hint').textContent=selected.provider==='ledger'?
+    'Connect your Ledger with Ethereum app open and approve on its screen.':
+    'Approve via the official Trezor Suite Connect 10 interface on your device.';
+  let working=false;
+  $('hardware-authority').addEventListener('submit',async event=>{
+    event.preventDefault();if(working)return;
+    if(hashed&&!$('hardware-hash-ack').checked){
+      $('status').textContent='Explicit acknowledgment of hash-only EIP-712 display is required.';
+      return;
+    }
+    working=true;$('hardware-authorize').disabled=true;
+    let signed=null,ledger=null;
+    try{
+      const current=(await chrome.storage.local.get(CONFIG_KEY))?.[CONFIG_KEY]?.accountMeta?.[account];
+      if(!current||JSON.stringify(current)!==JSON.stringify(meta))
+        throw new Error('Hardware account or derivation changed during review');
+      const observed=await provider().request('eth_chainId',[]);
+      if(BigInt(observed)!==BigInt(pending.context.chainId))
+        throw new Error('Hardware signing chain changed');
+      const trezorCall=async(method,params)=>{
+        const response=await chrome.runtime.sendMessage({
+          source:'420-wallet-authority-ui',kind:'authority-trezor',
+          authorityRequestId,method,params});
+        if(response?.error)throw new Error(response.error.message);
+        if(!response||!('result'in response))throw new Error('Trezor bridge did not return a result');
+        return response.result;
+      };
+      let device;
+      if(selected.provider==='ledger'){
+        ledger=await ledgerOpen420();
+        device={
+          address:async()=>ledger.address(selected.index,selected.account),
+          signTransaction:async(prep)=>ledger.signTransaction(selected,prep.unsignedSerialized),
+          signTypedData:async(prep)=>ledger.signTypedDataHash(selected,prep.domainHash,prep.messageHash)
+        };
+      }else{
+        const bridge=createTrezorConnect420({
+          ethereumGetAddress:p=>trezorCall('ethereumGetAddress',p),
+          ethereumSignTransaction:p=>trezorCall('ethereumSignTransaction',p),
+          ethereumSignTypedData:p=>trezorCall('ethereumSignTypedData',p),
+          ethereumSignMessage:p=>trezorCall('ethereumSignMessage',p),
+        });
+        device={
+          address:async()=>bridge.address(selected.path),
+          signTransaction:async prep=>bridge.signTransaction(selected.path,prep),
+          signTypedData:async prep=>bridge.signTypedData(selected.path,prep),
+          signPersonalMessage:async data=>bridge.signPersonalMessage(selected.path,data),
+        };
+      }
+      const proof=await device.address();
+      if(proof.address.toLowerCase()!==account.toLowerCase()||proof.path!==selected.path)
+        throw new Error('Connected hardware address/path does not match reviewed account');
+      const assertRecipient=async()=>{
+        if(!tx?.recipientSnapshot)return;
+        if(tx.recipientSnapshot.recipient!==tx.to?.toLowerCase())
+          throw new Error('Reviewed name and transaction target disagree');
+        const resolved=await resolveExtensionRecipient420(provider(),{
+          input:tx.recipientSnapshot.input,chainId:tx.chainId,
+          qualifiedNamesConfig:config.qualifiedNamesRuntime??null,
+        });
+        assertExtensionRecipientSnapshot420(tx.recipientSnapshot,resolved);
+      };
+      if(prepared){
+        await preBroadcastHardware420(provider(),prepared,assertRecipient);
+        signed=acceptHardwareTxSignature420(prepared,await device.signTransaction(prepared));
+        await preBroadcastHardware420(provider(),prepared,assertRecipient);
+        const response=await chrome.runtime.sendMessage({
+          source:'420-wallet-authority-ui',kind:'authority-eoa-signed',
+          authorityRequestId,submission:Object.fromEntries(Object.entries(signed).filter(([k])=>k!=='raw'))
+        });
+        if(response?.error||response?.result!==true)throw new Error(response?.error?.message||'Hardware activity record rejected');
+        const broadcast=await provider().request('eth_sendRawTransaction',[signed.raw]);
+        if(typeof broadcast!=='string'||broadcast.toLowerCase()!==signed.hash)
+          throw new Error('Broadcast hash disagrees with device-signed transaction');
+        await complete({result:signed.hash});
+      }else if(typed){
+        const signature=acceptHardwareTypedSignature420(typed,await device.signTypedData(typed));
+        if(BigInt(await provider().request('eth_chainId',[]))!==BigInt(pending.context.chainId))
+          throw new Error('Chain changed during typed-data signing');
+        await complete({result:signature});
+      }else{
+        if(selected.provider==='ledger')throw new Error('Ledger personal message signing requires device signer support');
+        const data=request.params?.[0];
+        const signature=acceptHardwarePersonalSignature420(account,data,await device.signPersonalMessage(data));
+        await complete({result:signature});
+      }
+    }catch(error){
+      $('status').textContent=error?.message||'Hardware signing rejected';
+      if(signed?.hash){
+        await complete({error:{code:4900,message:'Hardware-signed transaction '+signed.hash+
+          ' may already have been submitted. Check chain activity before retrying.',data:{hash:signed.hash,pending:true}}});
+      }else{working=false;$('hardware-authorize').disabled=false;}
+    }finally{await ledger?.close().catch(()=>{});}
+  });
+}
+
 async function run() {
   if (!authorityRequestId) throw new Error('authority request ID required');
   const { pending, bindings, config } = await readState();
@@ -65,6 +190,12 @@ async function run() {
   $('details').textContent = pending.request.method === 'eth_sendTransaction'
     ? JSON.stringify(pending.request.params?.[0] ?? {}, null, 2)
     : 'This request requires a configured local signing authority.';
+
+  const currentMeta=config?.accountMeta?.[pending.context.accounts?.[0]];
+  if(currentMeta?.type==='hardware'){
+    await executeHardware420(pending,config);
+    return;
+  }
 
   if(['personal_sign','eth_signTypedData_v4'].includes(pending.request.method) &&
      pending.request.executionModel==='eoa'){

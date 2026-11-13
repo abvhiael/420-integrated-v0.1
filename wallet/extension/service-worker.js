@@ -1,7 +1,7 @@
 import {Transaction} from './vendor/ethers-6.17.0.min.js';
 import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
-import {validateUserOpReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
+import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
 import {encodeExecute} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
@@ -918,13 +918,50 @@ async function replacementPreview420(message){
   if(!['speed-up','cancel'].includes(message.action))
     throw Object.assign(new Error('Unsupported replacement action'),{code:-32602});
   const entries=await readWalletUiActivity420(),original=entries.find(x=>x.id===message.activityId);
-  if(!original||original.executionModel!=='erc4337'||original.controller!==state.selectedAccount||
-     original.chainId!==state.network.expectedChainId||!validHash420(original.userOpHash))
-    throw Object.assign(new Error('No locally authorized pending UserOperation to replace'),{code:4100});
-  if(entries.some(x=>x.replaces===original.userOpHash&&
+  if(!original||original.controller!==state.selectedAccount||
+     original.chainId!==state.network.expectedChainId||
+     !(original.executionModel==='eoa'?validHash420(original.hash):validHash420(original.userOpHash)))
+    throw Object.assign(new Error('No locally authorized pending transaction to replace'),{code:4100});
+  if(!['submitted','pending','reorganized','included'].includes(original.status))
+    throw Object.assign(new Error('Only unconfirmed transactions may be replaced'),{code:4100});
+  if(entries.some(x=>x.replaces===(original.executionModel==='eoa'?original.hash:original.userOpHash)&&
      ['pending','submitted','included','reorganized','confirmed'].includes(x.status)))
     throw Object.assign(new Error('A replacement of this UserOperation already exists; resolve its outcome first'),{code:4001});
   const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+  if(original.executionModel==='eoa'){
+    if(state.account.kind!=='eoa'||!state.vault?.unlocked)
+      throw Object.assign(new Error('Local EOA signing authority is locked'),{code:4100});
+    let target=original.to,value=original.value,data=original.data;
+    if(message.action==='cancel'){
+      target=original.from;value='0x0';data='0x';
+    }
+    const pending=await provider.request('eth_getTransactionByHash',[original.hash]);
+    if(pending?.blockHash)throw new Error('Original EOA is included; do not replace');
+    if(pending&&(pending.from?.toLowerCase()!==original.from||
+       BigInt(pending.nonce)!==BigInt(original.nonce)))
+      throw new Error('Original EOA nonce/signer changed');
+    const block=await provider.request('eth_getBlockByNumber',['latest',false]);
+    if(!block?.baseFeePerGas)throw new Error('EIP-1559 base fee unavailable');
+    const bump=x=>BigInt(x)+((BigInt(x)*25n+99n)/100n)||1n;
+    const priority=bump(original.maxPriorityFeePerGas);
+    let maximum=bump(original.maxFeePerGas);
+    const floor=BigInt(block.baseFeePerGas)*2n+priority;
+    if(maximum<floor)maximum=floor;
+    const choice={level:'custom',maxFeePerGas:'0x'+maximum.toString(16),
+      maxPriorityFeePerGas:'0x'+priority.toString(16)};
+    const transaction={from:original.from,to:target,value,data};
+    const quote=await quoteExtensionEoa420(provider,{chainId:original.chainId,
+      from:original.from,transaction,choice,nonceOverride:original.nonce,
+      allowPendingReplacement:true});
+    const candidate={executionModel:'eoa',action:message.action,chainId:original.chainId,
+      from:original.from,to:target,nonce:original.nonce,value,data,
+      maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas};
+    validateEoaReplacement420(original,candidate,{minimumBumpPercent:20});
+    return {originalId:original.id,originalHash:original.hash,action:message.action,
+      chainId:original.chainId,epoch:state.network.epoch,account:state.selectedAccount,
+      executionModel:'eoa',transaction,quote,nonce:original.nonce,replaces:original.hash};
+  }
+  if(original.executionModel!=='erc4337')throw new Error('Unsupported pending execution model');
   let target=original.target,value=original.value,data=original.data;
   if(message.action==='cancel'){
     const code=await provider.request('eth_getCode',[state.account.controller,'latest']);
@@ -1101,11 +1138,16 @@ async function handleWalletUi420(message) {
     if(!provided||provided.action!==preview.action||provided.originalId!==preview.originalId||
        provided.originalHash!==preview.originalHash||provided.chainId!==preview.chainId||
        provided.epoch!==preview.epoch||provided.account!==preview.account||
-       provided.quote?.gasFees!==preview.quote.gasFees||
        provided.quote?.blockHash!==preview.quote.blockHash||
-       provided.quote?.nonce!==preview.quote.nonce||
-       provided.quote?.gasBudget?.accountGasLimits!==preview.quote.gasBudget?.accountGasLimits||
-       provided.quote?.gasBudget?.preVerificationGas!==preview.quote.gasBudget?.preVerificationGas||
+       (preview.executionModel==='eoa'?
+         (provided.quote?.nonce!==preview.quote.nonce||
+          provided.quote?.gasLimit!==preview.quote.gasLimit||
+          provided.quote?.maxFeePerGas!==preview.quote.maxFeePerGas||
+          provided.quote?.maxPriorityFeePerGas!==preview.quote.maxPriorityFeePerGas):
+         (provided.quote?.gasFees!==preview.quote.gasFees||
+          provided.quote?.nonce!==preview.quote.nonce||
+          provided.quote?.gasBudget?.accountGasLimits!==preview.quote.gasBudget?.accountGasLimits||
+          provided.quote?.gasBudget?.preVerificationGas!==preview.quote.gasBudget?.preVerificationGas))||
        JSON.stringify(provided.transaction)!==JSON.stringify(preview.transaction))
       throw Object.assign(new Error('Replacement fee, nonce, chain or intent changed; review again'),{code:4001});
     const source=(await readWalletUiActivity420()).find(x=>x.id===preview.originalId);
@@ -1114,15 +1156,21 @@ async function handleWalletUi420(message) {
       smartAccount:source.smartAccount,recipient:preview.transaction.to,
       amount:preview.action==='cancel'?'0':source.amount,symbol:source.symbol,
       status:'pending',hash:null,action:preview.action,
+      executionModel:preview.executionModel||'erc4337',
       replaces:preview.replaces,originalId:preview.originalId};
     await rememberWalletUiActivity420(entry);
     let hash=null;
     try{
       hash=await executeWithLocalAuthority({
         method:'eth_sendTransaction',
-        params:[{...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce,
-          accountGasLimits:preview.quote.gasBudget.accountGasLimits,
-          preVerificationGas:preview.quote.gasBudget.preVerificationGas}]
+        params:[preview.executionModel==='eoa'?
+          {...preview.transaction,executionModel:'eoa',chainId:preview.chainId,
+            nonce:preview.nonce,gasLimit:preview.quote.gasLimit,
+            maxFeePerGas:preview.quote.maxFeePerGas,
+            maxPriorityFeePerGas:preview.quote.maxPriorityFeePerGas}:
+          {...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce,
+            accountGasLimits:preview.quote.gasBudget.accountGasLimits,
+            preVerificationGas:preview.quote.gasBudget.preVerificationGas}]
       },{origin:null,chainId:preview.chainId,epoch:preview.epoch,accounts:[preview.account],tabId:null,activityId:id});
       await rememberWalletUiActivity420({...entry,status:'submitted',hash});
       return {status:'submitted',hash,originalId:source.id};

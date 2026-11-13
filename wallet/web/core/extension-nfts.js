@@ -71,6 +71,7 @@ export function nftMetadataUrl420(value,{tokenId=null}={}){
 export async function fetchSafeNftMetadata420(uri,{fetcher=fetch,tokenId=null}={}){
  const url=nftMetadataUrl420(uri,{tokenId});
  const abort=new AbortController();
+ const timeout=setTimeout(()=>abort.abort(),7000);
  const promise=fetcher(url,{method:'GET',redirect:'error',credentials:'omit',
   cache:'no-store',referrerPolicy:'no-referrer',signal:abort.signal,
   headers:{Accept:'application/json'}});
@@ -85,7 +86,7 @@ export async function fetchSafeNftMetadata420(uri,{fetcher=fetch,tokenId=null}={
   const body=await res.text();
   requireSafe(body.length<=65536,'NFT metadata exceeds 64 KiB');
   return nftSafeMetadata420(JSON.parse(body),uri);
- }finally{abort.abort();}
+ }finally{clearTimeout(timeout);abort.abort();}
 }
 export async function verifiedNftStandard420(provider,address){
  const contract=normalizeAddress(address);
@@ -227,4 +228,29 @@ export async function verifyNftApproval420(provider,request,owner){
  requireSafe(typeof result==='string'&&WORD.test(result),'Malformed NFT approval response');
  return request.collectionWide?BigInt(result)===(request.approved?1n:0n):
   result.slice(-40).toLowerCase()===(request.approved?op.slice(2):ZERO.slice(2));
+}
+
+export async function readNftApproval420(provider,{asset,owner,operator=null}={}){
+ const ref=normalizedNftRecord420(asset),from=normalizeAddress(owner);
+ const verified=await verifyNftOwnership420(provider,ref,from);
+ requireSafe(verified.verified,'NFT owner changed before approval inspection');
+ if(ref.standard==='ERC721'){
+  const response=await provider.request('eth_call',[{
+   to:ref.address,data:'0x081812fc'+word(ref.tokenId)
+  },'latest']);
+  requireSafe(typeof response==='string'&&/^0x0{24}[0-9a-fA-F]{40}$/.test(response),
+   'Malformed ERC721 getApproved address');
+  return {...ref,owner:from,approvedOperator:'0x'+response.slice(-40).toLowerCase(),
+   approved:response.slice(-40).toLowerCase()!==ZERO.slice(2),scope:'token'};
+ }
+ requireSafe(typeof operator==='string','ERC1155 operator must be specified');
+ const checked=normalizeAddress(operator);
+ requireSafe(checked!==ZERO&&checked!==from,'Invalid operator for ERC1155 approval inspection');
+ const response=await provider.request('eth_call',[{
+  to:ref.address,data:'0xe985e9c5'+from.slice(2).padStart(64,'0')+
+   checked.slice(2).padStart(64,'0')
+ },'latest']);
+ requireSafe(typeof response==='string'&&WORD.test(response)&&
+  (BigInt(response)===0n||BigInt(response)===1n),'Invalid ERC1155 operator approval response');
+ return {...ref,owner:from,operator:checked,approved:BigInt(response)===1n,scope:'collection'};
 }

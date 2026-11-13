@@ -84,7 +84,8 @@ try{
  await page.screenshot({path:resolve(shots,'onboarding-04-restored-accounts.png')});
  const popup=await browser.newPage();
  await popup.goto(rootUrl+'popup.html',{waitUntil:'load'});
- await popup.locator('#vault-title').waitFor();
+ // Verify real unlocked state, not just the presence of an uninitialized DOM element.
+ await popup.waitForFunction(()=>/wallet unlocked/i.test(document.querySelector('#vault-title')?.textContent||''),undefined,{timeout:15000});
  assert.match(await popup.locator('#vault-title').textContent(),/wallet unlocked/i);
  await popup.locator('#open-wallet').click();
  const tabs=browser.pages();

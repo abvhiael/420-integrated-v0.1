@@ -14,6 +14,14 @@ const controller='0x1111111111111111111111111111111111111111';
 const factory='0x2222222222222222222222222222222222222222';
 const account='0x3333333333333333333333333333333333333333';
 const addressWord=a=>'0x'+a.slice(2).padStart(64,'0');
+const token='0x5555555555555555555555555555555555555555';
+const nft='0x6666666666666666666666666666666666666666';
+const transfer='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+const word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
+const stringReturn=s=>{
+  const hex=Buffer.from(s).toString('hex');
+  return '0x'+word(32).slice(2)+word(hex.length/2).slice(2)+hex.padEnd(Math.ceil(hex.length/64)*64,'0');
+};
 const rpc=createServer(async(req,res)=>{
   const parts=[];
   for await(const chunk of req)parts.push(chunk);
@@ -24,7 +32,21 @@ const rpc=createServer(async(req,res)=>{
   else if(method==='eth_blockNumber')result='0x200';
   else if(method==='eth_getCode')result='0x6001600055';
   else if(method==='eth_getBalance')result='0x16c4abbebea0100000';
-  else if(method==='eth_call')result=body.params?.[0]?.to?.toLowerCase()===factory?addressWord(account):addressWord(controller);
+  else if(method==='eth_getLogs'){
+    const topics=body.params?.[0]?.topics||[];
+    result=topics[1]===null?[
+      {address:token,topics:[transfer,addressWord('0x'+'0'.repeat(40)),addressWord(controller)]},
+      {address:nft,topics:[transfer,addressWord('0x'+'0'.repeat(40)),addressWord(controller),word(42)]}
+    ]:[];
+  }
+  else if(method==='eth_call'){
+    const to=body.params?.[0]?.to?.toLowerCase(),data=body.params?.[0]?.data?.toLowerCase()||'';
+    if(to===token&&data==='0x313ce567')result=word(6);
+    else if(to===token&&data==='0x95d89b41')result=stringReturn('TEST');
+    else if(to===token&&data.startsWith('0x70a08231'))result=word(12500000);
+    else if(to===nft&&data.startsWith('0x6352211e'))result=addressWord(controller);
+    else result=to===factory?addressWord(account):addressWord(controller);
+  }
   else {res.writeHead(400).end(JSON.stringify({error:{message:'Unsupported local fixture method'}}));return;}
   res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({jsonrpc:'2.0',id:body.id,result}));
 });
@@ -131,6 +153,28 @@ try{
   assert.ok(epochReturned>epochAfterSwitch,'A→B→A cannot reuse old preview epoch');
   await page.locator('[data-screen="dashboard"]').click();
   await page.screenshot({path:resolve(screenshots,'05-multichain-local-fixture.png')});
+  // W15.6-M4: actual Chromium portfolio, contract-backed import, hide/unhide, discovery and NFT ownership.
+  await page.waitForFunction(()=>document.querySelector('#portfolio-status')?.textContent.includes('Block'));
+  assert.match(await page.locator('#portfolio-fiat').textContent(),/Fiat total unavailable/);
+  assert.equal(await page.locator('#quick-send').isDisabled(),true,'Watch-only portfolio remains non-signing');
+  await page.locator('#header-settings').click();
+  await page.locator('#token-address').fill(token);
+  await page.locator('#token-import-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#asset-list')?.textContent.includes('TEST'));
+  await page.screenshot({path:resolve(screenshots,'09-portfolio-tokens.png')});
+  await page.getByRole('button',{name:'View TEST asset details'}).click();
+  assert.match(await page.locator('#asset-detail').textContent(),/Verified on-chain/);
+  await page.screenshot({path:resolve(screenshots,'10-portfolio-asset-detail.png')});
+  await page.locator('#asset-hide').click();
+  await page.waitForFunction(()=>!document.querySelector('#asset-list')?.textContent.includes('TEST'));
+  await page.locator('#show-hidden-assets').click();
+  await page.waitForFunction(()=>document.querySelector('#asset-list')?.textContent.includes('TEST'));
+  await page.locator('#discover-assets').click();
+  await page.waitForFunction(()=>document.querySelector('#dashboard-notice')?.textContent.includes('ERC-721'));
+  await page.locator('#tab-nfts').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-list')?.textContent.includes('ERC721 #42'));
+  await page.screenshot({path:resolve(screenshots,'11-portfolio-nft-verified.png')});
+  await page.locator('[data-screen="dashboard"]').click();
   await page.locator('[data-screen="sites-view"]').click();
   assert.match(await page.locator('#site-list').textContent(),/example\.test/);
   assert.equal(await page.locator('.site-network-select').first().inputValue(),'0x1a4');
@@ -154,7 +198,7 @@ try{
   await page.locator('#approve').waitFor({state:'visible'});
   assert.match(await page.locator('#origin').textContent(),/example\.test/);
   await page.screenshot({path:resolve(screenshots,'08-approval-local-fixture.png')});
-  console.log('PASS: eight actual extension popup screenshots; numbered 03–08 use a clearly synthetic local fixture; no transaction was submitted.');
+  console.log('PASS: packaged extension popup and M4 account-scoped Tokens/NFTs/asset-details with real mock-chain RPC; no signing or transaction submitted.');
 }finally{
   await browser.close();
   await new Promise(resolve=>rpc.close(resolve));

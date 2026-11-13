@@ -1357,8 +1357,11 @@ async function securityState420(){
     t.spam!==true&&typeof t.address==='string').slice(0,8).map(t=>t.address);
   if(verified.length){
    const owner=ctx.wallet.account.kind==='eoa'?ctx.account:smart?.smartAccount;
-   if(owner)discovered=await discoverRecentSecurityAllowances420(ctx.provider,{
-     chainId:ctx.chainId,owner,tokens:verified,lookbackBlocks:4096,maxSpenders:20});
+   if(owner){
+    discovered=await discoverRecentSecurityAllowances420(ctx.provider,{
+      chainId:ctx.chainId,owner,tokens:verified,lookbackBlocks:4096,maxSpenders:20});
+    discovered.ownerType=ctx.wallet.account.kind==='eoa'?'eoa':'smart-account';
+   }
   }
  }catch(error){discovered={entries:[],partial:true,error:error.message,
     note:'Bounded Approval log discovery unavailable; manually inspect exact token and spender'};}

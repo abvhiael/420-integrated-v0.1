@@ -1,3 +1,4 @@
+import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
 import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
 import {reconcileExtensionTransaction420} from './core/extension-transaction-activity.js';
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
@@ -847,6 +848,25 @@ async function handleWalletUi420(message) {
     await changeNetwork420(chainId);
     return walletUiState420();
   }
+  if(kind==='send-preflight'){
+    const state=await walletUiState420();
+    if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||
+       state.selectedAccount!==message.account||!extensionCanSend420(state))
+      throw Object.assign(new Error('Account, signing authority or network changed'),{code:4901});
+    const transaction=buildExtensionSend420({
+      from:state.account.controller,recipient:message.recipient,amount:message.amount,
+      asset:message.asset,
+      trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status==='spendable')||[],
+    });
+    const quote=await quoteExtensionSend420(
+      {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
+      {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
+       transaction:transaction.transaction,choice:normalizeExtensionFeeChoice420(message.feeChoice)});
+    const current=await effectiveChain420();
+    if(current.chainId!==message.chainId||current.epoch!==message.epoch)
+      throw Object.assign(new Error('Chain changed during preflight'),{code:4901});
+    return {transaction,quote};
+  }
   if(kind==='send'){
     if(message.confirmed!==true)throw Object.assign(new Error('Explicit transaction confirmation required'),{code:4001});
     const state=await walletUiState420();
@@ -857,6 +877,15 @@ async function handleWalletUi420(message) {
       from:state.account.controller,recipient:message.recipient,amount:message.amount,
       asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
     });
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const quote=await quoteExtensionSend420(
+      {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
+      {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
+       transaction:request.transaction,choice});
+    if(!message.preflight||message.preflight.chainId!==quote.chainId||
+       message.preflight.from!==quote.from||message.preflight.to!==quote.to||
+       message.preflight.gasFees!==quote.gasFees||message.preflight.blockHash!==quote.blockHash)
+      throw Object.assign(new Error('Preflight changed since review; review transaction again'),{code:4001});
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
       controller:state.account.controller,smartAccount:state.account.smartAccount,
@@ -866,7 +895,7 @@ async function handleWalletUi420(message) {
     let hash=null;
     try {
       hash=await executeWithLocalAuthority(
-        {method:'eth_sendTransaction',params:[request.transaction]},
+        {method:'eth_sendTransaction',params:[{...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level}]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null}
       );
       const current=await effectiveChain420();

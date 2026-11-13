@@ -1,0 +1,36 @@
+name: 420Wallet W15.6-M12 Reproducible Browser Packages
+on:
+  pull_request:
+    paths:
+      - "wallet/extension/scripts/build-firefox.mjs"
+      - "wallet/extension/scripts/qualify-reproducible.mjs"
+      - "wallet/extension/scripts/build.mjs"
+      - "wallet/extension/package.json"
+      - "wallet/extension/manifest.json"
+      - ".github/workflows/wallet-security-m12.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned browser SDK toolchains
+        working-directory: wallet/extension
+        run: npm install --no-audit --no-fund --no-package-lock
+      - name: Byte-reproduce Chromium package, isolate Firefox event page and verify identical source payload
+        working-directory: wallet/extension
+        env:
+          WALLET_HARDWARE_RELEASE: '1'
+          WALLET_CONNECT_RELEASE: '1'
+          WALLET_FIREFOX_EXTENSION_ID: "ci-qualification@420integrated.invalid"
+        run: node scripts/qualify-reproducible.mjs
+      - name: Firefox Manifest V3 browser schema lint only (not live Firefox runtime acceptance)
+        working-directory: wallet/extension
+        run: npm exec --yes --package=web-ext@10.8.0 -- web-ext lint --source-dir dist-firefox --self-hosted

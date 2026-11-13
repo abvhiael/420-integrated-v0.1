@@ -1,4 +1,5 @@
 import {Wallet} from './vendor/ethers-6.17.0.min.js';
+import {ledgerOpen420} from './core/hardware-ledger.js';
 import {VAULT_STORAGE_KEY,createVault420,unlockVault420,hasVault420,restoreEncryptedBackup420,normalizeMnemonic420,generateMnemonic420,validatePrivateKey420,decryptVault420,deriveMnemonicAccount420} from './core/vault.js';
 
 const $=id=>document.getElementById(id);
@@ -292,6 +293,36 @@ async function backup(){
   try{const a=document.createElement('a');a.href=url;a.download='420wallet-encrypted-vault-backup.json';a.click();}finally{setTimeout(()=>URL.revokeObjectURL(url),500);}
   message('Encrypted backup downloaded. This file contains your imported keys and all derived-account indices. Keep the backup and password separate.','success');
 }
+
+async function connectHardware420(){
+  if($('hardware-provider').value!=='ledger')throw new Error('Trezor signing transport has not been integrated; no device has been paired.');
+  const account=Number($('hardware-account').value),start=Number($('hardware-start').value),count=Number($('hardware-count').value);
+  if(!Number.isInteger(account)||account<0||account>499||!Number.isInteger(start)||start<0||start>499||
+    !Number.isInteger(count)||count<1||count>5||start+count>500)
+    throw new Error('Invalid device derivation path or bounded discovery count');
+  const results=$('hardware-results');results.replaceChildren();
+  const connection=await ledgerOpen420();
+  try{
+    for(let index=start;index<start+count;index++){
+      const found=await connection.address(index,account);
+      const configKey='420-wallet-extension-config-v1';
+      const config=(await chrome.storage.local.get(configKey))[configKey]||{};
+      const accounts=Array.isArray(config.accounts)?config.accounts:[];
+      const meta=config.accountMeta&&typeof config.accountMeta==='object'?config.accountMeta:{};
+      const label='Ledger '+account+'/'+index;
+      if(meta[found.address]?.type&&meta[found.address]?.type!=='hardware')
+        throw new Error('Device account collides with an existing account of different signing type');
+      const updated={...config,accounts:[...new Set([...accounts,found.address])],
+        accountMeta:{...meta,[found.address]:{type:'hardware',label,path:found.path,provider:'ledger',hidden:false,signingQualified:false}}};
+      await chrome.storage.local.set({[configKey]:updated});
+      const row=document.createElement('p');row.className='hint';
+      row.textContent=label+' · '+found.path+' · '+found.address+' · public only';
+      results.append(row);
+    }
+    message('Ledger public accounts verified on device and saved. Hardware signing remains disabled until its qualified transport is installed.','success');
+  }finally{await connection.close();}
+}
+
 function listen(id,event,fn){$(id).addEventListener(event,async ev=>{try{await fn(ev);}catch(e){message(e.message,'error');}});}
 async function initialize(){
   if(await hasVault420(chrome.storage.local)){show('unlock');message('Existing encrypted vault detected. Enter your password to unlock.');}
@@ -300,7 +331,10 @@ async function initialize(){
 listen('welcome-create','click',()=>{$('setup-mode').value='create';setupMode();show('setup');});
 listen('welcome-import','click',()=>{$('setup-mode').value='mnemonic';setupMode();show('setup');});
 listen('welcome-passkey','click',()=>{show('passkey-info');message('Passkey SmartAccount enrollment requires verified deployed contract authority.');});
-listen('welcome-hardware','click',()=>{show('hardware-info');message('Hardware wallet connection requires a supported hardware signing integration.');});
+listen('welcome-hardware','click',()=>{show('hardware-info');message('Verify each Ledger address on its screen before saving.');});
+listen('add-hardware','click',()=>{show('hardware-info');message('Hardware public-address discovery only.');});
+listen('hardware-connect','click',connectHardware420);
+listen('hardware-provider','change',()=>{$('hardware-connect').disabled=$('hardware-provider').value!=='ledger';});
 listen('passkey-back','click',initialize);listen('hardware-back','click',initialize);listen('setup-back','click',()=>{clearStaging();show('welcome');});
 listen('setup-mode','change',setupMode);
 listen('setup-form','submit',setup);listen('confirm-form','submit',confirmPhrase);

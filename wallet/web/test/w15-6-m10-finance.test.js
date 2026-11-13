@@ -179,6 +179,7 @@ test('genesis 420Stake refuses public delegation and returns only validator evid
   if(method==='eth_call'){
    const sel=params[0].data.slice(0,10);
    if(sel===iface.getFunction('delegationEnabled').selector)return iface.encodeFunctionResult('delegationEnabled',[false]);
+   if(sel===iface.getFunction('stakeWeightedVotingEnabled').selector)return iface.encodeFunctionResult('stakeWeightedVotingEnabled',[false]);
    if(sel===iface.getFunction('validatorStatus').selector)return iface.encodeFunctionResult('validatorStatus',[3]);
    if(sel===iface.getFunction('validatorBondComposition').selector)return iface.encodeFunctionResult('validatorBondComposition',[21000n,21000n,42000n,0n]);
    if(sel===iface.getFunction('validatorRewardAccrued').selector)return iface.encodeFunctionResult('validatorRewardAccrued',[42n]);

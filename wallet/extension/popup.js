@@ -333,13 +333,14 @@ async function prepareReview(){
   const context={chainId:w.network.expectedChainId,epoch:w.network.epoch,account:w.selectedAccount,
     recipient:$('send-recipient').value.trim(),amount:$('send-amount').value.trim(),
     asset:$('send-asset').value,feeChoice:currentFeeChoice420()};
-  const {transaction,quote}=await command('send-preflight',context);
+  const {transaction,quote,recipientSnapshot}=await command('send-preflight',context);
   if(state.wallet!==w||w.network.expectedChainId!==context.chainId||w.network.epoch!==context.epoch)
     throw new Error('Network/account changed during preflight; restart review');
-  state.prepared={...transaction,...context,controller:w.selectedAccount,quote};
+  state.prepared={...transaction,...context,controller:w.selectedAccount,quote,recipientSnapshot};
   $('review-asset').textContent=transaction.summary.symbol;
   $('review-amount').textContent=transaction.summary.amount;
-  $('review-recipient').textContent=transaction.summary.recipient;
+  $('review-recipient').textContent=recipientSnapshot.kind==='address'?transaction.summary.recipient:
+    recipientSnapshot.input+' → '+transaction.summary.recipient+' (resolved on '+context.chainId+')';
   $('review-chain').textContent=context.chainId;
   $('review-sender').textContent=w.account.smartAccount;
   $('review-max-fee').textContent=quote.maxFeePerGas+' wei/gas';
@@ -586,18 +587,20 @@ function setup(){
     try {
       // Recompute from current fields. Any edits invalidate the exact user-approved preview.
       const now=buildExtensionSend420({
-        from:state.wallet.account.controller,recipient:$('send-recipient').value.trim(),
+        from:state.wallet.account.controller,recipient:before.recipientSnapshot.recipient,
         amount:$('send-amount').value.trim(),asset:$('send-asset').value,
         trackedAssets:state.wallet.config.trackedAssets,
       });
       if(JSON.stringify(now)!==JSON.stringify({transaction:before.transaction,summary:before.summary})||
+          $('send-recipient').value.trim()!==before.recipientSnapshot.input||
           JSON.stringify(currentFeeChoice420())!==JSON.stringify(before.feeChoice)||
           before.chainId!==state.wallet.network.expectedChainId||before.epoch!==state.wallet.network.epoch||before.controller!==state.wallet.selectedAccount)
         throw new Error('Network, account or transaction changed; review again');
       state.submitting=true;$('send-confirm').disabled=true;
       $('send-state').textContent='Waiting for local passkey authorization, simulation and transaction receipt. Do not close the approval window.';
       const receipt=await command('send',{confirmed:true,chainId:before.chainId,epoch:before.epoch,account:before.controller,
-        recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset,
+        recipient:before.recipientSnapshot.input,recipientSnapshot:before.recipientSnapshot,
+        amount:before.summary.amount,asset:before.asset,
         feeChoice:before.feeChoice,preflight:before.quote});
       $('send-state').textContent='Transaction submitted: '+receipt.hash+' — awaiting network confirmation.';
       resetReview();

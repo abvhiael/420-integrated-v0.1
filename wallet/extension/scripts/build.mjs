@@ -27,6 +27,22 @@ export async function buildExtension420() {
   await cp(join(walletRoot, 'web', 'core'), join(dist, 'core'), { recursive: true });
   await cp(join(extensionRoot, 'core'), join(dist, 'core'), { recursive: true });
   await cp(join(extensionRoot, 'vendor'), join(dist, 'vendor'), { recursive: true });
+  try {
+    const {build}=await import('esbuild');
+    await build({
+      entryPoints:[join(extensionRoot,'trezor-connect-entry.mjs')],
+      bundle:true,format:'esm',platform:'browser',target:'chrome120',
+      outfile:join(dist,'vendor','trezor-connect-10.bundle.js'),
+      legalComments:'inline',
+      logLevel:'silent',
+    });
+  }catch(error){
+    if(process.env.WALLET_HARDWARE_RELEASE==='1')
+      throw new Error('Trezor Connect 10 must be locally bundled for hardware release: '+error.message);
+    // Other wallet tests have no npm-installed hardware SDK: those builds
+    // do not claim Trezor availability. Runtime import fails closed.
+  }
+
   return { dist, files: await readdir(dist) };
 }
 

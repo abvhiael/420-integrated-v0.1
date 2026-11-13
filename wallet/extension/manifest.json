@@ -51,5 +51,10 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'; base-uri 'none'; frame-ancestors 'none'"
   },
-  "options_page": "wallet.html"
+  "options_page": "wallet.html",
+  "externally_connectable": {
+    "matches": [
+      "https://suite.trezor.io/*"
+    ]
+  }
 }

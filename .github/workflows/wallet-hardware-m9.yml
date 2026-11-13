@@ -1,0 +1,36 @@
+name: 420Wallet W15.6-M9 Hardware SDK Build
+on:
+  pull_request:
+    paths:
+      - "wallet/extension/**"
+      - "wallet/web/core/extension-wallet-ui.js"
+      - ".github/workflows/wallet-hardware-m9.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  hardware-sdk-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Trezor SDK build dependencies
+        working-directory: wallet/extension
+        run: npm install --no-audit --no-fund --no-package-lock
+      - name: Require locally bundled Trezor Connect 10 MV3 extension SDK
+        working-directory: wallet/extension
+        env:
+          WALLET_HARDWARE_RELEASE: "1"
+        run: |
+          node scripts/check-release.mjs
+          test -s dist/vendor/trezor-connect-10.bundle.js
+      - name: Verify packed source boundary
+        working-directory: wallet/extension
+        run: |
+          node --check service-worker.js
+          node --check authority.js
+          node --check wallet.js

@@ -1,5 +1,6 @@
 import { APP_CATEGORIES, APP_SERVICES, buildAppCatalog, filterAppCatalog } from './core/apps.js';
 import { resolveServices } from './core/services.js';
+import { filterEcosystemWebsites, isApprovedEcosystemWebsite } from './core/ecosystem-websites.js';
 
 function installAppsStylesheet() {
   if (document.querySelector('link[data-wallet-apps-styles]')) return;
@@ -39,6 +40,24 @@ function makeAppCard(app) {
   const action = el('span', 'app-open-label', app.available ? 'Open ↗' : 'Unavailable');
   footer.append(verification, action);
   card.append(top, description, footer);
+  return card;
+}
+
+function makeWebsiteCard(app) {
+  // Navigation is not a dApp connection, verification or authorization grant.
+  const card = el('a', 'app-card ecosystem-website');
+  if (!isApprovedEcosystemWebsite(app)) throw new Error('Unapproved ecosystem website URL');
+  card.href = app.url;
+  card.target = '_blank';
+  card.rel = 'noopener noreferrer';
+  const top = el('div', 'app-card-top');
+  const mark = el('span', 'app-mark', app.name.slice(0, 2).toUpperCase());
+  const identity = el('div', 'app-identity');
+  identity.append(el('strong', null, app.name), el('span', 'app-category', app.category));
+  top.append(mark, identity);
+  const footer = el('div', 'app-card-footer');
+  footer.append(el('span', 'verification-badge unavailable', 'Website shortcut · not verified'), el('span', 'app-open-label', 'Visit ↗'));
+  card.append(top, el('p', 'app-description', app.description), footer);
   return card;
 }
 
@@ -97,7 +116,13 @@ function ensurePage(section) {
   const note = el('div', 'apps-verification-note');
   note.innerHTML = '<strong>Verified service discovery</strong><span>Launch links are enabled only after the configured ecosystem manifest passes schema, verification and safe-protocol checks.</span>';
 
-  section.append(heading, gateway, controls, featuredHeading, featured, allHeading, grid, note);
+  const websitesHeading = el('div', 'section-heading compact-heading');
+  websitesHeading.append(el('div', null), el('span', 'section-kicker', 'External website navigation only'));
+  websitesHeading.firstChild.append(el('p', 'eyebrow', 'Websites'), el('h3', null, '420Integrated websites'));
+  const websiteNote = el('p', 'muted', 'Website shortcuts are not verified Registry services. Visiting a site never connects your wallet or grants signing or spending permission. Links may be offline until deployed.');
+  const websiteGrid = el('div', 'app-grid');
+  websiteGrid.id = 'ecosystem-websites';
+  section.append(heading, gateway, controls, featuredHeading, featured, allHeading, grid, note, websitesHeading, websiteNote, websiteGrid);
 }
 
 export async function loadVerifiedApps(fetchImpl = globalThis.fetch) {
@@ -118,6 +143,7 @@ export function renderApps(section, apps, { query = '', category = 'all', trust 
   const featured = section.querySelector('#featured-apps');
   const grid = section.querySelector('#services');
   const trustState = section.querySelector('#apps-trust-state');
+  const websiteGrid = section.querySelector('#ecosystem-websites');
   trustState.textContent = trust;
   trustState.dataset.state = trust === 'Verified manifest' ? 'passed' : 'idle';
 
@@ -127,6 +153,10 @@ export function renderApps(section, apps, { query = '', category = 'all', trust 
 
   grid.replaceChildren(...filtered.map(makeAppCard));
   if (!grid.children.length) grid.append(el('p', 'muted', 'No ecosystem apps match this search or category.'));
+  // Named website shortcuts are always separate from manifest-verified services.
+  const websites = filterEcosystemWebsites(query).filter((app) => category === 'all' || app.category === category);
+  websiteGrid.replaceChildren(...websites.map(makeWebsiteCard));
+  if (!websites.length) websiteGrid.append(el('p', 'muted', 'No website shortcuts match this search or category.'));
 }
 
 export async function initAppsPage() {

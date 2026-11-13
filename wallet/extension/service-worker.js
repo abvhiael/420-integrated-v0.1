@@ -1,5 +1,5 @@
 import {nftId420,normalizedNftRecord420,verifyNftOwnership420,discoverNftTransfers420,nftSpamFlags420,
- nftMetadataUrl420,fetchSafeNftMetadata420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420} from './core/extension-nfts.js';
+ nftMetadataUrl420,fetchSafeNftMetadata420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420} from './core/extension-nfts.js';
 import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
 import {readSecurityAllowance420,discoverRecentSecurityAllowances420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
 import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
@@ -1662,6 +1662,15 @@ async function nftMetadata420(message){
  await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
  return {metadata,nft:newest};
 }
+async function nftApprovalStatus420(message){
+ const selected=await nftSelection420(message,{allowSpam:true});
+ const inspected=await readNftApproval420(selected.provider,{
+  asset:selected.ref,owner:selected.ctx.owner,operator:message.operator??null
+ });
+ const still=await effectiveChain420();
+ if(still.epoch!==selected.ctx.epoch)throw Object.assign(new Error('NFT network changed during approval inspection'),{code:4901});
+ return inspected;
+}
 async function nftVisibility420(message){
  const state=await walletUiState420(),ctx=nftContext420(state),
    ref=normalizedNftRecord420(message);
@@ -1694,6 +1703,13 @@ async function nftPrepare420(message){
   call=nftApprovalCall420({standard:ref.standard,contract:ref.address,tokenId:ref.tokenId,
    owner:ctx.owner,operator:message.operator,
    approved:action==='approve',collectionWide:message.collectionWide===true});
+  if(action==='revoke'){
+   const current=await readNftApproval420(provider,{
+     asset:ref,owner:ctx.owner,operator:call.operator
+   });
+   if(!current.approved||ref.standard==='ERC721'&&current.approvedOperator!==call.operator)
+    throw Object.assign(new Error('Operator no longer holds this exact NFT approval'),{code:4001});
+  }
  }
  const transaction={from:ctx.account,to:call.to,value:'0x0',data:call.data};
  const choice={level:'standard'};
@@ -1781,6 +1797,7 @@ async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
   if(kind==='nft-metadata')return nftMetadata420(message);
+  if(kind==='nft-approval-status')return nftApprovalStatus420(message);
   if(kind==='nft-visibility')return nftVisibility420(message);
   if(kind==='nft-review')return nftReview420(message);
   if(kind==='nft-submit')return nftSubmit420(message);

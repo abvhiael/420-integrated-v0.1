@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {Interface,keccak256} from '../../extension/vendor/ethers-6.17.0.min.js';
 import {normalizeFinanceProvider420,verifyFinanceDeployment420,quoteFinanceRoutes420,
  financeQuoteIdentity420,buildFinanceSwapCall420,readFinanceAllowance420,
- financeApprovalCall420,financeBridgeCall420,bridgeReceiptEvidence420,
+ financeApprovalCall420,financeBridgeCall420,bridgeReceiptEvidence420,bridgeDestinationEvidence420,FINANCE_TRANSFER_ABI_420,
  bridgeStage420,readFinanceValidator420,FINANCE_ROUTER_ABI_420,FINANCE_BRIDGE_ABI_420,
  FINANCE_STAKE_ABI_420} from '../../extension/core/finance420.js';
 import {financeRaw420,financeProviderCatalog420,financeOptions420,financePrepare420,
@@ -142,6 +142,33 @@ test('source bridge evidence demands canonical source receipt and exactly one ev
  assert.throws(()=>bridgeReceiptEvidence420({...{receipt:{...receipt,logs:[]}},router,routeId:ID(5),adapterId:ID(4)}),/Exactly one/);
  assert.throws(()=>bridgeStage420('source-submitted','destination-finalized'),/Invalid/);
  assert.equal(bridgeStage420('source-included','source-finalized'),'source-finalized');
+});
+test('destination proof requires exact gateway event, transfer registry source binding and deployment',async()=>{
+ const destinationRouter=ADDRESS(200),destinationRegistry=ADDRESS(201),policy={
+   destinationRouter,destinationCodeHash:HASH,destinationRegistry,destinationRegistryCodeHash:HASH,
+   destinationAdapterId:ID(4),routeId:ID(5),assetId:ID(6)
+ };
+ const iface=new Interface(FINANCE_TRANSFER_ABI_420);
+ const log=bridge.encodeEventLog(bridge.getEvent('InboundAccepted'),[ID(88),ID(4)]);
+ const receipt={status:'0x1',transactionHash:ID(90),blockHash:ID(91),blockNumber:'0x40',
+   logs:[{address:destinationRouter,topics:log.topics,data:log.data}]};
+ const transfer=[ID(5),ID(6),account,destination,123n,ID(80),ID(77),7,100,101];
+ const mock={request:async(method,params)=>{
+   if(method==='eth_getCode')return CODE;
+   if(method==='eth_call')return iface.encodeFunctionResult('transfers',transfer);
+   throw Error(method);
+ }};
+ const evidence=await bridgeDestinationEvidence420({provider:mock,policy,receipt,
+   source:{sourceMessageId:ID(77)},expected:{sender:account,recipient:destination,amountRaw:'123'}});
+ assert.equal(evidence.state,'inbound-accepted');
+ assert.equal(evidence.transferId,ID(88));
+ assert.equal(evidence.beneficiaryPaid,false);
+ await assert.rejects(()=>bridgeDestinationEvidence420({provider:mock,policy,receipt,
+   source:{sourceMessageId:ID(78)},expected:{sender:account,recipient:destination,amountRaw:'123'}}),/source message/);
+ await assert.rejects(()=>bridgeDestinationEvidence420({provider:mock,policy,receipt,
+   source:{sourceMessageId:ID(77)},expected:{sender:account,recipient:ADDRESS(300),amountRaw:'123'}}),/recipient or amount/);
+ await assert.rejects(()=>bridgeDestinationEvidence420({provider:mock,policy:{...policy,destinationCodeHash:ID(100)},receipt,
+   source:{sourceMessageId:ID(77)},expected:{sender:account,recipient:destination,amountRaw:'123'}}),/code hash/);
 });
 test('genesis 420Stake refuses public delegation and returns only validator evidence',async()=>{
  const raw={id:'stake',label:'420Stake',kind:'420stake',releaseApproved:true,chainId:CHAIN,

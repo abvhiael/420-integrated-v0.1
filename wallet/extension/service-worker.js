@@ -224,21 +224,26 @@ async function changeNetwork420(chain,{origin=null}={}){
   const health=await probeNetwork420(network);
   if(!health.some(x=>x.healthy))throw Object.assign(new Error('No verified RPC endpoint on selected chain'),{code:4900});
   const before=(await effectiveChain420(origin).catch(()=>({chainId:null}))).chainId;
-  if(before!==key){
-    registry.epoch++;
-    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry});
-  }
+  if(before!==key)registry.epoch++;
   if(origin){
     const overrides=await readObject(ORIGIN_NETWORKS_KEY_420);
-    overrides[origin]=key;await chrome.storage.local.set({[ORIGIN_NETWORKS_KEY_420]:overrides});
     const permissions=await readObject(PERMISSIONS_KEY);
-    if(permissions[origin]){delete permissions[origin];await chrome.storage.local.set({[PERMISSIONS_KEY]:permissions});await notifyDisconnectedSite420(origin);}
+    overrides[origin]=key;
+    const connected=Object.hasOwn(permissions,origin);
+    delete permissions[origin];
+    // Network identity, epoch and account revocation are committed together.
+    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry,
+      [ORIGIN_NETWORKS_KEY_420]:overrides,[PERMISSIONS_KEY]:permissions});
+    if(connected)await notifyDisconnectedSite420(origin);
   }else{
-    registry.selectedChainId=key;await chrome.storage.local.set({[NETWORKS_KEY_420]:registry});
-    const previous=await readObject(EXTENSION_CONFIG_KEY_420),same=previous.chainId&&chainId420(previous.chainId)===key;
-    await chrome.storage.local.set({[EXTENSION_CONFIG_KEY_420]:{...previous,chainId:key,
-      rpcUrl:health.find(x=>x.healthy).url,explorerUrl:network.blockExplorerUrls[0]||null,networkName:network.chainName,
-      trackedAssets:network.assets||[],smartAccountConfig:same?previous.smartAccountConfig:null}});
+    registry.selectedChainId=key;
+    const previous=await readObject(EXTENSION_CONFIG_KEY_420);
+    const same=previous.chainId&&chainId420(previous.chainId)===key;
+    const config={...previous,chainId:key,rpcUrl:health.find(x=>x.healthy).url,
+      explorerUrl:network.blockExplorerUrls[0]||null,networkName:network.chainName,
+      trackedAssets:network.assets||[],smartAccountConfig:same?previous.smartAccountConfig:null};
+    // Never publish an epoch attached to one chain and the UI config for another.
+    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry,[EXTENSION_CONFIG_KEY_420]:config});
   }
   if(before!==key){
     if(origin)await notifyChain420(origin,key);

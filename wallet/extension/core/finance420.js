@@ -51,7 +51,7 @@ export function normalizeFinanceProvider420(raw,expectedChain){
     out.adapterId=b32(raw.adapterId);out.routeId=b32(raw.routeId);out.assetId=b32(raw.assetId);
     out.destinationChainId=chain(raw.destinationChainId);
     check(out.destinationChainId!==out.chainId,'Bridge destination must differ from source');
-    out.asset=addr(raw.asset);
+    out.asset=addr(raw.asset);out.spender=addr(raw.spender);out.spenderCodeHash=b32(raw.spenderCodeHash);
     out.recipientEncoding=raw.recipientEncoding==='evm20'?'evm20':null;
     check(out.recipientEncoding==='evm20','Unsupported destination recipient encoding');
     out.extra=hex(raw.extra??'0x');out.networkFeeWei=String(raw.networkFeeWei??'');
@@ -124,6 +124,7 @@ export function financeBridgeCall420(p,{account,recipient,amountRaw}){
   check(['420bridge','third-party-bridge'].includes(p.kind),'Not a bridge provider');
   check(p.recipientEncoding==='evm20','Unsupported recipient bytes');
   const r=addr(recipient),n=amount(amountRaw);
+  check(p.spender&&p.asset,'Verified bridge asset/spender required');
   return {from:addr(account),to:p.router,value:quantity(p.networkFeeWei),
     data:bridge.encodeFunctionData('initiateOutbound',[p.adapterId,p.routeId,p.assetId,r,n,p.extra])};
 }

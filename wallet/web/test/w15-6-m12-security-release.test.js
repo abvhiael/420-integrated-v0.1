@@ -95,7 +95,7 @@ test('malicious infinite allowance and NFT operator grant require critical risk 
 });
 test('EOA replacement replay cannot cross execution models, nonces, chains or unbumped fees',()=>{
  const original={hash:'0x'+'aa'.repeat(32),from:ACCOUNT,to:DEST,nonce:'0x1',
-   chainId:'0x1a4',executionModel:'eoa',maxFeePerGas:'0x64',maxPriorityFeePerGas:'0x32',value:'0x0',data:'0x'};
+   chainId:'0x1a4',executionModel:'eoa',status:'submitted',action:'speed-up',maxFeePerGas:'0x64',maxPriorityFeePerGas:'0x32',value:'0x0',data:'0x'};
  const changed={...original,maxFeePerGas:'0x80',maxPriorityFeePerGas:'0x40'};
  assert.doesNotThrow(()=>validateEoaReplacement420(original,changed));
  for(const delta of [{chainId:'0x1'},{nonce:'0x2'},{executionModel:'erc4337'},

@@ -127,7 +127,7 @@ assert.match(popup, /id="dashboard"/);
 assert.match(popup, /id="asset-list"/);
 assert.match(popup, /id="sites-view"/);
 assert.match(popup, /id="send-review"/);
-assert.match(popup, /vendor\\/qrcode\\.min\\.js/);
+assert.ok(popup.includes('vendor/qrcode.min.js'));
 assert.match(popup, /id="receive-qr"/);
 assert.match(popup, /id="settings-view"/);
 for (const html of [popup, authorityHtml, walletHtml]) {

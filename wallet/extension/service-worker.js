@@ -1640,6 +1640,27 @@ async function nftSelection420(message,{allowSpam=false}={}){
  if(now.epoch!==ctx.epoch)throw Object.assign(new Error('NFT network changed during verification'),{code:4901});
  return {wallet,ctx,provider,ref,asset,cached};
 }
+async function nftImport420(message){
+ const wallet=await walletUiState420(),ctx=nftContext420(wallet);
+ const ref=normalizedNftRecord420({standard:message.standard,address:message.address,
+   tokenId:message.tokenId});
+ const provider=await nftProvider420(ctx.chainId);
+ const verified=await verifyNftOwnership420(provider,ref,ctx.owner);
+ if(!verified.verified)throw Object.assign(new Error('Collectible is not owned by this account on this chain'),{code:4100});
+ const current=await effectiveChain420();
+ if(current.chainId!==ctx.chainId||current.epoch!==ctx.epoch)
+   throw Object.assign(new Error('Chain changed during collectible import'),{code:4901});
+ const record=await portfolioRecord420(ctx.scope),cache=await readObject(PORTFOLIO_CACHE_KEY_420);
+ const stored=cache[ctx.scope]||{};
+ const nfts=new Map((stored.nfts||[]).map(n=>[n.key||nftId420(n.address,n.standard,n.tokenId),n]));
+ const previous=nfts.get(ref.key);
+ nfts.set(ref.key,{...verified,source:'manual',metadata:previous?.metadata||null,
+   hidden:record.nftHidden.includes(ref.key),spam:record.nftSpam.includes(ref.key)});
+ if(nfts.size>100)throw Object.assign(new Error('NFT inventory limit reached; hide or manage old entries'),{code:4100});
+ cache[ctx.scope]={...stored,nfts:[...nfts.values()]};
+ await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
+ return walletUiState420();
+}
 async function nftMetadata420(message){
  const selected=await nftSelection420(message,{allowSpam:true});
  const {provider,ref,ctx}=selected;
@@ -1796,6 +1817,7 @@ async function nftSubmit420(message){
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='nft-import')return nftImport420(message);
   if(kind==='nft-metadata')return nftMetadata420(message);
   if(kind==='nft-approval-status')return nftApprovalStatus420(message);
   if(kind==='nft-visibility')return nftVisibility420(message);

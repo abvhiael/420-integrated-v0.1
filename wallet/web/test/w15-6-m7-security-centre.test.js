@@ -89,7 +89,7 @@ test('canonical session key revocation is tied to the current epoch and owner',a
  await assert.rejects(prepareSecurityRevocation420(provider({sessionEpoch:8n}),{
   kind:'session',chainId,account,key:spender,smartState:smart}),/expired authorization epoch/);
  await assert.rejects(prepareSecurityRevocation420(provider(),{
-  kind:'session',chainId,account:key,smartState:smart,key:spender}),/owner authorization/);
+  kind:'session',chainId,account:token,smartState:smart,key:spender}),/owner authorization/);
 });
 test('passkey revocation verifies current credential is active, never edits local WebAuthn key to fake it',async()=>{
  const p=provider(),credentialIdHash='0x'+'de'.repeat(32);

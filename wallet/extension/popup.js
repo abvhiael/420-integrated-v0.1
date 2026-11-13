@@ -584,7 +584,13 @@ function setup(){
       await refresh();screen('activity-view');
       tell('Transaction submitted. Confirmation is pending.');
     }catch(e){
-      $('send-state').textContent='Transaction not confirmed: '+e.message;
+      if(e?.data?.pending===true&&/^0x[0-9a-fA-F]{64}$/.test(e.data.userOpHash||'')){
+        resetReview();
+        await refresh();screen('activity-view');
+        tell('UserOperation submitted ('+e.data.userOpHash+'). Awaiting its transaction receipt. Do not resend.','warn');
+      }else{
+        $('send-state').textContent='Transaction not confirmed: '+e.message;
+      }
     }finally{state.submitting=false;$('send-confirm').disabled=false;}
   });
 }

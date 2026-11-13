@@ -20,6 +20,14 @@
       <input id="eoa-password" type="password" autocomplete="current-password" required minlength="12">
       <button id="eoa-authorize" type="submit">Sign and broadcast this exact transaction</button>
     </form>
+    <form id="hardware-authority" hidden>
+      <p>Review the exact sender, network, recipient, transaction fees or typed-data fields here and on your physical hardware wallet before confirming. No recovery phrase is ever requested.</p>
+      <p id="hardware-device-hint">Reconnect the originally selected Ledger or Trezor device. A different address or derivation path is rejected.</p>
+      <label id="hardware-hash-label" hidden><input id="hardware-hash-ack" type="checkbox">
+        I understand this Ledger firmware may show only EIP-712 hashes, not readable message fields, and I compared the complete request above.
+      </label>
+      <button id="hardware-authorize" type="submit">Verify device and sign exact reviewed request</button>
+    </form>
   </main>
   <script type="module" src="authority.js"></script>
 </body>

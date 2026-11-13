@@ -482,7 +482,9 @@ async function readWalletUiActivity420() {
 // Reconcile only canonical receipts. Missing receipts cannot prove a dropped or failed transaction.
 async function refreshWalletUiActivity420() {
   const entries=await readWalletUiActivity420();
-  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized'].includes(x.status)&&/^0x[0-9a-fA-F]{64}$/.test(x.hash||'')).slice(0,5);
+  const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
+  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized'].includes(x.status)&&
+    (validHash420(x.hash)||validHash420(x.userOpHash))).slice(0,5);
   if(!candidates.length)return entries;
   let chain;
   try{chain=await effectiveChain420();}catch{return entries;}
@@ -492,8 +494,15 @@ async function refreshWalletUiActivity420() {
     if(entry.chainId!==chain.chainId)continue;
     try{
       const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:entry.chainId})};
-      const reconciled=await reconcileExtensionTransaction420(entry,{provider,chainId:entry.chainId,confirmations:2});
-      if(reconciled.status!==entry.status){
+      let current=entry;
+      if(!validHash420(current.hash)&&validHash420(current.userOpHash)){
+        const receipt=await provider.request('eth_getUserOperationReceipt',[current.userOpHash]);
+        const receiptHash=receipt?.receipt?.transactionHash??receipt?.transactionHash;
+        if(validHash420(receiptHash))current={...current,hash:receiptHash.toLowerCase()};
+      }
+      if(!validHash420(current.hash))continue;
+      const reconciled=await reconcileExtensionTransaction420(current,{provider,chainId:entry.chainId,confirmations:2});
+      if(reconciled.status!==entry.status||reconciled.hash!==entry.hash){
         updates.set(entry.id,{...reconciled,updatedAt:Date.now()});
         changed=true;
       }
@@ -501,7 +510,9 @@ async function refreshWalletUiActivity420() {
   }
   if(!changed)return entries;
   const fresh=await readWalletUiActivity420();
-  const next=fresh.map(x=>updates.has(x.id)&&x.hash===updates.get(x.id).hash&&x.status!=='confirmed'?updates.get(x.id):x);
+  const next=fresh.map(x=>updates.has(x.id)&&
+    (x.hash===updates.get(x.id).hash||(!x.hash&&x.userOpHash===updates.get(x.id).userOpHash))&&
+    !['confirmed','reverted','cancelled','replaced','dropped'].includes(x.status)?updates.get(x.id):x);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
   return next;
 }
@@ -864,7 +875,8 @@ async function handleWalletUi420(message) {
       await rememberWalletUiActivity420({...entry,status:'submitted',hash});
       return {hash,status:'submitted'};
     }catch(error){
-      await rememberWalletUiActivity420({...entry,status:hash?'submitted':'failed',hash,
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,status:(hash||userOpHash)?'submitted':'failed',hash,userOpHash,
         error:error?.message||'Authorization failed'});
       throw error;
     }

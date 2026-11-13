@@ -7,7 +7,7 @@ import {createVault420,restoreEncryptedBackup420,unlockVault420,VAULT_STORAGE_KE
 import {createExtensionRpcRouter420} from '../core/extension-rpc-router.js';
 import {validateEoaReplacement420} from '../core/extension-replacement-policy.js';
 import {inspectExtensionApprovalRisk420} from '../core/extension-approval-risk.js';
-import {chainId420,endpoint420} from '../core/network-registry.js';
+import {chainId420,endpoint420} from '../../extension/core/network-registry.js';
 const SECRET='this-is-a-long-wallet-password-420';
 const ACCOUNT='0x'+'11'.repeat(20),DEST='0x'+'22'.repeat(20);
 let chain=Promise.resolve();

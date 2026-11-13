@@ -1,3 +1,4 @@
+import {installMockWebLocks420} from './support/mock-browser-locks.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {webcrypto} from 'node:crypto';
@@ -10,6 +11,7 @@ import {
 } from '../../extension/core/vault.js';
 
 globalThis.crypto ??= webcrypto;
+installMockWebLocks420();
 class MemoryStorage{
   constructor(){this.data={};}
   async get(key){return {[key]:this.data[key]};}

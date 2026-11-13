@@ -6,7 +6,7 @@ import {
  NFT_TRANSFER721_TOPIC_420,NFT_TRANSFER_SINGLE_TOPIC_420,NFT_TRANSFER_BATCH_TOPIC_420,
  nftId420,normalizedNftRecord420,nftSpamFlags420,nftSafeMetadata420,nftMetadataUrl420,
  fetchSafeNftMetadata420,verifiedNftStandard420,verifyNftOwnership420,
- discoverNftTransfers420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420
+ discoverNftTransfers420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420
 } from '../core/extension-nfts.js';
 const owner='0x'+'11'.repeat(20),recipient='0x'+'22'.repeat(20),
  operator='0x'+'33'.repeat(20),erc721='0x'+'44'.repeat(20),erc1155='0x'+'55'.repeat(20);
@@ -145,6 +145,10 @@ test('NFT approval separates ERC721 single-id and broad operator grants from ERC
   owner,operator,approved:true,collectionWide:true});
  assert.match(b.data,/^0xa22cb465/);
  assert.equal(b.data.slice(-64),word(1).slice(2));
+ const revokeSingle=nftApprovalCall420({standard:'ERC721',contract:erc721,tokenId:42,
+  owner,operator,approved:false,collectionWide:false});
+ assert.equal(revokeSingle.data.slice(10,74),word(0).slice(2),
+  'ERC721 per-token revoke must approve the ZERO address, not reapprove the operator');
  const revoke=nftApprovalCall420({standard:'ERC1155',contract:erc1155,tokenId:7,
   owner,operator,approved:false,collectionWide:true});
  assert.equal(revoke.data.slice(-64),word(0).slice(2));
@@ -153,18 +157,34 @@ test('NFT approval separates ERC721 single-id and broad operator grants from ERC
  const p=provider();
  assert.equal(await verifyNftApproval420(p,a,owner),true);
  assert.equal(await verifyNftApproval420(p,b,owner),true);
+ const single=await readNftApproval420(p,{asset:a.asset,owner});
+ assert.equal(single.scope,'token');
+ assert.equal(single.approvedOperator,operator);
+ const collection=await readNftApproval420(p,{asset:b.asset,owner,operator});
+ assert.equal(collection.scope,'collection');
+ assert.equal(collection.approved,true);
+ await assert.rejects(readNftApproval420(p,{asset:b.asset,owner}),/operator must be specified/);
 });
 test('NFT popup and worker require guarded review + real local signer; metadata never iframe/HTML injection',()=>{
  const root=resolve(new URL('../../extension/',import.meta.url).pathname);
  const files=['popup.html','popup.js','service-worker.js'];
  const [html,popup,worker]=files.map(p=>readFileSync(resolve(root,p),'utf8'));
  for(const id of ['nft-detail-view','nft-action-form','nft-review','nft-review-ack','nft-load-metadata',
-  'nft-collection-wide','nft-hide','nft-spam','nft-index-status'])assert.ok(html.includes('id="'+id+'"'));
- for(const action of ['nft-review','nft-submit','nft-metadata','nft-visibility'])assert.ok(worker.includes(action));
+  'nft-collection-wide','nft-hide','nft-spam','nft-index-status','nft-import-form','nft-approval-status'])assert.ok(html.includes('id="'+id+'"'));
+ for(const action of ['nft-review','nft-submit','nft-metadata','nft-visibility','nft-import','nft-approval-status'])assert.ok(worker.includes(action));
  assert.ok(worker.includes('verifyNftOwnership420'));
  assert.ok(worker.includes('executeWithLocalAuthority'));
  assert.ok(worker.includes('NFT_REVIEW_KEY_420'));
  assert.ok(popup.includes('textContent'));
  assert.equal(popup.includes('innerHTML'),false);
  assert.equal(html.includes('<iframe'),false);
+});
+test('portfolio settings preserve user trusted NFT overrides without changing ownership',async()=>{
+ const {normalizedPortfolioSettings420}=await import('../core/extension-portfolio.js');
+ const key=nftId420(erc721,'ERC721',42);
+ const settings=normalizedPortfolioSettings420({nftSpam:[key],nftTrusted:[key],nftHidden:[key]});
+ assert.deepEqual(settings.nftSpam,[key]);
+ assert.deepEqual(settings.nftTrusted,[key]);
+ assert.deepEqual(settings.nftHidden,[key]);
+ assert.ok(!Object.hasOwn(settings,'ownership'));
 });

@@ -14,6 +14,12 @@
       <div id="origin"></div>
       <pre id="details"></pre>
     </section>
+    <form id="eoa-authority" hidden>
+      <p>This transaction will be signed locally with your encrypted EOA key. Its password and key never leave this extension window.</p>
+      <label for="eoa-password">Wallet password</label>
+      <input id="eoa-password" type="password" autocomplete="current-password" required minlength="12">
+      <button id="eoa-authorize" type="submit">Sign and broadcast this exact transaction</button>
+    </form>
   </main>
   <script type="module" src="authority.js"></script>
 </body>

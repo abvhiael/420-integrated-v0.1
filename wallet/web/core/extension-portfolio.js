@@ -124,7 +124,7 @@ export function normalizedPortfolioSettings420(record={}){
   const priceEndpoint=typeof record.priceEndpoint==='string'&&/^https:\/\//.test(record.priceEndpoint)?record.priceEndpoint:null;
   const nftKeys=value=>Array.isArray(value)?[...new Set(value.filter(x=>
     typeof x==='string'&&/^(ERC721|ERC1155):0x[0-9a-fA-F]{40}:\d{1,78}$/.test(x)
-  ).map(x=>x.toLowerCase()))].slice(0,200):[];
+  ).map(x=>x.slice(0,x.indexOf(':'))+x.slice(x.indexOf(':')).toLowerCase()))].slice(0,200):[];
   const nftIndexFrom=typeof record.nftIndexFrom==='string'&&/^\d+$/.test(record.nftIndexFrom)?
     record.nftIndexFrom:null;
   return {tokens,hidden:[...new Set(hidden)],spam:[...new Set(spam)],

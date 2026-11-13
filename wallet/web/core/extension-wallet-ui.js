@@ -56,6 +56,13 @@ export function extensionBalanceText420(raw,decimals=18,maxPrecision=5){
   const fraction=(n%scale).toString().padStart(decimals,'0').slice(0,maxPrecision).replace(/0+$/,'');
   return whole.toLocaleString('en-US')+(fraction?'.'+fraction:'');
 }
+export function formatExtensionUnitsExact420(raw,decimals=18){
+  if(typeof raw!=='string'||!/^\d+$/.test(raw))throw new Error('verified raw balance required');
+  if(!Number.isInteger(decimals)||decimals<0||decimals>255)throw new Error('invalid token decimals');
+  const n=BigInt(raw),scale=10n**BigInt(decimals);
+  const fraction=decimals?(n%scale).toString().padStart(decimals,'0').replace(/0+$/,''):'';
+  return (n/scale).toString()+(fraction?'.'+fraction:'');
+}
 export function shortExtensionAddress420(value){
   return typeof value==='string'&&ADDRESS.test(value)?value.slice(0,7)+'…'+value.slice(-5):'Not available';
 }
@@ -72,7 +79,11 @@ export function buildExtensionSend420({from,recipient,amount,asset='native',trac
   return {transaction:{from:controller,to:request.target,value:'0x'+BigInt(request.value).toString(16),data:request.data},summary:{kind:summary.kind,symbol:summary.symbol,recipient:summary.recipient,amount:summary.amount}};
 }
 export function extensionCanSend420(state){
-  return Boolean(!['eoa','watch-only','hardware'].includes(state?.account?.kind)&&state?.network?.status==='matched'&&state?.account?.deployed===true&&state?.account?.ownerVerified===true&&state?.account?.controller&&state?.account?.smartAccount);
+  if(state?.network?.status!=='matched'||!state?.account?.controller)return false;
+  if(state.account.kind==='eoa')return state.vault?.unlocked===true&&
+    state.selectedAccount===state.account.controller;
+  if(['watch-only','hardware'].includes(state?.account?.kind))return false;
+  return Boolean(state.account.deployed===true&&state.account.ownerVerified===true&&state.account.smartAccount);
 }
 export function extensionReceiveAddress420(state){
   if(state?.network?.status!=='matched')return null;

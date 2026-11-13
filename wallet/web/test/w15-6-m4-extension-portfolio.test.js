@@ -117,5 +117,7 @@ test('M4: Chromium-owned popup views and chain scoped operations; no RPC signing
  assert.ok(popup.includes('Fiat total unavailable'));
  assert.ok(popup.includes('Unmark spam'));
  assert.ok(popup.includes('renderNFT420'));
- assert.doesNotMatch(worker,/eth_sendRawTransaction/);
+ assert.match(worker,/Raw transaction broadcast is restricted to the local EOA authority/);
+ assert.match(worker,/assertEoaRawMatchesAuthority420/);
+ assert.doesNotMatch(worker,/READ_METHODS = new Set\(\[[^\]]*eth_sendRawTransaction/);
 });

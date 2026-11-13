@@ -1,3 +1,12 @@
+import {Transaction} from './vendor/ethers-6.17.0.min.js';
+import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
+import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
+import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420,transitionReplacement420} from './core/extension-replacement-policy.js';
+import {encodeExecute} from './core/abi.js';
+import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
+import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
+import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
+import {reconcileExtensionTransaction420} from './core/extension-transaction-activity.js';
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
 import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
@@ -11,7 +20,7 @@ const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
-const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt']);
+const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
@@ -109,7 +118,7 @@ async function readAssetPortfolio420(state){
   }
   blank.blockNumber=block.toString();
   const checkedAt=Date.now(),pending=(await readWalletUiActivity420()).filter(x=>
-    x.controller===selectedAccount&&x.chainId===chainId&&x.status==='pending').length;
+    x.controller===selectedAccount&&x.chainId===chainId&&['pending','submitted','included','confirming','reorganized'].includes(x.status)).length;
   const nativeNetwork=chain.network.nativeCurrency;
   let native;
   try{
@@ -308,7 +317,11 @@ async function rpcRequest(method,params=[],{origin=null,expectedChainId=null}={}
 async function executeWithLocalAuthority(request, context) {
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
   const effective=await effectiveChain420(context.origin);
-  if(!effective.network.smartAccountApproved)throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
+  const isEoa=request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel==='eoa';
+  if(!isEoa&&!effective.network.smartAccountApproved)
+    throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
+  if(isEoa&&!(await vaultLockState420()).unlocked)
+    throw Object.assign(new Error('Encrypted local EOA vault is locked'),{code:4100});
   if(!context.chainId||effective.chainId!==context.chainId||effective.epoch!==context.epoch)
     throw Object.assign(new Error('Network context changed before signing authority'),{code:4901});
   const address=prefs.selectedAccount;
@@ -316,8 +329,9 @@ async function executeWithLocalAuthority(request, context) {
   const metadata=await accountMetadata420();
   if(!address||!listed.includes(address)||!context.accounts?.includes(address))
     throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
-  if(['watch-only','hardware','eoa'].includes(metadata[address]?.type))
-    throw Object.assign(new Error('This account has no verified SmartAccount passkey signing authority in this flow'),{code:4100});
+  if(['watch-only','hardware'].includes(metadata[address]?.type)||
+     (isEoa?metadata[address]?.type!=='eoa':metadata[address]?.type==='eoa'))
+    throw Object.assign(new Error('Selected account has no authorized local signing authority for this model'),{code:4100});
   const requestedFrom=request.method==='eth_sendTransaction'?request.params?.[0]?.from:
     request.method==='personal_sign'?request.params?.[1]:request.method==='eth_signTypedData_v4'?request.params?.[0]:null;
   if(typeof requestedFrom!=='string'||requestedFrom.toLowerCase()!==address)
@@ -330,7 +344,8 @@ async function executeWithLocalAuthority(request, context) {
   pending[authorityRequestId] = {
     authorityRequestId,
     request,
-    context: { origin: context.origin, chainId:context.chainId, epoch:context.epoch, accounts: context.accounts ?? [], tabId: context.tabId ?? null },
+    context: { origin: context.origin, chainId:context.chainId, epoch:context.epoch, accounts: context.accounts ?? [],
+      tabId: context.tabId ?? null, activityId:context.activityId??null },
     createdAt: Date.now(),
   };
   await chrome.storage.local.set({ [AUTHORITY_KEY]: pending });
@@ -456,10 +471,107 @@ async function handleApprovalMethod(request, context) {
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
   const before=await effectiveChain420(origin),pinned=before.chainId;
-  await createApproval(request, { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
-  if((await effectiveChain420(origin)).epoch!==before.epoch)throw Object.assign(new Error('Chain changed during approval'),{code:4901});
+  let feePreview=null,approvedTxRequest=request;
+  if(request.method==='eth_sendTransaction'){
+    const tx=request.params?.[0];
+    if(!tx||!tx.to||!tx.from||normalizeExtensionAddress420(tx.from)!==granted[0])
+      throw Object.assign(new Error('Exact granted account and transaction target required'),{code:4100});
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
+    const accountMeta=await accountMetadata420(),eoa=accountMeta[granted[0]]?.type==='eoa';
+    if(eoa&&!(await vaultLockState420()).unlocked)
+      throw Object.assign(new Error('Encrypted EOA vault is locked'),{code:4100});
+    let smart=null;
+    if(!eoa){
+      if(!config.smartAccountConfig||config.chainId!==pinned)
+        throw Object.assign(new Error('Approved SmartAccount configuration is missing for site chain'),{code:4100});
+      smart=await discoverSmartAccount(provider,granted[0],config.smartAccountConfig);
+      if(!smart?.deployed||!smart?.controllerIsOwner||!smart?.entryPoint)
+        throw Object.assign(new Error('Verified SmartAccount owner or EntryPoint missing'),{code:4100});
+    }
+    if(tx.gasPrice!=null)throw Object.assign(new Error('Legacy gasPrice not supported; use EIP-1559'),{code:-32602});
+    const choice=tx.maxFeePerGas!=null||tx.maxPriorityFeePerGas!=null?
+      {level:'custom',maxFeePerGas:tx.maxFeePerGas,maxPriorityFeePerGas:tx.maxPriorityFeePerGas}:
+      {level:'standard'};
+    const normalizedTx={from:granted[0],to:normalizeExtensionAddress420(tx.to),
+      value:tx.value??'0x0',data:tx.data??'0x'};
+    const quote=eoa?
+      await quoteExtensionEoa420(provider,{chainId:pinned,from:granted[0],transaction:normalizedTx,choice}):
+      await quoteExtensionSend420(provider,{chainId:pinned,
+        smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+        transaction:normalizedTx,choice,strictUserOpGas:true});
+    const risk=inspectExtensionApprovalRisk420(normalizedTx);
+    feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:eoa?'eoa':'erc4337'};
+  }
+  await createApproval(feePreview?{...request,feePreview}:request,
+    { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
+  if((await effectiveChain420(origin)).epoch!==before.epoch)
+    throw Object.assign(new Error('Chain changed during approval'),{code:4901});
   const current=await accountsFor(origin);
   if(current.length!==1||current[0]!==granted[0])throw Object.assign(new Error('Account was changed or disconnected during approval'),{code:4100});
+  if(request.method==='eth_sendTransaction'){
+    const after=await effectiveChain420(origin);
+    if(after.chainId!==pinned||after.epoch!==before.epoch)
+      throw Object.assign(new Error('Site approval expired or chain changed'),{code:4901});
+    const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const fee=feePreview.quote;
+    const choice=request.params?.[0]?.maxFeePerGas!=null||request.params?.[0]?.maxPriorityFeePerGas!=null?
+      {level:'custom',maxFeePerGas:request.params[0].maxFeePerGas,
+       maxPriorityFeePerGas:request.params[0].maxPriorityFeePerGas}:{level:'standard'};
+    let newQuote;
+    if(feePreview.executionModel==='eoa'){
+      if(!(await vaultLockState420()).unlocked)
+        throw Object.assign(new Error('EOA vault locked during approval'),{code:4100});
+      newQuote=await quoteExtensionEoa420(provider,{chainId:pinned,from:current[0],
+        transaction:feePreview.normalizedTx,choice});
+      if(fee.nonce!==newQuote.nonce||fee.gasLimit!==newQuote.gasLimit||
+         fee.maxFeePerGas!==newQuote.maxFeePerGas||
+         fee.maxPriorityFeePerGas!==newQuote.maxPriorityFeePerGas||
+         fee.blockHash!==newQuote.blockHash)
+        throw Object.assign(new Error('EOA nonce/fees changed; new approval required'),{code:4001});
+      approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
+        executionModel:'eoa',chainId:pinned,nonce:newQuote.nonce,gasLimit:newQuote.gasLimit,
+        maxFeePerGas:newQuote.maxFeePerGas,maxPriorityFeePerGas:newQuote.maxPriorityFeePerGas}]};
+    }else{
+      const smart=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
+      newQuote=await quoteExtensionSend420(provider,{
+        chainId:pinned,smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+        transaction:feePreview.normalizedTx,choice,strictUserOpGas:true});
+      if(fee.gasFees!==newQuote.gasFees||fee.blockHash!==newQuote.blockHash||
+         fee.nonce!==newQuote.nonce||fee.entryPoint!==newQuote.entryPoint||
+         fee.gasBudget?.accountGasLimits!==newQuote.gasBudget?.accountGasLimits||
+         fee.gasBudget?.preVerificationGas!==newQuote.gasBudget?.preVerificationGas)
+        throw Object.assign(new Error('DApp UserOperation gas estimate changed; new approval required'),{code:4001});
+      approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
+        gasFees:newQuote.gasFees,accountGasLimits:newQuote.gasBudget.accountGasLimits,
+        preVerificationGas:newQuote.gasBudget.preVerificationGas,expectedNonce:newQuote.nonce}]};
+    }
+    const tx=request.params?.[0]||{};
+    const id='site-send-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+    const entry={id,at:Date.now(),chainId:pinned,controller:current[0],
+      executionModel:feePreview.executionModel,
+      origin,recipient:typeof tx.to==='string'?tx.to.toLowerCase():null,
+      amount:typeof tx.value==='string'?tx.value:'0x0',
+      symbol:tx.data&&tx.data!=='0x'?'contract call':'native',
+      status:'pending',hash:null};
+    await rememberWalletUiActivity420(entry);
+    let hash=null;
+    try{
+      hash=await executeWithLocalAuthority(approvedTxRequest,{
+        ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId:id
+      });
+      await rememberWalletUiActivity420({...entry,hash,status:'submitted'});
+      return hash;
+    }catch(error){
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      const signedHash=validHash420(error?.data?.hash)?error.data.hash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,hash:hash||signedHash,userOpHash,
+        status:(hash||signedHash||userOpHash)?'submitted':'failed',
+        error:error?.message||'Site transaction authority unavailable'});
+      throw error;
+    }
+  }
   return executeWithLocalAuthority(request, { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
 }
 
@@ -475,11 +587,179 @@ function trustedWalletPopup420(sender) {
 }
 async function readWalletUiActivity420() {
   const value=(await chrome.storage.local.get(EXTENSION_ACTIVITY_KEY_420))?.[EXTENSION_ACTIVITY_KEY_420];
-  return Array.isArray(value)?value.slice(0,40).filter(x=>x&&typeof x==='object'):[];
+  return Array.isArray(value)?value.slice(0,200).filter(x=>x&&typeof x==='object'):[];
+}
+// Reconcile only canonical receipts. Missing receipts cannot prove a dropped or failed transaction.
+const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
+async function refreshWalletUiActivity420() {
+  const entries=await readWalletUiActivity420();
+  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized','confirmed','reverted'].includes(x.status)&&
+    (validHash420(x.hash)||validHash420(x.userOpHash)))
+    .sort((a,b)=>(a.lastCheckedAt??a.at??0)-(b.lastCheckedAt??b.at??0)).slice(0,8);
+  if(!candidates.length)return entries;
+  let chain;
+  try{chain=await effectiveChain420();}catch{return entries;}
+  let changed=false;
+  const updates=new Map();
+  for(const entry of candidates){
+    if(entry.chainId!==chain.chainId)continue;
+    try{
+      const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:entry.chainId})};
+      let current=entry;
+      let opReceipt=null;
+      if(validHash420(current.userOpHash)){
+        opReceipt=await provider.request('eth_getUserOperationReceipt',[current.userOpHash]);
+        const receiptHash=opReceipt?.receipt?.transactionHash??opReceipt?.transactionHash;
+        if(validHash420(receiptHash)){
+          if(validHash420(current.hash)&&current.hash.toLowerCase()!==receiptHash.toLowerCase())
+            throw new Error('bundler transaction hash changed unexpectedly');
+          current={...current,hash:receiptHash.toLowerCase()};
+        }
+      }
+      if(!validHash420(current.hash))continue;
+      let reconciled=await reconcileExtensionTransaction420(current,{provider,chainId:entry.chainId,confirmations:2});
+      if(reconciled.status==='confirmed'&&opReceipt?.success===false)
+        reconciled={...reconciled,status:'reverted'};
+      updates.set(entry.id,{...reconciled,lastCheckedAt:Date.now(),
+        ...(reconciled.status!==entry.status?{updatedAt:Date.now()}: {})});
+      changed=true;
+    }catch{ /* RPC outages retain the last known status, never fabricate failure. */ }
+  }
+  const fresh=await readWalletUiActivity420();
+  const next=fresh.map(x=>updates.has(x.id)&&
+    (x.hash===updates.get(x.id).hash||(!x.hash&&x.userOpHash===updates.get(x.id).userOpHash))
+       ? updates.get(x.id):x);
+  // Replacement status follows confirmed UserOperation evidence, not receipt
+  // timeout, elapsed time, or a submitted replacement hash.
+  const byId=new Map(next.map(x=>[x.id,x]));
+  for(const replacement of next.filter(x=>x.originalId&&x.replaces)){
+    const original=byId.get(replacement.originalId);
+    if(!original||original.chainId!==chain.chainId)continue;
+    if(replacement.status==='confirmed'&&['submitted','pending','included','reorganized'].includes(original.status)){
+      try{
+        const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:chain.chainId})};
+        if(original.executionModel==='erc4337'){
+          const validated=await reconcileUserOpReplacement420(provider,original,replacement);
+          byId.set(original.id,validated);changed=true;
+        }else if(original.executionModel==='eoa'&&replacement.executionModel==='eoa'){
+          const [confirmed,originalReceipt,originalTransaction]=await Promise.all([
+            provider.request('eth_getTransactionByHash',[replacement.hash]),
+            provider.request('eth_getTransactionReceipt',[original.hash]),
+            provider.request('eth_getTransactionByHash',[original.hash])
+          ]);
+          if(originalReceipt||originalTransaction?.blockHash)throw Error('Original EOA is included');
+          if(!confirmed?.blockHash||!confirmed?.from||confirmed.nonce==null||
+            confirmed.hash?.toLowerCase()!==replacement.hash?.toLowerCase()||
+            confirmed.from.toLowerCase()!==original.from||
+            BigInt(confirmed.nonce)!==BigInt(original.nonce))
+            throw Error('Replacement EOA canonical sender/nonce evidence missing');
+          const validated=transitionReplacement420(original,{action:replacement.action,txHash:replacement.hash},
+            {canonicalEvidence:{sameChain:true,sameSenderAndNonce:true,replacementIncluded:true,
+              originalNotCanonical:true,checkedAt:Date.now()}});
+          byId.set(original.id,validated);changed=true;
+        }
+      }catch{ /* Replacement proof must be canonical and signer/nonce-checked. */ }
+    }else if(replacement.status==='reorganized'&&['replaced','cancelled'].includes(original.status)&&
+             original.replacedBy===replacement.hash){
+      byId.set(original.id,{...original,status:'submitted',replacementUncertain:true,
+        replacedBy:null,replacementUserOpHash:null});changed=true;
+    }
+  }
+  if(!changed)return entries;
+  const committed=next.map(x=>byId.get(x.id)||x);
+  await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:committed});
+  return committed;
+}
+function assertEoaRawMatchesAuthority420(raw,approved){
+  if(typeof raw!=='string'||!/^0x(?:[0-9a-fA-F]{2})+$/.test(raw)||raw.length>262144)
+    throw new Error('Invalid signed EOA transaction');
+  const signed=Transaction.from(raw);
+  if(signed.type!==2||!signed.hash||!validHash420(signed.hash)||
+     signed.from?.toLowerCase()!==approved.from?.toLowerCase()||
+     signed.to?.toLowerCase()!==approved.to?.toLowerCase()||
+     BigInt(signed.chainId)!==BigInt(approved.chainId)||
+     BigInt(signed.nonce)!==BigInt(approved.nonce)||
+     signed.value!==BigInt(approved.value??'0x0')||
+     signed.gasLimit!==BigInt(approved.gasLimit)||
+     signed.maxFeePerGas!==BigInt(approved.maxFeePerGas)||
+     signed.maxPriorityFeePerGas!==BigInt(approved.maxPriorityFeePerGas)||
+     signed.data.toLowerCase()!==(approved.data??'0x').toLowerCase())
+    throw new Error('Signed EOA envelope differs from user-approved exact transaction');
+  return signed.hash.toLowerCase();
+}
+async function recordAuthoritySignedEoa420(sender,requestId,submission){
+  const expected=chrome.runtime.getURL('authority.html');
+  if(sender?.id!==chrome.runtime.id||typeof sender?.url!=='string'||
+    sender.url.split('?')[0]!==expected||
+    new URL(sender.url).searchParams.get('request')!==requestId)
+    throw Object.assign(new Error('Untrusted EOA authority result'),{code:4100});
+  const pending=(await readObject(AUTHORITY_KEY))[requestId];
+  if(!pending||pending.request?.method!=='eth_sendTransaction'||
+     pending.request?.params?.[0]?.executionModel!=='eoa')
+    throw Object.assign(new Error('No pending EOA signing authority'),{code:4100});
+  const tx=pending.request.params[0];
+  const now=await effectiveChain420(pending.context.origin);
+  if(now.chainId!==pending.context.chainId||now.epoch!==pending.context.epoch||
+      tx.chainId!==now.chainId||tx.from?.toLowerCase()!==pending.context.accounts?.[0])
+    throw Object.assign(new Error('EOA signing chain/account changed'),{code:4901});
+  if(!validHash420(submission?.hash)||submission.chainId!==tx.chainId||
+     submission.from!==tx.from?.toLowerCase()||submission.to!==tx.to?.toLowerCase()||
+     submission.nonce!==tx.nonce||
+     submission.value!==tx.value||submission.data!==tx.data?.toLowerCase()||
+     submission.maxFeePerGas!==tx.maxFeePerGas||
+     submission.maxPriorityFeePerGas!==tx.maxPriorityFeePerGas||
+     submission.gasLimit!==tx.gasLimit)
+    throw Object.assign(new Error('EOA signed metadata differs from approved transaction'),{code:4100});
+  const id=pending.context.activityId;
+  if(id){
+    const activities=await readWalletUiActivity420();
+    const existing=activities.find(x=>x.id===id&&x.controller===submission.from&&x.chainId===tx.chainId);
+    if(!existing)throw new Error('Pending EOA activity not found');
+    await rememberWalletUiActivity420({...existing,executionModel:'eoa',status:'submitted',
+      hash:submission.hash,from:submission.from,to:submission.to,
+      nonce:submission.nonce,value:submission.value,data:submission.data,
+      gasLimit:submission.gasLimit,maxFeePerGas:submission.maxFeePerGas,
+      maxPriorityFeePerGas:submission.maxPriorityFeePerGas,submittedAt:Date.now()});
+  }
+  return true;
+}
+async function recordAuthoritySubmission420(sender,requestId,submission){
+  const address=chrome.runtime.getURL('authority.html');
+  if(sender?.id!==chrome.runtime.id||typeof sender?.url!=='string'||
+     !sender.url.startsWith(address+'?'))throw Object.assign(new Error('Unauthorized authority submission'),{code:4100});
+  const actual=new URL(sender.url).searchParams.get('request');
+  if(actual!==requestId)throw Object.assign(new Error('Authority request identity mismatch'),{code:4100});
+  const pending=await readObject(AUTHORITY_KEY),request=pending[requestId];
+  if(!request||request.context?.chainId!==(await effectiveChain420(request.context.origin)).chainId)
+    throw Object.assign(new Error('Stale or missing authority request'),{code:4901});
+  if(!validHash420(submission?.userOpHash)||!/^0x[0-9a-fA-F]{1,64}$/.test(submission?.nonce??'')||
+      !/^0x[0-9a-fA-F]{64}$/.test(submission?.gasFees??'')||
+      !/^0x[0-9a-fA-F]{40}$/.test(submission?.sender??'')||
+      !/^0x[0-9a-fA-F]{40}$/.test(submission?.entryPoint??''))
+    throw Object.assign(new Error('Unverified UserOperation submission metadata'),{code:-32602});
+  const id=request.context.activityId;
+  if(!id)return true; // Non-send signing requests have no transaction record.
+  const activities=await readWalletUiActivity420();
+  const entry=activities.find(x=>x.id===id&&x.chainId===request.context.chainId&&
+    x.controller===request.context.accounts?.[0]);
+  if(!entry)throw Object.assign(new Error('Pending activity was not found'),{code:-32603});
+  await rememberWalletUiActivity420({...entry,
+    executionModel:'erc4337',status:'submitted',submittedAt:Date.now(),
+    userOpHash:submission.userOpHash.toLowerCase(),
+    sender:submission.sender.toLowerCase(),entryPoint:submission.entryPoint.toLowerCase(),
+    entryPointVersion:'0.7',nonce:submission.nonce,nonceKey:submission.nonceKey,
+    nonceSequence:submission.nonceSequence,gasFees:submission.gasFees.toLowerCase(),
+    maxPriorityFeePerGas:'0x'+BigInt('0x'+submission.gasFees.slice(2,34)).toString(16),
+    maxFeePerGas:'0x'+BigInt('0x'+submission.gasFees.slice(34,66)).toString(16),
+    callData:submission.callData,initCode:submission.initCode,target:submission.target,
+    value:submission.value,data:submission.data
+  });
+  return true;
 }
 async function rememberWalletUiActivity420(entry) {
   const current=await readWalletUiActivity420();
-  const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
+  const previous=current.find(x=>x.id===entry.id);
+  const next=[{...previous,...entry},...current.filter(x=>x.id!==entry.id)].slice(0,200);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
 }
 async function finalizeWalletUiState420(state){
@@ -531,7 +811,8 @@ async function walletUiState420() {
       nativeCurrency:active?.network.nativeCurrency||{name:'420',symbol:'420',decimals:18},
       vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
-    selectedAccount:selected,sites,activity:(await readWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
+    addressBook:normalizeExtensionAddressBook420((await chrome.storage.local.get(EXTENSION_ADDRESS_BOOK_KEY_420))?.[EXTENSION_ADDRESS_BOOK_KEY_420]),
+    selectedAccount:selected,sites,activity:(await refreshWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
     vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null,health:[],epoch:registry.epoch},
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
@@ -589,7 +870,7 @@ async function walletUiState420() {
     const provider={request:(method,params)=>rpcRequest(method,params)};
     const discovered=await discoverSmartAccount(provider,selected,config.smartAccountConfig);
     state.account={
-      controller:selected,smartAccount:discovered.smartAccount,
+      controller:selected,smartAccount:discovered.smartAccount,entryPoint:discovered.entryPoint,
       deployed:discovered.deployed===true,ownerVerified:discovered.controllerIsOwner===true,
       reason:discovered.deployed?(discovered.controllerIsOwner?'Deployed SmartAccount discovered; controller matches owner. Deployment provenance requires approved configuration.':'Controller is not the current account owner'):'Counterfactual account; not yet deployed',
     };
@@ -672,9 +953,105 @@ async function switchSelectedAccount420(value){
   }
   return walletUiState420();
 }
+async function replacementPreview420(message){
+  const state=await walletUiState420();
+  if(!extensionCanSend420(state)||message.chainId!==state.network.expectedChainId||
+     message.epoch!==state.network.epoch||message.account!==state.selectedAccount)
+    throw Object.assign(new Error('Wallet authority or chain changed'),{code:4901});
+  if(!['speed-up','cancel'].includes(message.action))
+    throw Object.assign(new Error('Unsupported replacement action'),{code:-32602});
+  const entries=await readWalletUiActivity420(),original=entries.find(x=>x.id===message.activityId);
+  if(!original||original.controller!==state.selectedAccount||
+     original.chainId!==state.network.expectedChainId||
+     !(original.executionModel==='eoa'?validHash420(original.hash):validHash420(original.userOpHash)))
+    throw Object.assign(new Error('No locally authorized pending transaction to replace'),{code:4100});
+  if(!['submitted','pending','reorganized','included'].includes(original.status))
+    throw Object.assign(new Error('Only unconfirmed transactions may be replaced'),{code:4100});
+  if(entries.some(x=>x.replaces===(original.executionModel==='eoa'?original.hash:original.userOpHash)&&
+     ['pending','submitted','included','reorganized','confirmed'].includes(x.status)))
+    throw Object.assign(new Error('A replacement of this UserOperation already exists; resolve its outcome first'),{code:4001});
+  const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+  if(original.executionModel==='eoa'){
+    if(state.account.kind!=='eoa'||!state.vault?.unlocked)
+      throw Object.assign(new Error('Local EOA signing authority is locked'),{code:4100});
+    let target=original.to,value=original.value,data=original.data;
+    if(message.action==='cancel'){
+      target=original.from;value='0x0';data='0x';
+    }
+    const pending=await provider.request('eth_getTransactionByHash',[original.hash]);
+    if(pending?.blockHash)throw new Error('Original EOA is included; do not replace');
+    if(pending&&(pending.from?.toLowerCase()!==original.from||
+       BigInt(pending.nonce)!==BigInt(original.nonce)))
+      throw new Error('Original EOA nonce/signer changed');
+    const block=await provider.request('eth_getBlockByNumber',['latest',false]);
+    if(!block?.baseFeePerGas)throw new Error('EIP-1559 base fee unavailable');
+    const bump=x=>BigInt(x)+((BigInt(x)*25n+99n)/100n)||1n;
+    const priority=bump(original.maxPriorityFeePerGas);
+    let maximum=bump(original.maxFeePerGas);
+    const floor=BigInt(block.baseFeePerGas)*2n+priority;
+    if(maximum<floor)maximum=floor;
+    const choice={level:'custom',maxFeePerGas:'0x'+maximum.toString(16),
+      maxPriorityFeePerGas:'0x'+priority.toString(16)};
+    const transaction={from:original.from,to:target,value,data};
+    const quote=await quoteExtensionEoa420(provider,{chainId:original.chainId,
+      from:original.from,transaction,choice,nonceOverride:original.nonce,
+      allowPendingReplacement:true});
+    const candidate={executionModel:'eoa',action:message.action,chainId:original.chainId,
+      from:original.from,to:target,nonce:original.nonce,value,data,
+      maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas};
+    validateEoaReplacement420(original,candidate,{minimumBumpPercent:20});
+    return {originalId:original.id,originalHash:original.hash,action:message.action,
+      chainId:original.chainId,epoch:state.network.epoch,account:state.selectedAccount,
+      executionModel:'eoa',transaction,quote,nonce:original.nonce,replaces:original.hash};
+  }
+  if(original.executionModel!=='erc4337')throw new Error('Unsupported pending execution model');
+  let target=original.target,value=original.value,data=original.data;
+  if(message.action==='cancel'){
+    const code=await provider.request('eth_getCode',[state.account.controller,'latest']);
+    if(code!=='0x'&&code!=='0x0')throw Object.assign(new Error('Cancellation requires a verified no-code owner EOA; cannot prove no-op'),{code:4100});
+    target=state.account.controller;value='0x0';data='0x';
+  }
+  const block=await provider.request('eth_getBlockByNumber',['latest',false]);
+  if(typeof block?.baseFeePerGas!=='string'||!/^0x[0-9a-fA-F]+$/.test(block.baseFeePerGas))
+    throw new Error('Current EIP-1559 base fee unavailable');
+  const bump=x=>BigInt(x)+((BigInt(x)*25n+99n)/100n)||1n;
+  const priority=bump(original.maxPriorityFeePerGas);
+  let maximum=bump(original.maxFeePerGas);
+  const floor=BigInt(block.baseFeePerGas)*2n+priority;
+  if(maximum<floor)maximum=floor;
+  const choice={level:'custom',maxFeePerGas:'0x'+maximum.toString(16),
+    maxPriorityFeePerGas:'0x'+priority.toString(16)};
+  const transaction={from:original.controller,to:target,value,data};
+  const quote=await quoteExtensionSend420(provider,{
+    chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
+    entryPoint:state.account.entryPoint,transaction,choice,strictUserOpGas:true,
+    expectedNonce:original.nonce});
+  const callData=encodeExecute(target,BigInt(value),data);
+  const candidate={executionModel:'erc4337',action:message.action,
+    chainId:original.chainId,sender:original.sender,entryPoint:original.entryPoint,
+    entryPointVersion:original.entryPointVersion,nonce:original.nonce,
+    maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas,
+    initCode:original.initCode,callData,verifiedNoOp:message.action==='cancel'};
+  const validated=validateUserOpReplacement420(original,candidate);
+  return {originalId:original.id,originalHash:original.userOpHash,action:message.action,
+    chainId:state.network.expectedChainId,epoch:state.network.epoch,account:state.selectedAccount,
+    transaction,quote,nonce:validated.nonce,entryPoint:validated.entryPoint,
+    replaces:validated.replaces,nonceKey:validated.nonceKey};
+}
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='addressbook-save'||kind==='addressbook-delete'){
+    const chain=await effectiveChain420();
+    if(message.chainId!==chain.chainId)throw Object.assign(new Error('Network changed; refresh contacts'),{code:4901});
+    const previous=normalizeExtensionAddressBook420(
+      (await chrome.storage.local.get(EXTENSION_ADDRESS_BOOK_KEY_420))?.[EXTENSION_ADDRESS_BOOK_KEY_420]);
+    const next=kind==='addressbook-save'
+      ?addExtensionContact420(previous,{label:message.label,address:message.address,chainId:chain.chainId})
+      :removeExtensionContact420(previous,{address:message.address,chainId:chain.chainId});
+    await chrome.storage.local.set({[EXTENSION_ADDRESS_BOOK_KEY_420]:next});
+    return walletUiState420();
+  }
   if(kind==='site-network'){
     const origin=normalizeOrigin(message.origin);
     await changeNetwork420(message.chainId,{origin});return walletUiState420();
@@ -796,33 +1173,189 @@ async function handleWalletUi420(message) {
     await changeNetwork420(chainId);
     return walletUiState420();
   }
+  if(kind==='replacement-preflight')return replacementPreview420(message);
+  if(kind==='replacement-submit'){
+    if(message.confirmed!==true)throw Object.assign(new Error('Explicit replacement confirmation required'),{code:4001});
+    const preview=await replacementPreview420(message);
+    const provided=message.preview;
+    if(!provided||provided.action!==preview.action||provided.originalId!==preview.originalId||
+       provided.originalHash!==preview.originalHash||provided.chainId!==preview.chainId||
+       provided.epoch!==preview.epoch||provided.account!==preview.account||
+       provided.quote?.blockHash!==preview.quote.blockHash||
+       (preview.executionModel==='eoa'?
+         (provided.quote?.nonce!==preview.quote.nonce||
+          provided.quote?.gasLimit!==preview.quote.gasLimit||
+          provided.quote?.maxFeePerGas!==preview.quote.maxFeePerGas||
+          provided.quote?.maxPriorityFeePerGas!==preview.quote.maxPriorityFeePerGas):
+         (provided.quote?.gasFees!==preview.quote.gasFees||
+          provided.quote?.nonce!==preview.quote.nonce||
+          provided.quote?.gasBudget?.accountGasLimits!==preview.quote.gasBudget?.accountGasLimits||
+          provided.quote?.gasBudget?.preVerificationGas!==preview.quote.gasBudget?.preVerificationGas))||
+       JSON.stringify(provided.transaction)!==JSON.stringify(preview.transaction))
+      throw Object.assign(new Error('Replacement fee, nonce, chain or intent changed; review again'),{code:4001});
+    const source=(await readWalletUiActivity420()).find(x=>x.id===preview.originalId);
+    const id='replacement-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+    const entry={id,at:Date.now(),chainId:preview.chainId,controller:preview.account,
+      smartAccount:source.smartAccount,recipient:preview.transaction.to,
+      amount:preview.action==='cancel'?'0':source.amount,symbol:source.symbol,
+      status:'pending',hash:null,action:preview.action,
+      executionModel:preview.executionModel||'erc4337',
+      replaces:preview.replaces,originalId:preview.originalId};
+    await rememberWalletUiActivity420(entry);
+    let hash=null;
+    try{
+      hash=await executeWithLocalAuthority({
+        method:'eth_sendTransaction',
+        params:[preview.executionModel==='eoa'?
+          {...preview.transaction,executionModel:'eoa',chainId:preview.chainId,
+            nonce:preview.nonce,gasLimit:preview.quote.gasLimit,
+            maxFeePerGas:preview.quote.maxFeePerGas,
+            maxPriorityFeePerGas:preview.quote.maxPriorityFeePerGas}:
+          {...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce,
+            accountGasLimits:preview.quote.gasBudget.accountGasLimits,
+            preVerificationGas:preview.quote.gasBudget.preVerificationGas}]
+      },{origin:null,chainId:preview.chainId,epoch:preview.epoch,accounts:[preview.account],tabId:null,activityId:id});
+      await rememberWalletUiActivity420({...entry,status:'submitted',hash});
+      return {status:'submitted',hash,originalId:source.id};
+    }catch(error){
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      const submittedHash=hash||(validHash420(error?.data?.hash)?error.data.hash.toLowerCase():null);
+      await rememberWalletUiActivity420({...entry,status:(submittedHash||userOpHash)?'submitted':'failed',
+        hash:submittedHash,userOpHash,
+        error:error?.message||'Replacement not authorized'});
+      throw error;
+    }
+  }
+  if(kind==='send-native-max'){
+    const state=await walletUiState420();
+    if(state.account.kind!=='eoa'||!extensionCanSend420(state)||
+       state.selectedAccount!==message.account||
+       state.network.expectedChainId!==message.chainId||
+       state.network.epoch!==message.epoch)
+      throw Object.assign(new Error('Unlocked EOA and unchanged verified chain required'),{code:4100});
+    const provider={request:(method,params)=>rpcRequest(method,params,
+      {expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const resolved=await resolveExtensionRecipient420(provider,{
+      input:message.recipient,chainId:message.chainId,qualifiedNamesConfig});
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const quote=await quoteExtensionEoa420(provider,{
+      chainId:message.chainId,from:state.selectedAccount,
+      transaction:{to:resolved.recipient,value:'0x0',data:'0x'},choice});
+    const balance=await provider.request('eth_getBalance',[state.selectedAccount,'pending']);
+    if(typeof balance!=='string'||!/^0x[0-9a-fA-F]+$/.test(balance))
+      throw new Error('Verified pending EOA balance unavailable');
+    const available=BigInt(balance)-BigInt(quote.totalFeeWei);
+    if(available<=0n)throw new Error('Insufficient EOA balance after maximum EIP-1559 gas cost');
+    const newQuote=await quoteExtensionEoa420(provider,{
+      chainId:message.chainId,from:state.selectedAccount,
+      transaction:{to:resolved.recipient,value:'0x'+available.toString(16),data:'0x'},choice});
+    if(quote.nonce!==newQuote.nonce||quote.gasLimit!==newQuote.gasLimit||
+       quote.maxFeePerGas!==newQuote.maxFeePerGas||
+       quote.maxPriorityFeePerGas!==newQuote.maxPriorityFeePerGas||
+       quote.blockHash!==newQuote.blockHash)
+      throw new Error('Gas cost or EOA nonce changed during Max; recompute');
+    const active=await effectiveChain420();
+    if(active.chainId!==message.chainId||active.epoch!==message.epoch)
+      throw new Error('Network changed while computing native Max');
+    return {raw:available.toString(),decimals:state.config.nativeCurrency.decimals,
+      symbol:state.config.nativeCurrency.symbol,recipientSnapshot:resolved,
+      feeWei:quote.totalFeeWei,nonce:quote.nonce};
+  }
+  if(kind==='send-preflight'){
+    const state=await walletUiState420();
+    if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||
+       state.selectedAccount!==message.account||!extensionCanSend420(state))
+      throw Object.assign(new Error('Account, signing authority or network changed'),{code:4901});
+    const nameProvider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const recipientSnapshot=await resolveExtensionRecipient420(nameProvider,{
+      input:message.recipient,chainId:state.network.expectedChainId,qualifiedNamesConfig});
+    const transaction=buildExtensionSend420({
+      from:state.account.controller,recipient:recipientSnapshot.recipient,amount:message.amount,
+      asset:message.asset,
+      trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status==='spendable')||[],
+    });
+    const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const quote=state.account.kind==='eoa'?
+      await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
+        from:state.account.controller,transaction:transaction.transaction,choice}):
+      await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
+        smartAccount:state.account.smartAccount,entryPoint:state.account.entryPoint,
+        transaction:transaction.transaction,choice,strictUserOpGas:true});
+    const current=await effectiveChain420();
+    if(current.chainId!==message.chainId||current.epoch!==message.epoch)
+      throw Object.assign(new Error('Chain changed during preflight'),{code:4901});
+    return {transaction,quote,recipientSnapshot};
+  }
   if(kind==='send'){
     if(message.confirmed!==true)throw Object.assign(new Error('Explicit transaction confirmation required'),{code:4001});
     const state=await walletUiState420();
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||state.selectedAccount!==message.account)
       throw Object.assign(new Error('Network or account changed since review'),{code:4901});
     if(!extensionCanSend420(state))throw Object.assign(new Error('Verified deployed SmartAccount owner and matching chain required'),{code:4100});
+    const nameProvider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const recipientSnapshot=await resolveExtensionRecipient420(nameProvider,{
+      input:message.recipient,chainId:state.network.expectedChainId,qualifiedNamesConfig});
+    assertExtensionRecipientSnapshot420(message.recipientSnapshot,recipientSnapshot);
     const request=buildExtensionSend420({
-      from:state.account.controller,recipient:message.recipient,amount:message.amount,
+      from:state.account.controller,recipient:recipientSnapshot.recipient,amount:message.amount,
       asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
     });
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const quote=state.account.kind==='eoa'?
+      await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
+        from:state.account.controller,transaction:request.transaction,choice}):
+      await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
+        smartAccount:state.account.smartAccount,entryPoint:state.account.entryPoint,
+        transaction:request.transaction,choice,strictUserOpGas:true});
+    if(!message.preflight||message.preflight.chainId!==quote.chainId||
+       message.preflight.from!==quote.from||message.preflight.to!==quote.to||
+       message.preflight.blockHash!==quote.blockHash||
+       (state.account.kind==='eoa'?
+         (message.preflight.executionModel!=='eoa'||
+          message.preflight.nonce!==quote.nonce||
+          message.preflight.gasLimit!==quote.gasLimit||
+          message.preflight.maxFeePerGas!==quote.maxFeePerGas||
+          message.preflight.maxPriorityFeePerGas!==quote.maxPriorityFeePerGas):
+         (message.preflight.gasFees!==quote.gasFees||
+          message.preflight.nonce!==quote.nonce||message.preflight.entryPoint!==quote.entryPoint||
+          message.preflight.gasBudget?.accountGasLimits!==quote.gasBudget?.accountGasLimits||
+          message.preflight.gasBudget?.preVerificationGas!==quote.gasBudget?.preVerificationGas)))
+      throw Object.assign(new Error('Preflight changed since review; review transaction again'),{code:4001});
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
       controller:state.account.controller,smartAccount:state.account.smartAccount,
+      executionModel:state.account.kind==='eoa'?'eoa':'erc4337',
       recipient:request.summary.recipient,amount:request.summary.amount,
       symbol:request.summary.symbol,status:'pending',hash:null};
     await rememberWalletUiActivity420(entry);
+    let hash=null;
     try {
-      const hash=await executeWithLocalAuthority(
-        {method:'eth_sendTransaction',params:[request.transaction]},
-        {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null}
+      hash=await executeWithLocalAuthority(
+        {method:'eth_sendTransaction',params:[state.account.kind==='eoa'?
+          {...request.transaction,executionModel:'eoa',chainId:quote.chainId,
+            recipientSnapshot,
+            nonce:quote.nonce,gasLimit:quote.gasLimit,
+            maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas}:
+          {...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level,
+            recipientSnapshot,
+            accountGasLimits:quote.gasBudget.accountGasLimits,
+            preVerificationGas:quote.gasBudget.preVerificationGas,expectedNonce:quote.nonce}]},
+        {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null,activityId:id}
       );
       const current=await effectiveChain420();
       if(current.chainId!==entry.chainId||current.epoch!==state.network.epoch)throw Object.assign(new Error('Chain changed during transaction'),{code:4901});
-      await rememberWalletUiActivity420({...entry,status:'confirmed',hash});
-      return {hash,status:'confirmed'};
+      // A hash confirms submission only. Inclusion/finality must be verified from a canonical receipt.
+      await rememberWalletUiActivity420({...entry,status:'submitted',hash});
+      return {hash,status:'submitted'};
     }catch(error){
-      await rememberWalletUiActivity420({...entry,status:'failed',error:error?.message||'Authorization failed'});
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,status:(hash||userOpHash)?'submitted':'failed',hash,userOpHash,
+        error:error?.message||'Authorization failed'});
       throw error;
     }
   }
@@ -848,6 +1381,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }catch(error){sendResponse({error:serializeError(error)});}})();
     return true;
   }
+  if (message?.source==='420-wallet-authority-ui'&&message.kind==='authority-submitted'){
+    (async()=>{try{
+      sendResponse({result:await recordAuthoritySubmission420(sender,message.authorityRequestId,message.submission)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
+  if(message?.source==='420-wallet-authority-ui'&&message.kind==='authority-eoa-signed'){
+    (async()=>{try{sendResponse({result:await recordAuthoritySignedEoa420(
+      sender,message.authorityRequestId,message.submission)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
   if (message?.source === '420-wallet-authority-ui' && message.kind === 'authority-rpc') {
     (async () => {
       try {
@@ -862,6 +1407,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const effective=await effectiveChain420(approval?.context?.origin);
         if(!approval?.context?.chainId||effective.chainId!==approval.context.chainId||effective.epoch!==approval.context.epoch)
           throw Object.assign(new Error('Network changed; authority request cancelled'),{code:4901});
+        if(request.method==='eth_sendRawTransaction'){
+          if(approval.request?.method!=='eth_sendTransaction'||
+             approval.request?.params?.[0]?.executionModel!=='eoa')
+            throw Object.assign(new Error('Raw transaction broadcast is restricted to the local EOA authority'),{code:4100});
+          const raw=request.params?.[0];
+          const localHash=assertEoaRawMatchesAuthority420(raw,approval.request.params[0]);
+          const rpcHash=await rpcRequest('eth_sendRawTransaction',[raw],
+            {origin:approval.context.origin,expectedChainId:approval.context.chainId});
+          if(typeof rpcHash!=='string'||rpcHash.toLowerCase()!==localHash)
+            throw new Error('RPC response hash differs from locally signed EOA transaction');
+          sendResponse({result:localHash});
+          return;
+        }
         const result=await rpcRequest(request.method,request.params??[],{origin:approval.context.origin,expectedChainId:approval.context.chainId});
         sendResponse({ result });
       } catch (error) {

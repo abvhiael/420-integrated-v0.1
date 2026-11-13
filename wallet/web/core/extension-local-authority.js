@@ -1,3 +1,5 @@
+import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './extension-recipient-resolver.js';
+import {packExtensionUserOpFees420} from './extension-fee-preflight.js';
 import { normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
 import { preparePasskeyUserOperationTransport } from './passkey-entrypoint-transport.js';
@@ -18,6 +20,11 @@ function txRequest(request = {}) {
     target: normalizeAddress(tx.to),
     value: tx.value ?? '0x0',
     data: tx.data ?? '0x',
+    gasFees:tx.gasFees??null,
+    expectedNonce:tx.expectedNonce??null,
+    accountGasLimits:tx.accountGasLimits??null,
+    preVerificationGas:tx.preVerificationGas??null,
+    recipientSnapshot:tx.recipientSnapshot??null,
   };
 }
 
@@ -64,7 +71,7 @@ async function waitForUserOperationReceipt(provider, userOpHash, { timeoutMs = 1
     }
     await new Promise((resolve) => setTimeout(resolve, pollMs));
   }
-  throw rpcError(4900, 'timed out waiting for SmartAccount420 user operation receipt');
+  throw rpcError(4900, 'SmartAccount420 UserOperation receipt still pending; do not rebroadcast automatically', {userOpHash:userOpHash.toLowerCase(),pending:true});
 }
 
 export function createExtensionLocalAuthority420({
@@ -76,6 +83,8 @@ export function createExtensionLocalAuthority420({
   signMessage = null,
   signTypedData = null,
   receiptOptions = {},
+  onUserOperationSubmitted = null,
+  qualifiedNamesRuntime = null,
 } = {}) {
   if (!provider || typeof provider.request !== 'function') throw new Error('extension authority provider required');
   if (!navigatorLike?.credentials || typeof navigatorLike.credentials.get !== 'function') throw new Error('extension WebAuthn authority required');
@@ -94,18 +103,44 @@ export function createExtensionLocalAuthority420({
       const binding = await loadPasskeyBinding({ account: controller, smartAccount: smartAccount.smartAccount, context });
       if (!binding) throw rpcError(4100, 'no active local passkey binding is available for this SmartAccount420');
 
+      if(tx.gasFees){
+        if(typeof tx.gasFees!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(tx.gasFees))
+          throw rpcError(-32602,'invalid packed UserOperation gas fees');
+        const priority='0x'+tx.gasFees.slice(2,34),maximum='0x'+tx.gasFees.slice(34,66);
+        if(packExtensionUserOpFees420({maxFeePerGas:maximum,maxPriorityFeePerGas:priority}).toLowerCase()!==tx.gasFees.toLowerCase())
+          throw rpcError(-32602,'invalid signed fee caps');
+      }
+      const assertReviewedRecipient=async()=>{
+        if(!tx.recipientSnapshot)return;
+        if(tx.recipientSnapshot.recipient!==tx.target)
+          throw rpcError(4100,'signed transaction target differs from confirmed resolved name');
+        const resolved=await resolveExtensionRecipient420(provider,{
+          input:tx.recipientSnapshot.input,chainId:context.chainId,
+          qualifiedNamesConfig:qualifiedNamesRuntime,
+        });
+        assertExtensionRecipientSnapshot420(tx.recipientSnapshot,resolved);
+      };
+      await assertReviewedRecipient();
       const prepared = await preparePasskeyUserOperationTransport(
         provider,
         navigatorLike,
         smartAccount,
         binding,
-        { target: tx.target, value: tx.value, data: tx.data },
+        { target: tx.target, value: tx.value, data: tx.data,
+          ...(tx.gasFees?{gasFees:tx.gasFees}:{}),
+          ...(tx.expectedNonce?{expectedNonce:tx.expectedNonce}:{}),
+          accountGasLimits:tx.accountGasLimits,
+          preVerificationGas:tx.preVerificationGas,
+          expectedChainId:context.chainId,
+          requireBundlerGasEstimate:true,
+        },
         { rpId: binding.rpId, origin: binding.origin },
       );
       if (!prepared?.broadcastReady || !prepared?.entryPointSimulation?.simulationPassed) {
         throw rpcError(-32603, 'local passkey UserOperation did not qualify for broadcast');
       }
 
+      await assertReviewedRecipient();
       const rpcUserOperation = toRpcUserOperation(prepared.userOperation);
       const userOpHash = await provider.request('eth_sendUserOperation', [rpcUserOperation, prepared.entryPoint]);
       if (!validHash(userOpHash)) throw rpcError(-32603, 'bundler returned an invalid UserOperation hash');
@@ -113,7 +148,34 @@ export function createExtensionLocalAuthority420({
         throw rpcError(-32603, 'bundler UserOperation hash does not match the locally signed canonical hash');
       }
       await persistPasskeyBinding(prepared.advancedBinding, { account: controller, context });
-      return waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
+      // Persist the submission identity before waiting for a bundler receipt, so
+      // service-worker suspension or an RPC outage does not erase transaction history.
+      if(typeof onUserOperationSubmitted==='function'){
+        await onUserOperationSubmitted({
+          userOpHash:userOpHash.toLowerCase(),sender:prepared.userOperation.sender,
+          entryPoint:prepared.entryPoint,entryPointVersion:'0.7',
+          nonce:'0x'+BigInt(prepared.nonce).toString(16),
+          nonceKey:'0x'+BigInt(prepared.nonceKey).toString(16),
+          nonceSequence:'0x'+(BigInt(prepared.nonce)&((1n<<64n)-1n)).toString(16),
+          gasFees:prepared.userOperation.gasFees,
+          callData:prepared.userOperation.callData,
+          initCode:prepared.userOperation.initCode,
+          target:prepared.target,value:'0x'+BigInt(prepared.value).toString(16),data:prepared.data,
+          source:'extension-local-passkey',
+        },context);
+      }
+
+      try {
+        return await waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
+      } catch (error) {
+        // Submission happened before receipt tracking. Preserve the signed operation
+        // identity on timeout/outage, without misreporting it as a failed transfer.
+        if (error?.code !== -32603 && error?.code !== 4001) {
+          error.data = {...(error.data && typeof error.data==='object' ? error.data : {}),
+            userOpHash:userOpHash.toLowerCase(),pending:true};
+        }
+        throw error;
+      }
     }
 
     if (request?.method === 'personal_sign') {

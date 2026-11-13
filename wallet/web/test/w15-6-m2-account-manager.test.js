@@ -69,7 +69,7 @@ test('M2: account switching, origin permission filtering and transaction signer 
  assert.match(source,/notifyDisconnectedSite420\(origin\)/);
  assert.match(source,/Untrusted account manager/);
  assert.match(source,/accountMeta/);
- assert.match(source,/activity:\(await readWalletUiActivity420\(\)\).filter/);
+ assert.match(source,/activity:\(await refreshWalletUiActivity420\(\)\).filter/);
 });
 test('M2: account manager never exports keys to service worker; deliberate password authentication precedes reveal',()=>{
  const source=read('wallet.js'),html=read('wallet.html');

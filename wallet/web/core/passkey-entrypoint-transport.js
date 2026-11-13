@@ -1,3 +1,4 @@
+import {estimateExtensionUserOpGas420} from './extension-userop-gas.js';
 import { normalizeAddress } from './abi.js';
 import { encodeExecute, normalizeBytes32 } from './abi.js';
 import { normalizeCallData, normalizeNativeValue } from './execution.js';
@@ -96,7 +97,22 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
   await assertPasskeyActive(provider, smartAccountState.smartAccount, validated.credentialIdHash);
   const nonce = await readOwnerNonce(provider, smartAccountState.smartAccount);
   if ((nonce >> 64n) !== 0n) throw new Error('passkey owner nonce is not on lane zero');
+  if(request.expectedNonce!=null&&BigInt(request.expectedNonce)!==nonce)
+    throw new Error('UserOperation nonce advanced or changed: replacement is no longer safe');
 
+  if(request.requireBundlerGasEstimate===true){
+    if(!request.expectedChainId||!request.gasFees||
+       !/^0x[0-9a-fA-F]{64}$/.test(request.accountGasLimits||'')||
+       request.preVerificationGas==null)
+      throw new Error('reviewed ERC-4337 gas limits, fee caps and chain required before passkey signing');
+    await estimateExtensionUserOpGas420(provider,{
+      chainId:request.expectedChainId,sender:smartAccountState.smartAccount,
+      entryPoint,nonce:'0x'+nonce.toString(16),
+      target,value:'0x'+value.toString(16),data,gasFees:request.gasFees,
+      approvedLimits:{accountGasLimits:request.accountGasLimits,
+        preVerificationGas:request.preVerificationGas},
+    });
+  }
   const unsigned = normalizePackedUserOperation({
     sender: smartAccountState.smartAccount,
     nonce,

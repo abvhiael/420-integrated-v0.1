@@ -35,7 +35,7 @@ jobs:
         run: node scripts/check-release.mjs
       - name: Install Chromium UI test dependency
         working-directory: wallet/extension
-        run: npm install --no-save --no-package-lock playwright
+        run: npm install --no-save --no-package-lock playwright jsqr
       - name: Install Chromium browser
         working-directory: wallet/extension
         run: npx playwright install --with-deps chromium

@@ -492,10 +492,10 @@ function setup(){
       $('send-state').textContent='Waiting for local passkey authorization, simulation and transaction receipt. Do not close the approval window.';
       const receipt=await command('send',{confirmed:true,chainId:before.chainId,epoch:before.epoch,account:before.controller,
         recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset});
-      $('send-state').textContent='Transaction confirmed: '+receipt.hash;
+      $('send-state').textContent='Transaction submitted: '+receipt.hash+' — awaiting network confirmation.';
       resetReview();
       await refresh();screen('activity-view');
-      tell('Transaction confirmed.');
+      tell('Transaction submitted. Confirmation is pending.');
     }catch(e){
       $('send-state').textContent='Transaction not confirmed: '+e.message;
     }finally{state.submitting=false;$('send-confirm').disabled=false;}

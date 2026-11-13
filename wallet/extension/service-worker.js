@@ -1345,7 +1345,34 @@ async function securityWatchEntries420(ctx,smart=null){
  }));
 }
 async function securityState420(){
- const ctx=await securityIdentity420();
+ let ctx;
+ try{ctx=await securityIdentity420();}
+ catch(error){
+  // A wrong-chain or offline wallet must still permit local website
+  // disconnection and inspection of prior local signature warnings.
+  const wallet=await walletUiState420();
+  const localRecords=await readObject(PERMISSIONS_KEY);
+  const signatures=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY];
+  const account=wallet.selectedAccount,chainId=wallet.network.expectedChainId;
+  const sites=wallet.sites.map(site=>({
+   ...site,grantedAt:localRecords[site.origin]?.grantedAt??null,
+   securityRisk:classifyWebsiteRisk420(site.origin),browserOnly:true
+  }));
+  const history=(Array.isArray(signatures)?signatures:[]).filter(x=>
+   x?.account===account&&x?.chainId===chainId).slice(0,80);
+  const watchedRaw=await readObject(SECURITY_WATCH_KEY);
+  const watched=account&&chainId&&Array.isArray(watchedRaw[securityContextKey420(chainId,account)])?
+   watchedRaw[securityContextKey420(chainId,account)].slice(0,60).map(x=>({
+    ...x,status:'unverified',verified:false,warning:'Offline or wrong-chain; no on-chain verification'
+   })):[];
+  return {chainId,account,epoch:wallet.network.epoch,sites,signatures:history,
+   watched,passkeys:[],discovered:{entries:[],partial:true,note:'Chain unavailable'},
+   alerts:[...sites.flatMap(site=>site.securityRisk.flags.map(message=>({
+    kind:'site',origin:site.origin,message
+   }))),{kind:'network',message:'On-chain security authorities cannot be verified: '+error.message}],
+   smart:null,smartError:error.message,
+   disclosure:'Offline view: local sites, signatures and watch records only. On-chain status is unknown; disconnected sites may retain independent on-chain authority.'};
+ }
  let smart=null,smartError=null,passkeys=[],watched=[];
  try{smart=await securitySmartAccount420(ctx);}
  catch(error){smartError=error.message;}
@@ -1402,6 +1429,27 @@ async function securityState420(){
   disclosure:'This device shows locally recorded activity and explicitly watched authorities only. Discovery is not a complete chain-wide approval or signing history.'};
 }
 async function securityWatch420(message,remove=false){
+ if(remove){
+  // Unwatching is a local-only storage action. It must remain possible even
+  // when RPC is offline or the current network cannot be qualified.
+  const registry=await networkRegistry420(),
+    prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const chainId=registry.selectedChainId,account=prefs.selectedAccount;
+  if(!chainId||!account)throw Object.assign(new Error('Account and network must be selected'),{code:4100});
+  const key=securityContextKey420(chainId,account),all=await readObject(SECURITY_WATCH_KEY);
+  const records=Array.isArray(all[key])?all[key]:[];
+  const kind=message.authorityKind;
+  const match=x=>x.kind===kind&&(
+   kind==='allowance'?x.token===String(message.token||'').toLowerCase()&&
+     x.spender===String(message.spender||'').toLowerCase()&&x.owner===message.owner:
+   kind==='capability'?x.grantId===String(message.grantId||'').toLowerCase():
+   kind==='session'?x.key===String(message.key||'').toLowerCase():
+   kind==='passkey'?x.credentialIdHash===String(message.credentialIdHash||'').toLowerCase():false
+  );
+  all[key]=records.filter(x=>!match(x));
+  await chrome.storage.local.set({[SECURITY_WATCH_KEY]:all});
+  return {removed:records.length!==all[key].length,localOnly:true};
+ }
  const ctx=await securityIdentity420();
  const kind=message.authorityKind;
  if(!SECURITY_KINDS_420.has(kind))throw Object.assign(new Error('Unknown security authority type'),{code:-32602});
@@ -1433,7 +1481,7 @@ async function securityWatch420(message,remove=false){
  const key=securityContextKey420(ctx.chainId,ctx.account);
  const all=await readObject(SECURITY_WATCH_KEY),arr=Array.isArray(all[key])?all[key]:[];
  const id=JSON.stringify(record),records=arr.filter(x=>JSON.stringify(x)!==id);
- if(!remove)records.unshift(record);
+ records.unshift(record);
  if(records.length>60)throw Object.assign(new Error('Security watch limit reached'),{code:4100});
  all[key]=records;
  await chrome.storage.local.set({[SECURITY_WATCH_KEY]:all});

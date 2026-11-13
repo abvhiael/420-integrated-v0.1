@@ -1,3 +1,4 @@
+import {walletConnectProject420,walletConnectProposal420,walletConnectRequest420,walletConnectResult420,walletConnectError420} from './core/walletconnect-policy420.js';
 import {CONVENIENCE_KEY420,normalizeConvenience420,updateAddressLabel420,normalizeServiceDirectory420,portfolioAnalytics420,actionableNotifications420,validateMobileInvite420} from './core/extension-convenience420.js';
 import {financeProviderCatalog420,financeOptions420,financePrepare420,assertFinanceReview420,financeStakeStatus420} from './core/finance-runtime420.js';
 import {bridgeReceiptEvidence420,bridgeDestinationEvidence420,verifyFinanceDeployment420} from './core/finance420.js';
@@ -2072,6 +2073,145 @@ async function financeCommands420(message){
 }
 
 
+
+const WC_CONFIG_KEY420='420-wallet-walletconnect-v2-v1';
+const WC_SESSIONS_KEY420='420-wallet-walletconnect-sessions-v1';
+let wcInstance420=null,wcProject420=null;
+async function walletConnectRuntime420(){
+ const cfg=await readObject(WC_CONFIG_KEY420);
+ const projectId=walletConnectProject420(cfg.projectId);
+ if(wcInstance420&&wcProject420===projectId)return wcInstance420;
+ if(wcInstance420&&wcProject420!==projectId)
+   throw new Error('WalletConnect project changed; disconnect existing sessions before reinitializing');
+ const {WalletKit,Core}=await import('./vendor/walletconnect-walletkit.bundle.js');
+ const core=new Core({projectId,customStoragePrefix:'420wallet-m11'});
+ const kit=await WalletKit.init({core,metadata:{
+   name:'420 Wallet',description:'420Integrated noncustodial EVM wallet',
+   url:'https://420integrated.com',icons:[]
+ }});
+ kit.on('session_proposal',proposal=>walletConnectProposalEvent420(kit,proposal).catch(()=>{}));
+ kit.on('session_request',event=>walletConnectRequestEvent420(kit,event).catch(()=>{}));
+ kit.on('session_delete',event=>walletConnectDeleteEvent420(event).catch(()=>{}));
+ wcInstance420=kit;wcProject420=projectId;
+ return kit;
+}
+async function walletConnectProposalEvent420(kit,proposal){
+ let accepted=false;
+ try{
+   const w=await walletUiState420();
+   const privacy=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]).privacy;
+   if(!privacy.allowDeepLinks||!extensionCanSend420(w)||w.network.status!=='matched')
+     throw new Error('WalletConnect permission or signing authority unavailable');
+   const details=walletConnectProposal420(proposal,{chainId:w.network.expectedChainId,account:w.selectedAccount});
+   const current=await effectiveChain420();
+   await createApproval({method:'walletconnect_sessionProposal',params:[{
+     dapp:details.name,origin:details.origin,chainId:details.network,
+     walletAccount:details.account,requestedMethods:details.methods,
+     requestedEvents:details.events,
+     warning:'Remote WalletConnect session. Approving shares your address and authorizes the listed methods, but every signature and transaction still requires a separate wallet approval.'
+   }],securityRisk:{severity:'high',flags:['Remote relay session; verify sender URL and methods']}},
+   {origin:details.origin,chainId:current.chainId,epoch:current.epoch,
+     accounts:[w.selectedAccount],tabId:null});
+   const after=await walletUiState420();
+   if(after.selectedAccount!==details.account||after.network.expectedChainId!==current.chainId||
+      after.network.epoch!==current.epoch||!extensionCanSend420(after))
+     throw new Error('WalletConnect approval expired; wallet/chain/authority changed');
+   const sessions=await readObject(WC_SESSIONS_KEY420);
+   const result=await kit.approveSession({id:proposal.id,namespaces:details.namespaces});
+   if(typeof result?.topic!=='string')throw new Error('WalletConnect did not establish a session topic');
+   const originPermissions=await readObject(PERMISSIONS_KEY);
+   // Preserve the preexisting injected-site grant, and only add the new
+   // origin grant if the user specifically approved this relay proposal.
+   sessions[result.topic]={origin:details.origin,account:details.account,chainId:current.chainId,
+     network:details.network,methods:details.methods,at:Date.now(),
+     injectedGrantAlreadyPresent:Array.isArray(originPermissions[details.origin]?.accounts)};
+   await chrome.storage.local.set({[WC_SESSIONS_KEY420]:sessions});
+   if(!sessions[result.topic].injectedGrantAlreadyPresent)await setAccounts(details.origin,[details.account]);
+   accepted=true;
+ }catch(error){
+   if(!accepted)await kit.rejectSession({id:proposal.id,reason:{code:5000,message:'WalletConnect proposal declined or unqualified'}}).catch(()=>{});
+ }
+}
+async function walletConnectRequestEvent420(kit,event){
+ const id=event?.id,topic=event?.topic;
+ try{
+   const registry=await readObject(WC_SESSIONS_KEY420),stored=registry[topic];
+   const sdkSession=kit.getActiveSessions?.()?.[topic];
+   if(!stored||!sdkSession||!Number.isSafeInteger(id))throw new Error('Unknown or expired WalletConnect session');
+   const w=await walletUiState420();
+   const privacy=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]).privacy;
+   if(!privacy.allowDeepLinks||!extensionCanSend420(w)||w.network.status!=='matched'||
+      w.selectedAccount!==stored.account||w.network.expectedChainId!==stored.chainId)
+     throw new Error('WalletConnect network/account/permission changed');
+   const request=walletConnectRequest420({...sdkSession,topic},event,stored);
+   const effective=await effectiveChain420(stored.origin);
+   if(effective.chainId!==stored.chainId||effective.epoch!==w.network.epoch)
+     throw new Error('WalletConnect origin network does not match reviewed wallet chain');
+   const result=await handleApprovalMethod({method:request.method,params:request.params},{
+     origin:stored.origin,chainId:effective.chainId,epoch:effective.epoch,
+     accounts:[stored.account],tabId:null
+   });
+   await kit.respondSessionRequest({topic,response:walletConnectResult420(id,result)});
+ }catch(error){
+   if(typeof topic==='string'&&Number.isSafeInteger(id))
+     await kit.respondSessionRequest({topic,response:walletConnectError420(id,error)}).catch(()=>{});
+ }
+}
+async function walletConnectDeleteEvent420(event){
+ const topic=event?.topic;
+ if(typeof topic!=='string')return;
+ const registry=await readObject(WC_SESSIONS_KEY420);
+ const session=registry[topic];if(!session)return;
+ delete registry[topic];
+ await chrome.storage.local.set({[WC_SESSIONS_KEY420]:registry});
+ if(!session.injectedGrantAlreadyPresent&&
+    !Object.values(registry).some(s=>s.origin===session.origin)){
+   const permissions=await readObject(PERMISSIONS_KEY);
+   if(permissions[session.origin]?.accounts?.length===1&&
+      permissions[session.origin].accounts[0]===session.account){
+     delete permissions[session.origin];
+     await chrome.storage.local.set({[PERMISSIONS_KEY]:permissions});
+     await notifyDisconnectedSite420(session.origin);
+   }
+ }
+}
+async function walletConnectCommand420(message){
+ if(message.kind==='walletconnect-config'){
+   const cfg=await readObject(WC_CONFIG_KEY420);
+   return {configured:typeof cfg.projectId==='string'&&/^[0-9a-fA-F]{32}$/.test(cfg.projectId),
+     connected:Object.keys(await readObject(WC_SESSIONS_KEY420)).length,
+     sessions:Object.entries(await readObject(WC_SESSIONS_KEY420)).map(([topic,s])=>({
+       topic,origin:s.origin,account:s.account,chainId:s.chainId}))};
+ }
+ if(message.kind==='walletconnect-set-project'){
+   const projectId=walletConnectProject420(message.projectId);
+   const sessions=await readObject(WC_SESSIONS_KEY420);
+   if(Object.keys(sessions).length)throw new Error('Disconnect existing WalletConnect sessions before changing project');
+   if(wcInstance420&&wcProject420!==projectId)throw new Error('Restart the extension before changing WalletConnect relay project');
+   await chrome.storage.local.set({[WC_CONFIG_KEY420]:{projectId}});
+   return {configured:true,connected:0};
+ }
+ if(message.kind==='walletconnect-pair'){
+   const privacy=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]).privacy;
+   if(!privacy.allowDeepLinks||message.confirmed!==true)
+     throw Object.assign(new Error('WalletConnect pairing requires explicit user consent'),{code:4001});
+   const invite=validateMobileInvite420(message.uri);
+   const kit=await walletConnectRuntime420();
+   await kit.pair({uri:invite.uri});
+   return {status:'pairing-initiated',topic:invite.topic,
+     note:'No account permission has been granted. Review and approve the separate incoming session proposal.'};
+ }
+ if(message.kind==='walletconnect-disconnect'){
+   const sessions=await readObject(WC_SESSIONS_KEY420),stored=sessions[message.topic];
+   if(!stored)throw new Error('Unknown WalletConnect session');
+   const kit=await walletConnectRuntime420();
+   await kit.disconnectSession({topic:message.topic,reason:{code:6000,message:'User disconnected WalletConnect session'}});
+   await walletConnectDeleteEvent420({topic:message.topic});
+   return walletConnectCommand420({kind:'walletconnect-config'});
+ }
+ throw new Error('Unsupported WalletConnect operation');
+}
+
 const NOTIFICATION_DELIVERED_KEY420='420-wallet-notifications-delivered-v1';
 async function convenienceState420(){
  const wallet=await walletUiState420();
@@ -2176,6 +2316,7 @@ async function maybeNotifyWalletActivity420(){
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind.startsWith('convenience-'))return convenienceCommand420(message);
+  if(kind.startsWith('walletconnect-'))return walletConnectCommand420(message);
   if(kind.startsWith('finance-'))return financeCommands420(message);
   if(kind==='get-state')return walletUiState420();
   if(kind==='nft-import')return nftImport420(message);

@@ -73,6 +73,8 @@
       <section id="activity-view" class="view" hidden aria-labelledby="activity-title">
         <div class="topline"><span class="eyebrow">TRANSACTION HISTORY</span><span class="chip">THIS DEVICE</span></div>
         <h1 id="activity-title" class="screen-title">Activity</h1>
+        <button id="refresh-transactions" type="button" class="secondary">Check receipts and confirmations</button>
+        <p class="intro">Pending, submitted, included, confirmed, reverted, dropped, replaced, cancelled and reorganized are distinct states. Replacement actions are unavailable until the account's signer and nonce authority are qualified.</p>
         <p class="intro">Transactions initiated by this browser extension. This is not a complete blockchain history.</p>
         <div id="activity-list" class="stack" aria-live="polite"><p class="empty">No extension transactions yet.</p></div>
       </section>
@@ -142,7 +144,9 @@
         <button type="button" class="back-button" data-back>‹ Wallet</button>
         <h1 id="receive-title" class="screen-title">Receive</h1>
         <p class="intro">Receive the selected network's native currency or ERC-20 tokens at this address only after confirming your network.</p>
-        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>Selected account</strong><div id="receive-address" class="full-address">Unavailable</div><button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
+        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>Selected account</strong><div id="receive-address" class="full-address">Unavailable</div>
+          <div id="receive-qr" aria-label="Locally generated wallet address QR code"></div>
+          <button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
         <p id="receive-warning" class="notice">Network and account verification required.</p>
       </section>
 
@@ -152,13 +156,33 @@
         <p class="intro">Review the recipient, amount and network. The local passkey authority will independently verify ownership and simulate before submission.</p>
         <form id="send-form" class="settings-panel">
           <label for="send-asset">Asset</label><select id="send-asset"><option value="native">420 · Native</option></select>
-          <label for="send-recipient">Recipient</label><input id="send-recipient" type="text" placeholder="0x…" autocomplete="off" spellcheck="false" required>
-          <label for="send-amount">Amount</label><input id="send-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" required>
+          <label for="send-recipient">Recipient (EVM address, verified .eth or .420)</label>
+          <input id="send-recipient" type="text" placeholder="0x… or verified name" autocomplete="off" spellcheck="false" required>
+          <label for="send-contact">Address book</label><select id="send-contact"><option value="">Choose saved address</option></select>
+          <label for="send-contact-label">Save recipient as</label>
+          <input id="send-contact-label" maxlength="80" placeholder="Optional contact label">
+          <button id="save-send-contact" type="button" class="secondary">Save verified recipient</button>
+          <button id="remove-send-contact" type="button" class="secondary">Remove selected contact</button>
+          <label for="send-amount">Amount</label>
+          <input id="send-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" required>
+          <button id="send-max" type="button" class="secondary">Max (after verified gas reserve)</button>
+          <details class="send-fee-settings"><summary>Advanced EIP-1559 fees (optional)</summary>
+            <label for="send-priority-fee">Max priority fee (gwei)</label>
+            <input id="send-priority-fee" type="text" inputmode="decimal" placeholder="Suggested">
+            <label for="send-fee-cap">Maximum fee (gwei)</label>
+            <input id="send-fee-cap" type="text" inputmode="decimal" placeholder="Suggested">
+          </details>
           <button id="send-review-button" type="submit" class="primary wide">Review transaction</button>
         </form>
         <div id="send-review" class="review-box" hidden>
           <h2>Confirm send</h2>
-          <dl><div><dt>Asset</dt><dd id="review-asset">—</dd></div><div><dt>Amount</dt><dd id="review-amount">—</dd></div><div><dt>Recipient</dt><dd id="review-recipient" class="wrap">—</dd></div><div><dt>Network</dt><dd id="review-chain">—</dd></div><div><dt>From</dt><dd id="review-sender" class="wrap">—</dd></div></dl>
+          <dl><div><dt>Asset</dt><dd id="review-asset">—</dd></div><div><dt>Amount</dt><dd id="review-amount">—</dd></div><div><dt>Recipient</dt><dd id="review-recipient" class="wrap">—</dd></div><div><dt>Network</dt><dd id="review-chain">—</dd></div><div><dt>From</dt><dd id="review-sender" class="wrap">—</dd></div>
+          <div><dt>Resolved name</dt><dd id="review-name">—</dd></div>
+          <div><dt>Simulation</dt><dd id="review-simulation">—</dd></div>
+          <div><dt>Advisory gas limit</dt><dd id="review-gas">—</dd></div>
+          <div><dt>Maximum gas reserve</dt><dd id="review-fees">—</dd></div>
+          <div><dt>Fee cap</dt><dd id="review-cap">—</dd></div></dl>
+          <p class="notice">Final ERC-4337 gas and nonce are revalidated by local passkey authority. This preview expires after 45 seconds. Unsupported networks cannot submit.</p>
           <div class="review-actions"><button id="send-edit" class="secondary" type="button">Edit</button><button id="send-confirm" class="primary" type="button">Confirm &amp; authorize</button></div>
         </div>
         <p id="send-state" class="notice" role="status" aria-live="polite">No transaction prepared.</p>
@@ -186,6 +210,7 @@
     </nav>
     <div id="global-status" class="sr-only" role="status" aria-live="polite"></div>
   </div>
+  <script src="vendor/qrcode.min.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

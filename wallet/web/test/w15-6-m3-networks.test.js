@@ -78,8 +78,10 @@ test('M3: provider, approval, sign/nonce/preview and UX are chain-bound',()=>{
  assert.match(worker,/state.network.epoch!==message.epoch/);
  assert.match(worker,/selectedAccount!==message.account/);
  assert.match(worker,/await probeNetwork420\(network\)/);
- assert.match(popup,/before.epoch!==state.wallet.network.epoch/);
- assert.match(popup,/confirmed:true,chainId:before.chainId,epoch:before.epoch/);
+ assert.match(popup,/before\.epoch!==w\.network\.epoch/);
+ assert.match(worker,/validatePreview420\(preview/);
+ assert.match(popup,/confirmed:true,previewId:before\.id,chainId:before\.chainId/);
+ assert.match(popup,/epoch:before\.epoch/);
  for(const id of ['network-select','switch-network','add-network-form','network-health','aggregate-assets','new-currency-symbol']){
    assert.match(html,new RegExp('id="'+id+'"'));
  }

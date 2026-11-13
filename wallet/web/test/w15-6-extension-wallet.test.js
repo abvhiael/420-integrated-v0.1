@@ -36,7 +36,9 @@ test('W15.6: wallet popup requests only trusted service-worker actions',()=>{
  assert.match(js,/screen\('dashboard'\)/);
  assert.match(js,/extensionCanSend420/);
  assert.match(js,/extensionReceiveAddress420/);
- assert.match(js,/buildExtensionSend420/);
+ assert.match(js,/command\('prepare-send'/);
+ assert.match(read('service-worker.js'),/buildExtensionSend420/);
+ assert.match(read('service-worker.js'),/validatePreview420/);
  assert.match(js,/navigator\.clipboard\.writeText/);
  assert.doesNotMatch(js,/eth_sendTransaction\s*\(/);
  assert.doesNotMatch(js,/localStorage/);

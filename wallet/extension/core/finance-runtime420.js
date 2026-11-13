@@ -25,8 +25,8 @@ export function financeToken420(state,token){
  return found;
 }
 export async function financeOptions420({provider,config,state,kind,amountInput,slippageBps=50}){
- const chainId=state?.network?.expectedChainId,account=state?.selectedAccount;
- if(!chainId||state.network.status!=='matched'||!account)FAIL('Verified wallet chain/account required');
+ const chainId=state?.network?.expectedChainId,account=state?.account?.kind==='eoa'||state?.account?.kind==='hardware'?state?.selectedAccount:state?.account?.smartAccount;
+ if(!chainId||state.network.status!=='matched'||!account)FAIL('Verified on-chain payer and wallet chain required');
  const approved=financeProviderCatalog420(config,chainId).filter(p=>
    kind==='swap'?['420exchange','third-party'].includes(p.kind):
    kind==='bridge'?['420bridge','third-party-bridge'].includes(p.kind):false);
@@ -73,8 +73,9 @@ export function financePlan420(p,option){
    slippageBps:option.slippageBps,priceImpactBps:option.impactBps};
 }
 export async function financePrepare420({provider,config,state,option,feeQuote}){
+ const payer=state?.account?.kind==='eoa'||state?.account?.kind==='hardware'?state?.selectedAccount:state?.account?.smartAccount;
  if(!state||state.network.status!=='matched'||option.chainId!==state.network.expectedChainId||
-    option.account!==state.selectedAccount)FAIL('Finance account or network changed');
+    option.account!==payer)FAIL('Finance payer or network changed');
  const p=financeProviderCatalog420(config,option.chainId).find(x=>x.id===option.providerId);
  if(!p)FAIL('Provider is not release approved');
  await verifyFinanceDeployment420(provider,p);

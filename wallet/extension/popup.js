@@ -1,3 +1,4 @@
+import {encryptConvenienceBackup420,decryptConvenienceBackup420,normalizeConvenience420} from './core/extension-convenience420.js';
 import qrcode from './vendor/qrcode.mjs';
 import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420,buildExtensionSend420,formatExtensionUnitsExact420} from './core/extension-wallet-ui.js';
 
@@ -679,7 +680,7 @@ async function applyWalletState420(next,expectedEpoch){
 }
 function renderAll(){
   if(!state.wallet)return;
-  summarizeNetwork();renderAccount();renderAssets();renderNFT420();renderActivity();renderSites();renderSettings();renderReceive();renderAddressBook420();
+  summarizeNetwork();renderAccount();renderAssets();renderNFT420();renderActivity();renderSites();renderSettings();renderReceive();renderAddressBook420();renderPrivacy420();
 }
 async function command(kind,extra={}){
   const response=await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind,...extra});
@@ -981,6 +982,152 @@ function setupFinance420(){
  const nav=document.querySelector('#bottom-nav [data-screen="finance-view"]');
  nav.addEventListener('click',()=>financeCatalog420().catch(e=>{$('finance-status').textContent=e.message;}));
  change();
+}
+
+
+const convenienceUi420={current:null,busy:false};
+async function convenienceRefresh420(){
+ const previous=state.wallet,record=await command('convenience-state');
+ if(state.wallet!==previous)return;
+ convenienceUi420.current=record;
+ const privacy=record.saved.privacy;
+ for(const checkbox of document.querySelectorAll('[data-convenience-privacy]'))
+   checkbox.checked=Boolean(privacy[checkbox.dataset.conveniencePrivacy]);
+ const list=$('convenience-label-list');list.replaceChildren();
+ if(!record.labels.length)list.append(node('p','empty','No locally labeled addresses for this chain.'));
+ for(const contact of record.labels){
+   const label=node('button','secondary',contact.label+' · '+shortExtensionAddress420(contact.address));
+   label.type='button';label.addEventListener('click',()=>{
+     $('convenience-label-address').value=contact.address;
+     $('convenience-label-name').value=contact.label;
+   });list.append(label);
+ }
+ const analytics=record.analytics;
+ $('convenience-insights').textContent=analytics?.available?
+   JSON.stringify({
+     chainId:analytics.chainId,blockNumber:analytics.blockNumber,assetCount:analytics.assetCount,
+     priced:analytics.verifiedPricedCount,unpriced:analytics.unpricedCount,
+     verifiedQuotedSubtotal:analytics.pricedSubtotalCents+' cents '+analytics.currency,
+     transactionStates:analytics.statuses,historyCount:analytics.transactionCount,
+     note:analytics.note
+   },null,2):analytics?.reason||'On-chain portfolio is not verified';
+ const services=$('convenience-services');services.replaceChildren();
+ if(!record.services.length)services.append(node('p','empty','No release-approved services enabled for this chain.'));
+ for(const entry of record.services){
+   const button=node('button','secondary',entry.name+' · '+entry.type);
+   button.type='button';
+   button.setAttribute('aria-label','Open approved service '+entry.name+' in a separate browser tab');
+   button.addEventListener('click',()=>chrome.tabs.create({url:entry.url}));
+   const wrapper=node('div','asset-row');
+   wrapper.append(node('span','asset-info',entry.description||entry.origin),button);
+   services.append(wrapper);
+ }
+ $('convenience-status').textContent='Local preferences loaded for '+(record.account?shortExtensionAddress420(record.account):'unselected account')+
+   '. On-chain balances are never altered by labels or backups.';
+ renderPrivacy420();
+}
+function renderPrivacy420(){
+ const flags=convenienceUi420.current?.saved?.privacy;
+ if(!flags)return;
+ if(flags.hideBalances){
+   for(const id of ['native-balance','portfolio-fiat']){
+     const el=$(id);if(!el)continue;
+     if(!el.dataset.privacyValue)el.dataset.privacyValue=el.textContent;
+     el.textContent='••••••';
+   }
+ }else{
+   for(const id of ['native-balance','portfolio-fiat']){
+     const el=$(id);if(el?.dataset.privacyValue){el.textContent=el.dataset.privacyValue;delete el.dataset.privacyValue;}
+   }
+   if(!flags.showFiat){
+     const fiat=$('portfolio-fiat');
+     if(fiat){fiat.dataset.privacyValue=fiat.textContent;fiat.textContent='Fiat valuation hidden by privacy preference';}
+   }
+ }
+}
+function setupConvenience420(){
+ $('convenience-full-page').addEventListener('click',()=>chrome.tabs.create({
+   url:chrome.runtime.getURL('popup.html?mode=full')
+ }));
+ const nav=document.querySelector('#bottom-nav [data-screen="convenience-view"]');
+ nav?.addEventListener('click',()=>convenienceRefresh420().catch(e=>{
+   $('convenience-status').textContent='Tools unavailable: '+e.message;
+ }));
+ for(const checkbox of document.querySelectorAll('[data-convenience-privacy]')){
+   checkbox.addEventListener('change',async()=>{
+     const setting=checkbox.dataset.conveniencePrivacy,enabled=checkbox.checked;
+     checkbox.disabled=true;
+     try{
+       if(setting==='notifications'&&enabled){
+         const granted=await chrome.permissions.request({permissions:['notifications']});
+         if(!granted)throw new Error('Browser notification permission declined');
+       }
+       const previous=state.wallet;
+       convenienceUi420.current=await command('convenience-privacy',{setting,enabled});
+       if(previous!==state.wallet)throw Error('Wallet account changed');
+       await convenienceRefresh420();
+       if(setting==='notifications'&&!enabled)
+         chrome.permissions.remove({permissions:['notifications']}).catch(()=>{});
+     }catch(e){
+       checkbox.checked=!enabled;
+       $('convenience-status').textContent='Privacy change rejected: '+e.message;
+     }finally{checkbox.disabled=false;}
+   });
+ }
+ $('convenience-label-form').addEventListener('submit',async e=>{
+   e.preventDefault();
+   try{
+     await command('convenience-label',{chainId:state.wallet?.network?.expectedChainId,
+       address:$('convenience-label-address').value.trim(),label:$('convenience-label-name').value.trim()});
+     await convenienceRefresh420();
+   }catch(err){$('convenience-status').textContent=err.message;}
+ });
+ $('convenience-label-remove').addEventListener('click',async()=>{
+   try{
+     await command('convenience-label',{chainId:state.wallet?.network?.expectedChainId,
+       address:$('convenience-label-address').value.trim(),
+       label:$('convenience-label-name').value.trim()||'Remove',remove:true});
+     await convenienceRefresh420();
+   }catch(err){$('convenience-status').textContent=err.message;}
+ });
+ $('convenience-backup-export').addEventListener('click',async()=>{
+   const button=$('convenience-backup-export');button.disabled=true;
+   try{
+     const data=(await command('convenience-state')).saved;
+     const text=await encryptConvenienceBackup420(data,$('convenience-backup-pass').value);
+     const url=URL.createObjectURL(new Blob([text],{type:'application/json'}));
+     try{
+       const a=document.createElement('a');a.href=url;a.download='420wallet-convenience-backup.json';
+       document.body.append(a);a.click();a.remove();
+     }finally{setTimeout(()=>URL.revokeObjectURL(url),1000);}
+     $('convenience-status').textContent='Encrypted metadata backup created locally. Keep the passphrase separately.';
+   }catch(err){$('convenience-status').textContent='Backup failed: '+err.message;}
+   finally{$('convenience-backup-pass').value='';button.disabled=false;}
+ });
+ $('convenience-backup-import').addEventListener('click',async()=>{
+   const button=$('convenience-backup-import');button.disabled=true;
+   try{
+     const file=$('convenience-backup-file').files?.[0];
+     if(!file||file.size>200000)throw Error('Select encrypted metadata backup smaller than 200 KB');
+     const decoded=await decryptConvenienceBackup420(await file.text(),$('convenience-backup-pass').value);
+     if(!confirm('Restore '+decoded.labels.length+' local address labels? Existing labels will be replaced. Connected site grants, keys and vaults will not be imported.'))return;
+     await command('convenience-import',{data:decoded,confirmed:true});
+     await convenienceRefresh420();
+     $('convenience-status').textContent='Encrypted metadata verified and restored; external permissions remain disabled.';
+   }catch(err){$('convenience-status').textContent='Restore declined: '+err.message;}
+   finally{$('convenience-backup-pass').value='';$('convenience-backup-file').value='';button.disabled=false;}
+ });
+ $('convenience-pair-form').addEventListener('submit',async e=>{
+   e.preventDefault();
+   try{
+     const preview=await command('convenience-pair-check',{uri:$('convenience-pair-uri').value.trim()});
+     $('convenience-pair-result').textContent=JSON.stringify(preview,null,2);
+   }catch(err){$('convenience-pair-result').textContent='Pairing unavailable: '+err.message;}
+ });
+ if(new URLSearchParams(location.search).get('mode')==='full'){
+   document.body.classList.add('full-wallet-page');
+   document.title='420 Wallet · Full page';
+ }
 }
 
 function setup(){
@@ -1342,6 +1489,7 @@ function setup(){
 }
 setup();
 if(!approvalId){
+  setupConvenience420();
   setupFinance420();
   chrome.storage.onChanged?.addListener((changes,area)=>{
     if(area!=='local')return;

@@ -127,9 +127,11 @@ export function normalizedPortfolioSettings420(record={}){
   ).map(x=>x.slice(0,x.indexOf(':'))+x.slice(x.indexOf(':')).toLowerCase()))].slice(0,200):[];
   const nftIndexFrom=typeof record.nftIndexFrom==='string'&&/^\d+$/.test(record.nftIndexFrom)?
     record.nftIndexFrom:null;
+  const nftIndexBefore=typeof record.nftIndexBefore==='string'&&/^\d+$/.test(record.nftIndexBefore)?
+    record.nftIndexBefore:null;
   return {tokens,hidden:[...new Set(hidden)],spam:[...new Set(spam)],
     nftHidden:nftKeys(record.nftHidden),nftSpam:nftKeys(record.nftSpam),
-    nftTrusted:nftKeys(record.nftTrusted),nftIndexFrom,
+    nftTrusted:nftKeys(record.nftTrusted),nftIndexFrom,nftIndexBefore,
     priceEndpoint,
     fiatCurrency:/^(CAD|USD|EUR|GBP)$/.test(record.fiatCurrency)?record.fiatCurrency:'CAD',
     discoveryFrom:typeof record.discoveryFrom==='string'&&/^\d+$/.test(record.discoveryFrom)?record.discoveryFrom:'0'};

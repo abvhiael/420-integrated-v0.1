@@ -1,7 +1,7 @@
 import {Transaction} from './vendor/ethers-6.17.0.min.js';
 import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
-import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
+import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420,transitionReplacement420} from './core/extension-replacement-policy.js';
 import {encodeExecute} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
@@ -637,11 +637,29 @@ async function refreshWalletUiActivity420() {
     if(replacement.status==='confirmed'&&['submitted','pending','included','reorganized'].includes(original.status)){
       try{
         const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:chain.chainId})};
-        const validated=await reconcileUserOpReplacement420(provider,original,replacement);
-        byId.set(original.id,validated);changed=true;
-      }catch{ /* Both canonical UserOperation proofs are mandatory. */ }
+        if(original.executionModel==='erc4337'){
+          const validated=await reconcileUserOpReplacement420(provider,original,replacement);
+          byId.set(original.id,validated);changed=true;
+        }else if(original.executionModel==='eoa'&&replacement.executionModel==='eoa'){
+          const [confirmed,originalReceipt,originalTransaction]=await Promise.all([
+            provider.request('eth_getTransactionByHash',[replacement.hash]),
+            provider.request('eth_getTransactionReceipt',[original.hash]),
+            provider.request('eth_getTransactionByHash',[original.hash])
+          ]);
+          if(originalReceipt||originalTransaction?.blockHash)throw Error('Original EOA is included');
+          if(!confirmed?.blockHash||!confirmed?.from||confirmed.nonce==null||
+            confirmed.hash?.toLowerCase()!==replacement.hash?.toLowerCase()||
+            confirmed.from.toLowerCase()!==original.from||
+            BigInt(confirmed.nonce)!==BigInt(original.nonce))
+            throw Error('Replacement EOA canonical sender/nonce evidence missing');
+          const validated=transitionReplacement420(original,{action:replacement.action,txHash:replacement.hash},
+            {canonicalEvidence:{sameChain:true,sameSenderAndNonce:true,replacementIncluded:true,
+              originalNotCanonical:true,checkedAt:Date.now()}});
+          byId.set(original.id,validated);changed=true;
+        }
+      }catch{ /* Replacement proof must be canonical and signer/nonce-checked. */ }
     }else if(replacement.status==='reorganized'&&['replaced','cancelled'].includes(original.status)&&
-             original.replacementUserOpHash===replacement.userOpHash){
+             original.replacedBy===replacement.hash){
       byId.set(original.id,{...original,status:'submitted',replacementUncertain:true,
         replacedBy:null,replacementUserOpHash:null});changed=true;
     }

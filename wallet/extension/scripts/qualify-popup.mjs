@@ -29,6 +29,9 @@ const rpc=createServer(async(req,res)=>{
     res.end('<!doctype html><html><head><title>420 Wallet dApp fixture</title></head><body><h1>Local dApp compatibility fixture</h1></body></html>');
     return;
   }
+  // Chromium automatically probes favicon and may issue HEAD/OPTIONS requests.
+  // Only POST carries JSON-RPC; never parse an empty non-RPC request as JSON.
+  if(req.method!=='POST'){res.writeHead(204).end();return;}
   const parts=[];
   for await(const chunk of req)parts.push(chunk);
   const body=JSON.parse(Buffer.concat(parts).toString());

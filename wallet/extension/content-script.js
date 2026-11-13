@@ -3,12 +3,6 @@
   const origin = window.location.origin;
   if (!origin || origin === 'null') return;
 
-  const script = document.createElement('script');
-  script.src = chrome.runtime.getURL('inpage.js');
-  script.async = false;
-  (document.documentElement || document.head).appendChild(script);
-  script.remove();
-
   window.addEventListener('message', async (event) => {
     if (event.source !== window || event.origin !== origin) return;
     const message = event.data;
@@ -39,8 +33,15 @@
     }
   });
 
+  // Install the isolated bridge before injecting the page provider. Otherwise
+  // its initial eth_chainId/eth_accounts restoration requests can race and be lost.
   chrome.runtime.onMessage.addListener((message) => {
     if (!message || message.source !== '420-wallet-service-worker' || message.channel !== CHANNEL || message.kind !== 'event') return;
     window.postMessage({ source: '420-wallet-extension', channel: CHANNEL, kind: 'event', event: message.event, data: message.data }, origin);
   });
+  const script = document.createElement('script');
+  script.src = chrome.runtime.getURL('inpage.js');
+  script.async = false;
+  (document.documentElement || document.head).appendChild(script);
+  script.remove();
 })();

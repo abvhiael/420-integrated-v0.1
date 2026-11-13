@@ -31,7 +31,8 @@ const ff=JSON.parse(await readFile(join(firefox,'manifest.json'),'utf8'));
 assert.deepEqual(ff.background,{scripts:['service-worker.js'],type:'module'});
 assert.equal(ff.background.service_worker,undefined);
 assert.equal(ff.externally_connectable,undefined);
-assert.equal(ff.browser_specific_settings.gecko.strict_min_version,'140.0');
+assert.equal(ff.browser_specific_settings.gecko.strict_min_version,'142.0');
+assert.equal(ff.permissions.includes('windows'),false);
 assert.deepEqual(ff.browser_specific_settings.gecko.data_collection_permissions.required,['none']);
 if(process.env.WALLET_PRODUCTION_RELEASE==='1'){
  for(const file of ['vendor/trezor-connect-10.bundle.js','vendor/walletconnect-walletkit.bundle.js']){

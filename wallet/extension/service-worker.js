@@ -343,19 +343,24 @@ async function executeWithLocalAuthority(request, context) {
   const address=prefs.selectedAccount;
   const metadata=await accountMetadata420();
   const isEoa=request.method==='eth_sendTransaction'?
-    request.params?.[0]?.executionModel==='eoa':
-    ['personal_sign','eth_signTypedData_v4'].includes(request.method)&&metadata[address]?.type==='eoa';
+    ['eoa','hardware'].includes(request.params?.[0]?.executionModel):
+    ['personal_sign','eth_signTypedData_v4'].includes(request.method)&&['eoa','hardware'].includes(metadata[address]?.type);
+  const isHardware=metadata[address]?.type==='hardware';
+  if(isHardware&&metadata[address]?.signingQualified!==true)
+    throw Object.assign(new Error('Hardware device account not verified'),{code:4100});
   if(!isEoa&&!effective.network.smartAccountApproved)
     throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
-  if(isEoa&&!(await vaultLockState420()).unlocked)
+  if(isEoa&&!isHardware&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Encrypted local EOA vault is locked'),{code:4100});
   if(!context.chainId||effective.chainId!==context.chainId||effective.epoch!==context.epoch)
     throw Object.assign(new Error('Network context changed before signing authority'),{code:4901});
   const listed=await accountVisibility420(normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420)).accounts);
   if(!address||!listed.includes(address)||!context.accounts?.includes(address))
     throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
-  if(['watch-only','hardware'].includes(metadata[address]?.type)||
-     (isEoa?metadata[address]?.type!=='eoa':metadata[address]?.type==='eoa'))
+  if(metadata[address]?.type==='watch-only'||
+     (isEoa?!['eoa','hardware'].includes(metadata[address]?.type):['eoa','hardware'].includes(metadata[address]?.type))||
+     (isHardware&&request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel!=='hardware')||
+     (!isHardware&&request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel==='hardware'))
     throw Object.assign(new Error('Selected account has no authorized local signing authority for this model'),{code:4100});
   const requestedFrom=request.method==='eth_sendTransaction'?request.params?.[0]?.from:
     request.method==='personal_sign'?request.params?.[1]:request.method==='eth_signTypedData_v4'?request.params?.[0]:null;
@@ -534,7 +539,10 @@ async function handleApprovalMethod(request, context) {
       throw Object.assign(new Error('Exact granted account and transaction target required'),{code:4100});
     const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
     const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
-    const accountMeta=await accountMetadata420(),eoa=accountMeta[granted[0]]?.type==='eoa';
+    const accountMeta=await accountMetadata420(),hardware=accountMeta[granted[0]]?.type==='hardware';
+    const eoa=accountMeta[granted[0]]?.type==='eoa'||hardware;
+    if(hardware&&accountMeta[granted[0]]?.signingQualified!==true)
+      throw Object.assign(new Error('Hardware account is not device verified'),{code:4100});
     if(eoa&&!(await vaultLockState420()).unlocked)
       throw Object.assign(new Error('Encrypted EOA vault is locked'),{code:4100});
     let smart=null;
@@ -557,7 +565,7 @@ async function handleApprovalMethod(request, context) {
         smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
         transaction:normalizedTx,choice,strictUserOpGas:true});
     const risk=inspectExtensionApprovalRisk420(normalizedTx);
-    feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:eoa?'eoa':'erc4337'};
+    feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:hardware?'hardware':eoa?'eoa':'erc4337'};
   }
   const signatureRisk=['personal_sign','eth_signTypedData_v4'].includes(request.method)?
     assessSecuritySignature420(request.method,request.params,{chainId:pinned,origin}):null;
@@ -583,8 +591,8 @@ async function handleApprovalMethod(request, context) {
       {level:'custom',maxFeePerGas:request.params[0].maxFeePerGas,
        maxPriorityFeePerGas:request.params[0].maxPriorityFeePerGas}:{level:'standard'};
     let newQuote;
-    if(feePreview.executionModel==='eoa'){
-      if(!(await vaultLockState420()).unlocked)
+    if(['eoa','hardware'].includes(feePreview.executionModel)){
+      if(feePreview.executionModel==='eoa'&&!(await vaultLockState420()).unlocked)
         throw Object.assign(new Error('EOA vault locked during approval'),{code:4100});
       newQuote=await quoteExtensionEoa420(provider,{chainId:pinned,from:current[0],
         transaction:feePreview.normalizedTx,choice});
@@ -594,7 +602,7 @@ async function handleApprovalMethod(request, context) {
          fee.blockHash!==newQuote.blockHash)
         throw Object.assign(new Error('EOA nonce/fees changed; new approval required'),{code:4001});
       approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
-        executionModel:'eoa',chainId:pinned,nonce:newQuote.nonce,gasLimit:newQuote.gasLimit,
+        executionModel:feePreview.executionModel,chainId:pinned,nonce:newQuote.nonce,gasLimit:newQuote.gasLimit,
         maxFeePerGas:newQuote.maxFeePerGas,maxPriorityFeePerGas:newQuote.maxPriorityFeePerGas}]};
     }else{
       const smart=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
@@ -637,11 +645,11 @@ async function handleApprovalMethod(request, context) {
   }
   const signerMeta=await accountMetadata420();
   const isEoaSignature=['personal_sign','eth_signTypedData_v4'].includes(request.method)&&
-    signerMeta[current[0]]?.type==='eoa';
-  if(isEoaSignature&&!(await vaultLockState420()).unlocked)
+    ['eoa','hardware'].includes(signerMeta[current[0]]?.type);
+  if(isEoaSignature&&signerMeta[current[0]]?.type==='eoa'&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Unlock the local EOA vault before signing'),{code:4100});
   const result=await executeWithLocalAuthority(
-    isEoaSignature?{...request,executionModel:'eoa'}:request,
+    isEoaSignature?{...request,executionModel:signerMeta[current[0]]?.type==='hardware'?'hardware':'eoa'}:request,
     { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
   if(signatureRisk){
     const item=securityRecordSignature420({origin,method:request.method,
@@ -926,7 +934,7 @@ async function recordAuthoritySignedEoa420(sender,requestId,submission){
     throw Object.assign(new Error('Untrusted EOA authority result'),{code:4100});
   const pending=(await readObject(AUTHORITY_KEY))[requestId];
   if(!pending||pending.request?.method!=='eth_sendTransaction'||
-     pending.request?.params?.[0]?.executionModel!=='eoa')
+     !['eoa','hardware'].includes(pending.request?.params?.[0]?.executionModel))
     throw Object.assign(new Error('No pending EOA signing authority'),{code:4100});
   const tx=pending.request.params[0];
   const now=await effectiveChain420(pending.context.origin);
@@ -946,7 +954,7 @@ async function recordAuthoritySignedEoa420(sender,requestId,submission){
     const activities=await readWalletUiActivity420();
     const existing=activities.find(x=>x.id===id&&x.controller===submission.from&&x.chainId===tx.chainId);
     if(!existing)throw new Error('Pending EOA activity not found');
-    await rememberWalletUiActivity420({...existing,executionModel:'eoa',status:'submitted',
+    await rememberWalletUiActivity420({...existing,executionModel:'eoa',signingProvider:tx.executionModel==='hardware'?'hardware':null,status:'submitted',
       hash:submission.hash,from:submission.from,to:submission.to,
       nonce:submission.nonce,value:submission.value,data:submission.data,
       gasLimit:submission.gasLimit,maxFeePerGas:submission.maxFeePerGas,
@@ -1208,7 +1216,7 @@ async function replacementPreview420(message){
     throw Object.assign(new Error('A replacement of this UserOperation already exists; resolve its outcome first'),{code:4001});
   const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
   if(original.executionModel==='eoa'){
-    if(state.account.kind!=='eoa'||!state.vault?.unlocked)
+    if(!['eoa','hardware'].includes(state.account.kind)||(state.account.kind==='eoa'&&!state.vault?.unlocked))
       throw Object.assign(new Error('Local EOA signing authority is locked'),{code:4100});
     let target=original.to,value=original.value,data=original.data;
     if(message.action==='cancel'){
@@ -1238,7 +1246,7 @@ async function replacementPreview420(message){
     validateEoaReplacement420(original,candidate,{minimumBumpPercent:20});
     return {originalId:original.id,originalHash:original.hash,action:message.action,
       chainId:original.chainId,epoch:state.network.epoch,account:state.selectedAccount,
-      executionModel:'eoa',transaction,quote,nonce:original.nonce,replaces:original.hash};
+      executionModel:state.account.kind==='hardware'?'hardware':'eoa',transaction,quote,nonce:original.nonce,replaces:original.hash};
   }
   if(original.executionModel!=='erc4337')throw new Error('Unsupported pending execution model');
   let target=original.target,value=original.value,data=original.data;
@@ -2012,7 +2020,7 @@ async function handleWalletUi420(message) {
        provided.originalHash!==preview.originalHash||provided.chainId!==preview.chainId||
        provided.epoch!==preview.epoch||provided.account!==preview.account||
        provided.quote?.blockHash!==preview.quote.blockHash||
-       (preview.executionModel==='eoa'?
+       (['eoa','hardware'].includes(preview.executionModel)?
          (provided.quote?.nonce!==preview.quote.nonce||
           provided.quote?.gasLimit!==preview.quote.gasLimit||
           provided.quote?.maxFeePerGas!==preview.quote.maxFeePerGas||
@@ -2036,8 +2044,8 @@ async function handleWalletUi420(message) {
     try{
       hash=await executeWithLocalAuthority({
         method:'eth_sendTransaction',
-        params:[preview.executionModel==='eoa'?
-          {...preview.transaction,executionModel:'eoa',chainId:preview.chainId,
+        params:[['eoa','hardware'].includes(preview.executionModel)?
+          {...preview.transaction,executionModel:preview.executionModel,chainId:preview.chainId,
             nonce:preview.nonce,gasLimit:preview.quote.gasLimit,
             maxFeePerGas:preview.quote.maxFeePerGas,
             maxPriorityFeePerGas:preview.quote.maxPriorityFeePerGas}:
@@ -2058,7 +2066,7 @@ async function handleWalletUi420(message) {
   }
   if(kind==='send-native-max'){
     const state=await walletUiState420();
-    if(state.account.kind!=='eoa'||!extensionCanSend420(state)||
+    if(!['eoa','hardware'].includes(state.account.kind)||!extensionCanSend420(state)||
        state.selectedAccount!==message.account||
        state.network.expectedChainId!==message.chainId||
        state.network.epoch!==message.epoch)
@@ -2108,7 +2116,7 @@ async function handleWalletUi420(message) {
     });
     const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
     const choice=normalizeExtensionFeeChoice420(message.feeChoice);
-    const quote=state.account.kind==='eoa'?
+    const quote=['eoa','hardware'].includes(state.account.kind)?
       await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
         from:state.account.controller,transaction:transaction.transaction,choice}):
       await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
@@ -2136,7 +2144,7 @@ async function handleWalletUi420(message) {
     });
     const choice=normalizeExtensionFeeChoice420(message.feeChoice);
     const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
-    const quote=state.account.kind==='eoa'?
+    const quote=['eoa','hardware'].includes(state.account.kind)?
       await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
         from:state.account.controller,transaction:request.transaction,choice}):
       await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
@@ -2145,7 +2153,7 @@ async function handleWalletUi420(message) {
     if(!message.preflight||message.preflight.chainId!==quote.chainId||
        message.preflight.from!==quote.from||message.preflight.to!==quote.to||
        message.preflight.blockHash!==quote.blockHash||
-       (state.account.kind==='eoa'?
+       (['eoa','hardware'].includes(state.account.kind)?
          (message.preflight.executionModel!=='eoa'||
           message.preflight.nonce!==quote.nonce||
           message.preflight.gasLimit!==quote.gasLimit||
@@ -2159,15 +2167,15 @@ async function handleWalletUi420(message) {
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
       controller:state.account.controller,smartAccount:state.account.smartAccount,
-      executionModel:state.account.kind==='eoa'?'eoa':'erc4337',
+      executionModel:['eoa','hardware'].includes(state.account.kind)?'eoa':'erc4337',
       recipient:request.summary.recipient,amount:request.summary.amount,
       symbol:request.summary.symbol,status:'pending',hash:null};
     await rememberWalletUiActivity420(entry);
     let hash=null;
     try {
       hash=await executeWithLocalAuthority(
-        {method:'eth_sendTransaction',params:[state.account.kind==='eoa'?
-          {...request.transaction,executionModel:'eoa',chainId:quote.chainId,
+        {method:'eth_sendTransaction',params:[['eoa','hardware'].includes(state.account.kind)?
+          {...request.transaction,executionModel:state.account.kind==='hardware'?'hardware':'eoa',chainId:quote.chainId,
             recipientSnapshot,
             nonce:quote.nonce,gasLimit:quote.gasLimit,
             maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas}:
@@ -2239,7 +2247,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           throw Object.assign(new Error('Network changed; authority request cancelled'),{code:4901});
         if(request.method==='eth_sendRawTransaction'){
           if(approval.request?.method!=='eth_sendTransaction'||
-             approval.request?.params?.[0]?.executionModel!=='eoa')
+             !['eoa','hardware'].includes(approval.request?.params?.[0]?.executionModel))
             throw Object.assign(new Error('Raw transaction broadcast is restricted to the local EOA authority'),{code:4100});
           const raw=request.params?.[0];
           const localHash=assertEoaRawMatchesAuthority420(raw,approval.request.params[0]);

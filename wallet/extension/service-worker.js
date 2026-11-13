@@ -819,8 +819,9 @@ async function handleWalletUi420(message) {
       );
       const current=await effectiveChain420();
       if(current.chainId!==entry.chainId||current.epoch!==state.network.epoch)throw Object.assign(new Error('Chain changed during transaction'),{code:4901});
-      await rememberWalletUiActivity420({...entry,status:'confirmed',hash});
-      return {hash,status:'confirmed'};
+      // A hash confirms submission only. Inclusion/finality must be verified from a canonical receipt.
+      await rememberWalletUiActivity420({...entry,status:'submitted',hash});
+      return {hash,status:'submitted'};
     }catch(error){
       await rememberWalletUiActivity420({...entry,status:'failed',error:error?.message||'Authorization failed'});
       throw error;

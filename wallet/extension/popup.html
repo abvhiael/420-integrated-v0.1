@@ -164,11 +164,21 @@
           <div class="review-actions"><button id="send-save-contact" class="secondary" type="button">Save recipient</button><button id="send-delete-contact" class="secondary" type="button">Remove selected contact</button></div>
           <label for="send-amount">Amount</label><input id="send-amount" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" required>
           <button id="send-max" type="button" class="secondary">Max verified ERC-20 balance</button>
+          <label for="send-fee-choice">Network fee preference</label>
+          <select id="send-fee-choice"><option value="economy">Economy</option><option value="standard" selected>Standard</option><option value="priority">Priority</option><option value="custom">Custom (EIP-1559)</option></select>
+          <label for="send-max-fee">Custom max fee (wei per gas, hex 0x…)</label>
+          <input id="send-max-fee" type="text" placeholder="0x…" autocomplete="off" spellcheck="false" disabled>
+          <label for="send-priority-fee">Custom priority fee (wei per gas, hex 0x…)</label>
+          <input id="send-priority-fee" type="text" placeholder="0x…" autocomplete="off" spellcheck="false" disabled>
           <button id="send-review-button" type="submit" class="primary wide">Review transaction</button>
         </form>
         <div id="send-review" class="review-box" hidden>
           <h2>Confirm send</h2>
-          <dl><div><dt>Asset</dt><dd id="review-asset">—</dd></div><div><dt>Amount</dt><dd id="review-amount">—</dd></div><div><dt>Recipient</dt><dd id="review-recipient" class="wrap">—</dd></div><div><dt>Network</dt><dd id="review-chain">—</dd></div><div><dt>From</dt><dd id="review-sender" class="wrap">—</dd></div></dl>
+          <dl><div><dt>Asset</dt><dd id="review-asset">—</dd></div><div><dt>Amount</dt><dd id="review-amount">—</dd></div><div><dt>Recipient</dt><dd id="review-recipient" class="wrap">—</dd></div><div><dt>Network</dt><dd id="review-chain">—</dd></div><div><dt>From</dt><dd id="review-sender" class="wrap">—</dd></div>
+          <div><dt>Max fee per gas</dt><dd id="review-max-fee">—</dd></div>
+          <div><dt>Priority fee per gas</dt><dd id="review-priority-fee">—</dd></div>
+          <div><dt>Preflight</dt><dd id="review-simulation">—</dd></div>
+          <div><dt>EntryPoint simulation</dt><dd id="review-entrypoint">—</dd></div></dl>
           <div class="review-actions"><button id="send-edit" class="secondary" type="button">Edit</button><button id="send-confirm" class="primary" type="button">Confirm &amp; authorize</button></div>
         </div>
         <p id="send-state" class="notice" role="status" aria-live="polite">No transaction prepared.</p>

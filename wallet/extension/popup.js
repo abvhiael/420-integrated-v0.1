@@ -309,6 +309,28 @@ function renderSecurity420(){
  if(!sec.alerts.length)securityEmpty420(alerts,'No local heuristic alerts detected. This does not prove safety.');
  for(const alert of sec.alerts)alerts.append(securityTextRow420(
   (alert.kind||'alert').toUpperCase(),(alert.origin?alert.origin+': ':'')+alert.message,'alert'));
+ const discovered=$('security-discovered');discovered.replaceChildren();
+ $('security-discovery-note').textContent=sec.discovered?.note||
+   'Recent event discovery did not run. Enter a known token and spender to inspect its allowance.';
+ if(!sec.discovered?.entries?.length)
+   securityEmpty420(discovered,sec.discovered?.error?
+     'Approval event scan unavailable: '+sec.discovered.error:
+     'No nonzero ERC-20 allowances found in the bounded recent log window. Older or nonstandard approvals may still exist.');
+ for(const found of sec.discovered?.entries||[]){
+   const item=securityTextRow420(found.token+' · '+found.spender,
+     'Token-reported raw allowance '+(found.value??'unverified')+
+     (found.unlimited?' · VERY LARGE':'')+(found.warning?' · '+found.warning:''));
+   if(found.value!==undefined){
+     const watch=node('button','secondary','Watch and inspect exact allowance');
+     watch.type='button';
+     watch.addEventListener('click',()=>watchSecurity420({
+       authorityKind:'allowance',token:found.token,spender:found.spender,
+       owner:sec.smart&&sec.account!==sec.smart.smartAccount?'smart-account':'eoa'
+     }));
+     item.append(watch);
+   }
+   discovered.append(item);
+ }
  const history=$('security-signatures');history.replaceChildren();
  if(!sec.signatures.length)securityEmpty420(history,'No successful local dApp signatures recorded for this account and chain.');
  for(const x of sec.signatures)history.append(securityTextRow420(

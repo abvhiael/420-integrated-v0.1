@@ -53,7 +53,7 @@ export function validateUserOpReplacement420(original,replacement,{minimumBumpPe
   if(original?.executionModel!=='erc4337'||replacement?.executionModel!=='erc4337')
     throw new Error('ERC-4337 cannot copy EOA replacement rules');
   if(!original?.userOpHash||!original?.entryPoint||original?.nonce==null||
-     !original?.sender||original?.chainId)throw new Error('original UserOperation metadata missing');
+     !original?.sender||!original?.chainId)throw new Error('original UserOperation metadata missing');
   hash(original.userOpHash);
   if(!['submitted','pending','included','reorganized'].includes(original.status))
     throw new Error('only unfinalized UserOperations can be replaced');

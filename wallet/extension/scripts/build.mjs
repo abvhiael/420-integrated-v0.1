@@ -18,6 +18,7 @@ const sourceFiles = [
   'wallet.js',
   'authority.html',
   'authority.js',
+  'wallet-notification.svg',
 ];
 
 export async function buildExtension420() {
@@ -43,6 +44,20 @@ export async function buildExtension420() {
     // do not claim Trezor availability. Runtime import fails closed.
   }
 
+  try {
+    const {build}=await import('esbuild');
+    await build({
+      entryPoints:[join(extensionRoot,'walletconnect-entry.mjs')],
+      bundle:true,format:'esm',platform:'browser',target:'chrome120',
+      outfile:join(dist,'vendor','walletconnect-walletkit.bundle.js'),
+      legalComments:'inline',logLevel:'silent',
+      define:{'process.env.NODE_ENV':'"production"'},
+    });
+  }catch(error){
+    if(process.env.WALLET_CONNECT_RELEASE==='1')
+      throw new Error('WalletConnect v2 WalletKit must be locally bundled: '+error.message);
+    // Without explicit SDK dependency install, connector activation fails closed.
+  }
   return { dist, files: await readdir(dist) };
 }
 

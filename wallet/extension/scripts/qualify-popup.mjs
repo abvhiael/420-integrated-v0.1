@@ -141,6 +141,36 @@ try{
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
 
+  // M11: actual packaged Tools view, account/chain-scoped local labels,
+  // privacy masking and full-page reuse of the same extension worker.
+  await page.locator('#bottom-nav [data-screen="convenience-view"]').click();
+  await page.waitForFunction(()=>document.querySelector('#convenience-status')?.textContent.includes('Local preferences loaded'));
+  assert.equal(await page.locator('#convenience-privacy-alerts').isChecked(),false);
+  assert.equal(await page.locator('#convenience-privacy-pair').isChecked(),false);
+  await page.locator('#convenience-label-address').fill(controller);
+  await page.locator('#convenience-label-name').fill('Verified local label');
+  await page.locator('#convenience-label-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#convenience-label-list')?.textContent.includes('Verified local label'));
+  assert.equal(await page.locator('#convenience-services .empty').count(),1);
+  await page.locator('#convenience-privacy-balances').check();
+  await page.waitForFunction(()=>document.querySelector('#native-balance')?.textContent.includes('••••'));
+  assert.match(await page.locator('#native-balance').textContent(),/••••/);
+  await page.locator('#convenience-privacy-balances').uncheck();
+  await page.waitForFunction(()=>!document.querySelector('#native-balance')?.textContent.includes('••••'));
+  await page.locator('#convenience-pair-uri').fill('wc:'+'a'.repeat(64)+'@2?relay-protocol=irn&symKey='+'b'.repeat(64));
+  await page.locator('#convenience-pair-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#convenience-pair-result')?.textContent.includes('Pairing unavailable'));
+  assert.match(await page.locator('#convenience-pair-result').textContent(),/[Ee]xplicit mobile pairing consent/);
+  const fullPagePromise=browser.waitForEvent('page');
+  await page.locator('#convenience-full-page').click();
+  const expanded=await fullPagePromise;
+  await expanded.waitForLoadState('load');
+  assert.equal(await expanded.locator('body').evaluate(el=>el.classList.contains('full-wallet-page')),true);
+  await expanded.close();
+  await page.screenshot({path:resolve(screenshots,'m11-local-tools-privacy-labels.png')});
+  console.log('PASS: M11 packaged Tools UI, privacy mask, label persistence, gated pairing and full-page mode');
+  await page.locator('#bottom-nav [data-screen="dashboard"]').click();
+
   // M6: real content-script injection, EIP-6963 re-discovery, passive
   // EIP-1193 connection restoration, MetaMask coexistence and EIP-2255
   // same-origin grant/revocation in packaged Chromium. No signing is simulated.

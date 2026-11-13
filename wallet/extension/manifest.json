@@ -56,5 +56,8 @@
     "matches": [
       "https://suite.trezor.io/*"
     ]
-  }
+  },
+  "optional_permissions": [
+    "notifications"
+  ]
 }

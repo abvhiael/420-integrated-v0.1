@@ -318,6 +318,16 @@ try{
     const extensionUrl='chrome-extension://'+new URL(firstWorker.url()).host+'/popup.html';
     const setup=await firstContext.newPage();
     await setup.goto(extensionUrl,{waitUntil:'load'});
+    // The extension's first-run registry initialization is asynchronous.
+    // Wait for the real service worker's default-registry transaction before
+    // writing the persisted restart fixture, or its first-run write may race
+    // and overwrite the saved chain identity during a cold profile startup.
+    await setup.waitForFunction(async()=>{
+      const response=await chrome.runtime.sendMessage({
+        source:'420-wallet-popup-ui',kind:'get-state'
+      });
+      return !response?.error&&Boolean(response?.result?.registry?.networks);
+    },undefined,{timeout:20000});
     await setup.evaluate(async({controller,port,dappOrigin})=>{
       await chrome.storage.local.set({
         '420-wallet-extension-config-v1':{
@@ -336,6 +346,9 @@ try{
           [dappOrigin]:{accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()}
         }
       });
+      const registry=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+      if(registry?.selectedChainId!=='0x1a4'||registry?.networks?.['0x1a4']?.enabled!==true)
+        throw new Error('Restart fixture network was not durably configured');
     },{controller,port:rpc.address().port,dappOrigin});
     await firstContext.close();
     firstContext=null;

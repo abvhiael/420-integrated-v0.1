@@ -962,6 +962,9 @@ async function recordAuthoritySignedEoa420(sender,requestId,submission){
      !['eoa','hardware'].includes(pending.request?.params?.[0]?.executionModel))
     throw Object.assign(new Error('No pending EOA signing authority'),{code:4100});
   const tx=pending.request.params[0];
+  const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  if(prefs.selectedAccount!==tx.from?.toLowerCase())
+    throw Object.assign(new Error('Selected signing account changed'),{code:4100});
   const now=await effectiveChain420(pending.context.origin);
   if(now.chainId!==pending.context.chainId||now.epoch!==pending.context.epoch||
       tx.chainId!==now.chainId||tx.from?.toLowerCase()!==pending.context.accounts?.[0])
@@ -2304,6 +2307,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           if(approval.request?.method!=='eth_sendTransaction'||
              !['eoa','hardware'].includes(approval.request?.params?.[0]?.executionModel))
             throw Object.assign(new Error('Raw transaction broadcast is restricted to the local EOA authority'),{code:4100});
+          const activePrefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+          if(activePrefs.selectedAccount!==approval.request.params[0].from?.toLowerCase())
+            throw Object.assign(new Error('Selected hardware/EOA account changed before broadcast'),{code:4100});
+          const currentChain=await effectiveChain420(approval.context.origin);
+          if(currentChain.chainId!==approval.context.chainId||currentChain.epoch!==approval.context.epoch)
+            throw Object.assign(new Error('Network changed before raw broadcast'),{code:4901});
           const raw=request.params?.[0];
           const localHash=assertEoaRawMatchesAuthority420(raw,approval.request.params[0]);
           const rpcHash=await rpcRequest('eth_sendRawTransaction',[raw],

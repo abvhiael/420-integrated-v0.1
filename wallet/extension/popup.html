@@ -294,6 +294,66 @@
         <p id="receive-warning" class="notice">Network and account verification required.</p>
       </section>
 
+      <section id="convenience-view" class="view" hidden aria-labelledby="convenience-title">
+        <div class="topline"><span class="eyebrow">WALLET TOOLS</span><span class="chip">OPT-IN</span></div>
+        <h1 id="convenience-title" class="screen-title">Wallet tools &amp; ecosystem</h1>
+        <p class="intro">Convenience information cannot authorize accounts, control funds or prove an on-chain identity. No contact data is uploaded automatically.</p>
+        <p id="convenience-status" class="notice" role="status" aria-live="polite">Checking local settings…</p>
+        <button id="convenience-full-page" class="secondary wide" type="button">Open full-page wallet</button>
+        <section class="settings-panel" aria-label="Portfolio insights">
+          <h2>Portfolio insights</h2>
+          <p class="intro">Current verified holdings and activity status only; historic returns and cost basis are not inferred.</p>
+          <pre id="convenience-insights" class="request-details" aria-live="polite"></pre>
+        </section>
+        <section class="settings-panel">
+          <h2>Contacts &amp; address labels</h2>
+          <form id="convenience-label-form">
+            <label for="convenience-label-address">Verified chain address</label><input id="convenience-label-address" placeholder="0x…" autocomplete="off" required>
+            <label for="convenience-label-name">Label (local only)</label><input id="convenience-label-name" maxlength="64" autocomplete="off" required>
+            <div class="review-actions">
+              <button type="submit" class="secondary">Save label</button>
+              <button id="convenience-label-remove" type="button" class="secondary">Remove label</button>
+            </div>
+          </form>
+          <div id="convenience-label-list" class="stack" aria-live="polite"></div>
+        </section>
+        <section class="settings-panel">
+          <h2>Privacy &amp; permissions</h2>
+          <label><input type="checkbox" id="convenience-privacy-analytics" data-convenience-privacy="portfolioAnalytics"> Allow local portfolio analytics</label>
+          <label><input type="checkbox" id="convenience-privacy-fiat" data-convenience-privacy="showFiat"> Show verified fiat values</label>
+          <label><input type="checkbox" id="convenience-privacy-balances" data-convenience-privacy="hideBalances"> Mask balances on screen</label>
+          <label><input type="checkbox" id="convenience-privacy-services" data-convenience-privacy="serviceDiscovery"> Show approved 420Integrated service directory</label>
+          <label><input type="checkbox" id="convenience-privacy-alerts" data-convenience-privacy="notifications"> Enable local transaction-status notifications</label>
+          <label><input type="checkbox" id="convenience-privacy-pair" data-convenience-privacy="allowDeepLinks"> Allow explicit WalletConnect v2 pairing URI review</label>
+          <p class="intro">Notifications require a separate browser permission. No notification content is sent to a cloud push provider. External contact/backup sync stays off without an independently verified end-to-end encrypted sync service.</p>
+        </section>
+        <section class="settings-panel">
+          <h2>Encrypted convenience backup</h2>
+          <p class="intro">Exports local labels and privacy preferences only. Recovery phrases, vaults, private keys, passkeys, account grants, RPC endpoints and transactions are never exported. Encrypt with a separate passphrase of at least 12 characters.</p>
+          <label for="convenience-backup-pass">Backup encryption passphrase</label>
+          <input id="convenience-backup-pass" type="password" autocomplete="new-password" minlength="12">
+          <button id="convenience-backup-export" type="button" class="secondary wide">Create encrypted local backup</button>
+          <label for="convenience-backup-file">Restore encrypted backup</label>
+          <input id="convenience-backup-file" type="file" accept=".json,application/json">
+          <button id="convenience-backup-import" type="button" class="secondary wide">Decrypt, inspect and restore labels</button>
+        </section>
+        <section class="settings-panel">
+          <h2>Mobile &amp; WalletConnect v2 pairing</h2>
+          <p class="intro">Review a pairing request from your own device. A pairing URI alone grants no permissions. A qualified relay project and session authorization must be available before any account can be shared.</p>
+          <form id="convenience-pair-form">
+            <label for="convenience-pair-uri">WalletConnect v2 URI</label>
+            <textarea id="convenience-pair-uri" rows="3" maxlength="3072" autocomplete="off" placeholder="wc:…"></textarea>
+            <button class="secondary wide" type="submit">Validate pairing request</button>
+          </form>
+          <pre id="convenience-pair-result" class="request-details" aria-live="polite"></pre>
+        </section>
+        <section class="settings-panel">
+          <h2>Verified 420Integrated applications</h2>
+          <p class="intro">Only services with explicitly approved HTTPS origin, service identity and active chain are displayed. Opening a service never connects it to your wallet automatically.</p>
+          <div id="convenience-services" class="stack" aria-live="polite"></div>
+        </section>
+      </section>
+
       <section id="finance-view" class="view" hidden aria-labelledby="finance-title">
         <div class="topline"><span class="eyebrow">ON-CHAIN FINANCE</span><span class="chip">DEPLOYMENT GATED</span></div>
         <h1 id="finance-title" class="screen-title">Swap · Bridge · Stake</h1>
@@ -399,6 +459,7 @@
       <button type="button" class="nav-item" data-screen="finance-view"><span aria-hidden="true">⇄</span><small>Finance</small></button>
       <button type="button" class="nav-item" data-screen="activity-view"><span aria-hidden="true">◷</span><small>Activity</small></button>
       <button type="button" class="nav-item" data-screen="sites-view"><span aria-hidden="true">◫</span><small>Sites</small></button>
+      <button type="button" class="nav-item" data-screen="convenience-view"><span aria-hidden="true">☷</span><small>Tools</small></button>
       <button type="button" class="nav-item" data-screen="settings-view"><span aria-hidden="true">⚙</span><small>Settings</small></button>
     </nav>
     <div id="global-status" class="sr-only" role="status" aria-live="polite"></div>

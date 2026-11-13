@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {keccak256Hex} from '../core/keccak.js';
 import {GENESIS_APP_SERVICES,NON_CANONICAL_WALLET_ALIASES,MISSING_CANONICAL_SERVICE_IDS_FOR_NAMED_GENESIS_PRODUCTS} from '../core/genesis-app-catalog.js';
 import {normalizeGenesisRegistryBinding420,normalizeGenesisServiceEntry420,decodeGenesisServiceRecord420,
- verifyGenesisService420,discoverGenesisServices420,assertGenesisNavigationSnapshot420} from '../core/genesis-wallet-integration420.js';
+ verifyGenesisService420,discoverGenesisServices420,assertGenesisNavigationSnapshot420,verifyGenesisIdentityBinding420} from '../core/genesis-wallet-integration420.js';
 import {normalize420Name,confirm420NameRecipient} from '../core/names-send.js';
 import {validateTokenRuntime420,TOKEN_SERVICE_ID_420} from '../core/token-runtime.js';
 import {validateWalletGasQuote420} from '../core/gas-sponsorship.js';
@@ -127,4 +127,24 @@ test('420Gas funding offers and 420Token deployment remain outside app navigatio
   paymasterAndData:'0xab',authority:'funding-offer-only',
   executionAuthorization:true
  },{entryPoint:registryAddress,account}),/authority/);
+});
+
+test('Identity420 binding is current, scoped, read-only, bilateral if claimed, never owner/signing authority',async()=>{
+ const profileId='0x'+'44'.repeat(32),label='0x'+'55'.repeat(32);
+ let calls=0;
+ const client={account,async verifySession(){calls++;return {chainId:chain}},
+   async profile(id){assert.equal(id,profileId);return {exists:true,active:true,controller:account,primaryName:label}},
+   async bilateralPrimaryName(id,hash){assert.equal(id,profileId);assert.equal(hash,label);
+      return {bilateral:true,profile:{controller:account}}}};
+ const verified=await verifyGenesisIdentityBinding420(client,{account,chainId:chain,profileId,requirePrimaryName:true});
+ assert.equal(verified.profileBinding,'on-chain-verified');
+ assert.equal(verified.primaryNameVerified,true);
+ assert.equal(verified.grantsWalletAuthority,false);
+ assert.equal(verified.grantsSpendingAuthority,false);
+ assert.equal(calls,2);
+ await assert.rejects(()=>verifyGenesisIdentityBinding420({...client,account:implementation},{account,chainId:chain,profileId}),/account mismatch/);
+ await assert.rejects(()=>verifyGenesisIdentityBinding420({...client,profile:async()=>({exists:true,active:true,controller:implementation,primaryName:label})},
+   {account,chainId:chain,profileId}),/another controller/);
+ await assert.rejects(()=>verifyGenesisIdentityBinding420({...client,bilateralPrimaryName:async()=>({bilateral:false})},
+   {account,chainId:chain,profileId,requirePrimaryName:true}),/mutually verified/);
 });

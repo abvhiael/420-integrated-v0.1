@@ -294,6 +294,50 @@
         <p id="receive-warning" class="notice">Network and account verification required.</p>
       </section>
 
+      <section id="finance-view" class="view" hidden aria-labelledby="finance-title">
+        <div class="topline"><span class="eyebrow">ON-CHAIN FINANCE</span><span class="chip">DEPLOYMENT GATED</span></div>
+        <h1 id="finance-title" class="screen-title">Swap · Bridge · Stake</h1>
+        <p class="intro">Only release-approved deployed contracts and verified routes are eligible. Quotes are indicative until executed. Testnet/liquidity and independently reviewed third-party providers are required for live transactions.</p>
+        <p class="notice" id="finance-status" role="status" aria-live="polite">Checking approved finance services…</p>
+        <form id="finance-options-form" class="settings-panel">
+          <label for="finance-kind">Operation</label>
+          <select id="finance-kind"><option value="swap">Swap tokens</option><option value="bridge">Bridge assets</option><option value="stake">Validator staking information</option></select>
+          <div id="finance-trade-fields">
+            <label for="finance-amount">Input amount (verified token units)</label>
+            <input id="finance-amount" inputmode="decimal" placeholder="0.0" autocomplete="off" required>
+            <label for="finance-slippage">Maximum swap slippage</label>
+            <select id="finance-slippage"><option value="50">0.5%</option><option value="100">1%</option><option value="200">2%</option><option value="500">5% (high risk)</option></select>
+            <button class="primary wide" id="finance-find" type="submit">Compare verified routes</button>
+          </div>
+        </form>
+        <div id="finance-stake-fields" class="settings-panel" hidden>
+          <p class="intro">420Stake genesis has no public delegation. Validator bond, status, slashing and rewards may be read when the approved contract is deployed; this screen does not invent a staking or unstaking transaction.</p>
+          <form id="finance-stake-form">
+            <label for="finance-validator">Validator ID (bytes32)</label>
+            <input id="finance-validator" placeholder="0x…" autocomplete="off" spellcheck="false" maxlength="66" required>
+            <button class="secondary wide" type="submit">Read verified validator state</button>
+          </form>
+          <pre id="finance-stake-result" class="request-details"></pre>
+        </div>
+        <div id="finance-route-list" class="stack" aria-live="polite"></div>
+        <div id="finance-review-box" class="review-box" hidden>
+          <h2>Review exact transaction</h2>
+          <pre id="finance-review-detail" class="request-details"></pre>
+          <label for="finance-risk-ack"><input type="checkbox" id="finance-risk-ack"> I reviewed token amount, spender, router, fees, slippage or bridge destination. An approval is a separate on-chain transaction; source submission is not destination delivery.</label>
+          <div class="review-actions"><button type="button" class="secondary" id="finance-clear">Change route</button><button type="button" class="primary" id="finance-confirm" disabled>Authorize reviewed action</button></div>
+        </div>
+        <section class="settings-panel">
+          <h2>Cross-chain transfer status</h2>
+          <p class="intro">Source receipt, reorg and confirmation checks are on-chain. Destination proof and beneficiary payment are never inferred from source submission.</p>
+          <form id="finance-track-form">
+            <label for="finance-activity-id">Bridge activity ID from transaction history</label>
+            <input id="finance-activity-id" autocomplete="off" required placeholder="finance-…">
+            <button type="submit" class="secondary wide">Verify source bridge status</button>
+          </form>
+          <pre id="finance-track-result" class="request-details" aria-live="polite"></pre>
+        </section>
+      </section>
+
       <section id="send-view" class="view" hidden aria-labelledby="send-title">
         <button type="button" class="back-button" data-back>‹ Wallet</button>
         <h1 id="send-title" class="screen-title">Send assets</h1>
@@ -351,6 +395,7 @@
     <nav id="bottom-nav" class="bottom-nav" aria-label="Wallet navigation">
       <button type="button" class="nav-item active" data-screen="dashboard" aria-current="page"><span aria-hidden="true">⌂</span><small>Wallet</small></button>
       <button type="button" class="nav-item" data-screen="nfts-view"><span aria-hidden="true">◇</span><small>NFTs</small></button>
+      <button type="button" class="nav-item" data-screen="finance-view"><span aria-hidden="true">⇄</span><small>Finance</small></button>
       <button type="button" class="nav-item" data-screen="activity-view"><span aria-hidden="true">◷</span><small>Activity</small></button>
       <button type="button" class="nav-item" data-screen="sites-view"><span aria-hidden="true">◫</span><small>Sites</small></button>
       <button type="button" class="nav-item" data-screen="settings-view"><span aria-hidden="true">⚙</span><small>Settings</small></button>

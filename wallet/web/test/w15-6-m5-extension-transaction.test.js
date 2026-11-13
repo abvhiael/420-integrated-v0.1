@@ -39,9 +39,15 @@ test('refuses wrong chain or malformed hash and does not query another network',
   await assert.rejects(reconcileExtensionTransaction420(entry,{provider:provider(),chainId:'0x1'}),/another chain/);
   await assert.rejects(reconcileExtensionTransaction420({...entry,hash:'garbage'},{provider:provider(),chainId}),/invalid transaction hash/);
 });
-test('stable states are not downgraded, and missing receipts never imply dropped/replaced/cancelled',async()=>{
-  for(const status of ['confirmed','reverted','dropped','replaced','cancelled']){
-    const stable={...entry,status};assert.deepEqual(await reconcileExtensionTransaction420(stable,{provider:provider({r:null}),chainId}),stable);
+test('canonical finality is rechecked while unsupported replacement/dropped conclusions remain unchanged',async()=>{
+  for(const status of ['confirmed','reverted']){
+    const prior={...entry,status};
+    const rechecked=await reconcileExtensionTransaction420(prior,{provider:provider({r:null}),chainId});
+    assert.equal(rechecked.status,'pending','lost canonical receipt must invalidate former finality');
+  }
+  for(const status of ['dropped','replaced','cancelled']){
+    const stable={...entry,status};
+    assert.deepEqual(await reconcileExtensionTransaction420(stable,{provider:provider({r:null}),chainId}),stable);
   }
 });
 test('in-flight status classification is explicit',()=>{

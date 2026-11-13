@@ -4,7 +4,7 @@ import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,ext
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
 const $=id=>document.getElementById(id);
-const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0,detailAddress:null,showHidden:false,security:null,securityReview:null,securityEpoch:0};
+const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0,detailAddress:null,showHidden:false,security:null,securityReview:null,securityEpoch:0,nftSelected:null,nftPrepared:null,nftShowHidden:false};
 const node=(tag,cls,text)=>{
   const el=document.createElement(tag);if(cls)el.className=cls;
   if(text!==undefined)el.textContent=text;return el;
@@ -147,23 +147,139 @@ function renderAssets(){
       (fiatCount?' · Partial quoted value '+quoted+' '+(p?.currency||'CAD'):''):
     'Quoted portfolio value '+quoted+' '+(p?.currency||'CAD')+' (not a guaranteed redemption value)';
 }
+function nftRow420(title,detail){
+ const el=node('div','nft-row');
+ el.append(node('strong','',title),node('small','',detail));
+ return el;
+}
+function selectedNft420(){
+ const nft=state.wallet?.portfolio?.nfts?.find(x=>x.key===state.nftSelected);
+ if(!nft||nft.ownership!=='verified'||nft.stale)
+  throw new Error('NFT is not currently verified; refresh the portfolio');
+ return nft;
+}
 function renderNFT420(){
-  const list=$('nft-list');list.replaceChildren();
-  const p=state.wallet?.portfolio;
-  const nfts=p?.nfts?.filter(x=>x.ownership==='verified'&&!x.stale)||[];
-  if(!nfts.length){
-    list.append(node('p','empty',p?.status==='outage'?'NFT ownership unavailable during network outage':
-      'No currently verified NFTs found in the bounded discovery window.'));
-    return;
-  }
+ const list=$('nft-list');list.replaceChildren();
+ const p=state.wallet?.portfolio;
+ const entries=(p?.nfts||[]).filter(x=>x.ownership==='verified'&&!x.stale);
+ const visible=entries.filter(x=>state.nftShowHidden||(!x.hidden&&!x.spam));
+ const groups=new Map();
+ for(const nft of visible){
+  const id=nft.standard+':'+nft.address;
+  if(!groups.has(id))groups.set(id,[]);
+  groups.get(id).push(nft);
+ }
+ $('nft-index-status').textContent=p?.status==='outage'?
+  'Network unavailable: stored NFTs are not verified as owned':
+  'Only indexed events and verified on-chain ownership appear; run Discover assets to scan the next bounded block window. Metadata is untrusted.';
+ $('nfts-show-hidden').textContent=state.nftShowHidden?'Hide spam / hidden collectibles':'Show hidden / spam collectibles';
+ $('nfts-show-hidden').setAttribute('aria-pressed',String(state.nftShowHidden));
+ if(!visible.length){
+  list.append(node('p','empty',entries.length&&!state.nftShowHidden?
+   'All verified NFTs are hidden/spam. Use Show hidden / spam collectibles to review.':
+   p?.status==='outage'?'NFT ownership cannot be verified while the chain is offline':
+   'No currently verified NFTs found in the indexed block windows.'));
+  return;
+ }
+ for(const [collection,nfts] of groups){
+  const heading=node('h2','nft-collection-title',nfts[0].standard+' · '+nfts[0].address);
+  list.append(heading);
   for(const nft of nfts){
-    const row=node('div','asset-row');
-    const info=node('div','asset-info');
-    info.append(node('strong','',nft.standard+' #'+nft.tokenId),
-      node('small','',nft.address),
-      node('small','','Owner verified on selected chain at last refresh'));
-    row.append(node('span','token-icon alt','◇'),info);list.append(row);
+   const button=node('button','asset-row nft-item');
+   button.type='button';
+   const info=node('div','asset-info');
+   const name=nft.metadata?.name||nft.standard+' #'+nft.tokenId;
+   info.append(node('strong','',name),
+     node('small','','#'+nft.tokenId+' · verified on chain · quantity '+nft.quantity),
+     node('small','',(nft.spam?'Potential spam · ':'')+
+       (nft.hidden?'Hidden · ':'')+'420Integrated/game labels are not ownership proof'));
+   button.append(node('span','token-icon alt','◇'),info);
+   button.addEventListener('click',()=>{
+    state.nftSelected=nft.key;state.nftPrepared=null;
+    renderNFTDetail420();screen('nft-detail-view');
+   });
+   list.append(button);
   }
+ }
+}
+function clearNftReview420(){
+ state.nftPrepared=null;$('nft-review').hidden=true;
+ $('nft-review-ack').checked=false;$('nft-review-confirm').disabled=true;
+}
+function renderNFTDetail420(){
+ const nft=selectedNft420();
+ $('nft-detail-title').textContent=nft.metadata?.name||nft.standard+' #'+nft.tokenId;
+ $('nft-detail-status').textContent='Owner: '+nft.owner+' · on-chain '+nft.ownership+
+  ' · balance '+nft.quantity+' · selected chain '+state.wallet?.network?.expectedChainId;
+ const facts=$('nft-detail-facts');facts.replaceChildren();
+ facts.append(nftRow420('Contract',nft.address),nftRow420('Standard and token ID',nft.standard+' #'+nft.tokenId),
+  nftRow420('Collection (contract-address grouping)',nft.address),
+  nftRow420('Ownership proof',nft.standard==='ERC721'?'ownerOf(tokenId)':'balanceOf(owner,tokenId)'));
+ const details=$('nft-detail-metadata');details.replaceChildren();
+ if(nft.metadata){
+  const meta=nft.metadata;
+  details.append(nftRow420('Untrusted metadata name',meta.name||'Unnamed'),
+   nftRow420('Description (plain text only)',meta.description||'No description'),
+   nftRow420('Untrusted image reference (not loaded)',meta.imageReference||'None'));
+  for(const attr of meta.attributes||[])details.append(nftRow420(attr.trait_type||'Attribute',attr.value||''));
+  if(meta.flags?.spam)details.append(nftRow420('Warning',meta.flags.reasons.join('; ')));
+ }else details.append(nftRow420('Metadata', 'Not loaded. Loading an external metadata URL can reveal the request to its host. Ownership never comes from metadata.'));
+ $('nft-hide').textContent=nft.hidden?'Unhide collectible':'Hide collectible';
+ $('nft-spam').textContent=nft.spam?'Unmark spam':'Mark as spam';
+ $('nft-load-metadata').disabled=nft.ownership!=='verified';
+ $('nft-quantity').value='1';
+ $('nft-quantity').disabled=nft.standard==='ERC721';
+ $('nft-collection-wide').checked=nft.standard==='ERC1155';
+ $('nft-collection-wide').disabled=nft.standard==='ERC1155';
+ $('nft-action').value='transfer';$('nft-recipient').value='';
+ $('nft-approval-status').textContent='On-chain operator approval has not been inspected.';
+ clearNftReview420();
+}
+async function nftWatchVisibility420(field){
+ const nft=selectedNft420();
+ try{
+  const epoch=++state.epoch;
+  const next=await command('nft-visibility',{standard:nft.standard,address:nft.address,
+   tokenId:nft.tokenId,[field]:!(field==='spam'?nft.spam:nft.hidden)});
+  if(await applyWalletState420(next,epoch)){
+   if(state.wallet.portfolio.nfts?.some(x=>x.key===nft.key&&x.ownership==='verified'))
+    renderNFTDetail420();
+   else screen('nfts-view');
+   tell('NFT '+field+' preference saved locally; chain ownership unchanged.');
+  }
+ }catch(error){$('nft-detail-status').textContent='NFT preference failed: '+error.message;}
+}
+async function nftReview420(event){
+ event.preventDefault();
+ try{
+  const nft=selectedNft420(),action=$('nft-action').value,
+   target=$('nft-recipient').value.trim(),collectionWide=$('nft-collection-wide').checked;
+  if(nft.hidden||nft.spam)throw new Error('Unhide and unmark spam before on-chain NFT actions');
+  if(nft.standard==='ERC1155'&&action!=='transfer'&&!collectionWide)
+   throw new Error('ERC-1155 approvals must be collection wide');
+  const request={action,standard:nft.standard,address:nft.address,tokenId:nft.tokenId,
+   quantity:$('nft-quantity').value,collectionWide,
+   ...(action==='transfer'?{recipient:target}:{operator:target})};
+  $('nft-detail-status').textContent='Verifying chain ownership, contract and network gas…';
+  const review=await command('nft-review',request);
+  if(state.nftSelected!==nft.key)throw new Error('NFT selection changed during review');
+  state.nftPrepared={...review,request,key:nft.key,epoch:state.wallet.network.epoch,
+   chainId:state.wallet.network.expectedChainId,account:state.wallet.selectedAccount};
+  const list=$('nft-review-details');list.replaceChildren();
+  list.append(nftRow420('Action',review.action+' · '+nft.standard+' #'+nft.tokenId),
+   nftRow420('Contract',review.transaction.to),
+   nftRow420('Verified owner',nft.owner),
+   nftRow420('Recipient/operator',target),
+   nftRow420('Amount',action==='transfer'?request.quantity:'operator rights'),
+   nftRow420('Chain',state.nftPrepared.chainId),
+   nftRow420('Calldata',review.transaction.data),
+   nftRow420('Nonce',review.quote.nonce),
+   nftRow420('Maximum estimated fee (wei)',review.quote.totalFeeWei??'Requires explicit fee recheck'));
+  $('nft-review-warning').textContent=review.warning;
+  $('nft-review-ack').checked=false;$('nft-review-confirm').disabled=true;
+  $('nft-review').hidden=false;
+  $('nft-detail-status').textContent='NFT review is ready. Confirm all fields before signing.';
+ }catch(error){clearNftReview420();$('nft-detail-status').textContent='NFT review blocked: '+error.message;}
 }
 async function replaceUserOperation420(entry,action){
   if(!['speed-up','cancel'].includes(action))throw new Error('Unsupported replacement action');
@@ -725,6 +841,116 @@ async function approval(){
   $('reject').addEventListener('click',()=>finish(false)); // User rejected request when approved=false.
 }
 function setup(){
+  for(const [id,older] of [['nfts-scan-recent',false],['nfts-scan-older',true]]){
+    $(id).addEventListener('click',async()=>{
+      const button=$(id);button.disabled=true;
+      try{
+        const epoch=++state.epoch;
+        const response=await command('portfolio-discover',{older});
+        if(await applyWalletState420(response.state,epoch)){
+          const d=response.discovery;
+          $('nft-index-status').textContent=d.nftBackfillComplete?
+            'Older NFT event history has reached genesis; currently owned collectibles remain verified on chain.':
+            (older?'Historical backfill':'Recent forward scan')+
+            ' complete for blocks '+d.nftFrom+'–'+d.nftTo+
+            ': '+d.nfts+' NFT holdings verified. Coverage is partial; repeat to scan more blocks.';
+          tell('NFT ownership reverified from contract state, not metadata.');
+        }
+      }catch(e){$('nft-index-status').textContent='NFT scan blocked: '+e.message;}
+      finally{button.disabled=false;}
+    });
+  }
+  $('nft-import-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+    button.disabled=true;
+    try{
+      const next=await command('nft-import',{
+        standard:$('nft-import-standard').value,
+        address:$('nft-import-contract').value.trim(),
+        tokenId:$('nft-import-id').value.trim()
+      });
+      const epoch=++state.epoch;
+      if(await applyWalletState420(next,epoch)){
+        $('nft-index-status').textContent='Imported after current on-chain ownership verification. Token metadata remains untrusted.';
+        tell('Verified collectible added to your collection.');
+      }
+    }catch(e){$('nft-index-status').textContent='Import blocked: '+e.message;}
+    finally{button.disabled=false;}
+  });
+  $('nfts-show-hidden').addEventListener('click',()=>{
+    state.nftShowHidden=!state.nftShowHidden;renderNFT420();
+  });
+  $('nft-load-metadata').addEventListener('click',async()=>{
+    const button=$('nft-load-metadata');button.disabled=true;
+    try{
+      const nft=selectedNft420();
+      const {metadata}=await command('nft-metadata',{
+       standard:nft.standard,address:nft.address,tokenId:nft.tokenId});
+      if(nft.key!==state.nftSelected)throw Error('Selected NFT changed');
+      const refreshed=await command('get-state');
+      await applyWalletState420(refreshed,++state.epoch);
+      renderNFTDetail420();
+      $('nft-detail-status').textContent='Untrusted metadata text loaded; ownership remains on-chain verified.';
+    }catch(e){$('nft-detail-status').textContent='Metadata unavailable: '+e.message;}
+    finally{button.disabled=false;}
+  });
+  $('nft-hide').addEventListener('click',()=>nftWatchVisibility420('hidden'));
+  $('nft-spam').addEventListener('click',()=>nftWatchVisibility420('spam'));
+  $('nft-inspect-approval').addEventListener('click',async()=>{
+    const button=$('nft-inspect-approval');button.disabled=true;
+    try{
+      const nft=selectedNft420();
+      const operator=$('nft-recipient').value.trim();
+      const response=await command('nft-approval-status',{
+        standard:nft.standard,address:nft.address,tokenId:nft.tokenId,
+        ...(nft.standard==='ERC1155'||$('nft-collection-wide').checked?{operator}:{}),
+        collectionWide:$('nft-collection-wide').checked
+      });
+      $('nft-approval-status').textContent=response.scope==='token'?
+        'On-chain ERC-721 token-specific approved address: '+response.approvedOperator:
+        'On-chain ERC-1155 operator '+response.operator+': '+(response.approved?'approved for ALL NFTs in collection':'not approved');
+    }catch(e){$('nft-approval-status').textContent='Cannot inspect approval: '+e.message;}
+    finally{button.disabled=false;}
+  });
+  $('nft-action-form').addEventListener('submit',nftReview420);
+  for(const id of ['nft-action','nft-recipient','nft-quantity','nft-collection-wide'])
+   $(id).addEventListener('input',clearNftReview420);
+  $('nft-action').addEventListener('change',()=>{
+   const nft=selectedNft420(),approval=$('nft-action').value!=='transfer';
+   $('nft-quantity').disabled=approval||nft.standard==='ERC721';
+   $('nft-collection-wide').disabled=!approval||nft.standard==='ERC1155';
+   if(approval&&nft.standard==='ERC1155')$('nft-collection-wide').checked=true;
+  });
+  $('nft-review-ack').addEventListener('change',()=>{
+    $('nft-review-confirm').disabled=!$('nft-review-ack').checked||!state.nftPrepared;
+  });
+  $('nft-review-cancel').addEventListener('click',()=>{
+    clearNftReview420();$('nft-detail-status').textContent='NFT review cancelled. No transaction was signed.';
+  });
+  $('nft-review-confirm').addEventListener('click',async()=>{
+    const previous=state.nftPrepared;
+    if(!previous||!$('nft-review-ack').checked)return;
+    const button=$('nft-review-confirm');button.disabled=true;
+    try{
+      const latest=selectedNft420();
+      const action=$('nft-action').value,target=$('nft-recipient').value.trim();
+      if(previous.key!==latest.key||previous.action!==action||
+         previous.chainId!==state.wallet.network.expectedChainId||
+         previous.epoch!==state.wallet.network.epoch||
+         previous.account!==state.wallet.selectedAccount||
+         previous.request.quantity!==$('nft-quantity').value||
+         previous.request.collectionWide!==$('nft-collection-wide').checked||
+         (action==='transfer'?previous.request.recipient:previous.request.operator)!==target)
+        throw new Error('NFT review fields, account or chain changed; inspect again');
+      const result=await command('nft-submit',{reviewId:previous.reviewId,confirmed:true});
+      clearNftReview420();
+      $('nft-detail-status').textContent='NFT '+action+' submitted: '+result.hash+
+        '. Awaiting canonical receipt and updated on-chain owner/approval.';
+      await refresh();
+    }catch(e){clearNftReview420();$('nft-detail-status').textContent='NFT submission not verified: '+e.message;}
+    finally{button.disabled=false;}
+  });
   $('open-security-centre').addEventListener('click',()=>{screen('security-view');loadSecurity420();});
   document.querySelector('#security-view [data-back]')?.addEventListener('click',event=>{event.stopImmediatePropagation();screen('sites-view');},true);
   $('security-refresh').addEventListener('click',()=>{clearSecurityReview420();loadSecurity420();});
@@ -778,8 +1004,9 @@ function setup(){
       const epoch=++state.epoch;
       const response=await command('portfolio-discover');
       if(await applyWalletState420(response.state,epoch))
-        tell('Scanned recent blocks. '+response.discovery.tokens+' ERC-20 and '+response.discovery.nfts+
-          ' verified ERC-721 holdings found. Older transfers may need a separate indexer.','success');
+        tell('Scanned bounded blocks. '+response.discovery.tokens+' ERC-20 and '+response.discovery.nfts+
+          ' NFT holdings verified (ERC-721/1155); NFT window '+response.discovery.nftFrom+
+          '–'+response.discovery.nftTo+'. Older assets may need manual import.','success');
     }catch(e){tell('Discovery unavailable: '+e.message,'error');}
     finally{button.disabled=false;}
   });
@@ -819,7 +1046,7 @@ function setup(){
   $('quick-send').addEventListener('click',()=>{populateSend();resetReview();screen('send-view');});
   $('quick-receive').addEventListener('click',()=>{renderReceive();screen('receive-view');});
   $('quick-refresh').addEventListener('click',refresh);
-  for(const back of document.querySelectorAll('[data-back]'))back.addEventListener('click',()=>screen(back.closest('#security-view')?'sites-view':'dashboard'));
+  for(const back of document.querySelectorAll('[data-back]'))back.addEventListener('click',()=>screen(back.closest('#security-view')?'sites-view':back.closest('#nft-detail-view')?'nfts-view':'dashboard'));
   $('copy-account').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>tell('Copy failed: '+e.message,'error')));
   $('copy-receive').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>{$('receive-warning').textContent=e.message;$('receive-warning').className='notice error';}));
   $('account-select').addEventListener('change',async event=>{

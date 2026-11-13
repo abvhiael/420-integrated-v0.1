@@ -1,3 +1,5 @@
+import {nftId420,normalizedNftRecord420,verifyNftOwnership420,discoverNftTransfers420,nftSpamFlags420,
+ nftMetadataUrl420,fetchSafeNftMetadata420,nftIndexWindow420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420} from './core/extension-nfts.js';
 import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
 import {readSecurityAllowance420,discoverRecentSecurityAllowances420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
 import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
@@ -11,7 +13,7 @@ import {Transaction} from './vendor/ethers-6.17.0.min.js';
 import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
 import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420,transitionReplacement420} from './core/extension-replacement-policy.js';
-import {encodeExecute} from './core/abi.js';
+import {encodeExecute,decodeString} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
 import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
@@ -31,6 +33,7 @@ const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
 const SECURITY_SIGNATURES_KEY='420-wallet-security-signature-history-v1';
 const SECURITY_WATCH_KEY='420-wallet-security-watch-v1';
 const SECURITY_REVIEW_KEY='420-wallet-security-reviews-v1';
+const NFT_REVIEW_KEY_420='420-wallet-nft-review-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_gasPrice','eth_feeHistory','eth_maxPriorityFeePerGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
 const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
@@ -161,17 +164,25 @@ async function readAssetPortfolio420(state){
         balance:classifyBalance420({status:'unavailable'}),error:'Token contract metadata or balance unavailable: '+error.message});
     }
   }
-  const nfts=(old.nfts||[]).map(n=>({...n,ownership:'unavailable',stale:true}));
-  // NFT ownership must be reverified; a cached transfer event is not proof of current ownership.
-  for(let i=0;i<nfts.length;i++){
-    const n=nfts[i];
+  // Cached event history and NFT metadata are NEVER ownership authority.
+  // Revalidate against ownerOf or balanceOf for each retained ERC721/1155,
+  // and keep failed verification visibly stale rather than spendable.
+  const nfts=[];
+  for(const oldNft of (old.nfts||[]).slice(0,100)){
     try{
-      if(n.standard!=='ERC721')continue;
-      const result=await provider.request('eth_call',[{to:n.address,data:'0x6352211e'+BigInt(n.tokenId).toString(16).padStart(64,'0')},'latest']);
-      n.ownership=typeof result==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result)&&
-        ('0x'+result.slice(-40).toLowerCase())===balanceAccount?'verified':'not-owned';
-      n.stale=false;
-    }catch{}
+      const checked=await verifyNftOwnership420(provider,oldNft,balanceAccount);
+      if(checked.verified){
+        const signals=nftSpamFlags420({...oldNft.metadata,spam:settings.nftSpam.includes(checked.key)});
+        const spam=!settings.nftTrusted.includes(checked.key)&&signals.spam;
+        nfts.push({...checked,metadata:oldNft.metadata||null,
+          hidden:settings.nftHidden.includes(checked.key)||spam,
+          spam,ownership:'verified'});
+      }
+    }catch{
+      nfts.push({...oldNft,owner:balanceAccount,ownership:'unavailable',verified:false,stale:true,
+        hidden:settings.nftHidden.includes(oldNft.key)||oldNft.hidden===true,
+        spam:settings.nftSpam.includes(oldNft.key)||oldNft.spam===true});
+    }
   }
   const portfolio={...blank,balanceAddress:balanceAccount,status:'verified',checkedAt,blockNumber:block.toString(),native,tokens,
     nfts:nfts.filter(n=>n.ownership!=='not-owned'),lastObserved:checkedAt,priceProviderConfigured:Boolean(settings.priceEndpoint),priceProviderUrl:settings.priceEndpoint};
@@ -1003,8 +1014,13 @@ async function finalizeWalletUiState420(state){
   return state;
 }
 async function walletUiState420() {
+  // Read one immutable network-registry snapshot for both the selected chain
+  // and its native-currency identity. Parallel popup refreshes and user chain
+  // changes must not combine 420 from a previous chain with an ETH selection.
   const registry=await networkRegistry420();
-  const active=await effectiveChain420().catch(()=>null);
+  const active=registry.selectedChainId&&registry.networks[registry.selectedChainId]?.enabled?
+    {registry,chainId:registry.selectedChainId,
+      network:registry.networks[registry.selectedChainId],epoch:registry.epoch}:null;
   const raw=await readObject(EXTENSION_CONFIG_KEY_420);
   const config=normalizeExtensionConfig420({...raw,chainId:active?.chainId||null,
     rpcUrl:active?.network.rpcUrls[0]||null,explorerUrl:active?.network.blockExplorerUrls[0]||null,
@@ -1604,9 +1620,221 @@ async function securitySubmit420(message){
   throw error;
  }
 }
+
+function nftContext420(state){
+ if(!state?.selectedAccount||state.network?.status!=='matched'||!state.network?.expectedChainId)
+  throw Object.assign(new Error('Verified NFT network/account required'),{code:4901});
+ return {chainId:state.network.expectedChainId,epoch:state.network.epoch,
+  account:state.selectedAccount,owner:state.portfolio?.balanceAddress||state.selectedAccount,
+  scope:portfolioScope420(state.network.expectedChainId,state.selectedAccount)};
+}
+async function nftProvider420(chainId){
+ const chain=await effectiveChain420();
+ if(chain.chainId!==chainId)throw Object.assign(new Error('NFT chain changed'),{code:4901});
+ return {request:(method,params)=>portfolioRpc420(chain,method,params)};
+}
+async function nftSelection420(message,{allowSpam=false}={}){
+ const wallet=await walletUiState420(),ctx=nftContext420(wallet);
+ const ref=normalizedNftRecord420({standard:message.standard,address:message.address,tokenId:message.tokenId});
+ const cached=wallet.portfolio?.nfts?.find(n=>n.key===ref.key);
+ if(!cached||cached.ownership!=='verified'||cached.stale||cached.hidden||(!allowSpam&&cached.spam))
+  throw Object.assign(new Error('Verified visible NFT ownership required. Hidden/spam or unknown assets are blocked'),{code:4100});
+ const provider=await nftProvider420(ctx.chainId);
+ const asset=await verifyNftOwnership420(provider,ref,ctx.owner);
+ if(!asset.verified)throw Object.assign(new Error('NFT is no longer owned on the selected chain'),{code:4100});
+ const now=await effectiveChain420();
+ if(now.epoch!==ctx.epoch)throw Object.assign(new Error('NFT network changed during verification'),{code:4901});
+ return {wallet,ctx,provider,ref,asset,cached};
+}
+async function nftImport420(message){
+ const wallet=await walletUiState420(),ctx=nftContext420(wallet);
+ const ref=normalizedNftRecord420({standard:message.standard,address:message.address,
+   tokenId:message.tokenId});
+ const provider=await nftProvider420(ctx.chainId);
+ const verified=await verifyNftOwnership420(provider,ref,ctx.owner);
+ if(!verified.verified)throw Object.assign(new Error('Collectible is not owned by this account on this chain'),{code:4100});
+ const current=await effectiveChain420();
+ if(current.chainId!==ctx.chainId||current.epoch!==ctx.epoch)
+   throw Object.assign(new Error('Chain changed during collectible import'),{code:4901});
+ const record=await portfolioRecord420(ctx.scope),cache=await readObject(PORTFOLIO_CACHE_KEY_420);
+ const stored=cache[ctx.scope]||{};
+ const nfts=new Map((stored.nfts||[]).map(n=>[n.key||nftId420(n.address,n.standard,n.tokenId),n]));
+ const previous=nfts.get(ref.key);
+ nfts.set(ref.key,{...verified,source:'manual',metadata:previous?.metadata||null,
+   hidden:record.nftHidden.includes(ref.key),spam:record.nftSpam.includes(ref.key)});
+ if(nfts.size>100)throw Object.assign(new Error('NFT inventory limit reached; hide or manage old entries'),{code:4100});
+ cache[ctx.scope]={...stored,nfts:[...nfts.values()]};
+ await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
+ return walletUiState420();
+}
+async function nftMetadata420(message){
+ const selected=await nftSelection420(message,{allowSpam:true});
+ const {provider,ref,ctx}=selected;
+ const id=BigInt(ref.tokenId).toString(16).padStart(64,'0');
+ const data=(ref.standard==='ERC721'?'0xc87b56dd':'0x0e89341c')+id;
+ const raw=await provider.request('eth_call',[{to:ref.address,data},'latest']);
+ const uri=decodeString(raw).slice(0,2048);
+ nftMetadataUrl420(uri,{tokenId:ref.tokenId});
+ // Never trust metadata name, image or claimed owner as authority.
+ const metadata=await fetchSafeNftMetadata420(uri,{tokenId:ref.tokenId});
+ const now=await effectiveChain420();
+ if(now.epoch!==ctx.epoch)throw Object.assign(new Error('Network changed while fetching NFT metadata'),{code:4901});
+ const newest=await verifyNftOwnership420(provider,ref,ctx.owner);
+ if(!newest.verified)throw Object.assign(new Error('NFT ownership changed while fetching metadata'),{code:4100});
+ const cache=await readObject(PORTFOLIO_CACHE_KEY_420);
+ const stored=cache[ctx.scope]||{};
+ stored.nfts=(stored.nfts||[]).map(n=>n.key===ref.key?
+   {...n,metadata,spam:n.spam||metadata.flags.spam,hidden:n.hidden||metadata.flags.spam}:n);
+ cache[ctx.scope]=stored;
+ await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
+ return {metadata,nft:newest};
+}
+async function nftApprovalStatus420(message){
+ const selected=await nftSelection420(message,{allowSpam:true});
+ const inspected=await readNftApproval420(selected.provider,{
+  asset:selected.ref,owner:selected.ctx.owner,operator:message.operator??null,
+  collectionWide:message.collectionWide===true
+ });
+ const still=await effectiveChain420();
+ if(still.epoch!==selected.ctx.epoch)throw Object.assign(new Error('NFT network changed during approval inspection'),{code:4901});
+ return inspected;
+}
+async function nftVisibility420(message){
+ const state=await walletUiState420(),ctx=nftContext420(state),
+   ref=normalizedNftRecord420(message);
+ if(typeof message.hidden!=='boolean'&&typeof message.spam!=='boolean')
+  throw Object.assign(new Error('Explicit NFT spam/visibility choice required'),{code:-32602});
+ const settings=await portfolioRecord420(ctx.scope);
+ for(const [field,value] of [['nftHidden',message.hidden],['nftSpam',message.spam]]){
+  if(typeof value==='boolean'){
+   settings[field]=value?[...new Set([...settings[field],ref.key])]:
+     settings[field].filter(x=>x!==ref.key);
+  }
+ }
+ if(typeof message.spam==='boolean'){
+  settings.nftTrusted=message.spam?
+    settings.nftTrusted.filter(x=>x!==ref.key):
+    [...new Set([...settings.nftTrusted,ref.key])];
+ }
+ await savePortfolioRecord420(ctx.scope,settings);
+ return walletUiState420();
+}
+async function nftPrepare420(message){
+ const selected=await nftSelection420(message);
+ if(!extensionCanSend420(selected.wallet))
+  throw Object.assign(new Error('Unlock qualified local EOA or passkey authority to manage NFTs'),{code:4100});
+ const {wallet,ctx,provider,ref,asset}=selected,action=message.action;
+ if(!['transfer','approve','revoke'].includes(action))
+  throw Object.assign(new Error('Unsupported NFT management action'),{code:-32602});
+ let call;
+ if(action==='transfer'){
+  call=nftTransferCall420({standard:ref.standard,contract:ref.address,tokenId:ref.tokenId,
+   from:ctx.owner,to:message.recipient,quantity:message.quantity??'1'});
+  if(BigInt(call.quantity)>BigInt(asset.quantity))
+   throw Object.assign(new Error('NFT transfer exceeds the verified current holding'),{code:4100});
+ }else{
+  call=nftApprovalCall420({standard:ref.standard,contract:ref.address,tokenId:ref.tokenId,
+   owner:ctx.owner,operator:message.operator,
+   approved:action==='approve',collectionWide:message.collectionWide===true});
+  if(action==='revoke'){
+   const current=await readNftApproval420(provider,{
+     asset:ref,owner:ctx.owner,operator:call.operator,collectionWide:call.collectionWide
+   });
+   if(!current.approved||ref.standard==='ERC721'&&!call.collectionWide&&current.approvedOperator!==call.operator)
+    throw Object.assign(new Error('Operator no longer holds this exact NFT approval'),{code:4001});
+  }
+ }
+ const transaction={from:ctx.account,to:call.to,value:'0x0',data:call.data};
+ const choice={level:'standard'};
+ const quote=wallet.account.kind==='eoa'?
+  await quoteExtensionEoa420(provider,{chainId:ctx.chainId,from:ctx.account,transaction,choice}):
+  await quoteExtensionSend420(provider,{chainId:ctx.chainId,smartAccount:wallet.account.smartAccount,
+   entryPoint:wallet.account.entryPoint,transaction,choice,strictUserOpGas:true});
+ const now=await effectiveChain420();
+ if(now.chainId!==ctx.chainId||now.epoch!==ctx.epoch)
+  throw Object.assign(new Error('NFT chain changed while quoting'),{code:4901});
+ return {ctx,asset,ref,action,call,transaction,quote,executionModel:wallet.account.kind==='eoa'?'eoa':'erc4337',
+  snapshot:{chainId:ctx.chainId,epoch:ctx.epoch,controller:ctx.account,owner:ctx.owner,
+   key:ref.key,quantity:asset.quantity,action,recipient:call.recipient||null,
+   operator:call.operator||null,approved:call.approved??null,
+   collectionWide:call.collectionWide??null,data:call.data,
+   nonce:quote.nonce,blockHash:quote.blockHash,
+   gasLimit:quote.gasLimit||null,maxFeePerGas:quote.maxFeePerGas||null,
+   maxPriorityFeePerGas:quote.maxPriorityFeePerGas||null,gasFees:quote.gasFees||null,
+   accountGasLimits:quote.gasBudget?.accountGasLimits||null,
+   preVerificationGas:quote.gasBudget?.preVerificationGas||null}};
+}
+async function nftReview420(message){
+ const prepared=await nftPrepare420(message);
+ const bytes=crypto.getRandomValues(new Uint8Array(16)),
+   reviewId=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+ const record={message:{
+   action:message.action,standard:message.standard,address:message.address,
+   tokenId:message.tokenId,recipient:message.recipient??null,
+   quantity:message.quantity??'1',operator:message.operator??null,
+   collectionWide:message.collectionWide===true
+  },snapshot:prepared.snapshot,transaction:prepared.transaction,createdAt:Date.now()};
+ const state=(await chrome.storage.session.get(NFT_REVIEW_KEY_420))?.[NFT_REVIEW_KEY_420]||{};
+ state[reviewId]=record;
+ await chrome.storage.session.set({[NFT_REVIEW_KEY_420]:Object.fromEntries(
+  Object.entries(state).filter(([,v])=>Date.now()-v.createdAt<120000).slice(-12)
+ )});
+ return {reviewId,action:prepared.action,asset:prepared.asset,
+  transaction:prepared.transaction,quote:prepared.quote,call:prepared.call,
+  executionModel:prepared.executionModel,
+  warning:prepared.action==='approve'&&prepared.call.collectionWide?
+   'CRITICAL: approving this operator gives control of every NFT in this collection owned by this account.':
+   'NFT transfers and approvals are on-chain and cannot be undone by disconnecting a website.'};
+}
+async function nftSubmit420(message){
+ if(message.confirmed!==true||typeof message.reviewId!=='string')
+  throw Object.assign(new Error('Explicit NFT confirmation required'),{code:4001});
+ const all=(await chrome.storage.session.get(NFT_REVIEW_KEY_420))?.[NFT_REVIEW_KEY_420]||{},
+  previous=all[message.reviewId];
+ if(!previous||Date.now()-previous.createdAt>120000)
+  throw Object.assign(new Error('NFT review expired; verify ownership again'),{code:4001});
+ delete all[message.reviewId];
+ await chrome.storage.session.set({[NFT_REVIEW_KEY_420]:all});
+ const current=await nftPrepare420(previous.message);
+ if(JSON.stringify(current.snapshot)!==JSON.stringify(previous.snapshot)||
+   JSON.stringify(current.transaction)!==JSON.stringify(previous.transaction))
+  throw Object.assign(new Error('NFT ownership, network, calldata, nonce or fee changed; review again'),{code:4001});
+ const ctx=current.ctx,quote=current.quote,tx=current.transaction;
+ const id='nft-'+Date.now()+'-'+message.reviewId;
+ const entry={id,at:Date.now(),chainId:ctx.chainId,controller:ctx.account,
+  smartAccount:current.executionModel==='erc4337'?ctx.owner:null,
+  executionModel:current.executionModel,recipient:tx.to,amount:'0x0',
+  symbol:current.ref.standard+' #'+current.ref.tokenId+' '+current.action,
+  status:'pending',hash:null,asset:current.ref};
+ await rememberWalletUiActivity420(entry);
+ let hash=null;
+ try{
+  const qualified=current.executionModel==='eoa'?
+    {...tx,executionModel:'eoa',chainId:ctx.chainId,nonce:quote.nonce,
+     gasLimit:quote.gasLimit,maxFeePerGas:quote.maxFeePerGas,
+     maxPriorityFeePerGas:quote.maxPriorityFeePerGas}:
+    {...tx,gasFees:quote.gasFees,accountGasLimits:quote.gasBudget.accountGasLimits,
+     preVerificationGas:quote.gasBudget.preVerificationGas,expectedNonce:quote.nonce};
+  hash=await executeWithLocalAuthority({method:'eth_sendTransaction',params:[qualified]},
+    {origin:null,chainId:ctx.chainId,epoch:ctx.epoch,accounts:[ctx.account],tabId:null,activityId:id});
+  await rememberWalletUiActivity420({...entry,hash,status:'submitted'});
+  return {hash,status:'submitted',message:'Submitted; ownership and approvals must be reverified on chain after receipt.'};
+ }catch(error){
+  const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+  await rememberWalletUiActivity420({...entry,hash,userOpHash,status:hash||userOpHash?'submitted':'failed',
+   error:error.message});
+  throw error;
+ }
+}
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='nft-import')return nftImport420(message);
+  if(kind==='nft-metadata')return nftMetadata420(message);
+  if(kind==='nft-approval-status')return nftApprovalStatus420(message);
+  if(kind==='nft-visibility')return nftVisibility420(message);
+  if(kind==='nft-review')return nftReview420(message);
+  if(kind==='nft-submit')return nftSubmit420(message);
   if(kind==='security-state')return securityState420();
   if(kind==='security-watch')return securityWatch420(message);
   if(kind==='security-unwatch')return securityWatch420(message,true);
@@ -1687,25 +1915,56 @@ async function handleWalletUi420(message) {
   if(kind==='portfolio-discover'){
     const {chain,account,scope}=await scopedPortfolio420(),record=await portfolioRecord420(scope);
     const provider={request:(method,params)=>portfolioRpc420(chain,method,params)};
-    const latest=BigInt(await provider.request('eth_blockNumber',[])),from=BigInt(record.discoveryFrom);
-    const start=from>latest?latest:from;
-    const bounded=latest-start>2048n?latest-2048n:start;
-    const found=await discoverTokens420(provider,account,{fromBlock:bounded,toBlock:latest,maxSpan:2048n});
-    const known=new Map(record.tokens.map(x=>[x.address,x]));
-    for(const token of found.tokens){
-      const current=known.get(token.address);
-      known.set(token.address,{...token,source:current?.source||'discovered'});
+    const latest=BigInt(await provider.request('eth_blockNumber',[]));
+    const sourceAccount=(await walletUiState420()).portfolio?.balanceAddress||account;
+    const older=message.older===true;
+    let found={tokens:[],nfts:[],unverified:[],limited:true};
+    if(!older){
+      const from=BigInt(record.discoveryFrom),start=from>latest?latest:from,
+        bounded=latest-start>2048n?latest-2048n:start;
+      found=await discoverTokens420(provider,sourceAccount,{
+        fromBlock:bounded,toBlock:latest,maxSpan:2048n});
+      const known=new Map(record.tokens.map(x=>[x.address,x]));
+      for(const token of found.tokens){
+        const previous=known.get(token.address);
+        known.set(token.address,{...token,source:previous?.source||'discovered'});
+      }
+      record.tokens=[...known.values()].slice(0,60);
+      record.discoveryFrom=(latest+1n).toString();
     }
-    record.tokens=[...known.values()].slice(0,60);
-    record.discoveryFrom=(latest+1n).toString();
+    // Two independent supported RPC checkpoints: forward events and historical
+    // backfill. Every request reads at most 2048 blocks, never skipping a gap.
+    const window=nftIndexWindow420(latest,{
+      nextForward:record.nftIndexFrom,nextBack:record.nftIndexBefore,older});
+    const foundNfts=window.complete?
+      {nfts:[],fromBlock:window.from.toString(),toBlock:window.to.toString(),limited:true}:
+      await discoverNftTransfers420(provider,sourceAccount,{
+        fromBlock:window.from,toBlock:window.to,maxSpan:2048n,
+        maxLogs:300,maxAssets:90});
+    const cache=await readObject(PORTFOLIO_CACHE_KEY_420),previous=cache[scope]||{};
+    const nfts=new Map((previous.nfts||[]).map(x=>[
+      x.key||nftId420(x.address,x.standard,x.tokenId),x
+    ]));
+    for(const nft of foundNfts.nfts){
+      const prior=nfts.get(nft.key);
+      nfts.set(nft.key,{...nft,metadata:prior?.metadata||null,
+        hidden:record.nftHidden.includes(nft.key)||prior?.hidden===true,
+        spam:record.nftSpam.includes(nft.key)||prior?.spam===true});
+    }
+    const current=await effectiveChain420();
+    if(current.chainId!==chain.chainId||current.epoch!==chain.epoch)
+      throw Object.assign(new Error('NFT index network changed during scan'),{code:4901});
+    if(!window.complete){
+      record.nftIndexFrom=window.nextForward??record.nftIndexFrom;
+      record.nftIndexBefore=window.nextBack??record.nftIndexBefore;
+    }
     await savePortfolioRecord420(scope,record);
-    const cache=await readObject(PORTFOLIO_CACHE_KEY_420);
-    const previous=cache[scope]||{};
-    const nfts=new Map((previous.nfts||[]).map(x=>[x.address+':'+x.tokenId,x]));
-    for(const nft of found.nfts)nfts.set(nft.address+':'+nft.tokenId,{...nft,ownership:'verified',stale:false});
     cache[scope]={...previous,nfts:[...nfts.values()].slice(0,100)};
     await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
-    return {discovery:{...found,tokens:found.tokens.length,nfts:found.nfts.length},
+    return {discovery:{...found,tokens:found.tokens.length,nfts:foundNfts.nfts.length,
+      nftFrom:foundNfts.fromBlock,nftTo:foundNfts.toBlock,nftOlder:older,
+      nftBackfillComplete:window.complete&&older,
+      nftNextBlock:record.nftIndexFrom,nftBeforeBlock:record.nftIndexBefore,partial:true},
       state:await walletUiState420()};
   }
   if(kind==='portfolio-refresh')return walletUiState420();

@@ -104,3 +104,30 @@ export function assertGenesisNavigationSnapshot420(previous,current,{account,cha
    account:account.toLowerCase(),chainId:current.chainId,
    accountGrant:false,spendingAuthority:false,authority:'NAVIGATION_ONLY'});
 }
+
+export async function verifyGenesisIdentityBinding420(client,{account,chainId:expectedChain,profileId,requirePrimaryName=false}={}){
+ check(client&&typeof client.verifySession==='function'&&typeof client.profile==='function'&&
+   typeof client.bilateralPrimaryName==='function','Verified Identity420 client required');
+ const controller=address(account,'Wallet controller'),expected=chainId(expectedChain);
+ check(typeof profileId==='string'&&HASH.test(profileId),'Identity420 profileId must be bytes32');
+ const prior=await client.verifySession();
+ check(chainId(prior?.chainId)===expected,'Identity420 network changed');
+ check(typeof client.account==='string'&&client.account.toLowerCase()===controller,'Identity420 signer account mismatch');
+ const profile=await client.profile(profileId);
+ check(profile?.exists===true&&profile.active===true&&
+   typeof profile.controller==='string'&&profile.controller.toLowerCase()===controller,
+   'Identity420 profile is inactive or belongs to another controller');
+ const zero='0x'+'0'.repeat(64);
+ let primaryNameVerified=false;
+ if(typeof profile.primaryName==='string'&&HASH.test(profile.primaryName)&&profile.primaryName.toLowerCase()!==zero){
+   const names=await client.bilateralPrimaryName(profileId,profile.primaryName);
+   primaryNameVerified=names?.bilateral===true&&names?.profile?.controller?.toLowerCase()===controller;
+ }
+ if(requirePrimaryName)check(primaryNameVerified,'Names420 and Identity420 primary name are not mutually verified');
+ const after=await client.verifySession();
+ check(chainId(after?.chainId)===expected&&client.account.toLowerCase()===controller,
+   'Identity420 account or chain changed while reading profile');
+ return Object.freeze({profileId:profileId.toLowerCase(),account:controller,chainId:expected,
+   active:true,primaryNameVerified,profileBinding:'on-chain-verified',
+   grantsWalletAuthority:false,grantsSpendingAuthority:false});
+}

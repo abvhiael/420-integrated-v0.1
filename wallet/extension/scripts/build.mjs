@@ -18,6 +18,7 @@ const sourceFiles = [
   'wallet.js',
   'authority.html',
   'authority.js',
+  'wallet-notification.svg',
 ];
 
 export async function buildExtension420() {

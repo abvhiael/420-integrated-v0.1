@@ -1,3 +1,4 @@
+import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
 import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
 import {reconcileExtensionTransaction420} from './core/extension-transaction-activity.js';
@@ -888,8 +889,12 @@ async function handleWalletUi420(message) {
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||
        state.selectedAccount!==message.account||!extensionCanSend420(state))
       throw Object.assign(new Error('Account, signing authority or network changed'),{code:4901});
+    const nameProvider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const recipientSnapshot=await resolveExtensionRecipient420(nameProvider,{
+      input:message.recipient,chainId:state.network.expectedChainId,qualifiedNamesConfig});
     const transaction=buildExtensionSend420({
-      from:state.account.controller,recipient:message.recipient,amount:message.amount,
+      from:state.account.controller,recipient:recipientSnapshot.recipient,amount:message.amount,
       asset:message.asset,
       trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status==='spendable')||[],
     });
@@ -900,7 +905,7 @@ async function handleWalletUi420(message) {
     const current=await effectiveChain420();
     if(current.chainId!==message.chainId||current.epoch!==message.epoch)
       throw Object.assign(new Error('Chain changed during preflight'),{code:4901});
-    return {transaction,quote};
+    return {transaction,quote,recipientSnapshot};
   }
   if(kind==='send'){
     if(message.confirmed!==true)throw Object.assign(new Error('Explicit transaction confirmation required'),{code:4001});
@@ -908,8 +913,13 @@ async function handleWalletUi420(message) {
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||state.selectedAccount!==message.account)
       throw Object.assign(new Error('Network or account changed since review'),{code:4901});
     if(!extensionCanSend420(state))throw Object.assign(new Error('Verified deployed SmartAccount owner and matching chain required'),{code:4100});
+    const nameProvider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const recipientSnapshot=await resolveExtensionRecipient420(nameProvider,{
+      input:message.recipient,chainId:state.network.expectedChainId,qualifiedNamesConfig});
+    assertExtensionRecipientSnapshot420(message.recipientSnapshot,recipientSnapshot);
     const request=buildExtensionSend420({
-      from:state.account.controller,recipient:message.recipient,amount:message.amount,
+      from:state.account.controller,recipient:recipientSnapshot.recipient,amount:message.amount,
       asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
     });
     const choice=normalizeExtensionFeeChoice420(message.feeChoice);

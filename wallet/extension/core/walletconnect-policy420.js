@@ -32,7 +32,7 @@ export function walletConnectProposal420(proposal,{chainId,account}){
 export function walletConnectRequest420(session,event,selected){
  check(session?.topic===event?.topic&&typeof session.topic==='string','Invalid WalletConnect session topic');
  const request=event.params?.request,chain=event.params?.chainId;
- check(request&&Number.isSafeInteger(request.id)&&METHOD.has(request.method),'Unsupported WalletConnect signing method');
+ check(request&&Number.isSafeInteger(event.id)&&METHOD.has(request.method),'Unsupported WalletConnect signing method');
  check(typeof chain==='string'&&chain===selected.network,'WalletConnect request chain changed');
  check(session.namespaces?.eip155?.accounts?.includes(selected.network+':'+selected.account),'Selected address was never shared with this session');
  check(session.namespaces.eip155.methods.includes(request.method),'WalletConnect request method not granted');

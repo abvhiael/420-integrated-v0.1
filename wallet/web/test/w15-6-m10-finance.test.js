@@ -122,7 +122,9 @@ test('canonical bridge route binds source/destination, spender, fees and recipie
  const p=normalizeFinanceProvider420({id:'bridge1',label:'420Bridge',kind:'420bridge',
   releaseApproved:true,chainId:CHAIN,router,codeHash:HASH,spender,spenderCodeHash:HASH,
   adapterId:ID(4),routeId:ID(5),assetId:ID(6),asset:tokenIn,
-  destinationChainId:'0x1',recipientEncoding:'evm20',networkFeeWei:'100',extra:'0x'},CHAIN);
+  destinationChainId:'0x1',destinationRouter:ADDRESS(200),destinationCodeHash:HASH,
+  destinationRegistry:ADDRESS(201),destinationRegistryCodeHash:HASH,destinationAdapterId:ID(4),
+  recipientEncoding:'evm20',networkFeeWei:'100',extra:'0x'},CHAIN);
  const tx=financeBridgeCall420(p,{account,recipient:destination,amountRaw:'123'});
  assert.equal(tx.to,router);assert.equal(tx.value,'0x64');
  const args=bridge.decodeFunctionData('initiateOutbound',tx.data);

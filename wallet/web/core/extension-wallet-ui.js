@@ -59,9 +59,9 @@ export function extensionBalanceText420(raw,decimals=18,maxPrecision=5){
 export function shortExtensionAddress420(value){
   return typeof value==='string'&&ADDRESS.test(value)?value.slice(0,7)+'…'+value.slice(-5):'Not available';
 }
-export function buildExtensionSend420({from,recipient,amount,asset='native',trackedAssets=[]}={}){
+export function buildExtensionSend420({from,recipient,amount,asset='native',trackedAssets=[],nativeCurrency={symbol:'420',decimals:18}}={}){
   const controller=normalizeExtensionAddress420(from);
-  let picked={kind:'native',symbol:'420',decimals:18};
+  let picked={kind:'native',symbol:nativeCurrency.symbol,decimals:nativeCurrency.decimals};
   if(asset!=='native'){
     const token=normalizeExtensionAddress420(asset);
     const entry=trackedAssets.find(x=>typeof x?.address==='string'&&x.address.toLowerCase()===token);

@@ -1,5 +1,12 @@
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
+import {createNames420Client} from './core/names-client.js';
+import {validateNamesRecord} from './core/names-send.js';
+import {parseUnits} from './core/send.js';
+import {ADDRESS_BOOK_KEY_420,TX_HISTORY_KEY_420,canonicalRecipient420,validateAddressBook420,
+  validateSendRecipient420,resolveENS420,hexQuantity420,gasQuote420,
+  exactMax420,checkAvailable420,validatePreview420,classifyReceipt420,transitionTransaction420,
+  replacementPolicy420} from './core/extension-transactions.js';
 import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
 import {PORTFOLIO_SETTINGS_KEY_420,PORTFOLIO_CACHE_KEY_420,PRICE_CACHE_KEY_420,
   portfolioScope420,normalizedPortfolioSettings420,checkedToken420,
@@ -10,13 +17,16 @@ const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
-const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
+const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','eth_maxPriorityFeePerGas','eth_gasPrice','net_version']);
 const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
 const LOCAL_AUTHORITY_SOURCE = '420-wallet-local-authority';
 const NETWORK_HEALTH_KEY_420='420-wallet-network-health-v1';
 const VAULT_KEY = '420-wallet-encrypted-vault-v1';
+const SEND_PREVIEW_KEY_420='420-wallet-send-previews-v1';
+const ACTIVE_SEND_PREVIEWS_420=new Set();
+const HEX_HASH_420=/^0x[0-9a-fA-F]{64}$/;
 const VAULT_LEASE_KEY = '420-wallet-vault-lease-v1';
 async function vaultLockState420() {
   const vault = (await chrome.storage.local.get(VAULT_KEY))?.[VAULT_KEY];
@@ -359,10 +369,15 @@ async function executeWithLocalAuthority(request, context) {
           reject(Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 }));
           return;
         }
-        effectiveChain420(context.origin).then(now=>{
-          if(now.chainId!==context.chainId||now.epoch!==context.epoch)throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+        (async()=>{
+          const now=await effectiveChain420(context.origin);
+          if(now.chainId!==context.chainId||now.epoch!==context.epoch)
+            throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+          const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+          if(!context.accounts?.includes(prefs.selectedAccount))
+            throw Object.assign(new Error('Selected account changed during signing'),{code:4100});
           resolve(message.result);
-        }).catch(reject);
+        })().catch(reject);
       });
     };
     async function cleanup() {
@@ -482,6 +497,138 @@ async function rememberWalletUiActivity420(entry) {
   const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
 }
+async function addressBook420(account){
+  const record=await readObject(ADDRESS_BOOK_KEY_420);
+  return validateAddressBook420(record[account]||{});
+}
+async function resolveWalletRecipient420(text,chain){
+  const intent=validateSendRecipient420(text);
+  if(intent.kind==='address')return {...intent,chainId:chain.chainId};
+  const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:chain.chainId})};
+  if(intent.kind==='ens')return resolveENS420(provider,intent.name,chain.chainId);
+  const config=await readObject(EXTENSION_CONFIG_KEY_420);
+  // The resolver must come from independently deployed chain configuration.
+  const resolver=config?.names420?.chainId===chain.chainId&&config?.names420?.verified===true?
+    config.names420.address:null;
+  if(!resolver)throw new Error('420Names authoritative resolver is not verified on this chain');
+  const client=createNames420Client({provider,namesAddress:resolver,chainId:chain.chainId});
+  const first=await client.lookup(intent.name);
+  const record=validateNamesRecord(first.record,{expectedLabelHash:first.labelHash,nowSeconds:await client.chainTime()});
+  return {kind:'420names',name:intent.name,recipient:record.recipient,chainId:chain.chainId,
+    owner:record.owner,expiresAt:record.expiresAt.toString()};
+}
+async function buildVerifiedSend420(message,{persist=false}={}){
+  const state=await walletUiState420();
+  if(!extensionCanSend420(state))throw Object.assign(new Error('No verified local signing authority for selected account'),{code:4100});
+  const chain=await effectiveChain420();
+  if(chain.chainId!==state.network.expectedChainId||chain.epoch!==state.network.epoch)
+    throw Object.assign(new Error('Network changed while preparing transaction'),{code:4901});
+  const input=String(message.recipient||'').trim();
+  const resolved=await resolveWalletRecipient420(input,chain);
+  const currency=chain.network.nativeCurrency;
+  const asset=message.asset==='native'?'native':normalizeExtensionAddress420(message.asset);
+  const tokens=state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[];
+  const chosen=asset==='native'?{symbol:currency.symbol,decimals:currency.decimals,raw:state.portfolio?.native?.raw,
+    balance:state.portfolio?.native?.balance}:tokens.find(x=>x.address===asset);
+  if(!chosen)throw new Error('Selected token is not currently verified and spendable');
+  const draft=buildExtensionSend420({from:state.account.controller,recipient:resolved.recipient,
+    amount:message.amount,asset,trackedAssets:tokens,nativeCurrency:currency});
+  const amountRaw=parseUnits(message.amount,chosen.decimals);
+  const simulationTx={...draft.transaction,from:state.account.smartAccount};
+  // Simulate the execution from the deployed SmartAccount; the signing controller stays distinct.
+  await rpcRequest('eth_call',[simulationTx,'latest'],{expectedChainId:chain.chainId});
+  const gasLimit=await rpcRequest('eth_estimateGas',[simulationTx],{expectedChainId:chain.chainId});
+  const latest=await rpcRequest('eth_getBlockByNumber',['latest',false],{expectedChainId:chain.chainId});
+  if(!latest?.baseFeePerGas)throw new Error('This chain has no verified EIP-1559 fee quote');
+  const base=hexQuantity420(latest.baseFeePerGas,'base fee');
+  const suggested=hexQuantity420(await rpcRequest('eth_maxPriorityFeePerGas',[],{expectedChainId:chain.chainId}),'priority fee');
+  const tip=message.maxPriorityFeePerGas?
+    hexQuantity420(message.maxPriorityFeePerGas,'custom priority fee'):suggested;
+  const cap=message.maxFeePerGas?
+    hexQuantity420(message.maxFeePerGas,'custom fee cap'):base*2n+tip;
+  const gas=gasQuote420({gasLimit,baseFee:latest.baseFeePerGas,
+    maxPriorityFeePerGas:'0x'+tip.toString(16),maxFeePerGas:'0x'+cap.toString(16),
+    chainId:chain.chainId,epoch:chain.epoch});
+  const reserve=gas.worstCaseFee;
+  // EIP-1559 fee settings are attached to the signed account operation, not a public RPC signature.
+  const tx={...draft.transaction,maxPriorityFeePerGas:gas.maxPriorityFeePerGas,maxFeePerGas:gas.maxFeePerGas};
+  checkAvailable420({balance:chosen.balance,units:amountRaw.toString(),gasReserve:reserve,
+    kind:asset==='native'?'native':'erc20',nativeBalance:state.portfolio?.native?.balance});
+  const now=await effectiveChain420();
+  if(now.chainId!==chain.chainId||now.epoch!==chain.epoch)throw new Error('Chain changed during transaction simulation');
+  const preview={id:crypto.randomUUID(),chainId:chain.chainId,epoch:chain.epoch,
+    controller:state.account.controller,smartAccount:state.account.smartAccount,
+    recipient:resolved.recipient,recipientInput:input,recipientKind:resolved.kind,
+    resolvedOwner:resolved.owner||null,resolvedExpiry:resolved.expiresAt||null,
+    asset,amount:String(message.amount),summary:draft.summary,
+    transaction:tx,simulationTransaction:simulationTx,gas,
+    simulation:{success:true,blockHash:latest.hash||null,advisory:true},
+    preparedAt:Date.now(),model:'erc4337',status:'pending'};
+  if(persist){
+    const stored=await readObject(SEND_PREVIEW_KEY_420);
+    // A single active preview per account; older quotes are unusable by construction.
+    for(const [key,v] of Object.entries(stored)){
+      if(v.controller===preview.controller)delete stored[key];
+    }
+    stored[preview.id]=preview;
+    await chrome.storage.local.set({[SEND_PREVIEW_KEY_420]:stored});
+  }
+  return preview;
+}
+async function trackWalletTransactions420({limit=10}={}){
+  const entries=await readWalletUiActivity420(),registry=await networkRegistry420();
+  let changed=false;
+  for(const tx of entries.slice(0,limit)){
+    if(!['submitted','included','confirmed','reorganized','replaced'].includes(tx.status)||
+      (!HEX_HASH_420.test(tx.hash||'')&&!HEX_HASH_420.test(tx.userOpHash||'')))continue;
+    const net=registry.networks[tx.chainId];
+    if(!net?.enabled||!net.rpcUrls?.length)continue;
+    // Never query a transaction through a different chain's RPC.
+    try{
+      const health=(await probeNetwork420(net)).find(x=>x.healthy);
+      if(!health)continue;
+      const request=async(method,params)=>{
+        const response=await fetch(health.url,{method:'POST',headers:{'content-type':'application/json'},
+          body:JSON.stringify({jsonrpc:'2.0',id:Date.now(),method,params})});
+        if(!response.ok)throw new Error('Receipt RPC unavailable');
+        const result=await response.json();
+        if(result.error)throw new Error(result.error.message||'Receipt provider failed');
+        return result.result;
+      };
+      let onchain=tx,operation=null;
+      if(!HEX_HASH_420.test(onchain.hash||'')){
+        operation=await request('eth_getUserOperationReceipt',[tx.userOpHash]);
+        if(!operation)continue; // Bundler has not yet proven inclusion.
+        const candidate=operation.receipt?.transactionHash||operation.transactionHash;
+        if(!HEX_HASH_420.test(candidate||''))continue;
+        onchain={...tx,hash:candidate.toLowerCase()};
+      }
+      const receipt=await request('eth_getTransactionReceipt',[onchain.hash]);
+      const transaction=receipt?null:await request('eth_getTransactionByHash',[onchain.hash]);
+      const head=receipt?await request('eth_blockNumber',[]):null;
+      let next=classifyReceipt420(onchain,{receipt,transaction,head});
+      if(operation?.success===false&&receipt?.blockHash){
+        next=transitionTransaction420(onchain,'reverted',{blockHash:receipt.blockHash.toLowerCase(),
+          blockNumber:receipt.blockNumber,confirmations:head?Number(BigInt(head)-BigInt(receipt.blockNumber)+1n):1});
+      }
+      if(!receipt&&tx.blockHash&&tx.blockNumber){
+        const canonical=await request('eth_getBlockByNumber',[tx.blockNumber,false]);
+        if(canonical?.hash&&canonical.hash.toLowerCase()!==tx.blockHash.toLowerCase())
+          next=transitionTransaction420(onchain,'reorganized',{blockHash:null,confirmations:0});
+      }
+      if(receipt?.blockNumber){
+        const canonical=await request('eth_getBlockByNumber',[receipt.blockNumber,false]);
+        if(!canonical?.hash||canonical.hash.toLowerCase()!==receipt.blockHash.toLowerCase()){
+          next=transitionTransaction420(onchain,'reorganized',{blockHash:null,confirmations:0});
+        }
+      }
+      if(JSON.stringify({...next,updatedAt:null})!==JSON.stringify({...tx,updatedAt:null})){
+        await rememberWalletUiActivity420(next);changed=true;
+      }
+    }catch{} // An outage never changes an on-chain transaction to dropped or cancelled.
+  }
+  return {changed};
+}
 async function finalizeWalletUiState420(state){
   const now=await networkRegistry420();
   if(now.epoch!==state.network.epoch||now.selectedChainId!==state.registry.selectedChainId)
@@ -532,6 +679,7 @@ async function walletUiState420() {
       vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
     selectedAccount:selected,sites,activity:(await readWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
+    addressBook:selected?await addressBook420(selected):{entries:[]},
     vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null,health:[],epoch:registry.epoch},
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
@@ -675,6 +823,55 @@ async function switchSelectedAccount420(value){
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='resolve-recipient'){
+    const chain=await effectiveChain420();
+    return resolveWalletRecipient420(message.recipient,chain);
+  }
+  if(kind==='address-book-save'){
+    const state=await walletUiState420();
+    if(!state.selectedAccount)throw new Error('Select a wallet account');
+    const book=await addressBook420(state.selectedAccount);
+    const address=canonicalRecipient420(message.address);
+    const entries=[...book.entries.filter(x=>x.address!==address),{address,label:message.label}];
+    const validated=validateAddressBook420({entries}),all=await readObject(ADDRESS_BOOK_KEY_420);
+    all[state.selectedAccount]=validated;await chrome.storage.local.set({[ADDRESS_BOOK_KEY_420]:all});
+    return walletUiState420();
+  }
+  if(kind==='address-book-remove'){
+    const state=await walletUiState420();
+    if(!state.selectedAccount)throw new Error('Select a wallet account');
+    const book=await addressBook420(state.selectedAccount),all=await readObject(ADDRESS_BOOK_KEY_420);
+    const address=canonicalRecipient420(message.address);
+    all[state.selectedAccount]=validateAddressBook420({entries:book.entries.filter(x=>x.address!==address)});
+    await chrome.storage.local.set({[ADDRESS_BOOK_KEY_420]:all});return walletUiState420();
+  }
+  if(kind==='max-amount'){
+    const state=await walletUiState420();
+    if(!extensionCanSend420(state))throw new Error('Verified signing account required');
+    const chosen=message.asset==='native'?state.portfolio?.native:
+      state.portfolio?.tokens?.find(t=>t.address===message.asset&&t.verified&&!t.hidden&&!t.spam);
+    if(!chosen||!['spendable','pending'].includes(chosen.balance?.status))throw new Error('Verified asset balance unavailable');
+    let reserve='0';
+    const chain=await effectiveChain420();
+    if(message.asset==='native'){
+      const target=await resolveWalletRecipient420(message.recipient,chain);
+      const tx={from:state.account.smartAccount,to:target.recipient,value:'0x0',data:'0x'};
+      const [gas,block,priority]=await Promise.all([
+        rpcRequest('eth_estimateGas',[tx],{expectedChainId:chain.chainId}),
+        rpcRequest('eth_getBlockByNumber',['latest',false],{expectedChainId:chain.chainId}),
+        rpcRequest('eth_maxPriorityFeePerGas',[],{expectedChainId:chain.chainId})
+      ]);
+      if(!block?.baseFeePerGas)throw new Error('Fresh EIP-1559 gas quote unavailable');
+      const base=hexQuantity420(block.baseFeePerGas),tip=hexQuantity420(priority);
+      reserve=gasQuote420({gasLimit:gas,baseFee:block.baseFeePerGas,maxPriorityFeePerGas:priority,
+        maxFeePerGas:'0x'+(base*2n+tip).toString(16),chainId:chain.chainId,epoch:chain.epoch}).worstCaseFee;
+      if((await effectiveChain420()).epoch!==chain.epoch)throw new Error('Chain changed during Max calculation');
+    }
+    return {amount:exactMax420({rawBalance:chosen.balance.spendable,gasReserve:reserve,
+      decimals:chosen.decimals,kind:message.asset==='native'?'native':'erc20'}),gasReserve:reserve};
+  }
+  if(kind==='prepare-send')return buildVerifiedSend420(message,{persist:true});
+  if(kind==='refresh-transactions'){await trackWalletTransactions420();return walletUiState420();}
   if(kind==='site-network'){
     const origin=normalizeOrigin(message.origin);
     await changeNetwork420(message.chainId,{origin});return walletUiState420();
@@ -798,33 +995,60 @@ async function handleWalletUi420(message) {
   }
   if(kind==='send'){
     if(message.confirmed!==true)throw Object.assign(new Error('Explicit transaction confirmation required'),{code:4001});
+    const stored=await readObject(SEND_PREVIEW_KEY_420),preview=stored[message.previewId];
     const state=await walletUiState420();
+    validatePreview420(preview,{chainId:state.network.expectedChainId,epoch:state.network.epoch,
+      controller:state.selectedAccount,recipient:message.recipient});
+    if(preview.asset!==message.asset||preview.amount!==message.amount)throw new Error('Transaction details changed after review');
+    if(ACTIVE_SEND_PREVIEWS_420.has(preview.id))throw new Error('Transaction preview already being authorized');
+    ACTIVE_SEND_PREVIEWS_420.add(preview.id);
+    try{
+    const freshRecipient=await resolveWalletRecipient420(preview.recipientInput,await effectiveChain420());
+    if(freshRecipient.recipient!==preview.recipient||
+      (freshRecipient.owner!==undefined&&freshRecipient.owner!==preview.resolvedOwner)||
+      (freshRecipient.expiresAt!==undefined&&freshRecipient.expiresAt!==preview.resolvedExpiry))
+      throw new Error('Recipient name changed; prepare a new transaction');
+    // Exact calldata is simulated again immediately before the authority boundary.
+    await rpcRequest('eth_call',[preview.simulationTransaction,'latest'],{expectedChainId:preview.chainId});
+    delete stored[preview.id];await chrome.storage.local.set({[SEND_PREVIEW_KEY_420]:stored});
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||state.selectedAccount!==message.account)
       throw Object.assign(new Error('Network or account changed since review'),{code:4901});
     if(!extensionCanSend420(state))throw Object.assign(new Error('Verified deployed SmartAccount owner and matching chain required'),{code:4100});
-    const request=buildExtensionSend420({
-      from:state.account.controller,recipient:message.recipient,amount:message.amount,
-      asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
-    });
+    const request={transaction:preview.transaction,summary:preview.summary};
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
       controller:state.account.controller,smartAccount:state.account.smartAccount,
       recipient:request.summary.recipient,amount:request.summary.amount,
-      symbol:request.summary.symbol,status:'pending',hash:null};
+      symbol:request.summary.symbol,status:'pending',model:'erc4337',nonce:null,hash:null,
+      fee:preview.gas,previewId:preview.id};
     await rememberWalletUiActivity420(entry);
     try {
-      const hash=await executeWithLocalAuthority(
+      const submitted=await executeWithLocalAuthority(
         {method:'eth_sendTransaction',params:[request.transaction]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null}
       );
       const current=await effectiveChain420();
-      if(current.chainId!==entry.chainId||current.epoch!==state.network.epoch)throw Object.assign(new Error('Chain changed during transaction'),{code:4901});
-      await rememberWalletUiActivity420({...entry,status:'confirmed',hash});
-      return {hash,status:'confirmed'};
+      if(current.chainId!==entry.chainId||current.epoch!==state.network.epoch)
+        throw Object.assign(new Error('Chain changed during transaction'),{code:4901});
+      let details;
+      if(submitted?.model==='erc4337'&&submitted.status==='submitted'&&
+        HEX_HASH_420.test(submitted.userOpHash||'')&&
+        /^0x[0-9a-fA-F]{40}$/.test(submitted.entryPoint||'')){
+        details={userOpHash:submitted.userOpHash,entryPoint:submitted.entryPoint,
+          nonce:submitted.nonce,nonceKey:submitted.nonceKey,gasFees:submitted.gasFees};
+      }else if(HEX_HASH_420.test(submitted||'')){
+        details={hash:submitted.toLowerCase()};
+      }else throw new Error('Local authority returned no valid EVM or ERC-4337 submission identifier');
+      const updated=transitionTransaction420(entry,'submitted',details);
+      await rememberWalletUiActivity420(updated);
+      // Receipt tracking is asynchronous: a pending UserOperation is not a confirmed EVM transaction.
+      return {status:'submitted',hash:details.hash||null,userOpHash:details.userOpHash||null};
     }catch(error){
-      await rememberWalletUiActivity420({...entry,status:'failed',error:error?.message||'Authorization failed'});
+      await rememberWalletUiActivity420({...entry,status:'pending',error:error?.message||
+        'Authorization or receipt unavailable; broadcast cannot be conclusively classified'});
       throw error;
     }
+    }finally{ACTIVE_SEND_PREVIEWS_420.delete(preview.id);}
   }
   throw Object.assign(new Error('Unsupported wallet popup action'),{code:4200});
 }
@@ -862,6 +1086,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const effective=await effectiveChain420(approval?.context?.origin);
         if(!approval?.context?.chainId||effective.chainId!==approval.context.chainId||effective.epoch!==approval.context.epoch)
           throw Object.assign(new Error('Network changed; authority request cancelled'),{code:4901});
+        const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+        const signer=approval.context.accounts?.[0];
+        const visible=await accountVisibility420(normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420)).accounts);
+        const metadata=await accountMetadata420();
+        if(!signer||signer!==prefs.selectedAccount||!visible.includes(signer)||
+          ['watch-only','hardware','eoa'].includes(metadata[signer]?.type))
+          throw Object.assign(new Error('Signing account authority changed or is not permitted'),{code:4100});
         const result=await rpcRequest(request.method,request.params??[],{origin:approval.context.origin,expectedChainId:approval.context.chainId});
         sendResponse({ result });
       } catch (error) {
@@ -911,6 +1142,7 @@ async function monitorNetworks420(){
   }
   await chrome.storage.local.set({[NETWORK_HEALTH_KEY_420]:snapshots});
   await monitorPortfolioBlocks420();
+  await trackWalletTransactions420({limit:6});
 }
 chrome.alarms?.onAlarm?.addListener(alarm=>{
   if(alarm.name==='420-wallet-network-health')monitorNetworks420().catch(()=>{});

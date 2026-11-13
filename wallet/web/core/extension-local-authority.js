@@ -18,9 +18,27 @@ function txRequest(request = {}) {
     target: normalizeAddress(tx.to),
     value: tx.value ?? '0x0',
     data: tx.data ?? '0x',
+    maxFeePerGas: tx.maxFeePerGas??null,
+    maxPriorityFeePerGas: tx.maxPriorityFeePerGas??null,
   };
 }
 
+function packEntryPointFees420(maxPriorityFeePerGas,maxFeePerGas){
+  const tip=BigInt(maxPriorityFeePerGas),cap=BigInt(maxFeePerGas);
+  if(tip<=0n||cap<tip||cap>=1n<<128n||tip>=1n<<128n)
+    throw rpcError(-32602,'Invalid packed ERC-4337 gas fee bounds');
+  return '0x'+((tip<<128n)|cap).toString(16).padStart(64,'0');
+}
+async function ownerGasFees420(provider,tx){
+  const block=await provider.request('eth_getBlockByNumber',['latest',false]);
+  if(!block?.baseFeePerGas)throw rpcError(4900,'Verified EIP-1559 base fee unavailable for ERC-4337 signing');
+  const base=BigInt(block.baseFeePerGas);
+  const tip=tx.maxPriorityFeePerGas!=null?BigInt(tx.maxPriorityFeePerGas):
+    BigInt(await provider.request('eth_maxPriorityFeePerGas',[]));
+  const cap=tx.maxFeePerGas!=null?BigInt(tx.maxFeePerGas):base*2n+tip;
+  if(cap<base+tip)throw rpcError(-32602,'ERC-4337 fee cap is below current base fee plus tip');
+  return packEntryPointFees420(tip,cap);
+}
 function grantedAccount(accounts, requested = null) {
   const granted = (Array.isArray(accounts) ? accounts : []).map(normalizeAddress);
   if (!granted.length) throw rpcError(4100, 'origin has no granted wallet accounts');
@@ -94,12 +112,13 @@ export function createExtensionLocalAuthority420({
       const binding = await loadPasskeyBinding({ account: controller, smartAccount: smartAccount.smartAccount, context });
       if (!binding) throw rpcError(4100, 'no active local passkey binding is available for this SmartAccount420');
 
+      const gasFees=await ownerGasFees420(provider,tx);
       const prepared = await preparePasskeyUserOperationTransport(
         provider,
         navigatorLike,
         smartAccount,
         binding,
-        { target: tx.target, value: tx.value, data: tx.data },
+        { target: tx.target, value: tx.value, data: tx.data, gasFees },
         { rpId: binding.rpId, origin: binding.origin },
       );
       if (!prepared?.broadcastReady || !prepared?.entryPointSimulation?.simulationPassed) {
@@ -113,6 +132,14 @@ export function createExtensionLocalAuthority420({
         throw rpcError(-32603, 'bundler UserOperation hash does not match the locally signed canonical hash');
       }
       await persistPasskeyBinding(prepared.advancedBinding, { account: controller, context });
+      // The trusted popup can follow the UserOperation asynchronously. An EIP-1193 dApp,
+      // however, must still receive an actual EVM transaction hash, never a UserOp hash.
+      if(context.origin===null)return {
+        status:'submitted',model:'erc4337',userOpHash:userOpHash.toLowerCase(),
+        entryPoint:prepared.entryPoint,nonce:prepared.nonce.toString(),
+        nonceKey:prepared.nonceKey.toString(),
+        gasFees:prepared.userOperation.gasFees
+      };
       return waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
     }
 

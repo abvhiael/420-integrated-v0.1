@@ -1,4 +1,5 @@
-import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420,buildExtensionSend420} from './core/extension-wallet-ui.js';
+import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420} from './core/extension-wallet-ui.js';
+import {parseUnits} from './core/send.js';
 
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
@@ -164,18 +165,33 @@ function renderNFT420(){
     row.append(node('span','token-icon alt','◇'),info);list.append(row);
   }
 }
+function statusLabel420(status){
+  return {pending:'Awaiting authorization',submitted:'Submitted; awaiting receipt',
+    included:'Included; waiting for confirmations',confirmed:'Confirmed on chain',
+    reverted:'Reverted on chain',dropped:'Dropped (verified)',replaced:'Replaced',
+    cancelled:'Cancelled (verified)',reorganized:'Chain reorganized; rechecking'}[status]||'Unavailable';
+}
 function renderActivity(){
   const list=$('activity-list');list.replaceChildren();
   const items=state.wallet?.activity||[];
   if(!items.length){list.append(node('p','empty','No extension transactions yet. This list records only transactions sent from this popup.'));return;}
   for(const entry of items){
     const row=node('div','activity-row');
-    row.append(node('div','token-icon alt',entry.status==='confirmed'?'✓':entry.status==='failed'?'!':'↗'));
+    row.append(node('div','token-icon alt',entry.status==='confirmed'?'✓':
+      ['reverted','dropped','reorganized'].includes(entry.status)?'!':'↗'));
     const info=node('div','asset-info');
     info.append(node('strong','',entry.amount+' '+entry.symbol),
       node('small','',shortExtensionAddress420(entry.recipient)+' · '+(new Date(entry.at).toLocaleString('en-CA'))));
     const side=node('div','asset-value');
-    side.append(node('strong','',entry.status),node('small','',entry.hash?shortExtensionAddress420(entry.hash):'Extension activity'));
+    side.append(node('strong','',statusLabel420(entry.status)),
+      node('small','',entry.hash?'Transaction: '+entry.hash:entry.userOpHash?'UserOperation: '+entry.userOpHash:'No submission identifier yet'));
+    if(entry.confirmations!==undefined)side.append(node('small','',String(entry.confirmations)+' confirmations'));
+    if(entry.error)side.append(node('small','',entry.error));
+    if(['submitted','included','reorganized'].includes(entry.status)){
+      const controls=node('small','');
+      controls.textContent='Speed up / Cancel: unavailable until signer and ERC-4337 nonce rules are verified.';
+      side.append(controls);
+    }
     row.append(info,side);list.append(row);
   }
 }
@@ -234,6 +250,14 @@ function renderSettings(){
 function renderReceive(){
   const address=extensionReceiveAddress420(state.wallet);
   $('receive-address').textContent=address||'Unavailable';
+  const qr=$('receive-qr');
+  if(qr.dataset.address!==address){
+    qr.replaceChildren();qr.dataset.address=address||'';
+    if(address&&typeof QRCode==='function'){
+      new QRCode(qr,{text:address,width:176,height:176,colorDark:'#10281c',
+        colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+    }
+  }
   $('copy-receive').disabled=!address;
   $('receive-warning').textContent=address?'Confirm the exact network and account address before transferring funds.':'A matching chain and an available account are required before receiving.';
   $('receive-warning').className='notice'+(address?'':' warn');
@@ -294,31 +318,48 @@ function resetReview(){
   state.prepared=null;$('send-review').hidden=true;$('send-confirm').disabled=true;
   $('send-state').textContent='Review required before authorization.';
 }
-function prepareReview(){
+async function prepareReview(){
   const w=state.wallet;
-  if(!extensionCanSend420(w))throw new Error('Verified account owner and matching network required');
-  const prepared=buildExtensionSend420({
-    from:w.account.controller,
-    recipient:$('send-recipient').value.trim(),amount:$('send-amount').value.trim(),
-    asset:$('send-asset').value,trackedAssets:w.config.trackedAssets,
-  });
-  state.prepared={...prepared,asset:$('send-asset').value,chainId:w.network.expectedChainId,
-    epoch:w.network.epoch,controller:w.selectedAccount};
-  $('review-asset').textContent=prepared.summary.symbol;
-  $('review-amount').textContent=prepared.summary.amount;
-  $('review-recipient').textContent=prepared.summary.recipient;
-  $('review-chain').textContent=w.network.expectedChainId;
-  $('review-sender').textContent=w.account.smartAccount;
-  $('send-review').hidden=false;$('send-confirm').disabled=false;
-  $('send-state').textContent='Review these exact details before confirming. The next step requires local passkey authority.';
-  $('send-confirm').focus();
+  if(!extensionCanSend420(w))throw new Error('Verified SmartAccount and matching network required');
+  const asset=$('send-asset').value,recipient=$('send-recipient').value.trim();
+  const amount=$('send-amount').value.trim();
+  const priorityText=$('send-priority-fee').value.trim(),capText=$('send-fee-cap').value.trim();
+  const maxPriorityFeePerGas=priorityText?'0x'+parseUnits(priorityText,9).toString(16):null;
+  const maxFeePerGas=capText?'0x'+parseUnits(capText,9).toString(16):null;
+  $('send-review-button').disabled=true;
+  try{
+    const review=await command('prepare-send',{asset,recipient,amount,maxPriorityFeePerGas,maxFeePerGas});
+    if(state.wallet?.network?.epoch!==review.epoch||state.wallet?.selectedAccount!==review.controller)
+      throw new Error('Network or account changed during transaction preparation');
+    state.prepared={...review,feeInputs:{priorityText,capText}};
+    $('review-asset').textContent=review.summary.symbol;
+    $('review-amount').textContent=review.amount;
+    $('review-recipient').textContent=review.recipient;
+    $('review-chain').textContent=review.chainId;
+    $('review-sender').textContent=review.smartAccount;
+    $('review-name').textContent=review.recipientKind==='address'?'Direct address':
+      review.recipientInput+' resolved on '+review.chainId;
+    $('review-simulation').textContent=review.simulation.success?
+      'Contract call simulated; UserOperation simulation required again at signing':'Failed';
+    $('review-gas').textContent=BigInt(review.gas.gasLimit).toString();
+    $('review-fees').textContent=extensionBalanceText420(review.gas.worstCaseFee,w.config.nativeCurrency?.decimals||18,10)+
+      ' '+(w.config.nativeCurrency?.symbol||'420')+' (maximum advisory reserve)';
+    $('review-cap').textContent=(Number(BigInt(review.gas.maxFeePerGas))/1e9).toLocaleString('en-US')+' gwei';
+    $('send-review').hidden=false;$('send-confirm').disabled=false;
+    $('send-state').textContent='On-chain simulation and EIP-1559 fee checks succeeded. Review the exact recipient and fee reserve.';
+    $('send-confirm').focus();
+  }finally{$('send-review-button').disabled=false;}
 }
 function populateSend(){
   const symbol=state.wallet?.config?.nativeCurrency?.symbol||'420';
   const select=$('send-asset');select.replaceChildren(new Option(symbol+' · Native','native'));
-  for(const token of state.wallet?.assets.tokens||[]){
-    if(token.error)continue;
+  for(const token of state.wallet?.portfolio?.tokens||[]){
+    if(!token.verified||token.hidden||token.spam||token.balance?.status==='unavailable')continue;
     select.add(new Option(token.symbol+' · ERC-20',token.address));
+  }
+  const book=$('send-contact');book.replaceChildren(new Option('Choose saved address',''));
+  for(const contact of state.wallet?.addressBook?.entries||[]){
+    book.add(new Option(contact.label+' · '+shortExtensionAddress420(contact.address),contact.address));
   }
 }
 async function copy(value){
@@ -430,6 +471,40 @@ function setup(){
   $('quick-send').addEventListener('click',()=>{populateSend();resetReview();screen('send-view');});
   $('quick-receive').addEventListener('click',()=>{renderReceive();screen('receive-view');});
   $('quick-refresh').addEventListener('click',refresh);
+  $('refresh-transactions').addEventListener('click',async()=>{
+    const button=$('refresh-transactions');button.disabled=true;
+    try{
+      const epoch=++state.epoch;const next=await command('refresh-transactions');
+      if(await applyWalletState420(next,epoch))tell('Transaction receipts refreshed; unverified states remain pending.');
+    }catch(error){tell('Transaction receipt check failed: '+error.message,'error');}
+    finally{button.disabled=false;}
+  });
+  $('send-contact').addEventListener('change',()=>{
+    if($('send-contact').value){$('send-recipient').value=$('send-contact').value;resetReview();}
+  });
+  $('save-send-contact').addEventListener('click',async()=>{
+    try{
+      const label=$('send-contact-label').value.trim(),value=$('send-recipient').value.trim();
+      if(!label)throw new Error('Enter a contact label');
+      const resolved=await command('resolve-recipient',{recipient:value});
+      const epoch=++state.epoch;
+      const next=await command('address-book-save',{address:resolved.recipient,label});
+      if(await applyWalletState420(next,epoch)){populateSend();tell('Verified recipient saved in this account address book.');}
+    }catch(e){tell('Address book save blocked: '+e.message,'error');}
+  });
+  $('remove-send-contact').addEventListener('click',async()=>{
+    const address=$('send-contact').value;if(!address)return;
+    try{const epoch=++state.epoch;const next=await command('address-book-remove',{address});
+      if(await applyWalletState420(next,epoch)){populateSend();tell('Address removed from this account address book.');}
+    }catch(e){tell('Address removal blocked: '+e.message,'error');}
+  });
+  $('send-max').addEventListener('click',async()=>{
+    try{
+      const result=await command('max-amount',{asset:$('send-asset').value,recipient:$('send-recipient').value.trim()});
+      $('send-amount').value=result.amount;resetReview();
+      $('send-state').textContent='Max calculated from verified balance and current fee reserve. Review again before sending.';
+    }catch(e){$('send-state').textContent='Max unavailable: '+e.message;}
+  });
   for(const back of document.querySelectorAll('[data-back]'))back.addEventListener('click',()=>screen('dashboard'));
   $('copy-account').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>tell('Copy failed: '+e.message,'error')));
   $('copy-receive').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>{$('receive-warning').textContent=e.message;$('receive-warning').className='notice error';}));
@@ -470,35 +545,36 @@ function setup(){
     }catch(e){tell('Network save failed: '+e.message,'error');$('global-status').textContent='Network save failed: '+e.message;}
     finally{button.disabled=false;}
   });
-  for(const id of ['send-asset','send-recipient','send-amount'])$(id).addEventListener('input',resetReview);
-  $('send-form').addEventListener('submit',event=>{
-    event.preventDefault();try{prepareReview();}catch(e){resetReview();$('send-state').textContent='Cannot review: '+e.message;}
+  for(const id of ['send-asset','send-recipient','send-amount','send-priority-fee','send-fee-cap'])
+    $(id).addEventListener('input',resetReview);
+  $('send-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    try{await prepareReview();}catch(e){resetReview();$('send-state').textContent='Cannot review: '+e.message;}
   });
   $('send-edit').addEventListener('click',()=>{$('send-review').hidden=true;resetReview();$('send-recipient').focus();});
   $('send-confirm').addEventListener('click',async()=>{
     if(!state.prepared||state.submitting)return;
     const before=state.prepared;
-    try {
-      // Recompute from current fields. Any edits invalidate the exact user-approved preview.
-      const now=buildExtensionSend420({
-        from:state.wallet.account.controller,recipient:$('send-recipient').value.trim(),
-        amount:$('send-amount').value.trim(),asset:$('send-asset').value,
-        trackedAssets:state.wallet.config.trackedAssets,
-      });
-      if(JSON.stringify(now)!==JSON.stringify({transaction:before.transaction,summary:before.summary})||
-          before.chainId!==state.wallet.network.expectedChainId||before.epoch!==state.wallet.network.epoch||before.controller!==state.wallet.selectedAccount)
-        throw new Error('Network, account or transaction changed; review again');
+    try{
+      const w=state.wallet;
+      if(!extensionCanSend420(w)||before.chainId!==w.network.expectedChainId||
+        before.epoch!==w.network.epoch||before.controller!==w.selectedAccount||
+        before.recipientInput!==$('send-recipient').value.trim()||
+        before.amount!==$('send-amount').value.trim()||before.asset!==$('send-asset').value||
+        before.feeInputs.priorityText!==$('send-priority-fee').value.trim()||
+        before.feeInputs.capText!==$('send-fee-cap').value.trim()||
+        Date.now()-before.preparedAt>45000)
+        throw new Error('Transaction preview expired or context changed; review again');
       state.submitting=true;$('send-confirm').disabled=true;
-      $('send-state').textContent='Waiting for local passkey authorization, simulation and transaction receipt. Do not close the approval window.';
-      const receipt=await command('send',{confirmed:true,chainId:before.chainId,epoch:before.epoch,account:before.controller,
-        recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset});
-      $('send-state').textContent='Transaction confirmed: '+receipt.hash;
-      resetReview();
-      await refresh();screen('activity-view');
-      tell('Transaction confirmed.');
-    }catch(e){
-      $('send-state').textContent='Transaction not confirmed: '+e.message;
-    }finally{state.submitting=false;$('send-confirm').disabled=false;}
+      $('send-state').textContent='Awaiting local passkey authorization and ERC-4337 simulation…';
+      const result=await command('send',{confirmed:true,previewId:before.id,chainId:before.chainId,
+        epoch:before.epoch,account:before.controller,recipient:before.recipient,
+        amount:before.amount,asset:before.asset});
+      $('send-state').textContent='Submitted: '+(result.hash||result.userOpHash)+'. Receipt confirmation remains pending.';
+      resetReview();await refresh();screen('activity-view');
+      tell('Transaction submitted; confirmation will be checked from chain receipts.');
+    }catch(e){$('send-state').textContent='Send could not be confirmed: '+e.message;resetReview();}
+    finally{state.submitting=false;$('send-confirm').disabled=false;}
   });
 }
 setup();

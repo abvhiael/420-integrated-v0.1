@@ -103,8 +103,15 @@ try{
   await page.screenshot({path:resolve(screenshots,'03-verified-local-fixture-wallet.png')});
   await page.locator('#quick-receive').click();
   assert.equal(await page.locator('#receive-address').textContent(),controller);
+  assert.equal(await page.locator('#receive-qr').locator('canvas, img').count()>0,true,
+    'Receive QR must render locally without a third-party request');
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
+  // M5: watch-only remains unable to execute the new preflight transaction workflow.
+  const blocked=await page.evaluate(async controller=>chrome.runtime.sendMessage({
+    source:'420-wallet-popup-ui',kind:'prepare-send',recipient:controller,amount:'1',asset:'native'
+  }),controller);
+  assert.match(blocked.error?.message||'',/No verified local signing authority/);
   // M3: watch-only and unverified SmartAccount cannot create an executable preview.
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   await page.locator('#header-settings').click();
@@ -137,7 +144,7 @@ try{
     return await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind:'send',confirmed:true,
       account:controller,chainId:'0x1a4',epoch:1,recipient:'0x4444444444444444444444444444444444444444',amount:'1',asset:'native'});
   },controller);
-  assert.match(replay.error?.message||'',/Network or account changed since review/);
+  assert.match(replay.error?.message||'',/Stale chain or account transaction preview|Network or account changed since review/);
   await page.locator('#header-settings').click();
   await page.locator('#network-select').selectOption('0x1a4');
   await page.locator('#switch-network').click();

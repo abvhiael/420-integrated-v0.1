@@ -50,3 +50,17 @@ button{cursor:pointer;font-family:inherit;transition:filter .15s}.primary,.secon
 #asset-detail .config-row strong{max-width:64%;overflow-wrap:anywhere}
 #nft-list .asset-row{padding:12px;align-items:center;overflow-wrap:anywhere}
 #asset-view .review-actions{gap:8px;flex-wrap:wrap}
+
+/* W15.6-M5 — local receive QR, verified fee review and transaction activity */
+#receive-qr{margin:14px auto;padding:12px;background:#fff;width:max-content;max-width:100%;border-radius:10px}
+#receive-qr:empty{display:none}
+#receive-qr canvas,#receive-qr img{display:block;max-width:100%;height:auto}
+#send-max,#save-send-contact,#remove-send-contact,#refresh-transactions{margin:8px 0;min-height:38px}
+.send-fee-settings{margin:12px 0;border:1px solid var(--border);border-radius:11px;padding:12px}
+.send-fee-settings summary{cursor:pointer;font-size:13px;font-weight:650}
+.send-fee-settings label{margin-top:10px}
+#send-review dd{overflow-wrap:anywhere;word-break:break-word}
+#send-contact{min-width:0;max-width:100%}
+#activity-list .asset-value{min-width:0;max-width:62%;overflow-wrap:anywhere}
+#activity-list .asset-value small{display:block;overflow-wrap:anywhere;word-break:break-all}
+#send-state{overflow-wrap:anywhere}

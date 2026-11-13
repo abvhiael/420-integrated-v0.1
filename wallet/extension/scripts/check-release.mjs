@@ -7,7 +7,8 @@ import { buildExtension420 } from './build.mjs';
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { dist: root } = await buildExtension420();
-const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'wallet.html', 'wallet.css', 'wallet.js', 'core/vault.js', 'core/extension-portfolio.js', 'vendor/ethers-6.17.0.min.js', 'vendor/ETHERS-LICENSE.md', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
+const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'wallet.html', 'wallet.css', 'wallet.js', 'core/vault.js', 'core/extension-portfolio.js', 'core/extension-transactions.js',
+  'vendor/qrcode.min.js', 'vendor/QRCODE-LICENSE.md', 'vendor/ethers-6.17.0.min.js', 'vendor/ETHERS-LICENSE.md', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
 const forbiddenPatterns = [
   /\beval\s*\(/,
   /\bnew\s+Function\s*\(/,
@@ -48,6 +49,9 @@ await scan(root);
 const canonicalEthers = await readFile(join(root, 'vendor/ethers-6.17.0.min.js'));
 const upstreamGitBlob = createHash('sha1').update('blob ' + canonicalEthers.length + '\0').update(canonicalEthers).digest('hex');
 assert.equal(upstreamGitBlob, '8b1bb8fb32192a266cbe2cf27983c71a69ba7d4c', 'vendored ethers 6.17.0 blob must match pinned upstream release');
+const qrSource=await readFile(join(root,'vendor/qrcode.min.js'));
+assert.equal(createHash('sha1').update('blob '+qrSource.length+'\0').update(qrSource).digest('hex'),
+  '993e88f396640f881b69f98db7a4d17401ef83ca','bundled local QR code library integrity mismatch');
 
 
 const serviceWorker = await readFile(join(root, 'service-worker.js'), 'utf8');
@@ -63,6 +67,10 @@ assert.match(serviceWorker, /readAssetPortfolio420/);
 assert.match(serviceWorker, /portfolioScope420/);
 assert.match(serviceWorker, /verifiedPrice420/);
 assert.match(serviceWorker, /monitorPortfolioBlocks420/);
+assert.match(serviceWorker, /buildVerifiedSend420/);
+assert.match(serviceWorker, /classifyReceipt420/);
+assert.match(serviceWorker, /validatePreview420/);
+assert.match(serviceWorker, /resolveWalletRecipient420/);
 assert.match(serviceWorker, /NETWORK_HEALTH_KEY_420/);
 assert.match(serviceWorker, /frameId/);
 assert.match(serviceWorker, /eth_requestAccounts/);
@@ -119,6 +127,8 @@ assert.match(popup, /id="dashboard"/);
 assert.match(popup, /id="asset-list"/);
 assert.match(popup, /id="sites-view"/);
 assert.match(popup, /id="send-review"/);
+assert.match(popup, /vendor\\/qrcode\\.min\\.js/);
+assert.match(popup, /id="receive-qr"/);
 assert.match(popup, /id="settings-view"/);
 for (const html of [popup, authorityHtml, walletHtml]) {
   assert.doesNotMatch(html, /<script[^>]+src=["']https?:/i);

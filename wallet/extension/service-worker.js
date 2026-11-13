@@ -1,4 +1,4 @@
-import {validateUserOpReplacement420} from './core/extension-replacement-policy.js';
+import {validateUserOpReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
 import {encodeExecute} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
@@ -488,7 +488,7 @@ async function readWalletUiActivity420() {
 const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 async function refreshWalletUiActivity420() {
   const entries=await readWalletUiActivity420();
-  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized'].includes(x.status)&&
+  const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized','confirmed','reverted'].includes(x.status)&&
     (validHash420(x.hash)||validHash420(x.userOpHash))).slice(0,5);
   if(!candidates.length)return entries;
   let chain;
@@ -500,26 +500,52 @@ async function refreshWalletUiActivity420() {
     try{
       const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:entry.chainId})};
       let current=entry;
-      if(!validHash420(current.hash)&&validHash420(current.userOpHash)){
-        const receipt=await provider.request('eth_getUserOperationReceipt',[current.userOpHash]);
-        const receiptHash=receipt?.receipt?.transactionHash??receipt?.transactionHash;
-        if(validHash420(receiptHash))current={...current,hash:receiptHash.toLowerCase()};
+      let opReceipt=null;
+      if(validHash420(current.userOpHash)){
+        opReceipt=await provider.request('eth_getUserOperationReceipt',[current.userOpHash]);
+        const receiptHash=opReceipt?.receipt?.transactionHash??opReceipt?.transactionHash;
+        if(validHash420(receiptHash)){
+          if(validHash420(current.hash)&&current.hash.toLowerCase()!==receiptHash.toLowerCase())
+            throw new Error('bundler transaction hash changed unexpectedly');
+          current={...current,hash:receiptHash.toLowerCase()};
+        }
       }
       if(!validHash420(current.hash))continue;
-      const reconciled=await reconcileExtensionTransaction420(current,{provider,chainId:entry.chainId,confirmations:2});
+      let reconciled=await reconcileExtensionTransaction420(current,{provider,chainId:entry.chainId,confirmations:2});
+      if(reconciled.status==='confirmed'&&opReceipt?.success===false)
+        reconciled={...reconciled,status:'reverted'};
       if(reconciled.status!==entry.status||reconciled.hash!==entry.hash){
         updates.set(entry.id,{...reconciled,updatedAt:Date.now()});
         changed=true;
       }
     }catch{ /* RPC outages retain the last known status, never fabricate failure. */ }
   }
-  if(!changed)return entries;
   const fresh=await readWalletUiActivity420();
   const next=fresh.map(x=>updates.has(x.id)&&
-    (x.hash===updates.get(x.id).hash||(!x.hash&&x.userOpHash===updates.get(x.id).userOpHash))&&
-    !['confirmed','reverted','cancelled','replaced','dropped'].includes(x.status)?updates.get(x.id):x);
-  await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
-  return next;
+    (x.hash===updates.get(x.id).hash||(!x.hash&&x.userOpHash===updates.get(x.id).userOpHash))
+       ? updates.get(x.id):x);
+  // Replacement status follows confirmed UserOperation evidence, not receipt
+  // timeout, elapsed time, or a submitted replacement hash.
+  const byId=new Map(next.map(x=>[x.id,x]));
+  for(const replacement of next.filter(x=>x.originalId&&x.replaces)){
+    const original=byId.get(replacement.originalId);
+    if(!original||original.chainId!==chain.chainId)continue;
+    if(replacement.status==='confirmed'&&['submitted','pending','included','reorganized'].includes(original.status)){
+      try{
+        const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:chain.chainId})};
+        const validated=await reconcileUserOpReplacement420(provider,original,replacement);
+        byId.set(original.id,validated);changed=true;
+      }catch{ /* Both canonical UserOperation proofs are mandatory. */ }
+    }else if(replacement.status==='reorganized'&&['replaced','cancelled'].includes(original.status)&&
+             original.replacementUserOpHash===replacement.userOpHash){
+      byId.set(original.id,{...original,status:'submitted',replacementUncertain:true,
+        replacedBy:null,replacementUserOpHash:null});changed=true;
+    }
+  }
+  if(!changed)return entries;
+  const committed=next.map(x=>byId.get(x.id)||x);
+  await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:committed});
+  return committed;
 }
 async function recordAuthoritySubmission420(sender,requestId,submission){
   const address=chrome.runtime.getURL('authority.html');

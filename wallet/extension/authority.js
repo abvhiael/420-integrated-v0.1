@@ -1,3 +1,4 @@
+import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {signExtensionEoa420} from './core/eoa-local-signer.js';
 import { createExtensionLocalAuthority420 } from './core/extension-local-authority.js';
 
@@ -80,6 +81,17 @@ async function run() {
         const vault=(await chrome.storage.local.get('420-wallet-encrypted-vault-v1'))['420-wallet-encrypted-vault-v1'];
         if(!vault)throw new Error('Encrypted local vault unavailable');
         const tx=pending.request.params[0];
+        const assertRecipient=async()=>{
+          if(!tx.recipientSnapshot)return;
+          if(tx.recipientSnapshot.recipient!==tx.to?.toLowerCase())
+            throw new Error('Reviewed name no longer matches signed transaction target');
+          const resolved=await resolveExtensionRecipient420(provider(),{
+            input:tx.recipientSnapshot.input,chainId:tx.chainId,
+            qualifiedNamesConfig:config.qualifiedNamesRuntime??null,
+          });
+          assertExtensionRecipientSnapshot420(tx.recipientSnapshot,resolved);
+        };
+        await assertRecipient();
         if(tx.from?.toLowerCase()!==pending.context.accounts?.[0]||
            tx.chainId!==pending.context.chainId)
           throw new Error('Approved account or EOA chain changed');
@@ -95,6 +107,7 @@ async function run() {
         if(!head?.baseFeePerGas||
            BigInt(signed.maxFeePerGas)<BigInt(head.baseFeePerGas)+BigInt(signed.maxPriorityFeePerGas))
           throw new Error('Fee cap no longer covers confirmed base fee; review transaction again');
+        await assertRecipient();
         const response=await chrome.runtime.sendMessage({
           source:'420-wallet-authority-ui',kind:'authority-eoa-signed',
           authorityRequestId,submission:Object.fromEntries(
@@ -124,6 +137,7 @@ async function run() {
     provider: provider(),
     navigatorLike: navigator,
     smartAccountConfig: config.smartAccountConfig,
+    qualifiedNamesRuntime:config.qualifiedNamesRuntime??null,
     // Return a pending UserOperation identity before the worker's 120s approval timeout.
     receiptOptions: {timeoutMs:90000,pollMs:1500},
     onUserOperationSubmitted:async (submission,context)=>{

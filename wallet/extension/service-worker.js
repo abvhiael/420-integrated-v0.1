@@ -333,7 +333,8 @@ async function executeWithLocalAuthority(request, context) {
   pending[authorityRequestId] = {
     authorityRequestId,
     request,
-    context: { origin: context.origin, chainId:context.chainId, epoch:context.epoch, accounts: context.accounts ?? [], tabId: context.tabId ?? null },
+    context: { origin: context.origin, chainId:context.chainId, epoch:context.epoch, accounts: context.accounts ?? [],
+      tabId: context.tabId ?? null, activityId:context.activityId??null },
     createdAt: Date.now(),
   };
   await chrome.storage.local.set({ [AUTHORITY_KEY]: pending });
@@ -517,9 +518,43 @@ async function refreshWalletUiActivity420() {
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
   return next;
 }
+async function recordAuthoritySubmission420(sender,requestId,submission){
+  const address=chrome.runtime.getURL('authority.html');
+  if(sender?.id!==chrome.runtime.id||typeof sender?.url!=='string'||
+     !sender.url.startsWith(address+'?'))throw Object.assign(new Error('Unauthorized authority submission'),{code:4100});
+  const actual=new URL(sender.url).searchParams.get('request');
+  if(actual!==requestId)throw Object.assign(new Error('Authority request identity mismatch'),{code:4100});
+  const pending=await readObject(AUTHORITY_KEY),request=pending[requestId];
+  if(!request||request.context?.chainId!==(await effectiveChain420(request.context.origin)).chainId)
+    throw Object.assign(new Error('Stale or missing authority request'),{code:4901});
+  if(!validHash420(submission?.userOpHash)||!/^0x[0-9a-fA-F]{1,64}$/.test(submission?.nonce??'')||
+      !/^0x[0-9a-fA-F]{64}$/.test(submission?.gasFees??'')||
+      !/^0x[0-9a-fA-F]{40}$/.test(submission?.sender??'')||
+      !/^0x[0-9a-fA-F]{40}$/.test(submission?.entryPoint??''))
+    throw Object.assign(new Error('Unverified UserOperation submission metadata'),{code:-32602});
+  const id=request.context.activityId;
+  if(!id)return true; // dApp-origin activity is tracked separately when the origin owns the request.
+  const activities=await readWalletUiActivity420();
+  const entry=activities.find(x=>x.id===id&&x.chainId===request.context.chainId&&
+    x.controller===request.context.accounts?.[0]);
+  if(!entry)throw Object.assign(new Error('Pending activity was not found'),{code:-32603});
+  await rememberWalletUiActivity420({...entry,
+    executionModel:'erc4337',status:'submitted',submittedAt:Date.now(),
+    userOpHash:submission.userOpHash.toLowerCase(),
+    sender:submission.sender.toLowerCase(),entryPoint:submission.entryPoint.toLowerCase(),
+    entryPointVersion:'0.7',nonce:submission.nonce,nonceKey:submission.nonceKey,
+    nonceSequence:submission.nonceSequence,gasFees:submission.gasFees.toLowerCase(),
+    maxPriorityFeePerGas:'0x'+BigInt('0x'+submission.gasFees.slice(2,34)).toString(16),
+    maxFeePerGas:'0x'+BigInt('0x'+submission.gasFees.slice(34,66)).toString(16),
+    callData:submission.callData,initCode:submission.initCode,target:submission.target,
+    value:submission.value,data:submission.data
+  });
+  return true;
+}
 async function rememberWalletUiActivity420(entry) {
   const current=await readWalletUiActivity420();
-  const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
+  const previous=current.find(x=>x.id===entry.id);
+  const next=[{...previous,...entry},...current.filter(x=>x.id!==entry.id)].slice(0,40);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
 }
 async function finalizeWalletUiState420(state){
@@ -896,7 +931,7 @@ async function handleWalletUi420(message) {
     try {
       hash=await executeWithLocalAuthority(
         {method:'eth_sendTransaction',params:[{...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level}]},
-        {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null}
+        {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null,activityId:id}
       );
       const current=await effectiveChain420();
       if(current.chainId!==entry.chainId||current.epoch!==state.network.epoch)throw Object.assign(new Error('Chain changed during transaction'),{code:4901});
@@ -929,6 +964,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     (async()=>{try{
       if(sender?.id!==chrome.runtime.id||sender?.url!==chrome.runtime.getURL('wallet.html'))throw Object.assign(new Error('Untrusted account manager'),{code:4100});
       sendResponse({result:await switchSelectedAccount420(message.account)});
+    }catch(error){sendResponse({error:serializeError(error)});}})();
+    return true;
+  }
+  if (message?.source==='420-wallet-authority-ui'&&message.kind==='authority-submitted'){
+    (async()=>{try{
+      sendResponse({result:await recordAuthoritySubmission420(sender,message.authorityRequestId,message.submission)});
     }catch(error){sendResponse({error:serializeError(error)});}})();
     return true;
   }

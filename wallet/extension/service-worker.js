@@ -13,7 +13,7 @@ import {Transaction} from './vendor/ethers-6.17.0.min.js';
 import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
 import {validateUserOpReplacement420,validateEoaReplacement420,reconcileUserOpReplacement420,transitionReplacement420} from './core/extension-replacement-policy.js';
-import {encodeExecute} from './core/abi.js';
+import {encodeExecute,decodeString} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
 import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
@@ -1867,7 +1867,8 @@ async function handleWalletUi420(message) {
     const latest=BigInt(await provider.request('eth_blockNumber',[])),from=BigInt(record.discoveryFrom);
     const start=from>latest?latest:from;
     const bounded=latest-start>2048n?latest-2048n:start;
-    const found=await discoverTokens420(provider,account,{fromBlock:bounded,toBlock:latest,maxSpan:2048n});
+    const sourceAccount=(await walletUiState420()).portfolio?.balanceAddress||account;
+    const found=await discoverTokens420(provider,sourceAccount,{fromBlock:bounded,toBlock:latest,maxSpan:2048n});
     const known=new Map(record.tokens.map(x=>[x.address,x]));
     for(const token of found.tokens){
       const current=known.get(token.address);
@@ -1878,7 +1879,6 @@ async function handleWalletUi420(message) {
     await savePortfolioRecord420(scope,record);
     const cache=await readObject(PORTFOLIO_CACHE_KEY_420);
     const previous=cache[scope]||{};
-    const sourceAccount=(await walletUiState420()).portfolio?.balanceAddress||account;
     // Scan one exact bounded window per user action. Maintain an explicit
     // account/chain checkpoint; do not silently jump over older history.
     const fromIndex=record.nftIndexFrom===null?

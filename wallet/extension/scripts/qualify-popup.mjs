@@ -332,6 +332,9 @@ try{
   await page.waitForFunction(()=>document.querySelector('#nft-approval-status')?.textContent?.includes('not approved')||
     document.querySelector('#nft-approval-status')?.textContent?.includes('approved for ALL'));
   await page.locator('#nft-detail-view [data-back]').click();
+  await page.locator('#nfts-scan-older').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-index-status')?.textContent?.includes('reached genesis'));
+  assert.match(await page.locator('#nft-list').textContent(),/ERC1155 #7/);
   await page.locator('[data-screen="dashboard"]').click();
   await page.locator('[data-screen="sites-view"]').click();
   assert.match(await page.locator('#site-list').textContent(),/example\.test/);

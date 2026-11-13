@@ -607,11 +607,26 @@ function setup(){
     }catch(e){tell('Network save failed: '+e.message,'error');$('global-status').textContent='Network save failed: '+e.message;}
     finally{button.disabled=false;}
   });
-  $('send-max').addEventListener('click',()=>{
+  $('send-max').addEventListener('click',async()=>{
+    const button=$('send-max');button.disabled=true;
     try{
       const w=state.wallet;
       if(!extensionCanSend420(w))throw new Error('Unlocked verified account and network are required');
-      if($('send-asset').value==='native')throw new Error('Native Max requires a verified account-abstraction gas and sponsorship quote; unavailable on this chain');
+      if($('send-asset').value==='native'){
+        if(w.account.kind!=='eoa')throw new Error('SmartAccount native Max requires verified paymaster and EntryPoint funding accounting; unavailable');
+        const max=await command('send-native-max',{
+          chainId:w.network.expectedChainId,epoch:w.network.epoch,
+          account:w.selectedAccount,recipient:$('send-recipient').value.trim(),
+          feeChoice:currentFeeChoice420()
+        });
+        if(state.wallet!==w)
+          throw new Error('Account changed during Max computation');
+        $('send-amount').value=formatExtensionUnitsExact420(max.raw,max.decimals);
+        resetReview();
+        $('send-state').textContent='Native Max reserves '+max.feeWei+
+          ' wei for the reviewed EIP-1559 gas cap. The fee and nonce will be rechecked before sending.';
+        return;
+      }
       const address=$('send-asset').value.toLowerCase();
       const token=w?.portfolio?.tokens?.find(t=>t.address===address);
       if(!token?.verified||token.hidden||token.spam||token.balance?.status!=='spendable')
@@ -622,6 +637,7 @@ function setup(){
       resetReview();
       $('send-state').textContent='Max verified token balance selected. Review before sending; gas and execution remain independently validated.';
     }catch(e){$('send-state').textContent='Max unavailable: '+e.message;}
+    finally{button.disabled=false;}
   });
   $('send-contact').addEventListener('change',()=>{
     const address=$('send-contact').value;

@@ -313,13 +313,13 @@ async function connectHardware420(){
       if(meta[found.address]?.type&&meta[found.address]?.type!=='hardware')
         throw new Error('Device account collides with an existing account of different signing type');
       const updated={...config,accounts:[...new Set([...accounts,found.address])],
-        accountMeta:{...meta,[found.address]:{type:'hardware',label,path:found.path,provider:'ledger',hidden:false,signingQualified:false}}};
+        accountMeta:{...meta,[found.address]:{type:'hardware',label,path:found.path,provider:'ledger',hidden:false,signingQualified:true}}};
       await chrome.storage.local.set({[configKey]:updated});
       const row=document.createElement('p');row.className='hint';
       row.textContent=label+' · '+found.path+' · '+found.address+' · public only';
       results.append(row);
     }
-    message('Ledger public accounts verified on device and saved. Hardware signing remains disabled until its qualified transport is installed.','success');
+    message('Ledger public accounts verified on device and saved. Hardware signing requires fresh device approval for every request; this build has not passed physical acceptance.','success');
   }finally{await connection.close();}
 }
 

@@ -80,10 +80,96 @@
       <section id="sites-view" class="view" hidden aria-labelledby="sites-title">
         <div class="topline"><span class="eyebrow">PERMISSIONS</span><span class="chip">DAPP CONNECTIONS</span></div>
         <h1 id="sites-title" class="screen-title">Connected sites</h1>
+        <button id="open-security-centre" type="button" class="primary wide">Open Security Centre · approvals, capabilities &amp; alerts</button>
         <p class="intro">Manage websites permitted to see your account. Disconnecting a site removes browser permission; it does not revoke any independent on-chain capability grant.</p>
         <div id="site-list" class="stack"><p class="empty">No websites connected.</p></div>
       </section>
 
+
+      <section id="security-view" class="view" hidden aria-labelledby="security-title">
+        <button type="button" class="back-button" data-back>‹ Connected sites</button>
+        <div class="topline"><span class="eyebrow">PERMISSIONS &amp; AUTHORITIES</span><span class="chip alert">SECURITY</span></div>
+        <h1 id="security-title" class="screen-title">Security Centre</h1>
+        <p class="intro">Website Disconnect removes only local browser account access. ERC-20 approvals, SmartAccount capability grants, session keys and passkeys are independent on-chain authorities. They require their own verified transaction to revoke.</p>
+        <div id="security-status" class="notice" role="status" aria-live="polite">Inspecting security authorities…</div>
+        <div class="security-section">
+          <h2>Connected websites &amp; granted accounts</h2>
+          <p class="intro">Account permission, website risks and local disconnect controls. This is not an on-chain revocation.</p>
+          <div id="security-sites" class="stack" aria-live="polite"></div>
+        </div>
+        <div class="security-section">
+          <h2>Security alerts</h2>
+          <p class="intro">Heuristic warnings are not a live threat-intelligence feed or an assertion that a site is safe.</p>
+          <div id="security-alerts" class="stack" aria-live="polite"></div>
+        </div>
+        <div class="security-section">
+          <h2>Signature history</h2>
+          <p class="intro">Successful signatures made through this extension on this account and network, recorded locally. This is not a complete global history.</p>
+          <div id="security-signatures" class="stack" aria-live="polite"></div>
+        </div>
+        <div class="security-section">
+          <h2>Token allowances</h2>
+          <p class="intro">Inspect a specific ERC-20 contract and spender. Values are read from that contract on the selected chain; this does not discover every spender. Revocation calls approve(spender,0) and costs network fees.</p>
+          <form id="security-allowance-form" class="security-form">
+            <label for="security-token">ERC-20 token contract</label><input id="security-token" placeholder="0x…" required pattern="0x[0-9a-fA-F]{40}" spellcheck="false">
+            <label for="security-spender">Authorized spender</label><input id="security-spender" placeholder="0x…" required pattern="0x[0-9a-fA-F]{40}" spellcheck="false">
+            <label for="security-allowance-owner">Allowance owner</label>
+            <select id="security-allowance-owner"><option value="eoa">Selected EOA account</option><option value="smart-account">Verified SmartAccount420</option></select>
+            <button class="secondary wide" type="submit">Verify allowance on chain &amp; watch</button>
+          </form>
+          <div id="security-allowances" class="stack" aria-live="polite"></div>
+          <h3>Recently observed approvals</h3>
+          <p class="intro" id="security-discovery-note">Recent event discovery is bounded and never a complete allowance inventory.</p>
+          <div id="security-discovered" class="stack" aria-live="polite"></div>
+        </div>
+        <div class="security-section">
+          <h2>SmartAccount420 authority</h2>
+          <div id="security-account" class="stack" aria-live="polite"></div>
+          <h3>Capability grants</h3>
+          <p class="intro">Inspect an exact canonical grant ID. Revoke via the SmartAccount420 owner and canonical CapabilityRegistry420, never by disconnecting a website.</p>
+          <form class="security-form" id="security-capability-form">
+            <label for="security-grant">Grant ID (bytes32)</label>
+            <input id="security-grant" placeholder="0x…" required pattern="0x[0-9a-fA-F]{64}" spellcheck="false">
+            <button class="secondary wide" type="submit">Verify capability grant &amp; watch</button>
+          </form>
+          <div id="security-capabilities" class="stack"></div>
+          <h3>Session keys</h3>
+          <p class="intro">A session key is active only in its authorization epoch. Expiry can also be imposed by its canonical session grants; merely hiding a key locally does not revoke it.</p>
+          <form class="security-form" id="security-session-form">
+            <label for="security-key">Session key address</label>
+            <input id="security-key" placeholder="0x…" required pattern="0x[0-9a-fA-F]{40}" spellcheck="false">
+            <button class="secondary wide" type="submit">Inspect session key &amp; watch</button>
+          </form>
+          <div id="security-sessions" class="stack"></div>
+          <h3>Passkeys</h3>
+          <p class="intro">Only locally enrolled credential references are shown. A passkey revocation requires the current canonical SmartAccount420 owner's on-chain approval.</p>
+          <div id="security-passkeys" class="stack"></div>
+          <h3>Recovery authority</h3>
+          <p class="intro">Changing recovery authority or resolving a pending recovery is a distinct SmartAccount owner/recovery authority action, not a website permission change.</p>
+          <div id="security-recovery" class="stack"></div>
+        </div>
+        <div class="security-section">
+          <h2>Review on-chain revocation</h2>
+          <div id="security-revocation-review" class="review-box" hidden>
+            <dl><div><dt>Authority</dt><dd id="security-review-kind">—</dd></div>
+              <div><dt>Target contract</dt><dd id="security-review-target" class="wrap">—</dd></div>
+              <div><dt>Current authorization</dt><dd id="security-review-current" class="wrap">—</dd></div>
+              <div><dt>Maximum network fee (wei)</dt><dd id="security-review-fee">—</dd></div>
+              <div><dt>Simulation</dt><dd id="security-review-simulation">—</dd></div></dl>
+            <p id="security-review-warning" class="notice warn">This transaction has not been submitted.</p>
+            <label class="security-check-label" for="security-review-ack">
+              <input id="security-review-ack" type="checkbox">
+              I understand the difference between a local website disconnect and this on-chain transaction. Submission alone does not confirm revocation.
+            </label>
+            <div class="review-actions">
+              <button id="security-cancel-review" type="button" class="secondary">Cancel review</button>
+              <button id="security-submit-review" type="button" class="primary" disabled>Confirm &amp; authorize on-chain</button>
+            </div>
+          </div>
+        </div>
+        <button id="security-refresh" type="button" class="secondary wide">Refresh verified security state</button>
+        <p class="intro">The Security Centre is scoped to the selected account and network. It can only inventory explicitly watched contracts, locally recorded signatures and locally configured passkeys. No unsupported remote authority is silently treated as revoked.</p>
+      </section>
       <section id="settings-view" class="view" hidden aria-labelledby="settings-title">
         <div class="topline"><span class="eyebrow">PREFERENCES</span><span class="chip">NETWORK</span></div>
         <h1 id="settings-title" class="screen-title">Settings</h1>

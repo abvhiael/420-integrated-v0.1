@@ -54,6 +54,7 @@ const rpc=createServer(async(req,res)=>{
     if(to===token&&data==='0x313ce567')result=word(6);
     else if(to===token&&data==='0x95d89b41')result=stringReturn('TEST');
     else if(to===token&&data.startsWith('0x70a08231'))result=word(12500000);
+    else if(to===token&&data.startsWith('0xdd62ed3e'))result=word(1000000000);
     else if(to===nft&&data.startsWith('0x6352211e'))result=addressWord(controller);
     else result=to===factory?addressWord(account):addressWord(controller);
   }
@@ -284,6 +285,30 @@ try{
   await page.locator('[data-screen="dashboard"]').click();
   await page.locator('[data-screen="sites-view"]').click();
   assert.match(await page.locator('#site-list').textContent(),/example\.test/);
+  // M7: actual packaged Security Centre reads a live mock-chain allowance;
+  // a watch-only account cannot submit an on-chain revoke transaction.
+  await page.locator('#open-security-centre').click();
+  assert.equal(await page.locator('#security-view').isVisible(),true);
+  await page.waitForFunction(()=>document.querySelector('#security-sites')?.textContent?.includes('example.test'));
+  assert.match(await page.locator('#security-sites').textContent(),/Disconnected|Disconnect website only/);
+  assert.match(await page.locator('#security-view').textContent(),/does not change|does not revoke|not an on-chain revocation/i);
+  await page.locator('#security-token').fill(token);
+  await page.locator('#security-spender').fill('0x'+'77'.repeat(20));
+  await page.locator('#security-allowance-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#security-allowances')?.textContent?.includes('1000000000'));
+  assert.match(await page.locator('#security-allowances').textContent(),/active/);
+  assert.equal(await page.locator('#security-capabilities').isVisible(),true);
+  assert.equal(await page.locator('#security-passkeys').isVisible(),true);
+  assert.equal(await page.locator('#security-recovery').isVisible(),true);
+  await page.screenshot({path:resolve(screenshots,'09-security-centre-verified-allowance.png')});
+  await page.getByRole('button',{name:'Review on-chain allowance revocation'}).click();
+  await page.waitForFunction(()=>document.querySelector('#security-status')?.textContent?.includes('Revocation cannot proceed'));
+  assert.match(await page.locator('#security-status').textContent(),/Unlock verified local signing authority/);
+  assert.equal(await page.locator('#security-revocation-review').isHidden(),true,
+    'Watch-only account cannot prepare or authorize an on-chain revoke');
+  await page.locator('#security-view [data-back]').click();
+  assert.equal(await page.locator('#sites-view').isVisible(),true);
+
   assert.equal(await page.locator('.site-network-select').first().inputValue(),'0x1a4');
   await page.screenshot({path:resolve(screenshots,'06-connected-sites-local-fixture.png')});
   page.once('dialog',dialog=>dialog.accept());

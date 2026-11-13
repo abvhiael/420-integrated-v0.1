@@ -1,3 +1,10 @@
+import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
+import {readSecurityAllowance420,discoverRecentSecurityAllowances420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
+import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
+import {prepareSessionKeyRevocation,readSessionEpoch} from './core/session-management.js';
+import {inspectCapabilityGrant} from './core/capabilities.js';
+import {readDeployedSmartAccountState} from './core/accounts.js';
+import {keccak256Hex} from './core/keccak.js';
 import {normalizeDappAccountPermission420,dappAccountPermissions420,normalizeDappWalletCalls420,walletCapabilities420,walletCallsStatus420} from './core/extension-dapp-compatibility.js';
 import {normalizeBatchCalls,encodeExecuteBatch} from './core/batch-execution.js';
 import {Transaction} from './vendor/ethers-6.17.0.min.js';
@@ -21,6 +28,9 @@ const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
+const SECURITY_SIGNATURES_KEY='420-wallet-security-signature-history-v1';
+const SECURITY_WATCH_KEY='420-wallet-security-watch-v1';
+const SECURITY_REVIEW_KEY='420-wallet-security-reviews-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_gasPrice','eth_feeHistory','eth_maxPriorityFeePerGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
 const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
@@ -467,7 +477,10 @@ async function handleApprovalMethod(request, context) {
     const available = (await accountVisibility420(Array.isArray(config.accounts) ? config.accounts : [])).filter(a=>a===prefs.selectedAccount);
     if (!available.length) throw Object.assign(new Error('no wallet accounts available'), { code: 4100 });
     const before=await effectiveChain420(origin),pinned=before.chainId;
-    const decision = await createApproval({ ...request, availableAccounts: available },{...context,chainId:pinned,epoch:before.epoch});
+    const siteRisk=classifyWebsiteRisk420(origin);
+    const decision = await createApproval({ ...request, availableAccounts: available,securityRisk:siteRisk.flags.length?
+      {severity:'high',flags:siteRisk.flags,summary:'Unverified or suspicious website origin'}:null
+    },{...context,chainId:pinned,epoch:before.epoch});
     const selected = Array.isArray(decision.accounts)&&decision.accounts.length?decision.accounts:available;
     if(selected.length!==1||selected[0]!==prefs.selectedAccount)
       throw Object.assign(new Error('Approval account no longer matches the selection'),{code:4100});
@@ -535,8 +548,15 @@ async function handleApprovalMethod(request, context) {
     const risk=inspectExtensionApprovalRisk420(normalizedTx);
     feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:eoa?'eoa':'erc4337'};
   }
-  await createApproval(feePreview?{...request,feePreview}:request,
-    { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
+  const signatureRisk=['personal_sign','eth_signTypedData_v4'].includes(request.method)?
+    assessSecuritySignature420(request.method,request.params,{chainId:pinned,origin}):null;
+  const siteRisk=classifyWebsiteRisk420(origin);
+  await createApproval({
+    ...request,...(feePreview?{feePreview}:{}),
+    ...(signatureRisk?{securityRisk:signatureRisk}:
+       siteRisk.flags.length?{securityRisk:{severity:'high',flags:siteRisk.flags,
+         summary:'Suspicious website domain'}}:{})
+  },{ ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
   if((await effectiveChain420(origin)).epoch!==before.epoch)
     throw Object.assign(new Error('Chain changed during approval'),{code:4901});
   const current=await accountsFor(origin);
@@ -609,9 +629,17 @@ async function handleApprovalMethod(request, context) {
     signerMeta[current[0]]?.type==='eoa';
   if(isEoaSignature&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Unlock the local EOA vault before signing'),{code:4100});
-  return executeWithLocalAuthority(
+  const result=await executeWithLocalAuthority(
     isEoaSignature?{...request,executionModel:'eoa'}:request,
     { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
+  if(signatureRisk){
+    const item=securityRecordSignature420({origin,method:request.method,
+      account:current[0],chainId:pinned,risk:signatureRisk});
+    const history=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY]||[];
+    await chrome.storage.local.set({[SECURITY_SIGNATURES_KEY]:
+      [item,...(Array.isArray(history)?history:[])].slice(0,150)});
+  }
+  return result;
 }
 
 
@@ -1230,9 +1258,360 @@ async function replacementPreview420(message){
     transaction,quote,nonce:validated.nonce,entryPoint:validated.entryPoint,
     replaces:validated.replaces,nonceKey:validated.nonceKey};
 }
+
+const SECURITY_KINDS_420=new Set(['allowance','capability','session','passkey']);
+function securityContextKey420(chainId,account){
+ return chainId+'|'+account.toLowerCase();
+}
+async function securityIdentity420(){
+ const wallet=await walletUiState420();
+ if(wallet.network.status!=='matched'||!wallet.network.expectedChainId||
+    !wallet.selectedAccount)throw Object.assign(new Error('Verified chain and selected wallet account required'),{code:4901});
+ const chainId=wallet.network.expectedChainId,account=wallet.selectedAccount,
+  epoch=wallet.network.epoch;
+ const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:chainId})};
+ return {wallet,chainId,account,epoch,provider};
+}
+async function securitySmartAccount420(ctx){
+ const raw=await readObject(EXTENSION_CONFIG_KEY_420);
+ const cfg=raw.smartAccountConfig;
+ if(!cfg||raw.chainId!==ctx.chainId)
+  throw Object.assign(new Error('Canonical SmartAccount420 deployment configuration unavailable'),{code:4100});
+ const chain=await effectiveChain420();
+ if(!chain.network.smartAccountApproved)
+  throw Object.assign(new Error('SmartAccount420 deployment not independently approved'),{code:4100});
+ const smart=await discoverSmartAccount(ctx.provider,ctx.account,cfg);
+ if(!smart?.deployed||!smart?.controllerIsOwner||smart.owner!==ctx.account||
+    !smart.entryPoint||!smart.verifiedCapabilityRegistry)
+  throw Object.assign(new Error('Deployed SmartAccount owner and canonical capability registry are not verified'),{code:4100});
+ return smart;
+}
+async function securityPasskeys420(ctx,smart){
+ const saved=(await chrome.storage.local.get('420-wallet-passkey-bindings-v1'))?.['420-wallet-passkey-bindings-v1']||{};
+ const bindings=new Map();
+ for(const b of Object.values(saved)){
+  if(!b||typeof b!=='object'||b.smartAccount?.toLowerCase()!==smart.smartAccount||
+     typeof b.credentialIdHash!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(b.credentialIdHash))continue;
+  bindings.set(b.credentialIdHash.toLowerCase(),b);
+ }
+ return Promise.all([...bindings.values()].slice(0,25).map(async b=>{
+  try{
+   const row=await readSecurityPasskey420(ctx.provider,smart.smartAccount,b.credentialIdHash);
+   return {credentialIdHash:row.credentialIdHash,active:row.active,
+    bindingEpoch:String(b.authorizationEpoch),currentEpoch:String(smart.authorizationEpoch),
+    relyingParty:b.rpId||'Unknown',status:row.active?'active':'inactive'};
+  }catch(error){
+   return {credentialIdHash:b.credentialIdHash,active:false,status:'unverified',
+    warning:error.message};
+  }
+ }));
+}
+async function securityWatchEntries420(ctx,smart=null){
+ const raw=(await chrome.storage.local.get(SECURITY_WATCH_KEY))?.[SECURITY_WATCH_KEY]||{};
+ const list=Array.isArray(raw[securityContextKey420(ctx.chainId,ctx.account)])?
+  raw[securityContextKey420(ctx.chainId,ctx.account)].slice(0,60):[];
+ return Promise.all(list.map(async record=>{
+  try{
+   if(record.kind==='allowance'){
+    const owner=record.owner==='smart-account'?smart?.smartAccount:ctx.account;
+    if(!owner)throw new Error('SmartAccount ownership needs verification');
+    const inspection=await readSecurityAllowance420(ctx.provider,{
+      chainId:ctx.chainId,owner,token:record.token,spender:record.spender});
+    return {...record,status:BigInt(inspection.value)===0n?'zero':'active',
+      value:inspection.value,unlimited:inspection.unlimited,verified:true};
+   }
+   if(!smart)throw new Error('Canonical SmartAccount deployment not verified');
+   if(record.kind==='capability'){
+    const inspection=await inspectCapabilityGrant(ctx.provider,smart,record.grantId);
+    const expiry=inspection.grant.validUntil;
+    const current=BigInt(Math.floor(Date.now()/1000));
+    return {...record,status:!inspection.exists?'absent':
+      !inspection.belongsToAccount?'foreign':
+      inspection.grant.revoked?'revoked':expiry!==0n&&expiry<current?'expired':'active',
+      verified:true,principal:inspection.grant.principal,validUntil:expiry.toString(),
+      scopeHash:inspection.grant.scopeHash};
+   }
+   if(record.kind==='session'){
+    const epoch=await readSessionEpoch(ctx.provider,smart.smartAccount,record.key);
+    return {...record,status:epoch===BigInt(smart.authorizationEpoch)?'active':'expired-or-revoked',
+      verified:true,sessionEpoch:epoch.toString(),authorizationEpoch:String(smart.authorizationEpoch)};
+   }
+   if(record.kind==='passkey'){
+    const status=await readSecurityPasskey420(ctx.provider,smart.smartAccount,record.credentialIdHash);
+    return {...record,status:status.active?'active':'inactive',verified:true};
+   }
+   throw new Error('Unknown observed security authority');
+  }catch(error){return {...record,status:'unverified',verified:false,warning:error.message};}
+ }));
+}
+async function securityState420(){
+ let ctx;
+ try{ctx=await securityIdentity420();}
+ catch(error){
+  // A wrong-chain or offline wallet must still permit local website
+  // disconnection and inspection of prior local signature warnings.
+  const wallet=await walletUiState420();
+  const localRecords=await readObject(PERMISSIONS_KEY);
+  const signatures=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY];
+  const account=wallet.selectedAccount,chainId=wallet.network.expectedChainId;
+  const sites=wallet.sites.map(site=>({
+   ...site,grantedAt:localRecords[site.origin]?.grantedAt??null,
+   securityRisk:classifyWebsiteRisk420(site.origin),browserOnly:true
+  }));
+  const history=(Array.isArray(signatures)?signatures:[]).filter(x=>
+   x?.account===account&&x?.chainId===chainId).slice(0,80);
+  const watchedRaw=await readObject(SECURITY_WATCH_KEY);
+  const watched=account&&chainId&&Array.isArray(watchedRaw[securityContextKey420(chainId,account)])?
+   watchedRaw[securityContextKey420(chainId,account)].slice(0,60).map(x=>({
+    ...x,status:'unverified',verified:false,warning:'Offline or wrong-chain; no on-chain verification'
+   })):[];
+  return {chainId,account,epoch:wallet.network.epoch,sites,signatures:history,
+   watched,passkeys:[],discovered:{entries:[],partial:true,note:'Chain unavailable'},
+   alerts:[...sites.flatMap(site=>site.securityRisk.flags.map(message=>({
+    kind:'site',origin:site.origin,message
+   }))),{kind:'network',message:'On-chain security authorities cannot be verified: '+error.message}],
+   smart:null,smartError:error.message,
+   disclosure:'Offline view: local sites, signatures and watch records only. On-chain status is unknown; disconnected sites may retain independent on-chain authority.'};
+ }
+ let smart=null,smartError=null,passkeys=[],watched=[];
+ try{smart=await securitySmartAccount420(ctx);}
+ catch(error){smartError=error.message;}
+ if(smart)passkeys=await securityPasskeys420(ctx,smart);
+ watched=await securityWatchEntries420(ctx,smart);
+ let discovered={entries:[],partial:true,note:'No verified ERC-20 contracts in this wallet portfolio to scan'};
+ try{
+  const verified=(ctx.wallet.portfolio?.tokens||[]).filter(t=>t?.verified===true&&t.hidden!==true&&
+    t.spam!==true&&typeof t.address==='string').slice(0,8).map(t=>t.address);
+  if(verified.length){
+   const owner=ctx.wallet.account.kind==='eoa'?ctx.account:smart?.smartAccount;
+   if(owner){
+    discovered=await discoverRecentSecurityAllowances420(ctx.provider,{
+      chainId:ctx.chainId,owner,tokens:verified,lookbackBlocks:4096,maxSpenders:20});
+    discovered.ownerType=ctx.wallet.account.kind==='eoa'?'eoa':'smart-account';
+   }
+  }
+ }catch(error){discovered={entries:[],partial:true,error:error.message,
+    note:'Bounded Approval log discovery unavailable; manually inspect exact token and spender'};}
+ const signatures=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY];
+ const currentSignatures=(Array.isArray(signatures)?signatures:[]).filter(x=>
+  x?.account===ctx.account&&x?.chainId===ctx.chainId).slice(0,80);
+ const siteRecords=(await readObject(PERMISSIONS_KEY));
+ const sites=ctx.wallet.sites.map(site=>({
+  ...site,grantedAt:siteRecords[site.origin]?.grantedAt??null,
+  securityRisk:classifyWebsiteRisk420(site.origin),
+  browserOnly:true
+ }));
+ const activity=ctx.wallet.activity.filter(x=>x?.status==='submitted'||x?.status==='pending'||x?.status==='reorganized');
+ const alerts=[
+  ...sites.flatMap(s=>s.securityRisk.flags.map(message=>({kind:'site',origin:s.origin,message}))),
+  ...currentSignatures.filter(x=>x.risk==='high').slice(0,10).map(x=>({
+    kind:'signature',origin:x.origin,message:(x.flags||[]).join('; ')||'Risky approved signature recorded'
+  })),
+  ...watched.filter(x=>x.status==='unverified'||x.unlimited).map(x=>({
+    kind:x.kind,message:x.status==='unverified'?x.warning:
+      'Very large token allowance: confirm token and spender against trusted sources'
+  })),
+  ...activity.filter(x=>x.symbol?.includes('security')).map(x=>({
+    kind:'pending',message:'Security transaction '+(x.hash||x.userOpHash||x.id)+
+    ' submitted. On-chain revocation is NOT verified until canonical confirmation.'
+  }))
+ ].slice(0,35);
+ return {chainId:ctx.chainId,account:ctx.account,epoch:ctx.epoch,sites,
+  signatures:currentSignatures,watched,discovered,alerts,passkeys,
+  smart:smart?{
+    smartAccount:smart.smartAccount,owner:smart.owner,recoveryAuthority:smart.recoveryAuthority,
+    pendingRecoveryOwner:smart.pendingRecoveryOwner,recoveryExecutableAt:String(smart.recoveryExecutableAt),
+    authorizationEpoch:String(smart.authorizationEpoch),
+    authorizationPolicyVersion:String(smart.authorizationPolicyVersion),
+    capabilityRegistry:smart.capabilityRegistry,verifiedCapabilityRegistry:smart.verifiedCapabilityRegistry,
+    entryPoint:smart.entryPoint
+  }:null,smartError,
+  disclosure:'This device shows locally recorded activity and explicitly watched authorities only. Discovery is not a complete chain-wide approval or signing history.'};
+}
+async function securityWatch420(message,remove=false){
+ if(remove){
+  // Unwatching is a local-only storage action. It must remain possible even
+  // when RPC is offline or the current network cannot be qualified.
+  const registry=await networkRegistry420(),
+    prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const chainId=registry.selectedChainId,account=prefs.selectedAccount;
+  if(!chainId||!account)throw Object.assign(new Error('Account and network must be selected'),{code:4100});
+  const key=securityContextKey420(chainId,account),all=await readObject(SECURITY_WATCH_KEY);
+  const records=Array.isArray(all[key])?all[key]:[];
+  const kind=message.authorityKind;
+  const match=x=>x.kind===kind&&(
+   kind==='allowance'?x.token===String(message.token||'').toLowerCase()&&
+     x.spender===String(message.spender||'').toLowerCase()&&x.owner===message.owner:
+   kind==='capability'?x.grantId===String(message.grantId||'').toLowerCase():
+   kind==='session'?x.key===String(message.key||'').toLowerCase():
+   kind==='passkey'?x.credentialIdHash===String(message.credentialIdHash||'').toLowerCase():false
+  );
+  all[key]=records.filter(x=>!match(x));
+  await chrome.storage.local.set({[SECURITY_WATCH_KEY]:all});
+  return {removed:records.length!==all[key].length,localOnly:true};
+ }
+ const ctx=await securityIdentity420();
+ const kind=message.authorityKind;
+ if(!SECURITY_KINDS_420.has(kind))throw Object.assign(new Error('Unknown security authority type'),{code:-32602});
+ let record={kind};
+ if(kind==='allowance'){
+  const addresses=normalizeSecurityAllowance420(message.token,message.spender);
+  record={...record,...addresses,owner:message.owner==='smart-account'?'smart-account':'eoa'};
+  const owner=record.owner==='smart-account'?
+    (await securitySmartAccount420(ctx)).smartAccount:ctx.account;
+  await readSecurityAllowance420(ctx.provider,{chainId:ctx.chainId,owner,...addresses});
+ }else{
+  const smart=await securitySmartAccount420(ctx);
+  if(kind==='capability'){
+   if(typeof message.grantId!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(message.grantId))
+    throw Object.assign(new Error('Capability grant ID must be bytes32'),{code:-32602});
+   const inspected=await inspectCapabilityGrant(ctx.provider,smart,message.grantId);
+   if(!inspected.exists||!inspected.belongsToAccount)
+    throw Object.assign(new Error('Capability grant does not belong to verified account'),{code:4100});
+   record.grantId=inspected.grantId;
+  }else if(kind==='session'){
+   const key=normalizeExtensionAddress420(message.key);
+   await readSessionEpoch(ctx.provider,smart.smartAccount,key);
+   record.key=key;
+  }else{
+   const inspected=await readSecurityPasskey420(ctx.provider,smart.smartAccount,message.credentialIdHash);
+   record.credentialIdHash=inspected.credentialIdHash;
+  }
+ }
+ const key=securityContextKey420(ctx.chainId,ctx.account);
+ const all=await readObject(SECURITY_WATCH_KEY),arr=Array.isArray(all[key])?all[key]:[];
+ const id=JSON.stringify(record),records=arr.filter(x=>JSON.stringify(x)!==id);
+ records.unshift(record);
+ if(records.length>60)throw Object.assign(new Error('Security watch limit reached'),{code:4100});
+ all[key]=records;
+ await chrome.storage.local.set({[SECURITY_WATCH_KEY]:all});
+ return securityState420();
+}
+async function securityPrepare420(message){
+ const ctx=await securityIdentity420();
+ if(!SECURITY_KINDS_420.has(message.authorityKind))
+  throw Object.assign(new Error('Invalid revocation class'),{code:-32602});
+ if(!extensionCanSend420(ctx.wallet))
+  throw Object.assign(new Error('Unlock verified local signing authority first'),{code:4100});
+ const smartNeeded=message.authorityKind!=='allowance'||message.owner==='smart-account';
+ const smart=smartNeeded?await securitySmartAccount420(ctx):null;
+ if(message.authorityKind!=='allowance'&&ctx.wallet.account.kind!=='eoa')
+  throw Object.assign(new Error('SmartAccount authority changes require the canonical EOA owner; passkey UserOperations cannot call owner-only revocation methods'),{code:4100});
+ const executionModel=message.authorityKind==='allowance'&&message.owner==='smart-account'?'erc4337':'eoa';
+ if(executionModel==='erc4337'&&ctx.wallet.account.kind==='eoa')
+  throw Object.assign(new Error('Cannot revoke SmartAccount-owned allowances using a different EOA sender'),{code:4100});
+ if(executionModel==='eoa'&&ctx.wallet.account.kind!=='eoa')
+  throw Object.assign(new Error('Local EOA owner authority is required'),{code:4100});
+ const prepare=await prepareSecurityRevocation420(ctx.provider,{
+   kind:message.authorityKind,chainId:ctx.chainId,account:ctx.account,
+   token:message.token,spender:message.spender,grantId:message.grantId,key:message.key,
+   credentialIdHash:message.credentialIdHash,
+   smartState:smart?(executionModel==='erc4337'?{...smart,allowanceOwner:smart.smartAccount}:smart):null
+ });
+ const choice={level:'standard'};
+ const quote=executionModel==='eoa'?
+   await quoteExtensionEoa420(ctx.provider,{
+     chainId:ctx.chainId,from:ctx.account,transaction:prepare.transaction,choice
+   }):await quoteExtensionSend420(ctx.provider,{
+     chainId:ctx.chainId,smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+     transaction:prepare.transaction,choice,strictUserOpGas:true
+   });
+ if((await effectiveChain420()).epoch!==ctx.epoch)
+  throw Object.assign(new Error('Chain changed during security review'),{code:4901});
+ return {ctx,prepare,quote,executionModel,
+  snapshot:{kind:prepare.kind,chainId:ctx.chainId,epoch:ctx.epoch,account:ctx.account,
+    contract:prepare.contract,spender:prepare.record.spender??null,
+    grantId:prepare.record.grantId??null,key:prepare.record.key??null,
+    credentialIdHash:prepare.record.credentialIdHash??null,
+    allowance:prepare.record.allowance??null,
+    authorizationEpoch:prepare.record.authorizationEpoch??null,
+    owner:prepare.record.owner??null,nonce:quote.nonce,blockHash:quote.blockHash,
+    maxFeePerGas:quote.maxFeePerGas??null,
+    maxPriorityFeePerGas:quote.maxPriorityFeePerGas??null,gasLimit:quote.gasLimit??null,
+    gasFees:quote.gasFees??null,
+    accountGasLimits:quote.gasBudget?.accountGasLimits??null,
+    preVerificationGas:quote.gasBudget?.preVerificationGas??null
+  }};
+}
+async function securityReview420(message){
+ const preview=await securityPrepare420(message);
+ const bytes=crypto.getRandomValues(new Uint8Array(16));
+ const reviewId=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+ const stored=(await chrome.storage.session.get(SECURITY_REVIEW_KEY))?.[SECURITY_REVIEW_KEY]||{};
+ stored[reviewId]={request:{
+    authorityKind:message.authorityKind,owner:message.owner??null,token:message.token??null,
+    spender:message.spender??null,grantId:message.grantId??null,
+    key:message.key??null,credentialIdHash:message.credentialIdHash??null},
+   snapshot:preview.snapshot,transaction:preview.prepare.transaction,
+   reviewedAt:Date.now()};
+ // Short-lived review ledger contains only public on-chain data and exact reviewed envelopes.
+ await chrome.storage.session.set({[SECURITY_REVIEW_KEY]:Object.fromEntries(
+   [...Object.entries(stored)].filter(([,x])=>Date.now()-x.reviewedAt<120000).slice(-12)
+ )});
+ return {reviewId,kind:preview.prepare.kind,authority:preview.prepare.authority,
+  transaction:preview.prepare.transaction,record:preview.prepare.record,
+  quote:preview.quote,executionModel:preview.executionModel,
+  explanation:preview.prepare.kind==='allowance'?
+   'On-chain ERC-20 approve(spender,0). Disconnecting a website does not change this allowance.':
+   'This is an on-chain SmartAccount420 owner-only authority change, not a website permission change.',
+  status:'review-required'};
+}
+async function securitySubmit420(message){
+ if(message.confirmed!==true||typeof message.reviewId!=='string')
+  throw Object.assign(new Error('Explicit security transaction confirmation required'),{code:4001});
+ const stored=(await chrome.storage.session.get(SECURITY_REVIEW_KEY))?.[SECURITY_REVIEW_KEY]||{};
+ const prior=stored[message.reviewId];
+ if(!prior||Date.now()-prior.reviewedAt>120000)
+  throw Object.assign(new Error('Security review expired; inspect on-chain authority again'),{code:4001});
+ delete stored[message.reviewId];
+ await chrome.storage.session.set({[SECURITY_REVIEW_KEY]:stored});
+ const now=await securityPrepare420(prior.request);
+ assertSecurityRevocationSnapshot420(prior.snapshot,now.snapshot);
+ assertSecurityTransaction420({
+   ...now.prepare,transaction:prior.transaction
+ },now.prepare);
+ if(JSON.stringify(prior.transaction)!==JSON.stringify(now.prepare.transaction))
+  throw Object.assign(new Error('Security transaction changed since review'),{code:4001});
+ const id='security-'+Date.now()+'-'+message.reviewId;
+ const entry={id,at:Date.now(),chainId:now.ctx.chainId,controller:now.ctx.account,
+   recipient:now.prepare.contract,
+   smartAccount:now.ctx.wallet.account.smartAccount??null,
+   executionModel:now.executionModel,symbol:'security '+now.prepare.kind,
+   amount:'0x0',status:'pending',hash:null,
+   securityAction:now.prepare.kind,securityRecord:now.prepare.record};
+ await rememberWalletUiActivity420(entry);
+ const tx=now.prepare.transaction;
+ const qualified=now.executionModel==='eoa'?
+   {...tx,executionModel:'eoa',chainId:now.ctx.chainId,nonce:now.quote.nonce,
+    gasLimit:now.quote.gasLimit,maxFeePerGas:now.quote.maxFeePerGas,
+    maxPriorityFeePerGas:now.quote.maxPriorityFeePerGas}:
+   {...tx,gasFees:now.quote.gasFees,accountGasLimits:now.quote.gasBudget.accountGasLimits,
+    preVerificationGas:now.quote.gasBudget.preVerificationGas,expectedNonce:now.quote.nonce};
+ let hash=null;
+ try{
+  hash=await executeWithLocalAuthority({method:'eth_sendTransaction',params:[qualified]},{
+    origin:null,accounts:[now.ctx.account],chainId:now.ctx.chainId,epoch:now.ctx.epoch,
+    tabId:null,activityId:id
+  });
+  await rememberWalletUiActivity420({...entry,hash,status:'submitted'});
+  return {hash,status:'submitted',kind:now.prepare.kind,
+    message:'Transaction submitted. Verify canonical receipt and on-chain authority before treating it as revoked.'};
+ }catch(error){
+  const signedHash=validHash420(error?.data?.hash)?error.data.hash.toLowerCase():null,
+    userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+  await rememberWalletUiActivity420({...entry,hash:hash||signedHash,userOpHash,
+    status:hash||signedHash||userOpHash?'submitted':'failed',error:error.message});
+  throw error;
+ }
+}
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='security-state')return securityState420();
+  if(kind==='security-watch')return securityWatch420(message);
+  if(kind==='security-unwatch')return securityWatch420(message,true);
+  if(kind==='security-review')return securityReview420(message);
+  if(kind==='security-submit')return securitySubmit420(message);
   if(kind==='addressbook-save'||kind==='addressbook-delete'){
     const chain=await effectiveChain420();
     if(message.chainId!==chain.chainId)throw Object.assign(new Error('Network changed; refresh contacts'),{code:4901});

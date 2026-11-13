@@ -317,16 +317,18 @@ async function rpcRequest(method,params=[],{origin=null,expectedChainId=null}={}
 async function executeWithLocalAuthority(request, context) {
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
   const effective=await effectiveChain420(context.origin);
-  const isEoa=request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel==='eoa';
+  const address=prefs.selectedAccount;
+  const metadata=await accountMetadata420();
+  const isEoa=request.method==='eth_sendTransaction'?
+    request.params?.[0]?.executionModel==='eoa':
+    ['personal_sign','eth_signTypedData_v4'].includes(request.method)&&metadata[address]?.type==='eoa';
   if(!isEoa&&!effective.network.smartAccountApproved)
     throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
   if(isEoa&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Encrypted local EOA vault is locked'),{code:4100});
   if(!context.chainId||effective.chainId!==context.chainId||effective.epoch!==context.epoch)
     throw Object.assign(new Error('Network context changed before signing authority'),{code:4901});
-  const address=prefs.selectedAccount;
   const listed=await accountVisibility420(normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420)).accounts);
-  const metadata=await accountMetadata420();
   if(!address||!listed.includes(address)||!context.accounts?.includes(address))
     throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
   if(['watch-only','hardware'].includes(metadata[address]?.type)||
@@ -470,6 +472,27 @@ async function handleApprovalMethod(request, context) {
   }
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
+  if(request.method==='personal_sign'){
+    const p=request.params;
+    if(!Array.isArray(p)||p.length!==2||typeof p[0]!=='string'||
+       !/^0x(?:[0-9a-fA-F]{2})*$/.test(p[0])||p[0].length>131074||
+       typeof p[1]!=='string'||p[1].toLowerCase()!==granted[0])
+      throw Object.assign(new Error('personal_sign requires exact connected signer and bounded hex message'),{code:-32602});
+  }
+  if(request.method==='eth_signTypedData_v4'){
+    const p=request.params;
+    if(!Array.isArray(p)||p.length!==2||typeof p[0]!=='string'||
+       p[0].toLowerCase()!==granted[0]||typeof p[1]!=='string'||p[1].length>131072)
+      throw Object.assign(new Error('typed data must include exact connected signer and bounded payload'),{code:-32602});
+    let payload;
+    try{payload=JSON.parse(p[1]);}catch{throw Object.assign(new Error('EIP-712 typed data must be valid JSON'),{code:-32602});}
+    if(!payload||typeof payload!=='object'||Array.isArray(payload)||
+       !payload.domain||!payload.types||!payload.primaryType||!payload.message)
+      throw Object.assign(new Error('EIP-712 domain, types, primary type and message required'),{code:-32602});
+    const requested=await effectiveChain420(origin);
+    if(payload.domain.chainId==null||BigInt(payload.domain.chainId)!==BigInt(requested.chainId))
+      throw Object.assign(new Error('EIP-712 domain chain ID mismatch'),{code:4901});
+  }
   const before=await effectiveChain420(origin),pinned=before.chainId;
   let feePreview=null,approvedTxRequest=request;
   if(request.method==='eth_sendTransaction'){
@@ -572,7 +595,14 @@ async function handleApprovalMethod(request, context) {
       throw error;
     }
   }
-  return executeWithLocalAuthority(request, { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
+  const signerMeta=await accountMetadata420();
+  const isEoaSignature=['personal_sign','eth_signTypedData_v4'].includes(request.method)&&
+    signerMeta[current[0]]?.type==='eoa';
+  if(isEoaSignature&&!(await vaultLockState420()).unlocked)
+    throw Object.assign(new Error('Unlock the local EOA vault before signing'),{code:4100});
+  return executeWithLocalAuthority(
+    isEoaSignature?{...request,executionModel:'eoa'}:request,
+    { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
 }
 
 

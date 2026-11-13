@@ -17,7 +17,7 @@ export function assertHardwareAccount420(meta,account){
   require420(meta?.type==='hardware'&&['ledger','trezor'].includes(meta.provider),'Selected account is not paired hardware');
   require420(typeof account==='string'&&ADDRESS.test(account),'Invalid hardware account address');
   const path=hardwarePath420(meta.path);
-  require420(meta.signingQualified!==false,'Hardware signing is not enabled for this device account');
+  require420(meta.signingQualified===true,'Hardware signing is not enabled for this device account');
   return {provider:meta.provider,account:account.toLowerCase(),...path};
 }
 export function prepareHardwareTransaction420(transaction,chainId,account){

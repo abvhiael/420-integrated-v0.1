@@ -673,6 +673,12 @@ async function loadAggregate420(){
 async function applyWalletState420(next,expectedEpoch){
   const record=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
   if(expectedEpoch!==state.epoch)return false;
+  // A delayed popup refresh must never roll the rendered wallet chain back
+  // to an earlier registry epoch after a successfully applied chain switch.
+  if(state.wallet&&Number.isSafeInteger(state.wallet.network?.epoch)&&
+     Number.isSafeInteger(next?.network?.epoch)&&
+     next.network.epoch<state.wallet.network.epoch)
+    throw Object.assign(new Error('Stale wallet network epoch; discard old display snapshot'),{code:4901});
   if(record&&(record.epoch!==next?.network?.epoch||record.selectedChainId!==next?.registry?.selectedChainId))
     throw Object.assign(new Error('Network changed while updating wallet display'),{code:4901});
   state.wallet=next;renderAll();

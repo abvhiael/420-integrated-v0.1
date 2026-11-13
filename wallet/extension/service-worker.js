@@ -1128,7 +1128,9 @@ async function handleWalletUi420(message) {
       return {status:'submitted',hash,originalId:source.id};
     }catch(error){
       const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
-      await rememberWalletUiActivity420({...entry,status:(hash||userOpHash)?'submitted':'failed',hash,userOpHash,
+      const submittedHash=hash||(validHash420(error?.data?.hash)?error.data.hash.toLowerCase():null);
+      await rememberWalletUiActivity420({...entry,status:(submittedHash||userOpHash)?'submitted':'failed',
+        hash:submittedHash,userOpHash,
         error:error?.message||'Replacement not authorized'});
       throw error;
     }
@@ -1147,11 +1149,14 @@ async function handleWalletUi420(message) {
       asset:message.asset,
       trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status==='spendable')||[],
     });
-    const quote=await quoteExtensionSend420(
-      {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
-      {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
-       entryPoint:state.account.entryPoint,transaction:transaction.transaction,
-       choice:normalizeExtensionFeeChoice420(message.feeChoice),strictUserOpGas:true});
+    const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const quote=state.account.kind==='eoa'?
+      await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
+        from:state.account.controller,transaction:transaction.transaction,choice}):
+      await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
+        smartAccount:state.account.smartAccount,entryPoint:state.account.entryPoint,
+        transaction:transaction.transaction,choice,strictUserOpGas:true});
     const current=await effectiveChain420();
     if(current.chainId!==message.chainId||current.epoch!==message.epoch)
       throw Object.assign(new Error('Chain changed during preflight'),{code:4901});
@@ -1173,32 +1178,44 @@ async function handleWalletUi420(message) {
       asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
     });
     const choice=normalizeExtensionFeeChoice420(message.feeChoice);
-    const quote=await quoteExtensionSend420(
-      {request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})},
-      {chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,
-       entryPoint:state.account.entryPoint,transaction:request.transaction,choice,
-       strictUserOpGas:true});
+    const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+    const quote=state.account.kind==='eoa'?
+      await quoteExtensionEoa420(provider,{chainId:state.network.expectedChainId,
+        from:state.account.controller,transaction:request.transaction,choice}):
+      await quoteExtensionSend420(provider,{chainId:state.network.expectedChainId,
+        smartAccount:state.account.smartAccount,entryPoint:state.account.entryPoint,
+        transaction:request.transaction,choice,strictUserOpGas:true});
     if(!message.preflight||message.preflight.chainId!==quote.chainId||
        message.preflight.from!==quote.from||message.preflight.to!==quote.to||
-       message.preflight.gasFees!==quote.gasFees||message.preflight.blockHash!==quote.blockHash||
-       message.preflight.nonce!==quote.nonce||message.preflight.entryPoint!==quote.entryPoint||
-       message.preflight.gasBudget?.accountGasLimits!==quote.gasBudget?.accountGasLimits||
-       message.preflight.gasBudget?.preVerificationGas!==quote.gasBudget?.preVerificationGas)
+       message.preflight.blockHash!==quote.blockHash||
+       (state.account.kind==='eoa'?
+         (message.preflight.executionModel!=='eoa'||
+          message.preflight.nonce!==quote.nonce||
+          message.preflight.gasLimit!==quote.gasLimit||
+          message.preflight.maxFeePerGas!==quote.maxFeePerGas||
+          message.preflight.maxPriorityFeePerGas!==quote.maxPriorityFeePerGas):
+         (message.preflight.gasFees!==quote.gasFees||
+          message.preflight.nonce!==quote.nonce||message.preflight.entryPoint!==quote.entryPoint||
+          message.preflight.gasBudget?.accountGasLimits!==quote.gasBudget?.accountGasLimits||
+          message.preflight.gasBudget?.preVerificationGas!==quote.gasBudget?.preVerificationGas)))
       throw Object.assign(new Error('Preflight changed since review; review transaction again'),{code:4001});
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
       controller:state.account.controller,smartAccount:state.account.smartAccount,
+      executionModel:state.account.kind==='eoa'?'eoa':'erc4337',
       recipient:request.summary.recipient,amount:request.summary.amount,
       symbol:request.summary.symbol,status:'pending',hash:null};
     await rememberWalletUiActivity420(entry);
     let hash=null;
     try {
       hash=await executeWithLocalAuthority(
-        {method:'eth_sendTransaction',params:[{...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level,
-          accountGasLimits:quote.gasBudget.accountGasLimits,
-          preVerificationGas:quote.gasBudget.preVerificationGas,
-          expectedNonce:quote.nonce,
-        }]},
+        {method:'eth_sendTransaction',params:[state.account.kind==='eoa'?
+          {...request.transaction,executionModel:'eoa',chainId:quote.chainId,
+            nonce:quote.nonce,gasLimit:quote.gasLimit,
+            maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas}:
+          {...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level,
+            accountGasLimits:quote.gasBudget.accountGasLimits,
+            preVerificationGas:quote.gasBudget.preVerificationGas,expectedNonce:quote.nonce}]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null,activityId:id}
       );
       const current=await effectiveChain420();

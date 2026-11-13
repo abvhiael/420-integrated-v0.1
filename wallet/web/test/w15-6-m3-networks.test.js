@@ -72,7 +72,7 @@ test('M3: provider, approval, sign/nonce/preview and UX are chain-bound',()=>{
  }
  for(const marker of ['networkRegistry420','effectiveChain420(origin)','probeNetwork420','notifyChain420','chainChanged',
   'context.epoch','context.chainId','Network context changed during signing','No independently verified SmartAccount420 authority',
-  'permission','aggregateAssets420','monitorNetworks420']){
+  'permission','aggregateAssets420','monitorNetworks420','finalizeWalletUiState420','Network changed while reading wallet state']){
    assert.ok(worker.includes(marker),marker);
  }
  assert.match(worker,/state.network.epoch!==message.epoch/);

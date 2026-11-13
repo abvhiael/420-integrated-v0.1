@@ -189,9 +189,9 @@ async function command(kind,extra={}){
   if(response.error)throw Object.assign(new Error(response.error.message||'Wallet request failed'),response.error);
   return response.result;
 }
-async function refresh(){
+async function refresh(retry=0){
   $('quick-refresh').disabled=true;
-  tell('Verifying network and SmartAccount…');
+  tell('Verifying network and account…');
   const epoch=++state.epoch;
   try{
     const next=await command('get-state');
@@ -199,8 +199,10 @@ async function refresh(){
     state.wallet=next;
     renderAll();
     loadAggregate420().catch(()=>{});
-  }catch(error){tell('Unable to refresh wallet: '+error.message,'error');}
-  finally{$('quick-refresh').disabled=false;}
+  }catch(error){
+    if(error.code===4901&&retry===0)return refresh(1);
+    if(epoch===state.epoch)tell('Unable to refresh wallet: '+error.message,'error');
+  }finally{$('quick-refresh').disabled=false;}
 }
 function resetReview(){
   state.prepared=null;$('send-review').hidden=true;$('send-confirm').disabled=true;

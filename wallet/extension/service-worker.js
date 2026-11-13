@@ -335,6 +335,12 @@ async function rememberWalletUiActivity420(entry) {
   const next=[entry,...current.filter(x=>x.id!==entry.id)].slice(0,40);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
 }
+async function finalizeWalletUiState420(state){
+  const now=await networkRegistry420();
+  if(now.epoch!==state.network.epoch||now.selectedChainId!==state.registry.selectedChainId)
+    throw Object.assign(new Error('Network changed while reading wallet state; refresh it again'),{code:4901});
+  return state;
+}
 async function walletUiState420() {
   const registry=await networkRegistry420();
   const active=await effectiveChain420().catch(()=>null);
@@ -370,9 +376,9 @@ async function walletUiState420() {
     account:{controller:selected,smartAccount:null,deployed:false,ownerVerified:false,reason:'Approved SmartAccount configuration and network required'},
     assets:{native:null,tokens:[]},
   };
-  if(!config.rpcUrl||!config.chainId)return state;
+  if(!config.rpcUrl||!config.chainId)return finalizeWalletUiState420(state);
   let expected;
-  try {expected=validateExtensionNetwork420(config);}catch(e){state.network={...state.network,status:'error',message:e.message};return state;}
+  try {expected=validateExtensionNetwork420(config);}catch(e){state.network={...state.network,status:'error',message:e.message};return finalizeWalletUiState420(state);}
   try {
     state.network.health=await probeNetwork420(active.network);
     if(!state.network.health.some(x=>x.healthy)){
@@ -380,17 +386,17 @@ async function walletUiState420() {
       state.network.status=mismatch?'wrong-chain':'error';
       state.network.message=mismatch?'RPC endpoint is connected to a different EIP-155 chain; switching and signing blocked':
         'No healthy RPC endpoint on this chain';
-      return state;
+      return finalizeWalletUiState420(state);
     }
     const chain=normalizeExtensionChain420(await rpcRequest('eth_chainId',[]));
     state.network.observedChainId=chain;
     if(chain!==expected.chainId){
       state.network.status='wrong-chain';
       state.network.message='RPC chain does not match the configured expected chain';
-      return state;
+      return finalizeWalletUiState420(state);
     }
     state.network.status='matched';
-    if(!selected){state.account.reason='No controller account provisioned by Wallet Core';return state;}
+    if(!selected){state.account.reason='No controller account provisioned by Wallet Core';return finalizeWalletUiState420(state);}
     if(accountMeta[selected]?.type==='watch-only'||accountMeta[selected]?.type==='hardware'||state.config.vaultAccounts.some(a=>typeof a==='string'&&a.toLowerCase()===selected.toLowerCase())){
       const provider={request:(method,params)=>rpcRequest(method,params)};
       const kind=accountMeta[selected]?.type||'eoa';
@@ -414,10 +420,10 @@ async function walletUiState420() {
         state.assets={native:null,tokens:[]};
         state.account.reason='EOA balance read failed: '+error.message;
       }
-      return state;
+      return finalizeWalletUiState420(state);
     }
     if(!active.network.smartAccountApproved||!config.smartAccountConfig?.factoryAddress){
-      state.account.reason='SmartAccount420 execution disabled until chain deployment and account authority are independently verified';return state;
+      state.account.reason='SmartAccount420 execution disabled until chain deployment and account authority are independently verified';return finalizeWalletUiState420(state);
     }
     const provider={request:(method,params)=>rpcRequest(method,params)};
     const discovered=await discoverSmartAccount(provider,selected,config.smartAccountConfig);
@@ -436,13 +442,13 @@ async function walletUiState420() {
         state.assets.tokens.push({address:asset.address,symbol:asset.symbol||'Token',error:'Token balance unavailable: '+error.message});
       }
     }
-    return state;
+    return finalizeWalletUiState420(state);
   }catch(error){
     state.network.status='error';
     state.network.message='Wallet discovery or RPC verification failed: '+error.message;
     state.account.smartAccount=null;
     state.assets={native:null,tokens:[]};
-    return state;
+    return finalizeWalletUiState420(state);
   }
 }
 async function aggregateAssets420(){

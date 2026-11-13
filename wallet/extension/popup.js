@@ -73,11 +73,12 @@ function renderAssets(){
     list.append(node('p','empty','No verified balances. Configure your network and canonical SmartAccount to view assets.'));
     return;
   }
-  const assets=[{symbol:'420',label:'Native 420',...w.assets.native},
+  const nativeSymbol=w.config.nativeCurrency?.symbol||'420';
+  const assets=[{symbol:nativeSymbol,label:'Native '+nativeSymbol,...w.assets.native},
     ...(w.assets.tokens||[]).map(t=>({...t,label:t.symbol||'Token'}))];
   for(const [index,asset] of assets.entries()){
     const line=node('div','asset-row');
-    line.append(node('div','token-icon'+(index?' alt':''),index?String(asset.symbol||'T').slice(0,2).toUpperCase():'420'));
+    line.append(node('div','token-icon'+(index?' alt':''),index?String(asset.symbol||'T').slice(0,2).toUpperCase():nativeSymbol.slice(0,3).toUpperCase()));
     const info=node('div','asset-info');
     info.append(node('strong','',asset.label||asset.symbol),node('small','',index?'ERC-20 · '+shortExtensionAddress420(asset.address):'Native asset · '+w.network.name));
     const val=node('div','asset-value');

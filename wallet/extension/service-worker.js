@@ -375,7 +375,13 @@ async function walletUiState420() {
   try {expected=validateExtensionNetwork420(config);}catch(e){state.network={...state.network,status:'error',message:e.message};return state;}
   try {
     state.network.health=await probeNetwork420(active.network);
-    if(!state.network.health.some(x=>x.healthy))throw new Error('No healthy verified RPC endpoint');
+    if(!state.network.health.some(x=>x.healthy)){
+      const mismatch=state.network.health.some(x=>/different chain ID|chain mismatch/i.test(x.error||''));
+      state.network.status=mismatch?'wrong-chain':'error';
+      state.network.message=mismatch?'RPC endpoint is connected to a different EIP-155 chain; switching and signing blocked':
+        'No healthy RPC endpoint on this chain';
+      return state;
+    }
     const chain=normalizeExtensionChain420(await rpcRequest('eth_chainId',[]));
     state.network.observedChainId=chain;
     if(chain!==expected.chainId){

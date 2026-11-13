@@ -98,7 +98,10 @@ try{
   await page.waitForFunction(()=>[...document.querySelector('#network-select').options].some(o=>o.value==='0x1'));
   await page.locator('#network-select').selectOption('0x1');
   await page.locator('#switch-network').click();
-  await page.waitForFunction(()=>document.querySelector('#network-select').value==='0x1'&&document.querySelector('#network-health').textContent.includes('0x1'));
+  await page.waitForFunction(async()=>{
+    const active=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+    return active?.selectedChainId==='0x1'&&document.querySelector('#native-symbol')?.textContent==='ETH';
+  });
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   await page.locator('[data-screen="dashboard"]').click();
   assert.equal(await page.locator('#native-symbol').textContent(),'ETH');
@@ -112,7 +115,10 @@ try{
   await page.locator('#header-settings').click();
   await page.locator('#network-select').selectOption('0x1a4');
   await page.locator('#switch-network').click();
-  await page.waitForFunction(()=>document.querySelector('#network-select').value==='0x1a4');
+  await page.waitForFunction(async()=>{
+    const active=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+    return active?.selectedChainId==='0x1a4'&&document.querySelector('#native-symbol')?.textContent==='420';
+  });
   assert.equal(await page.locator('#native-symbol').textContent(),'420');
   const epochReturned=await page.evaluate(async()=>((await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1']).epoch);
   assert.ok(epochReturned>epochAfterSwitch,'A→B→A cannot reuse old preview epoch');

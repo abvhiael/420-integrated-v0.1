@@ -230,11 +230,11 @@ export async function verifyNftApproval420(provider,request,owner){
   result.slice(-40).toLowerCase()===(request.approved?op.slice(2):ZERO.slice(2));
 }
 
-export async function readNftApproval420(provider,{asset,owner,operator=null}={}){
+export async function readNftApproval420(provider,{asset,owner,operator=null,collectionWide=false}={}){
  const ref=normalizedNftRecord420(asset),from=normalizeAddress(owner);
  const verified=await verifyNftOwnership420(provider,ref,from);
  requireSafe(verified.verified,'NFT owner changed before approval inspection');
- if(ref.standard==='ERC721'){
+ if(ref.standard==='ERC721'&&!collectionWide){
   const response=await provider.request('eth_call',[{
    to:ref.address,data:'0x081812fc'+word(ref.tokenId)
   },'latest']);
@@ -243,7 +243,7 @@ export async function readNftApproval420(provider,{asset,owner,operator=null}={}
   return {...ref,owner:from,approvedOperator:'0x'+response.slice(-40).toLowerCase(),
    approved:response.slice(-40).toLowerCase()!==ZERO.slice(2),scope:'token'};
  }
- requireSafe(typeof operator==='string','ERC1155 operator must be specified');
+ requireSafe(typeof operator==='string',ref.standard+' operator must be specified for collection-wide approval');
  const checked=normalizeAddress(operator);
  requireSafe(checked!==ZERO&&checked!==from,'Invalid operator for ERC1155 approval inspection');
  const response=await provider.request('eth_call',[{

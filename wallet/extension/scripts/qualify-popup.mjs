@@ -119,6 +119,13 @@ try{
     const active=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
     return active?.selectedChainId==='0x1a4'&&document.querySelector('#native-symbol')?.textContent==='420';
   });
+  console.log('network roundtrip display',JSON.stringify(await page.evaluate(async()=>{
+    const reg=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+    const bridge=await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind:'get-state'});
+    return {epoch:reg?.epoch,selectedChainId:reg?.selectedChainId,
+      currency:bridge?.result?.config?.nativeCurrency?.symbol,
+      observed:document.querySelector('#native-symbol')?.textContent};
+  })));
   assert.equal(await page.locator('#native-symbol').textContent(),'420');
   const epochReturned=await page.evaluate(async()=>((await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1']).epoch);
   assert.ok(epochReturned>epochAfterSwitch,'A→B→A cannot reuse old preview epoch');

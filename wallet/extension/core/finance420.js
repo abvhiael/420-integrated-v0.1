@@ -50,6 +50,9 @@ export function normalizeFinanceProvider420(raw,expectedChain){
   if(['420bridge','third-party-bridge'].includes(out.kind)){
     out.adapterId=b32(raw.adapterId);out.routeId=b32(raw.routeId);out.assetId=b32(raw.assetId);
     out.destinationChainId=chain(raw.destinationChainId);
+    out.destinationRouter=addr(raw.destinationRouter);out.destinationCodeHash=b32(raw.destinationCodeHash);
+    out.destinationRegistry=addr(raw.destinationRegistry);out.destinationRegistryCodeHash=b32(raw.destinationRegistryCodeHash);
+    out.destinationAdapterId=b32(raw.destinationAdapterId);
     check(out.destinationChainId!==out.chainId,'Bridge destination must differ from source');
     out.asset=addr(raw.asset);out.spender=addr(raw.spender);out.spenderCodeHash=b32(raw.spenderCodeHash);
     out.recipientEncoding=raw.recipientEncoding==='evm20'?'evm20':null;
@@ -168,4 +171,39 @@ export function bridgeStage420(previous,observation){
     'destination-reorganized':['destination-included','proof-pending'] };
   check(allowed[previous]?.includes(observation),'Invalid cross-chain state transition');
   return observation;
+}
+
+export const FINANCE_TRANSFER_ABI_420=[
+ 'function transfers(bytes32) view returns (bytes32 routeId,bytes32 assetId,address sender,address recipient,uint256 amount,bytes32 sourceTxId,bytes32 sourceMessageId,uint8 status,uint64 createdAt,uint64 updatedAt)'
+];
+const transferRegistry=new Interface(FINANCE_TRANSFER_ABI_420);
+export async function bridgeDestinationEvidence420({provider,policy,receipt,source,expected}){
+ check(policy&&policy.destinationRouter&&policy.destinationRegistry,'Destination gateway/registry not approved');
+ check(source?.sourceMessageId&&BYTES32.test(source.sourceMessageId),'Verified source message required');
+ check(receipt?.status==='0x1'&&BYTES32.test(receipt.blockHash)&&BYTES32.test(receipt.transactionHash),
+   'Destination transaction is not a successful canonical receipt');
+ await verifyFinanceDeployment420(provider,{router:policy.destinationRouter,codeHash:policy.destinationCodeHash});
+ await verifyFinanceDeployment420(provider,{router:policy.destinationRegistry,codeHash:policy.destinationRegistryCodeHash});
+ const event=bridge.getEvent('InboundAccepted'),matches=[];
+ for(const log of receipt.logs??[]){
+   if(log.address?.toLowerCase()!==policy.destinationRouter)continue;
+   let parsed;try{parsed=bridge.parseLog(log);}catch{continue;}
+   if(parsed?.name==='InboundAccepted'&&parsed.args.adapterId.toLowerCase()===policy.destinationAdapterId)
+     matches.push(parsed.args.transferId.toLowerCase());
+ }
+ check(matches.length===1&&BigInt(matches[0])!==0n,'Exactly one matching destination gateway inbound proof event required');
+ const transferId=matches[0];
+ const data=transferRegistry.encodeFunctionData('transfers',[transferId]);
+ const response=await provider.request('eth_call',[{to:policy.destinationRegistry,data},'latest']);
+ const transfer=transferRegistry.decodeFunctionResult('transfers',response);
+ check(transfer.routeId.toLowerCase()===policy.routeId&&transfer.assetId.toLowerCase()===policy.assetId&&
+   transfer.sourceMessageId.toLowerCase()===source.sourceMessageId,
+   'Destination transfer registry is not bound to canonical route, asset and source message');
+ check(transfer.sender.toLowerCase()===expected.sender.toLowerCase()&&
+   transfer.recipient.toLowerCase()===expected.recipient.toLowerCase()&&
+   transfer.amount===BigInt(expected.amountRaw),'Destination transfer owner, recipient or amount mismatch');
+ return {state:'inbound-accepted',destinationTxHash:receipt.transactionHash.toLowerCase(),
+   destinationBlockHash:receipt.blockHash.toLowerCase(),transferId,
+   registryStatus:Number(transfer.status),beneficiaryPaid:false,
+   note:'Inbound proof accepted; beneficiary payout is not established by gateway/registry events alone'};
 }

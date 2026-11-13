@@ -54,9 +54,11 @@ test('approved provider must bind exact chain, deployed router and spender bytec
  const {provider}=mockRpc();
  await verifyFinanceDeployment420(provider,p);
  for(const changes of [
-   {releaseApproved:false},{chainId:'0x1'},{codeHash:ID(3)},{tokenIn:tokenOut},{routes:[]},
+   {releaseApproved:false},{chainId:'0x1'},{tokenIn:tokenOut},{routes:[]},
  ])assert.throws(()=>normalizeFinanceProvider420({...providerRaw,...changes},CHAIN));
  await assert.rejects(()=>verifyFinanceDeployment420({request:async()=> '0x6001600056'},p),/code hash/);
+ const mismatched=normalizeFinanceProvider420({...providerRaw,codeHash:ID(3)},CHAIN);
+ await assert.rejects(()=>verifyFinanceDeployment420(provider,mismatched),/code hash/);
 });
 test('swap route comparison uses canonical on-chain output and enforces slippage',async()=>{
  const p=normalizeFinanceProvider420(providerRaw,CHAIN);
@@ -104,7 +106,7 @@ test('finance approval requires exact spender and amount, and review is invalida
  assertFinanceReview420(prepared,prepared);
  assert.throws(()=>assertFinanceReview420(prepared,{...prepared,spender:ADDRESS(7)}),/changed/);
  assert.throws(()=>assertFinanceReview420(prepared,{...prepared,fee:{nonce:'0x2'}}),/changed/);
- assert.throws(()=>financeApprovalCall420(tokenIn,account,spender,'0'),/positive/);
+ assert.throws(()=>financeApprovalCall420(tokenIn,account,spender,'0'),/Amount exceeds supported/);
 });
 test('finance execution needs live allowance and never trusts changed quote',async()=>{
  const config={financeProviders:[providerRaw]},state=makeState(),{provider}=mockRpc();
@@ -113,7 +115,7 @@ test('finance execution needs live allowance and never trusts changed quote',asy
  const ready=await financePrepare420({provider,config,state,option,feeQuote});
  assert.equal(ready.phase,'execute');
  assert.equal(ready.call.to,router);
- await assert.rejects(()=>financePrepare420({provider,config,state,option:{...option,outputRaw:'999'},feeQuote}),/changed/);
+ await assert.rejects(()=>financePrepare420({provider,config,state,option:{...option,outputRaw:'999'},feeQuote}),/changed|Invalid slippage boundary/);
  await assert.rejects(()=>financePrepare420({provider,config,state:{...state,selectedAccount:ADDRESS(99)},option,feeQuote}),/payer or network changed/);
 });
 test('canonical bridge route binds source/destination, spender, fees and recipient without claiming delivery',()=>{

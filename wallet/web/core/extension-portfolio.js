@@ -122,7 +122,14 @@ export function normalizedPortfolioSettings420(record={}){
   const spam=Array.isArray(record.spam)?record.spam.filter(x=>typeof x==='string'&&ADDRESS.test(x)).map(x=>x.toLowerCase()).slice(0,150):[];
   const tokens=Array.isArray(record.tokens)?record.tokens.slice(0,60).map(x=>{try{return checkedToken420(x);}catch{return null;}}).filter(Boolean):[];
   const priceEndpoint=typeof record.priceEndpoint==='string'&&/^https:\/\//.test(record.priceEndpoint)?record.priceEndpoint:null;
-  return {tokens,hidden:[...new Set(hidden)],spam:[...new Set(spam)],priceEndpoint,
+  const nftKeys=value=>Array.isArray(value)?[...new Set(value.filter(x=>
+    typeof x==='string'&&/^(ERC721|ERC1155):0x[0-9a-fA-F]{40}:\d{1,78}$/.test(x)
+  ).map(x=>x.toLowerCase()))].slice(0,200):[];
+  const nftIndexFrom=typeof record.nftIndexFrom==='string'&&/^\d+$/.test(record.nftIndexFrom)?
+    record.nftIndexFrom:null;
+  return {tokens,hidden:[...new Set(hidden)],spam:[...new Set(spam)],
+    nftHidden:nftKeys(record.nftHidden),nftSpam:nftKeys(record.nftSpam),nftIndexFrom,
+    priceEndpoint,
     fiatCurrency:/^(CAD|USD|EUR|GBP)$/.test(record.fiatCurrency)?record.fiatCurrency:'CAD',
     discoveryFrom:typeof record.discoveryFrom==='string'&&/^\d+$/.test(record.discoveryFrom)?record.discoveryFrom:'0'};
 }

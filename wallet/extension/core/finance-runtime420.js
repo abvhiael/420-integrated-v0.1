@@ -90,7 +90,7 @@ export async function financePrepare420({provider,config,state,option,feeQuote})
  if(allowance<BigInt(plan.amountRaw)){
    const approval=financeApprovalCall420(plan.token,option.account,plan.spender,plan.amountRaw);
    return {phase:'allowance',call:approval,allowance:allowance.toString(),required:plan.amountRaw,
-     maxApproval:plan.amountRaw,spender:plan.spender,token:plan.token,plan};
+     maxApproval:plan.amountRaw,spender:plan.spender,token:plan.token,plan,fee:await feeQuote(approval)};
  }
  const simulation=await provider.request('eth_call',[plan.transaction,'latest']);
  if(typeof simulation!=='string'||!/^0x(?:[0-9a-fA-F]{2})*$/.test(simulation))

@@ -1,3 +1,4 @@
+import {installMockWebLocks420} from './support/mock-browser-locks.js';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {readFileSync} from 'node:fs';
@@ -8,6 +9,7 @@ import {Wallet} from '../../extension/vendor/ethers-6.17.0.min.js';
 import {createVault420,unlockVault420} from '../../extension/core/vault.js';
 import {extensionCanSend420,extensionReceiveAddress420} from '../core/extension-wallet-ui.js';
 globalThis.crypto ??= webcrypto;
+installMockWebLocks420();
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../../extension');
 const read=name=>readFileSync(resolve(root,name),'utf8');
 const password='Correct horse battery staple 420';

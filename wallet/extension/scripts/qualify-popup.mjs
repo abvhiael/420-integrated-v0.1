@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {mkdirSync} from 'node:fs';
-import {resolve,dirname} from 'node:path';
+import {mkdirSync,mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import jsQR from 'jsqr';
@@ -304,6 +305,65 @@ try{
   await page.locator('#approve').waitFor({state:'visible'});
   assert.match(await page.locator('#origin').textContent(),/example\.test/);
   await page.screenshot({path:resolve(screenshots,'08-approval-local-fixture.png')});
+  // M6: preserve origin-scoped grants and selected network through a genuine
+  // Chromium process/extension-worker restart, not merely a page reload.
+  const restartProfile=mkdtempSync(join(tmpdir(),'wallet420-m6-profile-'));
+  const browserOptions={channel:'chromium',headless:true,viewport:{width:410,height:640},
+    args:['--disable-extensions-except='+root,'--load-extension='+root]};
+  let firstContext=null,rebootContext=null;
+  try{
+    firstContext=await chromium.launchPersistentContext(restartProfile,browserOptions);
+    let firstWorker=firstContext.serviceWorkers()[0];
+    if(!firstWorker)firstWorker=await firstContext.waitForEvent('serviceworker',{timeout:20000});
+    const extensionUrl='chrome-extension://'+new URL(firstWorker.url()).host+'/popup.html';
+    const setup=await firstContext.newPage();
+    await setup.goto(extensionUrl,{waitUntil:'load'});
+    await setup.evaluate(async({controller,port,dappOrigin})=>{
+      await chrome.storage.local.set({
+        '420-wallet-extension-config-v1':{
+          rpcUrl:'http://127.0.0.1:'+port+'/',chainId:'0x1a4',networkName:'420 Integrated',
+          accounts:[controller],accountMeta:{[controller]:{label:'Restart fixture',type:'watch-only'}},
+          trackedAssets:[],smartAccountConfig:null
+        },
+        '420-wallet-ui-preferences-v1':{selectedAccount:controller},
+        '420-wallet-networks-v1':{version:1,epoch:1,selectedChainId:'0x1a4',networks:{
+          '0x1a4':{chainId:'0x1a4',chainName:'420 Integrated',
+            rpcUrls:['http://127.0.0.1:'+port+'/'],blockExplorerUrls:[],
+            enabled:true,trusted:true,smartAccountApproved:false,
+            nativeCurrency:{name:'420',symbol:'420',decimals:18}}
+        }},
+        '420-wallet-origin-permissions-v1':{
+          [dappOrigin]:{accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()}
+        }
+      });
+    },{controller,port:rpc.address().port,dappOrigin});
+    await firstContext.close();
+    firstContext=null;
+    rebootContext=await chromium.launchPersistentContext(restartProfile,browserOptions);
+    const restored=await rebootContext.newPage();
+    await restored.goto(dappOrigin+'/dapp',{waitUntil:'load'});
+    const recovered=await restored.evaluate(async()=>{
+      let provider=null;
+      window.addEventListener('eip6963:announceProvider',event=>{
+        if(event.detail?.info?.name==='420 Wallet')provider=event.detail.provider;
+      });
+      window.dispatchEvent(new Event('eip6963:requestProvider'));
+      if(!provider)throw new Error('Provider missing after browser restart');
+      return {
+        accounts:await provider.request({method:'eth_accounts'}),
+        chainId:await provider.request({method:'eth_chainId'}),
+        permissions:await provider.request({method:'wallet_getPermissions'})
+      };
+    });
+    assert.deepEqual(recovered.accounts,[controller]);
+    assert.equal(recovered.chainId,'0x1a4');
+    assert.equal(recovered.permissions[0]?.parentCapability,'eth_accounts');
+    console.log('PASS: Chromium restart preserves origin grants, chain identity and wallet discovery');
+  }finally{
+    if(firstContext)await firstContext.close();
+    if(rebootContext)await rebootContext.close();
+    rmSync(restartProfile,{recursive:true,force:true});
+  }
   console.log('PASS: packaged extension popup and M4 account-scoped Tokens/NFTs/asset-details with real mock-chain RPC; no signing or transaction submitted.');
 }finally{
   await browser.close();

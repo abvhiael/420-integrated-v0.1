@@ -2080,6 +2080,9 @@ let wcInstance420=null,wcProject420=null;
 async function walletConnectRuntime420(){
  const cfg=await readObject(WC_CONFIG_KEY420);
  const projectId=walletConnectProject420(cfg.projectId);
+ const appUrl=new URL(cfg.appUrl||'invalid');
+ if(appUrl.protocol!=='https:'||appUrl.username||appUrl.password||appUrl.search||appUrl.hash)
+   throw new Error('Approved WalletConnect application URL must be clean HTTPS');
  if(wcInstance420&&wcProject420===projectId)return wcInstance420;
  if(wcInstance420&&wcProject420!==projectId)
    throw new Error('WalletConnect project changed; disconnect existing sessions before reinitializing');
@@ -2087,7 +2090,7 @@ async function walletConnectRuntime420(){
  const core=new Core({projectId,customStoragePrefix:'420wallet-m11'});
  const kit=await WalletKit.init({core,metadata:{
    name:'420 Wallet',description:'420Integrated noncustodial EVM wallet',
-   url:'https://420integrated.com',icons:[]
+   url:appUrl.origin,icons:[]
  }});
  kit.on('session_proposal',proposal=>walletConnectProposalEvent420(kit,proposal).catch(()=>{}));
  kit.on('session_request',event=>walletConnectRequestEvent420(kit,event).catch(()=>{}));
@@ -2185,10 +2188,14 @@ async function walletConnectCommand420(message){
  }
  if(message.kind==='walletconnect-set-project'){
    const projectId=walletConnectProject420(message.projectId);
+   const parsed=new URL(message.appUrl||'invalid');
+   if(parsed.protocol!=='https:'||parsed.username||parsed.password||parsed.search||parsed.hash||
+      !parsed.hostname.includes('.'))throw new Error('WalletKit application URL must be a public clean HTTPS site');
    const sessions=await readObject(WC_SESSIONS_KEY420);
    if(Object.keys(sessions).length)throw new Error('Disconnect existing WalletConnect sessions before changing project');
    if(wcInstance420&&wcProject420!==projectId)throw new Error('Restart the extension before changing WalletConnect relay project');
-   await chrome.storage.local.set({[WC_CONFIG_KEY420]:{projectId}});
+   await chrome.storage.local.set({[WC_CONFIG_KEY420]:{projectId,appUrl:parsed.origin}});
+   chrome.alarms.create('420-wallet-walletconnect-relay',{periodInMinutes:1});
    return {configured:true,connected:0};
  }
  if(message.kind==='walletconnect-pair'){
@@ -2236,6 +2243,16 @@ async function convenienceCommand420(message){
      throw Object.assign(new Error('Remote sync requires a verified encrypted sync provider and explicit consent'),{code:4100});
    const after={...before,privacy:{...before.privacy,[key]:message.enabled}};
    await chrome.storage.local.set({[CONVENIENCE_KEY420]:after});
+   if(key==='allowDeepLinks'&&!message.enabled){
+     const sessions=await readObject(WC_SESSIONS_KEY420);
+     if(Object.keys(sessions).length){
+       let kit=null;try{kit=await walletConnectRuntime420();}catch{}
+       for(const topic of Object.keys(sessions)){
+         await kit?.disconnectSession({topic,reason:{code:6000,message:'User revoked WalletConnect permission'}}).catch(()=>{});
+         await walletConnectDeleteEvent420({topic});
+       }
+     }
+   }
    if(key==='notifications'){
      if(message.enabled){
        const wallet=await walletUiState420();
@@ -2291,6 +2308,7 @@ async function maybeNotifyWalletActivity420(){
  if(!(await chrome.permissions.contains({permissions:['notifications']})))return;
  let wallet;try{wallet=await walletUiState420();}catch{return;}
  if(wallet.network.status!=='matched'||!wallet.selectedAccount)return;
+ if(!wallet.selectedAccount||!wallet.network.expectedChainId)return;
  const entries=actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
    chainId:wallet.network.expectedChainId,after:0,limit:12});
  const previous=await readObject(NOTIFICATION_DELIVERED_KEY420);
@@ -2844,4 +2862,6 @@ chrome.runtime.onInstalled.addListener(async () => {
 // Opt-in, locally stored transaction-status alerts only; no push provider or analytics tracker.
 chrome.alarms.onAlarm.addListener(alarm=>{
  if(alarm.name==='420-wallet-transaction-alerts')maybeNotifyWalletActivity420().catch(()=>{});
+ if(alarm.name==='420-wallet-walletconnect-relay')walletConnectRuntime420().catch(()=>{});
 });
+chrome.runtime.onStartup.addListener(()=>walletConnectRuntime420().catch(()=>{}));

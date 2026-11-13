@@ -1,3 +1,4 @@
+import {signExtensionEoa420} from './core/eoa-local-signer.js';
 import { createExtensionLocalAuthority420 } from './core/extension-local-authority.js';
 
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
@@ -63,6 +64,61 @@ async function run() {
   $('details').textContent = pending.request.method === 'eth_sendTransaction'
     ? JSON.stringify(pending.request.params?.[0] ?? {}, null, 2)
     : 'This request requires a configured local signing authority.';
+
+  if(pending.request.method==='eth_sendTransaction'&&
+     pending.request.params?.[0]?.executionModel==='eoa'){
+    $('status').textContent='Verify the recipient, amount, chain, nonce and fee caps. Your wallet password authorizes this transaction only.';
+    const form=$('eoa-authority');form.hidden=false;
+    let signing=false;
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();if(signing)return;
+      signing=true;$('eoa-authorize').disabled=true;
+      const password=$('eoa-password').value;
+      $('eoa-password').value='';
+      let signed=null;
+      try{
+        const vault=(await chrome.storage.local.get('420-wallet-encrypted-vault-v1'))['420-wallet-encrypted-vault-v1'];
+        if(!vault)throw new Error('Encrypted local vault unavailable');
+        const tx=pending.request.params[0];
+        if(tx.from?.toLowerCase()!==pending.context.accounts?.[0]||
+           tx.chainId!==pending.context.chainId)
+          throw new Error('Approved account or EOA chain changed');
+        signed=await signExtensionEoa420({vaultRecord:vault,password,
+          account:tx.from,transaction:tx,chainId:tx.chainId});
+        const observed=await provider().request('eth_chainId',[]);
+        if(BigInt(observed)!==BigInt(signed.chainId))
+          throw new Error('EOA signing network changed');
+        const latest=await provider().request('eth_getTransactionCount',[signed.from,'latest']);
+        if(BigInt(latest)>BigInt(signed.nonce))
+          throw new Error('EOA nonce has already been confirmed; replacement is unsafe');
+        const head=await provider().request('eth_getBlockByNumber',['latest',false]);
+        if(!head?.baseFeePerGas||
+           BigInt(signed.maxFeePerGas)<BigInt(head.baseFeePerGas)+BigInt(signed.maxPriorityFeePerGas))
+          throw new Error('Fee cap no longer covers confirmed base fee; review transaction again');
+        const response=await chrome.runtime.sendMessage({
+          source:'420-wallet-authority-ui',kind:'authority-eoa-signed',
+          authorityRequestId,submission:Object.fromEntries(
+            Object.entries(signed).filter(([key])=>key!=='raw')),
+        });
+        if(response?.error)throw new Error(response.error.message);
+        if(response?.result!==true)throw new Error('Signed transaction activity could not be preserved');
+        const broadcast=await provider().request('eth_sendRawTransaction',[signed.raw]);
+        if(typeof broadcast!=='string'||broadcast.toLowerCase()!==signed.hash)
+          throw new Error('RPC transaction hash differs from locally signed raw transaction');
+        await complete({result:signed.hash});
+      }catch(error){
+        $('status').textContent=error?.message||'EOA signature failed';
+        if(signed?.hash){
+          await complete({error:{code:4900,
+            message:'EOA signed transaction '+signed.hash+' may already be broadcast. Do not resend until chain status is checked.',
+            data:{hash:signed.hash,pending:true}}});
+        }else{
+          signing=false;$('eoa-authorize').disabled=false;
+        }
+      }finally{signed=null;}
+    });
+    return;
+  }
 
   const execute = createExtensionLocalAuthority420({
     provider: provider(),

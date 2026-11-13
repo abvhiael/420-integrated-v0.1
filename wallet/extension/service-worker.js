@@ -1,3 +1,4 @@
+import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
 import {reconcileExtensionTransaction420} from './core/extension-transaction-activity.js';
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
@@ -558,6 +559,7 @@ async function walletUiState420() {
       nativeCurrency:active?.network.nativeCurrency||{name:'420',symbol:'420',decimals:18},
       vaultAccounts:(await readObject(EXTENSION_CONFIG_KEY_420)).vaultAccounts||[],
       factoryAddress:config.smartAccountConfig?.factoryAddress||null},
+    addressBook:normalizeExtensionAddressBook420((await chrome.storage.local.get(EXTENSION_ADDRESS_BOOK_KEY_420))?.[EXTENSION_ADDRESS_BOOK_KEY_420]),
     selectedAccount:selected,sites,activity:(await refreshWalletUiActivity420()).filter(x=>x.controller===selected&&(!config.chainId||x.chainId===config.chainId)),
     vault:await vaultLockState420(),
     network:{status:'unconfigured',name:config.networkName,expectedChainId:config.chainId,observedChainId:null,health:[],epoch:registry.epoch},
@@ -702,6 +704,17 @@ async function switchSelectedAccount420(value){
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
+  if(kind==='addressbook-save'||kind==='addressbook-delete'){
+    const chain=await effectiveChain420();
+    if(message.chainId!==chain.chainId)throw Object.assign(new Error('Network changed; refresh contacts'),{code:4901});
+    const previous=normalizeExtensionAddressBook420(
+      (await chrome.storage.local.get(EXTENSION_ADDRESS_BOOK_KEY_420))?.[EXTENSION_ADDRESS_BOOK_KEY_420]);
+    const next=kind==='addressbook-save'
+      ?addExtensionContact420(previous,{label:message.label,address:message.address,chainId:chain.chainId})
+      :removeExtensionContact420(previous,{address:message.address,chainId:chain.chainId});
+    await chrome.storage.local.set({[EXTENSION_ADDRESS_BOOK_KEY_420]:next});
+    return walletUiState420();
+  }
   if(kind==='site-network'){
     const origin=normalizeOrigin(message.origin);
     await changeNetwork420(message.chainId,{origin});return walletUiState420();

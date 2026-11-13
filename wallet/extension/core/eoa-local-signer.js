@@ -37,7 +37,7 @@ export async function signExtensionEoa420({vaultRecord,password,account,transact
  const gasLimit=amount(transaction?.gasLimit,'gas limit');
  const value=amount(transaction?.value??'0x0','native amount');
  const data=transaction?.data??'0x';
- if(!Number.isSafeInteger(Number(nonce))||tip>max||!gasLimit||
+ if(!Number.isSafeInteger(Number(nonce))||tip>maxFee||!gasLimit||
     typeof data!=='string'||!/^0x(?:[0-9a-fA-F]{2})*$/.test(data))
   throw new Error('invalid reviewed EOA signing parameters');
  let payload=null,signer=null;

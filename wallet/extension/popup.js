@@ -841,6 +841,24 @@ async function approval(){
   $('reject').addEventListener('click',()=>finish(false)); // User rejected request when approved=false.
 }
 function setup(){
+  $('nft-import-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const form=event.currentTarget,button=form.querySelector('button[type=submit]');
+    button.disabled=true;
+    try{
+      const next=await command('nft-import',{
+        standard:$('nft-import-standard').value,
+        address:$('nft-import-contract').value.trim(),
+        tokenId:$('nft-import-id').value.trim()
+      });
+      const epoch=++state.epoch;
+      if(await applyWalletState420(next,epoch)){
+        $('nft-index-status').textContent='Imported after current on-chain ownership verification. Token metadata remains untrusted.';
+        tell('Verified collectible added to your collection.');
+      }
+    }catch(e){$('nft-index-status').textContent='Import blocked: '+e.message;}
+    finally{button.disabled=false;}
+  });
   $('nfts-show-hidden').addEventListener('click',()=>{
     state.nftShowHidden=!state.nftShowHidden;renderNFT420();
   });
@@ -966,8 +984,9 @@ function setup(){
       const epoch=++state.epoch;
       const response=await command('portfolio-discover');
       if(await applyWalletState420(response.state,epoch))
-        tell('Scanned recent blocks. '+response.discovery.tokens+' ERC-20 and '+response.discovery.nfts+
-          ' verified ERC-721 holdings found. Older transfers may need a separate indexer.','success');
+        tell('Scanned bounded blocks. '+response.discovery.tokens+' ERC-20 and '+response.discovery.nfts+
+          ' NFT holdings verified (ERC-721/1155); NFT window '+response.discovery.nftFrom+
+          '–'+response.discovery.nftTo+'. Older assets may need manual import.','success');
     }catch(e){tell('Discovery unavailable: '+e.message,'error');}
     finally{button.disabled=false;}
   });

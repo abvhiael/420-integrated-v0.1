@@ -378,8 +378,15 @@ async function executeWithLocalAuthority(request, context) {
           reject(Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 }));
           return;
         }
-        effectiveChain420(context.origin).then(now=>{
-          if(now.chainId!==context.chainId||now.epoch!==context.epoch)throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+        Promise.all([effectiveChain420(context.origin),accountsFor(context.origin)]).then(([now,stillGranted])=>{
+          if(now.chainId!==context.chainId||now.epoch!==context.epoch)
+            throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+          // Approval may be revoked while the password/passkey window is open.
+          // No origin may receive the resulting signature/transaction identity
+          // after its account permission has been removed.
+          if(context.origin&&(!Array.isArray(stillGranted)||
+             stillGranted.length!==1||stillGranted[0]!==context.accounts?.[0]))
+            throw Object.assign(new Error('Website account authorization changed during signing'),{code:4100});
           resolve(message.result);
         }).catch(reject);
       });

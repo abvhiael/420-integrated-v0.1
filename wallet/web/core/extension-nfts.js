@@ -110,6 +110,7 @@ export async function verifyNftOwnership420(provider,record,owner){
   '0x00fdd58e'+account.slice(2).padStart(64,'0')+id;
  const raw=await provider.request('eth_call',[{to:address,data},'latest']);
  requireSafe(typeof raw==='string'&&WORD.test(raw),'Malformed NFT ownership ABI');
+ if(standard==='ERC721')requireSafe(/^0x0{24}[0-9a-fA-F]{40}$/.test(raw),'Invalid ERC721 ownerOf return padding');
  const owned=standard==='ERC721'?raw.slice(-40).toLowerCase()===account.slice(2):
   BigInt(raw)>0n;
  return {...record,key,address,standard,tokenId,owner:account,quantity:
@@ -121,8 +122,10 @@ function boundedArray(hex,{max=40}={}){
   'Malformed ERC-1155 batch transfer log');
  const raw=hex.slice(2);
  const at=i=>{const off=i*64;requireSafe(off+64<=raw.length,'Truncated ERC-1155 batch data');return BigInt('0x'+raw.slice(off,off+64))};
- const a=Number(at(0)/32n),b=Number(at(1)/32n);
- requireSafe(Number.isSafeInteger(a)&&Number.isSafeInteger(b)&&a%32===0&&b%32===0,
+ const offsetA=at(0),offsetB=at(1);
+ requireSafe(offsetA%32n===0n&&offsetB%32n===0n,'Malformed ERC-1155 ABI offsets');
+ const a=Number(offsetA/32n),b=Number(offsetB/32n);
+ requireSafe(Number.isSafeInteger(a)&&Number.isSafeInteger(b)&&a>=2&&b>=2,
   'Malformed ERC-1155 batch array offsets');
  const read=offset=>{const length=Number(at(offset));
   requireSafe(Number.isSafeInteger(length)&&length<=max,'Unbounded ERC-1155 batch array');
@@ -209,8 +212,9 @@ export function nftApprovalCall420({standard,contract,tokenId,owner,operator,app
  requireSafe(from!==ZERO&&spender!==ZERO&&from!==spender,'Invalid NFT operator');
  requireSafe(typeof approved==='boolean'&&typeof collectionWide==='boolean','Explicit NFT approval choice required');
  requireSafe(standard==='ERC721'||collectionWide,'ERC1155 supports only operator-wide approvals');
+ const approvalTarget=!approved&&!collectionWide?ZERO:spender;
  const data=collectionWide?'0xa22cb465'+spender.slice(2).padStart(64,'0')+word(approved?1:0):
-  '0x095ea7b3'+spender.slice(2).padStart(64,'0')+word(asset.tokenId);
+  '0x095ea7b3'+approvalTarget.slice(2).padStart(64,'0')+word(asset.tokenId);
  // approve(address,uint256) for ERC721; do not confuse with ERC20's selector.
  return {to:asset.address,value:'0x0',data,asset,from,operator:spender,approved,collectionWide};
 }
@@ -221,5 +225,6 @@ export async function verifyNftApproval420(provider,request,owner){
   op.slice(2).padStart(64,'0'):'0x081812fc'+word(asset.tokenId);
  const result=await provider.request('eth_call',[{to:asset.address,data},'latest']);
  requireSafe(typeof result==='string'&&WORD.test(result),'Malformed NFT approval response');
- return request.collectionWide?BigInt(result)===1n:result.slice(-40).toLowerCase()===op.slice(2);
+ return request.collectionWide?BigInt(result)===(request.approved?1n:0n):
+  result.slice(-40).toLowerCase()===(request.approved?op.slice(2):ZERO.slice(2));
 }

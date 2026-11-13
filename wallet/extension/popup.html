@@ -340,10 +340,16 @@
         <section class="settings-panel">
           <h2>Mobile &amp; WalletConnect v2 pairing</h2>
           <p class="intro">Review a pairing request from your own device. A pairing URI alone grants no permissions. A qualified relay project and session authorization must be available before any account can be shared.</p>
+          <form id="walletconnect-project-form">
+            <label for="walletconnect-project-id">Approved WalletConnect relay project ID</label>
+            <input id="walletconnect-project-id" type="password" autocomplete="off" placeholder="32 hexadecimal characters" maxlength="32">
+            <button type="submit" class="secondary wide">Configure WalletKit v2 relay</button>
+          </form>
+          <div id="walletconnect-sessions" class="stack" aria-live="polite"></div>
           <form id="convenience-pair-form">
             <label for="convenience-pair-uri">WalletConnect v2 URI</label>
             <textarea id="convenience-pair-uri" rows="3" maxlength="3072" autocomplete="off" placeholder="wc:…"></textarea>
-            <button class="secondary wide" type="submit">Validate pairing request</button>
+            <button class="secondary wide" type="submit">Review and pair through WalletKit</button>
           </form>
           <pre id="convenience-pair-result" class="request-details" aria-live="polite"></pre>
         </section>

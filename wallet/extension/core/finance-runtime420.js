@@ -80,6 +80,8 @@ export async function financePrepare420({provider,config,state,option,feeQuote})
  if(!p)FAIL('Provider is not release approved');
  await verifyFinanceDeployment420(provider,p);
  const plan=financePlan420(p,option);
+ const currentToken=financeToken420(state,plan.token);
+ if(BigInt(currentToken.balance.spendable)<BigInt(plan.amountRaw))FAIL('Source balance changed; refresh the amount and quote');
  if(plan.kind==='swap'){
    const routes=await quoteFinanceRoutes420(provider,p,{
      account:option.account,amountRaw:option.inputRaw,slippageBps:option.slippageBps});

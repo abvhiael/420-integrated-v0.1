@@ -24,6 +24,11 @@ const stringReturn=s=>{
   return '0x'+word(32).slice(2)+word(hex.length/2).slice(2)+hex.padEnd(Math.ceil(hex.length/64)*64,'0');
 };
 const rpc=createServer(async(req,res)=>{
+  if(req.method==='GET'&&req.url==='/dapp'){
+    res.writeHead(200,{'content-type':'text/html','cache-control':'no-store'});
+    res.end('<!doctype html><html><head><title>420 Wallet dApp fixture</title></head><body><h1>Local dApp compatibility fixture</h1></body></html>');
+    return;
+  }
   const parts=[];
   for await(const chunk of req)parts.push(chunk);
   const body=JSON.parse(Buffer.concat(parts).toString());
@@ -121,6 +126,84 @@ try{
   console.log('PASS: QR verified by independent jsQR decoder on real Chromium Receive canvas');
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
+
+  // M6: real content-script injection, EIP-6963 re-discovery, passive
+  // EIP-1193 connection restoration, MetaMask coexistence and EIP-2255
+  // same-origin grant/revocation in packaged Chromium. No signing is simulated.
+  const dappOrigin='http://127.0.0.1:'+rpc.address().port;
+  await page.evaluate(async({dappOrigin,controller})=>{
+    const key='420-wallet-origin-permissions-v1';
+    const grants=(await chrome.storage.local.get(key))?.[key]||{};
+    grants[dappOrigin]={accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()};
+    await chrome.storage.local.set({[key]:grants});
+  },{dappOrigin,controller});
+  const dapp=await browser.newPage();
+  await dapp.goto(dappOrigin+'/dapp',{waitUntil:'load'});
+  const providerSnapshot=await dapp.evaluate(async()=>{
+    let found=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')found=event.detail;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    if(!found)throw new Error('EIP-6963 provider not discoverable in real page');
+    window.__wallet420=found.provider;
+    const accounts=await found.provider.request({method:'eth_accounts'});
+    const chainId=await found.provider.request({method:'eth_chainId'});
+    const permissions=await found.provider.request({method:'wallet_getPermissions'});
+    const capabilities=await found.provider.request({method:'wallet_getCapabilities',params:[accounts[0]]});
+    const requested=await found.provider.request({method:'wallet_requestPermissions',params:[{eth_accounts:{}}]});
+    return {accounts,chainId,permissions,capabilities,requested,
+      name:found.info.name,icon:found.info.icon,connected:found.provider.isConnected()};
+  });
+  assert.deepEqual(providerSnapshot.accounts,[controller]);
+  assert.equal(providerSnapshot.chainId,'0x1a4');
+  assert.equal(providerSnapshot.permissions[0]?.parentCapability,'eth_accounts');
+  assert.equal(providerSnapshot.requested[0]?.parentCapability,'eth_accounts');
+  assert.equal(providerSnapshot.capabilities['0x1a4']?.atomicBatch?.supported,false,
+    'Watch-only EOA cannot claim atomic SmartAccount execution');
+  assert.equal(providerSnapshot.connected,true);
+  assert.match(providerSnapshot.icon,/^data:image\\/svg\\+xml,/);
+  const coexistence=await dapp.evaluate(()=>{
+    const wallet=window.__wallet420;
+    const metamask={isMetaMask:true};
+    Object.defineProperty(window,'ethereum',{configurable:true,value:metamask});
+    let discovered=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')discovered=event.detail.provider;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    return {metaMaskPreserved:window.ethereum===metamask,walletPreserved:discovered===wallet};
+  });
+  assert.equal(coexistence.metaMaskPreserved,true);
+  assert.equal(coexistence.walletPreserved,true);
+  await dapp.reload();
+  const afterReload=await dapp.evaluate(async()=>{
+    let wallet=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')wallet=event.detail.provider;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    if(!wallet)throw new Error('Wallet disappeared after reload');
+    window.__wallet420=wallet;window.__accountsEvents=[];
+    wallet.on('accountsChanged',accounts=>window.__accountsEvents.push(accounts));
+    return {accounts:await wallet.request({method:'eth_accounts'}),
+      chainId:await wallet.request({method:'eth_chainId'})};
+  });
+  assert.deepEqual(afterReload.accounts,[controller]);
+  assert.equal(afterReload.chainId,'0x1a4');
+  await dapp.evaluate(async()=>window.__wallet420.request({
+    method:'wallet_revokePermissions',params:[{eth_accounts:{}}]
+  }));
+  await dapp.waitForFunction(()=>window.__accountsEvents?.some(x=>Array.isArray(x)&&x.length===0));
+  assert.deepEqual(await dapp.evaluate(async()=>window.__wallet420.request({method:'eth_accounts'})),[]);
+  const denied=await dapp.evaluate(async()=>{
+    try{await window.__wallet420.request({method:'wallet_sendCalls',params:[]});return false;}
+    catch(error){return error.code===4100;}
+  });
+  assert.equal(denied,true,'Revoked site must not submit contract batch');
+  await dapp.close();
+  console.log('PASS: real Chromium EIP-6963, coexistence, account restoration, EIP-2255 permission and revocation');
+
   // M3: watch-only and unverified SmartAccount cannot create an executable preview.
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   await page.locator('#header-settings').click();

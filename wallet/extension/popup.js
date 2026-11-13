@@ -317,6 +317,18 @@ function renderActivity(){
     side.append(node('strong','',entry.status),node('small','',entry.hash?entry.hash.slice(0,10)+'…'+entry.hash.slice(-8):
       entry.userOpHash?'UserOp '+entry.userOpHash.slice(0,10)+'…'+entry.userOpHash.slice(-8):'Extension activity'));
     row.append(info,side);
+    if(entry.kind==='finance-bridge'&&entry.financePhase==='execute'){
+      info.append(node('small','',entry.id+' · destination delivery not assumed'));
+      const verify=node('button','secondary','Check bridge');
+      verify.type='button';
+      verify.addEventListener('click',()=>{
+        $('finance-activity-id').value=entry.id;
+        screen('finance-view');
+        financeCatalog420().catch(e=>{$('finance-status').textContent=e.message;});
+        $('finance-track-result').textContent='Press Verify source bridge status. A destination hash is optional but must be backed by a canonical receipt.';
+      });
+      row.append(verify);
+    }
     const canReplace=(
       (entry.executionModel==='erc4337'&&
         /^0x[0-9a-fA-F]{64}$/.test(entry.userOpHash||'')&&
@@ -840,6 +852,137 @@ async function approval(){
   $('approve').addEventListener('click',()=>finish(true));
   $('reject').addEventListener('click',()=>finish(false)); // User rejected request when approved=false.
 }
+
+const financeUi420={options:[],catalog:[],review:null,identity:null,busy:false};
+function financeReset420(reason='Select an approved route and request current quotes.'){
+ financeUi420.options=[];financeUi420.review=null;financeUi420.identity=null;
+ $('finance-route-list').replaceChildren();$('finance-review-box').hidden=true;
+ $('finance-risk-ack').checked=false;$('finance-confirm').disabled=true;
+ $('finance-status').textContent=reason;
+}
+async function financeCatalog420(){
+ const stateBefore=state.wallet,ctx=await command('finance-catalog');
+ if(state.wallet!==stateBefore)return;
+ financeUi420.catalog=ctx.providers;
+ const swaps=ctx.providers.filter(p=>['420exchange','third-party'].includes(p.kind));
+ const bridges=ctx.providers.filter(p=>['420bridge','third-party-bridge'].includes(p.kind));
+ $('finance-status').textContent=swaps.length+' approved swap venue(s), '+bridges.length+
+  ' bridge route(s) configured for '+ctx.chainId+
+  '. Deployed contracts, liquidity and signing authority are independently checked before execution.';
+}
+function financeShowOption420(option,index){
+ const row=node('div','asset-row');
+ const type=option.kind==='bridge'?'Bridge':'Swap';
+ const label=option.kind==='bridge'?
+   'Send '+option.amountRaw+' raw · '+option.chainId+' → '+option.destinationChainId:
+   'Receive '+option.outputRaw+' raw (minimum '+option.minimumRaw+')';
+ const details=option.kind==='bridge'?
+   'Source network fee '+option.networkFeeWei+' wei; destination gas/output unverified':
+   'Slippage '+option.slippageBps/100+'% · impact '+option.impactBps/100+'% · spender '+option.spender;
+ const info=node('div','asset-info');
+ info.append(node('strong','',type+' · '+option.providerId+' · '+(option.routeName||option.routeId)),
+  node('small','',label),node('small','',details));
+ const button=node('button','secondary','Review');button.type='button';
+ button.addEventListener('click',async()=>{
+   if(financeUi420.busy)return;
+   button.disabled=true;financeUi420.busy=true;
+   try{
+     const w=state.wallet,reviewed=await command('finance-review',{index});
+     if(state.wallet!==w)throw new Error('Wallet account or network changed; refresh quotes');
+     financeUi420.review={...reviewed,index};
+     financeUi420.identity={chainId:w.network.expectedChainId,epoch:w.network.epoch,account:w.selectedAccount};
+     const tx=reviewed.review;
+     $('finance-review-detail').textContent=JSON.stringify({
+       operation:reviewed.operation,phase:tx.phase,
+       ...(tx.phase==='allowance'?{notice:'Separate exact allowance transaction; repeat route review after approval receipt.',
+         currentAllowanceRaw:tx.allowance,approvedAmountRaw:tx.required}:{}),
+       ...(reviewed.operation==='bridge'?{warning:'Source transaction alone cannot prove delivery or refund. Destination fee and final output are unknown.'}:{}),
+       token:tx.token,spender:tx.spender,routerOrApprovalTarget:tx.call.to,
+       payer:reviewed.option.account,destinationChainId:reviewed.option.destinationChainId??null,
+       transaction:tx.call,
+       minimumOutputRaw:tx.plan.minimumOutputRaw??null,maximumSlippageBps:tx.plan.slippageBps??null,
+       gasQuote:tx.fee
+     },null,2);
+     $('finance-risk-ack').checked=false;$('finance-confirm').disabled=true;
+     $('finance-review-box').hidden=false;
+     $('finance-status').textContent='Review all contract addresses, allowance, slippage and network fees before signing.';
+     $('finance-review-box').scrollIntoView?.({block:'nearest'});
+   }catch(error){financeReset420('Finance review blocked: '+error.message);}
+   finally{financeUi420.busy=false;button.disabled=false;}
+ });
+ row.append(info,button);return row;
+}
+function setupFinance420(){
+ const change=()=>{
+   financeReset420();
+   const stake=$('finance-kind').value==='stake';
+   $('finance-trade-fields').hidden=stake;$('finance-stake-fields').hidden=!stake;
+   $('finance-amount').required=!stake;
+   $('finance-slippage').disabled=stake||$('finance-kind').value==='bridge';
+ };
+ $('finance-kind').addEventListener('change',change);
+ for(const name of ['finance-amount','finance-slippage'])$(name).addEventListener('input',()=>financeReset420('Input changed; previous quotes and review invalidated.'));
+ $('finance-options-form').addEventListener('submit',async event=>{
+   event.preventDefault();if(financeUi420.busy)return;
+   financeUi420.busy=true;$('finance-find').disabled=true;
+   financeReset420('Comparing current on-chain executable routes…');
+   try{
+     const w=state.wallet;
+     const result=await command('finance-options',{
+       financeKind:$('finance-kind').value,
+       amountInput:$('finance-amount').value.trim(),
+       slippageBps:Number($('finance-slippage').value)
+     });
+     if(state.wallet!==w)throw new Error('Account/chain changed while comparing quotes');
+     financeUi420.options=result.options;
+     const list=$('finance-route-list');list.replaceChildren();
+     result.options.forEach((option,index)=>list.append(financeShowOption420(option,index)));
+     $('finance-status').textContent=result.note+
+       (result.options.length?' Compare output, slippage, spender and source/destination fee disclosures before selecting.':'');
+   }catch(e){financeReset420('Finance quote unavailable: '+e.message);}
+   finally{financeUi420.busy=false;$('finance-find').disabled=false;}
+ });
+ $('finance-risk-ack').addEventListener('change',()=>{
+   $('finance-confirm').disabled=!financeUi420.review||!$('finance-risk-ack').checked;
+ });
+ $('finance-clear').addEventListener('click',()=>{financeUi420.review=null;$('finance-review-box').hidden=true;$('finance-risk-ack').checked=false;});
+ $('finance-confirm').addEventListener('click',async()=>{
+   const r=financeUi420.review;if(financeUi420.busy||!r||!$('finance-risk-ack').checked)return;
+   financeUi420.busy=true;$('finance-confirm').disabled=true;
+   try{
+     const w=state.wallet,identity=financeUi420.identity;
+     if(!w||w.selectedAccount!==identity.account||w.network.expectedChainId!==identity.chainId||
+        w.network.epoch!==identity.epoch)throw new Error('Account or network changed');
+     const result=await command('finance-submit',{index:r.index,reviewId:r.reviewId,confirmed:true});
+     financeReset420('Finance '+result.phase+' submitted: '+result.hash+'. '+result.note);
+     if(result.phase==='execute'&&r.operation==='bridge')
+       $('finance-activity-id').value=result.activityId;
+     await refresh();
+   }catch(e){financeReset420('Finance submission not confirmed: '+e.message);}
+   finally{financeUi420.busy=false;$('finance-confirm').disabled=false;}
+ });
+ $('finance-stake-form').addEventListener('submit',async event=>{
+   event.preventDefault();const button=event.target.querySelector('button[type=submit]');button.disabled=true;
+   try{
+     const result=await command('finance-stake',{validatorId:$('finance-validator').value.trim()});
+     $('finance-stake-result').textContent=JSON.stringify(result,null,2);
+   }catch(e){$('finance-stake-result').textContent='Validator state unavailable: '+e.message;}
+   finally{button.disabled=false;}
+ });
+ $('finance-track-form').addEventListener('submit',async event=>{
+   event.preventDefault();const button=event.target.querySelector('button[type=submit]');button.disabled=true;
+   try{
+     const result=await command('finance-track',{activityId:$('finance-activity-id').value.trim(),
+       destinationTxHash:$('finance-destination-hash').value.trim()||null});
+     $('finance-track-result').textContent=JSON.stringify(result,null,2);
+   }catch(e){$('finance-track-result').textContent='Cannot verify source bridge: '+e.message;}
+   finally{button.disabled=false;}
+ });
+ const nav=document.querySelector('#bottom-nav [data-screen="finance-view"]');
+ nav.addEventListener('click',()=>financeCatalog420().catch(e=>{$('finance-status').textContent=e.message;}));
+ change();
+}
+
 function setup(){
   for(const [id,older] of [['nfts-scan-recent',false],['nfts-scan-older',true]]){
     $(id).addEventListener('click',async()=>{
@@ -1199,6 +1342,7 @@ function setup(){
 }
 setup();
 if(!approvalId){
+  setupFinance420();
   chrome.storage.onChanged?.addListener((changes,area)=>{
     if(area!=='local')return;
     if(['420-wallet-portfolio-block-v1',

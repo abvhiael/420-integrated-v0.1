@@ -401,10 +401,18 @@ function renderSecurity420(){
    hide.addEventListener('click',async()=>{
     hide.disabled=true;
     try{
-     const next=await command('security-unwatch',{
-       authorityKind:kind,...x
+     const result=await command('security-unwatch',{
+       ...x,authorityKind:kind
      });
-     state.security=next;renderSecurity420();
+     if(result?.localOnly){
+       state.security.watched=state.security.watched.filter(item=>
+         !(item.kind===kind&&JSON.stringify(item)===JSON.stringify(x)));
+       // Reloading may fail while offline. The local unwatch must still be
+       // reflected immediately without altering any on-chain permission.
+       row.remove();
+       if(!element.childElementCount)
+         securityEmpty420(element,'No '+kind+' authorities tracked.');
+     }
      securityMessage420('Removed watch entry locally. On-chain authority is unchanged.');
     }catch(e){securityMessage420(e.message,true);}
     finally{hide.disabled=false;}

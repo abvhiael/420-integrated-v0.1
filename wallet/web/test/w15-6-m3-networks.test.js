@@ -83,5 +83,7 @@ test('M3: provider, approval, sign/nonce/preview and UX are chain-bound',()=>{
  for(const id of ['network-select','switch-network','add-network-form','network-health','aggregate-assets','new-currency-symbol']){
    assert.match(html,new RegExp('id="'+id+'"'));
  }
- assert.doesNotMatch(worker,/eth_sendRawTransaction/);
+ assert.match(worker,/Raw transaction broadcast is restricted to the local EOA authority/);
+ assert.match(worker,/assertEoaRawMatchesAuthority420/);
+ assert.doesNotMatch(worker,/READ_METHODS = new Set\(\[[^\]]*eth_sendRawTransaction/);
 });

@@ -6,7 +6,7 @@ import {
  NFT_TRANSFER721_TOPIC_420,NFT_TRANSFER_SINGLE_TOPIC_420,NFT_TRANSFER_BATCH_TOPIC_420,
  nftId420,normalizedNftRecord420,nftSpamFlags420,nftSafeMetadata420,nftMetadataUrl420,
  fetchSafeNftMetadata420,verifiedNftStandard420,verifyNftOwnership420,
- discoverNftTransfers420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420
+ discoverNftTransfers420,nftIndexWindow420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420
 } from '../core/extension-nfts.js';
 const owner='0x'+'11'.repeat(20),recipient='0x'+'22'.repeat(20),
  operator='0x'+'33'.repeat(20),erc721='0x'+'44'.repeat(20),erc1155='0x'+'55'.repeat(20);
@@ -196,4 +196,33 @@ test('portfolio settings preserve user trusted NFT overrides without changing ow
  assert.deepEqual(settings.nftTrusted,[key]);
  assert.deepEqual(settings.nftHidden,[key]);
  assert.ok(!Object.hasOwn(settings,'ownership'));
+});
+
+test('NFT index windows provide gap-free bounded forward catch-up and backward historical backfill',()=>{
+ const recent=nftIndexWindow420(10000n);
+ assert.equal(recent.from,7952n);
+ assert.equal(recent.to,10000n);
+ assert.equal(recent.nextForward,'10001');
+ assert.equal(recent.nextBack,'7952');
+ const older=nftIndexWindow420(10000n,{
+  older:true,nextForward:recent.nextForward,nextBack:recent.nextBack});
+ assert.equal(older.to,7951n);
+ assert.equal(older.from,5904n);
+ assert.equal(older.nextBack,'5904');
+ assert.equal(older.nextForward,'10001');
+ const earlier=nftIndexWindow420(10000n,{
+  older:true,nextForward:older.nextForward,nextBack:older.nextBack});
+ assert.equal(earlier.to,5903n);
+ assert.equal(earlier.from,3856n);
+ const newBlocks=nftIndexWindow420(11000n,{
+  nextForward:recent.nextForward,nextBack:earlier.nextBack});
+ assert.equal(newBlocks.from,10001n);
+ assert.equal(newBlocks.to,11000n);
+ assert.equal(newBlocks.nextBack,'3856');
+ const genesis=nftIndexWindow420(1000n);
+ assert.equal(genesis.from,0n);
+ const finished=nftIndexWindow420(1000n,{
+  older:true,nextForward:genesis.nextForward,nextBack:genesis.nextBack});
+ assert.equal(finished.complete,true);
+ assert.throws(()=>nftIndexWindow420(100n,{older:true,nextBack:'999'}),/backfill checkpoint/);
 });

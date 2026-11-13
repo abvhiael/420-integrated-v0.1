@@ -29,7 +29,7 @@
         pending.delete(id);
         reject(Object.assign(new Error('420 Wallet request timed out: ' + method), { code: 4900 }));
       }, 30000);
-      pending.set(id, { resolve, reject, timeout });
+      pending.set(id, { resolve, reject, timeout, method });
       window.postMessage({ source: '420-wallet-inpage', channel: CHANNEL, kind: 'request', id, method, params }, window.location.origin);
     });
   }
@@ -73,8 +73,22 @@
         const error = new Error(message.error.message || '420 Wallet request failed');
         if (Number.isInteger(message.error.code)) error.code = message.error.code;
         if ('data' in message.error) error.data = message.error.data;
+        if (error.code === 4900 && connected) {
+          connected = false;
+          currentAccounts = [];
+          emit('disconnect', { code: 4900, message: error.message });
+        }
         entry.reject(error);
-      } else entry.resolve(message.result);
+      } else {
+        if (entry.method === 'eth_chainId' && typeof message.result === 'string' &&
+            /^0x[0-9a-fA-F]+$/.test(message.result)) {
+          const first = !connected;
+          connected = true;
+          currentChain = message.result;
+          if (first) emit('connect', { chainId: currentChain });
+        }
+        entry.resolve(message.result);
+      }
       return;
     }
     if (message.kind !== 'event' || !EVENTS.has(message.event)) return;

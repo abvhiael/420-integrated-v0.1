@@ -1,3 +1,5 @@
+import {validateUserOpReplacement420} from './core/extension-replacement-policy.js';
+import {encodeExecute} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
 import {quoteExtensionSend420,normalizeExtensionFeeChoice420} from './core/extension-fee-preflight.js';
 import {EXTENSION_ADDRESS_BOOK_KEY_420,normalizeExtensionAddressBook420,addExtensionContact420,removeExtensionContact420} from './core/extension-address-book.js';
@@ -749,6 +751,52 @@ async function switchSelectedAccount420(value){
   }
   return walletUiState420();
 }
+async function replacementPreview420(message){
+  const state=await walletUiState420();
+  if(!extensionCanSend420(state)||message.chainId!==state.network.expectedChainId||
+     message.epoch!==state.network.epoch||message.account!==state.selectedAccount)
+    throw Object.assign(new Error('Wallet authority or chain changed'),{code:4901});
+  if(!['speed-up','cancel'].includes(message.action))
+    throw Object.assign(new Error('Unsupported replacement action'),{code:-32602});
+  const entries=await readWalletUiActivity420(),original=entries.find(x=>x.id===message.activityId);
+  if(!original||original.executionModel!=='erc4337'||original.controller!==state.selectedAccount||
+     original.chainId!==state.network.expectedChainId||!validHash420(original.userOpHash))
+    throw Object.assign(new Error('No locally authorized pending UserOperation to replace'),{code:4100});
+  if(entries.some(x=>x.replaces===original.userOpHash&&
+     ['pending','submitted','included','reorganized','confirmed'].includes(x.status)))
+    throw Object.assign(new Error('A replacement of this UserOperation already exists; resolve its outcome first'),{code:4001});
+  const provider={request:(method,params)=>rpcRequest(method,params,{expectedChainId:state.network.expectedChainId})};
+  let target=original.target,value=original.value,data=original.data;
+  if(message.action==='cancel'){
+    const code=await provider.request('eth_getCode',[state.account.controller,'latest']);
+    if(code!=='0x'&&code!=='0x0')throw Object.assign(new Error('Cancellation requires a verified no-code owner EOA; cannot prove no-op'),{code:4100});
+    target=state.account.controller;value='0x0';data='0x';
+  }
+  const block=await provider.request('eth_getBlockByNumber',['latest',false]);
+  if(typeof block?.baseFeePerGas!=='string'||!/^0x[0-9a-fA-F]+$/.test(block.baseFeePerGas))
+    throw new Error('Current EIP-1559 base fee unavailable');
+  const bump=x=>BigInt(x)+((BigInt(x)*25n+99n)/100n)||1n;
+  const priority=bump(original.maxPriorityFeePerGas);
+  let maximum=bump(original.maxFeePerGas);
+  const floor=BigInt(block.baseFeePerGas)*2n+priority;
+  if(maximum<floor)maximum=floor;
+  const choice={level:'custom',maxFeePerGas:'0x'+maximum.toString(16),
+    maxPriorityFeePerGas:'0x'+priority.toString(16)};
+  const transaction={from:original.controller,to:target,value,data};
+  const quote=await quoteExtensionSend420(provider,{
+    chainId:state.network.expectedChainId,smartAccount:state.account.smartAccount,transaction,choice});
+  const callData=encodeExecute(target,BigInt(value),data);
+  const candidate={executionModel:'erc4337',action:message.action,
+    chainId:original.chainId,sender:original.sender,entryPoint:original.entryPoint,
+    entryPointVersion:original.entryPointVersion,nonce:original.nonce,
+    maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas,
+    initCode:original.initCode,callData,verifiedNoOp:message.action==='cancel'};
+  const validated=validateUserOpReplacement420(original,candidate);
+  return {originalId:original.id,originalHash:original.userOpHash,action:message.action,
+    chainId:state.network.expectedChainId,epoch:state.network.epoch,account:state.selectedAccount,
+    transaction,quote,nonce:validated.nonce,entryPoint:validated.entryPoint,
+    replaces:validated.replaces,nonceKey:validated.nonceKey};
+}
 async function handleWalletUi420(message) {
   const kind=message.kind;
   if(kind==='get-state')return walletUiState420();
@@ -883,6 +931,41 @@ async function handleWalletUi420(message) {
     await chrome.storage.local.set({[NETWORKS_KEY_420]:registry});
     await changeNetwork420(chainId);
     return walletUiState420();
+  }
+  if(kind==='replacement-preflight')return replacementPreview420(message);
+  if(kind==='replacement-submit'){
+    if(message.confirmed!==true)throw Object.assign(new Error('Explicit replacement confirmation required'),{code:4001});
+    const preview=await replacementPreview420(message);
+    const provided=message.preview;
+    if(!provided||provided.action!==preview.action||provided.originalId!==preview.originalId||
+       provided.originalHash!==preview.originalHash||provided.chainId!==preview.chainId||
+       provided.epoch!==preview.epoch||provided.account!==preview.account||
+       provided.quote?.gasFees!==preview.quote.gasFees||
+       provided.quote?.blockHash!==preview.quote.blockHash||
+       JSON.stringify(provided.transaction)!==JSON.stringify(preview.transaction))
+      throw Object.assign(new Error('Replacement fee, nonce, chain or intent changed; review again'),{code:4001});
+    const source=(await readWalletUiActivity420()).find(x=>x.id===preview.originalId);
+    const id='replacement-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+    const entry={id,at:Date.now(),chainId:preview.chainId,controller:preview.account,
+      smartAccount:source.smartAccount,recipient:preview.transaction.to,
+      amount:preview.action==='cancel'?'0':source.amount,symbol:source.symbol,
+      status:'pending',hash:null,action:preview.action,
+      replaces:preview.replaces,originalId:preview.originalId};
+    await rememberWalletUiActivity420(entry);
+    let hash=null;
+    try{
+      hash=await executeWithLocalAuthority({
+        method:'eth_sendTransaction',
+        params:[{...preview.transaction,gasFees:preview.quote.gasFees,expectedNonce:preview.nonce}]
+      },{origin:null,chainId:preview.chainId,epoch:preview.epoch,accounts:[preview.account],tabId:null,activityId:id});
+      await rememberWalletUiActivity420({...entry,status:'submitted',hash});
+      return {status:'submitted',hash,originalId:source.id};
+    }catch(error){
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,status:(hash||userOpHash)?'submitted':'failed',hash,userOpHash,
+        error:error?.message||'Replacement not authorized'});
+      throw error;
+    }
   }
   if(kind==='send-preflight'){
     const state=await walletUiState420();

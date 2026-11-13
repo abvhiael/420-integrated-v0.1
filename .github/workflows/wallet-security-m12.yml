@@ -4,6 +4,7 @@ on:
     paths:
       - "wallet/extension/scripts/build-firefox.mjs"
       - "wallet/extension/scripts/qualify-reproducible.mjs"
+      - "wallet/extension/scripts/qualify-firefox.py"
       - "wallet/extension/scripts/build.mjs"
       - "wallet/extension/package.json"
       - "wallet/extension/manifest.json"
@@ -34,3 +35,9 @@ jobs:
       - name: Firefox Manifest V3 browser schema lint only (not live Firefox runtime acceptance)
         working-directory: wallet/extension
         run: npm exec --yes --package=web-ext@10.8.0 -- web-ext lint --source-dir dist-firefox --self-hosted --warnings-as-errors
+      - name: Real Firefox MV3 temporary extension and EIP-1193 deny-by-default smoke
+        working-directory: wallet/extension
+        run: |
+          firefox --version
+          python3 -m pip install --disable-pip-version-check --quiet selenium==4.52.0
+          python3 scripts/qualify-firefox.py

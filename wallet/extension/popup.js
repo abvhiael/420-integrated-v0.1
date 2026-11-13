@@ -1146,7 +1146,8 @@ function setupConvenience420(){
  $('walletconnect-project-form').addEventListener('submit',async e=>{
    e.preventDefault();const button=e.currentTarget.querySelector('button[type=submit]');button.disabled=true;
    try{
-     await command('walletconnect-set-project',{projectId:$('walletconnect-project-id').value.trim()});
+     await command('walletconnect-set-project',{projectId:$('walletconnect-project-id').value.trim(),
+       appUrl:$('walletconnect-app-url').value.trim()});
      $('convenience-pair-result').textContent='Locally bundled WalletKit configured. No session is active until you approve a pairing proposal.';
      await walletConnectSessionsUi420();
    }catch(err){$('convenience-pair-result').textContent='Relay configuration rejected: '+err.message;}

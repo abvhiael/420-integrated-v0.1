@@ -58,6 +58,7 @@ const rpc=createServer(async(req,res)=>{
         (to===nft&&iface==='80ac58cd')||(to===nft1155&&iface==='d9b67a26')?1:0);
     }
     else if(to===nft1155&&data.startsWith('0x00fdd58e'))result=word(3);
+    else if(to===nft1155&&data.startsWith('0xe985e9c5'))result=word(0);
     else if(to===nft&&data.startsWith('0xc87b56dd'))result=stringReturn('https://metadata.example.test/42.json');
     else if(to===token&&data==='0x313ce567')result=word(6);
     else if(to===token&&data==='0x95d89b41')result=stringReturn('TEST');

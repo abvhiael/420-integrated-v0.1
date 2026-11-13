@@ -383,10 +383,18 @@ async function prepareReview(){
   $('review-sender').textContent=w.account.smartAccount;
   $('review-max-fee').textContent=quote.maxFeePerGas+' wei/gas';
   $('review-priority-fee').textContent=quote.maxPriorityFeePerGas+' wei/gas';
+  $('review-aa-gas').textContent=quote.gasBudget?
+    ('Call '+BigInt(quote.gasBudget.callGasLimit).toString()+
+      ', verification '+BigInt(quote.gasBudget.verificationGasLimit).toString()+
+      ', pre-verification '+BigInt(quote.gasBudget.preVerificationGas).toString()):'Unavailable';
+  $('review-total-fee').textContent=quote.totalFeeWei===null?
+    'Unavailable — transaction blocked':'Up to '+quote.totalFeeWei+' wei (no sponsorship assumed)';
   $('review-simulation').textContent='Target call passed; this does NOT prove account-abstraction execution.';
-  $('review-entrypoint').textContent='Requires passkey signing and final EntryPoint simulation before broadcast; fee total not yet verified.';
+  $('review-entrypoint').textContent=quote.gasBudget?.estimateVerified?
+    'Bundler gas quote verified before confirmation. Signed EntryPoint execution must still pass before broadcast.':
+    'Bundler estimate unavailable — cannot sign or submit.';
   $('send-review').hidden=false;$('send-confirm').disabled=false;
-  $('send-state').textContent='Review target call and fee caps. Fees are indicative; final UserOperation signature, gas validation and EntryPoint simulation are required before submission.';
+  $('send-state').textContent='Review verified bundler gas caps and worst-case fee exposure. Target call passed. Final signed EntryPoint simulation is still required before submission.';
   $('send-confirm').focus();
 }
 function renderAddressBook420(){

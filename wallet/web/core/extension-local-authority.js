@@ -21,6 +21,8 @@ function txRequest(request = {}) {
     data: tx.data ?? '0x',
     gasFees:tx.gasFees??null,
     expectedNonce:tx.expectedNonce??null,
+    accountGasLimits:tx.accountGasLimits??null,
+    preVerificationGas:tx.preVerificationGas??null,
   };
 }
 
@@ -113,6 +115,10 @@ export function createExtensionLocalAuthority420({
         { target: tx.target, value: tx.value, data: tx.data,
           ...(tx.gasFees?{gasFees:tx.gasFees}:{}),
           ...(tx.expectedNonce?{expectedNonce:tx.expectedNonce}:{}),
+          accountGasLimits:tx.accountGasLimits,
+          preVerificationGas:tx.preVerificationGas,
+          expectedChainId:context.chainId,
+          requireBundlerGasEstimate:true,
         },
         { rpId: binding.rpId, origin: binding.origin },
       );

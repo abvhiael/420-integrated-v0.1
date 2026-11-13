@@ -5,7 +5,9 @@
   "version": "0.1.0",
   "dependencies": {
     "@trezor/connect-webextension": "10.0.1",
-    "events": "3.3.0"
+    "events": "3.3.0",
+    "@reown/walletkit": "1.6.0",
+    "@walletconnect/core": "2.25.0"
   },
   "devDependencies": {
     "esbuild": "0.25.12"

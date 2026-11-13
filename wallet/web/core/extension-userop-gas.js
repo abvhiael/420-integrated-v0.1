@@ -28,7 +28,7 @@ export function parseExtensionUserOpGasEstimate420(raw){
 }
 export async function estimateExtensionUserOpGas420(provider,{
   chainId,sender,entryPoint,nonce,target,value='0x0',data='0x',
-  gasFees,approvedLimits=null,
+  gasFees,approvedLimits=null,accountCallData=null,
 }={}){
   if(!provider||typeof provider.request!=='function')throw new Error('bundler transport required');
   await assertWalletChain420(provider,chainId);
@@ -36,9 +36,13 @@ export async function estimateExtensionUserOpGas420(provider,{
   const n=q(nonce,'owner nonce',{allowZero:true}),amount=q(value,'native value',{allowZero:true});
   if(!/^0x[0-9a-fA-F]{64}$/.test(gasFees||''))throw new Error('validated EIP-1559 packed gas fees required');
   if(typeof data!=='string'||!/^0x(?:[0-9a-fA-F]{2})*$/.test(data))throw new Error('invalid target calldata');
+  if(accountCallData!==null&&
+     (typeof accountCallData!=='string'||!/^0x34fcd5be(?:[0-9a-fA-F]{2})+$/.test(accountCallData)||
+      accountCallData.length>40000))
+    throw new Error('invalid verified SmartAccount420 executeBatch calldata');
   const op={
     sender:account,nonce:asHex(n),initCode:'0x',
-    callData:encodeExecute(to,amount,data),
+    callData:accountCallData??encodeExecute(to,amount,data),
     accountGasLimits:'0x'+'0'.repeat(64),preVerificationGas:'0x0',
     gasFees,paymasterAndData:'0x',signature:'0x',
   };

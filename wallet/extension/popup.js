@@ -165,6 +165,25 @@ function renderNFT420(){
     row.append(node('span','token-icon alt','◇'),info);list.append(row);
   }
 }
+async function replaceUserOperation420(entry,action){
+  if(!['speed-up','cancel'].includes(action))throw new Error('Unsupported replacement action');
+  const context={activityId:entry.id,action,chainId:entry.chainId,
+    epoch:state.wallet?.network?.epoch,account:state.wallet?.selectedAccount};
+  const preview=await command('replacement-preflight',context);
+  const description=action==='cancel'
+    ?'Cancel pending transfer by signing a zero-value, no-data call to the verified EOA owner. Cancellation is NOT guaranteed until confirmed.'
+    :'Speed up the pending transfer using a new passkey-signed UserOperation with the SAME sender and full nonce.';
+  const message=description+'\n\nChain: '+preview.chainId+
+    '\nOriginal UserOp: '+preview.originalHash+
+    '\nNew max fee per gas: '+preview.quote.maxFeePerGas+' wei'+
+    '\nNew priority fee per gas: '+preview.quote.maxPriorityFeePerGas+' wei'+
+    '\nTarget: '+preview.transaction.to+
+    '\n\nTarget call preflight passed. Final EntryPoint simulation after passkey is mandatory. Continue?';
+  if(!window.confirm(message))return;
+  const result=await command('replacement-submit',{...context,confirmed:true,preview});
+  tell('Replacement submitted '+result.hash+'. Original operation is not marked replaced until canonical evidence.','warn');
+  await refresh();
+}
 function renderActivity(){
   const list=$('activity-list');list.replaceChildren();
   const items=state.wallet?.activity||[];
@@ -178,7 +197,26 @@ function renderActivity(){
     const side=node('div','asset-value');
     side.append(node('strong','',entry.status),node('small','',entry.hash?entry.hash.slice(0,10)+'…'+entry.hash.slice(-8):
       entry.userOpHash?'UserOp '+entry.userOpHash.slice(0,10)+'…'+entry.userOpHash.slice(-8):'Extension activity'));
-    row.append(info,side);list.append(row);
+    row.append(info,side);
+    const canReplace=entry.executionModel==='erc4337'&&
+      ['pending','submitted','reorganized'].includes(entry.status)&&
+      /^0x[0-9a-fA-F]{64}$/.test(entry.userOpHash||'')&&entry.nonce&&entry.callData&&
+      entry.maxFeePerGas&&entry.maxPriorityFeePerGas&&entry.entryPoint;
+    if(canReplace){
+      const actions=node('div','review-actions');
+      for(const [action,label] of [['speed-up','Speed up'],['cancel','Cancel pending']]){
+        const button=node('button','secondary',label);button.type='button';
+        button.addEventListener('click',async()=>{
+          button.disabled=true;
+          try{await replaceUserOperation420(entry,action);}
+          catch(error){tell('Replacement unavailable: '+error.message,'error');}
+          finally{button.disabled=false;}
+        });
+        actions.append(button);
+      }
+      row.append(actions);
+    }
+    list.append(row);
   }
 }
 function renderSites(){

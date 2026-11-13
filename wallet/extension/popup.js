@@ -269,7 +269,7 @@ async function applyWalletState420(next,expectedEpoch){
 }
 function renderAll(){
   if(!state.wallet)return;
-  summarizeNetwork();renderAccount();renderAssets();renderNFT420();renderActivity();renderSites();renderSettings();renderReceive();
+  summarizeNetwork();renderAccount();renderAssets();renderNFT420();renderActivity();renderSites();renderSettings();renderReceive();renderAddressBook420();
 }
 async function command(kind,extra={}){
   const response=await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind,...extra});
@@ -312,6 +312,20 @@ function prepareReview(){
   $('send-review').hidden=false;$('send-confirm').disabled=false;
   $('send-state').textContent='Review these exact details before confirming. The next step requires local passkey authority.';
   $('send-confirm').focus();
+}
+function renderAddressBook420(){
+  const chain=state.wallet?.network?.expectedChainId;
+  const contacts=(state.wallet?.addressBook||[]).filter(c=>c.chainId===chain);
+  const selector=$('send-contact'),suggestions=$('send-address-suggestions');
+  if(!selector||!suggestions)return;
+  const selected=selector.value;
+  selector.replaceChildren(new Option('Choose a saved contact',''));
+  suggestions.replaceChildren();
+  for(const contact of contacts){
+    selector.add(new Option(contact.label+' · '+shortExtensionAddress420(contact.address),contact.address));
+    const option=document.createElement('option');option.value=contact.address;option.label=contact.label;suggestions.append(option);
+  }
+  if(contacts.some(c=>c.address===selected))selector.value=selected;
 }
 function populateSend(){
   const symbol=state.wallet?.config?.nativeCurrency?.symbol||'420';
@@ -468,6 +482,37 @@ function setup(){
       if(await applyWalletState420(next,epoch))tell('Network preferences saved; network verification refreshed.');
       screen('dashboard');
     }catch(e){tell('Network save failed: '+e.message,'error');$('global-status').textContent='Network save failed: '+e.message;}
+    finally{button.disabled=false;}
+  });
+  $('send-contact').addEventListener('change',()=>{
+    const address=$('send-contact').value;
+    if(!address)return;
+    const contact=state.wallet?.addressBook?.find(c=>c.address===address&&c.chainId===state.wallet.network.expectedChainId);
+    if(!contact)return;
+    $('send-recipient').value=contact.address;
+    $('send-contact-label').value=contact.label;
+    resetReview();
+  });
+  $('send-save-contact').addEventListener('click',async()=>{
+    const button=$('send-save-contact');button.disabled=true;
+    try{
+      const address=$('send-recipient').value.trim(),label=$('send-contact-label').value.trim();
+      if(!label)throw new Error('Enter a nickname to save this recipient');
+      const chainId=state.wallet?.network?.expectedChainId;
+      const next=await command('addressbook-save',{chainId,address,label});
+      const epoch=state.epoch;
+      if(await applyWalletState420(next,epoch))tell('Saved recipient on this network.');
+    }catch(e){tell('Could not save recipient: '+e.message,'error');}
+    finally{button.disabled=false;}
+  });
+  $('send-delete-contact').addEventListener('click',async()=>{
+    const address=$('send-contact').value;if(!address)return;
+    const button=$('send-delete-contact');button.disabled=true;
+    try{
+      const next=await command('addressbook-delete',{chainId:state.wallet?.network?.expectedChainId,address});
+      if(await applyWalletState420(next,state.epoch))tell('Saved recipient removed.');
+      $('send-contact-label').value='';
+    }catch(e){tell('Could not remove recipient: '+e.message,'error');}
     finally{button.disabled=false;}
   });
   for(const id of ['send-asset','send-recipient','send-amount'])$(id).addEventListener('input',resetReview);

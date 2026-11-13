@@ -160,7 +160,7 @@ try{
   await page.locator('#convenience-pair-uri').fill('wc:'+'a'.repeat(64)+'@2?relay-protocol=irn&symKey='+'b'.repeat(64));
   await page.locator('#convenience-pair-form button[type=submit]').click();
   await page.waitForFunction(()=>document.querySelector('#convenience-pair-result')?.textContent.includes('Pairing unavailable'));
-  assert.match(await page.locator('#convenience-pair-result').textContent(),/explicit mobile pairing consent/);
+  assert.match(await page.locator('#convenience-pair-result').textContent(),/[Ee]xplicit mobile pairing consent/);
   const fullPagePromise=browser.waitForEvent('page');
   await page.locator('#convenience-full-page').click();
   const expanded=await fullPagePromise;

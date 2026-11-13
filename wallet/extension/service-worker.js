@@ -1,3 +1,9 @@
+import {readSecurityAllowance420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
+import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
+import {prepareSessionKeyRevocation,readSessionEpoch} from './core/session-management.js';
+import {inspectCapabilityGrant} from './core/capabilities.js';
+import {readDeployedSmartAccountState} from './core/accounts.js';
+import {keccak256Hex} from './core/keccak.js';
 import {normalizeDappAccountPermission420,dappAccountPermissions420,normalizeDappWalletCalls420,walletCapabilities420,walletCallsStatus420} from './core/extension-dapp-compatibility.js';
 import {normalizeBatchCalls,encodeExecuteBatch} from './core/batch-execution.js';
 import {Transaction} from './vendor/ethers-6.17.0.min.js';
@@ -21,6 +27,9 @@ const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
+const SECURITY_SIGNATURES_KEY='420-wallet-security-signature-history-v1';
+const SECURITY_WATCH_KEY='420-wallet-security-watch-v1';
+const SECURITY_REVIEW_KEY='420-wallet-security-reviews-v1';
 const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_gasPrice','eth_feeHistory','eth_maxPriorityFeePerGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
 const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
@@ -467,7 +476,10 @@ async function handleApprovalMethod(request, context) {
     const available = (await accountVisibility420(Array.isArray(config.accounts) ? config.accounts : [])).filter(a=>a===prefs.selectedAccount);
     if (!available.length) throw Object.assign(new Error('no wallet accounts available'), { code: 4100 });
     const before=await effectiveChain420(origin),pinned=before.chainId;
-    const decision = await createApproval({ ...request, availableAccounts: available },{...context,chainId:pinned,epoch:before.epoch});
+    const siteRisk=classifyWebsiteRisk420(origin);
+    const decision = await createApproval({ ...request, availableAccounts: available,securityRisk:siteRisk.flags.length?
+      {severity:'high',flags:siteRisk.flags,summary:'Unverified or suspicious website origin'}:null
+    },{...context,chainId:pinned,epoch:before.epoch});
     const selected = Array.isArray(decision.accounts)&&decision.accounts.length?decision.accounts:available;
     if(selected.length!==1||selected[0]!==prefs.selectedAccount)
       throw Object.assign(new Error('Approval account no longer matches the selection'),{code:4100});
@@ -535,8 +547,15 @@ async function handleApprovalMethod(request, context) {
     const risk=inspectExtensionApprovalRisk420(normalizedTx);
     feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:eoa?'eoa':'erc4337'};
   }
-  await createApproval(feePreview?{...request,feePreview}:request,
-    { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
+  const signatureRisk=['personal_sign','eth_signTypedData_v4'].includes(request.method)?
+    assessSecuritySignature420(request.method,request.params,{chainId:pinned,origin}):null;
+  const siteRisk=classifyWebsiteRisk420(origin);
+  await createApproval({
+    ...request,...(feePreview?{feePreview}:{}),
+    ...(signatureRisk?{securityRisk:signatureRisk}:
+       siteRisk.flags.length?{securityRisk:{severity:'high',flags:siteRisk.flags,
+         summary:'Suspicious website domain'}}:{})
+  },{ ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
   if((await effectiveChain420(origin)).epoch!==before.epoch)
     throw Object.assign(new Error('Chain changed during approval'),{code:4901});
   const current=await accountsFor(origin);
@@ -609,9 +628,17 @@ async function handleApprovalMethod(request, context) {
     signerMeta[current[0]]?.type==='eoa';
   if(isEoaSignature&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Unlock the local EOA vault before signing'),{code:4100});
-  return executeWithLocalAuthority(
+  const result=await executeWithLocalAuthority(
     isEoaSignature?{...request,executionModel:'eoa'}:request,
     { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
+  if(signatureRisk){
+    const item=securityRecordSignature420({origin,method:request.method,
+      account:current[0],chainId:pinned,risk:signatureRisk});
+    const history=(await chrome.storage.local.get(SECURITY_SIGNATURES_KEY))?.[SECURITY_SIGNATURES_KEY]||[];
+    await chrome.storage.local.set({[SECURITY_SIGNATURES_KEY]:
+      [item,...(Array.isArray(history)?history:[])].slice(0,150)});
+  }
+  return result;
 }
 
 

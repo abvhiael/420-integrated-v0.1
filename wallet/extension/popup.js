@@ -439,7 +439,7 @@ async function copy(value){
 function prettyRequest(request){
   if(!request)return '';
   if(request.method==='eth_requestAccounts')return 'Connect this site to 420 Wallet.';
-  if(request.method==='eth_sendTransaction'){
+  if(request.method==='eth_sendTransaction'||request.method==='wallet_sendCalls'){
     const preview=request.feePreview;
     return JSON.stringify(request.params?.[0]??{},null,2)+
       (preview?'\n\nON-CHAIN TRANSACTION REVIEW\nChain: '+preview.chainId+
@@ -474,7 +474,7 @@ async function approval(){
   $('details').textContent=prettyRequest(approval.request);
   const risk=approval.request.feePreview?.risk;
   const acknowledgement=$('approval-risk-ack'),checkbox=$('approval-risk-check');
-  const highRisk=approval.request.method==='eth_sendTransaction'&&
+  const highRisk=['eth_sendTransaction','wallet_sendCalls'].includes(approval.request.method)&&
     ['high','critical'].includes(risk?.severity);
   acknowledgement.hidden=!highRisk;checkbox.checked=false;
   $('approve').disabled=highRisk;

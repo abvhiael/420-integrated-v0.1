@@ -110,7 +110,7 @@ async function readAssetPortfolio420(state){
   }
   blank.blockNumber=block.toString();
   const checkedAt=Date.now(),pending=(await readWalletUiActivity420()).filter(x=>
-    x.controller===selectedAccount&&x.chainId===chainId&&x.status==='pending').length;
+    x.controller===selectedAccount&&x.chainId===chainId&&['pending','submitted','included','confirming','reorganized'].includes(x.status)).length;
   const nativeNetwork=chain.network.nativeCurrency;
   let native;
   try{

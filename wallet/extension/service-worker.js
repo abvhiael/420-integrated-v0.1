@@ -2263,6 +2263,13 @@ async function convenienceCommand420(message){
    const permission=assertGenesisNavigationSnapshot420(message.snapshot,current,{account:before.selectedAccount,chainId:chain});
    const after=await walletUiState420();
    const now=normalizeConvenience420((await chrome.storage.local.get(CONVENIENCE_KEY420))?.[CONVENIENCE_KEY420]);
+   const freshConfig=await readObject(EXTENSION_CONFIG_KEY_420);
+   const freshService=freshConfig.ecosystemServices?.find(x=>x.serviceId===message.serviceId);
+   // Config changes or service delisting during the asynchronous Registry check
+   // cannot publish a navigable destination from a stale local manifest.
+   if(JSON.stringify(freshConfig.ecosystemRegistry)!==JSON.stringify(raw.ecosystemRegistry)||
+      JSON.stringify(freshService)!==JSON.stringify(declared))
+     throw Object.assign(new Error('Genesis service publication changed during review'),{code:4901});
    if(!now.privacy.serviceDiscovery||after.network.status!=='matched'||
       after.network.expectedChainId!==chain||after.network.epoch!==epoch||after.selectedAccount!==before.selectedAccount)
      throw Object.assign(new Error('Wallet account or network changed before application launch'),{code:4901});

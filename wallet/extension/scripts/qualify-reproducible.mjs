@@ -31,7 +31,8 @@ const ff=JSON.parse(await readFile(join(firefox,'manifest.json'),'utf8'));
 assert.deepEqual(ff.background,{scripts:['service-worker.js'],type:'module'});
 assert.equal(ff.background.service_worker,undefined);
 assert.equal(ff.externally_connectable,undefined);
-assert.equal(ff.browser_specific_settings.gecko.strict_min_version,'128.0');
+assert.equal(ff.browser_specific_settings.gecko.strict_min_version,'140.0');
+assert.deepEqual(ff.browser_specific_settings.gecko.data_collection_permissions.required,['none']);
 if(process.env.WALLET_PRODUCTION_RELEASE==='1'){
  for(const file of ['vendor/trezor-connect-10.bundle.js','vendor/walletconnect-walletkit.bundle.js']){
   assert(firstInv.some(([path])=>path===file),'Release SDK bundle missing: '+file);
@@ -39,8 +40,12 @@ if(process.env.WALLET_PRODUCTION_RELEASE==='1'){
  // A reproducible build from already installed deps is necessary but not
  // sufficient. A committed transitive dependency lock and independent audit
  // are release gates, never bypassed by this checker.
- assert.equal(process.env.WALLET_EXTERNAL_AUDIT_APPROVED,'true','Independent external custody/security audit required');
+ const {readFile:readReleaseLock}=await import('node:fs/promises');
+ const packageLock=JSON.parse(await readReleaseLock(join(second,'..','package-lock.json'),'utf8'));
+ assert(packageLock.lockfileVersion>=3&&packageLock.packages?.['node_modules/@reown/walletkit']?.integrity,
+   'Release requires a committed npm integrity lockfile for transitive dependencies');
+ throw new Error('Independent external custody/authorization/cryptography audit has not been verified; release blocked');
 }
 console.log('PASS: byte-for-byte double-build Chromium, distinct Firefox event-page manifest, common code digest parity');
-console.log('Chromium SHA256 inventory:',JSON.stringify(firstInv));
-console.log('Firefox SHA256 inventory:',JSON.stringify(ffInv));
+console.log('Chromium combined artifact SHA256:',digest(JSON.stringify(firstInv)),'files:',firstInv.length);
+console.log('Firefox combined artifact SHA256:',digest(JSON.stringify(ffInv)),'files:',ffInv.length);

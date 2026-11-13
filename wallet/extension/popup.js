@@ -171,14 +171,17 @@ async function replaceUserOperation420(entry,action){
     epoch:state.wallet?.network?.epoch,account:state.wallet?.selectedAccount};
   const preview=await command('replacement-preflight',context);
   const description=action==='cancel'
-    ?'Cancel pending transfer by signing a zero-value, no-data call to the verified EOA owner. Cancellation is NOT guaranteed until confirmed.'
-    :'Speed up the pending transfer using a new passkey-signed UserOperation with the SAME sender and full nonce.';
+    ?'Cancel the pending transfer by signing a zero-value self-transaction for this exact nonce. Cancellation is not guaranteed until confirmed.'
+    :entry.executionModel==='eoa'
+      ?'Speed up with a locally signed EIP-1559 transaction using the SAME chain, sender, nonce and original call.'
+      :'Speed up with a new passkey-signed UserOperation using the SAME sender and FULL nonce.';
   const message=description+'\n\nChain: '+preview.chainId+
-    '\nOriginal UserOp: '+preview.originalHash+
+    '\nOriginal '+(entry.executionModel==='eoa'?'transaction':'UserOp')+': '+preview.originalHash+
     '\nNew max fee per gas: '+preview.quote.maxFeePerGas+' wei'+
     '\nNew priority fee per gas: '+preview.quote.maxPriorityFeePerGas+' wei'+
     '\nTarget: '+preview.transaction.to+
-    '\n\nTarget call preflight passed. Final EntryPoint simulation after passkey is mandatory. Continue?';
+    '\n\nTarget simulation passed. '+(entry.executionModel==='eoa'?
+      'Local EOA password signing is required.':'Final EntryPoint simulation after passkey is mandatory.')+' Continue?';
   if(!window.confirm(message))return;
   const result=await command('replacement-submit',{...context,confirmed:true,preview});
   tell('Replacement submitted '+result.hash+'. Original operation is not marked replaced until canonical evidence.','warn');
@@ -198,10 +201,14 @@ function renderActivity(){
     side.append(node('strong','',entry.status),node('small','',entry.hash?entry.hash.slice(0,10)+'…'+entry.hash.slice(-8):
       entry.userOpHash?'UserOp '+entry.userOpHash.slice(0,10)+'…'+entry.userOpHash.slice(-8):'Extension activity'));
     row.append(info,side);
-    const canReplace=entry.executionModel==='erc4337'&&
-      ['pending','submitted','reorganized'].includes(entry.status)&&
-      /^0x[0-9a-fA-F]{64}$/.test(entry.userOpHash||'')&&entry.nonce&&entry.callData&&
-      entry.maxFeePerGas&&entry.maxPriorityFeePerGas&&entry.entryPoint;
+    const canReplace=(
+      (entry.executionModel==='erc4337'&&
+        /^0x[0-9a-fA-F]{64}$/.test(entry.userOpHash||'')&&
+        entry.nonce&&entry.callData&&entry.maxFeePerGas&&entry.maxPriorityFeePerGas&&entry.entryPoint)
+      ||(entry.executionModel==='eoa'&&
+        /^0x[0-9a-fA-F]{64}$/.test(entry.hash||'')&&
+        entry.nonce&&entry.from&&entry.to&&entry.maxFeePerGas&&entry.maxPriorityFeePerGas)
+      )&&['pending','submitted','reorganized'].includes(entry.status);
     if(canReplace){
       const actions=node('div','review-actions');
       for(const [action,label] of [['speed-up','Speed up'],['cancel','Cancel pending']]){
@@ -380,19 +387,23 @@ async async function prepareReview(){
   $('review-recipient').textContent=recipientSnapshot.kind==='address'?transaction.summary.recipient:
     recipientSnapshot.input+' → '+transaction.summary.recipient+' (resolved on '+context.chainId+')';
   $('review-chain').textContent=context.chainId;
-  $('review-sender').textContent=w.account.smartAccount;
+  $('review-sender').textContent=w.account.kind==='eoa'?w.account.controller:w.account.smartAccount;
   $('review-max-fee').textContent=quote.maxFeePerGas+' wei/gas';
   $('review-priority-fee').textContent=quote.maxPriorityFeePerGas+' wei/gas';
-  $('review-aa-gas').textContent=quote.gasBudget?
-    ('Call '+BigInt(quote.gasBudget.callGasLimit).toString()+
-      ', verification '+BigInt(quote.gasBudget.verificationGasLimit).toString()+
-      ', pre-verification '+BigInt(quote.gasBudget.preVerificationGas).toString()):'Unavailable';
+  $('review-aa-gas').textContent=quote.executionModel==='eoa'?
+    ('EOA EIP-1559 limit: '+BigInt(quote.gasLimit).toString()+' gas'):
+    quote.gasBudget?
+      ('Call '+BigInt(quote.gasBudget.callGasLimit).toString()+
+        ', verification '+BigInt(quote.gasBudget.verificationGasLimit).toString()+
+        ', pre-verification '+BigInt(quote.gasBudget.preVerificationGas).toString()):'Unavailable';
   $('review-total-fee').textContent=quote.totalFeeWei===null?
     'Unavailable — transaction blocked':'Up to '+quote.totalFeeWei+' wei (no sponsorship assumed)';
   $('review-simulation').textContent='Target call passed; this does NOT prove account-abstraction execution.';
-  $('review-entrypoint').textContent=quote.gasBudget?.estimateVerified?
-    'Bundler gas quote verified before confirmation. Signed EntryPoint execution must still pass before broadcast.':
-    'Bundler estimate unavailable — cannot sign or submit.';
+  $('review-entrypoint').textContent=quote.executionModel==='eoa'?
+    'Not applicable: local vault EOA signs the reviewed EIP-1559 transaction and verifies the signature envelope.':
+    quote.gasBudget?.estimateVerified?
+      'Bundler gas quote verified before confirmation. Signed EntryPoint execution must still pass before broadcast.':
+      'Bundler estimate unavailable — cannot sign or submit.';
   $('send-review').hidden=false;$('send-confirm').disabled=false;
   $('send-state').textContent='Review verified bundler gas caps and worst-case fee exposure. Target call passed. Final signed EntryPoint simulation is still required before submission.';
   $('send-confirm').focus();

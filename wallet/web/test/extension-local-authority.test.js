@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createExtensionLocalAuthority420, serializeExtensionUserOperation420 } from '../core/extension-local-authority.js';
+import { createExtensionLocalAuthority420, serializeExtensionUserOperation420, waitForExtensionUserOperationReceipt420 } from '../core/extension-local-authority.js';
 
 const ACCOUNT = '0x1111111111111111111111111111111111111111';
 const SMART = '0x2222222222222222222222222222222222222222';
@@ -70,4 +70,13 @@ test('UserOperation serialization emits RPC quantities and preserves signed enve
   assert.equal(serialized.nonce, '0x4');
   assert.equal(serialized.preVerificationGas, '0x5208');
   assert.equal(serialized.signature, '0xdeadbeef');
+});
+
+test('ERC-4337 receipt timeout exposes UserOperation hash as pending without suggesting rebroadcast', async () => {
+  const opHash='0x'+'ab'.repeat(32);
+  await assert.rejects(
+    waitForExtensionUserOperationReceipt420({request:async()=>null},opHash,{timeoutMs:-1}),
+    error=>error.code===4900&&error.data?.userOpHash===opHash&&error.data?.pending===true&&
+      /do not rebroadcast/.test(error.message),
+  );
 });

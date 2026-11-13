@@ -1014,8 +1014,13 @@ async function finalizeWalletUiState420(state){
   return state;
 }
 async function walletUiState420() {
+  // Read one immutable network-registry snapshot for both the selected chain
+  // and its native-currency identity. Parallel popup refreshes and user chain
+  // changes must not combine 420 from a previous chain with an ETH selection.
   const registry=await networkRegistry420();
-  const active=await effectiveChain420().catch(()=>null);
+  const active=registry.selectedChainId&&registry.networks[registry.selectedChainId]?.enabled?
+    {registry,chainId:registry.selectedChainId,
+      network:registry.networks[registry.selectedChainId],epoch:registry.epoch}:null;
   const raw=await readObject(EXTENSION_CONFIG_KEY_420);
   const config=normalizeExtensionConfig420({...raw,chainId:active?.chainId||null,
     rpcUrl:active?.network.rpcUrls[0]||null,explorerUrl:active?.network.blockExplorerUrls[0]||null,

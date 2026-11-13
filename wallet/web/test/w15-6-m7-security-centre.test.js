@@ -196,3 +196,42 @@ test('approval discovery refuses unbounded log results, wrong-chain provider and
  await assert.rejects(discoverRecentSecurityAllowances420(malformed,{
   chainId,owner:account,tokens:[token]}),/Unbounded or malformed/);
 });
+
+test('capability revocation executes through owner-only SmartAccount and canonical verified registry',async()=>{
+ const grantId='0x'+'ab'.repeat(32),component='0x'+'cd'.repeat(32),
+  scope='0x'+'de'.repeat(32),capability='0x'+'ef'.repeat(32);
+ const wd=x=>x.slice(2).padStart(64,'0');
+ const grantResult='0x'+[
+   wd(spender),wd(component),wd(capability),wd(scope),q(0).slice(2),q(0).slice(2),
+   q(0).slice(2),q(1).slice(2),q(0).slice(2),q(0).slice(2)
+ ].join('');
+ const calls=[];
+ const p={request:async(method,params=[])=>{
+  calls.push({method,params});
+  if(method==='eth_chainId')return chainId;
+  if(method==='eth_getCode')return '0x6001600055';
+  if(method==='eth_estimateGas')return '0x186a0';
+  if(method==='eth_call'){
+   const data=params[0]?.data||'';
+   if(data.startsWith('0x2b081d1d'))return component;
+   if(data.startsWith('0x918e9de3'))return grantResult;
+   if(data.startsWith('0x4a8f2a54'))return '0x'+q(0).slice(2)+q(0).slice(2);
+   if(data.startsWith('0xbe737654'))return '0x';
+   throw Error('unexpected method selector '+data);
+  }
+  throw Error('unexpected '+method);
+ }};
+ const prepared=await prepareSecurityRevocation420(p,{
+  kind:'capability',chainId,account,smartState:smart,grantId});
+ assert.equal(prepared.transaction.to,smartAccount);
+ assert.equal(prepared.transaction.from,account);
+ assert.equal(prepared.transaction.data,'0xbe737654'+grantId.slice(2));
+ assert.equal(prepared.record.authorizationEpoch,'9');
+ assert.equal(prepared.authority,'smartaccount-canonical-owner');
+ assert.equal(calls.some(x=>x.method.startsWith('eth_send')),false);
+ await assert.rejects(prepareSecurityRevocation420(p,{
+  kind:'capability',chainId,account:token,smartState:smart,grantId}),/owner authorization/);
+ const bad=smart?{...smart,verifiedCapabilityRegistry:token}:null;
+ await assert.rejects(prepareSecurityRevocation420(p,{
+  kind:'capability',chainId,account,smartState:bad,grantId}),/canonical CapabilityRegistry420/);
+});

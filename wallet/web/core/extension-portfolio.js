@@ -128,7 +128,8 @@ export function normalizedPortfolioSettings420(record={}){
   const nftIndexFrom=typeof record.nftIndexFrom==='string'&&/^\d+$/.test(record.nftIndexFrom)?
     record.nftIndexFrom:null;
   return {tokens,hidden:[...new Set(hidden)],spam:[...new Set(spam)],
-    nftHidden:nftKeys(record.nftHidden),nftSpam:nftKeys(record.nftSpam),nftIndexFrom,
+    nftHidden:nftKeys(record.nftHidden),nftSpam:nftKeys(record.nftSpam),
+    nftTrusted:nftKeys(record.nftTrusted),nftIndexFrom,
     priceEndpoint,
     fiatCurrency:/^(CAD|USD|EUR|GBP)$/.test(record.fiatCurrency)?record.fiatCurrency:'CAD',
     discoveryFrom:typeof record.discoveryFrom==='string'&&/^\d+$/.test(record.discoveryFrom)?record.discoveryFrom:'0'};

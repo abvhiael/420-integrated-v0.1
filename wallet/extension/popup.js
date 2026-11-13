@@ -1,3 +1,4 @@
+import qrcode from './vendor/qrcode.mjs';
 import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,extensionReceiveAddress420,extensionNetworkLabel420,buildExtensionSend420,formatExtensionUnitsExact420} from './core/extension-wallet-ui.js';
 
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
@@ -233,8 +234,33 @@ function renderSettings(){
 }
 function renderReceive(){
   const address=extensionReceiveAddress420(state.wallet);
+  const canvas=$('receive-qr'),network=$('receive-qr-network');
   $('receive-address').textContent=address||'Unavailable';
   $('copy-receive').disabled=!address;
+  canvas.hidden=true;
+  if(address){
+    try{
+      // Encode the exact same canonical address shown and copied by this screen, locally.
+      // Do not make network requests or embed unverified ENS/420Names in a QR.
+      const qr=qrcode(0,'M');qr.addData(address,'Byte');qr.make();
+      const modules=qr.getModuleCount(),quiet=4,side=canvas.width,scale=side/(modules+2*quiet);
+      const ctx=canvas.getContext('2d');
+      if(!ctx)throw new Error('Canvas unavailable');
+      ctx.fillStyle='#ffffff';ctx.fillRect(0,0,side,side);
+      ctx.fillStyle='#000000';
+      for(let row=0;row<modules;row++)for(let col=0;col<modules;col++){
+        if(!qr.isDark(row,col))continue;
+        const x0=Math.round((col+quiet)*scale),y0=Math.round((row+quiet)*scale);
+        const x1=Math.round((col+quiet+1)*scale),y1=Math.round((row+quiet+1)*scale);
+        ctx.fillRect(x0,y0,x1-x0,y1-y0);
+      }
+      canvas.hidden=false;
+      network.textContent='Address-only QR · '+(state.wallet?.network?.name||'Selected network')+
+        ' · '+state.wallet?.network?.expectedChainId+'. Always verify the network before sending.';
+    }catch(error){network.textContent='QR unavailable: '+error.message+'; the verified address can still be copied.';}
+  }else{
+    network.textContent='QR unavailable until the network and selected receiving address are verified.';
+  }
   $('receive-warning').textContent=address?'Confirm the exact network and account address before transferring funds.':'A matching chain and an available account are required before receiving.';
   $('receive-warning').className='notice'+(address?'':' warn');
 }

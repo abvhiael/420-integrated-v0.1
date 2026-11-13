@@ -82,7 +82,8 @@ export function extensionCanSend420(state){
   if(state?.network?.status!=='matched'||!state?.account?.controller)return false;
   if(state.account.kind==='eoa')return state.vault?.unlocked===true&&
     state.selectedAccount===state.account.controller;
-  if(['watch-only','hardware'].includes(state?.account?.kind))return false;
+  if(state.account.kind==='hardware')return state.selectedAccount===state.account.controller&&state.config?.accountMeta?.[state.selectedAccount]?.signingQualified===true;
+  if(state.account.kind==='watch-only')return false;
   return Boolean(state.account.deployed===true&&state.account.ownerVerified===true&&state.account.smartAccount);
 }
 export function extensionReceiveAddress420(state){

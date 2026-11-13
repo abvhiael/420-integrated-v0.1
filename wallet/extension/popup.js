@@ -505,7 +505,7 @@ setup();
 if(!approvalId){
   chrome.storage.onChanged?.addListener((changes,area)=>{
     if(area!=='local')return;
-    if(['420-wallet-portfolio-block-v1','420-wallet-portfolio-settings-v1',
+    if(['420-wallet-portfolio-block-v1',
       '420-wallet-networks-v1','420-wallet-origin-networks-v1','420-wallet-extension-config-v1',
       '420-wallet-ui-preferences-v1'].some(key=>Object.hasOwn(changes,key))){
       resetReview();

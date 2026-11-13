@@ -126,6 +126,10 @@ try{
   });
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   await page.locator('[data-screen="dashboard"]').click();
+  await page.waitForFunction(async()=>{
+    const registry=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+    return registry?.selectedChainId==='0x1'&&document.querySelector('#native-symbol')?.textContent==='ETH';
+  },undefined,{timeout:15000});
   assert.equal(await page.locator('#native-symbol').textContent(),'ETH');
   const epochAfterSwitch=await page.evaluate(async()=>((await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1']).epoch);
   assert.ok(epochAfterSwitch>1,'chain switch advances context epoch');

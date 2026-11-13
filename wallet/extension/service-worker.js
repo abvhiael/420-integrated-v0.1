@@ -492,6 +492,9 @@ async function finalizeWalletUiState420(state){
     state.portfolio={status:state.network.status,account:state.selectedAccount,chainId:state.network.expectedChainId,
       native:null,tokens:[],nfts:[],currency:'CAD',priceStatus:{status:'unavailable'}};
   }
+  const latest=await networkRegistry420();
+  if(latest.epoch!==state.network.epoch||latest.selectedChainId!==state.registry.selectedChainId)
+    throw Object.assign(new Error('Network changed during portfolio refresh'),{code:4901});
   return state;
 }
 async function walletUiState420() {

@@ -87,6 +87,8 @@
           <input id="nft-quantity" type="number" min="1" step="1" value="1" required>
           <label for="nft-collection-wide"><input id="nft-collection-wide" type="checkbox">
             Collection-wide approval — gives this operator permission for all NFTs in this collection</label>
+          <button id="nft-inspect-approval" type="button" class="secondary wide">Inspect on-chain approval state</button>
+          <p id="nft-approval-status" class="notice" role="status">On-chain operator approval has not been inspected.</p>
           <button id="nft-review-button" class="primary wide" type="submit">Review transaction and network fees</button>
         </form>
         <div id="nft-review" class="review-box" hidden>

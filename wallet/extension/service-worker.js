@@ -1225,6 +1225,42 @@ async function handleWalletUi420(message) {
       throw error;
     }
   }
+  if(kind==='send-native-max'){
+    const state=await walletUiState420();
+    if(state.account.kind!=='eoa'||!extensionCanSend420(state)||
+       state.selectedAccount!==message.account||
+       state.network.expectedChainId!==message.chainId||
+       state.network.epoch!==message.epoch)
+      throw Object.assign(new Error('Unlocked EOA and unchanged verified chain required'),{code:4100});
+    const provider={request:(method,params)=>rpcRequest(method,params,
+      {expectedChainId:state.network.expectedChainId})};
+    const qualifiedNamesConfig=(await readObject(EXTENSION_CONFIG_KEY_420)).qualifiedNamesRuntime||null;
+    const resolved=await resolveExtensionRecipient420(provider,{
+      input:message.recipient,chainId:message.chainId,qualifiedNamesConfig});
+    const choice=normalizeExtensionFeeChoice420(message.feeChoice);
+    const quote=await quoteExtensionEoa420(provider,{
+      chainId:message.chainId,from:state.selectedAccount,
+      transaction:{to:resolved.recipient,value:'0x0',data:'0x'},choice});
+    const balance=await provider.request('eth_getBalance',[state.selectedAccount,'pending']);
+    if(typeof balance!=='string'||!/^0x[0-9a-fA-F]+$/.test(balance))
+      throw new Error('Verified pending EOA balance unavailable');
+    const available=BigInt(balance)-BigInt(quote.totalFeeWei);
+    if(available<=0n)throw new Error('Insufficient EOA balance after maximum EIP-1559 gas cost');
+    const newQuote=await quoteExtensionEoa420(provider,{
+      chainId:message.chainId,from:state.selectedAccount,
+      transaction:{to:resolved.recipient,value:'0x'+available.toString(16),data:'0x'},choice});
+    if(quote.nonce!==newQuote.nonce||quote.gasLimit!==newQuote.gasLimit||
+       quote.maxFeePerGas!==newQuote.maxFeePerGas||
+       quote.maxPriorityFeePerGas!==newQuote.maxPriorityFeePerGas||
+       quote.blockHash!==newQuote.blockHash)
+      throw new Error('Gas cost or EOA nonce changed during Max; recompute');
+    const active=await effectiveChain420();
+    if(active.chainId!==message.chainId||active.epoch!==message.epoch)
+      throw new Error('Network changed while computing native Max');
+    return {raw:available.toString(),decimals:state.config.nativeCurrency.decimals,
+      symbol:state.config.nativeCurrency.symbol,recipientSnapshot:resolved,
+      feeWei:quote.totalFeeWei,nonce:quote.nonce};
+  }
   if(kind==='send-preflight'){
     const state=await walletUiState420();
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||

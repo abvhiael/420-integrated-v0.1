@@ -57,7 +57,7 @@ export function extensionBalanceText420(raw,decimals=18,maxPrecision=5){
   return whole.toLocaleString('en-US')+(fraction?'.'+fraction:'');
 }
 export function formatExtensionUnitsExact420(raw,decimals=18){
-  if(typeof raw!=='string'||!/^\\d+$/.test(raw))throw new Error('verified raw balance required');
+  if(typeof raw!=='string'||!/^\d+$/.test(raw))throw new Error('verified raw balance required');
   if(!Number.isInteger(decimals)||decimals<0||decimals>255)throw new Error('invalid token decimals');
   const n=BigInt(raw),scale=10n**BigInt(decimals);
   const fraction=decimals?(n%scale).toString().padStart(decimals,'0').replace(/0+$/,''):'';

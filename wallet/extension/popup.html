@@ -21,13 +21,13 @@
         <h1 id="dashboard-title" class="screen-title">Overview</h1>
         <div id="vault-banner" class="vault-banner"><div><strong id="vault-title">Secure wallet</strong><span id="vault-description">Create or unlock your encrypted wallet.</span></div><button id="open-wallet" type="button" class="secondary">Open vault</button></div>
         <div class="account-panel">
-          <div class="account-head"><span class="eyebrow">SMART ACCOUNT</span><button id="copy-account" class="quiet-button" type="button" disabled>Copy <span aria-hidden="true">⧉</span></button></div>
+          <div class="account-head"><span class="eyebrow">SELECTED EVM ACCOUNT</span><button id="copy-account" class="quiet-button" type="button" disabled>Copy <span aria-hidden="true">⧉</span></button></div>
           <label class="sr-only" for="account-select">Controller account</label>
           <select id="account-select" aria-label="Select controller account" disabled><option>Connect an account</option></select>
           <div id="account-address" class="account-address" aria-live="polite">No verified wallet address</div>
           <span id="account-state" class="account-footnote">SmartAccount verification required</span>
           <div class="balance-label">NATIVE BALANCE</div>
-          <div class="balance-line"><span id="native-balance" class="balance-number">—</span><span class="currency">420</span></div>
+          <div class="balance-line"><span id="native-balance" class="balance-number">—</span><span class="currency" id="native-symbol">420</span></div>
           <p class="balance-detail" id="balance-note">Actual network balances will appear here when your account and chain are verified.</p>
         </div>
         <div class="quick-actions" aria-label="Wallet actions">
@@ -37,6 +37,7 @@
           <button id="quick-refresh" class="action" type="button"><span class="action-icon" aria-hidden="true">↻</span><span>Refresh</span></button>
         </div>
         <div class="section-head"><h2>Assets</h2><span class="subtle">On-chain balances</span></div>
+        <div class="network-assets"><button id="aggregate-assets" type="button" class="secondary">Balances across enabled networks</button><div id="aggregate-list" aria-live="polite"></div></div>
         <div id="asset-list" class="asset-list" aria-live="polite"><p class="empty">Checking your wallet…</p></div>
         <div class="notice" id="dashboard-notice" role="status">Wallet status will appear here.</div>
       </section>
@@ -60,7 +61,22 @@
         <h1 id="settings-title" class="screen-title">Settings</h1>
         <div class="settings-panel">
           <h2>Network configuration</h2>
-          <p class="intro">Only configure an approved network. The RPC is transport, not an account or signing authority. Incorrect settings block transactions.</p>
+          <label for="network-select">Active network</label>
+          <select id="network-select" aria-label="Select EVM network"></select>
+          <button id="switch-network" type="button" class="secondary">Switch &amp; verify network</button>
+          <div id="network-health" class="notice" role="status">Network health not checked.</div>
+          <h2>Add a custom network</h2>
+          <form id="add-network-form">
+            <label for="new-chain-name">Network name</label><input id="new-chain-name" maxlength="80" required placeholder="EVM network">
+            <label for="new-chain-id">Chain ID (hex)</label><input id="new-chain-id" required placeholder="0x1">
+            <label for="new-rpc-urls">RPC endpoints (one per line, HTTPS)</label><textarea id="new-rpc-urls" rows="3" required placeholder="https://rpc.example.org"></textarea>
+            <label for="new-currency-name">Native currency name</label><input id="new-currency-name" required placeholder="Ether">
+            <label for="new-currency-symbol">Native currency symbol</label><input id="new-currency-symbol" required maxlength="12" placeholder="ETH">
+            <label for="new-currency-decimals">Native currency decimals</label><input id="new-currency-decimals" required type="number" min="0" max="36" value="18">
+            <label for="new-explorers">Explorer URLs (one per line, optional)</label><textarea id="new-explorers" rows="2" placeholder="https://explorer.example.org"></textarea>
+            <button class="primary wide" type="submit">Validate &amp; add network</button>
+          </form>
+          <p class="intro">Custom network endpoints are untrusted until their chain IDs are verified. They do not provide SmartAccount420 signing authority. Use multiple RPC endpoints for failover. Any chain switch clears the transaction review.</p>
           <form id="network-form">
             <label for="rpc-url">RPC endpoint</label><input id="rpc-url" type="url" placeholder="https://rpc.example.org" autocomplete="off" spellcheck="false">
             <label for="expected-chain">Expected chain ID (hex)</label><input id="expected-chain" type="text" placeholder="0x1a4" autocomplete="off" spellcheck="false">
@@ -79,8 +95,8 @@
       <section id="receive-view" class="view" hidden aria-labelledby="receive-title">
         <button type="button" class="back-button" data-back>‹ Wallet</button>
         <h1 id="receive-title" class="screen-title">Receive</h1>
-        <p class="intro">Send 420 or a supported token to your canonical SmartAccount420 address on the verified network only.</p>
-        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>SmartAccount420</strong><div id="receive-address" class="full-address">Unavailable</div><button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
+        <p class="intro">Receive the selected network's native currency or ERC-20 tokens at this address only after confirming your network.</p>
+        <div class="receive-card"><div class="receive-icon" aria-hidden="true">↙</div><strong>Selected account</strong><div id="receive-address" class="full-address">Unavailable</div><button id="copy-receive" class="primary wide" type="button" disabled>Copy address</button></div>
         <p id="receive-warning" class="notice">Network and account verification required.</p>
       </section>
 

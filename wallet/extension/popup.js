@@ -3,7 +3,7 @@ import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,ext
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
 const $=id=>document.getElementById(id);
-const state={wallet:null,screen:'dashboard',prepared:null,submitting:false};
+const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0};
 const node=(tag,cls,text)=>{
   const el=document.createElement(tag);if(cls)el.className=cls;
   if(text!==undefined)el.textContent=text;return el;
@@ -57,6 +57,7 @@ function renderAccount(){
   $('quick-receive').disabled=!address;
   $('quick-send').disabled=!extensionCanSend420(w);
   $('native-balance').textContent=w.assets.native?extensionBalanceText420(w.assets.native.raw,w.assets.native.decimals):'—';
+  $('native-symbol').textContent=w.config.nativeCurrency?.symbol||'420';
   $('balance-note').textContent=w.network.status==='matched'&&address?'Chain-derived balance. No fiat value is inferred.':'Connect to the approved chain and verify your SmartAccount to display balances.';
   const status=['eoa','watch-only','hardware'].includes(w.account.kind) ?
     (w.network.status==='matched'?w.account.reason:'Set up your verified EVM network to display address balances.') :
@@ -72,11 +73,12 @@ function renderAssets(){
     list.append(node('p','empty','No verified balances. Configure your network and canonical SmartAccount to view assets.'));
     return;
   }
-  const assets=[{symbol:'420',label:'Native 420',...w.assets.native},
+  const nativeSymbol=w.config.nativeCurrency?.symbol||'420';
+  const assets=[{symbol:nativeSymbol,label:'Native '+nativeSymbol,...w.assets.native},
     ...(w.assets.tokens||[]).map(t=>({...t,label:t.symbol||'Token'}))];
   for(const [index,asset] of assets.entries()){
     const line=node('div','asset-row');
-    line.append(node('div','token-icon'+(index?' alt':''),index?String(asset.symbol||'T').slice(0,2).toUpperCase():'420'));
+    line.append(node('div','token-icon'+(index?' alt':''),index?String(asset.symbol||'T').slice(0,2).toUpperCase():nativeSymbol.slice(0,3).toUpperCase()));
     const info=node('div','asset-info');
     info.append(node('strong','',asset.label||asset.symbol),node('small','',index?'ERC-20 · '+shortExtensionAddress420(asset.address):'Native asset · '+w.network.name));
     const val=node('div','asset-value');
@@ -107,12 +109,28 @@ function renderSites(){
   for(const site of sites){
     const card=node('div','site-row');
     const info=node('div','site-info');
-    info.append(node('strong','',site.origin),node('small','',site.accounts.map(shortExtensionAddress420).join(', ')));
+    info.append(node('strong','',site.origin),
+      node('small','',site.accounts.length?site.accounts.map(shortExtensionAddress420).join(', '):'No account permission'));
+    const choose=node('select','site-network-select');
+    choose.setAttribute('aria-label','Selected network for '+site.origin);
+    for(const network of Object.values(state.wallet?.registry?.networks||{})){
+      if(network.enabled&&network.rpcUrls?.length)choose.add(new Option(network.chainName+' · '+network.chainId,network.chainId));
+    }
+    choose.value=site.chainId||state.wallet?.registry?.selectedChainId||'';
+    choose.addEventListener('change',async()=>{
+      try{
+        resetReview();const epoch=++state.epoch;
+        const next=await command('site-network',{origin:site.origin,chainId:choose.value});
+        if(await applyWalletState420(next,epoch))tell('Site network changed; prior account permission revoked.');
+      }catch(error){tell('Site network change blocked: '+error.message,'error');renderSites();}
+    });
+    info.append(choose);
     const button=node('button','small-danger','Disconnect');button.type='button';button.setAttribute('aria-label','Disconnect '+site.origin);
     button.addEventListener('click',async()=>{
       if(!window.confirm('Disconnect '+site.origin+'? This removes browser account permission, not on-chain grants.'))return;
       button.disabled=true;
-      try {state.wallet=await command('disconnect-site',{origin:site.origin});renderAll();tell('Disconnected '+site.origin);}
+      try {const epoch=++state.epoch;const next=await command('disconnect-site',{origin:site.origin});
+        if(await applyWalletState420(next,epoch))tell('Disconnected '+site.origin);}
       catch(error){button.disabled=false;tell('Disconnect failed: '+error.message,'error');}
     });
     card.append(info,button);list.append(card);
@@ -120,6 +138,14 @@ function renderSites(){
 }
 function renderSettings(){
   const c=state.wallet?.config||{};
+  const choices=$('network-select');choices.replaceChildren();
+  for(const net of Object.values(state.wallet?.registry?.networks||{})){
+    choices.add(new Option(net.chainName+' · '+net.chainId+(net.enabled?'':' (disabled)'),net.chainId));
+    choices.lastChild.disabled=!net.enabled||!net.rpcUrls?.length;
+  }
+  choices.value=state.wallet?.registry?.selectedChainId||'';
+  const health=state.wallet?.network?.health||[];
+  $('network-health').textContent=!c.chainId?'No active EVM network':c.chainId+': '+(health.length?health.filter(x=>x.healthy).length+'/'+health.length+' healthy RPC endpoints':'No RPC endpoint verification');
   $('rpc-url').value=c.rpcUrl||'';
   $('expected-chain').value=c.chainId||'';
   $('explorer-url').value=c.explorerUrl||'';
@@ -133,6 +159,35 @@ function renderReceive(){
   $('receive-warning').textContent=address?'Confirm the exact network and account address before transferring funds.':'A matching chain and an available account are required before receiving.';
   $('receive-warning').className='notice'+(address?'':' warn');
 }
+async function loadAggregate420(){
+  const epoch=state.epoch,account=state.wallet?.selectedAccount,box=$('aggregate-list');
+  if(!account){box.textContent='Select an account to view enabled network balances.';return;}
+  box.textContent='Checking enabled network balances…';
+  try{
+    const items=await command('aggregate-assets');
+    if(epoch!==state.epoch||state.wallet?.selectedAccount!==account)return;
+    box.replaceChildren();
+    for(const entry of items){
+      const label=entry.status==='verified'?
+        extensionBalanceText420(entry.raw,entry.decimals)+' '+entry.symbol:'Unavailable';
+      const summary=node('p','balance-detail',entry.name+' ('+entry.chainId+') · '+label);
+      box.append(summary);
+      for(const token of entry.tokens||[]){
+        const amount=token.status==='unavailable'?'Unavailable':extensionBalanceText420(token.raw,token.decimals)+' '+token.symbol;
+        box.append(node('p','balance-detail','   '+token.symbol+' · '+amount));
+      }
+    }
+    if(!items.length)box.textContent='No enabled networks with verified RPC endpoints.';
+  }catch(e){if(epoch===state.epoch)box.textContent='Network balances unavailable: '+e.message;}
+}
+async function applyWalletState420(next,expectedEpoch){
+  const record=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+  if(expectedEpoch!==state.epoch)return false;
+  if(record&&(record.epoch!==next?.network?.epoch||record.selectedChainId!==next?.registry?.selectedChainId))
+    throw Object.assign(new Error('Network changed while updating wallet display'),{code:4901});
+  state.wallet=next;renderAll();
+  return true;
+}
 function renderAll(){
   if(!state.wallet)return;
   summarizeNetwork();renderAccount();renderAssets();renderActivity();renderSites();renderSettings();renderReceive();
@@ -143,14 +198,18 @@ async function command(kind,extra={}){
   if(response.error)throw Object.assign(new Error(response.error.message||'Wallet request failed'),response.error);
   return response.result;
 }
-async function refresh(){
+async function refresh(retry=0){
   $('quick-refresh').disabled=true;
-  tell('Verifying network and SmartAccount…');
+  tell('Verifying network and account…');
+  const epoch=++state.epoch;
   try{
-    state.wallet=await command('get-state');
-    renderAll();
-  }catch(error){tell('Unable to refresh wallet: '+error.message,'error');}
-  finally{$('quick-refresh').disabled=false;}
+    const next=await command('get-state');
+    if(epoch!==state.epoch)return;
+    if(await applyWalletState420(next,epoch))loadAggregate420().catch(()=>{});
+  }catch(error){
+    if(error.code===4901&&retry===0)return refresh(1);
+    if(epoch===state.epoch)tell('Unable to refresh wallet: '+error.message,'error');
+  }finally{$('quick-refresh').disabled=false;}
 }
 function resetReview(){
   state.prepared=null;$('send-review').hidden=true;$('send-confirm').disabled=true;
@@ -164,7 +223,8 @@ function prepareReview(){
     recipient:$('send-recipient').value.trim(),amount:$('send-amount').value.trim(),
     asset:$('send-asset').value,trackedAssets:w.config.trackedAssets,
   });
-  state.prepared={...prepared,asset:$('send-asset').value};
+  state.prepared={...prepared,asset:$('send-asset').value,chainId:w.network.expectedChainId,
+    epoch:w.network.epoch,controller:w.selectedAccount};
   $('review-asset').textContent=prepared.summary.symbol;
   $('review-amount').textContent=prepared.summary.amount;
   $('review-recipient').textContent=prepared.summary.recipient;
@@ -175,7 +235,8 @@ function prepareReview(){
   $('send-confirm').focus();
 }
 function populateSend(){
-  const select=$('send-asset');select.replaceChildren(new Option('420 · Native','native'));
+  const symbol=state.wallet?.config?.nativeCurrency?.symbol||'420';
+  const select=$('send-asset');select.replaceChildren(new Option(symbol+' · Native','native'));
   for(const token of state.wallet?.assets.tokens||[]){
     if(token.error)continue;
     select.add(new Option(token.symbol+' · ERC-20',token.address));
@@ -242,17 +303,38 @@ function setup(){
   $('copy-account').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>tell('Copy failed: '+e.message,'error')));
   $('copy-receive').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>{$('receive-warning').textContent=e.message;$('receive-warning').className='notice error';}));
   $('account-select').addEventListener('change',async event=>{
-    try{resetReview();state.wallet=await command('set-account',{account:event.target.value});renderAll();}
+    try{resetReview();const epoch=++state.epoch;const next=await command('set-account',{account:event.target.value});if(await applyWalletState420(next,epoch))loadAggregate420().catch(()=>{});}
     catch(e){tell('Account change blocked: '+e.message,'error');}
   });
+  $('switch-network').addEventListener('click',async()=>{
+    try{
+      resetReview();const epoch=++state.epoch;
+      const next=await command('switch-network',{chainId:$('network-select').value});
+      if(await applyWalletState420(next,epoch)){loadAggregate420().catch(()=>{});tell('Network switched. All pending transaction previews were invalidated.');}
+    }catch(e){tell('Network switch blocked: '+e.message,'error');}
+  });
+  $('add-network-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const urls=id=>$(id).value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    const net={chainId:$('new-chain-id').value.trim(),chainName:$('new-chain-name').value.trim(),
+      rpcUrls:urls('new-rpc-urls'),blockExplorerUrls:urls('new-explorers'),
+      nativeCurrency:{name:$('new-currency-name').value.trim(),symbol:$('new-currency-symbol').value.trim(),decimals:Number($('new-currency-decimals').value)}};
+    try{
+      const epoch=++state.epoch;const next=await command('add-network',{network:net});
+      if(await applyWalletState420(next,epoch))tell('Network added after RPC verification; SmartAccount execution remains disabled on unapproved chains.');
+    }catch(e){tell('Network rejected: '+e.message,'error');}
+  });
+  $('aggregate-assets').addEventListener('click',()=>loadAggregate420().catch(()=>{}));
   $('network-form').addEventListener('submit',async event=>{
     event.preventDefault();
     const button=event.target.querySelector('button[type=submit]');button.disabled=true;
     try {
-      state.wallet=await command('save-network',{
+      resetReview();++state.epoch;
+      const epoch=state.epoch;
+      const next=await command('save-network',{
         rpcUrl:$('rpc-url').value.trim(),chainId:$('expected-chain').value.trim(),explorerUrl:$('explorer-url').value.trim(),
       });
-      renderAll();tell('Network preferences saved; network verification refreshed.');
+      if(await applyWalletState420(next,epoch))tell('Network preferences saved; network verification refreshed.');
       screen('dashboard');
     }catch(e){tell('Network save failed: '+e.message,'error');$('global-status').textContent='Network save failed: '+e.message;}
     finally{button.disabled=false;}
@@ -272,10 +354,13 @@ function setup(){
         amount:$('send-amount').value.trim(),asset:$('send-asset').value,
         trackedAssets:state.wallet.config.trackedAssets,
       });
-      if(JSON.stringify(now)!==JSON.stringify({transaction:before.transaction,summary:before.summary}))throw new Error('Transaction changed; review again');
+      if(JSON.stringify(now)!==JSON.stringify({transaction:before.transaction,summary:before.summary})||
+          before.chainId!==state.wallet.network.expectedChainId||before.epoch!==state.wallet.network.epoch||before.controller!==state.wallet.selectedAccount)
+        throw new Error('Network, account or transaction changed; review again');
       state.submitting=true;$('send-confirm').disabled=true;
       $('send-state').textContent='Waiting for local passkey authorization, simulation and transaction receipt. Do not close the approval window.';
-      const receipt=await command('send',{confirmed:true,recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset});
+      const receipt=await command('send',{confirmed:true,chainId:before.chainId,epoch:before.epoch,account:before.controller,
+        recipient:before.summary.recipient,amount:before.summary.amount,asset:before.asset});
       $('send-state').textContent='Transaction confirmed: '+receipt.hash;
       resetReview();
       await refresh();screen('activity-view');
@@ -286,5 +371,15 @@ function setup(){
   });
 }
 setup();
+if(!approvalId){
+  chrome.storage.onChanged?.addListener((changes,area)=>{
+    if(area!=='local')return;
+    if(['420-wallet-networks-v1','420-wallet-origin-networks-v1','420-wallet-extension-config-v1',
+      '420-wallet-ui-preferences-v1'].some(key=>Object.hasOwn(changes,key))){
+      resetReview();
+      refresh().catch(()=>{});
+    }
+  });
+}
 if(approvalId)approval().catch(error=>{$('status').textContent=error?.message||'Unable to load approval request.';});
 else {screen('dashboard');refresh();}

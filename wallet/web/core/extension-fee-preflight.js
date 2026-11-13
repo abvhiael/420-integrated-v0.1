@@ -26,14 +26,21 @@ export function packExtensionUserOpFees420({maxFeePerGas,maxPriorityFeePerGas}){
   if(!max||priority>max)throw new Error('invalid UserOperation fee caps');
   return '0x'+priority.toString(16).padStart(32,'0')+max.toString(16).padStart(32,'0');
 }
-export async function quoteExtensionSend420(provider,{chainId,smartAccount,entryPoint,transaction,choice,strictUserOpGas=false,expectedNonce=null}={}){
+export async function quoteExtensionSend420(provider,{chainId,smartAccount,entryPoint,transaction,choice,strictUserOpGas=false,expectedNonce=null,accountCallData=null}={}){
   if(!provider||typeof provider.request!=='function')throw new Error('verified RPC required');
   await assertWalletChain420(provider,chainId);
   const mode=normalizeExtensionFeeChoice420(choice);
   const from=normalizeAddress(smartAccount),to=normalizeAddress(transaction?.to);
   if(!/^0x(?:[0-9a-fA-F]{2})*$/.test(transaction?.data??'0x'))throw new Error('invalid calldata');
   const value=quantity(transaction?.value??'0x0','transaction value');
-  const call={from,to,data:transaction?.data??'0x',value:'0x'+value.toString(16)};
+  if(accountCallData!==null&&
+     (typeof accountCallData!=='string'||!/^0x34fcd5be(?:[0-9a-fA-F]{2})+$/.test(accountCallData)||
+      accountCallData.length>40000||to!==from||value!==0n||!entryPoint||
+      transaction.data?.toLowerCase()!==accountCallData.toLowerCase()))
+    throw new Error('invalid atomic SmartAccount420 batch preflight context');
+  const call=accountCallData===null?
+    {from,to,data:transaction?.data??'0x',value:'0x'+value.toString(16)}:
+    {from:normalizeAddress(entryPoint),to:from,data:accountCallData,value:'0x0'};
   // This checks target contract execution as SmartAccount, not EntryPoint execution.
   // It is NEVER evidence that the fully signed UserOperation will succeed.
   try{await provider.request('eth_call',[call,'latest']);}
@@ -68,7 +75,7 @@ export async function quoteExtensionSend420(provider,{chainId,smartAccount,entry
     }
     gasBudget=await estimateExtensionUserOpGas420(provider,{
       chainId,sender:from,entryPoint,nonce,target:to,value:call.value,data:call.data,
-      gasFees:packExtensionUserOpFees420({
+      accountCallData,gasFees:packExtensionUserOpFees420({
         maxFeePerGas:'0x'+maxFeePerGas.toString(16),
         maxPriorityFeePerGas:'0x'+maxPriorityFeePerGas.toString(16)}),
     });

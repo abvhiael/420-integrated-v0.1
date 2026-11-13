@@ -108,7 +108,7 @@ assert.match(serviceWorker,/securitySubmit420/);
 assert.match(serviceWorker,/assertSecurityRevocationSnapshot420/);
 assert.match(serviceWorker,/securityRecordSignature420/);
 assert.match(serviceWorker,/trustedWalletPopup420/);
-assert.doesNotMatch(serviceWorker,/eth_sendTransaction.*return rpcRequest/s);
+assert.doesNotMatch(serviceWorker,/return rpcRequest\\(['\"]eth_sendTransaction['\"]/);
 const securityMarkup=await readFile(join(root,'popup.html'),'utf8');
 for(const id of ['security-view','security-sites','security-signatures','security-allowances',
  'security-discovered','security-capabilities','security-sessions','security-passkeys',

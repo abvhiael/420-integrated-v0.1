@@ -95,6 +95,29 @@ assert.match(signingPolicy, /personal_sign: 'message-signature'/);
 assert.match(signingPolicy, /eth_signTypedData_v4: 'typed-data-signature'/);
 assert.match(signingPolicy, /return 'unsupported'/);
 
+const securityCore=await readFile(join(root,'core/extension-security-centre.js'),'utf8');
+const securityActions=await readFile(join(root,'core/extension-security-actions.js'),'utf8');
+assert.match(securityCore,/readSecurityAllowance420/);
+assert.match(securityCore,/discoverRecentSecurityAllowances420/);
+assert.match(securityCore,/assessSecuritySignature420/);
+assert.match(securityActions,/prepareCapabilityGrantRevocation/);
+assert.match(securityActions,/prepareSessionKeyRevocation/);
+assert.match(securityActions,/readSecurityPasskey420/);
+assert.match(serviceWorker,/securityReview420/);
+assert.match(serviceWorker,/securitySubmit420/);
+assert.match(serviceWorker,/assertSecurityRevocationSnapshot420/);
+assert.match(serviceWorker,/securityRecordSignature420/);
+assert.match(serviceWorker,/trustedWalletPopup420/);
+assert.doesNotMatch(serviceWorker,/eth_sendTransaction.*return rpcRequest/s);
+const securityMarkup=await readFile(join(root,'popup.html'),'utf8');
+for(const id of ['security-view','security-sites','security-signatures','security-allowances',
+ 'security-discovered','security-capabilities','security-sessions','security-passkeys',
+ 'security-recovery','security-alerts','security-revocation-review',
+ 'security-review-ack','security-submit-review']){
+ assert.match(securityMarkup,new RegExp('id="'+id+'"'),id+' must be packaged');
+}
+assert.match(securityMarkup,/Disconnect removes only local browser/);
+assert.match(securityMarkup,/does not change this allowance|does not discover every spender/);
 const authority = await readFile(join(root, 'authority.js'), 'utf8');
 assert.match(authority, /createExtensionLocalAuthority420/);
 assert.match(authority, /navigatorLike: navigator/);

@@ -1,5 +1,5 @@
 import {financeProviderCatalog420,financeOptions420,financePrepare420,assertFinanceReview420,financeStakeStatus420} from './core/finance-runtime420.js';
-import {bridgeReceiptEvidence420,verifyFinanceDeployment420,FINANCE_BRIDGE_ABI_420} from './core/finance420.js';
+import {bridgeReceiptEvidence420,bridgeDestinationEvidence420,verifyFinanceDeployment420} from './core/finance420.js';
 import {nftId420,normalizedNftRecord420,verifyNftOwnership420,discoverNftTransfers420,nftSpamFlags420,
  nftMetadataUrl420,fetchSafeNftMetadata420,nftIndexWindow420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420} from './core/extension-nfts.js';
 import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
@@ -1890,6 +1890,24 @@ async function financeFeeQuote420(ctx,transaction){
 async function financeReviewCandidate420(ctx,option){
  return financePrepare420({...ctx,option,feeQuote:tx=>financeFeeQuote420(ctx,tx)});
 }
+async function financeDestinationRpc420(network,method,params){
+ if(network?.trusted!==true||network.enabled!==true||!network.rpcUrls?.length)
+   throw Object.assign(new Error('Destination network is not independently approved'),{code:4901});
+ const good=(await probeNetwork420(network)).some(x=>x.healthy);
+ if(!good)throw Object.assign(new Error('Destination RPC chain identity is not healthy'),{code:4901});
+ const url=new URL(network.rpcUrls[0]);
+ if(url.protocol!=='https:'||url.username||url.password||url.hash)
+   throw new Error('Destination RPC requires HTTPS and no embedded credentials');
+ const signal=AbortSignal.timeout(10000);
+ const result=await fetch(url.toString(),{method:'POST',headers:{'content-type':'application/json'},
+   body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),signal,cache:'no-store'});
+ if(!result.ok)throw new Error('Destination RPC unavailable');
+ const body=await result.json();
+ if(body?.error||!Object.hasOwn(body??{},'result'))
+   throw new Error('Destination RPC rejected '+method);
+ return body.result;
+}
+
 async function financeCommands420(message){
  const kind=message.kind;
  if(kind==='finance-catalog'){
@@ -1957,7 +1975,9 @@ async function financeCommands420(message){
      ...(snap.kind==='bridge'?{destinationChainId:next.plan.destinationChainId,
        bridgeProviderId:option.providerId,bridgeRouteId:option.routeId,
        bridgeAdapterId:financeProviderCatalog420(ctx.config,ctx.state.network.expectedChainId)
-         .find(x=>x.id===option.providerId)?.adapterId,bridgeRouter:option.router}:{}),
+         .find(x=>x.id===option.providerId)?.adapterId,bridgeRouter:option.router,
+       bridgeSender:option.account,bridgeRecipient:option.recipient,
+       bridgeAmountRaw:option.amountRaw}:{}),
      ...(next.phase==='allowance'?{allowanceSpender:next.spender,approvedAmountRaw:next.required}:{}),
    };
    await rememberWalletUiActivity420(entry);
@@ -2006,11 +2026,45 @@ async function financeCommands420(message){
      return {state:'source-reorganized',hash:activity.hash,note:'Source receipt no longer canonical'};
    const current=BigInt(await ctx.provider.request('eth_blockNumber',[]));
    const confirmations=current-BigInt(receipt.blockNumber)+1n;
-   const state=confirmations>=12n?'source-finalized':'source-included';
+   if(confirmations<1n)throw new Error('Source receipt is ahead of observed canonical head');
+   let sourceFinal=false;
+   try{
+     const finalized=await ctx.provider.request('eth_getBlockByNumber',['finalized',false]);
+     sourceFinal=finalized?.number!=null&&BigInt(finalized.number)>=BigInt(receipt.blockNumber);
+   }catch{/* Unsupported finalized tag cannot be presented as finality. */}
+   const state=sourceFinal?'source-finalized':'source-confirmed';
    const result={...proof,state,confirmations:Number(confirmations),
-     destinationChainId:provider.destinationChainId,note:'Destination proof, inbound and beneficiary settlement are not independently verified'};
+     destinationChainId:provider.destinationChainId,
+     note:'Source confirmation is not destination proof or beneficiary settlement'};
    await rememberWalletUiActivity420({...activity,bridgeStatus:state,sourceMessageId:proof.sourceMessageId,
      sourceBlockHash:proof.sourceBlockHash,sourceConfirmations:Number(confirmations)});
+   if(!message.destinationTxHash)return result;
+   if(!validHash420(message.destinationTxHash))throw new Error('Destination transaction hash must be exact bytes32');
+   if(!sourceFinal)return {...result,note:'Destination monitoring waits for canonical source finalized block'};
+   const networks=await networkRegistry420(),destination=networks.networks[provider.destinationChainId];
+   if(!destination)throw new Error('Destination EIP-155 network is not configured');
+   const destProvider={request:async(method,params)=>{
+     const chain=await financeDestinationRpc420(destination,'eth_chainId',[]);
+     if(BigInt(chain)!==BigInt(provider.destinationChainId))
+       throw Object.assign(new Error('Destination RPC reports wrong EIP-155 chain'),{code:4901});
+     return financeDestinationRpc420(destination,method,params);
+   }};
+   const destReceipt=await destProvider.request('eth_getTransactionReceipt',[message.destinationTxHash]);
+   if(!destReceipt)return {...result,destination:'pending',note:'No canonical destination receipt'};
+   if(destReceipt.status!=='0x1')return {...result,destination:'reverted',
+      note:'Destination reverted; no automatic retry, bridge governance recovery required'};
+   const destBlock=await destProvider.request('eth_getBlockByNumber',[destReceipt.blockNumber,false]);
+   if(destBlock?.hash?.toLowerCase()!==destReceipt.blockHash?.toLowerCase())
+     return {...result,destination:'reorganized',note:'Destination receipt block no longer canonical'};
+   const destFinal=await destProvider.request('eth_getBlockByNumber',['finalized',false]).catch(()=>null);
+   if(!destFinal||BigInt(destFinal.number)<BigInt(destReceipt.blockNumber))
+     return {...result,destination:'included',note:'Destination proof not finalized; do not claim settlement'};
+   const accepted=await bridgeDestinationEvidence420({provider:destProvider,policy:provider,
+     receipt:destReceipt,source:proof,
+     expected:{sender:activity.bridgeSender,recipient:activity.bridgeRecipient,amountRaw:activity.bridgeAmountRaw}});
+   await rememberWalletUiActivity420({...activity,bridgeStatus:'inbound-accepted',
+     destinationTxHash:accepted.destinationTxHash,transferId:accepted.transferId});
+   return {...result,destination:accepted};
    return result;
  }
  throw Object.assign(new Error('Unsupported finance operation'),{code:4200});

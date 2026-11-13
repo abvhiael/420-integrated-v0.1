@@ -586,14 +586,15 @@ function trustedWalletPopup420(sender) {
 }
 async function readWalletUiActivity420() {
   const value=(await chrome.storage.local.get(EXTENSION_ACTIVITY_KEY_420))?.[EXTENSION_ACTIVITY_KEY_420];
-  return Array.isArray(value)?value.slice(0,40).filter(x=>x&&typeof x==='object'):[];
+  return Array.isArray(value)?value.slice(0,200).filter(x=>x&&typeof x==='object'):[];
 }
 // Reconcile only canonical receipts. Missing receipts cannot prove a dropped or failed transaction.
 const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 async function refreshWalletUiActivity420() {
   const entries=await readWalletUiActivity420();
   const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized','confirmed','reverted'].includes(x.status)&&
-    (validHash420(x.hash)||validHash420(x.userOpHash))).slice(0,5);
+    (validHash420(x.hash)||validHash420(x.userOpHash)))
+    .sort((a,b)=>(a.lastCheckedAt??a.at??0)-(b.lastCheckedAt??b.at??0)).slice(0,8);
   if(!candidates.length)return entries;
   let chain;
   try{chain=await effectiveChain420();}catch{return entries;}
@@ -618,10 +619,9 @@ async function refreshWalletUiActivity420() {
       let reconciled=await reconcileExtensionTransaction420(current,{provider,chainId:entry.chainId,confirmations:2});
       if(reconciled.status==='confirmed'&&opReceipt?.success===false)
         reconciled={...reconciled,status:'reverted'};
-      if(reconciled.status!==entry.status||reconciled.hash!==entry.hash){
-        updates.set(entry.id,{...reconciled,updatedAt:Date.now()});
-        changed=true;
-      }
+      updates.set(entry.id,{...reconciled,lastCheckedAt:Date.now(),
+        ...(reconciled.status!==entry.status?{updatedAt:Date.now()}: {})});
+      changed=true;
     }catch{ /* RPC outages retain the last known status, never fabricate failure. */ }
   }
   const fresh=await readWalletUiActivity420();
@@ -758,7 +758,7 @@ async function recordAuthoritySubmission420(sender,requestId,submission){
 async function rememberWalletUiActivity420(entry) {
   const current=await readWalletUiActivity420();
   const previous=current.find(x=>x.id===entry.id);
-  const next=[{...previous,...entry},...current.filter(x=>x.id!==entry.id)].slice(0,40);
+  const next=[{...previous,...entry},...current.filter(x=>x.id!==entry.id)].slice(0,200);
   await chrome.storage.local.set({[EXTENSION_ACTIVITY_KEY_420]:next});
 }
 async function finalizeWalletUiState420(state){

@@ -1338,9 +1338,11 @@ async function handleWalletUi420(message) {
       hash=await executeWithLocalAuthority(
         {method:'eth_sendTransaction',params:[state.account.kind==='eoa'?
           {...request.transaction,executionModel:'eoa',chainId:quote.chainId,
+            recipientSnapshot,
             nonce:quote.nonce,gasLimit:quote.gasLimit,
             maxFeePerGas:quote.maxFeePerGas,maxPriorityFeePerGas:quote.maxPriorityFeePerGas}:
           {...request.transaction,gasFees:quote.gasFees,feeChoice:choice.level,
+            recipientSnapshot,
             accountGasLimits:quote.gasBudget.accountGasLimits,
             preVerificationGas:quote.gasBudget.preVerificationGas,expectedNonce:quote.nonce}]},
         {origin:null,chainId:state.network.expectedChainId,epoch:state.network.epoch,accounts:[state.account.controller],tabId:null,activityId:id}

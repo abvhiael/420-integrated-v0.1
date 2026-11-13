@@ -1,4 +1,5 @@
 import {normalizeAddress} from './abi.js';
+import {keccak256Hex} from './keccak.js';
 import {inspectExtensionApprovalRisk420} from './extension-approval-risk.js';
 
 const WORD=/^0x[0-9a-fA-F]{64}$/;
@@ -123,4 +124,54 @@ export function assertSecurityRevocationSnapshot420(old,current){
  ].some(k=>old[k]!==current[k]))
   throw error('Security authority or on-chain state changed since review; start a new review',4001);
  return true;
+}
+
+export const ERC20_APPROVAL_TOPIC_420=keccak256Hex(new TextEncoder().encode('Approval(address,address,uint256)'));
+export async function discoverRecentSecurityAllowances420(provider,{
+ chainId,owner,tokens=[],lookbackBlocks=4096,maxSpenders=20
+}={}){
+ if(!provider?.request)throw error('Verified security discovery RPC required',4900);
+ const normalizedOwner=normalizeAddress(owner),candidates=[...new Set(tokens.map(normalizeAddress))].slice(0,8);
+ if(!candidates.length)return {entries:[],fromBlock:null,toBlock:null,partial:true};
+ if(!Number.isInteger(lookbackBlocks)||lookbackBlocks<1||lookbackBlocks>10000||
+    !Number.isInteger(maxSpenders)||maxSpenders<1||maxSpenders>30)
+  throw error('Bounded approval log search limits required');
+ const seen=await provider.request('eth_chainId',[]);
+ if(BigInt(seen)!==BigInt(chainId))throw error('Approval log chain mismatch',4901);
+ const height=BigInt(await provider.request('eth_blockNumber',[]));
+ const first=height>BigInt(lookbackBlocks)?height-BigInt(lookbackBlocks):0n;
+ const ownerTopic='0x'+normalizedOwner.slice(2).padStart(64,'0');
+ const logs=await provider.request('eth_getLogs',[{
+  address:candidates,fromBlock:'0x'+first.toString(16),
+  toBlock:'0x'+height.toString(16),
+  topics:[ERC20_APPROVAL_TOPIC_420,ownerTopic]
+ }]);
+ if(!Array.isArray(logs)||logs.length>2500)throw error('Unbounded or malformed ERC-20 approval event result',4900);
+ const pairs=new Map();
+ for(const item of logs){
+  if(typeof item?.address!=='string'||!candidates.includes(item.address.toLowerCase())||
+     !Array.isArray(item.topics)||item.topics.length!==3||
+     item.topics[0]?.toLowerCase()!==ERC20_APPROVAL_TOPIC_420||
+     item.topics[1]?.toLowerCase()!==ownerTopic||
+     typeof item.topics[2]!=='string'||!/^0x0{24}[0-9a-fA-F]{40}$/.test(item.topics[2]))continue;
+  const spender='0x'+item.topics[2].slice(-40).toLowerCase();
+  if(/^0x0{40}$/.test(spender))continue;
+  const id=item.address.toLowerCase()+':'+spender;
+  pairs.set(id,{token:item.address.toLowerCase(),spender});
+ }
+ const chosen=[...pairs.values()].slice(0,maxSpenders),entries=[];
+ for(const pair of chosen){
+  try{
+   const verified=await readSecurityAllowance420(provider,{chainId,owner:normalizedOwner,...pair});
+   if(BigInt(verified.value)>0n)entries.push(verified);
+  }catch(error){
+   entries.push({...pair,status:'unverified',warning:error.message});
+  }
+ }
+ if(BigInt(await provider.request('eth_chainId',[]))!==BigInt(chainId))
+  throw error('Approval discovery network changed',4901);
+ return {entries,fromBlock:'0x'+first.toString(16),
+  toBlock:'0x'+height.toString(16),partial:true,
+  truncated:pairs.size>maxSpenders||logs.length>=2500,
+  note:'Recent Approval events on up to 8 verified tokens. Older grants and non-standard approvals require manual inspection.'};
 }

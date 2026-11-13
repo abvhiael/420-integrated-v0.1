@@ -20,6 +20,7 @@ function txRequest(request = {}) {
     value: tx.value ?? '0x0',
     data: tx.data ?? '0x',
     gasFees:tx.gasFees??null,
+    expectedNonce:tx.expectedNonce??null,
   };
 }
 
@@ -78,6 +79,7 @@ export function createExtensionLocalAuthority420({
   signMessage = null,
   signTypedData = null,
   receiptOptions = {},
+  onUserOperationSubmitted = null,
 } = {}) {
   if (!provider || typeof provider.request !== 'function') throw new Error('extension authority provider required');
   if (!navigatorLike?.credentials || typeof navigatorLike.credentials.get !== 'function') throw new Error('extension WebAuthn authority required');
@@ -110,6 +112,7 @@ export function createExtensionLocalAuthority420({
         binding,
         { target: tx.target, value: tx.value, data: tx.data,
           ...(tx.gasFees?{gasFees:tx.gasFees}:{}),
+          ...(tx.expectedNonce?{expectedNonce:tx.expectedNonce}:{}),
         },
         { rpId: binding.rpId, origin: binding.origin },
       );
@@ -124,6 +127,23 @@ export function createExtensionLocalAuthority420({
         throw rpcError(-32603, 'bundler UserOperation hash does not match the locally signed canonical hash');
       }
       await persistPasskeyBinding(prepared.advancedBinding, { account: controller, context });
+      // Persist the submission identity before waiting for a bundler receipt, so
+      // service-worker suspension or an RPC outage does not erase transaction history.
+      if(typeof onUserOperationSubmitted==='function'){
+        await onUserOperationSubmitted({
+          userOpHash:userOpHash.toLowerCase(),sender:prepared.userOperation.sender,
+          entryPoint:prepared.entryPoint,entryPointVersion:'0.7',
+          nonce:'0x'+BigInt(prepared.nonce).toString(16),
+          nonceKey:'0x'+BigInt(prepared.nonceKey).toString(16),
+          nonceSequence:'0x'+(BigInt(prepared.nonce)&((1n<<64n)-1n)).toString(16),
+          gasFees:prepared.userOperation.gasFees,
+          callData:prepared.userOperation.callData,
+          initCode:prepared.userOperation.initCode,
+          target:prepared.target,value:'0x'+BigInt(prepared.value).toString(16),data:prepared.data,
+          source:'extension-local-passkey',
+        },context);
+      }
+
       try {
         return await waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
       } catch (error) {

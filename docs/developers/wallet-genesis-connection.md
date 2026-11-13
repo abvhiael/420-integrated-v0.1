@@ -1,3 +1,12 @@
+---
+title: 420Wallet Genesis application connection
+audience:
+  - developer
+category: developer
+status: development
+version: current
+---
+
 # Genesis dApp → 420Wallet connection and authorization
 
 **Use the canonical ID defined in** `contracts/src/libraries/ServiceIds420.sol`, not a product display name or a URL. `420Exchange`, `420Commerce` and `420Grow` do not currently have separate canonical service IDs; use the actual applicable approved Swap/Bridge, Market/Pay or other canonical roles rather than inventing IDs.

@@ -317,6 +317,18 @@ function renderActivity(){
     side.append(node('strong','',entry.status),node('small','',entry.hash?entry.hash.slice(0,10)+'…'+entry.hash.slice(-8):
       entry.userOpHash?'UserOp '+entry.userOpHash.slice(0,10)+'…'+entry.userOpHash.slice(-8):'Extension activity'));
     row.append(info,side);
+    if(entry.kind==='finance-bridge'&&entry.financePhase==='execute'){
+      info.append(node('small','',entry.id+' · destination delivery not assumed'));
+      const verify=node('button','secondary','Check bridge');
+      verify.type='button';
+      verify.addEventListener('click',()=>{
+        $('finance-activity-id').value=entry.id;
+        screen('finance-view');
+        financeCatalog420().catch(e=>{$('finance-status').textContent=e.message;});
+        $('finance-track-result').textContent='Press Verify source bridge status. A destination hash is optional but must be backed by a canonical receipt.';
+      });
+      row.append(verify);
+    }
     const canReplace=(
       (entry.executionModel==='erc4337'&&
         /^0x[0-9a-fA-F]{64}$/.test(entry.userOpHash||'')&&
@@ -960,7 +972,8 @@ function setupFinance420(){
  $('finance-track-form').addEventListener('submit',async event=>{
    event.preventDefault();const button=event.target.querySelector('button[type=submit]');button.disabled=true;
    try{
-     const result=await command('finance-track',{activityId:$('finance-activity-id').value.trim()});
+     const result=await command('finance-track',{activityId:$('finance-activity-id').value.trim(),
+       destinationTxHash:$('finance-destination-hash').value.trim()||null});
      $('finance-track-result').textContent=JSON.stringify(result,null,2);
    }catch(e){$('finance-track-result').textContent='Cannot verify source bridge: '+e.message;}
    finally{button.disabled=false;}

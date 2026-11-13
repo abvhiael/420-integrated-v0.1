@@ -51,7 +51,12 @@ const rpc=createServer(async(req,res)=>{
   }
   else if(method==='eth_call'){
     const to=body.params?.[0]?.to?.toLowerCase(),data=body.params?.[0]?.data?.toLowerCase()||'';
-    if(to===token&&data==='0x313ce567')result=word(6);
+    if(to===nft&&data.startsWith('0x01ffc9a7')){
+      const iface=data.slice(10,18);
+      result=word(iface==='01ffc9a7'||iface==='80ac58cd'?1:0);
+    }
+    else if(to===nft&&data.startsWith('0xc87b56dd'))result=stringReturn('https://metadata.example.test/42.json');
+    else if(to===token&&data==='0x313ce567')result=word(6);
     else if(to===token&&data==='0x95d89b41')result=stringReturn('TEST');
     else if(to===token&&data.startsWith('0x70a08231'))result=word(12500000);
     else if(to===token&&data.startsWith('0xdd62ed3e'))result=word(1000000000);
@@ -281,7 +286,33 @@ try{
   await page.waitForFunction(()=>document.querySelector('#dashboard-notice')?.textContent.includes('ERC-721'));
   await page.locator('#tab-nfts').click();
   await page.waitForFunction(()=>document.querySelector('#nft-list')?.textContent.includes('ERC721 #42'));
+  assert.match(await page.locator('#nft-list').textContent(),/Owner|verified on chain/i);
   await page.screenshot({path:resolve(screenshots,'11-portfolio-nft-verified.png')});
+  // M8: actual packaged NFT detail, collection grouping, local spam,
+  // safe metadata opt-in boundary and fail-closed watch-only signing.
+  await page.locator('#nft-list .nft-item').first().click();
+  assert.equal(await page.locator('#nft-detail-view').isVisible(),true);
+  assert.match(await page.locator('#nft-detail-facts').textContent(),/ownerOf\(tokenId\)/);
+  assert.match(await page.locator('#nft-detail-metadata').textContent(),/Not loaded/);
+  assert.equal(await page.locator('#nft-review').isHidden(),true);
+  await page.locator('#nft-recipient').fill('0x'+'77'.repeat(20));
+  await page.locator('#nft-action-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-detail-status')?.textContent?.includes('NFT review blocked'));
+  assert.match(await page.locator('#nft-detail-status').textContent(),/Unlock qualified local EOA or passkey authority/);
+  assert.equal(await page.locator('#nft-review').isHidden(),true);
+  await page.locator('#nft-spam').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-spam')?.textContent==='Unmark spam');
+  await page.locator('#nft-detail-view [data-back]').click();
+  assert.equal(await page.locator('#nfts-view').isVisible(),true);
+  assert.equal(await page.locator('#nft-list .nft-item').count(),0,'Flagged spam collectible hidden from the default collection view');
+  await page.locator('#nfts-show-hidden').click();
+  await page.waitForFunction(()=>document.querySelectorAll('#nft-list .nft-item').length===1);
+  assert.match(await page.locator('#nft-list').textContent(),/Potential spam/);
+  await page.screenshot({path:resolve(screenshots,'11a-nft-collection-and-spam.png')});
+  await page.locator('#nft-list .nft-item').first().click();
+  await page.locator('#nft-spam').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-spam')?.textContent==='Mark as spam');
+  await page.locator('#nft-detail-view [data-back]').click();
   await page.locator('[data-screen="dashboard"]').click();
   await page.locator('[data-screen="sites-view"]').click();
   assert.match(await page.locator('#site-list').textContent(),/example\.test/);

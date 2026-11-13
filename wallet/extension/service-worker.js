@@ -1117,7 +1117,7 @@ async function walletUiState420() {
       state.account={kind,controller:selected,smartAccount:null,receiveAddress:selected,
         deployed:false,ownerVerified:false,
         reason:kind==='watch-only'?'Read-only account. Sending and signing are permanently disabled.':
-          kind==='hardware'?'Hardware signature requires verified external device transport; unavailable.':
+          kind==='hardware'?'Hardware signer: reverify device and approve each request; physical/testnet acceptance pending.':
           'Locally encrypted EOA. No SmartAccount passkey authority is inherited.'};
       try{
         const native=await readNativeBalance(provider,selected);

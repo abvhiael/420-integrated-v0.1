@@ -1,4 +1,4 @@
-import {readWalletTransactionStatus420} from './core/transaction-lifecycle.js';
+import {reconcileExtensionTransaction420} from './core/extension-transaction-activity.js';
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
 import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
@@ -491,12 +491,9 @@ async function refreshWalletUiActivity420() {
     if(entry.chainId!==chain.chainId)continue;
     try{
       const provider={request:(method,params=[])=>rpcRequest(method,params,{expectedChainId:entry.chainId})};
-      const result=await readWalletTransactionStatus420(provider,entry.hash,{expectedChainId:entry.chainId,canonical:true,confirmations:2});
-      // 'confirming' means inclusion with fewer than two canonical confirmations.
-      const status=result.status==='confirming'?'included':result.status;
-      if(status!==entry.status){
-        updates.set(entry.id,{...entry,status,confirmations:result.confirmations.toString(),
-          blockNumber:result.receipt?.blockNumber||null,updatedAt:Date.now()});
+      const reconciled=await reconcileExtensionTransaction420(entry,{provider,chainId:entry.chainId,confirmations:2});
+      if(reconciled.status!==entry.status){
+        updates.set(entry.id,{...reconciled,updatedAt:Date.now()});
         changed=true;
       }
     }catch{ /* RPC outages retain the last known status, never fabricate failure. */ }

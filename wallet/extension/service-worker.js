@@ -467,6 +467,30 @@ async function handleApprovalMethod(request, context) {
   if((await effectiveChain420(origin)).epoch!==before.epoch)throw Object.assign(new Error('Chain changed during approval'),{code:4901});
   const current=await accountsFor(origin);
   if(current.length!==1||current[0]!==granted[0])throw Object.assign(new Error('Account was changed or disconnected during approval'),{code:4100});
+  if(request.method==='eth_sendTransaction'){
+    const tx=request.params?.[0]||{};
+    const id='site-send-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+    const entry={id,at:Date.now(),chainId:pinned,controller:current[0],
+      origin,recipient:typeof tx.to==='string'?tx.to.toLowerCase():null,
+      amount:typeof tx.value==='string'?tx.value:'0x0',
+      symbol:tx.data&&tx.data!=='0x'?'contract call':'native',
+      status:'pending',hash:null};
+    await rememberWalletUiActivity420(entry);
+    let hash=null;
+    try{
+      hash=await executeWithLocalAuthority(request,{
+        ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId:id
+      });
+      await rememberWalletUiActivity420({...entry,hash,status:'submitted'});
+      return hash;
+    }catch(error){
+      const userOpHash=validHash420(error?.data?.userOpHash)?error.data.userOpHash.toLowerCase():null;
+      await rememberWalletUiActivity420({...entry,hash,userOpHash,
+        status:(hash||userOpHash)?'submitted':'failed',
+        error:error?.message||'Site transaction authority unavailable'});
+      throw error;
+    }
+  }
   return executeWithLocalAuthority(request, { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
 }
 
@@ -562,7 +586,7 @@ async function recordAuthoritySubmission420(sender,requestId,submission){
       !/^0x[0-9a-fA-F]{40}$/.test(submission?.entryPoint??''))
     throw Object.assign(new Error('Unverified UserOperation submission metadata'),{code:-32602});
   const id=request.context.activityId;
-  if(!id)return true; // dApp-origin activity is tracked separately when the origin owns the request.
+  if(!id)return true; // Non-send signing requests have no transaction record.
   const activities=await readWalletUiActivity420();
   const entry=activities.find(x=>x.id===id&&x.chainId===request.context.chainId&&
     x.controller===request.context.accounts?.[0]);

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {quoteExtensionSend420,packExtensionUserOpFees420,normalizeExtensionFeeChoice420} from '../core/extension-fee-preflight.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420,ensNamehash420} from '../core/extension-recipient-resolver.js';
-import {validateEoaReplacement420,validateUserOpReplacement420,transitionReplacement420} from '../core/extension-replacement-policy.js';
+import {validateEoaReplacement420,validateUserOpReplacement420,transitionReplacement420,reconcileUserOpReplacement420} from '../core/extension-replacement-policy.js';
 const chainId='0x1',sender='0x'+'11'.repeat(20),to='0x'+'22'.repeat(20);
 const h='0x'+'ab'.repeat(32),node='0x'+'cd'.repeat(32),reg='0x00000000000c2e074ec69a0dfb2997ba6c7d2e1e';
 const addressWord=(a)=>'0x'+'0'.repeat(24)+a.slice(2);
@@ -84,4 +84,32 @@ test('never mark replaced or cancelled without canonical chain evidence',()=>{
   sameChain:true,sameSenderAndNonce:true,replacementIncluded:true,originalNotCanonical:true
  }});
  assert.equal(result.status,'replaced');assert.equal(result.replacedBy,node);
+});
+
+test('ERC-4337 replacement is finalized only with matching included UserOperation and absent original',async()=>{
+  const old={executionModel:'erc4337',userOpHash:h,chainId,sender,entryPoint:to,nonce:'0x4',status:'submitted'};
+  const replacement={executionModel:'erc4337',userOpHash:node,replaces:h,chainId,sender,entryPoint:to,
+    nonce:'0x4',status:'confirmed',action:'speed-up',hash:'0x'+'ef'.repeat(32)};
+  const provider={request:async(method,params)=>{
+    assert.equal(method,'eth_getUserOperationReceipt');
+    if(params[0]===node)return {success:true,sender,nonce:'0x4',receipt:{transactionHash:replacement.hash}};
+    if(params[0]===h)return null;
+    throw Error('unexpected hash');
+  }};
+  const updated=await reconcileUserOpReplacement420(provider,old,replacement);
+  assert.equal(updated.status,'replaced');
+  assert.equal(updated.replacementUserOpHash,node);
+  await assert.rejects(reconcileUserOpReplacement420({request:async()=>null},old,replacement),/evidence/);
+  await assert.rejects(reconcileUserOpReplacement420({request:async(_,params)=>params[0]===h?{success:true}:{
+    success:true,sender,nonce:'0x4',receipt:{transactionHash:replacement.hash}
+  }},old,replacement),/original UserOperation/);
+});
+test('ERC-4337 cancel outcome requires confirmed verified no-op and proof',async()=>{
+ const old={executionModel:'erc4337',userOpHash:h,chainId,sender,entryPoint:to,nonce:'0x4',status:'pending'};
+ const replacement={executionModel:'erc4337',userOpHash:node,replaces:h,chainId,sender,entryPoint:to,
+   nonce:'0x4',status:'confirmed',action:'cancel',hash:'0x'+'ef'.repeat(32)};
+ const provider={request:async(_,params)=>params[0]===h?null:{
+   success:true,sender,nonce:'0x4',receipt:{transactionHash:replacement.hash}
+ }};
+ assert.equal((await reconcileUserOpReplacement420(provider,old,replacement)).status,'cancelled');
 });

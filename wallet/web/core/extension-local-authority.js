@@ -1,3 +1,4 @@
+import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './extension-recipient-resolver.js';
 import {packExtensionUserOpFees420} from './extension-fee-preflight.js';
 import { normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
@@ -23,6 +24,7 @@ function txRequest(request = {}) {
     expectedNonce:tx.expectedNonce??null,
     accountGasLimits:tx.accountGasLimits??null,
     preVerificationGas:tx.preVerificationGas??null,
+    recipientSnapshot:tx.recipientSnapshot??null,
   };
 }
 
@@ -82,6 +84,7 @@ export function createExtensionLocalAuthority420({
   signTypedData = null,
   receiptOptions = {},
   onUserOperationSubmitted = null,
+  qualifiedNamesRuntime = null,
 } = {}) {
   if (!provider || typeof provider.request !== 'function') throw new Error('extension authority provider required');
   if (!navigatorLike?.credentials || typeof navigatorLike.credentials.get !== 'function') throw new Error('extension WebAuthn authority required');
@@ -107,6 +110,17 @@ export function createExtensionLocalAuthority420({
         if(packExtensionUserOpFees420({maxFeePerGas:maximum,maxPriorityFeePerGas:priority}).toLowerCase()!==tx.gasFees.toLowerCase())
           throw rpcError(-32602,'invalid signed fee caps');
       }
+      const assertReviewedRecipient=async()=>{
+        if(!tx.recipientSnapshot)return;
+        if(tx.recipientSnapshot.recipient!==tx.target)
+          throw rpcError(4100,'signed transaction target differs from confirmed resolved name');
+        const resolved=await resolveExtensionRecipient420(provider,{
+          input:tx.recipientSnapshot.input,chainId:context.chainId,
+          qualifiedNamesConfig:qualifiedNamesRuntime,
+        });
+        assertExtensionRecipientSnapshot420(tx.recipientSnapshot,resolved);
+      };
+      await assertReviewedRecipient();
       const prepared = await preparePasskeyUserOperationTransport(
         provider,
         navigatorLike,
@@ -126,6 +140,7 @@ export function createExtensionLocalAuthority420({
         throw rpcError(-32603, 'local passkey UserOperation did not qualify for broadcast');
       }
 
+      await assertReviewedRecipient();
       const rpcUserOperation = toRpcUserOperation(prepared.userOperation);
       const userOpHash = await provider.request('eth_sendUserOperation', [rpcUserOperation, prepared.entryPoint]);
       if (!validHash(userOpHash)) throw rpcError(-32603, 'bundler returned an invalid UserOperation hash');

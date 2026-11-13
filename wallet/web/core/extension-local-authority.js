@@ -64,7 +64,7 @@ async function waitForUserOperationReceipt(provider, userOpHash, { timeoutMs = 1
     }
     await new Promise((resolve) => setTimeout(resolve, pollMs));
   }
-  throw rpcError(4900, 'timed out waiting for SmartAccount420 user operation receipt');
+  throw rpcError(4900, 'SmartAccount420 UserOperation receipt still pending; do not rebroadcast automatically', {userOpHash:userOpHash.toLowerCase(),pending:true});
 }
 
 export function createExtensionLocalAuthority420({
@@ -113,7 +113,17 @@ export function createExtensionLocalAuthority420({
         throw rpcError(-32603, 'bundler UserOperation hash does not match the locally signed canonical hash');
       }
       await persistPasskeyBinding(prepared.advancedBinding, { account: controller, context });
-      return waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
+      try {
+        return await waitForUserOperationReceipt(provider, userOpHash, receiptOptions);
+      } catch (error) {
+        // Submission happened before receipt tracking. Preserve the signed operation
+        // identity on timeout/outage, without misreporting it as a failed transfer.
+        if (error?.code !== -32603 && error?.code !== 4001) {
+          error.data = {...(error.data && typeof error.data==='object' ? error.data : {}),
+            userOpHash:userOpHash.toLowerCase(),pending:true};
+        }
+        throw error;
+      }
     }
 
     if (request?.method === 'personal_sign') {

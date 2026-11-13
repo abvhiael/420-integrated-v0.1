@@ -1,6 +1,7 @@
 import {estimateExtensionUserOpGas420} from './extension-userop-gas.js';
 import { normalizeAddress } from './abi.js';
 import { encodeExecute, normalizeBytes32 } from './abi.js';
+import {normalizeBatchCalls,encodeExecuteBatch} from './batch-execution.js';
 import { normalizeCallData, normalizeNativeValue } from './execution.js';
 import { readDeployedSmartAccountState } from './accounts.js';
 import { authenticatePasskey } from './passkeys.js';
@@ -89,9 +90,11 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
   const rpId = options.rpId ?? binding?.rpId;
   const origin = options.origin ?? binding?.origin;
   const validated = validatePasskeyCredentialBinding(binding, { smartAccountState, rpId, origin });
-  const target = assertSafeOwnerTarget(request.target, smartAccountState);
-  const value = normalizeNativeValue(request.value ?? 0n);
-  const data = normalizeCallData(request.data ?? '0x');
+  const batch=request.batchCalls==null?null:normalizeBatchCalls(smartAccountState,request.batchCalls);
+  const target=batch?normalizeAddress(smartAccountState.smartAccount):assertSafeOwnerTarget(request.target,smartAccountState);
+  const value=batch?0n:normalizeNativeValue(request.value ?? 0n);
+  const data=batch?'0x':normalizeCallData(request.data ?? '0x');
+  const accountCallData=batch?encodeExecuteBatch(batch.calls):null;
   const entryPoint = normalizeAddress(smartAccountState.entryPoint);
 
   await assertPasskeyActive(provider, smartAccountState.smartAccount, validated.credentialIdHash);
@@ -108,7 +111,8 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
     await estimateExtensionUserOpGas420(provider,{
       chainId:request.expectedChainId,sender:smartAccountState.smartAccount,
       entryPoint,nonce:'0x'+nonce.toString(16),
-      target,value:'0x'+value.toString(16),data,gasFees:request.gasFees,
+      target,value:'0x'+value.toString(16),data,
+      accountCallData,gasFees:request.gasFees,
       approvedLimits:{accountGasLimits:request.accountGasLimits,
         preVerificationGas:request.preVerificationGas},
     });
@@ -117,7 +121,7 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
     sender: smartAccountState.smartAccount,
     nonce,
     initCode: '0x',
-    callData: encodeExecute(target, value, data),
+    callData: accountCallData??encodeExecute(target, value, data),
     accountGasLimits: request.accountGasLimits ?? ZERO_BYTES32,
     preVerificationGas: request.preVerificationGas ?? 0n,
     gasFees: request.gasFees ?? ZERO_BYTES32,
@@ -159,6 +163,7 @@ export async function preparePasskeyUserOperationTransport(provider, navigatorLi
     target,
     value,
     data,
+    batchCalls:batch?.calls??null,
     nonce,
     nonceKey: 0n,
     userOpHash,

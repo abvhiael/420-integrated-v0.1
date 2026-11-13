@@ -1,4 +1,4 @@
-import {HDNodeWallet,Wallet,Transaction} from '../vendor/ethers-6.17.0.min.js';
+import {HDNodeWallet,Wallet,Transaction,getBytes,verifyMessage,verifyTypedData} from '../vendor/ethers-6.17.0.min.js';
 import {decryptVault420,DERIVATION_PATH_420} from './vault.js';
 const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 const Q=/^0x[0-9a-fA-F]+$/;
@@ -64,4 +64,46 @@ export async function signExtensionEoa420({vaultRecord,password,account,transact
   // JS strings cannot be reliably zeroized; do not persist or share decrypted data.
   payload=null;signer=null;
  }
+}
+
+/** EIP-191 / EIP-712 signatures are produced by the same short-lived local
+ * password-authorized vault as EOA transactions. Do not send secret material
+ * to the service worker, RPC, website, telemetry or an untrusted tab. */
+export async function signExtensionEoaMessage420({vaultRecord,password,account,method,params,chainId}={}){
+ const from=norm(account);
+ const chain=amount(chainId,'approved signing chain');
+ if(chain===0n||!Array.isArray(params)||params.length!==2)throw new Error('invalid signed message request');
+ let payload=null,signer=null;
+ try{
+  payload=await decryptVault420(vaultRecord,password);
+  signer=signerFor(payload,from);
+  if(method==='personal_sign'){
+   if(norm(params[1])!==from)throw new Error('personal_sign signer differs from approved account');
+   const raw=params[0];
+   if(typeof raw!=='string'||!/^0x(?:[0-9a-fA-F]{2})*$/.test(raw)||raw.length>131074)
+    throw new Error('personal_sign requires bounded hex-encoded message bytes');
+   const bytes=getBytes(raw);
+   const signature=await signer.signMessage(bytes);
+   if(verifyMessage(bytes,signature).toLowerCase()!==from)
+    throw new Error('local EIP-191 signature did not recover approved owner');
+   return signature;
+  }
+  if(method==='eth_signTypedData_v4'){
+   if(norm(params[0])!==from||typeof params[1]!=='string'||params[1].length>131072)
+    throw new Error('typed-data request or signer invalid');
+   const typed=JSON.parse(params[1]);
+   if(!typed||Array.isArray(typed)||typeof typed!=='object'||
+      !typed.domain||!typed.types||!typed.message||!typed.primaryType)
+    throw new Error('EIP-712 typed-data domain, types, primary type and message required');
+   if(typed.domain.chainId==null||BigInt(typed.domain.chainId)!==chain)
+    throw new Error('EIP-712 domain chain ID does not match approved wallet network');
+   const types={...typed.types};
+   delete types.EIP712Domain;
+   const signature=await signer.signTypedData(typed.domain,types,typed.message);
+   if(verifyTypedData(typed.domain,types,typed.message,signature).toLowerCase()!==from)
+    throw new Error('local EIP-712 signature did not recover approved owner');
+   return signature;
+  }
+  throw new Error('unsupported local signing method');
+ }finally{payload=null;signer=null;}
 }

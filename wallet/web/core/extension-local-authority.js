@@ -1,6 +1,7 @@
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './extension-recipient-resolver.js';
 import {packExtensionUserOpFees420} from './extension-fee-preflight.js';
 import { normalizeAddress } from './abi.js';
+import {normalizeBatchCalls,encodeExecuteBatch} from './batch-execution.js';
 import { discoverSmartAccount } from './accounts.js';
 import { preparePasskeyUserOperationTransport } from './passkey-entrypoint-transport.js';
 
@@ -25,6 +26,7 @@ function txRequest(request = {}) {
     accountGasLimits:tx.accountGasLimits??null,
     preVerificationGas:tx.preVerificationGas??null,
     recipientSnapshot:tx.recipientSnapshot??null,
+    batchCalls:tx.batchCalls??null,
   };
 }
 
@@ -100,6 +102,12 @@ export function createExtensionLocalAuthority420({
       if (!smartAccount?.deployed || !smartAccount.controllerIsOwner) {
         throw rpcError(4100, 'granted account is not the current SmartAccount420 owner');
       }
+      if(tx.batchCalls!==null){
+        const calls=normalizeBatchCalls(smartAccount,tx.batchCalls);
+        if(calls.calls.length<2||tx.target!==normalizeAddress(smartAccount.smartAccount)||
+           BigInt(tx.value)!==0n||tx.data.toLowerCase()!==encodeExecuteBatch(calls.calls).toLowerCase())
+          throw rpcError(-32602,'atomic call list differs from the reviewed SmartAccount batch');
+      }
       const binding = await loadPasskeyBinding({ account: controller, smartAccount: smartAccount.smartAccount, context });
       if (!binding) throw rpcError(4100, 'no active local passkey binding is available for this SmartAccount420');
 
@@ -127,6 +135,7 @@ export function createExtensionLocalAuthority420({
         smartAccount,
         binding,
         { target: tx.target, value: tx.value, data: tx.data,
+          batchCalls:tx.batchCalls,
           ...(tx.gasFees?{gasFees:tx.gasFees}:{}),
           ...(tx.expectedNonce?{expectedNonce:tx.expectedNonce}:{}),
           accountGasLimits:tx.accountGasLimits,

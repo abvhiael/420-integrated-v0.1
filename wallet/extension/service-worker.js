@@ -1,3 +1,5 @@
+import {normalizeDappAccountPermission420,dappAccountPermissions420,normalizeDappWalletCalls420,walletCapabilities420,walletCallsStatus420} from './core/extension-dapp-compatibility.js';
+import {normalizeBatchCalls,encodeExecuteBatch} from './core/batch-execution.js';
 import {Transaction} from './vendor/ethers-6.17.0.min.js';
 import {quoteExtensionEoa420} from './core/extension-eoa-preflight.js';
 import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
@@ -19,7 +21,7 @@ const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
 const APPROVALS_KEY = '420-wallet-pending-approvals-v1';
 const AUTHORITY_KEY = '420-wallet-pending-authority-v1';
-const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
+const READ_METHODS = new Set(['eth_chainId','eth_blockNumber','eth_call','eth_estimateGas','eth_gasPrice','eth_feeHistory','eth_maxPriorityFeePerGas','eth_getBalance','eth_getCode','eth_getTransactionCount','eth_getTransactionReceipt','eth_getTransactionByHash','eth_getBlockByNumber','eth_getLogs','net_version']);
 const AUTHORITY_TRANSPORT_METHODS = new Set([...READ_METHODS, 'eth_sendUserOperation', 'eth_getUserOperationReceipt','eth_estimateUserOperationGas','eth_sendRawTransaction']);
 const APPROVAL_METHODS = new Set(['eth_requestAccounts','eth_sendTransaction','personal_sign','eth_signTypedData_v4','wallet_addEthereumChain','wallet_switchEthereumChain','wallet_watchAsset']);
 const LOCAL_AUTHORITY_METHODS = new Set(['eth_sendTransaction','personal_sign','eth_signTypedData_v4']);
@@ -317,16 +319,18 @@ async function rpcRequest(method,params=[],{origin=null,expectedChainId=null}={}
 async function executeWithLocalAuthority(request, context) {
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
   const effective=await effectiveChain420(context.origin);
-  const isEoa=request.method==='eth_sendTransaction'&&request.params?.[0]?.executionModel==='eoa';
+  const address=prefs.selectedAccount;
+  const metadata=await accountMetadata420();
+  const isEoa=request.method==='eth_sendTransaction'?
+    request.params?.[0]?.executionModel==='eoa':
+    ['personal_sign','eth_signTypedData_v4'].includes(request.method)&&metadata[address]?.type==='eoa';
   if(!isEoa&&!effective.network.smartAccountApproved)
     throw Object.assign(new Error('No independently verified SmartAccount420 authority on selected EVM chain'),{code:4100});
   if(isEoa&&!(await vaultLockState420()).unlocked)
     throw Object.assign(new Error('Encrypted local EOA vault is locked'),{code:4100});
   if(!context.chainId||effective.chainId!==context.chainId||effective.epoch!==context.epoch)
     throw Object.assign(new Error('Network context changed before signing authority'),{code:4901});
-  const address=prefs.selectedAccount;
   const listed=await accountVisibility420(normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420)).accounts);
-  const metadata=await accountMetadata420();
   if(!address||!listed.includes(address)||!context.accounts?.includes(address))
     throw Object.assign(new Error('Account selection or permission changed; reconnect and confirm again'),{code:4100});
   if(['watch-only','hardware'].includes(metadata[address]?.type)||
@@ -374,8 +378,15 @@ async function executeWithLocalAuthority(request, context) {
           reject(Object.assign(new Error('420 Wallet local authority returned no result'), { code: -32603 }));
           return;
         }
-        effectiveChain420(context.origin).then(now=>{
-          if(now.chainId!==context.chainId||now.epoch!==context.epoch)throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+        Promise.all([effectiveChain420(context.origin),accountsFor(context.origin)]).then(([now,stillGranted])=>{
+          if(now.chainId!==context.chainId||now.epoch!==context.epoch)
+            throw Object.assign(new Error('Network context changed during signing'),{code:4901});
+          // Approval may be revoked while the password/passkey window is open.
+          // No origin may receive the resulting signature/transaction identity
+          // after its account permission has been removed.
+          if(context.origin&&(!Array.isArray(stillGranted)||
+             stillGranted.length!==1||stillGranted[0]!==context.accounts?.[0]))
+            throw Object.assign(new Error('Website account authorization changed during signing'),{code:4100});
           resolve(message.result);
         }).catch(reject);
       });
@@ -470,6 +481,27 @@ async function handleApprovalMethod(request, context) {
   }
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
+  if(request.method==='personal_sign'){
+    const p=request.params;
+    if(!Array.isArray(p)||p.length!==2||typeof p[0]!=='string'||
+       !/^0x(?:[0-9a-fA-F]{2})*$/.test(p[0])||p[0].length>131074||
+       typeof p[1]!=='string'||p[1].toLowerCase()!==granted[0])
+      throw Object.assign(new Error('personal_sign requires exact connected signer and bounded hex message'),{code:-32602});
+  }
+  if(request.method==='eth_signTypedData_v4'){
+    const p=request.params;
+    if(!Array.isArray(p)||p.length!==2||typeof p[0]!=='string'||
+       p[0].toLowerCase()!==granted[0]||typeof p[1]!=='string'||p[1].length>131072)
+      throw Object.assign(new Error('typed data must include exact connected signer and bounded payload'),{code:-32602});
+    let payload;
+    try{payload=JSON.parse(p[1]);}catch{throw Object.assign(new Error('EIP-712 typed data must be valid JSON'),{code:-32602});}
+    if(!payload||typeof payload!=='object'||Array.isArray(payload)||
+       !payload.domain||!payload.types||!payload.primaryType||!payload.message)
+      throw Object.assign(new Error('EIP-712 domain, types, primary type and message required'),{code:-32602});
+    const requested=await effectiveChain420(origin);
+    if(payload.domain.chainId==null||BigInt(payload.domain.chainId)!==BigInt(requested.chainId))
+      throw Object.assign(new Error('EIP-712 domain chain ID mismatch'),{code:4901});
+  }
   const before=await effectiveChain420(origin),pinned=before.chainId;
   let feePreview=null,approvedTxRequest=request;
   if(request.method==='eth_sendTransaction'){
@@ -572,9 +604,169 @@ async function handleApprovalMethod(request, context) {
       throw error;
     }
   }
-  return executeWithLocalAuthority(request, { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
+  const signerMeta=await accountMetadata420();
+  const isEoaSignature=['personal_sign','eth_signTypedData_v4'].includes(request.method)&&
+    signerMeta[current[0]]?.type==='eoa';
+  if(isEoaSignature&&!(await vaultLockState420()).unlocked)
+    throw Object.assign(new Error('Unlock the local EOA vault before signing'),{code:4100});
+  return executeWithLocalAuthority(
+    isEoaSignature?{...request,executionModel:'eoa'}:request,
+    { ...context, accounts: current,chainId:pinned,epoch:before.epoch });
 }
 
+
+
+/* Origin-scoped EIP-2255 / EIP-5792 compatibility. These methods never allow
+ * websites to call the RPC broadcaster, invent a grant, or bypass local authority. */
+async function handleDappCompatibility420(request,context){
+  const origin=context.origin,method=request.method,params=request.params??[];
+  const granted=await accountsFor(origin);
+  if(method==='wallet_getPermissions'){
+    if(!Array.isArray(params)||params.length)throw Object.assign(new Error('wallet_getPermissions accepts no parameters'),{code:-32602});
+    const records=await readObject(PERMISSIONS_KEY);
+    return dappAccountPermissions420(granted,origin,records[origin]?.grantedAt);
+  }
+  if(method==='wallet_requestPermissions'){
+    normalizeDappAccountPermission420(params);
+    await handleApprovalMethod({method:'eth_requestAccounts',params:[]},context);
+    const records=await readObject(PERMISSIONS_KEY);
+    return dappAccountPermissions420(await accountsFor(origin),origin,records[origin]?.grantedAt);
+  }
+  if(method==='wallet_revokePermissions'){
+    normalizeDappAccountPermission420(params);
+    const records=await readObject(PERMISSIONS_KEY);
+    if(Object.hasOwn(records,origin)){
+      delete records[origin];
+      await chrome.storage.local.set({[PERMISSIONS_KEY]:records});
+      await notifyDisconnectedSite420(origin);
+    }
+    return null;
+  }
+  if(method==='wallet_getCapabilities'){
+    if(!granted.length)throw Object.assign(new Error('Connect the requesting site to view wallet capabilities'),{code:4100});
+    if(!Array.isArray(params)||params.length<1||params.length>2||
+       typeof params[0]!=='string'||params[0].toLowerCase()!==granted[0]||
+       (params.length===2&&(!Array.isArray(params[1])||params[1].length>16)))
+      throw Object.assign(new Error('wallet_getCapabilities requires connected account and optional chain IDs'),{code:-32602});
+    const effective=await effectiveChain420(origin),config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const metadata=await accountMetadata420();
+    let supported=false;
+    if(metadata[granted[0]]?.type!=='eoa'&&
+       !['watch-only','hardware'].includes(metadata[granted[0]]?.type)&&
+       effective.network.smartAccountApproved&&config.chainId===effective.chainId&&config.smartAccountConfig){
+      try{
+        const smart=await discoverSmartAccount({request:(m,p)=>rpcRequest(m,p,{origin,expectedChainId:effective.chainId})},granted[0],config.smartAccountConfig);
+        const records=(await chrome.storage.local.get('420-wallet-passkey-bindings-v1'))?.['420-wallet-passkey-bindings-v1']??{};
+        supported=smart?.deployed===true&&smart?.controllerIsOwner===true&&
+          !!(records[smart.smartAccount?.toLowerCase()]||records[granted[0]]);
+      }catch{supported=false;}
+    }
+    const requested=params[1]?.length?params[1]:[effective.chainId];
+    const out={};
+    for(const item of requested){
+      const key=chainId420(item);
+      out[key]=walletCapabilities420(key,{atomicBatch:key===effective.chainId&&supported})[key];
+    }
+    return out;
+  }
+  if(method==='wallet_getCallsStatus'){
+    if(!granted.length)throw Object.assign(new Error('Connect this site before querying its batches'),{code:4100});
+    if(!Array.isArray(params)||params.length!==1)throw Object.assign(new Error('batch ID required'),{code:-32602});
+    const entries=(await readWalletUiActivity420()).filter(x=>x.origin===origin&&x.controller===granted[0]&&x.callsId);
+    let status=walletCallsStatus420(entries,params[0]);
+    if(status.status===200){
+      const item=entries.find(x=>x.callsId===status.id);
+      if(!validHash420(item.hash))throw Object.assign(new Error('confirmed batch has no transaction hash'),{code:4900});
+      const receipt=await rpcRequest('eth_getTransactionReceipt',[item.hash],{origin,expectedChainId:item.chainId});
+      if(!receipt||receipt.transactionHash?.toLowerCase()!==item.hash.toLowerCase()||
+         receipt.status!=='0x1')throw Object.assign(new Error('confirmed batch receipt is no longer canonical'),{code:4900});
+      status={...status,receipts:[receipt]};
+    }
+    return status;
+  }
+  if(method!=='wallet_sendCalls')throw Object.assign(new Error('Unsupported dApp compatibility method'),{code:4200});
+  if(granted.length!==1)throw Object.assign(new Error('Connect one account to submit atomic batch'),{code:4100});
+  const before=await effectiveChain420(origin),pinned=before.chainId;
+  const callRequest=normalizeDappWalletCalls420(params,{account:granted[0],chainId:pinned});
+  const metadata=await accountMetadata420();
+  if(metadata[granted[0]]?.type==='eoa'||['hardware','watch-only'].includes(metadata[granted[0]]?.type))
+    throw Object.assign(new Error('Atomic batch requires a verified passkey SmartAccount420'),{code:4200});
+  if(!before.network.smartAccountApproved)
+    throw Object.assign(new Error('SmartAccount420 is not approved on selected chain'),{code:4100});
+  const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+  if(config.chainId!==pinned||!config.smartAccountConfig)
+    throw Object.assign(new Error('Verified SmartAccount runtime configuration missing'),{code:4100});
+  const provider={request:(m,p)=>rpcRequest(m,p,{origin,expectedChainId:pinned})};
+  const smart=await discoverSmartAccount(provider,granted[0],config.smartAccountConfig);
+  if(!smart?.deployed||!smart?.controllerIsOwner||!smart?.entryPoint)
+    throw Object.assign(new Error('SmartAccount owner/EntryPoint proof required'),{code:4100});
+  const normalized=normalizeBatchCalls(smart,callRequest.calls);
+  const calls=normalized.calls.map(c=>({target:c.target,value:'0x'+c.value.toString(16),data:c.data}));
+  const callData=encodeExecuteBatch(normalized.calls);
+  const transaction={from:granted[0],to:smart.smartAccount,value:'0x0',data:callData};
+  const choice={level:'standard'};
+  const quote=await quoteExtensionSend420(provider,{chainId:pinned,smartAccount:smart.smartAccount,
+    entryPoint:smart.entryPoint,transaction,choice,strictUserOpGas:true,accountCallData:callData});
+  const risks=normalized.calls.map(c=>inspectExtensionApprovalRisk420({
+    to:c.target,value:'0x'+c.value.toString(16),data:c.data
+  }));
+  const severityOrder={critical:4,high:3,medium:2,low:1,none:0};
+  const risk=risks.reduce((worst,next)=>
+    (severityOrder[next?.severity]??0)>(severityOrder[worst?.severity]??0)?next:worst,
+    {severity:'low',message:'Review each call in this atomic batch'});
+  await createApproval({...request,params:[callRequest],feePreview:{
+    quote,risk:{...risk,message:'Atomic batch: '+risks.map((x,i)=>
+      'Call '+(i+1)+': '+(x?.message||'verify destination and calldata')).join('; ')},
+    chainId:pinned,normalizedTx:transaction,batchCalls:calls,executionModel:'erc4337'}},
+    {...context,accounts:granted,chainId:pinned,epoch:before.epoch});
+  const after=await effectiveChain420(origin),current=await accountsFor(origin);
+  if(after.chainId!==pinned||after.epoch!==before.epoch||
+     current.length!==1||current[0]!==granted[0])
+    throw Object.assign(new Error('Batch approval expired after chain/account change'),{code:4901});
+  const latest=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
+  if(!latest?.deployed||!latest?.controllerIsOwner||
+     latest.smartAccount!==smart.smartAccount||latest.entryPoint!==smart.entryPoint||
+     encodeExecuteBatch(normalizeBatchCalls(latest,calls).calls)!==callData)
+    throw Object.assign(new Error('SmartAccount batch authority or calls changed'),{code:4100});
+  const refreshed=await quoteExtensionSend420(provider,{chainId:pinned,
+    smartAccount:latest.smartAccount,entryPoint:latest.entryPoint,transaction,
+    choice,strictUserOpGas:true,accountCallData:callData});
+  if(refreshed.blockHash!==quote.blockHash||refreshed.gasFees!==quote.gasFees||
+     refreshed.nonce!==quote.nonce||
+     refreshed.gasBudget?.accountGasLimits!==quote.gasBudget?.accountGasLimits||
+     refreshed.gasBudget?.preVerificationGas!==quote.gasBudget?.preVerificationGas)
+    throw Object.assign(new Error('Batch nonce, block or fees changed; obtain a new approval'),{code:4001});
+  const activityId='site-batch-'+Date.now()+'-'+Math.random().toString(16).slice(2);
+  const entry={id:activityId,at:Date.now(),chainId:pinned,origin,
+    controller:granted[0],executionModel:'erc4337',recipient:smart.smartAccount,
+    amount:'0x0',symbol:'atomic contract batch',status:'pending',hash:null};
+  await rememberWalletUiActivity420(entry);
+  const prepared={method:'eth_sendTransaction',params:[{
+    ...transaction,batchCalls:calls,gasFees:refreshed.gasFees,
+    accountGasLimits:refreshed.gasBudget.accountGasLimits,
+    preVerificationGas:refreshed.gasBudget.preVerificationGas,
+    expectedNonce:refreshed.nonce
+  }]};
+  try{
+    const txHash=await executeWithLocalAuthority(prepared,{
+      ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId
+    });
+    const recorded=(await readWalletUiActivity420()).find(x=>x.id===activityId);
+    const callsId=validHash420(recorded?.userOpHash)?recorded.userOpHash.toLowerCase():txHash.toLowerCase();
+    await rememberWalletUiActivity420({...entry,hash:txHash,callsId,status:'submitted'});
+    return callsId;
+  }catch(error){
+    const userOpHash=error?.data?.userOpHash;
+    if(validHash420(userOpHash)){
+      const callsId=userOpHash.toLowerCase();
+      await rememberWalletUiActivity420({...entry,callsId,userOpHash:callsId,status:'submitted'});
+      return callsId; // Submitted: timeout cannot safely imply failure or rebroadcast.
+    }
+    await rememberWalletUiActivity420({...entry,status:'failed',
+      error:error?.message||'Batch authorization failed'});
+    throw error;
+  }
+}
 
 /* The popup owns presentation only. The service worker revalidates every read and
    action. No popup-origin message is accepted from content scripts or web pages. */
@@ -1439,6 +1631,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       const context = { origin, tabId: sender?.tab?.id ?? null, frameId: sender?.frameId ?? 0, method: request.method };
       let result;
       if (READ_METHODS.has(request.method)) result = await rpcRequest(request.method,request.params??[],{origin});
+      else if (['wallet_getPermissions','wallet_requestPermissions','wallet_revokePermissions','wallet_getCapabilities','wallet_sendCalls','wallet_getCallsStatus'].includes(request.method))
+        result=await handleDappCompatibility420(request,context);
       else if (request.method === 'eth_accounts' || APPROVAL_METHODS.has(request.method)) result = await handleApprovalMethod(request, context);
       else throw Object.assign(new Error(`unsupported provider method: ${request.method}`), { code: 4200 });
       sendResponse({ id: request.id, result });

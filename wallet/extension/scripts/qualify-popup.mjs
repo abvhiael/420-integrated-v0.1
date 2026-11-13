@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {mkdirSync} from 'node:fs';
-import {resolve,dirname} from 'node:path';
+import {mkdirSync,mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
 import jsQR from 'jsqr';
@@ -24,6 +25,14 @@ const stringReturn=s=>{
   return '0x'+word(32).slice(2)+word(hex.length/2).slice(2)+hex.padEnd(Math.ceil(hex.length/64)*64,'0');
 };
 const rpc=createServer(async(req,res)=>{
+  if(req.method==='GET'&&req.url==='/dapp'){
+    res.writeHead(200,{'content-type':'text/html','cache-control':'no-store'});
+    res.end('<!doctype html><html><head><title>420 Wallet dApp fixture</title></head><body><h1>Local dApp compatibility fixture</h1></body></html>');
+    return;
+  }
+  // Chromium automatically probes favicon and may issue HEAD/OPTIONS requests.
+  // Only POST carries JSON-RPC; never parse an empty non-RPC request as JSON.
+  if(req.method!=='POST'){res.writeHead(204).end();return;}
   const parts=[];
   for await(const chunk of req)parts.push(chunk);
   const body=JSON.parse(Buffer.concat(parts).toString());
@@ -121,6 +130,84 @@ try{
   console.log('PASS: QR verified by independent jsQR decoder on real Chromium Receive canvas');
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
+
+  // M6: real content-script injection, EIP-6963 re-discovery, passive
+  // EIP-1193 connection restoration, MetaMask coexistence and EIP-2255
+  // same-origin grant/revocation in packaged Chromium. No signing is simulated.
+  const dappOrigin='http://127.0.0.1:'+rpc.address().port;
+  await page.evaluate(async({dappOrigin,controller})=>{
+    const key='420-wallet-origin-permissions-v1';
+    const grants=(await chrome.storage.local.get(key))?.[key]||{};
+    grants[dappOrigin]={accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()};
+    await chrome.storage.local.set({[key]:grants});
+  },{dappOrigin,controller});
+  const dapp=await browser.newPage();
+  await dapp.goto(dappOrigin+'/dapp',{waitUntil:'load'});
+  const providerSnapshot=await dapp.evaluate(async()=>{
+    let found=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')found=event.detail;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    if(!found)throw new Error('EIP-6963 provider not discoverable in real page');
+    window.__wallet420=found.provider;
+    const accounts=await found.provider.request({method:'eth_accounts'});
+    const chainId=await found.provider.request({method:'eth_chainId'});
+    const permissions=await found.provider.request({method:'wallet_getPermissions'});
+    const capabilities=await found.provider.request({method:'wallet_getCapabilities',params:[accounts[0]]});
+    const requested=await found.provider.request({method:'wallet_requestPermissions',params:[{eth_accounts:{}}]});
+    return {accounts,chainId,permissions,capabilities,requested,
+      name:found.info.name,icon:found.info.icon,connected:found.provider.isConnected()};
+  });
+  assert.deepEqual(providerSnapshot.accounts,[controller]);
+  assert.equal(providerSnapshot.chainId,'0x1a4');
+  assert.equal(providerSnapshot.permissions[0]?.parentCapability,'eth_accounts');
+  assert.equal(providerSnapshot.requested[0]?.parentCapability,'eth_accounts');
+  assert.equal(providerSnapshot.capabilities['0x1a4']?.atomicBatch?.supported,false,
+    'Watch-only EOA cannot claim atomic SmartAccount execution');
+  assert.equal(providerSnapshot.connected,true);
+  assert.ok(providerSnapshot.icon.startsWith('data:image/svg+xml,'));
+  const coexistence=await dapp.evaluate(()=>{
+    const wallet=window.__wallet420;
+    const metamask={isMetaMask:true};
+    Object.defineProperty(window,'ethereum',{configurable:true,value:metamask});
+    let discovered=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')discovered=event.detail.provider;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    return {metaMaskPreserved:window.ethereum===metamask,walletPreserved:discovered===wallet};
+  });
+  assert.equal(coexistence.metaMaskPreserved,true);
+  assert.equal(coexistence.walletPreserved,true);
+  await dapp.reload();
+  const afterReload=await dapp.evaluate(async()=>{
+    let wallet=null;
+    window.addEventListener('eip6963:announceProvider',event=>{
+      if(event.detail?.info?.name==='420 Wallet')wallet=event.detail.provider;
+    });
+    window.dispatchEvent(new Event('eip6963:requestProvider'));
+    if(!wallet)throw new Error('Wallet disappeared after reload');
+    window.__wallet420=wallet;window.__accountsEvents=[];
+    wallet.on('accountsChanged',accounts=>window.__accountsEvents.push(accounts));
+    return {accounts:await wallet.request({method:'eth_accounts'}),
+      chainId:await wallet.request({method:'eth_chainId'})};
+  });
+  assert.deepEqual(afterReload.accounts,[controller]);
+  assert.equal(afterReload.chainId,'0x1a4');
+  await dapp.evaluate(async()=>window.__wallet420.request({
+    method:'wallet_revokePermissions',params:[{eth_accounts:{}}]
+  }));
+  await dapp.waitForFunction(()=>window.__accountsEvents?.some(x=>Array.isArray(x)&&x.length===0));
+  assert.deepEqual(await dapp.evaluate(async()=>window.__wallet420.request({method:'eth_accounts'})),[]);
+  const denied=await dapp.evaluate(async()=>{
+    try{await window.__wallet420.request({method:'wallet_sendCalls',params:[]});return false;}
+    catch(error){return error.code===4100;}
+  });
+  assert.equal(denied,true,'Revoked site must not submit contract batch');
+  await dapp.close();
+  console.log('PASS: real Chromium EIP-6963, coexistence, account restoration, EIP-2255 permission and revocation');
+
   // M3: watch-only and unverified SmartAccount cannot create an executable preview.
   assert.equal(await page.locator('#quick-send').isDisabled(),true);
   await page.locator('#header-settings').click();
@@ -218,6 +305,78 @@ try{
   await page.locator('#approve').waitFor({state:'visible'});
   assert.match(await page.locator('#origin').textContent(),/example\.test/);
   await page.screenshot({path:resolve(screenshots,'08-approval-local-fixture.png')});
+  // M6: preserve origin-scoped grants and selected network through a genuine
+  // Chromium process/extension-worker restart, not merely a page reload.
+  const restartProfile=mkdtempSync(join(tmpdir(),'wallet420-m6-profile-'));
+  const browserOptions={channel:'chromium',headless:true,viewport:{width:410,height:640},
+    args:['--disable-extensions-except='+root,'--load-extension='+root]};
+  let firstContext=null,rebootContext=null;
+  try{
+    firstContext=await chromium.launchPersistentContext(restartProfile,browserOptions);
+    let firstWorker=firstContext.serviceWorkers()[0];
+    if(!firstWorker)firstWorker=await firstContext.waitForEvent('serviceworker',{timeout:20000});
+    const extensionUrl='chrome-extension://'+new URL(firstWorker.url()).host+'/popup.html';
+    const setup=await firstContext.newPage();
+    await setup.goto(extensionUrl,{waitUntil:'load'});
+    // The extension's first-run registry initialization is asynchronous.
+    // Wait for the real service worker's default-registry transaction before
+    // writing the persisted restart fixture, or its first-run write may race
+    // and overwrite the saved chain identity during a cold profile startup.
+    await setup.waitForFunction(async()=>{
+      const response=await chrome.runtime.sendMessage({
+        source:'420-wallet-popup-ui',kind:'get-state'
+      });
+      return !response?.error&&Boolean(response?.result?.registry?.networks);
+    },undefined,{timeout:20000});
+    await setup.evaluate(async({controller,port,dappOrigin})=>{
+      await chrome.storage.local.set({
+        '420-wallet-extension-config-v1':{
+          rpcUrl:'http://127.0.0.1:'+port+'/',chainId:'0x1a4',networkName:'420 Integrated',
+          accounts:[controller],accountMeta:{[controller]:{label:'Restart fixture',type:'watch-only'}},
+          trackedAssets:[],smartAccountConfig:null
+        },
+        '420-wallet-ui-preferences-v1':{selectedAccount:controller},
+        '420-wallet-networks-v1':{version:1,epoch:1,selectedChainId:'0x1a4',networks:{
+          '0x1a4':{chainId:'0x1a4',chainName:'420 Integrated',
+            rpcUrls:['http://127.0.0.1:'+port+'/'],blockExplorerUrls:[],
+            enabled:true,trusted:true,smartAccountApproved:false,
+            nativeCurrency:{name:'420',symbol:'420',decimals:18}}
+        }},
+        '420-wallet-origin-permissions-v1':{
+          [dappOrigin]:{accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()}
+        }
+      });
+      const registry=(await chrome.storage.local.get('420-wallet-networks-v1'))['420-wallet-networks-v1'];
+      if(registry?.selectedChainId!=='0x1a4'||registry?.networks?.['0x1a4']?.enabled!==true)
+        throw new Error('Restart fixture network was not durably configured');
+    },{controller,port:rpc.address().port,dappOrigin});
+    await firstContext.close();
+    firstContext=null;
+    rebootContext=await chromium.launchPersistentContext(restartProfile,browserOptions);
+    const restored=await rebootContext.newPage();
+    await restored.goto(dappOrigin+'/dapp',{waitUntil:'load'});
+    const recovered=await restored.evaluate(async()=>{
+      let provider=null;
+      window.addEventListener('eip6963:announceProvider',event=>{
+        if(event.detail?.info?.name==='420 Wallet')provider=event.detail.provider;
+      });
+      window.dispatchEvent(new Event('eip6963:requestProvider'));
+      if(!provider)throw new Error('Provider missing after browser restart');
+      return {
+        accounts:await provider.request({method:'eth_accounts'}),
+        chainId:await provider.request({method:'eth_chainId'}),
+        permissions:await provider.request({method:'wallet_getPermissions'})
+      };
+    });
+    assert.deepEqual(recovered.accounts,[controller]);
+    assert.equal(recovered.chainId,'0x1a4');
+    assert.equal(recovered.permissions[0]?.parentCapability,'eth_accounts');
+    console.log('PASS: Chromium restart preserves origin grants, chain identity and wallet discovery');
+  }finally{
+    if(firstContext)await firstContext.close();
+    if(rebootContext)await rebootContext.close();
+    rmSync(restartProfile,{recursive:true,force:true});
+  }
   console.log('PASS: packaged extension popup and M4 account-scoped Tokens/NFTs/asset-details with real mock-chain RPC; no signing or transaction submitted.');
 }finally{
   await browser.close();

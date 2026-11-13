@@ -18,6 +18,7 @@ const account='0x3333333333333333333333333333333333333333';
 const addressWord=a=>'0x'+a.slice(2).padStart(64,'0');
 const token='0x5555555555555555555555555555555555555555';
 const nft='0x6666666666666666666666666666666666666666';
+const nft1155='0x7777777777777777777777777777777777777777';
 const transfer='0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const word=n=>'0x'+BigInt(n).toString(16).padStart(64,'0');
 const stringReturn=s=>{
@@ -51,10 +52,12 @@ const rpc=createServer(async(req,res)=>{
   }
   else if(method==='eth_call'){
     const to=body.params?.[0]?.to?.toLowerCase(),data=body.params?.[0]?.data?.toLowerCase()||'';
-    if(to===nft&&data.startsWith('0x01ffc9a7')){
+    if((to===nft||to===nft1155)&&data.startsWith('0x01ffc9a7')){
       const iface=data.slice(10,18);
-      result=word(iface==='01ffc9a7'||iface==='80ac58cd'?1:0);
+      result=word(iface==='01ffc9a7'||
+        (to===nft&&iface==='80ac58cd')||(to===nft1155&&iface==='d9b67a26')?1:0);
     }
+    else if(to===nft1155&&data.startsWith('0x00fdd58e'))result=word(3);
     else if(to===nft&&data.startsWith('0xc87b56dd'))result=stringReturn('https://metadata.example.test/42.json');
     else if(to===token&&data==='0x313ce567')result=word(6);
     else if(to===token&&data==='0x95d89b41')result=stringReturn('TEST');
@@ -312,6 +315,21 @@ try{
   await page.locator('#nft-list .nft-item').first().click();
   await page.locator('#nft-spam').click();
   await page.waitForFunction(()=>document.querySelector('#nft-spam')?.textContent==='Mark as spam');
+  await page.locator('#nft-detail-view [data-back]').click();
+  // M8: Manual import of older game collectibles not seen in recent logs;
+  // ERC-1155 balanceOf must prove current ownership before display.
+  await page.locator('#nft-import-standard').selectOption('ERC1155');
+  await page.locator('#nft-import-contract').fill(nft1155);
+  await page.locator('#nft-import-id').fill('7');
+  await page.locator('#nft-import-form button[type=submit]').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-list')?.textContent?.includes('ERC1155 #7'));
+  assert.match(await page.locator('#nft-list').textContent(),/quantity 3/);
+  await page.locator('#nft-list .nft-item').filter({hasText:'ERC1155 #7'}).click();
+  assert.match(await page.locator('#nft-detail-facts').textContent(),/balanceOf\(owner,tokenId\)/);
+  await page.locator('#nft-recipient').fill('0x'+'33'.repeat(20));
+  await page.locator('#nft-inspect-approval').click();
+  await page.waitForFunction(()=>document.querySelector('#nft-approval-status')?.textContent?.includes('not approved')||
+    document.querySelector('#nft-approval-status')?.textContent?.includes('approved for ALL'));
   await page.locator('#nft-detail-view [data-back]').click();
   await page.locator('[data-screen="dashboard"]').click();
   await page.locator('[data-screen="sites-view"]').click();

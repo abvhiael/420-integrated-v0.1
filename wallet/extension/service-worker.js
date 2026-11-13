@@ -2096,8 +2096,20 @@ async function convenienceCommand420(message){
      throw Object.assign(new Error('Remote sync requires a verified encrypted sync provider and explicit consent'),{code:4100});
    const after={...before,privacy:{...before.privacy,[key]:message.enabled}};
    await chrome.storage.local.set({[CONVENIENCE_KEY420]:after});
-   if(key==='notifications'&&!message.enabled)
-     await chrome.storage.local.remove(NOTIFICATION_DELIVERED_KEY420);
+   if(key==='notifications'){
+     if(message.enabled){
+       const wallet=await walletUiState420();
+       const history=actionableNotifications420(wallet.activity,{account:wallet.selectedAccount,
+         chainId:wallet.network.expectedChainId,after:0});
+       const indexed={initializedAt:Date.now()};
+       for(const entry of history)indexed[wallet.network.expectedChainId+':'+entry.id]=entry.status;
+       await chrome.storage.local.set({[NOTIFICATION_DELIVERED_KEY420]:indexed});
+       chrome.alarms.create('420-wallet-transaction-alerts',{periodInMinutes:5});
+     }else{
+       await chrome.alarms.clear('420-wallet-transaction-alerts');
+       await chrome.storage.local.remove(NOTIFICATION_DELIVERED_KEY420);
+     }
+   }
    return convenienceState420();
  }
  if(message.kind==='convenience-label'){
@@ -2144,17 +2156,17 @@ async function maybeNotifyWalletActivity420(){
  const previous=await readObject(NOTIFICATION_DELIVERED_KEY420);
  for(const entry of entries){
    if(!['confirmed','reverted','reorganized','failed'].includes(entry.status))continue;
-   const key=entry.chainId+':'+entry.id;
+   const key=wallet.network.expectedChainId+':'+entry.id;
    if(previous[key]===entry.status)continue;
    // Don't announce old wallet history when permission is first enabled.
    if(!Object.hasOwn(previous,'initializedAt')){
      previous.initializedAt=Date.now();
-     for(const observed of entries)previous[observed.id]=observed.status;
+     for(const observed of entries)previous[wallet.network.expectedChainId+':'+observed.id]=observed.status;
      break;
    }
    previous[key]=entry.status;
    await chrome.notifications.create('420-wallet-'+String(entry.id).slice(0,80),{
-     type:'basic',iconUrl:'icons/icon128.png',title:'420 Wallet transaction update',
+     type:'basic',iconUrl:chrome.runtime.getURL('wallet-notification.svg'),title:'420 Wallet transaction update',
      message:entry.label+': '+entry.status+'. Open the wallet to verify the on-chain receipt.',
      priority:0});
  }
@@ -2686,4 +2698,9 @@ chrome.runtime.onInstalled.addListener(async () => {
   chrome.alarms?.create?.('420-wallet-network-health',{periodInMinutes:1});
   const config = await readObject('420-wallet-extension-config-v1');
   if (!Object.keys(config).length) await chrome.storage.local.set({ '420-wallet-extension-config-v1': { rpcUrl: null, accounts: [], smartAccountConfig: null } });
+});
+
+// Opt-in, locally stored transaction-status alerts only; no push provider or analytics tracker.
+chrome.alarms.onAlarm.addListener(alarm=>{
+ if(alarm.name==='420-wallet-transaction-alerts')maybeNotifyWalletActivity420().catch(()=>{});
 });

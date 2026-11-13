@@ -4,7 +4,7 @@ import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,ext
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
 const $=id=>document.getElementById(id);
-const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0,detailAddress:null,showHidden:false};
+const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0,detailAddress:null,showHidden:false,security:null,securityReview:null,securityEpoch:0};
 const node=(tag,cls,text)=>{
   const el=document.createElement(tag);if(cls)el.className=cls;
   if(text!==undefined)el.textContent=text;return el;
@@ -260,6 +260,186 @@ function renderSites(){
     card.append(info,button);list.append(card);
   }
 }
+
+function securityTextRow420(title,description,kind=''){
+  const item=node('div','security-row');
+  const heading=node('strong','',title);
+  const detail=node('small','',description);
+  item.append(heading,detail);
+  if(kind)item.dataset.kind=kind;
+  return item;
+}
+function securityEmpty420(root,message){
+ root.replaceChildren(node('p','empty',message));
+}
+function securitySafeTime420(value){
+ const parsed=Number(value);
+ return Number.isFinite(parsed)&&parsed>0?new Date(parsed).toLocaleString():'Unknown';
+}
+function renderSecurity420(){
+ const sec=state.security;
+ if(!sec)return;
+ $('security-status').textContent='Selected '+sec.account+' · chain '+sec.chainId+
+  '. Browser permissions are separate from on-chain authorities.';
+ const sites=$('security-sites');sites.replaceChildren();
+ if(!sec.sites.length)securityEmpty420(sites,'No connected sites for this wallet.');
+ for(const site of sec.sites){
+  const risk=site.securityRisk?.flags?.length?site.securityRisk.flags.join('; '):'No local heuristic warning detected (not a safety guarantee)';
+  const item=securityTextRow420(site.origin,
+    'Accounts: '+(site.accounts?.join(', ')||'none')+
+    ' · granted '+securitySafeTime420(site.grantedAt)+
+    ' · '+risk);
+  const btn=node('button','small-danger','Disconnect website only');
+  btn.type='button';btn.setAttribute('aria-label','Disconnect '+site.origin);
+  btn.addEventListener('click',async()=>{
+   if(!confirm('Remove only browser account access for '+site.origin+
+    '? Token approvals, SmartAccount grants, session keys and passkeys remain unchanged on chain.'))return;
+   btn.disabled=true;
+   try{
+    const epoch=++state.epoch,next=await command('disconnect-site',{origin:site.origin});
+    await applyWalletState420(next,epoch);
+    await loadSecurity420();
+    securityMessage420('Browser site disconnected. No on-chain permission was revoked.');
+   }catch(e){securityMessage420(e.message,true);}
+   finally{btn.disabled=false;}
+  });
+  item.append(btn);sites.append(item);
+ }
+ const alerts=$('security-alerts');alerts.replaceChildren();
+ if(!sec.alerts.length)securityEmpty420(alerts,'No local heuristic alerts detected. This does not prove safety.');
+ for(const alert of sec.alerts)alerts.append(securityTextRow420(
+  (alert.kind||'alert').toUpperCase(),(alert.origin?alert.origin+': ':'')+alert.message,'alert'));
+ const history=$('security-signatures');history.replaceChildren();
+ if(!sec.signatures.length)securityEmpty420(history,'No successful local dApp signatures recorded for this account and chain.');
+ for(const x of sec.signatures)history.append(securityTextRow420(
+  x.method+' · '+securitySafeTime420(x.at),
+  x.origin+' · '+x.account+' · '+(x.flags?.length?x.flags.join('; '):'No heuristic warning')+
+  ' · This record cannot undo the signature.'));
+ const smart=$('security-account');smart.replaceChildren();
+ if(sec.smart){
+  const a=sec.smart;
+  smart.append(securityTextRow420('SmartAccount420 · '+a.smartAccount,
+   'Owner '+a.owner+' · EntryPoint '+a.entryPoint+
+   ' · authorization epoch '+a.authorizationEpoch+
+   ' · policy version '+a.authorizationPolicyVersion));
+  smart.append(securityTextRow420('Canonical capability registry '+a.capabilityRegistry,
+   'Verified registry '+a.verifiedCapabilityRegistry));
+ }else smart.append(securityTextRow420('SmartAccount420 unavailable',
+  sec.smartError||'Canonical deployment not verified; no SmartAccount authority can be revoked.'));
+ const recovery=$('security-recovery');recovery.replaceChildren();
+ recovery.append(sec.smart?securityTextRow420(
+  'Recovery authority: '+sec.smart.recoveryAuthority,
+  'Pending owner '+sec.smart.pendingRecoveryOwner+
+  ' · executable after '+(Number(sec.smart.recoveryExecutableAt)?
+   securitySafeTime420(Number(sec.smart.recoveryExecutableAt)*1000):'not scheduled')+
+  '. Recovery changes need separate canonical authority.'):
+  securityTextRow420('Unavailable','No verified SmartAccount recovery authority.'));
+ const passkeys=$('security-passkeys');passkeys.replaceChildren();
+ if(!sec.passkeys.length)securityEmpty420(passkeys,'No locally bound passkeys found or no verified SmartAccount.');
+ for(const x of sec.passkeys){
+  const item=securityTextRow420('Credential '+x.credentialIdHash,
+   'RP '+(x.relyingParty||'unknown')+' · binding epoch '+x.bindingEpoch+
+   ' · on-chain '+x.status);
+  if(x.active){
+   const button=node('button','small-danger','Review on-chain passkey revocation');
+   button.type='button';
+   button.addEventListener('click',()=>reviewSecurity420({
+    authorityKind:'passkey',credentialIdHash:x.credentialIdHash
+   }));
+   item.append(button);
+  }
+  passkeys.append(item);
+ }
+ for(const kind of ['allowance','capability','session']){
+  const element=$('security-'+(kind==='allowance'?'allowances':kind==='capability'?'capabilities':'sessions'));
+  element.replaceChildren();
+  const matches=sec.watched.filter(x=>x.kind===kind);
+  if(!matches.length)securityEmpty420(element,'No '+kind+' authorities tracked. Add an exact on-chain reference above.');
+  for(const x of matches){
+   const who=kind==='allowance'?x.token+' · spender '+x.spender+
+    ' · '+x.owner+' owner':kind==='capability'?x.grantId+' · principal '+(x.principal||'unverified'):x.key;
+   const detail='On-chain '+x.status+(x.value!=null?' · raw allowance '+x.value:'')+
+    (x.unlimited?' · VERY LARGE ALLOWANCE':'')+
+    (x.validUntil?' · valid until '+x.validUntil:'')+
+    (x.sessionEpoch?' · session epoch '+x.sessionEpoch:'')+
+    (x.warning?' · '+x.warning:'');
+   const row=securityTextRow420(who,detail);
+   if(x.verified===true&&(x.status==='active')){
+    const button=node('button','small-danger','Review on-chain '+kind+' revocation');
+    button.type='button';
+    button.addEventListener('click',()=>reviewSecurity420({
+     authorityKind:kind,...(kind==='allowance'?
+      {token:x.token,spender:x.spender,owner:x.owner}:
+      kind==='capability'?{grantId:x.grantId}:{key:x.key})
+    }));
+    row.append(button);
+   }
+   const hide=node('button','secondary','Stop watching (local only)');
+   hide.type='button';
+   hide.addEventListener('click',async()=>{
+    hide.disabled=true;
+    try{
+     const next=await command('security-unwatch',{
+       authorityKind:kind,...x
+     });
+     state.security=next;renderSecurity420();
+     securityMessage420('Removed watch entry locally. On-chain authority is unchanged.');
+    }catch(e){securityMessage420(e.message,true);}
+    finally{hide.disabled=false;}
+   });
+   row.append(hide);element.append(row);
+  }
+ }
+}
+function securityMessage420(text,isError=false){
+ const message=$('security-status');message.textContent=text;
+ message.className='notice'+(isError?' error':'');
+}
+async function loadSecurity420(){
+ const version=++state.securityEpoch;
+ try{
+  securityMessage420('Verifying security authorities against the current chain…');
+  const next=await command('security-state');
+  if(version!==state.securityEpoch)return;
+  state.security=next;renderSecurity420();
+ }catch(error){if(version===state.securityEpoch)securityMessage420('Security inventory unavailable: '+error.message,true);}
+}
+async function watchSecurity420(request){
+ try{
+  const next=await command('security-watch',request);
+  state.security=next;renderSecurity420();
+  securityMessage420('Verified on-chain authority added to this device’s watchlist. No revocation occurred.');
+ }catch(error){securityMessage420('Security inspection blocked: '+error.message,true);}
+}
+async function reviewSecurity420(request){
+ if(state.securityReview){securityMessage420('Cancel the existing revocation review before starting another.',true);return;}
+ try{
+  securityMessage420('Rechecking current chain, owner and authority before preparing revocation…');
+  const review=await command('security-review',request);
+  state.securityReview=review;
+  $('security-review-kind').textContent=review.kind+' · '+review.authority+
+   ' · '+review.executionModel;
+  $('security-review-target').textContent=review.transaction.to+
+   ' · calldata '+review.transaction.data;
+  $('security-review-current').textContent=JSON.stringify(review.record);
+  $('security-review-fee').textContent=review.quote.totalFeeWei??'Unavailable';
+  $('security-review-simulation').textContent=review.quote.simulation+
+   ' · nonce '+(review.quote.nonce||'unknown');
+  $('security-review-warning').textContent=review.explanation+
+   ' Gas is charged on chain. Submission is NOT evidence of revocation.';
+  $('security-review-ack').checked=false;
+  $('security-submit-review').disabled=true;
+  $('security-revocation-review').hidden=false;
+  $('security-revocation-review').scrollIntoView({block:'nearest'});
+  securityMessage420('Separate on-chain revocation reviewed. Recheck destination and fee, then explicitly confirm.');
+ }catch(error){securityMessage420('Revocation cannot proceed: '+error.message,true);}
+}
+function clearSecurityReview420(){
+ state.securityReview=null;
+ $('security-revocation-review').hidden=true;
+ $('security-review-ack').checked=false;
+ $('security-submit-review').disabled=true;
+}
 function renderSettings(){
   const c=state.wallet?.config||{};
   const choices=$('network-select');choices.replaceChildren();
@@ -473,9 +653,16 @@ async function approval(){
   $('origin').textContent=approval.context.origin;
   $('details').textContent=prettyRequest(approval.request);
   const risk=approval.request.feePreview?.risk;
+  const signatureRisk=approval.request.securityRisk;
   const acknowledgement=$('approval-risk-ack'),checkbox=$('approval-risk-check');
-  const highRisk=['eth_sendTransaction','wallet_sendCalls'].includes(approval.request.method)&&
-    ['high','critical'].includes(risk?.severity);
+  const highRisk=(['eth_sendTransaction','wallet_sendCalls'].includes(approval.request.method)&&
+    ['high','critical'].includes(risk?.severity))||
+    signatureRisk?.severity==='high';
+  if(signatureRisk?.flags?.length)
+    $('details').textContent+='\\n\\nSECURITY WARNING: '+signatureRisk.flags.join('; ');
+  acknowledgement.querySelector('label').lastChild.textContent=signatureRisk?.severity==='high'?
+    ' I have inspected the site, signing message, requested account and authorization risks; this signature or permission may expose assets.':
+    ' I understand this contract approval/interaction could transfer assets or grant spending permissions.';
   acknowledgement.hidden=!highRisk;checkbox.checked=false;
   $('approve').disabled=highRisk;
   checkbox.addEventListener('change',()=>{$('approve').disabled=highRisk&&!checkbox.checked;});
@@ -508,6 +695,41 @@ async function approval(){
   $('reject').addEventListener('click',()=>finish(false)); // User rejected request when approved=false.
 }
 function setup(){
+  $('open-security-centre').addEventListener('click',()=>{screen('security-view');loadSecurity420();});
+  document.querySelector('#security-view [data-back]')?.addEventListener('click',event=>{event.stopImmediatePropagation();screen('sites-view');},true);
+  $('security-refresh').addEventListener('click',()=>{clearSecurityReview420();loadSecurity420();});
+  $('security-allowance-form').addEventListener('submit',event=>{
+    event.preventDefault();
+    watchSecurity420({authorityKind:'allowance',token:$('security-token').value.trim(),
+      spender:$('security-spender').value.trim(),owner:$('security-allowance-owner').value});
+  });
+  $('security-capability-form').addEventListener('submit',event=>{
+    event.preventDefault();watchSecurity420({authorityKind:'capability',grantId:$('security-grant').value.trim()});
+  });
+  $('security-session-form').addEventListener('submit',event=>{
+    event.preventDefault();watchSecurity420({authorityKind:'session',key:$('security-key').value.trim()});
+  });
+  $('security-review-ack').addEventListener('change',()=>{
+    $('security-submit-review').disabled=!$('security-review-ack').checked||!state.securityReview;
+  });
+  $('security-cancel-review').addEventListener('click',()=>{
+    clearSecurityReview420();securityMessage420('Revocation review cancelled. No on-chain action was taken.');
+  });
+  $('security-submit-review').addEventListener('click',async()=>{
+    const review=state.securityReview;
+    if(!review||!$('security-review-ack').checked)return;
+    const button=$('security-submit-review');button.disabled=true;
+    try{
+      const result=await command('security-submit',{reviewId:review.reviewId,confirmed:true});
+      clearSecurityReview420();
+      await loadSecurity420();
+      securityMessage420('Submitted '+result.kind+' transaction '+result.hash+
+        '. The on-chain authority is NOT yet verified revoked; check the canonical receipt.');
+    }catch(error){
+      clearSecurityReview420();
+      securityMessage420('On-chain security submission not verified: '+error.message,true);
+    }
+  });
   for(const nav of document.querySelectorAll('[data-screen]'))nav.addEventListener('click',()=>screen(nav.dataset.screen));
   $('tab-tokens').addEventListener('click',()=>screen('dashboard'));
   $('tab-nfts').addEventListener('click',()=>screen('nfts-view'));
@@ -567,7 +789,7 @@ function setup(){
   $('quick-send').addEventListener('click',()=>{populateSend();resetReview();screen('send-view');});
   $('quick-receive').addEventListener('click',()=>{renderReceive();screen('receive-view');});
   $('quick-refresh').addEventListener('click',refresh);
-  for(const back of document.querySelectorAll('[data-back]'))back.addEventListener('click',()=>screen('dashboard'));
+  for(const back of document.querySelectorAll('[data-back]'))back.addEventListener('click',()=>screen(back.closest('#security-view')?'sites-view':'dashboard'));
   $('copy-account').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>tell('Copy failed: '+e.message,'error')));
   $('copy-receive').addEventListener('click',()=>copy(extensionReceiveAddress420(state.wallet)).catch(e=>{$('receive-warning').textContent=e.message;$('receive-warning').className='notice error';}));
   $('account-select').addEventListener('change',async event=>{

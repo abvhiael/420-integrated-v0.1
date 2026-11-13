@@ -477,23 +477,31 @@ async function handleApprovalMethod(request, context) {
     if(!tx||!tx.to||!tx.from||normalizeExtensionAddress420(tx.from)!==granted[0])
       throw Object.assign(new Error('Exact granted account and transaction target required'),{code:4100});
     const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
-    if(!config.smartAccountConfig||config.chainId!==pinned)
-      throw Object.assign(new Error('Approved SmartAccount configuration is missing for site chain'),{code:4100});
     const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
-    const smart=await discoverSmartAccount(provider,granted[0],config.smartAccountConfig);
-    if(!smart?.deployed||!smart?.controllerIsOwner||!smart?.entryPoint)
-      throw Object.assign(new Error('Verified SmartAccount owner or EntryPoint missing'),{code:4100});
-    if(tx.gasPrice!=null)throw Object.assign(new Error('Legacy gasPrice not supported by ERC-4337; use EIP-1559'),{code:-32602});
+    const accountMeta=await accountMetadata420(),eoa=accountMeta[granted[0]]?.type==='eoa';
+    if(eoa&&!(await vaultLockState420()).unlocked)
+      throw Object.assign(new Error('Encrypted EOA vault is locked'),{code:4100});
+    let smart=null;
+    if(!eoa){
+      if(!config.smartAccountConfig||config.chainId!==pinned)
+        throw Object.assign(new Error('Approved SmartAccount configuration is missing for site chain'),{code:4100});
+      smart=await discoverSmartAccount(provider,granted[0],config.smartAccountConfig);
+      if(!smart?.deployed||!smart?.controllerIsOwner||!smart?.entryPoint)
+        throw Object.assign(new Error('Verified SmartAccount owner or EntryPoint missing'),{code:4100});
+    }
+    if(tx.gasPrice!=null)throw Object.assign(new Error('Legacy gasPrice not supported; use EIP-1559'),{code:-32602});
     const choice=tx.maxFeePerGas!=null||tx.maxPriorityFeePerGas!=null?
       {level:'custom',maxFeePerGas:tx.maxFeePerGas,maxPriorityFeePerGas:tx.maxPriorityFeePerGas}:
       {level:'standard'};
     const normalizedTx={from:granted[0],to:normalizeExtensionAddress420(tx.to),
       value:tx.value??'0x0',data:tx.data??'0x'};
-    const quote=await quoteExtensionSend420(provider,{chainId:pinned,
-      smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
-      transaction:normalizedTx,choice,strictUserOpGas:true});
+    const quote=eoa?
+      await quoteExtensionEoa420(provider,{chainId:pinned,from:granted[0],transaction:normalizedTx,choice}):
+      await quoteExtensionSend420(provider,{chainId:pinned,
+        smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+        transaction:normalizedTx,choice,strictUserOpGas:true});
     const risk=inspectExtensionApprovalRisk420(normalizedTx);
-    feePreview={quote,risk,normalizedTx,chainId:pinned};
+    feePreview={quote,risk,normalizedTx,chainId:pinned,executionModel:eoa?'eoa':'erc4337'};
   }
   await createApproval(feePreview?{...request,feePreview}:request,
     { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
@@ -507,26 +515,42 @@ async function handleApprovalMethod(request, context) {
       throw Object.assign(new Error('Site approval expired or chain changed'),{code:4901});
     const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
     const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
-    const smart=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
     const fee=feePreview.quote;
-    const newQuote=await quoteExtensionSend420(provider,{
-      chainId:pinned,smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
-      transaction:feePreview.normalizedTx,
-      choice:request.params?.[0]?.maxFeePerGas!=null||request.params?.[0]?.maxPriorityFeePerGas!=null?
-        {level:'custom',maxFeePerGas:request.params[0].maxFeePerGas,
-         maxPriorityFeePerGas:request.params[0].maxPriorityFeePerGas}:{level:'standard'},
-      strictUserOpGas:true});
-    if(fee.gasFees!==newQuote.gasFees||fee.blockHash!==newQuote.blockHash||
-       fee.nonce!==newQuote.nonce||fee.entryPoint!==newQuote.entryPoint||
-       fee.gasBudget?.accountGasLimits!==newQuote.gasBudget?.accountGasLimits||
-       fee.gasBudget?.preVerificationGas!==newQuote.gasBudget?.preVerificationGas)
-      throw Object.assign(new Error('DApp fee or UserOperation gas estimate changed; new approval required'),{code:4001});
-    approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
-      gasFees:newQuote.gasFees,accountGasLimits:newQuote.gasBudget.accountGasLimits,
-      preVerificationGas:newQuote.gasBudget.preVerificationGas,expectedNonce:newQuote.nonce}]};
+    const choice=request.params?.[0]?.maxFeePerGas!=null||request.params?.[0]?.maxPriorityFeePerGas!=null?
+      {level:'custom',maxFeePerGas:request.params[0].maxFeePerGas,
+       maxPriorityFeePerGas:request.params[0].maxPriorityFeePerGas}:{level:'standard'};
+    let newQuote;
+    if(feePreview.executionModel==='eoa'){
+      if(!(await vaultLockState420()).unlocked)
+        throw Object.assign(new Error('EOA vault locked during approval'),{code:4100});
+      newQuote=await quoteExtensionEoa420(provider,{chainId:pinned,from:current[0],
+        transaction:feePreview.normalizedTx,choice});
+      if(fee.nonce!==newQuote.nonce||fee.gasLimit!==newQuote.gasLimit||
+         fee.maxFeePerGas!==newQuote.maxFeePerGas||
+         fee.maxPriorityFeePerGas!==newQuote.maxPriorityFeePerGas||
+         fee.blockHash!==newQuote.blockHash)
+        throw Object.assign(new Error('EOA nonce/fees changed; new approval required'),{code:4001});
+      approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
+        executionModel:'eoa',chainId:pinned,nonce:newQuote.nonce,gasLimit:newQuote.gasLimit,
+        maxFeePerGas:newQuote.maxFeePerGas,maxPriorityFeePerGas:newQuote.maxPriorityFeePerGas}]};
+    }else{
+      const smart=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
+      newQuote=await quoteExtensionSend420(provider,{
+        chainId:pinned,smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+        transaction:feePreview.normalizedTx,choice,strictUserOpGas:true});
+      if(fee.gasFees!==newQuote.gasFees||fee.blockHash!==newQuote.blockHash||
+         fee.nonce!==newQuote.nonce||fee.entryPoint!==newQuote.entryPoint||
+         fee.gasBudget?.accountGasLimits!==newQuote.gasBudget?.accountGasLimits||
+         fee.gasBudget?.preVerificationGas!==newQuote.gasBudget?.preVerificationGas)
+        throw Object.assign(new Error('DApp UserOperation gas estimate changed; new approval required'),{code:4001});
+      approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
+        gasFees:newQuote.gasFees,accountGasLimits:newQuote.gasBudget.accountGasLimits,
+        preVerificationGas:newQuote.gasBudget.preVerificationGas,expectedNonce:newQuote.nonce}]};
+    }
     const tx=request.params?.[0]||{};
     const id='site-send-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:pinned,controller:current[0],
+      executionModel:feePreview.executionModel,
       origin,recipient:typeof tx.to==='string'?tx.to.toLowerCase():null,
       amount:typeof tx.value==='string'?tx.value:'0x0',
       symbol:tx.data&&tx.data!=='0x'?'contract call':'native',

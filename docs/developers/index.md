@@ -27,6 +27,7 @@ DOC-9.2 adds the first working developer path:
 - [Local development](local-development.md) — real15 topology, lifecycle commands, local data/reset expectations and health-check order.
 - [Project structure and starters](project-structure.md) — `sdk-basic`, `protocol-reader`, `wallet-aware` and the recommended integration layers.
 - [First read and Wallet-authorized write](first-read-write.md) — canonical-read versus signing-authority boundary and post-submit confirmation.
+- [420Wallet Genesis application connection](wallet-genesis-connection.md) — canonical ProtocolRegistry service discovery, identity, consent, and safe SDK handoffs without implicit spending grants.
 
 DOC-9.3 adds safe environment and public-access guidance:
 

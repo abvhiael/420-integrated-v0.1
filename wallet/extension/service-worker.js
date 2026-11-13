@@ -481,9 +481,9 @@ async function readWalletUiActivity420() {
   return Array.isArray(value)?value.slice(0,40).filter(x=>x&&typeof x==='object'):[];
 }
 // Reconcile only canonical receipts. Missing receipts cannot prove a dropped or failed transaction.
+const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
 async function refreshWalletUiActivity420() {
   const entries=await readWalletUiActivity420();
-  const validHash420=x=>typeof x==='string'&&/^0x[0-9a-fA-F]{64}$/.test(x);
   const candidates=entries.filter(x=>['submitted','pending','confirming','included','reorganized'].includes(x.status)&&
     (validHash420(x.hash)||validHash420(x.userOpHash))).slice(0,5);
   if(!candidates.length)return entries;

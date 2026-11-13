@@ -3,7 +3,7 @@ import {shortExtensionAddress420,extensionBalanceText420,extensionCanSend420,ext
 const APPROVALS_KEY='420-wallet-pending-approvals-v1';
 const approvalId=new URLSearchParams(location.search).get('approval');
 const $=id=>document.getElementById(id);
-const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0};
+const state={wallet:null,screen:'dashboard',prepared:null,submitting:false,epoch:0,detailAddress:null,showHidden:false};
 const node=(tag,cls,text)=>{
   const el=document.createElement(tag);if(cls)el.className=cls;
   if(text!==undefined)el.textContent=text;return el;
@@ -66,25 +66,102 @@ function renderAccount(){
       w.network.message||'Network unconfigured. Open Settings to set your approved RPC and chain.';
   tell(status,w.network.status==='matched'?'':w.network.status==='wrong-chain'?'error':'warn');
 }
+function portfolioRows420(){
+  const p=state.wallet?.portfolio;
+  if(!p)return [];
+  return [...(p.native?[p.native]:[]),...(p.tokens||[])];
+}
+function openAsset420(asset){
+  state.detailAddress=asset.address;
+  const detail=$('asset-detail');detail.replaceChildren();
+  const p=state.wallet?.portfolio;
+  const data=[
+    ['Asset',asset.symbol||'Unknown'],
+    ['Chain',p?.chainId||'No chain'],
+    ['Contract',asset.address==='native'?'Native currency':asset.address],
+    ['Source',asset.address==='native'?'Chain native asset':asset.source||'imported'],
+    ['Metadata',asset.verified||asset.address==='native'?'Verified on-chain':'Unverified'],
+    ['Balance',asset.balance?.status==='unavailable'?'Unavailable':
+      extensionBalanceText420(asset.balance?.spendable||'0',asset.decimals)+' '+asset.symbol],
+    ['Status',asset.balance?.status||'unavailable'],
+    ['Pending transactions',String(asset.pendingTransactions||0)],
+    ['Block',asset.balance?.blockNumber||p?.blockNumber||'Unavailable'],
+    ['Checked',asset.balance?.checkedAt?new Date(asset.balance.checkedAt).toLocaleString():'Unavailable'],
+    ['Fiat',asset.price?.status==='verified'&&asset.price.value!==null?
+      asset.price.value+' '+asset.price.currency+' (quote '+new Date(asset.price.timestamp).toLocaleString()+')':
+      asset.price?.status==='stale'?'Stale quote — valuation suppressed':'Unavailable — no verified quote'],
+    ['Risk',asset.spam?'Suspected spam; hidden by default':asset.hidden?'Hidden':'No automatic spam warning'],
+  ];
+  for(const [label,value] of data){
+    const row=node('div','config-row');row.append(node('span','',label),node('strong','',value));detail.append(row);
+  }
+  const editable=asset.address!=='native';
+  $('asset-hide').hidden=!editable;$('asset-spam').hidden=!editable;
+  $('asset-hide').textContent=asset.hidden?'Show token':'Hide token';
+  $('asset-spam').textContent=asset.spam?'Unmark spam':'Mark as spam';
+  screen('asset-view');
+}
 function renderAssets(){
+  const p=state.wallet?.portfolio;
   const list=$('asset-list');list.replaceChildren();
-  const w=state.wallet;
-  if(!w?.assets.native){
-    list.append(node('p','empty','No verified balances. Configure your network and canonical SmartAccount to view assets.'));
+  const badge=$('portfolio-status');
+  if(!p||p.status!=='verified'){
+    badge.textContent=p?.status==='outage'?'Portfolio provider unavailable; cached balances are NOT spendable':
+      'Portfolio unavailable until network and account are verified';
+  }else{
+    badge.textContent='Block '+p.blockNumber+' · '+new Date(p.checkedAt).toLocaleString()+
+      ' · Account '+shortExtensionAddress420(p.account);
+  }
+  const assets=portfolioRows420().filter(t=>!t.hidden||state.showHidden);
+  if(!assets.length){list.append(node('p','empty','No verified assets on this chain. Import a token or scan recent blocks.'));$('portfolio-fiat').textContent='Fiat valuation unavailable without a fresh verified provider quote.';return;}
+  let cents=0n,fiatCount=0,missing=0;
+  for(const asset of assets){
+    if(asset.price?.status==='verified'&&asset.price.value!==null){
+      const [whole,fraction='']=asset.price.value.split('.');
+      cents+=BigInt(whole)*100n+BigInt(fraction.padEnd(2,'0').slice(0,2));fiatCount++;
+    }else missing++;
+    const row=node('button','asset-row portfolio-token-row');
+    row.type='button';row.setAttribute('aria-label','View '+asset.symbol+' asset details');
+    row.append(node('span','token-icon',asset.address==='native'?'◆':String(asset.symbol||'T').slice(0,2).toUpperCase()));
+    const info=node('span','asset-info');
+    info.append(node('strong','',asset.symbol||'Unknown'),
+      node('small','',asset.address==='native'?'Native currency':shortExtensionAddress420(asset.address)),
+      node('small','',asset.hidden?'Hidden · '+(asset.spam?'Suspected spam':'User-hidden'):
+        asset.verified||asset.address==='native'?'Contract-verified metadata':'Metadata unverified'));
+    const val=node('span','asset-value');
+    const status=asset.balance?.status||'unavailable';
+    val.append(node('strong','',status==='unavailable'?'Unavailable':
+      extensionBalanceText420(asset.balance.spendable,asset.decimals)),
+      node('small','',status==='pending'||asset.pendingTransactions>0?
+        'Pending activity; on-chain balance not reserved':status==='spendable'?
+        (extensionCanSend420(state.wallet)?'On-chain balance':'On-chain balance; sending not authorized'):'Not available'));
+    if(asset.price?.status==='verified'&&asset.price.value!==null)
+      val.append(node('small','',asset.price.value+' '+asset.price.currency));
+    else val.append(node('small','',asset.price?.status==='stale'?'Fiat quote stale':'Fiat unavailable'));
+    row.append(info,val);row.addEventListener('click',()=>openAsset420(asset));list.append(row);
+  }
+  const quoted=(cents/100n).toString()+'.'+(cents%100n).toString().padStart(2,'0');
+  $('portfolio-fiat').textContent=missing?
+    'Fiat total unavailable: '+missing+' asset(s) lack fresh verified prices'+
+      (fiatCount?' · Partial quoted value '+quoted+' '+(p?.currency||'CAD'):''):
+    'Quoted portfolio value '+quoted+' '+(p?.currency||'CAD')+' (not a guaranteed redemption value)';
+}
+function renderNFT420(){
+  const list=$('nft-list');list.replaceChildren();
+  const p=state.wallet?.portfolio;
+  const nfts=p?.nfts?.filter(x=>x.ownership==='verified'&&!x.stale)||[];
+  if(!nfts.length){
+    list.append(node('p','empty',p?.status==='outage'?'NFT ownership unavailable during network outage':
+      'No currently verified NFTs found in the bounded discovery window.'));
     return;
   }
-  const nativeSymbol=w.config.nativeCurrency?.symbol||'420';
-  const assets=[{symbol:nativeSymbol,label:'Native '+nativeSymbol,...w.assets.native},
-    ...(w.assets.tokens||[]).map(t=>({...t,label:t.symbol||'Token'}))];
-  for(const [index,asset] of assets.entries()){
-    const line=node('div','asset-row');
-    line.append(node('div','token-icon'+(index?' alt':''),index?String(asset.symbol||'T').slice(0,2).toUpperCase():nativeSymbol.slice(0,3).toUpperCase()));
+  for(const nft of nfts){
+    const row=node('div','asset-row');
     const info=node('div','asset-info');
-    info.append(node('strong','',asset.label||asset.symbol),node('small','',index?'ERC-20 · '+shortExtensionAddress420(asset.address):'Native asset · '+w.network.name));
-    const val=node('div','asset-value');
-    val.append(node('strong','',asset.error?'Unavailable':extensionBalanceText420(asset.raw,asset.decimals)),
-      node('small','',asset.error||asset.symbol));
-    line.append(info,val);list.append(line);
+    info.append(node('strong','',nft.standard+' #'+nft.tokenId),
+      node('small','',nft.address),
+      node('small','','Owner verified on selected chain at last refresh'));
+    row.append(node('span','token-icon alt','◇'),info);list.append(row);
   }
 }
 function renderActivity(){
@@ -151,6 +228,8 @@ function renderSettings(){
   $('explorer-url').value=c.explorerUrl||'';
   $('settings-controller').textContent=shortExtensionAddress420(state.wallet?.selectedAccount);
   $('settings-factory').textContent=shortExtensionAddress420(c.factoryAddress);
+  $('fiat-currency').value=state.wallet?.portfolio?.currency||'CAD';
+  $('price-provider-url').value=state.wallet?.portfolio?.priceProviderUrl||'';
 }
 function renderReceive(){
   const address=extensionReceiveAddress420(state.wallet);
@@ -190,7 +269,7 @@ async function applyWalletState420(next,expectedEpoch){
 }
 function renderAll(){
   if(!state.wallet)return;
-  summarizeNetwork();renderAccount();renderAssets();renderActivity();renderSites();renderSettings();renderReceive();
+  summarizeNetwork();renderAccount();renderAssets();renderNFT420();renderActivity();renderSites();renderSettings();renderReceive();
 }
 async function command(kind,extra={}){
   const response=await chrome.runtime.sendMessage({source:'420-wallet-popup-ui',kind,...extra});
@@ -293,6 +372,58 @@ async function approval(){
 }
 function setup(){
   for(const nav of document.querySelectorAll('[data-screen]'))nav.addEventListener('click',()=>screen(nav.dataset.screen));
+  $('tab-tokens').addEventListener('click',()=>screen('dashboard'));
+  $('tab-nfts').addEventListener('click',()=>screen('nfts-view'));
+  $('tab-activity').addEventListener('click',()=>screen('activity-view'));
+  $('nfts-refresh').addEventListener('click',()=>refresh());
+  $('portfolio-refresh').addEventListener('click',()=>refresh());
+  $('show-hidden-assets').addEventListener('click',()=>{
+    state.showHidden=!state.showHidden;
+    $('show-hidden-assets').setAttribute('aria-pressed',String(state.showHidden));
+    $('show-hidden-assets').textContent=state.showHidden?'Hide hidden/spam tokens':'Show hidden/spam tokens';
+    renderAssets();
+  });
+  $('discover-assets').addEventListener('click',async()=>{
+    const button=$('discover-assets');button.disabled=true;
+    try{
+      const epoch=++state.epoch;
+      const response=await command('portfolio-discover');
+      if(await applyWalletState420(response.state,epoch))
+        tell('Scanned recent blocks. '+response.discovery.tokens+' ERC-20 and '+response.discovery.nfts+
+          ' verified ERC-721 holdings found. Older transfers may need a separate indexer.','success');
+    }catch(e){tell('Discovery unavailable: '+e.message,'error');}
+    finally{button.disabled=false;}
+  });
+  $('token-import-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    try{
+      const epoch=++state.epoch;
+      const next=await command('portfolio-import',{address:$('token-address').value.trim()});
+      if(await applyWalletState420(next,epoch)){tell('ERC-20 contract metadata verified on chain; token imported.','success');screen('dashboard');}
+    }catch(e){tell('Token import rejected: '+e.message,'error');}
+  });
+  $('price-provider-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    try{
+      const epoch=++state.epoch;
+      const next=await command('portfolio-provider',{url:$('price-provider-url').value.trim(),currency:$('fiat-currency').value});
+      if(await applyWalletState420(next,epoch))tell('Fiat settings saved; quotes remain unavailable until authoritative provider responses.','success');
+    }catch(e){tell('Price settings rejected: '+e.message,'error');}
+  });
+  $('asset-hide').addEventListener('click',async()=>{
+    const item=portfolioRows420().find(a=>a.address===state.detailAddress);
+    if(!item||item.address==='native')return;
+    try{const epoch=++state.epoch;const next=await command('portfolio-visibility',{address:item.address,hidden:!item.hidden});
+      if(await applyWalletState420(next,epoch))screen('dashboard');
+    }catch(e){tell('Visibility update rejected: '+e.message,'error');}
+  });
+  $('asset-spam').addEventListener('click',async()=>{
+    const item=portfolioRows420().find(a=>a.address===state.detailAddress);
+    if(!item||item.address==='native')return;
+    try{const epoch=++state.epoch;const next=await command('portfolio-visibility',{address:item.address,spam:!item.spam});
+      if(await applyWalletState420(next,epoch))screen('dashboard');
+    }catch(e){tell('Spam setting rejected: '+e.message,'error');}
+  });
   $('header-settings').addEventListener('click',()=>screen('settings-view'));
   $('open-wallet').addEventListener('click',()=>chrome.tabs.create({url:chrome.runtime.getURL('wallet.html')}));
   $('quick-activity').addEventListener('click',()=>screen('activity-view'));
@@ -374,7 +505,8 @@ setup();
 if(!approvalId){
   chrome.storage.onChanged?.addListener((changes,area)=>{
     if(area!=='local')return;
-    if(['420-wallet-networks-v1','420-wallet-origin-networks-v1','420-wallet-extension-config-v1',
+    if(['420-wallet-portfolio-block-v1','420-wallet-portfolio-settings-v1',
+      '420-wallet-networks-v1','420-wallet-origin-networks-v1','420-wallet-extension-config-v1',
       '420-wallet-ui-preferences-v1'].some(key=>Object.hasOwn(changes,key))){
       resetReview();
       refresh().catch(()=>{});

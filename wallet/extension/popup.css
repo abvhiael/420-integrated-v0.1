@@ -35,3 +35,18 @@ button{cursor:pointer;font-family:inherit;transition:filter .15s}.primary,.secon
 
 .site-network-select{font-size:12px;min-height:38px;margin-top:8px;max-width:100%;text-overflow:ellipsis}
 .network-assets button{margin-bottom:6px}
+
+/* W15.6-M4 portfolio: compact token detail, tabs and explicit balance provenance */
+.portfolio-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+.portfolio-tabs button{min-height:38px;text-align:center}
+.portfolio-token-row{display:flex;width:100%;text-align:left;gap:10px;align-items:center;background:transparent;border:1px solid var(--border);border-radius:12px;padding:10px;margin-bottom:8px;color:var(--text);cursor:pointer}
+.portfolio-token-row:hover,.portfolio-token-row:focus-visible{border-color:var(--accent);background:#1e3325}
+.portfolio-token-row .asset-info{flex:1;min-width:0}
+.portfolio-token-row .asset-value{min-width:90px;max-width:47%;text-align:right}
+.portfolio-token-row .asset-info small,.portfolio-token-row .asset-value small{display:block;overflow-wrap:anywhere}
+#portfolio-status{margin:10px 0;overflow-wrap:anywhere}
+#portfolio-fiat{padding:9px 0;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+#discover-assets,#portfolio-refresh,#show-hidden-assets{font-size:11px;margin:3px 5px 6px 0;padding:9px;min-height:36px}
+#asset-detail .config-row strong{max-width:64%;overflow-wrap:anywhere}
+#nft-list .asset-row{padding:12px;align-items:center;overflow-wrap:anywhere}
+#asset-view .review-actions{gap:8px;flex-wrap:wrap}

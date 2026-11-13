@@ -4,6 +4,7 @@ import {mkdirSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from 'playwright';
+import jsQR from 'jsqr';
 import {buildExtension420} from './build.mjs';
 
 const sourceRoot=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -103,6 +104,21 @@ try{
   await page.screenshot({path:resolve(screenshots,'03-verified-local-fixture-wallet.png')});
   await page.locator('#quick-receive').click();
   assert.equal(await page.locator('#receive-address').textContent(),controller);
+  // Independent third-party decoder on pixels rendered by the actual extension popup.
+  // The source text, copied address and decoded QR must agree exactly.
+  const qrPixels=await page.locator('#receive-qr').evaluate(canvas=>{
+    if(canvas.hidden)throw new Error('Receive QR is unexpectedly hidden');
+    const context=canvas.getContext('2d',{willReadFrequently:true});
+    if(!context)throw new Error('Receive canvas is unavailable');
+    return {width:canvas.width,height:canvas.height,
+      bytes:Array.from(context.getImageData(0,0,canvas.width,canvas.height).data)};
+  });
+  const qrResult=jsQR(Uint8ClampedArray.from(qrPixels.bytes),qrPixels.width,qrPixels.height,
+    {inversionAttempts:'dontInvert'});
+  assert.ok(qrResult,'Independent decoder must read actual rendered QR pixels');
+  assert.equal(qrResult.data,controller,'Decoded QR must equal the verified receiving address');
+  assert.match(await page.locator('#receive-qr-network').textContent(),/Address-only QR/);
+  console.log('PASS: QR verified by independent jsQR decoder on real Chromium Receive canvas');
   await page.screenshot({path:resolve(screenshots,'04-receive-local-fixture.png')});
   await page.locator('#receive-view [data-back]').click();
   // M3: watch-only and unverified SmartAccount cannot create an executable preview.

@@ -1,3 +1,4 @@
+import {packExtensionUserOpFees420} from './extension-fee-preflight.js';
 import { normalizeAddress } from './abi.js';
 import { discoverSmartAccount } from './accounts.js';
 import { preparePasskeyUserOperationTransport } from './passkey-entrypoint-transport.js';
@@ -18,6 +19,7 @@ function txRequest(request = {}) {
     target: normalizeAddress(tx.to),
     value: tx.value ?? '0x0',
     data: tx.data ?? '0x',
+    gasFees:tx.gasFees??null,
   };
 }
 
@@ -94,12 +96,21 @@ export function createExtensionLocalAuthority420({
       const binding = await loadPasskeyBinding({ account: controller, smartAccount: smartAccount.smartAccount, context });
       if (!binding) throw rpcError(4100, 'no active local passkey binding is available for this SmartAccount420');
 
+      if(tx.gasFees){
+        if(typeof tx.gasFees!=='string'||!/^0x[0-9a-fA-F]{64}$/.test(tx.gasFees))
+          throw rpcError(-32602,'invalid packed UserOperation gas fees');
+        const priority='0x'+tx.gasFees.slice(2,34),maximum='0x'+tx.gasFees.slice(34,66);
+        if(packExtensionUserOpFees420({maxFeePerGas:maximum,maxPriorityFeePerGas:priority}).toLowerCase()!==tx.gasFees.toLowerCase())
+          throw rpcError(-32602,'invalid signed fee caps');
+      }
       const prepared = await preparePasskeyUserOperationTransport(
         provider,
         navigatorLike,
         smartAccount,
         binding,
-        { target: tx.target, value: tx.value, data: tx.data },
+        { target: tx.target, value: tx.value, data: tx.data,
+          ...(tx.gasFees?{gasFees:tx.gasFees}:{}),
+        },
         { rpId: binding.rpId, origin: binding.origin },
       );
       if (!prepared?.broadcastReady || !prepared?.entryPointSimulation?.simulationPassed) {

@@ -7,7 +7,7 @@ import { buildExtension420 } from './build.mjs';
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const { dist: root } = await buildExtension420();
-const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'wallet.html', 'wallet.css', 'wallet.js', 'core/vault.js', 'vendor/ethers-6.17.0.min.js', 'vendor/ETHERS-LICENSE.md', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
+const required = ['manifest.json', 'service-worker.js', 'content-script.js', 'inpage.js', 'popup.html', 'popup.css', 'popup.js', 'wallet.html', 'wallet.css', 'wallet.js', 'core/vault.js', 'core/extension-portfolio.js', 'vendor/ethers-6.17.0.min.js', 'vendor/ETHERS-LICENSE.md', 'authority.html', 'authority.js', 'core/extension-local-authority.js', 'core/signing-policy.js'];
 const forbiddenPatterns = [
   /\beval\s*\(/,
   /\bnew\s+Function\s*\(/,
@@ -59,6 +59,10 @@ assert.match(serviceWorker, /effectiveChain420/);
 assert.match(serviceWorker, /wallet_addEthereumChain/);
 assert.match(serviceWorker, /wallet_switchEthereumChain/);
 assert.match(serviceWorker, /wallet_watchAsset/);
+assert.match(serviceWorker, /readAssetPortfolio420/);
+assert.match(serviceWorker, /portfolioScope420/);
+assert.match(serviceWorker, /verifiedPrice420/);
+assert.match(serviceWorker, /monitorPortfolioBlocks420/);
 assert.match(serviceWorker, /NETWORK_HEALTH_KEY_420/);
 assert.match(serviceWorker, /frameId/);
 assert.match(serviceWorker, /eth_requestAccounts/);
@@ -75,6 +79,10 @@ assert.doesNotMatch(serviceWorker, /localStorage|sessionStorage/);
 const registry = await readFile(join(root, 'core/network-registry.js'), 'utf8');
 assert.match(registry, /probeNetwork420/);
 assert.match(registry, /smartAccountApproved:false/);
+const portfolio = await readFile(join(root, 'core/extension-portfolio.js'), 'utf8');
+assert.match(portfolio, /verifiedTokenMetadata420/);
+assert.match(portfolio, /validatePrice420/);
+assert.match(portfolio, /discoverTokens420/);
 const router = await readFile(join(root, 'core/extension-rpc-router.js'), 'utf8');
 assert.match(router, /signing-policy\.js/);
 assert.match(router, /classifyProviderMethod420/);

@@ -1,6 +1,10 @@
 import {normalizeExtensionConfig420, normalizeExtensionPreferences420, validateExtensionNetwork420, normalizeExtensionChain420, normalizeExtensionRpc420, normalizeExtensionAddress420, buildExtensionSend420, extensionCanSend420, EXTENSION_CONFIG_KEY_420, EXTENSION_UI_KEY_420, EXTENSION_ACTIVITY_KEY_420} from './core/extension-wallet-ui.js';
 import {discoverSmartAccount} from './core/accounts.js';
 import {readNativeBalance,readErc20Balance} from './core/portfolio.js';
+import {PORTFOLIO_SETTINGS_KEY_420,PORTFOLIO_CACHE_KEY_420,PRICE_CACHE_KEY_420,
+  portfolioScope420,normalizedPortfolioSettings420,checkedToken420,
+  verifiedTokenMetadata420,checkedTokenBalance420,discoverTokens420,
+  spamSignals420,classifyBalance420,validatePrice420,fiatValue420} from './core/extension-portfolio.js';
 import {NETWORKS_KEY_420,ORIGIN_NETWORKS_KEY_420,normalizeRegistry420,normalizeNetwork420,networkFromLegacy420,chainId420,probeNetwork420,watchAsset420} from './core/network-registry.js';
 const CHANNEL = '420-wallet-provider-v1';
 const PERMISSIONS_KEY = '420-wallet-origin-permissions-v1';
@@ -19,6 +23,144 @@ async function vaultLockState420() {
   if (!vault) return { exists: false, unlocked: false };
   const lease=(await chrome.storage.session.get(VAULT_LEASE_KEY))?.[VAULT_LEASE_KEY];
   return {exists:true,unlocked:typeof lease?.expiresAt==='number' && lease.expiresAt > Date.now() && lease.expiresAt<=Date.now()+30*60*1000};
+}
+async function portfolioRecord420(scope){
+  const all=await readObject(PORTFOLIO_SETTINGS_KEY_420);
+  return normalizedPortfolioSettings420(all[scope]||{});
+}
+async function savePortfolioRecord420(scope,record){
+  const all=await readObject(PORTFOLIO_SETTINGS_KEY_420);
+  all[scope]=normalizedPortfolioSettings420(record);
+  await chrome.storage.local.set({[PORTFOLIO_SETTINGS_KEY_420]:all});
+}
+async function scopedPortfolio420(){
+  const chain=await effectiveChain420();
+  const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+  const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
+  const account=prefs.selectedAccount;
+  if(!account||!(await accountVisibility420(config.accounts)).includes(account))
+    throw Object.assign(new Error('An unlocked selected account is required'),{code:4100});
+  return {chain,account,scope:portfolioScope420(chain.chainId,account)};
+}
+async function portfolioRpc420(chain,method,params){
+  const now=await effectiveChain420();
+  if(now.chainId!==chain.chainId||now.epoch!==chain.epoch)throw Object.assign(new Error('Portfolio network changed'),{code:4901});
+  return rpcRequest(method,params,{expectedChainId:chain.chainId});
+}
+async function verifiedPrice420(chain,scope,asset,settings){
+  const cache=await readObject(PRICE_CACHE_KEY_420);
+  const key=scope+':'+asset.address;
+  const previous=cache[key];
+  const now=Date.now();
+  if(!settings.priceEndpoint){
+    return {status:'unavailable',reason:'No approved price provider configured'};
+  }
+  let url;
+  try{
+    url=new URL(settings.priceEndpoint);
+    if(url.protocol!=='https:'||url.username||url.password||url.hash||url.search)throw new Error('Invalid provider URL');
+  }catch{return {status:'unavailable',reason:'Price provider is not a valid HTTPS endpoint'};}
+  // A provider only supplies data, never transaction or signing authority.
+  url.searchParams.set('chainId',chain.chainId);
+  url.searchParams.set('asset',asset.address);
+  url.searchParams.set('currency',settings.fiatCurrency);
+  try{
+    const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),6000);
+    let response;
+    try{response=await fetch(url.href,{method:'GET',signal:controller.signal,cache:'no-store'});}
+    finally{clearTimeout(timer);}
+    if(!response.ok)throw new Error('Price provider HTTP '+response.status);
+    const payload=await response.json();
+    const quote=validatePrice420(payload,{chainId:chain.chainId,address:asset.address,now});
+    if(quote.currency!==settings.fiatCurrency)throw new Error('Fiat currency mismatch');
+    cache[key]=quote;await chrome.storage.local.set({[PRICE_CACHE_KEY_420]:cache});
+    return {...quote,status:quote.stale?'stale':'verified',value:quote.stale?null:fiatValue420(asset.raw,asset.decimals,quote)};
+  }catch(error){
+    if(previous){
+      try{
+        const quote=validatePrice420(previous,{chainId:chain.chainId,address:asset.address,now});
+        return {...quote,status:'stale',stale:true,value:null,reason:'Price provider unavailable: '+error.message};
+      }catch{}
+    }
+    return {status:'unavailable',reason:'Price provider unavailable: '+error.message};
+  }
+}
+async function readAssetPortfolio420(state){
+  const {selectedAccount,network,registry}=state;
+  const chainId=network.expectedChainId,epoch=network.epoch;
+  const noPrices={status:'unavailable',reason:'No authoritative price quote'};
+  const blank={account:selectedAccount,chainId,status:'unavailable',
+    checkedAt:Date.now(),blockNumber:null,currency:'CAD',native:null,tokens:[],nfts:[],priceStatus:noPrices};
+  if(!selectedAccount||!chainId||network.status!=='matched')return blank;
+  const balanceAccount=state.account?.smartAccount&&state.account?.deployed===true&&state.account?.ownerVerified===true?
+    state.account.smartAccount:selectedAccount;
+  const scope=portfolioScope420(chainId,selectedAccount),settings=await portfolioRecord420(scope);
+  blank.currency=settings.fiatCurrency;blank.priceProviderConfigured=Boolean(settings.priceEndpoint);blank.priceProviderUrl=settings.priceEndpoint;
+  const cache=await readObject(PORTFOLIO_CACHE_KEY_420),old=cache[scope]||{};
+  const chain=await effectiveChain420();
+  if(chain.chainId!==chainId||chain.epoch!==epoch)throw Object.assign(new Error('Portfolio context changed'),{code:4901});
+  const provider={request:(method,params)=>portfolioRpc420(chain,method,params)};
+  let block;
+  try{block=BigInt(await provider.request('eth_blockNumber',[]));}catch{
+    return {...blank,status:'outage',lastObserved:old.checkedAt||null,
+      native:old.native?{...old.native,balance:classifyBalance420({status:'unavailable'}),stale:true,price:noPrices}:null,
+      tokens:(old.tokens||[]).map(t=>({...t,balance:classifyBalance420({status:'unavailable'}),stale:true,price:noPrices})),
+      nfts:(old.nfts||[]).map(n=>({...n,stale:true,ownership:'unavailable'}))};
+  }
+  blank.blockNumber=block.toString();
+  const checkedAt=Date.now(),pending=(await readWalletUiActivity420()).filter(x=>
+    x.controller===selectedAccount&&x.chainId===chainId&&x.status==='pending').length;
+  const nativeNetwork=chain.network.nativeCurrency;
+  let native;
+  try{
+    const result=await provider.request('eth_getBalance',[balanceAccount,'latest']);
+    if(typeof result!=='string'||!/^0x[0-9a-fA-F]+$/.test(result))throw new Error('Invalid native balance');
+    const raw=BigInt(result).toString();
+    native={address:'native',symbol:nativeNetwork.symbol,decimals:nativeNetwork.decimals,raw,
+      balance:classifyBalance420({raw,status:'verified',blockNumber:block.toString(),checkedAt}),
+      pendingTransactions:pending,price:noPrices};
+  }catch{native={address:'native',symbol:nativeNetwork.symbol,decimals:nativeNetwork.decimals,
+    balance:classifyBalance420({status:'unavailable'}),pendingTransactions:pending,price:noPrices};}
+  const known=new Map();
+  for(const x of [...(chain.network.assets||[]),...settings.tokens]){
+    try{const token=checkedToken420(x);known.set(token.address,token);}catch{}
+  }
+  const tokens=[];
+  for(const token of [...known.values()].slice(0,60)){
+    const flags=spamSignals420({...token,spam:settings.spam.includes(token.address)});
+    const hidden=settings.hidden.includes(token.address)||token.hidden||flags.suspected;
+    try{
+      const metadata=await verifiedTokenMetadata420(provider,token.address);
+      // User-submitted symbols/decimals are display hints, never verified contract metadata.
+      const raw=await checkedTokenBalance420(provider,metadata,balanceAccount);
+      tokens.push({...metadata,raw,source:token.source,hidden,spam:flags.suspected,
+        balance:classifyBalance420({raw,status:'verified',blockNumber:block.toString(),checkedAt}),price:noPrices});
+    }catch(error){
+      tokens.push({...token,verified:false,hidden,spam:flags.suspected,price:noPrices,
+        balance:classifyBalance420({status:'unavailable'}),error:'Token contract metadata or balance unavailable: '+error.message});
+    }
+  }
+  const nfts=(old.nfts||[]).map(n=>({...n,ownership:'unavailable',stale:true}));
+  // NFT ownership must be reverified; a cached transfer event is not proof of current ownership.
+  for(let i=0;i<nfts.length;i++){
+    const n=nfts[i];
+    try{
+      if(n.standard!=='ERC721')continue;
+      const result=await provider.request('eth_call',[{to:n.address,data:'0x6352211e'+BigInt(n.tokenId).toString(16).padStart(64,'0')},'latest']);
+      n.ownership=typeof result==='string'&&/^0x[0-9a-fA-F]{64}$/.test(result)&&
+        ('0x'+result.slice(-40).toLowerCase())===balanceAccount?'verified':'not-owned';
+      n.stale=false;
+    }catch{}
+  }
+  const portfolio={...blank,balanceAddress:balanceAccount,status:'verified',checkedAt,blockNumber:block.toString(),native,tokens,
+    nfts:nfts.filter(n=>n.ownership!=='not-owned'),lastObserved:checkedAt,priceProviderConfigured:Boolean(settings.priceEndpoint),priceProviderUrl:settings.priceEndpoint};
+  const assets=[native,...tokens.filter(t=>t.balance.status!=='unavailable')];
+  for(const asset of assets){
+    asset.price=await verifiedPrice420(chain,scope,asset,settings);
+  }
+  if((await effectiveChain420()).epoch!==epoch)throw Object.assign(new Error('Network changed while reading portfolio'),{code:4901});
+  cache[scope]={...portfolio};await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
+  return portfolio;
 }
 async function accountMetadata420(){
   const config=await readObject('420-wallet-extension-config-v1');
@@ -82,21 +224,26 @@ async function changeNetwork420(chain,{origin=null}={}){
   const health=await probeNetwork420(network);
   if(!health.some(x=>x.healthy))throw Object.assign(new Error('No verified RPC endpoint on selected chain'),{code:4900});
   const before=(await effectiveChain420(origin).catch(()=>({chainId:null}))).chainId;
-  if(before!==key){
-    registry.epoch++;
-    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry});
-  }
+  if(before!==key)registry.epoch++;
   if(origin){
     const overrides=await readObject(ORIGIN_NETWORKS_KEY_420);
-    overrides[origin]=key;await chrome.storage.local.set({[ORIGIN_NETWORKS_KEY_420]:overrides});
     const permissions=await readObject(PERMISSIONS_KEY);
-    if(permissions[origin]){delete permissions[origin];await chrome.storage.local.set({[PERMISSIONS_KEY]:permissions});await notifyDisconnectedSite420(origin);}
+    overrides[origin]=key;
+    const connected=Object.hasOwn(permissions,origin);
+    delete permissions[origin];
+    // Network identity, epoch and account revocation are committed together.
+    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry,
+      [ORIGIN_NETWORKS_KEY_420]:overrides,[PERMISSIONS_KEY]:permissions});
+    if(connected)await notifyDisconnectedSite420(origin);
   }else{
-    registry.selectedChainId=key;await chrome.storage.local.set({[NETWORKS_KEY_420]:registry});
-    const previous=await readObject(EXTENSION_CONFIG_KEY_420),same=previous.chainId&&chainId420(previous.chainId)===key;
-    await chrome.storage.local.set({[EXTENSION_CONFIG_KEY_420]:{...previous,chainId:key,
-      rpcUrl:health.find(x=>x.healthy).url,explorerUrl:network.blockExplorerUrls[0]||null,networkName:network.chainName,
-      trackedAssets:network.assets||[],smartAccountConfig:same?previous.smartAccountConfig:null}});
+    registry.selectedChainId=key;
+    const previous=await readObject(EXTENSION_CONFIG_KEY_420);
+    const same=previous.chainId&&chainId420(previous.chainId)===key;
+    const config={...previous,chainId:key,rpcUrl:health.find(x=>x.healthy).url,
+      explorerUrl:network.blockExplorerUrls[0]||null,networkName:network.chainName,
+      trackedAssets:network.assets||[],smartAccountConfig:same?previous.smartAccountConfig:null};
+    // Never publish an epoch attached to one chain and the UI config for another.
+    await chrome.storage.local.set({[NETWORKS_KEY_420]:registry,[EXTENSION_CONFIG_KEY_420]:config});
   }
   if(before!==key){
     if(origin)await notifyChain420(origin,key);
@@ -339,6 +486,20 @@ async function finalizeWalletUiState420(state){
   const now=await networkRegistry420();
   if(now.epoch!==state.network.epoch||now.selectedChainId!==state.registry.selectedChainId)
     throw Object.assign(new Error('Network changed while reading wallet state; refresh it again'),{code:4901});
+  if(state.network.status==='matched'){
+    try{state.portfolio=await readAssetPortfolio420(state);}
+    catch(error){
+      if(error.code===4901)throw error;
+      state.portfolio={status:'outage',reason:error.message,account:state.selectedAccount,
+        chainId:state.network.expectedChainId,native:null,tokens:[],nfts:[],currency:'CAD'};
+    }
+  }else{
+    state.portfolio={status:state.network.status,account:state.selectedAccount,chainId:state.network.expectedChainId,
+      native:null,tokens:[],nfts:[],currency:'CAD',priceStatus:{status:'unavailable'}};
+  }
+  const latest=await networkRegistry420();
+  if(latest.epoch!==state.network.epoch||latest.selectedChainId!==state.registry.selectedChainId)
+    throw Object.assign(new Error('Network changed during portfolio refresh'),{code:4901});
   return state;
 }
 async function walletUiState420() {
@@ -536,6 +697,70 @@ async function handleWalletUi420(message) {
     })));
   }
   if(kind==='aggregate-assets')return aggregateAssets420();
+  if(kind==='portfolio-import'){
+    const {chain,account,scope}=await scopedPortfolio420();
+    const provider={request:(method,params)=>portfolioRpc420(chain,method,params)};
+    const input=normalizeExtensionAddress420(message.address);
+    const metadata=await verifiedTokenMetadata420(provider,input);
+    const record=await portfolioRecord420(scope);
+    record.tokens=[...record.tokens.filter(x=>x.address!==metadata.address),
+      {...metadata,source:'imported'}].slice(0,60);
+    record.hidden=record.hidden.filter(x=>x!==metadata.address);
+    await savePortfolioRecord420(scope,record);
+    return walletUiState420();
+  }
+  if(kind==='portfolio-visibility'){
+    const {scope}=await scopedPortfolio420();
+    const address=normalizeExtensionAddress420(message.address);
+    if(typeof message.hidden!=='boolean'&&typeof message.spam!=='boolean')
+      throw new Error('Explicit hide or spam choice required');
+    const record=await portfolioRecord420(scope);
+    if(typeof message.hidden==='boolean')record.hidden=message.hidden?
+      [...new Set([...record.hidden,address])]:record.hidden.filter(a=>a!==address);
+    if(typeof message.spam==='boolean')record.spam=message.spam?
+      [...new Set([...record.spam,address])]:record.spam.filter(a=>a!==address);
+    await savePortfolioRecord420(scope,record);
+    return walletUiState420();
+  }
+  if(kind==='portfolio-provider'){
+    const {scope}=await scopedPortfolio420();
+    const record=await portfolioRecord420(scope);
+    if(message.url){
+      const url=new URL(message.url);
+      if(url.protocol!=='https:'||url.username||url.password||url.hash||url.search)
+        throw new Error('Price provider requires an HTTPS endpoint without credentials or query');
+      record.priceEndpoint=url.href;
+    }else record.priceEndpoint=null;
+    if(!/^(CAD|USD|EUR|GBP)$/.test(message.currency))throw new Error('Unsupported fiat currency');
+    record.fiatCurrency=message.currency;
+    await savePortfolioRecord420(scope,record);
+    return walletUiState420();
+  }
+  if(kind==='portfolio-discover'){
+    const {chain,account,scope}=await scopedPortfolio420(),record=await portfolioRecord420(scope);
+    const provider={request:(method,params)=>portfolioRpc420(chain,method,params)};
+    const latest=BigInt(await provider.request('eth_blockNumber',[])),from=BigInt(record.discoveryFrom);
+    const start=from>latest?latest:from;
+    const bounded=latest-start>2048n?latest-2048n:start;
+    const found=await discoverTokens420(provider,account,{fromBlock:bounded,toBlock:latest,maxSpan:2048n});
+    const known=new Map(record.tokens.map(x=>[x.address,x]));
+    for(const token of found.tokens){
+      const current=known.get(token.address);
+      known.set(token.address,{...token,source:current?.source||'discovered'});
+    }
+    record.tokens=[...known.values()].slice(0,60);
+    record.discoveryFrom=(latest+1n).toString();
+    await savePortfolioRecord420(scope,record);
+    const cache=await readObject(PORTFOLIO_CACHE_KEY_420);
+    const previous=cache[scope]||{};
+    const nfts=new Map((previous.nfts||[]).map(x=>[x.address+':'+x.tokenId,x]));
+    for(const nft of found.nfts)nfts.set(nft.address+':'+nft.tokenId,{...nft,ownership:'verified',stale:false});
+    cache[scope]={...previous,nfts:[...nfts.values()].slice(0,100)};
+    await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
+    return {discovery:{...found,tokens:found.tokens.length,nfts:found.nfts.length},
+      state:await walletUiState420()};
+  }
+  if(kind==='portfolio-refresh')return walletUiState420();
   if(kind==='set-account'){
     return switchSelectedAccount420(message.account);
   }
@@ -577,10 +802,9 @@ async function handleWalletUi420(message) {
     if(state.network.expectedChainId!==message.chainId||state.network.epoch!==message.epoch||state.selectedAccount!==message.account)
       throw Object.assign(new Error('Network or account changed since review'),{code:4901});
     if(!extensionCanSend420(state))throw Object.assign(new Error('Verified deployed SmartAccount owner and matching chain required'),{code:4100});
-    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
     const request=buildExtensionSend420({
       from:state.account.controller,recipient:message.recipient,amount:message.amount,
-      asset:message.asset,trackedAssets:config.trackedAssets,
+      asset:message.asset,trackedAssets:state.portfolio?.tokens?.filter(t=>t.verified&&!t.hidden&&!t.spam&&t.balance?.status!=='unavailable')||[],
     });
     const id='wallet-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:state.network.expectedChainId,
@@ -667,21 +891,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
+const PORTFOLIO_BLOCK_KEY_420='420-wallet-portfolio-block-v1';
+async function monitorPortfolioBlocks420(){
+  try{
+    const {chain,account,scope}=await scopedPortfolio420();
+    if(!chain.network.rpcUrls.length)return;
+    const height=await portfolioRpc420(chain,'eth_blockNumber',[]);
+    const previous=await readObject(PORTFOLIO_BLOCK_KEY_420);
+    if(previous[scope]!==height){
+      previous[scope]=height;
+      await chrome.storage.local.set({[PORTFOLIO_BLOCK_KEY_420]:previous});
+    }
+  }catch{} // Outage cannot create a synthetic balance.
+}
 async function monitorNetworks420(){
   const registry=await networkRegistry420(),snapshots={};
   for(const network of Object.values(registry.networks).filter(n=>n.enabled)){
     snapshots[network.chainId]={checkedAt:Date.now(),endpoints:await probeNetwork420(network)};
   }
   await chrome.storage.local.set({[NETWORK_HEALTH_KEY_420]:snapshots});
+  await monitorPortfolioBlocks420();
 }
 chrome.alarms?.onAlarm?.addListener(alarm=>{
   if(alarm.name==='420-wallet-network-health')monitorNetworks420().catch(()=>{});
 });
 chrome.runtime.onStartup?.addListener(()=>{
-  chrome.alarms?.create?.('420-wallet-network-health',{periodInMinutes:5});
+  chrome.alarms?.create?.('420-wallet-network-health',{periodInMinutes:1});
 });
 chrome.runtime.onInstalled.addListener(async () => {
-  chrome.alarms?.create?.('420-wallet-network-health',{periodInMinutes:5});
+  chrome.alarms?.create?.('420-wallet-network-health',{periodInMinutes:1});
   const config = await readObject('420-wallet-extension-config-v1');
   if (!Object.keys(config).length) await chrome.storage.local.set({ '420-wallet-extension-config-v1': { rpcUrl: null, accounts: [], smartAccountConfig: null } });
 });

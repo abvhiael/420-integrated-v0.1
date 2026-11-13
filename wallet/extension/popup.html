@@ -37,11 +37,39 @@
           <button id="quick-refresh" class="action" type="button"><span class="action-icon" aria-hidden="true">↻</span><span>Refresh</span></button>
         </div>
         <div class="section-head"><h2>Assets</h2><span class="subtle">On-chain balances</span></div>
+        <div class="portfolio-tabs" role="group" aria-label="Portfolio sections">
+          <button type="button" id="tab-tokens" class="secondary">Tokens</button>
+          <button type="button" id="tab-nfts" class="secondary">NFTs</button>
+          <button type="button" id="tab-activity" class="secondary">Activity</button>
+        </div>
+        <p id="portfolio-status" class="notice" role="status">Portfolio has not been verified.</p>
+        <button id="discover-assets" type="button" class="secondary">Discover tokens and NFTs (recent blocks)</button>
+        <button id="portfolio-refresh" type="button" class="secondary">Refresh portfolio</button>
+        <button id="show-hidden-assets" type="button" class="secondary" aria-pressed="false">Show hidden/spam tokens</button>
+        <div class="portfolio-price" id="portfolio-fiat" aria-live="polite">Fiat value unavailable without verified quotes.</div>
         <div class="network-assets"><button id="aggregate-assets" type="button" class="secondary">Balances across enabled networks</button><div id="aggregate-list" aria-live="polite"></div></div>
         <div id="asset-list" class="asset-list" aria-live="polite"><p class="empty">Checking your wallet…</p></div>
         <div class="notice" id="dashboard-notice" role="status">Wallet status will appear here.</div>
       </section>
 
+      <section id="nfts-view" class="view" hidden aria-labelledby="nfts-title">
+        <div class="topline"><span class="eyebrow">COLLECTIBLES</span><span class="chip">VERIFIED OWNERSHIP</span></div>
+        <h1 id="nfts-title" class="screen-title">NFTs</h1>
+        <p class="intro">Only bounded ERC-721 discoveries with a current on-chain ownerOf check appear here. No untrusted NFT images or metadata are loaded automatically.</p>
+        <button id="nfts-refresh" type="button" class="secondary">Check NFT ownership</button>
+        <div id="nft-list" class="stack" aria-live="polite"><p class="empty">No verified NFTs found.</p></div>
+      </section>
+      <section id="asset-view" class="view" hidden aria-labelledby="asset-detail-title">
+        <button type="button" class="back-button" data-back>‹ Tokens</button>
+        <h1 id="asset-detail-title" class="screen-title">Asset details</h1>
+        <div class="settings-panel">
+          <div id="asset-detail" class="stack"></div>
+          <div class="review-actions">
+            <button id="asset-hide" type="button" class="secondary">Hide token</button>
+            <button id="asset-spam" type="button" class="secondary">Mark spam</button>
+          </div>
+        </div>
+      </section>
       <section id="activity-view" class="view" hidden aria-labelledby="activity-title">
         <div class="topline"><span class="eyebrow">TRANSACTION HISTORY</span><span class="chip">THIS DEVICE</span></div>
         <h1 id="activity-title" class="screen-title">Activity</h1>
@@ -82,6 +110,24 @@
             <label for="expected-chain">Expected chain ID (hex)</label><input id="expected-chain" type="text" placeholder="0x1a4" autocomplete="off" spellcheck="false">
             <label for="explorer-url">Block explorer URL (optional)</label><input id="explorer-url" type="url" placeholder="https://explorer.example.org" autocomplete="off" spellcheck="false">
             <button class="primary wide" type="submit">Save &amp; verify network</button>
+          </form>
+          <div class="rule"></div>
+          <h2>Custom ERC-20</h2>
+          <p class="intro">Verify contract code, symbol and decimals from the current chain. Imported token symbols are not trusted as metadata.</p>
+          <form id="token-import-form">
+            <label for="token-address">Token contract address</label>
+            <input id="token-address" required pattern="0x[0-9a-fA-F]{40}" spellcheck="false" autocomplete="off" placeholder="0x…">
+            <button type="submit" class="secondary">Verify and import token</button>
+          </form>
+          <div class="rule"></div>
+          <h2>Fiat price provider</h2>
+          <p class="intro">Optional explicit HTTPS price API. The provider must return chain ID, asset address, fiat currency, exact decimal price and timestamp. No configured provider means no fiat valuation.</p>
+          <form id="price-provider-form">
+            <label for="price-provider-url">HTTPS price API (optional)</label>
+            <input id="price-provider-url" type="url" placeholder="https://price-provider.example/quote">
+            <label for="fiat-currency">Display currency</label>
+            <select id="fiat-currency"><option>CAD</option><option>USD</option><option>EUR</option><option>GBP</option></select>
+            <button type="submit" class="secondary">Save price settings</button>
           </form>
           <div class="rule"></div>
           <h2>Account &amp; security</h2>
@@ -133,6 +179,7 @@
     </main>
     <nav id="bottom-nav" class="bottom-nav" aria-label="Wallet navigation">
       <button type="button" class="nav-item active" data-screen="dashboard" aria-current="page"><span aria-hidden="true">⌂</span><small>Wallet</small></button>
+      <button type="button" class="nav-item" data-screen="nfts-view"><span aria-hidden="true">◇</span><small>NFTs</small></button>
       <button type="button" class="nav-item" data-screen="activity-view"><span aria-hidden="true">◷</span><small>Activity</small></button>
       <button type="button" class="nav-item" data-screen="sites-view"><span aria-hidden="true">◫</span><small>Sites</small></button>
       <button type="button" class="nav-item" data-screen="settings-view"><span aria-hidden="true">⚙</span><small>Settings</small></button>

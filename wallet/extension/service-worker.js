@@ -1,3 +1,4 @@
+import {inspectExtensionApprovalRisk420} from './core/extension-approval-risk.js';
 import {validateUserOpReplacement420,reconcileUserOpReplacement420} from './core/extension-replacement-policy.js';
 import {encodeExecute} from './core/abi.js';
 import {resolveExtensionRecipient420,assertExtensionRecipientSnapshot420} from './core/extension-recipient-resolver.js';
@@ -463,11 +464,59 @@ async function handleApprovalMethod(request, context) {
   const granted = await accountsFor(origin);
   if (!granted.length) throw Object.assign(new Error('origin is not connected to 420 Wallet'), { code: 4100 });
   const before=await effectiveChain420(origin),pinned=before.chainId;
-  await createApproval(request, { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
-  if((await effectiveChain420(origin)).epoch!==before.epoch)throw Object.assign(new Error('Chain changed during approval'),{code:4901});
+  let feePreview=null,approvedTxRequest=request;
+  if(request.method==='eth_sendTransaction'){
+    const tx=request.params?.[0];
+    if(!tx||!tx.to||!tx.from||normalizeExtensionAddress420(tx.from)!==granted[0])
+      throw Object.assign(new Error('Exact granted account and transaction target required'),{code:4100});
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    if(!config.smartAccountConfig||config.chainId!==pinned)
+      throw Object.assign(new Error('Approved SmartAccount configuration is missing for site chain'),{code:4100});
+    const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
+    const smart=await discoverSmartAccount(provider,granted[0],config.smartAccountConfig);
+    if(!smart?.deployed||!smart?.controllerIsOwner||!smart?.entryPoint)
+      throw Object.assign(new Error('Verified SmartAccount owner or EntryPoint missing'),{code:4100});
+    if(tx.gasPrice!=null)throw Object.assign(new Error('Legacy gasPrice not supported by ERC-4337; use EIP-1559'),{code:-32602});
+    const choice=tx.maxFeePerGas!=null||tx.maxPriorityFeePerGas!=null?
+      {level:'custom',maxFeePerGas:tx.maxFeePerGas,maxPriorityFeePerGas:tx.maxPriorityFeePerGas}:
+      {level:'standard'};
+    const normalizedTx={from:granted[0],to:normalizeExtensionAddress420(tx.to),
+      value:tx.value??'0x0',data:tx.data??'0x'};
+    const quote=await quoteExtensionSend420(provider,{chainId:pinned,
+      smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+      transaction:normalizedTx,choice,strictUserOpGas:true});
+    const risk=inspectExtensionApprovalRisk420(normalizedTx);
+    feePreview={quote,risk,normalizedTx,chainId:pinned};
+  }
+  await createApproval(feePreview?{...request,feePreview}:request,
+    { ...context, accounts: granted,chainId:pinned,epoch:before.epoch });
+  if((await effectiveChain420(origin)).epoch!==before.epoch)
+    throw Object.assign(new Error('Chain changed during approval'),{code:4901});
   const current=await accountsFor(origin);
   if(current.length!==1||current[0]!==granted[0])throw Object.assign(new Error('Account was changed or disconnected during approval'),{code:4100});
   if(request.method==='eth_sendTransaction'){
+    const after=await effectiveChain420(origin);
+    if(after.chainId!==pinned||after.epoch!==before.epoch)
+      throw Object.assign(new Error('Site approval expired or chain changed'),{code:4901});
+    const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
+    const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
+    const smart=await discoverSmartAccount(provider,current[0],config.smartAccountConfig);
+    const fee=feePreview.quote;
+    const newQuote=await quoteExtensionSend420(provider,{
+      chainId:pinned,smartAccount:smart.smartAccount,entryPoint:smart.entryPoint,
+      transaction:feePreview.normalizedTx,
+      choice:request.params?.[0]?.maxFeePerGas!=null||request.params?.[0]?.maxPriorityFeePerGas!=null?
+        {level:'custom',maxFeePerGas:request.params[0].maxFeePerGas,
+         maxPriorityFeePerGas:request.params[0].maxPriorityFeePerGas}:{level:'standard'},
+      strictUserOpGas:true});
+    if(fee.gasFees!==newQuote.gasFees||fee.blockHash!==newQuote.blockHash||
+       fee.nonce!==newQuote.nonce||fee.entryPoint!==newQuote.entryPoint||
+       fee.gasBudget?.accountGasLimits!==newQuote.gasBudget?.accountGasLimits||
+       fee.gasBudget?.preVerificationGas!==newQuote.gasBudget?.preVerificationGas)
+      throw Object.assign(new Error('DApp fee or UserOperation gas estimate changed; new approval required'),{code:4001});
+    approvedTxRequest={...request,params:[{...feePreview.normalizedTx,
+      gasFees:newQuote.gasFees,accountGasLimits:newQuote.gasBudget.accountGasLimits,
+      preVerificationGas:newQuote.gasBudget.preVerificationGas,expectedNonce:newQuote.nonce}]};
     const tx=request.params?.[0]||{};
     const id='site-send-'+Date.now()+'-'+Math.random().toString(16).slice(2);
     const entry={id,at:Date.now(),chainId:pinned,controller:current[0],
@@ -478,7 +527,7 @@ async function handleApprovalMethod(request, context) {
     await rememberWalletUiActivity420(entry);
     let hash=null;
     try{
-      hash=await executeWithLocalAuthority(request,{
+      hash=await executeWithLocalAuthority(approvedTxRequest,{
         ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId:id
       });
       await rememberWalletUiActivity420({...entry,hash,status:'submitted'});

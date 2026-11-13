@@ -372,7 +372,7 @@ function currentFeeChoice420(){
     ?{level,maxFeePerGas:$('send-max-fee').value.trim(),maxPriorityFeePerGas:$('send-priority-fee').value.trim()}
     :{level};
 }
-async async function prepareReview(){
+async function prepareReview(){
   const w=state.wallet;
   if(!extensionCanSend420(w))throw new Error('Verified account owner and matching network required');
   const context={chainId:w.network.expectedChainId,epoch:w.network.epoch,account:w.selectedAccount,

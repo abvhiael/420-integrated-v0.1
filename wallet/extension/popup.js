@@ -428,7 +428,20 @@ async function copy(value){
 function prettyRequest(request){
   if(!request)return '';
   if(request.method==='eth_requestAccounts')return 'Connect this site to 420 Wallet.';
-  if(request.method==='eth_sendTransaction')return JSON.stringify(request.params?.[0]??{},null,2);
+  if(request.method==='eth_sendTransaction'){
+    const preview=request.feePreview;
+    return JSON.stringify(request.params?.[0]??{},null,2)+
+      (preview?'\n\nON-CHAIN TRANSACTION REVIEW\nChain: '+preview.chainId+
+        '\nTarget: '+preview.normalizedTx.to+
+        '\nGas fee cap: '+preview.quote.maxFeePerGas+' wei/gas'+
+        '\nPriority fee cap: '+preview.quote.maxPriorityFeePerGas+' wei/gas'+
+        '\nBundler estimated gas: '+preview.quote.gasBudget.callGasLimit+' call, '+
+           preview.quote.gasBudget.verificationGasLimit+' verification, '+
+           preview.quote.gasBudget.preVerificationGas+' pre-verification'+
+        '\nMaximum estimated execution fee: '+preview.quote.totalFeeWei+' wei'+
+        '\nTARGET CALL PASSED. Signed EntryPoint execution must still pass.'+
+        '\nRisk: '+preview.risk.severity.toUpperCase()+' — '+preview.risk.message:'');
+  }
   if(request.method==='personal_sign')return 'Personal signature request\n'+String(request.params?.[0]??'');
   if(request.method==='eth_signTypedData_v4')return 'Typed data signature request\n'+String(request.params?.[1]??'');
   return JSON.stringify(request.params??[],null,2);
@@ -444,11 +457,22 @@ async function approval(){
   $('kind').textContent=approval.request.method;
   $('origin').textContent=approval.context.origin;
   $('details').textContent=prettyRequest(approval.request);
+  const risk=approval.request.feePreview?.risk;
+  const acknowledgement=$('approval-risk-ack'),checkbox=$('approval-risk-check');
+  const highRisk=approval.request.method==='eth_sendTransaction'&&
+    ['high','critical'].includes(risk?.severity);
+  acknowledgement.hidden=!highRisk;checkbox.checked=false;
+  $('approve').disabled=highRisk;
+  checkbox.addEventListener('change',()=>{$('approve').disabled=highRisk&&!checkbox.checked;});
   if(Array.isArray(approval.request.availableAccounts)&&approval.request.availableAccounts.length){
     $('account-picker').hidden=false;
     $('account').replaceChildren(...approval.request.availableAccounts.map(x=>new Option(x,x)));
   }
   async function finish(approved){
+    if(approved&&highRisk&&!checkbox.checked){
+      $('status').textContent='You must explicitly acknowledge the contract approval risk.';
+      return;
+    }
     $('approve').disabled=true;$('reject').disabled=true;
     try{
       const current=await chrome.storage.local.get(APPROVALS_KEY);
@@ -462,7 +486,7 @@ async function approval(){
       window.close();
     }catch(error){
       $('status').textContent='Could not deliver the approval result: '+error.message;
-      $('approve').disabled=false;$('reject').disabled=false;
+      $('approve').disabled=highRisk&&!checkbox.checked;$('reject').disabled=false;
     }
   }
   $('approve').addEventListener('click',()=>finish(true));

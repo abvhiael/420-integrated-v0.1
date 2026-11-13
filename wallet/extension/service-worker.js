@@ -1,5 +1,5 @@
 import {nftId420,normalizedNftRecord420,verifyNftOwnership420,discoverNftTransfers420,nftSpamFlags420,
- nftMetadataUrl420,fetchSafeNftMetadata420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420} from './core/extension-nfts.js';
+ nftMetadataUrl420,fetchSafeNftMetadata420,nftIndexWindow420,nftTransferCall420,nftApprovalCall420,verifyNftApproval420,readNftApproval420} from './core/extension-nfts.js';
 import {prepareSecurityRevocation420,assertSecurityTransaction420,readSecurityPasskey420} from './core/extension-security-actions.js';
 import {readSecurityAllowance420,discoverRecentSecurityAllowances420,normalizeSecurityAllowance420,encodeSecurityRevokeAllowance420,classifyWebsiteRisk420,assessSecuritySignature420,securityRecordSignature420,securityRevocationKind420,assertSecurityRevocationSnapshot420} from './core/extension-security-centre.js';
 import {prepareCapabilityGrantRevocation} from './core/capability-management.js';
@@ -1915,44 +1915,56 @@ async function handleWalletUi420(message) {
   if(kind==='portfolio-discover'){
     const {chain,account,scope}=await scopedPortfolio420(),record=await portfolioRecord420(scope);
     const provider={request:(method,params)=>portfolioRpc420(chain,method,params)};
-    const latest=BigInt(await provider.request('eth_blockNumber',[])),from=BigInt(record.discoveryFrom);
-    const start=from>latest?latest:from;
-    const bounded=latest-start>2048n?latest-2048n:start;
+    const latest=BigInt(await provider.request('eth_blockNumber',[]));
     const sourceAccount=(await walletUiState420()).portfolio?.balanceAddress||account;
-    const found=await discoverTokens420(provider,sourceAccount,{fromBlock:bounded,toBlock:latest,maxSpan:2048n});
-    const known=new Map(record.tokens.map(x=>[x.address,x]));
-    for(const token of found.tokens){
-      const current=known.get(token.address);
-      known.set(token.address,{...token,source:current?.source||'discovered'});
+    const older=message.older===true;
+    let found={tokens:[],nfts:[],unverified:[],limited:true};
+    if(!older){
+      const from=BigInt(record.discoveryFrom),start=from>latest?latest:from,
+        bounded=latest-start>2048n?latest-2048n:start;
+      found=await discoverTokens420(provider,sourceAccount,{
+        fromBlock:bounded,toBlock:latest,maxSpan:2048n});
+      const known=new Map(record.tokens.map(x=>[x.address,x]));
+      for(const token of found.tokens){
+        const previous=known.get(token.address);
+        known.set(token.address,{...token,source:previous?.source||'discovered'});
+      }
+      record.tokens=[...known.values()].slice(0,60);
+      record.discoveryFrom=(latest+1n).toString();
     }
-    record.tokens=[...known.values()].slice(0,60);
-    record.discoveryFrom=(latest+1n).toString();
-    await savePortfolioRecord420(scope,record);
-    const cache=await readObject(PORTFOLIO_CACHE_KEY_420);
-    const previous=cache[scope]||{};
-    // Scan one exact bounded window per user action. Maintain an explicit
-    // account/chain checkpoint; do not silently jump over older history.
-    const fromIndex=record.nftIndexFrom===null?
-      (latest>2048n?latest-2048n:0n):BigInt(record.nftIndexFrom);
-    const scanFrom=fromIndex>latest?latest:fromIndex;
-    const scanTo=scanFrom+2048n>latest?latest:scanFrom+2048n;
-    const foundNfts=await discoverNftTransfers420(provider,sourceAccount,{
-      fromBlock:scanFrom,toBlock:scanTo,maxSpan:2048n,maxLogs:300,maxAssets:90
-    });
-    const nfts=new Map((previous.nfts||[]).map(x=>[x.key||nftId420(x.address,x.standard,x.tokenId),x]));
+    // Two independent supported RPC checkpoints: forward events and historical
+    // backfill. Every request reads at most 2048 blocks, never skipping a gap.
+    const window=nftIndexWindow420(latest,{
+      nextForward:record.nftIndexFrom,nextBack:record.nftIndexBefore,older});
+    const foundNfts=window.complete?
+      {nfts:[],fromBlock:window.from.toString(),toBlock:window.to.toString(),limited:true}:
+      await discoverNftTransfers420(provider,sourceAccount,{
+        fromBlock:window.from,toBlock:window.to,maxSpan:2048n,
+        maxLogs:300,maxAssets:90});
+    const cache=await readObject(PORTFOLIO_CACHE_KEY_420),previous=cache[scope]||{};
+    const nfts=new Map((previous.nfts||[]).map(x=>[
+      x.key||nftId420(x.address,x.standard,x.tokenId),x
+    ]));
     for(const nft of foundNfts.nfts){
       const prior=nfts.get(nft.key);
       nfts.set(nft.key,{...nft,metadata:prior?.metadata||null,
         hidden:record.nftHidden.includes(nft.key)||prior?.hidden===true,
         spam:record.nftSpam.includes(nft.key)||prior?.spam===true});
     }
-    record.nftIndexFrom=(scanTo+1n).toString();
+    const current=await effectiveChain420();
+    if(current.chainId!==chain.chainId||current.epoch!==chain.epoch)
+      throw Object.assign(new Error('NFT index network changed during scan'),{code:4901});
+    if(!window.complete){
+      record.nftIndexFrom=window.nextForward??record.nftIndexFrom;
+      record.nftIndexBefore=window.nextBack??record.nftIndexBefore;
+    }
     await savePortfolioRecord420(scope,record);
     cache[scope]={...previous,nfts:[...nfts.values()].slice(0,100)};
     await chrome.storage.local.set({[PORTFOLIO_CACHE_KEY_420]:cache});
     return {discovery:{...found,tokens:found.tokens.length,nfts:foundNfts.nfts.length,
-      nftFrom:foundNfts.fromBlock,nftTo:foundNfts.toBlock,
-      nftNextBlock:record.nftIndexFrom,partial:true},
+      nftFrom:foundNfts.fromBlock,nftTo:foundNfts.toBlock,nftOlder:older,
+      nftBackfillComplete:window.complete&&older,
+      nftNextBlock:record.nftIndexFrom,nftBeforeBlock:record.nftIndexBefore,partial:true},
       state:await walletUiState420()};
   }
   if(kind==='portfolio-refresh')return walletUiState420();

@@ -5,13 +5,14 @@ import "../src/bridge/verifiers/BitcoinHeaderPow420.sol";
 
 contract BitcoinHeaderPow420Test {
     // Canonical Bitcoin mainnet genesis header, encoded in wire byte order.
-    bytes constant GENESIS_HEADER =
-        hex"01000000"
-        hex"0000000000000000000000000000000000000000000000000000000000000000"
-        hex"3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
-        hex"29ab5f49"
-        hex"ffff001d"
-        hex"1dac2b7c";
+    function _genesisHeader() internal pure returns (bytes memory) {
+        return hex"01000000"
+            hex"0000000000000000000000000000000000000000000000000000000000000000"
+            hex"3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a"
+            hex"29ab5f49"
+            hex"ffff001d"
+            hex"1dac2b7c";
+    }
 
     bytes32 constant GENESIS_SHA256D_RAW =
         0x6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000;
@@ -26,22 +27,22 @@ contract BitcoinHeaderPow420Test {
 
     function testCanonicalGenesisHeaderPoW() public pure {
         require(
-            BitcoinHeaderPow420.verify(GENESIS_HEADER) == GENESIS_SHA256D_RAW,
+            BitcoinHeaderPow420.verify(_genesisHeader()) == GENESIS_SHA256D_RAW,
             "Bitcoin genesis header SHA256d mismatch"
         );
         require(
-            BitcoinHeaderPow420.decodeTarget(0x1d00ffff) == BitcoinHeaderPow420.MAINNET_POW_LIMIT,
+            BitcoinHeaderPow420.decodeTarget(0x1d00ffff) == 0x00000000ffff0000000000000000000000000000000000000000000000000000,
             "Bitcoin mainnet compact target mismatch"
         );
     }
 
     function testModifiedNonceAndMerkleRootReject() public {
-        bytes memory wrongNonce = GENESIS_HEADER;
+        bytes memory wrongNonce = _genesisHeader();
         wrongNonce[79] = bytes1(uint8(wrongNonce[79]) ^ 1);
         (bool acceptedNonce,) = address(this).call(abi.encodeCall(this.verifyExternal, (wrongNonce)));
         require(!acceptedNonce, "modified nonce accepted");
 
-        bytes memory wrongRoot = GENESIS_HEADER;
+        bytes memory wrongRoot = _genesisHeader();
         wrongRoot[36] = bytes1(uint8(wrongRoot[36]) ^ 1);
         (bool acceptedRoot,) = address(this).call(abi.encodeCall(this.verifyExternal, (wrongRoot)));
         require(!acceptedRoot, "modified Merkle root accepted");

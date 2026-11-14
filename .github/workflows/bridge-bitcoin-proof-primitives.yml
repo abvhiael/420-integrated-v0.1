@@ -1,0 +1,49 @@
+name: 420Bridge Bitcoin Local Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/bridge/verifiers/Bitcoin*420.sol"
+      - "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      - "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      - "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      - "contracts/test/Bitcoin*420.t.sol"
+      - "contracts/test/fixtures/bitcoin/headers.bin"
+      - "contracts/test/fixtures/bitcoin/block170.bin"
+      - "contracts/test/fixtures/bitcoin/block481824.bin"
+      - "contracts/test/fixtures/bitcoin/segwit-transaction.bin"
+      - "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol"
+      - "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol"
+      - "scripts/qualify-bitcoin.py"
+      - "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol"
+      - "contracts/test/BitcoinMerkleBranch420.t.sol"
+      - "contracts/test/BitcoinHeaderPow420.t.sol"
+      - ".github/workflows/bridge-bitcoin-proof-primitives.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: bridge-bitcoin-primitives-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  bitcoin-proof-crypto:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Bitcoin consensus, deposit, shared router integration, fuzz and invariants
+        run: python3 scripts/qualify-bitcoin.py

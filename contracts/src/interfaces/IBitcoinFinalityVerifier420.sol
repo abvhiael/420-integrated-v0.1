@@ -5,6 +5,9 @@ pragma solidity ^0.8.24;
 /// @dev Production implementations must validate Bitcoin SHA-256d PoW/header-chain work,
 ///      transaction inclusion, source-output ownership and the configured confirmation policy.
 interface IBitcoinFinalityVerifier420 {
+    function routeId() external view returns (bytes32);
+    function gatewayScriptHash() external view returns (bytes32);
+    function destinationRouter() external view returns (address);
     struct FinalizedTransfer {
         bytes32 genesisHash;
         bytes4 messageStart;

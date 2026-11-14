@@ -5,6 +5,10 @@ import "../src/bridge/adapters/BitcoinBridgeAdapter420.sol";
 import "../src/interfaces/IBitcoinFinalityVerifier420.sol";
 
 contract BitcoinFinalityVerifierMock420 is IBitcoinFinalityVerifier420 {
+    address public immutable destinationRouter;
+    constructor(address router){destinationRouter=router;}
+    function routeId() external pure returns(bytes32){return keccak256("420/BRIDGE/ROUTE/BTC/BITCOIN/MAINNET");}
+    function gatewayScriptHash() external pure returns(bytes32){return keccak256("test-only gateway");}
     FinalizedTransfer private nextTransfer;
     function set(FinalizedTransfer calldata t) external { nextTransfer = t; }
     function verifyFinalizedTransfer(bytes calldata) external view returns (FinalizedTransfer memory) { return nextTransfer; }
@@ -29,8 +33,8 @@ contract BitcoinBridgeAdapter420Test {
     BitcoinBridgeAdapter420 private adapter;
 
     constructor() {
-        verifier = new BitcoinFinalityVerifierMock420();
         router = new BitcoinRouterCaller420();
+        verifier = new BitcoinFinalityVerifierMock420(address(router));
         adapter = new BitcoinBridgeAdapter420(address(this), address(router), address(verifier));
         adapter.setBtcBinding(BTC_ASSET, BTC_ROUTE);
         _setTransfer(keccak256("btc-message-1"), 6, true, true, GENESIS, 0xf9beb4d9);
@@ -73,6 +77,18 @@ contract BitcoinBridgeAdapter420Test {
         router.inbound(adapter, bytes("proof"));
         (bool ok,) = address(router).call(abi.encodeCall(router.inbound, (adapter, bytes("proof"))));
         require(!ok, "replay accepted");
+    }
+
+    function testOutpointReplayWithDifferentMessageAfterVerifierRotation() public {
+        IBitcoinFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer(hex"00");
+        router.inbound(adapter,hex"00");
+        bytes32 originalOutput=t.sourceOutput;
+        t.messageId=keccak256("different message, same authenticated outpoint");
+        require(!adapter.consumedMessages(t.messageId));
+        BitcoinFinalityVerifierMock420 replacement=new BitcoinFinalityVerifierMock420(address(router));
+        replacement.set(t);adapter.setVerifier(address(replacement));
+        (bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));
+        require(!ok && adapter.consumedSourceOutputs(originalOutput),"outpoint replay bypassed after rotation");
     }
 
     function testOutboundLegacySegwitAndTaproot() public {

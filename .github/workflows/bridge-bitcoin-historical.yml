@@ -1,0 +1,25 @@
+name: Bitcoin historical fixture verification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bridge-bitcoin-historical.yml'
+      - 'contracts/test/fixtures/bitcoin/*.bin'
+      - 'contracts/test/fixtures/bitcoin/*.json'
+      - 'contracts/test/fixtures/bitcoin/*.jsonl'
+      - 'contracts/test/fixtures/bitcoin/*.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Independently verify checked-in historical evidence offline
+        run: |
+          python3 contracts/test/fixtures/bitcoin/verify.py
+          python3 contracts/test/fixtures/bitcoin/verify-block170.py
+          python3 contracts/test/fixtures/bitcoin/verify-segwit.py

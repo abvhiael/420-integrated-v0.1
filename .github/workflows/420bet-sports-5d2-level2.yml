@@ -7,6 +7,7 @@ on:
       - 'contracts/src/bet/**'
       - 'contracts/src/system/CapabilityRegistry420.sol'
       - 'contracts/src/interfaces/**'
+      - '!contracts/src/interfaces/IBitcoinFinalityVerifier420.sol'
       - 'contracts/src/exchange/Wrapped420.sol'
       - 'contracts/test/sports-5d2/**'
       - 'contracts/foundry.toml'

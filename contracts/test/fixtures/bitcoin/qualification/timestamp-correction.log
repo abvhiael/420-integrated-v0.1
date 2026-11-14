@@ -1,0 +1,10 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 16.97s
+Compiler run successful!
+2026-11-14T05:48:31.674194Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 1 test for contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[PASS] testMalformedHeadersAndTimestampRules() (gas: 58315737)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 23.54ms (23.03ms CPU time)
+
+Ran 1 test suite in 23.78ms (23.54ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

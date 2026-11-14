@@ -20,6 +20,8 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public cureRouteId;
     mapping(bytes32 => bool) public gatewayScripts;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     mapping(bytes32 => bool) public consumedSourceOutputs;
     uint256 public outboundNonce;
 
@@ -66,7 +68,8 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (cureAssetId == bytes32(0)) revert AssetNotConfigured();
         if (cureRouteId == bytes32(0)) revert RouteNotConfigured();
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
-        consumedMessages[p.messageId] = true; consumedSourceOutputs[p.sourceOutput] = true;
+        consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(p.gatewayScriptHash, cureAssetId); consumedSourceOutputs[p.sourceOutput] = true;
         emit CurecoinInboundConsumed(p.messageId, p.transactionHash, p.sourceOutput);
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));
         if (syntheticSender == address(0)) revert InvalidProof();

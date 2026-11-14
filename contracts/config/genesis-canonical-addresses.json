@@ -98,7 +98,10 @@
     },
     {
       "id": "bridge-router",
-      "contract": "GatewayRouter420.sol"
+      "contract": "GatewayRouter420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/GATEWAY_ROUTER",
+      "authority": "contracts/config/bridge/deployment-v1.json"
     },
     {
       "id": "payment-router",
@@ -210,6 +213,55 @@
       "component_id_preimage": "420/component/governance/civic-validator-electorate-source/v1",
       "authority": "contracts/config/governance-deployment-v1.json",
       "profile": "VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"
+    },
+    {
+      "id": "bridge-risk-manager",
+      "contract": "BridgeRiskManager.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/RISK_MANAGER",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-transfer-registry",
+      "contract": "BridgeTransferRegistry.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/TRANSFER_REGISTRY",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-asset-registry",
+      "contract": "BridgeAssetRegistry.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/ASSET_REGISTRY",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-chain-registry",
+      "contract": "BridgeChainRegistry420.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/CHAIN_REGISTRY",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-route-registry",
+      "contract": "BridgeRouteRegistry.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/ROUTE_REGISTRY",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-accounting-registry",
+      "contract": "BridgeAccountingRegistry.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/ACCOUNTING_REGISTRY",
+      "authority": "contracts/config/bridge/deployment-v1.json"
+    },
+    {
+      "id": "bridge-cadc-integration",
+      "contract": "CADCBridgeIntegration.sol",
+      "status": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+      "component_id_preimage": "420/APP/420BRIDGE/CADC_INTEGRATION",
+      "authority": "contracts/config/bridge/deployment-v1.json"
     }
   ],
   "reserved": [

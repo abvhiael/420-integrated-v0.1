@@ -1,6 +1,6 @@
 {
   "bootstrap_governor": "0x0000000000000000000000000000000000000437",
-  "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
+  "bridge_verifier": "0x0000000000000000000000000000000000000000",
   "community_validator_reserve": "0x0000000000000000000000000000000000000425",
   "consensus_system_call": "0x000000000000000000000000000000000000043c",
   "dex_pool_implementation": "UNRESOLVED_NOT_REQUIRED_FOR_SWAP_PREDEPLOY_BIND_AFTER_QUALIFIED_POOL_DEPLOYMENT",
@@ -178,7 +178,13 @@
     "VerifiedGateway420": {
       "constructor": [
         "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash",
         "bridge_verifier"
+      ],
+      "post_init": [
+        "remain disabled while verifier == address(0)",
+        "governance setVerifier(code-bearing qualified verifier) before approving assets or bridge movement"
       ]
     }
   },
@@ -196,7 +202,8 @@
     "ConsensusSystemCall420 itself has no mutable caller binding; it accepts top-level calls only from go-ethereum params.SystemAddress.",
     "GovernanceTimelock bootstrapGovernor MUST be Governance420 at 0x0437; Governance420 may schedule only the exact canonical Civic bootstrap plan and retires that role permanently on Civic activation.",
     "GenesisDEXFactory begins with poolImplementation=0; governance MUST bind a qualified code-bearing implementation reference before canonical pool registration.",
-    "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
+    "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly.",
+    "VerifiedGateway420 is materialized fail-closed with verifier=address(0); governance may install only a nonzero code-bearing verifier before use."
   ],
   "schema": "420-predeploy-storage-init-v2",
   "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac"

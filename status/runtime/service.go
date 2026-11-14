@@ -20,7 +20,7 @@ type Service struct {
 	cfg Config
 	probe IndexerProbe
 	ready atomic.Bool
-	observedUnix atomic.Int64
+	observedUnixNano atomic.Int64
 	qualifiedUnixNano atomic.Int64
 }
 
@@ -45,7 +45,7 @@ func (s *Service) Qualify(ctx context.Context, now time.Time) error {
 		s.ready.Store(false)
 		return fmt.Errorf("indexer evidence is stale or invalid: observed_at=%s", observedAt.UTC().Format(time.RFC3339))
 	}
-	s.observedUnix.Store(observedAt.Unix())
+	s.observedUnixNano.Store(observedAt.UnixNano())
 	s.qualifiedUnixNano.Store(now.UnixNano())
 	s.ready.Store(true)
 	return nil
@@ -56,10 +56,10 @@ func (s *Service) Qualify(ctx context.Context, now time.Time) error {
 func (s *Service) Ready(now time.Time) bool {
 	if !s.ready.Load() || now.IsZero() { return false }
 	lastQualified := s.qualifiedUnixNano.Load()
-	observed := s.observedUnix.Load()
+	observed := s.observedUnixNano.Load()
 	if lastQualified == 0 || observed == 0 { return false }
 	qualifiedAt := time.Unix(0, lastQualified)
-	observedAt := time.Unix(observed, 0)
+	observedAt := time.Unix(0, observed)
 	if now.Before(qualifiedAt) || now.Before(observedAt) { return false }
 	return now.Sub(qualifiedAt) <= s.cfg.MaxEvidenceAge && now.Sub(observedAt) <= s.cfg.MaxEvidenceAge
 }
@@ -68,7 +68,7 @@ func (s *Service) Ready(now time.Time) bool {
 // Indexer observation. It is not a new observation or canonical state.
 func (s *Service) ObservedAt() time.Time {
 	if !s.ready.Load() { return time.Time{} }
-	return time.Unix(s.observedUnix.Load(), 0).UTC()
+	return time.Unix(0, s.observedUnixNano.Load()).UTC()
 }
 
 func (s *Service) Handler() http.Handler {
@@ -77,11 +77,11 @@ func (s *Service) Handler() http.Handler {
 		writeJSON(w, http.StatusOK, map[string]any{"service":"420Status","status":"ok","canonical":false,"authority":"observational"})
 	})
 	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, _ *http.Request) {
-		if !s.ready.Load() {
+		if !s.Ready(time.Now().UTC()) {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]any{"service":"420Status","ready":false,"canonical":false})
 			return
 		}
-		writeJSON(w, http.StatusOK, map[string]any{"service":"420Status","ready":true,"canonical":false,"evidence_observed_at":time.Unix(s.observedUnix.Load(),0).UTC().Format(time.RFC3339)})
+		writeJSON(w, http.StatusOK, map[string]any{"service":"420Status","ready":true,"canonical":false,"evidence_observed_at":s.ObservedAt().Format(time.RFC3339)})
 	})
 	return mux
 }

@@ -1,0 +1,43 @@
+name: 420Bridge BRIDGE-AUDIT-3.2 Adapter Proof Context
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/bridge/adapters/*BridgeAdapter420.sol"
+      - "contracts/src/interfaces/IBridgeVerifiedSourceContext420.sol"
+      - "contracts/test/*BridgeAdapter420.t.sol"
+      - "contracts/test/VerifierRotationHardening420.t.sol"
+      - ".github/workflows/bridge-audit-3-2-adapter-context.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: bridge-audit-3-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  adapter-source-context:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact PR head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify chain adapter inbound and source-context behavior
+        working-directory: contracts
+        run: forge test --match-path 'test/*BridgeAdapter420.t.sol' -vv
+      - name: Qualify verifier rotation safeguards
+        working-directory: contracts
+        run: forge test --match-path 'test/VerifierRotationHardening420.t.sol' -vv

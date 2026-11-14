@@ -1,0 +1,19 @@
+{
+  "source": "https://raw.githubusercontent.com/nip-333/btc-archive/gh-pages/btc.archive.bin",
+  "count": 32257,
+  "start": 0,
+  "end": 32256,
+  "sha256": "ade4a0714414cae17b4c91e0a6485db80bdaa1fd1cfa6bbc0cb5aa761551aaba",
+  "expected_sha256": "7f9aebf9869dc9ca43c1c2c1df056ced57799b5e5a24b6990c253ab87505e5ce",
+  "transitions": [
+    {
+      "height": 32256,
+      "previous": "0x1d00ffff",
+      "result": "0x1d00d86a",
+      "elapsed": 1022578
+    }
+  ],
+  "genesis": "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
+  "tip": "000000004f2886a170adb7204cb0c7a824217dd24d11a74423d564c4e0904967",
+  "chainwork": "0x7e01acd42dd2"
+}

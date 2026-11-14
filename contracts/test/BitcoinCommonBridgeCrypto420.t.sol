@@ -14,7 +14,7 @@ contract CommonBridgeCrypto420Test is Test {
         assertEq(BridgeCrypto420.sha256d(header),digest);
         assertEq(BitcoinHeaderPow420.verify(header),digest);
         bytes32 root=0x3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a;
-        assertTrue(BitcoinMerkleBranch420.verify(root,root,0,1,new bytes32[](0)));
+        require(BitcoinMerkleBranch420.verify(root,root,0,1,new bytes32[](0)));
     }
     function testHashVectors() public pure {
         assertEq(BridgeCrypto420.sha256d(bytes("")),0x5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456);
@@ -73,7 +73,7 @@ contract CommonBridgeCrypto420Test is Test {
         bytes32 a=bytes32(uint256(1));bytes32 b=bytes32(uint256(2));
         bytes32[] memory branch=new bytes32[](1);branch[0]=b;
         bytes32 root=sha256(abi.encodePacked(a,b));
-        assertTrue(BridgeCrypto420.verifySha256Branch(a,root,0,1,branch));
-        assertFalse(BridgeCrypto420.verifySha256Branch(a,root,1,1,branch));
+        require(BridgeCrypto420.verifySha256Branch(a,root,0,1,branch));
+        require(!BridgeCrypto420.verifySha256Branch(a,root,1,1,branch));
     }
 }

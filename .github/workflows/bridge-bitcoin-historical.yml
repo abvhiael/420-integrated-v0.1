@@ -1,0 +1,28 @@
+name: Bitcoin historical fixture acquisition
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bridge-bitcoin-historical.yml'
+      - 'contracts/test/fixtures/bitcoin/**'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  historical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+      - name: Acquire and independently verify
+        run: |
+          python3 contracts/test/fixtures/bitcoin/verify.py --acquire
+          python3 contracts/test/fixtures/bitcoin/verify.py
+      - name: Store verified fixtures on originating branch
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add contracts/test/fixtures/bitcoin/headers.bin contracts/test/fixtures/bitcoin/manifest.json contracts/test/fixtures/bitcoin/expected.jsonl
+          git diff --cached --quiet || (git commit -m 'test(bridge): store independently verified historical BTC headers' && git push origin HEAD)

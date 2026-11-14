@@ -1,0 +1,3 @@
+# Historical Bitcoin mainnet headers
+
+This fixture is generated from the public Bitcoin header archive listed in verify.py. The manifest records the actual source and checksums after successful acquisition. The sequence spans genesis through height 32256, including the first nontrivial difficulty transition. Run `python3 contracts/test/fixtures/bitcoin/verify.py` offline to recompute every record and reject corrupted or truncated data. The expected JSONL uses display-order block hashes and hexadecimal integer targets, work and cumulative work; MTP includes the current header and up to ten ancestors. This is header-only evidence, not proof of full block validity or current network freshness. No route activation or Solidity qualification is implied.

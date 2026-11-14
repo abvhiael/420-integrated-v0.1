@@ -9,6 +9,8 @@ import "../src/bridge/GatewayRouter420.sol";
 import "../src/bridge/BridgeRiskManager.sol";
 import "../src/bridge/BridgeTransferRegistry.sol";
 import "../src/bridge/BridgeRouteRegistry.sol";
+import "../src/bridge/BridgeChainRegistry420.sol";
+import "../src/bridge/BridgeAccountingRegistry.sol";
 import "../src/interfaces/ICanonicalSettlement420.sol";
 import "./SwapGenesisIntegration420.t.sol";
 import "./BridgeGenesisIntegration420.t.sol";
@@ -38,6 +40,8 @@ contract PaySwapBridgeGenesisIntegration420Test {
         BridgeRiskManager risk = new BridgeRiskManager(address(this), address(env.registry()), keccak256("risk"));
         BridgeTransferRegistry transfers = new BridgeTransferRegistry(address(this), address(env.registry()), keccak256("transfers"));
         BridgeRouteRegistry routes = new BridgeRouteRegistry(address(this), address(env.registry()), keccak256("routes"));
+        BridgeChainRegistry420 chains = new BridgeChainRegistry420(address(this), address(env.registry()), keccak256("chains"));
+        BridgeAccountingRegistry accounting = new BridgeAccountingRegistry(address(this), address(env.registry()), keccak256("accounting"));
         MockBridgeAdapter420 bridgeAdapter = new MockBridgeAdapter420();
 
         env.registerResident(address(markets), markets.componentId());
@@ -48,6 +52,8 @@ contract PaySwapBridgeGenesisIntegration420Test {
         env.registerResident(address(risk), risk.componentId());
         env.registerResident(address(transfers), transfers.componentId());
         env.registerResident(address(routes), routes.componentId());
+        env.registerResident(address(chains), chains.componentId());
+        env.registerResident(address(accounting), accounting.componentId());
 
         env.setSettlementAsset(CADC, ASSET_ID, true);
         env.health().setMarket(MARKET_ID, true);
@@ -74,7 +80,28 @@ contract PaySwapBridgeGenesisIntegration420Test {
             inboundEnabled: true,
             outboundEnabled: true
         });
+        // Route activation now requires both active canonical network identities.
+        chains.setChain(
+            keccak256("420/BRIDGE/CHAIN/ETH"),
+            BridgeChainRegistry420.Chain(
+                1, keccak256("ETHEREUM/MAINNET"), ASSET_ID,
+                keccak256("ETHEREUM/FINALITY"), BridgeChainRegistry420.ChainFamily.EVM, true
+            )
+        );
+        chains.setChain(
+            keccak256("420/BRIDGE/CHAIN/420"),
+            BridgeChainRegistry420.Chain(
+                uint64(block.chainid), keccak256("420/TESTNET"), ASSET_ID,
+                keccak256("420/FINALITY"), BridgeChainRegistry420.ChainFamily.EVM, true
+            )
+        );
         routes.setRoute(ROUTE_ID, route);
+        // Accounting health is independent of route health. A matching evidence
+        // observation is required before either direction consumes risk.
+        accounting.applyReconciliation(
+            ASSET_ID, 1_000_000 ether, 1_000_000 ether,
+            uint64(block.timestamp), keccak256("pay-swap-bridge-reconciliation")
+        );
         BridgeRiskManager.Limits memory limits = BridgeRiskManager.Limits(
             1_000_000 ether, 1_000_000 ether, 1_000_000 ether,
             1_000_000 ether, 1_000_000 ether, 1_000_000 ether

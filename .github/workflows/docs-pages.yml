@@ -7,6 +7,7 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'

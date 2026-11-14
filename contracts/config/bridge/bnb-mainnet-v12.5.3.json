@@ -1,6 +1,6 @@
 {
   "schema": "420-bridge-bnb-mainnet-v12.5.3",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY",
+  "status": "APPROVED_INACTIVE_LOCAL_VERIFIER_QUALIFIED_PENDING_DEPLOYMENT_AND_GATEWAY",
   "canonical_chain_key": "420/BRIDGE/CHAIN/BNB",
   "chain_family": "EVM_BNB",
   "route_chain_id": "0x424e424d41494e01",
@@ -18,7 +18,7 @@
   "adapter": {
     "contract": "BnbBridgeAdapter420",
     "adapter_id_preimage": "420/BRIDGE/BNB/MAINNET/V12.5.3",
-    "required_finality": "production verifier-defined finalized checkpoint",
+    "required_finality": "BnbConsensusLightClient420 two linked BSC mainnet BLS quorum certificates",
     "recipient_encoding": "20-byte EVM address",
     "native_value_on_420_outbound": "rejected"
   },
@@ -42,5 +42,20 @@
     "message replay fails closed",
     "direct adapter calls bypassing GatewayRouter420 fail closed",
     "outbound recipients must be exactly 20 bytes"
-  ]
+  ],
+  "local_verifier": {
+    "consensus": "BnbConsensusLightClient420",
+    "bls": "BnbBlsVerifier420",
+    "message": "BnbGatewayMessageVerifier420",
+    "composition": "BnbFinalityVerifier420",
+    "source_gateway": "BnbDepositGateway420",
+    "profile": "BSC mainnet Maxwell-and-later, epoch length 1000, address-sorted BLS rosters, authenticated delayed epoch transitions",
+    "trusted_snapshot_commitment": "0x699c25bd3d1edf26b29d35102e7a5b1b8d4823ad696d4139c87ee80a5c75dd68",
+    "checkpoint": 116663998,
+    "previous_epoch": 116662000,
+    "current_epoch": 116663000,
+    "qualified": true,
+    "deployed": false,
+    "operational_cost": "Software BLS is expensive: thousands of progress calls and approximately 41-45 billion gas per certificate; retain inactive route pending deployment configuration."
+  }
 }

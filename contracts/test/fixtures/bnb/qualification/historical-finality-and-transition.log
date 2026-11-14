@@ -1,0 +1,9 @@
+Compiling 7 files with Solc 0.8.24
+Solc 0.8.24 finished in 13.76s
+Compiler run successful!
+
+Ran 1 test for contracts/test/BnbConsensus420.t.sol:BnbConsensus420Test
+[PASS] testHistoricalFinalityAndRealValidatorTransition() (gas: 170186425858)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 203.74s (203.74s CPU time)
+
+Ran 1 test suite in 203.74s (203.74s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

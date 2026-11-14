@@ -60,7 +60,7 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if(p.blockNumber==0||p.blockHash==bytes32(0)||p.transactionHash==bytes32(0)||p.messageId==bytes32(0)||p.gateway==address(0)||p.sourceSender==address(0)||p.recipient==address(0)||p.amount==0) revert InvalidProof();
         if(!gateways[p.gateway]) revert GatewayNotAllowed();
         bytes32 sourceAsset=sourceAssetKey(p.sourceToken); bytes32 assetId=assetIdBySourceAsset[sourceAsset]; if(assetId==bytes32(0)) revert AssetNotAllowed();
-        bytes32 routeId=routeIdByAssetId[assetId]; if(routeId==bytes32(0)) revert RouteNotAllowed(); if(consumedMessages[p.messageId]) revert Replay();
+        bytes32 routeId=routeIdByAssetId[assetId]; if(routeId==bytes32(0)) revert RouteNotAllowed(); if(p.destinationChainId!=block.chainid || p.destinationRouter!=gatewayRouter || p.routeId!=routeId) revert InvalidProof(); if(consumedMessages[p.messageId]) revert Replay();
         consumedMessages[p.messageId]=true; emit BnbInboundConsumed(p.messageId,p.transactionHash,p.blockNumber);
         v=VerifiedTransfer({routeId:routeId,assetId:assetId,sender:p.sourceSender,recipient:p.recipient,amount:p.amount,sourceTxId:p.transactionHash,sourceMessageId:p.messageId});
     }

@@ -1,0 +1,10 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.86s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/BnbBlsSoftware420.t.sol:BnbBlsSoftware420Test
+[PASS] testRealCancunBLSWithoutNativeBlsPrecompiles() (gas: 41531456416)
+[PASS] testWrongMessageBlsPairingRejected() (gas: 41708735044)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 50.47s (99.68s CPU time)
+
+Ran 1 test suite in 50.48s (50.47s CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

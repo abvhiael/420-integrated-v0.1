@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'
@@ -53,6 +54,13 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/verifiers/bnb/**'
+      - '!contracts/src/bridge/verifiers/Bnb*420.sol'
+      - '!contracts/src/bridge/verifiers/EthereumRLP420.sol'
+      - '!contracts/src/bridge/verifiers/EthereumMPT420.sol'
+      - '!contracts/src/bridge/BnbDepositGateway420.sol'
+      - '!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'
+      - '!contracts/src/interfaces/IBnb*420.sol'
       - '!contracts/src/bridge/verifiers/Bitcoin*420.sol'
       - '!contracts/src/bridge/verifiers/BridgeCrypto420.sol'
       - '!contracts/src/bridge/verifiers/BridgeWire420.sol'
@@ -82,6 +90,7 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'
@@ -127,6 +136,13 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/verifiers/bnb/**'
+      - '!contracts/src/bridge/verifiers/Bnb*420.sol'
+      - '!contracts/src/bridge/verifiers/EthereumRLP420.sol'
+      - '!contracts/src/bridge/verifiers/EthereumMPT420.sol'
+      - '!contracts/src/bridge/BnbDepositGateway420.sol'
+      - '!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'
+      - '!contracts/src/interfaces/IBnb*420.sol'
       - '!contracts/src/bridge/verifiers/Bitcoin*420.sol'
       - '!contracts/src/bridge/verifiers/BridgeCrypto420.sol'
       - '!contracts/src/bridge/verifiers/BridgeWire420.sol'

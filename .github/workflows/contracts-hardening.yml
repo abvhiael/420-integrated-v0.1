@@ -6,6 +6,16 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/bnb/**"
+      - "!contracts/src/bridge/verifiers/Bnb*420.sol"
+      - "!contracts/src/bridge/verifiers/EthereumRLP420.sol"
+      - "!contracts/src/bridge/verifiers/EthereumMPT420.sol"
+      - "!contracts/src/bridge/BnbDepositGateway420.sol"
+      - "!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/IBnb*420.sol"
+      - "!contracts/test/Bnb*420.t.sol"
+      - "!contracts/test/fixtures/bnb/**"
+      - "!contracts/config/bridge/bnb-mainnet-v12.5.3.json"
       - ".github/workflows/contracts-hardening.yml"
   pull_request:
     paths:

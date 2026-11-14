@@ -1,0 +1,42 @@
+{
+  "BnbDepositGateway420": {
+    "init_bytes": 1820,
+    "runtime_bytes": 1659
+  },
+  "BnbGatewayToken420": {
+    "init_bytes": 0,
+    "runtime_bytes": 0
+  },
+  "BnbBridgeAdapter420": {
+    "init_bytes": 4488,
+    "runtime_bytes": 4072
+  },
+  "BnbFinalityVerifier420": {
+    "init_bytes": 3031,
+    "runtime_bytes": 2623
+  },
+  "BnbGatewayMessageVerifier420": {
+    "init_bytes": 10318,
+    "runtime_bytes": 10041
+  },
+  "BnbBlsHash420": {
+    "init_bytes": 7840,
+    "runtime_bytes": 7813
+  },
+  "BnbBlsMath420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "BnbBlsVerifier420": {
+    "init_bytes": 23653,
+    "runtime_bytes": 15688
+  },
+  "BnbConsensusLightClient420": {
+    "init_bytes": 24083,
+    "runtime_bytes": 13113
+  },
+  "BnbHeader420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

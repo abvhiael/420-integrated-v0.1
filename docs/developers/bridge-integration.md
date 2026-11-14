@@ -59,7 +59,9 @@ Bridge proof validity does not grant general Oracle authority and does not make 
 
 Bridge accounting records authorized-versus-observed supply evidence and health. It cannot mint, burn or repair balances by itself.
 
-If reconciliation is unhealthy, halt/escalate according to safety policy and reconcile canonical state. Do not "fix" the discrepancy by mutating balances from an off-chain spreadsheet or provider report.
+If reconciliation is `UNKNOWN` or reports either authorized-versus-observed mismatch direction, new inbound and outbound Bridge movement fails closed before risk consumption or adapter execution. Recovery requires a strictly newer observation with a distinct evidence hash that returns authorized and observed supply to equality.
+
+Reconciliation remains evidence-only: do not "fix" the discrepancy by mutating balances from an off-chain spreadsheet or provider report. Existing-transfer refund/recovery is separately governed and safety-classified; it does not turn accounting evidence into custody or permit a new outbound initiation.
 
 ## Failure handling
 

@@ -1,0 +1,15 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.09s
+Compiler run successful!
+
+Ran 7 tests for contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test
+[PASS] testCanonicalLitecoinInboundPasses() (gas: 163368)
+[PASS] testInsufficientConfirmationsRejected() (gas: 132837)
+[PASS] testInvalidPowRejected() (gas: 132824)
+[PASS] testMwebRejected() (gas: 132963)
+[PASS] testOutboundLegacySegwitAndTaproot() (gas: 155505)
+[PASS] testReplayRejected() (gas: 291212)
+[PASS] testWrongNetworkRejected() (gas: 132596)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 2.68ms (2.86ms CPU time)
+
+Ran 1 test suite in 3.99ms (2.68ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)

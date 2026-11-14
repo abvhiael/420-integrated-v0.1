@@ -28,6 +28,8 @@ contract LitecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     mapping(bytes32 => bool) public consumedMessages;
     mapping(bytes32 => bool) public consumedSourceOutputs;
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
 
     error InvalidAddress(); error InvalidVerifier(); error WrongNetwork(); error Unfinalized();
@@ -60,6 +62,7 @@ contract LitecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     }
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
+        if(verifier.routeId()!=ltcRouteId || verifier.destinationRouter()!=gatewayRouter || verifier.gatewayScriptHash()==0)revert InvalidVerifier();
         ILitecoinFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.genesisHash != LTC_MAINNET_GENESIS_HASH || p.messageStart != LTC_MAINNET_MESSAGE_START) revert WrongNetwork();
@@ -75,6 +78,7 @@ contract LitecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
         consumedMessages[p.messageId] = true;
         consumedSourceOutputs[p.sourceOutput] = true;
+        verifiedSourceContext[p.messageId]=SourceProofContext(verifier.gatewayScriptHash(),ltcAssetId);
         emit LitecoinInboundConsumed(p.messageId, p.transactionHash, p.sourceOutput);
 
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));

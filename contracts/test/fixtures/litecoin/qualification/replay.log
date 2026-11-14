@@ -1,0 +1,10 @@
+Compiling 6 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.84s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/LitecoinReplayQualification420.t.sol:LitecoinReplayQualification420Test
+[PASS] testMWEBOutboundProgramAndUnauthorizedAdapterCallFailWithoutNonceMutation() (gas: 1972060)
+[PASS] testOutpointCannotReplayWithDifferentMessageAfterVerifierRotation() (gas: 2955603)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 1.01ms (1.08ms CPU time)
+
+Ran 1 test suite in 2.73ms (1.01ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

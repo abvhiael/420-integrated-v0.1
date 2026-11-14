@@ -43,7 +43,7 @@ struct Envelope {
 
 The envelope is restricted to 128 KiB encoded bytes, maximum evidence age of one day and a maximum one-day validity span. These guards limit stale/malformed claim replays; finality and reorg policy remain the source-specific verifier's duty. Transport bytes are ABI-reencoded and compared for canonicality to reject altered offsets, padding and trailing bytes.
 
-**Generic `VerifiedGateway420` boundary:** its legacy `IVerifiedGatewayVerifier420` four-tuple does not provide sufficient source gateway, source-chain or proof-domain context for this envelope. It must not be treated as evidence of production finality or routed through this proof transport until its verifier boundary is separately qualified. No Genesis predeploy or `VerifiedGateway420` ABI is changed here.
+**Generic `VerifiedGateway420` boundary:** its legacy `IVerifiedGatewayVerifier420` four-tuple does not provide sufficient source gateway, source-chain or proof-domain context for this envelope. It must not be treated as evidence of production finality or routed through this proof transport until its verifier boundary is separately qualified. The legacy `VerifiedGateway420.verifyDeposit` and `verifyWithdrawal` now explicitly revert before accepting a verifier-returned four-tuple; the external ABI and frozen address are preserved, but the implementation intentionally fails closed until that path can authenticate full source-chain provenance. Deployment bytecode/hash must be qualified before any Genesis or testnet use.
 
 ## Targeted test scope
 

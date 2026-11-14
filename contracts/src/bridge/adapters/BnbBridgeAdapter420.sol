@@ -19,6 +19,8 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
 
     error InvalidAddress(); error InvalidVerifier(); error WrongChain(); error Unfinalized(); error InvalidProof();
@@ -61,7 +63,8 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if(!gateways[p.gateway]) revert GatewayNotAllowed();
         bytes32 sourceAsset=sourceAssetKey(p.sourceToken); bytes32 assetId=assetIdBySourceAsset[sourceAsset]; if(assetId==bytes32(0)) revert AssetNotAllowed();
         bytes32 routeId=routeIdByAssetId[assetId]; if(routeId==bytes32(0)) revert RouteNotAllowed(); if(consumedMessages[p.messageId]) revert Replay();
-        consumedMessages[p.messageId]=true; emit BnbInboundConsumed(p.messageId,p.transactionHash,p.blockNumber);
+        consumedMessages[p.messageId]=true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(bytes32(uint256(uint160(p.gateway))), sourceAsset); emit BnbInboundConsumed(p.messageId,p.transactionHash,p.blockNumber);
         v=VerifiedTransfer({routeId:routeId,assetId:assetId,sender:p.sourceSender,recipient:p.recipient,amount:p.amount,sourceTxId:p.transactionHash,sourceMessageId:p.messageId});
     }
     function initiateOutbound(bytes32 routeId, bytes32 assetId, address sender, bytes calldata recipient, uint256 amount, bytes calldata extra) external payable onlyRouter returns(bytes32 sourceMessageId){

@@ -5,6 +5,9 @@ import "../src/bridge/adapters/DogecoinBridgeAdapter420.sol";
 import "../src/interfaces/IDogecoinFinalityVerifier420.sol";
 
 contract DogecoinFinalityVerifierMock420 is IDogecoinFinalityVerifier420 {
+    bytes32 public constant routeId=keccak256("420/BRIDGE/ROUTE/DOGE/MAINNET");
+    address public destinationRouter;
+    function setRouter(address router) external {destinationRouter=router;}
     FinalizedTransfer private nextTransfer;
     function set(FinalizedTransfer calldata transfer_) external { nextTransfer = transfer_; }
     function verifyFinalizedTransfer(bytes calldata) external view returns (FinalizedTransfer memory) { return nextTransfer; }
@@ -42,6 +45,7 @@ contract DogecoinBridgeAdapter420Test {
         verifier = new DogecoinFinalityVerifierMock420();
         router = new DogecoinRouterCaller420();
         adapter = new DogecoinBridgeAdapter420(address(this), address(router), address(verifier));
+        verifier.setRouter(address(router));
         adapter.setGatewayScript(SCRIPT, true);
         adapter.setDogeBinding(DOGE_ASSET, ROUTE);
         verifier.set(_healthy(keccak256("doge-message-1"), OUTPOINT));

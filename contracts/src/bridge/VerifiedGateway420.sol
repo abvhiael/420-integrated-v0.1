@@ -78,7 +78,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             Types420.Direction.INBOUND
         );
         require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        (depositId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyDeposit(proof);
+        revert("legacy source proof domain unqualified"); // ABI lacks chain/gateway/tx binding
         _checkReplay(depositId);
         require(!consumedDeposits[depositId], "replay");
         require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");
@@ -97,7 +97,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             Types420.Direction.OUTBOUND
         );
         require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        (withdrawalId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyWithdrawal(proof);
+        revert("legacy source proof domain unqualified"); // ABI lacks chain/gateway/tx binding
         _checkReplay(withdrawalId);
         require(!consumedWithdrawals[withdrawalId], "replay");
         require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");

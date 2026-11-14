@@ -25,6 +25,10 @@ contract MockBridgeAdapter420 is IBridgeAdapter420 {
     function verifyInbound(bytes calldata) external view returns (VerifiedTransfer memory) {
         require(!failInbound, "proof failure"); return nextTransfer;
     }
+    function verifiedSourceContext(bytes32 messageId) external view returns (bytes32, bytes32) {
+        require(messageId == nextTransfer.sourceMessageId && messageId != bytes32(0), "source context");
+        return (keccak256("fixture/gateway"), bytes32(uint256(uint160(address(0xCA420)))));
+    }
     function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata)
         external payable returns(bytes32 sourceMessageId)
     { require(!failOutbound, "outbound failure"); return nextOutboundId; }
@@ -254,6 +258,9 @@ contract BridgeGenesisIntegration420Test {
         e = abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
         e.sourceMessageId = keccak256("wrong message");
         require(_rejectProof(f, e), "message substituted");
+        e = abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
+        e.sourceGateway = keccak256("substituted gateway");
+        require(_rejectProof(f, e), "gateway substituted");
         e = abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
         e.sourceGateway = bytes32(0);
         require(_rejectProof(f, e), "empty gateway accepted");

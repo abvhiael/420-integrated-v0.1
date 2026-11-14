@@ -3,12 +3,14 @@ pragma solidity ^0.8.24;
 
 import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/IBridgeAdapter420.sol";
+import "../interfaces/IBridgeVerifiedSourceContext420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/ICanonicalAssetRegistry420.sol";
 import "../interfaces/genesis/ISettlementHealth420.sol";
 import "../libraries/GenesisInterfaceIds420.sol";
 import "./BridgeIds420.sol";
+import "./BridgeProofEnvelope420.sol";
 
 interface IBridgeRiskConsumer420 { function consume(bytes32, bytes32, bool, uint256) external; }
 interface IBridgeAccountingHealth420 { function movementHealthy(bytes32) external view returns (bool); }
@@ -23,6 +25,7 @@ interface IBridgeTransferCreate420 {
 interface IBridgeRouteRegistryView420 {
     function routes(bytes32) external view returns (bytes32,uint64,uint64,bytes32,bytes32,bytes32,bytes32,uint32,uint8,bool,bool);
     function requireRouteChainsCurrent(bytes32) external view;
+    function chainBindings(bytes32) external view returns (bytes32,bytes32,bytes32,bytes32);
 }
 
 contract GatewayRouter420 is GenesisResidentAccess420 {
@@ -81,6 +84,32 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         routes.requireRouteChainsCurrent(routeId);
     }
 
+    function _requireProofRouteDomain(BridgeProofEnvelope420.Envelope memory e) internal view {
+        IBridgeRouteRegistryView420 routeRegistry =
+            IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY));
+        (
+            bytes32 configuredAsset,
+            uint64 sourceChain,
+            uint64 destinationChain,
+            bytes32 configuredSourceAsset,
+            ,
+            bytes32 configuredAdapter,
+            bytes32 configuredVerifierHash,
+            ,
+            ,
+            ,
+        ) = routeRegistry.routes(e.routeId);
+        (,bytes32 sourceNetwork,,bytes32 destinationNetwork) = routeRegistry.chainBindings(e.routeId);
+        require(
+            configuredAsset == e.assetId && configuredAdapter == e.adapterId
+                && configuredSourceAsset == e.sourceAsset
+                && configuredVerifierHash == e.verifierConfigHash
+                && sourceChain == e.sourceChainId && destinationChain == e.destinationChainId
+                && sourceNetwork == e.sourceNetworkId && destinationNetwork == e.destinationNetworkId,
+            "proof domain mismatch"
+        );
+    }
+
     function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {
         _requireOperational(
             BridgeIds420.ACTION_INBOUND,
@@ -89,7 +118,25 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         );
         address adapter = adapters[adapterId_];
         require(adapter != address(0) && adapter.code.length != 0, "adapter");
-        IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(proof);
+        // Envelope identity checks cannot replace source consensus/inclusion verification.
+        BridgeProofEnvelope420.Envelope memory e = BridgeProofEnvelope420.decode(proof);
+        IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(e.innerProof);
+        // Read the context that the adapter derived from the actual verified message.
+        // Never accept a source gateway or source asset solely from the caller's envelope.
+        (bytes32 verifiedGateway, bytes32 verifiedSourceAsset) =
+            IBridgeVerifiedSourceContext420(adapter).verifiedSourceContext(v.sourceMessageId);
+        require(
+            verifiedGateway != bytes32(0) && verifiedSourceAsset != bytes32(0)
+                && verifiedGateway == e.sourceGateway && verifiedSourceAsset == e.sourceAsset,
+            "source proof context mismatch"
+        );
+        require(
+            v.routeId == e.routeId && v.assetId == e.assetId && adapterId_ == e.adapterId
+                && v.recipient == e.recipient && v.amount == e.amount
+                && v.sourceTxId == e.sourceTxId && v.sourceMessageId == e.sourceMessageId,
+            "proof claim mismatch"
+        );
+        _requireProofRouteDomain(e);
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
         _requireRouteHealthy(v.routeId);
@@ -103,7 +150,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
             v.routeId, v.assetId, v.sender, v.recipient, v.amount, v.sourceTxId, v.sourceMessageId
         );
         bytes32 sourceEvidence = keccak256(abi.encode(v.sourceTxId, v.sourceMessageId));
-        bytes32 proofEvidence = keccak256(proof);
+        bytes32 proofEvidence = keccak256(proof); // canonical envelope commits every bound field
         transferRegistry.markSourcePending(transferId, sourceEvidence);
         transferRegistry.markSourceFinalized(
             transferId, keccak256(abi.encode(sourceEvidence, keccak256("SOURCE_FINALIZED")))

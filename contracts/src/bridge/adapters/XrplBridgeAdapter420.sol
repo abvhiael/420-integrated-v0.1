@@ -17,6 +17,8 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public xrpRouteId;
     mapping(bytes20 => bool) public gatewayAccounts;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     mapping(bytes32 => bool) public consumedTransactions;
     uint256 public outboundNonce;
 
@@ -84,6 +86,7 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (consumedMessages[p.messageId] || consumedTransactions[p.transactionHash]) revert Replay();
 
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(bytes32(p.gatewayAccount), xrpAssetId);
         consumedTransactions[p.transactionHash] = true;
         emit XrpInboundConsumed(p.messageId, p.transactionHash, p.ledgerIndex);
 

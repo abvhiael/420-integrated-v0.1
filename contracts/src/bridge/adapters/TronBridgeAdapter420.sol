@@ -22,6 +22,8 @@ contract TronBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     mapping(bytes20 => bool) public gatewayAccounts;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     mapping(bytes32 => bool) public consumedTransactions;
     uint256 public outboundNonce;
 
@@ -97,6 +99,7 @@ contract TronBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (consumedMessages[p.messageId] || consumedTransactions[p.transactionHash]) revert Replay();
 
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(bytes32(p.gatewayAccount), trxAssetId);
         consumedTransactions[p.transactionHash] = true;
         emit TronInboundConsumed(p.messageId, p.transactionHash, p.sourceAccount);
 

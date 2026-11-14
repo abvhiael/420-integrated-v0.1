@@ -68,3 +68,44 @@ func TestHealthAndReadinessAreNoncanonical(t *testing.T){
 	r=httptest.NewRequest(http.MethodGet,"/readyz",nil); w=httptest.NewRecorder(); svc.Handler().ServeHTTP(w,r)
 	if w.Code!=http.StatusOK || !strings.Contains(w.Body.String(),`"canonical":false`) { t.Fatalf("bad ready response: %d %s",w.Code,w.Body.String()) }
 }
+
+func TestReadinessExpiresEvenIfBackgroundRefreshStops(t *testing.T) {
+	now := time.Now().UTC()
+	svc,err := NewService(testConfig(), fakeProbe{chain:420, observed:now.Add(-time.Second)})
+	if err!=nil { t.Fatal(err) }
+	if err:=svc.Qualify(context.Background(),now); err!=nil { t.Fatal(err) }
+	if !svc.Ready(now) { t.Fatal("fresh qualification should be ready") }
+	if svc.Ready(now.Add(3*time.Minute)) { t.Fatal("stale qualification must expire") }
+	// The HTTP path must also fail closed using its own wall clock.
+	stale := time.Now().UTC().Add(-3*time.Minute)
+	staleSvc,err := NewService(testConfig(),fakeProbe{chain:420,observed:stale})
+	if err!=nil { t.Fatal(err) }
+	if err:=staleSvc.Qualify(context.Background(),stale); err!=nil { t.Fatal(err) }
+	res:=httptest.NewRecorder()
+	staleSvc.Handler().ServeHTTP(res,httptest.NewRequest(http.MethodGet,"/readyz",nil))
+	if res.Code!=http.StatusServiceUnavailable { t.Fatalf("stale HTTP readiness must be 503, got %d",res.Code) }
+}
+
+type mutableIndexerProbe struct {
+	chain uint64
+	observed time.Time
+	err error
+}
+func (p *mutableIndexerProbe) ChainID(context.Context)(uint64,error) { return p.chain,p.err }
+func (p *mutableIndexerProbe) Ready(context.Context) error { return p.err }
+func (p *mutableIndexerProbe) ObservedAt(context.Context)(time.Time,error) { return p.observed,p.err }
+
+func TestFailedRefreshInvalidatesPreviouslyReadyService(t *testing.T) {
+	now:=time.Now().UTC()
+	probe:=&mutableIndexerProbe{chain:420,observed:now}
+	svc,err:=NewService(testConfig(),probe)
+	if err!=nil { t.Fatal(err) }
+	if err:=svc.Qualify(context.Background(),now); err!=nil { t.Fatal(err) }
+	if !svc.Ready(now) { t.Fatal("initial qualification missing") }
+	probe.err=errors.New("indexer down")
+	if err:=svc.Qualify(context.Background(),now.Add(time.Second)); err==nil { t.Fatal("expected failed refresh") }
+	if svc.Ready(now.Add(time.Second)) { t.Fatal("previous success must not survive refresh failure") }
+	res:=httptest.NewRecorder()
+	svc.Handler().ServeHTTP(res,httptest.NewRequest(http.MethodGet,"/readyz",nil))
+	if res.Code!=http.StatusServiceUnavailable { t.Fatalf("expected 503 after failed refresh, got %d",res.Code) }
+}

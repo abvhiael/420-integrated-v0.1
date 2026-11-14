@@ -103,7 +103,9 @@ func TestCloseoutPublicSurfaceMinimizesPrivateAndFreeFormData(t *testing.T) {
 }
 
 func TestCloseoutRestartRequiresFreshQualification(t *testing.T) {
-	now := time.Date(2026, 9, 17, 21, 0, 0, 0, time.UTC)
+	// HTTP readiness now evaluates the actual current time, so the qualified
+	// observation in this integration test must be fresh in wall-clock time.
+	now := time.Now().UTC().Truncate(time.Second)
 	cfg := statusruntime.Config{ChainID: 420, IndexerURL: "https://indexer.example", ListenAddr: ":8422", RequestTimeout: time.Second, MaxEvidenceAge: 2 * time.Minute}
 	probe := runtimeProbe{chain: 420, observed: now.Add(-time.Second)}
 

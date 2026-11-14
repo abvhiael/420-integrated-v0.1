@@ -31,6 +31,7 @@ Optional:
 - `STATUS_LISTEN_ADDR` — defaults to `:8422`.
 - `STATUS_REQUEST_TIMEOUT` — defaults to `5s`.
 - `STATUS_MAX_EVIDENCE_AGE` — defaults to `2m`.
+- `STATUS_ENVIRONMENT` — defaults to `testnet`; labels evidence without claiming authority over chain identity.
 
 Probe URLs are validated against SSRF/private-network targets and revalidated at dial/redirect time.
 
@@ -59,7 +60,7 @@ go run ./status/cmd/status420
 
 The process exposes `/healthz`, `/readyz`, the read-only `/v1/status`, `/v1/components`, `/v1/incidents`, `/v1/maintenance`, `/v1/history` API surface, and the embedded public frontend.
 
-Readiness is deliberately stricter than liveness. Wrong-chain, stale, future-dated, unavailable or unready dependency evidence keeps the service unready.
+Readiness is deliberately stricter than liveness. Wrong-chain, stale, future-dated, unavailable or unready dependency evidence keeps the service unready. The executable now mounts the actual read-only API and embedded frontend together with health/readiness routes, registers the qualified public 420Indexer component, and requalifies the Indexer every one-third of the maximum evidence age (capped at 30 seconds). Successful and failed probes update the public component state. A missed refresh cannot leave readiness green after the evidence or qualification expires; `/readyz` then returns 503. Other service classes are not fabricated as healthy until their public probes are qualified.
 
 ## Public API and privacy
 

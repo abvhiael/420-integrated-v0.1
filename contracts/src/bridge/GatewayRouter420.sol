@@ -150,7 +150,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
             v.routeId, v.assetId, v.sender, v.recipient, v.amount, v.sourceTxId, v.sourceMessageId
         );
         bytes32 sourceEvidence = keccak256(abi.encode(v.sourceTxId, v.sourceMessageId));
-        bytes32 proofEvidence = keccak256(abi.encode(e.routeId, e.adapterId, e.assetId, e.sourceNetworkId, e.destinationNetworkId, e.sourceGateway, e.sourceAsset, e.verifierConfigHash, e.destinationChainIdEvm, e.destinationRouter, keccak256(e.innerProof)));
+        bytes32 proofEvidence = keccak256(proof); // canonical envelope commits every bound field
         transferRegistry.markSourcePending(transferId, sourceEvidence);
         transferRegistry.markSourceFinalized(
             transferId, keccak256(abi.encode(sourceEvidence, keccak256("SOURCE_FINALIZED")))

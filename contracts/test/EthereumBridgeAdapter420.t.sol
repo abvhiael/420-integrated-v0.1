@@ -111,8 +111,9 @@ contract EthereumBridgeAdapter420Test {
 
     function _setMessage(address token, bytes32 messageId) private { messageVerifier.set(_message(token, messageId)); }
 
-    function _message(address token, bytes32 messageId) private pure returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m) {
+    function _message(address token, bytes32 messageId) private view returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m) {
         m = IEthereumGatewayMessageVerifier420.GatewayMessage({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: ROUTE,
             messageId: messageId,
             gateway: GATEWAY,
             sourceToken: token,

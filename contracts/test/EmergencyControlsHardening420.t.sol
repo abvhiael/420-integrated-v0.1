@@ -184,6 +184,7 @@ contract EmergencyControlsHardening420Test {
         private view returns (IEthereumFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = IEthereumFinalityVerifier420.FinalizedTransfer({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: ETH_ROUTE,
             sourceChainId: ethAdapter.ETHEREUM_MAINNET_CHAIN_ID(),
             blockNumber: 22_000_004,
             blockHash: keccak256("emergency-eth-block"),

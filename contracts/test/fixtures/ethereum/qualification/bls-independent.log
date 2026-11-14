@@ -1,0 +1,1 @@
+PASS: mainnet Fulu sync update, 512/512 BLS participants, actual fork/genesis domain, finality/next-committee/execution SSZ proofs; changed signing root, invalid signature and empty participation rejected

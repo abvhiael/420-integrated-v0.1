@@ -20,6 +20,8 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
 
     bool public inboundHalted;
@@ -95,6 +97,8 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         IEthereumFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.sourceChainId != ETHEREUM_MAINNET_CHAIN_ID) revert WrongChain();
+        if (p.destinationChainId != block.chainid) revert WrongChain();
+        if (p.destinationRouter != gatewayRouter) revert InvalidProof();
         if (p.blockNumber == 0 || p.blockHash == bytes32(0) || p.receiptsRoot == bytes32(0) || p.transactionHash == bytes32(0) || p.messageId == bytes32(0) || p.gateway == address(0) || p.sourceSender == address(0) || p.recipient == address(0) || p.amount == 0) revert InvalidProof();
         if (!gateways[p.gateway]) revert GatewayNotAllowed();
         bytes32 sourceAsset = sourceAssetKey(p.sourceToken);
@@ -102,8 +106,10 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (assetId == bytes32(0)) revert AssetNotAllowed();
         bytes32 routeId = routeIdByAssetId[assetId];
         if (routeId == bytes32(0)) revert RouteNotAllowed();
+        if (p.routeId != routeId) revert RouteNotAllowed();
         if (consumedMessages[p.messageId]) revert Replay();
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(bytes32(uint256(uint160(p.gateway))), sourceAsset);
         emit EthereumInboundConsumed(p.messageId, p.transactionHash, p.blockNumber);
         v = VerifiedTransfer({routeId: routeId, assetId: assetId, sender: p.sourceSender, recipient: p.recipient, amount: p.amount, sourceTxId: p.transactionHash, sourceMessageId: p.messageId});
     }

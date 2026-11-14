@@ -1,0 +1,49 @@
+Compiling 14 files with Solc 0.8.24
+Solc 0.8.24 finished in 7.45s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/helpers/EthereumProofFixture420.sol:24:21:
+   |
+24 |     function client(string memory prefix) internal returns(EthereumConsensusLightClient420 c){
+   |                     ^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> contracts/test/helpers/EthereumProofFixture420.sol:39:5:
+   |
+39 |     function prefix(bytes memory payload,uint256 offset) internal pure returns(bytes memory){
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-14T07:20:50.891594Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891619Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891628Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891645Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891651Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891673Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891688Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891694Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.891700Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892448Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892459Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892466Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892476Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892482Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892630Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892647Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892653Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+2026-11-14T07:20:50.892659Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21199)
+
+Ran 1 test for contracts/test/EthereumConsensusInvariant420.t.sol:EthereumConsensusInvariant420Test
+[PASS] invariantOnlyProvenMainnetCheckpointAndCommitteeCanBeStored() (runs: 128, calls: 8192, reverts: 0)
+
+╭--------------------------------------+----------------+-------+---------+----------╮
+| Contract                             | Selector       | Calls | Reverts | Discards |
++====================================================================================+
+| EthereumConsensusInvariantHandler420 | forgeCommittee | 2668  | 0       | 0        |
+|--------------------------------------+----------------+-------+---------+----------|
+| EthereumConsensusInvariantHandler420 | forgeFinality  | 2751  | 0       | 0        |
+|--------------------------------------+----------------+-------+---------+----------|
+| EthereumConsensusInvariantHandler420 | validOrReplay  | 2773  | 0       | 0        |
+╰--------------------------------------+----------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 2.07s (2.07s CPU time)
+
+Ran 1 test suite in 2.07s (2.07s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

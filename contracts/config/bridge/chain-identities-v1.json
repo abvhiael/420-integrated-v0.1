@@ -1,0 +1,86 @@
+{
+  "schema": "420-bridge-chain-identities-v1",
+  "status": "BOOTSTRAP_AUTHORITY_FAIL_CLOSED",
+  "policy": "Every chain used by an ACTIVE BridgeRouteRegistry route must be registered in BridgeChainRegistry420. routeChainId is only a compact lookup key; chainKey plus networkId is the canonical network binding. A changed network fingerprint requires explicit route reactivation.",
+  "local_420": {
+    "chain_key": "420/BRIDGE/CHAIN/420",
+    "route_chain_id": 420,
+    "family": "EVM",
+    "native_asset_id_source": "canonical native $420 asset identity",
+    "verifier_family": "420/BRIDGE/LOCAL",
+    "network_id_source": "frozen 420 execution genesis hash / canonical network manifest",
+    "testnet_source": "testnet/config/launch.json",
+    "active": false,
+    "activation_blocker": "Public testnet chain/genesis identity must be frozen before BridgeChainRegistry420 activation."
+  },
+  "external_identities": [
+    {
+      "chain_key": "420/BRIDGE/CHAIN/BTC",
+      "route_chain_id": "0x4254430000000001",
+      "source_manifest": "contracts/config/bridge/bitcoin-mainnet-v12.5.14.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/ETH",
+      "route_chain_id": "0x4554484d41494e01",
+      "source_manifest": "contracts/config/bridge/ethereum-mainnet-v12.5.4.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/SOL",
+      "route_chain_id": "0x534f4c414e410001",
+      "source_manifest": "contracts/config/bridge/solana-mainnet-v12.5.2.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/BNB",
+      "route_chain_id": "0x424e424d41494e01",
+      "source_manifest": "contracts/config/bridge/bnb-mainnet-v12.5.3.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/DOGE",
+      "route_chain_id": "0x444f474500000001",
+      "source_manifest": "contracts/config/bridge/dogecoin-mainnet-v12.5.5.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/XRP",
+      "route_chain_id": "0x5852504c00000001",
+      "source_manifest": "contracts/config/bridge/xrpl-mainnet-v12.5.15.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/TRX",
+      "route_chain_id": "0x5452580000000001",
+      "source_manifest": "contracts/config/bridge/tron-mainnet-v12.5.7.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/POT",
+      "route_chain_id": "0x504f540000000001",
+      "source_manifest": "contracts/config/bridge/potcoin-mainnet-v12.5.9.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/BOB",
+      "route_chain_id": "0x424f420000000001",
+      "source_manifest": "contracts/config/bridge/dobbscoin-mainnet-v12.5.10.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/CURE",
+      "route_chain_id": "0x4355524500000001",
+      "source_manifest": "contracts/config/bridge/curecoin-mainnet-v12.5.11.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/ARRR",
+      "route_chain_id": "0x4152525200000001",
+      "source_manifest": "contracts/config/bridge/pirate-mainnet-v12.5.12.json"
+    },
+    {
+      "chain_key": "420/BRIDGE/CHAIN/LTC",
+      "route_chain_id": "0x4c54430000000001",
+      "source_manifest": "contracts/config/bridge/litecoin-mainnet-v12.5.13.json"
+    }
+  ],
+  "activation_rules": [
+    "Resolve chainKey to one unique routeChainId.",
+    "Require nonzero networkId, nativeAssetId and verifierFamily and a non-NONE chain family.",
+    "Require active=true before an ACTIVE route may bind the chain.",
+    "Capture source/destination chainKey and networkId at route activation.",
+    "Revalidate route-chain bindings on every inbound and outbound execution.",
+    "Deactivate or explicitly reactivate routes after routeChainId rebinding or networkId changes."
+  ]
+}

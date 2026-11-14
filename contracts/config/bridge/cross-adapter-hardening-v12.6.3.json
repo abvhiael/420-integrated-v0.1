@@ -1,6 +1,6 @@
 {
   "schema": "420-exchange-cross-adapter-hardening-v12.6.3",
-  "status": "IN_QUALIFICATION",
+  "status": "QUALIFIED_RETAINED_SECURITY_SLICE",
   "scope": "VERIFIER_ROTATION_AND_AUTHORIZATION_HARDENING",
   "model": "Verifier replacement is governance-only, rejects zero/non-contract targets, and transfers proof authority atomically to the newly configured verifier without altering adapter replay, route or asset state.",
   "invariants": [
@@ -20,5 +20,6 @@
     "Ethereum proof authority transfers from old verifier to new verifier",
     "Solana proof authority transfers from old verifier to new verifier"
   ],
-  "follow_on": "V12.6.4 pause and emergency controls"
+  "follow_on": "V12.6.4 pause and emergency controls",
+  "superseded_by": "BRIDGE-AUDIT-7 exact-head Level 1 qualification evidence"
 }

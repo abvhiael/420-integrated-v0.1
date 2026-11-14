@@ -1,0 +1,31 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.13s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+ --> contracts/test/DogecoinHistorical420.t.sol:7:19:
+  |
+7 |     function read(string memory name) private view returns(bytes memory ...
+  |                   ^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+ --> contracts/test/DogecoinHistorical420.t.sol:8:5:
+  |
+8 |     function name(uint256 v) private pu ... 48+v%10));v/=10;}return string(b);}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 3 tests for contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[PASS] testGenuineDigishieldActivationHeaderAdmission() (gas: 279212008)
+[PASS] testGenuineGenesisLinkedScryptHeadersAndWork() (gas: 3306472484)
+[FAIL: vm.readFileBinary: failed to open file "/tmp/dogecoin-qualification-_r2hpg7k/contracts/test/fixtures/dogecoin/aux/371340.bin": No such file or directory (os error 2)] testGenuineMergedMiningChainParentWorkConfirmationsAndTransaction() (gas: 1106085946)
+Suite result: FAILED. 2 passed; 1 failed; 0 skipped; finished in 8.37s (11.46s CPU time)
+
+Ran 1 test suite in 8.37s (8.37s CPU time): 2 tests passed, 1 failed, 0 skipped (3 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[FAIL: vm.readFileBinary: failed to open file "/tmp/dogecoin-qualification-_r2hpg7k/contracts/test/fixtures/dogecoin/aux/371340.bin": No such file or directory (os error 2)] testGenuineMergedMiningChainParentWorkConfirmationsAndTransaction() (gas: 1106085946)
+
+Encountered a total of 1 failing tests, 2 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

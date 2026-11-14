@@ -5,6 +5,8 @@ pragma solidity ^0.8.24;
 /// @dev Production implementations must validate Dogecoin PoW/AuxPoW header-chain work,
 ///      transaction inclusion, canonical bridge-script output and the configured confirmation/finality policy.
 interface IDogecoinFinalityVerifier420 {
+    function routeId() external view returns(bytes32);
+    function destinationRouter() external view returns(address);
     struct FinalizedTransfer {
         bytes32 genesisHash;
         bytes4 messageStart;

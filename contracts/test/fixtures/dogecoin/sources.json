@@ -1,0 +1,28 @@
+{
+  "network": "Dogecoin mainnet",
+  "genesis_hash": "1a91e3dace36e2be3bf030a65679fe821aa1d6ef92e7c9902eb318182c355691",
+  "auxpow_activation_checkpoint": "60323982f9c5ff1b5a954eac9dc1269352835f47c2c5222691d80f0d50dcf053",
+  "source_endpoint_template": "https://api.blockchair.com/dogecoin/raw/block/{height}",
+  "requested_ranges": [
+    [
+      0,
+      480
+    ],
+    [
+      144988,
+      145012
+    ],
+    [
+      371325,
+      371349
+    ]
+  ],
+  "representation": "source-blocks.zip contains raw/{height}.bin: actual full serialized block when available; otherwise an exact 80-byte header reconstructed from accompanying raw/{height}.json decoded RPC data, including full AuxPoW fields. Header-only responses are not represented as full blocks.",
+  "core_repository": "https://github.com/dogecoin/dogecoin",
+  "core_commit": "b38c83fbf10302b23ac6e7ad89bc83068efe2fd8",
+  "scrypt_dependency_sha": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+  "scrypt_dependency_blob": "ebb233af9ab8ecc23b31aa2557b2320a3bbd854f",
+  "independent_scrypt": "Python hashlib.scrypt / OpenSSL 3.5.8 25 Aug 2026",
+  "acquisition_date_utc": "2026-11-14",
+  "base_main_sha": "bb4bd6374d561bcba65345a1dbc86c0c70d53272"
+}

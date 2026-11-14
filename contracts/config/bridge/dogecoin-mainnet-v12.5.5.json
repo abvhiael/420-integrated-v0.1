@@ -37,5 +37,16 @@
     "direct adapter calls bypassing GatewayRouter420 fail closed",
     "outbound recipient hashes must be exactly 20 bytes",
     "only P2PKH and P2SH outbound script types are accepted"
-  ]
+  ],
+  "local_implementation": {
+    "roadmap_step": "BRIDGE-AUDIT-3.V.5",
+    "status": "IMPLEMENTED_AND_LOCALLY_QUALIFIED_NOT_DEPLOYED",
+    "header_chain": "DogecoinHeaderChain420",
+    "finality_verifier": "DogecoinFinalityVerifier420",
+    "scrypt_worker": "LitecoinScrypt420, exact unchanged dependency from qualified Litecoin SHA 5741522429732437b92b3a9e0d0f659d6b781b1f",
+    "confirmation_policy": "Nonzero minimumConfirmations is an explicit immutable deployment parameter; local integration qualifies 12",
+    "proof_specification": "contracts/test/fixtures/dogecoin/README.md",
+    "qualification": "contracts/test/fixtures/dogecoin/qualification/RESULTS.md",
+    "route_activation": false
+  }
 }

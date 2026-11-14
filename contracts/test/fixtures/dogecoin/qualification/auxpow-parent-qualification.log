@@ -1,0 +1,18 @@
+Compiling 8 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.12s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DogecoinAuxPowQualification420.t.sol:53:5:
+   |
+53 |     function testParentCandidateTransactionIsNotSubjectToDogecoinOutputValidation() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test
+[PASS] testAuxPowRejectsSubstitutedBranchesIndexParentAndEnvelope() (gas: 462474)
+[PASS] testGenuineActivationAuxPowAndParentScrypt() (gas: 278337030)
+[PASS] testMergedMiningMagicPlacementTreeSizeNonceAndLegacyRootRules() (gas: 1185587)
+[PASS] testParentCandidateTransactionIsNotSubjectToDogecoinOutputValidation() (gas: 165133)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 556.14ms (562.11ms CPU time)
+
+Ran 1 test suite in 556.75ms (556.14ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

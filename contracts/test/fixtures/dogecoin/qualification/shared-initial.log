@@ -1,0 +1,29 @@
+Compiling 43 files with Solc 0.8.24
+Solc 0.8.24 finished in 52.62s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/DogecoinConsensusQualification420.t.sol:55:81:
+   |
+55 |  ... es32 h,bytes32 parent,bytes32 root,uint256 work,uint64 height,uint32 time,uint32 b ...
+   |                                         ^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/test/DogecoinConsensusQualification420.t.sol:203:5:
+    |
+203 |     function work(DogecoinHeaderChain42 ... or(id)<2048)worker.advance(id,32);}
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 1 test for contracts/test/DogecoinGatewayIntegration420.t.sol:DogecoinGatewayIntegration420Test
+[FAIL: InvalidTransaction()] testDogecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 24691848)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 3.77ms (2.75ms CPU time)
+
+Ran 1 test suite in 6.03ms (3.77ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/DogecoinGatewayIntegration420.t.sol:DogecoinGatewayIntegration420Test
+[FAIL: InvalidTransaction()] testDogecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 24691848)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

@@ -23,6 +23,8 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     mapping(bytes32 => bool) public gatewayScripts;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     mapping(bytes32 => bool) public consumedSourceOutputs;
     uint256 public outboundNonce;
 
@@ -76,6 +78,7 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
 
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(p.gatewayScriptHash, bobAssetId);
         consumedSourceOutputs[p.sourceOutput] = true;
         emit DobbscoinInboundConsumed(p.messageId, p.transactionHash, p.sourceOutput);
 

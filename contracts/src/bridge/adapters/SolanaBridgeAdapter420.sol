@@ -24,6 +24,8 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
 
     uint256 public outboundNonce;
     bool public inboundHalted;
@@ -143,6 +145,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (sourceSender == address(0)) revert InvalidProof();
 
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(p.gatewayProgram, p.sourceAsset);
         emit SolanaInboundConsumed(p.messageId, p.transactionSignature, p.slot);
 
         v = VerifiedTransfer({

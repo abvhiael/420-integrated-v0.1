@@ -41,6 +41,10 @@ contract MockWrongBridgeAdapter420 is IBridgeAdapter420 {
     function adapterId() external pure returns (bytes32) { return keccak256("TEST/BRIDGE/WRONG_ADAPTER"); }
     function setInbound(VerifiedTransfer calldata v) external { nextTransfer = v; }
     function verifyInbound(bytes calldata) external view returns (VerifiedTransfer memory) { return nextTransfer; }
+    function verifiedSourceContext(bytes32 messageId) external view returns (bytes32, bytes32) {
+        require(messageId == nextTransfer.sourceMessageId && messageId != bytes32(0), "source context");
+        return (keccak256("fixture/gateway"), bytes32(uint256(uint160(address(0xCA420)))));
+    }
     function initiateOutbound(bytes32,bytes32,address,bytes calldata,uint256,bytes calldata)
         external payable returns(bytes32 sourceMessageId)
     { return nextOutboundId; }
@@ -311,6 +315,7 @@ contract BridgeGenesisIntegration420Test {
 
     function testInboundWrongRegisteredAdapterFailsClosed() public {
         Fixture memory f = _setup();
+        f.adapter.setInbound(_inbound(10 ether));
         MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
         wrong.setInbound(_inbound(10 ether));
         f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));

@@ -83,23 +83,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         routes.requireRouteChainsCurrent(routeId);
     }
 
-    function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {
-        _requireOperational(
-            BridgeIds420.ACTION_INBOUND,
-            ISystemSafety420.ActionClass.NORMAL_ONLY,
-            Types420.Direction.INBOUND
-        );
-        address adapter = adapters[adapterId_];
-        require(adapter != address(0) && adapter.code.length != 0, "adapter");
-        // Envelope identity checks cannot replace source consensus/inclusion verification.
-        BridgeProofEnvelope420.Envelope memory e = BridgeProofEnvelope420.decode(proof);
-        IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(e.innerProof);
-        require(
-            v.routeId == e.routeId && v.assetId == e.assetId && adapterId_ == e.adapterId
-                && v.recipient == e.recipient && v.amount == e.amount
-                && v.sourceTxId == e.sourceTxId && v.sourceMessageId == e.sourceMessageId,
-            "proof claim mismatch"
-        );
+    function _requireProofRouteDomain(BridgeProofEnvelope420.Envelope memory e) internal view {
         IBridgeRouteRegistryView420 routeRegistry =
             IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY));
         (
@@ -123,6 +107,26 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
                 && sourceNetwork == e.sourceNetworkId && destinationNetwork == e.destinationNetworkId,
             "proof domain mismatch"
         );
+    }
+
+    function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {
+        _requireOperational(
+            BridgeIds420.ACTION_INBOUND,
+            ISystemSafety420.ActionClass.NORMAL_ONLY,
+            Types420.Direction.INBOUND
+        );
+        address adapter = adapters[adapterId_];
+        require(adapter != address(0) && adapter.code.length != 0, "adapter");
+        // Envelope identity checks cannot replace source consensus/inclusion verification.
+        BridgeProofEnvelope420.Envelope memory e = BridgeProofEnvelope420.decode(proof);
+        IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(e.innerProof);
+        require(
+            v.routeId == e.routeId && v.assetId == e.assetId && adapterId_ == e.adapterId
+                && v.recipient == e.recipient && v.amount == e.amount
+                && v.sourceTxId == e.sourceTxId && v.sourceMessageId == e.sourceMessageId,
+            "proof claim mismatch"
+        );
+        _requireProofRouteDomain(e);
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
         _requireRouteHealthy(v.routeId);

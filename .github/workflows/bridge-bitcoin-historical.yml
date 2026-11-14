@@ -1,12 +1,15 @@
-name: Bitcoin historical fixture acquisition
+name: Bitcoin historical fixture verification
 on:
   pull_request:
     paths:
       - '.github/workflows/bridge-bitcoin-historical.yml'
-      - 'contracts/test/fixtures/bitcoin/**'
+      - 'contracts/test/fixtures/bitcoin/*.bin'
+      - 'contracts/test/fixtures/bitcoin/*.json'
+      - 'contracts/test/fixtures/bitcoin/*.jsonl'
+      - 'contracts/test/fixtures/bitcoin/*.py'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   historical:
     runs-on: ubuntu-latest
@@ -14,15 +17,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
-      - name: Acquire and independently verify
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Independently verify checked-in historical evidence offline
         run: |
-          python3 contracts/test/fixtures/bitcoin/verify.py --acquire
           python3 contracts/test/fixtures/bitcoin/verify.py
-      - name: Store verified fixtures on originating branch
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add contracts/test/fixtures/bitcoin/headers.bin contracts/test/fixtures/bitcoin/manifest.json contracts/test/fixtures/bitcoin/expected.jsonl
-          git diff --cached --quiet || (git commit -m 'test(bridge): store independently verified historical BTC headers' && git push origin HEAD)
+          python3 contracts/test/fixtures/bitcoin/verify-block170.py
+          python3 contracts/test/fixtures/bitcoin/verify-segwit.py

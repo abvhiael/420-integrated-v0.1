@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 import "./BridgeCrypto420.sol";
 import "./BridgeWire420.sol";
+import "./BitcoinHeaderPow420.sol";
 
 /// @notice Mainnet header-only SPV chain anchored at Bitcoin genesis.
 /// @dev Selects strictly greater cumulative work, retaining competing branches.
@@ -26,10 +27,7 @@ contract BitcoinHeaderChain420 {
         Header memory h=headers[hash];if(h.work==0) revert UnknownParent();return h;
     }
     function decodeTarget(uint32 bits) public pure returns(uint256 target){
-        uint256 size=bits>>24;uint256 word=bits&0x007fffff;
-        if(word==0 || (bits&0x00800000)!=0 || size>34 || (word>0xff && size>33) || (word>0xffff && size>32)) revert InvalidTarget();
-        target=size<=3?word>>(8*(3-size)):word<<(8*(size-3));
-        if(target==0 || target>POW_LIMIT) revert InvalidTarget();
+        return BitcoinHeaderPow420.decodeTarget(bits);
     }
     function encodeTarget(uint256 target) public pure returns(uint32){
         if(target==0 || target>POW_LIMIT) revert InvalidTarget();
@@ -79,7 +77,7 @@ contract BitcoinHeaderChain420 {
         if(time<=medianTimePast(parent) || uint256(time)>block.timestamp+7200) revert InvalidTimestamp();
         if(bits!=expectedBits(parent)) revert InvalidTarget();
         uint256 target=decodeTarget(bits);
-        if(BridgeWire420.readLE(abi.encodePacked(hash),0,32)>target) revert InvalidTarget();
+        BitcoinHeaderPow420.verify(raw);
         uint64 height=p.height+1;
         // Bitcoin Core mainnet buried version deployments.
         int32 version=int32(uint32(BridgeWire420.readLE(raw,0,4)));

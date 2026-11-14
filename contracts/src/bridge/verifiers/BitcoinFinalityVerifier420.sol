@@ -11,6 +11,9 @@ contract BitcoinFinalityVerifier420 is IBitcoinFinalityVerifier420 {
     BitcoinHeaderChain420 public immutable chain;
     bytes32 public immutable gatewayScriptHash;
     bytes32 public immutable depositDomain;
+    bytes32 public immutable routeId;
+    uint256 public immutable destinationChainId;
+    address public immutable destinationRouter;
     uint64 public immutable minimumDepositHeight;
     error InvalidDeposit();
     error InvalidInclusion();
@@ -27,8 +30,8 @@ contract BitcoinFinalityVerifier420 is IBitcoinFinalityVerifier420 {
         bytes32[] ancestry;
     }
 
-    constructor(BitcoinHeaderChain420 chain_, bytes memory gatewayScript, bytes32 route, uint64 minimumHeight) {
-        if(address(chain_).code.length==0 || route==0 || minimumHeight==0) revert InvalidDeposit();
+    constructor(BitcoinHeaderChain420 chain_, bytes memory gatewayScript, bytes32 route, uint64 minimumHeight, address router) {
+        if(address(chain_).code.length==0 || router.code.length==0 || route==0 || minimumHeight==0) revert InvalidDeposit();
         // Require a standard spendable gateway locking script.
         uint256 n=gatewayScript.length;
         bool standard=(n==25 && gatewayScript[0]==0x76 && gatewayScript[1]==0xa9 && gatewayScript[2]==0x14 && gatewayScript[23]==0x88 && gatewayScript[24]==0xac)
@@ -37,9 +40,12 @@ contract BitcoinFinalityVerifier420 is IBitcoinFinalityVerifier420 {
             || (n==34 && (gatewayScript[0]==0 || gatewayScript[0]==0x51) && gatewayScript[1]==0x20);
         if(!standard) revert InvalidDeposit();
         chain=chain_;
+        routeId=route;
+        destinationChainId=block.chainid;
+        destinationRouter=router;
         gatewayScriptHash=keccak256(gatewayScript);
         minimumDepositHeight=minimumHeight;
-        depositDomain=keccak256(abi.encode("420/BTC/DEPOSIT/V1",block.chainid,route,gatewayScriptHash));
+        depositDomain=keccak256(abi.encode("420/BTC/DEPOSIT/V1",block.chainid,router,route,gatewayScriptHash));
     }
 
     /// @notice Exact OP_RETURN push of domain-bound payment commitment.
@@ -48,6 +54,7 @@ contract BitcoinFinalityVerifier420 is IBitcoinFinalityVerifier420 {
     }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns(FinalizedTransfer memory t){
+        if(block.chainid!=destinationChainId || proof.length>1_100_000) revert InvalidDeposit();
         Proof memory p=abi.decode(proof,(Proof));
         if(keccak256(proof)!=keccak256(abi.encode(p)) || p.recipient==address(0)) revert InvalidDeposit();
         BitcoinHeaderChain420.Header memory h=chain.getHeader(p.blockHash);
@@ -57,7 +64,7 @@ contract BitcoinFinalityVerifier420 is IBitcoinFinalityVerifier420 {
         BitcoinTransaction420.Parsed memory tx_=BitcoinTransaction420.parse(p.transaction,p.paymentIndex,p.commitmentIndex);
         // Reject 64-byte stripped transactions: an internal Merkle node must never be
         // reinterpretable as a deposit transaction. Reject coinbase custody deposits.
-        if(p.transaction.length==64 || tx_.coinbase || tx_.payment.value==0 || tx_.payment.scriptHash!=gatewayScriptHash
+        if(tx_.strippedSize==64 || tx_.coinbase || tx_.commitmentOutputs!=1 || tx_.payment.value==0 || tx_.payment.scriptHash!=gatewayScriptHash
             || tx_.commitment.value!=0 || tx_.commitment.scriptHash!=keccak256(commitmentScript(p.paymentIndex,p.recipient,tx_.payment.value)))
             revert InvalidDeposit();
         if(!verifyInclusion(tx_.txid,h.merkleRoot,p.index,p.siblings)) revert InvalidInclusion();

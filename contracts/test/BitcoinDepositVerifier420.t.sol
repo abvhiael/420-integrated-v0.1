@@ -20,7 +20,7 @@ contract BitcoinDepositVerifier420Test {
     function testDepositWireAndDomain() public {
         BitcoinHeaderChain420 c=new BitcoinHeaderChain420();
         bytes memory script=hex"00141111111111111111111111111111111111111111";
-        BitcoinFinalityVerifier420 v=new BitcoinFinalityVerifier420(c,script,keccak256("btc-route"),1);
+        BitcoinFinalityVerifier420 v=new BitcoinFinalityVerifier420(c,script,keccak256("btc-route"),1,address(this));
         bytes memory commitment=v.commitmentScript(0,address(0xB0B),1000);
         bytes memory tx_=abi.encodePacked(hex"0100000001",bytes32(uint256(1)),hex"0000000000ffffffff02e80300000000000016",script,hex"000000000000000022",commitment,hex"00000000");
         BitcoinTransaction420.Parsed memory parsed=BitcoinTransaction420.parse(tx_,0,1);

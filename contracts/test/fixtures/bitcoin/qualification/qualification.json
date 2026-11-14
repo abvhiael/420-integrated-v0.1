@@ -1,0 +1,286 @@
+{
+  "baseline_main": "074d1f3628e07ae937117e4b0c700d40adf6e6f1",
+  "reconciled_pr_1156": "8f6346d5d1f8901a966dc08e6b6a7542a45a0bac",
+  "pr_1155_inspected": "c9affd6740f005293b6fdf8610f77ebc31001196",
+  "solc": "0.8.24+commit.e11b9ed9",
+  "forge": "1.9.0",
+  "tests_passed": 41,
+  "fuzz_runs": 10000,
+  "invariant_runs": 256,
+  "invariant_calls": 128000,
+  "invariant_handler_reverts": 0,
+  "historical_headers": 32257,
+  "historical_full_block_transactions": 1868,
+  "source_sha256": {
+    "contracts/forge-std/Test.sol": "27a857f765a3b00ee508f5c2d5163d46b61773dbc05e15aab44089e573c084c4",
+    "contracts/src/accounts/ECDSA420.sol": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+    "contracts/src/bridge/BridgeAccountingRegistry.sol": "911acce3b2031c7e084857d9d63ce57c441988c29abf63116aec824e93ec1593",
+    "contracts/src/bridge/BridgeChainRegistry420.sol": "812af8415d941c139170bd40071da2f332ba5d1e645dc2881c5ad05740747dc1",
+    "contracts/src/bridge/BridgeIds420.sol": "2037bfdac5f8b60503ccaa8871831fac86e5e64ea806665af97a08243650a941",
+    "contracts/src/bridge/BridgeRiskManager.sol": "b23940e18fb17c4294c29f7c85a197134393ff6b17e74bfe1e05edc4cba85158",
+    "contracts/src/bridge/BridgeRouteRegistry.sol": "efa9155fc2583375a34675443e478f0cca79c3dbfa10fcbd232afcb576bb90e7",
+    "contracts/src/bridge/BridgeTransferRegistry.sol": "e24ab379df3972c927c5e626375df6224bb80be6f56888236f0137ea7990a5ff",
+    "contracts/src/bridge/GatewayRouter420.sol": "20dc2c5b0746415ebb8d00028af2bd14e3f6abfe29b7a13d0020632d8c016fec",
+    "contracts/src/bridge/VerifiedGateway420.sol": "64c8c5db86705abcee2eafc83318f089e134fcf0cb688624e5165e54129b9a63",
+    "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol": "f75df2c10974d78a075f027c78e84012b4b494c532cf420c33f1eaeff27c0abd",
+    "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+    "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
+    "contracts/src/bridge/verifiers/BitcoinHeaderChain420.sol": "bcfa4deed2468667947ca5f6b96ea51520c94728f33bdabf645a0647b24190f6",
+    "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol": "4a363407208defa952a791ff183a99b351d56a58409bb05eefcac9e0a7b56657",
+    "contracts/src/bridge/verifiers/BitcoinMerkleBranch420.sol": "cdea23ad8a87a0483162590ffa463e237e5d6b5c008c27ac50fd078d3c46ad0f",
+    "contracts/src/bridge/verifiers/BitcoinTransaction420.sol": "f99827849281dc7754e7062212a38e54916b63814d4b2321e5ed57309ae55580",
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+    "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol": "2fe5a7140dbd43096a59dbc6c71a0f5914e2054e1506447ae6007b53c9fe76bd",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/genesis/Errors420.sol": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/IFeeQuote420.sol": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGenesisResident420.sol": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IMetadataCommitment420.sol": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IReplayProtection420.sol": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+    "contracts/src/interfaces/genesis/IRiskLimits420.sol": "10120c6a8973925fc8ba84aaac43a40dfcbee337dbe0c7f5e3a004763f6fe513",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BitcoinBridgeAdapter420.t.sol": "a1282d9f133b7a441e5aa856686eeb9a54dc5eb521b02bf7aa06479fdd08ff59",
+    "contracts/test/BitcoinChainInvariant420.t.sol": "7246fe3036a022db5f5461a90f2900a8596b8459928fd0e36c18e4972c08f974",
+    "contracts/test/BitcoinCommonBridgeCrypto420.t.sol": "3d9440aa54f0f30f54cf182e25d1c94620b68547b6a9cc2e5a7303086855aef0",
+    "contracts/test/BitcoinConsensusQualification420.t.sol": "6bce433cb7fc25a335a9ffda4b0420de1d777f2d5317e1ed1a94f731f31c52f6",
+    "contracts/test/BitcoinDepositVerifier420.t.sol": "76a22fb4786578fcf253fc53511d433c117eda6673604fc60f7c7d6a7e0b4f21",
+    "contracts/test/BitcoinGatewayIntegration420.t.sol": "b237f14a9941c33d14fc281152e224079ae4b0563a050804e069e70234aad0b0",
+    "contracts/test/BitcoinHeaderPow420.t.sol": "22a34e5517a90e9dbaf98db7cc742665b1833249f102d23dca7d0cab0dcc5765",
+    "contracts/test/BitcoinHistoricalSegwit420.t.sol": "821d261b268b36926ecf3455a0d2ced17b8d50599e1d512871d6f453f6682650",
+    "contracts/test/BitcoinMerkleBranch420.t.sol": "e907cd8ae6119d9d5eb22fc9005dee4780c332bc7f069331a127ad8220039286",
+    "contracts/test/helpers/GenesisMocks420.sol": "2ac3e980d82c042f80721d6c0d6f3c0ff2432ba6001baedbc2004e50c41eeba1"
+  },
+  "results": {
+    "testHistoricalMainnetEveryHeaderThroughFirstDifficultyChange": {
+      "status": "PASS",
+      "evidence": "historical-solidity.log",
+      "result": "[PASS] testHistoricalMainnetEveryHeaderThroughFirstDifficultyChange() (gas: 9713034042)"
+    },
+    "testDepositWireAndDomain": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testDepositWireAndDomain() (gas: 2883107)"
+    },
+    "testGenesisAndConsensusArithmetic": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testGenesisAndConsensusArithmetic() (gas: 1282343)"
+    },
+    "testCanonicalBitcoinInboundPasses": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testCanonicalBitcoinInboundPasses() (gas: 161023)"
+    },
+    "testInsufficientConfirmationsRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testInsufficientConfirmationsRejected() (gas: 130178)"
+    },
+    "testInvalidChainworkRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testInvalidChainworkRejected() (gas: 130175)"
+    },
+    "testInvalidPowRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testInvalidPowRejected() (gas: 130208)"
+    },
+    "testOutboundLegacySegwitAndTaproot": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testOutboundLegacySegwitAndTaproot() (gas: 155483)"
+    },
+    "testReplayRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testReplayRejected() (gas: 286309)"
+    },
+    "testWrongNetworkRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testWrongNetworkRejected() (gas: 130029)"
+    },
+    "testCanonicalGenesisHeaderPoW": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testCanonicalGenesisHeaderPoW() (gas: 6054)"
+    },
+    "testMalformedDifficultyAndHeaderReject": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testMalformedDifficultyAndHeaderReject() (gas: 112269)"
+    },
+    "testModifiedNonceAndMerkleRootReject": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testModifiedNonceAndMerkleRootReject() (gas: 59605)"
+    },
+    "testMalformedTreeReverts": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testMalformedTreeReverts() (gas: 126566)"
+    },
+    "testOneTransactionBlockBranch": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testOneTransactionBlockBranch() (gas: 400)"
+    },
+    "testThreeLeafProofAndIndependentSha256dVector": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testThreeLeafProofAndIndependentSha256dVector() (gas: 12567)"
+    },
+    "testWrongRootRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testWrongRootRejected() (gas: 4738)"
+    },
+    "testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 25090165)"
+    },
+    "testCheckpoint": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testCheckpoint() (gas: 1244552)"
+    },
+    "testCompactBoundaries": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testCompactBoundaries() (gas: 5425)"
+    },
+    "testFuzzCompactSize": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testFuzzCompactSize(uint64) (runs: 2500, \u03bc: 3291, ~: 3535)"
+    },
+    "testFuzzIntegerRoundTrip": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testFuzzIntegerRoundTrip(uint256,uint8) (runs: 2500, \u03bc: 14095, ~: 11144)"
+    },
+    "testHashVectors": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testHashVectors() (gas: 2905)"
+    },
+    "testHistoricalGenesis": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testHistoricalGenesis() (gas: 7443)"
+    },
+    "testMalformedCompact": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testMalformedCompact() (gas: 12429)"
+    },
+    "testOrderedMerkle": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testOrderedMerkle() (gas: 2853)"
+    },
+    "testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains() (gas: 8403140)"
+    },
+    "testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected() (gas: 4418533)"
+    },
+    "testForkSelectionAndReorgOfCanonicalConfirmations": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 58559508)"
+    },
+    "testFuzzTruncatedTransaction": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testFuzzTruncatedTransaction(uint16) (runs: 2500, \u03bc: 34240, ~: 28637)"
+    },
+    "testHistoricalTransactionAndMerkleInclusion": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testHistoricalTransactionAndMerkleInclusion() (gas: 59669874)"
+    },
+    "testHistoricalVersionEnforcementAndMedianSorting": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testHistoricalVersionEnforcementAndMedianSorting() (gas: 58309364)"
+    },
+    "testMalformedHeadersAndTimestampRules": {
+      "status": "PASS",
+      "evidence": "timestamp-correction.log",
+      "result": "[PASS] testMalformedHeadersAndTimestampRules() (gas: 58315737)"
+    },
+    "testMismatchedVerifierRouteOrRouterRejectedByAdapter": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testMismatchedVerifierRouteOrRouterRejectedByAdapter() (gas: 5875533)"
+    },
+    "testParserRejectsNoncanonicalCountsAndInvalidIndices": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testParserRejectsNoncanonicalCountsAndInvalidIndices() (gas: 165720)"
+    },
+    "testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation() (gas: 6408322)"
+    },
+    "testRetargetClampsAndSignedElapsed": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testRetargetClampsAndSignedElapsed() (gas: 1218828)"
+    },
+    "testSegwitTxidAndMalformedWitness": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testSegwitTxidAndMalformedWitness() (gas: 241956)"
+    },
+    "testTargetsAndFuzzArithmetic": {
+      "status": "PASS",
+      "evidence": "contracts.log",
+      "result": "[PASS] testTargetsAndFuzzArithmetic(uint32) (runs: 2500, \u03bc: 1162278, ~: 1161644)"
+    },
+    "invariantBestTipTracksGreatestAdmittedWorkAndGenesisIsImmutable": {
+      "status": "PASS",
+      "evidence": "invariant.log",
+      "result": "[PASS] invariantBestTipTracksGreatestAdmittedWorkAndGenesisIsImmutable() (runs: 256, calls: 128000, reverts: 0)"
+    },
+    "testGenuineHistoricalSegwitTxidOutputsAndMerkleBranch": {
+      "status": "PASS",
+      "evidence": "historical-segwit.log",
+      "result": "[PASS] testGenuineHistoricalSegwitTxidOutputsAndMerkleBranch() (gas: 9934572)"
+    }
+  },
+  "qualification_note": "Historical header source closure remained byte-identical after its passing 414.53s run. Final contract-owner run passed 37 tests and failed one timestamp fixture; only that fixture was corrected (restoring the clock after the future-time boundary), then its test passed separately. The stateful invariant and genuine historical SegWit test passed separately. No source contracts changed after the final contract-owner run. Test/log/report additions do not invalidate passing source evidence. CI status and final commit identity are recorded in PR #1156.",
+  "header_tip_cross_check": {
+    "source": "https://blockstream.info/api/block-height/32256",
+    "height": 32256,
+    "block_hash": "000000004f2886a170adb7204cb0c7a824217dd24d11a74423d564c4e0904967"
+  },
+  "retained_ci": {
+    "id": 43553972819,
+    "head_sha": "5287e2845c220b934fdde037e4e4754df881ba3c",
+    "conclusion": "success",
+    "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/43553972819"
+  }
+}

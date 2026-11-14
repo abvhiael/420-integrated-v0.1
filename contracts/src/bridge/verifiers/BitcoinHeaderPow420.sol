@@ -35,11 +35,12 @@ library BitcoinHeaderPow420 {
     function decodeTarget(uint32 compact) internal pure returns (uint256 target) {
         uint256 exponent = uint8(compact >> 24);
         uint256 mantissa = compact & 0x007fffff;
-        if (mantissa == 0 || (compact & 0x00800000) != 0 || exponent < 3 || exponent > 32) {
+        if (mantissa == 0 || (compact & 0x00800000) != 0 || exponent > 34
+            || (mantissa > 0xff && exponent > 33) || (mantissa > 0xffff && exponent > 32)) {
             revert InvalidDifficultyTarget();
         }
 
-        target = mantissa << (8 * (exponent - 3));
+        target = exponent <= 3 ? mantissa >> (8 * (3 - exponent)) : mantissa << (8 * (exponent - 3));
         if (target == 0 || target > MAINNET_POW_LIMIT) revert InvalidDifficultyTarget();
     }
 }

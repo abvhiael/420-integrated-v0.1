@@ -3,7 +3,11 @@ name: 420Bridge Bitcoin Proof Primitives
 on:
   pull_request:
     paths:
-      - "contracts/src/bridge/verifiers/BitcoinMerkleBranch420.sol"
+      - "contracts/src/bridge/verifiers/Bitcoin*420.sol"
+      - "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      - "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      - "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      - "contracts/test/Bitcoin*420.t.sol"
       - "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol"
       - "contracts/test/BitcoinMerkleBranch420.t.sol"
       - "contracts/test/BitcoinHeaderPow420.t.sol"

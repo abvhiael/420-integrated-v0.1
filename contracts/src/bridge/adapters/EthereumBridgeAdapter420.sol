@@ -20,6 +20,8 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
+    mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
 
     bool public inboundHalted;
@@ -104,6 +106,7 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (routeId == bytes32(0)) revert RouteNotAllowed();
         if (consumedMessages[p.messageId]) revert Replay();
         consumedMessages[p.messageId] = true;
+        verifiedSourceContext[p.messageId] = SourceProofContext(bytes32(uint256(uint160(p.gateway))), sourceAsset);
         emit EthereumInboundConsumed(p.messageId, p.transactionHash, p.blockNumber);
         v = VerifiedTransfer({routeId: routeId, assetId: assetId, sender: p.sourceSender, recipient: p.recipient, amount: p.amount, sourceTxId: p.transactionHash, sourceMessageId: p.messageId});
     }

@@ -11,6 +11,9 @@ interface IEthereumGatewayMessageVerifier420 {
         address recipient;
         uint256 amount;
         bytes32 transactionHash;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyGatewayMessage(

@@ -114,9 +114,10 @@ contract UniBridgeAdapter420Test {
     }
 
     function _message(bytes32 messageId)
-        private pure returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
+        private view returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
     {
         m = IEthereumGatewayMessageVerifier420.GatewayMessage({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: UNI_ROUTE,
             messageId: messageId,
             gateway: GATEWAY,
             sourceToken: UNI_ETHEREUM,

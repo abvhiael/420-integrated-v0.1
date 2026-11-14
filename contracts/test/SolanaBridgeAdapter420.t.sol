@@ -163,6 +163,8 @@ contract SolanaBridgeAdapter420Test {
         require(adapter.sourceAssetByAssetId(SPL_ASSET) == replacementMint, "replacement missing");
     }
 
+    function testDestinationChainRouterAndRouteCannotBeSubstituted() public {bytes32 id=keccak256("destination-bindings");ISolanaFinalityVerifier420.FinalizedTransfer memory p=_healthy(adapter.SOL_NATIVE_SOURCE_ASSET(),id);p.destinationChainId=97;verifier.set(p);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok);p=_healthy(adapter.SOL_NATIVE_SOURCE_ASSET(),id);p.destinationRouter=address(0xBAD);verifier.set(p);(ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok);p=_healthy(adapter.SOL_NATIVE_SOURCE_ASSET(),id);p.routeId=keccak256("wrong route");verifier.set(p);(ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok && !adapter.consumedMessages(id));}
+    function testFullSolanaOwnerKeyIsPreserved() public {bytes32 id=keccak256("full owner key");ISolanaFinalityVerifier420.FinalizedTransfer memory p=_healthy(adapter.SOL_NATIVE_SOURCE_ASSET(),id);p.sourceOwner=bytes32((uint256(0xCAFE)<<160)|uint256(0xA11CE));verifier.set(p);router.inbound(adapter,hex"01");require(adapter.sourceOwnerByMessage(id)==p.sourceOwner);}
     function _setHealthy(bytes32 sourceAsset, bytes32 messageId) private {
         verifier.set(_healthy(sourceAsset, messageId));
     }
@@ -182,7 +184,10 @@ contract SolanaBridgeAdapter420Test {
             sourceOwner: OWNER,
             recipient: address(0xB0B),
             amount: 42 ether,
-            finalized: true
+            finalized: true,
+            destinationChainId: block.chainid,
+            destinationRouter: address(router),
+            routeId: adapter.routeIdByAssetId(adapter.assetIdBySourceAsset(sourceAsset))
         });
     }
 }

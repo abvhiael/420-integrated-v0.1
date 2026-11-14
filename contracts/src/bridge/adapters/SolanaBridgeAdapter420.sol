@@ -24,6 +24,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    mapping(bytes32 => bytes32) public sourceOwnerByMessage;
 
     uint256 public outboundNonce;
     bool public inboundHalted;
@@ -137,12 +138,14 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (assetId == bytes32(0)) revert AssetNotAllowed();
         bytes32 routeId = routeIdByAssetId[assetId];
         if (routeId == bytes32(0)) revert RouteNotAllowed();
+        if (p.destinationChainId!=block.chainid || p.destinationRouter!=gatewayRouter || p.routeId!=routeId) revert InvalidProof();
         if (consumedMessages[p.messageId]) revert Replay();
 
         address sourceSender = address(uint160(uint256(p.sourceOwner)));
         if (sourceSender == address(0)) revert InvalidProof();
 
         consumedMessages[p.messageId] = true;
+        sourceOwnerByMessage[p.messageId] = p.sourceOwner;
         emit SolanaInboundConsumed(p.messageId, p.transactionSignature, p.slot);
 
         v = VerifiedTransfer({

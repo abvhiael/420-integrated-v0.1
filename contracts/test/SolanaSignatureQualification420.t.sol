@@ -1,0 +1,13 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+import "../src/bridge/verifiers/solana/SolanaTransaction420.sol";
+interface SolanaCryptoVm420 {function readFileBinary(string calldata) external view returns(bytes memory);}
+contract SolanaSignatureQualification420Test {
+ SolanaCryptoVm420 constant vm=SolanaCryptoVm420(address(uint160(uint256(keccak256("hevm cheat code")))));
+ function vectors() internal view returns(bytes32[] memory,bytes[] memory,bytes[] memory,bytes[] memory){return abi.decode(vm.readFileBinary("contracts/test/fixtures/solana/crypto-vectors.bin"),(bytes32[],bytes[],bytes[],bytes[]));}
+ function testIndependentSha512AndEd25519MessageBoundaries() public {SolanaEd25519420 ed=new SolanaEd25519420();(bytes32[] memory pk,bytes[] memory msg_,bytes[] memory sig,bytes[] memory hash)=vectors();for(uint256 i;i<pk.length;++i){require(keccak256(ed.sha().digest(msg_[i]))==keccak256(hash[i]));uint256 g=gasleft();require(ed.verify(pk[i],msg_[i],sig[i]));require(g-gasleft()<30000000,"one signature exceeds transaction budget");}}
+ function testPermissionlessSignatureCacheChecksEquationAndBindsAllBytes() public {SolanaEd25519420 ed=new SolanaEd25519420();(bytes32[] memory pk,bytes[] memory msg_,bytes[] memory sig,)=vectors();uint256 i=15;bytes32 id=ed.certify(pk[i],msg_[i],sig[i]);require(ed.certifiedSignatures(id) && ed.verify(pk[i],msg_[i],sig[i]));sig[i][0]^=0x01;(bool ok,)=address(ed).call(abi.encodeCall(ed.certify,(pk[i],msg_[i],sig[i])));require(!ok && !ed.certifiedSignatures(ed.identifier(pk[i],msg_[i],sig[i])));require(!ed.verify(pk[i],msg_[i],sig[i]));}
+ function testScalarMalleabilityAndNonCanonicalPublicKeyRejected() public {SolanaEd25519420 ed=new SolanaEd25519420();(bytes32[] memory pk,bytes[] memory msg_,bytes[] memory sig,)=vectors();uint256 s;for(uint256 i;i<32;++i)s|=uint256(uint8(sig[1][32+i]))<<(i*8);s+=2**252+27742317777372353535851937790883648493;for(uint256 i;i<32;++i)sig[1][32+i]=bytes1(uint8(s>>(8*i)));require(!ed.verify(pk[1],msg_[1],sig[1]));require(!ed.verify(0xedffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f,msg_[0],sig[0]));}
+ function compact(bytes memory raw) external pure returns(uint256 value,uint256 at){return SolanaTransaction420.compact(raw,0);}
+ function testFuzzCanonicalShortVecAndRedundantEncodingRejected(uint16 value) public {uint256 v=value;bytes memory encoded;while(v>=128){encoded=abi.encodePacked(encoded,bytes1(uint8(v&127)|128));v>>=7;}encoded=abi.encodePacked(encoded,bytes1(uint8(v)));(uint256 decoded,uint256 at)=this.compact(encoded);require(decoded==value && at==encoded.length);encoded[encoded.length-1]|=0x80;bool rejected;try this.compact(abi.encodePacked(encoded,hex"00")){}catch{rejected=true;}require(rejected);}
+}

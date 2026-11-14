@@ -1,0 +1,18 @@
+[2026-11-14T20:52:13.341943594Z WARN  cargo_build_sbf] Package 'solana-gateway-420' has two crate types defined: cdylib and lib. This setting precludes link-time optimizations (LTO). Use cdylib for programs to be deployed and rlib for packages to be imported by other programs as libraries.
+   Compiling solana-gateway-420 v0.1.0 (/workspace/scratch/2e63af2acea0/repo/contracts/solana/gateway)
+warning: use of deprecated module `solana_program::system_instruction`: Use `solana_system_interface` crate instead
+ --> src/lib.rs:3:216
+  |
+3 | ...program_pack::Pack, pubkey, pubkey::Pubkey, rent::Rent, system_instruction, system_program, sysvar::Sysvar};
+  |                                                            ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated module `solana_program::system_program`: Use `solana_sdk_ids::system_program` instead
+ --> src/lib.rs:3:236
+  |
+3 | ..., pubkey, pubkey::Pubkey, rent::Rent, system_instruction, system_program, sysvar::Sysvar};
+  |                                                              ^^^^^^^^^^^^^^
+
+warning: `solana-gateway-420` (lib) generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.93s

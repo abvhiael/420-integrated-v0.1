@@ -6,6 +6,15 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
+      - "!contracts/src/bridge/verifiers/solana/**"
+      - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/ISolanaFinalityVerifier420.sol"
+      - "!contracts/solana/**"
+      - "!contracts/test/Solana*.t.sol"
+      - "!contracts/test/RaySolanaBridgeAdapter420.t.sol"
+      - "!contracts/test/EurcSolanaBridgeAdapter420.t.sol"
+      - "!contracts/test/fixtures/solana/**"
       - ".github/workflows/contracts-hardening.yml"
   pull_request:
     paths:

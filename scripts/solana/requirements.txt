@@ -1,0 +1,4 @@
+eth-abi==5.2.0
+eth-hash[pycryptodome]==0.8.0
+cryptography==46.0.3
+base58==2.1.1

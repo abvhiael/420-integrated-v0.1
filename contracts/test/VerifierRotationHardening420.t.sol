@@ -159,7 +159,10 @@ contract VerifierRotationHardening420Test {
             sourceOwner: SOL_OWNER,
             recipient: address(0xB0B),
             amount: 420_000_000,
-            finalized: finalized
+            finalized: finalized,
+            destinationChainId: block.chainid,
+            destinationRouter: address(router),
+            routeId: SOL_ROUTE
         });
     }
 }

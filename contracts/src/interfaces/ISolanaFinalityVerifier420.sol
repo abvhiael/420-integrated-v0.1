@@ -8,6 +8,7 @@ interface ISolanaFinalityVerifier420 {
     struct FinalizedTransfer {
         bytes32 genesisHash;
         uint64 slot;
+        /// @dev SHA-256 of all 64 bytes of the primary Ed25519 signature.
         bytes32 transactionSignature;
         bytes32 messageId;
         bytes32 gatewayProgram;
@@ -16,6 +17,9 @@ interface ISolanaFinalityVerifier420 {
         address recipient;
         uint256 amount;
         bool finalized;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns (FinalizedTransfer memory transfer_);

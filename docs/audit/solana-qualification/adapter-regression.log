@@ -1,0 +1,47 @@
+Compiling 7 files with Solc 0.8.24
+Solc 0.8.24 finished in 7.15s
+Compiler run successful!
+
+Ran 10 tests for contracts/test/SolanaBridgeAdapter420.t.sol:SolanaBridgeAdapter420Test
+[PASS] testAssetRebindingClearsPriorSourceMapping() (gas: 135969)
+[PASS] testCanonicalMainnetSolInboundPasses() (gas: 128652)
+[PASS] testDirectCallerCannotBypassRouter() (gas: 27675)
+[PASS] testOutboundRequiresExactRouteAndSolanaRecipientWidth() (gas: 137573)
+[FAIL: InvalidProof()] testQualifiedSplMintUsesBoundAssetAndRoute() (gas: 268559)
+[PASS] testReplayFailsClosed() (gas: 273692)
+[PASS] testUnapprovedSplMintFailsClosed() (gas: 150067)
+[PASS] testUnfinalizedProofFailsClosed() (gas: 143952)
+[PASS] testWrongClusterFailsClosed() (gas: 148638)
+[PASS] testWrongGatewayProgramFailsClosed() (gas: 151395)
+Suite result: FAILED. 9 passed; 1 failed; 0 skipped; finished in 1.42ms (1.34ms CPU time)
+
+Ran 7 tests for contracts/test/EurcSolanaBridgeAdapter420.t.sol:EurcSolanaBridgeAdapter420Test
+[PASS] testCanonicalEurcSolanaInboundPasses() (gas: 125510)
+[PASS] testEurcSolanaDifferentRouteRejected() (gas: 42880)
+[PASS] testEurcSolanaOutboundUsesBoundRoute() (gas: 69320)
+[PASS] testEurcSolanaRejectsShortRecipient() (gas: 38143)
+[PASS] testEurcSolanaReplayRejected() (gas: 270116)
+[PASS] testWrongEurcSolanaMintRejected() (gas: 149773)
+[PASS] testWrongSolanaClusterRejected() (gas: 144961)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.44ms (1.74ms CPU time)
+
+Ran 7 tests for contracts/test/RaySolanaBridgeAdapter420.t.sol:RaySolanaBridgeAdapter420Test
+[PASS] testCanonicalRaySolanaInboundPasses() (gas: 125466)
+[PASS] testRaySolanaDifferentRouteRejected() (gas: 42863)
+[PASS] testRaySolanaOutboundUsesBoundRoute() (gas: 69388)
+[PASS] testRaySolanaRejectsShortRecipient() (gas: 38160)
+[PASS] testRaySolanaReplayRejected() (gas: 270106)
+[PASS] testWrongRaySolanaMintRejected() (gas: 149817)
+[PASS] testWrongSolanaClusterRejected() (gas: 144946)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.45ms (618.34µs CPU time)
+
+Ran 3 test suites in 3.66ms (4.32ms CPU time): 23 tests passed, 1 failed, 0 skipped (24 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/SolanaBridgeAdapter420.t.sol:SolanaBridgeAdapter420Test
+[FAIL: InvalidProof()] testQualifiedSplMintUsesBoundAssetAndRoute() (gas: 268559)
+
+Encountered a total of 1 failing tests, 23 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

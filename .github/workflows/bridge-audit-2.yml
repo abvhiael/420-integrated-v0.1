@@ -14,9 +14,15 @@ on:
       - "contracts/src/bridge/VerifiedGateway420.sol"
       - "contracts/test/Bridge*.t.sol"
       - "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol"
+      - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
+      - "contracts/test/ExchangeBridgeQualification420.t.sol"
       - "contracts/config/genesis-dapp-contract-map.json"
       - ".github/workflows/bridge-audit-2.yml"
   workflow_dispatch:
+
+concurrency:
+  group: bridge-audit-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

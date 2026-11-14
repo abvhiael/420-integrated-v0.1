@@ -81,6 +81,22 @@ func main() {
 		cancel()
 		if err != nil {
 			log.Printf("420Status dependency unready: %v", err)
+			// A failed live probe is itself an observation of an unavailable
+			// dependency. Replace the old healthy observation immediately.
+			failed := evidence.Observation{
+				ComponentID: "indexer", SourceID: "indexer-readiness",
+				Network: network, Environment: environment,
+				State: components.HealthUnavailable, Live: false, Ready: false,
+				ObservedAt: now, ExpiresAt: now.Add(cfg.MaxEvidenceAge),
+				Canonical: false,
+			}
+			if obs, ingestErr := ingestor.Ingest("indexer", indexerSource{failed}, now); ingestErr == nil {
+				if historyErr := historyStore.AppendObservation(obs, now); historyErr != nil {
+					log.Printf("420Status failure history append rejected: %v", historyErr)
+				}
+			} else {
+				log.Printf("420Status failure observation rejected: %v", ingestErr)
+			}
 			return
 		}
 		observedAt := svc.ObservedAt()

@@ -184,6 +184,83 @@ contract BridgeGenesisIntegration420Test {
         return abi.encode(e);
     }
 
+    function _rejectProof(Fixture memory f, BridgeProofEnvelope420.Envelope memory e)
+        private returns (bool rejected)
+    {
+        (bool ok,) = address(f.router).call(
+            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, abi.encode(e))
+        );
+        return !ok;
+    }
+
+    function testMalformedAndStaleProofEnvelopesFailClosed() public {
+        Fixture memory f = _setup();
+        f.adapter.setInbound(_inbound(100 ether));
+        (bool rawOk,) = address(f.router).call(
+            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201")
+        );
+        require(!rawOk, "raw proof accepted");
+
+        BridgeProofEnvelope420.Envelope memory e =
+            abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
+        e.observedAt = uint64(block.timestamp - 1);
+        e.expiresAt = uint64(block.timestamp);
+        require(_rejectProof(f, e), "expired accepted");
+
+        e = abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
+        e.observedAt = uint64(block.timestamp + 1);
+        require(_rejectProof(f, e), "future observation accepted");
+
+        e = abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
+        e.version = 2;
+        require(_rejectProof(f, e), "unknown version accepted");
+    }
+
+    function testSubstitutedProofDomainsAndClaimsFailClosed() public {
+        Fixture memory f = _setup();
+        f.adapter.setInbound(_inbound(100 ether));
+        BridgeProofEnvelope420.Envelope memory original =
+            abi.decode(_proof(f), (BridgeProofEnvelope420.Envelope));
+        BridgeProofEnvelope420.Envelope memory e = original;
+        e.destinationRouter = address(0xBAD);
+        require(_rejectProof(f, e), "wrong destination accepted");
+        e = original;
+        e.destinationChainIdEvm = block.chainid + 1;
+        require(_rejectProof(f, e), "wrong destination chain accepted");
+        e = original;
+        e.sourceNetworkId = keccak256("fork");
+        require(_rejectProof(f, e), "fork substituted");
+        e = original;
+        e.verifierConfigHash = keccak256("unqualified");
+        require(_rejectProof(f, e), "verifier config substituted");
+        e = original;
+        e.sourceAsset = keccak256("wrong asset");
+        require(_rejectProof(f, e), "source asset substituted");
+        e = original;
+        e.adapterId = keccak256("wrong adapter");
+        require(_rejectProof(f, e), "adapter substituted");
+        e = original;
+        e.routeId = keccak256("wrong route");
+        require(_rejectProof(f, e), "route substituted");
+        e = original;
+        e.recipient = address(0xBAD);
+        require(_rejectProof(f, e), "recipient substituted");
+        e = original;
+        e.amount = 1;
+        require(_rejectProof(f, e), "amount substituted");
+        e = original;
+        e.sourceTxId = keccak256("wrong transaction");
+        require(_rejectProof(f, e), "transaction substituted");
+        e = original;
+        e.sourceMessageId = keccak256("wrong message");
+        require(_rejectProof(f, e), "message substituted");
+        e = original;
+        e.sourceGateway = bytes32(0);
+        require(_rejectProof(f, e), "empty gateway accepted");
+        (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
+        require(routeTVL == 0, "failed proof consumed risk");
+    }
+
     function testInboundCreatesTransferAndConsumesRiskAtomically() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));

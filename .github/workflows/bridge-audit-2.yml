@@ -1,0 +1,53 @@
+name: 420Bridge BRIDGE-AUDIT-2 Shared Core Qualification
+
+on:
+  pull_request:
+    paths:
+      - "contracts/src/bridge/BridgeAccountingRegistry.sol"
+      - "contracts/src/bridge/BridgeAssetRegistry.sol"
+      - "contracts/src/bridge/BridgeChainRegistry420.sol"
+      - "contracts/src/bridge/BridgeIds420.sol"
+      - "contracts/src/bridge/BridgeRiskManager.sol"
+      - "contracts/src/bridge/BridgeRouteRegistry.sol"
+      - "contracts/src/bridge/BridgeTransferRegistry.sol"
+      - "contracts/src/bridge/GatewayRouter420.sol"
+      - "contracts/src/bridge/VerifiedGateway420.sol"
+      - "contracts/test/Bridge*.t.sol"
+      - "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol"
+      - "contracts/config/genesis-dapp-contract-map.json"
+      - ".github/workflows/bridge-audit-2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shared-bridge-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify shared Bridge core, chain registry, lifecycle, risk fuzz and invariants
+        working-directory: contracts
+        run: forge test --match-path 'test/Bridge*.t.sol' -vv
+      - name: Qualify accounting evidence and recovery
+        working-directory: contracts
+        run: forge test --match-path 'test/GovernanceAccountingRecoveryHardening420.t.sol' -vv
+      - name: Qualify Pay/Swap/Bridge downstream compatibility
+        working-directory: contracts
+        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vv
+      - name: Qualify Exchange bridge asset/route bindings
+        working-directory: contracts
+        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vv

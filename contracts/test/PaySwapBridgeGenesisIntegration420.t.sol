@@ -116,7 +116,29 @@ contract PaySwapBridgeGenesisIntegration420Test {
             amount: 100 ether, sourceTxId: keccak256("source"), sourceMessageId: keccak256("message")
         }));
 
-        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, hex"4201");
+        BridgeProofEnvelope420.Envelope memory envelope = BridgeProofEnvelope420.Envelope({
+            version: 1,
+            routeId: ROUTE_ID,
+            adapterId: ADAPTER_ID,
+            assetId: ASSET_ID,
+            sourceChainId: 1,
+            destinationChainId: uint64(block.chainid),
+            sourceNetworkId: keccak256("ETHEREUM/MAINNET"),
+            destinationNetworkId: keccak256("420/TESTNET"),
+            sourceGateway: keccak256("fixture/gateway"),
+            sourceAsset: bytes32(uint256(uint160(CADC))),
+            verifierConfigHash: keccak256("verified-config"),
+            destinationChainIdEvm: block.chainid,
+            destinationRouter: address(bridge),
+            recipient: address(0xB0B),
+            amount: 100 ether,
+            sourceTxId: keccak256("source"),
+            sourceMessageId: keccak256("message"),
+            observedAt: uint64(block.timestamp),
+            expiresAt: uint64(block.timestamp + 3600),
+            innerProof: hex"4201"
+        });
+        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, abi.encode(envelope));
         require(bridgeTransferId != bytes32(0), "bridge transfer");
 
         ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote(

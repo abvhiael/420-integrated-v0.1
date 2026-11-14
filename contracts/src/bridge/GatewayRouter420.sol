@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/IBridgeAdapter420.sol";
+import "../interfaces/IBridgeVerifiedSourceContext420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/ICanonicalAssetRegistry420.sol";
@@ -120,6 +121,15 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         // Envelope identity checks cannot replace source consensus/inclusion verification.
         BridgeProofEnvelope420.Envelope memory e = BridgeProofEnvelope420.decode(proof);
         IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(e.innerProof);
+        // Read the context that the adapter derived from the actual verified message.
+        // Never accept a source gateway or source asset solely from the caller's envelope.
+        (bytes32 verifiedGateway, bytes32 verifiedSourceAsset) =
+            IBridgeVerifiedSourceContext420(adapter).verifiedSourceContext(v.sourceMessageId);
+        require(
+            verifiedGateway != bytes32(0) && verifiedSourceAsset != bytes32(0)
+                && verifiedGateway == e.sourceGateway && verifiedSourceAsset == e.sourceAsset,
+            "source proof context mismatch"
+        );
         require(
             v.routeId == e.routeId && v.assetId == e.assetId && adapterId_ == e.adapterId
                 && v.recipient == e.recipient && v.amount == e.amount

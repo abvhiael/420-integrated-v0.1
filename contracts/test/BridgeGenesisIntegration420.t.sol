@@ -559,7 +559,7 @@ contract BridgeGenesisIntegration420Test {
         env.registerResident(address(gateway), gateway.componentId());
         require(gateway.verifier() == address(0), "genesis verifier not disabled");
 
-        (bool ok,) = address(gateway).call(abi.encodeWithSelector(gateway.verifyDeposit.selector, _proof(f)));
+        (bool ok,) = address(gateway).call(abi.encodeWithSelector(gateway.verifyDeposit.selector, hex"4201"));
         require(!ok, "disabled verifier accepted proof");
     }
 

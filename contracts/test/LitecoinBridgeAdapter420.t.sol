@@ -5,6 +5,10 @@ import "../src/bridge/adapters/LitecoinBridgeAdapter420.sol";
 import "../src/interfaces/ILitecoinFinalityVerifier420.sol";
 
 contract LitecoinFinalityVerifierMock420 is ILitecoinFinalityVerifier420 {
+    bytes32 public constant routeId=keccak256("420/BRIDGE/ROUTE/LTC/LITECOIN/MAINNET");
+    bytes32 public constant gatewayScriptHash=bytes32(uint256(1));
+    address public destinationRouter;
+    function setRouter(address router) external {destinationRouter=router;}
     FinalizedTransfer private nextTransfer;
     function set(FinalizedTransfer calldata t) external { nextTransfer = t; }
     function verifyFinalizedTransfer(bytes calldata) external view returns (FinalizedTransfer memory) { return nextTransfer; }
@@ -32,6 +36,7 @@ contract LitecoinBridgeAdapter420Test {
         verifier = new LitecoinFinalityVerifierMock420();
         router = new LitecoinRouterCaller420();
         adapter = new LitecoinBridgeAdapter420(address(this), address(router), address(verifier));
+        verifier.setRouter(address(router));
         adapter.setLtcBinding(LTC_ASSET, LTC_ROUTE);
         _setTransfer(keccak256("ltc-message-1"), 12, true, true, false, GENESIS, 0xfbc0b6db);
     }

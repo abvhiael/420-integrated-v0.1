@@ -1,0 +1,52 @@
+name: 420Bridge Litecoin Local Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/Litecoin*420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeCrypto420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeWire420.sol'
+      - 'contracts/src/interfaces/IBridgeAdapter420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/bridge/GatewayRouter420.sol'
+      - 'contracts/src/bridge/BridgeRiskManager.sol'
+      - 'contracts/src/bridge/BridgeTransferRegistry.sol'
+      - 'contracts/src/bridge/BridgeRouteRegistry.sol'
+      - 'contracts/src/bridge/BridgeChainRegistry420.sol'
+      - 'contracts/src/bridge/BridgeAccountingRegistry.sol'
+      - 'contracts/src/bridge/VerifiedGateway420.sol'
+      - 'contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/ILitecoinFinalityVerifier420.sol'
+      - 'contracts/config/bridge/litecoin-mainnet-v12.5.13.json'
+      - 'contracts/test/Litecoin*420.t.sol'
+      - 'contracts/test/fixtures/litecoin/**'
+      - 'scripts/qualify-litecoin.py'
+      - 'scripts/verify-litecoin-bytecode.py'
+      - '.github/workflows/bridge-litecoin-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bridge-litecoin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  litecoin-consensus-deposits-and-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independently verify genuine Litecoin history and fixture integrity
+        run: python3 contracts/test/fixtures/litecoin/verify.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Scrypt, Litecoin consensus, MWEB restrictions, deposits, replay and rollback
+        run: python3 scripts/qualify-litecoin.py

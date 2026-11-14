@@ -1,0 +1,42 @@
+{
+  "network": "Litecoin mainnet",
+  "genesis_display": "12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2",
+  "header_source": "https://litecoinspace.org/api/blocks/{height}; descending ten-block pages from 4032 to 0",
+  "header_range": [
+    0,
+    4032
+  ],
+  "modern_block_source": "https://litecoinspace.org/api/block/b13ad2996ea82902fda1b53e9b59046f25ef1a5f24b53a4fdd84471741f98b5b",
+  "legacy_block_height": 448,
+  "modern_block_height": 2300000,
+  "transaction_sources": {
+    "legacy": {
+      "txid": "b6489c55aab48b31c592959ca38a89521372ec683088b5888e512e072b73812a",
+      "raw_url": "https://litecoinspace.org/api/tx/b6489c55aab48b31c592959ca38a89521372ec683088b5888e512e072b73812a/hex",
+      "metadata_url": "https://litecoinspace.org/api/tx/b6489c55aab48b31c592959ca38a89521372ec683088b5888e512e072b73812a",
+      "block_hash": "6995d69ce2cb7768ef27f55e02dd1772d452deb44e1716bb1dd9c29409edf252",
+      "transaction_index": 1
+    },
+    "transparent": {
+      "txid": "9980499a9cc1b8f3e1cae191f40f034dae1d6cc1332d3279ad4ded9810db0f8c",
+      "raw_url": "https://litecoinspace.org/api/tx/9980499a9cc1b8f3e1cae191f40f034dae1d6cc1332d3279ad4ded9810db0f8c/hex",
+      "metadata_url": "https://litecoinspace.org/api/tx/9980499a9cc1b8f3e1cae191f40f034dae1d6cc1332d3279ad4ded9810db0f8c",
+      "block_hash": "b13ad2996ea82902fda1b53e9b59046f25ef1a5f24b53a4fdd84471741f98b5b",
+      "transaction_index": 1
+    },
+    "hogex": {
+      "txid": "3e1b31e04d9a5d1e377daae53141b665fb822892de422a6c2f88f9b116a0c4b8",
+      "raw_url": "https://litecoinspace.org/api/tx/3e1b31e04d9a5d1e377daae53141b665fb822892de422a6c2f88f9b116a0c4b8/hex",
+      "metadata_url": "https://litecoinspace.org/api/tx/3e1b31e04d9a5d1e377daae53141b665fb822892de422a6c2f88f9b116a0c4b8",
+      "block_hash": "b13ad2996ea82902fda1b53e9b59046f25ef1a5f24b53a4fdd84471741f98b5b",
+      "transaction_index": 192
+    }
+  },
+  "core_repository": "https://github.com/litecoin-project/litecoin",
+  "core_commit": "9fe73a4bd1433f9b90ee0ea5fc6e985b6702d343",
+  "core_raw_source_template": "https://raw.githubusercontent.com/litecoin-project/litecoin/9fe73a4bd1433f9b90ee0ea5fc6e985b6702d343/{path}",
+  "independent_scrypt": "Python hashlib.scrypt using OpenSSL 3.5.8 25 Aug 2026",
+  "python": "3.12.14",
+  "acquired_date_utc": "2026-11-14",
+  "base_main_sha": "bb4bd6374d561bcba65345a1dbc86c0c70d53272"
+}

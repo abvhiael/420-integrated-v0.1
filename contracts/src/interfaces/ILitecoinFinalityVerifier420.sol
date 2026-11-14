@@ -6,6 +6,9 @@ pragma solidity ^0.8.24;
 ///      transaction inclusion, source-output ownership and the configured confirmation policy.
 ///      MWEB transfers are intentionally excluded from the Genesis route.
 interface ILitecoinFinalityVerifier420 {
+    function routeId() external view returns(bytes32);
+    function gatewayScriptHash() external view returns(bytes32);
+    function destinationRouter() external view returns(address);
     struct FinalizedTransfer {
         bytes32 genesisHash;
         bytes4 messageStart;

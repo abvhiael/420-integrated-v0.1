@@ -44,6 +44,7 @@ jobs:
           python scripts/solana/make_controlled.py
           sha256sum -c contracts/test/fixtures/solana/SHA256SUMS
           python -m unittest discover -s scripts -p test_solana_bridge420.py -v
+          python -O -m unittest discover -s scripts -p test_solana_bridge420.py -v
       - name: Exact affected Solidity owners
         run: |
           python scripts/qualify-solana.py

@@ -4,7 +4,7 @@
   "solidity_unique_tests_passed": 53,
   "fuzz_cases": 2500,
   "sbf_execution_tests_passed": 6,
-  "sdk_tests_passed": 4,
+  "sdk_tests_passed": 6,
   "genuine_transactions_signature_checked": 1053,
   "historical_bridge_finality_qualified": false,
   "production_trusted_epoch_root_installed": false,
@@ -15,5 +15,11 @@
     "Authenticated replayed validator/eligible-stake epoch snapshot unavailable",
     "Real authorized validator certificates for committed gateway deposits unavailable",
     "Approved deployed source gateway unavailable"
-  ]
+  ],
+  "sdk_execution_modes": [
+    "normal",
+    "optimized (-O)"
+  ],
+  "followup_base_commit": "dba26122ba09e242a9a222f257abb82ecaeea9d6",
+  "sdk_followup": "Explicit input validation survives Python optimization; actual CLI rejection coverage. Solidity and SBF evidence retained unchanged."
 }

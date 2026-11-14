@@ -32,8 +32,10 @@
     "scripts/solana/make_controlled.py": "193cc4b875da89d49a3b9fbd2b61db883d453c204b8547142e9a312fec1ed04a",
     "scripts/solana/observe_stake.py": "440e11fa62838a00205117c87b3f53ed9dcb0c52ffcddc603cf12e2e8c28b119",
     "scripts/solana/verify_history.py": "e6c68fb6c35b8d6a70564f0cd1c3aa366cb5b34ee3d6af68db8634d67fe2d53e",
-    "scripts/solana_bridge420.py": "eae3af452d101eeead1ac708ce4a34356a90e1e2c4ba1cdb7285358337cfc9b3",
-    "scripts/test_solana_bridge420.py": "5712f8904ed1054daa6e16d38d6e455b9c18df43e2481befcaae5dcbc7389e15",
+    "scripts/solana_bridge420.py": "b7a2db779bf3475e9164b9edfaea74eb4a1fd7ec94ba1a5a3b7918b554f54e69",
+    "scripts/test_solana_bridge420.py": "92801fac1c5123bfbe485d72ba200ca69e4a7ee407d3e0c5da4ecf5237f55972",
     "scripts/verify-solana-bytecode.py": "7d587b1f06145ad2d6883e24937ef9c464aadd872750fc45bd943a7ae82c0893"
-  }
+  },
+  "followup_base_commit": "dba26122ba09e242a9a222f257abb82ecaeea9d6",
+  "followup_method": "Only public SDK and SDK test hashes updated after six tests passed in normal and optimized execution. Other source hashes and qualification evidence retained."
 }

@@ -79,6 +79,18 @@ contract BitcoinBridgeAdapter420Test {
         require(!ok, "replay accepted");
     }
 
+    function testOutpointReplayWithDifferentMessageAfterVerifierRotation() public {
+        IBitcoinFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer(hex"00");
+        router.inbound(adapter,hex"00");
+        bytes32 originalOutput=t.sourceOutput;
+        t.messageId=keccak256("different message, same authenticated outpoint");
+        require(!adapter.consumedMessages(t.messageId));
+        BitcoinFinalityVerifierMock420 replacement=new BitcoinFinalityVerifierMock420(address(router));
+        replacement.set(t);adapter.setVerifier(address(replacement));
+        (bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));
+        require(!ok && adapter.consumedSourceOutputs(originalOutput),"outpoint replay bypassed after rotation");
+    }
+
     function testOutboundLegacySegwitAndTaproot() public {
         bytes memory h160 = abi.encodePacked(address(0xCAFE));
         bytes memory h256 = abi.encodePacked(bytes32(uint256(0xCAFE)));

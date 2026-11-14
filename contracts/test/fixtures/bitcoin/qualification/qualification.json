@@ -4,7 +4,7 @@
   "pr_1155_inspected": "c9affd6740f005293b6fdf8610f77ebc31001196",
   "solc": "0.8.24+commit.e11b9ed9",
   "forge": "1.9.0",
-  "tests_passed": 41,
+  "tests_passed": 42,
   "fuzz_runs": 10000,
   "invariant_runs": 256,
   "invariant_calls": 128000,
@@ -53,7 +53,7 @@
     "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
     "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
-    "contracts/test/BitcoinBridgeAdapter420.t.sol": "a1282d9f133b7a441e5aa856686eeb9a54dc5eb521b02bf7aa06479fdd08ff59",
+    "contracts/test/BitcoinBridgeAdapter420.t.sol": "4b2ab6fee32e0c771d7a0fcc315703a2de0ad999c3dcd270ab0e69e1d3c8cda5",
     "contracts/test/BitcoinChainInvariant420.t.sol": "7246fe3036a022db5f5461a90f2900a8596b8459928fd0e36c18e4972c08f974",
     "contracts/test/BitcoinCommonBridgeCrypto420.t.sol": "3d9440aa54f0f30f54cf182e25d1c94620b68547b6a9cc2e5a7303086855aef0",
     "contracts/test/BitcoinConsensusQualification420.t.sol": "6bce433cb7fc25a335a9ffda4b0420de1d777f2d5317e1ed1a94f731f31c52f6",
@@ -269,9 +269,14 @@
       "status": "PASS",
       "evidence": "historical-segwit.log",
       "result": "[PASS] testGenuineHistoricalSegwitTxidOutputsAndMerkleBranch() (gas: 9934572)"
+    },
+    "testOutpointReplayWithDifferentMessageAfterVerifierRotation": {
+      "status": "PASS",
+      "evidence": "outpoint-rotation.log",
+      "result": "[PASS] testOutpointReplayWithDifferentMessageAfterVerifierRotation() (gas: 867301)"
     }
   },
-  "qualification_note": "Historical header source closure remained byte-identical after its passing 414.53s run. Final contract-owner run passed 37 tests and failed one timestamp fixture; only that fixture was corrected (restoring the clock after the future-time boundary), then its test passed separately. The stateful invariant and genuine historical SegWit test passed separately. No source contracts changed after the final contract-owner run. Test/log/report additions do not invalidate passing source evidence. CI status and final commit identity are recorded in PR #1156.",
+  "qualification_note": "Historical header source closure remained byte-identical after its passing 414.53s run. Final contract-owner run passed 37 tests and failed one timestamp fixture; only that fixture was corrected (restoring the clock after the future-time boundary), then its test passed separately. The stateful invariant and genuine historical SegWit test passed separately. No source contracts changed after the final contract-owner run. Test/log/report additions do not invalidate passing source evidence. CI status and final commit identity are recorded in PR #1156. One additional isolated adapter test passed after publication: a replacement verifier presenting the same consumed outpoint under a fresh message ID is rejected independently of the message replay map. Only test/evidence and unrelated workflow-path-filter files changed after the source CI head; every production contract byte is unchanged. Passing source CI and historical results are preserved without repetition.",
   "header_tip_cross_check": {
     "source": "https://blockstream.info/api/block-height/32256",
     "height": 32256,
@@ -282,5 +287,8 @@
     "head_sha": "5287e2845c220b934fdde037e4e4754df881ba3c",
     "conclusion": "success",
     "html_url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/43553972819"
-  }
+  },
+  "source_ci_head": "5f58baf6dc861939a21119a0fce645060a067518",
+  "source_ci_run": 43563876854,
+  "fixture_ci_run": 43563876850
 }

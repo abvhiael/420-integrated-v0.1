@@ -24,6 +24,8 @@ Full raw block 481824 (`block481824.bin`, Blockstream Esplora source recorded in
 
 ## Local qualification evidence
 
-`qualification/qualification.json` consolidates 41 unique passing test/invariant owners, 10,000 fuzz cases, 256 stateful runs / 128,000 handler calls / zero handler reverts, source SHA-256 hashes and original logs. It preserves the failed timestamp fixture and its successful targeted correction rather than rerunning unaffected passing tests. The 32,257-header Solidity admission run is retained unchanged. The exact published commit, CI runs and merge outcome belong to PR #1156. The earlier passing CI run 43553972819 is retained as historical evidence at its original SHA; changed Bitcoin sources are qualified by the new evidence, not that earlier run.
+`qualification/qualification.json` consolidates 42 unique passing test/invariant owners, 10,000 fuzz cases, 256 stateful runs / 128,000 handler calls / zero handler reverts, source SHA-256 hashes and original logs. It preserves the failed timestamp fixture and its successful targeted correction rather than rerunning unaffected passing tests. The 32,257-header Solidity admission run is retained unchanged. The exact published commit, CI runs and merge outcome belong to PR #1156. The earlier passing CI run 43553972819 is retained as historical evidence at its original SHA; changed Bitcoin sources are qualified by the new evidence, not that earlier run.
 
 The next canonical verifier step is **BRIDGE-AUDIT-3.V.3 — Ethereum**. It has not been started here.
+
+An additional isolated replay test supplies a fresh message ID for an already consumed outpoint through a replacement verifier. The outpoint map rejects it independently of message-ID replay. This test/evidence-only addition preserves production source CI at `5f58baf6dc861939a21119a0fce645060a067518`; no contract byte or qualification setting changed.

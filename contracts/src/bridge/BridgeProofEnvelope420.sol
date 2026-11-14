@@ -48,7 +48,7 @@ library BridgeProofEnvelope420 {
                 || e.sourceChainId == e.destinationChainId || e.sourceNetworkId == bytes32(0)
                 || e.destinationNetworkId == bytes32(0) || e.sourceGateway == bytes32(0)
                 || e.sourceAsset == bytes32(0) || e.verifierConfigHash == bytes32(0)
-                || e.destinationChainIdEvm != block.chainid || e.destinationRouter != msg.sender
+                || e.destinationChainIdEvm != block.chainid || e.destinationRouter != address(this)
                 || e.recipient == address(0) || e.amount == 0 || e.sourceTxId == bytes32(0)
                 || e.sourceMessageId == bytes32(0) || e.innerProof.length == 0
         ) revert InvalidProofEnvelope();

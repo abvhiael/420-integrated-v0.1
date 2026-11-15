@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'
+      - '!docs/audit/cadc-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -55,6 +57,8 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'
+      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'
@@ -88,6 +92,8 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'
+      - '!docs/audit/cadc-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -135,6 +141,8 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'
+      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'

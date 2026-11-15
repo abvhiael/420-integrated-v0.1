@@ -1,0 +1,29 @@
+{
+  "observed": "2026-11-15",
+  "issuer_url": "https://loon.finance/blog/access-cadc-on-layerzero/",
+  "protocol_source_repository": "https://github.com/LayerZero-Labs/LayerZero-v2",
+  "protocol_commit": "9c741e7f9790639537b1710a203bcdfd73b0b9ac",
+  "qualification_boundary": "Public protocol metadata plus matching historical chain observations. Runtime admission never accepts these files, RPC flags, or claimed quorum. It executes native ULN and Endpoint verification against live configured issuer contracts.",
+  "messages": {
+    "base-eth": {
+      "scan_url": "https://scan.layerzero-api.com/v1/messages/pathway/30184-30101-0x91222d95170227badb6d4e856fc03324eb6a4ab8-0xe0f9483de044b8e0c069a8561bdb580778854143?limit=3",
+      "archive_rpc_url": "https://eth.drpc.org",
+      "state_block": "0x192d5ca",
+      "source_transaction": "0x1e564acb150317ee86f0912b6fb2422cd0e4114cc809c849a0bc2a3423038b07",
+      "destination_transaction": "0xfe2e4d56b78db143f886bddb502249606d0de1a5e38ebc48503439b65abc9b41",
+      "sealer_transaction": "0xb345d79f79029ea55270fba4f54bc766d63063f55a8505757a1006538e45d712",
+      "source_block": "56561014",
+      "destination_block": 26400203
+    },
+    "polygon-eth": {
+      "scan_url": "https://scan.layerzero-api.com/v1/messages/pathway/30109-30101-0xf004f8c27851f4f7123b974bf4d106a1aa5c0ef5-0xe0f9483de044b8e0c069a8561bdb580778854143?limit=3",
+      "archive_rpc_url": "https://eth.drpc.org",
+      "state_block": "0x192d495",
+      "source_transaction": "0x4bd0a4d1fff6b84825684e48161ec21d5465084fbec3473feb0e9f7d889a8f47",
+      "destination_transaction": "0x75ecfddb1933302d372b0a5281290df4e83ec1763756870898c3147432a2c910",
+      "sealer_transaction": "0x3868f0dc2c3afb2f59eb29584274d678c014751f80824c771b1f51fff9af33aa",
+      "source_block": "97195455",
+      "destination_block": 26399894
+    }
+  }
+}

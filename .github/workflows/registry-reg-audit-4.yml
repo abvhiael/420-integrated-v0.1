@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'contracts/config/**'
+      - '!contracts/config/bridge/cadc.json'
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'developer-hub/catalogue/local.example.json'

@@ -1,0 +1,36 @@
+name: CADC LayerZero native verification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'
+      - 'contracts/src/bridge/CADCBridgeIntegration.sol'
+      - 'contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
+      - 'contracts/test/CADC*420.t.sol'
+      - 'contracts/test/CADCHistoricalFork.t.sol'
+      - 'contracts/test/fixtures/cadc/**'
+      - 'contracts/config/bridge/cadc.json'
+      - 'scripts/qualify-cadc.py'
+      - 'scripts/verify-cadc-history.py'
+      - 'docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'
+      - 'docs/audit/cadc-qualification/**'
+      - '.github/workflows/bridge-cadc-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - run: python -m pip install 'eth-abi==5.2.0' 'eth-hash[pycryptodome]==0.8.0'
+      - run: python scripts/verify-cadc-history.py
+      - run: python scripts/qualify-cadc.py --match CADCLayerZero420.t.sol
+      - run: python scripts/qualify-cadc.py --match CADCGatewayIntegration420.t.sol --match-test '^testRouter'

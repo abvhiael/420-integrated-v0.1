@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "owned_change_matches": {
+    "bridge-cadc-proof.yml": [
+      "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol",
+      "contracts/test/CADCGatewayIntegration420.t.sol",
+      "contracts/test/CADCHistoricalFork.t.sol",
+      "contracts/test/CADCLayerZero420.t.sol",
+      "contracts/test/fixtures/cadc/history/PROVENANCE.json",
+      "contracts/test/fixtures/cadc/history/SHA256SUMS.json",
+      "contracts/test/fixtures/cadc/history/base-eth-archive-rpc.json",
+      "contracts/test/fixtures/cadc/history/base-eth-scan.json"
+    ]
+  },
+  "note": "Workflow self-edits legitimately match their own workflows; publication commit uses [skip ci], and actual run list is checked after publication."
+}

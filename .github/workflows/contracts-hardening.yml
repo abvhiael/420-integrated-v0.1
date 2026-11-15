@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      - "!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      - "!contracts/test/CADC*420.t.sol"
+      - "!contracts/test/CADCHistoricalFork.t.sol"
+      - "!contracts/test/fixtures/cadc/**"
+      - "!contracts/config/bridge/cadc.json"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

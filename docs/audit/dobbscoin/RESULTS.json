@@ -1,0 +1,94 @@
+{
+  "task": "BRIDGE-AUDIT-3.V.12",
+  "status": "LOCAL_IMPLEMENTATION_AND_QUALIFICATION_COMPLETE",
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "native_source_commit": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "trust_model": "Authenticated governance-selected native replay authority; not a permissionless scrypt light client",
+  "solidity_unique_tests": 79,
+  "fuzz_cases": 5000,
+  "python_unique_tests": 29,
+  "upstream_native_tests": 21,
+  "native_regtest": [
+    "AuxPoW activation and later standalone work",
+    "101-block reorg rejected; 100-block higher-work reorg accepted"
+  ],
+  "genuine_mainnet": {
+    "blocks": 1914746,
+    "transactions": 2140134,
+    "height": 1914745,
+    "tip": "c6d2be979323fee26cac4dd88c0e180992d8c62a8901cf6a2faf621f347d2cb8",
+    "chain_work": "000000000000000000000000000000000000000000000000007b83dcd4a57899",
+    "headers_sha256": "805b01aef94d298dc4aa42142e7dac7e53bb05b672ea0f1560bfa9c772591594",
+    "native_historical_script_inputs": 1911823,
+    "native_script_shortcut_closed": true,
+    "emergency_blocks": 4,
+    "settled_evm_records": 28,
+    "native_sdk_evm_bundle_root": "0xedffc231746bc9a13ed079a20a9b5b74d9b32da71b6aab486449ada9a311726a"
+  },
+  "qualification_runs": {
+    "solidity": [
+      "solidity-initial.log",
+      "solidity-aux-final.log",
+      "adapter-new.log",
+      "historical-solidity.log",
+      "access-tests.log",
+      "parent-branch-test.log",
+      "merkle-domain-tests.log",
+      "final-bundle-solidity.log"
+    ],
+    "python": [
+      "python-tests.log",
+      "bundle-tests-final.log",
+      "aux-wire-tests.log",
+      "acquisition-tests.log",
+      "native-identity-tests.log"
+    ],
+    "native": [
+      "native-tests.log",
+      "native-regtest.json",
+      "native-reorg.json",
+      "native-replay-qualified.json",
+      "native-historical-scripts.json"
+    ]
+  },
+  "ci_run_ids": [],
+  "ci_status": "Not launched; local passing evidence retained and publication uses [skip ci]",
+  "deployment_status": "INACTIVE; authority/root, code identity and gateway/custody/Registry bindings remain deployment prerequisites",
+  "merge_status": "Not merged; no merge requested for this task",
+  "external_blockers_for_local_step": [],
+  "next_inventory_family": "Pirate Chain (ARRR); current main has no numbered 3.V.13 entry",
+  "requirements": {
+    "authoritative consensus audit": "PASS; see audit requirement mapping and retained evidence",
+    "chain-specific scrypt PoW and AuxPoW": "PASS; see audit requirement mapping and retained evidence",
+    "activation heights and network identity": "PASS; see audit requirement mapping and retained evidence",
+    "ancestry difficulty cumulative work and selection": "PASS; see audit requirement mapping and retained evidence",
+    "288 confirmations": "PASS; see audit requirement mapping and retained evidence",
+    "transaction inclusion gateway outputs destination and replay": "PASS; see audit requirement mapping and retained evidence",
+    "genuine historical qualification": "PASS; see audit requirement mapping and retained evidence"
+  },
+  "source_fingerprints_sha256": {
+    "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol": "4e724cd1d9b851d08f9e3c078c1089ba96afa4119a666058449df131fac4bdb8",
+    "contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol": "72a3a76d1d1426bc097f23a66eec984d89e3b633e256d8556648a15a6ec2e701",
+    "contracts/src/bridge/verifiers/dobbscoin/DobbscoinConsensus420.sol": "d55a7de3e13be4ec4646c21d402148ccdb6c0bed890f527079adcfe6dec6f98b",
+    "contracts/src/bridge/verifiers/dobbscoin/DobbscoinWire420.sol": "73fab16ae4f9c36f42143f23dc2e4875bc229395f1e11e72e4f1482822d0745c",
+    "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol": "ed5643a7956b22509c586e74e1ffc8fa81f4d60e71c49363d40aa5210f49a55d",
+    "scripts/dobbscoin/acquire.py": "7d017a7c4f8950e04c8f1628c79b11950e13a32dc2247513a71ddfdf8ea55114",
+    "scripts/dobbscoin/build_native.py": "7ce6876ace7a020e208bd689bef57681c2d17b89f84a936896a1588de0cb43f9",
+    "scripts/dobbscoin/bundle.py": "5fd00a12789e7aeca40d066913f003366a395476ed92428bee9c6878a64d07b6",
+    "scripts/dobbscoin/consensus.py": "d4db38ec3c22730b47095b17d52b312954e32e02f1403b8d12170badbb20fd46",
+    "scripts/dobbscoin/fixtures.py": "a3c4c841a7271580451a20cffe5854267e5073692dd313aae339091a6d949676",
+    "scripts/dobbscoin/history.py": "8f91716bb20905f7021419487563d740c44cfc531e1e8eba5c787b3344256389",
+    "scripts/dobbscoin/native_regtest.py": "77e332d2973926b023a643a4ac73e1588daa252a83aa854846f8dd630c5b3f59",
+    "scripts/dobbscoin/native_reorg.py": "9f7a518bec0a4a8039e7e9fa3e906812308781c8990a5fe9475046a3631dc66e",
+    "scripts/dobbscoin/native_replay.py": "ec5e267be469c6e8f41d601aff749c93048b046e2cba7a60ae11d66f9a4c3282",
+    "scripts/dobbscoin/qualify_script_coverage.py": "8c9033f1941542a8ea6a86583f6ff627a72c79bd45013f646a088012cf0f4b10",
+    "scripts/dobbscoin/test_acquisition.py": "439e66e528c202bd2ee44b798f4655082e81c1877d1bc288ac7b698be318135d",
+    "scripts/dobbscoin/test_aux_wire.py": "e237311679298ce3fe719395a7dde7b0bdd426d41685fc0290d5a04adebffb1b",
+    "scripts/dobbscoin/test_bundle.py": "2a2f49b1349b7998fdfc27c25ac04a4bdfc2a59b7db3c28a7565c3252ac01b2a",
+    "scripts/dobbscoin/test_consensus.py": "01f15b3dbb1f5d488b3aa6db75b0c907a8814c388081874aa147af7849661923",
+    "scripts/dobbscoin/test_native_identity.py": "b168a2932bcc9a0aadce30e59a6fcaca72f70c2caa4a106077ef81738c6c3d03",
+    "scripts/dobbscoin/verify_fixtures.py": "0693f703848e145909621be1e94927e5db38c7aa0707cab18f235a4944b19a2a",
+    "scripts/dobbscoin/verify_native_scripts.py": "628702e2a9d7b72245e9bea9d59b94bbd5d75d5ddbf3b5945dc2b963c498227b"
+  },
+  "preserved_evidence": "Passing scoped owners retained. AuxPoW correction and SDK script-coverage changes requalified only affected owners. The independent complete scan was not repeated; later additions handle AuxPoW trailers and requested fixture extraction."
+}

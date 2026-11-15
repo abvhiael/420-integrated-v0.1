@@ -1,0 +1,18 @@
+{
+  "DobbscoinBridgeAdapter420": {
+    "init_bytes": 4339,
+    "runtime_bytes": 3930
+  },
+  "DobbscoinFinalityVerifier420": {
+    "init_bytes": 13911,
+    "runtime_bytes": 13294
+  },
+  "DobbscoinConsensus420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "DobbscoinWire420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

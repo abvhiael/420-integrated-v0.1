@@ -73,6 +73,7 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayScripts[p.gatewayScriptHash]) revert GatewayNotAllowed();
         if (bobAssetId == bytes32(0)) revert AssetNotConfigured();
         if (bobRouteId == bytes32(0)) revert RouteNotConfigured();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != bobRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
 
         consumedMessages[p.messageId] = true;

@@ -1,0 +1,7 @@
+test_modified_or_mismatched_build_is_rejected (test_native_identity.NativeIdentityTests.test_modified_or_mismatched_build_is_rejected) ... ok
+test_retained_or_new_source_verified_binary_identity (test_native_identity.NativeIdentityTests.test_retained_or_new_source_verified_binary_identity) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK

@@ -74,15 +74,23 @@ contract DobbscoinBridgeAdapter420Test {
         bytes32 id = router.outbound(adapter, ROUTE, BOB_ASSET, address(this), recipient, 1e8, hex"00"); require(id != bytes32(0), "message");
     }
 
+
+    function testWrongDestinationChainFails() public {IDobbscoinFinalityVerifier420.FinalizedTransfer memory p=_healthy(1900000,keccak256("domain-chain"),keccak256("domain-chain-out"),false);p.destinationChainId++;verifier.set(p);_fails();}
+    function testWrongDestinationRouterFails() public {IDobbscoinFinalityVerifier420.FinalizedTransfer memory p=_healthy(1900000,keccak256("domain-router"),keccak256("domain-router-out"),false);p.destinationRouter=address(0x123);verifier.set(p);_fails();}
+    function testWrongDestinationRouteFails() public {IDobbscoinFinalityVerifier420.FinalizedTransfer memory p=_healthy(1900000,keccak256("domain-route"),keccak256("domain-route-out"),false);p.routeId=bytes32(uint256(1));verifier.set(p);_fails();}
+    function testSourceOutputReplayAcrossMessageAndVerifierRotation() public {bytes32 output=keccak256("same-utxo");verifier.set(_healthy(1900000,keccak256("old-message"),output,false));router.inbound(adapter,hex"01");DobbscoinFinalityVerifierMock420 rotated=new DobbscoinFinalityVerifierMock420();rotated.set(_healthy(1900000,keccak256("new-message"),output,false));adapter.setVerifier(address(rotated));_fails();}
+    function testBindingFailureDoesNotConsumeOutput() public {IDobbscoinFinalityVerifier420.FinalizedTransfer memory p=_healthy(1900000,keccak256("rollback"),keccak256("rollback-output"),false);p.routeId=bytes32(uint256(1));verifier.set(p);_fails();require(!adapter.consumedSourceOutputs(p.sourceOutput));p.routeId=ROUTE;verifier.set(p);router.inbound(adapter,hex"01");}
+    function testNonRouterFails() public {(bool ok,)=address(adapter).call(abi.encodeCall(adapter.verifyInbound,(hex"01")));require(!ok);}
+    function _fails() private {(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok,"invalid proof accepted");}
     function _healthy(uint64 height, bytes32 messageId, bytes32 sourceOutput, bool aux)
-        private pure returns (IDobbscoinFinalityVerifier420.FinalizedTransfer memory p)
+        private view returns (IDobbscoinFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = IDobbscoinFinalityVerifier420.FinalizedTransfer({
             genesisHash: 0x6d2d7d525900712451b9697d0b5b2304ebae6efb349540da445bf575c0159969,
             messageStart: 0xa0fb1783, blockHeight: height, blockHash: keccak256(abi.encode("bob-block", height)),
             transactionHash: keccak256(abi.encode("bob-tx", messageId)), messageId: messageId, gatewayScriptHash: GATEWAY,
             sourceOutput: sourceOutput, recipient: address(0xB0B), amount: 42_00000000, confirmations: 288,
-            finalized: true, auxPowValidated: aux
+            finalized: true, auxPowValidated: aux, destinationChainId: block.chainid, destinationRouter: address(router), routeId: ROUTE
         });
     }
 }

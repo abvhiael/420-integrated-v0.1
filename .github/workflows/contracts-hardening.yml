@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol"
+      - "!contracts/src/bridge/verifiers/dobbscoin/**"
+      - "!contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol"
+      - "!contracts/test/Dobbscoin*.t.sol"
+      - "!contracts/test/fixtures/dobbscoin/**"
+      - "!contracts/config/bridge/dobbscoin-mainnet-v12.5.10.json"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

@@ -1,0 +1,12 @@
+{
+  "classification": "CONTROLLED TEST ONLY \u2014 not historical native consensus evidence",
+  "public_test_private_key": "01",
+  "height": 300000,
+  "time": 1777803100,
+  "chain_id": 420,
+  "router": "0x0000000000000000000000000000000000420420",
+  "recipient": "0x0000000000000000000000000000000000000b0b",
+  "root": "d67af2c0424845b507256a0a3c195e656ef56005c2857d36b4374c86de0c6185",
+  "sha256d_raw": "d76399a73e3f1b058719cc0635441d0610f7ef25ab5b227620b91cfe0bb90c6a",
+  "native_source": "a3eb106715638e316eb03af383dc27aad2e89536"
+}

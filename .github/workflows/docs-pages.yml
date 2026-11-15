@@ -9,6 +9,8 @@ on:
       - 'docs/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md'
+      - '!docs/audit/curecoin-qualification/**'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'

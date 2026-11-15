@@ -57,6 +57,7 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
         ICurecoinFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
+        if (p.destinationChainId!=block.chainid||p.destinationRouter!=gatewayRouter||p.routeId!=cureRouteId) revert InvalidProof();
         if (!p.finalized) revert Unfinalized();
         if (p.genesisHash != CURE_MAINNET_GENESIS_HASH || p.messageStart != CURE_MAINNET_MESSAGE_START) revert WrongNetwork();
         if (!p.proofOfStake) revert NotProofOfStake();

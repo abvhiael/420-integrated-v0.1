@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol"
+      - "!contracts/src/bridge/verifiers/curecoin/**"
+      - "!contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/ICurecoinFinalityVerifier420.sol"
+      - "!contracts/test/Curecoin*420.t.sol"
+      - "!contracts/test/fixtures/curecoin/**"
+      - "!contracts/config/bridge/curecoin-mainnet-v12.5.11.json"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

@@ -1,0 +1,8 @@
+test_qualified_candidate_and_metadata_substitution (test_curecoin.CurecoinTests.test_qualified_candidate_and_metadata_substitution) ... ok
+test_native_chain_trust_disagreement_rejected (test_curecoin.CurecoinTests.test_native_chain_trust_disagreement_rejected) ... ok
+test_optimized_cli_requires_pinned_report_hash (test_curecoin.CurecoinTests.test_optimized_cli_requires_pinned_report_hash) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.468s
+
+OK

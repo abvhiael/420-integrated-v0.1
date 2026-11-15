@@ -1,0 +1,12 @@
+checked 0 blocks 0.0 seconds
+checked 50000 blocks 11.98 seconds
+checked 100000 blocks 26.91 seconds
+checked 150000 blocks 39.52 seconds
+checked 200000 blocks 56.09 seconds
+checked 250000 blocks 73.76 seconds
+checked 300000 blocks 87.44 seconds
+checked 350000 blocks 100.57 seconds
+checked 400000 blocks 114.1 seconds
+checked 450000 blocks 129.74 seconds
+checked 500000 blocks 145.34 seconds
+PASS independent historical consensus, kernels, modifiers, signatures and UTXO projection

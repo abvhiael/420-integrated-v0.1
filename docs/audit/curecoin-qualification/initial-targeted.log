@@ -1,0 +1,61 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 15.97s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/CurecoinFinalityVerifier420.t.sol:60:2:
+   |
+60 |  function testFuzzCompactTargetRound ... <=type(uint256).max>>24,"target");}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 5 tests for contracts/test/CurecoinBridgeAdapter420.t.sol:CurecoinBridgeAdapter420Test
+[PASS] testCanonicalCurecoinInboundPasses() (gas: 124770)
+[PASS] testNonPoSBlockRejected() (gas: 147118)
+[PASS] testOutboundP2PKHAndP2SH() (gas: 111999)
+[PASS] testReplayRejected() (gas: 269426)
+[PASS] testWrongNetworkRejected() (gas: 147035)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 2.35ms (1.72ms CPU time)
+
+Ran 30 tests for contracts/test/CurecoinFinalityVerifier420.t.sol:CurecoinFinalityVerifier420Test
+[PASS] testBadCoinstakeMerkleRejected() (gas: 192693)
+[PASS] testBadDepositMerkleRejected() (gas: 192671)
+[PASS] testBadSignatureRejected() (gas: 192700)
+[PASS] testBootstrapRejected() (gas: 4924213)
+[PASS] testCheckpointRotationInvalidatesProof() (gas: 230273)
+[FAIL: InvalidProof()] testControlledNativeX13SignedDeposit() (gas: 173990)
+[PASS] testDuplicateOddBranchSubstitutionRejected() (gas: 192509)
+[PASS] testFutureTimeRejected() (gas: 195197)
+[PASS] testFuzzCoinAgeSaturates(uint64,uint32) (runs: 2500, μ: 6627, ~: 6627)
+[PASS] testFuzzCompactTargetRoundTrip(uint32) (runs: 2500, μ: 7410, ~: 7395)
+[PASS] testGatewayRevocationRejected() (gas: 217490)
+[PASS] testGenuineGenesisTransactionHash() (gas: 58844)
+[PASS] testHistoricalTransitions() (gas: 12417)
+[PASS] testImmatureStakeRejected() (gas: 4924390)
+[PASS] testInsufficientDepthRejected() (gas: 4924702)
+[PASS] testMalformedCompactRejected() (gas: 5845)
+[PASS] testMalformedEncodingRejected() (gas: 6664)
+[PASS] testMedianTimeRejected() (gas: 4924072)
+[PASS] testOriginAmountSubstitutionRejected() (gas: 4924411)
+[PASS] testOriginTransactionSubstitutionRejected() (gas: 192524)
+[PASS] testRetargetNativeSpacing240() (gas: 24546)
+[PASS] testSpentStakeRejected() (gas: 4924165)
+[PASS] testUnauthenticatedRpcClaimRejected() (gas: 192303)
+[PASS] testWrongChainTrustRejected() (gas: 4924084)
+[PASS] testWrongConsensusRevisionRejected() (gas: 4924478)
+[PASS] testWrongDestinationChainRejected() (gas: 195544)
+[PASS] testWrongDifficultyRejected() (gas: 4924522)
+[PASS] testWrongGenesisRejected() (gas: 4924653)
+[PASS] testWrongOutputRejected() (gas: 192371)
+[PASS] testWrongRouteRejected() (gas: 192481)
+Suite result: FAILED. 29 passed; 1 failed; 0 skipped; finished in 39.88ms (87.00ms CPU time)
+
+Ran 2 test suites in 40.71ms (42.23ms CPU time): 34 tests passed, 1 failed, 0 skipped (35 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/CurecoinFinalityVerifier420.t.sol:CurecoinFinalityVerifier420Test
+[FAIL: InvalidProof()] testControlledNativeX13SignedDeposit() (gas: 173990)
+
+Encountered a total of 1 failing tests, 34 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

@@ -1,0 +1,1 @@
+{"contract": "USDCCCTPAdapter", "solc": "0.8.24", "evm": "cancun", "via_ir": true, "optimizer_runs": 200, "runtime_size": 12828, "creation_sha256": "8f11c08aa14b3745f30f6a030095a412c639c6f7defff3f8e9e33ae31870592e", "deployed_code_hash": "NOT_ASSIGNED; constructor immutables and approved deployment required"}

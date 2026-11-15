@@ -1,0 +1,7 @@
+{
+  "functional_paths_match_only": [
+    "bridge-cctp-proof.yml"
+  ],
+  "changed_workflow_file_self_matches": "skipped by one publication commit; existing branch filters unchanged",
+  "new_branch_restrictions": false
+}

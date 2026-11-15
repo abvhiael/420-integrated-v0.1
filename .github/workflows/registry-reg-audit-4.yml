@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'contracts/config/**'
+      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'developer-hub/catalogue/local.example.json'

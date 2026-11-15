@@ -1,0 +1,22 @@
+Compiling 36 files with Solc 0.8.24
+Solc 0.8.24 finished in 46.08s
+Compiler run successful!
+
+Ran 1 test for contracts/test/CCTPAdapter420.t.sol:CCTPSourceEthereumHistory420Test
+[PASS] testGenuineEthereumToBase() (gas: 422641)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 11.01ms (1.53ms CPU time)
+
+Ran 5 tests for contracts/test/CCTPAdapter420.t.sol:CCTPAdapter420Test
+[PASS] testDirtyEVMSourceSenderRejected() (gas: 195314)
+[PASS] testGenuineArbitrumFastNetFees() (gas: 481514)
+[PASS] testGenuineArbitrumFinalizedWithOpaqueHook() (gas: 483210)
+[PASS] testGenuineBaseStandard() (gas: 457115)
+[PASS] testGenuineSolanaMessageSenderNotTruncated() (gas: 407366)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 11.76ms (5.43ms CPU time)
+
+Ran 2 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 1342822)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 841442)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 16.05ms (4.71ms CPU time)
+
+Ran 3 test suites in 16.63ms (38.82ms CPU time): 8 tests passed, 0 failed, 0 skipped (8 total tests)

@@ -1,0 +1,56 @@
+name: USDC Circle CCTP Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/adapters/USDCCCTPAdapter.sol'
+      - 'contracts/src/bridge/verifiers/cctp/**'
+      - 'contracts/src/bridge/verifiers/BridgeWire420.sol'
+      - 'contracts/src/interfaces/ICircleCCTPV2420.sol'
+      - 'contracts/src/interfaces/IBridgeAdapter420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/system/GenesisResidentAccess420.sol'
+      - 'contracts/src/bridge/GatewayRouter420.sol'
+      - 'contracts/src/bridge/BridgeRiskManager.sol'
+      - 'contracts/src/bridge/BridgeTransferRegistry.sol'
+      - 'contracts/src/bridge/BridgeRouteRegistry.sol'
+      - 'contracts/src/bridge/BridgeChainRegistry420.sol'
+      - 'contracts/src/bridge/BridgeAccountingRegistry.sol'
+      - 'contracts/test/CCTP*.t.sol'
+      - 'contracts/test/helpers/CCTPNativeHarness420.sol'
+      - 'contracts/test/helpers/GenesisMocks420.sol'
+      - 'contracts/test/fixtures/cctp/**'
+      - 'contracts/config/bridge/usdc-cctp-v2-v1.json'
+      - 'scripts/qualify-cctp.py'
+      - 'scripts/cctp/**'
+      - 'docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'
+      - 'docs/audit/cctp-qualification/**'
+      - '.github/workflows/bridge-cctp-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cctp-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Verify pinned toolchains and upstream contracts
+        run: |
+          python -m pip install -r scripts/cctp/requirements.txt
+          python scripts/cctp/fetch_compilers.py "$RUNNER_TEMP/cctp-compilers"
+          python scripts/cctp/build_upstream.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.7.6"
+      - name: Qualify only the affected owners and genuine issuer evidence
+        run: |
+          python scripts/qualify-cctp.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.8.24"
+          python scripts/cctp/check_bytecode.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.8.24"
+          python scripts/cctp/verify_history.py
+          python -m unittest discover -s scripts/cctp -p test_cctp.py -v
+          sha256sum -c contracts/test/fixtures/cctp/SHA256SUMS

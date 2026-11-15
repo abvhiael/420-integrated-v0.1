@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/adapters/USDCCCTPAdapter.sol"
+      - "!contracts/src/bridge/verifiers/cctp/**"
+      - "!contracts/src/interfaces/ICircleCCTPV2420.sol"
+      - "!contracts/test/CCTP*.t.sol"
+      - "!contracts/test/helpers/CCTPNativeHarness420.sol"
+      - "!contracts/test/fixtures/cctp/**"
+      - "!contracts/config/bridge/usdc-cctp-v2-v1.json"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

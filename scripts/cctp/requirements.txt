@@ -1,0 +1,4 @@
+eth-abi==5.2.0
+eth-keys==0.8.0
+eth-hash[pycryptodome]==0.8.0
+PyYAML==6.0.3

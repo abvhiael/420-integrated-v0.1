@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'
+      - '!docs/audit/cctp-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -55,6 +57,9 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/adapters/USDCCCTPAdapter.sol'
+      - '!contracts/src/bridge/verifiers/cctp/**'
+      - '!contracts/src/interfaces/ICircleCCTPV2420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'
@@ -88,6 +93,8 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'
+      - '!docs/audit/cctp-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -135,6 +142,9 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/adapters/USDCCCTPAdapter.sol'
+      - '!contracts/src/bridge/verifiers/cctp/**'
+      - '!contracts/src/interfaces/ICircleCCTPV2420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'

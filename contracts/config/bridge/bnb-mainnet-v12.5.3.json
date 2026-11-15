@@ -32,7 +32,7 @@
     "route risk caps and emergency isolation are configured",
     "end-to-end inbound and outbound qualification passes"
   ],
-  "bep20_policy": "Default deny. Every BEP-20 contract requires an explicit source-token-to-420-asset mapping and route binding before acceptance.",
+  "bep20_policy": "Default deny. A mapping and route alone are insufficient. The Bridge asset registry must independently qualify a canonical token profile; no BEP-20 profile is currently supported by the authoritative launch catalogue.",
   "security_invariants": [
     "wrong EIP-155 chain id fails closed",
     "non-finalized proof fails closed",

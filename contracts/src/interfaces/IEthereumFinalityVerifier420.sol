@@ -15,6 +15,9 @@ interface IEthereumFinalityVerifier420 {
         address recipient;
         uint256 amount;
         bool finalized;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns (FinalizedTransfer memory transfer_);

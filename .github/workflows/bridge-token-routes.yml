@@ -1,0 +1,71 @@
+name: Supported token route qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/BridgeAssetRegistry.sol'
+      - 'contracts/src/bridge/EthereumDepositGateway420.sol'
+      - 'contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol'
+      - 'contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'
+      - 'contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'
+      - 'contracts/src/bridge/tokens/**'
+      - 'contracts/src/bridge/verifiers/Ethereum*.sol'
+      - 'contracts/src/bridge/verifiers/vendor/sp1/**'
+      - 'contracts/src/bridge/verifiers/solana/vendor/**'
+      - 'contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'
+      - 'contracts/src/interfaces/IEthereum*420.sol'
+      - 'contracts/config/bridge/*-ethereum-v12.5.*.json'
+      - 'contracts/config/bridge/*-solana-v12.5.*.json'
+      - 'contracts/config/bridge/bnb-mainnet-v12.5.3.json'
+      - 'contracts/config/bridge/supported-token-routes-v1.json'
+      - 'contracts/config/bridge/token-route-dependencies/**'
+      - 'contracts/test/AaveBridgeAdapter420.t.sol'
+      - 'contracts/test/AudioBridgeAdapter420.t.sol'
+      - 'contracts/test/EthereumBridgeAdapter420.t.sol'
+      - 'contracts/test/EurcBridgeAdapter420.t.sol'
+      - 'contracts/test/LinkBridgeAdapter420.t.sol'
+      - 'contracts/test/QcadBridgeAdapter420.t.sol'
+      - 'contracts/test/UniBridgeAdapter420.t.sol'
+      - 'contracts/test/UsdtBridgeAdapter420.t.sol'
+      - 'contracts/test/EurcSolanaBridgeAdapter420.t.sol'
+      - 'contracts/test/RaySolanaBridgeAdapter420.t.sol'
+      - 'contracts/test/SolanaBridgeAdapter420.t.sol'
+      - 'contracts/test/SolanaFinalityProof420.t.sol'
+      - 'contracts/test/BnbBridgeAdapter420.t.sol'
+      - 'contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol'
+      - 'contracts/test/DomainNonceRouterBypassHardening420.t.sol'
+      - 'contracts/test/EmergencyControlsHardening420.t.sol'
+      - 'contracts/test/MalformedProofRecipientFuzzHardening420.t.sol'
+      - 'contracts/test/VerifierRotationHardening420.t.sol'
+      - 'contracts/test/SupportedTokenRoutes420.t.sol'
+      - 'contracts/test/TokenGateway*420.t.sol'
+      - 'contracts/test/helpers/Token*420.sol'
+      - 'contracts/test/helpers/EthereumProofFixture420.sol'
+      - 'contracts/test/fixtures/token-routes/**'
+      - 'scripts/qualify-token-routes.py'
+      - 'scripts/verify-token-route*.py'
+      - 'docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md'
+      - 'docs/audit/token-route-qualification/**'
+      - '.github/workflows/bridge-token-routes.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  routes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - run: python scripts/verify-token-routes.py
+      - run: python scripts/qualify-token-routes.py
+      - run: python scripts/qualify-token-routes.py --match TokenGatewaySemantics420.t.sol --match-test '^testGateway'
+      - run: python scripts/qualify-token-routes.py --match TokenGatewayRouterIntegration420.t.sol --match-test '^testRouter'
+      - run: python scripts/qualify-token-routes.py --match SolanaFinalityProof420.t.sol --match-test '^testControlledCanonicalRayAndEurcMintRoutes' --fixture contracts/test/fixtures/solana
+      - run: python scripts/qualify-token-routes.py --owners AaveBridgeAdapter420.t.sol AudioBridgeAdapter420.t.sol EthereumBridgeAdapter420.t.sol EurcBridgeAdapter420.t.sol LinkBridgeAdapter420.t.sol QcadBridgeAdapter420.t.sol UniBridgeAdapter420.t.sol UsdtBridgeAdapter420.t.sol EurcSolanaBridgeAdapter420.t.sol RaySolanaBridgeAdapter420.t.sol SolanaBridgeAdapter420.t.sol BnbBridgeAdapter420.t.sol CrossAdapterHardeningBridgeAdapter420.t.sol DomainNonceRouterBypassHardening420.t.sol EmergencyControlsHardening420.t.sol MalformedProofRecipientFuzzHardening420.t.sol VerifierRotationHardening420.t.sol
+      - run: python scripts/verify-token-route-bytecode.py --solc "$HOME/.svm/0.8.24/solc-0.8.24"

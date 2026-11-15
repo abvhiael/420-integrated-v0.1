@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/EthereumBridgeAdapter420.sol";
 import "../src/bridge/adapters/SolanaBridgeAdapter420.sol";
@@ -63,7 +64,9 @@ contract VerifierRotationHardening420Test {
         attacker = new UnauthorizedVerifierRotator420();
 
         ethAdapter = new EthereumBridgeAdapter420(address(this), address(router), address(oldEthVerifier));
+        ethAdapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
         solAdapter = new SolanaBridgeAdapter420(address(this), address(router), address(oldSolVerifier));
+        solAdapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
 
         ethAdapter.setGateway(ETH_GATEWAY, true);
         ethAdapter.setAssetMapping(ethAdapter.sourceAssetKey(ETH_TOKEN), ETH_ASSET, true);
@@ -131,6 +134,7 @@ contract VerifierRotationHardening420Test {
         private view returns (IEthereumFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = IEthereumFinalityVerifier420.FinalizedTransfer({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: ETH_ROUTE,
             sourceChainId: ethAdapter.ETHEREUM_MAINNET_CHAIN_ID(),
             blockNumber: 22_000_001,
             blockHash: keccak256("rotation-eth-block"),

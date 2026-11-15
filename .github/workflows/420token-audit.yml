@@ -5,6 +5,8 @@ on:
     paths:
       - 'contracts/src/token/**'
       - 'contracts/test/Token*.t.sol'
+      - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'
+      - '!contracts/test/TokenGatewaySemantics420.t.sol'
       - 'contracts/config/420token-genesis.json'
       - 'contracts/config/token/**'
       - 'contracts/config/genesis-canonical-addresses.json'

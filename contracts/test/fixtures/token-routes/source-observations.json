@@ -1,0 +1,238 @@
+{
+  "observed": "2026-11-15",
+  "boundary": "RPC token-state observations only; not finality proofs or runtime admission authority. Ethereum account/code proofs and consensus are qualified separately at original SHA.",
+  "ethereum": [
+    {
+      "config": "aave-ethereum-v12.5.18.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000012"
+      },
+      "expected_decimals": 18
+    },
+    {
+      "config": "audio-ethereum-v12.5.8.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x18aAA7115705e8be94bfFEBDE57Af9BFc265B998",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000012"
+      },
+      "expected_decimals": 18
+    },
+    {
+      "config": "eurc-ethereum-v12.5.21.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000006"
+      },
+      "expected_decimals": 6
+    },
+    {
+      "config": "link-ethereum-v12.5.17.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000012"
+      },
+      "expected_decimals": 18
+    },
+    {
+      "config": "qcad-ethereum-v12.5.20.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x3fa142dd3f384414e05e71ad0939274edc82ec0a",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000006"
+      },
+      "expected_decimals": 6
+    },
+    {
+      "config": "uni-ethereum-v12.5.16.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000012"
+      },
+      "expected_decimals": 18
+    },
+    {
+      "config": "usdt-ethereum-v12.5.19.json",
+      "url": "https://eth.drpc.org",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "eth_call",
+        "params": [
+          {
+            "to": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+            "data": "0x313ce567"
+          },
+          "0x19300c2"
+        ]
+      },
+      "response": {
+        "id": 1,
+        "jsonrpc": "2.0",
+        "result": "0x0000000000000000000000000000000000000000000000000000000000000006"
+      },
+      "expected_decimals": 6
+    }
+  ],
+  "solana": [
+    {
+      "config": "eurc-solana-v12.5.22.json",
+      "url": "https://api.mainnet-beta.solana.com",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getAccountInfo",
+        "params": [
+          "HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr",
+          {
+            "encoding": "base64",
+            "commitment": "finalized"
+          }
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "result": {
+          "context": {
+            "apiVersion": "4.4.0",
+            "slot": 469833036
+          },
+          "value": {
+            "data": [
+              "AQAAAPwckECOUSE/vNdOM2YsEjvSzXWDefk3IWT7Dz0tY2g3FLUxLqFvAAAGAQEAAABN8GtMRHYCd+Q0hvg5l32TFY9n958M/kBLGF/4hQDm/Q==",
+              "base64"
+            ],
+            "executable": false,
+            "lamports": 1089504528,
+            "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "rentEpoch": 18446744073709551615,
+            "space": 82
+          }
+        },
+        "id": 1
+      },
+      "expected_decimals": 6
+    },
+    {
+      "config": "ray-solana-v12.5.23.json",
+      "url": "https://api.mainnet-beta.solana.com",
+      "request": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "getAccountInfo",
+        "params": [
+          "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+          {
+            "encoding": "base64",
+            "commitment": "finalized"
+          }
+        ]
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "result": {
+          "context": {
+            "apiVersion": "4.4.0",
+            "slot": 469833051
+          },
+          "value": {
+            "data": [
+              "AAAAAGTAxuCHdubhHkDFa7JYs1BNUSZnSdTP4QN5n/otcPcqksk9YcT4AQAGAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "base64"
+            ],
+            "executable": false,
+            "lamports": 346827788910,
+            "owner": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+            "rentEpoch": 18446744073709551615,
+            "space": 82
+          }
+        },
+        "id": 1
+      },
+      "expected_decimals": 6
+    }
+  ]
+}

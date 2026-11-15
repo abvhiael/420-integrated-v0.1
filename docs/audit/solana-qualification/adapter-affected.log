@@ -1,0 +1,11 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 4.06s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/SolanaBridgeAdapter420.t.sol:SolanaBridgeAdapter420Test
+[PASS] testDestinationChainRouterAndRouteCannotBeSubstituted() (gas: 508234)
+[PASS] testFullSolanaOwnerKeyIsPreserved() (gas: 222193)
+[PASS] testQualifiedSplMintUsesBoundAssetAndRoute() (gas: 332935)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.00ms (1.09ms CPU time)
+
+Ran 1 test suite in 2.48ms (1.00ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

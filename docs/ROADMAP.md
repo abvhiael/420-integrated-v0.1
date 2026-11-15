@@ -212,6 +212,10 @@ Shared-service and application launch gates are being completed before public ex
 
 **Cross-cutting entry/exit requirements:** share the Step 5 canary/observation/public promotion gates; freeze network/genesis/contract/release SHA and service URLs; integrate 420Wallet, 420Indexer, Compute API/SDK, 420Compute and node420 worker against real compatible deployed versions; prohibit browser custody, Indexer/scheduler authority, synthetic stake amounts or project-preference authorization; retain exact release lineage, transaction hashes, safe/finalized heights, signed receipts, negative/privacy/replay tests, CI job evidence, monitoring/recovery and rollback decisions. Gate each CMP-9 milestone on actual deployed evidence rather than fixture-only repository tests. CMP-0 operational closeout remains open until CMP-9.15 proves it.
 
+### 420Bridge — Solana deferred final qualification
+
+**BRIDGE-AUDIT-3.V.7: repository implementation qualified; remaining final qualification deferred to testnet by user authorization (2026-11-14).** [PR #1161](https://github.com/abvhiael/420-integrated-v0.1/pull/1161) integrates implementation SHA `6de0a1a34cdb33156caeca32d2847f1dfe214995` with retained Solidity, SBF and SDK evidence. The [420Bridge testnet work roadmap](audit/420BRIDGE-TESTNET-WORK-ROADMAP.md) owns the unfinished authenticated validator/stake snapshot, genuine bridge-domain validator certificates, approved deployed source gateway and historical end-to-end SOL/SPL finality/execution qualification. Public RPC observations and controlled certificates do not satisfy these requirements. Full-step acceptance remains open and routes remain inactive.
+
 ## 16. Independent audit and launch review
 Audit consensus-critical Go code, system contracts, genesis allocations, validator economics, bridges/oracles, and regulatory launch structure before considering mainnet.
 

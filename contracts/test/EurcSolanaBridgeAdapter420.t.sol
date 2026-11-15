@@ -128,7 +128,10 @@ contract EurcSolanaBridgeAdapter420Test {
             sourceOwner: OWNER,
             recipient: address(0xB0B),
             amount: 420 * ONE_EURC,
-            finalized: true
+            finalized: true,
+            destinationChainId: block.chainid,
+            destinationRouter: address(router),
+            routeId: EURC_ROUTE
         });
     }
 }

@@ -1,0 +1,26 @@
+[package]
+name = "solana-gateway-420"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+custom-heap = []
+custom-panic = []
+
+[dependencies]
+solana-program = "=2.3.0"
+spl-token = { version = "=8.0.0", features = ["no-entrypoint"] }
+
+[dev-dependencies]
+solana-program-test = "=2.3.13"
+solana-sdk = "=2.3.1"
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }

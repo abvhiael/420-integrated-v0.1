@@ -1,0 +1,68 @@
+name: Solana Bridge Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/solana/**'
+      - 'contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/ISolanaFinalityVerifier420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/test/Solana*.t.sol'
+      - 'contracts/test/RaySolanaBridgeAdapter420.t.sol'
+      - 'contracts/test/EurcSolanaBridgeAdapter420.t.sol'
+      - 'contracts/test/VerifierRotationHardening420.t.sol'
+      - 'contracts/test/fixtures/solana/**'
+      - 'contracts/solana/gateway/**'
+      - 'scripts/qualify-solana.py'
+      - 'scripts/verify-solana-bytecode.py'
+      - 'scripts/solana_bridge420.py'
+      - 'scripts/test_solana_bridge420.py'
+      - 'scripts/solana/**'
+      - '.github/workflows/bridge-solana-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  solana-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Offline evidence and SDK
+        run: |
+          python -m pip install -r scripts/solana/requirements.txt
+          python scripts/solana/verify_history.py
+          python scripts/solana/observe_stake.py
+          python scripts/solana/make_controlled.py
+          sha256sum -c contracts/test/fixtures/solana/SHA256SUMS
+          python -m unittest discover -s scripts -p test_solana_bridge420.py -v
+          python -O -m unittest discover -s scripts -p test_solana_bridge420.py -v
+      - name: Exact affected Solidity owners
+        run: |
+          python scripts/qualify-solana.py
+          python scripts/qualify-solana.py --match RaySolanaBridgeAdapter420.t.sol
+          python scripts/qualify-solana.py --match EurcSolanaBridgeAdapter420.t.sol
+          python scripts/qualify-solana.py --match VerifierRotationHardening420.t.sol --exclude-test Ethereum
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          SOLANA_SOLC="$solc_path" python scripts/verify-solana-bytecode.py
+      - uses: dtolnay/rust-toolchain@1.91.1
+      - name: Build and execute actual SBF gateway and Tokenkeg
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/solana-target
+          BPF_OUT_DIR: ${{ runner.temp }}/solana-programs
+        run: |
+          rustup toolchain install 1.99.1 --profile minimal
+          cargo +1.99.1 install cargo-build-sbf --version 4.5.0 --locked
+          mkdir -p "$BPF_OUT_DIR"
+          cargo build-sbf --manifest-path contracts/solana/gateway/Cargo.toml --arch v1 --tools-version v1.57 --sbf-out-dir "$BPF_OUT_DIR"
+          cp contracts/test/fixtures/solana/spl_token.so "$BPF_OUT_DIR/spl_token.so"
+          cargo test --locked --manifest-path contracts/solana/gateway/Cargo.toml --test escrow -- --test-threads=1

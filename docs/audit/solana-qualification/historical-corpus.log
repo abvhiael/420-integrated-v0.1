@@ -1,0 +1,9 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.71s
+Compiler run successful!
+
+Ran 1 test for contracts/test/SolanaHistoricalCorpus420.t.sol:SolanaHistoricalCorpus420Test
+[PASS] testRemainingGenuineHistoricalBlockCorpusWithoutRepeatingQualifiedVectors() (gas: 3040536990)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.19s (9.18s CPU time)
+
+Ran 1 test suite in 9.19s (9.19s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

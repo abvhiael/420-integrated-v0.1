@@ -1,0 +1,9 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 21.70s
+Compiler run successful!
+
+Ran 1 test for contracts/test/TronFinalityProof420.t.sol:TronHistoricalEvidence420Test
+[PASS] testGenuineMainnetSolidifiedNativeTransfer() (gas: 126949727)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 207.37ms (206.57ms CPU time)
+
+Ran 1 test suite in 208.35ms (207.37ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

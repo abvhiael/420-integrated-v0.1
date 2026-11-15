@@ -1,0 +1,44 @@
+name: TRON Native Bridge Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/TronFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/tron/**'
+      - 'contracts/src/bridge/adapters/TronBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/ITronFinalityVerifier420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/config/bridge/tron-mainnet-v12.5.7.json'
+      - 'contracts/test/Tron*420.t.sol'
+      - 'contracts/test/fixtures/tron/**'
+      - 'scripts/qualify-tron.py'
+      - 'scripts/verify-tron-bytecode.py'
+      - 'scripts/tron/**'
+      - '.github/workflows/bridge-tron-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tron-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Offline native historical proof verification
+        run: |
+          python -m pip install -r scripts/tron/requirements.txt
+          python scripts/tron/verify_history.py
+          sha256sum -c contracts/test/fixtures/tron/SHA256SUMS
+      - name: Targeted TRON Solidity qualification and production bounds
+        run: |
+          python scripts/qualify-tron.py
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          TRON_SOLC="$solc_path" python scripts/verify-tron-bytecode.py

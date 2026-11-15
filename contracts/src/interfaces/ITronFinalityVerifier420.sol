@@ -17,6 +17,9 @@ interface ITronFinalityVerifier420 {
         uint256 amountSun;
         bool solidified;
         bool executionSuccess;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns (FinalizedTransfer memory transfer_);

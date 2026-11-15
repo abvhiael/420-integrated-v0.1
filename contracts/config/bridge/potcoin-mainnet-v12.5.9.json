@@ -1,6 +1,6 @@
 {
   "schema": "420-bridge-potcoin-mainnet-v12.5.9",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_POS_FINALITY_VERIFIER_AND_GATEWAY_SCRIPT",
+  "status": "INACTIVE_PENDING_GENUINE_POST_BOOTSTRAP_REPLAY_AND_PRODUCTION_AUTHORITY",
   "canonical_chain_key": "420/BRIDGE/CHAIN/POT",
   "chain_family": "UTXO_PROOF_OF_STAKE",
   "route_chain_id": "0x504f540000000001",
@@ -9,11 +9,21 @@
     "network_id_preimage": "POTCOIN/MAINNET",
     "consensus": "pure proof-of-stake after block 500",
     "last_pow_block": 500,
-    "target_block_seconds": 260,
+    "target_block_seconds": 258,
     "p2p_port": 16420,
     "rpc_port": 16421,
     "p2pkh_version": 55,
-    "p2sh_version": 110
+    "p2sh_version": 110,
+    "advertised_block_seconds": 260,
+    "genesis": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+    "block_hash": "X13 (upstream Hash9)",
+    "first_pos_height": 20,
+    "minimum_stake_age_seconds": 900,
+    "maximum_stake_weight_age_seconds": 2160000,
+    "stake_modifier_interval_seconds": 60,
+    "coinbase_and_coinstake_maturity_blocks": 10,
+    "consensus_source": "potcoin/PotCoin@24b987951186417af909a9cf1ea4da736e782c0f",
+    "network_identity_caveat": "Native main/test genesis and P2P magic coincide; mainnet canonical replay and authority configuration are required."
   },
   "native_asset": {
     "symbol": "POT",
@@ -46,5 +56,11 @@
     "source-output replay under a different message id fails closed",
     "direct adapter calls bypassing GatewayRouter420 fail closed",
     "outbound destinations are constrained to native PotCoin P2PKH/P2SH hash160 payloads"
-  ]
+  ],
+  "verifier": {
+    "contract": "PotcoinFinalityVerifier420",
+    "trust_model": "Explicit authenticated full-native replay checkpoint; X13, UTXO state, modifier ancestry, scripts/rewards and greatest-chain-trust canonicality depend on native replay authority. Not a permissionless light client or irreversible PoS finality.",
+    "destination_memo": "OP_RETURN push60: 420POTV1 || sha256(abi.encode(\"420/POT/DESTINATION/V1\",chainId,router,routeId)) || recipient20",
+    "qualified_historical_pos": false
+  }
 }

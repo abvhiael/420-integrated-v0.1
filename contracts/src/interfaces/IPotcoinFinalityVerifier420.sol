@@ -17,6 +17,9 @@ interface IPotcoinFinalityVerifier420 {
         uint256 amountPotSatoshis;
         bool proofOfStake;
         bool finalized;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof)

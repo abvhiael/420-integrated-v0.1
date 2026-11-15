@@ -1,0 +1,22 @@
+{
+  "PotcoinBridgeAdapter420": {
+    "init_bytes": 4242,
+    "runtime_bytes": 3833
+  },
+  "PotcoinFinalityVerifier420": {
+    "init_bytes": 17192,
+    "runtime_bytes": 16578
+  },
+  "PotcoinConsensus420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "PotcoinSignature420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "PotcoinWire420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

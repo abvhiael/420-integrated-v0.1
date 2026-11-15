@@ -103,6 +103,7 @@ contract PotcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayScripts[p.gatewayScriptHash]) revert GatewayNotAllowed();
         if (potAssetId == bytes32(0)) revert AssetNotConfigured();
         if (potRouteId == bytes32(0)) revert RouteNotConfigured();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != potRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
 
         consumedMessages[p.messageId] = true;

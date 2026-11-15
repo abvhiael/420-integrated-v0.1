@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol"
+      - "!contracts/src/bridge/verifiers/potcoin/**"
+      - "!contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/IPotcoinFinalityVerifier420.sol"
+      - "!contracts/test/Potcoin*420.t.sol"
+      - "!contracts/test/fixtures/potcoin/**"
+      - "!contracts/config/bridge/potcoin-mainnet-v12.5.9.json"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

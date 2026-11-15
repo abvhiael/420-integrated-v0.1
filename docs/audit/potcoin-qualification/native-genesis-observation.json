@@ -1,0 +1,52 @@
+{
+  "node": {
+    "version": "v2.0.1",
+    "protocolversion": 100001,
+    "walletversion": 60000,
+    "balance": 0.0,
+    "newmint": 0.0,
+    "stake": 0.0,
+    "combine threshold": 250.0,
+    "blocks": 0,
+    "timeoffset": 0,
+    "moneysupply": 0.0,
+    "connections": 0,
+    "proxy": "",
+    "ip": "0.0.0.0",
+    "difficulty": {
+      "proof-of-work": 0.00024414,
+      "proof-of-stake": 0.00024414
+    },
+    "testnet": false,
+    "keypoololdest": 1794707571,
+    "keypoolsize": 101,
+    "paytxfee": 0.42,
+    "mininput": 0.0,
+    "staking status": "Staking Not Active",
+    "errors": ""
+  },
+  "genesis": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+  "block": {
+    "hash": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+    "confirmations": 1,
+    "size": 188,
+    "height": 0,
+    "version": 1,
+    "merkleroot": "51d897834ac4834bec5fa26ed648ccea33173f9f8c66911561554ee25441e0d0",
+    "mint": 0.0,
+    "time": 1774803100,
+    "nonce": 1054102,
+    "bits": "1e0fffff",
+    "difficulty": 0.00024414,
+    "blocktrust": "100001",
+    "chaintrust": "100001",
+    "flags": "proof-of-work stake-modifier",
+    "proofhash": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+    "entropybit": 0,
+    "modifier": "0000000000000000",
+    "modifierchecksum": "fd11f4e7",
+    "tx": [
+      "51d897834ac4834bec5fa26ed648ccea33173f9f8c66911561554ee25441e0d0"
+    ]
+  }
+}

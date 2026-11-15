@@ -81,6 +81,7 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (p.ledgerIndex == 0 || p.ledgerHash == bytes32(0) || p.transactionRoot == bytes32(0) || p.transactionHash == bytes32(0) || p.messageId == bytes32(0) || p.gatewayAccount == bytes20(0) || p.sourceAccount == bytes20(0) || p.recipient == address(0) || p.amountDrops == 0) revert InvalidProof();
         if (!gatewayAccounts[p.gatewayAccount]) revert GatewayNotAllowed();
         if (xrpAssetId == bytes32(0) || xrpRouteId == bytes32(0)) revert InvalidBinding();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != xrpRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedTransactions[p.transactionHash]) revert Replay();
 
         consumedMessages[p.messageId] = true;

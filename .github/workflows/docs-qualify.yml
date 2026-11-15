@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md'
+      - '!docs/audit/xrpl-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'

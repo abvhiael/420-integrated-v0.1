@@ -18,6 +18,9 @@ interface IXrplFinalityVerifier420 {
         bool hasDestinationTag;
         bool validated;
         bool tesSuccess;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns (FinalizedTransfer memory transfer_);

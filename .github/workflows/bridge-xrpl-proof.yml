@@ -1,0 +1,46 @@
+name: XRPL Native Validated Ledger Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/xrpl/**'
+      - 'contracts/src/bridge/verifiers/solana/vendor/Sha512.sol'
+      - 'contracts/src/bridge/adapters/XrplBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IXrplFinalityVerifier420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/config/bridge/xrpl-mainnet-v12.5.15.json'
+      - 'contracts/test/Xrpl*420.t.sol'
+      - 'contracts/test/fixtures/xrpl/**'
+      - 'scripts/qualify-xrpl.py'
+      - 'scripts/verify-xrpl-bytecode.py'
+      - 'scripts/xrpl/**'
+      - '.github/workflows/bridge-xrpl-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  xrpl-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Authenticate preserved publisher lists and genuine native evidence offline
+        run: |
+          python -m pip install -r scripts/xrpl/requirements.txt
+          python scripts/xrpl/verify_history.py
+          python scripts/xrpl/make_controlled.py
+          sha256sum -c contracts/test/fixtures/xrpl/SHA256SUMS
+      - name: Targeted XRPL proof and adapter owners
+        run: |
+          python scripts/qualify-xrpl.py
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          XRPL_SOLC="$solc_path" python scripts/verify-xrpl-bytecode.py

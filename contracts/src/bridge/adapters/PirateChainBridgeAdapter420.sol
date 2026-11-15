@@ -22,6 +22,7 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public arrrAssetId;
     bytes32 public arrrRouteId;
 
+    mapping(bytes32 => bool) public gatewayKeys;
     mapping(bytes32 => bool) public consumedMessages;
     mapping(bytes32 => bool) public consumedNullifiers;
     mapping(bytes32 => bool) public consumedNotes;
@@ -83,6 +84,8 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         emit ArrrBindingSet(assetId, routeId);
     }
 
+    function setGatewayKey(bytes32 keyId,bool allowed) external onlyGovernance {if(keyId==0)revert InvalidProof();gatewayKeys[keyId]=allowed;}
+
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
         IPirateChainFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
@@ -97,6 +100,7 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         ) revert InvalidProof();
         if (arrrAssetId == bytes32(0)) revert AssetNotConfigured();
         if (arrrRouteId == bytes32(0)) revert RouteNotConfigured();
+        if(p.destinationChainId!=block.chainid||p.destinationRouter!=gatewayRouter||p.routeId!=arrrRouteId||!gatewayKeys[p.gatewayKeyId])revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedNullifiers[p.nullifier] || consumedNotes[p.noteCommitment]) revert Replay();
 
         consumedMessages[p.messageId] = true;
@@ -128,7 +132,7 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     ) external payable onlyRouter returns (bytes32 sourceMessageId) {
         if (
             routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0)
-                || recipient.length < 4 || recipient.length > 192 || amount == 0 || msg.value != 0
+                || recipient.length < 4 || recipient.length > 192 || amount == 0 || amount > 200_000_000 * 100_000_000 || msg.value != 0
                 || extra.length != 1 || uint8(extra[0]) > IRONWOOD_POOL
         ) revert InvalidOutbound();
         if (assetId != arrrAssetId) revert AssetNotConfigured();
@@ -144,13 +148,21 @@ contract PirateChainBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         emit PirateOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, amount, shieldedPool);
     }
 
-    function _validRecipientPrefix(bytes calldata recipient, uint8 shieldedPool) private pure returns (bool) {
-        if (shieldedPool == SAPLING_POOL) {
-            return recipient.length >= 3 && recipient[0] == 0x7a && recipient[1] == 0x73 && recipient[2] == 0x31; // zs1
-        }
-        return recipient.length >= 7
-            && recipient[0] == 0x70 && recipient[1] == 0x69 && recipient[2] == 0x72
-            && recipient[3] == 0x61 && recipient[4] == 0x74 && recipient[5] == 0x65 && recipient[6] == 0x31; // pirate1
+    // Both native Pirate encoders use original Bech32 (checksum 1), including
+    // Ironwood. Exact 43-byte payload; lowercase canonical form, no extra bits.
+    function _step(uint32 c,uint8 value) private pure returns(uint32) {
+        uint32 top=c>>25;c=((c&0x1ffffff)<<5)^value;
+        uint32[5] memory gen=[uint32(0x3b6a57b2),0x26508e6d,0x1ea119fa,0x3d4233dd,0x2a1462b3];
+        for(uint8 i;i<5;++i)if((top>>i)&1!=0)c^=gen[i];return c;
+    }
+    function _validRecipientPrefix(bytes calldata recipient, uint8 pool) private pure returns(bool) {
+        bytes memory hrp=pool==0?bytes("zs"):bytes("pirate");uint256 h=hrp.length;
+        if(recipient.length!=h+1+69+6||recipient[h]!=0x31)return false;
+        uint32 c=1;for(uint256 i;i<h;++i){if(recipient[i]!=hrp[i])return false;c=_step(c,uint8(hrp[i])>>5);}
+        c=_step(c,0);for(uint256 i;i<h;++i)c=_step(c,uint8(hrp[i])&31);
+        bytes memory alphabet=bytes("qpzry9x8gf2tvdw0s3jn54khce6mua7l");uint8 last;
+        for(uint256 i=h+1;i<recipient.length;++i){uint8 value=32;for(uint8 j;j<32;++j)if(recipient[i]==alphabet[j]){value=j;break;}if(value==32)return false;c=_step(c,value);if(i==h+69)last=value;}
+        return c==1&&(last&1)==0;
     }
 
     function _setVerifier(address verifier_) private {

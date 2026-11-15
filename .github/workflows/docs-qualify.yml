@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md'
+      - '!docs/audit/pirate-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -55,6 +57,10 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol'
+      - '!contracts/src/bridge/verifiers/pirate/**'
+      - '!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol'
+      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'
@@ -88,6 +94,8 @@ on:
       - main
     paths:
       - 'docs/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md'
+      - '!docs/audit/pirate-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
       - 'mkdocs.yml'
@@ -135,6 +143,10 @@ on:
       - 'scripts/qualify-generated-reference.py'
       - 'scripts/reference_*_renderer.py'
       - 'contracts/src/**'
+      - '!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol'
+      - '!contracts/src/bridge/verifiers/pirate/**'
+      - '!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol'
+      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol'
       - '!contracts/src/bridge/verifiers/solana/**'
       - '!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol'

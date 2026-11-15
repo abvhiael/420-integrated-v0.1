@@ -6,6 +6,13 @@ on:
       - main
     paths:
       - "contracts/**"
+      - "!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol"
+      - "!contracts/src/bridge/verifiers/pirate/**"
+      - "!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol"
+      - "!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol"
+      - "!contracts/config/bridge/pirate-mainnet-v12.5.12.json"
+      - "!contracts/test/Pirate*.t.sol"
+      - "!contracts/test/fixtures/pirate/**"
       - "!contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
       - "!contracts/src/bridge/verifiers/solana/**"
       - "!contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"

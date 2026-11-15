@@ -1,0 +1,29 @@
+PASS sapling: wrong tree root
+PASS sapling: wrong note position
+PASS sapling: wrong output
+PASS sapling: wrong pool
+PASS sapling: caller-selected nullifier
+PASS sapling: missing witness
+PASS ironwood: wrong tree root
+PASS ironwood: wrong note position
+PASS ironwood: wrong output
+PASS ironwood: wrong pool
+PASS ironwood: caller-selected nullifier
+PASS ironwood: missing witness
+{
+  "checks": [
+    "sapling: wrong tree root",
+    "sapling: wrong note position",
+    "sapling: wrong output",
+    "sapling: wrong pool",
+    "sapling: caller-selected nullifier",
+    "sapling: missing witness",
+    "ironwood: wrong tree root",
+    "ironwood: wrong note position",
+    "ironwood: wrong output",
+    "ironwood: wrong pool",
+    "ironwood: caller-selected nullifier",
+    "ironwood: missing witness"
+  ],
+  "passed": 12
+}

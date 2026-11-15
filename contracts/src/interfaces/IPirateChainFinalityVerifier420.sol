@@ -12,16 +12,20 @@ interface IPirateChainFinalityVerifier420 {
         bytes32 blockHash;
         bytes32 transactionHash;
         bytes32 messageId;
-        bytes32 nullifier;
+        bytes32 nullifier; // Deposited note NF derived with FVK and authenticated position.
         bytes32 noteCommitment;
         bytes32 memoBindingHash;
         address recipient;
         uint256 amountArrrtoshi;
         uint32 confirmations;
-        uint8 shieldedPool; // 0 = Sapling, 1 = Ironwood/Orchard
+        uint8 shieldedPool; // 0 = Sapling, 1 = Ironwood (PostNu6_3; not legacy Orchard)
         bool equihashValidated;
         bool notarizationValidated;
         bool finalized;
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
+        bytes32 gatewayKeyId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof)

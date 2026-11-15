@@ -1,0 +1,10 @@
+{
+  "rust_version": "1.96.0",
+  "profile": "release",
+  "artifacts": {
+    "scripts/pirate/shielded/Cargo.toml": "9e50adfb98d1969010f5329e1eb70c53a7dd920ed55c71fd5926894bc70b8f9f",
+    "scripts/pirate/shielded/Cargo.lock": "b0ba08ed693bb8f6941e10cf5b222984c728e06026e9aa0e8fc7f0f09d7d5eaa",
+    "scripts/pirate/shielded/src/main.rs": "c71e2db5f47aaad76a31edfe9705893b0cee6670a37d94ae15db8b5ed7cb5591",
+    "local-qualified-crypto-binary": "252cad0c8b889600d62014baaac5af77842b2294360cff96d10e2f3e84c77759"
+  }
+}

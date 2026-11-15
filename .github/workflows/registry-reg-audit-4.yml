@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'contracts/config/**'
+      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'developer-hub/catalogue/local.example.json'

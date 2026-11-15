@@ -1,6 +1,6 @@
 # BRIDGE-AUDIT-3.V.7 — Solana (SOL and SPL)
 
-**Status: local implementation qualified; entire roadmap step NOT qualified. Routes remain inactive.** Base main bb4bd6374d561bcba65345a1dbc86c0c70d53272. No production gateway deployment, trusted epoch root or real validator certificate is claimed.
+**Status: local implementation qualified; remaining final qualification deferred to testnet by user authorization on 2026-11-14. Routes remain inactive.** Base main bb4bd6374d561bcba65345a1dbc86c0c70d53272. No production gateway deployment, trusted epoch root or real validator certificate is claimed.
 
 ## Original requirements and evidence
 
@@ -49,10 +49,16 @@ Reproduction: scripts/qualify-solana.py selects exact test owners; scripts/verif
 
 The public endpoint returned a native Alpenglow genesis certificate, but no authenticated historical validator/stake mapping. getVatActiveSetRankMap returned -32601; the public certificate index reset upstream. The old archived SP1/Geyser prototype did not supply a current qualified historical proof. No real authorized validators signed this bridge domain and no deployed approved gateway was available. Those facts prevent the full historical finality and transfer exit criteria from passing. Routes must stay inactive; controlled certificates must never be represented as genuine validator evidence.
 
-Main and the previous BTC/ETH/LTC/DOGE/BNB evidence were preserved. No merge is claimed. The next numbered step is BRIDGE-AUDIT-3.V.8; its canonical title was not found in the authoritative repository, so no title or additional work is invented and it has not begun.
+Main and the previous BTC/ETH/LTC/DOGE/BNB evidence were preserved. At the original qualification closeout, no merge was claimed. The next numbered step is BRIDGE-AUDIT-3.V.8; its canonical title was not found in the authoritative repository, so no title or additional work is invented and it has not begun.
 
 ## Continuation review — SDK optimization bypass repaired
 
 Review of published source dba26122ba09e242a9a222f257abb82ecaeea9d6 reproduced two SDK test failures under Python `-O`: removable assertions allowed empty or insufficient-stake certificates to pass the offline checker. Solidity checks were unaffected. Replaced every security assertion in the public SDK/CLI with explicit ValueError checks and validated total stake, vote-account and index bounds. Invalid input remains rejected with PYTHONOPTIMIZE enabled. Six SDK tests pass in normal and optimized execution, including a subprocess test of the actual optimized CLI rejecting wrong bundle hashes, wrong approved roots, empty certificates and insufficient stake. The workflow now runs both modes. Retained Solidity/SBF evidence remains applicable because these sources did not change.
 
-Follow-up logs: solana-qualification/sdk-normal-followup.log and sdk-optimized-followup.log. The earlier four-test SDK count above describes the original qualification; the current count is six unique tests, exercised in two modes. The external authority/deployment blockers in the requirements table remain unresolved; this repair does not qualify historical finality or authorize activation. PR #1161 remains draft.
+Follow-up logs: solana-qualification/sdk-normal-followup.log and sdk-optimized-followup.log. The earlier four-test SDK count above describes the original qualification; the current count is six unique tests, exercised in two modes. The external authority/deployment blockers in the requirements table remain unresolved; this repair does not qualify historical finality or authorize activation. PR #1161 was draft at the SDK continuation closeout.
+
+## Authorized merge and testnet handoff — 2026-11-14
+
+The user authorized merging the locally qualified implementation and moving all remaining unfinished work to the testnet work roadmap. The open obligations in the requirements table are retained in [420Bridge testnet work roadmap](420BRIDGE-TESTNET-WORK-ROADMAP.md) under the original BRIDGE-AUDIT-3.V.7 scope. This handoff does not qualify historical finality, deploy a gateway, install a trusted root or activate any route.
+
+Implementation and retained passing evidence: `6de0a1a34cdb33156caeca32d2847f1dfe214995` (original Solidity/SBF qualification source `dba26122ba09e242a9a222f257abb82ecaeea9d6`; SDK repair at `6de0a1a34cdb33156caeca32d2847f1dfe214995`). PR [#1161](https://github.com/abvhiael/420-integrated-v0.1/pull/1161) is the integration vehicle. The handoff changes documentation only; all source, fixtures, logs, checksums and original passing evidence remain unchanged. No test rerun or CI run is required by these documentation changes. Full-step acceptance remains open until the deferred original requirements pass with genuine evidence.

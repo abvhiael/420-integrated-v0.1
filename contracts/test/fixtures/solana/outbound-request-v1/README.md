@@ -1,0 +1,3 @@
+# Synthetic outbound request vector
+
+This is a controlled public wire-format fixture generated with `scripts/solana_outbound420.py`, cross-checked with independent fixed-offset Python assertions and the production Solidity encoder. It is not a genuine Solana transaction, validator certificate, finalized execution record, gateway deposit or withdrawal authorization. Addresses, IDs and mint are fixed dummy values; no credentials are included. The recipient retains its high bit and final byte, and the nonce exceeds uint64. Golden hex is newline-free for Foundry's strict parser; the normative encoded message is 340 bytes.

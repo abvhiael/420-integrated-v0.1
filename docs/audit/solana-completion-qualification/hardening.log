@@ -1,0 +1,34 @@
+Compiling 85 files with Solc 0.8.24
+Solc 0.8.24 finished in 44.98s
+Compiler run successful!
+
+Ran 6 tests for contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test
+[PASS] testConfiguredRouterIsImmutableBoundary() (gas: 12790)
+[PASS] testDirectInboundRouterBypassRejectedWithoutReplayMutation() (gas: 1114352)
+[PASS] testDirectOutboundRouterBypassRejectedWithoutNonceMutation() (gas: 78615)
+[PASS] testIdenticalEconomicOutboundRequestsCannotShareCrossAdapterMessageId() (gas: 876963)
+[PASS] testInvalidOutboundPreservesNonce() (gas: 87316)
+[PASS] testSequentialSolanaOutboundUsesMonotonicNonceAndDistinctIdentity() (gas: 727518)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.62ms (1.24ms CPU time)
+
+Ran 4 tests for contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test
+[PASS] testSolanaInboundHaltPreservesReplayState() (gas: 658151)
+[PASS] testSolanaOutboundHaltPreservesNonceAndDirectionIndependence() (gas: 1031122)
+[PASS] testUnauthorizedEmergencyChangesRejected() (gas: 75697)
+[PASS] testZeroIncidentRejectedWhenHalting() (gas: 54260)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.06ms (479.49µs CPU time)
+
+Ran 4 tests for contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test
+[PASS] testGovernanceCanRotateVerifiers() (gas: 90686)
+[PASS] testRotationTransfersSolanaProofAuthorityToNewVerifier() (gas: 871729)
+[PASS] testUnauthorizedVerifierRotationRejected() (gas: 82485)
+[PASS] testZeroAndEoaVerifierRotationRejected() (gas: 104124)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 774.74µs (255.23µs CPU time)
+
+Ran 3 tests for contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test
+[PASS] testFuzzSolanaMalformedMandatoryFieldRejected(uint8,bytes32) (runs: 2500, μ: 382990, ~: 382990)
+[PASS] testFuzzSolanaRecipientLength(bytes) (runs: 2500, μ: 148132, ~: 52482)
+[PASS] testFuzzSolanaWrongGenesisRejected(bytes32,bytes32) (runs: 2500, μ: 408116, ~: 408188)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 258.61ms (435.94ms CPU time)
+
+Ran 4 test suites in 259.74ms (263.06ms CPU time): 17 tests passed, 0 failed, 0 skipped (17 total tests)

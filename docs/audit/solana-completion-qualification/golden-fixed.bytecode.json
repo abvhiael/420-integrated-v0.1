@@ -1,0 +1,5 @@
+{
+  "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol:SolanaBridgeAdapter420": 8542,
+  "contracts/src/bridge/solana/SolanaOutboundWire420.sol:SolanaOutboundWire420": 57,
+  "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol:SupportedTokenRoutes420": 57
+}

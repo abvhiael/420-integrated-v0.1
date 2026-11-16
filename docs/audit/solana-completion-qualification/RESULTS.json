@@ -1,0 +1,106 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-5",
+  "base_main_sha": "5524e46400be4fa85400a48a03099310731a7bc7",
+  "qualified_sha": "Published qualified SHA and integration status are reported by the associated PR",
+  "runs": [
+    {
+      "log": "docs/audit/solana-completion-qualification/outbound.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/outbound.inputs.json",
+      "cases_passed": 21,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 128,
+      "invariant_calls": 8192,
+      "expected_failed_tests": [
+        "testIndependentPythonGoldenWire"
+      ]
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/golden-fixed.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/golden-fixed.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/hardening.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/hardening.inputs.json",
+      "cases_passed": 17,
+      "fuzz_inputs": 7500,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/token-regression.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/token-regression.inputs.json",
+      "cases_passed": 32,
+      "fuzz_inputs": 5000,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/token-router.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/token-router.inputs.json",
+      "cases_passed": 4,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/token-payload.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/token-payload.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/solana-completion-qualification/recipient-regression.log",
+      "source_inputs": "docs/audit/solana-completion-qualification/recipient-regression.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    }
+  ],
+  "corrected_failures": {
+    "docs/audit/solana-completion-qualification/outbound.log": {
+      "testIndependentPythonGoldenWire": "docs/audit/solana-completion-qualification/golden-fixed.log"
+    }
+  },
+  "totals": {
+    "cases_passed": 77,
+    "fuzz_inputs": 15000,
+    "invariant_runs": 128,
+    "invariant_calls": 8192
+  },
+  "sdk_tests": 9,
+  "sdk_modes": [
+    "normal",
+    "optimized"
+  ],
+  "solana_adapter_runtime_bytes": 8542,
+  "eip170_limit": 24576,
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "fuzz_seed": "0x42022"
+  },
+  "ci_run_ids": [],
+  "production_approvals": [],
+  "historical_consensus_or_sbf_reruns": 0,
+  "native_consensus_component_graphs_unchanged": 12,
+  "source_trust_model": "Existing governance-authenticated stake-weighted bridge certificate oracle; not a native Tower/Alpenglow light client",
+  "live_source_qualification": "Deferred; no real approved stake/validator snapshot, bridge certificate or gateway deployment invented",
+  "release_program_implemented": false,
+  "outbound_boundary": "Typed and canonical public request transport completed; actual proof-consuming custody release requires finalized 420 burn/escrow backing and authenticated provider/program/accounts. Existing SBF remains deposit-only.",
+  "source_reconciliation": {
+    "shared_fixture": "Only Ethereum zero-address predicate changed; all Solana hardening method bodies remain unchanged. Original passing batch/source preserved; new deterministic Ethereum case qualifies correction.",
+    "fixture_transport": "Golden hex changed only by removing its trailing newline; Python strips framing whitespace, so normative golden bytes and passing SDK semantics are unchanged."
+  },
+  "sdk_inputs": "docs/audit/solana-completion-qualification/SDK-INPUTS.json"
+}

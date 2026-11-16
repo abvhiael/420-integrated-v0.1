@@ -55,3 +55,7 @@ Genuinely deployed-node, gateway/custody, issuer, trust-root and live-transfer q
 ## Ethereum completion qualification extension
 
 BRIDGE-AUDIT-4 adds a typed persisted outbound request and Ethereum source-gateway settlement ABI, preserving native/ERC-20 message IDs and rejecting zero recipients. Original V.22 manifests remain pinned to their original source. Current machine inventory qualification_extensions explicitly records each old/new input hash and current passing manifests. No Ethereum consensus/message-proof implementation changes, production approval, custody release or live-finality qualification are implied. See [Ethereum completion](BRIDGE-AUDIT-4-ETHEREUM-COMPLETION.md).
+
+## Solana completion qualification extension
+
+BRIDGE-AUDIT-5 adds typed outbound SOL/SPL payloads and canonical public message transport with full 32-byte recipients and uint64 amounts; native SOL now rejects oversized wire amounts. Existing native/SPL IDs, authenticated finality integration and SBF deposit program remain unchanged. The chained qualification inventory preserves original framework/Ethereum manifests and explicitly records superseding qualified input hashes. SOL still lacks genuine live source authority/finality evidence and has no production approval. See [Solana completion](BRIDGE-AUDIT-5-SOLANA-COMPLETION.md).

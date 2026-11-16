@@ -1,0 +1,45 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/sol-hardening-build",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/{VerifierRotationHardening420.t.sol,EmergencyControlsHardening420.t.sol,DomainNonceRouterBypassHardening420.t.sol,MalformedProofRecipientFuzzHardening420.t.sol}",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test",
+    "--match-test",
+    "Solana|UnauthorizedVerifierRotation|ZeroAndEoaVerifier|GovernanceCanRotate|UnauthorizedEmergency|ZeroIncident|IdenticalEconomic|InvalidOutboundPreserves|DirectOutboundRouter|DirectInboundRouter|ConfiguredRouter"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "VerifierRotationHardening420.t.sol",
+    "EmergencyControlsHardening420.t.sol",
+    "DomainNonceRouterBypassHardening420.t.sol",
+    "MalformedProofRecipientFuzzHardening420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol": "76f062b31fb0ede0636f8d44d94b0d70c01e5a1f238bcd7f59a3e2bcac917a45",
+    "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol": "f314115ec5e140552f4dd530689395d632d4b12fc78ab595a738ca3bd18520c5",
+    "contracts/src/bridge/solana/SolanaOutboundWire420.sol": "932d7154cf52c2fbb1f8dd788b310a9fb8892247f9abe49c4d58b1ce02f57a54",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/interfaces/IEthereumFinalityVerifier420.sol": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+    "contracts/src/interfaces/IEthereumOutboundMessage420.sol": "44813c7089bcef7b128cd3276e33045750fb293e41e4d8ee6387d61f446c77bc",
+    "contracts/src/interfaces/ISolanaFinalityVerifier420.sol": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+    "contracts/src/interfaces/ISolanaOutboundMessage420.sol": "6ca37faa38a5b1077e01e331be6674f42540e9e99dbcee482b1011ef429ebcce",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/DomainNonceRouterBypassHardening420.t.sol": "c114d980da528e8abdecd7f88c74bc585ffe38db2fd4ef8ba5cc3028021b7b6c",
+    "contracts/test/EmergencyControlsHardening420.t.sol": "7d92a06d8cb717248252e606f7709ef39d19f4ac0a5d7ecde36a221b4b1e6784",
+    "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol": "d97841cdcb2a94f2e4385aedf55c3d4d7442eff0a9cc5d0b3d75190e6ade4c7b",
+    "contracts/test/VerifierRotationHardening420.t.sol": "d44ebbd862f2f7a80cde8b2295a239f3ab8b2de5156e526bac0f5fa23a864708",
+    "contracts/test/helpers/TokenPolicyBoundaryFixture420.sol": "6cc4f47611f8c8a8f0332bbeb7b808b7cde18f3d32df1edb451fb55dc011a09b"
+  }
+}

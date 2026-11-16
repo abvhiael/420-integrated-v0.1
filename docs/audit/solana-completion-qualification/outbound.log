@@ -1,0 +1,72 @@
+Compiling 80 files with Solc 0.8.24
+Solc 0.8.24 finished in 27.15s
+Compiler run successful!
+
+Ran 12 tests for contracts/test/SolanaBridgeAdapter420.t.sol:SolanaBridgeAdapter420Test
+[PASS] testAssetRebindingClearsPriorSourceMapping() (gas: 136178)
+[PASS] testCanonicalMainnetSolInboundPasses() (gas: 173926)
+[PASS] testDestinationChainRouterAndRouteCannotBeSubstituted() (gas: 509328)
+[PASS] testDirectCallerCannotBypassRouter() (gas: 27744)
+[PASS] testFullSolanaOwnerKeyIsPreserved() (gas: 267663)
+[PASS] testOutboundRequiresExactRouteAndSolanaRecipientWidth() (gas: 428691)
+[PASS] testQualifiedSplMintUsesBoundAssetAndRoute() (gas: 383501)
+[PASS] testReplayFailsClosed() (gas: 332978)
+[PASS] testUnapprovedSplMintFailsClosed() (gas: 161099)
+[PASS] testUnfinalizedProofFailsClosed() (gas: 157345)
+[PASS] testWrongClusterFailsClosed() (gas: 162051)
+[PASS] testWrongGatewayProgramFailsClosed() (gas: 164837)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 2.41ms (1.32ms CPU time)
+2026-11-16T15:15:56.040239Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040419Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040548Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040596Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040610Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040675Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040716Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.040778Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041277Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041295Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041301Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041330Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041449Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041856Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041884Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T15:15:56.041916Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+
+Ran 9 tests for contracts/test/SolanaOutboundMessage420.t.sol:SolanaOutboundMessage420Test
+[PASS] testDownstreamRollbackRemovesMessageAndNonce() (gas: 668136)
+[PASS] testExactU64MaximumRoundTrips() (gas: 373343)
+[PASS] testFuzzPubkeyAndLamportsAreNotTruncated(uint64,bytes32) (runs: 2500, μ: 418962, ~: 419126)
+[FAIL: vm.readFile: failed to open file "/workspace/scratch/3b8511e6cffb/sol-outbound-build/contracts/test/fixtures/solana/outbound-request-v1/golden.hex": No such file or directory (os error 2)] testIndependentPythonGoldenWire() (gas: 3560)
+[PASS] testMalformedRecipientLengthsReject() (gas: 2950519)
+[PASS] testNativeAmountAboveU64RejectsBeforeNonce() (gas: 50989)
+[PASS] testOldPayloadSurvivesFurtherMessages() (gas: 792944)
+[PASS] testTypedMessageAndLegacyDigestBindFullPubkey() (gas: 448769)
+[PASS] testUnknownRequestsAndUnauthorizedCallerReject() (gas: 48406)
+Suite result: FAILED. 8 passed; 1 failed; 0 skipped; finished in 257.44ms (256.43ms CPU time)
+
+Ran 1 test for contracts/test/SolanaOutboundMessage420.t.sol:SolanaOutboundMessageInvariant420Test
+[PASS] invariantOnlySuccessfulRequestsPersistSolanaPayloadAndNonce() (runs: 128, calls: 8192, reverts: 0)
+
+╭-----------------------+-----------+-------+---------+----------╮
+| Contract              | Selector  | Calls | Reverts | Discards |
++================================================================+
+| SolOutboundHandler420 | oversized | 2776  | 0       | 0        |
+|-----------------------+-----------+-------+---------+----------|
+| SolOutboundHandler420 | request   | 2676  | 0       | 0        |
+|-----------------------+-----------+-------+---------+----------|
+| SolOutboundHandler420 | rollback  | 2740  | 0       | 0        |
+╰-----------------------+-----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.42s (1.42s CPU time)
+
+Ran 3 test suites in 1.43s (1.68s CPU time): 21 tests passed, 1 failed, 0 skipped (22 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/SolanaOutboundMessage420.t.sol:SolanaOutboundMessage420Test
+[FAIL: vm.readFile: failed to open file "/workspace/scratch/3b8511e6cffb/sol-outbound-build/contracts/test/fixtures/solana/outbound-request-v1/golden.hex": No such file or directory (os error 2)] testIndependentPythonGoldenWire() (gas: 3560)
+
+Encountered a total of 1 failing tests, 21 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

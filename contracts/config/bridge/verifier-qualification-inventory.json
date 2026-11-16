@@ -369,7 +369,7 @@
     {
       "asset": "SOL",
       "adapter": "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol",
-      "adapter_source_sha256": "d3dd504891073a5b7d70bda3e50ab8f6a1bbf1fe71cd0ba3feb54bf8b781d0fe",
+      "adapter_source_sha256": "f314115ec5e140552f4dd530689395d632d4b12fc78ab595a738ca3bd18520c5",
       "verifier": "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol",
       "verifier_source_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
       "source_qualification_pr": 1161,
@@ -422,7 +422,8 @@
       "additional_qualification_shas": [
         "dba26122ba09e242a9a222f257abb82ecaeea9d6",
         "6de0a1a34cdb33156caeca32d2847f1dfe214995"
-      ]
+      ],
+      "adapter_qualification_extension": "BRIDGE-AUDIT-5"
     },
     {
       "asset": "TRX",
@@ -940,6 +941,21 @@
         "contracts/test/TokenGatewayRouterIntegration420.t.sol": {
           "previous_sha256": "4bdae9ab51e12cd91eaf6c969f5fd800e81e8c516810279ee15b13c3d1b8aa17",
           "current_sha256": "e036f1c8008dd32b149066903d75b920fa28c5d2fb22d2207cfc59c414909292"
+        }
+      }
+    },
+    {
+      "step": "BRIDGE-AUDIT-5",
+      "base_main_sha": "5524e46400be4fa85400a48a03099310731a7bc7",
+      "results": "docs/audit/solana-completion-qualification/RESULTS.json",
+      "superseded_inputs": {
+        "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol": {
+          "previous_sha256": "d3dd504891073a5b7d70bda3e50ab8f6a1bbf1fe71cd0ba3feb54bf8b781d0fe",
+          "current_sha256": "f314115ec5e140552f4dd530689395d632d4b12fc78ab595a738ca3bd18520c5"
+        },
+        "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol": {
+          "previous_sha256": "d97841cdcb2a94f2e4385aedf55c3d4d7442eff0a9cc5d0b3d75190e6ade4c7b",
+          "current_sha256": "3dda94045fb5d74d924f4f30cf68c61893c5e6678130c1ed02784cb5302dff89"
         }
       }
     }

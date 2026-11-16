@@ -1,0 +1,9 @@
+{
+  "kind": "negative path additions only; existing jobs and branch rules unchanged",
+  "paths": [
+    ".github/workflows/420bet-sports-5d2-level2.yml",
+    ".github/workflows/contracts-hardening.yml",
+    ".github/workflows/docs-pages.yml",
+    ".github/workflows/docs-qualify.yml"
+  ]
+}

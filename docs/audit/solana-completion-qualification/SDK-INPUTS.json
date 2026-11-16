@@ -1,0 +1,24 @@
+{
+  "source_sha256": {
+    "scripts/solana_outbound420.py": "d7a55f42dc7395d7bc3e953f35f1c3fb34da8e58b153e077a8d7d65e180ff0a4",
+    "scripts/test_solana_outbound420.py": "55fd073fb36fdb6f9d50a29d138a3998e65e6d0a43b244f76ca458e0a8c3930a",
+    "contracts/test/fixtures/solana/outbound-request-v1/request.json": "f8107d7f8b8110af112b16077456ce0c81d1a8d3929f3d23a54ec943b4d8117c"
+  },
+  "normative_golden_bytes_sha256": "271ecaf099efb23f90e4c6470d01e75965ac07612b2c332339ff2faa0572a5bb",
+  "cases": 9,
+  "modes": [
+    "normal",
+    "optimized"
+  ],
+  "fixture_kind": "synthetic public request; not blockchain/finality evidence",
+  "note": "Removing the golden hex trailing newline changes transport text only; SDK decodes the identical stripped hex bytes.",
+  "golden_hex": "contracts/test/fixtures/solana/outbound-request-v1/golden.hex",
+  "logs": {
+    "normal": "docs/audit/solana-completion-qualification/sdk-normal.log",
+    "optimized": "docs/audit/solana-completion-qualification/sdk-optimized.log"
+  },
+  "commands": [
+    "python3 scripts/test_solana_outbound420.py",
+    "python3 -O scripts/test_solana_outbound420.py"
+  ]
+}

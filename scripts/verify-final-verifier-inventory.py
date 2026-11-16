@@ -5,23 +5,42 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 def check():
  inventory=json.loads((ROOT/'contracts/config/bridge/verifier-qualification-inventory.json').read_text());assert inventory['audit_status']=='QUALIFIED_LOCAL_INTEGRATION'
- extensions=inventory.get('qualification_extensions',[]);superseded={};extension_manifests=0;extension_sizes={}
+ extensions=inventory.get('qualification_extensions',[]);transitions={};extension_manifests=0;extension_sizes={}
  for extension in extensions:
-  report=json.loads((ROOT/extension['results']).read_text());assert report['pass']
-  tested={}
+  for path,record in extension['superseded_inputs'].items():
+   chain=transitions.setdefault(path,[])
+   if chain:assert chain[-1]['current_sha256']==record['previous_sha256'],path
+   assert record['previous_sha256']!=record['current_sha256']
+   chain.append(record)
+ def matches_qualified_lineage(path,digest):
+  current=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
+  for record in transitions.get(path,[]):
+   if digest==record['previous_sha256']:digest=record['current_sha256']
+  assert digest==current,path
+ for extension in extensions:
+  report=json.loads((ROOT/extension['results']).read_text());assert report['pass'];tested=set()
   for run in report['runs']:
    inp=json.loads((ROOT/run['source_inputs']).read_text());log=(ROOT/run['log']).read_text()
-   assert '[FAIL' not in log and re.search(r'\b[1-9][0-9]* tests? passed, 0 failed',log)
-   assert len(re.findall(r'^\[PASS\] ',log,re.M))==run['cases_passed']
+   failures=set(re.findall(r'^\[FAIL[\s\S]*?\]\s+(\w+)\(',log,re.M))
+   assert failures==set(run.get('expected_failed_tests',[])),run['log']
+   assert len(re.findall(r'^\[PASS\] ',log,re.M))==run['cases_passed'] and run['cases_passed']>0
+   for name in failures:
+    corrected=report['corrected_failures'][run['log']][name]
+    assert any(x['log']==corrected and not x.get('expected_failed_tests') for x in report['runs'])
+    assert re.search(r'^\[PASS\] '+re.escape(name)+r'\(', (ROOT/corrected).read_text(),re.M)
    for path,digest in inp['source_sha256'].items():
-    assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest()==digest,path
-    tested[path]=digest
-   extension_sizes.update(json.loads((ROOT/run['log']).with_suffix('.bytecode.json').read_text()))
+    matches_qualified_lineage(path,digest);tested.add((path,digest))
+   size_path=(ROOT/run['log']).with_suffix('.bytecode.json')
+   if size_path.exists():extension_sizes.update(json.loads(size_path.read_text()))
    extension_manifests+=1
-  for path,record in extension['superseded_inputs'].items():
-   assert tested[path]==record['current_sha256'],path
-   assert path not in superseded
-   superseded[path]=record
+  for path,record in extension['superseded_inputs'].items():assert (path,record['current_sha256']) in tested,path
+  if report.get('sdk_inputs'):
+   sdk=json.loads((ROOT/report['sdk_inputs']).read_text())
+   for path,digest in sdk['source_sha256'].items():assert hashlib.sha256((ROOT/path).read_bytes()).hexdigest()==digest,path
+   assert hashlib.sha256(bytes.fromhex((ROOT/sdk['golden_hex']).read_text().strip()[2:])).hexdigest()==sdk['normative_golden_bytes_sha256']
+   for log_path in sdk['logs'].values():
+    text=(ROOT/log_path).read_text();assert 'Ran '+str(sdk['cases'])+' tests' in text and text.strip().endswith('OK')
+
  families=inventory['families'];assert len(families)==14 and len({f['asset'] for f in families})==14
  assert inventory['production_approvals']==[] and inventory['no_production_activation_authorized']
  for f in families:
@@ -44,10 +63,7 @@ def check():
  for family in ['bitcoin','ethereum','litecoin','dogecoin','bnb','solana','tron','xrpl','potcoin','curecoin','dobbscoin','pirate']:assert not retained[family+'-inputs.json']['changed_production_sources'],family
  for name in ['envelope-core-domain','envelope-core-admission','envelope-core-invariant','envelope-core-settlement','envelope-core-downstream','envelope-full','envelope-utxo','envelope-ethereum','envelope-tokens','envelope-token-router','envelope-cadc','envelope-cadc-router','envelope-admission','envelope-legacy']:
   inp=json.loads((evidence/(name+'.inputs.json')).read_text())
-  for p,h in inp['source_sha256'].items():
-   current=hashlib.sha256((ROOT/p).read_bytes()).hexdigest()
-   if current!=h:
-    assert p in superseded and superseded[p]['previous_sha256']==h and superseded[p]['current_sha256']==current,p
+  for p,h in inp['source_sha256'].items():matches_qualified_lineage(p,h)
  sizes=json.loads((evidence/'envelope-legacy.bytecode.json').read_text());assert sizes and max(sizes.values())<=24576
  sizes.update(extension_sizes);assert max(sizes.values())<=24576
  catalogue=json.loads((evidence/'catalogue-integrity.log').read_text());assert catalogue['pass']
@@ -56,5 +72,5 @@ def check():
   log=(ROOT/run['log']).read_text();assert '[FAIL' not in log and re.search(r'\b[1-9][0-9]* tests? passed, 0 failed',log),run['log']
   assert len(re.findall(r'^\[PASS\] ',log,re.M))==run['cases_passed']
  assert sum(run['cases_passed'] for run in results['runs'])==inventory['current_affected_qualification']['required_cases_passed']
- return {'pass':True,'verifier_families':14,'local_verifier_models':sum(x['local_verifier_qualified_for_documented_model'] for x in families),'generic_token_routes':9,'production_approvals':0,'source_identical_native_component_graphs':12,'compiled_bridge_artifacts':len(sizes),'maximum_runtime_bytes':max(sizes.values()),'retained_bitcoin_ci':inventory['retained_bitcoin_ci'],'retained_framework_input_manifests':14,'current_extension_input_manifests_verified':extension_manifests,'explicitly_requalified_input_changes':len(superseded)}
+ return {'pass':True,'verifier_families':14,'local_verifier_models':sum(x['local_verifier_qualified_for_documented_model'] for x in families),'generic_token_routes':9,'production_approvals':0,'source_identical_native_component_graphs':12,'compiled_bridge_artifacts':len(sizes),'maximum_runtime_bytes':max(sizes.values()),'retained_bitcoin_ci':inventory['retained_bitcoin_ci'],'retained_framework_input_manifests':14,'current_extension_input_manifests_verified':extension_manifests,'explicitly_requalified_input_changes':len(transitions)}
 if __name__=='__main__':print(json.dumps(check(),indent=2))

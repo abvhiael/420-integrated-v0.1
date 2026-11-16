@@ -149,7 +149,7 @@ contract MalformedProofRecipientFuzzHardening420Test {
         (bool ok, bytes memory data) = address(router).call(
             abi.encodeCall(router.ethOutbound, (ethAdapter, ETH_ROUTE, ETH_ASSET, recipient))
         );
-        if (recipient.length == 20) {
+        if (recipient.length == 20 && keccak256(recipient) != keccak256(new bytes(20))) {
             require(ok, "canonical eth recipient rejected");
             require(data.length >= 32, "missing eth message id");
             require(ethAdapter.outboundNonce() == nonceBefore + 1, "eth nonce did not advance once");

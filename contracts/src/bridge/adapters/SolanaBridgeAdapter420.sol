@@ -2,6 +2,8 @@
 pragma solidity ^0.8.24;
 
 import "../../interfaces/IBridgeAdapter420.sol";
+import "../../interfaces/ISolanaOutboundMessage420.sol";
+import "../solana/SolanaOutboundWire420.sol";
 import "../../interfaces/ISolanaFinalityVerifier420.sol";
 import "../../system/SystemAccess.sol";
 import "../../interfaces/IBridgeTokenRoutePolicy420.sol";
@@ -10,7 +12,7 @@ import "../tokens/SupportedTokenRoutes420.sol";
 /// @notice Canonical Solana mainnet adapter for 420Bridge.
 /// @dev The adapter does not trust arbitrary RPC responses. It consumes only messages returned by a
 ///      governance-configured finality verifier and independently rechecks canonical cluster/program/asset bindings.
-contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
+contract SolanaBridgeAdapter420 is IBridgeAdapter420, ISolanaOutboundMessage420, SystemAccess {
     bytes32 public constant ADAPTER_ID = keccak256("420/BRIDGE/SOLANA/MAINNET/V12.5.2");
     bytes32 public constant SOLANA_CHAIN_KEY = keccak256("420/BRIDGE/CHAIN/SOL");
     uint64 public constant SOLANA_ROUTE_CHAIN_ID = 0x534f4c414e410001; // "SOLANA" + profile version 1
@@ -58,6 +60,20 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
     mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
+    mapping(bytes32 => OutboundMessage) private outboundMessages;
+    event SolanaOutboundPayloadStored(bytes32 indexed messageId, uint256 indexed nonce);
+
+    function outboundMessage(bytes32 messageId) external view returns (OutboundMessage memory) {
+        if (outboundMessages[messageId].nonce == 0) revert InvalidOutbound();
+        return outboundMessages[messageId];
+    }
+
+    function outboundMessageData(bytes32 messageId) external view returns (bytes memory) {
+        OutboundMessage storage r = outboundMessages[messageId];
+        if (r.nonce == 0 || r.extra.length > type(uint32).max) revert InvalidOutbound();
+        return SolanaOutboundWire420.encode(r);
+    }
+
     error InvalidAddress();
     error InvalidVerifier();
     error WrongCluster();
@@ -213,6 +229,7 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();
 
         uint256 sourceAmount = _tokenAmount(routeId, assetId, sourceAsset, bytes32(0), amount, false);
+        if (sourceAmount > type(uint64).max || extra.length > type(uint32).max) revert InvalidOutbound();
         uint256 nonce = ++outboundNonce;
         sourceMessageId = (sourceAsset == SOL_NATIVE_SOURCE_ASSET && !SupportedTokenRoutes420.isTokenAsset(assetId))
             ? keccak256(
@@ -235,6 +252,23 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
                     extra
                 )
             );
+        bytes32 recipientKey;
+        assembly ("memory-safe") { recipientKey := calldataload(recipient.offset) }
+        OutboundMessage storage request = outboundMessages[sourceMessageId];
+        request.sourceChainId = block.chainid;
+        request.sourceRouter = gatewayRouter;
+        request.sourceAdapter = address(this);
+        request.messageId = sourceMessageId;
+        request.routeId = routeId;
+        request.assetId = assetId;
+        request.sender = sender;
+        request.recipient = recipientKey;
+        request.localAmount = amount;
+        request.solanaAmount = uint64(sourceAmount);
+        request.solanaAsset = sourceAsset;
+        request.nonce = nonce;
+        request.extra = extra;
+        emit SolanaOutboundPayloadStored(sourceMessageId, nonce);
         emit SolanaOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, sourceAmount, sourceAsset);
     }
 

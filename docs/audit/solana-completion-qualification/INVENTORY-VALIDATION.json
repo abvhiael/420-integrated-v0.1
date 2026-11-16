@@ -1,0 +1,33 @@
+{
+  "pass": true,
+  "verifier_families": 14,
+  "local_verifier_models": 11,
+  "generic_token_routes": 9,
+  "production_approvals": 0,
+  "source_identical_native_component_graphs": 12,
+  "compiled_bridge_artifacts": 94,
+  "maximum_runtime_bytes": 22063,
+  "retained_bitcoin_ci": [
+    {
+      "run_id": 43563876850,
+      "source_sha": "5f58baf6dc861939a21119a0fce645060a067518",
+      "scope": "historical fixture verification",
+      "status": "PASS"
+    },
+    {
+      "run_id": 43563876854,
+      "source_sha": "5f58baf6dc861939a21119a0fce645060a067518",
+      "scope": "41 tests, 10000 fuzz cases, 256 invariant runs /128000 calls",
+      "status": "PASS"
+    },
+    {
+      "run_id": 43553972819,
+      "source_sha": "5287e2845c220b934fdde037e4e4754df881ba3c",
+      "scope": "earlier historical evidence only; not qualification of changed code",
+      "status": "RETAINED"
+    }
+  ],
+  "retained_framework_input_manifests": 14,
+  "current_extension_input_manifests_verified": 12,
+  "explicitly_requalified_input_changes": 5
+}

@@ -16,7 +16,7 @@ def main():
   seen.add(rel);source=ROOT/rel;target=dest/rel;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
   for dep in re.findall(r'(?:from\s+|import\s+)"([^"]+)"',source.read_text()):
    path=(ROOT/'contracts/test/fixtures/cadc/upstream'/dep if dep.startswith('@') or dep.startswith('solidity-bytes-utils/') else ROOT/'contracts'/dep if dep.startswith('forge-std/') else source.parent/dep).resolve();pending.append(path.relative_to(ROOT))
- for fixture in ['ethereum','bitcoin','litecoin','dogecoin','cadc','cctp','verifier-identity']:
+ for fixture in ['ethereum','bitcoin','litecoin','dogecoin','cadc','cctp','verifier-identity','solana/outbound-request-v1']:
   src=ROOT/'contracts/test/fixtures'/fixture
   if src.exists():shutil.copytree(src,dest/'contracts/test/fixtures'/fixture,dirs_exist_ok=True)
  config='''[profile.default]

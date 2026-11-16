@@ -1,0 +1,36 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/sol-outbound-build",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/{SolanaOutboundMessage420.t.sol,SolanaBridgeAdapter420.t.sol}",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "SolanaOutboundMessage420.t.sol",
+    "SolanaBridgeAdapter420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol": "f314115ec5e140552f4dd530689395d632d4b12fc78ab595a738ca3bd18520c5",
+    "contracts/src/bridge/solana/SolanaOutboundWire420.sol": "932d7154cf52c2fbb1f8dd788b310a9fb8892247f9abe49c4d58b1ce02f57a54",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/interfaces/ISolanaFinalityVerifier420.sol": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+    "contracts/src/interfaces/ISolanaOutboundMessage420.sol": "6ca37faa38a5b1077e01e331be6674f42540e9e99dbcee482b1011ef429ebcce",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/SolanaBridgeAdapter420.t.sol": "fd1a0ca714e5a486d4e0ce4d69924f3e7d9b46c2dd27f57f9f1c4e07671f0263",
+    "contracts/test/SolanaOutboundMessage420.t.sol": "07426381f81882a71982466cad73d3fb6e0b487668d575c2ebbef04f5c98d706",
+    "contracts/test/helpers/TokenPolicyBoundaryFixture420.sol": "6cc4f47611f8c8a8f0332bbeb7b808b7cde18f3d32df1edb451fb55dc011a09b"
+  }
+}

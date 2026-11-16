@@ -1,0 +1,52 @@
+Compiling 112 files with Solc 0.8.24
+Solc 0.8.24 finished in 84.46s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:396:5:
+    |
+396 |     function testFuzzPrecisionRoundTrip(uint64 amount) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:508:5:
+    |
+508 |     function testFrozenCatalogueMatchesRegistryProfilesIndependently() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 32 tests for contracts/test/SupportedTokenRoutes420.t.sol:SupportedTokenRoutes420Test
+[PASS] testAaveRoute() (gas: 8594371)
+[PASS] testAudioRoute() (gas: 8594324)
+[PASS] testAuthenticatedLegacyQcadCannotSubstitute() (gas: 8434240)
+[PASS] testAuthenticatedNativeCannotMasqueradeAsUni() (gas: 8442127)
+[PASS] testCounterfeitAndLegacySourceMappingsRejected() (gas: 8404640)
+[PASS] testDestinationContractSubstitutionRejected() (gas: 10488485)
+[PASS] testDestinationTokenDecimalsDrift() (gas: 8727218)
+[PASS] testEurcBothChainsShareDestinationAsset() (gas: 11664983)
+[PASS] testEurcEthereumRoute() (gas: 8594694)
+[PASS] testEurcSolanaRoute() (gas: 8586060)
+[PASS] testFrozenCatalogueMatchesRegistryProfilesIndependently() (gas: 20634)
+[PASS] testFuzzPrecisionOverflowFailsClosed(uint256) (runs: 2500, μ: 3996, ~: 650)
+[PASS] testFuzzPrecisionRoundTrip(uint64) (runs: 2500, μ: 1135, ~: 1141)
+[PASS] testInactiveRouteRejected() (gas: 10330235)
+[PASS] testLinkRoute() (gas: 8594485)
+[PASS] testNativeAssetCannotMasqueradeAsToken() (gas: 8412753)
+[PASS] testNativeOutboundKeepsQualifiedDigest() (gas: 921792)
+[PASS] testNoPolicyIsNotQualification() (gas: 10263100)
+[PASS] testOnlyGovernanceCanQualifyTokenRoute() (gas: 8318924)
+[PASS] testOutboundDustRejected() (gas: 8479131)
+[PASS] testOutboundExactConversionAllRoutes() (gas: 30134976)
+[PASS] testPolicyPinsGatewayWithinAdapterAllowlist() (gas: 8431986)
+[PASS] testQcadRoute() (gas: 8594769)
+[PASS] testQualifiedReplayStillRejected() (gas: 8834947)
+[PASS] testRayRoute() (gas: 8586485)
+[PASS] testRegistryCannotBeCalledAsAnAdapterByAnyone() (gas: 8307361)
+[PASS] testSolanaInboundRejectsU64Overflow() (gas: 8493010)
+[PASS] testSolanaOutboundRejectsU64Overflow() (gas: 8455230)
+[PASS] testSuspendedBridgeAssetRejected() (gas: 8453767)
+[PASS] testUniRoute() (gas: 8594885)
+[PASS] testUsdtRoute() (gas: 8594915)
+[PASS] testVerifierDependencyRotationRequiresQualification() (gas: 8627686)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 62.89ms (105.19ms CPU time)
+
+Ran 1 test suite in 63.42ms (62.89ms CPU time): 32 tests passed, 0 failed, 0 skipped (32 total tests)

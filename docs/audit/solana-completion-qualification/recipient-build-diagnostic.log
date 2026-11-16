@@ -1,0 +1,6 @@
+Error: Compiler run failed:
+Error (9553): Invalid type for argument in function call. Invalid implicit conversion from bytes memory to bytes calldata requested.
+ --> contracts/test/BridgeRecipientEncodingRegression420.t.sol:6:106:
+  |
+6 |  function testEthereumZeroRecipientIsRejectedByExistingAdapter() public {testFuzzEthereumRecipientLength(new bytes(20));}
+  |                                                                                                          ^^^^^^^^^^^^^

@@ -1,0 +1,41 @@
+{
+  "bridge-dobbscoin-proof.yml": {
+    "events": [
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "jobs": [
+      "dobbscoin-proof"
+    ]
+  },
+  "contracts-hardening.yml": {
+    "events": [
+      "push",
+      "pull_request",
+      "workflow_dispatch"
+    ],
+    "jobs": [
+      "hardening"
+    ]
+  },
+  "docs-pages.yml": {
+    "events": [
+      "push",
+      "workflow_dispatch"
+    ],
+    "jobs": [
+      "build",
+      "deploy"
+    ]
+  },
+  "docs-qualify.yml": {
+    "events": [
+      "pull_request",
+      "push",
+      "workflow_dispatch"
+    ],
+    "jobs": [
+      "qualify"
+    ]
+  }
+}

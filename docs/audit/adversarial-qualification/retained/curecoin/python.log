@@ -1,0 +1,13 @@
+test_chain_trust_and_pow_cutoff (test_curecoin.CurecoinTests.test_chain_trust_and_pow_cutoff) ... ok
+test_genuine_genesis_and_six_decimal_units (test_curecoin.CurecoinTests.test_genuine_genesis_and_six_decimal_units) ... ok
+test_genuine_historical_proof_wire_and_native_amounts (test_curecoin.CurecoinTests.test_genuine_historical_proof_wire_and_native_amounts) ... ok
+test_historical_target_limits (test_curecoin.CurecoinTests.test_historical_target_limits) ... ok
+test_kernel_cap_subtracts_minimum_age_after_cap (test_curecoin.CurecoinTests.test_kernel_cap_subtracts_minimum_age_after_cap) ... ok
+test_native_retarget_no_potcoin_negative_spacing_fallback (test_curecoin.CurecoinTests.test_native_retarget_no_potcoin_negative_spacing_fallback) ... ok
+test_rpc_only_or_optimized_validation_claim_rejected (test_curecoin.CurecoinTests.test_rpc_only_or_optimized_validation_claim_rejected) ... ok
+test_signed_comment_destination_domain (test_curecoin.CurecoinTests.test_signed_comment_destination_domain) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.004s
+
+OK

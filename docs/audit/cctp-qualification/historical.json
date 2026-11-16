@@ -1,0 +1,103 @@
+{
+  "genuine_authenticated_messages": 5,
+  "results": [
+    {
+      "name": "base-standard",
+      "source_domain": 6,
+      "destination_domain": 0,
+      "source_transaction": "0xeb99b38a590a57118685eba013104ce24c2246cf49002ecfbec33b0a651dff6a",
+      "destination_transaction": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb",
+      "executed_finality": 2000,
+      "amount": 51757000000,
+      "fee": 0,
+      "delivered": 51757000000,
+      "nonce": "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+      "message_hash": "0x30e27b5c1d543a87e4bcaceb583d539e07ef1da2e4001376a5d31ae11f357579",
+      "authorized_signers": [
+        "0x52ed4cbff8dce6a19748043f3240ec03c834bcef",
+        "0x725b06f73ff761ef5390e39315e2bfbf60d33f96"
+      ],
+      "observed_destination_receipt": true
+    },
+    {
+      "name": "arbitrum-fast",
+      "source_domain": 3,
+      "destination_domain": 0,
+      "source_transaction": "0xc78bb8e00f8a57c98cf1c7ed9065ce436bbbf9a3b5d32e5502c3d31047dc5b56",
+      "destination_transaction": "0x22a0f06d954db582201271e58e36737b9d8361256b0091a6fe747920a161b07a",
+      "executed_finality": 1000,
+      "amount": 61558230000,
+      "fee": 8618152,
+      "delivered": 61549611848,
+      "nonce": "0x64d34447836dba3f4c0b24ef9322d59d63b7a8009aaac9be8eabc5ee514ed4f2",
+      "message_hash": "0xfafcd75584afbfd1c0a086f8b96301d718e570968613b4cd241dc0784f7656d5",
+      "authorized_signers": [
+        "0x52ed4cbff8dce6a19748043f3240ec03c834bcef",
+        "0x725b06f73ff761ef5390e39315e2bfbf60d33f96"
+      ],
+      "observed_destination_receipt": true
+    },
+    {
+      "name": "arbitrum-standard-hook",
+      "source_domain": 3,
+      "destination_domain": 0,
+      "source_transaction": "0x94a8d13827caed99ce527d67f2b53810984167d137f01b3523db2862f5997c21",
+      "destination_transaction": "0x611aad8d962c78003ea03890157e64e495cd6c8ed71b85ed8d6e7cbcee6f9595",
+      "executed_finality": 2000,
+      "amount": 10101115984,
+      "fee": 846005,
+      "delivered": 10100269979,
+      "nonce": "0x04258ebfdc98c25d689d668b17d49f0347b1ffd6a38aad8f5dede69f1553c740",
+      "message_hash": "0xf41d79257163bb5e4f860fba684bb0200ebe4df5d2fca828f557cf9bc6e9f985",
+      "authorized_signers": [
+        "0x52ed4cbff8dce6a19748043f3240ec03c834bcef",
+        "0x725b06f73ff761ef5390e39315e2bfbf60d33f96"
+      ],
+      "observed_destination_receipt": true
+    },
+    {
+      "name": "solana-standard",
+      "source_domain": 5,
+      "destination_domain": 0,
+      "source_transaction": "3Nxks3vSP5gz2kXvPbhPVxZSAfCZb1eWGqS7HU9N95jkM6U5RTkmf374eNgWnZXjeCCc3KNhaL4JFd5appEH2Cz4",
+      "destination_transaction": "0x830d6601934c4078ffb479538e31fbb76836d13b4a4180fbf90f7d8675813501",
+      "executed_finality": 2000,
+      "amount": 446465039,
+      "fee": 0,
+      "delivered": 446465039,
+      "nonce": "0xf23d4ae1027bca22fe756d439d821ff37a5b7bffdee9e0a7e570237acb0a534c",
+      "message_hash": "0xa4cf22b937c20e50b22b1fdbc529c95147d9dd7e238e1a247eaef0371bcabd78",
+      "authorized_signers": [
+        "0x52ed4cbff8dce6a19748043f3240ec03c834bcef",
+        "0x725b06f73ff761ef5390e39315e2bfbf60d33f96"
+      ],
+      "observed_destination_receipt": true
+    },
+    {
+      "name": "ethereum-fast-to-base",
+      "source_domain": 0,
+      "destination_domain": 6,
+      "source_transaction": "0x65c0d05ebcb19ce1cf580dd7b4c71385b26140b933aaeffa0819e9c5ddb445ea",
+      "destination_transaction": "0xc2951ae66ffaa8c7020a5b8720235db4724b16418f21fbca6992e7934bc73c63",
+      "executed_finality": 1000,
+      "amount": 13960000000,
+      "fee": 1396000,
+      "delivered": 13958604000,
+      "nonce": "0x9fc6501142aba8d1a2a4cc7581fcca33bca4b4964feb77d6faecc4433137da4c",
+      "message_hash": "0x571ff890f7cec90f7d3ae72580b6d44c41b137e95d7f7b3a6fb918156945f39c",
+      "authorized_signers": [
+        "0x52ed4cbff8dce6a19748043f3240ec03c834bcef",
+        "0x725b06f73ff761ef5390e39315e2bfbf60d33f96"
+      ],
+      "observed_destination_receipt": false
+    }
+  ],
+  "issuer_420chain_public_status": {
+    "cctp_listed": false,
+    "native_usdc_listed": false,
+    "assigned_domain": null,
+    "status": "NOT_CURRENTLY_LISTED_NATIVE_USDC_OR_CCTP",
+    "private_issuer_approval": "NOT_ESTABLISHED_BY_PUBLIC_PUBLICATIONS"
+  },
+  "420chain_end_to_end_qualified": false
+}

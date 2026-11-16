@@ -1,0 +1,69 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 14.91s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/PotcoinFinalityVerifier420.t.sol:60:2:
+   |
+60 |  function testFuzzCompactTargetRound ... <=type(uint256).max>>24,"target");}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 12 tests for contracts/test/PotcoinBridgeAdapter420.t.sol:PotcoinBridgeAdapter420Test
+[PASS] testBootstrapPowBlockRejected() (gas: 147255)
+[PASS] testCanonicalPotcoinInboundPasses() (gas: 124270)
+[PASS] testDirectInboundBypassRejected() (gas: 27694)
+[PASS] testMessageReplayRejected() (gas: 267864)
+[PASS] testOutboundP2pkhPasses() (gas: 68145)
+[PASS] testOutboundP2shPasses() (gas: 68137)
+[PASS] testOutboundUnknownScriptTypeRejected() (gas: 37005)
+[PASS] testPostBootstrapNonPosRejected() (gas: 144457)
+[PASS] testSourceOutputReplayRejected() (gas: 335744)
+[PASS] testUnfinalizedPotcoinTransferRejected() (gas: 144245)
+[PASS] testWrongGatewayRejected() (gas: 146872)
+[PASS] testWrongPotcoinNetworkRejected() (gas: 144203)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 2.61ms (3.83ms CPU time)
+
+Ran 30 tests for contracts/test/PotcoinFinalityVerifier420.t.sol:PotcoinFinalityVerifier420Test
+[PASS] testBadCoinstakeMerkleRejected() (gas: 318686)
+[PASS] testBadDepositMerkleRejected() (gas: 419530)
+[PASS] testBadSignatureRejected() (gas: 366892)
+[PASS] testBootstrapRejected() (gas: 4756823)
+[PASS] testCheckpointRotationInvalidatesProof() (gas: 238446)
+[PASS] testControlledNativeX13SignedDeposit() (gas: 414400)
+[FAIL: accepted invalid proof] testDuplicateOddBranchSubstitutionRejected() (gas: 431920)
+[PASS] testFutureTimeRejected() (gas: 258125)
+[PASS] testFuzzCoinAgeSaturates(uint64,uint32) (runs: 2500, μ: 6619, ~: 6619)
+[PASS] testFuzzCompactTargetRoundTrip(uint32) (runs: 2500, μ: 7368, ~: 7360)
+[PASS] testGatewayRevocationRejected() (gas: 450552)
+[FAIL: genesis tx] testGenuineGenesisTransactionHash() (gas: 41781)
+[PASS] testHistoricalTransitions() (gas: 16223)
+[PASS] testImmatureStakeRejected() (gas: 4819391)
+[PASS] testInsufficientDepthRejected() (gas: 4772840)
+[PASS] testMalformedCompactRejected() (gas: 5845)
+[PASS] testMalformedEncodingRejected() (gas: 6646)
+[PASS] testMedianTimeRejected() (gas: 4819395)
+[PASS] testOriginAmountSubstitutionRejected() (gas: 4808657)
+[PASS] testOriginTransactionSubstitutionRejected() (gas: 243785)
+[PASS] testRetargetNativeSpacing258() (gas: 24573)
+[PASS] testSpentStakeRejected() (gas: 4818756)
+[PASS] testUnauthenticatedRpcClaimRejected() (gas: 211772)
+[PASS] testWrongChainTrustRejected() (gas: 4827621)
+[PASS] testWrongConsensusRevisionRejected() (gas: 4757008)
+[PASS] testWrongDestinationChainRejected() (gas: 195505)
+[PASS] testWrongDifficultyRejected() (gas: 4818852)
+[PASS] testWrongGenesisRejected() (gas: 4757139)
+[PASS] testWrongOutputRejected() (gas: 423275)
+[PASS] testWrongRouteRejected() (gas: 425543)
+Suite result: FAILED. 28 passed; 2 failed; 0 skipped; finished in 54.24ms (116.11ms CPU time)
+
+Ran 2 test suites in 55.37ms (56.84ms CPU time): 40 tests passed, 2 failed, 0 skipped (42 total tests)
+
+Failing tests:
+Encountered 2 failing tests in contracts/test/PotcoinFinalityVerifier420.t.sol:PotcoinFinalityVerifier420Test
+[FAIL: accepted invalid proof] testDuplicateOddBranchSubstitutionRejected() (gas: 431920)
+[FAIL: genesis tx] testGenuineGenesisTransactionHash() (gas: 41781)
+
+Encountered a total of 2 failing tests, 40 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 2 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

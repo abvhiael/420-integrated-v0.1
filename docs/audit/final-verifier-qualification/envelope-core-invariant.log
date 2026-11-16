@@ -1,0 +1,112 @@
+Compiling 109 files with Solc 0.8.24
+Solc 0.8.24 finished in 127.97s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-16T05:57:55.264576Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.264677Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.264710Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.264826Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.264837Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.265178Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.265224Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.265286Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.268854Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.268908Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.268930Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.268992Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.269012Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.269044Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.269083Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T05:57:55.269138Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 1 test for contracts/test/BridgeProductionAdmissionInvariant420.t.sol:BridgeProductionAdmissionInvariant420Test
+[PASS] invariantOnlyLiveQualifiedRoutesAdmitAndRejectedProofsDoNotConsumeRisk() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| V20AdmissionHandler | attempt  | 1593  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | disable  | 1691  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | qualify  | 1621  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | revoke   | 1618  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | suspend  | 1669  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.43s (8.37s CPU time)
+
+Ran 1 test suite in 8.43s (8.43s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

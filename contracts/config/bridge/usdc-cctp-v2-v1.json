@@ -1,0 +1,70 @@
+{
+  "schema": "420-bridge-usdc-cctp-v2-v1",
+  "status": "APPROVED_INACTIVE_PENDING_CIRCLE_420_SUPPORT",
+  "asset": "USDC",
+  "asset_decimals": 6,
+  "adapter": "USDCCCTPAdapter",
+  "adapter_id_preimage": "420/BRIDGE/USDCCCTPAdapter",
+  "protocol": "Circle CCTP V2",
+  "wire_header_version": 1,
+  "wire_burn_body_version": 1,
+  "local": {
+    "canonical_chain_key": "420/BRIDGE/CHAIN/420",
+    "evm_chain_id": 420,
+    "circle_domain": null,
+    "native_usdc": null,
+    "message_transmitter": null,
+    "token_messenger": null,
+    "token_minter": null,
+    "transmitter_implementation_hash": null,
+    "messenger_implementation_hash": null,
+    "issuer_support_evidence": null
+  },
+  "issuer_public_status": "NOT_CURRENTLY_LISTED_NATIVE_USDC_OR_CCTP",
+  "private_issuer_approval": "NOT_ESTABLISHED",
+  "verification": "Official issuer MessageTransmitterV2 validates Iris attestations; TokenMessengerV2 and TokenMinterV2 perform actual native USDC burn/mint. No 420 validator committee or synthetic replacement.",
+  "replay": "Circle V2 globally unique bytes32 nonce, independent persistent adapter consumption across re-attestation and reconfiguration.",
+  "default_minimum_finality": 2000,
+  "fast_transfer_policy": "Only explicitly qualified peers may use 1000; fee-adjusted native delivery is required.",
+  "source_peers": {
+    "0": {
+      "name": "Ethereum",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "address_model": "EVM",
+      "evm_chain_id": 1,
+      "active": false
+    },
+    "3": {
+      "name": "Arbitrum",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831",
+      "address_model": "EVM",
+      "evm_chain_id": 42161,
+      "active": false
+    },
+    "6": {
+      "name": "Base",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "address_model": "EVM",
+      "evm_chain_id": 8453,
+      "active": false
+    }
+  },
+  "risk_limits": "contracts/config/bridge/risk-limits.json",
+  "activation_requirements": [
+    "Circle-supported 420Chain CCTP domain, native USDC and official CCTP deployments confirmed",
+    "Exact issuer MessageTransmitter/TokenMessenger native implementation identities and token-minter bindings qualified",
+    "Actual source-domain, remote-messenger and USDC token-pair bindings reconciled",
+    "Issuer support evidence recorded; adapter explicitly enabled by canonical governance",
+    "Approved routes, asset, risk, health and accounting configured in canonical registries",
+    "Funded source burn -> genuine Iris attestation -> native destination mint qualified on the approved network"
+  ],
+  "audit": "docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md",
+  "canonical_asset_id": null,
+  "asset_binding": "Resolve the approved canonical Registry asset ID for Circle native USDC; no new identifier is assigned here."
+}

@@ -1,0 +1,25 @@
+{
+  "base_main": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "method": "Exact production import closure and final test/tool sources; retained unique passing test union without redundant reruns; publication commit identifies exact file tree.",
+  "files": {
+    "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol": "fb03a16d58c713f756f8a9187336168a75a9c923d38f0fd0e5b79863d18912b0",
+    "contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol": "9fb9c74fa6817717ca9f582714d498d9b522525687c0a2ecc3953cc1b89db58f",
+    "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+    "contracts/src/bridge/verifiers/xrpl/XrplBinary420.sol": "d1d3f0845a9a9c622971adfc189c1555c4aec581bc8899ff44a4e35c13197da3",
+    "contracts/src/bridge/verifiers/xrpl/XrplPayment420.sol": "af9cb0d201d5a8787994e1fac52a9534ced0588bf7ce1675963d226cefe8c597",
+    "contracts/src/bridge/verifiers/xrpl/XrplSHA512Half420.sol": "3d896af9fd38bf0fcd107c924beca49b18a311ff3e1708bb30debae11523c9fd",
+    "contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol": "3671575426f53d946d91ce98f15d0e438d4d8bb598ea9fb64359ffc0eec26fbb",
+    "contracts/src/bridge/verifiers/xrpl/XrplValidation420.sol": "fc785413d5d4ff1fbfee2b034f0a41c2833c15c7c90ef51075b10de62cd0ce34",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IXrplFinalityVerifier420.sol": "85375e44c0651836c4dbd09c29cafa5d0012df63ac99b6e87774c5c4be394b28",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/XrplBridgeAdapter420.t.sol": "57d00ec4037766077c56382e9f6421c6d37d26a049a14316abde0d5db6d044b5",
+    "contracts/test/XrplFinalityProof420.t.sol": "f110ae789c762f91e58829328bad833d6f11a040f9d6cbfbfd867da6b8e6835a",
+    "scripts/qualify-xrpl.py": "a838c1a33c377263e7a4120cf499cb1fe58f1dd5787700052595d38e1715999c",
+    "scripts/verify-xrpl-bytecode.py": "b4444306e39ed397a3038e4ef7716a1ad59cf0d9c771217a888d56f24d5ba575",
+    "scripts/xrpl/fetch_history.py": "6efb83dd5e14ef1b0c55a8d4c82782ef9887299f2d91ff870ad798348208d62a",
+    "scripts/xrpl/make_controlled.py": "c3d7126399790cac2945ea9498b8c738495bbf19caef21d31ff0682fe1c89b0c",
+    "scripts/xrpl/requirements.txt": "27c1b2a9b8b6173fa9a9debefb6870dfb1b8c17263790e2514dc58e74d27ed51",
+    "scripts/xrpl/verify_history.py": "f0a29d5afee7a1d56b83ae7a461db018489f0cd165f9c1d6de3d41c8103216d3"
+  }
+}

@@ -1,0 +1,50 @@
+Compiling 12 files with Solc 0.8.24
+Solc 0.8.24 finished in 17.11s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/CurecoinFinalityVerifier420.t.sol:96:2:
+   |
+96 |  function testFuzzCompactTargetRound ... <=type(uint256).max>>24,"target");}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 36 tests for contracts/test/CurecoinFinalityVerifier420.t.sol:CurecoinFinalityVerifier420Test
+[PASS] testBadCoinstakeMerkleRejected() (gas: 331589)
+[PASS] testBadDepositMerkleRejected() (gas: 429445)
+[PASS] testBadSignatureRejected() (gas: 383570)
+[PASS] testBootstrapRejected() (gas: 5008108)
+[PASS] testCheckpointRotationInvalidatesProof() (gas: 245744)
+[PASS] testControlledNativeSha256dSignedDeposit() (gas: 422730)
+[PASS] testDuplicateOddBranchSubstitutionRejected() (gas: 429220)
+[PASS] testFutureTimeRejected() (gas: 268917)
+[PASS] testFuzzCoinAgeSaturates(uint64,uint32) (runs: 2500, μ: 6688, ~: 6688)
+[PASS] testFuzzCompactTargetRoundTrip(uint32) (runs: 2500, μ: 7462, ~: 7450)
+[PASS] testGatewayRevocationRejected() (gas: 460438)
+[PASS] testGenuineGenesisTransactionHash() (gas: 56394)
+[PASS] testGenuineHistoricalStakeProofs() (gas: 48898775)
+[PASS] testHistoricalTransitions() (gas: 12710)
+[PASS] testImmatureStakeRejected() (gas: 5079404)
+[PASS] testInsufficientDepthRejected() (gas: 5029297)
+[PASS] testInvalidMinimumAgeContextRejected() (gas: 5088295)
+[PASS] testKernelTargetEqualityAndUnboundedProduct() (gas: 27621)
+[PASS] testMalformedCompactRejected() (gas: 5904)
+[PASS] testMalformedEncodingRejected() (gas: 6751)
+[PASS] testMedianTimeRejected() (gas: 5079219)
+[PASS] testNativeHybridPublicKeyAndParity() (gas: 266246)
+[PASS] testOriginAmountSubstitutionRejected() (gas: 5066630)
+[PASS] testOriginTransactionSubstitutionRejected() (gas: 252714)
+[PASS] testRealVerifierAdapterReplayAfterRotation() (gas: 6107335)
+[PASS] testRealVerifierCannotSubstituteAdapterRoute() (gas: 1554582)
+[PASS] testRetargetNativeSpacing240() (gas: 24600)
+[PASS] testSpentStakeRejected() (gas: 5078742)
+[PASS] testUnauthenticatedRpcClaimRejected() (gas: 219251)
+[PASS] testWrongChainTrustRejected() (gas: 5087616)
+[PASS] testWrongConsensusRevisionRejected() (gas: 5008344)
+[PASS] testWrongDestinationChainRejected() (gas: 197836)
+[PASS] testWrongDifficultyRejected() (gas: 5078865)
+[PASS] testWrongGenesisRejected() (gas: 5008502)
+[PASS] testWrongOutputRejected() (gas: 426735)
+[PASS] testWrongRouteRejected() (gas: 435407)
+Suite result: ok. 36 passed; 0 failed; 0 skipped; finished in 63.02ms (178.28ms CPU time)
+
+Ran 1 test suite in 63.82ms (63.02ms CPU time): 36 tests passed, 0 failed, 0 skipped (36 total tests)

@@ -1,0 +1,7 @@
+{
+  "functional_paths_matching_pr_workflows": [
+    "bridge-pirate-proof.yml"
+  ],
+  "changed_workflow_files": "self-owner matches intentionally skipped by publication commit; no branch filters added or changed",
+  "actions_runs_launched": 0
+}

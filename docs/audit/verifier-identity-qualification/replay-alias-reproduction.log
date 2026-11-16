@@ -1,0 +1,18 @@
+Compiling 35 files with Solc 0.8.24
+Solc 0.8.24 finished in 67.48s
+Compiler run successful!
+
+Ran 1 test for contracts/test/BridgeVerifierRouteIdentity420.t.sol:BridgeVerifierRouteIdentity420Test
+[FAIL: unqualified route executed] testV19SourceChainAliasCannotResetCanonicalMessageReplay() (gas: 30677611)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 9.17ms (7.89ms CPU time)
+
+Ran 1 test suite in 9.82ms (9.17ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BridgeVerifierRouteIdentity420.t.sol:BridgeVerifierRouteIdentity420Test
+[FAIL: unqualified route executed] testV19SourceChainAliasCannotResetCanonicalMessageReplay() (gas: 30677611)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

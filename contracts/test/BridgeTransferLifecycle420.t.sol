@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/bridge/BridgeTransferRegistry.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./BridgeGenesisIntegration420.t.sol";
 
 contract BridgeLifecycleCaller420 {
     function markSourcePending(BridgeTransferRegistry registry, bytes32 id, bytes32 evidence) external {
@@ -10,9 +11,9 @@ contract BridgeLifecycleCaller420 {
     }
 }
 
-contract BridgeTransferLifecycle420Test {
-    bytes32 private constant ROUTE = keccak256("route");
-    bytes32 private constant ASSET = keccak256("asset");
+contract BridgeTransferLifecycle420Test is BridgeGenesisFixture420 {
+    bytes32 private constant ROUTE = keccak256("CADC/LZ/ETH-420");
+    bytes32 private constant ASSET = keccak256("CADC");
     bytes32 private constant SOURCE_TX = keccak256("source-tx");
     bytes32 private constant SOURCE_MESSAGE = keccak256("source-message");
     address private constant SENDER = address(0xA11CE);
@@ -22,11 +23,15 @@ contract BridgeTransferLifecycle420Test {
     BridgeTransferRegistry private registry;
 
     function setUp() public {
-        env = new GenesisMockEnvironment420();
-        registry = new BridgeTransferRegistry(address(this), address(env.registry()), keccak256("transfer-lifecycle"));
-        env.registerResident(address(registry), registry.componentId());
-        registry.setRouter(address(this), true);
+        Fixture memory f=_setup();env=f.env;registry=f.transfers;
+        env.registerResident(address(this),BridgeIds420.GATEWAY_ROUTER);
+        registry.setRouter(address(this),true);
+        BridgeQualificationFixture420.approveRoute(env,f.routes,ROUTE,address(this),address(this),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
+
+    // Controlled canonical-router identity for lifecycle unit tests; not a production router.
+    function adapters(bytes32) external view returns(address){return address(this);}
+    function adapterId() external pure returns(bytes32){return keccak256("TEST/BRIDGE/ADAPTER");}
 
     function _evidence(string memory label) private pure returns (bytes32) {
         return keccak256(bytes(label));

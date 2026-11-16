@@ -1,0 +1,4 @@
+94735135331d05c72c360db44ff575ea4b06a0e7f5d57c96ad84711f009b1390  contracts/test/fixtures/dobbscoin/historical.json
+1b477d4dfe49e8d03eb852a7e9833c9cdd9f6029d9ac3a3f473b3ec8dcd0326a  contracts/test/fixtures/dobbscoin/native-checkpoint.json
+4392d435ef550545d3763fbe8e7d0f43bfd038d3ad7e5d8aa7d6092bab67ffd4  contracts/test/fixtures/dobbscoin/native-regtest-auxpow.json
+f491a94d19e6d0b42e4c863b9fdabb4ba5bb5fc9784072e240dfdacaa739a22d  contracts/test/fixtures/dobbscoin/proofs.json

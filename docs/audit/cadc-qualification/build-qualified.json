@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "compiler": "solc 0.8.24",
+  "compiler_sha256": "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f",
+  "optimizer_runs": 200,
+  "via_ir": true,
+  "evm_version": "cancun",
+  "runtime_bytes": 12217,
+  "runtime_sha256": "3d2f7722325baa64f5bb819c36272d4e3d6183d515890743c95b3dea41379785",
+  "source_sha256": {
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": "323c4e562af28b536ef2ea7f87518f0e4f0ce406747ef934e189333f9cb09356",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a"
+  }
+}

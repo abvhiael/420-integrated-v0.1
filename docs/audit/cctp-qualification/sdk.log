@@ -1,0 +1,38 @@
+test_abi_proof_round_trip (test_cctp.CCTPTests.test_abi_proof_round_trip) ... ok
+test_boolean_is_not_an_amount_or_threshold (test_cctp.CCTPTests.test_boolean_is_not_an_amount_or_threshold) ... ok
+test_bound_caller_is_adapter_not_router (test_cctp.CCTPTests.test_bound_caller_is_adapter_not_router) ... ok
+test_changed_nonce_invalidates_attestation (test_cctp.CCTPTests.test_changed_nonce_invalidates_attestation) ... ok
+test_dirty_evm_source_sender_rejected (test_cctp.CCTPTests.test_dirty_evm_source_sender_rejected) ... ok
+test_duplicate_signer (test_cctp.CCTPTests.test_duplicate_signer) ... ok
+test_expiry_equality_rejected (test_cctp.CCTPTests.test_expiry_equality_rejected) ... ok
+test_fast_requires_explicit_peer_policy (test_cctp.CCTPTests.test_fast_requires_explicit_peer_policy) ... ok
+test_fee_above_maximum (test_cctp.CCTPTests.test_fee_above_maximum) ... ok
+test_five_authentic_historical_messages (test_cctp.CCTPTests.test_five_authentic_historical_messages) ... ok
+test_high_s_malleability (test_cctp.CCTPTests.test_high_s_malleability) ... ok
+test_malformed_v (test_cctp.CCTPTests.test_malformed_v) ... ok
+test_native_non_evm_destination_is_not_truncated (test_cctp.CCTPTests.test_native_non_evm_destination_is_not_truncated) ... ok
+test_no_invented_420_domain_or_support (test_cctp.CCTPTests.test_no_invented_420_domain_or_support) ... ok
+test_noncanonical_evm_recipient (test_cctp.CCTPTests.test_noncanonical_evm_recipient) ... ok
+test_nonce_replay_survives_message_digest_change (test_cctp.CCTPTests.test_nonce_replay_survives_message_digest_change) ... ok
+test_outbound_dirty_evm_caller_rejected (test_cctp.CCTPTests.test_outbound_dirty_evm_caller_rejected) ... ok
+test_outbound_dirty_evm_recipient_rejected (test_cctp.CCTPTests.test_outbound_dirty_evm_recipient_rejected) ... ok
+test_outbound_encoding_preserves_hook (test_cctp.CCTPTests.test_outbound_encoding_preserves_hook) ... ok
+test_sandbox_keys_cannot_authorize_mainnet (test_cctp.CCTPTests.test_sandbox_keys_cannot_authorize_mainnet) ... ok
+test_truncated_messages (test_cctp.CCTPTests.test_truncated_messages) ... ok
+test_unsorted_signers (test_cctp.CCTPTests.test_unsorted_signers) ... ok
+test_unsupported_wire_version (test_cctp.CCTPTests.test_unsupported_wire_version) ... ok
+test_v1_keys_cannot_authorize_v2 (test_cctp.CCTPTests.test_v1_keys_cannot_authorize_v2) ... ok
+test_valid_route_and_net_delivery (test_cctp.CCTPTests.test_valid_route_and_net_delivery) ... ok
+test_wrong_burn_token (test_cctp.CCTPTests.test_wrong_burn_token) ... ok
+test_wrong_destination_domain (test_cctp.CCTPTests.test_wrong_destination_domain) ... ok
+test_wrong_destination_messenger (test_cctp.CCTPTests.test_wrong_destination_messenger) ... ok
+test_wrong_signature_count (test_cctp.CCTPTests.test_wrong_signature_count) ... ok
+test_wrong_signing_domain_prefix (test_cctp.CCTPTests.test_wrong_signing_domain_prefix) ... ok
+test_wrong_source_domain (test_cctp.CCTPTests.test_wrong_source_domain) ... ok
+test_wrong_source_messenger (test_cctp.CCTPTests.test_wrong_source_messenger) ... ok
+test_zero_threshold_not_an_authentication_bypass (test_cctp.CCTPTests.test_zero_threshold_not_an_authentication_bypass) ... ok
+
+----------------------------------------------------------------------
+Ran 33 tests in 0.111s
+
+OK

@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "historical-sapling: native proofs and signatures",
+    "historical-sapling: altered authorization rejected",
+    "historical-sapling: wrong consensus branch rejected",
+    "historical-sapling: caller RPC assertion rejected",
+    "controlled-sapling-v6: native proofs and signatures",
+    "controlled-sapling-v6: altered authorization rejected",
+    "controlled-sapling-v6: wrong consensus branch rejected",
+    "controlled-sapling-v6: caller RPC assertion rejected",
+    "controlled-ironwood-v6: native proofs and signatures",
+    "controlled-ironwood-v6: altered authorization rejected",
+    "controlled-ironwood-v6: wrong consensus branch rejected",
+    "controlled-ironwood-v6: caller RPC assertion rejected",
+    "controlled-ironwood-spend-v6: native proofs and signatures",
+    "controlled-ironwood-spend-v6: altered authorization rejected",
+    "controlled-ironwood-spend-v6: wrong consensus branch rejected",
+    "controlled-ironwood-spend-v6: caller RPC assertion rejected",
+    "world-readable credential rejected",
+    "symlink credential rejected",
+    "incoming-only/wrong-width credential rejected",
+    "unowned key rejected"
+  ],
+  "passed": 20,
+  "historical_owned_deposit_qualified": false
+}

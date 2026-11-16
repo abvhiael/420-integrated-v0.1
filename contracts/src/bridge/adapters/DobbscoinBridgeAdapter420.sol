@@ -26,6 +26,8 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedSourceOutputs;
     uint256 public outboundNonce;
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress(); error InvalidVerifier(); error WrongNetwork(); error Unfinalized();
     error InsufficientConfirmations(); error InvalidProof(); error AuxPowRequired(); error GatewayNotAllowed();
     error AssetNotConfigured(); error RouteNotConfigured(); error Replay(); error OnlyRouter(); error InvalidOutbound();
@@ -73,6 +75,7 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayScripts[p.gatewayScriptHash]) revert GatewayNotAllowed();
         if (bobAssetId == bytes32(0)) revert AssetNotConfigured();
         if (bobRouteId == bytes32(0)) revert RouteNotConfigured();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != bobRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
 
         consumedMessages[p.messageId] = true;
@@ -81,6 +84,7 @@ contract DobbscoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));
         if (syntheticSender == address(0)) revert InvalidProof();
+        verifiedSourceContext[p.messageId]=SourceProofContext(p.gatewayScriptHash,bobAssetId);
         v = VerifiedTransfer({routeId: bobRouteId, assetId: bobAssetId, sender: syntheticSender,
             recipient: p.recipient, amount: p.amount, sourceTxId: p.transactionHash, sourceMessageId: p.messageId});
     }

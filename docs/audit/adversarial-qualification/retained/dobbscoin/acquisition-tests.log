@@ -1,0 +1,6 @@
+test_cached_raw_requires_exact_bytes_not_just_size (test_acquisition.AcquisitionTests.test_cached_raw_requires_exact_bytes_not_just_size) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+OK

@@ -1,0 +1,22 @@
+Compiling 37 files with Solc 0.8.24
+Solc 0.8.24 finished in 30.08s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/SupportedTokenRoutes420.t.sol:65:2460:
+   |
+65 |  ... assetId,true);reject(1,42 ether);} function testFuzzPrecisionRoundTrip ... verted,18,6)==amount,"precision");}
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/SupportedTokenRoutes420.t.sol:75:1:
+   |
+75 | function testFrozenCatalogueMatches ... ozen registry profile mismatch");}}
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 2 tests for contracts/test/SupportedTokenRoutes420.t.sol:SupportedTokenRoutes420Test
+[PASS] testNativeOutboundKeepsQualifiedDigest() (gas: 402374)
+[PASS] testOutboundExactConversionAllRoutes() (gas: 12901642)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.72ms (5.70ms CPU time)
+
+Ran 1 test suite in 8.00ms (7.72ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

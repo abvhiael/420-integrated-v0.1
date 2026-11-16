@@ -4,8 +4,16 @@
   "canonical_chain_key": "420/BRIDGE/CHAIN/ETH",
   "chain_family": "EVM_ETHEREUM",
   "route_chain_id": "0x4554484d41494e01",
-  "network_identity": { "method": "EIP155_CHAIN_ID", "chain_id": 1, "caip2": "eip155:1" },
-  "native_asset": { "symbol": "ETH", "source_asset_marker": "420/BRIDGE/ETHEREUM/NATIVE/ETH", "units": "wei" },
+  "network_identity": {
+    "method": "EIP155_CHAIN_ID",
+    "chain_id": 1,
+    "caip2": "eip155:1"
+  },
+  "native_asset": {
+    "symbol": "ETH",
+    "source_asset_marker": "420/BRIDGE/ETHEREUM/NATIVE/ETH",
+    "units": "wei"
+  },
   "adapter": {
     "contract": "EthereumBridgeAdapter420",
     "adapter_id_preimage": "420/BRIDGE/ETHEREUM/MAINNET/V12.5.4",
@@ -35,5 +43,21 @@
     "message replay fails closed",
     "direct adapter calls bypassing GatewayRouter420 fail closed",
     "outbound recipients must be exactly 20 bytes"
-  ]
+  ],
+  "local_implementation": {
+    "roadmap_step": "BRIDGE-AUDIT-3.V.3",
+    "status": "IMPLEMENTED_AND_LOCALLY_QUALIFIED_NOT_DEPLOYED",
+    "finality_oracle": "EthereumConsensusLightClient420",
+    "consensus_proof": "SP1 v6.1.0 Groth16 verifier / pinned SP1 v6.8.1 Helios guest",
+    "message_verifier": "EthereumGatewayMessageVerifier420",
+    "source_gateway": "EthereumDepositGateway420",
+    "proof_specification": "contracts/test/fixtures/ethereum/README.md",
+    "qualification": "contracts/test/fixtures/ethereum/qualification/RESULTS.md",
+    "destination_binding": [
+      "chain_id",
+      "router_address",
+      "route_id"
+    ],
+    "activation": "No route or custody activation is performed by local qualification"
+  }
 }

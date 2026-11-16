@@ -1,0 +1,33 @@
+{
+  "reference": "Python standard library struct.pack(<Q) and hashlib.sha256; canonical 160-byte source gateway instruction layout",
+  "values": [
+    {
+      "amount_and_nonce": 0,
+      "instruction_sha256": "93e9b25ab7b02c233de622cdb7b26aad0b4ec3728db346bad238f35afe9a1092"
+    },
+    {
+      "amount_and_nonce": 1,
+      "instruction_sha256": "e65b74fc5581d5d5a4b5812c4c2fb7678ade46fff26f40d30df71c786d339aa6"
+    },
+    {
+      "amount_and_nonce": 4294967295,
+      "instruction_sha256": "26eaa11b078f74bcd0b454d8cce3e7f3a531eaf3c25fad866d696ae8730518ab"
+    },
+    {
+      "amount_and_nonce": 4294967296,
+      "instruction_sha256": "16cf4201ec186b4a757dfbc20c3d8062e972e47ad5a41a908077371d75570a06"
+    },
+    {
+      "amount_and_nonce": 9007199254740992,
+      "instruction_sha256": "f1cbdc19b5a426b5c92d77d99fd58deca8fd3cda12e32f3a128dff4e90bc4038"
+    },
+    {
+      "amount_and_nonce": 9223372036854775808,
+      "instruction_sha256": "039e1094925a60b60dda409e4386b547a190b7e86ec79a2d3546c3cd8dade86e"
+    },
+    {
+      "amount_and_nonce": 18446744073709551615,
+      "instruction_sha256": "cd9f843d2c5652360d9209f357a82de7f05925fbff286672ba69289674164991"
+    }
+  ]
+}

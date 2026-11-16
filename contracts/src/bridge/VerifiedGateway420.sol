@@ -10,6 +10,7 @@ import "../interfaces/genesis/IReplayProtection420.sol";
 import "../interfaces/genesis/Errors420.sol";
 import "../libraries/GenesisInterfaceIds420.sol";
 import "./BridgeIds420.sol";
+import "./BridgeVerifierRegistry420.sol";
 
 interface IVerifiedGatewayVerifier420 {
     function verifyDeposit(bytes calldata proof) external view returns (
@@ -30,7 +31,11 @@ interface IVerifiedGatewayVerifier420 {
 /// @dev Shared pause/safety/replay and canonical settlement eligibility are authoritative.
 contract VerifiedGateway420 is GenesisResidentAccess420 {
     address public verifier;
+    address public qualificationRegistry;
+    bytes32 public qualificationRegistryCodeHash;
+    bytes32 public qualificationId;
     mapping(bytes32 => bool) public consumedDeposits;
+    mapping(bytes32 => bool) public consumedEvidence;
     mapping(bytes32 => bool) public consumedWithdrawals;
     mapping(address => bool) public approvedAssets;
 
@@ -52,9 +57,24 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
         _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
         require(verifier_ != address(0) && verifier_.code.length != 0, "verifier");
         verifier = verifier_;
+        qualificationId=0;
         emit VerifierSet(verifier_);
     }
 
+    event QualificationBound(bytes32 indexed approvalId,address indexed registry);
+    function bindQualification(bytes32 expected) external {
+        _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
+        address target=_resolveRequired(BridgeIds420.VERIFIER_REGISTRY);
+        require(expected!=0 && BridgeVerifierRegistry420(target).requireCurrent(address(this))==expected,"qualification");
+        qualificationRegistry=target;qualificationRegistryCodeHash=target.codehash;qualificationId=expected;
+        emit QualificationBound(expected,target);
+    }
+    function _qualification(uint8 direction) private view returns(BridgeVerifierRegistry420 qualification){
+        address target=_resolveRequired(BridgeIds420.VERIFIER_REGISTRY);
+        require(target==qualificationRegistry && target.codehash==qualificationRegistryCodeHash && qualificationId!=0,"qualification not bound");
+        qualification=BridgeVerifierRegistry420(target);
+        require(qualification.requireDirection(address(this),direction)==qualificationId,"stale qualification");
+    }
     function setAsset(address asset, bool approved) external {
         _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
         if (approved) _canonicalSettlementAsset(asset);
@@ -77,14 +97,8 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
-        require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        (depositId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyDeposit(proof);
-        _checkReplay(depositId);
-        require(!consumedDeposits[depositId], "replay");
-        require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");
-        _canonicalSettlementAsset(asset);
-        consumedDeposits[depositId] = true;
-        emit DepositVerified(depositId, recipient, asset, amount);
+        _qualification(1);
+        revert("legacy source proof domain unqualified");
     }
 
     function verifyWithdrawal(bytes calldata proof)
@@ -96,13 +110,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.OUTBOUND
         );
-        require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        (withdrawalId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyWithdrawal(proof);
-        _checkReplay(withdrawalId);
-        require(!consumedWithdrawals[withdrawalId], "replay");
-        require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");
-        _canonicalSettlementAsset(asset);
-        consumedWithdrawals[withdrawalId] = true;
-        emit WithdrawalVerified(withdrawalId, recipient, asset, amount);
+        _qualification(2);
+        revert("legacy source proof domain unqualified");
     }
 }

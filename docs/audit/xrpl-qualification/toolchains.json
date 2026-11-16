@@ -1,0 +1,10 @@
+{
+  "xrpl-py": "4.3.0",
+  "coincurve": "21.0.0",
+  "cryptography": "50.0.0",
+  "eth-abi": "5.2.0",
+  "eth-hash": "0.8.0",
+  "websocket-client": "1.8.0",
+  "forge": "forge Version: 1.9.0\nCommit SHA: 6056c5845d34205a83cf7108042adb137325c9df\nBuild Timestamp: 2026-11-02T20:28:32.434285913Z (1793651312)\nBuild Profile: dist",
+  "solc": "solc, the solidity compiler commandline interface\nVersion: 0.8.24+commit.e11b9ed9.Linux.g++"
+}

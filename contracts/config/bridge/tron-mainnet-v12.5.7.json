@@ -1,13 +1,14 @@
 {
   "schema": "420-bridge-tron-mainnet-v12.5.7",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_SOLIDIFIED_RECEIPT_VERIFIER_AND_GATEWAY_ACCOUNT",
+  "status": "IMPLEMENTED_LOCALLY_QUALIFIED_INACTIVE_PENDING_PRODUCTION_DEPLOYMENT_AND_GATEWAY_ACCOUNT",
   "canonical_chain_key": "420/BRIDGE/CHAIN/TRX",
   "chain_family": "ACCOUNT_TRON_DPOS",
   "route_chain_id": "0x5452580000000001",
   "network_identity": {
     "domain": "TRON/MAINNET",
     "external_address_prefix": "0x41",
-    "finality_basis": "solidified block / SolidityNode view"
+    "finality_basis": "19 distinct active SRs signing a consecutive native block branch at or above the target; RPC SolidityNode status alone is insufficient",
+    "genesis_block_id": "0x00000000000000001ebf88508a03865c71d452e25f4d51194196a1d22b6653dc"
   },
   "native_asset": {
     "symbol": "TRX",
@@ -38,5 +39,15 @@
     "direct adapter calls bypassing GatewayRouter420 fail closed",
     "outbound recipients must be exactly 21 bytes and begin with 0x41",
     "outbound extra data is rejected"
-  ]
+  ],
+  "verifier": {
+    "contract": "TronFinalityVerifier420",
+    "trust_model": "Governance-authenticated canonical checkpoint and ordered 27-SR witness-permission snapshot, bounded before maintenance or permission/consensus changes; native signature/ancestry/solidification verification, not autonomous election replay",
+    "profile_installation": "Explicit installProfile; unknown/disabled profiles fail closed; no production profile automatically installed",
+    "execution": "Native TransferContract only; full transaction protobuf Merkle leaf commits signatures and any execution result; failed results and TVM/TRC token paths reject",
+    "proof_abi": "DepositProof(bytes32 profile,uint64 number,bytes transaction,uint32 index,uint32 count,bytes32[] siblings)",
+    "bridge_memo": "420TRXV1 || uint256BE destinationChainId || router20 || route32 || recipient20",
+    "source_reference": "tronprotocol/java-tron@b33eed89a6a424c498d4fb1b03ca2c86eddf4840",
+    "qualification": "docs/audit/BRIDGE-AUDIT-3-V-8-TRON.md"
+  }
 }

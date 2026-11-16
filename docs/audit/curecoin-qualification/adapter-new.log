@@ -1,0 +1,14 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 4.41s
+Compiler run successful!
+
+Ran 6 tests for contracts/test/CurecoinBridgeAdapter420.t.sol:CurecoinBridgeAdapter420Test
+[PASS] testDestinationBindingsRejected() (gas: 387882)
+[PASS] testGatewayRevocationRejected() (gas: 100863)
+[PASS] testOnlyRouterRejected() (gas: 27998)
+[PASS] testSourceReplaySurvivesVerifierRotation() (gas: 849650)
+[PASS] testUnfinalizedRejected() (gas: 147201)
+[PASS] testWrongMagicRejected() (gas: 147359)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 2.47ms (4.66ms CPU time)
+
+Ran 1 test suite in 4.45ms (2.47ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

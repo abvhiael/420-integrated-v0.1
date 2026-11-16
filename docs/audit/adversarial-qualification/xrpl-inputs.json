@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/xrpl",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "xrpl",
+  "files": {
+    "contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol": {
+      "sha256": "9fb9c74fa6817717ca9f582714d498d9b522525687c0a2ecc3953cc1b89db58f",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol": {
+      "sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/xrpl/XrplBinary420.sol": {
+      "sha256": "d1d3f0845a9a9c622971adfc189c1555c4aec581bc8899ff44a4e35c13197da3",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/xrpl/XrplPayment420.sol": {
+      "sha256": "af9cb0d201d5a8787994e1fac52a9534ced0588bf7ce1675963d226cefe8c597",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/xrpl/XrplSHA512Half420.sol": {
+      "sha256": "3d896af9fd38bf0fcd107c924beca49b18a311ff3e1708bb30debae11523c9fd",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol": {
+      "sha256": "3671575426f53d946d91ce98f15d0e438d4d8bb598ea9fb64359ffc0eec26fbb",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/bridge/verifiers/xrpl/XrplValidation420.sol": {
+      "sha256": "fc785413d5d4ff1fbfee2b034f0a41c2833c15c7c90ef51075b10de62cd0ce34",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/interfaces/IXrplFinalityVerifier420.sol": {
+      "sha256": "85375e44c0651836c4dbd09c29cafa5d0012df63ac99b6e87774c5c4be394b28",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/XrplV18.t.sol": {
+      "sha256": "2eee28bc013c57905a2da108515e9e3844f16136042bc7c4be5f745a30288eaa",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a"
+}

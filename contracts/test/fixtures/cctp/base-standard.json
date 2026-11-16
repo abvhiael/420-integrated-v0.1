@@ -1,0 +1,666 @@
+{
+  "name": "base-standard",
+  "source_api": "https://iris-api.circle.com/v2/messages/6?nonce=ad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+  "issuer_response": {
+    "messages": [
+      {
+        "attestation": "0xaf05e12ca399160908031e4efa0ea9b8457f7e20ae5481b7381ffa153cf580cb2841466d360936469616ed9338c6ff2381070ed6815d76dbdd189487fd2923221b8ae56f865cfef1bdbd4e1991a75a78d658ef5b831f35317ce2826f15e43f585d38497d4cda73824bd5c22b2cc55b612a499b34a8d91138972fad2fff344dc3f41b",
+        "message": "0x000000010000000600000000ad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d0000000000000000000000000000000000000000000000000000000000000000000007d0000007d000000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "eventNonce": "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+        "cctpVersion": 2,
+        "status": "complete",
+        "decodedMessage": {
+          "sourceDomain": "6",
+          "destinationDomain": "0",
+          "nonce": "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+          "sender": "0x28b5a0e9c621a5badaa536219b3a228c8168cf5d",
+          "recipient": "0x28b5a0e9c621a5badaa536219b3a228c8168cf5d",
+          "destinationCaller": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "minFinalityThreshold": "2000",
+          "finalityThresholdExecuted": "2000",
+          "messageBody": "0x00000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "decodedMessageBody": {
+            "burnToken": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "mintRecipient": "0x1d88785ddd08d752da653c3359938e7351cd3694",
+            "amount": "51757000000",
+            "messageSender": "0x1d88785ddd08d752da653c3359938e7351cd3694",
+            "maxFee": "0",
+            "feeExecuted": "0",
+            "expirationBlock": "0",
+            "hookData": null
+          },
+          "decodedCctpXMessageBody": null
+        },
+        "delayReason": null,
+        "destinationMintTxHash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb"
+      }
+    ],
+    "sourceTxHash": "0xeb99b38a590a57118685eba013104ce24c2246cf49002ecfbec33b0a651dff6a"
+  },
+  "destination_transaction": {
+    "priority_fee": "23140200000000",
+    "raw_input": "0x57ecfd28000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000001e00000000000000000000000000000000000000000000000000000000000000178000000010000000600000000ad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d0000000000000000000000000000000000000000000000000000000000000000000007d0000007d000000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd369400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000082af05e12ca399160908031e4efa0ea9b8457f7e20ae5481b7381ffa153cf580cb2841466d360936469616ed9338c6ff2381070ed6815d76dbdd189487fd2923221b8ae56f865cfef1bdbd4e1991a75a78d658ef5b831f35317ce2826f15e43f585d38497d4cda73824bd5c22b2cc55b612a499b34a8d91138972fad2fff344dc3f41b000000000000000000000000000000000000000000000000000000000000",
+    "is_pending_update": false,
+    "result": "success",
+    "hash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb",
+    "max_fee_per_gas": "402200000",
+    "revert_reason": null,
+    "confirmation_duration": [
+      0,
+      12000.0
+    ],
+    "transaction_burnt_fee": "33101288616700",
+    "type": 2,
+    "token_transfers_overflow": null,
+    "confirmations": 139,
+    "position": 199,
+    "max_priority_fee_per_gas": "150000000",
+    "transaction_tag": null,
+    "created_contract": null,
+    "value": "0",
+    "from": {
+      "ens_domain_name": null,
+      "hash": "0x1D88785DDD08d752da653c3359938E7351cd3694",
+      "implementations": [],
+      "is_contract": false,
+      "is_scam": false,
+      "is_verified": false,
+      "metadata": null,
+      "name": null,
+      "private_tags": [],
+      "proxy_type": null,
+      "public_tags": [],
+      "reputation": "ok",
+      "watchlist_names": []
+    },
+    "gas_used": "154268",
+    "status": "ok",
+    "to": {
+      "ens_domain_name": null,
+      "hash": "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64",
+      "implementations": [
+        {
+          "address_hash": "0xa30C41865729C248067704d4DB9F38385Cbe1186",
+          "name": "MessageTransmitterV2"
+        }
+      ],
+      "is_contract": true,
+      "is_scam": false,
+      "is_verified": true,
+      "metadata": {
+        "tags": [
+          {
+            "meta": {
+              "projectName": "Cross-Chain Transfer Protocol (CCTP)",
+              "tagUrl": "https://scout-app.kleros.io/single-tags/0x1f8d5764b326bf296fde097175911fe8413fc4b395efe1af3fa3f1698e861d3a",
+              "tooltipDescription": "Core CCTP contract that sends and receives messages; used by TokenMessengerV2. Official Ethereum address documented by Circle.",
+              "tooltipUrl": "https://www.circle.com/"
+            },
+            "name": "Message Transmitter V2",
+            "ordinal": 10,
+            "slug": "message-transmitter-v2-1",
+            "tagType": "name"
+          },
+          {
+            "meta": {
+              "appActionButtonText": "Cross-Chain Transfer Protocol",
+              "appID": "cross-chain-transfer-protocol",
+              "bgColor": "#F0F8FF",
+              "tagIcon": "https://cdn.brandfetch.io/iduqAVaA_O/theme/dark/symbol.svg?c=1bxid64Mup7aczewSAYMX&t=1668070497764",
+              "tagUrl": "https://www.circle.com/cross-chain-transfer-protocol?utm_source=Blockscout",
+              "textColor": "#000000",
+              "tooltipTitle": "Cross-Chain Transfer Protocol",
+              "tooltipUrl": "https://www.circle.com/cross-chain-transfer-protocol"
+            },
+            "name": "Circle CCTP",
+            "ordinal": 0,
+            "slug": "circle-cctp",
+            "tagType": "protocol"
+          }
+        ]
+      },
+      "name": "AdminUpgradableProxy",
+      "private_tags": [],
+      "proxy_type": "eip1967",
+      "public_tags": [],
+      "reputation": "ok",
+      "watchlist_names": []
+    },
+    "authorization_list": [],
+    "method": "receiveMessage",
+    "fee": {
+      "type": "actual",
+      "value": "56241488616700"
+    },
+    "gas_limit": "234990",
+    "gas_price": "364570025",
+    "decoded_input": {
+      "method_call": "receiveMessage(bytes message, bytes attestation)",
+      "method_id": "57ecfd28",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "bytes",
+          "value": "0x000000010000000600000000ad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d0000000000000000000000000000000000000000000000000000000000000000000007d0000007d000000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "name": "attestation",
+          "type": "bytes",
+          "value": "0xaf05e12ca399160908031e4efa0ea9b8457f7e20ae5481b7381ffa153cf580cb2841466d360936469616ed9338c6ff2381070ed6815d76dbdd189487fd2923221b8ae56f865cfef1bdbd4e1991a75a78d658ef5b831f35317ce2826f15e43f585d38497d4cda73824bd5c22b2cc55b612a499b34a8d91138972fad2fff344dc3f41b"
+        }
+      ]
+    },
+    "fhe_operations_count": 0,
+    "token_transfers": null,
+    "base_fee_per_gas": "214570025",
+    "timestamp": "2026-11-15T15:36:23.000000Z",
+    "nonce": 11,
+    "historic_exchange_rate": null,
+    "transaction_types": [
+      "contract_call",
+      "token_transfer"
+    ],
+    "exchange_rate": "1808.16",
+    "block_number": 26421341,
+    "has_error_in_internal_transactions": false
+  },
+  "destination_logs": {
+    "items": [
+      {
+        "address": {
+          "ens_domain_name": null,
+          "hash": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "implementations": [
+            {
+              "address_hash": "0x43506849D7C04F9138D1A2050bbF3A0c054402dd",
+              "name": "FiatTokenV2_2"
+            }
+          ],
+          "is_contract": true,
+          "is_scam": false,
+          "is_verified": true,
+          "metadata": {
+            "tags": [
+              {
+                "meta": {
+                  "projectName": "Circle",
+                  "tagIcon": "https://assets.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+                  "tagIcon ": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tagUrl": "https://scout-app.kleros.io/single-tags/0x924f91c6a015abb7e7a5f8c7c0989761b4df998abdbd6541365eb3c82132a390",
+                  "textColor": "#C163D4",
+                  "tokenAttributes": "{\"logo_url\":\"https://cdn.kleros.link/ipfs/Qmc3TH5cPhyh7418kSD83SSBzng1oqbLxjzxfjwA2VAoj8/BccwoeFESYBsv6XiJVRAp5b3pRpvMgdhfZCxV5vSppWbAukhqrBRVRj3jAxHnbfmvg181rcVw9ny4LBLbFdm2S2RRH\",\"token_symbol\":\"USDC\",\"token_name\":\"USD Coin\",\"decimals\":6}",
+                  "tooltipAttribution": "https://www.openlabelsinitiative.org?utm_source=blockscout",
+                  "tooltipAttributionIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tooltipDescription": "USDC is a US dollar-backed stablecoin issued by Circle. USDC is designed to provide a faster, safer, and more efficient way to send, spend, and exchange money around the world.",
+                  "tooltipUrl": "https://www.circle.com/en/usdc"
+                },
+                "name": "USDC Token",
+                "ordinal": 10,
+                "slug": "usdc-token-1",
+                "tagType": "name"
+              },
+              {
+                "meta": {},
+                "name": "Token Contract",
+                "ordinal": 0,
+                "slug": "token-contract",
+                "tagType": "generic"
+              },
+              {
+                "meta": {},
+                "name": "Stablecoin",
+                "ordinal": 0,
+                "slug": "stablecoin",
+                "tagType": "generic"
+              },
+              {
+                "meta": {},
+                "name": "USDC",
+                "ordinal": 0,
+                "slug": "usdc",
+                "tagType": "generic"
+              },
+              {
+                "meta": {
+                  "tagIcon ": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "textColor": "#C163D4",
+                  "tooltipAttribution": "https://www.openlabelsinitiative.org?utm_source=blockscout",
+                  "tooltipAttributionIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tooltipDescription": "Provided by OLI"
+                },
+                "name": "USD Coin",
+                "ordinal": 0,
+                "slug": "usd-coin",
+                "tagType": "name"
+              },
+              {
+                "meta": {
+                  "appID": "circle",
+                  "appMarketplaceURL": "https://app.circle.com/get-started",
+                  "bgColor": "#2775ca",
+                  "tagIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/circle-icon-white.png",
+                  "textColor": "#FFFFFF",
+                  "tooltipUrl": "https://www.circle.com/"
+                },
+                "name": "Circle",
+                "ordinal": 0,
+                "slug": "circle",
+                "tagType": "protocol"
+              },
+              {
+                "meta": {
+                  "data": "ok"
+                },
+                "name": "Credible token",
+                "ordinal": 0,
+                "slug": "credible-token",
+                "tagType": "token_reputation"
+              }
+            ]
+          },
+          "name": "USDC",
+          "private_tags": [],
+          "proxy_type": "eip1967_oz",
+          "public_tags": [],
+          "reputation": "ok",
+          "watchlist_names": []
+        },
+        "block_hash": "0xae1b1a1b51628c81c4de06499fce0c83358adcb87f1f9c5553615fecaa6655c2",
+        "block_number": 26421341,
+        "block_timestamp": "2026-11-15T15:36:23.000000Z",
+        "data": "0x0000000000000000000000000000000000000000000000000000000c0cf52540",
+        "decoded": {
+          "method_call": "Mint(address indexed minter, address indexed to, uint256 amount)",
+          "method_id": "ab8530f8",
+          "parameters": [
+            {
+              "indexed": true,
+              "name": "minter",
+              "type": "address",
+              "value": "0xfd78EE919681417d192449715b2594ab58f5D002"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address",
+              "value": "0x1D88785DDD08d752da653c3359938E7351cd3694"
+            },
+            {
+              "indexed": false,
+              "name": "amount",
+              "type": "uint256",
+              "value": "51757000000"
+            }
+          ]
+        },
+        "index": 341,
+        "smart_contract": null,
+        "topics": [
+          "0xab8530f87dc9b59234c4623bf917212bb2536d647574c8e7e5da92c2ede0c9f8",
+          "0x000000000000000000000000fd78ee919681417d192449715b2594ab58f5d002",
+          "0x0000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694",
+          null
+        ],
+        "transaction_hash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb"
+      },
+      {
+        "address": {
+          "ens_domain_name": null,
+          "hash": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "implementations": [
+            {
+              "address_hash": "0x43506849D7C04F9138D1A2050bbF3A0c054402dd",
+              "name": "FiatTokenV2_2"
+            }
+          ],
+          "is_contract": true,
+          "is_scam": false,
+          "is_verified": true,
+          "metadata": {
+            "tags": [
+              {
+                "meta": {
+                  "projectName": "Circle",
+                  "tagIcon": "https://assets.coingecko.com/coins/images/6319/small/usdc.png?1696506694",
+                  "tagIcon ": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tagUrl": "https://scout-app.kleros.io/single-tags/0x924f91c6a015abb7e7a5f8c7c0989761b4df998abdbd6541365eb3c82132a390",
+                  "textColor": "#C163D4",
+                  "tokenAttributes": "{\"logo_url\":\"https://cdn.kleros.link/ipfs/Qmc3TH5cPhyh7418kSD83SSBzng1oqbLxjzxfjwA2VAoj8/BccwoeFESYBsv6XiJVRAp5b3pRpvMgdhfZCxV5vSppWbAukhqrBRVRj3jAxHnbfmvg181rcVw9ny4LBLbFdm2S2RRH\",\"token_symbol\":\"USDC\",\"token_name\":\"USD Coin\",\"decimals\":6}",
+                  "tooltipAttribution": "https://www.openlabelsinitiative.org?utm_source=blockscout",
+                  "tooltipAttributionIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tooltipDescription": "USDC is a US dollar-backed stablecoin issued by Circle. USDC is designed to provide a faster, safer, and more efficient way to send, spend, and exchange money around the world.",
+                  "tooltipUrl": "https://www.circle.com/en/usdc"
+                },
+                "name": "USDC Token",
+                "ordinal": 10,
+                "slug": "usdc-token-1",
+                "tagType": "name"
+              },
+              {
+                "meta": {},
+                "name": "Token Contract",
+                "ordinal": 0,
+                "slug": "token-contract",
+                "tagType": "generic"
+              },
+              {
+                "meta": {},
+                "name": "Stablecoin",
+                "ordinal": 0,
+                "slug": "stablecoin",
+                "tagType": "generic"
+              },
+              {
+                "meta": {},
+                "name": "USDC",
+                "ordinal": 0,
+                "slug": "usdc",
+                "tagType": "generic"
+              },
+              {
+                "meta": {
+                  "tagIcon ": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "textColor": "#C163D4",
+                  "tooltipAttribution": "https://www.openlabelsinitiative.org?utm_source=blockscout",
+                  "tooltipAttributionIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/OLI_tag_logo.svg",
+                  "tooltipDescription": "Provided by OLI"
+                },
+                "name": "USD Coin",
+                "ordinal": 0,
+                "slug": "usd-coin",
+                "tagType": "name"
+              },
+              {
+                "meta": {
+                  "appID": "circle",
+                  "appMarketplaceURL": "https://app.circle.com/get-started",
+                  "bgColor": "#2775ca",
+                  "tagIcon": "https://blockscout-icons.s3.us-east-1.amazonaws.com/circle-icon-white.png",
+                  "textColor": "#FFFFFF",
+                  "tooltipUrl": "https://www.circle.com/"
+                },
+                "name": "Circle",
+                "ordinal": 0,
+                "slug": "circle",
+                "tagType": "protocol"
+              },
+              {
+                "meta": {
+                  "data": "ok"
+                },
+                "name": "Credible token",
+                "ordinal": 0,
+                "slug": "credible-token",
+                "tagType": "token_reputation"
+              }
+            ]
+          },
+          "name": "USDC",
+          "private_tags": [],
+          "proxy_type": "eip1967_oz",
+          "public_tags": [],
+          "reputation": "ok",
+          "watchlist_names": []
+        },
+        "block_hash": "0xae1b1a1b51628c81c4de06499fce0c83358adcb87f1f9c5553615fecaa6655c2",
+        "block_number": 26421341,
+        "block_timestamp": "2026-11-15T15:36:23.000000Z",
+        "data": "0x0000000000000000000000000000000000000000000000000000000c0cf52540",
+        "decoded": {
+          "method_call": "Transfer(address indexed from, address indexed to, uint256 value)",
+          "method_id": "ddf252ad",
+          "parameters": [
+            {
+              "indexed": true,
+              "name": "from",
+              "type": "address",
+              "value": "0x0000000000000000000000000000000000000000"
+            },
+            {
+              "indexed": true,
+              "name": "to",
+              "type": "address",
+              "value": "0x1D88785DDD08d752da653c3359938E7351cd3694"
+            },
+            {
+              "indexed": false,
+              "name": "value",
+              "type": "uint256",
+              "value": "51757000000"
+            }
+          ]
+        },
+        "index": 342,
+        "smart_contract": null,
+        "topics": [
+          "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694",
+          null
+        ],
+        "transaction_hash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb"
+      },
+      {
+        "address": {
+          "ens_domain_name": null,
+          "hash": "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d",
+          "implementations": [
+            {
+              "address_hash": "0x555E272506C06e7E559d57418563742AFE363ec8",
+              "name": "TokenMessengerV2"
+            }
+          ],
+          "is_contract": true,
+          "is_scam": false,
+          "is_verified": true,
+          "metadata": {
+            "tags": [
+              {
+                "meta": {
+                  "projectName": "Circle",
+                  "tagUrl": "https://scout-app.kleros.io/single-tags/0x338a280dc3efa87f082b5caee8724338cf1d302cc821f32dd342e9c73ea084f8",
+                  "tooltipDescription": "Circle CCTP TokenMessenger V2 proxy on Ethereum mainnet. Entrypoint for cross-chain USDC transfers.",
+                  "tooltipUrl": "https://www.circle.com/",
+                  "verifiedDomains": [
+                    "stargate.finance",
+                    "sailor.finance",
+                    "app.sailor.finance",
+                    "bridge.dragonswap.app"
+                  ]
+                },
+                "name": "TokenMessenger V2",
+                "ordinal": 10,
+                "slug": "tokenmessenger-v2-1",
+                "tagType": "name"
+              },
+              {
+                "meta": {
+                  "alertStatus": "info",
+                  "data": "This nametag was submitted by Kleros Scout."
+                },
+                "name": "note_0",
+                "ordinal": 0,
+                "slug": "note0",
+                "tagType": "note"
+              },
+              {
+                "meta": {
+                  "appActionButtonText": "Cross-Chain Transfer Protocol",
+                  "appID": "cross-chain-transfer-protocol",
+                  "bgColor": "#F0F8FF",
+                  "tagIcon": "https://cdn.brandfetch.io/iduqAVaA_O/theme/dark/symbol.svg?c=1bxid64Mup7aczewSAYMX&t=1668070497764",
+                  "tagUrl": "https://www.circle.com/cross-chain-transfer-protocol?utm_source=Blockscout",
+                  "textColor": "#000000",
+                  "tooltipTitle": "Cross-Chain Transfer Protocol",
+                  "tooltipUrl": "https://www.circle.com/cross-chain-transfer-protocol"
+                },
+                "name": "Circle CCTP",
+                "ordinal": 0,
+                "slug": "circle-cctp",
+                "tagType": "protocol"
+              }
+            ]
+          },
+          "name": "AdminUpgradableProxy",
+          "private_tags": [],
+          "proxy_type": "eip1967",
+          "public_tags": [],
+          "reputation": "ok",
+          "watchlist_names": []
+        },
+        "block_hash": "0xae1b1a1b51628c81c4de06499fce0c83358adcb87f1f9c5553615fecaa6655c2",
+        "block_number": 26421341,
+        "block_timestamp": "2026-11-15T15:36:23.000000Z",
+        "data": "0x0000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000000000000000000000000000000000000000000000",
+        "decoded": {
+          "method_call": "MintAndWithdraw(address indexed mintRecipient, uint256 amount, address indexed mintToken, uint256 feeCollected)",
+          "method_id": "50c55e91",
+          "parameters": [
+            {
+              "indexed": true,
+              "name": "mintRecipient",
+              "type": "address",
+              "value": "0x1D88785DDD08d752da653c3359938E7351cd3694"
+            },
+            {
+              "indexed": false,
+              "name": "amount",
+              "type": "uint256",
+              "value": "51757000000"
+            },
+            {
+              "indexed": true,
+              "name": "mintToken",
+              "type": "address",
+              "value": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+            },
+            {
+              "indexed": false,
+              "name": "feeCollected",
+              "type": "uint256",
+              "value": "0"
+            }
+          ]
+        },
+        "index": 343,
+        "smart_contract": null,
+        "topics": [
+          "0x50c55e915134d457debfa58eb6f4342956f8b0616d51a89a3659360178e1ab63",
+          "0x0000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694",
+          "0x000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          null
+        ],
+        "transaction_hash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb"
+      },
+      {
+        "address": {
+          "ens_domain_name": null,
+          "hash": "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64",
+          "implementations": [
+            {
+              "address_hash": "0xa30C41865729C248067704d4DB9F38385Cbe1186",
+              "name": "MessageTransmitterV2"
+            }
+          ],
+          "is_contract": true,
+          "is_scam": false,
+          "is_verified": true,
+          "metadata": {
+            "tags": [
+              {
+                "meta": {
+                  "projectName": "Cross-Chain Transfer Protocol (CCTP)",
+                  "tagUrl": "https://scout-app.kleros.io/single-tags/0x1f8d5764b326bf296fde097175911fe8413fc4b395efe1af3fa3f1698e861d3a",
+                  "tooltipDescription": "Core CCTP contract that sends and receives messages; used by TokenMessengerV2. Official Ethereum address documented by Circle.",
+                  "tooltipUrl": "https://www.circle.com/"
+                },
+                "name": "Message Transmitter V2",
+                "ordinal": 10,
+                "slug": "message-transmitter-v2-1",
+                "tagType": "name"
+              },
+              {
+                "meta": {
+                  "appActionButtonText": "Cross-Chain Transfer Protocol",
+                  "appID": "cross-chain-transfer-protocol",
+                  "bgColor": "#F0F8FF",
+                  "tagIcon": "https://cdn.brandfetch.io/iduqAVaA_O/theme/dark/symbol.svg?c=1bxid64Mup7aczewSAYMX&t=1668070497764",
+                  "tagUrl": "https://www.circle.com/cross-chain-transfer-protocol?utm_source=Blockscout",
+                  "textColor": "#000000",
+                  "tooltipTitle": "Cross-Chain Transfer Protocol",
+                  "tooltipUrl": "https://www.circle.com/cross-chain-transfer-protocol"
+                },
+                "name": "Circle CCTP",
+                "ordinal": 0,
+                "slug": "circle-cctp",
+                "tagType": "protocol"
+              }
+            ]
+          },
+          "name": "AdminUpgradableProxy",
+          "private_tags": [],
+          "proxy_type": "eip1967",
+          "public_tags": [],
+          "reputation": "ok",
+          "watchlist_names": []
+        },
+        "block_hash": "0xae1b1a1b51628c81c4de06499fce0c83358adcb87f1f9c5553615fecaa6655c2",
+        "block_number": 26421341,
+        "block_timestamp": "2026-11-15T15:36:23.000000Z",
+        "data": "0x000000000000000000000000000000000000000000000000000000000000000600000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000e400000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd369400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "decoded": {
+          "method_call": "MessageReceived(address indexed caller, uint32 sourceDomain, bytes32 indexed nonce, bytes32 sender, uint32 indexed finalityThresholdExecuted, bytes messageBody)",
+          "method_id": "ff48c13e",
+          "parameters": [
+            {
+              "indexed": true,
+              "name": "caller",
+              "type": "address",
+              "value": "0x1D88785DDD08d752da653c3359938E7351cd3694"
+            },
+            {
+              "indexed": false,
+              "name": "sourceDomain",
+              "type": "uint32",
+              "value": "6"
+            },
+            {
+              "indexed": true,
+              "name": "nonce",
+              "type": "bytes32",
+              "value": "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c"
+            },
+            {
+              "indexed": false,
+              "name": "sender",
+              "type": "bytes32",
+              "value": "0x00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d"
+            },
+            {
+              "indexed": true,
+              "name": "finalityThresholdExecuted",
+              "type": "uint32",
+              "value": "2000"
+            },
+            {
+              "indexed": false,
+              "name": "messageBody",
+              "type": "bytes",
+              "value": "0x00000001000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda029130000000000000000000000001d88785ddd08d752da653c3359938e7351cd36940000000000000000000000000000000000000000000000000000000c0cf525400000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+            }
+          ]
+        },
+        "index": 344,
+        "smart_contract": null,
+        "topics": [
+          "0xff48c13eda96b1cceacc6b9edeedc9e9db9d6226afbc30146b720c19d3addb1c",
+          "0x0000000000000000000000001d88785ddd08d752da653c3359938e7351cd3694",
+          "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+          "0x00000000000000000000000000000000000000000000000000000000000007d0"
+        ],
+        "transaction_hash": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb"
+      }
+    ],
+    "next_page_params": null
+  }
+}

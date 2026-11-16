@@ -1,0 +1,18 @@
+{
+  "DogecoinBridgeAdapter420": {
+    "creation_bytes": 4304,
+    "runtime_bytes": 3895
+  },
+  "DogecoinFinalityVerifier420": {
+    "creation_bytes": 8022,
+    "runtime_bytes": 6896
+  },
+  "DogecoinHeaderChain420": {
+    "creation_bytes": 15767,
+    "runtime_bytes": 9836
+  },
+  "LitecoinScrypt420": {
+    "creation_bytes": 5551,
+    "runtime_bytes": 5524
+  }
+}

@@ -1,0 +1,4 @@
+Prepared 1047 previously untested block transactions; retained six existing on-chain vectors
+PASS independently verified all 1051 historical block transactions and two token transactions; versions {'legacy': 730, '0': 190, '1': 131}
+Signature identity only. Historical finality and execution metadata are NOT authenticated by this check.
+PASS observed Tokenkeg executable bytes; account authenticity remains unproven

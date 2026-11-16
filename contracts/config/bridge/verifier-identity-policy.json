@@ -1,0 +1,32 @@
+{
+  "schema": "420-bridge-verifier-identity-policy-v1",
+  "component_id_preimage": "420/APP/420BRIDGE/VERIFIER_REGISTRY",
+  "registration": "ProtocolRegistry.registerComponent with deployed runtime code hash, active lifecycle and version 1.0.0; no new reserved/predeploy address assigned.",
+  "governance": "Existing Genesis governance authority and timelock ACTION_CONFIGURE; no new approver, branch rule or delay.",
+  "production_approvals": [],
+  "identity_profiles": {
+    "DIRECT": "Governance qualifies this runtime as nondelegating. Code hash and address are pinned. Unknown delegation is not made safe by choosing this label.",
+    "ERC1167": "Exact 45-byte runtime template, embedded implementation address and actual implementation code hash.",
+    "MANAGED": "Registry-created governance proxy; native implementation/version getters; upgrades, including change-and-restore, invalidate old snapshots.",
+    "AUDITED_PUBLIC": "Governance-qualified runtime profile with a reviewed native nondelegating implementation() getter; implementation address/code hash and profile revision are pinned. Includes the actual Circle AdminUpgradableProxy tested here. Revoking/requalifying the class does not revive instance approvals."
+  },
+  "live_manifest": {
+    "maximum_dependencies": 16,
+    "maximum_probes": 64,
+    "maximum_probe_calldata_bytes": 512,
+    "maximum_probe_return_bytes": 4096,
+    "forwarded_probe_gas": 50000,
+    "trusted_root_and_configuration_probes_required": true,
+    "semantics": "The manifest is part of qualification evidence and must cover all security-relevant observable roots, authority epochs, routes, assets, policies and dependency implementations. State transitions authenticated by the qualified consensus mechanism are not automatically new configuration approvals. Unobservable or unaudited mutable dependencies are not implicitly approved."
+  },
+  "binding": {
+    "runtime_hash": "EVM EXTCODEHASH (Keccak-256)",
+    "probe_result_hash": "Keccak-256 of the exact ABI return bytes",
+    "evidence": "Nonzero content commitment to reproducible qualification evidence; publish its hash algorithm and source separately. It is a governance qualification reference, not an onchain proof that tests passed.",
+    "chains": "Canonical source/destination keys, complete chain records, chain-registry address/runtime hash, revisions and local chain ID.",
+    "routes": "Explicit governance binding to exact active route tuple and current instance approval; an approval cannot be reused for a different tuple of an already bound route.",
+    "rotation": "Compare-and-swap current approval; new ID and explicit route/gateway rebinding. Revoked IDs cannot be revived.",
+    "replay": "Router source-network/canonical-message keys exclude chain-key aliases, verifier, approval and qualification-registry identities. Generic gateway evidence IDs persist across replacement.",
+    "consumer": "Only the canonical verifier() getter or audited self-verification is supported; self mode cannot omit an exposed external verifier."
+  }
+}

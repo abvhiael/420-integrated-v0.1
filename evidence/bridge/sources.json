@@ -1,0 +1,3542 @@
+{
+  "schema": "420-bridge-evidence-sources-v1",
+  "repository": "abvhiael/420-integrated-v0.1",
+  "catalogued_on": "2026-11-15",
+  "timezone": "America/Regina",
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "datasets": [
+    {
+      "id": "bitcoin",
+      "commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "pr": null,
+      "network": "bitcoin-mainnet",
+      "prefix": "contracts/test/fixtures/bitcoin",
+      "selection": [
+        {
+          "pattern": "headers.bin",
+          "kind": "headers",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "block*.bin",
+          "kind": "block",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "segwit-transaction.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "manifest.json"
+      ],
+      "expected": [
+        "expected.jsonl",
+        "block170.json",
+        "segwit.json"
+      ],
+      "qualification": [
+        "qualification/qualification.json",
+        "qualification/historical-solidity.log",
+        "qualification/historical-segwit.log"
+      ],
+      "limitations": [
+        "Ordinary historical transactions are not approved gateway deposits.",
+        "Historical headers do not establish the current greatest-work tip."
+      ],
+      "original_reproducer": "python contracts/test/fixtures/bitcoin/verify.py",
+      "extra_records": [],
+      "ci_run_ids": []
+    },
+    {
+      "id": "ethereum",
+      "commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "pr": 1157,
+      "network": "ethereum-mainnet",
+      "prefix": "contracts/test/fixtures/ethereum",
+      "selection": [
+        {
+          "pattern": "*bootstrap.bin",
+          "kind": "checkpoint_candidate",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "*bootstrap.json",
+          "kind": "validator_data",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "*proof.bin",
+          "kind": "consensus_proof",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "*public-values.bin",
+          "kind": "consensus_proof",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "sync-update.json",
+          "kind": "validator_data",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "finalized-execution.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "parent-header.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "execution-block.json",
+          "kind": "transactions",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "execution-parent.json",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "execution-receipts.json",
+          "kind": "receipts",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "history-*.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "account-*.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "account-*.json",
+          "kind": "rpc_capture",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "code-*.bin",
+          "kind": "runtime_code",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "sources.json",
+        "SHA256SUMS.json",
+        "consensus-source-transaction.json",
+        "rotation-source-transaction.json"
+      ],
+      "expected": [
+        "expected.json",
+        "consensus-spec.json"
+      ],
+      "qualification": [
+        "qualification/RESULTS.md",
+        "qualification/test-results.json",
+        "qualification/historical-oracle.log",
+        "qualification/bls-independent.log"
+      ],
+      "limitations": [
+        "Historical trusted checkpoints expire; they are not live bootstrap authorization.",
+        "Real consensus/transaction proofs are distinct from controlled source-gateway test execution."
+      ],
+      "original_reproducer": "python contracts/test/fixtures/ethereum/verify.py",
+      "extra_records": [],
+      "ci_run_ids": []
+    },
+    {
+      "id": "litecoin",
+      "commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "pr": 1158,
+      "network": "litecoin-mainnet",
+      "prefix": "contracts/test/fixtures/litecoin",
+      "selection": [
+        {
+          "pattern": "headers.bin",
+          "kind": "headers",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "legacy.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "transparent.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "hogex.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "hogex-stripped.bin",
+          "kind": "transaction",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "*-proof.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "modern-header.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "bad-pow.bin",
+          "kind": "negative_vector",
+          "origin": "CONTROLLED",
+          "gateway_relation": "UNRELATED",
+          "network": "controlled-fixture"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "sources.json",
+        "SHA256SUMS.json"
+      ],
+      "expected": [
+        "expected.jsonl",
+        "legacy.json",
+        "transparent.json",
+        "hogex.json"
+      ],
+      "qualification": [
+        "qualification/RESULTS.md",
+        "qualification/test-results.json",
+        "qualification/independent-oracle.log"
+      ],
+      "limitations": [
+        "Historical payments do not bind a 420 gateway destination.",
+        "Header SPV is not complete execution validation or proof of the current tip."
+      ],
+      "original_reproducer": "python contracts/test/fixtures/litecoin/verify.py",
+      "extra_records": [],
+      "ci_run_ids": []
+    },
+    {
+      "id": "dogecoin",
+      "commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "pr": 1159,
+      "network": "dogecoin-mainnet",
+      "prefix": "contracts/test/fixtures/dogecoin",
+      "selection": [
+        {
+          "pattern": "headers.bin",
+          "kind": "headers",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "headers/*.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "aux/*.bin",
+          "kind": "auxpow",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "parents/*.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "payment.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "payment-proof.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "sources.json",
+        "SHA256SUMS.json",
+        "source-sha256.json"
+      ],
+      "expected": [
+        "expected.json"
+      ],
+      "qualification": [
+        "qualification/RESULTS.md",
+        "qualification/test-results.json",
+        "qualification/independent-oracle.log"
+      ],
+      "limitations": [
+        "AuxPoW parent candidates need not be accepted Litecoin blocks.",
+        "Ordinary transactions are not gateway authorization; parent chain finality is not proved."
+      ],
+      "original_reproducer": "python contracts/test/fixtures/dogecoin/verify.py",
+      "extra_records": [],
+      "ci_run_ids": []
+    },
+    {
+      "id": "bnb",
+      "commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "pr": 1160,
+      "network": "bnb-mainnet",
+      "prefix": "contracts/test/fixtures/bnb",
+      "selection": [
+        {
+          "pattern": "header_*.rlp",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "vote_*.bin",
+          "kind": "consensus_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "vote_*.rlp",
+          "kind": "consensus_proof",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-*.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-source.zip",
+          "kind": "rpc_capture",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "bls-wrong-message.bin",
+          "kind": "negative_vector",
+          "origin": "CONTROLLED",
+          "gateway_relation": "UNRELATED",
+          "network": "controlled-fixture"
+        }
+      ],
+      "provenance": [
+        "sources.json",
+        "SHA256SUMS.json"
+      ],
+      "expected": [
+        "transactions-expected.json"
+      ],
+      "qualification": [
+        "qualification/test-results.json",
+        "qualification/independent-oracle.log"
+      ],
+      "limitations": [
+        "Historical checkpoint/epoch bootstrap is explicitly trusted and not a current authority grant.",
+        "Controlled gateway and injected context tests are not genuine historical bridge deposits."
+      ],
+      "original_reproducer": "python contracts/test/fixtures/bnb/verify.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "solana",
+      "commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "pr": 1161,
+      "network": "solana-mainnet",
+      "prefix": "contracts/test/fixtures/solana",
+      "selection": [
+        {
+          "pattern": "historical-*.bin",
+          "kind": "signed_transaction",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "rpc-observations.zip",
+          "kind": "rpc_capture",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "observed-stake-candidate.json",
+          "kind": "untrusted_validator_data",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "controlled-eurc.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        },
+        {
+          "pattern": "controlled-ray.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "SHA256SUMS"
+      ],
+      "expected": [
+        "historical-expected.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "RPC observed execution, loaded addresses, stake snapshots and finality are unauthenticated.",
+        "The 699-account stake candidate must not be installed as an authenticated epoch root.",
+        "1,053 genuine signed transactions do not call the new gateway."
+      ],
+      "original_reproducer": "python scripts/solana/verify_history.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md",
+        "docs/audit/solana-qualification/RESULTS.json",
+        "docs/audit/solana-qualification/qualified-source-sha256.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "tron",
+      "commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "pr": 1162,
+      "network": "tron-mainnet",
+      "prefix": "contracts/test/fixtures/tron",
+      "selection": [
+        {
+          "pattern": "blocks-*.json",
+          "kind": "blocks",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "genesis.json",
+          "kind": "checkpoint_candidate",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-headers.bin",
+          "kind": "headers",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-profile.bin",
+          "kind": "checkpoint_candidate",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-transaction.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "java-tron-mainnet-config.conf",
+          "kind": "validator_data",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "SHA256SUMS"
+      ],
+      "expected": [
+        "expected.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "Bounded historical authenticated SR/checkpoint context is not a live registry approval.",
+        "The ordinary 580000000000-sun transfer is not a bridge deposit."
+      ],
+      "original_reproducer": "python scripts/tron/verify_history.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-8-TRON.md",
+        "docs/audit/tron-qualification/RESULTS.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "xrpl",
+      "commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "pr": 1163,
+      "network": "xrpl-mainnet",
+      "prefix": "contracts/test/fixtures/xrpl",
+      "selection": [
+        {
+          "pattern": "historical-header.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-validations.bin",
+          "kind": "consensus_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-payment.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-profile.bin",
+          "kind": "checkpoint_candidate",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "*-vl.json",
+          "kind": "validator_data",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "validations.json",
+          "kind": "validator_data",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "ledger.json",
+          "kind": "transactions",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "controlled-success.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "SHA256SUMS",
+        "upstream-validators-example.txt"
+      ],
+      "expected": [
+        "expected.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "Historical UNL/manifests are not current live validator authorization.",
+        "The real successful tagged payment lacks bridge-specific destination authorization."
+      ],
+      "original_reproducer": "python scripts/xrpl/verify_history.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md",
+        "docs/audit/xrpl-qualification/RESULTS.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "potcoin",
+      "commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "pr": 1164,
+      "network": "potcoin-mainnet",
+      "prefix": "contracts/test/fixtures/potcoin",
+      "selection": [
+        {
+          "pattern": "genesis-header.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "genesis-transaction.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "genesis-bootstrap.dat",
+          "kind": "block",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "controlled-proof.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        },
+        {
+          "pattern": "controlled-root.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "SHA256SUMS"
+      ],
+      "expected": [],
+      "qualification": [],
+      "limitations": [
+        "Only genuine genesis evidence is available; historical post-500 PoS, modifiers, spent state, forks and gateways remain unavailable.",
+        "The post-bootstrap fixture is controlled, not historical PoS."
+      ],
+      "original_reproducer": "See original PotCoin audit and native replay/export commands.",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-10-POTCOIN.md",
+        "docs/audit/potcoin-qualification/RESULTS.json",
+        "docs/audit/potcoin-qualification/source.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "curecoin",
+      "commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "pr": 1165,
+      "network": "curecoin-mainnet",
+      "prefix": "contracts/test/fixtures/curecoin",
+      "selection": [
+        {
+          "pattern": "block-*.bin",
+          "kind": "block",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "genesis-header.bin",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "stake-*.bin",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "controlled-proof.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        },
+        {
+          "pattern": "controlled-root.bin",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "controlled-fixture"
+        },
+        {
+          "pattern": "genesis-transaction.bin",
+          "kind": "transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [
+        "README.md",
+        "SHA256SUMS"
+      ],
+      "expected": [
+        "historical.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "Native replay selected 500001 blocks; the bundled evidence is a sample, not the complete raw archive.",
+        "The checkpoint authority in Solidity historical tests is TEST authority.",
+        "Historical packets lack the bridge destination comment and cannot be credited as transfers."
+      ],
+      "original_reproducer": "See original Curecoin native and independent replay commands.",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md",
+        "docs/audit/curecoin-qualification/RESULTS.json",
+        "docs/audit/curecoin-qualification/source.json",
+        "docs/audit/curecoin-qualification/native-replay.json",
+        "docs/audit/curecoin-qualification/native-lineage.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "dobbscoin",
+      "commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "pr": 1166,
+      "network": "dobbscoin-mainnet",
+      "prefix": "contracts/test/fixtures/dobbscoin",
+      "selection": [
+        {
+          "pattern": "proofs.json",
+          "kind": "inclusion_proof",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "native-checkpoint.json",
+          "kind": "checkpoint_candidate",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "native-regtest-auxpow.json",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "dobbscoin-regtest"
+        }
+      ],
+      "provenance": [
+        "SHA256SUMS"
+      ],
+      "expected": [
+        "historical.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "Native replay of 1914746 blocks and 2140134 transactions is retained qualification, not a copy of the entire archive here.",
+        "Checkpoint roots are not approved production authority and historical outputs are not gateway deposits.",
+        "Regtest AuxPoW/reorg observations are not genuine mainnet AuxPoW."
+      ],
+      "original_reproducer": "See original Dobbscoin hardened native replay/export commands.",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-12-DOBBSCOIN.md",
+        "docs/audit/dobbscoin/RESULTS.json",
+        "docs/audit/dobbscoin/ACQUISITION.json",
+        "docs/audit/dobbscoin/native-replay-qualified.json",
+        "docs/audit/dobbscoin/native-historical-scripts.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "pirate",
+      "commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "pr": 1167,
+      "network": "pirate-mainnet",
+      "prefix": "contracts/test/fixtures/pirate",
+      "selection": [
+        {
+          "pattern": "historical-header.hex",
+          "kind": "header",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-headers.json",
+          "kind": "headers",
+          "origin": "DERIVED_HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "historical-sapling.hex",
+          "kind": "shielded_transaction",
+          "origin": "HISTORICAL",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "controlled-sapling-v6.hex",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "pirate-regtest"
+        },
+        {
+          "pattern": "controlled-ironwood-v6.hex",
+          "kind": "controlled_proof",
+          "origin": "CONTROLLED",
+          "gateway_relation": "CONTROLLED",
+          "network": "pirate-regtest"
+        }
+      ],
+      "provenance": [
+        "SHA256SUMS"
+      ],
+      "expected": [
+        "historical-inclusion.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "The full source archive checksum was NOT verified; sample/header/transaction checksums and crypto were verified.",
+        "449 headers and sampled ancestry do not establish canonical tip, native dPoW, applicable notaries or onward anchors.",
+        "Historical Sapling proof/inclusion does not establish note ownership, viewing authority, native spent-state or a gateway deposit.",
+        "Controlled native regtest Ironwood/Sapling transactions are not historical mainnet gateway evidence."
+      ],
+      "original_reproducer": "See original Pirate archive extraction and native crypto worker commands.",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md",
+        "docs/audit/pirate-qualification/RESULTS.md",
+        "docs/audit/pirate-qualification/upstream-source.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "cctp",
+      "commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "pr": 1168,
+      "network": "cctp-mainnet",
+      "prefix": "contracts/test/fixtures/cctp",
+      "selection": [
+        {
+          "pattern": "*.message.hex",
+          "kind": "issuer_message",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "*.attestation.hex",
+          "kind": "issuer_attestation",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "base-standard.json",
+          "kind": "issuer_protocol_record",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "arbitrum-fast.json",
+          "kind": "issuer_protocol_record",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "arbitrum-standard-hook.json",
+          "kind": "issuer_protocol_record",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "solana-standard.json",
+          "kind": "issuer_protocol_record",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "ethereum-fast-to-base.json",
+          "kind": "issuer_protocol_record",
+          "origin": "HISTORICAL",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "issuer-observation.json",
+          "kind": "rpc_capture",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "issuer-public-keys.json",
+          "kind": "issuer_key_observation",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        },
+        {
+          "pattern": "issuer-sandbox-public-keys.json",
+          "kind": "issuer_key_observation",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED",
+          "network": "circle-sandbox"
+        }
+      ],
+      "provenance": [
+        "SHA256SUMS",
+        "issuer-contract-addresses.md",
+        "issuer-supported-domains.md",
+        "issuer-usdc-addresses.md"
+      ],
+      "expected": [
+        "historical-index.json"
+      ],
+      "qualification": [],
+      "limitations": [
+        "Genuine Circle attestations and native issuer transfers on existing domains do not authorize 420 or supply a 420 CCTP domain/native deployment.",
+        "Sandbox keys and issuer/RPC observations are not mainnet signing authority."
+      ],
+      "original_reproducer": "python scripts/cctp/verify_history.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md",
+        "docs/audit/cctp-qualification/RESULTS.md",
+        "docs/audit/cctp-qualification/historical.json",
+        "docs/audit/cctp-qualification/historical-provenance.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "cadc",
+      "commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "pr": 1169,
+      "network": "cadc-mainnet",
+      "prefix": "contracts/test/fixtures/cadc/history",
+      "selection": [
+        {
+          "pattern": "*-scan.json",
+          "kind": "protocol_observation",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        },
+        {
+          "pattern": "*-archive-rpc.json",
+          "kind": "protocol_observation",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "NATIVE_ISSUER_PROTOCOL"
+        }
+      ],
+      "provenance": [
+        "PROVENANCE.json",
+        "SHA256SUMS.json",
+        "metadata-extract.json",
+        "issuer-publication.html"
+      ],
+      "expected": [],
+      "qualification": [],
+      "limitations": [
+        "Two genuine historical issuer OFT transfers were executed against genuine pre-commit native mainnet state in retained fork tests.",
+        "RPC captures are not standalone chain-finality proofs.",
+        "Issuer authorization, destination EID/endpoint, OFT and DVNs for 420 are not established."
+      ],
+      "original_reproducer": "python scripts/verify-cadc-history.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md",
+        "docs/audit/cadc-qualification/RESULTS.json",
+        "docs/audit/cadc-qualification/history-qualified.json",
+        "docs/audit/cadc-qualification/SHA256SUMS.json"
+      ],
+      "ci_run_ids": []
+    },
+    {
+      "id": "token-routes",
+      "commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "pr": 1170,
+      "network": "token-routes-mainnet",
+      "prefix": "contracts/test/fixtures/token-routes",
+      "selection": [
+        {
+          "pattern": "source-observations.json",
+          "kind": "token_state_observation",
+          "origin": "RPC_OBSERVATION",
+          "gateway_relation": "UNRELATED"
+        }
+      ],
+      "provenance": [],
+      "expected": [],
+      "qualification": [],
+      "limitations": [
+        "Source decimal/mint observations are not finality or complete gateway authorization."
+      ],
+      "original_reproducer": "python scripts/verify-token-routes.py",
+      "extra_records": [
+        "docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md",
+        "docs/audit/token-route-qualification/RESULTS.json",
+        "docs/audit/token-route-qualification/SHA256SUMS.json"
+      ],
+      "ci_run_ids": []
+    }
+  ],
+  "recoveries": [
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/historical-forks-qualified.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "be14d9a022fc70718d74d48233d540a94997cab11f0f872e582f46e024af2b9f",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/historical-forks-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/outbound-qualified.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "df1862d64f0764b4ef060ae2ac9a32c05327b033724284fe68bc411cd5d7fcda",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/outbound-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/router-outbound-qualified.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "c2595009313398832a3bb55f1bfb0baaf687135e437af3d592d1403bb6b00101",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/router-outbound-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/router-qualified.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "c4ca2b3a680c657c707ae890d5c2eaf376fe48aabeb0541e1e27d1e04f0edf17",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/router-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/unit-affected.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "06a39619c91a6de0365782aa5702d2a3268e58d50489ed173db5a59aef45ec70",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/unit-affected.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "cadc",
+      "original_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "original_path": "docs/audit/cadc-qualification/unit-original.log",
+      "checksum_manifest": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "expected_sha256": "ce8561bb48770e92ab0e9973eae1f11ff6410718ea5fe59f0fa1f55d67edc3dc",
+      "workspace_relative": "cadc-repo/docs/audit/cadc-qualification/unit-original.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/catalogue-solidity.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "d5f41db664eba619668116b9f68bd0833d12b609f297dd284c08a2bba4d719d1",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/catalogue-solidity.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/gateway-final.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "c1ba54596cb496bfb267d84db4fd0a8abdbadf4132c8383622fbdfb5144adcdf",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/gateway-final.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/native-compatibility.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "ae18fa6edeba340f0fa7f127b0294982b93f426c2e7a877355273b013334b0db",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/native-compatibility.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/registry-additional.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "15cb949716fb47fb4ae35b38e73dffc52094276edd37828c17b3c99fe0bcb125",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/registry-additional.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/registry.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "5bd25326fc156742063d4b76147f09362af8eafb58d8bea3f8bf1d7f0e0e2fd2",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/registry.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/router-final-affected.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "abfc18534d5d6639aa957353909e16f49860eb5b621c75de019ed81c1cb10eb5",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/router-final-affected.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/router-original-failure.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "d00618eca89bcc527e579b6fc46b6452cbbb67b178c1180e09e60ad18237d35c",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/router-original-failure.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/router-reconciliation-fix.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "5481402abb69ca4449429f0bec853054c691a1d175e646e21b24001b470b2a2e",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/router-reconciliation-fix.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/router.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "d00618eca89bcc527e579b6fc46b6452cbbb67b178c1180e09e60ad18237d35c",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/router.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/solana-admission-qualified.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "0fba84968b2a56734a27b9bd964e3d01af79c521046d9fffd22e108011ba07f5",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/solana-admission-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/spl-width-qualified.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "5d03bf9c42d3c5de93a97cf6f71c8ad1cf744f5a6d924cecd7d288d247fbbf4b",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/spl-width-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/targeted-regressions-qualified.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "1628b4b315a3b92a2dd1849da39862bd040c0298cd60d1c836f57a86bc941b3d",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/targeted-regressions-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    },
+    {
+      "dataset": "token-routes",
+      "original_commit": "3724e246f2c4deeab69ac0892742291c72a40df0",
+      "original_path": "docs/audit/token-route-qualification/token-catalogue-final-qualified.log",
+      "checksum_manifest": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "expected_sha256": "cb6607f7505de77ddaa21137514f7061abb162ea9e5e4532b936777b1975c4a3",
+      "workspace_relative": "token-repo/docs/audit/token-route-qualification/token-catalogue-final-qualified.log",
+      "reason": "Published checksum manifest pins this original log, but its path was excluded from the published Git tree. Retained original bytes recovered without rerunning tests."
+    }
+  ],
+  "inventory": [
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/README.md",
+      "git_blob_oid": "2dc8a71ead62c831a217da472fbb264d928736e2"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/block170.bin",
+      "git_blob_oid": "70e62bb4cce66b524d0b562081ef6a9b235fee20"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/block170.json",
+      "git_blob_oid": "5c49d20c09360598aeb3274115aaca995ecbf78a"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/block481824.bin",
+      "git_blob_oid": "18ee6fc21210f445f2c1e2807a548e924d6f0a2a"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/expected.jsonl",
+      "git_blob_oid": "a53593f225703a4048626fc952bf97271b7e1eae"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/headers.bin",
+      "git_blob_oid": "e410eabf66256acea3eea9ab03742d576d3e1e92"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/manifest.json",
+      "git_blob_oid": "0a08952332f23c241512218902950b0787304505"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/qualification/historical-segwit.log",
+      "git_blob_oid": "a5b4f8ec25e27ac6f970ca93b0a884dd808efab7"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/qualification/historical-solidity.log",
+      "git_blob_oid": "9b704b623703e8e4add9af81864d2ffa0e523277"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/qualification/qualification.json",
+      "git_blob_oid": "cb52536e38131fa62e60a8502aa92b69e9cbaf33"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/segwit-transaction.bin",
+      "git_blob_oid": "b0cfaf94cd7b1e2cec44cd3045d915b34fa39c75"
+    },
+    {
+      "dataset": "bitcoin",
+      "path": "contracts/test/fixtures/bitcoin/segwit.json",
+      "git_blob_oid": "74d6dca3e948100dd3e180155d66fb4e0d070779"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/README.md",
+      "git_blob_oid": "4fced39826f180867eb663634dbd6f91642ade5b"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/SHA256SUMS.json",
+      "git_blob_oid": "96e6f9f926db84cf696f3d396e6367e11e3631aa"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-aave.bin",
+      "git_blob_oid": "dfaea043bfb8170685ccffa5668eca43784f194a"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-aave.json",
+      "git_blob_oid": "4a0834a2cedc7e2f4fc12c4ac04f44ca59d59588"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-audio.bin",
+      "git_blob_oid": "8862e9888468794c6b9f4d5835f1ad1071b0fed8"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-audio.json",
+      "git_blob_oid": "619af099a212ceb4c1a72455b232d6b35b9919ac"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-eurc.bin",
+      "git_blob_oid": "5a9bfa26c77ad4ee387b9073875633ebe4f87b64"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-eurc.json",
+      "git_blob_oid": "f9991e6e35959b6874d2a5393d86bad2e2d8768e"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-link.bin",
+      "git_blob_oid": "09d3dc1a36510a1cab41488c9512dc9a3085013b"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-link.json",
+      "git_blob_oid": "febc8a4509882f88bf881c78cbad3bc37c75f1d2"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-qcad.bin",
+      "git_blob_oid": "b7aa36ed0a11aee0437eea0e1bc735804bceaa24"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-qcad.json",
+      "git_blob_oid": "2cf9f8aab4fc9e9285561ed4b14b79288feabd4f"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-uni.bin",
+      "git_blob_oid": "855abf7ef1b20e3f19de7ba5ae046fc127d03776"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-uni.json",
+      "git_blob_oid": "c367580ce9aa4a764a91d8c4dc1be38096817015"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-usdt.bin",
+      "git_blob_oid": "cb18bb93aa1eda97eb80d2fbfd64dc9654684bba"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/account-usdt.json",
+      "git_blob_oid": "7afa50deff93803fb7c05dc93c063c95670a5521"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/bootstrap.bin",
+      "git_blob_oid": "43f4e65621f0a40d1564905a799b0811467557ca"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/bootstrap.json",
+      "git_blob_oid": "dd52ddf71f0d33b415ef90764f7e8f0cbb709d4b"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-aave.bin",
+      "git_blob_oid": "a0055fbcebca9820933b780139f87d3c40be1d9a"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-audio.bin",
+      "git_blob_oid": "6a98828fbdd26f961f8358ac36698aac97130819"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-eurc.bin",
+      "git_blob_oid": "43c6419e272ff82adb3ba9d8ec9b2e0ea676a342"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-link.bin",
+      "git_blob_oid": "fa88175110a17112c60251dae17eddb7db771f9c"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-qcad.bin",
+      "git_blob_oid": "bb43ebc0dc2b06d88402496f3a659c44645ae2a9"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-uni.bin",
+      "git_blob_oid": "c0d0c6a891121cc2908aa45ad539b77a925b67d9"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/code-usdt.bin",
+      "git_blob_oid": "86dfd88a74b8540309e926562d469c7650d1764e"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/consensus-proof.bin",
+      "git_blob_oid": "380c50ab3287dbdf70865027c9e8a3784a5c2ad5"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/consensus-public-values.bin",
+      "git_blob_oid": "f094f94335bdb2d4f000dccc9654aa33094eeed7"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/consensus-source-transaction.json",
+      "git_blob_oid": "2d06f544b693e73c0d9284c583af3ef242efad1d"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/consensus-spec.json",
+      "git_blob_oid": "7aeaa32ccff0651de9cfd3fa88357a918a1280b0"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/execution-block.json",
+      "git_blob_oid": "ea0403a969fe4782520fb07f88050f6949a71180"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/execution-parent.json",
+      "git_blob_oid": "26c7b2e48f2c667da2e85cabf8e47f364e11e9c7"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/execution-receipts.json",
+      "git_blob_oid": "8aa7526f799055ed533ce49f4fda93c6060a9cd6"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/expected.json",
+      "git_blob_oid": "39eaaf63a053583b6ac2b78471a2199a96b5605a"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/finalized-bootstrap.json",
+      "git_blob_oid": "fffe6a4d08e78d6cd671fb50e01f24c43b6c0302"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/finalized-execution.bin",
+      "git_blob_oid": "3aef476ffde387133b3dcdd61484131f42e114d4"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/history-aave.bin",
+      "git_blob_oid": "ce3d5fb616395b98ac028392fd9dafd6191384f0"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/history-link.bin",
+      "git_blob_oid": "9a95aa49fac4044664f5ba8bd5a29d9ba4bab0bd"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/history-native.bin",
+      "git_blob_oid": "63245d666a2a8a94932bf56186386f2371458885"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/history-usdt.bin",
+      "git_blob_oid": "7bd8b1f8931631970e055a0d12829366c99ed2c5"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/parent-header.bin",
+      "git_blob_oid": "6a41d44587de0371fb0ad058225963d7dccc872b"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/qualification/RESULTS.md",
+      "git_blob_oid": "5b6cca617c0d46ba3ae55866825017b99b51185f"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/qualification/bls-independent.log",
+      "git_blob_oid": "6de74ddfbd2ed066881f34cb24179961e12d8ce2"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/qualification/historical-oracle.log",
+      "git_blob_oid": "0126c34addb6f7859441141c9451af67dce315b4"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/qualification/test-results.json",
+      "git_blob_oid": "d87a97cbc258979a6a3ef9e5096b436154b19f02"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-bootstrap.bin",
+      "git_blob_oid": "826fc7f5760ce2ca4065c10a4d3c107276c86f53"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-bootstrap.json",
+      "git_blob_oid": "a59c6b634795c27c0f5da46c3b6f7c35936d2b5e"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-finalized-bootstrap.json",
+      "git_blob_oid": "3761acb9fe819dd6bec64ed1eec6c06884f411dc"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-proof.bin",
+      "git_blob_oid": "f116e6ada005ed4f0c0d2bb68985bb1cb1d94f25"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-public-values.bin",
+      "git_blob_oid": "914347d6afbd8b8a543c5419258387a745237929"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/rotation-source-transaction.json",
+      "git_blob_oid": "fe4ea664195fcf5515318c822b12dd6c1b43dda4"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/sources.json",
+      "git_blob_oid": "8c43a94a56d4f4c8f920768b208cd3f6a125cb9d"
+    },
+    {
+      "dataset": "ethereum",
+      "path": "contracts/test/fixtures/ethereum/sync-update.json",
+      "git_blob_oid": "f4820f30d1f750ab391b657f43ef2daa66f76461"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/README.md",
+      "git_blob_oid": "a33fb82a5a863d969681af5f02976c32a5678f7e"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/SHA256SUMS.json",
+      "git_blob_oid": "9d47060a3d458b21d4aaf6c674a0f4cf922d36cc"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/bad-pow.bin",
+      "git_blob_oid": "e302b22463709b3c1f9582260deee2c18b49a50c"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/expected.jsonl",
+      "git_blob_oid": "513bb0ca5e6fa895ba9968cbd0f4c9266b601aa1"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/headers.bin",
+      "git_blob_oid": "124d2e40451a20e61728f67416b2edd0b46f302b"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/hogex-proof.bin",
+      "git_blob_oid": "93d43d98f14fca075e1f567e9fc3fefc92e913c1"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/hogex-stripped.bin",
+      "git_blob_oid": "81d038c3f0678b46fd0bf367cbbdaf297acf8922"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/hogex.bin",
+      "git_blob_oid": "a180163121e0cd0ed21dfc64f26ba5b63ac1034f"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/hogex.json",
+      "git_blob_oid": "903b918b1e1f49f26965a643f7aaffa3cb8384bc"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/legacy-proof.bin",
+      "git_blob_oid": "cde4a33bbfd01a18c956364e82e13f745769698b"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/legacy.bin",
+      "git_blob_oid": "7c7d8ba847b15254574cb893240d3dc3be0a4569"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/legacy.json",
+      "git_blob_oid": "c0d71bb623003af94e1824c16c661e0c14b6a776"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/modern-header.bin",
+      "git_blob_oid": "50c3d923d571e21f4521b832231706cea2b85d5e"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/qualification/RESULTS.md",
+      "git_blob_oid": "95903e87c6f4735c030a6265cf05985ee3a7cad2"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/qualification/independent-oracle.log",
+      "git_blob_oid": "f2a7dd1f1f80da04a27b74cdd1dd3000fbb8ab7e"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/qualification/test-results.json",
+      "git_blob_oid": "fc00cc065e3db2e51e7152d88282af17c5b456b0"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/sources.json",
+      "git_blob_oid": "54e4372930d2878b3ed682daa34a919922701dee"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/transparent-proof.bin",
+      "git_blob_oid": "c5775dfa69b096960ae7073603ede1914496c13a"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/transparent.bin",
+      "git_blob_oid": "c5e29f195f71c2e661e1b4b9cb46b47673755a39"
+    },
+    {
+      "dataset": "litecoin",
+      "path": "contracts/test/fixtures/litecoin/transparent.json",
+      "git_blob_oid": "339f9106f21b586c960d9dd16b07f5348e250aac"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/README.md",
+      "git_blob_oid": "84a6497473390b7eca13ec3fe8a9f84b6287ffb8"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/SHA256SUMS.json",
+      "git_blob_oid": "e843bd60a956f6e1fb8c28b5ff5cad118170efa6"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371325.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371326.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371327.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371328.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371329.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371330.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371331.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371332.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371333.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371334.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371335.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371336.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371337.bin",
+      "git_blob_oid": "87d9fcf1d15b4b1fcf7eaebc0eb6776fbb594b4b"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371338.bin",
+      "git_blob_oid": "27f91014d38f37b6b6631949e3dbd46ba84e2cb7"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371339.bin",
+      "git_blob_oid": "27458614cc7b208e9eaf2120c832f61bee2c2cd8"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371340.bin",
+      "git_blob_oid": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371341.bin",
+      "git_blob_oid": "a3c9cd7be548cae59532bd62028b1c080c51ac46"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371342.bin",
+      "git_blob_oid": "ffc44244c104b6152d3d36f9a09e66edbbc6a488"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371343.bin",
+      "git_blob_oid": "068885dc0c1cb7c8a3fb200241a7cc0740da31f5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371344.bin",
+      "git_blob_oid": "a08bd88dad0d8503ce36b7483364b9208b6219ac"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371345.bin",
+      "git_blob_oid": "ef0a8d4c0356b31457979bdf06b97156b25d9a5c"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371346.bin",
+      "git_blob_oid": "153233a5bc26ea514958c6a4075f1bff15552f0f"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371347.bin",
+      "git_blob_oid": "243cde65545b97d1328f421942288293866e45b6"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371348.bin",
+      "git_blob_oid": "8fc941e3c8b3a9e6206825317727eb4fbb46cb21"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/aux/371349.bin",
+      "git_blob_oid": "a14724e68935856ffae2a0bb8696e70afa4afdc1"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/expected.json",
+      "git_blob_oid": "a5010d05b5589518e271d40cf9b62e5f42fd3d45"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers.bin",
+      "git_blob_oid": "442e30456b038ef270b0ec9a3fc9663ff917f642"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/0.bin",
+      "git_blob_oid": "dea0789b8e5744c91ebcc797bca2f55359ab1766"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/1.bin",
+      "git_blob_oid": "4ed64fef2a0655f1cbcc8d6ad6d07dc418b34770"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/10.bin",
+      "git_blob_oid": "a2876d17c11fac435f9f3fe9ef028c3eb3d43d20"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/11.bin",
+      "git_blob_oid": "3625e350840702907575acb3268cc75a97e3658c"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/12.bin",
+      "git_blob_oid": "e46280de5d7b4c004b3d4d16787665d29d6562f8"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/13.bin",
+      "git_blob_oid": "4be5e03bf5bc0f5e34553b75d5921cdf386242c1"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/14.bin",
+      "git_blob_oid": "2694a7a4bb22269b54c1b0ae27c1607d321516cb"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144988.bin",
+      "git_blob_oid": "8d865c2b47967e40431800f87038f61aa853b842"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144989.bin",
+      "git_blob_oid": "52ce2cb3554fd48b5006745c207f6064879e8587"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144990.bin",
+      "git_blob_oid": "881f59ec4a5dcba95b270a17203e77f24bbdc467"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144991.bin",
+      "git_blob_oid": "e97095a09df42ba9764d4cbd29a47b09f68a09d2"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144992.bin",
+      "git_blob_oid": "b1410674a4966a36a024f994203fbd5f1f7ab191"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144993.bin",
+      "git_blob_oid": "fe4a02f6d08bd9658aa9d1d451ed98e7acac5956"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144994.bin",
+      "git_blob_oid": "a8d8aa3533f1d198dae331ba78436985e9a50954"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144995.bin",
+      "git_blob_oid": "69e703e293c4ab31512be80289b1d0826a570683"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144996.bin",
+      "git_blob_oid": "5535052df0b43d7d2d152a9fc3b146f8662b41b6"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144997.bin",
+      "git_blob_oid": "ac19253ff77b8a3a901d9cd2df401c1ff2ab2bc4"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144998.bin",
+      "git_blob_oid": "1fceb1ed91ca2a859e0ea27f4b1562fd6f779804"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/144999.bin",
+      "git_blob_oid": "f3bede1693ba95b82fce2f71de0530eb71cae355"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145000.bin",
+      "git_blob_oid": "5c3e9d8361c746eb0e3052e2995a6aae474ff744"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145001.bin",
+      "git_blob_oid": "4463cb516c0acadaf679634aec9e915d9d58cf09"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145002.bin",
+      "git_blob_oid": "77bc2df713db74e5c3f1efc7fea2d250d9d87cc1"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145003.bin",
+      "git_blob_oid": "168a5d972e88cad2e9e2332a33ddcb43eab28fe8"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145004.bin",
+      "git_blob_oid": "3d98d044eeda46797ddfa7ae79ebd7b9f2103ddd"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145005.bin",
+      "git_blob_oid": "dac87ccf9ce10a7db7621ab275486d17488d017b"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145006.bin",
+      "git_blob_oid": "4289337d64a666bb9d81262a0c4eb4dd8af03d51"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145007.bin",
+      "git_blob_oid": "10f061cc89bd4fa8f9fe6ae4fb0675185c6d6883"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145008.bin",
+      "git_blob_oid": "5d36a7362cb5bae6a6f85e1d613d59dabd185883"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145009.bin",
+      "git_blob_oid": "5666191b7fdd3817f70da170aca3d4e955cbeb12"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145010.bin",
+      "git_blob_oid": "31e53c7698f8bed4d038669eba8fcbe0cbab67ec"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145011.bin",
+      "git_blob_oid": "fd98eaef16f109bfee585de0ee3d3b46fba1d095"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/145012.bin",
+      "git_blob_oid": "0e71541b3e5b2a4b9ef3c2d81365ffc837163166"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/15.bin",
+      "git_blob_oid": "00f7fba520e96c620b351548dcea0bbd37740afa"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/16.bin",
+      "git_blob_oid": "f63973ceb364dd0ae9a2f0e7a3fd0266efbcefe5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/2.bin",
+      "git_blob_oid": "de05ca0583613d2a25fc1db69633c724cbdbcca5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/3.bin",
+      "git_blob_oid": "63c3fcf1793e015cd4175b9af5881134b4c82425"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371325.bin",
+      "git_blob_oid": "0f4d1cbd9f76200563a66d2e31eac8cbbfdf2ddf"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371326.bin",
+      "git_blob_oid": "a985e2dcb789db76f5587ced5966ec3127f887d3"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371327.bin",
+      "git_blob_oid": "8f634c30fe7947924ceddbee736db35f1238a8a4"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371328.bin",
+      "git_blob_oid": "c8223100a7dca060fa3889dc384cdb48b2a47373"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371329.bin",
+      "git_blob_oid": "4cde96da36aa7669186ae10446535ac5048af7eb"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371330.bin",
+      "git_blob_oid": "f5f89cd5ce8dd2225cf6b1540f2e4e06fa70b30c"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371331.bin",
+      "git_blob_oid": "0851dacf3355067129d90e4cf04cadb3e64755c2"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371332.bin",
+      "git_blob_oid": "1e75be11ed3f0468dec0ba8fd9a501149a100711"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371333.bin",
+      "git_blob_oid": "01a4a190a7079dd44df9d5fa1a100aa9261216dd"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371334.bin",
+      "git_blob_oid": "83917dffe26b4e6a61649ceb52cb0a0661379ef5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371335.bin",
+      "git_blob_oid": "dc3fcfaee1db51a0e11f4eb19322932551e13dfd"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371336.bin",
+      "git_blob_oid": "11dce8b686bbe228d530f9008e327416eeb251fb"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371337.bin",
+      "git_blob_oid": "a260f158c3b68699af3c9ec9abcc5b4d95640795"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371338.bin",
+      "git_blob_oid": "0f70a838b66fc48aeb65a3c9e6c1517c4b103136"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371339.bin",
+      "git_blob_oid": "9265c1abad8a469c8f111a1bbfbc4eaf2e256ac5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371340.bin",
+      "git_blob_oid": "6174f2e3ad8e565111b239dba0b2863b626fdbc6"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371341.bin",
+      "git_blob_oid": "3c04dacbe08a26e6d60f983ef0c1e4764fe379e7"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371342.bin",
+      "git_blob_oid": "cb592bb4c31db64a1721f48a5b52420394453b12"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371343.bin",
+      "git_blob_oid": "5744bfcc97c4ba73f2aca1e103f6fe0f00947522"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371344.bin",
+      "git_blob_oid": "6081de071f8b8047fe4b236cae81f7edbfb3d87d"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371345.bin",
+      "git_blob_oid": "18a47002eb74a8822105f7240a3579fb301a7555"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371346.bin",
+      "git_blob_oid": "a7bec3d0b9be1c731ef87fd2e0014239d1feb861"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371347.bin",
+      "git_blob_oid": "513963032281acda6935e931234fccba47ee2c04"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371348.bin",
+      "git_blob_oid": "c9d729a96d79e7c325d9d1c1ef2321e8b716c621"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/371349.bin",
+      "git_blob_oid": "14ab3ee6c5e8e40ee71249947e196b70f21e82a0"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/4.bin",
+      "git_blob_oid": "0830a4b9310ec20193dc91214a1e4d3673933bd8"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/5.bin",
+      "git_blob_oid": "bf78e560a6409d5e2f1ea5ef0381cfc0a2cf3618"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/6.bin",
+      "git_blob_oid": "c2f1ccb6f8023066041bab83bb0364f448e93bbb"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/7.bin",
+      "git_blob_oid": "3e3034cb90b0c7a2fa52bd862cca13f9e523e750"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/8.bin",
+      "git_blob_oid": "9972bbbb7c090eb57247f683d8f961dcd0e73083"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/headers/9.bin",
+      "git_blob_oid": "e87e788ff0dcaa83336660c29a7b3640586ebf32"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371337.bin",
+      "git_blob_oid": "928635b1321be2b0696f7da4eae975409d1764af"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371338.bin",
+      "git_blob_oid": "d38339ac6286b068097177efce2bf1a6459bb467"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371339.bin",
+      "git_blob_oid": "22a1eec56924c710fccc747fc0e4dabd86860d70"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371341.bin",
+      "git_blob_oid": "56072739101f02afaf6e41d2e644aeea53f59d5c"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371342.bin",
+      "git_blob_oid": "49086b0718eac89c4331cc1726ea243012a6e62a"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371343.bin",
+      "git_blob_oid": "e78077508600193b93b0f0f28ebbc0482b2b3f2c"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371344.bin",
+      "git_blob_oid": "5b4998a7be419e27985415833cf142648f67a814"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371345.bin",
+      "git_blob_oid": "ff8c236517e09fc5e8d267f522ddbbdb2762a57f"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371346.bin",
+      "git_blob_oid": "7128594f323aedb584d1f57a958f0b083d951a27"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371347.bin",
+      "git_blob_oid": "a80c65fa2d5539e00d8a6ed26d5476032aaf8785"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371348.bin",
+      "git_blob_oid": "6c1d7b235c30af75663ad6213671a4a37cf0153a"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/parents/371349.bin",
+      "git_blob_oid": "9c581098e138572aa9013a1e1daeae47909f61d5"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/payment-proof.bin",
+      "git_blob_oid": "027944a2e6707aa8a08c3b22827cd7843ddb3c7e"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/payment.bin",
+      "git_blob_oid": "7444c290828f3598db998720088789439b1c73f6"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/qualification/RESULTS.md",
+      "git_blob_oid": "787c62c899dc1105c4eff3bccf8f6db34108e884"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/qualification/independent-oracle.log",
+      "git_blob_oid": "035a3c04b85d1766b9622903ba17fe16a6d77eed"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/qualification/test-results.json",
+      "git_blob_oid": "2d4231ceef11a9f35e193075104d8b86a257c43d"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/source-sha256.json",
+      "git_blob_oid": "6cb3a82bf86c79531814a3f7eab036d508d8cf9b"
+    },
+    {
+      "dataset": "dogecoin",
+      "path": "contracts/test/fixtures/dogecoin/sources.json",
+      "git_blob_oid": "7c90a7dc1a7b675d138afadab99bba9401af951d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/SHA256SUMS.json",
+      "git_blob_oid": "41dd800097bc161edd9c195c66bc5730c8397353"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/bls-wrong-message.bin",
+      "git_blob_oid": "6c54734c93705b94ce18fda2250b6820ced3005d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116662000.rlp",
+      "git_blob_oid": "d6ccda4228fed333cdd7a59070b6077ca7fe796b"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116663000.rlp",
+      "git_blob_oid": "3e960ed416be96eb057bd96e8f563c0546d879c5"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116663998.rlp",
+      "git_blob_oid": "bb917d71b86f6e105fde3dee95f039b836fcc54f"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116663999.rlp",
+      "git_blob_oid": "4b7bc3bbb6065e32ed0ca9766e4e685b34dab9ab"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664000.rlp",
+      "git_blob_oid": "652997a869c20326a519e2b7168b1a445a7a01b3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664001.rlp",
+      "git_blob_oid": "5d79cab745f7ace888a48768aee76c6cc59431c3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664002.rlp",
+      "git_blob_oid": "190ec65927d1920a4f4b51cc8828a255a4510e84"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664003.rlp",
+      "git_blob_oid": "ca4e6b346605c25c6d3a0dcefb9294f3fe21e9ae"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664004.rlp",
+      "git_blob_oid": "a02e6f6b201677e097e560c11213de6c172ce54d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664005.rlp",
+      "git_blob_oid": "9736d633df8adca87ebf582a4c408f29311945c2"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664006.rlp",
+      "git_blob_oid": "253046cb762a233cc5e69baf10a35b84a5eef68e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664007.rlp",
+      "git_blob_oid": "b7f31948e6ac121d1719a9d6a4396abbbe7aab87"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664008.rlp",
+      "git_blob_oid": "90a0897b028f0cf77ae9df2de484ae97d255a88e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664009.rlp",
+      "git_blob_oid": "7392a349cd10a505a61c3b04cfd68c3d98430c66"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664010.rlp",
+      "git_blob_oid": "b82d8e396bca11842cf422a8f1ac876b6bf139f3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664011.rlp",
+      "git_blob_oid": "1891fc2adfb08f1aef55e80f399ed9c65e3c9ac6"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664012.rlp",
+      "git_blob_oid": "5a2e8a5f11387b8822641c6433e0634fd56a12c2"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664013.rlp",
+      "git_blob_oid": "96305a97346e12494587de62f5fe34ffbd4fea27"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664014.rlp",
+      "git_blob_oid": "9c08a9661e49c8ae6b7143e5a25ce89ffc41435e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664015.rlp",
+      "git_blob_oid": "0366b944c79028a07f7630f9537c8935c72e6068"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664016.rlp",
+      "git_blob_oid": "3fe65e36d68e5d33eaefd649ef3a8ab5b9d95956"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664017.rlp",
+      "git_blob_oid": "7051ea50239b0ad78a1eae36da34fbe38ec0e30a"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664018.rlp",
+      "git_blob_oid": "0b7ba83164329e1bb8e1d68d64ecd22f5ca4c042"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664019.rlp",
+      "git_blob_oid": "114ff1cd8a1cd14f23c2b055c824b40e665c6c3d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664020.rlp",
+      "git_blob_oid": "c5a0b0560e58bc46796ed2f1cf54569a5ef92898"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664021.rlp",
+      "git_blob_oid": "8bfe165e6a22c8e6dcfd5b71b2d53239dbc71d03"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664022.rlp",
+      "git_blob_oid": "aed067a24d5fd963b9ccf2fb1387a48f4171ee9a"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664023.rlp",
+      "git_blob_oid": "b387c6821378871b8e9d859461368d370440aace"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664024.rlp",
+      "git_blob_oid": "a7df94993015e5ec35529de4f713a4691f7f77fc"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664025.rlp",
+      "git_blob_oid": "a4454a03d9c56ca589c60524020ef24253872594"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664026.rlp",
+      "git_blob_oid": "97344f9485c17a50cbff65880cac4901cf8cf3d0"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664027.rlp",
+      "git_blob_oid": "6425b453e0a069298419451120b87e6f39c4d463"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664028.rlp",
+      "git_blob_oid": "39fe90648bc94196c8a029d3782923a6da7f8a31"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664029.rlp",
+      "git_blob_oid": "d6b7c511ed07f65cfe6dc0a6bb9a5bad06c25f6e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664030.rlp",
+      "git_blob_oid": "e2e08048b90d1a392a8c6d8cca12eb7a16170fa3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664031.rlp",
+      "git_blob_oid": "aebb523854a8e0c297ae2304f1ff782ead2cc2c2"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664032.rlp",
+      "git_blob_oid": "32dbe452829a93d1ea116642ebb87f6d9e079995"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664033.rlp",
+      "git_blob_oid": "c5b2664e762af3e41806ae4b8a9e549320ab5e35"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664034.rlp",
+      "git_blob_oid": "e1c14e6ad40a892714cff60542b0efceaa5cd5e8"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664035.rlp",
+      "git_blob_oid": "e02f4995e7f69a7848dfb2b826ce7b54bf3913a6"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664036.rlp",
+      "git_blob_oid": "6bb8ea13d18910143d6480698a4740dbb0501721"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664037.rlp",
+      "git_blob_oid": "8af18370973d38e62a7ba12deb6c235af830e75b"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664038.rlp",
+      "git_blob_oid": "ea95e76ef656acedbf11f09fe5474976c680de17"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664039.rlp",
+      "git_blob_oid": "d21aa2027a03ea12d410e2ba9e2f1780ee813160"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664040.rlp",
+      "git_blob_oid": "46bbc030f9ca9f555f41213eff213d4118855e46"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664041.rlp",
+      "git_blob_oid": "f5a5cf3096491312bcea29e084af4b59d78ee0b2"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664042.rlp",
+      "git_blob_oid": "3f5b6f9f3339977db9df454cfb8f277d5f78e3d7"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664043.rlp",
+      "git_blob_oid": "d1d29df0af2b1cc875e5db1560d33fab85c1bb87"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664044.rlp",
+      "git_blob_oid": "b945e48c3f5d865eb40915ae23ea1d225f25b024"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664045.rlp",
+      "git_blob_oid": "cb1cc9ecb82403c0928be4a8da424334ae23f785"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664046.rlp",
+      "git_blob_oid": "db5770b13075e9afdb1f768a415337ed8d40aecd"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664047.rlp",
+      "git_blob_oid": "ea4eafef845069d5cf86baae19b59c96ccb7cdac"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664048.rlp",
+      "git_blob_oid": "383f02669293f9d347d080c510b81731d25e50ba"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664049.rlp",
+      "git_blob_oid": "4d3a7ae78c71af9c1e8f20806df7c4ddc1b14ea8"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664050.rlp",
+      "git_blob_oid": "b200fb201aa5f2971f97f32f68873c218b60dd8c"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664051.rlp",
+      "git_blob_oid": "9d4f3538e68c472994b939218365e54cf054ee9f"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664052.rlp",
+      "git_blob_oid": "d622c38fda7c4fe761c8a2d7fb837b5df0941a82"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664053.rlp",
+      "git_blob_oid": "a0261c954f03b9f480a59997d7d0501331714bcd"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664054.rlp",
+      "git_blob_oid": "da5ee93cd9d884594b7ebd77e920f841a3b971cc"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664055.rlp",
+      "git_blob_oid": "3235ee87753022aa85e6e4a09bb4778119ada12a"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664056.rlp",
+      "git_blob_oid": "b375d579878fb5229f00aa461d8c8315dbc1d615"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664057.rlp",
+      "git_blob_oid": "c798acd035bc90756467909de4434632b2774096"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664058.rlp",
+      "git_blob_oid": "25a90193b09c9e87c3b4054f0cadd2cf241ca8c3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664059.rlp",
+      "git_blob_oid": "b7ef9671bfd63d6a9bb6a3a0aea05ff3aa5e76a6"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664060.rlp",
+      "git_blob_oid": "3ee1deb50217d8227313915d4a01933d7f7ad09a"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664061.rlp",
+      "git_blob_oid": "d5517e413f7ad188366058c5751d49903db056a3"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664062.rlp",
+      "git_blob_oid": "dc365dad084482dadb810c5a255cf152b84f52c6"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664063.rlp",
+      "git_blob_oid": "b68d4c84fc9eb10213d4f3d63cb3da619e42403e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664064.rlp",
+      "git_blob_oid": "0d42f58d0e915d47d9d003ec782a9e5c1a9442f4"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664065.rlp",
+      "git_blob_oid": "4974660224748f7a71adb37c4fefe65cfe54f8d9"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664066.rlp",
+      "git_blob_oid": "f977f3e4152cd9837d68f077ce7105b39da9f1d8"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664067.rlp",
+      "git_blob_oid": "27ecd75934169743501359429362ae93db5d4ddd"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664068.rlp",
+      "git_blob_oid": "deaf0ea8b5efc1ad37adb60466cc7ee11bd374d8"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664069.rlp",
+      "git_blob_oid": "7da36699b02d91c2a8d08403d0971943dfaea361"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664070.rlp",
+      "git_blob_oid": "fbbae6e60e9a63f5a7c22aa984a06eccaa9f3131"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664071.rlp",
+      "git_blob_oid": "3aebd042f4a59ecc40ba28a0c1bfbc4268aef68d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664072.rlp",
+      "git_blob_oid": "50ff9ed394159a23e79777854cf394b8ce4dcd36"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664073.rlp",
+      "git_blob_oid": "8d8e3eb7c06d037622c174244d27ea86dd6c6c03"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664074.rlp",
+      "git_blob_oid": "865cc49b12a733babc747360b8313743ae34081d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664075.rlp",
+      "git_blob_oid": "2410551ac1cc44b221b31378e74ad3235c943082"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664076.rlp",
+      "git_blob_oid": "11451c29c5002e2e8bbba1565cd0422eeb3c0c51"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664077.rlp",
+      "git_blob_oid": "f2dc58b6d92f2d08d133ad8baacb35e337192712"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664078.rlp",
+      "git_blob_oid": "ccd699f125a4bf1f6cc3dd2eb00cbdfbe65bdc9d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664079.rlp",
+      "git_blob_oid": "92f69a7cf54021248a155683a0750a92d56a7a77"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664080.rlp",
+      "git_blob_oid": "6ae58c6e402eb4ac35eacd9ca0b57f29a946b220"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664081.rlp",
+      "git_blob_oid": "fa0ed04a3cadfcc66b9ae75095cd56aebb0ea9ec"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664082.rlp",
+      "git_blob_oid": "70957a0f7862ce575d06b9c08ff4de2edd31c033"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664083.rlp",
+      "git_blob_oid": "6ea1452942f6be8346cae56cdefa4c33894a2b81"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664084.rlp",
+      "git_blob_oid": "1cd689b638bf3a952aeb821ad2e7d99543889b9b"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664085.rlp",
+      "git_blob_oid": "4fd1a9521e0de01d25bfcbc8d6c614d653ac5a36"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664086.rlp",
+      "git_blob_oid": "1d0ec7e093f2e19614533b4d351066f5c468a2ad"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664087.rlp",
+      "git_blob_oid": "24c474110f95e1f4dae9ba0944bc28a5b1368291"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664088.rlp",
+      "git_blob_oid": "e8a9917b609e49f0d9fd6472c64204c9d5f62979"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664089.rlp",
+      "git_blob_oid": "6528e60bac32535796e861047fe6fb15df30ed85"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664090.rlp",
+      "git_blob_oid": "152d737d3bef479cbdf89c4852be3abb86a20090"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664091.rlp",
+      "git_blob_oid": "53d866ce6d5da70898ae82b25948fd824287becb"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/header_116664092.rlp",
+      "git_blob_oid": "5ca87b34d394ddc342d7f45401bc459a824076b4"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/historical-native.bin",
+      "git_blob_oid": "f4b6fd4ab3a70b21cc52ca3a94e77e4a04697dab"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/historical-source.zip",
+      "git_blob_oid": "f69414cb24e00d9bc1788ec7f47a0478d1784d05"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/historical-token.bin",
+      "git_blob_oid": "c9427ac334ea1d674a2422b1142587ab1d09eff9"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/qualification/independent-oracle.log",
+      "git_blob_oid": "0e11d12f2cf6f89a9a210146c3a3dd52ec454a82"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/qualification/test-results.json",
+      "git_blob_oid": "3f6c389961da2e3979328b68ea0e17db6a6e4830"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/sources.json",
+      "git_blob_oid": "b61fc5bc6d16cb39031b52fa7fbe51c4d81586c6"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/transactions-expected.json",
+      "git_blob_oid": "9d5927002e2e4f9d7a21765edf51df7768c35b2e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664000.bin",
+      "git_blob_oid": "082002ef5445ec63d6bc3618f7832fe5dd4a6f9e"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664000.rlp",
+      "git_blob_oid": "c74c042acff1c5f32337c6f8c88ca8387b69ea81"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664001.bin",
+      "git_blob_oid": "e3bc7e4045e11ded7f662669a9a7069027f8a83c"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664001.rlp",
+      "git_blob_oid": "6b88bad43c06161a354cc34dfc90908604100433"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664090.bin",
+      "git_blob_oid": "eceb9b4e333c9860519e5cf50a19e785c9d126d1"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664090.rlp",
+      "git_blob_oid": "5693b0a6d9238d056b6f5d9c13ea7f712d62d16d"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664091.bin",
+      "git_blob_oid": "2720e6828dae5d2c743a9b47e19bba257dfe4aa2"
+    },
+    {
+      "dataset": "bnb",
+      "path": "contracts/test/fixtures/bnb/vote_116664091.rlp",
+      "git_blob_oid": "b94bff64c519b12ba5f21a102d36fc162dc62725"
+    },
+    {
+      "dataset": "bnb",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md",
+      "git_blob_oid": "600a0ccb5bbea173cc5caf7953780dab52d5a3a7"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/README.md",
+      "git_blob_oid": "2829cd461b8340e1d98db78f9ceace998e7e0c07"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/SHA256SUMS",
+      "git_blob_oid": "9472bcc94abb4eca9a45071d227da1e505cf1249"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/controlled-eurc.bin",
+      "git_blob_oid": "a07a8c9fae3b54eaafec4374b57e91b0a20f5203"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/controlled-ray.bin",
+      "git_blob_oid": "e8ecb70d2ba03846dc4c5856e7738a430b91af24"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-eurc.bin",
+      "git_blob_oid": "195db69eeb10a3d2eeb76920298617b67e88be31"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-expected.json",
+      "git_blob_oid": "91ebcb6bbdcc4765af033d6048966b6a75e80b36"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-legacy.bin",
+      "git_blob_oid": "915a7886fdca5ba8d52eca8799d37082ce433a57"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-native.bin",
+      "git_blob_oid": "b717a12d0550ba0a0aeeb854e2207cbeee71d1a8"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-ray.bin",
+      "git_blob_oid": "47e7085d1da9ba7143036d1e8b3ebe9279e26c1e"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-remaining-block.bin",
+      "git_blob_oid": "54ede44fc21a24dff96670995557a3582d062453"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-v0.bin",
+      "git_blob_oid": "865c64396785f15b7334b44ee7a450e202368dfe"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/historical-v1.bin",
+      "git_blob_oid": "fcb6e33c7dccaa805cec6cd592a21fd63a39a80b"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/observed-stake-candidate.json",
+      "git_blob_oid": "9888946051ba3c4be257e29a8789388bf645f373"
+    },
+    {
+      "dataset": "solana",
+      "path": "contracts/test/fixtures/solana/rpc-observations.zip",
+      "git_blob_oid": "80586efec5f6f94bddbef9fe81ff20725943c6ec"
+    },
+    {
+      "dataset": "solana",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md",
+      "git_blob_oid": "17a225cf61f467a845cb9a9d5d2cccffea8fafa1"
+    },
+    {
+      "dataset": "solana",
+      "path": "docs/audit/solana-qualification/RESULTS.json",
+      "git_blob_oid": "cecb6497d13c89b3ccd25304ca6c93691ebde6d9"
+    },
+    {
+      "dataset": "solana",
+      "path": "docs/audit/solana-qualification/qualified-source-sha256.json",
+      "git_blob_oid": "3635654bf7471af571b763ffad60c2d9be8fa025"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/README.md",
+      "git_blob_oid": "11582151a4e7a2ac8f277b8b1c411581e35083ae"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/SHA256SUMS",
+      "git_blob_oid": "f2a6f0dcd1da0f213741f590c4eacf8712762679"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-1-100.json",
+      "git_blob_oid": "87f902110bb4621c25f1e7dd1a6e95552679aebf"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-100-200.json",
+      "git_blob_oid": "96163c9461ed4ff1c71530b41ac3ccab6ff99930"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-1000-1100.json",
+      "git_blob_oid": "03f07650582b0410e07f81a916526a7b3e6212b8"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-200-300.json",
+      "git_blob_oid": "de5d3f7d87b2fe2725e3c8c20c00bfb1a855e800"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-300-400.json",
+      "git_blob_oid": "b2df81cbfa9c73bb1d815ae19c3ac44ccaf0f7c2"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-400-500.json",
+      "git_blob_oid": "6715450de61bb355b776f6264a9c13098b104b73"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-500-600.json",
+      "git_blob_oid": "048c520a80bd4ec00bfce740d187c1760025f103"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-600-700.json",
+      "git_blob_oid": "9e085c66344e8fb0de0ad366f4883973e9ca5372"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-700-800.json",
+      "git_blob_oid": "0752fd70c3b95ab510d04320e6c271c0746862b9"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-800-900.json",
+      "git_blob_oid": "32baa96eef3170ca7ecee10b675883e7d542cb51"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/blocks-900-1000.json",
+      "git_blob_oid": "8204d52b46c835998d4918c1410c4e19780be2cc"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/expected.json",
+      "git_blob_oid": "9f80d20836992a5bd902d6423c8ea3e678440c3a"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/genesis.json",
+      "git_blob_oid": "426370bf07f06598aa9c4bd56f218cd98598e843"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/historical-headers.bin",
+      "git_blob_oid": "ffe49ecf3a50d53ab73402cb9d51b3f948d24190"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/historical-profile.bin",
+      "git_blob_oid": "e615d5e359cd08823d08f424c2137cdf09d61cd8"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/historical-transaction.bin",
+      "git_blob_oid": "e41c24e708c5f8e53f72378b266afbef20fb2261"
+    },
+    {
+      "dataset": "tron",
+      "path": "contracts/test/fixtures/tron/java-tron-mainnet-config.conf",
+      "git_blob_oid": "1176dd4631139f11ff60c9b4b4916b2f9f6f9919"
+    },
+    {
+      "dataset": "tron",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-8-TRON.md",
+      "git_blob_oid": "8d860dbaab23a695552e6a93c2b428feb69339f0"
+    },
+    {
+      "dataset": "tron",
+      "path": "docs/audit/tron-qualification/RESULTS.json",
+      "git_blob_oid": "24826fcb39d44fc3ab159db94a4b71345f25c09e"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/README.md",
+      "git_blob_oid": "3b141313f242e2b77453a5fa9a2164d36192eba7"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/SHA256SUMS",
+      "git_blob_oid": "3524050af3b36a62bc7a434acb117abdf9ae6dba"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/controlled-success.bin",
+      "git_blob_oid": "d285ee6eb8ca4c2dda79b85d2e0a1931a124b369"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/expected.json",
+      "git_blob_oid": "24c498ba38dd5e3a1fe25bbc4b4a9483e452f457"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/foundation-vl.json",
+      "git_blob_oid": "c46633617aafdd09192af2cfd767fced3cfec9e6"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/historical-header.bin",
+      "git_blob_oid": "431de35c493ac6a2cc98b14e9d3ba4e669a15b29"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/historical-payment.bin",
+      "git_blob_oid": "5d75aea8d8e9cfaf8afe594fd31ab5336938bafa"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/historical-profile.bin",
+      "git_blob_oid": "9b9180c4d6ccfa8ddf6e149883c120fab85179ab"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/historical-validations.bin",
+      "git_blob_oid": "24ba68a7314fd45ead23fdcf6198503c268ebec2"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/ledger.json",
+      "git_blob_oid": "f51884f705c2f3232198c9c2b4f7ea5384b1ca9e"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/ripple-vl.json",
+      "git_blob_oid": "b6a3b04a07f50b2d8dd204b155771bcc89692410"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/upstream-validators-example.txt",
+      "git_blob_oid": "d690a67501561d5e4ff3a10ed60e2fedaec541aa"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "contracts/test/fixtures/xrpl/validations.json",
+      "git_blob_oid": "f298348ed88b5bb9cac3128f63556b98f3158b75"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md",
+      "git_blob_oid": "60151e903dc6e2cbdea877d85859060fd6509360"
+    },
+    {
+      "dataset": "xrpl",
+      "path": "docs/audit/xrpl-qualification/RESULTS.json",
+      "git_blob_oid": "b9f67acd6dacd91c93e7b7d1733580d16ca35d6b"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/README.md",
+      "git_blob_oid": "69a72b53767b7a3e698790ff089cd2f1e32fd8e1"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/SHA256SUMS",
+      "git_blob_oid": "e7dc34fc345c5b194a2bbbea61eb629fea4e6ef0"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/controlled-proof.bin",
+      "git_blob_oid": "e61bd0c608aa469ff147e25e77178ceed2bad232"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/controlled-root.bin",
+      "git_blob_oid": "af487d49533d0c5517cdf09df8fa0ccffb3c47c2"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/genesis-bootstrap.dat",
+      "git_blob_oid": "6518146d4347af978e0bbd2c701f29143acf5b4b"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/genesis-header.bin",
+      "git_blob_oid": "0fc4b9d017a5c71e7e740f34130b175f1b4addbc"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "contracts/test/fixtures/potcoin/genesis-transaction.bin",
+      "git_blob_oid": "05c95b16cf4aab289f96774e17f96da904c8802d"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-10-POTCOIN.md",
+      "git_blob_oid": "5d9ad4dc75eac3df4928966dae4c5f0e4bf69258"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "docs/audit/potcoin-qualification/RESULTS.json",
+      "git_blob_oid": "405bfb6d48b5a40dfe22df870523e23c352e031c"
+    },
+    {
+      "dataset": "potcoin",
+      "path": "docs/audit/potcoin-qualification/source.json",
+      "git_blob_oid": "0a450f759160af33385e45d2ce4ccc27d4547795"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/README.md",
+      "git_blob_oid": "fbe1e8a75a3de18369560db5cbcb0b4719e8c384"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/SHA256SUMS",
+      "git_blob_oid": "33272373e2ee2eebe188e082434ac8fa6481a596"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-0.bin",
+      "git_blob_oid": "5d25e318bd12e8cdfaac3355bd3f1becb1bd85d1"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-1.bin",
+      "git_blob_oid": "9f66a2d442bc5220c10916ab52720b51a97dcc69"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-14060.bin",
+      "git_blob_oid": "a65914e0d89f1a96b3891e33af03c90852c53e25"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-14061.bin",
+      "git_blob_oid": "c97da6952f1ae1aba8312f6551142df7435e0e21"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-15000.bin",
+      "git_blob_oid": "92c050340f43f64d977b2242b6b9b0a65a55eb8d"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-15001.bin",
+      "git_blob_oid": "b39dad871fbb57bb84b158f98ae06e140ef2338a"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257310.bin",
+      "git_blob_oid": "62f5e59063c156f980f16577a43fde63790458f7"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257321.bin",
+      "git_blob_oid": "e54da3ab4993da706d88c4bd2eb744559612a135"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257322.bin",
+      "git_blob_oid": "c516c379cbd3547fb8c1e782cc652f18c990ae86"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257323.bin",
+      "git_blob_oid": "81839889e44579c64e0c299625ffbb5938afc730"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257324.bin",
+      "git_blob_oid": "bbaf3029a118db432c5034a639b8f6189e6b09b3"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-257368.bin",
+      "git_blob_oid": "99de8f60d60cc7e3e67e560c0382f40b046cfe0e"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-500000.bin",
+      "git_blob_oid": "4420fb6e2f0afd7be3cac657102eb2ff577b9bbe"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-9688.bin",
+      "git_blob_oid": "9524cd4c75017fb00e1ef8f9e2dbb33b63c536ea"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/block-9689.bin",
+      "git_blob_oid": "b972bf383768fa762d9e133fdcccfb73455eba1a"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/controlled-proof.bin",
+      "git_blob_oid": "c297803f81a738dfbed6ce110b7dd033c875eef6"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/controlled-root.bin",
+      "git_blob_oid": "1c2a5c1419ef30b2aa8e2db0715f0e1e2807199d"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/genesis-header.bin",
+      "git_blob_oid": "4594cbe50b5c13c56afdd6c9e753dc19760b2d02"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/genesis-transaction.bin",
+      "git_blob_oid": "d70441b5dab534fbdf664641483ed655540fd659"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/historical.json",
+      "git_blob_oid": "2cd907994c4c43bef60cabf75991d850b0d2763f"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257310.bin",
+      "git_blob_oid": "63476b6b080fb12fcd531ca845d577b2e27112ef"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257321.bin",
+      "git_blob_oid": "ca7bfd1e57dfda0caabbf386b79f1cbf6d8a7032"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257322.bin",
+      "git_blob_oid": "6966eb30c8b0ab44a390cf0ab9d3d876ab0f4b55"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257323.bin",
+      "git_blob_oid": "0df146296c08ec4a2835df84c59ac92996ee7fe7"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257324.bin",
+      "git_blob_oid": "0bb9957e230da5645e0f4897f1f81c1dc8258d48"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-257368.bin",
+      "git_blob_oid": "84c5bb0c761cdead1b3007487da19af4a0acaa36"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-500000.bin",
+      "git_blob_oid": "fc299633d41286e3887e9012a05888233e1aa968"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-9688.bin",
+      "git_blob_oid": "f44eb3116fa44af313cfbbd6cb308125c08f24c9"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "contracts/test/fixtures/curecoin/stake-9689.bin",
+      "git_blob_oid": "0e7bc12d5fa67362231b1c9722b8676afc436325"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md",
+      "git_blob_oid": "a2b19b395ddc06f3f13e5976185fbf9e3c996bc0"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "docs/audit/curecoin-qualification/RESULTS.json",
+      "git_blob_oid": "9ddaa70cfe7b2a587e263ccf3c27d2e9bb5971c7"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "docs/audit/curecoin-qualification/native-lineage.json",
+      "git_blob_oid": "73dc239e195fc3a2d0508772395f2ae306d28d2a"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "docs/audit/curecoin-qualification/native-replay.json",
+      "git_blob_oid": "5661e33e7480d1823440afcfc2f5468b988f12d3"
+    },
+    {
+      "dataset": "curecoin",
+      "path": "docs/audit/curecoin-qualification/source.json",
+      "git_blob_oid": "158f048ba05c16aaf77187f5d027268526560d3d"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "contracts/test/fixtures/dobbscoin/SHA256SUMS",
+      "git_blob_oid": "e666ac4c435afcb11d05f4b10d95897aa59f0834"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "contracts/test/fixtures/dobbscoin/historical.json",
+      "git_blob_oid": "78129cb5a7ff68b587ee9ff6bcc377d6f578b86c"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "contracts/test/fixtures/dobbscoin/native-checkpoint.json",
+      "git_blob_oid": "aa9ca1f9642f3fc9fcf2828d03d72bc20d0a4c5e"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "contracts/test/fixtures/dobbscoin/native-regtest-auxpow.json",
+      "git_blob_oid": "d462a5d90c43a166cdd9fb4aa196db27d3dda1a3"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "contracts/test/fixtures/dobbscoin/proofs.json",
+      "git_blob_oid": "c32c08005bac27e46d489d0da3d74c3e247da69f"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-12-DOBBSCOIN.md",
+      "git_blob_oid": "2b376856ebb9e5cb5ab77102978e2d536a67d132"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "docs/audit/dobbscoin/ACQUISITION.json",
+      "git_blob_oid": "44718dfd45d61c5358eaa2b5a0becfd5da174eda"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "docs/audit/dobbscoin/RESULTS.json",
+      "git_blob_oid": "082f1cf0d35489770853afcd608d4e3cef2e55ae"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "docs/audit/dobbscoin/native-historical-scripts.json",
+      "git_blob_oid": "80555ac4db607d02527118a01542cb9e27291dfc"
+    },
+    {
+      "dataset": "dobbscoin",
+      "path": "docs/audit/dobbscoin/native-replay-qualified.json",
+      "git_blob_oid": "168f80683c3bae646d4c1952b1512d2a7dbe7ea3"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/SHA256SUMS",
+      "git_blob_oid": "54c683cca5a0822cbae79b40f66edd163df9739f"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/controlled-ironwood-v6.hex",
+      "git_blob_oid": "9efa6101115ae71b10264171100fc945d8e01069"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/controlled-sapling-v6.hex",
+      "git_blob_oid": "7568b20949ca433fe788037992303e2d4ddb4df2"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/historical-header.hex",
+      "git_blob_oid": "13c8de89fa241c61bc7b120a2e40163377ad16ce"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/historical-headers.json",
+      "git_blob_oid": "151ee52ca8e709804edbe4e0ca34e92e79a209a1"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/historical-inclusion.json",
+      "git_blob_oid": "0010ab541ebb393a1d9c3248240beb24fe23e80c"
+    },
+    {
+      "dataset": "pirate",
+      "path": "contracts/test/fixtures/pirate/historical-sapling.hex",
+      "git_blob_oid": "0c47b2771d1c4e75952817210d000d435fe28b67"
+    },
+    {
+      "dataset": "pirate",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md",
+      "git_blob_oid": "3b1a471963e915de2058032739cdfda0f0124d1d"
+    },
+    {
+      "dataset": "pirate",
+      "path": "docs/audit/pirate-qualification/RESULTS.md",
+      "git_blob_oid": "d621f84c92a006d368859e69eff2c99393121edf"
+    },
+    {
+      "dataset": "pirate",
+      "path": "docs/audit/pirate-qualification/upstream-source.json",
+      "git_blob_oid": "7350e9502c35d2f4b98c0975b0f3add0d190f87f"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/SHA256SUMS",
+      "git_blob_oid": "c3074e7164d44e8f72c4651d0e1c251779995732"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-fast.attestation.hex",
+      "git_blob_oid": "325a6cc2d890ee788460f73132322406b9b81b6d"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-fast.json",
+      "git_blob_oid": "b21fe769bf219f7f43cbaa5bc605341531c80d59"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-fast.message.hex",
+      "git_blob_oid": "c6a3b69e9c9ed9017a3f197324683c5198ea81d9"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-standard-hook.attestation.hex",
+      "git_blob_oid": "e667bce877f69d682b716adf1972fb58198cc338"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-standard-hook.json",
+      "git_blob_oid": "12d98cdd166b84e7a8622934badad514ebbaff21"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/arbitrum-standard-hook.message.hex",
+      "git_blob_oid": "08d226f8ec1a6a211cf87c0fb5a068d575893e11"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/base-standard.attestation.hex",
+      "git_blob_oid": "f8fe19d03897dfcc8282c5ebddae4c79fb83e697"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/base-standard.json",
+      "git_blob_oid": "37672091cff3375c5fbfa39d77e553dd90ad4082"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/base-standard.message.hex",
+      "git_blob_oid": "63cb81ca164f4c066d6d1d5f12fd1c2758cfe5fb"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/ethereum-fast-to-base.attestation.hex",
+      "git_blob_oid": "596bce3bbf016b9e5065d1ebf4cc0aaac3c491ce"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/ethereum-fast-to-base.json",
+      "git_blob_oid": "1b6df13623ba90993d2ddb3f0f329ae030520e38"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/ethereum-fast-to-base.message.hex",
+      "git_blob_oid": "1d6b36cf5c66da83c5607693d297fbee806e5199"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/historical-index.json",
+      "git_blob_oid": "8841d800aacfad9968f2ac68b25a4ec9a9edc41e"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-contract-addresses.md",
+      "git_blob_oid": "cd2a41abfca01a613ae9637aa35f3c94bcdd00e5"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-observation.json",
+      "git_blob_oid": "86e09774d951c570e5c758ac9bfa384ce0a4880a"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-public-keys.json",
+      "git_blob_oid": "26573132bafc9a234931a99289712bcb4a39e5fc"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-sandbox-public-keys.json",
+      "git_blob_oid": "7a2476ae8ecd5eb6211d54ea3e3ca654495b06ea"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-supported-domains.md",
+      "git_blob_oid": "b629eb10f6ba5ce2b57137dbb4de3efe287e1b9c"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/issuer-usdc-addresses.md",
+      "git_blob_oid": "25111557bef9e5b275ec1b0b4f32f7e10249b5b6"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/solana-standard.attestation.hex",
+      "git_blob_oid": "617cd94e5c4d8173f6fe72e0833a09155c65b72f"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/solana-standard.json",
+      "git_blob_oid": "c2e11b83d2cde7ddb0b4d044f5d09192d91b728a"
+    },
+    {
+      "dataset": "cctp",
+      "path": "contracts/test/fixtures/cctp/solana-standard.message.hex",
+      "git_blob_oid": "dccff091415ae1d02fe178c75043bb0ce5d1247d"
+    },
+    {
+      "dataset": "cctp",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md",
+      "git_blob_oid": "e32d2b1c93be61b3f83d9deda540f7d943b68cbc"
+    },
+    {
+      "dataset": "cctp",
+      "path": "docs/audit/cctp-qualification/RESULTS.md",
+      "git_blob_oid": "ed155661ecb705dedf04b572b1c081be8eecf34f"
+    },
+    {
+      "dataset": "cctp",
+      "path": "docs/audit/cctp-qualification/historical-provenance.json",
+      "git_blob_oid": "960b0570ad26e81379100aadf2cf95244110b024"
+    },
+    {
+      "dataset": "cctp",
+      "path": "docs/audit/cctp-qualification/historical.json",
+      "git_blob_oid": "6dced51a7edca7b27aae52b521683c03faa9a706"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/PROVENANCE.json",
+      "git_blob_oid": "78f46a0affca5b9078adb91746e9de437a5918d9"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/SHA256SUMS.json",
+      "git_blob_oid": "37c5b785d79e32825068eef2f842414a3ae017bc"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/base-eth-archive-rpc.json",
+      "git_blob_oid": "2d253b9115a72dd080e06df6c2ab1e60b4b1976f"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/base-eth-scan.json",
+      "git_blob_oid": "51180fb212f1068fe7d48b1c48cf4c3a2d291d32"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/issuer-publication.html",
+      "git_blob_oid": "ec8fcb9d4f0a44359df100f9e5d1f5ae0c16aaec"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/metadata-extract.json",
+      "git_blob_oid": "b6afd21a6f7ccad471edf41858de5b0f02f38eb8"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/polygon-eth-archive-rpc.json",
+      "git_blob_oid": "137f4d48c40b2f879ca99b7797f8f3b481be8401"
+    },
+    {
+      "dataset": "cadc",
+      "path": "contracts/test/fixtures/cadc/history/polygon-eth-scan.json",
+      "git_blob_oid": "9d9ec16406609fe2beef94cd54e9cbbc865c4637"
+    },
+    {
+      "dataset": "cadc",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md",
+      "git_blob_oid": "79ae9c254c63202fd22755e22ecb26bebf147a98"
+    },
+    {
+      "dataset": "cadc",
+      "path": "docs/audit/cadc-qualification/RESULTS.json",
+      "git_blob_oid": "3418a88e98d38156b88c9e4272d2712a6b2193fd"
+    },
+    {
+      "dataset": "cadc",
+      "path": "docs/audit/cadc-qualification/SHA256SUMS.json",
+      "git_blob_oid": "c2e1990d3d6675bbd7f182088b02ed0f6f79149f"
+    },
+    {
+      "dataset": "cadc",
+      "path": "docs/audit/cadc-qualification/history-qualified.json",
+      "git_blob_oid": "7be4bc04d210a94f8037b11ffe7a2e69d30eec7d"
+    },
+    {
+      "dataset": "token-routes",
+      "path": "contracts/test/fixtures/token-routes/source-observations.json",
+      "git_blob_oid": "f4e3297f32d0f3dc3775634beed28360bb2f7a2a"
+    },
+    {
+      "dataset": "token-routes",
+      "path": "docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md",
+      "git_blob_oid": "5e857431a341f51c6800d04febf4f8c3f16602da"
+    },
+    {
+      "dataset": "token-routes",
+      "path": "docs/audit/token-route-qualification/RESULTS.json",
+      "git_blob_oid": "840d512a89e58991527fb3745887aa388e79e267"
+    },
+    {
+      "dataset": "token-routes",
+      "path": "docs/audit/token-route-qualification/SHA256SUMS.json",
+      "git_blob_oid": "11102a8ecbbe7680f2749428e3f6a718c2376cd1"
+    }
+  ]
+}

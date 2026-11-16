@@ -1,0 +1,11 @@
+Compiling 35 files with Solc 0.8.24
+Solc 0.8.24 finished in 28.23s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 1342646)
+[PASS] testRouterOutboundBurnAndLifecycle() (gas: 2308284)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 841244)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 11.52ms (7.59ms CPU time)
+
+Ran 1 test suite in 11.87ms (11.52ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

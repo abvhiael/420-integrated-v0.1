@@ -1,0 +1,13 @@
+test_bad_compact_and_compactsize (test_consensus.NativePortTests.test_bad_compact_and_compactsize) ... ok
+test_bootstrap_is_raw_not_rpc_assertion (test_consensus.NativePortTests.test_bootstrap_is_raw_not_rpc_assertion) ... ok
+test_genesis_serialization (test_consensus.NativePortTests.test_genesis_serialization) ... ok
+test_kernel_preimage_and_strict_hit (test_consensus.NativePortTests.test_kernel_preimage_and_strict_hit) ... ok
+test_minimum_age_and_saturation (test_consensus.NativePortTests.test_minimum_age_and_saturation) ... ok
+test_retarget (test_consensus.NativePortTests.test_retarget) ... ok
+test_transition_and_trust_rule (test_consensus.NativePortTests.test_transition_and_trust_rule) ... ok
+test_weighted_target_larger_than_uint256 (test_consensus.NativePortTests.test_weighted_target_larger_than_uint256) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.001s
+
+OK

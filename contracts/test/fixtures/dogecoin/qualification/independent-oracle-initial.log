@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/2e63af2acea0/repo/contracts/test/fixtures/dogecoin/verify.py", line 152, in <module>
+    if __name__=='__main__':verify('--write' in sys.argv)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/2e63af2acea0/repo/contracts/test/fixtures/dogecoin/verify.py", line 118, in verify
+    if height and ((height>=145000 and height>=lo+2) or (height<145000 and (height%240 or height==240 or height==480))):assert expected_bits(rows,height)==row['bits'],('difficulty',height)
+                                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/2e63af2acea0/repo/contracts/test/fixtures/dogecoin/verify.py", line 98, in expected_bits
+    prev=rows[height-1];bits=prev['bits']
+         ~~~~^^^^^^^^^^
+KeyError: 144987

@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "../../interfaces/IBridgeAdapter420.sol";
 import "../../interfaces/ISolanaFinalityVerifier420.sol";
 import "../../system/SystemAccess.sol";
+import "../../interfaces/IBridgeTokenRoutePolicy420.sol";
+import "../tokens/SupportedTokenRoutes420.sol";
 
 /// @notice Canonical Solana mainnet adapter for 420Bridge.
 /// @dev The adapter does not trust arbitrary RPC responses. It consumes only messages returned by a
@@ -26,12 +28,36 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedMessages;
     mapping(bytes32 => bytes32) public sourceOwnerByMessage;
 
+    address public tokenRoutePolicy;
+    event TokenRoutePolicySet(address indexed policy);
+
+    function setTokenRoutePolicy(address policy) external onlyGovernance {
+        if (
+            policy.code.length == 0
+                || IBridgeTokenRoutePolicy420(policy).componentId() != keccak256("420/APP/420BRIDGE/ASSET_REGISTRY")
+        ) revert InvalidVerifier();
+        tokenRoutePolicy = policy;
+        emit TokenRoutePolicySet(policy);
+    }
+
+    function _tokenAmount(bytes32 route, bytes32 asset, bytes32 source, bytes32 gateway, uint256 amount, bool inbound)
+        private
+        view
+        returns (uint256)
+    {
+        if (source == SOL_NATIVE_SOURCE_ASSET && !SupportedTokenRoutes420.isTokenAsset(asset)) return amount;
+        if (tokenRoutePolicy.code.length == 0) revert AssetNotAllowed();
+        return IBridgeTokenRoutePolicy420(tokenRoutePolicy)
+            .qualifyTokenTransfer(route, asset, source, ADAPTER_ID, address(verifier), gateway, amount, inbound);
+    }
     uint256 public outboundNonce;
     bool public inboundHalted;
     bool public outboundHalted;
     bytes32 public inboundIncidentHash;
     bytes32 public outboundIncidentHash;
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress();
     error InvalidVerifier();
     error WrongCluster();
@@ -63,7 +89,9 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         bytes32 sourceAsset
     );
 
-    constructor(address governanceTimelock_, address gatewayRouter_, address verifier_) SystemAccess(governanceTimelock_) {
+    constructor(address governanceTimelock_, address gatewayRouter_, address verifier_)
+        SystemAccess(governanceTimelock_)
+    {
         if (gatewayRouter_ == address(0) || gatewayRouter_.code.length == 0) revert InvalidAddress();
         gatewayRouter = gatewayRouter_;
         _setVerifier(verifier_);
@@ -74,9 +102,13 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         _;
     }
 
-    function adapterId() external pure returns (bytes32) { return ADAPTER_ID; }
+    function adapterId() external pure returns (bytes32) {
+        return ADAPTER_ID;
+    }
 
-    function setVerifier(address verifier_) external onlyGovernance { _setVerifier(verifier_); }
+    function setVerifier(address verifier_) external onlyGovernance {
+        _setVerifier(verifier_);
+    }
 
     function setEmergencyHalt(bool inbound, bool halted, bytes32 incidentHash_) external onlyGovernance {
         if (halted && incidentHash_ == bytes32(0)) revert InvalidIncident();
@@ -138,7 +170,10 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (assetId == bytes32(0)) revert AssetNotAllowed();
         bytes32 routeId = routeIdByAssetId[assetId];
         if (routeId == bytes32(0)) revert RouteNotAllowed();
-        if (p.destinationChainId!=block.chainid || p.destinationRouter!=gatewayRouter || p.routeId!=routeId) revert InvalidProof();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != routeId) {
+            revert InvalidProof();
+        }
+        uint256 localAmount = _tokenAmount(routeId, assetId, p.sourceAsset, p.gatewayProgram, p.amount, true);
         if (consumedMessages[p.messageId]) revert Replay();
 
         address sourceSender = address(uint160(uint256(p.sourceOwner)));
@@ -148,12 +183,13 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         sourceOwnerByMessage[p.messageId] = p.sourceOwner;
         emit SolanaInboundConsumed(p.messageId, p.transactionSignature, p.slot);
 
+        verifiedSourceContext[p.messageId]=SourceProofContext(p.gatewayProgram,p.sourceAsset);
         v = VerifiedTransfer({
             routeId: routeId,
             assetId: assetId,
             sender: sourceSender,
             recipient: p.recipient,
-            amount: p.amount,
+            amount: localAmount,
             sourceTxId: p.transactionSignature,
             sourceMessageId: p.messageId
         });
@@ -176,11 +212,30 @@ contract SolanaBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (sourceAsset == bytes32(0)) revert AssetNotAllowed();
         if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();
 
+        uint256 sourceAmount = _tokenAmount(routeId, assetId, sourceAsset, bytes32(0), amount, false);
         uint256 nonce = ++outboundNonce;
-        sourceMessageId = keccak256(
-            abi.encode(ADAPTER_ID, block.chainid, routeId, assetId, sender, recipient, amount, sourceAsset, nonce, extra)
-        );
-        emit SolanaOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, amount, sourceAsset);
+        sourceMessageId = (sourceAsset == SOL_NATIVE_SOURCE_ASSET && !SupportedTokenRoutes420.isTokenAsset(assetId))
+            ? keccak256(
+                abi.encode(
+                    ADAPTER_ID, block.chainid, routeId, assetId, sender, recipient, amount, sourceAsset, nonce, extra
+                )
+            )
+            : keccak256(
+                abi.encode(
+                    ADAPTER_ID,
+                    block.chainid,
+                    routeId,
+                    assetId,
+                    sender,
+                    recipient,
+                    amount,
+                    sourceAmount,
+                    sourceAsset,
+                    nonce,
+                    extra
+                )
+            );
+        emit SolanaOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, sourceAmount, sourceAsset);
     }
 
     function _setVerifier(address verifier_) private {

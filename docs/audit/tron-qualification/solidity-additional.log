@@ -1,0 +1,28 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 20.69s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/TronBridgeAdapter420.t.sol:TronBridgeAdapter420Test
+[PASS] testWrongCertifiedRouteFailsClosed() (gas: 147937)
+[PASS] testWrongDestinationChainFailsClosed() (gas: 148034)
+[PASS] testWrongDestinationRouterFailsClosed() (gas: 147625)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 3.44ms (1.82ms CPU time)
+
+Ran 5 tests for contracts/test/TronFinalityProof420.t.sol:TronFinalityProof420Test
+[PASS] testMalformedAndMissingRequiredProtobufFieldsReject() (gas: 297884)
+[PASS] testNativeHighSProducerSignatureMatchesJavaTron() (gas: 1198043)
+[FAIL: test enum located] testNativeTransferRejectsTokenTypeAndSelfTransfer() (gas: 166133)
+[PASS] testProductionCodeSizeAndPerCallGasBounds() (gas: 14354920)
+[PASS] testSignedNativeFailureStatusAndUnsupportedMemoReject() (gas: 1460943)
+Suite result: FAILED. 4 passed; 1 failed; 0 skipped; finished in 49.64ms (65.91ms CPU time)
+
+Ran 2 test suites in 51.36ms (53.08ms CPU time): 7 tests passed, 1 failed, 0 skipped (8 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/TronFinalityProof420.t.sol:TronFinalityProof420Test
+[FAIL: test enum located] testNativeTransferRejectsTokenTypeAndSelfTransfer() (gas: 166133)
+
+Encountered a total of 1 failing tests, 7 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

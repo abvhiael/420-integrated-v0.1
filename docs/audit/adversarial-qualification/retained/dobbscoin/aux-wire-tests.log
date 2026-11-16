@@ -1,0 +1,9 @@
+test_native_trailer_round_trip (test_aux_wire.AuxWireTests.test_native_trailer_round_trip) ... ok
+test_parent_branch_no_invented_32_level_cap (test_aux_wire.AuxWireTests.test_parent_branch_no_invented_32_level_cap) ... ok
+test_sdk_work_header_is_parent_not_child (test_aux_wire.AuxWireTests.test_sdk_work_header_is_parent_not_child) ... ok
+test_truncated_aux_trailer_rejected (test_aux_wire.AuxWireTests.test_truncated_aux_trailer_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.005s
+
+OK

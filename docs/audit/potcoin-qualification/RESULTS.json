@@ -1,0 +1,42 @@
+{
+  "step": "BRIDGE-AUDIT-3.V.10",
+  "status": "LOCAL_IMPLEMENTATION_QUALIFIED_HISTORICAL_POS_BLOCKED",
+  "base_main": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "full_step_complete": false,
+  "historical_genesis_qualified": true,
+  "historical_post_bootstrap_pos_qualified": false,
+  "production_activation": false,
+  "solidity_unique_passes": 43,
+  "solidity_evidence": {
+    "initial-targeted.log": "12 adapter passes retained; 28 preliminary verifier passes; 2 diagnosed verifier failures superseded by verifier.log",
+    "verifier.log": "30 verifier passes including 5000 fuzz executions after Merkle/parser correction",
+    "adapter-domain.log": "1 new adapter domain-binding test passes, three wrong destination variants"
+  },
+  "python_passes": 8,
+  "native_replay": "genesis only, offline fresh native v2.0.1, mainnet, zero peers",
+  "native_x13": "compiled pinned upstream implementation matches genuine genesis",
+  "ci_run_ids": [],
+  "publication": "One coherent commit; draft PR, no merge requested for this task; no remote CI rerun",
+  "external_blockers": [
+    "Genuine current-native-chain post-500 raw block/transaction corpus, stake origins, modifier ancestry and fork evidence unavailable; nine public endpoints returned HTTP 503 in this environment.",
+    "No qualified production native replay/checkpoint authority or approved gateway. Post-bootstrap exporter/native fork behavior remains unqualified without the missing raw corpus."
+  ],
+  "next_numbered_step": "BRIDGE-AUDIT-3.V.11; title not established by checked-in main inventory; not begun",
+  "qualified_source_sha256": {
+    "contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol": "1007df22ae19c95d5d8667d99f5a5db97b75027e9dedc2615bd2f949dbf2db4e",
+    "contracts/src/bridge/verifiers/potcoin/PotcoinConsensus420.sol": "dcc6139e5b04d4857ce59a0cba1803fb14778307c4d43337c124bbb2abb40def",
+    "contracts/src/bridge/verifiers/potcoin/PotcoinSignature420.sol": "6947b69887e7edb8011bccb5adbc645949aa7d49f50855bd9f740b214e4cc46a",
+    "contracts/src/bridge/verifiers/potcoin/PotcoinWire420.sol": "4423fabcf900952a2a7ed1a8313dd7ce626c111bd21fd51c97675d2c55df5591",
+    "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol": "b40ed41745c8c2dca7595f839d1241fd2947ddf2f0dfa3beb9f15f522ad7ac9f",
+    "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol": "785906f41c14b25f250ac5d697f81804e446ffbf70b53e677b1ec634168d77f7",
+    "contracts/test/PotcoinFinalityVerifier420.t.sol": "5a03ff9a6c7c28144ae7266f50fd8161d243b650ed67511d03ddef77f1351598",
+    "contracts/test/PotcoinBridgeAdapter420.t.sol": "c50547f078f47431fe9b83adae5eaa147be8f88df951528ea9fc0652d3093b8f",
+    "scripts/potcoin/consensus.py": "27b0fcf22024e048d8b58dd5a091da117ab61204631fbd9e127395f2e97bfd80",
+    "scripts/potcoin/generate_controlled.py": "14e7c0789bca693e3e69d93d70dfa2d97e2a196d92c853073aa6ceb67e172ab7",
+    "scripts/potcoin/native_hash.py": "a6e120a452f275ab9656ecc805a6ac0ef7c1f48c972925bf1678c0bc2e9935e3",
+    "scripts/potcoin/replay.py": "7141961ad0cf54dd5b3972fe9095b325d6e5bebedc029ddea1a5f0a285cbb9b1",
+    "scripts/potcoin/test_consensus.py": "d0500333c3907081616aec8d87f88e48dc6e4285d56e4b558fb0355a88c77633",
+    "scripts/qualify-potcoin.py": "cbfb3f7a1b895dc5c2cf370846037076fb16dcef03a9660910d260622cf1a4d4",
+    "scripts/verify-potcoin-bytecode.py": "48f96b8f9231d7477d23b89207aed99adfd4585a0527ce5ba89dc4c4fbfc4f39"
+  }
+}

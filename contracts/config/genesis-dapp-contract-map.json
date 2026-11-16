@@ -327,7 +327,9 @@
         "CADCLayerZeroAdapter.sol",
         "USDCCCTPAdapter.sol",
         "ETHProofAdapter.sol",
-        "BTCLightClientAdapter.sol"
+        "BTCLightClientAdapter.sol",
+        "BridgeVerifierRegistry420.sol",
+        "BridgeVerifierProxy420.sol"
       ]
     },
     {

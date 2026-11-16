@@ -1,0 +1,17 @@
+{
+  "ledger_index": 108335815,
+  "ledger_hash": "57aae73205466cc58b797ba8be06286d5b7a26dadd7f990c6782da7c259d669e",
+  "transaction_root": "e1207021132d869e0742c02c1c966712686f70049e3669fc85ae2b58454bad33",
+  "full_ledger_transactions": 74,
+  "authenticated_publisher_lists": 2,
+  "trusted_validators": 35,
+  "genuine_unique_validations": 34,
+  "quorum": 28,
+  "transaction_hash": "f3f79b9f3230a7823be46802a433aba2ad046262811c9655d7e909dcf88a5399",
+  "amount_drops": 24809848,
+  "destination_tag": 282161781,
+  "source": "d528b62dc7af16417c9f44aad8c04d920a3a705f",
+  "gateway": "cfa3536f5d67dd960240d14d9af13517551e57ff",
+  "proof_depth": 2
+}
+PASS: authenticated publisher lists/manifests, native validated-ledger quorum, ledger hash, complete SHAMap root and successful native tagged payment/balance credit.

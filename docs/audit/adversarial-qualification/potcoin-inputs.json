@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/potcoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "potcoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol": {
+      "sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol": {
+      "sha256": "1007df22ae19c95d5d8667d99f5a5db97b75027e9dedc2615bd2f949dbf2db4e",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/potcoin/PotcoinConsensus420.sol": {
+      "sha256": "dcc6139e5b04d4857ce59a0cba1803fb14778307c4d43337c124bbb2abb40def",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/potcoin/PotcoinSignature420.sol": {
+      "sha256": "6947b69887e7edb8011bccb5adbc645949aa7d49f50855bd9f740b214e4cc46a",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/bridge/verifiers/potcoin/PotcoinWire420.sol": {
+      "sha256": "4423fabcf900952a2a7ed1a8313dd7ce626c111bd21fd51c97675d2c55df5591",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol": {
+      "sha256": "785906f41c14b25f250ac5d697f81804e446ffbf70b53e677b1ec634168d77f7",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/PotcoinV18.t.sol": {
+      "sha256": "87cbc9192589f81f02627576cb8ed623c58421827dcd471f93c0b3499dc870cf",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623"
+}

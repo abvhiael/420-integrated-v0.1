@@ -1,0 +1,131 @@
+No files changed, compilation skipped
+
+Ran 1 test for contracts/test/BridgeFinalAdmission420.t.sol:BridgeFinalAdmission420Test
+[PASS] testEveryUnqualifiedConcreteAdapterAndRouteFailClosed() (gas: 55800105)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 15.15ms (14.04ms CPU time)
+
+Ran 1 test for contracts/test/EthereumGatewaySharedIntegration420.t.sol:EthereumGatewaySharedIntegration420Test
+[PASS] testConcreteEthereumGatewayRouterRiskTransferAndAtomicRollback() (gas: 49061198)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 31.79ms (30.46ms CPU time)
+
+Ran 1 test for contracts/test/LitecoinGatewayIntegration420.t.sol:LitecoinGatewayIntegration420Test
+[PASS] testLitecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 40234122)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 15.01ms (13.92ms CPU time)
+
+Ran 32 tests for contracts/test/SupportedTokenRoutes420.t.sol:SupportedTokenRoutes420Test
+[PASS] testAaveRoute() (gas: 8590948)
+[PASS] testAudioRoute() (gas: 8590901)
+[PASS] testAuthenticatedLegacyQcadCannotSubstitute() (gas: 8430996)
+[PASS] testAuthenticatedNativeCannotMasqueradeAsUni() (gas: 8438893)
+[PASS] testCounterfeitAndLegacySourceMappingsRejected() (gas: 8401187)
+[PASS] testDestinationContractSubstitutionRejected() (gas: 10483056)
+[PASS] testDestinationTokenDecimalsDrift() (gas: 8723779)
+[PASS] testEurcBothChainsShareDestinationAsset() (gas: 11612959)
+[PASS] testEurcEthereumRoute() (gas: 8591271)
+[PASS] testEurcSolanaRoute() (gas: 8535115)
+[PASS] testFrozenCatalogueMatchesRegistryProfilesIndependently() (gas: 20634)
+[PASS] testFuzzPrecisionOverflowFailsClosed(uint256) (runs: 2500, μ: 4356, ~: 650)
+[PASS] testFuzzPrecisionRoundTrip(uint64) (runs: 2500, μ: 1135, ~: 1141)
+[PASS] testInactiveRouteRejected() (gas: 10324763)
+[PASS] testLinkRoute() (gas: 8591062)
+[PASS] testNativeAssetCannotMasqueradeAsToken() (gas: 8409311)
+[PASS] testNativeOutboundKeepsQualifiedDigest() (gas: 402506)
+[PASS] testNoPolicyIsNotQualification() (gas: 10003213)
+[PASS] testOnlyGovernanceCanQualifyTokenRoute() (gas: 8315164)
+[PASS] testOutboundDustRejected() (gas: 8475496)
+[PASS] testOutboundExactConversionAllRoutes() (gas: 27726664)
+[PASS] testPolicyPinsGatewayWithinAdapterAllowlist() (gas: 8428774)
+[PASS] testQcadRoute() (gas: 8591346)
+[PASS] testQualifiedReplayStillRejected() (gas: 8831607)
+[PASS] testRayRoute() (gas: 8535540)
+[PASS] testRegistryCannotBeCalledAsAnAdapterByAnyone() (gas: 8303573)
+[PASS] testSolanaInboundRejectsU64Overflow() (gas: 8486535)
+[PASS] testSolanaOutboundRejectsU64Overflow() (gas: 8448711)
+[PASS] testSuspendedBridgeAssetRejected() (gas: 8450336)
+[PASS] testUniRoute() (gas: 8591462)
+[PASS] testUsdtRoute() (gas: 8591492)
+[PASS] testVerifierDependencyRotationRequiresQualification() (gas: 8624255)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 110.52ms (108.31ms CPU time)
+
+Ran 12 tests for contracts/test/TokenGatewayRouterIntegration420.t.sol:TokenGatewayRouterIntegration420Test
+[FAIL: EvmError: Revert] testAaveRoute() (gas: 8310604)
+[FAIL: EvmError: Revert] testEurcEthereumRoute() (gas: 8310758)
+[FAIL: EvmError: Revert] testEurcSolanaRoute() (gas: 8291635)
+[FAIL: EvmError: Revert] testLinkRoute() (gas: 8310773)
+[FAIL: EvmError: Revert] testQcadRoute() (gas: 8310853)
+[FAIL: EvmError: Revert] testRayRoute() (gas: 8291760)
+[PASS] testRouterIndependentTokenAdmissionsAndNormalizedRisk() (gas: 52157058)
+[PASS] testRouterOutboundKeepsSourcePending() (gas: 13055481)
+[PASS] testRouterPrecisionRiskFailureRestoresReplay() (gas: 12316480)
+[PASS] testRouterSuspendedAssetCannotBeAdmitted() (gas: 9468480)
+[FAIL: EvmError: Revert] testUniRoute() (gas: 8310800)
+[FAIL: EvmError: Revert] testUsdtRoute() (gas: 8310783)
+Suite result: FAILED. 4 passed; 8 failed; 0 skipped; finished in 86.10ms (82.91ms CPU time)
+
+Ran 3 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 6105556)
+[PASS] testRouterOutboundBurnAndLifecycle() (gas: 10836387)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 2852066)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 50.62ms (36.33ms CPU time)
+
+Ran 1 test for contracts/test/DogecoinGatewayIntegration420.t.sol:DogecoinGatewayIntegration420Test
+[PASS] testDogecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 41286677)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 12.47ms (11.70ms CPU time)
+
+Ran 37 tests for contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test
+[PASS] testComposeRequiresQualifiedConsumer() (gas: 177626)
+[PASS] testDirtyRecipient() (gas: 259439)
+[PASS] testDuplicateDelivery() (gas: 524104)
+[PASS] testEarlierExternalCommitCannotBypassAdmission() (gas: 402080)
+[PASS] testEffectiveDefaultConfigurationDrift() (gas: 307168)
+[PASS] testFuzzNativeAmountBinding(uint64) (runs: 2500, μ: 382724, ~: 394378)
+[PASS] testFuzzUnauthenticatedAmountMutation(uint64) (runs: 2500, μ: 316902, ~: 318794)
+[PASS] testInactive() (gas: 91350)
+[PASS] testInsufficientConfirmations() (gas: 321285)
+[PASS] testIssuerSecurityCommitmentMismatch() (gas: 143697)
+[PASS] testIssuerTokenSubstitution() (gas: 156016)
+[PASS] testLibrarySubstitution() (gas: 2115196)
+[PASS] testMissingRequiredDvnPolicy() (gas: 501177)
+[PASS] testNativeEndpointUlnOftDelivery() (gas: 396336)
+[PASS] testNativeOutboundDispatchesRequiredDvns() (gas: 4739668)
+[PASS] testNoRpcFinalityAssertion() (gas: 193943)
+[PASS] testNonceTampering() (gas: 318953)
+[PASS] testOnlyGovernance() (gas: 34528)
+[PASS] testOnlyRouter() (gas: 33240)
+[PASS] testOptionalThresholdRequired() (gas: 999447)
+[PASS] testOutboundAssetSubstitution() (gas: 4537804)
+[PASS] testOutboundConfigDrift() (gas: 4611992)
+[PASS] testOutboundRejectsDust() (gas: 4546792)
+[PASS] testOutboundRejectsWrongNativeGuidAndRollsBackBurn() (gas: 7629159)
+[PASS] testOutboundRouteSubstitution() (gas: 4538258)
+[PASS] testPayloadTampering() (gas: 319013)
+[PASS] testPeerCannotChangeWhileActive() (gas: 37176)
+[PASS] testPeerSubstitution() (gas: 257902)
+[PASS] testRejectedDeliveryPreservesDvnEvidence() (gas: 550574)
+[PASS] testReplaySurvivesRepinning() (gas: 851114)
+[PASS] testSingleRequiredDVNInsufficient() (gas: 258639)
+[PASS] testSixDecimalIssuerToken() (gas: 3497491)
+[PASS] testWrongDVNInsufficient() (gas: 318718)
+[PASS] testWrongSourceEid() (gas: 80066)
+[PASS] testZeroAmount() (gas: 258656)
+[PASS] testZeroNonce() (gas: 257888)
+[PASS] testZeroRecipient() (gas: 258815)
+Suite result: ok. 37 passed; 0 failed; 0 skipped; finished in 962.28ms (969.19ms CPU time)
+
+Ran 8 test suites in 979.90ms (1.28s CPU time): 80 tests passed, 8 failed, 0 skipped (88 total tests)
+
+Failing tests:
+Encountered 8 failing tests in contracts/test/TokenGatewayRouterIntegration420.t.sol:TokenGatewayRouterIntegration420Test
+[FAIL: EvmError: Revert] testAaveRoute() (gas: 8310604)
+[FAIL: EvmError: Revert] testEurcEthereumRoute() (gas: 8310758)
+[FAIL: EvmError: Revert] testEurcSolanaRoute() (gas: 8291635)
+[FAIL: EvmError: Revert] testLinkRoute() (gas: 8310773)
+[FAIL: EvmError: Revert] testQcadRoute() (gas: 8310853)
+[FAIL: EvmError: Revert] testRayRoute() (gas: 8291760)
+[FAIL: EvmError: Revert] testUniRoute() (gas: 8310800)
+[FAIL: EvmError: Revert] testUsdtRoute() (gas: 8310783)
+
+Encountered a total of 8 failing tests, 80 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 8 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

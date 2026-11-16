@@ -1,0 +1,162 @@
+Compiling 49 files with Solc 0.8.24
+Solc 0.8.24 finished in 135.50s
+Compiler run successful!
+
+Ran 8 tests for contracts/test/BitcoinBridgeAdapter420.t.sol:BitcoinBridgeAdapter420Test
+[PASS] testCanonicalBitcoinInboundPasses() (gas: 161057)
+[PASS] testInsufficientConfirmationsRejected() (gas: 130255)
+[PASS] testInvalidChainworkRejected() (gas: 130252)
+[PASS] testInvalidPowRejected() (gas: 130284)
+[PASS] testOutboundLegacySegwitAndTaproot() (gas: 155519)
+[PASS] testOutpointReplayWithDifferentMessageAfterVerifierRotation() (gas: 867301)
+[PASS] testReplayRejected() (gas: 286359)
+[PASS] testWrongNetworkRejected() (gas: 130079)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.08ms (1.09ms CPU time)
+
+Ran 18 tests for contracts/test/BridgeGenesisIntegration420.t.sol:BridgeGenesisIntegration420Test
+[PASS] testAccountingRecoveryDoesNotRewriteCompletedTransferHistory() (gas: 27184112)
+[PASS] testAuthorizedExceedsObservedBlocksNewInbound() (gas: 25877740)
+[PASS] testDirectionDisabledFailsClosed() (gas: 25839679)
+[PASS] testFrozenGatewayMayStartFailClosedWithoutVerifier() (gas: 6353877)
+[PASS] testFrozenGatewayVerifierActivationRequiresCode() (gas: 6535187)
+[PASS] testInboundCreatesTransferAndConsumesRiskAtomically() (gas: 26589724)
+[PASS] testInboundFailsWhenSourceNetworkFingerprintDrifts() (gas: 25516920)
+[PASS] testInboundWrongRegisteredAdapterFailsClosed() (gas: 27422547)
+[PASS] testObservedExceedsAuthorizedBlocksNewOutbound() (gas: 26935804)
+[PASS] testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() (gas: 27409174)
+[PASS] testOutboundAfterInboundReducesTVL() (gas: 27767590)
+[PASS] testOutboundFailsWhenDestinationChainInactive() (gas: 25390634)
+[PASS] testOutboundWrongRegisteredAdapterFailsClosed() (gas: 28466848)
+[PASS] testRecoveryRequiresNewerDistinctEvidenceBeforeMovementResumes() (gas: 27048315)
+[PASS] testReplayFailureRollsBackRiskConsumption() (gas: 27221335)
+[PASS] testSharedPauseFailsClosed() (gas: 25368839)
+[PASS] testUnknownAccountingHealthBlocksNewInboundBeforeRiskConsumption() (gas: 26909494)
+[PASS] testWithdrawalRecoveryRemainsSafetyBoundWhileAccountingUnhealthy() (gas: 27183236)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 63.70ms (62.39ms CPU time)
+
+Ran 8 tests for contracts/test/BridgeRouteChainIdentity420.t.sol:BridgeRouteChainIdentity420Test
+[PASS] testActiveRouteCapturesCanonicalChainBindings() (gas: 7818288)
+[PASS] testActiveRouteFailsForInactiveDestinationChain() (gas: 7466139)
+[PASS] testActiveRouteFailsForUnknownSourceChain() (gas: 7226900)
+[PASS] testDirectionSpecificRoutesBindBothCanonicalIdentities() (gas: 8250889)
+[PASS] testDuplicateRouteChainIdCannotBeReassignedToFork() (gas: 7216134)
+[PASS] testNetworkFingerprintChangeInvalidatesActiveRoute() (gas: 7861754)
+[PASS] testRouteChainRebindingInvalidatesActiveRoute() (gas: 7867795)
+[PASS] testStaleActiveRouteCannotChangeDirection() (gas: 7904056)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 5.36ms (5.21ms CPU time)
+
+Ran 14 tests for contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[PASS] testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains() (gas: 8452252)
+[PASS] testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected() (gas: 4431760)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 3778)
+[PASS] testFuzzTruncatedTransaction(uint16) (runs: 2500, μ: 34476, ~: 28637)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testHistoricalMainnetEveryHeaderThroughFirstDifficultyChange() (gas: 3550)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/block170.bin is not allowed to be accessed for read operations] testHistoricalTransactionAndMerkleInclusion() (gas: 3150)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testHistoricalVersionEnforcementAndMedianSorting() (gas: 1154128)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testMalformedHeadersAndTimestampRules() (gas: 3523)
+[PASS] testMismatchedVerifierRouteOrRouterRejectedByAdapter() (gas: 5900261)
+[PASS] testParserRejectsNoncanonicalCountsAndInvalidIndices() (gas: 165720)
+[PASS] testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation() (gas: 6432890)
+[PASS] testRetargetClampsAndSignedElapsed() (gas: 1218828)
+[PASS] testSegwitTxidAndMalformedWitness() (gas: 241956)
+[PASS] testTargetsAndFuzzArithmetic(uint32) (runs: 2500, μ: 1162311, ~: 1161644)
+Suite result: FAILED. 9 passed; 5 failed; 0 skipped; finished in 394.83ms (394.37ms CPU time)
+
+Ran 1 test for contracts/test/BitcoinGatewayIntegration420.t.sol:BitcoinGatewayIntegration420Test
+[PASS] testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 36000162)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.78ms (8.87ms CPU time)
+2026-11-16T03:01:35.978488Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978623Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978641Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978703Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978717Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978764Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978808Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.978852Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980163Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980185Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980192Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980213Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980228Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980243Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980271Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:01:35.980311Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+
+Ran 44 tests for contracts/test/BridgeVerifierIdentity420.t.sol:BridgeVerifierIdentity420Test
+[PASS] testChainIdentityChangeAndRestoreCannotReviveApproval() (gas: 1554172)
+[PASS] testChainRegistryReplacementInvalidates() (gas: 2712277)
+[PASS] testChainVerifierFamilyDriftInvalidates() (gas: 1480665)
+[PASS] testConfigurationRevisionPreventsChangeAndRestore() (gas: 1652296)
+[PASS] testConsumerCodeReplacementInvalidates() (gas: 1526859)
+[PASS] testDestinationChainChangeInvalidates() (gas: 1424905)
+[PASS] testErc1167IdentityUsesActualRuntimeBytes() (gas: 1780577)
+[PASS] testExpiryFailsClosed() (gas: 1393031)
+[PASS] testFuzzRuntimeHashCannotBeSubstituted(bytes32) (runs: 2500, μ: 135665, ~: 135763)
+[PASS] testFuzzWrongRootCannotKeepQualification(bytes32) (runs: 2500, μ: 1611022, ~: 1611122)
+[PASS] testGenericGatewayQualificationAndReplaySurviveReplacement() (gas: 7802283)
+[PASS] testGenericGatewayUnqualifiedVerifierCannotExecute() (gas: 2449737)
+[PASS] testGovernanceRecordsExactIdentityAndEvidence() (gas: 1584534)
+[PASS] testIdenticalRuntimeAtNewAddressDoesNotInheritApproval() (gas: 1533987)
+[PASS] testManagedProxyAuthenticatesActualImplementation() (gas: 2123892)
+[PASS] testManifestLengthBoundsReject() (gas: 263070)
+[PASS] testMissingProofSystemRejected() (gas: 113669)
+[PASS] testMissingQualificationEvidenceRejected() (gas: 113226)
+[PASS] testMissingRootOrConfigurationManifestRejected() (gas: 254367)
+[PASS] testOnlyGovernanceCanApprove() (gas: 86182)
+[PASS] testOnlyGovernanceCanCreateProxy() (gas: 34102)
+[PASS] testOnlyGovernanceCanRevoke() (gas: 1574319)
+[PASS] testProbeResultSubstitutionRejected() (gas: 142552)
+[PASS] testProbeReturndataBombFailsBoundedly() (gas: 267765)
+[PASS] testProbeTargetsCannotBeSubstituted() (gas: 139423)
+[PASS] testProxyInitializerCannotReplaceItsIdentity() (gas: 248099)
+[PASS] testProxyUpgradeAndRestoreStillInvalidates() (gas: 2449601)
+[PASS] testProxyUpgradeCannotInheritApproval() (gas: 2409152)
+[PASS] testProxyUpgradeIsGovernanceOnly() (gas: 537747)
+[PASS] testProxyUpgradeRejectsStaleVersion() (gas: 534134)
+[PASS] testQualificationRegistryReplacementDoesNotInheritRecords() (gas: 5732839)
+[PASS] testRevocationIsPermanentAndEvidenceRetained() (gas: 2894491)
+[PASS] testRootAndConfigDriftInvalidate() (gas: 1603444)
+[PASS] testRotationUsesCompareAndSwap() (gas: 1648533)
+[PASS] testTrackedDependencyCodeChangeInvalidates() (gas: 1956272)
+[PASS] testUnqualifiedDirectionRejected() (gas: 1540759)
+[PASS] testUnqualifiedNewConfigurationCannotInheritApproval() (gas: 2872159)
+[PASS] testUnqualifiedRecordCannotExecute() (gas: 1385237)
+[PASS] testUntrackedProxyGetterCannotAuthenticateImplementation() (gas: 182561)
+[PASS] testVerifierCodeReplacementInvalidates() (gas: 1536953)
+[PASS] testVerifierPointerSubstitutionInvalidates() (gas: 1827031)
+[PASS] testWrongExpectedImplementationHashRejected() (gas: 134671)
+[PASS] testWrongExpectedRuntimeHashRejected() (gas: 135155)
+[PASS] testWrongRouteConfigurationAndChainRejected() (gas: 1788575)
+Suite result: ok. 44 passed; 0 failed; 0 skipped; finished in 1.63s (1.63s CPU time)
+
+Ran 1 test for contracts/test/BridgeVerifierIdentityInvariant420.t.sol:BridgeVerifierIdentityInvariant420Test
+[PASS] invariantOnlyCurrentQualifiedStateCanBeUsedAndRevocationIsPermanent() (runs: 128, calls: 8192, reverts: 0)
+
+╭--------------------+----------+-------+---------+----------╮
+| Contract           | Selector | Calls | Reverts | Discards |
++============================================================+
+| V19IdentityHandler | mutate   | 1991  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | qualify  | 2086  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | replace  | 2069  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | revoke   | 2046  | 0       | 0        |
+╰--------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.47s (3.46s CPU time)
+
+Ran 7 test suites in 3.88s (5.57s CPU time): 89 tests passed, 5 failed, 0 skipped (94 total tests)
+
+Failing tests:
+Encountered 5 failing tests in contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 3778)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testHistoricalMainnetEveryHeaderThroughFirstDifficultyChange() (gas: 3550)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/block170.bin is not allowed to be accessed for read operations] testHistoricalTransactionAndMerkleInclusion() (gas: 3150)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testHistoricalVersionEnforcementAndMedianSorting() (gas: 1154128)
+[FAIL: vm.readFileBinary: the path contracts/test/fixtures/bitcoin/headers.bin is not allowed to be accessed for read operations] testMalformedHeadersAndTimestampRules() (gas: 3523)
+
+Encountered a total of 5 failing tests, 89 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 5 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

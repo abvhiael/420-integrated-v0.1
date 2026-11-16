@@ -18,6 +18,8 @@ on:
       - 'wallet/web/test/token-*.test.js'
       - 'testnet/public-services/token/readiness.json'
       - '.github/workflows/420token-audit.yml'
+      - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'
+      - '!contracts/test/TokenGatewaySemantics420.t.sol'
   workflow_dispatch:
 
 permissions:

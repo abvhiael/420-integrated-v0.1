@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/EthereumBridgeAdapter420.sol";
 import "../src/bridge/adapters/SolanaBridgeAdapter420.sol";
@@ -78,7 +79,9 @@ contract EmergencyControlsHardening420Test {
         attacker = new UnauthorizedEmergencyCaller420();
 
         ethAdapter = new EthereumBridgeAdapter420(address(this), address(router), address(ethVerifier));
+        ethAdapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
         solAdapter = new SolanaBridgeAdapter420(address(this), address(router), address(solVerifier));
+        solAdapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
 
         ethAdapter.setGateway(ETH_GATEWAY, true);
         ethAdapter.setAssetMapping(ethAdapter.sourceAssetKey(ETH_TOKEN), ETH_ASSET, true);
@@ -184,6 +187,7 @@ contract EmergencyControlsHardening420Test {
         private view returns (IEthereumFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = IEthereumFinalityVerifier420.FinalizedTransfer({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: ETH_ROUTE,
             sourceChainId: ethAdapter.ETHEREUM_MAINNET_CHAIN_ID(),
             blockNumber: 22_000_004,
             blockHash: keccak256("emergency-eth-block"),
@@ -203,6 +207,7 @@ contract EmergencyControlsHardening420Test {
         private view returns (ISolanaFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = ISolanaFinalityVerifier420.FinalizedTransfer({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: SOL_ROUTE,
             genesisHash: solAdapter.SOLANA_MAINNET_GENESIS_HASH(),
             slot: 250_000_004,
             transactionSignature: keccak256(abi.encode("emergency-sol-tx", messageId)),

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/EthereumBridgeAdapter420.sol";
 import "../src/bridge/verifiers/EthereumFinalityVerifier420.sol";
@@ -57,6 +58,7 @@ contract AudioBridgeAdapter420Test {
         verifier = new EthereumFinalityVerifier420(address(this), address(oracle), address(messageVerifier));
         router = new AudioEthereumRouterCaller420();
         adapter = new EthereumBridgeAdapter420(address(this), address(router), address(verifier));
+        adapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
 
         adapter.setGateway(GATEWAY, true);
         adapter.setAssetMapping(adapter.sourceAssetKey(AUDIO_ETHEREUM), AUDIO_ASSET, true);
@@ -114,9 +116,10 @@ contract AudioBridgeAdapter420Test {
     }
 
     function _message(bytes32 messageId)
-        private pure returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
+        private view returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
     {
         m = IEthereumGatewayMessageVerifier420.GatewayMessage({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: AUDIO_ROUTE,
             messageId: messageId,
             gateway: GATEWAY,
             sourceToken: AUDIO_ETHEREUM,

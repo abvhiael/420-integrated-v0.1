@@ -1,0 +1,40 @@
+Compiling 36 files with Solc 0.8.24
+Solc 0.8.24 finished in 93.23s
+Compiler run successful!
+2026-11-16T03:59:13.279444Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279474Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279482Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279512Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279518Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279541Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279559Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.279602Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282094Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282106Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282113Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282131Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282137Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282153Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282170Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T03:59:13.282200Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 1 test for contracts/test/BridgeProductionAdmissionInvariant420.t.sol:BridgeProductionAdmissionInvariant420Test
+[PASS] invariantOnlyLiveQualifiedRoutesAdmitAndRejectedProofsDoNotConsumeRisk() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| V20AdmissionHandler | attempt  | 1660  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | disable  | 1599  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | qualify  | 1675  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | revoke   | 1668  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | suspend  | 1590  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.41s (8.41s CPU time)
+
+Ran 1 test suite in 8.42s (8.41s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

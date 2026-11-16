@@ -72,6 +72,26 @@ contract CurecoinBridgeAdapter420Test {
         require(a != bytes32(0) && b != bytes32(0) && a != b, "outbound");
     }
 
+    function testUnfinalizedRejected() public {
+        _setTransfer(keccak256("unfinal"),true,false,GENESIS,0xe4e8e9e5);_reject();
+    }
+    function testWrongMagicRejected() public {
+        _setTransfer(keccak256("magic"),true,true,GENESIS,0xcdf2c0ef);_reject();
+    }
+    function testGatewayRevocationRejected() public {adapter.setGatewayScript(GATEWAY_SCRIPT,false);_reject();}
+    function testOnlyRouterRejected() public {(bool ok,)=address(adapter).call(abi.encodeCall(adapter.verifyInbound,(bytes("proof"))));require(!ok,"router bypass");}
+    function testSourceReplaySurvivesVerifierRotation() public {
+        router.inbound(adapter,bytes("proof"));CurecoinFinalityVerifierMock420 replacement=new CurecoinFinalityVerifierMock420();
+        ICurecoinFinalityVerifier420.FinalizedTransfer memory p=_healthy();p.messageId=keccak256("different-message");replacement.set(p);adapter.setVerifier(address(replacement));_reject();
+    }
+    function testDestinationBindingsRejected() public {
+        for(uint256 i;i<3;++i){ICurecoinFinalityVerifier420.FinalizedTransfer memory p=_healthy();if(i==0)p.destinationChainId++;else if(i==1)p.destinationRouter=address(1);else p.routeId=bytes32(uint256(1));verifier.set(p);_reject();}
+    }
+    function _reject() private {(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"invalid inbound");}
+    function _healthy() private view returns(ICurecoinFinalityVerifier420.FinalizedTransfer memory p){
+        bytes32 id=keccak256("cure-message-1");p=ICurecoinFinalityVerifier420.FinalizedTransfer(GENESIS,0xe4e8e9e5,3000000,keccak256(abi.encode("cure-block",id)),keccak256(abi.encode("cure-tx",id)),id,GATEWAY_SCRIPT,keccak256(abi.encode("cure-out",id)),address(0xb0b),42000000000,true,true,block.chainid,address(router),CURE_ROUTE);
+    }
+
     function _setTransfer(bytes32 messageId, bool pos, bool finalized, bytes32 genesis, bytes4 messageStart) private {
         verifier.set(ICurecoinFinalityVerifier420.FinalizedTransfer({
             genesisHash: genesis,
@@ -85,7 +105,10 @@ contract CurecoinBridgeAdapter420Test {
             recipient: address(0xB0B),
             amount: 42000000000,
             proofOfStake: pos,
-            finalized: finalized
+            finalized: finalized,
+            destinationChainId:block.chainid,
+            destinationRouter:address(router),
+            routeId:CURE_ROUTE
         }));
     }
 }

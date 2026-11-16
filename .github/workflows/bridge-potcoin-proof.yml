@@ -1,0 +1,48 @@
+name: Native PotCoin Bridge Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/potcoin/**'
+      - 'contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IPotcoinFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/bridge/verifiers/BridgeCrypto420.sol'
+      - 'contracts/src/accounts/ECDSA420.sol'
+      - 'contracts/test/Potcoin*420.t.sol'
+      - 'contracts/test/fixtures/potcoin/**'
+      - 'contracts/config/bridge/potcoin-mainnet-v12.5.9.json'
+      - 'scripts/potcoin/**'
+      - 'scripts/qualify-potcoin.py'
+      - 'scripts/verify-potcoin-bytecode.py'
+      - '.github/workflows/bridge-potcoin-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  potcoin-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Targeted controlled proof and genuine genesis checks
+        run: |
+          python -m pip install -r scripts/potcoin/requirements.txt
+          sha256sum -c contracts/test/fixtures/potcoin/SHA256SUMS
+          python -m unittest discover -s scripts/potcoin -p test_consensus.py -v
+          git clone https://github.com/potcoin/PotCoin.git "$RUNNER_TEMP/potcoin-native"
+          git -C "$RUNNER_TEMP/potcoin-native" checkout 24b987951186417af909a9cf1ea4da736e782c0f
+          python scripts/potcoin/native_hash.py --source "$RUNNER_TEMP/potcoin-native"
+          python scripts/qualify-potcoin.py
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          POTCOIN_SOLC="$solc_path" python scripts/verify-potcoin-bytecode.py

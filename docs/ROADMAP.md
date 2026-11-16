@@ -216,6 +216,8 @@ Shared-service and application launch gates are being completed before public ex
 
 **BRIDGE-AUDIT-3.V.7: repository implementation qualified; remaining final qualification deferred to testnet by user authorization (2026-11-14).** [PR #1161](https://github.com/abvhiael/420-integrated-v0.1/pull/1161) integrates implementation SHA `6de0a1a34cdb33156caeca32d2847f1dfe214995` with retained Solidity, SBF and SDK evidence. The [420Bridge testnet work roadmap](audit/420BRIDGE-TESTNET-WORK-ROADMAP.md) owns the unfinished authenticated validator/stake snapshot, genuine bridge-domain validator certificates, approved deployed source gateway and historical end-to-end SOL/SPL finality/execution qualification. Public RPC observations and controlled certificates do not satisfy these requirements. Full-step acceptance remains open and routes remain inactive.
 
+**420Bridge final verifier audit (BRIDGE-AUDIT-3.V.22 / 3.5):** qualified implementations and original source evidence are reconciled in the [authoritative verifier inventory](audit/BRIDGE-AUDIT-3-1-VERIFIER-QUALIFICATION-INVENTORY.md). All production routes remain inactive until their genuine source/issuer/deployment conditions pass. The [existing 420Bridge testnet work roadmap](audit/420BRIDGE-TESTNET-WORK-ROADMAP.md) owns deployment-dependent integration; missing POT history and SOL/ARRR authority remain explicit external prerequisites, not implied consequences of running testnet.
+
 ## 16. Independent audit and launch review
 Audit consensus-critical Go code, system contracts, genesis allocations, validator economics, bridges/oracles, and regulatory launch structure before considering mainnet.
 

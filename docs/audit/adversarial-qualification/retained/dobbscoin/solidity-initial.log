@@ -1,0 +1,87 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 27.42s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:47:5:
+   |
+47 |     function testConfirmationBoundary288() public {require(verify().confirmations==288);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:83:5:
+   |
+83 |     function testNativeMoneyLimitExceed ... ts[0].amount==30000000*100000000);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 7 tests for contracts/test/DobbscoinBridgeAdapter420.t.sol:DobbscoinBridgeAdapter420Test
+[PASS] testAuxPowRequiredAfterActivation() (gas: 145373)
+[PASS] testCanonicalDobbscoinInboundPasses() (gas: 124657)
+[PASS] testInsufficientConfirmationsFailsClosed() (gas: 148082)
+[PASS] testOutboundP2PKHPasses() (gas: 67503)
+[PASS] testReplayFailsClosed() (gas: 272077)
+[PASS] testValidatedAuxPowPassesAfterActivation() (gas: 203815)
+[PASS] testWrongNetworkFailsClosed() (gas: 145284)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 3.16ms (3.61ms CPU time)
+
+Ran 57 tests for contracts/test/DobbscoinFinalityVerifier420.t.sol:DobbscoinFinalityVerifier420Test
+[PASS] test287ConfirmationsRejected() (gas: 4099730)
+[PASS] testAuxPowBindsChildHeader() (gas: 8361360)
+[PASS] testAuxPowBranchTooLongRejected() (gas: 4447347)
+[PASS] testAuxPowDuplicateMagicRejected() (gas: 4425735)
+[PASS] testAuxPowInvalidChainIndexRejected() (gas: 4400010)
+[PASS] testAuxPowLegacyRootAt20Allowed() (gas: 4531471)
+[PASS] testAuxPowLegacyRootAt21Rejected() (gas: 4462698)
+[PASS] testAuxPowMagicMustPrecedeRoot() (gas: 4418912)
+[PASS] testAuxPowParentIndexMustBeZero() (gas: 4362757)
+[PASS] testAuxPowParentSameChainRejected() (gas: 4343445)
+[PASS] testAuxPowParentZeroOutputsAndChildTarget() (gas: 4487873)
+[PASS] testAuxPowTreeSizeRejected() (gas: 4418241)
+[PASS] testAuxPowTruncatedTreeRejected() (gas: 4416038)
+[PASS] testAuxPowWrongParentMerkleRejected() (gas: 4378951)
+[PASS] testAuxiliaryDataWithoutFlagRejected() (gas: 162637)
+[PASS] testBadCheckpointSignature() (gas: 43809)
+[PASS] testBadCompactTargets() (gas: 52840)
+[PASS] testCanonicalAbiRequired() (gas: 102733)
+[PASS] testChainWorkMismatch() (gas: 4111634)
+[PASS] testChainWorkOverflow() (gas: 4111109)
+[PASS] testConfirmationBoundary288() (gas: 199641)
+[PASS] testControlledTransferAndAdapterConsume() (gas: 303712)
+[PASS] testEmergencyDoesNotForceMinimum() (gas: 4171364)
+[PASS] testEmergencyNotBeforeActivation() (gas: 4110422)
+[PASS] testEmergencyStrictlyGreaterThanSixHours() (gas: 8267363)
+[PASS] testFutureTime() (gas: 137890)
+[PASS] testFuzzCompactWork(uint16) (runs: 2500, μ: 10661, ~: 10639)
+[PASS] testFuzzExpectedIndex(uint32,uint8) (runs: 2500, μ: 6673, ~: 6673)
+[PASS] testHeaderSubstitution() (gas: 103543)
+[PASS] testInsufficientScryptWork() (gas: 4127264)
+[PASS] testLegacyOnlyRejectsSegwitMarker() (gas: 14279)
+[PASS] testMedianTimePastEquality() (gas: 4105923)
+[PASS] testMoneyAboveNativeLimitRejected() (gas: 39924)
+[PASS] testNativeMoneyLimitExceedsBitcoinLimit() (gas: 46424)
+[PASS] testOutputIndexSubstitution() (gas: 196514)
+[PASS] testPostActivationMissingChainIdRejected() (gas: 4102710)
+[PASS] testPostActivationStandaloneIsAllowed() (gas: 4205181)
+[PASS] testPrematureAuxPow() (gas: 4131823)
+[PASS] testPrematureChainId() (gas: 4132786)
+[PASS] testRawRpcEnvelopeRejected() (gas: 12330)
+[PASS] testReplaySurvivesVerifierRotation() (gas: 4519858)
+[PASS] testScryptCommitmentBindsWorkHeader() (gas: 4106127)
+[PASS] testSignedAdvanceThenReplayRejected() (gas: 420876)
+[PASS] testStaleAuthorityEpoch() (gas: 161339)
+[PASS] testTrailingTransactionDataRejected() (gas: 66358)
+[PASS] testTransactionSubstitution() (gas: 196524)
+[PASS] testUnauthenticatedState() (gas: 136776)
+[PASS] testWrongAncestry() (gas: 4084059)
+[PASS] testWrongDestinationChain() (gas: 99889)
+[PASS] testWrongGateway() (gas: 219401)
+[PASS] testWrongGenesis() (gas: 4067692)
+[PASS] testWrongMerkleBranch() (gas: 196280)
+[PASS] testWrongNormalDifficulty() (gas: 4106043)
+[PASS] testWrongRecipient() (gas: 198811)
+[PASS] testWrongRouteMemo() (gas: 228726)
+[PASS] testWrongSourceRevision() (gas: 4067855)
+[PASS] testWrongTransactionPosition() (gas: 141094)
+Suite result: ok. 57 passed; 0 failed; 0 skipped; finished in 48.24ms (133.15ms CPU time)
+
+Ran 2 test suites in 49.55ms (51.41ms CPU time): 64 tests passed, 0 failed, 0 skipped (64 total tests)

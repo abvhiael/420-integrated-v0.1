@@ -1,0 +1,51 @@
+Compiling 17 files with Solc 0.8.24
+Solc 0.8.24 finished in 8.11s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/helpers/EthereumProofFixture420.sol:24:21:
+   |
+24 |     function client(string memory prefix) internal returns(EthereumConsensusLightClient420 c){
+   |                     ^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> contracts/test/helpers/EthereumProofFixture420.sol:39:5:
+   |
+39 |     function prefix(bytes memory payload,uint256 offset) internal pure returns(bytes memory){
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-16T01:33:18.951438Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951477Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951487Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951502Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951514Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951543Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951576Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.951620Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952383Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952403Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952409Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952419Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952431Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952451Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952480Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21309)
+2026-11-16T01:33:18.952515Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21309)
+
+Ran 5 tests for contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test
+[PASS] invariantV18UntrustedRelayerCannotAuthorizeTransfer() (runs: 128, calls: 8192, reverts: 0)
+
+╭------------------+------------+-------+---------+----------╮
+| Contract         | Selector   | Calls | Reverts | Discards |
++============================================================+
+| EnvelopeActorV18 | foreign    | 2786  | 0       | 0        |
+|------------------+------------+-------+---------+----------|
+| EnvelopeActorV18 | lengthBomb | 2741  | 0       | 0        |
+|------------------+------------+-------+---------+----------|
+| EnvelopeActorV18 | words      | 2665  | 0       | 0        |
+╰------------------+------------+-------+---------+----------╯
+
+[PASS] testFuzzV18MalformedEnvelope(bytes32,uint8,uint8) (runs: 2500, μ: 93014, ~: 88701)
+[PASS] testV18CrossProtocolAndRpcAssertions() (gas: 158243)
+[PASS] testV18DynamicLengthAndOffsetBombs() (gas: 1402135)
+[PASS] testV18LargeHostileEnvelopeHasBoundedVerifierWork() (gas: 32862950)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 722.53ms (999.11ms CPU time)
+
+Ran 1 test suite in 723.92ms (722.53ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

@@ -1,0 +1,6 @@
+xrpl-py==4.3.0
+coincurve==21.0.0
+cryptography==50.0.0
+eth-abi==5.2.0
+eth-hash[pycryptodome]==0.8.0
+websocket-client==1.8.0

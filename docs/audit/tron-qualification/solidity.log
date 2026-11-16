@@ -1,0 +1,53 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 20.94s
+Compiler run successful!
+2026-11-15T00:43:42.831902Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 12 tests for contracts/test/TronBridgeAdapter420.t.sol:TronBridgeAdapter420Test
+[PASS] testCanonicalTronInboundPasses() (gas: 124316)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27585)
+[PASS] testMessageReplayFailsClosed() (gas: 264468)
+[PASS] testOutboundCanonicalHexAddressPasses() (gas: 67269)
+[PASS] testOutboundExtraDataFailsClosed() (gas: 36964)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 36285)
+[PASS] testOutboundWrongPrefixFailsClosed() (gas: 36719)
+[PASS] testRejectedExecutionFailsClosed() (gas: 140729)
+[PASS] testTransactionReplayFailsClosed() (gas: 329079)
+[PASS] testUnsolidifiedFailsClosed() (gas: 140913)
+[PASS] testWrongGatewayFailsClosed() (gas: 143486)
+[PASS] testWrongNetworkFailsClosed() (gas: 140744)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 2.73ms (7.94ms CPU time)
+
+Ran 1 test for contracts/test/TronFinalityProof420.t.sol:TronHistoricalEvidence420Test
+[PASS] testGenuineMainnetSolidifiedNativeTransfer() (gas: 126949727)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 381.95ms (381.19ms CPU time)
+
+Ran 25 tests for contracts/test/TronFinalityProof420.t.sol:TronFinalityProof420Test
+[PASS] testBadSRSignatureFails() (gas: 685928)
+[PASS] testBrokenAncestryAndMalformedHeaderFail() (gas: 702783)
+[PASS] testCommittedFailureCannotBecomeSuccessfulTransfer() (gas: 1365352)
+[PASS] testConflictingSolidBranchCannotReplaceAcceptedBlock() (gas: 1805121)
+[PASS] testDestinationChainChangeRejectsOldProfile() (gas: 1269741)
+[PASS] testEighteenDistinctProducersCannotSolidify() (gas: 1037059)
+[PASS] testFuzzNativeSunAmountPreserved(uint64) (runs: 2500, μ: 294656, ~: 293121)
+[PASS] testFuzzUnknownWireTagsFail(uint32) (runs: 2500, μ: 39683, ~: 40086)
+[PASS] testInvalidPendingBranchDoesNotPinHead() (gas: 2272305)
+[PASS] testMissingMemoAndZeroAmountFail() (gas: 1441239)
+[PASS] testNativeSolidificationAndConcreteAdapterDeposit() (gas: 1937825)
+[PASS] testNonCanonicalEnvelopeAndWrongIndexReject() (gas: 1321319)
+[PASS] testOddMerkleNodeIsPromotedWithoutDuplication() (gas: 40358)
+[PASS] testRPCOnlyAndUnsolidifiedTransactionReject() (gas: 129827)
+[PASS] testRepeatedProducerBlocksCannotReplaceDistinctSRs() (gas: 1422291)
+[PASS] testResultTamperingFailsMerkleInclusion() (gas: 1283701)
+[PASS] testSnapshotDeadlineAndCheckpointHeightFailClosed() (gas: 2419040)
+[PASS] testSnapshotGovernanceAndClusterFailClosed() (gas: 330178)
+[PASS] testUnapprovedGatewayFails() (gas: 1548280)
+[PASS] testUnknownAndDisabledProfileReject() (gas: 1723844)
+[PASS] testVerifierRotationPreservesAdapterReplay() (gas: 1939605)
+[PASS] testWrongChainMemoFails() (gas: 1518690)
+[PASS] testWrongDestinationAndRouteMemoFail() (gas: 1521214)
+[PASS] testWrongRouterMemoFails() (gas: 1516733)
+[PASS] testWrongScheduledSRFails() (gas: 575658)
+Suite result: ok. 25 passed; 0 failed; 0 skipped; finished in 703.39ms (1.09s CPU time)
+
+Ran 3 test suites in 706.20ms (1.09s CPU time): 38 tests passed, 0 failed, 0 skipped (38 total tests)

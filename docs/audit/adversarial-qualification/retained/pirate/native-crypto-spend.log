@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "controlled-ironwood-spend-v6: native proofs and signatures",
+    "controlled-ironwood-spend-v6: altered authorization rejected",
+    "controlled-ironwood-spend-v6: wrong consensus branch rejected",
+    "controlled-ironwood-spend-v6: caller RPC assertion rejected"
+  ],
+  "passed": 4,
+  "historical_owned_deposit_qualified": false
+}

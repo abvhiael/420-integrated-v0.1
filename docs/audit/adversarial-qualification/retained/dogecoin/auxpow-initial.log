@@ -1,0 +1,13 @@
+Compiling 8 files with Solc 0.8.24
+Solc 0.8.24 finished in 8.26s
+Compiler run successful!
+
+Ran 5 tests for contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test
+[PASS] testAuxPowRejectsSubstitutedBranchesIndexParentAndEnvelope() (gas: 462548)
+[PASS] testChainIdentityActivationLegacyV2AndBuriedBaseVersions() (gas: 80447)
+[PASS] testFuzzWrongChainIdentityAlwaysFails(uint16) (runs: 2500, μ: 16175, ~: 16259)
+[PASS] testGenuineActivationAuxPowAndParentScrypt() (gas: 278340937)
+[PASS] testMergedMiningMagicPlacementTreeSizeNonceAndLegacyRootRules() (gas: 1185887)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 606.09ms (643.88ms CPU time)
+
+Ran 1 test suite in 606.43ms (606.09ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

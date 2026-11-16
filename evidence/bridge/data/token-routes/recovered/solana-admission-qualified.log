@@ -1,0 +1,9 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 11.69s
+Compiler run successful!
+
+Ran 1 test for contracts/test/SolanaFinalityProof420.t.sol:SolanaFinalityProof420Test
+[PASS] testControlledCanonicalRayAndEurcMintRoutes() (gas: 27157610)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 49.44ms (48.77ms CPU time)
+
+Ran 1 test suite in 50.05ms (49.44ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

@@ -1,0 +1,95 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/ethereum",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "ethereum",
+  "files": {
+    "contracts/src/bridge/verifiers/EthereumConsensusLightClient420.sol": {
+      "sha256": "b287076d3321bf059fd69cb48edf2cf8655dd1d160ff2a71804c5a1a0b06bdce",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumExecutionHeader420.sol": {
+      "sha256": "09163f73546a48675ec5915ec89fa2922c1eef6be1bfccde62b0c25591f9ab6d",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol": {
+      "sha256": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumGatewayMessageVerifier420.sol": {
+      "sha256": "8577b2656474de03925b0ea3d2b2d31bd4c353928ad4b846b0e10cbbad37714f",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumMPT420.sol": {
+      "sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumRLP420.sol": {
+      "sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/EthereumSSZ420.sol": {
+      "sha256": "8b0f9bbdafd3e271f1bc7853818af52a22d28b7a176b9680d0473ef6330e4903",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/vendor/sp1/ISP1Verifier.sol": {
+      "sha256": "9e918032a5aa799c1319b14b013154d6a40ca6e5f2267c9f540560abd7fd7689",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/Groth16Verifier.sol": {
+      "sha256": "01ab92508b9d56556ee247c7cb6b2ebd9c17835a4618896462b2a3a8708a50bf",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/SP1VerifierGroth16.sol": {
+      "sha256": "48e1db5baca3b102242ebd88280b3689a088076688146cd0d98876f5dacb76d0",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/interfaces/IEthereumFinalityOracle420.sol": {
+      "sha256": "8c63c8c41ea74899d2d7c5a0fbeb3de588afd5260bd106292d4b3ed5ca9f50e8",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/interfaces/IEthereumFinalityVerifier420.sol": {
+      "sha256": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol": {
+      "sha256": "f673cee4b4ed84594ded273a229f01857a84e4139c979a278aba25a9ec966be6",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EthereumV18.t.sol": {
+      "sha256": "193f65e7e7ef64ffab9431106e127186452ba455c942a54b596226548774982b",
+      "source": "V18_TEST"
+    },
+    "contracts/test/fixtures/ethereum/bootstrap.bin": {
+      "sha256": "ba417e4ebf6568a7427b30ae8378b2c3cd496a19d11bf38d846900711c7a9094",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    },
+    "contracts/test/helpers/EthereumProofFixture420.sol": {
+      "sha256": "0a54730c05d354dfeb5f0f9bee3a1a81747bd0a82169498be8b160bb5c352765",
+      "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3"
+}

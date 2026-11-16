@@ -1,0 +1,10 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 21.79s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/TronFinalityProof420.t.sol:TronFinalityProof420Test
+[PASS] testDelegatedWitnessPermissionAuthenticatesSRIdentity() (gas: 3098120)
+[PASS] testSignedFailedNativeResultAndInt64OverflowReject() (gas: 864867)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 18.84ms (22.91ms CPU time)
+
+Ran 1 test suite in 19.41ms (18.84ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

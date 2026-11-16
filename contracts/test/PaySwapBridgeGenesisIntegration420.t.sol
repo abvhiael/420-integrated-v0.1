@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/BridgeQualificationFixture420.sol";
+import "./helpers/ProofEnvelopeFixture420.sol";
 
 import "../src/pay/PaymentRouter420.sol";
 import "../src/pay/adapters/CanonicalSettlementAdapter420.sol";
@@ -76,7 +78,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
             adapterId: ADAPTER_ID,
             verifierConfigHash: keccak256("verified-config"),
             version: 1,
-            status: BridgeRouteRegistry.Status.ACTIVE,
+            status: BridgeRouteRegistry.Status.APPROVED_INACTIVE,
             inboundEnabled: true,
             outboundEnabled: true
         });
@@ -111,12 +113,13 @@ contract PaySwapBridgeGenesisIntegration420Test {
         risk.setRouter(address(bridge), true);
         transfers.setRouter(address(bridge), true);
         bridge.setAdapter(ADAPTER_ID, address(bridgeAdapter));
+        BridgeQualificationFixture420.approveRoute(env,routes,ROUTE_ID,address(bridgeAdapter),address(bridgeAdapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
         bridgeAdapter.setInbound(IBridgeAdapter420.VerifiedTransfer({
             routeId: ROUTE_ID, assetId: ASSET_ID, sender: address(0xA11CE), recipient: address(0xB0B),
             amount: 100 ether, sourceTxId: keccak256("source"), sourceMessageId: keccak256("message")
         }));
 
-        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(bridge,ADAPTER_ID,hex"4201"));
         require(bridgeTransferId != bytes32(0), "bridge transfer");
 
         ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote(

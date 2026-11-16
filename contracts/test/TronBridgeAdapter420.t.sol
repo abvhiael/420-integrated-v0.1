@@ -149,8 +149,29 @@ contract TronBridgeAdapter420Test {
         require(!ok, "extra data accepted");
     }
 
+    function testWrongDestinationChainFailsClosed() public {
+        ITronFinalityVerifier420.FinalizedTransfer memory p = _healthy(keccak256("wrong-chain"), keccak256("tx-chain"));
+        p.destinationChainId = block.chainid + 1; verifier.set(p);
+        (bool ok,) = address(router).call(abi.encodeCall(router.inbound, (adapter, hex"01")));
+        require(!ok, "wrong destination chain accepted");
+    }
+
+    function testWrongDestinationRouterFailsClosed() public {
+        ITronFinalityVerifier420.FinalizedTransfer memory p = _healthy(keccak256("wrong-router"), keccak256("tx-router"));
+        p.destinationRouter = address(0xDEAD); verifier.set(p);
+        (bool ok,) = address(router).call(abi.encodeCall(router.inbound, (adapter, hex"01")));
+        require(!ok, "wrong destination router accepted");
+    }
+
+    function testWrongCertifiedRouteFailsClosed() public {
+        ITronFinalityVerifier420.FinalizedTransfer memory p = _healthy(keccak256("wrong-route"), keccak256("tx-route"));
+        p.routeId = keccak256("substituted route"); verifier.set(p);
+        (bool ok,) = address(router).call(abi.encodeCall(router.inbound, (adapter, hex"01")));
+        require(!ok, "wrong certified route accepted");
+    }
+
     function _healthy(bytes32 messageId, bytes32 txHash)
-        private pure returns (ITronFinalityVerifier420.FinalizedTransfer memory p)
+        private view returns (ITronFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = ITronFinalityVerifier420.FinalizedTransfer({
             networkId: keccak256("TRON/MAINNET"),
@@ -163,7 +184,10 @@ contract TronBridgeAdapter420Test {
             recipient: address(0xB0B),
             amountSun: 42_000_000,
             solidified: true,
-            executionSuccess: true
+            executionSuccess: true,
+            destinationChainId: block.chainid,
+            destinationRouter: address(router),
+            routeId: ROUTE
         });
     }
 }

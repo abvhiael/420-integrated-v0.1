@@ -1,0 +1,24 @@
+Compiling 42 files with Solc 0.8.24
+Solc 0.8.24 finished in 84.73s
+Compiler run successful!
+2026-11-16T04:36:30.303903Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 2 tests for contracts/test/BridgeSettlementBoundary420.t.sol:BridgeProofOnlySettlement420Test
+[PASS] testProofOnlyAdapterCannotAtomicallyClaimSettlement() (gas: 29483709)
+[PASS] testProofOnlyTransferStaysVerifiedWithoutDeliveryReceipt() (gas: 29853272)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 18.02ms (16.86ms CPU time)
+
+Ran 1 test for contracts/test/BridgeSettlementBoundary420.t.sol:BridgeNativeBurnAccounting420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testActualReceivedBalanceBurnMatchesRiskAndObservedSupply() (gas: 9887932)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 45.86ms (29.85ms CPU time)
+
+Ran 2 test suites in 46.40ms (63.87ms CPU time): 2 tests passed, 1 failed, 0 skipped (3 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BridgeSettlementBoundary420.t.sol:BridgeNativeBurnAccounting420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testActualReceivedBalanceBurnMatchesRiskAndObservedSupply() (gas: 9887932)
+
+Encountered a total of 1 failing tests, 2 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

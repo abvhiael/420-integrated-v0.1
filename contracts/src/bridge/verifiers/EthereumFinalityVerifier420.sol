@@ -34,10 +34,12 @@ contract EthereumFinalityVerifier420 is IEthereumFinalityVerifier420, SystemAcce
     function setMessageVerifier(address verifier_) external onlyGovernance { _setMessageVerifier(verifier_); }
 
     function verifyFinalizedTransfer(bytes calldata proof) external view returns (FinalizedTransfer memory transfer_) {
+        if (proof.length > 1_200_000) revert InvalidEnvelope();
         (uint64 blockNumber, bytes32 blockHash, bytes32 receiptsRoot, bytes memory messageProof) =
             abi.decode(proof, (uint64, bytes32, bytes32, bytes));
 
-        if (blockNumber == 0 || blockHash == bytes32(0) || receiptsRoot == bytes32(0) || messageProof.length == 0) {
+        if (keccak256(proof) != keccak256(abi.encode(blockNumber, blockHash, receiptsRoot, messageProof))
+            || blockNumber == 0 || blockHash == bytes32(0) || receiptsRoot == bytes32(0) || messageProof.length == 0) {
             revert InvalidEnvelope();
         }
         if (!finalityOracle.isFinalizedExecutionBlock(blockNumber, blockHash, receiptsRoot)) revert BlockNotFinalized();
@@ -47,6 +49,7 @@ contract EthereumFinalityVerifier420 is IEthereumFinalityVerifier420, SystemAcce
         if (
             m.messageId == bytes32(0) || m.gateway == address(0) || m.sourceSender == address(0)
                 || m.recipient == address(0) || m.amount == 0 || m.transactionHash == bytes32(0)
+                || m.destinationChainId != block.chainid || m.destinationRouter == address(0) || m.routeId == bytes32(0)
         ) revert InvalidMessage();
 
         transfer_ = FinalizedTransfer({
@@ -61,7 +64,10 @@ contract EthereumFinalityVerifier420 is IEthereumFinalityVerifier420, SystemAcce
             sourceSender: m.sourceSender,
             recipient: m.recipient,
             amount: m.amount,
-            finalized: true
+            finalized: true,
+            destinationChainId: m.destinationChainId,
+            destinationRouter: m.destinationRouter,
+            routeId: m.routeId
         });
     }
 

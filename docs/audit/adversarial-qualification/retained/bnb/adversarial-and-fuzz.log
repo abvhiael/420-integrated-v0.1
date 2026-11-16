@@ -1,0 +1,21 @@
+Compiling 8 files with Solc 0.8.24
+Solc 0.8.24 finished in 35.14s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/BnbAdversarial420.t.sol:11:2:
+   |
+11 |  function testHeaderCanonicalFieldsA ... {reverted=true;}require(reverted);}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 7 tests for contracts/test/BnbAdversarial420.t.sol:BnbAdversarial420Test
+[PASS] testBadBootstrapCannotSubstituteCommitteeOrCheckpoint() (gas: 5805805)
+[PASS] testBlsMalformedCompressionAndWitnessCannotStartJob() (gas: 5866658)
+[PASS] testFuzzFieldMultiplicationMatchesNativeUint256(uint128,uint128) (runs: 2500, μ: 18324, ~: 18616)
+[PASS] testHeaderCanonicalFieldsAndNetworkSealFailClosed() (gas: 1861512)
+[PASS] testQuorumOutOfRangeBitsAndMalformedVoteRejected() (gas: 17526565)
+[PASS] testUncomputedBlsCannotFinalizeOrRegisterEpoch() (gas: 19329354)
+[PASS] testUnfinalizedEpochCannotAuthorizeItsNewKeys() (gas: 17102126)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 47.00ms (133.81ms CPU time)
+
+Ran 1 test suite in 47.39ms (47.00ms CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)

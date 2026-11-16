@@ -1,0 +1,48 @@
+{
+  "inactive_under_existing_branch_filters": {
+    "420bet-daily-application-level2.yml:push": {
+      "existing_branches": [
+        "bet/5b2-daily-application"
+      ],
+      "matching_paths": [
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+        "contracts/src/bridge/verifiers/solana/vendor/LICENSE",
+        "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol",
+        "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      ],
+      "reason": "existing branch filter does not match this publication"
+    },
+    "420bet-deployment-readiness-level2.yml:push": {
+      "existing_branches": [
+        "bet/tn-fan-01-local-readiness"
+      ],
+      "matching_paths": [
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+        "contracts/src/bridge/verifiers/solana/vendor/LICENSE",
+        "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol",
+        "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      ],
+      "reason": "existing branch filter does not match this publication"
+    },
+    "contracts-hardening.yml:push": {
+      "existing_branches": [
+        "main"
+      ],
+      "matching_paths": [
+        "contracts/config/bridge/adversarial-sources-v1.json",
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+        "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      ],
+      "reason": "existing branch filter does not match this publication"
+    }
+  },
+  "owned_path_matches": {
+    "bridge-solana-proof.yml:pull_request": [
+      "contracts/src/bridge/verifiers/solana/vendor/LICENSE",
+      "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+    ]
+  },
+  "publication": "Existing [skip ci] avoids redundant execution, including workflow self-edit triggers; remote run list will be verified.",
+  "unfiltered_metadata_workflows": [],
+  "workflow_job_inventories_unchanged": true
+}

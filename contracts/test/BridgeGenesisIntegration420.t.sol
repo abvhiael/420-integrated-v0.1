@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ProofEnvelopeFixture420.sol";
 
 import "../src/bridge/GatewayRouter420.sol";
 import "../src/bridge/BridgeRiskManager.sol";
@@ -11,8 +12,10 @@ import "../src/bridge/VerifiedGateway420.sol";
 import "../src/interfaces/IBridgeAdapter420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./helpers/BridgeQualificationFixture420.sol";
 
 contract MockBridgeAdapter420 is IBridgeAdapter420 {
+    function verifiedSourceContext(bytes32) external pure returns(bytes32,bytes32){return(keccak256("fixture/gateway"),bytes32(uint256(uint160(address(0xCA420)))));}
     VerifiedTransfer public nextTransfer;
     bytes32 public nextOutboundId = keccak256("outbound-message");
     bool public failInbound;
@@ -30,6 +33,7 @@ contract MockBridgeAdapter420 is IBridgeAdapter420 {
 }
 
 contract MockWrongBridgeAdapter420 is IBridgeAdapter420 {
+    function verifiedSourceContext(bytes32) external pure returns(bytes32,bytes32){return(keccak256("fixture/gateway"),bytes32(uint256(uint160(address(0xCA420)))));}
     VerifiedTransfer public nextTransfer;
     bytes32 public nextOutboundId = keccak256("wrong-outbound-message");
 
@@ -50,9 +54,9 @@ contract MockVerifiedGatewayVerifier420 is IVerifiedGatewayVerifier420 {
     }
 }
 
-interface VmBridgeAccounting420 { function warp(uint256) external; }
+interface VmBridgeAccounting420 { function warp(uint256) external; function prank(address) external; }
 
-contract BridgeGenesisIntegration420Test {
+abstract contract BridgeGenesisFixture420 {
     VmBridgeAccounting420 constant vm =
         VmBridgeAccounting420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 constant ROUTE_ID = keccak256("CADC/LZ/ETH-420");
@@ -127,7 +131,7 @@ contract BridgeGenesisIntegration420Test {
             adapterId: ADAPTER_ID,
             verifierConfigHash: keccak256("verified-config"),
             version: 1,
-            status: BridgeRouteRegistry.Status.ACTIVE,
+            status: BridgeRouteRegistry.Status.APPROVED_INACTIVE,
             inboundEnabled: true,
             outboundEnabled: true
         });
@@ -141,6 +145,7 @@ contract BridgeGenesisIntegration420Test {
         f.accounting.applyReconciliation(
             ASSET_ID, 1_000_000 ether, 1_000_000 ether, uint64(block.timestamp), keccak256("accounting-bootstrap")
         );
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
 
     function _inbound(uint256 amount) internal pure returns (IBridgeAdapter420.VerifiedTransfer memory) {
@@ -155,10 +160,12 @@ contract BridgeGenesisIntegration420Test {
         });
     }
 
+}
+contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
     function testInboundCreatesTransferAndConsumesRiskAtomically() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         (,,,,uint256 amount,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
         require(amount == 100 ether && status == BridgeTransferRegistry.Status.VERIFIED, "transfer");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
@@ -168,9 +175,9 @@ contract BridgeGenesisIntegration420Test {
     function testReplayFailureRollsBackRiskConsumption() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         (,,,,,,uint256 beforeTVL) = f.risk.routeUsage(ROUTE_ID);
-        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201"));
+        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201")));
         require(!ok, "replay accepted");
         (,,,,,,uint256 afterTVL) = f.risk.routeUsage(ROUTE_ID);
         require(afterTVL == beforeTVL, "risk did not roll back");
@@ -179,7 +186,7 @@ contract BridgeGenesisIntegration420Test {
     function testOutboundAfterInboundReducesTVL() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         bytes memory recipient = hex"0102";
         bytes32 messageId = f.router.initiateOutbound(ADAPTER_ID, ROUTE_ID, ASSET_ID, recipient, 40 ether, hex"");
         require(messageId != bytes32(0), "message");
@@ -201,6 +208,7 @@ contract BridgeGenesisIntegration420Test {
         MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
         wrong.setInbound(_inbound(10 ether));
         f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(wrong),address(wrong),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         (bool ok,) = address(f.router).call(
             abi.encodeWithSelector(f.router.acceptInbound.selector, WRONG_ADAPTER_ID, hex"4201")
         );
@@ -212,9 +220,10 @@ contract BridgeGenesisIntegration420Test {
     function testOutboundWrongRegisteredAdapterFailsClosed() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
         f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(wrong),address(wrong),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         (bool ok,) = address(f.router).call(
             abi.encodeWithSelector(
                 f.router.initiateOutbound.selector,
@@ -233,9 +242,10 @@ contract BridgeGenesisIntegration420Test {
 
     function testDirectionDisabledFailsClosed() public {
         Fixture memory f = _setup();
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         f.routes.setDirection(ROUTE_ID, false, true);
         f.adapter.setInbound(_inbound(10 ether));
-        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201"));
+        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201")));
         require(!ok, "disabled inbound accepted");
     }
 
@@ -243,7 +253,7 @@ contract BridgeGenesisIntegration420Test {
         Fixture memory f = _setup();
         f.chains.setChain(EXTERNAL_CHAIN, _chain(1, keccak256("TEST-EXTERNAL/FORK"), true));
         f.adapter.setInbound(_inbound(10 ether));
-        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201"));
+        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201")));
         require(!ok, "stale source network accepted");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
         require(routeTVL == 0, "risk consumed for stale network");
@@ -275,7 +285,7 @@ contract BridgeGenesisIntegration420Test {
 
         f.adapter.setInbound(_inbound(10 ether));
         (bool ok,) = address(f.router).call(
-            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201")
+            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"))
         );
         require(!ok, "unknown accounting accepted");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
@@ -296,7 +306,7 @@ contract BridgeGenesisIntegration420Test {
 
         f.adapter.setInbound(_inbound(10 ether));
         (bool ok,) = address(f.router).call(
-            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201")
+            abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"))
         );
         require(!ok, "deficit accounting accepted");
         (,,,,,,uint256 routeTVL) = f.risk.routeUsage(ROUTE_ID);
@@ -306,7 +316,7 @@ contract BridgeGenesisIntegration420Test {
     function testObservedExceedsAuthorizedBlocksNewOutbound() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         (,,,,,,uint256 beforeTVL) = f.risk.routeUsage(ROUTE_ID);
 
         vm.warp(block.timestamp + 1);
@@ -355,15 +365,16 @@ contract BridgeGenesisIntegration420Test {
         require(f.accounting.movementHealthy(ASSET_ID), "newer recovery not healthy");
 
         f.adapter.setInbound(_inbound(10 ether));
-        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         require(transferId != bytes32(0), "movement did not resume");
     }
 
     function testAccountingRecoveryDoesNotRewriteCompletedTransferHistory() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(25 ether));
-        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         f.transfers.markDestinationPending(transferId, keccak256("destination-pending"));
+        vm.prank(address(f.router));
         f.transfers.markCompleted(transferId, keccak256("completed"));
         (,,,,,,, BridgeTransferRegistry.Status beforeStatus,,) = f.transfers.transfers(transferId);
         require(beforeStatus == BridgeTransferRegistry.Status.COMPLETED, "precondition");
@@ -384,7 +395,7 @@ contract BridgeGenesisIntegration420Test {
     function testWithdrawalRecoveryRemainsSafetyBoundWhileAccountingUnhealthy() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(25 ether));
-        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
         f.transfers.markFailed(transferId, keccak256("destination-failure"));
 
         vm.warp(block.timestamp + 1);
@@ -409,7 +420,7 @@ contract BridgeGenesisIntegration420Test {
     function testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, hex"4201");
+        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
 
         (,,uint256 routeHourlyIn,uint256 routeHourlyOut,uint256 routeDailyIn,uint256 routeDailyOut,uint256 routeTVL) =
             f.risk.routeUsage(ROUTE_ID);
@@ -477,7 +488,7 @@ contract BridgeGenesisIntegration420Test {
         Fixture memory f = _setup();
         f.env.pause().setPaused(true);
         f.adapter.setInbound(_inbound(10 ether));
-        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201"));
+        (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201")));
         require(!ok, "paused inbound accepted");
     }
 }

@@ -1,0 +1,20 @@
+{
+  "height": 2526076,
+  "block_hash": "000000000f4108bf11548d27b49d9823efac45f846331f1bf5c5140bdd008e74",
+  "transaction_index": 1,
+  "transaction_id": "61d66b2621a7ae0f9ac126dda732244d799d504a3fbb37e7a1f0ba5275fd739d",
+  "merkle_branch": [
+    "f21c52438d117371d98bb3606a040e30f726c81896e7d2e16c1a2e5408de0fce",
+    "f3b24c7558f048ed7cfd56a6a05ccd81cab7e7bb0d0d277e21ef1b445b370a87",
+    "8248cdb6978098058b14480cc48992193f72816ffad2a673deb27c1e02f5bf9d",
+    "fab7f94aacded4a93fd33a058cd37cd2a0d5a51c95e78eab784f49979d37f770",
+    "c8be7497c872d0d1895b30b4f114ab52731802af390980bc1d3744d614cbc232"
+  ],
+  "header_sha256": "7ca630ef90257d93dc81b2f01701db2f2ed8a65897a3d8a0e6d8b8fa0244103f",
+  "transaction_sha256": "a33566f053e9da053c0d6d670aa3aaf93af12dbc476fac8f38d80a1aad94d3cf",
+  "blockfile_sha256": "72a181336902aadd751a9f87de109ea6dbdd18908cca5b162c9e964295ce7286",
+  "source": "https://bootstrap1.cryptoforge.cc/ARRR-bootstrap-v2.tar.gz",
+  "archive_entry": "blocks/blk00141.dat",
+  "archive_manifest_sha256": "f755897cd9d28a95e92a8da3ecef36b924878f29a754f859066cf974af43513a",
+  "complete_archive_checksum_verified": false
+}

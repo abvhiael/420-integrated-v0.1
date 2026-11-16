@@ -1,0 +1,146 @@
+Compiling 50 files with Solc 0.8.24
+Solc 0.8.24 finished in 157.45s
+Compiler run successful!
+
+Ran 1 test for contracts/test/BitcoinGatewayIntegration420.t.sol:BitcoinGatewayIntegration420Test
+[PASS] testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 36584914)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 11.37ms (9.98ms CPU time)
+
+Ran 18 tests for contracts/test/BridgeGenesisIntegration420.t.sol:BridgeGenesisIntegration420Test
+[PASS] testAccountingRecoveryDoesNotRewriteCompletedTransferHistory() (gas: 27638157)
+[PASS] testAuthorizedExceedsObservedBlocksNewInbound() (gas: 26377158)
+[PASS] testDirectionDisabledFailsClosed() (gas: 26339135)
+[PASS] testFrozenGatewayMayStartFailClosedWithoutVerifier() (gas: 6353877)
+[PASS] testFrozenGatewayVerifierActivationRequiresCode() (gas: 6535187)
+[PASS] testInboundCreatesTransferAndConsumesRiskAtomically() (gas: 27043769)
+[PASS] testInboundFailsWhenSourceNetworkFingerprintDrifts() (gas: 26012373)
+[PASS] testInboundWrongRegisteredAdapterFailsClosed() (gas: 27929917)
+[PASS] testObservedExceedsAuthorizedBlocksNewOutbound() (gas: 27389849)
+[PASS] testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() (gas: 27867357)
+[PASS] testOutboundAfterInboundReducesTVL() (gas: 28227887)
+[PASS] testOutboundFailsWhenDestinationChainInactive() (gas: 25886083)
+[PASS] testOutboundWrongRegisteredAdapterFailsClosed() (gas: 28928906)
+[PASS] testRecoveryRequiresNewerDistinctEvidenceBeforeMovementResumes() (gas: 27502360)
+[PASS] testReplayFailureRollsBackRiskConsumption() (gas: 27634039)
+[PASS] testSharedPauseFailsClosed() (gas: 25864221)
+[PASS] testUnknownAccountingHealthBlocksNewInboundBeforeRiskConsumption() (gas: 27408912)
+[PASS] testWithdrawalRecoveryRemainsSafetyBoundWhileAccountingUnhealthy() (gas: 27637281)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 64.44ms (63.58ms CPU time)
+
+Ran 8 tests for contracts/test/BridgeRouteChainIdentity420.t.sol:BridgeRouteChainIdentity420Test
+[PASS] testActiveRouteCapturesCanonicalChainBindings() (gas: 7868541)
+[PASS] testActiveRouteFailsForInactiveDestinationChain() (gas: 7516386)
+[PASS] testActiveRouteFailsForUnknownSourceChain() (gas: 7277147)
+[PASS] testDirectionSpecificRoutesBindBothCanonicalIdentities() (gas: 8301145)
+[PASS] testDuplicateRouteChainIdCannotBeReassignedToFork() (gas: 7266378)
+[PASS] testNetworkFingerprintChangeInvalidatesActiveRoute() (gas: 7912004)
+[PASS] testRouteChainRebindingInvalidatesActiveRoute() (gas: 7918045)
+[PASS] testStaleActiveRouteCannotChangeDirection() (gas: 7954325)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 7.29ms (7.09ms CPU time)
+2026-11-16T03:26:02.676724Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.676868Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.676880Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.676948Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.676970Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.677087Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.677154Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.677280Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678592Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678620Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678630Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678656Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678673Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678701Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678738Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21230)
+2026-11-16T03:26:02.678787Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21230)
+
+Ran 53 tests for contracts/test/BridgeVerifierIdentity420.t.sol:BridgeVerifierIdentity420Test
+[PASS] testChainIdentityChangeAndRestoreCannotReviveApproval() (gas: 1564438)
+[PASS] testChainRegistryReplacementInvalidates() (gas: 2722565)
+[PASS] testChainVerifierFamilyDriftInvalidates() (gas: 1490799)
+[PASS] testConfigurationRevisionPreventsChangeAndRestore() (gas: 1667500)
+[PASS] testConsumerCodeReplacementInvalidates() (gas: 1539649)
+[PASS] testDestinationChainChangeInvalidates() (gas: 1435127)
+[PASS] testErc1167IdentityUsesActualRuntimeBytes() (gas: 1795836)
+[PASS] testExpiryFailsClosed() (gas: 1403121)
+[PASS] testFuzzRuntimeHashCannotBeSubstituted(bytes32) (runs: 2500, μ: 145782, ~: 145877)
+[PASS] testFuzzWrongRootCannotKeepQualification(bytes32) (runs: 2500, μ: 1626273, ~: 1626370)
+[PASS] testGenericGatewayQualificationAndReplaySurviveReplacement() (gas: 7853481)
+[PASS] testGenericGatewayUnqualifiedVerifierCannotExecute() (gas: 2449913)
+[PASS] testGovernanceRecordsExactIdentityAndEvidence() (gas: 1599754)
+[PASS] testIdenticalRuntimeAtNewAddressDoesNotInheritApproval() (gas: 1544275)
+[PASS] testManagedConsumerProxyUpgradeInvalidatesQualification() (gas: 2653817)
+[PASS] testManagedProxyAuthenticatesActualImplementation() (gas: 2139262)
+[PASS] testManagedProxyCannotDowngradeToPublicGetterProfile() (gas: 630048)
+[PASS] testManifestLengthBoundsReject() (gas: 268180)
+[PASS] testMissingProofSystemRejected() (gas: 118867)
+[PASS] testMissingQualificationEvidenceRejected() (gas: 118358)
+[PASS] testMissingRootOrConfigurationManifestRejected() (gas: 269459)
+[PASS] testNativeCircleProxyImplementationAndUpgradeAreAuthenticated() (gas: 3061190)
+[PASS] testNativeCircleProxyRejectsUnauthorizedUpgrade() (gas: 1029357)
+[PASS] testOnlyGovernanceCanApprove() (gas: 91314)
+[PASS] testOnlyGovernanceCanCreateProxy() (gas: 34278)
+[PASS] testOnlyGovernanceCanRevoke() (gas: 1589599)
+[PASS] testProbeResultSubstitutionRejected() (gas: 152710)
+[PASS] testProbeReturndataBombFailsBoundedly() (gas: 282828)
+[PASS] testProbeTargetsCannotBeSubstituted() (gas: 149493)
+[PASS] testProxyInitializerCannotReplaceItsIdentity() (gas: 248131)
+[PASS] testProxyRuntimeProfilesRequireGovernance() (gas: 36346)
+[PASS] testProxyRuntimeRevocationAndReapprovalCannotReviveInstances() (gas: 2881276)
+[PASS] testProxyUpgradeAndRestoreStillInvalidates() (gas: 2465159)
+[PASS] testProxyUpgradeCannotInheritApproval() (gas: 2424688)
+[PASS] testProxyUpgradeInitializationFailureRollsBackIdentity() (gas: 671942)
+[PASS] testProxyUpgradeIsGovernanceOnly() (gas: 537813)
+[PASS] testProxyUpgradeRejectsStaleVersion() (gas: 534244)
+[PASS] testQualificationRegistryReplacementDoesNotInheritRecords() (gas: 6090122)
+[PASS] testRevocationIsPermanentAndEvidenceRetained() (gas: 2914923)
+[PASS] testRootAndConfigDriftInvalidate() (gas: 1618648)
+[PASS] testRotationUsesCompareAndSwap() (gas: 1668527)
+[PASS] testTimelockAndGovernanceAuthorityAreRequired() (gas: 258059)
+[PASS] testTrackedDependencyCodeChangeInvalidates() (gas: 1976781)
+[PASS] testUnknownPublicProxyRuntimeCannotAuthenticateItself() (gas: 753523)
+[PASS] testUnqualifiedDirectionRejected() (gas: 1555753)
+[PASS] testUnqualifiedNewConfigurationCannotInheritApproval() (gas: 2897341)
+[PASS] testUnqualifiedRecordCannotExecute() (gas: 1395531)
+[PASS] testUntrackedProxyGetterCannotAuthenticateImplementation() (gas: 182832)
+[PASS] testVerifierCodeReplacementInvalidates() (gas: 1552157)
+[PASS] testVerifierPointerSubstitutionInvalidates() (gas: 1842235)
+[PASS] testWrongExpectedImplementationHashRejected() (gas: 144653)
+[PASS] testWrongExpectedRuntimeHashRejected() (gas: 145247)
+[PASS] testWrongRouteConfigurationAndChainRejected() (gas: 1808701)
+Suite result: ok. 53 passed; 0 failed; 0 skipped; finished in 1.66s (1.66s CPU time)
+
+Ran 13 tests for contracts/test/BridgeVerifierRouteIdentity420.t.sol:BridgeVerifierRouteIdentity420Test
+[PASS] testV19ChainRevisionInvalidatesRouteUntilRequalified() (gas: 29020609)
+[PASS] testV19IdenticalCodeReplacementRequiresNewRouteBinding() (gas: 29756619)
+[PASS] testV19LateFailureRollsBackCentralReplayKey() (gas: 27987037)
+[PASS] testV19NewQualificationDoesNotReactivateOldRouteBinding() (gas: 29362722)
+[PASS] testV19OnlyGovernanceCanBindQualification() (gas: 25604215)
+[PASS] testV19RegistryReplacementNeedsFreshApprovalAndBinding() (gas: 33628317)
+[PASS] testV19ReplaySurvivesApprovedAdapterReplacementAndChangedAmount() (gas: 29991357)
+[PASS] testV19ReplaySurvivesQualificationRegistryReplacement() (gas: 34109680)
+[PASS] testV19RevocationStopsInboundAndOutbound() (gas: 26310501)
+[PASS] testV19RouteVersionChangeRequiresNewQualification() (gas: 29436588)
+[PASS] testV19SourceChainAliasCannotResetCanonicalMessageReplay() (gas: 29956302)
+[PASS] testV19UnqualifiedProofCannotConsumeReplay() (gas: 29018764)
+[PASS] testV19UnqualifiedReplacementAdapterNeverExecutes() (gas: 26307289)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 69.37ms (68.38ms CPU time)
+
+Ran 1 test for contracts/test/BridgeVerifierIdentityInvariant420.t.sol:BridgeVerifierIdentityInvariant420Test
+[PASS] invariantOnlyCurrentQualifiedStateCanBeUsedAndRevocationIsPermanent() (runs: 128, calls: 8192, reverts: 0)
+
+╭--------------------+----------+-------+---------+----------╮
+| Contract           | Selector | Calls | Reverts | Discards |
++============================================================+
+| V19IdentityHandler | mutate   | 1991  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | qualify  | 2086  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | replace  | 2069  | 0       | 0        |
+|--------------------+----------+-------+---------+----------|
+| V19IdentityHandler | revoke   | 2046  | 0       | 0        |
+╰--------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 3.54s (3.54s CPU time)
+
+Ran 6 test suites in 3.63s (5.36s CPU time): 94 tests passed, 0 failed, 0 skipped (94 total tests)

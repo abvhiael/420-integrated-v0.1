@@ -1,0 +1,19 @@
+{
+  "created_fresh_from_raw_only": true,
+  "daemon_sha256": "1d9dbbec52b2674a10c3048d7a6f1eae5fc43b574a9c36c61a0d06d6acd1a91c",
+  "bootstrap_sha256": "6efdb6bb958d6a5909c4499122dc2c0219436da439fe06a7746d2dca250345fa",
+  "observed_reference_prefix_height": 90518,
+  "observed_reference_prefix_hash": "3285e9c7c5551d41c939d17d928db4f2554289af04b007b06f351f90fdb24b97",
+  "assumevalid": "0",
+  "source": "a3eb106715638e316eb03af383dc27aad2e89536",
+  "trace_scope": "Original fresh-node replay. Resume only its own validated database, never archive databases.",
+  "retained_native_trace_sha256": {
+    "daemon.log": "7a474cbe98a85f6bc85fc91bd6e95638591b90efa78bfd03af82641b0dfd9553",
+    "daemon-resume-1.log": "abb7e75971d4abaa9cface4cf54ed85c7f019b9168716fa80a18919d366c707e",
+    "daemon-resume-3.log": "fbe9568ed28a72e9973bf8d966d786cba7061e79f12f03bd298a4e62c5c3b2bf"
+  },
+  "prior_daemon_sha256": "3fffbe6c1f853405907d2d63671ca2a5085f28ce73105e41b0f2765cba2afebc",
+  "prior_native_prefix_height": 201279,
+  "prior_native_prefix_hash": "b813f209a7d27385fc2de32c1cf0740164fdc95430e9ce1a222fafa63319331b",
+  "native_crypto_equivalence_sha256": "30d32d40d05dab0641c45a44171f17e6156e3326108b24fb7ff840736dedd9bd"
+}

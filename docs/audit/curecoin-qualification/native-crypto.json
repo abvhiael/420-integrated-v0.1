@@ -1,0 +1,5 @@
+{
+  "pass": true,
+  "comparisons": 10000,
+  "cases": "compressed/uncompressed, low/high-s, invalid scalar/digest mutations and DER/trailing bytes; exact OpenSSL fallback preserved"
+}

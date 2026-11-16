@@ -1,0 +1,67 @@
+[
+  {
+    "head": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "path": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+    "base_sha256": "f18b029c26125744dc84ff59a3ad41d8be485379d77fdac2b12d0d1ba9c447a9",
+    "incoming_sha256": "0e9b8b048e4edc2d1a75c44416fd51e6d4adf639c2231fc0354a48d1e4083f12",
+    "current_sha256": "c336271cd1ee7d207fcb31f4de84d595a40cc1ca4f31f0c77729ac5322254e22",
+    "resolution": "retain V21 native delivery receipt / harness additions",
+    "selected_source": "a21bf15a72535e7803823a47708b1cf301daea20",
+    "final_source_sha256": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced"
+  },
+  {
+    "head": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "path": "contracts/test/helpers/CCTPNativeHarness420.sol",
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "incoming_sha256": "77d6b23ea0658016e2191536757610f784c9b4ce4df81c43b35d4c0e9f61114d",
+    "current_sha256": "625ae368baaee4aebe99252f2c475c81ec2479bfc881461867845b36d0d6397b",
+    "resolution": "retain V21 native delivery receipt / harness additions",
+    "selected_source": "a21bf15a72535e7803823a47708b1cf301daea20",
+    "final_source_sha256": "625ae368baaee4aebe99252f2c475c81ec2479bfc881461867845b36d0d6397b"
+  },
+  {
+    "head": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "path": "contracts/src/bridge/EthereumDepositGateway420.sol",
+    "base_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "incoming_sha256": "531428f4026cc19e2c439b514cf4b4dadc481703b92d229f421d9036d160f1a6",
+    "current_sha256": "1680f5104f3a3778c6a20d6906fedefa381729bebe57bc1d8951039a3e30c1b3",
+    "resolution": "use later qualified token binding or CADC canonical-envelope implementation",
+    "selected_source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "final_source_sha256": "531428f4026cc19e2c439b514cf4b4dadc481703b92d229f421d9036d160f1a6"
+  },
+  {
+    "head": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "path": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol",
+    "base_sha256": "ab49a8995ae9c5934bde26258fc6d508bcf9e97cac093b2617693bd479cac369",
+    "incoming_sha256": "23517d738452ce2e62d69a3f2d0f0c4aab6a6932b03780e1217572fc8910ebae",
+    "current_sha256": "bd4722d28bf15c37192868e5e31db02b5d728700821d9518d0d5433e95f7c350",
+    "resolution": "use later qualified token binding or CADC canonical-envelope implementation",
+    "selected_source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "final_source_sha256": "f415836c61e1fecb5d09e62b1399e49e2b738719371184b0871445ae6b9d1713"
+  },
+  {
+    "head": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "path": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol",
+    "base_sha256": "8fc68158c823dfe35a38edf73f03e4215eb96ea8d491cb29015f654417a42852",
+    "incoming_sha256": "49f0407c291a1fa0f9084261cc492c84038b006f4518a06e0a2f6c1493c5486e",
+    "current_sha256": "4ca16da94e5d5622f4bddb3d1f624e6048c27bf60eabe66dfb5d827a9da208cd",
+    "resolution": "use later qualified token binding or CADC canonical-envelope implementation",
+    "selected_source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "final_source_sha256": "49f0407c291a1fa0f9084261cc492c84038b006f4518a06e0a2f6c1493c5486e"
+  },
+  {
+    "head": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+    "base_sha256": "5c5e3cc6ed4cdc33eb1755f91d4b3915bc911e8bdfeced17f862d1d8a5fe5279",
+    "incoming_sha256": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+    "current_sha256": "323c4e562af28b536ef2ea7f87518f0e4f0ce406747ef934e189333f9cb09356",
+    "resolution": "use later qualified token binding or CADC canonical-envelope implementation",
+    "selected_source": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "final_source_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325"
+  },
+  {
+    "head": "c9affd6740f005293b6fdf8610f77ebc31001196",
+    "scope": "Outstanding BRIDGE-AUDIT-3.2 draft",
+    "resolution": "Reconcile canonical envelope into current V21 router and current native adapters; authenticate source context after native verification, preserve current admission/receipt/replay logic and native shielded proof capacity; replace draft fixtures with current governance-qualified fixtures. Domain-unbound legacy tuple paths explicitly revert. Original draft head retained as merge ancestor."
+  }
+]

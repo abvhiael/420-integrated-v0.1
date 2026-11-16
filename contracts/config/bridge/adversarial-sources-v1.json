@@ -1,0 +1,137 @@
+{
+  "schema": "420-bridge-adversarial-sources-v1",
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "catalogue_sha": "3dcee22927c181c23451ed49eb908330b5254866",
+  "families": {
+    "bitcoin": {
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "source_pr": null,
+      "test": "contracts/test/adversarial/BitcoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "ethereum": {
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "source_pr": 1157,
+      "test": "contracts/test/adversarial/EthereumV18.t.sol",
+      "fixture_prefixes": [
+        "contracts/test/fixtures/ethereum/bootstrap.bin"
+      ],
+      "patches": []
+    },
+    "litecoin": {
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "source_pr": 1158,
+      "test": "contracts/test/adversarial/LitecoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "dogecoin": {
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "source_pr": 1159,
+      "test": "contracts/test/adversarial/DogecoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "bnb": {
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "source_pr": 1160,
+      "test": "contracts/test/adversarial/BnbV18.t.sol",
+      "fixture_prefixes": [
+        "contracts/test/fixtures/bnb/header_116663998.rlp",
+        "contracts/test/fixtures/bnb/header_116662000.rlp",
+        "contracts/test/fixtures/bnb/header_116663000.rlp",
+        "contracts/test/fixtures/bnb/header_116664000.rlp",
+        "contracts/test/fixtures/bnb/header_116664001.rlp",
+        "contracts/test/fixtures/bnb/vote_116664000.rlp",
+        "contracts/test/fixtures/bnb/vote_116664001.rlp"
+      ],
+      "patches": []
+    },
+    "solana": {
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "source_pr": 1161,
+      "test": "contracts/test/adversarial/SolanaV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": [
+        "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+      ],
+      "restoration": {
+        "path": "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol",
+        "from_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+        "sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "published_pin_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+        "published_pin_path": "docs/audit/solana-qualification/qualified-source-sha256.json",
+        "reason": "Exact originally qualified source omitted from main; same bytes retained by XRPL audit."
+      }
+    },
+    "tron": {
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "source_pr": 1162,
+      "test": "contracts/test/adversarial/TronV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "xrpl": {
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "source_pr": 1163,
+      "test": "contracts/test/adversarial/XrplV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "potcoin": {
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "source_pr": 1164,
+      "test": "contracts/test/adversarial/PotcoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "curecoin": {
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "source_pr": 1165,
+      "test": "contracts/test/adversarial/CurecoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "dobbscoin": {
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "source_pr": 1166,
+      "test": "contracts/test/adversarial/DobbscoinV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": []
+    },
+    "pirate": {
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "source_pr": 1167,
+      "test": "contracts/test/adversarial/PirateV18.t.sol",
+      "fixture_prefixes": [
+        "contracts/test/fixtures/pirate/historical-header.hex"
+      ],
+      "patches": []
+    },
+    "cctp": {
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "source_pr": 1168,
+      "test": "contracts/test/adversarial/CctpV18.t.sol",
+      "fixture_prefixes": [
+        "contracts/test/fixtures/cctp"
+      ],
+      "patches": []
+    },
+    "cadc": {
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "source_pr": 1169,
+      "test": "contracts/test/adversarial/CadcV18.t.sol",
+      "fixture_prefixes": [],
+      "patches": [
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      ]
+    }
+  },
+  "retained_token_routes_sha": "3724e246f2c4deeab69ac0892742291c72a40df0",
+  "fuzz_runs": 2500,
+  "invariant_runs": 128,
+  "invariant_depth": 64,
+  "ci_run_ids": [],
+  "fuzz_seed": "0x42018"
+}

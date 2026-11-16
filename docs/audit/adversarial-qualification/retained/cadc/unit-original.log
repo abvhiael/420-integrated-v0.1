@@ -1,0 +1,52 @@
+Compiling 74 files with Solc 0.8.24
+Solc 0.8.24 finished in 28.99s
+Compiler run successful!
+
+Ran 35 tests for contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test
+[PASS] testComposeRequiresQualifiedConsumer() (gas: 258504)
+[PASS] testDirtyRecipient() (gas: 258110)
+[PASS] testDuplicateDelivery() (gas: 521463)
+[PASS] testEarlierExternalCommitCannotBypassAdmission() (gas: 400782)
+[PASS] testEffectiveDefaultConfigurationDrift() (gas: 305839)
+[PASS] testFuzzNativeAmountBinding(uint64) (runs: 2500, μ: 382078, ~: 393057)
+[PASS] testFuzzUnauthenticatedAmountMutation(uint64) (runs: 2500, μ: 314914, ~: 317462)
+[PASS] testInactive() (gas: 90105)
+[PASS] testInsufficientConfirmations() (gas: 319965)
+[PASS] testIssuerSecurityCommitmentMismatch() (gas: 142390)
+[PASS] testIssuerTokenSubstitution() (gas: 154655)
+[FAIL: LZ_UnsupportedEid()] testLibrarySubstitution() (gas: 1834657)
+[PASS] testMissingRequiredDvnPolicy() (gas: 499770)
+[PASS] testNativeEndpointUlnOftDelivery() (gas: 394983)
+[PASS] testNativeOutboundDispatchesRequiredDvns() (gas: 4737833)
+[PASS] testNoRpcFinalityAssertion() (gas: 192645)
+[PASS] testNonceTampering() (gas: 317611)
+[PASS] testOnlyGovernance() (gas: 34528)
+[PASS] testOnlyRouter() (gas: 33193)
+[PASS] testOptionalThresholdRequired() (gas: 996673)
+[PASS] testOutboundAssetSubstitution() (gas: 4537482)
+[PASS] testOutboundConfigDrift() (gas: 4611611)
+[PASS] testOutboundRejectsDust() (gas: 4546358)
+[PASS] testOutboundRouteSubstitution() (gas: 4537892)
+[PASS] testPayloadTampering() (gas: 317671)
+[PASS] testPeerCannotChangeWhileActive() (gas: 37123)
+[PASS] testPeerSubstitution() (gas: 256576)
+[PASS] testRejectedDeliveryPreservesDvnEvidence() (gas: 547939)
+[PASS] testReplaySurvivesRepinning() (gas: 848350)
+[PASS] testSingleRequiredDVNInsufficient() (gas: 257297)
+[PASS] testWrongDVNInsufficient() (gas: 317376)
+[PASS] testWrongSourceEid() (gas: 78835)
+[PASS] testZeroAmount() (gas: 257327)
+[PASS] testZeroNonce() (gas: 256559)
+[PASS] testZeroRecipient() (gas: 257486)
+Suite result: FAILED. 34 passed; 1 failed; 0 skipped; finished in 255.65ms (519.19ms CPU time)
+
+Ran 1 test suite in 256.36ms (255.65ms CPU time): 34 tests passed, 1 failed, 0 skipped (35 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test
+[FAIL: LZ_UnsupportedEid()] testLibrarySubstitution() (gas: 1834657)
+
+Encountered a total of 1 failing tests, 34 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

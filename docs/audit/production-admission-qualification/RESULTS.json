@@ -1,0 +1,62 @@
+{
+  "step": "BRIDGE-AUDIT-3.V.20",
+  "main_base_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "required_dependency": {
+    "step": "V.19",
+    "pr": 1173,
+    "sha": "deaa99174ea95850d1c7b17cd613c34a26ae4b65",
+    "merge_status": "unmerged at qualification"
+  },
+  "qualified_distinct_cases": 145,
+  "fuzz_cases": 10000,
+  "invariant_runs_each": 128,
+  "invariant_depth_each": 64,
+  "invariant_calls_total": 16384,
+  "invariant_handler_reverts": 0,
+  "evidence": [
+    {
+      "log": "qualification.log",
+      "passes": 136,
+      "failures": 0,
+      "scope": "main affected unit/integration/fuzz/V19 invariant batch; CADC configuration getter added afterwards and qualified separately"
+    },
+    {
+      "log": "cadc-invariant.log",
+      "passes": 8,
+      "failures": 1,
+      "scope": "all eight CADC tests pass on final CADC source; new admission invariant constructor setup failed"
+    },
+    {
+      "log": "invariant-qualified.log",
+      "passes": 1,
+      "failures": 0,
+      "scope": "only corrected admission invariant rerun; postdeployment handler initialization satisfies existing operator code-length guard"
+    }
+  ],
+  "final_source_reconciliation": "All final invariant input hashes match; original batch differs only in CADC source now qualified by eight CADC cases; CADC batch differs only in corrected invariant test owner. Exact earlier snapshots hash-verified and retained.",
+  "runtime_bytes": {
+    "BridgeChainRegistry420": 3486,
+    "BridgeRouteRegistry": 9888,
+    "BridgeTransferRegistry": 18076,
+    "BridgeVerifierProxy420": 1354,
+    "BridgeVerifierRegistry420": 22063,
+    "CADCBridgeIntegration": 5893,
+    "GatewayRouter420": 12507,
+    "VerifiedGateway420": 9495
+  },
+  "production_runtime_limit": 24576,
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "via_ir": true,
+    "optimizer_runs": 200
+  },
+  "ci_run_ids": [],
+  "ci_reason": "Targeted local qualification preserved; existing skip-ci publication convention avoids duplicate runs.",
+  "workflow_validation": "Four YAML files parsed; job bodies unchanged; only narrow bridge audit/policy path exclusions added; no branch rules added.",
+  "production_approvals": [],
+  "live_deployment_performed": false,
+  "deployment_prerequisites": "Approved testnet, actual governance registrations and authentic route/issuer manifests; no external credentials or production authorization invented.",
+  "next_canonical_step": "No successor to V.20 supplied or found on available main; none begun."
+}

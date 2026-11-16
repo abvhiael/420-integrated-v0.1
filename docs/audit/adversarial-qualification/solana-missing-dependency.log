@@ -1,0 +1,16 @@
+fatal: path 'contracts/src/bridge/verifiers/solana/vendor/Sha512.sol' does not exist in '97413f2eea862d5f2ec3117313cd3beb15a634f4'
+Traceback (most recent call last):
+  File "/workspace/scratch/3b8511e6cffb/adversarial-repo/scripts/qualify-bridge-adversarial.py", line 121, in <module>
+    run(parser.parse_args())
+  File "/workspace/scratch/3b8511e6cffb/adversarial-repo/scripts/qualify-bridge-adversarial.py", line 35, in run
+    payload = git('show', commit + ':' + path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/3b8511e6cffb/adversarial-repo/scripts/qualify-bridge-adversarial.py", line 16, in git
+    return subprocess.check_output(['git', '--no-replace-objects', '-C', str(ROOT), *args])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', '--no-replace-objects', '-C', '/workspace/scratch/3b8511e6cffb/adversarial-repo', 'show', '97413f2eea862d5f2ec3117313cd3beb15a634f4:contracts/src/bridge/verifiers/solana/vendor/Sha512.sol']' returned non-zero exit status 128.

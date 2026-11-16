@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/PirateNetwork/pirate",
+  "commit": "b14db80bfc1a819b958e36d1e0127e94c395d445",
+  "files": {
+    "src/chainparams.cpp": "46098a8da67b3108671ad62032be4e7cf12d8aa9eaaf897a67ee97b80a8fd0cf",
+    "src/komodo_utils.cpp": "a8b41ea44bf852e4f67f561389268503d58f7b1696b233923fe4ad6af8393e15",
+    "src/pow.cpp": "3ce3d5a09c74c27eb7e82df135117620c4b3b3f323a7b7240fbbc3e85b6891f9",
+    "src/main.cpp": "9d93d26c4214671723c9315e41743bc2372f260d7a05b0166e478e6556d4aed8",
+    "src/init.cpp": "806d00e823c70d93a3d3bd1e86395e89f6f1744ee4799da8959fd710980c4b87",
+    "src/komodo_notary.cpp": "6aa8303e90205b067fbaf9c5df4536fbb6258d1fae6ecfd5f2beefd037964515",
+    "src/komodo_hardfork.cpp": "0f7f3a82d033b53b1bd163ab04547ea8dc0eb2e775775089e9d15377343ce66f",
+    "src/komodo.cpp": "2a3bdb774c5cf69379b70efd131896eecea08706546bc917823124648e0b75cb",
+    "src/komodo_bitcoind.cpp": "8af0658d467ee968c4474d363ea5eaac3b952ceecf36650953dc2fcdd5462930",
+    "src/notarisationdb.cpp": "964e3a5a3e3115d05d5e75acd985af6666b72b32597c85dd0644e3160af7ec4c",
+    "src/crosschain.cpp": "72d2aafa24c64dffdc7d6b686043b9b1495a46148b190a0163b359410a5bf651",
+    "src/cc/eval.cpp": "0ab78a8d13b725b951a868d9d94a6e68561bc1131a070bee0c43e9d6f388db9e",
+    "src/key_io.cpp": "0b71b46688733c52d96f657322dc4d6f9f1b1fa83877efe2c892d97ca3574484",
+    "src/consensus/upgrades.cpp": "e002f95066ed2cda1573240c4b5f317a8dafdf1cc670cdd8454cc5a0eb0ad753",
+    "src/rust/src/sapling_protocol/sapling_actions.rs": "5883ba072f5f96c84764513a861d91b66894dec7fa1eb78f6b88a0ccf7ef1386",
+    "src/rust/src/ironwood_protocol/ironwood_bundle.rs": "15a5c4f39d3224710a5019ee1bcc18abc62f6b182796d9e4eb6a3f3b29638b80"
+  }
+}

@@ -42,6 +42,7 @@ contract PirateChainBridgeAdapter420Test {
         router = new PirateChainRouterCaller420();
         adapter = new PirateChainBridgeAdapter420(address(this), address(router), address(verifier));
         adapter.setArrrBinding(ARRR_ASSET, ARRR_ROUTE);
+        adapter.setGatewayKey(bytes32(uint256(1)),true);
         _setTransfer(keccak256("arrr-message-1"), NETWORK, 3, true, true, 0);
     }
 
@@ -86,13 +87,13 @@ contract PirateChainBridgeAdapter420Test {
     }
 
     function testSaplingOutboundPasses() public {
-        bytes memory recipient = bytes("zs1piratebridgeexample");
+        bytes memory recipient = bytes("zs1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpq6d8g");
         bytes32 id = router.outbound(adapter, ARRR_ROUTE, ARRR_ASSET, address(this), recipient, 1e8, hex"00");
         require(id != bytes32(0), "sapling outbound");
     }
 
     function testIronwoodOutboundPasses() public {
-        bytes memory recipient = bytes("pirate1bridgeexample");
+        bytes memory recipient = bytes("pirate1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq09ld92");
         bytes32 id = router.outbound(adapter, ARRR_ROUTE, ARRR_ASSET, address(this), recipient, 1e8, hex"01");
         require(id != bytes32(0), "ironwood outbound");
     }
@@ -105,6 +106,13 @@ contract PirateChainBridgeAdapter420Test {
         require(!ok, "transparent destination accepted");
     }
 
+    function testInvalidChecksumRejected() public {bytes memory r=bytes("zs1piratebridgeexample");(bool ok,)=address(router).call(abi.encodeCall(router.outbound,(adapter,ARRR_ROUTE,ARRR_ASSET,address(this),r,1e8,hex"00")));require(!ok,"checksum");}
+    function testGatewayRevocationRejected() public {adapter.setGatewayKey(bytes32(uint256(1)),false);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"gateway revoked");}
+    function testReplaySurvivesVerifierRotation() public {router.inbound(adapter,bytes("proof"));PirateChainFinalityVerifierMock420 old=verifier;verifier=new PirateChainFinalityVerifierMock420();adapter.setVerifier(address(verifier));_setTransfer(keccak256("arrr-message-1"),NETWORK,3,true,true,0);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"rotation replay");verifier=old;}
+    function testNoteReplayAcrossMessagesRejected() public {bytes32 first=keccak256("arrr-message-1");router.inbound(adapter,bytes("proof"));_setTransfer(keccak256("second"),NETWORK,3,true,true,0);IPirateChainFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer("");t.noteCommitment=keccak256(abi.encode("arrr-note",first));verifier.set(t);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"note reuse");}
+    function testWrongDestinationRejected() public {IPirateChainFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer("");t.destinationChainId++;verifier.set(t);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"destination");}
+    function testWrongRouteRejected() public {IPirateChainFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer("");t.routeId=bytes32(uint256(55));verifier.set(t);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,bytes("proof"))));require(!ok,"route");}
+    function testUnauthorizedInboundRejected() public {(bool ok,)=address(adapter).call(abi.encodeCall(adapter.verifyInbound,(bytes("proof"))));require(!ok,"router authorization");}
     function _setTransfer(
         bytes32 messageId,
         bytes32 networkId,
@@ -128,7 +136,8 @@ contract PirateChainBridgeAdapter420Test {
             shieldedPool: pool,
             equihashValidated: equihashValidated,
             notarizationValidated: notarizationValidated,
-            finalized: true
+            finalized: true,
+            destinationChainId: block.chainid,destinationRouter:address(router),routeId:ARRR_ROUTE,gatewayKeyId:bytes32(uint256(1))
         }));
     }
 }

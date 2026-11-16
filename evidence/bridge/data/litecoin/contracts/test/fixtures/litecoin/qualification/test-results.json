@@ -1,0 +1,122 @@
+{
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testCanonicalLitecoinInboundPasses": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testInsufficientConfirmationsRejected": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testInvalidPowRejected": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testMwebRejected": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testOutboundLegacySegwitAndTaproot": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testReplayRejected": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinBridgeAdapter420.t.sol:LitecoinBridgeAdapter420Test:testWrongNetworkRejected": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinChainInvariant420.t.sol:LitecoinChainInvariant420Test:invariantOnlyContiguousGenuineGreatestWorkChainCanAdvance": {
+    "evidence": "chain-invariant.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testForkSelectionAndReorgOfCanonicalConfirmations": {
+    "evidence": "consensus-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testFuzzTruncatedTransaction": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testHistoricalVersionEnforcementAndMedianSorting": {
+    "evidence": "consensus-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testMalformedHeadersAndTimestampRules": {
+    "evidence": "consensus-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testMismatchedVerifierRouteOrRouterRejectedByAdapter": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testParserRejectsNoncanonicalCountsAndInvalidIndices": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testRetargetClampsAndSignedElapsed": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testSegwitTxidAndMalformedWitness": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinConsensusQualification420.t.sol:LitecoinConsensusQualification420Test:testTargetsAndFuzzArithmetic": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinGatewayIntegration420.t.sol:LitecoinGatewayIntegration420Test:testLitecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback": {
+    "evidence": "shared-router.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinHistorical420.t.sol:LitecoinHistorical420Test:testGenuineConsecutiveHeadersScryptChainWorkAndTwelveConfirmations": {
+    "evidence": "historical-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinHistorical420.t.sol:LitecoinHistorical420Test:testGenuineFirstAndFullPeriodRetargetBoundaries": {
+    "evidence": "retarget-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinHistorical420.t.sol:LitecoinHistorical420Test:testModernMainnetScryptAndGenuineSegwitOutputsAndMerklePaths": {
+    "evidence": "historical-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinReplayQualification420.t.sol:LitecoinReplayQualification420Test:testMWEBOutboundProgramAndUnauthorizedAdapterCallFailWithoutNonceMutation": {
+    "evidence": "replay.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinReplayQualification420.t.sol:LitecoinReplayQualification420Test:testOutpointCannotReplayWithDifferentMessageAfterVerifierRotation": {
+    "evidence": "replay.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinRestrictions420.t.sol:LitecoinRestrictions420Test:testActualMWEBHogExAndStrippedHogAddrAndPeginProgramsRejected": {
+    "evidence": "restrictions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinRestrictions420.t.sol:LitecoinRestrictions420Test:testFuzzUnknownOrOutOfRangeProgressNeverCreatesCompletedWork": {
+    "evidence": "restrictions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinRestrictions420.t.sol:LitecoinRestrictions420Test:testUnfinishedWorkWrongHeaderAndInvalidScryptCannotAuthorizeHeaders": {
+    "evidence": "restrictions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LitecoinScrypt420.t.sol:LitecoinScrypt420Test:testGenuineGenesisScryptAndBoundedProgress": {
+    "evidence": "scrypt-corrected.log",
+    "status": "PASS"
+  }
+}

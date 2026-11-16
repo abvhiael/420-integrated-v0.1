@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../src/bridge/BridgeChainRegistry420.sol";
 import "../src/bridge/BridgeRouteRegistry.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./helpers/BridgeQualificationFixture420.sol";
 
 contract BridgeRouteChainIdentity420Test {
     bytes32 private constant EXTERNAL = keccak256("420/BRIDGE/CHAIN/TEST-EXTERNAL");
@@ -25,6 +26,14 @@ contract BridgeRouteChainIdentity420Test {
         f.routes = new BridgeRouteRegistry(address(this), address(f.env.registry()), keccak256("routes"));
         f.env.registerResident(address(f.chains), f.chains.componentId());
         f.env.registerResident(address(f.routes), f.routes.componentId());
+        f.env.registerResident(address(this),BridgeIds420.GATEWAY_ROUTER);
+    }
+
+    function adapters(bytes32) external view returns(address){return address(this);}
+    function adapterId() external pure returns(bytes32){return ADAPTER;}
+    function _activate(Fixture memory f,bytes32 id,BridgeRouteRegistry.Route memory r) private {
+        r.status=BridgeRouteRegistry.Status.APPROVED_INACTIVE;f.routes.setRoute(id,r);
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,id,address(this),address(this),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
 
     function _chain(uint64 routeChainId, bytes32 networkId, bool active)
@@ -73,7 +82,7 @@ contract BridgeRouteChainIdentity420Test {
         Fixture memory f = _setup();
         _registerHealthy(f);
         bytes32 routeId = keccak256("route/inbound");
-        f.routes.setRoute(
+        _activate(f,
             routeId,
             _route(EXTERNAL_ID, uint64(block.chainid), BridgeRouteRegistry.Status.ACTIVE, true, false)
         );
@@ -115,7 +124,7 @@ contract BridgeRouteChainIdentity420Test {
         Fixture memory f = _setup();
         _registerHealthy(f);
         bytes32 routeId = keccak256("route/fingerprint");
-        f.routes.setRoute(
+        _activate(f,
             routeId,
             _route(EXTERNAL_ID, uint64(block.chainid), BridgeRouteRegistry.Status.ACTIVE, true, false)
         );
@@ -127,7 +136,7 @@ contract BridgeRouteChainIdentity420Test {
         Fixture memory f = _setup();
         _registerHealthy(f);
         bytes32 routeId = keccak256("route/rebind");
-        f.routes.setRoute(
+        _activate(f,
             routeId,
             _route(EXTERNAL_ID, uint64(block.chainid), BridgeRouteRegistry.Status.ACTIVE, true, false)
         );
@@ -141,11 +150,11 @@ contract BridgeRouteChainIdentity420Test {
         bytes32 inboundRoute = keccak256("route/inbound-only");
         bytes32 outboundRoute = keccak256("route/outbound-only");
 
-        f.routes.setRoute(
+        _activate(f,
             inboundRoute,
             _route(EXTERNAL_ID, uint64(block.chainid), BridgeRouteRegistry.Status.ACTIVE, true, false)
         );
-        f.routes.setRoute(
+        _activate(f,
             outboundRoute,
             _route(uint64(block.chainid), EXTERNAL_ID, BridgeRouteRegistry.Status.ACTIVE, false, true)
         );
@@ -171,7 +180,7 @@ contract BridgeRouteChainIdentity420Test {
         Fixture memory f = _setup();
         _registerHealthy(f);
         bytes32 routeId = keccak256("route/stale-direction");
-        f.routes.setRoute(
+        _activate(f,
             routeId,
             _route(EXTERNAL_ID, uint64(block.chainid), BridgeRouteRegistry.Status.ACTIVE, true, false)
         );

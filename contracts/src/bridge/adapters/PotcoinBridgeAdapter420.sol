@@ -27,6 +27,8 @@ contract PotcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedSourceOutputs;
     uint256 public outboundNonce;
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress();
     error InvalidVerifier();
     error WrongNetwork();
@@ -103,6 +105,7 @@ contract PotcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayScripts[p.gatewayScriptHash]) revert GatewayNotAllowed();
         if (potAssetId == bytes32(0)) revert AssetNotConfigured();
         if (potRouteId == bytes32(0)) revert RouteNotConfigured();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != potRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedSourceOutputs[p.sourceOutput]) revert Replay();
 
         consumedMessages[p.messageId] = true;
@@ -112,6 +115,7 @@ contract PotcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));
         if (syntheticSender == address(0)) revert InvalidProof();
 
+        verifiedSourceContext[p.messageId]=SourceProofContext(p.gatewayScriptHash,potAssetId);
         v = VerifiedTransfer({
             routeId: potRouteId,
             assetId: potAssetId,

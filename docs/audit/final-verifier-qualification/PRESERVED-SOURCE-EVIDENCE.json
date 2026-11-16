@@ -1,0 +1,1032 @@
+{
+  "bitcoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
+        "original_sha256": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
+        "path": "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "bcfa4deed2468667947ca5f6b96ea51520c94728f33bdabf645a0647b24190f6",
+        "original_sha256": "bcfa4deed2468667947ca5f6b96ea51520c94728f33bdabf645a0647b24190f6",
+        "path": "contracts/src/bridge/verifiers/BitcoinHeaderChain420.sol"
+      },
+      {
+        "current_sha256": "4a363407208defa952a791ff183a99b351d56a58409bb05eefcac9e0a7b56657",
+        "original_sha256": "4a363407208defa952a791ff183a99b351d56a58409bb05eefcac9e0a7b56657",
+        "path": "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol"
+      },
+      {
+        "current_sha256": "f99827849281dc7754e7062212a38e54916b63814d4b2321e5ed57309ae55580",
+        "original_sha256": "f99827849281dc7754e7062212a38e54916b63814d4b2321e5ed57309ae55580",
+        "path": "contracts/src/bridge/verifiers/BitcoinTransaction420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "2fe5a7140dbd43096a59dbc6c71a0f5914e2054e1506447ae6007b53c9fe76bd",
+        "original_sha256": "2fe5a7140dbd43096a59dbc6c71a0f5914e2054e1506447ae6007b53c9fe76bd",
+        "path": "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol"
+      }
+    ]
+  },
+  "bnb-fork-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+        "original_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+        "path": "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+        "original_sha256": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+        "path": "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "original_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "path": "contracts/src/bridge/verifiers/EthereumMPT420.sol"
+      },
+      {
+        "current_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "original_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "path": "contracts/src/bridge/verifiers/EthereumRLP420.sol"
+      },
+      {
+        "current_sha256": "8e04c84533a944492e332a79bb0633b068fe8c37355c3467825a3461af1a281f",
+        "original_sha256": "8e04c84533a944492e332a79bb0633b068fe8c37355c3467825a3461af1a281f",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsHash420.sol"
+      },
+      {
+        "current_sha256": "369833d16d8db8998fac8fe416443751223baaf0dff2cae69d9186daa2d769b6",
+        "original_sha256": "369833d16d8db8998fac8fe416443751223baaf0dff2cae69d9186daa2d769b6",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsMath420.sol"
+      },
+      {
+        "current_sha256": "b0206004dc9997364ecf68d65cfd170fcd0a5ca28fba8e2dfa184d2f26fad7d1",
+        "original_sha256": "b0206004dc9997364ecf68d65cfd170fcd0a5ca28fba8e2dfa184d2f26fad7d1",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsVerifier420.sol"
+      },
+      {
+        "current_sha256": "1b91145c4323af901acb06b5b2f3eba1eb69972e45b87cdac47f08d4eeaa0854",
+        "original_sha256": "1b91145c4323af901acb06b5b2f3eba1eb69972e45b87cdac47f08d4eeaa0854",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbConsensusLightClient420.sol"
+      },
+      {
+        "current_sha256": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+        "original_sha256": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol"
+      },
+      {
+        "current_sha256": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+        "original_sha256": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+        "path": "contracts/src/interfaces/IBnbFinalityOracle420.sol"
+      },
+      {
+        "current_sha256": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+        "original_sha256": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+        "path": "contracts/src/interfaces/IBnbFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+        "original_sha256": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+        "path": "contracts/src/interfaces/IBnbGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "bnb-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+        "original_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+        "path": "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+        "original_sha256": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+        "path": "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "original_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "path": "contracts/src/bridge/verifiers/EthereumMPT420.sol"
+      },
+      {
+        "current_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "original_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "path": "contracts/src/bridge/verifiers/EthereumRLP420.sol"
+      },
+      {
+        "current_sha256": "8e04c84533a944492e332a79bb0633b068fe8c37355c3467825a3461af1a281f",
+        "original_sha256": "8e04c84533a944492e332a79bb0633b068fe8c37355c3467825a3461af1a281f",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsHash420.sol"
+      },
+      {
+        "current_sha256": "369833d16d8db8998fac8fe416443751223baaf0dff2cae69d9186daa2d769b6",
+        "original_sha256": "369833d16d8db8998fac8fe416443751223baaf0dff2cae69d9186daa2d769b6",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsMath420.sol"
+      },
+      {
+        "current_sha256": "b0206004dc9997364ecf68d65cfd170fcd0a5ca28fba8e2dfa184d2f26fad7d1",
+        "original_sha256": "b0206004dc9997364ecf68d65cfd170fcd0a5ca28fba8e2dfa184d2f26fad7d1",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbBlsVerifier420.sol"
+      },
+      {
+        "current_sha256": "1b91145c4323af901acb06b5b2f3eba1eb69972e45b87cdac47f08d4eeaa0854",
+        "original_sha256": "1b91145c4323af901acb06b5b2f3eba1eb69972e45b87cdac47f08d4eeaa0854",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbConsensusLightClient420.sol"
+      },
+      {
+        "current_sha256": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+        "original_sha256": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+        "path": "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol"
+      },
+      {
+        "current_sha256": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+        "original_sha256": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+        "path": "contracts/src/interfaces/IBnbFinalityOracle420.sol"
+      },
+      {
+        "current_sha256": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+        "original_sha256": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+        "path": "contracts/src/interfaces/IBnbFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+        "original_sha256": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+        "path": "contracts/src/interfaces/IBnbGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "cadc-affected-inputs.json": {
+    "changed_production_sources": [
+      {
+        "current_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+        "original_sha256": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+        "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      },
+      {
+        "current_sha256": "a676ff18701817eea69837fd53a9d7f280882f70567142c96bf25fbd9e15311d",
+        "original_sha256": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+        "path": "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      }
+    ],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "original_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "path": "contracts/src/interfaces/IBridgeAdapter420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "cadc-inputs.json": {
+    "changed_production_sources": [
+      {
+        "current_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+        "original_sha256": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+        "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      },
+      {
+        "current_sha256": "a676ff18701817eea69837fd53a9d7f280882f70567142c96bf25fbd9e15311d",
+        "original_sha256": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+        "path": "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      }
+    ],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "original_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "path": "contracts/src/interfaces/IBridgeAdapter420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "cadc-integration-inputs.json": {
+    "changed_production_sources": [
+      {
+        "current_sha256": "768f2215ef47ef911ad6e03c860b5cf25eecd5d48479b7ab2331e1634f6c97e1",
+        "original_sha256": "812af8415d941c139170bd40071da2f332ba5d1e645dc2881c5ad05740747dc1",
+        "path": "contracts/src/bridge/BridgeChainRegistry420.sol"
+      },
+      {
+        "current_sha256": "a1465c037f57ba74e33598d9ced93d24016fc4119d5460a233f6432d4d941e3d",
+        "original_sha256": "2037bfdac5f8b60503ccaa8871831fac86e5e64ea806665af97a08243650a941",
+        "path": "contracts/src/bridge/BridgeIds420.sol"
+      },
+      {
+        "current_sha256": "e060cfdbd5d8b280a8c6ed0f5519fcdeacfb379a0048be7f9378b9e955561d16",
+        "original_sha256": "efa9155fc2583375a34675443e478f0cca79c3dbfa10fcbd232afcb576bb90e7",
+        "path": "contracts/src/bridge/BridgeRouteRegistry.sol"
+      },
+      {
+        "current_sha256": "cf3b8d5bd41807e385825ed4c1b9f4b95b35ebbd8ddb853c136f0884530b9431",
+        "original_sha256": "e24ab379df3972c927c5e626375df6224bb80be6f56888236f0137ea7990a5ff",
+        "path": "contracts/src/bridge/BridgeTransferRegistry.sol"
+      },
+      {
+        "current_sha256": "7d38fcee9d738fdb4c403bfa05e0a1e59fb03b430d18cbce866a5cc938274ffc",
+        "original_sha256": "339e180f5cf7987498c9af03b0d85ce32f370a0e1cabeed11a2d4a5cf6f7b276",
+        "path": "contracts/src/bridge/CADCBridgeIntegration.sol"
+      },
+      {
+        "current_sha256": "82c5bf4e3ef033e8f029ffcce42c531f21a8144bcf935b77fc832b1010cc61c7",
+        "original_sha256": "20dc2c5b0746415ebb8d00028af2bd14e3f6abfe29b7a13d0020632d8c016fec",
+        "path": "contracts/src/bridge/GatewayRouter420.sol"
+      },
+      {
+        "current_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+        "original_sha256": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+        "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      },
+      {
+        "current_sha256": "a676ff18701817eea69837fd53a9d7f280882f70567142c96bf25fbd9e15311d",
+        "original_sha256": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+        "path": "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      }
+    ],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "911acce3b2031c7e084857d9d63ce57c441988c29abf63116aec824e93ec1593",
+        "original_sha256": "911acce3b2031c7e084857d9d63ce57c441988c29abf63116aec824e93ec1593",
+        "path": "contracts/src/bridge/BridgeAccountingRegistry.sol"
+      },
+      {
+        "current_sha256": "b23940e18fb17c4294c29f7c85a197134393ff6b17e74bfe1e05edc4cba85158",
+        "original_sha256": "b23940e18fb17c4294c29f7c85a197134393ff6b17e74bfe1e05edc4cba85158",
+        "path": "contracts/src/bridge/BridgeRiskManager.sol"
+      },
+      {
+        "current_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "original_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "path": "contracts/src/interfaces/IBridgeAdapter420.sol"
+      },
+      {
+        "current_sha256": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+        "original_sha256": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+        "path": "contracts/src/interfaces/genesis/Errors420.sol"
+      },
+      {
+        "current_sha256": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+        "original_sha256": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+        "path": "contracts/src/interfaces/genesis/IAssetCapabilities420.sol"
+      },
+      {
+        "current_sha256": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+        "original_sha256": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+        "path": "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol"
+      },
+      {
+        "current_sha256": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+        "original_sha256": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+        "path": "contracts/src/interfaces/genesis/IChainContext420.sol"
+      },
+      {
+        "current_sha256": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+        "original_sha256": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+        "path": "contracts/src/interfaces/genesis/IFeeQuote420.sol"
+      },
+      {
+        "current_sha256": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+        "original_sha256": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+        "path": "contracts/src/interfaces/genesis/IGenesisInitializable420.sol"
+      },
+      {
+        "current_sha256": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+        "original_sha256": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+        "path": "contracts/src/interfaces/genesis/IGenesisResident420.sol"
+      },
+      {
+        "current_sha256": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+        "original_sha256": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+        "path": "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol"
+      },
+      {
+        "current_sha256": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+        "original_sha256": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+        "path": "contracts/src/interfaces/genesis/IMetadataCommitment420.sol"
+      },
+      {
+        "current_sha256": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+        "original_sha256": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+        "path": "contracts/src/interfaces/genesis/IPauseRegistry420.sol"
+      },
+      {
+        "current_sha256": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+        "original_sha256": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+        "path": "contracts/src/interfaces/genesis/IProtocolRegistry420.sol"
+      },
+      {
+        "current_sha256": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+        "original_sha256": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+        "path": "contracts/src/interfaces/genesis/IReplayProtection420.sol"
+      },
+      {
+        "current_sha256": "10120c6a8973925fc8ba84aaac43a40dfcbee337dbe0c7f5e3a004763f6fe513",
+        "original_sha256": "10120c6a8973925fc8ba84aaac43a40dfcbee337dbe0c7f5e3a004763f6fe513",
+        "path": "contracts/src/interfaces/genesis/IRiskLimits420.sol"
+      },
+      {
+        "current_sha256": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+        "original_sha256": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+        "path": "contracts/src/interfaces/genesis/ISettlementHealth420.sol"
+      },
+      {
+        "current_sha256": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+        "original_sha256": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+        "path": "contracts/src/interfaces/genesis/ISystemSafety420.sol"
+      },
+      {
+        "current_sha256": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+        "original_sha256": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+        "path": "contracts/src/interfaces/genesis/Types420.sol"
+      },
+      {
+        "current_sha256": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+        "original_sha256": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+        "path": "contracts/src/libraries/AppDependencyIds420.sol"
+      },
+      {
+        "current_sha256": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+        "original_sha256": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+        "path": "contracts/src/libraries/GenesisInterfaceIds420.sol"
+      },
+      {
+        "current_sha256": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+        "original_sha256": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+        "path": "contracts/src/system/GenesisResidentAccess420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "cadc-original-inputs.json": {
+    "changed_production_sources": [
+      {
+        "current_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+        "original_sha256": "323c4e562af28b536ef2ea7f87518f0e4f0ce406747ef934e189333f9cb09356",
+        "path": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+      },
+      {
+        "current_sha256": "a676ff18701817eea69837fd53a9d7f280882f70567142c96bf25fbd9e15311d",
+        "original_sha256": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+        "path": "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol"
+      }
+    ],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "original_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "path": "contracts/src/interfaces/IBridgeAdapter420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "cctp-inputs.json": {
+    "changed_production_sources": [
+      {
+        "current_sha256": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced",
+        "original_sha256": "0e9b8b048e4edc2d1a75c44416fd51e6d4adf639c2231fc0354a48d1e4083f12",
+        "path": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol"
+      }
+    ],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "f87a6d89ff66cb6bfc7e721c33e8fd81f8699354fca0cb4ee56ad2bd43b1507e",
+        "original_sha256": "f87a6d89ff66cb6bfc7e721c33e8fd81f8699354fca0cb4ee56ad2bd43b1507e",
+        "path": "contracts/src/bridge/verifiers/cctp/CCTPV2Message420.sol"
+      },
+      {
+        "current_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "original_sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+        "path": "contracts/src/interfaces/IBridgeAdapter420.sol"
+      },
+      {
+        "current_sha256": "46f5dc719e7f296e9c74e794832921060309b12df6c9115faf0a80056b227da3",
+        "original_sha256": "46f5dc719e7f296e9c74e794832921060309b12df6c9115faf0a80056b227da3",
+        "path": "contracts/src/interfaces/ICircleCCTPV2420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "curecoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "original_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "path": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "09d3589114c856c2925c67e0e7bec54cc3612d348f42c3a35b3796ffb6c0f185",
+        "original_sha256": "09d3589114c856c2925c67e0e7bec54cc3612d348f42c3a35b3796ffb6c0f185",
+        "path": "contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "b7429f8b2e2a45690d05012eb0e2e87ecad3e130b40af6d33bef1cbbaed17d3a",
+        "original_sha256": "b7429f8b2e2a45690d05012eb0e2e87ecad3e130b40af6d33bef1cbbaed17d3a",
+        "path": "contracts/src/bridge/verifiers/curecoin/CurecoinConsensus420.sol"
+      },
+      {
+        "current_sha256": "7ca958893e861be5f4a598fc928453355654950f55357453e7f0810e95093d71",
+        "original_sha256": "7ca958893e861be5f4a598fc928453355654950f55357453e7f0810e95093d71",
+        "path": "contracts/src/bridge/verifiers/curecoin/CurecoinSignature420.sol"
+      },
+      {
+        "current_sha256": "7c9d5188def5fc9fc471a584c06f4754da1d658e37c9cdc69827e8192484a531",
+        "original_sha256": "7c9d5188def5fc9fc471a584c06f4754da1d658e37c9cdc69827e8192484a531",
+        "path": "contracts/src/bridge/verifiers/curecoin/CurecoinWire420.sol"
+      },
+      {
+        "current_sha256": "e92328b74f9ec7c764771605f5225cbe242894d4fac461a54ccbdccdf85b0c9a",
+        "original_sha256": "e92328b74f9ec7c764771605f5225cbe242894d4fac461a54ccbdccdf85b0c9a",
+        "path": "contracts/src/interfaces/ICurecoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "dobbscoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "original_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "path": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "72a3a76d1d1426bc097f23a66eec984d89e3b633e256d8556648a15a6ec2e701",
+        "original_sha256": "72a3a76d1d1426bc097f23a66eec984d89e3b633e256d8556648a15a6ec2e701",
+        "path": "contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "d55a7de3e13be4ec4646c21d402148ccdb6c0bed890f527079adcfe6dec6f98b",
+        "original_sha256": "d55a7de3e13be4ec4646c21d402148ccdb6c0bed890f527079adcfe6dec6f98b",
+        "path": "contracts/src/bridge/verifiers/dobbscoin/DobbscoinConsensus420.sol"
+      },
+      {
+        "current_sha256": "73fab16ae4f9c36f42143f23dc2e4875bc229395f1e11e72e4f1482822d0745c",
+        "original_sha256": "73fab16ae4f9c36f42143f23dc2e4875bc229395f1e11e72e4f1482822d0745c",
+        "path": "contracts/src/bridge/verifiers/dobbscoin/DobbscoinWire420.sol"
+      },
+      {
+        "current_sha256": "ed5643a7956b22509c586e74e1ffc8fa81f4d60e71c49363d40aa5210f49a55d",
+        "original_sha256": "ed5643a7956b22509c586e74e1ffc8fa81f4d60e71c49363d40aa5210f49a55d",
+        "path": "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "dogecoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "51a5bfbfc70b4f85ac0b9033eeddd30482de7ef8e67a7f4cb499e505190172d1",
+        "original_sha256": "51a5bfbfc70b4f85ac0b9033eeddd30482de7ef8e67a7f4cb499e505190172d1",
+        "path": "contracts/src/bridge/verifiers/DogecoinAuxPow420.sol"
+      },
+      {
+        "current_sha256": "26cd27e028cd3f3c7b2a611aaa5ae83c6f0ca15bdbe5ff33fe324a151f41d79e",
+        "original_sha256": "26cd27e028cd3f3c7b2a611aaa5ae83c6f0ca15bdbe5ff33fe324a151f41d79e",
+        "path": "contracts/src/bridge/verifiers/DogecoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "794e7e35b5b52a9df4f948c7d49f16448d3d56e6c78bfa662dc543710913c43f",
+        "original_sha256": "794e7e35b5b52a9df4f948c7d49f16448d3d56e6c78bfa662dc543710913c43f",
+        "path": "contracts/src/bridge/verifiers/DogecoinHeaderChain420.sol"
+      },
+      {
+        "current_sha256": "0b85446bb9329deee7fd54a281fe7497f8da5d83ae018900bd20bde2367dbe8b",
+        "original_sha256": "0b85446bb9329deee7fd54a281fe7497f8da5d83ae018900bd20bde2367dbe8b",
+        "path": "contracts/src/bridge/verifiers/DogecoinTransaction420.sol"
+      },
+      {
+        "current_sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+        "original_sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+        "path": "contracts/src/bridge/verifiers/LitecoinScrypt420.sol"
+      },
+      {
+        "current_sha256": "e8720de766fbed0e9d8edb94a378204e2426048305ebb4ff146d37b4c9ad5aea",
+        "original_sha256": "e8720de766fbed0e9d8edb94a378204e2426048305ebb4ff146d37b4c9ad5aea",
+        "path": "contracts/src/interfaces/IDogecoinFinalityVerifier420.sol"
+      }
+    ]
+  },
+  "ethereum-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "b287076d3321bf059fd69cb48edf2cf8655dd1d160ff2a71804c5a1a0b06bdce",
+        "original_sha256": "b287076d3321bf059fd69cb48edf2cf8655dd1d160ff2a71804c5a1a0b06bdce",
+        "path": "contracts/src/bridge/verifiers/EthereumConsensusLightClient420.sol"
+      },
+      {
+        "current_sha256": "09163f73546a48675ec5915ec89fa2922c1eef6be1bfccde62b0c25591f9ab6d",
+        "original_sha256": "09163f73546a48675ec5915ec89fa2922c1eef6be1bfccde62b0c25591f9ab6d",
+        "path": "contracts/src/bridge/verifiers/EthereumExecutionHeader420.sol"
+      },
+      {
+        "current_sha256": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
+        "original_sha256": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
+        "path": "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "8577b2656474de03925b0ea3d2b2d31bd4c353928ad4b846b0e10cbbad37714f",
+        "original_sha256": "8577b2656474de03925b0ea3d2b2d31bd4c353928ad4b846b0e10cbbad37714f",
+        "path": "contracts/src/bridge/verifiers/EthereumGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "original_sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+        "path": "contracts/src/bridge/verifiers/EthereumMPT420.sol"
+      },
+      {
+        "current_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "original_sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+        "path": "contracts/src/bridge/verifiers/EthereumRLP420.sol"
+      },
+      {
+        "current_sha256": "8b0f9bbdafd3e271f1bc7853818af52a22d28b7a176b9680d0473ef6330e4903",
+        "original_sha256": "8b0f9bbdafd3e271f1bc7853818af52a22d28b7a176b9680d0473ef6330e4903",
+        "path": "contracts/src/bridge/verifiers/EthereumSSZ420.sol"
+      },
+      {
+        "current_sha256": "9e918032a5aa799c1319b14b013154d6a40ca6e5f2267c9f540560abd7fd7689",
+        "original_sha256": "9e918032a5aa799c1319b14b013154d6a40ca6e5f2267c9f540560abd7fd7689",
+        "path": "contracts/src/bridge/verifiers/vendor/sp1/ISP1Verifier.sol"
+      },
+      {
+        "current_sha256": "01ab92508b9d56556ee247c7cb6b2ebd9c17835a4618896462b2a3a8708a50bf",
+        "original_sha256": "01ab92508b9d56556ee247c7cb6b2ebd9c17835a4618896462b2a3a8708a50bf",
+        "path": "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/Groth16Verifier.sol"
+      },
+      {
+        "current_sha256": "48e1db5baca3b102242ebd88280b3689a088076688146cd0d98876f5dacb76d0",
+        "original_sha256": "48e1db5baca3b102242ebd88280b3689a088076688146cd0d98876f5dacb76d0",
+        "path": "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/SP1VerifierGroth16.sol"
+      },
+      {
+        "current_sha256": "8c63c8c41ea74899d2d7c5a0fbeb3de588afd5260bd106292d4b3ed5ca9f50e8",
+        "original_sha256": "8c63c8c41ea74899d2d7c5a0fbeb3de588afd5260bd106292d4b3ed5ca9f50e8",
+        "path": "contracts/src/interfaces/IEthereumFinalityOracle420.sol"
+      },
+      {
+        "current_sha256": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+        "original_sha256": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+        "path": "contracts/src/interfaces/IEthereumFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "f673cee4b4ed84594ded273a229f01857a84e4139c979a278aba25a9ec966be6",
+        "original_sha256": "f673cee4b4ed84594ded273a229f01857a84e4139c979a278aba25a9ec966be6",
+        "path": "contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "litecoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "dc7d16124acdb4d7f303d01cd488b13350d931351a7cd2a9777b36e2608214bd",
+        "original_sha256": "dc7d16124acdb4d7f303d01cd488b13350d931351a7cd2a9777b36e2608214bd",
+        "path": "contracts/src/bridge/verifiers/LitecoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "2c04358e8dde23b1f4fce696776c09bd416026f832b4b23b11b15ad629364246",
+        "original_sha256": "2c04358e8dde23b1f4fce696776c09bd416026f832b4b23b11b15ad629364246",
+        "path": "contracts/src/bridge/verifiers/LitecoinHeaderChain420.sol"
+      },
+      {
+        "current_sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+        "original_sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+        "path": "contracts/src/bridge/verifiers/LitecoinScrypt420.sol"
+      },
+      {
+        "current_sha256": "75ef381f9724009ce64a3b008db2e1322cbb64701b23eac3ccae61bf8791d8df",
+        "original_sha256": "75ef381f9724009ce64a3b008db2e1322cbb64701b23eac3ccae61bf8791d8df",
+        "path": "contracts/src/bridge/verifiers/LitecoinTransaction420.sol"
+      },
+      {
+        "current_sha256": "344925576f6522fc4e837ef8ed49e0d1f7d4f40323f6238a5cd31ceed543a4d2",
+        "original_sha256": "344925576f6522fc4e837ef8ed49e0d1f7d4f40323f6238a5cd31ceed543a4d2",
+        "path": "contracts/src/interfaces/ILitecoinFinalityVerifier420.sol"
+      }
+    ]
+  },
+  "pirate-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "original_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "path": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "0f94f13ad867d819474eaae20462f22caf84281bcaafa2a48da5ad735f0c02c8",
+        "original_sha256": "0f94f13ad867d819474eaae20462f22caf84281bcaafa2a48da5ad735f0c02c8",
+        "path": "contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "bf8e7f89b0368b521dfa02ab940601d78862cca4189110a434847d04b513909e",
+        "original_sha256": "bf8e7f89b0368b521dfa02ab940601d78862cca4189110a434847d04b513909e",
+        "path": "contracts/src/bridge/verifiers/pirate/PirateEquihash420.sol"
+      },
+      {
+        "current_sha256": "9bb5521f47cf204594068c96a9d01cf020c170971f2ad0613a3d8a935a2618db",
+        "original_sha256": "9bb5521f47cf204594068c96a9d01cf020c170971f2ad0613a3d8a935a2618db",
+        "path": "contracts/src/interfaces/IPirateChainFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "pirate-integers-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "original_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "path": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "original_sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+        "path": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+      },
+      {
+        "current_sha256": "0f94f13ad867d819474eaae20462f22caf84281bcaafa2a48da5ad735f0c02c8",
+        "original_sha256": "0f94f13ad867d819474eaae20462f22caf84281bcaafa2a48da5ad735f0c02c8",
+        "path": "contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "bf8e7f89b0368b521dfa02ab940601d78862cca4189110a434847d04b513909e",
+        "original_sha256": "bf8e7f89b0368b521dfa02ab940601d78862cca4189110a434847d04b513909e",
+        "path": "contracts/src/bridge/verifiers/pirate/PirateEquihash420.sol"
+      },
+      {
+        "current_sha256": "9bb5521f47cf204594068c96a9d01cf020c170971f2ad0613a3d8a935a2618db",
+        "original_sha256": "9bb5521f47cf204594068c96a9d01cf020c170971f2ad0613a3d8a935a2618db",
+        "path": "contracts/src/interfaces/IPirateChainFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "potcoin-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+        "path": "contracts/src/accounts/ECDSA420.sol"
+      },
+      {
+        "current_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "original_sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+        "path": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+      },
+      {
+        "current_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "original_sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+        "path": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+      },
+      {
+        "current_sha256": "1007df22ae19c95d5d8667d99f5a5db97b75027e9dedc2615bd2f949dbf2db4e",
+        "original_sha256": "1007df22ae19c95d5d8667d99f5a5db97b75027e9dedc2615bd2f949dbf2db4e",
+        "path": "contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "dcc6139e5b04d4857ce59a0cba1803fb14778307c4d43337c124bbb2abb40def",
+        "original_sha256": "dcc6139e5b04d4857ce59a0cba1803fb14778307c4d43337c124bbb2abb40def",
+        "path": "contracts/src/bridge/verifiers/potcoin/PotcoinConsensus420.sol"
+      },
+      {
+        "current_sha256": "6947b69887e7edb8011bccb5adbc645949aa7d49f50855bd9f740b214e4cc46a",
+        "original_sha256": "6947b69887e7edb8011bccb5adbc645949aa7d49f50855bd9f740b214e4cc46a",
+        "path": "contracts/src/bridge/verifiers/potcoin/PotcoinSignature420.sol"
+      },
+      {
+        "current_sha256": "4423fabcf900952a2a7ed1a8313dd7ce626c111bd21fd51c97675d2c55df5591",
+        "original_sha256": "4423fabcf900952a2a7ed1a8313dd7ce626c111bd21fd51c97675d2c55df5591",
+        "path": "contracts/src/bridge/verifiers/potcoin/PotcoinWire420.sol"
+      },
+      {
+        "current_sha256": "785906f41c14b25f250ac5d697f81804e446ffbf70b53e677b1ec634168d77f7",
+        "original_sha256": "785906f41c14b25f250ac5d697f81804e446ffbf70b53e677b1ec634168d77f7",
+        "path": "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "solana-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+        "original_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+        "path": "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "72899d889550a343512c22c5429bde9d5ead1456f975045f66950051de2f3ae6",
+        "original_sha256": "72899d889550a343512c22c5429bde9d5ead1456f975045f66950051de2f3ae6",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaEd25519420.sol"
+      },
+      {
+        "current_sha256": "417a46791431f6df36eb192c02e6762e335eb6d3400613934e8517988c2146ed",
+        "original_sha256": "417a46791431f6df36eb192c02e6762e335eb6d3400613934e8517988c2146ed",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaTransaction420.sol"
+      },
+      {
+        "current_sha256": "8aac6aec68dcd84ff03da0120de8233604643b552e7ea8f1ab99240aaf087844",
+        "original_sha256": "8aac6aec68dcd84ff03da0120de8233604643b552e7ea8f1ab99240aaf087844",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaValidatorQuorum420.sol"
+      },
+      {
+        "current_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "original_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "path": "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+      },
+      {
+        "current_sha256": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+        "original_sha256": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+        "path": "contracts/src/interfaces/ISolanaFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "solana-integers-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+        "original_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+        "path": "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "72899d889550a343512c22c5429bde9d5ead1456f975045f66950051de2f3ae6",
+        "original_sha256": "72899d889550a343512c22c5429bde9d5ead1456f975045f66950051de2f3ae6",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaEd25519420.sol"
+      },
+      {
+        "current_sha256": "417a46791431f6df36eb192c02e6762e335eb6d3400613934e8517988c2146ed",
+        "original_sha256": "417a46791431f6df36eb192c02e6762e335eb6d3400613934e8517988c2146ed",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaTransaction420.sol"
+      },
+      {
+        "current_sha256": "8aac6aec68dcd84ff03da0120de8233604643b552e7ea8f1ab99240aaf087844",
+        "original_sha256": "8aac6aec68dcd84ff03da0120de8233604643b552e7ea8f1ab99240aaf087844",
+        "path": "contracts/src/bridge/verifiers/solana/SolanaValidatorQuorum420.sol"
+      },
+      {
+        "current_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "original_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "path": "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+      },
+      {
+        "current_sha256": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+        "original_sha256": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+        "path": "contracts/src/interfaces/ISolanaFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "tron-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "4a65d81a9291a85766d50ee2bc5c471952e118494ec79cc46358ea454d42ae3d",
+        "original_sha256": "4a65d81a9291a85766d50ee2bc5c471952e118494ec79cc46358ea454d42ae3d",
+        "path": "contracts/src/bridge/verifiers/TronFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "4a6eab6b0cd67f90922fa0b285807449f30b759d3fbeb55914880badb86b6e0e",
+        "original_sha256": "4a6eab6b0cd67f90922fa0b285807449f30b759d3fbeb55914880badb86b6e0e",
+        "path": "contracts/src/bridge/verifiers/tron/TronProto420.sol"
+      },
+      {
+        "current_sha256": "61280703244520644e77dddcb2c6c04a34c1d0b8d4ea8ecd7e3e47f3978a2b6b",
+        "original_sha256": "61280703244520644e77dddcb2c6c04a34c1d0b8d4ea8ecd7e3e47f3978a2b6b",
+        "path": "contracts/src/bridge/verifiers/tron/TronWire420.sol"
+      },
+      {
+        "current_sha256": "732ffa5fb1663fbe3fc3befc9970fcbbf054ef3ba3333ebc070d1ae1c7c3dc1d",
+        "original_sha256": "732ffa5fb1663fbe3fc3befc9970fcbbf054ef3ba3333ebc070d1ae1c7c3dc1d",
+        "path": "contracts/src/interfaces/ITronFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  },
+  "xrpl-inputs.json": {
+    "changed_production_sources": [],
+    "unchanged_production_sources": [
+      {
+        "current_sha256": "9fb9c74fa6817717ca9f582714d498d9b522525687c0a2ecc3953cc1b89db58f",
+        "original_sha256": "9fb9c74fa6817717ca9f582714d498d9b522525687c0a2ecc3953cc1b89db58f",
+        "path": "contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "original_sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+        "path": "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+      },
+      {
+        "current_sha256": "d1d3f0845a9a9c622971adfc189c1555c4aec581bc8899ff44a4e35c13197da3",
+        "original_sha256": "d1d3f0845a9a9c622971adfc189c1555c4aec581bc8899ff44a4e35c13197da3",
+        "path": "contracts/src/bridge/verifiers/xrpl/XrplBinary420.sol"
+      },
+      {
+        "current_sha256": "af9cb0d201d5a8787994e1fac52a9534ced0588bf7ce1675963d226cefe8c597",
+        "original_sha256": "af9cb0d201d5a8787994e1fac52a9534ced0588bf7ce1675963d226cefe8c597",
+        "path": "contracts/src/bridge/verifiers/xrpl/XrplPayment420.sol"
+      },
+      {
+        "current_sha256": "3d896af9fd38bf0fcd107c924beca49b18a311ff3e1708bb30debae11523c9fd",
+        "original_sha256": "3d896af9fd38bf0fcd107c924beca49b18a311ff3e1708bb30debae11523c9fd",
+        "path": "contracts/src/bridge/verifiers/xrpl/XrplSHA512Half420.sol"
+      },
+      {
+        "current_sha256": "3671575426f53d946d91ce98f15d0e438d4d8bb598ea9fb64359ffc0eec26fbb",
+        "original_sha256": "3671575426f53d946d91ce98f15d0e438d4d8bb598ea9fb64359ffc0eec26fbb",
+        "path": "contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol"
+      },
+      {
+        "current_sha256": "fc785413d5d4ff1fbfee2b034f0a41c2833c15c7c90ef51075b10de62cd0ce34",
+        "original_sha256": "fc785413d5d4ff1fbfee2b034f0a41c2833c15c7c90ef51075b10de62cd0ce34",
+        "path": "contracts/src/bridge/verifiers/xrpl/XrplValidation420.sol"
+      },
+      {
+        "current_sha256": "85375e44c0651836c4dbd09c29cafa5d0012df63ac99b6e87774c5c4be394b28",
+        "original_sha256": "85375e44c0651836c4dbd09c29cafa5d0012df63ac99b6e87774c5c4be394b28",
+        "path": "contracts/src/interfaces/IXrplFinalityVerifier420.sol"
+      },
+      {
+        "current_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "original_sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "path": "contracts/src/system/SystemAccess.sol"
+      }
+    ]
+  }
+}

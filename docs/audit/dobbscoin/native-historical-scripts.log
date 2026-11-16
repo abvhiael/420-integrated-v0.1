@@ -1,0 +1,20 @@
+native historical scripts 0 inputs 0 elapsed 0
+native historical scripts 100000 inputs 184601 elapsed 29
+native historical scripts 200000 inputs 329868 elapsed 49
+native historical scripts 300000 inputs 477204 elapsed 85
+native historical scripts 400000 inputs 531614 elapsed 93
+native historical scripts 500000 inputs 608710 elapsed 110
+native historical scripts 600000 inputs 728804 elapsed 138
+native historical scripts 700000 inputs 835409 elapsed 150
+native historical scripts 800000 inputs 940793 elapsed 160
+native historical scripts 900000 inputs 1052509 elapsed 171
+native historical scripts 1000000 inputs 1091250 elapsed 177
+native historical scripts 1100000 inputs 1140930 elapsed 184
+native historical scripts 1200000 inputs 1243966 elapsed 194
+native historical scripts 1300000 inputs 1347409 elapsed 204
+native historical scripts 1400000 inputs 1454025 elapsed 214
+native historical scripts 1500000 inputs 1558737 elapsed 224
+native historical scripts 1600000 inputs 1628545 elapsed 232
+native historical scripts 1700000 inputs 1735681 elapsed 242
+native historical scripts 1800000 inputs 1853214 elapsed 257
+PASS {"source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3", "native_library_sha256": "677d72715aa87a83a210287b13577e92f46020d5fd9194c94b1fa1e5fbb8d7ee", "headers_sha256": "805b01aef94d298dc4aa42142e7dac7e53bb05b672ea0f1560bfa9c772591594", "scope": "scripts skipped by native built-in-checkpoint optimization; no scrypt/difficulty replay", "first_height": 1, "last_height": 1847999, "native_checkpoint_height": 1848000, "blocks_read": 1848000, "transactions_read": 2051458, "verified_inputs": 1911823, "dersig_inputs": 1765871, "tampered_historical_signature_rejected": true, "last_hash": "b90c793c130fcc32893b404caffe0f64a7b6600b7207b2d917b5d729315d1b6a"}

@@ -1,0 +1,59 @@
+{
+  "scope": "Current native 2026 chain; no legacy or SPL substitution",
+  "attempts": [
+    {
+      "url": "https://explorer.potcoin.com/api/getblockcount",
+      "observed_at": "2026-11-15T02:06:47.854495+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://explorer.potcoin.com/api/getblockhash?index=501",
+      "observed_at": "2026-11-15T02:06:47.855263+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://wallet.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.855910+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.856583+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://whitepaper.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.857481+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://seeds.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.858915+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://seed.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.861557+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://seed2.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.862490+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    },
+    {
+      "url": "https://dnsseed.potcoin.com",
+      "observed_at": "2026-11-15T02:06:47.864341+00:00",
+      "status": 503,
+      "body": "upstream connect error or disconnect/reset before headers. reset reason: remote connection failure"
+    }
+  ]
+}

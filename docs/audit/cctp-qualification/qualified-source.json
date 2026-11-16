@@ -1,0 +1,13 @@
+{
+  "baseline": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "files": {
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": "0e9b8b048e4edc2d1a75c44416fd51e6d4adf639c2231fc0354a48d1e4083f12",
+    "contracts/src/interfaces/ICircleCCTPV2420.sol": "46f5dc719e7f296e9c74e794832921060309b12df6c9115faf0a80056b227da3",
+    "contracts/src/bridge/verifiers/cctp/CCTPV2Message420.sol": "f87a6d89ff66cb6bfc7e721c33e8fd81f8699354fca0cb4ee56ad2bd43b1507e",
+    "contracts/test/CCTPAdapter420.t.sol": "2b4e1f368d7054175a36b80b05928fa728268448f07eb9e43c392f68f2c7aa5f",
+    "contracts/test/CCTPGatewayIntegration420.t.sol": "56d726a41f8e04f0c2213c141553dd40d1cb54d6246f5fb44697037f6fed8aa1",
+    "contracts/test/helpers/CCTPNativeHarness420.sol": "77d6b23ea0658016e2191536757610f784c9b4ce4df81c43b35d4c0e9f61114d",
+    "scripts/cctp/cctp.py": "fe74dd4fff47fe9a684b627459add68854828536bc38ea612c199f426171cb0a",
+    "scripts/cctp/test_cctp.py": "d81393455fb4f26a50aa8f0f348efd91f9b152d4a61b8eb9136e82368832e89c"
+  }
+}

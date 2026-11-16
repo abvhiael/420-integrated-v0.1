@@ -1,6 +1,6 @@
 {
   "schema": "420-bridge-pirate-mainnet-v12.5.12",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_SHIELDED_VERIFIER_AND_GATEWAY",
+  "status": "APPROVED_INACTIVE_LOCAL_CRYPTO_QUALIFIED_NATIVE_DPOW_PROVIDER_AND_CUSTODY_UNQUALIFIED",
   "canonical_chain_key": "420/BRIDGE/CHAIN/ARRR",
   "chain_family": "SHIELDED_EQUIHASH_DPOW",
   "route_chain_id": "0x4152525200000001",
@@ -10,12 +10,21 @@
     "target_block_seconds": 60,
     "mining_algorithm": "Equihash 200,9",
     "privacy_model": "shielded-only ordinary peer-to-peer transfers",
-    "shielded_pools": ["Sapling", "Ironwood/Orchard"]
+    "shielded_pools": [
+      "Sapling",
+      "Ironwood PostNu6_3 (V6; not legacy Orchard)"
+    ],
+    "genesis_hash": "027e3758c3a65b12aa1046462b486d0a63bfa1beae327897f56c5cfb7daaae71",
+    "source_commit": "b14db80bfc1a819b958e36d1e0127e94c395d445",
+    "ironwood_activation_height": 4161185,
+    "ironwood_branch_id": "37a5165b"
   },
   "finality_policy": {
     "delayed_proof_of_work_notarization_required": true,
     "minimum_dpow_confirmations": 3,
-    "note": "Pirate service-provider guidance recommends using dPoW-aware confirmations rather than rawconfirmations; more than 2 after notarization is the baseline service-provider policy."
+    "note": "At least three confirmations, with deposit height strictly below an authenticated native notarized height. No pre-notarization raw-confirmation fallback.",
+    "strict_notarized_height_coverage": true,
+    "rpc_only_assertions": "REJECTED"
   },
   "adapter": {
     "contract": "PirateChainBridgeAdapter420",
@@ -40,5 +49,15 @@
     "ARRR asset id and route id governance binding",
     "risk caps and emergency isolation configured",
     "end-to-end Sapling and Ironwood inbound/outbound qualification"
-  ]
+  ],
+  "implementation": {
+    "verifier": "PirateChainFinalityVerifier420",
+    "consensus_boundary": "governance-authenticated native state plus independent current-block EVM Equihash/PoW/work",
+    "shielded_crypto": "scripts/pirate/shielded; upstream pinned Sapling and Ironwood V6",
+    "proof_service_authority": null,
+    "gateway_key_id": null,
+    "production_custody": null,
+    "full_step_acceptance": "OPEN",
+    "evidence": "docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md"
+  }
 }

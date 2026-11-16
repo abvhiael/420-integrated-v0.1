@@ -24,6 +24,8 @@ contract DogecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public gatewayScripts;
     mapping(bytes32 => bool) public consumedMessages;
     mapping(bytes32 => bool) public consumedSourceOutputs;
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
 
     error InvalidAddress();
@@ -74,6 +76,7 @@ contract DogecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     }
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
+        if(verifier.routeId()!=dogeRouteId || verifier.destinationRouter()!=gatewayRouter)revert InvalidVerifier();
         IDogecoinFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.genesisHash != DOGE_MAINNET_GENESIS_HASH || p.messageStart != DOGE_MAINNET_MESSAGE_START) revert WrongNetwork();
@@ -89,6 +92,7 @@ contract DogecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
         consumedMessages[p.messageId] = true;
         consumedSourceOutputs[p.sourceOutput] = true;
+        verifiedSourceContext[p.messageId]=SourceProofContext(p.gatewayScriptHash,dogeAssetId);
         emit DogecoinInboundConsumed(p.messageId, p.transactionHash, p.sourceOutput);
 
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));

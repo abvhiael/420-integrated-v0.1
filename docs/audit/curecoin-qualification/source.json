@@ -1,0 +1,58 @@
+{
+  "repository": "https://github.com/cygnusxi/CurecoinSource",
+  "source": "a3eb106715638e316eb03af383dc27aad2e89536",
+  "release_tag": "v2.5.2.2",
+  "release_commit": "2cc3da2932e7ec42d865a28a905dc84b3093b842",
+  "src_diff_from_release": "",
+  "source_file_sha256": {
+    "src/main.cpp": "53e3969e0021c1c21498239f30b79bc8cc4da6f9fb1e7edc92ac248aa1d4405a",
+    "src/main.h": "387e90748cec4bdb6c906f799e8fc341fb378fcb2ba0c9f7cd1ab1e80aa9328b",
+    "src/util.h": "1a63eb805ce4f1547adab9ee7775226f1e7cf60a2bc0d9e6feb4a760042198d1",
+    "src/kernel.cpp": "33a30fc16ed9f5932915b2ac32aebebcfa96394054fac6f2ea1cd0db958b15ae",
+    "src/kernel.h": "ec5c5328c260d641e50aef85ca81d4560923d778f5b765d12ff7fac04067bd74",
+    "src/key.cpp": "0d7c0990e0ae1c92cea93502c58ff81632c99153e6fc7064e6cf9b535b670006",
+    "src/key.h": "f175356f76c8ac85207eb1170ef31dcc6cd7f875032863c823243b09c383bf6b",
+    "src/script.cpp": "a4942a79d4175e4266c372e83c09cb2fd1ce992e3a0f39c6d532ce1538bf8dc2",
+    "src/checkpoints.cpp": "e543fb4d342b25a56db2ffca3df4c2b550b63b9f1a13a9de7052c13d27c2c579",
+    "src/serialize.h": "9d99aa02d828445a123a56fb7bc41f3489b1f671b167dcc054c32d80b6c79db2",
+    "src/init.cpp": "0585e5f61909de7929456d207bf8aade8a0e3b0f3c78679f78138f3624a2dd1b",
+    "src/rpcblockchain.cpp": "2114711d379ccec64fb4de33b152a4e7e6bcb6d3cc628bb535770c90614151ce",
+    "src/base58.h": "edfaa60ed292aa672fcbc3ee45da9e7872cc1feda83d9d89ab3d138742dcc63c"
+  },
+  "official_archive": {
+    "url": "https://github.com/cygnusxi/CurecoinSource/releases/download/v2.1.0.1/CCBlockchain.zip",
+    "release": "v2.1.0.1",
+    "sha256": "c7ef8efdbe6d5fa8fce0799e0a9ce0a3289bd80c2076b333afb8d6650e6c09e0",
+    "raw_entry": "blk0001.dat",
+    "raw_sha256": "80b66b6a0c483b03c40484e69acb543399df7b74a2162ff017b7e3a030f2317c",
+    "archive_index_databases_imported": false
+  },
+  "native_prefix": {
+    "height": 500000,
+    "tip": "e7ef734c9072344412d94493fcf13aa13d2b94f3344bba2c9cda100872d9505d",
+    "sha256": "6efdb6bb958d6a5909c4499122dc2c0219436da439fe06a7746d2dca250345fa"
+  },
+  "reference_release_asset": {
+    "url": "https://github.com/cygnusxi/CurecoinSource/releases/download/v2.5.2.2/curecoin-2.5.2.2-ubuntu-amd64.deb",
+    "sha256": "c887271ca2e7387822f09ed9f0aaf742a18ba8b854512909fea902eb22c2b6f1",
+    "daemon_sha256": "c308f908fc03edcbb8cb34436671c6e2858be4c0b8212fa6c77229861d05529e"
+  },
+  "secp_source": {
+    "repository": "https://github.com/bitcoin-core/secp256k1",
+    "tag": "v0.7.1",
+    "commit": "1a53f4961f337b4d166c25fce72ef0dc88806618",
+    "static_library_sha256": "822de282a882283442dd23dd176a6299837861a98b68e1849bb3a4a3616bb8cc"
+  },
+  "native_final_build": {
+    "source": "a3eb106715638e316eb03af383dc27aad2e89536",
+    "patch_sha256": "44790ac27e1648bfb5bcf753601e2496d1dda7728ac0302aaf35fe7254fb0187",
+    "daemon_sha256": "1d9dbbec52b2674a10c3048d7a6f1eae5fc43b574a9c36c61a0d06d6acd1a91c",
+    "secp_source": "1a53f4961f337b4d166c25fce72ef0dc88806618",
+    "secp_static_library_sha256": "822de282a882283442dd23dd176a6299837861a98b68e1849bb3a4a3616bb8cc"
+  },
+  "native_patch_artifact": {
+    "path": "native-replay-performance.patch.gz",
+    "encoding": "gzip; uncompressed bytes are the exact executed patch",
+    "uncompressed_sha256": "44790ac27e1648bfb5bcf753601e2496d1dda7728ac0302aaf35fe7254fb0187"
+  }
+}

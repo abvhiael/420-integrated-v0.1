@@ -1,0 +1,33 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.73s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+ --> contracts/test/DogecoinHistorical420.t.sol:7:19:
+  |
+7 |     function read(string memory name) private view returns(bytes memory ...
+  |                   ^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+ --> contracts/test/DogecoinHistorical420.t.sol:8:5:
+  |
+8 |     function name(uint256 v) private pu ... (uint8(48+v%10));return string(b);}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 3 tests for contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineDigishieldActivationHeaderAdmission() (gas: 3547700)
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineGenesisLinkedScryptHeadersAndWork() (gas: 3546132)
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineMergedMiningChainParentWorkConfirmationsAndTransaction() (gas: 3547785)
+Suite result: FAILED. 0 passed; 3 failed; 0 skipped; finished in 961.07µs (1.50ms CPU time)
+
+Ran 1 test suite in 2.89ms (961.07µs CPU time): 0 tests passed, 3 failed, 0 skipped (3 total tests)
+
+Failing tests:
+Encountered 3 failing tests in contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineDigishieldActivationHeaderAdmission() (gas: 3547700)
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineGenesisLinkedScryptHeadersAndWork() (gas: 3546132)
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineMergedMiningChainParentWorkConfirmationsAndTransaction() (gas: 3547785)
+
+Encountered a total of 3 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 3 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

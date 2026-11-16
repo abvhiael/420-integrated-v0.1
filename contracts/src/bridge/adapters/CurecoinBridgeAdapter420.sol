@@ -23,6 +23,8 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedSourceOutputs;
     uint256 public outboundNonce;
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress(); error InvalidVerifier(); error WrongNetwork(); error NotProofOfStake();
     error Unfinalized(); error InvalidProof(); error GatewayNotAllowed(); error AssetNotConfigured();
     error RouteNotConfigured(); error Replay(); error OnlyRouter(); error InvalidOutbound();
@@ -57,6 +59,7 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
 
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
         ICurecoinFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
+        if (p.destinationChainId!=block.chainid||p.destinationRouter!=gatewayRouter||p.routeId!=cureRouteId) revert InvalidProof();
         if (!p.finalized) revert Unfinalized();
         if (p.genesisHash != CURE_MAINNET_GENESIS_HASH || p.messageStart != CURE_MAINNET_MESSAGE_START) revert WrongNetwork();
         if (!p.proofOfStake) revert NotProofOfStake();
@@ -70,6 +73,7 @@ contract CurecoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         emit CurecoinInboundConsumed(p.messageId, p.transactionHash, p.sourceOutput);
         address syntheticSender = address(uint160(uint256(keccak256(abi.encodePacked(p.sourceOutput)))));
         if (syntheticSender == address(0)) revert InvalidProof();
+        verifiedSourceContext[p.messageId]=SourceProofContext(p.gatewayScriptHash,cureAssetId);
         v = VerifiedTransfer({routeId:cureRouteId, assetId:cureAssetId, sender:syntheticSender, recipient:p.recipient, amount:p.amount, sourceTxId:p.transactionHash, sourceMessageId:p.messageId});
     }
 

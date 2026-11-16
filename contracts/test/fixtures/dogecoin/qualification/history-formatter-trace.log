@@ -1,0 +1,44 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.71s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+ --> contracts/test/DogecoinHistorical420.t.sol:7:19:
+  |
+7 |     function read(string memory name) private view returns(bytes memory ...
+  |                   ^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+ --> contracts/test/DogecoinHistorical420.t.sol:8:5:
+  |
+8 |     function name(uint256 v) private pu ... (uint8(48+v%10));return string(b);}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 1 test for contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineGenesisLinkedScryptHeadersAndWork() (gas: 3546132)
+Traces:
+  [3546132] DogecoinHistorical420Test::testGenuineGenesisLinkedScryptHeadersAndWork()
+    ├─ [0] VM::warp(1800000000 [1.8e9])
+    │   └─ ← [Return]
+    ├─ [3541484] VM::deployCode("contracts/src/bridge/verifiers/DogecoinHeaderChain420.sol:DogecoinHeaderChain420")
+    │   ├─ [3508496] → new DogecoinHeaderChain420@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   │   ├─ [1105956] → new LitecoinScrypt420@0x104fBc016F4bb334D775a19E8A6510109AC63E00
+    │   │   │   └─ ← [Return] 5524 bytes of code
+    │   │   └─ ← [Return] 9864 bytes of code
+    │   └─ ← [Return] DogecoinHeaderChain420: [0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f]
+    └─ ← [Revert] panic: arithmetic underflow or overflow (0x11)
+
+Backtrace:
+  at DogecoinHistorical420Test.testGenuineGenesisLinkedScryptHeadersAndWork
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 781.78µs (449.18µs CPU time)
+
+Ran 1 test suite in 3.89ms (781.78µs CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineGenesisLinkedScryptHeadersAndWork() (gas: 3546132)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

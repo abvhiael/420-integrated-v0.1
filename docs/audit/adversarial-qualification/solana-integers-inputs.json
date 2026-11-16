@@ -1,0 +1,63 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/solana",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    "^SolanaIntegerV18Test$",
+    "--match-test",
+    "^(testV18IndependentInstruction|testFuzzV18DirtyAmount)",
+    "-vv"
+  ],
+  "family": "solana",
+  "files": {
+    "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol": {
+      "sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/solana/SolanaEd25519420.sol": {
+      "sha256": "72899d889550a343512c22c5429bde9d5ead1456f975045f66950051de2f3ae6",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/solana/SolanaTransaction420.sol": {
+      "sha256": "417a46791431f6df36eb192c02e6762e335eb6d3400613934e8517988c2146ed",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/solana/SolanaValidatorQuorum420.sol": {
+      "sha256": "8aac6aec68dcd84ff03da0120de8233604643b552e7ea8f1ab99240aaf087844",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol": {
+      "sha256": "96a74497a31f38c57bbf989e66575ae72338bbce950cbbf9bc202cb52cd91eb8",
+      "source": "V18_PATCH"
+    },
+    "contracts/src/interfaces/ISolanaFinalityVerifier420.sol": {
+      "sha256": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/SolanaIntegerV18.t.sol": {
+      "sha256": "59a11dac6e72e8920dd12402f822e81b95a09f9f44633dbd79265e2fccd7af49",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/SolanaV18.t.sol": {
+      "sha256": "29811d1e23c633ad12fd8e53a58a33557e7dfe282b7b1a0eac50814510a96677",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+}

@@ -1,0 +1,11 @@
+test_archive_member_filter (test_bundle.BundleTests.test_archive_member_filter) ... ok
+test_every_merkle_record_matches_root (test_bundle.BundleTests.test_every_merkle_record_matches_root) ... ok
+test_incomplete_or_wrong_native_replay_rejected (test_bundle.BundleTests.test_incomplete_or_wrong_native_replay_rejected) ... ok
+test_rpc_only_rejected (test_bundle.BundleTests.test_rpc_only_rejected) ... ok
+test_selected_chain_disagreement_rejected (test_bundle.BundleTests.test_selected_chain_disagreement_rejected) ... ok
+test_signature_domain_separation (test_bundle.BundleTests.test_signature_domain_separation) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.067s
+
+OK

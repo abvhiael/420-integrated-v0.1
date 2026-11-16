@@ -1,0 +1,30 @@
+{
+  "XrplBridgeAdapter420": {
+    "init_bytes": 4201,
+    "runtime_bytes": 3792
+  },
+  "XrplFinalityVerifier420": {
+    "init_bytes": 23695,
+    "runtime_bytes": 19130
+  },
+  "XrplBinary420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "XrplPayment420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "XrplSHA512Half420": {
+    "init_bytes": 4173,
+    "runtime_bytes": 4146
+  },
+  "XrplSHAMap420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "XrplValidation420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

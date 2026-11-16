@@ -72,7 +72,7 @@
     {
       "asset": "ETH",
       "adapter": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol",
-      "adapter_source_sha256": "49f0407c291a1fa0f9084261cc492c84038b006f4518a06e0a2f6c1493c5486e",
+      "adapter_source_sha256": "76f062b31fb0ede0636f8d44d94b0d70c01e5a1f238bcd7f59a3e2bcac917a45",
       "verifier": "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol",
       "verifier_source_sha256": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
       "source_qualification_pr": 1157,
@@ -156,7 +156,8 @@
           "identical": true
         }
       },
-      "evidence": "contracts/test/fixtures/bitcoin/README.md"
+      "evidence": "contracts/test/fixtures/bitcoin/README.md",
+      "adapter_qualification_extension": "BRIDGE-AUDIT-4"
     },
     {
       "asset": "LTC",
@@ -919,6 +920,28 @@
     "build_artifacts": 93,
     "maximum_runtime_bytes": 22063,
     "logs": "docs/audit/final-verifier-qualification",
-    "ci_run_ids": []
-  }
+    "ci_run_ids": [],
+    "source_qualified_sha": "c8dcda792d0c1e7e2a14ba63b713de91a023ee4e"
+  },
+  "qualification_extensions": [
+    {
+      "step": "BRIDGE-AUDIT-4",
+      "base_main_sha": "6a462f59e375b6873719d09c68b13913b8df7a95",
+      "results": "docs/audit/ethereum-completion-qualification/RESULTS.json",
+      "superseded_inputs": {
+        "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol": {
+          "previous_sha256": "49f0407c291a1fa0f9084261cc492c84038b006f4518a06e0a2f6c1493c5486e",
+          "current_sha256": "76f062b31fb0ede0636f8d44d94b0d70c01e5a1f238bcd7f59a3e2bcac917a45"
+        },
+        "contracts/test/SupportedTokenRoutes420.t.sol": {
+          "previous_sha256": "0af53af1bd3511c371d03500c7bfa5b214d7384c8f6902547f2c01e2b094fc59",
+          "current_sha256": "e6ffca531d9bff6c83ba725e5e85bc2084d87e8aa3c34c6eb2e3f87d5eb12d78"
+        },
+        "contracts/test/TokenGatewayRouterIntegration420.t.sol": {
+          "previous_sha256": "4bdae9ab51e12cd91eaf6c969f5fd800e81e8c516810279ee15b13c3d1b8aa17",
+          "current_sha256": "e036f1c8008dd32b149066903d75b920fa28c5d2fb22d2207cfc59c414909292"
+        }
+      }
+    }
+  ]
 }

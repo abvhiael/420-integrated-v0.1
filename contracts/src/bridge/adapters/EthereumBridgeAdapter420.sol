@@ -2,13 +2,14 @@
 pragma solidity ^0.8.24;
 
 import "../../interfaces/IBridgeAdapter420.sol";
+import "../../interfaces/IEthereumOutboundMessage420.sol";
 import "../../interfaces/IEthereumFinalityVerifier420.sol";
 import "../../system/SystemAccess.sol";
 import "../../interfaces/IBridgeTokenRoutePolicy420.sol";
 import "../tokens/SupportedTokenRoutes420.sol";
 
 /// @notice Canonical Ethereum mainnet adapter for 420Bridge.
-contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
+contract EthereumBridgeAdapter420 is IBridgeAdapter420, IEthereumOutboundMessage420, SystemAccess {
     bytes32 public constant ADAPTER_ID = keccak256("420/BRIDGE/ETHEREUM/MAINNET/V12.5.4");
     bytes32 public constant ETH_CHAIN_KEY = keccak256("420/BRIDGE/CHAIN/ETH");
     uint64 public constant ETH_ROUTE_CHAIN_ID = 0x4554484d41494e01; // "ETHMAIN" + profile version 1
@@ -56,6 +57,14 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bool public outboundHalted;
     bytes32 public inboundIncidentHash;
     bytes32 public outboundIncidentHash;
+    mapping(bytes32 => OutboundMessage) private outboundMessages;
+    event EthereumOutboundPayloadStored(bytes32 indexed messageId, uint256 indexed nonce);
+
+    function outboundMessage(bytes32 messageId) external view returns (OutboundMessage memory) {
+        if (outboundMessages[messageId].nonce == 0) revert InvalidOutbound();
+        return outboundMessages[messageId];
+    }
+
 
     error InvalidAddress();
     error InvalidVerifier();
@@ -206,6 +215,9 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
             routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 20
                 || amount == 0 || msg.value != 0
         ) revert InvalidOutbound();
+        address recipientAddress;
+        assembly ("memory-safe") { recipientAddress := shr(96, calldataload(recipient.offset)) }
+        if (recipientAddress == address(0)) revert InvalidOutbound();
         bytes32 sourceAsset = sourceAssetByAssetId[assetId];
         if (sourceAsset == bytes32(0)) revert AssetNotAllowed();
         if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();
@@ -232,6 +244,21 @@ contract EthereumBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
                     extra
                 )
             );
+        OutboundMessage storage request = outboundMessages[sourceMessageId];
+        request.sourceChainId = block.chainid;
+        request.sourceRouter = gatewayRouter;
+        request.sourceAdapter = address(this);
+        request.messageId = sourceMessageId;
+        request.routeId = routeId;
+        request.assetId = assetId;
+        request.sender = sender;
+        request.recipient = recipientAddress;
+        request.localAmount = amount;
+        request.ethereumAmount = sourceAmount;
+        request.ethereumAsset = sourceAsset;
+        request.nonce = nonce;
+        request.extra = extra;
+        emit EthereumOutboundPayloadStored(sourceMessageId, nonce);
         emit EthereumOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, sourceAmount, sourceAsset);
     }
 

@@ -100,6 +100,8 @@ on:
       - '!contracts/src/bridge/verifiers/vendor/sp1/**'
       - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'
       - '!contracts/src/interfaces/IBridgeVerifiedSourceContext420.sol'
+      - '!contracts/src/interfaces/IEthereumOutboundMessage420.sol'
+      - '!contracts/src/interfaces/IEthereumSourceGatewaySettlement420.sol'
       - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'
       - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'
       - '!contracts/test/SupportedTokenRoutes420.t.sol'

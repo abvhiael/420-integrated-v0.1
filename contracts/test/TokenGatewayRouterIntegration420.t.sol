@@ -99,9 +99,9 @@ contract TokenGatewayRouterIntegration420Test is TokenRouteFixture420 {
         SupportedTokenRoutes420.Profile memory p = setupRoute(4);
         gateway.acceptInbound(eth.ADAPTER_ID(), transport(4, 42e6));
         bytes32 messageId =
-            gateway.initiateOutbound(eth.ADAPTER_ID(), p.routeId, p.assetId, new bytes(20), 42 ether, bytes(""));
+            gateway.initiateOutbound(eth.ADAPTER_ID(), p.routeId, p.assetId, abi.encodePacked(address(0xB0B)), 42 ether, bytes(""));
         bytes32 id = transfers.deriveOutboundTransferId(
-            p.routeId, p.assetId, address(this), keccak256(new bytes(20)), 42 ether, messageId
+            p.routeId, p.assetId, address(this), keccak256(abi.encodePacked(address(0xB0B))), 42 ether, messageId
         );
         (,,,,,,, BridgeTransferRegistry.Status state,,) = transfers.transfers(id);
         require(state == BridgeTransferRegistry.Status.SOURCE_PENDING, "intent is not settlement");

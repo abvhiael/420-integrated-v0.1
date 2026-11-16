@@ -1,0 +1,24 @@
+Compiling 119 files with Solc 0.8.24
+Solc 0.8.24 finished in 163.19s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:396:5:
+    |
+396 |     function testFuzzPrecisionRoundTrip(uint64 amount) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:508:5:
+    |
+508 |     function testFrozenCatalogueMatchesRegistryProfilesIndependently() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 4 tests for contracts/test/TokenGatewayRouterIntegration420.t.sol:TokenGatewayRouterIntegration420Test
+[PASS] testRouterIndependentTokenAdmissionsAndNormalizedRisk() (gas: 54398954)
+[PASS] testRouterOutboundKeepsSourcePending() (gas: 13574660)
+[PASS] testRouterPrecisionRiskFailureRestoresReplay() (gas: 12707658)
+[PASS] testRouterSuspendedAssetCannotBeAdmitted() (gas: 9748237)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 67.64ms (89.43ms CPU time)
+
+Ran 1 test suite in 68.09ms (67.64ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

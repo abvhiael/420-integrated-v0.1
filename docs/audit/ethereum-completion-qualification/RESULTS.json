@@ -1,0 +1,72 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-4",
+  "base_main_sha": "6a462f59e375b6873719d09c68b13913b8df7a95",
+  "qualified_sha": "Associated PR reports published qualified commit; source manifests bind exact bytes",
+  "runs": [
+    {
+      "log": "docs/audit/ethereum-completion-qualification/outbound.log",
+      "source_inputs": "docs/audit/ethereum-completion-qualification/outbound.inputs.json",
+      "cases_passed": 16,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 128,
+      "invariant_calls": 8192
+    },
+    {
+      "log": "docs/audit/ethereum-completion-qualification/token-regression.log",
+      "source_inputs": "docs/audit/ethereum-completion-qualification/token-regression.inputs.json",
+      "cases_passed": 32,
+      "fuzz_inputs": 5000,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/ethereum-completion-qualification/shared-router.log",
+      "source_inputs": "docs/audit/ethereum-completion-qualification/shared-router.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/ethereum-completion-qualification/token-router.log",
+      "source_inputs": "docs/audit/ethereum-completion-qualification/token-router.inputs.json",
+      "cases_passed": 4,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/ethereum-completion-qualification/token-payload.log",
+      "source_inputs": "docs/audit/ethereum-completion-qualification/token-payload.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    }
+  ],
+  "totals": {
+    "cases_passed": 54,
+    "fuzz_inputs": 7500,
+    "invariant_runs": 128,
+    "invariant_calls": 8192
+  },
+  "ethereum_adapter_runtime_bytes": 7498,
+  "eip170_limit": 24576,
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "fuzz_seed": "0x42022"
+  },
+  "ci_run_ids": [],
+  "production_approvals": [],
+  "unchanged_consensus_graphs": 12,
+  "native_source_finality_reruns": 0,
+  "source_gateway_custody_release_implemented": false,
+  "settlement_boundary": "Typed ABI completed; authenticated finalized backing/custody implementation and live authority remain explicit deployment prerequisites, not an authorization from request transport",
+  "retained_ethereum_source_sha": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+  "retained_framework_source_sha": "c8dcda792d0c1e7e2a14ba63b713de91a023ee4e"
+}

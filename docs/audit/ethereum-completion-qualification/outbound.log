@@ -1,0 +1,64 @@
+Compiling 83 files with Solc 0.8.24
+Solc 0.8.24 finished in 22.47s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/EthereumOutboundMessage420.t.sol:20:2:
+   |
+20 |  function testUnknownPayloadFailsClo ... cak256("unknown"))));require(!ok);}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+2026-11-16T14:54:58.569277Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 8 tests for contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test
+[PASS] testDirectAdapterBypassFailsClosed() (gas: 30444)
+[PASS] testFinalizedEthereumInboundPasses() (gas: 162886)
+[PASS] testMalformedOutboundRecipientFailsClosed() (gas: 38917)
+[PASS] testQualifiedErc20Passes() (gas: 370446)
+[PASS] testReplayFailsClosed() (gas: 308800)
+[PASS] testUnfinalizedExecutionBlockFailsClosed() (gas: 80224)
+[PASS] testUnknownErc20FailsClosed() (gas: 167843)
+[PASS] testWrongGatewayFailsClosed() (gas: 148383)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.78ms (783.28µs CPU time)
+2026-11-16T14:54:58.572503Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572602Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572610Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572668Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572683Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572724Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572767Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.572825Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573430Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573451Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573457Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573483Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573519Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573535Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573557Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T14:54:58.573590Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+
+Ran 7 tests for contracts/test/EthereumOutboundMessage420.t.sol:EthereumOutboundMessage420Test
+[PASS] testCallerCannotForgeOutboundRecord() (gas: 34142)
+[PASS] testDownstreamRollbackRemovesNonceAndPayload() (gas: 747020)
+[PASS] testFuzzNativePayloadAmountAndRecipient(uint96,address) (runs: 2500, μ: 417966, ~: 418366)
+[PASS] testPayloadIsStableAcrossLaterRequests() (gas: 781730)
+[PASS] testPublicPayloadBindsEveryOutboundFieldAndPreservesLegacyDigest() (gas: 407665)
+[PASS] testUnknownPayloadFailsClosed() (gas: 8295)
+[PASS] testZeroRecipientRejectsWithoutConsumingNonce() (gas: 45793)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 183.03ms (182.13ms CPU time)
+
+Ran 1 test for contracts/test/EthereumOutboundMessage420.t.sol:EthereumOutboundMessageInvariant420Test
+[PASS] invariantOnlySuccessfulRequestsPersistNonceAndTypedPayload() (runs: 128, calls: 8192, reverts: 0)
+
+╭-------------------------+------------+-------+---------+----------╮
+| Contract                | Selector   | Calls | Reverts | Discards |
++===================================================================+
+| OutboundStateHandler420 | rejectZero | 2729  | 0       | 0        |
+|-------------------------+------------+-------+---------+----------|
+| OutboundStateHandler420 | request    | 2707  | 0       | 0        |
+|-------------------------+------------+-------+---------+----------|
+| OutboundStateHandler420 | rollback   | 2756  | 0       | 0        |
+╰-------------------------+------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 932.74ms (931.65ms CPU time)
+
+Ran 3 test suites in 944.77ms (1.12s CPU time): 16 tests passed, 0 failed, 0 skipped (16 total tests)

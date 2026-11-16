@@ -68,7 +68,7 @@ contract TokenRouterBoundary420 {
             route,
             asset,
             msg.sender,
-            new bytes(adapter.adapterId() == keccak256("420/BRIDGE/SOLANA/MAINNET/V12.5.2") ? 32 : 20),
+            (adapter.adapterId() == keccak256("420/BRIDGE/SOLANA/MAINNET/V12.5.2") ? new bytes(32) : abi.encodePacked(address(0xB0B))),
             amount,
             bytes("")
         );
@@ -549,7 +549,7 @@ contract SupportedTokenRoutes420Test is TokenRouteFixture420 {
                 route,
                 asset,
                 address(this),
-                new bytes(20),
+                abi.encodePacked(address(0xB0B)),
                 uint256(42 ether),
                 eth.ETH_NATIVE_SOURCE_ASSET(),
                 uint256(1),

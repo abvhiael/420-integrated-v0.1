@@ -51,3 +51,7 @@ See [final qualification record](BRIDGE-AUDIT-3-V-22-FINAL-VERIFIER-QUALIFICATIO
 ## Remaining work and next canonical action
 
 Genuinely deployed-node, gateway/custody, issuer, trust-root and live-transfer qualifications belong to the [existing testnet work roadmap](420BRIDGE-TESTNET-WORK-ROADMAP.md). The missing POT corpus/native replay and unestablished SOL/ARRR source authority are explicit external blockers, not implementation work falsely declared completed or automatically supplied by a running destination testnet. No production activation, new approver, new phase or invented V.23 is authorized. The next available canonical action is the existing 420Bridge testnet qualification/handoff once those prerequisites exist.
+
+## Ethereum completion qualification extension
+
+BRIDGE-AUDIT-4 adds a typed persisted outbound request and Ethereum source-gateway settlement ABI, preserving native/ERC-20 message IDs and rejecting zero recipients. Original V.22 manifests remain pinned to their original source. Current machine inventory qualification_extensions explicitly records each old/new input hash and current passing manifests. No Ethereum consensus/message-proof implementation changes, production approval, custody release or live-finality qualification are implied. See [Ethereum completion](BRIDGE-AUDIT-4-ETHEREUM-COMPLETION.md).

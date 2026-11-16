@@ -1,0 +1,39 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/eth-outbound-build",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/{EthereumOutboundMessage420.t.sol,EthereumBridgeAdapter420.t.sol}",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "EthereumOutboundMessage420.t.sol",
+    "EthereumBridgeAdapter420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol": "76f062b31fb0ede0636f8d44d94b0d70c01e5a1f238bcd7f59a3e2bcac917a45",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/interfaces/IEthereumFinalityOracle420.sol": "8c63c8c41ea74899d2d7c5a0fbeb3de588afd5260bd106292d4b3ed5ca9f50e8",
+    "contracts/src/interfaces/IEthereumFinalityVerifier420.sol": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+    "contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol": "f673cee4b4ed84594ded273a229f01857a84e4139c979a278aba25a9ec966be6",
+    "contracts/src/interfaces/IEthereumOutboundMessage420.sol": "44813c7089bcef7b128cd3276e33045750fb293e41e4d8ee6387d61f446c77bc",
+    "contracts/src/interfaces/IEthereumSourceGatewaySettlement420.sol": "19fbdca4b959518878d2f46e37a872a5decaa70b1bdab9a93155579ff76b6e55",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/EthereumBridgeAdapter420.t.sol": "3c438904441c84f7ab72a27a00e3a7bc3ce3b8cb25e7ea470f4c188cfaeb443f",
+    "contracts/test/EthereumOutboundMessage420.t.sol": "f012f3d917f237a652ef931653212feeb37b171fa36b8c0f6630811015ea4a44",
+    "contracts/test/helpers/TokenPolicyBoundaryFixture420.sol": "6cc4f47611f8c8a8f0332bbeb7b808b7cde18f3d32df1edb451fb55dc011a09b"
+  }
+}

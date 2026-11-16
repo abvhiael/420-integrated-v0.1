@@ -3,6 +3,15 @@
 import hashlib,json,re
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
+def qualified_source_matches(path,digest):
+ """Retain original SHA evidence while requiring every later source transition to be qualified."""
+ inventory=json.loads((ROOT/'contracts/config/bridge/verifier-qualification-inventory.json').read_text())
+ for extension in inventory.get('qualification_extensions',[]):
+  record=extension.get('superseded_inputs',{}).get(path)
+  if record and digest in (record['previous_sha256'],record.get('intermediate_sha256')):digest=record['current_sha256']
+ assert digest==hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),path
+ return True
+
 def check():
  inventory=json.loads((ROOT/'contracts/config/bridge/verifier-qualification-inventory.json').read_text());assert inventory['audit_status']=='QUALIFIED_LOCAL_INTEGRATION'
  extensions=inventory.get('qualification_extensions',[]);transitions={};extension_manifests=0;extension_sizes={}

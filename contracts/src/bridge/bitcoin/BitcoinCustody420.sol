@@ -80,4 +80,12 @@ contract BitcoinCustody420 is SystemAccess,IBitcoinCustody420 {
   bytes32 approval=_live();Authorization storage a=authorizations[requestId];require(a.approvalId==approval,"stale custody approval");require(a.status==Status.CONFIRMED&&a.tip==withdrawalProof.chain().bestTip(),"stale custody receipt");IBitcoinWithdrawal420.Request memory r=adapter.outboundMessage(requestId);
   txid=a.txid;blockHash=a.blockHash;recipientScript=adapter.outboundScript(requestId);amountSatoshis=r.amountSatoshis;evidenceHash=keccak256(abi.encode("420/BTC/PAID/V1",requestId,a.txid,a.blockHash,a.tip,keccak256(recipientScript),a.approvalId));
  }
+ /// @notice Authenticated payment fact, including after signing revocation. Never signing authority.
+ /// The outcome verifier must itself be currently qualified against this immutable proof/chain graph.
+ function observedPayment(bytes32 requestId) external view returns(bytes32 txid,bytes32 blockHash,bytes memory recipientScript,uint64 amountSatoshis,bytes32 evidenceHash){
+  Authorization storage a=authorizations[requestId];require(a.status==Status.CONFIRMED&&a.tip==withdrawalProof.chain().bestTip(),"stale payment observation");
+  IBitcoinWithdrawal420.Request memory r=adapter.outboundMessage(requestId);txid=a.txid;blockHash=a.blockHash;recipientScript=adapter.outboundScript(requestId);amountSatoshis=r.amountSatoshis;
+  evidenceHash=keccak256(abi.encode("420/BTC/OBSERVED_PAYMENT/V1",requestId,txid,blockHash,a.tip,keccak256(recipientScript),a.approvalId));
+ }
+
 }

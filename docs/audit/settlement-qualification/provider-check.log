@@ -1,0 +1,10 @@
+{
+  "pass": true,
+  "new_provider_integration_cases": 6,
+  "retained_production_sources_qualified_lineage": true,
+  "production_approvals": 0,
+  "CADC_active": false,
+  "USDC_active": false,
+  "historical_replays_rerun": 0,
+  "observations_are_issuer_authorization": false
+}

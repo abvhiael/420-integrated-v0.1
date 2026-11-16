@@ -1,0 +1,150 @@
+Compiling 125 files with Solc 0.8.24
+Solc 0.8.24 finished in 547.04s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 2 tests for contracts/test/BridgeProviderFunding420.t.sol:BridgeProviderFunding420Test
+[PASS] testNativeIssuerCannotBeRefundedByLocalGenericMint() (gas: 23254638)
+[PASS] testNativeProviderFundingRequiresActualCircleBurn() (gas: 23297731)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 116.04ms (94.92ms CPU time)
+
+Ran 3 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 6863596)
+[PASS] testRouterOutboundBurnAndLifecycle() (gas: 21780852)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 3575713)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 96.42ms (74.62ms CPU time)
+2026-11-16T18:51:10.492915Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493137Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493150Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493299Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493323Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493414Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493464Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.493578Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498405Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498439Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498448Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498541Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498550Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498574Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498606Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T18:51:10.498664Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+
+Ran 26 tests for contracts/test/BridgeFullLocalIntegration420.t.sol:BridgeFullLocalIntegration420Test
+[PASS] testAccountingHealthFailureRollsBackNativeMint() (gas: 3470948)
+[PASS] testAttestationTamperingRejected() (gas: 2598536)
+[PASS] testAttesterThresholdDriftInvalidatesQualification() (gas: 1862530)
+[PASS] testCounterfeitAmountRejectedByActualIssuerSignatures() (gas: 2722740)
+[PASS] testCrossDomainEvidenceCannotUseQualifiedBaseRoute() (gas: 2885072)
+[PASS] testDelayedCompletionDoesNotMintOrChargeRiskAgain() (gas: 9960338)
+[PASS] testFuzzHistoricalAttestationCannotAuthenticateChangedAmount(uint64) (runs: 2500, μ: 2637638, ~: 2722561)
+[PASS] testGenuineIssuerEvidenceCompletesFullLocalLifecycle() (gas: 9032546)
+[PASS] testLateSettlementAssetMismatchRollsBackVerificationAndMint() (gas: 3081386)
+[PASS] testLateTransferRegistryFailureRollsBackNativeMint() (gas: 12541611)
+[PASS] testLyingTokenCannotProduceSettlementReceipt() (gas: 2695626)
+[PASS] testNativeIssuerPauseRejectsWithoutPartialDelivery() (gas: 1881189)
+[PASS] testNativeProxyImplementationSubstitutionRejected() (gas: 1788204)
+[PASS] testNativeTokenPairSubstitutionRejected() (gas: 2109467)
+[PASS] testNonCanonicalEnvelopeRejected() (gas: 2502998)
+[PASS] testOperatorCannotFabricateSettlementCompletion() (gas: 10696721)
+[PASS] testOutboundNativeBurnCannotBeReportedCompletedWithoutReceipt() (gas: 23636180)
+[PASS] testRecipientSubstitutionRejected() (gas: 2609977)
+[PASS] testReplayDoesNotCreditOrConsumeRiskTwice() (gas: 10801159)
+[PASS] testRevocationRejectsHistoricalProofBeforeDelivery() (gas: 924067)
+[PASS] testRevocationStopsDelayedCompletion() (gas: 7202561)
+[PASS] testRiskFailureRollsBackNativeMintAllReplayAndReceipt() (gas: 12535735)
+[PASS] testSuspendedRouteRollsBackNativeExecution() (gas: 2133058)
+[PASS] testTokenMintFailureRollsBackEntireLifecycle() (gas: 11157500)
+[PASS] testUnconfiguredNativeIssuerRemainsInactive() (gas: 3104796)
+[PASS] testWrongDestinationDomainRejectedAtomically() (gas: 2560872)
+Suite result: ok. 26 passed; 0 failed; 0 skipped; finished in 14.35s (14.33s CPU time)
+
+Ran 1 test for contracts/test/BridgeFullLocalInvariant420.t.sol:BridgeFullLocalInvariant420Test
+[PASS] invariantAuthenticEvidenceCannotDoubleSettleOrBypassRevocation() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| FullLocalHandler420 | attempt  | 2015  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | restore  | 2078  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | revoke   | 2040  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | suspend  | 2059  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 45.10s (45.06s CPU time)
+
+Ran 4 test suites in 45.31s (59.66s CPU time): 32 tests passed, 0 failed, 0 skipped (32 total tests)

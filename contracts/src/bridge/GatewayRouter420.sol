@@ -13,6 +13,10 @@ import "./BridgeIds420.sol";
 import "./BridgeProofEnvelope420.sol";
 import "../interfaces/IBridgeVerifiedSourceContext420.sol";
 import "./BridgeVerifierRegistry420.sol";
+import "../interfaces/IBridgeValueCustody420.sol";
+import "../interfaces/IBridgeExposureEvidence420.sol";
+import "./BridgeRiskManager.sol";
+import "./BridgeTransferRegistry.sol";
 
 interface IBridgeRiskConsumer420 { function consume(bytes32, bytes32, bool, uint256) external; }
 interface IBridgeAccountingHealth420 { function movementHealthy(bytes32) external view returns (bool); }
@@ -38,6 +42,8 @@ interface IBridgeRouteRegistryView420 {
 contract GatewayRouter420 is GenesisResidentAccess420 {
     mapping(bytes32 => address) public adapters;
     mapping(bytes32 => bool) public consumedSourceMessages;
+    mapping(bytes32=>bool) public consumedOutboundMessages;
+    mapping(bytes32=>bytes32) public sourceKeyForTransfer;
 
     event AdapterSet(bytes32 indexed adapterId, address indexed adapter);
     event InboundAccepted(bytes32 indexed transferId, bytes32 indexed adapterId);
@@ -123,11 +129,14 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         _requireBridgeAsset(asset);_requireRouteHealthy(route);_requireAccountingHealthy(asset);
         (,,,,,bytes32 adapterId_,,,,,)=IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).routes(route);
         _requireRouteDirection(route,asset,adapterId_,true);
-        (address token,address deliveredTo,uint256 delivered,bytes32 evidence)=IBridgeSettlementEvidence420(adapters[adapterId_]).settlementEvidence(message);
+        address token;address deliveredTo;uint256 delivered;bytes32 evidence;
+        try IBridgeSettlementEvidence420(adapters[adapterId_]).settlementEvidence(message) returns(address t,address to,uint256 value,bytes32 e){token=t;deliveredTo=to;delivered=value;evidence=e;}catch{}
+        if(evidence==0){evidence=_qualifiedValueCustody().settleInbound(transferId);token=ICanonicalAssetRegistry420(_resolveRequired(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY)).asset(asset).token;deliveredTo=recipient;delivered=amount;}
         ICanonicalAssetRegistry420 assets=ICanonicalAssetRegistry420(_resolveRequired(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY));
         require(evidence!=0 && token==assets.asset(asset).token && recipient==deliveredTo && amount==delivered,"settlement receipt");
         if(status==5)transfers_.markDestinationPending(transferId,evidence);
         transfers_.markCompleted(transferId,evidence);
+        BridgeRiskManager(_resolveRequired(BridgeIds420.RISK_MANAGER)).completeInbound(transferId);
         _requireRouteDirection(route,asset,adapterId_,true);
         emit InboundSettled(transferId,evidence,token,amount);
     }
@@ -177,6 +186,10 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         (bytes32 verifiedGateway,bytes32 verifiedSourceAsset)=IBridgeVerifiedSourceContext420(adapter).verifiedSourceContext(v.sourceMessageId);
         require(verifiedGateway!=0 && verifiedSourceAsset!=0 && verifiedGateway==envelope.sourceGateway && verifiedSourceAsset==envelope.sourceAsset,"source proof context mismatch");
         require(v.routeId==envelope.routeId && v.assetId==envelope.assetId && v.recipient==envelope.recipient && v.amount==envelope.amount && v.sourceTxId==envelope.sourceTxId && v.sourceMessageId==envelope.sourceMessageId,"proof claim mismatch");
+        bool nativeDelivered;
+        try IBridgeSettlementEvidence420(adapter).settlementEvidence(v.sourceMessageId) returns(address deliveredToken,address deliveredTo,uint256 delivered,bytes32 receipt){
+            if(receipt!=0){require(deliveredToken==ICanonicalAssetRegistry420(_resolveRequired(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY)).asset(v.assetId).token&&deliveredTo==v.recipient&&delivered==v.amount,"native receipt asset binding");nativeDelivered=true;}
+        }catch{}
         require(qualification.requireCurrent(adapter)==approval,"qualification changed during proof");
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
@@ -189,12 +202,16 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         bytes32 sourceKey=sourceReplayKey(sourceNetwork,v.sourceMessageId);
         require(!consumedSourceMessages[sourceKey],"source replay");
         consumedSourceMessages[sourceKey]=true;
-        IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, v.amount);
+        uint256 exposure=v.amount;
+        try IBridgeExposureEvidence420(adapter).exposureForMessage(v.sourceMessageId) returns(uint256 actual){require(actual>=v.amount,"exposure below delivery");exposure=actual;}catch{}
+        IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, exposure);
         IBridgeTransferCreate420 transferRegistry =
             IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
         transferId = transferRegistry.create(
             v.routeId, v.assetId, v.sender, v.recipient, v.amount, v.sourceTxId, v.sourceMessageId
         );
+        sourceKeyForTransfer[transferId]=sourceKey;
+        if(!nativeDelivered)BridgeRiskManager(_resolveRequired(BridgeIds420.RISK_MANAGER)).reserveInbound(transferId,v.routeId,v.assetId,exposure);
         bytes32 sourceEvidence = keccak256(abi.encode(v.sourceTxId, v.sourceMessageId));
         bytes32 proofEvidence = keccak256(proof);
         transferRegistry.markSourcePending(transferId, sourceEvidence);
@@ -210,14 +227,37 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         emit InboundAccepted(transferId, adapterId_);
     }
 
-    function initiateOutbound(
-        bytes32 adapterId_,
-        bytes32 routeId,
-        bytes32 assetId,
-        bytes calldata recipient,
-        uint256 amount,
-        bytes calldata extra
-    ) external payable returns (bytes32 sourceMessageId) {
+    function initiateOutbound(bytes32 adapterId_,bytes32 routeId,bytes32 assetId,bytes calldata recipient,uint256 amount,bytes calldata extra) external payable returns(bytes32){
+        return _fundedOutbound(adapterId_,routeId,assetId,recipient,amount,extra);
+    }
+    function initiateFundedOutbound(bytes32 adapterId_,bytes32 routeId,bytes32 assetId,bytes calldata recipient,uint256 amount,bytes calldata extra) external payable returns(bytes32 message){return _fundedOutbound(adapterId_,routeId,assetId,recipient,amount,extra);}
+    function _fundedOutbound(bytes32 adapterId_,bytes32 routeId,bytes32 assetId,bytes calldata recipient,uint256 amount,bytes calldata extra) private returns(bytes32 message){
+        this.requireOutboundSigningAdmission(adapterId_,routeId,assetId);
+        IBridgeValueCustody420 custody=_qualifiedValueCustody();
+        custody.reserve(routeId,assetId,msg.sender,amount);message=_initiateOutbound(adapterId_,routeId,assetId,recipient,amount,extra);
+        bytes32 id=BridgeTransferRegistry(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)).deriveOutboundTransferId(routeId,assetId,msg.sender,keccak256(recipient),amount,message);custody.bindOutbound(id);
+    }
+    function _qualifiedValueCustody() private view returns(IBridgeValueCustody420 custody){
+        address target=_resolveRequired(BridgeIds420.VALUE_CUSTODY);
+        BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY)).requireCurrent(target);
+        return IBridgeValueCustody420(target);
+    }
+    function resolveFundedOutbound(bytes32 id,bytes calldata proof) external {
+        _requireOperational(BridgeIds420.ACTION_WITHDRAWAL_RECOVERY,ISystemSafety420.ActionClass.WITHDRAWAL_ONLY,Types420.Direction.NONE);
+        BridgeTransferRegistry tr=BridgeTransferRegistry(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
+        (bytes32 route,bytes32 asset,,,uint256 amount,,,,,)=tr.transfers(id);
+        _requireBridgeAsset(asset);_requireRouteHealthy(route);
+        (bool paid,bytes32 e)=_qualifiedValueCustody().resolveOutbound(id,proof);
+        BridgeRiskManager(_resolveRequired(BridgeIds420.RISK_MANAGER)).resolveOutbound(id,route,asset,amount,paid);
+        if(paid)tr.recordPaidWithdrawal(id,e);else tr.refundTransfer(id,e);
+    }
+    function resolveSourceRefund(bytes32 id,bytes calldata proof) external {
+        _requireOperational(BridgeIds420.ACTION_WITHDRAWAL_RECOVERY,ISystemSafety420.ActionClass.WITHDRAWAL_ONLY,Types420.Direction.NONE);
+        bytes32 e=_qualifiedValueCustody().resolveInboundRefund(id,proof);
+        BridgeRiskManager(_resolveRequired(BridgeIds420.RISK_MANAGER)).refundUnsettledInbound(id);
+        BridgeTransferRegistry(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY)).refundTransfer(id,e);
+    }
+    function _initiateOutbound(bytes32 adapterId_,bytes32 routeId,bytes32 assetId,bytes calldata recipient,uint256 amount,bytes calldata extra) private returns(bytes32 sourceMessageId){
         _requireOperational(
             BridgeIds420.ACTION_OUTBOUND,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
@@ -240,6 +280,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(qualification.requireCurrent(adapter)==approval,"qualification changed during dispatch");
         _requireRouteDirection(routeId, assetId, adapterId_, false);
         require(sourceMessageId != bytes32(0), "message id");
+        bytes32 outboundKey=keccak256(abi.encode(adapterId_,sourceMessageId));require(!consumedOutboundMessages[outboundKey],"outbound message replay");consumedOutboundMessages[outboundKey]=true;
 
         IBridgeTransferCreate420 transferRegistry =
             IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));

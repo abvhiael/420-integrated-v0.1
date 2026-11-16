@@ -34,6 +34,13 @@ contract BridgeRiskManager is GenesisResidentAccess420 {
     mapping(bytes32 => Usage) public routeUsage;
     mapping(bytes32 => Usage) public assetUsage;
     mapping(address => bool) public trustedRouter;
+    mapping(bytes32=>uint256) public routePendingOutbound;
+    mapping(bytes32=>uint256) public assetPendingOutbound;
+    mapping(bytes32=>bool) public resolvedWithdrawals;
+    struct InboundReservation {bytes32 route;bytes32 asset;uint256 amount;}
+    mapping(bytes32=>InboundReservation) public unsettledInbound;
+    mapping(bytes32=>uint256) public routeUnsettledInbound;
+    mapping(bytes32=>uint256) public assetUnsettledInbound;
 
     event LimitsSet(bytes32 indexed id, bool assetLevel);
     event RouterSet(address indexed router, bool trusted);
@@ -73,24 +80,24 @@ contract BridgeRiskManager is GenesisResidentAccess420 {
         if (u.dayIndex != d) { u.dayIndex = d; u.dailyIn = 0; u.dailyOut = 0; }
     }
 
-    function _consume(Usage storage u, Limits memory l, bool inbound, uint256 amount) internal {
+    function _consume(Usage storage u, Limits memory l, bool inbound, uint256 amount, uint256 pending_,uint256 unsettled_) internal {
         _roll(u);
         require(l.maxSingle > 0 && amount > 0 && amount <= l.maxSingle, "single cap");
         if (inbound) {
             require(u.hourlyIn + amount <= l.maxHourlyIn, "hourly in");
             require(u.dailyIn + amount <= l.maxDailyIn, "daily in");
-            require(u.currentTVL + amount <= l.maxTVL, "tvl");
+            require(u.currentTVL + pending_ + amount <= l.maxTVL, "tvl");
             u.hourlyIn += amount; u.dailyIn += amount; u.currentTVL += amount;
         } else {
             require(u.hourlyOut + amount <= l.maxHourlyOut, "hourly out");
             require(u.dailyOut + amount <= l.maxDailyOut, "daily out");
-            require(amount <= u.currentTVL, "tvl underflow");
+            require(unsettled_<=u.currentTVL&&amount<=u.currentTVL-unsettled_, "unsettled backing/tvl underflow");
             u.hourlyOut += amount; u.dailyOut += amount; u.currentTVL -= amount;
         }
     }
 
     function consume(bytes32 routeId, bytes32 assetId, bool inbound, uint256 amount) external {
-        require(trustedRouter[msg.sender], "router");
+        require(trustedRouter[msg.sender] && msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER), "canonical router");
         bytes32 action = inbound ? BridgeIds420.ACTION_INBOUND : BridgeIds420.ACTION_OUTBOUND;
         _requireOperational(
             action,
@@ -104,8 +111,30 @@ contract BridgeRiskManager is GenesisResidentAccess420 {
         );
         require(sharedLimit.maximum > 0 && amount <= sharedLimit.remaining, "shared risk limit");
 
-        _consume(routeUsage[routeId], routeLimits[routeId], inbound, amount);
-        _consume(assetUsage[assetId], assetLimits[assetId], inbound, amount);
+        _consume(routeUsage[routeId], routeLimits[routeId], inbound, amount,routePendingOutbound[routeId],routeUnsettledInbound[routeId]);
+        _consume(assetUsage[assetId], assetLimits[assetId], inbound, amount,assetPendingOutbound[assetId],assetUnsettledInbound[assetId]);
+        if(!inbound){routePendingOutbound[routeId]+=amount;assetPendingOutbound[assetId]+=amount;}
         emit Consumed(routeId, assetId, inbound, amount);
     }
+    function outstanding(bytes32 route,bytes32 asset) external view returns(uint256,uint256){return(routeUsage[route].currentTVL+routePendingOutbound[route],assetUsage[asset].currentTVL+assetPendingOutbound[asset]);}
+    function resolveOutbound(bytes32 id,bytes32 route,bytes32 asset,uint256 amount,bool paid) external {
+        require(trustedRouter[msg.sender]&&msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"canonical router");
+        require(id!=0&&!resolvedWithdrawals[id]&&amount>0,"withdrawal resolution");resolvedWithdrawals[id]=true;
+        routePendingOutbound[route]-=amount;assetPendingOutbound[asset]-=amount;
+        if(!paid){routeUsage[route].currentTVL+=amount;assetUsage[asset].currentTVL+=amount;}
+    }
+
+    function reserveInbound(bytes32 id,bytes32 route,bytes32 asset,uint256 amount) external {
+        require(trustedRouter[msg.sender]&&msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"canonical router");require(amount>0&&unsettledInbound[id].amount==0,"inbound reservation");
+        unsettledInbound[id]=InboundReservation(route,asset,amount);routeUnsettledInbound[route]+=amount;assetUnsettledInbound[asset]+=amount;
+    }
+    function completeInbound(bytes32 id) external {
+        require(trustedRouter[msg.sender]&&msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"canonical router");InboundReservation memory r=unsettledInbound[id];
+        if(r.amount!=0){routeUnsettledInbound[r.route]-=r.amount;assetUnsettledInbound[r.asset]-=r.amount;delete unsettledInbound[id];}
+    }
+    function refundUnsettledInbound(bytes32 id) external {
+        require(trustedRouter[msg.sender]&&msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"canonical router");InboundReservation memory r=unsettledInbound[id];require(r.amount>0,"unsettled source refund");
+        routeUnsettledInbound[r.route]-=r.amount;assetUnsettledInbound[r.asset]-=r.amount;routeUsage[r.route].currentTVL-=r.amount;assetUsage[r.asset].currentTVL-=r.amount;delete unsettledInbound[id];
+    }
+
 }

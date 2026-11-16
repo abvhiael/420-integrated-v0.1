@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./helpers/CCTPNativeHarness420.sol";
+import "./helpers/ValueCustodyFixture420.sol";
 import "./helpers/ProofEnvelopeFixture420.sol";
 import "./helpers/BridgeQualificationFixture420.sol";
 import "./helpers/GenesisMocks420.sol";
@@ -70,6 +71,7 @@ abstract contract BridgeFullLocalFixture420 is CCTPNativeHarness420 {
         assembly{mstore(ps,n)}r.probes=ps;bytes32 id=qualification.record(r,qualification.currentApproval(address(adapter)),true);
         BridgeRouteRegistry.Route memory next; (next.assetId,next.sourceChainId,next.destinationChainId,next.sourceAsset,next.destinationAsset,next.adapterId,next.verifierConfigHash,next.version,next.status,next.inboundEnabled,next.outboundEnabled)=routes.routes(route(6));next.status=BridgeRouteRegistry.Status.ACTIVE;routes.setRoute(route(6),next);require(qualification.currentApproval(address(adapter))==id);
     }
+    function installNativeCustody() internal {ValueCustodyFixture420.nativeProvider(env,address(token),ASSET,keccak256("420/BRIDGE/CHAIN/BASE"),keccak256("420/BRIDGE/CHAIN/ETH"));}
     function transport(bytes memory inner) internal view returns(bytes memory){
         CCTPV2Message420.Message memory m=message("base-standard");
         IBridgeAdapter420.VerifiedTransfer memory v=IBridgeAdapter420.VerifiedTransfer(route(6),ASSET,address(uint160(uint256(m.messageSender))),m.mintRecipient,m.amount-m.fee,keccak256(file("base-standard.message.hex")),keccak256(abi.encode("420/CCTP/V2/NONCE",m.nonce)));

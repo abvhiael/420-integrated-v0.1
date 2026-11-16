@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - "contracts/src/bridge/BridgeAccountingRegistry.sol"
+      - "contracts/src/bridge/BridgeValueCustody420.sol"
+      - "contracts/src/bridge/BridgeRepresentation420.sol"
+      - "contracts/src/interfaces/IBridgeValueCustody420.sol"
+      - "contracts/src/interfaces/IBridgeExposureEvidence420.sol"
+      - "contracts/test/helpers/ValueCustodyFixture420.sol"
       - "contracts/src/bridge/BridgeAssetRegistry.sol"
       - "contracts/src/bridge/BridgeChainRegistry420.sol"
       - "contracts/src/bridge/BridgeIds420.sol"

@@ -34,6 +34,7 @@ contract USDCCCTPAdapter is IBridgeAdapter420,IBridgeSettlementEvidence420,Syste
     // These survive issuer deployment/configuration changes and re-attestation.
     mapping(bytes32=>bool) public consumedNonces;
     uint256 public outboundNonce;
+    mapping(bytes32=>uint256) public exposureForMessage;
     error InvalidConfiguration();error Inactive();error OnlyRouter();error InvalidProof();error Replay();error Reentrancy();error TokenMovement();
     event IssuerConfigured(address indexed transmitter,address indexed messenger,uint32 domain,bytes32 supportEvidence);
     event IssuerEnabled(bool enabled);
@@ -100,6 +101,7 @@ contract USDCCCTPAdapter is IBridgeAdapter420,IBridgeSettlementEvidence420,Syste
         bytes32 messageHash=keccak256(message);
         bytes32 id=keccak256(abi.encode("420/CCTP/V2/NONCE",m.nonce));
         verifiedSourceContext[id]=SourceProofContext(m.sender,m.burnToken);
+        exposureForMessage[id]=m.amount;
         settlements[id]=Settlement(usdc,m.mintRecipient,delivered,keccak256(abi.encode("420/CCTP/NATIVE_DELIVERY/V1",messageHash,m.nonce,usdc,m.mintRecipient,delivered)));
         v=VerifiedTransfer(p.route,usdcAssetId,sender,m.mintRecipient,delivered,messageHash,id);
         emit CCTPInbound(m.nonce,messageHash,p.route,m.amount,m.fee,delivered);

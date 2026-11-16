@@ -124,8 +124,8 @@ contract BridgeTransferLifecycle420Test is BridgeGenesisFixture420 {
         );
         require(!ok, "dispute bypassed");
 
-        registry.refundTransfer(id, _evidence("refund"));
-        require(_status(id) == BridgeTransferRegistry.Status.REFUNDED, "not refunded");
+        (ok,) = address(registry).call(abi.encodeCall(registry.refundTransfer,(id,_evidence("refund"))));
+        require(!ok && _status(id) == BridgeTransferRegistry.Status.DISPUTED, "unpaid refund claimed");
 
         (ok,) = address(registry).call(
             abi.encodeWithSelector(registry.resumeTransfer.selector, id, _evidence("reopen refund"))
@@ -143,8 +143,8 @@ contract BridgeTransferLifecycle420Test is BridgeGenesisFixture420 {
         );
         require(!ok, "expired resumed");
 
-        registry.refundTransfer(id, _evidence("expired refund"));
-        require(_status(id) == BridgeTransferRegistry.Status.REFUNDED, "expired not refunded");
+        (ok,) = address(registry).call(abi.encodeCall(registry.refundTransfer,(id,_evidence("expired refund"))));
+        require(!ok && _status(id) == BridgeTransferRegistry.Status.EXPIRED, "unpaid expiry refund claimed");
     }
 
     function testZeroEvidenceFailsClosed() public {

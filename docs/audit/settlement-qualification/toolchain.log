@@ -1,0 +1,9 @@
+$ /workspace/scratch/3b8511e6cffb/bin/forge --version
+forge Version: 1.9.0
+Commit SHA: 6056c5845d34205a83cf7108042adb137325c9df
+Build Timestamp: 2026-11-02T20:28:32.434285913Z (1793651312)
+Build Profile: dist
+
+$ /workspace/scratch/3b8511e6cffb/bin/solc-0.8.24 --version
+solc, the solidity compiler commandline interface
+Version: 0.8.24+commit.e11b9ed9.Linux.g++

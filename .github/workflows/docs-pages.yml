@@ -15,6 +15,8 @@ on:
       - '!docs/audit/provider-completion-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-8-REMAINING-ADAPTERS.md'
       - '!docs/audit/remaining-adapters-qualification/**'
+      - '!docs/audit/BRIDGE-AUDIT-9-VALUE-SETTLEMENT.md'
+      - '!docs/audit/settlement-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-4-ETHEREUM-COMPLETION.md'
       - '!docs/audit/ethereum-completion-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-22-FINAL-VERIFIER-QUALIFICATION.md'

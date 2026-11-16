@@ -10,6 +10,7 @@ import "../interfaces/genesis/IReplayProtection420.sol";
 import "../interfaces/genesis/Errors420.sol";
 import "./BridgeIds420.sol";
 import "./BridgeRouteRegistry.sol";
+import "../interfaces/IBridgeValueCustody420.sol";
 
 contract BridgeTransferRegistry is GenesisResidentAccess420 {
     enum Status {
@@ -301,16 +302,18 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
         _transition(id, Status.EXPIRED, evidenceHash);
     }
 
-    function refundTransfer(bytes32 id, bytes32 evidenceHash) external {
-        _requireGenesisGovernance(BridgeIds420.ACTION_WITHDRAWAL_RECOVERY);
-        _requireOperational(
-            BridgeIds420.ACTION_WITHDRAWAL_RECOVERY,
-            ISystemSafety420.ActionClass.WITHDRAWAL_ONLY,
-            Types420.Direction.NONE
-        );
-        Status current = _transfer(id).status;
-        require(current == Status.FAILED || current == Status.EXPIRED || current == Status.DISPUTED, "refund state");
-        _transition(id, Status.REFUNDED, evidenceHash);
+
+    /// Economic closure requires the canonical custody outcome, never a governance label.
+    function refundTransfer(bytes32 id,bytes32 evidenceHash) external {_economicOutcome(id,false,evidenceHash);}
+    function recordPaidWithdrawal(bytes32 id,bytes32 evidenceHash) external {_economicOutcome(id,true,evidenceHash);}
+    function _economicOutcome(bytes32 id,bool paid,bytes32 evidenceHash) private {
+        require(msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"economic outcome router");
+        Transfer storage t=_transfer(id);require((transferDirection[id]==Direction.OUTBOUND||(!paid&&transferDirection[id]==Direction.INBOUND&&t.status==Status.DISPUTED))&&!_isTerminal(t.status),"withdrawal outcome state");
+        (bool actual,bytes32 e)=IBridgeValueCustody420(_resolveRequired(BridgeIds420.VALUE_CUSTODY)).outcomeEvidence(id);
+        require(e!=0&&e==evidenceHash&&actual==paid,"economic outcome receipt");
+        if(!paid)require(t.status==Status.FAILED||t.status==Status.EXPIRED||t.status==Status.DISPUTED,"refund state");
+        Status before_=t.status;t.status=paid?Status.COMPLETED:Status.REFUNDED;t.updatedAt=uint64(block.timestamp);lastEvidenceHash[id]=evidenceHash;
+        emit TransferStatus(id,t.status);emit TransferTransition(id,before_,t.status,evidenceHash,msg.sender);
     }
 
     function isAllowedTransition(Status fromStatus, Status toStatus) public pure returns (bool) {

@@ -1,0 +1,725 @@
+No files changed, compilation skipped
+
+Ran 1 test for contracts/test/BridgeRepresentationEconomic420.t.sol:BridgeRepresentationEconomic420Test
+[FAIL: identity probe failed] testRealRepresentationRequiresQualifiedProofAndActualBurn() (gas: 38768928)
+Traces:
+  [38768928] BridgeRepresentationEconomic420Test::testRealRepresentationRequiresQualifiedProofAndActualBurn()
+    ├─ [3917788] → new GenesisMockEnvironment420@0x5615dEB798BB3E4dFa0139dFa1b3D433Cc23b72f
+    │   ├─ [276325] → new MockProtocolRegistryV1@0x104fBc016F4bb334D775a19E8A6510109AC63E00
+    │   │   └─ ← [Return] 1380 bytes of code
+    │   ├─ [115266] → new MockGovernanceAuthorityV1@0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3
+    │   │   └─ ← [Return] 465 bytes of code
+    │   ├─ [90947] → new MockPauseRegistryV1@0xDDc10602782af652bB913f7bdE1fD82981Db7dd9
+    │   │   └─ ← [Return] 454 bytes of code
+    │   ├─ [141091] → new MockSystemSafetyV1@0x7FdB3132Ff7D02d8B9e221c61cC895ce9a4bb773
+    │   │   └─ ← [Return] 594 bytes of code
+    │   ├─ [116140] → new MockChainContextV1@0xfD07C974e33dd1626640bA3a5acF0418FaacCA7a
+    │   │   └─ ← [Return] 359 bytes of code
+    │   ├─ [186639] → new MockCanonicalAssetRegistryV1@0xD76ffbd1eFF76C510C3a509fE22864688aC3A588
+    │   │   └─ ← [Return] 932 bytes of code
+    │   ├─ [109765] → new MockAssetCapabilitiesV1@0x4ff05a443250A64a18C68CEdd2122cFDf3872140
+    │   │   └─ ← [Return] 548 bytes of code
+    │   ├─ [115572] → new MockSettlementHealthV1@0xc98D9175A32ca68C4B83dB84B4707AF82ae37cC4
+    │   │   └─ ← [Return] 577 bytes of code
+    │   ├─ [135190] → new MockFeeQuoteV1@0x40b4863C923385D1632d640B097DDeA6EaB92e76
+    │   │   └─ ← [Return] 675 bytes of code
+    │   ├─ [62717] → new MockReplayProtectionV1@0x5366ba85D9F7FF951548a0B990E6cc4e56f5A976
+    │   │   └─ ← [Return] 313 bytes of code
+    │   ├─ [88341] → new MockMetadataCommitmentV1@0xA8156Cbca2b79bb568d251F44eF88b9EcAF697C4
+    │   │   └─ ← [Return] 441 bytes of code
+    │   ├─ [119070] → new MockRiskLimitsV1@0x794aC86b74c89e4c4f5722e8cdB15e982ecD1C92
+    │   │   └─ ← [Return] 484 bytes of code
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, MockGovernanceAuthorityV1: [0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0xb2f9a3db669531e5f43a079726cdcd056f8afcf4e689099d1cfeb8737b282455, MockPauseRegistryV1: [0xDDc10602782af652bB913f7bdE1fD82981Db7dd9])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0xb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c7, MockSystemSafetyV1: [0x7FdB3132Ff7D02d8B9e221c61cC895ce9a4bb773])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69, MockChainContextV1: [0xfD07C974e33dd1626640bA3a5acF0418FaacCA7a])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3, MockCanonicalAssetRegistryV1: [0xD76ffbd1eFF76C510C3a509fE22864688aC3A588])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x18602c81dfd1a909054c80dc2797759be3e4ce55152de2b8fde20bd26abc3b2b, MockAssetCapabilitiesV1: [0x4ff05a443250A64a18C68CEdd2122cFDf3872140])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0xbc76d517f8b89e9b7790c83946fce372c495bd5cfd2da39cd79a0b71c85bd783, MockSettlementHealthV1: [0xc98D9175A32ca68C4B83dB84B4707AF82ae37cC4])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x46227db02d37f7af3d49bbdfff7bd19d7b51f6372ccd8baf6019105c0d06d46c, MockFeeQuoteV1: [0x40b4863C923385D1632d640B097DDeA6EaB92e76])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0xb831bb18b2dad8576d463ba0079e499aa842b98e9f23a340f452a148a84c1967, MockReplayProtectionV1: [0x5366ba85D9F7FF951548a0B990E6cc4e56f5A976])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x655c6620a826d9b6fd2942b0839e86a32503962bd01893efd257314d43636662, MockMetadataCommitmentV1: [0xA8156Cbca2b79bb568d251F44eF88b9EcAF697C4])
+    │   │   └─ ← [Stop]
+    │   ├─ [111608] MockProtocolRegistryV1::set(0x4fdf82ffd81cd4aa0c3b2bf06d6e4855a30131e3d79871f53fb1a7a3d99be603, MockRiskLimitsV1: [0x794aC86b74c89e4c4f5722e8cdB15e982ecD1C92])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return] 1244 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [4493619] → new GatewayRouter420@0x2e234DAe75C793f67A35089C9d99245E1C58470b
+    │   └─ ← [Return] 20534 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [2000694] → new BridgeRiskManager@0xF62849F9A0B5Bf2913b396098F7c7019b51A820a
+    │   └─ ← [Return] 8999 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [4139805] → new BridgeTransferRegistry@0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9
+    │   └─ ← [Return] 18891 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [2193235] → new BridgeRouteRegistry@0xc7183455a4C133Ae270771860664b6B7ec320bB1
+    │   └─ ← [Return] 9888 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [810160] → new BridgeChainRegistry420@0xa0Cb889707d426A7A386870A03bc70d1b0697598
+    │   └─ ← [Return] 3486 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [1234704] → new BridgeAccountingRegistry@0x1d1499e622D69689cdf9004d05Ec547d650Ff211
+    │   └─ ← [Return] 5458 bytes of code
+    ├─ [349198] → new MockBridgeAdapter420@0xA4AD4f68d0b91CFD19687c881e50f3A00242828c
+    │   └─ ← [Return] 1263 bytes of code
+    ├─ [680] GatewayRouter420::componentId() [staticcall]
+    │   └─ ← [Return] 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21
+    ├─ [141412] GenesisMockEnvironment420::registerResident(GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21, GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [733] BridgeRiskManager::componentId() [staticcall]
+    │   └─ ← [Return] 0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e
+    ├─ [141424] GenesisMockEnvironment420::registerResident(BridgeRiskManager: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], 0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e, BridgeRiskManager: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [1018] BridgeTransferRegistry::componentId() [staticcall]
+    │   └─ ← [Return] 0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0
+    ├─ [141424] GenesisMockEnvironment420::registerResident(BridgeTransferRegistry: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9], 0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0, BridgeTransferRegistry: [0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [486] BridgeRouteRegistry::componentId() [staticcall]
+    │   └─ ← [Return] 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143
+    ├─ [141424] GenesisMockEnvironment420::registerResident(BridgeRouteRegistry: [0xc7183455a4C133Ae270771860664b6B7ec320bB1], 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143, BridgeRouteRegistry: [0xc7183455a4C133Ae270771860664b6B7ec320bB1])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [459] BridgeChainRegistry420::componentId() [staticcall]
+    │   └─ ← [Return] 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3
+    ├─ [141424] GenesisMockEnvironment420::registerResident(BridgeChainRegistry420: [0xa0Cb889707d426A7A386870A03bc70d1b0697598], 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, BridgeChainRegistry420: [0xa0Cb889707d426A7A386870A03bc70d1b0697598])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [449] BridgeAccountingRegistry::componentId() [staticcall]
+    │   └─ ← [Return] 0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38
+    ├─ [141412] GenesisMockEnvironment420::registerResident(BridgeAccountingRegistry: [0x1d1499e622D69689cdf9004d05Ec547d650Ff211], 0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, BridgeAccountingRegistry: [0x1d1499e622D69689cdf9004d05Ec547d650Ff211])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [171545] GenesisMockEnvironment420::setSettlementAsset(0x00000000000000000000000000000000000ca420, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, true)
+    │   ├─ [89288] MockCanonicalAssetRegistryV1::setAsset(0x00000000000000000000000000000000000ca420, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212)
+    │   │   └─ ← [Return]
+    │   ├─ [22420] MockAssetCapabilitiesV1::setEligible(0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, true)
+    │   │   └─ ← [Return]
+    │   ├─ [22582] MockSettlementHealthV1::setAsset(0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, true)
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [2477] GenesisMockEnvironment420::health() [staticcall]
+    │   └─ ← [Return] MockSettlementHealthV1: [0xc98D9175A32ca68C4B83dB84B4707AF82ae37cC4]
+    ├─ [44265] MockSettlementHealthV1::setRoute(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, true)
+    │   └─ ← [Stop]
+    ├─ [2362] GenesisMockEnvironment420::risk() [staticcall]
+    │   └─ ← [Return] MockRiskLimitsV1: [0x794aC86b74c89e4c4f5722e8cdB15e982ecD1C92]
+    ├─ [28755] MockRiskLimitsV1::set(1000000000000000000000000 [1e24], 0)
+    │   └─ ← [Stop]
+    ├─ [205216] BridgeChainRegistry420::setChain(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, Chain({ routeChainId: 1, networkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit ChainSet(chainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, routeChainId: 1, networkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true)
+    │   └─ ← [Stop]
+    ├─ [205228] BridgeChainRegistry420::setChain(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, Chain({ routeChainId: 31337 [3.133e4], networkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit ChainSet(chainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, routeChainId: 31337 [3.133e4], networkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true)
+    │   └─ ← [Stop]
+    ├─ [225447] BridgeRouteRegistry::setRoute(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, Route({ assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, sourceChainId: 1, destinationChainId: 31337 [3.133e4], sourceAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, destinationAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, adapterId: 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, verifierConfigHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, version: 1, status: 1, inboundEnabled: true, outboundEnabled: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouteSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, version: 1, status: 1)
+    │   └─ ← [Stop]
+    ├─ [179367] BridgeRiskManager::setRouteLimits(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, Limits({ maxSingle: 1000000000000000000000000 [1e24], maxHourlyIn: 1000000000000000000000000 [1e24], maxHourlyOut: 1000000000000000000000000 [1e24], maxDailyIn: 1000000000000000000000000 [1e24], maxDailyOut: 1000000000000000000000000 [1e24], maxTVL: 1000000000000000000000000 [1e24] }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit LimitsSet(id: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, assetLevel: false)
+    │   └─ ← [Return]
+    ├─ [179467] BridgeRiskManager::setAssetLimits(0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, Limits({ maxSingle: 1000000000000000000000000 [1e24], maxHourlyIn: 1000000000000000000000000 [1e24], maxHourlyOut: 1000000000000000000000000 [1e24], maxDailyIn: 1000000000000000000000000 [1e24], maxDailyOut: 1000000000000000000000000 [1e24], maxTVL: 1000000000000000000000000 [1e24] }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit LimitsSet(id: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, assetLevel: true)
+    │   └─ ← [Return]
+    ├─ [70445] BridgeRiskManager::setRouter(GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouterSet(router: GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], trusted: true)
+    │   └─ ← [Return]
+    ├─ [70876] BridgeTransferRegistry::setRouter(GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouterSet(router: GatewayRouter420: [0x2e234DAe75C793f67A35089C9d99245E1C58470b], trusted: true)
+    │   └─ ← [Stop]
+    ├─ [67936] BridgeTransferRegistry::setOperator(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit OperatorSet(operator: BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], trusted: true)
+    │   └─ ← [Stop]
+    ├─ [71367] GatewayRouter420::setAdapter(0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c])
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   ├─ emit AdapterSet(adapterId: 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, adapter: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c])
+    │   └─ ← [Return]
+    ├─ [254991] BridgeAccountingRegistry::applyReconciliation(0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 1000000000000000000000000 [1e24], 1000000000000000000000000 [1e24], 1, 0x479ace2971197dba7186d2e587aa1c2aa3ee4a7eda5648deee4b031efd9bb08a)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, implementation: 0x1d1499e622D69689cdf9004d05Ec547d650Ff211, runtimeCodeHash: 0xe26454cbb1444da2a16b3ba5568e2e159a1e313875c97c2e69a3290d35dd43fe, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c7) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c7, implementation: 0x7FdB3132Ff7D02d8B9e221c61cC895ce9a4bb773, runtimeCodeHash: 0x30bfa047eb574d1252b952a150751a49bc4b4779efecb44b5d14c022298c853d, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2461] MockSystemSafetyV1::actionAllowed(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, 0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69, implementation: 0xfD07C974e33dd1626640bA3a5acF0418FaacCA7a, runtimeCodeHash: 0xc0344737464042228baf856170fbd2861eb68f4bca6a150a41f5173452c521f5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [210] MockChainContextV1::chainId() [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4]
+    │   ├─ [473] MockChainContextV1::protocolVersion() [staticcall]
+    │   │   └─ ← [Return] Version({ major: 1, minor: 0, patch: 0 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3, implementation: 0xD76ffbd1eFF76C510C3a509fE22864688aC3A588, runtimeCodeHash: 0x7e020c339463ef50a4ae6a3171460aa5688621ce6fc3f0b21d4a7e4a9cbcfe72, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2472] MockCanonicalAssetRegistryV1::isCanonical(0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit Reconciled(assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, authorizedSupply: 1000000000000000000000000 [1e24], observedSupply: 1000000000000000000000000 [1e24], healthy: true, evidenceHash: 0x479ace2971197dba7186d2e587aa1c2aa3ee4a7eda5648deee4b031efd9bb08a)
+    │   ├─ emit ReconciliationHealth(assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, state: 1, observedAt: 1, evidenceHash: 0x479ace2971197dba7186d2e587aa1c2aa3ee4a7eda5648deee4b031efd9bb08a)
+    │   └─ ← [Stop]
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   └─ ← [Return] ContractRef({ componentId: 0x0000000000000000000000000000000000000000000000000000000000000000, implementation: 0x0000000000000000000000000000000000000000, runtimeCodeHash: 0x0000000000000000000000000000000000000000000000000000000000000000, version: Version({ major: 0, minor: 0, patch: 0 }), lifecycle: 0 })
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [4809135] → new BridgeVerifierRegistry420@0x886D6d1eB8D415b00052828CD6d5B321f072073d
+    │   └─ ← [Return] 22063 bytes of code
+    ├─ [629] BridgeVerifierRegistry420::componentId() [staticcall]
+    │   └─ ← [Return] 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4
+    ├─ [141412] GenesisMockEnvironment420::registerResident(BridgeVerifierRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d], 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, BridgeVerifierRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [10912] BridgeVerifierRegistry420::identity(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 })
+    ├─ [10912] BridgeVerifierRegistry420::identity(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 })
+    ├─ [15344] BridgeRouteRegistry::routes(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3) [staticcall]
+    │   └─ ← [Return] 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 1, 31337 [3.133e4], 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 1, 1, true, true
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    ├─ [2891] BridgeVerifierRegistry420::currentApproval(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c]) [staticcall]
+    │   └─ ← [Return] 0x0000000000000000000000000000000000000000000000000000000000000000
+    ├─ [1235598] BridgeVerifierRegistry420::record(Registration({ consumer: Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 }), verifier: Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 }), verifierGetter: 0x00000000, sourceChainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, destinationChainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, proofSystem: 0xeaefb6ca7d1901b6f64f6f5e13c4e2ecc13b9f66876d6061afde6b0673604394, configurationHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, evidenceHash: 0x11d4bc063b5ed6a50d85feac4a619421d9ac5339728abf505872cbb9cbf01139, validUntil: 0, directions: 3, dependencies: [], probes: [Probe({ identity: 1, trustedRoot: true, data: 0x5fb86b01, expectedResultHash: 0x9fcf5e647ba31c2aa12e113d6d0ab9f79ce717d4ca3a27c05de598c28151f543 }), Probe({ identity: 1, trustedRoot: false, data: 0x5fb86b01, expectedResultHash: 0x9fcf5e647ba31c2aa12e113d6d0ab9f79ce717d4ca3a27c05de598c28151f543 })] }), 0x0000000000000000000000000000000000000000000000000000000000000000, true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11488] BridgeChainRegistry420::requireActive(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] Chain({ routeChainId: 1, networkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true })
+    │   ├─ [11488] BridgeChainRegistry420::requireActive(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] Chain({ routeChainId: 31337 [3.133e4], networkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true })
+    │   ├─ [3490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [3490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [3359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   ├─ [3359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   ├─ emit QualificationRecorded(id: 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480, consumer: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], verifier: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], status: 2, evidenceHash: 0x11d4bc063b5ed6a50d85feac4a619421d9ac5339728abf505872cbb9cbf01139)
+    │   └─ ← [Return] 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480
+    ├─ [15344] BridgeRouteRegistry::routes(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3) [staticcall]
+    │   └─ ← [Return] 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 1, 31337 [3.133e4], 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 1, 1, true, true
+    ├─ [646750] BridgeRouteRegistry::setRoute(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, Route({ assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, sourceChainId: 1, destinationChainId: 31337 [3.133e4], sourceAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, destinationAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, adapterId: 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, verifierConfigHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, version: 1, status: 2, inboundEnabled: true, outboundEnabled: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    │   ├─ [11170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    │   ├─ [11170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouteChainBindingSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, sourceChainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, destinationChainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, sourceNetworkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, destinationNetworkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2)
+    │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21, implementation: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, runtimeCodeHash: 0x2acb77382c47b18519b0c312f93b4814d84269305886e8716ed45576eb8e8b17, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2592] GatewayRouter420::adapters(0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4) [staticcall]
+    │   │   └─ ← [Return] MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c]
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [177388] BridgeVerifierRegistry420::requireRoute(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 1, 31337 [3.133e4], 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 3) [staticcall]
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   │   └─ ← [Return] true
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [3359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   │   ├─ [3359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   └─ ← [Return] 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480
+    │   ├─ [86289] BridgeVerifierRegistry420::pinRoute(0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480, 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, 0x6a84c5acb0b9685bb5997bfc83a9e75efbe8741380b9c6565af356df33226a25)
+    │   │   ├─ [11730] MockProtocolRegistryV1::component(0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143, implementation: 0xc7183455a4C133Ae270771860664b6B7ec320bB1, runtimeCodeHash: 0xa03c1b5d595be4cf8e4e7809a3a381122c79450b9a9f47734dca05b202937ed5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   │   └─ ← [Return] true
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   │   ├─ [1359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   └─ ← [Stop]
+    │   ├─ emit RouteVerifierBound(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, approvalId: 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480, consumer: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c])
+    │   ├─ emit RouteSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, assetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, version: 1, status: 2)
+    │   └─ ← [Stop]
+    ├─ [228132] → new ValueOutcome420@0x94771550282853f6E0124c302F7dE1Cf50aa45CA
+    │   └─ ← [Return] 809 bytes of code
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [5129384] → new BridgeValueCustody420@0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   └─ ← [Return] 23229 bytes of code
+    ├─ [809] BridgeValueCustody420::componentId() [staticcall]
+    │   └─ ← [Return] 0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707
+    ├─ [141424] GenesisMockEnvironment420::registerResident(BridgeValueCustody420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A], 0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707)
+    │   ├─ [114108] MockProtocolRegistryV1::set(0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707, BridgeValueCustody420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A])
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [717217] → new BridgeRepresentation420@0xe916cadb12C49389E487eB1e8194B1459b29B0eC
+    │   ├─ [754] BridgeValueCustody420::deploymentAddress() [staticcall]
+    │   │   └─ ← [Return] BridgeValueCustody420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A]
+    │   ├─ [289] BridgeValueCustody420::qualificationAnchor() [staticcall]
+    │   │   └─ ← [Return] BridgeVerifierRegistry420: [0x886D6d1eB8D415b00052828CD6d5B321f072073d]
+    │   └─ ← [Return] 2626 bytes of code
+    ├─ [171749] GenesisMockEnvironment420::setSettlementAsset(BridgeRepresentation420: [0xe916cadb12C49389E487eB1e8194B1459b29B0eC], 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, true)
+    │   ├─ [89288] MockCanonicalAssetRegistryV1::setAsset(BridgeRepresentation420: [0xe916cadb12C49389E487eB1e8194B1459b29B0eC], 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613)
+    │   │   └─ ← [Return]
+    │   ├─ [22420] MockAssetCapabilitiesV1::setEligible(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, true)
+    │   │   └─ ← [Return]
+    │   ├─ [22582] MockSettlementHealthV1::setAsset(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, true)
+    │   │   └─ ← [Stop]
+    │   └─ ← [Return]
+    ├─ [194698] BridgeValueCustody420::configure(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, BridgeRepresentation420: [0xe916cadb12C49389E487eB1e8194B1459b29B0eC], 1)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707, implementation: 0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A, runtimeCodeHash: 0xd23a0ba44f7ba7b040bd46b7c8adae5b5328ef50458711b59220eb32ba5d0329, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0x9adf13b1795847c8319473f2a541c7e72468798e2a4b19d95e2a04fad3394707, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3, implementation: 0xD76ffbd1eFF76C510C3a509fE22864688aC3A588, runtimeCodeHash: 0x7e020c339463ef50a4ae6a3171460aa5688621ce6fc3f0b21d4a7e4a9cbcfe72, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [5039] MockCanonicalAssetRegistryV1::asset(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613) [staticcall]
+    │   │   └─ ← [Return] AssetRef({ assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, token: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, decimals: 18, currency: 0x434144, canonical: true })
+    │   ├─ [2504] MockCanonicalAssetRegistryV1::isUsable(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [259] BridgeRepresentation420::decimals() [staticcall]
+    │   │   └─ ← [Return] 18
+    │   ├─ [1039] MockCanonicalAssetRegistryV1::asset(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613) [staticcall]
+    │   │   └─ ← [Return] AssetRef({ assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, token: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, decimals: 18, currency: 0x434144, canonical: true })
+    │   ├─ [259] BridgeRepresentation420::decimals() [staticcall]
+    │   │   └─ ← [Return] 18
+    │   ├─ [2315] BridgeRepresentation420::totalSupply() [staticcall]
+    │   │   └─ ← [Return] 0
+    │   └─ ← [Stop]
+    ├─ [15344] BridgeRouteRegistry::routes(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3) [staticcall]
+    │   └─ ← [Return] 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 1, 31337 [3.133e4], 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 1, 2, true, true
+    ├─ [119951] BridgeRouteRegistry::setRoute(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, Route({ assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, sourceChainId: 1, destinationChainId: 31337 [3.133e4], sourceAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, destinationAsset: 0x000000000000000000000000e916cadb12c49389e487eb1e8194b1459b29b0ec, adapterId: 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, verifierConfigHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, version: 1, status: 1, inboundEnabled: true, outboundEnabled: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouteSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, version: 1, status: 1)
+    │   └─ ← [Stop]
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    ├─ [10912] BridgeVerifierRegistry420::identity(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 })
+    ├─ [10912] BridgeVerifierRegistry420::identity(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 })
+    ├─ [15344] BridgeRouteRegistry::routes(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3) [staticcall]
+    │   └─ ← [Return] 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, 1, 31337 [3.133e4], 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x000000000000000000000000e916cadb12c49389e487eb1e8194b1459b29b0ec, 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 1, 1, true, true
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    ├─ [2891] BridgeVerifierRegistry420::currentApproval(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c]) [staticcall]
+    │   └─ ← [Return] 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480
+    ├─ [1201782] BridgeVerifierRegistry420::record(Registration({ consumer: Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 }), verifier: Identity({ target: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, runtimeHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, kind: 0, implementation: 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, implementationHash: 0x020586cf1bad142981158b1f5f9060fcf2d22dbf6563f1f3b4ed25894e4546d8, version: 0 }), verifierGetter: 0x00000000, sourceChainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, destinationChainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, proofSystem: 0xeaefb6ca7d1901b6f64f6f5e13c4e2ecc13b9f66876d6061afde6b0673604394, configurationHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, evidenceHash: 0x11d4bc063b5ed6a50d85feac4a619421d9ac5339728abf505872cbb9cbf01139, validUntil: 0, directions: 3, dependencies: [], probes: [Probe({ identity: 1, trustedRoot: true, data: 0x5fb86b01, expectedResultHash: 0x9fcf5e647ba31c2aa12e113d6d0ab9f79ce717d4ca3a27c05de598c28151f543 }), Probe({ identity: 1, trustedRoot: false, data: 0x5fb86b01, expectedResultHash: 0x9fcf5e647ba31c2aa12e113d6d0ab9f79ce717d4ca3a27c05de598c28151f543 })] }), 0xaf96f2dcd3ea4c78f119f516e38fd7f6339d8203d06c996be1859e2ea3054480, true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11488] BridgeChainRegistry420::requireActive(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] Chain({ routeChainId: 1, networkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true })
+    │   ├─ [11488] BridgeChainRegistry420::requireActive(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] Chain({ routeChainId: 31337 [3.133e4], networkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, nativeAssetId: 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, verifierFamily: 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, family: 1, active: true })
+    │   ├─ [3490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [3490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [3359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   ├─ [3359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   ├─ emit QualificationRecorded(id: 0x6315cb002ed519d643365bbab6b591aa6ce9745fe6d547f34acf62e9acebde55, consumer: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], verifier: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], status: 2, evidenceHash: 0x11d4bc063b5ed6a50d85feac4a619421d9ac5339728abf505872cbb9cbf01139)
+    │   └─ ← [Return] 0x6315cb002ed519d643365bbab6b591aa6ce9745fe6d547f34acf62e9acebde55
+    ├─ [15344] BridgeRouteRegistry::routes(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3) [staticcall]
+    │   └─ ← [Return] 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, 1, 31337 [3.133e4], 0x00000000000000000000000000000000000000000000000000000000000ca420, 0x000000000000000000000000e916cadb12c49389e487eb1e8194b1459b29b0ec, 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 1, 1, true, true
+    ├─ [646954] BridgeRouteRegistry::setRoute(0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, Route({ assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, sourceChainId: 1, destinationChainId: 31337 [3.133e4], sourceAsset: 0x00000000000000000000000000000000000000000000000000000000000ca420, destinationAsset: 0x000000000000000000000000e916cadb12c49389e487eb1e8194b1459b29b0ec, adapterId: 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4, verifierConfigHash: 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, version: 1, status: 2, inboundEnabled: true, outboundEnabled: true }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    │   ├─ [11170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    │   ├─ [11170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit RouteChainBindingSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, sourceChainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, destinationChainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, sourceNetworkId: 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, destinationNetworkId: 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2)
+    │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [699] BridgeChainRegistry420::chainKeyByRouteId(1) [staticcall]
+    │   │   └─ ← [Return] 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [699] BridgeChainRegistry420::chainKeyByRouteId(31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c
+    │   ├─ [1490] BridgeChainRegistry420::isActiveRoute(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, 31337 [3.133e4]) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21, implementation: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, runtimeCodeHash: 0x2acb77382c47b18519b0c312f93b4814d84269305886e8716ed45576eb8e8b17, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2592] GatewayRouter420::adapters(0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4) [staticcall]
+    │   │   └─ ← [Return] MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c]
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [177388] BridgeVerifierRegistry420::requireRoute(MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c], 1, 31337 [3.133e4], 0x1140f0e644efdde0e1e943f45c6e7ae9336191528cef530a681347c3c1285436, 3) [staticcall]
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   │   └─ ← [Return] true
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [3359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   │   ├─ [3359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   └─ ← [Return] 0x6315cb002ed519d643365bbab6b591aa6ce9745fe6d547f34acf62e9acebde55
+    │   ├─ [86289] BridgeVerifierRegistry420::pinRoute(0x6315cb002ed519d643365bbab6b591aa6ce9745fe6d547f34acf62e9acebde55, 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, 0xc53b8b3eee53584a16bfbd981cb771f82b3543e0ac87da3cb86bcbf6f41b2dad)
+    │   │   ├─ [11730] MockProtocolRegistryV1::component(0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143, implementation: 0xc7183455a4C133Ae270771860664b6B7ec320bB1, runtimeCodeHash: 0xa03c1b5d595be4cf8e4e7809a3a381122c79450b9a9f47734dca05b202937ed5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   │   └─ ← [Return] true
+    │   │   ├─ [1730] MockProtocolRegistryV1::component(0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3, implementation: 0xa0Cb889707d426A7A386870A03bc70d1b0697598, runtimeCodeHash: 0xb147a5a42760e74921a8374e241782e96a4bfc60a474443ba553393a5d3ad939, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [1359] BridgeChainRegistry420::identityHash(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 0x782016a82396ccb927c6cff105d744e8aca605f240a7911321f72c3de1854c38
+    │   │   ├─ [1359] BridgeChainRegistry420::identityHash(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 0x8509a073c95637b2c8dbd354d66b304efb0608bd90012ce68d0b6228df7d5e00
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c) [staticcall]
+    │   │   │   └─ ← [Return] 31337 [3.133e4], 0x81ffc3eaa052ddf458d374b329699291cf9ca78151954ebc1196b99d2443b7a2, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [1170] BridgeChainRegistry420::chains(0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4) [staticcall]
+    │   │   │   └─ ← [Return] 1, 0x0efc87f28af9d87bf4874b15511c3d2481df170425d7a3e4699e071badfb3e07, 0x06a4ff8e6506cf79a7ee6f664b442c716257c35781ecd953d7180257ba6d2212, 0xf9ef85894e07f169b02cc2e700de34a4fddafaef69b984e029a5bf002d2004c9, 1, true
+    │   │   ├─ [296] MockBridgeAdapter420::verifier() [staticcall]
+    │   │   │   └─ ← [Revert] unrecognized function selector 0x2b7ac3f3 for contract 0xA4AD4f68d0b91CFD19687c881e50f3A00242828c, which has no fallback function.
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   ├─ [256] MockBridgeAdapter420::adapterId() [staticcall]
+    │   │   │   └─ ← [Return] 0x14a41c6474514e0cbe99088c76b41bf620bdb90779b565086de0c767371d42c4
+    │   │   └─ ← [Stop]
+    │   ├─ emit RouteVerifierBound(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, approvalId: 0x6315cb002ed519d643365bbab6b591aa6ce9745fe6d547f34acf62e9acebde55, consumer: MockBridgeAdapter420: [0xA4AD4f68d0b91CFD19687c881e50f3A00242828c])
+    │   ├─ emit RouteSet(routeId: 0x00924a51d0620839fcbffcfc2d6ee157b0117a7022d3a4ca434eb42f05eba7d3, assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, version: 1, status: 2)
+    │   └─ ← [Stop]
+    ├─ [179467] BridgeRiskManager::setAssetLimits(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, Limits({ maxSingle: 1000000000000000000000000 [1e24], maxHourlyIn: 1000000000000000000000000 [1e24], maxHourlyOut: 1000000000000000000000000 [1e24], maxDailyIn: 1000000000000000000000000 [1e24], maxDailyOut: 1000000000000000000000000 [1e24], maxTVL: 1000000000000000000000000 [1e24] }))
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit LimitsSet(id: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, assetLevel: true)
+    │   └─ ← [Return]
+    ├─ [215023] BridgeAccountingRegistry::applyReconciliation(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, 0, 0, 1, 0xa3f689ba4a44a163c216d1558a4ae574f4511f027d98fd763088ff752191c9f6)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, implementation: 0x1d1499e622D69689cdf9004d05Ec547d650Ff211, runtimeCodeHash: 0xe26454cbb1444da2a16b3ba5568e2e159a1e313875c97c2e69a3290d35dd43fe, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [1551] MockProtocolRegistryV1::supportsVersion(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, Version({ major: 1, minor: 0, patch: 0 })) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c7) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xb6ba898fada0af5edf4e37a4f4f9727ba64450ba6e6726890fad5eb6e37311c7, implementation: 0x7FdB3132Ff7D02d8B9e221c61cC895ce9a4bb773, runtimeCodeHash: 0x30bfa047eb574d1252b952a150751a49bc4b4779efecb44b5d14c022298c853d, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2461] MockSystemSafetyV1::actionAllowed(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, 0x35d23a66caf213aa9bf4f5f286ac26b1e576605f6696edb13ffe67d2727e0aa8, 1) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x68883ee137e70661082c5612ae8df1d82a5451349b68868ea24672af0787ca69, implementation: 0xfD07C974e33dd1626640bA3a5acF0418FaacCA7a, runtimeCodeHash: 0xc0344737464042228baf856170fbd2861eb68f4bca6a150a41f5173452c521f5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [210] MockChainContextV1::chainId() [staticcall]
+    │   │   └─ ← [Return] 31337 [3.133e4]
+    │   ├─ [473] MockChainContextV1::protocolVersion() [staticcall]
+    │   │   └─ ← [Return] Version({ major: 1, minor: 0, patch: 0 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3, implementation: 0xD76ffbd1eFF76C510C3a509fE22864688aC3A588, runtimeCodeHash: 0x7e020c339463ef50a4ae6a3171460aa5688621ce6fc3f0b21d4a7e4a9cbcfe72, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2472] MockCanonicalAssetRegistryV1::isCanonical(0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ emit Reconciled(assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, authorizedSupply: 0, observedSupply: 0, healthy: true, evidenceHash: 0xa3f689ba4a44a163c216d1558a4ae574f4511f027d98fd763088ff752191c9f6)
+    │   ├─ emit ReconciliationHealth(assetId: 0x33ea96d7470eba1f64d78dc547ce2d71436891ce959e87bd9175413c17e9b613, state: 1, observedAt: 1, evidenceHash: 0xa3f689ba4a44a163c216d1558a4ae574f4511f027d98fd763088ff752191c9f6)
+    │   └─ ← [Stop]
+    ├─ [2499] GenesisMockEnvironment420::registry() [staticcall]
+    │   └─ ← [Return] MockProtocolRegistryV1: [0x104fBc016F4bb334D775a19E8A6510109AC63E00]
+    ├─ [11730] MockProtocolRegistryV1::component(0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4) [staticcall]
+    │   └─ ← [Return] ContractRef({ componentId: 0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4, implementation: 0x886D6d1eB8D415b00052828CD6d5B321f072073d, runtimeCodeHash: 0x175eca810b1160591cfe8c976907c76855247d86937b11841107b300f6f03190, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    ├─ [23346] BridgeVerifierRegistry420::identity(BridgeValueCustody420: [0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A, runtimeHash: 0xd23a0ba44f7ba7b040bd46b7c8adae5b5328ef50458711b59220eb32ba5d0329, kind: 0, implementation: 0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A, implementationHash: 0xd23a0ba44f7ba7b040bd46b7c8adae5b5328ef50458711b59220eb32ba5d0329, version: 0 })
+    ├─ [10735] BridgeVerifierRegistry420::identity(ValueOutcome420: [0x94771550282853f6E0124c302F7dE1Cf50aa45CA], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0x94771550282853f6E0124c302F7dE1Cf50aa45CA, runtimeHash: 0x600db8ce98bed9fa0fe89cad71639d06c07bb6942b02d5c64eb66c9ac00082dd, kind: 0, implementation: 0x94771550282853f6E0124c302F7dE1Cf50aa45CA, implementationHash: 0x600db8ce98bed9fa0fe89cad71639d06c07bb6942b02d5c64eb66c9ac00082dd, version: 0 })
+    ├─ [11476] BridgeVerifierRegistry420::identity(BridgeRepresentation420: [0xe916cadb12C49389E487eB1e8194B1459b29B0eC], 0) [staticcall]
+    │   └─ ← [Return] Identity({ target: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, runtimeHash: 0x2f2fc3c6897e94afb9ff50dff9497540612f31d806bca06ea86f47a726c95e72, kind: 0, implementation: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, implementationHash: 0x2f2fc3c6897e94afb9ff50dff9497540612f31d806bca06ea86f47a726c95e72, version: 0 })
+    ├─ [216] ValueOutcome420::root() [staticcall]
+    │   └─ ← [Return] 0x7d08fdf2d11097d737b517979169902c4f196593d3e56f7ad843d1f47642efc4
+    ├─ [105664] BridgeValueCustody420::configurationState() [staticcall]
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21, implementation: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, runtimeCodeHash: 0x2acb77382c47b18519b0c312f93b4814d84269305886e8716ed45576eb8e8b17, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0, implementation: 0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9, runtimeCodeHash: 0xe75e32bdbed30c7753553a0bec4ea8cf7fe1a5176431cbfc3edc2f912b680230, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143, implementation: 0xc7183455a4C133Ae270771860664b6B7ec320bB1, runtimeCodeHash: 0xa03c1b5d595be4cf8e4e7809a3a381122c79450b9a9f47734dca05b202937ed5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e, implementation: 0xF62849F9A0B5Bf2913b396098F7c7019b51A820a, runtimeCodeHash: 0x46c6f33cddaebe065b388934a81aad9d896068c8c8aa5ca7c93b907dea81bc6a, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38, implementation: 0x1d1499e622D69689cdf9004d05Ec547d650Ff211, runtimeCodeHash: 0xe26454cbb1444da2a16b3ba5568e2e159a1e313875c97c2e69a3290d35dd43fe, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x18dfe4e05fdffa1e80e9aff07cf6ff06d23bc82d4f9f6a7242d1ec985422dcc3, implementation: 0xD76ffbd1eFF76C510C3a509fE22864688aC3A588, runtimeCodeHash: 0x7e020c339463ef50a4ae6a3171460aa5688621ce6fc3f0b21d4a7e4a9cbcfe72, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   └─ ← [Return] 0x101bcfb94f5ddd7ea3734e0bcb75734eca685be9c21393cd382cdbdfd905d803
+    ├─ [173818] BridgeVerifierRegistry420::record(Registration({ consumer: Identity({ target: 0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A, runtimeHash: 0xd23a0ba44f7ba7b040bd46b7c8adae5b5328ef50458711b59220eb32ba5d0329, kind: 0, implementation: 0x8227724C33C1748A42d1C1cD06e21AB8Deb6eB0A, implementationHash: 0xd23a0ba44f7ba7b040bd46b7c8adae5b5328ef50458711b59220eb32ba5d0329, version: 0 }), verifier: Identity({ target: 0x94771550282853f6E0124c302F7dE1Cf50aa45CA, runtimeHash: 0x600db8ce98bed9fa0fe89cad71639d06c07bb6942b02d5c64eb66c9ac00082dd, kind: 0, implementation: 0x94771550282853f6E0124c302F7dE1Cf50aa45CA, implementationHash: 0x600db8ce98bed9fa0fe89cad71639d06c07bb6942b02d5c64eb66c9ac00082dd, version: 0 }), verifierGetter: 0x2b7ac3f3, sourceChainKey: 0x64b7fd3544d0681fb3ea320cd58a65584ab3fd61772499f2d5c9efcdc4f4dea4, destinationChainKey: 0x467eefec8ebfd895acdc596616762296ae86a80cc0f3efea01fe096c8039b28c, proofSystem: 0x064ee02d0ae9bea57a811c3d7bd5dcbb61cf29afe23f1d73c8199b5af8c83433, configurationHash: 0x30356a6113cdee998291b06f34448150d43d37c50bea2dbf933edd05de2e6970, evidenceHash: 0xa58794ac0bedcc452c179f3a767fb1da86812d6a4070f22911e43cb5886e3772, validUntil: 0, directions: 3, dependencies: [Identity({ target: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, runtimeHash: 0x2f2fc3c6897e94afb9ff50dff9497540612f31d806bca06ea86f47a726c95e72, kind: 0, implementation: 0xe916cadb12C49389E487eB1e8194B1459b29B0eC, implementationHash: 0x2f2fc3c6897e94afb9ff50dff9497540612f31d806bca06ea86f47a726c95e72, version: 0 })], probes: [Probe({ identity: 1, trustedRoot: true, data: 0xebf0c717, expectedResultHash: 0xa02e00e0f582309b08bd62fd0e2474b0a478f6e3b1151393d9035b3603803c91 }), Probe({ identity: 0, trustedRoot: false, data: 0xaac25835, expectedResultHash: 0x8e63bdcfac24e5488207eaf67f49715640739cc3a61be5395727e2dabb4e49f5 })] }), 0x0000000000000000000000000000000000000000000000000000000000000000, true)
+    │   ├─ [11730] MockProtocolRegistryV1::component(0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d) [staticcall]
+    │   │   └─ ← [Return] ContractRef({ componentId: 0x1765f250d1199065a9927d58b8ca6303b5bfc24a76af1c5b69169b55989f487d, implementation: 0x037eDa3aDB1198021A9b2e88C22B464fD38db3f3, runtimeCodeHash: 0x119d80ce9f700bb98ec8f1ef70756e2118eecbd75c72001281b8957c39c716be, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   ├─ [2478] MockGovernanceAuthorityV1::isAuthorized(BridgeRepresentationEconomic420Test: [0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496], 0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [272] MockGovernanceAuthorityV1::timelockSatisfied(0x5eda4f710624f8d380427eef0ef00bac78e53f779b410dffee88d6b3c282fee2) [staticcall]
+    │   │   └─ ← [Return] true
+    │   ├─ [2439] BridgeValueCustody420::verifier() [staticcall]
+    │   │   └─ ← [Return] ValueOutcome420: [0x94771550282853f6E0124c302F7dE1Cf50aa45CA]
+    │   ├─ [216] ValueOutcome420::root() [staticcall]
+    │   │   └─ ← [Return] 0x7d08fdf2d11097d737b517979169902c4f196593d3e56f7ad843d1f47642efc4
+    │   ├─ [50000] BridgeValueCustody420::configurationState() [staticcall]
+    │   │   ├─ [11730] MockProtocolRegistryV1::component(0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21, implementation: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, runtimeCodeHash: 0x2acb77382c47b18519b0c312f93b4814d84269305886e8716ed45576eb8e8b17, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [11730] MockProtocolRegistryV1::component(0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0, implementation: 0x5991A2dF15A8F6A256D3Ec51E99254Cd3fb576A9, runtimeCodeHash: 0xe75e32bdbed30c7753553a0bec4ea8cf7fe1a5176431cbfc3edc2f912b680230, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   ├─ [11730] MockProtocolRegistryV1::component(0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143) [staticcall]
+    │   │   │   └─ ← [Return] ContractRef({ componentId: 0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143, implementation: 0xc7183455a4C133Ae270771860664b6B7ec320bB1, runtimeCodeHash: 0xa03c1b5d595be4cf8e4e7809a3a381122c79450b9a9f47734dca05b202937ed5, version: Version({ major: 1, minor: 0, patch: 0 }), lifecycle: 2 })
+    │   │   └─ ← [OutOfGas] EvmError: OutOfGas
+    │   └─ ← [Revert] identity probe failed
+    └─ ← [Revert] identity probe failed
+
+Backtrace:
+  at MockBridgeAdapter420.verifier
+  at BridgeVerifierRegistry420.pinRoute
+  at BridgeRouteRegistry.setRoute
+  at BridgeRepresentationEconomic420Test.testRealRepresentationRequiresQualifiedProofAndActualBurn
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 36.80ms (25.58ms CPU time)
+
+Ran 1 test suite in 153.18ms (36.80ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BridgeRepresentationEconomic420.t.sol:BridgeRepresentationEconomic420Test
+[FAIL: identity probe failed] testRealRepresentationRequiresQualifiedProofAndActualBurn() (gas: 38768928)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

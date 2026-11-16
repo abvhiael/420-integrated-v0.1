@@ -1,0 +1,160 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-9",
+  "base_main_sha": "88ae52ce75c64108d33df4ac65152386a4239064",
+  "qualified_sha": "Qualified commit and verified main integration are recorded in the associated PR.",
+  "runs": [
+    {
+      "log": "docs/audit/settlement-qualification/final-ingress.log",
+      "source_inputs": "docs/audit/settlement-qualification/final-ingress.inputs.json",
+      "cases_passed": 15
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-source.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-source.inputs.json",
+      "cases_passed": 6
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-source-token.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-source-token.inputs.json",
+      "cases_passed": 2
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-native.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-native.inputs.json",
+      "cases_passed": 32
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-cadc.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-cadc.inputs.json",
+      "cases_passed": 4
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-admission-delivery.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-admission-delivery.inputs.json",
+      "cases_passed": 5
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-value.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-value.inputs.json",
+      "cases_passed": 28
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-core-final.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-core-final.inputs.json",
+      "cases_passed": 36
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-bitcoin.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-bitcoin.inputs.json",
+      "cases_passed": 27
+    },
+    {
+      "log": "docs/audit/settlement-qualification/qualified-directions.log",
+      "source_inputs": "docs/audit/settlement-qualification/qualified-directions.inputs.json",
+      "cases_passed": 5
+    }
+  ],
+  "totals": {
+    "distinct_cases_passed": 160,
+    "fuzz_inputs": 12500,
+    "invariant_runs": 512,
+    "invariant_calls": 32768
+  },
+  "changed_production_sources": [
+    "contracts/src/bridge/BridgeAccountingRegistry.sol",
+    "contracts/src/bridge/BridgeIds420.sol",
+    "contracts/src/bridge/BridgeRepresentation420.sol",
+    "contracts/src/bridge/BridgeRiskManager.sol",
+    "contracts/src/bridge/BridgeTransferRegistry.sol",
+    "contracts/src/bridge/BridgeValueCustody420.sol",
+    "contracts/src/bridge/EthereumDepositGateway420.sol",
+    "contracts/src/bridge/GatewayRouter420.sol",
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+    "contracts/src/bridge/bitcoin/BitcoinCustody420.sol",
+    "contracts/src/bridge/bitcoin/BitcoinCustodyOutcome420.sol",
+    "contracts/src/interfaces/IBridgeExposureEvidence420.sol",
+    "contracts/src/interfaces/IBridgeValueCustody420.sol",
+    "contracts/src/interfaces/IEthereumWithdrawalBacking420.sol"
+  ],
+  "input_sha256": {
+    ".github/workflows/420bet-sports-5d2-level2.yml": "70127da70fec275a7f6a2925fc8a1f929fda7658a3eaf4828df76c57d88c98c4",
+    ".github/workflows/bridge-audit-2.yml": "8b7a3e2eb5dc4b95a0b214da35906fbee049ec4822e8790daa7a62ea2aa2ec3d",
+    ".github/workflows/bridge-bitcoin-proof-primitives.yml": "942cdeb0e3caf9228f92a5b3dbed6e15fc16983ef1b61101ebf44d9ac4f24709",
+    ".github/workflows/bridge-dogecoin-qualification.yml": "bd7adcb1c563e2ca69780e156380893188b252ad60e1606ddd8fce002153d131",
+    ".github/workflows/bridge-litecoin-qualification.yml": "3229d8e1d54c538db8b2ff161e7a81d92aa64e778ccc36d57de86e5ee7402a35",
+    ".github/workflows/contracts-hardening.yml": "a1f821b207d0374b9a25f99a6bdaa306210415244e4a698c65cfe27d5e3436f8",
+    ".github/workflows/docs-pages.yml": "fef46e514d2fe6cbd73c6f38a163d7034a40ab950fcb514e50a62ecef1d6fcb6",
+    ".github/workflows/docs-qualify.yml": "3073ff8865434930169b5610c18a34ae25dbb7da572490adbdba22b8bb0c54c7",
+    "contracts/config/bridge/verifier-qualification-inventory.json": "98629202f257e5723397f724383c97657cefb593152700fb460bd9834a8891c5",
+    "contracts/src/bridge/BridgeAccountingRegistry.sol": "fd68fbc2dc65f7ec830b73d4eaec3242b396d2cb504bc2d98b45b79fe662d7b8",
+    "contracts/src/bridge/BridgeIds420.sol": "33b57cfc3369159458c4cdbefe4358aa07e5c15a421bfd56e8a49bbae7d159df",
+    "contracts/src/bridge/BridgeRepresentation420.sol": "f832565dd8e48fed574a3e148b260d3de101b956163fa4564e5b69c658293f50",
+    "contracts/src/bridge/BridgeRiskManager.sol": "b977d7329bf0004b557d8f3dc546dfe93d9bb2fec4806d6a113d05d649402eff",
+    "contracts/src/bridge/BridgeTransferRegistry.sol": "79640b696487c90c9fd70e451c9827371904b40d2e56841940f2c19880087393",
+    "contracts/src/bridge/BridgeValueCustody420.sol": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+    "contracts/src/bridge/EthereumDepositGateway420.sol": "d73d7b2a5dcc965f453bd3df88c829b7cdcf9cd94948e764a2b50d150d23e3b9",
+    "contracts/src/bridge/GatewayRouter420.sol": "b2aaeaaa50e828e7947d6b52ce7d98487e4b8140838bae499f054cb7e900ccd2",
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": "eb93808f155c355de7de9702b17fa87226c37e4167fe7dfa8be4ec7694e97105",
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": "7eab0e7d4211686ff994392ab4a8f32ba5be8e861c0686a1a3205a07d51db485",
+    "contracts/src/bridge/bitcoin/BitcoinCustody420.sol": "40ee4a906509f2ed319c7b86715d157a16e4274c80c83f5dbbe4f928e6bb26d7",
+    "contracts/src/bridge/bitcoin/BitcoinCustodyOutcome420.sol": "3c47db6ac7864096269bb06875b19ae2e5d89ffe9db0ce6b41db680ce45da628",
+    "contracts/src/interfaces/IBridgeExposureEvidence420.sol": "cbe2135ca42691efb34b910a2a80170465e5179b91d0b4df80905a4f0e5a0693",
+    "contracts/src/interfaces/IBridgeValueCustody420.sol": "ac35870decc4568e391a466ccb74dff17556378131319bcd614fac8e642dc94a",
+    "contracts/src/interfaces/IEthereumWithdrawalBacking420.sol": "6c7dd95efc553deed219076ae3b777c089ef907d2a2e5772453c5f16a680598d",
+    "contracts/test/BitcoinCustodyAdversarial420.t.sol": "c44e0b4e89123e5e5978a9b50bcc0656c07c0e0f6b9dfac6d88a47c2dcf0af7b",
+    "contracts/test/BitcoinCustodyCompletion420.t.sol": "10a4574144807906506bd264861204cb20fbd61b0c1030caa163961045cd69c9",
+    "contracts/test/BitcoinEconomicOutcome420.t.sol": "eae34bff3ff350ed71425fe0696a6799148aad9393f783cd1ec8bf878690ab04",
+    "contracts/test/BridgeFullLocalFixture420.sol": "f4f8578ce83f2c88cbc1d5c589816b38cf9145099bfb2eac979af50f7100ea15",
+    "contracts/test/BridgeFullLocalIntegration420.t.sol": "e88322390f3d4ce3223dcb8f63168d419e6c68595202a5ec7a222eaa120f3cfc",
+    "contracts/test/BridgeGenesisIntegration420.t.sol": "1da46d39b5dcb775b405d3bc28992b2dc4fc802500549dd6561185bcc9157e74",
+    "contracts/test/BridgeInvariant420.t.sol": "2cca17c2bec9ea080837fc5f3bdbdebc6b75207c6d9a4837cdd35d52faa70024",
+    "contracts/test/BridgeNativeValueSettlement420.t.sol": "5cfc2ebd907bd32faf55da394b65cadad84b99c7f58080a576d969b931527e9c",
+    "contracts/test/BridgeProductionAdmission420.t.sol": "bef3c1d8bacdef01510ca97606d889580ce9f33f02812f46ab5234d38f98c1a7",
+    "contracts/test/BridgeProviderFunding420.t.sol": "cee3c490e49f79e011298b44e4ee3ebde585ddf4b8d25491517e98aabca67fc7",
+    "contracts/test/BridgeRepresentationEconomic420.t.sol": "655427266172b24b49db210ab8aec93c26f4a5f2aa239e91f12ed30c74e9dc40",
+    "contracts/test/BridgeRiskFuzz420.t.sol": "40f529adb2180702199069bf12ea4e8e33ef0865dc6451e5c9b63d6d23df36af",
+    "contracts/test/BridgeSettlementBoundary420.t.sol": "1a64b7ed7a82036c0d10c92e9d78fd96920ce85db4726a0c09afc1a583deea3e",
+    "contracts/test/BridgeTransferLifecycle420.t.sol": "5e801fec7c675dac50714c295ac580117afe2bcf9353b908747e9508de6d08ba",
+    "contracts/test/BridgeValueAuthority420.t.sol": "618883cc9edffaa17e32d43c7c2f92f8d73a97ef5f583b38abb5c9cef0d6e0af",
+    "contracts/test/BridgeValueConservation420.t.sol": "3704537256b21059d8605e81ced4a91ff19eb0504ac25d797cc814588437803e",
+    "contracts/test/BridgeValueDirection420.t.sol": "2513a5cb6e14aeaafc839a7ac88d8f76becba0df327703021198efa1366f9733",
+    "contracts/test/BridgeValueInvariant420.t.sol": "ed9d8f09e89f24d3b345cce9d6de4a1fe011d737433c30f2fd80722bcc0f4387",
+    "contracts/test/CADCGatewayIntegration420.t.sol": "f399bcda1b20c6a507f36e506de56dec894476ae7f4da1d8da0eb6e5bf2721c5",
+    "contracts/test/CCTPGatewayIntegration420.t.sol": "403465f60d8b8fc3e9cd19c5536a3e370a520650bacd3edadcb3131e69a66d52",
+    "contracts/test/EthereumCustodyRelease420.t.sol": "4c0e6e41fc71dd350812e1a76e9c086be26a74f4a916fa41d6c15256a0a74ea5",
+    "contracts/test/EthereumTokenCustodyRelease420.t.sol": "e61a32f9f70af60f83f33f3bbc1ca9ce8e997824a2f935730f7418b3d5840f29",
+    "contracts/test/helpers/ValueCustodyFixture420.sol": "81ed159e9b4049e85ce49c7b6051e7a764e29d3949def5bb7200fbd09a299b19",
+    "docs/audit/420BRIDGE-TESTNET-WORK-ROADMAP.md": "4ddbe4cad53c881ccb4847b939e4a19a506f38975789330b730f032a74e5cfda",
+    "docs/audit/BRIDGE-AUDIT-3-1-VERIFIER-QUALIFICATION-INVENTORY.md": "2d26f36c8c76352b591eb8ba04c612cd1dab6d36a8ba096794260a55996e1000",
+    "docs/audit/BRIDGE-AUDIT-9-VALUE-SETTLEMENT.md": "a73f2db097be5bfa84412225d310b97d489ad01b4180534816c0088e3eb3bf36",
+    "scripts/qualify-bridge-final.py": "257e20ad63366a16a4861ebee36a036c3a4de0525452b7d507108e2d2ed57805",
+    "scripts/verify-bridge-value-settlement.py": "8fa535c95d7b444bf35e4d5455c1ef7259a1484c0c43321221df35ad644d515c",
+    "scripts/verify-final-verifier-inventory.py": "799217804eb792d65451a6a6600d6ae99ee75089e88e58c070af2463843c2ff5",
+    "scripts/verify-provider-completion.py": "0fd222049fe97b6b74b2841d34b5e07894bed9a05083e6565bb4753336f3a81a"
+  },
+  "production_approvals": [],
+  "live_settlement_qualified": false,
+  "ci_run_ids": [],
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "via_ir": true,
+    "optimizer_runs": 200,
+    "fuzz_seed": "0x42022"
+  },
+  "preserved_bitcoin_ci": [
+    "43563876850",
+    "43563876854"
+  ],
+  "retained_evidence": "Original V.22 and BRIDGE-AUDIT-4 through 8 SHA/run/input evidence is preserved through the authoritative inventory lineage; unchanged source consensus/history suites were not repeated.",
+  "diagnostics": {
+    "bounded-probe-trace.log": "Actual 50k-gas out-of-gas trace. Six dependency bindings now use separate probes without increasing the bound. final-value.log records the failed setup; qualified-value.log supersedes it.",
+    "resource-value.log": "Compiler SIGKILL under memory pressure; no passing evidence claimed. Subsequent qualifications reuse compiled graphs with reduced concurrency.",
+    "resource-bitcoin.log": "Compiler SIGKILL under memory pressure; no passing evidence claimed. Corrected execution uses qualified existing build caches.",
+    "interrupted_and_intermediate_runs": "All other non-listed logs are diagnostic or superseded prototype passes, never included in final totals."
+  },
+  "external_dependencies": "docs/audit/420BRIDGE-TESTNET-WORK-ROADMAP.md#custody-and-economic-settlement-handoff--bridge-audit-9",
+  "next_canonical_work": "Existing 420Bridge testnet custody/source/issuer and funded settlement qualification; no numbered BRIDGE-AUDIT-10 is defined in the authoritative repository roadmap."
+}

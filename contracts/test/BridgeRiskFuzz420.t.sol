@@ -17,6 +17,7 @@ contract BridgeRiskFuzz420Test {
         BridgeRiskManager risk = new BridgeRiskManager(address(this), address(env.registry()), keccak256("risk"));
         env.registerResident(address(risk), risk.componentId());
         risk.setRouter(address(this), true);
+        env.registerResident(address(this),BridgeIds420.GATEWAY_ROUTER);
         risk.setRouteLimits(ROUTE_ID, _limits(1_000_000 ether));
         risk.setAssetLimits(ASSET_ID, _limits(1_000_000 ether));
         uint256 amount = (uint256(rawAmount) % 1_000_000 ether) + 1;
@@ -30,6 +31,7 @@ contract BridgeRiskFuzz420Test {
         BridgeRiskManager risk = new BridgeRiskManager(address(this), address(env.registry()), keccak256("risk"));
         env.registerResident(address(risk), risk.componentId());
         risk.setRouter(address(this), true);
+        env.registerResident(address(this),BridgeIds420.GATEWAY_ROUTER);
         risk.setRouteLimits(ROUTE_ID, _limits(100 ether));
         risk.setAssetLimits(ASSET_ID, _limits(100 ether));
         uint256 amount = 100 ether + (uint256(extra) % 100 ether) + 1;

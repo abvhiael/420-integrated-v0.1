@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "../../interfaces/IBridgeAdapter420.sol";
+import "../../interfaces/IBridgeSettlementEvidence420.sol";
 import "../../interfaces/bridge/ILayerZeroCADC420.sol";
 import "../../system/SystemAccess.sol";
 
@@ -8,7 +9,7 @@ import "../../system/SystemAccess.sol";
 /// @dev Commit and execution are atomic: an RPC assertion or an earlier endpoint commitment
 /// cannot establish which DVN configuration authenticated a packet. Already delivered packets
 /// cannot be retrospectively credited. Source transaction hashes are not present in OFT packets.
-contract CADCLayerZeroAdapter is IBridgeAdapter420, SystemAccess {
+contract CADCLayerZeroAdapter is IBridgeAdapter420, IBridgeSettlementEvidence420, SystemAccess {
     struct Peer {
         bytes32 routeId;
         bytes32 remote;
@@ -31,6 +32,10 @@ contract CADCLayerZeroAdapter is IBridgeAdapter420, SystemAccess {
     event PeerConfigured(uint32 indexed eid, bytes32 indexed routeId, bytes32 configuration);
     struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
     mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
+    struct Delivery {address token;address recipient;uint256 amount;bytes32 evidenceHash;}
+    mapping(bytes32=>Delivery) private deliveries;
+    function settlementEvidence(bytes32 id) external view returns(address,address,uint256,bytes32){Delivery memory d=deliveries[id];return(d.token,d.recipient,d.amount,d.evidenceHash);}
+
     error InvalidConfiguration();
     error InvalidProof();
     error Replay();
@@ -179,6 +184,7 @@ contract CADCLayerZeroAdapter is IBridgeAdapter420, SystemAccess {
         if (ICADCToken420(i.cadc()).balanceOf(recipient) != beforeBalance + amount) revert InvalidProof();
         // No originating EOA or transaction hash is authenticated by a simple OFT packet.
         verifiedSourceContext[guid]=SourceProofContext(p.remote,p.remote);
+        deliveries[guid]=Delivery(i.cadc(),recipient,amount,keccak256(abi.encode("420/CADC/NATIVE_DELIVERY/V1",endpoint,oft,guid,keccak256(message),recipient,amount)));
         v = VerifiedTransfer(
             p.routeId,
             assetId,

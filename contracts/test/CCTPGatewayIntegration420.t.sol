@@ -14,7 +14,7 @@ contract CCTPGatewayIntegration420Test is BridgeFullLocalFixture420 {
         require(!ok&&!adapter.consumedNonces(m.nonce)&&CCTPNativeMT420(MT).usedNonces(m.nonce)==0&&token.balanceOf(m.mintRecipient)==0,"atomic native/router rollback");
         (,,,,,,uint256 tvl)=risk.routeUsage(route(6));require(tvl==0,"risk rollback");
     }
-    function testRouterOutboundBurnAndLifecycle() public {
+    function testRouterOutboundBurnAndLifecycle() public {installNativeCustody();
         gateway.acceptInbound(adapter.ADAPTER_ID(),transport(proof("base-standard")));token.fund(address(this),10e6);token.approve(address(adapter),10e6);
         bytes32 id=gateway.initiateOutbound(adapter.ADAPTER_ID(),route(6),ASSET,abi.encode(bytes32(uint256(uint160(address(0xB0B))))),10e6,abi.encode(bytes32(0),uint256(0),uint32(2000),bytes("")));
         require(id!=0&&token.balanceOf(address(this))==0&&token.allowance(address(adapter),TM)==0,"native outbound burn");

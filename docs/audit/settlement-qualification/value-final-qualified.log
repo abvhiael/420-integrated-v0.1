@@ -1,0 +1,101 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 196.99s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for contracts/test/BridgeValueConservation420.t.sol:BridgeLiquidityConservation420Test
+[PASS] testActualLockReleaseAndRefundConserveBalances() (gas: 6972632)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 29.94ms (20.16ms CPU time)
+
+Ran 17 tests for contracts/test/BridgeValueConservation420.t.sol:BridgeValueConservation420Test
+[PASS] testAuthenticatedCancellationActuallyRefundsAndCannotRepeat() (gas: 7518855)
+[PASS] testCanonicalNativeUnitMismatchRejected() (gas: 269497)
+[PASS] testDispatchFailureRollsBackActualBurn() (gas: 5225810)
+[PASS] testDisputedDeliveredPaymentCannotAuthorizeSourceRefund() (gas: 3571611)
+[PASS] testDuplicateMessageCannotBurnTwiceWithChangedAmount() (gas: 7822666)
+[PASS] testExpiredWithdrawalRequiresAuthenticatedRefund() (gas: 6984450)
+[PASS] testFuzzConservationAfterWithdrawal(uint96) (runs: 2500, μ: 6895470, ~: 6895667)
+[PASS] testGovernanceLabelCannotClaimRefund() (gas: 6232719)
+[PASS] testLiveProfileCannotBeReplaced() (gas: 3595242)
+[PASS] testPendingWithdrawalStillConsumesRouteAndAssetExposure() (gas: 7342436)
+[PASS] testProofBackedMintBurnPaidConservesObligations() (gas: 6977956)
+[PASS] testReconciliationNumbersCannotHideUnauthorizedMint() (gas: 3821661)
+[PASS] testRefundFailureRollsBackAllOutcomeAndAccounting() (gas: 7608257)
+[PASS] testRetryNeverRepeatsBurnOrConsumesProofTwice() (gas: 8146349)
+[PASS] testUnmintedDisputeRequiresRealSourceRefundAndRetainsReplay() (gas: 4363277)
+[PASS] testUnsettledDepositCannotFundAnotherWithdrawal() (gas: 3479154)
+[PASS] testUnverifiedOutcomeCannotReleasePendingExposure() (gas: 6705134)
+Suite result: ok. 17 passed; 0 failed; 0 skipped; finished in 22.43s (22.56s CPU time)
+
+Ran 2 test suites in 22.43s (22.46s CPU time): 18 tests passed, 0 failed, 0 skipped (18 total tests)

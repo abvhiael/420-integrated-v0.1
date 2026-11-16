@@ -1,0 +1,150 @@
+Compiling 20 files with Solc 0.8.24
+Solc 0.8.24 finished in 672.05s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-16T19:10:59.461943Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462034Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462046Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462215Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462235Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462270Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462331Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.462407Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 5 tests for contracts/test/BitcoinCustodyAdversarial420.t.sol:BitcoinCustodyAdversarial420Test
+[PASS] testCustodyUTXOReservationPreventsIndependentDoubleSelection() (gas: 6211263)
+[PASS] testForgedMerklePositionAndTrailingProofReject() (gas: 2428962)
+[PASS] testFreshQualificationCannotReactivateOldSigningAuthorization() (gas: 5794947)
+[PASS] testWitnessChangesDoNotChangeTxidOrAuthorizedSkeleton() (gas: 332601)
+[PASS] testWrongChangeScriptCannotReachSigner() (gas: 1191854)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 69.15ms (32.43ms CPU time)
+2026-11-16T19:10:59.468981Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469033Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469043Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469267Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469292Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469318Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469368Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T19:10:59.469557Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 14 tests for contracts/test/BitcoinCustodyCompletion420.t.sol:BitcoinCustodyCompletion420Test
+[PASS] testBackedPlanProducesOnlyPublicSigningAuthorization() (gas: 3786513)
+[PASS] testBackingFailureCannotCreateAuthorization() (gas: 1252405)
+[PASS] testDefaultInactiveEvenWithQualification() (gas: 94449)
+[PASS] testExcessFeeAndWrongInputReject() (gas: 2379417)
+[PASS] testFiveConfirmationsAndForgedPayoutReject() (gas: 2786616)
+[PASS] testFuzzFeeCap(uint64) (runs: 2500, μ: 1555574, ~: 1799626)
+[PASS] testNativeRouteSuspensionBlocksSigning() (gas: 509109)
+[PASS] testPreviouslySignedReplacementCanConfirm() (gas: 5179808)
+[PASS] testReorganizedPaymentCannotRemainLiveEvidence() (gas: 4195639)
+[PASS] testReplacementUsesCASAndSameFunding() (gas: 6530029)
+[PASS] testRevocationImmediatelyRemovesSigningAuthority() (gas: 1961339)
+[PASS] testSignedDataCannotBeAuthorizedAsUnsignedPSBT() (gas: 1232673)
+[PASS] testSixConfirmedPaymentAndRefresh() (gas: 4544285)
+[PASS] testUnauthorizedCustodyControlsReject() (gas: 30083)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 8.29s (8.25s CPU time)
+
+Ran 5 tests for contracts/test/BitcoinCustodySafety420.t.sol:BitcoinCustodySafety420Test
+[PASS] testGlobalPauseSafetyAndCanonicalAssetLifecycleBlockSigning() (gas: 4003280)
+[PASS] testInboundOnlyCustodyQualificationCannotAuthorizeWithdrawals() (gas: 2335276)
+[PASS] testNativeVerifierRotationRequiresFreshCustodyApprovalAndBacking() (gas: 12263780)
+[PASS] testNonconflictingReplacementFundingIsRejected() (gas: 3992112)
+[PASS] testUnqualifiedConsumerCannotActivate() (gas: 182047)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 51.14ms (24.92ms CPU time)
+
+Ran 2 tests for contracts/test/BitcoinEconomicOutcome420.t.sol:BitcoinEconomicOutcome420Test
+[PASS] testBitcoinOutcomeAuthenticatesPaidRequestAcrossSigningRevocation() (gas: 68992413)
+[PASS] testBitcoinOutcomeRejectsUnknownTransferAndStaleCanonicalTip() (gas: 67561130)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 59.17ms (57.44ms CPU time)
+
+Ran 1 test for contracts/test/BitcoinCustodyInvariant420.t.sol:BitcoinCustodyInvariant420Test
+[PASS] invariantNoStaleSigningAuthorityOrReleasedInputReservations() (runs: 128, calls: 8192, reverts: 0)
+
+╭-------------------------------+------------------+-------+---------+----------╮
+| Contract                      | Selector         | Calls | Reverts | Discards |
++===============================================================================+
+| BitcoinCustodyStateHandler420 | attempt          | 1612  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | backingAvailable | 1594  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | halt             | 1637  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | restore          | 1631  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | revoke           | 1718  | 0       | 0        |
+╰-------------------------------+------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 17.06s (17.00s CPU time)
+
+Ran 5 test suites in 17.07s (25.53s CPU time): 27 tests passed, 0 failed, 0 skipped (27 total tests)

@@ -1,0 +1,156 @@
+Compiling 7 files with Solc 0.8.24
+Solc 0.8.24 finished in 247.34s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 1 test for contracts/test/BridgeSettlementBoundary420.t.sol:BridgeNativeBurnAccounting420Test
+[PASS] testActualReceivedBalanceBurnMatchesRiskAndObservedSupply() (gas: 23912306)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 66.51ms (45.81ms CPU time)
+
+Ran 2 tests for contracts/test/BridgeSettlementBoundary420.t.sol:BridgeProofOnlySettlement420Test
+[PASS] testProofOnlyAdapterCannotAtomicallyClaimSettlement() (gas: 32081137)
+[PASS] testProofOnlyTransferStaysVerifiedWithoutDeliveryReceipt() (gas: 32460327)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 21.04ms (19.33ms CPU time)
+
+Ran 12 tests for contracts/test/BridgeTransferLifecycle420.t.sol:BridgeTransferLifecycle420Test
+[PASS] testAllowedTransitionMatrixMatchesFrozenGraph() (gas: 1001531)
+[PASS] testBackwardAndSkippedNormalTransitionsFailClosed() (gas: 3803026)
+[PASS] testDisputeCanOnlyResolveToRefund() (gas: 6079388)
+[PASS] testExpiryCanResolveToRefundButCannotResume() (gas: 4923695)
+[PASS] testNormalLifecycleProgressesMonotonicallyToCompletion() (gas: 8006281)
+[PASS] testOutboundIdentityIncludesRecipientAndIsReplaySafe() (gas: 3578602)
+[PASS] testOutboundSourceTransactionMustBindBeforeFinality() (gas: 3811719)
+[PASS] testPauseAndResumeRestoreExactPriorState() (gas: 6926680)
+[PASS] testRetryReturnsOnlyToRecordedFailedStage() (gas: 6066497)
+[PASS] testSourceReorgReturnsRetryToSourcePending() (gas: 7176455)
+[PASS] testUnauthorizedLifecycleActorFailsClosed() (gas: 1530025)
+[PASS] testZeroEvidenceFailsClosed() (gas: 1478856)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 39.85ms (34.12ms CPU time)
+2026-11-16T18:59:47.019567Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.019694Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.019704Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.019936Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.019948Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.019983Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.020047Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.020057Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.020066Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021003Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021049Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021058Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021104Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021113Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021135Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021158Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021275Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+2026-11-16T18:59:47.021284Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21205)
+
+Ran 18 tests for contracts/test/BridgeGenesisIntegration420.t.sol:BridgeGenesisIntegration420Test
+[PASS] testAccountingRecoveryDoesNotRewriteCompletedTransferHistory() (gas: 33105874)
+[PASS] testAuthorizedExceedsObservedBlocksNewInbound() (gas: 30309621)
+[PASS] testDirectionDisabledFailsClosed() (gas: 31642281)
+[PASS] testFrozenGatewayMayStartFailClosedWithoutVerifier() (gas: 5898122)
+[PASS] testFrozenGatewayVerifierActivationRequiresCode() (gas: 6068804)
+[PASS] testInboundCreatesTransferAndConsumesRiskAtomically() (gas: 31833428)
+[PASS] testInboundFailsWhenSourceNetworkFingerprintDrifts() (gas: 29760396)
+[PASS] testInboundWrongRegisteredAdapterFailsClosed() (gas: 31457378)
+[PASS] testObservedExceedsAuthorizedBlocksNewOutbound() (gas: 32175846)
+[PASS] testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() (gas: 46301077)
+[PASS] testOutboundAfterInboundReducesTVL() (gas: 47166848)
+[PASS] testOutboundFailsWhenDestinationChainInactive() (gas: 29558419)
+[PASS] testOutboundWrongRegisteredAdapterFailsClosed() (gas: 33749425)
+[PASS] testRecoveryRequiresNewerDistinctEvidenceBeforeMovementResumes() (gas: 32307446)
+[PASS] testReplayFailureRollsBackRiskConsumption() (gas: 32683209)
+[PASS] testSharedPauseFailsClosed() (gas: 29612023)
+[PASS] testUnknownAccountingHealthBlocksNewInboundBeforeRiskConsumption() (gas: 31454532)
+[PASS] testWithdrawalRecoveryRemainsSafetyBoundWhileAccountingUnhealthy() (gas: 32317640)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 190.08ms (187.66ms CPU time)
+
+Ran 2 tests for contracts/test/BridgeRiskFuzz420.t.sol:BridgeRiskFuzz420Test
+[PASS] testFuzz_InboundUsageNeverExceedsConfiguredCaps(uint96) (runs: 2500, μ: 7029740, ~: 7029731)
+[PASS] testFuzz_SingleCapRejectsExcess(uint96) (runs: 2500, μ: 6860066, ~: 6860068)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 3.93s (3.93s CPU time)
+
+Ran 1 test for contracts/test/BridgeInvariant420.t.sol:BridgeInvariant420Test
+[PASS] invariant_RouteAndAssetTVLAgreeWithModel() (runs: 128, calls: 8192, reverts: 0)
+
+╭-------------------------------+----------+-------+---------+----------╮
+| Contract                      | Selector | Calls | Reverts | Discards |
++=======================================================================+
+| BridgeRiskInvariantHandler420 | step     | 8192  | 0       | 0        |
+╰-------------------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 4.04s (4.04s CPU time)
+
+Ran 6 test suites in 4.18s (8.29s CPU time): 36 tests passed, 0 failed, 0 skipped (36 total tests)

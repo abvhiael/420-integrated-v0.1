@@ -8,6 +8,8 @@ on:
       - "contracts/src/bridge/verifiers/BridgeWire420.sol"
       - "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
       - "contracts/test/Bitcoin*420.t.sol"
+      - "!contracts/test/BitcoinCustody*420.t.sol"
+      - "!contracts/test/BitcoinEconomicOutcome420.t.sol"
       - "contracts/test/fixtures/bitcoin/headers.bin"
       - "contracts/test/fixtures/bitcoin/block170.bin"
       - "contracts/test/fixtures/bitcoin/block481824.bin"

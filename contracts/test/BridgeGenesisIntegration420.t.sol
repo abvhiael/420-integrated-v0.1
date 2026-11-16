@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./helpers/ProofEnvelopeFixture420.sol";
+import "./helpers/ValueCustodyFixture420.sol";
 
 import "../src/bridge/GatewayRouter420.sol";
 import "../src/bridge/BridgeRiskManager.sol";
@@ -54,7 +55,8 @@ contract MockVerifiedGatewayVerifier420 is IVerifiedGatewayVerifier420 {
     }
 }
 
-interface VmBridgeAccounting420 { function warp(uint256) external; function prank(address) external; }
+interface VmBridgeAccounting420 {
+    function prank(address) external; function warp(uint256) external; }
 
 abstract contract BridgeGenesisFixture420 {
     VmBridgeAccounting420 constant vm =
@@ -148,6 +150,17 @@ abstract contract BridgeGenesisFixture420 {
         BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
 
+    function _setupFunded() internal returns(Fixture memory f){
+        f=_setup();ValueToken420 token=new ValueToken420();f.env.setSettlementAsset(address(token),ASSET_ID,true);
+        BridgeValueCustody420 custody=new BridgeValueCustody420(address(this),address(f.env.registry()),keccak256("controlled MINT custody"),new ValueOutcome420());f.env.registerResident(address(custody),custody.componentId());token.configure(address(custody));custody.configure(ASSET_ID,address(token),BridgeValueCustody420.Mode.MINT_BURN);
+        BridgeRouteRegistry.Route memory route;(route.assetId,route.sourceChainId,route.destinationChainId,route.sourceAsset,route.destinationAsset,route.adapterId,route.verifierConfigHash,route.version,route.status,route.inboundEnabled,route.outboundEnabled)=f.routes.routes(ROUTE_ID);route.destinationAsset=bytes32(uint256(uint160(address(token))));route.status=BridgeRouteRegistry.Status.APPROVED_INACTIVE;f.routes.setRoute(ROUTE_ID,route);
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
+        ValueCustodyFixture420.approve(f.env,custody,address(token),address(custody.verifier()),abi.encodeWithSignature("root()"),EXTERNAL_CHAIN,LOCAL_CHAIN);
+    }
+    function _creditFunded(Fixture memory f,uint256 amount) internal {
+        f.adapter.setInbound(_inbound(amount));f.router.acceptInboundAndSettle(ADAPTER_ID,ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"09"));ValueToken420 token=ValueToken420(f.env.assets().asset(ASSET_ID).token);
+        VmBridgeAccounting420(address(vm)).prank(address(0xB0B));token.transfer(address(this),amount);token.approve(f.env.registry().component(BridgeIds420.VALUE_CUSTODY).implementation,amount);
+    }
     function _inbound(uint256 amount) internal pure returns (IBridgeAdapter420.VerifiedTransfer memory) {
         return IBridgeAdapter420.VerifiedTransfer({
             routeId: ROUTE_ID,
@@ -184,9 +197,9 @@ contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
     }
 
     function testOutboundAfterInboundReducesTVL() public {
-        Fixture memory f = _setup();
+        Fixture memory f = _setupFunded();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
+        _creditFunded(f,100 ether);
         bytes memory recipient = hex"0102";
         bytes32 messageId = f.router.initiateOutbound(ADAPTER_ID, ROUTE_ID, ASSET_ID, recipient, 40 ether, hex"");
         require(messageId != bytes32(0), "message");
@@ -412,15 +425,16 @@ contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
         require(!denied, "safety denial bypassed");
 
         f.env.safety().setAllowed(true);
-        f.transfers.refundTransfer(transferId, keccak256("approved-withdrawal-recovery"));
+        (bool claimed,) = address(f.transfers).call(abi.encodeCall(f.transfers.refundTransfer,(transferId,keccak256("approved-withdrawal-recovery"))));
+        require(!claimed,"governance label treated as refund");
         (,,,,,,, BridgeTransferRegistry.Status status,,) = f.transfers.transfers(transferId);
-        require(status == BridgeTransferRegistry.Status.REFUNDED, "safe refund blocked");
+        require(status == BridgeTransferRegistry.Status.FAILED, "unpaid refund changed state");
     }
 
     function testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() public {
-        Fixture memory f = _setup();
+        Fixture memory f = _setupFunded();
         f.adapter.setInbound(_inbound(100 ether));
-        f.router.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(f.router,ADAPTER_ID,hex"4201"));
+        _creditFunded(f,100 ether);
 
         (,,uint256 routeHourlyIn,uint256 routeHourlyOut,uint256 routeDailyIn,uint256 routeDailyOut,uint256 routeTVL) =
             f.risk.routeUsage(ROUTE_ID);

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./CADCLayerZero420.t.sol";
+import "./helpers/ValueCustodyFixture420.sol";
 import "./helpers/BridgeQualificationFixture420.sol";
 import "./helpers/ProofEnvelopeFixture420.sol";
 import "./helpers/GenesisMocks420.sol";
@@ -164,6 +165,7 @@ contract CADCGatewayIntegration420Test is CADCLayerZero420Test {
         ready(1, m);
         gateway.acceptInbound(adapter.adapterId(), transport(1,m));
         setupOutbound();
+        ValueCustodyFixture420.nativeProvider(env,address(oft),ASSET,keccak256("ETHEREUM"),keccak256("CONTROLLED/DESTINATION"));
         bytes32 id = gateway.initiateOutbound(
             adapter.adapterId(),
             ROUTE,

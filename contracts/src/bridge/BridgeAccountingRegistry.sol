@@ -7,6 +7,7 @@ import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/ICanonicalAssetRegistry420.sol";
 import "../libraries/GenesisInterfaceIds420.sol";
 import "./BridgeIds420.sol";
+import "../interfaces/IBridgeValueCustody420.sol";
 
 /// @notice Canonical bridge supply reconciliation evidence.
 /// @dev This registry records observed/authorized supply; it does not mint, burn, or repair balances.
@@ -82,6 +83,9 @@ contract BridgeAccountingRegistry is GenesisResidentAccess420 {
     }
 
     function movementHealthy(bytes32 assetId) external view returns (bool) {
-        return healthState(assetId) == HealthState.HEALTHY;
+        if(healthState(assetId)!=HealthState.HEALTHY)return false;
+        address custody=IProtocolRegistry420(registry).component(BridgeIds420.VALUE_CUSTODY).implementation;
+        if(custody!=address(0))return IBridgeValueCustody420(_resolveRequired(BridgeIds420.VALUE_CUSTODY)).conservationHealthy(assetId);
+        return true;
     }
 }

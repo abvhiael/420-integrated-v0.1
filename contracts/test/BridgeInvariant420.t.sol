@@ -60,6 +60,7 @@ contract BridgeInvariant420Test is InvariantTarget420 {
         risk.setAssetLimits(ASSET_ID, limits);
         handler = new BridgeRiskInvariantHandler420(risk, ROUTE_ID, ASSET_ID, CAP);
         risk.setRouter(address(handler), true);
+        env.registerResident(address(handler),BridgeIds420.GATEWAY_ROUTER);
         targetContract(address(handler));
     }
 
@@ -78,6 +79,8 @@ contract BridgeInvariant420Test is InvariantTarget420 {
         require(assetHourlyOut == handler.modelOutbound(), "asset hourly out model");
         require(routeDailyOut == handler.modelOutbound(), "route daily out model");
         require(assetDailyOut == handler.modelOutbound(), "asset daily out model");
+        require(routeTVL+risk.routePendingOutbound(ROUTE_ID)==handler.modelInbound(),"pending obligations");
+        require(risk.routePendingOutbound(ROUTE_ID)==risk.assetPendingOutbound(ASSET_ID),"pending asset/route drift");
         require(routeTVL <= CAP, "cap");
     }
 }

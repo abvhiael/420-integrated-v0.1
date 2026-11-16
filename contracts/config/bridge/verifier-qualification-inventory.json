@@ -787,7 +787,7 @@
     {
       "asset": "USDC",
       "adapter": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
-      "adapter_source_sha256": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced",
+      "adapter_source_sha256": "7eab0e7d4211686ff994392ab4a8f32ba5be8e861c0686a1a3205a07d51db485",
       "verifier": null,
       "verifier_source_sha256": null,
       "source_qualification_pr": 1168,
@@ -802,7 +802,7 @@
       "v18_component_graph_comparison": {
         "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": {
           "original_sha256": "0e9b8b048e4edc2d1a75c44416fd51e6d4adf639c2231fc0354a48d1e4083f12",
-          "current_sha256": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced",
+          "current_sha256": "7eab0e7d4211686ff994392ab4a8f32ba5be8e861c0686a1a3205a07d51db485",
           "identical": false
         },
         "contracts/src/bridge/verifiers/BridgeWire420.sol": {
@@ -836,7 +836,7 @@
     {
       "asset": "CADC",
       "adapter": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
-      "adapter_source_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+      "adapter_source_sha256": "eb93808f155c355de7de9702b17fa87226c37e4167fe7dfa8be4ec7694e97105",
       "verifier": null,
       "verifier_source_sha256": null,
       "source_qualification_pr": 1169,
@@ -851,7 +851,7 @@
       "v18_component_graph_comparison": {
         "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": {
           "original_sha256": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
-          "current_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+          "current_sha256": "eb93808f155c355de7de9702b17fa87226c37e4167fe7dfa8be4ec7694e97105",
           "identical": false
         },
         "contracts/src/interfaces/IBridgeAdapter420.sol": {
@@ -997,6 +997,120 @@
           "intermediate_source": "docs/audit/remaining-adapters-qualification/BnbBridgeAdapter420-before-domain-fix.sol",
           "intermediate_unchanged_function": "initiateOutbound"
         }
+      }
+    },
+    {
+      "step": "BRIDGE-AUDIT-9",
+      "results": "docs/audit/settlement-qualification/RESULTS.json",
+      "superseded_inputs": {
+        "contracts/src/bridge/BridgeAccountingRegistry.sol": {
+          "previous_sha256": "911acce3b2031c7e084857d9d63ce57c441988c29abf63116aec824e93ec1593",
+          "current_sha256": "fd68fbc2dc65f7ec830b73d4eaec3242b396d2cb504bc2d98b45b79fe662d7b8"
+        },
+        "contracts/src/bridge/BridgeIds420.sol": {
+          "previous_sha256": "a1465c037f57ba74e33598d9ced93d24016fc4119d5460a233f6432d4d941e3d",
+          "current_sha256": "33b57cfc3369159458c4cdbefe4358aa07e5c15a421bfd56e8a49bbae7d159df"
+        },
+        "contracts/src/bridge/BridgeRiskManager.sol": {
+          "previous_sha256": "b23940e18fb17c4294c29f7c85a197134393ff6b17e74bfe1e05edc4cba85158",
+          "current_sha256": "b977d7329bf0004b557d8f3dc546dfe93d9bb2fec4806d6a113d05d649402eff"
+        },
+        "contracts/src/bridge/BridgeTransferRegistry.sol": {
+          "previous_sha256": "cf3b8d5bd41807e385825ed4c1b9f4b95b35ebbd8ddb853c136f0884530b9431",
+          "current_sha256": "79640b696487c90c9fd70e451c9827371904b40d2e56841940f2c19880087393"
+        },
+        "contracts/src/bridge/EthereumDepositGateway420.sol": {
+          "previous_sha256": "531428f4026cc19e2c439b514cf4b4dadc481703b92d229f421d9036d160f1a6",
+          "current_sha256": "d73d7b2a5dcc965f453bd3df88c829b7cdcf9cd94948e764a2b50d150d23e3b9",
+          "intermediate_source": "docs/audit/settlement-qualification/EthereumDepositGateway420.sol.before-direction-guard",
+          "intermediate_sha256": "5aff0837ddeab929d2a3ba5c70a80939a7875c84292ebe3496251ba484a27ec9"
+        },
+        "contracts/src/bridge/GatewayRouter420.sol": {
+          "previous_sha256": "98abd847dc85b4bc98ee7ed20d921d119ebf23c29f25340530f92117a219c989",
+          "current_sha256": "b2aaeaaa50e828e7947d6b52ce7d98487e4b8140838bae499f054cb7e900ccd2"
+        },
+        "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": {
+          "previous_sha256": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+          "current_sha256": "eb93808f155c355de7de9702b17fa87226c37e4167fe7dfa8be4ec7694e97105"
+        },
+        "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": {
+          "previous_sha256": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced",
+          "current_sha256": "7eab0e7d4211686ff994392ab4a8f32ba5be8e861c0686a1a3205a07d51db485"
+        },
+        "contracts/src/bridge/bitcoin/BitcoinCustody420.sol": {
+          "previous_sha256": "31b582b2343fdae2ee04b6670ceb4477de947b92d0ac214fce2f3676b84076ad",
+          "current_sha256": "40ee4a906509f2ed319c7b86715d157a16e4274c80c83f5dbbe4f928e6bb26d7"
+        },
+        "contracts/test/BitcoinCustodyAdversarial420.t.sol": {
+          "previous_sha256": "06222b459bd9036b9eb723355915f7a8de8fef29f611787172bfa65826696c67",
+          "current_sha256": "c44e0b4e89123e5e5978a9b50bcc0656c07c0e0f6b9dfac6d88a47c2dcf0af7b"
+        },
+        "contracts/test/BitcoinCustodyCompletion420.t.sol": {
+          "previous_sha256": "2e3d3842e12391e40eca800253e7351574c1c2bbe9298df56b6d059a52576877",
+          "current_sha256": "10a4574144807906506bd264861204cb20fbd61b0c1030caa163961045cd69c9"
+        },
+        "contracts/test/BridgeFullLocalFixture420.sol": {
+          "previous_sha256": "0be3712b76110facd535c77784ab59102bef1c93c7fda307d95554a0de8c4671",
+          "current_sha256": "f4f8578ce83f2c88cbc1d5c589816b38cf9145099bfb2eac979af50f7100ea15"
+        },
+        "contracts/test/BridgeFullLocalIntegration420.t.sol": {
+          "previous_sha256": "2c7d401670ed21ef1f7ee9907a9e6e9b75efbd1afae1da7d52e23ca56e49d77e",
+          "current_sha256": "e88322390f3d4ce3223dcb8f63168d419e6c68595202a5ec7a222eaa120f3cfc"
+        },
+        "contracts/test/BridgeGenesisIntegration420.t.sol": {
+          "previous_sha256": "d2c5005c98e7cec81302ba36239f858aefd5e62a324f0d3e5184e6ce85d675d0",
+          "current_sha256": "1da46d39b5dcb775b405d3bc28992b2dc4fc802500549dd6561185bcc9157e74"
+        },
+        "contracts/test/BridgeInvariant420.t.sol": {
+          "previous_sha256": "fc2b2b5629cfd5b8950b3663fc6818d76599ca2e1e34877a6154edec2a7f3c72",
+          "current_sha256": "2cca17c2bec9ea080837fc5f3bdbdebc6b75207c6d9a4837cdd35d52faa70024"
+        },
+        "contracts/test/BridgeProductionAdmission420.t.sol": {
+          "previous_sha256": "c2c54f407dc5ac141aa9db8aa9763e75bd9f41b6ddb599f0546612a0fa2da9e1",
+          "current_sha256": "bef3c1d8bacdef01510ca97606d889580ce9f33f02812f46ab5234d38f98c1a7"
+        },
+        "contracts/test/BridgeRiskFuzz420.t.sol": {
+          "previous_sha256": "b3dd05fb6e0d5a4e86ce5642b744c47ade6cb83c209e9b40b1963124f1a785d8",
+          "current_sha256": "40f529adb2180702199069bf12ea4e8e33ef0865dc6451e5c9b63d6d23df36af"
+        },
+        "contracts/test/BridgeSettlementBoundary420.t.sol": {
+          "previous_sha256": "3de14be7c03849c17ba7ee5cf9f869a354e5eeb0fc87fb5a0a78f2391a192353",
+          "current_sha256": "1a64b7ed7a82036c0d10c92e9d78fd96920ce85db4726a0c09afc1a583deea3e"
+        },
+        "contracts/test/BridgeTransferLifecycle420.t.sol": {
+          "previous_sha256": "8d073e8f1362b7b69d5ed50aa1623172cb6d271bc444a98b3c4de01f623869d8",
+          "current_sha256": "5e801fec7c675dac50714c295ac580117afe2bcf9353b908747e9508de6d08ba"
+        },
+        "contracts/test/CADCGatewayIntegration420.t.sol": {
+          "previous_sha256": "b96f72bac72b24633a26ef15d06184433ed110a8c41925d2c6f337f61a1053ca",
+          "current_sha256": "f399bcda1b20c6a507f36e506de56dec894476ae7f4da1d8da0eb6e5bf2721c5"
+        },
+        "contracts/test/CCTPGatewayIntegration420.t.sol": {
+          "previous_sha256": "febef30111a4838b4b2e02d2ca2574dc3cdae36add4850473ba7b87792923c63",
+          "current_sha256": "403465f60d8b8fc3e9cd19c5536a3e370a520650bacd3edadcb3131e69a66d52"
+        },
+        "contracts/src/bridge/BridgeValueCustody420.sol": {
+          "previous_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+          "current_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+          "intermediate_source": "docs/audit/settlement-qualification/BridgeValueCustody420.sol.before-direction-guard",
+          "intermediate_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6"
+        }
+      },
+      "economic_execution": {
+        "qualified_components": [
+          "contracts/src/bridge/BridgeValueCustody420.sol",
+          "contracts/src/bridge/BridgeRepresentation420.sol",
+          "contracts/src/bridge/EthereumDepositGateway420.sol",
+          "contracts/src/bridge/bitcoin/BitcoinCustodyOutcome420.sol"
+        ],
+        "actual_funding_required_on_both_router_outbound_ABIs": true,
+        "outcome_binds_original_transfer_qualification": true,
+        "unminted_admissions_are_not_spendable_backing": true,
+        "native_issuer_generic_refund_supported": false,
+        "production_approvals": [],
+        "external_dependencies": "docs/audit/420BRIDGE-TESTNET-WORK-ROADMAP.md#custody-and-economic-settlement-handoff--bridge-audit-9",
+        "direction_masks_enforced": true,
+        "custody_approval_rechecked_after_dispatch": true
       }
     }
   ],

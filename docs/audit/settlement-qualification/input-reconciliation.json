@@ -1,0 +1,111 @@
+[
+  {
+    "run": "final-ingress",
+    "source_inputs": 57,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/EthereumDepositGateway420.sol": {
+        "tested_sha256": "5aff0837ddeab929d2a3ba5c70a80939a7875c84292ebe3496251ba484a27ec9",
+        "final_sha256": "d73d7b2a5dcc965f453bd3df88c829b7cdcf9cd94948e764a2b50d150d23e3b9",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-source",
+    "source_inputs": 49,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      },
+      "contracts/src/bridge/EthereumDepositGateway420.sol": {
+        "tested_sha256": "5aff0837ddeab929d2a3ba5c70a80939a7875c84292ebe3496251ba484a27ec9",
+        "final_sha256": "d73d7b2a5dcc965f453bd3df88c829b7cdcf9cd94948e764a2b50d150d23e3b9",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-source-token",
+    "source_inputs": 49,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      },
+      "contracts/src/bridge/EthereumDepositGateway420.sol": {
+        "tested_sha256": "5aff0837ddeab929d2a3ba5c70a80939a7875c84292ebe3496251ba484a27ec9",
+        "final_sha256": "d73d7b2a5dcc965f453bd3df88c829b7cdcf9cd94948e764a2b50d150d23e3b9",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-native",
+    "source_inputs": 128,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-cadc",
+    "source_inputs": 114,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-value",
+    "source_inputs": 47,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-core-final",
+    "source_inputs": 59,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-admission-delivery",
+    "source_inputs": 126,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  },
+  {
+    "run": "qualified-bitcoin",
+    "source_inputs": 62,
+    "qualified_guard_transitions": {
+      "contracts/src/bridge/BridgeValueCustody420.sol": {
+        "tested_sha256": "6f897271a7b126a11f72cfbbdf249a6fb83f5942ed0dda1f5d6ba2724ccf95f6",
+        "final_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+        "scope": "Added direction mask and post-dispatch approval gates; existing permitted behavior retained. See qualified-directions.log."
+      }
+    }
+  }
+]

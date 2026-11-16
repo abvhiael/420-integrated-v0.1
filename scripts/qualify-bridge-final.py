@@ -5,7 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OWNERS=['BridgeCanonicalEnvelope420.t.sol', 'BridgeFinalAdmission420.t.sol', 'SupportedTokenRoutes420.t.sol', 'TokenGatewayRouterIntegration420.t.sol', 'EthereumGatewaySharedIntegration420.t.sol', 'LitecoinGatewayIntegration420.t.sol', 'DogecoinGatewayIntegration420.t.sol', 'CCTPGatewayIntegration420.t.sol', 'CADCLayerZero420.t.sol', 'CADCGatewayIntegration420.t.sol', 'BridgeGenesisIntegration420.t.sol', 'BridgeVerifierRouteIdentity420.t.sol', 'BridgeProductionAdmission420.t.sol', 'BridgeProductionAdmissionInvariant420.t.sol', 'BridgeFullLocalIntegration420.t.sol', 'BridgeFullLocalInvariant420.t.sol', 'BridgeSettlementBoundary420.t.sol', 'PaySwapBridgeGenesisIntegration420.t.sol', 'BitcoinGatewayIntegration420.t.sol', 'BridgeTransferLifecycle420.t.sol']
 def main():
- p=argparse.ArgumentParser();p.add_argument('--forge',required=True);p.add_argument('--solc',required=True);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--group',choices=['build','integration','cadc-router','token-router'],required=True);p.add_argument('--owners',nargs='+');p.add_argument('--match-test');p.add_argument('--log',type=Path,required=True);a=p.parse_args();dest=a.workspace.resolve();dest.mkdir(parents=True,exist_ok=True)
+ p=argparse.ArgumentParser();p.add_argument('--forge',required=True);p.add_argument('--solc',required=True);p.add_argument('--workspace',type=Path,required=True);p.add_argument('--group',choices=['build','integration','cadc-router','token-router'],required=True);p.add_argument('--owners',nargs='+');p.add_argument('--match-test');p.add_argument('--exclude-contract',nargs='*',default=[]);p.add_argument('--log',type=Path,required=True);a=p.parse_args();dest=a.workspace.resolve();dest.mkdir(parents=True,exist_ok=True)
  if a.group!='build' and not a.owners:p.error('--owners must name the affected test owners; see retained command manifests')
  marker=dest/'.v22-owned';assert marker.exists() or not any(dest.iterdir()),'refusing foreign workspace';marker.touch()
  owners=a.owners or OWNERS
@@ -41,6 +41,9 @@ fail_on_revert=true
  if a.group!='build':
   command+=['--match-path',('contracts/test/'+owners[0] if len(owners)==1 else 'contracts/test/{'+','.join(owners)+'}'),'-vv']
   command+=['--no-match-contract','CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test'] if a.group=='integration' else ['--match-contract','^'+('CADCGatewayIntegration420Test' if a.group=='cadc-router' else 'TokenGatewayRouterIntegration420Test')+'$','--match-test','^testRouter']
+ if a.exclude_contract:
+  assert a.group=='integration','contract exclusion belongs to integration selection'
+  at=command.index('--no-match-contract');command[at+1]+='|'+'|'.join('^'+re.escape(x)+'$' for x in a.exclude_contract)
  if a.match_test:command+=['--match-test',a.match_test]
  a.log.parent.mkdir(parents=True,exist_ok=True);inputs={str(x):hashlib.sha256((ROOT/x).read_bytes()).hexdigest() for x in sorted(seen)}
  a.log.with_suffix('.inputs.json').write_text(json.dumps({'command':command,'source_sha256':inputs,'foundry_config':config,'owners':owners},indent=2,sort_keys=True)+'\n')

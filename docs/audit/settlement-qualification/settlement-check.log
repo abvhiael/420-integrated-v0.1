@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "distinct_cases_passed": 160,
+  "fuzz_inputs": 12500,
+  "invariant_runs": 512,
+  "invariant_calls": 32768,
+  "compiled_bridge_artifacts": 46,
+  "maximum_runtime_bytes": 23129,
+  "production_approvals": 0,
+  "live_settlement_qualified": false,
+  "new_ci_runs": 0
+}

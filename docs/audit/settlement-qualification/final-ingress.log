@@ -1,0 +1,46 @@
+Compiling 126 files with Solc 0.8.24
+Solc 0.8.24 finished in 336.41s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/helpers/EthereumProofFixture420.sol:24:21:
+   |
+24 |     function client(string memory prefix) internal returns(EthereumConsensusLightClient420 c){
+   |                     ^^^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> contracts/test/helpers/EthereumProofFixture420.sol:39:5:
+   |
+39 |     function prefix(bytes memory payload,uint256 offset) internal pure returns(bytes memory){
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:396:5:
+    |
+396 |     function testFuzzPrecisionRoundTrip(uint64 amount) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> contracts/test/SupportedTokenRoutes420.t.sol:508:5:
+    |
+508 |     function testFrozenCatalogueMatchesRegistryProfilesIndependently() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 15 tests for contracts/test/TokenGatewaySemantics420.t.sol:TokenGatewaySemantics420Test
+[PASS] testGatewayAaveReceipt() (gas: 17425255)
+[PASS] testGatewayAudioReceipt() (gas: 17424804)
+[PASS] testGatewayEurcReceipt() (gas: 17425666)
+[PASS] testGatewayLinkReceipt() (gas: 17425001)
+[PASS] testGatewayQcadReceipt() (gas: 17425411)
+[PASS] testGatewayReceiptTamperedAmountRejected() (gas: 17071048)
+[PASS] testGatewayRejectsFalseReturn() (gas: 3196439)
+[PASS] testGatewayRejectsMalformedReturn() (gas: 3226229)
+[PASS] testGatewayRejectsRebasingDelta() (gas: 3230977)
+[PASS] testGatewayRejectsSenderSurcharge() (gas: 3231165)
+[PASS] testGatewayRejectsSourceDecimalDrift() (gas: 3174866)
+[PASS] testGatewayRejectsTokenRevert() (gas: 3196272)
+[PASS] testGatewayRejectsTransferFee() (gas: 3230757)
+[PASS] testGatewayUniReceipt() (gas: 17424576)
+[PASS] testGatewayUsdtReceiptNoReturn() (gas: 17444804)
+Suite result: ok. 15 passed; 0 failed; 0 skipped; finished in 50.82ms (87.86ms CPU time)
+
+Ran 1 test suite in 51.59ms (50.82ms CPU time): 15 tests passed, 0 failed, 0 skipped (15 total tests)

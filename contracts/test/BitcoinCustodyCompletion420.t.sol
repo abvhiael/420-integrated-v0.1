@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./BridgeGenesisIntegration420.t.sol";
+import "../src/bridge/bitcoin/BitcoinCustodyOutcome420.sol";
+import "./helpers/ValueCustodyFixture420.sol";
 import "../src/bridge/bitcoin/BitcoinCustody420.sol";
 interface CustodyVm420 {function store(address,bytes32,bytes32) external;function prank(address) external;}
 /// @dev Controlled backing authority only; never production burn/UTXO proof evidence.
@@ -21,7 +23,12 @@ abstract contract BitcoinCustodyFixture420 is BridgeGenesisFixture420 {
   f.router.setAdapter(btc.ADAPTER_ID(),address(btc));f.routes.setRoute(ROUTE_ID,BridgeRouteRegistry.Route(ASSET_ID,btc.BTC_ROUTE_CHAIN_ID(),uint64(block.chainid),ASSET_ID,bytes32(uint256(uint160(TOKEN))),btc.ADAPTER_ID(),keccak256("controlled BTC configuration"),2,BridgeRouteRegistry.Status.APPROVED_INACTIVE,true,true));
   BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(btc),address(deposits),bytes4(keccak256("verifier()")),abi.encodeWithSignature("gatewayScriptHash()"),abi.encodeWithSignature("depositDomain()"),true);
   q=BridgeQualificationFixture420.registry(f.env);payoutProof=new BitcoinWithdrawalProof420(IBitcoinWithdrawal420(address(btc)),deposits);backing=new ControlledBitcoinBacking420();custody=new BitcoinCustody420(address(this),address(f.env.registry()),btc,payoutProof,backing,keccak256("controlled descriptor; no private keys"),500);
-  creditDeposit();qualifyCustody();if(activate)custody.setActive(true);
+  ValueToken420 represented=new ValueToken420();f.env.setSettlementAsset(address(represented),ASSET_ID,true);
+  f.routes.setRoute(ROUTE_ID,BridgeRouteRegistry.Route(ASSET_ID,btc.BTC_ROUTE_CHAIN_ID(),uint64(block.chainid),ASSET_ID,bytes32(uint256(uint160(address(represented)))),btc.ADAPTER_ID(),keccak256("controlled BTC configuration"),3,BridgeRouteRegistry.Status.APPROVED_INACTIVE,true,true));
+  BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(btc),address(deposits),bytes4(keccak256("verifier()")),abi.encodeWithSignature("gatewayScriptHash()"),abi.encodeWithSignature("depositDomain()"),true);
+  BitcoinCustodyOutcome420 outcome=new BitcoinCustodyOutcome420(custody,f.transfers);BridgeValueCustody420 value=new BridgeValueCustody420(address(this),address(f.env.registry()),keccak256("controlled BTC representation"),outcome);f.env.registerResident(address(value),value.componentId());represented.configure(address(value));value.configure(ASSET_ID,address(represented),BridgeValueCustody420.Mode.MINT_BURN);
+  ValueCustodyFixture420.approve(f.env,value,address(represented),address(outcome),abi.encodeWithSignature("configurationState()"),EXTERNAL_CHAIN,LOCAL_CHAIN);
+  creditDeposit();represented.approve(address(value),PAY);qualifyCustody();if(activate)custody.setActive(true);
   requestId=f.router.initiateOutbound(btc.ADAPTER_ID(),ROUTE_ID,ASSET_ID,recipientProgram(),PAY,hex"02");
  }
  function qualifyCustody() internal {
@@ -32,7 +39,7 @@ abstract contract BitcoinCustodyFixture420 is BridgeGenesisFixture420 {
   bytes memory marker=deposits.commitmentScript(0,address(this),10_000);bytes memory script_=custodyScript();bytes memory raw=bytes.concat(hex"0200000001",abi.encodePacked(bytes32(uint256(0x987654))),hex"0000000000fdffffff02",BridgeWire420.encodeLE(10_000,8),BridgeWire420.encodeCompactSize(uint64(script_.length)),script_,hex"000000000000000022",marker,hex"00000000");prev=BridgeCrypto420.sha256d(raw);
   bytes32 parent=headerChain.GENESIS();for(uint256 i=1;i<=6;++i){bytes32 next=keccak256(abi.encode("funded fixture",i));put(next,parent,i==1?prev:bytes32(uint256(1)),uint64(i));parent=next;}fundingTip=parent;cvm.store(address(headerChain),bytes32(uint256(1)),parent);bytes32[] memory ancestry=new bytes32[](5);for(uint256 i;i<5;++i)ancestry[i]=keccak256(abi.encode("funded fixture",uint256(5)-i));
   bytes memory inner=abi.encode(BitcoinFinalityVerifier420.Proof(keccak256(abi.encode("funded fixture",uint256(1))),raw,0,1,address(this),0,new bytes32[](0),ancestry));IBitcoinFinalityVerifier420.FinalizedTransfer memory t=deposits.verifyFinalizedTransfer(inner);IBridgeAdapter420.VerifiedTransfer memory transfer_=IBridgeAdapter420.VerifiedTransfer(ROUTE_ID,ASSET_ID,address(uint160(uint256(keccak256(abi.encodePacked(t.sourceOutput))))),address(this),t.amountSatoshis,t.transactionHash,t.messageId);
-  f.router.acceptInbound(btc.ADAPTER_ID(),ProofEnvelopeFixture420.wrap(f.router,btc.ADAPTER_ID(),transfer_,keccak256(custodyScript()),inner));
+  f.router.acceptInboundAndSettle(btc.ADAPTER_ID(),ProofEnvelopeFixture420.wrap(f.router,btc.ADAPTER_ID(),transfer_,keccak256(custodyScript()),inner));
  }
  function funding() internal view returns(IBitcoinCustody420.FundingInput[] memory list){list=new IBitcoinCustody420.FundingInput[](1);list[0]=IBitcoinCustody420.FundingInput(prev,0,10_000,keccak256(custodyScript()));}
  function transaction(uint64 fee,bool signed_) internal view returns(bytes memory){

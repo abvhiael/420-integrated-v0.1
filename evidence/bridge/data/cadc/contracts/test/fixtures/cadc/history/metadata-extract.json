@@ -1,0 +1,350 @@
+{
+  "ethereum": {
+    "chainDetails": {
+      "cgNetworkId": "eth",
+      "nativeChainId": 1,
+      "name": "Ethereum",
+      "shortName": "Ethereum",
+      "chainKey": "ethereum",
+      "chainType": "evm",
+      "chainLayer": "L1",
+      "chainStatus": "ACTIVE",
+      "nativeCurrency": {
+        "name": "ETH TOKEN",
+        "symbol": "ETH",
+        "decimals": 18,
+        "cgId": "ethereum",
+        "cmcId": 1027
+      },
+      "averageBlockTime": 10800
+    },
+    "deployments": [
+      {
+        "version": 2,
+        "eid": "30101",
+        "stage": "mainnet",
+        "chainKey": "ethereum",
+        "blockedMessageLib": {
+          "address": "0x1ccbf0db9c192d969de57e25b3ff09a25bb1d862"
+        },
+        "deadDVN": {
+          "address": "0x747c741496a507e4b404b50463e691a8d692f6ac"
+        },
+        "endpointV2": {
+          "address": "0x1a44076050125825900e736c501f859c50fe728c"
+        },
+        "endpointV2View": {
+          "address": "0x8fafc84caea1cef8475cb5cb344658d160c9ce0b"
+        },
+        "executor": {
+          "address": "0x173272739bd7aa6e4e214714048a9fe699453059"
+        },
+        "lzExecutor": {
+          "address": "0xbf2e102fb382d6ec52823c8f81a45e9caa951320"
+        },
+        "readLib1002": {
+          "address": "0x74f55bc2a79a27a0bf1d1a35db5d0fc36b9fdb9d"
+        },
+        "receiveUln302": {
+          "address": "0xc02ab410f0734efa3f14628780e6e695156024c2"
+        },
+        "sendUln302": {
+          "address": "0xbb2ea70c9e858123480642cf96acbcce1372dce1"
+        }
+      }
+    ],
+    "tokens": {
+      "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a": {
+        "symbol": "CAD-COIN",
+        "decimals": 6,
+        "cgId": "cad-coin",
+        "type": "ERC20",
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7",
+        "proxyAddresses": [
+          "0xe0f9483de044b8e0c069a8561bdb580778854143"
+        ]
+      },
+      "0xe0f9483de044b8e0c069a8561bdb580778854143": {
+        "type": "ProxyOFT",
+        "sharedDecimals": 6,
+        "erc20TokenAddress": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+        "decimals": 6,
+        "cgId": "cad-coin",
+        "symbol": "CADC",
+        "eid": 30101,
+        "mintAndBurn": true,
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true,
+          "symbol": "CAD-COIN"
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7"
+      }
+    }
+  },
+  "base": {
+    "chainDetails": {
+      "chainStack": "OP_STACK",
+      "cgNetworkId": "base",
+      "nativeChainId": 8453,
+      "name": "Base",
+      "shortName": "Base",
+      "chainKey": "base",
+      "chainType": "evm",
+      "chainLayer": "L2",
+      "chainStatus": "ACTIVE",
+      "nativeCurrency": {
+        "name": "ETH TOKEN",
+        "symbol": "ETH",
+        "decimals": 18,
+        "cgId": "ethereum",
+        "cmcId": 1027
+      },
+      "averageBlockTime": 200
+    },
+    "deployments": [
+      {
+        "version": 2,
+        "eid": "30184",
+        "stage": "mainnet",
+        "chainKey": "base",
+        "blockedMessageLib": {
+          "address": "0x1ccbf0db9c192d969de57e25b3ff09a25bb1d862"
+        },
+        "deadDVN": {
+          "address": "0x6498b0632f3834d7647367334838111c8c889703"
+        },
+        "endpointV2": {
+          "address": "0x1a44076050125825900e736c501f859c50fe728c"
+        },
+        "endpointV2View": {
+          "address": "0x5e2a88c385b86f00eb8f4d9f861649a6feb93f24"
+        },
+        "executor": {
+          "address": "0x2cca08ae69e0c44b18a57ab2a87644234daebae4"
+        },
+        "lzExecutor": {
+          "address": "0x125bd5c6c5066dcb4bb448b6ea8b9234ed60e160"
+        },
+        "readLib1002": {
+          "address": "0x1273141a3f7923aa2d9eddfa402440ce075ed8ff"
+        },
+        "receiveUln302": {
+          "address": "0xc70ab6f32772f59fbfc23889caf4ba3376c84baf"
+        },
+        "sendUln302": {
+          "address": "0xb5320b0b3a13cc860893e2bd79fcd7e13484dda2"
+        }
+      }
+    ],
+    "tokens": {
+      "0x5e63e9c06c3f2c779ef29a8071f94f5a724eb5e4": {
+        "symbol": "CAD-COIN",
+        "decimals": 6,
+        "type": "ERC20",
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7",
+        "proxyAddresses": [
+          "0x91222d95170227badb6d4e856fc03324eb6a4ab8"
+        ]
+      },
+      "0x91222d95170227badb6d4e856fc03324eb6a4ab8": {
+        "type": "ProxyOFT",
+        "sharedDecimals": 6,
+        "erc20TokenAddress": "0x5e63e9c06c3f2c779ef29a8071f94f5a724eb5e4",
+        "decimals": 6,
+        "symbol": "CADC",
+        "eid": 30184,
+        "mintAndBurn": true,
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7"
+      }
+    }
+  },
+  "polygon": {
+    "chainDetails": {
+      "cgNetworkId": "polygon_pos",
+      "nativeChainId": 137,
+      "name": "Polygon",
+      "shortName": "Polygon",
+      "chainKey": "polygon",
+      "chainType": "evm",
+      "chainLayer": "L2",
+      "chainStatus": "ACTIVE",
+      "nativeCurrency": {
+        "name": "MATIC TOKEN",
+        "symbol": "MATIC",
+        "decimals": 18,
+        "cgId": "polygon-ecosystem-token",
+        "cmcId": 28321
+      },
+      "averageBlockTime": 2000
+    },
+    "deployments": [
+      {
+        "version": 2,
+        "eid": "30109",
+        "stage": "mainnet",
+        "chainKey": "polygon",
+        "blockedMessageLib": {
+          "address": "0x1ccbf0db9c192d969de57e25b3ff09a25bb1d862"
+        },
+        "deadDVN": {
+          "address": "0x43cfcc293cdf99f7d021f21ffd443f174ab0e843"
+        },
+        "endpointV2": {
+          "address": "0x1a44076050125825900e736c501f859c50fe728c"
+        },
+        "endpointV2View": {
+          "address": "0x1bef2d7c5c60fd826cc1b1f29ca357af2d0ae2c6"
+        },
+        "executor": {
+          "address": "0xcd3f213ad101472e1713c72b1697e727c803885b"
+        },
+        "lzExecutor": {
+          "address": "0xe25741bda30bb79a66adf656e7f2d3f0c4fb3191"
+        },
+        "readLib1002": {
+          "address": "0xc214d690031d3f873365f94d381d6d50c35aa7fa"
+        },
+        "receiveUln302": {
+          "address": "0x1322871e4ab09bc7f5717189434f97bbd9546e95"
+        },
+        "sendUln302": {
+          "address": "0x6c26c61a97006888ea9e4fa36584c7df57cd9da3"
+        }
+      }
+    ],
+    "tokens": {
+      "0x74d9423a2886618522f7c992edf647ea707a38eb": {
+        "symbol": "CAD-COIN",
+        "decimals": 6,
+        "type": "ERC20",
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7",
+        "proxyAddresses": [
+          "0xf004f8c27851f4f7123b974bf4d106a1aa5c0ef5"
+        ]
+      },
+      "0xf004f8c27851f4f7123b974bf4d106a1aa5c0ef5": {
+        "type": "ProxyOFT",
+        "sharedDecimals": 6,
+        "erc20TokenAddress": "0x74d9423a2886618522f7c992edf647ea707a38eb",
+        "decimals": 6,
+        "symbol": "CADC",
+        "eid": 30109,
+        "mintAndBurn": true,
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7"
+      }
+    }
+  },
+  "solana": {
+    "chainDetails": {
+      "cgNetworkId": "solana",
+      "nativeChainId": 101,
+      "chainKey": "solana",
+      "chainType": "solana",
+      "chainLayer": "L1",
+      "chainStatus": "ACTIVE",
+      "nativeCurrency": {
+        "name": "SOL TOKEN",
+        "symbol": "SOL",
+        "decimals": 9,
+        "cgId": "solana",
+        "cmcId": 5426
+      }
+    },
+    "deployments": [
+      {
+        "version": 2,
+        "eid": "30168",
+        "stage": "mainnet",
+        "chainKey": "solana",
+        "blocked_messagelib": {
+          "address": "2XrYqmhBMPJgDsb4SVbjV1PnJBprurd5bzRCkHwiFCJB"
+        },
+        "dvn": {
+          "address": "HtEYV4xB4wvsj5fgTkcfuChYpvGYzgzwvNhgDZQNh7wW"
+        },
+        "endpointV2": {
+          "address": "76y77prsiCMvXMjuoZ5VRrhG5qYBrUMYTE5WgHqgjEn6"
+        },
+        "executor": {
+          "address": "6doghB248px58JSSwG4qejQ46kFMW4AMj7vzJnWZHNZn",
+          "pda": "AwrbHeCyniXaQhiJZkLhgWdUCteeWSGaSN1sTfLiY7xK"
+        },
+        "pricefeed": {
+          "address": "8ahPGPjEbpgGaZx2NV1iG5Shj7TDwvsjkEDcGWjt94TP"
+        },
+        "receiveUln302": {
+          "address": "7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"
+        },
+        "sendUln302": {
+          "address": "7a4WjyR8VZ7yZz5XJAKm39BUGn5iT9CKcv2pmG9tdXVH"
+        }
+      }
+    ],
+    "tokens": {
+      "52spLAAFjKMwhNJ3TL2PUAUGYGgXsbvipP4whRtBp82S": {
+        "symbol": "CAD-COIN",
+        "decimals": 6,
+        "type": "ERC20",
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "erc20TokenProgramId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7",
+        "proxyAddresses": [
+          "54NDwhi5dWeKBjBh8EkWH7mhsP2LLWw6y921gPRtPmQ5"
+        ]
+      },
+      "54NDwhi5dWeKBjBh8EkWH7mhsP2LLWw6y921gPRtPmQ5": {
+        "type": "ProxyOFT",
+        "sharedDecimals": 6,
+        "erc20TokenAddress": "52spLAAFjKMwhNJ3TL2PUAUGYGgXsbvipP4whRtBp82S",
+        "erc20TokenProgramId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+        "escrowTokenAddress": "EU2Ac2b55yPaehg2bJ5x8SmfdKK3wFnAngvcEHNmy1hD",
+        "oftProgramId": "G1US6gZ41fXPGZCndwMQpjQd6ohekptSnPUNPpHuywvh",
+        "decimals": 6,
+        "symbol": "CADC",
+        "eid": 30168,
+        "mintAndBurn": true,
+        "peggedTo": {
+          "address": "0x49a6f6aeab68ea001beaa4815186eb22fbdccf2a",
+          "chainName": "ethereum",
+          "programaticallyPegged": true
+        },
+        "tokenMeshId": "a415bcaf-9b03-4f3d-b911-26d0dfb47fa7"
+      }
+    }
+  },
+  "_provenance": {
+    "url": "https://metadata.layerzero-api.com/v1/metadata",
+    "observed": "2026-11-15",
+    "full_response_sha256": "323bbd6dc728b6348e4ae0a697cf1f3df17448ff7aee90058108bf6460d61039",
+    "chains_with_native_chain_id_420": [
+      "optimism-goerli"
+    ],
+    "scope": "Issuer CADC token identities cross-checked with issuer publication; metadata and RPC remain observations, not finality proofs."
+  }
+}

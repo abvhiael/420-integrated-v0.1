@@ -1,0 +1,63 @@
+{
+  "observed_at": "2026-11-15T16:30:30.060518+00:00",
+  "sources": {
+    "issuer-public-keys.json": {
+      "url": "https://iris-api.circle.com/v2/publicKeys",
+      "sha256": "526be5b4ade24dd754c1f5df37e473a859135d131dcf58cc0cc797a478d669bd"
+    },
+    "issuer-supported-domains.md": {
+      "url": "https://developers.circle.com/cctp/concepts/supported-chains-and-domains.md",
+      "sha256": "d636b46468bc715aaff071c604a5954571d4a5ec9078c2d4e7777885ec298f12"
+    },
+    "issuer-contract-addresses.md": {
+      "url": "https://developers.circle.com/cctp/references/contract-addresses.md",
+      "sha256": "7f036b0f5175352354d5e95d09bc81572bd1cbb11ada9a0217b989f2cd9c8b34"
+    },
+    "issuer-usdc-addresses.md": {
+      "url": "https://developers.circle.com/stablecoins/usdc-contract-addresses.md",
+      "sha256": "993ced64d29c9374d4494fdedfafa70bf9237d1d7d6be995ad18ed7de3009203"
+    },
+    "issuer-solana-programs.md": {
+      "url": "https://developers.circle.com/cctp/references/solana-programs.md",
+      "sha256": "4da531f0a542deb399c75d9dee18db8cbf07b3b88935f6d85948ba6dcfa3899b"
+    }
+  },
+  "published_deployments": {
+    "0": {
+      "name": "Ethereum",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "address_model": "EVM"
+    },
+    "3": {
+      "name": "Arbitrum",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831",
+      "address_model": "EVM"
+    },
+    "6": {
+      "name": "Base",
+      "message_transmitter": "00000000000000000000000081d40f21f12a8f0e3252bccb954d722d4c464b64",
+      "token_messenger": "00000000000000000000000028b5a0e9c621a5badaa536219b3a228c8168cf5d",
+      "usdc": "000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "address_model": "EVM"
+    },
+    "5": {
+      "name": "Solana",
+      "message_transmitter": "a65fc81ce19edcd2d2c340b02fa61be1d5badde1592833ddf92009d8cf685455",
+      "token_messenger": "a65fc81d0fefa8860cb3b83f089b0224be8a6687b7ae49f594c0b9b4d7e93893",
+      "usdc": "c6fa7af3bedbad3a3d65f36aabc97431b1bbe4c2d2f6e0e47ca60203452f5d61",
+      "address_model": "Solana"
+    }
+  },
+  "420chain": {
+    "cctp_listed": false,
+    "native_usdc_listed": false,
+    "assigned_domain": null,
+    "status": "NOT_CURRENTLY_LISTED_NATIVE_USDC_OR_CCTP",
+    "private_issuer_approval": "NOT_ESTABLISHED_BY_PUBLIC_PUBLICATIONS"
+  },
+  "private_issuer_contact_or_approval": "NOT_ESTABLISHED"
+}

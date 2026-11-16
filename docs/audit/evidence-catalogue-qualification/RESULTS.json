@@ -1,0 +1,31 @@
+{
+  "artifacts": 495,
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "bytes": 25240921,
+  "catalogue_sha256": "aeb75831e79bc618f333db418d790ef254751c4f050684af6b238d82555d2dd6",
+  "ci_run_ids": [],
+  "complete_420_gateway_authorizations": 0,
+  "consensus_test_reruns": 0,
+  "consensus_test_suites_rerun": 0,
+  "datasets": 15,
+  "independent_identity_checks": 39,
+  "merge_status": "NOT_REQUESTED",
+  "next_canonical_step": "No successor to V.17 is specified in current main or the supplied task sequence. None invented or begun.",
+  "original_checksum_checks": 418,
+  "original_checksum_conflicts": 0,
+  "origins": {
+    "CONTROLLED": 12,
+    "DERIVED_HISTORICAL": 75,
+    "EXPECTED_RESULTS": 18,
+    "HISTORICAL": 266,
+    "PROVENANCE": 37,
+    "QUALIFICATION_RECORD": 69,
+    "RPC_OBSERVATION": 18
+  },
+  "pass": true,
+  "recovered_original_logs": 19,
+  "source_integration": "Original immutable source pins retained, including unmerged audit PRs; no verifier implementation or activation changed.",
+  "status": "CATALOGUE_QUALIFIED",
+  "task": "BRIDGE-AUDIT-3.V.17",
+  "tests_passed": 22
+}

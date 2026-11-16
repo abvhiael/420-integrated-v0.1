@@ -1,0 +1,22 @@
+{
+  "artifacts": 495,
+  "bytes": 25240921,
+  "catalogue_sha256": "aeb75831e79bc618f333db418d790ef254751c4f050684af6b238d82555d2dd6",
+  "complete_420_gateway_authorizations": 0,
+  "consensus_test_suites_rerun": 0,
+  "datasets": 15,
+  "independent_identity_checks": 39,
+  "original_checksum_checks": 418,
+  "original_checksum_conflicts": 0,
+  "origins": {
+    "CONTROLLED": 12,
+    "DERIVED_HISTORICAL": 75,
+    "EXPECTED_RESULTS": 18,
+    "HISTORICAL": 266,
+    "PROVENANCE": 37,
+    "QUALIFICATION_RECORD": 69,
+    "RPC_OBSERVATION": 18
+  },
+  "pass": true,
+  "recovered_original_logs": 19
+}

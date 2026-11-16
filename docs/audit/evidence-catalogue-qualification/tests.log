@@ -1,0 +1,27 @@
+test_artifact_deletion (__main__.CatalogueTests.test_artifact_deletion) ... ok
+test_changed_payload (__main__.CatalogueTests.test_changed_payload) ... ok
+test_complete_bundle (__main__.CatalogueTests.test_complete_bundle) ... ok
+test_controlled_is_not_historical (__main__.CatalogueTests.test_controlled_is_not_historical) ... ok
+test_dataset_deletion (__main__.CatalogueTests.test_dataset_deletion) ... ok
+test_duplicate_artifact (__main__.CatalogueTests.test_duplicate_artifact) ... ok
+test_duplicate_json_keys (__main__.CatalogueTests.test_duplicate_json_keys) ... ok
+test_expected_result_substitution (__main__.CatalogueTests.test_expected_result_substitution) ... ok
+test_forbidden_claims_for_all_origins (__main__.CatalogueTests.test_forbidden_claims_for_all_origins) ... ok
+test_materialization_is_reproducible (__main__.CatalogueTests.test_materialization_is_reproducible) ... ok
+test_missing_payload (__main__.CatalogueTests.test_missing_payload) ... ok
+test_observation_claim_is_limited (__main__.CatalogueTests.test_observation_claim_is_limited) ... ok
+test_prior_run_evidence_preserved (__main__.CatalogueTests.test_prior_run_evidence_preserved) ... ok
+test_recovered_log_pin_substitution (__main__.CatalogueTests.test_recovered_log_pin_substitution) ... ok
+test_rpc_cannot_become_consensus (__main__.CatalogueTests.test_rpc_cannot_become_consensus) ... ok
+test_scope_limitations_preserved (__main__.CatalogueTests.test_scope_limitations_preserved) ... ok
+test_source_object_substitution (__main__.CatalogueTests.test_source_object_substitution) ... ok
+test_source_revision_substitution (__main__.CatalogueTests.test_source_revision_substitution) ... ok
+test_symlink_payload (__main__.CatalogueTests.test_symlink_payload) ... ok
+test_unlisted_payload (__main__.CatalogueTests.test_unlisted_payload) ... ok
+test_unrelated_payment_cannot_become_gateway (__main__.CatalogueTests.test_unrelated_payment_cannot_become_gateway) ... ok
+test_unsafe_paths (__main__.CatalogueTests.test_unsafe_paths) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 2.286s
+
+OK

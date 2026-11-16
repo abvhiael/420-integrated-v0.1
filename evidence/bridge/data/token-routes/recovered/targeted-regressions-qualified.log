@@ -1,0 +1,169 @@
+Compiling 31 files with Solc 0.8.24
+Solc 0.8.24 finished in 56.74s
+Compiler run successful!
+
+Ran 11 tests for contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[PASS] testAssetRebindingRemovesStaleSourceMapping() (gas: 133545)
+[PASS] testCanonicalMainnetBnbInboundPasses() (gas: 97586)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27705)
+[PASS] testMappingAloneDoesNotQualifyUnsupportedBep20() (gas: 280427)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 37030)
+[PASS] testOutboundWrongRouteFailsClosed() (gas: 41448)
+[PASS] testReplayFailsClosed() (gas: 224301)
+[PASS] testUnfinalizedFailsClosed() (gas: 122527)
+[PASS] testUnknownBep20FailsClosed() (gas: 149242)
+[PASS] testWrongChainFailsClosed() (gas: 127203)
+[PASS] testWrongGatewayFailsClosed() (gas: 129915)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 1.29ms (746.93µs CPU time)
+
+Ran 7 tests for contracts/test/RaySolanaBridgeAdapter420.t.sol:RaySolanaBridgeAdapter420Test
+[PASS] testCanonicalRaySolanaInboundPasses() (gas: 131183)
+[PASS] testRaySolanaDifferentRouteRejected() (gas: 42919)
+[PASS] testRaySolanaOutboundUsesBoundRoute() (gas: 77172)
+[PASS] testRaySolanaRejectsShortRecipient() (gas: 38210)
+[PASS] testRaySolanaReplayRejected() (gas: 281550)
+[PASS] testWrongRaySolanaMintRejected() (gas: 149843)
+[PASS] testWrongSolanaClusterRejected() (gas: 144963)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.23ms (605.12µs CPU time)
+
+Ran 5 tests for contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test
+[PASS] testCanonicalUniEthereumInboundPasses() (gas: 167886)
+[PASS] testUniDifferentRouteRejected() (gas: 42923)
+[PASS] testUniOutboundUsesEthereumRoute() (gas: 77248)
+[PASS] testUniReplayRejected() (gas: 319265)
+[PASS] testWrongUniTokenRejected() (gas: 150666)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.43ms (735.70µs CPU time)
+
+Ran 6 tests for contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test
+[PASS] testCanonicalQcadEthereumInboundPasses() (gas: 167913)
+[PASS] testLegacyQcadTokenRejected() (gas: 150947)
+[PASS] testQcadDifferentRouteRejected() (gas: 42909)
+[PASS] testQcadOutboundUsesEthereumRoute() (gas: 77166)
+[PASS] testQcadReplayRejected() (gas: 319183)
+[PASS] testWrongQcadTokenRejected() (gas: 150721)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.56ms (847.66µs CPU time)
+
+Ran 7 tests for contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test
+[PASS] testCrossAdapterReplayStateIsIsolated() (gas: 1165744)
+[PASS] testDirectCallsCannotBypassEitherRouter() (gas: 754162)
+[PASS] testOutboundMessagesAreAdapterDomainSeparated() (gas: 149876)
+[PASS] testRebindingClearsStaleSourcesOnBothAdapters() (gas: 140870)
+[PASS] testSameAssetIdBindsDistinctCanonicalSourcesAndRoutes() (gas: 30670)
+[PASS] testUnknownAssetsFailClosedOnOutbound() (gas: 76882)
+[PASS] testWrongRoutesFailClosedOnOutbound() (gas: 81258)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.87ms (935.83µs CPU time)
+
+Ran 5 tests for contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test
+[PASS] testCanonicalUsdtEthereumInboundPasses() (gas: 167846)
+[PASS] testUsdtDifferentRouteRejected() (gas: 42921)
+[PASS] testUsdtOutboundUsesEthereumRoute() (gas: 77151)
+[PASS] testUsdtReplayRejected() (gas: 319230)
+[PASS] testWrongUsdtTokenRejected() (gas: 150657)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 838.29µs (476.93µs CPU time)
+
+Ran 5 tests for contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test
+[PASS] testCanonicalLinkEthereumInboundPasses() (gas: 167886)
+[PASS] testLinkDifferentRouteRejected() (gas: 42967)
+[PASS] testLinkOutboundUsesEthereumRoute() (gas: 77202)
+[PASS] testLinkReplayRejected() (gas: 319255)
+[PASS] testWrongLinkTokenRejected() (gas: 150705)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.13ms (752.53µs CPU time)
+
+Ran 12 tests for contracts/test/SolanaBridgeAdapter420.t.sol:SolanaBridgeAdapter420Test
+[PASS] testAssetRebindingClearsPriorSourceMapping() (gas: 136106)
+[PASS] testCanonicalMainnetSolInboundPasses() (gas: 129268)
+[PASS] testDestinationChainRouterAndRouteCannotBeSubstituted() (gas: 508614)
+[PASS] testDirectCallerCannotBypassRouter() (gas: 27711)
+[PASS] testFullSolanaOwnerKeyIsPreserved() (gas: 222869)
+[PASS] testOutboundRequiresExactRouteAndSolanaRecipientWidth() (gas: 138269)
+[PASS] testQualifiedSplMintUsesBoundAssetAndRoute() (gas: 338761)
+[PASS] testReplayFailsClosed() (gas: 287990)
+[PASS] testUnapprovedSplMintFailsClosed() (gas: 160934)
+[PASS] testUnfinalizedProofFailsClosed() (gas: 157107)
+[PASS] testWrongClusterFailsClosed() (gas: 161813)
+[PASS] testWrongGatewayProgramFailsClosed() (gas: 164593)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 1.97ms (1.48ms CPU time)
+
+Ran 5 tests for contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test
+[PASS] testGovernanceCanRotateVerifiers() (gas: 90716)
+[PASS] testRotationTransfersEthereumProofAuthorityToNewVerifier() (gas: 945547)
+[PASS] testRotationTransfersSolanaProofAuthorityToNewVerifier() (gas: 827074)
+[PASS] testUnauthorizedVerifierRotationRejected() (gas: 82503)
+[PASS] testZeroAndEoaVerifierRotationRejected() (gas: 104134)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.16ms (517.76µs CPU time)
+
+Ran 5 tests for contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test
+[PASS] testAaveDifferentRouteRejected() (gas: 42939)
+[PASS] testAaveOutboundUsesEthereumRoute() (gas: 77202)
+[PASS] testAaveReplayRejected() (gas: 319264)
+[PASS] testCanonicalAaveEthereumInboundPasses() (gas: 167822)
+[PASS] testWrongAaveTokenRejected() (gas: 150783)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 968.84µs (517.62µs CPU time)
+
+Ran 7 tests for contracts/test/EurcSolanaBridgeAdapter420.t.sol:EurcSolanaBridgeAdapter420Test
+[PASS] testCanonicalEurcSolanaInboundPasses() (gas: 131227)
+[PASS] testEurcSolanaDifferentRouteRejected() (gas: 42936)
+[PASS] testEurcSolanaOutboundUsesBoundRoute() (gas: 77104)
+[PASS] testEurcSolanaRejectsShortRecipient() (gas: 38193)
+[PASS] testEurcSolanaReplayRejected() (gas: 281560)
+[PASS] testWrongEurcSolanaMintRejected() (gas: 149799)
+[PASS] testWrongSolanaClusterRejected() (gas: 144978)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.19ms (565.91µs CPU time)
+
+Ran 5 tests for contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test
+[PASS] testAudioCannotUseDifferentRoute() (gas: 42896)
+[PASS] testAudioOutboundUsesEthereumRoute() (gas: 77282)
+[PASS] testAudioReplayFailsClosed() (gas: 319255)
+[PASS] testCanonicalAudioEthereumInboundPasses() (gas: 167886)
+[PASS] testWrongAudioTokenFailsClosed() (gas: 150705)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 712.97µs (443.10µs CPU time)
+
+Ran 8 tests for contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test
+[PASS] testCanonicalAdapterDomainsAreDistinct() (gas: 19039)
+[PASS] testConfiguredRouterIsImmutableBoundary() (gas: 12799)
+[PASS] testDirectInboundRouterBypassRejectedWithoutReplayMutation() (gas: 1069702)
+[PASS] testDirectOutboundRouterBypassRejectedWithoutNonceMutation() (gas: 78518)
+[PASS] testIdenticalEconomicOutboundRequestsCannotShareCrossAdapterMessageId() (gas: 164120)
+[PASS] testInvalidOutboundPreservesNonce() (gas: 87195)
+[PASS] testSequentialEthereumOutboundUsesMonotonicNonceAndDistinctIdentity() (gas: 147702)
+[PASS] testSequentialSolanaOutboundUsesMonotonicNonceAndDistinctIdentity() (gas: 147690)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.82ms (1.20ms CPU time)
+
+Ran 6 tests for contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test
+[PASS] testEthereumInboundHaltPreservesReplayState() (gas: 685137)
+[PASS] testEthereumOutboundHaltPreservesNonceAndDirectionIndependence() (gas: 768481)
+[PASS] testSolanaInboundHaltPreservesReplayState() (gas: 613403)
+[PASS] testSolanaOutboundHaltPreservesNonceAndDirectionIndependence() (gas: 696402)
+[PASS] testUnauthorizedEmergencyChangesRejected() (gas: 75663)
+[PASS] testZeroIncidentRejectedWhenHalting() (gas: 54283)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 5.69ms (5.00ms CPU time)
+
+Ran 8 tests for contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test
+[PASS] testDirectAdapterBypassFailsClosed() (gas: 30463)
+[PASS] testFinalizedEthereumInboundPasses() (gas: 162855)
+[PASS] testMalformedOutboundRecipientFailsClosed() (gas: 38931)
+[PASS] testQualifiedErc20Passes() (gas: 370424)
+[PASS] testReplayFailsClosed() (gas: 308739)
+[PASS] testUnfinalizedExecutionBlockFailsClosed() (gas: 80243)
+[PASS] testUnknownErc20FailsClosed() (gas: 167858)
+[PASS] testWrongGatewayFailsClosed() (gas: 148398)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 1.11ms (728.92µs CPU time)
+
+Ran 5 tests for contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test
+[PASS] testCanonicalEurcEthereumInboundPasses() (gas: 167874)
+[PASS] testEurcDifferentRouteRejected() (gas: 42881)
+[PASS] testEurcOutboundUsesEthereumRoute() (gas: 77154)
+[PASS] testEurcReplayRejected() (gas: 319193)
+[PASS] testWrongEurcTokenRejected() (gas: 150655)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 715.60µs (426.85µs CPU time)
+
+Ran 6 tests for contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test
+[PASS] testFuzzEthereumMalformedMandatoryFieldRejected(uint8,bytes32) (runs: 2500, μ: 432368, ~: 432337)
+[PASS] testFuzzEthereumRecipientLength(bytes) (runs: 2500, μ: 52284, ~: 51669)
+[PASS] testFuzzEthereumWrongChainRejected(uint256,bytes32) (runs: 2500, μ: 450630, ~: 457538)
+[PASS] testFuzzSolanaMalformedMandatoryFieldRejected(uint8,bytes32) (runs: 2500, μ: 382864, ~: 382869)
+[PASS] testFuzzSolanaRecipientLength(bytes) (runs: 2500, μ: 63291, ~: 52310)
+[PASS] testFuzzSolanaWrongGenesisRejected(bytes32,bytes32) (runs: 2500, μ: 407810, ~: 408048)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 128.48ms (712.91ms CPU time)
+
+Ran 17 test suites in 129.29ms (154.17ms CPU time): 113 tests passed, 0 failed, 0 skipped (113 total tests)

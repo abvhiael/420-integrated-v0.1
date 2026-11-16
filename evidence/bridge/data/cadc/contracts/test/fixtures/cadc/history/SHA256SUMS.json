@@ -1,0 +1,9 @@
+{
+  "PROVENANCE.json": "95ce45c003afae2ef3b40dbe61295e763c333c7c5ca9e3db35d0fbd3a9838e9e",
+  "base-eth-archive-rpc.json": "d653544cc048b62e9c5fce502e8e76db51ecd97e0382ccb13369c2e8d7c10371",
+  "base-eth-scan.json": "5307a2b7518d1d3fd3d921ad6d46968884df8e8ed1f22fae90d65f154c3579e6",
+  "issuer-publication.html": "241ce59a6cc262a5c79bf9866466b9cf142548fb8decfbdc5dda9e192a3623b5",
+  "metadata-extract.json": "ab9be3a9b87ea850be9e35cfa1172975b7d53bcefa3ad2e0b404ee5092b758bc",
+  "polygon-eth-archive-rpc.json": "ca2058a97e383e7d2e03e1594c33947f3b8c9e4165771d39e7c74fd593d75f79",
+  "polygon-eth-scan.json": "ac17aaf8b37f99502277d76487a4ad9f82a7a8dc4616b440bb3200e8ea928eb0"
+}

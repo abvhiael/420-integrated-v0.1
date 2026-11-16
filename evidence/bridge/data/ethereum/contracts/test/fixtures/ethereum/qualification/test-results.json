@@ -1,0 +1,374 @@
+{
+  "contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test:testAaveDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test:testAaveOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test:testAaveReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test:testCanonicalAaveEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test:testWrongAaveTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test:testAudioCannotUseDifferentRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test:testAudioOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test:testAudioReplayFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test:testCanonicalAudioEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test:testWrongAudioTokenFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testCrossAdapterReplayStateIsIsolated": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testDirectCallsCannotBypassEitherRouter": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testOutboundMessagesAreAdapterDomainSeparated": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testRebindingClearsStaleSourcesOnBothAdapters": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testSameAssetIdBindsDistinctCanonicalSourcesAndRoutes": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testUnknownAssetsFailClosedOnOutbound": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test:testWrongRoutesFailClosedOnOutbound": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testCanonicalAdapterDomainsAreDistinct": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testConfiguredRouterIsImmutableBoundary": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testDirectInboundRouterBypassRejectedWithoutReplayMutation": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testDirectOutboundRouterBypassRejectedWithoutNonceMutation": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testIdenticalEconomicOutboundRequestsCannotShareCrossAdapterMessageId": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testInvalidOutboundPreservesNonce": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test:testSequentialEthereumOutboundUsesMonotonicNonceAndDistinctIdentity": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test:testEthereumInboundHaltPreservesReplayState": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test:testEthereumOutboundHaltPreservesNonceAndDirectionIndependence": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test:testUnauthorizedEmergencyChangesRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test:testZeroIncidentRejectedWhenHalting": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testDirectAdapterBypassFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testFinalizedEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testMalformedOutboundRecipientFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testQualifiedErc20Passes": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testReplayFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testUnfinalizedExecutionBlockFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testUnknownErc20FailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test:testWrongGatewayFailsClosed": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusInvariant420.t.sol:EthereumConsensusInvariant420Test:invariantOnlyProvenMainnetCheckpointAndCommitteeCanBeStored": {
+    "evidence": "consensus-invariant.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testCanonicalRLPRejectsMalformedLengthsIntegersAndTrailingBytes": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testConsensusRejectsForgedCommitteesOutputsReplayAndNoncanonicalJournal": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testEmbeddedTrieChildrenAndHashedShortNodeRejection": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testExecutionHeaderCanonicalFieldBoundaries": {
+    "evidence": "header-boundaries.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testExecutionPayloadHashBindingAndUnknownBeaconRejected": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testFuzzCanonicalIndexEncoding": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testFuzzTruncatedHistoricalExecutionHeader": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testGenuineFinalizedExecutionAncestryAndSubstitutionRejection": {
+    "evidence": "ancestry.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testHistoricalCanonicalTokenAccountsAndCodeHashes": {
+    "evidence": "accounts-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testHistoricalNativeAndErc20TransactionReceiptMembership": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testRealMainnetConsensusFinalityExecutionAndReceiptRoots": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testRealMainnetSyncCommitteePeriodTransition": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testWeakSubjectivityAndFutureCheckpointFailClosed": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumConsensusQualification420.t.sol:EthereumConsensusQualification420Test:testWrongTrieKeyValueRootAndTrailingProofRejected": {
+    "evidence": "consensus-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testAuthenticatedDepositCannotBeConsumedByAnotherDestinationRouter": {
+    "evidence": "destination-router.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testAuthenticatedWrongDestinationAndRouteEventsRejected": {
+    "evidence": "native-gateway-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testControlledAllCanonicalEthereumTokenRoutes": {
+    "evidence": "gateway-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testControlledNativeGatewayConcreteVerifierAdapterAndRotationReplay": {
+    "evidence": "native-gateway-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testGatewayEscrowAmountsFailuresAndReentrancy": {
+    "evidence": "gateway-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testOrdinaryHistoricalPaymentsCannotBecomeGatewayDeposits": {
+    "evidence": "gateway-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewayQualification420.t.sol:EthereumGatewayQualification420Test:testTransactionReceiptIdentitySuccessAndEnvelopeSubstitutionRejected": {
+    "evidence": "native-gateway-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumGatewaySharedIntegration420.t.sol:EthereumGatewaySharedIntegration420Test:testConcreteEthereumGatewayRouterRiskTransferAndAtomicRollback": {
+    "evidence": "shared-router-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/EthereumSP1HistoricalProof420.t.sol:EthereumSP1HistoricalProof420Test:testRealHistoricalMainnetConsensusProofAndTampering": {
+    "evidence": "sp1-proof.log",
+    "status": "PASS"
+  },
+  "contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test:testCanonicalEurcEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test:testEurcDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test:testEurcOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test:testEurcReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test:testWrongEurcTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test:testCanonicalLinkEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test:testLinkDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test:testLinkOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test:testLinkReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test:testWrongLinkTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test:testFuzzEthereumMalformedMandatoryFieldRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test:testFuzzEthereumRecipientLength": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test:testFuzzEthereumWrongChainRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testCanonicalQcadEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testLegacyQcadTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testQcadDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testQcadOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testQcadReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test:testWrongQcadTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test:testCanonicalUniEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test:testUniDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test:testUniOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test:testUniReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test:testWrongUniTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test:testCanonicalUsdtEthereumInboundPasses": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test:testUsdtDifferentRouteRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test:testUsdtOutboundUsesEthereumRoute": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test:testUsdtReplayRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test:testWrongUsdtTokenRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test:testGovernanceCanRotateVerifiers": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test:testRotationTransfersEthereumProofAuthorityToNewVerifier": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test:testUnauthorizedVerifierRotationRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  },
+  "contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test:testZeroAndEoaVerifierRotationRejected": {
+    "evidence": "route-regressions.log",
+    "status": "PASS"
+  }
+}

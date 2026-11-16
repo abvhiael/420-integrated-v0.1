@@ -1,0 +1,12 @@
+Compiling 74 files with Solc 0.8.24
+Solc 0.8.24 finished in 12.04s
+Compiler run successful!
+2026-11-15T17:12:03.421123Z  WARN foundry_fork_db::cache: Failed to read cache file err=Os { code: 2, kind: NotFound, message: "No such file or directory" } path="/home/agent/.foundry/cache/rpc/mainnet/26400201"
+2026-11-15T17:12:03.462261Z  WARN foundry_fork_db::cache: Failed to read cache file err=Os { code: 2, kind: NotFound, message: "No such file or directory" } path="/home/agent/.foundry/cache/rpc/mainnet/26399892"
+
+Ran 2 tests for contracts/test/CADCHistoricalFork.t.sol:CADCHistoricalFork420Test
+[PASS] testGenuineBaseDvnStateAndIssuerExecution() (gas: 3767236)
+[PASS] testGenuinePolygonDvnStateAndIssuerExecution() (gas: 3767251)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.87s (15.59s CPU time)
+
+Ran 1 test suite in 7.87s (7.87s CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

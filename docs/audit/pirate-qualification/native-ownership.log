@@ -1,0 +1,10 @@
+sapling 0 tree matches native True
+sapling 0 ownership verified
+sapling 1 tree matches native True
+sapling 1 rejected
+ironwood 0 tree matches native True
+ironwood 0 ownership verified
+ironwood 1 tree matches native True
+ironwood 1 rejected
+sapling received-note nullifier matched subsequent native spend
+ironwood received-note nullifier matched subsequent native spend

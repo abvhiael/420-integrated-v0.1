@@ -1,0 +1,26 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 8.85s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/LitecoinHistorical420.t.sol:43:5:
+   |
+43 |     function membership(bytes32 txid,string memory file) private {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 3 tests for contracts/test/LitecoinHistorical420.t.sol:LitecoinHistorical420Test
+[PASS] testGenuineConsecutiveHeadersScryptChainWorkAndTwelveConfirmations() (gas: 3309007339)
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineFirstAndFullPeriodRetargetBoundaries() (gas: 280979118)
+[PASS] testModernMainnetScryptAndGenuineSegwitOutputsAndMerklePaths() (gas: 279321077)
+Suite result: FAILED. 2 passed; 1 failed; 0 skipped; finished in 7.98s (9.12s CPU time)
+
+Ran 1 test suite in 7.98s (7.98s CPU time): 2 tests passed, 1 failed, 0 skipped (3 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/LitecoinHistorical420.t.sol:LitecoinHistorical420Test
+[FAIL: panic: arithmetic underflow or overflow (0x11)] testGenuineFirstAndFullPeriodRetargetBoundaries() (gas: 280979118)
+
+Encountered a total of 1 failing tests, 2 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

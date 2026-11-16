@@ -1,0 +1,37 @@
+{
+  "task": "BRIDGE-AUDIT-3.V.18",
+  "status": "LOCAL_ADVERSARIAL_QUALIFICATION_COMPLETE",
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "catalogue_sha": "3dcee22927c181c23451ed49eb908330b5254866",
+  "implemented_verifier_families": 14,
+  "new_and_affected_foundry_passes": 113,
+  "v18_new_passes": 80,
+  "affected_cadc_regression_passes": 33,
+  "fuzz_executions": 42500,
+  "invariant_calls": 122880,
+  "invariant_handler_reverts": 0,
+  "retained_log_files": 182,
+  "retained_passing_case_records": 1012,
+  "attack_matrix_entries": 196,
+  "uncovered_applicable_entries": 0,
+  "cadc_main_production_imports_verified": {
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  },
+  "independent_reference_records": [
+    {
+      "commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "path": "docs/audit/dobbscoin/native-reorg.json",
+      "local_path": "docs/audit/adversarial-qualification/dobbscoin-native-reorg.json",
+      "sha256": "c26fcaac1942c7e29e33102dd1c6934195caee63ef9df12023082ee0742feec8",
+      "scope": "Retained native 100-block higher-work reorg acceptance and 101-block rejection; no rerun."
+    }
+  ],
+  "independent_new_instruction_vectors": 7,
+  "ci_run_ids": [],
+  "old_consensus_test_reruns": 0,
+  "production_activation": false,
+  "merge_requested": false
+}

@@ -16,6 +16,22 @@ on:
       - 'docs/audit/REG-AUDIT-4-GENESIS-ADDRESS-NAMESPACE-QUALIFICATION.*'
       - 'docs/audit/420REGISTRY-COMPLETE-AUDIT-20260928.*'
       - '.github/workflows/registry-reg-audit-4.yml'
+      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'
+      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'
+      - '!contracts/config/bridge/cadc.json'
+      - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'
+      - '!contracts/config/bridge/audio-ethereum-v12.5.8.json'
+      - '!contracts/config/bridge/bnb-mainnet-v12.5.3.json'
+      - '!contracts/config/bridge/eurc-ethereum-v12.5.21.json'
+      - '!contracts/config/bridge/eurc-solana-v12.5.22.json'
+      - '!contracts/config/bridge/link-ethereum-v12.5.17.json'
+      - '!contracts/config/bridge/qcad-ethereum-v12.5.20.json'
+      - '!contracts/config/bridge/ray-solana-v12.5.23.json'
+      - '!contracts/config/bridge/uni-ethereum-v12.5.16.json'
+      - '!contracts/config/bridge/usdt-ethereum-v12.5.19.json'
+      - '!contracts/config/bridge/supported-token-routes-v1.json'
+      - '!contracts/config/bridge/token-route-dependencies/**'
+      - '!contracts/config/bridge/adversarial-sources-v1.json'
   workflow_dispatch:
 permissions:
   contents: read

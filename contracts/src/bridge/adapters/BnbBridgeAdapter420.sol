@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "../../interfaces/IBridgeAdapter420.sol";
 import "../../interfaces/IBnbFinalityVerifier420.sol";
 import "../../system/SystemAccess.sol";
+import "../../interfaces/IBridgeTokenRoutePolicy420.sol";
+import "../tokens/SupportedTokenRoutes420.sol";
 
 contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     bytes32 public constant ADAPTER_ID = keccak256("420/BRIDGE/BNB/MAINNET/V12.5.3");
@@ -19,56 +21,188 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bytes32) public sourceAssetByAssetId;
     mapping(bytes32 => bytes32) public routeIdByAssetId;
     mapping(bytes32 => bool) public consumedMessages;
+    address public tokenRoutePolicy;
+
+    function setTokenRoutePolicy(address policy) external onlyGovernance {
+        if (
+            policy.code.length == 0
+                || IBridgeTokenRoutePolicy420(policy).componentId() != keccak256("420/APP/420BRIDGE/ASSET_REGISTRY")
+        ) revert InvalidVerifier();
+        tokenRoutePolicy = policy;
+    }
+
+    function _tokenAmount(bytes32 route, bytes32 asset, bytes32 source, bytes32 gateway, uint256 amount, bool inbound)
+        private
+        view
+        returns (uint256)
+    {
+        if (source == BNB_NATIVE_SOURCE_ASSET && !SupportedTokenRoutes420.isTokenAsset(asset)) return amount;
+        if (tokenRoutePolicy.code.length == 0) revert AssetNotAllowed();
+        return IBridgeTokenRoutePolicy420(tokenRoutePolicy)
+            .qualifyTokenTransfer(route, asset, source, ADAPTER_ID, address(verifier), gateway, amount, inbound);
+    }
     uint256 public outboundNonce;
 
-    error InvalidAddress(); error InvalidVerifier(); error WrongChain(); error Unfinalized(); error InvalidProof();
-    error GatewayNotAllowed(); error AssetNotAllowed(); error RouteNotAllowed(); error Replay(); error OnlyRouter(); error InvalidOutbound();
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
+    error InvalidAddress();
+    error InvalidVerifier();
+    error WrongChain();
+    error Unfinalized();
+    error InvalidProof();
+    error GatewayNotAllowed();
+    error AssetNotAllowed();
+    error RouteNotAllowed();
+    error Replay();
+    error OnlyRouter();
+    error InvalidOutbound();
 
     event VerifierSet(address indexed verifier);
     event GatewaySet(address indexed gateway, bool allowed);
     event AssetMappingSet(bytes32 indexed sourceAsset, bytes32 indexed assetId, bool allowed);
     event RouteBindingSet(bytes32 indexed assetId, bytes32 indexed routeId);
     event BnbInboundConsumed(bytes32 indexed messageId, bytes32 indexed transactionHash, uint64 blockNumber);
-    event BnbOutboundRequested(bytes32 indexed messageId, bytes32 indexed routeId, bytes32 indexed assetId, address sender, bytes recipient, uint256 amount, bytes32 sourceAsset);
+    event BnbOutboundRequested(
+        bytes32 indexed messageId,
+        bytes32 indexed routeId,
+        bytes32 indexed assetId,
+        address sender,
+        bytes recipient,
+        uint256 amount,
+        bytes32 sourceAsset
+    );
 
-    constructor(address governanceTimelock_, address gatewayRouter_, address verifier_) SystemAccess(governanceTimelock_) {
+    constructor(address governanceTimelock_, address gatewayRouter_, address verifier_)
+        SystemAccess(governanceTimelock_)
+    {
         if (gatewayRouter_ == address(0) || gatewayRouter_.code.length == 0) revert InvalidAddress();
         gatewayRouter = gatewayRouter_;
         _setVerifier(verifier_);
     }
-    modifier onlyRouter() { if (msg.sender != gatewayRouter) revert OnlyRouter(); _; }
-    function adapterId() external pure returns (bytes32) { return ADAPTER_ID; }
-    function setVerifier(address verifier_) external onlyGovernance { _setVerifier(verifier_); }
-    function setGateway(address gateway, bool allowed) external onlyGovernance { if (gateway == address(0)) revert InvalidAddress(); gateways[gateway]=allowed; emit GatewaySet(gateway,allowed); }
+    modifier onlyRouter() {
+        if (msg.sender != gatewayRouter) revert OnlyRouter();
+        _;
+    }
+
+    function adapterId() external pure returns (bytes32) {
+        return ADAPTER_ID;
+    }
+
+    function setVerifier(address verifier_) external onlyGovernance {
+        _setVerifier(verifier_);
+    }
+
+    function setGateway(address gateway, bool allowed) external onlyGovernance {
+        if (gateway == address(0)) revert InvalidAddress();
+        gateways[gateway] = allowed;
+        emit GatewaySet(gateway, allowed);
+    }
+
     function setAssetMapping(bytes32 sourceAsset, bytes32 assetId, bool allowed) external onlyGovernance {
-        if (sourceAsset==bytes32(0)||assetId==bytes32(0)) revert InvalidProof();
+        if (sourceAsset == bytes32(0) || assetId == bytes32(0)) revert InvalidProof();
         if (allowed) {
-            bytes32 previousSource=sourceAssetByAssetId[assetId]; if(previousSource!=bytes32(0)&&previousSource!=sourceAsset) delete assetIdBySourceAsset[previousSource];
-            bytes32 previousAsset=assetIdBySourceAsset[sourceAsset]; if(previousAsset!=bytes32(0)&&previousAsset!=assetId) delete sourceAssetByAssetId[previousAsset];
-            assetIdBySourceAsset[sourceAsset]=assetId; sourceAssetByAssetId[assetId]=sourceAsset;
+            bytes32 previousSource = sourceAssetByAssetId[assetId];
+            if (previousSource != bytes32(0) && previousSource != sourceAsset) delete assetIdBySourceAsset[
+                previousSource
+            ];
+            bytes32 previousAsset = assetIdBySourceAsset[sourceAsset];
+            if (previousAsset != bytes32(0) && previousAsset != assetId) delete sourceAssetByAssetId[previousAsset];
+            assetIdBySourceAsset[sourceAsset] = assetId;
+            sourceAssetByAssetId[assetId] = sourceAsset;
         } else {
-            if(assetIdBySourceAsset[sourceAsset]==assetId) delete assetIdBySourceAsset[sourceAsset];
-            if(sourceAssetByAssetId[assetId]==sourceAsset) delete sourceAssetByAssetId[assetId];
+            if (assetIdBySourceAsset[sourceAsset] == assetId) delete assetIdBySourceAsset[sourceAsset];
+            if (sourceAssetByAssetId[assetId] == sourceAsset) delete sourceAssetByAssetId[assetId];
         }
-        emit AssetMappingSet(sourceAsset,assetId,allowed);
+        emit AssetMappingSet(sourceAsset, assetId, allowed);
     }
-    function setRouteBinding(bytes32 assetId, bytes32 routeId) external onlyGovernance { if(assetId==bytes32(0)) revert InvalidProof(); routeIdByAssetId[assetId]=routeId; emit RouteBindingSet(assetId,routeId); }
-    function sourceAssetKey(address sourceToken) public pure returns(bytes32){ if(sourceToken==address(0)) return BNB_NATIVE_SOURCE_ASSET; return bytes32(uint256(uint160(sourceToken))); }
+
+    function setRouteBinding(bytes32 assetId, bytes32 routeId) external onlyGovernance {
+        if (assetId == bytes32(0)) revert InvalidProof();
+        routeIdByAssetId[assetId] = routeId;
+        emit RouteBindingSet(assetId, routeId);
+    }
+
+    function sourceAssetKey(address sourceToken) public pure returns (bytes32) {
+        if (sourceToken == address(0)) return BNB_NATIVE_SOURCE_ASSET;
+        return bytes32(uint256(uint160(sourceToken)));
+    }
+
     function verifyInbound(bytes calldata proof) external onlyRouter returns (VerifiedTransfer memory v) {
-        IBnbFinalityVerifier420.FinalizedTransfer memory p=verifier.verifyFinalizedTransfer(proof);
-        if(!p.finalized) revert Unfinalized(); if(p.sourceChainId!=BNB_MAINNET_CHAIN_ID) revert WrongChain();
-        if(p.blockNumber==0||p.blockHash==bytes32(0)||p.transactionHash==bytes32(0)||p.messageId==bytes32(0)||p.gateway==address(0)||p.sourceSender==address(0)||p.recipient==address(0)||p.amount==0) revert InvalidProof();
-        if(!gateways[p.gateway]) revert GatewayNotAllowed();
-        bytes32 sourceAsset=sourceAssetKey(p.sourceToken); bytes32 assetId=assetIdBySourceAsset[sourceAsset]; if(assetId==bytes32(0)) revert AssetNotAllowed();
-        bytes32 routeId=routeIdByAssetId[assetId]; if(routeId==bytes32(0)) revert RouteNotAllowed(); if(consumedMessages[p.messageId]) revert Replay();
-        consumedMessages[p.messageId]=true; emit BnbInboundConsumed(p.messageId,p.transactionHash,p.blockNumber);
-        v=VerifiedTransfer({routeId:routeId,assetId:assetId,sender:p.sourceSender,recipient:p.recipient,amount:p.amount,sourceTxId:p.transactionHash,sourceMessageId:p.messageId});
+        IBnbFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
+        if (!p.finalized) revert Unfinalized();
+        if (p.sourceChainId != BNB_MAINNET_CHAIN_ID) revert WrongChain();
+        if (
+            p.blockNumber == 0 || p.blockHash == bytes32(0) || p.transactionHash == bytes32(0)
+                || p.messageId == bytes32(0) || p.gateway == address(0) || p.sourceSender == address(0)
+                || p.recipient == address(0) || p.amount == 0
+        ) revert InvalidProof();
+        if (!gateways[p.gateway]) revert GatewayNotAllowed();
+        bytes32 sourceAsset = sourceAssetKey(p.sourceToken);
+        bytes32 assetId = assetIdBySourceAsset[sourceAsset];
+        if (assetId == bytes32(0)) revert AssetNotAllowed();
+        bytes32 routeId = routeIdByAssetId[assetId];
+        if (routeId == bytes32(0)) revert RouteNotAllowed();
+        if (consumedMessages[p.messageId]) revert Replay();
+        uint256 localAmount =
+            _tokenAmount(routeId, assetId, sourceAsset, bytes32(uint256(uint160(p.gateway))), p.amount, true);
+        consumedMessages[p.messageId] = true;
+        emit BnbInboundConsumed(p.messageId, p.transactionHash, p.blockNumber);
+        verifiedSourceContext[p.messageId]=SourceProofContext(bytes32(uint256(uint160(p.gateway))),sourceAsset);
+        v = VerifiedTransfer({
+            routeId: routeId,
+            assetId: assetId,
+            sender: p.sourceSender,
+            recipient: p.recipient,
+            amount: localAmount,
+            sourceTxId: p.transactionHash,
+            sourceMessageId: p.messageId
+        });
     }
-    function initiateOutbound(bytes32 routeId, bytes32 assetId, address sender, bytes calldata recipient, uint256 amount, bytes calldata extra) external payable onlyRouter returns(bytes32 sourceMessageId){
-        if(routeId==bytes32(0)||assetId==bytes32(0)||sender==address(0)||recipient.length!=20||amount==0||msg.value!=0) revert InvalidOutbound();
-        bytes32 sourceAsset=sourceAssetByAssetId[assetId]; if(sourceAsset==bytes32(0)) revert AssetNotAllowed(); if(routeIdByAssetId[assetId]!=routeId) revert RouteNotAllowed();
-        uint256 nonce=++outboundNonce; sourceMessageId=keccak256(abi.encode(ADAPTER_ID,block.chainid,routeId,assetId,sender,recipient,amount,sourceAsset,nonce,extra));
-        emit BnbOutboundRequested(sourceMessageId,routeId,assetId,sender,recipient,amount,sourceAsset);
+
+    function initiateOutbound(
+        bytes32 routeId,
+        bytes32 assetId,
+        address sender,
+        bytes calldata recipient,
+        uint256 amount,
+        bytes calldata extra
+    ) external payable onlyRouter returns (bytes32 sourceMessageId) {
+        if (
+            routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 20
+                || amount == 0 || msg.value != 0
+        ) revert InvalidOutbound();
+        bytes32 sourceAsset = sourceAssetByAssetId[assetId];
+        if (sourceAsset == bytes32(0)) revert AssetNotAllowed();
+        if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();
+        uint256 sourceAmount = _tokenAmount(routeId, assetId, sourceAsset, bytes32(0), amount, false);
+        uint256 nonce = ++outboundNonce;
+        sourceMessageId = (sourceAsset == BNB_NATIVE_SOURCE_ASSET && !SupportedTokenRoutes420.isTokenAsset(assetId))
+            ? keccak256(
+                abi.encode(
+                    ADAPTER_ID, block.chainid, routeId, assetId, sender, recipient, amount, sourceAsset, nonce, extra
+                )
+            )
+            : keccak256(
+                abi.encode(
+                    ADAPTER_ID,
+                    block.chainid,
+                    routeId,
+                    assetId,
+                    sender,
+                    recipient,
+                    amount,
+                    sourceAmount,
+                    sourceAsset,
+                    nonce,
+                    extra
+                )
+            );
+        emit BnbOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, sourceAmount, sourceAsset);
     }
-    function _setVerifier(address verifier_) private { if(verifier_==address(0)||verifier_.code.length==0) revert InvalidVerifier(); verifier=IBnbFinalityVerifier420(verifier_); emit VerifierSet(verifier_); }
+
+    function _setVerifier(address verifier_) private {
+        if (verifier_ == address(0) || verifier_.code.length == 0) revert InvalidVerifier();
+        verifier = IBnbFinalityVerifier420(verifier_);
+        emit VerifierSet(verifier_);
+    }
 }

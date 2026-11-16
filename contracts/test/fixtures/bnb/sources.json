@@ -1,0 +1,80 @@
+{
+  "bsc_core": {
+    "repository": "https://github.com/bnb-chain/bsc",
+    "commit": "cdb7548b5baacfdae92f9f63437d6456411665f3",
+    "release": "v1.7.8",
+    "files": [
+      "consensus/parlia/parlia.go",
+      "consensus/parlia/snapshot.go",
+      "core/types/block.go",
+      "core/types/vote.go"
+    ],
+    "downloaded_parlia_sha256": "531a47ff04a57902694b3ad2e840146c047dd7c5d57b14ea83c30eb92569be03"
+  },
+  "archived_headers": {
+    "repository": "https://github.com/Alt-bi/helios-bsc",
+    "commit": "97bfa399ae06fd9d3b4d4c48a3477b8cb7779781",
+    "path": "fixtures/mainnet",
+    "source_rpc": "https://bsc-mainnet.public.blastapi.io",
+    "capture_date": "2026-08-18",
+    "notes": "Seven epoch/boundary header captures. Independently rehashed and all mainnet-domain secp256k1 seals recovered."
+  },
+  "acquired": {
+    "rpc": "https://bsc-mainnet.public.blastapi.io",
+    "date": "2026-11-14",
+    "network_verified": "eth_chainId returned 0x38",
+    "headers": "116664003..116664092",
+    "block_and_receipts": 116663999,
+    "methods": [
+      "eth_getBlockByNumber",
+      "eth_getTransactionReceipt"
+    ],
+    "notes": "Block receipts reconstructed from 81 individual receipt RPC results after block-receipts endpoint unavailable. All hashes, tx indices, transaction and receipt trie roots independently verified."
+  },
+  "certificate_reference": {
+    "repository": "https://github.com/mapprotocol/map-contracts",
+    "commit": "b669194f6894189eeab62bfd7f0aef7b4a26d789",
+    "path": "lightclients/bsc/contracts/LightNodeV2.sol",
+    "notes": "Two linked vote certificate pattern; no MAP/native-precompile backend is trusted or required."
+  },
+  "bls_formulas": {
+    "reference": "https://github.com/ethereum/py_ecc/tree/v8.0.0",
+    "version": "8.0.0",
+    "license": "PY_ECC_LICENSE",
+    "files": [
+      "optimized_bls12_381/optimized_curve.py",
+      "optimized_bls12_381/optimized_pairing.py",
+      "optimized_bls12_381/optimized_swu.py",
+      "optimized_bls12_381/constants.py",
+      "bls/hash_to_curve.py"
+    ],
+    "ciphersuite": "BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_POP_",
+    "notes": "Software Solidity adaptation of field, homogeneous curve, SWU/isogeny and pairing formulas. No Python code participates in runtime verification."
+  },
+  "ethereum_reuse": {
+    "qualified_source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+    "pr": 1157,
+    "preserved_tests": 93,
+    "exact_unchanged_libraries": [
+      "EthereumRLP420.sol",
+      "EthereumMPT420.sol"
+    ],
+    "notes": "Libraries included in this main-based branch; no dependency on merging other open verifier branches."
+  },
+  "bootstrap_epochs_direct_rpc_recheck": {
+    "date": "2026-11-14",
+    "rpc": "https://bsc-mainnet.public.blastapi.io",
+    "results": [
+      {
+        "number": 116662000,
+        "hash": "0xa10ceb45e4c4b7a62fb536db3c8d531e9d996cd229eb6c622340b0479ad5a4c4",
+        "epoch_extra_matches": true
+      },
+      {
+        "number": 116663000,
+        "hash": "0xa1e343e187e51df89ee14d384b92b0d2797a4a8b2ae4ec8728bef1c9076dafdf",
+        "epoch_extra_matches": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 2.66s
+Compiler run successful!
+
+Ran 11 tests for contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test
+[PASS] testCanonicalDogecoinInboundPasses() (gas: 165221)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27626)
+[PASS] testMessageReplayFailsClosed() (gas: 297539)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 36500)
+[PASS] testOutboundP2pkhPasses() (gas: 67681)
+[PASS] testOutboundUnsupportedScriptTypeFailsClosed() (gas: 36963)
+[PASS] testSourceOutputReplayFailsClosed() (gas: 357665)
+[PASS] testUnfinalizedFailsClosed() (gas: 130401)
+[PASS] testWrongGatewayScriptFailsClosed() (gas: 137652)
+[PASS] testWrongGenesisFailsClosed() (gas: 135146)
+[PASS] testWrongMessageStartFailsClosed() (gas: 135306)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 1.38ms (3.03ms CPU time)
+
+Ran 1 test suite in 2.43ms (1.38ms CPU time): 11 tests passed, 0 failed, 0 skipped (11 total tests)

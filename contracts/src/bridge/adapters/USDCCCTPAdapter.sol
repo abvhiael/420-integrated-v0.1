@@ -41,6 +41,8 @@ contract USDCCCTPAdapter is IBridgeAdapter420,IBridgeSettlementEvidence420,Syste
     event CCTPInbound(bytes32 indexed nonce,bytes32 indexed messageHash,bytes32 indexed route,uint256 burned,uint256 fee,uint256 delivered);
     event CCTPOutbound(bytes32 indexed requestId,bytes32 indexed route,address indexed sender,bytes32 recipient,uint256 amount,uint256 maxFee,uint32 minFinality);
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     struct Settlement {address token;address recipient;uint256 amount;bytes32 evidenceHash;}
     mapping(bytes32=>Settlement) private settlements;
     function settlementEvidence(bytes32 sourceMessageId) external view returns(address,address,uint256,bytes32){Settlement memory s=settlements[sourceMessageId];return(s.token,s.recipient,s.amount,s.evidenceHash);}
@@ -97,6 +99,7 @@ contract USDCCCTPAdapter is IBridgeAdapter420,IBridgeSettlementEvidence420,Syste
         if(ICCTPUSDC420(usdc).balanceOf(m.mintRecipient)!=beforeBalance+expected||ICircleMessageTransmitterV2420(messageTransmitter).usedNonces(m.nonce)!=1)revert TokenMovement();
         bytes32 messageHash=keccak256(message);
         bytes32 id=keccak256(abi.encode("420/CCTP/V2/NONCE",m.nonce));
+        verifiedSourceContext[id]=SourceProofContext(m.sender,m.burnToken);
         settlements[id]=Settlement(usdc,m.mintRecipient,delivered,keccak256(abi.encode("420/CCTP/NATIVE_DELIVERY/V1",messageHash,m.nonce,usdc,m.mintRecipient,delivered)));
         v=VerifiedTransfer(p.route,usdcAssetId,sender,m.mintRecipient,delivered,messageHash,id);
         emit CCTPInbound(m.nonce,messageHash,p.route,m.amount,m.fee,delivered);

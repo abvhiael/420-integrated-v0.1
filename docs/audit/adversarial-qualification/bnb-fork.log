@@ -1,0 +1,37 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 21.31s
+Compiler run successful!
+2026-11-16T01:51:06.196178Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196307Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196315Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196349Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196363Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196433Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196472Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196491Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.196512Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198040Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198064Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198070Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198082Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198094Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198116Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198135Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198145Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+2026-11-16T01:51:06.198155Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21265)
+
+Ran 2 tests for contracts/test/adversarial/BnbForkV18.t.sol:BnbForkV18Test
+[PASS] invariantV18FinalizedPrefixAndCommitteeResistCachedForks() (runs: 128, calls: 8192, reverts: 0)
+
+╭-----------------+-------------------------+-------+---------+----------╮
+| Contract        | Selector                | Calls | Reverts | Discards |
++========================================================================+
+| BnbForkActorV18 | cacheConflictingHeader  | 4045  | 0       | 0        |
+|-----------------+-------------------------+-------+---------+----------|
+| BnbForkActorV18 | claimUncomputedFinality | 4147  | 0       | 0        |
+╰-----------------+-------------------------+-------+---------+----------╯
+
+[PASS] testV18ConflictingHeaderCacheCannotReorganizeFinalizedPrefix() (gas: 5358645)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 80.79s (80.78s CPU time)
+
+Ran 1 test suite in 80.80s (80.79s CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

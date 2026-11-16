@@ -1,0 +1,18 @@
+{
+  "TronBridgeAdapter420": {
+    "init_bytes": 4132,
+    "runtime_bytes": 3723
+  },
+  "TronFinalityVerifier420": {
+    "init_bytes": 13757,
+    "runtime_bytes": 13451
+  },
+  "TronProto420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "TronWire420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

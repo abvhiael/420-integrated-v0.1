@@ -1,0 +1,9 @@
+{
+  "file": "daemon-resume.log",
+  "sha256": "26ebfa4035cde77e9f23ce641af4bf1149a636dd0af258d5b1caf239ebc4f7b2",
+  "bytes": 1941961014,
+  "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "reindexing_finished": true,
+  "clean_shutdown": true,
+  "large_trace_retention": "checksum and final trace excerpt; reproduce from pinned official raw snapshot"
+}

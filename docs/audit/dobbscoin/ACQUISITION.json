@@ -1,0 +1,25 @@
+{
+  "source_primary": "https://git.subgenius.finance/SubGeniusFinance/dobbscoin-source",
+  "source_mirror": "https://github.com/dobbscoin/dobbscoin-source",
+  "source_commit": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "source_modified": false,
+  "archive": "https://www.dobbscoin.info/bootstrap/dobbscoin-chain-1914745-20260928.zip",
+  "archive_manifest": "https://www.dobbscoin.info/bootstrap/SHA256SUMS",
+  "archive_sha256": "30874468c97d7911d1486828a2e8410f11f5af7921786f9073d295bf57ed278a",
+  "archive_bytes": 858892051,
+  "selected_raw_files_sha256": {
+    "blocks/blk00001.dat": "2548c57778520342431b223b153691208389c26b1d48bb88ef28036a51216b74",
+    "blocks/blk00000.dat": "6731e85b50e285ad7046aa9d683033c703dfe4e88475b85d8f862982b644da65",
+    "blocks/blk00004.dat": "d2e3cb026b983e8c1fc1208a0e30b090ca3f5b19d72aa2ae22d61528b798239d",
+    "blocks/blk00003.dat": "568a987e3d8aa4422f16ae1b425c330418f61e7c28d5c9ea4dc5a42b7f0cf7b8",
+    "blocks/blk00005.dat": "07f4c31cb1f1f70f39004d9f41862f217865de1f6d870da4a622ac4c64d10f5c",
+    "blocks/blk00002.dat": "b23d41718cee1b7ad227fbd46537f2ccdf46ffab799641e944fb019c1d56d633"
+  },
+  "snapshot_tip": "c6d2be979323fee26cac4dd88c0e180992d8c62a8901cf6a2faf621f347d2cb8",
+  "snapshot_height": 1914745,
+  "databases_imported": false,
+  "daemon_sha256": "ecd039b25bee21baeb13f8dabd51bb9ea9246fcc5a9cbc69022542ccdb383b39",
+  "native_tests_sha256": "92cdd7cd65637c1103587624120847eca4f1d7878ac944404ab48926e852dd96",
+  "compiler": "g++ (Debian 14.2.0-19) 14.2.0",
+  "consensus_library_sha256": "677d72715aa87a83a210287b13577e92f46020d5fd9194c94b1fa1e5fbb8d7ee"
+}

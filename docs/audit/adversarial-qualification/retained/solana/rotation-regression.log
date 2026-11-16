@@ -1,0 +1,12 @@
+Compiling 7 files with Solc 0.8.24
+Solc 0.8.24 finished in 4.47s
+Compiler run successful!
+
+Ran 4 tests for contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test
+[PASS] testGovernanceCanRotateVerifiers() (gas: 90591)
+[PASS] testRotationTransfersSolanaProofAuthorityToNewVerifier() (gas: 821223)
+[PASS] testUnauthorizedVerifierRotationRejected() (gas: 82387)
+[PASS] testZeroAndEoaVerifierRotationRejected() (gas: 103966)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.27ms (1.19ms CPU time)
+
+Ran 1 test suite in 3.19ms (1.27ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

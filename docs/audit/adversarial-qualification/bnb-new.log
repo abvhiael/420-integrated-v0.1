@@ -1,0 +1,40 @@
+Compiling 16 files with Solc 0.8.24
+Solc 0.8.24 finished in 25.54s
+Compiler run successful!
+2026-11-16T01:33:58.817373Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817425Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817435Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817453Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817468Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817495Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817529Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.817572Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819178Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819197Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819204Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819214Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819220Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819237Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819260Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21353)
+2026-11-16T01:33:58.819297Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21353)
+
+Ran 5 tests for contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test
+[PASS] invariantV18UntrustedRelayerCannotAuthorizeTransfer() (runs: 128, calls: 8192, reverts: 0)
+
+╭------------------+------------+-------+---------+----------╮
+| Contract         | Selector   | Calls | Reverts | Discards |
++============================================================+
+| EnvelopeActorV18 | foreign    | 2786  | 0       | 0        |
+|------------------+------------+-------+---------+----------|
+| EnvelopeActorV18 | lengthBomb | 2741  | 0       | 0        |
+|------------------+------------+-------+---------+----------|
+| EnvelopeActorV18 | words      | 2665  | 0       | 0        |
+╰------------------+------------+-------+---------+----------╯
+
+[PASS] testFuzzV18MalformedEnvelope(bytes32,uint8,uint8) (runs: 2500, μ: 93435, ~: 88941)
+[PASS] testV18CrossProtocolAndRpcAssertions() (gas: 158331)
+[PASS] testV18DynamicLengthAndOffsetBombs() (gas: 1402883)
+[PASS] testV18LargeHostileEnvelopeHasBoundedVerifierWork() (gas: 32863015)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 772.82ms (1.01s CPU time)
+
+Ran 1 test suite in 774.10ms (772.82ms CPU time): 5 tests passed, 0 failed, 0 skipped (5 total tests)

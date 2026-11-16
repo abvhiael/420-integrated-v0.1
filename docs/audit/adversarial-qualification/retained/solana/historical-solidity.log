@@ -1,0 +1,10 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 4.24s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/SolanaHistoricalEvidence420.t.sol:SolanaHistoricalEvidence420Test
+[PASS] testGenuineLegacyV0V1NativeRayAndEurcSignatureEvidence() (gas: 18612140)
+[PASS] testHistoricalSignatureAndShortVecSubstitutionFail() (gas: 3995377)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 53.50ms (61.08ms CPU time)
+
+Ran 1 test suite in 54.12ms (53.50ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

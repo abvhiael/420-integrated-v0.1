@@ -1,0 +1,10 @@
+No files changed, compilation skipped
+
+Ran 4 tests for contracts/test/CADCGatewayIntegration420.t.sol:CADCGatewayIntegration420Test
+[PASS] testRouterNativeDeliveryLifecycle() (gas: 2780829)
+[PASS] testRouterOutboundNativeBurnRemainsPending() (gas: 13293148)
+[PASS] testRouterRevokedIssuerGuardRejectsNativeDelivery() (gas: 696386)
+[PASS] testRouterRiskFailureRollsBackEndpointDvnTokenReplay() (gas: 4187407)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 34.64ms (32.12ms CPU time)
+
+Ran 1 test suite in 35.89ms (34.64ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

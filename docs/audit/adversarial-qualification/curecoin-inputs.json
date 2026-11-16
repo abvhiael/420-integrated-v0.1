@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/curecoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "curecoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol": {
+      "sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol": {
+      "sha256": "09d3589114c856c2925c67e0e7bec54cc3612d348f42c3a35b3796ffb6c0f185",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/curecoin/CurecoinConsensus420.sol": {
+      "sha256": "b7429f8b2e2a45690d05012eb0e2e87ecad3e130b40af6d33bef1cbbaed17d3a",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/curecoin/CurecoinSignature420.sol": {
+      "sha256": "7ca958893e861be5f4a598fc928453355654950f55357453e7f0810e95093d71",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/bridge/verifiers/curecoin/CurecoinWire420.sol": {
+      "sha256": "7c9d5188def5fc9fc471a584c06f4754da1d658e37c9cdc69827e8192484a531",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/interfaces/ICurecoinFinalityVerifier420.sol": {
+      "sha256": "e92328b74f9ec7c764771605f5225cbe242894d4fac461a54ccbdccdf85b0c9a",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+    },
+    "contracts/test/adversarial/CurecoinV18.t.sol": {
+      "sha256": "a809f334d52d56c6b6d308e562120d925a7092d9623ddf9831d168b1ca8611b0",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f"
+}

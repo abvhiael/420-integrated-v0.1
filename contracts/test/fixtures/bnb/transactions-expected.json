@@ -1,0 +1,18 @@
+{
+  "block": 116663999,
+  "count": 81,
+  "transactionsRoot": "0xf0a5e253e0f6844373fcd35cce3eeda8013e99f5f97f789e10f9cb1d36f187ec",
+  "receiptsRoot": "0x780ba1281be7d91afa083927b39fedd6aeb84e0526f6ea9d57b508edaea37393",
+  "vectors": [
+    {
+      "kind": "native",
+      "index": 23,
+      "transactionHash": "0x92b9a3c1fcbc6aab030b42047bcc49f317b6ec006bc05d5c03f09f9d525d5619"
+    },
+    {
+      "kind": "token",
+      "index": 1,
+      "transactionHash": "0x0647889fdd70ee0365d1538a283258ca56f72164b679298ac5d145f30a1796f8"
+    }
+  ]
+}

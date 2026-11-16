@@ -1,0 +1,25 @@
+{
+  "unique_solidity_tests_qualified": 55,
+  "fuzz_cases": 2500,
+  "sdk_tests_passed": 33,
+  "historical_messages_authenticated": 5,
+  "separately_observed_destination_receipts": 4,
+  "upstream_native_creation_artifacts_reproduced": 4,
+  "production_runtime_bytes": 12828,
+  "retained_solidity_runs": [
+    {
+      "artifact": "solidity-owners.log",
+      "passes": 54,
+      "failures": 1
+    },
+    {
+      "artifact": "source-address-guard.log",
+      "passes": 8,
+      "failures": 0
+    }
+  ],
+  "all_latest_test_results": "PASS",
+  "github_actions_run_ids": [],
+  "issuer_420_support": "NOT_CURRENTLY_LISTED",
+  "full_420chain_acceptance": "OPEN_ISSUER_SUPPORT_BLOCKED"
+}

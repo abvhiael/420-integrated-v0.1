@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/ProofEnvelopeFixture420.sol";
 
 import "../src/bridge/GatewayRouter420.sol";
 import "../src/bridge/BridgeRiskManager.sol";
@@ -15,6 +16,7 @@ import "./helpers/BridgeQualificationFixture420.sol";
 import "./BitcoinConsensusQualification420.t.sol";
 
 contract BitcoinSharedMockAdapter420 is IBridgeAdapter420 {
+    function verifiedSourceContext(bytes32) external pure returns(bytes32,bytes32){return(keccak256("fixture/gateway"),bytes32(uint256(uint160(address(0xCA420)))));}
     VerifiedTransfer public nextTransfer;
     bytes32 public nextOutboundId = keccak256("outbound-message");
     bool public failInbound;
@@ -32,6 +34,7 @@ contract BitcoinSharedMockAdapter420 is IBridgeAdapter420 {
 }
 
 contract BitcoinSharedWrongAdapter420 is IBridgeAdapter420 {
+    function verifiedSourceContext(bytes32) external pure returns(bytes32,bytes32){return(keccak256("fixture/gateway"),bytes32(uint256(uint160(address(0xCA420)))));}
     VerifiedTransfer public nextTransfer;
     bytes32 public nextOutboundId = keccak256("wrong-outbound-message");
 
@@ -165,6 +168,11 @@ contract BitcoinGatewayIntegration420Test {
         btcvm.store(address(c),bytes32(uint256(slot)+2),bytes32(work));
         btcvm.store(address(c),bytes32(uint256(slot)+3),bytes32(uint256(height)|(uint256(1231469665)<<64)|(uint256(0x1d00ffff)<<96)|(uint256(1231006505)<<128)));
     }
+    function transport(Fixture memory f,BitcoinBridgeAdapter420 a,BitcoinFinalityVerifier420 verifier,bytes memory raw) internal view returns(bytes memory){
+        IBitcoinFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer(raw);
+        IBridgeAdapter420.VerifiedTransfer memory v=IBridgeAdapter420.VerifiedTransfer(ROUTE_ID,ASSET_ID,address(1),t.recipient,t.amountSatoshis,t.transactionHash,t.messageId);
+        return ProofEnvelopeFixture420.wrap(f.router,a.ADAPTER_ID(),v,verifier.gatewayScriptHash(),raw);
+    }
     function testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() public {
         Fixture memory f=_setup();
         BitcoinHeaderChain420 c=new BitcoinHeaderChain420();
@@ -187,23 +195,23 @@ contract BitcoinGatewayIntegration420Test {
         IBitcoinFinalityVerifier420.FinalizedTransfer memory t=verifier.verifyFinalizedTransfer(encoded);
         // Fail after adapter verification: route safety must roll back both replay maps.
         f.routes.setDirection(ROUTE_ID,false,false);
-        (bool ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),encoded)));
+        (bool ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),transport(f,a,verifier,encoded))));
         require(!ok && !a.consumedMessages(t.messageId) && !a.consumedSourceOutputs(t.sourceOutput));
         f.routes.setDirection(ROUTE_ID,true,false);
         f.routes.bindVerifier(ROUTE_ID,BridgeQualificationFixture420.registry(f.env).currentApproval(address(a)));
         // Fail after risk consumption: transfer registry rejects untrusted router.
         f.transfers.setRouter(address(f.router),false);
-        (ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),encoded)));
+        (ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),transport(f,a,verifier,encoded))));
         require(!ok && !a.consumedSourceOutputs(t.sourceOutput));
         (,,,,,,uint256 rolledBack)=f.risk.routeUsage(ROUTE_ID);require(rolledBack==0);
         f.transfers.setRouter(address(f.router),true);
-        bytes32 id=f.router.acceptInbound(a.ADAPTER_ID(),encoded);
+        bytes32 id=f.router.acceptInbound(a.ADAPTER_ID(),transport(f,a,verifier,encoded));
         (,,,,uint256 amount,,,BridgeTransferRegistry.Status status,,)=f.transfers.transfers(id);
         require(amount==1000 && status==BridgeTransferRegistry.Status.VERIFIED);
         (,,,,,,uint256 tvl)=f.risk.routeUsage(ROUTE_ID);require(tvl==1000);
         (bytes32 gateway,bytes32 sourceAsset)=a.verifiedSourceContext(t.messageId);
         require(gateway==keccak256(script) && sourceAsset==ASSET_ID);
-        (ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),encoded)));require(!ok);
+        (ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),transport(f,a,verifier,encoded))));require(!ok);
         (,,,,,,uint256 afterReplay)=f.risk.routeUsage(ROUTE_ID);require(afterReplay==tvl);
     }
 }

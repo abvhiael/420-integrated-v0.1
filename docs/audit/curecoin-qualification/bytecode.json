@@ -1,0 +1,22 @@
+{
+  "CurecoinBridgeAdapter420": {
+    "init_bytes": 4273,
+    "runtime_bytes": 3864
+  },
+  "CurecoinFinalityVerifier420": {
+    "init_bytes": 18336,
+    "runtime_bytes": 17722
+  },
+  "CurecoinConsensus420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "CurecoinSignature420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "CurecoinWire420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  }
+}

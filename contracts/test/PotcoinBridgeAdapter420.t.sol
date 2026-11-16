@@ -148,8 +148,16 @@ contract PotcoinBridgeAdapter420Test {
         require(!ok, "unknown script type accepted");
     }
 
+    function testDestinationBindingsRejected() public {
+        for(uint256 i;i<3;++i){
+            IPotcoinFinalityVerifier420.FinalizedTransfer memory p=_healthy(keccak256(abi.encode(i)),keccak256(abi.encode("out",i)));
+            if(i==0)p.destinationChainId++;else if(i==1)p.destinationRouter=address(1);else p.routeId=bytes32(uint256(1));
+            verifier.set(p);(bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok,"destination substitution");
+        }
+    }
+
     function _healthy(bytes32 messageId, bytes32 sourceOutput)
-        private pure returns (IPotcoinFinalityVerifier420.FinalizedTransfer memory p)
+        private view returns (IPotcoinFinalityVerifier420.FinalizedTransfer memory p)
     {
         p = IPotcoinFinalityVerifier420.FinalizedTransfer({
             networkId: keccak256("POTCOIN/MAINNET"),
@@ -162,7 +170,10 @@ contract PotcoinBridgeAdapter420Test {
             recipient: address(0xB0B),
             amountPotSatoshis: 42_00000000,
             proofOfStake: true,
-            finalized: true
+            finalized: true,
+            destinationChainId: block.chainid,
+            destinationRouter: address(router),
+            routeId: ROUTE
         });
     }
 }

@@ -30,6 +30,8 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         uint256 amount;
     }
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress();
     error InvalidVerifier();
     error InvalidBinding();
@@ -81,12 +83,14 @@ contract XrplBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (p.ledgerIndex == 0 || p.ledgerHash == bytes32(0) || p.transactionRoot == bytes32(0) || p.transactionHash == bytes32(0) || p.messageId == bytes32(0) || p.gatewayAccount == bytes20(0) || p.sourceAccount == bytes20(0) || p.recipient == address(0) || p.amountDrops == 0) revert InvalidProof();
         if (!gatewayAccounts[p.gatewayAccount]) revert GatewayNotAllowed();
         if (xrpAssetId == bytes32(0) || xrpRouteId == bytes32(0)) revert InvalidBinding();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != xrpRouteId) revert InvalidProof();
         if (consumedMessages[p.messageId] || consumedTransactions[p.transactionHash]) revert Replay();
 
         consumedMessages[p.messageId] = true;
         consumedTransactions[p.transactionHash] = true;
         emit XrpInboundConsumed(p.messageId, p.transactionHash, p.ledgerIndex);
 
+        verifiedSourceContext[p.messageId]=SourceProofContext(bytes32(p.gatewayAccount),xrpAssetId);
         v = VerifiedTransfer({routeId: xrpRouteId, assetId: xrpAssetId, sender: address(uint160(p.sourceAccount)), recipient: p.recipient, amount: p.amountDrops, sourceTxId: p.transactionHash, sourceMessageId: p.messageId});
     }
 

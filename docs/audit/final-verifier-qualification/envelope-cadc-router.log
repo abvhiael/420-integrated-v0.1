@@ -1,0 +1,12 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 130.16s
+Compiler run successful!
+
+Ran 4 tests for contracts/test/CADCGatewayIntegration420.t.sol:CADCGatewayIntegration420Test
+[PASS] testRouterNativeDeliveryLifecycle() (gas: 3046593)
+[PASS] testRouterOutboundNativeBurnRemainsPending() (gas: 13566498)
+[PASS] testRouterRevokedIssuerGuardRejectsNativeDelivery() (gas: 961899)
+[PASS] testRouterRiskFailureRollsBackEndpointDvnTokenReplay() (gas: 4716541)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 25.58ms (26.78ms CPU time)
+
+Ran 1 test suite in 26.18ms (25.58ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

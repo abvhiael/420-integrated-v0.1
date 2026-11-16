@@ -1,0 +1,26 @@
+{
+  "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "prior_results_sha256": "fdf0437459d51aaff17af0b7212f9d67b9840aee7163713c5a2d85da93b3fe1c",
+  "daemon_sha256": "ecd039b25bee21baeb13f8dabd51bb9ea9246fcc5a9cbc69022542ccdb383b39",
+  "rejected_depth": 101,
+  "accepted_depth": 100,
+  "rejected_final": {
+    "height": 211,
+    "hash": "d74d6c79e4a9a8c6a0ee93a0e65dbc68e8a7754f6527a2adc2356ffb76fa45f7",
+    "result": "bad-reorg-depth"
+  },
+  "accepted_final": {
+    "height": 211,
+    "hash": "ad01fee151157b70fe2b8f1dbfb320eab487ab550195b92009101de02e6dddad",
+    "result": null
+  },
+  "selected": {
+    "chain": "regtest",
+    "blocks": 211,
+    "headers": 211,
+    "bestblockhash": "ad01fee151157b70fe2b8f1dbfb320eab487ab550195b92009101de02e6dddad",
+    "difficulty": 0.0,
+    "verificationprogress": 1.0,
+    "chainwork": "00000000000000000000000000000000000000000000000000000000000001a8"
+  }
+}

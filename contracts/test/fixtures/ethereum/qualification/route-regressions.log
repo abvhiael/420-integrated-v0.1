@@ -1,0 +1,113 @@
+Compiling 22 files with Solc 0.8.24
+Solc 0.8.24 finished in 41.81s
+Compiler run successful!
+
+Ran 5 tests for contracts/test/EurcBridgeAdapter420.t.sol:EurcBridgeAdapter420Test
+[PASS] testCanonicalEurcEthereumInboundPasses() (gas: 162125)
+[PASS] testEurcDifferentRouteRejected() (gas: 42819)
+[PASS] testEurcOutboundUsesEthereumRoute() (gas: 69344)
+[PASS] testEurcReplayRejected() (gas: 307664)
+[PASS] testWrongEurcTokenRejected() (gas: 150627)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.21ms (585.82µs CPU time)
+
+Ran 5 tests for contracts/test/AudioBridgeAdapter420.t.sol:AudioBridgeAdapter420Test
+[PASS] testAudioCannotUseDifferentRoute() (gas: 42834)
+[PASS] testAudioOutboundUsesEthereumRoute() (gas: 69472)
+[PASS] testAudioReplayFailsClosed() (gas: 307726)
+[PASS] testCanonicalAudioEthereumInboundPasses() (gas: 162137)
+[PASS] testWrongAudioTokenFailsClosed() (gas: 150677)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.25ms (639.39µs CPU time)
+
+Ran 5 tests for contracts/test/AaveBridgeAdapter420.t.sol:AaveBridgeAdapter420Test
+[PASS] testAaveDifferentRouteRejected() (gas: 42877)
+[PASS] testAaveOutboundUsesEthereumRoute() (gas: 69392)
+[PASS] testAaveReplayRejected() (gas: 307735)
+[PASS] testCanonicalAaveEthereumInboundPasses() (gas: 162073)
+[PASS] testWrongAaveTokenRejected() (gas: 150755)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.39ms (653.23µs CPU time)
+
+Ran 6 tests for contracts/test/QcadBridgeAdapter420.t.sol:QcadBridgeAdapter420Test
+[PASS] testCanonicalQcadEthereumInboundPasses() (gas: 162164)
+[PASS] testLegacyQcadTokenRejected() (gas: 150919)
+[PASS] testQcadDifferentRouteRejected() (gas: 42847)
+[PASS] testQcadOutboundUsesEthereumRoute() (gas: 69356)
+[PASS] testQcadReplayRejected() (gas: 307654)
+[PASS] testWrongQcadTokenRejected() (gas: 150693)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.27ms (613.43µs CPU time)
+
+Ran 4 tests for contracts/test/EmergencyControlsHardening420.t.sol:EmergencyControlsHardening420Test
+[PASS] testEthereumInboundHaltPreservesReplayState() (gas: 679190)
+[PASS] testEthereumOutboundHaltPreservesNonceAndDirectionIndependence() (gas: 754624)
+[PASS] testUnauthorizedEmergencyChangesRejected() (gas: 75539)
+[PASS] testZeroIncidentRejectedWhenHalting() (gas: 54266)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 1.45ms (562.61µs CPU time)
+
+Ran 7 tests for contracts/test/DomainNonceRouterBypassHardening420.t.sol:DomainNonceRouterBypassHardening420Test
+[PASS] testCanonicalAdapterDomainsAreDistinct() (gas: 18701)
+[PASS] testConfiguredRouterIsImmutableBoundary() (gas: 12802)
+[PASS] testDirectInboundRouterBypassRejectedWithoutReplayMutation() (gas: 959091)
+[PASS] testDirectOutboundRouterBypassRejectedWithoutNonceMutation() (gas: 78253)
+[PASS] testIdenticalEconomicOutboundRequestsCannotShareCrossAdapterMessageId() (gas: 148367)
+[PASS] testInvalidOutboundPreservesNonce() (gas: 86930)
+[PASS] testSequentialEthereumOutboundUsesMonotonicNonceAndDistinctIdentity() (gas: 131994)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.68ms (758.06µs CPU time)
+
+Ran 5 tests for contracts/test/UniBridgeAdapter420.t.sol:UniBridgeAdapter420Test
+[PASS] testCanonicalUniEthereumInboundPasses() (gas: 162137)
+[PASS] testUniDifferentRouteRejected() (gas: 42861)
+[PASS] testUniOutboundUsesEthereumRoute() (gas: 69438)
+[PASS] testUniReplayRejected() (gas: 307736)
+[PASS] testWrongUniTokenRejected() (gas: 150638)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 756.54µs (457.17µs CPU time)
+
+Ran 4 tests for contracts/test/VerifierRotationHardening420.t.sol:VerifierRotationHardening420Test
+[PASS] testGovernanceCanRotateVerifiers() (gas: 90547)
+[PASS] testRotationTransfersEthereumProofAuthorityToNewVerifier() (gas: 939644)
+[PASS] testUnauthorizedVerifierRotationRejected() (gas: 82343)
+[PASS] testZeroAndEoaVerifierRotationRejected() (gas: 103922)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 973.90µs (367.91µs CPU time)
+
+Ran 5 tests for contracts/test/UsdtBridgeAdapter420.t.sol:UsdtBridgeAdapter420Test
+[PASS] testCanonicalUsdtEthereumInboundPasses() (gas: 162097)
+[PASS] testUsdtDifferentRouteRejected() (gas: 42859)
+[PASS] testUsdtOutboundUsesEthereumRoute() (gas: 69341)
+[PASS] testUsdtReplayRejected() (gas: 307701)
+[PASS] testWrongUsdtTokenRejected() (gas: 150629)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 1.03ms (462.82µs CPU time)
+
+Ran 5 tests for contracts/test/LinkBridgeAdapter420.t.sol:LinkBridgeAdapter420Test
+[PASS] testCanonicalLinkEthereumInboundPasses() (gas: 162137)
+[PASS] testLinkDifferentRouteRejected() (gas: 42905)
+[PASS] testLinkOutboundUsesEthereumRoute() (gas: 69392)
+[PASS] testLinkReplayRejected() (gas: 307726)
+[PASS] testWrongLinkTokenRejected() (gas: 150677)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 93.89ms (683.80µs CPU time)
+
+Ran 8 tests for contracts/test/EthereumBridgeAdapter420.t.sol:EthereumBridgeAdapter420Test
+[PASS] testDirectAdapterBypassFailsClosed() (gas: 30441)
+[PASS] testFinalizedEthereumInboundPasses() (gas: 162224)
+[PASS] testMalformedOutboundRecipientFailsClosed() (gas: 38875)
+[PASS] testQualifiedErc20Passes() (gas: 364609)
+[PASS] testReplayFailsClosed() (gas: 307468)
+[PASS] testUnfinalizedExecutionBlockFailsClosed() (gas: 80221)
+[PASS] testUnknownErc20FailsClosed() (gas: 167830)
+[PASS] testWrongGatewayFailsClosed() (gas: 148376)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 93.72ms (1.01ms CPU time)
+
+Ran 7 tests for contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol:CrossAdapterHardeningBridgeAdapter420Test
+[PASS] testCrossAdapterReplayStateIsIsolated() (gas: 1036887)
+[PASS] testDirectCallsCannotBypassEitherRouter() (gas: 684246)
+[PASS] testOutboundMessagesAreAdapterDomainSeparated() (gas: 134272)
+[PASS] testRebindingClearsStaleSourcesOnBothAdapters() (gas: 140643)
+[PASS] testSameAssetIdBindsDistinctCanonicalSourcesAndRoutes() (gas: 30482)
+[PASS] testUnknownAssetsFailClosedOnOutbound() (gas: 76754)
+[PASS] testWrongRoutesFailClosedOnOutbound() (gas: 81130)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 93.90ms (720.06µs CPU time)
+
+Ran 3 tests for contracts/test/MalformedProofRecipientFuzzHardening420.t.sol:MalformedProofRecipientFuzzHardening420Test
+[PASS] testFuzzEthereumMalformedMandatoryFieldRejected(uint8,bytes32) (runs: 2500, μ: 432260, ~: 432187)
+[PASS] testFuzzEthereumRecipientLength(bytes) (runs: 2500, μ: 52061, ~: 51537)
+[PASS] testFuzzEthereumWrongChainRejected(uint256,bytes32) (runs: 2500, μ: 451384, ~: 457394)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 94.05ms (279.64ms CPU time)
+
+Ran 13 test suites in 97.70ms (386.56ms CPU time): 69 tests passed, 0 failed, 0 skipped (69 total tests)

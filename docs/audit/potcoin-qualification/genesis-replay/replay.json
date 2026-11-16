@@ -1,0 +1,12 @@
+{
+  "classification": "UNSIGNED FULL NATIVE REPLAY; not an authorized checkpoint",
+  "consensus_source": "24b987951186417af909a9cf1ea4da736e782c0f",
+  "daemon_sha256": "c41f725574e9e435840316d231cca828688be20a48d9b992e01d1ab20c30181a",
+  "bootstrap_sha256": "916c8f19ae2b66fcad62a95d9d58c243d973952df4f0a44232c0a3ba57f66d85",
+  "mainnet": true,
+  "genesis": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+  "tip_height": 0,
+  "tip": "000002fe94ee5871d9954e6b441195ad6a2709c33e47fc7ba51914bb0e8109f8",
+  "chain_trust": "1048577",
+  "historical_post_bootstrap_replayed": false
+}

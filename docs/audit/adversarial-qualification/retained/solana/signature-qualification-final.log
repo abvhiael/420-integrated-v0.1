@@ -1,0 +1,18 @@
+Compiling 4 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.36s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/SolanaSignatureQualification420.t.sol:12:2:
+   |
+12 |  function testFuzzCanonicalShortVecA ... {rejected=true;}require(rejected);}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 4 tests for contracts/test/SolanaSignatureQualification420.t.sol:SolanaSignatureQualification420Test
+[PASS] testFuzzCanonicalShortVecAndRedundantEncodingRejected(uint16) (runs: 2500, μ: 7703, ~: 8180)
+[PASS] testIndependentSha512AndEd25519MessageBoundaries() (gas: 90372807)
+[PASS] testPermissionlessSignatureCacheChecksEquationAndBindsAllBytes() (gas: 6182968)
+[PASS] testScalarMalleabilityAndNonCanonicalPublicKeyRejected() (gas: 1878532)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 295.23ms (337.66ms CPU time)
+
+Ran 1 test suite in 295.88ms (295.23ms CPU time): 4 tests passed, 0 failed, 0 skipped (4 total tests)

@@ -1,0 +1,31 @@
+{
+  "pass": true,
+  "historical_messages": 2,
+  "upstream_sources": 69,
+  "results": [
+    {
+      "fixture": "base-eth",
+      "guid": "0x75cdaa63f2b1e7b7e97b3776b0feafb4738d8a240ee242383920cd3f85268660",
+      "source_eid": 30184,
+      "destination_eid": 30101,
+      "amount_local_units": 1000000,
+      "authenticated_native_dvn_events": 5,
+      "required_dvns": 2,
+      "optional_threshold": 1,
+      "receipt": "0xfe2e4d56b78db143f886bddb502249606d0de1a5e38ebc48503439b65abc9b41",
+      "qualification": "MATCHED_HISTORICAL_PROTOCOL_AND_RPC_OBSERVATIONS_NOT_A_420_FINALITY_PROOF"
+    },
+    {
+      "fixture": "polygon-eth",
+      "guid": "0x25ccbf6c79e62492b5220015e789dfcd8f872c8a4f06d23a9520442fdc0527ce",
+      "source_eid": 30109,
+      "destination_eid": 30101,
+      "amount_local_units": 100000,
+      "authenticated_native_dvn_events": 5,
+      "required_dvns": 2,
+      "optional_threshold": 1,
+      "receipt": "0x75ecfddb1933302d372b0a5281290df4e83ec1763756870898c3147432a2c910",
+      "qualification": "MATCHED_HISTORICAL_PROTOCOL_AND_RPC_OBSERVATIONS_NOT_A_420_FINALITY_PROOF"
+    }
+  ]
+}

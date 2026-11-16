@@ -1,0 +1,48 @@
+name: Dobbscoin Bridge Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/dobbscoin/**'
+      - 'contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeCrypto420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeWire420.sol'
+      - 'contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/test/Dobbscoin*.t.sol'
+      - 'contracts/test/fixtures/dobbscoin/**'
+      - 'contracts/config/bridge/dobbscoin-mainnet-v12.5.10.json'
+      - 'scripts/dobbscoin/**'
+      - 'scripts/qualify-dobbscoin.py'
+      - 'scripts/verify-dobbscoin-bytecode.py'
+      - '.github/workflows/bridge-dobbscoin-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dobbscoin-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Offline retained evidence and SDK
+        run: |
+          python -m pip install -r scripts/dobbscoin/requirements.txt
+          sha256sum -c contracts/test/fixtures/dobbscoin/SHA256SUMS
+          python scripts/dobbscoin/verify_fixtures.py
+          python -m unittest discover -s scripts/dobbscoin -p 'test_*.py' -v
+      - name: Affected Solidity owners and production bytecode
+        run: |
+          python scripts/qualify-dobbscoin.py
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          DOBBSCOIN_SOLC="$solc_path" python scripts/verify-dobbscoin-bytecode.py

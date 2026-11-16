@@ -108,7 +108,20 @@ contract XrplBridgeAdapter420Test {
 
     function _setHealthy(bytes32 messageId, bytes32 transactionHash) private { verifier.set(_healthy(messageId, transactionHash)); }
 
-    function _healthy(bytes32 messageId, bytes32 transactionHash) private pure returns (IXrplFinalityVerifier420.FinalizedTransfer memory p) {
-        p = IXrplFinalityVerifier420.FinalizedTransfer({ledgerIndex: 100_000_000, ledgerHash: keccak256("validated-ledger"), transactionRoot: keccak256("transaction-root"), transactionHash: transactionHash, messageId: messageId, gatewayAccount: GATEWAY, sourceAccount: SOURCE, recipient: address(0xB0B), amountDrops: 42_000_000, destinationTag: 420, hasDestinationTag: true, validated: true, tesSuccess: true});
+    function testWrongCertifiedDestinationChainRejects() public {
+        IXrplFinalityVerifier420.FinalizedTransfer memory p=_healthy(keccak256("chain"),keccak256("tx-chain"));p.destinationChainId=block.chainid+1;verifier.set(p);
+        (bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok,"wrong chain");
+    }
+    function testWrongCertifiedDestinationRouterRejects() public {
+        IXrplFinalityVerifier420.FinalizedTransfer memory p=_healthy(keccak256("router"),keccak256("tx-router"));p.destinationRouter=address(0xbad);verifier.set(p);
+        (bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok,"wrong router");
+    }
+    function testWrongCertifiedDestinationRouteRejects() public {
+        IXrplFinalityVerifier420.FinalizedTransfer memory p=_healthy(keccak256("route"),keccak256("tx-route"));p.routeId=keccak256("substituted route");verifier.set(p);
+        (bool ok,)=address(router).call(abi.encodeCall(router.inbound,(adapter,hex"01")));require(!ok,"wrong route");
+    }
+
+    function _healthy(bytes32 messageId, bytes32 transactionHash) private view returns (IXrplFinalityVerifier420.FinalizedTransfer memory p) {
+        p = IXrplFinalityVerifier420.FinalizedTransfer({ledgerIndex: 100_000_000, ledgerHash: keccak256("validated-ledger"), transactionRoot: keccak256("transaction-root"), transactionHash: transactionHash, messageId: messageId, gatewayAccount: GATEWAY, sourceAccount: SOURCE, recipient: address(0xB0B), amountDrops: 42_000_000, destinationTag: 420, hasDestinationTag: true, validated: true, tesSuccess: true, destinationChainId: block.chainid, destinationRouter: address(router), routeId: ROUTE});
     }
 }

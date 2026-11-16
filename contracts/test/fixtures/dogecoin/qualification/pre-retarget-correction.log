@@ -1,0 +1,31 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 11.17s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+ --> contracts/test/DogecoinHistorical420.t.sol:7:19:
+  |
+7 |     function read(string memory name) private view returns(bytes memory ...
+  |                   ^^^^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+ --> contracts/test/DogecoinHistorical420.t.sol:8:5:
+  |
+8 |     function name(uint256 v) private pu ... 48+v%10));v/=10;}return string(b);}
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/DogecoinHistorical420.t.sol:40:133:
+   |
+40 |  ... 0;++k)raw[k]=data[uint256(j)*80+k];bytes32 id=BridgeCrypto420.sha256d(raw);bytes ...
+   |                                         ^^^^^^^^^^
+Note: The shadowed declaration is here:
+  --> contracts/test/DogecoinHistorical420.t.sol:41:233:
+   |
+41 |  ... .readLE(child,72,4));work(c,child);bytes32 id=c.submit(child,hex"");require(c.be ...
+   |                                         ^^^^^^^^^^
+
+
+Ran 1 test for contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test
+[PASS] testGenuinePreDigishieldRetargetBoundariesAndWork() (gas: 555715492)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.21s (1.20s CPU time)
+
+Ran 1 test suite in 1.21s (1.21s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

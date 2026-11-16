@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/SolanaBridgeAdapter420.sol";
 import "../src/interfaces/ISolanaFinalityVerifier420.sol";
@@ -47,6 +48,7 @@ contract SolanaBridgeAdapter420Test {
         verifier = new SolanaFinalityVerifierMock420();
         router = new SolanaRouterCaller420();
         adapter = new SolanaBridgeAdapter420(address(this), address(router), address(verifier));
+        adapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
         adapter.setGatewayProgram(PROGRAM, true);
         adapter.setAssetMapping(adapter.SOL_NATIVE_SOURCE_ASSET(), SOL_ASSET, true);
         adapter.setRouteBinding(SOL_ASSET, ROUTE);

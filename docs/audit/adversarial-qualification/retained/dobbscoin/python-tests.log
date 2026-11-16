@@ -1,0 +1,19 @@
+test_activation (test_consensus.ConsensusTests.test_activation) ... ok
+test_compact_boundaries (test_consensus.ConsensusTests.test_compact_boundaries) ... ok
+test_digishield_negative_filter (test_consensus.ConsensusTests.test_digishield_negative_filter) ... ok
+test_emergency_boundaries (test_consensus.ConsensusTests.test_emergency_boundaries) ... ok
+test_empty_and_truncated_transactions (test_consensus.ConsensusTests.test_empty_and_truncated_transactions) ... ok
+test_genesis_is_explicit_exception (test_consensus.ConsensusTests.test_genesis_is_explicit_exception) ... ok
+test_lwma_bootstrap_and_floor (test_consensus.ConsensusTests.test_lwma_bootstrap_and_floor) ... ok
+test_merkle_mutation_and_position (test_consensus.ConsensusTests.test_merkle_mutation_and_position) ... ok
+test_modes (test_consensus.ConsensusTests.test_modes) ... ok
+test_money_is_not_bitcoin_cap (test_consensus.ConsensusTests.test_money_is_not_bitcoin_cap) ... ok
+test_nonminimal_compact (test_consensus.ConsensusTests.test_nonminimal_compact) ... ok
+test_slot_uint32_wrap (test_consensus.ConsensusTests.test_slot_uint32_wrap) ... ok
+test_truncation_toward_zero (test_consensus.ConsensusTests.test_truncation_toward_zero) ... ok
+test_v1_interval (test_consensus.ConsensusTests.test_v1_interval) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.002s
+
+OK

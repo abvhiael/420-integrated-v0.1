@@ -1,0 +1,57 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 27.95s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> contracts/test/XrplFinalityProof420.t.sol:131:31:
+    |
+131 |         for(uint16 i;i<4;++i){uint256 before_=gasleft();verifier.submitValidatio ...
+    |                               ^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/test/XrplFinalityProof420.t.sol:132:9:
+    |
+132 |         uint256 before_=gasleft();router.inbound(adapter,abi.encode(proof(b)));require(before_-gasleft()<30_000_000,"deposit gas");
+    |         ^^^^^^^^^^^^^^^
+
+Warning (2519): This declaration shadows an existing declaration.
+   --> contracts/test/XrplFinalityProof420.t.sol:155:42:
+    |
+155 |         for(uint256 i;i<bad.length;++i){(bool ok,)=address(wire).call(abi.encodeCall(wire.field,(bad[i])));require(!ok,"malformed VL accepted");}
+    |                                          ^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/test/XrplFinalityProof420.t.sol:156:10:
+    |
+156 |         (bool ok,)=address(wire).call(abi.encodeCall(wire.nativeAmount,(abi.encodePacked(uint64(0x4000000000000000)))));require(!ok,"zero drops");
+    |          ^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+ --> contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol:9:5:
+  |
+9 |     function verify(XrplSHA512Half420 hash,bytes memory tx_,bytes memory metadata,bytes32[16][] memory nodes,bytes32 root)
+  |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/test/XrplFinalityProof420.t.sol:134:5:
+    |
+134 |     function testFuzzNativeDropsIntact(uint64 value) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/test/XrplFinalityProof420.t.sol:142:5:
+    |
+142 |     function testIndependentSHA512HalfPaddingAndPrefixVectors() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 3 tests for contracts/test/XrplBridgeAdapter420.t.sol:XrplBridgeAdapter420Test
+[PASS] testWrongCertifiedDestinationChainRejects() (gas: 145967)
+[PASS] testWrongCertifiedDestinationRouteRejects() (gas: 146047)
+[PASS] testWrongCertifiedDestinationRouterRejects() (gas: 145581)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 1.42ms (876.43µs CPU time)
+
+Ran 3 tests for contracts/test/XrplFinalityProof420.t.sol:XrplFinalityProof420Test
+[PASS] testIndependentSHA512HalfPaddingAndPrefixVectors() (gas: 20062880)
+[PASS] testMalformedVLAndNativeAmountBoundariesReject() (gas: 154151)
+[PASS] testNativeDERCanonicalFlagAndMalformedSignature() (gas: 131345)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 71.11ms (69.26ms CPU time)
+
+Ran 2 test suites in 71.66ms (72.52ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

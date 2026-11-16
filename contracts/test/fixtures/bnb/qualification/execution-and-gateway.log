@@ -1,0 +1,10 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.32s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/BnbExecution420.t.sol:BnbExecution420Test
+[PASS] testControlledNativeGatewayConcreteCompositionReplayAndBindings() (gas: 17935842)
+[PASS] testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs() (gas: 8809440)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 31.31ms (48.76ms CPU time)
+
+Ran 1 test suite in 31.51ms (31.31ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

@@ -1,6 +1,6 @@
 {
   "schema": "420-bridge-dobbscoin-mainnet-v12.5.10",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_SCRIPT",
+  "status": "IMPLEMENTED_QUALIFIED_INACTIVE_PENDING_AUTHORITY_DEPLOYMENT_AND_GATEWAY_SCRIPT",
   "canonical_chain_key": "420/BRIDGE/CHAIN/BOB",
   "chain_family": "UTXO_SCRYPT_POW_WITH_SCHEDULED_AUXPOW",
   "route_chain_id": "0x424f420000000001",
@@ -17,9 +17,16 @@
     "emergency_difficulty_activation_height": 1888888,
     "auxpow_activation_height": 2000000,
     "auxpow_chain_id": 176,
-    "minimum_bridge_confirmations": 288
+    "minimum_bridge_confirmations": 288,
+    "auxpow_optional_after_activation": true,
+    "post_activation_chain_id_required": true,
+    "max_reorg_depth": 100,
+    "max_reorg_activation_height": 1888808
   },
-  "native_asset": {"symbol":"BOB","units":"satoshi-style base units"},
+  "native_asset": {
+    "symbol": "BOB",
+    "units": "satoshi-style base units"
+  },
   "adapter": {
     "contract": "DobbscoinBridgeAdapter420",
     "adapter_id_preimage": "420/BRIDGE/DOBBSCOIN/MAINNET/V12.5.10",
@@ -35,5 +42,16 @@
     "BOB asset id and route id are governance bound",
     "route risk caps and emergency isolation are configured",
     "end-to-end inbound and outbound qualification passes"
-  ]
+  ],
+  "verifier": {
+    "contract": "DobbscoinFinalityVerifier420",
+    "model": "Authenticated pinned native full-replay checkpoints; not a permissionless scrypt light client",
+    "source_repository": "https://git.subgenius.finance/SubGeniusFinance/dobbscoin-source",
+    "source_commit": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+    "authority": "UNCONFIGURED",
+    "deployed_address": null,
+    "gateway_script": null,
+    "rpc_only_finality_supported": false,
+    "historical_snapshot_sha256": "30874468c97d7911d1486828a2e8410f11f5af7921786f9073d295bf57ed278a"
+  }
 }

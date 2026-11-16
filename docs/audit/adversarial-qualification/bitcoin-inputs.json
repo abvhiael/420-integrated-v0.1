@@ -1,0 +1,63 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/bitcoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "bitcoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol": {
+      "sha256": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BitcoinHeaderChain420.sol": {
+      "sha256": "bcfa4deed2468667947ca5f6b96ea51520c94728f33bdabf645a0647b24190f6",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol": {
+      "sha256": "4a363407208defa952a791ff183a99b351d56a58409bb05eefcac9e0a7b56657",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BitcoinTransaction420.sol": {
+      "sha256": "f99827849281dc7754e7062212a38e54916b63814d4b2321e5ed57309ae55580",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": {
+      "sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol": {
+      "sha256": "2fe5a7140dbd43096a59dbc6c71a0f5914e2054e1506447ae6007b53c9fe76bd",
+      "source": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+    },
+    "contracts/test/adversarial/BitcoinV18.t.sol": {
+      "sha256": "eb3eb247d0aceb9ab8654f3ffa39d58b4163d475cb5716e3781c4f837b78e432",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4"
+}

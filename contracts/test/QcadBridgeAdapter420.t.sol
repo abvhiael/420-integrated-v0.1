@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/EthereumBridgeAdapter420.sol";
 import "../src/bridge/verifiers/EthereumFinalityVerifier420.sol";
@@ -59,6 +60,7 @@ contract QcadBridgeAdapter420Test {
         verifier = new EthereumFinalityVerifier420(address(this), address(oracle), address(messageVerifier));
         router = new QcadEthereumRouterCaller420();
         adapter = new EthereumBridgeAdapter420(address(this), address(router), address(verifier));
+        adapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
 
         adapter.setGateway(GATEWAY, true);
         adapter.setAssetMapping(adapter.sourceAssetKey(QCAD_ETHEREUM), QCAD_ASSET, true);
@@ -124,9 +126,10 @@ contract QcadBridgeAdapter420Test {
     }
 
     function _message(bytes32 messageId)
-        private pure returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
+        private view returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m)
     {
         m = IEthereumGatewayMessageVerifier420.GatewayMessage({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: QCAD_ROUTE,
             messageId: messageId,
             gateway: GATEWAY,
             sourceToken: QCAD_ETHEREUM,

@@ -1,0 +1,44 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.70s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/PotcoinFinalityVerifier420.t.sol:60:2:
+   |
+60 |  function testFuzzCompactTargetRound ... <=type(uint256).max>>24,"target");}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 30 tests for contracts/test/PotcoinFinalityVerifier420.t.sol:PotcoinFinalityVerifier420Test
+[PASS] testBadCoinstakeMerkleRejected() (gas: 318716)
+[PASS] testBadDepositMerkleRejected() (gas: 419540)
+[PASS] testBadSignatureRejected() (gas: 366922)
+[PASS] testBootstrapRejected() (gas: 4756823)
+[PASS] testCheckpointRotationInvalidatesProof() (gas: 238446)
+[PASS] testControlledNativeX13SignedDeposit() (gas: 414425)
+[PASS] testDuplicateOddBranchSubstitutionRejected() (gas: 419387)
+[PASS] testFutureTimeRejected() (gas: 258125)
+[PASS] testFuzzCoinAgeSaturates(uint64,uint32) (runs: 2500, μ: 6619, ~: 6619)
+[PASS] testFuzzCompactTargetRoundTrip(uint32) (runs: 2500, μ: 7365, ~: 7360)
+[PASS] testGatewayRevocationRejected() (gas: 450577)
+[PASS] testGenuineGenesisTransactionHash() (gas: 41712)
+[PASS] testHistoricalTransitions() (gas: 16223)
+[PASS] testImmatureStakeRejected() (gas: 4819391)
+[PASS] testInsufficientDepthRejected() (gas: 4772840)
+[PASS] testMalformedCompactRejected() (gas: 5845)
+[PASS] testMalformedEncodingRejected() (gas: 6646)
+[PASS] testMedianTimeRejected() (gas: 4819395)
+[PASS] testOriginAmountSubstitutionRejected() (gas: 4808657)
+[PASS] testOriginTransactionSubstitutionRejected() (gas: 243785)
+[PASS] testRetargetNativeSpacing258() (gas: 24573)
+[PASS] testSpentStakeRejected() (gas: 4818756)
+[PASS] testUnauthenticatedRpcClaimRejected() (gas: 211772)
+[PASS] testWrongChainTrustRejected() (gas: 4827621)
+[PASS] testWrongConsensusRevisionRejected() (gas: 4757008)
+[PASS] testWrongDestinationChainRejected() (gas: 195505)
+[PASS] testWrongDifficultyRejected() (gas: 4818852)
+[PASS] testWrongGenesisRejected() (gas: 4757139)
+[PASS] testWrongOutputRejected() (gas: 423300)
+[PASS] testWrongRouteRejected() (gas: 425568)
+Suite result: ok. 30 passed; 0 failed; 0 skipped; finished in 43.76ms (112.73ms CPU time)
+
+Ran 1 test suite in 47.18ms (43.76ms CPU time): 30 tests passed, 0 failed, 0 skipped (30 total tests)

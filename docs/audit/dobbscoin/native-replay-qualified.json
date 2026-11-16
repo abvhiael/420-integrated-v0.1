@@ -1,0 +1,231 @@
+{
+  "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "daemon_sha256": "ecd039b25bee21baeb13f8dabd51bb9ea9246fcc5a9cbc69022542ccdb383b39",
+  "created_fresh_from_raw_only": true,
+  "assumevalid": "0",
+  "connections": 0,
+  "lineage": {
+    "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+    "daemon_sha256": "ecd039b25bee21baeb13f8dabd51bb9ea9246fcc5a9cbc69022542ccdb383b39",
+    "created_fresh_from_raw_only": true,
+    "assumevalid": "0",
+    "datadir": "/workspace/scratch/3b8511e6cffb/bob-data/native",
+    "raw_archive_sha256": "30874468c97d7911d1486828a2e8410f11f5af7921786f9073d295bf57ed278a",
+    "traces": {
+      "/workspace/scratch/3b8511e6cffb/bob-data/original-native-trace.log": "59aabcc7425f2e64b9230822ef9cf36a6689ad1b7f2e4eb4bfe4ab75f6332e20"
+    }
+  },
+  "chain": {
+    "chain": "main",
+    "blocks": 1914745,
+    "headers": 1914745,
+    "bestblockhash": "c6d2be979323fee26cac4dd88c0e180992d8c62a8901cf6a2faf621f347d2cb8",
+    "difficulty": 0.02260092,
+    "verificationprogress": 0.93705681,
+    "chainwork": "000000000000000000000000000000000000000000000000007b83dcd4a57899"
+  },
+  "selected": {
+    "0": {
+      "hash": "6d2d7d525900712451b9697d0b5b2304ebae6efb349540da445bf575c0159969",
+      "confirmations": 1914746,
+      "size": 281,
+      "height": 0,
+      "version": 1,
+      "merkleroot": "21e66ff8b6f14eb3fa0edf35dc93440a751fdddb421965c88029ad0048d98ca1",
+      "tx": [
+        "21e66ff8b6f14eb3fa0edf35dc93440a751fdddb421965c88029ad0048d98ca1"
+      ],
+      "time": 1389086657,
+      "nonce": 2084524493,
+      "bits": "1e0ffff0",
+      "difficulty": 0.00024414,
+      "chainwork": "0000000000000000000000000000000000000000000000000000000000100010",
+      "nextblockhash": "e613b5a195556386f422875d8df68e3e154f37b4981dec641fe041211672870f"
+    },
+    "1": {
+      "hash": "e613b5a195556386f422875d8df68e3e154f37b4981dec641fe041211672870f",
+      "confirmations": 1914745,
+      "size": 186,
+      "height": 1,
+      "version": 2,
+      "merkleroot": "22219cf4e9d7fffee37cb879302a4579e6d7c3af46aa492a5fcb8fdcb317553f",
+      "tx": [
+        "22219cf4e9d7fffee37cb879302a4579e6d7c3af46aa492a5fcb8fdcb317553f"
+      ],
+      "time": 1389133144,
+      "nonce": 565393,
+      "bits": "1e0ffff0",
+      "difficulty": 0.00024414,
+      "chainwork": "0000000000000000000000000000000000000000000000000000000000200020",
+      "previousblockhash": "6d2d7d525900712451b9697d0b5b2304ebae6efb349540da445bf575c0159969",
+      "nextblockhash": "b883c297ca127142be645e5a854b18079bfc34701975b54d17e8c5b46f16b3c7"
+    },
+    "2016": {
+      "hash": "94a9ab39b9e1e7dafdda1a5823c11556750157aa16e93ae2a59de426e185de58",
+      "confirmations": 1912730,
+      "size": 188,
+      "height": 2016,
+      "version": 2,
+      "merkleroot": "1cc255b9a7c6a2d76162457687ba2f10736eaf567fa6ea473aa4ac253dde833e",
+      "tx": [
+        "1cc255b9a7c6a2d76162457687ba2f10736eaf567fa6ea473aa4ac253dde833e"
+      ],
+      "time": 1389293911,
+      "nonce": 2834498304,
+      "bits": "1e03fffc",
+      "difficulty": 0.00097656,
+      "chainwork": "000000000000000000000000000000000000000000000000000000007e407e40",
+      "previousblockhash": "c8e8eec61b1c982e95b67614b1f84d65dbded3d88e8189d16faa0b04ad3f8f08",
+      "nextblockhash": "224f2738ba705bf43124574aee16e9a6cb3a779b4bcb7abe7c21fca438e9e31e"
+    },
+    "13579": {
+      "hash": "d17e462cf9364a76e5923d9878c9503a957f7644fe2e51847bfcc1d77f9bb171",
+      "confirmations": 1901167,
+      "size": 430,
+      "height": 13579,
+      "version": 2,
+      "merkleroot": "0a9e98aed9f873acd0e3cd5381fc806c6a6efee5ebed4822349afbb078e21895",
+      "tx": [
+        "5ed9b958dacf92aab62b0e756ad4a43614e229e344f367e27782bf506d2a090a",
+        "4415d1cdd304b18cf16af0484019382e4756a6ef0c4e5c1176b61d14e8dae8c6"
+      ],
+      "time": 1398306238,
+      "nonce": 1466588467,
+      "bits": "1c57de38",
+      "difficulty": 2.91341525,
+      "chainwork": "000000000000000000000000000000000000000000000000000007de2a167cda",
+      "previousblockhash": "28e29314998a519499a3d4915e1859a4a5b1da28af6869df2457b8ef39aba64e",
+      "nextblockhash": "641ebc7772b160498a50e65880d9aaffc671988b408244dbd428e2b0b5c77620"
+    },
+    "31597": {
+      "hash": "480c02cc60467f2a3592a591792830a3baafe77a6f5985e1dc748e95b3150ee6",
+      "confirmations": 1883149,
+      "size": 235,
+      "height": 31597,
+      "version": 2,
+      "merkleroot": "1e53c1ff4c8fba600a62b10af4abb04cdec60c068db15e8793af6760f8d0c2a0",
+      "tx": [
+        "1e53c1ff4c8fba600a62b10af4abb04cdec60c068db15e8793af6760f8d0c2a0"
+      ],
+      "time": 1411019961,
+      "nonce": 4194689118,
+      "bits": "1c581d63",
+      "difficulty": 2.90525675,
+      "chainwork": "0000000000000000000000000000000000000000000000000000969630e41f32",
+      "previousblockhash": "11fedd8e427720c0e7be69546645907ea3d213bdbd894700b2697b4250ee6d27",
+      "nextblockhash": "e0d32fae638a75b735f234a6400670251a78feb5f44cf12dd8374e90f4a0bd39"
+    },
+    "68425": {
+      "hash": "b6814d4aab1f042b1d595c20d3048f1e95ac54ef07c0169cf357f7fe87d8aa0e",
+      "confirmations": 1846321,
+      "size": 2356,
+      "height": 68425,
+      "version": 3,
+      "merkleroot": "478c12d8ad041a82f2499f242789b063ec80f9e4df52f9b9aca8ed6ede04cea4",
+      "tx": [
+        "5cab39a06c194b5510cf8ccd19cd4377c0b06874be8a4677676fafe1c6404f47",
+        "161d9aa8f6d71c35334a914045c1bf841a4b059e295a5d18c02f57beccaded7f",
+        "aa152963efba69498ef3cdecd9652c4019157eb6048c12233411df659bb27cb4",
+        "3cf8f73793e2f6eda5bb2efe29bfc4b96decb720b49c095b2cee200e32442c25",
+        "e81f26eeb04c410200641c78f097a46a444e6ccab1b8396c93bf6de8253dd41d"
+      ],
+      "time": 1440995855,
+      "nonce": 643161930,
+      "bits": "1c17fc7c",
+      "difficulty": 10.67261082,
+      "chainwork": "0000000000000000000000000000000000000000000000000005a00802870add",
+      "previousblockhash": "51dd909ee619c61344be802c636ff3fb64e60c7561559a4d075c57f196588b0e",
+      "nextblockhash": "3174f4bd20a02993984948229a78dbb04fc1c4d1b83217e191f55623f463e52c"
+    },
+    "1888808": {
+      "hash": "c36c11465449dac4f9cd6da0faf62afdaaa722163cf6c4a0df3a12e1113236a4",
+      "confirmations": 25938,
+      "size": 203,
+      "height": 1888808,
+      "version": 3,
+      "merkleroot": "121304428da5fe12688ff319a1c19b753986b590cca34ba7178cc9cdfb471f39",
+      "tx": [
+        "121304428da5fe12688ff319a1c19b753986b590cca34ba7178cc9cdfb471f39"
+      ],
+      "time": 1786615561,
+      "nonce": 3865224501,
+      "bits": "1c46498b",
+      "difficulty": 3.64213986,
+      "chainwork": "000000000000000000000000000000000000000000000000007a0588872862ea",
+      "previousblockhash": "a6c553384a0072bea5bccf5ee7b129f49f1224e680a5cbf3e86391ac4e23e24f",
+      "nextblockhash": "133f05c4f45d13776f7e856f44e59bda783300f391ec7420f04a0b2e12cc1d60"
+    },
+    "1888868": {
+      "hash": "e1b363ee9f720d9712e06c45ad572202ab74e030b987542e6a86febfcd5d034c",
+      "confirmations": 25878,
+      "size": 203,
+      "height": 1888868,
+      "version": 3,
+      "merkleroot": "8d2c5769efd633d2f5e56c20bfff1a4aa3c7ddd8c6e1463dbead505cbb289efe",
+      "tx": [
+        "8d2c5769efd633d2f5e56c20bfff1a4aa3c7ddd8c6e1463dbead505cbb289efe"
+      ],
+      "time": 1786622820,
+      "nonce": 62825634,
+      "bits": "1c4d0837",
+      "difficulty": 3.32323966,
+      "chainwork": "000000000000000000000000000000000000000000000000007a0662bda3cfdd",
+      "previousblockhash": "846e4eb0a1bdbd0296c78f5e12a75cbcc739422dd89e7948dcb4f74136c7f06b",
+      "nextblockhash": "4448f8d1cc30fc5c7bf4d217f77967b579cda5f8b37e29ae26dea2679a2cf659"
+    },
+    "1888888": {
+      "hash": "2287989695322f1dd6d87d3ecadfa0af14b18978a5354ca7f44c75649fd57ae9",
+      "confirmations": 25858,
+      "size": 203,
+      "height": 1888888,
+      "version": 3,
+      "merkleroot": "ca31f9d41e8350bc7e8a60cfb2810dda7657a0b87f716a556c035ebd7265e7e3",
+      "tx": [
+        "ca31f9d41e8350bc7e8a60cfb2810dda7657a0b87f716a556c035ebd7265e7e3"
+      ],
+      "time": 1786624090,
+      "nonce": 2964333473,
+      "bits": "1c37d91f",
+      "difficulty": 4.58378995,
+      "chainwork": "000000000000000000000000000000000000000000000000007a06b2ca37b576",
+      "previousblockhash": "9fda2dc81450cbbc8c98c1ff7c01927add09afc3f7e42412f08ae0ce56a1df51",
+      "nextblockhash": "22c83f6cd0d137ff6297618c5b404ff1f98f3a5f33a992d91b343eecce9c24e7"
+    },
+    "1914745": {
+      "hash": "c6d2be979323fee26cac4dd88c0e180992d8c62a8901cf6a2faf621f347d2cb8",
+      "confirmations": 1,
+      "size": 1496,
+      "height": 1914745,
+      "version": 3,
+      "merkleroot": "638936a07eb7815b2923a4197abd57b533d930358c14f3e65abdf0e1b1cc04c2",
+      "tx": [
+        "7c50f7cd2a6a3fb91cfbf6f8bc6ad408498e7d35b746717b825df804b21389a5",
+        "d444ad56a62d816028db019e06e9f19a9f7d6fdc42fb237be0f3c0917187923e"
+      ],
+      "time": 1790634135,
+      "nonce": 2401476249,
+      "bits": "1d2c3ecd",
+      "difficulty": 0.02260092,
+      "chainwork": "000000000000000000000000000000000000000000000000007b83dcd4a57899",
+      "previousblockhash": "023ba00cb37b5da6bb79e623938486af1310bbdefe10b1ee2e5d5bce76e26fdb"
+    }
+  },
+  "checkpoints_disabled": false,
+  "script_validation": {
+    "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+    "native_library_sha256": "677d72715aa87a83a210287b13577e92f46020d5fd9194c94b1fa1e5fbb8d7ee",
+    "headers_sha256": "805b01aef94d298dc4aa42142e7dac7e53bb05b672ea0f1560bfa9c772591594",
+    "scope": "scripts skipped by native built-in-checkpoint optimization; no scrypt/difficulty replay",
+    "first_height": 1,
+    "last_height": 1847999,
+    "native_checkpoint_height": 1848000,
+    "blocks_read": 1848000,
+    "transactions_read": 2051458,
+    "verified_inputs": 1911823,
+    "dersig_inputs": 1765871,
+    "tampered_historical_signature_rejected": true,
+    "last_hash": "b90c793c130fcc32893b404caffe0f64a7b6600b7207b2d917b5d729315d1b6a"
+  },
+  "original_replay_receipt_sha256": "dc0acb589a570ee951166147beb62df7a5acdca64d9735f9b8b1e657d8bbbdbd",
+  "script_receipt_sha256": "d372d3eda58cbfcc60ad32aaa2bfbe3951dc7545055af86ba3059f4064455682"
+}

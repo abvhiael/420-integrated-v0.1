@@ -1,0 +1,718 @@
+[
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-ethereum-qualification.yml",
+    "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/Ethereum*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/vendor/sp1/**'",
+      "      - '!contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol'",
+      "      - '!contracts/src/bridge/EthereumDepositGateway420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/Ethereum*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/vendor/sp1/**'",
+      "      - '!contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol'",
+      "      - '!contracts/src/bridge/EthereumDepositGateway420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/ILitecoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-litecoin-qualification.yml",
+    "source": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/Litecoin*420.sol'",
+      "      - '!contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/ILitecoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/Litecoin*420.sol'",
+      "      - '!contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/ILitecoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/IDogecoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-dogecoin-qualification.yml",
+    "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/Dogecoin*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/LitecoinScrypt420.sol'",
+      "      - '!contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IDogecoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/Dogecoin*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/LitecoinScrypt420.sol'",
+      "      - '!contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IDogecoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-bnb-verifier.yml",
+    "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/bnb/**'",
+      "      - '!contracts/src/bridge/verifiers/Bnb*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumRLP420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumMPT420.sol'",
+      "      - '!contracts/src/bridge/BnbDepositGateway420.sol'",
+      "      - '!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IBnb*420.sol'",
+      "      - '!contracts/test/Bnb*420.t.sol'",
+      "      - '!contracts/test/fixtures/bnb/**'",
+      "      - '!contracts/config/bridge/bnb-mainnet-v12.5.3.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'",
+      "      - '!contracts/src/bridge/verifiers/bnb/**'",
+      "      - '!contracts/src/bridge/verifiers/Bnb*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumRLP420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumMPT420.sol'",
+      "      - '!contracts/src/bridge/BnbDepositGateway420.sol'",
+      "      - '!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IBnb*420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-6-BNB.md'",
+      "      - '!contracts/src/bridge/verifiers/bnb/**'",
+      "      - '!contracts/src/bridge/verifiers/Bnb*420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumRLP420.sol'",
+      "      - '!contracts/src/bridge/verifiers/EthereumMPT420.sol'",
+      "      - '!contracts/src/bridge/BnbDepositGateway420.sol'",
+      "      - '!contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IBnb*420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-tron-proof.yml",
+    "source": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-8-TRON.md'",
+      "      - '!docs/audit/tron-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-8-TRON.md'",
+      "      - '!docs/audit/tron-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-xrpl-proof.yml",
+    "source": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md'",
+      "      - '!docs/audit/xrpl-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md'",
+      "      - '!docs/audit/xrpl-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-potcoin-proof.yml",
+    "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/potcoin/**'",
+      "      - '!contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPotcoinFinalityVerifier420.sol'",
+      "      - '!contracts/test/Potcoin*420.t.sol'",
+      "      - '!contracts/test/fixtures/potcoin/**'",
+      "      - '!contracts/config/bridge/potcoin-mainnet-v12.5.9.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-10-POTCOIN.md'",
+      "      - '!docs/audit/potcoin-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-10-POTCOIN.md'",
+      "      - '!docs/audit/potcoin-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/potcoin/**'",
+      "      - '!contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPotcoinFinalityVerifier420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-10-POTCOIN.md'",
+      "      - '!docs/audit/potcoin-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/potcoin/**'",
+      "      - '!contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPotcoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-curecoin-proof.yml",
+    "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/curecoin/**'",
+      "      - '!contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/ICurecoinFinalityVerifier420.sol'",
+      "      - '!contracts/test/Curecoin*420.t.sol'",
+      "      - '!contracts/test/fixtures/curecoin/**'",
+      "      - '!contracts/config/bridge/curecoin-mainnet-v12.5.11.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md'",
+      "      - '!docs/audit/curecoin-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md'",
+      "      - '!docs/audit/curecoin-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/curecoin/**'",
+      "      - '!contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/ICurecoinFinalityVerifier420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md'",
+      "      - '!docs/audit/curecoin-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/curecoin/**'",
+      "      - '!contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/ICurecoinFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-dobbscoin-proof.yml",
+    "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/dobbscoin/**'",
+      "      - '!contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol'",
+      "      - '!contracts/test/Dobbscoin*.t.sol'",
+      "      - '!contracts/test/fixtures/dobbscoin/**'",
+      "      - '!contracts/config/bridge/dobbscoin-mainnet-v12.5.10.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-12-DOBBSCOIN.md'",
+      "      - '!docs/audit/dobbscoin/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-12-DOBBSCOIN.md'",
+      "      - '!docs/audit/dobbscoin/**'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-12-DOBBSCOIN.md'",
+      "      - '!docs/audit/dobbscoin/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420indexer.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'",
+      "      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-pirate-proof.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/pirate/**'",
+      "      - '!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'",
+      "      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'",
+      "      - '!contracts/test/Pirate*.t.sol'",
+      "      - '!contracts/test/fixtures/pirate/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md'",
+      "      - '!docs/audit/pirate-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md'",
+      "      - '!docs/audit/pirate-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/pirate/**'",
+      "      - '!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-13-PIRATE.md'",
+      "      - '!docs/audit/pirate-qualification/**'",
+      "      - '!contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol'",
+      "      - '!contracts/src/bridge/verifiers/pirate/**'",
+      "      - '!contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol'",
+      "      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/registry-reg-audit-4.yml",
+    "source": "02c96466f03b203a682c548cb1a6e591848aa4af",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420indexer.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'",
+      "      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-cctp-proof.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/adapters/USDCCCTPAdapter.sol'",
+      "      - '!contracts/src/bridge/verifiers/cctp/**'",
+      "      - '!contracts/src/interfaces/ICircleCCTPV2420.sol'",
+      "      - '!contracts/test/CCTP*.t.sol'",
+      "      - '!contracts/test/helpers/CCTPNativeHarness420.sol'",
+      "      - '!contracts/test/fixtures/cctp/**'",
+      "      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'",
+      "      - '!docs/audit/cctp-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'",
+      "      - '!docs/audit/cctp-qualification/**'",
+      "      - '!contracts/src/bridge/adapters/USDCCCTPAdapter.sol'",
+      "      - '!contracts/src/bridge/verifiers/cctp/**'",
+      "      - '!contracts/src/interfaces/ICircleCCTPV2420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-14-CCTP.md'",
+      "      - '!docs/audit/cctp-qualification/**'",
+      "      - '!contracts/src/bridge/adapters/USDCCCTPAdapter.sol'",
+      "      - '!contracts/src/bridge/verifiers/cctp/**'",
+      "      - '!contracts/src/interfaces/ICircleCCTPV2420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/registry-reg-audit-4.yml",
+    "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/usdc-cctp-v2-v1.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420indexer.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/cadc.json'",
+      "      - '!contracts/config/bridge/cadc.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-cadc-proof.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'",
+      "      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'",
+      "      - '!contracts/test/CADC*420.t.sol'",
+      "      - '!contracts/test/CADCHistoricalFork.t.sol'",
+      "      - '!contracts/test/fixtures/cadc/**'",
+      "      - '!contracts/config/bridge/cadc.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'",
+      "      - '!docs/audit/cadc-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'",
+      "      - '!docs/audit/cadc-qualification/**'",
+      "      - '!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'",
+      "      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-15-CADC.md'",
+      "      - '!docs/audit/cadc-qualification/**'",
+      "      - '!contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol'",
+      "      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/registry-reg-audit-4.yml",
+    "source": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/cadc.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420bet-sports-5d2-level2.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420indexer.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'",
+      "      - '!contracts/config/bridge/audio-ethereum-v12.5.8.json'",
+      "      - '!contracts/config/bridge/bnb-mainnet-v12.5.3.json'",
+      "      - '!contracts/config/bridge/eurc-ethereum-v12.5.21.json'",
+      "      - '!contracts/config/bridge/eurc-solana-v12.5.22.json'",
+      "      - '!contracts/config/bridge/link-ethereum-v12.5.17.json'",
+      "      - '!contracts/config/bridge/qcad-ethereum-v12.5.20.json'",
+      "      - '!contracts/config/bridge/ray-solana-v12.5.23.json'",
+      "      - '!contracts/config/bridge/uni-ethereum-v12.5.16.json'",
+      "      - '!contracts/config/bridge/usdt-ethereum-v12.5.19.json'",
+      "      - '!contracts/config/bridge/supported-token-routes-v1.json'",
+      "      - '!contracts/config/bridge/token-route-dependencies/**'",
+      "      - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'",
+      "      - '!contracts/config/bridge/audio-ethereum-v12.5.8.json'",
+      "      - '!contracts/config/bridge/bnb-mainnet-v12.5.3.json'",
+      "      - '!contracts/config/bridge/eurc-ethereum-v12.5.21.json'",
+      "      - '!contracts/config/bridge/eurc-solana-v12.5.22.json'",
+      "      - '!contracts/config/bridge/link-ethereum-v12.5.17.json'",
+      "      - '!contracts/config/bridge/qcad-ethereum-v12.5.20.json'",
+      "      - '!contracts/config/bridge/ray-solana-v12.5.23.json'",
+      "      - '!contracts/config/bridge/uni-ethereum-v12.5.16.json'",
+      "      - '!contracts/config/bridge/usdt-ethereum-v12.5.19.json'",
+      "      - '!contracts/config/bridge/supported-token-routes-v1.json'",
+      "      - '!contracts/config/bridge/token-route-dependencies/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420token-audit.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'",
+      "      - '!contracts/test/TokenGatewaySemantics420.t.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/bridge-token-routes.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "new exact workflow"
+  },
+  {
+    "path": ".github/workflows/contracts-hardening.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'",
+      "      - '!contracts/config/bridge/audio-ethereum-v12.5.8.json'",
+      "      - '!contracts/config/bridge/eurc-ethereum-v12.5.21.json'",
+      "      - '!contracts/config/bridge/eurc-solana-v12.5.22.json'",
+      "      - '!contracts/config/bridge/link-ethereum-v12.5.17.json'",
+      "      - '!contracts/config/bridge/qcad-ethereum-v12.5.20.json'",
+      "      - '!contracts/config/bridge/ray-solana-v12.5.23.json'",
+      "      - '!contracts/config/bridge/uni-ethereum-v12.5.16.json'",
+      "      - '!contracts/config/bridge/usdt-ethereum-v12.5.19.json'",
+      "      - '!contracts/test/AaveBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/AudioBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/EthereumBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/EurcBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/LinkBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/QcadBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/UniBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/UsdtBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/SolanaBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/SolanaFinalityProof420.t.sol'",
+      "      - '!contracts/test/BnbBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol'",
+      "      - '!contracts/test/DomainNonceRouterBypassHardening420.t.sol'",
+      "      - '!contracts/test/EmergencyControlsHardening420.t.sol'",
+      "      - '!contracts/test/MalformedProofRecipientFuzzHardening420.t.sol'",
+      "      - '!contracts/test/VerifierRotationHardening420.t.sol'",
+      "      - '!contracts/src/bridge/BridgeAssetRegistry.sol'",
+      "      - '!contracts/src/bridge/EthereumDepositGateway420.sol'",
+      "      - '!contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol'",
+      "      - '!contracts/src/bridge/tokens/**'",
+      "      - '!contracts/src/bridge/verifiers/Ethereum*.sol'",
+      "      - '!contracts/src/bridge/verifiers/vendor/sp1/**'",
+      "      - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'",
+      "      - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'",
+      "      - '!contracts/test/SupportedTokenRoutes420.t.sol'",
+      "      - '!contracts/test/TokenGateway*420.t.sol'",
+      "      - '!contracts/test/helpers/Token*420.sol'",
+      "      - '!contracts/test/helpers/EthereumProofFixture420.sol'",
+      "      - '!contracts/test/fixtures/token-routes/**'",
+      "      - '!contracts/config/bridge/supported-token-routes-v1.json'",
+      "      - '!contracts/config/bridge/token-route-dependencies/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md'",
+      "      - '!docs/audit/token-route-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md'",
+      "      - '!docs/audit/token-route-qualification/**'",
+      "      - '!contracts/src/bridge/BridgeAssetRegistry.sol'",
+      "      - '!contracts/src/bridge/tokens/**'",
+      "      - '!contracts/src/bridge/verifiers/Ethereum*.sol'",
+      "      - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-16-TOKEN-ROUTES.md'",
+      "      - '!docs/audit/token-route-qualification/**'",
+      "      - '!contracts/src/bridge/BridgeAssetRegistry.sol'",
+      "      - '!contracts/src/bridge/tokens/**'",
+      "      - '!contracts/src/bridge/verifiers/Ethereum*.sol'",
+      "      - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'"
+    ]
+  },
+  {
+    "path": ".github/workflows/registry-reg-audit-4.yml",
+    "source": "3724e246f2c4deeab69ac0892742291c72a40df0",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'",
+      "      - '!contracts/config/bridge/audio-ethereum-v12.5.8.json'",
+      "      - '!contracts/config/bridge/bnb-mainnet-v12.5.3.json'",
+      "      - '!contracts/config/bridge/eurc-ethereum-v12.5.21.json'",
+      "      - '!contracts/config/bridge/eurc-solana-v12.5.22.json'",
+      "      - '!contracts/config/bridge/link-ethereum-v12.5.17.json'",
+      "      - '!contracts/config/bridge/qcad-ethereum-v12.5.20.json'",
+      "      - '!contracts/config/bridge/ray-solana-v12.5.23.json'",
+      "      - '!contracts/config/bridge/uni-ethereum-v12.5.16.json'",
+      "      - '!contracts/config/bridge/usdt-ethereum-v12.5.19.json'",
+      "      - '!contracts/config/bridge/supported-token-routes-v1.json'",
+      "      - '!contracts/config/bridge/token-route-dependencies/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/420indexer.yml",
+    "source": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/adversarial-sources-v1.json'",
+      "      - '!contracts/config/bridge/adversarial-sources-v1.json'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-pages.yml",
+    "source": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-18-ADVERSARIAL.md'",
+      "      - '!docs/audit/adversarial-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/docs-qualify.yml",
+    "source": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-18-ADVERSARIAL.md'",
+      "      - '!docs/audit/adversarial-qualification/**'",
+      "      - '!docs/audit/BRIDGE-AUDIT-3-V-18-ADVERSARIAL.md'",
+      "      - '!docs/audit/adversarial-qualification/**'"
+    ]
+  },
+  {
+    "path": ".github/workflows/registry-reg-audit-4.yml",
+    "source": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "kind": "negative path union only",
+    "added": [
+      "      - '!contracts/config/bridge/adversarial-sources-v1.json'"
+    ]
+  },
+  {
+    "source": "V22 canonical envelope / final inventory",
+    "kind": "negative path union only; jobs and branch rules unchanged",
+    "paths": [
+      ".github/workflows/docs-qualify.yml",
+      ".github/workflows/420bet-sports-5d2-level2.yml",
+      ".github/workflows/contracts-hardening.yml",
+      ".github/workflows/docs-pages.yml",
+      ".github/workflows/docs-qualify.yml"
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+# Curecoin historical and controlled proof fixtures
+
+The `block-*.bin` and `stake-*.bin` files are genuine native Curecoin data from `CCBlockchain.zip`, attached to official release v2.1.0.1. Only `blk0001.dat` was extracted; archive databases were never imported. Source URL, archive/raw checksums, source pins and native replay evidence are in `docs/audit/curecoin-qualification`. `historical.json` records the independent canonical replay from genesis through hardened checkpoint 500000 (500001 canonical blocks, 468943 PoS blocks), actual modifier/kernel facts and sealed state leaves. Heights cover entropy, target-limit, version and 2.0 hardfork boundaries; 257368 includes a normal transaction. CURE has SIX decimal places.
+
+`stake-*.bin` ABI-encodes `CurecoinFinalityVerifier420.Proof`, including genuine origin transactions, coinstakes, block signatures, Merkle paths and replay-derived state. Root/state authorization in Solidity tests uses a TEST checkpoint authority; fixture possession is not a production checkpoint signature. Historical packets intentionally lack the new bridge destination comment. They pass block verification and fail transfer crediting. They do not represent historical 420 gateway deposits.
+
+`genesis-header.bin` and `genesis-transaction.bin` reproduce the authoritative source genesis exactly. `controlled-*` and `controlled.json` contain clearly controlled TEST-ONLY transactions/origins/checkpoints, public test private key 1 and a real SHA256d/ECDSA calculation. The controlled block is not a genuine historical block or a native full-node accepted block; mocked input scripts are not spending evidence. No production authority, gateway or custody key is installed by these tests.
+
+The proof ABI is exported as `PROOF` / `STATE` by `scripts/curecoin/generate_controlled.py`. Hashes in state/API block identifiers are display order; transaction identifiers and Merkle branches use native raw hash bytes. Destination metadata uses native signed `strTxComment`, not unsupported OP_RETURN relay assumptions.
+
+Regenerate/qualify with the commands in the audit report. `SHA256SUMS` checks the committed offline dataset without downloading or repeating a full replay.

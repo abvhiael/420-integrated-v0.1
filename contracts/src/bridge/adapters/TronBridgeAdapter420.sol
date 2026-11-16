@@ -25,6 +25,8 @@ contract TronBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     mapping(bytes32 => bool) public consumedTransactions;
     uint256 public outboundNonce;
 
+    struct SourceProofContext {bytes32 gateway;bytes32 sourceAsset;}
+    mapping(bytes32=>SourceProofContext) public verifiedSourceContext;
     error InvalidAddress();
     error InvalidVerifier();
     error WrongNetwork();
@@ -94,12 +96,16 @@ contract TronBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (!gatewayAccounts[p.gatewayAccount]) revert GatewayNotAllowed();
         if (trxAssetId == bytes32(0)) revert AssetNotConfigured();
         if (trxRouteId == bytes32(0)) revert RouteNotConfigured();
+        if (p.destinationChainId != block.chainid || p.destinationRouter != gatewayRouter || p.routeId != trxRouteId) {
+            revert InvalidProof();
+        }
         if (consumedMessages[p.messageId] || consumedTransactions[p.transactionHash]) revert Replay();
 
         consumedMessages[p.messageId] = true;
         consumedTransactions[p.transactionHash] = true;
         emit TronInboundConsumed(p.messageId, p.transactionHash, p.sourceAccount);
 
+        verifiedSourceContext[p.messageId]=SourceProofContext(bytes32(p.gatewayAccount),trxAssetId);
         v = VerifiedTransfer({
             routeId: trxRouteId,
             assetId: trxAssetId,

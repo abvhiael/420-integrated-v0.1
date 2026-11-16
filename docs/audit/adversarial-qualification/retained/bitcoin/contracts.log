@@ -1,0 +1,74 @@
+Compiling 49 files with Solc 0.8.24
+Solc 0.8.24 finished in 58.39s
+Compiler run successful!
+2026-11-14T05:47:38.943349Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 2 tests for contracts/test/BitcoinDepositVerifier420.t.sol:BitcoinDepositVerifier420Test
+[PASS] testDepositWireAndDomain() (gas: 2883107)
+[PASS] testGenesisAndConsensusArithmetic() (gas: 1282343)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 863.09µs (1.16ms CPU time)
+
+Ran 7 tests for contracts/test/BitcoinBridgeAdapter420.t.sol:BitcoinBridgeAdapter420Test
+[PASS] testCanonicalBitcoinInboundPasses() (gas: 161023)
+[PASS] testInsufficientConfirmationsRejected() (gas: 130178)
+[PASS] testInvalidChainworkRejected() (gas: 130175)
+[PASS] testInvalidPowRejected() (gas: 130208)
+[PASS] testOutboundLegacySegwitAndTaproot() (gas: 155483)
+[PASS] testReplayRejected() (gas: 286309)
+[PASS] testWrongNetworkRejected() (gas: 130029)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 1.70ms (1.19ms CPU time)
+
+Ran 3 tests for contracts/test/BitcoinHeaderPow420.t.sol:BitcoinHeaderPow420Test
+[PASS] testCanonicalGenesisHeaderPoW() (gas: 6054)
+[PASS] testMalformedDifficultyAndHeaderReject() (gas: 112269)
+[PASS] testModifiedNonceAndMerkleRootReject() (gas: 59605)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 445.31µs (295.65µs CPU time)
+
+Ran 4 tests for contracts/test/BitcoinMerkleBranch420.t.sol:BitcoinMerkleBranch420Test
+[PASS] testMalformedTreeReverts() (gas: 126566)
+[PASS] testOneTransactionBlockBranch() (gas: 400)
+[PASS] testThreeLeafProofAndIndependentSha256dVector() (gas: 12567)
+[PASS] testWrongRootRejected() (gas: 4738)
+Suite result: ok. 4 passed; 0 failed; 0 skipped; finished in 291.29µs (214.18µs CPU time)
+
+Ran 1 test for contracts/test/BitcoinGatewayIntegration420.t.sol:BitcoinGatewayIntegration420Test
+[PASS] testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 25090165)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 9.35ms (7.71ms CPU time)
+
+Ran 8 tests for contracts/test/BitcoinCommonBridgeCrypto420.t.sol:CommonBridgeCrypto420Test
+[PASS] testCheckpoint() (gas: 1244552)
+[PASS] testCompactBoundaries() (gas: 5425)
+[PASS] testFuzzCompactSize(uint64) (runs: 2500, μ: 3291, ~: 3535)
+[PASS] testFuzzIntegerRoundTrip(uint256,uint8) (runs: 2500, μ: 14095, ~: 11144)
+[PASS] testHashVectors() (gas: 2905)
+[PASS] testHistoricalGenesis() (gas: 7443)
+[PASS] testMalformedCompact() (gas: 12429)
+[PASS] testOrderedMerkle() (gas: 2853)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 106.67ms (127.95ms CPU time)
+
+Ran 13 tests for contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[PASS] testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains() (gas: 8403140)
+[PASS] testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected() (gas: 4418533)
+[PASS] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 58559508)
+[PASS] testFuzzTruncatedTransaction(uint16) (runs: 2500, μ: 34240, ~: 28637)
+[PASS] testHistoricalTransactionAndMerkleInclusion() (gas: 59669874)
+[PASS] testHistoricalVersionEnforcementAndMedianSorting() (gas: 58309364)
+[FAIL: Error != expected error: InvalidTimestamp() != InvalidTarget()] testMalformedHeadersAndTimestampRules() (gas: 58252333)
+[PASS] testMismatchedVerifierRouteOrRouterRejectedByAdapter() (gas: 5875533)
+[PASS] testParserRejectsNoncanonicalCountsAndInvalidIndices() (gas: 165720)
+[PASS] testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation() (gas: 6408322)
+[PASS] testRetargetClampsAndSignedElapsed() (gas: 1218828)
+[PASS] testSegwitTxidAndMalformedWitness() (gas: 241956)
+[PASS] testTargetsAndFuzzArithmetic(uint32) (runs: 2500, μ: 1162278, ~: 1161644)
+Suite result: FAILED. 12 passed; 1 failed; 0 skipped; finished in 106.73ms (385.81ms CPU time)
+
+Ran 7 test suites in 107.11ms (226.05ms CPU time): 37 tests passed, 1 failed, 0 skipped (38 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[FAIL: Error != expected error: InvalidTimestamp() != InvalidTarget()] testMalformedHeadersAndTimestampRules() (gas: 58252333)
+
+Encountered a total of 1 failing tests, 37 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

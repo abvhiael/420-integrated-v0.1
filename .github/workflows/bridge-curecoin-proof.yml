@@ -1,0 +1,47 @@
+name: Curecoin Bridge Proof Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/curecoin/**'
+      - 'contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/ICurecoinFinalityVerifier420.sol'
+      - 'contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeCrypto420.sol'
+      - 'contracts/src/accounts/ECDSA420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/test/Curecoin*420.t.sol'
+      - 'contracts/test/fixtures/curecoin/**'
+      - 'contracts/config/bridge/curecoin-mainnet-v12.5.11.json'
+      - 'scripts/curecoin/**'
+      - 'docs/audit/curecoin-qualification/native-replay.json'
+      - 'docs/audit/curecoin-qualification/source.json'
+      - 'scripts/qualify-curecoin.py'
+      - 'scripts/verify-curecoin-bytecode.py'
+      - '.github/workflows/bridge-curecoin-proof.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  curecoin-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Offline native evidence and affected Solidity owners
+        run: |
+          python -m pip install -r scripts/curecoin/requirements.txt
+          sha256sum -c contracts/test/fixtures/curecoin/SHA256SUMS
+          python -m unittest discover -s scripts/curecoin -p test_curecoin.py -v
+          python scripts/qualify-curecoin.py
+          solc_path=$(find "$HOME/.svm/0.8.24" -name 'solc-0.8.24' -type f -print -quit)
+          test -x "$solc_path"
+          CURECOIN_SOLC="$solc_path" python scripts/verify-curecoin-bytecode.py

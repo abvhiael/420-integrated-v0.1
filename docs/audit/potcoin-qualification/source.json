@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/potcoin/PotCoin",
+  "source": "24b987951186417af909a9cf1ea4da736e782c0f",
+  "release_tag": "v2.0.1",
+  "release_tag_commit": "8615fa3d4a794f0884aaf8bc81653b6db859d6c3",
+  "release_asset": "https://github.com/potcoin/PotCoin/releases/download/v2.0.1/potcoin-e30f3d875c14-x86_64-Linux-gnu.tar.gz",
+  "asset_sha256": "a4569115923a3ccaf1af30e7f8bd83079039d865f03b4d04754bc81401093466",
+  "daemon_sha256": "c41f725574e9e435840316d231cca828688be20a48d9b992e01d1ab20c30181a",
+  "reproducible_binary_build_established": false,
+  "source_file_sha256": {
+    "src/main.cpp": "368164b667f8288d8cca13527db3d8dc38c4e43329787c9c8e7bd6f74be8449b",
+    "src/main.h": "462f03da43dba4b13075cfa6f1de5f6984e58d93bbf07614c8c57bdd5112bdb8",
+    "src/kernel.cpp": "37d4ad2d1e330b998040f55a2b82e00857d9582612830116da9688eafcbeed53",
+    "src/hashblock.h": "981a960b0680d320db941651fe4b20c5040412abdcec27dc2c3c46edfa16d0be",
+    "src/script.cpp": "21434836197beda234e02ac9176f7cba78f307108b012bdd82b74a926ce11cc9",
+    "src/checkpoints.cpp": "3a6654242edd83b5544c26bd0545dec36ee48db613e0c9d78d13466cba078e3d",
+    "src/rpcblockchain.cpp": "2e6c382a4e84d45c06cae259058bfd5f152921af4df9b1cc1f16aa552aeedf00",
+    "src/init.cpp": "22d87a3a62049fa5bac7416463bc3c0c69bb79cbdfe209b9f4436ac5d1b6c719"
+  }
+}

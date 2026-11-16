@@ -1,6 +1,6 @@
 {
   "schema": "420-bridge-curecoin-mainnet-v12.5.11",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VERIFIER_AND_GATEWAY_SCRIPT",
+  "status": "LOCAL_IMPLEMENTATION_QUALIFIED_INACTIVE_PENDING_DEPLOYMENT_CONFIGURATION",
   "canonical_chain_key": "420/BRIDGE/CHAIN/CURE",
   "chain_family": "UTXO_PROOF_OF_STAKE",
   "route_chain_id": "0x4355524500000001",
@@ -11,14 +11,35 @@
     "rpc_port": 19911,
     "p2pkh_version": 25,
     "p2sh_version": 30,
-    "target_block_seconds": 600
+    "target_block_seconds": 240
   },
   "consensus_profile": {
     "security_model": "PURE_PROOF_OF_STAKE_V2_PLUS",
     "research_rewards": "Folding@home reward distribution is external to consensus and outside the bridge verifier trust boundary",
-    "finality_policy": "production verifier must prove canonical PoS-chain inclusion and configured finalized depth"
+    "finality_policy": "Constructor-configured nonzero confirmation depth; authority rotation invalidates current checkpoints; incompatible deep reorgs require isolation/reconciliation and verifier/checkpoint recovery with adapter replay state preserved.",
+    "consensus_source": "cygnusxi/CurecoinSource@a3eb106715638e316eb03af383dc27aad2e89536",
+    "block_hash": "SHA256d of native 80-byte header",
+    "last_pow_height": 257322,
+    "pre_fork_target_block_seconds": 600,
+    "post_fork_target_block_seconds": 240,
+    "post_fork_spacing_first_candidate": 257324,
+    "stake_modifier_interval_seconds": 21600,
+    "stake_age_cap_before_subtraction_seconds": 7776000,
+    "stake_minimum_age_seconds": {
+      "legacy": 2592000,
+      "post_fork": 345600,
+      "binding": "Authenticate actual replay context; native global mutation/restart ordering matters at the boundary."
+    },
+    "mint_maturity_blocks": 10,
+    "maximum_clock_drift_seconds": 7200,
+    "chain_selection": "Strictly greater cumulative trust; PoW adds 1, PoS adds floor(2^256/(target+1)).",
+    "trust_model": "AuthenticatedCheckpoint420 authority attests full native replay state; independent on-chain header/kernel/eligibility/block-signature/Merkle/output checks. Not a permissionless light client or irreversible finality."
   },
-  "native_asset": {"symbol":"CURE","units":"satoshi-style base units"},
+  "native_asset": {
+    "symbol": "CURE",
+    "units": "micro-CURE (1 CURE = 1000000 base units)",
+    "decimals": 6
+  },
   "adapter": {
     "contract": "CurecoinBridgeAdapter420",
     "adapter_id_preimage": "420/BRIDGE/CURECOIN/MAINNET/V12.5.11",
@@ -31,5 +52,14 @@
     "CURE asset id and route id are governance bound",
     "route risk caps and emergency isolation are configured",
     "end-to-end native CURE settlement qualification passes"
-  ]
+  ],
+  "verifier": {
+    "contract": "CurecoinFinalityVerifier420",
+    "checkpoint": "AuthenticatedCheckpoint420",
+    "destination_binding": "Native signed strTxComment: 420CUREV1 || sha256(abi.encode(\"420/CURE/DESTINATION/V1\",destinationChainId,destinationRouter,routeId)) || recipient20",
+    "proof_tools": "scripts/curecoin/native_replay.py, qualify_history.py and bundle.py",
+    "qualification_report": "docs/audit/BRIDGE-AUDIT-3-V-11-CURECOIN.md",
+    "production_addresses": null,
+    "production_confirmations": null
+  }
 }

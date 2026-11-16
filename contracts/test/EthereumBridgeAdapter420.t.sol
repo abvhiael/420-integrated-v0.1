@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
+import "./helpers/TokenPolicyBoundaryFixture420.sol";
 
 import "../src/bridge/adapters/EthereumBridgeAdapter420.sol";
 import "../src/bridge/verifiers/EthereumFinalityVerifier420.sol";
@@ -44,6 +45,7 @@ contract EthereumBridgeAdapter420Test {
         verifier = new EthereumFinalityVerifier420(address(this), address(oracle), address(messageVerifier));
         router = new EthereumRouterCaller420();
         adapter = new EthereumBridgeAdapter420(address(this), address(router), address(verifier));
+        adapter.setTokenRoutePolicy(address(new TokenPolicyBoundaryFixture420()));
         adapter.setGateway(GATEWAY, true);
         adapter.setAssetMapping(adapter.ETH_NATIVE_SOURCE_ASSET(), ETH_ASSET, true);
         adapter.setRouteBinding(ETH_ASSET, ROUTE);
@@ -111,8 +113,9 @@ contract EthereumBridgeAdapter420Test {
 
     function _setMessage(address token, bytes32 messageId) private { messageVerifier.set(_message(token, messageId)); }
 
-    function _message(address token, bytes32 messageId) private pure returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m) {
+    function _message(address token, bytes32 messageId) private view returns (IEthereumGatewayMessageVerifier420.GatewayMessage memory m) {
         m = IEthereumGatewayMessageVerifier420.GatewayMessage({
+            destinationChainId: block.chainid, destinationRouter: address(router), routeId: ROUTE,
             messageId: messageId,
             gateway: GATEWAY,
             sourceToken: token,

@@ -4,8 +4,8 @@ pragma solidity ^0.8.24;
 /// @notice Verifier boundary for canonical Dobbscoin mainnet bridge messages.
 /// @dev Production implementations must validate Dobbscoin header-chain work, LWMA/emergency-difficulty
 ///      rules, transaction inclusion, canonical bridge output and the configured confirmation policy.
-///      At/after the AuxPoW activation height they must additionally validate the AuxPoW commitment and
-///      parent-chain scrypt proof according to Dobbscoin chain-id separation rules.
+///      At/after activation they must enforce chain ID 176; when AuxPoW is present, validate
+///      its commitment and parent scrypt work against the CHILD target. Standalone work remains valid.
 interface IDobbscoinFinalityVerifier420 {
     struct FinalizedTransfer {
         bytes32 genesisHash;
@@ -20,7 +20,10 @@ interface IDobbscoinFinalityVerifier420 {
         uint256 amount;
         uint32 confirmations;
         bool finalized;
-        bool auxPowValidated;
+        bool auxPowValidated; // Activation-appropriate work/chain-ID path qualified, not AuxPoW presence.
+        uint256 destinationChainId;
+        address destinationRouter;
+        bytes32 routeId;
     }
 
     function verifyFinalizedTransfer(bytes calldata proof)

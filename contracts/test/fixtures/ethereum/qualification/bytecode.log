@@ -1,0 +1,26 @@
+{
+  "EthereumDepositGateway420": {
+    "creation_bytes": 1820,
+    "runtime_bytes": 1659
+  },
+  "EthereumBridgeAdapter420": {
+    "creation_bytes": 5171,
+    "runtime_bytes": 4748
+  },
+  "EthereumConsensusLightClient420": {
+    "creation_bytes": 15231,
+    "runtime_bytes": 7889
+  },
+  "EthereumFinalityVerifier420": {
+    "creation_bytes": 3031,
+    "runtime_bytes": 2623
+  },
+  "EthereumGatewayMessageVerifier420": {
+    "creation_bytes": 8700,
+    "runtime_bytes": 8423
+  },
+  "SP1Verifier": {
+    "creation_bytes": 5576,
+    "runtime_bytes": 5549
+  }
+}

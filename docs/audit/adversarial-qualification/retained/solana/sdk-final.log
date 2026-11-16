@@ -1,0 +1,9 @@
+test_actual_signatures_match_claim_and_merkle_wire (test_solana_bridge420.SolanaSdkTests.test_actual_signatures_match_claim_and_merkle_wire) ... ok
+test_insufficient_stake_and_duplicate_voter_rejected (test_solana_bridge420.SolanaSdkTests.test_insufficient_stake_and_duplicate_voter_rejected) ... ok
+test_rpc_only_and_weak_keys_cannot_be_certificates (test_solana_bridge420.SolanaSdkTests.test_rpc_only_and_weak_keys_cannot_be_certificates) ... ok
+test_wrong_trust_root_and_quorum_domain_rejected (test_solana_bridge420.SolanaSdkTests.test_wrong_trust_root_and_quorum_domain_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.053s
+
+OK

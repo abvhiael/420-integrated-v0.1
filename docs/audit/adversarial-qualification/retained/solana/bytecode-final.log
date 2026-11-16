@@ -1,0 +1,26 @@
+{
+  "SolanaBridgeAdapter420": {
+    "init_bytes": 4877,
+    "runtime_bytes": 4454
+  },
+  "SolanaFinalityVerifier420": {
+    "init_bytes": 12226,
+    "runtime_bytes": 11532
+  },
+  "SolanaEd25519420": {
+    "init_bytes": 7441,
+    "runtime_bytes": 3040
+  },
+  "SolanaSha512420": {
+    "init_bytes": 4281,
+    "runtime_bytes": 4254
+  },
+  "SolanaTransaction420": {
+    "init_bytes": 85,
+    "runtime_bytes": 57
+  },
+  "SolanaValidatorQuorum420": {
+    "init_bytes": 12241,
+    "runtime_bytes": 4526
+  }
+}

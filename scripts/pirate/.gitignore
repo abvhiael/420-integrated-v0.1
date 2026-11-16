@@ -1,0 +1,5 @@
+__pycache__/
+*.private
+*.params
+*.part
+shielded/target/

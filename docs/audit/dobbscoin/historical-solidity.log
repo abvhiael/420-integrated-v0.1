@@ -1,0 +1,22 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 22.26s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:47:5:
+   |
+47 |     function testConfirmationBoundary288() public {require(verify().confirmations==288);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:83:5:
+   |
+83 |     function testNativeMoneyLimitExceed ... ts[0].amount==30000000*100000000);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 2 tests for contracts/test/DobbscoinHistorical420.t.sol:DobbscoinHistorical420Test
+[PASS] testGenuineHistoricalDifficultyAndEmergencyBlocks() (gas: 108819030)
+[PASS] testGenuineHistoricalTransactionAndOutputNotABridgeDeposit() (gas: 5771639)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 24.59ms (32.15ms CPU time)
+
+Ran 1 test suite in 25.21ms (24.59ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

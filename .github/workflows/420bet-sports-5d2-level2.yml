@@ -16,6 +16,14 @@ on:
       - 'scripts/bet/*sports-5d2.py'
       - 'docs/bet/SPORTS-5D.2-CATALOG.json'
       - '.github/workflows/420bet-sports-5d2-level2.yml'
+      - '!contracts/src/interfaces/IEthereumFinalityVerifier420.sol'
+      - '!contracts/src/interfaces/IEthereumGatewayMessageVerifier420.sol'
+      - '!contracts/src/interfaces/ILitecoinFinalityVerifier420.sol'
+      - '!contracts/src/interfaces/IDogecoinFinalityVerifier420.sol'
+      - '!contracts/src/interfaces/IPirateChainFinalityVerifier420.sol'
+      - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
+      - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'
+      - '!contracts/src/interfaces/IBridgeVerifiedSourceContext420.sol'
   workflow_dispatch:
 permissions:
   contents: read

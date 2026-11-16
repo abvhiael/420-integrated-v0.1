@@ -1,0 +1,27 @@
+Compiling 41 files with Solc 0.8.24
+Solc 0.8.24 finished in 56.12s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to pure
+  --> contracts/test/SupportedTokenRoutes420.t.sol:64:2460:
+   |
+64 |  ... assetId,true);reject(1,42 ether);} function testFuzzPrecisionRoundTrip ... verted,18,6)==amount,"precision");}
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 4 tests for contracts/test/TokenGatewayRouterIntegration420.t.sol:TokenGatewayRouterIntegration420Test
+[FAIL: evidence replay] testRouterIndependentTokenAdmissionsAndNormalizedRisk() (gas: 4901134)
+[PASS] testRouterOutboundKeepsSourcePending() (gas: 4015567)
+[PASS] testRouterPrecisionRiskFailureRestoresReplay() (gas: 3781251)
+[PASS] testRouterSuspendedAssetCannotBeAdmitted() (gas: 2217865)
+Suite result: FAILED. 3 passed; 1 failed; 0 skipped; finished in 13.11ms (15.35ms CPU time)
+
+Ran 1 test suite in 13.60ms (13.11ms CPU time): 3 tests passed, 1 failed, 0 skipped (4 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/TokenGatewayRouterIntegration420.t.sol:TokenGatewayRouterIntegration420Test
+[FAIL: evidence replay] testRouterIndependentTokenAdmissionsAndNormalizedRisk() (gas: 4901134)
+
+Encountered a total of 1 failing tests, 3 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

@@ -1,0 +1,167 @@
+{
+  "pass": true,
+  "scope": "V22 current affected composition; original unchanged cryptographic evidence retained at its original SHA",
+  "qualified_commit": "Reported by associated PR; all input hashes bind this tree",
+  "forge": "1.9.0 / 6056c5845d34205a83cf7108042adb137325c9df",
+  "solc": "0.8.24+commit.e11b9ed9",
+  "evm": "cancun",
+  "optimizer_runs": 200,
+  "via_ir": true,
+  "fuzz_seed": "0x42022",
+  "runs": [
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-core-domain.log",
+      "cases_passed": 31,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-core-domain.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-core-admission.log",
+      "cases_passed": 39,
+      "fuzz_inputs": 5000,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-core-admission.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-core-invariant.log",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 128,
+      "invariant_calls": 8192,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-core-invariant.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-core-settlement.log",
+      "cases_passed": 3,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-core-settlement.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-core-downstream.log",
+      "cases_passed": 13,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-core-downstream.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-full.log",
+      "cases_passed": 30,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 128,
+      "invariant_calls": 8192,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-full.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-utxo.log",
+      "cases_passed": 3,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-utxo.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-ethereum.log",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-ethereum.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-tokens.log",
+      "cases_passed": 32,
+      "fuzz_inputs": 5000,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-tokens.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-token-router.log",
+      "cases_passed": 4,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-token-router.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-cadc.log",
+      "cases_passed": 37,
+      "fuzz_inputs": 5000,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-cadc.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-cadc-router.log",
+      "cases_passed": 4,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-cadc-router.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-admission.log",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-admission.inputs.json"
+    },
+    {
+      "log": "docs/audit/final-verifier-qualification/envelope-legacy.log",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "source_inputs": "docs/audit/final-verifier-qualification/envelope-legacy.inputs.json"
+    }
+  ],
+  "totals": {
+    "required_cases_passed": 200,
+    "fuzz_runs": 20000,
+    "invariant_runs": 256,
+    "invariant_calls": 16384,
+    "sdk_cases_passed": 12,
+    "build_artifacts": 93,
+    "maximum_runtime_bytes": 22063,
+    "logs": "docs/audit/final-verifier-qualification",
+    "ci_run_ids": []
+  },
+  "native_component_graphs_unchanged": 12,
+  "local_verifier_models": 11,
+  "production_approvals": 0,
+  "new_ci_run_ids": [],
+  "catalogue_integrity": {
+    "artifacts": 495,
+    "bytes": 25240921,
+    "catalogue_sha256": "aeb75831e79bc618f333db418d790ef254751c4f050684af6b238d82555d2dd6",
+    "complete_420_gateway_authorizations": 0,
+    "consensus_test_suites_rerun": 0,
+    "datasets": 15,
+    "independent_identity_checks": 39,
+    "original_checksum_checks": 418,
+    "original_checksum_conflicts": 0,
+    "origins": {
+      "CONTROLLED": 12,
+      "DERIVED_HISTORICAL": 75,
+      "EXPECTED_RESULTS": 18,
+      "HISTORICAL": 266,
+      "PROVENANCE": 37,
+      "QUALIFICATION_RECORD": 69,
+      "RPC_OBSERVATION": 18
+    },
+    "pass": true,
+    "recovered_original_logs": 19
+  },
+  "diagnostics": [
+    "Interim wrong-owner inherited unit selection excluded; proper unit owner passes",
+    "Struct literal IR stack failure corrected by sequential fixture assignment",
+    "Combined 251-file and grouped core compilers exited SIGKILL before test execution; owner-scoped qualifications preserve compiler settings and assertions"
+  ]
+}

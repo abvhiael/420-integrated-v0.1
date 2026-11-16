@@ -1,0 +1,14 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 5.65s
+Compiler run successful!
+
+Ran 6 tests for contracts/test/DobbscoinBridgeAdapter420.t.sol:DobbscoinBridgeAdapter420Test
+[PASS] testBindingFailureDoesNotConsumeOutput() (gas: 342970)
+[PASS] testNonRouterFails() (gas: 27644)
+[PASS] testSourceOutputReplayAcrossMessageAndVerifierRotation() (gas: 936888)
+[PASS] testWrongDestinationChainFails() (gas: 149683)
+[PASS] testWrongDestinationRouteFails() (gas: 149109)
+[PASS] testWrongDestinationRouterFails() (gas: 149211)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 1.71ms (3.18ms CPU time)
+
+Ran 1 test suite in 6.10ms (1.71ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

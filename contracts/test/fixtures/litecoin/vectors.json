@@ -1,0 +1,30 @@
+[
+  {
+    "name": "legacy",
+    "height": 448,
+    "txid": "b6489c55aab48b31c592959ca38a89521372ec683088b5888e512e072b73812a",
+    "outputs": 1,
+    "amounts": [
+      40000000000
+    ]
+  },
+  {
+    "name": "transparent",
+    "height": 2300000,
+    "txid": "9980499a9cc1b8f3e1cae191f40f034dae1d6cc1332d3279ad4ded9810db0f8c",
+    "outputs": 2,
+    "amounts": [
+      381815687,
+      227171762
+    ]
+  },
+  {
+    "name": "hogex",
+    "height": 2300000,
+    "txid": "3e1b31e04d9a5d1e377daae53141b665fb822892de422a6c2f88f9b116a0c4b8",
+    "outputs": 1,
+    "amounts": [
+      479305571564
+    ]
+  }
+]

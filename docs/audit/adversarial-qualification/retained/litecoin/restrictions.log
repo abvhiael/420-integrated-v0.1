@@ -1,0 +1,11 @@
+Compiling 9 files with Solc 0.8.24
+Solc 0.8.24 finished in 8.06s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/LitecoinRestrictions420.t.sol:LitecoinRestrictions420Test
+[PASS] testActualMWEBHogExAndStrippedHogAddrAndPeginProgramsRejected() (gas: 96093)
+[PASS] testFuzzUnknownOrOutOfRangeProgressNeverCreatesCompletedWork(bytes32,uint16) (runs: 2500, μ: 1312536, ~: 1312668)
+[PASS] testUnfinishedWorkWrongHeaderAndInvalidScryptCannotAuthorizeHeaders() (gas: 283510649)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 621.29ms (663.53ms CPU time)
+
+Ran 1 test suite in 622.25ms (621.29ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

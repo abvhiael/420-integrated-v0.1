@@ -1,13 +1,15 @@
 {
   "schema": "420-bridge-xrpl-mainnet-v12.5.15",
-  "status": "APPROVED_INACTIVE_PENDING_PRODUCTION_VALIDATED_LEDGER_VERIFIER_AND_GATEWAY_ACCOUNT",
+  "status": "IMPLEMENTED_LOCALLY_AND_HISTORICALLY_QUALIFIED_INACTIVE_PENDING_DEPLOYMENT_AND_GATEWAY_ACCOUNT",
   "canonical_chain_key": "420/BRIDGE/CHAIN/XRP",
   "chain_family": "XRPL",
   "route_chain_id": "0x5852504c00000001",
   "network_identity": {
     "method": "validated-ledger consensus",
     "ledger_index_type": "UInt32",
-    "ledger_hash_type": "SHA-512Half UInt256"
+    "ledger_hash_type": "SHA-512Half UInt256",
+    "domain": "XRPL/MAINNET",
+    "network_id": 0
   },
   "native_asset": {
     "symbol": "XRP",
@@ -39,5 +41,19 @@
     "outbound AccountID payloads must be exactly 20 bytes plus explicit tag metadata",
     "a destination tag cannot be supplied when the tag-present flag is false"
   ],
-  "qualification_note": "V12.5.15 requalifies the preserved V12.5.6 XRP design against the modular adapter CI without the obsolete temporary workflow diagnostics."
+  "qualification_note": "BRIDGE-AUDIT-3.V.9 adds native full-validation quorum, SHA-512Half, SHAMap and transaction/metadata verification; deployment and route activation remain separate.",
+  "verifier": {
+    "contract": "XrplFinalityVerifier420",
+    "hash_contract": "XrplSHA512Half420",
+    "trust_model": "Governance-authenticated mainnet UNL/master-to-manifest-signing-key snapshot over explicit ledger and Ripple-time ranges; native full-validation signatures, no RPC-label authority",
+    "minimum_quorum": "ceil(80% of unique trusted masters); no automatic negative-UNL reduction",
+    "hashes": "Native SHA-512Half prefixes LWR, VAL, TXN, SND and MIN",
+    "inclusion": "Key-directed SHAMap v1 transaction-plus-metadata leaves; full native transaction and metadata bytes",
+    "native_payment": "tesSUCCESS, positive native drops, reject partial payments/issued currency/SendMax/DeliverMin/Paths; delivered amount must match when present",
+    "gateway_binding": "Explicit AccountID + tag-present flag + uint32 destination tag + route, default deny",
+    "bridge_memo": "420XRPV1 || uint256BE destinationChainId || destinationRouter20 || route32 || recipient20",
+    "qualified_evidence": "docs/audit/BRIDGE-AUDIT-3-V-9-XRPL.md",
+    "source_reference": "XRPLF/rippled@3c72fb540d239463d2a4e071d6f71200c3abb5f4"
+  },
+  "prior_qualification_note": "V12.5.15 requalifies the preserved V12.5.6 XRP design against the modular adapter CI without the obsolete temporary workflow diagnostics."
 }

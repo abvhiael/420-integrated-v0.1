@@ -1,0 +1,60 @@
+name: 420Bridge Ethereum Local Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/Ethereum*420.sol'
+      - 'contracts/src/bridge/verifiers/vendor/sp1/**'
+      - 'contracts/src/bridge/EthereumDepositGateway420.sol'
+      - 'contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IEthereum*420.sol'
+      - 'contracts/test/Ethereum*420.t.sol'
+      - 'contracts/test/helpers/Ethereum*420.sol'
+      - 'contracts/test/fixtures/ethereum/**'
+      - 'contracts/test/AaveBridgeAdapter420.t.sol'
+      - 'contracts/test/AudioBridgeAdapter420.t.sol'
+      - 'contracts/test/EurcBridgeAdapter420.t.sol'
+      - 'contracts/test/LinkBridgeAdapter420.t.sol'
+      - 'contracts/test/QcadBridgeAdapter420.t.sol'
+      - 'contracts/test/UniBridgeAdapter420.t.sol'
+      - 'contracts/test/UsdtBridgeAdapter420.t.sol'
+      - 'contracts/test/VerifierRotationHardening420.t.sol'
+      - 'contracts/test/EmergencyControlsHardening420.t.sol'
+      - 'contracts/test/CrossAdapterHardeningBridgeAdapter420.t.sol'
+      - 'contracts/test/DomainNonceRouterBypassHardening420.t.sol'
+      - 'contracts/test/MalformedProofRecipientFuzzHardening420.t.sol'
+      - 'scripts/qualify-ethereum.py'
+      - 'scripts/verify-ethereum-bytecode.py'
+      - '.github/workflows/bridge-ethereum-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bridge-ethereum-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  ethereum-proof-consensus-and-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r contracts/test/fixtures/ethereum/requirements.lock
+      - name: Check pinned historical and program artifacts
+        run: python contracts/test/fixtures/ethereum/verify_manifest.py
+      - name: Independently authenticate historical execution and accounts
+        run: python contracts/test/fixtures/ethereum/verify.py
+      - name: Independently verify genuine BLS and SSZ update
+        run: python contracts/test/fixtures/ethereum/verify_bls.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Concrete consensus, gateway, shared router, seven token routes and affected hardening
+        run: python scripts/qualify-ethereum.py --routes --hardening

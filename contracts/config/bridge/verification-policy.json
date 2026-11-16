@@ -58,5 +58,6 @@
     "asset-specific adapters"
   ],
   "qualification_registry_policy": "contracts/config/bridge/verifier-identity-policy.json",
-  "productionAdmissionPolicy": "contracts/config/bridge/production-admission-policy.json"
+  "productionAdmissionPolicy": "contracts/config/bridge/production-admission-policy.json",
+  "qualification_inventory": "contracts/config/bridge/verifier-qualification-inventory.json"
 }

@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/dobbscoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "dobbscoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol": {
+      "sha256": "36bdad833e0a2f82bf8de54bb2db9db0e9111434dccd17e274b851ce7344bb7c",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": {
+      "sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol": {
+      "sha256": "72a3a76d1d1426bc097f23a66eec984d89e3b633e256d8556648a15a6ec2e701",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/dobbscoin/DobbscoinConsensus420.sol": {
+      "sha256": "d55a7de3e13be4ec4646c21d402148ccdb6c0bed890f527079adcfe6dec6f98b",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/bridge/verifiers/dobbscoin/DobbscoinWire420.sol": {
+      "sha256": "73fab16ae4f9c36f42143f23dc2e4875bc229395f1e11e72e4f1482822d0745c",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol": {
+      "sha256": "ed5643a7956b22509c586e74e1ffc8fa81f4d60e71c49363d40aa5210f49a55d",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+    },
+    "contracts/test/adversarial/DobbscoinV18.t.sol": {
+      "sha256": "6a048e50ade4e8fcb2075c9d45e2e22251826304c4ee49a0e562d71b0521316c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04"
+}

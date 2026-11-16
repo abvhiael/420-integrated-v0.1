@@ -1,7 +1,7 @@
 {
   "schema": "420-cadc-genesis-integration-v1",
   "status": "CANONICAL_CAD_PENDING_ISSUER_INTEGRATION",
-  "issuer": "Loon Technology Inc.",
+  "issuer": "CADC Reserve Trust",
   "symbol": "CADC",
   "reference_currency": "CAD",
   "architecture": "ISSUER_CANONICAL_LAYERZERO_OFT_PATH",
@@ -14,28 +14,49 @@
   "known_source_deployments": [
     {
       "chain": "Ethereum",
-      "token": "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
-      "status": "LOON_PUBLISHED"
+      "token": "0x49A6F6aeAB68eA001bEaa4815186eb22FBDcCF2A",
+      "status": "ISSUER_PUBLISHED_UPGRADED_TOKEN_NOT_OFT_IDENTITY",
+      "legacy_token": "0xcadc0acd4b445166f12d2c07eac6e2544fbe2eef",
+      "active_420_route": false,
+      "oft_or_adapter": "0xe0f9483de044b8e0c069a8561bdb580778854143",
+      "layerzero_metadata_oft_or_store": "0xe0f9483de044b8e0c069a8561bdb580778854143",
+      "oft_qualification": "GENUINE_HISTORICAL_TOKEN_ENDPOINT_PEER_ULN_AND_EXECUTION_QUALIFIED_NOT_420_AUTHORIZATION"
     },
     {
       "chain": "Arbitrum",
-      "token": "0x2b28E826b55e399F4d4699b85f68666AC51e6f70",
-      "status": "LOON_PUBLISHED"
+      "token": null,
+      "status": "ISSUER_SUPPORT_PAUSED",
+      "legacy_token": "0x2b28E826b55e399F4d4699b85f68666AC51e6f70",
+      "active_420_route": false
     },
     {
       "chain": "Polygon",
-      "token": "0x9de41aff9f55219d5bf4359f167d1d0c772a396d",
-      "status": "LOON_PUBLISHED"
+      "token": "0x74D9423a2886618522F7C992Edf647ea707A38eb",
+      "status": "ISSUER_PUBLISHED_UPGRADED_TOKEN_NOT_OFT_IDENTITY",
+      "legacy_token": "0x9de41aff9f55219d5bf4359f167d1d0c772a396d",
+      "active_420_route": false,
+      "oft_or_adapter": "PENDING_ONCHAIN_AUTHENTICATION",
+      "layerzero_metadata_oft_or_store": "0xf004f8c27851f4f7123b974bf4d106a1aa5c0ef5",
+      "oft_qualification": "AUTHENTICATED_ETHEREUM_REMOTE_PEER_AND_PROTOCOL_METADATA_NOT_420_AUTHORIZATION"
     },
     {
       "chain": "Base",
-      "token": "0x043eb4b75d0805c43d7c834902e335621983cf03",
-      "status": "LOON_PUBLISHED"
+      "token": "0x5e63E9C06c3F2c779EF29a8071F94F5a724eB5e4",
+      "status": "ISSUER_PUBLISHED_UPGRADED_TOKEN_NOT_OFT_IDENTITY",
+      "legacy_token": "0x043eb4b75d0805c43d7c834902e335621983cf03",
+      "active_420_route": false,
+      "oft_or_adapter": "PENDING_ONCHAIN_AUTHENTICATION",
+      "layerzero_metadata_oft_or_store": "0x91222d95170227badb6d4e856fc03324eb6a4ab8",
+      "oft_qualification": "AUTHENTICATED_ETHEREUM_REMOTE_PEER_AND_PROTOCOL_METADATA_NOT_420_AUTHORIZATION"
     },
     {
       "chain": "Solana",
-      "token": "9ewjJpmD1ES83RDRFnHs7V2hUdH76WAVjdvu6UV6WNo7",
-      "status": "LOON_PUBLISHED"
+      "token": "52spLAAFjKMwhNJ3TL2PUAUGYGgXsbvipP4whRtBp82S",
+      "status": "ISSUER_PUBLISHED_UPGRADED_TOKEN_NOT_OFT_IDENTITY",
+      "legacy_token": "9ewjJpmD1ES83RDRFnHs7V2hUdH76WAVjdvu6UV6WNo7",
+      "active_420_route": false,
+      "oft_or_adapter": "PENDING_ONCHAIN_AUTHENTICATION",
+      "layerzero_metadata_oft_or_store": "54NDwhi5dWeKBjBh8EkWH7mhsP2LLWw6y921gPRtPmQ5"
     }
   ],
   "qualification": [
@@ -53,5 +74,21 @@
     "420 protocol has no unilateral CADC mint authority.",
     "Only issuer-approved CADC representation may receive CANONICAL_CAD status.",
     "If qualification is lost, canonical quote status can be removed without confiscating balances."
-  ]
+  ],
+  "servicer": "Loon Payments Inc.",
+  "issuer_source": "https://loon.finance/blog/access-cadc-on-layerzero/",
+  "issuer_source_observed": "2026-11-15",
+  "issuer_published_dvn_description": {
+    "threshold": 3,
+    "providers": [
+      "LayerZero Labs",
+      "Fidelity Center for Applied Technologies",
+      "Deutsche Telekom MMS",
+      "Canary",
+      "Google Cloud"
+    ],
+    "effective_onchain_configuration": "HISTORICAL_ETHEREUM_RECEIVER_2_REQUIRED_PLUS_1_OF_3_OPTIONAL_QUALIFIED",
+    "project_policy": "At least two required independent DVNs; unchanged"
+  },
+  "evidence": "contracts/test/fixtures/cadc/history/PROVENANCE.json"
 }

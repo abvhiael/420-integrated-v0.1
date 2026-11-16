@@ -97,19 +97,8 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
-        require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        BridgeVerifierRegistry420 qualification=_qualification(1);
-        bytes32 approval=qualification.requireCurrent(address(this));
-        (depositId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyDeposit(proof);
-        require(qualification.requireCurrent(address(this))==approval,"qualification changed");
-        _checkReplay(depositId);
-        require(!consumedEvidence[depositId],"evidence replay");
-        require(!consumedDeposits[depositId], "replay");
-        require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");
-        _canonicalSettlementAsset(asset);
-        consumedDeposits[depositId] = true;
-        consumedEvidence[depositId] = true;
-        emit DepositVerified(depositId, recipient, asset, amount);
+        _qualification(1);
+        revert("legacy source proof domain unqualified");
     }
 
     function verifyWithdrawal(bytes calldata proof)
@@ -121,18 +110,7 @@ contract VerifiedGateway420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.OUTBOUND
         );
-        require(verifier != address(0) && verifier.code.length != 0, "verifier");
-        BridgeVerifierRegistry420 qualification=_qualification(2);
-        bytes32 approval=qualification.requireCurrent(address(this));
-        (withdrawalId, recipient, asset, amount) = IVerifiedGatewayVerifier420(verifier).verifyWithdrawal(proof);
-        require(qualification.requireCurrent(address(this))==approval,"qualification changed");
-        _checkReplay(withdrawalId);
-        require(!consumedEvidence[withdrawalId],"evidence replay");
-        require(!consumedWithdrawals[withdrawalId], "replay");
-        require(recipient != address(0) && amount > 0 && approvedAssets[asset], "transfer");
-        _canonicalSettlementAsset(asset);
-        consumedWithdrawals[withdrawalId] = true;
-        consumedEvidence[withdrawalId] = true;
-        emit WithdrawalVerified(withdrawalId, recipient, asset, amount);
+        _qualification(2);
+        revert("legacy source proof domain unqualified");
     }
 }

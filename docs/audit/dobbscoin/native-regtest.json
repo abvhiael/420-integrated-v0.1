@@ -1,0 +1,21 @@
+{
+  "source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3",
+  "daemon_sha256": "ecd039b25bee21baeb13f8dabd51bb9ea9246fcc5a9cbc69022542ccdb383b39",
+  "checks": [
+    "createauxblock rejects before activation",
+    "height 9 preactivation identity",
+    "genuine native-mined AuxPoW at activation; child target, zero parent outputs",
+    "standalone native work after AuxPoW activation",
+    "native selected chain through max-reorg activation"
+  ],
+  "chain": {
+    "chain": "regtest",
+    "blocks": 210,
+    "headers": 210,
+    "bestblockhash": "db5641b2b0a2b8a7e1640738a33628cd8942f499cdd8c90b32ca236bff5f0b72",
+    "difficulty": 0.0,
+    "verificationprogress": 1.0,
+    "chainwork": "00000000000000000000000000000000000000000000000000000000000001a6"
+  },
+  "auxpow_sha256": "7843316c6deea32ed4bad8f5db4382fe64e20706d48d2a8b01d69d32b240521d"
+}

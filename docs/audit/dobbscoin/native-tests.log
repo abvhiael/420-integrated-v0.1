@@ -1,0 +1,96 @@
+Running 21 test cases...
+[1;34;49mEntering test module "Dobbscoin Test Suite"
+[0;39;49m[1;33;49mtest/allocator_tests.cpp(11): Test suite "allocator_tests" is skipped because disabled
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(21): Entering test suite "auxpow_tests"
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(148): Entering test case "check_auxpow_merkle_commitment"
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(148): Leaving test case "check_auxpow_merkle_commitment"; testing time: 357us
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(232): Entering test case "check_auxpow_legacy_no_magic"
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(232): Leaving test case "check_auxpow_legacy_no_magic"; testing time: 36us
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(256): Entering test case "check_auxpow_nonce_and_size_tampering"
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(256): Leaving test case "check_auxpow_nonce_and_size_tampering"; testing time: 38us
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(294): Entering test case "check_auxpow_pow_helper"
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(294): Leaving test case "check_auxpow_pow_helper"; testing time: 3928us
+[0;39;49m[1;34;49mtest/auxpow_tests.cpp(21): Leaving test suite "auxpow_tests"; testing time: 4383us
+[0;39;49m[1;33;49mtest/base32_tests.cpp(9): Test suite "base32_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/base58_tests.cpp(26): Test suite "base58_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/base64_tests.cpp(9): Test suite "base64_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/bloom_tests.cpp(25): Test suite "bloom_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/checkblock_tests.cpp(22): Test suite "CheckBlock_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/Checkpoints_tests.cpp(17): Test suite "Checkpoints_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/coins_tests.cpp(63): Test suite "coins_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/compress_tests.cpp(24): Test suite "compress_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/crypto_tests.cpp(20): Test suite "crypto_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/DoS_tests.cpp(44): Test suite "DoS_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/getarg_tests.cpp(14): Test suite "getarg_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/hash_tests.cpp(14): Test suite "hash_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/key_tests.cpp(61): Test suite "key_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/main_tests.cpp(10): Test suite "main_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/mempool_tests.cpp(12): Test suite "mempool_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/mruset_tests.cpp(37): Test suite "mruset_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/multisig_tests.cpp(27): Test suite "multisig_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/netbase_tests.cpp(13): Test suite "netbase_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/pmt_tests.cpp(29): Test suite "pmt_tests" is skipped because disabled
+[0;39;49m[1;34;49mtest/pow_tests.cpp(14): Entering test suite "pow_tests"
+[0;39;49m[1;34;49mtest/pow_tests.cpp(23): Entering test case "kgw_historical_regression_6da0ef49"
+[0;39;49m[1;34;49mtest/pow_tests.cpp(23): Leaving test case "kgw_historical_regression_6da0ef49"; testing time: 166us
+[0;39;49m[1;34;49mtest/pow_tests.cpp(14): Leaving test suite "pow_tests"; testing time: 170us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(14): Entering test suite "lwma3_tests"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(47): Entering test case "lwma3_inactive_below_fork"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(47): Leaving test case "lwma3_inactive_below_fork"; testing time: 33us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(73): Entering test case "lwma3_bootstrap_returns_prev_nbits"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(73): Leaving test case "lwma3_bootstrap_returns_prev_nbits"; testing time: 28us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(95): Entering test case "lwma3_equilibrium_holds_difficulty"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(95): Leaving test case "lwma3_equilibrium_holds_difficulty"; testing time: 244us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(126): Entering test case "lwma3_fast_blocks_raise_difficulty"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(126): Leaving test case "lwma3_fast_blocks_raise_difficulty"; testing time: 228us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(154): Entering test case "lwma3_slow_blocks_lower_difficulty"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(154): Leaving test case "lwma3_slow_blocks_lower_difficulty"; testing time: 227us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(181): Entering test case "lwma3_outlier_solvetime_is_clamped"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(181): Leaving test case "lwma3_outlier_solvetime_is_clamped"; testing time: 229us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(215): Entering test case "lwma3_negative_weight_floor_engages"
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(215): Leaving test case "lwma3_negative_weight_floor_engages"; testing time: 224us
+[0;39;49m[1;34;49mtest/lwma3_tests.cpp(14): Leaving test suite "lwma3_tests"; testing time: 1247us
+[0;39;49m[1;33;49mtest/cltv_tests.cpp(18): Test suite "cltv_tests" is skipped because disabled
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(14): Entering test suite "emergency_diff_tests"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(39): Entering test case "emergency_diff_inactive_below_fork"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(39): Leaving test case "emergency_diff_inactive_below_fork"; testing time: 49us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(59): Entering test case "emergency_diff_normal_block_at_min_diff_rejected"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(59): Leaving test case "emergency_diff_normal_block_at_min_diff_rejected"; testing time: 17us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(77): Entering test case "emergency_diff_long_gap_at_min_diff_accepted"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(77): Leaving test case "emergency_diff_long_gap_at_min_diff_accepted"; testing time: 236us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(97): Entering test case "emergency_diff_long_gap_better_than_min_not_emergency"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(97): Leaving test case "emergency_diff_long_gap_better_than_min_not_emergency"; testing time: 23us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(122): Entering test case "emergency_diff_exact_6h_gap_rejected"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(122): Leaving test case "emergency_diff_exact_6h_gap_rejected"; testing time: 52us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(140): Entering test case "emergency_diff_null_prev_safe"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(140): Leaving test case "emergency_diff_null_prev_safe"; testing time: 18us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(165): Entering test case "miner_valve_fires_post_fork_after_stall"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(165): Leaving test case "miner_valve_fires_post_fork_after_stall"; testing time: 20us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(187): Entering test case "miner_valve_gated_below_fork"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(187): Leaving test case "miner_valve_gated_below_fork"; testing time: 50us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(208): Entering test case "miner_valve_closed_at_exact_gap"
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(208): Leaving test case "miner_valve_closed_at_exact_gap"; testing time: 403us
+[0;39;49m[1;34;49mtest/emergency_diff_tests.cpp(14): Leaving test suite "emergency_diff_tests"; testing time: 975us
+[0;39;49m[1;33;49mtest/rpc_tests.cpp(49): Test suite "rpc_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/sanity_tests.cpp(9): Test suite "sanity_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/script_P2SH_tests.cpp(50): Test suite "script_P2SH_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/script_tests.cpp(63): Test suite "script_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/scriptnum_tests.cpp(10): Test suite "scriptnum_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/scrypt_tests.cpp(381): Test suite "scrypt_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/serialize_tests.cpp(14): Test suite "serialize_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/sighash_tests.cpp(117): Test suite "sighash_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/sigopcount_tests.cpp(26): Test suite "sigopcount_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/skiplist_tests.cpp(15): Test suite "skiplist_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/timedata_tests.cpp(11): Test suite "timedata_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/transaction_tests.cpp(78): Test suite "transaction_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/uint256_tests.cpp(15): Test suite "uint256_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/univalue_tests.cpp(15): Test suite "univalue_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/util_tests.cpp(21): Test suite "util_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/accounting_tests.cpp(15): Test suite "accounting_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/wallet_sqlite_tests.cpp(172): Test suite "wallet_sqlite_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/wallet_tests.cpp(26): Test suite "wallet_tests" is skipped because disabled
+[0;39;49m[1;33;49mtest/rpc_wallet_tests.cpp(22): Test suite "rpc_wallet_tests" is skipped because disabled
+[0;39;49m[1;34;49mLeaving test module "Dobbscoin Test Suite"; testing time: 6939us
+[0;39;49m
+[1;32;49m*** No errors detected
+[0;39;49m

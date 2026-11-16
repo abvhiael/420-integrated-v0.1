@@ -1,0 +1,53 @@
+name: 420Bridge Dogecoin Local Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/Dogecoin*420.sol'
+      - 'contracts/src/bridge/verifiers/LitecoinScrypt420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeCrypto420.sol'
+      - 'contracts/src/bridge/verifiers/BridgeWire420.sol'
+      - 'contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IDogecoinFinalityVerifier420.sol'
+      - 'contracts/src/interfaces/IBridgeAdapter420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/test/helpers/GenesisMocks420.sol'
+      - 'contracts/config/bridge/dogecoin-mainnet-v12.5.5.json'
+      - 'contracts/test/Dogecoin*420.t.sol'
+      - 'contracts/test/fixtures/dogecoin/**'
+      - 'contracts/src/bridge/GatewayRouter420.sol'
+      - 'contracts/src/bridge/BridgeRiskManager.sol'
+      - 'contracts/src/bridge/BridgeTransferRegistry.sol'
+      - 'contracts/src/bridge/BridgeRouteRegistry.sol'
+      - 'contracts/src/bridge/BridgeChainRegistry420.sol'
+      - 'contracts/src/bridge/BridgeAccountingRegistry.sol'
+      - 'scripts/qualify-dogecoin.py'
+      - 'scripts/verify-dogecoin-bytecode.py'
+      - '.github/workflows/bridge-dogecoin-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bridge-dogecoin-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  dogecoin-scrypt-auxpow-consensus-and-deposits:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Independently verify genuine Scrypt/AuxPoW history and checksums
+        run: python3 contracts/test/fixtures/dogecoin/verify.py
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Dogecoin consensus, historical merged mining, deposits, replay and rollback
+        run: python3 scripts/qualify-dogecoin.py

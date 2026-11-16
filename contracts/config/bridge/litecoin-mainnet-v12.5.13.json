@@ -10,7 +10,10 @@
     "p2p_port": 9333,
     "target_block_seconds": 150,
     "p2pkh_version": 48,
-    "p2sh_versions": [5, 50],
+    "p2sh_versions": [
+      5,
+      50
+    ],
     "bech32_hrp": "ltc",
     "mweb_hrp": "ltcmweb"
   },
@@ -22,11 +25,21 @@
     "mweb_supported_by_chain": true,
     "mweb_supported_by_genesis_bridge": false
   },
-  "native_asset": {"symbol":"LTC","decimals":8,"base_unit":"litoshi"},
+  "native_asset": {
+    "symbol": "LTC",
+    "decimals": 8,
+    "base_unit": "litoshi"
+  },
   "adapter": {
     "contract": "LitecoinBridgeAdapter420",
     "adapter_id_preimage": "420/BRIDGE/LITECOIN/MAINNET/V12.5.13",
-    "outbound_program_types": ["P2PKH","P2SH","P2WPKH","P2WSH","P2TR"],
+    "outbound_program_types": [
+      "P2PKH",
+      "P2SH",
+      "P2WPKH",
+      "P2WSH",
+      "P2TR"
+    ],
     "mweb": "rejected at Genesis"
   },
   "activation_requirements": [
@@ -38,5 +51,15 @@
     "gateway custody and withdrawal signing are production configured",
     "route risk caps and emergency isolation are configured",
     "end-to-end inbound and outbound qualification passes"
-  ]
+  ],
+  "local_implementation": {
+    "roadmap_step": "BRIDGE-AUDIT-3.V.4",
+    "status": "IMPLEMENTED_AND_LOCALLY_QUALIFIED_NOT_DEPLOYED",
+    "header_chain": "LitecoinHeaderChain420",
+    "pow": "Exact on-chain Scrypt(1024,1,1), permissionless bounded progress via immutable LitecoinScrypt420",
+    "finality_verifier": "LitecoinFinalityVerifier420",
+    "deposit_specification": "contracts/test/fixtures/litecoin/README.md",
+    "qualification": "contracts/test/fixtures/litecoin/qualification/RESULTS.md",
+    "route_activation": false
+  }
 }

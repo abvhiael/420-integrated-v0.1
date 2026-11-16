@@ -1,0 +1,20 @@
+{
+  "base_main": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "method": "Exact production source/import closure and final test/tool source hashes; retained passing log union without redundant test reruns. Published commit identifies the tree.",
+  "files": {
+    "contracts/src/bridge/adapters/TronBridgeAdapter420.sol": "8b5ed16505d641d03012a732e7b83ccd68245e481e45aa26e42554d87b6b4ddf",
+    "contracts/src/bridge/verifiers/TronFinalityVerifier420.sol": "4a65d81a9291a85766d50ee2bc5c471952e118494ec79cc46358ea454d42ae3d",
+    "contracts/src/bridge/verifiers/tron/TronProto420.sol": "4a6eab6b0cd67f90922fa0b285807449f30b759d3fbeb55914880badb86b6e0e",
+    "contracts/src/bridge/verifiers/tron/TronWire420.sol": "61280703244520644e77dddcb2c6c04a34c1d0b8d4ea8ecd7e3e47f3978a2b6b",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/ITronFinalityVerifier420.sol": "732ffa5fb1663fbe3fc3befc9970fcbbf054ef3ba3333ebc070d1ae1c7c3dc1d",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/TronBridgeAdapter420.t.sol": "7d8c62916f5757aaeac4045da81abf3444f58ab2a644c6354bdb083e85e27436",
+    "contracts/test/TronFinalityProof420.t.sol": "ba6bf99d92f071198424c54656239757847876d9d2f37573e54d8fb8ddd7980c",
+    "scripts/qualify-tron.py": "a0e56ae1d963b6ef48afebaf0a048b2cefce8db7e5fb26ba36f81427e9fd6c57",
+    "scripts/tron/fetch_history.py": "5200aba4544845ef8b65b359b1f3372978e7dd196cb17f83fc58ce7430174db0",
+    "scripts/tron/requirements.txt": "6b1a217475e34a971cb77ee0eb4bd6e5a6604184cc9ac05a967b03e636538708",
+    "scripts/tron/verify_history.py": "b48208e8edf0ee7416cf47c07df3755dea19d77ed4e09d463847b6d989aacd9e",
+    "scripts/verify-tron-bytecode.py": "a7eb3dd3adad0c1fb50ff9032a98099917d81abcf1f0c69bc18a4ebefa99f9d9"
+  }
+}

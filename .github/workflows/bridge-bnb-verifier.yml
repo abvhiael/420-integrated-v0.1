@@ -1,0 +1,56 @@
+name: 420Bridge BNB Local Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bridge/verifiers/bnb/**'
+      - 'contracts/src/bridge/verifiers/Bnb*420.sol'
+      - 'contracts/src/bridge/verifiers/EthereumRLP420.sol'
+      - 'contracts/src/bridge/verifiers/EthereumMPT420.sol'
+      - 'contracts/src/bridge/BnbDepositGateway420.sol'
+      - 'contracts/src/bridge/adapters/BnbBridgeAdapter420.sol'
+      - 'contracts/src/interfaces/IBnb*420.sol'
+      - 'contracts/test/Bnb*420.t.sol'
+      - 'contracts/test/fixtures/bnb/**'
+      - 'contracts/config/bridge/bnb-mainnet-v12.5.3.json'
+      - 'scripts/qualify-bnb.py'
+      - 'scripts/verify-bnb-bytecode.py'
+      - '.github/workflows/bridge-bnb-verifier.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bnb:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install -r contracts/test/fixtures/bnb/requirements.txt
+      - name: Independently reproduce genuine evidence
+        run: |
+          python3 contracts/test/fixtures/bnb/verify_manifest.py
+          python3 contracts/test/fixtures/bnb/verify.py
+      - name: Targeted Cancun qualification without duplicate inherited tests
+        run: |
+          python3 scripts/qualify-bnb.py --match BnbConsensus420.t.sol
+          python3 scripts/qualify-bnb.py --match BnbBlsSoftware420.t.sol
+          python3 scripts/qualify-bnb.py --match BnbAdversarial420.t.sol --exclude-test testHistorical
+          python3 scripts/qualify-bnb.py --match BnbExecution420.t.sol
+          python3 scripts/qualify-bnb.py --match BnbBridgeAdapter420.t.sol
+          python3 scripts/qualify-bnb.py --match BnbSubgroup420.t.sol
+          python3 scripts/qualify-bnb.py --match BnbCallGas420.t.sol --match-test testHistoricalFinalizationFitsSingleTransaction
+      - name: Production initcode and runtime bounds
+        env:
+          BNB_SOLC: /home/runner/.svm/0.8.24/solc-0.8.24
+        run: python3 scripts/verify-bnb-bytecode.py

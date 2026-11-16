@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "generic_token_routes": 9,
+  "issuer_route_declarations": 8,
+  "paused_issuer_routes": 1,
+  "source_decimals_and_mint_observations": 9,
+  "active_routes": 0,
+  "consensus_suites_rerun": false
+}

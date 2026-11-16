@@ -1,0 +1,14 @@
+test_duplicate_indices (test_evidence.PublicEvidenceTests.test_duplicate_indices) ... ok
+test_header_binding (test_evidence.PublicEvidenceTests.test_header_binding) ... ok
+test_inclusion (test_evidence.PublicEvidenceTests.test_inclusion) ... ok
+test_mutated_header (test_evidence.PublicEvidenceTests.test_mutated_header) ... ok
+test_mutated_transaction (test_evidence.PublicEvidenceTests.test_mutated_transaction) ... ok
+test_noncanonical_index (test_evidence.PublicEvidenceTests.test_noncanonical_index) ... ok
+test_noncanonical_solution (test_evidence.PublicEvidenceTests.test_noncanonical_solution) ... ok
+test_v6_is_not_sha256d (test_evidence.PublicEvidenceTests.test_v6_is_not_sha256d) ... ok
+test_wrong_index (test_evidence.PublicEvidenceTests.test_wrong_index) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.002s
+
+OK

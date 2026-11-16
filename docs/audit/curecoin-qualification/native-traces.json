@@ -1,0 +1,62 @@
+[
+  {
+    "path": "daemon.log",
+    "sha256": "7a474cbe98a85f6bc85fc91bd6e95638591b90efa78bfd03af82641b0dfd9553",
+    "native_best_chain_events": 73452,
+    "first": "SetBestChain: new best=00000ce427729d5393db  height=0  trust=1  date=04/22/14 07:23:42,block hash= 00000ce427729d5393dbf9f464e7a1d2c039e393e881f93448516b1530b688fc",
+    "last": "SetBestChain: new best=a5328b1238f103a17e0c  height=73451  trust=100345809778894  date=08/29/15 02:37:19,block hash= a5328b1238f103a17e0c844a4c13eff060dced8b3a59b6a26bcb41929a850a11",
+    "reorganization_messages": 0,
+    "milestones": [
+      "SetBestChain: new best=00000ce427729d5393db  height=0  trust=1  date=04/22/14 07:23:42,block hash= 00000ce427729d5393dbf9f464e7a1d2c039e393e881f93448516b1530b688fc",
+      "SetBestChain: new best=000000002f4984003de2  height=1  trust=2  date=05/02/14 05:36:21,block hash= 000000002f4984003de245a1666d8a8271ddf4236cf190bb9a2595dc4e7d4696",
+      "SetBestChain: new best=dc9e420ce3510b372fd1  height=9688  trust=8711984776  date=07/16/14 09:52:15,block hash= dc9e420ce3510b372fd1ce68492e5ece0257fe5f602428b50bb8de3018de87d7",
+      "SetBestChain: new best=78fec4664d5a0b11486b  height=9689  trust=8713033353  date=07/16/14 10:02:13,block hash= 78fec4664d5a0b11486b1528ecdd232b36f52ad463703e4c1394d1758c482194",
+      "SetBestChain: new best=ea83da9e532a4e5e5b0f  height=11000  trust=10786549718  date=07/25/14 19:15:32,block hash= ea83da9e532a4e5e5b0fabea3e427c06b0e8b8b59e4ee3d926a2b0757b60d529",
+      "SetBestChain: new best=00000000000000204016  height=14060  trust=25106437210  date=08/14/14 09:26:45,block hash= 00000000000000204016a5f24b17d41c3c2878148e1092d4408f423cc20f3a0d",
+      "SetBestChain: new best=00000000000005b83ccd  height=14061  trust=25106437211  date=08/14/14 10:27:54,block hash= 00000000000005b83ccd032a0861ffe9d8a4d0af87d9567e0800a1279118cb3f",
+      "SetBestChain: new best=0000000000000131b0e7  height=15000  trust=68162858873  date=08/21/14 05:58:35,block hash= 0000000000000131b0e7d7d90a9e43f426bf7038992de9b6b844e264e89b7f1f",
+      "SetBestChain: new best=00000000000003392b46  height=15001  trust=68162858874  date=08/21/14 06:14:58,block hash= 00000000000003392b461937f2068cfe76edb1a4de8783894f3fe11e65505a14"
+    ]
+  },
+  {
+    "path": "daemon-resume-1.log",
+    "sha256": "abb7e75971d4abaa9cface4cf54ed85c7f019b9168716fa80a18919d366c707e",
+    "native_best_chain_events": 17058,
+    "first": "SetBestChain: new best=765d03dd5501bbf2a359  height=73461  trust=100408689117726  date=08/29/15 04:00:31,block hash= 765d03dd5501bbf2a3594796af8d5f478f43d01c998a644bf2e28408873985eb",
+    "last": "SetBestChain: new best=3285e9c7c5551d41c939  height=90518  trust=199237021063346  date=12/14/15 05:06:14,block hash= 3285e9c7c5551d41c939d17d928db4f2554289af04b007b06f351f90fdb24b97",
+    "reorganization_messages": 4,
+    "milestones": []
+  },
+  {
+    "path": "daemon-resume-3.log",
+    "sha256": "fbe9568ed28a72e9973bf8d966d786cba7061e79f12f03bd298a4e62c5c3b2bf",
+    "native_best_chain_events": 110760,
+    "first": "SetBestChain: new best=bbcbc52f13f72efc22a5  height=90519  trust=199243971749258  date=12/14/15 05:07:58,block hash= bbcbc52f13f72efc22a5c8cc7876d283010e83ace081ae7c50d5825019475e8f",
+    "last": "SetBestChain: new best=b813f209a7d27385fc2d  height=201279  trust=2146162617945804  date=11/29/17 05:07:19,block hash= b813f209a7d27385fc2de32c1cf0740164fdc95430e9ce1a222fafa63319331b",
+    "reorganization_messages": 0,
+    "milestones": [
+      "SetBestChain: new best=1a42c44f40a1ffe6539d  height=130000  trust=699546376124953  date=08/21/16 22:17:54,block hash= 1a42c44f40a1ffe6539d37175559c307340811c9c43277cd99ba8e6370d46bb5",
+      "SetBestChain: new best=6eff6bbe6b2f5f6282b8  height=148000  trust=1030067944587799  date=12/14/16 14:23:55,block hash= 6eff6bbe6b2f5f6282b8628f6d7185e454c715f89a6d9a250df1fc0f6e0ed4e7",
+      "SetBestChain: new best=9cbc41346470862c61a2  height=180646  trust=1801278201232569  date=07/13/17 03:49:26,block hash= 9cbc41346470862c61a2acba7b4773128339fe9ffd6c1da6e566657a4eb6f2c5"
+    ]
+  },
+  {
+    "path": "daemon-resume.log",
+    "sha256": "93c0498f4f9978de244d21a6c04a27f2611e4f925b2d8a60287fb0db5f1a8600",
+    "native_best_chain_events": 298713,
+    "first": "SetBestChain: new best=009d330cbf4b0dda1bd6  height=201288  trust=2146575461243476  date=11/29/17 06:29:43,block hash= 009d330cbf4b0dda1bd607413126bf9afed6f1b749e577a37db2efb28e488cbe",
+    "last": "SetBestChain: new best=e7ef734c9072344412d9  height=500000  trust=8070163640872156  date=11/08/20 02:24:33,block hash= e7ef734c9072344412d94493fcf13aa13d2b94f3344bba2c9cda100872d9505d",
+    "reorganization_messages": 0,
+    "milestones": [
+      "SetBestChain: new best=7c0b71191e9419f0ac6a  height=208090  trust=2299545350792599  date=01/14/18 05:17:46,block hash= 7c0b71191e9419f0ac6a0dad5a4fedb056f190dd0c3aa67628e51c8bf2e7d943",
+      "SetBestChain: new best=9466a840d8f31e7100a6  height=250000  trust=3211396569438415  date=11/04/18 10:36:51,block hash= 9466a840d8f31e7100a6669db27e965f0b5d8d27a3a2e4708f11f424d9224c46",
+      "SetBestChain: new best=bc7a3cecea050289c2b8  height=257310  trust=3377243790266148  date=12/22/18 00:20:59,block hash= bc7a3cecea050289c2b8eb67a7ba64fd0b6926728d3d8339a7026224ba64fbf1",
+      "SetBestChain: new best=3cbff6f19c7dc21edb78  height=257321  trust=3377465458023591  date=12/22/18 01:52:04,block hash= 3cbff6f19c7dc21edb7895aa39577fb4ae6aa8d9a4575a177d8f1a5f598439d5",
+      "SetBestChain: new best=131c7806e9c47608dd89  height=257322  trust=3377485524232047  date=12/22/18 01:53:54,block hash= 131c7806e9c47608dd89cb99107b14087cb619bad58d5e8701d34e2b34cde835",
+      "SetBestChain: new best=92dc612abe4810fe2b1e  height=257323  trust=3377506993074680  date=12/22/18 02:01:26,block hash= 92dc612abe4810fe2b1e3289b020ae83b630f53e62a950901d8d0af2bdce81c4",
+      "SetBestChain: new best=ff0e9f64c545ae2516c1  height=257324  trust=3377527857646761  date=12/22/18 02:02:51,block hash= ff0e9f64c545ae2516c1fca59533fb66abd43960d55ec3d2a56a70795e0334ba",
+      "SetBestChain: new best=b77e663eb2a3bd3d9611  height=257368  trust=3378263191411949  date=12/22/18 06:44:54,block hash= b77e663eb2a3bd3d96115419a91332c927c47800ce10d40f30db57905398efc1",
+      "SetBestChain: new best=e7ef734c9072344412d9  height=500000  trust=8070163640872156  date=11/08/20 02:24:33,block hash= e7ef734c9072344412d94493fcf13aa13d2b94f3344bba2c9cda100872d9505d"
+    ]
+  }
+]

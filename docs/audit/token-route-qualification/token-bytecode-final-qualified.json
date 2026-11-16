@@ -1,0 +1,61 @@
+{
+  "pass": true,
+  "compiler_version": "solc, the solidity compiler commandline interface\nVersion: 0.8.24+commit.e11b9ed9.Linux.g++",
+  "evm": "cancun",
+  "via_ir": true,
+  "optimizer_runs": 200,
+  "contracts": {
+    "BridgeAssetRegistry": {
+      "runtime_bytes": 9303,
+      "runtime_sha256": "6f940e36e1e5bfe7ad5a4949d8647b7fca579da84cf64cf685f39b88e7ff5615"
+    },
+    "EthereumDepositGateway420": {
+      "runtime_bytes": 2920,
+      "runtime_sha256": "1592f066ba080cf11b63045b440880dda896bec6333bf6dcdfacfc810db58fe2"
+    },
+    "EthereumBridgeAdapter420": {
+      "runtime_bytes": 6309,
+      "runtime_sha256": "48075ffd02f4944b318d3850e0617bbda51843d16ea392a4411af49bffc32920"
+    },
+    "SolanaBridgeAdapter420": {
+      "runtime_bytes": 6038,
+      "runtime_sha256": "ce938ef093c36ee52915eae688a940e1b5e4092a9c0ef97e5182d9d97ce43aeb"
+    },
+    "BnbBridgeAdapter420": {
+      "runtime_bytes": 5354,
+      "runtime_sha256": "16d21e867a3749dd72dda89116176df7e07d77f6d8f0735cbe5875d9803dc7eb"
+    }
+  },
+  "qualified_source_sha256": {
+    "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol": "23517d738452ce2e62d69a3f2d0f0c4aab6a6932b03780e1217572fc8910ebae",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/src/interfaces/IBnbFinalityVerifier420.sol": "1a18746f6ae7523f3fde1c9c507b184b79f6aa8df0391d5a1fcf4b7a46995eef",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol": "8ed7fbbebb16f09a573ebe66bc4f7e7fc22a3c5d1ba92fe6873da79468d0f2ae",
+    "contracts/src/interfaces/ISolanaFinalityVerifier420.sol": "a6aeaa8ac0dd1af30c0a35c8b37871efeb167c6fe70c0f5adaacac06cabd446d",
+    "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol": "49f0407c291a1fa0f9084261cc492c84038b006f4518a06e0a2f6c1493c5486e",
+    "contracts/src/interfaces/IEthereumFinalityVerifier420.sol": "fcb29f8feebfc074ba7139de9315a02bf0e6caa0798798784ac2a1657dd5b3bc",
+    "contracts/src/bridge/EthereumDepositGateway420.sol": "531428f4026cc19e2c439b514cf4b4dadc481703b92d229f421d9036d160f1a6",
+    "contracts/src/bridge/BridgeAssetRegistry.sol": "df6eae7c2e0e818f97206e211afbd9d135602b9e5f85507a2b9bc46220177be5",
+    "contracts/src/bridge/BridgeRouteRegistry.sol": "efa9155fc2583375a34675443e478f0cca79c3dbfa10fcbd232afcb576bb90e7",
+    "contracts/src/bridge/BridgeChainRegistry420.sol": "812af8415d941c139170bd40071da2f332ba5d1e645dc2881c5ad05740747dc1",
+    "contracts/src/bridge/BridgeIds420.sol": "2037bfdac5f8b60503ccaa8871831fac86e5e64ea806665af97a08243650a941",
+    "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGenesisResident420.sol": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+    "contracts/src/interfaces/genesis/Errors420.sol": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453"
+  }
+}

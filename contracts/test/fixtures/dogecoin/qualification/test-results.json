@@ -1,0 +1,146 @@
+{
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testAuxPowRejectsSubstitutedBranchesIndexParentAndEnvelope": {
+    "evidence": "auxpow-parent-qualification.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testChainIdentityActivationLegacyV2AndBuriedBaseVersions": {
+    "evidence": "auxpow-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testFuzzWrongChainIdentityAlwaysFails": {
+    "evidence": "auxpow-initial.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testGenuineActivationAuxPowAndParentScrypt": {
+    "evidence": "auxpow-parent-qualification.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testMergedMiningMagicPlacementTreeSizeNonceAndLegacyRootRules": {
+    "evidence": "auxpow-parent-qualification.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinAuxPowQualification420.t.sol:DogecoinAuxPowQualification420Test:testParentCandidateTransactionIsNotSubjectToDogecoinOutputValidation": {
+    "evidence": "auxpow-parent-qualification.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testCanonicalDogecoinInboundPasses": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testDirectInboundBypassFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testMessageReplayFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testOutboundMalformedRecipientFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testOutboundP2pkhPasses": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testOutboundUnsupportedScriptTypeFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testSourceOutputReplayFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testUnfinalizedFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testWrongGatewayScriptFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testWrongGenesisFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinBridgeAdapter420.t.sol:DogecoinBridgeAdapter420Test:testWrongMessageStartFailsClosed": {
+    "evidence": "adapter-regression.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinChainInvariant420.t.sol:DogecoinChainInvariant420Test:invariantBestTipTracksGreatestAdmittedWorkAndGenesisIsImmutable": {
+    "evidence": "invariant.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testDisabledWitnessAndDogecoinMoneyLimits": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testForkSelectionAndReorgOfCanonicalConfirmations": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testFuzzTruncatedTransaction": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testMalformedHeadersAndTimestampRules": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testMismatchedVerifierRouteOrRouterRejectedByAdapter": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testParserRejectsNoncanonicalCountsAndInvalidIndices": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test:testTargetsAndFuzzArithmetic": {
+    "evidence": "consensus.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinDifficulty420.t.sol:DogecoinDifficulty420Test:testDigishieldAmplitudeSignedDivisionAndBoundsAgainstIndependentVectors": {
+    "evidence": "difficulty.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinDifficulty420.t.sol:DogecoinDifficulty420Test:testMergedMiningLCGOverflowAgainstIndependentVectors": {
+    "evidence": "difficulty.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinDifficulty420.t.sol:DogecoinDifficulty420Test:testPreDigishieldAllClampRegimesAndPowLimit": {
+    "evidence": "difficulty.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinGatewayIntegration420.t.sol:DogecoinGatewayIntegration420Test:testDogecoinGatewayConcreteVerifierRiskReplayAndAtomicRollback": {
+    "evidence": "shared-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test:testGenuineDigishieldActivationHeaderAdmission": {
+    "evidence": "history-fixture-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test:testGenuineGenesisLinkedScryptHeadersAndWork": {
+    "evidence": "history-fixture-correction.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test:testGenuineMergedMiningChainParentWorkConfirmationsAndTransaction": {
+    "evidence": "history-parent-qualification.log",
+    "status": "PASS"
+  },
+  "contracts/test/DogecoinHistorical420.t.sol:DogecoinHistorical420Test:testGenuinePreDigishieldRetargetBoundariesAndWork": {
+    "evidence": "pre-retarget-correction.log",
+    "status": "PASS"
+  }
+}

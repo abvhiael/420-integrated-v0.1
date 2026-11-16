@@ -1,0 +1,11 @@
+Compiling 8 files with Solc 0.8.24
+Solc 0.8.24 finished in 23.80s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/CCTPAdapter420.t.sol:CCTPAdapter420Test
+[PASS] testExtraSignatureRejectedByActualIssuer() (gas: 243357)
+[PASS] testHighSMalleableSignatureRejectedByActualIssuer() (gas: 241899)
+[PASS] testUnauthorizedWellFormedSignersRejectedByActualIssuer() (gas: 231624)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 8.21ms (2.81ms CPU time)
+
+Ran 1 test suite in 8.47ms (8.21ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

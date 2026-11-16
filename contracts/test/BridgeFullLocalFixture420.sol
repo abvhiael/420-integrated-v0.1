@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./helpers/CCTPNativeHarness420.sol";
+import "./helpers/ProofEnvelopeFixture420.sol";
 import "./helpers/BridgeQualificationFixture420.sol";
 import "./helpers/GenesisMocks420.sol";
 import "../src/bridge/GatewayRouter420.sol";
@@ -68,6 +69,11 @@ abstract contract BridgeFullLocalFixture420 is CCTPNativeHarness420 {
         n=addProbe(ps,n,3,false,abi.encodeWithSignature("minFee()"));
         assembly{mstore(ps,n)}r.probes=ps;bytes32 id=qualification.record(r,qualification.currentApproval(address(adapter)),true);
         BridgeRouteRegistry.Route memory next; (next.assetId,next.sourceChainId,next.destinationChainId,next.sourceAsset,next.destinationAsset,next.adapterId,next.verifierConfigHash,next.version,next.status,next.inboundEnabled,next.outboundEnabled)=routes.routes(route(6));next.status=BridgeRouteRegistry.Status.ACTIVE;routes.setRoute(route(6),next);require(qualification.currentApproval(address(adapter))==id);
+    }
+    function transport(bytes memory inner) internal view returns(bytes memory){
+        CCTPV2Message420.Message memory m=message("base-standard");
+        IBridgeAdapter420.VerifiedTransfer memory v=IBridgeAdapter420.VerifiedTransfer(route(6),ASSET,address(uint160(uint256(m.messageSender))),m.mintRecipient,m.amount-m.fee,keccak256(file("base-standard.message.hex")),keccak256(abi.encode("420/CCTP/V2/NONCE",m.nonce)));
+        return ProofEnvelopeFixture420.wrap(gateway,adapter.ADAPTER_ID(),v,m.sender,inner);
     }
     function sourceMessage() internal view returns(bytes32){return keccak256(abi.encode("420/CCTP/V2/NONCE",message("base-standard").nonce));}
     function assertClean() internal view {CCTPV2Message420.Message memory m=message("base-standard");require(!adapter.consumedNonces(m.nonce)&&CCTPNativeMT420(MT).usedNonces(m.nonce)==0&&token.balanceOf(m.mintRecipient)==0,"partial native settlement");require(!gateway.consumedSourceMessages(gateway.sourceReplayKey(keccak256("BASE/MAINNET"),sourceMessage())),"partial router replay");(,,,,,,uint256 tvl)=risk.routeUsage(route(6));require(tvl==0,"partial risk");(,,,,,,uint256 assetTvl)=risk.assetUsage(ASSET);require(assetTvl==0,"partial asset risk");

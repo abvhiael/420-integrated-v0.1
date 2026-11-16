@@ -1,0 +1,8 @@
+Compiling 251 files with Solc 0.8.24
+Solc 0.8.24 finished in 259.03s
+Warning: dynamic test linking failed (stack too deep); retrying with native test linking. Use --no-dynamic-test-linking to skip the failed attempt.
+Compiling 251 files with Solc 0.8.24
+Solc 0.8.24 finished in 305.06s
+Error: Compiler run failed:
+Error: Yul exception:Cannot swap Variable var_adapter with Variable expr_139332_mpos: too deep in the stack by 2 slots in [ RET var_adapter var_raw_mpos expr_4 _19 _18 _17 _16 _1 var_router_address expr_component expr_139236_component_3 var_gateway expr_139283_component_3 expr_139283_component_1 _14 expr_139236_component_2 expr_139236_component_1 _15 expr_139332_mpos ]
+No memoryguard was present. Consider using memory-safe assembly only and annotating it via 'assembly ("memory-safe") { ... }'.

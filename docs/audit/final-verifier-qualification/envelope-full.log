@@ -1,0 +1,73 @@
+Compiling 114 files with Solc 0.8.24
+Solc 0.8.24 finished in 172.72s
+Compiler run successful!
+2026-11-16T05:51:34.693008Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693062Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693072Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693165Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693191Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693250Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693279Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.693344Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699599Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699632Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699642Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699730Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699748Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699772Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699802Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T05:51:34.699845Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+
+Ran 26 tests for contracts/test/BridgeFullLocalIntegration420.t.sol:BridgeFullLocalIntegration420Test
+[PASS] testAccountingHealthFailureRollsBackNativeMint() (gas: 3435572)
+[PASS] testAttestationTamperingRejected() (gas: 2597141)
+[PASS] testAttesterThresholdDriftInvalidatesQualification() (gas: 1861643)
+[PASS] testCounterfeitAmountRejectedByActualIssuerSignatures() (gas: 2721345)
+[PASS] testCrossDomainEvidenceCannotUseQualifiedBaseRoute() (gas: 2861507)
+[PASS] testDelayedCompletionDoesNotMintOrChargeRiskAgain() (gas: 9828935)
+[PASS] testFuzzHistoricalAttestationCannotAuthenticateChangedAmount(uint64) (runs: 2500, μ: 2638463, ~: 2721166)
+[PASS] testGenuineIssuerEvidenceCompletesFullLocalLifecycle() (gas: 8914319)
+[PASS] testLateSettlementAssetMismatchRollsBackVerificationAndMint() (gas: 7755764)
+[PASS] testLateTransferRegistryFailureRollsBackNativeMint() (gas: 12376976)
+[PASS] testLyingTokenCannotProduceSettlementReceipt() (gas: 2694231)
+[PASS] testNativeIssuerPauseRejectsWithoutPartialDelivery() (gas: 1880299)
+[PASS] testNativeProxyImplementationSubstitutionRejected() (gas: 1787376)
+[PASS] testNativeTokenPairSubstitutionRejected() (gas: 2108481)
+[PASS] testNonCanonicalEnvelopeRejected() (gas: 2501603)
+[PASS] testOperatorCannotFabricateSettlementCompletion() (gas: 10565632)
+[PASS] testOutboundNativeBurnCannotBeReportedCompletedWithoutReceipt() (gas: 13341188)
+[PASS] testRecipientSubstitutionRejected() (gas: 2608582)
+[PASS] testReplayDoesNotCreditOrConsumeRiskTwice() (gas: 10697619)
+[PASS] testRevocationRejectsHistoricalProofBeforeDelivery() (gas: 923390)
+[PASS] testRevocationStopsDelayedCompletion() (gas: 7102298)
+[PASS] testRiskFailureRollsBackNativeMintAllReplayAndReceipt() (gas: 12375546)
+[PASS] testSuspendedRouteRollsBackNativeExecution() (gas: 2132068)
+[PASS] testTokenMintFailureRollsBackEntireLifecycle() (gas: 11053660)
+[PASS] testUnconfiguredNativeIssuerRemainsInactive() (gas: 3090021)
+[PASS] testWrongDestinationDomainRejectedAtomically() (gas: 2559477)
+Suite result: ok. 26 passed; 0 failed; 0 skipped; finished in 11.88s (11.87s CPU time)
+
+Ran 3 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 6776403)
+[PASS] testRouterOutboundBurnAndLifecycle() (gas: 11511903)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 3518268)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 56.95ms (43.26ms CPU time)
+
+Ran 1 test for contracts/test/BridgeFullLocalInvariant420.t.sol:BridgeFullLocalInvariant420Test
+[PASS] invariantAuthenticEvidenceCannotDoubleSettleOrBypassRevocation() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| FullLocalHandler420 | attempt  | 2015  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | restore  | 2078  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | revoke   | 2040  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | suspend  | 2059  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 40.24s (40.20s CPU time)
+
+Ran 3 test suites in 40.24s (52.18s CPU time): 30 tests passed, 0 failed, 0 skipped (30 total tests)

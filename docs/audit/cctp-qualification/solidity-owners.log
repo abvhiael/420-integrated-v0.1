@@ -1,0 +1,78 @@
+Compiling 36 files with Solc 0.8.24
+Solc 0.8.24 finished in 49.35s
+Compiler run successful!
+
+Ran 1 test for contracts/test/CCTPAdapter420.t.sol:CCTPSourceEthereumHistory420Test
+[PASS] testGenuineEthereumToBase() (gas: 422631)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.72ms (1.77ms CPU time)
+
+Ran 3 tests for contracts/test/CCTPGatewayIntegration420.t.sol:CCTPGatewayIntegration420Test
+[PASS] testActualRouterRecordsNativeCCTPDelivery() (gas: 1342812)
+[PASS] testRouterOutboundBurnAndLifecycle() (gas: 2308629)
+[PASS] testRouterRiskRejectionRollsBackNativeMintAndBothNonceStores() (gas: 841432)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 12.95ms (8.72ms CPU time)
+
+Ran 51 tests for contracts/test/CCTPAdapter420.t.sol:CCTPAdapter420Test
+[PASS] testActualMintFailureRollsBackNonce() (gas: 406603)
+[PASS] testChangedSignedAmountRejectedByActualIssuer() (gas: 410039)
+[PASS] testClaimedMintWithoutDeliveryRejectedAndRolledBack() (gas: 430381)
+[PASS] testDefaultUnconfiguredIntegrationInactive() (gas: 2946384)
+[FAIL: wrong rejection boundary] testDirtyEVMSourceSenderRejected() (gas: 233262)
+[PASS] testDirtyRecipientHighBitsRejected() (gas: 148354)
+[PASS] testDisabledIssuerFailsClosed() (gas: 109687)
+[PASS] testDuplicateSignerRejectedByActualIssuer() (gas: 254420)
+[PASS] testExpiredMessageRejected() (gas: 204955)
+[PASS] testExtraSignatureRejectedByActualIssuer() (gas: 243511)
+[PASS] testFastMessageRejectedByFinalizedPolicy() (gas: 332001)
+[PASS] testFeeAboveMaximumRejected() (gas: 262829)
+[PASS] testFuzzTruncatedWireRejected(uint16) (runs: 2500, μ: 26016, ~: 25797)
+[PASS] testGenuineArbitrumFastNetFees() (gas: 481504)
+[PASS] testGenuineArbitrumFinalizedWithOpaqueHook() (gas: 483200)
+[PASS] testGenuineBaseStandard() (gas: 457105)
+[PASS] testGenuineSolanaMessageSenderNotTruncated() (gas: 407356)
+[PASS] testGovernanceAuthorization() (gas: 30122)
+[PASS] testHighSMalleableSignatureRejectedByActualIssuer() (gas: 242053)
+[PASS] testInconsistentExecutedFinalityRejected() (gas: 174207)
+[PASS] testLaterRouterFailureRollsBackNativeDelivery() (gas: 432726)
+[PASS] testMalformedRecoveryIdRejectedByActualIssuer() (gas: 227074)
+[PASS] testMissingSignatureRejectedByActualIssuer() (gas: 238949)
+[PASS] testNativeImplementationChangeRequiresRequalification() (gas: 92138)
+[PASS] testNativePeerSubstitutionRejected() (gas: 274861)
+[PASS] testNativeTokenPairSubstitutionRejected() (gas: 358722)
+[PASS] testOnlyRouterInbound() (gas: 55327)
+[PASS] testOutboundActualNativeBurnAndMessageSent() (gas: 382796)
+[PASS] testOutboundBurnFailureRestoresUserFunds() (gas: 369473)
+[PASS] testOutboundDirtyEVMCallerRejected() (gas: 116652)
+[PASS] testOutboundDirtyEVMRecipientRejectedBeforeBurn() (gas: 216328)
+[PASS] testOutboundWrongAssetRejected() (gas: 90607)
+[PASS] testPausedActualTransmitterRejected() (gas: 261937)
+[PASS] testReentrantRouterCallRejected() (gas: 967205)
+[PASS] testReplayRejectsSameAttestation() (gas: 513506)
+[PASS] testReplaySurvivesReattestedMessageDigestChange() (gas: 522821)
+[PASS] testReplaySurvivesReconfiguration() (gas: 682763)
+[PASS] testRevokedIssuerAttesterRejected() (gas: 305964)
+[PASS] testTrailingEnvelopeRejected() (gas: 116387)
+[PASS] testUnauthorizedWellFormedSignersRejectedByActualIssuer() (gas: 231800)
+[PASS] testUnsortedSignersRejectedByActualIssuer() (gas: 265187)
+[PASS] testWrongBodyVersionRejected() (gas: 116114)
+[PASS] testWrongBurnTokenRejected() (gas: 202827)
+[PASS] testWrongDestinationCallerRejected() (gas: 204208)
+[PASS] testWrongDestinationRejected() (gas: 195913)
+[PASS] testWrongLocalMessengerRejected() (gas: 202594)
+[PASS] testWrongMessengerRejected() (gas: 202485)
+[PASS] testWrongSourceRejected() (gas: 185743)
+[PASS] testWrongVersionRejected() (gas: 115075)
+[PASS] testZeroAmountRejected() (gas: 180728)
+[PASS] testZeroNonceRejected() (gas: 180134)
+Suite result: FAILED. 50 passed; 1 failed; 0 skipped; finished in 34.18ms (67.84ms CPU time)
+
+Ran 3 test suites in 35.20ms (55.86ms CPU time): 54 tests passed, 1 failed, 0 skipped (55 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/CCTPAdapter420.t.sol:CCTPAdapter420Test
+[FAIL: wrong rejection boundary] testDirtyEVMSourceSenderRejected() (gas: 233262)
+
+Encountered a total of 1 failing tests, 54 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

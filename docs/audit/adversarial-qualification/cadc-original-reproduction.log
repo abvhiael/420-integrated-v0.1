@@ -1,0 +1,18 @@
+Compiling 72 files with Solc 0.8.24
+Solc 0.8.24 finished in 66.46s
+Compiler run successful!
+
+Ran 1 test for contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test
+[FAIL: noncanonical envelope authorized native delivery] testV18TrailingEnvelopeCannotDeliver() (gas: 515640)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 3.96ms (833.46µs CPU time)
+
+Ran 1 test suite in 4.38ms (3.96ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test
+[FAIL: noncanonical envelope authorized native delivery] testV18TrailingEnvelopeCannotDeliver() (gas: 515640)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

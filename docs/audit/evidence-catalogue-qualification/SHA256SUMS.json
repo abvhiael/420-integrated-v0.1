@@ -1,0 +1,13 @@
+{
+  "docs/audit/BRIDGE-AUDIT-3-V-17-EVIDENCE.md": "8bb93a0180b0d284131335aba4363d60c3a167b58c0a3438a6a81f49d92991e4",
+  "docs/audit/evidence-catalogue-qualification/RESULTS.json": "62e7e7cd88b887b14905ceb515529bafed965494bf498df3bba5df1407d82058",
+  "docs/audit/evidence-catalogue-qualification/reacquisition.json": "5e62f46e289f43c7c13b8e224d70397fda130ead6ffe7c7b92960ea936f81fc4",
+  "docs/audit/evidence-catalogue-qualification/tests.log": "2e3bda5383da5a0cbfbad85c95e42641cee677ae587564322428cf9af9a3372e",
+  "docs/audit/evidence-catalogue-qualification/verification.json": "5e62f46e289f43c7c13b8e224d70397fda130ead6ffe7c7b92960ea936f81fc4",
+  "evidence/bridge/README.md": "245e85f1df84facce416b951ca05de3d2f568e6f34cc7838ea9c73875271bd2c",
+  "evidence/bridge/catalogue.json": "aeb75831e79bc618f333db418d790ef254751c4f050684af6b238d82555d2dd6",
+  "evidence/bridge/catalogue.sha256": "4613e5d79924e95da0ab19175ce630d1dd563f47f977c22ba3552793e4ec1bac",
+  "evidence/bridge/sources.json": "34e503808d6dc95c673042f111f672d1f68abfd9fd7ee54da696bba9899c7c15",
+  "scripts/bridge_evidence_catalogue.py": "5c710b5c027787ba229aa7601ae9b1449feec9822180a2ef38b3878910203cc5",
+  "scripts/test_bridge_evidence_catalogue.py": "e131862b78aa8d922269868395d9ec1d4c07f69d48c131d035a029b34fb1086e"
+}

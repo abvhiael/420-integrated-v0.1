@@ -41,5 +41,15 @@
     "production Solana finality verifier deployed and reviewed",
     "production gateway program approved by governance",
     "route and liquidity/risk limits activated by governance"
-  ]
+  ],
+  "token_route_policy": {
+    "registry": "BridgeAssetRegistry",
+    "qualification_ledger": "contracts/config/bridge/supported-token-routes-v1.json",
+    "source_decimals": 6,
+    "destination_token_and_decimals": "RESOLVE_ACTUAL_CANONICAL_ASSET_REGISTRY",
+    "conversion": "EXACT_NO_DUST_OR_OVERFLOW",
+    "behavior": "EXACT_SENDER_DEBIT_AND_GATEWAY_CREDIT",
+    "mapping_alone_is_qualification": false,
+    "production_active": false
+  }
 }

@@ -1,0 +1,9 @@
+Compiling 8 files with Solc 0.8.24
+Solc 0.8.24 finished in 18.52s
+Compiler run successful!
+
+Ran 1 test for contracts/test/BnbCallGas420.t.sol:BnbCallGas420Test
+[PASS] testHistoricalFinalizationFitsSingleTransaction() (gas: 113167578)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 171.94ms (171.71ms CPU time)
+
+Ran 1 test suite in 172.51ms (171.94ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

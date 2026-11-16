@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import "./helpers/BridgeQualificationFixture420.sol";
+import "./helpers/ProofEnvelopeFixture420.sol";
 
 import "../src/pay/PaymentRouter420.sol";
 import "../src/pay/adapters/CanonicalSettlementAdapter420.sol";
@@ -118,7 +119,7 @@ contract PaySwapBridgeGenesisIntegration420Test {
             amount: 100 ether, sourceTxId: keccak256("source"), sourceMessageId: keccak256("message")
         }));
 
-        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, hex"4201");
+        bytes32 bridgeTransferId = bridge.acceptInbound(ADAPTER_ID, ProofEnvelopeFixture420.mock(bridge,ADAPTER_ID,hex"4201"));
         require(bridgeTransferId != bytes32(0), "bridge transfer");
 
         ICanonicalSettlement420.Quote memory q = ICanonicalSettlement420.Quote(

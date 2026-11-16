@@ -1,0 +1,27 @@
+indexed blk00000.dat
+indexed blk00001.dat
+indexed blk00002.dat
+indexed blk00003.dat
+indexed blk00004.dat
+indexed blk00005.dat
+verified 999 elapsed 1
+verified 100999 elapsed 17
+verified 200999 elapsed 33
+verified 300999 elapsed 51
+verified 400999 elapsed 70
+verified 500999 elapsed 86
+verified 600999 elapsed 101
+verified 700999 elapsed 119
+verified 800999 elapsed 135
+verified 900999 elapsed 151
+verified 1000999 elapsed 167
+verified 1100999 elapsed 183
+verified 1200999 elapsed 197
+verified 1300999 elapsed 212
+verified 1400999 elapsed 231
+verified 1500999 elapsed 246
+verified 1600999 elapsed 261
+verified 1700999 elapsed 277
+verified 1800999 elapsed 294
+verified 1900999 elapsed 308
+{"source": "1a300eb0f469e5a3cb0d8337f20adbab83a512e3", "genesis": "6d2d7d525900712451b9697d0b5b2304ebae6efb349540da445bf575c0159969", "height": 1914745, "tip": "c6d2be979323fee26cac4dd88c0e180992d8c62a8901cf6a2faf621f347d2cb8", "blocks": 1914746, "transactions": 2140134, "difficulty_modes": {"1": 13579, "2": 18018, "3": 36828, "4": 1820383, "5": 25938}, "emergency_blocks": 4, "chain_work": "0x7b83dcd4a57899", "headers_sha256": "805b01aef94d298dc4aa42142e7dac7e53bb05b672ea0f1560bfa9c772591594"}

@@ -1,0 +1,48 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-7",
+  "base_main_sha": "9d396fda5cc947cd5a17f679ff9c742fe969059e",
+  "qualified_sha": "Published SHA and verified main integration are recorded in the associated PR",
+  "locally_controllable_work_complete": true,
+  "production_acceptance": false,
+  "runs": [
+    {
+      "log": "docs/audit/provider-completion-qualification/providers.log",
+      "source_inputs": "docs/audit/provider-completion-qualification/providers.inputs.json",
+      "cases_passed": 6,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    }
+  ],
+  "totals": {
+    "cases_passed": 6,
+    "fuzz_inputs": 0,
+    "invariant_runs": 0,
+    "invariant_calls": 0
+  },
+  "production_sources_unchanged": true,
+  "production_approvals": [],
+  "ci_run_ids": [],
+  "runtime_bytes": {
+    "contracts/src/bridge/CADCBridgeIntegration.sol:CADCBridgeIntegration": 5893,
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol:CADCLayerZeroAdapter": 12422,
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol:USDCCCTPAdapter": 13491
+  },
+  "eip170_limit": 24576,
+  "retained_evidence": "docs/audit/provider-completion-qualification/RECONCILIATION.json",
+  "historical_or_archive_replays_rerun": 0,
+  "toolchain": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true
+  },
+  "external_blockers": [
+    "CADC issuer-approved 420 representation/OFT and supported Endpoint V2/EID with actual reciprocal peer/DVN deployment qualification",
+    "Circle-supported 420 domain/native USDC and official transmitter/messenger/minter authority",
+    "Funded deployed provider/issuer transfer qualification and recovery evidence"
+  ],
+  "next_canonical_work": "Existing 420Bridge testnet provider/issuer qualification; no numbered successor on current authoritative roadmap invented"
+}

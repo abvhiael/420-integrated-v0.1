@@ -978,6 +978,12 @@
           "scope": "Internal test-only correction of the single failed canonical asset lifecycle method; original source and four passing cases preserved"
         }
       }
+    },
+    {
+      "step": "BRIDGE-AUDIT-7",
+      "base_main_sha": "9d396fda5cc947cd5a17f679ff9c742fe969059e",
+      "results": "docs/audit/provider-completion-qualification/RESULTS.json",
+      "superseded_inputs": {}
     }
   ],
   "bitcoin_custody_boundary": {

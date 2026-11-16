@@ -16,6 +16,7 @@ on:
       - 'contracts/src/bridge/BridgeChainRegistry420.sol'
       - 'contracts/src/bridge/BridgeAccountingRegistry.sol'
       - 'contracts/test/CCTP*.t.sol'
+      - 'contracts/test/ProviderCCTPCompletion420.t.sol'
       - 'contracts/test/helpers/CCTPNativeHarness420.sol'
       - 'contracts/test/helpers/GenesisMocks420.sol'
       - 'contracts/test/fixtures/cctp/**'
@@ -50,6 +51,7 @@ jobs:
       - name: Qualify only the affected owners and genuine issuer evidence
         run: |
           python scripts/qualify-cctp.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.8.24"
+          python scripts/qualify-cctp.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.8.24" --match ProviderCCTPCompletion420.t.sol --match-test '^testProvider'
           python scripts/cctp/check_bytecode.py --solc "$RUNNER_TEMP/cctp-compilers/solc-0.8.24"
           python scripts/cctp/verify_history.py
           python -m unittest discover -s scripts/cctp -p test_cctp.py -v

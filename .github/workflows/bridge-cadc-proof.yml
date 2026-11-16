@@ -7,6 +7,7 @@ on:
       - 'contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
       - 'contracts/test/CADC*420.t.sol'
       - 'contracts/test/CADCHistoricalFork.t.sol'
+      - 'contracts/test/ProviderCADCCompletion420.t.sol'
       - 'contracts/test/fixtures/cadc/**'
       - 'contracts/config/bridge/cadc.json'
       - 'scripts/qualify-cadc.py'
@@ -34,3 +35,4 @@ jobs:
       - run: python scripts/verify-cadc-history.py
       - run: python scripts/qualify-cadc.py --match CADCLayerZero420.t.sol
       - run: python scripts/qualify-cadc.py --match CADCGatewayIntegration420.t.sol --match-test '^testRouter'
+      - run: python scripts/qualify-cadc.py --match ProviderCADCCompletion420.t.sol --match-test '^testProvider'

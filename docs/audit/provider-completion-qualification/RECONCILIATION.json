@@ -1,0 +1,91 @@
+{
+  "step": "BRIDGE-AUDIT-7",
+  "base_main_sha": "9d396fda5cc947cd5a17f679ff9c742fe969059e",
+  "production_sources_unchanged": true,
+  "source_sha256": {
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": "240618f99afe0fa89ff286143e1a7bd22b55cbb2f4dc176487ec76c9ca552325",
+    "contracts/src/bridge/CADCBridgeIntegration.sol": "7d38fcee9d738fdb4c403bfa05e0a1e59fb03b430d18cbce866a5cc938274ffc",
+    "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol": "a676ff18701817eea69837fd53a9d7f280882f70567142c96bf25fbd9e15311d",
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": "050929f525a6857367aae1b68ecafd39d94b8559f38e77d4f0633f558b1f9ced",
+    "contracts/src/interfaces/ICircleCCTPV2420.sol": "46f5dc719e7f296e9c74e794832921060309b12df6c9115faf0a80056b227da3",
+    "contracts/src/bridge/verifiers/cctp/CCTPV2Message420.sol": "f87a6d89ff66cb6bfc7e721c33e8fd81f8699354fca0cb4ee56ad2bd43b1507e",
+    "contracts/src/bridge/BridgeVerifierRegistry420.sol": "1c3a07235b8045844388530bd3833008e46e4e933b4d492d7fecff3f072bc88b",
+    "contracts/src/bridge/GatewayRouter420.sol": "98abd847dc85b4bc98ee7ed20d921d119ebf23c29f25340530f92117a219c989",
+    "contracts/config/bridge/cadc.json": "d9b1003883aa3c0204048ecdacbce9b9ea86f054bc2b1b1ec61abb1f3979ba61",
+    "contracts/config/bridge/usdc-cctp-v2-v1.json": "9ab8c339437512448dbb1266bee247625979ffd3e2b5f0158d9ef2d9cc2c10de"
+  },
+  "provider_observations": [
+    {
+      "retrieved_utc": "2026-11-16",
+      "provider": "Circle",
+      "url": "https://developers.circle.com/cctp/concepts/supported-chains-and-domains",
+      "facts": [
+        "420Chain has no listed CCTP domain.",
+        "Domain identifiers are assigned by Circle and are separate from EVM chain IDs.",
+        "Configured Ethereum (0), Arbitrum (3) and Base (6) source domains support USDC/CCTP.",
+        "No local Circle deployment, native-USDC token or mint authorization is established."
+      ],
+      "scope": "Public documentation observation, not private issuer approval or a cryptographic root"
+    },
+    {
+      "retrieved_utc": "2026-11-16",
+      "provider": "CADC Reserve Trust / Loon",
+      "url": "https://loon.finance/blog/access-cadc-on-layerzero/",
+      "facts": [
+        "CADC uses LayerZero OFT; issuer is CADC Reserve Trust and servicer Loon Payments.",
+        "Published networks are Ethereum, Base, Polygon and Solana; Arbitrum is paused.",
+        "Published token addresses remain identical to checked-in upgraded token identities.",
+        "No 420 deployment or issuer authorization is established."
+      ],
+      "scope": "Public issuer publication, not private authorization for a new deployment"
+    },
+    {
+      "retrieved_utc": "2026-11-16",
+      "provider": "LayerZero",
+      "url": "https://docs.layerzero.network/v2/developers/evm/oft/quickstart",
+      "facts": [
+        "OFT sends debit/burn on source and credit/mint on destination; OFTAdapter uses existing tokens.",
+        "Peers, message libraries and application DVN/security configurations must match the qualified pathway."
+      ],
+      "scope": "Official interface documentation; no 420 endpoint/EID assigned by this audit"
+    },
+    {
+      "retrieved_utc": "2026-11-16",
+      "provider": "Circle",
+      "url": "https://developers.circle.com/cctp/references/contract-addresses",
+      "facts": [
+        "Published Ethereum, Arbitrum and Base MessageTransmitterV2 0x81D40F21F12A8F0E3252Bccb954D722d4c464B64 and TokenMessengerV2 0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d match the existing configured peers.",
+        "TokenMessengerWithFees is a distinct published interface/deployment and is not silently substituted for the approved TokenMessengerV2 path."
+      ],
+      "scope": "Published addresses only; no 420 deployment or runtime upgrade approval established"
+    }
+  ],
+  "retained_evidence": {
+    "USDC": {
+      "source_qualified_sha": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "record": "docs/audit/cctp-qualification/RESULTS.md",
+      "historical_message_attestation_pairs": 5,
+      "source_solidity_cases": 55,
+      "source_sdk_cases": 33,
+      "ci_run_ids": []
+    },
+    "CADC": {
+      "source_qualified_sha": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "record": "docs/audit/cadc-qualification/RESULTS.json",
+      "source_solidity_cases": 42,
+      "genuine_historical_messages": 2,
+      "ci_run_ids": []
+    }
+  },
+  "production_approvals": [],
+  "retained_artifact_sha256": {
+    "docs/audit/cctp-qualification/RESULTS.md": "c3e348a8f29b4233a090d6450784c3105d0519535547b8b8290eb6938d1f02fa",
+    "docs/audit/cadc-qualification/RESULTS.json": "83e569d381f076b8deda742d50d19c91a769aa8ba8333787cc2132c7bf24286d",
+    "docs/audit/final-verifier-qualification/envelope-cadc.log": "4cc7f966b4bae69ed0050f7c1079d59ba4f17d8219da2d59fee8ac6be8be5365",
+    "docs/audit/final-verifier-qualification/envelope-cadc.inputs.json": "4663540bdf049d125cc095d0b9da300fd9897aa5ef564f6d21bba92a816d8ab2",
+    "docs/audit/final-verifier-qualification/envelope-cadc-router.log": "138fee3fa8b30ff33c2b60da5ec7a76b7478b4a122efaef5b6ae51aa8e8282c2",
+    "docs/audit/final-verifier-qualification/envelope-cadc-router.inputs.json": "7b6814791e8d3ec8f21726dc75d52d9bb6dfa7414b44529ce65d498a795e331b",
+    "docs/audit/final-verifier-qualification/envelope-full.log": "915953f262e3ff75bc43ad418627a24ab7943e46b1fe79b9a4f90d2357ff525b",
+    "docs/audit/final-verifier-qualification/envelope-full.inputs.json": "885262859dbbb0cdca70bfa0a7240be8f981c13ffdee63771f5e0b43bfd8046b"
+  }
+}

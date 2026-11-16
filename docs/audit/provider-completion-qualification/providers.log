@@ -1,0 +1,17 @@
+Compiling 118 files with Solc 0.8.24
+Solc 0.8.24 finished in 267.89s
+Compiler run successful!
+
+Ran 3 tests for contracts/test/ProviderCADCCompletion420.t.sol:ProviderCADCCompletion420Test
+[PASS] testProviderCADCDvnRuntimeChangeInvalidatesIssuerGuard() (gas: 4796118)
+[PASS] testProviderCADCNativeEndpointRuntimeSubstitutionRejected() (gas: 4008116)
+[PASS] testProviderCADCRequalificationCannotReplayNativePacket() (gas: 10880766)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 36.36ms (19.89ms CPU time)
+
+Ran 3 tests for contracts/test/ProviderCCTPCompletion420.t.sol:ProviderCCTPCompletion420Test
+[PASS] testProviderCCTPMessengerRuntimeCannotImpersonateNativeIssuer() (gas: 2732235)
+[PASS] testProviderCCTPPeerRotationCannotReviveConsumedNonce() (gas: 20294734)
+[PASS] testProviderCCTPProxyRuntimeImpersonationFailsQualification() (gas: 9468976)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 56.42ms (46.43ms CPU time)
+
+Ran 2 test suites in 60.99ms (92.78ms CPU time): 6 tests passed, 0 failed, 0 skipped (6 total tests)

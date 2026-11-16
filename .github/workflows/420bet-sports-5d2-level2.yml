@@ -24,6 +24,7 @@ on:
       - '!contracts/src/interfaces/bridge/ILayerZeroCADC420.sol'
       - '!contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol'
       - '!contracts/src/interfaces/IBridgeVerifiedSourceContext420.sol'
+      - '!contracts/src/interfaces/IBitcoinWithdrawal420.sol'
       - '!contracts/src/interfaces/ISolanaOutboundMessage420.sol'
       - '!contracts/src/interfaces/IEthereumOutboundMessage420.sol'
       - '!contracts/src/interfaces/IEthereumSourceGatewaySettlement420.sol'

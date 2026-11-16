@@ -1,0 +1,18 @@
+Error: Compiler run failed:
+Error (9574): Type string memory is not implicitly convertible to expected type bytes memory.
+  --> contracts/test/BitcoinCustodyCompletion420.t.sol:33:3:
+   |
+33 |   bytes memory prefix=signed_?hex"020000000001":hex"02000000";
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error (1080): True expression's type string memory does not match false expression's type bytes memory.
+  --> contracts/test/BitcoinCustodyCompletion420.t.sol:37:44:
+   |
+37 |   return bytes.concat(prefix,input,outputs,signed_?hex"010151":bytes(""),hex"00000000");
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Error (8015): Invalid type for argument in the bytes.concat function call. bytes or fixed bytes type is required, but string memory provided.
+  --> contracts/test/BitcoinCustodyCompletion420.t.sol:37:44:
+   |
+37 |   return bytes.concat(prefix,input,outputs,signed_?hex"010151":bytes(""),hex"00000000");
+   |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

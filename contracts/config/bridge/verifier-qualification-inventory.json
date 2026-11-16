@@ -13,7 +13,7 @@
     {
       "asset": "BTC",
       "adapter": "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol",
-      "adapter_source_sha256": "f75df2c10974d78a075f027c78e84012b4b494c532cf420c33f1eaeff27c0abd",
+      "adapter_source_sha256": "ea5b6d52917b605339c964e7851a056711923c1b563892f5548ba84512bc2095",
       "verifier": "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol",
       "verifier_source_sha256": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
       "source_qualification_pr": 1156,
@@ -24,7 +24,7 @@
       "local_verifier_qualified_for_documented_model": true,
       "production_route_qualified": false,
       "approved_instances": [],
-      "external_dependencies": "Custody/withdrawal authorization, funded gateway/domain deposit and live chain synchronization",
+      "external_dependencies": "Qualified production backing/UTXO authority, owned custody descriptor and HSM/full-node signing/broadcast service, funded gateway/domain deposit and live chain synchronization; all inactive",
       "v18_component_graph_comparison": {
         "contracts/src/accounts/ECDSA420.sol": {
           "original_sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
@@ -958,6 +958,34 @@
           "current_sha256": "3dda94045fb5d74d924f4f30cf68c61893c5e6678130c1ed02784cb5302dff89"
         }
       }
+    },
+    {
+      "step": "BRIDGE-AUDIT-6",
+      "base_main_sha": "50ad3c49bd323b9eddca42f100fe6ca43e79f730",
+      "results": "docs/audit/bitcoin-completion-qualification/RESULTS.json",
+      "superseded_inputs": {
+        "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol": {
+          "previous_sha256": "f75df2c10974d78a075f027c78e84012b4b494c532cf420c33f1eaeff27c0abd",
+          "current_sha256": "ea5b6d52917b605339c964e7851a056711923c1b563892f5548ba84512bc2095"
+        },
+        "contracts/src/bridge/GatewayRouter420.sol": {
+          "previous_sha256": "82c5bf4e3ef033e8f029ffcce42c531f21a8144bcf935b77fc832b1010cc61c7",
+          "current_sha256": "98abd847dc85b4bc98ee7ed20d921d119ebf23c29f25340530f92117a219c989"
+        },
+        "contracts/test/BitcoinCustodySafety420.t.sol": {
+          "previous_sha256": "c3d3139535c1a1ee5c9bf345d5b4c945eaeff9ec9925f0bbbc449d22dcf6a67b",
+          "current_sha256": "36e2318d85d406779ab6f2bfd62512f0ebfe87ca777e04f1538a93365b02aecc",
+          "scope": "Internal test-only correction of the single failed canonical asset lifecycle method; original source and four passing cases preserved"
+        }
+      }
     }
-  ]
+  ],
+  "bitcoin_custody_boundary": {
+    "implementation": "contracts/src/bridge/bitcoin/BitcoinCustody420.sol",
+    "status": "QUALIFIED_LOCAL_CONTROL_PLANE_DEFAULT_INACTIVE",
+    "production_backing_implementations": [],
+    "production_signers": [],
+    "evidence": "docs/audit/bitcoin-completion-qualification/RESULTS.json",
+    "no_mint_burn_or_release_authority": true
+  }
 }

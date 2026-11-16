@@ -1,0 +1,111 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-6",
+  "base_main_sha": "50ad3c49bd323b9eddca42f100fe6ca43e79f730",
+  "qualified_sha": "Published qualified SHA and integration status are reported by the associated PR",
+  "runs": [
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/encoding.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/encoding.inputs.json",
+      "cases_passed": 13,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/custody-final.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/custody-final.inputs.json",
+      "cases_passed": 19,
+      "fuzz_inputs": 2500,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/gateway.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/gateway.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/safety.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/safety.inputs.json",
+      "cases_passed": 4,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0,
+      "expected_failed_tests": [
+        "testGlobalPauseSafetyAndAssetHealthBlockSigning"
+      ]
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/safety-fixed.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/safety-fixed.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/invariant.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/invariant.inputs.json",
+      "cases_passed": 1,
+      "fuzz_inputs": 0,
+      "invariant_runs": 128,
+      "invariant_calls": 8192
+    },
+    {
+      "log": "docs/audit/bitcoin-completion-qualification/vectors.log",
+      "source_inputs": "docs/audit/bitcoin-completion-qualification/vectors.inputs.json",
+      "cases_passed": 2,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    }
+  ],
+  "totals": {
+    "cases_passed": 41,
+    "fuzz_inputs": 5000,
+    "invariant_runs": 128,
+    "invariant_calls": 8192
+  },
+  "corrected_failures": {
+    "docs/audit/bitcoin-completion-qualification/safety.log": {
+      "testGlobalPauseSafetyAndAssetHealthBlockSigning": {
+        "log": "docs/audit/bitcoin-completion-qualification/safety-fixed.log",
+        "test": "testGlobalPauseSafetyAndCanonicalAssetLifecycleBlockSigning"
+      }
+    }
+  },
+  "independent_reference": {
+    "log": "docs/audit/bitcoin-completion-qualification/reference-vectors.log",
+    "synthetic_vectors": 3,
+    "implementation": "Python stdlib struct/hashlib SHA256d; legacy/Segwit/unsigned serialization"
+  },
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true,
+    "fuzz_seed": "0x42022"
+  },
+  "runtime_bytes": {
+    "BitcoinCustody420": 15782,
+    "BitcoinWithdrawalProof420": 7382,
+    "GatewayRouter420": 16897
+  },
+  "eip170_limit": 24576,
+  "ci_run_ids": [],
+  "production_approvals": [],
+  "historical_consensus_reruns": 0,
+  "native_consensus_component_graphs_unchanged": 12,
+  "custody_status": "Default inactive. No production backing verifier, custody signer, deployed descriptor or live payment qualification exists. Controlled backing verifier and injected headers are test-only.",
+  "diagnostics": {
+    "rotation-reproduction.log": "Actual stale-approval authorization inheritance reproduced; fixed by exact approval snapshot and current-approval equality. All affected 19 cases rerun. Old passing 14-case batch is interim evidence only.",
+    "safety-failure-trace.log": "Mock health flag did not control canonical asset lifecycle. Corrected only failed method to pause canonical asset state; four unchanged passing methods retained with exact source snapshot.",
+    "custody-build-diagnostic.log": "Fixture literal typing compile error corrected.",
+    "custody-setup-diagnostic.log": "Fixture TVL underflow corrected by authenticating a controlled deposit through canonical router before requesting withdrawal."
+  }
+}

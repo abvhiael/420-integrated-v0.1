@@ -1,0 +1,10 @@
+Compiling 75 files with Solc 0.8.24
+Solc 0.8.24 finished in 12.11s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/BitcoinSigningVectors420.t.sol:BitcoinSigningVectors420Test
+[PASS] testIndependentLegacyAndSegwitTxidsAndSkeletons() (gas: 479733)
+[PASS] testMalformedSigningSerializationCannotReachWallet() (gas: 152806)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 8.65ms (9.13ms CPU time)
+
+Ran 1 test suite in 14.05ms (8.65ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

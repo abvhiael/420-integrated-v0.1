@@ -1,0 +1,8 @@
+{
+  "contracts/src/bridge/adapters/BTCLightClientAdapter.sol:BTCLightClientAdapter": 674,
+  "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol:BitcoinBridgeAdapter420": 6084,
+  "contracts/src/bridge/bitcoin/BitcoinScript420.sol:BitcoinScript420": 57,
+  "contracts/src/bridge/bitcoin/BitcoinSigningTransaction420.sol:BitcoinSigningTransaction420": 57,
+  "contracts/src/bridge/verifiers/BridgeCrypto420.sol:BridgeCrypto420": 57,
+  "contracts/src/bridge/verifiers/BridgeWire420.sol:BridgeWire420": 57
+}

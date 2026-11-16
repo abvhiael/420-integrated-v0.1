@@ -94,6 +94,15 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
     }
 
     /// @notice Stable across verifier/approval/registry and canonical chain-key replacement.
+    /// @notice Reuse canonical outbound safety/asset/route/qualification checks before custody signing.
+    /// This observational guard never consumes risk, creates a transfer, burns or authorizes payment.
+    function requireOutboundSigningAdmission(bytes32 adapterId_,bytes32 routeId,bytes32 assetId) external view returns(bytes32) {
+        _requireOperational(BridgeIds420.ACTION_OUTBOUND,ISystemSafety420.ActionClass.NORMAL_ONLY,Types420.Direction.OUTBOUND);
+        _requireBridgeAsset(assetId);_requireRouteHealthy(routeId);_requireAccountingHealthy(assetId);
+        _requireRouteDirection(routeId,assetId,adapterId_,false);
+        return BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY)).requireCurrent(adapters[adapterId_]);
+    }
+
     function sourceReplayKey(bytes32 network,bytes32 message) public pure returns(bytes32){
         require(network!=0 && message!=0,"source identity");
         return keccak256(abi.encode("420/BRIDGE/SOURCE_MESSAGE/V1",network,message));

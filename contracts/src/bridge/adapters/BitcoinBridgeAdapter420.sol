@@ -2,11 +2,13 @@
 pragma solidity ^0.8.24;
 
 import "../../interfaces/IBridgeAdapter420.sol";
+import "../../interfaces/IBitcoinWithdrawal420.sol";
+import "../bitcoin/BitcoinScript420.sol";
 import "../../interfaces/IBitcoinFinalityVerifier420.sol";
 import "../../system/SystemAccess.sol";
 
 /// @notice Canonical Bitcoin mainnet adapter for 420Bridge.
-contract BitcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
+contract BitcoinBridgeAdapter420 is IBridgeAdapter420, IBitcoinWithdrawal420, SystemAccess {
     bytes32 public constant ADAPTER_ID = keccak256("420/BRIDGE/BITCOIN/MAINNET/V12.5.14");
     bytes32 public constant BTC_CHAIN_KEY = keccak256("420/BRIDGE/CHAIN/BTC");
     uint64 public constant BTC_ROUTE_CHAIN_ID = 0x4254430000000001; // "BTC" + profile version 1
@@ -31,6 +33,11 @@ contract BitcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
     struct SourceProofContext { bytes32 gateway; bytes32 sourceAsset; }
     mapping(bytes32 => SourceProofContext) public verifiedSourceContext;
     uint256 public outboundNonce;
+    mapping(bytes32=>Request) private requests;
+    event BitcoinWithdrawalStored(bytes32 indexed messageId,uint256 indexed nonce);
+    function outboundMessage(bytes32 messageId) external view returns(Request memory){if(requests[messageId].nonce==0)revert InvalidOutbound();return requests[messageId];}
+    function outboundScript(bytes32 messageId) external view returns(bytes memory){Request storage r=requests[messageId];if(r.nonce==0)revert InvalidOutbound();return BitcoinScript420.lockingScript(r.recipientProgram,r.scriptType);}
+
 
     error InvalidAddress(); error InvalidVerifier(); error WrongNetwork(); error Unfinalized();
     error InvalidConsensusProof(); error InsufficientConfirmations(); error InvalidProof();
@@ -92,7 +99,7 @@ contract BitcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         uint256 amount, bytes calldata extra) external payable onlyRouter returns (bytes32 sourceMessageId)
     {
         if (routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || amount == 0
-            || msg.value != 0 || extra.length != 1) revert InvalidOutbound();
+            || amount > BitcoinScript420.MAX_MONEY || msg.value != 0 || extra.length != 1) revert InvalidOutbound();
         if (assetId != btcAssetId) revert AssetNotConfigured();
         if (routeId != btcRouteId) revert RouteNotConfigured();
         uint8 scriptType = uint8(extra[0]);
@@ -101,6 +108,8 @@ contract BitcoinBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         uint256 nonce = ++outboundNonce;
         sourceMessageId = keccak256(abi.encode(ADAPTER_ID, block.chainid, routeId, assetId, sender,
             recipient, amount, scriptType, nonce));
+        Request storage r=requests[sourceMessageId];r.sourceChainId=block.chainid;r.sourceRouter=gatewayRouter;r.sourceAdapter=address(this);r.messageId=sourceMessageId;r.routeId=routeId;r.assetId=assetId;r.sender=sender;r.recipientProgram=recipient;r.scriptType=scriptType;r.amountSatoshis=uint64(amount);r.nonce=nonce;
+        emit BitcoinWithdrawalStored(sourceMessageId,nonce);
         emit BitcoinOutboundRequested(sourceMessageId, routeId, assetId, sender, recipient, amount, scriptType);
     }
 

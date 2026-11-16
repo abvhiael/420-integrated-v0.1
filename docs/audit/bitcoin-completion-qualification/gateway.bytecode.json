@@ -1,0 +1,21 @@
+{
+  "contracts/src/bridge/BridgeAccountingRegistry.sol:BridgeAccountingRegistry": 4934,
+  "contracts/src/bridge/BridgeChainRegistry420.sol:BridgeChainRegistry420": 3486,
+  "contracts/src/bridge/BridgeIds420.sol:BridgeIds420": 57,
+  "contracts/src/bridge/BridgeProofEnvelope420.sol:BridgeProofEnvelope420": 57,
+  "contracts/src/bridge/BridgeRiskManager.sol:BridgeRiskManager": 6855,
+  "contracts/src/bridge/BridgeRouteRegistry.sol:BridgeRouteRegistry": 9888,
+  "contracts/src/bridge/BridgeTransferRegistry.sol:BridgeTransferRegistry": 18156,
+  "contracts/src/bridge/BridgeVerifierProxy420.sol:BridgeVerifierProxy420": 1354,
+  "contracts/src/bridge/BridgeVerifierRegistry420.sol:BridgeVerifierRegistry420": 22063,
+  "contracts/src/bridge/GatewayRouter420.sol:GatewayRouter420": 16897,
+  "contracts/src/bridge/VerifiedGateway420.sol:VerifiedGateway420": 7340,
+  "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol:BitcoinBridgeAdapter420": 6084,
+  "contracts/src/bridge/bitcoin/BitcoinScript420.sol:BitcoinScript420": 57,
+  "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol:BitcoinFinalityVerifier420": 6939,
+  "contracts/src/bridge/verifiers/BitcoinHeaderChain420.sol:BitcoinHeaderChain420": 4481,
+  "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol:BitcoinHeaderPow420": 57,
+  "contracts/src/bridge/verifiers/BitcoinTransaction420.sol:BitcoinTransaction420": 57,
+  "contracts/src/bridge/verifiers/BridgeCrypto420.sol:BridgeCrypto420": 57,
+  "contracts/src/bridge/verifiers/BridgeWire420.sol:BridgeWire420": 57
+}

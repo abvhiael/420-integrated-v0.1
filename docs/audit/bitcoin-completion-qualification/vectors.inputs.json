@@ -1,0 +1,30 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/btc-vectors-build",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/BitcoinSigningVectors420.t.sol",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "BitcoinSigningVectors420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/accounts/ECDSA420.sol": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+    "contracts/src/bridge/bitcoin/BitcoinScript420.sol": "2a6267334a792166383b6162624bc26d9f81645dfe33322fc6d0a65de74bdd29",
+    "contracts/src/bridge/bitcoin/BitcoinSigningTransaction420.sol": "cffa42edfa9ed04827c80e822d619a09d1b24ea78c212b0552219a1e66addc79",
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+    "contracts/test/BitcoinSigningVectors420.t.sol": "b989deff7d399b100214be8ebecb8d4bbf1b326d7bf246692dd7b67e09844a4a"
+  }
+}

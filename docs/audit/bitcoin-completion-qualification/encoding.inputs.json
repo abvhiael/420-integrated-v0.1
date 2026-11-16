@@ -1,0 +1,38 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/btc-encoding-build",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/{BitcoinWithdrawalEncoding420.t.sol,BitcoinBridgeAdapter420.t.sol}",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "BitcoinWithdrawalEncoding420.t.sol",
+    "BitcoinBridgeAdapter420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/accounts/ECDSA420.sol": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+    "contracts/src/bridge/adapters/BTCLightClientAdapter.sol": "5fd97f915f4e88af50c638348b79b8d3f0290030d3d52e6103f894808a4cd160",
+    "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol": "ea5b6d52917b605339c964e7851a056711923c1b563892f5548ba84512bc2095",
+    "contracts/src/bridge/bitcoin/BitcoinScript420.sol": "2a6267334a792166383b6162624bc26d9f81645dfe33322fc6d0a65de74bdd29",
+    "contracts/src/bridge/bitcoin/BitcoinSigningTransaction420.sol": "cffa42edfa9ed04827c80e822d619a09d1b24ea78c212b0552219a1e66addc79",
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+    "contracts/src/interfaces/IBitcoinFinalityVerifier420.sol": "2fe5a7140dbd43096a59dbc6c71a0f5914e2054e1506447ae6007b53c9fe76bd",
+    "contracts/src/interfaces/IBitcoinWithdrawal420.sol": "33eca6fd3bf1cc67ee7b3234f519e26f672b2ff0287f6ef7072278fd9efacec7",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BitcoinBridgeAdapter420.t.sol": "4b2ab6fee32e0c771d7a0fcc315703a2de0ad999c3dcd270ab0e69e1d3c8cda5",
+    "contracts/test/BitcoinWithdrawalEncoding420.t.sol": "e291972b01916604925aaadc0b444672a02d60fa6128d8e6c7a1495b18d17e23"
+  }
+}

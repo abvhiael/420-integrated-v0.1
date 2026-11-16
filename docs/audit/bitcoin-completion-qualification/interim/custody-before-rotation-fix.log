@@ -1,0 +1,94 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 152.18s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 14 tests for contracts/test/BitcoinCustodyCompletion420.t.sol:BitcoinCustodyCompletion420Test
+[PASS] testBackedPlanProducesOnlyPublicSigningAuthorization() (gas: 3611730)
+[PASS] testBackingFailureCannotCreateAuthorization() (gas: 1205903)
+[PASS] testDefaultInactiveEvenWithQualification() (gas: 94449)
+[PASS] testExcessFeeAndWrongInputReject() (gas: 2290753)
+[PASS] testFiveConfirmationsAndForgedPayoutReject() (gas: 2704771)
+[PASS] testFuzzFeeCap(uint64) (runs: 2500, μ: 1495679, ~: 1717825)
+[PASS] testNativeRouteSuspensionBlocksSigning() (gas: 508125)
+[PASS] testPreviouslySignedReplacementCanConfirm() (gas: 4989488)
+[PASS] testReorganizedPaymentCannotRemainLiveEvidence() (gas: 4067302)
+[PASS] testReplacementUsesCASAndSameFunding() (gas: 6249013)
+[PASS] testRevocationImmediatelyRemovesSigningAuthority() (gas: 1879538)
+[PASS] testSignedDataCannotBeAuthorizedAsUnsignedPSBT() (gas: 1188341)
+[PASS] testSixConfirmedPaymentAndRefresh() (gas: 4369396)
+[PASS] testUnauthorizedCustodyControlsReject() (gas: 30083)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 5.21s (5.24s CPU time)
+
+Ran 1 test suite in 5.22s (5.21s CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)

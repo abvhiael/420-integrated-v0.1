@@ -1,0 +1,30 @@
+Compiling 82 files with Solc 0.8.24
+Solc 0.8.24 finished in 20.42s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/BitcoinWithdrawalEncoding420.t.sol:13:2:
+   |
+13 |  function testFuzzScriptKindsAndProg ... 4)&&width==32);require(ok==valid);}
+   |  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 8 tests for contracts/test/BitcoinBridgeAdapter420.t.sol:BitcoinBridgeAdapter420Test
+[PASS] testCanonicalBitcoinInboundPasses() (gas: 161222)
+[PASS] testInsufficientConfirmationsRejected() (gas: 130363)
+[PASS] testInvalidChainworkRejected() (gas: 130360)
+[PASS] testInvalidPowRejected() (gas: 130392)
+[PASS] testOutboundLegacySegwitAndTaproot() (gas: 847692)
+[PASS] testOutpointReplayWithDifferentMessageAfterVerifierRotation() (gas: 867605)
+[PASS] testReplayRejected() (gas: 286641)
+[PASS] testWrongNetworkRejected() (gas: 130187)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 2.29ms (1.52ms CPU time)
+
+Ran 5 tests for contracts/test/BitcoinWithdrawalEncoding420.t.sol:BitcoinWithdrawalEncoding420Test
+[PASS] testAllFiveCanonicalOutputEncodingsAndLegacyIds() (gas: 1676002)
+[PASS] testFuzzScriptKindsAndProgramLengths(uint8,uint8) (runs: 2500, μ: 2604, ~: 2592)
+[PASS] testLegacyLightClientAdapterRemainsExplicitlyDisabled() (gas: 288287)
+[PASS] testMalformedAndDuplicateInputsReject() (gas: 68567)
+[PASS] testMoneyRangeAndUnknownRequestsReject() (gas: 345391)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 30.17ms (29.25ms CPU time)
+
+Ran 2 test suites in 30.76ms (32.45ms CPU time): 13 tests passed, 0 failed, 0 skipped (13 total tests)

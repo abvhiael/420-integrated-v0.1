@@ -1,0 +1,112 @@
+Compiling 123 files with Solc 0.8.24
+Solc 0.8.24 finished in 271.85s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-16T16:23:04.131001Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131226Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131237Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131317Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131323Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131346Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.131386Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.132000Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135293Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135317Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135324Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135372Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135378Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135397Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135423Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T16:23:04.135458Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 1 test for contracts/test/BitcoinCustodyInvariant420.t.sol:BitcoinCustodyInvariant420Test
+[PASS] invariantNoStaleSigningAuthorityOrReleasedInputReservations() (runs: 128, calls: 8192, reverts: 0)
+
+╭-------------------------------+------------------+-------+---------+----------╮
+| Contract                      | Selector         | Calls | Reverts | Discards |
++===============================================================================+
+| BitcoinCustodyStateHandler420 | attempt          | 1612  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | backingAvailable | 1594  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | halt             | 1637  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | restore          | 1631  | 0       | 0        |
+|-------------------------------+------------------+-------+---------+----------|
+| BitcoinCustodyStateHandler420 | revoke           | 1718  | 0       | 0        |
+╰-------------------------------+------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 16.83s (16.80s CPU time)
+
+Ran 1 test suite in 16.83s (16.83s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

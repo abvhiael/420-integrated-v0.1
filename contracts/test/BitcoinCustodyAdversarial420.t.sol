@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
+import "./BitcoinCustodyCompletion420.t.sol";
+contract BitcoinCustodyAdversarial420Test is BitcoinCustodyFixture420 {
+ function setUp() public {setupCustody(true);}
+ function testFreshQualificationCannotReactivateOldSigningAuthorization() public {bytes32 old=authorize(100,0);q.revoke(q.currentApproval(address(custody)),keccak256("old authority revoked"));custody.setActive(false);qualifyCustody();custody.setActive(true);require(!custody.signingAuthorization(requestId,old),"old signing authorization inherited new approval");}
+ function testCustodyUTXOReservationPreventsIndependentDoubleSelection() public {bytes32 first=requestId;authorize(100,0);requestId=f.router.initiateOutbound(btc.ADAPTER_ID(),ROUTE_ID,ASSET_ID,recipientProgram(),PAY,hex"02");require(first!=requestId);(bool ok,)=address(custody).call(abi.encodeCall(custody.authorizeSigning,(requestId,transaction(100,false),funding(),hex"01",bytes32(0))));require(!ok,"same UTXO selected for two requests");}
+ function testWrongChangeScriptCannotReachSigner() public {bytes memory raw=transaction(100,false);raw[raw.length-5]^=0x01;(bool ok,)=address(custody).call(abi.encodeCall(custody.authorizeSigning,(requestId,raw,funding(),hex"01",bytes32(0))));require(!ok);}
+ function testForgedMerklePositionAndTrailingProofReject() public {authorize(100,0);(bytes memory proof,,)=sourceProof(100,keccak256("A"),6);BitcoinWithdrawalProof420.Proof memory p=abi.decode(proof,(BitcoinWithdrawalProof420.Proof));p.index=1;(bool ok,)=address(custody).call(abi.encodeCall(custody.observeSettlement,(requestId,abi.encode(p))));require(!ok);(ok,)=address(custody).call(abi.encodeCall(custody.observeSettlement,(requestId,bytes.concat(proof,hex"00"))));require(!ok);}
+ function testWitnessChangesDoNotChangeTxidOrAuthorizedSkeleton() public view {bytes memory raw=transaction(100,true);BitcoinSigningTransaction420.Parsed memory first=BitcoinSigningTransaction420.parse(raw);raw[raw.length-5]^=0x01;BitcoinSigningTransaction420.Parsed memory second=BitcoinSigningTransaction420.parse(raw);require(first.txid==second.txid&&first.skeletonHash==second.skeletonHash&&first.inputsHash==second.inputsHash);}
+}

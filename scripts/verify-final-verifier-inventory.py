@@ -26,8 +26,10 @@ def check():
    assert len(re.findall(r'^\[PASS\] ',log,re.M))==run['cases_passed'] and run['cases_passed']>0
    for name in failures:
     corrected=report['corrected_failures'][run['log']][name]
-    assert any(x['log']==corrected and not x.get('expected_failed_tests') for x in report['runs'])
-    assert re.search(r'^\[PASS\] '+re.escape(name)+r'\(', (ROOT/corrected).read_text(),re.M)
+    corrected_log=corrected['log'] if isinstance(corrected,dict) else corrected
+    corrected_name=corrected.get('test',name) if isinstance(corrected,dict) else name
+    assert any(x['log']==corrected_log and not x.get('expected_failed_tests') for x in report['runs'])
+    assert re.search(r'^\[PASS\] '+re.escape(corrected_name)+r'\(', (ROOT/corrected_log).read_text(),re.M)
    for path,digest in inp['source_sha256'].items():
     matches_qualified_lineage(path,digest);tested.add((path,digest))
    size_path=(ROOT/run['log']).with_suffix('.bytecode.json')

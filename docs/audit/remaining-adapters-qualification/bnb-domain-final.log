@@ -1,0 +1,35 @@
+Compiling 11 files with Solc 0.8.24
+Solc 0.8.24 finished in 21.60s
+Compiler run successful!
+
+Ran 12 tests for contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[PASS] testAssetRebindingRemovesStaleSourceMapping() (gas: 133720)
+[PASS] testCanonicalMainnetBnbInboundPasses() (gas: 151000)
+[PASS] testDestinationAndRouteCannotBeSubstituted() (gas: 431219)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27743)
+[PASS] testMappingAloneDoesNotQualifyUnsupportedBep20() (gas: 300361)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 37074)
+[PASS] testOutboundWrongRouteFailsClosed() (gas: 41519)
+[PASS] testReplayFailsClosed() (gas: 297585)
+[PASS] testUnfinalizedFailsClosed() (gas: 142398)
+[PASS] testUnknownBep20FailsClosed() (gas: 169097)
+[PASS] testWrongChainFailsClosed() (gas: 147061)
+[PASS] testWrongGatewayFailsClosed() (gas: 149781)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 3.02ms (1.62ms CPU time)
+
+Ran 2 tests for contracts/test/BnbExecution420.t.sol:BnbExecution420Test
+[FAIL: vm.readFileBinary: failed to open file "/workspace/scratch/3b8511e6cffb/remaining-outbound-build/contracts/test/fixtures/bnb/header_116663999.rlp": No such file or directory (os error 2)] testControlledNativeGatewayConcreteCompositionReplayAndBindings() (gas: 5551867)
+[FAIL: vm.readFileBinary: failed to open file "/workspace/scratch/3b8511e6cffb/remaining-outbound-build/contracts/test/fixtures/bnb/historical-native.bin": No such file or directory (os error 2)] testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs() (gas: 2487019)
+Suite result: FAILED. 0 passed; 2 failed; 0 skipped; finished in 3.88ms (3.11ms CPU time)
+
+Ran 2 test suites in 5.94ms (6.90ms CPU time): 12 tests passed, 2 failed, 0 skipped (14 total tests)
+
+Failing tests:
+Encountered 2 failing tests in contracts/test/BnbExecution420.t.sol:BnbExecution420Test
+[FAIL: vm.readFileBinary: failed to open file "/workspace/scratch/3b8511e6cffb/remaining-outbound-build/contracts/test/fixtures/bnb/header_116663999.rlp": No such file or directory (os error 2)] testControlledNativeGatewayConcreteCompositionReplayAndBindings() (gas: 5551867)
+[FAIL: vm.readFileBinary: failed to open file "/workspace/scratch/3b8511e6cffb/remaining-outbound-build/contracts/test/fixtures/bnb/historical-native.bin": No such file or directory (os error 2)] testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs() (gas: 2487019)
+
+Encountered a total of 2 failing tests, 12 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 2 failed tests
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

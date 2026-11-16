@@ -11,11 +11,13 @@ def check():
    chain=transitions.setdefault(path,[])
    if chain:assert chain[-1]['current_sha256']==record['previous_sha256'],path
    assert record['previous_sha256']!=record['current_sha256']
+   if record.get('intermediate_source'):
+    assert hashlib.sha256((ROOT/record['intermediate_source']).read_bytes()).hexdigest()==record['intermediate_sha256'],path
    chain.append(record)
  def matches_qualified_lineage(path,digest):
   current=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
   for record in transitions.get(path,[]):
-   if digest==record['previous_sha256']:digest=record['current_sha256']
+   if digest in (record['previous_sha256'],record.get('intermediate_sha256')):digest=record['current_sha256']
   assert digest==current,path
  for extension in extensions:
   report=json.loads((ROOT/extension['results']).read_text());assert report['pass'];tested=set()
@@ -28,7 +30,7 @@ def check():
     corrected=report['corrected_failures'][run['log']][name]
     corrected_log=corrected['log'] if isinstance(corrected,dict) else corrected
     corrected_name=corrected.get('test',name) if isinstance(corrected,dict) else name
-    assert any(x['log']==corrected_log and not x.get('expected_failed_tests') for x in report['runs'])
+    assert any(x['log']==corrected_log and corrected_name not in x.get('expected_failed_tests',[]) for x in report['runs'])
     assert re.search(r'^\[PASS\] '+re.escape(corrected_name)+r'\(', (ROOT/corrected_log).read_text(),re.M)
    for path,digest in inp['source_sha256'].items():
     matches_qualified_lineage(path,digest);tested.add((path,digest))

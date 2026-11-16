@@ -1,0 +1,51 @@
+{
+  "command": [
+    "../bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/remaining-outbound-build",
+    "--use",
+    "../bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/{RemainingChainOutbound420.t.sol,RemainingBnbRecipient420.t.sol,BnbBridgeAdapter420.t.sol}",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "RemainingChainOutbound420.t.sol",
+    "RemainingBnbRecipient420.t.sol",
+    "BnbBridgeAdapter420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol": "7752bf4e98c9873f2c30158aa08fef9a0241409d92d7827e26475b3f70dc8991",
+    "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol": "5091cacdd9e605b92601bfdb3c67642a33b00e923d7d823948a2009cd58bea12",
+    "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol": "390f733d97e675d983896b95b42fd2ce6c7df68a17466621667560a12550eaaa",
+    "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol": "64673f52ea8082e8c796cf8a20e2a44cba1a72b5ef9ef0c290489aaae0b8480b",
+    "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol": "87be38f852a9eb655b46adfaaa8cfb64b5a7d4ae52ea52c5f6ee15f12902ca59",
+    "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol": "6b2ab3fee09e4f403f47d2ac898b2c254382dfdf233feb470176b25388386035",
+    "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol": "ed80b627b69561a58fc97dbebbe70f7aa4052f5accb30821660ea799ad6e3f49",
+    "contracts/src/bridge/adapters/TronBridgeAdapter420.sol": "17040e885d5c6800edd456abdc6350f6064d7e355660337b09e1208698e72ab3",
+    "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol": "940c28b64afdf6928ce45d135b28897e953783d52771f8fa822468029892208c",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/IBnbFinalityVerifier420.sol": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/interfaces/ICurecoinFinalityVerifier420.sol": "e92328b74f9ec7c764771605f5225cbe242894d4fac461a54ccbdccdf85b0c9a",
+    "contracts/src/interfaces/IDobbscoinFinalityVerifier420.sol": "ed5643a7956b22509c586e74e1ffc8fa81f4d60e71c49363d40aa5210f49a55d",
+    "contracts/src/interfaces/IDogecoinFinalityVerifier420.sol": "e8720de766fbed0e9d8edb94a378204e2426048305ebb4ff146d37b4c9ad5aea",
+    "contracts/src/interfaces/ILitecoinFinalityVerifier420.sol": "344925576f6522fc4e837ef8ed49e0d1f7d4f40323f6238a5cd31ceed543a4d2",
+    "contracts/src/interfaces/IPirateChainFinalityVerifier420.sol": "9bb5521f47cf204594068c96a9d01cf020c170971f2ad0613a3d8a935a2618db",
+    "contracts/src/interfaces/IPotcoinFinalityVerifier420.sol": "785906f41c14b25f250ac5d697f81804e446ffbf70b53e677b1ec634168d77f7",
+    "contracts/src/interfaces/ITronFinalityVerifier420.sol": "732ffa5fb1663fbe3fc3befc9970fcbbf054ef3ba3333ebc070d1ae1c7c3dc1d",
+    "contracts/src/interfaces/IXrplFinalityVerifier420.sol": "85375e44c0651836c4dbd09c29cafa5d0012df63ac99b6e87774c5c4be394b28",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BnbBridgeAdapter420.t.sol": "1672ed18b7a201a34ef132739784e0b16c8c54db398af18e77a8b22724765f65",
+    "contracts/test/RemainingBnbRecipient420.t.sol": "74367604b0d041b79d958982d748b75fc893ca29686cdea436159cbc6cd56eb3",
+    "contracts/test/RemainingChainOutbound420.t.sol": "e0e430c5c0a84e616a43e63a7a758512418ec7dfc3aa3f7c1a046bceb9e08f7b"
+  }
+}

@@ -131,6 +131,8 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         IBnbFinalityVerifier420.FinalizedTransfer memory p = verifier.verifyFinalizedTransfer(proof);
         if (!p.finalized) revert Unfinalized();
         if (p.sourceChainId != BNB_MAINNET_CHAIN_ID) revert WrongChain();
+        if (p.destinationChainId != block.chainid) revert WrongChain();
+        if (p.destinationRouter != gatewayRouter) revert InvalidProof();
         if (
             p.blockNumber == 0 || p.blockHash == bytes32(0) || p.transactionHash == bytes32(0)
                 || p.messageId == bytes32(0) || p.gateway == address(0) || p.sourceSender == address(0)
@@ -142,6 +144,7 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
         if (assetId == bytes32(0)) revert AssetNotAllowed();
         bytes32 routeId = routeIdByAssetId[assetId];
         if (routeId == bytes32(0)) revert RouteNotAllowed();
+        if (p.routeId != routeId) revert RouteNotAllowed();
         if (consumedMessages[p.messageId]) revert Replay();
         uint256 localAmount =
             _tokenAmount(routeId, assetId, sourceAsset, bytes32(uint256(uint160(p.gateway))), p.amount, true);
@@ -171,6 +174,9 @@ contract BnbBridgeAdapter420 is IBridgeAdapter420, SystemAccess {
             routeId == bytes32(0) || assetId == bytes32(0) || sender == address(0) || recipient.length != 20
                 || amount == 0 || msg.value != 0
         ) revert InvalidOutbound();
+        address recipientAddress;
+        assembly ("memory-safe") { recipientAddress := shr(96, calldataload(recipient.offset)) }
+        if (recipientAddress == address(0)) revert InvalidOutbound();
         bytes32 sourceAsset = sourceAssetByAssetId[assetId];
         if (sourceAsset == bytes32(0)) revert AssetNotAllowed();
         if (routeIdByAssetId[assetId] != routeId) revert RouteNotAllowed();

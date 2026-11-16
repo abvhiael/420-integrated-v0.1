@@ -1,0 +1,18 @@
+Compiling 77 files with Solc 0.8.24
+Solc 0.8.24 finished in 17.17s
+Compiler run successful!
+
+Ran 1 test for contracts/test/RemainingBnbRecipient420.t.sol:RemainingBnbRecipient420Test
+[FAIL: zero BNB recipient accepted] testBnbZeroRecipientRejectedBeforeNonceConsumption() (gas: 2130497)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 1.30ms (624.56µs CPU time)
+
+Ran 1 test suite in 4.99ms (1.30ms CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/RemainingBnbRecipient420.t.sol:RemainingBnbRecipient420Test
+[FAIL: zero BNB recipient accepted] testBnbZeroRecipientRejectedBeforeNonceConsumption() (gas: 2130497)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

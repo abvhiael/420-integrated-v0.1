@@ -1,0 +1,34 @@
+{
+  "command": [
+    "../bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/remaining-bnb-build",
+    "--use",
+    "../bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/RemainingBnbRecipient420.t.sol",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test",
+    "--match-test",
+    "^testBnbZeroRecipient"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "RemainingBnbRecipient420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol": "f415836c61e1fecb5d09e62b1399e49e2b738719371184b0871445ae6b9d1713",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/IBnbFinalityVerifier420.sol": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BnbBridgeAdapter420.t.sol": "1672ed18b7a201a34ef132739784e0b16c8c54db398af18e77a8b22724765f65",
+    "contracts/test/RemainingBnbRecipient420.t.sol": "74367604b0d041b79d958982d748b75fc893ca29686cdea436159cbc6cd56eb3"
+  }
+}

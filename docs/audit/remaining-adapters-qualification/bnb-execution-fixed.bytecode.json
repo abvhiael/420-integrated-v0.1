@@ -1,0 +1,18 @@
+{
+  "contracts/src/bridge/BnbDepositGateway420.sol:BnbDepositGateway420": 1659,
+  "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol:BnbBridgeAdapter420": 5725,
+  "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol:CurecoinBridgeAdapter420": 3956,
+  "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol:DobbscoinBridgeAdapter420": 4066,
+  "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol:DogecoinBridgeAdapter420": 3895,
+  "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol:LitecoinBridgeAdapter420": 4288,
+  "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol:PirateChainBridgeAdapter420": 5374,
+  "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol:PotcoinBridgeAdapter420": 3968,
+  "contracts/src/bridge/adapters/TronBridgeAdapter420.sol:TronBridgeAdapter420": 3815,
+  "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol:XrplBridgeAdapter420": 3909,
+  "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol:SupportedTokenRoutes420": 57,
+  "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol:BnbFinalityVerifier420": 2623,
+  "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol:BnbGatewayMessageVerifier420": 10041,
+  "contracts/src/bridge/verifiers/EthereumMPT420.sol:EthereumMPT420": 57,
+  "contracts/src/bridge/verifiers/EthereumRLP420.sol:EthereumRLP420": 57,
+  "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol:BnbHeader420": 57
+}

@@ -1,0 +1,47 @@
+Compiling 94 files with Solc 0.8.24
+Solc 0.8.24 finished in 39.35s
+Compiler run successful!
+
+Ran 1 test for contracts/test/RemainingBnbRecipient420.t.sol:RemainingBnbRecipient420Test
+[PASS] testBnbZeroRecipientRejectedBeforeNonceConsumption() (gas: 2103719)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 634.16µs (436.46µs CPU time)
+
+Ran 12 tests for contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[PASS] testAssetRebindingRemovesStaleSourceMapping() (gas: 133720)
+[PASS] testCanonicalMainnetBnbInboundPasses() (gas: 150884)
+[FAIL: EvmError: Revert] testDestinationAndRouteCannotBeSubstituted() (gas: 224690)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27737)
+[PASS] testMappingAloneDoesNotQualifyUnsupportedBep20() (gas: 300245)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 37074)
+[PASS] testOutboundWrongRouteFailsClosed() (gas: 41519)
+[PASS] testReplayFailsClosed() (gas: 297353)
+[PASS] testUnfinalizedFailsClosed() (gas: 142377)
+[PASS] testUnknownBep20FailsClosed() (gas: 169012)
+[PASS] testWrongChainFailsClosed() (gas: 147040)
+[PASS] testWrongGatewayFailsClosed() (gas: 149696)
+Suite result: FAILED. 11 passed; 1 failed; 0 skipped; finished in 4.06ms (3.36ms CPU time)
+
+Ran 11 tests for contracts/test/RemainingChainOutbound420.t.sol:RemainingChainOutbound420Test
+[PASS] testRemainingBnbWeiAndCanonicalMessageIdentity() (gas: 149616)
+[PASS] testRemainingBobScriptsAndBaseUnits() (gas: 135792)
+[PASS] testRemainingCureScriptsAndVersions() (gas: 136798)
+[PASS] testRemainingDogeScriptsAndBaseUnits() (gas: 135828)
+[PASS] testRemainingLitecoinFiveScriptEncodings() (gas: 312329)
+[PASS] testRemainingPirateShieldedPoolsAndBaseUnits() (gas: 400779)
+[PASS] testRemainingPotScriptsAndVersions() (gas: 136847)
+[PASS] testRemainingRouterBypassAndUnauthorizedVerifierRotation() (gas: 1770486)
+[PASS] testRemainingTronSunAndPrefix() (gas: 118471)
+[PASS] testRemainingWrongRouteAssetAndMalformedRecipient() (gas: 1013791)
+[PASS] testRemainingXrpDropsAndTagEndian() (gas: 134651)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 5.75ms (4.57ms CPU time)
+
+Ran 3 test suites in 8.52ms (10.44ms CPU time): 23 tests passed, 1 failed, 0 skipped (24 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[FAIL: EvmError: Revert] testDestinationAndRouteCannotBeSubstituted() (gas: 224690)
+
+Encountered a total of 1 failing tests, 23 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

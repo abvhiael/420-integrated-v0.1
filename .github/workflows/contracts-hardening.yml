@@ -67,6 +67,8 @@ on:
       - '!contracts/test/CADCHistoricalFork.t.sol'
       - '!contracts/test/ProviderCADCCompletion420.t.sol'
       - '!contracts/test/ProviderCCTPCompletion420.t.sol'
+      - '!contracts/test/RemainingBnbRecipient420.t.sol'
+      - '!contracts/test/RemainingChainOutbound420.t.sol'
       - '!contracts/test/fixtures/cadc/**'
       - '!contracts/config/bridge/cadc.json'
       - '!contracts/config/bridge/aave-ethereum-v12.5.18.json'

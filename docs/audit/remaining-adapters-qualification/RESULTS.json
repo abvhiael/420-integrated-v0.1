@@ -1,0 +1,80 @@
+{
+  "pass": true,
+  "step": "BRIDGE-AUDIT-8",
+  "base_main_sha": "e382c5e508816cb3c508a0b7c2ac11300f1b4b3b",
+  "qualified_sha": "Published qualified SHA and verified main integration are recorded in the associated PR",
+  "runs": [
+    {
+      "log": "docs/audit/remaining-adapters-qualification/outbound.log",
+      "source_inputs": "docs/audit/remaining-adapters-qualification/outbound.inputs.json",
+      "cases_passed": 23,
+      "expected_failed_tests": [
+        "testDestinationAndRouteCannotBeSubstituted"
+      ],
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/remaining-adapters-qualification/bnb-domain-final.log",
+      "source_inputs": "docs/audit/remaining-adapters-qualification/bnb-domain-final.inputs.json",
+      "cases_passed": 12,
+      "expected_failed_tests": [
+        "testControlledNativeGatewayConcreteCompositionReplayAndBindings",
+        "testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs"
+      ],
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    },
+    {
+      "log": "docs/audit/remaining-adapters-qualification/bnb-execution-fixed.log",
+      "source_inputs": "docs/audit/remaining-adapters-qualification/bnb-execution-fixed.inputs.json",
+      "cases_passed": 2,
+      "fuzz_inputs": 0,
+      "invariant_runs": 0,
+      "invariant_calls": 0
+    }
+  ],
+  "corrected_failures": {
+    "docs/audit/remaining-adapters-qualification/outbound.log": {
+      "testDestinationAndRouteCannotBeSubstituted": "docs/audit/remaining-adapters-qualification/bnb-domain-final.log"
+    },
+    "docs/audit/remaining-adapters-qualification/bnb-domain-final.log": {
+      "testControlledNativeGatewayConcreteCompositionReplayAndBindings": "docs/audit/remaining-adapters-qualification/bnb-execution-fixed.log",
+      "testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs": "docs/audit/remaining-adapters-qualification/bnb-execution-fixed.log"
+    }
+  },
+  "totals": {
+    "cases_passed": 26,
+    "pass_observations": 37,
+    "superseded_duplicate_pass_observations": 11,
+    "new_cases": 12,
+    "affected_existing_cases": 14,
+    "fuzz_inputs": 0,
+    "invariant_runs": 0,
+    "invariant_calls": 0
+  },
+  "scope": {
+    "additional_native_chains": 9,
+    "generic_token_routes": 9,
+    "new_consensus_implementations": 0,
+    "native_consensus_suites_rerun": 0,
+    "production_approvals": 0
+  },
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true
+  },
+  "ci_run_ids": [],
+  "production_approvals": [],
+  "diagnostics": {
+    "bnb-reproduction.log": "Actual zero EVM recipient accepted; corrected before nonce consumption.",
+    "bnb-destination-failure-trace.log": "Existing destination/route substitution case failed against actual adapter. Missing destination chain/router/route checks added. All 12 affected BNB adapter cases passed. Earlier 11 BNB passes are superseded, not additional unique qualifications.",
+    "bnb-domain-final.log": "Native integration fixture reads failed because isolated runner omitted existing BNB fixture directory. Runner now copies it. Only the two failed integration cases reran and passed."
+  },
+  "intermediate_source_scope": "Outbound/authorization bodies are identical between the 23-pass batch source snapshot and current code; the later change adds inbound domain checks only. Current BNB inbound cases supersede earlier passes. All original logs and source hashes remain intact."
+}

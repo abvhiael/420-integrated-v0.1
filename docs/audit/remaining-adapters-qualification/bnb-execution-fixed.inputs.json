@@ -1,0 +1,39 @@
+{
+  "command": [
+    "../bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/remaining-outbound-build",
+    "--use",
+    "../bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--no-dynamic-test-linking",
+    "--match-path",
+    "contracts/test/BnbExecution420.t.sol",
+    "-vv",
+    "--no-match-contract",
+    "CADCGatewayIntegration420Test|TokenGatewayRouterIntegration420Test"
+  ],
+  "foundry_config": "[profile.default]\nsrc=\"contracts/src\"\ntest=\"contracts/test\"\nevm_version=\"cancun\"\noptimizer=true\noptimizer_runs=200\nvia_ir=true\nffi=false\ngas_limit=9223372036854775807\ncode_size_limit=1000000\nremappings=[\"forge-std/=contracts/forge-std/\",\"@layerzerolabs/=contracts/test/fixtures/cadc/upstream/@layerzerolabs/\",\"@openzeppelin/=contracts/test/fixtures/cadc/upstream/@openzeppelin/\",\"solidity-bytes-utils/=contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/\"]\nfs_permissions=[{access=\"read\",path=\"./contracts/test/fixtures\"}]\nfuzz={runs=2500,seed=\"0x42022\"}\n[invariant]\nruns=128\ndepth=64\nfail_on_revert=true\n",
+  "owners": [
+    "BnbExecution420.t.sol"
+  ],
+  "source_sha256": {
+    "contracts/src/bridge/BnbDepositGateway420.sol": "48a4fa317b3a60143a8737d7adfba71faa5bc09d41a7d52a090831c8106989e3",
+    "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol": "69793b6b5b67ce4edad81a43b00b7c7689451bf327d123b93d7bf2fe34cb97b3",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+    "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+    "contracts/src/bridge/verifiers/EthereumMPT420.sol": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+    "contracts/src/bridge/verifiers/EthereumRLP420.sol": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+    "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+    "contracts/src/interfaces/IBnbFinalityOracle420.sol": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+    "contracts/src/interfaces/IBnbFinalityVerifier420.sol": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+    "contracts/src/interfaces/IBnbGatewayMessageVerifier420.sol": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeTokenRoutePolicy420.sol": "01b195a8ad119e6f42e9c83fbadf583b368095dc2d39dd8e6cea39f12e668f57",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BnbExecution420.t.sol": "a3c68e9fc420921fc9a9ebb3ee5359567173916d8f6534f9a8a78b1f2368424c"
+  }
+}

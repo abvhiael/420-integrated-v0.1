@@ -285,7 +285,7 @@
     {
       "asset": "BNB",
       "adapter": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol",
-      "adapter_source_sha256": "f415836c61e1fecb5d09e62b1399e49e2b738719371184b0871445ae6b9d1713",
+      "adapter_source_sha256": "69793b6b5b67ce4edad81a43b00b7c7689451bf327d123b93d7bf2fe34cb97b3",
       "verifier": "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol",
       "verifier_source_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
       "source_qualification_pr": 1160,
@@ -984,6 +984,20 @@
       "base_main_sha": "9d396fda5cc947cd5a17f679ff9c742fe969059e",
       "results": "docs/audit/provider-completion-qualification/RESULTS.json",
       "superseded_inputs": {}
+    },
+    {
+      "step": "BRIDGE-AUDIT-8",
+      "base_main_sha": "e382c5e508816cb3c508a0b7c2ac11300f1b4b3b",
+      "results": "docs/audit/remaining-adapters-qualification/RESULTS.json",
+      "superseded_inputs": {
+        "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol": {
+          "previous_sha256": "f415836c61e1fecb5d09e62b1399e49e2b738719371184b0871445ae6b9d1713",
+          "current_sha256": "69793b6b5b67ce4edad81a43b00b7c7689451bf327d123b93d7bf2fe34cb97b3",
+          "intermediate_sha256": "7752bf4e98c9873f2c30158aa08fef9a0241409d92d7827e26475b3f70dc8991",
+          "intermediate_source": "docs/audit/remaining-adapters-qualification/BnbBridgeAdapter420-before-domain-fix.sol",
+          "intermediate_unchanged_function": "initiateOutbound"
+        }
+      }
     }
   ],
   "bitcoin_custody_boundary": {

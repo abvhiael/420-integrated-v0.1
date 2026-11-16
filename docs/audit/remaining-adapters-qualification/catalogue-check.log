@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "remaining_native_chains": 9,
+  "generic_token_routes": 9,
+  "qualified_distinct_cases": 26,
+  "native_consensus_graphs_unchanged": 12,
+  "production_approvals": 0,
+  "POT_full_native_qualification": false,
+  "ARRR_full_native_qualification": false,
+  "CURE_decimals": 6,
+  "source_profiles_unchanged": true
+}

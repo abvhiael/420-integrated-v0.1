@@ -1,0 +1,8 @@
+No files changed, compilation skipped
+
+Ran 2 tests for contracts/test/BnbExecution420.t.sol:BnbExecution420Test
+[PASS] testControlledNativeGatewayConcreteCompositionReplayAndBindings() (gas: 18332895)
+[PASS] testHistoricalTransactionAndReceiptInclusionRejectSubstitutionAndOrdinaryLogs() (gas: 8809147)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 51.60ms (83.04ms CPU time)
+
+Ran 1 test suite in 53.00ms (51.60ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

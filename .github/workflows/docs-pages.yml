@@ -13,6 +13,8 @@ on:
       - '!docs/audit/bitcoin-completion-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-7-PROVIDER-COMPLETION.md'
       - '!docs/audit/provider-completion-qualification/**'
+      - '!docs/audit/BRIDGE-AUDIT-8-REMAINING-ADAPTERS.md'
+      - '!docs/audit/remaining-adapters-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-4-ETHEREUM-COMPLETION.md'
       - '!docs/audit/ethereum-completion-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-22-FINAL-VERIFIER-QUALIFICATION.md'

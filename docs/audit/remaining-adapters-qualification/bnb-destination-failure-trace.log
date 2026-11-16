@@ -1,0 +1,32 @@
+No files changed, compilation skipped
+
+Ran 1 test for contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[FAIL: EvmError: Revert] testDestinationAndRouteCannotBeSubstituted() (gas: 224690)
+Traces:
+  [224690] BnbBridgeAdapter420Test::testDestinationAndRouteCannotBeSubstituted()
+    ├─ [67443] BnbFinalityVerifierMock420::set(FinalizedTransfer({ sourceChainId: 56, blockNumber: 42000000 [4.2e7], blockHash: 0x6d3e046613926dcf9ac5d951b8c2f950be3edcfa249be65bec94dc45e54bc57a, receiptsRoot: 0xc2e28f2d36a95daffaad90ee75aeb081c5e00de77d0af03f667bd2d488d4a75b, transactionHash: 0x2c1ddb78dee64187b6ebae8c04bc3eadc0759448bcafcb1f944737244defa6b3, messageId: 0x286aad0944ffb82c7447d1f667cfb334328ef7ab4ca43238813c385dead8cf12, gateway: 0x0000000000000000000000000000000000420420, sourceToken: 0x0000000000000000000000000000000000000000, sourceSender: 0x00000000000000000000000000000000000A11cE, recipient: 0x0000000000000000000000000000000000000B0b, amount: 42000000000000000000 [4.2e19], finalized: true, destinationChainId: 97, destinationRouter: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, routeId: 0x9e059571b21aff37787aa47d62f05ffa18a7ed37f6201bd0f86d313a5b54dd0f }))
+    │   └─ ← [Return]
+    ├─ [142794] BnbRouterCaller420::inbound(BnbBridgeAdapter420: [0xF62849F9A0B5Bf2913b396098F7c7019b51A820a], 0x01)
+    │   ├─ [116670] BnbBridgeAdapter420::verifyInbound(0x01)
+    │   │   ├─ [33050] BnbFinalityVerifierMock420::verifyFinalizedTransfer(0x01) [staticcall]
+    │   │   │   └─ ← [Return] FinalizedTransfer({ sourceChainId: 56, blockNumber: 42000000 [4.2e7], blockHash: 0x6d3e046613926dcf9ac5d951b8c2f950be3edcfa249be65bec94dc45e54bc57a, receiptsRoot: 0xc2e28f2d36a95daffaad90ee75aeb081c5e00de77d0af03f667bd2d488d4a75b, transactionHash: 0x2c1ddb78dee64187b6ebae8c04bc3eadc0759448bcafcb1f944737244defa6b3, messageId: 0x286aad0944ffb82c7447d1f667cfb334328ef7ab4ca43238813c385dead8cf12, gateway: 0x0000000000000000000000000000000000420420, sourceToken: 0x0000000000000000000000000000000000000000, sourceSender: 0x00000000000000000000000000000000000A11cE, recipient: 0x0000000000000000000000000000000000000B0b, amount: 42000000000000000000 [4.2e19], finalized: true, destinationChainId: 97, destinationRouter: 0x2e234DAe75C793f67A35089C9d99245E1C58470b, routeId: 0x9e059571b21aff37787aa47d62f05ffa18a7ed37f6201bd0f86d313a5b54dd0f })
+    │   │   ├─ emit BnbInboundConsumed(messageId: 0x286aad0944ffb82c7447d1f667cfb334328ef7ab4ca43238813c385dead8cf12, transactionHash: 0x2c1ddb78dee64187b6ebae8c04bc3eadc0759448bcafcb1f944737244defa6b3, blockNumber: 42000000 [4.2e7])
+    │   │   └─ ← [Return] VerifiedTransfer({ routeId: 0x9e059571b21aff37787aa47d62f05ffa18a7ed37f6201bd0f86d313a5b54dd0f, assetId: 0x4e5554fbfb28b2f1d0060138533252cef16b0e0c10de8fe0e06e224cc86a7f57, sender: 0x00000000000000000000000000000000000A11cE, recipient: 0x0000000000000000000000000000000000000B0b, amount: 42000000000000000000 [4.2e19], sourceTxId: 0x2c1ddb78dee64187b6ebae8c04bc3eadc0759448bcafcb1f944737244defa6b3, sourceMessageId: 0x286aad0944ffb82c7447d1f667cfb334328ef7ab4ca43238813c385dead8cf12 })
+    │   └─ ← [Return] VerifiedTransfer({ routeId: 0x9e059571b21aff37787aa47d62f05ffa18a7ed37f6201bd0f86d313a5b54dd0f, assetId: 0x4e5554fbfb28b2f1d0060138533252cef16b0e0c10de8fe0e06e224cc86a7f57, sender: 0x00000000000000000000000000000000000A11cE, recipient: 0x0000000000000000000000000000000000000B0b, amount: 42000000000000000000 [4.2e19], sourceTxId: 0x2c1ddb78dee64187b6ebae8c04bc3eadc0759448bcafcb1f944737244defa6b3, sourceMessageId: 0x286aad0944ffb82c7447d1f667cfb334328ef7ab4ca43238813c385dead8cf12 })
+    └─ ← [Revert] EvmError: Revert
+
+Backtrace:
+  at BnbBridgeAdapter420Test.testDestinationAndRouteCannotBeSubstituted
+
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 709.81µs (183.91µs CPU time)
+
+Ran 1 test suite in 11.34ms (709.81µs CPU time): 0 tests passed, 1 failed, 0 skipped (1 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[FAIL: EvmError: Revert] testDestinationAndRouteCannotBeSubstituted() (gas: 224690)
+
+Encountered a total of 1 failing tests, 0 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

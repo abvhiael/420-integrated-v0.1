@@ -51,7 +51,7 @@ contract MockVerifiedGatewayVerifier420 is IVerifiedGatewayVerifier420 {
     }
 }
 
-interface VmBridgeAccounting420 { function warp(uint256) external; }
+interface VmBridgeAccounting420 { function warp(uint256) external; function prank(address) external; }
 
 abstract contract BridgeGenesisFixture420 {
     VmBridgeAccounting420 constant vm =
@@ -371,6 +371,7 @@ contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
         f.adapter.setInbound(_inbound(25 ether));
         bytes32 transferId = f.router.acceptInbound(ADAPTER_ID, hex"4201");
         f.transfers.markDestinationPending(transferId, keccak256("destination-pending"));
+        vm.prank(address(f.router));
         f.transfers.markCompleted(transferId, keccak256("completed"));
         (,,,,,,, BridgeTransferRegistry.Status beforeStatus,,) = f.transfers.transfers(transferId);
         require(beforeStatus == BridgeTransferRegistry.Status.COMPLETED, "precondition");

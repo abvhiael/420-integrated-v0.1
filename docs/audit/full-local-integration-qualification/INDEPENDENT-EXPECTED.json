@@ -1,0 +1,15 @@
+{
+  "historical_destination_transaction": "0x95c6700f6685fd7f50a6044f6f4f1af680cde24be2ee04cd92426357c11e4ffb",
+  "historical_source_domain": 6,
+  "historical_destination_domain": 0,
+  "native_recipient": "0x1d88785ddd08d752da653c3359938e7351cd3694",
+  "burned_amount": 51757000000,
+  "fee": 0,
+  "delivered_amount": 51757000000,
+  "nonce": "0xad7c34892fd1dbfcb735992032d365f542061df0b6d75cad4562a7a0d91bbf1c",
+  "message_sha256": "6de09f5f44f44d4b215427faaec689b7b7a3af1195e1dea9e5ab0616da4edb90",
+  "attestation_sha256": "024c236e9fa8d666d2d1eb7debb4acaf68a7c5f1f564721a6706e7df01a9897c",
+  "original_fixture_checksums_verified": 27,
+  "independent_checks": "stdlib message offsets, destination call ABI, successful transaction identity and original USDC mint Transfer log",
+  "limits": "No source-block SPV claim; source finality/message authorization use Circle issuer attestation. Reconstructed local token/governance state is not native deployed USDC or 420Chain approval."
+}

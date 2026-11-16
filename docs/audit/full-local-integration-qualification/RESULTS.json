@@ -1,0 +1,77 @@
+{
+  "step": "BRIDGE-AUDIT-3.V.21",
+  "baseline_main": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "dependency": {
+    "V20": {
+      "pr": 1174,
+      "sha": "b1d2abc7a5d7797042d901e811e268247d2db6e1",
+      "merged": false
+    },
+    "V19": {
+      "pr": 1173,
+      "sha": "deaa99174ea95850d1c7b17cd613c34a26ae4b65",
+      "merged": false
+    },
+    "native_CCTP_reused_source": {
+      "pr": 1168,
+      "sha": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "whole_pr_merge_not_claimed": true
+    }
+  },
+  "qualified_distinct_cases": 102,
+  "fuzz_runs": 7500,
+  "invariant_calls": 16384,
+  "invariant_runs_each": 128,
+  "invariant_depth": 64,
+  "invariant_handler_reverts": 0,
+  "qualification_batches": [
+    {
+      "log": "qualification.log",
+      "passed": 98,
+      "failed": 1,
+      "scope": "new nine-stage lifecycle and affected regression owners; native proxy substitution harness inspection failure"
+    },
+    {
+      "log": "settlement-boundary.log",
+      "passed": 2,
+      "failed": 1,
+      "scope": "proof-only settlement rejection passes; native burn caller prank consumed by argument getter"
+    },
+    {
+      "log": "affected-qualified.log",
+      "passed": 2,
+      "failed": 0,
+      "scope": "only corrected two cases rerun; production code unchanged"
+    }
+  ],
+  "production_runtime_sizes": {
+    "BridgeChainRegistry420": 3486,
+    "BridgeRouteRegistry": 9888,
+    "BridgeTransferRegistry": 18156,
+    "BridgeVerifierProxy420": 1354,
+    "BridgeVerifierRegistry420": 22063,
+    "GatewayRouter420": 14444,
+    "USDCCCTPAdapter": 13330,
+    "VerifiedGateway420": 9495
+  },
+  "eip170_limit": 24576,
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9",
+    "native_fixture_solc": "0.7.6 / optimizer runs 100000",
+    "evm": "cancun",
+    "optimizer_runs": 200,
+    "via_ir": true
+  },
+  "historical_evidence": "INDEPENDENT-EXPECTED.json",
+  "imported_files_verified_against_original_git_source": 32,
+  "native_protocol_upstream_commit": "a92a2b4e7e6ef99bf0b05dca71780f5ec190e729",
+  "production_approvals": [],
+  "live_deployment_or_real_funds_moved": false,
+  "local_model": "Faithful original Base(6)-Ethereum(0) CCTP message and real issuer signatures/native protocol bytecode. Local chain ID 1, reconstructed proxy/configuration and controlled token/Genesis dependencies.",
+  "production_limits": "No 420Chain Circle domain, issuer authorization, native-USDC deployment or authentic historical 420Chain gateway transfer claimed. Existing issuer/testnet prerequisites unchanged. Proof-only adapters cannot settle without actual qualified delivery evidence; outbound acknowledgement remains unsupported and closed.",
+  "ci_run_ids": [],
+  "ci_reason": "Existing skip-ci publication convention preserves local qualification and prevents redundant runs.",
+  "workflow_changes": "Narrow audit evidence and unrelated sports-interface exclusions only; job bodies and branch controls unchanged.",
+  "next_canonical_step": "No successor to V.21 supplied or identified on available main; none begun."
+}

@@ -229,6 +229,7 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
 
     function markCompleted(bytes32 id, bytes32 evidenceHash) external {
         _requireLifecycleActor(id);
+        require(msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"settlement router");
         _transition(id, Status.COMPLETED, evidenceHash);
     }
 

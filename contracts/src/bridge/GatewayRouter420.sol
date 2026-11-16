@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/IBridgeAdapter420.sol";
+import "../interfaces/IBridgeSettlementEvidence420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/ICanonicalAssetRegistry420.sol";
@@ -20,6 +21,10 @@ interface IBridgeTransferCreate420 {
     function markSourceFinalized(bytes32, bytes32) external;
     function markProofPending(bytes32, bytes32) external;
     function markVerified(bytes32, bytes32) external;
+    function markDestinationPending(bytes32,bytes32) external;
+    function markCompleted(bytes32,bytes32) external;
+    function transferDirection(bytes32) external view returns(uint8);
+    function transfers(bytes32) external view returns(bytes32,bytes32,address,address,uint256,bytes32,bytes32,uint8,uint64,uint64);
 }
 interface IBridgeRouteRegistryView420 {
     function routes(bytes32) external view returns (bytes32,uint64,uint64,bytes32,bytes32,bytes32,bytes32,uint32,uint8,bool,bool);
@@ -91,7 +96,31 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(network!=0 && message!=0,"source identity");
         return keccak256(abi.encode("420/BRIDGE/SOURCE_MESSAGE/V1",network,message));
     }
-    function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {
+    function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {return _acceptInbound(adapterId_,proof);}
+    /// @notice Atomic verification, native adapter delivery and authorized lifecycle completion.
+    function acceptInboundAndSettle(bytes32 adapterId_,bytes calldata proof) external returns(bytes32 transferId){
+        transferId=_acceptInbound(adapterId_,proof);_completeInbound(transferId);
+    }
+    /// @notice Complete a previously accepted native-delivery receipt without minting or consuming risk twice.
+    function completeInboundSettlement(bytes32 transferId) external {_completeInbound(transferId);}
+    event InboundSettled(bytes32 indexed transferId,bytes32 indexed evidenceHash,address indexed token,uint256 amount);
+    function _completeInbound(bytes32 transferId) private {
+        _requireOperational(BridgeIds420.ACTION_INBOUND,ISystemSafety420.ActionClass.NORMAL_ONLY,Types420.Direction.INBOUND);
+        IBridgeTransferCreate420 transfers_=IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
+        (bytes32 route,bytes32 asset,,address recipient,uint256 amount,,bytes32 message,uint8 status,,)=transfers_.transfers(transferId);
+        require(transfers_.transferDirection(transferId)==1 && (status==5 || status==6),"settlement state");
+        _requireBridgeAsset(asset);_requireRouteHealthy(route);_requireAccountingHealthy(asset);
+        (,,,,,bytes32 adapterId_,,,,,)=IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).routes(route);
+        _requireRouteDirection(route,asset,adapterId_,true);
+        (address token,address deliveredTo,uint256 delivered,bytes32 evidence)=IBridgeSettlementEvidence420(adapters[adapterId_]).settlementEvidence(message);
+        ICanonicalAssetRegistry420 assets=ICanonicalAssetRegistry420(_resolveRequired(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY));
+        require(evidence!=0 && token==assets.asset(asset).token && recipient==deliveredTo && amount==delivered,"settlement receipt");
+        if(status==5)transfers_.markDestinationPending(transferId,evidence);
+        transfers_.markCompleted(transferId,evidence);
+        _requireRouteDirection(route,asset,adapterId_,true);
+        emit InboundSettled(transferId,evidence,token,amount);
+    }
+    function _acceptInbound(bytes32 adapterId_, bytes calldata proof) private returns (bytes32 transferId) {
         _requireOperational(
             BridgeIds420.ACTION_INBOUND,
             ISystemSafety420.ActionClass.NORMAL_ONLY,

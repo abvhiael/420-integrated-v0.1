@@ -1,0 +1,201 @@
+Compiling 74 files with Solc 0.8.24
+Solc 0.8.24 finished in 268.67s
+Compiler run successful!
+2026-11-16T04:36:36.397153Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 1 test for contracts/test/BitcoinGatewayIntegration420.t.sol:BitcoinGatewayIntegration420Test
+[PASS] testBitcoinGatewayConcreteVerifierRiskReplayAndAtomicRollback() (gas: 39204175)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 15.08ms (13.95ms CPU time)
+
+Ran 26 tests for contracts/test/BridgeFullLocalIntegration420.t.sol:BridgeFullLocalIntegration420Test
+[PASS] testAccountingHealthFailureRollsBackNativeMint() (gas: 2718396)
+[PASS] testAttestationTamperingRejected() (gas: 1926900)
+[PASS] testAttesterThresholdDriftInvalidatesQualification() (gas: 1662888)
+[PASS] testCounterfeitAmountRejectedByActualIssuerSignatures() (gas: 2050890)
+[PASS] testCrossDomainEvidenceCannotUseQualifiedBaseRoute() (gas: 2523928)
+[PASS] testDelayedCompletionDoesNotMintOrChargeRiskAgain() (gas: 9153044)
+[PASS] testFuzzHistoricalAttestationCannotAuthenticateChangedAmount(uint64) (runs: 2500, μ: 1997411, ~: 2050711)
+[PASS] testGenuineIssuerEvidenceCompletesFullLocalLifecycle() (gas: 8240433)
+[PASS] testLateSettlementAssetMismatchRollsBackVerificationAndMint() (gas: 7080485)
+[PASS] testLateTransferRegistryFailureRollsBackNativeMint() (gas: 11032036)
+[PASS] testLyingTokenCannotProduceSettlementReceipt() (gas: 2023992)
+[PASS] testNativeIssuerPauseRejectsWithoutPartialDelivery() (gas: 1681540)
+[FAIL: EvmError: Revert] testNativeProxyImplementationSubstitutionRejected() (gas: 1210867)
+[PASS] testNativeTokenPairSubstitutionRejected() (gas: 1909397)
+[PASS] testNonCanonicalEnvelopeRejected() (gas: 1831049)
+[PASS] testOperatorCannotFabricateSettlementCompletion() (gas: 9892526)
+[PASS] testOutboundNativeBurnCannotBeReportedCompletedWithoutReceipt() (gas: 12662952)
+[PASS] testRecipientSubstitutionRejected() (gas: 1938341)
+[PASS] testReplayDoesNotCreditOrConsumeRiskTwice() (gas: 9350685)
+[PASS] testRevocationRejectsHistoricalProofBeforeDelivery() (gas: 725126)
+[PASS] testRevocationStopsDelayedCompletion() (gas: 6431672)
+[PASS] testRiskFailureRollsBackNativeMintAllReplayAndReceipt() (gas: 11029990)
+[PASS] testSuspendedRouteRollsBackNativeExecution() (gas: 2667792)
+[PASS] testTokenMintFailureRollsBackEntireLifecycle() (gas: 9707941)
+[PASS] testUnconfiguredNativeIssuerRemainsInactive() (gas: 3054244)
+[PASS] testWrongDestinationDomainRejectedAtomically() (gas: 1889241)
+Suite result: FAILED. 25 passed; 1 failed; 0 skipped; finished in 7.76s (7.74s CPU time)
+2026-11-16T04:36:44.194049Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194102Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194110Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194196Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194210Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194617Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194666Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.194751Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198334Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198366Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198373Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198412Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198427Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198444Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198467Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21227)
+2026-11-16T04:36:44.198504Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21227)
+
+Ran 26 tests for contracts/test/BridgeProductionAdmission420.t.sol:BridgeProductionAdmission420Test
+[PASS] testFuzzV20CounterfeitAssetRejected(bytes32) (runs: 2500, μ: 27308942, ~: 27319870)
+[PASS] testFuzzV20UnqualifiedRouteActivationRejected(bytes32) (runs: 2500, μ: 27360638, ~: 27371681)
+[PASS] testV20AdapterRuntimeReplacementRejected() (gas: 27307280)
+[PASS] testV20ChainDriftAllowsEmergencyDirectionDisable() (gas: 27133603)
+[PASS] testV20ChangedTupleCannotReuseApprovalDuringActivation() (gas: 27472325)
+[PASS] testV20DirectCreationCannotBypassRevokedRoute() (gas: 27393612)
+[PASS] testV20DirectCreationCannotSubstituteAsset() (gas: 27428044)
+[PASS] testV20FreshApprovalAllowsActivationAndAtomicBinding() (gas: 31621789)
+[PASS] testV20IntraDispatchConfigurationChangeRollsBack() (gas: 29946861)
+[PASS] testV20IntraProofConfigurationChangeRollsBack() (gas: 29768991)
+[PASS] testV20LegacyAdaptersRemainFailClosed() (gas: 837712)
+[PASS] testV20NewApprovalCannotLaunderOldTransferQualification() (gas: 31408302)
+[PASS] testV20OperatorCannotAssertVerification() (gas: 30950956)
+[PASS] testV20QualificationRegistryRuntimeReplacementRejected() (gas: 27322368)
+[PASS] testV20RevocationAfterDestinationPendingStopsCompletion() (gas: 29884733)
+[PASS] testV20RevocationAllowsBothDirectionsDisabled() (gas: 27507488)
+[PASS] testV20RevocationAllowsRouteSuspension() (gas: 27556799)
+[PASS] testV20RevocationStillAllowsPauseDisputeAndRefund() (gas: 29826040)
+[PASS] testV20RevokedRouteCannotReenableDirection() (gas: 27393252)
+[PASS] testV20RevokedTransferCannotAdvanceToSettlement() (gas: 29603645)
+[PASS] testV20RouteRegistryRuntimeReplacementRejected() (gas: 27652775)
+[PASS] testV20StaleChainCannotBeAdmittedThroughDirectRouteGuard() (gas: 27150296)
+[PASS] testV20TrustedAlternativeRouterCannotFabricateOutbound() (gas: 27112711)
+[PASS] testV20TrustedAlternativeRouterCannotFabricateTransfer() (gas: 27113091)
+[PASS] testV20UnqualifiedRouteCanBeStagedInactive() (gas: 27557085)
+[PASS] testV20UnqualifiedRouteCannotBeActivated() (gas: 27371454)
+Suite result: ok. 26 passed; 0 failed; 0 skipped; finished in 15.12s (15.12s CPU time)
+2026-11-16T04:36:51.515833Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.515868Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.515880Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.515943Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.515970Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.515995Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.516035Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.516108Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520148Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520179Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520190Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520229Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520237Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520257Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520280Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-16T04:36:51.520317Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 1 test for contracts/test/BridgeProductionAdmissionInvariant420.t.sol:BridgeProductionAdmissionInvariant420Test
+[PASS] invariantOnlyLiveQualifiedRoutesAdmitAndRejectedProofsDoNotConsumeRisk() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| V20AdmissionHandler | attempt  | 1689  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | disable  | 1575  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | qualify  | 1629  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | revoke   | 1638  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| V20AdmissionHandler | suspend  | 1661  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.13s (8.13s CPU time)
+
+Ran 12 tests for contracts/test/BridgeTransferLifecycle420.t.sol:BridgeTransferLifecycle420Test
+[PASS] testAllowedTransitionMatrixMatchesFrozenGraph() (gas: 995847)
+[PASS] testBackwardAndSkippedNormalTransitionsFailClosed() (gas: 3025655)
+[PASS] testDisputeCanOnlyResolveToRefund() (gas: 4839669)
+[PASS] testExpiryCanResolveToRefundButCannotResume() (gas: 3956106)
+[PASS] testNormalLifecycleProgressesMonotonicallyToCompletion() (gas: 6192537)
+[PASS] testOutboundIdentityIncludesRecipientAndIsReplaySafe() (gas: 2801290)
+[PASS] testOutboundSourceTransactionMustBindBeforeFinality() (gas: 3034383)
+[PASS] testPauseAndResumeRestoreExactPriorState() (gas: 5371909)
+[PASS] testRetryReturnsOnlyToRecordedFailedStage() (gas: 4770764)
+[PASS] testSourceReorgReturnsRetryToSourcePending() (gas: 5621598)
+[PASS] testUnauthorizedLifecycleActorFailsClosed() (gas: 1270903)
+[PASS] testZeroEvidenceFailsClosed() (gas: 1219737)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 32.02ms (24.79ms CPU time)
+
+Ran 13 tests for contracts/test/BridgeVerifierRouteIdentity420.t.sol:BridgeVerifierRouteIdentity420Test
+[PASS] testV19ChainRevisionInvalidatesRouteUntilRequalified() (gas: 31225036)
+[PASS] testV19IdenticalCodeReplacementRequiresNewRouteBinding() (gas: 31989549)
+[PASS] testV19LateFailureRollsBackCentralReplayKey() (gas: 30212719)
+[PASS] testV19NewQualificationDoesNotReactivateOldRouteBinding() (gas: 31598217)
+[PASS] testV19OnlyGovernanceCanBindQualification() (gas: 27051667)
+[PASS] testV19RegistryReplacementNeedsFreshApprovalAndBinding() (gas: 36062624)
+[PASS] testV19ReplaySurvivesApprovedAdapterReplacementAndChangedAmount() (gas: 32227042)
+[PASS] testV19ReplaySurvivesQualificationRegistryReplacement() (gas: 36575217)
+[PASS] testV19RevocationStopsInboundAndOutbound() (gas: 27780824)
+[PASS] testV19RouteVersionChangeRequiresNewQualification() (gas: 31402070)
+[PASS] testV19SourceChainAliasCannotResetCanonicalMessageReplay() (gas: 32276790)
+[PASS] testV19UnqualifiedProofCannotConsumeReplay() (gas: 31223200)
+[PASS] testV19UnqualifiedReplacementAdapterNeverExecutes() (gas: 27754868)
+Suite result: ok. 13 passed; 0 failed; 0 skipped; finished in 92.78ms (92.11ms CPU time)
+
+Ran 1 test for contracts/test/PaySwapBridgeGenesisIntegration420.t.sol:PaySwapBridgeGenesisIntegration420Test
+[PASS] testOneRegistryCoordinatesBridgeThenPaySwap() (gas: 38540007)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 8.30ms (8.10ms CPU time)
+
+Ran 18 tests for contracts/test/BridgeGenesisIntegration420.t.sol:BridgeGenesisIntegration420Test
+[PASS] testAccountingRecoveryDoesNotRewriteCompletedTransferHistory() (gas: 30510428)
+[PASS] testAuthorizedExceedsObservedBlocksNewInbound() (gas: 27830942)
+[PASS] testDirectionDisabledFailsClosed() (gas: 29454745)
+[PASS] testFrozenGatewayMayStartFailClosedWithoutVerifier() (gas: 6353877)
+[PASS] testFrozenGatewayVerifierActivationRequiresCode() (gas: 6535187)
+[PASS] testInboundCreatesTransferAndConsumesRiskAtomically() (gas: 29238336)
+[PASS] testInboundFailsWhenSourceNetworkFingerprintDrifts() (gas: 27460149)
+[PASS] testInboundWrongRegisteredAdapterFailsClosed() (gas: 29388455)
+[PASS] testObservedExceedsAuthorizedBlocksNewOutbound() (gas: 29584670)
+[PASS] testOutboundAdapterFailureRollsBackRiskAndTransferRegistration() (gas: 30090681)
+[PASS] testOutboundAfterInboundReducesTVL() (gas: 30875801)
+[PASS] testOutboundFailsWhenDestinationChainInactive() (gas: 27334203)
+[PASS] testOutboundWrongRegisteredAdapterFailsClosed() (gas: 31128660)
+[PASS] testRecoveryRequiresNewerDistinctEvidenceBeforeMovementResumes() (gas: 29696956)
+[PASS] testReplayFailureRollsBackRiskConsumption() (gas: 29859950)
+[PASS] testSharedPauseFailsClosed() (gas: 27311962)
+[PASS] testUnknownAccountingHealthBlocksNewInboundBeforeRiskConsumption() (gas: 28862696)
+[PASS] testWithdrawalRecoveryRemainsSafetyBoundWhileAccountingUnhealthy() (gas: 29832120)
+Suite result: ok. 18 passed; 0 failed; 0 skipped; finished in 93.41ms (92.44ms CPU time)
+
+Ran 1 test for contracts/test/BridgeFullLocalInvariant420.t.sol:BridgeFullLocalInvariant420Test
+[PASS] invariantAuthenticEvidenceCannotDoubleSettleOrBypassRevocation() (runs: 128, calls: 8192, reverts: 0)
+
+╭---------------------+----------+-------+---------+----------╮
+| Contract            | Selector | Calls | Reverts | Discards |
++=============================================================+
+| FullLocalHandler420 | attempt  | 2040  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | restore  | 2095  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | revoke   | 2056  | 0       | 0        |
+|---------------------+----------+-------+---------+----------|
+| FullLocalHandler420 | suspend  | 2001  | 0       | 0        |
+╰---------------------+----------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 34.87s (34.84s CPU time)
+
+Ran 9 test suites in 42.64s (66.12s CPU time): 98 tests passed, 1 failed, 0 skipped (99 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BridgeFullLocalIntegration420.t.sol:BridgeFullLocalIntegration420Test
+[FAIL: EvmError: Revert] testNativeProxyImplementationSubstitutionRejected() (gas: 1210867)
+
+Encountered a total of 1 failing tests, 98 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

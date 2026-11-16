@@ -1,0 +1,29 @@
+Compiling 14 files with Solc 0.8.24
+Solc 0.8.24 finished in 17.95s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+  --> contracts/test/DogecoinConsensusQualification420.t.sol:55:81:
+   |
+55 |  ... es32 h,bytes32 parent,bytes32 root,uint256 work,uint64 height,uint32 time,uint32 b ...
+   |                                         ^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/test/DogecoinConsensusQualification420.t.sol:203:5:
+    |
+203 |     function work(DogecoinHeaderChain42 ... or(id)<2048)worker.advance(id,32);}
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 10 tests for contracts/test/DogecoinConsensusQualification420.t.sol:DogecoinConsensusQualification420Test
+[PASS] testAdmissionRejectsSubstitutedAmountsScriptsCommitmentsAndDomains() (gas: 10918481)
+[PASS] testDisabledWitnessAndDogecoinMoneyLimits() (gas: 75655)
+[PASS] testDuplicateCommitmentsCoinbaseAndMerkleDepthRejected() (gas: 9316169)
+[PASS] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 829110219)
+[PASS] testFuzzTruncatedTransaction(uint16) (runs: 2500, μ: 35353, ~: 29009)
+[PASS] testMalformedHeadersAndTimestampRules() (gas: 278920539)
+[PASS] testMismatchedVerifierRouteOrRouterRejectedByAdapter() (gas: 8224532)
+[PASS] testParserRejectsNoncanonicalCountsAndInvalidIndices() (gas: 175765)
+[PASS] testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation() (gas: 8946474)
+[PASS] testTargetsAndFuzzArithmetic(uint32) (runs: 2500, μ: 3554049, ~: 3553497)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 1.81s (2.75s CPU time)
+
+Ran 1 test suite in 1.81s (1.81s CPU time): 10 tests passed, 0 failed, 0 skipped (10 total tests)

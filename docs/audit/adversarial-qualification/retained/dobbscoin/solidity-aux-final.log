@@ -1,0 +1,34 @@
+Compiling 12 files with Solc 0.8.24
+Solc 0.8.24 finished in 19.41s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:47:5:
+   |
+47 |     function testConfirmationBoundary288() public {require(verify().confirmations==288);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/test/DobbscoinFinalityVerifier420.t.sol:83:5:
+   |
+83 |     function testNativeMoneyLimitExceed ... ts[0].amount==30000000*100000000);}
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Ran 14 tests for contracts/test/DobbscoinFinalityVerifier420.t.sol:DobbscoinFinalityVerifier420Test
+[PASS] testAuxPowBindsChildHeader() (gas: 8323659)
+[PASS] testAuxPowBranchTooLongRejected() (gas: 4428532)
+[PASS] testAuxPowDuplicateMagicRejected() (gas: 4406849)
+[PASS] testAuxPowInvalidChainIndexRejected() (gas: 4381124)
+[PASS] testAuxPowLegacyRootAt20Allowed() (gas: 4512585)
+[PASS] testAuxPowLegacyRootAt21Rejected() (gas: 4443812)
+[PASS] testAuxPowMagicMustPrecedeRoot() (gas: 4400026)
+[PASS] testAuxPowParentIndexMustBeZero() (gas: 4343942)
+[PASS] testAuxPowParentSameChainRejected() (gas: 4324630)
+[PASS] testAuxPowParentZeroOutputsAndChildTarget() (gas: 4468987)
+[PASS] testAuxPowTreeSizeRejected() (gas: 4399355)
+[PASS] testAuxPowTruncatedTreeRejected() (gas: 4397152)
+[PASS] testAuxPowWrongParentMerkleRejected() (gas: 4360065)
+[PASS] testPrematureAuxPow() (gas: 4113008)
+Suite result: ok. 14 passed; 0 failed; 0 skipped; finished in 7.86ms (19.43ms CPU time)
+
+Ran 1 test suite in 8.41ms (7.86ms CPU time): 14 tests passed, 0 failed, 0 skipped (14 total tests)

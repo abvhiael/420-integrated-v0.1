@@ -1,0 +1,9 @@
+[
+  {
+    "commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+    "path": "docs/audit/dobbscoin/native-reorg.json",
+    "local_path": "docs/audit/adversarial-qualification/dobbscoin-native-reorg.json",
+    "sha256": "c26fcaac1942c7e29e33102dd1c6934195caee63ef9df12023082ee0742feec8",
+    "scope": "Retained native 100-block higher-work reorg acceptance and 101-block rejection; no rerun."
+  }
+]

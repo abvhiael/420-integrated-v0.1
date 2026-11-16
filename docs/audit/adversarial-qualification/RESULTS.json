@@ -1,0 +1,1198 @@
+{
+  "affected_cadc_regression_passes": 33,
+  "attack_matrix_entries": 196,
+  "base_main_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "cadc_main_production_imports_verified": {
+    "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol": "479f9dd02e833091443e63c532935d051799a765718fc364a30e403c56e6824c",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/bridge/ILayerZeroCADC420.sol": "48aed7dbc535248846397a24288ebbb2f31a0e0d124465fef0b094fe7a46d211",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  },
+  "catalogue_sha": "3dcee22927c181c23451ed49eb908330b5254866",
+  "ci_run_ids": [],
+  "fuzz_executions": 42500,
+  "implemented_verifier_families": 14,
+  "independent_new_instruction_vectors": 7,
+  "independent_reference_records": [
+    {
+      "commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "local_path": "docs/audit/adversarial-qualification/dobbscoin-native-reorg.json",
+      "path": "docs/audit/dobbscoin/native-reorg.json",
+      "scope": "Retained native 100-block higher-work reorg acceptance and 101-block rejection; no rerun.",
+      "sha256": "c26fcaac1942c7e29e33102dd1c6934195caee63ef9df12023082ee0742feec8"
+    }
+  ],
+  "input_manifests": {
+    "bitcoin-inputs.json": "5aac97464cb8bc06ede2f1d431fdc8717fe694b4fdd934c76ec027147b126da4",
+    "bnb-fork-inputs.json": "6f875acc3f36193d0efaaba14132f465efee373e90b5e9f7c69ad8c38c3ed5c3",
+    "bnb-inputs.json": "c43b4bd2826b6efad8e2613872f7a0661c2b55d719ccd6165340704beb598e57",
+    "cadc-affected-inputs.json": "78a0bd554cb9deb9bf67e0e7261373ac8c079bf1bdb479f3489d8bd211361b65",
+    "cadc-inputs.json": "537dab330ebe58d70c642b9dd3e07317e33a00a3d51bed135eee3260f8d44c2c",
+    "cadc-integration-inputs.json": "ebb9809f8f77e345760c4cd41670d995d8c8d442e916a139d31f8fb504db6a2f",
+    "cadc-original-inputs.json": "c608889139e170fef5c7e36d2acc9d23aa80c31a0a7efde936b0b60a6e9b23b6",
+    "cctp-inputs.json": "871121142e3041451f51b364fdf0489bfb395a2b0944c4adeda56a9c5936deff",
+    "curecoin-inputs.json": "ebcb62e198b721934e1e1f2e5b11994f3345a893ff8fbaaf9a32add4007042d9",
+    "dobbscoin-inputs.json": "1f081da92f05add698e299829c4e2da2ef5141698d0f52ef20fd43b10f668217",
+    "dogecoin-inputs.json": "9d2144db95fd35a39d538dc29c1070656085142956b5ce08994604f5fd246d37",
+    "ethereum-inputs.json": "703e3ad0bef8edbe34f4987cd99dcf80ff82a3d43aa2437ea9c331672099b5e3",
+    "litecoin-inputs.json": "ad9006234a109159f5fa9b8e4019e250255a1aaf9dd10b6b464e3ec675e3c476",
+    "pirate-inputs.json": "121fefd4d06503e106fbefcdb1b62a2c5240709c74d946bd703b26a0c4e9bf51",
+    "pirate-integers-inputs.json": "f54ea7cba25de195e2a0ef7a018f87691d9cfce0f6ca219f438e4492dc326b97",
+    "potcoin-inputs.json": "b0af8baa722f05fbd8e7462cc567314f14c2b0eb6462a3d0d971b0748c7583b8",
+    "solana-inputs.json": "d1b73853cb5ee4267f7abaded34802210226ff0878fbbe86bc80f4b605c7d23d",
+    "solana-integers-inputs.json": "e0707cf6503d15ec307d65d155af1c74883cf3f6dd56394697985f853334daa5",
+    "tron-inputs.json": "02d97771a2bed6e4da4a55830cff3f642c82e0e696cdb39a1448bbb9189d54b1",
+    "xrpl-inputs.json": "ecc54ca4e02ee0ffa7c1ce09f0d980f9149df59bfe1775ff0ef67962cc30c623"
+  },
+  "invariant_calls": 122880,
+  "invariant_handler_reverts": 0,
+  "limitations": [
+    "Qualified against exact main / unmerged PR source pins, not a claim that all those PRs are merged.",
+    "Malformed-envelope invariants use unconfigured authority / no accepted deposits; they complement retained valid-context forgery and redemption tests.",
+    "500000 forwarded gas bounds new hostile-envelope rejection, excluding payload construction / transaction calldata gas. It is not a maximum valid-proof deployment cost claim.",
+    "BNB software BLS retains its previously measured multi-transaction, billions-of-gas cost; prior bounded-progress evidence is unchanged.",
+    "Existing Solana, PotCoin, Pirate, CCTP and CADC historical/native authority/deployment/issuer prerequisites remain as recorded by their audits. No new trust root or production readiness claim."
+  ],
+  "merge_requested": false,
+  "new_and_affected_foundry_passes": 113,
+  "old_consensus_test_reruns": 0,
+  "passing_cases": [
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "bitcoin",
+      "log": "docs/audit/adversarial-qualification/bitcoin-new.log",
+      "owner": "contracts/test/adversarial/BitcoinV18.t.sol:BitcoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93360, ~: 88764)",
+      "family": "bitcoin",
+      "log": "docs/audit/adversarial-qualification/bitcoin-new.log",
+      "owner": "contracts/test/adversarial/BitcoinV18.t.sol:BitcoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156605)",
+      "family": "bitcoin",
+      "log": "docs/audit/adversarial-qualification/bitcoin-new.log",
+      "owner": "contracts/test/adversarial/BitcoinV18.t.sol:BitcoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1384974)",
+      "family": "bitcoin",
+      "log": "docs/audit/adversarial-qualification/bitcoin-new.log",
+      "owner": "contracts/test/adversarial/BitcoinV18.t.sol:BitcoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 28865376)",
+      "family": "bitcoin",
+      "log": "docs/audit/adversarial-qualification/bitcoin-new.log",
+      "owner": "contracts/test/adversarial/BitcoinV18.t.sol:BitcoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-fork.log",
+      "owner": "contracts/test/adversarial/BnbForkV18.t.sol:BnbForkV18Test",
+      "signature": "invariantV18FinalizedPrefixAndCommitteeResistCachedForks()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "invariantV18FinalizedPrefixAndCommitteeResistCachedForks"
+    },
+    {
+      "details": "(gas: 5358645)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-fork.log",
+      "owner": "contracts/test/adversarial/BnbForkV18.t.sol:BnbForkV18Test",
+      "signature": "testV18ConflictingHeaderCacheCannotReorganizeFinalizedPrefix()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "testV18ConflictingHeaderCacheCannotReorganizeFinalizedPrefix"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-new.log",
+      "owner": "contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93435, ~: 88941)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-new.log",
+      "owner": "contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 158331)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-new.log",
+      "owner": "contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1402883)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-new.log",
+      "owner": "contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 32863015)",
+      "family": "bnb",
+      "log": "docs/audit/adversarial-qualification/bnb-new.log",
+      "owner": "contracts/test/adversarial/BnbV18.t.sol:BnbEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(gas: 177626)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testComposeRequiresQualifiedConsumer()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testComposeRequiresQualifiedConsumer"
+    },
+    {
+      "details": "(gas: 259302)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testDirtyRecipient()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testDirtyRecipient"
+    },
+    {
+      "details": "(gas: 523813)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testDuplicateDelivery()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testDuplicateDelivery"
+    },
+    {
+      "details": "(gas: 401935)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testEarlierExternalCommitCannotBypassAdmission()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testEarlierExternalCommitCannotBypassAdmission"
+    },
+    {
+      "details": "(gas: 307031)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testEffectiveDefaultConfigurationDrift()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testEffectiveDefaultConfigurationDrift"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 382884, ~: 394211)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testFuzzNativeAmountBinding(uint64)",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testFuzzNativeAmountBinding"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 315910, ~: 318637)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testFuzzUnauthenticatedAmountMutation(uint64)",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testFuzzUnauthenticatedAmountMutation"
+    },
+    {
+      "details": "(gas: 91293)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testInactive()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testInactive"
+    },
+    {
+      "details": "(gas: 321140)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testInsufficientConfirmations()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testInsufficientConfirmations"
+    },
+    {
+      "details": "(gas: 143535)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testIssuerSecurityCommitmentMismatch()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testIssuerSecurityCommitmentMismatch"
+    },
+    {
+      "details": "(gas: 155845)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testIssuerTokenSubstitution()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testIssuerTokenSubstitution"
+    },
+    {
+      "details": "(gas: 2115060)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testLibrarySubstitution()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testLibrarySubstitution"
+    },
+    {
+      "details": "(gas: 500917)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testMissingRequiredDvnPolicy()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testMissingRequiredDvnPolicy"
+    },
+    {
+      "details": "(gas: 396181)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testNativeEndpointUlnOftDelivery()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testNativeEndpointUlnOftDelivery"
+    },
+    {
+      "details": "(gas: 193798)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testNoRpcFinalityAssertion()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testNoRpcFinalityAssertion"
+    },
+    {
+      "details": "(gas: 318808)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testNonceTampering()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testNonceTampering"
+    },
+    {
+      "details": "(gas: 34528)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testOnlyGovernance()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testOnlyGovernance"
+    },
+    {
+      "details": "(gas: 33240)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testOnlyRouter()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testOnlyRouter"
+    },
+    {
+      "details": "(gas: 999024)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testOptionalThresholdRequired()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testOptionalThresholdRequired"
+    },
+    {
+      "details": "(gas: 318868)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testPayloadTampering()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testPayloadTampering"
+    },
+    {
+      "details": "(gas: 37167)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testPeerCannotChangeWhileActive()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testPeerCannotChangeWhileActive"
+    },
+    {
+      "details": "(gas: 257765)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testPeerSubstitution()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testPeerSubstitution"
+    },
+    {
+      "details": "(gas: 550282)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testRejectedDeliveryPreservesDvnEvidence()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testRejectedDeliveryPreservesDvnEvidence"
+    },
+    {
+      "details": "(gas: 850700)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testReplaySurvivesRepinning()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testReplaySurvivesRepinning"
+    },
+    {
+      "details": "(gas: 258494)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testSingleRequiredDVNInsufficient()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testSingleRequiredDVNInsufficient"
+    },
+    {
+      "details": "(gas: 3497213)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testSixDecimalIssuerToken()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testSixDecimalIssuerToken"
+    },
+    {
+      "details": "(gas: 318573)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testWrongDVNInsufficient()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testWrongDVNInsufficient"
+    },
+    {
+      "details": "(gas: 79980)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testWrongSourceEid()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testWrongSourceEid"
+    },
+    {
+      "details": "(gas: 258519)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testZeroAmount()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testZeroAmount"
+    },
+    {
+      "details": "(gas: 257751)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testZeroNonce()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testZeroNonce"
+    },
+    {
+      "details": "(gas: 258678)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-affected.log",
+      "owner": "contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test",
+      "signature": "testZeroRecipient()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testZeroRecipient"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 115872, ~: 110977)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 474631)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18CanonicalEnvelopeDelivers()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18CanonicalEnvelopeDelivers"
+    },
+    {
+      "details": "(gas: 221001)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 249929)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18DirtyPaddingCannotDeliver()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18DirtyPaddingCannotDeliver"
+    },
+    {
+      "details": "(gas: 2075879)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 107605)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(gas: 249415)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18RelocatedDynamicTailCannotDeliver()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18RelocatedDynamicTailCannotDeliver"
+    },
+    {
+      "details": "(gas: 248913)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-new.log",
+      "owner": "contracts/test/adversarial/CadcV18.t.sol:CadcEnvelopeV18Test",
+      "signature": "testV18TrailingEnvelopeCannotDeliver()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testV18TrailingEnvelopeCannotDeliver"
+    },
+    {
+      "details": "(gas: 1342981)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-integration.log",
+      "owner": "contracts/test/CADCGatewayIntegration420.t.sol:CADCGatewayIntegration420Test",
+      "signature": "testRouterNativeDeliveryLifecycle()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testRouterNativeDeliveryLifecycle"
+    },
+    {
+      "details": "(gas: 2129939)",
+      "family": "cadc",
+      "log": "docs/audit/adversarial-qualification/cadc-integration.log",
+      "owner": "contracts/test/CADCGatewayIntegration420.t.sol:CADCGatewayIntegration420Test",
+      "signature": "testRouterRiskFailureRollsBackEndpointDvnTokenReplay()",
+      "source_commit": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "status": "V18_PASS",
+      "test": "testRouterRiskFailureRollsBackEndpointDvnTokenReplay"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "cctp",
+      "log": "docs/audit/adversarial-qualification/cctp-new.log",
+      "owner": "contracts/test/adversarial/CctpV18.t.sol:CctpEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 142642, ~: 138112)",
+      "family": "cctp",
+      "log": "docs/audit/adversarial-qualification/cctp-new.log",
+      "owner": "contracts/test/adversarial/CctpV18.t.sol:CctpEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 309585)",
+      "family": "cctp",
+      "log": "docs/audit/adversarial-qualification/cctp-new.log",
+      "owner": "contracts/test/adversarial/CctpV18.t.sol:CctpEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 2997820)",
+      "family": "cctp",
+      "log": "docs/audit/adversarial-qualification/cctp-new.log",
+      "owner": "contracts/test/adversarial/CctpV18.t.sol:CctpEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 329357)",
+      "family": "cctp",
+      "log": "docs/audit/adversarial-qualification/cctp-new.log",
+      "owner": "contracts/test/adversarial/CctpV18.t.sol:CctpEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "curecoin",
+      "log": "docs/audit/adversarial-qualification/curecoin-new.log",
+      "owner": "contracts/test/adversarial/CurecoinV18.t.sol:CurecoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93248, ~: 89287)",
+      "family": "curecoin",
+      "log": "docs/audit/adversarial-qualification/curecoin-new.log",
+      "owner": "contracts/test/adversarial/CurecoinV18.t.sol:CurecoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156518)",
+      "family": "curecoin",
+      "log": "docs/audit/adversarial-qualification/curecoin-new.log",
+      "owner": "contracts/test/adversarial/CurecoinV18.t.sol:CurecoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1700521)",
+      "family": "curecoin",
+      "log": "docs/audit/adversarial-qualification/curecoin-new.log",
+      "owner": "contracts/test/adversarial/CurecoinV18.t.sol:CurecoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 2570006)",
+      "family": "curecoin",
+      "log": "docs/audit/adversarial-qualification/curecoin-new.log",
+      "owner": "contracts/test/adversarial/CurecoinV18.t.sol:CurecoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "dobbscoin",
+      "log": "docs/audit/adversarial-qualification/dobbscoin-new.log",
+      "owner": "contracts/test/adversarial/DobbscoinV18.t.sol:DobbscoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 94481, ~: 90669)",
+      "family": "dobbscoin",
+      "log": "docs/audit/adversarial-qualification/dobbscoin-new.log",
+      "owner": "contracts/test/adversarial/DobbscoinV18.t.sol:DobbscoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 158969)",
+      "family": "dobbscoin",
+      "log": "docs/audit/adversarial-qualification/dobbscoin-new.log",
+      "owner": "contracts/test/adversarial/DobbscoinV18.t.sol:DobbscoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1488270)",
+      "family": "dobbscoin",
+      "log": "docs/audit/adversarial-qualification/dobbscoin-new.log",
+      "owner": "contracts/test/adversarial/DobbscoinV18.t.sol:DobbscoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 33313777)",
+      "family": "dobbscoin",
+      "log": "docs/audit/adversarial-qualification/dobbscoin-new.log",
+      "owner": "contracts/test/adversarial/DobbscoinV18.t.sol:DobbscoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "dogecoin",
+      "log": "docs/audit/adversarial-qualification/dogecoin-new.log",
+      "owner": "contracts/test/adversarial/DogecoinV18.t.sol:DogecoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93639, ~: 89464)",
+      "family": "dogecoin",
+      "log": "docs/audit/adversarial-qualification/dogecoin-new.log",
+      "owner": "contracts/test/adversarial/DogecoinV18.t.sol:DogecoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156449)",
+      "family": "dogecoin",
+      "log": "docs/audit/adversarial-qualification/dogecoin-new.log",
+      "owner": "contracts/test/adversarial/DogecoinV18.t.sol:DogecoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1382062)",
+      "family": "dogecoin",
+      "log": "docs/audit/adversarial-qualification/dogecoin-new.log",
+      "owner": "contracts/test/adversarial/DogecoinV18.t.sol:DogecoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 28865324)",
+      "family": "dogecoin",
+      "log": "docs/audit/adversarial-qualification/dogecoin-new.log",
+      "owner": "contracts/test/adversarial/DogecoinV18.t.sol:DogecoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "ethereum",
+      "log": "docs/audit/adversarial-qualification/ethereum-new.log",
+      "owner": "contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93014, ~: 88701)",
+      "family": "ethereum",
+      "log": "docs/audit/adversarial-qualification/ethereum-new.log",
+      "owner": "contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 158243)",
+      "family": "ethereum",
+      "log": "docs/audit/adversarial-qualification/ethereum-new.log",
+      "owner": "contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1402135)",
+      "family": "ethereum",
+      "log": "docs/audit/adversarial-qualification/ethereum-new.log",
+      "owner": "contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 32862950)",
+      "family": "ethereum",
+      "log": "docs/audit/adversarial-qualification/ethereum-new.log",
+      "owner": "contracts/test/adversarial/EthereumV18.t.sol:EthereumEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "litecoin",
+      "log": "docs/audit/adversarial-qualification/litecoin-new.log",
+      "owner": "contracts/test/adversarial/LitecoinV18.t.sol:LitecoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93335, ~: 88978)",
+      "family": "litecoin",
+      "log": "docs/audit/adversarial-qualification/litecoin-new.log",
+      "owner": "contracts/test/adversarial/LitecoinV18.t.sol:LitecoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156659)",
+      "family": "litecoin",
+      "log": "docs/audit/adversarial-qualification/litecoin-new.log",
+      "owner": "contracts/test/adversarial/LitecoinV18.t.sol:LitecoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1385550)",
+      "family": "litecoin",
+      "log": "docs/audit/adversarial-qualification/litecoin-new.log",
+      "owner": "contracts/test/adversarial/LitecoinV18.t.sol:LitecoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 28865394)",
+      "family": "litecoin",
+      "log": "docs/audit/adversarial-qualification/litecoin-new.log",
+      "owner": "contracts/test/adversarial/LitecoinV18.t.sol:LitecoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-new.log",
+      "owner": "contracts/test/adversarial/PirateV18.t.sol:PirateEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93162, ~: 89069)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-new.log",
+      "owner": "contracts/test/adversarial/PirateV18.t.sol:PirateEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156932)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-new.log",
+      "owner": "contracts/test/adversarial/PirateV18.t.sol:PirateEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1603881)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-new.log",
+      "owner": "contracts/test/adversarial/PirateV18.t.sol:PirateEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 295044416)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-new.log",
+      "owner": "contracts/test/adversarial/PirateV18.t.sol:PirateEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(gas: 57886252)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-integers.log",
+      "owner": "contracts/test/adversarial/PirateIntegerV18.t.sol:PirateIntegerV18Test",
+      "signature": "testV18NativeSupplyAmountBounds()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testV18NativeSupplyAmountBounds"
+    },
+    {
+      "details": "(gas: 19291302)",
+      "family": "pirate",
+      "log": "docs/audit/adversarial-qualification/pirate-integers.log",
+      "owner": "contracts/test/adversarial/PirateIntegerV18.t.sol:PirateIntegerV18Test",
+      "signature": "testV18NotePositionCannotTruncate()",
+      "source_commit": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "status": "V18_PASS",
+      "test": "testV18NotePositionCannotTruncate"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "potcoin",
+      "log": "docs/audit/adversarial-qualification/potcoin-new.log",
+      "owner": "contracts/test/adversarial/PotcoinV18.t.sol:PotcoinEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93065, ~: 88696)",
+      "family": "potcoin",
+      "log": "docs/audit/adversarial-qualification/potcoin-new.log",
+      "owner": "contracts/test/adversarial/PotcoinV18.t.sol:PotcoinEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 156413)",
+      "family": "potcoin",
+      "log": "docs/audit/adversarial-qualification/potcoin-new.log",
+      "owner": "contracts/test/adversarial/PotcoinV18.t.sol:PotcoinEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1695273)",
+      "family": "potcoin",
+      "log": "docs/audit/adversarial-qualification/potcoin-new.log",
+      "owner": "contracts/test/adversarial/PotcoinV18.t.sol:PotcoinEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 2569971)",
+      "family": "potcoin",
+      "log": "docs/audit/adversarial-qualification/potcoin-new.log",
+      "owner": "contracts/test/adversarial/PotcoinV18.t.sol:PotcoinEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-new.log",
+      "owner": "contracts/test/adversarial/SolanaV18.t.sol:SolanaEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93244, ~: 88454)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-new.log",
+      "owner": "contracts/test/adversarial/SolanaV18.t.sol:SolanaEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 157004)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-new.log",
+      "owner": "contracts/test/adversarial/SolanaV18.t.sol:SolanaEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1517822)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-new.log",
+      "owner": "contracts/test/adversarial/SolanaV18.t.sol:SolanaEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 590575)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-new.log",
+      "owner": "contracts/test/adversarial/SolanaV18.t.sol:SolanaEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 24699, ~: 24700)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-integers.log",
+      "owner": "contracts/test/adversarial/SolanaIntegerV18.t.sol:SolanaIntegerV18Test",
+      "signature": "testFuzzV18DirtyAmountCannotTruncate(uint192,uint64)",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testFuzzV18DirtyAmountCannotTruncate"
+    },
+    {
+      "details": "(gas: 112019)",
+      "family": "solana",
+      "log": "docs/audit/adversarial-qualification/solana-integers.log",
+      "owner": "contracts/test/adversarial/SolanaIntegerV18.t.sol:SolanaIntegerV18Test",
+      "signature": "testV18IndependentInstructionIntegerVectors()",
+      "source_commit": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+      "status": "V18_PASS",
+      "test": "testV18IndependentInstructionIntegerVectors"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "tron",
+      "log": "docs/audit/adversarial-qualification/tron-new.log",
+      "owner": "contracts/test/adversarial/TronV18.t.sol:TronEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 92781, ~: 88310)",
+      "family": "tron",
+      "log": "docs/audit/adversarial-qualification/tron-new.log",
+      "owner": "contracts/test/adversarial/TronV18.t.sol:TronEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 159376)",
+      "family": "tron",
+      "log": "docs/audit/adversarial-qualification/tron-new.log",
+      "owner": "contracts/test/adversarial/TronV18.t.sol:TronEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1383854)",
+      "family": "tron",
+      "log": "docs/audit/adversarial-qualification/tron-new.log",
+      "owner": "contracts/test/adversarial/TronV18.t.sol:TronEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 814790)",
+      "family": "tron",
+      "log": "docs/audit/adversarial-qualification/tron-new.log",
+      "owner": "contracts/test/adversarial/TronV18.t.sol:TronEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    },
+    {
+      "details": "(runs: 128, calls: 8192, reverts: 0)",
+      "family": "xrpl",
+      "log": "docs/audit/adversarial-qualification/xrpl-new.log",
+      "owner": "contracts/test/adversarial/XrplV18.t.sol:XrplEnvelopeV18Test",
+      "signature": "invariantV18UntrustedRelayerCannotAuthorizeTransfer()",
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "status": "V18_PASS",
+      "test": "invariantV18UntrustedRelayerCannotAuthorizeTransfer"
+    },
+    {
+      "details": "(runs: 2500, \u03bc: 93531, ~: 89449)",
+      "family": "xrpl",
+      "log": "docs/audit/adversarial-qualification/xrpl-new.log",
+      "owner": "contracts/test/adversarial/XrplV18.t.sol:XrplEnvelopeV18Test",
+      "signature": "testFuzzV18MalformedEnvelope(bytes32,uint8,uint8)",
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "status": "V18_PASS",
+      "test": "testFuzzV18MalformedEnvelope"
+    },
+    {
+      "details": "(gas: 158866)",
+      "family": "xrpl",
+      "log": "docs/audit/adversarial-qualification/xrpl-new.log",
+      "owner": "contracts/test/adversarial/XrplV18.t.sol:XrplEnvelopeV18Test",
+      "signature": "testV18CrossProtocolAndRpcAssertions()",
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "status": "V18_PASS",
+      "test": "testV18CrossProtocolAndRpcAssertions"
+    },
+    {
+      "details": "(gas: 1391982)",
+      "family": "xrpl",
+      "log": "docs/audit/adversarial-qualification/xrpl-new.log",
+      "owner": "contracts/test/adversarial/XrplV18.t.sol:XrplEnvelopeV18Test",
+      "signature": "testV18DynamicLengthAndOffsetBombs()",
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "status": "V18_PASS",
+      "test": "testV18DynamicLengthAndOffsetBombs"
+    },
+    {
+      "details": "(gas: 1429088)",
+      "family": "xrpl",
+      "log": "docs/audit/adversarial-qualification/xrpl-new.log",
+      "owner": "contracts/test/adversarial/XrplV18.t.sol:XrplEnvelopeV18Test",
+      "signature": "testV18LargeHostileEnvelopeHasBoundedVerifierWork()",
+      "source_commit": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "status": "V18_PASS",
+      "test": "testV18LargeHostileEnvelopeHasBoundedVerifierWork"
+    }
+  ],
+  "production_activation": false,
+  "retained_log_files": 182,
+  "retained_passing_case_records": 1012,
+  "status": "LOCAL_ADVERSARIAL_QUALIFICATION_COMPLETE",
+  "task": "BRIDGE-AUDIT-3.V.18",
+  "uncovered_applicable_entries": 0,
+  "v18_new_passes": 80
+}

@@ -1,0 +1,63 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/litecoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "litecoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": {
+      "sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/LitecoinFinalityVerifier420.sol": {
+      "sha256": "dc7d16124acdb4d7f303d01cd488b13350d931351a7cd2a9777b36e2608214bd",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/LitecoinHeaderChain420.sol": {
+      "sha256": "2c04358e8dde23b1f4fce696776c09bd416026f832b4b23b11b15ad629364246",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/LitecoinScrypt420.sol": {
+      "sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/bridge/verifiers/LitecoinTransaction420.sol": {
+      "sha256": "75ef381f9724009ce64a3b008db2e1322cbb64701b23eac3ccae61bf8791d8df",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/src/interfaces/ILitecoinFinalityVerifier420.sol": {
+      "sha256": "344925576f6522fc4e837ef8ed49e0d1f7d4f40323f6238a5cd31ceed543a4d2",
+      "source": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/LitecoinV18.t.sol": {
+      "sha256": "25787be94a1e80374223ecbaadfecd33c639eb333edd2f60b5f126892c74a737",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "5741522429732437b92b3a9e0d0f659d6b781b1f"
+}

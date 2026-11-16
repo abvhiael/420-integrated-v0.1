@@ -1,0 +1,19 @@
+{
+  "categories": {
+    "fabricated_headers_or_consensus_signatures": "(ModifiedNonce|BadSRSignature|BadSignature|HeaderSubstitution|CorruptInput|CorruptSolution|HeaderCanonical|MalformedHeaders|ExecutionPayloadHash|WrongLedgerAndSequence|ConsensusRejects|IncorrectClaimStill|WrongMessageBls|NativeDER)|MissingSignature|UnauthorizedWellFormedSigners|NoRpcFinalityAssertion",
+    "chain_work_and_difficulty": "(ChainWork|ChainTrust|Difficulty|Targets|Retarget|CompactWork|BlockWork|ExactNativeBlockWork)",
+    "validator_sets_and_signers": "(Committee|Quorum|Signer|Signature|Authority|WrongMember|ForgedStake|TrustedList|SnapshotGovernance|WrongDVN|SingleRequired|Subgroup|BadBootstrap|UncomputedBls|BelowQuorum)",
+    "forged_inclusion": "(Merkle|Trie|Inclusion|SHAMap|RootTampering|OriginTransactionSubstitution|TransactionSubstitution|RawTransactionSubstitution|IncorrectClaimStill)",
+    "wrong_chain_and_network": "(WrongNetwork|WrongGenesis|WrongCluster|WrongChain|MainnetIdentity|CrossInstanceAndCrossChain|WrongSource|WrongDestination|ChainIdentity|SnapshotGovernance)",
+    "gateway_substitution": "(Gateway|PeerSubstitution|WrongMessenger|WrongLocalMessenger|LibrarySubstitution|IssuerTokenSubstitution|ViewingCredentialBinding|UnapprovedGateway)",
+    "recipient_asset_amount": "(Amounts|Amount|Recipient|Output|Token|Mint|Route|IncorrectClaimStill|OrdinaryHistorical|Memo)",
+    "stale_conflicting_unfinalized": "(Stale|Conflict|Unfinalized|Unsolid|Unvalidated|Expired|Deadline|SnapshotTime|WeakSubjectivity|FutureCheckpoint|Uncertified|Insufficient|NoDpow|StrictNotarization|CheckpointRotation|OldAuthority|NotarizationRequired|FinalizedPolicy|EarlierExternal)",
+    "reorganizations": "(Reorg|ForkSelection|Conflict|CertifiedBankCannotBeReplaced|CheckpointRotation|OldAuthority|StaleAuthority|Canonical|UnfinalizedEpoch)",
+    "cross_route_and_domain": "(Domain|Destination|Route|CrossInstance|MemoCannot|WrongRouterMemo|WrongChainMemo|PeerSubstitution)",
+    "replay_and_duplicates": "(Replay|DuplicateDelivery|DuplicateRedemption|DuplicateMaster)",
+    "malformed_serialization": "(Malformed|NonCanonical|Noncanonical|CanonicalAbi|Trailing|Truncated|UnknownWire|ScalarMalleability|NativeDER)",
+    "integer_and_precision": "(Fuzz.*(Amount|Integer|Field|CoinAge|Compact|NativeDrops|SignAndIssued)|Money|Overflow|Precision|Dust|Dirty|Int64|KernelTarget|MalformedCompact)|TargetsAndFuzzArithmetic",
+    "computational_and_memory_limits": "(Bounded|Gas|Maximum|PerCall|ProductionSizes|Progress|CanonicalFieldBoundaries|Bytecode)"
+  },
+  "review": "Exact passing-case references are retained below; applicability follows the implemented chain/protocol trust model. Regexes nominate references, never assert production readiness."
+}

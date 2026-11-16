@@ -1,0 +1,119 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/bnb",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    "^BnbForkV18Test$",
+    "--match-test",
+    "^(testV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "bnb",
+  "files": {
+    "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol": {
+      "sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol": {
+      "sha256": "2d83d435b66f3ca6e3f2f9ceef5f08f2e7b1d9c3d5b49b0cc75dac62892bdc7d",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/EthereumMPT420.sol": {
+      "sha256": "0b1f442b7c48a31bc334122423fd4e10ee9156552b551956b43ab8cd268227e0",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/EthereumRLP420.sol": {
+      "sha256": "0819763d0af797e353afc6dffc16eda1d6e08aeae6bb104ca18f1e34185aee49",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/bnb/BnbBlsHash420.sol": {
+      "sha256": "8e04c84533a944492e332a79bb0633b068fe8c37355c3467825a3461af1a281f",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/bnb/BnbBlsMath420.sol": {
+      "sha256": "369833d16d8db8998fac8fe416443751223baaf0dff2cae69d9186daa2d769b6",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/bnb/BnbBlsVerifier420.sol": {
+      "sha256": "b0206004dc9997364ecf68d65cfd170fcd0a5ca28fba8e2dfa184d2f26fad7d1",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/bnb/BnbConsensusLightClient420.sol": {
+      "sha256": "1b91145c4323af901acb06b5b2f3eba1eb69972e45b87cdac47f08d4eeaa0854",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol": {
+      "sha256": "e835dd5761724332305d3652d0cbe429094c7722f09ae3d9ca85558a45e30ad4",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/interfaces/IBnbFinalityOracle420.sol": {
+      "sha256": "3cb00740a36f8eaa049225066317550ec1cecf0197489fbd9fdd6fe5177acde7",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/interfaces/IBnbFinalityVerifier420.sol": {
+      "sha256": "e84b52a2f9f0aba205c15ca59725fd998ac14d89608916cfe75823841cb92f88",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/interfaces/IBnbGatewayMessageVerifier420.sol": {
+      "sha256": "31c53592417caf9984944a97b12d3ac801fbb04e0844b85e3e6cc4d046c6360b",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/BnbConsensus420.t.sol": {
+      "sha256": "3c31ac9a2c0f4c0394a63c289643845271b970c919fa05fd85792ef5aac3f8d4",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/adversarial/BnbForkV18.t.sol": {
+      "sha256": "a889b8ff3a275761db31048705d8b41111f6b15c0217e72ca655effc6ded2144",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/BnbV18.t.sol": {
+      "sha256": "68a13511e3464c3ad3d0db66d62303206c88a3a3f1b4e0f73ee0a0f354cd8a4f",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/fixtures/bnb/header_116662000.rlp": {
+      "sha256": "56d372f312670e41a368fa97c5bb33d57bbc141c6887fcde434955cbe9963268",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/header_116663000.rlp": {
+      "sha256": "57f5e64bb4d8d9d68625cedd2448617413432f4474e85f6213d884b4687802fd",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/header_116663998.rlp": {
+      "sha256": "4ce8b17853981d49d5b63322b1b9c2f88857bc72870ca32ffbbe9ad85476a962",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/header_116664000.rlp": {
+      "sha256": "7dbaca5ccefed5b15129e575252648326c138ac00c929997bd286c15d2cafd6b",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/header_116664001.rlp": {
+      "sha256": "4cd1486180cc33e51c10d96b785b48c63643d9ec46db7d5b8e05fb8ca07ee64d",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/vote_116664000.rlp": {
+      "sha256": "4a3414f8c6fb1d79cc39628522998dda9d0159ceafd6ec23892d4a10d87b4d21",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    },
+    "contracts/test/fixtures/bnb/vote_116664001.rlp": {
+      "sha256": "c1b8453b5d2a490d85f71a632206ab694da00a30b35901a251c2c155c28ef893",
+      "source": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5"
+}

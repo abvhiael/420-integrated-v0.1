@@ -1,0 +1,87 @@
+   Compiling solana-gateway-420 v0.1.0 (/workspace/scratch/2e63af2acea0/repo/contracts/solana/gateway)
+warning: use of deprecated module `solana_program::system_instruction`: Use `solana_system_interface` crate instead
+ --> src/lib.rs:3:216
+  |
+3 | ..., program_pack::Pack, pubkey, pubkey::Pubkey, rent::Rent, system_instruction, system_program, sysvar::Sysvar};
+  |                                                              ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated module `solana_program::system_program`: Use `solana_sdk_ids::system_program` instead
+ --> src/lib.rs:3:236
+  |
+3 | ...ck, pubkey, pubkey::Pubkey, rent::Rent, system_instruction, system_program, sysvar::Sysvar};
+  |                                                                ^^^^^^^^^^^^^^
+
+warning: `solana-gateway-420` (lib) generated 2 warnings
+warning: use of deprecated module `solana_program::system_program`: Use `solana_sdk_ids::system_program` instead
+ --> tests/escrow.rs:2:80
+  |
+2 | use solana_program::{program_option::COption,program_pack::Pack,pubkey::Pubkey,system_program};
+  |                                                                                ^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(deprecated)]` on by default
+
+warning: `solana-gateway-420` (test "escrow") generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.21s
+     Running tests/escrow.rs (/workspace/scratch/2e63af2acea0/solana-build-target/debug/deps/escrow-9eeb62a929f41c5b)
+
+running 6 tests
+test cpi_pda_owner_can_deposit_without_an_outer_owner_signature ... [2026-11-14T20:54:47.261039825Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.261696364Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.276877579Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+ok
+test native_deposit_nonce_and_atomic_failure ... [2026-11-14T20:54:47.449090530Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.449741972Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.463482729Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.463750398Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.464125006Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.468010259Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.468375043Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.472332413Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+ok
+test native_wrong_authority_vault_and_destination_rejected ... [2026-11-14T20:54:47.634197066Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.634898151Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.650095330Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.650558160Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.655533617Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.655932232Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.659889973Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+ok
+test pda_bindings_match_independent_python_reference ... ok
+test prefunded_state_can_initialize_only_once ... [2026-11-14T20:54:47.816209953Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.816823238Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.832172353Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.832549405Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.832836313Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:47.833706671Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+ok
+test ray_and_eurc_real_spl_cpi_and_rollback ... [2026-11-14T20:54:48.018639632Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.019537781Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.050144185Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.050288610Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.050995895Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.056204601Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.056333042Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.056439411Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.056579510Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.057272913Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.064866926Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.064993845Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.186202505Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.186356635Z WARN  tarpc::server::tokio] Requests stream errored out: an error occurred in the transport: an error occurred sending over the channel
+[2026-11-14T20:54:48.187170258Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.325614986Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.326836136Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.328307701Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.334552982Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.334715735Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.334822915Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.334955302Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.335687504Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.344268528Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+[2026-11-14T20:54:48.344393514Z WARN  tarpc::client] OpenTelemetry subscriber not installed; making unsampled child context.
+ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s
+

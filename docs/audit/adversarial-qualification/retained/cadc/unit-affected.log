@@ -1,0 +1,10 @@
+Compiling 74 files with Solc 0.8.24
+Solc 0.8.24 finished in 33.10s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/CADCLayerZero420.t.sol:CADCLayerZero420Test
+[PASS] testLibrarySubstitution() (gas: 2113892)
+[PASS] testSixDecimalIssuerToken() (gas: 3496025)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 2.97ms (1.95ms CPU time)
+
+Ran 1 test suite in 3.64ms (2.97ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

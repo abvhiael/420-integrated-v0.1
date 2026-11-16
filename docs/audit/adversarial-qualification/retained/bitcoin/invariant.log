@@ -1,0 +1,35 @@
+Compiling 6 files with Solc 0.8.24
+Solc 0.8.24 finished in 1.69s
+Compiler run successful!
+2026-11-14T05:47:19.616622Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+2026-11-14T05:47:19.656163Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656191Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656200Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656212Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656219Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656240Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656253Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656260Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656266Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656555Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656563Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656568Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656576Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656582Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656596Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656606Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656612Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+2026-11-14T05:47:19.656618Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21217)
+
+Ran 1 test for contracts/test/BitcoinChainInvariant420.t.sol:BitcoinChainInvariant420Test
+[PASS] invariantBestTipTracksGreatestAdmittedWorkAndGenesisIsImmutable() (runs: 256, calls: 128000, reverts: 0)
+
+╭-----------------------------+----------+--------+---------+----------╮
+| Contract                    | Selector | Calls  | Reverts | Discards |
++======================================================================+
+| BitcoinHistoricalHandler420 | submit   | 128000 | 0       | 0        |
+╰-----------------------------+----------+--------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 124.00s (123.96s CPU time)
+
+Ran 1 test suite in 124.00s (124.00s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

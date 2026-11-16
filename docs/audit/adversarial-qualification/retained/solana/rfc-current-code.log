@@ -1,0 +1,10 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 2.86s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/SolanaEd25519420.t.sol:SolanaEd25519420Test
+[PASS] testNonCanonicalScalarAndIdentityKeyFailClosed() (gas: 1741846)
+[PASS] testRfc8032EmptyMessageAndMutation() (gas: 3540253)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 7.32ms (7.63ms CPU time)
+
+Ran 1 test suite in 7.63ms (7.32ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

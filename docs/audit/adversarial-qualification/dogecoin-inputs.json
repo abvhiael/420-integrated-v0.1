@@ -1,0 +1,67 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/dogecoin",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "dogecoin",
+  "files": {
+    "contracts/src/accounts/ECDSA420.sol": {
+      "sha256": "0f7f033fb31378377958bc77aadbb9343c4befb5ed4814dbe2f87c7d56362f69",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/BridgeCrypto420.sol": {
+      "sha256": "3415f4a3c12e03417e63ebc196ec905a85a3bf528ed13fedb147bb4b4d21a166",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": {
+      "sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/DogecoinAuxPow420.sol": {
+      "sha256": "51a5bfbfc70b4f85ac0b9033eeddd30482de7ef8e67a7f4cb499e505190172d1",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/DogecoinFinalityVerifier420.sol": {
+      "sha256": "26cd27e028cd3f3c7b2a611aaa5ae83c6f0ca15bdbe5ff33fe324a151f41d79e",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/DogecoinHeaderChain420.sol": {
+      "sha256": "794e7e35b5b52a9df4f948c7d49f16448d3d56e6c78bfa662dc543710913c43f",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/DogecoinTransaction420.sol": {
+      "sha256": "0b85446bb9329deee7fd54a281fe7497f8da5d83ae018900bd20bde2367dbe8b",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/bridge/verifiers/LitecoinScrypt420.sol": {
+      "sha256": "15cbd1ced17a4fbd89cc8cc34f9b4e530298114e2e2a5bcac38649a9ec3bb3f5",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/src/interfaces/IDogecoinFinalityVerifier420.sol": {
+      "sha256": "e8720de766fbed0e9d8edb94a378204e2426048305ebb4ff146d37b4c9ad5aea",
+      "source": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+    },
+    "contracts/test/adversarial/DogecoinV18.t.sol": {
+      "sha256": "53da8fe8bb5c53906467fee921caaa5ea65b23575b590142b1ea8fd683c3f3ab",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "cfafb347a3f4c1f8401df47488a78c30922af3b8"
+}

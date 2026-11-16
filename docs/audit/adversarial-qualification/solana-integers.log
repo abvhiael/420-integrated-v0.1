@@ -1,0 +1,10 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.59s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/adversarial/SolanaIntegerV18.t.sol:SolanaIntegerV18Test
+[PASS] testFuzzV18DirtyAmountCannotTruncate(uint192,uint64) (runs: 2500, μ: 24699, ~: 24700)
+[PASS] testV18IndependentInstructionIntegerVectors() (gas: 112019)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 100.13ms (99.05ms CPU time)
+
+Ran 1 test suite in 100.58ms (100.13ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

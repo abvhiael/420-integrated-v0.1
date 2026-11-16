@@ -1,0 +1,20 @@
+Compiling 10 files with Solc 0.8.24
+Solc 0.8.24 finished in 11.26s
+Compiler run successful!
+
+Ran 12 tests for contracts/test/SolanaFinalityProof420.t.sol:SolanaFinalityProof420Test
+[PASS] testCertifiedBankCannotBeReplaced() (gas: 11913607)
+[PASS] testCertifiedCpiPdaOwnerAndUncommittedInvocation() (gas: 16093588)
+[PASS] testControlledCanonicalRayAndEurcMintRoutes() (gas: 25968786)
+[PASS] testControlledNativeActualSignaturesQuorumAndReplayAcrossVerifierRotation() (gas: 18260870)
+[PASS] testControlledV0AndV0AuthenticatedLoadedAddressesAndV1() (gas: 38117058)
+[PASS] testCrossInstanceAndCrossChainCertificatesRejected() (gas: 14682035)
+[PASS] testEpochRootImmutableAndRevocationInvalidatesCertificate() (gas: 10440957)
+[PASS] testIncorrectClaimStillFailsWithValidControlledQuorumCertificate() (gas: 48570101)
+[PASS] testPreparedMaximumV1MultisigProofFitsTransactionBudget() (gas: 110589134)
+[PASS] testRpcOnlyAndUncertifiedExecutionNeverFinalizes() (gas: 7192165)
+[PASS] testStatementAndAuthorityCannotBeSubstituted() (gas: 8689776)
+[PASS] testThresholdDuplicateVoteAndForgedStake() (gas: 10367925)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 339.48ms (740.58ms CPU time)
+
+Ran 1 test suite in 339.95ms (339.48ms CPU time): 12 tests passed, 0 failed, 0 skipped (12 total tests)

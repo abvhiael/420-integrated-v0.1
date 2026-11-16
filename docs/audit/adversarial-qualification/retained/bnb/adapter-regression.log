@@ -1,0 +1,20 @@
+Compiling 5 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.07s
+Compiler run successful!
+
+Ran 12 tests for contracts/test/BnbBridgeAdapter420.t.sol:BnbBridgeAdapter420Test
+[PASS] testAssetRebindingRemovesStaleSourceMapping() (gas: 133423)
+[PASS] testCanonicalMainnetBnbInboundPasses() (gas: 105950)
+[PASS] testDestinationAndRouteCannotBeSubstituted() (gas: 445377)
+[PASS] testDirectInboundBypassFailsClosed() (gas: 27743)
+[PASS] testOutboundMalformedRecipientFailsClosed() (gas: 36993)
+[PASS] testOutboundWrongRouteFailsClosed() (gas: 41398)
+[PASS] testQualifiedBep20BindsToIntendedRoute() (gas: 321251)
+[PASS] testReplayFailsClosed() (gas: 252497)
+[PASS] testUnfinalizedFailsClosed() (gas: 142367)
+[PASS] testUnknownBep20FailsClosed() (gas: 168997)
+[PASS] testWrongChainFailsClosed() (gas: 147030)
+[PASS] testWrongGatewayFailsClosed() (gas: 149711)
+Suite result: ok. 12 passed; 0 failed; 0 skipped; finished in 1.16ms (2.75ms CPU time)
+
+Ran 1 test suite in 2.83ms (1.16ms CPU time): 12 tests passed, 0 failed, 0 skipped (12 total tests)

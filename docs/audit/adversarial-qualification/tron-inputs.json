@@ -1,0 +1,51 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/tron",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "tron",
+  "files": {
+    "contracts/src/bridge/verifiers/TronFinalityVerifier420.sol": {
+      "sha256": "4a65d81a9291a85766d50ee2bc5c471952e118494ec79cc46358ea454d42ae3d",
+      "source": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+    },
+    "contracts/src/bridge/verifiers/tron/TronProto420.sol": {
+      "sha256": "4a6eab6b0cd67f90922fa0b285807449f30b759d3fbeb55914880badb86b6e0e",
+      "source": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+    },
+    "contracts/src/bridge/verifiers/tron/TronWire420.sol": {
+      "sha256": "61280703244520644e77dddcb2c6c04a34c1d0b8d4ea8ecd7e3e47f3978a2b6b",
+      "source": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+    },
+    "contracts/src/interfaces/ITronFinalityVerifier420.sol": {
+      "sha256": "732ffa5fb1663fbe3fc3befc9970fcbbf054ef3ba3333ebc070d1ae1c7c3dc1d",
+      "source": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/TronV18.t.sol": {
+      "sha256": "e4eb2108975266e1710ec7dc3fb6642d8c1241380ae31058e2965800dba6e6da",
+      "source": "V18_TEST"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "97b1323b27d8208dba3843734cf2275b63e47bfd"
+}

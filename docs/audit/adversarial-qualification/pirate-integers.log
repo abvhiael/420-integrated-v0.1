@@ -1,0 +1,10 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 8.72s
+Compiler run successful!
+
+Ran 2 tests for contracts/test/adversarial/PirateIntegerV18.t.sol:PirateIntegerV18Test
+[PASS] testV18NativeSupplyAmountBounds() (gas: 57886252)
+[PASS] testV18NotePositionCannotTruncate() (gas: 19291302)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 68.71ms (92.57ms CPU time)
+
+Ran 1 test suite in 69.15ms (68.71ms CPU time): 2 tests passed, 0 failed, 0 skipped (2 total tests)

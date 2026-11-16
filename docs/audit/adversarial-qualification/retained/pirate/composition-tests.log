@@ -1,0 +1,18 @@
+test_controlled_abi_round_trip (test_compose.CompositionTests.test_controlled_abi_round_trip) ... ok
+test_domain_substitution (test_compose.CompositionTests.test_domain_substitution) ... ok
+test_header_identity (test_compose.CompositionTests.test_header_identity) ... ok
+test_missing_worker_validation (test_compose.CompositionTests.test_missing_worker_validation) ... ok
+test_native_block_work (test_compose.CompositionTests.test_native_block_work) ... ok
+test_native_txid_endianness (test_compose.CompositionTests.test_native_txid_endianness) ... ok
+test_note_position_substitution (test_compose.CompositionTests.test_note_position_substitution) ... ok
+test_nullifier_substitution (test_compose.CompositionTests.test_nullifier_substitution) ... ok
+test_pool_substitution (test_compose.CompositionTests.test_pool_substitution) ... ok
+test_raw_rpc_status_not_a_context (test_compose.CompositionTests.test_raw_rpc_status_not_a_context) ... ok
+test_root_substitution (test_compose.CompositionTests.test_root_substitution) ... ok
+test_strict_notarization (test_compose.CompositionTests.test_strict_notarization) ... ok
+test_transaction_substitution (test_compose.CompositionTests.test_transaction_substitution) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.019s
+
+OK

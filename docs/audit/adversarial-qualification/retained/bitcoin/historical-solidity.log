@@ -1,0 +1,26 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 10.93s
+Compiler run successful!
+2026-11-14T05:39:00.226292Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 8 tests for contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[PASS] testForkSelectionAndReorgOfCanonicalConfirmations() (gas: 58557476)
+[PASS] testHistoricalMainnetEveryHeaderThroughFirstDifficultyChange() (gas: 9713034042)
+[PASS] testHistoricalTransactionAndMerkleInclusion() (gas: 59528454)
+[FAIL: Error != expected error: InvalidTimestamp() != InvalidTarget()] testMalformedHeadersAndTimestampRules() (gas: 58250407)
+[PASS] testRealVerifierAdapterDepositAndOutpointReplayAcrossRotation() (gas: 5964786)
+[PASS] testRetargetClampsAndSignedElapsed() (gas: 1218665)
+[PASS] testSegwitTxidAndMalformedWitness() (gas: 223880)
+[PASS] testTargetsAndFuzzArithmetic(uint32) (runs: 2500, μ: 1162308, ~: 1161587)
+Suite result: FAILED. 7 passed; 1 failed; 0 skipped; finished in 414.53s (414.78s CPU time)
+
+Ran 1 test suite in 414.54s (414.53s CPU time): 7 tests passed, 1 failed, 0 skipped (8 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BitcoinConsensusQualification420.t.sol:BitcoinConsensusQualification420Test
+[FAIL: Error != expected error: InvalidTimestamp() != InvalidTarget()] testMalformedHeadersAndTimestampRules() (gas: 58250407)
+
+Encountered a total of 1 failing tests, 7 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

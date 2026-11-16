@@ -1,0 +1,171 @@
+{
+  "command": [
+    "/workspace/scratch/3b8511e6cffb/bin/forge",
+    "test",
+    "--root",
+    "/workspace/scratch/3b8511e6cffb/adversarial-build/cctp",
+    "--use",
+    "/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24",
+    "--threads",
+    "2",
+    "--match-contract",
+    ".*V18.*Test",
+    "--match-test",
+    "^(testV18|testFuzzV18|invariantV18)",
+    "-vv"
+  ],
+  "family": "cctp",
+  "files": {
+    "contracts/src/bridge/adapters/USDCCCTPAdapter.sol": {
+      "sha256": "0e9b8b048e4edc2d1a75c44416fd51e6d4adf639c2231fc0354a48d1e4083f12",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/src/bridge/verifiers/BridgeWire420.sol": {
+      "sha256": "aff79f1d1be1d90bb241c8504f74d170643a22b690a455abb830202f1f73dfe9",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/src/bridge/verifiers/cctp/CCTPV2Message420.sol": {
+      "sha256": "f87a6d89ff66cb6bfc7e721c33e8fd81f8699354fca0cb4ee56ad2bd43b1507e",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/src/interfaces/IBridgeAdapter420.sol": {
+      "sha256": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/src/interfaces/ICircleCCTPV2420.sol": {
+      "sha256": "46f5dc719e7f296e9c74e794832921060309b12df6c9115faf0a80056b227da3",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/src/system/SystemAccess.sol": {
+      "sha256": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/adversarial/CctpV18.t.sol": {
+      "sha256": "03ab2b557847076f325a92bf410d07bf28323e63ca493508a3f705d0665a88de",
+      "source": "V18_TEST"
+    },
+    "contracts/test/adversarial/EnvelopeV18.sol": {
+      "sha256": "64909f2ba5a6963891b6f1de5d3db5026ffe20d1fb9c679f51b032949969d97c",
+      "source": "V18_TEST"
+    },
+    "contracts/test/fixtures/cctp/SHA256SUMS": {
+      "sha256": "244eca4e075fe95624f8026767ae3400c9186f89f52a7de698df06fca3fbbf4d",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-fast.attestation.hex": {
+      "sha256": "6c9a38661bf6fe9d7d52cd1e737bb23c701d3885e32c614b2930b0bdf42768fc",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-fast.json": {
+      "sha256": "d80e4dc2a6abbdf9fd67263ec536198150759229567e61c49eb5dd9a1514c461",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-fast.message.hex": {
+      "sha256": "e884aae2156c0e2c9834d3796184ea6ee619dcea841950e72725a6b6f0f8742a",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-standard-hook.attestation.hex": {
+      "sha256": "dcf8574b69fe044b45d01cd6a4e26094b8185b2b99f33ca31630927236c996f5",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-standard-hook.json": {
+      "sha256": "403b5a3f0a7881cf584869b3206e00784eb7686177730f36689c86731e5e61b3",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/arbitrum-standard-hook.message.hex": {
+      "sha256": "afb4523e3da28071ef2888601c0294017f91adf129e0251848a98576897da9cc",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/base-standard.attestation.hex": {
+      "sha256": "7fd5163b2ca0806079fbf50c174e5967b58ce6396cda66173ac2b8e98d25ba98",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/base-standard.json": {
+      "sha256": "d0147c7a4fdde9cbe3790ad92a9ac619d9000fe028b7682c0ffb3c0b7d0cd01d",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/base-standard.message.hex": {
+      "sha256": "3db0d5351ae0aee407dc2c16871a532bfa705dbd406726a4c7e3b906699e4a43",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/ethereum-fast-to-base.attestation.hex": {
+      "sha256": "af9482fdb286b690567a13ee1827317b7efebc4a8a327861a036154cffba9ee3",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/ethereum-fast-to-base.json": {
+      "sha256": "76d6ee488398c78710c5118327d9cd5233c91c377273602fa76463ccf220aeac",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/ethereum-fast-to-base.message.hex": {
+      "sha256": "027d71fb168d81c0dad1f8bc97c2a559dd9f6140528650ae23a8e24778c3b4eb",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/historical-index.json": {
+      "sha256": "46d6e5bd77b1ec6f385c03ee0021d0ad82c838f8c43f19ded3d4ca478d89aaa3",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-contract-addresses.md": {
+      "sha256": "7f036b0f5175352354d5e95d09bc81572bd1cbb11ada9a0217b989f2cd9c8b34",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-observation.json": {
+      "sha256": "8101b878f01a57492c4063029a2276583a4662a6cdc5336a526f1fcd4ad72f8d",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-public-keys.json": {
+      "sha256": "526be5b4ade24dd754c1f5df37e473a859135d131dcf58cc0cc797a478d669bd",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-sandbox-public-keys.json": {
+      "sha256": "1594bf48df859912559c677a6b8da1d1714cca36160d22d53f1084f668a170b6",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-solana-programs.md": {
+      "sha256": "4da531f0a542deb399c75d9dee18db8cbf07b3b88935f6d85948ba6dcfa3899b",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-supported-domains.md": {
+      "sha256": "d636b46468bc715aaff071c604a5954571d4a5ec9078c2d4e7777885ec298f12",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/issuer-usdc-addresses.md": {
+      "sha256": "993ced64d29c9374d4494fdedfafa70bf9237d1d7d6be995ad18ed7de3009203",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/solana-standard.attestation.hex": {
+      "sha256": "bc1207770a385a1bedfac134b3c08f479df0f98848634032d646e3f30429aff2",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/solana-standard.json": {
+      "sha256": "e33bdde0efe5acf11e671406300f084078bb5287e9aa93955907df7bb5d67372",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/solana-standard.message.hex": {
+      "sha256": "d54e20862b37f627810cdb512c651541e889edfc8798cf71feec9c518e29237e",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/upstream/AdminUpgradableProxy.creation.hex": {
+      "sha256": "e095891d8d2c244217879dc496c54f2372c2ec76b5e8ee6acc43795106d45c12",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/upstream/MessageTransmitterV2.creation.hex": {
+      "sha256": "09e6242a96e689551c58515906d1ebe8501d29d9879a8fe8753670d2784fff03",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/upstream/TokenMessengerV2.creation.hex": {
+      "sha256": "f76b0ae2efb55a5ecb5647cf1c32856abcd933e295d1cfe731290e6c9b9671b6",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/fixtures/cctp/upstream/TokenMinterV2.creation.hex": {
+      "sha256": "8d365b6505ae4b0accdfabf7e9c726721d5d5752e0552775cc61808c00114692",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    },
+    "contracts/test/helpers/CCTPNativeHarness420.sol": {
+      "sha256": "77d6b23ea0658016e2191536757610f784c9b4ce4df81c43b35d4c0e9f61114d",
+      "source": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+    }
+  },
+  "foundry_config_sha256": "2394135334f1791c0898573c2ecccffb6db17f17e3ab9a224fe28abeec42e3f1",
+  "original": false,
+  "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+}

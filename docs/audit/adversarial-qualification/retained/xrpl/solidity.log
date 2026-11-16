@@ -1,0 +1,80 @@
+Compiling 13 files with Solc 0.8.24
+Solc 0.8.24 finished in 25.20s
+Compiler run successful with warnings:
+Warning (2519): This declaration shadows an existing declaration.
+   --> contracts/test/XrplFinalityProof420.t.sol:129:31:
+    |
+129 |         for(uint16 i;i<4;++i){uint256 before_=gasleft();verifier.submitValidatio ...
+    |                               ^^^^^^^^^^^^^^^
+Note: The shadowed declaration is here:
+   --> contracts/test/XrplFinalityProof420.t.sol:130:9:
+    |
+130 |         uint256 before_=gasleft();router.inbound(adapter,abi.encode(proof(b)));require(before_-gasleft()<30_000_000,"deposit gas");
+    |         ^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to pure
+ --> contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol:9:5:
+  |
+9 |     function verify(XrplSHA512Half420 hash,bytes memory tx_,bytes memory metadata,bytes32[16][] memory nodes,bytes32 root)
+  |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/test/XrplFinalityProof420.t.sol:132:5:
+    |
+132 |     function testFuzzNativeDropsIntact(uint64 value) public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 10 tests for contracts/test/XrplBridgeAdapter420.t.sol:XrplBridgeAdapter420Test
+[PASS] testDirectAdapterBypassFailsClosed() (gas: 27648)
+[PASS] testMalformedOutboundTagFailsClosed() (gas: 41385)
+[PASS] testMessageReplayFailsClosed() (gas: 322705)
+[PASS] testOutboundWithTagPasses() (gas: 68151)
+[PASS] testOutboundWithoutTagPasses() (gas: 68045)
+[PASS] testTransactionFailureFailsClosed() (gas: 138670)
+[PASS] testTransactionReplayFailsClosedAcrossMessageIds() (gas: 324875)
+[PASS] testUnvalidatedLedgerFailsClosed() (gas: 138779)
+[PASS] testValidatedSuccessfulInboundPasses() (gas: 124489)
+[PASS] testWrongGatewayFailsClosed() (gas: 141451)
+Suite result: ok. 10 passed; 0 failed; 0 skipped; finished in 280.34ms (4.28ms CPU time)
+
+Ran 32 tests for contracts/test/XrplFinalityProof420.t.sol:XrplFinalityProof420Test
+[PASS] testAbsentDestinationTagDiffersFromZeroTag() (gas: 11765323)
+[PASS] testBelowQuorumCannotValidateLedger() (gas: 3466863)
+[PASS] testCommittedFailureRejects() (gas: 7258244)
+[PASS] testConflictingValidatedLedgerCannotReplaceCanonical() (gas: 4808661)
+[PASS] testDeliveredAmountMismatchRejects() (gas: 7263433)
+[PASS] testDestinationTagSubstitutionRejects() (gas: 7263822)
+[PASS] testDuplicateMasterCannotCountTwice() (gas: 1913221)
+[PASS] testExplicitZeroTagRequiresExplicitBinding() (gas: 11779541)
+[PASS] testFuzzInvalidNativeSignAndIssuedBitReject(uint64) (runs: 2500, μ: 29440, ~: 29431)
+[PASS] testFuzzNativeDropsIntact(uint64) (runs: 2500, μ: 8005, ~: 8005)
+[PASS] testGatewayRevocationAndReplayAcrossVerifierRotation() (gas: 16240816)
+[PASS] testIssuedCurrencyCannotBecomeNativeXRP() (gas: 7422199)
+[PASS] testKeyDirectedSHAMapWrongBranchRejects() (gas: 7173343)
+[PASS] testMalformedSTObjectAndNonCanonicalEnvelopeReject() (gas: 4004889)
+[PASS] testMetadataAndTransactionRootTamperingRejects() (gas: 5943478)
+[PASS] testMissingBridgeMemoCannotRelabelPayment() (gas: 6720114)
+[PASS] testNativeQuorumSHAMapAndConcreteTaggedDeposit() (gas: 12746785)
+[PASS] testPartialAndNonCanonicalValidationReject() (gas: 635146)
+[PASS] testPartialPaymentCannotOverCreditRequestedAmount() (gas: 7179837)
+[PASS] testProductionSizesAndPerCallGas() (gas: 8407468)
+[PASS] testRPCOnlyValidatedAssertionRejects() (gas: 29355)
+[PASS] testSHAMapMissingOrExcessiveDepthRejects() (gas: 5586343)
+[PASS] testSnapshotTimeAndLedgerWindowsReject() (gas: 2243533)
+[PASS] testTrustedListQuorumAndGovernanceRules() (gas: 219040)
+[PASS] testUnknownDisabledAndExpiredProfilesFailClosed() (gas: 5140803)
+[PASS] testWrongDestinationChainAfterDeploymentRejects() (gas: 4433132)
+[PASS] testWrongDestinationChainRejects() (gas: 7259302)
+[PASS] testWrongDestinationRouterRejects() (gas: 7267729)
+[PASS] testWrongLedgerAndSequenceValidationReject() (gas: 1223156)
+[PASS] testWrongMemberAndMutatedSignatureReject() (gas: 1579152)
+[PASS] testWrongRouteRejects() (gas: 7266800)
+[PASS] testZeroNativeAmountRejects() (gas: 7187437)
+Suite result: ok. 32 passed; 0 failed; 0 skipped; finished in 280.03ms (1.66s CPU time)
+
+Ran 1 test for contracts/test/XrplFinalityProof420.t.sol:XrplHistoricalEvidence420Test
+[PASS] testGenuineNativeValidatedLedgerQuorumAndTaggedPayment() (gas: 63706514)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 288.47ms (288.09ms CPU time)
+
+Ran 3 test suites in 289.65ms (848.84ms CPU time): 43 tests passed, 0 failed, 0 skipped (43 total tests)

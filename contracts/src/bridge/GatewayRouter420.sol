@@ -9,6 +9,7 @@ import "../interfaces/genesis/ICanonicalAssetRegistry420.sol";
 import "../interfaces/genesis/ISettlementHealth420.sol";
 import "../libraries/GenesisInterfaceIds420.sol";
 import "./BridgeIds420.sol";
+import "./BridgeVerifierRegistry420.sol";
 
 interface IBridgeRiskConsumer420 { function consume(bytes32, bytes32, bool, uint256) external; }
 interface IBridgeAccountingHealth420 { function movementHealthy(bytes32) external view returns (bool); }
@@ -22,11 +23,14 @@ interface IBridgeTransferCreate420 {
 }
 interface IBridgeRouteRegistryView420 {
     function routes(bytes32) external view returns (bytes32,uint64,uint64,bytes32,bytes32,bytes32,bytes32,uint32,uint8,bool,bool);
+    function chainBindings(bytes32) external view returns(bytes32,bytes32,bytes32,bytes32);
     function requireRouteChainsCurrent(bytes32) external view;
+    function requireRouteVerifierCurrent(bytes32) external view;
 }
 
 contract GatewayRouter420 is GenesisResidentAccess420 {
     mapping(bytes32 => address) public adapters;
+    mapping(bytes32 => bool) public consumedSourceMessages;
 
     event AdapterSet(bytes32 indexed adapterId, address indexed adapter);
     event InboundAccepted(bytes32 indexed transferId, bytes32 indexed adapterId);
@@ -79,8 +83,14 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(configuredAdapter == adapterId_, "route adapter");
         require(inbound ? inboundEnabled : outboundEnabled, "direction disabled");
         routes.requireRouteChainsCurrent(routeId);
+        routes.requireRouteVerifierCurrent(routeId);
     }
 
+    /// @notice Stable across verifier/approval/registry and canonical chain-key replacement.
+    function sourceReplayKey(bytes32 network,bytes32 message) public pure returns(bytes32){
+        require(network!=0 && message!=0,"source identity");
+        return keccak256(abi.encode("420/BRIDGE/SOURCE_MESSAGE/V1",network,message));
+    }
     function acceptInbound(bytes32 adapterId_, bytes calldata proof) external returns (bytes32 transferId) {
         _requireOperational(
             BridgeIds420.ACTION_INBOUND,
@@ -89,13 +99,21 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         );
         address adapter = adapters[adapterId_];
         require(adapter != address(0) && adapter.code.length != 0, "adapter");
+        BridgeVerifierRegistry420 qualification=BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY));
+        bytes32 approval=qualification.requireCurrent(adapter);
         IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(proof);
+        require(qualification.requireCurrent(adapter)==approval,"qualification changed during proof");
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
         _requireBridgeAsset(v.assetId);
         _requireRouteHealthy(v.routeId);
         _requireAccountingHealthy(v.assetId);
         _requireRouteDirection(v.routeId, v.assetId, adapterId_, true);
 
+        require(v.sourceMessageId!=0 && v.sourceTxId!=0,"source identity");
+        (,bytes32 sourceNetwork,,)=IBridgeRouteRegistryView420(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).chainBindings(v.routeId);
+        bytes32 sourceKey=sourceReplayKey(sourceNetwork,v.sourceMessageId);
+        require(!consumedSourceMessages[sourceKey],"source replay");
+        consumedSourceMessages[sourceKey]=true;
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(v.routeId, v.assetId, true, v.amount);
         IBridgeTransferCreate420 transferRegistry =
             IBridgeTransferCreate420(_resolveRequired(BridgeIds420.TRANSFER_REGISTRY));
@@ -136,9 +154,13 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         _requireAccountingHealthy(assetId);
         _requireRouteDirection(routeId, assetId, adapterId_, false);
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(routeId, assetId, false, amount);
+        BridgeVerifierRegistry420 qualification=BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY));
+        bytes32 approval=qualification.requireCurrent(adapter);
         sourceMessageId = IBridgeAdapter420(adapter).initiateOutbound{ value: msg.value }(
             routeId, assetId, msg.sender, recipient, amount, extra
         );
+        require(qualification.requireCurrent(adapter)==approval,"qualification changed during dispatch");
+        _requireRouteDirection(routeId, assetId, adapterId_, false);
         require(sourceMessageId != bytes32(0), "message id");
 
         IBridgeTransferCreate420 transferRegistry =

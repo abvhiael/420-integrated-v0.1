@@ -39,18 +39,23 @@
     "governance/emergency pause",
     "delayed configuration changes",
     "independent config-hash monitoring",
-    "no bridge verifier controlled by the 420 validator committee solely by virtue of validator status"
+    "no bridge verifier controlled by the 420 validator committee solely by virtue of validator status",
+    "governance-qualified verifier runtime and underlying proxy implementation identities",
+    "live trusted-root/configuration manifests and irreversible qualification revocation",
+    "route-bound qualification snapshots without approval inheritance"
   ],
   "risk_limits": "contracts/config/bridge/risk-limits.json",
   "launch_catalog": "contracts/config/bridge/launch-catalog-v12.5.1.json",
   "protocol_components": [
     "BridgeAssetRegistry",
     "BridgeChainRegistry420",
+    "BridgeVerifierRegistry420",
     "BridgeRouteRegistry",
     "BridgeRiskManager",
     "BridgeTransferRegistry",
     "GatewayRouter420",
     "BridgeAccountingRegistry",
     "asset-specific adapters"
-  ]
+  ],
+  "qualification_registry_policy": "contracts/config/bridge/verifier-identity-policy.json"
 }

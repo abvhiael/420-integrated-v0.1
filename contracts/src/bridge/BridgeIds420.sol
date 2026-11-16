@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 library BridgeIds420 {
+    bytes32 internal constant VERIFIER_REGISTRY = keccak256("420/APP/420BRIDGE/VERIFIER_REGISTRY");
     bytes32 internal constant VERIFIED_GATEWAY = keccak256("420/APP/420BRIDGE/VERIFIED_GATEWAY");
     bytes32 internal constant GATEWAY_ROUTER = keccak256("420/APP/420BRIDGE/GATEWAY_ROUTER");
     bytes32 internal constant RISK_MANAGER = keccak256("420/APP/420BRIDGE/RISK_MANAGER");

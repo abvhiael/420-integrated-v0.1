@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "../system/GenesisResidentAccess420.sol";
 import "./BridgeIds420.sol";
 import "./BridgeChainRegistry420.sol";
+import "./BridgeVerifierRegistry420.sol";
+interface IBridgeQualifiedRouter420 { function adapters(bytes32) external view returns(address); }
 
 contract BridgeRouteRegistry is GenesisResidentAccess420 {
     enum Status { NONE, APPROVED_INACTIVE, ACTIVE, SUSPENDED, DEPRECATED }
@@ -27,6 +29,8 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
         bytes32 destinationNetworkId;
     }
 
+    struct VerifierBinding { address registry; bytes32 registryRuntimeHash; address consumer; bytes32 approvalId; bytes32 routeHash; }
+    mapping(bytes32 => VerifierBinding) public verifierBindings;
     mapping(bytes32 => Route) public routes;
     mapping(bytes32 => ChainBinding) public chainBindings;
 
@@ -74,6 +78,7 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
             delete chainBindings[routeId];
         }
 
+        delete verifierBindings[routeId];
         routes[routeId] = r;
         emit RouteSet(routeId, r.assetId, r.version, r.status);
     }
@@ -82,6 +87,7 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
         _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
         require(routes[routeId].status != Status.NONE, "unknown");
         if (routes[routeId].status == Status.ACTIVE) _requireCurrentChainBinding(routeId);
+        delete verifierBindings[routeId];
         routes[routeId].inboundEnabled = inbound;
         routes[routeId].outboundEnabled = outbound;
         emit DirectionSet(routeId, inbound, outbound);
@@ -104,6 +110,26 @@ contract BridgeRouteRegistry is GenesisResidentAccess420 {
 
     function requireRouteChainsCurrent(bytes32 routeId) external view {
         _requireCurrentChainBinding(routeId);
+    }
+
+    event RouteVerifierBound(bytes32 indexed routeId, bytes32 indexed approvalId, address indexed consumer);
+    function bindVerifier(bytes32 routeId, bytes32 expectedApproval) external {
+        _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
+        _requireCurrentChainBinding(routeId);
+        Route memory r=routes[routeId];
+        address consumer=IBridgeQualifiedRouter420(_resolveRequired(BridgeIds420.GATEWAY_ROUTER)).adapters(r.adapterId);
+        BridgeVerifierRegistry420 qualification=BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY));
+        bytes32 approved=qualification.requireRoute(consumer,r.sourceChainId,r.destinationChainId,r.verifierConfigHash,(r.inboundEnabled?1:0)|(r.outboundEnabled?2:0));
+        require(approved==expectedApproval && approved!=0,"approval changed");
+        qualification.pinRoute(approved,routeId,keccak256(abi.encode(r)));
+        verifierBindings[routeId]=VerifierBinding(address(qualification),address(qualification).codehash,consumer,approved,keccak256(abi.encode(r)));
+        emit RouteVerifierBound(routeId,approved,consumer);
+    }
+    function requireRouteVerifierCurrent(bytes32 routeId) external view {
+        Route memory r=routes[routeId];VerifierBinding memory b=verifierBindings[routeId];
+        require(r.status==Status.ACTIVE && b.registry==_resolveRequired(BridgeIds420.VERIFIER_REGISTRY) && b.registry.codehash==b.registryRuntimeHash && b.approvalId!=0 && b.routeHash==keccak256(abi.encode(r)),"unqualified route");
+        require(IBridgeQualifiedRouter420(_resolveRequired(BridgeIds420.GATEWAY_ROUTER)).adapters(r.adapterId)==b.consumer,"adapter replaced");
+        require(BridgeVerifierRegistry420(b.registry).requireRoute(b.consumer,r.sourceChainId,r.destinationChainId,r.verifierConfigHash,(r.inboundEnabled?1:0)|(r.outboundEnabled?2:0))==b.approvalId,"stale route qualification");
     }
 
     function _bindingCurrent(

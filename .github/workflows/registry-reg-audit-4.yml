@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'contracts/config/**'
+      - '!contracts/config/bridge/verifier-identity-policy.json'
+      - '!contracts/config/bridge/verification-policy.json'
       - 'config/**'
       - 'wallet/deployment-inventory.json'
       - 'developer-hub/catalogue/local.example.json'

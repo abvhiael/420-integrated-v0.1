@@ -20,6 +20,7 @@ contract BridgeChainRegistry420 is GenesisResidentAccess420 {
     }
 
     mapping(bytes32 => Chain) public chains;
+    mapping(bytes32 => uint256) public revisions;
     mapping(uint64 => bytes32) public chainKeyByRouteId;
 
     event ChainSet(
@@ -52,6 +53,7 @@ contract BridgeChainRegistry420 is GenesisResidentAccess420 {
         bytes32 existing = chainKeyByRouteId[c.routeChainId];
         require(existing == bytes32(0) || existing == chainKey, "route id bound");
 
+        ++revisions[chainKey];
         chains[chainKey] = c;
         chainKeyByRouteId[c.routeChainId] = chainKey;
         emit ChainSet(
@@ -63,6 +65,10 @@ contract BridgeChainRegistry420 is GenesisResidentAccess420 {
             c.family,
             c.active
         );
+    }
+
+    function identityHash(bytes32 chainKey) external view returns (bytes32) {
+        return keccak256(abi.encode(address(this), chainKey, revisions[chainKey], chains[chainKey]));
     }
 
     function requireActive(bytes32 chainKey) external view returns (Chain memory c) {

@@ -9,6 +9,8 @@ on:
       - 'docs/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-7-SOLANA.md'
       - '!docs/audit/solana-qualification/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-19-VERIFIER-IDENTITY.md'
+      - '!docs/audit/verifier-identity-qualification/**'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'

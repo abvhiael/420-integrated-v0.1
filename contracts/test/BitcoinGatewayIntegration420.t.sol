@@ -11,6 +11,7 @@ import "../src/bridge/VerifiedGateway420.sol";
 import "../src/interfaces/IBridgeAdapter420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./helpers/BridgeQualificationFixture420.sol";
 import "./BitcoinConsensusQualification420.t.sol";
 
 contract BitcoinSharedMockAdapter420 is IBridgeAdapter420 {
@@ -142,6 +143,7 @@ contract BitcoinGatewayIntegration420Test {
         f.accounting.applyReconciliation(
             ASSET_ID, 1_000_000 ether, 1_000_000 ether, uint64(block.timestamp), keccak256("accounting-bootstrap")
         );
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
 
     function _inbound(uint256 amount) internal pure returns (IBridgeAdapter420.VerifiedTransfer memory) {
@@ -172,6 +174,7 @@ contract BitcoinGatewayIntegration420Test {
         f.chains.setChain(a.BTC_CHAIN_KEY(),BridgeChainRegistry420.Chain(a.BTC_ROUTE_CHAIN_ID(),a.BTC_MAINNET_GENESIS_HASH(),ASSET_ID,keccak256("BTC/SPV"),BridgeChainRegistry420.ChainFamily.UTXO,true));
         f.routes.setRoute(ROUTE_ID,BridgeRouteRegistry.Route(ASSET_ID,a.BTC_ROUTE_CHAIN_ID(),uint64(block.chainid),ASSET_ID,bytes32(uint256(uint160(TOKEN))),a.ADAPTER_ID(),keccak256(abi.encode(address(verifier))),2,BridgeRouteRegistry.Status.ACTIVE,true,false));
         f.router.setAdapter(a.ADAPTER_ID(),address(a));
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(a),address(verifier),bytes4(keccak256("verifier()")),abi.encodeWithSignature("gatewayScriptHash()"),abi.encodeWithSignature("depositDomain()"),true);
         bytes memory tx_=abi.encodePacked(hex"0100000001",bytes32(uint256(1)),hex"0000000000ffffffff02e80300000000000016",script,hex"000000000000000022",verifier.commitmentScript(0,address(0xB0B),1000),hex"00000000");
         bytes32 deposit=keccak256("controlled deposit block");put(c,deposit,c.GENESIS(),BridgeCrypto420.sha256d(tx_),100,1);
         bytes32 parent=deposit;
@@ -187,6 +190,7 @@ contract BitcoinGatewayIntegration420Test {
         (bool ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),encoded)));
         require(!ok && !a.consumedMessages(t.messageId) && !a.consumedSourceOutputs(t.sourceOutput));
         f.routes.setDirection(ROUTE_ID,true,false);
+        f.routes.bindVerifier(ROUTE_ID,BridgeQualificationFixture420.registry(f.env).currentApproval(address(a)));
         // Fail after risk consumption: transfer registry rejects untrusted router.
         f.transfers.setRouter(address(f.router),false);
         (ok,)=address(f.router).call(abi.encodeCall(f.router.acceptInbound,(a.ADAPTER_ID(),encoded)));

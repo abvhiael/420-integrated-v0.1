@@ -1,0 +1,69 @@
+{
+  "step": "BRIDGE-AUDIT-3.V.19",
+  "base_sha": "97413f2eea862d5f2ec3117313cd3beb15a634f4",
+  "qualification": "97 distinct cases passed using preserved 96-case batch evidence plus affected single-case rerun",
+  "passing_cases": 97,
+  "fuzz_cases": 5000,
+  "invariant_runs": 128,
+  "invariant_depth": 64,
+  "invariant_calls": 8192,
+  "invariant_handler_reverts": 0,
+  "batch": {
+    "log": "qualification-batch.log",
+    "passed": 96,
+    "failed": 1,
+    "failed_case": "testOversizedProbeRejectedBeforeNestedMemoryCopy"
+  },
+  "affected_rerun": {
+    "log": "oversized-bounded.log",
+    "passed": 1,
+    "failed": 0,
+    "reason": "Require exact explicit bounds rejection within 200000 forwarded gas rather than arbitrary total caller-cost assertion"
+  },
+  "source_reconciliation": {
+    "final_manifest": "oversized-bounded.inputs.json",
+    "batch_manifest": "qualification-batch.inputs.json",
+    "only_changed_batch_source": [
+      "contracts/test/BridgeVerifierIdentity420.t.sol"
+    ],
+    "exact_batch_source": "oversized-batch-before/BridgeVerifierIdentity420.t.sol",
+    "all_other_batch_inputs_unchanged": true
+  },
+  "runtime_bytes": {
+    "BridgeChainRegistry420": 3486,
+    "BridgeRouteRegistry": 8334,
+    "BridgeVerifierProxy420": 1354,
+    "BridgeVerifierRegistry420": 21910,
+    "GatewayRouter420": 11885,
+    "VerifiedGateway420": 9495
+  },
+  "eip170_limit": 24576,
+  "tools": {
+    "forge": "1.9.0",
+    "solc": "0.8.24+commit.e11b9ed9"
+  },
+  "ci_runs": [],
+  "ci_reason": "Local targeted qualification; publish with existing skip-ci convention",
+  "workflow_jobs_unchanged": [
+    ".github/workflows/420indexer.yml",
+    ".github/workflows/registry-reg-audit-4.yml",
+    ".github/workflows/docs-pages.yml",
+    ".github/workflows/docs-qualify.yml"
+  ],
+  "fixture_original_bytes_verified": true,
+  "replay_reproduction_sources_hash_verified": true,
+  "production_approvals": [],
+  "live_deployment_performed": false,
+  "prior_evidence": {
+    "V17": "3dcee22927c181c23451ed49eb908330b5254866",
+    "V18": "a417ba42079e3865b56f0c23823bccb29056ad50",
+    "CCTP_fixture": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679"
+  },
+  "next_canonical_step": "No successor to V.19 identified in available main roadmap or supplied task list.",
+  "genesis_inventory": {
+    "command": "python3 scripts/validate-doc-genesis-contract-inventory.py",
+    "result": "PASS: 38 contract-map surfaces, 21 frozen public surfaces, zero documentation gaps",
+    "log": "genesis-inventory.log",
+    "setup": "Initial checks lacked sparse checkout documentation; hydrated unchanged main inputs before qualifying."
+  }
+}

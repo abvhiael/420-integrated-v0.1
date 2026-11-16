@@ -11,6 +11,7 @@ import "../src/bridge/VerifiedGateway420.sol";
 import "../src/interfaces/IBridgeAdapter420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./helpers/BridgeQualificationFixture420.sol";
 
 contract MockBridgeAdapter420 is IBridgeAdapter420 {
     VerifiedTransfer public nextTransfer;
@@ -52,7 +53,7 @@ contract MockVerifiedGatewayVerifier420 is IVerifiedGatewayVerifier420 {
 
 interface VmBridgeAccounting420 { function warp(uint256) external; }
 
-contract BridgeGenesisIntegration420Test {
+abstract contract BridgeGenesisFixture420 {
     VmBridgeAccounting420 constant vm =
         VmBridgeAccounting420(address(uint160(uint256(keccak256("hevm cheat code")))));
     bytes32 constant ROUTE_ID = keccak256("CADC/LZ/ETH-420");
@@ -141,6 +142,7 @@ contract BridgeGenesisIntegration420Test {
         f.accounting.applyReconciliation(
             ASSET_ID, 1_000_000 ether, 1_000_000 ether, uint64(block.timestamp), keccak256("accounting-bootstrap")
         );
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),true);
     }
 
     function _inbound(uint256 amount) internal pure returns (IBridgeAdapter420.VerifiedTransfer memory) {
@@ -155,6 +157,8 @@ contract BridgeGenesisIntegration420Test {
         });
     }
 
+}
+contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
     function testInboundCreatesTransferAndConsumesRiskAtomically() public {
         Fixture memory f = _setup();
         f.adapter.setInbound(_inbound(100 ether));
@@ -201,6 +205,7 @@ contract BridgeGenesisIntegration420Test {
         MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
         wrong.setInbound(_inbound(10 ether));
         f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(wrong),address(wrong),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         (bool ok,) = address(f.router).call(
             abi.encodeWithSelector(f.router.acceptInbound.selector, WRONG_ADAPTER_ID, hex"4201")
         );
@@ -215,6 +220,7 @@ contract BridgeGenesisIntegration420Test {
         f.router.acceptInbound(ADAPTER_ID, hex"4201");
         MockWrongBridgeAdapter420 wrong = new MockWrongBridgeAdapter420();
         f.router.setAdapter(WRONG_ADAPTER_ID, address(wrong));
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(wrong),address(wrong),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         (bool ok,) = address(f.router).call(
             abi.encodeWithSelector(
                 f.router.initiateOutbound.selector,

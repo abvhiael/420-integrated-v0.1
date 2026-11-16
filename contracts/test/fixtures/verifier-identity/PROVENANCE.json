@@ -1,0 +1,11 @@
+{
+  "kind": "pinned genuine upstream compiled proxy code; controlled verifier logic/state in tests",
+  "source_commit": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+  "source_path": "contracts/test/fixtures/cctp/upstream/AdminUpgradableProxy.creation.hex",
+  "sha256": "e095891d8d2c244217879dc496c54f2372c2ec76b5e8ee6acc43795106d45c12",
+  "previous_qualification": "BRIDGE-AUDIT-3.V.14 / PR #1168",
+  "scope": "Native proxy identity and upgrade behavior; not historical Circle messages, production approval or issuer authorization.",
+  "upstream_commit": "a92a2b4e7e6ef99bf0b05dca71780f5ec190e729",
+  "native_compiler": "solc 0.7.6; optimizer runs 100000; exact creation artifact previously independently rebuilt",
+  "license_sha256": "4cd13f7a31e98f51c4fb960a115e9a9ab9c42284ca5d5c9b5ccbcf322de45bfd"
+}

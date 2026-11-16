@@ -11,6 +11,8 @@ on:
       - '!docs/audit/solana-qualification/**'
       - '!docs/audit/BRIDGE-AUDIT-3-V-19-VERIFIER-IDENTITY.md'
       - '!docs/audit/verifier-identity-qualification/**'
+      - '!docs/audit/BRIDGE-AUDIT-3-V-20-PRODUCTION-ADMISSION.md'
+      - '!docs/audit/production-admission-qualification/**'
       - 'mkdocs.yml'
       - 'requirements-docs.txt'
       - 'README.md'

@@ -1,0 +1,29 @@
+Compiling 42 files with Solc 0.8.24
+Solc 0.8.24 finished in 139.98s
+Compiler run successful!
+
+Ran 1 test for contracts/test/BridgeProductionAdmissionInvariant420.t.sol:BridgeProductionAdmissionInvariant420Test
+[FAIL: operator] setUp() (gas: 0)
+Suite result: FAILED. 0 passed; 1 failed; 0 skipped; finished in 3.16ms (0.00ns CPU time)
+
+Ran 8 tests for contracts/test/BridgeCADCAdmission420.t.sol:BridgeCADCAdmission420Test
+[PASS] testV20CADCConfigurationChangeClearsBinding() (gas: 34755816)
+[PASS] testV20CADCEndpointRuntimeSubstitutionRejected() (gas: 32025472)
+[PASS] testV20CADCIssuerRuntimeSubstitutionRejected() (gas: 31983021)
+[PASS] testV20CADCNewApprovalNeedsExplicitRebinding() (gas: 34428232)
+[PASS] testV20CADCQualifiedLiveGuardSucceeds() (gas: 31990162)
+[PASS] testV20CADCRevokedActiveFlagDoesNotAuthorizeExecution() (gas: 31860764)
+[PASS] testV20CADCUnprivilegedCannotBindOrActivate() (gas: 31220393)
+[PASS] testV20CADCUnqualifiedCannotActivate() (gas: 29218975)
+Suite result: ok. 8 passed; 0 failed; 0 skipped; finished in 21.26ms (36.10ms CPU time)
+
+Ran 2 test suites in 22.76ms (24.42ms CPU time): 8 tests passed, 1 failed, 0 skipped (9 total tests)
+
+Failing tests:
+Encountered 1 failing test in contracts/test/BridgeProductionAdmissionInvariant420.t.sol:BridgeProductionAdmissionInvariant420Test
+[FAIL: operator] setUp() (gas: 0)
+
+Encountered a total of 1 failing tests, 8 tests succeeded
+
+Tip: Run `forge test --rerun` to retry only the 1 failed test
+Tip: Run `forge test --debug --match-test <TEST_NAME>` to inspect one failing test in the debugger

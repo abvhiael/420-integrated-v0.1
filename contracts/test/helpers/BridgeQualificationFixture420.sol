@@ -24,7 +24,13 @@ library BridgeQualificationFixture420 {
         r.probes[0]=BridgeVerifierRegistry420.Probe(1,true,rootCall,resultHash(verifier,rootCall));
         r.probes[1]=BridgeVerifierRegistry420.Probe(1,false,configCall,resultHash(verifier,configCall));
         id=q.record(r,q.currentApproval(consumer),true);
-        if(bind)routes.bindVerifier(route,id);
+        if(bind){
+            if(status!=BridgeRouteRegistry.Status.ACTIVE){
+                BridgeRouteRegistry.Route memory next;
+                (next.assetId,next.sourceChainId,next.destinationChainId,next.sourceAsset,next.destinationAsset,next.adapterId,next.verifierConfigHash,next.version,next.status,next.inboundEnabled,next.outboundEnabled)=routes.routes(route);
+                next.status=BridgeRouteRegistry.Status.ACTIVE;routes.setRoute(route,next);
+            } else routes.bindVerifier(route,id);
+        }
     }
     function resultHash(address target,bytes memory data) internal view returns(bytes32){(bool ok,bytes memory result)=target.staticcall(data);require(ok&&result.length>0,"fixture probe");return keccak256(result);}
 }

@@ -5,6 +5,7 @@ import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "./BridgeIds420.sol";
+import "./BridgeVerifierRegistry420.sol";
 
 /// @notice Registry/guard for an issuer-approved CADC LayerZero pathway on 420.
 /// @dev It never mints, burns, custodies, wraps, or impersonates CADC.
@@ -15,6 +16,9 @@ contract CADCBridgeIntegration is GenesisResidentAccess420 {
     bool public active;
     bytes32 public securityConfigHash;
     bytes32 public peerConfigHash;
+    address public qualificationRegistry;
+    bytes32 public qualificationId;
+    bytes32 public qualificationRegistryHash;
 
     event CADCPathConfigured(
         address indexed cadc,
@@ -43,12 +47,32 @@ contract CADCBridgeIntegration is GenesisResidentAccess420 {
         require(cadc_ != address(0) && endpoint_ != address(0) && issuerOFT_ != address(0), "zero");
         require(cadc_.code.length != 0 && endpoint_.code.length != 0 && issuerOFT_.code.length != 0, "code");
         require(securityConfigHash_ != bytes32(0) && peerConfigHash_ != bytes32(0), "config hash");
+        qualificationId=0;
         cadc = cadc_;
         layerZeroEndpoint = endpoint_;
         issuerOFT = issuerOFT_;
         securityConfigHash = securityConfigHash_;
         peerConfigHash = peerConfigHash_;
         emit CADCPathConfigured(cadc_, endpoint_, issuerOFT_, securityConfigHash_, peerConfigHash_);
+    }
+
+    function configurationState() external view returns(bytes32){return keccak256(abi.encode(cadc,layerZeroEndpoint,issuerOFT,securityConfigHash,peerConfigHash));}
+    function bindQualification(bytes32 expected) external {
+        _requireGenesisGovernance(BridgeIds420.ACTION_CONFIGURE);
+        address target=_resolveRequired(BridgeIds420.VERIFIER_REGISTRY);
+        require(expected!=0 && BridgeVerifierRegistry420(target).requireDirection(address(this),1)==expected,"qualification");
+        qualificationRegistry=target;qualificationRegistryHash=target.codehash;qualificationId=expected;
+    }
+    function _requireQualification() private view {
+        address target=_resolveRequired(BridgeIds420.VERIFIER_REGISTRY);
+        require(target==qualificationRegistry && target.codehash==qualificationRegistryHash && qualificationId!=0,"qualification binding");
+        require(BridgeVerifierRegistry420(target).requireDirection(address(this),1)==qualificationId,"stale qualification");
+    }
+    /// @notice Consumers must use this live guard; the stored active flag is not an execution authorization.
+    function requireActive() external view {
+        require(active,"inactive CADC path");
+        _requireOperational(BridgeIds420.ACTION_INBOUND,ISystemSafety420.ActionClass.NORMAL_ONLY,Types420.Direction.INBOUND);
+        _requireQualification();
     }
 
     function setActive(bool active_) external {
@@ -61,6 +85,7 @@ contract CADCBridgeIntegration is GenesisResidentAccess420 {
             );
             require(cadc != address(0) && layerZeroEndpoint != address(0) && issuerOFT != address(0), "unconfigured");
             require(securityConfigHash != bytes32(0) && peerConfigHash != bytes32(0), "unverified");
+            _requireQualification();
         }
         active = active_;
         emit CADCPathActive(active_);

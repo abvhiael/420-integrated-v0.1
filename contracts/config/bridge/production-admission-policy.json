@@ -1,0 +1,12 @@
+{
+  "schema": "420-bridge-production-admission-policy-v1",
+  "governance": "Existing Genesis authority/timelock; no new approver or delay",
+  "route_activation": "Stage inactive, qualify exact adapter/verifier/configuration, activate with atomic binding. ACTIVE label alone never authorizes execution.",
+  "execution": "Live canonical registry, chain, runtime, implementation, configuration and exact route checks before and after verification/dispatch and at positive transfer lifecycle advancement.",
+  "lifecycle": "Only canonical trusted router creates transfers or asserts VERIFIED. Exact original transfer qualification remains pinned through settlement. Operators cannot supply substitute proof authorization.",
+  "recovery": "Both-direction disable, suspension, pause, dispute, expiry and governed refund remain available after qualification drift. Positive recovery cannot restore stale approval.",
+  "chain_orientation": "One exact recorded endpoint must be the executing chain; local source and local destination orientations supported.",
+  "cadc": "Explicit qualification binding for activation; requireActive for live use; public configuration commitment and audited dependency manifest. No issuer authorization implied.",
+  "unsupported": "Legacy placeholder adapters revert. Unsupported protocol receipt/finality paths confer no settlement authorization.",
+  "production_approvals": []
+}

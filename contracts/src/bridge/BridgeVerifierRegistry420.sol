@@ -81,7 +81,7 @@ contract BridgeVerifierRegistry420 is GenesisResidentAccess420 {
         BridgeChainRegistry420 chains=BridgeChainRegistry420(_resolveRequired(BridgeIds420.CHAIN_REGISTRY));
         BridgeChainRegistry420.Chain memory source=chains.requireActive(r.sourceChainKey);
         BridgeChainRegistry420.Chain memory destination=chains.requireActive(r.destinationChainKey);
-        require(r.sourceChainKey!=r.destinationChainKey && destination.routeChainId==block.chainid,"qualification chain");
+        require(r.sourceChainKey!=r.destinationChainKey && (source.routeChainId==block.chainid || destination.routeChainId==block.chainid),"qualification chain");
         require(chains.isActiveRoute(r.sourceChainKey,source.routeChainId) && chains.isActiveRoute(r.destinationChainKey,destination.routeChainId),"chain binding");
         id=keccak256(abi.encode(block.chainid,address(this),++sequence,r.consumer.target,r.verifier.target,snapshot,r.evidenceHash));
         approvals[id]=Approval(r.consumer.target,r.verifier.target,address(chains),address(chains).codehash,r.sourceChainKey,r.destinationChainKey,chains.identityHash(r.sourceChainKey),chains.identityHash(r.destinationChainKey),r.proofSystem,r.configurationHash,roots,r.evidenceHash,snapshot,r.validUntil,r.directions,qualified?Status.APPROVED:Status.UNQUALIFIED);
@@ -100,7 +100,7 @@ contract BridgeVerifierRegistry420 is GenesisResidentAccess420 {
         require(a.status==Status.APPROVED && a.consumer==consumer && (a.validUntil==0||block.timestamp<a.validUntil),"unqualified verifier");
         BridgeChainRegistry420 chains=BridgeChainRegistry420(_resolveRequired(BridgeIds420.CHAIN_REGISTRY));
         require(address(chains)==a.chainRegistry && address(chains).codehash==a.chainRuntimeHash && chains.identityHash(a.sourceChainKey)==a.sourceIdentity && chains.identityHash(a.destinationChainKey)==a.destinationIdentity,"stale chain qualification");
-        (uint64 destinationId,,,,,)=chains.chains(a.destinationChainKey);require(destinationId==block.chainid,"wrong destination chain");
+        (uint64 destinationId,,,,,)=chains.chains(a.destinationChainKey);(uint64 sourceId,,,,,)=chains.chains(a.sourceChainKey);require(sourceId==block.chainid || destinationId==block.chainid,"wrong destination chain");
         Registration memory r=abi.decode(registrations[id],(Registration));(bytes32 live,)=_snapshot(r);require(live==a.snapshotHash,"stale verifier qualification");
     }
     function isCurrent(address consumer) external view returns(bool){try this.requireCurrent(consumer) returns(bytes32){return true;}catch{return false;}}

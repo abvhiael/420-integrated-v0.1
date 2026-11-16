@@ -1,0 +1,10 @@
+{
+  "BridgeChainRegistry420": 3486,
+  "BridgeRouteRegistry": 9888,
+  "BridgeTransferRegistry": 18076,
+  "BridgeVerifierProxy420": 1354,
+  "BridgeVerifierRegistry420": 22063,
+  "CADCBridgeIntegration": 5747,
+  "GatewayRouter420": 13045,
+  "VerifiedGateway420": 9495
+}

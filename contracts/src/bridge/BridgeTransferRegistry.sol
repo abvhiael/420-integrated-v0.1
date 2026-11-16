@@ -9,6 +9,7 @@ import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/IReplayProtection420.sol";
 import "../interfaces/genesis/Errors420.sol";
 import "./BridgeIds420.sol";
+import "./BridgeRouteRegistry.sol";
 
 contract BridgeTransferRegistry is GenesisResidentAccess420 {
     enum Status {
@@ -38,6 +39,7 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
     mapping(bytes32 => bytes32) public lastEvidenceHash;
     mapping(bytes32 => Status) public retryTarget;
     mapping(bytes32 => Status) public pausedFrom;
+    mapping(bytes32 => bytes32) public transferQualification;
     mapping(address => bool) public trustedRouter;
     mapping(address => bool) public trustedOperator;
 
@@ -129,7 +131,7 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
         bytes32 sourceTxId,
         bytes32 sourceMessageId
     ) external returns (bytes32 id) {
-        require(trustedRouter[msg.sender], "router");
+        require(trustedRouter[msg.sender] && msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER), "canonical router");
         _requireOperational(
             BridgeIds420.ACTION_INBOUND,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
@@ -140,8 +142,10 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
                 && amount > 0 && sourceTxId != bytes32(0) && sourceMessageId != bytes32(0),
             "transfer"
         );
+        _requireAdmission(routeId,assetId,true);
         id = deriveTransferId(routeId, assetId, sender, recipient, amount, sourceTxId, sourceMessageId);
         _consumeIdentity(id);
+        transferQualification[id]=_admissionIdentity(routeId);
         transfers[id] = Transfer(
             routeId, assetId, sender, recipient, amount, sourceTxId, sourceMessageId,
             Status.CREATED, uint64(block.timestamp), uint64(block.timestamp)
@@ -159,7 +163,7 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
         uint256 amount,
         bytes32 sourceMessageId
     ) external returns (bytes32 id) {
-        require(trustedRouter[msg.sender], "router");
+        require(trustedRouter[msg.sender] && msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER), "canonical router");
         _requireOperational(
             BridgeIds420.ACTION_OUTBOUND,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
@@ -170,8 +174,10 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
                 && recipientHash != bytes32(0) && amount > 0 && sourceMessageId != bytes32(0),
             "transfer"
         );
+        _requireAdmission(routeId,assetId,false);
         id = deriveOutboundTransferId(routeId, assetId, sender, recipientHash, amount, sourceMessageId);
         _consumeIdentity(id);
+        transferQualification[id]=_admissionIdentity(routeId);
         transfers[id] = Transfer(
             routeId, assetId, sender, address(0), amount, bytes32(0), sourceMessageId,
             Status.CREATED, uint64(block.timestamp), uint64(block.timestamp)
@@ -212,6 +218,7 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
 
     function markVerified(bytes32 id, bytes32 evidenceHash) external {
         _requireLifecycleActor(id);
+        require(msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER),"verification router");
         _transition(id, Status.VERIFIED, evidenceHash);
     }
 
@@ -361,6 +368,11 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
         Status fromStatus = t.status;
         _requireEvidence(evidenceHash);
         require(isAllowedTransition(fromStatus, toStatus), "transition");
+        // Recovery and negative evidence remain recordable after revocation; positive advancement cannot bypass admission.
+        if (toStatus==Status.SOURCE_PENDING || toStatus==Status.SOURCE_FINALIZED || toStatus==Status.PROOF_PENDING || toStatus==Status.VERIFIED || toStatus==Status.DESTINATION_PENDING || toStatus==Status.COMPLETED) {
+            _requireAdmission(t.routeId,t.assetId,transferDirection[id]==Direction.INBOUND);
+            require(transferQualification[id]==_admissionIdentity(t.routeId),"transfer qualification changed");
+        }
         t.status = toStatus;
         t.updatedAt = uint64(block.timestamp);
         lastEvidenceHash[id] = evidenceHash;
@@ -368,8 +380,17 @@ contract BridgeTransferRegistry is GenesisResidentAccess420 {
         emit TransferTransition(id, fromStatus, toStatus, evidenceHash, msg.sender);
     }
 
+    function _admissionIdentity(bytes32 routeId) private view returns(bytes32) {
+        BridgeRouteRegistry routes=BridgeRouteRegistry(_resolveRequired(BridgeIds420.ROUTE_REGISTRY));
+        (address qualification,bytes32 runtimeHash,address consumer,bytes32 approvalId,bytes32 routeHash)=routes.verifierBindings(routeId);
+        return keccak256(abi.encode(address(routes),address(routes).codehash,qualification,runtimeHash,consumer,approvalId,routeHash));
+    }
+    function _requireAdmission(bytes32 routeId,bytes32 assetId,bool inbound) private view {
+        BridgeRouteRegistry(_resolveRequired(BridgeIds420.ROUTE_REGISTRY)).requireAdmission(routeId,assetId,inbound);
+    }
+
     function _requireLifecycleActor(bytes32 id) private view {
-        require(trustedRouter[msg.sender] || trustedOperator[msg.sender], "lifecycle actor");
+        require((trustedRouter[msg.sender] && msg.sender==_resolveRequired(BridgeIds420.GATEWAY_ROUTER)) || trustedOperator[msg.sender], "lifecycle actor");
         Direction direction = transferDirection[id];
         require(direction != Direction.NONE, "direction");
         if (direction == Direction.INBOUND) {

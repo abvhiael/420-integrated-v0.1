@@ -101,6 +101,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         require(adapter != address(0) && adapter.code.length != 0, "adapter");
         BridgeVerifierRegistry420 qualification=BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY));
         bytes32 approval=qualification.requireCurrent(adapter);
+        require(IBridgeAdapter420(adapter).adapterId()==adapterId_,"adapter id changed");
         IBridgeAdapter420.VerifiedTransfer memory v = IBridgeAdapter420(adapter).verifyInbound(proof);
         require(qualification.requireCurrent(adapter)==approval,"qualification changed during proof");
         require(v.sender != address(0) && v.recipient != address(0) && v.amount > 0, "transfer");
@@ -130,6 +131,8 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         transferRegistry.markVerified(
             transferId, keccak256(abi.encode(adapterId_, proofEvidence, keccak256("PROOF_VERIFIED")))
         );
+        require(qualification.requireCurrent(adapter)==approval,"qualification changed during admission");
+        _requireRouteDirection(v.routeId,v.assetId,adapterId_,true);
         emit InboundAccepted(transferId, adapterId_);
     }
 
@@ -156,6 +159,7 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
         IBridgeRiskConsumer420(_resolveRequired(BridgeIds420.RISK_MANAGER)).consume(routeId, assetId, false, amount);
         BridgeVerifierRegistry420 qualification=BridgeVerifierRegistry420(_resolveRequired(BridgeIds420.VERIFIER_REGISTRY));
         bytes32 approval=qualification.requireCurrent(adapter);
+        require(IBridgeAdapter420(adapter).adapterId()==adapterId_,"adapter id changed");
         sourceMessageId = IBridgeAdapter420(adapter).initiateOutbound{ value: msg.value }(
             routeId, assetId, msg.sender, recipient, amount, extra
         );
@@ -173,6 +177,8 @@ contract GatewayRouter420 is GenesisResidentAccess420 {
             transferId, keccak256(abi.encode(adapterId_, sourceMessageId, recipientHash))
         );
 
+        require(qualification.requireCurrent(adapter)==approval,"qualification changed during admission");
+        _requireRouteDirection(routeId,assetId,adapterId_,false);
         emit OutboundInitiated(routeId, adapterId_, sourceMessageId);
         emit OutboundTransferRegistered(transferId, routeId, sourceMessageId);
     }

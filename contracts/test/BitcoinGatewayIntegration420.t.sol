@@ -129,7 +129,7 @@ contract BitcoinGatewayIntegration420Test {
             adapterId: ADAPTER_ID,
             verifierConfigHash: keccak256("verified-config"),
             version: 1,
-            status: BridgeRouteRegistry.Status.ACTIVE,
+            status: BridgeRouteRegistry.Status.APPROVED_INACTIVE,
             inboundEnabled: true,
             outboundEnabled: true
         });
@@ -172,7 +172,7 @@ contract BitcoinGatewayIntegration420Test {
         BitcoinFinalityVerifier420 verifier=new BitcoinFinalityVerifier420(c,script,ROUTE_ID,1,address(f.router));
         BitcoinBridgeAdapter420 a=new BitcoinBridgeAdapter420(address(this),address(f.router),address(verifier));a.setBtcBinding(ASSET_ID,ROUTE_ID);
         f.chains.setChain(a.BTC_CHAIN_KEY(),BridgeChainRegistry420.Chain(a.BTC_ROUTE_CHAIN_ID(),a.BTC_MAINNET_GENESIS_HASH(),ASSET_ID,keccak256("BTC/SPV"),BridgeChainRegistry420.ChainFamily.UTXO,true));
-        f.routes.setRoute(ROUTE_ID,BridgeRouteRegistry.Route(ASSET_ID,a.BTC_ROUTE_CHAIN_ID(),uint64(block.chainid),ASSET_ID,bytes32(uint256(uint160(TOKEN))),a.ADAPTER_ID(),keccak256(abi.encode(address(verifier))),2,BridgeRouteRegistry.Status.ACTIVE,true,false));
+        f.routes.setRoute(ROUTE_ID,BridgeRouteRegistry.Route(ASSET_ID,a.BTC_ROUTE_CHAIN_ID(),uint64(block.chainid),ASSET_ID,bytes32(uint256(uint160(TOKEN))),a.ADAPTER_ID(),keccak256(abi.encode(address(verifier))),2,BridgeRouteRegistry.Status.APPROVED_INACTIVE,true,false));
         f.router.setAdapter(a.ADAPTER_ID(),address(a));
         BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(a),address(verifier),bytes4(keccak256("verifier()")),abi.encodeWithSignature("gatewayScriptHash()"),abi.encodeWithSignature("depositDomain()"),true);
         bytes memory tx_=abi.encodePacked(hex"0100000001",bytes32(uint256(1)),hex"0000000000ffffffff02e80300000000000016",script,hex"000000000000000022",verifier.commitmentScript(0,address(0xB0B),1000),hex"00000000");

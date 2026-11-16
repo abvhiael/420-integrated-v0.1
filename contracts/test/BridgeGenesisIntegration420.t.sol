@@ -128,7 +128,7 @@ abstract contract BridgeGenesisFixture420 {
             adapterId: ADAPTER_ID,
             verifierConfigHash: keccak256("verified-config"),
             version: 1,
-            status: BridgeRouteRegistry.Status.ACTIVE,
+            status: BridgeRouteRegistry.Status.APPROVED_INACTIVE,
             inboundEnabled: true,
             outboundEnabled: true
         });
@@ -239,6 +239,7 @@ contract BridgeGenesisIntegration420Test is BridgeGenesisFixture420 {
 
     function testDirectionDisabledFailsClosed() public {
         Fixture memory f = _setup();
+        BridgeQualificationFixture420.approveRoute(f.env,f.routes,ROUTE_ID,address(f.adapter),address(f.adapter),0,abi.encodeWithSignature("adapterId()"),abi.encodeWithSignature("adapterId()"),false);
         f.routes.setDirection(ROUTE_ID, false, true);
         f.adapter.setInbound(_inbound(10 ether));
         (bool ok,) = address(f.router).call(abi.encodeWithSelector(f.router.acceptInbound.selector, ADAPTER_ID, hex"4201"));

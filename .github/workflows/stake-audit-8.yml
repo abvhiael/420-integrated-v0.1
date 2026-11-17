@@ -51,6 +51,8 @@ jobs:
           git diff --exit-code
       - name: Stake lifecycle, accounting, ABI, fuzz and invariants
         working-directory: contracts
+        env:
+          FOUNDRY_REMAPPINGS: '["forge-std/=forge-std/","@layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/","@openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/","solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/"]'
         run: |
           forge test --match-path 'test/Stake*.t.sol' -vv | tee /tmp/stake-audit-8/contracts.log
           forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vv | tee /tmp/stake-audit-8/gateway.log

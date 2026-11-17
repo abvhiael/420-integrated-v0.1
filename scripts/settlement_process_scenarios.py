@@ -79,6 +79,7 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         seen = []
         while time.monotonic() < deadline:
             if process.poll() is not None:
+                if event == 'exited':return {'exit':process.returncode}
                 raise AssertionError(f'consensus exited {process.returncode}; events={seen}')
             try:
                 item = messages.get(timeout=.2)
@@ -128,7 +129,8 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         (out / f'certified-{slot}-{calls}.json').write_text(json.dumps(record))
         return record
     index_store = out / 'indexed-canonical.json'
-    def index_checkpoint(expected, record):
+    live_indexers=[]
+    def index_checkpoint(expected, record, continuous=False):
         env = dict(os.environ, INDEXER_RPC_URL=f'http://127.0.0.1:{auth_port}',
                    INDEXER_ENGINE_URL=f'http://127.0.0.1:{auth_port}', INDEXER_JWT_SECRET=str(out/'jwt.hex'),
                    INDEXER_CERTIFIED_DIR=str(state), INDEXER_SETTLEMENT_TRUST=str(trust_path),
@@ -147,16 +149,17 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
                 if process_index.poll() is not None: raise AssertionError('certified Indexer exited: '+(out/f'indexer-{len(evidence["indexer_processes"])-1}.log').read_text())
                 if index_store.exists():
                     data=json.loads(index_store.read_text());cp=data.get('checkpoint',{})
-                    if cp.get('indexedHash')==expected['hash'] and cp.get('finalizedHeight')==3:
-                        assert data['blocks']['4']['producer']['certified']
-                        assert data['blocks']['4']['producer']['consensusBlockRoot']=='0x'+bytes(record['Certificate']['BlockRoot']).hex()
-                        head_logs=[x for x in data['logs'].values() if x['blockNumber']==4]
+                    if cp.get('indexedHash')==expected['hash'] and cp.get('finalizedHeight')==int(expected['number'],16)-1:
+                        assert data['blocks'][str(int(expected['number'],16))]['producer']['certified']
+                        assert data['blocks'][str(int(expected['number'],16))]['producer']['consensusBlockRoot']=='0x'+bytes(record['Certificate']['BlockRoot']).hex()
+                        head_logs=[x for x in data['logs'].values() if x['blockNumber']==int(expected['number'],16)]
                         assert head_logs and all(x['blockHash']==expected['hash'] for x in head_logs)
+                        if continuous:live_indexers.append(process_index)
                         return data
                 time.sleep(.1)
             raise AssertionError('Indexer did not persist certified checkpoint')
         finally:
-            if process_index.poll() is None: os.killpg(process_index.pid,signal.SIGKILL);process_index.wait(timeout=15)
+            if process_index not in live_indexers and process_index.poll() is None: os.killpg(process_index.pid,signal.SIGKILL);process_index.wait(timeout=15)
             log.close()
     def record_scenario(name, before, after, **extra):
         evidence['scenarios'].append(dict(name=name, before=before, after=after, **extra))
@@ -439,10 +442,16 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         monitor.divergence(False)
         record_scenario('actual wrong execution chain rejected without advancing settlement', replaced, snapshot(), rejected_chain_id=421)
 
+        if os.environ.get('STAKE_INTEGRATED_FAULTS') == '1':
+            spec=importlib.util.spec_from_file_location('stake_integrated_faults',root/'scripts/stake_integrated_faults.py')
+            integrated=importlib.util.module_from_spec(spec);spec.loader.exec_module(integrated)
+            evidence['integrated_faults']=integrated.run(root,out,monitor,produce,send,wait,spawn,kill_consensus,checkpoint,cursor,history,snapshot,start_execution,stop_execution,index_checkpoint,replacement,cross_final,old_cursor)
 
     finally:
         if monitor is not None: monitor.close()
         kill_consensus()
+        for indexer in live_indexers:
+            if indexer.poll() is None:os.killpg(indexer.pid,signal.SIGKILL);indexer.wait(timeout=15)
         for log in logs:
             log.close()
         (out / 'consensus-events.json').write_text(json.dumps(all_messages, indent=2))

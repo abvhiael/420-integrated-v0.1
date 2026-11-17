@@ -41,12 +41,21 @@ func keys() (rec.Trust, []*bls.SecretKey) {
 	return t, keys
 }
 func main() {
+	protectedDir := flag.String("provision-protected", "", "LOCAL ONLY: initialize fixture signer policy and validator history")
+	protectedConfig := flag.String("protected-config", "", "require production protected seat-zero vote, never fall back")
 	genesis := flag.String("genesis", "", "execution genesis hash for local fixture")
 	timestamp := flag.String("timestamp", "0x0", "genesis timestamp")
 	deriveOnly := flag.Bool("batch", false, "derive the canonical batch instead of certifying a payload")
 	plan := flag.String("record", "", "JSON plan to certify")
 	flag.Parse()
+	if *protectedDir != "" {
+		provisionProtected(*protectedDir)
+		return
+	}
 	t, keys := keys()
+	if *protectedConfig != "" {
+		keys[0].Destroy()
+	}
 	if *genesis != "" {
 		h, e := ct.ParseRoot(*genesis)
 		if e != nil {
@@ -115,7 +124,17 @@ func main() {
 	root := cc.SigningRoot(cc.DomainQC, 420, 1, cert.SigningDataRoot())
 	var sigs []ct.BLSSignature
 	for i := 0; i < 11; i++ {
-		sig, e := keys[i].Sign(root[:])
+		var sig ct.BLSSignature
+		var e error
+		if i == 0 && *protectedConfig != "" {
+			source := t.Genesis
+			if p.Parent != nil {
+				source = ct.Checkpoint{Slot: p.Parent.Certificate.Slot, Root: p.Parent.Certificate.BlockRoot}
+			}
+			sig, e = protectedVote(*protectedConfig, cert, source)
+		} else {
+			sig, e = keys[i].Sign(root[:])
+		}
 		if e != nil {
 			panic(e)
 		}

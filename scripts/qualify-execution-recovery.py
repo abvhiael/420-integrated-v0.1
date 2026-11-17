@@ -5,7 +5,8 @@ Reuses node420 and the pinned execution genesis. The real gateway is compiled in
 an isolated import closure; a downstream counter is explicitly a test fixture.
 Default mode qualifies execution only. --consensus adds the real BLS-verifying
 settlement daemon; its separate local producer uses explicitly insecure fixture keys.
-Production signing-boundary qualification is not claimed.
+--integrated requires an indispensable production protected-signer share and adds
+coordinated fault/alarms qualification. Remaining co-signers are local fixtures.
 """
 import argparse
 import base64
@@ -31,6 +32,7 @@ ACTION = '420/SYSCALL/ROTATION_SNAPSHOT/V1'
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--integrated', action='store_true', help='require witnessed protected signing and coordinated fault/alarms qualification (needs TLS PostgreSQL)')
     p.add_argument('--consensus', action='store_true', help='qualify the production certified-settlement daemon and signed history')
     p.add_argument('--geth', type=Path, default=ROOT / 'bin/upstream/geth-v1.17.5-420')
     p.add_argument('--solc', default='solc')
@@ -38,6 +40,10 @@ def main():
     p.add_argument('--auth-port', type=int, default=8551)
     p.add_argument('--rpc-port', type=int, default=8545)
     a = p.parse_args()
+    if a.integrated:
+        if not a.consensus or not os.environ.get('STAKE_SIGNER_PG_DSN'):
+            p.error('--integrated requires --consensus and STAKE_SIGNER_PG_DSN')
+        os.environ['STAKE_INTEGRATED_FAULTS']='1'
     out = a.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
     if (out / 'execution/geth').exists():

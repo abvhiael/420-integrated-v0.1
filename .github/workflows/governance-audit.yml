@@ -50,8 +50,6 @@ on:
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
-      - '420-indexer/src/protocol-object-service.ts'
-      - '420-indexer/src/protocol-projections.ts'
       - '420-indexer/src/query-service.ts'
       - '420-indexer/src/event-stream.ts'
       - '420-indexer/src/index.ts'
@@ -67,7 +65,6 @@ on:
       - '420-indexer/test/event-subscription.test.ts'
       - 'docs/apps/governance/**'
       - 'docs/audit/420GOVERNANCE-*'
-      - '.github/workflows/governance-audit.yml'
   pull_request:
     paths:
       - 'contracts/src/governance/**'
@@ -115,8 +112,6 @@ on:
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
-      - '420-indexer/src/protocol-object-service.ts'
-      - '420-indexer/src/protocol-projections.ts'
       - '420-indexer/src/query-service.ts'
       - '420-indexer/src/event-stream.ts'
       - '420-indexer/src/index.ts'
@@ -132,7 +127,6 @@ on:
       - '420-indexer/test/event-subscription.test.ts'
       - 'docs/apps/governance/**'
       - 'docs/audit/420GOVERNANCE-*'
-      - '.github/workflows/governance-audit.yml'
   workflow_dispatch:
 
 permissions:

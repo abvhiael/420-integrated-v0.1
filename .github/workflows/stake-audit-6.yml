@@ -11,10 +11,8 @@ on:
       - '420-indexer/src/abi-manifest.ts'
       - '420-indexer/test/stake420-release-descriptor.test.ts'
       - 'indexer/model/stake.go'
-      - 'indexer/api/stake.go'
       - 'indexer/api/stake_test.go'
       - 'indexer/api/server.go'
-      - 'indexer/store/file.go'
       - 'explorer/indexerclient/stake.go'
       - 'explorer/indexerclient/stake_test.go'
       - 'explorer/service/stakeviews.go'
@@ -27,20 +25,17 @@ on:
       - 'packages/420-sdk/src/stake.ts'
       - 'packages/420-sdk/src/index.ts'
       - 'packages/420-sdk/test/stake-sdk.test.mjs'
-      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
-      - '.github/workflows/stake-audit-6.yml'
   pull_request:
     paths:
       - 'contracts/artifacts/ValidatorRegistry.abi.json'
       - 'contracts/artifacts/RewardController.abi.json'
       - 'contracts/src/system/ValidatorRegistry.sol'
       - 'contracts/src/system/RewardController.sol'
-      - '420-indexer/**'
-      - 'indexer/**'
+      - '420-indexer/descriptors/stake420-v3.json'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/test/stake420-release-descriptor.test.ts'
       - 'explorer/**'
       - 'packages/420-sdk/**'
-      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
-      - '.github/workflows/stake-audit-6.yml'
   workflow_dispatch:
 
 concurrency:

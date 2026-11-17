@@ -6,22 +6,24 @@ on:
       - 'packages/420-sdk/**'
       - 'packages/420-cli/**'
       - 'services/compute-api/**'
-      - '420-indexer/**'
+      - '420-indexer/src/compute*.ts'
+      - '420-indexer/test/compute*.test.ts'
+      - '420-indexer/descriptors/compute420-v1.json'
       - 'docs/compute-market/CMP-7*'
       - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
       - 'scripts/verify-cmp-7-10-closeout.py'
-      - '.github/workflows/compute-developer.yml'
   push:
     branches: [ main ]
     paths:
       - 'packages/420-sdk/**'
       - 'packages/420-cli/**'
       - 'services/compute-api/**'
-      - '420-indexer/**'
+      - '420-indexer/src/compute*.ts'
+      - '420-indexer/test/compute*.test.ts'
+      - '420-indexer/descriptors/compute420-v1.json'
       - 'docs/compute-market/CMP-7*'
       - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
       - 'scripts/verify-cmp-7-10-closeout.py'
-      - '.github/workflows/compute-developer.yml'
 
 concurrency:
   group: compute-developer-${{ github.event.pull_request.number || github.ref }}

@@ -77,15 +77,21 @@ export async function recoverCanonicalAncestry420(
   for (let depth = 1; depth <= maxDepth; depth += 1) {
     if (current.blockNumber < BigInt(depth)) break;
     const number = current.blockNumber - BigInt(depth);
+    if (current.finalizedNumber !== undefined && number < current.finalizedNumber) throw new Error('reorg violates finalized history');
     const local = await history.load(number);
     if (!local) continue;
     const canonical = await source.getBlockByNumber(number);
     if (canonical && sameHash(canonical.hash, local.blockHash)) {
+      if (current.finalizedNumber !== undefined) {
+        local.finalizedNumber = current.finalizedNumber;
+        local.finalizedHash = current.finalizedHash;
+      }
       await commitRollback420(consumer, checkpoints, history, number, local);
       return { detected: true, depth, ancestor: local };
     }
   }
 
+  if (current.finalizedNumber !== undefined && current.blockNumber - BigInt(maxDepth) <= current.finalizedNumber) throw new Error('reorg violates finalized history');
   if (current.blockNumber < BigInt(maxDepth)) {
     await commitRollback420(consumer, checkpoints, history, null, null);
     return { detected: true, depth: Number(current.blockNumber + 1n), ancestor: null };

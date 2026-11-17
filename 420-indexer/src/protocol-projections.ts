@@ -6,8 +6,11 @@ export class ProtocolProjection420 {
   constructor(readonly db: TransactionalSql420, readonly decoders: ProtocolDecoderRegistry420) {}
 
   async applyLogs(chainId: bigint, logs: readonly IndexerLog[]): Promise<number> {
+    return this.db.transaction((tx) => this.applyLogsTx(chainId, logs, tx));
+  }
+
+  async applyLogsTx(chainId: bigint, logs: readonly IndexerLog[], tx: SqlExecutor420): Promise<number> {
     let decodedCount = 0;
-    await this.db.transaction(async (tx: SqlExecutor420) => {
       for (const log of logs) {
         const decoded = this.decoders.decode(log);
         if (!decoded) continue;
@@ -23,7 +26,6 @@ export class ProtocolProjection420 {
           [chainId.toString(), decoded.blockNumber.toString(), decoded.blockHash, decoded.transactionHash, decoded.transactionIndex, decoded.logIndex, decoded.contractAddress, decoded.protocol, decoded.eventName, JSON.stringify(decoded.fields, (_key, value) => typeof value === 'bigint' ? value.toString() : value)]
         );
       }
-    });
     return decodedCount;
   }
 

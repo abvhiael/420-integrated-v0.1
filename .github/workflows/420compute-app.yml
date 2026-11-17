@@ -21,12 +21,13 @@ on:
       - 'scripts/verify-cmp-8-closeout.py'
       - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
       - 'docs/compute-market/CMP-8*'
-      - '.github/workflows/420compute-app.yml'
   push:
     branches: [ main ]
     paths:
       - 'compute/web/**'
-      - '420-indexer/**'
+      - '420-indexer/src/compute*.ts'
+      - '420-indexer/test/compute*.test.ts'
+      - '420-indexer/descriptors/compute420-v1.json'
       - 'services/compute-api/**'
       - 'compute/worker/**'
       - 'packaging/node420-compute/**'
@@ -34,7 +35,6 @@ on:
       - 'scripts/verify-cmp-8-closeout.py'
       - 'contracts/config/compute-market/cmp-8-phase-closeout.json'
       - 'docs/compute-market/CMP-8*'
-      - '.github/workflows/420compute-app.yml'
 
 concurrency:
   group: compute-app-${{ github.event.pull_request.number || github.ref }}

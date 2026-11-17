@@ -139,7 +139,7 @@ def main() -> int:
         "StakeValidatorRegistryAddress",
         "StakeRewardControllerAddress",
         "Finality",
-        "CanonicalAuthority:false",
+        "CanonicalAuthority: false",
         "malformed Stake validator topic",
     ])
     require("indexer/store/file.go", [

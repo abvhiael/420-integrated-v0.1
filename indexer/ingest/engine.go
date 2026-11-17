@@ -29,11 +29,11 @@ type ProducerAttributor interface {
 }
 
 type Engine struct {
-	chainID       uint64
-	schemaVersion string
-	source        Source
-	store         Store
-	core          *core.Indexer
+	chainID            uint64
+	schemaVersion      string
+	source             Source
+	store              Store
+	core               *core.Indexer
 	producerAttributor ProducerAttributor
 }
 
@@ -41,14 +41,25 @@ func New(chainID uint64, schemaVersion string, source Source, store Store) *Engi
 	return &Engine{chainID: chainID, schemaVersion: schemaVersion, source: source, store: store, core: core.New(chainID, schemaVersion, store)}
 }
 
-func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine { e.producerAttributor = a; return e }
+func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine {
+	e.producerAttributor = a
+	return e
+}
 
 func (e *Engine) attributeProducer(block *model.BlockRecord) error {
-	if block.Number == 0 { return nil }
-	if e.producerAttributor == nil { return nil }
+	if block.Number == 0 {
+		return nil
+	}
+	if e.producerAttributor == nil {
+		return nil
+	}
 	producer, ok, err := e.producerAttributor.ProducerForBlock(block.Hash)
-	if err != nil { return err }
-	if !ok { return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash) }
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash)
+	}
 	block.Producer = &producer
 	return nil
 }
@@ -58,26 +69,64 @@ func (e *Engine) attributeProducer(block *model.BlockRecord) error {
 // rolls back only non-finalized history, and replays the remote canonical branch.
 // After ingestion or repair, safe/finalized tags are verified and promoted into durable state.
 func (e *Engine) CatchUp(ctx context.Context) error {
-	if err := e.core.ValidateSource(e.source); err != nil { return err }
+	if err := e.core.ValidateSource(e.source); err != nil {
+		return err
+	}
 	head, err := e.source.BlockNumber(ctx)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	cp, hasCP, err := e.store.Checkpoint()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	start := uint64(0)
-	if hasCP { start = cp.IndexedHeight + 1 }
+	if hasCP {
+		// Reconcile the saved tip even if the remote head has not advanced.
+		// Otherwise an equal-height fork leaves orphaned Stake events visible.
+		if head < cp.IndexedHeight {
+			if err := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor).Repair(ctx, head); err != nil {
+				return err
+			}
+			return e.PromoteFinality(ctx)
+		}
+		tip, err := e.source.BundleByNumber(ctx, e.chainID, cp.IndexedHeight, model.FinalityHead, e.schemaVersion)
+		if err != nil {
+			return err
+		}
+		if tip.Block.Hash != cp.IndexedHash {
+			if err := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor).Repair(ctx, head); err != nil {
+				return err
+			}
+			return e.PromoteFinality(ctx)
+		}
+		start = cp.IndexedHeight + 1
+	}
 	for number := start; number <= head; number++ {
-		if err := ctx.Err(); err != nil { return err }
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		bundle, err := e.source.BundleByNumber(ctx, e.chainID, number, model.FinalityHead, e.schemaVersion)
-		if err != nil { return fmt.Errorf("fetch block %d: %w", number, err) }
-		if bundle.Block.Number != number { return fmt.Errorf("rpc returned block %d for requested %d", bundle.Block.Number, number) }
-		if err := e.attributeProducer(&bundle.Block); err != nil { return fmt.Errorf("attribute block %d producer: %w", number, err) }
+		if err != nil {
+			return fmt.Errorf("fetch block %d: %w", number, err)
+		}
+		if bundle.Block.Number != number {
+			return fmt.Errorf("rpc returned block %d for requested %d", bundle.Block.Number, number)
+		}
+		if err := e.attributeProducer(&bundle.Block); err != nil {
+			return fmt.Errorf("attribute block %d producer: %w", number, err)
+		}
 		if number > 0 {
 			parent, ok, err := e.store.Block(number - 1)
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 			if hasCP || number > start {
 				if !ok || parent.Hash != bundle.Block.ParentHash {
 					r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor)
-					if err := r.Repair(ctx, head); err != nil { return fmt.Errorf("repair reorg at block %d: %w", number, err) }
+					if err := r.Repair(ctx, head); err != nil {
+						return fmt.Errorf("repair reorg at block %d: %w", number, err)
+					}
 					return e.PromoteFinality(ctx)
 				}
 			}
@@ -93,7 +142,9 @@ func (e *Engine) CatchUp(ctx context.Context) error {
 		if err := e.core.AcceptBlock(bundle.Block); err != nil {
 			if errors.Is(err, core.ErrParentMismatch) {
 				r := reorg.New(e.chainID, e.schemaVersion, e.source, e.store).WithProducerAttributor(e.producerAttributor)
-				if repairErr := r.Repair(ctx, head); repairErr != nil { return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr) }
+				if repairErr := r.Repair(ctx, head); repairErr != nil {
+					return fmt.Errorf("repair reorg after accept block %d: %w", number, repairErr)
+				}
 				return e.PromoteFinality(ctx)
 			}
 			return fmt.Errorf("accept block %d: %w", number, err)

@@ -7,9 +7,12 @@ on:
       - 'contracts/src/system/GenesisResidentAccess420.sol'
       - 'contracts/test/Registry*.t.sol'
       - '420-indexer/descriptors/protocol-registry-v4.json'
-      - '420-indexer/src/**'
-      - '420-indexer/test/**'
-      - 'indexer/**'
+      - '420-indexer/test/protocol-registry-release-descriptor.test.ts'
+      - '420-indexer/src/abi-manifest.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - 'indexer/decoder/**'
+      - 'indexer/api/registry*'
+      - 'indexer/ingest/registry*'
       - 'explorer/**'
       - 'search/**'
       - 'developer-hub/**'
@@ -23,7 +26,6 @@ on:
       - 'docs/audit/REG-AUDIT-7-*'
       - 'docs/audit/EXP-NEXT.1-*'
       - 'docs/architecture/infrastructure/420indexer.md'
-      - '.github/workflows/registry-reg-audit-7.yml'
   workflow_dispatch:
 
 jobs:

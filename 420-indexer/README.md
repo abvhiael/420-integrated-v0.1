@@ -96,3 +96,46 @@ See `docs/420INDEXER-TESTNET.md` for the qualification contract and required evi
 ## Next phase
 
 IDX-10 implementation is complete. The branch still requires final CI/reconciliation before merge. Actual testnet closeout remains intentionally `no-go` until live IDX-10.2/10.3/10.4 evidence, exact deployed revisions, concrete witness data, and artifact-backed genesis descriptor qualification are supplied. After the Indexer PR is reconciled and merged, the infrastructure roadmap proceeds to 420RPC.
+
+## Stake restart and canonical reconstruction
+
+Use `createStakeIndexer420` from `src/stake-indexer.ts` with `PostgresSql420`
+from `src/postgres.ts`, the pinned Stake release descriptor and retained
+ValidatorRegistry/RewardController ABI artifacts. Apply the numbered SQL
+migrations in order, including `008-finalized-recovery.sql` and
+`009-stake-lifecycle-recovery.sql`. The assembly requires a source exposing the
+canonical finalized block tag and pins all writes/rollback to the configured
+chain. Do not assemble separate core and Stake protocol transactions: the
+factory commits events, raw rows, canonical history and checkpoint together.
+
+Retain the PostgreSQL data directory across worker restarts. Recreate the worker
+with the same chain/source, database and descriptor configuration; `runOnce()`
+loads durable ancestry before indexing. A disconnected worker leaves an
+uncommitted transaction for PostgreSQL to roll back. A bounded replacement
+atomically retracts the orphaned lifecycle events with the rollback checkpoint
+and then replays canonical blocks. The default reorg depth is 64, an Indexer
+operational limit, with no change to consensus rules. `idx_stake_state` rebuilds
+from committed canonical events and matches the retained lifecycle reducer,
+including terminal states and events that do not change validator status.
+
+The Go `indexer420` daemon retains its existing FileStore/activity API path.
+Persist `INDEXER_STORE_PATH` and the configured consensus status/history source;
+run one writer per file. Snapshots fsync the file and containing directory.
+Checkpoint write failure restores the prior in-memory snapshot; uncertain
+post-rename durability requires reopening the store. An uncheckpointed bundle
+is replayed in full, replacing its previous rows. Rollback updates its checkpoint
+in the same snapshot. Catch-up reconciles equal-height and shorter remote heads,
+with a 64-block rollback bound and an immutable persisted finalized boundary.
+
+Existing SQL checkpoints acquire their finalized high-water mark only after
+canonical history is independently matched to the source. Missing history,
+finalized hash conflicts/regression, mixed-block evidence and excessive reorgs
+halt ingestion. Preserve evidence and correct the source/configuration before
+retrying. Never clear a checkpoint to force acceptance of a conflicting
+finalized chain. For an explicit projection rebuild, stop writers, back up the
+store, verify chain identity and finalized history against consensus/execution,
+then rebuild into an empty projection store from the canonical source. Compare
+its lifecycle history/state to the retained canonical evidence before serving it.
+`INDEXER_REBUILD=1` is the existing Go rebuild action; it does not authorize a
+consensus rollback. Stake query projections never settle rewards, slashes,
+withdrawals or validator membership.

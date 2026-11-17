@@ -19,7 +19,7 @@ export async function protocolObjectState420(
   if (!protocol.trim()) throw new Error('protocol is required');
   if (!objectKey.trim()) throw new Error('object key is required');
 
-  const stateView = protocol === '420Governance'
+  const stateView = protocol === '420Stake' ? 'idx_stake_state' : protocol === '420Governance'
     ? 'idx_governance_state'
     : protocol === '420Bridge' ? 'idx_bridge_state'
     : 'idx_protocol_latest_object_state';

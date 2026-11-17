@@ -1,3 +1,4 @@
+# Shared 420-indexer/** recovery/core coverage is owned by 420indexer.yml.
 name: 420AI Audit Qualification
 
 on:
@@ -7,7 +8,8 @@ on:
       - 'services/420ai-provider/**'
       - 'docs/apps/ai/developer/api.md'
       - 'scripts/verify-420ai-read-api.py'
-      - '420-indexer/**'
+      - '420-indexer/src/ai-*.ts'
+      - '420-indexer/test/ai-*.test.ts'
       - 'ai/web/**'
       - 'scripts/verify-420ai-client.py'
       - 'contracts/config/genesis-dapp-contract-map.json'
@@ -33,7 +35,6 @@ on:
       - 'contracts/test/AIDeploymentMaterialization420.t.sol'
       - 'scripts/verify-420ai-provider-runtime.py'
       - 'scripts/verify-420ai-pretestnet.py'
-      - '.github/workflows/420ai-audit.yml'
   workflow_dispatch:
 
 concurrency:

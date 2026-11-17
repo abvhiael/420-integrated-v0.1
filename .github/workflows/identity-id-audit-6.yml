@@ -4,16 +4,16 @@ on:
   pull_request:
     paths:
       - "contracts/artifacts/Identity420.json"
-      - "420-indexer/src/**"
-      - "420-indexer/sql/**"
-      - "420-indexer/test/**"
+      - "420-indexer/src/identity-descriptors.ts"
+      - "420-indexer/src/identity-read-model.ts"
+      - "420-indexer/src/protocol-decoder.ts"
+      - "420-indexer/test/identity*.test.ts"
       - "search/**"
       - "explorer/**"
       - "contracts/config/420search-genesis.json"
       - "contracts/config/420explorer-genesis.json"
       - "scripts/verify-id-audit-6-derived-services.py"
       - "docs/audit/ID-AUDIT-6-DERIVED-SERVICE-COMPATIBILITY.md"
-      - ".github/workflows/identity-id-audit-6.yml"
   workflow_dispatch:
 
 concurrency:

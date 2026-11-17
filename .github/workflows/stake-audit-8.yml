@@ -1,0 +1,74 @@
+name: 420Stake STAKE-AUDIT-8
+on:
+  pull_request:
+    paths:
+      - 'scripts/qualify-420stake-testnet.py'
+      - '.github/workflows/stake-audit-8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact head and prior audit ancestry
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git merge-base --is-ancestor 4ce11c46f25107df88ac6e3aea08f99882c6d95c HEAD
+          mkdir -p /tmp/stake-audit-8
+          git rev-parse HEAD > /tmp/stake-audit-8/sha.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualification harness rejection tests
+        run: |
+          python -m py_compile scripts/qualify-420stake-testnet.py
+          python scripts/qualify-420stake-testnet.py --self-test | tee /tmp/stake-audit-8/harness.log
+      - name: Reproduce retained bytecode and Genesis storage with inherited dependencies
+        run: |
+          python scripts/verify-stake-audit-7-predeploy.py
+          python scripts/test-stake-audit-7-predeploy.py
+          python scripts/generate-stake-audit-7-predeploy.py --check | tee /tmp/stake-audit-8/materialization.log
+      - name: Stake lifecycle, accounting, ABI, fuzz and invariants
+        working-directory: contracts
+        run: |
+          forge test --match-path 'test/Stake*.t.sol' -vv | tee /tmp/stake-audit-8/contracts.log
+          forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vv | tee /tmp/stake-audit-8/gateway.log
+          forge test --match-path 'test/ValidatorEligibility420.t.sol' -vv | tee /tmp/stake-audit-8/eligibility.log
+      - name: Consensus derivation and execution integration
+        run: |
+          go test -count=1 ./consensus/systemcall ./consensus/engine ./execution/systemcall/... | tee /tmp/stake-audit-8/consensus.log
+          go build -o /tmp/stake-audit-8-fourtwentyd ./consensus/cmd/fourtwentyd
+      - name: Wallet authorization, simulation and UI
+        working-directory: wallet/web
+        run: |
+          node --test test/stake-management.test.js test/stake-management-ui.test.js test/runtime-config-generator.test.js | tee /tmp/stake-audit-8/wallet.log
+      - name: Reject tracked artifact drift
+        run: git diff --exit-code
+      - name: Record offline result
+        run: |
+          printf 'repositorySha=%s\nrunId=%s\nresult=PASS\nliveQualificationComplete=false\n' "$(git rev-parse HEAD)" "$GITHUB_RUN_ID" > /tmp/stake-audit-8/result.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stake-audit-8-exact-head
+          path: /tmp/stake-audit-8/
+defaults:
+  run:
+    shell: bash

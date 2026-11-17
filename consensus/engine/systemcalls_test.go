@@ -36,7 +36,7 @@ func TestVerifyPayloadSystemCallRoot(t *testing.T) {
 	b := testSystemBatch()
 	root := b.Root()
 	parent := Hash32("0x"+hex.EncodeToString(b.ParentHash[:]))
-	p := ExecutionPayloadV3{ParentHash:parent,ExtraData:"0x"+hex.EncodeToString(root[:])}
+	p := ExecutionPayloadV3{ParentHash:parent,BlockNumber:"0xb",ExtraData:"0x"+hex.EncodeToString(root[:])}
 	if err:=VerifyPayloadSystemCallRoot(p,b); err!=nil { t.Fatal(err) }
 	p.ExtraData="0x00"
 	if err:=VerifyPayloadSystemCallRoot(p,b); err==nil { t.Fatal("bad root accepted") }

@@ -63,3 +63,7 @@ test('logs are canonicalized, removed logs dropped, and duplicates suppressed', 
   assert.equal(ordered.length, 3);
   assert.deepEqual(ordered.map((entry) => [entry.transactionIndex, entry.logIndex]), [[0, 0], [0, 1], [1, 0]]);
 });
+
+test('conflicting duplicate event evidence fails closed', () => {
+  assert.throws(() => normalizeLogs420([log({data:'0x00'}), log({data:'0x01'})]), /conflicting duplicate event/);
+});

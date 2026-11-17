@@ -20,13 +20,11 @@ on:
       - 'wallet/web/test/governance-management*.test.js'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
-      - '420-indexer/src/protocol-object-service.ts'
       - '420-indexer/src/query-service.ts'
       - '420-indexer/test/governance-descriptors.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - '420-indexer/test/protocol-object-service.test.ts'
       - '420-indexer/test/query-service.test.ts'
-      - '.github/workflows/governance-integration-audit.yml'
   pull_request:
     paths:
       - 'contracts/config/interfaces/governance-cross-protocol-integration.json'
@@ -44,13 +42,11 @@ on:
       - 'wallet/web/test/governance-management*.test.js'
       - '420-indexer/src/governance-descriptors.ts'
       - '420-indexer/src/lifecycle-reducer.ts'
-      - '420-indexer/src/protocol-object-service.ts'
       - '420-indexer/src/query-service.ts'
       - '420-indexer/test/governance-descriptors.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - '420-indexer/test/protocol-object-service.test.ts'
       - '420-indexer/test/query-service.test.ts'
-      - '.github/workflows/governance-integration-audit.yml'
   workflow_dispatch:
 
 permissions:

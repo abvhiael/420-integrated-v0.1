@@ -12,6 +12,8 @@ export interface IndexCheckpoint420 {
   blockNumber: bigint;
   blockHash: Hex;
   parentHash: Hex;
+  finalizedNumber?: bigint;
+  finalizedHash?: Hex;
 }
 
 export function assertFinalityPolicy420(policy: FinalityPolicy420): void {
@@ -59,14 +61,20 @@ export function compareLogs420(a: IndexerLog, b: IndexerLog): number {
 }
 
 export function normalizeLogs420(logs: readonly IndexerLog[]): IndexerLog[] {
-  const seen = new Set<string>();
+  const seen = new Map<string, IndexerLog>();
   return [...logs]
     .filter((log) => !log.removed)
     .sort(compareLogs420)
     .filter((log) => {
       const key = `${log.blockHash.toLowerCase()}:${log.transactionHash.toLowerCase()}:${log.logIndex}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
+      const previous = seen.get(key);
+      if (previous) {
+        if (previous.blockNumber !== log.blockNumber || previous.transactionIndex !== log.transactionIndex ||
+          previous.address.toLowerCase() !== log.address.toLowerCase() || previous.data.toLowerCase() !== log.data.toLowerCase() ||
+          previous.topics.map(t=>t.toLowerCase()).join(':') !== log.topics.map(t=>t.toLowerCase()).join(':')) throw new Error('conflicting duplicate event evidence');
+        return false;
+      }
+      seen.set(key, log);
       return true;
     });
 }

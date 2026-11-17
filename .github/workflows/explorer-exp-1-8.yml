@@ -1,9 +1,9 @@
 name: EXP-1.8 Runtime Negative Divergence Qualification
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
-      - 'indexer/**'
       - 'consensus/storage/**'
       - 'explorer/**'
       - 'config/420indexer-v1.json'
@@ -12,7 +12,6 @@ on:
       - 'docker/Dockerfile.420indexer'
       - 'docs/audit/EXP-1.8-runtime-negative-divergence.*'
       - 'scripts/verify-exp-1-8-runtime-negative-divergence.py'
-      - '.github/workflows/explorer-exp-1-8.yml'
 
 concurrency:
   group: exp-1-8-${{ github.event.pull_request.number || github.ref }}

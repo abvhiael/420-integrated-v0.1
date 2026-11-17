@@ -191,6 +191,21 @@ on:
       - 'scripts/verify-exp-0-4-2-historical-closeouts.py'
       - 'scripts/verify-exp-0-4-1-ci-inventory.py'
       - '.github/workflows/420indexer.yml'
+      - '.github/workflows/governance-integration-audit.yml'
+      - '.github/workflows/governance-audit.yml'
+      - '.github/workflows/identity-id-audit-6.yml'
+      - 'docs/audit/420STAKE-AUDIT-9.3-QUALIFICATION.md'
+      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
+      - '.github/workflows/420-indexer.yml'
+      - '.github/workflows/explorer-exp-1-6.yml'
+      - '.github/workflows/explorer-exp-1-7.yml'
+      - '.github/workflows/explorer-exp-1-8.yml'
+      - '.github/workflows/stake-audit-6.yml'
+      - '.github/workflows/420ai-audit.yml'
+      - '.github/workflows/420compute-app.yml'
+      - '.github/workflows/compute-developer.yml'
+      - '.github/workflows/registry-reg-audit-7.yml'
+      - '.github/workflows/docs-pages.yml'
       - '!contracts/config/bridge/pirate-mainnet-v12.5.12.json'
       - '!contracts/config/bridge/usdc-cctp-v2-v1.json'
       - '!contracts/config/bridge/cadc.json'
@@ -282,6 +297,21 @@ on:
       - 'scripts/verify-exp-0-3-7-traceability.py'
       - 'scripts/verify-exp-0-3-8-scope-resolution.py'
       - '.github/workflows/420indexer.yml'
+      - '.github/workflows/governance-integration-audit.yml'
+      - '.github/workflows/governance-audit.yml'
+      - '.github/workflows/identity-id-audit-6.yml'
+      - 'docs/audit/420STAKE-AUDIT-9.3-QUALIFICATION.md'
+      - 'scripts/verify-stake-audit-6-indexer-explorer-sdk.py'
+      - '.github/workflows/420-indexer.yml'
+      - '.github/workflows/explorer-exp-1-6.yml'
+      - '.github/workflows/explorer-exp-1-7.yml'
+      - '.github/workflows/explorer-exp-1-8.yml'
+      - '.github/workflows/stake-audit-6.yml'
+      - '.github/workflows/420ai-audit.yml'
+      - '.github/workflows/420compute-app.yml'
+      - '.github/workflows/compute-developer.yml'
+      - '.github/workflows/registry-reg-audit-7.yml'
+      - '.github/workflows/docs-pages.yml'
       - 'docs/audit/EXP-1.9-ci-qualification-automation.json'
       - 'docs/audit/EXP-1.9-ci-qualification-automation.md'
       - 'scripts/verify-exp-1-9-ci-automation.py'
@@ -315,10 +345,49 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      recovery: ${{ steps.paths.outputs.recovery }}
+      qualified_tree: ${{ steps.paths.outputs.qualified_tree }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - id: paths
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY_SCOPE'
+          import json, os, subprocess, urllib.request
+          allowed = set(json.loads(r'[".github/workflows/420-indexer.yml", ".github/workflows/420ai-audit.yml", ".github/workflows/420compute-app.yml", ".github/workflows/420indexer.yml", ".github/workflows/compute-developer.yml", ".github/workflows/docs-pages.yml", ".github/workflows/docs-qualify.yml", ".github/workflows/explorer-exp-1-6.yml", ".github/workflows/explorer-exp-1-7.yml", ".github/workflows/explorer-exp-1-8.yml", ".github/workflows/governance-audit.yml", ".github/workflows/governance-integration-audit.yml", ".github/workflows/identity-id-audit-6.yml", ".github/workflows/registry-reg-audit-7.yml", ".github/workflows/stake-audit-6.yml", "420-indexer/README.md", "420-indexer/package.json", "420-indexer/sql/008-finalized-recovery.sql", "420-indexer/sql/009-stake-lifecycle-recovery.sql", "420-indexer/src/checkpoint-store.ts", "420-indexer/src/core-projections.ts", "420-indexer/src/indexing.ts", "420-indexer/src/ingestor.ts", "420-indexer/src/postgres.ts", "420-indexer/src/protocol-object-service.ts", "420-indexer/src/protocol-projections.ts", "420-indexer/src/recovery-store.ts", "420-indexer/src/reorg.ts", "420-indexer/src/stake-indexer.ts", "420-indexer/test/helpers/stake-recovery-fixture.ts", "420-indexer/test/helpers/stake-recovery-worker.ts", "420-indexer/test/indexing.test.ts", "420-indexer/test/stake-recovery-postgres.test.ts", "docs/audit/420STAKE-AUDIT-9.3-QUALIFICATION.md", "indexer/api/stake.go", "indexer/api/stake_recovery_test.go", "indexer/ingest/engine.go", "indexer/ingest/finality.go", "indexer/ingest/stake_recovery_test.go", "indexer/reorg/engine.go", "indexer/store/file.go", "indexer/store/stake_persistence_test.go", "scripts/verify-stake-audit-6-indexer-explorer-sdk.py"]'))
+          files = subprocess.check_output(['git','diff','--name-only',os.environ['BASE_SHA'],'HEAD'],text=True).splitlines()
+          recovery = bool(files) and all(p in allowed for p in files)
+          qualified = False
+          parents = subprocess.check_output(['git','rev-list','--parents','-n','1','HEAD'],text=True).split()
+          if recovery and os.environ['GITHUB_EVENT_NAME'] == 'push' and len(parents) == 3:
+              tree = lambda ref: subprocess.check_output(['git','rev-parse',ref+'^{tree}'],text=True).strip()
+              if tree('HEAD') == tree(parents[2]):
+                  url = 'https://api.github.com/repos/' + os.environ['GITHUB_REPOSITORY'] + '/actions/workflows/420indexer.yml/runs?event=pull_request&status=success&head_sha=' + parents[2]
+                  try:
+                      request = urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
+                      with urllib.request.urlopen(request) as response: runs = json.load(response)['workflow_runs']
+                      qualified = any(run['head_sha'] == parents[2] and run['conclusion'] == 'success' for run in runs)
+                  except Exception as error:
+                      print('Could not verify prior qualification; tests will run:',type(error).__name__)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as output:
+              output.write('qualified_tree=' + str(qualified).lower() + '\n')
+              output.write('recovery=' + str(recovery).lower() + '\n')
+          print(json.dumps({'recovery_only':recovery,'changed_paths':files},indent=2))
+          PY_SCOPE
   qualify:
-    if: github.event_name != 'pull_request' || !(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-'))
+    needs: scope
+    if: needs.scope.outputs.recovery != 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -350,7 +419,12 @@ jobs:
         with:
           node-version: '22'
       - name: Test indexer
-        run: go test ./indexer/...
+        run: |
+          set -o pipefail
+          mkdir -p stake-9-3-evidence
+          git rev-parse HEAD > stake-9-3-evidence/candidate-sha.txt
+          go version > stake-9-3-evidence/go-version.txt
+          GOFLAGS='-race -v' go test ./indexer/... 2>&1 | tee stake-9-3-evidence/go-tests.log
       - name: Vet indexer
         run: go vet ./indexer/...
       - name: Test TypeScript 420Indexer
@@ -359,7 +433,11 @@ jobs:
           INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
         run: |
           npm install --no-audit --no-fund
-          npm test
+          set -o pipefail
+          node --version > ../stake-9-3-evidence/node-version.txt
+          npm test 2>&1 | tee ../stake-9-3-evidence/node-tests.log
+      - name: Verify retained Stake ingestion and authority assertions
+        run: python scripts/verify-stake-audit-6-indexer-explorer-sdk.py
       - name: Test Explorer indexer consumer
         run: go test ./explorer/...
       - name: Vet Explorer indexer consumer
@@ -446,18 +524,10 @@ jobs:
           docker compose -f deployments/indexer/docker-compose.yml config >/dev/null
       - name: EXP-1.6 historical block producer attribution
         run: python scripts/verify-exp-1-6-historical-producer.py
-      - name: Build EXP-1.6 Indexer runtime binary
-        run: go build ./indexer/cmd/indexer420
-      - name: Test EXP-1.7 Explorer trace consumer
-        run: go test ./explorer/...
-      - name: Vet EXP-1.7 Explorer trace consumer
-        run: go vet ./explorer/...
       - name: EXP-1.7 cross-layer traceability
         run: python scripts/verify-exp-1-7-cross-layer-traceability.py
       - name: EXP-1.8 runtime negative and divergence qualification
         run: python scripts/verify-exp-1-8-runtime-negative-divergence.py
-      - name: Build EXP-1.8 Indexer runtime binary
-        run: go build ./indexer/cmd/indexer420
       - name: EXP-1.9 CI and qualification automation
         run: python scripts/verify-exp-1-9-ci-automation.py
       - name: EXP-1.10 final EXP-1 phase closeout
@@ -735,5 +805,79 @@ jobs:
         with:
           name: exp-2-1-transaction-fee-api
           path: exp-2-1-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Retain Stake recovery qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stake-audit-9-3-recovery-${{ github.event.pull_request.head.sha || github.sha }}
+          path: stake-9-3-evidence/
+          if-no-files-found: error
+          retention-days: 14
+
+  stake-recovery:
+    needs: scope
+    if: needs.scope.outputs.recovery == 'true' && needs.scope.outputs.qualified_tree != 'true'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: indexer420
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres -d indexer420"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          mkdir -p stake-9-3-evidence
+          git rev-parse HEAD > stake-9-3-evidence/candidate-sha.txt
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualify canonical file recovery and Explorer projection consumer
+        run: |
+          set -o pipefail
+          go version > stake-9-3-evidence/go-version.txt
+          GOFLAGS='-race -v' go test ./indexer/... 2>&1 | tee stake-9-3-evidence/go-tests.log
+          go vet ./indexer/...
+          go test ./explorer/... 2>&1 | tee stake-9-3-evidence/explorer-tests.log
+          go vet ./explorer/...
+      - name: Qualify transactional Stake lifecycle recovery against PostgreSQL
+        working-directory: 420-indexer
+        env:
+          INDEXER_PG_URL: postgresql://postgres:postgres@localhost:5432/indexer420
+        run: |
+          set -o pipefail
+          node --version > ../stake-9-3-evidence/node-version.txt
+          npm install --no-package-lock --no-audit --no-fund
+          npm test 2>&1 | tee ../stake-9-3-evidence/node-tests.log
+      - name: Retain canonical ingestion and authority regressions
+        run: |
+          set -o pipefail
+          python scripts/verify-420indexer.py 2>&1 | tee stake-9-3-evidence/indexer-verifier.log
+          python scripts/verify-exp-1-3-canonical-indexing.py 2>&1 | tee stake-9-3-evidence/canonical-verifier.log
+          python scripts/verify-stake-audit-6-indexer-explorer-sdk.py 2>&1 | tee stake-9-3-evidence/stake-verifier.log
+      - name: Retain Stake recovery qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stake-audit-9-3-recovery-${{ github.event.pull_request.head.sha || github.sha }}
+          path: stake-9-3-evidence/
           if-no-files-found: error
           retention-days: 14

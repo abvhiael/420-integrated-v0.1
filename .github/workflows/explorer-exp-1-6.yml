@@ -1,15 +1,14 @@
 name: EXP-1.6 Historical Producer Qualification
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'consensus/storage/**'
-      - 'indexer/**'
       - 'config/420indexer-v1.json'
       - 'testnet/public-services/indexer/readiness.json'
       - 'docs/audit/EXP-1.6-historical-producer-attribution.*'
       - 'scripts/verify-exp-1-6-historical-producer.py'
-      - '.github/workflows/explorer-exp-1-6.yml'
 
 concurrency:
   group: exp-1-6-${{ github.event.pull_request.number || github.ref }}

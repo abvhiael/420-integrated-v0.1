@@ -18,38 +18,76 @@ import (
 // observes either the previous complete snapshot or the new complete snapshot, never a partial write.
 // The format is intentionally rebuildable and versioned; a database-backed implementation can replace it later.
 type FileStore struct {
-	mu   sync.Mutex
-	path string
-	data fileState
+	mu        sync.Mutex
+	path      string
+	data      fileState
+	committed []byte
+	failed    error
 }
 
 type fileState struct {
 	Version        uint64                               `json:"version"`
 	Checkpoint     *model.ChainCheckpoint               `json:"checkpoint,omitempty"`
-	Blocks         map[uint64]model.BlockRecord          `json:"blocks"`
-	Transactions   map[string]model.TransactionRecord    `json:"transactions"`
-	Receipts       map[string]model.ReceiptRecord        `json:"receipts"`
-	Logs           map[string]model.LogRecord            `json:"logs"`
-	Contracts      map[string]model.ContractRecord       `json:"contracts"`
-	AssetTransfers map[string]model.AssetTransferRecord  `json:"assetTransfers"`
+	Blocks         map[uint64]model.BlockRecord         `json:"blocks"`
+	Transactions   map[string]model.TransactionRecord   `json:"transactions"`
+	Receipts       map[string]model.ReceiptRecord       `json:"receipts"`
+	Logs           map[string]model.LogRecord           `json:"logs"`
+	Contracts      map[string]model.ContractRecord      `json:"contracts"`
+	AssetTransfers map[string]model.AssetTransferRecord `json:"assetTransfers"`
 }
 
 func NewFileStore(path string) (*FileStore, error) {
-	if path == "" { return nil, errors.New("store path required") }
+	if path == "" {
+		return nil, errors.New("store path required")
+	}
 	s := &FileStore{path: path}
 	s.data = emptyFileState()
 	b, err := os.ReadFile(path)
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) { return s, nil }
+		if errors.Is(err, os.ErrNotExist) {
+			s.committed, _ = json.Marshal(s.data)
+			return s, nil
+		}
 		return nil, err
 	}
-	if err := json.Unmarshal(b, &s.data); err != nil { return nil, fmt.Errorf("decode indexer store: %w", err) }
-	if s.data.Blocks == nil { s.data.Blocks = map[uint64]model.BlockRecord{} }
-	if s.data.Transactions == nil { s.data.Transactions = map[string]model.TransactionRecord{} }
-	if s.data.Receipts == nil { s.data.Receipts = map[string]model.ReceiptRecord{} }
-	if s.data.Logs == nil { s.data.Logs = map[string]model.LogRecord{} }
-	if s.data.Contracts == nil { s.data.Contracts = map[string]model.ContractRecord{} }
-	if s.data.AssetTransfers == nil { s.data.AssetTransfers = map[string]model.AssetTransferRecord{} }
+	s.data = fileState{} // A null or missing-version snapshot must not become an empty store.
+	if err := json.Unmarshal(b, &s.data); err != nil {
+		return nil, fmt.Errorf("decode indexer store: %w", err)
+	}
+	if s.data.Version != 1 {
+		return nil, fmt.Errorf("unsupported indexer store version %d", s.data.Version)
+	}
+	if s.data.Blocks == nil {
+		s.data.Blocks = map[uint64]model.BlockRecord{}
+	}
+	if s.data.Transactions == nil {
+		s.data.Transactions = map[string]model.TransactionRecord{}
+	}
+	if s.data.Receipts == nil {
+		s.data.Receipts = map[string]model.ReceiptRecord{}
+	}
+	if s.data.Logs == nil {
+		s.data.Logs = map[string]model.LogRecord{}
+	}
+	if s.data.Contracts == nil {
+		s.data.Contracts = map[string]model.ContractRecord{}
+	}
+	if s.data.AssetTransfers == nil {
+		s.data.AssetTransfers = map[string]model.AssetTransferRecord{}
+	}
+	if cp := s.data.Checkpoint; cp != nil {
+		block, ok := s.data.Blocks[cp.IndexedHeight]
+		if !ok || block.Hash != cp.IndexedHash || block.ChainID != cp.ChainID || cp.FinalizedHeight > cp.IndexedHeight {
+			return nil, errors.New("indexer checkpoint does not match durable canonical history")
+		}
+		if cp.FinalizedHash != "" {
+			finalized, ok := s.data.Blocks[cp.FinalizedHeight]
+			if !ok || finalized.Hash != cp.FinalizedHash {
+				return nil, ErrFinalizedMutation
+			}
+		}
+	}
+	s.committed, _ = json.Marshal(s.data)
 	return s, nil
 }
 
@@ -57,155 +95,337 @@ func emptyFileState() fileState {
 	return fileState{Version: 1, Blocks: map[uint64]model.BlockRecord{}, Transactions: map[string]model.TransactionRecord{}, Receipts: map[string]model.ReceiptRecord{}, Logs: map[string]model.LogRecord{}, Contracts: map[string]model.ContractRecord{}, AssetTransfers: map[string]model.AssetTransferRecord{}}
 }
 
-func (s *FileStore) persistLocked() error {
-	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil { return err }
+func (s *FileStore) persistLocked() (err error) {
+	defer func() {
+		if err != nil {
+			// A failed write must never become an in-memory checkpoint.
+			var previous fileState
+			if json.Unmarshal(s.committed, &previous) == nil {
+				s.data = previous
+			}
+		}
+	}()
+	if s.failed != nil {
+		return s.failed
+	}
+	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil {
+		return err
+	}
 	b, err := json.MarshalIndent(s.data, "", "  ")
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	tmp := s.path + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o600); err != nil { return err }
+	if err := os.WriteFile(tmp, b, 0o600); err != nil {
+		return err
+	}
 	f, err := os.OpenFile(tmp, os.O_RDWR, 0o600)
-	if err != nil { return err }
-	if err := f.Sync(); err != nil { f.Close(); return err }
-	if err := f.Close(); err != nil { return err }
-	return os.Rename(tmp, s.path)
+	if err != nil {
+		return err
+	}
+	if err := f.Sync(); err != nil {
+		f.Close()
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	if err = os.Rename(tmp, s.path); err != nil {
+		return err
+	}
+	dir, err := os.Open(filepath.Dir(s.path))
+	if err == nil {
+		err = dir.Sync()
+		closeErr := dir.Close()
+		if err == nil {
+			err = closeErr
+		}
+	}
+	if err != nil {
+		// Rename succeeded, but durability is uncertain. Require reopening the store.
+		s.failed = fmt.Errorf("indexer snapshot directory sync: %w", err)
+		return s.failed
+	}
+	s.committed = append([]byte(nil), b...)
+	return nil
 }
 
 func (s *FileStore) Reset() error {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.data = emptyFileState()
 	return s.persistLocked()
 }
 
 func (s *FileStore) Checkpoint() (model.ChainCheckpoint, bool, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
-	if s.data.Checkpoint == nil { return model.ChainCheckpoint{}, false, nil }
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.failed != nil {
+		return model.ChainCheckpoint{}, false, s.failed
+	}
+	if s.data.Checkpoint == nil {
+		return model.ChainCheckpoint{}, false, nil
+	}
 	return *s.data.Checkpoint, true, nil
 }
 
 func (s *FileStore) SaveCheckpoint(cp model.ChainCheckpoint) error {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if old := s.data.Checkpoint; old != nil {
+		if old.ChainID != cp.ChainID || cp.FinalizedHeight < old.FinalizedHeight || (cp.FinalizedHeight == old.FinalizedHeight && old.FinalizedHash != "" && cp.FinalizedHash != old.FinalizedHash) {
+			return ErrFinalizedMutation
+		}
+	}
 	s.data.Checkpoint = &cp
 	return s.persistLocked()
 }
 
 func (s *FileStore) Block(number uint64) (model.BlockRecord, bool, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	b, ok := s.data.Blocks[number]
 	return b, ok, nil
 }
 
 func (s *FileStore) PutBlock(b model.BlockRecord) error {
-	if err := validateBlockRecord(b); err != nil { return err }
-	s.mu.Lock(); defer s.mu.Unlock()
+	if err := validateBlockRecord(b); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if existing, ok := s.data.Blocks[b.Number]; ok {
-		if err := rejectFinalizedOverwrite(existing, b); err != nil { return err }
+		if err := rejectFinalizedOverwrite(existing, b); err != nil {
+			return err
+		}
 	}
 	s.data.Blocks[b.Number] = b
 	return s.persistLocked()
 }
 
 func (s *FileStore) PutBundle(block model.BlockRecord, txs []model.TransactionRecord, receipts []model.ReceiptRecord, logs []model.LogRecord) error {
-	if err := validateBlockRecord(block); err != nil { return err }
+	if err := validateBlockRecord(block); err != nil {
+		return err
+	}
 	transfers, err := assets.DecodeBundle(txs, logs)
-	if err != nil { return fmt.Errorf("decode asset transfers for block %d: %w", block.Number, err) }
-	s.mu.Lock(); defer s.mu.Unlock()
+	if err != nil {
+		return fmt.Errorf("decode asset transfers for block %d: %w", block.Number, err)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if existing, ok := s.data.Blocks[block.Number]; ok {
-		if err := rejectFinalizedOverwrite(existing, block); err != nil { return err }
+		if err := rejectFinalizedOverwrite(existing, block); err != nil {
+			return err
+		}
+	}
+	// An interrupted ingestion may have persisted an uncheckpointed competing
+	// bundle. Replace all of its derived rows, including logs absent on retry.
+	for k, tx := range s.data.Transactions {
+		if tx.BlockNumber == block.Number {
+			delete(s.data.Transactions, k)
+		}
+	}
+	for k, r := range s.data.Receipts {
+		if r.BlockNumber == block.Number {
+			delete(s.data.Receipts, k)
+		}
+	}
+	for k, lg := range s.data.Logs {
+		if lg.BlockNumber == block.Number {
+			delete(s.data.Logs, k)
+		}
+	}
+	for k, t := range s.data.AssetTransfers {
+		if t.BlockNumber == block.Number {
+			delete(s.data.AssetTransfers, k)
+		}
+	}
+	for k, c := range s.data.Contracts {
+		if c.DeploymentBlock == block.Number {
+			delete(s.data.Contracts, k)
+		}
 	}
 	s.data.Blocks[block.Number] = block
-	for _, tx := range txs { s.data.Transactions[strings.ToLower(tx.Hash)] = tx }
-	for _, r := range receipts { s.data.Receipts[strings.ToLower(r.TransactionHash)] = r }
-	for _, lg := range logs { s.data.Logs[logKey(lg)] = lg }
-	for _, transfer := range transfers { s.data.AssetTransfers[assetTransferKey(transfer)] = transfer }
+	for _, tx := range txs {
+		s.data.Transactions[strings.ToLower(tx.Hash)] = tx
+	}
+	for _, r := range receipts {
+		s.data.Receipts[strings.ToLower(r.TransactionHash)] = r
+	}
+	for _, lg := range logs {
+		s.data.Logs[logKey(lg)] = lg
+	}
+	for _, transfer := range transfers {
+		s.data.AssetTransfers[assetTransferKey(transfer)] = transfer
+	}
 	return s.persistLocked()
 }
 
 func (s *FileStore) PutContract(record model.ContractRecord) error {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.data.Contracts[strings.ToLower(record.Address)] = record
 	return s.persistLocked()
 }
 
 func (s *FileStore) Contract(address string) (model.ContractRecord, bool, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	record, ok := s.data.Contracts[strings.ToLower(address)]
 	return record, ok, nil
 }
 
 func (s *FileStore) Transaction(hash string) (model.TransactionRecord, bool, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	tx, ok := s.data.Transactions[strings.ToLower(hash)]
 	return tx, ok, nil
 }
 
 func (s *FileStore) Receipt(txHash string) (model.ReceiptRecord, bool, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	r, ok := s.data.Receipts[strings.ToLower(txHash)]
 	return r, ok, nil
 }
 
 func (s *FileStore) LogsByBlock(number uint64) ([]model.LogRecord, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	out := make([]model.LogRecord, 0)
-	for _, lg := range s.data.Logs { if lg.BlockNumber == number { out = append(out, lg) } }
+	for _, lg := range s.data.Logs {
+		if lg.BlockNumber == number {
+			out = append(out, lg)
+		}
+	}
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].TransactionIndex == out[j].TransactionIndex { return out[i].LogIndex < out[j].LogIndex }
+		if out[i].TransactionIndex == out[j].TransactionIndex {
+			return out[i].LogIndex < out[j].LogIndex
+		}
 		return out[i].TransactionIndex < out[j].TransactionIndex
 	})
 	return out, nil
 }
 
 func (s *FileStore) LogsByAddresses(addresses ...string) ([]model.LogRecord, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	wanted := make(map[string]struct{}, len(addresses))
 	for _, address := range addresses {
 		address = strings.ToLower(strings.TrimSpace(address))
-		if address != "" { wanted[address] = struct{}{} }
+		if address != "" {
+			wanted[address] = struct{}{}
+		}
 	}
 	out := make([]model.LogRecord, 0)
 	for _, lg := range s.data.Logs {
-		if _, ok := wanted[strings.ToLower(lg.Address)]; ok { out = append(out, lg) }
+		if _, ok := wanted[strings.ToLower(lg.Address)]; ok {
+			out = append(out, lg)
+		}
 	}
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].BlockNumber != out[j].BlockNumber { return out[i].BlockNumber > out[j].BlockNumber }
-		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex > out[j].TransactionIndex }
+		if out[i].BlockNumber != out[j].BlockNumber {
+			return out[i].BlockNumber > out[j].BlockNumber
+		}
+		if out[i].TransactionIndex != out[j].TransactionIndex {
+			return out[i].TransactionIndex > out[j].TransactionIndex
+		}
 		return out[i].LogIndex > out[j].LogIndex
 	})
 	return out, nil
 }
 
 func (s *FileStore) AssetTransfers(assetKey, address string) ([]model.AssetTransferRecord, error) {
-	s.mu.Lock(); defer s.mu.Unlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	assetKey = strings.ToLower(strings.TrimSpace(assetKey))
 	address = strings.ToLower(strings.TrimSpace(address))
 	out := make([]model.AssetTransferRecord, 0)
 	for _, transfer := range s.data.AssetTransfers {
-		if assetKey != "" && strings.ToLower(transfer.AssetKey) != assetKey { continue }
-		if address != "" && !strings.EqualFold(transfer.From, address) && !strings.EqualFold(transfer.To, address) { continue }
+		if assetKey != "" && strings.ToLower(transfer.AssetKey) != assetKey {
+			continue
+		}
+		if address != "" && !strings.EqualFold(transfer.From, address) && !strings.EqualFold(transfer.To, address) {
+			continue
+		}
 		out = append(out, transfer)
 	}
 	sort.Slice(out, func(i, j int) bool {
-		if out[i].BlockNumber != out[j].BlockNumber { return out[i].BlockNumber > out[j].BlockNumber }
-		if out[i].TransactionIndex != out[j].TransactionIndex { return out[i].TransactionIndex > out[j].TransactionIndex }
-		if out[i].LogIndex != out[j].LogIndex { return out[i].LogIndex > out[j].LogIndex }
+		if out[i].BlockNumber != out[j].BlockNumber {
+			return out[i].BlockNumber > out[j].BlockNumber
+		}
+		if out[i].TransactionIndex != out[j].TransactionIndex {
+			return out[i].TransactionIndex > out[j].TransactionIndex
+		}
+		if out[i].LogIndex != out[j].LogIndex {
+			return out[i].LogIndex > out[j].LogIndex
+		}
 		return out[i].AssetKey < out[j].AssetKey
 	})
 	return out, nil
 }
 
 func (s *FileStore) DeleteBlocksAbove(number uint64) error {
-	s.mu.Lock(); defer s.mu.Unlock()
-	if err := rejectRollbackBelowFinality(s.data.Checkpoint, number); err != nil { return err }
-	for n := range s.data.Blocks { if n > number { delete(s.data.Blocks, n) } }
-	for h, tx := range s.data.Transactions { if tx.BlockNumber > number { delete(s.data.Transactions, h) } }
-	for h, r := range s.data.Receipts { if r.BlockNumber > number { delete(s.data.Receipts, h) } }
-	for k, lg := range s.data.Logs { if lg.BlockNumber > number { delete(s.data.Logs, k) } }
-	for address, record := range s.data.Contracts { if record.DeploymentBlock > number { delete(s.data.Contracts, address) } }
-	for key, transfer := range s.data.AssetTransfers { if transfer.BlockNumber > number { delete(s.data.AssetTransfers, key) } }
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := rejectRollbackBelowFinality(s.data.Checkpoint, number); err != nil {
+		return err
+	}
+	if cp := s.data.Checkpoint; cp != nil && cp.IndexedHeight > number {
+		if _, ok := s.data.Blocks[number]; !ok {
+			return fmt.Errorf("rollback ancestor %d missing", number)
+		}
+	}
+	for n := range s.data.Blocks {
+		if n > number {
+			delete(s.data.Blocks, n)
+		}
+	}
+	for h, tx := range s.data.Transactions {
+		if tx.BlockNumber > number {
+			delete(s.data.Transactions, h)
+		}
+	}
+	for h, r := range s.data.Receipts {
+		if r.BlockNumber > number {
+			delete(s.data.Receipts, h)
+		}
+	}
+	for k, lg := range s.data.Logs {
+		if lg.BlockNumber > number {
+			delete(s.data.Logs, k)
+		}
+	}
+	for address, record := range s.data.Contracts {
+		if record.DeploymentBlock > number {
+			delete(s.data.Contracts, address)
+		}
+	}
+	for key, transfer := range s.data.AssetTransfers {
+		if transfer.BlockNumber > number {
+			delete(s.data.AssetTransfers, key)
+		}
+	}
+	// Rollback and its checkpoint are one durable snapshot, including crashes
+	// before the caller starts replaying the replacement branch.
+	if cp := s.data.Checkpoint; cp != nil && cp.IndexedHeight > number {
+		b, ok := s.data.Blocks[number]
+		if !ok {
+			return fmt.Errorf("rollback ancestor %d missing", number)
+		}
+		next := *cp
+		next.IndexedHeight, next.IndexedHash = number, b.Hash
+		if next.SafeHeight > number {
+			next.SafeHeight, next.SafeHash = number, b.Hash
+		}
+		s.data.Checkpoint = &next
+	}
 	return s.persistLocked()
 }
 
-func logKey(lg model.LogRecord) string { return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex) }
+func logKey(lg model.LogRecord) string {
+	return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex)
+}
 func assetTransferKey(t model.AssetTransferRecord) string {
 	return fmt.Sprintf("%s:%d:%s:%s:%s:%s", strings.ToLower(t.TransactionHash), t.LogIndex, strings.ToLower(t.AssetKey), strings.ToLower(t.From), strings.ToLower(t.To), t.Amount)
 }

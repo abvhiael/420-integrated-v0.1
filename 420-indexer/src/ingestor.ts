@@ -29,6 +29,7 @@ function durableConsumer420(consumer: BlockConsumer420): DurableBlockConsumer420
 
 export class IndexerIngestor420 {
   readonly history: CanonicalHistoryStore420;
+  private running = false;
   constructor(
     readonly source: ChainSource420,
     readonly checkpoints: CheckpointStore420,
@@ -53,8 +54,23 @@ export class IndexerIngestor420 {
   }
   private async runOnceInner(): Promise<IngestionRun420> {
     const chainId = await this.source.chainId();
+    const observedFinalized = this.source.finalizedBlockNumber ? await this.source.finalizedBlockNumber() : undefined;
     let checkpoint = await this.checkpoints.load();
     if (checkpoint && checkpoint.chainId !== chainId) throw new Error(`checkpoint chain mismatch: expected ${chainId}, got ${checkpoint.chainId}`);
+    if (checkpoint && this.source.finalizedBlockNumber) {
+      const finalized = observedFinalized!;
+      if (checkpoint.finalizedNumber !== undefined && finalized < checkpoint.finalizedNumber) throw new Error('finalized boundary regressed');
+      const number = finalized < checkpoint.blockNumber ? finalized : checkpoint.blockNumber;
+      const local = number === checkpoint.blockNumber ? checkpoint : await this.history.load(number);
+      const remote = await this.source.getBlockByNumber(number);
+      if (!local || !remote || local.blockHash.toLowerCase() !== remote.hash.toLowerCase()) throw new Error('source conflicts with finalized history');
+      if (checkpoint.finalizedNumber !== undefined) {
+        const previous = await this.source.getBlockByNumber(checkpoint.finalizedNumber);
+        if (!previous || previous.hash.toLowerCase() !== checkpoint.finalizedHash?.toLowerCase()) throw new Error('source conflicts with finalized history');
+      }
+      checkpoint = { ...checkpoint, finalizedNumber: number, finalizedHash: remote.hash };
+      await this.checkpoints.save(checkpoint);
+    }
     const durable = durableConsumer420(this.consumer);
     let recoveredReorgDepth = 0;
     if (checkpoint) {
@@ -96,7 +112,20 @@ export class IndexerIngestor420 {
         receipts.push(receipt);
       }
       const logs = normalizeLogs420(await this.source.getLogs({ fromBlock: blockNumber, toBlock: blockNumber }));
+      for (const row of [...transactions, ...receipts, ...logs]) {
+        if (row.blockNumber !== block.number || row.blockHash.toLowerCase() !== block.hash.toLowerCase()) throw new Error('mixed canonical block bundle');
+      }
+      const canonical = await this.source.getBlockByNumber(blockNumber);
+      if (!canonical || canonical.hash.toLowerCase() !== block.hash.toLowerCase()) throw new Error('canonical block changed during ingestion');
       const nextCheckpoint = checkpointFromBlock420(chainId, block);
+      if (checkpoint?.finalizedNumber !== undefined) {
+        nextCheckpoint.finalizedNumber = checkpoint.finalizedNumber;
+        nextCheckpoint.finalizedHash = checkpoint.finalizedHash;
+      }
+      if (observedFinalized !== undefined && block.number <= observedFinalized || this.options.finality.mode === 'finalized') {
+        nextCheckpoint.finalizedNumber = block.number;
+        nextCheckpoint.finalizedHash = block.hash;
+      }
       const batch = { chainId, block, transactions, receipts, logs };
       if (durable) {
         await durable.applyBlockDurably(batch, nextCheckpoint);
@@ -112,6 +141,8 @@ export class IndexerIngestor420 {
     return { chainId, sourceId: this.source.sourceId, safeHead, processed, firstBlock, lastBlock, checkpoint, recoveredReorgDepth };
   }
   async runOnce(): Promise<IngestionRun420> {
+    if (this.running) throw new Error('ingestion already running');
+    this.running = true;
     try {
       const run = await (this.workController
         ? this.workController.run(() => this.runOnceInner())
@@ -122,6 +153,6 @@ export class IndexerIngestor420 {
     } catch (error) {
       this.telemetry?.recordIngestFailure();
       throw error;
-    }
+    } finally { this.running = false; }
   }
 }

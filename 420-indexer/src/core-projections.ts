@@ -1,3 +1,4 @@
+import { ProtocolProjection420 } from './protocol-projections.js';
 import type { IndexedBlockBatch420, BlockConsumer420, DurableBlockConsumer420 } from './ingestor.js';
 import type { IndexCheckpoint420 } from './indexing.js';
 
@@ -20,6 +21,8 @@ async function writeRecoveryMetadata420(tx: SqlExecutor420, checkpoint: IndexChe
        block_hash=excluded.block_hash,
        parent_hash=excluded.parent_hash`, values
   );
+  await tx.query(`update idx_checkpoints set finalized_number=$2, finalized_hash=$3 where chain_id=$1`,
+    [checkpoint.chainId.toString(), checkpoint.finalizedNumber?.toString() ?? null, checkpoint.finalizedHash ?? null]);
   await tx.query(
     `insert into idx_canonical_history(chain_id, block_number, block_hash, parent_hash)
      values ($1,$2,$3,$4)
@@ -30,7 +33,7 @@ async function writeRecoveryMetadata420(tx: SqlExecutor420, checkpoint: IndexChe
 }
 
 export class CoreProjectionConsumer420 implements BlockConsumer420, DurableBlockConsumer420 {
-  constructor(readonly db: TransactionalSql420) {}
+  constructor(readonly db: TransactionalSql420, readonly protocols?: ProtocolProjection420, readonly chainId?: bigint) {}
 
   private async applyBlockTx420(tx: SqlExecutor420, batch: IndexedBlockBatch420): Promise<void> {
     await tx.query(
@@ -100,11 +103,28 @@ export class CoreProjectionConsumer420 implements BlockConsumer420, DurableBlock
   }
 
   async applyBlockDurably(batch: IndexedBlockBatch420, checkpoint: IndexCheckpoint420): Promise<void> {
-    if (checkpoint.chainId !== batch.chainId || checkpoint.blockNumber !== batch.block.number || checkpoint.blockHash.toLowerCase() !== batch.block.hash.toLowerCase()) {
+    if (checkpoint.chainId !== batch.chainId || checkpoint.blockNumber !== batch.block.number || checkpoint.parentHash.toLowerCase() !== batch.block.parentHash.toLowerCase() || checkpoint.blockHash.toLowerCase() !== batch.block.hash.toLowerCase()) {
       throw new Error('durable checkpoint does not match projection batch');
     }
     await this.db.transaction(async (tx) => {
+      if (this.chainId !== undefined) {
+        await tx.query('select pg_advisory_xact_lock(hashtextextended($1,0))', ['420indexer:' + this.chainId]);
+        const result = await tx.query('select block_number, block_hash, finalized_number, finalized_hash from idx_checkpoints where chain_id=$1 for update', [this.chainId.toString()]) as SqlQueryResult420;
+        const previous = result.rows?.[0];
+        if (previous) {
+          const number = BigInt(String(previous.block_number));
+          const hash = String(previous.block_hash).toLowerCase();
+          if (!(number === batch.block.number && hash === batch.block.hash.toLowerCase()) &&
+              !(number + 1n === batch.block.number && hash === batch.block.parentHash.toLowerCase())) throw new Error('durable checkpoint continuation conflict');
+          if (previous.finalized_number != null && checkpoint.finalizedNumber === BigInt(String(previous.finalized_number)) && checkpoint.finalizedHash !== previous.finalized_hash) throw new Error('finalized checkpoint hash conflict');
+          if (previous.finalized_number != null && (checkpoint.finalizedNumber === undefined || checkpoint.finalizedNumber < BigInt(String(previous.finalized_number)))) {
+            checkpoint = { ...checkpoint, finalizedNumber: BigInt(String(previous.finalized_number)), finalizedHash: String(previous.finalized_hash) as `0x${string}` };
+          }
+        }
+      }
       await this.applyBlockTx420(tx, batch);
+      if (this.chainId !== undefined && batch.chainId !== this.chainId) throw new Error('projection chain mismatch');
+      if (this.protocols) await this.protocols.applyLogsTx(batch.chainId, batch.logs, tx);
       await writeRecoveryMetadata420(tx, checkpoint);
     });
   }
@@ -114,24 +134,35 @@ export class CoreProjectionConsumer420 implements BlockConsumer420, DurableBlock
   }
 
   async rollbackDurably(blockNumber: bigint | null, ancestor: IndexCheckpoint420 | null): Promise<void> {
+    if (this.chainId !== undefined && ancestor && ancestor.chainId !== this.chainId) throw new Error('rollback chain mismatch');
     await this.db.transaction(async (tx) => {
-      if (blockNumber === null) {
-        await tx.query('delete from idx_logs');
-        await tx.query('delete from idx_receipts');
-        await tx.query('delete from idx_transactions');
-        await tx.query('delete from idx_blocks');
-        await tx.query('delete from idx_checkpoints');
-        await tx.query('delete from idx_canonical_history');
-        return;
+      // The production Stake factory always pins chainId. Legacy unpinned
+      // consumers retain their single-chain behavior for compatibility.
+      const chain = this.chainId ?? ancestor?.chainId;
+      if (chain !== undefined) {
+        await tx.query('select pg_advisory_xact_lock(hashtextextended($1,0))', ['420indexer:' + chain]);
+        const result = await tx.query('select finalized_number, finalized_hash from idx_checkpoints where chain_id=$1 for update', [chain.toString()]) as SqlQueryResult420;
+        const previous = result.rows?.[0];
+        if (previous?.finalized_number != null) {
+          const finalized = BigInt(String(previous.finalized_number));
+          if (blockNumber === null || blockNumber < finalized) throw new Error('rollback violates finalized history');
+          if (!ancestor) throw new Error('verified rollback ancestor required');
+          const local = await tx.query('select block_hash from idx_canonical_history where chain_id=$1 and block_number=$2', [chain.toString(), blockNumber!.toString()]) as SqlQueryResult420;
+          if (local.rows?.[0]?.block_hash !== ancestor.blockHash) throw new Error('rollback ancestor mismatch');
+          ancestor = { ...ancestor, finalizedNumber: finalized, finalizedHash: String(previous.finalized_hash) as `0x${string}` };
+        }
       }
-      const n = blockNumber.toString();
-      await tx.query('delete from idx_logs where block_number > $1', [n]);
-      await tx.query('delete from idx_receipts where block_number > $1', [n]);
-      await tx.query('delete from idx_transactions where block_number > $1', [n]);
-      await tx.query('delete from idx_blocks where block_number > $1', [n]);
-      await tx.query('delete from idx_canonical_history where block_number > $1', [n]);
+      const chainClause = chain === undefined ? '' : 'chain_id=$1';
+      const params: unknown[] = chain === undefined ? [] : [chain.toString()];
+      if (blockNumber !== null) params.push(blockNumber.toString());
+      const heightClause = blockNumber === null ? '' : `block_number > $${params.length}`;
+      const where = [chainClause, heightClause].filter(Boolean).join(' and ');
+      for (const table of ['idx_protocol_events', 'idx_logs', 'idx_receipts', 'idx_transactions', 'idx_blocks', 'idx_canonical_history']) {
+        if (table === 'idx_protocol_events' && !this.protocols) continue;
+        await tx.query(`delete from ${table}${where ? ' where ' + where : ''}`, params);
+      }
       if (ancestor) await writeRecoveryMetadata420(tx, ancestor);
-      else await tx.query('delete from idx_checkpoints where block_number > $1', [n]);
+      else await tx.query(`delete from idx_checkpoints${where ? ' where ' + where : ''}`, params);
     });
   }
 }

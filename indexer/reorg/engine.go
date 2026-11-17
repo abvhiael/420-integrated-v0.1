@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	ErrNoCommonAncestor = errors.New("no common ancestor above finalized boundary")
+	ErrNoCommonAncestor        = errors.New("no common ancestor above finalized boundary")
 	ErrRemoteFinalizedConflict = errors.New("remote chain conflicts with finalized history")
 )
 
@@ -34,10 +34,10 @@ type ProducerAttributor interface {
 }
 
 type Engine struct {
-	chainID uint64
-	schemaVersion string
-	source Source
-	store Store
+	chainID            uint64
+	schemaVersion      string
+	source             Source
+	store              Store
 	producerAttributor ProducerAttributor
 }
 
@@ -45,14 +45,25 @@ func New(chainID uint64, schemaVersion string, source Source, store Store) *Engi
 	return &Engine{chainID: chainID, schemaVersion: schemaVersion, source: source, store: store}
 }
 
-func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine { e.producerAttributor = a; return e }
+func (e *Engine) WithProducerAttributor(a ProducerAttributor) *Engine {
+	e.producerAttributor = a
+	return e
+}
 
 func (e *Engine) attributeProducer(block *model.BlockRecord) error {
-	if block.Number == 0 { return nil }
-	if e.producerAttributor == nil { return nil }
+	if block.Number == 0 {
+		return nil
+	}
+	if e.producerAttributor == nil {
+		return nil
+	}
 	producer, ok, err := e.producerAttributor.ProducerForBlock(block.Hash)
-	if err != nil { return err }
-	if !ok { return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash) }
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("historical producer attribution missing for block %d %s", block.Number, block.Hash)
+	}
 	block.Producer = &producer
 	return nil
 }
@@ -60,18 +71,46 @@ func (e *Engine) attributeProducer(block *model.BlockRecord) error {
 // FindCommonAncestor walks backward from the local indexed head to the finalized boundary.
 // It returns the highest height whose local and remote hashes match.
 func (e *Engine) FindCommonAncestor(ctx context.Context) (uint64, error) {
-	cp, ok, err := e.store.Checkpoint()
-	if err != nil { return 0, err }
-	if !ok { return 0, ErrNoCommonAncestor }
+	return e.findCommonAncestor(ctx, ^uint64(0))
+}
 
-	for h := cp.IndexedHeight; ; h-- {
-		if err := ctx.Err(); err != nil { return 0, err }
+func (e *Engine) findCommonAncestor(ctx context.Context, remoteHead uint64) (uint64, error) {
+	cp, ok, err := e.store.Checkpoint()
+	if err != nil {
+		return 0, err
+	}
+	if !ok {
+		return 0, ErrNoCommonAncestor
+	}
+
+	if remoteHead < cp.FinalizedHeight {
+		return 0, ErrRemoteFinalizedConflict
+	}
+	start := cp.IndexedHeight
+	if remoteHead < start {
+		start = remoteHead
+	}
+	for h := start; ; h-- {
+		if cp.IndexedHeight-h > 64 {
+			return 0, ErrNoCommonAncestor
+		}
+		if err := ctx.Err(); err != nil {
+			return 0, err
+		}
 		local, exists, err := e.store.Block(h)
-		if err != nil { return 0, err }
-		if !exists { return 0, fmt.Errorf("local block %d missing", h) }
+		if err != nil {
+			return 0, err
+		}
+		if !exists {
+			return 0, fmt.Errorf("local block %d missing", h)
+		}
 		remote, err := e.source.BundleByNumber(ctx, e.chainID, h, model.FinalityHead, e.schemaVersion)
-		if err != nil { return 0, fmt.Errorf("fetch remote block %d: %w", h, err) }
-		if remote.Block.Hash == local.Hash { return h, nil }
+		if err != nil {
+			return 0, fmt.Errorf("fetch remote block %d: %w", h, err)
+		}
+		if remote.Block.Hash == local.Hash {
+			return h, nil
+		}
 		if h <= cp.FinalizedHeight {
 			return 0, ErrRemoteFinalizedConflict
 		}
@@ -81,40 +120,71 @@ func (e *Engine) FindCommonAncestor(ctx context.Context) (uint64, error) {
 // Repair rolls back only non-finalized history and deterministically replays remote canonical history through head.
 func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 	cp, ok, err := e.store.Checkpoint()
-	if err != nil { return err }
-	if !ok { return ErrNoCommonAncestor }
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNoCommonAncestor
+	}
 
-	ancestor, err := e.FindCommonAncestor(ctx)
-	if err != nil { return err }
-	if err := RequireRollback(cp.FinalizedHeight, ancestor); err != nil { return err }
+	ancestor, err := e.findCommonAncestor(ctx, remoteHead)
+	if err != nil {
+		return err
+	}
+	if err := RequireRollback(cp.FinalizedHeight, ancestor); err != nil {
+		return err
+	}
 
 	ancestorBlock, exists, err := e.store.Block(ancestor)
-	if err != nil { return err }
-	if !exists { return fmt.Errorf("ancestor block %d missing before rollback", ancestor) }
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("ancestor block %d missing before rollback", ancestor)
+	}
 
 	// Validate the complete replacement branch before mutating local state.
 	// This includes historical producer attribution so an unavailable or
 	// contradictory consensus ledger cannot leave the index partially rolled back.
+	if remoteHead < ancestor {
+		return fmt.Errorf("remote head below common ancestor")
+	}
 	bundles := make([]indexerrpc.Bundle, 0, remoteHead-ancestor)
 	parentHash := ancestorBlock.Hash
 	for h := ancestor + 1; h <= remoteHead; h++ {
-		if err := ctx.Err(); err != nil { return err }
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		bundle, err := e.source.BundleByNumber(ctx, e.chainID, h, model.FinalityHead, e.schemaVersion)
-		if err != nil { return fmt.Errorf("replay preflight fetch block %d: %w", h, err) }
-		if bundle.Block.Number != h { return fmt.Errorf("remote returned block %d for requested %d", bundle.Block.Number, h) }
-		if bundle.Block.ParentHash != parentHash { return fmt.Errorf("non-contiguous replay at block %d", h) }
-		if err := e.attributeProducer(&bundle.Block); err != nil { return fmt.Errorf("replay producer attribution at block %d: %w", h, err) }
+		if err != nil {
+			return fmt.Errorf("replay preflight fetch block %d: %w", h, err)
+		}
+		if bundle.Block.Number != h {
+			return fmt.Errorf("remote returned block %d for requested %d", bundle.Block.Number, h)
+		}
+		if bundle.Block.ParentHash != parentHash {
+			return fmt.Errorf("non-contiguous replay at block %d", h)
+		}
+		if err := e.attributeProducer(&bundle.Block); err != nil {
+			return fmt.Errorf("replay producer attribution at block %d: %w", h, err)
+		}
 		bundles = append(bundles, bundle)
 		parentHash = bundle.Block.Hash
 	}
 
-	if err := e.store.DeleteBlocksAbove(ancestor); err != nil { return fmt.Errorf("rollback above %d: %w", ancestor, err) }
+	if err := e.store.DeleteBlocksAbove(ancestor); err != nil {
+		return fmt.Errorf("rollback above %d: %w", ancestor, err)
+	}
 
 	cp.IndexedHeight = ancestor
 	cp.IndexedHash = ancestorBlock.Hash
-	if cp.SafeHeight > ancestor { cp.SafeHeight, cp.SafeHash = ancestor, ancestorBlock.Hash }
+	if cp.SafeHeight > ancestor {
+		cp.SafeHeight, cp.SafeHash = ancestor, ancestorBlock.Hash
+	}
 	cp.UpdatedAt = time.Now().UTC()
-	if err := e.store.SaveCheckpoint(cp); err != nil { return fmt.Errorf("save rollback checkpoint: %w", err) }
+	if err := e.store.SaveCheckpoint(cp); err != nil {
+		return fmt.Errorf("save rollback checkpoint: %w", err)
+	}
 
 	for _, bundle := range bundles {
 		h := bundle.Block.Number
@@ -126,7 +196,9 @@ func (e *Engine) Repair(ctx context.Context, remoteHead uint64) error {
 		}
 		cp.IndexedHeight, cp.IndexedHash = h, bundle.Block.Hash
 		cp.UpdatedAt = time.Now().UTC()
-		if err := e.store.SaveCheckpoint(cp); err != nil { return fmt.Errorf("replay checkpoint block %d: %w", h, err) }
+		if err := e.store.SaveCheckpoint(cp); err != nil {
+			return fmt.Errorf("replay checkpoint block %d: %w", h, err)
+		}
 	}
 	return nil
 }

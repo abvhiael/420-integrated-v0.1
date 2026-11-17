@@ -1,0 +1,572 @@
+{
+  "base": "77f4b1d97e71517a4117f4bdda4fc58b8e7a6a93",
+  "legacy": [
+    {
+      "pr": 463,
+      "head": "a1bac7e7ec8f497cd493f14e116ebc01c17b5acf"
+    },
+    {
+      "pr": 465,
+      "head": "45ed77f472c476116f63379f83da8514656852e3"
+    },
+    {
+      "pr": 467,
+      "head": "fdb6c49217b0e9626c2de1f0664a20be2b90767a"
+    },
+    {
+      "pr": 470,
+      "head": "42060ec5c0ea5efde0c527b38333381c44fb5f59"
+    },
+    {
+      "pr": 472,
+      "head": "52f5aadbe89b52697df7bb91bd461f2008ce03e2"
+    },
+    {
+      "pr": 476,
+      "head": "7a50712a27f1ff847e75157580f8dbd331f47fa3"
+    },
+    {
+      "pr": 481,
+      "head": "33f5a376d17478cea68cdafd04144498b6f4fe4b"
+    }
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/bridge-audit-8.yml",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": ".github/workflows/bridge-fast.yml",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "420-indexer/descriptors/bridge420-v1.json",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "420-indexer/src/bridge-descriptors.ts",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "420-indexer/src/index.ts",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "420-indexer/src/lifecycle-reducer.ts",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "420-indexer/src/protocol-decoder.ts",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "420-indexer/test/bridge-descriptors.test.ts",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "contracts/config/bridge/chain-identities-v1.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/cross-adapter-hardening-v12.6.3.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/cross-adapter-hardening-v12.6.4.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/cross-adapter-hardening-v12.6.6.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/cross-adapter-hardening-v12.6.7.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/deployment-v1.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/launch-catalog-v12.5.1.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/bridge/security-hardening-v1.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/genesis-canonical-addresses.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/genesis-dapp-contract-map.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/config/predeploy/storage-init.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/BridgeAccountingRegistry.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/BridgeChainRegistry420.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/BridgeIds420.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/BridgeRouteRegistry.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/BridgeTransferRegistry.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/GatewayRouter420.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/bridge/VerifiedGateway420.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/BridgeDeploymentBinding420.t.sol",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "contracts/test/BridgeGenesisIntegration420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/BridgeRouteChainIdentity420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/BridgeTransferLifecycle420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/ExchangeBridgeQualification420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/ROADMAP.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/analytics/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/bridge/deployment-operations.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/bridge/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/bridge/security.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/explorer/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/notifications/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/swap/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/apps/wallet/index.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/architecture/protocols/pay-token-exchange-bridge.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/420BRIDGE-AUDIT-8-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION-TRIGGER.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-4-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-5-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-6-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/audit/BRIDGE-AUDIT-7-QUALIFICATION.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/developers/bridge-integration.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "docs/troubleshooting/value-movement-economics.md",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "exchange/read-service/src/catalogue.mjs",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/read-service/src/http.mjs",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/read-service/src/projection.mjs",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/read-service/src/service.mjs",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/read-service/test/contract.test.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/read-service/test/projection.test.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/app.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/core/bridge.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/core/exchange-client.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/core/exchange-data.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/fixtures/bridge-routes.json",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "exchange/web/index.html",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/test/bridge.test.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "exchange/web/test/exchange-client.test.js",
+      "disposition": "Reconciled with current interfaces in this merge"
+    },
+    {
+      "path": "mkdocs.yml",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "scripts/verify-bridge-audit-6-deployment.py",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "scripts/verify-bridge-audit-7-security.py",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "scripts/verify-bridge-audit-8-abi.py",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "scripts/verify-bridge-audit-8-integration.py",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    },
+    {
+      "path": "scripts/verify-bridge-hardening.py",
+      "disposition": "Retained in original commit ancestry; current main implementation/configuration/documentation takes precedence"
+    }
+  ],
+  "qualification": [
+    {
+      "number": 465,
+      "head": "45ed77f472c476116f63379f83da8514656852e3",
+      "paths": [
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-1-QUALIFICATION-TRIGGER.md",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": [
+        "docs/audit/BRIDGE-AUDIT-1-QUALIFICATION-TRIGGER.md"
+      ]
+    },
+    {
+      "number": 467,
+      "head": "fdb6c49217b0e9626c2de1f0664a20be2b90767a",
+      "paths": [
+        ".github/workflows/bridge-fast.yml",
+        "contracts/config/bridge/chain-identities-v1.json",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/bridge/BridgeChainRegistry420.sol",
+        "contracts/src/bridge/BridgeRouteRegistry.sol",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "contracts/test/BridgeRouteChainIdentity420.t.sol",
+        "contracts/test/ExchangeBridgeQualification420.t.sol",
+        "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": []
+    },
+    {
+      "number": 470,
+      "head": "42060ec5c0ea5efde0c527b38333381c44fb5f59",
+      "paths": [
+        ".github/workflows/bridge-fast.yml",
+        "contracts/config/bridge/chain-identities-v1.json",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/bridge/BridgeChainRegistry420.sol",
+        "contracts/src/bridge/BridgeRouteRegistry.sol",
+        "contracts/src/bridge/BridgeTransferRegistry.sol",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "contracts/test/BridgeRouteChainIdentity420.t.sol",
+        "contracts/test/BridgeTransferLifecycle420.t.sol",
+        "contracts/test/ExchangeBridgeQualification420.t.sol",
+        "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION-TRIGGER.md",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": []
+    },
+    {
+      "number": 472,
+      "head": "52f5aadbe89b52697df7bb91bd461f2008ce03e2",
+      "paths": [
+        ".github/workflows/bridge-fast.yml",
+        "contracts/config/bridge/chain-identities-v1.json",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/src/bridge/BridgeAccountingRegistry.sol",
+        "contracts/src/bridge/BridgeChainRegistry420.sol",
+        "contracts/src/bridge/BridgeIds420.sol",
+        "contracts/src/bridge/BridgeRouteRegistry.sol",
+        "contracts/src/bridge/BridgeTransferRegistry.sol",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "contracts/test/BridgeRouteChainIdentity420.t.sol",
+        "contracts/test/BridgeTransferLifecycle420.t.sol",
+        "contracts/test/ExchangeBridgeQualification420.t.sol",
+        "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol",
+        "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION.md",
+        "docs/developers/bridge-integration.md",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": []
+    },
+    {
+      "number": 476,
+      "head": "7a50712a27f1ff847e75157580f8dbd331f47fa3",
+      "paths": [
+        ".github/workflows/bridge-fast.yml",
+        "contracts/config/bridge/chain-identities-v1.json",
+        "contracts/config/bridge/deployment-v1.json",
+        "contracts/config/genesis-canonical-addresses.json",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/predeploy/storage-init.json",
+        "contracts/src/bridge/BridgeAccountingRegistry.sol",
+        "contracts/src/bridge/BridgeChainRegistry420.sol",
+        "contracts/src/bridge/BridgeIds420.sol",
+        "contracts/src/bridge/BridgeRouteRegistry.sol",
+        "contracts/src/bridge/BridgeTransferRegistry.sol",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/src/bridge/VerifiedGateway420.sol",
+        "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+        "contracts/test/BridgeDeploymentBinding420.t.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "contracts/test/BridgeRouteChainIdentity420.t.sol",
+        "contracts/test/BridgeTransferLifecycle420.t.sol",
+        "contracts/test/ExchangeBridgeQualification420.t.sol",
+        "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol",
+        "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/apps/bridge/deployment-operations.md",
+        "docs/apps/bridge/index.md",
+        "docs/apps/index.md",
+        "docs/apps/swap/index.md",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-4-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-5-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-6-QUALIFICATION-TRIGGER.md",
+        "docs/developers/bridge-integration.md",
+        "exchange/read-service/src/catalogue.mjs",
+        "exchange/read-service/src/http.mjs",
+        "exchange/read-service/src/service.mjs",
+        "exchange/read-service/test/contract.test.js",
+        "exchange/web/app.js",
+        "exchange/web/core/bridge.js",
+        "exchange/web/core/exchange-client.js",
+        "exchange/web/core/exchange-data.js",
+        "exchange/web/fixtures/bridge-routes.json",
+        "exchange/web/index.html",
+        "exchange/web/test/bridge.test.js",
+        "exchange/web/test/exchange-client.test.js",
+        "mkdocs.yml",
+        "scripts/verify-bridge-audit-6-deployment.py",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": [
+        "docs/audit/BRIDGE-AUDIT-6-QUALIFICATION-TRIGGER.md"
+      ]
+    },
+    {
+      "number": 481,
+      "head": "33f5a376d17478cea68cdafd04144498b6f4fe4b",
+      "paths": [
+        ".github/workflows/bridge-fast.yml",
+        "contracts/config/bridge/chain-identities-v1.json",
+        "contracts/config/bridge/cross-adapter-hardening-v12.6.3.json",
+        "contracts/config/bridge/cross-adapter-hardening-v12.6.4.json",
+        "contracts/config/bridge/cross-adapter-hardening-v12.6.6.json",
+        "contracts/config/bridge/cross-adapter-hardening-v12.6.7.json",
+        "contracts/config/bridge/deployment-v1.json",
+        "contracts/config/bridge/launch-catalog-v12.5.1.json",
+        "contracts/config/bridge/security-hardening-v1.json",
+        "contracts/config/genesis-canonical-addresses.json",
+        "contracts/config/genesis-dapp-contract-map.json",
+        "contracts/config/predeploy/storage-init.json",
+        "contracts/src/bridge/BridgeAccountingRegistry.sol",
+        "contracts/src/bridge/BridgeChainRegistry420.sol",
+        "contracts/src/bridge/BridgeIds420.sol",
+        "contracts/src/bridge/BridgeRouteRegistry.sol",
+        "contracts/src/bridge/BridgeTransferRegistry.sol",
+        "contracts/src/bridge/GatewayRouter420.sol",
+        "contracts/src/bridge/VerifiedGateway420.sol",
+        "contracts/src/exchange/ExchangeBridgeQualification420.sol",
+        "contracts/test/BridgeDeploymentBinding420.t.sol",
+        "contracts/test/BridgeGenesisIntegration420.t.sol",
+        "contracts/test/BridgeRouteChainIdentity420.t.sol",
+        "contracts/test/BridgeTransferLifecycle420.t.sol",
+        "contracts/test/ExchangeBridgeQualification420.t.sol",
+        "contracts/test/GovernanceAccountingRecoveryHardening420.t.sol",
+        "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol",
+        "docs/420BRIDGE-AUDIT-REMEDIATION-ROADMAP.md",
+        "docs/apps/bridge/deployment-operations.md",
+        "docs/apps/bridge/index.md",
+        "docs/apps/index.md",
+        "docs/apps/swap/index.md",
+        "docs/architecture/protocols/pay-token-exchange-bridge.md",
+        "docs/audit/420BRIDGE-COMPLETE-AUDIT-20261001.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-2-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION-TRIGGER.md",
+        "docs/audit/BRIDGE-AUDIT-3-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-4-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-5-QUALIFICATION.md",
+        "docs/audit/BRIDGE-AUDIT-6-QUALIFICATION.md",
+        "docs/developers/bridge-integration.md",
+        "exchange/read-service/src/catalogue.mjs",
+        "exchange/read-service/src/http.mjs",
+        "exchange/read-service/src/service.mjs",
+        "exchange/read-service/test/contract.test.js",
+        "exchange/web/app.js",
+        "exchange/web/core/bridge.js",
+        "exchange/web/core/exchange-client.js",
+        "exchange/web/core/exchange-data.js",
+        "exchange/web/fixtures/bridge-routes.json",
+        "exchange/web/index.html",
+        "exchange/web/test/bridge.test.js",
+        "exchange/web/test/exchange-client.test.js",
+        "mkdocs.yml",
+        "scripts/verify-bridge-audit-6-deployment.py",
+        "scripts/verify-bridge-audit-7-security.py",
+        "scripts/verify-bridge-hardening.py"
+      ],
+      "unique_vs_463": []
+    }
+  ]
+}

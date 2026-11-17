@@ -63,3 +63,8 @@ test('stream error degrades freshness explicitly', () => {
   socket.onerror();
   assert.equal(layer.store.freshness,'degraded');
 });
+
+test('bridge observations refresh across reads rather than retaining a cached completion',async()=>{
+ let calls=0;const layer=new ExchangeDataLayer({baseUrl:'https://api.example.test',fetchImpl:async()=>{calls++;return response({schema:'420-exchange-bridge-response-v13.6',routes:[],settlements:[],provenance:{rpcFallbackReady:true,authoritative:false}});}});
+ await layer.loadBridge();await layer.loadBridge();assert.equal(calls,2);
+});

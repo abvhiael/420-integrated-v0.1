@@ -1,0 +1,10 @@
+✔ bridge endpoint requires RPC fallback readiness and preserves route identity (2.518953ms)
+✔ bridge projections reject a claim to settlement authority (0.412762ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 167.576536

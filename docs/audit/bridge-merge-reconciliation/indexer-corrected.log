@@ -1,0 +1,48 @@
+✔ pinned Names420 descriptor is exact, reproducible and artifact-bound (10.316559ms)
+✔ canonical Names420 descriptors decode registration, resolution, renewal and transfer lifecycle (4.791315ms)
+✔ Names420 fork replacement retracts orphan state and recovers on canonical replacement (2.985134ms)
+✔ descriptor/address/artifact drift fails closed (1.945537ms)
+✔ matching Names420 topic from the wrong contract address is rejected (2.427681ms)
+✔ pinned ProtocolRegistry descriptor is reproducible and hash-bound (7.575484ms)
+✔ known ServiceVersionPublished vector decodes with canonical descriptor and address (1.223421ms)
+✔ known registration profile vector decodes deterministically (0.61542ms)
+✔ descriptor hash drift and identity drift fail closed (1.256285ms)
+✔ matching topic from the wrong contract address is rejected (0.827593ms)
+✔ pinned generalized Randomness descriptor binds fixed registry and Registry-resolved router (25.867887ms)
+✔ generalized router request and resolve events reduce to pending then completed (4.43369ms)
+✔ voided generalized request becomes terminal expired (1.311063ms)
+✔ registry request and fulfillment events retain the same request object identity (1.631919ms)
+✔ wrong router address and registry/router address collision fail closed (3.49009ms)
+✔ pinned 420Stake descriptor is exact and retains canonical lifecycle/reward event set (20.851619ms)
+✔ canonical Stake descriptors decode validator lifecycle, slashing and rewards (6.266242ms)
+✔ Stake event canonicality retracts orphan lifecycle/reward observations on reorg (2.664124ms)
+✔ Stake descriptor and retained artifact provenance drift fails closed (2.170685ms)
+✔ matching canonical Stake topic from the wrong contract is rejected (1.963936ms)
+✖ Go Stake activity classifier is pinned to the same descriptor topics (0.428756ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 20
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 555.133551
+
+✖ failing tests:
+
+test at dist/test/stake420-release-descriptor.test.js:114:1
+✖ Go Stake activity classifier is pinned to the same descriptor topics (0.428756ms)
+  Error: ENOENT: no such file or directory, open '../indexer/api/stake.go'
+      at readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/stake420-release-descriptor.test.js:115:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '../indexer/api/stake.go'
+  }

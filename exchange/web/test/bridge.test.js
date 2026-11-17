@@ -8,7 +8,8 @@ const route=()=>({
   adapterId:'adapter1',adapterAddress:'0xadapter',verifierId:'verifier1',
   provenanceHash:'0xprov',verificationHash:'0xprov',direction:'INBOUND',
   qualified:true,representationActive:true,canonicalRepresentation:true,routeActive:true,directionEnabled:true,
-  adapterLive:true,adapterMatches:true,verifierConfigured:true,settlementHealthy:true,paused:false,bridgeFee:0.42
+  adapterLive:true,adapterMatches:true,verifierConfigured:true,settlementHealthy:true,paused:false,bridgeFee:0.42,
+  routeLimit:'1000 raw / tx',assetLimit:'10000 raw TVL',finality:'safe',freshness:'canonical',canonicality:'canonical',observedAt:1000
 });
 
 test('route qualification requires every live V11 dependency',()=>{
@@ -46,5 +47,38 @@ test('settlement timeline preserves attestation and proof provenance',()=>{
 test('failed settlements remain inspectable and explicitly retryable or terminal',()=>{
   const record=normalizeSettlement({settlementId:'s2',routeId:'r1',state:'FAILED',retryable:true,failureReason:'proof unavailable'});
   assert.equal(record.retryable,true);
-  assert.equal(settlementProgress(record).terminal,true);
+  assert.equal(settlementProgress(record).terminal,false);
+});
+
+
+test('stale or noncanonical bridge projections fail closed',()=>{
+  assert.equal(bridgeQualification({...route(),freshness:'stale'}).reason,'stale');
+  assert.equal(bridgeQualification({...route(),canonicality:'reorged'}).reason,'noncanonical');
+});
+
+test('bridge review preserves chains, limits and finality context',()=>{
+  const intent=buildBridgeIntent(route(),{amount:10,recipient:'0xrecipient'});
+  assert.equal(intent.sourceChain,'ethereum');
+  assert.equal(intent.destinationChain,'420');
+  assert.equal(intent.routeLimit,'1000 raw / tx');
+  assert.equal(intent.assetLimit,'10000 raw TVL');
+  assert.equal(intent.finality,'safe');
+  assert.equal(intent.freshness,'canonical');
+});
+
+test('only finalized canonical completion or refund is terminal; projection labels cannot submit',()=>{
+ for(const state of ['CREATED','SOURCE_PENDING','SOURCE_FINALIZED','PROOF_PENDING','VERIFIED','DESTINATION_PENDING','FAILED','RETRYABLE','EXPIRED','PAUSED','DISPUTED']){
+  assert.equal(settlementProgress({settlementId:'s',routeId:'r',state,finality:'finalized',canonicality:'canonical'}).terminal,false);
+ }
+ for(const state of ['COMPLETED','REFUNDED']){
+  assert.equal(settlementProgress({settlementId:'s',routeId:'r',state,finality:'safe',canonicality:'canonical'}).terminal,false);
+  assert.equal(settlementProgress({settlementId:'s',routeId:'r',state,finality:'finalized',canonicality:'canonical'}).terminal,true);
+  assert.equal(settlementProgress({settlementId:'s',routeId:'r',state,finality:'finalized',canonicality:'reorged',active:false}).terminal,false);
+ }
+ const r=normalizeBridgeRoute(route());assert.equal(canSubmitBridge({route:r,intent:buildBridgeIntent(r,{amount:1,recipient:'test'}),walletReady:true}).reason,'canonical-execution-review-required');
+});
+
+test('partial transfer history keeps unknown route explicit without granting settlement',()=>{
+ const record=normalizeSettlement({settlementId:'s',routeId:null,state:'DESTINATION_PENDING',canonicality:'canonical',finality:'safe'});
+ assert.equal(record.routeId,'unknown');assert.equal(settlementProgress(record).terminal,false);
 });

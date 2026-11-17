@@ -1,0 +1,26 @@
+✖ Go Stake activity classifier is pinned to the same descriptor topics (1.37501ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 846.702415
+
+✖ failing tests:
+
+test at dist/test/stake420-release-descriptor.test.js:114:1
+✖ Go Stake activity classifier is pinned to the same descriptor topics (1.37501ms)
+  Error: ENOENT: no such file or directory, open '../indexer/api/stake.go'
+      at readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/stake420-release-descriptor.test.js:115:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '../indexer/api/stake.go'
+  }

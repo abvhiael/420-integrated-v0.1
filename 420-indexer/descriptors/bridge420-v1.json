@@ -1,0 +1,937 @@
+{
+  "schema": "420-bridge-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Bridge",
+  "authority": "artifact_events_only_addresses_resolved_by_deployment",
+  "contracts": [
+    {
+      "contractName": "BridgeChainRegistry420",
+      "sourcePath": "contracts/src/bridge/BridgeChainRegistry420.sol",
+      "sourceBlobSha": "1b2baaa1e2319eea8bd0328e0cb85870fa4ff4e9",
+      "events": [
+        {
+          "name": "ChainSet",
+          "signature": "ChainSet(bytes32,uint64,bytes32,bytes32,bytes32,uint8,bool)",
+          "inputs": [
+            {
+              "name": "chainKey",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "routeChainId",
+              "type": "uint64",
+              "indexed": true
+            },
+            {
+              "name": "networkId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "nativeAssetId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "verifierFamily",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "family",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeAssetRegistry",
+      "sourcePath": "contracts/src/bridge/BridgeAssetRegistry.sol",
+      "sourceBlobSha": "81e8fc6b5baf843f84b6a116f45856cadc7436f1",
+      "events": [
+        {
+          "name": "AssetSet",
+          "signature": "AssetSet(bytes32,address,uint8,bool)",
+          "inputs": [
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "localToken",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "canonicalRepresentation",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "TokenRouteSet",
+          "signature": "TokenRouteSet(bytes32,bytes32,bytes32,bool)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceAsset",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "verifierSnapshot",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeRouteRegistry",
+      "sourcePath": "contracts/src/bridge/BridgeRouteRegistry.sol",
+      "sourceBlobSha": "2bbad4c961c1758654fe0481ca36792a25625b8f",
+      "events": [
+        {
+          "name": "DirectionSet",
+          "signature": "DirectionSet(bytes32,bool,bool)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "inboundEnabled",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "outboundEnabled",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RouteChainBindingSet",
+          "signature": "RouteChainBindingSet(bytes32,bytes32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceChainKey",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "destinationChainKey",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceNetworkId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "destinationNetworkId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RouteSet",
+          "signature": "RouteSet(bytes32,bytes32,uint32,uint8)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "version",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RouteVerifierBound",
+          "signature": "RouteVerifierBound(bytes32,bytes32,address)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "approvalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "consumer",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeRiskManager",
+      "sourcePath": "contracts/src/bridge/BridgeRiskManager.sol",
+      "sourceBlobSha": "a350becc8a736f44ceaa7f081f50fa69c666ec7a",
+      "events": [
+        {
+          "name": "Consumed",
+          "signature": "Consumed(bytes32,bytes32,bool,uint256)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "inbound",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "LimitsSet",
+          "signature": "LimitsSet(bytes32,bool)",
+          "inputs": [
+            {
+              "name": "id",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "assetLevel",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RouterSet",
+          "signature": "RouterSet(address,bool)",
+          "inputs": [
+            {
+              "name": "router",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "trusted",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeTransferRegistry",
+      "sourcePath": "contracts/src/bridge/BridgeTransferRegistry.sol",
+      "sourceBlobSha": "8e2aff185907e41386d37564e6dff01a31249317",
+      "events": [
+        {
+          "name": "OperatorSet",
+          "signature": "OperatorSet(address,bool)",
+          "inputs": [
+            {
+              "name": "operator",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "trusted",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "OutboundTransferCreated",
+          "signature": "OutboundTransferCreated(bytes32,bytes32,bytes32,address,bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sender",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "recipientHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "sourceMessageId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RouterSet",
+          "signature": "RouterSet(address,bool)",
+          "inputs": [
+            {
+              "name": "router",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "trusted",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "SourceTransactionBound",
+          "signature": "SourceTransactionBound(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceTxId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "TransferCreated",
+          "signature": "TransferCreated(bytes32,bytes32,bytes32,uint256)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "TransferStatus",
+          "signature": "TransferStatus(bytes32,uint8)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "TransferTransition",
+          "signature": "TransferTransition(bytes32,uint8,uint8,bytes32,address)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "fromStatus",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "toStatus",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "actor",
+              "type": "address",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeAccountingRegistry",
+      "sourcePath": "contracts/src/bridge/BridgeAccountingRegistry.sol",
+      "sourceBlobSha": "84b073e18eded88dca1279faf9c888b200503513",
+      "events": [
+        {
+          "name": "Reconciled",
+          "signature": "Reconciled(bytes32,uint256,uint256,bool,bytes32)",
+          "inputs": [
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "authorizedSupply",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "observedSupply",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "healthy",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "ReconciliationHealth",
+          "signature": "ReconciliationHealth(bytes32,uint8,uint64,bytes32)",
+          "inputs": [
+            {
+              "name": "assetId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "state",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "observedAt",
+              "type": "uint64",
+              "indexed": false
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "GatewayRouter420",
+      "sourcePath": "contracts/src/bridge/GatewayRouter420.sol",
+      "sourceBlobSha": "5f8a2ee578e617fe4ccf1e0daaa2d03c83cd17a3",
+      "events": [
+        {
+          "name": "AdapterSet",
+          "signature": "AdapterSet(bytes32,address)",
+          "inputs": [
+            {
+              "name": "adapterId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "adapter",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "InboundAccepted",
+          "signature": "InboundAccepted(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "adapterId",
+              "type": "bytes32",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "InboundSettled",
+          "signature": "InboundSettled(bytes32,bytes32,address,uint256)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "OutboundInitiated",
+          "signature": "OutboundInitiated(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "adapterId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceMessageId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "OutboundTransferRegistered",
+          "signature": "OutboundTransferRegistered(bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "routeId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "sourceMessageId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "VerifiedGateway420",
+      "sourcePath": "contracts/src/bridge/VerifiedGateway420.sol",
+      "sourceBlobSha": "dfb0f95ef701143469718bb397453cc28b541e11",
+      "events": [
+        {
+          "name": "AssetApproval",
+          "signature": "AssetApproval(address,bool)",
+          "inputs": [
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "approved",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "DepositVerified",
+          "signature": "DepositVerified(bytes32,address,address,uint256)",
+          "inputs": [
+            {
+              "name": "depositId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "QualificationBound",
+          "signature": "QualificationBound(bytes32,address)",
+          "inputs": [
+            {
+              "name": "approvalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "registry",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "VerifierSet",
+          "signature": "VerifierSet(address)",
+          "inputs": [
+            {
+              "name": "verifier",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        },
+        {
+          "name": "WithdrawalVerified",
+          "signature": "WithdrawalVerified(bytes32,address,address,uint256)",
+          "inputs": [
+            {
+              "name": "withdrawalId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "recipient",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "asset",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "CADCBridgeIntegration",
+      "sourcePath": "contracts/src/bridge/CADCBridgeIntegration.sol",
+      "sourceBlobSha": "c847a53723ea531e99c2b65c615d0f1a22844253",
+      "events": [
+        {
+          "name": "CADCPathActive",
+          "signature": "CADCPathActive(bool)",
+          "inputs": [
+            {
+              "name": "active",
+              "type": "bool",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CADCPathConfigured",
+          "signature": "CADCPathConfigured(address,address,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "cadc",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "endpoint",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "issuerOFT",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "securityConfigHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "peerConfigHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeVerifierRegistry420",
+      "sourcePath": "contracts/src/bridge/BridgeVerifierRegistry420.sol",
+      "sourceBlobSha": "b3725df1b615c7bd21524bc1c0c74ab471a856c9",
+      "events": [
+        {
+          "name": "ProxyRuntimeQualified",
+          "signature": "ProxyRuntimeQualified(bytes32,uint256,bool,bytes32)",
+          "inputs": [
+            {
+              "name": "runtimeHash",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "revision",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "active",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "QualificationRecorded",
+          "signature": "QualificationRecorded(bytes32,address,address,uint8,bytes32)",
+          "inputs": [
+            {
+              "name": "id",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "consumer",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "verifier",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "indexed": false
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "QualificationRevoked",
+          "signature": "QualificationRevoked(bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "id",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "reasonHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "VerifierProxyCreated",
+          "signature": "VerifierProxyCreated(address,address)",
+          "inputs": [
+            {
+              "name": "proxy",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "implementation",
+              "type": "address",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "BridgeValueCustody420",
+      "sourcePath": "contracts/src/bridge/BridgeValueCustody420.sol",
+      "sourceBlobSha": "ecdba3e7a2336736f7903f38c2e892584262229a",
+      "events": [
+        {
+          "name": "ValueDelivered",
+          "signature": "ValueDelivered(bytes32,address,address,uint256,bytes32)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "token",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "recipient",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "WithdrawalResolved",
+          "signature": "WithdrawalResolved(bytes32,bool,bytes32)",
+          "inputs": [
+            {
+              "name": "transferId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "paid",
+              "type": "bool",
+              "indexed": false
+            },
+            {
+              "name": "proofId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

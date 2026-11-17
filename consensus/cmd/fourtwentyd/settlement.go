@@ -8,16 +8,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	eng "github.com/420integrated/420-integrated/consensus/engine"
 	"github.com/420integrated/420-integrated/consensus/recovery"
+	"github.com/420integrated/420-integrated/consensus/telemetry"
 )
 
 // runSettlement consumes the certified-consensus stream. Signature verification
 // and the persisted ancestry/finality owner remain mandatory for every record;
 // stdin is a transport, never an alternative source of settlement authority.
-func runSettlement(ctx context.Context, endpoint, jwt, trustPath, pin, dir string, repair bool) error {
+func runSettlement(ctx context.Context, endpoint, jwt, trustPath, pin, dir string, repair bool) (runErr error) {
+	health := telemetry.New(os.Getenv("STAKE_SETTLEMENT_HEALTH_FILE"), "settlement")
+	defer func() { health.Close(runErr) }()
 	raw, err := os.ReadFile(trustPath)
 	if err != nil {
 		return err
@@ -72,22 +76,25 @@ func runSettlement(ctx context.Context, endpoint, jwt, trustPath, pin, dir strin
 		}
 	}()
 	emit := func(event string, err error) {
-		message := ""
-		if err != nil {
-			message = err.Error()
+		message, failedSequence := telemetry.SettlementCode(err)
+		if event == "rejected" && err != nil && strings.Contains(err.Error(), "restart reconciliation required") {
+			message = "RESTART_RECONCILIATION_REQUIRED"
+			failedSequence = 0
 		}
-		_ = output.Encode(map[string]any{"event": event, "error": message, "status": s.Status()})
+		_ = output.Encode(map[string]any{"event": event, "error": message, "failed_sequence": failedSequence, "status": s.Status()})
 	}
 	lastError := ""
 	wasReady := false
 	attempt := func() {
 		if err := s.Reconcile(ctx); err != nil {
+			health.Failure(err)
 			if lastError != err.Error() {
 				emit("halted", err)
 				lastError = err.Error()
 			}
 			wasReady = false
 		} else if !wasReady || lastError != "" {
+			health.Set("READY")
 			emit("settled", nil)
 			lastError = ""
 			wasReady = true

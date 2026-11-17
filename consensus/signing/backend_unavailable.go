@@ -21,3 +21,5 @@ func verifyResult(Policy, Duty, Result) error { return bls.ErrBackendUnavailable
 func backendReady() error              { return bls.ErrBackendUnavailable }
 func ValidateKey(Policy, []byte) error { return bls.ErrBackendUnavailable }
 func (*Signer) Close()                 {}
+
+func (*Signer) Health(context.Context) error { return bls.ErrBackendUnavailable }

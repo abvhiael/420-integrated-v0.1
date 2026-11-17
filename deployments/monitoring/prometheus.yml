@@ -1,0 +1,6 @@
+scrape_configs:
+  - job_name: stake-monitor
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['stake-monitor:9545']
+rule_files: ['/etc/prometheus/stake-alarms.yml']

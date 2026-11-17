@@ -16,9 +16,10 @@ import (
 
 	"github.com/420integrated/420-integrated/consensus/signing"
 	"github.com/420integrated/420-integrated/consensus/slashing"
+	"github.com/420integrated/420-integrated/consensus/telemetry"
 )
 
-func run() error {
+func run() (runErr error) {
 	policyPath := flag.String("policy", "", "independently provisioned signing policy")
 	policyPin := flag.String("policy-sha256", "", "required policy SHA-256")
 	history := flag.String("history", "", "private durable signing journal (never auto-created)")
@@ -33,6 +34,8 @@ func run() error {
 	recoverHistory := flag.Bool("recover-witness-history", false, "explicitly recover complete history from the independent witness, then exit")
 	importPin := flag.String("import-verified-history-sha256", "", "explicit independent complete-history digest for an existing key; never overwrite an existing witness")
 	flag.Parse()
+	health := telemetry.New(os.Getenv("STAKE_SIGNER_HEALTH_FILE"), "signer")
+	defer func() { health.Close(runErr) }()
 	if (*provision && *recoverHistory) || (*importPin != "" && (*provision || *recoverHistory)) {
 		return fmt.Errorf("provision and recovery are mutually exclusive")
 	}
@@ -100,7 +103,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	server := &http.Server{Addr: *listen, Handler: signing.Handler(signer, pin), TLSConfig: config, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10}
+	server := &http.Server{Addr: *listen, Handler: signing.ObservingHandler(signer, pin, health.Failure), TLSConfig: config, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 15 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 16 << 10}
 	listener, err := net.Listen("tcp", *listen)
 	if err != nil {
 		return err
@@ -111,6 +114,8 @@ func run() error {
 		defer cancel()
 		_ = server.Shutdown(timeout)
 	}()
+	stopHealth := health.Watch(ctx, signer.Health)
+	defer stopHealth()
 	err = server.ServeTLS(listener, "", "")
 	if err == http.ErrServerClosed {
 		return nil
@@ -119,7 +124,7 @@ func run() error {
 }
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintln(os.Stderr, "protected signer halted:", err)
+		fmt.Fprintln(os.Stderr, "STAKE_SIGNER_HALTED", telemetry.SigningCode(err))
 		os.Exit(1)
 	}
 }

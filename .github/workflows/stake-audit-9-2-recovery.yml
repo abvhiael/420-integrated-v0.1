@@ -2,6 +2,12 @@ name: 420Stake STAKE-AUDIT-9.2 recovery
 on:
   pull_request:
     paths:
+      - 'consensus/monitoring/**'
+      - 'consensus/telemetry/**'
+      - 'consensus/cmd/stake-monitor/**'
+      - 'deployments/monitoring/**'
+      - 'docker/Dockerfile.stake-monitor'
+      - '.github/workflows/stake-audit-9-2-recovery.yml'
       - 'consensus/engine/**'
       - 'consensus/recovery/**'
       - 'consensus/cmd/fourtwentyd/settlement.go'
@@ -21,16 +27,54 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
       - name: Verify exact head
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha }}
-        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          mkdir -p stake-9-5-evidence
+          git rev-parse HEAD > stake-9-5-evidence/candidate-sha.txt
+          go version > stake-9-5-evidence/go-version.txt
+      - name: Route component-owned qualification
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 - <<'PY_SCOPE'
+          import os,subprocess
+          files=subprocess.check_output(['git','diff','--name-only',os.environ['BASE'],'HEAD'],text=True).splitlines()
+          owned=('consensus/monitoring/','consensus/telemetry/','consensus/cmd/stake-monitor/','deployments/monitoring/')
+          shared={'consensus/cmd/fourtwentyd/main.go','consensus/cmd/fourtwentyd/signing.go','consensus/cmd/fourtwentyd/settlement.go','consensus/cmd/stake-signer/main.go','consensus/signing/backend_blst.go','consensus/signing/backend_unavailable.go','consensus/signing/health.go','consensus/signing/health_test.go','consensus/signing/process_test.go','consensus/signing/transport.go','deployments/consensus/protected-signing.compose.yml','docker/Dockerfile.stake-monitor','scripts/qualify-execution-recovery.py','scripts/settlement_process_scenarios.py','scripts/stake_monitor_scenarios.py','.github/workflows/stake-audit-9-2-recovery.yml','.github/workflows/node420-release-gate.yml'}
+          only=bool(files) and all(p.startswith(owned) or p in shared for p in files)
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('MONITORING_ONLY='+str(only).lower()+'\n')
+          PY_SCOPE
       - name: Targeted recovery qualification
         run: |
-          go test ./consensus/recovery
-          go test -race -tags blst -count=1 -v ./consensus/recovery ./consensus/crypto/bls ./consensus/engine ./consensus/systemcall ./consensus/storage ./consensus/devnet ./consensus/finality ./execution/systemcall/...
+          set -o pipefail
+          if [ "$MONITORING_ONLY" = true ]; then
+            go test -race -tags blst -count=1 -v ./consensus/monitoring ./consensus/telemetry ./consensus/cmd/stake-monitor 2>&1 | tee stake-9-5-evidence/tests.log
+            go vet -tags blst ./consensus/monitoring ./consensus/telemetry ./consensus/cmd/stake-monitor
+          else
+            go test ./consensus/recovery
+            go test -race -tags blst -count=1 -v ./consensus/recovery ./consensus/crypto/bls ./consensus/engine ./consensus/systemcall ./consensus/storage ./consensus/devnet ./consensus/finality ./execution/systemcall/...
+          fi
       - name: Build consensus daemon
         run: go build -tags blst -o bin/fourtwentyd ./consensus/cmd/fourtwentyd
+
+      - name: Build operational observer and deployment image
+        if: env.MONITORING_ONLY == 'true'
+        run: |
+          set -o pipefail
+          go build -tags blst -o bin/stake-monitor ./consensus/cmd/stake-monitor
+          sha256sum bin/stake-monitor > stake-9-5-evidence/binary-sha256.txt
+          git archive HEAD | docker build -f docker/Dockerfile.stake-monitor -t stake-monitor:qualified - 2>&1 | tee stake-9-5-evidence/image-build.log
+          docker image inspect stake-monitor:qualified > stake-9-5-evidence/image.json
+      - uses: actions/upload-artifact@v4
+        if: always() && env.MONITORING_ONLY == 'true'
+        with:
+          name: stake-audit-9-5-monitoring-${{ github.event.pull_request.head.sha }}
+          path: stake-9-5-evidence/
+          retention-days: 14

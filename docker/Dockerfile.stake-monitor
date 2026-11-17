@@ -1,0 +1,17 @@
+FROM golang:1.24-alpine AS build
+RUN apk add --no-cache build-base
+WORKDIR /src
+COPY go.mod go.sum ./
+COPY consensus ./consensus
+COPY execution/storage ./execution/storage
+COPY indexer ./indexer
+COPY notifications/delivery ./notifications/delivery
+RUN CGO_ENABLED=1 go build -tags blst -trimpath -ldflags='-s -w' -o /out/stake-monitor ./consensus/cmd/stake-monitor
+FROM alpine:3.22
+RUN apk add --no-cache ca-certificates && addgroup -g 10003 -S monitor && adduser -u 10003 -S -G monitor monitor && mkdir /var/lib/stake-monitor && chown monitor:monitor /var/lib/stake-monitor
+COPY --from=build /out/stake-monitor /usr/local/bin/stake-monitor
+USER 10003:10003
+EXPOSE 9545
+HEALTHCHECK CMD wget -qO- http://127.0.0.1:9545/live || exit 1
+ENTRYPOINT ["/usr/local/bin/stake-monitor"]
+CMD ["--config=/etc/stake-monitor/config.json"]

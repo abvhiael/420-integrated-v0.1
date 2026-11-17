@@ -51,10 +51,28 @@ func MutualTLS(cert tls.Certificate, ca *x509.CertPool, peer [32]byte, server bo
 	}
 	return config, nil
 }
-func Handler(s *Signer, clientPin [32]byte) http.Handler {
+func Handler(s *Signer, clientPin [32]byte) http.Handler { return ObservingHandler(s, clientPin, nil) }
+
+// ObservingHandler reports only the outcome to a local categorical observer.
+// It cannot change signing authorization, reservations or responses.
+func ObservingHandler(s *Signer, clientPin [32]byte, observe func(error)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.TLS == nil || len(r.TLS.VerifiedChains) == 0 || len(r.TLS.PeerCertificates) == 0 || SPKIPin(r.TLS.PeerCertificates[0]) != clientPin {
 			http.Error(w, "unauthorized validator", http.StatusUnauthorized)
+			return
+		}
+		if r.Method == "GET" && r.URL.Path == "/v1/health" && r.URL.RawQuery == "" {
+			ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+			defer cancel()
+			err := s.Health(ctx)
+			if observe != nil {
+				observe(err)
+			}
+			if err != nil {
+				http.Error(w, "protected signer unavailable", http.StatusServiceUnavailable)
+			} else {
+				w.WriteHeader(http.StatusNoContent)
+			}
 			return
 		}
 		if r.Method != "POST" || r.URL.Path != "/v1/sign" || r.URL.RawQuery != "" {
@@ -74,6 +92,9 @@ func Handler(s *Signer, clientPin [32]byte) http.Handler {
 		ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 		defer cancel()
 		result, err := s.Sign(ctx, duty)
+		if observe != nil {
+			observe(err)
+		}
 		if err != nil {
 			http.Error(w, "protected signing refused", http.StatusConflict)
 			return

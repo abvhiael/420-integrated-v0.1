@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/consensus/slashing"
+	"github.com/420integrated/420-integrated/consensus/telemetry"
 )
 
 type child struct {
@@ -138,6 +139,9 @@ func TestActualProtectedSigningProcesses(t *testing.T) {
 		t.Run(stage, func(t *testing.T) {
 			p, ikm := policy(t)
 			remoteDir, nodeDir := privateDir(t), privateDir(t)
+			healthDir := t.TempDir()
+			signerHealth := filepath.Join(healthDir, "signer.json")
+			validatorHealth := filepath.Join(healthDir, "validator.json")
 			policyRaw, _ := json.Marshal(p)
 			pin := sha256.Sum256(policyRaw)
 			policyPath := filepath.Join(remoteDir, "policy.json")
@@ -162,7 +166,7 @@ func TestActualProtectedSigningProcesses(t *testing.T) {
 				t.Fatal(err)
 			}
 			startSigner := func(fault string) *child {
-				env := []string{}
+				env := []string{"STAKE_SIGNER_HEALTH_FILE=" + signerHealth}
 				if fault != "" {
 					env = append(env, "STAKE_SIGNING_STOP_AT="+fault)
 				}
@@ -178,7 +182,7 @@ func TestActualProtectedSigningProcesses(t *testing.T) {
 			duty := proposal(p, 10)
 			dutyRaw, _ := json.Marshal(duty)
 			request := func(raw []byte) *child {
-				c := spawn(t, nodeBinary, nodeArgs, nil)
+				c := spawn(t, nodeBinary, nodeArgs, []string{"STAKE_VALIDATOR_HEALTH_FILE=" + validatorHealth})
 				_, _ = c.input.Write(append(raw, '\n'))
 				c.input.Close()
 				return c
@@ -245,7 +249,7 @@ func TestActualProtectedSigningProcesses(t *testing.T) {
 			write(t, remoteHistory, initial)
 			halted := startSigner("")
 			halted.wait(t, false)
-			if !bytes.Contains(mustRead(t, halted.log), []byte("offline signing history rollback")) {
+			if !bytes.Contains(mustRead(t, halted.log), []byte("SIGNING_HISTORY_ROLLBACK")) {
 				t.Fatal("rollback did not fail at independent witness")
 			}
 			recovery := spawn(t, productionBinary, append(append([]string{}, args...), "--recover-witness-history"), nil)
@@ -271,6 +275,13 @@ func TestActualProtectedSigningProcesses(t *testing.T) {
 				t.Fatal("restored journal permitted double proposal")
 			}
 			server.kill(t)
+			var observed telemetry.Health
+			if err = json.Unmarshal(mustRead(t, signerHealth), &observed); err != nil || observed.Validate() != nil || observed.Status != "SIGNING_PROTECTION_FAILURE" {
+				t.Fatal("actual signer failure not observable", observed, err)
+			}
+			if bytes.Contains(mustRead(t, signerHealth), []byte(hex.EncodeToString(ikm))) || bytes.Contains(mustRead(t, validatorHealth), []byte(os.Getenv("STAKE_SIGNER_PG_DSN"))) {
+				t.Fatal("runtime telemetry leaked signing credentials")
+			}
 			t.Logf("scenario=%s signer_pid=%d consensus_pid=%d fault=SIGKILL next_duty=verified production_signer=true witnessed_recovery=true offline_rollback=rejected conflicting_signature=absent", stage, serverPID, node.cmd.Process.Pid)
 		})
 	}

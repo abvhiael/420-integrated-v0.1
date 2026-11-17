@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - "consensus/monitoring/**"
+      - "consensus/telemetry/**"
+      - "consensus/cmd/stake-monitor/**"
+      - "scripts/stake_monitor_scenarios.py"
       - "execution/**"
       - "consensus/systemcall/**"
       - "consensus/engine/**"

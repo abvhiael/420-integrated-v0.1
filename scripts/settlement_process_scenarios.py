@@ -4,6 +4,7 @@ Only this LOCAL producer holds known fixture keys. fourtwentyd receives public
 keys/PoPs and real quorum signatures through its production certified ingress.
 """
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -36,11 +37,13 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
     logs = []
     evidence['consensus_processes'] = []
     number = 0
+    monitor=None
     def spawn(fault_slot=None, repair=False, directory=None):
         nonlocal process, number, messages
         messages = queue.Queue()
         binary = fault_daemon if fault_slot else daemon
         env = os.environ.copy()
+        env["STAKE_SETTLEMENT_HEALTH_FILE"]=str(out/"settlement-health.json")
         if fault_slot:
             env['FOURTWENTYD_RECOVERY_STOP_SLOT'] = str(fault_slot)
         errlog = (out / f'consensus-{number}.log').open('w')
@@ -255,10 +258,15 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         evidence['certified_indexer_replacement']={'before':indexed_before,'after':indexed_after,'after_restart':indexed_restart}
         record_scenario('real Indexer certified-history ingestion, SIGKILL, canonical replacement and repeated restart',after,replaced)
         record_scenario('certified bounded replacement restores canonical parent sequence', after, replaced)
+        monitor_spec=importlib.util.spec_from_file_location('stake_monitor_scenarios',root/'scripts/stake_monitor_scenarios.py')
+        monitor_module=importlib.util.module_from_spec(monitor_spec);monitor_spec.loader.exec_module(monitor_module)
+        monitor=monitor_module.Qualification(root,out,evidence,trust_path,pin,state,index_store,auth_port)
+        monitor.run()
+        record_scenario('real operational monitor SIGKILL, durable retry/dedup, categorical alarms and recovery delivery',replaced,snapshot())
         stable = checkpoint()
         send(cross_final)
         rejected = wait('rejected')
-        assert 'finalized' in rejected['error']
+        assert rejected['error']=='FINALIZED_BOUNDARY_REJECTED'
         assert snapshot() == replaced and checkpoint() == stable and history()['Pending'] is None
         assert rpc('engine420_getSystemCallLogsV1',[replaced['hash']]) == native_replacement
         cross_plan = out / 'plan-1-1.json'
@@ -271,7 +279,7 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         else:
             raise AssertionError('orphan gateway checkpoint accepted as canonical')
         send(replacement)
-        assert 'already recorded' in wait('rejected')['error']
+        assert wait('rejected')['error']=='DUPLICATE_SETTLEMENT_REJECTED'
         bad = json.loads(json.dumps(replacement))
         bad['Consensus']['header']['Slot'] = 5
         send(bad)
@@ -312,7 +320,7 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         spawn(repair=True, directory=broken)
         assert process.wait(timeout=15) != 0
         logs[-1].flush()
-        assert 'history missing durable settled checkpoint' in (out / f'consensus-{number-1}.log').read_text()
+        assert 'DURABLE_SETTLEMENT_HISTORY_MISSING' in (out / f'consensus-{number-1}.log').read_text()
         assert snapshot() == replaced
         record_scenario('corrupted cursor and finalized history truncation fail closed', replaced, snapshot())
         spawn()
@@ -331,9 +339,9 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         send(invalid)
         wait('queued')
         failed = wait('halted')
-        assert 'INVALID' in failed['error'], failed
+        assert failed['error']=='EXECUTION_REJECTED', failed
         send(fifth)
-        assert 'restart reconciliation required' in wait('rejected')['error']
+        assert wait('rejected')['error']=='RESTART_RECONCILIATION_REQUIRED'
         assert failed['status']['Settlement']['ExecutionBlock'] == 4
         assert (invalid_state / 'checkpoint.json').read_bytes() == settled_bytes
         assert (invalid_state / 'sequence.json').read_bytes() == journal_bytes
@@ -389,7 +397,7 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         send(bad_record)
         wait('queued')
         native_rejection = wait('halted')
-        assert '420 system call sequence 7: execution reverted' in native_rejection['error'], native_rejection
+        assert native_rejection['error']=='EXECUTION_NATIVE_CALL_REJECTED' and native_rejection['failed_sequence']==7, native_rejection
         assert snapshot() == replaced and (native_state / 'checkpoint.json').read_bytes() == stable_native
         kill_consensus()
         record_scenario('real block import rejects a failed later native call without partial settlement', replaced, snapshot(), error=native_rejection['error'])
@@ -417,9 +425,10 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         stop_execution(abrupt=True)
         start_execution(directory=wrong_directory)
         assert rpc('eth_chainId', []) == '0x1a5'
+        monitor.divergence(True)
         spawn()
         wrong = wait('halted')
-        assert 'execution chain mismatch' in wrong['error']
+        assert wrong['error']=='EXECUTION_CHAIN_MISMATCH'
         assert (state / 'checkpoint.json').read_bytes() == stable_bytes
         kill_consensus()
         stop_execution(abrupt=True)
@@ -427,10 +436,12 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         spawn()
         wait('settled', 4)
         assert snapshot() == replaced
+        monitor.divergence(False)
         record_scenario('actual wrong execution chain rejected without advancing settlement', replaced, snapshot(), rejected_chain_id=421)
 
 
     finally:
+        if monitor is not None: monitor.close()
         kill_consensus()
         for log in logs:
             log.close()

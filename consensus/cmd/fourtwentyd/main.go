@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"flag"
 	"fmt"
+	"github.com/420integrated/420-integrated/consensus/telemetry"
 	"os"
 	"os/signal"
 	"syscall"
@@ -57,7 +58,7 @@ func main() {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 		if err := runProtectedSigning(ctx, *signerEndpoint, *signingPolicy, *signingPolicyPin, *signingHistory, *signingCert, *signingKey, *signingCA, *signingPeer); err != nil {
-			fmt.Fprintln(os.Stderr, "protected consensus signing halted:", err)
+			fmt.Fprintln(os.Stderr, "STAKE_VALIDATOR_SIGNING_HALTED")
 			os.Exit(1)
 		}
 		return
@@ -80,7 +81,8 @@ func main() {
 		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 		defer stop()
 		if err := runSettlement(ctx, *engineEndpoint, *jwtPath, *trustPath, *trustPin, *settlementDir, *repairSequence); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			code, _ := telemetry.SettlementCode(err)
+			fmt.Fprintln(os.Stderr, "STAKE_SETTLEMENT_HALTED", code)
 			os.Exit(1)
 		}
 		return

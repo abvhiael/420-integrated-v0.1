@@ -67,7 +67,7 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 		case "engine_forkchoiceUpdatedV3":
 			json.NewEncoder(w).Encode(map[string]any{
 				"jsonrpc": "2.0", "id": req["id"],
-				"result": map[string]any{"payloadStatus": map[string]any{"status": "VALID"}, "payloadId": "0x01"},
+				"result": map[string]any{"payloadStatus": map[string]any{"status": "VALID", "latestValidHash": parentHex}, "payloadId": "0x01"},
 			})
 		default:
 			t.Fatalf("unexpected method=%s", method)

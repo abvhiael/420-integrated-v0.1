@@ -68,6 +68,7 @@ for required in \
     core/systemcall420/systemcall.go \
     core/systemcall420/systemcall_test.go \
     core/vm/contracts.go \
+    eth/downloader/syncmode.go \
     core/vm/p256_420_test.go; do
     if ! grep -q "$required" "$PATCH_DIFF"; then
         echo "fatal: release patch evidence omitted $required" >&2

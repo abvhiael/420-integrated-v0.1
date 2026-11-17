@@ -79,14 +79,19 @@ func (s *FileStore) Save(st Status) error {
 	if err != nil {
 		return err
 	}
-	tmp := s.path + ".tmp"
-	if err := os.WriteFile(tmp, append(raw, '\n'), 0o600); err != nil {
+	f, err := os.CreateTemp(filepath.Dir(s.path), ".consensus-checkpoint-*")
+	if err != nil { return err }
+	tmp := f.Name()
+	defer os.Remove(tmp)
+	defer f.Close()
+	if _, err := f.Write(append(raw, '\n')); err != nil {
 		return err
 	}
-	f, err := os.OpenFile(tmp, os.O_RDWR, 0)
-	if err == nil {
-		_ = f.Sync()
-		_ = f.Close()
-	}
-	return os.Rename(tmp, s.path)
+	if err := f.Sync(); err != nil { return err }
+	if err := f.Close(); err != nil { return err }
+	if err := os.Rename(tmp, s.path); err != nil { return err }
+	d, err := os.Open(filepath.Dir(s.path))
+	if err != nil { return err }
+	defer d.Close()
+	return d.Sync()
 }

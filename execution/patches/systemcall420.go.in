@@ -92,6 +92,16 @@ func Stage(batch Batch) error {
     return nil
 }
 
+// Replace is called only by the authenticated, finality/context-checked API.
+func Replace(batch Batch) error {
+    if err := Validate(batch); err != nil { return err }
+    if batch.BatchRoot != Root(batch) { return ErrRoot }
+    staged.Lock()
+    defer staged.Unlock()
+    staged.m[key{Number:uint64(batch.ExecutionBlock),Parent:batch.ParentHash}] = clone(batch)
+    return nil
+}
+
 func Get(number uint64, parent common.Hash) (Batch, bool) {
     staged.RLock()
     defer staged.RUnlock()

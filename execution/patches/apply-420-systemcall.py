@@ -58,6 +58,12 @@ def main() -> None:
         raise SystemExit(f"already patched: {target}")
     target.write_text(SYSTEMCALL_TEMPLATE.read_text())
 
+    # After an abrupt path-state restart, canonical block records can be ahead
+    # of CurrentBlock's available state. That is forward state reconstruction,
+    # not an unsigned subtraction into the bounded *backward* reorg path.
+    # SetCanonical retains upstream ancestor/state validation and re-executes
+    # only batches independently restaged by consensus.
+
     catalyst = root / "eth" / "catalyst" / "api.go"
     replace_once(
         catalyst,
@@ -67,16 +73,16 @@ def main() -> None:
     replace_once(
         catalyst,
         '\tstack.RegisterAPIs([]rpc.API{\n\t\tnewTestingAPI(backend),\n',
-        '\tstack.RegisterAPIs([]rpc.API{\n\t\tnewTestingAPI(backend),\n\t\t{Namespace: "engine420", Service: &SystemCallAPI{}, Authenticated: true},\n',
+        '\tstack.RegisterAPIs([]rpc.API{\n\t\tnewTestingAPI(backend),\n\t\t{Namespace: "engine420", Service: &SystemCallAPI{eth: backend}, Authenticated: true},\n',
     )
     replace_once(
         catalyst,
         '\treturn nil\n}\n\nconst (\n',
-        '\treturn nil\n}\n\n// SystemCallAPI stages committed consensus data but never executes EVM state from RPC context.\ntype SystemCallAPI struct{}\n\nfunc (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n\tif err := systemcall420.Stage(batch); err != nil {\n\t\ts := err.Error()\n\t\treturn systemcall420.Status{Status: "INVALID", BatchRoot: batch.BatchRoot, ValidationError: &s}\n\t}\n\treturn systemcall420.Status{Status: "ACCEPTED", BatchRoot: batch.BatchRoot}\n}\n\nconst (\n',
+        '\treturn nil\n}\n\n// SystemCallAPI stages committed consensus data but never executes EVM state from RPC context.\ntype SystemCallAPI struct{ eth *eth.Ethereum }\n\nfunc (api *SystemCallAPI) SubmitSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n\tif err := systemcall420.Stage(batch); err != nil {\n\t\ts := err.Error()\n\t\treturn systemcall420.Status{Status: "INVALID", BatchRoot: batch.BatchRoot, ValidationError: &s}\n\t}\n\treturn systemcall420.Status{Status: "ACCEPTED", BatchRoot: batch.BatchRoot}\n}\n\n// ReplaceSystemCallsV1 changes staging only above the existing finalized boundary.\nfunc (api *SystemCallAPI) ReplaceSystemCallsV1(batch systemcall420.Batch) systemcall420.Status {\n invalid := func(err error) systemcall420.Status { s := err.Error(); return systemcall420.Status{Status: "INVALID", BatchRoot: batch.BatchRoot, ValidationError: &s} }\n chain := api.eth.BlockChain()\n if !chain.Config().ChainID.IsUint64() || chain.Config().ChainID.Uint64() != uint64(batch.ChainID) { return invalid(systemcall420.ErrContext) }\n if final := chain.CurrentFinalBlock(); final != nil && uint64(batch.ExecutionBlock) <= final.Number.Uint64() { return invalid(systemcall420.ErrContext) }\n if uint64(batch.ExecutionBlock) == 0 || rawdb.ReadCanonicalHash(api.eth.ChainDb(), uint64(batch.ExecutionBlock)-1) != batch.ParentHash { return invalid(systemcall420.ErrContext) }\n if err := systemcall420.Replace(batch); err != nil { return invalid(err) }\n return systemcall420.Status{Status: "ACCEPTED", BatchRoot: batch.BatchRoot}\n}\n\nconst (\n',
     )
 
     upstream_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod())\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\treturn ourCaps\n}\n'''
-    patched_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod()+1)\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\tourCaps = append(ourCaps, "engine420_submitSystemCallsV1")\n\treturn ourCaps\n}\n'''
+    patched_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod()+1)\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\tourCaps = append(ourCaps, "engine420_submitSystemCallsV1", "engine420_replaceSystemCallsV1")\n\treturn ourCaps\n}\n'''
     replace_once(catalyst, upstream_exchange_capabilities, patched_exchange_capabilities)
 
     # Geth's JWT-authenticated endpoint filters namespaces through DefaultAuthModules.
@@ -157,7 +163,31 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         '\tif len(miner.config.ExtraData) != 0 {\n\t\theader.Extra = miner.config.ExtraData\n\t}\n\troot420, ok420 := systemcall420.RootFor(number.Uint64(), parent.Hash())\n\tif !ok420 {\n\t\treturn nil, systemcall420.ErrNotStaged\n\t}\n\theader.Extra = root420[:]\n\tif genParams.forceOverrides {\n\t\tif len(genParams.overrideExtraData) != 0 && !bytes.Equal(genParams.overrideExtraData, root420[:]) {\n\t\t\treturn nil, systemcall420.ErrRoot\n\t\t}\n\t\theader.Extra = root420[:]\n\t}\n',
     )
 
-    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker)])
+    replace_once(
+        catalyst,
+        '\t} else {\n\t\tif finalized := api.eth.BlockChain().CurrentFinalBlock(); finalized != nil && block.NumberU64() <= finalized.Number.Uint64() {\n',
+        '\t} else if final := api.eth.BlockChain().CurrentFinalBlock(); payloadAttributes != nil && final != nil && final.Hash() == update.HeadBlockHash {\n'
+        '\t\t// 420: build a replacement child of the exact finalized parent.\n'
+        '\t\t// Keep the current head; payload generation below uses the supplied parent.\n'
+        '\t} else if block.NumberU64() > api.eth.BlockChain().CurrentBlock().Number.Uint64() {\n'
+        '\t\t// 420: canonical headers survived a crash but path-state was rewound.\n'
+        '\t\t// Reconstruct through the normal staged block processor; do not\n'
+        '\t\t// underflow the backward-only reorganization depth calculation.\n'
+        '\t\tif latestValid, err := api.eth.BlockChain().SetCanonical(block); err != nil {\n'
+        '\t\t\treturn engine.ForkChoiceResponse{PayloadStatus: engine.PayloadStatusV1{Status: engine.INVALID, LatestValidHash: &latestValid}}, err\n'
+        '\t\t}\n'
+        '\t} else {\n\t\tif finalized := api.eth.BlockChain().CurrentFinalBlock(); finalized != nil && block.NumberU64() <= finalized.Number.Uint64() {\n',
+    )
+    syncmode = root / "eth" / "downloader" / "syncmode.go"
+    replace_once(
+        syncmode,
+        '\t\tif fullBlock.Number.Uint64() == 0 && snapBlock.Number.Uint64() > 0 {\n',
+        '\t\t// 420 full-sync crash recovery can leave canonical headers ahead of\n'
+        '\t\t// state without ever having started snap sync. Only a recorded snap\n'
+        '\t\t// pivot authorizes restoring the snap-sync mode here.\n'
+        '\t\tif fullBlock.Number.Uint64() == 0 && snapBlock.Number.Uint64() > 0 && rawdb.ReadLastPivotNumber(disk) != nil {\n',
+    )
+    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker), str(syncmode)])
     print("420 system-call patch applied to", root)
 
 

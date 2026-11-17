@@ -49,6 +49,12 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 		method := req["method"].(string)
 		methods = append(methods, method)
 		switch method {
+		case "eth_chainId":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": req["id"], "result": "0x1a4"})
+		case "eth_getBlockByNumber":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": req["id"], "result": map[string]any{"hash": parentHex, "number": "0x64"}})
+		case "eth_call":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc": "2.0", "id": req["id"], "result": "0x" + strings.Repeat("0", 63) + "9"})
 		case "engine420_submitSystemCallsV1":
 			params := req["params"].([]any)
 			batch := params[0].(map[string]any)
@@ -67,7 +73,7 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 		case "engine_forkchoiceUpdatedV3":
 			json.NewEncoder(w).Encode(map[string]any{
 				"jsonrpc": "2.0", "id": req["id"],
-				"result": map[string]any{"payloadStatus": map[string]any{"status": "VALID"}, "payloadId": "0x01"},
+				"result": map[string]any{"payloadStatus": map[string]any{"status": "VALID", "latestValidHash": parentHex}, "payloadId": "0x01"},
 			})
 		default:
 			t.Fatalf("unexpected method=%s", method)
@@ -95,7 +101,29 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 	if resp.PayloadStatus.Status != "VALID" || len(batch.Calls) != 1 || batch.Calls[0].Sequence != 10 {
 		t.Fatalf("resp=%+v batch=%+v", resp, batch)
 	}
-	if len(methods) != 2 || methods[0] != "engine420_submitSystemCallsV1" || methods[1] != "engine_forkchoiceUpdatedV3" {
+	if strings.Join(methods, ",") != "eth_chainId,eth_getBlockByNumber,eth_call,eth_getBlockByNumber,engine420_submitSystemCallsV1,engine_forkchoiceUpdatedV3" {
 		t.Fatalf("method order=%v", methods)
+	}
+}
+
+// A production caller must distinguish deterministic INVALID from a transport
+// outage. Do not erase the Engine status when the verified wrapper returns an error.
+func TestVerifiedStakeImportPreservesRejectedExecutionStatus(t *testing.T) {
+	parent := csys.SequenceAnchor{ChainID: 420, ExecutionBlock: 10, BlockHash: testSystemBatch().ParentHash}
+	fixture := &recoveryFixture{chain: "0x1a4", fault: "INVALID", anchors: map[string]csys.SequenceAnchor{"0xa": parent}}
+	client := fixture.client(t)
+	manager := csys.SequenceManager{Store: &memorySequenceStore{anchor: parent, ok: true}}
+	outcomes := csys.FinalizedStakeOutcomes{Rotation: &csys.RotationSnapshotOutcome{Rotation: 7, EligibleSnapshot: 15}}
+	batch, err := manager.BuildNext(parent, outcomes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	payload := ExecutionPayloadV3{BlockNumber: "0xb", ParentHash: recoveryHash(parent.BlockHash), BlockHash: recoveryHash([32]byte{99}), ExtraData: string(recoveryHash(batch.Root()))}
+	status, derived, err := client.NewPayloadV3WithFinalizedStakeOutcomes(context.Background(), payload, nil, "", manager, parent, outcomes)
+	if err == nil || status.Status != "INVALID" || derived.Root() != batch.Root() {
+		t.Fatalf("rejected status lost: %+v %v", status, err)
+	}
+	if _, err = manager.RequireCanonicalParent(parent); err != nil {
+		t.Fatal("rejected import advanced journal")
 	}
 }

@@ -40,13 +40,23 @@ def closure(owners):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--audit", choices=["7", "8"], required=True)
+    p.add_argument("--audit", choices=["2", "7", "8"], required=True)
+    p.add_argument("--group", choices=["all", "abi", "integration"], default="all",
+                   help="STAKE-AUDIT-2 retained job scope")
     p.add_argument("--log-dir", type=Path, required=True)
     a = p.parse_args()
     a.log_dir.mkdir(parents=True, exist_ok=True)
     logdir = a.log_dir.resolve()
     testdir = CONTRACTS / "test"
-    if a.audit == "7":
+    if a.audit != "2" and a.group != "all":
+        p.error("--group is only supported for audit 2")
+    if a.audit == "2":
+        names = {"abi": ["StakeSystemCallABIVectors420.t.sol"],
+                 "integration": ["ConsensusSystemCall420.t.sol", "StakeValidatorGenesis420.t.sol"]}
+        selected = names["abi"] + names["integration"] if a.group == "all" else names[a.group]
+        owners = [testdir / n for n in selected]
+        groups = [(x, None) for x in owners]
+    elif a.audit == "7":
         owners = [testdir / n for n in ("StakeValidatorGenesis420.t.sol",
                                         "StakeSystemCallABIVectors420.t.sol")]
         groups = [(owners[0], GENESIS_FILTER), (owners[1], None)]

@@ -1,10 +1,13 @@
 package systemcall
 
 import (
+	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
@@ -38,6 +41,7 @@ type sequenceFile struct {
 	ExecutionBlock uint64 `json:"executionBlock"`
 	BlockHash      string `json:"blockHash"`
 	LastSequence   uint64 `json:"lastSequence"`
+	Checksum       string `json:"checksum"`
 }
 
 func (s FileSequenceStore) Load() (SequenceAnchor, bool, error) {
@@ -51,11 +55,19 @@ func (s FileSequenceStore) Load() (SequenceAnchor, bool, error) {
 	if err != nil {
 		return SequenceAnchor{}, false, err
 	}
+	if err := requireSequenceFields(raw); err != nil {
+		return SequenceAnchor{}, false, err
+	}
 	var disk sequenceFile
-	if err := json.Unmarshal(raw, &disk); err != nil {
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&disk); err != nil {
 		return SequenceAnchor{}, false, fmt.Errorf("decode sequence state: %w", err)
 	}
-	if disk.Schema != "420-stake-systemcall-sequence-v1" {
+	if err := dec.Decode(new(any)); err != io.EOF {
+		return SequenceAnchor{}, false, ErrInvalidSequenceAnchor
+	}
+	if disk.Schema != "420-stake-systemcall-sequence-v2" || disk.Checksum != sequenceChecksum(disk) {
 		return SequenceAnchor{}, false, fmt.Errorf("%w: unsupported sequence-state schema", ErrInvalidSequenceAnchor)
 	}
 	hash, err := decodeHash32(disk.BlockHash)
@@ -74,6 +86,49 @@ func (s FileSequenceStore) Load() (SequenceAnchor, bool, error) {
 	return anchor, true, nil
 }
 
+// encoding/json permits duplicate keys and defaults missing numeric fields to
+// zero. Neither is valid journal evidence, even if the resulting struct has the
+// checksum of a valid zero-sequence anchor.
+func requireSequenceFields(raw []byte) error {
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	start, err := dec.Token()
+	if err != nil || start != json.Delim('{') {
+		return ErrInvalidSequenceAnchor
+	}
+	required := map[string]bool{"schema": false, "chainId": false, "executionBlock": false, "blockHash": false, "lastSequence": false, "checksum": false}
+	for dec.More() {
+		key, err := dec.Token()
+		if err != nil {
+			return ErrInvalidSequenceAnchor
+		}
+		name, ok := key.(string)
+		if !ok {
+			return ErrInvalidSequenceAnchor
+		}
+		seen, known := required[name]
+		if !known || seen {
+			return ErrInvalidSequenceAnchor
+		}
+		required[name] = true
+		var value json.RawMessage
+		if err := dec.Decode(&value); err != nil || bytes.Equal(bytes.TrimSpace(value), []byte("null")) {
+			return ErrInvalidSequenceAnchor
+		}
+	}
+	if _, err := dec.Token(); err != nil {
+		return ErrInvalidSequenceAnchor
+	}
+	for _, seen := range required {
+		if !seen {
+			return ErrInvalidSequenceAnchor
+		}
+	}
+	if err := dec.Decode(new(any)); err != io.EOF {
+		return ErrInvalidSequenceAnchor
+	}
+	return nil
+}
+
 func (s FileSequenceStore) Store(anchor SequenceAnchor) error {
 	if s.Path == "" {
 		return fmt.Errorf("%w: empty sequence-state path", ErrInvalidSequenceAnchor)
@@ -86,12 +141,13 @@ func (s FileSequenceStore) Store(anchor SequenceAnchor) error {
 		return err
 	}
 	disk := sequenceFile{
-		Schema:         "420-stake-systemcall-sequence-v1",
+		Schema:         "420-stake-systemcall-sequence-v2",
 		ChainID:        anchor.ChainID,
 		ExecutionBlock: anchor.ExecutionBlock,
 		BlockHash:      "0x" + hex.EncodeToString(anchor.BlockHash[:]),
 		LastSequence:   anchor.LastSequence,
 	}
+	disk.Checksum = sequenceChecksum(disk)
 	raw, err := json.MarshalIndent(disk, "", "  ")
 	if err != nil {
 		return err
@@ -127,11 +183,12 @@ func (s FileSequenceStore) Store(anchor SequenceAnchor) error {
 		_ = os.Remove(tmpName)
 		return err
 	}
-	if d, err := os.Open(dir); err == nil {
-		_ = d.Sync()
-		_ = d.Close()
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
 	}
-	return nil
+	defer d.Close()
+	return d.Sync()
 }
 
 type SequenceManager struct {
@@ -194,7 +251,7 @@ func (m SequenceManager) CommitCanonicalChild(parent SequenceAnchor, childBlockH
 	if err != nil {
 		return SequenceAnchor{}, err
 	}
-	if childBlockHash == ([32]byte{}) ||
+	if parent.ExecutionBlock == ^uint64(0) || childBlockHash == ([32]byte{}) || childBlockHash == parent.BlockHash ||
 		batch.ChainID != parent.ChainID ||
 		batch.ParentHash != parent.BlockHash ||
 		batch.ExecutionBlock != parent.ExecutionBlock+1 {
@@ -237,4 +294,11 @@ func decodeHash32(raw string) ([32]byte, error) {
 	}
 	copy(out[:], b)
 	return out, nil
+}
+
+func sequenceChecksum(d sequenceFile) string {
+	d.Checksum = ""
+	raw, _ := json.Marshal(d)
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:])
 }

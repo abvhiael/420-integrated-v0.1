@@ -67,7 +67,13 @@ def main() -> int:
     require_tokens(
         "consensus/systemcall/sequence_state.go",
         [
-            "420-stake-systemcall-sequence-v1",
+            "420-stake-systemcall-sequence-v2",
+            'disk.Schema != "420-stake-systemcall-sequence-v2" || disk.Checksum != sequenceChecksum(disk)',
+            "sha256.Sum256",
+            "dec.DisallowUnknownFields()",
+            "err != io.EOF",
+            "return d.Sync()",
+            "requireSequenceFields(raw)",
             "RequireCanonicalParent",
             "RecoverCanonicalParent",
             "CommitCanonicalChild",
@@ -82,12 +88,24 @@ def main() -> int:
         [
             "ForkchoiceUpdatedV3WithFinalizedStakeOutcomes",
             "NewPayloadV3WithFinalizedStakeOutcomes",
-            "sequences.BuildNext(parent, outcomes)",
+            "c.buildVerifiedStakeBatch(ctx, sequences, parent, outcomes)",
+            "m.RequireCanonicalParent(parent)",
+            "c.CanonicalSequenceAnchor(ctx,",
+            "actual != parent",
+            "m.BuildNext(parent, outcomes)",
         ],
     )
     require_tokens(
         "consensus/systemcall/stake_derivation_test.go",
         ["TestStakeABIPayloadVectors", "TestSequenceManagerPersistenceAndExplicitRecovery"],
+    )
+    require_tokens(
+        "consensus/systemcall/sequence_fault_test.go",
+        ["TestSequenceJournalFaults", "TestLegacySequenceRequiresExplicitRecovery", '"corrupted"', '"legacy"', '"trailing"'],
+    )
+    require_tokens(
+        "consensus/engine/recovery.go",
+        ["RecoverVerifiedSequence", "CommitVerifiedSequence", "requireValidExecution", "execution child sequence divergence", "c.VerifyCanonicalBatch(ctx, child, batch)", "execution canonical batch commitment mismatch"],
     )
     require_tokens(
         "contracts/test/StakeSystemCallABIVectors420.t.sol",

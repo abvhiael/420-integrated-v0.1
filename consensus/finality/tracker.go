@@ -63,3 +63,12 @@ func (t *Tracker) AddCertified(qc ctypes.QuorumCertificate) error {
 	}
 	return nil
 }
+
+// Clone isolates speculative forkchoice until execution accepts it.
+func(t *Tracker) Clone()*Tracker{
+ out:=NewTrackerFromStatus(t.status)
+ for k,v:=range t.certified{out.certified[k]=v}
+ for k,v:=range t.parent{out.parent[k]=v}
+ for k,v:=range t.slot{out.slot[k]=v}
+ return out
+}

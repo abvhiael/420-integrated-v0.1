@@ -1,0 +1,340 @@
+{
+  "candidate_sha": "f8bd2999b23ac8be4bf4f5d9fee4f04d15387410",
+  "scope": "production certified consensus settlement with BLS/QC/PoP and real execution processes; downstream fixture",
+  "source_sha256": {
+    "execution/patches/apply-420-systemcall.py": "3bdb96328a547b17078ad3d8ec127b14fc3c0ded63b139c0019ed23c620f9acf",
+    "execution/patches/systemcall420.go.in": "c93e56a9b9cdfb5c8ae67a103fcb8114333a11d1e893efd95b20baea65553bfd",
+    "scripts/qualify-execution-recovery.py": "955fbb9ae51e167f066ba8214fe5b44bceb25293d17793a6d7b64a642ec4088a",
+    "scripts/settlement_process_scenarios.py": "7edc4136819b8588a43cc5341821856598e881c5f3b0430a45b5b7086817984a",
+    "consensus/recovery/history.go": "7b8569cae68fa0ce502644f403df8d10364e88d7eda198453f7d67d7d28a383b",
+    "consensus/recovery/settlement.go": "18273e249c099e43c41bc47cd74844e2703c4ea5b12ea207af051228e6e9cbff",
+    "consensus/cmd/fourtwentyd/settlement.go": "ad4e9f31aeae0113e279d45110567ac0cce9e784f7230b01316ab14e6d69ff70",
+    "go.mod": "38a06278292f765c2a59e0f1ba5544ec467e7efe00469efc43bf69d362ced351",
+    "go.sum": "52c5ec5d1059fbc1a5eb8324ab90d945db82dd346c90097b13bbc9d8faa7dc68"
+  },
+  "geth_upstream_commit": "9621c6ad10934a01b5514886fb6fbd87640b6c05",
+  "geth_sha256": "526c6970bde9548907c37c003c2fae9fcebfc6f726ac6cc550bc3e59ca6e5b12",
+  "wrapper_sha256": "3c8e7b98c90f5b5bcdf51adc9724e298c0acee9e91140f4e12d0a4f332d633b8",
+  "gateway_selector_from_compiled_method_identifiers": "3bc684e9",
+  "genesis_sha256": "1d6cef3130b0dd0135f37bc871ea8a6d293ec3ae58c7592cc246a4dd3aae3132",
+  "fixture": "real ConsensusSystemCall420 with RecoveryCounter downstream test double",
+  "processes": [
+    {
+      "wrapper_pid": 449,
+      "geth_pid": 466
+    },
+    {
+      "wrapper_pid": 543,
+      "geth_pid": 561
+    },
+    {
+      "wrapper_pid": 631,
+      "geth_pid": 649
+    },
+    {
+      "wrapper_pid": 826,
+      "geth_pid": 842
+    },
+    {
+      "wrapper_pid": 864,
+      "geth_pid": 883
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "production consensus-only SIGKILL/restart and next derivation",
+      "before": {
+        "number": "0x1",
+        "hash": "0x46f42635695fda5c892feb97183fd0b1d7125aa97b4bc2ffe3175e34ed4655f8",
+        "root": "0x5ad58a652789773b29b77268b489e72d2c5a57a35fbf87829b04be7619c21ab4",
+        "sequence": 2,
+        "observed": 2
+      },
+      "after": {
+        "number": "0x2",
+        "hash": "0xbbabce0da4c0ffbb033ca73d29d3403843564f09886bea78d61be4a569740f2e",
+        "root": "0x1bd5d39fc6f43e1ffa95a70c2bdd7c3f4cdb187ef862c9d9c094ca4c067009a0",
+        "sequence": 3,
+        "observed": 3
+      }
+    },
+    {
+      "name": "production simultaneous SIGKILL/restart with independent persistent stores",
+      "before": {
+        "number": "0x2",
+        "hash": "0xbbabce0da4c0ffbb033ca73d29d3403843564f09886bea78d61be4a569740f2e",
+        "root": "0x1bd5d39fc6f43e1ffa95a70c2bdd7c3f4cdb187ef862c9d9c094ca4c067009a0",
+        "sequence": 3,
+        "observed": 3
+      },
+      "after": {
+        "number": "0x2",
+        "hash": "0xbbabce0da4c0ffbb033ca73d29d3403843564f09886bea78d61be4a569740f2e",
+        "root": "0x1bd5d39fc6f43e1ffa95a70c2bdd7c3f4cdb187ef862c9d9c094ca4c067009a0",
+        "sequence": 3,
+        "observed": 3
+      }
+    },
+    {
+      "name": "production consensus killed after canonical acceptance before journal persistence",
+      "before": {
+        "number": "0x2",
+        "hash": "0xbbabce0da4c0ffbb033ca73d29d3403843564f09886bea78d61be4a569740f2e",
+        "root": "0x1bd5d39fc6f43e1ffa95a70c2bdd7c3f4cdb187ef862c9d9c094ca4c067009a0",
+        "sequence": 3,
+        "observed": 3
+      },
+      "after": {
+        "number": "0x3",
+        "hash": "0x0f5638fb349a2d35008f8ff28f39ad269b4aaf0aca7000fba56598d43f16fe86",
+        "root": "0x9c3d617475ca915c2826285a993f63691e8751eb18bc8364acea4425060b2d49",
+        "sequence": 4,
+        "observed": 4
+      },
+      "stale_journal_sequence": 3,
+      "recovered_journal_sequence": 4
+    },
+    {
+      "name": "execution-only crash while production consensus stays alive; unavailable execution cannot settle",
+      "before": {
+        "number": "0x3",
+        "hash": "0x0f5638fb349a2d35008f8ff28f39ad269b4aaf0aca7000fba56598d43f16fe86",
+        "root": "0x9c3d617475ca915c2826285a993f63691e8751eb18bc8364acea4425060b2d49",
+        "sequence": 4,
+        "observed": 4
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0xfd6c5dbf856c467848c8d5252cd7bfbd9d5f66d5f87b8553d5d84519d49786da",
+        "root": "0x7aebbf2fb3763a6a1e0b5dfdac70c5a3c5f05f8bbccd43fcd30666e8dd9909eb",
+        "sequence": 6,
+        "observed": 6
+      }
+    },
+    {
+      "name": "certified bounded replacement restores canonical parent sequence",
+      "before": {
+        "number": "0x4",
+        "hash": "0xfd6c5dbf856c467848c8d5252cd7bfbd9d5f66d5f87b8553d5d84519d49786da",
+        "root": "0x7aebbf2fb3763a6a1e0b5dfdac70c5a3c5f05f8bbccd43fcd30666e8dd9909eb",
+        "sequence": 6,
+        "observed": 6
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      }
+    },
+    {
+      "name": "finalized-boundary, duplicate settlement and forged certificate rejection",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      }
+    },
+    {
+      "name": "orphan/stale journal rejected; explicit verified canonical repair",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      }
+    },
+    {
+      "name": "corrupted cursor and finalized history truncation fail closed",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      }
+    },
+    {
+      "name": "Engine-rejected certified payload cannot advance durable settlement",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "error": "execution rejected certified settlement; restart reconciliation required: INVALID: execution transition not verified VALID: INVALID: blockhash mismatch, want 47faf4136ef479580e44257e5cac254cc5dda5bf690b6f8db250e3edd5558b81, got 218a1072996fe4dfd40f251a417c1f2df2da24ac1fab146085a5e9d388f3d00a"
+    },
+    {
+      "name": "real block import rejects a failed later native call without partial settlement",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "error": "execution rejected certified settlement; restart reconciliation required: INVALID: execution transition not verified VALID: INVALID: 420 consensus system calls: 420 system call sequence 7: execution reverted"
+    },
+    {
+      "name": "real native gateway rejects replayed next-block sequence",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      }
+    },
+    {
+      "name": "actual wrong execution chain rejected without advancing settlement",
+      "before": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "after": {
+        "number": "0x4",
+        "hash": "0x07afe0d68fb5adf872f9bc4a33716abbfe96b1d4e5ed73bb2aa8a37d0e8d185e",
+        "root": "0xacc9a2894337f9729c4ceea0bec5521571ffde2c5473ce86345abb7a84aca17f",
+        "sequence": 5,
+        "observed": 5
+      },
+      "rejected_chain_id": 421
+    }
+  ],
+  "pass": true,
+  "consensus_sha256": "d6cbd9130f80582b882e0b934660c6855b1baa13652d5f51b8057de471c70b3a",
+  "instrumented_consensus_sha256": "c88a49055ca1bbddba546c3d56eeef9ea4b76bedcc29d8e5fcb9a183470e05fc",
+  "fixture_producer_sha256": "e2b963777702ad67f8c7f14cc1cd0e4c4cc241e808021c80e349dbb751550ec7",
+  "trust_sha256": "841a2b539de78e6130dec865af7fa66dfbc4eb0a9ea8bc468e153432b0665af6",
+  "consensus_build_tags": "blst",
+  "fault_binary_build_tags": "blst recoveryfault",
+  "consensus_processes": [
+    {
+      "pid": 485,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 520,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 573,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 597,
+      "fault_slot": 3,
+      "repair": false
+    },
+    {
+      "pid": 608,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 683,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 692,
+      "fault_slot": null,
+      "repair": true
+    },
+    {
+      "pid": 703,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 712,
+      "fault_slot": null,
+      "repair": true
+    },
+    {
+      "pid": 724,
+      "fault_slot": null,
+      "repair": true
+    },
+    {
+      "pid": 732,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 754,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 777,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 855,
+      "fault_slot": null,
+      "repair": false
+    },
+    {
+      "pid": 898,
+      "fault_slot": null,
+      "repair": false
+    }
+  ],
+  "working_tree_changes_present": true,
+  "provenance_note": "Local working-tree certified settlement qualification based on candidate_sha. Exact-head CI is retained by PR #1189 and the release-gate artifact."
+}

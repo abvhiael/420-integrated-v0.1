@@ -8,6 +8,7 @@ on:
       - 'consensus/engine/stake_systemcalls_test.go'
       - 'contracts/test/StakeSystemCallABIVectors420.t.sol'
       - 'scripts/verify-stake-audit-2-systemcalls.py'
+      - 'scripts/qualify-stake-isolated.py'
       - 'docs/architecture/decisions/STAKE-AUDIT-2-SYSTEM-CALL-DERIVATION.md'
       - 'docs/architecture/infrastructure/fourtwentyd.md'
       - '.github/workflows/stake-audit-2.yml'
@@ -49,8 +50,7 @@ jobs:
         with:
           version: stable
       - name: Cross-check exact ABI payload vectors in Solidity
-        working-directory: contracts
-        run: forge test --match-path 'test/StakeSystemCallABIVectors420.t.sol' -vvv
+        run: python scripts/qualify-stake-isolated.py --audit 2 --group abi --log-dir /tmp/stake-audit-2/abi
 
   level-2-stake-consensus-integration:
     runs-on: ubuntu-latest
@@ -72,9 +72,5 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Run retained consensus gateway regression
-        working-directory: contracts
-        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv
-      - name: Run retained Stake lifecycle and settlement regression
-        working-directory: contracts
-        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv
+      - name: Run retained gateway, Stake lifecycle and settlement regressions
+        run: python scripts/qualify-stake-isolated.py --audit 2 --group integration --log-dir /tmp/stake-audit-2/integration

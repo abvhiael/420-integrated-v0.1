@@ -67,7 +67,11 @@ The chain-global gateway sequence remains canonical execution state. Local fourt
 - canonical execution block hash;
 - last applied system-call sequence.
 
-Writes use a same-directory temporary file, restrictive permissions, fsync, atomic rename and best-effort directory sync.
+The journal schema is `420-stake-systemcall-sequence-v2`. Its SHA-256 checksum covers all anchor fields in the canonical struct encoding. Loading rejects unknown, duplicate, missing and null fields, trailing JSON, unsupported schemas and checksum mismatch. The checksum detects accidental corruption; it is not consensus authentication.
+
+Writes use a same-directory temporary file, restrictive permissions, mandatory file fsync, atomic rename and mandatory directory fsync. Synchronization failures propagate to the caller. A failure after rename leaves an uncertain persisted cursor and requires reconciliation before processing resumes.
+
+V1 journals cannot authorize batch derivation. Migration requires independent verification of the canonical consensus execution hash, ancestry and finalized boundary, followed by a block-hash-pinned gateway read through `RecoverVerifiedSequence`. Recovery writes a fresh V2 journal; it never silently resets to sequence zero.
 
 `SequenceManager` enforces these rules:
 
@@ -154,7 +158,9 @@ The Engine client now exposes:
 - `ForkchoiceUpdatedV3WithFinalizedStakeOutcomes`;
 - `NewPayloadV3WithFinalizedStakeOutcomes`.
 
-Both derive the canonical batch from the verified parent sequence anchor before using the already-qualified staging/import path. Local build and received-payload validation therefore use the same deterministic constructor.
+Both library methods derive the canonical batch from the verified parent sequence anchor before staging/import. STAKE-AUDIT-9.2 now integrates certified settlement/history through `fourtwentyd --certified-settlement`. This mode consumes real quorum-certified headers/bodies and exact payloads, validates BLS quorum/PoP and authenticated ancestry, and persists write-ahead intent before Engine mutations. It is separate from the deterministic devnet validator and does not implement or claim the unfinished 9.1 production signing boundary.
+
+`CommitVerifiedSequence` requires exact VALID/latest-valid-hash evidence, canonical parent and child gateway sequences, and the canonical child header's parent and batch-root commitment. Staging ACCEPTED and payload VALID are not canonical settlement. The production `consensus/recovery` owner now enforces consensus authority, ancestry and the durable finalized high-water before recovery. On restart it reconstructs lost execution staging/state from authenticated history; a pending intent resolves acceptance-before-journal and journal-before-checkpoint crash windows. See [the authoritative recovery qualification record](../../audit/420STAKE-AUDIT-9.2-QUALIFICATION.md).
 
 The methods return the derived `systemcall.Batch` so the consensus block body/header commitment can retain exactly the calls that were staged.
 

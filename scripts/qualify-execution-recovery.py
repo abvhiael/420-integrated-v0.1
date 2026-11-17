@@ -208,6 +208,7 @@ contract RecoveryCounter {
         genesis_hash = block()['hash']
         if a.consensus:
             subprocess.run(['go','build','-tags','blst','-o',str(ROOT/'bin/indexer420'),'./indexer/cmd/indexer420'],cwd=ROOT,check=True)
+            subprocess.run(['go','build','-tags','blst','-o',str(ROOT/'bin/stake-monitor'),'./consensus/cmd/stake-monitor'],cwd=ROOT,check=True)
             scenario_spec = importlib.util.spec_from_file_location('settlement_scenarios', ROOT / 'scripts/settlement_process_scenarios.py')
             scenarios = importlib.util.module_from_spec(scenario_spec); scenario_spec.loader.exec_module(scenarios)
             scenarios.qualify(ROOT, out, evidence, rpc, snapshot, start, stop, genesis_hash, block()['timestamp'], a.auth_port)

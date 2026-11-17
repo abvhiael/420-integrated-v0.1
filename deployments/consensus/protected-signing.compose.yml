@@ -5,6 +5,8 @@ services:
     build:
       context: ../..
       dockerfile: docker/Dockerfile.stake-signer
+    environment:
+      STAKE_SIGNER_HEALTH_FILE: /var/lib/stake-health/signer.json
     user: '10002:10002'
     read_only: true
     cap_drop: [ALL]
@@ -12,6 +14,7 @@ services:
     volumes:
       - '${STAKE_SIGNER_PRIVATE_DIR:?required}:/run/signer:ro'
       - '${STAKE_SIGNER_HISTORY_DIR:?required}:/var/lib/stake-signer'
+      - '${STAKE_SIGNER_HEALTH_DIR:-./health/signer}:/var/lib/stake-health'
     command:
       - --policy=/run/signer/policy.json
       - '--policy-sha256=${STAKE_SIGNING_POLICY_SHA256:?required}'
@@ -27,6 +30,8 @@ services:
     build:
       context: ../..
       dockerfile: docker/Dockerfile.fourtwentyd
+    environment:
+      STAKE_VALIDATOR_HEALTH_FILE: /var/lib/stake-health/validator.json
     user: '10001:10001'
     read_only: true
     cap_drop: [ALL]
@@ -35,6 +40,7 @@ services:
     volumes:
       - '${STAKE_VALIDATOR_PRIVATE_DIR:?required}:/run/validator:ro'
       - '${STAKE_VALIDATOR_HISTORY_DIR:?required}:/var/lib/validator'
+      - '${STAKE_VALIDATOR_HEALTH_DIR:-./health/validator}:/var/lib/stake-health'
     command:
       - --protected-signing
       - --signer=https://stake-signer:9443

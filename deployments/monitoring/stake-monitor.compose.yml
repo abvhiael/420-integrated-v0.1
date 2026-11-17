@@ -1,0 +1,19 @@
+# Provision the public input projections and private outbox before deployment.
+# The observer has no signer BLS key, mTLS private key or witness DSN mount.
+services:
+  stake-monitor:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.stake-monitor
+    user: '10003:10003'
+    read_only: true
+    restart: unless-stopped
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    ports: ['127.0.0.1:9545:9545']
+    volumes:
+      - '${STAKE_MONITOR_CONFIG:?required}:/etc/stake-monitor/config.json:ro'
+      - '../../testnet/public/monitoring/policy.json:/etc/stake-monitor/public-monitoring-policy.json:ro'
+      - '${STAKE_MONITOR_PUBLIC_INPUTS:?required}:/input:ro'
+      - '${STAKE_MONITOR_ENGINE_JWT:?required}:/run/secrets/engine-jwt:ro'
+      - '${STAKE_MONITOR_OUTBOX:?required}:/var/lib/stake-monitor'

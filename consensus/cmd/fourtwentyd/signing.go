@@ -9,6 +9,7 @@ import (
 	"github.com/420integrated/420-integrated/consensus/recovery"
 	"github.com/420integrated/420-integrated/consensus/signing"
 	"github.com/420integrated/420-integrated/consensus/slashing"
+	"github.com/420integrated/420-integrated/consensus/telemetry"
 	ct "github.com/420integrated/420-integrated/consensus/types"
 )
 
@@ -16,7 +17,9 @@ import (
 // witness credential, Wallet key or Engine JWT is accepted in this process mode.
 // Duty selection/fork choice remains the consensus caller's responsibility;
 // every emitted proposal/vote signature must pass local + remote protection.
-func runProtectedSigning(ctx context.Context, endpoint, policyPath, policyPin, history, cert, key, ca, peer string) error {
+func runProtectedSigning(ctx context.Context, endpoint, policyPath, policyPin, history, cert, key, ca, peer string) (runErr error) {
+	health := telemetry.New(os.Getenv("STAKE_VALIDATOR_HEALTH_FILE"), "validator")
+	defer func() { health.Close(runErr) }()
 	policy, err := signing.LoadPolicy(policyPath, policyPin)
 	if err != nil {
 		return err
@@ -35,6 +38,8 @@ func runProtectedSigning(ctx context.Context, endpoint, policyPath, policyPin, h
 		return err
 	}
 	defer client.Close()
+	stopHealth := health.Watch(ctx, client.Health)
+	defer stopHealth()
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(make([]byte, 4096), 64<<10)
 	output := json.NewEncoder(os.Stdout)

@@ -107,3 +107,12 @@ func (s *Signer) Close() {
 	s.failed = slashing.ErrHistoryUnavailable
 	s.key.Destroy()
 }
+
+func (s *Signer) Health(ctx context.Context) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.failed != nil {
+		return s.failed
+	}
+	return s.witness.Check(ctx, s.protector)
+}

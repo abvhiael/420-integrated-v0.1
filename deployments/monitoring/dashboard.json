@@ -1,0 +1,278 @@
+{
+  "uid": "stake-audit-9-5",
+  "title": "Stake operational recovery and alarm delivery",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": false,
+  "tags": [
+    "stake",
+    "operational-projection"
+  ],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "refresh": "15s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Consensus certification and finality",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_current_slot"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_head_slot"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_finalized_slot"
+        },
+        {
+          "refId": "D",
+          "expr": "stake_uncertified_slots"
+        },
+        {
+          "refId": "E",
+          "expr": "stake_finality_lag_slots"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Validator eligibility and participation",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_active_seats"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_committee_seats"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_eligible_validators"
+        },
+        {
+          "refId": "D",
+          "expr": "stake_qc_signers"
+        },
+        {
+          "refId": "E",
+          "expr": "stake_qc_quorum"
+        },
+        {
+          "refId": "F",
+          "expr": "stake_attestation_participation_pct"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Execution and sequencing",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_execution_block"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_gateway_sequence"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_consensus_sequence"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Indexer and accounting",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_indexer_height"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_indexer_lag_blocks"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_accounting_discrepancies"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Issuance accruals (not native mint proof)",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_gross_scheduled_issuance"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_realized_issuance_accrual"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_security_accrual"
+        },
+        {
+          "refId": "D",
+          "expr": "stake_attention_accrual"
+        },
+        {
+          "refId": "E",
+          "expr": "stake_development_accrual"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 6,
+      "title": "Collateral, slashes and recycling",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 12,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_owned_custody"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_protocol_credit_custody"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_protocol_credit_recycled"
+        },
+        {
+          "refId": "D",
+          "expr": "stake_owned_slashed"
+        },
+        {
+          "refId": "E",
+          "expr": "stake_owned_withdrawn"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    },
+    {
+      "id": 7,
+      "title": "Alarm delivery and evidence availability",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "stake_alarm_active"
+        },
+        {
+          "refId": "B",
+          "expr": "stake_signal_known"
+        },
+        {
+          "refId": "C",
+          "expr": "stake_alarm_delivery_records"
+        },
+        {
+          "refId": "D",
+          "expr": "stake_alarm_delivery_attempts_total"
+        },
+        {
+          "refId": "E",
+          "expr": "stake_monitor_ready"
+        },
+        {
+          "refId": "F",
+          "expr": "stake_monitor_observed_timestamp_seconds"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      }
+    }
+  ],
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ]
+}

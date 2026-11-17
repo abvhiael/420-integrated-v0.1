@@ -100,6 +100,8 @@ jobs:
           python scripts/verify-step6-contracts.py
       - name: Run retained Stake genesis and binding regressions
         working-directory: contracts
+        env:
+          FOUNDRY_REMAPPINGS: '["forge-std/=forge-std/","@layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/","@openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/","solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/"]'
         run: |
           forge test --match-path test/StakeValidatorGenesis420.t.sol --match-test 'testStakeGenesisInitializationIntrospection|testGenesisBondLifecycleAndDelegationPolicy|testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome|testStakeFacadeReportsCollateralSolvency' -vv
           forge test --match-path test/StakeSystemCallABIVectors420.t.sol -vv

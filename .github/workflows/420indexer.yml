@@ -6,6 +6,12 @@ on:
       - 'docs/audit/EXP-2R*'
       - 'scripts/verify-exp-2r-post-merge.py'
       - '.github/workflows/explorer-exp-2r.yml'
+      - 'consensus/accounting/**'
+      - 'consensus/cmd/stake-reconcile/**'
+      - 'scripts/qualify-stake-accounting.py'
+      - 'contracts/test/StakeAccountingReconciliation420.t.sol'
+      - 'consensus/engine/native_logs*.go'
+      - 'consensus/recovery/observation*.go'
       - 'indexer/**'
       - '420-indexer/**'
       - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
@@ -227,6 +233,12 @@ on:
       - main
       - 'audit/bnb-phase4-bnb-4-1-baseline-20261013'
     paths:
+      - 'consensus/accounting/**'
+      - 'consensus/cmd/stake-reconcile/**'
+      - 'scripts/qualify-stake-accounting.py'
+      - 'contracts/test/StakeAccountingReconciliation420.t.sol'
+      - 'consensus/engine/native_logs*.go'
+      - 'consensus/recovery/observation*.go'
       - 'indexer/**'
       - '420-indexer/**'
       - 'contracts/config/compute-market/cmp-7.10-phase-closeout.json'
@@ -352,6 +364,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       recovery: ${{ steps.paths.outputs.recovery }}
+      accounting: ${{ steps.paths.outputs.accounting }}
       qualified_tree: ${{ steps.paths.outputs.qualified_tree }}
     steps:
       - uses: actions/checkout@v4
@@ -367,7 +380,10 @@ jobs:
           import json, os, subprocess, urllib.request
           allowed = set(json.loads(r'[".github/workflows/420-indexer.yml", ".github/workflows/420ai-audit.yml", ".github/workflows/420compute-app.yml", ".github/workflows/420indexer.yml", ".github/workflows/compute-developer.yml", ".github/workflows/docs-pages.yml", ".github/workflows/docs-qualify.yml", ".github/workflows/explorer-exp-1-6.yml", ".github/workflows/explorer-exp-1-7.yml", ".github/workflows/explorer-exp-1-8.yml", ".github/workflows/governance-audit.yml", ".github/workflows/governance-integration-audit.yml", ".github/workflows/identity-id-audit-6.yml", ".github/workflows/registry-reg-audit-7.yml", ".github/workflows/stake-audit-6.yml", "420-indexer/README.md", "420-indexer/package.json", "420-indexer/sql/008-finalized-recovery.sql", "420-indexer/sql/009-stake-lifecycle-recovery.sql", "420-indexer/src/checkpoint-store.ts", "420-indexer/src/core-projections.ts", "420-indexer/src/indexing.ts", "420-indexer/src/ingestor.ts", "420-indexer/src/postgres.ts", "420-indexer/src/protocol-object-service.ts", "420-indexer/src/protocol-projections.ts", "420-indexer/src/recovery-store.ts", "420-indexer/src/reorg.ts", "420-indexer/src/stake-indexer.ts", "420-indexer/test/helpers/stake-recovery-fixture.ts", "420-indexer/test/helpers/stake-recovery-worker.ts", "420-indexer/test/indexing.test.ts", "420-indexer/test/stake-recovery-postgres.test.ts", "docs/audit/420STAKE-AUDIT-9.3-QUALIFICATION.md", "indexer/api/stake.go", "indexer/api/stake_recovery_test.go", "indexer/ingest/engine.go", "indexer/ingest/finality.go", "indexer/ingest/stake_recovery_test.go", "indexer/reorg/engine.go", "indexer/store/file.go", "indexer/store/stake_persistence_test.go", "scripts/verify-stake-audit-6-indexer-explorer-sdk.py"]'))
           files = subprocess.check_output(['git','diff','--name-only',os.environ['BASE_SHA'],'HEAD'],text=True).splitlines()
+          accounting_paths = {'indexer/cmd/indexer420/certified_test.go','docker/Dockerfile.420indexer','indexer/consensusview/certified.go','indexer/consensusview/certified_test.go','indexer/cmd/indexer420/certified.go','indexer/store/file_test.go', 'execution/patches/systemcall420_test.go.in', 'consensus/recovery/observation.go', 'indexer/rpc/native.go', 'consensus/engine/native_logs.go', 'scripts/settlement_process_scenarios.py', 'indexer/cmd/indexer420/main.go', 'contracts/test/StakeAccountingReconciliation420.t.sol', 'deployments/indexer/docker-compose.yml', '.github/workflows/stake-audit-9-2-recovery.yml', 'indexer/rpc/client.go', '.github/workflows/cmp-science-read-endpoint.yml', 'execution/patches/systemcall420.go.in', 'consensus/recovery/observation_test.go', 'execution/patches/apply-420-systemcall.py', 'indexer/rpc/native_test.go', 'indexer/store/file.go', 'scripts/qualify-stake-accounting.py', 'consensus/engine/native_logs_test.go', 'scripts/qualify-execution-recovery.py', 'indexer/rpc/eth.go', '.github/workflows/explorer-exp-1-8.yml', '.github/workflows/420indexer.yml', '.github/workflows/node420-release-gate.yml'}
+          accounting = bool(files) and all(p in accounting_paths or p.startswith(("consensus/accounting/","consensus/cmd/stake-reconcile/")) for p in files)
           recovery = bool(files) and all(p in allowed for p in files)
+          recovery = recovery or accounting
           qualified = False
           parents = subprocess.check_output(['git','rev-list','--parents','-n','1','HEAD'],text=True).split()
           if recovery and os.environ['GITHUB_EVENT_NAME'] == 'push' and len(parents) == 3:
@@ -383,6 +399,7 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a') as output:
               output.write('qualified_tree=' + str(qualified).lower() + '\n')
               output.write('recovery=' + str(recovery).lower() + '\n')
+              output.write('accounting=' + str(accounting).lower() + '\n')
           print(json.dumps({'recovery_only':recovery,'changed_paths':files},indent=2))
           PY_SCOPE
   qualify:
@@ -819,7 +836,7 @@ jobs:
 
   stake-recovery:
     needs: scope
-    if: needs.scope.outputs.recovery == 'true' && needs.scope.outputs.qualified_tree != 'true'
+    if: needs.scope.outputs.recovery == 'true' && needs.scope.outputs.accounting != 'true' && needs.scope.outputs.qualified_tree != 'true'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -881,3 +898,52 @@ jobs:
           path: stake-9-3-evidence/
           if-no-files-found: error
           retention-days: 14
+
+  stake-accounting:
+    needs: scope
+    if: needs.scope.outputs.accounting == 'true' && needs.scope.outputs.qualified_tree != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Record exact candidate and tools
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          mkdir -p stake-9-4-evidence
+          git rev-parse HEAD > stake-9-4-evidence/candidate-sha.txt
+          go version > stake-9-4-evidence/go-version.txt
+          forge --version > stake-9-4-evidence/forge-version.txt
+      - name: Pinned Solidity compiler
+        run: |
+          curl -fL https://github.com/ethereum/solidity/releases/download/v0.8.24/solc-static-linux -o "$RUNNER_TEMP/solc-0.8.24"
+          echo "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f  $RUNNER_TEMP/solc-0.8.24" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/solc-0.8.24"
+      - name: Real financial events versus independent getters
+        run: python3 scripts/qualify-stake-accounting.py --solc "$RUNNER_TEMP/solc-0.8.24" --output stake-9-4-evidence
+      - name: Consensus history, authenticated observation and Indexer integration
+        run: |
+          set -o pipefail
+          go test -race -tags blst -count=1 -v ./indexer/... ./consensus/cmd/stake-reconcile 2>&1 | tee stake-9-4-evidence/integration.log
+          go vet -tags blst ./consensus/accounting ./consensus/cmd/stake-reconcile ./consensus/recovery ./consensus/engine ./indexer/...
+          go build -tags blst -o bin/stake-reconcile ./consensus/cmd/stake-reconcile
+          python3 scripts/verify-exp-1-8-runtime-negative-divergence.py
+      - name: Build production Indexer with the real BLS verifier
+        run: |
+          set -o pipefail
+          git archive HEAD | docker build --tag stake-indexer-qualified --file docker/Dockerfile.420indexer - 2>&1 | tee stake-9-4-evidence/indexer-image.log
+          docker image inspect stake-indexer-qualified > stake-9-4-evidence/indexer-image.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stake-audit-9-4-accounting-${{ github.event.pull_request.head.sha || github.sha }}
+          path: stake-9-4-evidence/

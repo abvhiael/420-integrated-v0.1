@@ -1,0 +1,472 @@
+[
+  {
+    "Address": "0x0000000000000000000000000000000000000420",
+    "Name": "RewardApplied",
+    "Inputs": [
+      {
+        "Name": "blockNumber",
+        "Type": "uint64",
+        "Indexed": true
+      },
+      {
+        "Name": "proposer",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "proposerAmount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "participantAmount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "attentionAmount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "developmentAmount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "CommunityValidatorReserveBound",
+    "Inputs": [
+      {
+        "Name": "reserve",
+        "Type": "address",
+        "Indexed": true
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ProtocolCreditReceived",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "beneficiary",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "PendingProtocolCreditReturned",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ValidatorRegistered",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "owner",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "withdrawal",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "ownedBond",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "protocolCredit",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "OwnedBondToppedUp",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "ownedBond",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ProtocolCreditReplaced",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "ownedBond",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "protocolCredit",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ValidatorBondWithdrawn",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "withdrawal",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "ownedAmount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "recycledCredit",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ConsensusStateApplied",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "previousStatus",
+        "Type": "uint8",
+        "Indexed": false
+      },
+      {
+        "Name": "newStatus",
+        "Type": "uint8",
+        "Indexed": false
+      },
+      {
+        "Name": "effectiveSlot",
+        "Type": "uint64",
+        "Indexed": false
+      },
+      {
+        "Name": "activationRotation",
+        "Type": "uint64",
+        "Indexed": false
+      },
+      {
+        "Name": "scheduledExitRotation",
+        "Type": "uint64",
+        "Indexed": false
+      },
+      {
+        "Name": "cooldownUntilRotation",
+        "Type": "uint64",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ExitNoticeApplied",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "noticeRotation",
+        "Type": "uint64",
+        "Indexed": false
+      },
+      {
+        "Name": "exitEligibleRotation",
+        "Type": "uint64",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "SlashApplied",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "offense",
+        "Type": "uint8",
+        "Indexed": false
+      },
+      {
+        "Name": "correlationTier",
+        "Type": "uint8",
+        "Indexed": false
+      },
+      {
+        "Name": "ownedSlashed",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "creditSlashed",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "evidenceHash",
+        "Type": "bytes32",
+        "Indexed": false
+      },
+      {
+        "Name": "resultingStatus",
+        "Type": "uint8",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "RotationSnapshotApplied",
+    "Inputs": [
+      {
+        "Name": "rotation",
+        "Type": "uint64",
+        "Indexed": true
+      },
+      {
+        "Name": "eligibleCount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "candidateTarget",
+        "Type": "uint16",
+        "Indexed": false
+      },
+      {
+        "Name": "activeTarget",
+        "Type": "uint16",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000423",
+    "Name": "ActiveTargetChanged",
+    "Inputs": [
+      {
+        "Name": "previousTarget",
+        "Type": "uint16",
+        "Indexed": false
+      },
+      {
+        "Name": "newTarget",
+        "Type": "uint16",
+        "Indexed": false
+      },
+      {
+        "Name": "rotation",
+        "Type": "uint64",
+        "Indexed": true
+      },
+      {
+        "Name": "safetyOverride",
+        "Type": "bool",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "CreditAssigned",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "beneficiary",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "CreditFunded",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "beneficiary",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "CreditReleased",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "CreditReturned",
+    "Inputs": [
+      {
+        "Name": "validatorId",
+        "Type": "bytes32",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "TreasuryTransfer",
+    "Inputs": [
+      {
+        "Name": "to",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "reason",
+        "Type": "bytes32",
+        "Indexed": true
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000425",
+    "Name": "ValidatorRegistryBound",
+    "Inputs": [
+      {
+        "Name": "validatorRegistry",
+        "Type": "address",
+        "Indexed": true
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000424",
+    "Name": "TreasuryTransfer",
+    "Inputs": [
+      {
+        "Name": "to",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "reason",
+        "Type": "bytes32",
+        "Indexed": true
+      }
+    ]
+  }
+]

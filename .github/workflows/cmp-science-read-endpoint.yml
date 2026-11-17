@@ -5,12 +5,32 @@ on:
       - 'indexer/api/external_science*'
       - 'indexer/api/backend.go'
       - 'indexer/api/server.go'
-      - 'indexer/cmd/indexer420/main.go'
       - 'compute/web/**'
       - '.github/workflows/cmp-science-read-endpoint.yml'
   workflow_dispatch:
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      science: ${{ steps.changed.outputs.science }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - id: changed
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          python3 - <<'PY_SCOPE'
+          import os,subprocess
+          files=subprocess.check_output(['git','diff','--name-only',os.environ['BASE'],'HEAD'],text=True).splitlines() if os.environ['BASE'] else ['compute/web/']
+          science=any(p.startswith(('compute/web/','indexer/api/external_science')) or p in ('indexer/api/backend.go','indexer/api/server.go') for p in files)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('science='+str(science).lower()+'\n')
+          PY_SCOPE
   science-read:
+    needs: scope
+    if: needs.scope.outputs.science == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -1,0 +1,236 @@
+package accounting
+
+import (
+	"context"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	eng "github.com/420integrated/420-integrated/consensus/engine"
+	rec "github.com/420integrated/420-integrated/consensus/recovery"
+	sys "github.com/420integrated/420-integrated/consensus/systemcall"
+	ct "github.com/420integrated/420-integrated/consensus/types"
+	ethhash "github.com/420integrated/420-integrated/execution/storage"
+	"github.com/420integrated/420-integrated/indexer/model"
+	"math/big"
+	"reflect"
+	"strings"
+	"testing"
+)
+
+func encoded(t *testing.T, name string, fields map[string]string, n uint64, hash string, index uint64) model.LogRecord {
+	t.Helper()
+	for _, d := range definitions() {
+		if d.Name != name {
+			continue
+		}
+		l := model.LogRecord{ChainID: 420, BlockNumber: n, BlockHash: hash, Address: d.Address, TransactionHash: hex32([32]byte{}), LogIndex: index, Topics: []string{ethhash.EventTopic(signature(d))}, Data: "0x"}
+		for _, f := range d.Inputs {
+			v := fields[f.Name]
+			var word []byte
+			if strings.HasPrefix(v, "0x") {
+				var err error
+				word, err = hex.DecodeString(v[2:])
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				word = money(v).Bytes()
+			}
+			w := fmt.Sprintf("%064x", word)
+			if f.Indexed {
+				l.Topics = append(l.Topics, "0x"+w)
+			} else {
+				l.Data += w
+			}
+		}
+		return l
+	}
+	t.Fatal(name)
+	return model.LogRecord{}
+}
+
+type fixtureSource struct {
+	logs           []model.LogRecord
+	initial, final State
+	fail           bool
+}
+
+func (s *fixtureSource) Anchor(context.Context, sys.SequenceAnchor) error {
+	if s.fail {
+		return fmt.Errorf("execution unavailable")
+	}
+	return nil
+}
+func (s *fixtureSource) Logs(context.Context, rec.Record) ([]model.LogRecord, error) {
+	return s.logs, nil
+}
+func (s *fixtureSource) State(_ context.Context, a sys.SequenceAnchor, _ []string, _ []string) (State, error) {
+	if a.ExecutionBlock == 0 {
+		return s.initial, nil
+	}
+	return s.final, nil
+}
+func fixtureReport(t *testing.T) (rec.CertifiedSnapshot, *fixtureSource, Index) {
+	t.Helper()
+	g, h := [32]byte{1}, [32]byte{2}
+	root := [32]byte{3}
+	reward := &sys.RewardOutcome{BlockNumber: 1, ActiveCount: 15, Proposer: sys.Address{1}, Participants: []sys.Address{{2}, {3}}}
+	out := sys.FinalizedStakeOutcomes{Reward: reward}
+	ex, err := expected(out)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log := encoded(t, "RewardApplied", ex[0].fields, 1, hex32(h), 0)
+	initial := State{"grossSecurityIssued": "0", "grossAttentionIssued": "0", "grossDevelopmentIssued": "0", "rewardAppliedCurrent": "0", accrued(address(reward.Proposer)): "0", accrued(address(reward.Participants[0])): "0", accrued(address(reward.Participants[1])): "0"}
+	final := State{}
+	for k, v := range initial {
+		final[k] = v
+	}
+	e, err := Decode(log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = Apply(final, e, 1, reward); err != nil {
+		t.Fatal(err)
+	}
+	final["rewardAppliedCurrent"] = "1"
+	snap := rec.CertifiedSnapshot{Trust: rec.Trust{ChainID: 420, Execution: sys.SequenceAnchor{ChainID: 420, BlockHash: g}}, Anchor: sys.SequenceAnchor{ChainID: 420, ExecutionBlock: 1, BlockHash: h}, Head: ct.Checkpoint{Root: root}, Finalized: ct.Checkpoint{Root: [32]byte{7}}, Canonical: []rec.Record{{Consensus: ct.ConsensusBlockEnvelope{Header: ct.ConsensusBlock{ExecutionPayloadHash: h}}, Outcomes: out, Payload: eng.ExecutionPayloadV3{BlockNumber: "0x1", BlockHash: eng.Hash32(hex32(h))}}}}
+	index := Index{ChainID: 420, Height: 1, Hash: hex32(h), FinalizedHash: hex32(g), Blocks: map[uint64]string{0: hex32(g), 1: hex32(h)}, Logs: []model.LogRecord{log}}
+	return snap, &fixtureSource{logs: []model.LogRecord{log}, initial: initial, final: final}, index
+}
+func has(r Report, code string) bool {
+	for _, d := range r.Discrepancies {
+		if d.Code == code {
+			return true
+		}
+	}
+	return false
+}
+func TestCanonicalReconciliationRestartAndDiscrepancies(t *testing.T) {
+	snap, source, index := fixtureReport(t)
+	clean := Reconcile(context.Background(), snap, source, index)
+	if clean.Status != "RECONCILED" {
+		t.Fatalf("%+v", clean.Discrepancies)
+	}
+	if clean.CanonicalAuthority || money(clean.Issuance.NonIssued).Sign() <= 0 {
+		t.Fatal("authority or nonparticipation accounting")
+	}
+	for i := 0; i < 3; i++ {
+		again := Reconcile(context.Background(), snap, source, index)
+		if !reflect.DeepEqual(clean, again) {
+			t.Fatal("restart changed report")
+		}
+	}
+	cases := []struct {
+		name, code string
+		mutate     func(*fixtureSource, *Index)
+	}{
+		{"missing", "MISSING_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = nil }},
+		{"duplicate", "DUPLICATE_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = append(i.Logs, i.Logs[0]) }},
+		{"orphan", "ORPHANED_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].BlockHash = hex32([32]byte{9}) }},
+		{"contradictory", "CONTRADICTORY_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].Data = "0x" + strings.Repeat("0", 256) }},
+		{"state", "EXECUTION_STATE_MISMATCH", func(s *fixtureSource, i *Index) { s.final["grossSecurityIssued"] = "1" }},
+		{"missing native", "MISSING_CONSENSUS_EVENT", func(s *fixtureSource, i *Index) { s.logs = nil }},
+		{"duplicated execution", "DUPLICATE_EXECUTION_EVENT", func(s *fixtureSource, i *Index) { s.logs = append(s.logs, s.logs[0]) }},
+		{"finalized", "INDEXER_FINALIZED_CHECKPOINT_MISMATCH", func(s *fixtureSource, i *Index) { i.FinalizedHeight = 1 }},
+		{"wrong chain", "INDEXER_CHECKPOINT_MISMATCH", func(s *fixtureSource, i *Index) { i.ChainID = 421 }},
+		{"unavailable", "SOURCE_UNAVAILABLE_OR_CONTRADICTORY", func(s *fixtureSource, i *Index) { s.fail = true }},
+		{"malformed", "MALFORMED_EXECUTION_EVENT", func(s *fixtureSource, i *Index) { s.logs[0].Data = "0x01" }},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			a, s, i := fixtureReport(t)
+			c.mutate(s, &i)
+			r := Reconcile(context.Background(), a, s, i)
+			if r.Status != "DISCREPANCY" || !has(r, c.code) {
+				t.Fatalf("%s: %+v", c.code, r.Discrepancies)
+			}
+		})
+	}
+	raw, err := json.Marshal(clean)
+	if err != nil || !json.Valid(raw) {
+		t.Fatal("machine report", err)
+	}
+}
+func TestCreditReplacementSlashingAndWithdrawal(t *testing.T) {
+	id := hex32([32]byte{1})
+	owner := "0x0000000000000000000000000000000000000001"
+	s := State{balance(CreditReserve): "100", balance(Registry): "0", balance(ProtocolReserve): "0"}
+	apply := func(name string, fields map[string]string, n uint64) {
+		t.Helper()
+		fields["validatorId"] = id
+		if err := Apply(s, Event{Name: name, Fields: fields}, n, nil); err != nil {
+			t.Fatalf("%s: %v", name, err)
+		}
+	}
+	apply("CreditAssigned", map[string]string{"amount": "40", "beneficiary": owner}, 1)
+	apply("ProtocolCreditReceived", map[string]string{"amount": "40", "beneficiary": owner}, 1)
+	apply("CreditFunded", map[string]string{"amount": "40", "beneficiary": owner}, 1)
+	apply("ValidatorRegistered", map[string]string{"ownedBond": "60", "protocolCredit": "40", "owner": owner, "withdrawal": owner}, 1)
+	apply("CreditReturned", map[string]string{"amount": "10"}, 2)
+	apply("ProtocolCreditReplaced", map[string]string{"amount": "10", "ownedBond": "70", "protocolCredit": "30"}, 2)
+	apply("CreditReturned", map[string]string{"amount": "3"}, 3)
+	apply("SlashApplied", map[string]string{"ownedSlashed": "7", "creditSlashed": "3", "evidenceHash": hex32([32]byte{2}), "resultingStatus": "6"}, 3)
+	if s.get("totalOwnedSlashed") != "7" || s.get("totalProtocolCreditRecycled") != "13" || s.get(balance(ProtocolReserve)) != "7" {
+		t.Fatal(s)
+	}
+	apply("ConsensusStateApplied", map[string]string{"previousStatus": "6", "newStatus": "8", "effectiveSlot": "4", "activationRotation": "0", "scheduledExitRotation": "1", "cooldownUntilRotation": "0"}, 4)
+	apply("ConsensusStateApplied", map[string]string{"previousStatus": "8", "newStatus": "9", "effectiveSlot": "5", "activationRotation": "0", "scheduledExitRotation": "1", "cooldownUntilRotation": "0"}, 105844)
+	apply("CreditReturned", map[string]string{"amount": "27"}, 105844)
+	fields := map[string]string{"validatorId": id, "ownedAmount": "63", "recycledCredit": "27", "withdrawal": owner}
+	if err := Apply(s, Event{Name: "ValidatorBondWithdrawn", Fields: fields}, 5, nil); err == nil {
+		t.Fatal("premature withdrawal")
+	}
+	apply("ValidatorBondWithdrawn", fields, 105844)
+	if s.get(balance(Registry)) != "0" || s.get(balance(CreditReserve)) != "100" || s.get("totalOwnedWithdrawn") != "63" || s.get("totalProtocolCreditCustody") != "0" {
+		t.Fatal(s)
+	}
+	if err := Apply(s, Event{Name: "ValidatorBondWithdrawn", Fields: fields}, 105845, nil); err == nil {
+		t.Fatal("duplicate withdrawal")
+	}
+	if new(big.Int).Add(money(s.get("totalOwnedSlashed")), money(s.get("totalOwnedWithdrawn"))).String() != "70" {
+		t.Fatal("owned conservation")
+	}
+}
+
+func TestReplacementAccountingEqualsCleanCanonicalRebuild(t *testing.T) {
+	old, oldSource, oldIndex := fixtureReport(t)
+	oldReport := Reconcile(context.Background(), old, oldSource, oldIndex)
+	replacement, source, index := fixtureReport(t)
+	hash := [32]byte{9}
+	replacement.Anchor.BlockHash = hash
+	replacement.Canonical[0].Payload.BlockHash = eng.Hash32(hex32(hash))
+	replacement.Canonical[0].Consensus.Header.ExecutionPayloadHash = hash
+	reward := replacement.Canonical[0].Outcomes.Reward
+	reward.Participants = reward.Participants[:1]
+	expectedEvents, err := expected(replacement.Canonical[0].Outcomes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source.logs = []model.LogRecord{encoded(t, "RewardApplied", expectedEvents[0].fields, 1, hex32(hash), 0)}
+	source.final = State{}
+	for k, v := range source.initial {
+		source.final[k] = v
+	}
+	e, _ := Decode(source.logs[0])
+	if err = Apply(source.final, e, 1, reward); err != nil {
+		t.Fatal(err)
+	}
+	source.final["rewardAppliedCurrent"] = "1"
+	index.Hash = hex32(hash)
+	index.Blocks[1] = hex32(hash)
+	index.Logs = source.logs
+	clean := Reconcile(context.Background(), replacement, source, index)
+	if clean.Status != "RECONCILED" || reflect.DeepEqual(clean.State, oldReport.State) {
+		t.Fatal("replacement inherited orphan accrual", clean.Discrepancies)
+	}
+	for i := 0; i < 3; i++ {
+		if rebuilt := Reconcile(context.Background(), replacement, source, index); !reflect.DeepEqual(rebuilt, clean) {
+			t.Fatal("restart/rebuild diverged")
+		}
+	}
+	index.Logs = append(index.Logs, oldIndex.Logs...)
+	if result := Reconcile(context.Background(), replacement, source, index); !has(result, "ORPHANED_INDEXER_EVENT") {
+		t.Fatal("orphan accepted")
+	}
+}

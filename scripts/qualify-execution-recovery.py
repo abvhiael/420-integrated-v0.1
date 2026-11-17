@@ -51,12 +51,13 @@ def main():
 pragma solidity ^0.8.24;
 contract RecoveryCounter {
  uint256 public observed;
+ event Observed(uint256 value);
  function applyExitNotice(bytes32, uint64 notice) external {
-  require(msg.sender == address(0x043c)); require(notice != 999, "injected downstream failure"); observed++;
+  require(msg.sender == address(0x043c)); require(notice != 999, "injected downstream failure"); observed++; emit Observed(observed);
  }
  function applyRotationSnapshot(uint64 rotation, uint256) external {
   require(msg.sender == address(0x043c));
-  require(rotation != 999, "injected downstream failure"); observed++;
+  require(rotation != 999, "injected downstream failure"); observed++; emit Observed(observed);
  }
 }'''}
     settings = {'optimizer': {'enabled': True, 'runs': 200}, 'viaIR': True, 'evmVersion': 'cancun',
@@ -104,7 +105,7 @@ contract RecoveryCounter {
                 'gateway_selector_from_compiled_method_identifiers': gateway['evm']['methodIdentifiers']['lastSequence()'],
                 'genesis_sha256': hashlib.sha256((out / 'genesis.json').read_bytes()).hexdigest(),
                 'fixture': 'real ConsensusSystemCall420 with RecoveryCounter downstream test double',
-                'processes': [], 'scenarios': [], 'pass': False}
+                'processes': [], 'scenarios': [], 'pass': False, 'ordinary_rpc_url':f'http://127.0.0.1:{a.rpc_port}'}
     def rpc(method, params, auth=True):
         body = json.dumps({'jsonrpc': '2.0', 'id': 1, 'method': method, 'params': params}).encode()
         headers = {'Content-Type': 'application/json'}
@@ -206,6 +207,7 @@ contract RecoveryCounter {
         start()
         genesis_hash = block()['hash']
         if a.consensus:
+            subprocess.run(['go','build','-tags','blst','-o',str(ROOT/'bin/indexer420'),'./indexer/cmd/indexer420'],cwd=ROOT,check=True)
             scenario_spec = importlib.util.spec_from_file_location('settlement_scenarios', ROOT / 'scripts/settlement_process_scenarios.py')
             scenarios = importlib.util.module_from_spec(scenario_spec); scenario_spec.loader.exec_module(scenarios)
             scenarios.qualify(ROOT, out, evidence, rpc, snapshot, start, stop, genesis_hash, block()['timestamp'], a.auth_port)
@@ -220,6 +222,9 @@ contract RecoveryCounter {
             'batch': b, 'payload': accepted_payload,
             'authority': 'local integration fixture; NOT verified production consensus history'}, indent=2))
         before = snapshot()
+        native_before = rpc('engine420_getSystemCallLogsV1', [before['hash']])
+        assert native_before['batchRoot'] == b['batchRoot'] and len(native_before['logs']) == 4
+        assert [int(x['data'],16) for x in native_before['logs'] if x['address'].lower() == TARGET] == [1,2]
         assert before['sequence'] == before['observed'] == 2 and before['root'] == b['batchRoot']
         evidence['scenarios'].append({'name': 'real native multi-call batch', 'before': initial, 'after': before})
         # Build, but do not import, the next batch. Staging/payload caches must
@@ -239,6 +244,7 @@ contract RecoveryCounter {
             stage(b)
             accept(accepted_payload)
         assert snapshot() == before, 'canonical reconstruction repeated or lost effects'
+        assert rpc('engine420_getSystemCallLogsV1',[before['hash']]) == native_before, 'native evidence changed across restart'
         second_payload = build(parent, staged)
         assert first_payload['blockHash'] == second_payload['blockHash'], 'restaged payload changed'
         accept(second_payload)
@@ -275,6 +281,7 @@ contract RecoveryCounter {
             raise AssertionError('rejected batch became valid after restart')
         assert snapshot() == after
         evidence['scenarios'].append({'name': 'later-call rejection and restart atomicity', 'rejection': rejection, 'before': after, 'after': snapshot()})
+        evidence['native_log_archive'] = {'before':native_before,'after_restart':rpc('engine420_getSystemCallLogsV1',[before['hash']]),'authenticated':True}
         evidence['pass'] = True
     finally:
         stop()

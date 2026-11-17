@@ -69,6 +69,17 @@ func NewFileStore(path string) (*FileStore, error) {
 	if s.data.Logs == nil {
 		s.data.Logs = map[string]model.LogRecord{}
 	}
+	// Re-key retained v1 snapshots before another idempotent ingestion. Native
+	// calls share the zero transaction hash across different canonical blocks.
+	normalized := make(map[string]model.LogRecord, len(s.data.Logs))
+	for _, entry := range s.data.Logs {
+		key := logKey(entry)
+		if _, exists := normalized[key]; exists {
+			return nil, errors.New("duplicate durable log identity")
+		}
+		normalized[key] = entry
+	}
+	s.data.Logs = normalized
 	if s.data.Contracts == nil {
 		s.data.Contracts = map[string]model.ContractRecord{}
 	}
@@ -424,7 +435,7 @@ func (s *FileStore) DeleteBlocksAbove(number uint64) error {
 }
 
 func logKey(lg model.LogRecord) string {
-	return fmt.Sprintf("%s:%d", strings.ToLower(lg.TransactionHash), lg.LogIndex)
+	return fmt.Sprintf("%d:%s:%s:%d", lg.ChainID, strings.ToLower(lg.BlockHash), strings.ToLower(lg.TransactionHash), lg.LogIndex)
 }
 func assetTransferKey(t model.AssetTransferRecord) string {
 	return fmt.Sprintf("%s:%d:%s:%s:%s:%s", strings.ToLower(t.TransactionHash), t.LogIndex, strings.ToLower(t.AssetKey), strings.ToLower(t.From), strings.ToLower(t.To), t.Amount)

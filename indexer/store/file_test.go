@@ -1,6 +1,8 @@
 package store
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -11,109 +13,259 @@ import (
 func TestFileStorePersistsBundleAndCheckpointAcrossRestart(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
 	s, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	block := model.BlockRecord{ChainID: 420, Number: 7, Hash: "0x07", ParentHash: "0x06", SchemaVersion: "v1"}
 	tx := model.TransactionRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0x07", Hash: "0xtx", Index: 0}
 	r := model.ReceiptRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0x07", TransactionHash: "0xtx", Status: 1}
 	lg := model.LogRecord{ChainID: 420, BlockNumber: 7, BlockHash: "0x07", TransactionHash: "0xtx", LogIndex: 0}
-	if err := s.PutBundle(block, []model.TransactionRecord{tx}, []model.ReceiptRecord{r}, []model.LogRecord{lg}); err != nil { t.Fatal(err) }
+	if err := s.PutBundle(block, []model.TransactionRecord{tx}, []model.ReceiptRecord{r}, []model.LogRecord{lg}); err != nil {
+		t.Fatal(err)
+	}
 	cp := model.ChainCheckpoint{ChainID: 420, IndexedHeight: 7, IndexedHash: "0x07", SchemaVersion: "v1", UpdatedAt: time.Now().UTC()}
-	if err := s.SaveCheckpoint(cp); err != nil { t.Fatal(err) }
+	if err := s.SaveCheckpoint(cp); err != nil {
+		t.Fatal(err)
+	}
 
 	reopened, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	got, ok, err := reopened.Block(7)
-	if err != nil || !ok { t.Fatalf("block missing after restart: ok=%v err=%v", ok, err) }
-	if got.Hash != "0x07" { t.Fatalf("unexpected block hash %s", got.Hash) }
+	if err != nil || !ok {
+		t.Fatalf("block missing after restart: ok=%v err=%v", ok, err)
+	}
+	if got.Hash != "0x07" {
+		t.Fatalf("unexpected block hash %s", got.Hash)
+	}
 	gotCP, ok, err := reopened.Checkpoint()
-	if err != nil || !ok { t.Fatalf("checkpoint missing after restart: ok=%v err=%v", ok, err) }
-	if gotCP.IndexedHeight != 7 || gotCP.IndexedHash != "0x07" { t.Fatalf("unexpected checkpoint: %+v", gotCP) }
+	if err != nil || !ok {
+		t.Fatalf("checkpoint missing after restart: ok=%v err=%v", ok, err)
+	}
+	if gotCP.IndexedHeight != 7 || gotCP.IndexedHash != "0x07" {
+		t.Fatalf("unexpected checkpoint: %+v", gotCP)
+	}
 }
 
 func TestFileStoreRollbackRemovesAuxiliaryRecordsByHeight(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
 	s, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	for n := uint64(1); n <= 3; n++ {
 		block := model.BlockRecord{ChainID: 420, Number: n, Hash: "h"}
 		tx := model.TransactionRecord{ChainID: 420, BlockNumber: n, Hash: string(rune('a' + n))}
-		if err := s.PutBundle(block, []model.TransactionRecord{tx}, nil, nil); err != nil { t.Fatal(err) }
+		if err := s.PutBundle(block, []model.TransactionRecord{tx}, nil, nil); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := s.DeleteBlocksAbove(1); err != nil { t.Fatal(err) }
-	if _, ok, _ := s.Block(2); ok { t.Fatal("block above rollback boundary survived") }
+	if err := s.DeleteBlocksAbove(1); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok, _ := s.Block(2); ok {
+		t.Fatal("block above rollback boundary survived")
+	}
 }
 
 func TestFileStoreResetClearsAllRebuildableStateAndSurvivesRestart(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
 	s, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	block := model.BlockRecord{ChainID: 420, Number: 9, Hash: "0x09"}
 	tx := model.TransactionRecord{ChainID: 420, BlockNumber: 9, Hash: "0xABC"}
 	r := model.ReceiptRecord{ChainID: 420, BlockNumber: 9, TransactionHash: "0xABC"}
 	lg := model.LogRecord{ChainID: 420, BlockNumber: 9, TransactionHash: "0xABC", LogIndex: 1}
-	if err := s.PutBundle(block, []model.TransactionRecord{tx}, []model.ReceiptRecord{r}, []model.LogRecord{lg}); err != nil { t.Fatal(err) }
-	if err := s.SaveCheckpoint(model.ChainCheckpoint{ChainID: 420, IndexedHeight: 9, IndexedHash: "0x09"}); err != nil { t.Fatal(err) }
-	if err := s.Reset(); err != nil { t.Fatal(err) }
+	if err := s.PutBundle(block, []model.TransactionRecord{tx}, []model.ReceiptRecord{r}, []model.LogRecord{lg}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.SaveCheckpoint(model.ChainCheckpoint{ChainID: 420, IndexedHeight: 9, IndexedHash: "0x09"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Reset(); err != nil {
+		t.Fatal(err)
+	}
 
 	reopened, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
-	if _, ok, _ := reopened.Checkpoint(); ok { t.Fatal("checkpoint survived reset") }
-	if _, ok, _ := reopened.Block(9); ok { t.Fatal("block survived reset") }
-	if _, ok, _ := reopened.Transaction("0xabc"); ok { t.Fatal("transaction survived reset") }
-	if _, ok, _ := reopened.Receipt("0xabc"); ok { t.Fatal("receipt survived reset") }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok, _ := reopened.Checkpoint(); ok {
+		t.Fatal("checkpoint survived reset")
+	}
+	if _, ok, _ := reopened.Block(9); ok {
+		t.Fatal("block survived reset")
+	}
+	if _, ok, _ := reopened.Transaction("0xabc"); ok {
+		t.Fatal("transaction survived reset")
+	}
+	if _, ok, _ := reopened.Receipt("0xabc"); ok {
+		t.Fatal("receipt survived reset")
+	}
 	logs, err := reopened.LogsByBlock(9)
-	if err != nil { t.Fatal(err) }
-	if len(logs) != 0 { t.Fatalf("logs survived reset: %d", len(logs)) }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(logs) != 0 {
+		t.Fatalf("logs survived reset: %d", len(logs))
+	}
 }
-
 
 func TestCanonicalBlockKeyUsesChainAndHash(t *testing.T) {
 	key, err := CanonicalBlockKey(420, "0xABC")
-	if err != nil { t.Fatal(err) }
-	if key != "420:0xabc" { t.Fatalf("unexpected canonical key %q", key) }
-	if _, err := CanonicalBlockKey(0, "0xabc"); err == nil { t.Fatal("expected zero-chain rejection") }
-	if _, err := CanonicalBlockKey(420, ""); err == nil { t.Fatal("expected empty-hash rejection") }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if key != "420:0xabc" {
+		t.Fatalf("unexpected canonical key %q", key)
+	}
+	if _, err := CanonicalBlockKey(0, "0xabc"); err == nil {
+		t.Fatal("expected zero-chain rejection")
+	}
+	if _, err := CanonicalBlockKey(420, ""); err == nil {
+		t.Fatal("expected empty-hash rejection")
+	}
 }
 
 func TestFileStoreRejectsFinalizedOverwrite(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
 	s, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
-	finalized := model.BlockRecord{ChainID:420, Number:2, Hash:"0xfinal", Finality:model.FinalityFinalized}
-	if err := s.PutBlock(finalized); err != nil { t.Fatal(err) }
-	if err := s.PutBlock(model.BlockRecord{ChainID:420, Number:2, Hash:"0xother", Finality:model.FinalityHead}); err == nil {
+	if err != nil {
+		t.Fatal(err)
+	}
+	finalized := model.BlockRecord{ChainID: 420, Number: 2, Hash: "0xfinal", Finality: model.FinalityFinalized}
+	if err := s.PutBlock(finalized); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.PutBlock(model.BlockRecord{ChainID: 420, Number: 2, Hash: "0xother", Finality: model.FinalityHead}); err == nil {
 		t.Fatal("expected finalized overwrite rejection")
 	}
 	got, ok, err := s.Block(2)
-	if err != nil || !ok || got.Hash != "0xfinal" { t.Fatalf("finalized block mutated: %+v ok=%v err=%v", got, ok, err) }
+	if err != nil || !ok || got.Hash != "0xfinal" {
+		t.Fatalf("finalized block mutated: %+v ok=%v err=%v", got, ok, err)
+	}
 }
 
 func TestFileStoreRejectsRollbackBelowFinalizedCheckpoint(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
 	s, err := NewFileStore(path)
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	for n := uint64(0); n <= 3; n++ {
 		finality := model.FinalityHead
-		if n <= 2 { finality = model.FinalityFinalized }
-		if err := s.PutBlock(model.BlockRecord{ChainID:420, Number:n, Hash:"0x"+string(rune('a'+n)), Finality:finality}); err != nil { t.Fatal(err) }
+		if n <= 2 {
+			finality = model.FinalityFinalized
+		}
+		if err := s.PutBlock(model.BlockRecord{ChainID: 420, Number: n, Hash: "0x" + string(rune('a'+n)), Finality: finality}); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := s.SaveCheckpoint(model.ChainCheckpoint{ChainID:420, IndexedHeight:3, IndexedHash:"0xd", SafeHeight:3, SafeHash:"0xd", FinalizedHeight:2, FinalizedHash:"0xc"}); err != nil { t.Fatal(err) }
-	if err := s.DeleteBlocksAbove(1); err == nil { t.Fatal("expected rollback below finality rejection") }
-	if _, ok, _ := s.Block(3); !ok { t.Fatal("store changed despite rejected rollback") }
+	if err := s.SaveCheckpoint(model.ChainCheckpoint{ChainID: 420, IndexedHeight: 3, IndexedHash: "0xd", SafeHeight: 3, SafeHash: "0xd", FinalizedHeight: 2, FinalizedHash: "0xc"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.DeleteBlocksAbove(1); err == nil {
+		t.Fatal("expected rollback below finality rejection")
+	}
+	if _, ok, _ := s.Block(3); !ok {
+		t.Fatal("store changed despite rejected rollback")
+	}
 }
-
 
 func TestFileStorePersistsBlockProducerAttributionAcrossRestart(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "indexer.json")
-	s, err := NewFileStore(path); if err != nil { t.Fatal(err) }
-	block := model.BlockRecord{
-		ChainID:420, Number:12, Hash:"0x12", ParentHash:"0x11",
-		Producer:&model.BlockProducer{ConsensusSlot:100,ProducerSeat:4,ProposerRank:0,ConsensusBlockRoot:"0xc12",Certified:true},
+	s, err := NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if err := s.PutBundle(block,nil,nil,nil); err != nil { t.Fatal(err) }
-	reopened, err := NewFileStore(path); if err != nil { t.Fatal(err) }
-	got, ok, err := reopened.Block(12); if err != nil || !ok { t.Fatalf("block missing: ok=%v err=%v",ok,err) }
+	block := model.BlockRecord{
+		ChainID: 420, Number: 12, Hash: "0x12", ParentHash: "0x11",
+		Producer: &model.BlockProducer{ConsensusSlot: 100, ProducerSeat: 4, ProposerRank: 0, ConsensusBlockRoot: "0xc12", Certified: true},
+	}
+	if err := s.PutBundle(block, nil, nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := reopened.Block(12)
+	if err != nil || !ok {
+		t.Fatalf("block missing: ok=%v err=%v", ok, err)
+	}
 	if got.Producer == nil || got.Producer.ConsensusSlot != 100 || got.Producer.ProducerSeat != 4 || got.Producer.ConsensusBlockRoot != "0xc12" || !got.Producer.Certified {
 		t.Fatalf("producer attribution not durable: %+v", got)
+	}
+}
+
+func TestNativeZeroTransactionHashLogsSurviveRestartAndReorganization(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "index.json")
+	s, err := NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for n := uint64(1); n <= 2; n++ {
+		b := model.BlockRecord{ChainID: 420, Number: n, Hash: string(rune('a' + n))}
+		l := model.LogRecord{ChainID: 420, BlockNumber: n, BlockHash: b.Hash, TransactionHash: "0x0000", LogIndex: 0}
+		if err = s.PutBundle(b, nil, nil, []model.LogRecord{l}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	s, err = NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for n := uint64(1); n <= 2; n++ {
+		logs, err := s.LogsByBlock(n)
+		if err != nil || len(logs) != 1 {
+			t.Fatalf("native log lost at %d: %v %v", n, logs, err)
+		}
+	}
+	if err = s.DeleteBlocksAbove(1); err != nil {
+		t.Fatal(err)
+	}
+	logs, _ := s.LogsByBlock(2)
+	if len(logs) != 0 {
+		t.Fatal("orphan survived")
+	}
+	logs, _ = s.LogsByBlock(1)
+	if len(logs) != 1 {
+		t.Fatal("canonical parent lost")
+	}
+}
+
+func TestLegacyLogKeyMigrationPreservesIdempotentNativeIngestion(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "index.json")
+	s, err := NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	block := model.BlockRecord{ChainID: 420, Number: 1, Hash: "block1"}
+	log := model.LogRecord{ChainID: 420, BlockNumber: 1, BlockHash: block.Hash, TransactionHash: "zero", LogIndex: 0}
+	if err = s.PutBundle(block, nil, nil, []model.LogRecord{log}); err != nil {
+		t.Fatal(err)
+	}
+	// Retained v1 records used transaction hash and index without a block hash.
+	s.data.Logs = map[string]model.LogRecord{"zero:0": log}
+	raw, err := json.Marshal(s.data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(path, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	s, err = NewFileStore(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = s.PutBundle(block, nil, nil, []model.LogRecord{log}); err != nil {
+		t.Fatal(err)
+	}
+	logs, err := s.LogsByBlock(1)
+	if err != nil || len(logs) != 1 {
+		t.Fatal("legacy reingestion duplicated native event", logs, err)
 	}
 }

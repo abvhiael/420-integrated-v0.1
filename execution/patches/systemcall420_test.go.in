@@ -2,6 +2,8 @@ package systemcall420
 
 import (
     "testing"
+ "github.com/ethereum/go-ethereum/core/rawdb"
+ "github.com/ethereum/go-ethereum/core/types"
 
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/common/hexutil"
@@ -126,4 +128,18 @@ func TestExplicitReplacementPreservesValidationAndCopies(t *testing.T) {
     if err := Replace(malformed); err == nil { t.Fatal("replacement bypassed validation") }
     after, _ := Get(uint64(b.ExecutionBlock), b.ParentHash)
     if after.BatchRoot != got.BatchRoot { t.Fatal("invalid replacement changed staging") }
+}
+
+func TestNativeLogArchiveIntegrity(t *testing.T) {
+ db:=rawdb.NewMemoryDatabase();defer db.Close();hash:=common.HexToHash("0x420")
+ if _,err:=ReadNativeLogs(db,hash);err==nil{t.Fatal("missing archive accepted")}
+ logs:=[]*types.Log{{Address:common.HexToAddress("0x43c"),BlockHash:hash,BlockNumber:1,Index:2,Data:[]byte{1}}}
+ if err:=WriteNativeLogs(db,hash,logs);err!=nil{t.Fatal(err)}
+ got,err:=ReadNativeLogs(db,hash);if err!=nil||len(got)!=1||got[0].Index!=2{t.Fatal(got,err)}
+ batch:=db.NewBatch();other:=common.HexToHash("0x421");if err=WriteNativeLogs(batch,other,nil);err!=nil{t.Fatal(err)}
+ if _,err=ReadNativeLogs(db,other);err==nil{t.Fatal("uncommitted archive visible")};if err=batch.Write();err!=nil{t.Fatal(err)}
+ if got,err=ReadNativeLogs(db,other);err!=nil||len(got)!=0{t.Fatal("accepted empty archive",err)}
+ raw,_:=db.Get(nativeLogKey(hash));raw[len(raw)-1]^=1;db.Put(nativeLogKey(hash),raw)
+ if _,err=ReadNativeLogs(db,hash);err==nil{t.Fatal("corrupt archive accepted")}
+ logs[0].BlockHash=other;WriteNativeLogs(db,hash,logs);if _,err=ReadNativeLogs(db,hash);err==nil{t.Fatal("orphan provenance accepted")}
 }

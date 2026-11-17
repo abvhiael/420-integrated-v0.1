@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"fmt"
 
 	csys "github.com/420integrated/420-integrated/consensus/systemcall"
 )
@@ -18,7 +19,7 @@ func (c *Client) ForkchoiceUpdatedV3WithFinalizedStakeOutcomes(
 	parent csys.SequenceAnchor,
 	outcomes csys.FinalizedStakeOutcomes,
 ) (ForkchoiceUpdatedResponse, csys.Batch, error) {
-	batch, err := sequences.BuildNext(parent, outcomes)
+	batch, err := c.buildVerifiedStakeBatch(ctx, sequences, parent, outcomes)
 	if err != nil {
 		return ForkchoiceUpdatedResponse{}, csys.Batch{}, err
 	}
@@ -41,7 +42,7 @@ func (c *Client) NewPayloadV3WithFinalizedStakeOutcomes(
 	parent csys.SequenceAnchor,
 	outcomes csys.FinalizedStakeOutcomes,
 ) (PayloadStatusV1, csys.Batch, error) {
-	batch, err := sequences.BuildNext(parent, outcomes)
+	batch, err := c.buildVerifiedStakeBatch(ctx, sequences, parent, outcomes)
 	if err != nil {
 		return PayloadStatusV1{}, csys.Batch{}, err
 	}
@@ -57,4 +58,12 @@ func (c *Client) NewPayloadV3WithFinalizedStakeOutcomes(
 		return PayloadStatusV1{}, csys.Batch{}, err
 	}
 	return status, batch, nil
+}
+
+// Never stage a batch based solely on a locally persisted cursor.
+func(c *Client) buildVerifiedStakeBatch(ctx context.Context,m csys.SequenceManager,parent csys.SequenceAnchor,outcomes csys.FinalizedStakeOutcomes)(csys.Batch,error){
+ if _,err:=m.RequireCanonicalParent(parent);err!=nil{return csys.Batch{},err}
+ actual,err:=c.CanonicalSequenceAnchor(ctx,parent.ChainID,parent.ExecutionBlock,parent.BlockHash);if err!=nil{return csys.Batch{},err}
+ if actual!=parent{return csys.Batch{},fmt.Errorf("execution parent sequence divergence: %w",csys.ErrSequenceRecoveryRequired)}
+ return m.BuildNext(parent,outcomes)
 }

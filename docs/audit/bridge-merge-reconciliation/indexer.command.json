@@ -1,0 +1,17 @@
+[
+  "node",
+  "--test",
+  "420-indexer/dist/test/ai420-read-model.test.js",
+  "420-indexer/dist/test/bridge-descriptors.test.js",
+  "420-indexer/dist/test/bridge-integration.test.js",
+  "420-indexer/dist/test/bridge-notifications.test.js",
+  "420-indexer/dist/test/commerce.test.js",
+  "420-indexer/dist/test/grants420-integration.test.js",
+  "420-indexer/dist/test/identity420-compatibility.test.js",
+  "420-indexer/dist/test/names420-release-descriptor.test.js",
+  "420-indexer/dist/test/protocol-projections.test.js",
+  "420-indexer/dist/test/protocol-registry-release-descriptor.test.js",
+  "420-indexer/dist/test/randomness420-release-descriptor.test.js",
+  "420-indexer/dist/test/stake420-release-descriptor.test.js",
+  "420-indexer/dist/test/treasury420-integration.test.js"
+]

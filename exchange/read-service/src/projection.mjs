@@ -1,11 +1,12 @@
 import crypto from 'node:crypto';
 import {bytes32Word,keccak256,uintWord} from '../../web/core/abi.js';
 
-export const HISTORY_KINDS=Object.freeze(['TRADE','FILL','ORDER','CANCELLATION','LIQUIDITY','BRIDGE_DEPOSIT','BRIDGE_WITHDRAWAL','ROUTE_STATE','FEE_ROUTING']);
+export const HISTORY_KINDS=Object.freeze(['TRADE','FILL','ORDER','CANCELLATION','LIQUIDITY','BRIDGE_DEPOSIT','BRIDGE_WITHDRAWAL','BRIDGE_LIFECYCLE','ROUTE_STATE','FEE_ROUTING']);
 const EVENT_KIND=Object.freeze({
   AtomicPathExecuted:'TRADE',NativePathExecuted:'TRADE',LimitOrderFilled:'FILL',
   LimitOrderCancelled:'CANCELLATION',LimitOrderNonceCancelled:'CANCELLATION',LimitOrderNonceFloorSet:'CANCELLATION',
-  OutboundInitiated:'BRIDGE_WITHDRAWAL',InboundAccepted:'BRIDGE_DEPOSIT',
+  OutboundInitiated:'BRIDGE_WITHDRAWAL',OutboundTransferRegistered:'BRIDGE_WITHDRAWAL',OutboundTransferCreated:'BRIDGE_WITHDRAWAL',InboundAccepted:'BRIDGE_DEPOSIT',
+  TransferCreated:'BRIDGE_LIFECYCLE',TransferStatus:'BRIDGE_LIFECYCLE',TransferTransition:'BRIDGE_LIFECYCLE',
   ExchangeFeeSettled:'FEE_ROUTING',ExchangeFeeRouted:'FEE_ROUTING',
   RouteSet:'ROUTE_STATE',DirectionSet:'ROUTE_STATE',
 });
@@ -16,12 +17,22 @@ function recordId(e){return keccak256('0x'+uintWord(BigInt(e.chainId))+bytes32Wo
 function subject(e,kind){
   if(kind==='TRADE')return field(e,'marketId','pathHash','tradeRef')??e.objectKey??e.transactionHash;
   if(kind==='FILL'||kind==='CANCELLATION'||kind==='ORDER')return field(e,'orderHash','tradeRef')??e.objectKey??e.transactionHash;
-  if(kind==='BRIDGE_WITHDRAWAL')return field(e,'routeId','sourceMessageId')??e.objectKey??e.transactionHash;
-  if(kind==='BRIDGE_DEPOSIT')return field(e,'transferId','routeId')??e.objectKey??e.transactionHash;
+  if(kind==='BRIDGE_WITHDRAWAL')return field(e,'transferId','routeId','sourceMessageId')??e.objectKey??e.transactionHash;
+  if(kind==='BRIDGE_DEPOSIT'||kind==='BRIDGE_LIFECYCLE')return field(e,'transferId','routeId')??e.objectKey??e.transactionHash;
   if(kind==='FEE_ROUTING')return field(e,'tradeRef','pathHash')??e.objectKey??e.transactionHash;
   return field(e,'routeId','marketId')??e.objectKey??e.transactionHash;
 }
-function semantic(e,kind,subjectId){return [kind,subjectId,e.eventName,field(e,'nonce','sourceMessageId','transferId','tradeRef')??''].join('|');}
+const BRIDGE_STATE=Object.freeze({
+  '1':'CREATED','2':'SOURCE_PENDING','3':'SOURCE_FINALIZED','4':'PROOF_PENDING','5':'VERIFIED','6':'DESTINATION_PENDING',
+  '7':'COMPLETED','8':'FAILED','9':'RETRYABLE','10':'EXPIRED','11':'PAUSED','12':'DISPUTED','13':'REFUNDED'
+});
+function bridgeLifecycleState(e){
+  if(e.protocol!=='420Bridge')return null;
+  if(e.eventName==='TransferCreated'||e.eventName==='OutboundTransferCreated')return 'CREATED';
+  const raw=field(e,'toStatus','status');
+  return raw===null?null:(BRIDGE_STATE[raw]??null);
+}
+function semantic(e,kind,subjectId){if(e.protocol==='420Bridge')return [kind,subjectId,e.eventName,e.transactionHash,e.logIndex].join('|');return [kind,subjectId,e.eventName,field(e,'nonce','sourceMessageId','transferId','tradeRef')??''].join('|');}
 export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed',freshness='canonical'}={}){
   if(!e||e.protocol!=='420Exchange'&&e.protocol!=='420Bridge')return null;
   const kind=EVENT_KIND[e.eventName];if(!kind)return null;
@@ -33,9 +44,10 @@ export function mapIndexerEventToHistory(e,{observedAt=0,finality='indexed',fres
   return Object.freeze({
     recordId:rid,semanticKey:semantic(e,kind,subjectId),kind,subjectId,active:true,replacedBy:null,
     chainId:str(e.chainId),blockNumber:str(e.blockNumber),blockHash:req(e.blockHash,'blockHash'),txHash:req(e.transactionHash,'transactionHash'),
-    logIndex:Number(e.logIndex),canonicality:'canonical',finality,freshness,observedAt:Number(observedAt)||0,
+    transactionIndex:Number(e.transactionIndex??0),logIndex:Number(e.logIndex),canonicality:'canonical',finality,freshness,observedAt:Number(observedAt)||0,
     eventName:e.eventName,contractAddress:req(e.contractAddress,'contractAddress'),amountRaw,beneficiary,feeAmountRaw,
     destinationAssetId:field(e,'destinationAssetId','assetId'),routeId:field(e,'routeId'),sourceMessageId:field(e,'sourceMessageId'),
+    transferId:field(e,'transferId'),bridgeLifecycleState:bridgeLifecycleState(e),
     provenance:Object.freeze({source:'420Indexer/v1',protocol:e.protocol,authoritative:false}),
   });
 }

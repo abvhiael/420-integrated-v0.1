@@ -80,3 +80,9 @@ If reconciliation is unhealthy, halt/escalate according to safety policy and rec
 ## Executable applications and SDK
 
 Use the [Wallet/Exchange/SDK bridge execution interface](bridge-execution-sdk.md) for Registry binding, reviewed raw-unit transactions, explicit confirmation, Indexer history, qualified notifications and composition recovery. Provider fee estimates and deployment-dependent funded qualification remain explicitly separated from local simulation.
+
+### Exchange display and Indexer ABI reconciliation
+
+`GET /v13/bridge` on the Exchange read service returns schema `420-exchange-bridge-response-v13.6`. It is a non-authoritative display projection; consume fresh responses and require canonical SDK/controller execution review. A proof admission event is not settlement. Completion requires current canonical finalized lifecycle evidence; removed completion logs invalidate the displayed completion. Partial histories can have a null route ID and must remain non-executable.
+
+`420-indexer/descriptors/bridge420-v1.json` describes the eleven current resident Bridge components and 37 ABI events. Regenerate/check it with `scripts/bridge-reconcile/generate-descriptors.py` using the pinned native solc described by its CLI. Bind descriptors to actual ProtocolRegistry component addresses. See `docs/audit/bridge-merge-reconciliation/README.md` for source reconciliation and qualification evidence.

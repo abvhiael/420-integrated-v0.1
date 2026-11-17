@@ -1,0 +1,65 @@
+✔ browser ExchangeClient and server adapter pass the same V13 snapshot/history contract (76.519145ms)
+✔ version headers are exact v13.6 and /ready reflects dependency readiness (13.453646ms)
+✔ Bridge admission is not completion and reorged completion cannot survive replacement history (20.756068ms)
+✔ Bridge fallback unavailability fails closed without manufacturing a projection (1.811101ms)
+✔ mapping preserves stable record IDs, provenance, finality and freshness (14.261544ms)
+✔ duplicate identical events dedupe while duplicate ID conflicts fail closed (4.738635ms)
+✔ source rollback marks disappeared records inactive without deleting provenance (7.961584ms)
+✔ same semantic event after rollback is explicit replacement with stable old record (5.606439ms)
+✔ fee and beneficiary conflicts on one semantic projection fail closed (5.311361ms)
+✔ pagination cursor is query-bound and activeOnly preserves orphan/replacement semantics (9.983373ms)
+✔ canonical Bridge lifecycle events map without synthetic legacy names (2.260155ms)
+✔ route qualification requires every live V11 dependency (2.026232ms)
+✔ paused or unhealthy routes fail closed (0.303398ms)
+✔ bridge intent preserves canonical route and asset identity (0.837951ms)
+✔ wallet-unavailable state blocks bridge submission (0.601261ms)
+✔ settlement timeline preserves attestation and proof provenance (0.526358ms)
+✔ failed settlements remain inspectable and explicitly retryable or terminal (0.31147ms)
+✔ stale or noncanonical bridge projections fail closed (0.41714ms)
+✔ bridge review preserves chains, limits and finality context (0.318751ms)
+✔ only finalized canonical completion or refund is terminal; projection labels cannot submit (0.708901ms)
+✔ snapshot preserves canonical subject and snapshot IDs (2.392692ms)
+✔ future API minor fails closed (1.06847ms)
+✔ history page is bounded to V13.4 maximum (0.765811ms)
+✔ replacement event requires distinct old and new record IDs (0.331448ms)
+✔ snapshot without canonical identity fails closed (0.492252ms)
+✖ bridge endpoint requires RPC fallback readiness and preserves route identity (2.25396ms)
+✔ data layer caches snapshot by canonical subject (1.638004ms)
+✔ data layer caches history by full cursor/filter identity (0.809049ms)
+✔ stream reconnect resumes from last delivered sequence (0.47577ms)
+✔ stream error degrades freshness explicitly (0.184738ms)
+✔ bridge observations refresh across reads rather than retaining a cached completion (0.495246ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 30
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 734.136747
+
+✖ failing tests:
+
+test at exchange/web/test/exchange-client.test.js:39:1
+✖ bridge endpoint requires RPC fallback readiness and preserves route identity (2.25396ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /RPC fallback readiness/. Input:
+  
+  'ExchangeApiError: bridge projection must be non-authoritative'
+  
+      at TestContext.<anonymous> (file:///workspace/scratch/db53560b7024/genesis/exchange/web/test/exchange-client.test.js:43:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: ExchangeApiError: bridge projection must be non-authoritative
+        at validateBridgeSurface (file:///workspace/scratch/db53560b7024/genesis/exchange/web/core/exchange-client.js:88:57)
+        at file:///workspace/scratch/db53560b7024/genesis/exchange/web/test/exchange-client.test.js:43:21
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///workspace/scratch/db53560b7024/genesis/exchange/web/test/exchange-client.test.js:43:10)
+        at async Test.run (node:internal/test_runner/test:1409:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    expected: /RPC fallback readiness/,
+    operator: 'throws',
+    diff: 'simple'
+  }

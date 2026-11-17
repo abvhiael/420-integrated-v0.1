@@ -22,6 +22,10 @@ export function createExchangeReadHandler(service,{allowedOrigins=[]}={}){
         const page=await service.history({kind,subjectId,activeOnly,cursor:u.searchParams.get('cursor')??'',limit:limit(u)});
         return write(res,200,{schema:'420-exchange-history-response-v13.6',...page},security);
       }
+      if(path==='/v13/bridge'){
+        const bridge=await service.bridgeSurface();
+        return write(res,200,{schema:'420-exchange-bridge-response-v13.6',...bridge},security);
+      }
       return error(res,404,'NOT_FOUND','route not found',security);
     }catch(e){
       if(e instanceof HttpSecurityError)return error(res,e.status,e.code,e.message,security);

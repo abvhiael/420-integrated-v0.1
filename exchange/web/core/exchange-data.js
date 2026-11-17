@@ -44,6 +44,11 @@ export class ExchangeDataLayer {
     return page;
   }
 
+  async loadBridge() {
+    // Bridge observations can be invalidated by a reorg between reads.
+    return this.client.bridge();
+  }
+
   connectStream() {
     if (!this.streamUrl) throw new Error('Exchange streamUrl required');
     if (this.disconnect) return this.disconnect;

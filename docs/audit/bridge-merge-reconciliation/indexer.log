@@ -1,0 +1,151 @@
+✔ AI job read model rebuilds AI/CMP/escrow lifecycle from canonical event history (5.688455ms)
+✔ AI provider state is rebuildable and preserves current CMP provider reference (1.009821ms)
+✔ AI read model fails closed on wrong network and private-field contamination (2.272242ms)
+✔ AI collection reads use bounded opaque keyset pagination and chain scope (2.928664ms)
+✔ AI event history is queried in canonical replay order so reorg rollback/rebuild can reconstruct state (0.544453ms)
+✔ AI protocol projection rollback removes orphaned events and permits canonical replay (1.770526ms)
+✔ AI policy projection is versioned and does not invent non-emitted privacy or pricing ids (0.671608ms)
+✔ AI reputation projection follows Trust-applied evidence counters without inventing a score (0.898458ms)
+✔ Bridge manifest covers all canonical contracts and 37 current events (33.360915ms)
+✔ Bridge deployment binding requires exact nonzero addresses (4.517771ms)
+✔ decoder supports identical Bridge event signatures on distinct bound contracts without cross-address confusion (9.045384ms)
+✔ canonical Bridge transfer events reconstruct exact lifecycle and preserve terminal completion (3.887709ms)
+✔ obsolete synthetic Bridge lifecycle names do not manufacture state (3.190611ms)
+✔ duplicate ABI registration is idempotent, conflicting layouts and wildcard ambiguity reject (4.180873ms)
+✔ all five actual transfer events decode with canonical transfer object keys (38.410492ms)
+✔ wrong emitter, malformed ABI and removed events cannot become bridge state (8.315226ms)
+✔ different transfers on the same route retain independent state (52.883907ms)
+✔ workflow failures can recover; only completed and refunded outcomes are terminal (13.281927ms)
+✔ rebuilding canonical history after a reorg removes orphaned completion (4.15452ms)
+✔ bridge notifications require finalized receipt logs from the Registry-qualified historical emitter (24.45995ms)
+✔ orphaned and reverted receipts, substituted runtime and unqualified projection claims cannot notify (5.250489ms)
+✔ notification adapter preserves checkpoint on missing or rejected bridge evidence, then resumes with qualified events (16.176903ms)
+✔ unsubscribed bridge events and non-lifecycle config logs do not block unrelated notification consumers (0.317495ms)
+✔ Market keys bind order before listing or payment; no secondary identity collision (1.556243ms)
+✔ Market frozen lifecycle and partial Pay refund separation; sorted replay converges (12.385806ms)
+✔ cancelled listing can revise/reopen; terminal order cannot reopen (0.330545ms)
+✔ actual ABI-generated order descriptor decodes provenance and rejects wrong emitter (10.553597ms)
+✔ Grants descriptor covers every event-emitting Grants registry and remains deployment-address unbound (36.081635ms)
+✔ Grants descriptor binding fails closed until all registry-resolved deployment identities are supplied (1.90253ms)
+✔ Grants descriptor generation rejects ABI/indexing drift (1.33153ms)
+✔ Grants program read model reconstructs active and awarded state without claiming authority (0.856006ms)
+✔ Grants application read model rejects replay and preserves immutable submission view (0.424043ms)
+✔ Grants award read model reconstructs terminal state and rejects terminal replay (0.70084ms)
+✔ Grants milestone read model reconstructs claim, Treasury binding and PAID terminal state (1.090367ms)
+✔ generic lifecycle reduction recognizes Grants object identities and terminal states (0.738396ms)
+✔ Grants HTTP read routes expose non-authoritative client views (4.357865ms)
+✔ final Identity artifact exposes exact nine-event derived-service surface (2.854581ms)
+✔ Identity profile, issuer and credential events use canonical object keys (2.649901ms)
+✔ Identity decoded fields preserve commitment hashes without dereference or reinterpretation (0.45652ms)
+✔ Identity event canonicality is replay-idempotent and reorg-sensitive (1.07949ms)
+✔ Identity SQL projection declares credential/issuer keys and explicit lifecycle events (0.874118ms)
+node:fs:483
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'descriptors/names420-v3.json'
+    at readFileSync (node:fs:483:20)
+    at file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/names420-release-descriptor.test.js:9:29
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'descriptors/names420-v3.json'
+}
+
+Node.js v24.22.1
+✖ 420-indexer/dist/test/names420-release-descriptor.test.js (502.083777ms)
+✔ manifest descriptor decodes indexed and data fields deterministically (2.380285ms)
+✔ projection stores decoded genesis events and ignores unknown topics (1.020376ms)
+✔ protocol projection rollback is block bounded (0.593868ms)
+✔ Governance event projection is idempotent and reorg replay replaces fork provenance after rollback (5.742112ms)
+✔ protocol decoder preserves signed int256 reputation totals (0.687296ms)
+node:fs:483
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'descriptors/protocol-registry-v4.json'
+    at readFileSync (node:fs:483:20)
+    at file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/protocol-registry-release-descriptor.test.js:6:29
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'descriptors/protocol-registry-v4.json'
+}
+
+Node.js v24.22.1
+✖ 420-indexer/dist/test/protocol-registry-release-descriptor.test.js (339.13114ms)
+node:fs:483
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'descriptors/randomness-v1.json'
+    at readFileSync (node:fs:483:20)
+    at file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/randomness420-release-descriptor.test.js:7:29
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'descriptors/randomness-v1.json'
+}
+
+Node.js v24.22.1
+✖ 420-indexer/dist/test/randomness420-release-descriptor.test.js (389.007028ms)
+node:fs:483
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'descriptors/stake420-v3.json'
+    at readFileSync (node:fs:483:20)
+    at file:///workspace/scratch/db53560b7024/genesis/420-indexer/dist/test/stake420-release-descriptor.test.js:9:29
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'descriptors/stake420-v3.json'
+}
+
+Node.js v24.22.1
+✖ 420-indexer/dist/test/stake420-release-descriptor.test.js (233.749515ms)
+✔ Treasury descriptor covers the complete modern event-emitting contract family and remains address-unbound (16.289395ms)
+✔ Treasury deployment binding fails closed until valid registry-resolved identities are supplied (1.61739ms)
+✔ Treasury descriptor generation rejects ABI/indexing drift (0.418011ms)
+✔ Treasury budget read model rebuilds complete state from creation and accounting events (0.918676ms)
+✔ Treasury disbursement read model preserves schedule fields and terminal release evidence (0.952514ms)
+✔ Treasury read model rejects terminal replay and accounting corruption (0.465552ms)
+✔ Treasury event projection is replay-safe and reorg rollback permits canonical replay (1.336732ms)
+ℹ tests 57
+ℹ suites 0
+ℹ pass 53
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1941.856074
+
+✖ failing tests:
+
+test at 420-indexer/dist/test/names420-release-descriptor.test.js:1:1
+✖ 420-indexer/dist/test/names420-release-descriptor.test.js (502.083777ms)
+  'test failed'
+
+test at 420-indexer/dist/test/protocol-registry-release-descriptor.test.js:1:1
+✖ 420-indexer/dist/test/protocol-registry-release-descriptor.test.js (339.13114ms)
+  'test failed'
+
+test at 420-indexer/dist/test/randomness420-release-descriptor.test.js:1:1
+✖ 420-indexer/dist/test/randomness420-release-descriptor.test.js (389.007028ms)
+  'test failed'
+
+test at 420-indexer/dist/test/stake420-release-descriptor.test.js:1:1
+✖ 420-indexer/dist/test/stake420-release-descriptor.test.js (233.749515ms)
+  'test failed'

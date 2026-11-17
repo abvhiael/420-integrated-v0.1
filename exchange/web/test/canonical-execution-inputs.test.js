@@ -27,7 +27,7 @@ test('floating display amounts and post-review path/recipient changes cannot bec
  assert.throws(()=>swap({execution:{...execution,hops:[{...execution.hops[0],routeId:'demo-route'}]}}),error=>error.code==='INVALID_ROUTE');
 });
 test('qualified bridge builds only exact reviewed raw-unit routes',()=>{
- const reviewed={kind:'BRIDGE_WITHDRAWAL',adapterId:id(1),routeId:id(2),exchangeAssetId:id(3)};
+ const reviewed={kind:'BRIDGE_WITHDRAWAL',amountRaw:'400',recipientBytes:'0x1234',feeValueWei:'0',adapterId:id(1),routeId:id(2),exchangeAssetId:id(3)};
  const outbound={adapterId:id(1),routeId:id(2),assetId:id(3),recipientBytes:'0x1234',amountRaw:'400',feeValueWei:'0'};
  const result=prepareCanonicalBridge({...base,reviewedIntent:reviewed,execution:outbound});assert.equal(result.transaction.kind,'BRIDGE');
  assert.throws(()=>prepareCanonicalBridge({...base,reviewedIntent:reviewed,execution:{...outbound,routeId:id(4)}}),/route changed after review/);

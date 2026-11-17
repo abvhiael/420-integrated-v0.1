@@ -47,3 +47,5 @@ export * from './compute-read-model.js';
 export * from './compute-analytics.js';
 
 export * from './compute-app-read-model.js';
+
+export * from './bridge-descriptors.js';

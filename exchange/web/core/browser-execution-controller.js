@@ -1,3 +1,4 @@
+import {createExchangeBridge420} from './canonical-bridge.js';
 import { WalletController, normalizeAccount, normalizeChainId } from './wallet-session.js';
 import { discoverWalletProviders, selectWalletProvider, verifyWalletSnapshot } from './wallet-compatibility.js';
 import { preflightExchangeTransaction, transactionFingerprint } from './preflight.js';
@@ -22,6 +23,7 @@ export class BrowserExecutionController {
     this.onState=onState;
     this.submissionGate=submissionGate;
     this.orderSigningGate=orderSigningGate;
+    this.bridgeReviews=new WeakMap();
     this.invalidationListeners=new Set();
     this.announcements=[];
     this.wallet=null;
@@ -164,6 +166,39 @@ export class BrowserExecutionController {
     this.assertUnchanged(wallet,generation,epoch);
     if(!preflight.ok) throw new BrowserExecutionError('PREFLIGHT_FAILED','transaction failed preflight');
     return submitPreflightedTransaction({provider:wallet.provider,session,expectedChainId:this.runtime.network.chainId,expectedGeneration:generation,transaction,preflight,submissionGate:this.submissionGate});
+  }
+  async prepareBridge(input) {
+    await this.assertLiveSession();
+    const token=this.captureExecutionContext(),pin=this.runtime.bridge;
+    if(!pin) throw new BrowserExecutionError('DEPLOYMENT_UNRESOLVED','Registry-bound bridge deployment missing');
+    const provider={request:async request=>{
+      this.assertExecutionContext(token);
+      const result=await token.wallet.provider.request(request);
+      this.assertExecutionContext(token);
+      return result;
+    }};
+    const client=createExchangeBridge420({...pin,provider,chainId:this.runtime.network.chainId});
+    const review=await client.review(input);
+    this.assertExecutionContext(token);
+    this.bridgeReviews.set(review,{client,token});
+    return review;
+  }
+  async submitBridge(review,confirm) {
+    const saved=this.bridgeReviews.get(review);
+    if(!saved) throw new BrowserExecutionError('REVIEW_REQUIRED','canonical bridge review required');
+    this.assertExecutionContext(saved.token);
+    if(this.submissionGate?.enabled!==true||!['PRE06_MOCK','PRE08_MOCK','LIVE_TESTNET_QUALIFICATION'].includes(this.submissionGate.mode)) {
+      throw new BrowserExecutionError('SUBMISSION_DISABLED','existing transaction submission gate is disabled');
+    }
+    const result=await saved.client.submit(review,async value=>{
+      this.assertExecutionContext(saved.token);
+      if(typeof confirm!=='function') throw new BrowserExecutionError('REVIEW_REQUIRED','explicit bridge confirmation required');
+      const accepted=await confirm(value);
+      this.assertExecutionContext(saved.token);
+      return accepted;
+    });
+    this.bridgeReviews.delete(review);
+    return result;
   }
   async signOrder({signingRequest,qualification}={}) {
     const {wallet,session,generation,epoch}=await this.assertLiveSession();

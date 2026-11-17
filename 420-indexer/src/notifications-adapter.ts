@@ -1,6 +1,6 @@
 import type { IndexerDeliveryPolicy420, IndexerDeliveryRecord420 } from './event-delivery.js';
 import { IndexerDeliveryQueue420 } from './event-delivery.js';
-import type { IndexerEventBatch420, IndexerEventStream420, IndexerEventStreamRequest420 } from './event-stream.js';
+import type { IndexerEventEnvelope420, IndexerEventBatch420, IndexerEventStream420, IndexerEventStreamRequest420 } from './event-stream.js';
 import type { IndexerEventSubscription420 } from './event-subscription.js';
 import { matchIndexerEventSubscriptions420, normalizeIndexerEventSubscription420 } from './event-subscription.js';
 import type { IndexerEventCanonicalSignal420 } from './event-canonicality.js';
@@ -72,7 +72,8 @@ export class NotificationsConsumerAdapter420 {
   constructor(
     readonly stream: Pick<IndexerEventStream420, 'protocolEvents'>,
     readonly queue: IndexerDeliveryQueue420,
-    readonly bindings: NotificationBinding420[]
+    readonly bindings: NotificationBinding420[],
+    readonly qualifyBridge: ((event: IndexerEventEnvelope420) => Promise<boolean>) | null = null
   ) {
     normalizedBindings420(bindings);
   }
@@ -96,7 +97,16 @@ export class NotificationsConsumerAdapter420 {
     const chainKey = chainId.toString();
     const current = this.checkpoint(chainId);
     const batch = await this.stream.protocolEvents(chainId, { ...request, cursor: current.cursor ?? undefined });
-    const result = this.processBatch(chainKey, batch, now);
+    const subscriptions = [...normalizedBindings420(this.bindings).values()].map(binding => binding.subscription);
+    const lifecycleEvents = new Set(['TransferCreated','OutboundTransferCreated','TransferStatus','TransferTransition']);
+    const filtered = { ...batch, events: batch.events.filter(event => event.protocol !== '420Bridge' || lifecycleEvents.has(event.eventName)) };
+    for (const event of filtered.events) {
+      if (event.protocol === '420Bridge' && matchIndexerEventSubscriptions420(subscriptions,event).length > 0 &&
+          (!this.qualifyBridge || !await this.qualifyBridge(event))) {
+        throw new Error('bridge notification lacks qualified canonical lifecycle evidence');
+      }
+    }
+    const result = this.processBatch(chainKey, filtered, now);
     this.checkpoints.set(chainKey, { chainId: chainKey, cursor: batch.nextCursor, authoritative: false });
     return result;
   }

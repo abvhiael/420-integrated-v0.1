@@ -1,0 +1,20 @@
+✔ Registry-backed bridge review uses exact raw amounts, networks, risk, ABI simulation and explicit confirmation (286.747624ms)
+✔ wrong chains and revoked services/components, stale routes, disabled adapters and ineligible Exchange assets fail closed (186.441366ms)
+✔ switching requests the exact network then rechecks live wallet state (1.459347ms)
+✔ floating amounts, malformed recipient networks and failed adapter simulation cannot be reviewed (373.099539ms)
+✔ confirmation rejection and post-review account/chain/route/risk/fee changes cannot submit (1335.293118ms)
+✔ simultaneous submits cannot send duplicate value and read-only projections cannot manufacture a review (276.490957ms)
+✔ Exchange shares Wallet execution and blocks Pay/Swap composition before canonical finalized settlement (157.579709ms)
+✔ Exchange browser controller owns canonical bridge reviews and invalidates them with its wallet session (557.584441ms)
+✔ security11 outbound presentation follows the reverse leg of canonical foreign-to-local routes (125.984488ms)
+✔ security11 a silent chain change in the last risk RPC cannot reach wallet submission (252.381772ms)
+✔ security11 verifier requalification with unchanged route labels invalidates the review (217.87334ms)
+✔ security11 the wallet request itself carries the reviewed EIP-155 chain (227.539943ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4243.707482

@@ -8,7 +8,7 @@ const tx='0x'+'ab'.repeat(32), block='0x'+'cd'.repeat(32), sourceMsg=id(123), tr
 const sourceRuntime={deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x420'},contracts:{GatewayRouter420:addr(20),ExchangeAuthorization420:addr(21)}};
 const destRuntime={deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x421'},contracts:{GatewayRouter420:addr(30),ExchangeAuthorization420:addr(31)}};
 const execution={adapterId:id(5),routeId:id(6),assetId:id(7),recipientBytes:'0x1234',amountRaw:'100',extra:'0x',feeValueWei:'0'};
-const reviewedIntent={kind:'BRIDGE_WITHDRAWAL',adapterId:id(5),routeId:id(6),exchangeAssetId:id(7)};
+const reviewedIntent={kind:'BRIDGE_WITHDRAWAL',amountRaw:execution.amountRaw,recipientBytes:execution.recipientBytes,feeValueWei:execution.feeValueWei,adapterId:id(5),routeId:id(6),exchangeAssetId:id(7)};
 const checks=[{action:'BRIDGE_WITHDRAW',principal:addr(1),subjectId:id(7),amountRaw:'100'}];
 function provider(chain,account,router,{revert=false,wrongEvent=false}={}){
  const calls=[];

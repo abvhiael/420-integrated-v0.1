@@ -1,0 +1,127 @@
+Compiling 43 files with Solc 0.8.24
+Solc 0.8.24 finished in 373.28s
+Compiler run successful with warnings:
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:28:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |                            ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:18:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                  ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:37:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                     ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:56:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                        ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+  --> contracts/src/bridge/VerifiedGateway420.sol:93:71:
+   |
+93 |         returns (bytes32 depositId, address recipient, address asset, uint256 amount)
+   |                                                                       ^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:31:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |                               ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:18:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                  ^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:40:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                        ^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:59:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                           ^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> contracts/src/bridge/VerifiedGateway420.sol:106:74:
+    |
+106 |         returns (bytes32 withdrawalId, address recipient, address asset, uint256 amount)
+    |                                                                          ^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+  --> contracts/src/bridge/VerifiedGateway420.sol:91:5:
+   |
+91 |     function verifyDeposit(bytes calldata proof)
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> contracts/src/bridge/VerifiedGateway420.sol:104:5:
+    |
+104 |     function verifyWithdrawal(bytes calldata proof)
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+2026-11-17T02:43:14.642521Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+2026-11-17T02:43:14.717634Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717688Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717697Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717776Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717788Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717898Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.717943Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.719013Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855059Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855102Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855112Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855161Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855170Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855196Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855217Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21232)
+2026-11-17T02:43:14.855259Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21232)
+
+Ran 1 test for contracts/test/BridgeSecurityEconomic11.t.sol:BridgeSecurityEconomicInvariant11Test
+[PASS] invariantSecurity11HostileCallbacksCannotCreateValueOrEscapeCaps() (runs: 128, calls: 8192, reverts: 0)
+
+╭------------------------------+-------------+-------+---------+----------╮
+| Contract                     | Selector    | Calls | Reverts | Discards |
++=========================================================================+
+| Security11EconomicHandler420 | begin       | 1597  | 0       | 0        |
+|------------------------------+-------------+-------+---------+----------|
+| Security11EconomicHandler420 | hostileMode | 1626  | 0       | 0        |
+|------------------------------+-------------+-------+---------+----------|
+| Security11EconomicHandler420 | resolve     | 1740  | 0       | 0        |
+|------------------------------+-------------+-------+---------+----------|
+| Security11EconomicHandler420 | rollWindow  | 1666  | 0       | 0        |
+|------------------------------+-------------+-------+---------+----------|
+| Security11EconomicHandler420 | tryDeposit  | 1563  | 0       | 0        |
+╰------------------------------+-------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 22.26s (22.18s CPU time)
+
+Ran 2 tests for contracts/test/BridgeSecurityEconomic11.t.sol:BridgeSecurityLiquidity11Test
+[PASS] testSecurity11TaxedAndFalseReturningFundingRollBackEscrow() (gas: 2097582)
+[PASS] testSecurity11TaxedDestinationReleaseRollsBackSourceReservation() (gas: 3694803)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 19.36ms (10.53ms CPU time)
+
+Ran 6 tests for contracts/test/BridgeSecurityEconomic11.t.sol:BridgeSecurityEconomic11Test
+[PASS] testFuzzSecurity11MaliciousMintBurnAndRefundRollback(uint96,uint8) (runs: 2500, μ: 5498805, ~: 4405173)
+[PASS] testSecurity11BurnCallbackCannotCreateSecondFundedWithdrawal() (gas: 6711988)
+[PASS] testSecurity11ExcessMintRollsBackProofReplayAndExposure() (gas: 6920786)
+[PASS] testSecurity11MintCallbackCannotReenterSettlementOrCreditTwice() (gas: 4838581)
+[PASS] testSecurity11PartialBurnCannotCreateUnderfundedClaim() (gas: 4405996)
+[PASS] testSecurity11RefundCallbackCannotResolveTwice() (gas: 7229091)
+Suite result: ok. 6 passed; 0 failed; 0 skipped; finished in 34.83s (34.88s CPU time)
+
+Ran 3 test suites in 34.84s (57.12s CPU time): 9 tests passed, 0 failed, 0 skipped (9 total tests)

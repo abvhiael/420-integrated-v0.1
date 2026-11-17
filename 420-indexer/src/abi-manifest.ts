@@ -58,6 +58,7 @@ export const GENESIS_PROTOCOL_BY_CONTRACT_420: Record<string, string> = {
   PublicBatchAuction: '420Swap',
   ApprovedQuoteAssetRegistry: '420Swap',
   VerifiedGateway420: '420Bridge',
+  BridgeTransferRegistry: '420Bridge',
   RandomnessRegistry: '420Randomness'
 };
 

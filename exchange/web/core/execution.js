@@ -216,8 +216,13 @@ export function buildBridgeOutboundTransaction({ runtime, account, reviewedInten
   const assetId = bytes32(execution?.assetId, 'bridge assetId');
   if (reviewedIntent.adapterId?.startsWith('0x') && !sameId(reviewedIntent.adapterId, adapterId)) throw new Error('bridge adapter changed after review');
   if (reviewedIntent.routeId?.startsWith('0x') && !sameId(reviewedIntent.routeId, routeId)) throw new Error('bridge route changed after review');
-  if (reviewedIntent.exchangeAssetId?.startsWith('0x') && !sameId(reviewedIntent.exchangeAssetId, assetId)) throw new Error('bridge asset changed after review');
+  if (!(reviewedIntent.bridgeAssetId ?? reviewedIntent.exchangeAssetId)?.startsWith('0x') || !sameId(reviewedIntent.bridgeAssetId ?? reviewedIntent.exchangeAssetId, assetId)) throw new Error('bridge asset changed after review');
 
+  for (const key of ['routeId','adapterId']) if (!sameId(reviewedIntent[key], execution?.[key])) throw new Error(`bridge ${key} changed after review`);
+  if (typeof reviewedIntent.amountRaw !== 'string' || reviewedIntent.amountRaw !== execution?.amountRaw) throw new Error('bridge raw amount changed after review');
+  if (!sameId(reviewedIntent.recipientBytes, execution?.recipientBytes)) throw new Error('bridge recipient changed after review');
+  if (!sameId(reviewedIntent.extra ?? '0x', execution?.extra ?? '0x')) throw new Error('bridge adapter data changed after review');
+  if (String(reviewedIntent.feeValueWei ?? '0') !== String(execution?.feeValueWei ?? '0')) throw new Error('bridge fee changed after review');
   const amountRaw = rawAmount(execution?.amountRaw, 'bridge raw amount');
   const feeValueWei = execution?.feeValueWei === undefined ? 0n : BigInt(execution.feeValueWei);
   if (feeValueWei < 0n) throw new Error('invalid bridge fee value');

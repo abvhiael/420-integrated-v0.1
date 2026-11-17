@@ -124,6 +124,7 @@ test('builds bridge qualification read and outbound GatewayRouter transaction', 
 
   const reviewedIntent = {
     kind:'BRIDGE_WITHDRAWAL',
+    amountRaw:'1000000000000000000',recipientBytes:'0x00112233445566778899aabbccddeeff00112233',feeValueWei:'420',
     routeId:id(71),
     exchangeAssetId:id(72),
     adapterId:id(73),
@@ -151,4 +152,12 @@ test('all transaction construction fails closed when deployment is unresolved', 
     () => buildBridgeQualificationCall({ runtime:unresolved, exchangeAssetId:id(1) }),
     /deployment is not resolved/,
   );
+});
+
+test('bridge execution rejects raw amount, recipient, adapter-data and fee substitution after review',()=>{
+ const reviewedIntent={kind:'BRIDGE_WITHDRAWAL',routeId:id(71),bridgeAssetId:id(72),exchangeAssetId:id(99),adapterId:id(73),amountRaw:'100',recipientBytes:'0x1234',feeValueWei:'3',extra:'0xabcd'};
+ const execution={routeId:id(71),assetId:id(72),adapterId:id(73),amountRaw:'100',recipientBytes:'0x1234',feeValueWei:'3',extra:'0xabcd'};
+ assert.equal(buildBridgeOutboundTransaction({runtime,account:address(1),reviewedIntent,execution}).kind,'BRIDGE');
+ for(const mutation of [{amountRaw:'101'},{recipientBytes:'0x5678'},{feeValueWei:'4'},{extra:'0xeeee'},{assetId:id(99)}])assert.throws(()=>buildBridgeOutboundTransaction({runtime,account:address(1),reviewedIntent,execution:{...execution,...mutation}}),/changed after review/);
+ assert.throws(()=>buildBridgeOutboundTransaction({runtime,account:address(1),reviewedIntent:{kind:'BRIDGE_WITHDRAWAL'},execution}),/changed after review/);
 });

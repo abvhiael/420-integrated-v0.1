@@ -104,3 +104,5 @@ export * from './stake.js';
 
 export * from './compute-client.js';
 export * from './commerce.js';
+
+export * from './bridge.js';

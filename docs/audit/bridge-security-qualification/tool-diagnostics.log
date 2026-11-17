@@ -1,0 +1,8 @@
+Existing qualifier CLI rejected --no-dynamic-test-linking before any tests ran. The new owner-scoped runner uses Forge config to assert dynamic_test_linking=false and preserves optimizer/viaIR/EVM/fuzz/invariant settings.
+error: unexpected argument '--no-dynamic-test-linking' found
+
+  tip: a similar argument exists: '--dynamic-test-linking'
+
+Usage: forge test --root <PATH> --use <SOLC_VERSION> --threads <THREADS> --dynamic-test-linking [PATH]
+
+For more information, try '--help'.

@@ -9,6 +9,8 @@ import (
  csys "github.com/420integrated/420-integrated/consensus/systemcall"
 )
 
+const gatewaySequenceSelector = "0x3bc684e9"
+
 // CanonicalSequenceAnchor verifies a consensus-selected execution checkpoint against
 // the paired, authenticated execution client's canonical block and gateway state.
 // The expected hash MUST originate from independently verified consensus history,

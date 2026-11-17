@@ -8,7 +8,7 @@ on:
       - "consensus/systemcall/**"
       - "consensus/engine/**"
       - "consensus/recovery/**"
-      - "consensus/cmd/fourtwentyd/**"
+      - "consensus/cmd/fourtwentyd/settlement.go"
       - "integration/cmd/settlement-fixture/**"
       - "scripts/settlement_process_scenarios.py"
       - "go.mod"
@@ -16,7 +16,6 @@ on:
       - "scripts/build-node420-upstream.sh"
       - "scripts/qualify-execution-recovery.py"
       - "scripts/qualify-stake-isolated.py"
-      - ".github/workflows/node420-release-gate.yml"
 
 jobs:
   geth-v1-17-5:

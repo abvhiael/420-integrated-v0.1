@@ -2,7 +2,7 @@
 FROM golang:1.23 AS build
 WORKDIR /src
 COPY . .
-RUN go build -o /out/fourtwentyd ./consensus/cmd/fourtwentyd
+RUN go build -tags blst -o /out/fourtwentyd ./consensus/cmd/fourtwentyd
 FROM debian:bookworm-slim
 COPY --from=build /out/fourtwentyd /usr/local/bin/fourtwentyd
 ENTRYPOINT ["fourtwentyd"]

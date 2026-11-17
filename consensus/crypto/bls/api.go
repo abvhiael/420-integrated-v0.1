@@ -10,7 +10,7 @@ var (
 	ErrInvalidSecretKey   = errors.New("invalid BLS secret key")
 	ErrInvalidPublicKey   = errors.New("invalid BLS public key")
 	ErrInvalidSignature   = errors.New("invalid BLS signature")
-	ErrBackendUnavailable = errors.New("BLS backend not compiled; build with -tags blst after adding github.com/supranational/blst")
+	ErrBackendUnavailable = errors.New("BLS backend not compiled; build with -tags blst")
 )
 
 type Verifier interface {

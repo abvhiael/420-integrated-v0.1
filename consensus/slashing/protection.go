@@ -26,8 +26,8 @@ type messageKey struct {
 type Protector struct {
 	mu     sync.Mutex
 	signed map[messageKey]ctypes.Root
-	votes []voteRecord
-	disk *durableHistory
+	votes  []voteRecord
+	disk   *durableHistory
 	failed error
 }
 
@@ -50,12 +50,22 @@ func (p *Protector) CheckAndRecordRecovery(validatorID uint64, incident, recover
 func (p *Protector) check(key messageKey, root ctypes.Root, conflict error) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	if err := p.checkHistoryLocked(); err != nil { return err }
-	if root == (ctypes.Root{}) { return ErrInvalidDuty }
-	if key.Type == "recovery" && key.Incident == (ctypes.Root{}) { return ErrInvalidDuty }
+	if err := p.checkHistoryLocked(); err != nil {
+		return err
+	}
+	if root == (ctypes.Root{}) {
+		return ErrInvalidDuty
+	}
+	if key.Type == "recovery" && key.Incident == (ctypes.Root{}) {
+		return ErrInvalidDuty
+	}
 	if p.disk != nil {
-		if key.Type == "attestation" { return ErrInvalidDuty }
-		if err := p.disk.checkIdentity(key.ValidatorID); err != nil { return err }
+		if key.Type == "attestation" {
+			return ErrInvalidDuty
+		}
+		if err := p.disk.checkIdentity(key.ValidatorID); err != nil {
+			return err
+		}
 	}
 	if old, ok := p.signed[key]; ok {
 		if old != root {

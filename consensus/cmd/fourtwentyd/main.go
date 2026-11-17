@@ -39,7 +39,29 @@ func main() {
 	fb1Down := flag.Bool("fb1-down", false, "devnet: treat fallback-1 as unavailable")
 	statePath := flag.String("state", "", "devnet persistent consensus state file")
 	engineStatePath := flag.String("engine-state", "", "devnet file sink for Engine head/safe/finalized")
+	protectedSigning := flag.Bool("protected-signing", false, "sign typed production duties exclusively through an authenticated protected remote signer")
+	signerEndpoint := flag.String("signer", "", "HTTPS remote validator signer")
+	signingPolicy := flag.String("signing-policy", "", "independently pinned validator signing policy")
+	signingPolicyPin := flag.String("signing-policy-sha256", "", "required signing policy SHA-256")
+	signingHistory := flag.String("signing-history", "", "existing private local slashing journal")
+	signingCert := flag.String("signer-client-cert", "", "dedicated P-256 validator client TLS certificate")
+	signingKey := flag.String("signer-client-key", "", "private validator transport key, never a Wallet/owner key")
+	signingCA := flag.String("signer-ca", "", "remote signer CA")
+	signingPeer := flag.String("signer-spki-sha256", "", "remote signer transport public-key pin")
 	flag.Parse()
+	if *protectedSigning {
+		if *devnet || *settlement || *engineProbe || *engineEndpoint != "" {
+			fmt.Fprintln(os.Stderr, "protected signing excludes simulator/settlement/Engine credential modes")
+			os.Exit(2)
+		}
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		if err := runProtectedSigning(ctx, *signerEndpoint, *signingPolicy, *signingPolicyPin, *signingHistory, *signingCert, *signingKey, *signingCA, *signingPeer); err != nil {
+			fmt.Fprintln(os.Stderr, "protected consensus signing halted:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if *showVersion {
 		fmt.Printf("fourtwentyd %s\n", version)

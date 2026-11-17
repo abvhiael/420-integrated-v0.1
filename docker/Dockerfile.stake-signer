@@ -1,0 +1,10 @@
+FROM golang:1.23 AS build
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY consensus ./consensus
+RUN go build -tags blst -o /out/stake-signer ./consensus/cmd/stake-signer
+FROM debian:bookworm-slim
+COPY --from=build /out/stake-signer /usr/local/bin/stake-signer
+USER 10002:10002
+ENTRYPOINT ["stake-signer"]

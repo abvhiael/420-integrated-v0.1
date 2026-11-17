@@ -1,25 +1,118 @@
-name: 420Stake STAKE-AUDIT-9.1 protector
+name: 420Stake STAKE-AUDIT-9.1 protected signing
 on:
   pull_request:
     paths:
       - 'consensus/slashing/**'
+      - 'consensus/signing/**'
+      - 'consensus/cmd/stake-signer/**'
+      - 'consensus/cmd/fourtwentyd/main.go'
+      - 'consensus/cmd/fourtwentyd/signing.go'
+      - 'consensus/crypto/bls/**'
+      - 'docker/Dockerfile.fourtwentyd'
+      - 'docker/Dockerfile.stake-signer'
+      - 'deployments/consensus/protected-signing.compose.yml'
       - '.github/workflows/stake-audit-9-1-protector.yml'
+      - '.github/workflows/stake-audit-9-2-recovery.yml'
+      - '.github/workflows/node420-release-gate.yml'
 permissions:
   contents: read
 jobs:
   qualify:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signing
+          POSTGRES_PASSWORD: qualification-only
+          POSTGRES_DB: signing
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U signing -d signing"
+          --health-interval 5s --health-timeout 5s --health-retries 12
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.23.x'
+          go-version-file: go.mod
       - name: Verify exact head
         env:
           EXPECTED: ${{ github.event.pull_request.head.sha }}
-        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
-      - name: Slashing history regression and race qualification
-        run: go test -race -count=1 -v ./consensus/slashing
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          mkdir -p stake-9-1-evidence
+          git rev-parse HEAD > stake-9-1-evidence/candidate-sha.txt
+          go version > stake-9-1-evidence/go-version.txt
+      - name: Configure authenticated TLS witness fixture
+        env:
+          CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          set -euo pipefail
+          tls_dir="$RUNNER_TEMP/stake-signing-pg"
+          mkdir -m 700 -p "$tls_dir"
+          tls_dir="$(realpath "$tls_dir")"
+          openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout "$tls_dir/server.key" -out "$tls_dir/server.crt" -days 1 -subj /CN=localhost -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1' >/dev/null 2>&1
+          docker cp "$tls_dir/server.key" "$CONTAINER:/var/lib/postgresql/data/server.key"
+          docker cp "$tls_dir/server.crt" "$CONTAINER:/var/lib/postgresql/data/server.crt"
+          docker exec -u root "$CONTAINER" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec -u root "$CONTAINER" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "alter system set ssl=on"
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "select pg_reload_conf()"
+          echo "STAKE_SIGNER_PG_DSN=postgresql://signing:qualification-only@127.0.0.1:5432/signing?sslmode=verify-full&sslrootcert=$tls_dir/server.crt&connect_timeout=5" >> "$GITHUB_ENV"
+          echo "STAKE_SIGNER_REQUIRE_PG=1" >> "$GITHUB_ENV"
+      - name: Build production and explicitly instrumented qualification binaries
+        run: |
+          mkdir -p bin
+          go build -tags blst -o bin/fourtwentyd-signing ./consensus/cmd/fourtwentyd
+          go build -tags blst -o bin/stake-signer ./consensus/cmd/stake-signer
+          go build -tags blst,stake_signing_faults -o bin/stake-signer-fault ./consensus/cmd/stake-signer
+          go version -m bin/stake-signer > stake-9-1-evidence/build-metadata.txt
+          sha256sum bin/fourtwentyd-signing bin/stake-signer bin/stake-signer-fault > stake-9-1-evidence/binary-sha256.txt
+          echo "STAKE_SIGNER_PRODUCTION_BINARY=$PWD/bin/stake-signer" >> "$GITHUB_ENV"
+          echo "STAKE_SIGNER_BINARY=$PWD/bin/stake-signer-fault" >> "$GITHUB_ENV"
+          echo "STAKE_CONSENSUS_BINARY=$PWD/bin/fourtwentyd-signing" >> "$GITHUB_ENV"
+      - name: Qualify real BLS, witness, mTLS, runtime and process crashes
+        run: |
+          set -o pipefail
+          go test -race -tags blst -count=1 -v ./consensus/signing ./consensus/slashing ./consensus/crypto/bls ./consensus/attestation ./consensus/finality ./consensus/recovery ./consensus/cmd/fourtwentyd ./consensus/cmd/stake-signer 2>&1 | tee stake-9-1-evidence/tests.log
+          go vet -tags blst ./consensus/signing ./consensus/slashing ./consensus/cmd/fourtwentyd ./consensus/cmd/stake-signer
+      - name: Verify default builds have no signing fallback
+        run: |
+          set -o pipefail
+          go test -count=1 -v ./consensus/signing ./consensus/recovery 2>&1 | tee stake-9-1-evidence/unavailable.log
+          go build ./consensus/cmd/fourtwentyd ./consensus/cmd/stake-signer
+      - name: Verify production packaging and credential mount separation
+        env:
+          STAKE_SIGNER_PRIVATE_DIR: /tmp/stake-signer-private
+          STAKE_SIGNER_HISTORY_DIR: /tmp/stake-signer-history
+          STAKE_VALIDATOR_PRIVATE_DIR: /tmp/stake-validator-private
+          STAKE_VALIDATOR_HISTORY_DIR: /tmp/stake-validator-history
+          STAKE_SIGNING_POLICY_SHA256: qualification-placeholder
+          STAKE_VALIDATOR_SPKI_SHA256: qualification-placeholder
+          STAKE_SIGNER_SPKI_SHA256: qualification-placeholder
+        run: |
+          docker build -f docker/Dockerfile.stake-signer -t stake-signer:qualified .
+          docker build -f docker/Dockerfile.fourtwentyd -t fourtwentyd:protected-signing .
+          docker compose -f deployments/consensus/protected-signing.compose.yml config > stake-9-1-evidence/credential-mounts.yml
+          isolation="$RUNNER_TEMP/stake-signing-isolation"
+          mkdir -p "$isolation"
+          printf 'qualification-fixture-only\n' > "$isolation/bls.hex"
+          sudo chown -R 10002:10002 "$isolation"
+          sudo chmod 700 "$isolation"
+          sudo chmod 600 "$isolation/bls.hex"
+          docker run --rm --read-only -v "$isolation:/run/signer:ro" --entrypoint /bin/sh stake-signer:qualified -c 'test "$(id -u)" = 10002 && test -r /run/signer/bls.hex'
+          docker run --rm --read-only --user 10001:10001 -v "$isolation:/run/signer:ro" --entrypoint /bin/sh fourtwentyd:protected-signing -c 'test "$(id -u)" = 10001 && test ! -r /run/signer/bls.hex'
+          printf 'signer_uid=10002 validator_uid=10001 validator_bls_read=denied\n' > stake-9-1-evidence/credential-isolation.txt
+          docker run --rm stake-signer:qualified --help >/dev/null 2>&1
+          docker run --rm fourtwentyd:protected-signing --version > stake-9-1-evidence/container-version.txt
+      - name: Retain exact-head qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stake-audit-9-1-signing-${{ github.event.pull_request.head.sha }}
+          path: stake-9-1-evidence/
+          if-no-files-found: error
+          retention-days: 14

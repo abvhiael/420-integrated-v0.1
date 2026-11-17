@@ -4,15 +4,13 @@ on:
     paths:
       - 'consensus/engine/**'
       - 'consensus/recovery/**'
-      - 'consensus/cmd/fourtwentyd/**'
-      - 'consensus/crypto/bls/**'
+      - 'consensus/cmd/fourtwentyd/settlement.go'
       - 'go.mod'
       - 'go.sum'
       - 'consensus/systemcall/**'
       - 'consensus/storage/**'
       - 'consensus/devnet/**'
       - 'consensus/finality/tracker.go'
-      - '.github/workflows/stake-audit-9-2-recovery.yml'
 permissions:
   contents: read
 jobs:

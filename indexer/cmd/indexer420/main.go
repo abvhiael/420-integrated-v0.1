@@ -76,7 +76,7 @@ func run() error {
 
 	rebuild := os.Getenv("INDEXER_REBUILD") == "1"
 	consensusStatusPath := os.Getenv("INDEXER_CONSENSUS_STATUS_PATH")
-	consensusProvider, err := newConsensusProvider(consensusStatusPath)
+	consensusProvider, err := newRuntimeConsensusProvider(consensusStatusPath)
 	if err != nil {
 		return err
 	}

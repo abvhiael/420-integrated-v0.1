@@ -124,6 +124,37 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         record = json.loads(subprocess.check_output([str(producer), '--record', str(path)], text=True))
         (out / f'certified-{slot}-{calls}.json').write_text(json.dumps(record))
         return record
+    index_store = out / 'indexed-canonical.json'
+    def index_checkpoint(expected, record):
+        env = dict(os.environ, INDEXER_RPC_URL=f'http://127.0.0.1:{auth_port}',
+                   INDEXER_ENGINE_URL=f'http://127.0.0.1:{auth_port}', INDEXER_JWT_SECRET=str(out/'jwt.hex'),
+                   INDEXER_CERTIFIED_DIR=str(state), INDEXER_SETTLEMENT_TRUST=str(trust_path),
+                   INDEXER_SETTLEMENT_TRUST_SHA256=pin, INDEXER_CONSENSUS_STATUS_PATH='',
+                   INDEXER_STORE_PATH=str(index_store), INDEXER_HTTP_ADDR='127.0.0.1:0',
+                   INDEXER_MAX_HEAD_AGE='1000000h', INDEXER_POLL_INTERVAL='1s')
+        # Public readiness calls also need JWT: use the ordinary endpoint instead.
+        # Its port is recorded by the parent qualification harness.
+        env['INDEXER_RPC_URL'] = evidence['ordinary_rpc_url']
+        log = (out / f'indexer-{len(evidence.setdefault("indexer_processes",[]))}.log').open('w')
+        process_index = subprocess.Popen([str(root/'bin/indexer420')],cwd=root,env=env,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+        evidence['indexer_processes'].append({'pid':process_index.pid,'binary_sha256':hashlib.sha256((root/'bin/indexer420').read_bytes()).hexdigest()})
+        try:
+            deadline=time.monotonic()+35
+            while time.monotonic()<deadline:
+                if process_index.poll() is not None: raise AssertionError('certified Indexer exited: '+(out/f'indexer-{len(evidence["indexer_processes"])-1}.log').read_text())
+                if index_store.exists():
+                    data=json.loads(index_store.read_text());cp=data.get('checkpoint',{})
+                    if cp.get('indexedHash')==expected['hash'] and cp.get('finalizedHeight')==3:
+                        assert data['blocks']['4']['producer']['certified']
+                        assert data['blocks']['4']['producer']['consensusBlockRoot']=='0x'+bytes(record['Certificate']['BlockRoot']).hex()
+                        head_logs=[x for x in data['logs'].values() if x['blockNumber']==4]
+                        assert head_logs and all(x['blockHash']==expected['hash'] for x in head_logs)
+                        return data
+                time.sleep(.1)
+            raise AssertionError('Indexer did not persist certified checkpoint')
+        finally:
+            if process_index.poll() is None: os.killpg(process_index.pid,signal.SIGKILL);process_index.wait(timeout=15)
+            log.close()
     def record_scenario(name, before, after, **extra):
         evidence['scenarios'].append(dict(name=name, before=before, after=after, **extra))
     try:
@@ -188,6 +219,7 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         after = snapshot()
         assert after['sequence'] == after['observed'] == 6
         record_scenario('execution-only crash while production consensus stays alive; unavailable execution cannot settle', accepted, after)
+        indexed_before = index_checkpoint(after, fourth)
         old_cursor = (state / 'sequence.json').read_bytes()
         # The original finalized parent is retained; only its unfinalized child
         # is replaced, with a different batch and gateway sequence.
@@ -216,6 +248,12 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         else:
             raise AssertionError('orphaned native accounting archive accepted')
         evidence['native_log_replacement'] = native_replacement
+        indexed_after = index_checkpoint(replaced, replacement)
+        indexed_restart = index_checkpoint(replaced, replacement)
+        assert indexed_restart['logs'] == indexed_after['logs']
+        assert all(x['blockHash']!=after['hash'] for x in indexed_after['logs'].values())
+        evidence['certified_indexer_replacement']={'before':indexed_before,'after':indexed_after,'after_restart':indexed_restart}
+        record_scenario('real Indexer certified-history ingestion, SIGKILL, canonical replacement and repeated restart',after,replaced)
         record_scenario('certified bounded replacement restores canonical parent sequence', after, replaced)
         stable = checkpoint()
         send(cross_final)

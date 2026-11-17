@@ -11,6 +11,7 @@ on:
       - 'deployments/indexer/**'
       - '!deployments/indexer/docker-compose.yml'
       - 'docker/Dockerfile.420indexer'
+      - '!docker/Dockerfile.420indexer'
       - 'docs/audit/EXP-1.8-runtime-negative-divergence.*'
       - 'scripts/verify-exp-1-8-runtime-negative-divergence.py'
 

@@ -105,7 +105,7 @@ contract RecoveryCounter {
                 'gateway_selector_from_compiled_method_identifiers': gateway['evm']['methodIdentifiers']['lastSequence()'],
                 'genesis_sha256': hashlib.sha256((out / 'genesis.json').read_bytes()).hexdigest(),
                 'fixture': 'real ConsensusSystemCall420 with RecoveryCounter downstream test double',
-                'processes': [], 'scenarios': [], 'pass': False}
+                'processes': [], 'scenarios': [], 'pass': False, 'ordinary_rpc_url':f'http://127.0.0.1:{a.rpc_port}'}
     def rpc(method, params, auth=True):
         body = json.dumps({'jsonrpc': '2.0', 'id': 1, 'method': method, 'params': params}).encode()
         headers = {'Content-Type': 'application/json'}
@@ -207,6 +207,7 @@ contract RecoveryCounter {
         start()
         genesis_hash = block()['hash']
         if a.consensus:
+            subprocess.run(['go','build','-tags','blst','-o',str(ROOT/'bin/indexer420'),'./indexer/cmd/indexer420'],cwd=ROOT,check=True)
             scenario_spec = importlib.util.spec_from_file_location('settlement_scenarios', ROOT / 'scripts/settlement_process_scenarios.py')
             scenarios = importlib.util.module_from_spec(scenario_spec); scenario_spec.loader.exec_module(scenarios)
             scenarios.qualify(ROOT, out, evidence, rpc, snapshot, start, stop, genesis_hash, block()['timestamp'], a.auth_port)

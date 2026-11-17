@@ -1,0 +1,89 @@
+{
+  "candidate_sha": "6185ea0eacacd336556aa15ee7de98ec3f16e3e7",
+  "scope": "real execution only; no production consensus process or finality qualification",
+  "geth_upstream_commit": "9621c6ad10934a01b5514886fb6fbd87640b6c05",
+  "geth_sha256": "34feb67503fe88a5b6bf959c9588cd4ce33751c8150e28371a74dd857b3757d6",
+  "wrapper_sha256": "3c8e7b98c90f5b5bcdf51adc9724e298c0acee9e91140f4e12d0a4f332d633b8",
+  "gateway_selector_from_compiled_method_identifiers": "3bc684e9",
+  "genesis_sha256": "f57f7475318f5e4933cb87a439c65c5093399d9f67d914a68a058649164fbafb",
+  "fixture": "real ConsensusSystemCall420 with RecoveryCounter downstream test double",
+  "processes": [
+    {
+      "wrapper_pid": 39,
+      "geth_pid": 58
+    },
+    {
+      "wrapper_pid": 72,
+      "geth_pid": 90
+    },
+    {
+      "wrapper_pid": 104,
+      "geth_pid": 122
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "real native multi-call batch",
+      "before": {
+        "number": "0x0",
+        "hash": "0xf108a98caf38c6f3962a692b86fa3de70ff9c1d7464708e1b7bc0f6f26b60b99",
+        "root": "0x3432302d696e7465677261746564",
+        "sequence": 0,
+        "observed": 0
+      },
+      "after": {
+        "number": "0x1",
+        "hash": "0xc930a9d6492f478481e326c3df0788db16e15669a67a203335a1c69e7d89f7e4",
+        "root": "0xa87e4f16e567ada3129cc4e414883d9c84ab0fd437aa99fa8ccc56f298b81d73",
+        "sequence": 2,
+        "observed": 2
+      }
+    },
+    {
+      "name": "SIGKILL execution restart and deterministic restaging",
+      "before": {
+        "number": "0x1",
+        "hash": "0xc930a9d6492f478481e326c3df0788db16e15669a67a203335a1c69e7d89f7e4",
+        "root": "0xa87e4f16e567ada3129cc4e414883d9c84ab0fd437aa99fa8ccc56f298b81d73",
+        "sequence": 2,
+        "observed": 2
+      },
+      "immediate_restart": {
+        "number": "0x0",
+        "hash": "0xf108a98caf38c6f3962a692b86fa3de70ff9c1d7464708e1b7bc0f6f26b60b99",
+        "root": "0x3432302d696e7465677261746564",
+        "sequence": 0,
+        "observed": 0
+      },
+      "required_canonical_replay": true,
+      "after": {
+        "number": "0x2",
+        "hash": "0x12502e9f92617dd07c46afa4f4263e4522ef39e6f5542873f5b36ad40725c290",
+        "root": "0x820ec522b7506ba5b5273e748dff8477a4be74e5630c903b7fc12b9c56caa700",
+        "sequence": 3,
+        "observed": 3
+      }
+    },
+    {
+      "name": "later-call rejection and restart atomicity",
+      "rejection": "{'code': -38003, 'message': 'Invalid payload attributes', 'data': {'err': '420 system call sequence 5: execution reverted'}}",
+      "before": {
+        "number": "0x2",
+        "hash": "0x12502e9f92617dd07c46afa4f4263e4522ef39e6f5542873f5b36ad40725c290",
+        "root": "0x820ec522b7506ba5b5273e748dff8477a4be74e5630c903b7fc12b9c56caa700",
+        "sequence": 3,
+        "observed": 3
+      },
+      "after": {
+        "number": "0x2",
+        "hash": "0x12502e9f92617dd07c46afa4f4263e4522ef39e6f5542873f5b36ad40725c290",
+        "root": "0x820ec522b7506ba5b5273e748dff8477a4be74e5630c903b7fc12b9c56caa700",
+        "sequence": 3,
+        "observed": 3
+      }
+    }
+  ],
+  "pass": true,
+  "working_tree_changes_present": true,
+  "provenance_note": "Local working-tree qualification based on candidate_sha. Exact committed-head qualification must be obtained from node420 Release Gate artifacts; this file does not claim exact-head qualification."
+}

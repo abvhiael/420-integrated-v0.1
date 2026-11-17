@@ -8,6 +8,8 @@ on:
       - "consensus/systemcall/**"
       - "consensus/engine/**"
       - "scripts/build-node420-upstream.sh"
+      - "scripts/qualify-execution-recovery.py"
+      - "scripts/qualify-stake-isolated.py"
       - ".github/workflows/node420-release-gate.yml"
 
 jobs:
@@ -18,6 +20,13 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 
       - uses: actions/setup-go@v5
         with:
@@ -35,6 +44,23 @@ jobs:
         run: |
           go build -o bin/node420 ./execution/cmd/node420
           ./bin/node420 --geth ./bin/upstream/geth-v1.17.5-420 --verify-geth
+
+      - name: Install pinned Solidity compiler for real gateway fixture
+        run: |
+          curl -fL https://github.com/ethereum/solidity/releases/download/v0.8.24/solc-static-linux -o "$RUNNER_TEMP/solc-0.8.24"
+          echo "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f  $RUNNER_TEMP/solc-0.8.24" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/solc-0.8.24"
+
+      - name: Real execution crash, reconstruction and batch atomicity
+        run: python3 scripts/qualify-execution-recovery.py --solc "$RUNNER_TEMP/solc-0.8.24" --output "$RUNNER_TEMP/execution-recovery"
+
+      - name: Retain process evidence without copying execution databases
+        if: always()
+        run: |
+          mkdir -p artifacts/node420-release-gate/recovery
+          for evidence in "$RUNNER_TEMP"/execution-recovery/*.json "$RUNNER_TEMP"/execution-recovery/*.log; do
+            [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/recovery/
+          done
 
       - name: Upload release-gate evidence
         if: always()

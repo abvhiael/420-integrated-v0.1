@@ -58,6 +58,12 @@ def main() -> None:
         raise SystemExit(f"already patched: {target}")
     target.write_text(SYSTEMCALL_TEMPLATE.read_text())
 
+    # After an abrupt path-state restart, canonical block records can be ahead
+    # of CurrentBlock's available state. That is forward state reconstruction,
+    # not an unsigned subtraction into the bounded *backward* reorg path.
+    # SetCanonical retains upstream ancestor/state validation and re-executes
+    # only batches independently restaged by consensus.
+
     catalyst = root / "eth" / "catalyst" / "api.go"
     replace_once(
         catalyst,
@@ -157,7 +163,28 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         '\tif len(miner.config.ExtraData) != 0 {\n\t\theader.Extra = miner.config.ExtraData\n\t}\n\troot420, ok420 := systemcall420.RootFor(number.Uint64(), parent.Hash())\n\tif !ok420 {\n\t\treturn nil, systemcall420.ErrNotStaged\n\t}\n\theader.Extra = root420[:]\n\tif genParams.forceOverrides {\n\t\tif len(genParams.overrideExtraData) != 0 && !bytes.Equal(genParams.overrideExtraData, root420[:]) {\n\t\t\treturn nil, systemcall420.ErrRoot\n\t\t}\n\t\theader.Extra = root420[:]\n\t}\n',
     )
 
-    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker)])
+    replace_once(
+        catalyst,
+        '\t} else {\n\t\tif finalized := api.eth.BlockChain().CurrentFinalBlock(); finalized != nil && block.NumberU64() <= finalized.Number.Uint64() {\n',
+        '\t} else if block.NumberU64() > api.eth.BlockChain().CurrentBlock().Number.Uint64() {\n'
+        '\t\t// 420: canonical headers survived a crash but path-state was rewound.\n'
+        '\t\t// Reconstruct through the normal staged block processor; do not\n'
+        '\t\t// underflow the backward-only reorganization depth calculation.\n'
+        '\t\tif latestValid, err := api.eth.BlockChain().SetCanonical(block); err != nil {\n'
+        '\t\t\treturn engine.ForkChoiceResponse{PayloadStatus: engine.PayloadStatusV1{Status: engine.INVALID, LatestValidHash: &latestValid}}, err\n'
+        '\t\t}\n'
+        '\t} else {\n\t\tif finalized := api.eth.BlockChain().CurrentFinalBlock(); finalized != nil && block.NumberU64() <= finalized.Number.Uint64() {\n',
+    )
+    syncmode = root / "eth" / "downloader" / "syncmode.go"
+    replace_once(
+        syncmode,
+        '\t\tif fullBlock.Number.Uint64() == 0 && snapBlock.Number.Uint64() > 0 {\n',
+        '\t\t// 420 full-sync crash recovery can leave canonical headers ahead of\n'
+        '\t\t// state without ever having started snap sync. Only a recorded snap\n'
+        '\t\t// pivot authorizes restoring the snap-sync mode here.\n'
+        '\t\tif fullBlock.Number.Uint64() == 0 && snapBlock.Number.Uint64() > 0 && rawdb.ReadLastPivotNumber(disk) != nil {\n',
+    )
+    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker), str(syncmode)])
     print("420 system-call patch applied to", root)
 
 

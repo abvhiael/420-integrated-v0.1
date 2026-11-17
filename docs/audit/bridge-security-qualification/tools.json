@@ -1,0 +1,17 @@
+{
+  "solc": {
+    "path": "solc-linux-amd64-v0.8.24+commit.e11b9ed9",
+    "version": "0.8.24",
+    "build": "commit.e11b9ed9",
+    "longVersion": "0.8.24+commit.e11b9ed9",
+    "keccak256": "0x5a127e73ef8c90f2df60ff2fe9dd79709da9e90d2d075cf05784c9a3efee2528",
+    "sha256": "0xfb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f",
+    "urls": [
+      "dweb:/ipfs/QmZ5YMZQfiLhjiXoPQBxJyY1KPVPzhUXDbD1B7bYQCVKjQ"
+    ]
+  },
+  "forge": "forge Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:50:55.527285345Z (1778226655)\nBuild Profile: dist",
+  "forge_binary_sha256": "4f77da0810de94325734855d0ad58d70640aa8a5b2a837608ddf8c26da34355c",
+  "slither": "0.11.3",
+  "node": "v24.22.1"
+}

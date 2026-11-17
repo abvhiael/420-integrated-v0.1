@@ -43,6 +43,7 @@ function fixture(){
   if(selector===sel('limit(bytes32,bytes32)'))return encode([id(2),H('420/BRIDGE/LIMIT/HOURLY_OUT'),3600,remaining,0,remaining]);
   if(selector===sel('transfers(bytes32)'))return encode([id(2),id(3),address(1),address(2),100,id(101),id(102),status,100,100]);
   if(selector===sel('initiateOutbound(bytes32,bytes32,bytes32,bytes,uint256,bytes)')){if(simulationFails)throw Error('adapter fee/recipient rejection');return encode([id(102)]);}
+  if(selector===sel('requireOutboundSigningAdmission(bytes32,bytes32,bytes32)'))return encode([id(80)]);
   if([sel('requireRouteChainsCurrent(bytes32)'),sel('requireRouteVerifierCurrent(bytes32)'),sel('requireOutboundSigningAdmission(bytes32,bytes32,bytes32)')].includes(selector))return '0x';
   throw Error('unexpected call '+selector+' to '+to);
  }
@@ -105,4 +106,38 @@ test('Exchange browser controller owns canonical bridge reviews and invalidates 
  const f=fixture(),control=new BrowserExecutionController({runtime:{deployment:{status:'RESOLVED',environment:'testnet'},network:{chainId:'0x420'},bridge:f.config}});
  await control.connect({ethereum:f.config.provider});const review=await control.prepareBridge(f.input);
  await assert.rejects(control.submitBridge(review,async()=>true),/gate is disabled/);assert.equal(f.sent.length,0);control.dispose();
+});
+
+test('security11 outbound presentation follows the reverse leg of canonical foreign-to-local routes',async()=>{
+ const f=fixture(),request=f.config.provider.request;
+ f.config.provider.request=async input=>{
+  if(input.method==='eth_call'&&input.params[0].data.startsWith(sel('routes(bytes32)')))return encode([id(3),1,0x420,id(32),id(31),id(4),id(5),1,2,1,1]);
+  if(input.method==='eth_call'&&input.params[0].data.startsWith(sel('chainBindings(bytes32)')))return encode([id(43),id(44),id(41),id(42)]);
+  return request(input);
+ };
+ const review=await f.client.review(f.input);
+ assert.equal(review.sourceChainId,'1056');assert.equal(review.destinationChainId,'1');
+ assert.equal(review.sourceNetworkId,id(42));assert.equal(review.destinationNetworkId,id(44));
+ assert.equal(review.sourceAssetId,id(31));assert.equal(review.destinationAssetId,id(32));
+});
+test('security11 a silent chain change in the last risk RPC cannot reach wallet submission',async()=>{
+ const f=fixture(),review=await f.client.review(f.input),request=f.config.provider.request;let confirmed=false;
+ f.config.provider.request=async input=>{
+  const response=await request(input);
+  if(confirmed&&input.method==='eth_call'&&input.params[0].data.startsWith(sel('limit(bytes32,bytes32)')))f.change({chain:'0x1'});
+  return response;
+ };
+ await assert.rejects(f.client.submit(review,async()=>{confirmed=true;return true;}),/wrong-chain/);
+ assert.equal(f.sent.length,0);
+});
+test('security11 verifier requalification with unchanged route labels invalidates the review',async()=>{
+ const f=fixture(),review=await f.client.review(f.input),request=f.config.provider.request;let rotated=false;
+ f.config.provider.request=async input=>{
+  if(rotated&&input.method==='eth_call'&&input.params[0].data.startsWith(sel('requireOutboundSigningAdmission(bytes32,bytes32,bytes32)')))return encode([id(81)]);
+  return request(input);
+ };
+ await assert.rejects(f.client.submit(review,async()=>{rotated=true;return true;}),/route changed during confirmation/);assert.equal(f.sent.length,0);
+});
+test('security11 the wallet request itself carries the reviewed EIP-155 chain',async()=>{
+ const f=fixture(),review=await f.client.review(f.input);await f.client.submit(review,async()=>true);assert.equal(f.sent[0].chainId,'0x420');
 });

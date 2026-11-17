@@ -69,7 +69,8 @@ export function createBridgeClient420({provider,chainId,registry,registryCodeHas
   routeId=id(routeId,'route');const ctx=await context(),b=ctx.block.number,c=ctx.contracts;
   const r=words(await call(c.BridgeRouteRegistry,'routes(bytes32)',[routeId],b),11);
   check(r[8]===w(2n)&&r[10]===w(1n),'outbound route disabled');
-  check(BigInt(r[1])===BigInt(expected)&&r[1]!==r[2],'route source network mismatch');
+  const reverse=BigInt(r[2])===BigInt(expected);
+  check((BigInt(r[1])===BigInt(expected)||reverse)&&r[1]!==r[2],'route network mismatch');
   await call(c.BridgeRouteRegistry,'requireRouteChainsCurrent(bytes32)',[routeId],b);
   await call(c.BridgeRouteRegistry,'requireRouteVerifierCurrent(bytes32)',[routeId],b);
   const bindings=words(await call(c.BridgeRouteRegistry,'chainBindings(bytes32)',[routeId],b),4);
@@ -81,7 +82,7 @@ export function createBridgeClient420({provider,chainId,registry,registryCodeHas
   check(asset[1]===r[0]&&asset[5]===w(2n)&&asset[6]===w(1n),'bridge representation ineligible');
   const adapter=addrWord(words(await call(c.GatewayRouter420,'adapters(bytes32)',[r[5]],b),1)[0]);
   check(words(await call(adapter,'adapterId()',[],b),1)[0]===r[5],'adapter identity mismatch');
-  await call(c.GatewayRouter420,'requireOutboundSigningAdmission(bytes32,bytes32,bytes32)',[r[5],routeId,r[0]],b);
+  const qualificationId=id(words(await call(c.GatewayRouter420,'requireOutboundSigningAdmission(bytes32,bytes32,bytes32)',[r[5],routeId,r[0]],b),1)[0],'outbound qualification');
   if(exchangeAssetId!==null){
    check(exchangeQualification!==null&&exchangeQualificationCodeHash!==null,'canonical Exchange qualification missing');
    check(hashCode(hex(await rpc('eth_getCode',[address(exchangeQualification),b]),'Exchange qualification code'))===id(exchangeQualificationCodeHash,'Exchange runtime'),'Exchange runtime mismatch');
@@ -91,8 +92,9 @@ export function createBridgeClient420({provider,chainId,registry,registryCodeHas
   const pinned=await rpc('eth_getBlockByNumber',[b,false]);check(pinned?.hash?.toLowerCase()===ctx.block.hash.toLowerCase(),'snapshot reorged');
   check(chain(await rpc('eth_chainId'))===expected,'RPC chain changed');
   const result={chainId:expected,contracts:c,routeId,assetId:r[0],adapterId:r[5],adapter,localToken:addrWord(asset[0]),
-   sourceChainId:BigInt(r[1]).toString(),destinationChainId:BigInt(r[2]).toString(),sourceNetworkId:bindings[1],destinationNetworkId:bindings[3],
-   sourceAssetId:r[3],destinationAssetId:r[4],verifierConfigHash:r[6],version:BigInt(r[7]).toString(),destinationFamily:Number(BigInt(destination[4])),
+   sourceChainId:BigInt(reverse?r[2]:r[1]).toString(),destinationChainId:BigInt(reverse?r[1]:r[2]).toString(),sourceNetworkId:reverse?bindings[3]:bindings[1],destinationNetworkId:reverse?bindings[1]:bindings[3],
+   sourceAssetId:reverse?r[4]:r[3],destinationAssetId:reverse?r[3]:r[4],verifierConfigHash:r[6],version:BigInt(r[7]).toString(),destinationFamily:Number(BigInt((reverse?source:destination)[4])),
+   routeSourceChainId:BigInt(r[1]).toString(),routeDestinationChainId:BigInt(r[2]).toString(),qualificationId,
    blockNumber:b,blockHash:ctx.block.hash,exchangeAssetId};
   result.binding=hashText(JSON.stringify({...result,blockNumber:undefined,blockHash:undefined}));
   return Object.freeze({...result,contracts:Object.freeze(c)});
@@ -132,7 +134,7 @@ export function createBridgeClient420({provider,chainId,registry,registryCodeHas
   const result=Object.freeze({...s,sender,amountRaw:amount.toString(),recipientBytes:recipient,
    feeValueWei:uint(feeValueWei).toString(),extra:hex(extra,'adapter extra'),expiresAt:clock()+validForMs,
    risk,minimumRaw:'1',feeAuthority:'ADAPTER_SIMULATION',settlementAuthority:'CANONICAL_BRIDGE_CONTRACTS'});
-  const transaction=Object.freeze({from:sender,to:s.contracts.GatewayRouter420,data:outboundData(result),value:'0x'+uint(result.feeValueWei).toString(16)});
+  const transaction=Object.freeze({chainId:expected,from:sender,to:s.contracts.GatewayRouter420,data:outboundData(result),value:'0x'+uint(result.feeValueWei).toString(16)});
   await rpc('eth_call',[transaction,'latest']);
   const gas=await rpc('eth_estimateGas',[transaction]);check(typeof gas==='string'&&/^0x[0-9a-fA-F]+$/.test(gas)&&BigInt(gas)>0n,'invalid gas estimate');
   check(await wallet()===sender,'wallet account changed during simulation');
@@ -154,6 +156,8 @@ export function createBridgeClient420({provider,chainId,registry,registryCodeHas
    current=await snapshot(reviewed.routeId,reviewed.exchangeAssetId);check(current.binding===reviewed.binding,'bridge route changed during confirmation');
    await rpc('eth_call',[reviewed.transaction,'latest']);
    await estimateRisk(current,uint(reviewed.amountRaw));
+   check(clock()<reviewed.expiresAt,'stale bridge quote');
+   check(await wallet()===reviewed.sender,'wallet account changed before submission');
    // Consume before handing off: an uncertain provider response must be
    // reconciled by canonical transfer/message history, never blindly retried.
    reviews.delete(reviewed);

@@ -1,0 +1,262 @@
+{
+  "pass": true,
+  "base_main": "671e72bef3a3c0e90e3db5581770049bfa9eb18d",
+  "candidate_dependency": "a467dfbd271be61ee6d022e950ea030c36cb747f",
+  "retained_settlement": {
+    "pass": true,
+    "distinct_cases_passed": 160,
+    "fuzz_inputs": 12500,
+    "invariant_runs": 512,
+    "invariant_calls": 32768,
+    "compiled_bridge_artifacts": 46,
+    "maximum_runtime_bytes": 23129,
+    "production_approvals": 0,
+    "live_settlement_qualified": false,
+    "new_ci_runs": 0
+  },
+  "retained_coverage_entries": 196,
+  "distinct_referenced_original_passes": 399,
+  "family_attack_statuses": {
+    "bitcoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "ethereum": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "litecoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "dogecoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "bnb": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "solana": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "tron": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "xrpl": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 13,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 1
+    },
+    "potcoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 14
+    },
+    "curecoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 14
+    },
+    "dobbscoin": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 14
+    },
+    "pirate": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 14
+    },
+    "cctp": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 11,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 3
+    },
+    "cadc": {
+      "QUALIFIED_IMPLEMENTED_BOUNDARY": 11,
+      "NOT_IMPLEMENTED_AT_THIS_LAYER": 3
+    }
+  },
+  "candidate_families": [
+    {
+      "asset": "BTC",
+      "adapter": "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "ea5b6d52917b605339c964e7851a056711923c1b563892f5548ba84512bc2095",
+      "verifier": "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "dabd5ca48326e037f6c9d67e579017ab5506631d7dd0e12238dfca0c58048ed8",
+      "source_qualified_sha": "b5f09dfcb794bbc820bcae6ab23df9c099499644",
+      "trust_model": "Genesis-anchored SHA256d SPV, best-known cumulative work, target/MTP and six confirmations",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Qualified production backing/UTXO authority, owned custody descriptor and HSM/full-node signing/broadcast service, funded gateway/domain deposit and live chain synchronization; all inactive"
+    },
+    {
+      "asset": "ETH",
+      "adapter": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol",
+      "adapter_source_sha256": "76f062b31fb0ede0636f8d44d94b0d70c01e5a1f238bcd7f59a3e2bcac917a45",
+      "verifier": "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol",
+      "verifier_source_sha256": "6a78b669ad7ae8b68318fcd30732d26cb012e6f235b6567628b66981a7a6bd32",
+      "source_qualified_sha": "2d766cb0421cdfb3b28a1cd5dc14991b03c16cc3",
+      "trust_model": "Immutable SP1/Helios consensus verification, SSZ/BLS result binding, execution RLP/MPT",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Production bootstrap/prover/deployed immutable verifier and authenticated source gateway/token/custody identities"
+    },
+    {
+      "asset": "LTC",
+      "adapter": "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "87be38f852a9eb655b46adfaaa8cfb64b5a7d4ae52ea52c5f6ee15f12902ca59",
+      "verifier": "contracts/src/bridge/verifiers/LitecoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "dc7d16124acdb4d7f303d01cd488b13350d931351a7cd2a9777b36e2608214bd",
+      "source_qualified_sha": "5741522429732437b92b3a9e0d0f659d6b781b1f",
+      "trust_model": "Direct bounded-progress Scrypt, chain work/difficulty and tx/output Merkle proofs",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Funded authenticated gateway, custody and operational multi-call Scrypt infrastructure"
+    },
+    {
+      "asset": "DOGE",
+      "adapter": "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "64673f52ea8082e8c796cf8a20e2a44cba1a72b5ef9ef0c290489aaae0b8480b",
+      "verifier": "contracts/src/bridge/verifiers/DogecoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "26cd27e028cd3f3c7b2a611aaa5ae83c6f0ca15bdbe5ff33fe324a151f41d79e",
+      "source_qualified_sha": "cfafb347a3f4c1f8401df47488a78c30922af3b8",
+      "trust_model": "Direct Scrypt/AuxPoW, native difficulty transitions, chain work and Merkle inclusion",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Authenticated deployed gateway/custody and live Scrypt/header relaying"
+    },
+    {
+      "asset": "BNB",
+      "adapter": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol",
+      "adapter_source_sha256": "69793b6b5b67ce4edad81a43b00b7c7689451bf327d123b93d7bf2fe34cb97b3",
+      "verifier": "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol",
+      "verifier_source_sha256": "dc0a7a9adc2fb79d5ff3146ab1b08941fd426f88ea54cb6ec5384fa101730df8",
+      "source_qualified_sha": "f28a454008450d5ad5d95e6d07cf1841bf7d1bc5",
+      "trust_model": "Native Parlia seals and BLS quorum/finalized committee transitions, execution RLP/MPT",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Authenticated bootstrap/gateway; software BLS costs 41-45 billion aggregate gas per certificate and needs explicit operational qualification"
+    },
+    {
+      "asset": "SOL",
+      "adapter": "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol",
+      "adapter_source_sha256": "f314115ec5e140552f4dd530689395d632d4b12fc78ab595a738ca3bd18520c5",
+      "verifier": "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol",
+      "verifier_source_sha256": "a38dc7b0b5fbf38a0b97644b0577acf2b6c62dae732512c211b4944bf8c8f785",
+      "source_qualified_sha": "a6ff49d53950cf6c7b8692f3d495dcb3baee542c",
+      "trust_model": "Bridge-domain validator certificate oracle, Ed25519 and authenticated transaction/execution binding",
+      "local_verifier_qualified_for_documented_model": false,
+      "production_route_qualified": false,
+      "external_dependencies": "Authenticated epoch stake/voter snapshot, genuine bridge-domain validator certificates and deployed gateway evidence remain unestablished"
+    },
+    {
+      "asset": "TRX",
+      "adapter": "contracts/src/bridge/adapters/TronBridgeAdapter420.sol",
+      "adapter_source_sha256": "17040e885d5c6800edd456abdc6350f6064d7e355660337b09e1208698e72ab3",
+      "verifier": "contracts/src/bridge/verifiers/TronFinalityVerifier420.sol",
+      "verifier_source_sha256": "4a65d81a9291a85766d50ee2bc5c471952e118494ec79cc46358ea454d42ae3d",
+      "source_qualified_sha": "97b1323b27d8208dba3843734cf2275b63e47bfd",
+      "trust_model": "Native signed protobuf headers, bounded authenticated 27-SR schedule and 19-SR solidification, tx/execution inclusion",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Fresh authenticated SR/schedule checkpoints and deployed memo-bound TRX gateway/custody evidence"
+    },
+    {
+      "asset": "XRP",
+      "adapter": "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol",
+      "adapter_source_sha256": "940c28b64afdf6928ce45d135b28897e953783d52771f8fa822468029892208c",
+      "verifier": "contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol",
+      "verifier_source_sha256": "9fb9c74fa6817717ca9f582714d498d9b522525687c0a2ecc3953cc1b89db58f",
+      "source_qualified_sha": "d37d35a18668d68cc960aae6be19441f241a7e2a",
+      "trust_model": "Native validated-ledger quorum under authenticated UNL snapshots; SHA512Half/SHAMap and successful Payment",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Deployed current validator-list/epoch configuration and funded gateway/account/tag/domain evidence"
+    },
+    {
+      "asset": "POT",
+      "adapter": "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "ed80b627b69561a58fc97dbebbe70f7aa4052f5accb30821660ea799ad6e3f49",
+      "verifier": "contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "1007df22ae19c95d5d8667d99f5a5db97b75027e9dedc2615bd2f949dbf2db4e",
+      "source_qualified_sha": "e2f1230095f7261a29610f786b1eb48e0b6d0623",
+      "trust_model": "Trusted native replay checkpoint consumer; independent kernel/eligibility/signature/Merkle/output checks",
+      "local_verifier_qualified_for_documented_model": false,
+      "production_route_qualified": false,
+      "external_dependencies": "Genuine post-500 corpus, native replay/modifier/UTXO/fork evidence and daemon source/build provenance remain unavailable; not solved by a running destination testnet"
+    },
+    {
+      "asset": "CURE",
+      "adapter": "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "5091cacdd9e605b92601bfdb3c67642a33b00e923d7d823948a2009cd58bea12",
+      "verifier": "contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "09d3589114c856c2925c67e0e7bec54cc3612d348f42c3a35b3796ffb6c0f185",
+      "source_qualified_sha": "30dcfe4d990bb5b65add04fcc8214b3aff91ea1f",
+      "trust_model": "Authenticated native replay/checkpoint consumer; independent PoS kernel, eligibility/signature/inclusion",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Production native replay authority/service, approved checkpoint/gateway/custody and funded signed-domain deposit evidence"
+    },
+    {
+      "asset": "BOB",
+      "adapter": "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol",
+      "adapter_source_sha256": "390f733d97e675d983896b95b42fd2ce6c7df68a17466621667560a12550eaaa",
+      "verifier": "contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol",
+      "verifier_source_sha256": "72a3a76d1d1426bc097f23a66eec984d89e3b633e256d8556648a15a6ec2e701",
+      "source_qualified_sha": "97ba7bcbfe9a28e4fc1709248015d5a9b7d25a04",
+      "trust_model": "Authenticated complete native replay, difficulty/scrypt/chain selection; EVM AuxPoW/state-proof/confirmation/inclusion consumer",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Production native replay authority/checkpoints, live source service and funded gateway/custody"
+    },
+    {
+      "asset": "ARRR",
+      "adapter": "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol",
+      "adapter_source_sha256": "6b2ab3fee09e4f403f47d2ac898b2c254382dfdf233feb470176b25388386035",
+      "verifier": "contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol",
+      "verifier_source_sha256": "0f94f13ad867d819474eaae20462f22caf84281bcaafa2a48da5ad735f0c02c8",
+      "source_qualified_sha": "02c96466f03b203a682c548cb1a6e591848aa4af",
+      "trust_model": "Equihash/PoW and native shielded crypto/ownership components; authenticated native-state admission",
+      "local_verifier_qualified_for_documented_model": false,
+      "production_route_qualified": false,
+      "external_dependencies": "Qualified Pirate/KMD/onward-anchor finality/notary proof service and production owned gateway/custody remain unestablished"
+    },
+    {
+      "asset": "USDC",
+      "adapter": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol",
+      "adapter_source_sha256": "7eab0e7d4211686ff994392ab4a8f32ba5be8e861c0686a1a3205a07d51db485",
+      "verifier": null,
+      "verifier_source_sha256": null,
+      "source_qualified_sha": "0a677dc9c7eedc2f56c5b35141ae770a2e13e679",
+      "trust_model": "Actual Circle MessageTransmitter/TokenMessenger/Minter V2, genuine threshold attestations and delivery checks",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Issuer authorization for 420, assigned supported domain, native USDC/mint roles, production native contracts and live transfers"
+    },
+    {
+      "asset": "CADC",
+      "adapter": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol",
+      "adapter_source_sha256": "eb93808f155c355de7de9702b17fa87226c37e4167fe7dfa8be4ec7694e97105",
+      "verifier": null,
+      "verifier_source_sha256": null,
+      "source_qualified_sha": "6ca38ccba5fbec26dced66ee21d08ddecd5a5b16",
+      "trust_model": "Actual LayerZero Endpoint/ULN/OFT, required/optional DVN thresholds, canonical payload and native delivery",
+      "local_verifier_qualified_for_documented_model": true,
+      "production_route_qualified": false,
+      "external_dependencies": "Issuer authorization, supported 420 endpoint/EID, issuer OFT/token and peers/DVNs, live funded transfers"
+    }
+  ],
+  "production_approvals": [],
+  "source_manifest_sha256": {
+    "contracts/config/bridge/verifier-qualification-inventory.json": "98629202f257e5723397f724383c97657cefb593152700fb460bd9834a8891c5",
+    "contracts/config/bridge/supported-token-routes-v1.json": "9a284955809b9540602c22715bfd936cd828910d4fe6a01ec5967b7be0f7d022",
+    "contracts/config/bridge/adversarial-sources-v1.json": "c0138aff1c0b65cf8f57a0495df1ea1603e927b580383a6a8120efd51e11df5b",
+    "docs/audit/adversarial-qualification/coverage-matrix.json": "f63469260bc7eb99900cf70914236bb9715d7710298cde91722c8bafe41df62d",
+    "docs/audit/settlement-qualification/RESULTS.json": "8321a0677896cff6d3d8da37d4e0654bf1138388e52725daedd235df4ed5d7f6",
+    "docs/audit/final-verifier-qualification/RESULTS.json": "bad0f4bdfafa66a3b33579d1d1c0dca72525d891fa88eed82b6ff74c6876c963"
+  },
+  "historical_ci_evidence": [
+    {
+      "sha": "5f58baf6dc861939a21119a0fce645060a067518",
+      "run_ids": [
+        "43563876850",
+        "43563876854"
+      ]
+    }
+  ],
+  "new_ci_runs": []
+}

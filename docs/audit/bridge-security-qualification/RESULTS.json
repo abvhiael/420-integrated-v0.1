@@ -1,0 +1,92 @@
+{
+  "step": "BRIDGE-AUDIT-11 \u2014 Security, Adversarial and Economic Qualification",
+  "pass": true,
+  "base_main": "671e72bef3a3c0e90e3db5581770049bfa9eb18d",
+  "implementation_dependency": {
+    "pr": 1183,
+    "sha": "a467dfbd271be61ee6d022e950ea030c36cb747f",
+    "status": "unmerged candidate included as parent; no merge is claimed"
+  },
+  "scope": "Repository-local implemented boundaries, all fourteen verifier candidate families and native/token profiles; not live source custody or production activation",
+  "confirmed_client_corrections": [
+    {
+      "id": "SEC11-CLIENT-1",
+      "issue": "Silent chain change during final risk RPC could reach eth_sendTransaction without a final chain recheck.",
+      "correction": "Recheck expiry and wallet chain/account after final risk reads and include expected EIP-155 chainId in transaction.",
+      "reproduction": "client-original-reproduction.log",
+      "regression": "security11 a silent chain change in the last risk RPC cannot reach wallet submission"
+    },
+    {
+      "id": "SEC11-CLIENT-2",
+      "issue": "Outbound client rejected canonical foreign-to-local routes and did not orient the reverse-leg network/assets for user presentation.",
+      "correction": "Validate either canonical route endpoint is local and orient actual outbound source/destination identities, assets and recipient family. Retain canonical route endpoint identity in the review binding.",
+      "reproduction": "client-original-reproduction.log",
+      "regression": "security11 outbound presentation follows the reverse leg of canonical foreign-to-local routes"
+    },
+    {
+      "id": "SEC11-CLIENT-3",
+      "issue": "Review binding discarded the router admission qualification ID, allowing a fresh approval under unchanged route labels to survive confirmation.",
+      "correction": "Bind nonzero requireOutboundSigningAdmission return value into review fingerprint.",
+      "regression": "security11 verifier requalification with unchanged route labels invalidates the review"
+    }
+  ],
+  "new_execution": {
+    "distinct_solidity_cases": 9,
+    "solidity_fuzz_inputs": 2500,
+    "invariant_runs": 128,
+    "invariant_depth": 64,
+    "invariant_calls": 8192,
+    "invariant_handler_reverts": 0,
+    "client_cases": 12,
+    "sdk_cases": 2,
+    "total_distinct_cases": 23,
+    "logs": [
+      "economic-qualified.log",
+      "client-final.log",
+      "sdk-final.log"
+    ],
+    "source_inputs": "economic-qualified.inputs.json",
+    "production_artifacts_built": 12,
+    "maximum_built_runtime_bytes": 23129,
+    "typescript_build": "PASS",
+    "exchange_packaging_import": "PASS"
+  },
+  "static_analysis": {
+    "tool": "Slither 0.11.3",
+    "mode": "compiler AST and SlithIR (bytecode not requested)",
+    "detectors": 99,
+    "bridge_source_files": 101,
+    "closure_files": 149,
+    "contracts_analyzed": 173,
+    "all_closure_records": 388,
+    "bridge_relevant_records": 386,
+    "raw_report": "slither.json.gz",
+    "triage": "static-triage.json",
+    "assessment": "STATIC-REVIEW.md",
+    "confirmed_onchain_findings": []
+  },
+  "retained_evidence": "retained-evidence.json",
+  "retained_policy": "Original test SHAs, log/run identities and qualified source-transition manifests retained; passing unchanged consensus/issuer/economic suites were not rerun. Retained cohorts overlap and are not added to fresh counts.",
+  "production_approvals": [],
+  "live_qualification": false,
+  "ci_run_ids": [],
+  "diagnostics": [
+    "Two client reproductions failed as expected on the prior implementation; both pass after correction.",
+    "Existing runner CLI flag incompatible with official available Forge; commands failed before compilation/test execution. New runner verifies the same false dynamic-linking setting and preserves the established compiler and test profile.",
+    "Retained-evidence verifier initially did not recognize the catalogue literal NOT_IMPLEMENTED_AT_THIS_LAYER. It now preserves the exact original status/reason, requires no fabricated test evidence for that status, and separately validates all 182 implemented entries."
+  ],
+  "remaining_external_scope": "Existing source custody/UTXO/HSM, issuer/domain/native deployments, genuine SOL/POT/ARRR source-authority prerequisites and funded live qualification remain unchanged in 420BRIDGE-TESTNET-WORK-ROADMAP.md. No external blocker prevents the completed internal scope.",
+  "next_canonical_work": "Existing 420Bridge testnet/deployment qualification roadmap and its original prerequisites; no numbered BRIDGE-AUDIT-12 appears in repository main and none is invented or begun.",
+  "qualified_input_sha256": {
+    "wallet/web/core/bridge-client.js": "a6e0c682184019bc5416b01f2c800ef1c3f95951ab4cab3168f8ff153f37d8a5",
+    "wallet/web/test/bridge-client.test.js": "828fec5850a65b74d40c2b572d4d650b7f260ee7efa6318e11cdfdd3db82f5ec",
+    "packages/420-sdk/src/bridge-runtime.d.ts": "df48650275b01bf519628993b483a72137ff156d53265757f27b5f119053b251",
+    "contracts/test/BridgeSecurityEconomic11.t.sol": "206aadcd00e44b7673cc563b72712e001dd57e6790fd0d0bb827af8d478c966e",
+    "packages/420-sdk/scripts/package-bridge-runtime.mjs": "cd0f6a5f1398938135ac5ed4f343e2109bc446fde2b3e9d462eb73a072a0f324",
+    "exchange/web/core/canonical-bridge.js": "aa2f72000d0ac6517072ddb9973e2e2d549e515723472ed2cddb5cffea7bf6c3",
+    "exchange/web/core/browser-execution-controller.js": "df1a0f24a8da05dabc28d9152b64884fc752b093b8273c070d2fa9c9c34f8800",
+    "scripts/bridge-audit-11/qualify-economic.py": "0f7979f4050b2d881f44bcdd5091491a76037d75f01aa8b6a3dea41742ed2b33",
+    "scripts/bridge-audit-11/verify-evidence.py": "790e5887a91a8c62a014aa2d62b7fd4eb417d020a7fa46f197ddb6e4715080ed",
+    "scripts/bridge-audit-11/static-analysis.py": "5488023f2e1e60e419b283f52b1b74453305aec5bb4df6a747e3d26494c40c86"
+  }
+}

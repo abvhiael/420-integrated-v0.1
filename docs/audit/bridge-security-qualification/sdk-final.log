@@ -1,0 +1,10 @@
+✔ bridge SDK packages the canonical Wallet runtime byte for byte (1.564694ms)
+✔ bridge SDK resolves trusted registry catalogue entry and defers chain operations to EIP-1193 runtime (1.284938ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 152.879352

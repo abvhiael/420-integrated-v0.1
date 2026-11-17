@@ -1,0 +1,40 @@
+name: 420Stake operator runbook qualification
+on:
+  pull_request:
+    paths:
+      - 'docs/STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md'
+      - 'docs/apps/stake/index.md'
+      - 'consensus/cmd/stake-operator-init/**'
+      - 'scripts/verify-stake-operator-runbook.py'
+      - '.github/workflows/stake-operator-runbook.yml'
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.3'
+          cache: true
+      - name: Qualify documented interfaces and first-use initializer
+        run: |
+          set -euo pipefail
+          mkdir -p stake-operator-evidence
+          go test -race -tags blst -count=1 -v ./consensus/cmd/stake-operator-init 2>&1 | tee stake-operator-evidence/initializer-tests.log
+          go vet -tags blst ./consensus/cmd/stake-operator-init
+          python3 scripts/verify-stake-operator-runbook.py --output stake-operator-evidence > stake-operator-evidence/commands.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stake-audit-9-7-operator-${{ github.event.pull_request.head.sha }}
+          path: stake-operator-evidence/
+          if-no-files-found: error

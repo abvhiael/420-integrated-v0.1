@@ -12,3 +12,5 @@ version: current
 Genesis exposes no public delegation and no stake-weighted governance through 420 Stake. Canonical authority remains in ValidatorRegistry, CommunityValidatorReserve, RewardController and consensus.
 
 Use [Getting started](getting-started.md) for validator basics and [Developer integration](developer/index.md) for canonical reads and event handling.
+
+Validator operators: see the [onboarding and operator runbook](../../STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md) for executable node, signer, recovery and withdrawal procedures.

@@ -73,8 +73,12 @@ func (c *Client) ForkchoiceUpdatedV3WithSystemCalls(
 		return ForkchoiceUpdatedResponse{}, err
 	}
 	resp, err := c.ForkchoiceUpdatedV3(ctx, state, attrs)
-	if err != nil { return resp, err }
-	if err = requireValidExecution(resp.PayloadStatus, state.HeadBlockHash); err != nil { return resp, err }
+	if err != nil {
+		return resp, err
+	}
+	if err = requireValidExecution(resp.PayloadStatus, state.HeadBlockHash); err != nil {
+		return resp, err
+	}
 	return resp, nil
 }
 
@@ -95,14 +99,20 @@ func (c *Client) NewPayloadV3WithSystemCalls(
 		return PayloadStatusV1{}, err
 	}
 	status, err := c.NewPayloadV3(ctx, payload, versionedHashes, parentBeaconBlockRoot)
-	if err != nil { return status, err }
-	if err = requireValidExecution(status, payload.BlockHash); err != nil { return status, err }
+	if err != nil {
+		return status, err
+	}
+	if err = requireValidExecution(status, payload.BlockHash); err != nil {
+		return status, err
+	}
 	return status, nil
 }
 
 // VerifyPayloadSystemCallRoot checks the execution-header commitment before NewPayload.
 func VerifyPayloadSystemCallRoot(payload ExecutionPayloadV3, batch csys.Batch) error {
-	if payload.BlockNumber != hexQuantity(batch.ExecutionBlock) { return fmt.Errorf("execution payload block number mismatch: got=%s want=%s", payload.BlockNumber, hexQuantity(batch.ExecutionBlock)) }
+	if payload.BlockNumber != hexQuantity(batch.ExecutionBlock) {
+		return fmt.Errorf("execution payload block number mismatch: got=%s want=%s", payload.BlockNumber, hexQuantity(batch.ExecutionBlock))
+	}
 	root := batch.Root()
 	want := "0x" + hex.EncodeToString(root[:])
 	if payload.ExtraData != want {
@@ -118,6 +128,27 @@ func VerifyPayloadSystemCallRoot(payload ExecutionPayloadV3, batch csys.Batch) e
 func hexQuantity(v uint64) string { return fmt.Sprintf("0x%x", v) }
 
 func requireValidExecution(status PayloadStatusV1, expected Hash32) error {
- if status.Status != "VALID" || status.LatestValidHash == nil || *status.LatestValidHash != expected || status.ValidationError != nil { return fmt.Errorf("execution transition not verified VALID: %s",status.Status) }
- return nil
+	if status.Status != "VALID" || status.LatestValidHash == nil || *status.LatestValidHash != expected || status.ValidationError != nil {
+		return fmt.Errorf("execution transition not verified VALID: %s", status.Status)
+	}
+	return nil
+}
+
+// ReplaceSystemCallBatch is used only after the certified-history owner has
+// validated a replacement above finality. The native endpoint independently
+// enforces execution finality, parent and chain context; normal staging still
+// rejects conflicting batches.
+func (c *Client) ReplaceSystemCallBatch(ctx context.Context, batch csys.Batch, previous uint64) error {
+	if err := batch.Validate(previous); err != nil {
+		return err
+	}
+	wire := EncodeSystemCallBatch(batch)
+	var result SystemCallBatchStatusV1
+	if err := c.Call(ctx, "engine420_replaceSystemCallsV1", []any{wire}, &result); err != nil {
+		return err
+	}
+	if result.Status != "ACCEPTED" || result.BatchRoot != wire.BatchRoot {
+		return fmt.Errorf("execution refused certified batch replacement: %+v", result)
+	}
+	return nil
 }

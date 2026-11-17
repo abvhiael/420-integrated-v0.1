@@ -24,6 +24,11 @@ func main() {
 	jwtPath := flag.String("jwt-secret", "./jwt.hex", "Engine API JWT secret")
 	engineProbe := flag.Bool("engine-probe", false, "negotiate Engine API capabilities and exit")
 
+	settlement := flag.Bool("certified-settlement", false, "consume verified quorum-certified blocks and persist execution settlement/history")
+	trustPath := flag.String("settlement-trust", "", "independently provisioned consensus genesis/committee checkpoint")
+	trustPin := flag.String("settlement-trust-sha256", "", "required SHA-256 of trusted checkpoint file")
+	settlementDir := flag.String("settlement-dir", "", "persistent certified history and sequence directory")
+	repairSequence := flag.Bool("recover-sequence", false, "explicitly repair a sequence journal from verified certified history")
 	devnet := flag.Bool("devnet-validator", false, "run deterministic local devnet validator")
 	nodeID := flag.Uint64("node-id", 0, "devnet node/validator id")
 	seat := flag.Uint("seat", 0, "devnet seat 0..14")
@@ -43,6 +48,19 @@ func main() {
 	if *showProtocol {
 		fmt.Printf("chain_id=%d slot_seconds=%d slots_per_epoch=%d epochs_per_rotation=%d slots_per_rotation=%d\n",
 			protocol.ChainID, protocol.SlotSeconds, protocol.SlotsPerEpoch, protocol.EpochsPerRotation, protocol.SlotsPerRotation)
+		return
+	}
+	if *settlement {
+		if *devnet || *engineProbe || *engineEndpoint == "" || *settlementDir == "" {
+			fmt.Fprintln(os.Stderr, "certified settlement requires Engine/state and excludes devnet/probe modes")
+			os.Exit(2)
+		}
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+		if err := runSettlement(ctx, *engineEndpoint, *jwtPath, *trustPath, *trustPin, *settlementDir, *repairSequence); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		return
 	}
 	if *engineProbe {

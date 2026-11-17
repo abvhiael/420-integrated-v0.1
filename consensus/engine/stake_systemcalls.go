@@ -25,7 +25,7 @@ func (c *Client) ForkchoiceUpdatedV3WithFinalizedStakeOutcomes(
 	}
 	resp, err := c.ForkchoiceUpdatedV3WithSystemCalls(ctx, state, attrs, batch, parent.LastSequence)
 	if err != nil {
-		return ForkchoiceUpdatedResponse{}, csys.Batch{}, err
+		return resp, batch, err
 	}
 	return resp, batch, nil
 }
@@ -55,15 +55,22 @@ func (c *Client) NewPayloadV3WithFinalizedStakeOutcomes(
 		parent.LastSequence,
 	)
 	if err != nil {
-		return PayloadStatusV1{}, csys.Batch{}, err
+		return status, batch, err
 	}
 	return status, batch, nil
 }
 
 // Never stage a batch based solely on a locally persisted cursor.
-func(c *Client) buildVerifiedStakeBatch(ctx context.Context,m csys.SequenceManager,parent csys.SequenceAnchor,outcomes csys.FinalizedStakeOutcomes)(csys.Batch,error){
- if _,err:=m.RequireCanonicalParent(parent);err!=nil{return csys.Batch{},err}
- actual,err:=c.CanonicalSequenceAnchor(ctx,parent.ChainID,parent.ExecutionBlock,parent.BlockHash);if err!=nil{return csys.Batch{},err}
- if actual!=parent{return csys.Batch{},fmt.Errorf("execution parent sequence divergence: %w",csys.ErrSequenceRecoveryRequired)}
- return m.BuildNext(parent,outcomes)
+func (c *Client) buildVerifiedStakeBatch(ctx context.Context, m csys.SequenceManager, parent csys.SequenceAnchor, outcomes csys.FinalizedStakeOutcomes) (csys.Batch, error) {
+	if _, err := m.RequireCanonicalParent(parent); err != nil {
+		return csys.Batch{}, err
+	}
+	actual, err := c.CanonicalSequenceAnchor(ctx, parent.ChainID, parent.ExecutionBlock, parent.BlockHash)
+	if err != nil {
+		return csys.Batch{}, err
+	}
+	if actual != parent {
+		return csys.Batch{}, fmt.Errorf("execution parent sequence divergence: %w", csys.ErrSequenceRecoveryRequired)
+	}
+	return m.BuildNext(parent, outcomes)
 }

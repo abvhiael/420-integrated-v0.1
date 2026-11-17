@@ -1,6 +1,6 @@
 # STAKE-AUDIT-9.2 — authoritative recovery qualification record
 
-Status: **OPEN — production consensus recovery is not qualified; do not merge as complete.**
+Status: **Production settlement/history implementation and local process qualification completed. Exact-head CI/merge provenance is retained in PR #1189 and its release-gate artifact.**
 
 Repository: `abvhiael/420-integrated-v0.1`. Existing PR: [1189](https://github.com/abvhiael/420-integrated-v0.1/pull/1189). Continuation baseline candidate: `6185ea0eacacd336556aa15ee7de98ec3f16e3e7`; main observed: `263dad07462cae1fef5c474d4c4c1a7dc731dfd3`. No competing branch was created. STAKE-AUDIT-9.1 is not closed and 9.3 has not begun.
 
@@ -56,7 +56,7 @@ Exploratory upstream catalyst reorg-depth and downloader synchronization tests f
 
 ## Execution-side atomicity review
 
-`core.Process420SystemCalls` may finalize successful earlier calls in its temporary per-block StateDB before a later call fails. The block processor returns before ValidateState/commit, and `BlockChain.ProcessBlock` starts from a fresh parent StateDB. The miner's `generateWork` returns an error with deferred work disposal and no assembled payload. Therefore failed block state must be discarded by those owners, not reused as a partially settled block. The real later-call rejection/restart test exercises the builder/canonical database boundary. It does not claim a separately forged invalid-payload import test.
+`core.Process420SystemCalls` may finalize successful earlier calls in its temporary per-block StateDB before a later call fails. The block processor returns before ValidateState/commit, and `BlockChain.ProcessBlock` starts from a fresh parent StateDB. The miner's `generateWork` returns an error with deferred work disposal and no assembled payload. Therefore failed block state must be discarded by those owners, not reused as a partially settled block. The real later-call rejection/restart test exercises the builder/canonical database boundary. That historical execution-only run did not include a forged invalid-payload import. The certified-runtime qualification below now separately exercises hash rejection and a correctly hashed block whose later native call reverts.
 
 Staging is in memory and is not an execution checkpoint. Default Geth path-state buffering can lose the latest stateful head on SIGKILL even after Engine VALID/canonicalization. Production recovery must retain every required canonical batch and payload in verified consensus history and restage them before requesting state reconstruction. Treating execution VALID as proof of crash-durable state is incorrect.
 
@@ -73,12 +73,72 @@ The consensus-selected canonical execution hash and committed batch history must
 - Reorganization: only a consensus-permitted replacement descending from the existing finalized checkpoint may replace a cursor. Orphan/stale checkpoints and cross-finalized recovery must halt.
 - Any malformed/missing/corrupt journal, conflicting sequence/root/hash, unavailable Engine, rejected transition or persistence/synchronization failure requires a fail-closed halt until independently verified reconciliation succeeds.
 
-**No production operator command implementing this full flow exists yet.** These are required recovery conditions, not a claim that operators can currently resume production safely using the deterministic devnet simulator.
+The production command is now `fourtwentyd --certified-settlement`, built with `-tags blst`, using an independently pinned trust file, paired JWT/Engine and persistent settlement directory. See [operator and architecture instructions](../../consensus/recovery/README.md). It consumes certified records rather than creating signatures; 9.1 remains separate.
 
-## Remaining local blockers — no testnet dependency
+## Production settlement/history integration and process qualification
 
-`consensus/cmd/fourtwentyd/main.go` has no production proposal/import/settlement loop. Its devnet node creates synthetic roots and unsigned signer counts; it must not supply production recovery authority. Neither `RecoverVerifiedSequence` nor `CommitVerifiedSequence` has an actual production daemon caller. `consensus/recovery` is a README stub. There is no integrated durable authenticated consensus batch/payload history source enforcing finality/ancestry across restart.
+The earlier absence of a production recovery caller is resolved by
+`consensus/recovery/{history,settlement}.go` and the certified-settlement daemon
+mode. This is a real BLS/QC/PoP-verifying settlement consumer, not the deterministic
+devnet validator. It uses the existing consensus envelope, derivation constructor,
+QC signing domain and one-certified-child finality rule. Unknown committee or
+rotation authority fails closed; the pinned trust/committee must be independently
+provisioned. Proposal signing, elections and the separate 9.1 signing-boundary
+qualification are not claimed by this consumer.
 
-Consequently consensus-only/simultaneous production restarts, abrupt consensus death between execution acceptance and journal persistence, production canonical replacement/finalized-boundary protection and imported-invalid-block settlement qualification remain **NOT EXECUTED / NOT QUALIFIED**. The execution driver and downstream test double do not satisfy those requirements. The library recovery method's caller-side finality condition remains unfinished production integration.
+A durable authenticated pending record precedes execution. Complete signed
+header/body/outcome/payload history, the committed settlement checkpoint, a
+separate finalized high-water and the V2 cursor have explicit crash-reconciliation
+ordering. Missing/truncated history cannot be overridden with `--recover-sequence`.
+The process owns its directory exclusively and persistence failure latches a halt.
 
-These are repository implementation gaps, not external provider or testnet blockers. Full STAKE-AUDIT-9.2 closeout and PR merge remain prohibited until they are implemented and qualified. STAKE-AUDIT-9.1 signing-boundary evidence and scope are preserved. No claim is made that 9.2 is complete or merged.
+The native authenticated replacement-staging method retains ordinary conflicting
+staging rejection, verifies chain/canonical parent and rejects replacement at or
+below finalized execution. A pinned-Geth builder correction permits a replacement
+child of the exact finalized parent without rewinding the finalized head.
+
+[Local working-tree process evidence](evidence/stake-audit-9.2/certified-settlement-local-working-tree.json) retains source/binary hashes and actual PIDs without relabeling it as an exact committed-head run.
+
+The extended existing execution harness (`--consensus`) executed these scenarios
+with real `fourtwentyd`/Geth PIDs, persistent state, authenticated Engine requests,
+actual native gateway calls and 11-of-15 BLST quorum signatures/PoPs:
+
+| Scenario | Local result |
+|---|---|
+| Consensus-only SIGKILL/restart; same execution remains running; next derivation | PASS |
+| Simultaneous SIGKILL/restart; reconstruct independent persistent stores | PASS |
+| Canonical execution acceptance followed by actual consensus kill before cursor persistence | PASS; execution sequence 4 with stale journal 3, then verified recovery to 4 without duplicate effects |
+| Execution-only SIGKILL; consensus stays alive and cannot advance checkpoint while Engine unavailable | PASS |
+| Lost execution state/staging reconstruction from authenticated consensus history | PASS |
+| Certified replacement above finality with changed batch/sequence | PASS; canonical sequence/counter 6 replaced by 5 |
+| Cross-finalized replacement, orphan checkpoint, duplicate commit and forged certificate | REJECTED as required |
+| Stale/corrupted cursor and explicit verified repair | PASS; no silent reset |
+| Truncated history beneath durable finalized high-water, even with repair | REJECTED as required |
+| Certified payload rejected by actual Engine import | PASS; history settlement, checkpoint and cursor unchanged |
+| Correctly hashed block import whose second native call reverts after the first writes temporary state | PASS; actual sequence-7 revert, no partial canonical effects or settlement |
+| Actual wrong-chain execution database paired with unchanged consensus history | REJECTED; no checkpoint advance |
+| Replayed sequence in the next actual execution block | REJECTED by native gateway |
+
+The production binary uses `blst`; the separate fault-instrumented build uses
+`blst recoveryfault` and SIGSTOP at the canonical-before-cursor boundary. The
+external harness sends SIGKILL to its actual PID. Known private keys belong only
+to the explicitly local fixture producer. Downstream native effects use the
+identified counter fixture; retained Solidity Stake/gateway tests cover actual
+contract semantics. This does not claim a completed validator signer or live
+public testnet.
+
+Local race-enabled tests additionally cover certificate/key/PoP validation,
+finality ancestry, derivation/commitment mismatch, strict history JSON, single
+state ownership, immutable queued authority, durable pending evidence, execution
+unavailability and forged history with a recomputed checksum. A discovered
+queued-input pointer alias was corrected by decoding into owned zero-value
+records; its regression now passes. The verified Stake import wrapper also preserves rejected Engine status/batch evidence, allowing the production caller to latch deterministic rejection rather than mistake it for a retryable outage; that regression passes.
+
+Preserve the historical run IDs/results above. The new release-gate artifact
+contains exact candidate SHA, binary hashes/build tags, trust pin, actual PIDs,
+certified records, stdout events, database logs and durable before/after evidence.
+PR #1189 records the final exact-head workflow IDs/artifact URL and merge result;
+no historical run is relabeled as evidence for later material changes.
+
+STAKE-AUDIT-9.1 remains open and STAKE-AUDIT-9.3 has not started. No new economics,
+frozen-address changes, signer authority or branch approval rules were introduced.

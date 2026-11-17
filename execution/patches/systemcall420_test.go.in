@@ -106,3 +106,24 @@ func TestGatewayInputUsesExecuteSelector(t *testing.T) {
         t.Fatalf("gateway selector mismatch: got %x want %x", input[:4], want)
     }
 }
+
+func TestExplicitReplacementPreservesValidationAndCopies(t *testing.T) {
+    b := testBatch()
+    b.ExecutionBlock = 4201
+    b.Calls[0].ExecutionBlock = b.ExecutionBlock
+    b.BatchRoot = Root(b)
+    if err := Stage(b); err != nil { t.Fatal(err) }
+    replacement := clone(b)
+    replacement.Calls[0].Payload[0] ^= 1
+    replacement.BatchRoot = Root(replacement)
+    if err := Stage(replacement); err != ErrDuplicate { t.Fatalf("implicit replacement: %v", err) }
+    if err := Replace(replacement); err != nil { t.Fatal(err) }
+    replacement.Calls[0].Payload[0] ^= 1
+    got, ok := Get(uint64(b.ExecutionBlock), b.ParentHash)
+    if !ok || got.BatchRoot == b.BatchRoot || Root(got) != got.BatchRoot { t.Fatal("replacement lost root binding or aliased caller") }
+    malformed := clone(got)
+    malformed.Calls[0].Sequence = 0
+    if err := Replace(malformed); err == nil { t.Fatal("replacement bypassed validation") }
+    after, _ := Get(uint64(b.ExecutionBlock), b.ParentHash)
+    if after.BatchRoot != got.BatchRoot { t.Fatal("invalid replacement changed staging") }
+}

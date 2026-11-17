@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - 'consensus/engine/**'
+      - 'consensus/recovery/**'
+      - 'consensus/cmd/fourtwentyd/**'
+      - 'consensus/crypto/bls/**'
+      - 'go.mod'
+      - 'go.sum'
       - 'consensus/systemcall/**'
       - 'consensus/storage/**'
       - 'consensus/devnet/**'
@@ -26,6 +31,8 @@ jobs:
           EXPECTED: ${{ github.event.pull_request.head.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED"
       - name: Targeted recovery qualification
-        run: go test -race -count=1 -v ./consensus/engine ./consensus/systemcall ./consensus/storage ./consensus/devnet ./consensus/finality ./execution/systemcall/...
+        run: |
+          go test ./consensus/recovery
+          go test -race -tags blst -count=1 -v ./consensus/recovery ./consensus/crypto/bls ./consensus/engine ./consensus/systemcall ./consensus/storage ./consensus/devnet ./consensus/finality ./execution/systemcall/...
       - name: Build consensus daemon
-        run: go build ./consensus/cmd/fourtwentyd
+        run: go build -tags blst -o bin/fourtwentyd ./consensus/cmd/fourtwentyd

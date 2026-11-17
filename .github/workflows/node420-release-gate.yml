@@ -7,6 +7,12 @@ on:
       - "execution/**"
       - "consensus/systemcall/**"
       - "consensus/engine/**"
+      - "consensus/recovery/**"
+      - "consensus/cmd/fourtwentyd/**"
+      - "integration/cmd/settlement-fixture/**"
+      - "scripts/settlement_process_scenarios.py"
+      - "go.mod"
+      - "go.sum"
       - "scripts/build-node420-upstream.sh"
       - "scripts/qualify-execution-recovery.py"
       - "scripts/qualify-stake-isolated.py"
@@ -54,12 +60,31 @@ jobs:
       - name: Real execution crash, reconstruction and batch atomicity
         run: python3 scripts/qualify-execution-recovery.py --solc "$RUNNER_TEMP/solc-0.8.24" --output "$RUNNER_TEMP/execution-recovery"
 
+      - name: Build certified consensus settlement runtime and local qualification producer
+        run: |
+          go build -tags blst -o bin/fourtwentyd ./consensus/cmd/fourtwentyd
+          go build -tags 'blst recoveryfault' -o bin/fourtwentyd-recovery-fault ./consensus/cmd/fourtwentyd
+          go build -tags blst -o bin/settlement-fixture ./integration/cmd/settlement-fixture
+
+      - name: Production consensus and execution process recovery qualification
+        run: python3 scripts/qualify-execution-recovery.py --consensus --solc "$RUNNER_TEMP/solc-0.8.24" --output "$RUNNER_TEMP/consensus-recovery"
+
       - name: Retain process evidence without copying execution databases
         if: always()
         run: |
           mkdir -p artifacts/node420-release-gate/recovery
           for evidence in "$RUNNER_TEMP"/execution-recovery/*.json "$RUNNER_TEMP"/execution-recovery/*.log; do
             [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/recovery/
+          done
+          mkdir -p artifacts/node420-release-gate/consensus-recovery
+          for evidence in "$RUNNER_TEMP"/consensus-recovery/*.json "$RUNNER_TEMP"/consensus-recovery/*.log; do
+            [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/consensus-recovery/
+          done
+          for state in consensus truncated-consensus invalid-import-consensus native-failure-consensus; do
+            if [ -d "$RUNNER_TEMP/consensus-recovery/$state" ]; then
+              mkdir -p "artifacts/node420-release-gate/consensus-recovery/$state"
+              cp "$RUNNER_TEMP/consensus-recovery/$state/"*.json "artifacts/node420-release-gate/consensus-recovery/$state/"
+            fi
           done
 
       - name: Upload release-gate evidence

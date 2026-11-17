@@ -91,8 +91,8 @@ def main() -> int:
             "c.buildVerifiedStakeBatch(ctx, sequences, parent, outcomes)",
             "m.RequireCanonicalParent(parent)",
             "c.CanonicalSequenceAnchor(ctx,",
-            "actual!=parent",
-            "m.BuildNext(parent,outcomes)",
+            "actual != parent",
+            "m.BuildNext(parent, outcomes)",
         ],
     )
     require_tokens(
@@ -105,7 +105,7 @@ def main() -> int:
     )
     require_tokens(
         "consensus/engine/recovery.go",
-        ["RecoverVerifiedSequence", "CommitVerifiedSequence", "requireValidExecution", "execution child sequence divergence", "c.verifyCanonicalBatch(ctx, child, batch)", "execution canonical batch commitment mismatch"],
+        ["RecoverVerifiedSequence", "CommitVerifiedSequence", "requireValidExecution", "execution child sequence divergence", "c.VerifyCanonicalBatch(ctx, child, batch)", "execution canonical batch commitment mismatch"],
     )
     require_tokens(
         "contracts/test/StakeSystemCallABIVectors420.t.sol",

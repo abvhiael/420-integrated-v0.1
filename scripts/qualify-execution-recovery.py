@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Real patched-Geth persistence/atomicity checks, NOT production consensus qualification.
+"""Real patched-Geth and optional production certified-settlement recovery checks.
 
 Reuses node420 and the pinned execution genesis. The real gateway is compiled in
 an isolated import closure; a downstream counter is explicitly a test fixture.
-No signer, QC, finality or consensus-authority claim is made by this harness.
+Default mode qualifies execution only. --consensus adds the real BLS-verifying
+settlement daemon; its separate local producer uses explicitly insecure fixture keys.
+Production signing-boundary qualification is not claimed.
 """
 import argparse
 import base64
@@ -29,6 +31,7 @@ ACTION = '420/SYSCALL/ROTATION_SNAPSHOT/V1'
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--consensus', action='store_true', help='qualify the production certified-settlement daemon and signed history')
     p.add_argument('--geth', type=Path, default=ROOT / 'bin/upstream/geth-v1.17.5-420')
     p.add_argument('--solc', default='solc')
     p.add_argument('--output', type=Path, required=True)
@@ -48,6 +51,9 @@ def main():
 pragma solidity ^0.8.24;
 contract RecoveryCounter {
  uint256 public observed;
+ function applyExitNotice(bytes32, uint64 notice) external {
+  require(msg.sender == address(0x043c)); require(notice != 999, "injected downstream failure"); observed++;
+ }
  function applyRotationSnapshot(uint64 rotation, uint256) external {
   require(msg.sender == address(0x043c));
   require(rotation != 999, "injected downstream failure"); observed++;
@@ -89,7 +95,9 @@ contract RecoveryCounter {
                 'scope': 'real execution only; no production consensus process or finality qualification',
                 'source_sha256': {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in
                     ['execution/patches/apply-420-systemcall.py', 'execution/patches/systemcall420.go.in',
-                     'scripts/qualify-execution-recovery.py']},
+                     'scripts/qualify-execution-recovery.py', 'scripts/settlement_process_scenarios.py',
+                     'consensus/recovery/history.go', 'consensus/recovery/settlement.go',
+                     'consensus/cmd/fourtwentyd/settlement.go', 'go.mod', 'go.sum']},
                 'geth_upstream_commit': '9621c6ad10934a01b5514886fb6fbd87640b6c05',
                 'geth_sha256': hashlib.sha256(geth.read_bytes()).hexdigest(),
                 'wrapper_sha256': hashlib.sha256(wrapper.read_bytes()).hexdigest(),
@@ -112,12 +120,13 @@ contract RecoveryCounter {
         return r['result']
     proc = None
     handles = []
-    def start():
+    evidence['scope'] = 'production certified consensus settlement with BLS/QC/PoP and real execution processes; downstream fixture' if a.consensus else evidence['scope']
+    def start(directory=None):
         nonlocal proc
         log = (out / ('execution-' + str(len(evidence['processes'])) + '.log')).open('w')
         handles.append(log)
         (out / 'geth.pid').unlink(missing_ok=True)
-        proc = subprocess.Popen([str(wrapper), '--geth', str(launcher), '--datadir', str(datadir),
+        proc = subprocess.Popen([str(wrapper), '--geth', str(launcher), '--datadir', str(directory or datadir),
             '--jwt-secret', str(out / 'jwt.hex'), '--authrpc.port', str(a.auth_port),
             '--http.port', str(a.rpc_port), '--port', '0', '--', '--ipcdisable', '--nodiscover', '--maxpeers', '0'],
             cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
@@ -127,7 +136,7 @@ contract RecoveryCounter {
             if proc.poll() is not None:
                 raise RuntimeError('execution exited: ' + str(proc.returncode))
             try:
-                assert rpc('eth_chainId', []) == '0x1a4'
+                assert rpc('eth_chainId', []) == ('0x1a5' if directory else '0x1a4')
                 record['geth_pid'] = int((out / 'geth.pid').read_text().strip())
                 assert record['geth_pid'] != proc.pid, 'wrapper/Geth are not separate processes'
                 return
@@ -196,6 +205,12 @@ contract RecoveryCounter {
                             '--init-genesis', str(out / 'genesis.json')], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, check=True)
         start()
         genesis_hash = block()['hash']
+        if a.consensus:
+            scenario_spec = importlib.util.spec_from_file_location('settlement_scenarios', ROOT / 'scripts/settlement_process_scenarios.py')
+            scenarios = importlib.util.module_from_spec(scenario_spec); scenario_spec.loader.exec_module(scenarios)
+            scenarios.qualify(ROOT, out, evidence, rpc, snapshot, start, stop, genesis_hash, block()['timestamp'], a.auth_port)
+            evidence['pass'] = True
+            print(json.dumps(evidence, indent=2)); return
         initial = snapshot()
         assert initial['sequence'] == initial['observed'] == 0
         b = batch(block(), 0, [1, 2])

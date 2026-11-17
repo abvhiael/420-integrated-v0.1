@@ -115,7 +115,7 @@ func (c *Client) CommitVerifiedSequence(ctx context.Context, m csys.SequenceMana
 	if err != nil {
 		return zero, err
 	}
-	if err := c.verifyCanonicalBatch(ctx, child, batch); err != nil {
+	if err := c.VerifyCanonicalBatch(ctx, child, batch); err != nil {
 		return zero, err
 	}
 	last := parent.LastSequence
@@ -130,7 +130,7 @@ func (c *Client) CommitVerifiedSequence(ctx context.Context, m csys.SequenceMana
 
 // Sequence continuity alone cannot prove which calls were executed. Bind the
 // canonical child to the exact parent and batch committed in its header.
-func (c *Client) verifyCanonicalBatch(ctx context.Context, child [32]byte, batch csys.Batch) error {
+func (c *Client) VerifyCanonicalBatch(ctx context.Context, child [32]byte, batch csys.Batch) error {
 	var b *struct {
 		Hash       Hash32
 		Number     string

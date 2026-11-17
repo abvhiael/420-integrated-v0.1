@@ -21,6 +21,7 @@ export async function protocolObjectState420(
 
   const stateView = protocol === '420Governance'
     ? 'idx_governance_state'
+    : protocol === '420Bridge' ? 'idx_bridge_state'
     : 'idx_protocol_latest_object_state';
   const row = firstRow420(await service.db.query(
     `select * from ${stateView}

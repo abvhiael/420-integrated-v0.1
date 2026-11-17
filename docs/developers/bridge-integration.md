@@ -76,3 +76,7 @@ If reconciliation is unhealthy, halt/escalate according to safety policy and rec
 - [420 Bridge application manual](../apps/bridge/index.md)
 - [Provider-backed integration model](provider-backed-integrations.md)
 - [Events, logs and finality](events-and-finality.md)
+
+## Executable applications and SDK
+
+Use the [Wallet/Exchange/SDK bridge execution interface](bridge-execution-sdk.md) for Registry binding, reviewed raw-unit transactions, explicit confirmation, Indexer history, qualified notifications and composition recovery. Provider fee estimates and deployment-dependent funded qualification remain explicitly separated from local simulation.

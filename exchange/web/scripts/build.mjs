@@ -33,6 +33,12 @@ function assertHttps(value,label,{ws=false}={}){
 clean();
 for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css']) copy(file);
 copyDir('core');
+const bridgeRuntime=path.join(dist,'core','wallet-bridge-runtime');
+fs.mkdirSync(bridgeRuntime,{recursive:true});
+for(const file of ['bridge-client.js','keccak.js']) fs.copyFileSync(path.join(root,'../../wallet/web/core',file),path.join(bridgeRuntime,file));
+const bridgeEntry=path.join(dist,'core','canonical-bridge.js');
+fs.writeFileSync(bridgeEntry,fs.readFileSync(bridgeEntry,'utf8').replace('../../../wallet/web/core/bridge-client.js','./wallet-bridge-runtime/bridge-client.js'));
+
 copyDir('fixtures');
 copyDir('assets');
 // Load the V15 wallet selector before the V14 read-only display application.

@@ -1,0 +1,99 @@
+{
+  "step": "BRIDGE-AUDIT-10 \u2014 Wallet, Exchange, Indexer and Ecosystem Integration",
+  "base_main": "671e72bef3a3c0e90e3db5581770049bfa9eb18d",
+  "scope": "Local controlled-provider integration; no live deployment or funded cross-chain claim",
+  "local_unique_test_passes": 81,
+  "test_groups": [
+    {
+      "command": "cd 420-indexer && node --test dist/test/bridge-integration.test.js dist/test/lifecycle-reducer.test.js dist/test/protocol-object-service.test.js dist/test/protocol-projections.test.js dist/test/abi-manifest.test.js dist/test/protocol-dto.test.js",
+      "passes": 35
+    },
+    {
+      "command": "cd 420-indexer && node --test dist/test/bridge-notifications.test.js dist/test/notifications-adapter.test.js",
+      "passes": 10,
+      "scope": "Final notification filter and stable evidence identity; affected group rerun after those changes"
+    },
+    {
+      "command": "node --test exchange/web/test/execution.test.js exchange/web/test/canonical-execution-inputs.test.js exchange/web/test/live-bridge-qualification.test.js",
+      "passes": 21
+    },
+    {
+      "command": "node --test --test-name-pattern='bridge execution rejects' exchange/web/test/execution.test.js",
+      "passes": 1
+    },
+    {
+      "command": "node --test exchange/web/test/browser-execution-controller.test.js",
+      "passes": 4
+    },
+    {
+      "command": "node --test wallet/web/test/bridge-client.test.js",
+      "passes": 7,
+      "scope": "Six initial passes plus corrected assertion in the Exchange composition test, rerun only that failed test"
+    },
+    {
+      "command": "node --test --test-name-pattern='Exchange browser controller owns' wallet/web/test/bridge-client.test.js",
+      "passes": 1
+    },
+    {
+      "command": "node --test packages/420-sdk/test/bridge.test.mjs",
+      "passes": 2
+    }
+  ],
+  "additional_qualification": [
+    "Indexer TypeScript build PASS",
+    "SDK strict TypeScript declaration build PASS; package-bridge-runtime.mjs PASS",
+    "node scripts/bridge-audit-10/qualify-sql.mjs PASS against @electric-sql/pglite 0.3.14 (PostgreSQL engine): fresh/upgrade views, independent transfer histories, orphan rollback and replacement replay, failed/retry/refund mapping",
+    "EXCHANGE_DEPLOYMENT_MODE=qualification node exchange/web/scripts/build.mjs PASS; dynamic import of packaged canonical bridge and BrowserExecutionController PASS",
+    "git diff --check PASS"
+  ],
+  "diagnostics": [
+    "A synchronous missing-Exchange-asset error was initially passed to assert.rejects. Corrected the assertion to assert.throws and reran only that test; production behavior was already fail-closed.",
+    "SDK exactOptionalPropertyTypes rejected clock:undefined. Omit the optional property when absent; strict compilation then passed.",
+    "Several shell edits used the package cwd with repository-relative paths and failed before modifying files. Corrected paths. One such command also repeated the unchanged nine notification tests; this duplicate is not counted in the unique total.",
+    "Notification review found an unscoped bridge gate could block unrelated subscriptions. Scope qualification to matching subscriptions and exclude non-lifecycle configuration events; final affected group passed all ten cases."
+  ],
+  "ci_run_ids": [],
+  "ci_policy": "No new GitHub Actions run requested; one coherent [skip ci] source commit. Existing workflow path filters and branch policy are unchanged.",
+  "preserved_evidence": {
+    "BRIDGE-AUDIT-9": "docs/audit/settlement-qualification/RESULTS.json",
+    "historical_ci_runs": [
+      "43563876850",
+      "43563876854"
+    ],
+    "policy": "Original SHAs, sources and run IDs are unchanged and are not relabelled as tests of this change."
+  },
+  "external_dependencies": "Existing approved Registry/deployment pins, live source custody, issuer/provider support and funded cross-chain operation remain in docs/audit/420BRIDGE-TESTNET-WORK-ROADMAP.md. No production activation or live all-in provider quote is claimed.",
+  "next_canonical_work": "Existing 420BRIDGE-TESTNET-WORK-ROADMAP.md deployment/provider/funded qualification. No numbered BRIDGE-AUDIT-11 is defined in the authoritative repository; do not invent it.",
+  "qualified_input_sha256": {
+    "420-indexer/sql/005-genesis-state-views.sql": "28bc1cb9dc656105220579d1f349b7499ca8b9c0ea78a47cc2a5cc87c23de7ea",
+    "420-indexer/sql/008-bridge-lifecycle.sql": "5f5225ca78cc7b285cd5cbe8a88ab167a15010458241474c9d4b2ae2ebbef931",
+    "420-indexer/src/abi-manifest.ts": "87ae82c406f211b849655d6c9a9f911d06c5ff1668b6a9692f3add27da8e1e29",
+    "420-indexer/src/bridge-descriptors.ts": "a2f97fe4d933be29c3dc4880cb31a0e5b29832792938e4bf86f6709ec4e86102",
+    "420-indexer/src/index.ts": "616594f81a76aaa1fcead7a6846eef298f8a8fac124d4d16780ce68196436c17",
+    "420-indexer/src/lifecycle-reducer.ts": "e40f71a02f7c19b21722c704f6fb48d82981855722aeafb6509c17930956395c",
+    "420-indexer/src/notifications-adapter.ts": "78ed003201e1b8180794ad836b1fb696a4e7b953a0c24ddebb91ccd57260dfcf",
+    "420-indexer/src/protocol-decoder.ts": "dfbcfb4615ff0cb43a5359286b7587a54037ab4dc1d94d261c246d23df82bece",
+    "420-indexer/src/protocol-object-service.ts": "596cfd9e260f4285cae8655571372e87373fc0722bc75e7bc8dff90b06586c49",
+    "420-indexer/test/bridge-integration.test.ts": "1dde06bdc75163e6ee4f873ed6c2181565091a845dd3a1dca8ea04990c50c9e5",
+    "420-indexer/test/bridge-notifications.test.ts": "8bd39826ac9ad0a56bfefab8686070f988e1d7b006f2e7d688ad19b5473c52f9",
+    "developer-hub/guides/wallet-genesis-integration.md": "13a1b998f222fb442f7341b29dac45f98adcfaa63286b28242d90011c374ef12",
+    "docs/developers/bridge-execution-sdk.md": "f8fb7676cabc3ee65f36820b0137df25e2d5a3ae2d9f20fba8eac104deddf4ba",
+    "docs/developers/bridge-integration.md": "6ed6f92be92fbde460c61f5b01bb6010bf635e97c23bea9bcc3e7568e8c6c429",
+    "exchange/web/core/browser-execution-controller.js": "df1a0f24a8da05dabc28d9152b64884fc752b093b8273c070d2fa9c9c34f8800",
+    "exchange/web/core/canonical-bridge.js": "aa2f72000d0ac6517072ddb9973e2e2d549e515723472ed2cddb5cffea7bf6c3",
+    "exchange/web/core/execution.js": "b74accc186fa6604d81c2c54056a94a0aaa2692a088f56b9e898385e5e3ab0e3",
+    "exchange/web/scripts/build.mjs": "a3ae5d6ee36f4b2707c17c7835e86b7c8ce65e7dbf421952e029277385d10f21",
+    "exchange/web/test/canonical-execution-inputs.test.js": "97a51c0fb62b5cf4c4bea1df7947bf856da1c2c9de8191c09787e07240798a57",
+    "exchange/web/test/execution.test.js": "b4c8c559b49c9af49bae5098cf446e0f7875555ceaa01a8d9848e3bcc82541f1",
+    "exchange/web/test/live-bridge-qualification.test.js": "d0978437e16a75cba60b71a799b2ef7540d3edc41e8abf43d3b0f94b3a79d2c4",
+    "packages/420-sdk/package.json": "65c9987e11a99b0bf654766b5cdf93c91075f48fb4942be62275ebd8841e172e",
+    "packages/420-sdk/scripts/package-bridge-runtime.mjs": "cd0f6a5f1398938135ac5ed4f343e2109bc446fde2b3e9d462eb73a072a0f324",
+    "packages/420-sdk/src/bridge-runtime.d.ts": "2568f297b7ca901bc4eca13993ca02bfa0e8a0f070294a722f93c53ed5ec44b8",
+    "packages/420-sdk/src/bridge.ts": "f07ca2baa2829281ac58e0630ca8a76aa475fe2b12bd00d1891487ad9f5b0d6a",
+    "packages/420-sdk/src/index.ts": "eeadf57d4a00bec18779685e26b4efc0c40ef63b27b1cbf10ae1cb1762509a97",
+    "packages/420-sdk/test/bridge.test.mjs": "ff965ccf27682ec06f766d8a25b0addbe177fa648b039c47de76f5842680e2b6",
+    "scripts/bridge-audit-10/qualify-sql.mjs": "8ab3cfaad7f3e50d60a3831a925f84b1d7afd37982ec0958fbda54b67bfb7590",
+    "wallet/web/core/bridge-client.js": "b6e8f015bda5a53634706c592d2ebf4dad51fbe64828609d06a3864cb49b3b1d",
+    "wallet/web/test/bridge-client.test.js": "129dad4fb21383dc6b080d6f4693c7025d33704e978ec2e57911877eff9bffcf"
+  }
+}

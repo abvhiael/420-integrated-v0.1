@@ -6,7 +6,7 @@
   "exports": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/package-bridge-runtime.mjs",
     "test": "npm run build && node --test test/*.test.mjs"
   },
   "devDependencies": {

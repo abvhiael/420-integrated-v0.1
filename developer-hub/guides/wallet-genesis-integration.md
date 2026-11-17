@@ -9,3 +9,7 @@ For approved Genesis services, Wallet's release config supplies one `ecosystemRe
 Service policies: recheck Names420 resolved address, expiry and label hash before sends; identity profile/controller and Names↔Identity bilateral claims are on-chain; paymaster offers are funding only; 420Token factory and ERC-20 approvals are separate reviewed transactions. The live Genesis manifest, service implementation proofs, browser/mobile device handoff and real transactions require W15.9 testnet evidence. W15.10 independently audits security and authorizes public release.
 
 Repository qualification: `docs/wallet/W15.8-GENESIS-ECOSYSTEM-INTEGRATION-QUALIFICATION.md`. External execution: `docs/wallet/W15.9-TESTNET-WORK-ROADMAP.md`.
+
+## Bridge transactions
+
+Use `@420/sdk.createBridgeSdk420` and the shared Wallet bridge runtime, or Exchange's `BrowserExecutionController.prepareBridge` / `submitBridge`. See [the executable bridge interface](../../docs/developers/bridge-execution-sdk.md) for exact arguments, Registry code pins, recipient/network review, simulation and confirmation, history/notification evidence and failed-settlement recovery. Genesis service discovery alone grants no spending permission. The existing browser submission lock remains until operational deployment qualification.

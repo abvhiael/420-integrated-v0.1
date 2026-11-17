@@ -62,6 +62,7 @@ export class ProtocolDecoderRegistry420 {
   }
 
   decode(log: IndexerLog): DecodedProtocolEvent420 | null {
+    if (log.removed) return null;
     const topic0 = log.topics[0]?.toLowerCase();
     if (!topic0) return null;
     const descriptor = this.byTopic.get(topic0);
@@ -70,12 +71,22 @@ export class ProtocolDecoderRegistry420 {
       throw new Error('protocol descriptor contract mismatch: ' + descriptor.protocol + '.' + descriptor.eventName);
     }
 
+    if (descriptor.protocol === '420Bridge') {
+      const indexed = descriptor.fields.filter(field => field.indexed).length;
+      const dataWords = descriptor.fields.length - indexed;
+      if (log.topics.length !== indexed + 1 || !/^0x[0-9a-fA-F]*$/.test(log.data) || log.data.length !== 2 + dataWords * 64) throw new Error('malformed canonical bridge log');
+    }
     const fields: Record<string, string | bigint | boolean> = {};
     let indexedIndex = 1;
     let dataIndex = 0;
     for (const field of descriptor.fields) {
       const encoded = field.indexed ? log.topics[indexedIndex++] : word(log.data, dataIndex++);
       if (!encoded || encoded.length !== 66) throw new Error(`malformed ${descriptor.protocol}.${descriptor.eventName} log`);
+      if (descriptor.protocol === '420Bridge') {
+        if (!/^0x[0-9a-fA-F]{64}$/.test(encoded)) throw new Error('malformed canonical bridge word');
+        if (field.kind.startsWith('uint') && BigInt(encoded) >= (1n << BigInt(field.kind.slice(4)))) throw new Error('noncanonical bridge integer');
+        if (field.kind === 'address' && BigInt(encoded) >= (1n << 160n)) throw new Error('noncanonical bridge address');
+      }
       fields[field.name] = decodeValue420(field.kind, encoded);
     }
 

@@ -1,6 +1,6 @@
 import type { DecodedProtocolEvent420 } from './protocol-decoder.js';
 
-export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED' | 'CREATED' | 'PAID' | 'FULFILLED' | 'DISPUTED' | 'REFUNDED';
+export type LifecycleState420 = 'UNKNOWN' | 'PENDING' | 'ACTIVE' | 'PASSED' | 'QUEUED' | 'EXECUTED' | 'COMPLETED' | 'CANCELLED' | 'REVOKED' | 'EXPIRED' | 'FAILED' | 'CREATED' | 'PAID' | 'FULFILLED' | 'DISPUTED' | 'REFUNDED' | 'SOURCE_PENDING' | 'SOURCE_FINALIZED' | 'PROOF_PENDING' | 'VERIFIED' | 'DESTINATION_PENDING' | 'RETRYABLE' | 'PAUSED';
 
 export interface LifecycleRule420 {
   eventName: string;
@@ -63,7 +63,9 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
   // PrimaryNameSet has labelHash and CredentialIssued has issuerId). The
   // canonical object key follows the Identity object being mutated, not the
   // first generic identifier present in the event.
-  const keys = event.protocol === '420Identity'
+  const keys = event.protocol === '420Bridge'
+    ? ['transferId','routeId','assetId'] as const
+    : event.protocol === '420Identity'
     ? ['credentialId','profileId','issuerId'] as const
     : event.protocol === '420Randomness'
       ? ['requestId','profileId','routeId'] as const
@@ -74,6 +76,14 @@ export function protocolObjectKey420(event: DecodedProtocolEvent420): string | n
   }
   return null;
 }
+
+// BridgeTransferRegistry.Status. FAILED/EXPIRED/DISPUTED are workflow states,
+// never payment or refund evidence. Retry and pause may legitimately resume.
+export const BRIDGE_STATUS_420: Readonly<Record<string, LifecycleState420>> = Object.freeze({
+  '1':'CREATED', '2':'SOURCE_PENDING', '3':'SOURCE_FINALIZED', '4':'PROOF_PENDING',
+  '5':'VERIFIED', '6':'DESTINATION_PENDING', '7':'COMPLETED', '8':'FAILED',
+  '9':'RETRYABLE', '10':'EXPIRED', '11':'PAUSED', '12':'DISPUTED', '13':'REFUNDED'
+});
 
 const POLICY_LIST: LifecyclePolicy420[] = [
   { protocol: '420Market', rules: [
@@ -171,12 +181,12 @@ const POLICY_LIST: LifecyclePolicy420[] = [
     { eventName: 'PaymentAuthorized', state: 'ACTIVE' }
   ]},
   { protocol: '420Bridge', rules: [
-    { eventName: 'TransferRequested', state: 'PENDING' },
-    { eventName: 'BridgeTransferRequested', state: 'PENDING' },
-    { eventName: 'TransferFinalized', state: 'COMPLETED', terminal: true },
-    { eventName: 'BridgeTransferFinalized', state: 'COMPLETED', terminal: true },
-    { eventName: 'TransferCancelled', state: 'CANCELLED', terminal: true },
-    { eventName: 'TransferFailed', state: 'FAILED', terminal: true }
+    { eventName: 'TransferCreated', state: 'CREATED' },
+    { eventName: 'OutboundTransferCreated', state: 'CREATED' },
+    { eventName: 'TransferStatus', state: 'UNKNOWN', stateField: 'status',
+      stateMap: BRIDGE_STATUS_420, terminalFieldValues: ['7','13'] },
+    { eventName: 'TransferTransition', state: 'UNKNOWN', stateField: 'toStatus',
+      stateMap: BRIDGE_STATUS_420, terminalFieldValues: ['7','13'] }
   ]},
   { protocol: '420Rights', rules: [
     { eventName: 'SubjectRegistered', state: 'ACTIVE' },
@@ -240,7 +250,8 @@ export function reduceProtocolLifecycle420(events: readonly DecodedProtocolEvent
         : activePolicy?.rules.find((candidate) => candidate.eventName === event.eventName);
     if (!rule) continue;
 
-    const current = states.get(key);
+    const storageKey = `${event.protocol}:${key}`;
+    const current = states.get(storageKey);
     if (current?.terminal) continue;
 
     const stateFieldValue = rule.stateField === undefined ? undefined : event.fields[rule.stateField];
@@ -249,7 +260,7 @@ export function reduceProtocolLifecycle420(events: readonly DecodedProtocolEvent
     const resolvedTerminal = Boolean(rule.terminal) ||
       (stateFieldKey !== undefined && Boolean(rule.terminalFieldValues?.includes(stateFieldKey)));
 
-    states.set(key, {
+    states.set(storageKey, {
       protocol: event.protocol,
       objectKey: key,
       state: resolvedState,

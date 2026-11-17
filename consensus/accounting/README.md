@@ -1,0 +1,45 @@
+# STAKE-AUDIT-9.4 operational accounting
+
+`stake-reconcile` is a read-only observer. Reports, Indexer projections and report files cannot authorize settlement, issue rewards, select a fork, slash a validator or change finalized history.
+
+Build with the production BLS verifier:
+
+```sh
+go build -tags blst -o bin/stake-reconcile ./consensus/cmd/stake-reconcile
+bin/stake-reconcile --trust /etc/420/settlement-trust.json \
+  --trust-sha256 "$APPROVED_TRUST_SHA256" \
+  --consensus-dir /var/lib/420consensus/settlement \
+  --indexer-store /var/lib/420indexer/index.json \
+  --engine http://127.0.0.1:8551 --rpc http://127.0.0.1:8545 \
+  --jwt-secret /run/secrets/engine-jwt --output /var/lib/420reports/stake.json
+```
+
+The trust file and its SHA-256 must come from independently approved consensus provisioning. The observer rechecks committee proofs, quorum signatures, ancestry, batch commitments, bounded replacement and existing finality rules using the production settlement history verifier. An unsettled write-ahead intent, skewed durable checkpoint, corrupt history, invalid signature or forbidden replacement prevents reconciliation. Complete canonical history begins at the frozen zero-accounting genesis. A nonzero or incomplete accounting baseline is rejected.
+
+Every canonical block is reconstructed from retained contract ABIs. Certified outcomes independently determine rewards, slashes, finality-equivocation penalties, lifecycle changes and exits. Ordinary financial events account for registration, top-up, reserve assignment/funding/release, pending credit, replacement/recycling, treasury transfers and withdrawals. The reconstruction compares every observed validator's composition, custody counters, reserve accounting, reward accruals and native custody balances with execution getters at each canonical block. Gateway sequence and block identity are checked before and after observations. Each state call uses EIP-1898 `blockHash` with `requireCanonical: true` on the JWT-authenticated endpoint. Indexed canonical blocks, finalized checkpoint and exact event identities/content are compared with execution evidence. Missing, duplicated, orphaned, malformed or contradictory evidence produces discrepancies.
+
+`issuance.grossScheduled` follows the frozen consensus gross schedule. `realized`, security, attention and development are the actual RewardController accrual counters; validator accruals include only actual certified participants, preserving unissued participation/rounding amounts. The current frozen implementation records accruals: the report does **not** treat these counters as proof of native token minting or an independently verified total-supply increase. This basis is embedded in every machine report.
+
+## Persistent inputs and execution event archive
+
+Retain consensus `history.json`, `checkpoint.json`, `sequence.json`, the independently pinned trust file, execution database and the Indexer store. Execution must retain historical state needed by the audit range; use an archive-capable execution database. Pruned or unavailable state is an error. An audit never repairs these authorities.
+
+Native calls have no ordinary Ethereum transaction receipt. Patched Geth writes `420-native-logs-v1:<block hash>` records in the accepted block's database batch, with SHA-256 integrity protection. Building or rejecting a payload cannot create an accepted archive. JWT-only `engine420_getSystemCallLogsV1(blockHash)` returns archives only for canonical imported blocks, including their block number and committed batch root. Missing/corrupt archives fail closed; a retained orphan archive is rejected. This observational archive does not alter transaction receipts, receipt roots, frozen addresses or protocol economics.
+
+The production Indexer requires `INDEXER_ENGINE_URL` and `INDEXER_JWT_SECRET` in addition to its existing approved RPC/consensus configuration. All ingestion bundle headers, receipts and native archives use the paired authenticated endpoint; ordinary public RPC remains a readiness source. Deployment mounts the JWT read-only. Native logs retain their zero transaction hash and block-qualified identity. Old v1 Indexer log keys are normalized on open; conflicting duplicate durable identities are rejected. Existing projection/checkpoint atomicity and finalized rollback protection remain in force.
+
+Execution databases imported before the archive implementation lack that evidence. Do not substitute empty logs or invent events from counters. Preserve consensus/finality state and rebuild an execution database from the approved genesis plus independently verified canonical consensus records, then rebuild the Indexer through its existing canonical ingestion path. Reconcile before accepting the rebuilt projection. This is an operator data rebuild, not a finalized checkpoint reset.
+
+## Restart, replacement and operator action
+
+Audits reconstruct into fresh memory and do not persist a second settlement cursor. Repeating after a restart yields the same report for unchanged inputs. A valid canonical replacement reconstructs only its canonical path; orphan issuance/accruals and collateral transitions are not carried forward. Consensus verification and the Indexer's finalized checkpoint prohibit crossing finalized history. Rebuilding from canonical replacement blocks must equal a clean canonical rebuild.
+
+Run against a stable checkpoint: pause ingress/ingestion, or retry after an input-change discrepancy. The observer rereads both durable snapshots after the audit and rechecks the execution anchor; changing files/head or execution outages cannot produce successful results. A journal/history mismatch is repaired only by the existing certified settlement recovery path, with its independent trust and finality checks. Never edit sequence/custody balances, trust an Indexer result as authority, or erase a finalized checkpoint to make a discrepancy disappear.
+
+JSON stdout is always the result for a valid CLI invocation. `status: RECONCILED` and exit 0 require no discrepancies. Errors produce `DISCREPANCY` and nonzero exit, including failed report writes. Optional report output uses file fsync, atomic rename and directory fsync. Each discrepancy contains code, block, path, expected and actual values. Archive/state outages require restoring the paired execution service/history; missing Indexer events require canonical catch-up/rebuild; contradictory consensus/execution evidence requires an operator halt and investigation through the existing recovery boundary.
+
+## Qualification
+
+Run `scripts/qualify-stake-accounting.py --solc /path/to/solc-0.8.24 --output <fresh evidence directory>`. It compiles the existing isolated Stake import closure, executes frozen contracts in a real local EVM, exports actual events and getter values, and compares them with Go reconstruction. Source and fixture hashes are retained. The financial fixture uses local operators and block-height jumps for withdrawal delays; it is not a network or production signing qualification.
+
+The existing real-process recovery harness additionally checks native archives across actual patched-Geth SIGKILL/reconstruction, rejected batches, certified bounded replacement and finalized-boundary rejection. Core tests cover discrepancy mutations, repeated reconciliation and replacement-versus-clean rebuild. Command tests launch separate reconciliation processes with real BLS trust verification and an authenticated local RPC fixture; their genesis wiring result is distinct from the real-contract financial and real-Geth process evidence. Exact-head CI provenance belongs in `QUALIFICATION.md`.

@@ -10,6 +10,7 @@ import (
 )
 
 type rpcBlock struct {
+	ExtraData    string           `json:"extraData"`
 	Number       string           `json:"number"`
 	Hash         string           `json:"hash"`
 	ParentHash   string           `json:"parentHash"`
@@ -27,15 +28,15 @@ type rpcTransaction struct {
 }
 
 type rpcReceipt struct {
-	TransactionHash  string   `json:"transactionHash"`
-	TransactionIndex string   `json:"transactionIndex"`
-	BlockHash        string   `json:"blockHash"`
-	BlockNumber      string   `json:"blockNumber"`
-	Status           string   `json:"status"`
+	TransactionHash   string   `json:"transactionHash"`
+	TransactionIndex  string   `json:"transactionIndex"`
+	BlockHash         string   `json:"blockHash"`
+	BlockNumber       string   `json:"blockNumber"`
+	Status            string   `json:"status"`
 	GasUsed           string   `json:"gasUsed"`
 	EffectiveGasPrice string   `json:"effectiveGasPrice"`
 	ContractAddress   string   `json:"contractAddress"`
-	Logs             []rpcLog `json:"logs"`
+	Logs              []rpcLog `json:"logs"`
 }
 
 type rpcLog struct {
@@ -58,9 +59,13 @@ type Bundle struct {
 
 func hexQuantityDecimal(v string) (string, error) {
 	v = strings.TrimPrefix(strings.ToLower(v), "0x")
-	if v == "" { return "0", nil }
+	if v == "" {
+		return "0", nil
+	}
 	n, ok := new(big.Int).SetString(v, 16)
-	if !ok { return "", fmt.Errorf("invalid hex quantity") }
+	if !ok {
+		return "", fmt.Errorf("invalid hex quantity")
+	}
 	return n.String(), nil
 }
 
@@ -69,38 +74,96 @@ func receiptFeeWei(gasUsed uint64, effectiveGasPrice string) (string, string, er
 		return "", "", fmt.Errorf("receipt effectiveGasPrice missing")
 	}
 	priceWei, err := hexQuantityDecimal(effectiveGasPrice)
-	if err != nil { return "", "", fmt.Errorf("invalid receipt effectiveGasPrice: %w", err) }
+	if err != nil {
+		return "", "", fmt.Errorf("invalid receipt effectiveGasPrice: %w", err)
+	}
 	price, ok := new(big.Int).SetString(priceWei, 10)
-	if !ok || price.Sign() < 0 { return "", "", fmt.Errorf("invalid receipt effectiveGasPrice") }
+	if !ok || price.Sign() < 0 {
+		return "", "", fmt.Errorf("invalid receipt effectiveGasPrice")
+	}
 	fee := new(big.Int).Mul(new(big.Int).SetUint64(gasUsed), price)
 	return priceWei, fee.String(), nil
 }
 
 func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint64, finality model.Finality, schemaVersion string) (Bundle, error) {
 	var raw rpcBlock
-	if err := c.call(ctx, "eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", number), true}, &raw); err != nil { return Bundle{}, err }
-	if raw.Hash == "" { return Bundle{}, fmt.Errorf("block %d unavailable", number) }
-	rn, err := parseHexUint64(raw.Number); if err != nil { return Bundle{}, err }
-	ts, err := parseHexUint64(raw.Timestamp); if err != nil { return Bundle{}, err }
+	if err := c.executionCall(ctx, "eth_getBlockByNumber", []interface{}{fmt.Sprintf("0x%x", number), true}, &raw); err != nil {
+		return Bundle{}, err
+	}
+	if raw.Hash == "" {
+		return Bundle{}, fmt.Errorf("block %d unavailable", number)
+	}
+	rn, err := parseHexUint64(raw.Number)
+	if err != nil {
+		return Bundle{}, err
+	}
+	if rn != number {
+		return Bundle{}, fmt.Errorf("requested block height mismatch")
+	}
+	ts, err := parseHexUint64(raw.Timestamp)
+	if err != nil {
+		return Bundle{}, err
+	}
 	bundle := Bundle{Block: model.BlockRecord{ChainID: chainID, Number: rn, Hash: raw.Hash, ParentHash: raw.ParentHash, Timestamp: ts, Finality: finality, SchemaVersion: schemaVersion}}
 	for _, tx := range raw.Transactions {
-		ti, err := parseHexUint64(tx.TransactionIndex); if err != nil { return Bundle{}, err }
-		valueWei, err := hexQuantityDecimal(tx.Value); if err != nil { return Bundle{}, err }
+		ti, err := parseHexUint64(tx.TransactionIndex)
+		if err != nil {
+			return Bundle{}, err
+		}
+		valueWei, err := hexQuantityDecimal(tx.Value)
+		if err != nil {
+			return Bundle{}, err
+		}
 		bundle.Transactions = append(bundle.Transactions, model.TransactionRecord{ChainID: chainID, BlockNumber: rn, BlockHash: raw.Hash, Hash: tx.Hash, Index: ti, From: tx.From, To: tx.To, ValueWei: valueWei, Input: tx.Input})
 		var receipt rpcReceipt
-		if err := c.call(ctx, "eth_getTransactionReceipt", []interface{}{tx.Hash}, &receipt); err != nil { return Bundle{}, err }
-		bi, err := parseHexUint64(receipt.BlockNumber); if err != nil { return Bundle{}, err }
-		ri, err := parseHexUint64(receipt.TransactionIndex); if err != nil { return Bundle{}, err }
-		status, err := parseHexUint64(receipt.Status); if err != nil { return Bundle{}, err }
-		gas, err := parseHexUint64(receipt.GasUsed); if err != nil { return Bundle{}, err }
-		effectiveGasPriceWei, actualFeeWei, err := receiptFeeWei(gas, receipt.EffectiveGasPrice); if err != nil { return Bundle{}, err }
+		if err := c.executionCall(ctx, "eth_getTransactionReceipt", []interface{}{tx.Hash}, &receipt); err != nil {
+			return Bundle{}, err
+		}
+		bi, err := parseHexUint64(receipt.BlockNumber)
+		if err != nil {
+			return Bundle{}, err
+		}
+		ri, err := parseHexUint64(receipt.TransactionIndex)
+		if err != nil {
+			return Bundle{}, err
+		}
+		if bi != rn || receipt.BlockHash != raw.Hash || receipt.TransactionHash != tx.Hash || ri != ti {
+			return Bundle{}, fmt.Errorf("receipt provenance mismatch")
+		}
+		status, err := parseHexUint64(receipt.Status)
+		if err != nil {
+			return Bundle{}, err
+		}
+		gas, err := parseHexUint64(receipt.GasUsed)
+		if err != nil {
+			return Bundle{}, err
+		}
+		effectiveGasPriceWei, actualFeeWei, err := receiptFeeWei(gas, receipt.EffectiveGasPrice)
+		if err != nil {
+			return Bundle{}, err
+		}
 		bundle.Receipts = append(bundle.Receipts, model.ReceiptRecord{ChainID: chainID, BlockNumber: bi, BlockHash: receipt.BlockHash, TransactionHash: receipt.TransactionHash, TransactionIndex: ri, Status: status, GasUsed: gas, EffectiveGasPriceWei: effectiveGasPriceWei, ActualFeeWei: actualFeeWei, ContractAddress: receipt.ContractAddress})
 		for _, lg := range receipt.Logs {
-			lbn, err := parseHexUint64(lg.BlockNumber); if err != nil { return Bundle{}, err }
-			lti, err := parseHexUint64(lg.TransactionIndex); if err != nil { return Bundle{}, err }
-			li, err := parseHexUint64(lg.LogIndex); if err != nil { return Bundle{}, err }
+			lbn, err := parseHexUint64(lg.BlockNumber)
+			if err != nil {
+				return Bundle{}, err
+			}
+			lti, err := parseHexUint64(lg.TransactionIndex)
+			if err != nil {
+				return Bundle{}, err
+			}
+			li, err := parseHexUint64(lg.LogIndex)
+			if err != nil {
+				return Bundle{}, err
+			}
+			if lbn != rn || lg.BlockHash != raw.Hash || lg.TransactionHash != tx.Hash || lti != ti {
+				return Bundle{}, fmt.Errorf("receipt log provenance mismatch")
+			}
 			bundle.Logs = append(bundle.Logs, model.LogRecord{ChainID: chainID, BlockNumber: lbn, BlockHash: lg.BlockHash, TransactionHash: lg.TransactionHash, TransactionIndex: lti, LogIndex: li, Address: lg.Address, Topics: lg.Topics, Data: lg.Data})
 		}
+	}
+	if err := c.appendNativeLogs(ctx, raw, &bundle); err != nil {
+		return Bundle{}, err
 	}
 	return bundle, nil
 }

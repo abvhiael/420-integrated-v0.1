@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	eng "github.com/420integrated/420-integrated/consensus/engine"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,8 +13,8 @@ import (
 	"time"
 
 	"github.com/420integrated/420-integrated/indexer/api"
-	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/consensusview"
+	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/ingest"
 	indexerrpc "github.com/420integrated/420-integrated/indexer/rpc"
 	"github.com/420integrated/420-integrated/indexer/store"
@@ -21,50 +22,77 @@ import (
 )
 
 const (
-	defaultHTTPAddr = ":8420"
+	defaultHTTPAddr     = ":8420"
 	defaultPollInterval = 12 * time.Second
-	defaultMaxHeadAge = 2 * time.Minute
+	defaultMaxHeadAge   = 2 * time.Minute
 )
 
 type startup struct {
-	Service       string `json:"service"`
-	Status        string `json:"status"`
-	ChainID       uint64 `json:"chainId"`
-	RPCConfigured bool   `json:"rpcConfigured"`
-	StorePath     string `json:"storePath"`
-	HTTPAddr      string `json:"httpAddr"`
-	PollInterval  string `json:"pollInterval"`
-	Rebuild       bool   `json:"rebuild"`
-	ConsensusStatusPath string `json:"consensusStatusPath"`
-	ConsensusQualified bool `json:"consensusQualified"`
-	MaxHeadAge string `json:"maxHeadAge"`
-	ExpectedGenesisHashConfigured bool `json:"expectedGenesisHashConfigured"`
+	Service                       string `json:"service"`
+	Status                        string `json:"status"`
+	ChainID                       uint64 `json:"chainId"`
+	RPCConfigured                 bool   `json:"rpcConfigured"`
+	StorePath                     string `json:"storePath"`
+	HTTPAddr                      string `json:"httpAddr"`
+	PollInterval                  string `json:"pollInterval"`
+	Rebuild                       bool   `json:"rebuild"`
+	ConsensusStatusPath           string `json:"consensusStatusPath"`
+	ConsensusQualified            bool   `json:"consensusQualified"`
+	MaxHeadAge                    string `json:"maxHeadAge"`
+	ExpectedGenesisHashConfigured bool   `json:"expectedGenesisHashConfigured"`
 }
 
 func main() {
-	if err := run(); err != nil { fatal(err) }
+	if err := run(); err != nil {
+		fatal(err)
+	}
 }
 
 func run() error {
 	rpcURL := os.Getenv("INDEXER_RPC_URL")
-	if rpcURL == "" { return errors.New("INDEXER_RPC_URL is required") }
+	if rpcURL == "" {
+		return errors.New("INDEXER_RPC_URL is required")
+	}
 
 	storePath := os.Getenv("INDEXER_STORE_PATH")
-	if storePath == "" { storePath = "./var/420indexer/index.json" }
+	if storePath == "" {
+		storePath = "./var/420indexer/index.json"
+	}
 
 	httpAddr := os.Getenv("INDEXER_HTTP_ADDR")
-	if httpAddr == "" { httpAddr = defaultHTTPAddr }
+	if httpAddr == "" {
+		httpAddr = defaultHTTPAddr
+	}
 
 	pollInterval, err := parsePollInterval(os.Getenv("INDEXER_POLL_INTERVAL"))
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	maxHeadAge, err := parseMaxHeadAge(os.Getenv("INDEXER_MAX_HEAD_AGE"))
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	expectedGenesisHash := os.Getenv("INDEXER_EXPECTED_GENESIS_HASH")
 
 	rebuild := os.Getenv("INDEXER_REBUILD") == "1"
 	consensusStatusPath := os.Getenv("INDEXER_CONSENSUS_STATUS_PATH")
 	consensusProvider, err := newConsensusProvider(consensusStatusPath)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
+	nativeURL, jwtPath := os.Getenv("INDEXER_ENGINE_URL"), os.Getenv("INDEXER_JWT_SECRET")
+	if nativeURL == "" || jwtPath == "" {
+		return errors.New("INDEXER_ENGINE_URL and INDEXER_JWT_SECRET are required for complete native accounting logs")
+	}
+	secret, err := eng.LoadJWTSecret(jwtPath)
+	if err != nil {
+		return err
+	}
+	native, err := eng.NewClient(nativeURL, secret)
+	if err != nil {
+		return err
+	}
+
 	out, _ := json.Marshal(startup{
 		Service: "420Indexer", Status: "EXP_1_4_RUNTIME", ChainID: 420,
 		RPCConfigured: true, StorePath: storePath, HTTPAddr: httpAddr,
@@ -75,12 +103,16 @@ func run() error {
 	fmt.Println(string(out))
 
 	durable, err := store.NewFileStore(storePath)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	if rebuild {
-		if err := durable.Reset(); err != nil { return fmt.Errorf("reset rebuildable index: %w", err) }
+		if err := durable.Reset(); err != nil {
+			return fmt.Errorf("reset rebuildable index: %w", err)
+		}
 	}
 
-	client := indexerrpc.NewClient(rpcURL, 15*time.Second)
+	client := indexerrpc.NewClient(rpcURL, 15*time.Second).WithNativeLogs(native)
 	engine := ingest.New(420, version.Schema, client, durable).WithProducerAttributor(consensusProvider)
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -88,12 +120,16 @@ func run() error {
 
 	// Fail closed on startup: validate runtime RPC identity/finality/freshness
 	// before exposing HTTP, then complete the first deterministic catch-up.
-	if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID:420, ExpectedGenesisHash:expectedGenesisHash, MaxHeadAge:maxHeadAge, Now:time.Now().UTC()}); err != nil {
+	if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID: 420, ExpectedGenesisHash: expectedGenesisHash, MaxHeadAge: maxHeadAge, Now: time.Now().UTC()}); err != nil {
 		return fmt.Errorf("initial runtime source qualification: %w", err)
 	}
-	if err := engine.CatchUp(ctx); err != nil { return fmt.Errorf("initial catch-up: %w", err) }
+	if err := engine.CatchUp(ctx); err != nil {
+		return fmt.Errorf("initial catch-up: %w", err)
+	}
 	registryCatalog, err := decoder.RebuildProtocolRegistryCatalog420(durable)
-	if err != nil { return fmt.Errorf("initial Registry projection rebuild: %w", err) }
+	if err != nil {
+		return fmt.Errorf("initial Registry projection rebuild: %w", err)
+	}
 
 	runtimeHealth := api.NewRuntimeHealth()
 	runtimeHealth.MarkHealthy()
@@ -110,7 +146,9 @@ func run() error {
 	serverErr := make(chan error, 1)
 	go func() {
 		err := server.ListenAndServe()
-		if err != nil && !errors.Is(err, http.ErrServerClosed) { serverErr <- err }
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErr <- err
+		}
 		close(serverErr)
 	}()
 
@@ -124,10 +162,12 @@ func run() error {
 			defer stop()
 			return server.Shutdown(shutdownCtx)
 		case err, ok := <-serverErr:
-			if ok && err != nil { return fmt.Errorf("http server: %w", err) }
+			if ok && err != nil {
+				return fmt.Errorf("http server: %w", err)
+			}
 			return nil
 		case <-ticker.C:
-			if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID:420, ExpectedGenesisHash:expectedGenesisHash, MaxHeadAge:maxHeadAge, Now:time.Now().UTC()}); err != nil {
+			if _, err := indexerrpc.Validate(indexerrpc.NewQualificationSource(ctx, client, 420, version.Schema), indexerrpc.Requirements{RequiredChainID: 420, ExpectedGenesisHash: expectedGenesisHash, MaxHeadAge: maxHeadAge, Now: time.Now().UTC()}); err != nil {
 				runtimeHealth.MarkFailure(runtimeRPCIssue(err))
 				fmt.Fprintf(os.Stderr, "420Indexer runtime source qualification failed: %v\n", err)
 				continue
@@ -157,36 +197,59 @@ func run() error {
 }
 
 func newConsensusProvider(path string) (*consensusview.Provider, error) {
-	if path == "" { return nil, errors.New("INDEXER_CONSENSUS_STATUS_PATH is required") }
+	if path == "" {
+		return nil, errors.New("INDEXER_CONSENSUS_STATUS_PATH is required")
+	}
 	provider, err := consensusview.New(path)
-	if err != nil { return nil, fmt.Errorf("consensus provider: %w", err) }
-	if _, err := provider.Consensus(); err != nil { return nil, fmt.Errorf("consensus provider qualification: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("consensus provider: %w", err)
+	}
+	if _, err := provider.Consensus(); err != nil {
+		return nil, fmt.Errorf("consensus provider qualification: %w", err)
+	}
 	return provider, nil
 }
 
 func runtimeRPCIssue(err error) string {
 	switch {
-	case errors.Is(err, indexerrpc.ErrWrongChain): return "RPC_WRONG_CHAIN"
-	case errors.Is(err, indexerrpc.ErrGenesisMismatch): return "RPC_GENESIS_MISMATCH"
-	case errors.Is(err, indexerrpc.ErrFinalityOrdering): return "RPC_FINALITY_DIVERGENCE"
-	case errors.Is(err, indexerrpc.ErrStaleSource): return "RPC_SOURCE_STALE"
-	default: return "RPC_SOURCE_INVALID"
+	case errors.Is(err, indexerrpc.ErrWrongChain):
+		return "RPC_WRONG_CHAIN"
+	case errors.Is(err, indexerrpc.ErrGenesisMismatch):
+		return "RPC_GENESIS_MISMATCH"
+	case errors.Is(err, indexerrpc.ErrFinalityOrdering):
+		return "RPC_FINALITY_DIVERGENCE"
+	case errors.Is(err, indexerrpc.ErrStaleSource):
+		return "RPC_SOURCE_STALE"
+	default:
+		return "RPC_SOURCE_INVALID"
 	}
 }
 
-func parseMaxHeadAge(raw string) (time.Duration,error) {
-	if raw=="" { return defaultMaxHeadAge,nil }
-	d,err:=time.ParseDuration(raw)
-	if err!=nil { return 0,fmt.Errorf("INDEXER_MAX_HEAD_AGE: %w",err) }
-	if d<time.Second { return 0,errors.New("INDEXER_MAX_HEAD_AGE must be at least 1s") }
-	return d,nil
+func parseMaxHeadAge(raw string) (time.Duration, error) {
+	if raw == "" {
+		return defaultMaxHeadAge, nil
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil {
+		return 0, fmt.Errorf("INDEXER_MAX_HEAD_AGE: %w", err)
+	}
+	if d < time.Second {
+		return 0, errors.New("INDEXER_MAX_HEAD_AGE must be at least 1s")
+	}
+	return d, nil
 }
 
 func parsePollInterval(raw string) (time.Duration, error) {
-	if raw == "" { return defaultPollInterval, nil }
+	if raw == "" {
+		return defaultPollInterval, nil
+	}
 	d, err := time.ParseDuration(raw)
-	if err != nil { return 0, fmt.Errorf("INDEXER_POLL_INTERVAL: %w", err) }
-	if d < time.Second { return 0, errors.New("INDEXER_POLL_INTERVAL must be at least 1s") }
+	if err != nil {
+		return 0, fmt.Errorf("INDEXER_POLL_INTERVAL: %w", err)
+	}
+	if d < time.Second {
+		return 0, errors.New("INDEXER_POLL_INTERVAL must be at least 1s")
+	}
 	return d, nil
 }
 

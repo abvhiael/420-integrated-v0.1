@@ -206,12 +206,23 @@ def qualify(root, out, evidence, rpc, snapshot, start_execution, stop_execution,
         replaced = snapshot()
         assert replaced['sequence'] == replaced['observed'] == 5
         assert checkpoint()['Finalized']['Slot'] == 3
+        native_replacement = rpc('engine420_getSystemCallLogsV1', [replaced['hash']])
+        assert native_replacement['batchRoot'] == replaced['root'] and len(native_replacement['logs']) == 2
+        assert [int(x['data'],16) for x in native_replacement['logs'] if x['address'].lower() == '0x0000000000000000000000000000000000000423'] == [5]
+        try:
+            rpc('engine420_getSystemCallLogsV1',[after['hash']])
+        except RuntimeError:
+            pass
+        else:
+            raise AssertionError('orphaned native accounting archive accepted')
+        evidence['native_log_replacement'] = native_replacement
         record_scenario('certified bounded replacement restores canonical parent sequence', after, replaced)
         stable = checkpoint()
         send(cross_final)
         rejected = wait('rejected')
         assert 'finalized' in rejected['error']
         assert snapshot() == replaced and checkpoint() == stable and history()['Pending'] is None
+        assert rpc('engine420_getSystemCallLogsV1',[replaced['hash']]) == native_replacement
         cross_plan = out / 'plan-1-1.json'
         old_batch = json.loads(subprocess.check_output([str(producer), '--batch', '--record', str(cross_plan)], text=True))
         assert rpc('engine420_replaceSystemCallsV1', [old_batch])['status'] == 'INVALID'

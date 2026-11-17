@@ -4,6 +4,7 @@ import (
     "bytes"
     "crypto/sha256"
     "encoding/binary"
+ "encoding/json"
     "errors"
     "fmt"
     "math/big"
@@ -13,6 +14,8 @@ import (
     "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/common/hexutil"
     "github.com/ethereum/go-ethereum/crypto"
+ "github.com/ethereum/go-ethereum/core/types"
+ "github.com/ethereum/go-ethereum/ethdb"
 )
 
 const (
@@ -209,4 +212,21 @@ func mustABI(s string) abi.ABI {
 func GatewayInput(c Call) ([]byte, error) {
     action := crypto.Keccak256Hash([]byte(c.Action))
     return gatewayABI.Pack("execute", uint64(c.Sequence), uint64(c.ExecutionBlock), c.ParentHash, new(big.Int).SetUint64(uint64(c.ChainID)), action, c.Target, []byte(c.Payload))
+}
+
+// Native logs are an observational archive, not synthetic transaction receipts.
+// Persist them atomically with accepted block data; never from payload building.
+func nativeLogKey(hash common.Hash) []byte { return append([]byte("420-native-logs-v1:"),hash[:]...) }
+func WriteNativeLogs(db ethdb.KeyValueWriter,hash common.Hash,logs []*types.Log)error{
+ if logs==nil{logs=[]*types.Log{}}
+ for _,entry:=range logs { if entry==nil{return fmt.Errorf("nil native log")};if entry.Topics==nil{entry.Topics=[]common.Hash{}} }
+ raw,err:=json.Marshal(logs);if err!=nil{return err}
+ sum:=sha256.Sum256(raw);return db.Put(nativeLogKey(hash),append(sum[:],raw...))
+}
+func ReadNativeLogs(db ethdb.KeyValueReader,hash common.Hash)([]*types.Log,error){
+ raw,err:=db.Get(nativeLogKey(hash));if err!=nil{return nil,fmt.Errorf("native log archive unavailable: %w",err)}
+ if len(raw)<34{return nil,fmt.Errorf("corrupt native log archive")};sum:=sha256.Sum256(raw[32:]);if !bytes.Equal(sum[:],raw[:32]){return nil,fmt.Errorf("native log archive checksum mismatch")}
+ var logs []*types.Log;if err=json.Unmarshal(raw[32:],&logs);err!=nil || logs==nil{return nil,fmt.Errorf("invalid native log archive")}
+ for i,log:=range logs{if log==nil || log.BlockHash!=hash || log.TxHash!=(common.Hash{}) || log.Removed || (i>0 && log.Index<=logs[i-1].Index){return nil,fmt.Errorf("native log provenance mismatch")}}
+ return logs,nil
 }

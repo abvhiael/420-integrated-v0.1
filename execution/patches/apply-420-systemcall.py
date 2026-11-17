@@ -82,7 +82,7 @@ def main() -> None:
     )
 
     upstream_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod())\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\treturn ourCaps\n}\n'''
-    patched_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod()+1)\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\tourCaps = append(ourCaps, "engine420_submitSystemCallsV1", "engine420_replaceSystemCallsV1")\n\treturn ourCaps\n}\n'''
+    patched_exchange_capabilities = '''// ExchangeCapabilities returns the current methods provided by this node.\nfunc (api *ConsensusAPI) ExchangeCapabilities(caps []string) []string {\n\tvalueT := reflect.TypeOf(api)\n\n\t// If the CL supports getBlobsV4, we call EnableCell() on the\n\t// blob cache to skip the blob recovery process. This is a\n\t// one-directional toggle, which assumes that once the CL\n\t// supports getBlobsV4, it will not fall back to getBlobsV3\n\t// again.\n\tcellmode := slices.Contains(caps, "engine_getBlobsV4")\n\tapi.eth.BlobCache().SetCellMode(cellmode)\n\n\tourCaps := make([]string, 0, valueT.NumMethod()+1)\n\tfor i := 0; i < valueT.NumMethod(); i++ {\n\t\tname := []rune(valueT.Method(i).Name)\n\t\tif string(name) == "ExchangeCapabilities" {\n\t\t\tcontinue\n\t\t}\n\t\tourCaps = append(ourCaps, "engine_"+string(unicode.ToLower(name[0]))+string(name[1:]))\n\t}\n\tourCaps = append(ourCaps, "engine420_submitSystemCallsV1", "engine420_replaceSystemCallsV1", "engine420_getSystemCallLogsV1")\n\treturn ourCaps\n}\n'''
     replace_once(catalyst, upstream_exchange_capabilities, patched_exchange_capabilities)
 
     # Geth's JWT-authenticated endpoint filters namespaces through DefaultAuthModules.
@@ -127,7 +127,7 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         msg := &Message{From: params.SystemAddress, GasLimit: gasLimit, GasPrice: uint256.NewInt(0), GasFeeCap: uint256.NewInt(0), GasTipCap: uint256.NewInt(0), To: &to, Data: input}
         evm.SetTxContext(NewEVMTxContext(msg))
         evm.StateDB.Prepare(evm.GetRules(), common.Address{}, common.Address{}, nil, nil, nil)
-        evm.StateDB.SetTxContext(common.Hash{}, 0, blockAccessIndex+uint32(i))
+        evm.StateDB.SetTxContext(common.Hash{}, int(blockAccessIndex-2), blockAccessIndex+uint32(i))
         evm.StateDB.AddAddressToAccessList(to)
         _, _, err = evm.Call(msg.From, *msg.To, msg.Data, gasBudget, common.U2560)
         if evm.StateDB.AccessEvents() != nil {
@@ -144,6 +144,28 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
 
 '''
     replace_once(state_processor, '\nvar depositTopic = common.HexToHash(', '\n' + process_fn + 'var depositTopic = common.HexToHash(')
+
+    # Preserve native EVM event evidence without inventing extra Ethereum
+    # transaction receipts or changing the frozen receipt/header commitment.
+    blockchain = root / "core" / "blockchain.go"
+    replace_once(blockchain, '"github.com/ethereum/go-ethereum/core/state"\n',
+                 '"github.com/ethereum/go-ethereum/core/state"\n\t"github.com/ethereum/go-ethereum/core/systemcall420"\n')
+    replace_once(blockchain, '\trawdb.WritePreimages(batch, statedb.Preimages())\n',
+                 '\tif err := systemcall420.WriteNativeLogs(batch, block.Hash(), statedb.GetLogs(common.Hash{}, block.NumberU64(), block.Hash(), block.Time())); err != nil { return err }\n\trawdb.WritePreimages(batch, statedb.Preimages())\n')
+    native_rpc = r'''
+// GetSystemCallLogsV1 returns only imported canonical native logs. A missing
+// archive is an error, including pre-upgrade blocks; it is never an empty proof.
+func (api *SystemCallAPI) GetSystemCallLogsV1(hash common.Hash) (map[string]interface{}, error) {
+ chain:=api.eth.BlockChain()
+ header:=chain.GetHeaderByHash(hash)
+ if header==nil || rawdb.ReadCanonicalHash(api.eth.ChainDb(),header.Number.Uint64())!=hash {return nil,fmt.Errorf("native log block is not canonical")}
+ logs,err:=systemcall420.ReadNativeLogs(api.eth.ChainDb(),hash);if err!=nil{return nil,err}
+ for _,entry:=range logs{if entry.BlockNumber!=header.Number.Uint64(){return nil,fmt.Errorf("native log height mismatch")}}
+ if rawdb.ReadCanonicalHash(api.eth.ChainDb(),header.Number.Uint64())!=hash{return nil,fmt.Errorf("canonical block changed")}
+ return map[string]interface{}{"blockHash":hash,"blockNumber":hexutil.Uint64(header.Number.Uint64()),"batchRoot":common.BytesToHash(header.Extra),"logs":logs},nil
+}
+'''
+    replace_once(catalyst, '\n// SystemCallAPI stages committed consensus data', native_rpc + '\n// SystemCallAPI stages committed consensus data')
 
     worker = root / "miner" / "worker.go"
     replace_once(worker, 'import (\n\t"context"\n', 'import (\n\t"bytes"\n\t"context"\n')
@@ -187,7 +209,7 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         '\t\t// pivot authorizes restoring the snap-sync mode here.\n'
         '\t\tif fullBlock.Number.Uint64() == 0 && snapBlock.Number.Uint64() > 0 && rawdb.ReadLastPivotNumber(disk) != nil {\n',
     )
-    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(worker), str(syncmode)])
+    subprocess.check_call(["gofmt", "-w", str(target), str(catalyst), str(defaults), str(state_processor), str(blockchain), str(worker), str(syncmode)])
     print("420 system-call patch applied to", root)
 
 

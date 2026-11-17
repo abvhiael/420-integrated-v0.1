@@ -1,0 +1,25 @@
+name: 420Stake STAKE-AUDIT-9.1 protector
+on:
+  pull_request:
+    paths:
+      - 'consensus/slashing/**'
+      - '.github/workflows/stake-audit-9-1-protector.yml'
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Verify exact head
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Slashing history regression and race qualification
+        run: go test -race -count=1 -v ./consensus/slashing

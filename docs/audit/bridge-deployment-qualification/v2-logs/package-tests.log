@@ -1,0 +1,25 @@
+test_active_frozen_gateway_rejected (__main__.PackageTest.test_active_frozen_gateway_rejected) ... ok
+test_artifact_tampering_rejected (__main__.PackageTest.test_artifact_tampering_rejected) ... ok
+test_compiler_input_tampering_rejected (__main__.PackageTest.test_compiler_input_tampering_rejected) ... ok
+test_configuration_tampering_rejected (__main__.PackageTest.test_configuration_tampering_rejected) ... ok
+test_create_address_known_evm_vector (__main__.PackageTest.test_create_address_known_evm_vector) ... ok
+test_custody_dependency_order_rejected (__main__.PackageTest.test_custody_dependency_order_rejected) ... ok
+test_deterministic_frozen_and_create_plan (__main__.PackageTest.test_deterministic_frozen_and_create_plan) ... ok
+test_duplicate_deployment_rejected (__main__.PackageTest.test_duplicate_deployment_rejected) ... ok
+test_foreign_registry_deployment_rejected (__main__.PackageTest.test_foreign_registry_deployment_rejected) ... ok
+test_invalid_chain_and_nonce_rejected (__main__.PackageTest.test_invalid_chain_and_nonce_rejected) ... ok
+test_legacy_placeholder_plans_rejected (__main__.PackageTest.test_legacy_placeholder_plans_rejected) ... ok
+test_production_plan_accepts_reconciled_frozen_authority (__main__.PackageTest.test_production_plan_accepts_reconciled_frozen_authority) ... ok
+test_production_plan_rejects_commitment_payload_tampering (__main__.PackageTest.test_production_plan_rejects_commitment_payload_tampering) ... ok
+test_production_plan_rejects_frozen_authority_drift (__main__.PackageTest.test_production_plan_rejects_frozen_authority_drift) ... ok
+test_production_plan_rejects_retired_commitment_version (__main__.PackageTest.test_production_plan_rejects_retired_commitment_version) ... ok
+test_source_drift_rejected (__main__.PackageTest.test_source_drift_rejected) ... ok
+test_wrong_constructor_config_rejected (__main__.PackageTest.test_wrong_constructor_config_rejected) ... ok
+test_wrong_constructor_governance_rejected (__main__.PackageTest.test_wrong_constructor_governance_rejected) ... ok
+test_wrong_constructor_registry_rejected (__main__.PackageTest.test_wrong_constructor_registry_rejected) ... ok
+test_wrong_registry_rejected (__main__.PackageTest.test_wrong_registry_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.280s
+
+OK

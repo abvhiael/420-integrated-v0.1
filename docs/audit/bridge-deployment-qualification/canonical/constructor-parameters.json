@@ -1,0 +1,1747 @@
+{
+  "constructors": [
+    {
+      "artifact_sha256": "77215b7f02e6dd402926e1d94f825db2e44a71d48eb73c49aedc5c3b0417e657",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        }
+      ],
+      "contract": "BnbDepositGateway420",
+      "source": "contracts/src/bridge/BnbDepositGateway420.sol"
+    },
+    {
+      "artifact_sha256": "161b056676406910f384a8ece12b8c4a50360dc1e58e5e30b8c22b8bad2f53f6",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeAccountingRegistry",
+      "source": "contracts/src/bridge/BridgeAccountingRegistry.sol"
+    },
+    {
+      "artifact_sha256": "f44b5ed60b44ebf5272d0a01b1f494107c39534d1e4fd6c9e99e23f5810d4274",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeAssetRegistry",
+      "source": "contracts/src/bridge/BridgeAssetRegistry.sol"
+    },
+    {
+      "artifact_sha256": "fb6dd7931fcf054f19cb39ba47d1f75261ceeef5933da1c1a5bc64b861581b4e",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeChainRegistry420",
+      "source": "contracts/src/bridge/BridgeChainRegistry420.sol"
+    },
+    {
+      "artifact_sha256": "d742995414a524407995cc80f7489b3a2208db69184c22c9c408d998e17358b6",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BridgeIds420",
+      "source": "contracts/src/bridge/BridgeIds420.sol"
+    },
+    {
+      "artifact_sha256": "2f26f7503e67a730ada6e952c2d6d458d38171589d6d1d356417cdebafad24ca",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BridgeProofEnvelope420",
+      "source": "contracts/src/bridge/BridgeProofEnvelope420.sol"
+    },
+    {
+      "artifact_sha256": "49ec93eb03032125167667ca61256b1f591054b30d9da967f644ffc28744752a",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "asset",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "units",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint8",
+          "value": null
+        },
+        {
+          "name": "custody",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BridgeRepresentation420",
+      "source": "contracts/src/bridge/BridgeRepresentation420.sol"
+    },
+    {
+      "artifact_sha256": "6b71a59600390e1087c267323156f2a2c11914f0a151a630c1275c75e6c4cc8c",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeRiskManager",
+      "source": "contracts/src/bridge/BridgeRiskManager.sol"
+    },
+    {
+      "artifact_sha256": "753e9df12bfcf46630beb620b572c6d45ec207163f4cc8498183ad5bf7df4970",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeRouteRegistry",
+      "source": "contracts/src/bridge/BridgeRouteRegistry.sol"
+    },
+    {
+      "artifact_sha256": "c9ac6583d2a67348cb50e5cfe8fc201eebb6acc673b62248004266c2cd231cd4",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeTransferRegistry",
+      "source": "contracts/src/bridge/BridgeTransferRegistry.sol"
+    },
+    {
+      "artifact_sha256": "6c8902ceb630b13599eb21bf45dec667311359390f4a01c00298dc632fdd9f58",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "gov",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "config",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BridgeValueCustody420",
+      "source": "contracts/src/bridge/BridgeValueCustody420.sol"
+    },
+    {
+      "artifact_sha256": "201ea77c80134ef139a9bb50b0e9fed4cad47151d33b3abe6d61807b36f561d0",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "implementation_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "initialization",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        }
+      ],
+      "contract": "BridgeVerifierProxy420",
+      "source": "contracts/src/bridge/BridgeVerifierProxy420.sol"
+    },
+    {
+      "artifact_sha256": "bcbffb707ec34226626188de842b3891149e572370e7fce004ca37ab797a2874",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "config",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "BridgeVerifierRegistry420",
+      "source": "contracts/src/bridge/BridgeVerifierRegistry420.sol"
+    },
+    {
+      "artifact_sha256": "d04c39fe3c2aef964e9159d0df3e7155ad0720133d10bdfeb3512ef74c9153dd",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "CADCBridgeIntegration",
+      "source": "contracts/src/bridge/CADCBridgeIntegration.sol"
+    },
+    {
+      "artifact_sha256": "bc2d1870c326ab889928812ed80c6aab033ff44c7e02142457b5f5b81a6e81d5",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        }
+      ],
+      "contract": "EthereumDepositGateway420",
+      "source": "contracts/src/bridge/EthereumDepositGateway420.sol"
+    },
+    {
+      "artifact_sha256": "9136ef3a70504b8edbeb2e26b8c6af684ef04f65c09957f313459624ed3178e1",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        }
+      ],
+      "contract": "GatewayRouter420",
+      "source": "contracts/src/bridge/GatewayRouter420.sol"
+    },
+    {
+      "artifact_sha256": "792d61f39b845976de4ce2a1b8b87f1c53312242e540423aff393e247a958cd0",
+      "classification": "core",
+      "constructor": [
+        {
+          "name": "timelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "genesisConfigHash_",
+          "resolution": "PINNED_GENESIS",
+          "type": "bytes32",
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+        },
+        {
+          "name": "verifier_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000000"
+        }
+      ],
+      "contract": "VerifiedGateway420",
+      "source": "contracts/src/bridge/VerifiedGateway420.sol"
+    },
+    {
+      "artifact_sha256": "e5602c56c4ba1a3f3191a75e05893b5384c06ee3596df8a400ed9eb8c8419398",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BitcoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/BitcoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "cde638b4d3e317e9a5945c8c67830c3a9ab9ab4bbc8a94c862d3ee08e6e442a4",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BnbBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/BnbBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "749458738d7a7bfe4f18764b86628aca07a9424070282bdaba3172a80a6d5cc3",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "integration_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "asset_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        }
+      ],
+      "contract": "CADCLayerZeroAdapter",
+      "source": "contracts/src/bridge/adapters/CADCLayerZeroAdapter.sol"
+    },
+    {
+      "artifact_sha256": "b4dd10057b96deb35c0137c71c60ad95b20b3b9b30340be0fc7a557d6efdd743",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "CurecoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/CurecoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "96b62c4fd3daf50b2605fb6d17c4c0562adc478e7cea257846a1794a2b2987d5",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "DobbscoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/DobbscoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "c6d59a6d3b25ca72b9443f2ed6f926c7f8827e9032d24991bc22380f9aded56d",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "DogecoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/DogecoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "6758225ac848f3ed618036d62dc1298cfc0a15e4a6b3166ccb88639bacaac28b",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "EthereumBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/EthereumBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "72b79535b44eb6e693f03a5306b6f2bd2833642a337e66a48a9480b4ee43024b",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "LitecoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/LitecoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "9b0e251bf7db657c6e5b2b3e9bc1edaeb6db83e48dc046080fe2ca9f701b42af",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "PirateChainBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/PirateChainBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "4d4b9249700e37e46e90e87d4f5f9ea1adddd8f825bd0c35bb35e8419945213f",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "PotcoinBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/PotcoinBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "77a97074d517f20488ba5c28fa0dae584ae26c1f5c93229b07d18cf425befb0b",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "SolanaBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/SolanaBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "9093513eb4b193169ac7dd8755190f927f3b25b6df17db8014891204c3070926",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "TronBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/TronBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "8c1679077def30281ad4df63fae7e35179bf7c8a2789dc0dd99c18fe6fd1d976",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "nativeUSDC",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "assetId",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        }
+      ],
+      "contract": "USDCCCTPAdapter",
+      "source": "contracts/src/bridge/adapters/USDCCCTPAdapter.sol"
+    },
+    {
+      "artifact_sha256": "244c88734b19b09d0704e4aa18bc9e285e6200f9128433b1d6a75f9898532511",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "gatewayRouter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "verifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "XrplBridgeAdapter420",
+      "source": "contracts/src/bridge/adapters/XrplBridgeAdapter420.sol"
+    },
+    {
+      "artifact_sha256": "707f7066f5f0f2264eb3e9606ba4ae8e6453e0b4d13117a309d9630f9309a6cd",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "registry_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000434"
+        },
+        {
+          "name": "adapter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "proof_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "backing_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "descriptor",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "feeCap",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        }
+      ],
+      "contract": "BitcoinCustody420",
+      "source": "contracts/src/bridge/bitcoin/BitcoinCustody420.sol"
+    },
+    {
+      "artifact_sha256": "c43389f42ca405c1216faf12f0a57a85a62b0a7a4698cc04f3c6d86d6a60a857",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "c",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "t",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BitcoinCustodyOutcome420",
+      "source": "contracts/src/bridge/bitcoin/BitcoinCustodyOutcome420.sol"
+    },
+    {
+      "artifact_sha256": "f666b96bc3ee1a841d54919e59c5b89ebcc6d1fcefe0a89e4010585f24c4aa93",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinScript420",
+      "source": "contracts/src/bridge/bitcoin/BitcoinScript420.sol"
+    },
+    {
+      "artifact_sha256": "325cd64e116f47a64b6429b2681de88b291efd7d97128804473b0d9792f52053",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinSigningTransaction420",
+      "source": "contracts/src/bridge/bitcoin/BitcoinSigningTransaction420.sol"
+    },
+    {
+      "artifact_sha256": "f1ce82435d3b2c86d88b5163e7b2b5deff07243a743bb9311fbb4df481e891e4",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "adapter_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "deposits_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BitcoinWithdrawalProof420",
+      "source": "contracts/src/bridge/bitcoin/BitcoinWithdrawalProof420.sol"
+    },
+    {
+      "artifact_sha256": "d123f346ed94bd0a0f014af3e49efc621192a0038f045ecda9846dcf69b29329",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SolanaOutboundWire420",
+      "source": "contracts/src/bridge/solana/SolanaOutboundWire420.sol"
+    },
+    {
+      "artifact_sha256": "ed6e68ef7594e783bc9020fd70dcefbfc78a8185b8bfc8e08f863a8ee9808520",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SupportedTokenRoutes420",
+      "source": "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol"
+    },
+    {
+      "artifact_sha256": "6b6396c3ce72fac18263c5f85d68c8df32b411656b2556dbdd57ee17d69a3456",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "network_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "signer",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "height",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        },
+        {
+          "name": "blockHash",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "root",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        }
+      ],
+      "contract": "AuthenticatedCheckpoint420",
+      "source": "contracts/src/bridge/verifiers/AuthenticatedCheckpoint420.sol"
+    },
+    {
+      "artifact_sha256": "e18684931c7ab78725b7b5c90493eb2b4f11c526c6a4176a0afaaaa56c39592b",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "chain_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "gatewayScript",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        },
+        {
+          "name": "route",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "minimumHeight",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BitcoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/BitcoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "1f5ff3746d3b9b916764657f39a931507d9458a1d59225b373cc682342628171",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinHeaderChain420",
+      "source": "contracts/src/bridge/verifiers/BitcoinHeaderChain420.sol"
+    },
+    {
+      "artifact_sha256": "e71be918b19d1f0eea58c182e555175942650931bef2673ffe16c3d1e2c84110",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinHeaderPow420",
+      "source": "contracts/src/bridge/verifiers/BitcoinHeaderPow420.sol"
+    },
+    {
+      "artifact_sha256": "71d464385814194509d2549b7c3bc42cb6c0f4924ddb20f5584e0b9f6102c003",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinMerkleBranch420",
+      "source": "contracts/src/bridge/verifiers/BitcoinMerkleBranch420.sol"
+    },
+    {
+      "artifact_sha256": "5572078ad89d021465019ac14f2eda8b6d983eebac261bbcfe9ebd26c3180428",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BitcoinTransaction420",
+      "source": "contracts/src/bridge/verifiers/BitcoinTransaction420.sol"
+    },
+    {
+      "artifact_sha256": "f9863343cb168aff23ac36ae4d3df6bc4436b02e6cfb4a703f992c375df63f3c",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "finalityOracle_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "messageVerifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BnbFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/BnbFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "0c85f77f36e5ec631d36c703a122ed191661581173e67d0550a93065f413dc4a",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "BnbGatewayMessageVerifier420",
+      "source": "contracts/src/bridge/verifiers/BnbGatewayMessageVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "33bd55d5dcd2af91f97df2273655aab11193a42203fed604283516ff367d31aa",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BridgeCrypto420",
+      "source": "contracts/src/bridge/verifiers/BridgeCrypto420.sol"
+    },
+    {
+      "artifact_sha256": "65956272edabac8ee0fed679c903629f2be58af907fbd5040a5bf17af0b5fac5",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BridgeWire420",
+      "source": "contracts/src/bridge/verifiers/BridgeWire420.sol"
+    },
+    {
+      "artifact_sha256": "2b41316c3a951feba839acf75a89ce3962398257d23888eee88c176bbf1346db",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "depth",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint32",
+          "value": null
+        }
+      ],
+      "contract": "CurecoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/CurecoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "91585a521f1e4f25d244204994cdab484df0a16a0c8fa5bd69a2107af6fb0e9c",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "minimumHeight",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        }
+      ],
+      "contract": "DobbscoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/DobbscoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "6731c3286d13241ce0cd4556b95b6ac6838c3500c469082de0800b0d08cc0e6a",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "DogecoinAuxPow420",
+      "source": "contracts/src/bridge/verifiers/DogecoinAuxPow420.sol"
+    },
+    {
+      "artifact_sha256": "25d3c79faf7d2f47b517d1a8eaea38e55ad2a644e16bc719ae9170f4f1245115",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "chain_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "gatewayScript",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        },
+        {
+          "name": "route",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "minimumHeight",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "confirmations_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint32",
+          "value": null
+        }
+      ],
+      "contract": "DogecoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/DogecoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "82074e076518ab8b195e8368f3671d283c27f37f42aa222824ac1181c7a5366e",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "DogecoinHeaderChain420",
+      "source": "contracts/src/bridge/verifiers/DogecoinHeaderChain420.sol"
+    },
+    {
+      "artifact_sha256": "adb5f01ba7f18c06fbd3fcdb20ffbbd53ecd006ad4972a6a7259f71875326246",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "DogecoinTransaction420",
+      "source": "contracts/src/bridge/verifiers/DogecoinTransaction420.sol"
+    },
+    {
+      "artifact_sha256": "1a58e5782855d8f42c0bc58c7b747ce9b835354d74a7c5d3abd186633facdbc0",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "trustedCheckpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "(uint64,uint64,bytes32,bytes32,bytes32)",
+          "value": null
+        },
+        {
+          "name": "committeeRoot",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "committeeBranch",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32[]",
+          "value": null
+        }
+      ],
+      "contract": "EthereumConsensusLightClient420",
+      "source": "contracts/src/bridge/verifiers/EthereumConsensusLightClient420.sol"
+    },
+    {
+      "artifact_sha256": "a8e850f335fb4d65ebb200223839b5e6e211c17b116a47fe4d70b3504e7d0fda",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "EthereumExecutionHeader420",
+      "source": "contracts/src/bridge/verifiers/EthereumExecutionHeader420.sol"
+    },
+    {
+      "artifact_sha256": "66f5f078c8769cf433193cf7d2d2dfdf066b46df85b2c1d045ee26e7523fb28d",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governanceTimelock_",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "finalityOracle_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "messageVerifier_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "EthereumFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/EthereumFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "e66bc28a8d0cef2da4455e827ec09b23947d5e492530dc2df1afaca6832822bb",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "EthereumGatewayMessageVerifier420",
+      "source": "contracts/src/bridge/verifiers/EthereumGatewayMessageVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "a6407ddf151f5f2b39fd0089c62322ceffbc1de66cd35ccb1d16065d8fb61f11",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "EthereumMPT420",
+      "source": "contracts/src/bridge/verifiers/EthereumMPT420.sol"
+    },
+    {
+      "artifact_sha256": "68b6ec901acb0f17fe23c04f2b2ab3ee91294e7fd5e55cf7eee966b6c853cde9",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "EthereumRLP420",
+      "source": "contracts/src/bridge/verifiers/EthereumRLP420.sol"
+    },
+    {
+      "artifact_sha256": "79e29b112b99ca7f9fa1adceddaa0e2275cec4d57af5f57af101d3b5af105759",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "EthereumSSZ420",
+      "source": "contracts/src/bridge/verifiers/EthereumSSZ420.sol"
+    },
+    {
+      "artifact_sha256": "e959af181e3cc7dec381c4b08eeeb9ef0691d4491014493f42797b313d3ccc5d",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "chain_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "gatewayScript",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        },
+        {
+          "name": "route",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "minimumHeight",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint64",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "LitecoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/LitecoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "2ad0cc46f32d40edb02d9bac4c0e15660716040385c6a12e0447db5b090fff3b",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "LitecoinHeaderChain420",
+      "source": "contracts/src/bridge/verifiers/LitecoinHeaderChain420.sol"
+    },
+    {
+      "artifact_sha256": "aa73ff0870b1498d36896e39bc40b24dd582cde920b766dae6c639d29f128fb2",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "LitecoinScrypt420",
+      "source": "contracts/src/bridge/verifiers/LitecoinScrypt420.sol"
+    },
+    {
+      "artifact_sha256": "77d0689eb14a5bb8532cb6344b9800f3ece483260e80a6f8d2d82c78f7d17de7",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "LitecoinTransaction420",
+      "source": "contracts/src/bridge/verifiers/LitecoinTransaction420.sol"
+    },
+    {
+      "artifact_sha256": "b735a1b532529dd26adbb55b10c4ee7b1fc7af0a6562e9c860107719d5761072",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "PirateChainFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/PirateChainFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "6ec47c11ffe152e63b2a6d3934bc77b55fefe19c6a14d7978f534a241cfd2a04",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "depth",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "uint32",
+          "value": null
+        }
+      ],
+      "contract": "PotcoinFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/PotcoinFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "8164db29df62189d5e9039eddc6095ffeb3234dc91814ffd5e634e95608193da",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "quorum_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "SolanaFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/SolanaFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "db0d9f42fb0299629e1fbd557548732e752544cdf6d85c47a4637814b06bdf2e",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "TronFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/TronFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "f51534e23716285085311a7c7d17a5c0514cc616d8ffea4d0e1882905eb58233",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        },
+        {
+          "name": "router",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        }
+      ],
+      "contract": "XrplFinalityVerifier420",
+      "source": "contracts/src/bridge/verifiers/XrplFinalityVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "34f3576032c91c1f0b96f0f07b7327e4b01e75c0ad3b9165468637963280567f",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BnbBlsHash420",
+      "source": "contracts/src/bridge/verifiers/bnb/BnbBlsHash420.sol"
+    },
+    {
+      "artifact_sha256": "822b30fcdf1c14bcc8f0c89cc0c0e2ae2e4547fb5e750c1212bbc3fe01d34fb3",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BnbBlsMath420",
+      "source": "contracts/src/bridge/verifiers/bnb/BnbBlsMath420.sol"
+    },
+    {
+      "artifact_sha256": "8bbc70688d4d453809d40c4015592acb9ed1908aa97ad1f0a1d2ee20c94e150b",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BnbBlsVerifier420",
+      "source": "contracts/src/bridge/verifiers/bnb/BnbBlsVerifier420.sol"
+    },
+    {
+      "artifact_sha256": "0ccd662235f288f8adc657fb91f07596655beacabf446ca83840fceae658564c",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "bls_",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "address",
+          "value": null
+        },
+        {
+          "name": "trustedSnapshot",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes32",
+          "value": null
+        },
+        {
+          "name": "checkpoint",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        },
+        {
+          "name": "previousEpoch",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        },
+        {
+          "name": "currentEpoch",
+          "resolution": "EXPLICIT_DEPLOYMENT_INPUT_REQUIRED",
+          "type": "bytes",
+          "value": null
+        }
+      ],
+      "contract": "BnbConsensusLightClient420",
+      "source": "contracts/src/bridge/verifiers/bnb/BnbConsensusLightClient420.sol"
+    },
+    {
+      "artifact_sha256": "c43ce0c6eaeb8d2de60bf1af0d96e5ca7844ef1728e165898ae30461f6f1fc7c",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "BnbHeader420",
+      "source": "contracts/src/bridge/verifiers/bnb/BnbHeader420.sol"
+    },
+    {
+      "artifact_sha256": "a6eea59550ad2f171867ce640091b105b25362d9f5330969d5aaef732a440827",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "CCTPV2Message420",
+      "source": "contracts/src/bridge/verifiers/cctp/CCTPV2Message420.sol"
+    },
+    {
+      "artifact_sha256": "e1d98bb86b6be6cd46158e7479edbb7e89c8f94214138937b56626c2a8e4eef4",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "CurecoinConsensus420",
+      "source": "contracts/src/bridge/verifiers/curecoin/CurecoinConsensus420.sol"
+    },
+    {
+      "artifact_sha256": "e997c43690aed974ff4300f4528cb0c96ef50e6db0968860b8faf11881a268f8",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "CurecoinSignature420",
+      "source": "contracts/src/bridge/verifiers/curecoin/CurecoinSignature420.sol"
+    },
+    {
+      "artifact_sha256": "1973bc62a152aec58126f53250611f5f53fac66bc097b87bf7f6547f5c6b560a",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "CurecoinWire420",
+      "source": "contracts/src/bridge/verifiers/curecoin/CurecoinWire420.sol"
+    },
+    {
+      "artifact_sha256": "4f15676a39416afd0aeccbd92a9cefc4683d62aad541c04f9fb93c39b6ace914",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "DobbscoinConsensus420",
+      "source": "contracts/src/bridge/verifiers/dobbscoin/DobbscoinConsensus420.sol"
+    },
+    {
+      "artifact_sha256": "16199e782077a95bce3b7fd3add8c1b58d1a292a350a9d4250d4342f07ba4968",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "DobbscoinWire420",
+      "source": "contracts/src/bridge/verifiers/dobbscoin/DobbscoinWire420.sol"
+    },
+    {
+      "artifact_sha256": "ec404ab905c6d1e2635ad75e3f9a2523490ee568d58d023dd0fbcb6dab8495e5",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "PirateEquihash420",
+      "source": "contracts/src/bridge/verifiers/pirate/PirateEquihash420.sol"
+    },
+    {
+      "artifact_sha256": "070c0d34e84c6218ef98fc2d482fe689abc5d3ae8b44bdc09c162bedf0e18bfe",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "PotcoinConsensus420",
+      "source": "contracts/src/bridge/verifiers/potcoin/PotcoinConsensus420.sol"
+    },
+    {
+      "artifact_sha256": "b24c504e59a70236100ccdf5df0c53570496c206b6984195eb2b6549911074ba",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "PotcoinSignature420",
+      "source": "contracts/src/bridge/verifiers/potcoin/PotcoinSignature420.sol"
+    },
+    {
+      "artifact_sha256": "0d8487966e59cb365261ee8eeef667f26dd690c0f29460deaac639771ba34fc5",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "PotcoinWire420",
+      "source": "contracts/src/bridge/verifiers/potcoin/PotcoinWire420.sol"
+    },
+    {
+      "artifact_sha256": "81b9c14a17a1ef78c5bc4f1359e91d384a6802bfe3f6d78e6f984a3414ed5ec0",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SolanaEd25519420",
+      "source": "contracts/src/bridge/verifiers/solana/SolanaEd25519420.sol"
+    },
+    {
+      "artifact_sha256": "ddc29cda3efb7bb5d439d2907663e64cebe402e7b331613942995fadb9a790e5",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SolanaSha512420",
+      "source": "contracts/src/bridge/verifiers/solana/SolanaEd25519420.sol"
+    },
+    {
+      "artifact_sha256": "f0c00cc44477cfe8d1854d558491d432436d426ac264efb99a9923e57512c00d",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SolanaTransaction420",
+      "source": "contracts/src/bridge/verifiers/solana/SolanaTransaction420.sol"
+    },
+    {
+      "artifact_sha256": "a3e1084a58c217a87c8d3b111960de4e521c63f7146bc98b2f8b054563fb03d8",
+      "classification": "candidate",
+      "constructor": [
+        {
+          "name": "governance",
+          "resolution": "PINNED_GENESIS",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000429"
+        }
+      ],
+      "contract": "SolanaValidatorQuorum420",
+      "source": "contracts/src/bridge/verifiers/solana/SolanaValidatorQuorum420.sol"
+    },
+    {
+      "artifact_sha256": "4b19d3b7642657907ed99612f8ab2aca9a4bb017cac1da1d14e1613d733c129f",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "Sha512",
+      "source": "contracts/src/bridge/verifiers/solana/vendor/Sha512.sol"
+    },
+    {
+      "artifact_sha256": "f7da38e8c9bd4646d18e0defabd2b35bae2a94834e5af8bd36df1167d074b365",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "TronProto420",
+      "source": "contracts/src/bridge/verifiers/tron/TronProto420.sol"
+    },
+    {
+      "artifact_sha256": "b15a1e28da8b68c107048d1580a30f7d7f86527491abe13a085eb8fb7aa5e671",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "TronWire420",
+      "source": "contracts/src/bridge/verifiers/tron/TronWire420.sol"
+    },
+    {
+      "artifact_sha256": "cdbb5f9dc3e24b39ebc72589985e9086832f7bea0909359d5f08a9f193a9f021",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "Verifier",
+      "source": "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/Groth16Verifier.sol"
+    },
+    {
+      "artifact_sha256": "c462ec97dde04564ce2309e5f117cc2fd93c1e5bbb11d52caa31f13b859e3213",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "SP1Verifier",
+      "source": "contracts/src/bridge/verifiers/vendor/sp1/v6.1.0/SP1VerifierGroth16.sol"
+    },
+    {
+      "artifact_sha256": "0ba268726d10554d7232f6887a97e80eafdddefde409d9c434e4ec346df21a23",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "XrplBinary420",
+      "source": "contracts/src/bridge/verifiers/xrpl/XrplBinary420.sol"
+    },
+    {
+      "artifact_sha256": "6ce08438c6d852947e478e06caf2df73061537dd11b2e8e81737d5e56fa6875d",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "XrplPayment420",
+      "source": "contracts/src/bridge/verifiers/xrpl/XrplPayment420.sol"
+    },
+    {
+      "artifact_sha256": "483b4a6d3217e98a3de191dbd60356cb970b954476ed09f2ab26e659ad9de169",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "XrplSHA512Half420",
+      "source": "contracts/src/bridge/verifiers/xrpl/XrplSHA512Half420.sol"
+    },
+    {
+      "artifact_sha256": "fb24e6e4533ab943f2a8a2c5bbcc6e13c79ecb0f816415c62d81731e96742a9d",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "XrplSHAMap420",
+      "source": "contracts/src/bridge/verifiers/xrpl/XrplSHAMap420.sol"
+    },
+    {
+      "artifact_sha256": "2d9a471c20e2484f383ffeb9c8d03efcbe4bcb4925c67bee2f055150727d3170",
+      "classification": "candidate",
+      "constructor": [],
+      "contract": "XrplValidation420",
+      "source": "contracts/src/bridge/verifiers/xrpl/XrplValidation420.sol"
+    }
+  ],
+  "core_publication_order": [
+    "VerifiedGateway420",
+    "BridgeVerifierRegistry420",
+    "BridgeChainRegistry420",
+    "BridgeAssetRegistry",
+    "BridgeRouteRegistry",
+    "BridgeRiskManager",
+    "BridgeTransferRegistry",
+    "BridgeAccountingRegistry",
+    "GatewayRouter420",
+    "CADCBridgeIntegration",
+    "BridgeValueCustody420"
+  ],
+  "current_authority_drift": [],
+  "custody_constructor_dependency": "publish BridgeVerifierRegistry420 before BridgeValueCustody420; independently qualified IBridgeWithdrawalOutcome420 required",
+  "deployment_ready": true,
+  "external_inputs": "Actual source/issuer/validator roots, deployed verifier/provider/token/custody dependencies and deployer/nonce/chain ID from existing testnet handoff; null is never encoded or deployed automatically",
+  "frozen_gateway": "0x0000000000000000000000000000000000000438",
+  "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+  "governance_timelock": "0x0000000000000000000000000000000000000429",
+  "legacy_excluded": [
+    "BTCLightClientAdapter",
+    "ETHProofAdapter"
+  ],
+  "production_approvals": [],
+  "registry": "0x0000000000000000000000000000000000000434",
+  "routes_active": false,
+  "schema": "420-bridge-pretestnet-constructor-inputs-v1"
+}

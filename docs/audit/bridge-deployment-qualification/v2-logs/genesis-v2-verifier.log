@@ -1,0 +1,5 @@
+GENESIS_CONFIG_COMMITMENT=PASS
+status=FROZEN_V2
+domain=420/GENESIS/CONFIG/V2
+genesisConfigHash=0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d
+authorityInputs=6

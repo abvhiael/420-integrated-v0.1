@@ -1,0 +1,139 @@
+{
+  "anvil_version": "anvil Version: 1.9.0\nCommit SHA: 6056c5845d34205a83cf7108042adb137325c9df\nBuild Timestamp: 2026-11-02T20:28:32.434285913Z (1793651312)\nBuild Profile: dist",
+  "chain_id": 31337,
+  "checks": [
+    "canonical Registry materialized at frozen 0x434",
+    "ten core constructors, immutables, canonical publication and exact runtime identity",
+    "frozen gateway constructor state exported with disabled verifier and no approvals",
+    "custody ordered after canonical qualification registry; publication grants no economic approval",
+    "both legacy placeholders reject inbound and outbound execution",
+    "unauthorized adapter installation and direction activation reject",
+    "deployment and publication leave every core approval empty"
+  ],
+  "deployments": [
+    {
+      "address": "0x0000000000000000000000000000000000000438",
+      "component_id": "0x51be8c14b335898882d5212db0cdfcdb796a27d20dc3621edbaaeb65b212ee93",
+      "name": "VerifiedGateway420",
+      "runtime_keccak256": "0x64b198df6a8c33513009c22cd429d6f4029c1ceb8b6a82d5559c4a004065f240",
+      "transaction_hash": "0x05456ff413edd4c44e5166f8f0f09bab37d155709316f64b5298c1d0d2123dfc"
+    },
+    {
+      "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+      "component_id": "0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4",
+      "name": "BridgeVerifierRegistry420",
+      "runtime_keccak256": "0xeff7e5073a09fb829d76879560c3c6289776bc284f97ea5f1362a8b604352ab4",
+      "transaction_hash": "0x288ae34f961566c77b018c36ddd5f0d275b13d481e9ea0695c004ee80db982e6"
+    },
+    {
+      "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+      "component_id": "0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3",
+      "name": "BridgeChainRegistry420",
+      "runtime_keccak256": "0xe4297ddef322822e0a4ea626fb340448fe259c605bf0ddb16ffd7d7d36f21a97",
+      "transaction_hash": "0x917e896fb1d26f16880390b03e27c90e4f9bb09b2d9387f333e280b47b67b487"
+    },
+    {
+      "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+      "component_id": "0x24dcc9b334fd3f837933f3cbfe59df8188ccb280050e0845fab6f4a2d6088baa",
+      "name": "BridgeAssetRegistry",
+      "runtime_keccak256": "0xf3dfd71caf9f0b97a9d55bb4f06b03182ff0242f211b4ff6027c22587c867015",
+      "transaction_hash": "0x09947d947a9e6afd421d6d761e8fba396bd62d4c3754c296dba85acc3cc559c6"
+    },
+    {
+      "address": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
+      "component_id": "0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143",
+      "name": "BridgeRouteRegistry",
+      "runtime_keccak256": "0xde53b6b1066a5166e9a18e36232a578166244792fd737d0a0a3ae31d8385888d",
+      "transaction_hash": "0x504d34260ba58908771681c2909fab90f30b728dc7c46e2aa34d6f05fee87dfc"
+    },
+    {
+      "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
+      "component_id": "0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e",
+      "name": "BridgeRiskManager",
+      "runtime_keccak256": "0xe7f52154dbf878c107b4ec5b074ff48dc2530be5f55acf24ce2cbe00b1bbb275",
+      "transaction_hash": "0xaba0d0ff1afbfd61a98e3e9b7a08061d3c53a508df863915734f6006d2e4bd34"
+    },
+    {
+      "address": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
+      "component_id": "0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0",
+      "name": "BridgeTransferRegistry",
+      "runtime_keccak256": "0xddb0843528feda92a18e7497b7fac47fe43ab47743c8c1bce6ba524e2dea17af",
+      "transaction_hash": "0xde2243c069de6ce22491fd3d6693ccae331910e6aa23c4d995076d335d9b6eb0"
+    },
+    {
+      "address": "0x9a676e781a523b5d0c0e43731313a708cb607508",
+      "component_id": "0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38",
+      "name": "BridgeAccountingRegistry",
+      "runtime_keccak256": "0xb946fdeb39a8d4c57f7de66f554bbffa77511856e04b21a3b6d0940e4396573b",
+      "transaction_hash": "0xef115893a4b3278dfd2cf9de0f2d7f14b003ddfdee7b13698f1096795cc966a7"
+    },
+    {
+      "address": "0x959922be3caee4b8cd9a407cc3ac1c251c2007b1",
+      "component_id": "0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21",
+      "name": "GatewayRouter420",
+      "runtime_keccak256": "0xfc12557ff6cc38a570a5b15c136d4feb31539eed8329ff11425f534d84c840cb",
+      "transaction_hash": "0x76f24790725713fe315105ac2b04b935b4480fd6eb073450e250becf78dce4a8"
+    },
+    {
+      "address": "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
+      "component_id": "0x78ba522671d02b6e0bc412974c77b15976e41552270fdfca190d30ed63ae1aad",
+      "name": "CADCBridgeIntegration",
+      "runtime_keccak256": "0x989377ad7060342ab6c0f2d64db00fcad9a06380e2e3362e02196da9c7342c29",
+      "transaction_hash": "0x3c40e2a4717a65270066b52ce91a61fa2455fa768656ab173c353b85dc6724da"
+    },
+    {
+      "address": "0x59b670e9fa9d0a427751af201d676719a970857b",
+      "name": "BridgeValueCustody420",
+      "test_only_outcome": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
+      "transaction_hash": "0x1739fdf07248db6502e3683c9a37af01195d03b2590c39e374a9d72fc53ac0b6"
+    }
+  ],
+  "environment": "fresh owned Anvil; controlled governance/configuration/outcome, not source authority",
+  "package_manifest_sha256": "a4479408b47c7b6a179238d92dc9042d88c998d42e7d640533f94301059e9af0",
+  "pass": true,
+  "production_approvals": [],
+  "source_fixture_sha256": {
+    "contracts/src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+    "contracts/src/bridge/BridgeAccountingRegistry.sol": "fd68fbc2dc65f7ec830b73d4eaec3242b396d2cb504bc2d98b45b79fe662d7b8",
+    "contracts/src/bridge/BridgeAssetRegistry.sol": "df6eae7c2e0e818f97206e211afbd9d135602b9e5f85507a2b9bc46220177be5",
+    "contracts/src/bridge/BridgeChainRegistry420.sol": "768f2215ef47ef911ad6e03c860b5cf25eecd5d48479b7ab2331e1634f6c97e1",
+    "contracts/src/bridge/BridgeIds420.sol": "33b57cfc3369159458c4cdbefe4358aa07e5c15a421bfd56e8a49bbae7d159df",
+    "contracts/src/bridge/BridgeProofEnvelope420.sol": "513071211e55f6b4e826b8f9815f247d1bfdd067117eaff1fba613e1e5260dd0",
+    "contracts/src/bridge/BridgeRiskManager.sol": "b977d7329bf0004b557d8f3dc546dfe93d9bb2fec4806d6a113d05d649402eff",
+    "contracts/src/bridge/BridgeRouteRegistry.sol": "e060cfdbd5d8b280a8c6ed0f5519fcdeacfb379a0048be7f9378b9e955561d16",
+    "contracts/src/bridge/BridgeTransferRegistry.sol": "79640b696487c90c9fd70e451c9827371904b40d2e56841940f2c19880087393",
+    "contracts/src/bridge/BridgeValueCustody420.sol": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48",
+    "contracts/src/bridge/BridgeVerifierProxy420.sol": "44c04fca5abeda9fd82860f9e2e8aaf38902c5fe0727654a6016a0d35580a32a",
+    "contracts/src/bridge/BridgeVerifierRegistry420.sol": "1c3a07235b8045844388530bd3833008e46e4e933b4d492d7fecff3f072bc88b",
+    "contracts/src/bridge/CADCBridgeIntegration.sol": "7d38fcee9d738fdb4c403bfa05e0a1e59fb03b430d18cbce866a5cc938274ffc",
+    "contracts/src/bridge/GatewayRouter420.sol": "b2aaeaaa50e828e7947d6b52ce7d98487e4b8140838bae499f054cb7e900ccd2",
+    "contracts/src/bridge/VerifiedGateway420.sol": "23ab0c2de8531ffe156246052bedc39ad7d2a28037a12432c22b38252a668f8b",
+    "contracts/src/bridge/tokens/SupportedTokenRoutes420.sol": "f1e7e9c5a16a3d4b9e4e330d199f47ba92b7e5b22f59e35a521572bf68db864b",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/IBridgeAdapter420.sol": "e200834c81136ec302754a132cc8d53a1697c10a7ac1aa400d08c4fb4708639a",
+    "contracts/src/interfaces/IBridgeExposureEvidence420.sol": "cbe2135ca42691efb34b910a2a80170465e5179b91d0b4df80905a4f0e5a0693",
+    "contracts/src/interfaces/IBridgeSettlementEvidence420.sol": "75211a2caa0f7627af986f708594158c25789db9b3d3f7c5e6d075581923cadf",
+    "contracts/src/interfaces/IBridgeValueCustody420.sol": "ac35870decc4568e391a466ccb74dff17556378131319bcd614fac8e642dc94a",
+    "contracts/src/interfaces/IBridgeVerifiedSourceContext420.sol": "a04df2ab2609467b4187fcc6b1857c8d53e4e0de3cb49a50623ff0a861a47ec2",
+    "contracts/src/interfaces/genesis/Errors420.sol": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGenesisResident420.sol": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IReplayProtection420.sol": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+    "contracts/src/interfaces/genesis/IRiskLimits420.sol": "10120c6a8973925fc8ba84aaac43a40dfcbee337dbe0c7f5e3a004763f6fe513",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+    "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/test/BridgeDeploymentBinding420.t.sol": "33653a303ddc9e22924270727412733e4e9e59da1edf7282eee17b09e319b632"
+  }
+}

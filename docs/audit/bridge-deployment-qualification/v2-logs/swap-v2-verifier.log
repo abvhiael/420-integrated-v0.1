@@ -1,0 +1,4 @@
+SWAP-AUDIT-6 repository evidence PASS
+compilerArtifacts=6
+frozenPredeployStates=4
+globalGenesisConfigHash=RESOLVED

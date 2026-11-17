@@ -1,0 +1,14 @@
+{
+  "package_integrity_pass": true,
+  "artifacts": 113,
+  "compiled_sources": 152,
+  "rehearsal_checks": 7,
+  "core_deployments": 11,
+  "frozen_gateway_runtime": "0x1f812f15d860bac085027736b3a17c85ed1f12f2e2fe1d45ef2527fb3d65b890",
+  "production_deployment_ready": false,
+  "pretestnet_blockers": [
+    "contracts/config/genesis-address-namespace.json",
+    "config/genesis-applications.json"
+  ],
+  "historical_suites_rerun": false
+}

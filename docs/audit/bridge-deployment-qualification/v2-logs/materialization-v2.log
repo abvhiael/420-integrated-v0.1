@@ -1,0 +1,1 @@
+{"pass": true, "address": "0x0000000000000000000000000000000000000438", "runtimeCodeHash": "0x560f89d7b0c658beeb207cbca1e034d33be66e4b2bcab452b755d5a7b993c64b", "runtimeBytes": 7340, "storageRoot": "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421", "templates": 99, "deployment_ready": true, "authority_drift_count": 0}

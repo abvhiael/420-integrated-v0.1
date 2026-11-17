@@ -1,0 +1,13 @@
+{
+  "package_integrity_pass": true,
+  "artifacts": 113,
+  "compiled_sources": 152,
+  "rehearsal_checks": 7,
+  "core_deployments": 11,
+  "v2_affected_resident_comparisons": 13,
+  "frozen_gateway_runtime": "0x560f89d7b0c658beeb207cbca1e034d33be66e4b2bcab452b755d5a7b993c64b",
+  "pretestnet_deployment_package_ready": true,
+  "live_deployment_qualified": false,
+  "pretestnet_blockers": [],
+  "historical_suites_rerun": false
+}

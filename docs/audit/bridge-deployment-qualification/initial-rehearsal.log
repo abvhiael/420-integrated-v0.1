@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/a5535b7a0bc7/420-integrated-v0.1/scripts/bridge-audit-12/rehearse.py", line 121, in <module>
+    p=argparse.ArgumentParser();p.add_argument('--package',type=Path,required=True);p.add_argument('--anvil',required=True);p.add_argument('--solc',required=True);p.add_argument('--output',type=Path,required=True);a=p.parse_args();run(a.package,a.anvil,a.solc,a.output)
+                                                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/a5535b7a0bc7/420-integrated-v0.1/scripts/bridge-audit-12/rehearse.py", line 51, in run
+    registry,receipt=deploy('ProtocolRegistry',['address'],[gov])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/a5535b7a0bc7/420-integrated-v0.1/scripts/bridge-audit-12/rehearse.py", line 50, in deploy
+    a=artifact(name);receipt=node.transact(gov,'0x'+a['evm']['bytecode']['object']+encode(types,args).hex());address=receipt['contractAddress'];actual=node.rpc('eth_getCode',[address,'latest']);assert (len(actual)-2)//2==records[name]['runtime_bytes'];return address,receipt
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/a5535b7a0bc7/420-integrated-v0.1/scripts/bridge-audit-12/rehearse.py", line 33, in transact
+    h=self.rpc('eth_sendTransaction',[tx]);receipt=self.rpc('eth_getTransactionReceipt',[h]);assert receipt and int(receipt['status'],16)==1,receipt
+                                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: None

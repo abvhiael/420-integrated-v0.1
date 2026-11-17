@@ -1,5 +1,7 @@
 # 420Bridge — Testnet Work Roadmap
 
+BRIDGE-AUDIT-12 pre-testnet preparation is qualified in [the authoritative deployment record](bridge-deployment-qualification/README.md). The global V1 input conflict is resolved by explicit V2 reconciliation and affected runtime materialization; it is not deferred here. The unchanged live requirements below are the next canonical work, not started by that preparation.
+
 ## BRIDGE-AUDIT-3.V.7 — Solana (SOL and SPL assets)
 
 **Status: DEFERRED TO TESTNET / FINAL QUALIFICATION OPEN.** User authorization: 2026-11-14. Priority: High. This records unfinished requirements of the existing audit step; it does not add a new audit phase or change its acceptance criteria. Implementation is integrated through [PR #1161](https://github.com/abvhiael/420-integrated-v0.1/pull/1161). Routes remain inactive pending genuine qualification.

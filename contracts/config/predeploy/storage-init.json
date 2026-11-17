@@ -1,6 +1,6 @@
 {
   "bootstrap_governor": "0x0000000000000000000000000000000000000437",
-  "bridge_verifier": "FROM_FROZEN_GATEWAY_VERIFICATION_DECISION",
+  "bridge_verifier": "0x0000000000000000000000000000000000000000",
   "community_validator_reserve": "0x0000000000000000000000000000000000000425",
   "consensus_system_call": "0x000000000000000000000000000000000000043c",
   "dex_pool_implementation": "UNRESOLVED_NOT_REQUIRED_FOR_SWAP_PREDEPLOY_BIND_AFTER_QUALIFIED_POOL_DEPLOYMENT",
@@ -178,8 +178,11 @@
     "VerifiedGateway420": {
       "constructor": [
         "governance_timelock",
+        "protocol_registry",
+        "genesis_config_hash",
         "bridge_verifier"
-      ]
+      ],
+      "note": "BRIDGE-AUDIT-12: starts disabled with verifier zero and empty qualification. Frozen snapshot materialization is retained in docs/audit/bridge-deployment-qualification/canonical; global authority-input drift must be reconciled before deployment."
     }
   },
   "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",

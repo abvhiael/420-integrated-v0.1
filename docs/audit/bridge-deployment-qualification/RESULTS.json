@@ -1,0 +1,73 @@
+{
+  "baseline_main_sha": "996c2f13b64a02ed625f7fa0d8328ce7a8aaf753",
+  "blocker_resolution_scope": "Existing global commitment-version decision and affected resident re-materialization; no silent FROZEN_V1 rewrite or revert of concurrent approved additions. Not deferred to testnet.",
+  "external_blockers": "Unchanged authentic source/issuer/provider/custody/funded-network gates in docs/audit/420BRIDGE-TESTNET-WORK-ROADMAP.md",
+  "fresh_qualification": {
+    "bridge_registry_artifacts": 113,
+    "compiler_source_closure": 152,
+    "frozen_address_authority": "PASS",
+    "genesis_documentation_inventory": "PASS",
+    "local_evm_assertion_groups": 7,
+    "local_evm_core_deployments": 11,
+    "maximum_runtime_bytes": 23129,
+    "package_unit_tests": 17,
+    "production_plan_rejects_existing_global_freeze_conflict": true,
+    "unresolved_link_references": 0
+  },
+  "full_step_closed": false,
+  "live_deployment_performed": false,
+  "new_ci_run_ids": [],
+  "next_canonical_work": "Existing 420Bridge deployment/testnet qualification, after global freeze reconciliation; not begun.",
+  "pretestnet_blockers": [
+    {
+      "current_blob": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "frozen_blob": "e6461503fbf49de5ef296ab3b102c39981a29342",
+      "path": "contracts/config/genesis-address-namespace.json"
+    },
+    {
+      "current_blob": "3f177b0062c307758767c0abfe596cc1d3e2ae2b",
+      "frozen_blob": "c8d3697a02dbc7b4fbd6e3713f5ac4a0e6611806",
+      "path": "config/genesis-applications.json"
+    }
+  ],
+  "production_approvals": [],
+  "production_solidity_changed": false,
+  "qualified_commit_provenance": "Published PR/final report records exact qualified SHA; file hashes bind the qualified source without a self-reference.",
+  "retained_qualification": {
+    "attack_entries": 196,
+    "counts_overlap_do_not_sum": true,
+    "families": 14,
+    "historical_ci_run_ids": [
+      "43563876850",
+      "43563876854"
+    ],
+    "historical_ci_sha": "5f58baf6dc861939a21119a0fce645060a067518",
+    "referenced_original_pass_records": 399,
+    "settlement": {
+      "compiled_bridge_artifacts": 46,
+      "distinct_cases_passed": 160,
+      "fuzz_inputs": 12500,
+      "invariant_calls": 32768,
+      "invariant_runs": 512,
+      "live_settlement_qualified": false,
+      "maximum_runtime_bytes": 23129,
+      "new_ci_runs": 0,
+      "pass": true,
+      "production_approvals": 0
+    }
+  },
+  "routes_activated": false,
+  "source_sha256": {
+    "contracts/config/genesis-dapp-contract-map.json": "58c5b474918d39774cc887d9ab0ae37ff28e8bf80bf449888572af46e0922cad",
+    "contracts/config/predeploy/predeploy-plan.json": "fd35a59363d39b39ee73aeb07edb63b792deb5d3c0811fb499c0b4fcf1cdca45",
+    "contracts/config/predeploy/storage-init.json": "d08712387a58826ea619f3536e0b884ce8d8ae00c17bcf122dbf65e915169c3c",
+    "scripts/bridge-audit-12/package.py": "0dbc92a6ff2eee4fdf65cf5612148f492ab4b328da236db69aaee39eb2a3f151",
+    "scripts/bridge-audit-12/prepare.py": "e43b13385c7883c89210cfa317a3ed009adb046d433d127c0c505a2eb68455b2",
+    "scripts/bridge-audit-12/rehearse.py": "7938831b8f89778e02da91809b97ccdadb5051c56189584aa22c349319642d1d",
+    "scripts/bridge-audit-12/requirements.txt": "4115cf6d5bc139887ff904792e9439504b8cdd3303491c2ee92f85ecf392f081",
+    "scripts/bridge-audit-12/test_package.py": "14e98f98b8ae3b3c1367e236ca849bf4bde6da4923fccf704b81d212807d3cab",
+    "scripts/bridge-audit-12/verify.py": "407ec7800c166587523ed4dbfc4e1aa08785cefce20f85fe0999c2c906a253d8"
+  },
+  "status": "LOCAL_PREPARATION_QUALIFIED_GLOBAL_FREEZE_BLOCKED",
+  "step": "BRIDGE-AUDIT-12"
+}

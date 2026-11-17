@@ -316,21 +316,41 @@
       "dapp": "420 Bridge",
       "contracts": [
         "VerifiedGateway420.sol",
-        "BridgeAssetRegistry.sol",
+        "BridgeVerifierRegistry420.sol",
         "BridgeChainRegistry420.sol",
-        "CADCBridgeIntegration.sol",
+        "BridgeAssetRegistry.sol",
         "BridgeRouteRegistry.sol",
         "BridgeRiskManager.sol",
         "BridgeTransferRegistry.sol",
-        "GatewayRouter420.sol",
         "BridgeAccountingRegistry.sol",
+        "GatewayRouter420.sol",
+        "CADCBridgeIntegration.sol",
+        "BridgeValueCustody420.sol",
+        "BridgeVerifierProxy420.sol",
+        "BridgeRepresentation420.sol",
+        "BitcoinBridgeAdapter420.sol",
+        "BnbBridgeAdapter420.sol",
         "CADCLayerZeroAdapter.sol",
+        "CurecoinBridgeAdapter420.sol",
+        "DobbscoinBridgeAdapter420.sol",
+        "DogecoinBridgeAdapter420.sol",
+        "EthereumBridgeAdapter420.sol",
+        "LitecoinBridgeAdapter420.sol",
+        "PirateChainBridgeAdapter420.sol",
+        "PotcoinBridgeAdapter420.sol",
+        "SolanaBridgeAdapter420.sol",
+        "TronBridgeAdapter420.sol",
         "USDCCCTPAdapter.sol",
-        "ETHProofAdapter.sol",
+        "XrplBridgeAdapter420.sol",
+        "SupportedTokenRoutes420.sol"
+      ],
+      "legacy_disabled_contracts": [
         "BTCLightClientAdapter.sol",
-        "BridgeVerifierRegistry420.sol",
-        "BridgeVerifierProxy420.sol"
-      ]
+        "ETHProofAdapter.sol"
+      ],
+      "verifier_inventory": "contracts/config/bridge/verifier-qualification-inventory.json",
+      "deployment_inventory": "docs/audit/bridge-deployment-qualification/package.tar.gz",
+      "note": "BRIDGE-AUDIT-12 reconciles current source candidates, not deployed instances or production approval. Only VerifiedGateway420 is a Bridge frozen predeploy (0x0438); other components and adapters remain Registry resolved. Source-chain gateway/custody deployments and verifier dependencies are enumerated in the compiler package and existing verifier/testnet handoff. Legacy placeholders remain always-reverting and cannot be selected by deployment preparation. Global Genesis commitment authority drift remains a pre-testnet blocker."
     },
     {
       "dapp": "420 Stake",

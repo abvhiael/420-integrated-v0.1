@@ -260,11 +260,12 @@
     {
       "address": "0x0000000000000000000000000000000000000438",
       "artifact": "contracts/artifacts/VerifiedGateway420.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "constructor_strategy": "EXECUTE_CONSTRUCTOR_AND_MATERIALIZE_RUNTIME_IMMUTABLES_AND_STORAGE",
       "name": "VerifiedGateway420",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "BRIDGE-AUDIT-12 constructor candidate and empty storage verified locally. Current global FROZEN_V1 authority-input drift blocks deployment; do not mark ARTIFACT_READY or use the candidate as release approval.",
       "source": "bridge/VerifiedGateway420.sol",
-      "status": "SOURCE_READY"
+      "status": "SOURCE_READY",
+      "candidate_evidence": "docs/audit/bridge-deployment-qualification/canonical/VerifiedGateway420-predeploy-state.json"
     },
     {
       "address": "0x0000000000000000000000000000000000000439",

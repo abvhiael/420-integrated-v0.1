@@ -16,6 +16,7 @@ func (s ClientSink) UpdateForkchoice(ctx context.Context, state ForkchoiceStateV
 	if s.Client == nil {
 		return nil
 	}
-	_, err := s.Client.ForkchoiceUpdatedV3(ctx, state, nil)
-	return err
+	resp, err := s.Client.ForkchoiceUpdatedV3(ctx, state, nil)
+	if err != nil { return err }
+	return requireValidExecution(resp.PayloadStatus, state.HeadBlockHash)
 }

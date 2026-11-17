@@ -49,6 +49,12 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 		method := req["method"].(string)
 		methods = append(methods, method)
 		switch method {
+		case "eth_chainId":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc":"2.0","id":req["id"],"result":"0x1a4"})
+		case "eth_getBlockByNumber":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc":"2.0","id":req["id"],"result":map[string]any{"hash":parentHex,"number":"0x64"}})
+		case "eth_call":
+			json.NewEncoder(w).Encode(map[string]any{"jsonrpc":"2.0","id":req["id"],"result":"0x"+strings.Repeat("0",63)+"9"})
 		case "engine420_submitSystemCallsV1":
 			params := req["params"].([]any)
 			batch := params[0].(map[string]any)
@@ -95,7 +101,7 @@ func TestForkchoiceDerivesAndStagesFinalizedStakeOutcomes(t *testing.T) {
 	if resp.PayloadStatus.Status != "VALID" || len(batch.Calls) != 1 || batch.Calls[0].Sequence != 10 {
 		t.Fatalf("resp=%+v batch=%+v", resp, batch)
 	}
-	if len(methods) != 2 || methods[0] != "engine420_submitSystemCallsV1" || methods[1] != "engine_forkchoiceUpdatedV3" {
+	if strings.Join(methods,",") != "eth_chainId,eth_getBlockByNumber,eth_call,eth_getBlockByNumber,engine420_submitSystemCallsV1,engine_forkchoiceUpdatedV3" {
 		t.Fatalf("method order=%v", methods)
 	}
 }

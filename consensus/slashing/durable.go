@@ -240,6 +240,7 @@ func (d *durableHistory) write(p historyPayload, initialize bool) error {
 	}
 	defer os.Remove(tmp.Name())
 	defer tmp.Close()
+	qualificationHistoryWrite(tmp, raw)
 	if _, e = tmp.Write(raw); e != nil {
 		return e
 	}

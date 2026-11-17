@@ -54,6 +54,7 @@ type durableHistory struct {
 	path string
 	identity HistoryIdentity
 	lock *os.File
+	expected [32]byte
 }
 
 var ErrHistoryUnavailable = errors.New("protected signing history unavailable")
@@ -103,6 +104,9 @@ func OpenProtector(path string, id HistoryIdentity) (*Protector, error) {
 			d.close(); return nil, fmt.Errorf("%w: invalid stored vote", ErrHistoryUnavailable)
 		}
 	}
+	b, err := json.Marshal(payload)
+	if err != nil { d.close(); return nil, err }
+	d.expected = sha256.Sum256(b)
 	p.disk=d
 	return p,nil
 }
@@ -166,7 +170,7 @@ func(d *durableHistory)write(p historyPayload, initialize bool)error{
 // checking both slot and target checkpoint double votes and strict surrounds.
 func(p *Protector)CheckAndRecordVote(id uint64,data ctypes.AttestationData)error{
 	p.mu.Lock();defer p.mu.Unlock()
-	if p.failed!=nil{return p.failed}
+	if e:=p.checkHistoryLocked();e!=nil{return e}
 	if p.disk!=nil{if e:=p.disk.checkIdentity(id);e!=nil{return e}}
 	if data.Source.Slot>=data.Target.Slot||data.Target.Slot>data.Slot||data.BlockRoot==(ctypes.Root{})||data.Target.Root==(ctypes.Root{})||data.Source.Root==(ctypes.Root{}){return ErrInvalidDuty}
 	root:=data.HashTreeRoot()
@@ -188,7 +192,18 @@ func(p *Protector)persistLocked()error{
 		a,b:=h.Signed[i],h.Signed[j];if a.Type!=b.Type{return a.Type<b.Type};if a.Slot!=b.Slot{return a.Slot<b.Slot};return bytes.Compare(a.Incident[:],b.Incident[:])<0
 	})
 	// Check the current durable file has not vanished or changed before replacing it.
-	if _,e:=p.disk.read();e!=nil{p.failed=fmt.Errorf("%w: %v",ErrHistoryUnavailable,e);return p.failed}
+	if e:=p.checkHistoryLocked();e!=nil{return e}
 	if e:=p.disk.write(h,false);e!=nil{p.failed=fmt.Errorf("%w: %v",ErrHistoryUnavailable,e);return p.failed}
+	b,e:=json.Marshal(h);if e!=nil{p.failed=ErrHistoryUnavailable;return p.failed}
+	p.disk.expected=sha256.Sum256(b)
 	return nil
+}
+
+// checkHistoryLocked verifies even idempotent retries against the last committed file.
+func(p *Protector)checkHistoryLocked()error{
+ if p.failed!=nil{return p.failed}
+ if p.disk==nil{return nil}
+ h,e:=p.disk.read();if e!=nil{p.failed=fmt.Errorf("%w: %v",ErrHistoryUnavailable,e);return p.failed}
+ b,e:=json.Marshal(h);if e!=nil||sha256.Sum256(b)!=p.disk.expected{p.failed=ErrHistoryUnavailable;return p.failed}
+ return nil
 }

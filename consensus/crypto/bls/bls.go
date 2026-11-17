@@ -125,3 +125,11 @@ func FastAggregateVerify(pubkeys []ctypes.BLSPubkey, message []byte, signature c
 	}
 	return sig.FastAggregateVerify(true, pks, message, dst)
 }
+
+// Destroy erases this key after its owning signer has stopped accepting duties.
+func (s *SecretKey) Destroy() {
+	if s != nil && s.sk != nil {
+		s.sk.Zeroize()
+		s.sk = nil
+	}
+}

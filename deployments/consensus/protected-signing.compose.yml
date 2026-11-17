@@ -1,0 +1,47 @@
+# The witness is an independently administered external PostgreSQL service.
+# Do not put it in this compose project or restore it with validator volumes.
+services:
+  stake-signer:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.stake-signer
+    user: '10002:10002'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    volumes:
+      - '${STAKE_SIGNER_PRIVATE_DIR:?required}:/run/signer:ro'
+      - '${STAKE_SIGNER_HISTORY_DIR:?required}:/var/lib/stake-signer'
+    command:
+      - --policy=/run/signer/policy.json
+      - '--policy-sha256=${STAKE_SIGNING_POLICY_SHA256:?required}'
+      - --history=/var/lib/stake-signer/history.json
+      - --bls-ikm=/run/signer/bls.hex
+      - --witness-dsn=/run/signer/witness.dsn
+      - --tls-cert=/run/signer/server.pem
+      - --tls-key=/run/signer/server.key
+      - --tls-ca=/run/signer/client-ca.pem
+      - '--client-spki-sha256=${STAKE_VALIDATOR_SPKI_SHA256:?required}'
+      - --listen=0.0.0.0:9443
+  validator-signing:
+    build:
+      context: ../..
+      dockerfile: docker/Dockerfile.fourtwentyd
+    user: '10001:10001'
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    stdin_open: true
+    volumes:
+      - '${STAKE_VALIDATOR_PRIVATE_DIR:?required}:/run/validator:ro'
+      - '${STAKE_VALIDATOR_HISTORY_DIR:?required}:/var/lib/validator'
+    command:
+      - --protected-signing
+      - --signer=https://stake-signer:9443
+      - --signing-policy=/run/validator/policy.json
+      - '--signing-policy-sha256=${STAKE_SIGNING_POLICY_SHA256:?required}'
+      - --signing-history=/var/lib/validator/history.json
+      - --signer-client-cert=/run/validator/client.pem
+      - --signer-client-key=/run/validator/client.key
+      - --signer-ca=/run/validator/signer-ca.pem
+      - '--signer-spki-sha256=${STAKE_SIGNER_SPKI_SHA256:?required}'

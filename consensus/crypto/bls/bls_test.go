@@ -41,3 +41,14 @@ func TestSignVerifyAggregateAndPoP(t *testing.T) {
 		t.Fatal("aggregate verification failed")
 	}
 }
+
+func TestDestroyedKeyCannotSign(t *testing.T) {
+	key, _, err := Generate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	key.Destroy()
+	if _, err = key.Sign([]byte("must not sign")); err == nil {
+		t.Fatal("destroyed key remained usable")
+	}
+}

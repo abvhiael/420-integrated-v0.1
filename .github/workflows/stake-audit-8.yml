@@ -2,6 +2,7 @@ name: 420Stake STAKE-AUDIT-8
 on:
   pull_request:
     paths:
+      - 'scripts/qualify-stake-isolated.py'
       - 'scripts/qualify-420stake-testnet.py'
       - '.github/workflows/stake-audit-8.yml'
   workflow_dispatch:
@@ -50,13 +51,7 @@ jobs:
           python scripts/generate-stake-audit-7-predeploy.py --check | tee /tmp/stake-audit-8/materialization.log
           git diff --exit-code
       - name: Stake lifecycle, accounting, ABI, fuzz and invariants
-        working-directory: contracts
-        env:
-          FOUNDRY_REMAPPINGS: '["forge-std/=forge-std/","@layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/","@openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/","solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/"]'
-        run: |
-          forge test --match-path 'test/Stake*.t.sol' -vv | tee /tmp/stake-audit-8/contracts.log
-          forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vv | tee /tmp/stake-audit-8/gateway.log
-          forge test --match-path 'test/ValidatorEligibility420.t.sol' -vv | tee /tmp/stake-audit-8/eligibility.log
+        run: python scripts/qualify-stake-isolated.py --audit 8 --log-dir /tmp/stake-audit-8/solidity
       - name: Consensus derivation and execution integration
         run: |
           go test -count=1 ./consensus/systemcall ./consensus/engine ./execution/systemcall/... | tee /tmp/stake-audit-8/consensus.log

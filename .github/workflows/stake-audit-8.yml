@@ -44,7 +44,11 @@ jobs:
         run: |
           python scripts/verify-stake-audit-7-predeploy.py
           python scripts/test-stake-audit-7-predeploy.py
+          python scripts/generate-stake-audit-7-predeploy.py --write
+          git diff --stat
+          git diff -- contracts/artifacts/RewardController.json contracts/artifacts/ValidatorRegistry.json contracts/artifacts/CommunityValidatorReserve.json contracts/artifacts/Stake420.json contracts/config/predeploy/ | tee /tmp/stake-audit-8/materialization.diff
           python scripts/generate-stake-audit-7-predeploy.py --check | tee /tmp/stake-audit-8/materialization.log
+          git diff --exit-code
       - name: Stake lifecycle, accounting, ABI, fuzz and invariants
         working-directory: contracts
         run: |

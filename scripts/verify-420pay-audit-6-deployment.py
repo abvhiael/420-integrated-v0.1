@@ -26,7 +26,7 @@ if d.get("repository_ready") is not True or d.get("live_qualified") is not False
 if d.get("address_policy")!="REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES": fail("address policy")
 if d.get("governance_timelock")!="0x0000000000000000000000000000000000000429": fail("timelock")
 if d.get("protocol_registry")!="0x0000000000000000000000000000000000000434": fail("registry")
-if d.get("genesis_config_hash")!="0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921": fail("genesis config")
+if d.get("genesis_config_hash")!="0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d": fail("genesis config")
 rs=d.get("residents",[])
 if {x.get("contract"):x.get("component_id_preimage") for x in rs}!=EXPECTED: fail("resident inventory/component ids")
 for x in rs:

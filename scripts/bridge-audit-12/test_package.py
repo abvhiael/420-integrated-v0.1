@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Adversarial tests of the actual compiled package and unsigned deployment boundary."""
 import copy, importlib.util, json, os, shutil, tempfile, unittest
+from unittest.mock import patch
 from pathlib import Path
 from eth_hash.auto import keccak
 spec=importlib.util.spec_from_file_location('package12',Path(__file__).with_name('package.py'));p=importlib.util.module_from_spec(spec);spec.loader.exec_module(p)
@@ -48,6 +49,27 @@ class PackageTest(unittest.TestCase):
             original=self.params[key];self.params[key]=value
             with self.subTest(key=key,value=value):self.rejects('chain id|nonce')
             self.params[key]=original
-    def test_production_plan_rejects_existing_frozen_authority_drift(self):
-        self.params.pop('environment');frozen=json.loads((p.ROOT/'contracts/config/genesis-config-commitment.json').read_text());self.params['governance']=frozen['commitmentPayload']['governanceTimelock'];self.params['genesis_config_hash']=frozen['genesisConfigHash'];self.rejects('frozen authority drift')
+    def production(self):
+        self.params.pop('environment');frozen=json.loads((p.ROOT/'contracts/config/genesis-config-commitment.json').read_text());self.params['governance']=frozen['commitmentPayload']['governanceTimelock'];self.params['genesis_config_hash']=frozen['genesisConfigHash']
+        for entry in self.params['contracts']:
+            entry['args'][0]=self.params['governance'];entry['args'][2]=self.params['genesis_config_hash']
+        return frozen
+    def test_production_plan_accepts_reconciled_frozen_authority(self):
+        self.production();plan=self.plan();self.assertFalse(plan['routes_active']);self.assertEqual(plan['production_approvals'],[])
+        self.assertNotIn('nonce',plan['steps'][0]['publication_transaction'])
+        self.assertEqual(plan['steps'][1]['transaction']['nonce'],0)
+    def authority_copy(self):
+        frozen=json.loads((p.ROOT/'contracts/config/genesis-config-commitment.json').read_text());root=self.package/'authority'
+        for path in ['contracts/config/genesis-config-commitment.json','contracts/config/system-addresses.json','contracts/config/genesis-canonical-addresses.json']+[x['path'] for x in frozen['commitmentPayload']['authorityInputs']]:
+            target=root/path;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p.ROOT/path,target)
+        return root
+    def test_production_plan_rejects_frozen_authority_drift(self):
+        frozen=self.production();root=self.authority_copy();(root/frozen['commitmentPayload']['authorityInputs'][0]['path']).write_text('{}')
+        with patch.object(p,'ROOT',root):self.rejects('frozen authority drift')
+    def test_production_plan_rejects_commitment_payload_tampering(self):
+        self.production();root=self.authority_copy();f=root/'contracts/config/genesis-config-commitment.json';obj=json.loads(f.read_text());obj['commitmentPayload']['initializationVersion']=2;p.write(f,obj)
+        with patch.object(p,'ROOT',root):self.rejects('frozen configuration commitment')
+    def test_production_plan_rejects_retired_commitment_version(self):
+        self.production();root=self.authority_copy();f=root/'contracts/config/genesis-config-commitment.json';obj=json.loads(f.read_text());obj['status']='FROZEN_V1';p.write(f,obj)
+        with patch.object(p,'ROOT',root):self.rejects('noncanonical commitment version')
 if __name__=='__main__':unittest.main(verbosity=2)

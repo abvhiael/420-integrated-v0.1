@@ -182,12 +182,12 @@
         "genesis_config_hash",
         "bridge_verifier"
       ],
-      "note": "BRIDGE-AUDIT-12: starts disabled with verifier zero and empty qualification. Frozen snapshot materialization is retained in docs/audit/bridge-deployment-qualification/canonical; global authority-input drift must be reconciled before deployment."
+      "note": "BRIDGE-AUDIT-12: V2 constructor-materialized frozen gateway starts disabled, with verifier zero, empty qualification and empty storage. Live activation requires existing governance and qualification."
     }
   },
   "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
   "genesis_config_commitment": "contracts/config/genesis-config-commitment.json",
-  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+  "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
   "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
   "governance_timelock": "0x0000000000000000000000000000000000000429",
   "protocol_registry": "0x0000000000000000000000000000000000000434",

@@ -1,0 +1,156 @@
+{
+  "affected_retained_runtimes": [
+    {
+      "compiler_artifact_sha256": "94052f488a61af35f7aab8e28b3ba746b5b34124ff2055a129332b7aaf3d6d3c",
+      "constructor_receipt": "0xd41f0cf5beedf90cf2738fdb016854f6d7e150f19239281cf6cc1658cba9404e",
+      "frozen_address": "0x000000000000000000000000000000000000042b",
+      "name": "GenesisDEXFactory",
+      "runtime_bytes": 4435,
+      "runtime_code_hash": "0xd538ac18165330a76ecf26167d18db1caa78c43bdf51dbbd80b2cc677781b684"
+    },
+    {
+      "compiler_artifact_sha256": "919ee0be6f82274852059a4b462d368be5e1fdd2c3f84abb707405771db718d8",
+      "constructor_receipt": "0x6b6e406347ed386a2a500fd6b9190ac5f861cee318f01eedcfb234549a46a270",
+      "frozen_address": "0x000000000000000000000000000000000000042c",
+      "name": "PublicBatchAuction",
+      "runtime_bytes": 11270,
+      "runtime_code_hash": "0x08d3024194eccc9221c9aeda6d5a152514e0f577b70efb2e9c08dac670d76c45"
+    },
+    {
+      "compiler_artifact_sha256": "b96b03ab2c684fd53158a11a360fc1b57c6295c651bb0c9e0fb55fa943d81b67",
+      "constructor_receipt": "0xab5cd3d6914c7e133ae3c971c76fb4ea2899747e86d5e55edf6de46de2a4c8d9",
+      "frozen_address": "0x000000000000000000000000000000000000042d",
+      "name": "TWAPOracle",
+      "runtime_bytes": 7529,
+      "runtime_code_hash": "0x841d11270af944e9ee4d6608b9c70c237a7b94f13632496412366274dacf770b"
+    },
+    {
+      "compiler_artifact_sha256": "6b4f8fc861ff160e93d82e2042f1762da43d68a1ea77bf6267d30d560d4cefaf",
+      "constructor_receipt": "0x31d82becbabaf66180beb8c11380f19ca6757b14deacf27a7a6500777a35c295",
+      "frozen_address": "0x0000000000000000000000000000000000000439",
+      "name": "ApprovedQuoteAssetRegistry",
+      "runtime_bytes": 4426,
+      "runtime_code_hash": "0x49079211bacaae693ee8df2971a308cf01b053de161c47db230f6e50f908a121"
+    },
+    {
+      "compiler_artifact_sha256": "6bfe404f5968dca28986b9c6247d9e6475cf6fa80d6985474e3996b259ec922b",
+      "constructor_receipt": "0xca2354fbc3f5e96c789d65b0131b9d749b4f63e817478ff05a9dfb5e82b7ebac",
+      "frozen_address": null,
+      "name": "MerchantRegistry420",
+      "runtime_bytes": 6639,
+      "runtime_code_hash": "0x1815390803af5d4f14cd6da5eceb0c7b9a2e92e235e0c91d3cb2523246f1d6a6"
+    },
+    {
+      "compiler_artifact_sha256": "44f45be05bde6a98fef5e7c16206c5c741a6af775576c004cff0bb6daf2c3bda",
+      "constructor_receipt": "0x534ae8a26822f8ee2bd3695121e1af707bc826068be880d985f6170ceee15d0f",
+      "frozen_address": null,
+      "name": "InvoiceRegistry420",
+      "runtime_bytes": 9916,
+      "runtime_code_hash": "0xbac01ffdb7284707efc9a70fac40c86da930b537038a431df7aee1bda3b986b4"
+    },
+    {
+      "compiler_artifact_sha256": "3d19c060feb91ef9f067bab57c1ef662476ba2bda455e7d6bcfe62fe164d83d2",
+      "constructor_receipt": "0x84f8cf1de8b72726e2f58cf2d9780013a66575342444ac703cdbaaa29f426d01",
+      "frozen_address": null,
+      "name": "PaymentRegistry420",
+      "runtime_bytes": 11851,
+      "runtime_code_hash": "0x155cddaabb35f56d9cf016daf4b491b34e3c79b8f116539ff51a72faba7e0067"
+    },
+    {
+      "compiler_artifact_sha256": "382293254701c34c17f06035453bcd8eb4f4a675728127e271fa31cf946e114e",
+      "constructor_receipt": "0x0b5ae44024abd4bfab029265dc41b2b9a60bef5508c6bfc0fb135cf0dcd3dd2b",
+      "frozen_address": null,
+      "name": "PaymentRouter420",
+      "runtime_bytes": 12710,
+      "runtime_code_hash": "0x5c1f76757e45c657b31f2b034105fde27b69b6a3ba446ec67248e2bdee6a3629"
+    },
+    {
+      "compiler_artifact_sha256": "f77708f8c1189c1233cb9d898a67fbe2efdcd0a1db7e7c0cf0da067fd3a11076",
+      "constructor_receipt": "0xbc62ee7fcc22fafdbb7b6797164e499871e573cec11ae4c5f9114791904c418c",
+      "frozen_address": null,
+      "name": "SettlementRouter420",
+      "runtime_bytes": 9570,
+      "runtime_code_hash": "0x24c6fdc627cdcca8983c9e4fa9ccef95d6a33f7cc3b9fcf69885592b98735762"
+    },
+    {
+      "compiler_artifact_sha256": "d12e1057fac97d7472f50dfacd7eca8d22224eff00af76ec541d25127efa4a36",
+      "constructor_receipt": "0x4240bb1ce1a176a64e99d65cd6b758d9c1322b88f2cf084d617a9e58f4f4a4cf",
+      "frozen_address": null,
+      "name": "RefundManager420",
+      "runtime_bytes": 12968,
+      "runtime_code_hash": "0x78fa0a28f2f06dec14c142e166c4809c49349441eedd24ad35efd8b954e49c2c"
+    },
+    {
+      "compiler_artifact_sha256": "68b9f90961673524eb56ad25ab74db1815d8a9f1ac377ed854f638a2c2680bf1",
+      "constructor_receipt": "0xce12bf6367b9f151214de05439f737e48cfe74574fd4ad7bfca4d9e2b6ed28cd",
+      "frozen_address": null,
+      "name": "GasSponsor420",
+      "runtime_bytes": 7687,
+      "runtime_code_hash": "0x76af2ff09f768eb3547d92dd80eba1f3a76d5c3eabc4118b946e9417aa6b63ab"
+    },
+    {
+      "compiler_artifact_sha256": "6b2143708a0dab1615a6c7ae51e8f474f7340f69f4f0ce3257043c1cc03ec9a0",
+      "constructor_receipt": "0x96222ca37ce894ab8cb38c7574755df6e8429caa751ff480fbad420f91232d6f",
+      "frozen_address": null,
+      "name": "CanonicalSettlementAdapter420",
+      "runtime_bytes": 8324,
+      "runtime_code_hash": "0xa1ff42b2f7d2e49ecdeee60328539e0d61fd219262a8ca556b68b82884353a33"
+    },
+    {
+      "compiler_artifact_sha256": "c0c50ea985fc0a690d22b816b0f81e26aa0214c142c0993e9f6f82bd76883318",
+      "constructor_receipt": "0x11403b493bb7bc034805beb2819515cad2fb2bc501136c145e67e57b30bd893b",
+      "frozen_address": null,
+      "name": "CanonicalSwapHealthAdapter420",
+      "runtime_bytes": 2910,
+      "runtime_code_hash": "0xa22811f4a81ea7a32182e4b93209a1e9f2647e875a9470cc6ddc59cdd20698c0"
+    }
+  ],
+  "chain_id": 31337,
+  "count": 13,
+  "environment": "fresh owned Anvil; canonical V2 constructors, no live deployment",
+  "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+  "pass": true,
+  "production_approvals": [],
+  "source_sha256": {
+    "contracts/src/interfaces/ICanonicalMarketHealth420.sol": "b05b7b0b849bdeacb3fcbbb4d5da971e06ca8a9258160aecd4c6c1e177ca7578",
+    "contracts/src/interfaces/ICanonicalSettlement420.sol": "8be91afa3a93d112b16eb3b371f08603f1d901ba82743f08e0e50d7556ca9438",
+    "contracts/src/interfaces/genesis/Errors420.sol": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/IFeeQuote420.sol": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGenesisResident420.sol": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IMetadataCommitment420.sol": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IReplayConsumer420.sol": "9877ffaf326f154e42d0d20a2f0c68cfd8bca2bd1253eb4d04356f0b7d1bc039",
+    "contracts/src/interfaces/genesis/IReplayProtection420.sol": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/pay/GasSponsor420.sol": "11969bcf3e39e956768a9d43cc373bd3900e7c9c1da1b76919d75da1461f1946",
+    "contracts/src/pay/InvoiceRegistry420.sol": "59531cb970d98ec772986079e5522495872705342387eaa4df3e5eb8e0df3274",
+    "contracts/src/pay/MerchantRegistry420.sol": "910b203f3244186ae5b815283d7943e45110c9ebee0bed3c857d57a271966b98",
+    "contracts/src/pay/PayIds420.sol": "ccdcfb2c568be433b7c04f63f0ba6ffa3d74e4cf635811451a756ad7cf5a64b8",
+    "contracts/src/pay/PaymentRegistry420.sol": "063607b8ad24e2005449a3beecd738a6d09f4a1e240871fd8aa78d178a7f9d1c",
+    "contracts/src/pay/PaymentRouter420.sol": "7742b1a204e37a31cc5cee2d618bbc45883c1fc5050a0f1278b0dcad0bb6a6d9",
+    "contracts/src/pay/RefundManager420.sol": "350046462858765d189fa5c0634b497358984d004b0bebf362da87962abd2068",
+    "contracts/src/pay/ReplayDomainIds420.sol": "9f53be01c8ee953ea67cad269a09dc14b5497f97a90e5317604f0ac147c55294",
+    "contracts/src/pay/SettlementRouter420.sol": "8d6cb38647bb555c0d585f293adbd0d6256da359d8fb00ee9e8c1a697c9bba6e",
+    "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol": "bd913b14cc3775631240a8168581835702a51c26763e6d146c5d53e0acafaac9",
+    "contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol": "075179e78864f8bed3bb9e23b5088e528197e250eda7941590bab5f6709f41eb",
+    "contracts/src/swap/ApprovedQuoteAssetRegistry.sol": "cdcbc42bcb84b7dbf4a78d6d3ce380cfe555d4af834ae1248c23343787e45ea8",
+    "contracts/src/swap/CanonicalConstantProductPool420.sol": "89bf043f5ad48a4edf9beb47737ac5099d34d571eed224d0e545ad93876d6c18",
+    "contracts/src/swap/CanonicalSwapExecutor420.sol": "bd5c273996facd1f1982bc925032076ed669a3f14b90c5d50ecad02a911688c1",
+    "contracts/src/swap/GenesisDEXFactory.sol": "06cb7df897ed5702b0b174ec673ae206da67a36212a1ca932b5ae1bf1bd69308",
+    "contracts/src/swap/PublicBatchAuction.sol": "d8f09946a422bc14727f060463bc3afc43143c63138aea1dc82441b1e08e3115",
+    "contracts/src/swap/SwapIds420.sol": "8505aff61c0adefcf71bcaa19efacf85a7a0c582ea3599463a2badfc0f7f2a71",
+    "contracts/src/swap/TWAPOracle.sol": "fd0c6ccf0a7522e5595d0f482c4427e739044d4c62e88d5d55bcffb82e8066ff",
+    "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  }
+}

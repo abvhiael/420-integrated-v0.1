@@ -34,7 +34,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeAccountingRegistry",
@@ -60,7 +60,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeAssetRegistry",
@@ -86,7 +86,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeChainRegistry420",
@@ -152,7 +152,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeRiskManager",
@@ -178,7 +178,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeRouteRegistry",
@@ -204,7 +204,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeTransferRegistry",
@@ -230,7 +230,7 @@
           "name": "config",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         },
         {
           "name": "verifier_",
@@ -288,7 +288,7 @@
           "name": "config",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "BridgeVerifierRegistry420",
@@ -314,7 +314,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "CADCBridgeIntegration",
@@ -354,7 +354,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         }
       ],
       "contract": "GatewayRouter420",
@@ -380,7 +380,7 @@
           "name": "genesisConfigHash_",
           "resolution": "PINNED_GENESIS",
           "type": "bytes32",
-          "value": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921"
+          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
         },
         {
           "name": "verifier_",
@@ -1729,23 +1729,12 @@
     "CADCBridgeIntegration",
     "BridgeValueCustody420"
   ],
-  "current_authority_drift": [
-    {
-      "current_blob": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
-      "frozen_blob": "e6461503fbf49de5ef296ab3b102c39981a29342",
-      "path": "contracts/config/genesis-address-namespace.json"
-    },
-    {
-      "current_blob": "3f177b0062c307758767c0abfe596cc1d3e2ae2b",
-      "frozen_blob": "c8d3697a02dbc7b4fbd6e3713f5ac4a0e6611806",
-      "path": "config/genesis-applications.json"
-    }
-  ],
+  "current_authority_drift": [],
   "custody_constructor_dependency": "publish BridgeVerifierRegistry420 before BridgeValueCustody420; independently qualified IBridgeWithdrawalOutcome420 required",
-  "deployment_ready": false,
+  "deployment_ready": true,
   "external_inputs": "Actual source/issuer/validator roots, deployed verifier/provider/token/custody dependencies and deployer/nonce/chain ID from existing testnet handoff; null is never encoded or deployed automatically",
   "frozen_gateway": "0x0000000000000000000000000000000000000438",
-  "genesis_config_hash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
+  "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
   "governance_timelock": "0x0000000000000000000000000000000000000429",
   "legacy_excluded": [
     "BTCLightClientAdapter",

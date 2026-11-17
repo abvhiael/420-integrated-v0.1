@@ -9,19 +9,10 @@ from eth_hash.auto import keccak
 spec=importlib.util.spec_from_file_location('rehearsal12',Path(__file__).with_name('rehearse.py'));r=importlib.util.module_from_spec(spec);spec.loader.exec_module(r);p=r.pkg
 
 def commitment():
-    obj=json.loads((p.ROOT/'contracts/config/genesis-config-commitment.json').read_text())
-    assert obj['status']=='FROZEN_V1'
-    payload=json.dumps(obj['commitmentPayload'],sort_keys=True,separators=(',',':')).encode()
-    assert obj['genesisConfigHash']=='0x'+keccak(payload).hex(),'frozen configuration commitment'
-    import subprocess
-    drift=[]
-    for entry in obj['commitmentPayload']['authorityInputs']:
-        actual=subprocess.check_output(['git','hash-object',entry['path']],cwd=p.ROOT,text=True).strip()
-        if actual!=entry['gitBlobSha1']:drift.append({'path':entry['path'],'frozen_blob':entry['gitBlobSha1'],'current_blob':actual})
-    return obj,drift
+    return p.commitment()
 
 def prepare(package,anvil,output):
-    output.mkdir(parents=True,exist_ok=True);p.namespace();cfg,drift=commitment();gov=cfg['commitmentPayload']['governanceTimelock'];config=cfg['genesisConfigHash']
+    p.namespace();cfg,drift=commitment();assert not drift, 'frozen authority drift';output.mkdir(parents=True,exist_ok=True);gov=cfg['commitmentPayload']['governanceTimelock'];config=cfg['genesisConfigHash']
     manifest=json.loads((package/'manifest.json').read_text());records={x['name']:x for x in manifest['contracts']}
     # All actual bridge and external constructor dependencies are explicit in their compiler ABI.
     templates=[]

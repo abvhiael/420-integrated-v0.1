@@ -8,7 +8,7 @@ This runbook covers deterministic repository deployment preparation for the regi
 
 - GovernanceTimelock: `0x0000000000000000000000000000000000000429`.
 - ProtocolRegistry: `0x0000000000000000000000000000000000000434`.
-- Global `genesisConfigHash`: `0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921`.
+- Global `genesisConfigHash`: `0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d`.
 - Pay residents are **Registry-resolved**. There is no adopted fixed-address or CREATE2 policy for this Pay family. Do not invent production addresses or salts.
 
 The retained authority is `contracts/config/pay/pay-audit-6-deployment-package.json`. The package freezes compiler provenance, source blobs, ABI commitments, compiler runtime templates, materialized runtime code hashes and immutable patch evidence while leaving every Pay deployment address null.

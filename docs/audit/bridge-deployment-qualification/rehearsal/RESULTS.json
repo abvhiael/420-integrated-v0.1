@@ -1,5 +1,5 @@
 {
-  "anvil_version": "anvil Version: 1.7.1\nCommit SHA: 4072e48705af9d93e3c0f6e29e93b5e9a40caed8\nBuild Timestamp: 2026-05-08T07:50:55.527285345Z (1778226655)\nBuild Profile: dist",
+  "anvil_version": "anvil Version: 1.9.0\nCommit SHA: 6056c5845d34205a83cf7108042adb137325c9df\nBuild Timestamp: 2026-11-02T20:28:32.434285913Z (1793651312)\nBuild Profile: dist",
   "chain_id": 31337,
   "checks": [
     "canonical Registry materialized at frozen 0x434",
@@ -15,77 +15,77 @@
       "address": "0x0000000000000000000000000000000000000438",
       "component_id": "0x51be8c14b335898882d5212db0cdfcdb796a27d20dc3621edbaaeb65b212ee93",
       "name": "VerifiedGateway420",
-      "runtime_keccak256": "0xd40ca08682789efe9ae9b703d1d114508bad547d3715a28c90e868992f09ac88",
-      "transaction_hash": "0xe760d7b578dbeeb538afc402a1abf91f1e17e896ff18bbc8f03db27ca100dc8f"
+      "runtime_keccak256": "0x64b198df6a8c33513009c22cd429d6f4029c1ceb8b6a82d5559c4a004065f240",
+      "transaction_hash": "0x05456ff413edd4c44e5166f8f0f09bab37d155709316f64b5298c1d0d2123dfc"
     },
     {
       "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
       "component_id": "0xe1acf8e095015e873d41085d495dc45a8505a47894fe2fc86d3fda952046d0d4",
       "name": "BridgeVerifierRegistry420",
-      "runtime_keccak256": "0xe20de0f0c0ececcc447d12f7721324f6bd2854874555277f1835a3aed5571953",
-      "transaction_hash": "0x48333377918401331564b28a6b1f6ebc60603aa69d44b5cc3b43f7051f2e624b"
+      "runtime_keccak256": "0xeff7e5073a09fb829d76879560c3c6289776bc284f97ea5f1362a8b604352ab4",
+      "transaction_hash": "0x288ae34f961566c77b018c36ddd5f0d275b13d481e9ea0695c004ee80db982e6"
     },
     {
       "address": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
       "component_id": "0xa819f69586c946f9886cc9a1a6bfba4b028599a57edb2de16e1813f6fd6ec5f3",
       "name": "BridgeChainRegistry420",
-      "runtime_keccak256": "0xa3edba752987d2cc3b21f8e59318757370e5f3e9eea03dc84371b43d5e1c248b",
-      "transaction_hash": "0xd2f1bbcc9ab5f5710a9e3348f8a8b54c127602473415c5fb1ba03326c15dba4b"
+      "runtime_keccak256": "0xe4297ddef322822e0a4ea626fb340448fe259c605bf0ddb16ffd7d7d36f21a97",
+      "transaction_hash": "0x917e896fb1d26f16880390b03e27c90e4f9bb09b2d9387f333e280b47b67b487"
     },
     {
       "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
       "component_id": "0x24dcc9b334fd3f837933f3cbfe59df8188ccb280050e0845fab6f4a2d6088baa",
       "name": "BridgeAssetRegistry",
-      "runtime_keccak256": "0x30cbb8e5ccc7794ec187240f71fb837bba71a54422105425abc37984aab87304",
-      "transaction_hash": "0xee58b5b77f4b548d14669b1e7444146cd701972fde2f70e8d8bfa10febca5bc3"
+      "runtime_keccak256": "0xf3dfd71caf9f0b97a9d55bb4f06b03182ff0242f211b4ff6027c22587c867015",
+      "transaction_hash": "0x09947d947a9e6afd421d6d761e8fba396bd62d4c3754c296dba85acc3cc559c6"
     },
     {
       "address": "0x2279b7a0a67db372996a5fab50d91eaa73d2ebe6",
       "component_id": "0x14273e13a4b5eb7f83f2f9fcf8e98e5ab6ae2ebdf71bc2317c8a0fcf84bcb143",
       "name": "BridgeRouteRegistry",
-      "runtime_keccak256": "0x1f6540755c9947b09f7c2504f01260f984ef6255b27862383e1ef3943ac8e4ff",
-      "transaction_hash": "0x22cba27847bf741c9dbe770487c11ec32b5a3773ca683bd7a89ec8152dc36be2"
+      "runtime_keccak256": "0xde53b6b1066a5166e9a18e36232a578166244792fd737d0a0a3ae31d8385888d",
+      "transaction_hash": "0x504d34260ba58908771681c2909fab90f30b728dc7c46e2aa34d6f05fee87dfc"
     },
     {
       "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
       "component_id": "0x6db6b58fdc097710ad6ba1fe5fed95932eb1a4e3a4dcb447e456814b6a74d92e",
       "name": "BridgeRiskManager",
-      "runtime_keccak256": "0xdf85de753769384b17d80edae6e8cfcb2b84e3eaecaf2928cbd44c72d585f053",
-      "transaction_hash": "0x61264dfe0bb5131f9ddb02887991f2aebd2813f47012ce8a2e75c1d06408f048"
+      "runtime_keccak256": "0xe7f52154dbf878c107b4ec5b074ff48dc2530be5f55acf24ce2cbe00b1bbb275",
+      "transaction_hash": "0xaba0d0ff1afbfd61a98e3e9b7a08061d3c53a508df863915734f6006d2e4bd34"
     },
     {
       "address": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
       "component_id": "0xe4a0e460d2725ffc53f59bcd07eec8bbf801addd1242700745047d6e545c19c0",
       "name": "BridgeTransferRegistry",
-      "runtime_keccak256": "0xb05bbd06ff7b867014ef2ba50c40ecf2e9d8f1e21bc8f29ea955392d9d1abdd5",
-      "transaction_hash": "0xa8dce38c5a04705618fc8f28fb2a18e218ca0181c8a3182272d959caafda4e73"
+      "runtime_keccak256": "0xddb0843528feda92a18e7497b7fac47fe43ab47743c8c1bce6ba524e2dea17af",
+      "transaction_hash": "0xde2243c069de6ce22491fd3d6693ccae331910e6aa23c4d995076d335d9b6eb0"
     },
     {
       "address": "0x9a676e781a523b5d0c0e43731313a708cb607508",
       "component_id": "0xb973b45cf3d6faa704df1967e26dbe0ba62ca8f5e125e00d976d99cb9be2fb38",
       "name": "BridgeAccountingRegistry",
-      "runtime_keccak256": "0x2bf069d08cd19149a4c7b9a05eae71452c64d33446f997b277409ce4355de111",
-      "transaction_hash": "0xf2cd35a1c93c24dbde2a96968f1bcd19508b2003b5c49b802d03f1e56b17946a"
+      "runtime_keccak256": "0xb946fdeb39a8d4c57f7de66f554bbffa77511856e04b21a3b6d0940e4396573b",
+      "transaction_hash": "0xef115893a4b3278dfd2cf9de0f2d7f14b003ddfdee7b13698f1096795cc966a7"
     },
     {
       "address": "0x959922be3caee4b8cd9a407cc3ac1c251c2007b1",
       "component_id": "0xd1df53b46a771ff1c2363d130e0019b8f7e084a42c5b37958e02d66dbf5e3f21",
       "name": "GatewayRouter420",
-      "runtime_keccak256": "0x8c7879acae17b35246a823db737532a3f3b8ce7739ac2ab22b7413dc245f6e85",
-      "transaction_hash": "0xb42c85ef852c7f532f82c9704fe5ed84b99c398d0e8fa0fd755e21dd79900033"
+      "runtime_keccak256": "0xfc12557ff6cc38a570a5b15c136d4feb31539eed8329ff11425f534d84c840cb",
+      "transaction_hash": "0x76f24790725713fe315105ac2b04b935b4480fd6eb073450e250becf78dce4a8"
     },
     {
       "address": "0x68b1d87f95878fe05b998f19b66f4baba5de1aed",
       "component_id": "0x78ba522671d02b6e0bc412974c77b15976e41552270fdfca190d30ed63ae1aad",
       "name": "CADCBridgeIntegration",
-      "runtime_keccak256": "0x4d83b3ef9526cb2fea8dd7572af961c723e7772f4b3683fc8879dcf72297a1c9",
-      "transaction_hash": "0xef19896daebc3b43dba6ef59b4f66237b8ab1974f5bddb96cdf9a133321cf12f"
+      "runtime_keccak256": "0x989377ad7060342ab6c0f2d64db00fcad9a06380e2e3362e02196da9c7342c29",
+      "transaction_hash": "0x3c40e2a4717a65270066b52ce91a61fa2455fa768656ab173c353b85dc6724da"
     },
     {
       "address": "0x59b670e9fa9d0a427751af201d676719a970857b",
       "name": "BridgeValueCustody420",
       "test_only_outcome": "0xc6e7df5e7b4f2a278906862b61205850344d4e7d",
-      "transaction_hash": "0x2798aaf0059adf03a6d940b6e88170206e575382c26121379478a306b5e561d6"
+      "transaction_hash": "0x1739fdf07248db6502e3683c9a37af01195d03b2590c39e374a9d72fc53ac0b6"
     }
   ],
   "environment": "fresh owned Anvil; controlled governance/configuration/outcome, not source authority",

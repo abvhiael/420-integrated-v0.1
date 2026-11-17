@@ -114,6 +114,8 @@ Remaining deployment work: publish exact deployed registry-resolved Pay contract
 
 ## PAY-AUDIT-6 — deterministic deployment package and Registry publication
 
+Current deployment identities are reconciled to global configuration V2 and already-integrated main sources by [BRIDGE-AUDIT-12](bridge-deployment-qualification/GENESIS-CONFIG-V2.md). Its retained affected-owner compiler output, 13 constructor/runtime comparisons and current Pay deployment/publication/wiring pass supplement the historical qualification below; the original SHAs and CI runs remain historical evidence. Live acceptance remains PAY-AUDIT-7.
+
 **Status: COMPLETE.**
 
 Durable Level 1 qualification basis: implementation SHA `9bfe0d72c8d696b4908f819612608ca5279ce930` passed 420Pay audit qualification run #216 (`37061442891`, job `111018792122`) and Solidity Contracts run #4259 (`37061442991`). The dedicated Pay run passed exact-head verification, static Pay verification, Solidity formatting, the Pay/settlement-boundary build, deterministic runtime materialization and verification, compiled artifact identity retention, derived runtime manifest retention, PAY-AUDIT-6 deployment qualification, forbidden-primitive scan, and 420Indexer Pay reconciliation. Repository deployment readiness is therefore qualified; live chain/address/transaction binding remains PAY-AUDIT-7.

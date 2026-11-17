@@ -28,7 +28,7 @@ contract PayAudit6DeploymentPackage420Test {
     VmPayAudit6 internal constant vm = VmPayAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     address internal constant TIMELOCK = 0x0000000000000000000000000000000000000429;
-    bytes32 internal constant CFG = 0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921;
+    bytes32 internal constant CFG = 0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d;
 
     function _v() private pure returns (Types420.Version memory) {
         return Types420.Version({ major: 1, minor: 0, patch: 0 });

@@ -9,6 +9,19 @@ CORE = ['VerifiedGateway420','BridgeVerifierRegistry420','BridgeChainRegistry420
 LEGACY = {'ETHProofAdapter','BTCLightClientAdapter'}
 REGISTRY = '0x0000000000000000000000000000000000000434'
 GATEWAY = '0x0000000000000000000000000000000000000438'
+CONFIG_HASH = '0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d'
+def commitment():
+    from eth_hash.auto import keccak
+    obj=json.loads((ROOT/'contracts/config/genesis-config-commitment.json').read_text())
+    assert obj['status']=='FROZEN_V2', 'noncanonical commitment version'
+    assert obj['commitmentPayload']['domain']=='420/GENESIS/CONFIG/V2', 'noncanonical commitment domain'
+    payload=json.dumps(obj['commitmentPayload'],sort_keys=True,separators=(',',':')).encode()
+    assert obj['genesisConfigHash']==CONFIG_HASH=='0x'+keccak(payload).hex(), 'frozen configuration commitment'
+    drift=[]
+    for entry in obj['commitmentPayload']['authorityInputs']:
+        actual=subprocess.check_output(['git','hash-object',entry['path']],cwd=ROOT,text=True).strip()
+        if actual!=entry['gitBlobSha1']:drift.append({'path':entry['path'],'frozen_blob':entry['gitBlobSha1'],'current_blob':actual})
+    return obj,drift
 def dump(value): return json.dumps(value, sort_keys=True, indent=2)+'\n'
 def sha(data): return hashlib.sha256(data).hexdigest()
 def write(path, value): path.parent.mkdir(parents=True, exist_ok=True); path.write_text(dump(value))
@@ -86,10 +99,9 @@ def make_plan(package, inputs):
         assert inputs['chain_id']==31337, 'controlled local chain id'
     else:
         assert inputs['governance'].lower()==namespace()['GovernanceTimelock'], 'noncanonical governance timelock'
-        frozen=json.loads((ROOT/'contracts/config/genesis-config-commitment.json').read_text())
+        frozen,drift=commitment()
         assert inputs['genesis_config_hash']==frozen['genesisConfigHash'], 'noncanonical Genesis commitment'
-        for entry in frozen['commitmentPayload']['authorityInputs']:
-            assert subprocess.check_output(['git','hash-object',entry['path']],cwd=ROOT,text=True).strip()==entry['gitBlobSha1'], 'frozen authority drift: '+entry['path']
+        assert not drift, 'frozen authority drift: '+','.join(x['path'] for x in drift)
     for path, expected in manifest['sources'].items():
         assert sha((ROOT/path).read_bytes())==expected, 'source drift: '+path
     steps=[];nonce=inputs['start_nonce'];seen=set()

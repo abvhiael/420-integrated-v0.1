@@ -55,7 +55,7 @@ def run(package, anvil, solc, output):
             a=artifact(name);receipt=node.transact(gov,'0x'+a['evm']['bytecode']['object']+encode(types,args).hex());address=receipt['contractAddress'];actual=node.rpc('eth_getCode',[address,'latest']);assert (len(actual)-2)//2==records[name]['runtime_bytes'];return address,receipt
         registry,receipt=deploy('ProtocolRegistry',['address'],[gov])
         node.rpc('anvil_setCode',[pkg.REGISTRY,node.rpc('eth_getCode',[registry,'latest'])]);passed('canonical Registry materialized at frozen 0x434')
-        config='0x'+keccak(b'BRIDGE-AUDIT-12/CONTROLLED-LOCAL-REHEARSAL').hex()
+        frozen,drift=pkg.commitment();assert not drift,'frozen authority drift';config=frozen['genesisConfigHash']
         core=[n for n in pkg.CORE if n!='BridgeValueCustody420']
         args={n:[gov,pkg.REGISTRY,config]+([ZERO] if n=='VerifiedGateway420' else []) for n in core}
         params={'environment':'local_rehearsal','chain_id':31337,'governance':gov,'deployer':gov,'registry':pkg.REGISTRY,'genesis_config_hash':config,'start_nonce':int(node.rpc('eth_getTransactionCount',[gov,'latest']),16),'contracts':[{'name':n,'args':args[n]} for n in core]}

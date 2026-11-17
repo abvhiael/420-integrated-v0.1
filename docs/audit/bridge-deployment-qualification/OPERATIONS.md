@@ -1,6 +1,6 @@
 # Bridge deployment, activation and rollback
 
-This is the executable preparation for the user-assigned BRIDGE-AUDIT-12. No new approval tier or branch rule is introduced. Existing Genesis governance, timelock, ProtocolRegistry, chain/token/risk/qualification authority and the original testnet handoff remain authoritative. The global freeze conflict in README.md blocks release preparation; the scripts reject it for production plans.
+This is the executable preparation for the user-assigned BRIDGE-AUDIT-12. No new approval tier or branch rule is introduced. Existing Genesis governance, timelock, ProtocolRegistry, chain/token/risk/qualification authority and the original testnet handoff remain authoritative. The explicit V2 reconciliation in GENESIS-CONFIG-V2.md is current authority; production plans reject any subsequent payload/input drift.
 
 ## Reproduce the retained build
 
@@ -11,6 +11,8 @@ python scripts/bridge-audit-12/package.py build --solc /path/to/solc --output /t
 BRIDGE12_PACKAGE=/tmp/bridge12-package python scripts/bridge-audit-12/test_package.py
 python scripts/bridge-audit-12/rehearse.py --package /tmp/bridge12-package --anvil /path/to/anvil --solc /path/to/solc --output /tmp/bridge12-rehearsal
 python scripts/bridge-audit-12/prepare.py --package /tmp/bridge12-package --anvil /path/to/anvil --output /tmp/bridge12-canonical
+python scripts/bridge-audit-12/reconcile_v2.py --check
+python scripts/bridge-audit-12/qualify_v2.py --anvil /path/to/anvil --output /tmp/v2-residents
 python scripts/bridge-audit-12/verify.py
 ```
 
@@ -20,7 +22,7 @@ python scripts/bridge-audit-12/verify.py
 
 ## Construct unsigned deployment and publication calls
 
-After the shared freeze is reconciled under its existing version-decision rule, supply the actual local chain ID, deployer, start nonce and explicit constructor arguments:
+Supply the actual local chain ID, deployer, start nonce and explicit constructor arguments:
 
 ```sh
 python scripts/bridge-audit-12/package.py plan --package /tmp/bridge12-package --parameters /path/to/approved-parameters.json --output /tmp/bridge12-plan.json
@@ -30,7 +32,7 @@ The parameter schema and a complete controlled example are in `rehearsal/unsigne
 
 The plan derives CREATE addresses from the exact deployer/nonce and emits ABI-encoded constructor data and governance publication calldata. Any other deployment transactions by that deployer invalidate subsequent predicted addresses. Governance publication calls are executed through the existing timelock, not signed as transactions by a contract address. Do not mix another account's nonce stream with the deployer's stream.
 
-1. Materialize the frozen ProtocolRegistry at `0x0434` through its already qualified Registry predeploy process. Materialize VerifiedGateway420 at `0x0438` from constructor execution, including immutable timelock/Registry/configuration and initial zero verifier. Do not deploy creation code at a frozen address, copy an unpatched runtime template, or move self-address-bound custody/proxy contracts after construction. The gateway candidate has no mutable constructor writes; its storage trie is empty. The candidate is explicitly `deployment_ready: false` while current authority inputs conflict with FROZEN_V1.
+1. Materialize the frozen ProtocolRegistry at `0x0434` through its already qualified Registry predeploy process. Materialize VerifiedGateway420 at `0x0438` from constructor execution, including immutable timelock/Registry/configuration and initial zero verifier. Do not deploy creation code at a frozen address, copy an unpatched runtime template, or move self-address-bound custody/proxy contracts after construction. The V2 gateway has no mutable constructor writes; its storage trie is empty. Its canonical runtime/storage and shared manifests are ARTIFACT_READY for offline deployment preparation; this does not approve any production route.
 2. Deploy/publish BridgeVerifierRegistry420 and the chain, asset, route, risk, transfer, accounting, router and CADC components. The executable core order is retained in constructor parameters. Each publication uses `registerComponent(componentId, implementation, (1,0,0), ACTIVE)` and pins the actual deployed runtime code hash. ACTIVE component discovery grants no route or economic approval.
 3. BridgeValueCustody420 must be constructed **after** the qualification registry is active in ProtocolRegistry. Its constructor resolves and permanently pins that registry address/hash, its own deployment address and a real code-bearing withdrawal outcome verifier. The always-reverting outcome in the rehearsal is an existing test fixture; it is absent from production deployment selections. Deploy BridgeRepresentation420 only against its final custody address. Never use bridged generic representations for issuer-native CADC/USDC.
 4. Deploy the selected production verifier/adapter graph with actual constructor dependencies from the inventory. For each instance retain actual runtime Keccak hash, implementation/proxy identity, trusted root/configuration probes, source/issuer authority evidence and qualification ID. Core/source/helper inventory entries do not themselves confer authority. The two legacy ETH/BTC placeholders are explicitly ineligible deployment selections, and both execution directions still revert.
@@ -54,4 +56,12 @@ Keep consumed source messages, transfer IDs, approvals originally pinned to tran
 
 Pause/dispute affected transfers through their existing lifecycle APIs. Retry and settlement recovery require the original qualified evidence and current authorization. A timeout, missing RPC result, governance label or unconfirmed cancellation does not establish nonpayment or authorize a refund. Refund local claims only through the existing qualified permanent cancellation/source-repayment paths. For replacements, qualify state/reservation migration before governance switches bindings. Reconcile supply, escrow, risk exposure and pending claims before reenabling any direction.
 
-Deployment-specific failures and the existing source/issuer/provider prerequisites remain in the existing testnet roadmap. The current global freeze conflict stays in this pre-testnet closeout record; it is not relabelled a testnet dependency.
+Deployment-specific failures and the existing source/issuer/provider prerequisites remain in the existing testnet roadmap. The prior V1 input conflict is resolved by the explicit V2 commitment and affected resident materialization; it is not a testnet blocker.
+
+## Reproduce the V2 affected-owner evidence
+
+The retained `v2-residents/compiler-artifacts.tar.gz` contains 15 raw compiler artifacts, their exact source closure, settings and binary hash. Extract it into a fresh temporary directory. Restore each `<Contract>.json` into `contracts/out/<Contract>.sol/<Contract>.json` before running `reconcile_v2.py --check` or `qualify_v2.py`; those commands verify current source/template identities and do not obtain dependencies from a network. The Bridge `package.tar.gz` remains unchanged and separate.
+
+For an independent affected-owner rebuild, use native solc 0.8.24 with the unchanged `contracts/foundry.toml` settings. Run Forge only for the six `DEPLOYMENT_COMPONENTS` paths in `generate-swap-audit-6-predeploy.py` and nine `RESIDENTS` paths in `generate-420pay-audit-6-deployment.py`, requesting storageLayout. The retained build compiled 40 sources. `reconcile_v2.py --check` compares fresh Swap template, ABI, creation code and immutable offsets to retained compiler evidence; AST numeric storage labels remain historical compiler metadata. It derives the four V2 states and all nine Pay runtime identities and checks exact retained output. `--write` deliberately regenerates only those existing outputs.
+
+The Pay deployment test uses a 42-file owned source closure, byte-identical to `v2-residents/pay-test-source-sha256.json`, the unchanged Foundry settings and the single `PayAudit6DeploymentPackage420.t.sol` test. Its full log is `v2-logs/pay-v2-deployment-test.log`. The final source/checksum verifier binds the test closure, fresh runtime comparisons, artifacts and current shared gateway manifests. Retained original security/settlement evidence is source-verified by `scripts/bridge-audit-11/verify-evidence.py --output /tmp/retained-evidence.json`; historical native tests are not re-executed.

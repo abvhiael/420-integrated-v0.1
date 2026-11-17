@@ -1,0 +1,980 @@
+Compiling 40 files with Solc 0.8.24
+Solc 0.8.24 finished in 22.59s
+Compiler run successful!
+2026-11-17T05:29:31.242676Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/PublicBatchAuction.sol:131:73
+    │
+131 │         if (auctions[auctionId].closesAt != 0 || closesAt <= opensAt || opensAt < block.timestamp) {
+    │                                                                         ━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-no-eth]: external call can be reentered before `_entered` is updated
+    ╭▸ src/swap/PublicBatchAuction.sol:352:14
+    │
+352 │         if (!IERC20PublicBatchAuction420(token).transferFrom(from, address(this), amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/PublicBatchAuction.sol:173:60
+    │
+173 │             a.closesAt == 0 || a.settled || a.cancelled || block.timestamp < a.opensAt
+    │                                                            ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/PublicBatchAuction.sol:174:20
+    │
+174 │                 || block.timestamp >= a.closesAt
+    │                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/PublicBatchAuction.sol:188:9
+    │
+188 │         emit Bid(auctionId, msg.sender, quoteAmount, quoteBids[auctionId][msg.sender]);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/swap/PublicBatchAuction.sol:224:28
+    │
+224 │         a.oversubscribed = oversubscribed;
+    │                            ━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/PublicBatchAuction.sol:203:13
+    │
+203 │         if (block.timestamp < a.closesAt) revert AuctionNotClosed();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[reentrancy-eth]: uncapped ETH transfer can be reentered before `_entered` is updated
+    ╭▸ src/swap/PublicBatchAuction.sol:297:26
+    │
+297 │             (bool ok,) = payable(msg.sender).call{value: native420Amount}("");
+    │                          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-eth
+
+warning[reentrancy-no-eth]: external call can be reentered before `_entered` is updated
+    ╭▸ src/swap/PublicBatchAuction.sol:360:14
+    │
+360 │         if (!IERC20PublicBatchAuction420(token).transfer(to, amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/PublicBatchAuction.sol:301:9
+    │
+301 │         emit Claimed(auctionId, msg.sender, native420Amount, quoteSpent, quoteRefund);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/swap/PublicBatchAuction.sol:312:28
+    │
+312 │         (uint8 status,,) = IApprovedQuoteAssetRegistryAuction420(quoteRegistry).quoteAssets(quoteAsset);
+    │                            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/PublicBatchAuction.sol:322:21
+    │
+322 │         decimals_ = uint8(decoded);
+    │                     ━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint8' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unused-return]: return value of an external call is not used
+   ╭▸ src/swap/CanonicalSwapExecutor420.sol:66:9
+   │
+66 │         (pool, asset0, asset1,,, active) = ICanonicalMarketRegistryExecutorView420(marketRegistry).markets(marketId);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+   ╭▸ src/swap/CanonicalSwapExecutor420.sol:77:40
+   │
+77 │           (bool ok, bytes memory data) = pool.call{ value: msg.value }(
+   │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+78 │ ┃             abi.encodeWithSignature(
+79 │ ┃                 "executeCanonicalSwap(address,address,address,address,uint256,uint256)",
+80 │ ┃                 request.payer,
+   ‡ ┃
+87 │ ┃         );
+   │ ┗━━━━━━━━━┛
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalSwapExecutor420.sol:112:9
+    │
+112 │         emit CanonicalSwapExecuted(marketId, request.payer, request.recipient, inputSpent, settlementDelivered);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-no-eth]: external call can be reentered before `price0CumulativeX96` is updated
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:219:14
+    │
+219 │         if (!IERC20CanonicalPool420(token).transferFrom(from, address(this), amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:255:9
+    │
+255 │         emit CumulativePriceUpdated(timestamp, price0CumulativeX96, price1CumulativeX96);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:240:9
+    │
+240 │         emit Sync(balance0, balance1);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:109:9
+    │
+109 │         emit LiquidityAdded(recipient, amount0Desired, amount1Desired, sharesMinted);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-no-eth]: external call can be reentered before `price0CumulativeX96` is updated
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:227:14
+    │
+227 │         if (!IERC20CanonicalPool420(token).transfer(to, amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:130:9
+    │
+130 │         emit LiquidityRemoved(msg.sender, recipient, amount0, amount1, sharesBurned);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:173:9
+    │
+173 │         emit Swap(payer, recipient, inputAsset, inputAmount, settlementDelivered, feeAmount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:185:21
+    │
+185 │         timestamp = uint64(block.timestamp);
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[arbitrary-send-erc20]: `transferFrom` uses an arbitrary `from`; require it to equal `msg.sender` or `address(this)`
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:219:14
+    │
+219 │         if (!IERC20CanonicalPool420(token).transferFrom(from, address(this), amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-erc20
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:220:13
+    │
+220 │         if (IERC20CanonicalPool420(token).balanceOf(address(this)) != expectedBalance) revert UnsupportedTokenBehavior();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:228:13
+    │
+228 │         if (IERC20CanonicalPool420(token).balanceOf(address(this)) != expectedBalance) revert UnsupportedTokenBehavior();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/CanonicalConstantProductPool420.sol:244:28
+    │
+244 │         uint64 timestamp = uint64(block.timestamp);
+    │                            ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/TWAPOracle.sol:168:41
+    │
+168 │         latestWindowSeconds[marketId] = uint32(elapsed);
+    │                                         ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/TWAPOracle.sol:172:69
+    │
+172 │         emit ObservationApplied(marketId, timestamp, normalizedX96, uint32(elapsed), sourceHash);
+    │                                                                     ━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint32' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/TWAPOracle.sol:205:13
+    │
+205 │         if (block.timestamp > expiry) revert ObservationStale();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/TWAPOracle.sol:209:22
+    │
+209 │         validUntil = uint64(expiry);
+    │                      ━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/swap/TWAPOracle.sol:266:41
+    │
+266 │         if (cumulativeTimestamp == 0 || cumulativeTimestamp > block.timestamp) revert InvalidPool();
+    │                                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/TWAPOracle.sol:307:22
+    │
+307 │         normalized = uint192(adjusted);
+    │                      ━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint192' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/swap/TWAPOracle.sol:315:21
+    │
+315 │         decimals_ = uint8(decoded);
+    │                     ━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint8' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[missing-events-access-control]: `consumedQuote` is changed without an event but is used for access control
+   ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:86:9
+   │
+86 │         consumedQuote[q.quoteId] = true;
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[missing-events-access-control]: `consumedQuote` is changed without an event but is used for access control
+    ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:104:9
+    │
+104 │         consumedQuote[q.quoteId] = true;
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+   ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:89:9
+   │
+89 │         emit SettlementExecuted(q.quoteId, payer, recipient, inputSpent, settlementDelivered);
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:112:9
+    │
+112 │         emit SettlementExecuted(q.quoteId, payer, settlementRouter, inputSpent, settlementDelivered);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:128:17
+    │
+128 │         require(block.timestamp <= uint256(q.quotedAt) + QUOTE_LIFETIME, "stale quote");
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/pay/adapters/CanonicalSettlementAdapter420.sol:141:40
+    │
+141 │           (bool ok, bytes memory data) = swapExecutor.call{ value: msg.value }(
+    │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+142 │ ┃             abi.encodeWithSignature(
+143 │ ┃                 "executeCanonicalSwap(bytes32,address,address,address,address,uint256,uint256)",
+144 │ ┃                 q.marketId,
+    ‡ ┃
+152 │ ┃         );
+    │ ┗━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/InvoiceRegistry420.sol:19:43
+   │
+19 │     bytes3 public constant CURRENCY_CAD = bytes3("CAD");
+   │                                           ━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes3' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/InvoiceRegistry420.sol:20:43
+   │
+20 │     bytes3 public constant CURRENCY_USD = bytes3("USD");
+   │                                           ━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes3' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/InvoiceRegistry420.sol:21:43
+   │
+21 │     bytes3 public constant CURRENCY_420 = bytes3("420");
+   │                                           ━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'bytes3' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/pay/InvoiceRegistry420.sol:103:33
+    │
+103 │         require(i.amount > 0 && i.expiresAt > block.timestamp, "amount/expiry");
+    │                                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/pay/InvoiceRegistry420.sol:139:17
+    │
+139 │         require(block.timestamp <= i.expiresAt, "expired");
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/pay/RefundManager420.sol:113:95
+    │
+113 │         refunds[refundId] = Refund(paymentId, settlementAsset, recipient, amount, reasonHash, uint64(block.timestamp));
+    │                                                                                               ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[reentrancy-no-eth]: external call can be reentered before `refundPayoutLocked` is updated
+    ╭▸ src/pay/RefundManager420.sol:143:21
+    │
+143 │             require(token.transferFrom(msg.sender, address(this), amount), "fund transfer");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/RefundManager420.sol:146:9
+    │
+146 │         emit AuthorizedRefundFunded(paymentId, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/pay/RefundManager420.sol:132:13
+    │
+132 │             IPaymentRefundAccounting420(paymentRegistry).refundAccounting(paymentId);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/RefundManager420.sol:144:21
+    │
+144 │             require(token.balanceOf(address(this)) - beforeBalance == amount, "fund delta");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[reentrancy-eth]: uncapped ETH transfer can be reentered before `refundPayoutLocked` is updated
+    ╭▸ src/pay/RefundManager420.sol:167:26
+    │
+167 │             (bool ok,) = payable(msg.sender).call{value: amount}("");
+    │                          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-eth
+
+warning[reentrancy-no-eth]: external call can be reentered before `refundPayoutLocked` is updated
+    ╭▸ src/pay/RefundManager420.sol:173:21
+    │
+173 │             require(token.transfer(msg.sender, amount), "fund unwind transfer");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/RefundManager420.sol:177:9
+    │
+177 │         emit AuthorizedRefundFundingCancelled(paymentId, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unused-return]: return value of an external call is not used
+    ╭▸ src/pay/RefundManager420.sol:163:41
+    │
+163 │         (, address canonicalAsset,,,) = IPaymentRefundAccounting420(paymentRegistry).refundAccounting(paymentId);
+    │                                         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/unused-return
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/RefundManager420.sol:174:21
+    │
+174 │             require(token.balanceOf(msg.sender) - beforeRecipient == amount, "fund unwind recipient");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/RefundManager420.sol:175:21
+    │
+175 │             require(beforeContract - token.balanceOf(address(this)) == amount, "fund unwind delta");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/pay/RefundManager420.sol:212:28
+    │
+212 │             (bool paid,) = payable(recipient).call{value: amount}("");
+    │                            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-eth]: uncapped ETH transfer can be reentered before `refundPayoutLocked` is updated
+    ╭▸ src/pay/RefundManager420.sol:212:28
+    │
+212 │             (bool paid,) = payable(recipient).call{value: amount}("");
+    │                            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-eth
+
+warning[reentrancy-no-eth]: external call can be reentered before `refundPayoutLocked` is updated
+    ╭▸ src/pay/RefundManager420.sol:218:21
+    │
+218 │             require(token.transfer(recipient, amount), "refund transfer");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/RefundManager420.sol:222:9
+    │
+222 │         emit RefundRecorded(refundId, paymentId, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/RefundManager420.sol:223:9
+    │
+223 │         emit FundedRefundPaid(refundId, paymentId, recipient, asset, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/pay/RefundManager420.sol:209:85
+    │
+209 │         refunds[refundId] = Refund(paymentId, asset, recipient, amount, reasonHash, uint64(block.timestamp));
+    │                                                                                     ━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/RefundManager420.sol:219:21
+    │
+219 │             require(token.balanceOf(recipient) - beforeRecipient == amount, "recipient delta");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/RefundManager420.sol:220:21
+    │
+220 │             require(beforeContract - token.balanceOf(address(this)) == amount, "payout delta");
+    │                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/pay/PaymentRouter420.sol:91:17
+   │
+91 │         require(block.timestamp <= uint256(limits.quoteTimestamp) + QUOTE_LIFETIME, "stale quote");
+   │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/pay/PaymentRouter420.sol:122:35
+    │
+122 │           (inputSpent, delivered) = ICanonicalSettlement420(settlementAdapter).execute{ value: msg.value }(
+    │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+123 │ ┃             q, payer, recipient, invoiceSettlementAmount
+124 │ ┃         );
+    │ ┗━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/PaymentRouter420.sol:127:9
+    │
+127 │         emit PaymentAuthorized(paymentId, payer, inputSpent, delivered);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/pay/PaymentRouter420.sol:144:35
+    │
+144 │           (inputSpent, delivered) = ICanonicalSplitSettlement420(settlementAdapter).executeSplit{ value: msg.value }(
+    │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+145 │ ┃             q, payer, paymentId, invoiceSettlementAmount, recipients, bps, primaryIndex
+146 │ ┃         );
+    │ ┗━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/PaymentRouter420.sol:149:9
+    │
+149 │         emit PaymentAuthorized(paymentId, payer, inputSpent, delivered);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/PaymentRouter420.sol:170:9
+    │
+170 │         emit PaymentAuthorized(paymentId, payer, amount, amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[arbitrary-send-eth]: ETH is sent to a user-controlled destination; restrict the destination or the caller
+    ╭▸ src/pay/PaymentRouter420.sol:187:9
+    │
+187 │ ┏         SettlementRouter420(settlementRouter).executeNativeSplit{ value: msg.value }(
+188 │ ┃             paymentId, msg.value, recipients, bps, primaryIndex
+189 │ ┃         );
+    │ ┗━━━━━━━━━┛
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/PaymentRouter420.sol:190:9
+    │
+190 │         emit PaymentAuthorized(paymentId, payer, msg.value, msg.value);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/pay/PaymentRouter420.sol:209:17
+    │
+209 │         require(block.timestamp <= uint256(q.quotedAt) + QUOTE_LIFETIME, "stale quote");
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+    ╭▸ src/pay/PaymentRouter420.sol:225:42
+    │
+225 │         if (fees.quoteId != q.quoteId || block.timestamp > fees.expiresAt) revert Errors420.StaleQuote(q.quoteId);
+    │                                          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/MerchantRegistry420.sol:55:63
+   │
+55 │         payoutProfiles[merchantId][1] = PayoutProfile(payout, uint64(block.timestamp), bytes32(0), true);
+   │                                                               ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/MerchantRegistry420.sol:57:60
+   │
+57 │         emit PayoutProfileScheduled(merchantId, 1, payout, uint64(block.timestamp), bytes32(0));
+   │                                                            ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/MerchantRegistry420.sol:77:32
+   │
+77 │         uint64 minActivation = uint64(block.timestamp);
+   │                                ━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[unsafe-typecast]: typecast can truncate values
+   ╭▸ src/pay/MerchantRegistry420.sol:79:29
+   │
+79 │             minActivation = uint64(block.timestamp + 1 days);
+   │                             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ├ note: consider disabling this lint if you're certain the cast is safe
+   │       
+   │       // casting to 'uint64' is safe because [explain why]
+   │       // forge-lint: disable-next-line(unsafe-typecast)
+   │       
+   │       
+   ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+
+warning[block-timestamp]: usage of `block.timestamp` in a comparison may be manipulated by validators
+   ╭▸ src/pay/MerchantRegistry420.sol:93:29
+   │
+93 │             if (p.active && p.activatesAt <= block.timestamp) return (p.primary, v, p.planHash);
+   │                             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/block-timestamp
+
+warning[uninitialized-local]: local variable is read before being initialized
+   ╭▸ src/pay/SettlementRouter420.sol:90:13
+   │
+90 │             total += bps[i];
+   │             ━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+   ╭▸ src/pay/SettlementRouter420.sol:89:13
+   │
+89 │             require(recipients[i] != address(0), "zero recipient");
+   │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/pay/SettlementRouter420.sol:107:13
+    │
+107 │             totalBps += bps[i];
+    │             ━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[uninitialized-local]: local variable is read before being initialized
+    ╭▸ src/pay/SettlementRouter420.sol:109:13
+    │
+109 │             assigned += amounts[i];
+    │             ━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/uninitialized-local
+
+warning[reentrancy-balance]: external call can be reentered before a stale contract balance is checked
+    ╭▸ src/pay/SettlementRouter420.sol:133:30
+    │
+133 │                 (bool ok,) = recipients[i].call{ value: amounts[i] }("");
+    │                              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-balance
+
+warning[reentrancy-eth]: uncapped ETH transfer can be reentered before `_entered` is updated
+    ╭▸ src/pay/SettlementRouter420.sol:133:30
+    │
+133 │                 (bool ok,) = recipients[i].call{ value: amounts[i] }("");
+    │                              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-eth
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:133:30
+    │
+133 │                 (bool ok,) = recipients[i].call{ value: amounts[i] }("");
+    │                              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/SettlementRouter420.sol:136:13
+    │
+136 │             emit SplitPaid(paymentId, recipients[i], amounts[i], bps[i]);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/SettlementRouter420.sol:139:9
+    │
+139 │         emit NativeSettlement(paymentId, address(0), amount);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:134:26
+    │
+134 │                 if (!ok) revert TransferFailed();
+    │                          ━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/SettlementRouter420.sol:138:13
+    │
+138 │         if (address(this).balance != residualBefore) revert AccountingMismatch();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[arbitrary-send-erc20]: `transferFrom` uses an arbitrary `from`; require it to equal `msg.sender` or `address(this)`
+    ╭▸ src/pay/SettlementRouter420.sol:162:14
+    │
+162 │         if (!token.transferFrom(payer, address(this), amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/arbitrary-send-erc20
+
+warning[reentrancy-no-eth]: external call can be reentered before `_entered` is updated
+    ╭▸ src/pay/SettlementRouter420.sol:162:14
+    │
+162 │         if (!token.transferFrom(payer, address(this), amount)) revert TransferFailed();
+    │              ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-no-eth]: external call can be reentered before `_entered` is updated
+    ╭▸ src/pay/SettlementRouter420.sol:220:37
+    │
+220 │             if (amounts[i] != 0 && !token.transfer(recipients[i], amounts[i])) revert TransferFailed();
+    │                                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-no-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/SettlementRouter420.sol:222:13
+    │
+222 │             emit SplitPaid(paymentId, recipients[i], amounts[i], bps[i]);
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/SettlementRouter420.sol:163:13
+    │
+163 │         if (token.balanceOf(address(this)) - balanceBefore != amount) revert AccountingMismatch();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:219:39
+    │
+219 │             uint256 recipientBefore = token.balanceOf(recipients[i]);
+    │                                       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:220:37
+    │
+220 │             if (amounts[i] != 0 && !token.transfer(recipients[i], amounts[i])) revert TransferFailed();
+    │                                     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[calls-loop]: external call inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:221:17
+    │
+221 │             if (token.balanceOf(recipients[i]) - recipientBefore != amounts[i]) revert AccountingMismatch();
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/calls-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:220:80
+    │
+220 │             if (amounts[i] != 0 && !token.transfer(recipients[i], amounts[i])) revert TransferFailed();
+    │                                                                                ━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[require-revert-in-loop]: `require` or `revert` inside a loop
+    ╭▸ src/pay/SettlementRouter420.sol:221:81
+    │
+221 │             if (token.balanceOf(recipients[i]) - recipientBefore != amounts[i]) revert AccountingMismatch();
+    │                                                                                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/require-revert-in-loop
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/SettlementRouter420.sol:221:17
+    │
+221 │             if (token.balanceOf(recipients[i]) - recipientBefore != amounts[i]) revert AccountingMismatch();
+    │                 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[incorrect-strict-equality]: dangerous strict equality check on an externally-influenced value
+    ╭▸ src/pay/SettlementRouter420.sol:224:13
+    │
+224 │         if (token.balanceOf(address(this)) != expectedResidual) revert AccountingMismatch();
+    │             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/incorrect-strict-equality
+
+warning[missing-events-access-control]: `authorizedRelayer` is changed without an event but is used for access control
+   ╭▸ src/pay/GasSponsor420.sol:94:9
+   │
+94 │         authorizedRelayer[relayer] = authorized;
+   │         ━━━━━━━━━━━━━━━━━━━━━━━━━━
+   │
+   ╰ help: https://getfoundry.sh/forge/linting/missing-events-access-control
+
+warning[reentrancy-eth]: uncapped ETH transfer can be reentered before `_entered` is updated
+    ╭▸ src/pay/GasSponsor420.sol:132:22
+    │
+132 │         (bool ok,) = payable(msg.sender).call{ value: actualCost }("");
+    │                      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-eth
+
+warning[reentrancy-events]: event emitted after an external call; reentrancy can reorder or fabricate logs that off-chain consumers rely on
+    ╭▸ src/pay/GasSponsor420.sol:134:9
+    │
+134 │         emit SponsoredReimbursed(msg.sender, wallet, merchantId, operation, actualCost, success);
+    │         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ╰ help: https://getfoundry.sh/forge/linting/reentrancy-events
+
+warning[unsafe-typecast]: typecast can truncate values
+    ╭▸ src/pay/GasSponsor420.sol:192:20
+    │
+192 │         uint64 d = uint64(block.timestamp / 1 days);
+    │                    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    │
+    ├ note: consider disabling this lint if you're certain the cast is safe
+    │       
+    │       // casting to 'uint64' is safe because [explain why]
+    │       // forge-lint: disable-next-line(unsafe-typecast)
+    │       
+    │       
+    ╰ help: https://getfoundry.sh/forge/linting/unsafe-typecast
+

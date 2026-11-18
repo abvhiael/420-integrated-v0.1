@@ -1,5 +1,13 @@
 name: PAY-APP-0 V3 native rehearsal
 on:
+  push:
+    branches: [feature/pay-app-0-genesis-product]
+    paths:
+      - '.github/workflows/pay-app-0-native.yml'
+      - 'config/candidates/genesis-applications-pay-v10.json'
+      - 'config/genesis-applications.json'
+      - 'contracts/config/genesis-config-commitment.json'
+      - 'contracts/config/predeploy/storage-init.json'
   pull_request:
     paths:
       - '.github/workflows/pay-app-0-native.yml'
@@ -18,11 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
-      - name: Verify exact PR head
+      - name: Verify exact qualification head
         env:
-          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
       - uses: actions/setup-python@v5
         with:
@@ -59,10 +67,19 @@ jobs:
           BRIDGE12_PACKAGE=/tmp/pay-app-0-bridge python scripts/bridge-audit-12/test_package.py
           python scripts/bridge-audit-12/rehearse.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --solc "$SOLC" --output pay-app-0-evidence/bridge-rehearsal
           python scripts/bridge-audit-12/prepare.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --output pay-app-0-evidence/bridge-canonical --check-committed
+      - name: Run configuration-sensitive Solidity suites on the feature branch
+        if: github.event_name == 'push'
+        run: |
+          python scripts/qualify-pay-regression.py --profile ci \
+            --match PayAudit6DeploymentPackage420.t.sol \
+            --match SwapGenesisDEXFactory420.t.sol \
+            --match SwapGenesisIntegration420.t.sol \
+            --match SwapDeploymentBinding420.t.sol \
+            --output pay-app-0-evidence/solidity
       - name: Preserve rehearsal evidence even on failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pay-app-0-native-${{ github.event.pull_request.head.sha }}
+          name: pay-app-0-native-${{ github.event.pull_request.head.sha || github.sha }}
           path: pay-app-0-evidence/
           if-no-files-found: warn

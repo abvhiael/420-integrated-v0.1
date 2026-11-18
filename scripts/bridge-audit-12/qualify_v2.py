@@ -40,7 +40,7 @@ def run(anvil,output):
             records.append({'name':name,'runtime_code_hash':actual,'runtime_bytes':(len(code)-2)//2,'frozen_address':fixed,'constructor_receipt':receipt['transactionHash'],'compiler_artifact_sha256':p.sha(p.dump(raw).encode())})
         source_paths=[p.ROOT/'contracts/src'/src for src,_ in list(v.s.DEPLOYMENT_COMPONENTS.values())+list(v.pay.RESIDENTS.values())]
         sources=p.closure(source_paths)
-        result={'pass':True,'genesis_config_hash':cfg,'chain_id':31337,'environment':'fresh owned Anvil; canonical V2 constructors, no live deployment','affected_retained_runtimes':records,'count':len(records),'source_sha256':{k:p.sha(x['content'].encode()) for k,x in sources.items()},'production_approvals':[]}
+        result={'pass':True,'genesis_config_hash':cfg,'chain_id':31337,'environment':'fresh owned Anvil; canonical frozen Genesis constructors, no live deployment','affected_retained_runtimes':records,'count':len(records),'source_sha256':{k:p.sha(x['content'].encode()) for k,x in sources.items()},'production_approvals':[]}
         p.write(output/'RESULTS.json',result)
         print(json.dumps({'pass':True,'constructor_runtime_comparisons':len(records),'configuration':cfg}))
     finally:node.close()

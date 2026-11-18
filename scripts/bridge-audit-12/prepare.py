@@ -53,5 +53,30 @@ def prepare(package,anvil,output):
         p.write(output/'gateway-genesis-allocation.json',{'deployment_ready':not drift,'current_authority_drift':drift,'alloc':{p.GATEWAY:{'code':code,'storage':{},'balance':'0x0'}}})
         print(json.dumps({'pass':True,'address':p.GATEWAY,'runtimeCodeHash':state['runtimeCodeHash'],'runtimeBytes':state['runtimeBytes'],'storageRoot':state['storageRoot'],'templates':len(templates),'deployment_ready':not drift,'authority_drift_count':len(drift)}))
     finally:node.close()
+def check_committed(output):
+    for name, path in {
+        'VerifiedGateway420.json': 'contracts/artifacts/VerifiedGateway420.json',
+        'VerifiedGateway420-predeploy-state.json': 'contracts/config/predeploy/VerifiedGateway420-predeploy-state.json',
+    }.items():
+        assert (output/name).read_bytes() == (p.ROOT/path).read_bytes(), f'V3 gateway artifact drift: {path}'
+    state = json.loads((output/'VerifiedGateway420-predeploy-state.json').read_bytes())
+    for path, key in [
+        ('deployment-manifest.json', 'contracts'),
+        ('predeploy/predeploy-plan.json', 'predeploys'),
+    ]:
+        manifest = json.loads((p.ROOT/'contracts/config'/path).read_bytes())
+        entry, = (row for row in manifest[key] if row['name'] == state['name'])
+        assert entry['address'] == state['address'], f'gateway address drift: {path}'
+        assert entry['runtime_code_hash'] == state['runtimeCodeHash'], f'gateway runtime drift: {path}'
+        assert entry['artifact_status'] == 'BRIDGE_AUDIT_12_ARTIFACT_READY', f'gateway status drift: {path}'
+
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--package',type=Path,required=True);parser.add_argument('--anvil',required=True);parser.add_argument('--output',type=Path,required=True);a=parser.parse_args();prepare(a.package,a.anvil,a.output)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--package', type=Path, required=True)
+    parser.add_argument('--anvil', required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--check-committed', action='store_true')
+    args = parser.parse_args()
+    prepare(args.package, args.anvil, args.output)
+    if args.check_committed:
+        check_committed(args.output)

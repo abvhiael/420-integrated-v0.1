@@ -51,13 +51,8 @@ jobs:
         run: forge build src/apps/Identity420.sol
 
       - name: Run Identity invariant suite
-        working-directory: contracts
-        run: forge test --match-path 'test/Identity420Audit.t.sol' -vv
-
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/Identity420Audit.t.sol --output /tmp/identity-id-audit-3-Identity420Audit-t-sol
       - name: Run frozen-interface compatibility suite
-        working-directory: contracts
-        run: forge test --match-path 'test/Identity420Compatibility.t.sol' -vv
-
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/Identity420Compatibility.t.sol --output /tmp/identity-id-audit-3-Identity420Compatibility-t-sol
       - name: Run Registry/Identity/Names regression
-        working-directory: contracts
-        run: forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/RegistryIdentityNames420.t.sol --output /tmp/identity-id-audit-3-RegistryIdentityNames420-t-sol

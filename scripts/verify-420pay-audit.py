@@ -131,9 +131,13 @@ for section,key in wiring_checks:
         errors.append(f"PAY-AUDIT-4 wiring manifest missing {section}.{key}")
 
 genesis_apps=json.loads(read("config/genesis-applications.json") or "{}")
-names={x.get("name") for x in genesis_apps.get("apps",[])}
-if "420 Pay" in names or "420Pay" in names:
-    errors.append("audit assumption changed: frozen Genesis application catalogue now contains 420Pay; reconcile audit report")
+pay_apps = [app for app in genesis_apps.get("apps", []) if app.get("name") in {"420 Pay", "420Pay"}]
+if len(pay_apps) != 1 or (
+    pay_apps[0].get("name") != "420 Pay"
+    or pay_apps[0].get("class") != "GENESIS_PROTOCOL_AND_USER_APP"
+    or pay_apps[0].get("contracts_required") is not True
+):
+    errors.append("expected exactly one approved 420 Pay Genesis application backed by its protocol contracts")
 
 summary={
  "schema":"420pay-complete-audit-verifier-v1",
@@ -141,7 +145,6 @@ summary={
  "errors":errors,
  "known_blockers_enforced":[
    "deployment binding remains unverified until live evidence",
-   "frozen Genesis user-application catalogue currently omits 420Pay",
    "external security audit remains separate production gate"
  ]
 }

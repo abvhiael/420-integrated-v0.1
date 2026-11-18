@@ -239,6 +239,8 @@ nav:
                   - Errors & Retries: apps/identity/developer/errors.md
                   - Examples: apps/identity/developer/examples.md
           - 420 Pay:
+              - Product Specification: apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md
+              - Development Roadmap: apps/pay/PAY-APP-ROADMAP.md
               - Deployment & Operations: apps/pay/deployment-operations.md
           - 420 Swap:
               - Overview: apps/swap/index.md

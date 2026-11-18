@@ -103,8 +103,7 @@ jobs:
             exit 1
           fi
       - name: Run Randomness qualification suite
-        working-directory: contracts
-        run: forge test --match-path 'test/Randomness*.t.sol' -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile pr --match 'test/Randomness*.t.sol' --output /tmp/420randomness-audit-Randomness-t-sol
       - name: Forbidden primitive scan
         run: |
           set -euo pipefail

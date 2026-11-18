@@ -94,13 +94,7 @@ jobs:
           python3 scripts/verify-genesis-predeploy-authority.py
 
       - name: Identity runtime regression tests
-        working-directory: contracts
-        run: |
-          set -euo pipefail
-          forge test --match-path 'test/Identity420Audit.t.sol' -vv
-          forge test --match-path 'test/Identity420Compatibility.t.sol' -vv
-          forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vv
-
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/Identity420Audit.t.sol --match test/Identity420Compatibility.t.sol --match test/RegistryIdentityNames420.t.sol --output /tmp/identity-id-audit-5-Identity420Audit-t-sol
       - name: Commit generated ID-AUDIT-5 Genesis outputs when absent or stale
         # Preserve this scoped poker PR's exact qualified source; validation above still runs.
         if: github.event_name == 'pull_request' && github.head_ref != 'audit/420bet-5c5-reconcile-main' && github.head_ref != 'audit/420bet-5c6-reconcile-main' && github.head_ref != 'audit/420bet-5c7-reconcile-main' && github.head_ref != 'bet/5c8-recovery-security-qualification'

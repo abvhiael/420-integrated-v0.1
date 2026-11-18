@@ -2,6 +2,25 @@ name: EXP-1.9 CI Qualification Automation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'indexer/**'
+      - '420-indexer/**'
+      - 'explorer/**'
+      - 'deployments/indexer/**'
+      - 'docker/Dockerfile.420indexer'
+      - 'config/420indexer-v1.json'
+      - 'testnet/public-services/indexer/**'
+      - 'testnet/public-services/explorer/**'
+      - 'docs/audit/EXP-1.*'
+      - 'scripts/verify-exp-1-*.py'
+      - 'scripts/verify-420indexer.py'
+      - '.github/workflows/420indexer.yml'
+      - '.github/workflows/docs-qualify.yml'
+      - '.github/workflows/qualification.yml'
+      - '.github/workflows/explorer-exp-1-9.yml'
 
 concurrency:
   group: exp-1-9-${{ github.event.pull_request.number || github.ref }}
@@ -62,10 +81,15 @@ jobs:
       - name: Validate deployment manifest
         env:
           INDEXER_RPC_URL: https://rpc.invalid.example
+          INDEXER_ENGINE_URL: https://engine.invalid.example
+          INDEXER_JWT_SECRET: /tmp/420-indexer-exp19-engine.jwt
           INDEXER_CONSENSUS_STATUS_DIR: /tmp/420consensus
           INDEXER_MAX_HEAD_AGE: 2m
           INDEXER_EXPECTED_GENESIS_HASH: ""
         run: |
+          # Validate only the Compose manifest; no external engine connection.
+          (umask 077; openssl rand -hex 32 > "$INDEXER_JWT_SECRET")
+          trap 'rm -f "$INDEXER_JWT_SECRET"' EXIT
           mkdir -p /tmp/420consensus
           printf '{}\n' > /tmp/420consensus/status.json
           docker compose -f deployments/indexer/docker-compose.yml config >/dev/null

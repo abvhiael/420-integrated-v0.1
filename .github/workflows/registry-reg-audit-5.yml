@@ -68,10 +68,7 @@ jobs:
         run: python3 scripts/test-reg-audit-5-registry-predeploy.py
 
       - name: Registry regression tests
-        working-directory: contracts
-        run: |
-          forge test --match-path 'test/Registry*.t.sol' -vv
-
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/Registry*.t.sol' --output /tmp/registry-reg-audit-5-Registry-t-sol
       - name: Upload generated evidence
         if: always()
         uses: actions/upload-artifact@v4

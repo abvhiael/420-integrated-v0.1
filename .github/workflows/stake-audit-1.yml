@@ -50,11 +50,9 @@ jobs:
         working-directory: contracts
         run: forge build src/system/ValidatorRegistry.sol
       - name: Run Stake lifecycle, custody and shared-safety qualification
-        working-directory: contracts
-        run: forge test --match-path 'test/StakeValidatorGenesis420.t.sol' -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/StakeValidatorGenesis420.t.sol --output /tmp/stake-audit-1-StakeValidatorGenesis420-t-sol
       - name: Run validator eligibility regression
-        working-directory: contracts
-        run: forge test --match-path 'test/ValidatorEligibility420.t.sol' -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/ValidatorEligibility420.t.sol --output /tmp/stake-audit-1-ValidatorEligibility420-t-sol
 
   level-2-stake-integration:
     runs-on: ubuntu-latest
@@ -72,5 +70,4 @@ jobs:
         with:
           version: stable
       - name: Run retained consensus-system-call regression
-        working-directory: contracts
-        run: forge test --match-path 'test/ConsensusSystemCall420.t.sol' -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/ConsensusSystemCall420.t.sol --output /tmp/stake-audit-1-ConsensusSystemCall420-t-sol

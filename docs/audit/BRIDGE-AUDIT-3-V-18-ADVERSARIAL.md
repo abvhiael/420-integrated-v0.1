@@ -1,6 +1,6 @@
 # BRIDGE-AUDIT-3.V.18 — Adversarial Cryptographic Qualification
 
-**Local implemented-boundary qualification complete.** Baseline main `97413f2eea862d5f2ec3117313cd3beb15a634f4`; original main and qualified PR source pins are retained. [Detailed scope, findings, reproduction and limits](../../qualification/bridge-adversarial/README.md).
+**Local implemented-boundary qualification complete.** Baseline main `97413f2eea862d5f2ec3117313cd3beb15a634f4`; original main and qualified PR source pins are retained. [Detailed scope, findings, reproduction and limits](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/qualification/bridge-adversarial/README.md).
 
 - 113 passing Foundry unit/integration/fuzz/invariant tests: 80 new + 33 affected CADC regressions.
 - 42,500 fuzz inputs; 122,880 stateful invariant calls across fourteen families; zero handler reverts.
@@ -10,7 +10,7 @@
 - Confirmed and corrected CADC alternate-envelope acceptance; integrated its qualified adapter/interface dependency from #1169. Positive native delivery, rejected serialization, replay-key preservation and actual router risk rollback pass.
 - Restored the exact previously qualified Solana SHA-512 dependency and license omitted from main; original published hash matches.
 
-[Machine-readable results](adversarial-qualification/RESULTS.json), [source locks](../../contracts/config/bridge/adversarial-sources-v1.json), [original-source CADC reproduction](adversarial-qualification/cadc-original-reproduction.log), [corrected CADC tests](adversarial-qualification/cadc-new.log), [affected tests](adversarial-qualification/cadc-affected.log), [router tests](adversarial-qualification/cadc-integration.log), and [source/record verification](adversarial-qualification/report-verification.log).
+[Machine-readable results](adversarial-qualification/RESULTS.json), [source locks](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/contracts/config/bridge/adversarial-sources-v1.json), [original-source CADC reproduction](adversarial-qualification/cadc-original-reproduction.log), [corrected CADC tests](adversarial-qualification/cadc-new.log), [affected tests](adversarial-qualification/cadc-affected.log), [router tests](adversarial-qualification/cadc-integration.log), and [source/record verification](adversarial-qualification/report-verification.log).
 
 Only relevant path exclusions were added to existing unrelated workflows; job definitions and existing branch filters remain unchanged. [Trigger analysis](adversarial-qualification/trigger-isolation.json) identifies the remaining related Solana/contract qualifications. Publication uses existing `[skip ci]` to avoid repeating qualified local work or launching workflow-self-edit jobs. CI run IDs: none (local qualification); verify remote run inventory at publication.
 

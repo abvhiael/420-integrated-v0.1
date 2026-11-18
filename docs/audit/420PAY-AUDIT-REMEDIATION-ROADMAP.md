@@ -195,3 +195,7 @@ Exit criteria:
 Run the security policy against one frozen candidate SHA. Critical/high findings must be fixed, remediation re-reviewed, deployed bytecode/code hashes must match the audited commit, release gates and operational monitoring/incident response must close, and the Genesis catalogue contradiction must be resolved.
 
 Only then may 420Pay be declared Genesis-ready or production-ready.
+
+## Standalone application scope decision — 2026-11-17
+
+The unresolved standalone product decision in PAY-AUDIT-1 is now owner-approved; active catalogue promotion remains open under [PAY-APP-0](../apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md). The [PAY-APP roadmap](../apps/pay/PAY-APP-ROADMAP.md) supplements PAY-AUDIT-1–8 without renumbering or changing historical qualification. Active V2 catalogue omission remains a deployment/configuration reconciliation requirement, not an unresolved product preference.

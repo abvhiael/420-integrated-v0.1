@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-materialize the existing Swap and Pay compiler identities for explicit V2.
+"""Re-materialize the existing Swap and Pay compiler identities for the active frozen Genesis configuration.
 
 Retained Swap compiler artifacts stay byte-for-byte intact. Fresh affected-owner
 compiler output must reproduce their template, ABI and creation identity. Pay's
@@ -44,6 +44,13 @@ def derive():
     outputs={s.PREDEPLOY_DIR/f'{name}-predeploy-state.json':state for name,state in states.items()}
     outputs[s.PLAN_PATH]=s.update_plan(json.loads(s.PLAN_PATH.read_text()),states,artifacts)
     outputs[s.DEPLOYMENT_PATH]=s.update_deployment(json.loads(s.DEPLOYMENT_PATH.read_text()),states,artifacts)
+    binding_path = p.ROOT/'contracts/config/swap/swap-audit-7-deployment-binding.json'
+    binding = json.loads(binding_path.read_text())
+    for row in binding['frozen_swap_predeploys']:
+        state = states[row['contract']]
+        assert row['address'] == state['address'], 'Swap binding address drift'
+        row['runtime_code_hash'] = state['runtimeCodeHash']
+    outputs[binding_path] = binding
     package=json.loads(pay.PACKAGE.read_text());original=copy.deepcopy(package);derived=pay.derive()
     # Exact compiler identities must match retained Pay evidence before changing
     # the configuration immutable; no source/template/ABI update is smuggled in.
@@ -63,8 +70,8 @@ def main():
     a=argparse.ArgumentParser();a.add_argument('--write',action='store_true');a.add_argument('--check',action='store_true');args=a.parse_args()
     outputs=derive()
     for path,obj in outputs.items():
-        data=json.dumps(obj,indent=2)+'\n' if path==pay.PACKAGE else p.dump(obj)
+        data=json.dumps(obj,indent=2)+'\n' if path in {pay.PACKAGE, p.ROOT/'contracts/config/swap/swap-audit-7-deployment-binding.json'} else p.dump(obj)
         if args.write:path.write_text(data)
-        if args.check:assert path.read_text()==data,'non-reproducible V2 output: '+str(path)
+        if args.check:assert path.read_text()==data,'non-reproducible Genesis resident output: '+str(path)
     print(json.dumps({'pass':True,'swap_fixed_runtimes':4,'pay_runtime_identities':9,'retained_swap_compiler_artifacts_changed':False,'configuration':p.CONFIG_HASH}))
 if __name__=='__main__':main()

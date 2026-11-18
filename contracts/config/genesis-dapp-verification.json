@@ -1,6 +1,14 @@
 {
   "pass": true,
   "errors": [],
-  "genesis_apps": 12,
-  "testnet_only_apps": 1
+  "genesis_apps": 21,
+  "testnet_only_apps": 1,
+  "explorer_profile": "420-explorer-genesis-v1",
+  "search_profile": "420-search-genesis-v1",
+  "analytics_profile": "420-analytics-genesis-v1",
+  "appstore_profile": "420-appstore-genesis-v1",
+  "verify_profile": "420-verify-genesis-v1",
+  "notifications_profile": "420-notifications-genesis-v1",
+  "arbitration_profile": "420-arbitration-genesis-v1",
+  "token_profile": "420-token-genesis-v1"
 }

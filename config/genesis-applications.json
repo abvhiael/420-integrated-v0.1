@@ -1,5 +1,5 @@
 {
-  "schema": "420-genesis-application-decision-v9",
+  "schema": "420-genesis-application-decision-v10",
   "decision_id": "GENESIS_APPLICATION_DECISION_1",
   "status": "FROZEN",
   "apps": [
@@ -82,6 +82,12 @@
       "purpose": "Canonical native DEX and 420/approved-stable market"
     },
     {
+      "name": "420 Pay",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "purpose": "Universal non-custodial consumer and merchant payments, invoices, payment requests, point-of-sale checkout, approved-asset conversion, split settlement, refunds, receipts and accounting; 420Wallet authorizes execution and existing 420Pay contracts own canonical settlement."
+    },
+    {
       "name": "420 Bridge",
       "class": "GENESIS_PROTOCOL_AND_USER_APP",
       "contracts_required": true,
@@ -150,7 +156,8 @@
     "420 Stake does not include stake-weighted delegation at genesis.",
     "420 Attention cannot access wallet keys, auto-sign, execute arbitrary wallet code, or transact on behalf of users.",
     "Post-Genesis 420Arcade ordinary core gameplay remains wallet-free and accessible to guests without registration or blockchain connectivity; optional Gaming Protocol integrations cannot create pay-to-win advantages or separate wallet or contract authority.",
-    "420 Faucet never participates in mainnet genesis economics."
+    "420 Faucet never participates in mainnet genesis economics.",
+    "420 Pay client expressions reuse canonical Pay contracts, Registry discovery and 420Wallet execution authorization; they do not create parallel custody, signing, settlement or financial authority."
   ],
   "amendments": [
     {
@@ -163,6 +170,20 @@
         "High Country Genesis continuation",
         "historical audit evidence"
       ]
+    },
+    {
+      "id": "GENESIS_APPLICATION_DECISION_1_PAY_INCLUSION_2026_11_17",
+      "scope": "Public Genesis product and launch requirements",
+      "decision": "Owner approves standalone 420Pay consumer and merchant web, Android and iOS, POS, hosted checkout and developer integrations; local development before testnet.",
+      "retained": "Existing 420Pay service ID, resident inventory and frozen payment parameters; non-custodial Wallet authorization.",
+      "noChanges": [
+        "Canonical service IDs",
+        "Contract addresses",
+        "Solidity interfaces and frozen payment economics",
+        "420Arcade deferral",
+        "Historical audit evidence"
+      ],
+      "activation": "Candidate only until explicit configuration-version transition, affected resident materialization and exact-head qualification."
     }
   ]
 }

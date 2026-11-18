@@ -1,3 +1,11 @@
+---
+title: Executable Wallet, Exchange and SDK bridge integration
+audience: [developer, architect, operator]
+category: developer
+status: current
+version: current
+---
+
 # Executable Wallet, Exchange and SDK bridge integration
 
 The canonical service ID is `420/service/bridge/v1` (hashed for `ProtocolRegistry.getService`). It is a service namespace, separate from the component IDs in `BridgeIds420`: `keccak256("420/APP/420BRIDGE/" + suffix)`. Service discovery grants navigation, not spending authority.

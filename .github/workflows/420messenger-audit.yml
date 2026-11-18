@@ -65,8 +65,7 @@ jobs:
         working-directory: contracts
         run: forge build src/messenger test/MessengerGenesis420.t.sol test/MessengerAudit420.t.sol --sizes
       - name: Run focused Messenger tests
-        working-directory: contracts
-        run: forge test --match-path 'test/Messenger*420.t.sol' -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/Messenger*420.t.sol' --output /tmp/420messenger-audit-Messenger-420-t-sol
       - name: Shared Genesis verification
         run: python3 scripts/verify-genesis-dapps.py
       - name: Messenger audit verification

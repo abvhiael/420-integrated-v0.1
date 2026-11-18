@@ -1,0 +1,87 @@
+name: PAY-APP-0 V3 native rehearsal
+on:
+  push:
+    branches: [feature/pay-app-0-genesis-product]
+    paths:
+      - '.github/workflows/pay-app-0-native.yml'
+      - 'scripts/qualify-pay-regression.py'
+      - 'config/candidates/genesis-applications-pay-v10.json'
+      - 'config/genesis-applications.json'
+      - 'contracts/config/genesis-config-commitment.json'
+      - 'contracts/config/predeploy/storage-init.json'
+  pull_request:
+    paths:
+      - '.github/workflows/pay-app-0-native.yml'
+      - 'scripts/qualify-pay-regression.py'
+      - 'config/candidates/genesis-applications-pay-v10.json'
+      - 'config/genesis-applications.json'
+      - 'contracts/config/genesis-config-commitment.json'
+      - 'contracts/config/predeploy/storage-init.json'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install pinned Bridge rehearsal dependencies
+        run: pip install -r scripts/bridge-audit-12/requirements.txt
+      - name: Compile Pay and Swap residents
+        working-directory: contracts
+        run: |
+          forge --version
+          forge build src/pay src/swap --extra-output storageLayout
+      - name: Verify committed V3 configuration and resident identities
+        run: |
+          mkdir -p pay-app-0-evidence
+          python scripts/verify-genesis-config-commitment.py | tee pay-app-0-evidence/genesis-config-verification.log
+          cmp config/genesis-applications.json config/candidates/genesis-applications-pay-v10.json
+          python scripts/bridge-audit-12/verify.py > pay-app-0-evidence/retained-v2.json
+          cp contracts/config/genesis-config-commitment.json pay-app-0-evidence/genesis-config-commitment-v3.json
+          python scripts/bridge-audit-12/reconcile_v2.py --check
+          python scripts/verify-swap-audit-7-deployment-binding.py | tee pay-app-0-evidence/swap-deployment-binding.log
+          python scripts/generate-420pay-audit-6-deployment.py --check --output pay-app-0-evidence/pay-derived.json
+          cp contracts/config/pay/pay-audit-6-deployment-package.json pay-app-0-evidence/
+          cp contracts/config/predeploy/*-predeploy-state.json pay-app-0-evidence/
+      - name: Execute fresh local Pay and Swap constructor comparisons
+        run: python scripts/bridge-audit-12/qualify_v2.py --anvil "$(command -v anvil)" --output pay-app-0-evidence/resident-rehearsal
+      - name: Compile Bridge and exercise deployment planner and local EVM
+        run: |
+          SOLC="$HOME/.svm/0.8.24/solc-0.8.24"
+          test -x "$SOLC"
+          python scripts/bridge-audit-12/package.py build --solc "$SOLC" --output /tmp/pay-app-0-bridge
+          BRIDGE12_PACKAGE=/tmp/pay-app-0-bridge python scripts/bridge-audit-12/test_package.py
+          python scripts/bridge-audit-12/rehearse.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --solc "$SOLC" --output pay-app-0-evidence/bridge-rehearsal
+          python scripts/bridge-audit-12/prepare.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --output pay-app-0-evidence/bridge-canonical --check-committed
+      - name: Run configuration-sensitive Solidity suites on the feature branch
+        if: github.event_name == 'push'
+        run: |
+          python scripts/qualify-pay-regression.py --profile ci \
+            --match PayAudit6DeploymentPackage420.t.sol \
+            --match SwapGenesisDEXFactory420.t.sol \
+            --match SwapGenesisIntegration420.t.sol \
+            --match SwapDeploymentBinding420.t.sol \
+            --output pay-app-0-evidence/solidity
+      - name: Preserve rehearsal evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-app-0-native-${{ github.event.pull_request.head.sha || github.sha }}
+          path: pay-app-0-evidence/
+          if-no-files-found: warn

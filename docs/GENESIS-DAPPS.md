@@ -8,9 +8,9 @@ version: current
 
 # 420 Integrated Genesis applications — Frozen Decision
 
-Genesis Application Decision #1 is frozen with an explicit owner-authorized 420Arcade inclusion amendment. The authoritative public application catalog is `config/genesis-applications.json` (`420-genesis-application-decision-v9`).
+Genesis Application Decision #1 includes the owner-approved 420 Pay launch surface and the 420Arcade deferral. The authoritative public application catalogue is `config/genesis-applications.json` (`420-genesis-application-decision-v10`).
 
-## Frozen Genesis catalog
+## Historical Genesis catalogue before Arcade deferral
 
 1. 420 Wallet
 2. 420 Explorer
@@ -109,3 +109,7 @@ This document describes both the frozen application decision and the current GEN
 - `contracts/config/genesis-dapp-contract-map.json` — broader Genesis implementation/contract inventory.
 - `docs/audit/genesis-contract-documentation-inventory.json` — documentation ownership reconciliation across the broader contract inventory.
 - `docs/ROADMAP.md` — top-level build sequence and current shared-service/application milestone.
+
+## Approved 420Pay catalogue amendment — activation pending
+
+The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V10 catalogue contains 22 surfaces and is bound by the V3 Genesis configuration commitment. The active JSON controls frozen deployment scope. The numbered list above records the earlier decision.

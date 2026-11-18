@@ -25,6 +25,9 @@
     "settlementHealthy":true,
     "paused":false,
     "bridgeFee":0.42,
+    "finality":"safe",
+    "freshness":"canonical",
+    "canonicality":"canonical",
     "demo":true
   },
   {
@@ -53,6 +56,9 @@
     "settlementHealthy":true,
     "paused":true,
     "bridgeFee":0.42,
+    "finality":"safe",
+    "freshness":"canonical",
+    "canonicality":"canonical",
     "demo":true
   }
 ]

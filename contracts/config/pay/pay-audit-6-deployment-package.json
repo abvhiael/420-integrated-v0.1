@@ -7,7 +7,7 @@
   "address_policy": "REGISTRY_RESOLVED_NO_FIXED_PAY_ADDRESSES",
   "governance_timelock": "0x0000000000000000000000000000000000000429",
   "protocol_registry": "0x0000000000000000000000000000000000000434",
-  "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+  "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
   "compiler": {
     "evmVersion": "cancun",
     "foundryConfigBlobSha1": "9fa5356e6595a751033cbacd83eef541d3c7d4ff",
@@ -71,13 +71,13 @@
         {
           "length": 32,
           "start": 219,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 3014,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -94,7 +94,7 @@
         }
       ],
       "runtime_bytes": 6639,
-      "runtime_code_hash": "0x1815390803af5d4f14cd6da5eceb0c7b9a2e92e235e0c91d3cb2523246f1d6a6",
+      "runtime_code_hash": "0xc55ef7e196ef75c86dde86ac7bb67a5f296a0b7b595ffccf1a8456bad43c4a88",
       "runtime_template_hash": "0x1bd8fd0149356dc9deb1afb905b516cc243c28ba5436464fe6926767ca84431c",
       "source": "contracts/src/pay/MerchantRegistry420.sol",
       "source_blob_sha1": "292333164b2958b6fb60291b9c4c9a20b515b34b"
@@ -164,13 +164,13 @@
         {
           "length": 32,
           "start": 374,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 8476,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -187,7 +187,7 @@
         }
       ],
       "runtime_bytes": 9916,
-      "runtime_code_hash": "0xbac01ffdb7284707efc9a70fac40c86da930b537038a431df7aee1bda3b986b4",
+      "runtime_code_hash": "0x5c488ba201ea6102e8fbc5f03436c02be8278befd7d72a2e9fbf24ca05821fdd",
       "runtime_template_hash": "0xea0f93684b60a07c1d75b3705058e706038b83f9b30d9235351af013304b0ae0",
       "source": "contracts/src/pay/InvoiceRegistry420.sol",
       "source_blob_sha1": "98061a3fed76b4caae040dec1f26ae3de698ecee"
@@ -281,13 +281,13 @@
         {
           "length": 32,
           "start": 784,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 7028,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -316,7 +316,7 @@
         }
       ],
       "runtime_bytes": 11851,
-      "runtime_code_hash": "0x155cddaabb35f56d9cf016daf4b491b34e3c79b8f116539ff51a72faba7e0067",
+      "runtime_code_hash": "0x129d518fd497c68d7cb1e46408a7e5e31a152fe4d6e58e94f4569edcdbea002a",
       "runtime_template_hash": "0x272fb3ffc2cac06ef4a1d635329614b4982294b40507576d5f699f9ec8faf100",
       "source": "contracts/src/pay/PaymentRegistry420.sol",
       "source_blob_sha1": "2c57d344e36995d17154a1553fc7aac24dc0d7d3"
@@ -380,13 +380,13 @@
         {
           "length": 32,
           "start": 3304,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 4194,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -409,7 +409,7 @@
         }
       ],
       "runtime_bytes": 12710,
-      "runtime_code_hash": "0x5c1f76757e45c657b31f2b034105fde27b69b6a3ba446ec67248e2bdee6a3629",
+      "runtime_code_hash": "0x67a400fbfd4bf603bc27dc53d2a9f74330e98dd4067cb10228a6559c1a1d7c70",
       "runtime_template_hash": "0x7a742dadd61cccd81d9f6e89cb4c3c29a0566ac0d706d14e4d191fdb7286de33",
       "source": "contracts/src/pay/PaymentRouter420.sol",
       "source_blob_sha1": "3341fa734911cc128791f24766718601829196db"
@@ -455,13 +455,13 @@
         {
           "length": 32,
           "start": 339,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 2712,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -478,7 +478,7 @@
         }
       ],
       "runtime_bytes": 9570,
-      "runtime_code_hash": "0x24c6fdc627cdcca8983c9e4fa9ccef95d6a33f7cc3b9fcf69885592b98735762",
+      "runtime_code_hash": "0xe22a82949a201eb06713478b0668fd8ed1e5c491e13967ccd7a256a054323ecc",
       "runtime_template_hash": "0x5f4d7d103ce4b675c1851152c0be94f203f4280c83a120d047fa77573eb7e656",
       "source": "contracts/src/pay/SettlementRouter420.sol",
       "source_blob_sha1": "97f22ac57508fc508be1b3c780a89e972a094c8e"
@@ -548,13 +548,13 @@
         {
           "length": 32,
           "start": 2250,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 7192,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -577,7 +577,7 @@
         }
       ],
       "runtime_bytes": 12968,
-      "runtime_code_hash": "0x78fa0a28f2f06dec14c142e166c4809c49349441eedd24ad35efd8b954e49c2c",
+      "runtime_code_hash": "0x84157701949c5c65b9b9d49e756b951a0a09e1aa4025fc94d245685aa6e89af8",
       "runtime_template_hash": "0x3f62e64fd76afba9a87c6f1702fb5e632c25af68d91467e1cb928383acead5e9",
       "source": "contracts/src/pay/RefundManager420.sol",
       "source_blob_sha1": "432705e375bef5c4f1a6b3d336a46e48ec1903f8"
@@ -635,13 +635,13 @@
         {
           "length": 32,
           "start": 646,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 2270,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -664,7 +664,7 @@
         }
       ],
       "runtime_bytes": 7687,
-      "runtime_code_hash": "0x76af2ff09f768eb3547d92dd80eba1f3a76d5c3eabc4118b946e9417aa6b63ab",
+      "runtime_code_hash": "0x319db77eb69fa85ad0ac11396d5872d9e87020a8dd08b4752fbba0c0ac78ed39",
       "runtime_template_hash": "0xca41dd7b70b96331cb72cf2a84a7cae0e4aa5ec39dcb2ff7537631096864a7da",
       "source": "contracts/src/pay/GasSponsor420.sol",
       "source_blob_sha1": "4b6eaee1987bd8d689efcc9607247b19025797f0"
@@ -740,13 +740,13 @@
         {
           "length": 32,
           "start": 579,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 2334,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -763,7 +763,7 @@
         }
       ],
       "runtime_bytes": 8324,
-      "runtime_code_hash": "0xa1ff42b2f7d2e49ecdeee60328539e0d61fd219262a8ca556b68b82884353a33",
+      "runtime_code_hash": "0x9795e67412781a347bc8b0ec327784aaddd4eb5550480530e860acec9af54f9e",
       "runtime_template_hash": "0x744c5754e0c343893aa968e2924f20eabb19b1e06e0d6e4892088d044975d1d3",
       "source": "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol",
       "source_blob_sha1": "5fd478f4a44481b0ffc0064c46c877edda6ac5e0"
@@ -797,13 +797,13 @@
         {
           "length": 32,
           "start": 177,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
           "length": 32,
           "start": 633,
-          "value": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+          "value": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
           "variable": "genesisConfigHash"
         },
         {
@@ -814,7 +814,7 @@
         }
       ],
       "runtime_bytes": 2910,
-      "runtime_code_hash": "0xa22811f4a81ea7a32182e4b93209a1e9f2647e875a9470cc6ddc59cdd20698c0",
+      "runtime_code_hash": "0xe626a9564ef0cef9365e6a35f1776c38496616ce78b2b7edd34dd734a7d44b52",
       "runtime_template_hash": "0x6aff5ccb783e4873e489896e0dea8a6841db182f27ac1ae1051f0bbc76732d3c",
       "source": "contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol",
       "source_blob_sha1": "0526054526289bc32c23082f2823dbf4932be3ed"
@@ -945,56 +945,56 @@
     "MerchantRegistry420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "InvoiceRegistry420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "PaymentRegistry420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "PaymentRouter420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "SettlementRouter420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "RefundManager420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "GasSponsor420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     },
     "CanonicalSettlementAdapter420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {
         "canonical_swap_executor": "PAY-AUDIT-7 deployed canonical CanonicalSwapExecutor420 address; repository-local qualification uses exact deployed executor instance"
       },
@@ -1003,7 +1003,7 @@
     "CanonicalSwapHealthAdapter420": {
       "governance_timelock": "0x0000000000000000000000000000000000000429",
       "protocol_registry": "0x0000000000000000000000000000000000000434",
-      "genesis_config_hash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+      "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
       "additional_arguments": {},
       "constructor_signature": "constructor(address timelock_, address registry_, bytes32 genesisConfigHash_)"
     }

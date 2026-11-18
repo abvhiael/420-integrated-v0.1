@@ -534,8 +534,13 @@ jobs:
       - name: Validate EXP-1.5 deployment manifest
         env:
           INDEXER_RPC_URL: https://rpc.invalid.example
+          INDEXER_ENGINE_URL: https://engine.invalid.example
+          INDEXER_JWT_SECRET: /tmp/420-indexer-ci-engine.jwt
           INDEXER_CONSENSUS_STATUS_DIR: /tmp/420consensus
         run: |
+          # Compose validation only: disposable JWT fixture, no RPC or Engine connection.
+          (umask 077; openssl rand -hex 32 > "$INDEXER_JWT_SECRET")
+          trap 'rm -f "$INDEXER_JWT_SECRET"' EXIT
           mkdir -p /tmp/420consensus
           printf '{}\n' > /tmp/420consensus/status.json
           docker compose -f deployments/indexer/docker-compose.yml config >/dev/null

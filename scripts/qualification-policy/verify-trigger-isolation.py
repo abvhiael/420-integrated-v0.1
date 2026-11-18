@@ -9,7 +9,7 @@ WORKFLOWS = (
  "420compliance-c08-5-level3.yml", "420hz-gca-17-level3.yml",
  "explorer-exp-1-9.yml", "explorer-exp-1-10.yml",
  "contracts-foundry.yml", "contracts-genesis.yml", "genesis-address-authority.yml",
- "highcountry-r06-level3.yml", "liftd-l02-13-level3.yml",
+ "liftd-l02-13-level3.yml",
  "mig-5-level3.yml", "qualification.yml",
 )
 
@@ -74,10 +74,41 @@ def check(before, after, name):
         fail(name + ": workflow name or header changed")
     return True
 
+# Preserve the retired owner separately from the active integrated inventory.
+# The original baseline and retirement commit are immutable Git evidence.
+RETIRED_HIGHCOUNTRY = {
+    "path": ".github/workflows/highcountry-r06-level3.yml",
+    "historical_base": "70e8d6968033d8889bd77ef09c634627afda7c0f",
+    "historical_blob": "da1e2f5c2f4177b43bf062b60f309b5803caa962",
+    "retirement": "9d132667d5cc7b40a5ed549cc1d0375202785077",
+    "destination": "abvhiael/HighCountry",
+    "destination_observed_head": "3c4e521eca344058216a21a196e8afb018ce5fe9",
+}
+
+
+def verify_retired(git):
+    r = RETIRED_HIGHCOUNTRY
+    path = r["path"]
+    historical = git("rev-parse", r["historical_base"] + ":" + path)
+    if historical != r["historical_blob"]:
+        fail("retired HighCountry historical identity drift")
+    if git("merge-base", r["retirement"], "HEAD") != r["retirement"]:
+        fail("HighCountry retirement is not in candidate ancestry")
+    for ref in (r["retirement"], "HEAD"):
+        if git("ls-tree", "-r", ref, "--", path):
+            fail("retired HighCountry workflow reintroduced: " + ref)
+    if (ROOT / path).exists():
+        fail("retired HighCountry workflow present in working tree")
+    print("PASS historical HighCountry inventory; retirement ancestry and absence verified")
+
+
 def main():
     if len(sys.argv) != 2:
         fail("usage: verify-trigger-isolation.py BASE_SHA")
     base = sys.argv[1]
+    def git(*args):
+        return subprocess.run(['git', *args], cwd=ROOT, text=True, capture_output=True, check=True).stdout.strip()
+    verify_retired(git)
     for name in WORKFLOWS:
         path = ".github/workflows/" + name
         before = subprocess.run(["git", "show", base + ":" + path],
@@ -85,7 +116,7 @@ def main():
         after = (ROOT / path).read_text()
         check(before, after, name)
         print("PASS", name, "scoped main regression; retained jobs" if name == "explorer-exp-1-9.yml" else "manual-only; identical job inventory")
-    print("PASS: ten manual-only workflows and one scoped EXP-1.9 main regression")
+    print("PASS: nine manual-only workflows, one scoped EXP-1.9 main regression, one retired historical inventory")
 
 if __name__ == "__main__":
     try:

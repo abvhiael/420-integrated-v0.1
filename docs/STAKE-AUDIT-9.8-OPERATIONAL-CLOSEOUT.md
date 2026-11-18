@@ -74,7 +74,7 @@ schema, wrong chain and stale/orphan anchor. No reset/migration shortcut exists.
 
 ## Live harness prepared and locally qualified
 
-[stake-live-operations.py](../scripts/stake-live-operations.py) has two explicit
+[stake-live-operations.py](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/scripts/stake-live-operations.py) has two explicit
 read-only modes. Both require independently approved input digests and exclusively
 create private, fsynced output evidence. They do not sign, send a transaction,
 signal a process, repair journals or choose a canonical branch.
@@ -108,7 +108,7 @@ python3 scripts/stake-live-operations.py check-bundle \
   --output /private/evidence/structure-check.json
 ```
 
-The [live configuration template](../deployments/stake-operations/live.example.json)
+The [live configuration template](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/stake-operations/live.example.json)
 contains no usable credentials or fake acceptance. Updated process IDs after a
 restart require a newly approved config digest; before/after snapshots must retain
 approved release/trust/runtime identity. Quiesce to a coherent boundary for each

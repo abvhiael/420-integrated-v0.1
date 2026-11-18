@@ -5,6 +5,10 @@ name: 420 Integrated Qualification
 on:
   workflow_dispatch:
 
+concurrency:
+  group: integrated-qualification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

@@ -1,7 +1,9 @@
 ---
 title: 420 Pay fees and settlement
-category: application
-status: approved-genesis-scope
+audience: [user, developer]
+category: applications
+status: current
+version: current
 ---
 
 # Fees and settlement

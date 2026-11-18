@@ -1,7 +1,9 @@
 ---
 title: Troubleshoot 420 Pay
-category: application
-status: approved-genesis-scope
+audience: [user, developer]
+category: applications
+status: current
+version: current
 ---
 
 # Troubleshoot 420 Pay

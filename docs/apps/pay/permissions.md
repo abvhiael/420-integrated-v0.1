@@ -1,7 +1,9 @@
 ---
 title: 420 Pay permissions
-category: application
-status: approved-genesis-scope
+audience: [user, developer]
+category: applications
+status: current
+version: current
 ---
 
 # Permissions and signing

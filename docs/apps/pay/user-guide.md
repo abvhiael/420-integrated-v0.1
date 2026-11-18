@@ -1,7 +1,9 @@
 ---
 title: Review a 420 Pay payment
-category: application
-status: approved-genesis-scope
+audience: [user, developer]
+category: applications
+status: current
+version: current
 ---
 
 # Review a 420 Pay payment

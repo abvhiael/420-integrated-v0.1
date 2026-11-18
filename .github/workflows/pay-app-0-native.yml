@@ -1,0 +1,100 @@
+name: PAY-APP-0 V3 candidate native rehearsal
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/pay-app-0-native.yml'
+      - 'config/candidates/genesis-applications-pay-v10.json'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Verify exact candidate head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Install pinned Bridge rehearsal dependencies
+        run: pip install -r scripts/bridge-audit-12/requirements.txt
+      - name: Compile Pay and Swap residents
+        working-directory: contracts
+        run: |
+          forge --version
+          forge build src/pay src/swap --extra-output storageLayout
+      - name: Derive and stage V3 only in disposable runner checkout
+        run: |
+          mkdir -p pay-app-0-evidence
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          from eth_hash.auto import keccak
+          path=Path('contracts/config/genesis-config-commitment.json')
+          old=json.loads(path.read_text())
+          history=Path('contracts/config/history/genesis-config-commitment-v2.json')
+          assert path.read_bytes()==history.read_bytes()
+          def digest(payload):
+              return '0x'+keccak(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hex()
+          assert digest(old['commitmentPayload'])==old['genesisConfigHash']
+          active=Path('config/genesis-applications.json')
+          candidate=Path('config/candidates/genesis-applications-pay-v10.json')
+          original=json.loads(active.read_text()); approved=json.loads(candidate.read_text())
+          assert [x for x in approved['apps'] if x['name']!='420 Pay']==original['apps']
+          assert sum(x['name']=='420 Pay' for x in approved['apps'])==1
+          active.write_bytes(candidate.read_bytes())
+          for entry in old['commitmentPayload']['authorityInputs']:
+              blob=subprocess.check_output(['git','hash-object',entry['path']],text=True).strip()
+              if entry['path']==str(active): entry['gitBlobSha1']=blob
+              else: assert blob==entry['gitBlobSha1']
+          previous=old['genesisConfigHash']
+          old['status']='FROZEN_V3'
+          old['commitmentPayload']['domain']='420/GENESIS/CONFIG/V3'
+          old['genesisConfigHash']=digest(old['commitmentPayload'])
+          old['supersedes']={'path':str(history),'genesisConfigHash':previous,'decision':'docs/apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md'}
+          path.write_text(json.dumps(old,indent=2)+'\n')
+          Path('pay-app-0-evidence/genesis-config-commitment-v3.json').write_bytes(path.read_bytes())
+          storage=Path('contracts/config/predeploy/storage-init.json')
+          s=json.loads(storage.read_text());s['genesis_config_hash']=old['genesisConfigHash'];storage.write_text(json.dumps(s,indent=2)+'\n')
+          # Update only the pinned version and hash in the disposable planner;
+          # preserve its exact digest and authority-input checks.
+          p=Path('scripts/bridge-audit-12/package.py')
+          text=p.read_text();assert previous in text
+          p.write_text(text.replace(previous,old['genesisConfigHash']).replace('FROZEN_V2','FROZEN_V3').replace('420/GENESIS/CONFIG/V2','420/GENESIS/CONFIG/V3'))
+          print('V3 candidate:',old['genesisConfigHash'])
+          PY
+      - name: Materialize Pay and Swap candidates
+        run: |
+          python scripts/bridge-audit-12/reconcile_v2.py --write
+          python scripts/bridge-audit-12/reconcile_v2.py --check
+          python scripts/generate-420pay-audit-6-deployment.py --check --output pay-app-0-evidence/pay-derived.json
+          cp contracts/config/pay/pay-audit-6-deployment-package.json pay-app-0-evidence/
+          cp contracts/config/predeploy/*-predeploy-state.json pay-app-0-evidence/
+      - name: Execute fresh local Pay and Swap constructor comparisons
+        run: python scripts/bridge-audit-12/qualify_v2.py --anvil "$(command -v anvil)" --output pay-app-0-evidence/resident-rehearsal
+      - name: Compile Bridge and exercise deployment planner and local EVM
+        run: |
+          SOLC="$HOME/.svm/0.8.24/solc-0.8.24"
+          test -x "$SOLC"
+          python scripts/bridge-audit-12/package.py build --solc "$SOLC" --output /tmp/pay-app-0-bridge
+          BRIDGE12_PACKAGE=/tmp/pay-app-0-bridge python scripts/bridge-audit-12/test_package.py
+          python scripts/bridge-audit-12/rehearse.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --solc "$SOLC" --output pay-app-0-evidence/bridge-rehearsal
+          python scripts/bridge-audit-12/prepare.py --package /tmp/pay-app-0-bridge --anvil "$(command -v anvil)" --output pay-app-0-evidence/bridge-canonical
+      - name: Preserve candidate evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-app-0-native-${{ github.event.pull_request.head.sha }}
+          path: pay-app-0-evidence/
+          if-no-files-found: warn

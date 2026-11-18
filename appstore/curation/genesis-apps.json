@@ -1,0 +1,19 @@
+[
+  {
+    "serviceId": "420/service/pay/v1",
+    "name": "420 Pay",
+    "classification": "GENESIS_PROTOCOL_AND_USER_APP",
+    "category": "payments",
+    "description": "Non-custodial payments and merchant tools for the 420 Integrated ecosystem.",
+    "helpRoute": "apps/pay/user-guide/",
+    "expressions": [
+      {"id":"consumer-payments","name":"Consumer payments","status":"planned","description":"Send and request payments, pay invoices, and review receipts."},
+      {"id":"merchant-dashboard","name":"Merchant dashboard","status":"planned","description":"Manage invoices, payments, refunds, receipts and accounting."},
+      {"id":"retail-pos","name":"Physical retail POS","status":"planned","description":"Prepare in-person sales and present QR checkout on a customer display."},
+      {"id":"hosted-checkout","name":"Hosted checkout","status":"planned","description":"Share hosted invoice checkout through payment links and QR codes."},
+      {"id":"android","name":"Android","status":"planned","description":"Scan and share payment requests with verified Wallet handoff."},
+      {"id":"ios","name":"iOS","status":"planned","description":"Scan and share payment requests with verified Wallet handoff."},
+      {"id":"developer-integrations","name":"Developer integrations","status":"planned","description":"Integrate through the Pay SDK, merchant API, and signed webhooks."}
+    ]
+  }
+]

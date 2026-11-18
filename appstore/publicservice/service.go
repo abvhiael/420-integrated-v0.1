@@ -10,9 +10,11 @@ import (
 	"time"
 
 	appstoreapi "github.com/420integrated/420-integrated/appstore/api"
+	"github.com/420integrated/420-integrated/appstore/curation"
 	"github.com/420integrated/420-integrated/appstore/hardening"
 	appstoreruntime "github.com/420integrated/420-integrated/appstore/runtime"
 	"github.com/420integrated/420-integrated/appstore/security"
+	"github.com/420integrated/420-integrated/appstore/wallet"
 	appstoreweb "github.com/420integrated/420-integrated/appstore/web"
 )
 
@@ -37,6 +39,8 @@ type Service struct {
 	dependencies DependencySource
 	limiter      *hardening.Limiter
 	web          http.Handler
+	genesis      http.Handler
+	curatedIDs   map[string]bool
 }
 
 func New(runtime *appstoreruntime.Service, views ViewSource, dependencies DependencySource, cfg Config) (*Service, error) {
@@ -49,12 +53,22 @@ func New(runtime *appstoreruntime.Service, views ViewSource, dependencies Depend
 	if cfg.RateWindow <= 0 {
 		cfg.RateWindow = time.Minute
 	}
+	apps, err := curation.GenesisApplications()
+	if err != nil {
+		return nil, err
+	}
+	ids := make(map[string]bool, len(apps))
+	for _, app := range apps {
+		ids[app.ServiceID] = true
+	}
 	return &Service{
 		runtime:      runtime,
 		views:        views,
 		dependencies: dependencies,
 		limiter:      hardening.NewLimiter(cfg.RateLimit, cfg.RateWindow),
 		web:          appstoreweb.Handler(),
+		genesis:      appstoreapi.GenesisHandler(apps),
+		curatedIDs:   ids,
 	}, nil
 }
 
@@ -62,6 +76,7 @@ func (s *Service) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", s.handleHealth)
 	mux.HandleFunc("GET /readyz", s.handleReady)
+	mux.Handle("GET /v1/apps/curated", s.limit(s.genesis))
 	mux.Handle("/v1/apps", s.limit(http.HandlerFunc(s.handleAPI)))
 	mux.Handle("/v1/apps/", s.limit(http.HandlerFunc(s.handleAPI)))
 	mux.Handle("/", s.web)
@@ -101,6 +116,15 @@ func (s *Service) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	views := s.views.Snapshot()
+	// Curated expression status carries no release authorization. Canonical
+	// records for these products remain readable through the Registry-backed API.
+	views = append([]appstoreapi.ApplicationView(nil), views...)
+	for i := range views {
+		if s.curatedIDs[strings.ToLower(strings.TrimSpace(views[i].Listing.Canonical.ServiceID))] {
+			views[i].Links.Direct = ""
+			views[i].Wallet = wallet.Presentation{}
+		}
+	}
 	if !assessment.CanVerify {
 		views = withoutVerificationEvidence(views)
 	}

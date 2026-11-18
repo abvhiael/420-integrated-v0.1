@@ -110,6 +110,8 @@ jobs:
           fi
       - name: AppStore unit and race qualification
         run: go test -race ./appstore/...
+      - name: Curated catalogue frontend qualification
+        run: node --test appstore/web/catalogue.test.cjs
       - name: AppStore vet
         run: go vet ./appstore/...
       - name: Production entrypoint build

@@ -30,7 +30,15 @@ Retained artifacts are independent inventory `14457823388`, full regression `144
 
 The active configuration is `FROZEN_V3`, domain `420/GENESIS/CONFIG/V3`, with commitment `0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d`. Independent Keccak-256 derivation also reproduced the historical V1 and V2 commitments. Git blob verification matched all six authority inputs. The only changed input was the approved V10 catalogue, blob `73a24bfe46787f3c2af043adc1de12eea1f456ab`.
 
-The exact-head native rehearsal workflow verifies committed V3, materializes the affected dependencies and retains the configuration, compiler and local-EVM comparison evidence. Existing V2 Bridge qualification remains anchored to its original revision.
+The initial permanent V3 integration passed exact-head native rehearsal and Pay audit at `5b5560c0db4fe80710ae349f987b11aaf2713b35`. Native rehearsal reproduced 9 Pay and 4 Swap constructor runtimes and the disabled Bridge gateway. The Bridge package contained 113 compiler artifacts, and all 20 planner tests and 7 rehearsal checks passed across 11 core deployments. The configuration-sensitive Pay deployment, publication and wiring test passed under the full CI profile. The PAY-APP-0.2 evidence applies to the other unchanged Pay owners.
+
+| Qualification | Run | Artifact |
+|---|---:|---:|
+| Committed V3 native rehearsal | [44378671347](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44378671347) | 14462148293 |
+| Configuration-sensitive Pay regression | [44378671219](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44378671219) | 14462745884 |
+| SWAP-AUDIT-6 materialized head | [44378671289](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44378671289) | See run |
+
+Retained historical commitment blobs are V1 `c8537f6c984ba7d4965e8b51aaefc26c6e2e1cd5` and V2 `b69b140df641975f57f05c42e45d48ee93c0c1e0`. The historical Bridge qualification verifies against `95f6a94b7c313a14a6689fe754806a88e9bdc95d`. The V3 Swap deployment binding derives its four runtime identities from the committed predeploy states and remains subject to SWAP-AUDIT-8 live qualification.
 
 ### PAY-APP-0.4 — Native artifact reconciliation
 

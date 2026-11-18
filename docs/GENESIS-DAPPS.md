@@ -8,9 +8,9 @@ version: current
 
 # 420 Integrated Genesis applications — Frozen Decision
 
-Genesis Application Decision #1 is frozen with an explicit owner-authorized 420Arcade inclusion amendment. The authoritative public application catalog is `config/genesis-applications.json` (`420-genesis-application-decision-v9`).
+Genesis Application Decision #1 includes the owner-approved 420 Pay launch surface and the 420Arcade deferral. The authoritative public application catalogue is `config/genesis-applications.json` (`420-genesis-application-decision-v10`).
 
-## Frozen Genesis catalog
+## Historical Genesis catalogue before Arcade deferral
 
 1. 420 Wallet
 2. 420 Explorer

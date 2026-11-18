@@ -45,6 +45,7 @@ jobs:
           python scripts/bridge-audit-12/verify.py > pay-app-0-evidence/retained-v2.json
           cp contracts/config/genesis-config-commitment.json pay-app-0-evidence/genesis-config-commitment-v3.json
           python scripts/bridge-audit-12/reconcile_v2.py --check
+          python scripts/verify-swap-audit-7-deployment-binding.py | tee pay-app-0-evidence/swap-deployment-binding.log
           python scripts/generate-420pay-audit-6-deployment.py --check --output pay-app-0-evidence/pay-derived.json
           cp contracts/config/pay/pay-audit-6-deployment-package.json pay-app-0-evidence/
           cp contracts/config/predeploy/*-predeploy-state.json pay-app-0-evidence/

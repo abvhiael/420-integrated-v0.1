@@ -30,6 +30,8 @@ on:
       - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
       - 'scripts/qualify-pay-regression.py'
+      - 'scripts/pay_regression_inventory.py'
+      - 'scripts/test_pay_regression_inventory.py'
       - 'contracts/foundry.toml'
       - 'contracts/test/fixtures/cadc/upstream/**'
       - 'scripts/generate-420pay-audit-6-deployment.py'
@@ -62,6 +64,8 @@ on:
       - '420-indexer/test/pay-accounting-export.test.ts'
       - 'scripts/verify-420pay-*.py'
       - 'scripts/qualify-pay-regression.py'
+      - 'scripts/pay_regression_inventory.py'
+      - 'scripts/test_pay_regression_inventory.py'
       - 'contracts/foundry.toml'
       - 'contracts/test/fixtures/cadc/upstream/**'
       - 'scripts/generate-420pay-audit-6-deployment.py'
@@ -75,6 +79,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: pay-audit-${{ github.event.pull_request.number || github.ref }}
@@ -96,6 +101,36 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify independent inventory discovery regressions
+        run: python3 -m unittest discover -s scripts -p test_pay_regression_inventory.py -v
+      - name: Reconcile exact-head Pay inventory without Solidity execution
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RETAINED_HEAD: fa8cc74c0d5529ecd9032eba6afbe0f4b9247041
+          RETAINED_ARTIFACT: '14447571280'
+          RETAINED_DIGEST: 357b189af9a6571c982fc71356e337478be09c75558847be834394fec6013777
+        run: |
+          set -euo pipefail
+          args=()
+          archive="$RUNNER_TEMP/pay-regression-baseline.zip"
+          if git merge-base --is-ancestor "$RETAINED_HEAD" HEAD && git diff --quiet "$RETAINED_HEAD" HEAD -- contracts/foundry.toml; then
+            if curl --fail --location --silent --show-error -H "Authorization: Bearer $GH_TOKEN" "https://api.github.com/repos/${{ github.repository }}/actions/artifacts/$RETAINED_ARTIFACT/zip" -o "$archive"; then
+              printf '%s  %s\n' "$RETAINED_DIGEST" "$archive" | sha256sum -c -
+              args=(--baseline-archive "$archive" --baseline-sha256 "$RETAINED_DIGEST")
+              echo "PAY_RETAINED_DIGEST=$RETAINED_DIGEST" >> "$GITHUB_ENV"
+            else
+              rm -f "$archive"
+              echo 'Retained artifact unavailable; no inherited result will be assumed.'
+            fi
+          fi
+          python3 scripts/qualify-pay-regression.py --profile ci --inventory-only --output pay-inventory-evidence "${args[@]}"
+      - name: Retain independent test inventory and source identities
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-inventory-${{ github.event.pull_request.head.sha || github.sha }}
+          path: pay-inventory-evidence/
+          if-no-files-found: warn
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -155,7 +190,13 @@ jobs:
       - name: Run PAY-AUDIT-6 Level 1 deployment qualification
         run: python3 scripts/qualify-pay-regression.py --profile pr --match PayAudit6DeploymentPackage420.t.sol --match ReplayProtectionConsumer420.t.sol --output pay-level1-evidence
       - name: Full applicable Pay contract regression qualification
-        run: python3 scripts/qualify-pay-regression.py --profile ci --output pay-regression-evidence
+        run: |
+          set -euo pipefail
+          args=()
+          if [[ -n "${PAY_RETAINED_DIGEST:-}" ]]; then
+            args=(--baseline-archive "$RUNNER_TEMP/pay-regression-baseline.zip" --baseline-sha256 "$PAY_RETAINED_DIGEST")
+          fi
+          python3 scripts/qualify-pay-regression.py --profile ci --output pay-regression-evidence "${args[@]}"
       - name: Retain Pay regression evidence
         if: always()
         uses: actions/upload-artifact@v4

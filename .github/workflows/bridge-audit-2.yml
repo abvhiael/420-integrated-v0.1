@@ -22,6 +22,7 @@ on:
       - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
       - "contracts/test/ExchangeBridgeQualification420.t.sol"
       - "contracts/config/genesis-dapp-contract-map.json"
+      - "scripts/qualify-bridge-full-local.py"
       - ".github/workflows/bridge-audit-2.yml"
   workflow_dispatch:
 
@@ -36,8 +37,12 @@ jobs:
   shared-bridge-core:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
     env:
-      FOUNDRY_PROFILE: pr
+      FOUNDRY_FUZZ_SEED: '0x420'
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -51,10 +56,30 @@ jobs:
         with:
           version: stable
       - name: Qualify shared Bridge core, accounting, and downstream compatibility
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
         run: |
-          python3 scripts/qualify-pay-regression.py --profile pr \
-            --match 'test/Bridge*.t.sol' \
-            --match GovernanceAccountingRecoveryHardening420.t.sol \
-            --match PaySwapBridgeGenesisIntegration420.t.sol \
-            --match ExchangeBridgeQualification420.t.sol \
-            --output /tmp/bridge-audit-2-solidity
+          set -euo pipefail
+          mapfile -t owners < <(git ls-files 'contracts/test/Bridge*.t.sol' \
+            contracts/test/GovernanceAccountingRecoveryHardening420.t.sol \
+            contracts/test/PaySwapBridgeGenesisIntegration420.t.sol \
+            contracts/test/ExchangeBridgeQualification420.t.sol | sed 's,.*/,,')
+          selected=()
+          for ((i = SHARD; i < ${#owners[@]}; i += 6)); do
+            selected+=("${owners[i]}")
+          done
+          test "${#selected[@]}" -gt 0
+          log="$RUNNER_TEMP/bridge-audit-2.log"
+          python3 scripts/qualify-bridge-full-local.py --owners "${selected[@]}" --log "$log"
+          for owner in "${selected[@]}"; do
+            grep -Fq "for contracts/test/$owner:" "$log"
+          done
+          grep -Eq '^Ran [0-9]+ test suites? in .*: [1-9][0-9]* tests? passed, 0 failed, 0 skipped' "$log"
+      - name: Retain Bridge qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-audit-2-${{ github.event.pull_request.head.sha || github.sha }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/bridge-audit-2.*
+          if-no-files-found: warn

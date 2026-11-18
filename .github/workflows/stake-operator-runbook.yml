@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
       - name: Verify exact qualification head
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
@@ -48,7 +48,7 @@ jobs:
               old=subprocess.check_output(['git','show',os.environ['BASE_SHA']+':'+doc],text=True)
               new=open(doc).read()
               commands=lambda text:re.findall(r'```(?:bash|sh|shell)\n(.*?)```',text,re.S)
-              if commands(old)==commands(new) and commands(new):
+              if old==new:
                   operator=False
                   os.makedirs('stake-operator-evidence',exist_ok=True)
                   open('stake-operator-evidence/prose-only.txt','w').write('All previously qualified shell blocks unchanged; prose is reviewed by the changed-scope owner.\n')
@@ -69,6 +69,8 @@ jobs:
           python3 scripts/verify-stake-operator-runbook.py --output stake-operator-evidence > stake-operator-evidence/commands.log
       - name: Qualify exact-head operational closeout and inherited evidence
         if: env.CLOSEOUT_CHANGED == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           mkdir -p stake-operator-evidence
           python3 - <<'PYFETCH'
@@ -78,7 +80,7 @@ jobs:
           assert all(re.fullmatch('[0-9a-f]{40}',r) for r in refs)
           subprocess.run(['git','fetch','--filter=blob:none','--no-tags','origin',*sorted(refs)],check=True)
           PYFETCH
-          python3 scripts/qualify-stake-closeout.py --output stake-operator-evidence > stake-operator-evidence/closeout.log
+          python3 scripts/qualify-stake-closeout.py --comparison-base "$BASE_SHA" --output stake-operator-evidence > stake-operator-evidence/closeout.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

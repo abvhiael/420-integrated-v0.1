@@ -1,6 +1,6 @@
 # 420Bridge — authoritative verifier qualification inventory
 
-**Reconciled by BRIDGE-AUDIT-3.V.22 / BRIDGE-AUDIT-3.5, 2026-11-15 (America/Regina).** Baseline main: `97413f2eea862d5f2ec3117313cd3beb15a634f4`. The original BRIDGE-AUDIT-3.1 snapshot remains immutable in that commit and earlier history; this document supersedes its then-current implementation inventory, not its historical findings. Machine-readable authority: [verifier-qualification-inventory.json](../../contracts/config/bridge/verifier-qualification-inventory.json).
+**Reconciled by BRIDGE-AUDIT-3.V.22 / BRIDGE-AUDIT-3.5, 2026-11-15 (America/Regina).** Baseline main: `97413f2eea862d5f2ec3117313cd3beb15a634f4`. The original BRIDGE-AUDIT-3.1 snapshot remains immutable in that commit and earlier history; this document supersedes its then-current implementation inventory, not its historical findings. Machine-readable authority: [verifier-qualification-inventory.json](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/contracts/config/bridge/verifier-qualification-inventory.json).
 
 ## Qualification meanings
 

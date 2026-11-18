@@ -8,7 +8,7 @@ version: current
 
 # 420 Integrated Genesis applications — Frozen Decision
 
-Genesis Application Decision #1 includes the owner-approved 420 Pay launch surface and the 420Arcade deferral. The authoritative public application catalogue is `config/genesis-applications.json` (`420-genesis-application-decision-v10`).
+Genesis Application Decision #1 includes the owner-approved 420 Pay launch surface and the 420Arcade deferral. The frozen inventory has 22 entries: 20 user-facing Genesis applications, one protocol-only Gaming entry, and one testnet-only Faucet. Pay uses the existing `420/service/pay/v1` identity and requires separate [deployment qualification](apps/pay/deployment-operations.md). The authoritative public application catalogue is `config/genesis-applications.json` (`420-genesis-application-decision-v10`).
 
 ## Historical Genesis catalogue before Arcade deferral
 
@@ -75,7 +75,7 @@ Protocol-backed applications in the frozen catalog — Registry, Names, Identity
 
 ## Public catalog versus implementation inventory
 
-The frozen list above is the public Genesis application decision. It is intentionally narrower than `contracts/config/genesis-dapp-contract-map.json`, which also tracks implementation protocols, shared infrastructure, aliases, and other Genesis contract families such as Smart Accounts, 420-IS, Randomness, Trust, Commons, Pulse, Messenger, Vault, Treasury, Grants, Launchpad, Resource Protocol, Market, Rights, Pay, Oracle, Civic, and ComputeMarket.
+The frozen list above is the public Genesis application decision. It is intentionally narrower than `contracts/config/genesis-dapp-contract-map.json`, which also tracks implementation protocols, shared infrastructure, aliases, and other Genesis contract families such as Smart Accounts, 420-IS, Randomness, Trust, Commons, Pulse, Messenger, Vault, Treasury, Grants, Launchpad, Resource Protocol, Market, Rights, Oracle, Civic, and ComputeMarket.
 
 Those implementation-only surfaces do not become additional public Genesis applications merely because they appear in the contract map. Their documentation ownership is reconciled in `docs/audit/genesis-contract-documentation-inventory.json`.
 

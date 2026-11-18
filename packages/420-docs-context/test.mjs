@@ -4,6 +4,10 @@ import { resolveGenesisDappHelp } from './index.js';
 
 const bundle = JSON.parse(fs.readFileSync(new URL('./genesis-dapps.json', import.meta.url), 'utf8'));
 
+const payHelp = resolveGenesisDappHelp(bundle, '420-pay', 'CTX-PAY-002', 'genesis', 'current');
+assert.equal(payHelp.available, true);
+assert.equal(payHelp.authority, 'documentation-navigation-only');
+assert.equal(resolveGenesisDappHelp(bundle, '420-pay', 'CTX-PAY-002', 'testnet', 'current').available, false);
 const ok = resolveGenesisDappHelp(bundle, '420-swap', 'CTX-SWAP-002', 'genesis', 'current');
 assert.equal(ok.available, true);
 assert.equal(ok.authority, 'documentation-navigation-only');

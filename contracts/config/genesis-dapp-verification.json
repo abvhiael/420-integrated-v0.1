@@ -2,6 +2,8 @@
   "pass": true,
   "errors": [],
   "genesis_apps": 21,
+  "genesis_user_apps": 20,
+  "genesis_protocol_only": 1,
   "testnet_only_apps": 1,
   "explorer_profile": "420-explorer-genesis-v1",
   "search_profile": "420-search-genesis-v1",

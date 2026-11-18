@@ -63,6 +63,12 @@ python scripts/bridge-audit-12/materialize_residents.py --check \
 
 The verifier selects the output directory from the active commitment domain. Use `--write` to regenerate the retained records from a qualified compiler build and fresh Anvil constructors. The V3 native workflow invokes `--check` and retains the rehearsal results.
 
+### PAY-APP-0.5 — Genesis application catalogue reconciliation
+
+**Status:** COMPLETE. **Testnet required:** No.
+
+The V3-committed V10 inventory has 22 entries. Pay is a Genesis protocol and user application under `420/service/pay/v1`. The dependency map, documentation matrix, Explorer requirements and acceptance references, Registry discovery guidance, and contextual help now use the same classification. Pay has six development and Genesis documentation routes. Deployment identity and readiness still require separate PAY-AUDIT-7 and Pay application evidence. Gaming remains protocol-only, Arcade remains deferred, and Faucet remains testnet-only.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

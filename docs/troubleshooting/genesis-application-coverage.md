@@ -35,6 +35,7 @@ The mapping rule is simple:
 | 420 Names | `TRB-NAMES-*`, `TRB-REGISTRY-*` | none | COVERED |
 | 420 Identity | `TRB-IDENTITY-*` | none | COVERED |
 | 420 Arbitration | `TRB-ARBITRATION-*` | none | COVERED |
+| 420 Pay | [Pay troubleshooting](../apps/pay/troubleshooting.md), `TRB-PAY-*`, `TRB-TX-*` | deployment identity and application-specific recovery guidance | COVERED |
 | 420 Swap | `TRB-SWAP-*`, `TRB-TX-*`, `TRB-ORACLE-*` where freshness applies | none | COVERED |
 | 420 Bridge | `TRB-BRIDGE-*`, `TRB-ORACLE-*`, `TRB-TX-*` | none | COVERED |
 | 420 Stake | `TRB-STAKE-*`, `TRB-CONSENSUS-*` | none | COVERED |
@@ -140,4 +141,4 @@ Where a symptom spans layers, cross-link in authority order. Examples:
 
 ## DOC-11.8 result
 
-All 20 frozen Genesis/testnet application manual targets have an explicit DOC-11 troubleshooting path. Three application-specific index entries (`TRB-APP-001` through `TRB-APP-003`) cover the only gaps that are better represented at the application layer than in an existing shared domain. 420 Gaming Protocol remains correctly protocol-only, and 420 Faucet remains explicitly testnet-only.
+All 21 frozen Genesis/testnet application manual targets have an explicit DOC-11 troubleshooting path. Three application-specific index entries (`TRB-APP-001` through `TRB-APP-003`) cover the only gaps that are better represented at the application layer than in an existing shared domain. 420 Gaming Protocol remains correctly protocol-only, and 420 Faucet remains explicitly testnet-only.

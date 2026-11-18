@@ -87,6 +87,10 @@ def main() -> int:
             continue
         errors.append(f"public Genesis application {name!r} has no inventory ownership or implementation alias")
 
+    pay = by_name.get("420 Pay", [{}])[0]
+    if pay.get("classification") != "public-genesis-app" or pay.get("docs") != "docs/apps/pay/index.md":
+        errors.append("420 Pay must have public Genesis application documentation ownership")
+
     faucet = by_name.get("420 Faucet", [{}])[0]
     if faucet.get("classification") != "testnet-only-app":
         errors.append("420 Faucet must remain testnet-only-app")

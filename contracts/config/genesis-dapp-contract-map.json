@@ -300,7 +300,21 @@
         "AccountingCommitment420.sol",
         "CanonicalSettlementAdapter420.sol",
         "CanonicalSwapHealthAdapter420.sol"
-      ]
+      ],
+      "application_catalogue": {
+        "catalogue": "config/genesis-applications.json",
+        "class": "GENESIS_PROTOCOL_AND_USER_APP",
+        "service_id": "420/service/pay/v1",
+        "deployment_evidence": "contracts/config/420pay-genesis-wiring.json"
+      },
+      "dependencies": {
+        "registry_resolved": [
+          "CanonicalSwapExecutor420.sol",
+          "ReplayProtectionConsumer420.sol"
+        ],
+        "authorization": "420 Wallet",
+        "read_projection": "420 Indexer"
+      }
     },
     {
       "dapp": "420 Oracle",

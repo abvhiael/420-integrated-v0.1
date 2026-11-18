@@ -148,8 +148,8 @@
     },
     {
       "name": "420 Pay",
-      "classification": "covered-protocol",
-      "docs": "docs/architecture/protocols/pay-token-exchange-bridge.md"
+      "classification": "public-genesis-app",
+      "docs": "docs/apps/pay/index.md"
     },
     {
       "name": "420 Oracle",

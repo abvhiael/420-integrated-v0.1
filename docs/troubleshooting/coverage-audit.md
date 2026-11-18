@@ -18,6 +18,8 @@ DOC-11.10 audits the ecosystem-wide troubleshooting registry after completion of
 
 **PASS, pending final branch reconciliation and exact-head qualification before merge.**
 
+The original DOC-11 audit covered 20 manual targets. The [active coverage map](genesis-application-coverage.md) includes Pay as the 21st target.
+
 The DOC-11 branch now contains the registry contract, reusable entry template, seven domain/application registry surfaces, Genesis-application coverage mapping, and the search/diagnostics/support workflow. All 20 frozen Genesis/testnet manual targets have an explicit troubleshooting route. The protocol-only 420 Gaming Protocol remains outside the standalone application matrix and 420 Faucet remains explicitly testnet-only/no-value.
 
 ## Stable-ID coverage

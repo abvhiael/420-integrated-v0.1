@@ -1788,5 +1788,14 @@
       ],
       "statement": "Governance is not part of the mandatory dedicated Explorer Genesis required-view set."
     }
-  ]
+  ],
+  "catalogue_reconciliation": {
+    "application": "420 Pay",
+    "explorer_profile": "contracts/config/420explorer-genesis.json",
+    "reference": "application_references.420 Pay",
+    "display_authority": "read_only_canonical_evidence",
+    "requires_dedicated_view": false,
+    "deployment_evidence": "contracts/config/420pay-genesis-wiring.json",
+    "acceptance": "Existing Explorer views may display canonical Pay evidence. Catalogue approval supplies no deployed address, live settlement evidence, or new mandatory Explorer view."
+  }
 }

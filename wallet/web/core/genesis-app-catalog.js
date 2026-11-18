@@ -1,6 +1,13 @@
 // Canonical Wallet-visible Genesis service catalogue.
 // Every serviceId in this file must exist in contracts/src/libraries/ServiceIds420.sol.
 // Availability and launch URLs still come exclusively from a verified ecosystem manifest.
+export const APP_RELEASE_STAGE_LABELS = Object.freeze({
+  approved: 'Genesis approved',
+  'under-development': 'Under development',
+  testnet: 'Testnet',
+  production: 'Production',
+});
+
 export const GENESIS_APP_SERVICES = Object.freeze([
   { id: 'registry', name: '420 Registry', serviceId: '420/service/protocol-registry/v1', category: 'infrastructure', description: 'Canonical protocol and service discovery for the 420 ecosystem.', featured: true },
   { id: 'explorer', name: '420 Explorer', serviceId: '420/service/explorer/v1', category: 'utility', description: 'Explore blocks, transactions, contracts and canonical network state.', featured: true },
@@ -23,7 +30,11 @@ export const GENESIS_APP_SERVICES = Object.freeze([
   { id: 'market', name: '420 Market', serviceId: '420/service/market/v1', category: 'finance', description: 'Canonical marketplace and commerce service discovery.' },
   { id: 'rights', name: '420 Rights', serviceId: '420/service/rights/v1', category: 'governance', description: 'Rights, licensing and entitlement coordination.' },
   { id: 'swap', name: '420 Swap', serviceId: '420/service/swap/v1', category: 'finance', description: 'Native asset exchange for the 420 ecosystem.', featured: true },
-  { id: 'pay', name: '420 Pay', serviceId: '420/service/pay/v1', category: 'finance', description: 'Canonical payment initiation and settlement access.', featured: true },
+  Object.freeze({ id: 'pay', name: '420 Pay', serviceId: '420/service/pay/v1', category: 'finance',
+    description: 'Canonical payment initiation and settlement access.', featured: true,
+    classification: 'GENESIS_PROTOCOL_AND_USER_APP', releaseStage: 'approved',
+    proposedOrigin: 'https://pay.420integrated.org', requiresVerifiedRegistry: true,
+    helpContextId: 'CTX-WALLET-004' }),
   { id: 'bridge', name: '420 Bridge', serviceId: '420/service/bridge/v1', category: 'finance', description: 'Verified cross-chain asset and attestation gateway.' },
   { id: 'stake', name: '420 Stake', serviceId: '420/service/stake/v1', category: 'finance', description: 'Validator and staking access for the 420 network.' },
   { id: 'governance', name: '420 Governance', serviceId: '420/service/governance/v1', category: 'governance', description: 'View proposals and participate in network governance.' },

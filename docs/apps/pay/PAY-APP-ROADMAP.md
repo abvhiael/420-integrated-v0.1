@@ -44,6 +44,20 @@ Retained historical commitment blobs are V1 `c8537f6c984ba7d4965e8b51aaefc26c6e2
 
 **Status:** OPEN. This step owns full native artifact reconciliation and qualification.
 
+### PAY-APP-0.6 — 420Wallet application discovery integration
+
+Wallet lists the approved Pay service as `420/service/pay/v1` with
+`https://pay.420integrated.org` as its proposed production origin. The web
+catalogue offers connection help while Pay is unavailable. Extension navigation
+requires a release-approved testnet or production entry, the corresponding
+chain's active ProtocolRegistry record and matching runtime, and a reachable
+approved endpoint. Navigation grants no account access or spending permission.
+
+Local qualification covers catalogue visibility, manifest-only bypass attempts,
+release and chain mismatches, unresolved and disabled records, endpoint failure,
+and Wallet authorization regressions. Live launch depends on a published
+release and active Registry binding.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

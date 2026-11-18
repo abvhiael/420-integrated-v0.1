@@ -6,6 +6,7 @@ export const APP_CATEGORIES = GENESIS_APP_CATEGORIES;
 export function buildAppCatalog(services = []) {
   return services.map((service) => {
     const meta = APP_SERVICES.find((entry) => entry.serviceId === service.serviceId) || {};
+    if (meta.requiresVerifiedRegistry) return { ...meta, available: false, url: null, verified: false };
     return {
       ...meta,
       ...service,

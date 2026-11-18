@@ -38,11 +38,17 @@ export function normalizeGenesisServiceEntry420(entry,selectedChain){
  check(typeof entry.origin==='string'&&entry.origin.startsWith('https://'),'Missing approved service origin');
  const parsedOrigin=new URL(entry.origin);
  check(parsedOrigin.origin===entry.origin&&!parsedOrigin.username&&!parsedOrigin.password&&!parsedOrigin.search&&!parsedOrigin.hash,'Origin must be exact HTTPS authority');
+ if(meta.requiresVerifiedRegistry){
+   check(entry.releaseStage==='testnet'||entry.releaseStage==='production','Genesis service release is unavailable');
+   check((entry.origin===meta.proposedOrigin)===(entry.releaseStage==='production'),
+     'Genesis service origin does not match its release stage');
+ }
  const result=Object.freeze({id:meta.id,name:meta.name,category:meta.category,serviceId:meta.serviceId,
    chainId:chainId(selectedChain),version:entry.version,origin:parsedOrigin.origin,url:url(entry.url,entry.origin),
    implementation:address(entry.implementation,'Service implementation'),
    codeHash:hash(entry.codeHash,'Service code hash'),metadataHash:hash(entry.metadataHash,'Service metadata hash'),
    permission:'NAVIGATION_ONLY',accountGrant:false,spendingAuthority:false,
+   ...(meta.requiresVerifiedRegistry ? {releaseStage:entry.releaseStage} : {}),
    description:meta.description});
  return result;
 }
@@ -57,10 +63,22 @@ export function decodeGenesisServiceRecord420(raw){
  return Object.freeze({implementation,codeHash:'0x'+words[1],metadataHash:'0x'+words[2],
    version:Number(version),activatedAt:BigInt('0x'+words[4]),active:active===1n});
 }
-export async function verifyGenesisService420(provider,{registry,entry,chainId:expectedChain}){
+async function requireAvailableEndpoint(destination,fetchImpl){
+ let response;
+ try{
+   response=await fetchImpl(destination,{method:'HEAD',credentials:'omit',redirect:'error',cache:'no-store',
+     referrerPolicy:'no-referrer',signal:AbortSignal.timeout(5000)});
+ }catch{
+   throw error('Genesis service endpoint is unavailable');
+ }
+ check(response?.ok&&response.url===destination&&!response.redirected,'Genesis service endpoint is unavailable');
+}
+
+export async function verifyGenesisService420(provider,{registry,entry,chainId:expectedChain,fetchImpl=globalThis.fetch}){
  check(provider&&typeof provider.request==='function','Verified chain RPC required');
  const expected=chainId(expectedChain),deployment=normalizeGenesisRegistryBinding420(registry,expected);
  const approved=normalizeGenesisServiceEntry420(entry,expected);
+ if(approved.releaseStage)check(registry.environment===approved.releaseStage,'Genesis Registry release environment mismatch');
  const start=chainId(await provider.request('eth_chainId',[]));
  check(start===expected,'RPC chain identity changed before service check');
  const registryCode=await provider.request('eth_getCode',[deployment.address,'latest']);
@@ -76,11 +94,12 @@ export async function verifyGenesisService420(provider,{registry,entry,chainId:e
  const serviceCode=await provider.request('eth_getCode',[actual.implementation,'latest']);
  check(typeof serviceCode==='string'&&/^0x(?:[0-9a-fA-F]{2})+$/.test(serviceCode)&&codeHash(serviceCode)===actual.codeHash,
    'Service implementation runtime code hash mismatch');
+ if(approved.releaseStage)await requireAvailableEndpoint(approved.url,fetchImpl);
  check(chainId(await provider.request('eth_chainId',[]))===expected,'RPC chain changed during service check');
  return Object.freeze({...approved,registry:deployment.address,registryCodeHash:deployment.codeHash,verified:true,
    status:'registry-verified',permission:'NAVIGATION_ONLY',accountGrant:false,spendingAuthority:false});
 }
-export async function discoverGenesisServices420(provider,{registry,services,chainId:expectedChain,limit=40}){
+export async function discoverGenesisServices420(provider,{registry,services,chainId:expectedChain,limit=40,fetchImpl=globalThis.fetch}){
  if(!registry||!Array.isArray(services)||services.length>60||!Number.isInteger(limit)||limit<1||limit>60)return [];
  const seen=new Set(),selected=[];
  for(const entry of services){
@@ -93,7 +112,7 @@ export async function discoverGenesisServices420(provider,{registry,services,cha
  // Bound RPC concurrency; do not hammer unresponsive Registry endpoints on popup open.
  for(let offset=0;offset<selected.length;offset+=3){
    const results=await Promise.allSettled(selected.slice(offset,offset+3).map(
-     entry=>verifyGenesisService420(provider,{registry,entry,chainId:expectedChain})));
+     entry=>verifyGenesisService420(provider,{registry,entry,chainId:expectedChain,fetchImpl})));
    for(const item of results)if(item.status==='fulfilled')output.push(item.value);
  }
  return output;
@@ -101,7 +120,7 @@ export async function discoverGenesisServices420(provider,{registry,services,cha
 export function assertGenesisNavigationSnapshot420(previous,current,{account,chainId:expectedChain}){
  check(previous?.verified===true&&current?.verified===true,'Unverified Genesis destination');
  check(previous.serviceId===current.serviceId&&previous.url===current.url&&previous.origin===current.origin&&
-  previous.version===current.version&&previous.implementation===current.implementation&&
+  previous.releaseStage===current.releaseStage&&previous.version===current.version&&previous.implementation===current.implementation&&
   previous.codeHash===current.codeHash&&previous.metadataHash===current.metadataHash,
    'Destination changed since review');
  check(current.chainId===chainId(expectedChain),'Genesis navigation chain changed');

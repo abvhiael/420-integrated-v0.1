@@ -51,3 +51,22 @@ test('420 Apps discovery leaves everything unavailable until a manifest is confi
   assert.equal(result.trust, 'Awaiting manifest');
   assert.ok(result.apps.every((app) => app.available === false && app.url === null));
 });
+
+test('Pay discovery presents the approved catalogue entry without allowing manifest-only launch', async () => {
+  const pay = APP_SERVICES.find((app) => app.id === 'pay');
+  const candidate = { serviceId: pay.serviceId, name: pay.name, url: pay.proposedOrigin,
+    releaseStage: 'production', available: true };
+  const responses = [
+    { manifest: { url: 'https://manifest.example/apps.json' } },
+    { schema: '420-ecosystem-manifest-v1', verified: true, services: [candidate] },
+  ];
+  const { apps } = await loadVerifiedApps(async () => ({ ok: true, json: async () => responses.shift() }));
+  const discovered = filterAppCatalog(apps, { category: 'finance', query: 'pay' });
+  const expected = { ...pay, available: false, url: null, verified: false };
+  assert.deepEqual(discovered.find((app) => app.id === 'pay'), expected);
+  assert.deepEqual(buildAppCatalog([candidate]), [expected]);
+  assert.equal(pay.serviceId, '420/service/pay/v1');
+  assert.equal(pay.proposedOrigin, 'https://pay.420integrated.org');
+  assert.equal(pay.releaseStage, 'approved');
+  assert.equal(pay.classification, 'GENESIS_PROTOCOL_AND_USER_APP');
+});

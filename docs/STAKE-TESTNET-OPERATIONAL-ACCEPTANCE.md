@@ -27,8 +27,8 @@ No live result may be inherited merely because a fixture used separate PIDs.
 ## Live drill harness and evidence contract
 
 Use the read-only collector and independently pinned configuration from
-[the closeout harness](../scripts/stake-live-operations.py) and the
-[explicit template](../deployments/stake-operations/live.example.json).
+[the closeout harness](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/scripts/stake-live-operations.py) and the
+[explicit template](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/stake-operations/live.example.json).
 Capture before/after healthy canonical boundaries on a designated, authorized
 qualification node. Conduct actual faults using its approved supervisor/storage/
 network controls. The collector intentionally cannot kill or rewrite a node.

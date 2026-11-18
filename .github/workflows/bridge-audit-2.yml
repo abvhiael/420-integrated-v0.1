@@ -66,8 +66,13 @@ jobs:
             contracts/test/PaySwapBridgeGenesisIntegration420.t.sol \
             contracts/test/ExchangeBridgeQualification420.t.sol | sed 's,.*/,,')
           selected=()
+          native_owner=
           for ((i = SHARD; i < ${#owners[@]}; i += 6)); do
-            selected+=("${owners[i]}")
+            if [[ "${owners[i]}" == BridgeNativeValueSettlement420.t.sol ]]; then
+              native_owner="${owners[i]}"
+            else
+              selected+=("${owners[i]}")
+            fi
           done
           test "${#selected[@]}" -gt 0
           log="$RUNNER_TEMP/bridge-audit-2.log"
@@ -76,6 +81,17 @@ jobs:
             grep -Fq "for contracts/test/$owner:" "$log"
           done
           grep -Eq '^Ran [0-9]+ test suites? in .*: [1-9][0-9]* tests? passed, 0 failed, 0 skipped' "$log"
+          if [[ -n "$native_owner" ]]; then
+            # The native settlement owner inherits the CADC issuer tests through
+            # the gateway fixture. Those tests use their own issuer/router fixtures
+            # in bridge-cadc-proof.yml. Retain the settlement audit's exact selector.
+            native_log="$RUNNER_TEMP/bridge-audit-2.native.log"
+            python3 scripts/qualify-bridge-full-local.py --owners "$native_owner" \
+              --match-test '^testNativeValue' --log "$native_log"
+            grep -Fq "for contracts/test/$native_owner:BridgeNativeCADCSettlement420Test" "$native_log"
+            grep -Fq "for contracts/test/$native_owner:BridgeNativeCCTPExposure420Test" "$native_log"
+            grep -Eq '^Ran 2 test suites in .*: [1-9][0-9]* tests? passed, 0 failed, 0 skipped' "$native_log"
+          fi
       - name: Retain Bridge qualification evidence
         if: always()
         uses: actions/upload-artifact@v4

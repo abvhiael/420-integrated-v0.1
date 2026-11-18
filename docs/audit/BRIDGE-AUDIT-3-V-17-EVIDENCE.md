@@ -2,7 +2,7 @@
 
 **Catalogue implementation and local qualification complete.** Baseline `main`: `97413f2eea862d5f2ec3117313cd3beb15a634f4`. Date: 2026-11-15, America/Regina. No merge requested; no live deployment, issuer authorization, validator root or production route changed.
 
-[Dataset, source pins and reproduction commands](../../evidence/bridge/README.md) · [Machine-readable qualification](evidence-catalogue-qualification/RESULTS.json) · [22 targeted tests](evidence-catalogue-qualification/tests.log) · [Independent reacquisition](evidence-catalogue-qualification/reacquisition.json).
+[Dataset, source pins and reproduction commands](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/evidence/bridge/README.md) · [Machine-readable qualification](evidence-catalogue-qualification/RESULTS.json) · [22 targeted tests](evidence-catalogue-qualification/tests.log) · [Independent reacquisition](evidence-catalogue-qualification/reacquisition.json).
 
 | Original requirement | Delivered evidence |
 |---|---|

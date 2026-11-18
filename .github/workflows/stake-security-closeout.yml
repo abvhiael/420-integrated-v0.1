@@ -1,0 +1,55 @@
+name: Stake security closeout preparation
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/system/StakeSystemSafety420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/system/StakeDependencyAccess420.sol'
+      - 'contracts/src/system/ConsensusSystemAccess420.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/CommunityValidatorReserve.sol'
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/system/ConsensusSystemCall420.sol'
+      - 'contracts/src/apps/Stake420.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/interfaces/genesis/ISystemSafety420.sol'
+      - 'contracts/src/libraries/StakeIds420.sol'
+      - 'contracts/test/SecurityStake*.t.sol'
+      - 'scripts/qualify-stake-security.py'
+      - 'scripts/test-stake-security.py'
+      - 'docs/STAKE-AUDIT-10-*'
+      - 'docs/stake-security-evidence/**'
+      - 'deployments/stake-security/**'
+      - '.github/workflows/stake-security-closeout.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Verify exact candidate and retained source-bound executions
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          mkdir -p stake-security-evidence
+          python3 scripts/test-stake-security.py 2>&1 | tee stake-security-evidence/gate-tests.log
+          python3 scripts/qualify-stake-security.py --output stake-security-evidence --verify-retained > stake-security-evidence/qualification.log 2>&1
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stake-security-${{ github.event.pull_request.head.sha || github.sha }}
+          path: stake-security-evidence/
+          if-no-files-found: error

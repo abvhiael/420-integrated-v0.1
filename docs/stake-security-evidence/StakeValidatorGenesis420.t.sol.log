@@ -1,0 +1,30 @@
+Compiling 1 files with Solc 0.8.24
+Solc 0.8.24 finished in 17.75s
+Compiler run successful!
+
+Ran 22 tests for test/StakeValidatorGenesis420.t.sol:StakeValidatorGenesis420Test
+[PASS] testActivationRequiresOneFullRotationAndFullBond() (gas: 510068)
+[PASS] testAssignedReserveCollateralCannotBeTreasurySpent() (gas: 154373)
+[PASS] testConsensusRewardAppliesOncePerExecutionBlock() (gas: 254114)
+[PASS] testConsensusRewardRejectsWrongBlockAndDuplicateParticipants() (gas: 69003)
+[PASS] testConsensusRewardRejectsZeroProposerZeroParticipantProposerParticipantAndOversizedSet() (gas: 157907)
+[PASS] testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome() (gas: 375540)
+[PASS] testCooldownIsBondedButNotSelectionEligible() (gas: 804457)
+[PASS] testDuplicateSlashEvidenceCannotChargeTwice() (gas: 1038010)
+[PASS] testDynamicCommitteeTiersAndRewardAllocation() (gas: 34371)
+[PASS] testExitWithdrawalReturnsOwnedAndRecyclesCredit() (gas: 1506545)
+[PASS] testFinalityEquivocationConsumesOwnedAndRevokesAllCredit() (gas: 923436)
+[PASS] testGenesisBondLifecycleAndDelegationPolicy() (gas: 38202)
+[PASS] testMatchedRegistrationMovesRealReserveCredit() (gas: 690573)
+[PASS] testProportionalSlashMovesOwnedValueAndRecyclesCredit() (gas: 968502)
+[PASS] testProtocolCreditReplacementReturnsValueToReserve() (gas: 806645)
+[PASS] testSelfFundedRegistrationLocksReal420() (gas: 385639)
+[PASS] testStakeFacadeReportsCollateralSolvency() (gas: 682478)
+[PASS] testStakeGenesisInitializationIntrospection() (gas: 32962)
+[PASS] testStakeSafetyFailsClosedOnInactiveOrCodeHashMismatch() (gas: 775732)
+[PASS] testSystemSafetyBlocksNewActivationOutsideNormal() (gas: 773717)
+[PASS] testUnregisteredFundedCreditCanBeReclaimed() (gas: 392036)
+[PASS] testZeroSlashEvidenceRejectedWithoutMutation() (gas: 811119)
+Suite result: ok. 22 passed; 0 failed; 0 skipped; finished in 3.76ms (7.29ms CPU time)
+
+Ran 1 test suite in 4.13ms (3.76ms CPU time): 22 tests passed, 0 failed, 0 skipped (22 total tests)

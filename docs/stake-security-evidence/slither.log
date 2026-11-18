@@ -1,0 +1,99 @@
+'/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24 --version' running
+'/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24 /workspace/scratch/5593579c88ce/stake10-static/Review.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --optimize --optimize-runs 200 --via-ir --evm-version cancun --allow-paths .,/workspace/scratch/5593579c88ce/stake10-static' running
+
+ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes) (../stake10-static/src/system/ConsensusSystemCall420.sol#43-65) uses a dangerous strict equality:
+	- block.number == 0 || parentHash != blockhash(uint256)(block.number - 1) (../stake10-static/src/system/ConsensusSystemCall420.sol#49)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+ValidatorRegistry.applyRotationSnapshot(uint64,uint256).safetyOverride (../stake10-static/src/system/ValidatorRegistry.sol#427) is a local variable never initialized
+ValidatorRegistry.maxSlashBps(ValidatorRegistry.SlashOffense,uint8).base (../stake10-static/src/system/ValidatorRegistry.sol#462) is a local variable never initialized
+RewardController.applyConsensusReward(uint64,address,address[],uint256,uint256,uint256,uint256).participantsIssued (../stake10-static/src/system/RewardController.sol#63) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+
+Stake420.rewardAllocation(uint16) (../stake10-static/src/apps/Stake420.sol#117-119) ignores return value by IValidatorRegistry420(validatorRegistry).rewardAllocation(activeCount) (../stake10-static/src/apps/Stake420.sol#118)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+
+ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes).target (../stake10-static/src/system/ConsensusSystemCall420.sol#43) lacks a zero-check on :
+		- (ok,returndata) = target.call(payload) (../stake10-static/src/system/ConsensusSystemCall420.sol#62)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+
+Reentrancy in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status) (../stake10-static/src/system/ValidatorRegistry.sol#327-384):
+	External calls:
+	- (ok,None) = address(PROTOCOL_RESERVE).call{value: ownedSlashed}() (../stake10-static/src/system/ValidatorRegistry.sol#374)
+	State variables written after the call(s):
+	- totalProtocolCreditCustody -= creditSlashed (../stake10-static/src/system/ValidatorRegistry.sol#378)
+	- totalProtocolCreditRecycled += creditSlashed (../stake10-static/src/system/ValidatorRegistry.sol#379)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+
+Reentrancy in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status) (../stake10-static/src/system/ValidatorRegistry.sol#327-384):
+	External calls:
+	- (ok,None) = address(PROTOCOL_RESERVE).call{value: ownedSlashed}() (../stake10-static/src/system/ValidatorRegistry.sol#374)
+	- _returnProtocolCredit(validatorId,creditSlashed) (../stake10-static/src/system/ValidatorRegistry.sol#380)
+		- ICommunityValidatorReserve420(communityValidatorReserve).returnCredit{value: amount}(validatorId) (../stake10-static/src/system/ValidatorRegistry.sol#548)
+	Event emitted after the call(s):
+	- SlashApplied(validatorId,offense,correlationTier,ownedSlashed,creditSlashed,evidenceHash,resultingStatus) (../stake10-static/src/system/ValidatorRegistry.sol#383)
+Reentrancy in ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes) (../stake10-static/src/system/ConsensusSystemCall420.sol#43-65):
+	External calls:
+	- (ok,returndata) = target.call(payload) (../stake10-static/src/system/ConsensusSystemCall420.sol#62)
+	Event emitted after the call(s):
+	- ConsensusSystemCallApplied(sequence,executionBlock,action,target,payloadHash,callHash) (../stake10-static/src/system/ConsensusSystemCall420.sol#64)
+Reentrancy in CommunityValidatorReserve.fundCredit(bytes32) (../stake10-static/src/system/CommunityValidatorReserve.sol#62-73):
+	External calls:
+	- IValidatorCreditReceiver420(validatorRegistry).receiveProtocolCredit{value: amount}(validatorId,beneficiary) (../stake10-static/src/system/CommunityValidatorReserve.sol#71)
+	Event emitted after the call(s):
+	- CreditFunded(validatorId,beneficiary,amount) (../stake10-static/src/system/CommunityValidatorReserve.sol#72)
+Reentrancy in ValidatorRegistry.replaceProtocolCredit(bytes32) (../stake10-static/src/system/ValidatorRegistry.sol#264-277):
+	External calls:
+	- _returnProtocolCredit(validatorId,msg.value) (../stake10-static/src/system/ValidatorRegistry.sol#275)
+		- ICommunityValidatorReserve420(communityValidatorReserve).returnCredit{value: amount}(validatorId) (../stake10-static/src/system/ValidatorRegistry.sol#548)
+	Event emitted after the call(s):
+	- ProtocolCreditReplaced(validatorId,msg.value,v.ownedBond,v.protocolCredit) (../stake10-static/src/system/ValidatorRegistry.sol#276)
+Reentrancy in ValidatorRegistry.returnPendingProtocolCredit(bytes32) (../stake10-static/src/system/ValidatorRegistry.sol#184-196):
+	External calls:
+	- _returnProtocolCredit(validatorId,amount) (../stake10-static/src/system/ValidatorRegistry.sol#194)
+		- ICommunityValidatorReserve420(communityValidatorReserve).returnCredit{value: amount}(validatorId) (../stake10-static/src/system/ValidatorRegistry.sol#548)
+	Event emitted after the call(s):
+	- PendingProtocolCreditReturned(validatorId,amount) (../stake10-static/src/system/ValidatorRegistry.sol#195)
+Reentrancy in CommunityValidatorReserve.treasuryTransfer(address,uint256,bytes32) (../stake10-static/src/system/CommunityValidatorReserve.sol#113-119):
+	External calls:
+	- (ok,None) = to.call{value: amount}() (../stake10-static/src/system/CommunityValidatorReserve.sol#116)
+	Event emitted after the call(s):
+	- TreasuryTransfer(to,amount,reason) (../stake10-static/src/system/CommunityValidatorReserve.sol#118)
+Reentrancy in ProtocolTreasury.treasuryTransfer(address,uint256,bytes32) (../stake10-static/src/system/ProtocolTreasury.sol#13-23):
+	External calls:
+	- (ok,None) = to.call{value: amount}() (../stake10-static/src/system/ProtocolTreasury.sol#20)
+	Event emitted after the call(s):
+	- TreasuryTransfer(to,amount,reason) (../stake10-static/src/system/ProtocolTreasury.sol#22)
+Reentrancy in ValidatorRegistry.withdrawBond(bytes32) (../stake10-static/src/system/ValidatorRegistry.sol#387-418):
+	External calls:
+	- _returnProtocolCredit(validatorId,recycledCredit) (../stake10-static/src/system/ValidatorRegistry.sol#410)
+		- ICommunityValidatorReserve420(communityValidatorReserve).returnCredit{value: amount}(validatorId) (../stake10-static/src/system/ValidatorRegistry.sol#548)
+	- (ok,None) = address(withdrawal).call{value: ownedAmount}() (../stake10-static/src/system/ValidatorRegistry.sol#413)
+	Event emitted after the call(s):
+	- ValidatorBondWithdrawn(validatorId,withdrawal,ownedAmount,recycledCredit) (../stake10-static/src/system/ValidatorRegistry.sol#417)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+
+ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes) (../stake10-static/src/system/ConsensusSystemCall420.sol#43-65) uses assembly
+	- INLINE ASM (../stake10-static/src/system/ConsensusSystemCall420.sol#54)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+
+ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status) (../stake10-static/src/system/ValidatorRegistry.sol#327-384) has a high cyclomatic complexity (18).
+ValidatorRegistry._validateLifecycleTransition(ValidatorRegistry.Validator,ValidatorRegistry.Status,ValidatorRegistry.Status,uint64,uint64,uint64) (../stake10-static/src/system/ValidatorRegistry.sol#509-544) has a high cyclomatic complexity (21).
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#cyclomatic-complexity
+
+Low level call in CommunityValidatorReserve.treasuryTransfer(address,uint256,bytes32) (../stake10-static/src/system/CommunityValidatorReserve.sol#113-119):
+	- (ok,None) = to.call{value: amount}() (../stake10-static/src/system/CommunityValidatorReserve.sol#116)
+Low level call in ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes) (../stake10-static/src/system/ConsensusSystemCall420.sol#43-65):
+	- (ok,returndata) = target.call(payload) (../stake10-static/src/system/ConsensusSystemCall420.sol#62)
+Low level call in ProtocolTreasury.treasuryTransfer(address,uint256,bytes32) (../stake10-static/src/system/ProtocolTreasury.sol#13-23):
+	- (ok,None) = to.call{value: amount}() (../stake10-static/src/system/ProtocolTreasury.sol#20)
+Low level call in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status) (../stake10-static/src/system/ValidatorRegistry.sol#327-384):
+	- (ok,None) = address(PROTOCOL_RESERVE).call{value: ownedSlashed}() (../stake10-static/src/system/ValidatorRegistry.sol#374)
+Low level call in ValidatorRegistry.withdrawBond(bytes32) (../stake10-static/src/system/ValidatorRegistry.sol#387-418):
+	- (ok,None) = address(withdrawal).call{value: ownedAmount}() (../stake10-static/src/system/ValidatorRegistry.sol#413)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+
+CommunityValidatorReserve (../stake10-static/src/system/CommunityValidatorReserve.sol#12-120) should inherit from ICommunityValidatorReserve420 (../stake10-static/src/system/ValidatorRegistry.sol#8-10)
+ValidatorRegistry (../stake10-static/src/system/ValidatorRegistry.sol#15-583) should inherit from IValidatorCreditReceiver420 (../stake10-static/src/system/CommunityValidatorReserve.sol#7-10)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+/workspace/scratch/5593579c88ce/stake10-static/Review.sol analyzed (20 contracts with 100 detectors), 25 result(s) found

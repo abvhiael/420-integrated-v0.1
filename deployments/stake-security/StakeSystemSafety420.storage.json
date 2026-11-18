@@ -1,0 +1,52 @@
+{
+  "storage": [
+    {
+      "astId": 78,
+      "contract": "src/system/StakeSystemSafety420.sol:StakeSystemSafety420",
+      "label": "safetyState",
+      "offset": 0,
+      "slot": "0",
+      "type": "t_enum(SafetyState)6"
+    },
+    {
+      "astId": 81,
+      "contract": "src/system/StakeSystemSafety420.sol:StakeSystemSafety420",
+      "label": "recoveryReference",
+      "offset": 0,
+      "slot": "1",
+      "type": "t_bytes32"
+    },
+    {
+      "astId": 85,
+      "contract": "src/system/StakeSystemSafety420.sol:StakeSystemSafety420",
+      "label": "actionDenied",
+      "offset": 0,
+      "slot": "2",
+      "type": "t_mapping(t_bytes32,t_bool)"
+    }
+  ],
+  "types": {
+    "t_bool": {
+      "encoding": "inplace",
+      "label": "bool",
+      "numberOfBytes": "1"
+    },
+    "t_bytes32": {
+      "encoding": "inplace",
+      "label": "bytes32",
+      "numberOfBytes": "32"
+    },
+    "t_enum(SafetyState)6": {
+      "encoding": "inplace",
+      "label": "enum ISystemSafety420.SafetyState",
+      "numberOfBytes": "1"
+    },
+    "t_mapping(t_bytes32,t_bool)": {
+      "encoding": "mapping",
+      "key": "t_bytes32",
+      "label": "mapping(bytes32 => bool)",
+      "numberOfBytes": "32",
+      "value": "t_bool"
+    }
+  }
+}

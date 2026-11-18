@@ -1,0 +1,11 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.68s
+Compiler run successful!
+
+Ran 3 tests for test/StakeRollbackAtomicity420.t.sol:StakeRollbackAtomicity420Test
+[PASS] testFuzz_ProtocolCreditReplacementRollbackOnReserveFailure(uint96) (runs: 10000, μ: 7972427, ~: 7972427)
+[PASS] testSystemCallFailureRollsBackSequenceHashAndDownstreamState() (gas: 819689)
+[PASS] testWithdrawalRollbackRestoresRegistryAndReserveWhenRecipientRejects() (gas: 9511391)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 856.54ms (858.02ms CPU time)
+
+Ran 1 test suite in 857.54ms (856.54ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

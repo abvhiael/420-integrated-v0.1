@@ -1,0 +1,31 @@
+{
+  "schema": "420-stake-safety-provider-deployment-v1",
+  "status": "LOCAL_IMPLEMENTATION_NOT_LIVE_DEPLOYMENT",
+  "source": "contracts/src/system/StakeSystemSafety420.sol",
+  "constructor": {
+    "timelock_": "0x0000000000000000000000000000000000000429"
+  },
+  "compiler": "0.8.24+commit.e11b9ed9",
+  "optimizerRuns": 200,
+  "viaIR": true,
+  "evmVersion": "cancun",
+  "address": null,
+  "componentIdSource": "contracts/src/libraries/AppDependencyIds420.sol:SYSTEM_SAFETY",
+  "registry": "0x0000000000000000000000000000000000000434",
+  "publicationRequirements": [
+    "independently reviewed runtime and constructor identity",
+    "actual deployment receipt and runtime code hash",
+    "governance-authorized ACTIVE ProtocolRegistry component binding",
+    "no replacement of an existing shared provider without reconciling every consumer",
+    "non-Stake actions are denied; this implementation does not claim ecosystem-wide safety coverage",
+    "live activation restriction and mature withdrawal recovery evidence"
+  ],
+  "frozenStakeAddressesChanged": false,
+  "externalReviewComplete": false,
+  "liveBindingVerified": false,
+  "compiledArtifact": "deployments/stake-security/StakeSystemSafety420.compiler.json",
+  "artifactSha256": "3cda66e9292e1339bdbf3ed1e93f1a697d21242e1b20a4530823ba9705745f77",
+  "sourceSha256": "b2593a956b4c8219e15c68e3ecda54cf22b213c23e9ddeeadd0f9536c975b3e0",
+  "storageLayout": "deployments/stake-security/StakeSystemSafety420.storage.json",
+  "storageSha256": "8a8015a7405cb40e96cf750728b993b1a2498e9a5490c718fa21f3dcf0af8699"
+}

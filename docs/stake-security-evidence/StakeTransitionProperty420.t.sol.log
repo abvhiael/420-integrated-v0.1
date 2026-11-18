@@ -1,0 +1,9 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.35s
+Compiler run successful!
+
+Ran 1 test for test/StakeTransitionProperty420.t.sol:StakeTransitionProperty420Test
+[PASS] testFuzz_TransitionGraphMatchesCanonicalEdges(uint8,uint8,uint64) (runs: 10000, μ: 7749660, ~: 7739355)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 882.94ms (882.58ms CPU time)
+
+Ran 1 test suite in 883.39ms (882.94ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

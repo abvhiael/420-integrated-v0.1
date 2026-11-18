@@ -1,0 +1,452 @@
+{
+  "authority_inputs": [
+    {
+      "gitBlobSha1": "d9c40056db30513c0445f0c341d261b63dc6a1a5",
+      "path": "contracts/config/genesis-address-namespace.json"
+    },
+    {
+      "gitBlobSha1": "50c8d7c860ff48d52f41874bc55ee092cc9c5b6d",
+      "path": "contracts/config/system-addresses.json"
+    },
+    {
+      "gitBlobSha1": "e5fc64b454dcaca4bbf112b1488986377d711128",
+      "path": "contracts/config/interfaces/genesis-interface-layer.json"
+    },
+    {
+      "gitBlobSha1": "73a24bfe46787f3c2af043adc1de12eea1f456ab",
+      "path": "config/genesis-applications.json"
+    },
+    {
+      "gitBlobSha1": "564d67fe2f959a96ed0c54d7862dd21bef30a8e9",
+      "path": "config/genesis-allocations.json"
+    },
+    {
+      "gitBlobSha1": "789c750c7fb2eb2cbd6844122789b6611e91fbb0",
+      "path": "config/ai-genesis.json"
+    }
+  ],
+  "bundle": "contracts.json.gz",
+  "bundle_content_sha256": "376badd44463268ac0e64dc413134f0e03b3fd6cf29debb05efb33f9d9e8261b",
+  "compiler": {
+    "evmVersion": "cancun",
+    "foundryConfigBlobSha1": "9fa5356e6595a751033cbacd83eef541d3c7d4ff",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "solidity": "0.8.24",
+    "toolchainConfigBlobSha1": "dd49cb0e07370b01401d63d2fb53683177de8abc",
+    "viaIR": true
+  },
+  "configuration_version": "v3",
+  "constructor_inventory": {
+    "ApprovedQuoteAssetRegistry": {
+      "candidate_reservation": null,
+      "fixed_address": "0x0000000000000000000000000000000000000439",
+      "materialized": true,
+      "source": "contracts/src/swap/ApprovedQuoteAssetRegistry.sol",
+      "source_sha256": "cdcbc42bcb84b7dbf4a78d6d3ce380cfe555d4af834ae1248c23343787e45ea8"
+    },
+    "BridgeAccountingRegistry": {
+      "candidate_reservation": "0x0000000000000000000000000000000000000444",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeAccountingRegistry.sol",
+      "source_sha256": "fd68fbc2dc65f7ec830b73d4eaec3242b396d2cb504bc2d98b45b79fe662d7b8"
+    },
+    "BridgeAssetRegistry": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeAssetRegistry.sol",
+      "source_sha256": "df6eae7c2e0e818f97206e211afbd9d135602b9e5f85507a2b9bc46220177be5"
+    },
+    "BridgeChainRegistry420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeChainRegistry420.sol",
+      "source_sha256": "768f2215ef47ef911ad6e03c860b5cf25eecd5d48479b7ab2331e1634f6c97e1"
+    },
+    "BridgeRiskManager": {
+      "candidate_reservation": "0x0000000000000000000000000000000000000441",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeRiskManager.sol",
+      "source_sha256": "b977d7329bf0004b557d8f3dc546dfe93d9bb2fec4806d6a113d05d649402eff"
+    },
+    "BridgeRouteRegistry": {
+      "candidate_reservation": "0x0000000000000000000000000000000000000440",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeRouteRegistry.sol",
+      "source_sha256": "e060cfdbd5d8b280a8c6ed0f5519fcdeacfb379a0048be7f9378b9e955561d16"
+    },
+    "BridgeTransferRegistry": {
+      "candidate_reservation": "0x0000000000000000000000000000000000000442",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeTransferRegistry.sol",
+      "source_sha256": "79640b696487c90c9fd70e451c9827371904b40d2e56841940f2c19880087393"
+    },
+    "BridgeValueCustody420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeValueCustody420.sol",
+      "source_sha256": "58da48b8e2fdcbf842aeeaea702c07a5cd2ac31b718614e7696892a17f130d48"
+    },
+    "BridgeVerifierRegistry420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/BridgeVerifierRegistry420.sol",
+      "source_sha256": "1c3a07235b8045844388530bd3833008e46e4e933b4d492d7fecff3f072bc88b"
+    },
+    "CADCBridgeIntegration": {
+      "candidate_reservation": "0x000000000000000000000000000000000000043d",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/CADCBridgeIntegration.sol",
+      "source_sha256": "7d38fcee9d738fdb4c403bfa05e0a1e59fb03b430d18cbce866a5cc938274ffc"
+    },
+    "CanonicalMarketRegistry": {
+      "candidate_reservation": "0x000000000000000000000000000000000000043e",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/swap/CanonicalMarketRegistry.sol",
+      "source_sha256": "798abcc28bbf2be16b5cda7b23a72e83a1632538c1043c95657e3b83a08e3f4d"
+    },
+    "CanonicalSettlementAdapter420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol",
+      "source_sha256": "bd913b14cc3775631240a8168581835702a51c26763e6d146c5d53e0acafaac9"
+    },
+    "CanonicalSwapExecutor420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/swap/CanonicalSwapExecutor420.sol",
+      "source_sha256": "bd5c273996facd1f1982bc925032076ed669a3f14b90c5d50ecad02a911688c1"
+    },
+    "CanonicalSwapHealthAdapter420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol",
+      "source_sha256": "075179e78864f8bed3bb9e23b5088e528197e250eda7941590bab5f6709f41eb"
+    },
+    "GasSponsor420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/GasSponsor420.sol",
+      "source_sha256": "11969bcf3e39e956768a9d43cc373bd3900e7c9c1da1b76919d75da1461f1946"
+    },
+    "GatewayRouter420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/bridge/GatewayRouter420.sol",
+      "source_sha256": "b2aaeaaa50e828e7947d6b52ce7d98487e4b8140838bae499f054cb7e900ccd2"
+    },
+    "GenesisDEXFactory": {
+      "candidate_reservation": null,
+      "fixed_address": "0x000000000000000000000000000000000000042b",
+      "materialized": true,
+      "source": "contracts/src/swap/GenesisDEXFactory.sol",
+      "source_sha256": "06cb7df897ed5702b0b174ec673ae206da67a36212a1ca932b5ae1bf1bd69308"
+    },
+    "InvoiceRegistry420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/InvoiceRegistry420.sol",
+      "source_sha256": "59531cb970d98ec772986079e5522495872705342387eaa4df3e5eb8e0df3274"
+    },
+    "MerchantRegistry420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/MerchantRegistry420.sol",
+      "source_sha256": "910b203f3244186ae5b815283d7943e45110c9ebee0bed3c857d57a271966b98"
+    },
+    "PaymentRegistry420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/PaymentRegistry420.sol",
+      "source_sha256": "063607b8ad24e2005449a3beecd738a6d09f4a1e240871fd8aa78d178a7f9d1c"
+    },
+    "PaymentRouter420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/PaymentRouter420.sol",
+      "source_sha256": "7742b1a204e37a31cc5cee2d618bbc45883c1fc5050a0f1278b0dcad0bb6a6d9"
+    },
+    "PermissionlessDEXFactory": {
+      "candidate_reservation": "0x000000000000000000000000000000000000043f",
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/swap/PermissionlessDEXFactory.sol",
+      "source_sha256": "76c681dcf499a51028a3ab568bd1c1108102d3a577d47d3b05e0d185b8c26f29"
+    },
+    "PublicBatchAuction": {
+      "candidate_reservation": null,
+      "fixed_address": "0x000000000000000000000000000000000000042c",
+      "materialized": true,
+      "source": "contracts/src/swap/PublicBatchAuction.sol",
+      "source_sha256": "d8f09946a422bc14727f060463bc3afc43143c63138aea1dc82441b1e08e3115"
+    },
+    "RefundManager420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/RefundManager420.sol",
+      "source_sha256": "350046462858765d189fa5c0634b497358984d004b0bebf362da87962abd2068"
+    },
+    "ReplayProtectionConsumer420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": false,
+      "source": "contracts/src/system/ReplayProtectionConsumer420.sol",
+      "source_sha256": "fd4094d6d46724d9c7462beab79f06dac1d47080dace911c62fce7cbd39b53ad"
+    },
+    "SettlementRouter420": {
+      "candidate_reservation": null,
+      "fixed_address": null,
+      "materialized": true,
+      "source": "contracts/src/pay/SettlementRouter420.sol",
+      "source_sha256": "8d6cb38647bb555c0d585f293adbd0d6256da359d8fb00ee9e8c1a697c9bba6e"
+    },
+    "TWAPOracle": {
+      "candidate_reservation": null,
+      "fixed_address": "0x000000000000000000000000000000000000042d",
+      "materialized": true,
+      "source": "contracts/src/swap/TWAPOracle.sol",
+      "source_sha256": "fd0c6ccf0a7522e5595d0f482c4427e739044d4c62e88d5d55bcffb82e8066ff"
+    },
+    "VerifiedGateway420": {
+      "candidate_reservation": null,
+      "fixed_address": "0x0000000000000000000000000000000000000438",
+      "materialized": true,
+      "source": "contracts/src/bridge/VerifiedGateway420.sol",
+      "source_sha256": "23ab0c2de8531ffe156246052bedc39ad7d2a28037a12432c22b38252a668f8b"
+    }
+  },
+  "deployment_input_records": [
+    "contracts/config/pay/pay-audit-6-deployment-package.json",
+    "contracts/config/predeploy/predeploy-plan.json",
+    "contracts/config/deployment-manifest.json",
+    "contracts/config/swap/swap-audit-7-deployment-binding.json"
+  ],
+  "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
+  "pay_swap_source_sha256": {
+    "contracts/src/interfaces/ICanonicalMarketHealth420.sol": "b05b7b0b849bdeacb3fcbbb4d5da971e06ca8a9258160aecd4c6c1e177ca7578",
+    "contracts/src/interfaces/ICanonicalSettlement420.sol": "8be91afa3a93d112b16eb3b371f08603f1d901ba82743f08e0e50d7556ca9438",
+    "contracts/src/interfaces/genesis/Errors420.sol": "479835a682c6c1e024289859a34382921dba25720cd3a6a262046aaa250015fc",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/IFeeQuote420.sol": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGenesisResident420.sol": "49a6c8d727616245a634d3e8eaba15fb50a08bfefb26f8fd2070d57db935de1b",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IMetadataCommitment420.sol": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IReplayConsumer420.sol": "9877ffaf326f154e42d0d20a2f0c68cfd8bca2bd1253eb4d04356f0b7d1bc039",
+    "contracts/src/interfaces/genesis/IReplayProtection420.sol": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/pay/GasSponsor420.sol": "11969bcf3e39e956768a9d43cc373bd3900e7c9c1da1b76919d75da1461f1946",
+    "contracts/src/pay/InvoiceRegistry420.sol": "59531cb970d98ec772986079e5522495872705342387eaa4df3e5eb8e0df3274",
+    "contracts/src/pay/MerchantRegistry420.sol": "910b203f3244186ae5b815283d7943e45110c9ebee0bed3c857d57a271966b98",
+    "contracts/src/pay/PayIds420.sol": "ccdcfb2c568be433b7c04f63f0ba6ffa3d74e4cf635811451a756ad7cf5a64b8",
+    "contracts/src/pay/PaymentRegistry420.sol": "063607b8ad24e2005449a3beecd738a6d09f4a1e240871fd8aa78d178a7f9d1c",
+    "contracts/src/pay/PaymentRouter420.sol": "7742b1a204e37a31cc5cee2d618bbc45883c1fc5050a0f1278b0dcad0bb6a6d9",
+    "contracts/src/pay/RefundManager420.sol": "350046462858765d189fa5c0634b497358984d004b0bebf362da87962abd2068",
+    "contracts/src/pay/ReplayDomainIds420.sol": "9f53be01c8ee953ea67cad269a09dc14b5497f97a90e5317604f0ac147c55294",
+    "contracts/src/pay/SettlementRouter420.sol": "8d6cb38647bb555c0d585f293adbd0d6256da359d8fb00ee9e8c1a697c9bba6e",
+    "contracts/src/pay/adapters/CanonicalSettlementAdapter420.sol": "bd913b14cc3775631240a8168581835702a51c26763e6d146c5d53e0acafaac9",
+    "contracts/src/pay/adapters/CanonicalSwapHealthAdapter420.sol": "075179e78864f8bed3bb9e23b5088e528197e250eda7941590bab5f6709f41eb",
+    "contracts/src/swap/ApprovedQuoteAssetRegistry.sol": "cdcbc42bcb84b7dbf4a78d6d3ce380cfe555d4af834ae1248c23343787e45ea8",
+    "contracts/src/swap/CanonicalConstantProductPool420.sol": "89bf043f5ad48a4edf9beb47737ac5099d34d571eed224d0e545ad93876d6c18",
+    "contracts/src/swap/CanonicalSwapExecutor420.sol": "bd5c273996facd1f1982bc925032076ed669a3f14b90c5d50ecad02a911688c1",
+    "contracts/src/swap/GenesisDEXFactory.sol": "06cb7df897ed5702b0b174ec673ae206da67a36212a1ca932b5ae1bf1bd69308",
+    "contracts/src/swap/PublicBatchAuction.sol": "d8f09946a422bc14727f060463bc3afc43143c63138aea1dc82441b1e08e3115",
+    "contracts/src/swap/SwapIds420.sol": "8505aff61c0adefcf71bcaa19efacf85a7a0c582ea3599463a2badfc0f7f2a71",
+    "contracts/src/swap/TWAPOracle.sol": "fd0c6ccf0a7522e5595d0f482c4427e739044d4c62e88d5d55bcffb82e8066ff",
+    "contracts/src/system/GenesisResidentAccess420.sol": "d89d47b0235e04204421241252fd94821c2e4583abf64239a4ce0dab1848de01",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  },
+  "production_approvals": [],
+  "qualification": {
+    "chain_id": 31337,
+    "constructor_comparisons": 14,
+    "gateway_verifier": "0x0000000000000000000000000000000000000000",
+    "governance_checks": [
+      "unauthorized caller rejected",
+      "timelock without Registry authority rejected"
+    ],
+    "registry_registration": "empty at construction"
+  },
+  "residents": {
+    "ApprovedQuoteAssetRegistry": {
+      "address": "0x0000000000000000000000000000000000000439",
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 4426,
+      "runtime_code_hash": "0x67f5eb0d0d65f5ae1ef8eac7ece468ab1d013829a75aaf74d68b657c11c569f1"
+    },
+    "CanonicalSettlementAdapter420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
+        {
+          "registry_component": "CanonicalSwapExecutor420"
+        }
+      ],
+      "runtime_bytes": 8324,
+      "runtime_code_hash": "0x9795e67412781a347bc8b0ec327784aaddd4eb5550480530e860acec9af54f9e"
+    },
+    "CanonicalSwapHealthAdapter420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 2910,
+      "runtime_code_hash": "0xe626a9564ef0cef9365e6a35f1776c38496616ce78b2b7edd34dd734a7d44b52"
+    },
+    "GasSponsor420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 7687,
+      "runtime_code_hash": "0x319db77eb69fa85ad0ac11396d5872d9e87020a8dd08b4752fbba0c0ac78ed39"
+    },
+    "GenesisDEXFactory": {
+      "address": "0x000000000000000000000000000000000000042b",
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 4435,
+      "runtime_code_hash": "0x519e5cdd3cd37335c124a2d27b48a2e9bc3594eba7ee3b32daa0e599e18a88d2"
+    },
+    "InvoiceRegistry420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 9916,
+      "runtime_code_hash": "0x5c488ba201ea6102e8fbc5f03436c02be8278befd7d72a2e9fbf24ca05821fdd"
+    },
+    "MerchantRegistry420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 6639,
+      "runtime_code_hash": "0xc55ef7e196ef75c86dde86ac7bb67a5f296a0b7b595ffccf1a8456bad43c4a88"
+    },
+    "PaymentRegistry420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 11851,
+      "runtime_code_hash": "0x129d518fd497c68d7cb1e46408a7e5e31a152fe4d6e58e94f4569edcdbea002a"
+    },
+    "PaymentRouter420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 12710,
+      "runtime_code_hash": "0x67a400fbfd4bf603bc27dc53d2a9f74330e98dd4067cb10228a6559c1a1d7c70"
+    },
+    "PublicBatchAuction": {
+      "address": "0x000000000000000000000000000000000000042c",
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 11270,
+      "runtime_code_hash": "0xf794f35a60d71f93c948b889f100223a3336355ca37d3468a47519721b8adcec"
+    },
+    "RefundManager420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 12968,
+      "runtime_code_hash": "0x84157701949c5c65b9b9d49e756b951a0a09e1aa4025fc94d245685aa6e89af8"
+    },
+    "SettlementRouter420": {
+      "address": null,
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 9570,
+      "runtime_code_hash": "0xe22a82949a201eb06713478b0668fd8ed1e5c491e13967ccd7a256a054323ecc"
+    },
+    "TWAPOracle": {
+      "address": "0x000000000000000000000000000000000000042d",
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+      ],
+      "runtime_bytes": 7529,
+      "runtime_code_hash": "0x6937dd180dbfd2470b33d9d4912d35f95c44334bf6af19e116edd1c7f9adfebe"
+    },
+    "VerifiedGateway420": {
+      "address": "0x0000000000000000000000000000000000000438",
+      "constructor_arguments": [
+        "0x0000000000000000000000000000000000000429",
+        "0x0000000000000000000000000000000000000434",
+        "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
+        "0x0000000000000000000000000000000000000000"
+      ],
+      "runtime_bytes": 7340,
+      "runtime_code_hash": "0x0394edbbc023e40f8989513baba196c1c968d2f8b139da87add95b33433f8c41"
+    }
+  },
+  "retained_rehearsal": {
+    "artifact_id": 14464554916,
+    "file": "native-rehearsal-14464554916.zip",
+    "head": "032f1bfa59e97436d6083b1f638a68eb00c7cc21",
+    "sha256": "3ab285049bc52c20458d503ddef39a6059e9942c097c1b6657eef69065c4f604",
+    "workflow_run": 44385260069
+  },
+  "schema": "420-genesis-resident-materialization-v1"
+}

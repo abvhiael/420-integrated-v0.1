@@ -62,17 +62,14 @@ jobs:
             test/RegistryApiReconciliation420.t.sol \
             test/RegistryGenesis420.t.sol \
             test/RegistryIdentityNames420.t.sol
-      - name: Run all twelve named REG invariant tests
-        working-directory: contracts
-        run: forge test --match-path 'test/RegistryInvariantCoverage420.t.sol' -vvv
-      - name: Run retained Registry reconciliation tests
-        working-directory: contracts
-        run: forge test --match-path 'test/RegistryApiReconciliation420.t.sol' -vvv
-      - name: Run retained Registry regression tests
-        working-directory: contracts
+      - name: Run all twelve named REG invariant tests and retained regressions
         run: |
-          forge test --match-path 'test/RegistryGenesis420.t.sol' -vvv
-          forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
+          python scripts/qualify-pay-regression.py --profile pr \
+            --match RegistryInvariantCoverage420.t.sol \
+            --match RegistryApiReconciliation420.t.sol \
+            --match RegistryGenesis420.t.sol \
+            --match RegistryIdentityNames420.t.sol \
+            --output reg-audit-3-evidence/solidity
       - name: Registry static authority/opcode scan
         working-directory: contracts
         run: |

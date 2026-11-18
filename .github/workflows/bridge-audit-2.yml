@@ -50,15 +50,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Qualify shared Bridge core, chain registry, lifecycle, risk fuzz and invariants
-        working-directory: contracts
-        run: forge test --match-path 'test/Bridge*.t.sol' -vv
-      - name: Qualify accounting evidence and recovery
-        working-directory: contracts
-        run: forge test --match-path 'test/GovernanceAccountingRecoveryHardening420.t.sol' -vv
-      - name: Qualify Pay/Swap/Bridge downstream compatibility
-        working-directory: contracts
-        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vv
-      - name: Qualify Exchange bridge asset/route bindings
-        working-directory: contracts
-        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vv
+      - name: Qualify shared Bridge core, accounting, and downstream compatibility
+        run: |
+          python3 scripts/qualify-pay-regression.py --profile pr \
+            --match 'test/Bridge*.t.sol' \
+            --match GovernanceAccountingRecoveryHardening420.t.sol \
+            --match PaySwapBridgeGenesisIntegration420.t.sol \
+            --match ExchangeBridgeQualification420.t.sol \
+            --output /tmp/bridge-audit-2-solidity

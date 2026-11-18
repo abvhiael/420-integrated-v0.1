@@ -57,8 +57,9 @@ jobs:
         run: python3 scripts/verify-exp-next-1-registry-descriptor-provenance.py
 
       - name: Registry and resident Solidity regressions
-        working-directory: contracts
-        run: forge test --match-path 'test/Registry*.t.sol' -vv
+        run: |
+          python3 scripts/qualify-pay-regression.py --profile default \
+            --match 'test/Registry*.t.sol' --output /tmp/registry-reg-audit-7-solidity
 
       - name: Full Go Indexer integration/regression
         run: |

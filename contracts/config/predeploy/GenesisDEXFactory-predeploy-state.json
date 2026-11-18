@@ -3,7 +3,7 @@
   "buildArtifact": "contracts/artifacts/GenesisDEXFactory.json",
   "compiler": {
     "evmVersion": "cancun",
-    "foundryConfigBlobSha1": "f18c965f43b244582f2a4c527e7bad6d23aee929",
+    "foundryConfigBlobSha1": "9fa5356e6595a751033cbacd83eef541d3c7d4ff",
     "optimizer": true,
     "optimizerRuns": 200,
     "solidity": "0.8.24",

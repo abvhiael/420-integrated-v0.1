@@ -4,6 +4,7 @@ on:
     branches: [feature/pay-app-0-genesis-product]
     paths:
       - '.github/workflows/pay-app-0-native.yml'
+      - 'scripts/qualify-pay-regression.py'
       - 'config/candidates/genesis-applications-pay-v10.json'
       - 'config/genesis-applications.json'
       - 'contracts/config/genesis-config-commitment.json'
@@ -11,6 +12,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/pay-app-0-native.yml'
+      - 'scripts/qualify-pay-regression.py'
       - 'config/candidates/genesis-applications-pay-v10.json'
       - 'config/genesis-applications.json'
       - 'contracts/config/genesis-config-commitment.json'

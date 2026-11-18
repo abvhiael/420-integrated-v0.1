@@ -4,6 +4,8 @@ name: 420AI Audit Qualification
 on:
   pull_request:
     paths:
+      - '.github/workflows/420ai-audit.yml'
+      - 'scripts/qualify-pay-regression.py'
       - 'contracts/src/ai/**'
       - 'services/420ai-provider/**'
       - 'docs/apps/ai/developer/api.md'
@@ -107,17 +109,23 @@ jobs:
         with:
           version: stable
       - name: Run AI custody/economic reconciliation suite
-        run: forge test --match-path 'test/AICustodySettlement420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/AICustodySettlement420.t.sol' --output /tmp/ai-foundry
       - name: Run AI to CMP integration suite
-        run: forge test --match-path 'test/AIComputeIntegration420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/AIComputeIntegration420.t.sol' --output /tmp/ai-foundry
       - name: Retain CMP Vault funding qualification
-        run: forge test --match-path 'test/ComputeEscrowFunding420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/ComputeEscrowFunding420.t.sol' --output /tmp/ai-foundry
       - name: Retain CMP provider payout/refund qualification
-        run: forge test --match-path 'test/ComputeVerifiedEntitlement420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/ComputeVerifiedEntitlement420.t.sol' --output /tmp/ai-foundry
       - name: Retain objective dispute slash evidence qualification
-        run: forge test --match-path 'test/ComputeVerifierDisputeSlashEvidence420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/ComputeVerifierDisputeSlashEvidence420.t.sol' --output /tmp/ai-foundry
       - name: Retain objective slash authorization qualification
-        run: forge test --match-path 'test/ComputeStakeSlashAuthorization420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/ComputeStakeSlashAuthorization420.t.sol' --output /tmp/ai-foundry
       - name: Verify AI-AUDIT-5 custody/settlement/dispute boundaries
         working-directory: .
         run: python3 scripts/verify-420ai-custody-settlement.py
@@ -143,7 +151,8 @@ jobs:
       - name: Build AI deployment graph
         run: forge build src/ai test/AIDeploymentMaterialization420.t.sol
       - name: Materialize frozen predeploys and Registry-resolved V1 graph
-        run: forge test --match-path 'test/AIDeploymentMaterialization420.t.sol' -vv
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/AIDeploymentMaterialization420.t.sol' --output /tmp/ai-foundry
       - name: Verify AI-AUDIT-9 deployment/materialization boundaries
         working-directory: .
         run: python3 scripts/verify-420ai-deployment-materialization.py
@@ -225,7 +234,8 @@ jobs:
       - name: Build implemented 420AI contracts
         run: forge build src/ai
       - name: Run implemented 420AI contract suites
-        run: forge test --match-path 'test/AI*420.t.sol'
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/AI*420.t.sol' --output /tmp/ai-foundry
 
 
   pretestnet-qualification:
@@ -258,16 +268,16 @@ jobs:
           forge clean
           forge build src/ai test/AI*420.t.sol test/ComputeEscrowFunding420.t.sol test/ComputeVerifiedEntitlement420.t.sol test/ComputeVerifierDisputeSlashEvidence420.t.sol test/ComputeStakeSlashAuthorization420.t.sol test/RegistryApiReconciliation420.t.sol test/RegistryGenesis420.t.sol test/RegistryIdentityNames420.t.sol test/Identity420Compatibility.t.sol test/Identity420Audit.t.sol --sizes
       - name: Run focused AI Foundry inventory
-        working-directory: contracts
-        run: forge test --match-path 'test/AI*420.t.sol' -vv
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/AI*420.t.sol' --output /tmp/ai-foundry
       - name: Run required CMP Vault Registry Identity integration
-        working-directory: contracts
+        working-directory: .
         shell: bash
         run: |
           set -euo pipefail
           for test_file in             test/ComputeEscrowFunding420.t.sol             test/ComputeVerifiedEntitlement420.t.sol             test/ComputeVerifierDisputeSlashEvidence420.t.sol             test/ComputeStakeSlashAuthorization420.t.sol             test/RegistryApiReconciliation420.t.sol             test/RegistryGenesis420.t.sol             test/RegistryIdentityNames420.t.sol             test/Identity420Compatibility.t.sol             test/Identity420Audit.t.sol
           do
-            forge test --match-path "$test_file" -vv
+            python3 scripts/qualify-pay-regression.py --profile default --match "$test_file" --output /tmp/ai-integration
           done
       - name: Run AI docs and boundary verifiers
         shell: bash
@@ -317,8 +327,8 @@ jobs:
         with:
           version: stable
       - name: Run AI hardening Foundry inventory
-        working-directory: contracts
-        run: forge test --match-path 'test/AI*420.t.sol' -vv
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile hardening --match 'test/AI*420.t.sol' --output /tmp/ai-foundry
       - name: Reject dangerous AI primitives
         shell: bash
         run: |

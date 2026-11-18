@@ -109,3 +109,7 @@ This document describes both the frozen application decision and the current GEN
 - `contracts/config/genesis-dapp-contract-map.json` — broader Genesis implementation/contract inventory.
 - `docs/audit/genesis-contract-documentation-inventory.json` — documentation ownership reconciliation across the broader contract inventory.
 - `docs/ROADMAP.md` — top-level build sequence and current shared-service/application milestone.
+
+## Approved 420Pay catalogue amendment — activation pending
+
+The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V2-committed catalogue remains unchanged pending an explicit configuration-version transition and affected resident qualification. The active JSON, not the historical numbered list above, controls current frozen deployment scope.

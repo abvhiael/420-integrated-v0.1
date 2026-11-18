@@ -83,6 +83,15 @@ release and chain mismatches, unresolved and disabled records, endpoint failure,
 and Wallet authorization regressions. Live launch depends on a published
 release and active Registry binding.
 
+### PAY-APP-0.7 — 420AppStore catalogue integration
+
+The AppStore Payments catalogue exposes the approved scope under
+`420/service/pay/v1`. Consumer payments, merchant dashboard, physical retail
+POS, hosted checkout, Android, iOS, and developer integrations are each
+listed as planned. Search and category browsing lead to the Genesis Pay user
+guide and the Registry-backed detail view. Curated metadata carries no
+contract binding, settlement authority, or launch target.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

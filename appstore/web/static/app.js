@@ -22,24 +22,78 @@ function appCard(item){
   </article>`;
 }
 
-async function browse(q=''){
+const expressionStatuses = {
+  'planned': 'Planned',
+  'locally-implemented': 'Locally implemented',
+  'testnet-qualified': 'Testnet qualified',
+  'production-available': 'Production available',
+};
+
+function curatedCard(app){
+  return `<article class="card">
+    <div class="meta"><span class="badge">Genesis approved</span><span class="badge">${esc(app.category)}</span></div>
+    <h2>${esc(app.name)}</h2><p class="muted">${esc(app.description)}</p>
+    <a class="button" href="#/curated/${encodeURIComponent(app.serviceId)}">View details</a>
+  </article>`;
+}
+
+async function browse(q='', category=''){
   route.innerHTML='<div class="panel"><p class="muted">Loading catalogue…</p></div>';
-  try{
-    const data=await getJSON(q?`/v1/apps/search?q=${encodeURIComponent(q)}`:'/v1/apps');
-    route.innerHTML=`<div class="panel"><p class="muted">${esc(data.disclaimer||'')}</p></div><section class="section grid">${data.items?.length?data.items.map(appCard).join(''):'<div class="empty">No applications found.</div>'}</section>`;
-  }catch(e){route.innerHTML=`<div class="panel"><h2>Catalogue unavailable</h2><p class="muted">${esc(e.message)}. Direct Registry, Explorer, Wallet and application access remain independent of AppStore availability.</p></div>`}
+  const params=new URLSearchParams();
+  if(q) params.set('q',q);
+  if(category) params.set('category',category);
+  const suffix=params.size?'?'+params:'';
+  const [registered,curated]=await Promise.allSettled([
+    getJSON((q?'/v1/apps/search':'/v1/apps')+suffix),
+    getJSON('/v1/apps/curated'+suffix),
+  ]);
+  const registeredItems=registered.value?.items||[];
+  const curatedItems=curated.value?.items||[];
+  const curatedIDs=new Set(curatedItems.map(app=>app.serviceId));
+  const cards=curatedItems.map(curatedCard).concat(registeredItems.filter(app=>!curatedIDs.has(app.serviceId)).map(appCard));
+  const messages=[
+    registered.value?.disclaimer,
+    registered.status==='rejected'?'Registry-backed listings are unavailable.':'',
+    curated.status==='rejected'?'Curated Genesis listings are unavailable.':'',
+  ].filter(Boolean);
+  route.innerHTML=`${category?`<div class="panel"><h2>${esc(category)}</h2></div>`:''}
+    <div class="panel">${messages.map(message=>`<p class="muted">${esc(message)}</p>`).join('')}</div>
+    <section class="section grid">${cards.length?cards.join(''):'<div class="empty">No applications found.</div>'}</section>`;
 }
 
 async function categories(){
-  try{
-    const data=await getJSON('/v1/apps/categories');
-    route.innerHTML=`<div class="panel"><h2>Categories</h2><div class="meta">${(data.categories||[]).map(c=>`<a class="badge" href="#/category/${encodeURIComponent(c)}">${esc(c)}</a>`).join('')}</div><p class="muted">${esc(data.disclaimer||'')}</p></div>`;
-  }catch(e){route.innerHTML=`<div class="panel"><p class="muted">${esc(e.message)}</p></div>`}
+  const [registered,curated]=await Promise.allSettled([getJSON('/v1/apps/categories'),getJSON('/v1/apps/curated')]);
+  const names=new Set([...(registered.value?.categories||[]),...(curated.value?.items||[]).map(app=>app.category)]);
+  route.innerHTML=`<div class="panel"><h2>Categories</h2><div class="meta">${[...names].sort().map(c=>`<a class="badge" href="#/category/${encodeURIComponent(c)}">${esc(c)}</a>`).join('')}</div>
+    <p class="muted">${esc(registered.value?.disclaimer||'Registry-backed categories are unavailable.')}</p></div>`;
 }
 
-async function category(name){
-  const data=await getJSON(`/v1/apps?category=${encodeURIComponent(name)}`);
-  route.innerHTML=`<div class="panel"><h2>${esc(name)}</h2></div><section class="section grid">${data.items?.length?data.items.map(appCard).join(''):'<div class="empty">No applications in this category.</div>'}</section>`;
+async function curatedDetail(id){
+  route.innerHTML='<div class="panel"><p class="muted">Loading application…</p></div>';
+  try{
+    const data=await getJSON('/v1/apps/curated?q='+encodeURIComponent(id));
+    const app=data.items.find(entry=>entry.serviceId===id);
+    if(!app) throw new Error('Curated application not found');
+    const help=/^apps\/(?:[a-z0-9-]+\/)+$/.test(app.helpRoute)
+      ? 'https://abvhiael.github.io/420-integrated-v0.1/versions/genesis/current/'+app.helpRoute : '';
+    route.innerHTML=`
+      <section class="panel">
+        <div class="meta"><span class="badge">Genesis approved</span></div>
+        <h2>${esc(app.name)}</h2><p>${esc(app.description)}</p>
+        <p class="muted">Service reference: ${esc(app.serviceId)}. Registry and chain state establish contract and settlement provenance.</p>
+        <div class="links">
+          ${help?`<a href="${esc(help)}" rel="noreferrer">Application guide</a>`:''}
+          <a href="#/app/${encodeURIComponent(app.serviceId)}">Check Registry-backed details</a>
+        </div>
+      </section>
+      <section class="section panel"><h3>Application expressions</h3>
+        <div class="grid">${app.expressions.map(expression=>`<article class="card">
+          <div class="meta"><span class="badge">${esc(Object.hasOwn(expressionStatuses, expression.status)?expressionStatuses[expression.status]:'Unavailable')}</span></div>
+          <h3>${esc(expression.name)}</h3><p>${esc(expression.description)}</p>
+        </article>`).join('')}</div>
+        <p class="muted">Launch is unavailable from this catalogue entry.</p>
+      </section>`;
+  }catch(e){route.innerHTML=`<div class="panel"><h2>Application unavailable</h2><p class="muted">${esc(e.message)}</p></div>`}
 }
 
 function evidenceList(sec){
@@ -77,7 +131,8 @@ async function render(){
   if(raw==='browse') return browse();
   if(raw==='categories') return categories();
   if(raw==='security'||raw==='about') return staticPage(raw);
-  if(raw.startsWith('category/')) return category(decodeURIComponent(raw.slice(9)));
+  if(raw.startsWith('category/')) return browse('',decodeURIComponent(raw.slice(9)));
+  if(raw.startsWith('curated/')) return curatedDetail(decodeURIComponent(raw.slice(8)));
   if(raw.startsWith('app/')) return detail(decodeURIComponent(raw.slice(4)));
   if(raw.startsWith('search/')) {const q=decodeURIComponent(raw.slice(7)); searchInput.value=q; return browse(q)}
   return browse();

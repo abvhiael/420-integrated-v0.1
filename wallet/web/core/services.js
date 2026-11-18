@@ -25,7 +25,7 @@ export function resolveServices(manifest, requiredServices) {
 
   return requiredServices.map((required) => {
     const resolved = entries.get(required.serviceId);
-    if (!resolved) return { ...required, available: false, url: null };
+    if (required.requiresVerifiedRegistry || !resolved) return { ...required, available: false, url: null };
     // Preserve canonical wallet metadata. A verified manifest may publish availability and URL,
     // but it cannot rename or re-identify a required wallet service.
     return {

@@ -1,4 +1,6 @@
 import { APP_CATEGORIES, APP_SERVICES, buildAppCatalog, filterAppCatalog } from './core/apps.js';
+import { APP_RELEASE_STAGE_LABELS } from './core/genesis-app-catalog.js';
+import { loadWalletHelpBundle, resolveWalletHelp } from './core/docs-help.js';
 import { resolveServices } from './core/services.js';
 import { filterEcosystemWebsites, isApprovedEcosystemWebsite } from './core/ecosystem-websites.js';
 
@@ -18,14 +20,12 @@ function el(tag, className, text) {
   return node;
 }
 
-function makeAppCard(app) {
+function makeAppCard(app, helpBundle) {
   const card = el(app.available ? 'a' : 'article', `app-card${app.available ? '' : ' unavailable'}`);
   if (app.available) {
     card.href = app.url;
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
-  } else {
-    card.ariaDisabled = 'true';
   }
 
   const top = el('div', 'app-card-top');
@@ -36,10 +36,18 @@ function makeAppCard(app) {
 
   const description = el('p', 'app-description', app.description);
   const footer = el('div', 'app-card-footer');
-  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, app.available ? 'Verified' : 'Not published');
+  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, app.available ? 'Verified' : (APP_RELEASE_STAGE_LABELS[app.releaseStage] || 'Not published'));
   const action = el('span', 'app-open-label', app.available ? 'Open ↗' : 'Unavailable');
   footer.append(verification, action);
   card.append(top, description, footer);
+  if (app.helpContextId && !app.available) {
+    const help = resolveWalletHelp(helpBundle, app.helpContextId, 'genesis');
+    if (help.available) {
+      const link = el('a', null, 'Wallet connection help');
+      link.href = help.url;
+      card.append(link);
+    }
+  }
   return card;
 }
 
@@ -138,7 +146,7 @@ export async function loadVerifiedApps(fetchImpl = globalThis.fetch) {
   return { apps: buildAppCatalog(resolved), trust: 'Verified manifest' };
 }
 
-export function renderApps(section, apps, { query = '', category = 'all', trust = 'Verified manifest' } = {}) {
+export function renderApps(section, apps, { query = '', category = 'all', trust = 'Verified manifest', helpBundle } = {}) {
   ensurePage(section);
   const featured = section.querySelector('#featured-apps');
   const grid = section.querySelector('#services');
@@ -148,10 +156,10 @@ export function renderApps(section, apps, { query = '', category = 'all', trust 
   trustState.dataset.state = trust === 'Verified manifest' ? 'passed' : 'idle';
 
   const filtered = filterAppCatalog(apps, { query, category });
-  featured.replaceChildren(...filtered.filter((app) => app.featured && app.available).slice(0, 3).map(makeAppCard));
+  featured.replaceChildren(...filtered.filter((app) => app.featured && app.available).slice(0, 3).map((app) => makeAppCard(app, helpBundle)));
   if (!featured.children.length) featured.append(el('p', 'muted', 'No featured verified services match this view.'));
 
-  grid.replaceChildren(...filtered.map(makeAppCard));
+  grid.replaceChildren(...filtered.map((app) => makeAppCard(app, helpBundle)));
   if (!grid.children.length) grid.append(el('p', 'muted', 'No ecosystem apps match this search or category.'));
   // Named website shortcuts are always separate from manifest-verified services.
   const websites = filterEcosystemWebsites(query).filter((app) => category === 'all' || app.category === category);
@@ -165,6 +173,7 @@ export async function initAppsPage() {
   installAppsStylesheet();
   ensurePage(section);
 
+  const helpBundlePromise = loadWalletHelpBundle().catch(() => null);
   let apps;
   let trust;
   try {
@@ -174,9 +183,10 @@ export async function initAppsPage() {
     trust = `Discovery blocked: ${error.message}`;
   }
 
+  const helpBundle = await helpBundlePromise;
   let category = 'all';
   const search = section.querySelector('#apps-search');
-  const refresh = () => renderApps(section, apps, { query: search.value, category, trust });
+  const refresh = () => renderApps(section, apps, { query: search.value, category, trust, helpBundle });
   search.addEventListener('input', refresh);
   const chooseCategory=(value)=>{
     category=value;

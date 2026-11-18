@@ -148,3 +148,71 @@ test('Identity420 binding is current, scoped, read-only, bilateral if claimed, n
  await assert.rejects(()=>verifyGenesisIdentityBinding420({...client,bilateralPrimaryName:async()=>({bilateral:false})},
    {account,chainId:chain,profileId,requirePrimaryName:true}),/mutually verified/);
 });
+
+const pay = GENESIS_APP_SERVICES.find(x => x.id === 'pay');
+const payEntry = { ...entry, id: pay.id, name: pay.name, serviceId: pay.serviceId,
+ origin: pay.proposedOrigin, url: pay.proposedOrigin+'/', releaseStage: 'production' };
+const payRegistry = { ...registry, environment: 'production' };
+const availableEndpoint = async url => ({ ok: true, url, redirected: false });
+
+test('Pay release discovery uses the canonical Registry key and a credential-free endpoint check', async()=>{
+ for (const releaseStage of ['testnet','production']){
+  const origin = releaseStage==='testnet'?'https://pay-testnet.example.org':pay.proposedOrigin;
+  const candidate = {...payEntry,releaseStage,origin,url:origin+'/'};
+  const {provider,calls}=fakeRpc();
+  const verified=await verifyGenesisService420(provider,{
+   registry:{...payRegistry,environment:releaseStage},entry:candidate,chainId:chain,
+   fetchImpl:async(url,options)=>{
+    assert.equal(url,candidate.url);
+    assert.equal(options.method,'HEAD');
+    assert.equal(options.credentials,'omit');
+    assert.equal(options.redirect,'error');
+    assert.equal(options.referrerPolicy,'no-referrer');
+    return availableEndpoint(url);
+   }
+  });
+  assert.equal(verified.releaseStage,releaseStage);
+  assert.deepEqual(calls.map(call=>call.method),['eth_chainId','eth_getCode','eth_call','eth_getCode','eth_chainId']);
+  const call=calls.find(x=>x.method==='eth_call');
+  assert.equal(call.args[0].data.slice(10),keccak256Hex(new TextEncoder().encode(pay.serviceId)).slice(2));
+  const navigation=assertGenesisNavigationSnapshot420(verified,verified,{account,chainId:chain});
+  assert.equal(navigation.authority,'NAVIGATION_ONLY');
+  assert.equal(navigation.accountGrant,false);
+  assert.equal(navigation.spendingAuthority,false);
+  assert.throws(()=>assertGenesisNavigationSnapshot420(verified,{...verified,releaseStage:'approved'},{account,chainId:chain}),/changed/);
+ }
+});
+
+test('Pay discovery blocks unreleased, wrong-chain, unresolved and disabled entries before probing', async()=>{
+ const cases=[
+  [{...payEntry,releaseStage:'approved'},payRegistry,{},/unavailable/],
+  [{...payEntry,releaseStage:'under-development'},payRegistry,{},/unavailable/],
+  [{...payEntry,releaseStage:'testnet'},payRegistry,{},/origin/],
+  [{...payEntry,origin:'https://pay.example.org',url:'https://pay.example.org/'},payRegistry,{},/origin/],
+  [payEntry,{...payRegistry,environment:'testnet'},{},/environment/],
+  [payEntry,payRegistry,{eth_chainId:()=> '0x1'},/chain identity/],
+  [payEntry,payRegistry,{eth_call:()=> '0x'+'0'.repeat(384)},/Malformed/],
+  [payEntry,payRegistry,{eth_call:()=>encoded({active:0})},/deactivated/],
+ ];
+ let probes=0;
+ for(const [entry,registry,overrides,reason] of cases){
+  await assert.rejects(verifyGenesisService420(fakeRpc(overrides).provider,{
+   registry,entry,chainId:chain,fetchImpl:async url=>{probes++;return availableEndpoint(url)}
+  }),reason);
+ }
+ assert.equal(probes,0);
+});
+
+test('Pay is omitted from discovery when its endpoint is unreachable or redirected', async()=>{
+ for(const fetchImpl of [
+  async()=>{throw Error('offline')},
+  async url=>({ok:false,url}),
+  async url=>({ok:true,url,redirected:true}),
+  async()=>({ok:true,url:'https://other.example.org/'}),
+ ]){
+  const services=await discoverGenesisServices420(fakeRpc().provider,{
+   registry:payRegistry,services:[payEntry],chainId:chain,fetchImpl
+  });
+  assert.deepEqual(services,[]);
+ }
+});

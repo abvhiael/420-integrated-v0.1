@@ -69,6 +69,20 @@ The verifier selects the output directory from the active commitment domain. Use
 
 The V3-committed V10 inventory has 22 entries. Pay is a Genesis protocol and user application under `420/service/pay/v1`. The dependency map, documentation matrix, Explorer requirements and acceptance references, Registry discovery guidance, and contextual help now use the same classification. Pay has six development and Genesis documentation routes. Deployment identity and readiness still require separate PAY-AUDIT-7 and Pay application evidence. Gaming remains protocol-only, Arcade remains deferred, and Faucet remains testnet-only.
 
+### PAY-APP-0.6 — 420Wallet application discovery integration
+
+Wallet lists the approved Pay service as `420/service/pay/v1` with
+`https://pay.420integrated.org` as its proposed production origin. The web
+catalogue offers connection help while Pay is unavailable. Extension navigation
+requires a release-approved testnet or production entry, the corresponding
+chain's active ProtocolRegistry record and matching runtime, and a reachable
+approved endpoint. Navigation grants no account access or spending permission.
+
+Local qualification covers catalogue visibility, manifest-only bypass attempts,
+release and chain mismatches, unresolved and disabled records, endpoint failure,
+and Wallet authorization regressions. Live launch depends on a published
+release and active Registry binding.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

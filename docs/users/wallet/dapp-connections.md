@@ -17,6 +17,20 @@ Prefer applications opened from the 420 Wallet ecosystem gateway, 420 AppStore, 
 
 A familiar logo, copied interface, HTTPS certificate, or plausible domain name is not enough to prove that a site is canonical.
 
+### 420 Pay in Wallet
+
+Wallet lists 420 Pay as a Genesis-approved application under the canonical service ID
+`420/service/pay/v1`. Its proposed production origin is `https://pay.420integrated.org`.
+Wallet displays approved and under-development entries without launch actions. The
+Registry-backed extension can open a testnet or production release after it verifies
+the configured network, active Registry binding, implementation code, and approved
+HTTPS endpoint. Testnet releases use a separate origin.
+
+Opening a verified Pay destination only opens a browser tab. Connect from the
+application and review the wallet's origin, account, chain, session scope, and
+transaction prompts separately. Existing passkey and smart-account policies apply
+to every authorization they govern.
+
 ## What a connection may expose
 
 Depending on the client and permission request, a connection may expose:

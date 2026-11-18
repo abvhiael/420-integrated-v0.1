@@ -40,7 +40,13 @@ try{
    const banner=await page.locator('#verification-banner-title').textContent();
    if(!/unconfigured|disconnected|not verified|check failed/i.test(banner||''))failures.push(width+': unverified chain banner '+banner);
    if(!await page.locator('#copy-receive-address').isDisabled())failures.push(width+': Receive enabled without deployment');
-   if(await page.locator('#services-section a.app-card').count())failures.push(width+': unverified app launch links');
+   if(await page.locator('#featured-apps a.app-card, #services a.app-card').count())failures.push(width+': unverified app launch links');
+   const payCard=page.locator('#services article.app-card').filter({has:page.getByText('420 Pay',{exact:true})});
+   if(!await payCard.getByText('Genesis approved',{exact:true}).isVisible() ||
+      !await payCard.getByRole('link',{name:'Wallet connection help'}).isVisible() ||
+      await page.locator('#services-section a[href^="https://pay.420integrated.org"]').count()){
+    failures.push(width+': staged Pay entry must offer connection help without a launch link');
+   }
    await page.screenshot({path:resolve(artifacts,'wallet-'+width+'.png'),fullPage:true});
    await page.addScriptTag({path:require.resolve('axe-core/axe.min.js')});
    const axe=await page.evaluate(()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));

@@ -44,7 +44,7 @@ Retained historical commitment blobs are V1 `c8537f6c984ba7d4965e8b51aaefc26c6e2
 
 **Status:** COMPLETE for frozen V3. **Testnet required:** No.
 
-The [resident manifest](../../../contracts/artifacts/genesis-residents/v3/manifest.json) records the nine Registry-resolved Pay residents, the four frozen Swap predeploys, and the disabled VerifiedGateway420 predeploy. Its compressed JSON bundle retains the compiler ABIs, creation and runtime bytecode, immutable references, storage layouts, and constructor inputs and outputs. The Pay settlement adapter's executor is a Registry-resolved deployment input. The address and storage word in its rehearsal record come from the local constructor run.
+The resident manifest at `contracts/artifacts/genesis-residents/v3/manifest.json` records the nine Registry-resolved Pay residents, the four frozen Swap predeploys, and the disabled VerifiedGateway420 predeploy. Its compressed JSON bundle retains the compiler ABIs, creation and runtime bytecode, immutable references, storage layouts, and constructor inputs and outputs. The Pay settlement adapter's executor is a Registry-resolved deployment input. The address and storage word in its rehearsal record come from the local constructor run.
 
 The source inventory found 28 global-commitment constructor consumers. Five are frozen predeploys and nine are covered Registry-resolved Pay residents. The remaining 14 are deployment-time dependencies. These include ten Bridge cores, three non-predeploy Swap components, and ReplayProtectionConsumer420. Candidate reservations convey no deployment authority. Stake's separate commitment is outside this inventory.
 

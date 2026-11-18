@@ -33,7 +33,60 @@ if decision.get("status") != "FROZEN":
 if len(decision.get("apps", [])) != 22:
     errors.append("expected 22 frozen public surfaces including testnet-only faucet")
 
+apps = decision.get("apps", [])
+names = [app["name"] for app in apps]
+if len(set(names)) != len(names):
+    errors.append("duplicate frozen application")
+classes = {app["name"]: app["class"] for app in apps}
+if classes.get("420 Gaming Protocol") != "GENESIS_PROTOCOL" or any(
+    name.lower().replace(" ", "") == "420arcade" for name in names
+):
+    errors.append("Gaming protocol-only or Arcade deferral drift")
+
 mapped = {x["dapp"]: x for x in mapping.get("apps", [])}
+if len(mapped) != len(mapping.get("apps", [])):
+    errors.append("duplicate Genesis contract-map application")
+pay_wiring = "contracts/config/420pay-genesis-wiring.json"
+pay_map = mapped.get("420 Pay", {})
+pay_catalogue = {
+    "catalogue": "config/genesis-applications.json",
+    "class": "GENESIS_PROTOCOL_AND_USER_APP",
+    "service_id": "420/service/pay/v1",
+    "deployment_evidence": pay_wiring,
+}
+if classes.get("420 Pay") != pay_catalogue["class"] or pay_map.get("application_catalogue") != pay_catalogue:
+    errors.append("420 Pay catalogue class or canonical reference drift")
+service_ids = (root / "contracts/src/libraries/ServiceIds420.sol").read_text()
+if ('PAY = keccak256("420/service/pay/v1")' not in service_ids or
+        "serviceId == PAY" not in service_ids):
+    errors.append("canonical Pay service identity drift")
+pay_package = load("contracts/config/pay/pay-audit-6-deployment-package.json")
+resident_files = {pathlib.Path(record["source"]).name for record in pay_package.get("residents", [])}
+if len(resident_files) != 9 or set(pay_map.get("contracts", [])) != resident_files | {
+    "PayIds420.sol", "AccountingCommitment420.sol"
+}:
+    errors.append("Pay resident contract-map drift")
+if pay_map.get("dependencies") != {
+    "registry_resolved": ["CanonicalSwapExecutor420.sol", "ReplayProtectionConsumer420.sol"],
+    "authorization": "420 Wallet",
+    "read_projection": "420 Indexer",
+}:
+    errors.append("Pay application dependency-map drift")
+protocol = load("config/protocol.json")
+protocol_pay = next((section["420pay"] for section in protocol.values()
+                     if isinstance(section, dict) and "420pay" in section), {})
+if protocol_pay.get("application_catalogue") != pay_catalogue:
+    errors.append("protocol Pay catalogue reference drift")
+explorer = load("contracts/config/420explorer-genesis.json")
+if explorer.get("application_references", {}).get("420 Pay") != {
+    **pay_catalogue,
+    "contract_map": "contracts/config/genesis-dapp-contract-map.json",
+    "authority": "read_only_canonical_evidence",
+}:
+    errors.append("Explorer Pay catalogue or read authority drift")
+if load(pay_wiring).get("deployment_binding_verified") is not False:
+    errors.append("Pay catalogue qualification requires separate live deployment evidence")
+
 for app in decision.get("apps", []):
     name = app["name"]
     map_name = "420 Civic" if name == "420 Governance" else name
@@ -265,6 +318,8 @@ out = {
     "pass": not errors,
     "errors": errors,
     "genesis_apps": sum(app.get("class") != "TESTNET_ONLY" for app in decision.get("apps", [])),
+    "genesis_user_apps": sum(kind in {"GENESIS_USER_APP", "GENESIS_PROTOCOL_AND_USER_APP"} for kind in classes.values()),
+    "genesis_protocol_only": sum(kind == "GENESIS_PROTOCOL" for kind in classes.values()),
     "testnet_only_apps": sum(app.get("class") == "TESTNET_ONLY" for app in decision.get("apps", [])),
     "explorer_profile": "420-explorer-genesis-v1",
     "search_profile": "420-search-genesis-v1",

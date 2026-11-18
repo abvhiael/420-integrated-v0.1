@@ -1,6 +1,6 @@
 # PAY-APP-0 — Owner-approved Genesis 420Pay product specification
 
-Decision date: 2026-11-17. Product scope approved; active Genesis configuration transition and qualification pending. This decision supplements PAY-AUDIT-1–8; it neither certifies implementation nor authorizes live deployment.
+Decision date: 2026-11-17. Product scope approved and active in the frozen V3 catalogue. Application delivery and live deployment qualification are tracked separately. This decision supplements PAY-AUDIT-1–8; it neither certifies implementation nor authorizes live deployment.
 
 ## Catalogue and configuration authority
 
@@ -34,6 +34,13 @@ Registry verifies service/deployment identities, version, chain and code hash. W
 ## Acceptance boundaries
 
 Local EVM, deterministic fixtures, ABI-backed clients and negative tests must qualify actual behavior; fixture mode clearly marked and cannot enable production. Tests cover wrong chain/runtime/origin, forged invoice/merchant, stale quote, replay, unauthorized spending/refund/split, malicious tokens, atomic rollback, tenant isolation, webhook signatures/replays, reorg and restart, privacy, accessibility and device handoff. Build web/PWA/Android/iOS and exercise actual devices where available before local closeout; record any genuinely external device/store blockers separately. App-store approval, DNS/provider credentials, applicable legal/merchant eligibility and live testnet deployment remain distinct external gates. No claim of payment licensing, fiat rails or production readiness.
+
+| Acceptance boundary | Current evidence | Remaining owner |
+| --- | --- | --- |
+| Catalogue class, canonical service ID and public documentation | Frozen V3 catalogue and reconciled inventories | PAY-APP-0 |
+| Canonical contract and Registry deployment identity | Repository deployment package and local rehearsal | PAY-AUDIT-7 live binding |
+| Consumer, merchant, POS and client acceptance | Approved scope and acceptance criteria | PAY-APP-1 through PAY-APP-18 |
+| Public origin and environment availability | Proposed origin and deployment gates | PAY-APP-17 and PAY-APP-18 |
 
 ## Status
 

@@ -63,6 +63,7 @@ Generated ABI/API/event/error reference belongs in DOC-10; application manuals e
 | 420 Identity | Genesis protocol + user app | [available](identity/index.md) | optional pseudonymous profiles, credentials and reputation |
 | 420 Arbitration | Genesis protocol + user app | [available](arbitration/index.md) | dispute cases, evidence commitments, rulings and bounded appeals |
 | 420 Swap | Genesis protocol + user app | [available](swap/index.md) | canonical exchange/swap user surface |
+| 420 Pay | Genesis protocol + user app | [scope and contextual help](pay/index.md) | consumer and merchant payment scope, with deployment pending qualification |
 | 420 Bridge | Genesis protocol + user app | [available](bridge/index.md) | verified, replay-protected cross-chain value movement |
 | 420 Stake | Genesis protocol + user app | [available](stake/index.md) | validator bond, registration, lifecycle, rewards and withdrawals |
 | 420 Governance | Genesis protocol + user app | [available](governance/index.md) | proposals, houses, voting, treasury and timelock workflows |
@@ -73,6 +74,8 @@ Generated ABI/API/event/error reference belongs in DOC-10; application manuals e
 | 420 Faucet | testnet only | [available](faucet/index.md) | no-value testnet distribution and developer onboarding |
 | 420 Gaming Protocol | Genesis protocol only | not an application manual target | shared optional-wallet game interoperability; covered by protocol/developer documentation |
 | 420 Launchpad | Genesis contract-map application surface | [available](launchpad/index.md) | qualified project launch, sale and allocation workflows |
+
+The inventory covers 20 Genesis user applications and one testnet-only manual target. Pay’s approved scope and help are published while the application roadmap tracks implementation and deployment.
 
 The protocol-only Gaming Protocol remains part of Genesis but has no standalone user application in the frozen catalog. Launchpad is documented under DOC-18 because it exists as a distinct contract-backed application surface in the Genesis contract map even though it is not a separate entry in the frozen public-catalog file.
 

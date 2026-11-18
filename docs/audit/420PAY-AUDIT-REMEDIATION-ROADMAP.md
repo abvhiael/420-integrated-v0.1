@@ -10,6 +10,8 @@ Requirement numbering is stable. Do not renumber closed or blocked items.
 
 Durable qualification basis: source head `79e3bc85f3f2de1778e0200b7eb5dc7895e699f8` passed 420Pay audit qualification run #59 (`36965952679`) and Solidity Contracts run #4003 (`36965952612`). This bookkeeping state is valid only while the commit carrying it also passes the dedicated exact-head 420Pay audit workflow.
 
+The historical omission described here was resolved by the frozen V3 catalogue. See the [Pay application roadmap](../apps/pay/PAY-APP-ROADMAP.md) for current scope and deployment gates.
+
 Freeze the repository-grounded scope, classify the generic shared-interface dependency row, and preserve the contradiction between the frozen Genesis user-application catalogue (which omits 420Pay) and the Genesis contract/interface records (which include it).
 
 Deliverables:

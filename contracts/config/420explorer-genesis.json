@@ -74,5 +74,15 @@
     "EXP-INV-011: Transaction, receipt, event and balance presentation must remain traceable to canonical block hashes and chain ID.",
     "EXP-INV-012: Privacy-sensitive off-chain payloads are not made canonical merely because a hash, commitment or transaction reference is visible in Explorer.",
     "EXP-INV-013: 420Explorer consumes 420Indexer for indexed chain/protocol data and MUST NOT implement an independent RPC ingestion, checkpoint, reorg or protocol-decoder pipeline."
-  ]
+  ],
+  "application_references": {
+    "420 Pay": {
+      "catalogue": "config/genesis-applications.json",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "service_id": "420/service/pay/v1",
+      "deployment_evidence": "contracts/config/420pay-genesis-wiring.json",
+      "contract_map": "contracts/config/genesis-dapp-contract-map.json",
+      "authority": "read_only_canonical_evidence"
+    }
+  }
 }

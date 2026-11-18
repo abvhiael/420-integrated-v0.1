@@ -239,6 +239,12 @@ nav:
                   - Errors & Retries: apps/identity/developer/errors.md
                   - Examples: apps/identity/developer/examples.md
           - 420 Pay:
+              - Overview: apps/pay/index.md
+              - User Guide: apps/pay/user-guide.md
+              - Permissions: apps/pay/permissions.md
+              - Fees & Settlement: apps/pay/fees.md
+              - Security & Privacy: apps/pay/security.md
+              - Troubleshooting: apps/pay/troubleshooting.md
               - Product Specification: apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md
               - Development Roadmap: apps/pay/PAY-APP-ROADMAP.md
               - Deployment & Operations: apps/pay/deployment-operations.md

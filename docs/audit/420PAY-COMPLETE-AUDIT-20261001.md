@@ -20,7 +20,9 @@ Canonical authority boundaries:
 
 ### Canonical-source conflict
 
-`config/genesis-applications.json` is frozen but currently omits 420Pay. Other authoritative Genesis records explicitly include 420Pay: the Genesis dApp contract map, Genesis interface implementation order, security suite registry, `config/protocol.json`, frozen Pay Decisions #1–#4 and protocol architecture.
+**Current reconciliation.** Frozen V3 commits the V10 catalogue, which includes the approved [420 Pay application](../apps/pay/index.md). The observations below describe the audit-date snapshot. Live deployment remains a separate qualification.
+
+`config/genesis-applications.json` was frozen at the time of this audit and omitted 420Pay. Other authoritative Genesis records explicitly include 420Pay: the Genesis dApp contract map, Genesis interface implementation order, security suite registry, `config/protocol.json`, frozen Pay Decisions #1–#4 and protocol architecture.
 
 Therefore this audit can establish 420Pay as Genesis protocol infrastructure, but it cannot invent a separate mandatory standalone user application/UI. The catalogue contradiction must be resolved before final Genesis closeout.
 

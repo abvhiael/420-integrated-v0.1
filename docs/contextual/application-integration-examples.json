@@ -19,6 +19,14 @@
       "expected_behavior": "resolve-within-genesis-only"
     },
     {
+      "surface": "420-pay",
+      "runtime_state": "payment-review-help",
+      "contextual_id": "CTX-PAY-002",
+      "environment": "genesis",
+      "version_intent": "current",
+      "expected_behavior": "resolve-within-genesis-only"
+    },
+    {
       "surface": "runtime-error",
       "runtime_state": "known-troubleshooting-id",
       "troubleshooting_id": "TRB-TX-001",

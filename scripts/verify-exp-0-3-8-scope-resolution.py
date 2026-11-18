@@ -50,6 +50,17 @@ def main():
     if len(views)!=10: errors.append(f"requiredViews count drift: {len(views)}")
     if "governance" in views: errors.append("governance unexpectedly present in requiredViews")
 
+    pay_profile = d["profile"].get("application_references", {}).get("420 Pay", {})
+    for name in ("req", "acs"):
+        ref = d[name].get("catalogue_reconciliation", {})
+        if (ref.get("application"), ref.get("explorer_profile"), ref.get("reference"),
+                ref.get("display_authority"), ref.get("requires_dedicated_view"), ref.get("deployment_evidence")) != (
+                    "420 Pay", FILES["profile"], "application_references.420 Pay",
+                    pay_profile.get("authority"), False, pay_profile.get("deployment_evidence")):
+            errors.append(f"{name}: Pay catalogue reference or acceptance boundary drift")
+    if pay_profile.get("authority") != "read_only_canonical_evidence" or any("pay" == x for x in views):
+        errors.append("Pay catalogue reference must preserve read-only authority and existing Explorer views")
+
     caps=d["cap"].get("capabilities",[])
     if any(x.get("id")=="EXP-CAP-019" for x in caps): errors.append("EXP-CAP-019 remains active")
     cap_res=d["cap"].get("resolved_scope_decisions",[])

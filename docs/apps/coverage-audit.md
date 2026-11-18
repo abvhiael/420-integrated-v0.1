@@ -15,7 +15,7 @@ DOC-8.10 audits the frozen Genesis application inventory against the task-orient
 
 ## Audit result
 
-**PASS.** All 20 user-facing Genesis/testnet manual targets in `config/genesis-applications.json` have the complete standard DOC-8 package and are reachable from the 420Docs application navigation. The protocol-only 420 Gaming Protocol remains intentionally outside the standalone user-application manual set and is routed to protocol/developer documentation.
+**Original DOC-8.10 result.** All 20 user-facing Genesis/testnet manual targets at that closeout have the complete standard DOC-8 package and are reachable from the 420Docs application navigation. The protocol-only 420 Gaming Protocol remains intentionally outside the standalone user-application manual set and is routed to protocol/developer documentation.
 
 The standard package is 16 pages per application:
 
@@ -24,7 +24,11 @@ The standard package is 16 pages per application:
 
 That yields **320 required standard pages across 20 manual targets**. Auxiliary coverage/readme files are allowed but are not substitutes for required pages.
 
-## Frozen inventory coverage
+## Pay catalogue update
+
+V10 expands the public inventory to 21 user-facing Genesis/testnet targets. The [Pay overview](pay/index.md) and six contextual routes cover the approved scope. The [Pay roadmap](pay/PAY-APP-ROADMAP.md) tracks delivery of the application and its remaining documentation.
+
+## Original DOC-8.10 inventory coverage
 
 | Application | Class | Package | Navigation | Authority/security boundary | Result |
 | --- | --- | ---: | --- | --- | --- |

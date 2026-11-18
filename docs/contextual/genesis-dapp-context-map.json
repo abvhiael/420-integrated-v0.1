@@ -21,6 +21,7 @@
     {"name": "420 Identity", "domain": "IDENTITY", "surface": "420-identity", "environments": ["development", "genesis"], "base_path": "apps/identity"},
     {"name": "420 Arbitration", "domain": "ARBITRATION", "surface": "420-arbitration", "environments": ["development", "genesis"], "base_path": "apps/arbitration"},
     {"name": "420 Swap", "domain": "SWAP", "surface": "420-swap", "environments": ["development", "genesis"], "base_path": "apps/swap"},
+    {"name": "420 Pay", "domain": "PAY", "surface": "420-pay", "environments": ["development", "genesis"], "base_path": "apps/pay"},
     {"name": "420 Bridge", "domain": "BRIDGE", "surface": "420-bridge", "environments": ["development", "genesis"], "base_path": "apps/bridge"},
     {"name": "420 Stake", "domain": "STAKE", "surface": "420-stake", "environments": ["development", "genesis"], "base_path": "apps/stake"},
     {"name": "420 Governance", "domain": "GOV", "surface": "420-governance", "environments": ["development", "genesis"], "base_path": "apps/governance"},

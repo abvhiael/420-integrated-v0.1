@@ -44,6 +44,12 @@ Retained historical commitment blobs are V1 `c8537f6c984ba7d4965e8b51aaefc26c6e2
 
 **Status:** OPEN. This step owns full native artifact reconciliation and qualification.
 
+### PAY-APP-0.5 — Genesis application catalogue reconciliation
+
+**Status:** COMPLETE. **Testnet required:** No.
+
+The V3-committed V10 inventory has 22 entries. Pay is a Genesis protocol and user application under `420/service/pay/v1`. The dependency map, documentation matrix, Explorer requirements and acceptance references, Registry discovery guidance, and contextual help now use the same classification. Pay has six development and Genesis documentation routes. Deployment identity and readiness still require separate PAY-AUDIT-7 and Pay application evidence. Gaming remains protocol-only, Arcade remains deferred, and Faucet remains testnet-only.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

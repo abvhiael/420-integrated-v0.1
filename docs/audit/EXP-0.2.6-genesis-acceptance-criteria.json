@@ -356,5 +356,14 @@
     "A passing source-level CI suite does not by itself satisfy a runtime, deployment, integration, security or end-to-end acceptance criterion.",
     "Post-Genesis enhancement findings do not block satisfaction of core Genesis acceptance criteria unless the authoritative Genesis scope is explicitly changed.",
     "EXP-8 is the only milestone authorized by this map to mark the final Genesis acceptance checklist satisfied."
-  ]
+  ],
+  "catalogue_reconciliation": {
+    "application": "420 Pay",
+    "explorer_profile": "contracts/config/420explorer-genesis.json",
+    "reference": "application_references.420 Pay",
+    "display_authority": "read_only_canonical_evidence",
+    "requires_dedicated_view": false,
+    "deployment_evidence": "contracts/config/420pay-genesis-wiring.json",
+    "acceptance": "Existing Explorer views may display canonical Pay evidence. Catalogue approval supplies no deployed address, live settlement evidence, or new mandatory Explorer view."
+  }
 }

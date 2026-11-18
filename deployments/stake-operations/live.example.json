@@ -1,0 +1,30 @@
+{
+  "schema": "420-stake-live-config-v1",
+  "environment": "TEMPLATE-NOT-ACCEPTANCE",
+  "deploymentId": "REPLACE_WITH_APPROVED_DEPLOYMENT",
+  "releaseSHA": "REPLACE_WITH_APPROVED_RELEASE_SHA",
+  "genesisHash": "REPLACE_WITH_APPROVED_GENESIS_HASH",
+  "trustSHA256": "REPLACE_WITH_INDEPENDENT_APPROVED_TRUST_DIGEST",
+  "trustFile": "/etc/420/consensus-trust.json",
+  "consensusDir": "/srv/420/settlement",
+  "indexerStore": "/srv/420/indexer/index.json",
+  "engineURL": "http://127.0.0.1:8551",
+  "rpcURL": "http://127.0.0.1:8545",
+  "engineJWTFile": "/srv/420/engine-jwt.hex",
+  "monitorURL": "http://127.0.0.1:9545",
+  "independentWitness": true,
+  "witnessBackupDomain": "REPLACE_WITH_INDEPENDENT_WITNESS_BACKUP_DOMAIN",
+  "reconciler": {"path": "/opt/420/bin/stake-reconcile", "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+  "runtimeSHA256": {
+    "0x0000000000000000000000000000000000000423": "REPLACE_WITH_APPROVED_RUNTIME_BYTE_SHA256",
+    "0x000000000000000000000000000000000000043c": "REPLACE_WITH_APPROVED_RUNTIME_BYTE_SHA256"
+  },
+  "processes": {
+    "execution": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+    "settlement": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+    "signer": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+    "validator": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+    "indexer": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"},
+    "monitor": {"pid": 0, "sha256": "REPLACE_WITH_APPROVED_BINARY_DIGEST"}
+  }
+}

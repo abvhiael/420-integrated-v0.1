@@ -1,0 +1,1821 @@
+{
+  "schema": "420-stake-operational-closeout-v1",
+  "baseMain": "e75d686f9b0bbc7506a3cfecba37ccb72907b62d",
+  "scope": "STAKE-AUDIT-9.1 through 9.8 local operational implementation and qualification, not live deployment or independent external review",
+  "evidence": [
+    {
+      "step": "9.1",
+      "qualifiedSource": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284286
+      ],
+      "requirements": [
+        "real BLS/mTLS signing isolation",
+        "independent TLS witness and rollback",
+        "durable local protection, safe retry and no fallback"
+      ],
+      "paths": [
+        "consensus/signing",
+        "consensus/slashing",
+        "consensus/cmd/stake-signer",
+        "consensus/cmd/fourtwentyd/signing.go",
+        "consensus/cmd/fourtwentyd/main.go",
+        "deployments/consensus/protected-signing.compose.yml"
+      ],
+      "files": {
+        "consensus/signing/QUALIFICATION.md": {
+          "mode": "100644",
+          "blob": "87ed70231f5cc84a6e978de32f5d5a02ef945d00"
+        },
+        "consensus/signing/README.md": {
+          "mode": "100644",
+          "blob": "421e281b4567226205361391c790c0587996ea91"
+        },
+        "consensus/signing/backend_blst.go": {
+          "mode": "100644",
+          "blob": "e5126a2818a4ce32fc01841d8639dbb79f9acc17"
+        },
+        "consensus/signing/backend_unavailable.go": {
+          "mode": "100644",
+          "blob": "7968ad3d0423e6e44f590d7be3137421197459d6"
+        },
+        "consensus/signing/duty.go": {
+          "mode": "100644",
+          "blob": "49b9f26132e8fcd0e0b0ea1e86662ab4509aa1eb"
+        },
+        "consensus/signing/fault_enabled.go": {
+          "mode": "100644",
+          "blob": "6e06e6c1c09fd63ab017f1c8d973fffef2ef1b87"
+        },
+        "consensus/signing/fault_none.go": {
+          "mode": "100644",
+          "blob": "bab3cbbcfce044feb93b56162d83b4dd8002f782"
+        },
+        "consensus/signing/files.go": {
+          "mode": "100644",
+          "blob": "055a7612cb57b64bf660375f26bb443fc4e23c84"
+        },
+        "consensus/signing/health.go": {
+          "mode": "100644",
+          "blob": "6bef9eae6404a642daea7e57dddd483b66ada8bd"
+        },
+        "consensus/signing/health_test.go": {
+          "mode": "100644",
+          "blob": "d11d0f4f1b16b057bd448a4b14bdb5b8c751e481"
+        },
+        "consensus/signing/process_test.go": {
+          "mode": "100644",
+          "blob": "d1f70e37395a79412fa743fd62f20da346365c0a"
+        },
+        "consensus/signing/signing_test.go": {
+          "mode": "100644",
+          "blob": "d289f7b48a58d97767926f41311fb0e16f11d0a8"
+        },
+        "consensus/signing/transport.go": {
+          "mode": "100644",
+          "blob": "56dc6530a5d1b8643041459e2b3cd86832f5e22a"
+        },
+        "consensus/signing/unavailable_test.go": {
+          "mode": "100644",
+          "blob": "fcabd6851592599a414f12806be7e76af54eb51c"
+        },
+        "consensus/signing/witness.go": {
+          "mode": "100644",
+          "blob": "2a5a1002c694bc0471c1ebc64b036ca2da3f35ec"
+        },
+        "consensus/signing/witness.sql": {
+          "mode": "100644",
+          "blob": "a0f28089e8646c5a12e26dd3b4175cf3977b05f2"
+        },
+        "consensus/slashing/README.md": {
+          "mode": "100644",
+          "blob": "185892024417656726bc067a41d1f4604fac9537"
+        },
+        "consensus/slashing/durable.go": {
+          "mode": "100644",
+          "blob": "4105393da2e1daa67d663152523d818b7b7fb84a"
+        },
+        "consensus/slashing/durable_test.go": {
+          "mode": "100644",
+          "blob": "73e0ed445082a995a359fc05afeafd2d1a2299a8"
+        },
+        "consensus/slashing/protection.go": {
+          "mode": "100644",
+          "blob": "db5a2bc9f5f96d8896a9a2211cf780696f1a9008"
+        },
+        "consensus/slashing/protection_test.go": {
+          "mode": "100644",
+          "blob": "3381050f4adf3452c7903bbdc04d292cd934a84c"
+        },
+        "consensus/slashing/witness_test.go": {
+          "mode": "100644",
+          "blob": "c3583831c274bee076c7e541cdc474072e385bd3"
+        },
+        "consensus/slashing/write_fault_enabled.go": {
+          "mode": "100644",
+          "blob": "c07ea9991ace7463aa5a461f58140be6f25614df"
+        },
+        "consensus/slashing/write_fault_none.go": {
+          "mode": "100644",
+          "blob": "08c8d3211ce4ae575d2fecd869966f234db8ccab"
+        },
+        "consensus/slashing/write_fault_none_test.go": {
+          "mode": "100644",
+          "blob": "0d251e561a44b33a6692c84c9fcf06ba56077efc"
+        },
+        "consensus/cmd/stake-signer/main.go": {
+          "mode": "100644",
+          "blob": "a59f664051d3e4ee62aab23ee6f47ea74efdfecf"
+        },
+        "consensus/cmd/fourtwentyd/signing.go": {
+          "mode": "100644",
+          "blob": "25febd7a47ff3af3f7232ff906565a3e0b7c151a"
+        },
+        "consensus/cmd/fourtwentyd/main.go": {
+          "mode": "100644",
+          "blob": "5117bfef0e20844dfd912e1772f956da3bae0815"
+        },
+        "deployments/consensus/protected-signing.compose.yml": {
+          "mode": "100644",
+          "blob": "7c488b7d69c45599342296c752906656ad7ae29d"
+        }
+      }
+    },
+    {
+      "step": "9.2",
+      "qualifiedSource": "f738795fcf88f3b22f443db17a355f4a9ccc4da1",
+      "runs": [
+        44159878183,
+        44159878518
+      ],
+      "requirements": [
+        "durable checkpoints/V2 journals",
+        "replay/divergence/canonical parent verification",
+        "interrupted batch atomicity and bounded finalized recovery"
+      ],
+      "paths": [
+        "consensus/engine",
+        "consensus/systemcall",
+        "consensus/storage",
+        "consensus/devnet",
+        "consensus/recovery",
+        "execution/patches"
+      ],
+      "files": {
+        "consensus/engine/README.md": {
+          "mode": "100644",
+          "blob": "dc620eddd3df0bb0e9d6cac270a4939e5a9c61d0"
+        },
+        "consensus/engine/client.go": {
+          "mode": "100644",
+          "blob": "b70345e2c83cc9970f4924bda2bc995a5e489198"
+        },
+        "consensus/engine/client_test.go": {
+          "mode": "100644",
+          "blob": "38ad192aff159413025ccce564f44b41c004d823"
+        },
+        "consensus/engine/native_logs.go": {
+          "mode": "100644",
+          "blob": "18e66897261a04757963ffcc457b657832abe059"
+        },
+        "consensus/engine/native_logs_test.go": {
+          "mode": "100644",
+          "blob": "58a6a7726c06db110ed87ef96c5ad720b9121792"
+        },
+        "consensus/engine/recovery.go": {
+          "mode": "100644",
+          "blob": "5c7e7e3d17e4f74e13901703432ea817d264a33b"
+        },
+        "consensus/engine/recovery_test.go": {
+          "mode": "100644",
+          "blob": "07a559c4b52ceab517ccd30dc9fa27643ae5adf7"
+        },
+        "consensus/engine/sink.go": {
+          "mode": "100644",
+          "blob": "840a29df2bf7de6a29b4ce5bed410df9ab8ac2f0"
+        },
+        "consensus/engine/stake_systemcalls.go": {
+          "mode": "100644",
+          "blob": "a9bad0d5a2c3b6214d439ab744f8251cbb5fb940"
+        },
+        "consensus/engine/stake_systemcalls_test.go": {
+          "mode": "100644",
+          "blob": "bb8103f63869711c8d6c5c417fd8cd249cf2f14e"
+        },
+        "consensus/engine/systemcalls.go": {
+          "mode": "100644",
+          "blob": "cf874facb38193a9ed0382c724ae7fda30ac2d6d"
+        },
+        "consensus/engine/systemcalls_test.go": {
+          "mode": "100644",
+          "blob": "4c19fb780c9ce340c7c613a884a805bd1ca77c85"
+        },
+        "consensus/engine/types.go": {
+          "mode": "100644",
+          "blob": "61190c4d24c192d9b202786e87ca131bccfa6da2"
+        },
+        "consensus/systemcall/batch.go": {
+          "mode": "100644",
+          "blob": "d6034fad3c26de2b01fd0ed974e1dc4146614764"
+        },
+        "consensus/systemcall/batch_test.go": {
+          "mode": "100644",
+          "blob": "7c32ff98c13e0bb28d758cc05de76459cc0d6ed3"
+        },
+        "consensus/systemcall/sequence_fault_test.go": {
+          "mode": "100644",
+          "blob": "427915bc2032ab49488b9a5fe4ba7a4a54d84bad"
+        },
+        "consensus/systemcall/sequence_state.go": {
+          "mode": "100644",
+          "blob": "11fa5e2f13bbd14ccde69566b4a79e57d043fc1c"
+        },
+        "consensus/systemcall/stake_derivation.go": {
+          "mode": "100644",
+          "blob": "00ef0c4368e5abdabc60dc220f74a2d8f182e912"
+        },
+        "consensus/systemcall/stake_derivation_test.go": {
+          "mode": "100644",
+          "blob": "f8e2c7e1ac3e152cd304a6fb207135659fa3b375"
+        },
+        "consensus/storage/README.md": {
+          "mode": "100644",
+          "blob": "65ccddba15e97ff9c4312b1343e312dd771692dd"
+        },
+        "consensus/storage/store.go": {
+          "mode": "100644",
+          "blob": "6ebec658c701bb8d4131c86a69e30d971686bede"
+        },
+        "consensus/storage/store_test.go": {
+          "mode": "100644",
+          "blob": "01acaee07d3490c1e8bde9dc718a15add57c1400"
+        },
+        "consensus/devnet/dedupe.go": {
+          "mode": "100644",
+          "blob": "1ca18b2fb54cce16e1935343426c61799b17379a"
+        },
+        "consensus/devnet/dedupe_test.go": {
+          "mode": "100644",
+          "blob": "44b1ff36d9784825e60cc4dff605558158feec99"
+        },
+        "consensus/devnet/engine_sink.go": {
+          "mode": "100644",
+          "blob": "3bf25ed062f886d3a095e0c64ae5d3bd3cb34aff"
+        },
+        "consensus/devnet/engine_sink_test.go": {
+          "mode": "100644",
+          "blob": "ae0d8f20903fa3aa57af3a9f8ca94a36bd0f3db2"
+        },
+        "consensus/devnet/node.go": {
+          "mode": "100644",
+          "blob": "adb4d94dc85c0ade27fea2cc897d5f9a2e01cb23"
+        },
+        "consensus/recovery/README.md": {
+          "mode": "100644",
+          "blob": "415b74f52b6a5b19f1b3bfb065bdebf71a0dbe7b"
+        },
+        "consensus/recovery/authority_blst.go": {
+          "mode": "100644",
+          "blob": "60b8d5dae6b301543717d1402aca277462d8a307"
+        },
+        "consensus/recovery/authority_unavailable.go": {
+          "mode": "100644",
+          "blob": "680036803046cdde1036375b00fdd876bf35397f"
+        },
+        "consensus/recovery/authority_unavailable_test.go": {
+          "mode": "100644",
+          "blob": "4b810b307ba49472cd280784acac3d5fb400afa7"
+        },
+        "consensus/recovery/fault_enabled.go": {
+          "mode": "100644",
+          "blob": "a6c35a43a8f769cd5a1ee6d1d165b07615e31d91"
+        },
+        "consensus/recovery/fault_none.go": {
+          "mode": "100644",
+          "blob": "ade6147f4f93905fd8af381d7830df1b22442181"
+        },
+        "consensus/recovery/history.go": {
+          "mode": "100644",
+          "blob": "caab8b37fb96f5aeda7a85e3b25840822b77740e"
+        },
+        "consensus/recovery/history_test.go": {
+          "mode": "100644",
+          "blob": "63a4c5c679bd0abc355ec88b62597d20968cf18a"
+        },
+        "consensus/recovery/observation.go": {
+          "mode": "100644",
+          "blob": "b916de258cf500f1e6c0dced828439b365d3bc0f"
+        },
+        "consensus/recovery/observation_test.go": {
+          "mode": "100644",
+          "blob": "2417236d982a3addf8fbb9395b9183b66d479288"
+        },
+        "consensus/recovery/settlement.go": {
+          "mode": "100644",
+          "blob": "97febc66e9f525513ae35a3d2ad59723c7b9aa66"
+        },
+        "execution/patches/README.md": {
+          "mode": "100644",
+          "blob": "c5a9a625caa6e076d1721501fc2f98c882a857cc"
+        },
+        "execution/patches/apply-420-p256.py": {
+          "mode": "100644",
+          "blob": "2c8b20dd895b76efa57fff4688898aa4c9628004"
+        },
+        "execution/patches/apply-420-systemcall.py": {
+          "mode": "100644",
+          "blob": "dcdcec45fdf6070fbb24e222bfe490c1ad891b95"
+        },
+        "execution/patches/p256_420_test.go.in": {
+          "mode": "100644",
+          "blob": "81e48640739b7c8ce5b98b8e9032df2b12728439"
+        },
+        "execution/patches/systemcall420.go.in": {
+          "mode": "100644",
+          "blob": "d92152be22624ea4abc7458f1e8e14bb47c91cc0"
+        },
+        "execution/patches/systemcall420_test.go.in": {
+          "mode": "100644",
+          "blob": "23e2b9030d85cf108a497406dcaa70b90190f135"
+        }
+      }
+    },
+    {
+      "step": "9.2-runtime",
+      "qualifiedSource": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284273
+      ],
+      "requirements": [
+        "actual production certified settlement/history caller",
+        "consensus/execution/simultaneous/pre-journal restart"
+      ],
+      "paths": [
+        "consensus/cmd/fourtwentyd/settlement.go"
+      ],
+      "files": {
+        "consensus/cmd/fourtwentyd/settlement.go": {
+          "mode": "100644",
+          "blob": "f11dbff649610671c66f4afaa678144d57ad7d86"
+        }
+      }
+    },
+    {
+      "step": "9.3-sql",
+      "qualifiedSource": "3627687a0a35542de2e5f2972dce7d16fe659263",
+      "runs": [
+        44137388796
+      ],
+      "requirements": [
+        "persistent SQL checkpoints and raw/projection transactions",
+        "restart/SIGKILL/rollback/finalized rejection and clean canonical rebuild"
+      ],
+      "paths": [
+        "420-indexer"
+      ],
+      "files": {
+        "420-indexer/.gitignore": {
+          "mode": "100644",
+          "blob": "849ddff3b7ec917b5f4563e9a6d3ea63ea512a70"
+        },
+        "420-indexer/README.md": {
+          "mode": "100644",
+          "blob": "acc5ef7b190d5acae9947791ecb78a4f50a6c2dc"
+        },
+        "420-indexer/descriptors/ai420-v1.json": {
+          "mode": "100644",
+          "blob": "2a461bc9c29381e093344fbdafbf8fc35accef6a"
+        },
+        "420-indexer/descriptors/bridge420-v1.json": {
+          "mode": "100644",
+          "blob": "ec7638d7fc89f81d4387b3aed58d941161b8fa96"
+        },
+        "420-indexer/descriptors/compute-worker-read-model-v1.json": {
+          "mode": "100644",
+          "blob": "53fe89bf0f5be460e2a3a27079ca778dae769113"
+        },
+        "420-indexer/descriptors/compute420-v1.json": {
+          "mode": "100644",
+          "blob": "6fc1c4f7bb5bbadf9e2de2b5889ab488cf6f8fc4"
+        },
+        "420-indexer/descriptors/governance-civic-v1.json": {
+          "mode": "100644",
+          "blob": "97d23f3735d586a66f29448681bce363f220b315"
+        },
+        "420-indexer/descriptors/grants420-v1.json": {
+          "mode": "100644",
+          "blob": "c2d2350d08e536056f9347c68e3acadd24f651cc"
+        },
+        "420-indexer/descriptors/names420-v3.json": {
+          "mode": "100644",
+          "blob": "912c2ec42eb1442d8dbf9ef18f8ea5de14263a04"
+        },
+        "420-indexer/descriptors/protocol-registry-v4.json": {
+          "mode": "100644",
+          "blob": "6d152461401592c1372a4959fe133c723774955e"
+        },
+        "420-indexer/descriptors/randomness-v1.json": {
+          "mode": "100644",
+          "blob": "f2e126abbcbfccd5e4f7391d3ec07ebcf05564d3"
+        },
+        "420-indexer/descriptors/rights420-v1.json": {
+          "mode": "100644",
+          "blob": "86b17ef1710acca3c17e2a84eb5ddbe6272659c0"
+        },
+        "420-indexer/descriptors/stake420-v3.json": {
+          "mode": "100644",
+          "blob": "b08369e241f7e8244ed31bc9022127aef6744a52"
+        },
+        "420-indexer/descriptors/treasury420-v1.json": {
+          "mode": "100644",
+          "blob": "5ed44cda1842b31253da30a3e15679795f42ed8f"
+        },
+        "420-indexer/package-lock.json": {
+          "mode": "100644",
+          "blob": "65827095c380dbe23fee23bec268578c9eccac42"
+        },
+        "420-indexer/package.json": {
+          "mode": "100644",
+          "blob": "fc5a07fc66a01280a4d4a940728edf2aae7e3ac2"
+        },
+        "420-indexer/scripts/generate-names420-descriptor.mjs": {
+          "mode": "100644",
+          "blob": "21c06df2c600ff757b9db3be37c54083019c1c41"
+        },
+        "420-indexer/scripts/qualify-identity-testnet.mjs": {
+          "mode": "100644",
+          "blob": "9e8f396798f3c005afecc134e32c394783ec6be7"
+        },
+        "420-indexer/scripts/qualify-names-testnet.mjs": {
+          "mode": "100644",
+          "blob": "4f427eff761b038e07deba6a0a6c627b859661a0"
+        },
+        "420-indexer/sql/001-core-projections.sql": {
+          "mode": "100644",
+          "blob": "6f0cd0d4ecdb82cc189904f7c5e89f0fd5d5361d"
+        },
+        "420-indexer/sql/002-asset-projections.sql": {
+          "mode": "100644",
+          "blob": "da7a6286e82e7d5f23bdedb0a7c58e3a467b04e4"
+        },
+        "420-indexer/sql/003-genesis-projections.sql": {
+          "mode": "100644",
+          "blob": "0c813631754a8b5642411f3a98572319b2346d3f"
+        },
+        "420-indexer/sql/004-genesis-materialized-views.sql": {
+          "mode": "100644",
+          "blob": "a516fb0ad9b375467bfb2b30f06aa4a1f81869ac"
+        },
+        "420-indexer/sql/005-genesis-state-views.sql": {
+          "mode": "100644",
+          "blob": "aa4620a0f35f3209c472b15ac59e578fa931e9e4"
+        },
+        "420-indexer/sql/006-query-indexes.sql": {
+          "mode": "100644",
+          "blob": "0fa44cfb976b1a917d6757c6e6d46165a4da8eda"
+        },
+        "420-indexer/sql/007-durable-recovery.sql": {
+          "mode": "100644",
+          "blob": "7e3e0cb5cdec261e2c022fffb7e9bf6104a87626"
+        },
+        "420-indexer/sql/008-bridge-lifecycle.sql": {
+          "mode": "100644",
+          "blob": "45697a76c985333246cab0db802000707be19320"
+        },
+        "420-indexer/sql/008-finalized-recovery.sql": {
+          "mode": "100644",
+          "blob": "1339a1f220f743a54e5c51f567c478a2ddee752e"
+        },
+        "420-indexer/sql/009-stake-lifecycle-recovery.sql": {
+          "mode": "100644",
+          "blob": "4d0cbbb43824366b22609a5321f01bbc1b3987c0"
+        },
+        "420-indexer/src/abi-manifest.ts": {
+          "mode": "100644",
+          "blob": "cce698488ec6adb4de88141c1d22a43b9bdb4f72"
+        },
+        "420-indexer/src/ai-descriptors.ts": {
+          "mode": "100644",
+          "blob": "cede3c7a031a8a5a7691020965f35a0d011969a9"
+        },
+        "420-indexer/src/ai-read-model.ts": {
+          "mode": "100644",
+          "blob": "31735a778a08ae2c7c410a53fdb3235864fa5088"
+        },
+        "420-indexer/src/api-contract.ts": {
+          "mode": "100644",
+          "blob": "eb3964e8d501a8f7914d4b344c645649a3eca364"
+        },
+        "420-indexer/src/api-surface.ts": {
+          "mode": "100644",
+          "blob": "fcd25fb2e1bfbe86a98924105e8748027d2be9ca"
+        },
+        "420-indexer/src/asset-decoder.ts": {
+          "mode": "100644",
+          "blob": "cf04f60b99b4f7b49b62079eb7b3e548dd45bda9"
+        },
+        "420-indexer/src/asset-projections.ts": {
+          "mode": "100644",
+          "blob": "cbe3034629ee155f422059e14396cee0e99b2c7a"
+        },
+        "420-indexer/src/bridge-descriptors.ts": {
+          "mode": "100644",
+          "blob": "658283455b21e811b88afa2d62428d1a96dda983"
+        },
+        "420-indexer/src/chain-source.ts": {
+          "mode": "100644",
+          "blob": "1de618992956b13f06d9c4028e5f57ced7f26e04"
+        },
+        "420-indexer/src/checkpoint-store.ts": {
+          "mode": "100644",
+          "blob": "91503c07d34b144d602fca07640e1480f0a144aa"
+        },
+        "420-indexer/src/compute-analytics.ts": {
+          "mode": "100644",
+          "blob": "7837de4b423676e68473d5512dd96b9f7e368dad"
+        },
+        "420-indexer/src/compute-app-read-model.ts": {
+          "mode": "100644",
+          "blob": "4104ac8f0a371ab42c2d4971488d1cf93b797cfa"
+        },
+        "420-indexer/src/compute-descriptors.ts": {
+          "mode": "100644",
+          "blob": "417636b3efad93c4dbae54753f91750ae2c2ab5a"
+        },
+        "420-indexer/src/compute-read-model.ts": {
+          "mode": "100644",
+          "blob": "ccffd5627cbd30df626cbc8ddf7cccd3c4d6bf43"
+        },
+        "420-indexer/src/core-projections.ts": {
+          "mode": "100644",
+          "blob": "d7e0622c956cda19a78e21889365017b43807fea"
+        },
+        "420-indexer/src/event-canonicality.ts": {
+          "mode": "100644",
+          "blob": "a8a902538649cb038e8c89c3677aa023140e6e5a"
+        },
+        "420-indexer/src/event-delivery.ts": {
+          "mode": "100644",
+          "blob": "8415261763e1fe53b43f0a4a86ab80750307e513"
+        },
+        "420-indexer/src/event-stream.ts": {
+          "mode": "100644",
+          "blob": "33adc0fd3faf6e0879ed6a497cdd5e7c6bbe7a66"
+        },
+        "420-indexer/src/event-subscription.ts": {
+          "mode": "100644",
+          "blob": "c18f3e59159613716d591a2d340a1c6fed43efe0"
+        },
+        "420-indexer/src/governance-descriptors.ts": {
+          "mode": "100644",
+          "blob": "058f22308e606cbb01b1b0d244490c13fe2f0b48"
+        },
+        "420-indexer/src/grants-descriptors.ts": {
+          "mode": "100644",
+          "blob": "709a9719231e9141023d7bb1d6f0e9b667f744e9"
+        },
+        "420-indexer/src/grants-read-model.ts": {
+          "mode": "100644",
+          "blob": "63e02026b32d3c4e34113c081412946b6792b045"
+        },
+        "420-indexer/src/http-transport.ts": {
+          "mode": "100644",
+          "blob": "d1eed1414ce0b1bd371b2486e576102af15b03c8"
+        },
+        "420-indexer/src/identity-testnet-qualification.ts": {
+          "mode": "100644",
+          "blob": "de58085840cb5ef422682bb294d4c2a43ba76f23"
+        },
+        "420-indexer/src/index.ts": {
+          "mode": "100644",
+          "blob": "ae89ef34a08cd6e9c1ce89a20a544c2e0a34b6d4"
+        },
+        "420-indexer/src/indexing.ts": {
+          "mode": "100644",
+          "blob": "41f6874ee171e596eb9994bc8a326aeb9e4390a5"
+        },
+        "420-indexer/src/ingestor.ts": {
+          "mode": "100644",
+          "blob": "c77bc270a0e3f3613fa055998b15e111a0e2d023"
+        },
+        "420-indexer/src/lifecycle-reducer.ts": {
+          "mode": "100644",
+          "blob": "2d807d4d0ca13739428b4b9e49bcbe585543af13"
+        },
+        "420-indexer/src/names-testnet-qualification.ts": {
+          "mode": "100644",
+          "blob": "0e7858de0ca7253b5cd566bfaf1b862705a91664"
+        },
+        "420-indexer/src/notifications-adapter.ts": {
+          "mode": "100644",
+          "blob": "e35f5e912904cd357601efde0182a13e7cca467d"
+        },
+        "420-indexer/src/operational-api.ts": {
+          "mode": "100644",
+          "blob": "acf5a2e6f915d25b225d0529dda5a74f572e2c20"
+        },
+        "420-indexer/src/operational-telemetry.ts": {
+          "mode": "100644",
+          "blob": "77323a652a986b311f796d5484dfbd5ae7b28dc6"
+        },
+        "420-indexer/src/pay-accounting-export.ts": {
+          "mode": "100644",
+          "blob": "fd40f69ae4c4fc98f266f6e9abe808ea8f5a679f"
+        },
+        "420-indexer/src/postgres.ts": {
+          "mode": "100644",
+          "blob": "538ee424aa9aab21b002207b8ee61d69ff2a25db"
+        },
+        "420-indexer/src/protocol-decoder.ts": {
+          "mode": "100644",
+          "blob": "42657faf544cfc05af51cf1c76a5fbd27b4261d0"
+        },
+        "420-indexer/src/protocol-object-service.ts": {
+          "mode": "100644",
+          "blob": "1cf9ad0a8b4791b91af51471e9738a447a725563"
+        },
+        "420-indexer/src/protocol-projections.ts": {
+          "mode": "100644",
+          "blob": "072c3a94f79e1e354b1d76150ec95b74c66da878"
+        },
+        "420-indexer/src/public-dto.ts": {
+          "mode": "100644",
+          "blob": "0723b12de3a261380d5474d6b94f6775cf6cbaaa"
+        },
+        "420-indexer/src/query-layer.ts": {
+          "mode": "100644",
+          "blob": "8aa2ca71b5ad834de49141c1223afe22f1d69f8d"
+        },
+        "420-indexer/src/query-service.ts": {
+          "mode": "100644",
+          "blob": "93ace10164dfe54f70d52c27b0e86ebb36c08196"
+        },
+        "420-indexer/src/randomness-descriptors.ts": {
+          "mode": "100644",
+          "blob": "1c537896f74f74a7823e070522fc0a8d6fd27665"
+        },
+        "420-indexer/src/receipt-log-dto.ts": {
+          "mode": "100644",
+          "blob": "69e3d30344635b96bd4f16da8e7b10b17c8ef5a7"
+        },
+        "420-indexer/src/receipt-log-service.ts": {
+          "mode": "100644",
+          "blob": "00a9944132af265aac334aada77ea0b8ef4326e1"
+        },
+        "420-indexer/src/recovery-store.ts": {
+          "mode": "100644",
+          "blob": "94fe3dff65f06c05fc567e13b675cdde9d877ca2"
+        },
+        "420-indexer/src/reorg.ts": {
+          "mode": "100644",
+          "blob": "937cb211e71a456ebb6f80aabc648b92746b0731"
+        },
+        "420-indexer/src/rights-descriptors.ts": {
+          "mode": "100644",
+          "blob": "2e5f097336e99fc1cc3ddeb311ce0272923bb840"
+        },
+        "420-indexer/src/rpc-source.ts": {
+          "mode": "100644",
+          "blob": "8bfb55c025d3fdf1697ba50d00adad766b4b6b23"
+        },
+        "420-indexer/src/runtime-state.ts": {
+          "mode": "100644",
+          "blob": "0e05af11121c97ce060e1bb5a28d74407a84b1a5"
+        },
+        "420-indexer/src/search-router.ts": {
+          "mode": "100644",
+          "blob": "0e338b48933b7438f38bde839c2eec55d2be9860"
+        },
+        "420-indexer/src/stake-indexer.ts": {
+          "mode": "100644",
+          "blob": "0b240c6e4a6b4c36c7da5ac6591d5a6442fee8ce"
+        },
+        "420-indexer/src/testnet-closeout.ts": {
+          "mode": "100644",
+          "blob": "c2df34624f851cc7be71a3778a2a3a22e4da316a"
+        },
+        "420-indexer/src/testnet-consumer-qualification.ts": {
+          "mode": "100644",
+          "blob": "dfe9ae4c53cad39cc0b793a96e04ec4fffee07e7"
+        },
+        "420-indexer/src/testnet-qualification.ts": {
+          "mode": "100644",
+          "blob": "c35f39a8a7af7b05e73e7168be37c92d3c778dea"
+        },
+        "420-indexer/src/treasury-descriptors.ts": {
+          "mode": "100644",
+          "blob": "32cc4bab8731e42a46ea89bb761c588e3df39b1c"
+        },
+        "420-indexer/src/treasury-read-model.ts": {
+          "mode": "100644",
+          "blob": "3d76e8894c53ea68b730098ea421eac8a3391c83"
+        },
+        "420-indexer/src/work-controller.ts": {
+          "mode": "100644",
+          "blob": "e91859c6f2f4d09a9a8debd313276243dc746452"
+        },
+        "420-indexer/test/abi-manifest.test.ts": {
+          "mode": "100644",
+          "blob": "f71487934689a9c49d2ec25a35cde7024031a919"
+        },
+        "420-indexer/test/ai420-descriptors.test.ts": {
+          "mode": "100644",
+          "blob": "f17f311b7b43e0c51dfe0f48026465cd88575e8e"
+        },
+        "420-indexer/test/ai420-read-model.test.ts": {
+          "mode": "100644",
+          "blob": "3f02d15db24c0539560066acd0149f3a3405fc13"
+        },
+        "420-indexer/test/api-contract.test.ts": {
+          "mode": "100644",
+          "blob": "a800e82f511d0cad9f986f7abd480040613327eb"
+        },
+        "420-indexer/test/api-surface.test.ts": {
+          "mode": "100644",
+          "blob": "df24713e14643b75b8c7438a97b4b6c0735bc634"
+        },
+        "420-indexer/test/assets.test.ts": {
+          "mode": "100644",
+          "blob": "616a1ad71b6726fc3acd409430a01374eab780da"
+        },
+        "420-indexer/test/bridge-descriptors.test.ts": {
+          "mode": "100644",
+          "blob": "05de4d8703eba70883b99728f8946b90b8e3c4b2"
+        },
+        "420-indexer/test/bridge-integration.test.ts": {
+          "mode": "100644",
+          "blob": "60ab9b20286afc8bfd773c00a8ae3a08d64b5515"
+        },
+        "420-indexer/test/bridge-notifications.test.ts": {
+          "mode": "100644",
+          "blob": "7fa539dd0e051986f653c384e5dff6f64be33d59"
+        },
+        "420-indexer/test/commerce.test.ts": {
+          "mode": "100644",
+          "blob": "25dcd50025b5c4f745ba4e581da0d79a631bc714"
+        },
+        "420-indexer/test/compute-analytics.test.ts": {
+          "mode": "100644",
+          "blob": "951c111d0f9e43f01da339507d5bc651640c4335"
+        },
+        "420-indexer/test/compute-app-read-model.test.ts": {
+          "mode": "100644",
+          "blob": "f42e809ded8a31689a523dbf75e6b838abab3ee1"
+        },
+        "420-indexer/test/compute-read-model.test.ts": {
+          "mode": "100644",
+          "blob": "e2ca2a0a48cbbbb4d8bf661ac49e19484161c3e2"
+        },
+        "420-indexer/test/compute420-descriptors.test.ts": {
+          "mode": "100644",
+          "blob": "b1511ef257bc966b66affe7d1d98d53e05cc8074"
+        },
+        "420-indexer/test/core-projections.test.ts": {
+          "mode": "100644",
+          "blob": "4e7806bf5a62d619d7469597060df4467e90b655"
+        },
+        "420-indexer/test/direct-resources.test.ts": {
+          "mode": "100644",
+          "blob": "4a1172620d5d162ced5e092eec1cba7087afd5ce"
+        },
+        "420-indexer/test/durable-recovery.test.ts": {
+          "mode": "100644",
+          "blob": "47b0d8d317c73fdd96e9e386c70339e79fca9102"
+        },
+        "420-indexer/test/event-canonicality.test.ts": {
+          "mode": "100644",
+          "blob": "a1b498dacd2e23ce1e05ccd159813bf15c24f898"
+        },
+        "420-indexer/test/event-delivery.test.ts": {
+          "mode": "100644",
+          "blob": "cacc3dc009d7cedfe83835a75035adbacf769eae"
+        },
+        "420-indexer/test/event-stream.test.ts": {
+          "mode": "100644",
+          "blob": "205bb1fb651ba559a1dc1e3412ea7cd10fb4df93"
+        },
+        "420-indexer/test/event-subscription.test.ts": {
+          "mode": "100644",
+          "blob": "787824e46c58d3eef0bd5d77b5c57c194031ee65"
+        },
+        "420-indexer/test/failure-recovery.test.ts": {
+          "mode": "100644",
+          "blob": "e0ffb6b6c6527e9bdafc319ce4715c738f1cab3d"
+        },
+        "420-indexer/test/governance-descriptors.test.ts": {
+          "mode": "100644",
+          "blob": "3e831fbe2ad2ae67e1956a7cd081a9d495f96faf"
+        },
+        "420-indexer/test/grants420-integration.test.ts": {
+          "mode": "100644",
+          "blob": "6cb3d6233d285af5f0fa072103bf0bf5aca8b27d"
+        },
+        "420-indexer/test/helpers/stake-recovery-fixture.ts": {
+          "mode": "100644",
+          "blob": "5b0b484bd981c821ecfd5316785eeff0fc64c6f1"
+        },
+        "420-indexer/test/helpers/stake-recovery-worker.ts": {
+          "mode": "100644",
+          "blob": "82ac939291a02089c5bc8d18faabeb3edb3c3e2c"
+        },
+        "420-indexer/test/http-hardening.test.ts": {
+          "mode": "100644",
+          "blob": "1758539e15016c5147139dbf8dc5a096f36bbed8"
+        },
+        "420-indexer/test/http-transport.test.ts": {
+          "mode": "100644",
+          "blob": "3afb49b3c5db748085f9d7192f93b5da56475c44"
+        },
+        "420-indexer/test/identity-testnet-qualification.test.ts": {
+          "mode": "100644",
+          "blob": "c95b2278fe4ac4bdd2b41c46cbb9c0d5a6385aa6"
+        },
+        "420-indexer/test/identity420-compatibility.test.ts": {
+          "mode": "100644",
+          "blob": "5cdea8e10c7f6919e7b2c927090a1cdf29392ca4"
+        },
+        "420-indexer/test/indexing.test.ts": {
+          "mode": "100644",
+          "blob": "c691dcd1ab88f11b8f109e65e922877d200a84a4"
+        },
+        "420-indexer/test/ingestion.test.ts": {
+          "mode": "100644",
+          "blob": "7d75b3dcc9d8a565baa1ac6caa6181469f89a6a2"
+        },
+        "420-indexer/test/lifecycle-reducer.test.ts": {
+          "mode": "100644",
+          "blob": "5aec5258685b059da109caa0791d56ef42d81e5a"
+        },
+        "420-indexer/test/names-testnet-qualification.test.ts": {
+          "mode": "100644",
+          "blob": "b92ef8ea622bac9d5cf57b9d77b1a11e6dbd7d80"
+        },
+        "420-indexer/test/names420-release-descriptor.test.ts": {
+          "mode": "100644",
+          "blob": "0b9918eee6bb0f64c5bdf635a08b7c4ca05bf6c0"
+        },
+        "420-indexer/test/notifications-adapter.test.ts": {
+          "mode": "100644",
+          "blob": "2a40e69991d45fa4fc90cd6df5afe52980d00792"
+        },
+        "420-indexer/test/operational-api.test.ts": {
+          "mode": "100644",
+          "blob": "c2d5df530a539cff9d118194e671a875acaed235"
+        },
+        "420-indexer/test/operational-telemetry.test.ts": {
+          "mode": "100644",
+          "blob": "dd4e47b21cec3baa63df586f6ba167648d0e77b4"
+        },
+        "420-indexer/test/pay-accounting-export.test.ts": {
+          "mode": "100644",
+          "blob": "d489d39b4355f4d5ea154aa01cb412072509bbe3"
+        },
+        "420-indexer/test/postgres-integration.test.ts": {
+          "mode": "100644",
+          "blob": "a1fb013b9961f8875a623534f8ac3034778a65cf"
+        },
+        "420-indexer/test/protocol-dto.test.ts": {
+          "mode": "100644",
+          "blob": "b7062ab8111e8b98e154cd9b34d4ce33837e8633"
+        },
+        "420-indexer/test/protocol-object-service.test.ts": {
+          "mode": "100644",
+          "blob": "7a6722a6677d1b3162d9a595da5cc1ca7f6dac17"
+        },
+        "420-indexer/test/protocol-projections.test.ts": {
+          "mode": "100644",
+          "blob": "5544fca513c17d5f255697cae20af02d43a4ecb6"
+        },
+        "420-indexer/test/protocol-registry-release-descriptor.test.ts": {
+          "mode": "100644",
+          "blob": "1a36a8017818d551662de16942a3832c5a99cf81"
+        },
+        "420-indexer/test/query-closeout.test.ts": {
+          "mode": "100644",
+          "blob": "5c8bc6f503e2c6466fe2b9811c8f7198b98f372a"
+        },
+        "420-indexer/test/query-layer.test.ts": {
+          "mode": "100644",
+          "blob": "3bc61d8190728514b47da9c743c123b9d2fd88c0"
+        },
+        "420-indexer/test/query-service.test.ts": {
+          "mode": "100644",
+          "blob": "cef8b6cd8c727a026b9a08340a96a8aa447654a9"
+        },
+        "420-indexer/test/randomness420-release-descriptor.test.ts": {
+          "mode": "100644",
+          "blob": "880b312127004a259a671a3991de6301a4d75bd7"
+        },
+        "420-indexer/test/receipt-log-api.test.ts": {
+          "mode": "100644",
+          "blob": "2f3f48107fce3f7e3046984dd5c6ad2fb9240a31"
+        },
+        "420-indexer/test/reorg.test.ts": {
+          "mode": "100644",
+          "blob": "a5f221bfd682a5e67a3fee92a714786c09c57a5d"
+        },
+        "420-indexer/test/rights420-descriptors.test.ts": {
+          "mode": "100644",
+          "blob": "f28162fd1648fcbb21f72dfa6d5844ddb1b6d0d9"
+        },
+        "420-indexer/test/runtime-state.test.ts": {
+          "mode": "100644",
+          "blob": "71bcddae971986dc3be6649df9d5d167b1150586"
+        },
+        "420-indexer/test/stake-recovery-postgres.test.ts": {
+          "mode": "100644",
+          "blob": "3ab420daf998b9be73ee3441b93b88ef71e770b1"
+        },
+        "420-indexer/test/stake420-release-descriptor.test.ts": {
+          "mode": "100644",
+          "blob": "55947b23a232d9bdfc1f2208a4b6385545fb7cbb"
+        },
+        "420-indexer/test/testnet-closeout.test.ts": {
+          "mode": "100644",
+          "blob": "40f146d1df29c4636e17ea2eb3b3e0ed2ce3ef25"
+        },
+        "420-indexer/test/testnet-consumer-qualification.test.ts": {
+          "mode": "100644",
+          "blob": "61cf761d87cdf6e33f015a548896d8ec6a4083a5"
+        },
+        "420-indexer/test/testnet-qualification.test.ts": {
+          "mode": "100644",
+          "blob": "7fa19699523572690ecac68a74212715c2f90523"
+        },
+        "420-indexer/test/testnet-recovery-qualification.test.ts": {
+          "mode": "100644",
+          "blob": "5aff1633994daa040e379a950030656335502dee"
+        },
+        "420-indexer/test/treasury420-integration.test.ts": {
+          "mode": "100644",
+          "blob": "da393e5a9ca5adbb8d1bae23f483be588a486445"
+        },
+        "420-indexer/test/work-controller.test.ts": {
+          "mode": "100644",
+          "blob": "c87898d5c29656ce400bc2a3e987580830c0be62"
+        },
+        "420-indexer/tsconfig.json": {
+          "mode": "100644",
+          "blob": "49d07c64f9ff240bcc7397991539ed7e081bbe09"
+        }
+      }
+    },
+    {
+      "step": "9.3-go",
+      "qualifiedSource": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284273
+      ],
+      "requirements": [
+        "actual certified Indexer ingestion/restart",
+        "native canonical logs, orphan exclusion and repeated restart"
+      ],
+      "paths": [
+        "indexer"
+      ],
+      "files": {
+        "indexer/README.md": {
+          "mode": "100644",
+          "blob": "add0a4d1ad5d4ee8cad0b75eacaec5dd854215b4"
+        },
+        "indexer/STATUS.md": {
+          "mode": "100644",
+          "blob": "299b255132cfd1fc67602c6b4bac7e0d4866a092"
+        },
+        "indexer/api/address.go": {
+          "mode": "100644",
+          "blob": "4b23946a30284bb3ba567b920f48bf36d715490a"
+        },
+        "indexer/api/address_test.go": {
+          "mode": "100644",
+          "blob": "6d0d5a1fc70b2cd94daaaee4deccc65251cbdfeb"
+        },
+        "indexer/api/assets_test.go": {
+          "mode": "100644",
+          "blob": "ea2a84e6b7c708dc771cdb7cccce2a1d71df2fa8"
+        },
+        "indexer/api/backend.go": {
+          "mode": "100644",
+          "blob": "e16cf6151488494f2860b0ad3ae8f782d29c9878"
+        },
+        "indexer/api/backend_test.go": {
+          "mode": "100644",
+          "blob": "993fbb35899bd4e6c0f7b0f7ddfbcf0f78290288"
+        },
+        "indexer/api/contracts.go": {
+          "mode": "100644",
+          "blob": "26d5e31543842bad16bac74f3d4508ed44bd32b3"
+        },
+        "indexer/api/cursor.go": {
+          "mode": "100644",
+          "blob": "2100e15029af29dc9fdc1100d759cdcd0f2a572d"
+        },
+        "indexer/api/cursor_test.go": {
+          "mode": "100644",
+          "blob": "10b917db426fbc683cf5d702661c4ab93f67d6c4"
+        },
+        "indexer/api/external_science.go": {
+          "mode": "100644",
+          "blob": "9991935e71996afebd6aa67342a91fadd702ccb7"
+        },
+        "indexer/api/external_science_snapshot.go": {
+          "mode": "100644",
+          "blob": "f4c5f9a8f53ebe3cafeeaf39169249d71c6dca87"
+        },
+        "indexer/api/external_science_snapshot_test.go": {
+          "mode": "100644",
+          "blob": "00765529d6f2e971fb4739445b1e77e6df8e5a7c"
+        },
+        "indexer/api/external_science_test.go": {
+          "mode": "100644",
+          "blob": "f0cbf984ae6b93502949251b1f699c61159fd330"
+        },
+        "indexer/api/registry_canonical_reconciliation_test.go": {
+          "mode": "100644",
+          "blob": "db6fce1ecfa6f821e8440afdf949911959118db9"
+        },
+        "indexer/api/server.go": {
+          "mode": "100644",
+          "blob": "494b4f38e6485cf57c1ff4cb76caf992482f15b9"
+        },
+        "indexer/api/server_test.go": {
+          "mode": "100644",
+          "blob": "0aaf108c1ab1d3195423c8b82efd000f96caf557"
+        },
+        "indexer/api/stake.go": {
+          "mode": "100644",
+          "blob": "337c9558f418d6afefe2f1d756face33adc63265"
+        },
+        "indexer/api/stake_recovery_test.go": {
+          "mode": "100644",
+          "blob": "6ff9230bdb7f2752fcf55dc576126becb1023e6c"
+        },
+        "indexer/api/stake_test.go": {
+          "mode": "100644",
+          "blob": "47b46cd3e50dbe326e1812a14050c07d9ac80f93"
+        },
+        "indexer/api/types.go": {
+          "mode": "100644",
+          "blob": "98448435c4f07a3e4443e1f813c5dde70cae3bc9"
+        },
+        "indexer/api/types_test.go": {
+          "mode": "100644",
+          "blob": "12ab8020c1af12083021acbf841d224a0bc75eec"
+        },
+        "indexer/assets/decoder.go": {
+          "mode": "100644",
+          "blob": "6f962a1bdea4069b1ea39039fccdf5cb50ef58a8"
+        },
+        "indexer/assets/decoder_test.go": {
+          "mode": "100644",
+          "blob": "428cb76090662fb5c47b1aa33f256c755757c07d"
+        },
+        "indexer/cmd/indexer420/certified.go": {
+          "mode": "100644",
+          "blob": "c62ae41e2df550ad4da95d0e796bafd178912481"
+        },
+        "indexer/cmd/indexer420/certified_test.go": {
+          "mode": "100644",
+          "blob": "44aa7e1573fdbad4686fb00a2cc07751809f219d"
+        },
+        "indexer/cmd/indexer420/main.go": {
+          "mode": "100644",
+          "blob": "6b8985d47af1608c7388cbf3d4a74bd1b0b34bba"
+        },
+        "indexer/cmd/indexer420/main_test.go": {
+          "mode": "100644",
+          "blob": "60548dae28689ebe10c0f2a25ebd86aa60df458d"
+        },
+        "indexer/consensusview/certified.go": {
+          "mode": "100644",
+          "blob": "ba9e24aa639db7edfd77e4bdf7784d1f7293d4fc"
+        },
+        "indexer/consensusview/certified_test.go": {
+          "mode": "100644",
+          "blob": "8ca8d149846e28069e5eae85a6477c3a88fbdbbd"
+        },
+        "indexer/consensusview/provider.go": {
+          "mode": "100644",
+          "blob": "0aa7aa8bae9b9ccc01d6232098f8b12562dba047"
+        },
+        "indexer/consensusview/provider_test.go": {
+          "mode": "100644",
+          "blob": "8bc7e1c5694544f4850e932d12ba1475c68528a3"
+        },
+        "indexer/core/indexer.go": {
+          "mode": "100644",
+          "blob": "3834c992a65d005cd239aea8b4d47c9fb4dec46e"
+        },
+        "indexer/core/indexer_test.go": {
+          "mode": "100644",
+          "blob": "6d2a314b1bd8d7b4b213f12a9e28f821bddba262"
+        },
+        "indexer/core/store_memory_test.go": {
+          "mode": "100644",
+          "blob": "14317f17aa03722dbdd253749625fba8f91c946b"
+        },
+        "indexer/decoder/README.md": {
+          "mode": "100644",
+          "blob": "48158ab4ceeb48ebbe12af3d50c8e5fa025db3f0"
+        },
+        "indexer/decoder/catalog.go": {
+          "mode": "100644",
+          "blob": "c2d38beddf52a0be00b1c2823eb762c1e77b63dd"
+        },
+        "indexer/decoder/catalog_registry_test.go": {
+          "mode": "100644",
+          "blob": "05e6b597c25e6396e10c67530393a1d9bd37bf7e"
+        },
+        "indexer/decoder/catalog_test.go": {
+          "mode": "100644",
+          "blob": "0c8353ab63f3fe7de637457665975e3677aa1fcf"
+        },
+        "indexer/decoder/dispatch.go": {
+          "mode": "100644",
+          "blob": "8bc0dc858f489afd9fad4ef0f6e387712394cfb0"
+        },
+        "indexer/decoder/dispatch_test.go": {
+          "mode": "100644",
+          "blob": "24898aa4543c0f2bf3305738d891ca700bf31997"
+        },
+        "indexer/decoder/projection.go": {
+          "mode": "100644",
+          "blob": "69fbfa93ba010f057f0c3c4485cdeb698c9a73c9"
+        },
+        "indexer/decoder/projection_test.go": {
+          "mode": "100644",
+          "blob": "f3597ce1691f0ef9385a2e86eb7cfe34e55ba819"
+        },
+        "indexer/decoder/registry.go": {
+          "mode": "100644",
+          "blob": "8f3b06fb71d92bbc6c5572d10b57fc202b9a5c32"
+        },
+        "indexer/decoder/registry_abi.go": {
+          "mode": "100644",
+          "blob": "10da819592b4daca8231abb39885f38997856fbd"
+        },
+        "indexer/decoder/registry_abi_test.go": {
+          "mode": "100644",
+          "blob": "a32db8d6fd70d7e0a96e55b034ea900d1b65606b"
+        },
+        "indexer/decoder/registry_events.go": {
+          "mode": "100644",
+          "blob": "dead1363e6abba35ea61502c8d9754a0e5d36e3e"
+        },
+        "indexer/decoder/registry_events_test.go": {
+          "mode": "100644",
+          "blob": "8d74834739cb5268369928a2b8bc4bbc048514f2"
+        },
+        "indexer/decoder/registry_test.go": {
+          "mode": "100644",
+          "blob": "5438f5b0d4c2e48dec7f46e0e809287cf19afb71"
+        },
+        "indexer/health/README.md": {
+          "mode": "100644",
+          "blob": "2eecbb35996254d1459de73d2d7573b5fa529777"
+        },
+        "indexer/ingest/contracts.go": {
+          "mode": "100644",
+          "blob": "ca84f55620e1bddbede1b9189b2c1c66b484fbb3"
+        },
+        "indexer/ingest/engine.go": {
+          "mode": "100644",
+          "blob": "17266c26cf6aab7e021f9c40603047a1c768cf25"
+        },
+        "indexer/ingest/finality.go": {
+          "mode": "100644",
+          "blob": "eea6cbd8c236f3afffe7a4e0151ddd7d2d392234"
+        },
+        "indexer/ingest/finality_test.go": {
+          "mode": "100644",
+          "blob": "54ef4c2acacdafc0f00f5cab623e290082c09f7b"
+        },
+        "indexer/ingest/producer_attribution_test.go": {
+          "mode": "100644",
+          "blob": "3234e36002e6ac5b0ef0b1f1268239ca14a57b99"
+        },
+        "indexer/ingest/registry_reorg_integration_test.go": {
+          "mode": "100644",
+          "blob": "b9e8ac8daf9580cf947783a2292e0b78ca8787c9"
+        },
+        "indexer/ingest/restart_reorg_integration_test.go": {
+          "mode": "100644",
+          "blob": "0bca6dbb38bde2bcde953972a70d276d0b4f60aa"
+        },
+        "indexer/ingest/stake_recovery_test.go": {
+          "mode": "100644",
+          "blob": "a391fb0c01aff38a7d9790f5d5b4623ed1340e18"
+        },
+        "indexer/model/assets.go": {
+          "mode": "100644",
+          "blob": "38561c6b974f1bed117f43caae10c2c5fe1c761e"
+        },
+        "indexer/model/consensus.go": {
+          "mode": "100644",
+          "blob": "a3ee98251f31ffcb0cf84dd45e23c84531cc8038"
+        },
+        "indexer/model/contract.go": {
+          "mode": "100644",
+          "blob": "028f8a311753edd104bc230ad1156db4c1662545"
+        },
+        "indexer/model/model.go": {
+          "mode": "100644",
+          "blob": "9dc99a64fca521aca1cce84542c652cad0f9b706"
+        },
+        "indexer/model/stake.go": {
+          "mode": "100644",
+          "blob": "2fe1f723a76583228ae06e58b50cfe6cc966febe"
+        },
+        "indexer/reorg/contracts.go": {
+          "mode": "100644",
+          "blob": "7520e709c6f807f3cf16f1d9137b916c8dd1d903"
+        },
+        "indexer/reorg/engine.go": {
+          "mode": "100644",
+          "blob": "5d527a50af92c409f6f3770340bf5903682b4349"
+        },
+        "indexer/reorg/engine_test.go": {
+          "mode": "100644",
+          "blob": "5b78900c6096cc3f018ee1d26ce4b7585ae301cf"
+        },
+        "indexer/reorg/policy.go": {
+          "mode": "100644",
+          "blob": "58304b96a7f41c1bf724574531800b253c9bc4f7"
+        },
+        "indexer/reorg/policy_test.go": {
+          "mode": "100644",
+          "blob": "de4c35dc7f508622c07d8aa8aa28811813f42fd0"
+        },
+        "indexer/rpc/client.go": {
+          "mode": "100644",
+          "blob": "e01d5a4793a50e0560443b9636dd771e690137e7"
+        },
+        "indexer/rpc/client_test.go": {
+          "mode": "100644",
+          "blob": "938c6e1cae96b35ae8be595e3c7ce3dea2dc5bb5"
+        },
+        "indexer/rpc/contract.go": {
+          "mode": "100644",
+          "blob": "54236419f7832c43a021555c7faf5cdf9b4a927e"
+        },
+        "indexer/rpc/eth.go": {
+          "mode": "100644",
+          "blob": "9e1c4bb2cb9be90523f942eabbdcab84eece323e"
+        },
+        "indexer/rpc/eth_fee_test.go": {
+          "mode": "100644",
+          "blob": "21f5f30580e9f3956000a52752560d630fc86d10"
+        },
+        "indexer/rpc/finality.go": {
+          "mode": "100644",
+          "blob": "d7b4509f7006df5b01664fa44dfec2b9c4bf0fe0"
+        },
+        "indexer/rpc/native.go": {
+          "mode": "100644",
+          "blob": "88e817e4472b6019d6ed78e450ebd3a3a33d36ae"
+        },
+        "indexer/rpc/native_test.go": {
+          "mode": "100644",
+          "blob": "3b941418ca8ce11e720180f40aeac2da037f10c9"
+        },
+        "indexer/rpc/qualification_source.go": {
+          "mode": "100644",
+          "blob": "90846a04b663198c2ed9f60bebc9c0539625d079"
+        },
+        "indexer/rpc/qualification_source_test.go": {
+          "mode": "100644",
+          "blob": "5307410b9af99e54ab4b100124036f9eb0b2ea10"
+        },
+        "indexer/rpc/source.go": {
+          "mode": "100644",
+          "blob": "10790aa67a8f1152172dfff9dce13a3612657210"
+        },
+        "indexer/rpc/source_test.go": {
+          "mode": "100644",
+          "blob": "3ae9036858dbfe34411f30f45825a65e9ba9358e"
+        },
+        "indexer/store/address.go": {
+          "mode": "100644",
+          "blob": "1131e5620f58f715b6f7a01892e03213db0522b7"
+        },
+        "indexer/store/address_test.go": {
+          "mode": "100644",
+          "blob": "6832c84218137a461ee8709efbe5db7009ab4d0a"
+        },
+        "indexer/store/assets_test.go": {
+          "mode": "100644",
+          "blob": "ccd855a776dd4c113a24212e15a48ee13c78c571"
+        },
+        "indexer/store/file.go": {
+          "mode": "100644",
+          "blob": "1e89ee47fc7086b2e234e56d0e10487eb1c6f823"
+        },
+        "indexer/store/file_test.go": {
+          "mode": "100644",
+          "blob": "0efa3af674f4fd9f4220be2629700833d594400c"
+        },
+        "indexer/store/invariants.go": {
+          "mode": "100644",
+          "blob": "c2091ae160d1e61b59dcba267432a86bb40be103"
+        },
+        "indexer/store/memory.go": {
+          "mode": "100644",
+          "blob": "b5675d8cb6c86d060d820f838dc8603ddb0da7f7"
+        },
+        "indexer/store/memory_test.go": {
+          "mode": "100644",
+          "blob": "9adb3df923f7d0f7c7b829efc0bc16272a5bdd6b"
+        },
+        "indexer/store/stake_persistence_test.go": {
+          "mode": "100644",
+          "blob": "6521234422d5c2b2bf43c8008b581a76e371ed4d"
+        },
+        "indexer/version/version.go": {
+          "mode": "100644",
+          "blob": "322179fe630c05f88939df38495ec81edc6c9534"
+        },
+        "indexer/version/version_test.go": {
+          "mode": "100644",
+          "blob": "2335e4204e6443f4d932709637f5cf0718c683bc"
+        }
+      }
+    },
+    {
+      "step": "9.4",
+      "qualifiedSource": "f738795fcf88f3b22f443db17a355f4a9ccc4da1",
+      "runs": [
+        44159878305
+      ],
+      "requirements": [
+        "scheduled/realized issuance and accruals",
+        "owned collateral/protocol credit/reserve/recycling",
+        "slash/equivocation/exit/withdrawal reconciliation",
+        "missing/duplicate/orphan/contradictory events and machine reports"
+      ],
+      "paths": [
+        "consensus/accounting",
+        "consensus/cmd/stake-reconcile",
+        "contracts/src/system/ValidatorRegistry.sol",
+        "contracts/src/system/CommunityValidatorReserve.sol",
+        "contracts/src/system/RewardController.sol",
+        "contracts/src/system/ConsensusSystemCall420.sol",
+        "contracts/src/system/StakeDependencyAccess420.sol",
+        "contracts/src/apps/Stake420.sol",
+        "contracts/src/IValidatorRegistry.sol",
+        "contracts/src/IRewardController.sol"
+      ],
+      "files": {
+        "consensus/accounting/QUALIFICATION.md": {
+          "mode": "100644",
+          "blob": "9c99eeea86ccfad72dee829797c02f224321858a"
+        },
+        "consensus/accounting/README.md": {
+          "mode": "100644",
+          "blob": "8b4f7b3c55bce6c928643d1e4bc5161f2322a841"
+        },
+        "consensus/accounting/abi.go": {
+          "mode": "100644",
+          "blob": "790ebf896eec682032368d724780b41098d08999"
+        },
+        "consensus/accounting/events.json": {
+          "mode": "100644",
+          "blob": "407187986e9c1b30c62e6c57825292817ffccf85"
+        },
+        "consensus/accounting/model.go": {
+          "mode": "100644",
+          "blob": "ce73a5c9803e5ee402b7142ec8a8003b5da777c3"
+        },
+        "consensus/accounting/real_evm_test.go": {
+          "mode": "100644",
+          "blob": "2fe8880fdecb5d825e740e48a89d684260c8124b"
+        },
+        "consensus/accounting/reconcile.go": {
+          "mode": "100644",
+          "blob": "31f7b604668a1ceb836eec82177984ce17b0736d"
+        },
+        "consensus/accounting/reconcile_test.go": {
+          "mode": "100644",
+          "blob": "b4e550b3ba7f00efbd0c6c4e3473b4c0d4452a8c"
+        },
+        "consensus/accounting/reducer.go": {
+          "mode": "100644",
+          "blob": "15231a84b8a747551b5970942eb8a19d7627f776"
+        },
+        "consensus/accounting/rpc.go": {
+          "mode": "100644",
+          "blob": "140726085916350adcbfeb5c0d89976749665e13"
+        },
+        "consensus/accounting/rpc_test.go": {
+          "mode": "100644",
+          "blob": "8677770ff589fc57caba40671ef934a5c8660abb"
+        },
+        "consensus/cmd/stake-reconcile/main.go": {
+          "mode": "100644",
+          "blob": "1af3df0814b9ac15f39f6996c2f8ed612b35d665"
+        },
+        "consensus/cmd/stake-reconcile/main_test.go": {
+          "mode": "100644",
+          "blob": "f2fdf98753c93f611e9e55b3eec4df738f1267d0"
+        },
+        "contracts/src/IRewardController.sol": {
+          "mode": "100644",
+          "blob": "6426999a7e7557e50f5b5e3721841b18a4a354ac"
+        },
+        "contracts/src/IValidatorRegistry.sol": {
+          "mode": "100644",
+          "blob": "48b46b7988ea887148bbf00d6ec5fbbd008c3e8c"
+        },
+        "contracts/src/apps/Stake420.sol": {
+          "mode": "100644",
+          "blob": "e26b6ec304bb9db2742796821caa0e549a145bba"
+        },
+        "contracts/src/system/CommunityValidatorReserve.sol": {
+          "mode": "100644",
+          "blob": "6ae1657a5ab45e97c76013ea45a310ae8fcd411c"
+        },
+        "contracts/src/system/ConsensusSystemCall420.sol": {
+          "mode": "100644",
+          "blob": "254a343b1f397d3bed0cf23afbdff61c85a91005"
+        },
+        "contracts/src/system/RewardController.sol": {
+          "mode": "100644",
+          "blob": "012c9e24b4e7a37ca89aad1c887529a19c70bb16"
+        },
+        "contracts/src/system/StakeDependencyAccess420.sol": {
+          "mode": "100644",
+          "blob": "61dea15aa241200cdbe3f1a17979eb84e278b38a"
+        },
+        "contracts/src/system/ValidatorRegistry.sol": {
+          "mode": "100644",
+          "blob": "e534624f007024d65fcbb9e0f730bafbb8077767"
+        }
+      }
+    },
+    {
+      "step": "9.5",
+      "qualifiedSource": "4561e95809e672a3b69177fbcd069a5f35c1551b",
+      "runs": [
+        44173816629
+      ],
+      "requirements": [
+        "existing policy/eligibility/finality thresholds preserved",
+        "structured alarms/severity/dedup/recovery",
+        "retry/dead-letter/redrive and secret-safe observations"
+      ],
+      "paths": [
+        "consensus/monitoring",
+        "consensus/telemetry",
+        "consensus/cmd/stake-monitor",
+        "deployments/monitoring",
+        "docker/Dockerfile.stake-monitor"
+      ],
+      "files": {
+        "consensus/monitoring/QUALIFICATION.md": {
+          "mode": "100644",
+          "blob": "450ee3dfb786ca7a23eaf2cf729caccf9c485a52"
+        },
+        "consensus/monitoring/README.md": {
+          "mode": "100644",
+          "blob": "e51864259bc303f339c82b938226d7bfe9b71fd9"
+        },
+        "consensus/monitoring/collector.go": {
+          "mode": "100644",
+          "blob": "42c5924cc2cb4e34da096ed8a47a8bf14c4cc9c6"
+        },
+        "consensus/monitoring/collector_test.go": {
+          "mode": "100644",
+          "blob": "3f22fa915d0bd4abf6383b7e669d9a51a66768f6"
+        },
+        "consensus/monitoring/delivery.go": {
+          "mode": "100644",
+          "blob": "c4d0482b60aa262d9842182fcf4c325addbe9783"
+        },
+        "consensus/monitoring/model.go": {
+          "mode": "100644",
+          "blob": "3c76af0f638b6cf0ee626afeac283b07ddcaa87f"
+        },
+        "consensus/monitoring/publish.go": {
+          "mode": "100644",
+          "blob": "4681709d85c0964f9e6e7fa1e4a027b0fabf441c"
+        },
+        "consensus/monitoring/publish_test.go": {
+          "mode": "100644",
+          "blob": "7268468848bdd7a626c6f9379363cb6c4f3e62ea"
+        },
+        "consensus/monitoring/service.go": {
+          "mode": "100644",
+          "blob": "8d6991c6ce1283a44f04d77121792284cf3579ba"
+        },
+        "consensus/monitoring/store.go": {
+          "mode": "100644",
+          "blob": "f48d96a4806f49cc7f6a42c3e06a9e6cb81619ce"
+        },
+        "consensus/monitoring/store_test.go": {
+          "mode": "100644",
+          "blob": "7f47f6b3ee464dfd50d1547dbdb1ee3ce26b1247"
+        },
+        "consensus/telemetry/codes.go": {
+          "mode": "100644",
+          "blob": "217a6fd4c45c08e131c4a7481a2c537200f78592"
+        },
+        "consensus/telemetry/health.go": {
+          "mode": "100644",
+          "blob": "e49b44485758b63418dc743949c6aa6ca1bd34ef"
+        },
+        "consensus/telemetry/health_test.go": {
+          "mode": "100644",
+          "blob": "eb0f3b3e5007009707ecde6d1f5f8fa9abfd9122"
+        },
+        "consensus/cmd/stake-monitor/main.go": {
+          "mode": "100644",
+          "blob": "02a31c26ce1bc5133497e5ec6cb31c82006118ea"
+        },
+        "deployments/monitoring/config.example.json": {
+          "mode": "100644",
+          "blob": "61962437e6b4a72948df4354b2ecea378434f181"
+        },
+        "deployments/monitoring/dashboard.json": {
+          "mode": "100644",
+          "blob": "fe76d47bf9a2bbc7264a16001f89c961eafe7c55"
+        },
+        "deployments/monitoring/prometheus.yml": {
+          "mode": "100644",
+          "blob": "47859e4034c62c05d4be013cec94cd8227c0ad9d"
+        },
+        "deployments/monitoring/stake-alarms.yml": {
+          "mode": "100644",
+          "blob": "5cd30cb22ee5dadfe3d73d68529629b55b7cc461"
+        },
+        "deployments/monitoring/stake-monitor.compose.yml": {
+          "mode": "100644",
+          "blob": "2c01582a2fc5635543a11b9342dcf63ea7eaf534"
+        },
+        "docker/Dockerfile.stake-monitor": {
+          "mode": "100644",
+          "blob": "119ae3e20ad767a3ab136ebe970baaab0e96d1fd"
+        }
+      }
+    },
+    {
+      "step": "9.6",
+      "qualifiedSource": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284273,
+        44178284286
+      ],
+      "requirements": [
+        "11 added integrated/14 baseline/3 execution scenarios",
+        "actual indispensable protected QC signer share",
+        "coordinated faults and alarms without weakening protection"
+      ],
+      "paths": [
+        "scripts/stake_integrated_faults.py",
+        "scripts/stake_monitor_scenarios.py",
+        "scripts/settlement_process_scenarios.py",
+        "scripts/qualify-execution-recovery.py",
+        "integration/cmd/settlement-fixture"
+      ],
+      "files": {
+        "scripts/stake_integrated_faults.py": {
+          "mode": "100644",
+          "blob": "3ef59ee2d5341dabee644212edd9b47085de97e6"
+        },
+        "scripts/stake_monitor_scenarios.py": {
+          "mode": "100644",
+          "blob": "0575d3d21493f0f230b7435764c3eeae41843e8e"
+        },
+        "scripts/settlement_process_scenarios.py": {
+          "mode": "100644",
+          "blob": "6e3354cfe485a3a875ebf30864b47a5a9428e92a"
+        },
+        "scripts/qualify-execution-recovery.py": {
+          "mode": "100644",
+          "blob": "5ca88f1d2ac7e0c84825da7085c3c9ff4e865671"
+        },
+        "integration/cmd/settlement-fixture/main.go": {
+          "mode": "100644",
+          "blob": "b90ae40f8f82e17056dc56b2c43f96c8470f97c1"
+        },
+        "integration/cmd/settlement-fixture/protected.go": {
+          "mode": "100644",
+          "blob": "a82578e26b4401b6ca50892c432781d17bba2de5"
+        }
+      }
+    },
+    {
+      "step": "9.7",
+      "qualifiedSource": "fa417175a4665c75ce7ccc0e11f1c26b8abaa1d8",
+      "runs": [
+        44193039776
+      ],
+      "requirements": [
+        "all twelve onboarding/runbook topics",
+        "20 command groups/7 binary builds/2 initializer tests",
+        "explicit interface-only/live-runtime boundaries"
+      ],
+      "paths": [
+        "consensus/cmd/stake-operator-init",
+        "scripts/verify-stake-operator-runbook.py",
+        "docs/STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md",
+        "docs/apps/stake/index.md"
+      ],
+      "files": {
+        "consensus/cmd/stake-operator-init/main.go": {
+          "mode": "100644",
+          "blob": "1583d1a6d2aae88c8b57417a4f792e487a930f3b"
+        },
+        "consensus/cmd/stake-operator-init/main_test.go": {
+          "mode": "100644",
+          "blob": "1a361560bc818c677ff5040874d8919d49e9fb5c"
+        },
+        "consensus/cmd/stake-operator-init/main_unavailable.go": {
+          "mode": "100644",
+          "blob": "12441cd333f9633f0e7910b265d625f54611de91"
+        },
+        "scripts/verify-stake-operator-runbook.py": {
+          "mode": "100644",
+          "blob": "5f451a1a9ffcd0b3cf10f2cd526c3279545a4312"
+        },
+        "docs/STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md": {
+          "mode": "100644",
+          "blob": "a5f7367e55b6d284a0185eba98640cbfe70604a3"
+        },
+        "docs/apps/stake/index.md": {
+          "mode": "100644",
+          "blob": "75bf409f6abb47e8d8b89be064ab3c069d34b5be"
+        }
+      }
+    },
+    {
+      "step": "shared-runtime",
+      "qualifiedSource": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284286,
+        44178284273
+      ],
+      "requirements": [
+        "unchanged protocol types, cryptographic backend, quorum/finality and module dependencies"
+      ],
+      "paths": [
+        "go.mod",
+        "go.sum",
+        "consensus/types",
+        "consensus/crypto",
+        "consensus/finality",
+        "execution/systemcall"
+      ],
+      "files": {
+        "consensus/crypto/README.md": {
+          "mode": "100644",
+          "blob": "1e6bf51fcbdd3902f5e39ad473f0df07b76790c8"
+        },
+        "consensus/crypto/bls/README.md": {
+          "mode": "100644",
+          "blob": "6b3ec3e7b2079d5754a678a95679aed92a682b7c"
+        },
+        "consensus/crypto/bls/api.go": {
+          "mode": "100644",
+          "blob": "edfed19c275fe9aac318fa9767292332f1c4b6e8"
+        },
+        "consensus/crypto/bls/backend_blst.go": {
+          "mode": "100644",
+          "blob": "2532e76a81415a8f9b161a793b6ea9bd7907b4ce"
+        },
+        "consensus/crypto/bls/bls.go": {
+          "mode": "100644",
+          "blob": "398bb207075de3ed3b6ac85cece99ec694646a94"
+        },
+        "consensus/crypto/bls/bls_test.go": {
+          "mode": "100644",
+          "blob": "73d8e0e3e37bc57477fcfbbdc99a56bad27656c2"
+        },
+        "consensus/crypto/bls/pop.go": {
+          "mode": "100644",
+          "blob": "0e281dc3bd682c0eaf451ed1c015a810f9360e57"
+        },
+        "consensus/crypto/domain.go": {
+          "mode": "100644",
+          "blob": "90f596d1bb4f4f2ba667e4ec3d5288c1674a336f"
+        },
+        "consensus/finality/README.md": {
+          "mode": "100644",
+          "blob": "0cbd41ab649991d5a5de0294eef504a980124c9a"
+        },
+        "consensus/finality/engine.go": {
+          "mode": "100644",
+          "blob": "e26f97d798397a5fc163d0a2edca2366d99219a5"
+        },
+        "consensus/finality/qc.go": {
+          "mode": "100644",
+          "blob": "eb94b30303604ead0e6e706e4ed75b2c35119c75"
+        },
+        "consensus/finality/qc_test.go": {
+          "mode": "100644",
+          "blob": "6754ce87358efe53e5f61592772594e428dab248"
+        },
+        "consensus/finality/tracker.go": {
+          "mode": "100644",
+          "blob": "666983e1ca02371e6ca5a4e73f02e22068098d45"
+        },
+        "consensus/types/consensus.go": {
+          "mode": "100644",
+          "blob": "5986637397cc94f91d2448fb5195ce278885676e"
+        },
+        "consensus/types/constants.go": {
+          "mode": "100644",
+          "blob": "3f646a839d4c9b302d6470974d117cc7167ad719"
+        },
+        "consensus/types/systemcalls.go": {
+          "mode": "100644",
+          "blob": "c199555012e4dd2bc76c166696806e210a4703d4"
+        },
+        "consensus/types/systemcalls_test.go": {
+          "mode": "100644",
+          "blob": "c79f37e9eeb7dba1e5cde55c5a82a7267a878ba0"
+        },
+        "execution/systemcall/envelope.go": {
+          "mode": "100644",
+          "blob": "adc1d642a0b28a4a166358a0383ba54884f9b625"
+        },
+        "execution/systemcall/envelope_test.go": {
+          "mode": "100644",
+          "blob": "fef4072491240600d3120aebb84a6ae7966a61ab"
+        },
+        "execution/systemcall/hook.go": {
+          "mode": "100644",
+          "blob": "c194e204df41bb36e6eaa1e83f2a634468ed750f"
+        },
+        "execution/systemcall/hook_test.go": {
+          "mode": "100644",
+          "blob": "1db5dbc0861a2ba19e4d9bd113227fa32aad8dbc"
+        },
+        "go.mod": {
+          "mode": "100644",
+          "blob": "e25640c23d70ab0ec75fda818b64cd799b26f8db"
+        },
+        "go.sum": {
+          "mode": "100644",
+          "blob": "a3b1f24572f080c37de0d51cc5950e575dd82c8e"
+        }
+      }
+    }
+  ],
+  "originalEvidence": [
+    {
+      "step": "9.1",
+      "candidate": "3cfd666c3723d8bf2db2bdc66338fe800950f533",
+      "runs": [
+        44146233112
+      ]
+    },
+    {
+      "step": "9.2",
+      "candidate": "74274d07c4d0e432ebb7f0fc8f610dc04d32bed2",
+      "runs": [
+        44130324547,
+        44130324320,
+        44130324379
+      ]
+    },
+    {
+      "step": "9.3",
+      "candidate": "3627687a0a35542de2e5f2972dce7d16fe659263",
+      "runs": [
+        44137388796
+      ]
+    },
+    {
+      "step": "9.4",
+      "candidate": "f738795fcf88f3b22f443db17a355f4a9ccc4da1",
+      "runs": [
+        44159878305,
+        44159878183,
+        44159878518
+      ]
+    },
+    {
+      "step": "9.5",
+      "candidate": "4561e95809e672a3b69177fbcd069a5f35c1551b",
+      "runs": [
+        44173816629,
+        44173816598,
+        44173816647
+      ]
+    },
+    {
+      "step": "9.6",
+      "candidate": "f1bd533fc09675da248068bc636cb85a48ffd730",
+      "runs": [
+        44178284273,
+        44178284286
+      ]
+    },
+    {
+      "step": "9.7",
+      "candidate": "fa417175a4665c75ce7ccc0e11f1c26b8abaa1d8",
+      "runs": [
+        44193039776
+      ]
+    }
+  ]
+}

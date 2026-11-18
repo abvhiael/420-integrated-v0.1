@@ -536,6 +536,48 @@
       "notes": "Quote is not authorization; execution and minimum-output semantics remain canonical."
     },
     {
+      "surface_id": "GEN-PAY",
+      "surface_name": "420 Pay",
+      "surface_class": "protocol-application",
+      "genesis_role": "user-facing",
+      "environments": [
+        "development",
+        "genesis"
+      ],
+      "required_dimensions": [
+        "architecture",
+        "user",
+        "developer",
+        "security_privacy",
+        "troubleshooting_recovery",
+        "reference"
+      ],
+      "evidence": {
+        "architecture": [
+          "docs/architecture/protocols/pay-token-exchange-bridge.md"
+        ],
+        "user": [
+          "docs/apps/pay/user-guide.md"
+        ],
+        "developer": [
+          "docs/apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md",
+          "docs/apps/pay/deployment-operations.md"
+        ],
+        "security_privacy": [
+          "docs/apps/pay/security.md"
+        ],
+        "troubleshooting_recovery": [
+          "docs/apps/pay/troubleshooting.md"
+        ],
+        "reference": [
+          "docs/apps/pay/fees.md",
+          "docs/420PAY-GENESIS-PARAMETERS.md"
+        ]
+      },
+      "status": "catalogue-approved-deployment-unverified",
+      "notes": "Genesis inclusion and local contract qualification leave live application readiness subject to PAY-APP and PAY-AUDIT-7 evidence."
+    },
+    {
       "surface_id": "GEN-BRIDGE",
       "surface_name": "420 Bridge",
       "surface_class": "protocol-application",

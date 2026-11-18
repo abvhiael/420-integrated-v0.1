@@ -4,7 +4,7 @@ Owner-approved product scope, 2026-11-17. Normative product decision: [PAY-APP-0
 
 ## PAY-APP-0 — Genesis catalogue amendment and product specification
 
-**Status:** PARTIAL. Product approval recorded and V10 catalogue promoted under V3. Native artifact reconciliation remains open. **Testnet required:** No.
+**Status:** COMPLETE. Product approval, V10 catalogue promotion under V3, and resident artifact qualification are recorded below. **Testnet required:** No.
 
 Exit criteria: Promote approved v10 candidate only with explicit configuration version transition, rematerialization of all affected residents, catalogue/docs/discovery/verifier reconciliation and exact-head evidence. Retain reproducible scoped qualification at exact implementation SHA.
 
@@ -42,7 +42,32 @@ Retained historical commitment blobs are V1 `c8537f6c984ba7d4965e8b51aaefc26c6e2
 
 ### PAY-APP-0.4 — Native artifact reconciliation
 
-**Status:** OPEN. This step owns full native artifact reconciliation and qualification.
+**Status:** COMPLETE for frozen V3. **Testnet required:** No.
+
+The resident manifest at `contracts/artifacts/genesis-residents/v3/manifest.json` records the nine Registry-resolved Pay residents, the four frozen Swap predeploys, and the disabled VerifiedGateway420 predeploy. Its compressed JSON bundle retains the compiler ABIs, creation and runtime bytecode, immutable references, storage layouts, and constructor inputs and outputs. The Pay settlement adapter's executor is a Registry-resolved deployment input. The address and storage word in its rehearsal record come from the local constructor run.
+
+The source inventory found 28 global-commitment constructor consumers. Five are frozen predeploys and nine are covered Registry-resolved Pay residents. The remaining 14 are deployment-time dependencies. These include ten Bridge cores, three non-predeploy Swap components, and ReplayProtectionConsumer420. Candidate reservations convey no deployment authority. Stake's separate commitment is outside this inventory.
+
+The retained [native rehearsal](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44385260069), artifact `14464554916`, ran at `032f1bfa59e97436d6083b1f638a68eb00c7cc21` with Solidity 0.8.24, Cancun, optimizer 200 and via IR. The repository preserves the retrieved archive byte for byte. Its SHA-256, originating commit, source identities, and 13 Pay and Swap compiler artifact digests are checked during reproduction. Fresh construction compares all 14 runtime identities and checks storage, the exact Registry and timelock bindings, empty initial registrations, and gateway verifier state. Unauthorized factory and settlement-adapter configuration calls revert. The pinned timelock also fails closed when the required Registry authority is missing.
+
+Run the pinned native build and verifier from the repository root with Foundry and the Bridge Python requirements installed.
+
+```sh
+(cd contracts && FOUNDRY_PROFILE=pr forge build src/pay src/swap --extra-output storageLayout)
+solc="$HOME/.svm/0.8.24/solc-0.8.24"
+python scripts/bridge-audit-12/package.py build --solc "$solc" --output /tmp/genesis-bridge
+python scripts/bridge-audit-12/materialize_residents.py --check \
+  --bridge-package /tmp/genesis-bridge --anvil "$(command -v anvil)" \
+  --output /tmp/genesis-resident-evidence
+```
+
+The verifier selects the output directory from the active commitment domain. Use `--write` to regenerate the retained records from a qualified compiler build and fresh Anvil constructors. The V3 native workflow invokes `--check` and retains the rehearsal results.
+
+### PAY-APP-0.5 — Genesis application catalogue reconciliation
+
+**Status:** COMPLETE. **Testnet required:** No.
+
+The V3-committed V10 inventory has 22 entries. Pay is a Genesis protocol and user application under `420/service/pay/v1`. The dependency map, documentation matrix, Explorer requirements and acceptance references, Registry discovery guidance, and contextual help now use the same classification. Pay has six development and Genesis documentation routes. Deployment identity and readiness still require separate PAY-AUDIT-7 and Pay application evidence. Gaming remains protocol-only, Arcade remains deferred, and Faucet remains testnet-only.
 
 ### PAY-APP-0.6 — 420Wallet application discovery integration
 

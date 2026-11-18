@@ -877,6 +877,12 @@
         "canonical_settlement_adapter": "CanonicalSettlementAdapter420",
         "production_swap_executor_wired": false,
         "foundry_execution_required": true
+      },
+      "application_catalogue": {
+        "catalogue": "config/genesis-applications.json",
+        "class": "GENESIS_PROTOCOL_AND_USER_APP",
+        "service_id": "420/service/pay/v1",
+        "deployment_evidence": "contracts/config/420pay-genesis-wiring.json"
       }
     },
     "security_toolchain": {

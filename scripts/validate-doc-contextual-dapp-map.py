@@ -16,6 +16,16 @@ def main() -> int:
     slots = data.get("target_slots", {})
     apps = data.get("applications", [])
     errors: list[str] = []
+    catalogue = json.loads((ROOT / "config/genesis-applications.json").read_text())
+    expected_names = {app["name"] for app in catalogue["apps"]
+                      if app["class"] != "GENESIS_PROTOCOL" and app["name"] != "420 Wallet"}
+    names = [app.get("name") for app in apps]
+    if len(names) != len(expected_names) or set(names) != expected_names:
+        errors.append("context map differs from the frozen application catalogue")
+    pay = next((app for app in apps if app.get("name") == "420 Pay"), {})
+    if pay != {"name": "420 Pay", "domain": "PAY", "surface": "420-pay",
+               "environments": ["development", "genesis"], "base_path": "apps/pay"}:
+        errors.append("Pay help must provide development and Genesis documentation routes")
     materialized = 0
     seen: set[str] = set()
 

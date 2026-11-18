@@ -15,3 +15,7 @@ Start with [Getting started](getting-started.md), then use the [User guide](user
 
 ## Authority label
 **Derived/rebuildable presentation.** Source truth remains with consensus/execution and the canonical protocol that owns each domain.
+
+## 420 Pay evidence
+
+Explorer can display transactions, receipts and canonical status from a qualified 420 Pay deployment through its existing views. Genesis catalogue inclusion under `420/service/pay/v1` supplies neither a deployed address nor a settlement verdict. See the [Pay application overview](../pay/index.md) for authority and deployment scope.

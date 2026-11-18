@@ -51,6 +51,7 @@ The following application domains are registered for `development` and `genesis`
 | 420 Identity | `IDENTITY` | `420-identity` |
 | 420 Arbitration | `ARBITRATION` | `420-arbitration` |
 | 420 Swap | `SWAP` | `420-swap` |
+| 420 Pay | `PAY` | `420-pay` |
 | 420 Bridge | `BRIDGE` | `420-bridge` |
 | 420 Stake | `STAKE` | `420-stake` |
 | 420 Governance | `GOV` | `420-governance` |
@@ -58,6 +59,8 @@ The following application domains are registered for `development` and `genesis`
 | 420 Attention | `ATTENTION` | `420-attention` |
 | 420 Token | `TOKEN` | `420-token` |
 | 420 Status | `STATUS` | `420-status` |
+
+Pay help describes approved application scope and verification boundaries. Resolving a Pay help link conveys documentation navigation authority only.
 
 The Faucet uses `FAUCET` / `420-faucet` but is registered only for the `testnet` environment. Because DOC-13 does not yet publish a testnet documentation track, those records are intentionally non-resolvable as authoritative runtime links until testnet publication exists.
 

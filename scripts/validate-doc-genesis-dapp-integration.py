@@ -36,7 +36,11 @@ def main():
     if set(bundle.get('published_environments',[]))!=published: errors.append('runtime dApp bundle publication environments differ from target')
     if bundle.get('cross_environment_fallback') is not False or bundle.get('cross_release_fallback') is not False: errors.append('runtime dApp fallback must remain disabled')
     if bundle.get('authority')!='documentation-navigation-only': errors.append('runtime dApp bundle authority marker missing')
-    if materialized!=108 or len(expected_apps)!=18: errors.append(f'expected 18 published dApps / 108 contexts, got {len(expected_apps)} / {materialized}')
+    catalogue=json.loads((ROOT/'config/genesis-applications.json').read_text())
+    names={a['name'] for a in catalogue['apps']
+           if a['class'] in {'GENESIS_USER_APP','GENESIS_PROTOCOL_AND_USER_APP'} and a['name']!='420 Wallet'}
+    if {a['name'] for a in expected_apps.values()}!=names or len(expected_apps)!=len(names) or materialized!=len(names)*6:
+        errors.append('published dApp contexts differ from the frozen user-facing catalogue')
     if '420-faucet' in bundle.get('applications',{}): errors.append('Faucet must remain unavailable until testnet publication')
     if any('GAMING' in key for app in bundle.get('applications',{}).values() for key in app.get('records',{})): errors.append('Gaming Protocol must remain protocol-only')
     for token in ['environment-unpublished','unsupported-version-intent','documentation-navigation-only','surface-unavailable']:
@@ -46,7 +50,7 @@ def main():
         print(f'420Docs Genesis dApp integration FAILED: {len(errors)} defect(s)',file=sys.stderr)
         for error in errors: print(f'- {error}',file=sys.stderr)
         return 1
-    print('420Docs Genesis dApp integration PASS: 18 published dApps, 108 CTX routes, Faucet unavailable, Gaming protocol-only, fail-closed production routing')
+    print(f'420Docs Genesis dApp integration PASS: {len(expected_apps)} published dApps, {materialized} CTX routes, Faucet unavailable, Gaming protocol-only, fail-closed production routing')
     return 0
 
 if __name__=='__main__': raise SystemExit(main())

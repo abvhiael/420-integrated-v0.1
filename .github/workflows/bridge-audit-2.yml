@@ -22,6 +22,7 @@ on:
       - "contracts/test/PaySwapBridgeGenesisIntegration420.t.sol"
       - "contracts/test/ExchangeBridgeQualification420.t.sol"
       - "contracts/config/genesis-dapp-contract-map.json"
+      - "scripts/qualify-bridge-full-local.py"
       - ".github/workflows/bridge-audit-2.yml"
   workflow_dispatch:
 
@@ -36,8 +37,12 @@ jobs:
   shared-bridge-core:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
     env:
-      FOUNDRY_PROFILE: pr
+      FOUNDRY_FUZZ_SEED: '0x420'
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -50,15 +55,47 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Qualify shared Bridge core, chain registry, lifecycle, risk fuzz and invariants
-        working-directory: contracts
-        run: forge test --match-path 'test/Bridge*.t.sol' -vv
-      - name: Qualify accounting evidence and recovery
-        working-directory: contracts
-        run: forge test --match-path 'test/GovernanceAccountingRecoveryHardening420.t.sol' -vv
-      - name: Qualify Pay/Swap/Bridge downstream compatibility
-        working-directory: contracts
-        run: forge test --match-path 'test/PaySwapBridgeGenesisIntegration420.t.sol' -vv
-      - name: Qualify Exchange bridge asset/route bindings
-        working-directory: contracts
-        run: forge test --match-path 'test/ExchangeBridgeQualification420.t.sol' -vv
+      - name: Qualify shared Bridge core, accounting, and downstream compatibility
+        shell: bash
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mapfile -t owners < <(git ls-files 'contracts/test/Bridge*.t.sol' \
+            contracts/test/GovernanceAccountingRecoveryHardening420.t.sol \
+            contracts/test/PaySwapBridgeGenesisIntegration420.t.sol \
+            contracts/test/ExchangeBridgeQualification420.t.sol | sed 's,.*/,,')
+          selected=()
+          native_owner=
+          for ((i = SHARD; i < ${#owners[@]}; i += 6)); do
+            if [[ "${owners[i]}" == BridgeNativeValueSettlement420.t.sol ]]; then
+              native_owner="${owners[i]}"
+            else
+              selected+=("${owners[i]}")
+            fi
+          done
+          test "${#selected[@]}" -gt 0
+          log="$RUNNER_TEMP/bridge-audit-2.log"
+          python3 scripts/qualify-bridge-full-local.py --owners "${selected[@]}" --log "$log"
+          for owner in "${selected[@]}"; do
+            grep -Fq "for contracts/test/$owner:" "$log"
+          done
+          grep -Eq '^Ran [0-9]+ test suites? in .*: [1-9][0-9]* tests? passed, 0 failed, 0 skipped' "$log"
+          if [[ -n "$native_owner" ]]; then
+            # The native settlement owner inherits the CADC issuer tests through
+            # the gateway fixture. Those tests use their own issuer/router fixtures
+            # in bridge-cadc-proof.yml. Retain the settlement audit's exact selector.
+            native_log="$RUNNER_TEMP/bridge-audit-2.native.log"
+            python3 scripts/qualify-bridge-full-local.py --owners "$native_owner" \
+              --match-test '^testNativeValue' --log "$native_log"
+            grep -Fq "for contracts/test/$native_owner:BridgeNativeCADCSettlement420Test" "$native_log"
+            grep -Fq "for contracts/test/$native_owner:BridgeNativeCCTPExposure420Test" "$native_log"
+            grep -Eq '^Ran 2 test suites in .*: [1-9][0-9]* tests? passed, 0 failed, 0 skipped' "$native_log"
+          fi
+      - name: Retain Bridge qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bridge-audit-2-${{ github.event.pull_request.head.sha || github.sha }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/bridge-audit-2.*
+          if-no-files-found: warn

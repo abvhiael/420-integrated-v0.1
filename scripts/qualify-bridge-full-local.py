@@ -2,18 +2,26 @@
 """Run only V.21 and the affected shared bridge owners on their exact import closure."""
 import argparse,hashlib,json,os,re,shutil,subprocess,tempfile
 from pathlib import Path
+from pay_regression_inventory import REMAPS
 ROOT=Path(__file__).resolve().parents[1]
 def main():
  p=argparse.ArgumentParser();p.add_argument('--solc',default='0.8.24');p.add_argument('--forge',default='forge');p.add_argument('--owners',nargs='+',default=['BridgeSettlementBoundary420.t.sol','BridgeFullLocalIntegration420.t.sol','BridgeFullLocalInvariant420.t.sol','BridgeProductionAdmission420.t.sol','BridgeProductionAdmissionInvariant420.t.sol','BridgeVerifierRouteIdentity420.t.sol','BridgeGenesisIntegration420.t.sol','BridgeTransferLifecycle420.t.sol','BitcoinGatewayIntegration420.t.sol','PaySwapBridgeGenesisIntegration420.t.sol']);p.add_argument('--match-test');p.add_argument('--match-contract');p.add_argument('--log',required=True);a=p.parse_args()
  with tempfile.TemporaryDirectory(prefix='bridge-identity-qualification-') as folder:
-  dest=Path(folder);pending=[Path('contracts/test')/name for name in a.owners];seen=set()
+  dest=Path(folder);pending=[Path('contracts/test')/name for name in a.owners];seen=set();used_remaps={'forge-std/'}
   while pending:
    rel=pending.pop()
    if rel in seen:continue
    seen.add(rel);source=ROOT/rel;target=dest/rel;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(source,target)
    for dependency in re.findall(r'(?:from\s+|import\s+)"([^"]+)"',source.read_text()):
-    path=(ROOT/'contracts'/dependency if dependency.startswith('forge-std/') else source.parent/dependency).resolve();pending.append(path.relative_to(ROOT))
+    prefix=next((prefix for prefix in REMAPS if dependency.startswith(prefix)),None)
+    if prefix:
+     used_remaps.add(prefix)
+     path=ROOT/'contracts'/REMAPS[prefix]/dependency[len(prefix):]
+    else:
+     path=source.parent/dependency
+    pending.append(path.resolve().relative_to(ROOT))
   for fixture in ['verifier-identity','cctp']:shutil.copytree(ROOT/('contracts/test/fixtures/'+fixture),dest/('contracts/test/fixtures/'+fixture))
+  remappings=json.dumps([prefix+'=contracts/'+path for prefix,path in REMAPS.items() if prefix in used_remaps])
   (dest/'foundry.toml').write_text('''[profile.default]
 src="contracts/src"
 test="contracts/test"
@@ -26,7 +34,7 @@ ffi=false
 fs_permissions=[{access="read",path="./contracts/test/fixtures"}]
 gas_limit=9223372036854775807
 code_size_limit=1000000
-remappings=["forge-std/=contracts/forge-std/"]
+remappings='''+remappings+'''
 fuzz={runs=2500,seed="0x42021"}
 [invariant]
 runs=128

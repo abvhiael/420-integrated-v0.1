@@ -56,14 +56,13 @@ jobs:
             test/RegistryApiReconciliation420.t.sol \
             test/RegistryGenesis420.t.sol \
             test/RegistryIdentityNames420.t.sol
-      - name: Run focused API reconciliation tests
-        working-directory: contracts
-        run: forge test --match-path 'test/RegistryApiReconciliation420.t.sol' -vvv
-      - name: Run retained Registry tests
-        working-directory: contracts
+      - name: Run Registry API reconciliation and retained tests
         run: |
-          forge test --match-path 'test/RegistryGenesis420.t.sol' -vvv
-          forge test --match-path 'test/RegistryIdentityNames420.t.sol' -vvv
+          python scripts/qualify-pay-regression.py --profile pr \
+            --match RegistryApiReconciliation420.t.sol \
+            --match RegistryGenesis420.t.sol \
+            --match RegistryIdentityNames420.t.sol \
+            --output reg-audit-2-evidence/solidity
       - name: Registry static authority/opcode scan
         working-directory: contracts
         run: |

@@ -92,6 +92,39 @@ listed as planned. Search and category browsing lead to the Genesis Pay user
 guide and the Registry-backed detail view. Curated metadata carries no
 contract binding, settlement authority, or launch target.
 
+### PAY-APP-0.8 — Ecosystem dependency requalification
+
+The requalification uses the frozen V3 commitment and V10 catalogue. The
+resident manifest accounts for 28 constructor consumers. Registry and Bridge
+qualification run each selected Solidity test from an isolated tracked import
+closure. The full-tree Foundry scan otherwise resolves unrelated CADC test
+fixtures before executing the selected tests. Production compiler settings,
+constructor inputs, bytecode and the dedicated CADC qualification are unchanged.
+
+| Component | Retained or reproduced evidence |
+|---|---|
+| Pay settlement, lifecycle and accounting | [Full Pay archive](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44342384413) and [dependency-aware extension](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44370481682). Verified the two archive digests and compared all 46 current owners against their tracked import closures. 45 qualify by source equivalence. |
+| Pay deployment and ReplayProtection | The sole changed owner, `PayAudit6DeploymentPackage420.t.sol`, has the [V3 CI-profile pass](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44378671219). Its source, imports and compiler profile match the current tree. The canonical Pay deployment verifier reproduces nine V3 resident identities. |
+| Swap, Bridge and deployment tooling | [Swap materialization](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44378671289) and [V3 native qualification](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44389872079). Verified six commitment inputs, checked historical V2 package integrity, compared 14 fresh constructor runtimes, and reproduced 20 Bridge planner tests and seven checks across 11 local deployments. |
+| Registry | The Registry API, invariants and retained tests use the same selectors and profiles with isolated sources. The Registry descriptor provenance and integration verifiers passed. |
+| Wallet and AppStore | [Wallet Web](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44396503563), [Extension](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44396503572), [Chromium](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44396503742), [Mobile](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44396503497) and [AppStore](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44401682196). The AppStore evidence is from the PAY-APP-0.7 dependency branch. Pay remains a discovery entry with launch gated separately. |
+| Indexer and Explorer | [Indexer](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44392690643) and [Explorer](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44392690788). Go suites, TS Pay and Registry descriptors, and Explorer application inventory and descriptor provenance checks passed. |
+| Stake | [Retained Stake qualification](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44370481363). Runtime sources and deployment inputs match the historical qualification. The separate Stake commitment, four frozen predeploys and Indexer/Explorer evidence bindings verify. |
+| 420Docs | Verified 22 frozen application rows, 38 contract-map surfaces and 114 published contextual routes. |
+| Additional consumers | Verified Arcade deferral, Doobr authority, shared consumer-service restrictions, Identity predeploy and Randomness audit. The affected Exchange release qualification passed six tests. [AI custody and deployment qualification](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44392690795) remains applicable to unchanged sources. |
+
+To reproduce Pay evidence selection, obtain archives `14447571280` and
+`14458074983` from their linked runs. Run
+`scripts/qualify-pay-regression.py --profile ci --inventory-only --baseline-archive ZIP --baseline-sha256 SHA --output DIR`
+once per archive and take the union of the two `baseline.reusable` arrays.
+The digests respectively are
+`357b189af9a6571c982fc71356e337478be09c75558847be834394fec6013777` and
+`8b8f2a7b88badfed8fcaff39734bae0e709ffa8a06483475bd0ece589b9d46b9`.
+Use the V3 configuration-sensitive run for the owner outside that union.
+
+Public network deployment receipts still belong to PAY-AUDIT-7 and
+PAY-APP-18. Repository qualification does not supply live deployment evidence.
+
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
 **Status:** PLANNED. **Testnet required:** No.

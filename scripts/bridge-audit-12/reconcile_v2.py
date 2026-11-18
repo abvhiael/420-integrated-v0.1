@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-materialize the existing Swap and Pay compiler identities for explicit V2.
+"""Re-materialize the existing Swap and Pay compiler identities for the active frozen Genesis configuration.
 
 Retained Swap compiler artifacts stay byte-for-byte intact. Fresh affected-owner
 compiler output must reproduce their template, ABI and creation identity. Pay's
@@ -65,6 +65,6 @@ def main():
     for path,obj in outputs.items():
         data=json.dumps(obj,indent=2)+'\n' if path==pay.PACKAGE else p.dump(obj)
         if args.write:path.write_text(data)
-        if args.check:assert path.read_text()==data,'non-reproducible V2 output: '+str(path)
+        if args.check:assert path.read_text()==data,'non-reproducible Genesis resident output: '+str(path)
     print(json.dumps({'pass':True,'swap_fixed_runtimes':4,'pay_runtime_identities':9,'retained_swap_compiler_artifacts_changed':False,'configuration':p.CONFIG_HASH}))
 if __name__=='__main__':main()

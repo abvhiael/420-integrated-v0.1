@@ -30,8 +30,8 @@ decision = load("config/genesis-applications.json")
 mapping = load("contracts/config/genesis-dapp-contract-map.json")
 if decision.get("status") != "FROZEN":
     errors.append("genesis application decision not frozen")
-if len(decision.get("apps", [])) != 21:
-    errors.append("expected 21 frozen public surfaces including testnet-only faucet")
+if len(decision.get("apps", [])) != 22:
+    errors.append("expected 22 frozen public surfaces including testnet-only faucet")
 
 mapped = {x["dapp"]: x for x in mapping.get("apps", [])}
 for app in decision.get("apps", []):
@@ -264,8 +264,8 @@ if "codeHash" not in registry or "metadataHash" not in registry or "version" not
 out = {
     "pass": not errors,
     "errors": errors,
-    "genesis_apps": 19,
-    "testnet_only_apps": 1,
+    "genesis_apps": sum(app.get("class") != "TESTNET_ONLY" for app in decision.get("apps", [])),
+    "testnet_only_apps": sum(app.get("class") == "TESTNET_ONLY" for app in decision.get("apps", [])),
     "explorer_profile": "420-explorer-genesis-v1",
     "search_profile": "420-search-genesis-v1",
     "analytics_profile": "420-analytics-genesis-v1",

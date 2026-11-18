@@ -10,7 +10,7 @@ consumer = json.loads(read("config/genesis-consumer-services.json"))
 travel = json.loads(read("config/420travel-genesis.json"))
 source = read("genesis/svc3/travelapp/compatibility.go")
 travel_spec = read("docs/genesis-services/GEN-SVC-3-TRAVEL.md")
-assert frozen["schema"] == "420-genesis-application-decision-v9"
+assert frozen["schema"] == "420-genesis-application-decision-v10"
 assert frozen["status"] == "FROZEN"
 assert not any("doobr" in a.get("name", "").casefold() for a in frozen["apps"])
 assert consumer["schema"] == "420-genesis-consumer-services-v1"

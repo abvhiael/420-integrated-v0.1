@@ -70,6 +70,6 @@ class PackageTest(unittest.TestCase):
         self.production();root=self.authority_copy();f=root/'contracts/config/genesis-config-commitment.json';obj=json.loads(f.read_text());obj['commitmentPayload']['initializationVersion']=2;p.write(f,obj)
         with patch.object(p,'ROOT',root):self.rejects('frozen configuration commitment')
     def test_production_plan_rejects_retired_commitment_version(self):
-        self.production();root=self.authority_copy();f=root/'contracts/config/genesis-config-commitment.json';obj=json.loads(f.read_text());obj['status']='FROZEN_V1';p.write(f,obj)
+        self.production();root=self.authority_copy();f=root/'contracts/config/genesis-config-commitment.json';obj=json.loads(f.read_text());obj['status']='FROZEN_V2';p.write(f,obj)
         with patch.object(p,'ROOT',root):self.rejects('noncanonical commitment version')
 if __name__=='__main__':unittest.main(verbosity=2)

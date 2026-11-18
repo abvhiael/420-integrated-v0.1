@@ -10,12 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 COMMITMENT = ROOT / "contracts/config/genesis-config-commitment.json"
 STORAGE_INIT = ROOT / "contracts/config/predeploy/storage-init.json"
 EXPECTED_SCHEMA = "420-genesis-configuration-commitment-v1"
-EXPECTED_STATUS = "FROZEN_V2"
-EXPECTED_DOMAIN = "420/GENESIS/CONFIG/V2"
+EXPECTED_STATUS = "FROZEN_V3"
+EXPECTED_DOMAIN = "420/GENESIS/CONFIG/V3"
 EXPECTED_SCOPE = "GENESIS_RESIDENT_CONTRACT_CONFIGURATION"
 EXPECTED_TIMELOCK = "0x0000000000000000000000000000000000000429"
 EXPECTED_REGISTRY = "0x0000000000000000000000000000000000000434"
-EXPECTED_HASH = "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d"
+EXPECTED_HASH = "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
 
 errors=[]
 
@@ -53,8 +53,17 @@ record=load(COMMITMENT)
 storage=load(STORAGE_INIT)
 history=ROOT/"contracts/config/history/genesis-config-commitment-v1.json"
 if git_blob(history) != "c8537f6c984ba7d4965e8b51aaefc26c6e2e1cd5": fail("historical V1 commitment changed")
-previous=load(history)
-if record.get("supersedes",{}).get("genesisConfigHash") != previous.get("genesisConfigHash"): fail("V2 supersession identity drift")
+v2_relative = "contracts/config/history/genesis-config-commitment-v2.json"
+v2_history = ROOT / v2_relative
+if git_blob(v2_history) != "b69b140df641975f57f05c42e45d48ee93c0c1e0":
+    fail("historical V2 commitment changed")
+previous = load(v2_history)
+if record.get("supersedes") != {
+    "path": v2_relative,
+    "genesisConfigHash": previous.get("genesisConfigHash"),
+    "decision": "docs/apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md",
+}:
+    fail("V3 supersession record drift")
 
 if record.get("schema") != EXPECTED_SCHEMA: fail("commitment schema drift")
 if record.get("status") != EXPECTED_STATUS: fail("commitment status drift")
@@ -90,7 +99,7 @@ else:
             continue
         actual=git_blob(p)
         if actual != expected:
-            fail(f"FROZEN_V2 authority input drift: {path}: expected {expected}, got {actual}")
+            fail(f"FROZEN_V3 authority input drift: {path}: expected {expected}, got {actual}")
 
 canonical=json.dumps(payload,sort_keys=True,separators=(",",":"),ensure_ascii=False).encode("utf-8")
 actual_hash=cast_keccak(canonical)

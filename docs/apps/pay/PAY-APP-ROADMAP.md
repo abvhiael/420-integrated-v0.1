@@ -1,12 +1,40 @@
 # 420Pay application roadmap — PAY-APP
 
-Owner-approved product scope, 2026-11-17. Normative product decision: [PAY-APP-0](PAY-APP-0-PRODUCT-SPECIFICATION.md). Existing PAY-AUDIT-1–8 numbering and historical results remain unchanged. All steps are unqualified unless exact-head evidence is retained. PAY-APP-0 product decision and staged candidate are implemented; configuration promotion and qualification remain open. PAY-APP-1–18 are planned, not implemented. Steps 0–17 are repository-side, including configuration transition; only real external/device/provider blockers may be deferred. Step 18 requires the live public testnet. Independent security review remains PAY-AUDIT-8.
+Owner-approved product scope, 2026-11-17. Normative product decision: [PAY-APP-0](PAY-APP-0-PRODUCT-SPECIFICATION.md). Existing PAY-AUDIT-1–8 numbering and historical results remain unchanged. All steps are unqualified unless exact-head evidence is retained. PAY-APP-0 tracks product approval, catalogue promotion and resident qualification. PAY-APP-1–18 are planned, not implemented. Steps 0–17 are repository-side, including configuration transition; only real external/device/provider blockers may be deferred. Step 18 requires the live public testnet. Independent security review remains PAY-AUDIT-8.
 
 ## PAY-APP-0 — Genesis catalogue amendment and product specification
 
-**Status:** PARTIAL — product approval recorded; catalogue promotion and qualification pending. **Testnet required:** No.
+**Status:** PARTIAL. Product approval recorded and V10 catalogue promoted under V3. Native artifact reconciliation remains open. **Testnet required:** No.
 
 Exit criteria: Promote approved v10 candidate only with explicit configuration version transition, rematerialization of all affected residents, catalogue/docs/discovery/verifier reconciliation and exact-head evidence. Retain reproducible scoped qualification at exact implementation SHA.
+
+### PAY-APP-0.2 — Dependency-aware regression discovery
+
+Qualified at `c3fb2cf48b3429a9d7e8da96b2e204d7c452863d`. The independent inventory examined 627 tracked owners and selected 46. Of those, 33 passed in retained evidence and 13 passed in the full CI profile. All 138 retained source SHA-256 identities matched. Six discovery tests and 23 Indexer tests passed.
+
+| Workflow | Run ID |
+|---|---:|
+| Full Pay regression | [44370481682](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44370481682) |
+| PAY-AUDIT-7 | 44370481289 |
+| 420Indexer | 44370482225 |
+| CI-GUARD-02 | 44370481232 |
+| 420Stake | 44370481363 |
+| 420Explorer | 44370481580 |
+| 420Registry | 44370481450 |
+| 420Docs | 44370481391 |
+| Native V3 candidate rehearsal | 44370481372 |
+
+Retained artifacts are independent inventory `14457823388`, full regression `14458074983`, and derived runtime identities `14458808233`. The earlier regression archive `14447571280` belongs to run `44342384413` at `fa8cc74c0d5529ecd9032eba6afbe0f4b9247041`. The historical passes for `BetVideoPokerPaytable54.t.sol` and `ComputeJobPayerCustody420.t.sol` are retained outside the dedicated Pay coverage count.
+
+### PAY-APP-0.3 — Permanent V3 Genesis configuration integration
+
+The active configuration is `FROZEN_V3`, domain `420/GENESIS/CONFIG/V3`, with commitment `0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d`. Independent Keccak-256 derivation also reproduced the historical V1 and V2 commitments. Git blob verification matched all six authority inputs. The only changed input was the approved V10 catalogue, blob `73a24bfe46787f3c2af043adc1de12eea1f456ab`.
+
+The exact-head native rehearsal workflow verifies committed V3, materializes the affected dependencies and retains the configuration, compiler and local-EVM comparison evidence. Existing V2 Bridge qualification remains anchored to its original revision.
+
+### PAY-APP-0.4 — Native artifact reconciliation
+
+**Status:** OPEN. This step owns full native artifact reconciliation and qualification.
 
 ## PAY-APP-1 — Shared application architecture and payment SDK
 

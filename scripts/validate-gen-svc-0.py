@@ -43,7 +43,7 @@ def main() -> int:
     require(registry.get("frozen_application_catalog") == "config/genesis-applications.json", "consumer registry must reference frozen application catalog", errors)
     require(registry.get("policy", {}).get("frozen_catalog_unchanged") is True, "GEN-SVC-0 must preserve the frozen application catalog", errors)
     require(frozen.get("status") == "FROZEN", "genesis application catalog must remain FROZEN", errors)
-    require(frozen.get("schema") == "420-genesis-application-decision-v9", "GEN-SVC-0 expects frozen application decision v9", errors)
+    require(frozen.get("schema") == "420-genesis-application-decision-v10", "GEN-SVC-0 expects frozen application decision v10", errors)
 
     services = registry.get("services", [])
     service_ids = [item.get("id") for item in services]

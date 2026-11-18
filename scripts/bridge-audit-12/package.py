@@ -9,13 +9,13 @@ CORE = ['VerifiedGateway420','BridgeVerifierRegistry420','BridgeChainRegistry420
 LEGACY = {'ETHProofAdapter','BTCLightClientAdapter'}
 REGISTRY = '0x0000000000000000000000000000000000000434'
 GATEWAY = '0x0000000000000000000000000000000000000438'
-CONFIG_HASH = '0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d'
+CONFIG_HASH = '0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d'
 def commitment():
     from eth_hash.auto import keccak
     obj=json.loads((ROOT/'contracts/config/genesis-config-commitment.json').read_text())
-    assert obj['status']=='FROZEN_V2', 'noncanonical commitment version'
-    assert obj['commitmentPayload']['domain']=='420/GENESIS/CONFIG/V2', 'noncanonical commitment domain'
-    payload=json.dumps(obj['commitmentPayload'],sort_keys=True,separators=(',',':')).encode()
+    assert obj['status']=='FROZEN_V3', 'noncanonical commitment version'
+    assert obj['commitmentPayload']['domain']=='420/GENESIS/CONFIG/V3', 'noncanonical commitment domain'
+    payload=json.dumps(obj['commitmentPayload'],sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()
     assert obj['genesisConfigHash']==CONFIG_HASH=='0x'+keccak(payload).hex(), 'frozen configuration commitment'
     drift=[]
     for entry in obj['commitmentPayload']['authorityInputs']:

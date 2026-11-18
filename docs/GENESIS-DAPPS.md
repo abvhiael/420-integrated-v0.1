@@ -112,4 +112,4 @@ This document describes both the frozen application decision and the current GEN
 
 ## Approved 420Pay catalogue amendment — activation pending
 
-The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V2-committed catalogue remains unchanged pending an explicit configuration-version transition and affected resident qualification. The active JSON, not the historical numbered list above, controls current frozen deployment scope.
+The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V10 catalogue contains 22 surfaces and is bound by the V3 Genesis configuration commitment. The active JSON controls frozen deployment scope. The numbered list above records the earlier decision.

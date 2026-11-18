@@ -189,7 +189,21 @@ jobs:
           if-no-files-found: error
       - name: Run PAY-AUDIT-6 Level 1 deployment qualification
         run: python3 scripts/qualify-pay-regression.py --profile pr --match PayAudit6DeploymentPackage420.t.sol --match ReplayProtectionConsumer420.t.sol --output pay-level1-evidence
+      - name: Identify V3-only changes to qualified Pay regression inputs
+        id: v3-regression
+        env:
+          QUALIFIED_HEAD: c3fb2cf48b3429a9d7e8da96b2e204d7c452863d
+        run: |
+          if git merge-base --is-ancestor "$QUALIFIED_HEAD" HEAD &&
+             git diff --quiet "$QUALIFIED_HEAD" HEAD -- '*.sol' contracts/foundry.toml scripts/pay_regression_inventory.py scripts/qualify-pay-regression.py ':(exclude)contracts/test/PayAudit6DeploymentPackage420.t.sol' &&
+             python3 scripts/verify-genesis-config-commitment.py; then
+            echo "v3_only=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Requalify the configuration-sensitive Pay owner under the full CI profile
+        if: steps.v3-regression.outputs.v3_only == 'true'
+        run: python3 scripts/qualify-pay-regression.py --profile ci --match PayAudit6DeploymentPackage420.t.sol --output pay-regression-evidence
       - name: Full applicable Pay contract regression qualification
+        if: steps.v3-regression.outputs.v3_only != 'true'
         run: |
           set -euo pipefail
           args=()

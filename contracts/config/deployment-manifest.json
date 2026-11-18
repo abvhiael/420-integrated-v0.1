@@ -83,7 +83,7 @@
       "name": "GenesisDEXFactory",
       "predeploy_state": "contracts/config/predeploy/GenesisDEXFactory-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/GenesisDEXFactory.json",
-      "runtime_code_hash": "0xd538ac18165330a76ecf26167d18db1caa78c43bdf51dbbd80b2cc677781b684",
+      "runtime_code_hash": "0x519e5cdd3cd37335c124a2d27b48a2e9bc3594eba7ee3b32daa0e599e18a88d2",
       "source_blob_sha1": "70f996054cae7dc1c8620cffa40628a4ceb930cd"
     },
     {
@@ -93,7 +93,7 @@
       "name": "PublicBatchAuction",
       "predeploy_state": "contracts/config/predeploy/PublicBatchAuction-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/PublicBatchAuction.json",
-      "runtime_code_hash": "0x08d3024194eccc9221c9aeda6d5a152514e0f577b70efb2e9c08dac670d76c45",
+      "runtime_code_hash": "0xf794f35a60d71f93c948b889f100223a3336355ca37d3468a47519721b8adcec",
       "source_blob_sha1": "403f502898ad445d38075bfb648a64fe73fc8f29"
     },
     {
@@ -103,7 +103,7 @@
       "name": "TWAPOracle",
       "predeploy_state": "contracts/config/predeploy/TWAPOracle-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/TWAPOracle.json",
-      "runtime_code_hash": "0x841d11270af944e9ee4d6608b9c70c237a7b94f13632496412366274dacf770b",
+      "runtime_code_hash": "0x6937dd180dbfd2470b33d9d4912d35f95c44334bf6af19e116edd1c7f9adfebe",
       "source_blob_sha1": "55802efd2331c6278ca4482f116c72e7cc590466"
     },
     {
@@ -176,10 +176,10 @@
       "artifact_status": "BRIDGE_AUDIT_12_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
       "name": "VerifiedGateway420",
-      "notes": "BRIDGE-AUDIT-12: canonical V2 constructor runtime and empty storage qualified locally; disabled until existing governance/route admission qualification. Live network acceptance remains testnet work.",
+      "notes": "BRIDGE-AUDIT-12: canonical V3 constructor runtime and empty storage qualified locally; disabled until existing governance/route admission qualification. Live network acceptance remains testnet work.",
       "predeploy_state": "contracts/config/predeploy/VerifiedGateway420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/VerifiedGateway420.json",
-      "runtime_code_hash": "0x560f89d7b0c658beeb207cbca1e034d33be66e4b2bcab452b755d5a7b993c64b",
+      "runtime_code_hash": "0x0394edbbc023e40f8989513baba196c1c968d2f8b139da87add95b33433f8c41",
       "source_blob_sha1": "dfb0f95ef701143469718bb397453cc28b541e11"
     },
     {
@@ -189,7 +189,7 @@
       "name": "ApprovedQuoteAssetRegistry",
       "predeploy_state": "contracts/config/predeploy/ApprovedQuoteAssetRegistry-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/ApprovedQuoteAssetRegistry.json",
-      "runtime_code_hash": "0x49079211bacaae693ee8df2971a308cf01b053de161c47db230f6e50f908a121",
+      "runtime_code_hash": "0x67f5eb0d0d65f5ae1ef8eac7ece468ab1d013829a75aaf74d68b657c11c569f1",
       "source_blob_sha1": "c374a9754eb9aadef96a2b761788df1dbc33e69e"
     },
     {

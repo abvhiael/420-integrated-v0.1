@@ -1,6 +1,6 @@
 {
   "schema": "420-genesis-configuration-commitment-v1",
-  "status": "FROZEN_V2",
+  "status": "FROZEN_V3",
   "commitmentAlgorithm": "keccak256",
   "canonicalization": "UTF-8 JSON of commitmentPayload with lexicographically sorted object keys, compact separators ',' and ':', arrays preserved in declared order",
   "commitmentPayload": {
@@ -18,7 +18,7 @@
         "path": "contracts/config/interfaces/genesis-interface-layer.json"
       },
       {
-        "gitBlobSha1": "3f177b0062c307758767c0abfe596cc1d3e2ae2b",
+        "gitBlobSha1": "73a24bfe46787f3c2af043adc1de12eea1f456ab",
         "path": "config/genesis-applications.json"
       },
       {
@@ -30,23 +30,23 @@
         "path": "config/ai-genesis.json"
       }
     ],
-    "domain": "420/GENESIS/CONFIG/V2",
+    "domain": "420/GENESIS/CONFIG/V3",
     "governanceTimelock": "0x0000000000000000000000000000000000000429",
     "initializationVersion": 1,
     "protocolRegistry": "0x0000000000000000000000000000000000000434",
     "scope": "GENESIS_RESIDENT_CONTRACT_CONFIGURATION"
   },
-  "genesisConfigHash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+  "genesisConfigHash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
   "exclusions": [
     "Generated predeploy artifacts/runtime bytecode are excluded to prevent circular commitment.",
     "Execution and consensus genesis output files are excluded because they are generated/ceremony outputs with independent freeze/checksum authority.",
     "Testnet genesis time, validator seed and live endpoint topology are not part of the resident-contract configuration commitment.",
-    "Any change to an authority input requires an explicit commitment-version decision and re-materialization of affected Genesis-resident runtimes; silent regeneration under FROZEN_V2 is forbidden."
+    "Any change to an authority input requires an explicit commitment-version decision and re-materialization of affected Genesis-resident runtimes; silent regeneration under FROZEN_V3 is forbidden."
   ],
   "authority": "Global Genesis resident-contract configuration identity for IGenesisInitializable420 / GenesisResidentAccess420",
   "supersedes": {
-    "path": "contracts/config/history/genesis-config-commitment-v1.json",
-    "genesisConfigHash": "0x01aea63faef55d711e5f93e800b04702177874f4015375b659038ce991d20921",
-    "decision": "docs/audit/bridge-deployment-qualification/GENESIS-CONFIG-V2.md"
+    "path": "contracts/config/history/genesis-config-commitment-v2.json",
+    "genesisConfigHash": "0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d",
+    "decision": "docs/apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md"
   }
 }

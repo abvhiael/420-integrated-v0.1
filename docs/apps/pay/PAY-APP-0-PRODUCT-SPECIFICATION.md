@@ -6,7 +6,7 @@ Decision date: 2026-11-17. Product scope approved; active Genesis configuration 
 
 420 Pay is approved as GENESIS_PROTOCOL_AND_USER_APP, using existing ServiceIds420.PAY (420/service/pay/v1) and existing Registry-resolved contracts. The proposed public origin is https://pay.420integrated.org; DNS, TLS, verified launch manifest and mobile association files remain deployment gates. The complete candidate catalogue is config/candidates/genesis-applications-pay-v10.json. It adds exactly one entry to the V2-committed v9 catalogue and preserves all existing entries, Arcade deferral, rules and amendments.
 
-The active config/genesis-applications.json is an authority input of FROZEN_V2 (0xa3d526cc61fa265507d4e44da7c1b07a42ffd3fc308a167692c5dba6505ae07d). Do not replace it or edit its hash in isolation. Activate the candidate only in a coherent explicit configuration-version transition: retain V2, derive the new authority blob/hash, identify every affected immutable/runtime/constructor/manifest, regenerate from pinned compiler artifacts, rehearse deployment and compare code/storage/immutable getters, update all catalogue consumers and exact-count/hash checks, run affected qualification, then merge. No fixed Pay addresses, new IDs, contract redesign or live migration are authorized. This transition is locally executable; not a testnet blocker.
+The active `config/genesis-applications.json` is committed by FROZEN_V3 (`0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d`). The commitment supersedes the retained V2 record and binds the approved V10 catalogue bytes. Pay uses Registry resolution and the existing contract inventory. Native artifact qualification is tracked in PAY-APP-0.4.
 
 ## Approved expressions
 
@@ -37,4 +37,4 @@ Local EVM, deterministic fixtures, ABI-backed clients and negative tests must qu
 
 ## Status
 
-Product decisions approved. Catalogue candidate staged; active catalogue promotion, V3-equivalent configuration transition, full dependent reconciliation and exact-head qualification remain open. See PAY-APP-ROADMAP.md.
+The product decision is approved and the V10 catalogue is integrated under V3. See [the canonical roadmap](PAY-APP-ROADMAP.md) for qualification status.

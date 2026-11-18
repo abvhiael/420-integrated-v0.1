@@ -46,3 +46,7 @@ Repository-side implementation can be qualified independently, but live Genesis/
 The repository security policy also retains an external independent security review as a mainnet/production release gate. No such third-party audit is claimed here.
 
 420Pay has no canonical standalone frontend in the current repository. User signing and payment presentation are expected to be provided through Wallet/application clients, while canonical authority remains in the Pay contracts and Registry-discovered dependencies.
+
+## Approved standalone application scope — 2026-11-17
+
+The owner has approved the standalone 420Pay Genesis product; no standalone implementation is claimed. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and [PAY-APP roadmap](apps/pay/PAY-APP-ROADMAP.md). The catalogue candidate is staged; active V2 configuration must remain intact until the qualified transition. Existing protocol qualification is retained without relabeling it as client qualification.

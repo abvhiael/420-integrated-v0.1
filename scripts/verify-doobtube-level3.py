@@ -33,7 +33,7 @@ sol=need(".github/workflows/contracts-foundry.yml",[
     "name: Solidity Contracts",
     'shard: [0, 1, 2, 3]',
     "qualify-foundry-shard.sh",
-    "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md",
+    "on:\n  workflow_dispatch:",
     "audit/doobtube-baseline-20261006",
 ])
 assert "matrix:\n        shard: [0, 1, 2, 3]" in sol
@@ -41,7 +41,7 @@ assert "--force" not in sol.split("pr-shards:",1)[1].split("foundry:",1)[0]
 
 gen=need(".github/workflows/genesis-address-authority.yml",[
     "name: Genesis Address Authority",
-    "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md",
+    "on:\n  workflow_dispatch:",
     "audit/doobtube-baseline-20261006",
     "Genesis owns address/namespace/predeploy authority qualification only",
 ])
@@ -50,7 +50,7 @@ for forbidden in ("forge test","qualify-foundry-shard.sh","forge build --force")
 
 global_ci=need(".github/workflows/qualification.yml",[
     "name: 420 Integrated Qualification",
-    "docs/audit/DOOBTUBE-PHASE-CLOSEOUT.md",
+    "on:\n  workflow_dispatch:",
     "audit/doobtube-baseline-20261006",
     "go test ./...",
     "live-engine-smoke.sh",

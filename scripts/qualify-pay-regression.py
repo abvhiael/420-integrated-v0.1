@@ -20,7 +20,7 @@ CONTRACTS = ROOT / 'contracts'
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--profile', choices=['pr', 'ci'], required=True)
+    p.add_argument('--profile', choices=['default', 'pr', 'ci'], required=True)
     p.add_argument('--match', action='append', help='Explicit owner selectors only; never used for default discovery')
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--inventory-only', action='store_true', help='Enumerate every tracked owner and exit without Forge')
@@ -107,7 +107,10 @@ def main():
         (dest / 'foundry.toml').write_text(config)
         env = dict(os.environ, FOUNDRY_PROFILE=a.profile)
         effective = json.loads(subprocess.check_output(['forge', 'config', '--root', str(dest), '--json'], env=env, text=True))
-        original = tomllib.loads(original_config)['profile'][a.profile]
+        configured = tomllib.loads(original_config)
+        original = configured['profile'][a.profile]
+        if a.profile == 'default':
+            original = {**original, 'invariant': configured['invariant']}
         for key in ('fuzz', 'invariant'):
             for field, value in original[key].items():
                 actual = effective[key][field]

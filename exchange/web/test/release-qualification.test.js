@@ -15,7 +15,7 @@ test('Genesis release drill matrix covers all critical paths',()=>{
   assert.equal(BROWSER_MATRIX.length>=6,true);
 });
 
-test('integrated market/swap/order/bridge review qualifies with current wallet generation',()=>{
+test('integrated market/swap/order/bridge review retains digests and requires canonical bridge execution review',()=>{
   const wallet=new WalletSession();
   wallet.connected({account:'0xabcdefabcdefabcdefabcdefabcdefabcdefabcd',chainId:'0x1a4'});
   const market=fixture('markets.json')[0];
@@ -30,7 +30,7 @@ test('integrated market/swap/order/bridge review qualifies with current wallet g
   });
   assert.equal(result.wallet.ok,true);
   assert.equal(result.swap.ok,true);
-  assert.equal(result.bridge.ok,true);
+  assert.deepEqual(result.bridge,{ok:false,reason:'canonical-execution-review-required'});
   assert.match(result.swapReviewDigest,/^[0-9a-f]{8}$/);
   assert.match(result.orderReviewDigest,/^[0-9a-f]{8}$/);
   assert.match(result.bridgeReviewDigest,/^[0-9a-f]{8}$/);

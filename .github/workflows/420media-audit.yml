@@ -76,7 +76,6 @@ jobs:
         working-directory: contracts
         run: forge build src/media
       - name: Test Media Phase 1 protocol
-        working-directory: contracts
-        run: forge test --match-path "test/MediaPhase1*420.t.sol" -vvv
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/MediaPhase1*420.t.sol' --output /tmp/420media-audit-MediaPhase1-420-t-sol
       - name: Run Media Anvil integration
         run: bash ./scripts/420media-anvil-integration.sh

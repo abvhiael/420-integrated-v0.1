@@ -128,6 +128,8 @@ jobs:
           forge build src/town/TownRewardsAdapter420.sol
           forge build src/town/TownContributionVerifier420.sol
       - name: Town focused tests
-        run: forge test --match-path "test/Town*.t.sol" -vvv
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match 'test/Town*.t.sol' --output /tmp/420town-audit-Town-t-sol
       - name: Cross-dApp rewards hardening
-        run: forge test --match-path "test/RewardsCrossDappHardening420.t.sol" -vvv
+        working-directory: .
+        run: python3 scripts/qualify-pay-regression.py --profile default --match test/RewardsCrossDappHardening420.t.sol --output /tmp/420town-audit-RewardsCrossDappHardening420-t-sol

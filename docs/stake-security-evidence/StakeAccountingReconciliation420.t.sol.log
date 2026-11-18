@@ -1,0 +1,32 @@
+Compiling 31 files with Solc 0.8.24
+Solc 0.8.24 finished in 32.45s
+Compiler run successful!
+2026-11-18T00:28:45.243377Z  WARN evm::traces: failed to read cache file path="/home/agent/.foundry/cache/signatures" err=Read { source: Os { code: 2, kind: NotFound, message: "No such file or directory" }, path: "/home/agent/.foundry/cache/signatures" }
+
+Ran 23 tests for test/StakeAccountingReconciliation420.t.sol:StakeAccountingReconciliation420Test
+[PASS] testAccountingRealContractsExport() (gas: 50256739)
+[PASS] testActivationRequiresOneFullRotationAndFullBond() (gas: 510131)
+[PASS] testAssignedReserveCollateralCannotBeTreasurySpent() (gas: 154373)
+[PASS] testConsensusRewardAppliesOncePerExecutionBlock() (gas: 254136)
+[PASS] testConsensusRewardRejectsWrongBlockAndDuplicateParticipants() (gas: 69003)
+[PASS] testConsensusRewardRejectsZeroProposerZeroParticipantProposerParticipantAndOversizedSet() (gas: 158867)
+[PASS] testConsensusSystemCallerIsOneTimeAndGovernanceCannotForgeOutcome() (gas: 375540)
+[PASS] testCooldownIsBondedButNotSelectionEligible() (gas: 804583)
+[PASS] testDuplicateSlashEvidenceCannotChargeTwice() (gas: 1038136)
+[PASS] testDynamicCommitteeTiersAndRewardAllocation() (gas: 34371)
+[PASS] testExitWithdrawalReturnsOwnedAndRecyclesCredit() (gas: 1506829)
+[PASS] testFinalityEquivocationConsumesOwnedAndRevokesAllCredit() (gas: 923499)
+[PASS] testGenesisBondLifecycleAndDelegationPolicy() (gas: 38202)
+[PASS] testMatchedRegistrationMovesRealReserveCredit() (gas: 690636)
+[PASS] testProportionalSlashMovesOwnedValueAndRecyclesCredit() (gas: 968587)
+[PASS] testProtocolCreditReplacementReturnsValueToReserve() (gas: 806708)
+[PASS] testSelfFundedRegistrationLocksReal420() (gas: 385702)
+[PASS] testStakeFacadeReportsCollateralSolvency() (gas: 682500)
+[PASS] testStakeGenesisInitializationIntrospection() (gas: 32984)
+[PASS] testStakeSafetyFailsClosedOnInactiveOrCodeHashMismatch() (gas: 775943)
+[PASS] testSystemSafetyBlocksNewActivationOutsideNormal() (gas: 773906)
+[PASS] testUnregisteredFundedCreditCanBeReclaimed() (gas: 392036)
+[PASS] testZeroSlashEvidenceRejectedWithoutMutation() (gas: 811245)
+Suite result: ok. 23 passed; 0 failed; 0 skipped; finished in 19.42ms (23.87ms CPU time)
+
+Ran 1 test suite in 20.04ms (19.42ms CPU time): 23 tests passed, 0 failed, 0 skipped (23 total tests)

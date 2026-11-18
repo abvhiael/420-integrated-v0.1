@@ -1,0 +1,9 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 6.13s
+Compiler run successful!
+
+Ran 1 test for test/StakeSystemCallABIVectors420.t.sol:StakeSystemCallABIVectors420Test
+[PASS] testExactStakeSystemCallABIVectors() (gas: 2154)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 314.47µs (44.45µs CPU time)
+
+Ran 1 test suite in 3.27ms (314.47µs CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

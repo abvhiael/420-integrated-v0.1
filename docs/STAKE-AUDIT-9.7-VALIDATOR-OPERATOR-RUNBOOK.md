@@ -219,7 +219,11 @@ binding/code-presence checks are necessary but are not full code-hash attestatio
 Frozen destinations are ValidatorRegistry `0x0000000000000000000000000000000000000423`,
 Stake420 `0x000000000000000000000000000000000000043a`, RewardController
 `0x0000000000000000000000000000000000000420`, and CommunityValidatorReserve
-`0x0000000000000000000000000000000000000424`.
+`0x0000000000000000000000000000000000000425`. ProtocolReserve is the distinct
+`0x0000000000000000000000000000000000000424` destination.
+The [Stake safety-provider manifest](../deployments/stake-security/safety-provider.json)
+requires an actual governance-approved Registry/code-hash binding before production
+activation; no provider address or live binding is inferred from local tests.
 
 Enter the approved nonzero validator ID, **public** BLS key (48 bytes / 96 hex
 digits after `0x`), withdrawal address and metadata commitment. Never paste IKM or

@@ -1,0 +1,403 @@
+{
+  "externalReviewComplete": false,
+  "findings": [
+    {
+      "check": "incorrect-equality",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/ConsensusSystemCall420.t.sol",
+      "fingerprint": "e06fcb5bfdfce1ffbe881b5f737286064e2fcf43778a995b448adcf182295f0d",
+      "impact": "Medium",
+      "originalSlitherId": "b4ae69bfa012f91a40db3b5f19d0037e904673bc54a45dfac01d7d3f075aa136",
+      "reason": "Intentional block-zero rejection and exact canonical parent comparison, not a balance or timestamp liveness condition. Weakening equality would admit the wrong execution context.",
+      "subject": "ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes)"
+    },
+    {
+      "check": "uninitialized-local",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeSecurityInvariant420.t.sol",
+      "fingerprint": "39614f4f2bdab61fc69be1103de1ae58e979d1635b4c89851336104aee14ead1",
+      "impact": "Medium",
+      "originalSlitherId": "45ea2dd63fc5f0d41fa613cfd3669acf63e18a4235247844263cb46e09578e2d",
+      "reason": "Solidity initializes the uint256 accumulator to zero; each participant allocation is accumulated before the residual calculation. No uninitialized memory read.",
+      "subject": "RewardController.applyConsensusReward(uint64,address,address[],uint256,uint256,uint256,uint256).participantsIssued"
+    },
+    {
+      "check": "uninitialized-local",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol",
+      "fingerprint": "9d9e2ed72dd9878879cd2cbd2f6a308d4075543a2a5aa6f111323edc89f2fd69",
+      "impact": "Medium",
+      "originalSlitherId": "84e116b5c3fffb3e50650007827481fa09238612fb37a089ad7427707ba1ee5c",
+      "reason": "Solidity initializes bool to false. It is set true only on the explicit safety override path and only annotates the event.",
+      "subject": "ValidatorRegistry.applyRotationSnapshot(uint64,uint256).safetyOverride"
+    },
+    {
+      "check": "uninitialized-local",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeTransitionProperty420.t.sol",
+      "fingerprint": "e5febd8509715c1b07a0219b8dfbaefc20a141287e8da810afd873077a61cd9f",
+      "impact": "Medium",
+      "originalSlitherId": "e069247714283c8e2bebfb61088b5ca82cb67341d32084e8b4021f81f6ea0885",
+      "reason": "Every non-returning, non-reverting offense branch assigns base before multiplication; invalid enum values are rejected by ABI decoding.",
+      "subject": "ValidatorRegistry.maxSlashBps(ValidatorRegistry.SlashOffense,uint8).base"
+    },
+    {
+      "check": "unused-return",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol",
+      "fingerprint": "c404408c57263b0b4434d5d3007950d124713c4c908e2f593b105c28d0ba4c1b",
+      "impact": "Medium",
+      "originalSlitherId": "7adba01fa2f7e4a01a1d471209f07c021151f7fd1680237907726b222389bbf6",
+      "reason": "Facade returns the complete three-value rewardAllocation tuple directly. Slither reports a returned tuple as unused; there is no discarded result.",
+      "subject": "Stake420.rewardAllocation(uint16)"
+    },
+    {
+      "check": "missing-zero-check",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/ConsensusSystemCall420.t.sol",
+      "fingerprint": "a6b4c2c7d1e59d330d7bc6ee6d49fae7ee247006b31127537b6d37404dc5c896",
+      "impact": "Low",
+      "originalSlitherId": "2dfc07ba0bc7b7b4b786822a9e9c8189ea524d05a321f914c278138cc57a795c",
+      "reason": "Target is constrained by _validateRoute to frozen nonzero reward or registry destinations before any call. A separate zero check is redundant.",
+      "subject": "ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes).target"
+    },
+    {
+      "check": "reentrancy-benign",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeRollbackAtomicity420.t.sol",
+      "fingerprint": "80f66d969d75b13b5e1686b79775345782cfeb40db0a7f6c4948e851eb6dad6d",
+      "impact": "Low",
+      "originalSlitherId": "c9eee1539ad84942a6c14be9cf87015d6a97dd2e51e4266485ed946259d403a4",
+      "reason": "Validator balances, status, evidence and owned custody are updated before the frozen ProtocolReserve transfer. A callback cannot impersonate the canonical gateway or bound credit reserve; credit return is bounded to remaining funded credit. Governance-controlled predeploy code remains a trusted dependency requiring live code identity verification.",
+      "subject": "Reentrancy in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/SecurityStakeFinal420.t.sol:testSecurityWithdrawalCallbackCannotWithdrawTwice",
+      "fingerprint": "431be3e12ff726c19ef00ac65e00257e706b24c830a73a7d135d8a53191337ef",
+      "impact": "Low",
+      "originalSlitherId": "0d360a370bc9407975065837e0d219427b5bec077bd3dfaac5d702229540ed9c",
+      "reason": "Bond is zeroed, status EXITED and custody reduced before the recipient callback. The new callback regression proves replay cannot pay twice. Event ordering does not authorize a second withdrawal.",
+      "subject": "Reentrancy in ValidatorRegistry.withdrawBond(bytes32)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol:testAssignedReserveCollateralCannotBeTreasurySpent",
+      "fingerprint": "737daeb488677277bf6f9358bc8d8c2bfcd4d25035546887e99095894bd98285",
+      "impact": "Low",
+      "originalSlitherId": "321a1cf9077f231c8cd20056db5a64946d48b51448f87a40418189cbd584f400",
+      "reason": "Only immutable governance can transfer unencumbered balance. Reentry cannot acquire governance authority; a reverting recipient rolls back. External governance compromise is outside this authorization claim.",
+      "subject": "Reentrancy in CommunityValidatorReserve.treasuryTransfer(address,uint256,bytes32)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/ConsensusSystemCall420.t.sol;StakeRollbackAtomicity420.t.sol",
+      "fingerprint": "5db58e0c37250ebabcc2feb069b882782b5d0dd697b05d7dea7a7eb626015aaa",
+      "impact": "Low",
+      "originalSlitherId": "403029b0d48fa74dba54404ee7391705a43b9505fbee0a9ddb33f32f8e2d2704",
+      "reason": "Only native SystemAddress can enter execute. Fixed downstream contracts cannot impersonate this sender; sequence/hash effects revert with downstream failure.",
+      "subject": "Reentrancy in ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeRollbackAtomicity420.t.sol:testFuzz_ProtocolCreditReplacementRollbackOnReserveFailure",
+      "fingerprint": "e74031e046777ab1912c218b9b9952a8463f4d4eec3ca595697fb42c267848ac",
+      "impact": "Low",
+      "originalSlitherId": "50a28a68c2a2e6705520dfae21debc20c3a6bc1571710046c4c0438e725c2285",
+      "reason": "Owned/credit composition and totals are updated before bounded reserve return; failure reverts all mutations. Caller must fund replacement with actual native value.",
+      "subject": "Reentrancy in ValidatorRegistry.replaceProtocolCredit(bytes32)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol",
+      "fingerprint": "e6e6eb762528463b8d517efc493c39d9a23acc2cc3773a14feb90affe2b3100f",
+      "impact": "Low",
+      "originalSlitherId": "73dffb854c2be5f32e36045b266c12adf02b626ea379a94712f125dc4f9ae28c",
+      "reason": "Funded totals are updated before calling the bound registry. Registry cannot act as governance to fund again; recipient failure reverts assignment funding.",
+      "subject": "Reentrancy in CommunityValidatorReserve.fundCredit(bytes32)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeSecurityInvariant420.t.sol;StakeRollbackAtomicity420.t.sol",
+      "fingerprint": "81ed05bf09b8eea795219116a72853202e9af1c74f393304b0ded9168f2ae1ff",
+      "impact": "Low",
+      "originalSlitherId": "7a594bd4348b8df4430b212a6c00442431429a1697221d3c9a13439ce5f8f48f",
+      "reason": "Events follow authorized atomic slashing/credit recycling. Reentrant callers cannot forge consensus authority; failed reserve transfer rolls back the transaction. Event consumers must use transaction/log order and canonical block identity.",
+      "subject": "Reentrancy in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol:testUnregisteredFundedCreditCanBeReclaimed",
+      "fingerprint": "cb045f5c212c1040dcb44cb671c31e52ef8095860f93019a158224c841efed3b",
+      "impact": "Low",
+      "originalSlitherId": "c2b1a8eae9c73e5cc7555d352e5800771cda9792c1ab5f1a0ddb49f3e88f19d2",
+      "reason": "Only bound reserve can request pending credit return; pending state is cleared before external return and the entire operation reverts on failure.",
+      "subject": "Reentrancy in ValidatorRegistry.returnPendingProtocolCredit(bytes32)"
+    },
+    {
+      "check": "reentrancy-events",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/SecurityStakeFinal420.t.sol:testSecurityOutsiderCannotSpendReserveOrChangeBindings",
+      "fingerprint": "4160606de450f25663846f834344c9244f71406dac448b510ddebd63a3a6c064",
+      "impact": "Low",
+      "originalSlitherId": "d1913832865fcea3a14609bb725bded39a98bcb83faf62160ed24745f8edc096",
+      "reason": "Generic treasury transfer requires immutable governance; low-level native transfer is checked for success. No public route acquires governance privileges. Encumbered Stake reserve overrides this function.",
+      "subject": "Reentrancy in ProtocolTreasury.treasuryTransfer(address,uint256,bytes32)"
+    },
+    {
+      "check": "assembly",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/ConsensusSystemCall420.t.sol",
+      "fingerprint": "b90dc68987e65c428ae4f968406ede3a9129a8a0ff11634de5b9a337beb60b6e",
+      "impact": "Informational",
+      "originalSlitherId": "33944913b5c424a4e46660c5f3e788eeceefc9a4e45adb67ad777382c7848031",
+      "reason": "Assembly reads the four-byte calldata selector only after payload length >=4, followed by fixed action/target/selector validation. No arbitrary storage or memory writes.",
+      "subject": "ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes)"
+    },
+    {
+      "check": "cyclomatic-complexity",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeTransitionProperty420.t.sol",
+      "fingerprint": "af519ea3bb46adef9fc952a0d7f558f3dae86101d82559f0819d48f408e8cff2",
+      "impact": "Informational",
+      "originalSlitherId": "6e0d5a8d65db66c8ae055a86bcaa271bda8f558066a2fe2fa0e05068d44cea5e",
+      "reason": "Explicit lifecycle transition matrix is intentionally branch-heavy. Existing transition properties and safety tests cover accepted and rejected transitions; complexity alone is not an authorization bypass.",
+      "subject": "ValidatorRegistry._validateLifecycleTransition(ValidatorRegistry.Validator,ValidatorRegistry.Status,ValidatorRegistry.Status,uint64,uint64,uint64)"
+    },
+    {
+      "check": "cyclomatic-complexity",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeSecurityInvariant420.t.sol;StakeTransitionProperty420.t.sol",
+      "fingerprint": "3c1162a988bd331ff56d21e1f70c357257823030ddca3d71c7208007cc6eb1f5",
+      "impact": "Informational",
+      "originalSlitherId": "7b0669379fde8569250b64cf0999026be44a2c9b0599816be01d022d49aa486e",
+      "reason": "Slash branches enforce offense ceiling, proportional owned/credit deductions, global evidence replay protection and full-bond finality-equivocation penalty. Complexity retained to preserve protocol rules.",
+      "subject": "ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status)"
+    },
+    {
+      "check": "low-level-calls",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeRollbackAtomicity420.t.sol:testSystemCallFailureRollsBackSequenceHashAndDownstreamState",
+      "fingerprint": "613c01d209d2ef402589a07d963e24bfca7bd5fe7f459d09f38205134fd187cf",
+      "impact": "Informational",
+      "originalSlitherId": "168a512aa923e73c4d658dfc4f79c663cdca460837ae5567eb66ca3a5324224a",
+      "reason": "Fixed route, validated selector, native-only origin and checked downstream success; call is required for the consensus gateway. Failure reverts sequence and effects.",
+      "subject": "Low level call in ConsensusSystemCall420.execute(uint64,uint64,bytes32,uint256,bytes32,address,bytes)"
+    },
+    {
+      "check": "low-level-calls",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/SecurityStakeFinal420.t.sol",
+      "fingerprint": "500dd3cfef15e96de81e456fa6a9ceab658fb2423490f7b0ea64126aaa9f7502",
+      "impact": "Informational",
+      "originalSlitherId": "1fdee52710aa60e55ef64ea7c243cd8c229535c4d7a615f13626a506ab055d40",
+      "reason": "Governance-authorized native transfer rejects zero recipient and checks success. This generic parent is not a public withdrawal capability.",
+      "subject": "Low level call in ProtocolTreasury.treasuryTransfer(address,uint256,bytes32)"
+    },
+    {
+      "check": "low-level-calls",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeRollbackAtomicity420.t.sol;SecurityStakeFinal420.t.sol",
+      "fingerprint": "0907b35191d0dfdae37e5c77f9cd85d194e09e44682fd541cdf0679920c32b23",
+      "impact": "Informational",
+      "originalSlitherId": "274e90bc32435e8401d6c802efa1d49f6284567c93388b59625826e57fc9430d",
+      "reason": "Native payout is to registered withdrawal only, after status/hold/safety checks and all bond effects. Revert restores both registry and reserve.",
+      "subject": "Low level call in ValidatorRegistry.withdrawBond(bytes32)"
+    },
+    {
+      "check": "low-level-calls",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol:testAssignedReserveCollateralCannotBeTreasurySpent",
+      "fingerprint": "c1a43212d255d1902f9540a3225454b86ea51ec7e4441497252be5d13195e5c9",
+      "impact": "Informational",
+      "originalSlitherId": "dfe884e77799c64f4ed9e9be498f7246d6ea13e2156f070f64f77ed5cf6e6eba",
+      "reason": "Reserve override enforces unencumbered balance and governance before checked native transfer. Outstanding assigned credit remains encumbered.",
+      "subject": "Low level call in CommunityValidatorReserve.treasuryTransfer(address,uint256,bytes32)"
+    },
+    {
+      "check": "low-level-calls",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeSecurityInvariant420.t.sol",
+      "fingerprint": "e3abb9bb2ac1758e9b8f94c22ca35263c46d64c44d0a15c5c4b18396798bf055",
+      "impact": "Informational",
+      "originalSlitherId": "ed41fcfdc2d6dc4bfb714c6ebb484282bca073d960afb3b8cdd360383b645a5f",
+      "reason": "Checked native transfer sends authorized owned slash to frozen ProtocolReserve only. Protocol credit is recycled separately; neither destination comes from an untrusted caller.",
+      "subject": "Low level call in ValidatorRegistry.applySlash(bytes32,ValidatorRegistry.SlashOffense,uint8,uint256,uint256,bytes32,ValidatorRegistry.Status)"
+    },
+    {
+      "check": "missing-inheritance",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol",
+      "fingerprint": "bb444c433221586e6982643fb1cabc08d81c68e52c4165f3502ba593a9674df8",
+      "impact": "Informational",
+      "originalSlitherId": "0784828c5d95fd4424941bb1765a958426efd4d4fd02657d8c022c8f89a9ddc4",
+      "reason": "Local minimal interface is used for calls across the registry/reserve dependency. Structural ABI compatibility is intentional and verified by physical credit round-trip tests. Adding inheritance is not needed for runtime safety.",
+      "subject": "CommunityValidatorReserve"
+    },
+    {
+      "check": "missing-inheritance",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "evidence": "contracts/test/StakeValidatorGenesis420.t.sol",
+      "fingerprint": "0b52a94500e62176888252cd9baa894e4b6b278da23b1fe4f822847138be64e5",
+      "impact": "Informational",
+      "originalSlitherId": "50f6f2f7bc32323f25a8b81ff0a1810e0f72d58bb16f7fcc066ca364232d61fb",
+      "reason": "Registry structurally implements credit receipt; bound reserve-only authorization is enforced at runtime. Interface inheritance suggestion does not indicate a missing method.",
+      "subject": "ValidatorRegistry"
+    }
+  ],
+  "operationalBaseline": "46d62c9012542abb8dbfe956c761f6c4a4312bc0",
+  "originalRegression": {
+    "candidate": "46d62c9012542abb8dbfe956c761f6c4a4312bc0",
+    "files": {
+      "docs/stake-security-evidence/ConsensusSystemCall420.t.sol.log": "92dc261d9d2b031bfc36a5f2770898d9ae6991328a14b96a86dcbac128ab4dfb",
+      "docs/stake-security-evidence/StakeAccountingReconciliation420.t.sol.log": "60bfa080ecec2d37766eb4c9e568a82485122399425dab7fe5ff4060de340ded",
+      "docs/stake-security-evidence/StakeRollbackAtomicity420.t.sol.log": "d0d0bd8149adb46bbb33e5cbceef85949eaceed6fd39d8f5c864e53de05ad318",
+      "docs/stake-security-evidence/StakeSecurityInvariant420.t.sol.log": "a353651688f1f234ec857e1ef15727496328fc5761f4066757e18126cec0ab16",
+      "docs/stake-security-evidence/StakeSystemCallABIVectors420.t.sol.log": "bfb4c677735c957f679984a17f47bd76feba5f3b4e4d8a5c4700f4a92cf4843a",
+      "docs/stake-security-evidence/StakeTransitionProperty420.t.sol.log": "13fea7e61cece6cf1edfbb593c6b6ab7f3a5008cdb6b1ec6e63158841ac6db44",
+      "docs/stake-security-evidence/StakeValidatorGenesis420.t.sol.log": "aa93b1b8da712ecd3c8a9f892f2d3aa545a68b5415195cc8ee468d0e5306155c",
+      "docs/stake-security-evidence/ValidatorEligibility420.t.sol.log": "c952744d8521c883f27e52f409634a0ddcee3d27ac3f988a53bebedc958e401b",
+      "docs/stake-security-evidence/inputs.json": "01dd6c73a00285b89ae5021c0dbe00be1c2e25222a68291d2db502a807aaa767"
+    },
+    "fuzzRuns": 10000,
+    "invariantDepth": 128,
+    "invariantRuns": 512,
+    "owners": [
+      "StakeAccountingReconciliation420.t.sol",
+      "StakeRollbackAtomicity420.t.sol",
+      "StakeSecurityInvariant420.t.sol",
+      "StakeSystemCallABIVectors420.t.sol",
+      "StakeTransitionProperty420.t.sol",
+      "StakeValidatorGenesis420.t.sol",
+      "ConsensusSystemCall420.t.sol",
+      "ValidatorEligibility420.t.sol"
+    ],
+    "passed": 59,
+    "profile": "default",
+    "result": "PASS"
+  },
+  "safety": {
+    "findings": [
+      {
+        "check": "incorrect-equality",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "decb93a0927e39e0282a86f2f56f58e2e39ae3d7bddb25753336ba2a5543b0ea",
+        "impact": "Medium",
+        "originalSlitherId": "9c2c910dbdbe615d17eadd15515e778ea35545155c6d3b7b506efbced49051d7",
+        "reason": "Version zero is the explicit unregistered service sentinel, not a balance or timestamp condition. Rejecting zero and inactive entries is required fail-closed discovery. Stake uses the separately authenticated component namespace."
+      },
+      {
+        "check": "reentrancy-events",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "3b774194bcb230f542dd6246edee15ce1c17955b047765cad779555b86a8b063",
+        "impact": "Low",
+        "originalSlitherId": "72edf8c8a554cc8d80a2f6314e0addfce4c104e98e3d715feced4af2d156a764",
+        "reason": "Operation executed is set before the external call; the same operation cannot replay. Permissionless execution of a different matured authorized operation is intentional. Event emission does not grant authority."
+      },
+      {
+        "check": "timestamp",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "7a12f17f4966449c5fb9879566be89cc973c099e46e9ff8c56038cf3521105b3",
+        "impact": "Low",
+        "originalSlitherId": "0b23bd55bcaab32aa585f7f459c9ab0c2f8a90b826dcdc86354b870aec905499",
+        "reason": "Timestamp is intentionally used to enforce the constitutional multi-day delay floor with checked uint64 overflow; it does not provide randomness or instant transaction ordering authority. A block producer cannot eliminate a seven-day floor. Cancellation does not use block time; that report follows the Operation struct and its closed-state checks."
+      },
+      {
+        "check": "timestamp",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "69b4535d0fc13653c875b2af724103c250c5f1ffbd9f1867f41461613f6e6117",
+        "impact": "Low",
+        "originalSlitherId": "d60b3ecc2e55a95dca7820ffbf2053d8068d72e594c2088dceacc15edbc66231",
+        "reason": "Timestamp is intentionally used to enforce the constitutional multi-day delay floor with checked uint64 overflow; it does not provide randomness or instant transaction ordering authority. A block producer cannot eliminate a seven-day floor. Cancellation does not use block time; that report follows the Operation struct and its closed-state checks."
+      },
+      {
+        "check": "timestamp",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "a3d76b7b6f9b2f2c51f9e61378b27d759563f10a2a7583b584748a42b880d813",
+        "impact": "Low",
+        "originalSlitherId": "e206012e898cb353557bd2a74fff71858af940471218cbc761fb95ece256f547",
+        "reason": "Timestamp is intentionally used to enforce the constitutional multi-day delay floor with checked uint64 overflow; it does not provide randomness or instant transaction ordering authority. A block producer cannot eliminate a seven-day floor. Cancellation does not use block time; that report follows the Operation struct and its closed-state checks."
+      },
+      {
+        "check": "timestamp",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "605e0921f1a89a1a586c14661a8e05da0e942e396c982949fd3605c0e0da68ae",
+        "impact": "Low",
+        "originalSlitherId": "e510fe9d810283705b61c93d09549849f12b95151c465ab8315a351cd96fcde1",
+        "reason": "No timestamp is compared in resolveActive. The guard checks version zero and active; the service struct also contains activatedAt, which triggers conservative detector taint. Stake resolves a code-hash-bound component independently."
+      },
+      {
+        "check": "timestamp",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "f37785bf0285ff828512704ca364462cbc6110b4b0772e9f6d1065e36a0ab072",
+        "impact": "Low",
+        "originalSlitherId": "f0f6685740433887829858d82e375a094108f39d31f29a000865b3fc94c86c23",
+        "reason": "Publication enforces sequential uint32 version equality; activatedAt is informational block time stored in another struct field. No timestamp authorizes publication; immutable governance does. Stake component registration additionally verifies deployed code and stores its actual hash."
+      },
+      {
+        "check": "low-level-calls",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "25d056195ca8d5671e28e9130edcee254688e0b7dbde1530edb58a9f6d62af37",
+        "impact": "Informational",
+        "originalSlitherId": "086b891e94ba35cbed18dbfcf19819bc34645ae9885c700b71c0710022dfbb3a",
+        "reason": "Execution target/value/data are frozen by the authorized scheduler and immutable delay floor, success is checked and failure rolls back executed state. Civic identity introspection is a staticcall; only bootstrap may activate the scheduler and malformed responses fail closed."
+      },
+      {
+        "check": "low-level-calls",
+        "disposition": "REVIEWED_NO_CHANGE",
+        "evidence": "contracts/test/SecurityStakeSafety420.t.sol:testSecurityTimelockAndSafetyClassBoundaries",
+        "fingerprint": "dcda9c94cfc54341eda6fa1967c33fe7663d47746ed7a4b0ae1993c55f2ae3f7",
+        "impact": "Informational",
+        "originalSlitherId": "4b662e9acdfa969044663b87c052eea2c413ebd73af010f6ca6725de1c5d7b30",
+        "reason": "Execution target/value/data are frozen by the authorized scheduler and immutable delay floor, success is checked and failure rolls back executed state. Civic identity introspection is a staticcall; only bootstrap may activate the scheduler and malformed responses fail closed."
+      }
+    ],
+    "source_sha256": {
+      "contracts/src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+      "contracts/src/governance/GovernanceTimelock.sol": "d119ff5fbfce560bf2039cb358935fed0ba2069282ca4af4d85533c294813291",
+      "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+      "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+      "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+      "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+      "contracts/src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+      "contracts/src/libraries/StakeIds420.sol": "9ea7855ced4c5190936d075308eb768c47f35f72129deb70352df66b42c30e9f",
+      "contracts/src/system/StakeSystemSafety420.sol": "b2593a956b4c8219e15c68e3ecda54cf22b213c23e9ddeeadd0f9536c975b3e0",
+      "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+    }
+  },
+  "schema": "420-stake-static-review-v1",
+  "source_sha256": {
+    "contracts/src/apps/Stake420.sol": "d22075113be7283ff9ab51cb8fe6351f860d264bc0722ca41270f8297e5a48dc",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/StakeIds420.sol": "9ea7855ced4c5190936d075308eb768c47f35f72129deb70352df66b42c30e9f",
+    "contracts/src/system/CommunityValidatorReserve.sol": "6a55f97f83c759b8cf744a12426ac5fc7a1aec48428496012640696fe616171f",
+    "contracts/src/system/ConsensusSystemAccess420.sol": "0b3c8860efc1e700bcef570d2a29ab422e9d05330e7ffa89c71f6b81e13e1f2c",
+    "contracts/src/system/ConsensusSystemCall420.sol": "21f5670d35a9f019ff20adb65abfae1af4d1b57852cb07cb3c1da49afc19a97f",
+    "contracts/src/system/ProtocolTreasury.sol": "f9b2ff42d13bf7fef79a3d66474dc850347c851a8dcd4b4a187404b3f6aa7019",
+    "contracts/src/system/RewardController.sol": "43d11ca06fbf1721c7246701f658df1daf91d9a7e0bcccbc475a1e079df27d24",
+    "contracts/src/system/StakeDependencyAccess420.sol": "0322c88e288786fd2868a3dd8508aa49d6eed3d6febb117f8ca81109e08f6c72",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/src/system/ValidatorRegistry.sol": "8c640e07cb847c833639128f387de8b94cd8b8e97ca6a57658d49b096755877d"
+  },
+  "tool": "slither-analyzer==0.11.3"
+}

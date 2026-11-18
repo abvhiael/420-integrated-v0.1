@@ -1,0 +1,9 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 9.00s
+Compiler run successful!
+
+Ran 1 test for test/ValidatorEligibility420.t.sol:ValidatorEligibility420Test
+[PASS] testCooldownValidatorIsBondedButNotSelectionEligible() (gas: 7950027)
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 1.55ms (1.26ms CPU time)
+
+Ran 1 test suite in 4.25ms (1.55ms CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

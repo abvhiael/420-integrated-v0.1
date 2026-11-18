@@ -1,0 +1,21 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 3.83s
+Compiler run successful with warnings:
+Warning (2018): Function state mutability can be restricted to view
+  --> test/ConsensusSystemCall420.t.sol:81:5:
+   |
+81 |     function testRemovedAccountingOnlyBondActionFailsClosed() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 7 tests for test/ConsensusSystemCall420.t.sol:ConsensusSystemCall420Test
+[PASS] testActionCannotBeRedirectedToWrongTarget() (gas: 45164)
+[PASS] testActionCannotUseWrongSelector() (gas: 45318)
+[PASS] testFrozenIdentitiesAndRoutes() (gas: 32737)
+[PASS] testNativeOriginRejectsWrongChainAndWrongBlock() (gas: 87705)
+[PASS] testOrdinaryCallerCannotApplySystemCall() (gas: 36962)
+[PASS] testRemovedAccountingOnlyBondActionFailsClosed() (gas: 5907)
+[PASS] testUnknownActionFailsClosed() (gas: 42280)
+Suite result: ok. 7 passed; 0 failed; 0 skipped; finished in 985.30µs (1.52ms CPU time)
+
+Ran 1 test suite in 3.30ms (985.30µs CPU time): 7 tests passed, 0 failed, 0 skipped (7 total tests)

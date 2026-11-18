@@ -1,0 +1,11 @@
+Compiling 30 files with Solc 0.8.24
+Solc 0.8.24 finished in 33.27s
+Compiler run successful!
+
+Ran 3 tests for test/SecurityStakeFinal420.t.sol:StakeFinalSecurity420Test
+[PASS] testSecurityGovernanceAndOutsidersCannotForgeRewardOrSlash() (gas: 535462)
+[PASS] testSecurityOutsiderCannotSpendReserveOrChangeBindings() (gas: 59437)
+[PASS] testSecurityWithdrawalCallbackCannotWithdrawTwice() (gas: 1152652)
+Suite result: ok. 3 passed; 0 failed; 0 skipped; finished in 5.79ms (1.65ms CPU time)
+
+Ran 1 test suite in 6.18ms (5.79ms CPU time): 3 tests passed, 0 failed, 0 skipped (3 total tests)

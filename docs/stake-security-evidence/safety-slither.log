@@ -1,0 +1,41 @@
+'/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24 --version' running
+'/workspace/scratch/3b8511e6cffb/bin/solc-0.8.24 /workspace/scratch/5593579c88ce/stake10-safety/Review.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --optimize --optimize-runs 200 --via-ir --evm-version cancun --allow-paths .,/workspace/scratch/5593579c88ce/stake10-safety' running
+
+ProtocolRegistry.resolveActive(bytes32) (../stake10-safety/src/apps/ProtocolRegistry.sol#273-277) uses a dangerous strict equality:
+	- current.version == 0 || ! current.active (../stake10-safety/src/apps/ProtocolRegistry.sol#275)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+
+Reentrancy in GovernanceTimelock.execute(bytes32) (../stake10-safety/src/governance/GovernanceTimelock.sol#122-136):
+	External calls:
+	- (ok,out) = op.target.call{value: op.value}(op.data) (../stake10-safety/src/governance/GovernanceTimelock.sol#132)
+	Event emitted after the call(s):
+	- Executed(id) (../stake10-safety/src/governance/GovernanceTimelock.sol#134)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+
+ProtocolRegistry._publish(bytes32,address,bytes32,bytes32,uint32,bool) (../stake10-safety/src/apps/ProtocolRegistry.sol#165-190) uses timestamp for comparisons
+	Dangerous comparisons:
+	- version != expected (../stake10-safety/src/apps/ProtocolRegistry.sol#177)
+ProtocolRegistry.resolveActive(bytes32) (../stake10-safety/src/apps/ProtocolRegistry.sol#273-277) uses timestamp for comparisons
+	Dangerous comparisons:
+	- current.version == 0 || ! current.active (../stake10-safety/src/apps/ProtocolRegistry.sol#275)
+GovernanceTimelock.cancel(bytes32) (../stake10-safety/src/governance/GovernanceTimelock.sol#112-120) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(op.target != address(0) && ! op.executed && ! op.cancelled,invalid) (../stake10-safety/src/governance/GovernanceTimelock.sol#117)
+GovernanceTimelock.execute(bytes32) (../stake10-safety/src/governance/GovernanceTimelock.sol#122-136) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(op.target != address(0),unknown) (../stake10-safety/src/governance/GovernanceTimelock.sol#126)
+	- require(bool,string)(! op.executed && ! op.cancelled,closed) (../stake10-safety/src/governance/GovernanceTimelock.sol#127)
+	- require(bool,string)(block.timestamp >= op.executeAfter,timelocked) (../stake10-safety/src/governance/GovernanceTimelock.sol#128)
+	- require(bool,string)(address(this).balance >= op.value,insufficient balance) (../stake10-safety/src/governance/GovernanceTimelock.sol#129)
+GovernanceTimelock._schedule(bytes32,address,uint256,bytes,GovernanceTimelock.Class,uint64) (../stake10-safety/src/governance/GovernanceTimelock.sol#138-152) uses timestamp for comparisons
+	Dangerous comparisons:
+	- require(bool,string)(operations[id].target == address(0),exists) (../stake10-safety/src/governance/GovernanceTimelock.sol#146)
+	- require(bool,string)(block.timestamp <= type()(uint64).max - delay,timestamp overflow) (../stake10-safety/src/governance/GovernanceTimelock.sol#148)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+
+Low level call in GovernanceTimelock._isCanonicalCivicGovernor(address) (../stake10-safety/src/governance/GovernanceTimelock.sol#78-84):
+	- (ok,data) = civicGovernor.staticcall(abi.encodeWithSignature(timelock())) (../stake10-safety/src/governance/GovernanceTimelock.sol#82)
+Low level call in GovernanceTimelock.execute(bytes32) (../stake10-safety/src/governance/GovernanceTimelock.sol#122-136):
+	- (ok,out) = op.target.call{value: op.value}(op.data) (../stake10-safety/src/governance/GovernanceTimelock.sol#132)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+/workspace/scratch/5593579c88ce/stake10-safety/Review.sol analyzed (10 contracts with 100 detectors), 9 result(s) found

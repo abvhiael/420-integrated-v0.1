@@ -1,0 +1,57 @@
+Compiling 3 files with Solc 0.8.24
+Solc 0.8.24 finished in 12.84s
+Compiler run successful!
+2026-11-18T00:29:08.829299Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829420Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829429Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829461Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829468Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829537Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829600Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829622Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.829629Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830786Z  WARN forge::test: failed calling "targetArtifactSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830821Z  WARN forge::test: failed calling "targetArtifacts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830835Z  WARN forge::test: failed calling "excludeArtifacts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830864Z  WARN forge::test: failed calling "targetSenders()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830877Z  WARN forge::test: failed calling "excludeSenders()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830893Z  WARN forge::test: failed calling "excludeContracts()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830932Z  WARN forge::test: failed calling "targetInterfaces()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830945Z  WARN forge::test: failed calling "targetSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+2026-11-18T00:29:08.830952Z  WARN forge::test: failed calling "excludeSelectors()": execution reverted: EvmError: Revert (gas: 21296)
+
+Ran 1 test for test/StakeSecurityInvariant420.t.sol:StakeSecurityInvariant420Test
+[PASS]
+StakeSecurityInvariant420Test invariants:
+[PASS] invariant_CustodyConservation
+[PASS] invariant_MalformedOrOversizedParticipantsNeverSettle
+[PASS] invariant_ReserveAccountingConservation
+[PASS] invariant_RewardIsAtMostOncePerBlock
+[PASS] invariant_SlashEvidenceIsUnique
+ StakeSecurityInvariant420Test invariants (runs: 512, calls: 65536, reverts: 0)
+
+╭----------------------------------+---------------------+-------+---------+----------╮
+| Contract                         | Selector            | Calls | Reverts | Discards |
++=====================================================================================+
+| StakeSecurityInvariantHandler420 | bootstrap           | 7187  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | nextBlock           | 7296  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | replaceCredit       | 7391  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | replayFixedEvidence | 7339  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | rewardAttempt       | 7249  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | slashEvidence       | 7227  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | slashPrincipal      | 7314  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | topUp               | 7336  | 0       | 0        |
+|----------------------------------+---------------------+-------+---------+----------|
+| StakeSecurityInvariantHandler420 | treasurySpend       | 7197  | 0       | 0        |
+╰----------------------------------+---------------------+-------+---------+----------╯
+
+Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in 12.13s (12.12s CPU time)
+
+Ran 1 test suite in 12.13s (12.13s CPU time): 1 tests passed, 0 failed, 0 skipped (1 total tests)

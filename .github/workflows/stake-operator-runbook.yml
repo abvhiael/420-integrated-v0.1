@@ -37,11 +37,21 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           python3 - <<'PYROUTE'
-          import os,subprocess
+          import os,re,subprocess
           paths=subprocess.check_output(['git','diff','--name-only',os.environ['BASE_SHA'],'HEAD'],text=True).splitlines()
           operator=any(p.startswith('consensus/cmd/stake-operator-init/') or p in {'docs/STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md','docs/apps/stake/index.md','scripts/verify-stake-operator-runbook.py'} for p in paths)
           closeout=any(p.startswith(('docs/STAKE-AUDIT-9.8-OPERATIONAL-','deployments/stake-operations/')) or p in {'docs/STAKE-TESTNET-OPERATIONAL-ACCEPTANCE.md','scripts/qualify-stake-closeout.py','scripts/stake-live-operations.py','scripts/test-stake-live-operations.py'} for p in paths)
           if '.github/workflows/stake-operator-runbook.yml' in paths and not closeout:operator=True
+          doc='docs/STAKE-AUDIT-9.7-VALIDATOR-OPERATOR-RUNBOOK.md'
+          other_operator=any(p.startswith('consensus/cmd/stake-operator-init/') or p in {'docs/apps/stake/index.md','scripts/verify-stake-operator-runbook.py'} for p in paths)
+          if doc in paths and not other_operator:
+              old=subprocess.check_output(['git','show',os.environ['BASE_SHA']+':'+doc],text=True)
+              new=open(doc).read()
+              commands=lambda text:re.findall(r'```(?:bash|sh|shell)\n(.*?)```',text,re.S)
+              if commands(old)==commands(new) and commands(new):
+                  operator=False
+                  os.makedirs('stake-operator-evidence',exist_ok=True)
+                  open('stake-operator-evidence/prose-only.txt','w').write('All previously qualified shell blocks unchanged; prose is reviewed by the changed-scope owner.\n')
           with open(os.environ['GITHUB_ENV'],'a') as f:f.write('OPERATOR_CHANGED='+str(operator).lower()+'\nCLOSEOUT_CHANGED='+str(closeout).lower()+'\nSTAKE_EVIDENCE_STEP='+('9-8' if closeout else '9-7')+'\n')
           PYROUTE
       - uses: actions/setup-go@v5

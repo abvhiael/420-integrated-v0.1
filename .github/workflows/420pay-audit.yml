@@ -76,7 +76,7 @@ concurrency:
 
 jobs:
   qualify:
-    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420pay-')
+    if: github.event_name != 'pull_request' || startsWith(github.head_ref, 'audit/420pay-') || github.head_ref == 'feature/pay-app-0-genesis-product'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -151,6 +151,12 @@ jobs:
         run: |
           forge test --match-path 'test/PayAudit6DeploymentPackage420.t.sol' -vvv
           forge test --match-path 'test/ReplayProtectionConsumer420.t.sol' -vvv
+      - name: Full applicable Pay contract regression qualification
+        working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: ci
+        run: |
+          forge test --match-path 'test/{*Pay*,Payment*,InvoiceRegistry420*,SettlementRouter420*,RefundManager420*,GasSponsor420*,MerchantRegistry420*,CanonicalSettlementAdapter420*,CanonicalSwapHealthAdapter420*,ReplayProtectionConsumer420*}.t.sol' -vv
       - name: Forbidden primitive scan
         shell: bash
         run: |

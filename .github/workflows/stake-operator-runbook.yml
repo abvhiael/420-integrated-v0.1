@@ -67,6 +67,7 @@ jobs:
           go test -race -tags blst -count=1 -v ./consensus/cmd/stake-operator-init 2>&1 | tee stake-operator-evidence/initializer-tests.log
           go vet -tags blst ./consensus/cmd/stake-operator-init
           python3 scripts/verify-stake-operator-runbook.py --output stake-operator-evidence > stake-operator-evidence/commands.log
+          cp stake-operator-evidence/evidence.json stake-operator-evidence/operator-runbook-result.json
       - name: Qualify exact-head operational closeout and inherited evidence
         if: env.CLOSEOUT_CHANGED == 'true'
         env:

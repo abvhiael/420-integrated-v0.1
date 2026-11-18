@@ -30,7 +30,7 @@ the reconciliation loop down; use SIGTERM.
 
 ## 1. Eligibility, collateral and identity
 
-Canonical sources are [ValidatorRegistry](../contracts/src/system/ValidatorRegistry.sol),
+Canonical sources are [ValidatorRegistry](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/contracts/src/system/ValidatorRegistry.sol),
 [the frozen lifecycle specification](VALIDATOR-LIFECYCLE-SLASHING-v1.md),
 [dynamic committee rules](DYNAMIC-VALIDATOR-REWARD-RAMP-v0.4.md) and finalized
 consensus history. Wallet/Indexer projections never confer eligibility.
@@ -140,8 +140,8 @@ is not a recoverable database. Witness storage is independently administered and
 outside these hosts' backup/rollback failure domain. Do not bundle a witness
 rollback with signer snapshots. The observer never mounts signer secrets or
 private signing journals. Use the UIDs and read-only/capability restrictions in
-[protected-signing compose](../deployments/consensus/protected-signing.compose.yml)
-and [monitor compose](../deployments/monitoring/stake-monitor.compose.yml).
+[protected-signing compose](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/consensus/protected-signing.compose.yml)
+and [monitor compose](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/monitoring/stake-monitor.compose.yml).
 
 ## 4. BLS generation, custody, policy and first-use protection
 
@@ -212,7 +212,7 @@ bin/stake-signer --policy /srv/420/signer-private/policy.json \
 
 ## 5. Wallet registration and collateral actions
 
-Open the Wallet's Stake management surface ([implementation](../wallet/web/stake-management-ui.js)).
+Open the Wallet's Stake management surface ([implementation](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/wallet/web/stake-management-ui.js)).
 Connect the **owner** account to approved chain 420 (`0x1a4`) and verify genesis,
 release bindings/code hashes using the approved deployment manifest. Wallet's
 binding/code-presence checks are necessary but are not full code-hash attestation.
@@ -221,7 +221,7 @@ Stake420 `0x000000000000000000000000000000000000043a`, RewardController
 `0x0000000000000000000000000000000000000420`, and CommunityValidatorReserve
 `0x0000000000000000000000000000000000000425`. ProtocolReserve is the distinct
 `0x0000000000000000000000000000000000000424` destination.
-The [Stake safety-provider manifest](../deployments/stake-security/safety-provider.json)
+The [Stake safety-provider manifest](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/stake-security/safety-provider.json)
 requires an actual governance-approved Registry/code-hash binding before production
 activation; no provider address or live binding is inferred from local tests.
 
@@ -318,7 +318,7 @@ openssl x509 -in "$PEER_CERTIFICATE" -pubkey -noout | \
 
 Start the independently backed witness, then signer, then protected duty consumer.
 Health directories must already exist. On a single host these use loopback;
-the provided [compose template](../deployments/consensus/protected-signing.compose.yml)
+the provided [compose template](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/consensus/protected-signing.compose.yml)
 uses separate users and `https://stake-signer:9443` with matching certificate SAN.
 
 ```sh
@@ -496,16 +496,16 @@ authorized operator; transfer public signing-history data with private filesyste
 permissions, not the witness DSN or BLS key. Existing-key witness import is an
 exceptional `--import-verified-history-sha256` operation on independently verified
 complete prior history, never a way to promote an uncertain backup; see
-[signer recovery details](../consensus/signing/README.md). Missing/corrupt witness
+[signer recovery details](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/consensus/signing/README.md). Missing/corrupt witness
 or conflicting evidence stays halted. No downgrade, force-sign or skip-protection
 operation exists.
 
 ## 11. Monitoring, alarms and incident response
 
-Use [the monitoring runbook](../consensus/monitoring/README.md),
-[deployment configuration](../deployments/monitoring/config.example.json),
-[Prometheus rules](../deployments/monitoring/stake-alarms.yml) and
-[Grafana dashboard](../deployments/monitoring/dashboard.json). Provision approved
+Use [the monitoring runbook](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/consensus/monitoring/README.md),
+[deployment configuration](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/monitoring/config.example.json),
+[Prometheus rules](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/monitoring/stake-alarms.yml) and
+[Grafana dashboard](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/deployments/monitoring/dashboard.json). Provision approved
 trust/pin and real input paths before initializing a never-used outbox. The
 example deliberately contains an unusable placeholder trust pin and simulated
 loopback receiver; it is not a deployment-ready credential bundle.
@@ -594,7 +594,7 @@ a BLS key whose prior identity/history remains slashable or permanently reserved
 
 ## Command qualification and retained evidence
 
-[scripts/verify-stake-operator-runbook.py](../scripts/verify-stake-operator-runbook.py)
+[scripts/verify-stake-operator-runbook.py](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/scripts/verify-stake-operator-runbook.py)
 builds actual documented binaries, compares documented flags/environment/API
 names with repository interfaces, syntax-checks shell blocks and checks links,
 executes safe protocol/version/first-use commands and adversarial initializer

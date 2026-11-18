@@ -41,7 +41,7 @@ The 420Arcade inclusion was explicitly authorized by the repository owner in the
 
 ## GEN-10 delivery roadmap
 
-The frozen catalog above defines what ships at Genesis. GEN-10 tracks the repository implementation and qualification of the contract-free user-facing clients and derived-data services that sit on top of the shared protocol and infrastructure layers.
+The active V10 catalogue defines Genesis application scope. GEN-10 tracks the repository implementation and qualification of the contract-free user-facing clients and derived-data services that sit on top of the shared protocol and infrastructure layers.
 
 ### Repository implementation status
 
@@ -71,11 +71,11 @@ There is no remaining greenfield GEN-10 application build after GEN-10.8. Remain
 - **420RPC** — public RPC/routing/policy layer is implemented through its hardening and qualification roadmap.
 - **Developer Hub / documentation** — integration, verification, publishing and service-health workflows exist to support live deployment and qualification.
 
-Protocol-backed applications in the frozen catalog — Registry, Names, Identity, Gaming Protocol, Arbitration, Swap, Bridge, Stake, Governance/Civic, AI, Attention and Token — continue to use their own contract/protocol deployment and qualification roadmaps. They are not reclassified as unfinished GEN-10 derived-data clients merely because later integration or production deployment work remains.
+Protocol-backed applications in the frozen catalog — Registry, Names, Identity, Gaming Protocol, Arbitration, Swap, Bridge, Stake, Governance/Civic, AI, Attention, Token and Pay — continue to use their own contract/protocol deployment and qualification roadmaps. They are not reclassified as unfinished GEN-10 derived-data clients merely because later integration or production deployment work remains.
 
 ## Public catalog versus implementation inventory
 
-The frozen list above is the public Genesis application decision. It is intentionally narrower than `contracts/config/genesis-dapp-contract-map.json`, which also tracks implementation protocols, shared infrastructure, aliases, and other Genesis contract families such as Smart Accounts, 420-IS, Randomness, Trust, Commons, Pulse, Messenger, Vault, Treasury, Grants, Launchpad, Resource Protocol, Market, Rights, Oracle, Civic, and ComputeMarket.
+The active V10 JSON is the public Genesis application decision. It is intentionally narrower than `contracts/config/genesis-dapp-contract-map.json`, which also tracks implementation protocols, shared infrastructure, aliases, and other Genesis contract families such as Smart Accounts, 420-IS, Randomness, Trust, Commons, Pulse, Messenger, Vault, Treasury, Grants, Launchpad, Resource Protocol, Market, Rights, Oracle, Civic, and ComputeMarket.
 
 Those implementation-only surfaces do not become additional public Genesis applications merely because they appear in the contract map. Their documentation ownership is reconciled in `docs/audit/genesis-contract-documentation-inventory.json`.
 
@@ -90,6 +90,7 @@ Protocol-backed Genesis applications must preserve their frozen authority bounda
 - 420 Identity remains optional and pseudonymous.
 - 420 Gaming Protocol does not make routine game state canonical and does not create parallel wallet authority.
 - 420 Arbitration records bounded dispute process and rulings but cannot directly acquire blanket custody or execution authority.
+- 420 Pay uses Registry-resolved contracts for payment and settlement state. Wallet authorizes spending. The standalone Pay clients are planned under PAY-APP.
 - 420 Bridge remains verifier-based and replay-protected; it does not gain unbacked mint authority.
 - 420 Stake has no stake-weighted delegation at Genesis.
 - 420 Governance uses the Civic implementation family and timelocked committed execution.
@@ -110,6 +111,6 @@ This document describes both the frozen application decision and the current GEN
 - `docs/audit/genesis-contract-documentation-inventory.json` — documentation ownership reconciliation across the broader contract inventory.
 - `docs/ROADMAP.md` — top-level build sequence and current shared-service/application milestone.
 
-## Approved 420Pay catalogue amendment — activation pending
+## 420 Pay catalogue amendment in frozen V3
 
-The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V10 catalogue contains 22 surfaces and is bound by the V3 Genesis configuration commitment. The active JSON controls frozen deployment scope. The numbered list above records the earlier decision.
+The owner approved 420 Pay as GENESIS_PROTOCOL_AND_USER_APP on 2026-11-17. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and `config/candidates/genesis-applications-pay-v10.json`. The active V10 catalogue contains 22 surfaces and is bound by the V3 Genesis configuration commitment. The active JSON controls catalogue scope. The numbered list above records the earlier decision. See the [current Pay entry](apps/pay/index.md) for Wallet and AppStore discovery, planned standalone expressions, and deployment gates.

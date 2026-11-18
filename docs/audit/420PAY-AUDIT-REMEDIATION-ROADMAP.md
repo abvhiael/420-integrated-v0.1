@@ -194,10 +194,10 @@ Exit criteria:
 
 **Status: BLOCKED.**
 
-Run the security policy against one frozen candidate SHA. Critical/high findings must be fixed, remediation re-reviewed, deployed bytecode/code hashes must match the audited commit, release gates and operational monitoring/incident response must close, and the Genesis catalogue contradiction must be resolved.
+Run the security policy against one frozen candidate SHA. Critical/high findings must be fixed, remediation re-reviewed, deployed bytecode/code hashes must match the audited commit, release gates and operational monitoring/incident response must close. The Genesis catalogue contradiction was resolved by the V3 transition.
 
 Only then may 420Pay be declared Genesis-ready or production-ready.
 
 ## Standalone application scope decision — 2026-11-17
 
-The unresolved standalone product decision in PAY-AUDIT-1 is now owner-approved; active catalogue promotion remains open under [PAY-APP-0](../apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md). The [PAY-APP roadmap](../apps/pay/PAY-APP-ROADMAP.md) supplements PAY-AUDIT-1–8 without renumbering or changing historical qualification. Active V2 catalogue omission remains a deployment/configuration reconciliation requirement, not an unresolved product preference.
+The owner approved the standalone product under [PAY-APP-0](../apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md). Frozen V3 commits V10, which includes 420 Pay under the existing Registry service ID. The [PAY-APP roadmap](../apps/pay/PAY-APP-ROADMAP.md) tracks standalone development and deployment. The audit-date catalogue conflict is resolved. PAY-AUDIT-7 live deployment and PAY-AUDIT-8 independent security review remain open.

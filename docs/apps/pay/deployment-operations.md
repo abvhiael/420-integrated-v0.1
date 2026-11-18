@@ -13,6 +13,25 @@ This runbook covers deterministic repository deployment preparation for the regi
 
 The retained authority is `contracts/config/pay/pay-audit-6-deployment-package.json`. The package freezes compiler provenance, source blobs, ABI commitments, compiler runtime templates, materialized runtime code hashes and immutable patch evidence while leaving every Pay deployment address null.
 
+## Frozen V3 artifacts and transition
+
+The active `contracts/config/genesis-config-commitment.json` binds the V10
+catalogue under `420/GENESIS/CONFIG/V3`. The earlier V2 state remains in
+`contracts/config/history/genesis-config-commitment-v2.json` for historical
+verification. The transition changes only the application catalogue among
+six authority inputs.
+
+| Retained material | Operator use |
+| --- | --- |
+| `contracts/artifacts/genesis-residents/v3/manifest.json` and `contracts.json.gz` | Verify the 14 resident identities, compiler output and constructor evidence. The set includes nine Pay residents, four fixed Swap predeploys and the disabled Bridge gateway. |
+| `contracts/config/pay/pay-audit-6-deployment-package.json` | Compare Pay ABI, compiler inputs, immutable materialization and expected runtime. Resolve addresses from qualified deployment evidence. |
+| `contracts/config/predeploy/storage-init.json` | Check the frozen configuration binding for predeploy initialization. |
+| [V3 resident rehearsal](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44389872079) | Reproduce retained constructor and runtime comparisons using the commands in [PAY-APP-0.4](PAY-APP-ROADMAP.md#pay-app-04-native-artifact-reconciliation). |
+
+The rehearsed Swap executor input is local evidence. An operator must verify
+the actual canonical executor binding before publishing or activating the
+settlement adapter.
+
 ## Reproduce the deterministic package
 
 From repository root:

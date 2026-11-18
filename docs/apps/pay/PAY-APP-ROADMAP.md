@@ -1,6 +1,6 @@
 # 420Pay application roadmap — PAY-APP
 
-Owner-approved product scope, 2026-11-17. Normative product decision: [PAY-APP-0](PAY-APP-0-PRODUCT-SPECIFICATION.md). Existing PAY-AUDIT-1–8 numbering and historical results remain unchanged. All steps are unqualified unless exact-head evidence is retained. PAY-APP-0 tracks product approval, catalogue promotion and resident qualification. PAY-APP-1–18 are planned, not implemented. Steps 0–17 are repository-side, including configuration transition; only real external/device/provider blockers may be deferred. Step 18 requires the live public testnet. Independent security review remains PAY-AUDIT-8.
+Owner-approved product scope, 2026-11-17. Normative product decision: [PAY-APP-0](PAY-APP-0-PRODUCT-SPECIFICATION.md). Existing PAY-AUDIT-1–8 numbering and historical results remain unchanged. All steps are unqualified unless exact-head evidence is retained. PAY-APP-0 records product approval, catalogue promotion, resident qualification, discovery and documentation. PAY-APP-1–18 track planned standalone development and deployment. Steps 0–17 are repository-side, including configuration transition; only real external/device/provider blockers may be deferred. Step 18 requires the live public testnet. Independent security review remains PAY-AUDIT-8.
 
 ## PAY-APP-0 — Genesis catalogue amendment and product specification
 
@@ -124,6 +124,23 @@ Use the V3 configuration-sensitive run for the owner outside that union.
 
 Public network deployment receipts still belong to PAY-AUDIT-7 and
 PAY-APP-18. Repository qualification does not supply live deployment evidence.
+
+Final requalification at `ae10c2f17b3b5fe5d5929c4d55e88b43cc55475b`
+passed [Bridge](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44410706202)
+with 275 cases across 30 test owners,
+[Registry API](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44410706136),
+[Registry invariants](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44410706121),
+[Indexer and Explorer](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44410706091)
+and [420Docs](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44410705980).
+
+### PAY-APP-0.9 — Documentation and product roadmap closeout
+
+The [approved product specification](PAY-APP-0-PRODUCT-SPECIFICATION.md)
+maps consumer and merchant acceptance to the 18 delivery steps below.
+The [Genesis inventory](../../GENESIS-DAPPS.md), [Wallet guide](../../users/wallet/dapp-connections.md),
+[AppStore guide](../appstore/user-guide.md) and [deployment runbook](deployment-operations.md)
+record the approved scope, discovery boundaries and frozen V3 artifact evidence.
+PAY-APP-1 is the next implementation step.
 
 ## PAY-APP-1 — Shared application architecture and payment SDK
 

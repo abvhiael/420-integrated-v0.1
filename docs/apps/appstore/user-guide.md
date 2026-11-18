@@ -20,7 +20,7 @@ Publication states describe each expression's progress.
 | Testnet qualified | Qualified against the public testnet |
 | Production available | Released for production use |
 
-All seven Pay expressions are currently planned. The curated card links to
+All seven Pay expressions are currently planned. The proposed web origin is `https://pay.420integrated.org`. See [Wallet discovery](../../users/wallet/dapp-connections.md#420-pay-in-wallet) for verified navigation and connection requirements. The curated card links to
 documentation and the Registry-backed detail view. Contract identity and
 settlement evidence come from Registry and chain state. Wallet controls any
 separately published launch and transaction authorization.

@@ -6,7 +6,7 @@ Decision date: 2026-11-17. Product scope approved and active in the frozen V3 ca
 
 420 Pay is approved as GENESIS_PROTOCOL_AND_USER_APP, using existing ServiceIds420.PAY (420/service/pay/v1) and existing Registry-resolved contracts. The proposed public origin is https://pay.420integrated.org; DNS, TLS, verified launch manifest and mobile association files remain deployment gates. The complete candidate catalogue is config/candidates/genesis-applications-pay-v10.json. It adds exactly one entry to the V2-committed v9 catalogue and preserves all existing entries, Arcade deferral, rules and amendments.
 
-The active `config/genesis-applications.json` is committed by FROZEN_V3 (`0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d`). The commitment supersedes the retained V2 record and binds the approved V10 catalogue bytes. Pay uses Registry resolution and the existing contract inventory. Native artifact qualification is tracked in PAY-APP-0.4.
+The active `config/genesis-applications.json` is committed by FROZEN_V3 (`0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d`). The commitment supersedes the retained V2 record and binds the approved V10 catalogue bytes. Pay uses Registry resolution and the existing contract inventory. The append-only V2 record preserves the prior commitment. V3 changes only the catalogue among the six authority inputs and preserves the existing initialization version, timelock and Registry. The [deployment runbook](deployment-operations.md) maps the generated artifacts to the operator checks.
 
 ## Approved expressions
 
@@ -30,6 +30,20 @@ contracts/config/pay/420pay-parameters.json and Decisions 1–4 remain normative
 ## Architecture and trust
 
 Registry verifies service/deployment identities, version, chain and code hash. Wallet/Smart Accounts own signing and capability authorization. Names resolves presentation identities; Identity supplies optional credentials. Pay contracts own canonical invoice/payment/settlement/refund authorization; Swap/Oracle supply eligible conversion/health; Indexer reconstructs events with checkpoints, idempotence and reorg handling. Explorer, Search, Analytics, Notifications and Mail are replaceable read/delivery surfaces with privacy and consent controls. Merchant metadata, access-scoped reports and webhook delivery records are application state only. API tokens cannot sign or authorize spending. No parallel payment protocol or financial ledger. Use existing repository client conventions; TypeScript shared logic is the approved design direction, exact web/mobile framework selection belongs to architecture reconciliation.
+
+## Delivery and acceptance ownership
+
+| Expression | Approved acceptance scope | Roadmap ownership |
+| --- | --- | --- |
+| Consumer web | Wallet account and network, send and request, receipts, accessible review | PAY-APP-2–5 |
+| Merchant web | Controller-bound onboarding, private invoices, scoped reporting and reconciliation | PAY-APP-6–9 |
+| Physical retail POS | Cashier scope, draft cart, customer display and online settlement evidence | PAY-APP-10 |
+| Hosted checkout and developer integrations | Explicit Wallet review, versioned SDK/API, signed replay-safe delivery | PAY-APP-1, PAY-APP-5 and PAY-APP-11 |
+| PWA, Android and iOS | Shared rules, safe offline behavior, verified Wallet handoff and device acceptance | PAY-APP-12–14 |
+
+All standalone expressions are planned. PAY-APP-15–18 own integration,
+security and accessibility acceptance, operational closeout and public testnet
+qualification for these expressions.
 
 ## Acceptance boundaries
 

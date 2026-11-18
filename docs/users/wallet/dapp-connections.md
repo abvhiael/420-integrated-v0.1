@@ -26,7 +26,7 @@ Registry-backed extension can open a testnet or production release after it veri
 the configured network, active Registry binding, implementation code, and approved
 HTTPS endpoint. Testnet releases use a separate origin.
 
-Opening a verified Pay destination only opens a browser tab. Connect from the
+See the [Pay product scope](../../apps/pay/index.md) for planned clients and the [AppStore entry guidance](../../apps/appstore/user-guide.md#find-420-pay) for catalogue discovery. Opening a verified Pay destination only opens a browser tab. Connect from the
 application and review the wallet's origin, account, chain, session scope, and
 transaction prompts separately. Existing passkey and smart-account policies apply
 to every authorization they govern.

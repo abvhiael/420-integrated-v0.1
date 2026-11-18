@@ -49,4 +49,4 @@ The repository security policy also retains an external independent security rev
 
 ## Approved standalone application scope — 2026-11-17
 
-The owner has approved the standalone 420Pay Genesis product; no standalone implementation is claimed. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and [PAY-APP roadmap](apps/pay/PAY-APP-ROADMAP.md). The catalogue candidate is staged; active V2 configuration must remain intact until the qualified transition. Existing protocol qualification is retained without relabeling it as client qualification.
+The owner has approved the standalone 420Pay Genesis product; no standalone implementation is claimed. See [PAY-APP-0](apps/pay/PAY-APP-0-PRODUCT-SPECIFICATION.md) and [PAY-APP roadmap](apps/pay/PAY-APP-ROADMAP.md). The frozen V3 configuration commits the active V10 catalogue with 420 Pay as a Genesis protocol and user application. Wallet and AppStore discovery describe the approved scope. Standalone clients remain planned and have separate application acceptance and deployment gates.

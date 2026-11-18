@@ -1,0 +1,41 @@
+name: PAY-APP shared SDK qualification
+
+on:
+  pull_request:
+    paths:
+      - 'packages/420-pay-sdk/**'
+      - '.github/workflows/pay-app-sdk.yml'
+      - 'contracts/src/pay/PayIds420.sol'
+      - 'contracts/src/pay/InvoiceRegistry420.sol'
+      - 'contracts/src/pay/PaymentRegistry420.sol'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/config/pay/420pay-parameters.json'
+      - 'contracts/artifacts/genesis-residents/v3/manifest.json'
+      - 'contracts/artifacts/genesis-residents/v3/contracts.json.gz'
+      - 'wallet/web/core/keccak.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pay-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify checked-out revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: packages/420-pay-sdk/package-lock.json
+      - name: Build and test Pay SDK
+        working-directory: packages/420-pay-sdk
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test

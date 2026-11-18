@@ -73,7 +73,7 @@ The consensus-selected canonical execution hash and committed batch history must
 - Reorganization: only a consensus-permitted replacement descending from the existing finalized checkpoint may replace a cursor. Orphan/stale checkpoints and cross-finalized recovery must halt.
 - Any malformed/missing/corrupt journal, conflicting sequence/root/hash, unavailable Engine, rejected transition or persistence/synchronization failure requires a fail-closed halt until independently verified reconciliation succeeds.
 
-The production command is now `fourtwentyd --certified-settlement`, built with `-tags blst`, using an independently pinned trust file, paired JWT/Engine and persistent settlement directory. See [operator and architecture instructions](../../consensus/recovery/README.md). It consumes certified records rather than creating signatures; 9.1 remains separate.
+The production command is now `fourtwentyd --certified-settlement`, built with `-tags blst`, using an independently pinned trust file, paired JWT/Engine and persistent settlement directory. See [operator and architecture instructions](https://github.com/abvhiael/420-integrated-v0.1/blob/43c7fa2363574cd21491ad6252371fa537ea1010/consensus/recovery/README.md). It consumes certified records rather than creating signatures; 9.1 remains separate.
 
 ## Production settlement/history integration and process qualification
 

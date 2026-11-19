@@ -209,9 +209,40 @@ that a wrong-chain request is rejected before approval.
 
 ## PAY-APP-3 — Consumer web dashboard and account management
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Responsive personal account UI, derived balances, history, receipts, settings, accessibility and explicit fixture mode. Retain reproducible scoped qualification at exact implementation SHA.
+
+The consumer web application is in `pay/web`. It connects through 420 Wallet
+and displays native and approved token balances of the selected address.
+It pages canonical PaymentRegistry events in 128-block intervals and reads the
+corresponding payment records at the same snapshot. It verifies event block
+provenance and displays records where the selected address is payer or
+merchant. Refresh loads a new snapshot. A Wallet account, network or connection
+change clears the current dashboard and invalidates pending results.
+
+The downloadable JSON receipt includes chain, block, payment and invoice
+identifiers, the canonical status and receipt commitment, and exact base-unit
+amounts. It rechecks the current account and payment before export. Refund
+accounting is labelled as the authorized refund amount. The amount visibility
+setting is stored locally. Fixture mode requires an explicit action, labels
+sample data and downloads, and is available only when deployment configuration
+is explicitly null.
+
+Build the shared SDK and consumer application with `npm ci` and
+`npm run build` in `packages/420-pay-sdk` and then `pay/web`. Serve
+`pay/web/dist` as static files. The checked-in `deployment.json` is null.
+For an approved deployment, serve the PAY-APP-2 bindings at that same-origin
+path with `chainId` as a decimal string, the verified HTTPS `rpcUrl`, and an
+optional `tokens` array containing `address`, `codeHash`, `symbol` and
+`decimals` for approved ERC-20 assets. The endpoint must serve canonical
+EIP-1898 calls and PaymentRegistry logs to the approved origin. See
+[deployment requirements](deployment-operations.md) for publication gates.
+
+Run the SDK and dashboard `npm test` commands and `npm run browser` in
+`pay/web` with Playwright Chromium installed. The scoped browser workflow
+verifies fixture and configured Wallet flows, responsive layout, keyboard
+navigation targets and automated accessibility checks at the exact revision.
 
 ## PAY-APP-4 — Send, request, QR codes and payment links
 

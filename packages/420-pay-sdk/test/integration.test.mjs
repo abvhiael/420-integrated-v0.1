@@ -57,7 +57,16 @@ function fixture() {
       assert.ok(params[0] === 'latest' || params[0] === state.block?.number);
       return state.canonical ? state.block : { ...state.block, hash: hash('b') };
     }
+    if (method === 'eth_getLogs') {
+      assert.equal(params[0].address, address('7'));
+      assert.deepEqual(params[0].topics, [digest('PaymentSet(bytes32,bytes32,uint8)')]);
+      return state.events;
+    }
     assert.deepEqual(params[1], { blockHash: snapshot.blockHash, requireCanonical: true });
+    if (method === 'eth_getBalance') {
+      assert.equal(params[0], account);
+      return state.native;
+    }
     if (method === 'eth_getCode') return params[0] === address('7') ? state.runtime : code;
     assert.equal(method, 'eth_call');
     assert.ok(replies.has(params[0].data), 'unexpected ABI call ' + params[0].data);
@@ -66,7 +75,9 @@ function fixture() {
     else if (params[0].data === paymentCall) {
       assert.equal(params[0].to, address('7'));
       if (state.reorgDuringRead) state.canonical = false;
-    } else assert.equal(params[0].to, config.registry);
+    } else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
+    else if (params[0].data.startsWith(digest('balanceOf(address)').slice(0, 10))) assert.equal(params[0].to, address('a'));
+    else assert.equal(params[0].to, config.registry);
     return replies.get(params[0].data);
   } }, config);
   return { state, replies, application, config, log, account, labelHash, profile, recordCall, profileCall };
@@ -183,4 +194,40 @@ test('Wallet settlement selectors agree with the frozen router ABI', async t => 
   const expected = writes.map(x => digest(x.name + '(' + x.inputs.map(type).join(',') + ')').slice(0, 10));
   for (const data of expected) await wallet.submitPayment({ data, value: 0n });
   assert.deepEqual(submitted, expected);
+});
+
+
+test('dashboard derives lossless balances through verified asset bytecode at the snapshot', async () => {
+  const { application, state, replies, account } = fixture();
+  state.native = '0x2000000000000000000';
+  replies.set(digest('balanceOf(address)').slice(0, 10) + word(account), encode(42n));
+  const asset = { address: address('a'), codeHash };
+  assert.deepEqual(await application.accountBalances(snapshot, account, [asset]), [BigInt(state.native), 42n]);
+  await assert.rejects(application.accountBalances(snapshot, account, [{ ...asset, codeHash: hash('b') }]), /runtime code/);
+});
+
+test('dashboard history verifies event blocks and payment identity, deduplicates and scopes records', async () => {
+  const { application, state, replies, account } = fixture();
+  const invoice = hash('d');
+  const linked = hash('6');
+  const other = hash('e');
+  const event = (id, index) => ({
+    address: address('7'), topics: [digest('PaymentSet(bytes32,bytes32,uint8)'), id, invoice],
+    blockNumber: '0x2', blockHash: snapshot.blockHash, logIndex: '0x' + index, removed: false
+  });
+  state.events = [event(linked, 0), event(linked, 1), event(other, 2)];
+  for (const [id, payer] of [[linked, account], [other, address('b')]]) {
+    replies.set(paymentView.selector + id.slice(2),
+      encode(invoice, payer, address('a'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('b'), 0, 0, 4));
+  }
+  const result = await application.accountHistory(snapshot, account);
+  assert.deepEqual(result.payments.map(payment => [payment.id, payment.status]), [[linked, 'FINALIZED']]);
+  assert.deepEqual([result.first, result.last, result.next], [0n, 2n, null]);
+  await assert.rejects(application.accountHistory(snapshot, account, 3n), /history range/);
+  state.events[2].topics[2] = hash('a');
+  await assert.rejects(application.accountHistory(snapshot, account), /canonical payment/);
+  state.events = [{ ...event(linked, 0), blockHash: hash('b') }];
+  await assert.rejects(application.accountHistory(snapshot, account), /no longer canonical/);
+  state.events[0].removed = true;
+  await assert.rejects(application.accountHistory(snapshot, account), /Invalid Pay history event/);
 });

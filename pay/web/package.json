@@ -1,0 +1,16 @@
+{
+  "name": "@420/pay-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "browser": "node test/browser.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.11.1",
+    "esbuild": "0.28.2",
+    "playwright": "1.65.1"
+  }
+}

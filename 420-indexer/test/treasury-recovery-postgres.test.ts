@@ -87,7 +87,8 @@ if(process.env.TREASURY_REC7_WORKER==='1'){
  const worker=fork(new URL(import.meta.url),[],{env:{...process.env,TREASURY_REC7_WORKER:'1'},stdio:['ignore','pipe','pipe','ipc']});
  try{
   const message=await Promise.race([once(worker,'message'),once(worker,'exit').then(()=>{throw new Error('Treasury worker exited before checkpoint');}),new Promise<never>((_,reject)=>{const timer=setTimeout(()=>reject(new Error('Treasury worker checkpoint timeout')),15000);timer.unref();})]);
-  assert.deepEqual(message,['checkpoint']);
+  assert.equal(message[0],'checkpoint');
+  assert.equal(message[1],undefined); // Node IPC emits message and optional sendHandle.
   const exit=once(worker,'exit');worker.kill('SIGKILL');assert.equal((await exit)[1],'SIGKILL');
  }finally{if(worker.exitCode===null&&worker.signalCode===null)worker.kill('SIGKILL');}
  assert.equal((await new SqlCheckpointStore420(db,420n).load())?.blockNumber,1n);assert.equal((await states())[1],null);

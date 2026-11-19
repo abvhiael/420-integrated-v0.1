@@ -34,6 +34,8 @@ export function createBusinessPanel() {
   let merchantId = null;
   let revision = 0;
   let busy = false;
+  let checkedOnline = true;
+  let releaseControls = () => {};
   let next = null;
   let rows = [];
   let reportSnapshot;
@@ -55,7 +57,7 @@ export function createBusinessPanel() {
   }
 
   async function run(operation) {
-    if (!connected?.source.business || busy) return;
+    if (!connected?.source.business || !checkedOnline || !navigator.onLine || busy) return;
     const active = connected;
     const ticket = revision;
     const current = () => revision === ticket;
@@ -63,13 +65,14 @@ export function createBusinessPanel() {
     const controls = [...document.querySelectorAll('#business button, #business input, #business select')];
     const previous = controls.map(control => control.disabled);
     controls.forEach(control => { control.disabled = true; });
+    releaseControls = () => controls.forEach((control, i) => { control.disabled = previous[i]; });
     status.textContent = '';
     try { await operation(active, current); }
     catch (error) { if (current()) status.textContent = error.message; }
     finally {
       if (current()) {
         busy = false;
-        controls.forEach((control, i) => { control.disabled = previous[i]; });
+        releaseControls();
       }
     }
   }
@@ -300,6 +303,28 @@ export function createBusinessPanel() {
   byId('business-report').addEventListener('click', () => report(undefined));
   older.addEventListener('click', () => { if (next !== null) report(next); });
   return {
+    connectivity(online) {
+      if (checkedOnline === online) return;
+      checkedOnline = online;
+      if (!online) {
+        ++revision;
+        if (busy) releaseControls();
+        busy = false;
+        rows = [];
+        next = null;
+        reportSnapshot = undefined;
+        records.replaceChildren();
+        range.textContent = credential.textContent = '';
+        reportActions.hidden = older.hidden = true;
+        resetInvoiceView();
+        status.textContent = 'Offline. You can save an open draft.';
+      } else if (connected) {
+        status.textContent = 'Connection restored. Verify current merchant data before continuing.';
+      }
+      for (const button of document.querySelectorAll('#business button')) {
+        if (!['invoice-save', 'invoice-new', 'pos-save', 'pos-new', 'pos-close'].includes(button.id)) button.disabled = !online;
+      }
+    },
     update(nextAccount) {
       if (connected === nextAccount) return;
       connected = nextAccount;

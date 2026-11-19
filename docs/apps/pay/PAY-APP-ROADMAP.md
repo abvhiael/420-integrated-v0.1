@@ -459,6 +459,26 @@ See [Developer integration operations](developer-integrations.md) for v1 routes,
 
 Exit criteria: Installability, offline safe cache, camera/share support, authenticated navigation and stale-state protections. Retain reproducible scoped qualification at exact implementation SHA.
 
+Serve the Pay web build over HTTPS. The manifest and icons support standalone
+installation and the build emits a revisioned service worker. Serve the worker
+script with revalidation and the manifest as `application/manifest+json`.
+The worker precaches the public dashboard shell, code, styling and icons.
+Deployment configuration, RPC, Wallet grants and all financial records remain
+network-only. Use the browser install prompt or its home-screen command.
+
+The payment form offers camera QR scanning when the browser grants permission.
+The file picker remains available and shared links use the platform share sheet
+where supported. QR and deep-link inputs still require canonical review and
+Wallet approval. Camera data stays in the browser and the stream stops on
+decode, cancellation, backgrounding or Wallet session changes.
+
+On loss of connectivity the dashboard clears balances, receipts, reports and
+quotes. Existing cart or invoice drafts can still be saved locally. A cached
+launch starts disconnected. Continuing a connected session after reconnection
+requires revalidating the Wallet account and network. Private sections cannot
+be opened through navigation until a Wallet session is available.
+
+
 ## PAY-APP-13 — Android application
 
 **Status:** PLANNED. **Testnet required:** No.

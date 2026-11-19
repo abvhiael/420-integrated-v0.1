@@ -144,9 +144,31 @@ PAY-APP-1 is the next implementation step.
 
 ## PAY-APP-1 — Shared application architecture and payment SDK
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Inventory reusable clients, ABI bindings, domain types, validation, private persistence, projection/HTTP boundaries; pin architecture and test contracts. Retain reproducible scoped qualification at exact implementation SHA.
+
+
+The shared TypeScript package is `packages/420-pay-sdk` (`@420/pay-sdk`).
+It supplies read-only invoice and payment bindings, typed domain records, the
+frozen quote lifetime check, a private draft read port and an authorized
+payment-status response shape. It is environment-neutral and has no runtime
+dependency on a web or native framework.
+
+| Boundary | Reused repository authority and application contract |
+| --- | --- |
+| Network and transport | Reuse the network and JSON-RPC conventions in `packages/420-sdk/src/index.ts`. The Pay read port accepts a component identity, chain ID, block hash and ABI calldata. The adapter must use the same canonical block for Registry resolution, runtime verification and the call. Unknown or reorged snapshots fail closed. PAY-APP-2 owns the production adapter and Wallet connection. |
+| ABI and domain | Use the frozen V3 compiler bundle and the PAY-AUDIT-6 deployment package. The SDK's two typed read bindings pin the Solidity selectors, tuple order, widths and enum values. Amounts and timestamps use `bigint`. An all-zero record represents a missing entry. Invoice `active` is the stored struct field. Checkout must separately verify closure, expiry, eligibility and Wallet authorization. |
+| Signing and transactions | Reuse `packages/420-sdk/src/wallet.ts` and the Wallet-origin, chain, session and confirmation boundaries. Router, refund and settlement writes remain with their owning contracts and Wallet-approved actions. The shared read SDK exposes no transaction builder or signer. |
+| Private persistence | The server derives authenticated merchant scope from chain and canonical merchant identity before opening any private draft read. The storage port takes that scope as a trusted input. Drafts and memos remain private off-chain state. Merchant onboarding, database implementation and report access belong to the merchant steps. Draft state cannot supply contract addresses or payout authority. |
+| Projections and HTTP | Reuse canonical Pay events via `420-indexer/src/abi-manifest.ts`, `lifecycle-reducer.ts` and `pay-accounting-export.ts`. HTTP handlers authorize access before returning a projection. The SDK's allowlist status DTO carries chain and block provenance, without payer or draft data. A submitted, included, certified or finalized status must retain its meaning. Settlement requires its own canonical evidence. HTTP handlers, replay, checkpointing and compensation belong to the downstream steps. |
+
+Run `npm ci --prefix packages/420-pay-sdk` and
+`npm test --prefix packages/420-pay-sdk`. Tests pin the ABI and source-level
+identifiers to retained authorities, check exact snapshot propagation and
+lossless decoding, reject malformed and impossible records, and verify the
+status response and 42-second boundary. The scoped SDK workflow checks the
+implementation revision before building and running these tests.
 
 ## PAY-APP-2 — Registry, Wallet, Names and Identity integration
 

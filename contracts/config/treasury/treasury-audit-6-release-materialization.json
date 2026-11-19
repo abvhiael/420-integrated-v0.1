@@ -2,7 +2,7 @@
   "schema": "420-treasury-audit-6-release-materialization-v1",
   "step": "TREASURY-AUDIT-6",
   "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
-  "repository_ready": false,
+  "repository_ready": true,
   "live_qualified": false,
   "address_policy": {
     "namespace_authority": "contracts/config/genesis-address-namespace.json",

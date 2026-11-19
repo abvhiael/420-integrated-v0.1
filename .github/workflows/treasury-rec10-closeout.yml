@@ -1,0 +1,82 @@
+name: Treasury REC-10 final pre-testnet closeout
+on:
+  pull_request:
+    paths:
+      - 'scripts/treasury/verify-pre-testnet.py'
+      - '.github/workflows/treasury-rec10-closeout.yml'
+      - 'docs/audit/420TREASURY-PRE-TESTNET-READINESS.md'
+      - 'docs/audit/420TREASURY-PRE-TESTNET-RESULT.json'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/treasury/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Check exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify prior completed run provenance and current input identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p rec10-evidence
+          for id in 44571486048 44574638401 44580443875 44583083947 44590461793 44597319428 44610899469 44614034940 44614506921 44614506846 44614506908 44614506834 44619508029 44619508030 44619508070; do
+            gh api repos/${{ github.repository }}/actions/runs/$id --jq '{id,head_sha,status,conclusion,name}'
+          done | jq -s . > rec10-evidence/retained-runs.json
+          python3 scripts/treasury/verify-pre-testnet.py rec10-evidence/retained-runs.json rec10-evidence/result.json
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix scripts/treasury
+      - name: Current exact-source release build and ABI identity
+        run: |
+          set -euo pipefail
+          forge --version > rec10-evidence/forge-version.txt
+          root="$RUNNER_TEMP/treasury-rec10"
+          python3 scripts/treasury/materialize-deployment-closure.py "$root" > rec10-evidence/release-sources.json
+          forge build --root "$root" --extra-output storageLayout | tee rec10-evidence/build.log
+          node scripts/treasury/deployment.mjs materialize "$root" rec10-evidence/release.json
+          mkdir -p contracts/out
+          for n in TreasuryPolicyRegistry420 TreasuryBudgetRegistry420 TreasuryDisbursementRegistry420; do
+            cp -a "$root/out/$n.sol" contracts/out/
+          done
+          python3 scripts/verify-treasury-audit-5-descriptor.py
+          python3 - <<'PY'
+          import json, hashlib, os
+          from pathlib import Path
+          p = Path('rec10-evidence')
+          r = json.loads((p/'result.json').read_text())
+          b = json.loads((p/'release.json').read_text())
+          old = json.loads(Path('docs/audit/420TREASURY-REC-8-REHEARSAL.json').read_text())['rehearsal']
+          for k in ['manifestHash','metadataHash','interfaceHash']:
+              assert b[k] == old[k], 'release commitment mismatch: '+k
+          r['workflowRun'] = int(os.environ['GITHUB_RUN_ID'])
+          r['build'] = 'PASS'
+          r['releaseSha256'] = hashlib.sha256((p/'release.json').read_bytes()).hexdigest()
+          r['artifactIdentities'] = {n:{k:a[k] for k in ('artifactSha256','abiHash','creationHash','runtimeTemplateHash')} for n,a in b['artifacts'].items()}
+          r['result'] = 'PASS'
+          (p/'result.json').write_text(json.dumps(r,indent=2,sort_keys=True)+'\n')
+          print(json.dumps({k:v for k,v in r.items() if k not in ('sourceSha256','retainedRuns')},sort_keys=True))
+          PY
+      - name: Preserve exact-head closeout evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: treasury-rec10-closeout-${{ github.event.pull_request.head.sha || github.sha }}
+          path: rec10-evidence/
+          if-no-files-found: error

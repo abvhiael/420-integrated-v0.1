@@ -267,42 +267,42 @@
   "runtimeArtifacts": {
     "GovernanceTimelock": {
       "path": "contracts/artifacts/GovernanceTimelock.json",
-      "runtimeCodeHash": "0xca5e96c6048b190839d68a8857b2ff5f0a7e0f356d4089ac31fa684cdee00139",
-      "sourceBlobSha1": "30977a1e172763aa333eeb4b34b1bbaee025c235"
+      "runtimeCodeHash": "0xa7e3f9407735669c1ea106fcf0cdc078a2de80c6f87a24537ef98d2aced12285",
+      "sourceBlobSha1": "823d82240bda175099e1e5d61f713e3332717234"
     },
     "Governance420": {
       "path": "contracts/artifacts/Governance420.json",
-      "runtimeCodeHash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+      "runtimeCodeHash": "0xe4e5fcbce3f66e0e53143ee47d7ed9a5fa74437540cd24cf70ea30744e70bf27",
       "sourceBlobSha1": "886668e8efa97bd32734e32cde11148bcf98e5bd"
     },
     "CivicConstitution420": {
       "path": "contracts/artifacts/CivicConstitution420.json",
-      "runtimeCodeHash": "0x2946e9f82bb274f1f85c1a7eb5e6fc0b580ee3cf7ec1c879dd9eb041f39068e5",
+      "runtimeCodeHash": "0xde4aa983478579bcec69b9524f34ff725fb33012bb7cff1e7dd79af139f07ed7",
       "sourceBlobSha1": "198c88d8c3bf58e20daf6b9ed73aa89817cb0942"
     },
     "CivicProposalRegistry420": {
       "path": "contracts/artifacts/CivicProposalRegistry420.json",
-      "runtimeCodeHash": "0x5c08d1c7bb5e814c027e1a06fb371038e5e5727a0758642090bd8b59f4e496bc",
+      "runtimeCodeHash": "0xded34b7b9b043601f4288d16b098b99918abacc2d1b97e3f802861d20294a8dd",
       "sourceBlobSha1": "6d42bb3fc0b91f2eebc817d9d5fdb27b687ccf31"
     },
     "CivicElectorateRegistry420": {
       "path": "contracts/artifacts/CivicElectorateRegistry420.json",
-      "runtimeCodeHash": "0xb9c1246005033a0d23112ab0c471287f7102d6b15a30f2658cdd0cc164f66aea",
+      "runtimeCodeHash": "0xce3bff5e78fbdc9567c866433365445b5983e51395685ad181fdc6c0e063a35f",
       "sourceBlobSha1": "3113d8cf485cac82e72a5cb564a848d6b67a8d69"
     },
     "CivicVoting420": {
       "path": "contracts/artifacts/CivicVoting420.json",
-      "runtimeCodeHash": "0x3ec8ce38ed4b641521899d79dd4e2f97009efce9844eb8796ef60042f2d3b781",
+      "runtimeCodeHash": "0xb58b55abf576243062604e9ea3b823cb1f2d6c8c1ebde32a6aaa738efc8d72a0",
       "sourceBlobSha1": "68e463fde4e4dff058f18e7435cdcf32cf6e1965"
     },
     "CivicGovernor420": {
       "path": "contracts/artifacts/CivicGovernor420.json",
-      "runtimeCodeHash": "0xbc34f741b779c76fd339b23335d98cd4a166f20e02dc4570a46f895a1a5d008e",
-      "sourceBlobSha1": "0412237da9aefe7238adc8333169bf09d347ae05"
+      "runtimeCodeHash": "0x46ecd1c5fab033778fde23b48c926e06c0e9d12b2256a8f4874d62d41a074611",
+      "sourceBlobSha1": "049d35562bbd74980976a7a25772634c40edd50a"
     },
     "CivicMerkleElectorateSource420": {
       "path": "contracts/artifacts/CivicMerkleElectorateSource420.json",
-      "runtimeCodeHash": "0xff8be4d7fca8a0f193dc1441b9000f205ba50dbf22df6c05c8396f00e6d803c6",
+      "runtimeCodeHash": "0x84c65e5558ee8f797192b8d8edf8d6a17553ed78a7c97b424f9d967a1a44e878",
       "sourceBlobSha1": "a16febddf53e305fbf54e25889904050eea73a1a"
     }
   },

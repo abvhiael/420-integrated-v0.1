@@ -10,7 +10,7 @@
     "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
   ],
   "runtimeArtifact": "contracts/artifacts/Governance420.json",
-  "runtimeCodeHash": "0x9af678e7626b6141b4af33e7729b27835949f8dad634298e7ce5a5e754305d64",
+  "runtimeCodeHash": "0xe4e5fcbce3f66e0e53143ee47d7ed9a5fa74437540cd24cf70ea30744e70bf27",
   "schema": "420-governance420-predeploy-state-v1",
   "status": "GOV_AUDIT_6_PREDEPLOY_READY",
   "storage": {},

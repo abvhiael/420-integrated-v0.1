@@ -1,6 +1,7 @@
 import { createConsumerSource, formatUnits, makeReceipt } from './source.js';
 import { createFixtureSource } from './fixture.js';
 import { createPaymentPanel } from './payments.js';
+import { installPayApp } from './pwa.js';
 import { createBusinessPanel } from './business.js';
 
 const byId = id => document.getElementById(id);
@@ -21,6 +22,7 @@ let connected = null;
 let data = null;
 let fixture = false;
 let busy = false;
+let online = navigator.onLine;
 let scope = 0;
 let stopWatching = () => {};
 const preferenceKey = '420pay.hideAmounts';
@@ -38,17 +40,19 @@ function displayAmount(amount, asset, assets) {
 }
 
 function draw() {
-  paymentPanel.update(connected, fixture);
+  paymentPanel.update(online ? connected : null, fixture);
   businessPanel.update(connected);
+  businessPanel.connectivity(online);
+  byId('offline-notice').hidden = online;
   const active = connected !== null;
   ui.banner.hidden = !fixture;
   ui.mode.textContent = fixture ? 'Personal · Fixture' : 'Personal';
   ui.connect.textContent = active && !fixture ? 'Disconnect Wallet' : 'Connect 420 Wallet';
-  ui.connect.disabled = busy || fixture || !deployment;
+  ui.connect.disabled = busy || fixture || !deployment || (!online && !active);
   ui.fixture.hidden = deployment !== null;
-  ui.fixture.disabled = busy;
+  ui.fixture.disabled = busy || !online;
   ui.fixture.textContent = fixture ? 'Exit fixture mode' : 'Open fixture mode';
-  ui.refresh.disabled = !active || busy;
+  ui.refresh.disabled = !active || busy || !online;
   ui.older.disabled = busy;
   ui.older.hidden = data?.history.next == null;
   ui.account.textContent = active ? 'Selected address ' + connected.account : 'Connect 420 Wallet to view your account.';
@@ -107,6 +111,7 @@ function clearConnection(message) {
 }
 
 async function load() {
+  if (!connected || !online) return;
   const ticket = scope;
   const { source, account } = connected;
   busy = true;
@@ -161,6 +166,7 @@ ui.connect.addEventListener('click', async () => {
     return;
   }
 
+  if (!online || !navigator.onLine || !deployment) return;
   const provider = findWallet();
   if (!provider) { announce('420 Wallet was not found in this browser.'); return; }
   const ticket = ++scope;
@@ -182,7 +188,7 @@ ui.connect.addEventListener('click', async () => {
 });
 
 ui.fixture.addEventListener('click', async () => {
-  if (deployment !== null || busy) return;
+  if (deployment !== null || busy || !online) return;
   fixture = !fixture;
   clearConnection(fixture ? 'Fixture mode opened.' : 'Fixture mode closed.');
   if (!fixture) return;
@@ -199,6 +205,7 @@ ui.privacy.addEventListener('change', () => {
 ui.filter.addEventListener('change', draw);
 
 ui.older.addEventListener('click', async () => {
+  if (!connected || !online || !data) return;
   const ticket = scope;
   const before = data;
   const {source, account} = connected;
@@ -227,6 +234,7 @@ ui.older.addEventListener('click', async () => {
 });
 
 async function download(payment, button) {
+  if (!connected || !online) return;
   const ticket = scope;
   const {source, account} = connected;
   button.disabled = true;
@@ -247,14 +255,80 @@ async function download(payment, button) {
   }
 }
 
-draw();
-try {
-  if (window.self !== window.top) throw new Error('Open the hosted Pay page in a top-level tab.');
-  const response = await fetch('./deployment.json', { credentials: 'same-origin', redirect: 'error', cache: 'no-store' });
-  if (!response.ok) throw new Error();
-  deployment = await response.json();
-  if (deployment === null) announce('Live deployment unavailable. Open fixture mode to explore sample data.');
-} catch {
-  announce('The approved Pay deployment configuration could not be loaded.');
+const protectedRoutes = new Set([...document.querySelectorAll('[data-wallet-route]')].map(link => link.hash));
+function guardRoute() {
+  if ((!connected || !online) && protectedRoutes.has(location.hash)) {
+    history.replaceState(history.state, '', location.pathname + location.search);
+    announce(online ? 'Connect 420 Wallet to open that section.' : 'This section needs a verified online Wallet connection.');
+  }
 }
+document.querySelectorAll('[data-wallet-route]').forEach(link => link.addEventListener('click', event => {
+  if (connected && online) return;
+  event.preventDefault();
+  announce(online ? 'Connect 420 Wallet to open that section.' : 'This section needs a verified online Wallet connection.');
+}));
+window.addEventListener('hashchange', guardRoute);
+window.addEventListener('offline', () => {
+  ++scope;
+  online = false;
+  data = null;
+  busy = false;
+  announce('Online payment and account data are unavailable.');
+  guardRoute();
+  draw();
+});
+async function restoreConnection() {
+  if (!navigator.onLine) {
+    announce('Still offline. Check your browser connection.');
+    return;
+  }
+  const ticket = ++scope;
+  try {
+    if (connected && !fixture) await connected.source.verifySession(connected.account);
+    if (ticket !== scope || !navigator.onLine) return;
+    if (!connected && deployment === undefined && !await loadDeployment()) {
+      if (ticket === scope) announce('Could not reach the approved Pay deployment.');
+      return;
+    }
+    if (ticket !== scope || !navigator.onLine) return;
+    online = true;
+    announce('Connection restored.');
+    if (connected) await load();
+    else draw();
+  } catch {
+    if (ticket !== scope) return;
+    online = navigator.onLine;
+    clearConnection('Verify your Wallet connection again.');
+  }
+}
+window.addEventListener('online', restoreConnection);
+byId('retry-network').addEventListener('click', restoreConnection);
+window.addEventListener('pagehide', event => {
+  if (event.persisted) clearConnection('Connect 420 Wallet to restore verified account data.');
+});
+window.addEventListener('pageshow', event => {
+  if (event.persisted) {
+    online = navigator.onLine;
+    guardRoute();
+    draw();
+  }
+});
+async function loadDeployment() {
+  try {
+    if (window.self !== window.top) throw new Error('Open the hosted Pay page in a top-level tab.');
+    const response = await fetch('./deployment.json', { credentials: 'same-origin', redirect: 'error', cache: 'no-store' });
+    if (!response.ok) throw new Error();
+    deployment = await response.json();
+    if (deployment === null) announce('Live deployment unavailable. Open fixture mode to explore sample data.');
+    return true;
+  } catch {
+    if (online) announce('The approved Pay deployment configuration could not be loaded.');
+    return false;
+  }
+}
+
+installPayApp();
+draw();
+if (online && !await loadDeployment()) online = false;
+guardRoute();
 draw();

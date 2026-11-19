@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
+import { qualifyPwa } from './pwa-browser.mjs';
 import AxeBuilder from '@axe-core/playwright';
 import { keccak256Hex } from '../../../wallet/web/core/keccak.js';
 
@@ -46,7 +47,8 @@ const posPayment = hash('3');
 const builtInvoice = hash('7');
 let invoicePublished = false;
 let balanceGate;
-const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
+const channel = process.env.PAY_BROWSER_CHANNEL ?? 'chromium';
+const browser = await chromium.launch({ channel });
 try {
   const context = await browser.newContext({viewport: {width: 1440, height: 900}});
   const page = await context.newPage();
@@ -240,7 +242,35 @@ try {
   await fixtureButton.click();
   await page.getByRole('button', {name: 'Create QR and link'}).click();
   await page.getByText('Fixture Receiving address link ready.').waitFor();
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'share', { configurable: true, value: async details => { window.sharedPay = details.url; } });
+    Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
+  });
+  await page.getByRole('button', {name: 'Create QR and link'}).click();
+  await page.getByRole('button', {name: 'Share payment link'}).click();
   const addressLink = await page.getByLabel('Share link').inputValue();
+  assert.equal(await page.evaluate(() => window.sharedPay), addressLink);
+  await page.evaluate(() => {
+    const qr = document.getElementById('payment-qr');
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    Object.defineProperty(navigator.mediaDevices, 'getUserMedia', { configurable: true, value: async () => {
+      await qr.decode();
+      const stream = canvas.captureStream(12);
+      window.testCameraTrack = stream.getVideoTracks()[0];
+      const timer = setInterval(() => {
+        ctx.drawImage(qr, 0, 0, canvas.width, canvas.height);
+        if (window.testCameraTrack.readyState === 'ended') clearInterval(timer);
+      }, 80);
+      return stream;
+    } });
+  });
+  await page.getByRole('button', {name: 'Scan with camera'}).click();
+  await page.getByText('QR read. Review the payment details.').waitFor();
+  assert.equal(await page.evaluate(() => window.testCameraTrack.readyState), 'ended');
+
   assert.match(addressLink, /kind=address/);
   const qr = page.waitForEvent('download');
   await page.getByText('Download QR image', {exact: true}).click();
@@ -477,6 +507,7 @@ try {
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {
     method: 'wallet_revokePermissions', params: [{eth_accounts: {}}]
   });
+  await qualifyPwa(chromium, channel);
   console.log('PASS: fixture isolation, responsive layout, axe, balances, statuses, receipts, Wallet invalidation and revocation');
 } finally {
   await browser.close();

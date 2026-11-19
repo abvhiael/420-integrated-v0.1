@@ -1,7 +1,8 @@
 import qrcode from '../../wallet/extension/vendor/qrcode.mjs';
 import jsQR from 'jsqr';
+import { payQrCamera } from './qr-camera.js';
 import { formatUnits } from './source.js';
-import { amountUnits, parsePayLink, paymentLink, previousInvoiceSubmission, reviewPayment, sameReview, sendOnce } from './payment-intent.js';
+import { amountUnits, parsePayLink, paymentLink, previousInvoiceSubmission, recipientAddress, reviewPayment, sameReview, sendOnce } from './payment-intent.js';
 
 async function readQr(file) {
   if (file.size > 8_000_000) throw new Error('Choose a smaller QR image.');
@@ -45,6 +46,22 @@ export function createPaymentPanel() {
   let checkoutQuote = null;
   let separate = false;
   let completed = false;
+  let lastHash = '';
+  const stopCamera = payQrCamera({
+    open: get('scan-pay-qr'), close: get('stop-pay-qr'), video: get('pay-qr-video'),
+    accept: text => {
+      if (!connection || busy) return;
+      clearReview();
+      try {
+        if (/^https?:/i.test(text)) parsePayLink(text, base, connection.chainId);
+        else recipientAddress(text);
+        recipient.value = text;
+        amount.value = '';
+        status.textContent = 'QR read. Review the payment details.';
+      } catch (error) { status.textContent = error.message; }
+    },
+    report: message => { status.textContent = message; }
+  });
 
   function draw() {
     get('send-fields').disabled = !connection || busy;
@@ -305,8 +322,18 @@ export function createPaymentPanel() {
       download.href = image.src;
       download.download = (fixture ? 'fixture-' : '') + '420-pay-' + kind + '-qr.gif';
       share.hidden = false;
+      get('native-share-payment').hidden = typeof navigator.share !== 'function' ||
+        (typeof navigator.canShare === 'function' && !navigator.canShare({ url: link }));
       status.textContent = (fixture ? 'Fixture ' : '') + title + ' link ready.';
     });
+  });
+  get('native-share-payment').addEventListener('click', async () => {
+    if (!connection || share.hidden) return;
+    const ticket = revision;
+    try { await navigator.share({ title: '420 Pay', url: get('payment-link').value }); }
+    catch (error) {
+      if (ticket === revision && error?.name !== 'AbortError') status.textContent = 'Use Copy link to share.';
+    }
   });
   get('copy-payment').addEventListener('click', async () => {
     try {
@@ -319,10 +346,18 @@ export function createPaymentPanel() {
   });
 
   function importLocation() {
-    if (!connection || busy || !location.hash.startsWith('#pay?')) return;
+    const hash = location.hash;
+    const isPayment = hash.startsWith('#pay?');
+    const hadPayment = lastHash.startsWith('#pay?');
+    lastHash = hash;
+    if (!connection || (!isPayment && !hadPayment)) return;
+    ++revision;
+    busy = false;
+    stopCamera();
     clearReview();
     recipient.value = '';
     amount.value = '';
+    if (!isPayment) return;
     try {
       parsePayLink(location.href, base, connection.chainId);
       recipient.value = location.href;
@@ -335,6 +370,7 @@ export function createPaymentPanel() {
     update(active, sample) {
       if (active === connection && sample === fixture) return;
       ++revision;
+      stopCamera();
       connection = active;
       fixture = sample;
       busy = false;

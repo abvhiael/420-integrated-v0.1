@@ -61,17 +61,19 @@ export function createConsumerSource(config, provider) {
   const chain = '0x' + registry.chainId.toString(16);
 
   async function verify(account) {
+    if (!navigator.onLine) throw new Error('Open a network connection to verify Pay state.');
     const [currentChain, accounts] = await Promise.all([
       provider.request({method: 'eth_chainId'}),
       provider.request({method: 'eth_accounts'})
     ]);
-    if (typeof currentChain !== 'string' || currentChain.toLowerCase() !== chain ||
+    if (!navigator.onLine || typeof currentChain !== 'string' || currentChain.toLowerCase() !== chain ||
         !Array.isArray(accounts) || accounts.length !== 1 || accounts[0]?.toLowerCase() !== account) {
       throw new Error('Wallet account or network changed. Connect again.');
     }
   }
   return {
     assets,
+    verifySession: verify,
     connect: wallet.connect,
     disconnect: wallet.revoke,
     async business(account, merchantId, locationId) {

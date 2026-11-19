@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "420 Pay",
+  "short_name": "420 Pay",
+  "description": "Review 420 payments and requests with 420 Wallet",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#142019",
+  "background_color": "#101815",
+  "icons": [
+    { "src": "./icons/pay-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/pay-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

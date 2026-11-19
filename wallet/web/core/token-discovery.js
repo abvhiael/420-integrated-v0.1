@@ -62,6 +62,19 @@ export async function discoverWalletTokenRuntime420(provider, config, controller
     'Token Wallet account chain mismatch');
   const accountConfig=walletAccountConfig(config);
   const selectedDeployed=selectedSmartAccount.deployed;
+  // Bound stalled RPCs and ensure the discovery path cannot request authority.
+  const underlying=provider;
+  const deadline=Date.now()+60000;
+  provider={request:async(method,params=[])=>{
+    check(['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call'].includes(method),'non-discovery RPC method');
+    const remaining=Math.min(10000,deadline-Date.now());
+    check(remaining>0,'Token discovery timed out');
+    let timer;
+    try {
+      return await Promise.race([Promise.resolve().then(()=>underlying.request(method,params)),
+        new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Token discovery RPC timed out')),remaining);})]);
+    } finally { clearTimeout(timer); }
+  }};
   await assertWalletChain420(provider,approved.binding.chainId);
   await selectedAccount(provider,owner);
   const runtime=await verifyTokenRuntime420(provider,approved.binding);
@@ -85,9 +98,19 @@ export async function discoverWalletTokenRuntime420(provider, config, controller
 const status = (state) => Object.freeze({status:state, authority:'DISCOVERY_ONLY',
   accountGrant:false, spendingAuthority:false});
 // A disconnect, account/chain change or newer refresh invalidates the old result.
-export function createTokenDiscoverySession420({onChange=()=>{}}={}) {
+export function createTokenDiscoverySession420() {
   let generation=0, snapshot=status('unconfigured');
-  function publish(value) { snapshot=value; onChange(value); return value; }
+  const listeners=new Set();
+  function publish(value) {
+    snapshot=value;
+    for (const listener of [...listeners]) listener(value);
+    return value;
+  }
+  function subscribe(listener) {
+    check(typeof listener==='function','Token discovery listener required');
+    listeners.add(listener); listener(snapshot);
+    return ()=>listeners.delete(listener);
+  }
   function invalidate(reason='disconnected') { generation++; return publish(status(reason)); }
   async function refresh({provider,config,controller,smartAccount}={}) {
     const attempt=++generation;
@@ -103,5 +126,8 @@ export function createTokenDiscoverySession420({onChange=()=>{}}={}) {
       return publish(status('blocked'));
     }
   }
-  return Object.freeze({refresh,invalidate,getSnapshot:()=>snapshot});
+  return Object.freeze({refresh,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
+
+// Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.
+export const walletTokenDiscovery420=createTokenDiscoverySession420();

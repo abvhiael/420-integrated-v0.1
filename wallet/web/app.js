@@ -1,6 +1,6 @@
 import { CORE_SERVICES, validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
-import { createTokenDiscoverySession420 } from './core/token-discovery.js';
+import { walletTokenDiscovery420 as tokenDiscovery } from './core/token-discovery.js';
 import { installProviderLifecycle } from './core/provider-lifecycle.js';
 import { discoverSmartAccount } from './core/accounts.js';
 import { inspectCapabilityGrant } from './core/capabilities.js';
@@ -26,7 +26,7 @@ import { prepareTreasuryWalletRelease420, submitTreasuryWalletRelease420, treasu
 function publishWalletVerificationState420(phase='idle',error=null) {
   document.dispatchEvent(new CustomEvent('wallet:verification-state',{detail:{
     config:state.config, network:state.network, controller:state.controller,
-    smartAccount:state.smartAccount, tokenDiscovery:tokenDiscovery.getSnapshot(), phase, error
+    smartAccount:state.smartAccount, phase, error
   }}));
 }
 
@@ -50,7 +50,6 @@ const state = {
   treasuryBusy: false,
 };
 
-const tokenDiscovery = createTokenDiscoverySession420({onChange:()=>publishWalletVerificationState420()});
 let detachTokenLifecycle = ()=>{};
 
 const $ = (selector) => document.querySelector(selector);
@@ -548,6 +547,7 @@ $('#treasury-check-receipt').addEventListener('click',()=>treasuryOperation(asyn
 loadConfig().then(() => {
   render();
 }).catch((error) => {
+  tokenDiscovery.invalidate('blocked');
   $('#status').textContent = `Configuration warning: ${error.message}`;
   render();
   publishWalletVerificationState420('failure',error.message);

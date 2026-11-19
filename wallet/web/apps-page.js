@@ -1,5 +1,6 @@
 import { APP_CATEGORIES, APP_SERVICES, buildAppCatalog, filterAppCatalog } from './core/apps.js';
 import { APP_RELEASE_STAGE_LABELS } from './core/genesis-app-catalog.js';
+import { walletTokenDiscovery420 } from './core/token-discovery.js';
 import { loadWalletHelpBundle, resolveWalletHelp } from './core/docs-help.js';
 import { resolveServices } from './core/services.js';
 import { filterEcosystemWebsites, isApprovedEcosystemWebsite } from './core/ecosystem-websites.js';
@@ -179,8 +180,7 @@ export async function initAppsPage() {
 
   let tokenDiscovery;
   let refresh=()=>{};
-  const onWalletState=event=>{tokenDiscovery=event.detail?.tokenDiscovery;refresh();};
-  document.addEventListener('wallet:verification-state',onWalletState);
+  const unsubscribe=walletTokenDiscovery420.subscribe(snapshot=>{tokenDiscovery=snapshot;refresh();});
   const helpBundlePromise = loadWalletHelpBundle().catch(() => null);
   let apps;
   let trust;
@@ -215,7 +215,7 @@ export async function initAppsPage() {
   const observer = new MutationObserver(() => {
     if (!section.querySelector('#apps-search')) {
       observer.disconnect();
-      document.removeEventListener('wallet:verification-state',onWalletState);
+      unsubscribe();
       delete section.dataset.appsPageInitialized;
       initAppsPage();
     }

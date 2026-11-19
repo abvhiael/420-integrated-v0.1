@@ -132,3 +132,17 @@ test('rollback suppresses unsent originals and compensates attempted delivery wi
   await neverSent.deliver();
   assert.equal(unsentAttempts, 0);
 });
+
+test('invoice responses remain bound to the requested ID and unexpired authorization', async t => {
+  let time = now;
+  const service = createPayDeveloperService({ ...options, now: () => time, readInvoice: async (scope, id) => {
+    const record = await options.readInvoice();
+    if (id === event.invoiceId) time = scope.expiresAt;
+    return record;
+  } });
+  t.after(service.close);
+  assert.equal((await call(service, '/v1/invoices/' + id('9'), token('a'))).status, 404);
+  const expired = await call(service, invoicePath, token('a'));
+  assert.equal(expired.status, 401);
+  assert.deepEqual(await expired.json(), { error: 'unauthorized' });
+});

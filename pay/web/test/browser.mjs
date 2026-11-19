@@ -337,6 +337,9 @@ try {
   status = 1;
   await page.getByRole('button', {name: /Download receipt/}).click();
   await page.getByText(/Receipt evidence is unavailable/).waitFor();
+  await page.getByRole('button', {name: 'Create QR and link'}).click();
+  await page.getByText('Receiving address link ready.', {exact: true}).waitFor();
+  assert.ok(await page.locator('#payment-link').inputValue());
   let unblock;
   balanceGate = new Promise(resolve => { unblock = resolve; });
   await page.getByRole('button', {name: 'Refresh'}).click();
@@ -345,6 +348,9 @@ try {
   await page.getByText('Wallet account or network changed. Connect again.').waitFor();
   assert.equal(await page.locator('#history li').count(), 0);
   assert.equal(await page.locator('#asset-list li').count(), 0);
+  assert.equal(await page.locator('#payment-link').inputValue(), '');
+  assert.equal(await page.locator('#payment-qr').getAttribute('src'), null);
+  assert.equal(await page.locator('#download-qr').getAttribute('href'), null);
   await page.evaluate(account => window.walletChange([account]), account);
   await page.getByRole('button', {name: 'Connect 420 Wallet'}).click();
   await page.getByText('Submitted', {exact: true}).waitFor();

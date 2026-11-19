@@ -29,7 +29,9 @@ const service = createPayDeveloperService({
     const final = await registry.latestSnapshot('finalized');
     const invoice = await createPayReader(registry.transport, final).invoice(id);
     if (invoice?.merchantId !== credential.merchantId || invoice.merchant !== credential.controller) return null;
-    return registry.merchantInvoice(final, credential.merchantId, credential.controller, id);
+    const result = await registry.merchantInvoice(final, credential.merchantId, credential.controller, id);
+    const current = await registry.merchantDashboard(await registry.latestSnapshot(), credential.merchantId, credential.controller);
+    return current?.controller && current.active ? result : null;
   },
   async readEvent(input) {
     return registry.developerPaymentEvent({ chainId, blockHash: input.blockHash }, input.txHash, BigInt(input.logIndex));

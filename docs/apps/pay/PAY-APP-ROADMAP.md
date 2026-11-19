@@ -512,6 +512,9 @@ See [Ecosystem integration](ecosystem.md) for authority and recovery boundaries.
 
 Exit criteria: Static/adversarial and local-EVM tests; injection, authorization, replay, cross-tenant, stale quote, reorg, restart and device/accessible journeys. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [Security and accessibility qualification](qualification.md) for tested boundaries and retained evidence.
+
+
 ## PAY-APP-17 — Documentation, deployment preparation and local closeout
 
 **Status:** PLANNED. **Testnet required:** No.

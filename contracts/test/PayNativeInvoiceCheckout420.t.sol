@@ -99,6 +99,22 @@ contract PayNativeInvoiceCheckout420Test {
         require(!ok && PAYOUT.balance - before == PRICE, "duplicate checkout");
     }
 
+    function testReviewedQuoteCannotBeSubmittedByAnotherPayer() public {
+        uint64 at = uint64(vm.getBlockTimestamp());
+        CanonicalPayQuote420.NativeQuote memory q = quotes.quoteNative(INVOICE, PAYER, 1, at);
+        address other = address(0x4252);
+        vm.deal(other, PRICE);
+        vm.prank(other);
+        (bool accepted,) = address(router).call{value: PRICE}(
+            abi.encodeCall(router.payNativeInvoice, (INVOICE, 1, at, q.quoteId))
+        );
+        require(!accepted && invoices.paidAmount(INVOICE) == 0 && PAYOUT.balance == 0);
+        require(!router.usedCheckoutNonces(other, 1) && !router.usedCheckoutNonces(PAYER, 1));
+        vm.prank(PAYER);
+        bytes32 id = router.payNativeInvoice{value: PRICE}(INVOICE, 1, at, q.quoteId);
+        require(payments.getPayment(id).payer == PAYER && PAYOUT.balance == PRICE);
+    }
+
     function testRevertingDeliveryRollsBackInvoiceAndPaymentState() public {
         vm.prank(CONTROLLER);
         merchants.schedulePayout(MERCHANT, address(this), bytes32(0), uint64(block.timestamp));

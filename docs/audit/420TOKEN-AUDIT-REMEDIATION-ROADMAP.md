@@ -1,8 +1,8 @@
 # 420Token audit remediation roadmap
 
-Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
+Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT QUALIFICATION COMPLETE; TOKEN-AUDIT-3 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
 
-Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation is recorded; next: TOKEN-AUDIT-2.
+Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation and TOKEN-AUDIT-2 contract qualification are complete; next: TOKEN-AUDIT-3.
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 
@@ -14,11 +14,12 @@ This audit preserves the frozen Genesis definition in `config/genesis-applicatio
 - Freeze the requirement matrix used by later steps.
 - **Finding at intake:** core contracts exist, but Token has no app-specific audit workflow, exact-head qualification record, release/deployment materialization, or Wallet transaction/runtime binding. The public-service readiness record still says `IMPLEMENTED_PENDING_EXACT_HEAD_QUALIFICATION`.
 
-## TOKEN-AUDIT-2 — contract invariant and adversarial qualification
+## TOKEN-AUDIT-2 — contract invariant and adversarial qualification — **COMPLETE (CURRENT REQUALIFICATION)**
 - Expand tests for all `TOK-INV-001` through `TOK-INV-010`.
 - Cover exact fee, Treasury atomicity, disabled/unknown templates, deterministic creator-nonce isolation, provenance, ownership/custody boundaries, caps/burn/permit/votes, safe NFT/multi-token transfers, governance-only disablement and downstream non-endorsement boundaries.
 - Add malformed-signature/replay/expiry, authorization and boundary-value tests.
 - Add a Token-owned CI gate with exact-head checking, formatting/build/tests and targeted static analysis.
+- Current qualification: `d31f48de7956a25196f84019574c06fba402d855`, PR #1235, Token run 44629627298, qualify 135932626685 and security 135932626096 both PASS. Dynamic chain permit domain, ERC721 approval existence, ERC1155 `uri(uint256)` and retained legacy getter corrected. 30/30 tests in each profile; four fuzz properties at 2,500/100,000 runs each; three invariant campaigns at 128/4,096 runs each with zero reverts. Slither high-severity gate PASS. Evidence: `docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json`. No testnet or overall repository-release qualification claimed.
 
 ## TOKEN-AUDIT-3 — real Treasury/Vault integration
 - Replace mock-only economic confidence with a retained integration test against the real Vault registry/accounting/deposit path.

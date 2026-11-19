@@ -13,7 +13,6 @@ contract ERC20Template420 {
     bool public immutable permitEnabled;
     bool public immutable votesEnabled;
     bytes32 public immutable templateId;
-    bytes32 public immutable DOMAIN_SEPARATOR;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
     mapping(address => uint256) public nonces;
@@ -70,15 +69,6 @@ contract ERC20Template420 {
         permitEnabled = permit_;
         votesEnabled = votes_;
         templateId = templateId_;
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
-                keccak256(bytes(name_)),
-                keccak256(bytes("1")),
-                block.chainid,
-                address(this)
-            )
-        );
         if (initialSupply_ != 0) _mint(owner_, initialSupply_);
     }
     modifier onlyOwner() {
@@ -162,6 +152,19 @@ contract ERC20Template420 {
         _burn(from, amount);
     }
 
+    /// @notice EIP-2612 domain follows the active chain ID, including after a chain split.
+    function DOMAIN_SEPARATOR() public view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+                keccak256(bytes(name)),
+                keccak256(bytes("1")),
+                block.chainid,
+                address(this)
+            )
+        );
+    }
+
     function permit(
         address holder,
         address spender,
@@ -178,7 +181,7 @@ contract ERC20Template420 {
         bytes32 digest = keccak256(
             abi.encodePacked(
                 "\x19\x01",
-                DOMAIN_SEPARATOR,
+                DOMAIN_SEPARATOR(),
                 keccak256(abi.encode(PERMIT_TYPEHASH, holder, spender, value, nonce, deadline))
             )
         );

@@ -14,6 +14,7 @@ on:
       - 'docs/apps/token/**'
       - 'docs/audit/420TOKEN-*'
       - 'scripts/verify-420token-audit.py'
+      - 'scripts/stage-420token-qualification.py'
       - 'wallet/web/core/token-*.js'
       - 'wallet/web/test/token-*.test.js'
       - 'testnet/public-services/token/readiness.json'
@@ -48,10 +49,11 @@ jobs:
           version: stable
       - name: Check Token formatting
         working-directory: contracts
-        run: forge fmt --check src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol
+        run: forge fmt --check src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol test/TokenCompliance420.t.sol test/TokenTemplateInvariant420.t.sol
+      - name: Stage exact Token test and source closure
+        run: python3 scripts/stage-420token-qualification.py "$RUNNER_TEMP/token-contracts"
       - name: Build Token graph
-        working-directory: contracts
-        run: forge build src/token test/TokenGenesis420.t.sol test/TokenAudit420.t.sol test/TokenVaultIntegration420.t.sol test/TokenDeploymentBinding420.t.sol --sizes
+        run: forge build --root "$RUNNER_TEMP/token-contracts" --sizes
       - name: Verify Token repository contract
         run: python3 scripts/verify-420token-audit.py
       - name: Verify shared Genesis dApp and address authority
@@ -62,8 +64,7 @@ jobs:
       - name: Run Wallet Token runtime qualification
         run: node --test wallet/web/test/token-runtime.test.js
       - name: Run Token Foundry qualification
-        working-directory: contracts
-        run: forge test --match-path 'test/Token*.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv
       - name: Reject dangerous Token primitives
         run: |
           set -euo pipefail
@@ -84,13 +85,18 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Stage exact Token test and source closure
+        run: python3 scripts/stage-420token-qualification.py "$RUNNER_TEMP/token-contracts"
       - name: Run Token hardening suite
-        working-directory: contracts
-        run: forge test --match-path 'test/Token*.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
       - name: Targeted Token Slither high-severity gate
-        working-directory: contracts
+        working-directory: ${{ runner.temp }}/token-contracts
         shell: bash
         run: |
           cat > TokenAuditSlitherTarget.sol <<'SOL'
@@ -104,7 +110,10 @@ jobs:
           import "./src/token/ERC1155Template420.sol";
           SOL
           set +e
-          slither TokenAuditSlitherTarget.sol --json /tmp/token-slither.json >/tmp/token-slither.txt 2>&1
+          slither TokenAuditSlitherTarget.sol --compile-force-framework solc \
+            --solc "$HOME/.svm/0.8.24/solc-0.8.24" \
+            --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' \
+            --json /tmp/token-slither.json >/tmp/token-slither.txt 2>&1
           set -e
           rm -f TokenAuditSlitherTarget.sol
           python - <<'PY'

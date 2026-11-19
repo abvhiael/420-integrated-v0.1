@@ -67,7 +67,12 @@ export async function qualifyPwa(chromium, channel) {
       catch { return false; }
     }), false);
     await context.setOffline(false);
-    await page.getByText('Connection restored.', { exact: true }).waitFor();
+    await page.waitForFunction(() => navigator.onLine);
+    await page.evaluate(() => {
+      if (!document.getElementById('offline-notice').hidden) document.getElementById('retry-network').click();
+    });
+    await page.locator('#offline-notice').waitFor({ state: 'hidden' });
+    await page.getByRole('button', { name: 'Open fixture mode' }).waitFor();
     assert.equal(await page.locator('#history li').count(), 0);
     console.log('PASS: PWA installability, untrusted navigation, offline shell, cache allowlist and stale-state clearance');
   } finally {

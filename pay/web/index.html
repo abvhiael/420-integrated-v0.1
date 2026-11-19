@@ -36,7 +36,10 @@
       </div>
       <button type="button" id="fixture" class="secondary">Open fixture mode</button>
     </section>
-    <p id="offline-notice" class="banner" role="status" hidden>Offline · Only local drafts are available.</p>
+    <div id="offline-notice" class="banner" hidden>
+      <p role="status">Offline · Only local drafts are available.</p>
+      <button id="retry-network" type="button" class="secondary">Check connection</button>
+    </div>
     <p id="banner" class="banner" hidden>Fixture mode · Sample balances, activity and receipts</p>
     <p id="status" class="notice" role="status" aria-live="polite"></p>
     <div class="grid">

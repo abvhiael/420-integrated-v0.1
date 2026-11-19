@@ -277,14 +277,21 @@ window.addEventListener('offline', () => {
   guardRoute();
   draw();
 });
-window.addEventListener('online', async () => {
+async function restoreConnection() {
+  if (!navigator.onLine) {
+    announce('Still offline. Check your browser connection.');
+    return;
+  }
   const ticket = ++scope;
   try {
     if (connected && !fixture) await connected.source.verifySession(connected.account);
     if (ticket !== scope || !navigator.onLine) return;
+    if (!connected && deployment === undefined && !await loadDeployment()) {
+      if (ticket === scope) announce('Could not reach the approved Pay deployment.');
+      return;
+    }
+    if (ticket !== scope || !navigator.onLine) return;
     online = true;
-    if (!connected && deployment === undefined) await loadDeployment();
-    if (ticket !== scope) return;
     announce('Connection restored.');
     if (connected) await load();
     else draw();
@@ -293,7 +300,9 @@ window.addEventListener('online', async () => {
     online = navigator.onLine;
     clearConnection('Verify your Wallet connection again.');
   }
-});
+}
+window.addEventListener('online', restoreConnection);
+byId('retry-network').addEventListener('click', restoreConnection);
 window.addEventListener('pagehide', event => {
   if (event.persisted) clearConnection('Connect 420 Wallet to restore verified account data.');
 });
@@ -311,8 +320,10 @@ async function loadDeployment() {
     if (!response.ok) throw new Error();
     deployment = await response.json();
     if (deployment === null) announce('Live deployment unavailable. Open fixture mode to explore sample data.');
+    return true;
   } catch {
     if (online) announce('The approved Pay deployment configuration could not be loaded.');
+    return false;
   }
 }
 

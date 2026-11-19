@@ -13,7 +13,8 @@ const IDENTITY = '420/service/identity/v1';
 export const MERCHANT_REGISTRY = '420/APP/420PAY/MERCHANT_REGISTRY';
 type RequiredComponent = typeof invoiceView.component | typeof paymentView.component | typeof PAYMENT_ROUTER;
 const NATIVE_QUOTE_SOURCE = '420/APP/420PAY/NATIVE_QUOTE_SOURCE';
-type OptionalComponent = typeof MERCHANT_REGISTRY | typeof NATIVE_QUOTE_SOURCE;
+const REFUND_MANAGER = '420/APP/420PAY/REFUND_MANAGER';
+type OptionalComponent = typeof MERCHANT_REGISTRY | typeof NATIVE_QUOTE_SOURCE | typeof REFUND_MANAGER;
 type Component = RequiredComponent | OptionalComponent;
 
 const abiWord = (value: bigint) => value.toString(16).padStart(64, '0');
@@ -122,6 +123,8 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     [PAYMENT_ROUTER]: hash(deployment.components[PAYMENT_ROUTER]),
     [MERCHANT_REGISTRY]: deployment.components[MERCHANT_REGISTRY] === undefined ? undefined :
       hash(deployment.components[MERCHANT_REGISTRY]),
+    [REFUND_MANAGER]: deployment.components[REFUND_MANAGER] === undefined ? undefined :
+      hash(deployment.components[REFUND_MANAGER]),
     [NATIVE_QUOTE_SOURCE]: deployment.components[NATIVE_QUOTE_SOURCE] === undefined ? undefined :
       hash(deployment.components[NATIVE_QUOTE_SOURCE])
   });
@@ -413,7 +416,7 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         return [native, ...balances];
       });
     },
-    async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint, merchantId?: Hex) {
+    async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint, merchantId?: Hex, accounting = false) {
       let owner = address(account);
       const tenant = merchantId && hash(merchantId);
       return pinned(snapshot, async state => {
@@ -437,7 +440,10 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
           const index = quantity(log?.logIndex);
           requirePay(log?.removed === false && address(log.address) === target && height >= first && height <= last &&
             Array.isArray(log.topics) && log.topics.length === 3 && log.topics[0] === topic, 'Invalid Pay history event');
-          return { id: hash(log.topics[1]), invoice: hash(log.topics[2]), height, index, block: hash(log.blockHash) };
+          return {
+            id: hash(log.topics[1]), invoice: hash(log.topics[2]), height, index, block: hash(log.blockHash),
+            settlementTx: accounting && words(log.data, 1)[0] === abiWord(5n) ? hash(log.transactionHash) : null
+          };
         }).sort((a, b) => a.height === b.height ? (a.index > b.index ? -1 : a.index < b.index ? 1 : 0) : a.height > b.height ? -1 : 1);
         const seen = new Set<Hex>();
         const unique = entries.filter(event => {
@@ -461,6 +467,9 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         const invoices = merchantId ? await state.component(invoiceView.component) : null;
         const invoiceReader = invoices && createPayReader({ read: ({ calldata }) => state.call(invoices, calldata) }, snapshot);
         const payments = [];
+        const accountingRows = [];
+        const settlementEvents = new Map(entries.filter(event => event.settlementTx).map(event => [event.id, event]));
+        const refunds = accounting && components[REFUND_MANAGER] ? await state.component(REFUND_MANAGER) : null;
         for (let offset = 0; offset < unique.length; offset += 12) {
           const group = await Promise.all(unique.slice(offset, offset + 12).map(async event => {
             const payment = await reader.payment(event.id);
@@ -468,11 +477,43 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
             if (!merchantId) return payment.payer === owner || payment.merchant === owner ? payment : null;
             if (payment.merchant !== owner) return null;
             const invoice = await invoiceReader?.invoice(payment.invoiceId);
-            return invoice && invoice.merchantId === tenant && invoice.merchant === owner ? payment : null;
+            if (!invoice || invoice.merchantId !== tenant || invoice.merchant !== owner) return null;
+            if (accounting) {
+              let delivered = payment.refundedAmount === 0n ? 0n : null;
+              if (refunds && payment.refundedAmount > 0n) {
+                const [total] = words(await state.call(refunds, calldata('deliveredByPayment(bytes32)', payment.id.slice(2))), 1);
+                delivered = uint(total, 256);
+                requirePay(delivered <= payment.refundedAmount, 'Refund delivery exceeds canonical authorization');
+              }
+              let networkFee = null;
+              const event = settlementEvents.get(payment.id);
+              if (event?.settlementTx) {
+                const receipt = await rpc.request('eth_getTransactionReceipt', [event.settlementTx]) as {
+                  transactionHash?: unknown; blockHash?: unknown; blockNumber?: unknown;
+                  status?: unknown; gasUsed?: unknown; effectiveGasPrice?: unknown; logs?: unknown;
+                } | null;
+                requirePay(hash(receipt?.transactionHash) === event.settlementTx &&
+                  hash(receipt?.blockHash) === event.block && quantity(receipt?.blockNumber) === event.height &&
+                  quantity(receipt?.status) === 1n, 'Settlement receipt conflicts with canonical payment history');
+                requirePay(Array.isArray(receipt?.logs) && receipt.logs.some(log =>
+                  log.address?.toLowerCase() === target && log.logIndex === '0x' + event.index.toString(16) &&
+                  log.topics?.length === 3 && log.topics[0] === topic &&
+                  log.topics[1] === payment.id && log.topics[2] === invoice.id &&
+                  log.data === '0x' + abiWord(5n)), 'Settlement receipt lacks the canonical payment event');
+                networkFee = quantity(receipt?.gasUsed) * quantity(receipt?.effectiveGasPrice);
+              }
+              return { payment, invoice, delivered, networkFee };
+            }
+            return payment;
           }));
-          payments.push(...group.filter(payment => payment !== null));
+          for (const item of group) {
+            if (item && 'payment' in item) {
+              accountingRows.push(item);
+              payments.push(item.payment);
+            } else if (item) payments.push(item);
+          }
         }
-        return { payments, first, last, next: first === 0n ? null : first - 1n };
+        return { payments, accountingRows, first, last, snapshot, next: first === 0n ? null : first - 1n };
       });
     },
     async resolveName(snapshot: PaySnapshot, input: string) {

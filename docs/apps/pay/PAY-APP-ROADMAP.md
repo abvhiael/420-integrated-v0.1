@@ -403,6 +403,24 @@ settlement entry point.
 
 Exit criteria: Exact frozen 15-field export, private metadata/reporting, reconciliation, CSV/JSON and printable report. Retain reproducible scoped qualification at exact implementation SHA.
 
+The merchant report reads a finalized snapshot and pages by block interval.
+The merchant controller or merchant-wide Reporter role is required. The
+dashboard rechecks current access before downloads and printing. Exports use the
+frozen Indexer serializer and exclude payer identifiers and private invoice
+details. JSON and CSV contain reconciled rows from the displayed interval.
+The printable report also shows rows with unresolved evidence.
+
+Network fees use gas used multiplied by effective gas price from the receipt
+containing the canonical settlement event. Refund authorization and delivered
+settlement assets are displayed separately. Only verified delivery counts
+toward `refund_total`. Configure the Registry-verified
+`420/APP/420PAY/REFUND_MANAGER` runtime binding to reconcile payments with refund
+authorization. A report row without the settlement receipt, the reviewed
+conversion economics, or a verified tax-summary commitment where metadata is
+committed stays visible for reconciliation and is omitted from the export.
+The invoice metadata content hash alone does not identify a tax summary.
+
+
 ## PAY-APP-10 — Merchant POS and customer-facing display
 
 **Status:** PLANNED. **Testnet required:** No.

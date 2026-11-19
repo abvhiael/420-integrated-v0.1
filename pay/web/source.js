@@ -90,14 +90,20 @@ export function createConsumerSource(config, provider) {
       await verify(account);
       return result;
     },
-    async merchantReport(account, merchantId, through) {
+    async authorizeReport(account, merchantId) {
+      await verify(account);
+      const merchant = await registry.merchantDashboard(await registry.latestSnapshot(), merchantId, account);
+      if (!merchant?.reports) throw new Error('Merchant report access denied.');
+      await verify(account);
+    },
+    async merchantReport(account, merchantId, through, snapshot) {
       await verify(account);
       const authorize = async () => {
         const merchant = await registry.merchantDashboard(await registry.latestSnapshot(), merchantId, account);
         if (!merchant?.reports) throw new Error('Merchant report access denied.');
       };
       await authorize();
-      const result = await registry.accountHistory(await registry.latestSnapshot('finalized'), account, through, merchantId);
+      const result = await registry.accountHistory(snapshot ?? await registry.latestSnapshot('finalized'), account, through, merchantId, true);
       await authorize();
       await verify(account);
       return result;

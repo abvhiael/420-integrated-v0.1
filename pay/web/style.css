@@ -67,3 +67,19 @@ dd{margin:0;text-align:right}
 #business label{display:grid;gap:.3rem}
 #business input{width:100%;height:auto;border:1px solid #4a6052;border-radius:.55rem;padding:.55rem;color:inherit;background:#111c16;font:inherit}
 #business-status,#business-records{overflow-wrap:anywhere}
+
+@media print {
+  body.print-accounting * { visibility: hidden; }
+  body.print-accounting #business-reports,
+  body.print-accounting #business-reports * { visibility: visible; }
+  body.print-accounting #business-reports {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    color: #000;
+    background: #fff;
+    overflow-wrap: anywhere;
+  }
+  body.print-accounting #business-reports button { display: none; }
+  body.print-accounting #business-records li { break-inside: avoid; }
+}

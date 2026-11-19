@@ -503,6 +503,9 @@ See [iOS build and deployment](ios.md) for simulator qualification and Universal
 
 Exit criteria: Reconcile Wallet/Swap/Registry/Indexer/Oracle/Commerce/Market and other authorized consumers; verify canonical state and recovery; no duplicate ledger. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [Ecosystem integration](ecosystem.md) for authority and recovery boundaries.
+
+
 ## PAY-APP-16 — Security, privacy, accessibility and adversarial qualification
 
 **Status:** PLANNED. **Testnet required:** No.

@@ -326,6 +326,31 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
       requirePay(invoice, 'Invoice acceptance policy is unavailable');
       return invoice.acceptance;
     },
+    async checkoutConfirmation(invoiceId: Hex, paymentId: Hex, account: Hex) {
+      const actor = address(account);
+      const latest = await latestSnapshot();
+      const initial = await createPayReader(transport, latest).invoice(invoiceId);
+      requirePay(initial, 'Invoice acceptance policy is unavailable');
+      const snapshot = initial.acceptance === 'FAST' ? latest : await latestSnapshot('finalized');
+      return pinned(snapshot, async state => {
+        const invoiceTarget = await state.component(invoiceView.component);
+        const ledger = await state.component(paymentView.component);
+        const invoice = await createPayReader({ read: ({ calldata }) => state.call(invoiceTarget, calldata) }, snapshot)
+          .invoice(invoiceId);
+        requirePay(invoice && invoice.merchant === initial.merchant && invoice.merchantId === initial.merchantId &&
+          invoice.acceptance === initial.acceptance, 'Invoice acceptance binding changed');
+        const payment = await createPayReader({ read: ({ calldata }) => state.call(ledger, calldata) }, snapshot)
+          .payment(paymentId);
+        if (payment) {
+          requirePay(payment.invoiceId === invoice.id && payment.merchant === invoice.merchant &&
+            (payment.payer === actor || payment.merchant === actor), 'No matching payment for this invoice and Wallet account');
+          if (['FINALIZED', 'SETTLED', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(payment.status)) {
+            requirePay(!/^0x0{64}$/.test(payment.receiptHash), 'Canonical payment receipt is unavailable');
+          }
+        }
+        return { status: payment?.status ?? null, snapshot, acceptance: invoice.acceptance };
+      });
+    },
     async hostedCheckout(snapshot: PaySnapshot, invoiceId: Hex) {
       return pinned(snapshot, async state => {
         const invoice = await checkoutInvoice(state, invoiceId, snapshot);

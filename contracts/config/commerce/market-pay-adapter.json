@@ -11,5 +11,7 @@
   "invoiceMode": "SINGLE_USE",
   "paymentAcceptance": "SETTLED",
   "partialRefundMarketTransition": false,
+  "refundDeliveryAuthority": "Active Registry-bound RefundManager420 for the same PaymentRegistry420",
+  "fullRefundMarketTransition": "AUTHORIZED_AND_FULLY_DELIVERED",
   "liveQualification": "COM-8"
 }

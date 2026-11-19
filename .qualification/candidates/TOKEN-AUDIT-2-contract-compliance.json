@@ -16,7 +16,11 @@
     "contracts/test/TokenCompliance420.t.sol",
     "contracts/test/TokenTemplateInvariant420.t.sol",
     ".qualification/candidates/TOKEN-AUDIT-2-contract-compliance.json",
-    "scripts/stage-420token-qualification.py"
+    "scripts/stage-420token-qualification.py",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json"
   ],
   "tests": [
     {

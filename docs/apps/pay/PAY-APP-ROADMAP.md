@@ -275,7 +275,7 @@ protection at the implementation revision.
 
 ## PAY-APP-5 — Hosted checkout, quotes and payment confirmation
 
-**Status:** Partial repository implementation. Checkout submission remains unavailable. **Testnet required:** No.
+**Status:** Native hosted checkout and canonical conversion contract candidates implemented. **Testnet required:** No.
 
 Exit criteria: Canonical prices, 42-second quote and fees, asset/settlement choices, explicit Wallet handoff, atomic failure and status. Retain reproducible scoped qualification at exact implementation SHA.
 
@@ -299,8 +299,20 @@ bindings stay available. The candidate changes three Pay resident runtimes.
 Any deployment must qualify the new runtimes and publish the native source as
 `420/APP/420PAY/NATIVE_QUOTE_SOURCE`, using the approved native asset policy
 commitment as its constructor input. The retained frozen deployment artifacts
-remain historical evidence. The hosted Wallet handoff and canonical conversion
-quotes remain outstanding.
+remain historical evidence. Hosted native checkout displays the canonical quote and hands the exact call to
+420 Wallet. Expired or changed quotes require a new review. Confirmation checks
+the selected account and invoice in canonical payment state. FINALIZED invoices
+use the finalized snapshot. Hosted HIGH_VALUE approval requires separate
+acceptance evidence and remains unavailable.
+
+For conversion, the invoice commits to an eligible input/settlement pair and
+canonical market. The quote reads the active pool price and fee, enforces asset
+and market health, binds the pool runtime and spend/receive bounds, and expires
+after 42 seconds or at invoice expiry. The invoice receives its outstanding
+amount as credit. The payout receives the disclosed pool output. Any mismatch
+during execution reverts the payout, accounting and replay state together.
+The hosted screen currently submits native invoices. Conversion is available
+through the qualified contract entry point for eligible ERC-20 pairs.
 
 
 ## PAY-APP-6 — Merchant registration and business dashboard

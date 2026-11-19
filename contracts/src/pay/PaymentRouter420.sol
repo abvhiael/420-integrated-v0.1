@@ -137,9 +137,36 @@ contract PaymentRouter420 is GenesisResidentAccess420 {
         uint16[] memory bps = new uint16[](1);
         bps[0] = 10_000;
         SettlementRouter420(settlementRouter).executeNativeSplit{value: msg.value}(paymentId, q.amount, recipients, bps, 0);
-        require(payments.recordNativeCheckout(invoiceId, msg.sender, q.merchant, q.amount, q.quoteId, payerNonce)
+        require(payments.recordInvoiceCheckout(invoiceId, msg.sender, q.merchant, address(0), q.amount,
+            address(0), q.amount, q.quoteId, payerNonce)
             == paymentId, "checkout payment identity");
         emit PaymentAuthorized(paymentId, msg.sender, q.amount, q.amount);
+        checkoutEntered = false;
+    }
+
+    function payConvertedInvoice(CanonicalPayQuote420.ConversionRequest calldata r, bytes32 expectedQuoteId)
+        external returns (bytes32 paymentId)
+    {
+        require(!checkoutEntered, "checkout reentrancy");
+        checkoutEntered = true;
+        _requireOperational(PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND);
+        require(msg.sender == r.payer && !usedCheckoutNonces[msg.sender][r.payerNonce], "checkout payer/nonce");
+        require(settlementAdapter == _resolveRequired(PayIds420.SETTLEMENT_ADAPTER), "settlement adapter");
+        CanonicalPayQuote420 source = CanonicalPayQuote420(_resolveRequired(PayIds420.NATIVE_QUOTE_SOURCE));
+        CanonicalPayQuote420.ConversionQuote memory q = source.quoteConversion(r);
+        require(q.swap.quoteId == expectedQuoteId, "checkout quote changed");
+        usedCheckoutNonces[msg.sender][r.payerNonce] = true;
+        InvoiceRegistry420(_resolveRequired(PayIds420.INVOICE_REGISTRY)).applyCheckoutPayment(r.invoiceId, q.invoiceAmount);
+        PaymentRegistry420 payments = PaymentRegistry420(_resolveRequired(PayIds420.PAYMENT_REGISTRY));
+        paymentId = payments.derivePaymentId(r.invoiceId, msg.sender, q.merchant, r.inputAsset, r.maxInput,
+            r.settlementAsset, q.swap.quotedSettlementAmount, q.swap.quoteId, r.payerNonce);
+        _consumePaymentAuthorization(paymentId);
+        (uint256 spent, uint256 delivered) = ICanonicalSettlement420(settlementAdapter)
+            .execute(q.swap, msg.sender, q.recipient, r.minOutput);
+        require(spent == r.maxInput && delivered == q.swap.quotedSettlementAmount, "conversion execution changed");
+        require(payments.recordInvoiceCheckout(r.invoiceId, msg.sender, q.merchant, r.inputAsset, spent,
+            r.settlementAsset, delivered, q.swap.quoteId, r.payerNonce) == paymentId, "checkout payment identity");
+        emit PaymentAuthorized(paymentId, msg.sender, spent, delivered);
         checkoutEntered = false;
     }
 

@@ -3,6 +3,12 @@ pragma solidity ^0.8.24;
 
 import "../src/pay/PaymentRouter420.sol";
 import "./helpers/GenesisMocks420.sol";
+import "./PayAudit4SettlementAndAccounting420.t.sol";
+import "../src/apps/ProtocolRegistry.sol";
+import "../src/pay/adapters/CanonicalSettlementAdapter420.sol";
+import "../src/swap/CanonicalMarketRegistry.sol";
+import "../src/swap/CanonicalConstantProductPool420.sol";
+import "../src/swap/CanonicalSwapExecutor420.sol";
 
 interface VmNativeInvoiceCheckout420 {
     function prank(address) external;
@@ -23,6 +29,8 @@ contract PayNativeInvoiceCheckout420Test {
     uint256 private constant PRICE = 3 ether;
 
     GenesisMockEnvironment420 private env;
+    ProtocolRegistry private registry;
+    bytes32 private constant CFG = keccak256("pay native checkout qualification");
     InvoiceRegistry420 private invoices;
     MerchantRegistry420 private merchants;
     PaymentRegistry420 private payments;
@@ -32,20 +40,27 @@ contract PayNativeInvoiceCheckout420Test {
 
     function setUp() public {
         env = new GenesisMockEnvironment420();
-        address registry = address(env.registry());
-        bytes32 cfg = keccak256("pay native checkout qualification");
-        invoices = new InvoiceRegistry420(address(this), registry, cfg);
-        merchants = new MerchantRegistry420(address(this), registry, cfg);
-        payments = new PaymentRegistry420(address(this), registry, cfg);
-        router = new PaymentRouter420(address(this), registry, cfg);
-        settlement = new SettlementRouter420(address(this), registry, cfg);
-        quotes = new CanonicalPayQuote420(address(this), registry, cfg, ASSET_POLICY);
-        env.registerResident(address(invoices), invoices.componentId());
-        env.registerResident(address(merchants), merchants.componentId());
-        env.registerResident(address(payments), payments.componentId());
-        env.registerResident(address(router), router.componentId());
-        env.registerResident(address(settlement), settlement.componentId());
-        env.registerResident(address(quotes), quotes.componentId());
+        registry = new ProtocolRegistry(address(this));
+        _publish(GenesisInterfaceIds420.GOVERNANCE_AUTHORITY, address(env.governance()));
+        _publish(GenesisInterfaceIds420.PAUSE_REGISTRY, address(env.pause()));
+        _publish(GenesisInterfaceIds420.CANONICAL_ASSET_REGISTRY, address(env.assets()));
+        _publish(AppDependencyIds420.SYSTEM_SAFETY, address(env.safety()));
+        _publish(AppDependencyIds420.CHAIN_CONTEXT, address(env.chain()));
+        _publish(AppDependencyIds420.ASSET_CAPABILITIES, address(env.capabilities()));
+        _publish(GenesisInterfaceIds420.SETTLEMENT_HEALTH, address(env.health()));
+        _publish(AppDependencyIds420.REPLAY_PROTECTION, address(env.replay()));
+        invoices = new InvoiceRegistry420(address(this), address(registry), CFG);
+        merchants = new MerchantRegistry420(address(this), address(registry), CFG);
+        payments = new PaymentRegistry420(address(this), address(registry), CFG);
+        router = new PaymentRouter420(address(this), address(registry), CFG);
+        settlement = new SettlementRouter420(address(this), address(registry), CFG);
+        quotes = new CanonicalPayQuote420(address(this), address(registry), CFG, ASSET_POLICY);
+        _publish(invoices.componentId(), address(invoices));
+        _publish(merchants.componentId(), address(merchants));
+        _publish(payments.componentId(), address(payments));
+        _publish(router.componentId(), address(router));
+        _publish(settlement.componentId(), address(settlement));
+        _publish(quotes.componentId(), address(quotes));
         env.setSettlementAsset(address(0), keccak256("native asset"), true);
         router.setSettlementRouter(address(settlement));
         settlement.setPaymentRouter(address(router));
@@ -117,5 +132,81 @@ contract PayNativeInvoiceCheckout420Test {
             abi.encodeCall(router.payNativeInvoice, (INVOICE, 1, at, replacement.quoteId))
         );
         require(!stale && !router.usedCheckoutNonces(PAYER, 1) && PAYER.balance == PRICE * 2, "stale quote");
+    }
+
+    function _publish(bytes32 id, address implementation) private {
+        registry.registerComponent(id, implementation, Types420.Version(1, 0, 0), Types420.Lifecycle.ACTIVE);
+        Types420.ContractRef memory ref = registry.component(id);
+        require(ref.implementation == implementation && ref.runtimeCodeHash == implementation.codehash);
+        require(registry.isActive(id) && registry.resolve(id) == implementation);
+    }
+
+    function testConversionGatesAndAtomicAccounting() public {
+        address reg = address(registry);
+        CanonicalMarketRegistry markets = new CanonicalMarketRegistry(address(this), reg, CFG);
+        CanonicalSwapExecutor420 executor = new CanonicalSwapExecutor420(address(this), reg, CFG);
+        CanonicalSettlementAdapter420 adapter = new CanonicalSettlementAdapter420(address(this), reg, CFG, address(executor));
+        _publish(markets.componentId(), address(markets));
+        _publish(executor.componentId(), address(executor));
+        _publish(adapter.componentId(), address(adapter));
+        executor.setTrustedCaller(address(adapter), true);
+        adapter.setPaymentRouter(address(router));
+        router.setSettlementAdapter(address(adapter));
+
+        PayAudit4Token420 input = new PayAudit4Token420();
+        PayAudit4Token420 target = new PayAudit4Token420();
+        CanonicalConstantProductPool420 pool = new CanonicalConstantProductPool420(
+            address(input), address(target), address(executor), 10
+        );
+        input.mint(address(this), 10000 ether);
+        target.mint(address(this), 10000 ether);
+        input.approve(address(pool), 10000 ether);
+        target.approve(address(pool), 10000 ether);
+        pool.addLiquidity(10000 ether, 10000 ether, 1, address(this));
+        input.mint(PAYER, 4 ether);
+        bytes32 market = keccak256("checkout canonical market");
+        env.setSettlementAsset(address(input), keccak256("checkout input asset"), true);
+        env.setSettlementAsset(address(target), keccak256("checkout target asset"), true);
+        markets.setMarket(market, address(pool), address(input), address(target), CanonicalMarketRegistry.Role.CANONICAL_CAD,
+            bytes32(0), true);
+        env.health().setMarket(market, true);
+        bytes32 invoice = keccak256("conversion invoice");
+        bytes32 policy = quotes.conversionAssetCommitment(market, address(input), address(target));
+        vm.prank(CONTROLLER);
+        invoices.createInvoice(invoice, InvoiceRegistry420.Invoice({
+            merchantId: MERCHANT, merchant: CONTROLLER, metadataHash: bytes32(0), currency: bytes3("CAD"),
+            amount: PRICE, expiresAt: uint64(block.timestamp + 120), refundUntil: uint64(block.timestamp + 240),
+            mode: InvoiceRegistry420.Mode.SINGLE_USE, acceptance: InvoiceRegistry420.Acceptance.FINALIZED,
+            partialPayments: false, quoteMaxSlippageBps: 42,
+            acceptedAssetsHash: policy,
+            settlementPlanHash: bytes32(0), tipPolicyHash: bytes32(0), active: true
+        }));
+        CanonicalPayQuote420.ConversionRequest memory request_ = CanonicalPayQuote420.ConversionRequest(
+            invoice, PAYER, 9, uint64(vm.getBlockTimestamp()), market, address(input), address(target), 4 ether, PRICE
+        );
+        CanonicalPayQuote420.ConversionQuote memory q = quotes.quoteConversion(request_);
+        IFeeQuote420.FeeQuote memory fee = quotes.feeQuote(q.swap.quoteId, abi.encode(request_));
+        require(fee.conversionFee == 4 ether / 1000 && fee.protocolFee == 0);
+        env.health().setMarket(market, false);
+        (bool healthy,) = address(quotes).staticcall(abi.encodeCall(quotes.quoteConversion, (request_)));
+        require(!healthy, "unhealthy market quoted");
+        env.health().setMarket(market, true);
+
+        vm.prank(PAYER);
+        (bool executed,) = address(router).call(abi.encodeCall(router.payConvertedInvoice, (request_, q.swap.quoteId)));
+        require(!executed && !invoices.closed(invoice) && invoices.paidAmount(invoice) == 0);
+        require(!router.usedCheckoutNonces(PAYER, 9) && !adapter.consumedQuote(q.swap.quoteId));
+        require(input.balanceOf(PAYER) == 4 ether && target.balanceOf(PAYOUT) == 0);
+
+        vm.prank(PAYER);
+        input.approve(address(pool), 4 ether);
+        vm.prank(PAYER);
+        bytes32 id = router.payConvertedInvoice(request_, q.swap.quoteId);
+        require(invoices.closed(invoice) && invoices.paidAmount(invoice) == PRICE);
+        require(target.balanceOf(PAYOUT) == q.swap.quotedSettlementAmount && input.balanceOf(PAYER) == 0);
+        PaymentRegistry420.Payment memory payment = payments.getPayment(id);
+        require(payment.status == PaymentRegistry420.Status.SETTLED && payment.invoiceId == invoice);
+        require(payment.inputAsset == address(input) && payment.settlementAsset == address(target));
+        require(payment.inputAmount == 4 ether && payment.settlementAmount == target.balanceOf(PAYOUT));
     }
 }

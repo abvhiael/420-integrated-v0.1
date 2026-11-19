@@ -2,6 +2,7 @@ import type { Hex } from './index.js';
 import { address, hash, quantity, requirePay, type PayRegistry } from './registry.js';
 
 // PaymentRouter420 execution selectors from the retained V3 ABI.
+const NATIVE_INVOICE_SELECTOR = '0xfdec5340';
 const settlementSelectors = new Set([
   '0xe360bec0', // executeDirectTokenSplitSettlement
   '0x8ef5948b', // executeNativeSplitSettlement
@@ -58,17 +59,19 @@ export function createPayWallet(registry: PayRegistry, provider: PayWalletProvid
       }
     },
 
-    async submitPayment(input: Readonly<{ data: Hex; value: bigint }>) {
+    async submitPayment(input: Readonly<{ data: Hex; value: bigint; expectedTarget?: Hex }>) {
       const { data, value } = input;
       requirePay(!submitting && !revoking && account, 'Connect a selected 420 Wallet account');
       requirePay(typeof data === 'string' && /^0x[0-9a-f]{8}(?:[0-9a-f]{2})*$/i.test(data) &&
-        settlementSelectors.has(data.slice(0, 10).toLowerCase()) &&
+        (settlementSelectors.has(data.slice(0, 10).toLowerCase()) ||
+          (data.startsWith(NATIVE_INVOICE_SELECTOR) && data.length === 266 && input.expectedTarget !== undefined)) &&
         typeof value === 'bigint' && value >= 0n && value < 1n << 256n, 'Invalid Pay transaction');
       const from = account;
       const ticket = generation;
       submitting = true;
       try {
         const to = await registry.paymentRouter(await registry.latestSnapshot(), registry.origin);
+        requirePay(input.expectedTarget === undefined || to === address(input.expectedTarget), 'Reviewed payment router changed');
         requirePay(await selected('eth_accounts') === from && ticket === generation,
           '420 Wallet selection changed or was revoked');
         const tx = Object.freeze({ chainId, from, to, data, value: `0x${value.toString(16)}` });

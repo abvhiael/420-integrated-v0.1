@@ -19,6 +19,8 @@ import { formatUnits, readNetwork, readPortfolio } from './core/portfolio.js';
 import { selectNativeAccountBalance420 } from './core/dashboard.js';
 import { getCanonicalReceiveAddress420 } from './core/receive.js';
 import { resolveServices } from './core/services.js';
+import { createTreasuryClient420 } from './core/treasury-client.js';
+import { prepareTreasuryWalletRelease420, submitTreasuryWalletRelease420, treasuryWalletReceipt420 } from './core/treasury-handoff.js';
 function publishWalletVerificationState420(phase='idle',error=null) {
   document.dispatchEvent(new CustomEvent('wallet:verification-state',{detail:{
     config:state.config, network:state.network, controller:state.controller,
@@ -41,6 +43,9 @@ const state = {
   managingSession: false,
   lastSimulation: null,
   capabilityInspection: null,
+  treasuryReview: null,
+  treasurySubmitted: null,
+  treasuryBusy: false,
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -232,6 +237,7 @@ function render() {
   $('#revoke-session-key').disabled = !canManageSession;
   $('#create-session-grant').disabled = !(canManageSession && sessionGrantEnabled);
 
+  renderTreasury();
   renderCapabilityInspection();
   renderPortfolio();
   renderReceive();
@@ -458,6 +464,67 @@ $('#create-session-grant').addEventListener('click', async () => {
   } catch (error) { $('#status').textContent = error.message; }
   finally { state.managingSession = false; render(); }
 });
+
+
+function treasuryClient() {
+  if (!state.provider || !state.config?.treasury || !state.config.network.chainId || state.network?.chainMismatch)
+    throw new Error('Treasury requires a qualified chain-specific Registry deployment pin');
+  return createTreasuryClient420({provider:state.provider,chainId:state.config.network.chainId,registryCodeHash:state.config.treasury.registryCodeHash,releaseExecutor:state.config.treasury.releaseExecutor});
+}
+function renderTreasury() {
+  const ready=Boolean(state.controller && state.provider && state.config?.treasury && state.config.network.chainId && state.network && !state.network.chainMismatch);
+  const owner=ready && runtimeAuthorityReady420() && state.config.features?.smartAccountExecution===true && state.smartAccount?.deployed && state.smartAccount?.controllerIsOwner;
+  const releaseReady=owner && Boolean(state.config.treasury.releaseExecutor);
+  $('#treasury-build-action').disabled=!ready||state.treasuryBusy;
+  $('#treasury-read').disabled=!ready||state.treasuryBusy;
+  $('#treasury-preview-release').disabled=!releaseReady||state.treasuryBusy||Boolean(state.treasurySubmitted);
+  $('#treasury-submit-release').disabled=!releaseReady||state.treasuryBusy||!state.treasuryReview||Boolean(state.treasurySubmitted);
+  $('#treasury-check-receipt').disabled=!state.treasurySubmitted||!state.provider||state.treasuryBusy;
+  $('#treasury-availability').textContent=ready?(releaseReady?'Verified discovery available; executor preflight required':'Discovery available; release executor not enabled'):'Unavailable until qualified Registry configuration and network connection';
+}
+function displayTreasury(value) {$('#treasury-output').textContent=JSON.stringify(value,(_,v)=>typeof v==='bigint'?v.toString():v,2);}
+async function treasuryOperation(callback) {
+  if(state.treasuryBusy)return;
+  state.treasuryBusy=true;render();
+  try{await callback();}catch(error){$('#treasury-status').textContent=error.message;}
+  finally{state.treasuryBusy=false;render();}
+}
+$('#treasury-id').addEventListener('input',()=>{state.treasuryReview=null;render();});
+$('#treasury-read').addEventListener('click',()=>treasuryOperation(async()=>{
+  displayTreasury(await treasuryClient().disbursement($('#treasury-id').value.trim()));
+  $('#treasury-status').textContent='Canonical Treasury record loaded. A release commitment is not independent transfer proof.';
+}));
+$('#treasury-build-action').addEventListener('click',()=>treasuryOperation(async()=>{
+  const input=JSON.parse($('#treasury-action-input').value);
+  const prepared=await treasuryClient().prepareGovernedAction(input);
+  displayTreasury(prepared.action);
+  $('#treasury-status').textContent='Civic action tuple prepared. Include in the exact proposal batch and verify its commitment in Governance; no transaction submitted.';
+}));
+$('#treasury-preview-release').addEventListener('click',()=>treasuryOperation(async()=>{
+  state.treasuryReview=null;
+  const prepared=await prepareTreasuryWalletRelease420(state.provider,state.controller,state.smartAccount,treasuryClient(),$('#treasury-id').value.trim());
+  state.treasuryReview=prepared;displayTreasury(prepared.review);
+  $('#treasury-status').textContent='Simulation passed; review exact recipient, base units, asset, operator and release commitment.';
+}));
+$('#treasury-submit-release').addEventListener('click',()=>treasuryOperation(async()=>{
+  const prior=state.treasuryReview;
+  if(!prior||state.treasurySubmitted)throw new Error('Fresh release simulation required; no automatic rebroadcast');
+  state.treasuryReview=null;
+  const submitted=await submitTreasuryWalletRelease420(state.provider,state.controller,state.smartAccount,treasuryClient(),prior.review.disbursement.id,async fresh=>{
+    if(fresh.review.chainId!==prior.review.chainId||fresh.review.evidence!==prior.review.evidence||fresh.data!==prior.data||fresh.smartAccount!==prior.smartAccount)
+      throw new Error('Treasury preflight changed; review a fresh simulation');
+    const d=fresh.review.disbursement;
+    return typeof globalThis.confirm==='function' && globalThis.confirm('Approve exact Treasury release? '+d.amount+' base units of '+d.asset+' to '+d.recipient+'; commitment '+fresh.review.commitment+'. Your device will request transaction approval.');
+  });
+  state.treasurySubmitted=submitted;displayTreasury(submitted.review);
+  $('#treasury-status').textContent='Submitted '+submitted.txHash+'; check the canonical receipt. Do not rebroadcast automatically.';
+}));
+$('#treasury-check-receipt').addEventListener('click',()=>treasuryOperation(async()=>{
+  const result=await treasuryWalletReceipt420(state.provider,state.treasurySubmitted);
+  displayTreasury(result);
+  $('#treasury-status').textContent='Transaction '+result.status+'; this is not independent proof of Vault transfer.';
+  if(result.status==='confirmed'||result.status==='reverted')state.treasurySubmitted=null;
+}));
 
 loadConfig().then(() => {
   render();

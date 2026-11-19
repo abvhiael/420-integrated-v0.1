@@ -106,3 +106,5 @@ export * from './compute-client.js';
 export * from './commerce.js';
 
 export * from './bridge.js';
+
+export * from './treasury.js';

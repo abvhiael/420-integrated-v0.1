@@ -149,5 +149,12 @@
     "registry_transactions": [],
     "runtime_code_hashes": {},
     "constructor_binding_receipts": []
+  },
+  "consumer_discovery": {
+    "service_id_preimage": "420/service/treasury/v1",
+    "router_component_id_preimage": "420/APP/420TREASURY/TREASURY_ROUTER",
+    "execution_capability_component_preimage": "420/TREASURY/COMPONENT/V1",
+    "wallet_requires_active_service_and_component": "same router with matching runtime code hash, protocol version and constructor graph",
+    "live_binding_owner": "TREASURY-AUDIT-8"
   }
 }

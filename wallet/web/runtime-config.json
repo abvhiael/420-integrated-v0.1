@@ -49,5 +49,6 @@
     "stakeAddress": null,
     "validatorRegistryAddress": null,
     "rewardControllerAddress": null
-  }
+  },
+  "treasury": null
 }

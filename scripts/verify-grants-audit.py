@@ -84,13 +84,15 @@ need("function disbursement(" in milestones and "returns (Disbursement memory)" 
 milestones_norm = normalized(milestones)
 need("d.state != ITreasuryDisbursementGrant420.State.SCHEDULED" in milestones, "Treasury scheduled-state approval gate missing")
 for field_check in (
-    "d.budgetId != p.treasuryBudgetId",
-    "d.recipient != a.recipient",
-    "d.amount != m.amount",
-    "d.civicActionHash != p.civicActionHash",
-    "d.purposeHash != m.purposeHash",
+    "d.budgetId == p.treasuryBudgetId",
+    "d.recipient == a.recipient",
+    "d.amount == m.amount",
+    "d.civicActionHash == p.civicActionHash",
+    "d.purposeHash == m.purposeHash",
 ):
     need(field_check in milestones, f"Treasury canonical binding check missing: {field_check}")
+need(milestones.count("!_matches(m, a, p, d)") == 3, "Treasury tuple must be checked at approval, finalization and cancellation")
+need("block.timestamp > d.expiresAt" in milestones and "d.exists && a.exists && p.exists" in milestones, "expired or missing Treasury record approval gate missing")
 need(
     "d.state != ITreasuryDisbursementGrant420.State.EXECUTED || d.vaultReleaseHash == bytes32(0)" in milestones_norm,
     "PAID finalization no longer requires executed Treasury plus Vault release commitment",

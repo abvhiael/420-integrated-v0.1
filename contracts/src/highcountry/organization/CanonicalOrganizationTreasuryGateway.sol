@@ -9,7 +9,7 @@ import { R04EmergencyConsumer } from "../security/R04EmergencyConsumer.sol";
 import { EmergencyDomains } from "../constants/EmergencyDomains.sol";
 
 /// @notice Bounded HC permission AND canonical Treasury execution authority; no funds or token allowance are held here.
-/// @dev Canonical Treasury owns budget, policy, capability and independently authorized vault-release provenance.
+/// @dev Canonical Treasury owns budget, policy and capability. The supplied nonzero releaseReceipt is a commitment, not independent proof of a Vault transfer.
 contract CanonicalOrganizationTreasuryGateway is R04EmergencyConsumer {
     error InvalidIntegration();
     TreasuryRouter420 public immutable router;

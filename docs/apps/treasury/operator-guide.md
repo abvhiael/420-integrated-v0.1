@@ -371,3 +371,7 @@ Canonical roadmap:
 - `docs/audit/420TREASURY-AUDIT-REMEDIATION-ROADMAP.md`.
 
 TREASURY-AUDIT-8 is the production-equivalent testnet gate. TREASURY-AUDIT-9 is external security review and final Genesis/production closeout.
+
+## Wallet and SDK handoff (REC-6)
+
+Treasury is a covered protocol, not a public standalone app. Wallet and SDK resolve its active service and TreasuryRouter component from the frozen ProtocolRegistry address, using the chain-specific trusted Registry runtime code hash and checking the service code hash, registration profile, module identities, controller, policy and Timelock links. The capability component is a separate namespace. Governed policy, budget, schedule and cancel operations produce typed zero-value Civic action tuples, not immediate Wallet owner transactions; use the existing Governance committed-batch review. For qualified executor deployments, Wallet binds the designated release executor code hash and operator, checks exact Treasury capability and canonical preview tuple, simulates SmartAccount execution and requires explicit review and Wallet approval. Failed, pending, reorganized or confirmed receipts are distinguished without auto-rebroadcast; even a confirmed transaction is not an independent proof of Vault transfer. The executor production address, operator and code pin remain unconfigured until REC-8/AUDIT-8. No arbitrary nonzero hash is supplied by this Wallet handoff.

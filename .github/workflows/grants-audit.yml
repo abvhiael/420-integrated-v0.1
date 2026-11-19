@@ -30,6 +30,7 @@ on:
       - "wallet/web/test/genesis-app-catalog.test.js"
       - "wallet/web/test/apps.test.js"
       - "wallet/web/test/grants-handoff.test.js"
+      - "scripts/materialize-grants-test-closure.py"
       - ".github/workflows/grants-audit.yml"
   workflow_dispatch:
 
@@ -109,13 +110,16 @@ jobs:
           print("GRANTS_AUDIT_5_ARTIFACT_IDENTITIES=" + json.dumps(records, sort_keys=True))
           PY
 
+      - name: Materialize exact Grants test import closure
+        run: python3 scripts/materialize-grants-test-closure.py "$RUNNER_TEMP/grants-tests"
+
       - name: Run Grants deployment and Registry binding qualification
         working-directory: contracts
-        run: forge test --match-path 'test/GrantsDeploymentBinding420.t.sol' -vvvv
+        run: forge test --root "$RUNNER_TEMP/grants-tests" --match-path 'test/GrantsDeploymentBinding420.t.sol' -vvvv
 
       - name: Run Grants lifecycle and adversarial regressions
         working-directory: contracts
-        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/grants-tests" --match-path 'test/GrantsGenesis420.t.sol' -vvv
 
   grants-client-integration:
     needs: grants-contract-core
@@ -190,11 +194,14 @@ jobs:
             exit 1
           fi
 
+      - name: Materialize exact Grants test import closure
+        run: python3 scripts/materialize-grants-test-closure.py "$RUNNER_TEMP/grants-tests"
+
       - name: Re-run Grants tests under hardening profile
         working-directory: contracts
         env:
           FOUNDRY_PROFILE: hardening
-        run: forge test --match-path 'test/GrantsGenesis420.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/grants-tests" --match-path 'test/GrantsGenesis420.t.sol' -vvv
 
       - name: Install Slither for Grants security qualification
         run: python -m pip install --disable-pip-version-check slither-analyzer

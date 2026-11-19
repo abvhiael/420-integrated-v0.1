@@ -275,9 +275,23 @@ protection at the implementation revision.
 
 ## PAY-APP-5 — Hosted checkout, quotes and payment confirmation
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Partial repository implementation. Checkout submission remains unavailable. **Testnet required:** No.
 
 Exit criteria: Canonical prices, 42-second quote and fees, asset/settlement choices, explicit Wallet handoff, atomic failure and status. Retain reproducible scoped qualification at exact implementation SHA.
+
+Hosted review reads the active invoice, merchant controller and current payout
+at one canonical snapshot. The approved deployment can supply the runtime
+hash for `420/APP/420PAY/MERCHANT_REGISTRY` in the existing component map.
+Payment confirmation checks the invoice and selected Wallet account against
+the canonical PaymentRegistry record and reports the exact status.
+
+The current adapter delegates quotes to a canonical engine and the shared
+fee-quote dependency is an interface. No executable price and fee authority
+is wired in the retained Pay package. The existing settlement and lifecycle
+methods also lack a single invoice-bound operation that enforces the reviewed
+terms and advances invoice state with delivery. Wallet checkout submission and
+asset selection stay unavailable until those dependencies are qualified.
+This limitation also applies to local checkout execution.
 
 ## PAY-APP-6 — Merchant registration and business dashboard
 

@@ -16,7 +16,7 @@ const blocks = { hash: hash('a'), number: '0x80', timestamp: '0xfa' };
 const account = address('9');
 const bytecode = '0x6000';
 const codeHash = keccak256Hex(Uint8Array.of(0x60, 0x00));
-const names = ['INVOICE_REGISTRY', 'PAYMENT_REGISTRY', 'PAYMENT_ROUTER'].map(id => '420/APP/420PAY/' + id);
+const names = ['INVOICE_REGISTRY', 'PAYMENT_REGISTRY', 'PAYMENT_ROUTER', 'MERCHANT_REGISTRY'].map(id => '420/APP/420PAY/' + id);
 const service = digit => ({ implementation: address(digit), metadataHash: hash('b'), codeHash, version: 1 });
 const config = { origin, rpcUrl, chainId: '420', registry: address('1'), registryCodeHash: codeHash,
   pay: service('2'), names: service('3'), identity: service('4'),
@@ -64,7 +64,20 @@ try {
       case 'eth_call': {
         const [{to, data}, blockTag] = params;
         assert.deepEqual(blockTag, latest);
-        if (data === '0xe66eefc8' + paymentId.slice(2)) {
+        if (data === digest('getInvoice(bytes32)').slice(0, 10) + invoiceId.slice(2)) {
+          assert.equal(to, address('6'));
+          result = encode(hash('4'), address('8'), hash('0'), '0x' + '343230'.padEnd(64,'0'),
+            12, 300, 400, 0, 1, 0, 0, hash('1'), hash('0'), hash('0'), 1);
+        } else if (data === digest('isClosed(bytes32)').slice(0, 10) + invoiceId.slice(2)) {
+          assert.equal(to, address('6'));
+          result = encode(0);
+        } else if (data === digest('merchants(bytes32)').slice(0, 10) + hash('4').slice(2)) {
+          assert.equal(to, address('5'));
+          result = encode(address('8'), hash('0'), hash('0'), 1, 1, 1);
+        } else if (data === digest('currentPayout(bytes32)').slice(0, 10) + hash('4').slice(2)) {
+          assert.equal(to, address('5'));
+          result = encode(address('3'), 1, hash('0'));
+        } else if (data === '0xe66eefc8' + paymentId.slice(2)) {
           assert.equal(to, address('7'));
           result = encode(invoiceId, account, address('8'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('c'), 0, 0, status);
         } else {
@@ -74,7 +87,7 @@ try {
           } else {
             const index = names.findIndex(name => key('component(bytes32)', name) === data);
             assert.ok(index >= 0, 'unexpected Registry request');
-            result = encode(digest(names[index]), address(String(index + 6)), codeHash, 1, 0, 0, 2);
+            result = encode(digest(names[index]), address(index === 3 ? '5' : String(index + 6)), codeHash, 1, 0, 0, 2);
           }
         }
         break;
@@ -222,6 +235,15 @@ try {
   await confirm.click();
   await page.getByText(/^Already submitted /).waitFor();
   assert.equal(await page.evaluate(() => window.calls.filter(call => call.method === 'eth_sendTransaction').length), 2);
+  const hostedLink = new URL(origin);
+  hostedLink.hash = 'pay?' + new URLSearchParams({v:'1', kind:'invoice', chain:'420', id:invoiceId});
+  await page.getByLabel('Address, .420 name or Pay link').fill(hostedLink.href);
+  await review.click();
+  await page.getByText(/Verified payout/).waitFor();
+  assert.equal(await confirm.count(), 0);
+  await page.getByLabel('Existing payment ID').fill(paymentId);
+  await page.getByRole('button', {name:'Check payment status'}).click();
+  await page.getByText(/Submitted · Canonical snapshot/).waitFor();
   await page.getByRole('button', {name: 'Disconnect Wallet'}).click();
   await page.getByText('Wallet disconnected.').waitFor();
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {

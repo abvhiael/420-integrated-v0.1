@@ -84,6 +84,23 @@ export function createConsumerSource(config, provider) {
         invoice: id => registry.invoiceForReview(snapshot, id)
       };
     },
+    async hostedCheckout(account, invoiceId) {
+      await verify(account);
+      const snapshot = await registry.latestSnapshot();
+      const review = await registry.hostedCheckout(snapshot, invoiceId);
+      await verify(account);
+      return review;
+    },
+    async checkoutConfirmation(account, invoiceId, paymentId) {
+      await verify(account);
+      const snapshot = await registry.latestSnapshot();
+      const payment = await createPayReader(registry.transport, snapshot).payment(paymentId);
+      if (!payment || payment.invoiceId !== invoiceId || (payment.payer !== account && payment.merchant !== account)) {
+        throw new Error('No matching payment for this invoice and Wallet account.');
+      }
+      await verify(account);
+      return { status: payment.status, snapshot };
+    },
     async sendNative(account, recipient, value) {
       await verify(account);
       return wallet.sendNative(recipient, value);

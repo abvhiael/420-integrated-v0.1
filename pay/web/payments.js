@@ -27,6 +27,10 @@ export function createPaymentPanel() {
   const amount = get('send-amount');
   const reviewNode = get('payment-review');
   const confirm = get('confirm-send');
+  const checkout = get('hosted-checkout');
+  const checkoutTerms = get('checkout-terms');
+  const checkoutStatus = get('checkout-status');
+  const checkoutPayment = get('checkout-payment-id');
   const repeat = get('repeat-send');
   const requestKind = get('request-kind');
   const share = get('share-payment');
@@ -36,6 +40,7 @@ export function createPaymentPanel() {
   let revision = 0;
   let busy = false;
   let reviewed = null;
+  let checkoutId = null;
   let separate = false;
   let completed = false;
 
@@ -57,6 +62,11 @@ export function createPaymentPanel() {
     separate = false;
     completed = false;
     reviewNode.hidden = true;
+    checkoutId = null;
+    checkout.hidden = true;
+    checkoutTerms.textContent = '';
+    checkoutStatus.textContent = '';
+    checkoutPayment.value = '';
     repeat.hidden = true;
     draw();
   }
@@ -85,6 +95,15 @@ export function createPaymentPanel() {
     event.preventDefault();
     clearReview();
     void run(async (active, current) => {
+      const text = recipient.value.trim();
+      if (!fixture && /^https?:/i.test(text)) {
+        const link = parsePayLink(text, base, active.chainId);
+        if (link.kind === 'invoice') {
+          checkoutId = link.id;
+          checkout.hidden = false;
+          checkoutTerms.textContent = 'Existing payments can be checked even if the invoice is closed.';
+        }
+      }
       const next = await getReview(active);
       if (!current()) return;
       reviewed = next;
@@ -98,6 +117,39 @@ export function createPaymentPanel() {
         (next.kind === 'invoice' ? '\nInvoice ' + next.id : '');
       reviewNode.hidden = false;
       reviewNode.focus();
+      if (next.kind === 'invoice' && !fixture) {
+        checkout.hidden = false;
+        checkoutTerms.textContent = 'Checking canonical merchant and payout…';
+        try {
+          const { invoice, recipient } = await active.source.hostedCheckout(active.account, next.id);
+          if (!current()) return;
+          if (!sameReview(next, { ...next, recipient: invoice.merchant, value: invoice.amount,
+            currency: invoice.currency, expires: invoice.expiresAt })) {
+            clearReview();
+            throw new Error('Invoice terms changed. Review again.');
+          }
+          checkoutTerms.textContent = 'Verified payout ' + recipient +
+            '\nAsset, fees and Wallet approval are unavailable without a qualified checkout route.';
+        } catch (error) {
+          if (current()) checkoutTerms.textContent = error.message || 'Canonical checkout terms unavailable.';
+        }
+      }
+    });
+  });
+  checkoutPayment.addEventListener('input', () => { checkoutStatus.textContent = ''; });
+  get('checkout-check').addEventListener('click', () => {
+    const invoiceId = checkoutId;
+    if (!invoiceId || fixture) return;
+    checkoutStatus.textContent = '';
+    void run(async (active, current) => {
+      const paymentId = checkoutPayment.value.trim().toLowerCase();
+      if (!/^0x[0-9a-f]{64}$/.test(paymentId) || /^0x0{64}$/.test(paymentId)) {
+        throw new Error('Enter a canonical payment ID.');
+      }
+      const result = await active.source.checkoutConfirmation(active.account, invoiceId, paymentId);
+      if (!current() || checkoutId !== invoiceId || checkoutPayment.value.trim().toLowerCase() !== paymentId) return;
+      checkoutStatus.textContent = result.status.replaceAll('_', ' ').toLowerCase().replace(/^./, c => c.toUpperCase()) +
+        ' · Canonical snapshot ' + result.snapshot.blockHash;
     });
   });
   for (const control of [recipient, amount]) control.addEventListener('input', clearReview);

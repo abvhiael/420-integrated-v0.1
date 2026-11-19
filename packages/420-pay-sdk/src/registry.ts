@@ -10,7 +10,9 @@ export interface PayRpc {
 export const PAYMENT_ROUTER = '420/APP/420PAY/PAYMENT_ROUTER';
 const NAMES = '420/service/names/v1';
 const IDENTITY = '420/service/identity/v1';
-type Component = typeof invoiceView.component | typeof paymentView.component | typeof PAYMENT_ROUTER;
+export const MERCHANT_REGISTRY = '420/APP/420PAY/MERCHANT_REGISTRY';
+type RequiredComponent = typeof invoiceView.component | typeof paymentView.component | typeof PAYMENT_ROUTER;
+type Component = RequiredComponent | typeof MERCHANT_REGISTRY;
 
 interface ServiceBinding {
   readonly implementation: Hex;
@@ -27,7 +29,7 @@ export interface PayDeployment {
   readonly pay: ServiceBinding;
   readonly names: ServiceBinding;
   readonly identity: ServiceBinding;
-  readonly components: Readonly<Record<Component, Hex>>;
+  readonly components: Readonly<Record<RequiredComponent, Hex> & Partial<Record<typeof MERCHANT_REGISTRY, Hex>>>;
 }
 
 export function requirePay(condition: unknown, message: string): asserts condition {
@@ -95,7 +97,9 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
   const components = Object.freeze({
     [invoiceView.component]: hash(deployment.components[invoiceView.component]),
     [paymentView.component]: hash(deployment.components[paymentView.component]),
-    [PAYMENT_ROUTER]: hash(deployment.components[PAYMENT_ROUTER])
+    [PAYMENT_ROUTER]: hash(deployment.components[PAYMENT_ROUTER]),
+    [MERCHANT_REGISTRY]: deployment.components[MERCHANT_REGISTRY] === undefined ? undefined :
+      hash(deployment.components[MERCHANT_REGISTRY])
   });
 
   async function verifyChain() {
@@ -137,15 +141,16 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     }
     const call = (to: Hex, data: Hex) => rpc.request('eth_call', [{ to, data }, blockTag]);
     async function component(id: Component) {
-      requirePay(Object.hasOwn(components, id), 'Unknown Pay component');
+      const expected = components[id];
+      requirePay(expected, 'Pay component deployment is unavailable');
       const key = hashText(id);
       const [actualId, implementation, codeHash, major, minor, patch, lifecycle] =
         words(await call(registry, calldata('component(bytes32)', key)), 7);
-      requirePay(actualId === key && '0x' + codeHash === components[id] &&
+      requirePay(actualId === key && '0x' + codeHash === expected &&
         uint(major, 16) === 1n && uint(minor, 16) === 0n && uint(patch, 16) === 0n &&
         uint(lifecycle, 8) === 2n, 'Pay component binding is inactive or changed');
       const target = addressWord(implementation);
-      await verifyCode(target, components[id]);
+      await verifyCode(target, expected);
       return target;
     }
     async function service(id: string, expected: ServiceBinding) {
@@ -169,6 +174,23 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     return result;
   }
 
+  async function checkoutInvoice(state: {
+    call(to: Hex, data: Hex): Promise<unknown>;
+    component(id: Component): Promise<Hex>;
+    timestamp: bigint;
+  }, invoiceId: Hex, snapshot: PaySnapshot) {
+    const id = hash(invoiceId);
+    const target = await state.component(invoiceView.component);
+    const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+    const [invoice, closed] = await Promise.all([
+      reader.invoice(id),
+      state.call(target, calldata('isClosed(bytes32)', id.slice(2)))
+    ]);
+    requirePay(invoice?.active && uint(words(closed, 1)[0], 8) === 0n && state.timestamp <= invoice.expiresAt,
+      'Invoice is unavailable, closed or expired');
+    return invoice;
+  }
+
   const transport: PayReadTransport = Object.freeze({
     async read({ component, snapshot, calldata: data }: Parameters<PayReadTransport['read']>[0]) {
       requirePay(component === invoiceView.component || component === paymentView.component, 'Unsupported Pay view');
@@ -189,17 +211,24 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
       return pinned(snapshot, async state => state.timestamp);
     },
     async invoiceForReview(snapshot: PaySnapshot, invoiceId: Hex) {
-      const id = hash(invoiceId);
+      return pinned(snapshot, state => checkoutInvoice(state, invoiceId, snapshot));
+    },
+    async hostedCheckout(snapshot: PaySnapshot, invoiceId: Hex) {
       return pinned(snapshot, async state => {
-        const target = await state.component(invoiceView.component);
-        const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
-        const [invoice, closed] = await Promise.all([
-          reader.invoice(id),
-          state.call(target, calldata('isClosed(bytes32)', id.slice(2)))
+        const invoice = await checkoutInvoice(state, invoiceId, snapshot);
+        const target = await state.component(MERCHANT_REGISTRY);
+        const id = hash(invoice.merchantId).slice(2);
+        const [merchantRaw, payoutRaw] = await Promise.all([
+          state.call(target, calldata('merchants(bytes32)', id)),
+          state.call(target, calldata('currentPayout(bytes32)', id))
         ]);
-        requirePay(invoice?.active && uint(words(closed, 1)[0], 8) === 0n && state.timestamp <= invoice.expiresAt,
-          'Invoice is unavailable, closed or expired');
-        return invoice;
+        const [controller, , , status, active] = words(merchantRaw, 6);
+        requirePay(addressWord(controller) === invoice.merchant && uint(status, 8) <= 3n &&
+          uint(active, 8) === 1n, 'Invoice merchant binding is unavailable');
+        const [primary, version, planHash] = words(payoutRaw, 3);
+        requirePay(uint(version, 32) > 0n && '0x' + planHash === invoice.settlementPlanHash,
+          'Invoice payout plan has changed');
+        return Object.freeze({ invoice, recipient: addressWord(primary), chainTime: state.timestamp });
       });
     },
     async accountBalances(snapshot: PaySnapshot, account: Hex, tokens: readonly { address: Hex; codeHash: Hex }[]) {

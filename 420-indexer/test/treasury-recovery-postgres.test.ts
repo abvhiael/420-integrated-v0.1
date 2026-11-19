@@ -2,13 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import type { ChainSource420, Hex, IndexerBlock, IndexerLog } from '../src/chain-source.js';
+import { fork } from 'node:child_process';
+import { once } from 'node:events';
+import type { ChainSource420, Hex, IndexerBlock, IndexerLog, IndexerTransaction, IndexerReceipt } from '../src/chain-source.js';
 import type { Artifact420 } from '../src/abi-manifest.js';
 import { TREASURY_EVENT_CONTRACTS_420, bindTreasuryDescriptors420, treasuryDescriptorsFromArtifacts420, type TreasuryArtifactManifest420, type TreasuryEventContract420 } from '../src/treasury-descriptors.js';
 import { createTreasuryIndexer420 } from '../src/treasury-indexer.js';
 import { PostgresSql420 } from '../src/postgres.js';
 import { SqlCheckpointStore420 } from '../src/recovery-store.js';
-import { treasuryBudgetState420, treasuryAssetPolicyState420, treasuryDisbursementState420 } from '../src/treasury-read-model.js';
+import { treasuryBudgetState420, treasuryAssetPolicyState420, treasuryDisbursementState420, treasuryCanonicalDisbursementId420 } from '../src/treasury-read-model.js';
 import type { SqlExecutor420 } from '../src/core-projections.js';
 
 const manifest = JSON.parse(readFileSync('descriptors/treasury420-v1.json','utf8')) as TreasuryArtifactManifest420;
@@ -17,9 +19,11 @@ const addresses = Object.fromEntries(TREASURY_EVENT_CONTRACTS_420.map((n,i)=>[n,
 const descriptors=bindTreasuryDescriptors420(treasuryDescriptorsFromArtifacts420(manifest,artifacts),addresses);
 const h=(n:number):Hex=>`0x${n.toString(16).padStart(64,'0')}`;
 const data=(...values:number[]):Hex=>`0x${values.map(n=>h(n).slice(2)).join('')}`;
-const budget=h(11), disb=h(12), asset='0x'+'0'.repeat(40);
+const budget=h(11), asset='0x'+'0'.repeat(40);
+const address=(n:number):Hex=>`0x${n.toString(16).padStart(40,'0')}`;
+const disb=treasuryCanonicalDisbursementId420({budgetId:budget,recipient:address(44),amount:'80',notBefore:'2',expiresAt:'100',civicActionHash:h(4),purposeHash:h(6)}) as Hex;
 class Source implements ChainSource420 {
- sourceId='treasury-recovery-fixture'; head=1n; chain=420n; fork=false;
+ sourceId='treasury-recovery-fixture'; head=1n; chain=420n; fork=false; badReceipt=false;
  async chainId(){return this.chain;}
  async blockNumber(){return this.head;}
  async getBlockByNumber(n:bigint):Promise<IndexerBlock|null>{
@@ -28,8 +32,18 @@ class Source implements ChainSource420 {
   return {number:n,hash:h(id(n)),parentHash:n===0n?h(0):h(id(n-1n)),timestamp:100n+n};
  }
  async getBlockByHash(hash:Hex){for(let n=0n;n<=this.head;n++){const b=await this.getBlockByNumber(n);if(b?.hash===hash)return b;}return null;}
- async getTransactionByHash(){return null;}
- async getTransactionReceipt(){return null;}
+ async getBlockTransactionsByNumber(n:bigint):Promise<IndexerTransaction[]> {
+  if(n===0n)return [];
+  const b=(await this.getBlockByNumber(n))!;
+  return [{hash:h(Number(n)+1000),blockNumber:n,blockHash:b.hash,transactionIndex:0,from:address(44),to:addresses.TreasuryDisbursementRegistry420,input:'0x',value:0n}];
+ }
+ async getTransactionByHash(hash:Hex):Promise<IndexerTransaction|null>{
+  for(let n=1n;n<=this.head;n++){const tx=(await this.getBlockTransactionsByNumber(n))[0];if(tx?.hash===hash)return tx;}return null;
+ }
+ async getTransactionReceipt(hash:Hex):Promise<IndexerReceipt|null>{
+  const tx=await this.getTransactionByHash(hash);if(!tx)return null;
+  return {transactionHash:hash,blockNumber:tx.blockNumber,blockHash:tx.blockHash,transactionIndex:0,status:this.badReceipt?0:1,contractAddress:null,logs:await this.getLogs({fromBlock:tx.blockNumber,toBlock:tx.blockNumber})};
+ }
  async call():Promise<Hex>{return '0x';}
  async getCode():Promise<Hex>{return '0x';}
  async getLogs(filter:{fromBlock:bigint;toBlock:bigint}):Promise<IndexerLog[]>{
@@ -45,13 +59,19 @@ class Source implements ChainSource420 {
  }
 }
 class FaultDB extends PostgresSql420 {
- failCheckpoint=false;
+ failCheckpoint=false; pauseCheckpoint=false;
  override async transaction<T>(work:(tx:SqlExecutor420)=>Promise<T>):Promise<T>{
-  return super.transaction(tx=>work({query:async(sql,params)=>{if(this.failCheckpoint&&sql.includes('insert into idx_checkpoints'))throw new Error('injected checkpoint failure');return tx.query(sql,params);}}));
+  return super.transaction(tx=>work({query:async(sql,params)=>{if(sql.includes('insert into idx_checkpoints')){if(this.failCheckpoint)throw new Error('injected checkpoint failure');if(this.pauseCheckpoint){process.send?.('checkpoint');await new Promise(()=>{});}}return tx.query(sql,params);}}));
  }
 }
 const databaseUrl=process.env.INDEXER_PG_URL;
-test('Treasury durable PostgreSQL checkpoint, restart, reorganization and clean rebuild', {skip:!databaseUrl,timeout:60000},async t=>{
+if(process.env.TREASURY_REC7_WORKER==='1'){
+ const source=new Source();source.head=3n;
+ const db=new FaultDB({connectionString:databaseUrl,options:'-c search_path=treasury_recovery_rec7'});
+ db.pauseCheckpoint=true;
+ await (await createTreasuryIndexer420(source,db,420n,h(1),manifest,artifacts,addresses,{finality:{mode:'head'}})).runOnce();
+ throw new Error('worker unexpectedly completed');
+} else test('Treasury durable PostgreSQL checkpoint, restart, reorganization and clean rebuild', {skip:!databaseUrl,timeout:60000},async t=>{
  const admin=new PostgresSql420({connectionString:databaseUrl});
  await admin.query('drop schema if exists treasury_recovery_rec7 cascade; create schema treasury_recovery_rec7');await admin.close();
  const open=()=>new FaultDB({connectionString:databaseUrl,options:'-c search_path=treasury_recovery_rec7'});
@@ -64,7 +84,15 @@ test('Treasury durable PostgreSQL checkpoint, restart, reorganization and clean 
  const run=async()=> (await ingest()).runOnce();
  const states=()=>Promise.all([treasuryBudgetState420(db,420n,budget),treasuryDisbursementState420(db,420n,disb),treasuryAssetPolicyState420(db,420n,asset)]);
  await run();assert.equal((await states())[0]?.committed,'0');
- source.head=3n;db.failCheckpoint=true;await assert.rejects(run,/injected checkpoint/);
+ const worker=fork(new URL(import.meta.url),[],{env:{...process.env,TREASURY_REC7_WORKER:'1'},stdio:['ignore','pipe','pipe','ipc']});
+ try{
+  const message=await Promise.race([once(worker,'message'),once(worker,'exit').then(()=>{throw new Error('Treasury worker exited before checkpoint');}),new Promise<never>((_,reject)=>{const timer=setTimeout(()=>reject(new Error('Treasury worker checkpoint timeout')),15000);timer.unref();})]);
+  assert.deepEqual(message,['checkpoint']);
+  const exit=once(worker,'exit');worker.kill('SIGKILL');assert.equal((await exit)[1],'SIGKILL');
+ }finally{if(worker.exitCode===null&&worker.signalCode===null)worker.kill('SIGKILL');}
+ assert.equal((await new SqlCheckpointStore420(db,420n).load())?.blockNumber,1n);assert.equal((await states())[1],null);
+ source.head=3n;source.badReceipt=true;await assert.rejects(run,/receipt provenance mismatch/);source.badReceipt=false;
+ db.failCheckpoint=true;await assert.rejects(run,/injected checkpoint/);
  assert.equal((await new SqlCheckpointStore420(db,420n).load())?.blockNumber,1n);
  assert.equal((await states())[1],null);
  db.failCheckpoint=false;await run();const original=await states();

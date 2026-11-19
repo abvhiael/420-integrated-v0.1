@@ -13,7 +13,7 @@ import {
   type TreasuryArtifactManifest420,
   type TreasuryEventContract420
 } from '../src/treasury-descriptors.js';
-import { treasuryBudgetState420, treasuryDisbursementState420, treasuryAssetPolicyState420 } from '../src/treasury-read-model.js';
+import { treasuryBudgetState420, treasuryDisbursementState420, treasuryAssetPolicyState420, treasuryCanonicalDisbursementId420 } from '../src/treasury-read-model.js';
 
 const manifest = JSON.parse(
   readFileSync(new URL('../../descriptors/treasury420-v1.json', import.meta.url), 'utf8')
@@ -115,21 +115,25 @@ test('Treasury budget read model rebuilds complete state from creation and accou
   assert.equal(state?.authoritative, false);
 });
 
+const canonicalDisbursement = (amount:string,notBefore:string,expiresAt:string,civicActionHash:Hex,purposeHash:Hex) => treasuryCanonicalDisbursementId420({budgetId:h(1),recipient:'0x00000000000000000000000000000000000000aa',amount,notBefore,expiresAt,civicActionHash,purposeHash});
+const disbursement21=canonicalDisbursement('300','20','50',h(4),h(22));
+const disbursement31=canonicalDisbursement('1','1','2',h(2),h(3));
+
 test('Treasury disbursement read model preserves schedule fields and terminal release evidence', async () => {
   const db = new QueueDb420();
   db.queue.push({ rows: [
     {
       chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementScheduled',
-      fields:{ disbursementId:h(21), budgetId:h(1), recipient:'0x00000000000000000000000000000000000000aa', asset:'0x0000000000000000000000000000000000000420', amount:'300', notBefore:'20', expiresAt:'50', civicActionHash:h(4), purposeHash:h(22) },
+      fields:{ disbursementId:disbursement21, budgetId:h(1), recipient:'0x00000000000000000000000000000000000000aa', asset:'0x0000000000000000000000000000000000000420', amount:'300', notBefore:'20', expiresAt:'50', civicActionHash:h(4), purposeHash:h(22) },
       block_number:'20', block_hash:h(23), tx_hash:h(24), tx_index:0, log_index:0
     },
     {
       chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementExecuted',
-      fields:{ disbursementId:h(21), vaultReleaseHash:h(25), executor:'0x00000000000000000000000000000000000000ee' },
+      fields:{ disbursementId:disbursement21, vaultReleaseHash:h(25), executor:'0x00000000000000000000000000000000000000ee' },
       block_number:'21', block_hash:h(26), tx_hash:h(27), tx_index:1, log_index:1
     }
   ]});
-  const state = await treasuryDisbursementState420(db, 420n, h(21));
+  const state = await treasuryDisbursementState420(db, 420n, disbursement21);
   assert.equal(state?.state, 'EXECUTED');
   assert.equal(state?.purposeHash, h(22));
   assert.equal(state?.vaultReleaseHash, h(25));
@@ -140,11 +144,11 @@ test('Treasury disbursement read model preserves schedule fields and terminal re
 test('Treasury read model rejects terminal replay and accounting corruption', async () => {
   const disb = new QueueDb420();
   disb.queue.push({ rows: [
-    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementScheduled', fields:{ disbursementId:h(31), budgetId:h(1), recipient:'0x00000000000000000000000000000000000000aa', asset:'0x0000000000000000000000000000000000000420', amount:'1', notBefore:'1', expiresAt:'2', civicActionHash:h(2), purposeHash:h(3) }, block_number:'1', block_hash:h(1), tx_hash:h(2), tx_index:0, log_index:0 },
-    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementCancelled', fields:{ disbursementId:h(31) }, block_number:'2', block_hash:h(3), tx_hash:h(4), tx_index:0, log_index:0 },
-    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementExecuted', fields:{ disbursementId:h(31), vaultReleaseHash:h(5), executor:'0x00000000000000000000000000000000000000ee' }, block_number:'3', block_hash:h(6), tx_hash:h(7), tx_index:0, log_index:0 }
+    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementScheduled', fields:{ disbursementId:disbursement31, budgetId:h(1), recipient:'0x00000000000000000000000000000000000000aa', asset:'0x0000000000000000000000000000000000000420', amount:'1', notBefore:'1', expiresAt:'2', civicActionHash:h(2), purposeHash:h(3) }, block_number:'1', block_hash:h(1), tx_hash:h(2), tx_index:0, log_index:0 },
+    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementCancelled', fields:{ disbursementId:disbursement31 }, block_number:'2', block_hash:h(3), tx_hash:h(4), tx_index:0, log_index:0 },
+    { chain_id:'420', protocol:'420Treasury', contract_address:'0xdddddddddddddddddddddddddddddddddddddddd', event_name:'DisbursementExecuted', fields:{ disbursementId:disbursement31, vaultReleaseHash:h(5), executor:'0x00000000000000000000000000000000000000ee' }, block_number:'3', block_hash:h(6), tx_hash:h(7), tx_index:0, log_index:0 }
   ]});
-  await assert.rejects(() => treasuryDisbursementState420(disb, 420n, h(31)), /terminal replay/);
+  await assert.rejects(() => treasuryDisbursementState420(disb, 420n, disbursement31), /terminal replay/);
 
   const budget = new QueueDb420();
   budget.queue.push({ rows: [

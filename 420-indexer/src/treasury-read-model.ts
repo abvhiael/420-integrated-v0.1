@@ -1,3 +1,4 @@
+import { AbiCoder, id as hashText, keccak256 } from 'ethers';
 import type { SqlExecutor420 } from './core-projections.js';
 import type { QueryRow420 } from './query-service.js';
 
@@ -232,6 +233,12 @@ export async function treasuryBudgetState420(
   };
 }
 
+export function treasuryCanonicalDisbursementId420(fields: Record<string,unknown>): string {
+  return keccak256(AbiCoder.defaultAbiCoder().encode(
+    ['bytes32','bytes32','address','uint128','uint64','uint64','bytes32','bytes32'],
+    [hashText('420/TREASURY/DISBURSEMENT/V1'),stringField420(fields,'budgetId'),stringField420(fields,'recipient'),uintField420(fields,'amount'),uintField420(fields,'notBefore'),uintField420(fields,'expiresAt'),stringField420(fields,'civicActionHash'),stringField420(fields,'purposeHash')]));
+}
+
 export async function treasuryDisbursementState420(
   db: SqlExecutor420,
   chainId: bigint,
@@ -256,6 +263,7 @@ export async function treasuryDisbursementState420(
   if (scheduled.length !== 1 || rows[0] !== scheduled[0]) throw new Error('Treasury disbursement schedule history invalid');
   const baseFields = fields420(scheduled[0]!);
   if (BigInt(uintField420(baseFields, 'amount')) === 0n || BigInt(uintField420(baseFields, 'expiresAt')) <= BigInt(uintField420(baseFields, 'notBefore')) || ['disbursementId','budgetId','civicActionHash','purposeHash'].some(name => /^0x0{64}$/.test(stringField420(baseFields, name))) || /^0x0{40}$/.test(stringField420(baseFields, 'recipient'))) throw new Error('Treasury disbursement schedule invalid');
+  if (treasuryCanonicalDisbursementId420(baseFields) !== id) throw new Error('Treasury canonical disbursement id mismatch');
   let state: TreasuryDisbursementState420['state'] = 'SCHEDULED';
   let vaultReleaseHash: string | null = null;
   let executor: string | null = null;

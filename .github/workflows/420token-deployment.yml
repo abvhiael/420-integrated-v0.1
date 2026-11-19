@@ -1,0 +1,51 @@
+name: 420Token V3 deployment rehearsal
+on:
+  pull_request:
+    paths:
+      - 'scripts/token/**'
+      - '.github/workflows/420token-deployment.yml'
+      - 'contracts/src/token/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/interfaces/genesis/**'
+      - 'contracts/src/interfaces/I420System.sol'
+      - 'contracts/src/libraries/ServiceIds420.sol'
+      - 'contracts/config/420token-genesis.json'
+      - 'contracts/config/token/**'
+      - 'contracts/config/genesis-config-commitment.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/predeploy/GovernanceTimelock-predeploy-state.json'
+      - 'contracts/config/predeploy/ProtocolRegistry-predeploy-state.json'
+      - 'contracts/artifacts/GovernanceTimelock.json'
+      - 'contracts/artifacts/ProtocolRegistry.json'
+      - 'contracts/artifacts/genesis-residents/v3/manifest.json'
+      - 'contracts/foundry.toml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: token-deployment-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Materialize twice and rehearse twice on local EVM
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 scripts/token/deployment.py qualify "$RUNNER_TEMP/token-v3-release"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: token-v3-release-and-local-evidence
+          path: ${{ runner.temp }}/token-v3-release/
+          if-no-files-found: error

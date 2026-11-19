@@ -28,6 +28,7 @@ interface VmTokenCompliance420 {
 contract TokenPermitCompliance420Test {
     VmTokenCompliance420 constant vm = VmTokenCompliance420(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant KEY = 0x420420;
+    uint256 constant ORIGINAL_CHAIN = 420;
     uint256 constant CURVE_ORDER = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
     bytes32 constant TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -36,6 +37,8 @@ contract TokenPermitCompliance420Test {
     address holder;
 
     function setUp() public {
+        // Establish a known chain outside the fuzz transaction: solc may cache CHAINID within one call.
+        vm.chainId(ORIGINAL_CHAIN);
         holder = vm.addr(KEY);
         token = new ERC20Template420(
             "Permit", "PMT", holder, 100 ether, 0, false, false, true, false, TokenIds420.ERC20_PERMIT
@@ -75,7 +78,7 @@ contract TokenPermitCompliance420Test {
         uint256 amount,
         uint64 nextChain
     ) public {
-        uint256 original = block.chainid;
+        uint256 original = ORIGINAL_CHAIN;
         uint256 next = uint256(nextChain) + 1;
         if (next == original) ++next;
         uint256 deadline = block.timestamp + 100;

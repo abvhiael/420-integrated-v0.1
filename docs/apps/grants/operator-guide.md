@@ -406,3 +406,7 @@ Canonical audit report and roadmap:
 - `docs/audit/420GRANTS-AUDIT-REMEDIATION-ROADMAP.md`.
 
 GRANTS-AUDIT-8 is exact-head Level 3 repository/app-phase closeout. GRANTS-AUDIT-9 is production-equivalent testnet qualification. GRANTS-AUDIT-10 is Genesis candidate / production closeout.
+
+## REC-6 consumer reconciliation
+
+Approval rejects a scheduled disbursement after its expiry (the execution window is inclusive). An already-approved expired disbursement is not automatically detached: governance must cancel Treasury first and then cancel Grants. Finalization rechecks the full original budget/recipient/amount/Civic/purpose tuple and its one-to-one binding. Successful execution may be finalized after expiry; do not hide valid historical execution by cancelling the award or milestone. PAID is the adopted commitment-only Treasury state, not independent proof of transfer.

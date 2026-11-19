@@ -44,6 +44,15 @@ export function validateRuntimeConfig(config) {
   optionalAddress(config.smartAccount.recoveryAuthority, 'smartAccount.recoveryAuthority');
   if (config.smartAccount.salt != null && !/^0x[0-9a-fA-F]{64}$/.test(config.smartAccount.salt)) throw new Error('smartAccount.salt must be bytes32');
   validateGasQuoteConfig420(config.gasQuote);
+  if (config.treasury != null) {
+    if (!config.network.chainId || typeof config.treasury !== 'object' || Array.isArray(config.treasury) ||
+        !/^0x[0-9a-fA-F]{64}$/.test(config.treasury.registryCodeHash || '') || /^0x0{64}$/i.test(config.treasury.registryCodeHash))
+      throw new Error('Treasury requires a chain-specific trusted Registry code hash');
+    const executor = config.treasury.releaseExecutor;
+    if (executor != null && (!/^0x[0-9a-fA-F]{40}$/.test(executor.address || '') || /^0x0{40}$/i.test(executor.address) ||
+        !/^0x[0-9a-fA-F]{64}$/.test(executor.codeHash || '') || /^0x0{64}$/i.test(executor.codeHash)))
+      throw new Error('Treasury release executor deployment pin invalid');
+  }
   if (!Array.isArray(config.trackedAssets)) throw new TypeError('trackedAssets array required');
   for (const asset of config.trackedAssets) {
     optionalAddress(asset.address, 'tracked asset address');

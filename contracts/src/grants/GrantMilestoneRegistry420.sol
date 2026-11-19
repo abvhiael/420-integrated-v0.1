@@ -172,9 +172,8 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         ITreasuryDisbursementGrant420.Disbursement memory d = treasury.disbursement(treasuryDisbursementId);
 
         if (
-            d.state != ITreasuryDisbursementGrant420.State.SCHEDULED || d.budgetId != p.treasuryBudgetId
-                || d.recipient != a.recipient || d.amount != m.amount || d.civicActionHash != p.civicActionHash
-                || d.purposeHash != m.purposeHash
+            !_matches(m, a, p, d) || d.state != ITreasuryDisbursementGrant420.State.SCHEDULED
+                || block.timestamp > d.expiresAt || d.vaultReleaseHash != bytes32(0)
         ) revert TreasuryMismatch();
 
         if (treasuryDisbursementMilestone[treasuryDisbursementId] != bytes32(0)) {
@@ -194,9 +193,15 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         if (m.state != State.APPROVED) revert InvalidState();
 
         ITreasuryDisbursementGrant420.Disbursement memory d = treasury.disbursement(m.treasuryDisbursementId);
-        if (d.state != ITreasuryDisbursementGrant420.State.EXECUTED || d.vaultReleaseHash == bytes32(0)) {
-            revert TreasuryMismatch();
-        }
+        GrantAwardRegistry420.Award memory a = awards.award(m.awardId);
+        GrantProgramRegistry420.Program memory p = programs.program(a.programId);
+        if (
+            treasuryDisbursementMilestone[m.treasuryDisbursementId] != id || !_matches(m, a, p, d)
+                || d.state != ITreasuryDisbursementGrant420.State.EXECUTED || d.vaultReleaseHash == bytes32(0)
+        ) revert TreasuryMismatch();
+
+        // PAID means canonical Treasury completion evidence, not independent Vault transfer proof.
+        // An executed record may be finalized even after its execution window or award has closed.
 
         m.state = State.PAID;
         emit MilestonePaid(id, m.treasuryDisbursementId);
@@ -213,7 +218,12 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
             // Never detach Grants from a payment Treasury can still execute. The
             // Treasury disbursement must be cancelled first; executed payments
             // remain historical fact and must be finalized PAID instead.
-            if (d.state != ITreasuryDisbursementGrant420.State.CANCELLED) revert InvalidState();
+            GrantAwardRegistry420.Award memory a = awards.award(m.awardId);
+            GrantProgramRegistry420.Program memory p = programs.program(a.programId);
+            if (
+                treasuryDisbursementMilestone[m.treasuryDisbursementId] != id || !_matches(m, a, p, d)
+                    || d.state != ITreasuryDisbursementGrant420.State.CANCELLED
+            ) revert InvalidState();
 
             delete treasuryDisbursementMilestone[m.treasuryDisbursementId];
             m.treasuryDisbursementId = bytes32(0);
@@ -228,6 +238,16 @@ contract GrantMilestoneRegistry420 is I420System, SystemAccess {
         bytes32 id
     ) external view returns (Milestone memory) {
         return _get(id);
+    }
+
+    function _matches(
+        Milestone storage m,
+        GrantAwardRegistry420.Award memory a,
+        GrantProgramRegistry420.Program memory p,
+        ITreasuryDisbursementGrant420.Disbursement memory d
+    ) private view returns (bool) {
+        return d.exists && a.exists && p.exists && d.budgetId == p.treasuryBudgetId && d.recipient == a.recipient
+            && d.amount == m.amount && d.civicActionHash == p.civicActionHash && d.purposeHash == m.purposeHash;
     }
 
     function _get(

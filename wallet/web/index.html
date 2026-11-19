@@ -106,6 +106,19 @@
         </div>
       </section>
 
+      <section id="treasury-panel" class="panel" aria-labelledby="treasury-heading">
+        <div class="section-heading"><div><p class="eyebrow">Covered protocol · canonical authority</p><h2 id="treasury-heading">420 Treasury</h2></div></div>
+        <p id="treasury-availability" class="muted" role="status">Unavailable until qualified Registry configuration and network connection</p>
+        <p class="wallet-field-help">Treasury is a governed budget control plane, not custody. Governance actions are prepared for Civic review; release execution is available only to a configured, independently authorized operator.</p>
+        <label><span class="label">Disbursement ID (bytes32)</span><input id="treasury-id" autocomplete="off" spellcheck="false"/></label>
+        <div class="button-row"><button id="treasury-read" type="button" disabled>Read record</button><button id="treasury-preview-release" type="button" disabled>Simulate release</button><button id="treasury-submit-release" type="button" disabled>Approve release</button><button id="treasury-check-receipt" type="button" disabled>Check receipt</button></div>
+        <details class="wallet-advanced-details"><summary>Prepare governed Civic action</summary>
+          <p class="wallet-field-help">Use setAssetPolicy, createBudget, schedule or cancel. Numeric amounts and timestamps must be decimal strings. Copy the returned action into the exact Civic batch; this does not execute governance.</p>
+          <textarea id="treasury-action-input" rows="5" spellcheck="false" placeholder='{"kind":"cancel","disbursementId":"0x…"}'></textarea>
+          <button id="treasury-build-action" type="button" disabled>Prepare Civic action</button>
+        </details>
+        <p id="treasury-status" role="status" aria-live="polite"></p><pre id="treasury-output" class="wallet-address-break" style="white-space:pre-wrap;overflow-wrap:anywhere" aria-live="polite"></pre>
+      </section>
       <section id="execution-panel" class="panel" hidden>
         <div class="section-heading"><div><p class="eyebrow">Owner authority · simulation required</p><h2>Send / Execute</h2></div><span id="review-state" class="status-pill" data-state="idle">Awaiting simulation</span></div>
         <p class="wallet-section-help">Prepare an asset transfer, simulate it, review the exact transaction, then approve it with your controller. No transfer occurs when you prepare or simulate.</p>

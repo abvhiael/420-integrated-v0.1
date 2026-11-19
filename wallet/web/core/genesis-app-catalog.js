@@ -22,7 +22,7 @@ export const GENESIS_APP_SERVICES = Object.freeze([
   { id: 'commons', name: '420 Commons', serviceId: '420/service/commons/v1', category: 'social', description: 'Shared community coordination and commons services.' },
   { id: 'pulse', name: '420 Pulse', serviceId: '420/service/pulse/v1', category: 'social', description: 'Canonical social graph and community activity routing.' },
   { id: 'messenger', name: '420 Messenger', serviceId: '420/service/messenger/v1', category: 'social', description: 'Verified messaging and communication services.' },
-  { id: 'treasury', name: '420 Treasury', serviceId: '420/service/treasury/v1', category: 'finance', description: 'Treasury coordination and protocol fund routing.' },
+  { id: 'treasury', name: '420 Treasury', serviceId: '420/service/treasury/v1', category: 'finance', description: 'Governed budgets and disbursements; Vault remains custody.', classification: 'COVERED_PROTOCOL', requiresVerifiedRegistry: true },
   { id: 'grants', name: '420 Grants', serviceId: '420/service/grants/v1', category: 'finance', description: 'Grant discovery, funding and lifecycle coordination.' },
   { id: 'launchpad', name: '420 Launchpad', serviceId: '420/service/launchpad/v1', category: 'finance', description: 'Launch and community-funding coordination for ecosystem projects.' },
   { id: 'token', name: '420 Token', serviceId: '420/service/token/v1', category: 'finance', description: 'Token creation and asset management tools.' },

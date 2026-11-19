@@ -1,0 +1,100 @@
+name: 420Treasury REC-6 consumer integration
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/grants/**'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/highcountry/organization/CanonicalOrganizationTreasuryGateway.sol'
+      - 'contracts/test/TreasuryGrantsIntegration420.t.sol'
+      - 'wallet/web/core/treasury-*.js'
+      - 'wallet/web/test/treasury-client.test.js'
+      - 'packages/420-sdk/src/treasury*'
+      - '.github/workflows/treasury-consumer-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: treasury-rec6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile and qualify exact affected Solidity import closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REC6_ROOT="$RUNNER_TEMP/treasury-rec6"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["REC6_ROOT"])
+          owners=[
+              "test/TreasuryGrantsIntegration420.t.sol",
+              "test/GrantsGenesis420.t.sol",
+              "test/TownAuthorityTreasury420.t.sol",
+              "test/highcountry/integration/R04TreasuryIdentity.t.sol",
+          ]
+          pending=[source/x for x in owners]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(source) or not p.is_file(): raise RuntimeError(f"missing import: {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else p.parent/name)
+          for p in sorted(seen):
+              target=dest/p.relative_to(source)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,target)
+              assert target.read_bytes()==p.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          forge test --root "$REC6_ROOT" --match-contract TreasuryGrantsIntegration420Test -vvv
+          forge test --root "$REC6_ROOT" --match-path test/GrantsGenesis420.t.sol -vvv
+          forge test --root "$REC6_ROOT" --match-path test/TownAuthorityTreasury420.t.sol -vvv
+          forge test --root "$REC6_ROOT" --match-path test/highcountry/integration/R04TreasuryIdentity.t.sol -vvv
+          mkdir -p out
+          cp -R "$REC6_ROOT/out/." out/
+      - name: Verify Grants and Treasury contracts, interfaces and release manifests
+        run: |
+          python3 scripts/verify-grants-audit.py
+          python3 scripts/verify-grants-audit-5-release.py
+          python3 scripts/verify-grants-audit-6-client-indexer.py
+          python3 scripts/verify-grants-audit-7-docs.py
+          python3 scripts/verify-treasury-audit-6-release.py
+          python3 scripts/verify-treasury-audit-7-docs.py
+      - name: Wallet consumer and existing Civic review regression
+        working-directory: wallet/web
+        run: |
+          node --check app.js
+          node --test test/treasury-client.test.js test/genesis-app-catalog.test.js test/apps.test.js test/grants-handoff.test.js test/governance-management.test.js
+      - name: Build SDK and verify shared Treasury runtime
+        working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npm run build
+          cmp dist/treasury-runtime.js ../../wallet/web/core/treasury-client.js
+          node --test test/treasury.test.mjs

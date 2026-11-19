@@ -346,22 +346,20 @@ contract TokenEconomics420Test {
     }
 
     function testFrozenDepositRollbackAndIdenticalCreate2RetryForEveryTemplate() public {
-        uint256 snapshot = vm.snapshotState();
-        address[8] memory expected;
         for (uint256 i; i < 8; ++i) {
-            expected[i] = _create(factory, i);
-        }
-        require(vm.revertToState(snapshot), "reference deployment snapshot");
-        registry.setState(ID, VaultRegistry420.VaultState.FROZEN);
-        for (uint256 i; i < 8; ++i) {
+            // Determine the expected address for this exact creator nonce, then rewind.
+            uint256 snapshot = vm.snapshotState();
+            address expected = _create(factory, i);
+            require(vm.revertToState(snapshot), "reference deployment snapshot");
+            registry.setState(ID, VaultRegistry420.VaultState.FROZEN);
             _reject(factory, i, FEE, TokenFactory420.TreasuryDepositFailed.selector);
-            require(expected[i].code.length == 0 && !factory.isFactoryDeployment(expected[i]), "reverted creation survived");
-            _economicState(0, 0, START);
-        }
-        registry.setState(ID, VaultRegistry420.VaultState.ACTIVE);
-        for (uint256 i; i < 8; ++i) {
+            require(
+                expected.code.length == 0 && !factory.isFactoryDeployment(expected), "reverted creation survived"
+            );
+            _economicState(i, 0, START);
+            registry.setState(ID, VaultRegistry420.VaultState.ACTIVE);
             address token = _create(factory, i);
-            require(token == expected[i], "nonce or CREATE2 address changed");
+            require(token == expected, "nonce or CREATE2 address changed");
             _provenance(i, token);
             _economicState(i + 1, 0, START);
         }

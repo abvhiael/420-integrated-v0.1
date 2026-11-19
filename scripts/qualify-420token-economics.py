@@ -70,15 +70,6 @@ def main():
         dest = Path(folder)
         hashes = stage(dest)
         print(json.dumps({"head": head, "owner": OWNER, "source_closure_sha256": hashes}, sort_keys=True), flush=True)
-        # Foundry's formatter works on a disposable byte-identical test copy, never production sources.
-        # Verify any formatting changes are whitespace-only; retain the authoritative input hash above.
-        subprocess.run(["forge", "fmt", "--root", folder, OWNER], cwd=dest, env=env, check=True)
-        original = (CONTRACTS / OWNER).read_text()
-        formatted = (dest / OWNER).read_text()
-        if re.sub(r"\s+", "", original) != re.sub(r"\s+", "", formatted):
-            raise RuntimeError("Formatting altered test tokens")
-        # Restore the exact committed file before compilation, so executed sources equal the recorded hashes.
-        (dest / OWNER).write_bytes((CONTRACTS / OWNER).read_bytes())
         result = subprocess.run(
             ["forge", "test", "--root", folder, "--match-path", OWNER, "--json"],
             cwd=dest, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,

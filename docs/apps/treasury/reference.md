@@ -151,6 +151,8 @@ Reads:
 
 The router is read-only and does not gain custody, governance or execution authority.
 
+`isExecutable` is caller-independent eligibility at the current block: scheduled state, inclusive execution window, effective parent budget, current asset allow/single cap, and asset-wide remaining epoch capacity (including spending from other budgets). The current policy applies immediately; a reduction below spending already recorded makes further execution ineligible without resetting epoch counters. A missing or zero ID reverts with `DisbursementNotFound()`; malformed ABI input reverts. A `true` result is not a guarantee of transaction success: `markExecuted` separately checks the actual caller's exact scoped capability and a nonzero Vault release commitment, and state can change before inclusion. No selector, constructor, return type, or service version changes.
+
 ## 420Indexer HTTP read API
 
 Treasury read routes are derived and non-authoritative.

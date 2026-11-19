@@ -116,6 +116,12 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Repository-only evidence: ledger commit `7e6956898b811b13613d13f551f3d04250e2ac0d`. Historical workflow-job lookups returned HTTP 404; original committed qualification evidence is retained, not represented as fresh CI. No production code was changed or contract tests rerun for this baseline-only step.
 - Next reconciliation step: **TREASURY-REC-2 — TreasuryRouter executability correction**. The remaining REC owners are recorded in the ledger; no implementation defect has been reclassified as testnet-dependent. AUDIT-8/9 remain unchanged.
 
+## TREASURY-REC-2 — TreasuryRouter executability correction — COMPLETE
+- Corrected `TreasuryRouter420.isExecutable()` to enforce the current asset-wide epoch cap, including cross-budget spend, cap reductions and epoch rollover. Preserved caller-neutral eligibility, inclusive validity bounds, missing-ID revert, read-only authority and the separate canonical write-path authorization and release checks.
+- Exact implementation SHA `45d8b4d0eecb8049229d79b6633d227273a2b9a6`: targeted workflow [44571486048](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44571486048), job `135727424443`, **24/24 PASS**, zero failures/skips (13 lifecycle, 5 security/property, 4 deployment/Registry, 2 direct gateway). Both fuzz properties passed 2,500 runs; compiled ABI, formatting and runtime template identity checks passed.
+- Durable evidence: [TREASURY-REC-2 qualification](420TREASURY-REC-2-QUALIFICATION.md). Reconciled REC-1 documentation-only merge without changing qualified code, tests or workflow; historical run remains bound to its original SHA. No redundant test rerun required.
+- Next reconciliation step: **TREASURY-REC-3 — Native Asset and 420Vault Reconciliation**. No testnet blocker for REC-2.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

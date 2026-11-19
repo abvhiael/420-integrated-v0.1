@@ -315,7 +315,7 @@ Canonical contract reads include:
 - `TreasuryDisbursementRegistry420.disbursement(id)`;
 - `TreasuryDisbursementRegistry420.epochSpent(asset, epoch)`;
 - `TreasuryRouter420.remainingBudget(budgetId)`;
-- `TreasuryRouter420.isExecutable(id)`.
+- `TreasuryRouter420.isExecutable(id)` — caller-independent eligibility, including current asset-wide epoch capacity and inclusive validity bounds; missing IDs revert. A true result does not grant execution permission or verify release evidence. Check the actual executor capability, release commitment and transaction simulation separately.
 
 For the complete event/error field reference, see `docs/apps/treasury/reference.md`.
 

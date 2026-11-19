@@ -138,15 +138,18 @@ contract TreasuryGenesis420Test {
             uint64(block.timestamp + 100),
             keccak256("purpose")
         );
+        require(e.router.isExecutable(id), "eligibility must not depend on caller capability");
         vm.prank(EXECUTOR);
         (bool denied,) =
             address(e.disb).call(abi.encodeWithSelector(e.disb.markExecuted.selector, id, keccak256("release")));
         require(!denied, "default allow");
+        require(e.router.isExecutable(id), "denied caller changed eligibility");
 
         authorize(e, id);
         vm.prank(EXECUTOR);
         e.disb.markExecuted(id, keccak256("release"));
         require(e.disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.EXECUTED, "not executed");
+        require(!e.router.isExecutable(id), "executed ID eligible");
     }
 
     function testBudgetAndSingleDisbursementCapsFailClosed() public {
@@ -176,6 +179,7 @@ contract TreasuryGenesis420Test {
 
         vm.prank(EXECUTOR);
         e.disb.markExecuted(first, keccak256("release-1"));
+        require(!e.router.isExecutable(second), "router ignored epoch cap");
 
         vm.prank(EXECUTOR);
         (bool ok,) =
@@ -261,6 +265,7 @@ contract TreasuryGenesis420Test {
         vm.prank(EXECUTOR);
         (bool ok,) = address(e.disb).call(abi.encodeWithSelector(e.disb.markExecuted.selector, id, bytes32(0)));
         require(!ok, "zero release commitment");
+        require(e.router.isExecutable(id), "zero commitment attempt changed eligibility");
     }
 
     function testCancellationReleasesCommitmentAndIsTerminal() public {
@@ -280,8 +285,129 @@ contract TreasuryGenesis420Test {
         e.disb.cancel(id);
         require(e.router.remainingBudget(b) == 2000, "reservation not released");
         require(e.disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.CANCELLED, "not cancelled");
+        require(!e.router.isExecutable(id), "cancelled ID eligible");
 
         (bool again,) = address(e.disb).call(abi.encodeWithSelector(e.disb.cancel.selector, id));
         require(!again, "terminal cancellation replay");
+    }
+
+    function testRouterExactEpochCapAcrossBudgetsAndRollover() public {
+        vm.warp(1000);
+        Env memory e = setup();
+        (bytes32 b, bytes32 action) = makeBudget(e);
+        (bytes32 other, bytes32 otherAction) = makeBudgetWithWindow(e, 1000, 2001);
+        bytes32 first = schedule(e, b, action, RECIPIENT, 800, 1000, 1200, keccak256("first"));
+        bytes32 exact = schedule(e, other, otherAction, RECIPIENT, 700, 1000, 1200, keccak256("exact"));
+        bytes32 excess = schedule(e, other, otherAction, RECIPIENT_2, 1, 1000, 1200, keccak256("excess"));
+        authorize(e, first);
+        authorize(e, exact);
+        authorize(e, excess);
+        require(e.router.isExecutable(first) && e.router.isExecutable(exact), "initial eligibility");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(first, keccak256("release-first"));
+        require(e.router.isExecutable(exact), "exact remaining cap rejected");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(exact, keccak256("release-exact"));
+        require(e.disb.epochSpent(ASSET, 10) == 1500, "exact spend");
+        require(!e.router.isExecutable(excess), "excess eligible");
+        vm.prank(EXECUTOR);
+        (bool ok, bytes memory reason) =
+            address(e.disb).call(abi.encodeCall(e.disb.markExecuted, (excess, keccak256("release-excess"))));
+        require(!ok && bytes4(reason) == TreasuryDisbursementRegistry420.EpochLimit.selector, "expected epoch limit");
+        vm.warp(1099);
+        require(!e.router.isExecutable(excess), "early rollover");
+        vm.warp(1100);
+        require(e.router.isExecutable(excess), "rollover not reflected");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(excess, keccak256("release-next"));
+        require(e.disb.epochSpent(ASSET, 10) == 1500 && e.disb.epochSpent(ASSET, 11) == 1, "epoch accounting");
+    }
+
+    function testRouterReflectsReducedCapsAndRestoration() public {
+        vm.warp(1000);
+        Env memory e = setup();
+        (bytes32 b, bytes32 action) = makeBudget(e);
+        bytes32 first = schedule(e, b, action, RECIPIENT, 800, 1000, 1200, keccak256("first"));
+        bytes32 next = schedule(e, b, action, RECIPIENT, 500, 1000, 1200, keccak256("next"));
+        authorize(e, first);
+        authorize(e, next);
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(first, keccak256("release-first"));
+        require(e.router.isExecutable(next), "initial eligibility");
+
+        e.policy.setAssetPolicy(ASSET, true, 400, 1500, 100);
+        require(!e.router.isExecutable(next), "single cap reduction ignored");
+        vm.prank(EXECUTOR);
+        (bool singleOk, bytes memory singleReason) =
+            address(e.disb).call(abi.encodeCall(e.disb.markExecuted, (next, keccak256("release-next"))));
+        require(
+            !singleOk && bytes4(singleReason) == TreasuryDisbursementRegistry420.NotExecutable.selector,
+            "expected single cap rejection"
+        );
+
+        e.policy.setAssetPolicy(ASSET, true, 500, 700, 100);
+        require(!e.router.isExecutable(next), "reduced epoch cap ignored");
+        vm.prank(EXECUTOR);
+        (bool epochOk, bytes memory epochReason) =
+            address(e.disb).call(abi.encodeCall(e.disb.markExecuted, (next, keccak256("release-next"))));
+        require(
+            !epochOk && bytes4(epochReason) == TreasuryDisbursementRegistry420.EpochLimit.selector,
+            "expected epoch cap rejection"
+        );
+        require(e.disb.epochSpent(ASSET, 10) == 800, "policy revision reset spending");
+
+        e.policy.setAssetPolicy(ASSET, false, 500, 1300, 100);
+        require(!e.router.isExecutable(next), "revocation ignored");
+        e.policy.setAssetPolicy(ASSET, true, 500, 1300, 100);
+        require(e.router.isExecutable(next), "restored exact cap rejected");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(next, keccak256("release-next"));
+        require(e.disb.epochSpent(ASSET, 10) == 1300, "revised cap accounting");
+    }
+
+    function testRouterExecutionAndBudgetWindowBoundaries() public {
+        vm.warp(1000);
+        Env memory e = setup();
+        (bytes32 b, bytes32 action) = makeBudgetWithWindow(e, 1000, 1020);
+        bytes32 startId = schedule(e, b, action, RECIPIENT, 100, 1010, 1020, keccak256("start"));
+        bytes32 endId = schedule(e, b, action, RECIPIENT, 100, 1010, 1020, keccak256("end"));
+        bytes32 expiredId = schedule(e, b, action, RECIPIENT, 100, 1010, 1020, keccak256("expired"));
+        authorize(e, startId);
+        authorize(e, endId);
+        authorize(e, expiredId);
+        vm.warp(1009);
+        require(!e.router.isExecutable(startId), "early eligibility");
+        vm.warp(1010);
+        require(e.router.isExecutable(startId), "notBefore must be inclusive");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(startId, keccak256("release-start"));
+        vm.warp(1020);
+        require(e.budgets.isEffective(b) && e.router.isExecutable(endId), "expiry must be inclusive");
+        vm.prank(EXECUTOR);
+        e.disb.markExecuted(endId, keccak256("release-end"));
+        vm.warp(1021);
+        require(!e.budgets.isEffective(b) && !e.router.isExecutable(expiredId), "expired budget eligible");
+        vm.prank(EXECUTOR);
+        (bool ok, bytes memory reason) =
+            address(e.disb).call(abi.encodeCall(e.disb.markExecuted, (expiredId, keccak256("late"))));
+        require(!ok && bytes4(reason) == TreasuryDisbursementRegistry420.NotExecutable.selector, "late execution");
+    }
+
+    function testRouterMissingAndMalformedReferencesRevert() public {
+        Env memory e = setup();
+        (bool zeroOk, bytes memory zeroReason) =
+            address(e.router).staticcall(abi.encodeCall(e.router.isExecutable, (bytes32(0))));
+        require(
+            !zeroOk && bytes4(zeroReason) == TreasuryDisbursementRegistry420.DisbursementNotFound.selector,
+            "zero ID did not revert as missing"
+        );
+        (bool unknownOk, bytes memory unknownReason) =
+            address(e.router).staticcall(abi.encodeCall(e.router.isExecutable, (keccak256("unknown"))));
+        require(
+            !unknownOk && bytes4(unknownReason) == TreasuryDisbursementRegistry420.DisbursementNotFound.selector,
+            "unknown ID did not revert as missing"
+        );
+        (bool malformedOk,) = address(e.router).staticcall(abi.encodePacked(e.router.isExecutable.selector, bytes1(0)));
+        require(!malformedOk, "truncated calldata accepted");
     }
 }

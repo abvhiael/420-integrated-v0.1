@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../interfaces/I420System.sol";
 import "./TreasuryBudgetRegistry420.sol";
+import "./TreasuryPolicyRegistry420.sol";
 import "./TreasuryDisbursementRegistry420.sol";
 
 contract TreasuryRouter420 is I420System {
@@ -33,12 +34,22 @@ contract TreasuryRouter420 is I420System {
         return uint256(b.ceiling) - uint256(b.committed);
     }
 
+    /// @notice Caller-independent eligibility at the current block, not execution authorization.
+    /// @dev Missing IDs revert; the executor and nonzero release commitment are checked by markExecuted.
     function isExecutable(
         bytes32 id
     ) external view returns (bool) {
         TreasuryDisbursementRegistry420.Disbursement memory d = disbursements.disbursement(id);
-        return d.state == TreasuryDisbursementRegistry420.State.SCHEDULED && block.timestamp >= d.notBefore
-            && block.timestamp <= d.expiresAt && budgets.isEffective(d.budgetId)
-            && disbursements.policy().isAllowed(d.asset, d.amount);
+        TreasuryPolicyRegistry420 policy = disbursements.policy();
+        if (
+            d.state != TreasuryDisbursementRegistry420.State.SCHEDULED || block.timestamp < d.notBefore
+                || block.timestamp > d.expiresAt || !budgets.isEffective(d.budgetId)
+                || !policy.isAllowed(d.asset, d.amount)
+        ) return false;
+
+        TreasuryPolicyRegistry420.AssetPolicy memory p = policy.assetPolicy(d.asset);
+        uint256 spent = disbursements.epochSpent(d.asset, block.timestamp / p.epochSeconds);
+        // A governance reduction may put current spending above the revised cap.
+        return spent <= p.maxEpochDisbursement && d.amount <= uint256(p.maxEpochDisbursement) - spent;
     }
 }

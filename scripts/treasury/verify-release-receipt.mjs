@@ -6,7 +6,7 @@
 import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-const require = createRequire(new URL('../../420-indexer/package.json', import.meta.url));
+const require = createRequire(import.meta.url);
 const { AbiCoder, Interface, JsonRpcProvider, concat, id, keccak256, ZeroHash } = require('ethers');
 const abi = AbiCoder.defaultAbiCoder();
 export const EVIDENCE_TYPE = 'tuple(uint256 chainId,address protocolRegistry,address treasuryRouter,uint32 treasuryVersion,address vaultRouter,uint32 vaultVersion,address disbursementRegistry,address budgetRegistry,address vaultAccounting,bytes32 disbursementId,bytes32 budgetId,bytes32 vaultId,address vault,bytes32 vaultCodeHash,address asset,address recipient,uint128 amount,bytes32 civicActionHash,bytes32 purposeHash,address executor,address operator,bytes32 operationId)';

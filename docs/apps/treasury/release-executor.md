@@ -50,7 +50,7 @@ All fields are derived from current canonical state or immutable configuration. 
 
 ## Receipt and interruption recovery
 
-Install the existing locked ethers dependency with `npm ci --prefix 420-indexer`. Use the read-only utility from the repository root:
+Install the isolated receipt utility dependencies with `npm ci --prefix scripts/treasury`. The ethers version and integrity-pinned transitive dependency closure are derived from the repository's existing ethers lock; unrelated Indexer dependencies are not installed. Use the read-only utility from the repository root:
 ```sh
 TREASURY_RPC_URL=https://trusted-rpc.example node scripts/treasury/verify-release-receipt.mjs reviewed-plan.json 0xTRANSACTION_HASH
 TREASURY_RPC_URL=https://trusted-rpc.example node scripts/treasury/verify-release-receipt.mjs reviewed-plan.json 0xFROM_BLOCK 0xTO_BLOCK

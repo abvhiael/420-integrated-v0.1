@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { decodeReviewedPlan, verifyReleaseReceipt, recoverRelease } from './verify-release-receipt.mjs';
-const require=createRequire(new URL('../../420-indexer/package.json',import.meta.url));
+const require=createRequire(import.meta.url);
 const {JsonRpcProvider,ContractFactory,ZeroAddress,ZeroHash,id,keccak256,toBeHex, toQuantity, AbiCoder}=require('ethers');
 const rpc=new JsonRpcProvider(process.env.TREASURY_RPC_URL,undefined,{cacheTimeout:0,batchMaxCount:1});
 rpc.pollingInterval=50;

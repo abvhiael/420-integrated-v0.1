@@ -81,9 +81,9 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: 420-indexer/package-lock.json
+          cache-dependency-path: scripts/treasury/package-lock.json
       - name: Install locked receipt utility dependency
-        run: npm ci --prefix 420-indexer
+        run: npm ci --prefix scripts/treasury
       - name: Actual Anvil receipt and atomicity qualification
         shell: bash
         run: |

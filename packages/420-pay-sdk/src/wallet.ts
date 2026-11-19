@@ -1,5 +1,5 @@
 import type { Hex } from './index.js';
-import { address, hash, quantity, requirePay, type PayRegistry } from './registry.js';
+import { address, hash, quantity, requirePay, type MerchantAction, type PayRegistry } from './registry.js';
 
 // PaymentRouter420 execution selectors from the retained V3 ABI.
 const NATIVE_INVOICE_SELECTOR = '0xfdec5340';
@@ -78,6 +78,23 @@ export function createPayWallet(registry: PayRegistry, provider: PayWalletProvid
         // 420 Wallet simulates the exact call from its execution account and
         // requires user approval before its local authority can submit it.
         const submissionHash = hash(await request('eth_sendTransaction', [tx]));
+        return Object.freeze({ submissionHash, chainId: registry.chainId });
+      } finally {
+        submitting = false;
+      }
+    },
+
+    async submitMerchantAction(action: MerchantAction) {
+      requirePay(!submitting && !revoking && account, 'Connect a selected 420 Wallet account');
+      const from = account;
+      const ticket = generation;
+      submitting = true;
+      try {
+        const { target, data } = await registry.merchantTransaction(await registry.latestSnapshot(), from, action);
+        requirePay(await selected('eth_accounts') === from && ticket === generation, '420 Wallet selection changed or was revoked');
+        const submissionHash = hash(await request('eth_sendTransaction', [
+          Object.freeze({ chainId, from, to: target, data, value: '0x0' })
+        ]));
         return Object.freeze({ submissionHash, chainId: registry.chainId });
       } finally {
         submitting = false;

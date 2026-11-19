@@ -81,7 +81,7 @@ function fixture() {
       if (state.reorgDuringRead) state.canonical = false;
     } else if (params[0].data.startsWith(invoiceView.selector) ||
       params[0].data.startsWith(digest('isClosed(bytes32)').slice(0, 10))) assert.equal(params[0].to, address('6'));
-    else if (['merchants(bytes32)', 'currentPayout(bytes32)'].some(sig =>
+    else if (['merchants(bytes32)', 'currentPayout(bytes32)', 'effectiveRole(bytes32,bytes32,address)', 'activeLocations(bytes32,bytes32)'].some(sig =>
       params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('5'));
     else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
     else if (params[0].data.startsWith(digest('balanceOf(address)').slice(0, 10))) assert.equal(params[0].to, address('a'));
@@ -301,4 +301,39 @@ test('hosted checkout reads verified invoice, active merchant and payout at one 
   await assert.rejects(application.hostedCheckout(snapshot, id), /payout plan has changed/);
   replies.set(controller, encode(address('a'), hash('0'), hash('0'), 1, 1, 1));
   await assert.rejects(application.hostedCheckout(snapshot, id), /merchant binding/);
+});
+
+
+test('merchant reports require a tenant role and filter invoices even when the controller is shared', async () => {
+  const { application, replies, state, account } = fixture();
+  const tenant = hash('1');
+  const otherTenant = hash('2');
+  const reporter = address('b');
+  const cashier = address('a');
+  const merchantRead = call('merchants(bytes32)', tenant);
+  const role = (location, user) => digest('effectiveRole(bytes32,bytes32,address)').slice(0, 10) +
+    word(tenant) + word(location) + word(user);
+  replies.set(merchantRead, encode(account, hash('0'), hash('0'), 2, 1, 1));
+  replies.set(role(hash('0'), reporter), encode(1));
+  replies.set(role(hash('0'), cashier), encode(0));
+  const records = [[hash('6'), hash('d'), tenant], [hash('8'), hash('e'), otherTenant]];
+  state.events = records.map(([payment, invoice], index) => ({
+    address: address('7'), topics: [digest('PaymentSet(bytes32,bytes32,uint8)'), payment, invoice],
+    blockNumber: '0x2', blockHash: snapshot.blockHash, logIndex: '0x' + index, removed: false
+  }));
+  for (const [payment, invoice, owner] of records) {
+    replies.set(paymentView.selector + payment.slice(2),
+      encode(invoice, address('7'), account, address('0'), 12, address('0'), 12, hash('0'), 0, hash('b'), 0, 0, 5));
+    replies.set(invoiceView.selector + invoice.slice(2), encode(owner, account, hash('0'), '0x' + '343230'.padEnd(64, '0'),
+      12, 20, 25, 0, 1, 0, 0, hash('a'), hash('0'), hash('0'), 1));
+  }
+  assert.equal((await application.merchantDashboard(snapshot, tenant, reporter)).status, 'CREDENTIALED');
+  assert.deepEqual((await application.accountHistory(snapshot, reporter, undefined, tenant)).payments.map(p => p.id), [hash('6')]);
+  await assert.rejects(application.accountHistory(snapshot, cashier, undefined, tenant), /access denied/);
+  await assert.rejects(application.merchantTransaction(snapshot, reporter, {kind:'location', id:tenant,
+    locationId:hash('3'), active:true}), /controller required/);
+  replies.set(merchantRead, encode(...Array(6).fill(0)));
+  const tx = await application.merchantTransaction(snapshot, account, {kind:'register', id:tenant, payout:reporter});
+  assert.deepEqual(tx, { target:address('5'),
+    data:digest('registerForController(bytes32,address,address)').slice(0, 10) + word(tenant) + word(account) + word(reporter) });
 });

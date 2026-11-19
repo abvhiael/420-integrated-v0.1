@@ -30,6 +30,8 @@ const topic = digest('PaymentSet(bytes32,bytes32,uint8)');
 const mime = { 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
 let status = 5;
 let finalizedStatus = 1;
+let businessRegistered = false;
+const businessId = hash('6');
 let balanceGate;
 const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
 try {
@@ -62,7 +64,9 @@ try {
         if (balanceGate) await balanceGate;
         result = '0x3a4965bf58a40000'; break;
       case 'eth_getLogs':
-        assert.deepEqual(params, [{address: address('7'), topics: [topic], fromBlock: '0x1', toBlock: '0x80'}]);
+                assert.deepEqual(params, [{address: address('7'), topics: [topic],
+          fromBlock: params[0].toBlock === '0x7f' ? '0x0' : '0x1', toBlock: params[0].toBlock}]);
+        if (params[0].toBlock === '0x7f') { result = []; break; }
         result = [{address: address('7'), topics: [topic, paymentId, invoiceId], blockNumber: '0x80',
           blockHash: blocks.hash, logIndex: '0x0', removed: false}];
         break;
@@ -87,6 +91,12 @@ try {
             12, 300, 400, 0, 2, 0, 0, hash('1'), hash('0'), hash('0'), 1);
         } else if (data === digest('isClosed(bytes32)').slice(0, 10) + invoiceId.slice(2)) {
           assert.equal(to, address('6'));
+          result = encode(0);
+        } else if (data === digest('merchants(bytes32)').slice(0, 10) + businessId.slice(2)) {
+          assert.equal(to, address('5'));
+          result = businessRegistered ? encode(account, hash('0'), hash('0'), 2, 1, 1) : encode(...Array(6).fill(0));
+        } else if (data.startsWith(digest('effectiveRole(bytes32,bytes32,address)').slice(0, 10))) {
+          assert.equal(to, address('5'));
           result = encode(0);
         } else if (data === digest('merchants(bytes32)').slice(0, 10) + hash('4').slice(2)) {
           assert.equal(to, address('5'));
@@ -283,6 +293,23 @@ try {
   await invoicePay.click();
   await page.getByText(/Previously submitted/).waitFor();
   assert.equal(await page.evaluate(() => window.calls.filter(call => call.method === 'eth_sendTransaction').length), 3);
+  await page.getByLabel('Merchant ID', {exact:true}).fill(businessId);
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByLabel('Payout address').fill(account);
+  await page.getByRole('button', {name:'Review registration in Wallet'}).click();
+  await page.locator('#business-status').getByText(/Submitted to Wallet network/).waitFor();
+  const businessTx = await page.evaluate(() => window.calls.at(-1).params[0]);
+  assert.deepEqual(businessTx, {chainId:'0x1a4', from:account, to:address('5'), value:'0x0',
+    data:digest('registerForController(bytes32,address,address)').slice(0, 10) + word(businessId) + word(account) + word(account)});
+  businessRegistered = true;
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByText('CREDENTIALED · Active · Controller').waitFor();
+  await page.getByRole('button', {name:'Load report', exact:true}).click();
+  await page.getByText('No payments in this report interval.').waitFor();
+  await page.getByLabel('Merchant ID', {exact:true}).fill(hash('4'));
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByText('Merchant access denied').waitFor();
+  assert.equal(await page.getByRole('button', {name:'Load report', exact:true}).count(), 0);
   await page.getByRole('button', {name: 'Disconnect Wallet'}).click();
   await page.getByText('Wallet disconnected.').waitFor();
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {

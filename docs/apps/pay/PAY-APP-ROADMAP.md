@@ -319,9 +319,27 @@ through the qualified contract entry point for eligible ERC-20 pairs.
 
 ## PAY-APP-6 — Merchant registration and business dashboard
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Controller-bound onboarding, credential status, tenant isolation, authorized roles/locations/cashiers and reports. Retain reproducible scoped qualification at exact implementation SHA.
+
+Business dashboard registration carries the selected controller explicitly in
+the Wallet call. MerchantRegistry rejects execution by a different account.
+Credential status comes from the canonical Registry and changes only through
+its existing governance authority.
+
+An active controller manages opaque location IDs and grants or revokes a
+tenant-wide Reporter role or a location-scoped Location Manager or Cashier
+role. Deactivating a location or merchant invalidates its existing grants,
+including after reactivation. The dashboard clears its scope when Wallet
+changes. Controllers and current reporters can view finalized payment report
+intervals. Reports match both the canonical controller and the invoice's
+merchant ID, including when several merchants share a controller. Location
+roles expose their own scope and confer no signing or funds authority.
+
+The MerchantRegistry candidate adds methods and storage. Deployments must
+publish its reviewed runtime hash before enabling the business dashboard.
+PAY-APP-7 owns invoice creation and PAY-APP-10 owns cashier checkout sessions.
 
 ## PAY-APP-7 — Invoice builder and merchant payment management
 

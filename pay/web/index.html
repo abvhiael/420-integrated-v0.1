@@ -18,6 +18,7 @@
         <a href="#payments">Send &amp; request</a>
         <a href="#activity">Activity</a>
         <a href="#settings">Settings</a>
+        <a href="#business">Business</a>
       </nav>
       <button type="button" id="connect">Connect 420 Wallet</button>
     </div>
@@ -112,6 +113,46 @@
           </form>
         </div>
         <p id="payment-status" class="notice" role="status"></p>
+      </section>
+      <section id="business" class="card activity" aria-labelledby="business-title">
+        <h2 id="business-title">Business dashboard</h2>
+        <p id="business-hint" class="muted">Connect 420 Wallet to manage a merchant account.</p>
+        <form id="business-open">
+          <fieldset disabled id="business-selector">
+            <label>Merchant ID <input name="merchantId" required maxlength="66" autocomplete="off"></label>
+            <label>Location ID for scoped access <input name="locationId" maxlength="66" autocomplete="off"></label>
+            <button type="submit">View merchant</button>
+            <button id="business-new" type="button" class="secondary">Generate merchant ID</button>
+          </fieldset>
+        </form>
+        <p id="business-status" class="notice" role="status"></p>
+        <p id="business-credential"></p>
+        <form id="business-register" hidden>
+          <label>Payout address <input name="payout" required maxlength="42" autocomplete="off"></label>
+          <button type="submit">Review registration in Wallet</button>
+        </form>
+        <div id="business-management" hidden>
+          <form id="business-location">
+            <h3>Locations</h3>
+            <label>Location ID <input name="locationId" required maxlength="66" autocomplete="off"></label>
+            <label>Location status <select name="active"><option value="on">Active</option><option value="off">Inactive</option></select></label>
+            <button type="submit">Review location change in Wallet</button>
+          </form>
+          <form id="business-role">
+            <h3>Roles and cashiers</h3>
+            <label>Delegate address <input name="account" required maxlength="42" autocomplete="off"></label>
+            <label>Role location ID <input name="locationId" maxlength="66" autocomplete="off"></label>
+            <label>Role <select name="role"><option value="1">Reporter</option><option value="2">Location manager</option><option value="3">Cashier</option><option value="0">Revoke</option></select></label>
+            <button type="submit">Review role change in Wallet</button>
+          </form>
+        </div>
+        <section id="business-reports" aria-labelledby="business-reports-title" hidden>
+          <h3 id="business-reports-title">Finalized payment report</h3>
+          <button type="button" id="business-report">Load report</button>
+          <button type="button" id="business-older" hidden>Load earlier blocks</button>
+          <p id="business-report-range" class="muted"></p>
+          <ul id="business-records" class="rows"></ul>
+        </section>
       </section>
       <section id="activity" class="card activity" aria-labelledby="activity-title">
         <div class="card-head">

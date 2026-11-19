@@ -19,7 +19,13 @@
     "wallet/web/test/token-discovery.test.js",
     "wallet/web/test/runtime-config-generator.test.js",
     "wallet/web/test/apps.test.js",
-    ".qualification/candidates/TOKEN-AUDIT-5.2-runtime-discovery.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.2-runtime-discovery.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.2-QUALIFICATION.json"
   ],
   "tests": [
     {

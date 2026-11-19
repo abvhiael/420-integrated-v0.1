@@ -122,6 +122,12 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: [TREASURY-REC-2 qualification](420TREASURY-REC-2-QUALIFICATION.md). Reconciled REC-1 documentation-only merge without changing qualified code, tests or workflow; historical run remains bound to its original SHA. No redundant test rerun required.
 - Next reconciliation step: **TREASURY-REC-3 — Native Asset and 420Vault Reconciliation**. No testnet blocker for REC-2.
 
+## TREASURY-REC-3 — native asset and 420Vault reconciliation — COMPLETE
+- Resolved the native asset mismatch: `address(0)` denotes native $420, with explicit governed allowlisting; nonzero token addresses retain exact token base units. Preserved ABI, canonical service IDs, policy caps, governance, custody and AUDIT-4 commitment-only boundaries.
+- Added internal read-only Registry/Vault binding and free-balance preflight, with actual Vault/capability integration tests covering correct release, insufficient funds, failed transfer, type/instance mismatch, scoped route substitution and native/token precision. Treasury commitments remain distinct from Vault reserves; production executor orchestration is REC-4, not claimed complete here.
+- Exact implementation SHA `e649d3a5b0dcae0aa0859750fe5a8808c5a9ed03`: [workflow 44574638401](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44574638401), job `135738686249`, **48/48 PASS**, zero failed/skipped, 5,000 fuzz runs. Release/operator verifiers and artifact/ABI capture passed. [Durable qualification evidence](420TREASURY-REC-3-QUALIFICATION.md). Corrected invariant wording (R08) without changing arithmetic.
+- Next reconciliation step: **TREASURY-REC-4 — Vault Release Evidence and Executor Qualification**. No testnet dependency for REC-3. AUDIT-8/9 remain unchanged.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

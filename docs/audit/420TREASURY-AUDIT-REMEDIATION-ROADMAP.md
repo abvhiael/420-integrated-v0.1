@@ -134,6 +134,17 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Exact implementation SHA `6c627ce4ebb1bb9dcb384a388124687bc50a077e`: [workflow 44580443875](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44580443875), job `135759328597`, **8/8 Anvil integration scenarios PASS** (9/9 Node test runner including parent; zero failures/skips), Solidity compilation, release/operator verifiers and executor ABI/artifact identity passed. [Durable qualification evidence](420TREASURY-REC-4-QUALIFICATION.md).
 - Next reconciliation step: **TREASURY-REC-5 — Governance and Capability Authorization Qualification**. REC-8 owns release materialization; AUDIT-8 owns live activation, receipt/finality and reorg correlation. AUDIT-9 remains unchanged.
 
+## TREASURY-REC-5 — Governance and Capability Authorization Qualification — SECURITY CLOSEOUT OPEN
+- PR #1227 merged into main at `a1f1164f3a147af52cd36e3b872464ef29eb3476` after executable qualification (62/62). Two high-severity Slither reentrancy findings and the corresponding Stake source-bound review remain open; this entry does not mark them resolved.
+
+## TREASURY-REC-6 — Grants, Wallet and Ecosystem Integration — COMPLETE (local scope)
+- Revalidated exact Treasury milestone tuple at approval, PAID and cancellation; expired or inconsistent schedules rejected; one-disbursement/one-milestone protection and commitment-only PAID semantics preserved.
+- Implemented chain-pinned canonical Treasury Registry discovery, dependency-root and runtime verification, Civic action construction/review and scoped executor SmartAccount simulation, confirmation and receipt handling; SDK shares the Wallet Treasury runtime. No standalone public Treasury app or fabricated live deployment address.
+- Qualified real Grants/Treasury/Registry integration, retained Town and HighCountry authority boundaries, Wallet/Civic and SDK regressions. Repaired legacy Grants audit import-closure compilation without weakening assertions or profiles.
+- Exact implementation SHA `c1507c3f8885246843da51a930468ec354eff22b`: [workflow 44590461793](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590461793), job `135794911879`, **63/63 PASS**, zero failures/skips (29 Solidity, 33 Wallet, 1 SDK); all six verifiers and SDK build/runtime identity passed. [Grants audit 44590461850](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590461850) passed core (20/20), hardening (17/17), zero high-severity Grants Slither findings, Indexer (9/9), Wallet (14/14); [browser accessibility 44590462083](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590462083) passed. Additional suites overlap the targeted count.
+- Durable evidence: [TREASURY-REC-6 qualification](420TREASURY-REC-6-QUALIFICATION.md). REC-5 security closeout remains open; live deployment/receipt correlation remains REC-8/AUDIT-8.
+- Next canonical reconciliation step: **TREASURY-REC-7 — Indexer, Explorer and Analytics Reconciliation**.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

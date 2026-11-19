@@ -1,0 +1,7 @@
+<resources>
+    <item type="id" name="pay_input" />
+    <item type="id" name="pay_status" />
+    <item type="id" name="pay_check" />
+    <item type="id" name="pay_hosted" />
+    <item type="id" name="pay_wallet" />
+</resources>

@@ -83,3 +83,7 @@ A future cryptographic verifier model would require a separate adopted architect
 Production-equivalent testnet qualification must retain evidence that permits an independent reviewer to correlate each tested Treasury `vaultReleaseHash` with the actual canonical 420Vault release evidence, including applicable transaction/event/receipt identity and chain/block context.
 
 That live correlation is owned by **TREASURY-AUDIT-8** and is not fabricated during this repository-only step.
+
+## REC-4 implementation reconciliation (no change to adopted decision)
+
+The designated executor candidate `TreasuryReleaseExecutor420` performs an authorized canonical Vault withdrawal and then submits its domain-separated commitment to the unchanged Treasury registry in one transaction. It does not supply a proof-verifier to the registry. The executor derives the reviewed tuple from actual state, not discretionary caller-selected release fields. The operator-side receipt utility correlates successful canonical RPC receipt/log and historical state evidence; it is not a consensus proof or a finality authority. Deployment/activation and public-chain finality/reorg qualification remain separate. See [release executor](../../apps/treasury/release-executor.md). Legacy direct authorized callers retain the exact original trust assumption; no arbitrary commitment is promoted to independent proof.

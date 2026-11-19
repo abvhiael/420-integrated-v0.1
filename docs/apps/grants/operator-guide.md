@@ -324,7 +324,7 @@ If a deployment is wrong, deploy/qualify a corrected registry-resolved release a
 
 420Grants consumes Treasury's V1 commitment-only release model. A milestone becomes PAID when the bound Treasury disbursement is EXECUTED and carries a nonzero `vaultReleaseHash`.
 
-Grants does **not** cryptographically prove that the hash corresponds to a real Vault release. Production-equivalent qualification must correlate the commitment with actual Vault transaction/event/receipt evidence.
+Grants does **not** cryptographically prove that the hash corresponds to a real Vault release. The designated Treasury release executor candidate produces same-transaction Vault/Treasury evidence; operators can use the [Treasury receipt reconciliation procedure](../treasury/release-executor.md) before relying on PAID. A legacy nonzero commitment, even when recorded by an authorized executor, is not independently verified payment. Production-equivalent qualification must correlate the commitment with actual Vault transaction/event/receipt evidence.
 
 ### Registry-resolved addresses
 

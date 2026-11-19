@@ -34,7 +34,7 @@ ManufacturedEquipmentIssuer pins an immutable reviewed recipe/output/type rule, 
 
 ## Treasury and Identity
 
-CanonicalOrganizationTreasuryGateway binds only a permission contract naming this exact gateway. Its reviewed executor supplies independently accepted vault-release provenance. The gateway checks actual GameIdentity/active game, bounded organization permission, canonical TreasuryRouter executability, budget/policy and separately scoped TreasuryAuthorization. Permission consumption/disbursement execution are atomic; denial or revocation rolls back permission accounting. Execution is single-use.
+CanonicalOrganizationTreasuryGateway binds only a permission contract naming this exact gateway. Its reviewed executor supplies a commitment to separately correlated vault-release provenance; the gateway itself does not check a receipt or move funds. This retained HighCountry-specific adapter is not the general Treasury release executor and must not be activated on the basis of the local fixture commitment alone. See the [Treasury release executor and receipt procedure](../apps/treasury/release-executor.md). The gateway checks actual GameIdentity/active game, bounded organization permission, canonical TreasuryRouter executability, budget/policy and separately scoped TreasuryAuthorization. Permission consumption/disbursement execution are atomic; denial or revocation rolls back permission accounting. Execution is single-use.
 
 The gateway holds no funds or allowances. Canonical Treasury retains its existing vault-release trust boundary. Actual funded vault movement and independent release receipts remain deployment/testnet acceptance; a fixture receipt is not proof of funded payment.
 

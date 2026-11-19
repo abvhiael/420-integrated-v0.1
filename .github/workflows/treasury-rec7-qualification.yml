@@ -44,7 +44,7 @@ jobs:
           node-version: '22'
       - working-directory: 420-indexer
         run: |
-          npm ci
+          npm install --no-audit --no-fund --no-package-lock
           npm run build
           node --test dist/test/treasury420-integration.test.js dist/test/http-transport.test.js dist/test/api-contract.test.js dist/test/treasury-recovery-postgres.test.js
       - uses: actions/setup-go@v5

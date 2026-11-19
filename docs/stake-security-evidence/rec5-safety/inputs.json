@@ -1,0 +1,63 @@
+{
+  "executionBase": "efd3ac50dd3aeebe27be9a960a61b92fce19655e",
+  "foundry_config_sha256": "7998cf0663907daced5812fbef76484e4d2dc1ca7df24c847f6c2ea3119d7d04",
+  "logs": {
+    "compiler.log": "28d286262a366da683788ca4ef59fcb8bc406156d92836b6082b824660314dbf",
+    "safety-slither.json": "5aeb6782e3cd16f11fd09b8876a0efb01fd189c0e78d573380ae36126d688232",
+    "safety-slither.log": "b1ec8450c777d0d88976a5383a70dca7a161e29e36ea75bf001d4ff1c13f9f4b",
+    "safety-tests.log": "a0039582928d582b3c68623e589dbe800fd9a97932aebc0c6e51c0feb7414f72"
+  },
+  "profile": "default",
+  "runId": "44583372456",
+  "source_sha256": {
+    "contracts/src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+    "contracts/src/governance/GovernanceTimelock.sol": "7fa9cbb5c9088f666f03b42e901ae9f0690ed10b12346f25c26d19d99fa16bc1",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+    "contracts/src/libraries/StakeIds420.sol": "9ea7855ced4c5190936d075308eb768c47f35f72129deb70352df66b42c30e9f",
+    "contracts/src/system/StakeSystemSafety420.sol": "b2593a956b4c8219e15c68e3ecda54cf22b213c23e9ddeeadd0f9536c975b3e0",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
+  },
+  "test_source_sha256": {
+    "contracts/src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+    "contracts/src/apps/Stake420.sol": "d22075113be7283ff9ab51cb8fe6351f860d264bc0722ca41270f8297e5a48dc",
+    "contracts/src/governance/GovernanceTimelock.sol": "7fa9cbb5c9088f666f03b42e901ae9f0690ed10b12346f25c26d19d99fa16bc1",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/IAssetCapabilities420.sol": "508757a667c314a764d76867c6efb22c301c723fabc6c1017d27bc6dcc4ef45b",
+    "contracts/src/interfaces/genesis/ICanonicalAssetRegistry420.sol": "ff02d22d74d84fe77afcdc3c74a1b6cb4bdab7db0fb80e35d81cc2e7dcf05b8f",
+    "contracts/src/interfaces/genesis/IChainContext420.sol": "f71689bcae6f910e8a667b469eccff0dbe45edde389b190bfc00e61f30bf5b91",
+    "contracts/src/interfaces/genesis/IFeeQuote420.sol": "5724d3ff0a6acd3a7ecb62f924c7a945af87b0025efb115abfaebf5762796bc9",
+    "contracts/src/interfaces/genesis/IGenesisInitializable420.sol": "b493ed9ecc50098c84f079e92ca76f2094ea60f9218abfeefcbb311b9c15f054",
+    "contracts/src/interfaces/genesis/IGovernanceAuthority420.sol": "fb8b0c98dca9baac75134667df594578b419362a2981aaba9572fa69d909337c",
+    "contracts/src/interfaces/genesis/IMetadataCommitment420.sol": "26b9e62ec5c5883ad00bf31ba7665dec384226709b1084930886924a0a02edd5",
+    "contracts/src/interfaces/genesis/IPauseRegistry420.sol": "07550b8e7f023c22243afd3dec40e53809129732068641fdfe1167071d6302e4",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/IReplayProtection420.sol": "abf217f10727a13f6e146376cae7148e26aaff4e11b1085cf6107ca5026c5553",
+    "contracts/src/interfaces/genesis/IRiskLimits420.sol": "10120c6a8973925fc8ba84aaac43a40dfcbee337dbe0c7f5e3a004763f6fe513",
+    "contracts/src/interfaces/genesis/ISettlementHealth420.sol": "3325cadd0c2ed2a3693e745c2797b2b00dd83e6bec927f2e3e34ec71b7eade32",
+    "contracts/src/interfaces/genesis/ISystemSafety420.sol": "024b381723c4dea1a0497faad8582e59df23e76d54670d346dc8d3ebee28b0dc",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/AppDependencyIds420.sol": "46121c1765eff2189adbdc68686cd2d2c83cc7a43f0accd42a80dd83d517b453",
+    "contracts/src/libraries/GenesisInterfaceIds420.sol": "5852c9dad4cba27257c54bcc02325d2833b853953027e55c1bbc4cb5207d4263",
+    "contracts/src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+    "contracts/src/libraries/StakeIds420.sol": "9ea7855ced4c5190936d075308eb768c47f35f72129deb70352df66b42c30e9f",
+    "contracts/src/system/CommunityValidatorReserve.sol": "6a55f97f83c759b8cf744a12426ac5fc7a1aec48428496012640696fe616171f",
+    "contracts/src/system/ConsensusSystemAccess420.sol": "0b3c8860efc1e700bcef570d2a29ab422e9d05330e7ffa89c71f6b81e13e1f2c",
+    "contracts/src/system/ProtocolTreasury.sol": "f9b2ff42d13bf7fef79a3d66474dc850347c851a8dcd4b4a187404b3f6aa7019",
+    "contracts/src/system/RewardController.sol": "43d11ca06fbf1721c7246701f658df1daf91d9a7e0bcccbc475a1e079df27d24",
+    "contracts/src/system/StakeDependencyAccess420.sol": "0322c88e288786fd2868a3dd8508aa49d6eed3d6febb117f8ca81109e08f6c72",
+    "contracts/src/system/StakeSystemSafety420.sol": "b2593a956b4c8219e15c68e3ecda54cf22b213c23e9ddeeadd0f9536c975b3e0",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/src/system/ValidatorRegistry.sol": "8c640e07cb847c833639128f387de8b94cd8b8e97ca6a57658d49b096755877d",
+    "contracts/test/SecurityStakeSafety420.t.sol": "bbd5befd85aefd5b2a97d391e9961f4b310162684712fbf2850bcab61e8bddc7",
+    "contracts/test/StakeValidatorGenesis420.t.sol": "43ee4f08ca4233e3ef72d47d6ab25cd7938028e0338e5ceb7adfe6edcd1a42dd",
+    "contracts/test/helpers/GenesisMocks420.sol": "2ac3e980d82c042f80721d6c0d6f3c0ff2432ba6001baedbc2004e50c41eeba1"
+  },
+  "tools": {
+    "forge": "forge Version: 1.9.0\nCommit SHA: 6056c5845d34205a83cf7108042adb137325c9df\nBuild Timestamp: 2026-11-02T20:28:32.434285913Z (1793651312)\nBuild Profile: dist",
+    "slither": "0.11.3"
+  }
+}

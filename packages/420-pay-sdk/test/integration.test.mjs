@@ -64,6 +64,7 @@ function fixture() {
       assert.ok(params[0] === 'latest' || params[0] === state.block?.number);
       return state.canonical ? state.block : { ...state.block, hash: hash('b') };
     }
+    if (method === 'eth_getTransactionReceipt') return state.receipt;
     if (method === 'eth_getLogs') {
       assert.equal(params[0].address, address('7'));
       assert.deepEqual(params[0].topics, [digest('PaymentSet(bytes32,bytes32,uint8)')]);
@@ -409,4 +410,26 @@ test('POS policy quote binds the fixed tip to the exact Wallet approval call', a
   await wallet.connect();
   await assert.rejects(wallet.submitPayment({ data: quote.data, value: quote.value }), /Invalid Pay transaction/);
   assert.equal((await wallet.submitPayment({ data: quote.data, value: quote.value, expectedTarget: quote.router })).submissionHash, hash('f'));
+});
+
+test('developer webhook provenance is bound to the canonical receipt, invoice and Pay deployment', async () => {
+  const { application, replies, state } = fixture();
+  const tx = hash('c'), merchantId = hash('b'), invoice = hash('a'), payment = hash('d'), merchant = address('5');
+  const zero = hash('0');
+  const log = { address: address('7'), logIndex: '0x0', data: encode(5),
+    topics: [digest('PaymentSet(bytes32,bytes32,uint8)'), payment, invoice] };
+  state.receipt = { blockHash: snapshot.blockHash, transactionHash: tx, status: '0x1', logs: [log] };
+  replies.set(invoiceView.selector + invoice.slice(2), encode(merchantId, merchant, zero, '0x' + '343230'.padEnd(64, '0'),
+    100, 100, 110, 0, 1, 0, 0, hash('1'), zero, zero, 1));
+  replies.set(paymentView.selector + payment.slice(2), encode(invoice, address('8'), merchant, address('0'), 100,
+    address('0'), 100, hash('2'), 1, hash('3'), 0, 0, 5));
+  const projected = await application.developerPaymentEvent(snapshot, tx, 0n);
+  assert.equal(projected.merchantId, merchantId);
+  assert.equal(projected.status, 5);
+  assert.equal(projected.payer, undefined);
+  log.address = address('2');
+  await assert.rejects(application.developerPaymentEvent(snapshot, tx, 0n), /Unverified Pay payment event/);
+  log.address = address('7');
+  state.canonical = false;
+  await assert.rejects(application.developerPaymentEvent(snapshot, tx, 0n), /no longer canonical/);
 });

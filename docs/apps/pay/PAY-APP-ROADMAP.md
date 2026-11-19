@@ -450,6 +450,9 @@ asset and merchant payout policy and does not set a conversion rate.
 
 Exit criteria: Versioned SDK/API, scoped credentials, hosted/embedded checkout, authenticated idempotent delivery and compensating reorg events; no signing. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [Developer integration operations](developer-integrations.md) for v1 routes, checkout handoff and webhook verification.
+
+
 ## PAY-APP-12 — Progressive Web App
 
 **Status:** PLANNED. **Testnet required:** No.

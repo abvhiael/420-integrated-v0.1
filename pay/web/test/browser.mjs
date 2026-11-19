@@ -27,7 +27,7 @@ const latest = { blockHash: blocks.hash, requireCanonical: true };
 const paymentId = hash('d');
 const invoiceId = hash('e');
 const topic = digest('PaymentSet(bytes32,bytes32,uint8)');
-const mime = { 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
+const mime = { 'checkout-embed.html': 'text/html', 'checkout-embed.js': 'text/javascript', 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
 let status = 5;
 let finalizedStatus = 1;
 let businessRegistered = false;
@@ -182,6 +182,27 @@ try {
     }
     return route.fulfill({headers: {'access-control-allow-origin': origin}, json: {jsonrpc: '2.0', id, result}});
   });
+
+  const embed = await context.newPage();
+  await embed.route(origin + '/**', async route => {
+    const file = new URL(route.request().url()).pathname.slice(1);
+    if (!Object.hasOwn(mime, file)) return route.abort();
+    return route.fulfill({ contentType: mime[file], body: await readFile(new URL('../dist/' + file, import.meta.url)) });
+  });
+  const merchantPage = 'https://merchant.example/';
+  await embed.route(merchantPage, route => route.fulfill({ contentType: 'text/html',
+    body: '<iframe title="Pay invoice" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox" src="' +
+      origin + '/checkout-embed.html?chain=420&amp;invoice=' + invoiceId + '"></iframe>' }));
+  await embed.goto(merchantPage);
+  const frame = embed.frameLocator('iframe');
+  const hosted = frame.getByRole('link', { name: 'Review invoice on 420 Pay' });
+  await hosted.waitFor();
+  assert.match(await hosted.getAttribute('href'), /#pay[?]v=1&chain=420&kind=invoice&id=/);
+  assert.equal(await hosted.getAttribute('target'), '_blank');
+  assert.equal(await frame.getByRole('button').count(), 0);
+  await embed.goto(origin + '/checkout-embed.html?chain=420&invoice=invalid');
+  assert.equal(await embed.getByRole('link', { name: 'Review invoice on 420 Pay' }).count(), 0);
+  await embed.close();
 
   await page.goto(origin);
   await page.keyboard.press('Tab');

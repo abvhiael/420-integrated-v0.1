@@ -6,6 +6,8 @@ on:
       - 'analytics/indexerclient/**'
       - 'explorer/indexerclient/**'
       - 'indexer/treasuryread/**'
+      - 'packages/420-sdk/src/treasury*'
+      - 'analytics/metrics/economic.go'
       - 'scripts/verify-treasury-audit-5-descriptor.py'
       - '.github/workflows/treasury-rec7-qualification.yml'
 permissions:
@@ -50,4 +52,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./indexer/treasuryread ./analytics/indexerclient ./explorer/indexerclient ./explorer/service ./explorer/api -run Treasury -count=1
+      - run: go test ./indexer/treasuryread ./analytics/indexerclient ./explorer/indexerclient ./explorer/service ./explorer/api ./analytics/metrics -run Treasury -count=1
+      - working-directory: packages/420-sdk
+        run: |
+          npm install --no-audit --no-fund --no-package-lock
+          npx tsc -p tsconfig.json
+          node --test test/treasury-projection.test.mjs

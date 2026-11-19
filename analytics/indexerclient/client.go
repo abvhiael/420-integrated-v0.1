@@ -64,6 +64,10 @@ type ProtocolObject struct {
 }
 
 type TreasuryBudget struct {
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
 	ChainID         string `json:"chainId"`
 	BudgetID        string `json:"budgetId"`
 	Asset           string `json:"asset"`
@@ -75,6 +79,10 @@ type TreasuryBudget struct {
 }
 
 type TreasuryDisbursement struct {
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
 	ChainID          string `json:"chainId"`
 	DisbursementID   string `json:"disbursementId"`
 	BudgetID         string `json:"budgetId"`
@@ -312,4 +320,25 @@ func (c *Client) treasuryRead(ctx context.Context, kind,id string,out any) error
   return err
  }
  return json.Unmarshal(raw,out)
+}
+
+type TreasuryAssetPolicy struct {
+ ChainID string `json:"chainId"`
+ Asset string `json:"asset"`
+ Allowed bool `json:"allowed"`
+ MaxSingleDisbursement string `json:"maxSingleDisbursement"`
+ MaxEpochDisbursement string `json:"maxEpochDisbursement"`
+ EpochSeconds string `json:"epochSeconds"`
+ Revision string `json:"revision"`
+ BlockNumber string `json:"blockNumber"`
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
+ Authoritative bool `json:"authoritative"`
+}
+func (c *Client) TreasuryAssetPolicy(ctx context.Context,asset string)(TreasuryAssetPolicy,error){
+ var out TreasuryAssetPolicy
+ err:=c.treasuryRead(ctx,"asset-policies",asset,&out)
+ return out,err
 }

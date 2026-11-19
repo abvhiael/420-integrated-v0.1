@@ -132,9 +132,9 @@ func BuildTreasuryEconomicMetrics(input TreasuryEconomicInput, provenance model.
 	}{
 		{MetricTreasuryBudgetCeiling, "Treasury budget ceiling", "base_units", ceiling},
 		{MetricTreasuryCommitted, "Treasury committed", "base_units", committed},
-		{MetricTreasuryExecuted, "Treasury executed", "base_units", executed},
+		{MetricTreasuryExecuted, "Treasury execution commitments (not Vault releases)", "base_units", executed},
 		{MetricTreasuryScheduledDisbursement, "Scheduled Treasury disbursement volume", "base_units", scheduledVolume},
-		{MetricTreasuryExecutedDisbursement, "Executed Treasury disbursement volume", "base_units", executedVolume},
+		{MetricTreasuryExecutedDisbursement, "Treasury execution commitment volume (not Vault releases)", "base_units", executedVolume},
 	}
 
 	out := make([]model.Metric, 0, len(defs))

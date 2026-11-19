@@ -146,6 +146,36 @@
             <button type="submit">Review role change in Wallet</button>
           </form>
         </div>
+        <section id="business-invoices" aria-labelledby="business-invoice-title" hidden>
+          <h3 id="business-invoice-title">Invoice builder</h3>
+          <label>Saved invoice drafts <select id="invoice-saved"><option value="">Choose draft</option></select></label>
+          <form id="invoice-draft">
+            <label>Invoice ID <input name="invoiceId" maxlength="66" required autocomplete="off"></label>
+            <button id="invoice-new" class="secondary" type="button">New invoice draft</button>
+            <label>Invoice currency <select name="currency"><option>420</option><option>CAD</option><option>USD</option></select></label>
+            <label>Invoice amount in base units <input name="amount" inputmode="numeric" maxlength="78" required></label>
+            <label>Invoice expiry (local time) <input name="expiresAt" type="datetime-local" required></label>
+            <label>Refund window ends (local time) <input name="refundUntil" type="datetime-local" required></label>
+            <label>Invoice mode <select name="mode"><option value="0">Single use</option><option value="1">Multi-use</option>
+              <option value="2">Partial payment</option></select></label>
+            <label>Acceptance <select name="acceptance"><option value="1">Finalized</option><option value="0">Fast</option>
+              <option value="2">High value</option></select></label>
+            <label>Accepted asset commitment <input name="assets" maxlength="66" placeholder="Blank uses the canonical native 420 policy"></label>
+            <label>Optional tip policy commitment <input name="tip" maxlength="66"></label>
+            <p class="muted">Tip policy is recorded on the invoice. Hosted checkout requires a compatible settlement route.</p>
+            <div>
+              <button type="button" id="invoice-save" class="secondary">Save local draft</button>
+              <button type="submit">Review invoice in Wallet</button>
+              <button type="button" id="invoice-inspect" class="secondary">Check finalized invoice</button>
+            </div>
+          </form>
+          <p id="invoice-summary" role="status"></p>
+          <button type="button" id="invoice-close" hidden>Review invoice closure in Wallet</button>
+          <div id="invoice-share" hidden>
+            <label>Verified invoice link <input id="invoice-link" readonly></label>
+            <button type="button" id="invoice-copy">Copy invoice link</button>
+          </div>
+        </section>
         <section id="business-reports" aria-labelledby="business-reports-title" hidden>
           <h3 id="business-reports-title">Finalized payment report</h3>
           <button type="button" id="business-report">Load report</button>

@@ -20,12 +20,18 @@ const abiWord = (value: bigint) => value.toString(16).padStart(64, '0');
 export const MERCHANT_ACTIONS = {
   register: 'registerForController(bytes32,address,address)',
   location: 'setLocation(bytes32,bytes32,bool)',
-  role: 'setRole(bytes32,bytes32,address,uint8)'
+  role: 'setRole(bytes32,bytes32,address,uint8)',
+  invoice: 'createMerchantInvoice(bytes32,(bytes32,address,bytes32,bytes3,uint256,uint64,uint64,uint8,uint8,bool,uint16,bytes32,bytes32,bytes32,bool))',
+  closeInvoice: 'close(bytes32)'
 } as const;
 export type MerchantAction =
   | { kind: 'register'; id: Hex; payout: Hex }
   | { kind: 'location'; id: Hex; locationId: Hex; active: boolean }
-  | { kind: 'role'; id: Hex; locationId: Hex; account: Hex; role: number };
+  | { kind: 'role'; id: Hex; locationId: Hex; account: Hex; role: number }
+  | { kind: 'invoice'; id: Hex; invoiceId: Hex; currency: '420' | 'CAD' | 'USD'; amount: bigint;
+      expiresAt: bigint; refundUntil: bigint; mode: number; acceptance: number;
+      acceptedAssetsHash?: Hex; tipPolicyHash?: Hex }
+  | { kind: 'closeInvoice'; id: Hex; invoiceId: Hex };
 const zero = '0'.repeat(64);
 const addressArgument = (value: Hex) => address(value).slice(2).padStart(64, '0');
 export const NATIVE_INVOICE_SIGNATURE = 'payNativeInvoice(bytes32,uint256,uint64,bytes32)';
@@ -322,6 +328,32 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
           locationActive };
       });
     },
+    async merchantInvoice(snapshot: PaySnapshot, merchantId: Hex, account: Hex, invoiceId: Hex) {
+      return pinned(snapshot, async state => {
+        const { merchant } = await readMerchant(state, merchantId);
+        requirePay(merchant?.active && merchant.controller === address(account), 'Active merchant controller required');
+        const target = await state.component(invoiceView.component);
+        const id = hash(invoiceId);
+        const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+        const invoice = await reader.invoice(id);
+        if (!invoice) return null;
+        requirePay(invoice.merchant === merchant.controller && invoice.merchantId === hash(merchantId), 'Invoice tenant mismatch');
+        const [paid, closed] = await Promise.all([
+          state.call(target, calldata('paidAmount(bytes32)', id.slice(2))),
+          state.call(target, calldata('isClosed(bytes32)', id.slice(2)))
+        ]);
+        const credited = uint(words(paid, 1)[0], 256);
+        const isClosed = uint(words(closed, 1)[0], 8);
+        requirePay(isClosed <= 1n, 'Invalid invoice lifecycle');
+        const reusable = invoice.mode === 'MULTI_USE' && !invoice.partialPayments;
+        const expired = state.timestamp > invoice.expiresAt;
+        const status = !reusable && credited >= invoice.amount ? 'PAID' : !invoice.active || isClosed === 1n ?
+          'CLOSED' : expired ? 'EXPIRED' : !reusable && credited > 0n ? 'PARTIALLY_PAID' : 'OPEN';
+        const outstanding = status === 'OPEN' || status === 'PARTIALLY_PAID' ?
+          reusable ? invoice.amount : invoice.amount - credited : 0n;
+        return { invoice, credited, status, outstanding };
+      });
+    },
     async merchantTransaction(snapshot: PaySnapshot, account: Hex, action: MerchantAction) {
       return pinned(snapshot, async state => {
         const { target, merchant } = await readMerchant(state, action.id);
@@ -332,6 +364,32 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
             addressArgument(account), addressArgument(action.payout)) };
         }
         requirePay(merchant?.active && merchant.controller === address(account), 'Active merchant controller required');
+        if (action.kind === 'invoice' || action.kind === 'closeInvoice') {
+          const invoiceId = hash(action.invoiceId);
+          const invoiceTarget = await state.component(invoiceView.component);
+          const reader = createPayReader({ read: ({ calldata }) => state.call(invoiceTarget, calldata) }, snapshot);
+          const existing = await reader.invoice(invoiceId);
+          if (action.kind === 'closeInvoice') {
+            requirePay(existing?.merchantId === action.id && existing.merchant === merchant.controller, 'Invoice tenant mismatch');
+            return { target: invoiceTarget, data: calldata(MERCHANT_ACTIONS.closeInvoice, invoiceId.slice(2)) };
+          }
+          requirePay(!existing, 'Invoice ID is already published');
+          const currency = { '420': '343230', CAD: '434144', USD: '555344' }[action.currency];
+          requirePay(currency && action.amount > 0n && action.amount < 1n << 256n &&
+            action.expiresAt > state.timestamp && action.refundUntil >= action.expiresAt &&
+            action.refundUntil < 1n << 64n && [0, 1, 2].includes(action.mode) && [0, 1, 2].includes(action.acceptance),
+            'Invalid invoice terms');
+          let policy = action.acceptedAssetsHash;
+          if (!policy && action.currency === '420') {
+            const source = await state.component(NATIVE_QUOTE_SOURCE);
+            policy = hash(await state.call(source, calldata('nativeAcceptedAssetsHash()')));
+          }
+          return { target: invoiceTarget, data: calldata(MERCHANT_ACTIONS.invoice, invoiceId.slice(2), id,
+            addressArgument(account), zero, currency.padEnd(64, '0'), abiWord(action.amount), abiWord(action.expiresAt),
+            abiWord(action.refundUntil), abiWord(BigInt(action.mode)), abiWord(BigInt(action.acceptance)),
+            abiWord(action.mode === 2 ? 1n : 0n), abiWord(42n), hash(policy).slice(2), zero,
+            action.tipPolicyHash ? hash(action.tipPolicyHash).slice(2) : zero, abiWord(1n)) };
+        }
         if (action.kind === 'location') {
           requirePay(typeof action.active === 'boolean', 'Invalid location action');
           return { target, data: calldata(MERCHANT_ACTIONS.location, id, hash(action.locationId).slice(2), abiWord(action.active ? 1n : 0n)) };

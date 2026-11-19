@@ -134,6 +134,18 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
             ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED,
             Types420.Direction.NONE
         );
+        _applyPayment(invoiceId, amount);
+    }
+
+    function applyCheckoutPayment(bytes32 invoiceId, uint256 amount) external {
+        require(msg.sender == _resolveRequired(PayIds420.PAYMENT_ROUTER), "checkout router");
+        _requireOperational(
+            PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.INBOUND
+        );
+        _applyPayment(invoiceId, amount);
+    }
+
+    function _applyPayment(bytes32 invoiceId, uint256 amount) private {
         Invoice storage i = _invoices[invoiceId];
         require(i.active && !closed[invoiceId], "inactive");
         require(block.timestamp <= i.expiresAt, "expired");

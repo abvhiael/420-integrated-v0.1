@@ -285,13 +285,23 @@ hash for `420/APP/420PAY/MERCHANT_REGISTRY` in the existing component map.
 Payment confirmation checks the invoice and selected Wallet account against
 the canonical PaymentRegistry record and reports the exact status.
 
-The current adapter delegates quotes to a canonical engine and the shared
-fee-quote dependency is an interface. No executable price and fee authority
-is wired in the retained Pay package. The existing settlement and lifecycle
-methods also lack a single invoice-bound operation that enforces the reviewed
-terms and advances invoice state with delivery. Wallet checkout submission and
-asset selection stay unavailable until those dependencies are qualified.
-This limitation also applies to local checkout execution.
+The native 420 checkout candidate adds a Registry-resolved
+`CanonicalPayQuote420` source and `PaymentRouter420.payNativeInvoice`. For a
+native-denominated invoice with the approved native asset commitment and
+single-recipient terms, the quote binds the payer, nonce, invoice terms, exact
+amount and active payout version to a 42-second window bounded by invoice expiry.
+The native fee quote reports zero protocol and conversion fees. Wallet estimates
+transaction gas separately. Delivery, invoice accounting, replay state and the
+settled payment record commit together or revert together.
+
+The native source uses its own Registry component so existing Swap fee
+bindings stay available. The candidate changes three Pay resident runtimes.
+Any deployment must qualify the new runtimes and publish the native source as
+`420/APP/420PAY/NATIVE_QUOTE_SOURCE`, using the approved native asset policy
+commitment as its constructor input. The retained frozen deployment artifacts
+remain historical evidence. The hosted Wallet handoff and canonical conversion
+quotes remain outstanding.
+
 
 ## PAY-APP-6 — Merchant registration and business dashboard
 

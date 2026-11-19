@@ -1,0 +1,39 @@
+name: Pay native invoice checkout qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/pay/CanonicalPayQuote420.sol'
+      - 'contracts/src/pay/InvoiceRegistry420.sol'
+      - 'contracts/src/pay/MerchantRegistry420.sol'
+      - 'contracts/src/pay/PayIds420.sol'
+      - 'contracts/src/pay/PaymentRegistry420.sol'
+      - 'contracts/src/pay/PaymentRouter420.sol'
+      - 'contracts/src/pay/SettlementRouter420.sol'
+      - 'contracts/test/PayNativeInvoiceCheckout420.t.sol'
+      - '.github/workflows/pay-native-checkout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-checkout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Qualify the exact revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/qualify-pay-regression.py --profile pr \
+            --match 'PayNativeInvoiceCheckout420.t.sol' \
+            --match 'PayAudit3Lifecycle420.t.sol' \
+            --match 'PayAudit4SettlementAndAccounting420.t.sol' \
+            --output "$RUNNER_TEMP/pay-native-checkout"

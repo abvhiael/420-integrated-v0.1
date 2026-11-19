@@ -367,6 +367,15 @@ async function rpcRequest(method,params=[],{origin=null,expectedChainId=null}={}
   throw Object.assign(new Error('No healthy RPC on '+chainId+': '+failures.join('; ')),{code:4900});
 }
 
+async function assertSiteTransactionGrant420(context) {
+  if(!context.origin)return;
+  const accounts=await accountsFor(context.origin);
+  const current=(await readObject(PERMISSIONS_KEY))[context.origin];
+  if(accounts.length!==1||accounts[0]!==context.accounts?.[0]||
+     !current||(current.grantedAt??null)!==context.grantedAt)
+    throw Object.assign(new Error('Website transaction permission was revoked or changed'),{code:4100});
+}
+
 async function executeWithLocalAuthority(request, context) {
   const prefs=normalizeExtensionPreferences420(await readObject(EXTENSION_UI_KEY_420));
   const effective=await effectiveChain420(context.origin);
@@ -399,13 +408,14 @@ async function executeWithLocalAuthority(request, context) {
   if (!LOCAL_AUTHORITY_METHODS.has(request.method)) {
     throw Object.assign(new Error(`unsupported local authority method: ${request.method}`), { code: 4200 });
   }
+  if(request.method==='eth_sendTransaction')await assertSiteTransactionGrant420(context);
   const authorityRequestId = `authority-${context.tabId ?? 'tab'}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const pending = await readObject(AUTHORITY_KEY);
   pending[authorityRequestId] = {
     authorityRequestId,
     request,
     context: { origin: context.origin, chainId:context.chainId, epoch:context.epoch, accounts: context.accounts ?? [],
-      tabId: context.tabId ?? null, activityId:context.activityId??null },
+      tabId: context.tabId ?? null, activityId:context.activityId??null, grantedAt:context.grantedAt??null },
     createdAt: Date.now(),
   };
   await chrome.storage.local.set({ [AUTHORITY_KEY]: pending });
@@ -562,11 +572,15 @@ async function handleApprovalMethod(request, context) {
       throw Object.assign(new Error('EIP-712 domain chain ID mismatch'),{code:4901});
   }
   const before=await effectiveChain420(origin),pinned=before.chainId;
-  let feePreview=null,approvedTxRequest=request;
+  let feePreview=null,approvedTxRequest=request,grantedAt;
   if(request.method==='eth_sendTransaction'){
     const tx=request.params?.[0];
     if(!tx||!tx.to||!tx.from||normalizeExtensionAddress420(tx.from)!==granted[0])
       throw Object.assign(new Error('Exact granted account and transaction target required'),{code:4100});
+    if(tx.chainId!==undefined&&chainId420(tx.chainId)!==pinned)
+      throw Object.assign(new Error('Transaction chain does not match the site Wallet network'),{code:4901});
+    grantedAt=(await readObject(PERMISSIONS_KEY))[origin]?.grantedAt??null;
+    await assertSiteTransactionGrant420({origin,accounts:granted,grantedAt});
     const config=normalizeExtensionConfig420(await readObject(EXTENSION_CONFIG_KEY_420));
     const provider={request:(method,params)=>rpcRequest(method,params,{origin,expectedChainId:pinned})};
     const accountMeta=await accountMetadata420(),hardware=accountMeta[granted[0]]?.type==='hardware';
@@ -661,7 +675,7 @@ async function handleApprovalMethod(request, context) {
     let hash=null;
     try{
       hash=await executeWithLocalAuthority(approvedTxRequest,{
-        ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId:id
+        ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId:id,grantedAt
       });
       await rememberWalletUiActivity420({...entry,hash,status:'submitted'});
       return hash;
@@ -765,6 +779,8 @@ async function handleDappCompatibility420(request,context){
   if(method!=='wallet_sendCalls')throw Object.assign(new Error('Unsupported dApp compatibility method'),{code:4200});
   if(granted.length!==1)throw Object.assign(new Error('Connect one account to submit atomic batch'),{code:4100});
   const before=await effectiveChain420(origin),pinned=before.chainId;
+  const grantedAt=(await readObject(PERMISSIONS_KEY))[origin]?.grantedAt??null;
+  await assertSiteTransactionGrant420({origin,accounts:granted,grantedAt});
   const callRequest=normalizeDappWalletCalls420(params,{account:granted[0],chainId:pinned});
   const metadata=await accountMetadata420();
   if(metadata[granted[0]]?.type==='eoa'||['hardware','watch-only'].includes(metadata[granted[0]]?.type))
@@ -827,7 +843,7 @@ async function handleDappCompatibility420(request,context){
   }]};
   try{
     const txHash=await executeWithLocalAuthority(prepared,{
-      ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId
+      ...context,accounts:current,chainId:pinned,epoch:before.epoch,activityId,grantedAt
     });
     const recorded=(await readWalletUiActivity420()).find(x=>x.id===activityId);
     const callsId=validHash420(recorded?.userOpHash)?recorded.userOpHash.toLowerCase():txHash.toLowerCase();
@@ -2792,6 +2808,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if(!pending||meta?.type!=='hardware'||meta?.provider!=='trezor'||meta?.signingQualified!==true||
          !account||effective.chainId!==pending.context.chainId||effective.epoch!==pending.context.epoch)
         throw Object.assign(new Error('Trezor account or chain is no longer authorized'),{code:4100});
+      if(pending.request.method==='eth_sendTransaction')await assertSiteTransactionGrant420(pending.context);
       const allowed=pending.request.method==='eth_sendTransaction'?'ethereumSignTransaction':
         pending.request.method==='eth_signTypedData_v4'?'ethereumSignTypedData':
         pending.request.method==='personal_sign'?'ethereumSignMessage':null;
@@ -2821,6 +2838,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const effective=await effectiveChain420(approval?.context?.origin);
         if(!approval?.context?.chainId||effective.chainId!==approval.context.chainId||effective.epoch!==approval.context.epoch)
           throw Object.assign(new Error('Network changed; authority request cancelled'),{code:4901});
+        if(approval.request?.method==='eth_sendTransaction')
+          await assertSiteTransactionGrant420(approval.context);
         if(request.method==='eth_sendRawTransaction'){
           if(approval.request?.method!=='eth_sendTransaction'||
              !['eoa','hardware'].includes(approval.request?.params?.[0]?.executionModel))

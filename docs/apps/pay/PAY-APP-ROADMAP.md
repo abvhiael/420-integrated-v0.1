@@ -172,9 +172,40 @@ implementation revision before building and running these tests.
 
 ## PAY-APP-2 — Registry, Wallet, Names and Identity integration
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Verified chain/service/code/origin resolution, account selection, exact Wallet simulation/confirmation and scoped revocation; reject wrong network and spoofed identities. Retain reproducible scoped qualification at exact implementation SHA.
+
+The shared SDK's `createPayRegistry` takes the verified deployment's chain,
+ProtocolRegistry address and runtime hash, approved Pay origin, and pinned
+service records for Pay, Names and Identity. Load these bindings from the
+approved deployment manifest. The Pay origin and metadata hash must come from
+the same approved service entry. Resolve active Pay components on-chain and
+compare the registered and live bytecode hashes to the retained deployment
+bindings. Registry, bytecode and view reads use the same canonical block hash.
+An RPC endpoint must support EIP-1898 canonical block selectors.
+
+Use `createPayReader(registry.transport, snapshot)` for Pay reads. The name
+resolver uses that same snapshot for the forward .420 record and its optional
+Identity420 profile. The record must be unexpired. A named profile must be
+active, point back to the same name and have the resolved recipient as its
+controller. Identity is presentation evidence. Canonical payment recipients
+and authority still come from the payment contracts and Wallet review.
+
+`createPayWallet` uses the selected 420 Wallet provider on the approved
+application origin. Connect explicitly and require exactly one Wallet-selected
+account on the configured chain. The SDK resolves the PaymentRouter420 target
+and forwards the exact chain, account, calldata and value to Wallet.
+Wallet simulates the exact call from its execution account and prompts for
+approval before submitting. The resulting hash records submission.
+Disconnect uses Wallet's origin-scoped `eth_accounts` revocation.
+
+Run `npm ci --prefix packages/420-pay-sdk` and
+`npm test --prefix packages/420-pay-sdk`. The SDK qualification covers the
+canonical snapshot and service bindings, name/profile mismatches, and exact
+Wallet requests. The existing Wallet extension popup qualification checks
+that a wrong-chain request is rejected before approval.
+
 
 ## PAY-APP-3 — Consumer web dashboard and account management
 

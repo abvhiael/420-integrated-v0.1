@@ -1,3 +1,4 @@
+import { accountingCsv, reconcileAccounting } from './accounting.js';
 import { paymentLink, recipientAddress } from './payment-intent.js';
 
 const zero = '0x' + '0'.repeat(64);
@@ -26,21 +27,27 @@ export function createBusinessPanel() {
   const reports = byId('business-reports');
   const records = byId('business-records');
   const range = byId('business-report-range');
+  const reportActions = byId('business-report-actions');
   const older = byId('business-older');
   let connected = null;
   let merchantId = null;
   let revision = 0;
   let busy = false;
   let next = null;
+  let rows = [];
+  let reportSnapshot;
 
   function clear() {
     merchantId = null;
     next = null;
+    reportSnapshot = undefined;
     register.hidden = management.hidden = reports.hidden = older.hidden = invoicePanel.hidden = true;
     resetInvoiceView();
     draft.reset();
     saved.replaceChildren(new Option('Choose draft', ''));
     records.replaceChildren();
+    rows = [];
+    reportActions.hidden = true;
     range.textContent = credential.textContent = '';
   }
 
@@ -218,22 +225,71 @@ export function createBusinessPanel() {
 
   function report(through) {
     records.replaceChildren();
+    rows = [];
+    reportActions.hidden = true;
     range.textContent = '';
     older.hidden = true;
     void run(async ({ source, account }, current) => {
-      const page = await source.merchantReport(account, merchantId, through);
+      const page = await source.merchantReport(account, merchantId, through, through === undefined ? undefined : reportSnapshot);
       if (!current()) return;
-      range.textContent = 'Finalized blocks ' + page.first + '–' + page.last;
-      for (const payment of page.payments) {
+      range.textContent = 'Finalized blocks ' + page.first + '–' + page.last + ' · Snapshot ' + page.snapshot.blockHash;
+      reportSnapshot = page.snapshot;
+      const reconciled = page.accountingRows.map(reconcileAccounting);
+      for (const entry of reconciled) {
         const item = document.createElement('li');
-        item.textContent = payment.id + ' · ' + payment.status + ' · ' +
-          payment.settlementAmount + ' base units · asset ' + payment.settlementAsset;
+        item.textContent = entry.paymentId + ' · Refund authorized ' + entry.authorized +
+          ' · Delivered ' + (entry.delivered ?? 'unverified') +
+          (entry.issues.length ? ' · ' + entry.issues.join(' · ') : '');
         records.append(item);
+        if (entry.row) {
+          const details = document.createElement('dl');
+          for (const [key, value] of Object.entries(entry.row)) {
+            const label = document.createElement('dt');
+            label.textContent = key.replaceAll('_', ' ');
+            const field = document.createElement('dd');
+            field.textContent = value;
+            details.append(label, field);
+          }
+          item.append(details);
+        }
+      }
+      rows = reconciled.flatMap(entry => entry.row ? [entry.row] : []);
+      reportActions.hidden = rows.length === 0;
+      if (rows.length !== reconciled.length) {
+        status.textContent = 'Exports contain reconciled rows only (' + rows.length + ' of ' + reconciled.length + ').';
       }
       if (!page.payments.length) status.textContent = 'No payments in this report interval.';
       next = page.next;
       older.hidden = next === null;
     });
+  }
+
+  function exportReport(format) {
+    void run(async ({ source, account }, current) => {
+      try {
+        await source.authorizeReport(account, merchantId);
+      } catch (error) {
+        if (current()) clear();
+        throw error;
+      }
+      if (!current() || rows.length === 0) return;
+      if (format === 'print') {
+        document.body.classList.add('print-accounting');
+        try { window.print(); }
+        finally { document.body.classList.remove('print-accounting'); }
+        return;
+      }
+      const body = format === 'csv' ? accountingCsv(rows) : JSON.stringify(rows, null, 2);
+      const url = URL.createObjectURL(new Blob([body], { type: format === 'csv' ? 'text/csv' : 'application/json' }));
+      const download = document.createElement('a');
+      download.href = url;
+      download.download = '420pay-accounting.' + format;
+      download.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+  }
+  for (const format of ['csv', 'json', 'print']) {
+    byId('business-' + format).addEventListener('click', () => exportReport(format));
   }
 
   byId('business-report').addEventListener('click', () => report(undefined));

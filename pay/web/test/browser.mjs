@@ -31,6 +31,12 @@ const mime = { 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.cs
 let status = 5;
 let finalizedStatus = 1;
 let businessRegistered = false;
+let reportAvailable = false;
+const reportPaymentId = hash('f');
+const reportTx = hash('5');
+const reportLog = { address: address('7'), topics: [topic, reportPaymentId, hash('7')],
+  blockNumber: finalizedBlock.number, blockHash: finalizedBlock.hash, logIndex: '0x0',
+  removed: false, data: encode(5), transactionHash: reportTx };
 const businessId = hash('6');
 const builtInvoice = hash('7');
 let invoicePublished = false;
@@ -65,10 +71,15 @@ try {
         assert.deepEqual(params, [account, latest]);
         if (balanceGate) await balanceGate;
         result = '0x3a4965bf58a40000'; break;
+      case 'eth_getTransactionReceipt':
+        assert.deepEqual(params, [reportTx]);
+        result = { transactionHash: reportTx, blockHash: finalizedBlock.hash, blockNumber: finalizedBlock.number,
+          status: '0x1', gasUsed: '0x5208', effectiveGasPrice: '0x2', logs: [reportLog] };
+        break;
       case 'eth_getLogs':
                 assert.deepEqual(params, [{address: address('7'), topics: [topic],
           fromBlock: params[0].toBlock === '0x7f' ? '0x0' : '0x1', toBlock: params[0].toBlock}]);
-        if (params[0].toBlock === '0x7f') { result = []; break; }
+        if (params[0].toBlock === '0x7f') { result = reportAvailable ? [reportLog, reportLog] : []; break; }
         result = [{address: address('7'), topics: [topic, paymentId, invoiceId], blockNumber: '0x80',
           blockHash: blocks.hash, logIndex: '0x0', removed: false}];
         break;
@@ -81,7 +92,7 @@ try {
           result = hash('1');
         } else if (data === digest('getInvoice(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
           assert.equal(to, address('6'));
-          result = invoicePublished ? encode(businessId, account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
+          result = (invoicePublished || reportAvailable) ? encode(businessId, account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
             100, 500, 600, 2, 1, 1, 42, hash('1'), hash('0'), hash('2'), 1) : encode(...Array(15).fill(0));
         } else if (data === digest('paidAmount(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
           assert.equal(to, address('6'));
@@ -119,6 +130,10 @@ try {
         } else if (data === digest('currentPayout(bytes32)').slice(0, 10) + hash('4').slice(2)) {
           assert.equal(to, address('5'));
           result = encode(address('3'), 1, hash('0'));
+        } else if (data === '0xe66eefc8' + reportPaymentId.slice(2)) {
+          assert.equal(to, address('7'));
+          result = encode(builtInvoice, address('8'), account, address('0'), 40, address('0'), 40,
+            hash('0'), 0, hash('c'), 0, 0, 5);
         } else if (data === '0xe66eefc8' + paymentId.slice(2)) {
           assert.equal(to, address('7'));
           result = encode(invoiceId, account, address('8'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('c'), 0, 0, finalized ? finalizedStatus : status);
@@ -321,6 +336,32 @@ try {
   await page.getByText('CREDENTIALED · Active · Controller').waitFor();
   await page.getByRole('button', {name:'Load report', exact:true}).click();
   await page.getByText('No payments in this report interval.').waitFor();
+  reportAvailable = true;
+  await page.getByRole('button', {name:'Load report', exact:true}).click();
+  const report = page.locator('#business-records');
+  await report.getByText('42000', {exact:true}).waitFor();
+  assert.equal(await report.locator('li').count(), 1);
+  const reportDownload = page.waitForEvent('download');
+  await page.getByRole('button', {name:'Download JSON', exact:true}).click();
+  const reportFile = await reportDownload;
+  assert.equal(reportFile.suggestedFilename(), '420pay-accounting.json');
+  const [row] = JSON.parse(await readFile(await reportFile.path(), 'utf8'));
+  assert.equal(row.payment_id, reportPaymentId);
+  assert.equal(row.network_fee, '42000');
+  assert.equal(row.refund_total, '0');
+  await page.evaluate(() => {
+    window.print = () => { document.body.dataset.accountingPrint = String(document.body.classList.contains('print-accounting')); };
+  });
+  await page.getByRole('button', {name:'Print report', exact:true}).click();
+  await page.locator('body[data-accounting-print="true"]').waitFor();
+  businessRegistered = false;
+  await page.getByRole('button', {name:'Download CSV', exact:true}).click();
+  await page.getByText('Merchant report access denied.').waitFor();
+  assert.equal(await report.locator('li').count(), 0);
+  businessRegistered = true;
+  reportAvailable = false;
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByText('CREDENTIALED · Active · Controller').waitFor();
   await page.getByLabel('Invoice ID', {exact:true}).fill(builtInvoice);
   await page.getByLabel('Invoice amount in base units').fill('100');
   await page.getByLabel('Invoice expiry (local time)').fill('2028-01-01T10:00');

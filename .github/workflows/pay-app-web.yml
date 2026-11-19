@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'pay/web/**'
+      - '420-indexer/src/pay-accounting-export.ts'
+      - 'contracts/config/pay/accounting-export-schema.json'
       - 'packages/420-pay-sdk/src/**'
       - 'packages/420-pay-sdk/package*.json'
       - 'packages/420-pay-sdk/tsconfig.json'

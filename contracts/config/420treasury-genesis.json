@@ -10,7 +10,9 @@
     "TreasuryPolicyRegistry420.sol",
     "TreasuryBudgetRegistry420.sol",
     "TreasuryDisbursementRegistry420.sol",
-    "TreasuryRouter420.sol"
+    "TreasuryRouter420.sol",
+    "TreasuryReleaseExecutor420.sol",
+    "TreasuryVaultBinding420.sol"
   ],
   "invariants": [
     "TREASURY-INV-001: no Treasury contract creates a parallel asset-custody path around 420Vault",
@@ -41,5 +43,20 @@
     "vault_identity": "Budget vaultId is the registered instance ID, distinct from the VAULT_TREASURY type ID.",
     "funding": "Budget commitment is spending authority, not a reservation of Vault free balance. Resolve the exact registered vault and check free balance before release.",
     "release_binding_helper": "contracts/src/treasury/TreasuryVaultBinding420.sol (internal read-only library; no deployed authority)"
+  },
+  "deployment_inventory": {
+    "deployable": [
+      "TreasuryAuthorization420",
+      "TreasuryPolicyRegistry420",
+      "TreasuryBudgetRegistry420",
+      "TreasuryDisbursementRegistry420",
+      "TreasuryRouter420"
+    ],
+    "designated_executor_candidate": "TreasuryReleaseExecutor420",
+    "internal_libraries": [
+      "TreasuryIds420",
+      "TreasuryVaultBinding420"
+    ],
+    "new_service_id_for_executor": false
   }
 }

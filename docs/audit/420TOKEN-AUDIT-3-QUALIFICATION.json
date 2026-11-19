@@ -1,0 +1,150 @@
+{
+  "schema": "420-token-audit-3-exact-implementation-qualification-v1",
+  "step": "TOKEN-AUDIT-3",
+  "status": "QUALIFIED",
+  "qualified_implementation_sha": "a7ce71b366804631a422388eb7dbbf9ca1ddffd4",
+  "reconciled_main": "26e66f1459c1559647277ee48ba6739909ef3b94",
+  "pr": 1236,
+  "qualification": {
+    "workflow": ".github/workflows/420token-economics.yml",
+    "run_id": 44631438474,
+    "job_id": 135938798869,
+    "conclusion": "success",
+    "exact_head_checkout": true,
+    "foundry_version": "1.10.0",
+    "foundry_profile": "ci",
+    "source_closure_sha256": {
+      "contracts/foundry.toml": "7998cf0663907daced5812fbef76484e4d2dc1ca7df24c847f6c2ea3119d7d04",
+      "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+      "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431",
+      "contracts/src/interfaces/genesis/ICapabilityRegistryExtended420.sol": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85",
+      "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
+      "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f28e6fbcd71e78632ce8decee2aac2967c7117d41e7574f67f8c95ec32a3e8b",
+      "contracts/src/system/CapabilityRegistry420.sol": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef",
+      "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+      "contracts/src/token/ERC1155Template420.sol": "68cebe24f4c40b4c037ecd33698934d2543caf74797851d2e82579a7cb3b3d0a",
+      "contracts/src/token/ERC20Template420.sol": "8f9a950e8b2ce8d76c45a7a50e4405e476e664b1bed044e4e89c4bd8bc04e303",
+      "contracts/src/token/ERC721Template420.sol": "afa0e5328e5bfdb6a6ec1998fa48fda86d24f34da91b75324fff3389ff9a88a3",
+      "contracts/src/token/TokenFactory420.sol": "6d41bd48ac71e742e1e670b0e56dd06729f355e8f00f65923366b83b77f50b5d",
+      "contracts/src/token/TokenIds420.sol": "c25c894640430023d01123830e65053330baefcacb877dde3e16f50446e58e70",
+      "contracts/src/token/TokenTemplateRegistry420.sol": "1c91296ed22c6f4dadae0da432ca713b9f723d0e04a675b156d05cdc72c553b1",
+      "contracts/src/vault/AssetVault420.sol": "e660cafd7873e04e036173f403b1bdd699b442550e2f38263c0e75751a565b94",
+      "contracts/src/vault/VaultAccounting420.sol": "7f6d8f702a973993708ba1925a5b8548df37379a7982df428c241b1501a99841",
+      "contracts/src/vault/VaultAuthorization420.sol": "2610d34dc2371bb37fd543f5de1e72f81f262bb522b32ba45afc4495f2bff9e0",
+      "contracts/src/vault/VaultIds420.sol": "b21e293c4b7c17e7557f0f07b7f53cf6ef73d66ce5a1cd3d59190e52d565ce75",
+      "contracts/src/vault/VaultPolicyRegistry420.sol": "ee917cf0b84d8c2e06c2276dc6e2eaa4730dcbaa6bd239fff3089e4266e4eac2",
+      "contracts/src/vault/VaultRegistry420.sol": "d1960f8cbd0caa947bf0b0b152eb0ac0533529cf7cd1a5c2478b1fffe919e718",
+      "contracts/test/token-economics/TokenEconomics420.t.sol": "6d877cabe1492143c324d335a82a46768212a7ee0a812603fa1a4392e5f433e2"
+    },
+    "tests_passed": 10,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "fuzz_runs": 50000,
+    "templates": 8,
+    "creation_fee_native": "42",
+    "test_results": {
+      "testAllEightRejectWrongFeeAndDisabledTemplate()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 3005358
+          }
+        }
+      },
+      "testAllEightTemplatesExactFeeLedgerProvenanceAndEvents()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 13452604
+          }
+        }
+      },
+      "testFrozenDepositRollbackAndIdenticalCreate2RetryForEveryTemplate()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 39405889
+          }
+        }
+      },
+      "testFuzzNonExactFeeNeverChangesEconomics(uint8,uint96)": {
+        "status": "Success",
+        "kind": {
+          "Fuzz": {
+            "first_case": {
+              "gas": 170866,
+              "stipend": 21356
+            },
+            "runs": 50000,
+            "mean_gas": 149184,
+            "median_gas": 149510,
+            "failed_corpus_replays": 0
+          }
+        }
+      },
+      "testHostileVaultReentryRejectedAcrossAllCreatePathsAndAtomicRollback()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 31029880
+          }
+        }
+      },
+      "testUnauthorizedLedgerWithdrawalAndFeeRedirection()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 4395079
+          }
+        }
+      },
+      "testUnrecordedNativeBalanceDoesNotCreateAccountingCredit()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 12969585
+          }
+        }
+      },
+      "testUnregisteredSameIdAndWrongAccountingRegistryRollback()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 41299354
+          }
+        }
+      },
+      "testWindingDownAndClosedVaultRejectEveryTemplate()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 26648829
+          }
+        }
+      },
+      "testWrongVaultIdAndDevCompRejectedAndSameIdSpoofNotAdmitted()": {
+        "status": "Success",
+        "kind": {
+          "Unit": {
+            "gas": 469784
+          }
+        }
+      }
+    },
+    "prior_token_audit_2_shared_closure_files_verified": 16
+  },
+  "economic_authority": {
+    "vault_id": "420/treasury/vault/token-creation-community-revenue/v1",
+    "fee_native": "42",
+    "successful_all_template_total_native": "336",
+    "development_compensation_share_native": "0",
+    "factory_retained_creation_fee_native": "0",
+    "fee_routing": "TokenFactory420 -> registered AssetVault420 -> VaultAccounting420; Treasury is budget/disbursement control plane, not parallel custody."
+  },
+  "deployment_trust_boundary": "The factory constructor validates vaultId and permanently binds the supplied address; ID alone is not code/registration identity. Local binding assertion and real registered AssetVault tests reject incorrect destination; arbitrary same-ID malicious contracts may pass constructor ID check, and the hostile test fixture demonstrates this explicitly. TOKEN-AUDIT-4 must bind expected release registry, vault address, runtime hash, accounting/authorization dependencies and governance; TOKEN-AUDIT-8 must prove the actual same-deployment identities. No runtime architecture or frozen economic inputs changed.",
+  "prior_evidence": "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+  "live_testnet_qualified": false,
+  "repository_release_qualified": false,
+  "next_step": "TOKEN-AUDIT-4",
+  "publication": "Evidence-only closeout updates documentation, readiness and candidate scope. No execution source or workflow changed; implementation qualification remains attached to the exact tested SHA. No redundant CI needed."
+}

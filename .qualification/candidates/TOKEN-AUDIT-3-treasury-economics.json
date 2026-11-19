@@ -9,7 +9,11 @@
     "contracts/test/token-economics/TokenEconomics420.t.sol",
     "scripts/qualify-420token-economics.py",
     ".github/workflows/420token-economics.yml",
-    ".qualification/candidates/TOKEN-AUDIT-3-treasury-economics.json"
+    ".qualification/candidates/TOKEN-AUDIT-3-treasury-economics.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json"
   ],
   "tests": [
     {

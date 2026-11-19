@@ -17,7 +17,8 @@ permissions:
 
 jobs:
   dashboard:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,8 +41,9 @@ jobs:
           npm run build --prefix packages/420-pay-sdk
           npm run build --prefix pay/web
           npm test --prefix pay/web
+      - name: Install Chromium
+        working-directory: pay/web
+        run: npx playwright install --with-deps chromium
       - name: Qualify Chromium dashboard and accessibility
         working-directory: pay/web
-        run: |
-          npx playwright install --with-deps chromium
-          npm run browser
+        run: npm run browser

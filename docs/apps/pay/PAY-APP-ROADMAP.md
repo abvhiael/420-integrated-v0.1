@@ -494,6 +494,9 @@ See [Android build and deployment](android.md) for qualification, App Links and 
 
 Exit criteria: Same domain parity, verified universal links, native QR/share, session security, build and device tests. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [iOS build and deployment](ios.md) for simulator qualification and Universal Link binding.
+
+
 ## PAY-APP-15 — Ecosystem integration and downstream consumers
 
 **Status:** PLANNED. **Testnet required:** No.

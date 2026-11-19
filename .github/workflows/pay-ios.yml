@@ -1,0 +1,70 @@
+name: PAY-APP iOS qualification
+on:
+  pull_request:
+    paths:
+      - 'pay/ios/**'
+      - 'pay/web/payment-intent.js'
+      - 'pay/web/package-lock.json'
+      - 'pay/android/build-sdk.mjs'
+      - 'pay/android/web/sdk.js'
+      - 'pay/android/app/src/main/assets/review.html'
+      - 'packages/420-pay-sdk/**'
+      - '.github/workflows/pay-ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify revision and generate project
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix packages/420-pay-sdk --ignore-scripts --no-audit --no-fund
+          npm ci --prefix pay/web --ignore-scripts --no-audit --no-fund
+          npm run build --prefix packages/420-pay-sdk
+          node pay/ios/build-sdk.mjs
+          brew install xcodegen
+          cd pay/ios
+          xcodegen generate
+      - name: Build unsigned iOS app
+        working-directory: pay/ios
+        run: |
+          xcodebuild -project Pay420.xcodeproj -scheme Pay420 -configuration Release \
+            -destination 'generic/platform=iOS' -derivedDataPath Reports/build CODE_SIGNING_ALLOWED=NO build
+          ditto -c -k --keepParent Reports/build/Build/Products/Release-iphoneos/Pay420.app Reports/Pay420-unsigned.zip
+      - name: Verify simulator flows
+        working-directory: pay/ios
+        run: |
+          set -euo pipefail
+          DEVICE="$(xcrun simctl list devices available --json | python3 -c '
+          import json, sys
+          data = json.load(sys.stdin)["devices"]
+          for key in reversed(sorted(data)):
+              for device in data[key]:
+                  if device["name"].startswith("iPhone"):
+                      print(device["udid"])
+                      sys.exit(0)
+          sys.exit("No available iPhone simulator")
+          ')"
+          xcodebuild -project Pay420.xcodeproj -scheme Pay420 -destination "platform=iOS Simulator,id=$DEVICE" \
+            -parallel-testing-enabled NO -resultBundlePath Reports/Pay420.xcresult \
+            PAY_CHAIN_ID=420 WALLET_LINK_HOST=wallet.example.test CODE_SIGNING_ALLOWED=NO test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420pay-ios-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: error
+          path: |
+            pay/ios/Reports/Pay420-unsigned.zip
+            pay/ios/Reports/Pay420.xcresult

@@ -1,0 +1,62 @@
+name: Pay420
+options:
+  deploymentTarget:
+    iOS: '16.0'
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+targets:
+  Pay420:
+    type: application
+    platform: iOS
+    sources:
+      - Pay420
+      - path: Generated
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.pay
+        PAY_LINK_HOST: pay.420integrated.org
+        PAY_CHAIN_ID: ''
+        WALLET_LINK_HOST: ''
+        CODE_SIGN_ENTITLEMENTS: Pay420/Pay420.entitlements
+    info:
+      path: Pay420-Generated-Info.plist
+      properties:
+        CFBundleDisplayName: '420 Pay'
+        UILaunchScreen: {}
+        PayLinkHost: $(PAY_LINK_HOST)
+        PayChainID: $(PAY_CHAIN_ID)
+        WalletLinkHost: $(WALLET_LINK_HOST)
+        NSCameraUsageDescription: 'Use the camera to read a payment QR code.'
+  Pay420Tests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Pay420Tests]
+    dependencies:
+      - target: Pay420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.pay.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Pay420.app/Pay420
+        BUNDLE_LOADER: $(TEST_HOST)
+  Pay420UITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [Pay420UITests]
+    dependencies:
+      - target: Pay420
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.fourtwenty.pay.uitests
+        TEST_TARGET_NAME: Pay420
+schemes:
+  Pay420:
+    build:
+      targets:
+        Pay420: all
+    test:
+      targets:
+        - Pay420Tests
+        - Pay420UITests

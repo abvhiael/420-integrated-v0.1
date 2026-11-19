@@ -172,3 +172,31 @@ test('qualified runtime generator preserves canonical Registry, Names and Identi
   inventory.walletAuthority.protocolRegistry.address = '0x0000000000000000000000000000000000000422';
   assert.throws(() => buildWalletRuntimeConfig420({ manifest: testnetManifest420(), inventory, baseConfig }), /frozen Genesis namespace/);
 });
+
+test('Token runtime generation uses only bound deployment inventory and clears stale base pins',async()=>{
+  const {fixture}=await import('./token-test-fixture.js');
+  const {validateRuntimeConfig}=await import('../core/config.js');
+  const {binding}=fixture();
+  const inventory=readyInventory420();
+  const baseConfig=await readJson('wallet/web/runtime-config.json');
+  baseConfig.token={environment:'testnet',binding};
+  const args={manifest:testnetManifest420(),inventory,baseConfig};
+  assert.equal(buildWalletRuntimeConfig420(args).token,null);
+  inventory.appAuthority.token420={status:'PENDING',environment:'testnet',deploymentVerified:false,binding};
+  assert.equal(buildWalletRuntimeConfig420(args).token,null);
+  inventory.walletAuthority.capabilityRegistry420.address=binding.vaultGraph.CapabilityRegistry420.address;
+  inventory.appAuthority.token420={status:'BOUND',environment:'testnet',deploymentVerified:true,binding};
+  const config=buildWalletRuntimeConfig420(args);
+  assert.equal(config.token.binding.factory.address,binding.factory.address);
+  assert.equal(config.token.binding.release.dependencyRoot,binding.release.dependencyRoot);
+  assert.equal(validateRuntimeConfig(JSON.parse(JSON.stringify(config))),true);
+  assert.deepEqual(config,buildWalletRuntimeConfig420(args));
+  inventory.appAuthority.token420.environment='mainnet';
+  assert.throws(()=>buildWalletRuntimeConfig420(args),/not bound to this environment/);
+  inventory.appAuthority.token420.environment='testnet';
+  inventory.appAuthority.token420.status='CONFLICTED';
+  assert.throws(()=>buildWalletRuntimeConfig420(args),/not bound to this environment/);
+  inventory.appAuthority.token420.status='BOUND';
+  inventory.walletAuthority.capabilityRegistry420.address='0x0000000000000000000000000000000000000447';
+  assert.throws(()=>buildWalletRuntimeConfig420(args),/CapabilityRegistry differs/);
+});

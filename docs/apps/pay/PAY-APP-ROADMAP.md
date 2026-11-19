@@ -539,12 +539,12 @@ Exit criteria: Bind deployed Pay/Wallet/Registry/Indexer; real receipts, runtime
 
 | Remaining work | Acceptance evidence |
 | --- | --- |
-| Contract deployment and Registry binding | Reconcile current Pay contract source, ABI and runtime against approved deployment candidates. Verify the frozen chain, Genesis configuration, governance, runtime hashes, dependency bindings, settlement health and actual Swap executor. Record deployment and activation receipts under [PAY-AUDIT-7](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-7--production-equivalent-testnet-qualification). |
+| Contract deployment and Registry binding | Reconcile current Pay contract source, ABI and runtime against approved deployment candidates. Verify the frozen chain, Genesis configuration, governance, runtime hashes, dependency bindings, settlement health and actual Swap executor. Record deployment and activation receipts under [PAY-AUDIT-7](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-7-production-equivalent-testnet-qualification). |
 | Live checkout and POS | Bind the approved Pay and Wallet origins and finalized RPC. Exercise live web, PWA and POS flows with Wallet authorization and canonical receipts. Verify quote freshness, failed settlement, replay and invoice acceptance from chain evidence. |
 | Mobile release and Wallet handoff | Sign Android and iOS releases, publish the verified platform associations and finish the Wallet approval and return transport. Verify live handoff and canonical payment status on devices. Hosted checkout remains the approval path until live native evidence is available. |
 | Developer and Indexer integration | Configure operator credentials, approved webhook recipients and the production-equivalent Indexer feed. Verify signed delivery, replay, restart and compensating reorg events using canonical testnet evidence. |
 | Market, Commerce and accounting | Governance-approve the updated Market adapter and bind Commerce to the active Refund Manager. Verify actual refund delivery and stock reconciliation. Keep converted and tax-committed rows out of structured exports until their required evidence can be verified. |
-| Independent review | Use the local security qualification and live evidence in the existing [PAY-AUDIT-8](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-8--independent-audit-and-genesisproduction-closeout) review. Retain the review outcome under that audit step. |
+| Independent review | Use the local security qualification and live evidence in the existing [PAY-AUDIT-8](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-8-independent-audit-and-genesisproduction-closeout) review. Retain the review outcome under that audit step. |
 
 This handoff preserves the original local qualification runs and assigns live
 acceptance to PAY-APP-18. It records outstanding work and carries no deployment,

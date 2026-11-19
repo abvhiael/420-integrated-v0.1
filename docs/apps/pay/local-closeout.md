@@ -45,7 +45,7 @@ Repository qualification supplies evidence for independent review.
 
 ## Live activation gates
 
-The [PAY-APP-18 testnet work](PAY-APP-ROADMAP.md#pay-app-18--public-testnet-deployment-and-live-acceptance) tracks the outstanding tasks and acceptance evidence.
+The [PAY-APP-18 testnet work](PAY-APP-ROADMAP.md#pay-app-18-public-testnet-deployment-and-live-acceptance) tracks the outstanding tasks and acceptance evidence.
 
 - Verify governance, chain and Registry identities, deployed runtime hashes,
   permissions, health dependencies and the actual Swap executor binding.

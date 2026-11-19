@@ -407,7 +407,20 @@ class RPC:
             tx["to"] = to
         tx_hash = self.call("eth_sendTransaction", tx)
         receipt = self.call("eth_getTransactionReceipt", tx_hash)
-        require(receipt and int(receipt["status"], 16) == 1, "transaction failed " + tx_hash)
+        if not receipt or int(receipt["status"], 16) != 1:
+            print(json.dumps({"failed_transaction": tx_hash, "sender": sender, "to": to,
+                              "dataHash": keccak(hexbytes(data)), "initcodeBytes": len(hexbytes(data)),
+                              "value": value, "receipt": receipt}), flush=True)
+            try:
+                trace = self.call("debug_traceTransaction", tx_hash, {"disableMemory": True, "disableStorage": True})
+                ops = trace.get("structLogs", [])
+                tail = [{**{k: entry.get(k) for k in ("pc", "op", "gas", "gasCost", "depth", "error")},
+                         "lastStack": entry.get("stack", [])[-6:]} for entry in ops[-20:]]
+                print(json.dumps({"transactionTrace": {k: v for k, v in trace.items() if k != "structLogs"},
+                                  "lastInstructions": tail}), flush=True)
+            except Exception as error:
+                print("Trace unavailable: " + str(error), flush=True)
+            raise RuntimeError("transaction failed " + tx_hash)
         return receipt
 
     def reject(self, sender, to, data, value=0):
@@ -443,6 +456,9 @@ def deploy(rpc, bundle, name, sender, args):
     predicted = unreserved(create_address(sender, nonce))
     data = initdata(bundle, name, args)
     expected_runtime = rpc.call("eth_call", {"from": sender, "data": data, "gas": hex(15_000_000)}, "latest")
+    print(json.dumps({"deploying": name, "predicted": predicted, "nonce": nonce,
+                      "creationBytes": len(hexbytes(data)), "runtimeBytes": len(hexbytes(expected_runtime))}),
+          flush=True)
     receipt = rpc.send(sender, data)
     actual = address(receipt["contractAddress"])
     require(actual == predicted, "CREATE address mismatch " + name)
@@ -723,7 +739,8 @@ def rehearsal(bundle, port):
         log = Path(folder) / "anvil.log"
         with log.open("w") as stream:
             proc = subprocess.Popen(["anvil", "--host", "127.0.0.1", "--port", str(port), "--chain-id", "31337",
-                                     "--timestamp", "1700000000", "--accounts", "3", "--balance", "10000", "--silent"],
+                                     "--timestamp", "1700000000", "--hardfork", "cancun",
+                                     "--accounts", "3", "--balance", "10000", "--silent"],
                                     stdout=stream, stderr=subprocess.STDOUT)
             try:
                 rpc = RPC("http://127.0.0.1:" + str(port))

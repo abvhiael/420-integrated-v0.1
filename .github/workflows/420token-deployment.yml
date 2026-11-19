@@ -45,6 +45,7 @@ jobs:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/token/deployment.py qualify "$RUNNER_TEMP/token-v3-release"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: token-v3-release-and-local-evidence
           path: ${{ runner.temp }}/token-v3-release/

@@ -84,9 +84,10 @@ export function treasuryDescriptorsFromArtifacts420(
     }
 
     const artifactBySignature = new Map(events.map((event) => [eventSignature420(event), event]));
+    if (artifactBySignature.size !== events.length || new Set(contract.events.map(event => event.signature)).size !== contract.events.length) throw new Error('Treasury duplicate event signature');
     for (const expected of contract.events) {
       const event = artifactBySignature.get(expected.signature);
-      if (!event || event.name !== expected.name) {
+      if (!event || event.anonymous || event.name !== expected.name) {
         throw new Error('Treasury artifact event missing: ' + contract.contractName + '.' + expected.signature);
       }
       if (event.inputs.length !== expected.inputs.length) {
@@ -122,6 +123,8 @@ export function bindTreasuryDescriptors420(
   addresses: Readonly<Record<TreasuryEventContract420, Hex>>
 ): GenesisDescriptor420[] {
   const seen = new Set<TreasuryEventContract420>();
+  const normalized = TREASURY_EVENT_CONTRACTS_420.map(name => addresses[name]?.toLowerCase());
+  if (normalized.some(address => !address || !/^0x[0-9a-f]{40}$/.test(address) || /^0x0{40}$/.test(address)) || new Set(normalized).size !== normalized.length) throw new Error('Treasury deployment address invalid or duplicated');
   const out = descriptors.map((descriptor) => {
     const address = addresses[descriptor.contractName];
     if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {

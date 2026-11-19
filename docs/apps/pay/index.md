@@ -8,7 +8,7 @@ version: current
 
 # 420 Pay
 
-420 Pay is an approved Genesis protocol and user application. Its canonical service ID is `420/service/pay/v1`. Product scope includes consumer payments, merchant invoices, checkout and POS. The proposed website is `https://pay.420integrated.org`. The personal dashboard is implemented in the repository. Merchant web, PWA, POS, hosted checkout, Android, iOS and developer integrations remain planned. [Wallet discovery](../../users/wallet/dapp-connections.md#420-pay-in-wallet) and [AppStore discovery](../appstore/user-guide.md#find-420-pay) describe the approved scope. The [Pay roadmap](PAY-APP-ROADMAP.md) and [deployment qualification](deployment-operations.md) track availability.
+420 Pay is an approved Genesis protocol and user application. Its canonical service ID is `420/service/pay/v1`. Product scope includes consumer payments, merchant invoices, checkout and POS. The proposed website is `https://pay.420integrated.org`. The repository contains the personal and merchant dashboards, PWA, POS, hosted checkout, Android and iOS clients, and developer integrations. Availability on a live network depends on the approved deployment bindings. [Wallet discovery](../../users/wallet/dapp-connections.md#420-pay-in-wallet) and [AppStore discovery](../appstore/user-guide.md#find-420-pay) describe the approved scope. The [Pay roadmap](PAY-APP-ROADMAP.md) and [deployment qualification](deployment-operations.md) track availability.
 
 420Wallet authorizes transactions. The Pay contracts own invoice, payment, settlement and refund state. ProtocolRegistry resolves the active deployment and its code identity. Explorer and Indexer display evidence from that state.
 
@@ -18,3 +18,7 @@ version: current
 - [Security and privacy](security.md)
 - [Troubleshooting](troubleshooting.md)
 - [Product scope and acceptance](PAY-APP-0-PRODUCT-SPECIFICATION.md)
+
+- [Developer API and webhooks](developer-integrations.md)
+- [Android](android.md) and [iOS](ios.md)
+- [Local release packages and deployment gates](local-closeout.md)

@@ -521,6 +521,9 @@ See [Security and accessibility qualification](qualification.md) for tested boun
 
 Exit criteria: Operator/user/developer manuals; deterministic packages, exact-SHA CI, release gates, security review preparation, merge only qualified candidate. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [local closeout](local-closeout.md) for release packaging, retained evidence and activation gates.
+
+
 ## PAY-APP-18 — Public testnet deployment and live acceptance
 
 **Status:** PLANNED. **Testnet required:** Yes.

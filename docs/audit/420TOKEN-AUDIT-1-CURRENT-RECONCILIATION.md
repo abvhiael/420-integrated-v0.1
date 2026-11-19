@@ -77,3 +77,31 @@ Wallet catalogue -> core/apps.js (9ca6558910fafcf9e7b2c529a3d1d880294c39b2) -> a
 Twelve cross-file authority assertions evaluated successfully via the GitHub-read reconciliation operation: FROZEN_V3 status/hash, app and namespace input blob identities, application class, six-contract map, eight templates, exact fee, Vault ID, Registry-resolved address model, standalone URL rule, live-not-qualified. The source-identity comparisons above were separately executed through GitHub reads. No Solidity, Wallet, Slither, or live tests were executed; this is an inventory-only change and does not invalidate earlier passing implementation evidence. Requalification is needed before testnet readiness can be restored.
 
 Current next step: TOKEN-AUDIT-2. No testnet needed for steps 2–7. Keep previous October report unchanged as historical evidence.
+
+## Extended authority and acceptance evidence
+
+All six frozen V3 authority-input Git blob SHA-1s were fetched at the exact audited main and individually matched the commitment payload (6/6):
+- contracts/config/genesis-address-namespace.json: d9c40056db30513c0445f0c341d261b63dc6a1a5
+- contracts/config/system-addresses.json: 50c8d7c860ff48d52f41874bc55ee092cc9c5b6d
+- contracts/config/interfaces/genesis-interface-layer.json: e5fc64b454dcaca4bbf112b1488986377d711128
+- config/genesis-applications.json: 73a24bfe46787f3c2af043adc1de12eea1f456ab
+- config/genesis-allocations.json: 564d67fe2f959a96ed0c54d7862dd21bef30a8e9
+- config/ai-genesis.json: 789c750c7fb2eb2cbd6844122789b6611e91fbb0
+
+Additional individually compared historical/current dependency blobs:
+
+| Dependency | October qualified blob | Current main blob |
+| --- | --- | --- |
+| ICapabilityRegistry420.sol | 266f4003c86fafb74e7bcbc869bed1df39f28cfb | same |
+| IProtocolRegistry420.sol | 0bf0a597fa2c6956b48acb0891beb4d0f57d25db | same |
+| Types420.sol | b9c4578b0fd0029c913dcd890b8d498c4ee357db | same |
+| accounts/SmartAccountFactory420.sol | da4c4eadda5b8d62b61e6a1de0ed469829dfba0c | same |
+| accounts/SmartAccount420.sol | 8d6250744956aa3967a1096a161db8a82bdfed5c | fad99ddd896aa893ca1516eb3794eb94d764e017 |
+| wallet/web/core/accounts.js | 19c749d22c2eb777e980d34e6037b518fc6bc76e | 111eb795aaf221292985028c7d4891a358abadc7 |
+| wallet/web/core/abi.js | 01e895ff305c0b8a691ff59db644e6e0cda4eade | same |
+| wallet/web/core/genesis-app-catalog.js | 0c6fc7a7749afffdbdd35766830cf39a665fdfcc | 4a79f7b69db809dce4200c2ef6423424b16162a6 |
+| wallet/web/core/transaction-lifecycle.js | not retrieved at historical ref | 826bccd91e70520e1a1567dd2751ab1d5a1f1c97 |
+
+SmartAccount420 imports ECDSA420, IEntryPoint420, IPasskeyVerifier420, SmartAccountScopes420, ICapabilityRegistry420 and ICapabilityRegistryExtended420; SmartAccountFactory420 imports SmartAccount420. These are Wallet-owned execution dependencies; do not assume historical Token test results qualify the revised SmartAccount. The local Token integration owner must establish the current SmartAccount boundary in TOKEN-AUDIT-5/7.
+
+Initial inventory commit e2ab9b45e8df869bd419caaee376e058c07e55a2 was read back from the branch and compared to audited main: nine assertions passed (branch SHA, unchanged main, ahead/behind, exact five-path diff, readiness, manifest, report, both roadmaps). Subsequent evidence updates do not change execution sources. No CI run IDs are claimed. Direct terminal git ls-remote failed because github.com could not resolve in the working container; no Foundry executable was found. GitHub connector reads/writes and assertion checks were performed; the full repository preflight script was not executed. No PR was opened solely to trigger the legacy broad Token hardening for evidence-only changes. Main and historical qualification records remain unchanged until an explicitly authorized merge.

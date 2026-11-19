@@ -36,4 +36,4 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go test ./analytics/indexerclient ./explorer/indexerclient -run Treasury -count=1
+      - run: go test ./indexer/treasuryread ./analytics/indexerclient ./explorer/indexerclient -run Treasury -count=1

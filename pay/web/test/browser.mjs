@@ -21,13 +21,15 @@ const service = digit => ({ implementation: address(digit), metadataHash: hash('
 const config = { origin, rpcUrl, chainId: '420', registry: address('1'), registryCodeHash: codeHash,
   pay: service('2'), names: service('3'), identity: service('4'),
   components: Object.fromEntries(names.map(name => [name, codeHash])) };
+const finalizedBlock = { hash: hash('b'), number: '0x7f', timestamp: '0xfa' };
+const finalizedTag = { blockHash: finalizedBlock.hash, requireCanonical: true };
 const latest = { blockHash: blocks.hash, requireCanonical: true };
 const paymentId = hash('d');
 const invoiceId = hash('e');
 const topic = digest('PaymentSet(bytes32,bytes32,uint8)');
 const mime = { 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
 let status = 5;
-let finalizedRead = false;
+let finalizedStatus = 1;
 let balanceGate;
 const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
 try {
@@ -50,10 +52,10 @@ try {
       case 'eth_chainId': result = '0x1a4'; break;
       case 'eth_getBlockByHash':
       case 'eth_getBlockByNumber':
-        if (params[0] === 'finalized') finalizedRead = true;
-        result = blocks; break;
+        result = ['finalized', finalizedBlock.hash, finalizedBlock.number].includes(params[0]) ? finalizedBlock : blocks;
+        break;
       case 'eth_getCode':
-        assert.deepEqual(params[1], latest);
+        assert.deepEqual(params[1], params[1].blockHash === finalizedBlock.hash ? finalizedTag : latest);
         result = bytecode; break;
       case 'eth_getBalance':
         assert.deepEqual(params, [account, latest]);
@@ -66,7 +68,8 @@ try {
         break;
       case 'eth_call': {
         const [{to, data}, blockTag] = params;
-        assert.deepEqual(blockTag, latest);
+        const finalized = blockTag.blockHash === finalizedBlock.hash;
+        assert.deepEqual(blockTag, finalized ? finalizedTag : latest);
         if (data.startsWith(digest('quoteNative(bytes32,address,uint256,uint64)').slice(0, 10))) {
           assert.equal(to, address('a'));
           const at = BigInt('0x' + data.slice(-64));
@@ -81,7 +84,7 @@ try {
         } else if (data === digest('getInvoice(bytes32)').slice(0, 10) + invoiceId.slice(2)) {
           assert.equal(to, address('6'));
           result = encode(hash('4'), address('8'), hash('0'), '0x' + '343230'.padEnd(64,'0'),
-            12, 300, 400, 0, 1, 0, 0, hash('1'), hash('0'), hash('0'), 1);
+            12, 300, 400, 0, 2, 0, 0, hash('1'), hash('0'), hash('0'), 1);
         } else if (data === digest('isClosed(bytes32)').slice(0, 10) + invoiceId.slice(2)) {
           assert.equal(to, address('6'));
           result = encode(0);
@@ -93,7 +96,7 @@ try {
           result = encode(address('3'), 1, hash('0'));
         } else if (data === '0xe66eefc8' + paymentId.slice(2)) {
           assert.equal(to, address('7'));
-          result = encode(invoiceId, account, address('8'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('c'), 0, 0, status);
+          result = encode(invoiceId, account, address('8'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('c'), 0, 0, finalized ? finalizedStatus : status);
         } else {
           assert.equal(to, config.registry);
           if (data === key('getService(bytes32)', '420/service/pay/v1')) {
@@ -255,6 +258,7 @@ try {
   await review.click();
   await page.getByText(/Asset: native 420/).waitFor();
   assert.equal(await confirm.count(), 0);
+  await page.getByText(/Acceptance: HIGH_VALUE/).waitFor();
   const invoicePay = page.getByRole('button', {name:'Continue to Wallet for invoice'});
   blocks.timestamp = '0x125';
   await invoicePay.click();
@@ -268,10 +272,11 @@ try {
   assert.equal(invoiceCalls[2].params[0].value, '0xc');
   assert.equal(invoiceCalls[2].params[0].data.slice(0, 10), digest('payNativeInvoice(bytes32,uint256,uint64,bytes32)').slice(0, 10));
   assert.equal(await page.getByLabel('Existing payment ID').inputValue(), paymentId);
-  await page.getByRole('button', {name:'Check payment status'}).click();
-  await page.getByText(/Submitted · Canonical snapshot.*FINALIZED/).waitFor();
-  assert.equal(finalizedRead, true);
   status = 5;
+  await page.getByRole('button', {name:'Check payment status'}).click();
+  await page.getByText(/Submitted · Canonical snapshot.*HIGH_VALUE/).waitFor();
+  assert.match(await page.locator('#checkout-status').innerText(), new RegExp(finalizedBlock.hash));
+  finalizedStatus = 5;
   await page.getByRole('button', {name:'Check payment status'}).click();
   await page.getByText(/Settled · Canonical snapshot/).waitFor();
   await review.click();

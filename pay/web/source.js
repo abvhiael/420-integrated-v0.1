@@ -95,7 +95,6 @@ export function createConsumerSource(config, provider) {
       await verify(account);
       const quote = await registry.nativeInvoiceQuote(await registry.latestSnapshot(), invoiceId, account, nonce, issuedAt);
       await verify(account);
-      if (quote.acceptance === 'HIGH_VALUE') throw new Error('High-value checkout is unavailable.');
       return quote;
     },
     async submitNativeInvoice(account, quote) {
@@ -107,10 +106,9 @@ export function createConsumerSource(config, provider) {
       await verify(account);
       let snapshot = await registry.latestSnapshot();
       const acceptance = await registry.invoiceAcceptance(snapshot, invoiceId);
-      if (acceptance === 'HIGH_VALUE') {
-        throw new Error('High-value acceptance evidence is unavailable in hosted checkout.');
+      if (acceptance === 'FINALIZED' || acceptance === 'HIGH_VALUE') {
+        snapshot = await registry.latestSnapshot('finalized');
       }
-      if (acceptance === 'FINALIZED') snapshot = await registry.latestSnapshot('finalized');
       const payment = await createPayReader(registry.transport, snapshot).payment(paymentId);
       if (payment && (payment.invoiceId !== invoiceId || (payment.payer !== account && payment.merchant !== account))) {
         throw new Error('No matching payment for this invoice and Wallet account.');

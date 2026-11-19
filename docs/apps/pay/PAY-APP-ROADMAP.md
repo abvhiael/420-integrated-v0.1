@@ -302,8 +302,10 @@ commitment as its constructor input. The retained frozen deployment artifacts
 remain historical evidence. Hosted native checkout displays the canonical quote and hands the exact call to
 420 Wallet. Expired or changed quotes require a new review. Confirmation checks
 the selected account and invoice in canonical payment state. FINALIZED invoices
-use the finalized snapshot. Hosted HIGH_VALUE approval requires separate
-acceptance evidence and remains unavailable.
+use the finalized snapshot. HIGH_VALUE also uses finalized state and requires
+healthy canonical pricing and settlement under Decision 4. For direct native
+checkout, the verified invoice supplies the fixed native price, and the quote
+and payment contracts enforce native asset health before execution.
 
 For conversion, the invoice commits to an eligible input/settlement pair and
 canonical market. The quote reads the active pool price and fee, enforces asset

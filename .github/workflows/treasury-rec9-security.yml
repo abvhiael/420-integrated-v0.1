@@ -1,0 +1,47 @@
+name: Treasury REC-9 security and adversarial qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/TreasuryRec9*.t.sol'
+      - 'scripts/treasury/qualify-security.py'
+      - '.github/workflows/treasury-rec9-security.yml'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/governance/CivicGovernor420.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: treasury-rec9-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FOUNDRY_PROFILE: ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install pinned static analysis tool
+        run: python -m pip install --disable-pip-version-check slither-analyzer==0.11.3
+      - name: Real contracts, independent state model, shared governance and static review
+        run: python3 scripts/treasury/qualify-security.py "$PWD/rec9-evidence" "$RUNNER_TEMP/rec9-security"
+      - name: Retain exact-head security evidence, including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: treasury-rec9-security-${{ github.event.pull_request.head.sha || github.sha }}
+          path: rec9-evidence/
+          if-no-files-found: error

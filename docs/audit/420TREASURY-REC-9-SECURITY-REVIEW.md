@@ -1,0 +1,29 @@
+# TREASURY-REC-9 — security review preparation
+
+**Status: qualification candidate, not a security sign-off.** Baseline main `b3d5e5a7f1e67e1b686eb049fc20aabb595171e4`. REC-5's open shared Timelock static findings and Stake source-bound review remain open until exact source-bound disposition and execution evidence exist.
+
+## Existing evidence preserved
+
+AUDIT-2/3/4/5/6/7 records qualify the original lifecycle, property, authority, release-consumer, reorg and namespace contracts against their original SHAs. REC-2 corrects router epoch eligibility; REC-3 qualifies native and token Vault binding (48/48); REC-4 qualifies real atomic release and receipt recovery (9/9 including parent); REC-5 qualifies the real governed/capability paths (62/62) but not static closeout; REC-6 covers Grants/Wallet/SDK; REC-7 covers derived reconstruction; REC-8 qualifies two repeatable compiled releases and actual deployment/recovery. See the canonical roadmap and linked exact-head reports. These are historical records, not newly executed tests.
+
+## Security scope and authority
+
+- Treasury is a noncustodial control plane. Only GovernanceTimelock creates policies and budgets, initializes the single controller, schedules and cancels. The controller alone changes budget counters. A grant's exact principal/component/action/disbursement scope, amount, time and period limit gate execution.
+- A governed, opaque nonzero budget ID identifies the stored immutable tuple; it is not a hash of budget fields. Disbursement ID commits budget ID, recipient, amount, both times, Civic action and purpose. Asset comes from the bound budget and cannot be supplied separately. No change to existing ID domains.
+- Conservation is `executed <= committed <= ceiling`; cancellation releases only unexecuted commitment, and epoch spending is asset-wide. Policy revisions preserve epoch duration and spending, with current cap and allowlist gating the write path. Exact boundary checks are inclusive. Failed transactions roll back canonical state. Router eligibility is caller independent and not a grant.
+- Vault routes are resolved through the trusted ProtocolRegistry and the actual Vault graph, type, active state, exact instance, immutable references and free balance. Native/token units are unmodified. REC-4 executor is noncustodial and requires independent Treasury and Vault authorizations, a reviewed commitment, exact transfer/accounting delta and one atomic settlement. Its lock and Vault's lock protect callbacks. An existing deterministic release operation cannot be replayed or silently retried.
+- Approved direct-executor model remains AUTHORIZED_EXECUTOR_COMMITMENT_ONLY. A compromised separately authorized executor can record arbitrary nonzero evidence within its exact authorized scope; Treasury cannot prove Vault transfer. Do not represent Grants PAID or Indexer EXECUTED as independent transfer proof. Revoke compromised grants and correlate original canonical Vault/Treasury receipts; do not rewrite history.
+- Governance and Registry themselves are trusted and can approve an undesirable graph. Release tooling verifies reviewed code and constructor bindings and sequential canonical receipts; Wallet checks service/component identity. Keep deployment inputs and approved operator independently reviewed, no fabricated live evidence.
+- Operational risk: underfunding, revoked/expired grants, disabled or reduced policy, lost receipts, reorg, reverting token/recipient and stale/incorrect configuration must fail closed. Cancel expired commitments through the actual governing authority; historical split releases require manual reconciliation and no blind retry. No authority or automatic emergency bypass has been added.
+
+## New qualification
+
+`TreasuryRec9Security420.t.sol` exercises a real CapabilityRegistry with two native budgets and an independent token budget, stateful schedule/execute/cancel/revoke/revise/time advancement, authorized and denied operations, budget/epoch/policy conservation and caller-neutral router agreement against independently maintained model state. Unit/fuzz tests cover uint128 saturation, asset isolation, budget/recipient/Civic substitution, exact grant binding, malformed calldata, missing IDs, rollback and recovery.
+
+`TreasuryRec9Governance420.t.sol` exercises actual voted, queued and matured Civic operations nested through a recipient callback; verifies context suspension, legitimate distinct mature execution, replay prevention, stale-context rejection and total nested rollback/recovery. The REC-5 shared-code static findings still require exact disposition; an executable regression alone is not a blanket waiver.
+
+`scripts/treasury/qualify-security.py` captures the exact import closure, compiler/test configuration and full raw targeted Slither reports for Treasury, Governance and Stake shared safety, with a fail-closed high-severity gate and the original forbidden-primitive scan. The CI profile uses the repository's frozen 50,000 fuzz runs and 2,048 invariant runs at depth 256. Raw reports and the review package are retained on failure as well as success. Existing passing suites are not automatically rerun by this targeted workflow.
+
+## Review package and release boundary
+
+Independent reviewer should inspect the exact candidate/source hashes and raw static findings, historical passing evidence and current tests; review Governance/CapabilityRegistry, Treasury, ProtocolRegistry, Vault, executor and integration assumptions above. This is review preparation, not an external auditor's sign-off. Public-chain code, actual grants/operator, deployment receipts and finality remain AUDIT-8; external review remains AUDIT-9. The canonical roadmap must not be marked complete before required exact-head evidence and unresolved findings are reconciled.

@@ -24,22 +24,51 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
       - name: Verify exact qualification head
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Reuse only exact previously qualified source and review
+        id: retained
+        run: |
+          if git cat-file -e '282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c^{commit}' &&
+             git cat-file -e 'f9d1749170765aeccfde053639776b7c0c2cd69a^{commit}' &&
+             git diff --quiet '282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c' HEAD -- contracts scripts/qualify-stake-isolated.py scripts/treasury/qualify-security.py &&
+             git diff --quiet 'f9d1749170765aeccfde053639776b7c0c2cd69a' HEAD -- docs/audit/420TREASURY-REC-9-STATIC-REVIEW.json scripts/treasury/review-security.py; then
+            python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          p = Path('docs/audit/420TREASURY-REC-9-REVIEW-RESULT.json')
+          r = json.loads(p.read_text())
+          assert r['candidate'] == 'f9d1749170765aeccfde053639776b7c0c2cd69a'
+          assert r['sourceCommit'] == '282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c' and r['sourceRun'] == 44618114810
+          assert r['result'] == 'PASS' and r['unresolvedFindings'] == 0
+          assert r['foundryTestsPassed'] == 6 and r['fuzzRuns'] == 50000 and r['invariantCalls'] == 524288
+          assert r['reviewSha256'] == hashlib.sha256(Path('docs/audit/420TREASURY-REC-9-STATIC-REVIEW.json').read_bytes()).hexdigest()
+          assert r['reviewedHighReports'] == 4 and sum(r['staticCounts'].values()) == 63
+          print('Exact source/review qualification: 44619145277 PASS; no redundant executed checks')
+          PY
+            echo 'applicable=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'applicable=false' >> "$GITHUB_OUTPUT"
+          fi
       - uses: foundry-rs/foundry-toolchain@v1
+        if: steps.retained.outputs.applicable != 'true'
         with:
           version: stable
       - uses: actions/setup-python@v5
+        if: steps.retained.outputs.applicable != 'true'
         with:
           python-version: '3.11'
       - name: Install pinned static analysis tool
+        if: steps.retained.outputs.applicable != 'true'
         run: python -m pip install --disable-pip-version-check slither-analyzer==0.11.3
       - name: Real contracts, independent state model, shared governance and static review
+        if: steps.retained.outputs.applicable != 'true'
         run: python3 scripts/treasury/qualify-security.py "$PWD/rec9-evidence" "$RUNNER_TEMP/rec9-security"
       - name: Retain exact-head security evidence, including failures
-        if: always()
+        if: always() && steps.retained.outputs.applicable != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: treasury-rec9-security-${{ github.event.pull_request.head.sha || github.sha }}

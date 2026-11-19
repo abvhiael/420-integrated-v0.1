@@ -1,6 +1,6 @@
 # TREASURY-REC-5 — Governance and capability authorization
 
-Status: **IMPLEMENTATION CANDIDATE — exact-head qualification pending**. Baseline main: `acc737d60b5e13858b34847c7dfd3a903233d65c` (REC-4 merged).
+Status: **COMPLETE — local executable and shared static qualification; external review remains open.** Baseline main: `acc737d60b5e13858b34847c7dfd3a903233d65c` (REC-4 merged).
 
 ## Corrected authority boundary
 
@@ -19,3 +19,7 @@ Compiler and materialization preflight [44582174617](https://github.com/abvhiael
 ## First exact-head executable evidence
 
 Run [44582567390](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44582567390), job `135766819508`, on `0bde9dd4cf8de349b3c5ed004753d1e6c71ee4eb`: PASS, 59/59, zero failed or skipped. Treasury 10, Civic execution 10, Governance audit 34 (including two fuzz properties with 2,500 cases each), retirement 5. All compiler/materialization and Governance/Treasury deployment and documentation verifiers passed. The shared manifest generator subsequently needed canonical sorted-key serialization to interoperate with the Stake and Randomness predeploy generators; their automatically triggered runs exposed this cross-generator discrepancy. Separate focused Stake safety regressions are required because the changed Timelock is part of that source closure. Historical Stake static review hashes are not rewritten as though they qualified new code.
+
+## Final executable and shared security reconciliation
+
+Exact candidate `4c8e448de67122d6c45f703c86075f6ec6ae664b` passed [44583083947](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44583083947), job 135768686226: 62/62 (59 prior cases plus 3 actual Stake safety cases). PR #1227 merged as `a1f1164f3a147af52cd36e3b872464ef29eb3476`. The old source-bound static review gate [44583083580](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44583083580) failed and was not relabeled. REC-9 reproduced the two high detector findings and verified nested mature Civic context isolation, replay prevention, and full nested rollback with actual tests. [REC-9 review gate 44619145277](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44619145277) passed after individual exact-source dispositions and byte-for-byte verification of the entire previously passed Stake safety test closure. [Current reviewed findings](420TREASURY-REC-9-STATIC-REVIEW.json) and [review result](420TREASURY-REC-9-REVIEW-RESULT.json) reconcile the shared safety scope. No blanket suppression, production permission change, or independent security sign-off is claimed; the separate full Stake audit retains its own evidence lifecycle.

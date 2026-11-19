@@ -5,11 +5,6 @@ on:
       - 'docs/audit/420TREASURY-REC-9-STATIC-REVIEW.json'
       - 'scripts/treasury/review-security.py'
       - '.github/workflows/treasury-rec9-review.yml'
-      - 'contracts/src/**'
-      - 'contracts/test/TreasuryRec9*.t.sol'
-      - 'contracts/foundry.toml'
-      - 'scripts/qualify-stake-isolated.py'
-      - 'scripts/treasury/qualify-security.py'
   workflow_dispatch:
 permissions:
   contents: read

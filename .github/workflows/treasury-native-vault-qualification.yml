@@ -1,0 +1,118 @@
+name: 420Treasury native asset and Vault qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/treasury/TreasuryPolicyRegistry420.sol'
+      - 'contracts/src/treasury/TreasuryBudgetRegistry420.sol'
+      - 'contracts/src/treasury/TreasuryVaultBinding420.sol'
+      - 'contracts/test/TreasuryNativeVaultIntegration420.t.sol'
+      - 'contracts/config/420treasury-genesis.json'
+      - '.github/workflows/treasury-native-vault-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: treasury-native-vault-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Prepare exact-source isolated Treasury import closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TREASURY_ROOT="$RUNNER_TEMP/treasury-native-vault"
+          python3 - <<'PY'
+          import hashlib, json, os, re, shutil
+          from pathlib import Path
+          source = Path.cwd().resolve()
+          dest = Path(os.environ["TREASURY_ROOT"])
+          owners = [
+              "test/TreasuryNativeVaultIntegration420.t.sol",
+              "test/TreasuryGenesis420.t.sol",
+              "test/GrantsGenesis420.t.sol",
+              "test/TreasurySecurityProperties420.t.sol",
+              "test/TreasuryDeploymentBinding420.t.sol",
+              "test/highcountry/integration/R04TreasuryIdentity.t.sol",
+          ]
+          pending = [source / x for x in owners]
+          seen = set()
+          pattern = re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p = pending.pop().resolve()
+              if p in seen:
+                  continue
+              if not p.is_relative_to(source) or not p.is_file():
+                  raise RuntimeError(f"missing or external import: {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  if name.startswith("forge-std/"):
+                      pending.append(source / name)
+                  else:
+                      pending.append(p.parent / name)
+          dest.mkdir(parents=True, exist_ok=True)
+          for p in sorted(seen):
+              target = dest / p.relative_to(source)
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(p, target)
+              assert target.read_bytes() == p.read_bytes()
+          shutil.copyfile(source / "foundry.toml", dest / "foundry.toml")
+          (dest / "remappings.txt").write_text("forge-std/=forge-std/\n")
+          print("Exact import closure:", json.dumps({
+              "owners": owners,
+              "source_sha256": {str(p.relative_to(source)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},
+              "foundry_config_sha256": hashlib.sha256((source / "foundry.toml").read_bytes()).hexdigest(),
+          }, sort_keys=True))
+          PY
+          echo "TREASURY_ROOT=$TREASURY_ROOT" >> "$GITHUB_ENV"
+      - name: Native asset and real Vault integration
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/TreasuryNativeVaultIntegration420.t.sol -vvv
+      - name: Grants consumer regression
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/GrantsGenesis420.t.sol -vvv
+      - name: Treasury lifecycle and eligibility regression
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/TreasuryGenesis420.t.sol -vvv
+      - name: Treasury property regression
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/TreasurySecurityProperties420.t.sol -vvv
+      - name: Registry and runtime identity regression
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/TreasuryDeploymentBinding420.t.sol -vvvv
+      - name: Existing direct gateway consumer regression
+        working-directory: contracts
+        run: forge test --root "$TREASURY_ROOT" --match-path test/highcountry/integration/R04TreasuryIdentity.t.sol -vvv
+      - name: Check canonical release and operator configuration
+        run: |
+          python3 scripts/verify-treasury-audit-6-release.py
+          python3 scripts/verify-treasury-audit-7-docs.py
+      - name: Retain changed compiled artifact and ABI identities
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          root = Path(os.environ["TREASURY_ROOT"]) / "out"
+          for name in ("TreasuryPolicyRegistry420", "TreasuryBudgetRegistry420", "TreasuryVaultBinding420"):
+              p = root / f"{name}.sol" / f"{name}.json"
+              a = json.loads(p.read_text())
+              print(name, "artifact sha256:", hashlib.sha256(p.read_bytes()).hexdigest())
+              print(name, "ABI:", json.dumps(a["abi"], sort_keys=True))
+              print(name, "runtime template sha256:", hashlib.sha256(bytes.fromhex(a["deployedBytecode"]["object"].removeprefix("0x"))).hexdigest())
+          PY

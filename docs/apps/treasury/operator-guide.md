@@ -86,7 +86,7 @@ Do not proceed when any identity or binding is ambiguous.
 
 Before `setAssetPolicy`:
 
-- verify the asset address;
+- use `address(0)` for native `$420` (18 decimals, integer wei); use the exact token contract address for an approved ERC-20 asset and its integer base units. Wrapped/bridged currency is a distinct asset; zero is not a wildcard;
 - verify `maxSingleDisbursement > 0`;
 - verify `maxEpochDisbursement >= maxSingleDisbursement`;
 - verify the already-initialized `epochSeconds` is not being changed.
@@ -97,7 +97,7 @@ Before `setAssetPolicy`:
 
 Before `createBudget` verify:
 
-- nonzero budget ID, vault ID, category, asset and Civic action hash;
+- nonzero budget ID, registered Vault instance ID, category and Civic action hash; a zero asset address is valid only for explicitly allowlisted native `$420`;
 - valid bounded `validFrom < validUntil`;
 - nonzero ceiling;
 - asset policy currently allows the asset;
@@ -118,7 +118,7 @@ Before `schedule` verify:
 - current policy allows the asset/amount;
 - sufficient uncommitted budget remains.
 
-Scheduling reserves budget commitment.
+Scheduling reserves budget commitment, not Vault assets. Governance must resolve the budget's exact registered Vault instance and confirm its type is `VAULT_TREASURY` (a type ID, not the instance ID). Multiple budgets may refer to one Vault; a budget ceiling is not a guarantee of current Vault free balance.
 
 ### Execution
 
@@ -130,6 +130,8 @@ Before execution verify:
 - current asset policy still allows the amount;
 - epoch cap has sufficient remaining allowance;
 - executor has the exact scoped capability;
+- resolve the current Treasury and Vault service identities through the canonical ProtocolRegistry and compare runtime identities; use `TreasuryVaultBinding420.resolveRelease` with that trusted Registry to derive the exact registered active Treasury Vault, asset, recipient and amount and check recorded free balance;
+- require the actual Vault route-scoped capability for the exact vault/asset/recipient/withdrawal action and amount; do not submit a Treasury completion commitment after insufficient funds, failed transfer or a mismatched release;
 - actual canonical Vault release evidence has been produced or is being produced according to the adopted release process;
 - the submitted `vaultReleaseHash` is derived from that actual evidence and is nonzero.
 

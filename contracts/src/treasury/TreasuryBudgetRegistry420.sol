@@ -18,8 +18,9 @@ contract TreasuryBudgetRegistry420 is I420System, SystemAccess {
     function systemName() external pure returns (string memory) { return "TreasuryBudgetRegistry420"; }
     function protocolVersion() external pure returns (uint32) { return 1; }
     function setController(address controller_) external onlyGovernance { if (controller != address(0)) revert ControllerAlreadySet(); require(controller_ != address(0), "controller"); controller = controller_; emit ControllerSet(controller_); }
+    /// @dev The zero asset address denotes native $420; the policy allowlist is authoritative.
     function createBudget(bytes32 budgetId, bytes32 vaultId, bytes32 category, address asset, uint128 ceiling, uint64 validFrom, uint64 validUntil, bytes32 civicActionHash, bytes32 metadataHash) external onlyGovernance {
-        if (budgetId == bytes32(0) || vaultId == bytes32(0) || category == bytes32(0) || asset == address(0) || ceiling == 0 || civicActionHash == bytes32(0) || validUntil <= validFrom) revert InvalidBudget();
+        if (budgetId == bytes32(0) || vaultId == bytes32(0) || category == bytes32(0) || ceiling == 0 || civicActionHash == bytes32(0) || validUntil <= validFrom) revert InvalidBudget();
         if (_budgets[budgetId].exists) revert BudgetExists(); if (!policy.isAllowed(asset, 1)) revert InvalidBudget();
         _budgets[budgetId] = Budget(vaultId, category, asset, ceiling, 0, 0, validFrom, validUntil, civicActionHash, metadataHash, true, true);
         emit BudgetCreated(budgetId, vaultId, category, asset, ceiling, validFrom, validUntil, civicActionHash, metadataHash);

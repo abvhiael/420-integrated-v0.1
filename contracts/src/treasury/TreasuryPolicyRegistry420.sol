@@ -45,7 +45,9 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
         uint128 maxEpoch,
         uint64 epochSeconds
     ) external onlyGovernance {
-        require(asset != address(0) && maxSingle > 0 && maxEpoch >= maxSingle && epochSeconds > 0, "policy");
+        // address(0) is the canonical native $420 asset, not an uninitialized policy.
+        // All assets (including native) remain default-deny until governance allows them.
+        require(maxSingle > 0 && maxEpoch >= maxSingle && epochSeconds > 0, "policy");
 
         AssetPolicy storage p = _assetPolicies[asset];
         if (p.revision != 0 && p.epochSeconds != epochSeconds) revert EpochDurationImmutable();

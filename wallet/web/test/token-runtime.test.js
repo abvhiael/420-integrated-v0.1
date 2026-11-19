@@ -58,7 +58,10 @@ test('shape-only or aliased release records cannot authorize a handoff',async()=
   await assert.rejects(prepareTokenDeploymentHandoff420(provider,controller,state,shape,r),/Genesis V3/);
   const wrong=structuredClone(binding);wrong.vaultGraph.VaultAccounting420.address=wrong.factory.address;
   assert.throws(()=>normalizeTokenReleaseBinding420(wrong),/alias/);
-  const bad=structuredClone(binding);bad.vaultGraph.AssetVault420.codeHash=digest(9);
+  const bad=structuredClone(binding);
+  bad.vaultGraph.AssetVault420={...bad.vaultGraph.AssetVault420,codeHash:digest(9)};
   assert.throws(()=>normalizeTokenReleaseBinding420(bad),/Vault binding mismatch/);
+  const paired=structuredClone(binding);paired.vaultGraph.AssetVault420.codeHash=digest(9);
+  assert.throws(()=>normalizeTokenReleaseBinding420(paired),/dependency root mismatch/);
   assert.throws(()=>normalizeTokenReleaseBinding420({...binding,genesisConfigHash:digest(3)}),/Genesis V3/);
 });

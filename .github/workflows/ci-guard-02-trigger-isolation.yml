@@ -36,5 +36,5 @@ jobs:
         env:
           RECONCILIATION_BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          python3 -m unittest scripts/qualification-policy/test_trigger_isolation.py -v
+          python3 scripts/qualification-policy/test_trigger_isolation.py -v
           python3 scripts/qualification-policy/verify-trigger-isolation.py "$RECONCILIATION_BASE"

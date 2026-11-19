@@ -65,6 +65,10 @@ There is no adopted CREATE2 policy for this registry-resolved Treasury family. D
 | 420Indexer / Explorer / Analytics | reconstruct and display derived Treasury state | canonical Treasury state authority |
 | 420Vault | custody/release governed Treasury assets | budget/governance authority |
 
+After Civic activation, approved, passed and matured proposal batches reach Treasury through GovernanceTimelock's operation-bound action dispatch; the Governor address, proposer, voter and permissionless execution trigger are not themselves Treasury administrators. The bootstrap scheduler and bootstrap cancellation are retired. Cancellation here means cancellation of a still-scheduled **Treasury disbursement**, not cancellation of a Civic proposal.
+
+The canonical execution grant tuple is `keccak256("420/TREASURY/COMPONENT/V1")`, `keccak256("420/TREASURY/ACTION/EXECUTE_DISBURSEMENT/V1")`, and `keccak256(abi.encode(disbursementId))`, bound to the actual executor address and exact amount in base units. `CapabilityIds420.TREASURY_SPEND`, cancellation-action grants, other component IDs and raw disbursement IDs are not substitutes. The registry checks per-call and remaining period capacity, validity and revocation; Treasury's exact-disbursement terminal state prevents repeat settlement. Treasury uses the read-only authorization interface, not metered grant consumption. Registry errors or malformed responses revert the whole transaction. A component authority can promptly revoke affected grants without a Treasury write or a Civic emergency override; registrar/component-authority rotation follows its own governed deployment/authorization boundary.
+
 Execution must remain default-deny. A valid capability does not bypass expiry, policy revocation, budget effectiveness, single-disbursement caps, or epoch caps.
 
 ## Normal operating procedure

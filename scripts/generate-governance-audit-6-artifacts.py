@@ -168,8 +168,8 @@ def main(argv=None):
   outputs[PRE/"GovernanceTimelock-predeploy-state.json"]=canon(timelock_state(records["GovernanceTimelock"]))
   outputs[PRE/"Governance420-predeploy-state.json"]=canon(governance_state(records["Governance420"]))
   outputs[CFG]=json.dumps(update_manifest(records),indent=2)+"\n"
-  outputs[PLAN]=json.dumps(update_plan(json.loads(PLAN.read_text()),records),indent=2)+"\n"
-  outputs[DEPLOY]=json.dumps(update_deploy(json.loads(DEPLOY.read_text()),records),indent=2)+"\n"
+  outputs[PLAN]=canon(update_plan(json.loads(PLAN.read_text()),records))
+  outputs[DEPLOY]=canon(update_deploy(json.loads(DEPLOY.read_text()),records))
   if args.write:
    for p,t in outputs.items(): p.parent.mkdir(parents=True,exist_ok=True); p.write_text(t)
   if args.check:

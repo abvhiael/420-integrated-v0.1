@@ -61,7 +61,7 @@ Mitigation: Timelock operations have fixed maturity, single-use executed/cancell
 
 Canonical Civic execution intentionally permits Governance-authorized arbitrary target calls only after the batch is committed, passed, queued and released by Timelock.
 
-The Timelock marks its operation executed before the external call. Reentry into the same operation cannot replay it. Direct entry into the queued Governor batch is Timelock-only. Atomic EVM rollback prevents partial committed execution when a target reverts.
+The Timelock marks its operation executed before the external call. The Governor must dispatch each exact committed action through `GovernanceTimelock.executeCivicAction`, which accepts only the active Civic scheduler and the currently executing mature operation ID. The Timelock, not the Governor, is the immediate caller at governed targets. It suspends the active operation context during each external action, preventing direct dispatch or a nested Governor call from borrowing another proposal's authority or bypassing its delay. Reentry into the same operation cannot replay it. Direct entry into the queued Governor batch is Timelock-only. Atomic EVM rollback prevents partial committed execution when a target reverts.
 
 Civic does not add an undocumented global reentrancy lock; governed target contracts must enforce their own safety. Target contracts remain responsible for their own reentrancy safety, authorization, accounting, and failure behavior.
 

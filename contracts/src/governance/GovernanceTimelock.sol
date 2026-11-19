@@ -30,6 +30,10 @@ contract GovernanceTimelock {
 
     mapping(bytes32 => Operation) public operations;
 
+    /// @notice Operation whose mature Civic batch is currently being dispatched.
+    /// @dev Cleared during each external action, restored only to the calling batch.
+    bytes32 public executingCivicOperation;
+
     event Scheduled(bytes32 indexed id, address indexed target, Class class_, uint64 executeAfter);
     event Executed(bytes32 indexed id);
     event Cancelled(bytes32 indexed id);
@@ -129,10 +133,29 @@ contract GovernanceTimelock {
         require(address(this).balance >= op.value, "insufficient balance");
 
         op.executed = true;
+        bytes32 previousOperation = executingCivicOperation;
+        executingCivicOperation = civicAuthorityActivated && op.target == scheduler ? id : bytes32(0);
         (bool ok, bytes memory out) = op.target.call{ value: op.value }(op.data);
+        executingCivicOperation = previousOperation;
         require(ok, "execution failed");
         emit Executed(id);
         return out;
+    }
+
+    /// @notice Dispatch one committed action from an executing Civic batch as the canonical Timelock.
+    /// @dev The Governor verifies the exact batch hash, value and proposal state. Suspend the context while
+    /// calling the target so neither a callback nor an action targeting the Governor can reuse it.
+    function executeCivicAction(
+        bytes32 id,
+        address target,
+        bytes calldata data
+    ) external payable returns (bool success) {
+        require(civicAuthorityActivated && msg.sender == scheduler, "unauthorized");
+        require(id != bytes32(0) && executingCivicOperation == id, "not executing civic operation");
+        require(target != address(0), "target");
+        executingCivicOperation = bytes32(0);
+        (success,) = target.call{ value: msg.value }(data);
+        executingCivicOperation = id;
     }
 
     function _schedule(

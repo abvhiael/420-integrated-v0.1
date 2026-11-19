@@ -102,11 +102,14 @@
     {
       "address": "0x0000000000000000000000000000000000000429",
       "artifact": "contracts/artifacts/GovernanceTimelock.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
       "name": "GovernanceTimelock",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
+      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
+      "runtime_code_hash": "0xa7e3f9407735669c1ea106fcf0cdc078a2de80c6f87a24537ef98d2aced12285",
       "source": "governance/GovernanceTimelock.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "823d82240bda175099e1e5d61f713e3332717234",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x000000000000000000000000000000000000042a",
@@ -251,11 +254,14 @@
     {
       "address": "0x0000000000000000000000000000000000000437",
       "artifact": "contracts/artifacts/Governance420.json",
-      "constructor_strategy": "GENESIS_STORAGE_INITIALIZATION",
+      "constructor_strategy": "DIRECT_GENESIS_IMMUTABLE_AND_STORAGE_MATERIALIZATION",
       "name": "Governance420",
-      "notes": "Runtime bytecode and storage must be generated from pinned compiler artifacts.",
+      "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
+      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
+      "runtime_code_hash": "0xe4e5fcbce3f66e0e53143ee47d7ed9a5fa74437540cd24cf70ea30744e70bf27",
       "source": "governance/Governance420.sol",
-      "status": "SOURCE_READY"
+      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd",
+      "status": "ARTIFACT_READY"
     },
     {
       "address": "0x0000000000000000000000000000000000000438",

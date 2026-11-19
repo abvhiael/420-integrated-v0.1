@@ -1,0 +1,140 @@
+name: 420Treasury REC-5 governance authorization
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/governance/CivicGovernor420.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - 'contracts/test/TreasuryGovernanceAuthorization420.t.sol'
+      - '.github/workflows/treasury-governance-authorization.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: treasury-rec5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Check changed formatting
+        working-directory: contracts
+        run: forge fmt --check src/governance/GovernanceTimelock.sol src/governance/CivicGovernor420.sol test/TreasuryGovernanceAuthorization420.t.sol
+      - name: Prepare exact source import closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export REC5_ROOT="$RUNNER_TEMP/treasury-rec5"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["REC5_ROOT"])
+          owners=[
+              "test/TreasuryGovernanceAuthorization420.t.sol",
+              "test/CivicTimelockExecution420.t.sol",
+              "test/Governance420Retirement.t.sol",
+              "test/GovernanceAudit2Hardening420.t.sol",
+              "test/GovernanceAudit3Adversarial420.t.sol",
+              "test/GovernanceAudit420.t.sol",
+              "test-governance-audit-6/GovernanceAudit6Deployment420.t.sol",
+              "test-governance-audit-7/GovernanceAudit7Integration420.t.sol",
+              "src/governance/Governance420.sol",
+          ]
+          pending=[source/x for x in owners]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(source) or not p.is_file(): raise RuntimeError(f"missing import: {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else p.parent/name)
+          for p in sorted(seen):
+              target=dest/p.relative_to(source)
+              # Include the two isolated governance tests in the selected Foundry test root.
+              if p.parent.name.startswith("test-governance-audit-"):
+                  # Keep the original directory structure for compilation metadata, and
+                  # also expose the exact bytes in the standard test root.
+                  alias=dest/"test"/p.name
+                  alias.parent.mkdir(parents=True,exist_ok=True)
+                  shutil.copyfile(p,alias)
+                  assert alias.read_bytes()==p.read_bytes()
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,target)
+              assert target.read_bytes()==p.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          echo "REC5_ROOT=$REC5_ROOT" >> "$GITHUB_ENV"
+      - name: Compile exact real Governance and Treasury dependency graph
+        run: forge build --root "$REC5_ROOT" --extra-output storageLayout
+      - name: Verify canonical Governance artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p contracts/out
+          cp -R "$REC5_ROOT/out/." contracts/out/
+          python3 scripts/generate-governance-audit-6-artifacts.py --check --print
+      - name: Verify canonical deployment and Treasury release commitments
+        run: |
+          python3 scripts/verify-governance-audit-6.py --require-ready
+          python3 scripts/verify-governance-audit-7.py
+          python3 scripts/verify-treasury-audit-6-release.py
+          python3 scripts/verify-treasury-audit-7-docs.py
+      - name: Treasury real Civic and real CapabilityRegistry authorization
+        run: forge test --root "$REC5_ROOT" --match-path 'test/TreasuryGovernanceAuthorization420.t.sol' -vvv
+      - name: Directly affected Governance execution, hardening and deployment regressions
+        run: |
+          forge test --root "$REC5_ROOT" --match-path 'test/CivicTimelockExecution420.t.sol' -vvv
+          forge test --root "$REC5_ROOT" --match-path 'test/Governance*420.t.sol' -vvv
+          forge test --root "$REC5_ROOT" --match-path 'test/Governance420Retirement.t.sol' -vvv
+
+      - name: Qualify directly affected Stake safety boundary in a separate exact closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export SAFETY_ROOT="$RUNNER_TEMP/rec5-stake-safety"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["SAFETY_ROOT"])
+          pending=[source/"test/SecurityStakeSafety420.t.sol"]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(source) or not p.is_file(): raise RuntimeError(f"missing import: {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else p.parent/name)
+          for p in sorted(seen):
+              target=dest/p.relative_to(source)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,target)
+              assert target.read_bytes()==p.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          forge test --root "$SAFETY_ROOT" --match-path test/SecurityStakeSafety420.t.sol --match-test '^testSecurity' -vvv

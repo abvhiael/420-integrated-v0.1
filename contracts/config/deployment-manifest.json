@@ -68,8 +68,13 @@
     },
     {
       "address": "0x0000000000000000000000000000000000000429",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "name": "GovernanceTimelock"
+      "name": "GovernanceTimelock",
+      "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/GovernanceTimelock.json",
+      "runtime_code_hash": "0xa7e3f9407735669c1ea106fcf0cdc078a2de80c6f87a24537ef98d2aced12285",
+      "source_blob_sha1": "823d82240bda175099e1e5d61f713e3332717234"
     },
     {
       "address": "0x000000000000000000000000000000000000042a",
@@ -168,8 +173,13 @@
     },
     {
       "address": "0x0000000000000000000000000000000000000437",
+      "artifact_status": "GOV_AUDIT_6_ARTIFACT_READY",
       "deployment": "GENESIS_SYSTEM_ADDRESS",
-      "name": "Governance420"
+      "name": "Governance420",
+      "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
+      "runtime_artifact": "contracts/artifacts/Governance420.json",
+      "runtime_code_hash": "0xe4e5fcbce3f66e0e53143ee47d7ed9a5fa74437540cd24cf70ea30744e70bf27",
+      "source_blob_sha1": "886668e8efa97bd32734e32cde11148bcf98e5bd"
     },
     {
       "address": "0x0000000000000000000000000000000000000438",

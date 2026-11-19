@@ -272,9 +272,12 @@ contract CivicGovernor420 is I420System {
             expectedValue += actions[i].value;
         }
         if (msg.value != expectedValue) revert ValueMismatch();
+        if (timelock.executingCivicOperation() != proposalId) revert UnauthorizedTimelock();
 
         for (uint256 i = 0; i < actions.length; ++i) {
-            (bool ok,) = actions[i].target.call{ value: actions[i].value }(actions[i].data);
+            bool ok = timelock.executeCivicAction{ value: actions[i].value }(
+                proposalId, actions[i].target, actions[i].data
+            );
             if (!ok) revert ActionExecutionFailed(i);
         }
 

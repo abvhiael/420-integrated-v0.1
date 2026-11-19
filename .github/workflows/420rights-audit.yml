@@ -16,6 +16,7 @@ on:
       - '420-indexer/test/rights420-descriptors.test.ts'
       - '420-indexer/test/lifecycle-reducer.test.ts'
       - 'scripts/verify-420rights-audit.py'
+      - 'scripts/materialize-rights-test-closure.py'
       - 'scripts/verify-rights-audit-4-release.py'
       - 'docs/audit/420RIGHTS-*'
       - '.github/workflows/420rights-audit.yml'
@@ -51,9 +52,11 @@ jobs:
       - name: Check canonical Rights formatting
         working-directory: contracts
         run: forge fmt --check src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol test/RightsDeploymentBinding420.t.sol
+      - name: Materialize exact Rights test import closure
+        run: python3 scripts/materialize-rights-test-closure.py "$RUNNER_TEMP/rights-tests"
       - name: Build canonical Rights graph
         working-directory: contracts
-        run: forge build src/rights test/RightsGenesis420.t.sol test/RightsFocusedHardening420.t.sol test/RightsDeploymentBinding420.t.sol --sizes
+        run: forge build --root "$RUNNER_TEMP/rights-tests" --out "$GITHUB_WORKSPACE/contracts/out" --sizes
       - name: Verify Rights inventory, ABI descriptors, lifecycle and address authority
         run: python3 scripts/verify-420rights-audit.py
       - name: Verify RIGHTS-AUDIT-4 release materialization
@@ -87,10 +90,10 @@ jobs:
           PY
       - name: Run RIGHTS-AUDIT-4 deployment and Registry binding qualification
         working-directory: contracts
-        run: forge test --match-path 'test/RightsDeploymentBinding420.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/rights-tests" --match-path 'test/RightsDeploymentBinding420.t.sol' -vvv
       - name: Run Rights contract qualification suite
         working-directory: contracts
-        run: forge test --match-path 'test/Rights*.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/rights-tests" --match-path 'test/Rights*.t.sol' -vvv
       - name: Reject dangerous Rights primitives
         run: |
           set -euo pipefail
@@ -124,9 +127,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - name: Materialize exact Rights test import closure
+        run: python3 scripts/materialize-rights-test-closure.py "$RUNNER_TEMP/rights-tests"
       - name: Run Rights hardening suite
         working-directory: contracts
-        run: forge test --match-path 'test/Rights*.t.sol' -vvv
+        run: forge test --root "$RUNNER_TEMP/rights-tests" --match-path 'test/Rights*.t.sol' -vvv
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
       - name: Targeted Rights Slither high-severity gate

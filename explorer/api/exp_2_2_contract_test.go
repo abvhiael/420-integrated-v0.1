@@ -37,6 +37,7 @@ func TestCapabilitiesAdvertisesCompleteExplorerAPIContract(t *testing.T) {
 		"/v1/assets/activity",
 		"/v1/stake/activity",
 		"/v1/consensus",
+		"/v1/treasury/{kind}/{id}",
 	}
 	if !reflect.DeepEqual(got.Endpoints, want) {
 		t.Fatalf("capability contract mismatch\n got: %#v\nwant: %#v", got.Endpoints, want)

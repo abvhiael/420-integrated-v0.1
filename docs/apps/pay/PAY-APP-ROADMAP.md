@@ -343,9 +343,29 @@ PAY-APP-7 owns invoice creation and PAY-APP-10 owns cashier checkout sessions.
 
 ## PAY-APP-7 — Invoice builder and merchant payment management
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Online merchant acceptance, offline drafts, modes/tips/expiry, sharing, outstanding balances and canonical lifecycle. Retain reproducible scoped qualification at exact implementation SHA.
+
+The Business dashboard saves form drafts in the current browser, scoped by
+chain, selected Wallet account and merchant. Draft saving works offline while
+the dashboard is open. Publication needs online Registry reads and Wallet
+approval. The InvoiceRegistry publication entry point independently checks the
+active merchant controller before committing the invoice. Duplicate IDs revert.
+
+The builder accepts single-use, multiple-use and explicitly partial modes,
+canonical acceptance modes, base-unit amounts, expiry, refund window and an
+optional tip policy commitment. A blank native asset commitment resolves to
+the canonical native checkout policy. The builder records tip policy terms.
+Tip payout and refund execution are owned by PAY-APP-8.
+
+Inspecting a finalized invoice verifies both tenant and controller, reads
+credited amounts and closure state, and exposes the outstanding amount for
+the current mode. For a reusable invoice this is the amount required for
+another use. The dashboard shares only finalized open or partially paid
+invoices and submits closure through Wallet. A return hash records submission.
+
+Live deployment must publish the reviewed InvoiceRegistry runtime hash.
 
 ## PAY-APP-8 — Split settlement, refunds and tips
 

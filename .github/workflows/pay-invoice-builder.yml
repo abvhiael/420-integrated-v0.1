@@ -1,0 +1,33 @@
+name: Pay merchant invoice builder qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/pay/InvoiceRegistry420.sol'
+      - 'contracts/src/pay/MerchantRegistry420.sol'
+      - 'contracts/test/PayMerchantInvoiceBuilder420.t.sol'
+      - 'contracts/test/helpers/GenesisMocks420.sol'
+      - '.github/workflows/pay-invoice-builder.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  invoice-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Verify invoice publishing at the exact revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/qualify-pay-regression.py --profile pr \
+            --match 'PayMerchantInvoiceBuilder420.t.sol' \
+            --output "$RUNNER_TEMP/pay-invoice-builder"

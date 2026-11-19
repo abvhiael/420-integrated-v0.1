@@ -32,6 +32,8 @@ let status = 5;
 let finalizedStatus = 1;
 let businessRegistered = false;
 const businessId = hash('6');
+const builtInvoice = hash('7');
+let invoicePublished = false;
 let balanceGate;
 const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
 try {
@@ -74,7 +76,20 @@ try {
         const [{to, data}, blockTag] = params;
         const finalized = blockTag.blockHash === finalizedBlock.hash;
         assert.deepEqual(blockTag, finalized ? finalizedTag : latest);
-        if (data.startsWith(digest('quoteNative(bytes32,address,uint256,uint64)').slice(0, 10))) {
+        if (data === digest('nativeAcceptedAssetsHash()').slice(0, 10)) {
+          assert.equal(to, address('a'));
+          result = hash('1');
+        } else if (data === digest('getInvoice(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
+          assert.equal(to, address('6'));
+          result = invoicePublished ? encode(businessId, account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
+            100, 500, 600, 2, 1, 1, 42, hash('1'), hash('0'), hash('2'), 1) : encode(...Array(15).fill(0));
+        } else if (data === digest('paidAmount(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
+          assert.equal(to, address('6'));
+          result = encode(40);
+        } else if (data === digest('isClosed(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
+          assert.equal(to, address('6'));
+          result = encode(0);
+        } else if (data.startsWith(digest('quoteNative(bytes32,address,uint256,uint64)').slice(0, 10))) {
           assert.equal(to, address('a'));
           const at = BigInt('0x' + data.slice(-64));
           result = encode(at === 250n ? hash('8') : hash('9'), address('8'), address('3'), 12, at === 250n ? 292 : 300);
@@ -306,6 +321,34 @@ try {
   await page.getByText('CREDENTIALED · Active · Controller').waitFor();
   await page.getByRole('button', {name:'Load report', exact:true}).click();
   await page.getByText('No payments in this report interval.').waitFor();
+  await page.getByLabel('Invoice ID', {exact:true}).fill(builtInvoice);
+  await page.getByLabel('Invoice amount in base units').fill('100');
+  await page.getByLabel('Invoice expiry (local time)').fill('2028-01-01T10:00');
+  await page.getByLabel('Refund window ends (local time)').fill('2028-01-02T10:00');
+  await page.getByLabel('Invoice mode').selectOption('2');
+  await page.getByLabel('Optional tip policy commitment').fill(hash('2'));
+  const callsBeforeDraft = await page.evaluate(() => window.calls.length);
+  await context.setOffline(true);
+  await page.getByRole('button', {name:'Save local draft'}).click();
+  await page.getByText('Draft saved on this browser.').waitFor();
+  assert.equal(await page.evaluate(() => window.calls.length), callsBeforeDraft);
+  await context.setOffline(false);
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByText('CREDENTIALED · Active · Controller').waitFor();
+  assert.equal(await page.getByLabel('Invoice ID', {exact:true}).inputValue(), builtInvoice);
+  await page.getByRole('button', {name:'Review invoice in Wallet'}).click();
+  await page.locator('#business-status').getByText(/Submitted to Wallet network/).waitFor();
+  const invoiceTx = await page.evaluate(() => window.calls.at(-1).params[0]);
+  assert.equal(invoiceTx.to, address('6'));
+  assert.ok(invoiceTx.data.startsWith(digest('createMerchantInvoice(bytes32,(bytes32,address,bytes32,bytes3,uint256,uint64,uint64,uint8,uint8,bool,uint16,bytes32,bytes32,bytes32,bool))').slice(0, 10) + word(builtInvoice) + word(businessId) + word(account)));
+  assert.equal(await page.getByLabel('Verified invoice link').isVisible(), false);
+  invoicePublished = true;
+  await page.getByRole('button', {name:'Check finalized invoice'}).click();
+  await page.getByText(/PARTIALLY_PAID · PARTIAL_PAYMENT · FINALIZED · Credited 40 · Outstanding 60/).waitFor();
+  assert.match(await page.getByLabel('Verified invoice link').inputValue(), /kind=invoice/);
+  await page.getByRole('button', {name:'Review invoice closure in Wallet'}).click();
+  await page.getByText(/Closure submitted/).waitFor();
+  assert.equal(await page.getByLabel('Verified invoice link').isVisible(), false);
   await page.getByLabel('Merchant ID', {exact:true}).fill(hash('4'));
   await page.getByRole('button', {name:'View merchant'}).click();
   await page.getByText('Merchant access denied').waitFor();

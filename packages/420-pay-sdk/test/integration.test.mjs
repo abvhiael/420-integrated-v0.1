@@ -80,7 +80,7 @@ function fixture() {
       assert.equal(params[0].to, address('7'));
       if (state.reorgDuringRead) state.canonical = false;
     } else if (params[0].data.startsWith(invoiceView.selector) ||
-      params[0].data.startsWith(digest('isClosed(bytes32)').slice(0, 10))) assert.equal(params[0].to, address('6'));
+      ['isClosed(bytes32)', 'paidAmount(bytes32)'].some(sig => params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('6'));
     else if (['merchants(bytes32)', 'currentPayout(bytes32)', 'effectiveRole(bytes32,bytes32,address)', 'activeLocations(bytes32,bytes32)'].some(sig =>
       params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('5'));
     else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
@@ -336,4 +336,33 @@ test('merchant reports require a tenant role and filter invoices even when the c
   const tx = await application.merchantTransaction(snapshot, account, {kind:'register', id:tenant, payout:reporter});
   assert.deepEqual(tx, { target:address('5'),
     data:digest('registerForController(bytes32,address,address)').slice(0, 10) + word(tenant) + word(account) + word(reporter) });
+});
+
+test('merchant invoice reads derive lifecycle and enforce tenant ownership before sharing or closure', async () => {
+  const { application, replies, state, account } = fixture();
+  const tenant = hash('e');
+  const id = hash('d');
+  const invoice = (merchantId, mode, partial) => encode(merchantId, account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
+    100, 30, 40, mode, 1, partial, 42, hash('a'), hash('0'), hash('0'), 1);
+  const invoiceCall = invoiceView.selector + id.slice(2);
+  const paid = call('paidAmount(bytes32)', id);
+  const closed = call('isClosed(bytes32)', id);
+  replies.set(call('merchants(bytes32)', tenant), encode(account, hash('0'), hash('0'), 1, 1, 1));
+  replies.set(invoiceCall, invoice(tenant, 2, 1));
+  replies.set(paid, encode(40));
+  replies.set(closed, encode(0));
+  const read = () => application.merchantInvoice(snapshot, tenant, account, id);
+  assert.equal((await read()).outstanding, 60n);
+  assert.equal((await read()).status, 'PARTIALLY_PAID');
+  replies.set(paid, encode(100));
+  replies.set(closed, encode(1));
+  assert.equal((await read()).status, 'PAID');
+  replies.set(invoiceCall, invoice(tenant, 1, 0));
+  replies.set(closed, encode(0));
+  assert.equal((await read()).outstanding, 100n);
+  state.block.timestamp = '0x1f';
+  assert.equal((await read()).status, 'EXPIRED');
+  replies.set(invoiceCall, invoice(hash('f'), 1, 0));
+  await assert.rejects(read(), /tenant mismatch/);
+  await assert.rejects(application.merchantTransaction(snapshot, account, {kind:'closeInvoice', id:tenant, invoiceId:id}), /tenant mismatch/);
 });

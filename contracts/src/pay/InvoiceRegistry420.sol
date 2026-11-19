@@ -9,6 +9,7 @@ import "../interfaces/genesis/ISystemSafety420.sol";
 import "../interfaces/genesis/IMetadataCommitment420.sol";
 import "../libraries/GenesisInterfaceIds420.sol";
 import "./PayIds420.sol";
+import "./MerchantRegistry420.sol";
 
 contract InvoiceRegistry420 is GenesisResidentAccess420 {
     enum Mode { SINGLE_USE, MULTI_USE, PARTIAL_PAYMENT }
@@ -93,6 +94,17 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
     }
 
     function createInvoice(bytes32 invoiceId, Invoice calldata i) external {
+        _createInvoice(invoiceId, i);
+    }
+
+    function createMerchantInvoice(bytes32 invoiceId, Invoice calldata i) external {
+        MerchantRegistry420 merchants = MerchantRegistry420(_resolveRequired(PayIds420.MERCHANT_REGISTRY));
+        (address controller,,,, bool active,) = merchants.merchants(i.merchantId);
+        require(active && controller == msg.sender && i.merchant == controller, "active merchant controller");
+        _createInvoice(invoiceId, i);
+    }
+
+    function _createInvoice(bytes32 invoiceId, Invoice calldata i) private {
         _requireOperational(
             PayIds420.ACTION_CREATE_INVOICE,
             ISystemSafety420.ActionClass.NORMAL_ONLY,

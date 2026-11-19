@@ -84,6 +84,12 @@ export function createConsumerSource(config, provider) {
       await verify(account);
       return wallet.submitMerchantAction(action);
     },
+    async merchantInvoice(account, merchantId, invoiceId) {
+      await verify(account);
+      const result = await registry.merchantInvoice(await registry.latestSnapshot('finalized'), merchantId, account, invoiceId);
+      await verify(account);
+      return result;
+    },
     async merchantReport(account, merchantId, through) {
       await verify(account);
       const authorize = async () => {

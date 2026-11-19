@@ -220,6 +220,12 @@ Indexer, Explorer and Analytics data are derived projections. They must not be u
 
 The authoritative operational model and incident/recovery procedures are in `docs/apps/treasury/operator-guide.md`.
 
+## Native asset and Vault binding
+
+Native `$420` uses `address(0)` consistently with `AssetVault420` and `PaymentRouter420`. Native amounts are exact integer wei (18 decimals); ERC-20 amounts are exact integer token base units, not normalized to 18 decimals. Every asset is default-deny until explicitly allowlisted by governance, including native. The budget's `vaultId` is a registered instance ID, not the `VAULT_TREASURY` type hash. Budget commitments do not escrow funds or reserve Vault free balance.
+
+`TreasuryVaultBinding420.resolveRelease` is an internal read-only library for consumers using the trusted canonical `ProtocolRegistry`. It resolves active Treasury and Vault service records, verifies their published runtime identities and dependency graph, binds the stored disbursement to its parent budget and exact registered active `VAULT_TREASURY` instance, and rejects insufficient recorded free balance. The actual Vault withdrawal separately enforces scoped capability and exact value transfer. The helper is not a receipt verifier, escrow or execution authority; executor integration and commitment provenance remain REC-4. Existing registry ABI and service IDs are unchanged.
+
 ## Vault release evidence warning
 
 `DisbursementExecuted` records a nonzero `vaultReleaseHash`, but Treasury does not cryptographically verify the actual 420Vault release. See:

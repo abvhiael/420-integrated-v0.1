@@ -128,6 +128,12 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Exact implementation SHA `e649d3a5b0dcae0aa0859750fe5a8808c5a9ed03`: [workflow 44574638401](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44574638401), job `135738686249`, **48/48 PASS**, zero failed/skipped, 5,000 fuzz runs. Release/operator verifiers and artifact/ABI capture passed. [Durable qualification evidence](420TREASURY-REC-3-QUALIFICATION.md). Corrected invariant wording (R08) without changing arithmetic.
 - Next reconciliation step: **TREASURY-REC-4 — Vault Release Evidence and Executor Qualification**. No testnet dependency for REC-3. AUDIT-8/9 remain unchanged.
 
+## TREASURY-REC-4 — Vault release evidence and executor qualification — COMPLETE
+- Designated the noncustodial `TreasuryReleaseExecutor420` candidate, with independently scoped Treasury/Vault capabilities, reviewed exact release commitment, deterministic Vault operation and atomic release/accounting. Preserved the adopted AUTHORIZED_EXECUTOR_COMMITMENT_ONLY architecture and all existing Treasury/Vault write paths, service IDs and custody boundaries.
+- Implemented read-only actual transaction/receipt correlation and interrupted-result recovery; detected historic split release and failed closed without automatic retry/settlement. Clarified Grants and retained HighCountry consumer trust boundaries; no nonzero commitment is represented as independent payment proof.
+- Exact implementation SHA `6c627ce4ebb1bb9dcb384a388124687bc50a077e`: [workflow 44580443875](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44580443875), job `135759328597`, **8/8 Anvil integration scenarios PASS** (9/9 Node test runner including parent; zero failures/skips), Solidity compilation, release/operator verifiers and executor ABI/artifact identity passed. [Durable qualification evidence](420TREASURY-REC-4-QUALIFICATION.md).
+- Next reconciliation step: **TREASURY-REC-5 — Governance and Capability Authorization Qualification**. REC-8 owns release materialization; AUDIT-8 owns live activation, receipt/finality and reorg correlation. AUDIT-9 remains unchanged.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

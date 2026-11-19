@@ -1,0 +1,26 @@
+{
+  "schema": "420-treasury-release-executor-v1",
+  "evidence_model": "420/TREASURY/VAULT_RELEASE_COMMITMENT/V1",
+  "mode": "AUTHORIZED_EXECUTOR_COMMITMENT_ONLY",
+  "status": "PRODUCTION_DESIGNATED_CANDIDATE_NOT_DEPLOYED",
+  "contract": "TreasuryReleaseExecutor420",
+  "source": "contracts/src/treasury/TreasuryReleaseExecutor420.sol",
+  "artifact": "contracts/out/TreasuryReleaseExecutor420.sol/TreasuryReleaseExecutor420.json",
+  "constructor": [
+    "canonical ProtocolRegistry",
+    "reviewed immutable operator"
+  ],
+  "new_frozen_predeploy": false,
+  "new_service_id": false,
+  "required_independent_grants": [
+    "Treasury exact disbursement/amount",
+    "Vault exact vault/asset/recipient/withdrawal route/amount"
+  ],
+  "receipt_utility": "scripts/treasury/verify-release-receipt.mjs",
+  "deployment_materialization_owner": "TREASURY-REC-8",
+  "live_correlation_owner": "TREASURY-AUDIT-8",
+  "live_qualified": false,
+  "production_address": null,
+  "operator": null,
+  "executor_runtime_code_hash": null
+}

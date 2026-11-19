@@ -122,6 +122,9 @@ Scheduling reserves budget commitment, not Vault assets. Governance must resolve
 
 ### Execution
 
+The production-designated **candidate** is `TreasuryReleaseExecutor420`, deployed with the trusted ProtocolRegistry and a reviewed immutable operator. It is not deployed or activated on the official network, is not a new canonical service, and has no custody or independent grant authority. Grant the executor contract (not its operator) both the exact Treasury disbursement capability and the independent Vault withdrawal route capability. Verify the actual Vault instance/runtime identity and release eligibility before approving the preview. Use only `execute(id, expectedCommitment)` for newly reviewed releases; do not mix direct Vault withdrawals and this path for the same disbursement. See [release executor and receipt reconciliation](release-executor.md).
+
+
 Before execution verify:
 
 - state is `SCHEDULED`;
@@ -132,8 +135,8 @@ Before execution verify:
 - executor has the exact scoped capability;
 - resolve the current Treasury and Vault service identities through the canonical ProtocolRegistry and compare runtime identities; use `TreasuryVaultBinding420.resolveRelease` with that trusted Registry to derive the exact registered active Treasury Vault, asset, recipient and amount and check recorded free balance;
 - require the actual Vault route-scoped capability for the exact vault/asset/recipient/withdrawal action and amount; do not submit a Treasury completion commitment after insufficient funds, failed transfer or a mismatched release;
-- actual canonical Vault release evidence has been produced or is being produced according to the adopted release process;
-- the submitted `vaultReleaseHash` is derived from that actual evidence and is nonzero.
+- obtain and retain the exact reviewed preview, then submit the atomic executor transaction; on successful inclusion correlate the actual Vault withdrawal, accounting and Treasury completion events using the receipt procedure;
+- the executor derives the submitted `vaultReleaseHash` from the current reviewed release tuple and successful withdrawal. It never accepts an arbitrary release receipt as proof.
 
 Execution settles Treasury budget accounting and stores the release commitment.
 

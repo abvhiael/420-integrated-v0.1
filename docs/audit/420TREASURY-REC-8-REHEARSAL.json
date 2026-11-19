@@ -1,0 +1,278 @@
+{
+  "schema": "420-treasury-rec8-retained-rehearsal-v1",
+  "chainContext": "LOCAL_ANVIL_ONLY",
+  "chainId": 31337,
+  "liveQualified": false,
+  "implementationSHA": "70895129b186e98d98e3aa5bb4b02f4d139750a2",
+  "baseMain": "1b0394c0b8c2074d81907a3f1d8e92646502ff65",
+  "workflowRun": 44614034940,
+  "job": 135877807565,
+  "compiler": "Solidity 0.8.24, Cancun, optimizer 200, viaIR",
+  "foundry": "1.10.0",
+  "artifact": {
+    "id": 14572913464,
+    "name": "treasury-rec8-exact-head-release",
+    "zipDigest": "sha256:75f10b513b212018dc339f09f26291085568fe2ee7933740923b23f4de07cb37",
+    "expiresAt": "2026-11-26T20:58:23Z",
+    "reproduction": "scripts/treasury/materialize-deployment-closure.py followed by forge build --extra-output storageLayout and scripts/treasury/deployment.mjs materialize; both independent builds byte-identical"
+  },
+  "tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "includesParent": true
+  },
+  "rehearsal": {
+    "manifestHash": "0xc2d1346c2de4b61018c2e926b124812ae899a21b748336272853665ec94830cc",
+    "metadataHash": "0x056e9670a3ab39effcb8e77ebca965c40a607b49c66d95c87697468e91187b02",
+    "interfaceHash": "0x5d24b8aa20595fc81b44641911393c99e91dab8c1378a17143bdc57abe79157c",
+    "dependencyRoot": "0x9d80386d5d4ff6632b90ce90cb949b1c2df73409e6dca3894cb901b3b51d4a9c",
+    "deployments": [
+      {
+        "name": "TreasuryAuthorization420",
+        "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "transactionHash": "0x51e0053e9cd4004f986dc907676af3b7a5d731e73ea3d59c4d20702bb7792919",
+        "blockNumber": "0x2",
+        "blockHash": "0xc4e1a4f687d853eacdef38d09c6dd8e424b0b58e186eafad75ab5fb3a6ec47a7",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x080922ae3402d758614dd6550a89738986c69b93ef4f479a51211c961d5cb5cb"
+      },
+      {
+        "name": "TreasuryPolicyRegistry420",
+        "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "transactionHash": "0xf4bd60ee5f642d477cfe827ffaa11aecccd6c086d8d19e6404bec1e6da07f460",
+        "blockNumber": "0x3",
+        "blockHash": "0x0c86d6f1b868f2c635a82668890fdd518f9b10582ba0cfa3494240ca02e7d536",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x014d9049fcb6b2f3a8827f81f764ea24378658342495c15a9ff94ada1c868732"
+      },
+      {
+        "name": "TreasuryBudgetRegistry420",
+        "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "transactionHash": "0xa05994a91bec673aabafc1b76501bb5ca367e7ada33ba383c66b1efa3156a38f",
+        "blockNumber": "0x4",
+        "blockHash": "0xd208dc0582269a0c10ce681c3475795fda31064acbb99ff9beae1c57b9c4ca31",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xb07af03dd9adac5ff10a9dfcdd60da64ee6e811f20c62d57d81512053ecdab0c"
+      },
+      {
+        "name": "TreasuryDisbursementRegistry420",
+        "address": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9",
+        "transactionHash": "0xbf2fd878f9de2c2e48d03c6a0fdf6c85091e9306f6e53643cb8a68be673e6ee6",
+        "blockNumber": "0x5",
+        "blockHash": "0xb86667271fdaf81931be3b53f8b205abb4ffd83843206711ad36cd0bda35df13",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x587a0997baeed97f57174bc65ca0fb3b80db6472399a3c6baf03de38822c3703"
+      },
+      {
+        "name": "TreasuryRouter420",
+        "address": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+        "transactionHash": "0x7ecc37e9197f6a8383f01da3bfc9f4a3ed1761a4abe6fa2189a16fbe2dd38b0b",
+        "blockNumber": "0x9",
+        "blockHash": "0x7b73dd8c9eec77d66148b2c8778542611dd607f4ec5fcb82d984b808791d1875",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xaf7b7a5937c57b1c1cec6e1ded8e1dd7f8d2bf5432080445c73f6bad5277adc0"
+      },
+      {
+        "name": "TreasuryReleaseExecutor420",
+        "address": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+        "transactionHash": "0xc04b8b23f007ec078c6a636832130138cb41fccbff6300cbf26a763a708901e9",
+        "blockNumber": "0xa",
+        "blockHash": "0x6165dacb2d4393d0fc43c7a8eebefcd0002464328b3f8c131822454b808a5c46",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xd7c931f4c1f6c3b40d9bcbf5549313d7fd730a59aea1eb0e66f3fa681b960be1"
+      }
+    ],
+    "governanceReceipts": [
+      {
+        "stage": "INITIALIZE_CONTROLLER:scheduled",
+        "transactionHash": "0x98421eca6ebda5ba677e07bbb6f282f2c0004d538e74ffa517595faebd120760",
+        "blockHash": "0x42ddbd9c809697ff4de5e3208559067f3ba2f8044269b2a41f125da1ec20f5c5",
+        "blockNumber": 6,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "INITIALIZE_CONTROLLER:executed",
+        "transactionHash": "0xdbe32ebd3e35efe2ab9b3f12dc3151426ede5b39344be0036078e00503adbd6b",
+        "blockHash": "0xb153ff0d5524022d3b79dc7b0afdbc976d5e05920278c01c5f078c6e06b70ea8",
+        "blockNumber": 8,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "REGISTER_CAPABILITY_COMPONENT",
+        "transactionHash": "0x36a25e266783c73328a5549f8de8f294aa830c3fef1c50451631b1403ba3aeeb",
+        "blockHash": "0xfea52880dd511417a2c5451fd40fb58686d01a026e8409379c03b4de21963aee",
+        "blockNumber": 11,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x8464135c8F25Da09e49BC8782676a84730C318bC"
+      },
+      {
+        "stage": "REGISTER_ROUTER_COMPONENT:scheduled",
+        "transactionHash": "0xc4a08e3d707ce85b065d092912945893291c818c83ae7f79c9e09e97212a4e53",
+        "blockHash": "0x129c94b2178f9673737a35d7997a8e34cda78841e60c336c971f82dadd76e84a",
+        "blockNumber": 12,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "REGISTER_ROUTER_COMPONENT:executed",
+        "transactionHash": "0x0e92f2f8e05ebf4f656a07cb7ceff6e71a90cc6c4a92ae3504995449e94962c9",
+        "blockHash": "0x3ff240248df69ae6e41cf14b16af7b56b5d0efd2dd4fb43991b0a6ebc20e2fd1",
+        "blockNumber": 14,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "PUBLISH_SERVICE:scheduled",
+        "transactionHash": "0x23540ee96a95fd4a9085550a1335c7dee9009ce3fa38e014c61a8c516b5de095",
+        "blockHash": "0x10673426f4ebb9c6a4ab58e042cd9ffafeb7c22b7422beeb3cece139524aa20d",
+        "blockNumber": 15,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "PUBLISH_SERVICE:executed",
+        "transactionHash": "0xee2ba135102ac324f984e2473edd40de86e4851f32695802c908f68ba879233d",
+        "blockHash": "0x0afa0abd6e171786ce4015cfd58e7cd93e239920ae86b79745364bc1e54aae48",
+        "blockNumber": 17,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      }
+    ]
+  },
+  "corrective": {
+    "revision": 2,
+    "router": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+    "deployments": [
+      {
+        "name": "TreasuryAuthorization420",
+        "address": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+        "transactionHash": "0x205751bae064746186f9e3dd4ea721bd5be4e9deb9399cfcae4eaad8229ce99e",
+        "blockNumber": "0x18",
+        "blockHash": "0x4c27d8df7297c1f82801e36d6bc5d4345657884ee80347d8c9599b08a9aefa4f",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x080922ae3402d758614dd6550a89738986c69b93ef4f479a51211c961d5cb5cb"
+      },
+      {
+        "name": "TreasuryPolicyRegistry420",
+        "address": "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853",
+        "transactionHash": "0x57051f3a81081fb505e44f0d5aa964d41556f236641046a0273c776fd0f9740f",
+        "blockNumber": "0x19",
+        "blockHash": "0xe48922578abbda92f8b4f48d8f7da243962a61ac26690d045c323860b1c0804a",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x014d9049fcb6b2f3a8827f81f764ea24378658342495c15a9ff94ada1c868732"
+      },
+      {
+        "name": "TreasuryBudgetRegistry420",
+        "address": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6",
+        "transactionHash": "0x1fa18abc8506e721fed23795a2e905c13bcdecdb61af492cd7f16878a4d1c2ae",
+        "blockNumber": "0x1a",
+        "blockHash": "0xd7d55d507913180485d053a50c75680efaf300c384b992bd1de3af711552a6ba",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0x536670827607adabe2ca9e28c0825e10f3eec99ddcafae9deebfb1b659c8751d"
+      },
+      {
+        "name": "TreasuryDisbursementRegistry420",
+        "address": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318",
+        "transactionHash": "0xcc43f190ba071753988275bcace6932c76482bc9f16883b7b64e9b677df23829",
+        "blockNumber": "0x1b",
+        "blockHash": "0x643e2be66f5b46b3dcff8e3bc06ff7d96e04b687a1b37b7d719eacbb299ce629",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xd35392a0d78a9dc760bbbb9757881dc787d291ab29deff7a1cf1bceebe3f6409"
+      },
+      {
+        "name": "TreasuryRouter420",
+        "address": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+        "transactionHash": "0x01a249d91db87c5eb05a887c105493e15319b804991102340333461007fab805",
+        "blockNumber": "0x1f",
+        "blockHash": "0x539567f63e47bfeaf88ad2ec4b940a86478b656a8bc0af445ab189f8187b3c7d",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xcce1b68e676dd8d25cfd60c4fd204f1dc4ddbfa6bac37b4236109389aed62e9b"
+      },
+      {
+        "name": "TreasuryReleaseExecutor420",
+        "address": "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+        "transactionHash": "0xc7e298070a2ba2a515221645c438013bd80fc1febac711b4af676a600b1546b7",
+        "blockNumber": "0x20",
+        "blockHash": "0xde385796047cd578170b989e3a159508e1d78d3412b5fee3b6e4074f131d2545",
+        "transactionIndex": "0x0",
+        "runtimeCodeHash": "0xd7c931f4c1f6c3b40d9bcbf5549313d7fd730a59aea1eb0e66f3fa681b960be1"
+      }
+    ],
+    "governanceReceipts": [
+      {
+        "stage": "PAUSE_COMPONENT:scheduled",
+        "transactionHash": "0x295536b0efdb74d370371358eaeda892902d82755ac8ad5b665e86c0e0284f3e",
+        "blockHash": "0xe47580c7429a3af1875c4917981d0da28e3bc8d97974414a96f06a68fd32a6b2",
+        "blockNumber": 21,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "PAUSE_COMPONENT:executed",
+        "transactionHash": "0xc7c989848fea276a7f27fab97a4240e9e836c3f308dfe278b5675e2a37e6e8aa",
+        "blockHash": "0x5c893795217e9727cc7ef09471f063feda82e30592d1cbb971c21f5988e2a8d7",
+        "blockNumber": 23,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "INITIALIZE_CONTROLLER:scheduled",
+        "transactionHash": "0xc97d571ee8c4627f3561fbf21aaa2bbfc0c62c6a0c6d15ffe31ac83d60198031",
+        "blockHash": "0x3301aeeaccd532b67c8840c60d8ee52bb498598bccd62d3ce1432bc6eca2217d",
+        "blockNumber": 28,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "INITIALIZE_CONTROLLER:executed",
+        "transactionHash": "0x955da663e09b7150c547a8ac8b8d20c1cb6bdd9643e5fe9dec1776f964d4d0c4",
+        "blockHash": "0x4c61e4cf767df1f569dc7a64cc4acfabc08e868a9ba686829f474f61bc86c08c",
+        "blockNumber": 30,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "REGISTER_ROUTER_COMPONENT:scheduled",
+        "transactionHash": "0x02ae1f07a77199b344e729d0cf3d72dfbde01df243fc2100d42e2b039bb4a8f2",
+        "blockHash": "0xf7521c470599f1101d2179bfec441fbb1d4bfa830d7d6c4417cff2be99839a1d",
+        "blockNumber": 33,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "REGISTER_ROUTER_COMPONENT:executed",
+        "transactionHash": "0x51656bcc7b952f3767e7405c10ea3d1d104cc15898c8f8f604b4866d16fba659",
+        "blockHash": "0xfa328a853955b5e0940a127be828460ca232c51025495c4deb16c99961342669",
+        "blockNumber": 35,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "PUBLISH_SERVICE:scheduled",
+        "transactionHash": "0xff5d121beb33b93be7b97ebdfb42525416a0a3d5369c01006a4398a43c45288f",
+        "blockHash": "0x78b41295b06274cebbba7faf3826077ac77cd04ccbf89e80ce9543b25d623a65",
+        "blockNumber": 36,
+        "from": "0x0000000000000000000000000000000000000437",
+        "to": "0x0000000000000000000000000000000000000429"
+      },
+      {
+        "stage": "PUBLISH_SERVICE:executed",
+        "transactionHash": "0x80ecbad8fc2fb70cd406f6f476100561b6eb0649aaff3cc0bb981f0b99c1169c",
+        "blockHash": "0x9d3ed9aecad42c582d52c4ffcf8452990aee592618a1b3083f0cdcd6c242d5c5",
+        "blockNumber": 38,
+        "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "to": "0x0000000000000000000000000000000000000429"
+      }
+    ]
+  },
+  "liveEvidence": {
+    "chainId": null,
+    "genesisHash": null,
+    "addresses": {},
+    "transactions": [],
+    "receipts": []
+  }
+}

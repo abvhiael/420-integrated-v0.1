@@ -106,3 +106,35 @@ jobs:
           forge test --root "$REC5_ROOT" --match-path 'test/CivicTimelockExecution420.t.sol' -vvv
           forge test --root "$REC5_ROOT" --match-path 'test/Governance*420.t.sol' -vvv
           forge test --root "$REC5_ROOT" --match-path 'test/Governance420Retirement.t.sol' -vvv
+
+      - name: Qualify directly affected Stake safety boundary in a separate exact closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export SAFETY_ROOT="$RUNNER_TEMP/rec5-stake-safety"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["SAFETY_ROOT"])
+          pending=[source/"test/SecurityStakeSafety420.t.sol"]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(source) or not p.is_file(): raise RuntimeError(f"missing import: {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else p.parent/name)
+          for p in sorted(seen):
+              target=dest/p.relative_to(source)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,target)
+              assert target.read_bytes()==p.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          forge test --root "$SAFETY_ROOT" --match-path test/SecurityStakeSafety420.t.sol --match-test '^testSecurity' -vvv

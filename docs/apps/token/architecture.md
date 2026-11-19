@@ -35,9 +35,11 @@ ERC20 permit domains commit chain ID and verifying-contract address. Canonical s
 
 ## Discovery and user path
 
-The Wallet Genesis application catalogue exposes `420/service/token/v1`. A verified runtime binding must contain the chain/version, TokenFactory420, TokenTemplateRegistry420 and community Treasury Vault addresses plus runtime code hashes and the exact canonical Vault ID. `wallet/web/core/token-runtime.js` fails closed on missing, zero, aliased or wrong identities.
+The Wallet Genesis application catalogue exposes `420/service/token/v1`. The shared SDK entry point is `wallet/web/core/token-app.js`: `token-sdk.js` owns frozen template descriptors, typed drafts and canonical ABI/config commitments; `token-runtime.js` owns release binding and read-only verification; `token-handoff.js` owns preparation through the existing Wallet execution boundary. This is a browser-safe application layer, not a second Wallet or standalone service.
 
-Transaction preparation uses `wallet/web/core/token-handoff.js`, which preserves `SmartAccount420` as execution authority. It requires the verified factory target, non-empty factory calldata and exactly 42 native 420. Token client code does not own a private key or acquire an independent transaction broadcaster.
+Runtime verification requires an independently approved Wallet-owned release binding. It reconciles chain and genesis hash, both canonical Registry records and their commitments, ten dependency code hashes, immutable getters, active community Vault registration and typed policies, all eight template profiles and the canonical verification block. It rejects reserved, aliased or mismatched dependencies. Shape validation alone is not authorization.
+
+Preparation re-encodes the typed draft, rejects mismatched or arbitrary calldata and requires the exact 42 native 420 fee. It verifies release and selected-template availability before and after existing SmartAccount420 simulation/estimation. The immutable result explicitly requires confirmation; it does not broadcast or grant signing/spending authority. The application must source the approved binding from trusted Wallet configuration and retain confirmation and submission control in Wallet. Step 5.1 is qualified; full application wiring and later end-to-end/live gates remain open.
 
 ## Downstream integrations
 

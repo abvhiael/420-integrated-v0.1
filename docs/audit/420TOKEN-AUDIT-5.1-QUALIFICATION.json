@@ -1,0 +1,135 @@
+{
+  "schema": "420-token-audit-5.1-exact-implementation-qualification-v1",
+  "step": "TOKEN-AUDIT-5.1",
+  "status": "QUALIFIED_SHARED_SDK_ONLY",
+  "qualified_implementation_sha": "dd4e778ce7be964a75a99df0e3d3c39ba4a053f2",
+  "reconciled_main": "57c69e2c392cae17b199342cdd17f8e9c49adb88",
+  "pr": 1238,
+  "qualification": {
+    "workflow": ".github/workflows/420token-audit.yml",
+    "run_id": 44636056332,
+    "jobs": {
+      "scope": {
+        "id": 135954734733,
+        "conclusion": "success"
+      },
+      "wallet-sdk": {
+        "id": 135955021351,
+        "conclusion": "success"
+      },
+      "qualify": {
+        "id": 135955023232,
+        "conclusion": "skipped"
+      },
+      "security": {
+        "id": 135955024029,
+        "conclusion": "skipped"
+      }
+    },
+    "exact_head_checkout": true,
+    "repository_verifier": "PASS",
+    "tests_passed": 29,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "tests_cancelled": 0,
+    "token_runtime_tests": 5,
+    "token_sdk_tests": 12,
+    "affected_genesis_navigation_regressions": 12,
+    "passed_test_names": [
+      "420Token runtime requires distinct verified factory, registry and Vault identities",
+      "420Token runtime fails closed on wrong service, version or Vault identity",
+      "420Token handoff preserves SmartAccount420 authority and exact fee",
+      "420Token handoff rejects wrong factory, fee and empty calldata before wallet execution",
+      "shape-only or aliased release records cannot authorize a handoff",
+      "canonical eight SDK profiles agree with frozen Genesis config, Solidity identity and profile commitments",
+      "ERC20 encoding uses exact Solidity ABI words, dynamic offsets, UTF-8 and base-unit supply",
+      "ERC721 and ERC1155 encodings use exact ABI layouts and distinct config hashes",
+      "all eight drafts are canonical, immutable, JSON-safe and distinguish feature semantics",
+      "draft validation rejects noncanonical templates, cap misuse, unsafe numeric values and oversized or malformed fields",
+      "real TOKEN-AUDIT-4 Registry dependency commitment is reproduced exactly by the SDK",
+      "runtime verifies all dependencies, active Registry records, every template and canonical block",
+      "every frozen profile prepares exact SmartAccount calldata, fee, configuration and explicit-review state",
+      "runtime rejects wrong chain, wrong genesis, absent code, wrong code and reorganized snapshots",
+      "runtime rejects wrong service, component, release commitments, immutables, Vault registration and template profiles",
+      "disabled templates are visible but cannot be prepared; a disable during simulation rejects the handoff",
+      "SmartAccount simulation, gas failures, ownership and chain changes remain fail-closed",
+      "W15.8 catalogue identities come from canonical Solidity service IDs, not aliases or named products",
+      "live ProtocolRegistry service identity, implementation code, metadata and navigation are independently verified",
+      "malformed, revoked, stale and counterfeit Registry records fail closed",
+      "service manifest spoofing and malformed destinations cannot enter verified directory",
+      "verified directory omits unavailable services, rejects duplicate identities and ignores stale registry data",
+      "launch rechecks immutable URL, version, implementation and account/network; no implicit grant",
+      "existing Names name normalizer blocks unicode and case lookalikes and catches retargeting between checks",
+      "420Gas funding offers and 420Token deployment remain outside app navigation authority",
+      "Identity420 binding is current, scoped, read-only, bilateral if claimed, never owner/signing authority",
+      "Pay release discovery uses the canonical Registry key and a credential-free endpoint check",
+      "Pay discovery blocks unreleased, wrong-chain, unresolved and disabled entries before probing",
+      "Pay is omitted from discovery when its endpoint is unreachable or redirected"
+    ],
+    "changed_execution_paths": [
+      {
+        "path": ".github/workflows/420token-audit.yml"
+      },
+      {
+        "path": ".qualification/candidates/TOKEN-AUDIT-5.1-shared-sdk.json"
+      },
+      {
+        "path": "wallet/web/core/token-app.js"
+      },
+      {
+        "path": "wallet/web/core/token-handoff.js"
+      },
+      {
+        "path": "wallet/web/core/token-runtime.js"
+      },
+      {
+        "path": "wallet/web/core/token-sdk.js"
+      },
+      {
+        "path": "wallet/web/test/token-runtime.test.js"
+      },
+      {
+        "path": "wallet/web/test/token-sdk.test.js"
+      },
+      {
+        "path": "wallet/web/test/token-test-fixture.js"
+      }
+    ],
+    "all_eight_profiles_prepared": true,
+    "retained_audit_4_dependency_commitment_reproduced": true,
+    "rpc_tests": "Deterministic simulated RPC fixtures; not a real deployed Wallet end-to-end transaction test."
+  },
+  "prior_attempt": {
+    "sha": "a6c74b815087576345c88ceb61a73f6b3efd70c8",
+    "run_id": 44635833320,
+    "job_id": 135954314644,
+    "passed": 28,
+    "failed": 1,
+    "disposition": "structuredClone preserved fixture aliases; independently substitute the Vault dependency and retain rejection of paired tampering by the dependency-root guard. Only the runtime test file changed."
+  },
+  "incidental_automatic_workflows": {
+    "prior_browser": {
+      "run_id": 44635833392,
+      "job_id": 135953966055,
+      "conclusion": "success"
+    },
+    "current_browser": {
+      "run_id": 44636056553,
+      "job_id": 135954735437,
+      "status": "in_progress",
+      "conclusion": null
+    },
+    "web_mobile_extension": "Automatically triggered but skipped by existing audit-branch rules. No manually dispatched unrelated qualification."
+  },
+  "retained_prior_evidence": [
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json"
+  ],
+  "trust_boundary": "Wallet-owned independently approved binding is an explicit input. SDK checks all supplied commitments against pinned-block code, Registry service/component/profile, Vault graph and active typed policies. Shape-only validation and draft construction authorize nothing. No live manifest, independent signer, broadcaster, UI wiring, real end-to-end SmartAccount send/receipt qualification or live release is asserted.",
+  "aggregate_token_audit_5_complete": false,
+  "repository_release_qualified": false,
+  "live_testnet_qualified": false,
+  "next_canonical_step": "TOKEN-AUDIT-5 (remaining assigned Wallet-integrated work; no separately numbered 5.2 description exists in current canonical roadmap)",
+  "publication": "Evidence-only closeout; executable/test inputs unchanged."
+}

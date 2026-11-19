@@ -14,7 +14,13 @@
     "wallet/web/test/token-test-fixture.js",
     "wallet/web/test/token-sdk.test.js",
     "wallet/web/test/token-runtime.test.js",
-    ".qualification/candidates/TOKEN-AUDIT-5.1-shared-sdk.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.1-shared-sdk.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json"
   ],
   "tests": [
     {

@@ -177,6 +177,21 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         bytes32 invoiceId, address payer, address merchant, address inputAsset, uint256 inputAmount,
         address settlementAsset, uint256 settlementAmount, bytes32 quoteId, uint256 payerNonce
     ) external returns (bytes32 paymentId) {
+        return _recordInvoiceCheckout(invoiceId, payer, merchant, inputAsset, inputAmount,
+            settlementAsset, settlementAmount, quoteId, payerNonce, 0);
+    }
+
+    function recordNativeCheckoutWithTip(
+        bytes32 invoiceId, address payer, address merchant, uint256 principal, uint256 tip, bytes32 quoteId, uint256 nonce
+    ) external returns (bytes32 paymentId) {
+        return _recordInvoiceCheckout(invoiceId, payer, merchant, address(0), principal + tip,
+            address(0), principal, quoteId, nonce, tip);
+    }
+
+    function _recordInvoiceCheckout(
+        bytes32 invoiceId, address payer, address merchant, address inputAsset, uint256 inputAmount,
+        address settlementAsset, uint256 settlementAmount, bytes32 quoteId, uint256 payerNonce, uint256 tip
+    ) private returns (bytes32 paymentId) {
         require(msg.sender == _resolveRequired(PayIds420.PAYMENT_ROUTER), "checkout router");
         _requireOperational(
             PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.INBOUND
@@ -188,7 +203,7 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         require(payments[paymentId].status == Status.NONE, "duplicate");
         bytes32 receipt = keccak256(abi.encode(block.chainid, address(this), paymentId));
         payments[paymentId] = Payment(
-            invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce, receipt, 0, 0,
+            invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce, receipt, tip, 0,
             Status.SETTLED
         );
         emit PaymentSet(paymentId, invoiceId, Status.SETTLED);
@@ -254,6 +269,20 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         _requireOperational(
             PayIds420.ACTION_REFUND, ISystemSafety420.ActionClass.SAFE_WHEN_PAUSED, Types420.Direction.NONE
         );
+        _applyRefund(paymentId, amount, complete);
+    }
+
+    function applyMerchantRefund(bytes32 paymentId, uint256 amount) external {
+        require(msg.sender == _resolveRequired(PayIds420.REFUND_MANAGER), "refund manager");
+        require(payments[paymentId].status == Status.SETTLED || payments[paymentId].status == Status.PARTIALLY_REFUNDED,
+            "payment not settled");
+        _requireOperational(
+            PayIds420.ACTION_REFUND, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND
+        );
+        _applyRefund(paymentId, amount, false);
+    }
+
+    function _applyRefund(bytes32 paymentId, uint256 amount, bool complete) private {
         Payment storage p = payments[paymentId];
         require(
             p.status == Status.FINALIZED || p.status == Status.SETTLED || p.status == Status.PARTIALLY_REFUNDED,

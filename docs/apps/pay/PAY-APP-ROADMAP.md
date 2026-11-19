@@ -373,6 +373,30 @@ Live deployment must publish the reviewed InvoiceRegistry runtime hash.
 
 Exit criteria: Canonical split limits/rounding, actual refund asset delivery vs evidence, authorization and replay protections. Retain reproducible scoped qualification at exact implementation SHA.
 
+Native invoice policy checkout uses `splitCommitment` for the ordered
+recipients, basis points and primary index, and `tipCommitment` for the tip
+recipient and cap. Publish the split commitment with the merchant payout and
+copy it into the invoice. Quote the exact selected tip with
+`quoteNativePolicy`, then submit the same policy and quote ID with
+`payNativeInvoiceWithPolicy` and send principal plus tip. Split amounts round
+down and the primary payout receives the remainder. Invoice credit is principal
+only. A failed recipient transfer reverts every delivery and the invoice,
+payment and replay writes.
+
+`RefundManager420.payMerchantRefund` takes funds from the active merchant
+controller within the invoice refund window and sends the original settlement
+asset to the canonical payer. For native refunds send the exact amount as
+transaction value. For ERC-20 refunds approve the Registry-resolved refund
+manager to pull the amount. The amount is subject to the payment's cumulative
+refund cap. `refundedByPayment` includes recorded evidence.
+`fundedRefundExecuted(refundId)` identifies asset delivery for a refund ID and
+`deliveredByPayment` totals executed deliveries.
+
+The hosted checkout and SDK still use the single-payout quote entry points.
+Native policy checkout and merchant-funded refunds can be exercised directly
+through the contracts. The conversion split router remains a separate
+settlement entry point.
+
 ## PAY-APP-9 — Accounting, reports and reconciliation
 
 **Status:** PLANNED. **Testnet required:** No.

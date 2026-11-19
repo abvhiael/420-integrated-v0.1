@@ -134,6 +134,96 @@ contract PayNativeInvoiceCheckout420Test {
         require(!stale && !router.usedCheckoutNonces(PAYER, 1) && PAYER.balance == PRICE * 2, "stale quote");
     }
 
+    function testPolicyCheckoutSplitsPrincipalAndDeliversTip() public {
+        CanonicalPayQuote420.NativePolicy memory policy = _policyInvoice(address(0x4204));
+        uint64 at = uint64(vm.getBlockTimestamp());
+        CanonicalPayQuote420.NativeQuote memory q = quotes.quoteNativePolicy(bytes32(uint256(8)), PAYER, 8, at, policy);
+        uint256 amount = PRICE + 1;
+        vm.prank(PAYER);
+        bytes32 id = router.payNativeInvoiceWithPolicy{value: amount + 7}(bytes32(uint256(8)), 8, at, q.quoteId, policy);
+        uint256 secondary = amount * 3333 / 10_000;
+        require(address(0x4203).balance == secondary && PAYOUT.balance == amount - secondary);
+        require(address(0x4204).balance == 7 && invoices.paidAmount(bytes32(uint256(8))) == amount);
+        PaymentRegistry420.Payment memory payment = payments.getPayment(id);
+        require(payment.tipAmount == 7 && payment.settlementAmount == amount && payment.inputAmount == amount + 7);
+    }
+
+    function testPolicyRejectsSubstitutionAndRollsBackWhenTipDeliveryFails() public {
+        CanonicalPayQuote420.NativePolicy memory policy = _policyInvoice(address(this));
+        uint64 at = uint64(vm.getBlockTimestamp());
+        bytes32 invoiceId = bytes32(uint256(8));
+        CanonicalPayQuote420.NativeQuote memory q = quotes.quoteNativePolicy(invoiceId, PAYER, 8, at, policy);
+        policy.tip = 8;
+        vm.prank(PAYER);
+        (bool changed,) = address(router).call{value: PRICE + 9}(
+            abi.encodeCall(router.payNativeInvoiceWithPolicy, (invoiceId, 8, at, q.quoteId, policy))
+        );
+        require(!changed, "substituted tip");
+        policy.tip = 7;
+        vm.prank(PAYER);
+        (bool paid,) = address(router).call{value: PRICE + 8}(
+            abi.encodeCall(router.payNativeInvoiceWithPolicy, (invoiceId, 8, at, q.quoteId, policy))
+        );
+        require(!paid && PAYOUT.balance == 0 && address(0x4203).balance == 0);
+        require(!router.usedCheckoutNonces(PAYER, 8) && invoices.paidAmount(invoiceId) == 0);
+    }
+
+    function testMerchantRefundDeliversAndRejectsWrongCallerReplayAndOverRefund() public {
+        RefundManager420 refunds = new RefundManager420(address(this), address(registry), CFG);
+        _publish(refunds.componentId(), address(refunds));
+        refunds.setPaymentRegistry(address(payments));
+        uint64 at = uint64(vm.getBlockTimestamp());
+        CanonicalPayQuote420.NativeQuote memory q = quotes.quoteNative(INVOICE, PAYER, 1, at);
+        vm.prank(PAYER);
+        bytes32 id = router.payNativeInvoice{value: PRICE}(INVOICE, 1, at, q.quoteId);
+        bytes32 refundId = keccak256("merchant refund");
+        bytes memory refund = abi.encodeCall(refunds.payMerchantRefund, (refundId, id, PRICE, bytes32(0)));
+        vm.deal(CONTROLLER, PRICE * 2);
+        (bool unauthorized,) = address(refunds).call(refund);
+        require(!unauthorized && payments.getPayment(id).refundedAmount == 0);
+        vm.prank(CONTROLLER);
+        (bool underfunded,) = address(refunds).call(refund);
+        require(!underfunded && !refunds.fundedRefundExecuted(refundId));
+        vm.prank(CONTROLLER);
+        refunds.payMerchantRefund{value: PRICE}(refundId, id, PRICE, bytes32(0));
+        require(PAYER.balance == PRICE * 2 && refunds.deliveredByPayment(id) == PRICE);
+        require(refunds.fundedRefundExecuted(refundId) && refunds.refundedByPayment(id) == PRICE);
+        require(payments.getPayment(id).status == PaymentRegistry420.Status.REFUNDED);
+        vm.prank(CONTROLLER);
+        (bool replay,) = address(refunds).call{value: PRICE}(refund);
+        require(!replay);
+        vm.prank(CONTROLLER);
+        (bool over,) = address(refunds).call{value: 1}(
+            abi.encodeCall(refunds.payMerchantRefund, (keccak256("excess"), id, 1, bytes32(0)))
+        );
+        require(!over && PAYER.balance == PRICE * 2);
+    }
+
+    function _policyInvoice(address tipRecipient) private returns (CanonicalPayQuote420.NativePolicy memory policy) {
+        policy.recipients = new address[](2);
+        policy.recipients[0] = PAYOUT;
+        policy.recipients[1] = address(0x4203);
+        policy.bps = new uint16[](2);
+        policy.bps[0] = 6667;
+        policy.bps[1] = 3333;
+        policy.tipRecipient = tipRecipient;
+        policy.tipMaximum = 10;
+        policy.tip = 7;
+        bytes32 splitHash = quotes.splitCommitment(policy.recipients, policy.bps, 0);
+        bytes32 tipHash = quotes.tipCommitment(tipRecipient, policy.tipMaximum);
+        uint64 at = uint64(vm.getBlockTimestamp());
+        vm.prank(CONTROLLER);
+        merchants.schedulePayout(MERCHANT, PAYOUT, splitHash, at);
+        vm.prank(CONTROLLER);
+        invoices.createInvoice(bytes32(uint256(8)), InvoiceRegistry420.Invoice({
+            merchantId: MERCHANT, merchant: CONTROLLER, metadataHash: bytes32(0), currency: bytes3("420"),
+            amount: PRICE + 1, expiresAt: at + 120, refundUntil: at + 240,
+            mode: InvoiceRegistry420.Mode.SINGLE_USE, acceptance: InvoiceRegistry420.Acceptance.FINALIZED,
+            partialPayments: false, quoteMaxSlippageBps: 0, acceptedAssetsHash: ASSET_POLICY,
+            settlementPlanHash: splitHash, tipPolicyHash: tipHash, active: true
+        }));
+    }
+
     function _publish(bytes32 id, address implementation) private {
         registry.registerComponent(id, implementation, Types420.Version(1, 0, 0), Types420.Lifecycle.ACTIVE);
         Types420.ContractRef memory ref = registry.component(id);

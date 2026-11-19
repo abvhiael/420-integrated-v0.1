@@ -5,6 +5,8 @@ import "../system/GenesisResidentAccess420.sol";
 import "../interfaces/genesis/Types420.sol";
 import "../interfaces/genesis/ISystemSafety420.sol";
 import "./PayIds420.sol";
+import "./PaymentRegistry420.sol";
+import "./InvoiceRegistry420.sol";
 
 interface IPaymentRefundAccounting420 {
     function refundAccounting(
@@ -43,6 +45,8 @@ contract RefundManager420 is GenesisResidentAccess420 {
     mapping(bytes32 => uint256) public authorizedRefundEscrow;
     mapping(bytes32 => bool) public fundedRefundExecuted;
     bool private refundPayoutLocked;
+
+    mapping(bytes32 => uint256) public deliveredByPayment;
 
     event PaymentRegistrySet(address indexed registry);
     event RefundRecorded(bytes32 indexed refundId, bytes32 indexed paymentId, address settlementAsset, uint256 amount);
@@ -208,6 +212,48 @@ contract RefundManager420 is GenesisResidentAccess420 {
         refundedByPayment[paymentId] += amount;
         refunds[refundId] = Refund(paymentId, asset, recipient, amount, reasonHash, uint64(block.timestamp));
         fundedRefundExecuted[refundId] = true;
+        deliveredByPayment[paymentId] += amount;
+        _deliver(asset, recipient, amount);
+        emit RefundRecorded(refundId, paymentId, asset, amount);
+        emit FundedRefundPaid(refundId, paymentId, recipient, asset, amount);
+    }
+
+    function payMerchantRefund(bytes32 refundId, bytes32 paymentId, uint256 amount, bytes32 reasonHash)
+        external payable refundNonReentrant
+    {
+        _requireOperational(PayIds420.ACTION_REFUND, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.OUTBOUND);
+        require(paymentRegistry == _resolveRequired(PayIds420.PAYMENT_REGISTRY), "payment registry");
+        require(refundId != bytes32(0) && refunds[refundId].paymentId == bytes32(0) && amount > 0, "invalid/exists");
+        PaymentRegistry420 ledger = PaymentRegistry420(paymentRegistry);
+        PaymentRegistry420.Payment memory payment = ledger.getPayment(paymentId);
+        InvoiceRegistry420.Invoice memory invoice =
+            InvoiceRegistry420(_resolveRequired(PayIds420.INVOICE_REGISTRY)).getInvoice(payment.invoiceId);
+        require(msg.sender == payment.merchant && msg.sender == invoice.merchant
+            && block.timestamp <= invoice.refundUntil, "refund controller/window");
+        MerchantRegistry420 merchants = MerchantRegistry420(_resolveRequired(PayIds420.MERCHANT_REGISTRY));
+        (address controller,,,, bool active,) = merchants.merchants(invoice.merchantId);
+        require(active && controller == msg.sender, "merchant inactive");
+        address asset = payment.settlementAsset;
+        _canonicalSettlementAsset(asset);
+        ledger.applyMerchantRefund(paymentId, amount);
+        refundedByPayment[paymentId] += amount;
+        deliveredByPayment[paymentId] += amount;
+        refunds[refundId] = Refund(paymentId, asset, payment.payer, amount, reasonHash, uint64(block.timestamp));
+        fundedRefundExecuted[refundId] = true;
+        if (asset == address(0)) require(msg.value == amount, "native refund funding");
+        else {
+            require(msg.value == 0, "unexpected native");
+            IERC20RefundAsset420 token = IERC20RefundAsset420(asset);
+            uint256 beforeContract = token.balanceOf(address(this));
+            require(token.transferFrom(msg.sender, address(this), amount), "refund funding transfer");
+            require(token.balanceOf(address(this)) - beforeContract == amount, "refund funding delta");
+        }
+        _deliver(asset, payment.payer, amount);
+        emit RefundRecorded(refundId, paymentId, asset, amount);
+        emit FundedRefundPaid(refundId, paymentId, payment.payer, asset, amount);
+    }
+
+    function _deliver(address asset, address recipient, uint256 amount) private {
         if (asset == address(0)) {
             (bool paid,) = payable(recipient).call{value: amount}("");
             require(paid, "native refund transfer");
@@ -219,8 +265,5 @@ contract RefundManager420 is GenesisResidentAccess420 {
             require(token.balanceOf(recipient) - beforeRecipient == amount, "recipient delta");
             require(beforeContract - token.balanceOf(address(this)) == amount, "payout delta");
         }
-        emit RefundRecorded(refundId, paymentId, asset, amount);
-        emit FundedRefundPaid(refundId, paymentId, recipient, asset, amount);
     }
-
 }

@@ -10,6 +10,8 @@ on:
       - 'contracts/src/pay/PaymentRegistry420.sol'
       - 'contracts/src/pay/PaymentRouter420.sol'
       - 'contracts/src/pay/SettlementRouter420.sol'
+      - 'contracts/src/pay/RefundManager420.sol'
+      - 'contracts/test/PayAudit4SettlementAndAccounting420.t.sol'
       - 'contracts/test/PayNativeInvoiceCheckout420.t.sol'
       - '.github/workflows/pay-native-checkout.yml'
   workflow_dispatch:

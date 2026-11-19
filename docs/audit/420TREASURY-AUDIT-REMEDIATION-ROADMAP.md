@@ -145,6 +145,13 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: [TREASURY-REC-6 qualification](420TREASURY-REC-6-QUALIFICATION.md). REC-5 security closeout remains open; live deployment/receipt correlation remains REC-8/AUDIT-8.
 - Next canonical reconciliation step: **TREASURY-REC-7 — Indexer, Explorer and Analytics Reconciliation**.
 
+## TREASURY-REC-7 — Indexer, Explorer and Analytics Reconciliation — COMPLETE (local scope)
+- PR #1229 established the shared Treasury ABI/event and derived TypeScript read boundary, durable recovery and SDK coverage. Original exact-head [qualification 44597319428](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44597319428) passed (31 TypeScript tests, 1 SDK test, seven compiled event descriptors).
+- PR #1230 reconciles the actual Go Indexer runtime, canonical checkpoint/receipt provenance and Treasury lifecycle projections, real Explorer/Analytics HTTP integration, capability inventory and fail-closed deployment binding. No payment or settlement authority is attributed to the Indexer.
+- Exact executable SHA `3d655c47a674bf4e2e1fadaf19973c6129deea24`: [qualification 44610899469](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44610899469) PASS (307 top-level tests, 354 including subtests, race checks, vet, 15/15 reader mappings). EXP-1.7/1.8 and Rights audit configuration fixes passed their respective exact-head workflows.
+- Durable evidence: [TREASURY-REC-7 qualification](420TREASURY-REC-7-QUALIFICATION.md). Live deployment addresses and actual release/receipt evidence remain REC-8/AUDIT-8; REC-5 security closeout remains open.
+- Next canonical reconciliation step: **TREASURY-REC-8 — Release materialization and deployment preparation**.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

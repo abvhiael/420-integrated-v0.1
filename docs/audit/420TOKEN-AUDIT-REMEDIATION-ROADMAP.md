@@ -1,8 +1,8 @@
 # 420Token audit remediation roadmap
 
-Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT QUALIFICATION COMPLETE; TOKEN-AUDIT-3 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
+Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT AND TOKEN-AUDIT-3 ECONOMIC QUALIFICATION COMPLETE; TOKEN-AUDIT-4 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
 
-Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation and TOKEN-AUDIT-2 contract qualification are complete; next: TOKEN-AUDIT-3.
+Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation, TOKEN-AUDIT-2 contract qualification and TOKEN-AUDIT-3 economic qualification are complete; next: TOKEN-AUDIT-4.
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 
@@ -21,10 +21,11 @@ This audit preserves the frozen Genesis definition in `config/genesis-applicatio
 - Add a Token-owned CI gate with exact-head checking, formatting/build/tests and targeted static analysis.
 - Current qualification: `d31f48de7956a25196f84019574c06fba402d855`, PR #1235, Token run 44629627298, qualify 135932626685 and security 135932626096 both PASS. Dynamic chain permit domain, ERC721 approval existence, ERC1155 `uri(uint256)` and retained legacy getter corrected. 30/30 tests in each profile; four fuzz properties at 2,500/100,000 runs each; three invariant campaigns at 128/4,096 runs each with zero reverts. Slither high-severity gate PASS. Evidence: `docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json`. No testnet or overall repository-release qualification claimed.
 
-## TOKEN-AUDIT-3 — real Treasury/Vault integration
+## TOKEN-AUDIT-3 — real Treasury/Vault integration — **COMPLETE (CURRENT REQUALIFICATION)**
 - Replace mock-only economic confidence with a retained integration test against the real Vault registry/accounting/deposit path.
 - Prove the configured fee sink is the canonical token-creation community-revenue vault identity and the full 42 native 420 enters Vault accounting atomically.
 - Document the deployment trust boundary: vault ID validation alone is not live deployment identity proof; release qualification must bind the factory constructor to the verified registered Vault address/code/config.
+- Current qualification: `a7ce71b366804631a422388eb7dbbf9ca1ddffd4`, PR #1236, economic workflow run 44631438474 / job 135938798869 PASS. All 10 scoped tests passed, including 50,000 fuzz cases; all eight templates reconciled exact 42 native 420 against the real Vault registry, authorization, accounting, capability registry and deposit implementation. Evidence: `docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json`. No production contract change was required, no prior passing suite repeated. Live deployment identity remains TOKEN-AUDIT-4/8.
 
 ## TOKEN-AUDIT-4 — deployment, Registry and address materialization
 - Preserve `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`; never allocate or resurrect historical candidate address `0x0455`.

@@ -1,0 +1,34 @@
+{
+  "step": "TOKEN-AUDIT-3",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "26e66f1459c1559647277ee48ba6739909ef3b94",
+  "candidate_sha": "HEAD",
+  "classification": "targeted-integration-qualification",
+  "scope": [
+    "contracts/test/token-economics/TokenEconomics420.t.sol",
+    "scripts/qualify-420token-economics.py",
+    ".github/workflows/420token-economics.yml",
+    ".qualification/candidates/TOKEN-AUDIT-3-treasury-economics.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/qualify-420token-economics.py",
+      "owner": "420Token fee and Treasury/Vault integration"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-economics.yml"
+  ],
+  "exit_criteria": [
+    "All eight templates pay exactly 42 native 420 into the registered real AssetVault through VaultAccounting",
+    "Reject invalid fee, disabled template, frozen/winding-down/closed state, incorrect registered and accounting dependencies, unauthorized direction and reentrant callbacks with atomic rollback",
+    "Reconcile immutable factory destination, actual local release binding, accounting events and preexisting unrecorded funds; preserve live release trust boundary and prior evidence"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

@@ -17,10 +17,10 @@
   "status": "REPOSITORY_REQUALIFICATION_REQUIRED",
   "repositoryQualified": false,
   "liveTestnetQualified": false,
-  "nextRoadmapStep": "TOKEN-AUDIT-3",
+  "nextRoadmapStep": "TOKEN-AUDIT-4",
   "blockers": [
-    "TOKEN-AUDIT-3 through TOKEN-AUDIT-7 local remediation and current-head qualification remain open",
+    "TOKEN-AUDIT-4 through TOKEN-AUDIT-7 local remediation and current-head qualification remain open",
     "TOKEN-AUDIT-8 requires the approved production-equivalent 420Integrated testnet and real Vault/Registry/Wallet infrastructure"
   ],
-  "note": "October TOKEN-AUDIT-1 through TOKEN-AUDIT-7 qualification is historical evidence. Current reconciliation: docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md. TOKEN-AUDIT-2 contract qualification passed on d31f48de7956a25196f84019574c06fba402d855 (run 44629627298); evidence docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json. No live or whole-application release qualification is claimed."
+  "note": "October TOKEN-AUDIT-1 through TOKEN-AUDIT-7 qualification is historical evidence. Current reconciliation: docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md. TOKEN-AUDIT-2 contract qualification passed on d31f48de7956a25196f84019574c06fba402d855 (run 44629627298); evidence docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json. TOKEN-AUDIT-3 economic qualification passed on a7ce71b366804631a422388eb7dbbf9ca1ddffd4 (run 44631438474); evidence docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json. No live or whole-application release qualification is claimed."
 }

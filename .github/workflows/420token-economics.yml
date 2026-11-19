@@ -1,0 +1,37 @@
+name: 420Token economic qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/token-economics/**'
+      - 'contracts/src/token/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/src/system/CapabilityRegistry420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/interfaces/I420System.sol'
+      - 'contracts/src/interfaces/genesis/ICapabilityRegistry*.sol'
+      - 'contracts/src/revenue/DevelopmentCompensation*.sol'
+      - 'contracts/config/420token-genesis.json'
+      - 'contracts/foundry.toml'
+      - 'scripts/qualify-420token-economics.py'
+      - '.github/workflows/420token-economics.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: token-economics-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  economics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Qualify exact-head real Vault economics
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 scripts/qualify-420token-economics.py

@@ -14,6 +14,7 @@ import (
 type TreasuryProjection struct {
  Data json.RawMessage `json:"data"`
  Authoritative bool `json:"authoritative"`
+ ReleaseEvidence string `json:"releaseEvidence"`
  VaultReleaseVerified bool `json:"vaultReleaseVerified"`
 }
 
@@ -29,5 +30,6 @@ func (c *Client) TreasuryRead(ctx context.Context, chain uint64, kind,id string)
   return out,err
  }
  out.Data=env.Data
+ if kind=="disbursements"{out.ReleaseEvidence="Treasury commitment only; Vault release not verified"}
  return out,nil
 }

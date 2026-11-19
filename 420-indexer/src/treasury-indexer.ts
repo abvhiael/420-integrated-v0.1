@@ -18,6 +18,16 @@ export async function createTreasuryIndexer420(source: ChainSource420, db: Trans
   if (!genesis || genesis.number !== 0n || genesis.hash.toLowerCase() !== genesisHash.toLowerCase()) throw new Error('Treasury source genesis mismatch');
   const descriptors = bindTreasuryDescriptors420(treasuryDescriptorsFromArtifacts420(manifest, artifacts), addresses);
   const protocols = new ProtocolProjection420(db, new ProtocolDecoderRegistry420(descriptors));
-  return new IndexerIngestor420(source, new SqlCheckpointStore420(db, chainId),
+  const pinned = new Proxy(source, { get(target, property) {
+    if (property === 'chainId') return async () => {
+      if (await target.chainId() !== chainId) throw new Error('Treasury source chain mismatch');
+      const block = await target.getBlockByNumber(0n);
+      if (!block || block.number !== 0n || block.hash.toLowerCase() !== genesisHash.toLowerCase()) throw new Error('Treasury source genesis mismatch');
+      return chainId;
+    };
+    const value = Reflect.get(target, property, target);
+    return typeof value === 'function' ? value.bind(target) : value;
+  } });
+  return new IndexerIngestor420(pinned, new SqlCheckpointStore420(db, chainId),
     new CoreProjectionConsumer420(db, protocols, chainId), options, new SqlCanonicalHistoryStore420(db, chainId));
 }

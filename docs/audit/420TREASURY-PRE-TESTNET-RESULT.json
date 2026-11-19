@@ -1,0 +1,68 @@
+{
+  "artifactIdentities": {
+    "CapabilityRegistry420": {
+      "abiHash": "0x748d9da4d70add5bd01347671b05cc0f1ba43ea37f8f6376f1ac502cc65591b2",
+      "artifactSha256": "0b868d2cf8cd639596f0ce6cde9511e833dcbc4210dffdb38d661d15314846f4",
+      "creationHash": "0xae02fb9becb1b25e00ebfb2a55f8760446821454ba99110001d18452f3582f9c",
+      "runtimeTemplateHash": "0xf2306ea45ae8c9caf7a2c5edb91a7e292c5511bf8fd444b78fa024b020b4292a"
+    },
+    "TreasuryAuthorization420": {
+      "abiHash": "0x5c057186c07601d47631c39df8dfd68b0e085a863de3772d71c2a6051a1fc62e",
+      "artifactSha256": "626b2720b69f9550543f089c339c64b3c617d1bd0f581995845e0357d72e1dbb",
+      "creationHash": "0x09bc0646a359e6f23f262313a9465529ab07d60d3950322e26ad39af379fb92f",
+      "runtimeTemplateHash": "0xcc219dbfc5f50b8f91ca5b44f91ab19a55763216cec9f093ceff3449260d24c8"
+    },
+    "TreasuryBudgetRegistry420": {
+      "abiHash": "0x31626fb6ec0fef002ac837bb908bbbba71e5b6273cf846deaa6cbdafa6589e78",
+      "artifactSha256": "886df11c0baf8eac208fc1da4666e7815b3071897f817ac0947447f1ad9bf770",
+      "creationHash": "0xe623376270053c76d7dcdd999ae3ddebd52b402ec8262573db0d997e2f61fffa",
+      "runtimeTemplateHash": "0x1a9c849e3f7da63ca7035537b96f3b5e94196f4422d154d8393a8aa9f09aa35c"
+    },
+    "TreasuryDisbursementRegistry420": {
+      "abiHash": "0xb74f7d5dd6a71d677dcc2c0843f98c31b9dbf4e0ba1331f952911359604fcfd3",
+      "artifactSha256": "d6fda1f8cdbcb6c5a0b3add25ace57658aa59b796852fe3b754ffa49d063c822",
+      "creationHash": "0xc6fc6094b895852b25f64ae94dc9ab6fb0cc81efc39506a508df553e509b0701",
+      "runtimeTemplateHash": "0x6f60c2c06dd60e7687af2ed366d52443df4cd341cbc2a3a5987798d283d02325"
+    },
+    "TreasuryPolicyRegistry420": {
+      "abiHash": "0xaea0e35a4931752816058f858608f60cab89b2fe9c542ffc7aa530140d503487",
+      "artifactSha256": "c1a80728b438f86c6e08fdf377aa35d1d35375ad9557700e0bba3a2ac660b9ff",
+      "creationHash": "0xb640b6c44181cd6d1eff8d85a391ae2661a0b2455be5c2298d87bc75231491a0",
+      "runtimeTemplateHash": "0x8cc3d1dcd2cb84f6b01ea245f567c0143d77825706f7053ea3423296bd92fd8e"
+    },
+    "TreasuryReleaseExecutor420": {
+      "abiHash": "0x949c27fdfbf23a6ca16ffebaa8e431a461cd1a35066046c1d45b8e8d22ea1b7f",
+      "artifactSha256": "545a1bc90f3f33dc3f2c4778439f08d323947d0366687bfabccacd292f371839",
+      "creationHash": "0x5e4873da99c94555b47254caf9652b426d58b559623e7589b2a7dd63c9d39d53",
+      "runtimeTemplateHash": "0xe6b175419f6885b4010bf2807a66953f8bcc6c381895a3c0a4f3b868910aab3d"
+    },
+    "TreasuryRouter420": {
+      "abiHash": "0x5d24b8aa20595fc81b44641911393c99e91dab8c1378a17143bdc57abe79157c",
+      "artifactSha256": "2c337e20c20cdfc47ea4bf1f73adfc7ef1e1a8abc0a3e52650013d1010d3f6fa",
+      "creationHash": "0x9abffc5f1823d5d9c9b7e1d6f4f05bb352ddf5440a45ab68a5012bbbf2b1de47",
+      "runtimeTemplateHash": "0xe877e1be27e2372fbc4e353b5860bffa7052436ce178d071acaa202843fce6c8"
+    }
+  },
+  "build": "PASS",
+  "candidate": "bbcbb9e3bb746ba6fa9ca924ad7134a737cb941f",
+  "externalReviewComplete": false,
+  "foundrySha256": "7998cf0663907daced5812fbef76484e4d2dc1ca7df24c847f6c2ea3119d7d04",
+  "liveAcceptanceComplete": false,
+  "localChecks": "PASS",
+  "releaseManifestHash": "0xc2d1346c2de4b61018c2e926b124812ae899a21b748336272853665ec94830cc",
+  "releaseSha256": "6035c9ada7f74ff62a7bcbe88801242db7d6edc3c254e4cdd925905f6e787bcb",
+  "releaseSource": "70895129b186e98d98e3aa5bb4b02f4d139750a2",
+  "result": "PASS",
+  "reviewSha256": "2dacd5a54a1626e2d154df829847371a2fd0de45d0a429de99a9c4fd217f6f2f",
+  "schema": "420-treasury-rec10-readiness-v1",
+  "securityFinal": "82f4221e1461a06f36db7596494c25027a11052b",
+  "securitySource": "282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c",
+  "tree": "5b57b2e563d61217b2d7d2bf4d79d4a50534728f",
+  "workflowRun": 44622141978,
+  "artifact": {
+    "id": 14578465408,
+    "digest": "sha256:4796343e5e4d6b8f82f889cf4899dc9539bc11fccc4f707b68070c60cd4bb907",
+    "expiresAt": "2026-11-26T21:46:34Z"
+  },
+  "evidenceScope": "Compact permanent record of actual CI output; full input hashes, prior run identities and release bundle retained in the linked artifact and reproducible from the pinned source. Original test results remain bound to original executions."
+}

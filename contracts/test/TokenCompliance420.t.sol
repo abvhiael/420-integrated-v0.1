@@ -7,28 +7,45 @@ import "../src/token/ERC721Template420.sol";
 import "../src/token/ERC1155Template420.sol";
 
 interface VmTokenCompliance420 {
-    function prank(address who) external;
-    function expectRevert(bytes4 selector) external;
-    function chainId(uint256 chain) external;
-    function addr(uint256 key) external returns (address);
-    function sign(uint256 key, bytes32 digest) external returns (uint8, bytes32, bytes32);
+    function prank(
+        address who
+    ) external;
+    function expectRevert(
+        bytes4 selector
+    ) external;
+    function chainId(
+        uint256 chain
+    ) external;
+    function addr(
+        uint256 key
+    ) external returns (address);
+    function sign(
+        uint256 key,
+        bytes32 digest
+    ) external returns (uint8, bytes32, bytes32);
 }
 
 contract TokenPermitCompliance420Test {
     VmTokenCompliance420 constant vm = VmTokenCompliance420(address(uint160(uint256(keccak256("hevm cheat code")))));
     uint256 constant KEY = 0x420420;
     uint256 constant CURVE_ORDER = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141;
-    bytes32 constant TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    bytes32 constant TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
     address constant SPENDER = address(0xB0B);
     ERC20Template420 token;
     address holder;
 
     function setUp() public {
         holder = vm.addr(KEY);
-        token = new ERC20Template420("Permit", "PMT", holder, 100 ether, 0, false, false, true, false, TokenIds420.ERC20_PERMIT);
+        token = new ERC20Template420(
+            "Permit", "PMT", holder, 100 ether, 0, false, false, true, false, TokenIds420.ERC20_PERMIT
+        );
     }
 
-    function _domain(address target, uint256 chain) private pure returns (bytes32) {
+    function _domain(
+        address target,
+        uint256 chain
+    ) private pure returns (bytes32) {
         return keccak256(
             abi.encode(
                 keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
@@ -47,12 +64,17 @@ contract TokenPermitCompliance420Test {
         uint256 deadline
     ) private returns (uint8 v, bytes32 r, bytes32 s) {
         bytes32 digest = keccak256(
-            abi.encodePacked("\x19\x01", domain, keccak256(abi.encode(TYPEHASH, holder, SPENDER, amount, nonce, deadline)))
+            abi.encodePacked(
+                "\x19\x01", domain, keccak256(abi.encode(TYPEHASH, holder, SPENDER, amount, nonce, deadline))
+            )
         );
         return vm.sign(KEY, digest);
     }
 
-    function testFuzzPermitCurrentChainAndContract(uint256 amount, uint64 nextChain) public {
+    function testFuzzPermitCurrentChainAndContract(
+        uint256 amount,
+        uint64 nextChain
+    ) public {
         uint256 original = block.chainid;
         uint256 next = uint256(nextChain) + 1;
         if (next == original) ++next;
@@ -96,27 +118,44 @@ contract TokenPermitCompliance420Test {
 }
 
 interface IERC721ApprovalQuery420 {
-    function getApproved(uint256 id) external view returns (address);
+    function getApproved(
+        uint256 id
+    ) external view returns (address);
 }
 
 interface IERC1155MetadataQuery420 {
-    function uri(uint256 id) external view returns (string memory);
+    function uri(
+        uint256 id
+    ) external view returns (string memory);
 }
 
 contract TokenReceiverCompliance420 is IERC721Receiver420, IERC1155Receiver420 {
     bool public reject;
     uint256 public calls;
 
-    function setReject(bool value) external {
+    function setReject(
+        bool value
+    ) external {
         reject = value;
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata) external returns (bytes4) {
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external returns (bytes4) {
         ++calls;
         return reject ? bytes4(0) : IERC721Receiver420.onERC721Received.selector;
     }
 
-    function onERC1155Received(address, address, uint256, uint256, bytes calldata) external returns (bytes4) {
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external returns (bytes4) {
         ++calls;
         return reject ? bytes4(0) : IERC1155Receiver420.onERC1155Received.selector;
     }
@@ -141,10 +180,14 @@ contract TokenNFTCompliance420Test {
     ERC721Template420 nft;
 
     function setUp() public {
-        nft = new ERC721Template420("Collection", "NFT", "ipfs://collection", address(this), TokenIds420.ERC721_COLLECTION);
+        nft = new ERC721Template420(
+            "Collection", "NFT", "ipfs://collection", address(this), TokenIds420.ERC721_COLLECTION
+        );
     }
 
-    function testFuzzApprovalExistenceClearingAndAuthorization(uint256 id) public {
+    function testFuzzApprovalExistenceClearingAndAuthorization(
+        uint256 id
+    ) public {
         IERC721ApprovalQuery420 approvals = IERC721ApprovalQuery420(address(nft));
         require(nft.supportsInterface(0x80ac58cd) && nft.supportsInterface(0x5b5e139f), "ERC721 interface");
         require(!nft.supportsInterface(0xffffffff), "invalid interface");
@@ -208,7 +251,9 @@ contract TokenMultiCompliance420Test {
         multi = new ERC1155Template420(URI, address(this), TokenIds420.ERC1155_MULTI);
     }
 
-    function testFuzzMetadataInterface(uint256 id) public view {
+    function testFuzzMetadataInterface(
+        uint256 id
+    ) public view {
         require(multi.supportsInterface(0xd9b67a26) && multi.supportsInterface(0x0e89341c), "ERC1155 interface");
         require(!multi.supportsInterface(0xffffffff), "invalid interface");
         string memory metadata = IERC1155MetadataQuery420(address(multi)).uri(id);
@@ -216,7 +261,10 @@ contract TokenMultiCompliance420Test {
         require(keccak256(bytes(multi.uri())) == keccak256(bytes(metadata)), "legacy metadata");
     }
 
-    function testFuzzBatchAuthorizationAndDuplicateIds(uint256 id, uint96 raw) public {
+    function testFuzzBatchAuthorizationAndDuplicateIds(
+        uint256 id,
+        uint96 raw
+    ) public {
         uint256 amount = uint256(raw) + 1;
         multi.mint(ALICE, id, amount * 2, "");
         uint256[] memory ids = new uint256[](2);
@@ -251,7 +299,9 @@ contract TokenMultiCompliance420Test {
         receiver.setReject(false);
         vm.prank(BOB);
         multi.safeBatchTransferFrom(ALICE, address(receiver), ids, values, "");
-        require(multi.balanceOf(ALICE, id) == 0 && multi.balanceOf(address(receiver), id) == amount * 2, "batch balance");
+        require(
+            multi.balanceOf(ALICE, id) == 0 && multi.balanceOf(address(receiver), id) == amount * 2, "batch balance"
+        );
         require(receiver.calls() == 1, "batch receiver");
     }
 

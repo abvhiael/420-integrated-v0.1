@@ -15,19 +15,24 @@
     "docs/apps/token/security.md",
     "contracts/test/TokenCompliance420.t.sol",
     "contracts/test/TokenTemplateInvariant420.t.sol",
-    ".qualification/candidates/TOKEN-AUDIT-2-contract-compliance.json"
+    ".qualification/candidates/TOKEN-AUDIT-2-contract-compliance.json",
+    "scripts/stage-420token-qualification.py"
   ],
   "tests": [
+    {
+      "command": "python3 scripts/stage-420token-qualification.py <fresh-output>",
+      "owner": "420Token exact import closure"
+    },
     {
       "command": "forge fmt --check src/token test/TokenCompliance420.t.sol test/TokenTemplateInvariant420.t.sol",
       "owner": "420Token"
     },
     {
-      "command": "FOUNDRY_PROFILE=pr forge test --match-path 'test/Token*.t.sol'",
+      "command": "FOUNDRY_PROFILE=pr forge test --root <staged-token-closure> --match-path 'test/Token*.t.sol'",
       "owner": "420Token"
     },
     {
-      "command": "FOUNDRY_PROFILE=hardening forge test --match-path 'test/Token*.t.sol'",
+      "command": "FOUNDRY_PROFILE=hardening forge test --root <staged-token-closure> --match-path 'test/Token*.t.sol'",
       "owner": "420Token"
     },
     {

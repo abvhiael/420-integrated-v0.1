@@ -8,7 +8,9 @@ import "../src/token/ERC1155Template420.sol";
 import "./helpers/InvariantTarget420.sol";
 
 interface VmTokenInvariant420 {
-    function prank(address who) external;
+    function prank(
+        address who
+    ) external;
 }
 
 contract TokenERC20InvariantHandler420 {
@@ -24,10 +26,11 @@ contract TokenERC20InvariantHandler420 {
     uint256 public constant VOTES_SUPPLY = 100 ether;
 
     constructor() {
-        capped = new ERC20Template420("Cap", "CAP", address(this), 0, CAP, true, false, false, false, TokenIds420.ERC20_CAPPED);
-        burnable = new ERC20Template420(
-            "Burn", "BRN", ALICE, CAP, 0, false, true, false, false, TokenIds420.ERC20_BURNABLE
+        capped = new ERC20Template420(
+            "Cap", "CAP", address(this), 0, CAP, true, false, false, false, TokenIds420.ERC20_CAPPED
         );
+        burnable =
+            new ERC20Template420("Burn", "BRN", ALICE, CAP, 0, false, true, false, false, TokenIds420.ERC20_BURNABLE);
         votes = new ERC20Template420(
             "Vote", "VOTE", ALICE, VOTES_SUPPLY, 0, false, false, true, true, TokenIds420.ERC20_VOTES
         );
@@ -38,14 +41,21 @@ contract TokenERC20InvariantHandler420 {
         votes.delegate(BOB);
     }
 
-    function mintCapped(bool toBob, uint96 raw) external {
+    function mintCapped(
+        bool toBob,
+        uint96 raw
+    ) external {
         uint256 room = CAP - expectedCapped;
         uint256 amount = uint256(raw) % (room + 1);
         capped.mint(toBob ? BOB : ALICE, amount);
         expectedCapped += amount;
     }
 
-    function move(bool fromBob, uint96 raw, uint8 profile) external {
+    function move(
+        bool fromBob,
+        uint96 raw,
+        uint8 profile
+    ) external {
         address from = fromBob ? BOB : ALICE;
         address to = fromBob ? ALICE : BOB;
         ERC20Template420 token = profile % 3 == 0 ? capped : profile % 3 == 1 ? burnable : votes;
@@ -56,7 +66,10 @@ contract TokenERC20InvariantHandler420 {
         token.transferFrom(from, to, amount);
     }
 
-    function burn(bool fromBob, uint96 raw) external {
+    function burn(
+        bool fromBob,
+        uint96 raw
+    ) external {
         address from = fromBob ? BOB : ALICE;
         uint256 amount = uint256(raw) % (burnable.balanceOf(from) + 1);
         vm.prank(from);
@@ -102,7 +115,11 @@ contract TokenNFTInvariantHandler420 {
         nft = new ERC721Template420("NFT", "NFT", "ipfs://", address(this), TokenIds420.ERC721_COLLECTION);
     }
 
-    function step(uint8 rawId, uint8 action, bool toBob) external {
+    function step(
+        uint8 rawId,
+        uint8 action,
+        bool toBob
+    ) external {
         uint256 id = rawId % 8;
         address owner = modelOwner[id];
         address to = toBob ? BOB : ALICE;
@@ -171,7 +188,12 @@ contract TokenMultiInvariantHandler420 {
         multi = new ERC1155Template420("ipfs://{id}", address(this), TokenIds420.ERC1155_MULTI);
     }
 
-    function step(uint8 rawId, uint8 action, uint64 rawAmount, bool fromBob) external {
+    function step(
+        uint8 rawId,
+        uint8 action,
+        uint64 rawAmount,
+        bool fromBob
+    ) external {
         uint256 id = rawId % 8;
         address from = fromBob ? BOB : ALICE;
         address to = fromBob ? ALICE : BOB;

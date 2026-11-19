@@ -297,6 +297,7 @@ contract PayAudit4SettlementAndAccounting420Test {
 
         refunds.recordRefund(keccak256("refund-1"), paymentId, address(token), address(this), 40, 90, bytes32(0));
         require(refunds.refundedByPayment(paymentId) == 40, "authorized refund not recorded");
+        require(refunds.deliveredByPayment(paymentId) == 0, "evidence reported as an asset transfer");
 
         (bool overAuthorized,) = address(refunds)
             .call(

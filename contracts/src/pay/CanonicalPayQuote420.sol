@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "./InvoiceRegistry420.sol";
 import "./MerchantRegistry420.sol";
+import "./SettlementRouter420.sol";
 import "../interfaces/genesis/IFeeQuote420.sol";
 import "../interfaces/ICanonicalSettlement420.sol";
 import "../swap/SwapIds420.sol";
@@ -28,6 +29,15 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
         uint64 expiresAt;
     }
 
+    struct NativePolicy {
+        address[] recipients;
+        uint16[] bps;
+        uint8 primary;
+        address tipRecipient;
+        uint256 tipMaximum;
+        uint256 tip;
+    }
+
     struct ConversionRequest {
         bytes32 invoiceId;
         address payer;
@@ -49,6 +59,8 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
         bytes3 currency;
         bytes32 assetPolicy;
         uint16 maxSlippageBps;
+        bytes32 settlementPlan;
+        bytes32 tipPolicy;
     }
 
     struct ConversionQuote {
@@ -74,12 +86,47 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
         public view returns (NativeQuote memory q)
     {
         InvoiceTerms memory i = _invoiceTerms(invoiceId, payer, payerNonce, quotedAt);
+        require(i.settlementPlan == bytes32(0) && i.tipPolicy == bytes32(0), "unsupported invoice policy");
         require(i.currency == bytes3("420") && i.assetPolicy == nativeAcceptedAssetsHash, "native asset");
         _canonicalSettlementAsset(address(0));
         q = NativeQuote({
             quoteId: keccak256(abi.encode(address(this), block.chainid, i.root, payer, payerNonce, quotedAt)),
             merchant: i.merchant, recipient: i.recipient, amount: i.amount, expiresAt: i.expiresAt
         });
+    }
+
+    function splitCommitment(address[] calldata recipients, uint16[] calldata bps, uint8 primary)
+        public pure returns (bytes32)
+    {
+        return keccak256(abi.encode(keccak256("420/PAY/SPLIT/V1"), recipients, bps, primary));
+    }
+
+    function tipCommitment(address recipient, uint256 maximum) public pure returns (bytes32) {
+        return keccak256(abi.encode(keccak256("420/PAY/TIP/V1"), recipient, maximum));
+    }
+
+    function quoteNativePolicy(
+        bytes32 invoiceId, address payer, uint256 payerNonce, uint64 quotedAt, NativePolicy calldata policy
+    ) public view returns (NativeQuote memory q) {
+        InvoiceTerms memory i = _invoiceTerms(invoiceId, payer, payerNonce, quotedAt);
+        require(i.currency == bytes3("420") && i.assetPolicy == nativeAcceptedAssetsHash, "native asset");
+        _canonicalSettlementAsset(address(0));
+        SettlementRouter420(_resolveRequired(PayIds420.SETTLEMENT_ROUTER))
+            .validateSplit(policy.recipients, policy.bps, policy.primary);
+        require(policy.recipients[policy.primary] == i.recipient, "primary payout");
+        if (i.settlementPlan == bytes32(0)) require(policy.recipients.length == 1, "unexpected split");
+        else require(i.settlementPlan == splitCommitment(policy.recipients, policy.bps, policy.primary), "split plan");
+        if (i.tipPolicy == bytes32(0)) {
+            require(policy.tipRecipient == address(0) && policy.tipMaximum == 0 && policy.tip == 0, "unexpected tip");
+        } else {
+            require(policy.tipRecipient != address(0) && policy.tipMaximum > 0 && policy.tip <= policy.tipMaximum
+                && i.tipPolicy == tipCommitment(policy.tipRecipient, policy.tipMaximum), "tip policy");
+        }
+        require(policy.tip <= type(uint256).max - i.amount, "total overflow");
+        q = NativeQuote(
+            keccak256(abi.encode(address(this), block.chainid, i.root, payer, payerNonce, quotedAt, policy)),
+            i.merchant, i.recipient, i.amount, i.expiresAt
+        );
     }
 
     function conversionAssetCommitment(bytes32 marketId, address input, address settlement)
@@ -90,6 +137,7 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
 
     function quoteConversion(ConversionRequest memory r) public view returns (ConversionQuote memory q) {
         InvoiceTerms memory i = _invoiceTerms(r.invoiceId, r.payer, r.payerNonce, r.quotedAt);
+        require(i.settlementPlan == bytes32(0) && i.tipPolicy == bytes32(0), "unsupported invoice policy");
         require(r.inputAsset != address(0) && r.settlementAsset != address(0) && r.inputAsset != r.settlementAsset,
             "conversion pair");
         require(i.assetPolicy == conversionAssetCommitment(r.marketId, r.inputAsset, r.settlementAsset),
@@ -130,7 +178,6 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
         InvoiceRegistry420 invoices = InvoiceRegistry420(_resolveRequired(PayIds420.INVOICE_REGISTRY));
         InvoiceRegistry420.Invoice memory i = invoices.getInvoice(invoiceId);
         require(i.active && !invoices.isClosed(invoiceId) && block.timestamp <= i.expiresAt, "invoice unavailable");
-        require(i.settlementPlanHash == bytes32(0) && i.tipPolicyHash == bytes32(0), "unsupported invoice policy");
         MerchantRegistry420 merchants = MerchantRegistry420(_resolveRequired(PayIds420.MERCHANT_REGISTRY));
         (address controller,,,, bool active,) = merchants.merchants(i.merchantId);
         require(active && controller == i.merchant, "merchant");
@@ -146,7 +193,8 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
             root: keccak256(abi.encode(invoices.invoiceSigningRoot(invoiceId, i), recipient, version, amount)),
             merchant: controller, recipient: recipient, amount: amount,
             expiresAt: deadline < i.expiresAt ? uint64(deadline) : i.expiresAt,
-            currency: i.currency, assetPolicy: i.acceptedAssetsHash, maxSlippageBps: i.quoteMaxSlippageBps
+            currency: i.currency, assetPolicy: i.acceptedAssetsHash, maxSlippageBps: i.quoteMaxSlippageBps,
+            settlementPlan: i.settlementPlanHash, tipPolicy: i.tipPolicyHash
         });
     }
 

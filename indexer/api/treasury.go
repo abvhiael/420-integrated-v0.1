@@ -31,6 +31,7 @@ func (b *StoreBackend) TreasuryRead(chain uint64,kind,id string)(json.RawMessage
  return treasuryread.Project(*b.treasuryBinding,kind,id,logs)
 }
 func (s *Server) treasury(w http.ResponseWriter,r *http.Request){
+ w.Header().Set("Cache-Control","no-store")
  kind,id:=r.PathValue("kind"),strings.ToLower(r.PathValue("id"))
  q:=r.URL.Query()["chainId"];var chain uint64;var err error
  if len(q)==1{chain,err=strconv.ParseUint(q[0],10,64)}

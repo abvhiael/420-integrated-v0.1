@@ -6,6 +6,12 @@ on:
       - 'analytics/indexerclient/**'
       - 'explorer/indexerclient/**'
       - 'indexer/treasuryread/**'
+      - 'indexer/api/**'
+      - 'indexer/store/**'
+      - 'indexer/cmd/indexer420/**'
+      - 'explorer/service/**'
+      - 'explorer/api/**'
+      - 'scripts/verify-exp-0-1-2-indexer-dependencies.py'
       - 'packages/420-sdk/src/treasury*'
       - 'analytics/metrics/economic.go'
       - 'scripts/verify-treasury-audit-5-descriptor.py'
@@ -14,7 +20,7 @@ permissions:
   contents: read
 jobs:
   qualify:
-    if: startsWith(github.head_ref, 'audit/treasury-rec-7')
+    if: startsWith(github.head_ref, 'audit/treasury-rec-7') && github.head_ref != 'audit/treasury-rec-7-runtime'
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -58,3 +64,23 @@ jobs:
           npm install --no-audit --no-fund --no-package-lock
           npx tsc -p tsconfig.json
           node --test test/treasury-projection.test.mjs
+  runtime:
+    if: github.head_ref == 'audit/treasury-rec-7-runtime'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Treasury runtime, Explorer and Analytics regressions
+        run: go test -v ./indexer/... ./explorer/... ./analytics/indexerclient ./analytics/metrics -count=1
+      - name: Treasury and Explorer race qualification
+        run: go test -race ./indexer/treasuryread ./indexer/api ./indexer/store ./explorer/service ./explorer/api -run Treasury -count=1
+      - name: Explorer source inventory
+        run: python3 scripts/verify-exp-0-1-2-indexer-dependencies.py
+      - name: Go static checks
+        run: go vet ./indexer/... ./explorer/... ./analytics/indexerclient ./analytics/metrics

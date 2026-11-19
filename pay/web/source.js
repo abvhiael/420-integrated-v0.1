@@ -74,6 +74,28 @@ export function createConsumerSource(config, provider) {
     assets,
     connect: wallet.connect,
     disconnect: wallet.revoke,
+    async business(account, merchantId, locationId) {
+      await verify(account);
+      const result = await registry.merchantDashboard(await registry.latestSnapshot(), merchantId, account, locationId);
+      await verify(account);
+      return result;
+    },
+    async submitMerchant(account, action) {
+      await verify(account);
+      return wallet.submitMerchantAction(action);
+    },
+    async merchantReport(account, merchantId, through) {
+      await verify(account);
+      const authorize = async () => {
+        const merchant = await registry.merchantDashboard(await registry.latestSnapshot(), merchantId, account);
+        if (!merchant?.reports) throw new Error('Merchant report access denied.');
+      };
+      await authorize();
+      const result = await registry.accountHistory(await registry.latestSnapshot('finalized'), account, through, merchantId);
+      await authorize();
+      await verify(account);
+      return result;
+    },
     async paymentContext(account) {
       await verify(account);
       const snapshot = await registry.latestSnapshot();

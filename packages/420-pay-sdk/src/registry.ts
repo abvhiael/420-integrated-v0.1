@@ -17,6 +17,16 @@ type OptionalComponent = typeof MERCHANT_REGISTRY | typeof NATIVE_QUOTE_SOURCE;
 type Component = RequiredComponent | OptionalComponent;
 
 const abiWord = (value: bigint) => value.toString(16).padStart(64, '0');
+export const MERCHANT_ACTIONS = {
+  register: 'registerForController(bytes32,address,address)',
+  location: 'setLocation(bytes32,bytes32,bool)',
+  role: 'setRole(bytes32,bytes32,address,uint8)'
+} as const;
+export type MerchantAction =
+  | { kind: 'register'; id: Hex; payout: Hex }
+  | { kind: 'location'; id: Hex; locationId: Hex; active: boolean }
+  | { kind: 'role'; id: Hex; locationId: Hex; account: Hex; role: number };
+const zero = '0'.repeat(64);
 const addressArgument = (value: Hex) => address(value).slice(2).padStart(64, '0');
 export const NATIVE_INVOICE_SIGNATURE = 'payNativeInvoice(bytes32,uint256,uint64,bytes32)';
 
@@ -199,6 +209,28 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     return invoice;
   }
 
+  async function readMerchant(state: {
+    call(to: Hex, data: Hex): Promise<unknown>;
+    component(id: Component): Promise<Hex>;
+  }, id: Hex) {
+    const target = await state.component(MERCHANT_REGISTRY);
+    const result = words(await state.call(target, calldata('merchants(bytes32)', hash(id).slice(2))), 6);
+    if (result.every(word => word === zero)) return { target, merchant: null };
+    const [controller, profile, , status, active] = result;
+    const statusCode = uint(status, 8);
+    const activeCode = uint(active, 8);
+    requirePay(statusCode <= 3n && activeCode <= 1n, 'Invalid merchant registry record');
+    return { target, merchant: { controller: addressWord(controller), profileId: '0x' + profile,
+      status: ['UNVERIFIED', 'REGISTERED', 'CREDENTIALED', 'REGULATED'][Number(statusCode)]!,
+      active: activeCode === 1n } };
+  }
+
+  async function merchantRole(state: { call(to: Hex, data: Hex): Promise<unknown> },
+    target: Hex, id: Hex, location: string, account: Hex) {
+    return uint(words(await state.call(target, calldata('effectiveRole(bytes32,bytes32,address)',
+      hash(id).slice(2), location, addressArgument(account))), 1)[0], 8);
+  }
+
   const transport: PayReadTransport = Object.freeze({
     async read({ component, snapshot, calldata: data }: Parameters<PayReadTransport['read']>[0]) {
       requirePay(component === invoiceView.component || component === paymentView.component, 'Unsupported Pay view');
@@ -276,6 +308,40 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         return Object.freeze({ invoice, recipient: addressWord(primary), chainTime: state.timestamp });
       });
     },
+    async merchantDashboard(snapshot: PaySnapshot, id: Hex, account: Hex, location?: Hex) {
+      return pinned(snapshot, async state => {
+        const { target, merchant } = await readMerchant(state, id);
+        if (!merchant) return null;
+        const controller = merchant.controller === address(account);
+        const selectedLocation = location ? hash(location).slice(2) : zero;
+        const role = merchant.active ? await merchantRole(state, target, id, selectedLocation, account) : 0n;
+        requirePay(controller || role === (location ? 2n : 1n) || (location && role === 3n), 'Merchant access denied');
+        const locationActive = location ? uint(words(await state.call(target, calldata('activeLocations(bytes32,bytes32)',
+          hash(id).slice(2), selectedLocation)), 1)[0], 8) === 1n : false;
+        return { ...merchant, controller, role: Number(role), reports: merchant.active && !location && (controller || role === 1n),
+          locationActive };
+      });
+    },
+    async merchantTransaction(snapshot: PaySnapshot, account: Hex, action: MerchantAction) {
+      return pinned(snapshot, async state => {
+        const { target, merchant } = await readMerchant(state, action.id);
+        const id = hash(action.id).slice(2);
+        if (action.kind === 'register') {
+          requirePay(!merchant, 'Merchant is already registered');
+          return { target, data: calldata(MERCHANT_ACTIONS.register, id,
+            addressArgument(account), addressArgument(action.payout)) };
+        }
+        requirePay(merchant?.active && merchant.controller === address(account), 'Active merchant controller required');
+        if (action.kind === 'location') {
+          requirePay(typeof action.active === 'boolean', 'Invalid location action');
+          return { target, data: calldata(MERCHANT_ACTIONS.location, id, hash(action.locationId).slice(2), abiWord(action.active ? 1n : 0n)) };
+        }
+        requirePay(Number.isInteger(action.role) && action.role >= 0 && action.role <= 3 &&
+          /^0x[0-9a-f]{64}$/i.test(action.locationId), 'Invalid merchant role');
+        return { target, data: calldata(MERCHANT_ACTIONS.role, id, action.locationId.slice(2),
+          addressArgument(action.account), abiWord(BigInt(action.role))) };
+      });
+    },
     async accountBalances(snapshot: PaySnapshot, account: Hex, tokens: readonly { address: Hex; codeHash: Hex }[]) {
       const owner = address(account);
       return pinned(snapshot, async state => {
@@ -289,9 +355,16 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         return [native, ...balances];
       });
     },
-    async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint) {
-      const owner = address(account);
+    async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint, merchantId?: Hex) {
+      let owner = address(account);
+      const tenant = merchantId && hash(merchantId);
       return pinned(snapshot, async state => {
+        if (merchantId) {
+          const { target, merchant } = await readMerchant(state, merchantId);
+          requirePay(merchant?.active && (merchant.controller === owner ||
+            await merchantRole(state, target, merchantId, zero, owner) === 1n), 'Merchant report access denied');
+          owner = merchant.controller;
+        }
         const last = through ?? state.height;
         requirePay(last >= 0n && last <= state.height, 'Invalid Pay history range');
         const first = last > 127n ? last - 127n : 0n;
@@ -327,12 +400,17 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
           }));
         }
         const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+        const invoices = merchantId ? await state.component(invoiceView.component) : null;
+        const invoiceReader = invoices && createPayReader({ read: ({ calldata }) => state.call(invoices, calldata) }, snapshot);
         const payments = [];
         for (let offset = 0; offset < unique.length; offset += 12) {
           const group = await Promise.all(unique.slice(offset, offset + 12).map(async event => {
             const payment = await reader.payment(event.id);
             requirePay(payment && payment.invoiceId === event.invoice, 'Pay history conflicts with the canonical payment');
-            return payment.payer === owner || payment.merchant === owner ? payment : null;
+            if (!merchantId) return payment.payer === owner || payment.merchant === owner ? payment : null;
+            if (payment.merchant !== owner) return null;
+            const invoice = await invoiceReader?.invoice(payment.invoiceId);
+            return invoice && invoice.merchantId === tenant && invoice.merchant === owner ? payment : null;
           }));
           payments.push(...group.filter(payment => payment !== null));
         }

@@ -62,3 +62,8 @@ dd{margin:0;text-align:right}
 .payment-result{margin-top:.85rem;white-space:pre-line;overflow-wrap:anywhere}
 #payment-qr{display:block;margin:1rem 0;background:white;image-rendering:pixelated}
 @media(max-width:670px){.payment-grid{grid-template-columns:1fr}}
+#business form{display:grid;gap:.7rem;margin-block:.8rem}
+#business fieldset,#business-management{display:grid;gap:.7rem}
+#business label{display:grid;gap:.3rem}
+#business input{width:100%;height:auto;border:1px solid #4a6052;border-radius:.55rem;padding:.55rem;color:inherit;background:#111c16;font:inherit}
+#business-status,#business-records{overflow-wrap:anywhere}

@@ -1,0 +1,64 @@
+name: 420Treasury router eligibility qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/treasury/TreasuryRouter420.sol'
+      - 'contracts/test/TreasuryGenesis420.t.sol'
+      - '.github/workflows/treasury-router-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: treasury-router-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact candidate
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify changed router formatting
+        working-directory: contracts
+        run: forge fmt --check src/treasury/TreasuryRouter420.sol
+      - name: Treasury lifecycle and eligibility regression
+        working-directory: contracts
+        run: forge test --match-path test/TreasuryGenesis420.t.sol -vvv
+      - name: Treasury property regression
+        working-directory: contracts
+        run: forge test --match-path test/TreasurySecurityProperties420.t.sol -vvv
+      - name: Registry and runtime identity regression
+        working-directory: contracts
+        run: forge test --match-path test/TreasuryDeploymentBinding420.t.sol -vvvv
+      - name: Existing direct gateway consumer regression
+        working-directory: contracts
+        run: forge test --match-path test/highcountry/integration/R04TreasuryIdentity.t.sol -vvv
+      - name: Retain compiled router ABI and runtime-template identity
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          p = Path("out/TreasuryRouter420.sol/TreasuryRouter420.json")
+          artifact = json.loads(p.read_text())
+          functions = {x["name"]: x for x in artifact["abi"] if x["type"] == "function"}
+          assert set(functions) == {"budgets", "disbursements", "isExecutable", "remainingBudget", "systemName", "protocolVersion"}
+          f = functions["isExecutable"]
+          assert f["stateMutability"] == "view"
+          assert [x["type"] for x in f["inputs"]] == ["bytes32"]
+          assert [x["type"] for x in f["outputs"]] == ["bool"]
+          assert all(x["stateMutability"] in ("view", "pure") for x in functions.values())
+          print("router artifact sha256:", hashlib.sha256(p.read_bytes()).hexdigest())
+          print("router ABI:", json.dumps(artifact["abi"], sort_keys=True))
+          print("router runtime template sha256:", hashlib.sha256(bytes.fromhex(artifact["deployedBytecode"]["object"].removeprefix("0x"))).hexdigest())
+          PY

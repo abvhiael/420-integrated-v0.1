@@ -1,13 +1,5 @@
 name: 420Treasury REC-5 governance authorization
 on:
-  push:
-    branches:
-      - audit/treasury-rec-5-governance-authorization
-    paths:
-      - 'contracts/src/governance/GovernanceTimelock.sol'
-      - 'contracts/src/governance/CivicGovernor420.sol'
-      - 'contracts/test/TreasuryGovernanceAuthorization420.t.sol'
-      - '.github/workflows/treasury-governance-authorization.yml'
   pull_request:
     paths:
       - 'contracts/src/governance/GovernanceTimelock.sol'
@@ -24,8 +16,6 @@ concurrency:
   cancel-in-progress: true
 jobs:
   qualify:
-    permissions:
-      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
@@ -41,10 +31,6 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
-      - name: Format candidate for one-time artifact regeneration
-        if: github.event_name == 'push'
-        working-directory: contracts
-        run: forge fmt src/governance/GovernanceTimelock.sol src/governance/CivicGovernor420.sol test/TreasuryGovernanceAuthorization420.t.sol
       - name: Check changed formatting
         working-directory: contracts
         run: forge fmt --check src/governance/GovernanceTimelock.sol src/governance/CivicGovernor420.sol test/TreasuryGovernanceAuthorization420.t.sol
@@ -100,41 +86,23 @@ jobs:
           echo "REC5_ROOT=$REC5_ROOT" >> "$GITHUB_ENV"
       - name: Compile exact real Governance and Treasury dependency graph
         run: forge build --root "$REC5_ROOT" --extra-output storageLayout
-      - name: Regenerate or verify canonical Governance artifacts
+      - name: Verify canonical Governance artifacts
         shell: bash
-        env:
-          IS_PUSH: ${{ github.event_name == 'push' }}
         run: |
           set -euo pipefail
           mkdir -p contracts/out
           cp -R "$REC5_ROOT/out/." contracts/out/
-          if [ "$IS_PUSH" = true ]; then
-            python3 scripts/generate-governance-audit-6-artifacts.py --write --check --print
-            git add contracts/src/governance/GovernanceTimelock.sol contracts/src/governance/CivicGovernor420.sol contracts/test/TreasuryGovernanceAuthorization420.t.sol
-            git add contracts/artifacts/GovernanceTimelock.json contracts/artifacts/Governance420.json contracts/artifacts/CivicConstitution420.json contracts/artifacts/CivicProposalRegistry420.json contracts/artifacts/CivicElectorateRegistry420.json contracts/artifacts/CivicVoting420.json contracts/artifacts/CivicGovernor420.json contracts/artifacts/CivicMerkleElectorateSource420.json
-            git add contracts/config/predeploy/GovernanceTimelock-predeploy-state.json contracts/config/predeploy/Governance420-predeploy-state.json contracts/config/governance-deployment-v1.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json
-            if ! git diff --cached --quiet; then
-              git config user.name "github-actions[bot]"
-              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-              git commit -m "build(governance): rematerialize REC-5 Timelock and Civic runtime artifacts"
-              git push origin HEAD:refs/heads/audit/treasury-rec-5-governance-authorization
-              git rev-parse HEAD
-            fi
-          else
-            python3 scripts/generate-governance-audit-6-artifacts.py --check --print
-          fi
+          python3 scripts/generate-governance-audit-6-artifacts.py --check --print
       - name: Verify canonical deployment and Treasury release commitments
-        if: github.event_name != 'push'
         run: |
           python3 scripts/verify-governance-audit-6.py --require-ready
           python3 scripts/verify-governance-audit-7.py
           python3 scripts/verify-treasury-audit-6-release.py
           python3 scripts/verify-treasury-audit-7-docs.py
       - name: Treasury real Civic and real CapabilityRegistry authorization
-        if: github.event_name != 'push'
         run: forge test --root "$REC5_ROOT" --match-path 'test/TreasuryGovernanceAuthorization420.t.sol' -vvv
       - name: Directly affected Governance execution, hardening and deployment regressions
-        if: github.event_name != 'push'
         run: |
           forge test --root "$REC5_ROOT" --match-path 'test/CivicTimelockExecution420.t.sol' -vvv
           forge test --root "$REC5_ROOT" --match-path 'test/Governance*420.t.sol' -vvv
+          forge test --root "$REC5_ROOT" --match-path 'test/Governance420Retirement.t.sol' -vvv

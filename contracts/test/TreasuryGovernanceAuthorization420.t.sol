@@ -33,6 +33,10 @@ interface VmTreasuryRec5 {
         bytes calldata
     ) external;
     function clearMockedCalls() external;
+    function deal(
+        address,
+        uint256
+    ) external;
 }
 
 contract TreasuryGovernanceAuthorization420Test {
@@ -644,5 +648,24 @@ contract TreasuryGovernanceAuthorization420Test {
             policy.isAllowed(ASSET, 100) && lock.executingCivicOperation() == bytes32(0),
             "legitimate mature operation failed"
         );
+    }
+
+    function testNativeActionValueAndFailedBatchRestoreTimelockBalance() public {
+        vm.deal(address(lock), 2 ether);
+        vm.deal(RECIPIENT, 0);
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](2);
+        actions[0] = CivicGovernor420.Action({ target: RECIPIENT, value: 1 ether, data: "" });
+        actions[1] = _action(address(budgets), abi.encodeCall(budgets.setController, (address(0))));
+        bytes32 id = _queue(actions);
+        _mature(id);
+        _reject(ATTACKER, address(lock), abi.encodeCall(lock.execute, (id)), bytes4(0));
+        require(address(lock).balance == 2 ether && RECIPIENT.balance == 0, "failed batch leaked funds");
+        require(address(governor).balance == 0, "failed batch retained governor funds");
+
+        CivicGovernor420.Action[] memory valid = new CivicGovernor420.Action[](1);
+        valid[0] = actions[0];
+        _execute(valid);
+        require(address(lock).balance == 1 ether && RECIPIENT.balance == 1 ether, "exact value not transferred");
+        require(address(governor).balance == 0, "governor retained action funds");
     }
 }

@@ -3,6 +3,7 @@ import { address, hash, quantity, requirePay, type MerchantAction, type PayRegis
 
 // PaymentRouter420 execution selectors from the retained V3 ABI.
 const NATIVE_INVOICE_SELECTOR = '0xfdec5340';
+const NATIVE_POS_INVOICE_SELECTOR = '0x313a3d41';
 const settlementSelectors = new Set([
   '0xe360bec0', // executeDirectTokenSplitSettlement
   '0x8ef5948b', // executeNativeSplitSettlement
@@ -64,7 +65,9 @@ export function createPayWallet(registry: PayRegistry, provider: PayWalletProvid
       requirePay(!submitting && !revoking && account, 'Connect a selected 420 Wallet account');
       requirePay(typeof data === 'string' && /^0x[0-9a-f]{8}(?:[0-9a-f]{2})*$/i.test(data) &&
         (settlementSelectors.has(data.slice(0, 10).toLowerCase()) ||
-          (data.startsWith(NATIVE_INVOICE_SELECTOR) && data.length === 266 && input.expectedTarget !== undefined)) &&
+          (input.expectedTarget !== undefined &&
+            ((data.startsWith(NATIVE_INVOICE_SELECTOR) && data.length === 266) ||
+             (data.startsWith(NATIVE_POS_INVOICE_SELECTOR) && data.length === 970)))) &&
         typeof value === 'bigint' && value >= 0n && value < 1n << 256n, 'Invalid Pay transaction');
       const from = account;
       const ticket = generation;

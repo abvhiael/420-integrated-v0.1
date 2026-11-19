@@ -38,6 +38,7 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
     }
 
     mapping(bytes32 => Payment) public payments;
+    mapping(bytes32 => bytes32) public checkoutPaymentForInvoice;
     event PaymentSet(bytes32 indexed paymentId, bytes32 indexed invoiceId, Status status);
 
     constructor(
@@ -206,6 +207,7 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
             invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce, receipt, tip, 0,
             Status.SETTLED
         );
+        checkoutPaymentForInvoice[invoiceId] = paymentId;
         emit PaymentSet(paymentId, invoiceId, Status.SETTLED);
     }
 

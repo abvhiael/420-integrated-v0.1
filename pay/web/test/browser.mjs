@@ -38,6 +38,11 @@ const reportLog = { address: address('7'), topics: [topic, reportPaymentId, hash
   blockNumber: finalizedBlock.number, blockHash: finalizedBlock.hash, logIndex: '0x0',
   removed: false, data: encode(5), transactionHash: reportTx };
 const businessId = hash('6');
+const posLocation = hash('2');
+let posId;
+let posPublished = false;
+let posSettled = false;
+const posPayment = hash('3');
 const builtInvoice = hash('7');
 let invoicePublished = false;
 let balanceGate;
@@ -87,7 +92,27 @@ try {
         const [{to, data}, blockTag] = params;
         const finalized = blockTag.blockHash === finalizedBlock.hash;
         assert.deepEqual(blockTag, finalized ? finalizedTag : latest);
-        if (data === digest('nativeAcceptedAssetsHash()').slice(0, 10)) {
+        if (data.startsWith(digest('activeLocations(bytes32,bytes32)').slice(0, 10))) {
+          assert.equal(to, address('5'));
+          result = encode(data.endsWith(posLocation.slice(2)) ? 1 : 0);
+        } else if (posId && data.endsWith(posId.slice(2)) && data.startsWith(digest('posTerms(bytes32)').slice(0, 10))) {
+          result = posPublished ? encode(posLocation, 10n ** 17n, 2n * 10n ** 17n, account, 1) : encode(0, 0, 0, 0, 0);
+        } else if (posId && data.endsWith(posId.slice(2)) && data.startsWith(digest('getInvoice(bytes32)').slice(0, 10))) {
+          result = posPublished ? encode(businessId, account, hash('0'), '0x' + '343230'.padEnd(64, '0'),
+            11n * 10n ** 17n, 2000000000, 2000000001, 0, 1, 0, 0, hash('1'), hash('0'), hash('2'), 1) :
+            encode(...Array(15).fill(0));
+        } else if (posId && data.endsWith(posId.slice(2)) && data.startsWith(digest('paidAmount(bytes32)').slice(0, 10))) {
+          result = encode(posSettled ? 11n * 10n ** 17n : 0);
+        } else if (posId && data.endsWith(posId.slice(2)) && data.startsWith(digest('isClosed(bytes32)').slice(0, 10))) {
+          result = encode(posSettled ? 1 : 0);
+        } else if (posId && data.endsWith(posId.slice(2)) && data.startsWith(digest('checkoutPaymentForInvoice(bytes32)').slice(0, 10))) {
+          result = posPayment;
+        } else if (data === '0xe66eefc8' + posPayment.slice(2)) {
+          result = encode(posId, address('8'), account, address('0'), 13n * 10n ** 17n, address('0'),
+            11n * 10n ** 17n, hash('2'), 1, hash('a'), 2n * 10n ** 17n, 0, 5);
+        } else if (data === digest('currentPayout(bytes32)').slice(0, 10) + businessId.slice(2)) {
+          result = encode(account, 1, hash('0'));
+        } else if (data === digest('nativeAcceptedAssetsHash()').slice(0, 10)) {
           assert.equal(to, address('a'));
           result = hash('1');
         } else if (data === digest('getInvoice(bytes32)').slice(0, 10) + builtInvoice.slice(2)) {
@@ -137,6 +162,10 @@ try {
         } else if (data === '0xe66eefc8' + paymentId.slice(2)) {
           assert.equal(to, address('7'));
           result = encode(invoiceId, account, address('8'), address('0'), 12, address('0'), 12, hash('0'), 0, hash('c'), 0, 0, finalized ? finalizedStatus : status);
+        } else if (data.startsWith(digest('getInvoice(bytes32)').slice(0, 10))) {
+          assert.equal(to, address('6'));
+          posId = '0x' + data.slice(10);
+          result = encode(...Array(15).fill(0));
         } else {
           assert.equal(to, config.registry);
           if (data === key('getService(bytes32)', '420/service/pay/v1')) {
@@ -394,6 +423,34 @@ try {
   await page.getByRole('button', {name:'View merchant'}).click();
   await page.getByText('Merchant access denied').waitFor();
   assert.equal(await page.getByRole('button', {name:'Load report', exact:true}).count(), 0);
+  await page.getByLabel('Merchant ID', {exact:true}).fill(businessId);
+  await page.getByLabel('Location ID for scoped access').fill(posLocation);
+  await page.getByRole('button', {name:'View merchant'}).click();
+  await page.getByRole('heading', {name:'Point of sale'}).waitFor();
+  await page.getByLabel('Quick amount in 420').fill('1');
+  await page.getByLabel('Tax in 420').fill('0.1');
+  await page.getByLabel('Tip in 420', {exact:true}).fill('0.2');
+  await page.getByLabel('POS expiry (local time)').fill('2028-01-01T10:00');
+  await page.getByLabel('POS refund window ends (local time)').fill('2028-01-02T10:00');
+  await context.setOffline(true);
+  await page.getByRole('button', {name:'Save cart draft'}).click();
+  await page.getByText('Cart saved as a local draft.').waitFor();
+  assert.equal(await page.locator('#pos-qr').getAttribute('src'), null);
+  await context.setOffline(false);
+  await page.getByRole('button', {name:'Review POS invoice in Wallet'}).click();
+  await page.locator('#pos-status').getByText(/Invoice submitted/).waitFor();
+  await page.getByRole('button', {name:'Open customer display'}).click();
+  await page.getByText('Waiting for finalized invoice.').waitFor();
+  posPublished = true;
+  await page.getByRole('button', {name:'Check finalized checkout'}).click();
+  await page.getByRole('link', {name:'Open checkout'}).waitFor();
+  assert.match(await page.locator('#pos-customer-terms').innerText(), /Tax 0.1 420 · Tip 0.2 420 · Total 1.3 420/);
+  posSettled = true;
+  await page.getByRole('button', {name:'Check finalized checkout'}).click();
+  await page.getByText('Payment settled', {exact:true}).waitFor();
+  assert.equal(await page.getByRole('link', {name:'Open checkout'}).isVisible(), false);
+  await page.getByRole('button', {name:'Close display'}).click();
+
   await page.getByRole('button', {name: 'Disconnect Wallet'}).click();
   await page.getByText('Wallet disconnected.').waitFor();
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {

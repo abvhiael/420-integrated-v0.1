@@ -1,6 +1,6 @@
 {
   "schema": "420treasury-genesis-v1",
-  "status": "IMPLEMENTATION_QUALIFICATION",
+  "status": "REPOSITORY_QUALIFIED_LIVE_TESTNET_DEFERRED",
   "suite": "420 Treasury",
   "custody_model": "420Vault VAULT_TREASURY; Treasury contracts are budget/disbursement control plane, not independent custody",
   "governance_model": "budget creation, scheduling and cancellation are GovernanceTimelock/Civic-controlled; execution is narrowly capability-scoped per disbursement",

@@ -142,21 +142,21 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Implemented chain-pinned canonical Treasury Registry discovery, dependency-root and runtime verification, Civic action construction/review and scoped executor SmartAccount simulation, confirmation and receipt handling; SDK shares the Wallet Treasury runtime. No standalone public Treasury app or fabricated live deployment address.
 - Qualified real Grants/Treasury/Registry integration, retained Town and HighCountry authority boundaries, Wallet/Civic and SDK regressions. Repaired legacy Grants audit import-closure compilation without weakening assertions or profiles.
 - Exact implementation SHA `c1507c3f8885246843da51a930468ec354eff22b`: [workflow 44590461793](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590461793), job `135794911879`, **63/63 PASS**, zero failures/skips (29 Solidity, 33 Wallet, 1 SDK); all six verifiers and SDK build/runtime identity passed. [Grants audit 44590461850](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590461850) passed core (20/20), hardening (17/17), zero high-severity Grants Slither findings, Indexer (9/9), Wallet (14/14); [browser accessibility 44590462083](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44590462083) passed. Additional suites overlap the targeted count.
-- Durable evidence: [TREASURY-REC-6 qualification](420TREASURY-REC-6-QUALIFICATION.md). REC-5 security closeout remains open; live deployment/receipt correlation remains REC-8/AUDIT-8.
+- Durable evidence: [TREASURY-REC-6 qualification](420TREASURY-REC-6-QUALIFICATION.md). REC-5 security closeout was subsequently reconciled in REC-9; live deployment/receipt correlation remains AUDIT-8 (REC-8 local materialization complete).
 - Next canonical reconciliation step: **TREASURY-REC-7 — Indexer, Explorer and Analytics Reconciliation**.
 
 ## TREASURY-REC-7 — Indexer, Explorer and Analytics Reconciliation — COMPLETE (local scope)
 - PR #1229 established the shared Treasury ABI/event and derived TypeScript read boundary, durable recovery and SDK coverage. Original exact-head [qualification 44597319428](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44597319428) passed (31 TypeScript tests, 1 SDK test, seven compiled event descriptors).
 - PR #1230 reconciles the actual Go Indexer runtime, canonical checkpoint/receipt provenance and Treasury lifecycle projections, real Explorer/Analytics HTTP integration, capability inventory and fail-closed deployment binding. No payment or settlement authority is attributed to the Indexer.
 - Exact executable SHA `3d655c47a674bf4e2e1fadaf19973c6129deea24`: [qualification 44610899469](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44610899469) PASS (307 top-level tests, 354 including subtests, race checks, vet, 15/15 reader mappings). EXP-1.7/1.8 and Rights audit configuration fixes passed their respective exact-head workflows.
-- Durable evidence: [TREASURY-REC-7 qualification](420TREASURY-REC-7-QUALIFICATION.md). Live deployment addresses and actual release/receipt evidence remain REC-8/AUDIT-8; REC-5 security closeout remains open.
+- Durable evidence: [TREASURY-REC-7 qualification](420TREASURY-REC-7-QUALIFICATION.md). Live deployment addresses and actual release/receipt evidence remain AUDIT-8 (REC-8 local materialization complete); REC-5 security closeout was subsequently reconciled in REC-9.
 - Next canonical reconciliation step: **TREASURY-REC-8 — Release materialization and deployment preparation**.
 
 ## TREASURY-REC-8 — Deployment and Release Materialization — COMPLETE (local scope)
 - Reconciled the exact five Treasury protocol deployments, the designated executor candidate and two internal libraries; preserved registry-resolved semantics, the frozen GovernanceTimelock and ProtocolRegistry identities, and the unmaterialized CapabilityRegistry candidate reservation. No production address, operator or receipt is fabricated.
 - Implemented reproducible release inputs and executable reviewed CREATE submission, canonical receipt recovery, exact constructor/runtime verification, one-time governed initialization and sequential component/service publication. Qualified corrective redeployment and Wallet-compatible dependency commitments.
 - Exact implementation SHA `70895129b186e98d98e3aa5bb4b02f4d139750a2`: [deployment qualification 44614034940](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614034940) PASS (6/6 Node tests including parent, two byte-identical builds, compiled ABI/namespace/docs verifiers); [native asset/Vault 44614034972](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614034972) PASS 48/48; [executor 44614035061](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614035061) PASS 9/9 including parent.
-- Durable [qualification evidence](420TREASURY-REC-8-QUALIFICATION.md), [local rehearsal receipts and identities](420TREASURY-REC-8-REHEARSAL.json), and [operator deployment runbook](../apps/treasury/deployment.md). Live materialization and receipt/finality correlation remain AUDIT-8; REC-5 security closeout remains open.
+- Durable [qualification evidence](420TREASURY-REC-8-QUALIFICATION.md), [local rehearsal receipts and identities](420TREASURY-REC-8-REHEARSAL.json), and [operator deployment runbook](../apps/treasury/deployment.md). Live materialization and receipt/finality correlation remain AUDIT-8; REC-5 security closeout was subsequently reconciled in REC-9.
 - Next canonical reconciliation step: **TREASURY-REC-9 — Security qualification and independent review preparation** (local review preparation; no live deployment required).
 
 ## TREASURY-REC-9 — Security and Adversarial Qualification — COMPLETE (local scope)
@@ -166,19 +166,24 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable [review record](420TREASURY-REC-9-SECURITY-REVIEW.md), [individual findings](420TREASURY-REC-9-STATIC-REVIEW.json), [machine-readable result](420TREASURY-REC-9-REVIEW-RESULT.json), and [review package](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44619145277/artifacts/14575843366). Review preparation is complete; no independent auditor sign-off or live acceptance claimed.
 - Next canonical reconciliation step: **TREASURY-REC-10 — Final Local Audit Closeout**. AUDIT-8 actual network and AUDIT-9 independent review remain blocked on their existing prerequisites.
 
+## TREASURY-REC-10 — Final Pre-Testnet Closeout — COMPLETE (local scope)
+- Reconciled REC-1–9, R01–R10 and all five principal Treasury contracts, executor and supporting libraries/interfaces, current release inputs, shared dependencies, Wallet/SDK, Grants/HighCountry/Town and Indexer/Explorer/Analytics. Corrected readiness metadata and operator/API/SDK and recovery guidance; retained historical executions and failed gates at their original SHAs.
+- Exact closeout candidate `bbcbb9e3bb746ba6fa9ca924ad7134a737cb941f`: [44622141978](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44622141978) PASS (job 135906304356). Verified 15 prior successful workflow identities and byte-identical scoped qualified inputs, all 63 retained static findings, canonical namespace and authority, fresh exact-source pinned-compiler build, compiled ABI descriptor and release identity. Manifest, metadata and interface commitments match REC-8. No production code or deployment semantics changed. [Permanent readiness record](420TREASURY-PRE-TESTNET-READINESS.md), [machine-readable result](420TREASURY-PRE-TESTNET-RESULT.json), [full qualification artifact](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44622141978/artifacts/14578465408).
+- Repository/local implementation, build, test, documentation, integration and engineering security preparation are complete in reviewed Treasury scope; no identified local blocker remains. No new production placeholder, frozen address, authority, or live evidence asserted. External security acceptance remains AUDIT-9, not complete. Central [testnet handoff](../ROADMAP.md) now records REC-1–10 completion and AUDIT-8 live work.
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;
-- deployed code/runtime hashes and constructor bindings;
-- ProtocolRegistry publication;
+- exact released code/runtime hashes, constructor bindings, governed controller initialization, actual CapabilityRegistry identity and authority, and designated executor address/runtime/operator for all six deployables;
+- governed ProtocolRegistry component/service publication, live verified Vault instance and Wallet/SDK bindings;
 - governed budget creation;
 - disbursement scheduling/cancellation;
-- capability-scoped execution;
+- independently scoped Treasury and Vault grants, exact atomic executor release and capability-scoped execution;
 - policy-revocation fail-closed behavior;
 - budget expiry behavior;
 - epoch-cap enforcement;
 - Vault release evidence according to the adopted TREASURY-AUDIT-4 model;
-- Indexer/Analytics/Explorer agreement;
+- same-deployment Wallet/SDK, Grants, Indexer/Analytics/Explorer agreement without claiming independent payment-verification authority;
 - restart/reorg/replay/rebuild drills.
 
 ## TREASURY-AUDIT-9 — external security review and Genesis/production closeout — BLOCKED

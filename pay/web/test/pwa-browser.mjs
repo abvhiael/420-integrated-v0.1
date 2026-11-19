@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createServer } from 'node:http';
 
 const assets = {
@@ -14,7 +16,7 @@ const assets = {
   '/icons/pay-512.png': ['icons/pay-512.png', 'image/png']
 };
 
-export async function qualifyPwa(browser) {
+export async function qualifyPwa(chromium, channel) {
   const server = createServer(async (req, res) => {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     if (pathname === '/deployment.json') return res.writeHead(200, { 'content-type': 'application/json' }).end('null');
@@ -29,8 +31,10 @@ export async function qualifyPwa(browser) {
   server.listen(0, '127.0.0.1');
   await once(server, 'listening');
   const origin = 'http://127.0.0.1:' + server.address().port;
-  const context = await browser.newContext();
+  const profile = await mkdtemp(join(tmpdir(), 'pay-pwa-profile-'));
+  let context;
   try {
+    context = await chromium.launchPersistentContext(profile, { channel });
     const page = await context.newPage();
     await page.goto(origin + '/#business');
     await page.getByText('Connect 420 Wallet to open that section.').waitFor();
@@ -67,7 +71,8 @@ export async function qualifyPwa(browser) {
     assert.equal(await page.locator('#history li').count(), 0);
     console.log('PASS: PWA installability, untrusted navigation, offline shell, cache allowlist and stale-state clearance');
   } finally {
-    await context.close();
+    await context?.close();
+    await rm(profile, { recursive: true, force: true });
     await new Promise(resolve => server.close(resolve));
   }
 }

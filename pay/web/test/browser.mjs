@@ -47,7 +47,8 @@ const posPayment = hash('3');
 const builtInvoice = hash('7');
 let invoicePublished = false;
 let balanceGate;
-const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
+const channel = process.env.PAY_BROWSER_CHANNEL ?? 'chromium';
+const browser = await chromium.launch({ channel });
 try {
   const context = await browser.newContext({viewport: {width: 1440, height: 900}});
   const page = await context.newPage();
@@ -506,7 +507,7 @@ try {
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {
     method: 'wallet_revokePermissions', params: [{eth_accounts: {}}]
   });
-  await qualifyPwa(browser);
+  await qualifyPwa(chromium, channel);
   console.log('PASS: fixture isolation, responsive layout, axe, balances, statuses, receipts, Wallet invalidation and revocation');
 } finally {
   await browser.close();

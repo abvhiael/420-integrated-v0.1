@@ -122,6 +122,9 @@ contract CanonicalPayQuote420 is GenesisResidentAccess420, IFeeQuote420 {
             require(policy.tipRecipient != address(0) && policy.tipMaximum > 0 && policy.tip <= policy.tipMaximum
                 && i.tipPolicy == tipCommitment(policy.tipRecipient, policy.tipMaximum), "tip policy");
         }
+        (bytes32 location,, uint256 retailTip,,) =
+            InvoiceRegistry420(_resolveRequired(PayIds420.INVOICE_REGISTRY)).posTerms(invoiceId);
+        require(location == bytes32(0) || policy.tip == retailTip, "POS tip changed");
         require(policy.tip <= type(uint256).max - i.amount, "total overflow");
         q = NativeQuote(
             keccak256(abi.encode(address(this), block.chainid, i.root, payer, payerNonce, quotedAt, policy)),

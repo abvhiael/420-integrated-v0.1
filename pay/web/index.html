@@ -127,6 +127,34 @@
         </form>
         <p id="business-status" class="notice" role="status"></p>
         <p id="business-credential"></p>
+        <section id="pos" aria-labelledby="pos-title" hidden>
+          <h3 id="pos-title">Point of sale</h3>
+          <form id="pos-cart">
+            <label>Quick amount in 420 <input name="quick" inputmode="decimal"></label>
+            <label>Cart items, one per line (name | quantity | unit price in 420)
+              <textarea name="items" rows="4" maxlength="4000"></textarea></label>
+            <label>Tax in 420 <input name="tax" inputmode="decimal"></label>
+            <label>Tip in 420 <input name="tip" inputmode="decimal"></label>
+            <label>POS expiry (local time) <input name="expiry" type="datetime-local" required></label>
+            <label>POS refund window ends (local time) <input name="refund" type="datetime-local" required></label>
+            <button id="pos-save" type="button">Save cart draft</button>
+            <button type="submit">Review POS invoice in Wallet</button>
+          </form>
+          <button id="pos-show" type="button">Open customer display</button>
+          <button id="pos-new" type="button">New sale</button>
+          <p id="pos-status" role="status"></p>
+          <dialog id="pos-display" aria-labelledby="pos-display-title">
+            <h4 id="pos-display-title">Pay with 420 Wallet</h4>
+            <p id="pos-customer-terms"></p>
+            <p id="pos-customer-status" role="status"></p>
+            <div id="pos-share" hidden>
+              <img id="pos-qr" alt="Scan to open this invoice" width="248" height="248">
+              <a id="pos-link">Open checkout</a>
+            </div>
+            <button id="pos-refresh" type="button">Check finalized checkout</button>
+            <button id="pos-close" type="button">Close display</button>
+          </dialog>
+        </section>
         <form id="business-register" hidden>
           <label>Payout address <input name="payout" required maxlength="42" autocomplete="off"></label>
           <button type="submit">Review registration in Wallet</button>

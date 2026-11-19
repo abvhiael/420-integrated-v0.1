@@ -1,3 +1,4 @@
+import { createPos } from './pos.js';
 import { accountingCsv, reconcileAccounting } from './accounting.js';
 import { paymentLink, recipientAddress } from './payment-intent.js';
 
@@ -36,9 +37,11 @@ export function createBusinessPanel() {
   let next = null;
   let rows = [];
   let reportSnapshot;
+  const pos = createPos(run);
 
   function clear() {
     merchantId = null;
+    pos.clear();
     next = null;
     reportSnapshot = undefined;
     register.hidden = management.hidden = reports.hidden = older.hidden = invoicePanel.hidden = true;
@@ -82,7 +85,7 @@ export function createBusinessPanel() {
     event.preventDefault();
     const form = new FormData(open);
     clear();
-    void run(async ({ source, account }, current) => {
+    void run(async ({ source, account, chainId }, current) => {
       const id = identifier(form.get('merchantId'));
       const location = form.get('locationId') ? identifier(form.get('locationId')) : undefined;
       const detail = await source.business(account, id, location);
@@ -93,6 +96,8 @@ export function createBusinessPanel() {
       reports.hidden = !detail?.reports;
       invoicePanel.hidden = !detail?.controller || !detail.active;
       if (!invoicePanel.hidden) restoreDraft();
+      if (location && detail?.active && detail.locationActive &&
+          (detail.controller || detail.role === 2 || detail.role === 3)) pos.open(chainId, account, id, location);
       credential.textContent = detail ? detail.status + ' · ' + (detail.active ? 'Active' : 'Inactive') +
         ' · ' + (detail.controller ? 'Controller' : roles[detail.role]) +
         (location ? ' · Location ' + (detail.locationActive ? 'active' : 'inactive') : '') : '';

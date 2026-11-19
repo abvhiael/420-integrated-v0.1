@@ -32,6 +32,8 @@ export type MerchantAction =
   | { kind: 'invoice'; id: Hex; invoiceId: Hex; currency: '420' | 'CAD' | 'USD'; amount: bigint;
       expiresAt: bigint; refundUntil: bigint; mode: number; acceptance: number;
       acceptedAssetsHash?: Hex; tipPolicyHash?: Hex }
+  | { kind: 'pos'; id: Hex; invoiceId: Hex; locationId: Hex; subtotal: bigint; tax: bigint; tip: bigint;
+      expiresAt: bigint; refundUntil: bigint }
   | { kind: 'closeInvoice'; id: Hex; invoiceId: Hex };
 const zero = '0'.repeat(64);
 const addressArgument = (value: Hex) => address(value).slice(2).padStart(64, '0');
@@ -218,6 +220,14 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     return invoice;
   }
 
+  async function readPosTerms(state: { call(to: Hex, data: Hex): Promise<unknown> }, target: Hex, invoiceId: Hex) {
+    const [location, tax, tip, payout, version] =
+      words(await state.call(target, calldata('posTerms(bytes32)', hash(invoiceId).slice(2))), 5);
+    if (location === zero) return null;
+    return { locationId: hash('0x' + location), tax: uint(tax, 256), tip: uint(tip, 256),
+      payout: addressWord(payout), version: uint(version, 32) };
+  }
+
   async function readMerchant(state: {
     call(to: Hex, data: Hex): Promise<unknown>;
     component(id: Component): Promise<Hex>;
@@ -271,27 +281,44 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         requirePay(quotedAt >= 0n && quotedAt <= state.timestamp && state.timestamp - quotedAt <= 42n &&
           quotedAt < 1n << 64n && nonce > 0n && nonce < 1n << 256n, 'Review a fresh checkout quote');
         const args = [hash(invoiceId).slice(2), addressArgument(payer), abiWord(nonce), abiWord(quotedAt)];
-        const [id, merchant, payout, amount, deadline] = words(await state.call(source,
-          calldata('quoteNative(bytes32,address,uint256,uint64)', ...args)), 5);
+        const policy = invoice.tipPolicyHash === '0x' + zero ? null :
+          await readPosTerms(state, await state.component(invoiceView.component), invoiceId);
+        let policyWords: string[] = [];
+        if (policy) {
+          requirePay(policy.tip > 0n && invoice.settlementPlanHash === '0x' + zero, 'Invalid POS tip policy');
+          policyWords = [abiWord(192n), abiWord(256n), zero, addressArgument(policy.payout), abiWord(policy.tip),
+            abiWord(policy.tip), abiWord(1n), addressArgument(policy.payout), abiWord(1n), abiWord(10000n)];
+        }
+        const policySignature = '(address[],uint16[],uint8,address,uint256,uint256)';
+        const [id, merchant, payout, amount, deadline] = words(await state.call(source, policy
+          ? calldata('quoteNativePolicy(bytes32,address,uint256,uint64,' + policySignature + ')',
+            ...args, abiWord(160n), ...policyWords)
+          : calldata('quoteNative(bytes32,address,uint256,uint64)', ...args)), 5);
         const quoteId = hash('0x' + id);
-        const value = uint(amount, 256);
+        const principal = uint(amount, 256);
+        const tip = policy?.tip ?? 0n;
+        const value = principal + tip;
+        requirePay(value < 1n << 256n && (!policy || policy.payout === addressWord(payout)), 'POS checkout payout changed');
         const expiresAt = uint(deadline, 64);
         requirePay(addressWord(merchant) === invoice.merchant && invoice.currency === '420' && value > 0n &&
           expiresAt >= state.timestamp && expiresAt <= invoice.expiresAt && expiresAt <= quotedAt + 42n,
           'Native checkout quote is invalid or expired');
-        const [feeId, protocol, network, provider, conversion, slippage, feeTime, feeExpiry] = words(
-          await state.call(source, calldata('feeQuote(bytes32,bytes)', quoteId.slice(2), abiWord(64n),
-            abiWord(128n), ...args)), 8);
-        requirePay(feeId === id && [protocol, network, provider, conversion, slippage].every(x => uint(x, 256) === 0n) &&
-          uint(feeTime, 64) === quotedAt && uint(feeExpiry, 64) === expiresAt, 'Native checkout fees changed');
+        if (!policy) {
+          const [feeId, protocol, network, provider, conversion, slippage, feeTime, feeExpiry] = words(
+            await state.call(source, calldata('feeQuote(bytes32,bytes)', quoteId.slice(2), abiWord(64n),
+              abiWord(128n), ...args)), 8);
+          requirePay(feeId === id && [protocol, network, provider, conversion, slippage].every(x => uint(x, 256) === 0n) &&
+            uint(feeTime, 64) === quotedAt && uint(feeExpiry, 64) === expiresAt, 'Native checkout fees changed');
+        }
         const paymentRegistry = await state.component(paymentView.component);
-        const zero = '0'.repeat(64);
         const paymentId = hash(await state.call(paymentRegistry,
           calldata('derivePaymentId(bytes32,address,address,address,uint256,address,uint256,bytes32,uint256)',
-            args[0]!, args[1]!, merchant!, zero, abiWord(value), zero, abiWord(value), id!, args[2]!)));
+            args[0]!, args[1]!, merchant!, zero, abiWord(value), zero, abiWord(principal), id!, args[2]!)));
         return Object.freeze({ invoiceId, payer: address(payer), recipient: addressWord(payout), router, nonce, quotedAt,
-          expiresAt, value, quoteId, paymentId, acceptance: invoice.acceptance,
-          data: calldata(NATIVE_INVOICE_SIGNATURE, args[0]!, args[2]!, args[3]!, id!) });
+          expiresAt, value, principal, tip, quoteId, paymentId, acceptance: invoice.acceptance,
+          data: policy ? calldata('payNativeInvoiceWithPolicy(bytes32,uint256,uint64,bytes32,' + policySignature + ')',
+            args[0]!, args[2]!, args[3]!, id!, abiWord(160n), ...policyWords) :
+            calldata(NATIVE_INVOICE_SIGNATURE, args[0]!, args[2]!, args[3]!, id!) });
       });
     },
     async invoiceAcceptance(snapshot: PaySnapshot, invoiceId: Hex) {
@@ -331,6 +358,42 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
           locationActive };
       });
     },
+    async posInvoice(snapshot: PaySnapshot, invoiceId: Hex) {
+      return pinned(snapshot, async state => {
+        const target = await state.component(invoiceView.component);
+        const terms = await readPosTerms(state, target, invoiceId);
+        if (!terms) return null;
+        const invoice = await createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot).invoice(invoiceId);
+        requirePay(invoice && terms.tax < invoice.amount &&
+          invoice.mode === 'SINGLE_USE' && invoice.acceptance === 'FINALIZED' && invoice.currency === '420',
+          'Invalid canonical POS invoice');
+        const [closed, paid] = await Promise.all([
+          state.call(target, calldata('isClosed(bytes32)', invoiceId.slice(2))),
+          state.call(target, calldata('paidAmount(bytes32)', invoiceId.slice(2)))
+        ]);
+        let settled = false;
+        if (uint(words(paid, 1)[0], 256) === invoice.amount) {
+          const ledger = await state.component(paymentView.component);
+          const [id] = words(await state.call(ledger, calldata('checkoutPaymentForInvoice(bytes32)', invoiceId.slice(2))), 1);
+          if (id !== zero) {
+            const reader = createPayReader({ read: ({ calldata }) => state.call(ledger, calldata) }, snapshot);
+            const payment = await reader.payment(hash('0x' + id));
+            settled = payment?.invoiceId === invoiceId && payment.merchant === invoice.merchant &&
+              payment.settlementAsset === '0x' + zero.slice(24) && payment.inputAsset === payment.settlementAsset &&
+              payment.settlementAmount === invoice.amount && payment.tipAmount === terms.tip &&
+              payment.inputAmount === invoice.amount + terms.tip && payment.receiptHash !== '0x' + zero &&
+              payment.status === 'SETTLED';
+          }
+        }
+        const { merchant, target: merchantTarget } = await readMerchant(state, invoice.merchantId);
+        const [payout, version, plan] = words(await state.call(merchantTarget,
+          calldata('currentPayout(bytes32)', invoice.merchantId.slice(2))), 3);
+        const payable = invoice.active && merchant?.active && merchant.controller === invoice.merchant &&
+          addressWord(payout) === terms.payout && uint(version, 32) === terms.version && plan === zero &&
+          uint(words(closed, 1)[0], 8) === 0n && state.timestamp <= invoice.expiresAt;
+        return { invoice, ...terms, settled, payable, snapshot };
+      });
+    },
     async merchantInvoice(snapshot: PaySnapshot, merchantId: Hex, account: Hex, invoiceId: Hex) {
       return pinned(snapshot, async state => {
         const { merchant } = await readMerchant(state, merchantId);
@@ -365,6 +428,21 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
           requirePay(!merchant, 'Merchant is already registered');
           return { target, data: calldata(MERCHANT_ACTIONS.register, id,
             addressArgument(account), addressArgument(action.payout)) };
+        }
+        if (action.kind === 'pos') {
+          const location = hash(action.locationId).slice(2);
+          const role = await merchantRole(state, target, action.id, location, account);
+          const [active] = words(await state.call(target, calldata('activeLocations(bytes32,bytes32)', id, location)), 1);
+          requirePay(merchant?.active && uint(active, 8) === 1n &&
+            (merchant.controller === address(account) || role === 2n || role === 3n), 'Active POS location and role required');
+          const invoiceTarget = await state.component(invoiceView.component);
+          const reader = createPayReader({ read: ({ calldata }) => state.call(invoiceTarget, calldata) }, snapshot);
+          requirePay(!(await reader.invoice(action.invoiceId)) && action.subtotal > 0n && action.tax >= 0n && action.tip >= 0n &&
+            action.subtotal + action.tax + action.tip < 1n << 256n && action.expiresAt > state.timestamp &&
+            action.refundUntil >= action.expiresAt && action.refundUntil < 1n << 64n, 'Invalid POS invoice terms');
+          return { target: invoiceTarget, data: calldata('createPosInvoice(bytes32,bytes32,bytes32,uint256,uint256,uint256,uint64,uint64)',
+            hash(action.invoiceId).slice(2), id, location, abiWord(action.subtotal), abiWord(action.tax), abiWord(action.tip),
+            abiWord(action.expiresAt), abiWord(action.refundUntil)) };
         }
         requirePay(merchant?.active && merchant.controller === address(account), 'Active merchant controller required');
         if (action.kind === 'invoice' || action.kind === 'closeInvoice') {

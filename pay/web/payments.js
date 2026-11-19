@@ -157,7 +157,8 @@ export function createPaymentPanel() {
   function showCheckoutQuote(quote) {
     checkoutQuote = quote;
     checkoutTerms.textContent = 'Asset: native 420\nAmount: ' + formatUnits(quote.value, 18) +
-      ' 420\nPayout: ' + quote.recipient + '\nProtocol and conversion fees: 0 420' +
+      ' 420' + (quote.tip ? '\nInvoice with tax: ' + formatUnits(quote.principal, 18) +
+        ' 420\nTip: ' + formatUnits(quote.tip, 18) + ' 420' : '') + '\nPayout: ' + quote.recipient + '\nProtocol and conversion fees: 0 420' +
       '\nNetwork fee: estimated and shown by 420 Wallet' +
       '\nQuote expires: ' + new Date(Number(quote.expiresAt) * 1000).toISOString() +
       '\nAcceptance: ' + quote.acceptance;

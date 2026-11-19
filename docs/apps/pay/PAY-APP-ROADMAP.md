@@ -427,6 +427,23 @@ The invoice metadata content hash alone does not identify a tax summary.
 
 Exit criteria: Quick pay, retail cart/tax/tip, cashier session, QR and verified settlement; offline draft only. Retain reproducible scoped qualification at exact implementation SHA.
 
+Open the merchant dashboard with an active location ID. The merchant controller,
+Location Manager or Cashier can create single-use native 420 POS invoices.
+The draft cart and item names stay in the browser. The canonical invoice
+credits subtotal plus tax and settles the disclosed tip separately. A
+scheduled payout change invalidates the affected checkout before delivery.
+
+The customer display offers a QR invoice link only after finalized publication.
+Refresh the display to check canonical settlement. Wallet submission alone
+does not update the display to settled. A browser with no network connection can
+save draft cart values locally. Publishing an invoice and checking payment both
+require canonical online reads and Wallet authorization for publication.
+
+Deployment needs approved Invoice Registry, native quote and Payment Registry
+runtime bindings for this revision. POS inherits the existing native checkout
+asset and merchant payout policy and does not set a conversion rate.
+
+
 ## PAY-APP-11 — Developer APIs, webhooks and checkout integrations
 
 **Status:** PLANNED. **Testnet required:** No.

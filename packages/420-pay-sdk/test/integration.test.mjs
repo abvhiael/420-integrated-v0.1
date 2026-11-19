@@ -23,12 +23,15 @@ function fixture() {
     pay: service('2', 'b'), names: service('3', 'c'), identity: service('4', 'd'),
     components: Object.fromEntries([invoiceView.component, paymentView.component, PAYMENT_ROUTER].map(id => [id, codeHash]))
   };
+  const quoteKey = '420/APP/420PAY/NATIVE_QUOTE_SOURCE';
+  config.components[quoteKey] = codeHash;
   const labelHash = digest('crowley');
   const profile = hash('5');
   const account = address('9');
   const merchantKey = '420/APP/420PAY/MERCHANT_REGISTRY';
   config.components[merchantKey] = codeHash;
   const replies = new Map();
+  replies.set(call('component(bytes32)', digest(quoteKey)), encode(digest(quoteKey), address('b'), codeHash, 1, 0, 0, 2));
   const merchantComponent = digest(merchantKey);
   replies.set(call('component(bytes32)', merchantComponent), encode(merchantComponent, address('5'), codeHash, 1, 0, 0, 2));
   for (const [id, entry] of [['pay', config.pay], ['names', config.names], ['identity', config.identity]]) {
@@ -80,9 +83,13 @@ function fixture() {
       assert.equal(params[0].to, address('7'));
       if (state.reorgDuringRead) state.canonical = false;
     } else if (params[0].data.startsWith(invoiceView.selector) ||
-      ['isClosed(bytes32)', 'paidAmount(bytes32)'].some(sig => params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('6'));
+      ['isClosed(bytes32)', 'paidAmount(bytes32)', 'posTerms(bytes32)'].some(sig => params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('6'));
     else if (['merchants(bytes32)', 'currentPayout(bytes32)', 'effectiveRole(bytes32,bytes32,address)', 'activeLocations(bytes32,bytes32)'].some(sig =>
       params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('5'));
+    else if (params[0].data.startsWith(digest('quoteNativePolicy(bytes32,address,uint256,uint64,(address[],uint16[],uint8,address,uint256,uint256))').slice(0, 10)))
+      assert.equal(params[0].to, address('b'));
+    else if (params[0].data.startsWith(digest('derivePaymentId(bytes32,address,address,address,uint256,address,uint256,bytes32,uint256)').slice(0, 10)))
+      assert.equal(params[0].to, address('7'));
     else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
     else if (params[0].data.startsWith(digest('balanceOf(address)').slice(0, 10))) assert.equal(params[0].to, address('a'));
     else assert.equal(params[0].to, config.registry);
@@ -365,4 +372,41 @@ test('merchant invoice reads derive lifecycle and enforce tenant ownership befor
   replies.set(invoiceCall, invoice(hash('f'), 1, 0));
   await assert.rejects(read(), /tenant mismatch/);
   await assert.rejects(application.merchantTransaction(snapshot, account, {kind:'closeInvoice', id:tenant, invoiceId:id}), /tenant mismatch/);
+});
+
+test('POS policy quote binds the fixed tip to the exact Wallet approval call', async t => {
+  const { application, replies, account } = fixture();
+  const invoice = hash('a');
+  const merchant = hash('4');
+  const quoteId = hash('b');
+  const payer = account;
+  const payout = address('c');
+  const zero = hash('0');
+  const amount = 100;
+  const tip = 2;
+  const tuple = [160, 192, 256, 0, payout, tip, tip, 1, payout, 1, 10000];
+  replies.set(invoiceView.selector + invoice.slice(2), encode(merchant, payout, zero, '0x' + '343230'.padEnd(64, '0'),
+    amount, 100, 110, 0, 1, 0, 0, hash('1'), zero, hash('2'), 1));
+  replies.set(call('isClosed(bytes32)', invoice), encode(0));
+  replies.set(call('posTerms(bytes32)', invoice), encode(hash('3'), 0, tip, payout, 1));
+  replies.set(call('quoteNativePolicy(bytes32,address,uint256,uint64,(address[],uint16[],uint8,address,uint256,uint256))',
+    encode(invoice, payer, 1, 10, ...tuple)), encode(quoteId, payout, payout, amount, 42));
+  replies.set(call('derivePaymentId(bytes32,address,address,address,uint256,address,uint256,bytes32,uint256)',
+    encode(invoice, payer, payout, zero, amount + tip, zero, amount, quoteId, 1)), hash('d'));
+  const quote = await application.nativeInvoiceQuote(snapshot, invoice, account, 1n);
+  assert.equal(quote.value, 102n);
+  const expected = '0x313a3d41' + encode(invoice, 1, 10, quoteId, ...tuple).slice(2);
+  assert.equal(quote.data, expected);
+  globalThis.location = { origin };
+  t.after(() => { delete globalThis.location; });
+  const wallet = createPayWallet(application, { is420Wallet: true, async request({method, params}) {
+    if (method === 'eth_chainId') return '0x1a4';
+    if (method === 'eth_requestAccounts' || method === 'eth_accounts') return [account];
+    assert.equal(method, 'eth_sendTransaction');
+    assert.deepEqual(params, [{ chainId: '0x1a4', from: account, to: address('8'), data: expected, value: '0x66' }]);
+    return hash('f');
+  } });
+  await wallet.connect();
+  await assert.rejects(wallet.submitPayment({ data: quote.data, value: quote.value }), /Invalid Pay transaction/);
+  assert.equal((await wallet.submitPayment({ data: quote.data, value: quote.value, expectedTarget: quote.router })).submissionHash, hash('f'));
 });

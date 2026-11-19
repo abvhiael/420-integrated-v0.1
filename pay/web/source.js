@@ -84,6 +84,22 @@ export function createConsumerSource(config, provider) {
       await verify(account);
       return wallet.submitMerchantAction(action);
     },
+    async posInvoice(account, merchantId, locationId, invoiceId) {
+      await verify(account);
+      const authorize = async () => {
+        const merchant = await registry.merchantDashboard(await registry.latestSnapshot(), merchantId, account, locationId);
+        if (!merchant?.active || !merchant.locationActive ||
+            !(merchant.controller || merchant.role === 2 || merchant.role === 3)) throw new Error('POS session access denied.');
+      };
+      await authorize();
+      const result = await registry.posInvoice(await registry.latestSnapshot('finalized'), invoiceId);
+      if (result && (result.invoice.merchantId !== merchantId || result.locationId !== locationId)) {
+        throw new Error('POS invoice scope mismatch.');
+      }
+      await authorize();
+      await verify(account);
+      return result;
+    },
     async merchantInvoice(account, merchantId, invoiceId) {
       await verify(account);
       const result = await registry.merchantInvoice(await registry.latestSnapshot('finalized'), merchantId, account, invoiceId);

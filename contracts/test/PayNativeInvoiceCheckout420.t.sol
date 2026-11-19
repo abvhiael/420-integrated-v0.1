@@ -224,6 +224,47 @@ contract PayNativeInvoiceCheckout420Test {
         }));
     }
 
+    function testCashierPosInvoiceSettlesTipSeparatelyAndBindsCanonicalPayment() public {
+        bytes32 location = keccak256("retail location");
+        bytes32 sale = keccak256("retail sale");
+        address cashier = address(0x4311);
+        uint64 at = uint64(vm.getBlockTimestamp());
+        vm.prank(CONTROLLER);
+        merchants.setLocation(MERCHANT, location, true);
+        vm.prank(CONTROLLER);
+        merchants.setRole(MERCHANT, location, cashier, MerchantRegistry420.Role.CASHIER);
+        vm.prank(cashier);
+        invoices.createPosInvoice(sale, MERCHANT, location, PRICE, 3, 7, at + 120, at + 240);
+        require(invoices.getInvoice(sale).merchant == CONTROLLER && invoices.getInvoice(sale).amount == PRICE + 3);
+        require(payments.checkoutPaymentForInvoice(sale) == bytes32(0));
+        CanonicalPayQuote420.NativePolicy memory policy;
+        policy.recipients = new address[](1);
+        policy.recipients[0] = PAYOUT;
+        policy.bps = new uint16[](1);
+        policy.bps[0] = 10_000;
+        policy.tipRecipient = PAYOUT;
+        policy.tipMaximum = 7;
+        (bool lowerTip,) = address(quotes).staticcall(
+            abi.encodeCall(quotes.quoteNativePolicy, (sale, PAYER, 10, at, policy))
+        );
+        require(!lowerTip, "cashier POS total can be changed");
+        policy.tip = 7;
+        CanonicalPayQuote420.NativeQuote memory q = quotes.quoteNativePolicy(sale, PAYER, 10, at, policy);
+        vm.prank(PAYER);
+        bytes32 payment = router.payNativeInvoiceWithPolicy{value: PRICE + 10}(sale, 10, at, q.quoteId, policy);
+        require(payments.checkoutPaymentForInvoice(sale) == payment && invoices.paidAmount(sale) == PRICE + 3);
+        require(PAYOUT.balance == PRICE + 10 && payments.getPayment(payment).tipAmount == 7);
+        vm.prank(CONTROLLER);
+        merchants.setLocation(MERCHANT, location, false);
+        vm.prank(CONTROLLER);
+        merchants.setLocation(MERCHANT, location, true);
+        vm.prank(cashier);
+        (bool accepted,) = address(invoices).call(
+            abi.encodeCall(invoices.createPosInvoice, (keccak256("revoked"), MERCHANT, location, 1, 0, 0, at + 120, at + 240))
+        );
+        require(!accepted, "old location grant restored");
+    }
+
     function _publish(bytes32 id, address implementation) private {
         registry.registerComponent(id, implementation, Types420.Version(1, 0, 0), Types420.Lifecycle.ACTIVE);
         Types420.ContractRef memory ref = registry.component(id);

@@ -11,6 +11,10 @@ import "../libraries/GenesisInterfaceIds420.sol";
 import "./PayIds420.sol";
 import "./MerchantRegistry420.sol";
 
+interface IPosNativePolicy420 {
+    function nativeAcceptedAssetsHash() external view returns (bytes32);
+}
+
 contract InvoiceRegistry420 is GenesisResidentAccess420 {
     enum Mode { SINGLE_USE, MULTI_USE, PARTIAL_PAYMENT }
     enum Acceptance { FAST, FINALIZED, HIGH_VALUE }
@@ -94,6 +98,7 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
     }
 
     function createInvoice(bytes32 invoiceId, Invoice calldata i) external {
+        require(i.merchant == msg.sender, "merchant");
         _createInvoice(invoiceId, i);
     }
 
@@ -104,14 +109,44 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         _createInvoice(invoiceId, i);
     }
 
-    function _createInvoice(bytes32 invoiceId, Invoice calldata i) private {
+    struct PosTerms {
+        bytes32 locationId;
+        uint256 tax;
+        uint256 tip;
+        address payout;
+        uint32 payoutVersion;
+    }
+
+    mapping(bytes32 => PosTerms) public posTerms;
+
+    function createPosInvoice(
+        bytes32 invoiceId, bytes32 merchantId, bytes32 locationId, uint256 subtotal,
+        uint256 tax, uint256 tip, uint64 expiresAt, uint64 refundUntil
+    ) external {
+        MerchantRegistry420 merchants = MerchantRegistry420(_resolveRequired(PayIds420.MERCHANT_REGISTRY));
+        (address controller,,,, bool active,) = merchants.merchants(merchantId);
+        MerchantRegistry420.Role role = merchants.effectiveRole(merchantId, locationId, msg.sender);
+        require(active && merchants.activeLocations(merchantId, locationId)
+            && (msg.sender == controller || role == MerchantRegistry420.Role.CASHIER
+                || role == MerchantRegistry420.Role.LOCATION_MANAGER), "active POS location/role");
+        (address payout, uint32 version, bytes32 plan) = merchants.currentPayout(merchantId);
+        require(payout != address(0) && plan == bytes32(0), "POS payout");
+        require(subtotal != 0 && tip <= type(uint256).max - subtotal - tax, "POS amount");
+        bytes32 tipPolicy = tip == 0 ? bytes32(0)
+            : keccak256(abi.encode(keccak256("420/PAY/TIP/V1"), payout, tip));
+        bytes32 assets = IPosNativePolicy420(_resolveRequired(PayIds420.NATIVE_QUOTE_SOURCE)).nativeAcceptedAssetsHash();
+        _createInvoice(invoiceId, Invoice(merchantId, controller, bytes32(0), bytes3("420"), subtotal + tax,
+            expiresAt, refundUntil, Mode.SINGLE_USE, Acceptance.FINALIZED, false, 0, assets, bytes32(0), tipPolicy, true));
+        posTerms[invoiceId] = PosTerms(locationId, tax, tip, payout, version);
+    }
+
+    function _createInvoice(bytes32 invoiceId, Invoice memory i) private {
         _requireOperational(
             PayIds420.ACTION_CREATE_INVOICE,
             ISystemSafety420.ActionClass.NORMAL_ONLY,
             Types420.Direction.INBOUND
         );
         require(invoiceId != bytes32(0) && _invoices[invoiceId].merchant == address(0), "invalid/exists");
-        require(i.merchant == msg.sender, "merchant");
         require(i.amount > 0 && i.expiresAt > block.timestamp, "amount/expiry");
         require(i.refundUntil >= i.expiresAt, "refund window");
         require(i.quoteMaxSlippageBps <= 42, "slippage cap");
@@ -129,7 +164,7 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
 
         _invoices[invoiceId] = i;
         _invoices[invoiceId].active = true;
-        emit InvoiceCreated(invoiceId, i.merchantId, msg.sender, i.amount, i.mode);
+        emit InvoiceCreated(invoiceId, i.merchantId, i.merchant, i.amount, i.mode);
     }
 
     function getInvoice(bytes32 invoiceId) external view returns (Invoice memory) { return _invoices[invoiceId]; }
@@ -154,6 +189,12 @@ contract InvoiceRegistry420 is GenesisResidentAccess420 {
         _requireOperational(
             PayIds420.ACTION_MARK_PAID, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.INBOUND
         );
+        PosTerms storage pos = posTerms[invoiceId];
+        if (pos.locationId != bytes32(0)) {
+            MerchantRegistry420 merchants = MerchantRegistry420(_resolveRequired(PayIds420.MERCHANT_REGISTRY));
+            (address payout, uint32 version, bytes32 plan) = merchants.currentPayout(_invoices[invoiceId].merchantId);
+            require(payout == pos.payout && version == pos.payoutVersion && plan == bytes32(0), "POS payout changed");
+        }
         _applyPayment(invoiceId, amount);
     }
 

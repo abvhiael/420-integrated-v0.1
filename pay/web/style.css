@@ -83,3 +83,27 @@ dd{margin:0;text-align:right}
   body.print-accounting #business-reports button { display: none; }
   body.print-accounting #business-records li { break-inside: avoid; }
 }
+
+#pos textarea {
+  width: 100%;
+  border: 1px solid #4a6052;
+  border-radius: .55rem;
+  padding: .55rem;
+  background: #111c16;
+  color: inherit;
+  font: inherit;
+}
+#pos-display {
+  width: min(34rem, calc(100% - 2rem));
+  max-height: calc(100% - 2rem);
+  border: 1px solid var(--stroke);
+  border-radius: 1rem;
+  padding: clamp(1rem, 4vw, 2rem);
+  color: #eef5ee;
+  background: #111c16;
+  text-align: center;
+}
+#pos-display::backdrop { background: rgba(0, 0, 0, .85); }
+#pos-qr { display: block; max-width: 100%; height: auto; margin: 1rem auto; image-rendering: pixelated; }
+#pos-display h4 { margin-top: 0; font-size: 1.5rem; }
+#pos-share { margin-bottom: 1rem; }

@@ -1,0 +1,46 @@
+{
+  "step": "TOKEN-AUDIT-5.1",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "57c69e2c392cae17b199342cdd17f8e9c49adb88",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-sdk.js",
+    "wallet/web/core/token-runtime.js",
+    "wallet/web/core/token-handoff.js",
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/core/token-app.js",
+    "wallet/web/test/token-test-fixture.js",
+    "wallet/web/test/token-sdk.test.js",
+    "wallet/web/test/token-runtime.test.js",
+    ".qualification/candidates/TOKEN-AUDIT-5.1-shared-sdk.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "420Token repository integrity"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/w15-8-genesis-integration.test.js",
+      "owner": "Wallet Token SDK and affected navigation boundary"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml"
+  ],
+  "exit_criteria": [
+    "Shared V1 catalog, typed JSON-safe creation drafts, exact ABI/calldata/config commitments for all eight profiles",
+    "Read-only on-chain release verification from independently approved Wallet configuration against V3 Registry and real dependency root; verify chain/genesis/code/state/immutable bindings and active templates",
+    "Canonical reviewed exact-fee SmartAccount preparation without signer, broadcaster or untrusted calldata",
+    "Retain previous contract/economic/deployment evidence and qualify affected Wallet SDK/regressions; no declaration of aggregate TOKEN-AUDIT-5 or live readiness"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

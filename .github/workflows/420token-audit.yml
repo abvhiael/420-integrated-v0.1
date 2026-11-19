@@ -16,7 +16,7 @@ on:
       - 'scripts/verify-420token-audit.py'
       - 'scripts/stage-420token-qualification.py'
       - 'wallet/web/core/token-*.js'
-      - 'wallet/web/test/token-*.test.js'
+      - 'wallet/web/test/token-*.js'
       - 'testnet/public-services/token/readiness.json'
       - '.github/workflows/420token-audit.yml'
       - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'
@@ -31,7 +31,55 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      contracts: ${{ steps.paths.outputs.contracts }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Classify exact contract qualification inputs
+        id: paths
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          if [ "$EVENT" != pull_request ]; then
+            echo 'contracts=true' >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only "$BASE...HEAD" > "$RUNNER_TEMP/token-paths.txt"
+            if grep -Eq '^(contracts/|scripts/stage-420token-qualification\.py$)' "$RUNNER_TEMP/token-paths.txt"; then
+              echo 'contracts=true' >> "$GITHUB_OUTPUT"
+            else
+              echo 'contracts=false' >> "$GITHUB_OUTPUT"
+            fi
+          fi
+  wallet-sdk:
+    needs: scope
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact qualification head and Token repository contract
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/verify-420token-audit.py
+      - name: Run Wallet Token SDK and runtime qualification
+        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/w15-8-genesis-integration.test.js
   qualify:
+    needs: scope
+    if: needs.scope.outputs.contracts == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -61,8 +109,6 @@ jobs:
           python3 scripts/verify-genesis-dapps.py
           python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
           python3 scripts/test-reg-audit-4-genesis-address-namespace.py
-      - name: Run Wallet Token runtime qualification
-        run: node --test wallet/web/test/token-runtime.test.js
       - name: Run Token Foundry qualification
         run: forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv
       - name: Reject dangerous Token primitives
@@ -74,6 +120,8 @@ jobs:
           fi
 
   security:
+    needs: scope
+    if: needs.scope.outputs.contracts == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:

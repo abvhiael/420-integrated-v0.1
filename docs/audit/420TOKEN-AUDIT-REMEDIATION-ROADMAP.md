@@ -2,7 +2,7 @@
 
 Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT, TOKEN-AUDIT-3 ECONOMIC AND TOKEN-AUDIT-4 DEPLOYMENT QUALIFICATION COMPLETE; TOKEN-AUDIT-5 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
 
-Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation, TOKEN-AUDIT-2 contract qualification, TOKEN-AUDIT-3 economic qualification and TOKEN-AUDIT-4 deployment preparation are complete; next: TOKEN-AUDIT-5.
+Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation, TOKEN-AUDIT-2 contract qualification, TOKEN-AUDIT-3 economic qualification and TOKEN-AUDIT-4 deployment preparation are complete; TOKEN-AUDIT-5 remains open; assigned substep 5.1 (shared application architecture and SDK) is qualified.
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 
@@ -40,6 +40,7 @@ This audit preserves the frozen Genesis definition in `config/genesis-applicatio
 - Preserve SmartAccount420 as transaction authority; Token code must not acquire an independent signer.
 - Enforce exact 42 native 420 value and reviewed Token factory target/calldata.
 - Cover wrong-chain, unresolved/zero-code, wrong-service, aliased dependency, wrong-fee and empty-calldata failures.
+- **Assigned substep 5.1 — Shared Token application architecture and SDK: COMPLETE.** Exact tested implementation `dd4e778ce7be964a75a99df0e3d3c39ba4a053f2`, PR #1238, Token workflow 44636056332, Wallet SDK job 135955021351 PASS (29/29, zero failures/skips); evidence `docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json`. Shared browser-safe catalog and typed drafts for all eight profiles; canonical ABI/config commitments; full release/Registry/Vault verification and review-only SmartAccount preparation. Retained deployment dependency root reproduced exactly. Aggregate TOKEN-AUDIT-5 remains open; actual application wiring, final user-flow qualification and live release approval are not asserted here.
 
 ## TOKEN-AUDIT-6 — documentation and integration reconciliation
 - Expand architecture, developer, user, security, troubleshooting and deployment/operator documentation to match the exact implementation.

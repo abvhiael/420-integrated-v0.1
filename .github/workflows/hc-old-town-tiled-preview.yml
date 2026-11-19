@@ -1,0 +1,29 @@
+name: HC Old Town Tiled canonical PNG preview package
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - hc-tiled-old-town-canonical-artwork
+    paths:
+      - tools/tiled/old-town/**
+      - .github/workflows/hc-old-town-tiled-preview.yml
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate hash-verified image tileset and map
+        run: node tools/tiled/old-town/build-canonical-preview.mjs
+      - name: Package original PNGs and Tiled files
+        run: |
+          mkdir -p package/tools/tiled/old-town package/apps/highcountry-web/public/assets/highcountry
+          cp tools/tiled/old-town/*.tmj tools/tiled/old-town/*.tsx tools/tiled/old-town/README.md package/tools/tiled/old-town/
+          cp -r apps/highcountry-web/public/assets/highcountry/old-town package/apps/highcountry-web/public/assets/highcountry/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hc-old-town-tiled-originals
+          path: package/
+          if-no-files-found: error
+          retention-days: 14

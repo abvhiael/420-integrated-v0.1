@@ -78,11 +78,21 @@ export function createPaymentPanel() {
     get('invoice-field').hidden = requestKind.value !== 'invoice';
   }
 
+  function clearShare() {
+    share.hidden = true;
+    get('payment-link').value = '';
+    get('payment-qr').removeAttribute('src');
+    get('payment-qr').alt = '';
+    get('download-qr').removeAttribute('href');
+    get('native-share-payment').hidden = true;
+  }
+
   function clearReview() {
     reviewed = null;
     separate = false;
     completed = false;
     reviewNode.hidden = true;
+    reviewNode.textContent = '';
     checkoutId = null;
     checkoutQuote = null;
     checkout.hidden = true;
@@ -285,10 +295,10 @@ export function createPaymentPanel() {
       status.textContent = 'QR read. Review the payment details.';
     });
   });
-  get('request-form').addEventListener('input', () => { share.hidden = true; draw(); });
+  get('request-form').addEventListener('input', () => { clearShare(); draw(); });
   get('request-form').addEventListener('submit', event => {
     event.preventDefault();
-    share.hidden = true;
+    clearShare();
     void run(async (active, current) => {
       const kind = requestKind.value;
       const context = await active.source.paymentContext(active.account);
@@ -336,10 +346,13 @@ export function createPaymentPanel() {
     }
   });
   get('copy-payment').addEventListener('click', async () => {
+    if (!connection || share.hidden) return;
+    const ticket = revision;
     try {
       await navigator.clipboard.writeText(get('payment-link').value);
-      status.textContent = 'Link copied.';
+      if (ticket === revision && !share.hidden) status.textContent = 'Link copied.';
     } catch {
+      if (ticket !== revision || share.hidden) return;
       get('payment-link').select();
       status.textContent = 'Select and copy the link.';
     }
@@ -380,7 +393,7 @@ export function createPaymentPanel() {
       get('request-amount').value = '';
       get('request-expiry').value = '';
       get('request-invoice').value = '';
-      share.hidden = true;
+      clearShare();
       status.textContent = '';
       importLocation();
       draw();

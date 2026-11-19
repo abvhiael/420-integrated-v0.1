@@ -165,7 +165,8 @@ export function createPayDeveloperService({ file, origin, chainId, credentials, 
       if (!credential.scopes.includes('invoices:read')) return json(403, { error: 'insufficient_scope' });
       try {
         const result = await readInvoice(credential, match[1]);
-        if (!result || result.invoice.merchantId !== credential.merchantId ||
+        if (credential.expiresAt <= now()) return json(401, { error: 'unauthorized' });
+        if (!result || result.invoice.id !== match[1] || result.invoice.merchantId !== credential.merchantId ||
             result.invoice.merchant !== credential.controller) return json(404, { error: 'not_found' });
         const { invoice } = result;
         return json(200, { version: 'v1', invoiceId: invoice.id, currency: invoice.currency,

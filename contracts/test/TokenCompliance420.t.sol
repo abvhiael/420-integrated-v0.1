@@ -79,7 +79,8 @@ contract TokenPermitCompliance420Test {
         uint64 nextChain
     ) public {
         uint256 original = ORIGINAL_CHAIN;
-        uint256 next = uint256(nextChain) + 1;
+        uint256 next = uint256(nextChain);
+        if (next == 0) next = 1;
         if (next == original) ++next;
         uint256 deadline = block.timestamp + 100;
         bytes32 originalDomain = _domain(address(token), original);

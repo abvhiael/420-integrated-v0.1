@@ -81,7 +81,8 @@ def hexbytes(value):
 
 
 def keccak(value):
-    return subprocess.check_output(["cast", "keccak"], input="0x" + value.hex() + "\n",\n                                   text=True, cwd=ROOT).strip().lower()
+    return subprocess.check_output(["cast", "keccak"], input="0x" + value.hex() + "\n",
+                                   text=True, cwd=ROOT).strip().lower()
 
 
 def digest(value):
@@ -160,7 +161,8 @@ def authority():
     require(any(x["id"] == "token-factory" and x["status"] == NS for x in ns["registryResolved"]), "Token namespace drift")
     residents = read(C / "artifacts/genesis-residents/v3/manifest.json")
     require(residents["genesis_config_hash"] == GENESIS, "resident manifest V3 drift")
-    require(not any(x.get("materialized") for n, x in residents["constructor_inventory"].items()
+    require(not any(n in residents["residents"] for n in ("TokenFactory420", "TokenTemplateRegistry420"))
+            and not any(x.get("materialized") for n, x in residents["constructor_inventory"].items()
                     if n in ("TokenFactory420", "TokenTemplateRegistry420")), "Token resident invented")
     token = read(C / "config/420token-genesis.json")
     release = read(C / "config/token/token-audit-4-release-materialization.json")
@@ -226,7 +228,8 @@ def artifact(dest, name):
         meta = json.loads(meta)
     settings = meta["settings"]
     require(meta["compiler"]["version"].startswith("0.8.24+") and settings["evmVersion"] == "cancun"
-            and settings["optimizer"] == {"enabled": True, "runs": 200} and settings["viaIR"] is True,
+            and settings["optimizer"]["enabled"] is True and settings["optimizer"]["runs"] == 200
+            and settings["viaIR"] is True,
             "compiler/profile drift " + name)
     constructors = [x for x in a["abi"] if x["type"] == "constructor"]
     types = [x["type"] for x in constructors[0]["inputs"]] if constructors else []
@@ -468,7 +471,8 @@ def anchor_check(rpc, bundle):
 
 
 def verify_vault(rpc, bundle, binding):
-    require(str(int(rpc.call("eth_chainId"), 16)) == str(binding["chainId"])
+    require(str(binding["chainId"]) in ("420", "31337")
+            and str(int(rpc.call("eth_chainId"), 16)) == str(binding["chainId"])
             and rpc.call("eth_getBlockByNumber", "0x0", False)["hash"].lower() == hash32(binding["genesisHash"]),
             "wrong chain or genesis")
     anchor_check(rpc, bundle)

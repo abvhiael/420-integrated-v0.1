@@ -406,7 +406,13 @@ class RPC:
         if to:
             tx["to"] = to
         tx_hash = self.call("eth_sendTransaction", tx)
+        # Anvil auto-mining may expose a transaction hash before indexing its receipt.
+        # Null is pending, never a failed receipt; wait boundedly for the actual result.
+        deadline = time.monotonic() + 30
         receipt = self.call("eth_getTransactionReceipt", tx_hash)
+        while receipt is None and time.monotonic() < deadline:
+            time.sleep(0.05)
+            receipt = self.call("eth_getTransactionReceipt", tx_hash)
         if not receipt or int(receipt["status"], 16) != 1:
             print(json.dumps({"failed_transaction": tx_hash, "sender": sender, "to": to,
                               "dataHash": keccak(hexbytes(data)), "initcodeBytes": len(hexbytes(data)),

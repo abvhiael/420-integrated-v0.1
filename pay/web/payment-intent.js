@@ -92,26 +92,46 @@ const safeRefusals = new Set([
   'EOA nonce/fees changed; new approval required', 'DApp UserOperation gas estimate changed; new approval required'
 ]);
 
-export async function sendOnce({ locks, storage, chainId, account, review, resetSubmitted = false, prepare }) {
+async function submissionKey(chainId, account, review) {
   const intent = review.id ?? review.recipient + '/' + review.value;
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',
     new TextEncoder().encode([chainId, account, review.kind, intent].join('/'))));
-  const key = '420pay.send.' + Array.from(digest, n => n.toString(16).padStart(2, '0')).join('');
+  return '420pay.send.' + Array.from(digest, n => n.toString(16).padStart(2, '0')).join('');
+}
+
+function decodeSubmission(existing, kind) {
+  const [submissionHash, paymentId, ...extra] = existing.split(':');
+  if (!HASH.test(submissionHash) || extra.length ||
+      (kind === 'invoice' ? !HASH.test(paymentId) : paymentId !== undefined)) {
+    throw new Error('The previous Wallet outcome cannot be verified.');
+  }
+  return paymentId === undefined ? { submissionHash } : { submissionHash, paymentId };
+}
+
+export async function previousInvoiceSubmission(storage, chainId, account, invoiceId) {
+  const existing = storage.getItem(await submissionKey(chainId, account, { kind: 'invoice', id: invoiceId }));
+  return existing && existing !== 'pending' ? decodeSubmission(existing, 'invoice') : null;
+}
+
+export async function sendOnce({ locks, storage, chainId, account, review, resetSubmitted = false, prepare }) {
+  const key = await submissionKey(chainId, account, review);
   if (!locks?.request) throw new Error('This browser cannot safely coordinate payment submissions.');
   return locks.request(key, { ifAvailable: true }, async lock => {
     if (!lock) throw new Error('This payment is already being reviewed in another tab.');
     const existing = storage.getItem(key);
     if (existing === 'pending') throw new Error('The previous Wallet outcome is unknown. Check Wallet activity before sending again.');
     if (existing !== null) {
-      if (!HASH.test(existing)) throw new Error('The previous Wallet outcome cannot be verified.');
-      if (!resetSubmitted || review.kind !== 'address') return { submissionHash: existing, duplicate: true };
+      const submission = decodeSubmission(existing, review.kind);
+      if (!resetSubmitted || review.kind !== 'address') return { ...submission, duplicate: true };
     }
     const submit = await prepare();
     storage.setItem(key, 'pending');
     try {
       const result = await submit();
       if (!HASH.test(result.submissionHash) || /^0x0{64}$/.test(result.submissionHash)) throw new Error();
-      storage.setItem(key, result.submissionHash);
+      if (review.kind === 'invoice' && !HASH.test(result.paymentId)) throw new Error();
+      storage.setItem(key, review.kind === 'invoice' ?
+        result.submissionHash + ':' + result.paymentId : result.submissionHash);
       return result;
     } catch (error) {
       if (error?.code === 4001 && safeRefusals.has(error.message)) {

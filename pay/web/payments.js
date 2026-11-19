@@ -1,7 +1,7 @@
 import qrcode from '../../wallet/extension/vendor/qrcode.mjs';
 import jsQR from 'jsqr';
 import { formatUnits } from './source.js';
-import { amountUnits, parsePayLink, paymentLink, reviewPayment, sameReview, sendOnce } from './payment-intent.js';
+import { amountUnits, parsePayLink, paymentLink, previousInvoiceSubmission, reviewPayment, sameReview, sendOnce } from './payment-intent.js';
 
 async function readQr(file) {
   if (file.size > 8_000_000) throw new Error('Choose a smaller QR image.');
@@ -27,6 +27,11 @@ export function createPaymentPanel() {
   const amount = get('send-amount');
   const reviewNode = get('payment-review');
   const confirm = get('confirm-send');
+  const checkout = get('hosted-checkout');
+  const checkoutTerms = get('checkout-terms');
+  const checkoutPay = get('checkout-pay');
+  const checkoutStatus = get('checkout-status');
+  const checkoutPayment = get('checkout-payment-id');
   const repeat = get('repeat-send');
   const requestKind = get('request-kind');
   const share = get('share-payment');
@@ -36,6 +41,8 @@ export function createPaymentPanel() {
   let revision = 0;
   let busy = false;
   let reviewed = null;
+  let checkoutId = null;
+  let checkoutQuote = null;
   let separate = false;
   let completed = false;
 
@@ -47,6 +54,8 @@ export function createPaymentPanel() {
         'Connect 420 Wallet to review payments and create requests.';
     confirm.hidden = fixture || !reviewed || reviewed.kind === 'invoice' || completed;
     confirm.disabled = busy;
+    checkoutPay.hidden = !checkoutQuote;
+    checkoutPay.disabled = busy;
     repeat.disabled = busy;
     get('request-terms').hidden = requestKind.value !== 'request';
     get('invoice-field').hidden = requestKind.value !== 'invoice';
@@ -57,6 +66,12 @@ export function createPaymentPanel() {
     separate = false;
     completed = false;
     reviewNode.hidden = true;
+    checkoutId = null;
+    checkoutQuote = null;
+    checkout.hidden = true;
+    checkoutTerms.textContent = '';
+    checkoutStatus.textContent = '';
+    checkoutPayment.value = '';
     repeat.hidden = true;
     draw();
   }
@@ -85,6 +100,21 @@ export function createPaymentPanel() {
     event.preventDefault();
     clearReview();
     void run(async (active, current) => {
+      const text = recipient.value.trim();
+      if (!fixture && /^https?:/i.test(text)) {
+        const link = parsePayLink(text, base, active.chainId);
+        if (link.kind === 'invoice') {
+          checkoutId = link.id;
+          checkout.hidden = false;
+          checkoutTerms.textContent = 'Existing payments can be checked even if the invoice is closed.';
+          const previous = await previousInvoiceSubmission(localStorage, active.chainId, active.account, link.id);
+          if (!current()) return;
+          if (previous) {
+            checkoutPayment.value = previous.paymentId;
+            checkoutStatus.textContent = 'Previously submitted ' + previous.submissionHash;
+          }
+        }
+      }
       const next = await getReview(active);
       if (!current()) return;
       reviewed = next;
@@ -98,6 +128,91 @@ export function createPaymentPanel() {
         (next.kind === 'invoice' ? '\nInvoice ' + next.id : '');
       reviewNode.hidden = false;
       reviewNode.focus();
+      if (next.kind === 'invoice' && !fixture) {
+        checkout.hidden = false;
+        checkoutTerms.textContent = 'Checking canonical merchant and payout…';
+        try {
+          const { invoice, recipient } = await active.source.hostedCheckout(active.account, next.id);
+          if (!current()) return;
+          if (!sameReview(next, { ...next, recipient: invoice.merchant, value: invoice.amount,
+            currency: invoice.currency, expires: invoice.expiresAt })) {
+            clearReview();
+            throw new Error('Invoice terms changed. Review again.');
+          }
+          checkoutTerms.textContent = 'Verified payout ' + recipient;
+          const bytes = crypto.getRandomValues(new Uint8Array(32));
+          const nonce = BigInt('0x' + Array.from(bytes, value => value.toString(16).padStart(2, '0')).join(''));
+          try {
+            const quote = await active.source.nativeInvoiceQuote(active.account, next.id, nonce);
+            if (current()) showCheckoutQuote(quote);
+          } catch (error) {
+            if (current()) checkoutTerms.textContent += '\nNative 420 quote unavailable. ' + error.message;
+          }
+        } catch (error) {
+          if (current()) checkoutTerms.textContent = error.message || 'Canonical checkout terms unavailable.';
+        }
+      }
+    });
+  });
+  function showCheckoutQuote(quote) {
+    checkoutQuote = quote;
+    checkoutTerms.textContent = 'Asset: native 420\nAmount: ' + formatUnits(quote.value, 18) +
+      ' 420\nPayout: ' + quote.recipient + '\nProtocol and conversion fees: 0 420' +
+      '\nNetwork fee: estimated and shown by 420 Wallet' +
+      '\nQuote expires: ' + new Date(Number(quote.expiresAt) * 1000).toISOString() +
+      '\nAcceptance: ' + quote.acceptance;
+  }
+
+  checkoutPay.addEventListener('click', () => {
+    const quote = checkoutQuote;
+    if (!quote) return;
+    void run(async (active, current) => {
+      const result = await sendOnce({
+        locks: navigator.locks, storage: localStorage, chainId: active.chainId, account: active.account,
+        review: { kind: 'invoice', id: quote.invoiceId }, prepare: async () => {
+          let fresh;
+          try {
+            fresh = await active.source.nativeInvoiceQuote(active.account, quote.invoiceId, quote.nonce, quote.quotedAt);
+          } catch {}
+          if (!current()) throw new Error('Wallet connection changed.');
+          if (!fresh || fresh.data !== quote.data || fresh.router !== quote.router || fresh.value !== quote.value ||
+              fresh.paymentId !== quote.paymentId || fresh.expiresAt !== quote.expiresAt) {
+            checkoutQuote = null;
+            checkoutTerms.textContent = 'Refreshing checkout quote…';
+            try {
+              const replacement = await active.source.nativeInvoiceQuote(active.account, quote.invoiceId, quote.nonce);
+              if (current()) showCheckoutQuote(replacement);
+            } catch (error) {
+              if (current()) checkoutTerms.textContent = 'Native 420 quote unavailable. ' + error.message;
+            }
+            throw new Error('Checkout terms changed or expired. Review the replacement before continuing.');
+          }
+          return async () => ({ ...await active.source.submitNativeInvoice(active.account, fresh), paymentId: fresh.paymentId });
+        }
+      });
+      if (!current()) return;
+      checkoutQuote = null;
+      checkoutPayment.value = result.paymentId;
+      checkoutStatus.textContent = (result.duplicate ? 'Previously submitted ' : 'Submitted to network ') +
+        result.submissionHash + '. Check canonical payment status for confirmation.';
+    });
+  });
+
+  checkoutPayment.addEventListener('input', () => { checkoutStatus.textContent = ''; });
+  get('checkout-check').addEventListener('click', () => {
+    const invoiceId = checkoutId;
+    if (!invoiceId || fixture) return;
+    checkoutStatus.textContent = '';
+    void run(async (active, current) => {
+      const paymentId = checkoutPayment.value.trim().toLowerCase();
+      if (!/^0x[0-9a-f]{64}$/.test(paymentId) || /^0x0{64}$/.test(paymentId)) {
+        throw new Error('Enter a canonical payment ID.');
+      }
+      const result = await active.source.checkoutConfirmation(active.account, invoiceId, paymentId);
+      if (!current() || checkoutId !== invoiceId || checkoutPayment.value.trim().toLowerCase() !== paymentId) return;
+      const label = result.status?.replaceAll('_', ' ').toLowerCase().replace(/^./, c => c.toUpperCase());
+      checkoutStatus.textContent = (label ?? 'Awaiting canonical payment') +
+        ' · Canonical snapshot ' + result.snapshot.blockHash + ' · ' + result.acceptance;
     });
   });
   for (const control of [recipient, amount]) control.addEventListener('input', clearReview);

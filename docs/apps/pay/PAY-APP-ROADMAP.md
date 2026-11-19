@@ -275,9 +275,47 @@ protection at the implementation revision.
 
 ## PAY-APP-5 — Hosted checkout, quotes and payment confirmation
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Native hosted checkout and canonical conversion contract candidates implemented. **Testnet required:** No.
 
 Exit criteria: Canonical prices, 42-second quote and fees, asset/settlement choices, explicit Wallet handoff, atomic failure and status. Retain reproducible scoped qualification at exact implementation SHA.
+
+Hosted review reads the active invoice, merchant controller and current payout
+at one canonical snapshot. The approved deployment can supply the runtime
+hash for `420/APP/420PAY/MERCHANT_REGISTRY` in the existing component map.
+Payment confirmation checks the invoice and selected Wallet account against
+the canonical PaymentRegistry record and reports the exact status.
+
+The native 420 checkout candidate adds a Registry-resolved
+`CanonicalPayQuote420` source and `PaymentRouter420.payNativeInvoice`. For a
+native-denominated invoice with the approved native asset commitment and
+single-recipient terms, the quote binds the payer, nonce, invoice terms, exact
+amount and active payout version to a 42-second window bounded by invoice expiry.
+The native fee quote reports zero protocol and conversion fees. Wallet estimates
+transaction gas separately. Delivery, invoice accounting, replay state and the
+settled payment record commit together or revert together.
+
+The native source uses its own Registry component so existing Swap fee
+bindings stay available. The candidate changes three Pay resident runtimes.
+Any deployment must qualify the new runtimes and publish the native source as
+`420/APP/420PAY/NATIVE_QUOTE_SOURCE`, using the approved native asset policy
+commitment as its constructor input. The retained frozen deployment artifacts
+remain historical evidence. Hosted native checkout displays the canonical quote and hands the exact call to
+420 Wallet. Expired or changed quotes require a new review. Confirmation checks
+the selected account and invoice in canonical payment state. FINALIZED invoices
+use the finalized snapshot. HIGH_VALUE also uses finalized state and requires
+healthy canonical pricing and settlement under Decision 4. For direct native
+checkout, the verified invoice supplies the fixed native price, and the quote
+and payment contracts enforce native asset health before execution.
+
+For conversion, the invoice commits to an eligible input/settlement pair and
+canonical market. The quote reads the active pool price and fee, enforces asset
+and market health, binds the pool runtime and spend/receive bounds, and expires
+after 42 seconds or at invoice expiry. The invoice receives its outstanding
+amount as credit. The payout receives the disclosed pool output. Any mismatch
+during execution reverts the payout, accounting and replay state together.
+The hosted screen currently submits native invoices. Conversion is available
+through the qualified contract entry point for eligible ERC-20 pairs.
+
 
 ## PAY-APP-6 — Merchant registration and business dashboard
 

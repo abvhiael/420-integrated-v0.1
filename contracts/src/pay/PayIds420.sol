@@ -11,6 +11,7 @@ library PayIds420 {
     bytes32 internal constant GAS_SPONSOR = keccak256("420/APP/420PAY/GAS_SPONSOR");
     bytes32 internal constant SETTLEMENT_ADAPTER = keccak256("420/APP/420PAY/SETTLEMENT_ADAPTER");
     bytes32 internal constant SWAP_HEALTH_ADAPTER = keccak256("420/APP/420PAY/SWAP_HEALTH_ADAPTER");
+    bytes32 internal constant NATIVE_QUOTE_SOURCE = keccak256("420/APP/420PAY/NATIVE_QUOTE_SOURCE");
 
     bytes32 internal constant ACTION_CONFIGURE = keccak256("420/PAY/ACTION/CONFIGURE");
     bytes32 internal constant ACTION_CREATE_INVOICE = keccak256("420/PAY/ACTION/CREATE_INVOICE");

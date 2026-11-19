@@ -84,6 +84,38 @@ export function createConsumerSource(config, provider) {
         invoice: id => registry.invoiceForReview(snapshot, id)
       };
     },
+    async hostedCheckout(account, invoiceId) {
+      await verify(account);
+      const snapshot = await registry.latestSnapshot();
+      const review = await registry.hostedCheckout(snapshot, invoiceId);
+      await verify(account);
+      return review;
+    },
+    async nativeInvoiceQuote(account, invoiceId, nonce, issuedAt) {
+      await verify(account);
+      const quote = await registry.nativeInvoiceQuote(await registry.latestSnapshot(), invoiceId, account, nonce, issuedAt);
+      await verify(account);
+      return quote;
+    },
+    async submitNativeInvoice(account, quote) {
+      await verify(account);
+      if (quote.payer !== account) throw new Error('Checkout payer changed.');
+      return wallet.submitPayment({ data: quote.data, value: quote.value, expectedTarget: quote.router });
+    },
+    async checkoutConfirmation(account, invoiceId, paymentId) {
+      await verify(account);
+      let snapshot = await registry.latestSnapshot();
+      const acceptance = await registry.invoiceAcceptance(snapshot, invoiceId);
+      if (acceptance === 'FINALIZED' || acceptance === 'HIGH_VALUE') {
+        snapshot = await registry.latestSnapshot('finalized');
+      }
+      const payment = await createPayReader(registry.transport, snapshot).payment(paymentId);
+      if (payment && (payment.invoiceId !== invoiceId || (payment.payer !== account && payment.merchant !== account))) {
+        throw new Error('No matching payment for this invoice and Wallet account.');
+      }
+      await verify(account);
+      return { status: payment?.status ?? null, snapshot, acceptance };
+    },
     async sendNative(account, recipient, value) {
       await verify(account);
       return wallet.sendNative(recipient, value);

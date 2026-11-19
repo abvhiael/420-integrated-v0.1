@@ -173,6 +173,27 @@ contract PaymentRegistry420 is GenesisResidentAccess420 {
         emit PaymentSet(paymentId, invoiceId, Status.SUBMITTED);
     }
 
+    function recordInvoiceCheckout(
+        bytes32 invoiceId, address payer, address merchant, address inputAsset, uint256 inputAmount,
+        address settlementAsset, uint256 settlementAmount, bytes32 quoteId, uint256 payerNonce
+    ) external returns (bytes32 paymentId) {
+        require(msg.sender == _resolveRequired(PayIds420.PAYMENT_ROUTER), "checkout router");
+        _requireOperational(
+            PayIds420.ACTION_SETTLE, ISystemSafety420.ActionClass.NORMAL_ONLY, Types420.Direction.INBOUND
+        );
+        require(invoiceId != bytes32(0) && payer != address(0) && merchant != address(0), "checkout parties");
+        require(inputAmount > 0 && settlementAmount > 0 && quoteId != bytes32(0) && payerNonce != 0, "checkout terms");
+        _canonicalSettlementAsset(settlementAsset);
+        paymentId = derivePaymentId(invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce);
+        require(payments[paymentId].status == Status.NONE, "duplicate");
+        bytes32 receipt = keccak256(abi.encode(block.chainid, address(this), paymentId));
+        payments[paymentId] = Payment(
+            invoiceId, payer, merchant, inputAsset, inputAmount, settlementAsset, settlementAmount, quoteId, payerNonce, receipt, 0, 0,
+            Status.SETTLED
+        );
+        emit PaymentSet(paymentId, invoiceId, Status.SETTLED);
+    }
+
     function recordSettled(
         bytes32 paymentId
     ) external {

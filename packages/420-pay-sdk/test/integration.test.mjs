@@ -26,7 +26,11 @@ function fixture() {
   const labelHash = digest('crowley');
   const profile = hash('5');
   const account = address('9');
+  const merchantKey = '420/APP/420PAY/MERCHANT_REGISTRY';
+  config.components[merchantKey] = codeHash;
   const replies = new Map();
+  const merchantComponent = digest(merchantKey);
+  replies.set(call('component(bytes32)', merchantComponent), encode(merchantComponent, address('5'), codeHash, 1, 0, 0, 2));
   for (const [id, entry] of [['pay', config.pay], ['names', config.names], ['identity', config.identity]]) {
     replies.set(call('getService(bytes32)', digest('420/service/' + id + '/v1')),
       encode(entry.implementation, codeHash, entry.metadataHash, 1, 10, 1));
@@ -77,6 +81,8 @@ function fixture() {
       if (state.reorgDuringRead) state.canonical = false;
     } else if (params[0].data.startsWith(invoiceView.selector) ||
       params[0].data.startsWith(digest('isClosed(bytes32)').slice(0, 10))) assert.equal(params[0].to, address('6'));
+    else if (['merchants(bytes32)', 'currentPayout(bytes32)'].some(sig =>
+      params[0].data.startsWith(digest(sig).slice(0, 10)))) assert.equal(params[0].to, address('5'));
     else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
     else if (params[0].data.startsWith(digest('balanceOf(address)').slice(0, 10))) assert.equal(params[0].to, address('a'));
     else assert.equal(params[0].to, config.registry);
@@ -272,4 +278,27 @@ test('invoice review rejects closed and expired canonical registry records', asy
   replies.set(closed, encode(0));
   state.block.timestamp = '0xc';
   await assert.rejects(application.invoiceForReview(snapshot, id), /closed or expired/);
+});
+
+
+test('hosted checkout reads verified invoice, active merchant and payout at one snapshot', async () => {
+  const {application, replies, account} = fixture();
+  const id = hash('d');
+  const merchant = hash('e');
+  const payout = address('b');
+  const controller = call('merchants(bytes32)', merchant);
+  const profile = call('currentPayout(bytes32)', merchant);
+  replies.set(invoiceView.selector + id.slice(2), encode(merchant, account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
+    42, 11, 20, 0, 1, 0, 0, hash('a'), hash('0'), hash('0'), 1));
+  replies.set(call('isClosed(bytes32)', id), encode(0));
+  replies.set(controller, encode(account, hash('0'), hash('0'), 1, 1, 1));
+  replies.set(profile, encode(payout, 1, hash('0')));
+  const review = await application.hostedCheckout(snapshot, id);
+  assert.equal(review.recipient, payout);
+  assert.equal(review.invoice.amount, 42n);
+  assert.equal(review.chainTime, 10n);
+  replies.set(profile, encode(payout, 2, hash('f')));
+  await assert.rejects(application.hostedCheckout(snapshot, id), /payout plan has changed/);
+  replies.set(controller, encode(address('a'), hash('0'), hash('0'), 1, 1, 1));
+  await assert.rejects(application.hostedCheckout(snapshot, id), /merchant binding/);
 });

@@ -69,6 +69,15 @@
               <button type="submit" class="secondary">Review payment</button>
             </fieldset>
             <p id="payment-review" class="payment-result" tabindex="-1" hidden></p>
+            <section id="hosted-checkout" aria-labelledby="checkout-title" hidden>
+              <h3 id="checkout-title">Hosted checkout</h3>
+              <p id="checkout-terms" class="payment-result"></p>
+              <button id="checkout-pay" type="button" hidden>Continue to Wallet for invoice</button>
+              <label for="checkout-payment-id">Existing payment ID</label>
+              <input id="checkout-payment-id" type="text" autocomplete="off" maxlength="66">
+              <button id="checkout-check" class="secondary" type="button">Check payment status</button>
+              <p id="checkout-status" class="payment-result" role="status"></p>
+            </section>
             <button id="confirm-send" type="button" hidden>Continue in 420 Wallet</button>
             <button id="repeat-send" type="button" class="secondary" hidden>Prepare a separate send</button>
           </form>

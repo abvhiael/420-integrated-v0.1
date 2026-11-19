@@ -1,0 +1,43 @@
+name: PAY-APP release package qualification
+on:
+  pull_request:
+    paths:
+      - 'scripts/package-pay-app-release.py'
+      - '.github/workflows/pay-app-release.yml'
+      - 'docs/apps/pay/local-closeout.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify reproducible release archives
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          npm ci --prefix packages/420-pay-sdk --ignore-scripts --no-audit --no-fund
+          npm ci --prefix pay/web --ignore-scripts --no-audit --no-fund
+          npm run build --prefix packages/420-pay-sdk
+          npm run build --prefix pay/web
+          python3 scripts/package-pay-app-release.py --web-dir pay/web/dist --output "$RUNNER_TEMP/pay-release"
+          mv pay/web/dist "$RUNNER_TEMP/pay-first-build"
+          npm run build --prefix pay/web
+          python3 scripts/package-pay-app-release.py --web-dir pay/web/dist --output "$RUNNER_TEMP/pay-repeat"
+          diff -r "$RUNNER_TEMP/pay-release" "$RUNNER_TEMP/pay-repeat"
+          cd "$RUNNER_TEMP/pay-release"
+          sha256sum -c SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 420pay-local-release-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/pay-release
+          if-no-files-found: error

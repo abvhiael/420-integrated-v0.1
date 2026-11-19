@@ -41,6 +41,14 @@ need("functionsetEnabled(bytes32id,boolenabled_)externalonlyGovernance" in templ
 erc20_compact = "".join(erc20.split())
 need("SECP256K1N_HALF" in erc20 and "(v!=27&&v!=28)" in erc20_compact, "canonical permit signature enforcement missing")
 need("block.chainid,address(this)" in erc20_compact, "permit domain separation missing")
+need("functionDOMAIN_SEPARATOR()publicviewreturns(bytes32)" in erc20_compact
+     and 'DOMAIN_SEPARATOR(),' in erc20, "permit must use the current-chain domain getter")
+erc721 = "".join(text("contracts/src/token/ERC721Template420.sol").split())
+erc1155 = "".join(text("contracts/src/token/ERC1155Template420.sol").split())
+need("functiongetApproved(uint256id)externalviewreturns(address){ownerOf(id);return_tokenApprovals[id];}" in erc721,
+     "ERC721 approval query must validate token existence")
+need("functionuri(uint256)externalviewreturns(stringmemory){return_uri;}" in erc1155,
+     "ERC1155 metadata interface getter missing")
 
 app = next((x for x in apps.get("apps", []) if x.get("name") == "420 Token"), None)
 need(app is not None and app.get("class") == "GENESIS_PROTOCOL_AND_USER_APP" and app.get("contracts_required") is True, "Genesis Token app definition drift")
@@ -62,6 +70,8 @@ for forbidden in ("eth_sendTransaction", "privateKey", "signTransaction", "new W
 required = [
     "contracts/test/TokenGenesis420.t.sol",
     "contracts/test/TokenAudit420.t.sol",
+    "contracts/test/TokenCompliance420.t.sol",
+    "contracts/test/TokenTemplateInvariant420.t.sol",
     "contracts/test/TokenVaultIntegration420.t.sol",
     "contracts/test/TokenDeploymentBinding420.t.sol",
     "wallet/web/test/token-runtime.test.js",

@@ -19,7 +19,7 @@ interface IERC1155Receiver420 {
 }
 
 contract ERC1155Template420 {
-    string public uri;
+    string private _uri;
     address public owner;
     bytes32 public immutable templateId;
     mapping(uint256 => mapping(address => uint256)) private _balances;
@@ -43,7 +43,7 @@ contract ERC1155Template420 {
         bytes32 templateId_
     ) {
         if (owner_ == address(0)) revert ZeroAddress();
-        uri = uri_;
+        _uri = uri_;
         owner = owner_;
         templateId = templateId_;
     }
@@ -56,6 +56,18 @@ contract ERC1155Template420 {
         bytes4 id
     ) external pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0xd9b67a26 || id == 0x0e89341c;
+    }
+
+    /// @notice ERC1155 metadata URI; clients substitute {id} according to ERC1155.
+    function uri(
+        uint256
+    ) external view returns (string memory) {
+        return _uri;
+    }
+
+    /// @notice Retain the original collection-level URI getter for existing clients.
+    function uri() external view returns (string memory) {
+        return _uri;
     }
 
     function balanceOf(

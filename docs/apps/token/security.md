@@ -16,13 +16,13 @@ The Token V1 fee does not route through DevelopmentCompensationVault420.
 
 ## Permit and voting
 
-The permit template uses an EIP-712 domain containing token name, version, chain ID and verifying-contract address, and it consumes monotonic holder nonces. Canonical `v` and low-`s` requirements reject signature-malleable forms. Expired, replayed or malformed permits fail closed.
+The permit template uses an EIP-712 domain containing token name, version, chain ID and verifying-contract address, and it consumes monotonic holder nonces. The domain separator tracks the current chain ID, so a signature made for a different chain ID fails validation even after a chain split. Canonical `v` and low-`s` requirements reject signature-malleable forms. Expired, replayed or malformed permits fail closed.
 
 Vote power exists only for delegated balances. Transfer, mint and burn paths move voting power between current delegates, while historical checkpoints support past-block queries.
 
 ## NFT receiver safety
 
-ERC721 and ERC1155 safe transfers/mints to contracts require the corresponding receiver callbacks. An incompatible contract recipient causes the operation to revert rather than silently locking the asset through a nominally safe path.
+ERC721 safe transfers and ERC1155 safe transfers/mints to contracts require the corresponding receiver callbacks. ERC721 owner-authorized `mint` is not a safe-mint operation; do not send newly minted NFTs to an incompatible contract. ERC721 approval queries reject nonexistent or burned IDs. An incompatible contract recipient causes the operation to revert rather than silently locking the asset through a nominally safe path.
 
 ## Operational checks
 

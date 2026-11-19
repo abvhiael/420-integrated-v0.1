@@ -1,0 +1,53 @@
+{
+  "step": "TOKEN-AUDIT-2",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "255a5de653c5797be5e886607f663554b582548b",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "contracts/src/token/ERC20Template420.sol",
+    "contracts/src/token/ERC721Template420.sol",
+    "contracts/src/token/ERC1155Template420.sol",
+    "scripts/verify-420token-audit.py",
+    ".github/workflows/420token-audit.yml",
+    "docs/apps/token/developer/contracts.md",
+    "docs/apps/token/security.md",
+    "contracts/test/TokenCompliance420.t.sol",
+    "contracts/test/TokenTemplateInvariant420.t.sol",
+    ".qualification/candidates/TOKEN-AUDIT-2-contract-compliance.json"
+  ],
+  "tests": [
+    {
+      "command": "forge fmt --check src/token test/TokenCompliance420.t.sol test/TokenTemplateInvariant420.t.sol",
+      "owner": "420Token"
+    },
+    {
+      "command": "FOUNDRY_PROFILE=pr forge test --match-path 'test/Token*.t.sol'",
+      "owner": "420Token"
+    },
+    {
+      "command": "FOUNDRY_PROFILE=hardening forge test --match-path 'test/Token*.t.sol'",
+      "owner": "420Token"
+    },
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "420Token repository verifier"
+    },
+    {
+      "command": "Targeted Token Slither high-severity gate",
+      "owner": "420Token security"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml"
+  ],
+  "exit_criteria": [
+    "ERC1155 standard metadata selector and retained legacy getter",
+    "ERC721 nonexistent/burned approval rejection and clearing",
+    "ERC20 live chain permit domain and signature replay/malleability regressions",
+    "Standards, adversarial, fuzz and stateful invariant qualification"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

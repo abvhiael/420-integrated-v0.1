@@ -19,7 +19,7 @@ contract ERC721Template420 {
     uint256 public totalSupply;
     mapping(uint256 => address) private _ownerOf;
     mapping(address => uint256) private _balanceOf;
-    mapping(uint256 => address) public getApproved;
+    mapping(uint256 => address) private _tokenApprovals;
     mapping(address => mapping(address => bool)) public isApprovedForAll;
     error Unauthorized();
     error ZeroAddress();
@@ -71,6 +71,14 @@ contract ERC721Template420 {
         return o;
     }
 
+    /// @notice ERC721 approval query must reject nonexistent and burned token IDs.
+    function getApproved(
+        uint256 id
+    ) external view returns (address) {
+        ownerOf(id);
+        return _tokenApprovals[id];
+    }
+
     function transferOwnership(
         address n
     ) external onlyOwner {
@@ -93,7 +101,7 @@ contract ERC721Template420 {
     ) external {
         address o = ownerOf(id);
         if (msg.sender != o && !isApprovedForAll[o][msg.sender]) revert Unauthorized();
-        getApproved[id] = to;
+        _tokenApprovals[id] = to;
         emit Approval(o, to, id);
     }
 
@@ -105,10 +113,10 @@ contract ERC721Template420 {
         if (to == address(0)) revert ZeroAddress();
         address o = ownerOf(id);
         if (o != from) revert Unauthorized();
-        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) {
+        if (msg.sender != o && msg.sender != _tokenApprovals[id] && !isApprovedForAll[o][msg.sender]) {
             revert Unauthorized();
         }
-        delete getApproved[id];
+        delete _tokenApprovals[id];
         unchecked {
             _balanceOf[from]--;
         }
@@ -157,10 +165,10 @@ contract ERC721Template420 {
         uint256 id
     ) external {
         address o = ownerOf(id);
-        if (msg.sender != o && msg.sender != getApproved[id] && !isApprovedForAll[o][msg.sender]) {
+        if (msg.sender != o && msg.sender != _tokenApprovals[id] && !isApprovedForAll[o][msg.sender]) {
             revert Unauthorized();
         }
-        delete getApproved[id];
+        delete _tokenApprovals[id];
         delete _ownerOf[id];
         unchecked {
             _balanceOf[o]--;

@@ -75,7 +75,9 @@ function fixture() {
     else if (params[0].data === paymentCall) {
       assert.equal(params[0].to, address('7'));
       if (state.reorgDuringRead) state.canonical = false;
-    } else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
+    } else if (params[0].data.startsWith(invoiceView.selector) ||
+      params[0].data.startsWith(digest('isClosed(bytes32)').slice(0, 10))) assert.equal(params[0].to, address('6'));
+    else if (params[0].data.startsWith(paymentView.selector)) assert.equal(params[0].to, address('7'));
     else if (params[0].data.startsWith(digest('balanceOf(address)').slice(0, 10))) assert.equal(params[0].to, address('a'));
     else assert.equal(params[0].to, config.registry);
     return replies.get(params[0].data);
@@ -230,4 +232,44 @@ test('dashboard history verifies event blocks and payment identity, deduplicates
   await assert.rejects(application.accountHistory(snapshot, account), /no longer canonical/);
   state.events[0].removed = true;
   await assert.rejects(application.accountHistory(snapshot, account), /Invalid Pay history event/);
+});
+
+test('native sends preserve the selected account, network, recipient and value in Wallet', async t => {
+  globalThis.location = {origin};
+  t.after(() => { delete globalThis.location; });
+  const {application, account} = fixture();
+  let selected = account;
+  const seen = [];
+  const wallet = createPayWallet(application, {is420Wallet: true, async request({method, params}) {
+    if (method === 'eth_chainId') return '0x1a4';
+    if (method === 'eth_accounts' || method === 'eth_requestAccounts') return [selected];
+    assert.equal(method, 'eth_sendTransaction');
+    seen.push(params);
+    return hash('f');
+  }});
+  await wallet.connect();
+  await assert.rejects(wallet.sendNative(address('0'), 1n), /Invalid Pay address/);
+  await assert.rejects(wallet.sendNative(address('a'), 0n), /Invalid native send value/);
+  selected = address('b');
+  await assert.rejects(wallet.sendNative(address('a'), 1n), /selection changed/);
+  selected = account;
+  assert.deepEqual(await wallet.sendNative(address('a'), 42n), {submissionHash:hash('f'), chainId:420n});
+  assert.deepEqual(seen, [[{chainId:'0x1a4', from:account, to:address('a'), data:'0x', value:'0x2a'}]]);
+});
+
+
+test('invoice review rejects closed and expired canonical registry records', async () => {
+  const {application, state, replies, account} = fixture();
+  const id = hash('d');
+  const get = invoiceView.selector + id.slice(2);
+  const closed = call('isClosed(bytes32)', id);
+  replies.set(get, encode(hash('e'), account, hash('0'), '0x' + '343230'.padEnd(64,'0'),
+    42, 11, 20, 0, 1, 0, 0, hash('a'), hash('0'), hash('0'), 1));
+  replies.set(closed, encode(0));
+  assert.equal((await application.invoiceForReview(snapshot, id)).merchant, account);
+  replies.set(closed, encode(1));
+  await assert.rejects(application.invoiceForReview(snapshot, id), /closed or expired/);
+  replies.set(closed, encode(0));
+  state.block.timestamp = '0xc';
+  await assert.rejects(application.invoiceForReview(snapshot, id), /closed or expired/);
 });

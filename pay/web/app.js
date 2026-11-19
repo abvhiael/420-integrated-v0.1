@@ -1,5 +1,6 @@
 import { createConsumerSource, formatUnits, makeReceipt } from './source.js';
 import { createFixtureSource } from './fixture.js';
+import { createPaymentPanel } from './payments.js';
 
 const byId = id => document.getElementById(id);
 const ui = Object.fromEntries([
@@ -22,6 +23,7 @@ let busy = false;
 let scope = 0;
 let stopWatching = () => {};
 const preferenceKey = '420pay.hideAmounts';
+const paymentPanel = createPaymentPanel();
 try { ui.privacy.checked = localStorage.getItem(preferenceKey) === 'true'; } catch {}
 
 const announce = message => { ui.status.textContent = message; };
@@ -34,6 +36,7 @@ function displayAmount(amount, asset, assets) {
 }
 
 function draw() {
+  paymentPanel.update(connected, fixture);
   const active = connected !== null;
   ui.banner.hidden = !fixture;
   ui.mode.textContent = fixture ? 'Personal · Fixture' : 'Personal';

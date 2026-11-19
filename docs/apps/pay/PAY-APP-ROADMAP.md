@@ -246,9 +246,32 @@ navigation targets and automated accessibility checks at the exact revision.
 
 ## PAY-APP-4 — Send, request, QR codes and payment links
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** Repository implementation complete. **Testnet required:** No.
 
 Exit criteria: Validate recipients, invoice and address QR distinction, links, expiry, sharing, retries and duplicate protection. Retain reproducible scoped qualification at exact implementation SHA.
+
+The consumer dashboard supports direct native 420 sends to an address or a
+verified .420 name. It revalidates the Wallet account, chain, recipient and
+request terms before asking Wallet to simulate, review and approve the transfer.
+A returned hash records submission. Direct transfers use Wallet transaction
+history. Invoice settlement and hosted checkout are owned by PAY-APP-5.
+
+Receiving-address links carry a destination. Amount requests add a fixed value,
+an expiry and an opaque request ID. Invoice links carry only the canonical
+invoice ID and load the merchant, amount, currency, expiry and closed state
+from the Registry. In all cases, the Pay link is bound to its origin and chain.
+The dashboard generates QR images locally, can read QR images from files, and
+offers link copying and QR downloads. Fixture mode previews the flow with
+sample data and never requests Wallet submission.
+
+An origin-local submission record and browser lock protect against accidental
+repeats across tabs and reloads. Explicit Wallet refusals before submission
+allow a retry. Ambiguous outcomes are held for Wallet activity review. Open
+the dashboard in a secure context for browser locking and clipboard access.
+
+The scoped SDK and dashboard workflows exercise recipient and expiry checks,
+invoice reads, exact Wallet requests, QR round-tripping and duplicate
+protection at the implementation revision.
 
 ## PAY-APP-5 — Hosted checkout, quotes and payment confirmation
 

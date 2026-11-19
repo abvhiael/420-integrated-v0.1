@@ -21,4 +21,14 @@ blocks, the activity filter to show sent or received payments, and **Settings**
 to hide amounts on screen. **Download receipt** exports verified payment
 evidence. Fixture mode is explicitly labelled and exports sample data.
 
+Under **Send & request**, paste a recipient, .420 name or Pay link, or choose a
+QR image to read. Review the resolved address and amount before continuing in
+420 Wallet. A submitted transaction appears in Wallet activity. If the outcome
+is unclear, check that activity before trying again.
+
+Choose **Receiving address** for a reusable link, **Amount request** for an
+amount with an expiry, or **Existing invoice** for a canonical invoice you own.
+Use **Copy link** or **Download QR image** to share it. The invoice review
+shows canonical terms. Checkout handles invoice settlement.
+
 See [permissions](permissions.md) and [recovery guidance](troubleshooting.md).

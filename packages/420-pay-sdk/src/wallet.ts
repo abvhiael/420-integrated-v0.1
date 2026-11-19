@@ -81,6 +81,24 @@ export function createPayWallet(registry: PayRegistry, provider: PayWalletProvid
       }
     },
 
+    async sendNative(recipient: Hex, value: bigint) {
+      const to = address(recipient);
+      requirePay(!submitting && !revoking && account, 'Connect a selected 420 Wallet account');
+      requirePay(typeof value === 'bigint' && value > 0n && value < 1n << 256n, 'Invalid native send value');
+      const from = account;
+      const ticket = generation;
+      submitting = true;
+      try {
+        requirePay(await selected('eth_accounts') === from && ticket === generation,
+          '420 Wallet selection changed or was revoked');
+        const tx = Object.freeze({ chainId, from, to, data: '0x', value: `0x${value.toString(16)}` });
+        const submissionHash = hash(await request('eth_sendTransaction', [tx]));
+        return Object.freeze({ submissionHash, chainId: registry.chainId });
+      } finally {
+        submitting = false;
+      }
+    },
+
     async revoke() {
       requirePay(!revoking && !connecting, '420 Wallet operation in progress');
       ++generation;

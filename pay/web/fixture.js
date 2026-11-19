@@ -26,6 +26,18 @@ export function createFixtureSource() {
     }),
     older: async () => ({ payments: [], first: 0n, last: 128n, next: null }),
     receipt: async (owner, payment) => makeReceipt(payment, owner, true),
+    async paymentContext() {
+      return { now: 1760000000n,
+        async resolve(name) {
+          if (name !== 'sample.420') throw new Error('Fixture name is unavailable.');
+          return { recipient: peer };
+        },
+        async invoice(id) {
+          if (id !== payments[0].invoiceId) throw new Error('Fixture invoice is unavailable.');
+          return { id, merchant: payments[0].merchant, currency: '420', amount: payments[0].inputAmount, expiresAt: 1760003600n };
+        }
+      };
+    },
     disconnect: async () => {}
   };
 }

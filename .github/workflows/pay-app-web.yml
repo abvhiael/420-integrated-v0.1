@@ -8,6 +8,7 @@ on:
       - 'packages/420-pay-sdk/package*.json'
       - 'packages/420-pay-sdk/tsconfig.json'
       - 'wallet/extension/inpage.js'
+      - 'wallet/extension/vendor/qrcode.mjs'
       - 'wallet/web/core/keccak.js'
       - '.github/workflows/pay-app-web.yml'
   workflow_dispatch:

@@ -74,6 +74,20 @@ export function createConsumerSource(config, provider) {
     assets,
     connect: wallet.connect,
     disconnect: wallet.revoke,
+    async paymentContext(account) {
+      await verify(account);
+      const snapshot = await registry.latestSnapshot();
+      const now = await registry.snapshotTime(snapshot);
+      return {
+        now,
+        resolve: name => registry.resolveName(snapshot, name),
+        invoice: id => registry.invoiceForReview(snapshot, id)
+      };
+    },
+    async sendNative(account, recipient, value) {
+      await verify(account);
+      return wallet.sendNative(recipient, value);
+    },
     async load(account) {
       await verify(account);
       const snapshot = await registry.latestSnapshot();

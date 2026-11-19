@@ -117,6 +117,33 @@ try {
   assert.equal(await page.locator('#banner').isVisible(), false);
   assert.equal(await page.getByLabel('Hide balances and payment amounts').isChecked(), true);
 
+  await fixtureButton.click();
+  await page.getByRole('button', {name: 'Create QR and link'}).click();
+  await page.getByText('Fixture Receiving address link ready.').waitFor();
+  const addressLink = await page.getByLabel('Share link').inputValue();
+  assert.match(addressLink, /kind=address/);
+  const qr = page.waitForEvent('download');
+  await page.getByText('Download QR image', {exact: true}).click();
+  await page.getByLabel('Read a QR image').setInputFiles(await (await qr).path());
+  await page.getByText('QR read. Review the payment details.').waitFor();
+  assert.equal(await page.getByLabel('Address, .420 name or Pay link').inputValue(), addressLink);
+  await page.getByLabel('Amount in 420', {exact:true}).fill('1');
+  await page.getByRole('button', {name:'Review payment'}).click();
+  await page.getByText(/Direct address payment/).waitFor();
+  assert.equal(await page.getByRole('button', {name:'Continue in 420 Wallet'}).count(), 0);
+  await page.getByLabel('QR and link type').selectOption('invoice');
+  await page.getByLabel('Canonical invoice ID').fill(hash('4'));
+  await page.getByRole('button', {name:'Create QR and link'}).click();
+  await page.getByText('Fixture Canonical invoice link ready.').waitFor();
+  const invoiceLink = await page.getByLabel('Share link').inputValue();
+  assert.match(invoiceLink, /kind=invoice/);
+  assert.equal(new URLSearchParams(new URL(invoiceLink).hash.slice(5)).has('to'), false);
+  await page.getByLabel('Amount in 420', {exact:true}).clear();
+  await page.getByLabel('Address, .420 name or Pay link').fill(invoiceLink);
+  await page.getByRole('button', {name:'Review payment'}).click();
+  await page.locator('#payment-review').getByText(/Canonical invoice/).waitFor();
+  assert.equal(await page.getByRole('button', {name:'Continue in 420 Wallet'}).count(), 0);
+
   deployment = config;
   await page.addInitScript(({ account }) => {
     const handlers = new Map();
@@ -132,6 +159,10 @@ try {
         window.calls.push({method, params});
         if (method === 'eth_chainId') return '0x1a4';
         if (method === 'eth_accounts' || method === 'eth_requestAccounts') return accounts;
+        if (method === 'eth_sendTransaction') {
+          if (window.rejectSend) throw Object.assign(new Error('User rejected the request'), {code:4001});
+          return '0x' + 'f'.repeat(64);
+        }
         if (method === 'wallet_revokePermissions') { accounts = []; return null; }
         throw new Error('Unexpected Wallet method');
       },
@@ -167,6 +198,30 @@ try {
   await page.evaluate(account => window.walletChange([account]), account);
   await page.getByRole('button', {name: 'Connect 420 Wallet'}).click();
   await page.getByText('Submitted', {exact: true}).waitFor();
+  const recipient = address('5');
+  const submittedRequest = new URL(origin);
+  submittedRequest.hash = 'pay?' + new URLSearchParams({v:'1', kind:'request', chain:'420', to:recipient,
+    value:'42000000000000000', expires:'300', id:hash('5')});
+  await page.evaluate(fragment => { history.replaceState(null, '', location.pathname); location.hash = fragment; }, submittedRequest.hash);
+  await page.getByText('Payment link loaded. Review the details before continuing.').waitFor();
+  const review = page.getByRole('button', {name:'Review payment'});
+  const confirm = page.getByRole('button', {name:'Continue in 420 Wallet'});
+  await review.click();
+  await page.locator('#payment-review').getByText(/0.042 420/).waitFor();
+  await page.evaluate(() => { window.rejectSend = true; });
+  await confirm.click();
+  await page.getByText(/Wallet declined the payment before submission/).waitFor();
+  await page.evaluate(() => { window.rejectSend = false; });
+  await confirm.click();
+  await page.locator('#payment-status').getByText(/^Submitted /).waitFor();
+  const requests = await page.evaluate(() => window.calls.filter(call => call.method === 'eth_sendTransaction'));
+  assert.equal(requests.length, 2);
+  assert.deepEqual(requests[1].params, [{from:account, to:recipient, chainId:'0x1a4', data:'0x',
+    value:'0x' + (42000000000000000n).toString(16)}]);
+  await review.click();
+  await confirm.click();
+  await page.getByText(/^Already submitted /).waitFor();
+  assert.equal(await page.evaluate(() => window.calls.filter(call => call.method === 'eth_sendTransaction').length), 2);
   await page.getByRole('button', {name: 'Disconnect Wallet'}).click();
   await page.getByText('Wallet disconnected.').waitFor();
   assert.deepEqual(await page.evaluate(() => window.calls.at(-1)), {

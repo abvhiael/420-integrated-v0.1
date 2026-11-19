@@ -185,6 +185,23 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
       requirePay(applicationOrigin === origin, 'Pay origin does not match its verified deployment');
       return pinned(snapshot, state => state.component(PAYMENT_ROUTER));
     },
+    async snapshotTime(snapshot: PaySnapshot) {
+      return pinned(snapshot, async state => state.timestamp);
+    },
+    async invoiceForReview(snapshot: PaySnapshot, invoiceId: Hex) {
+      const id = hash(invoiceId);
+      return pinned(snapshot, async state => {
+        const target = await state.component(invoiceView.component);
+        const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+        const [invoice, closed] = await Promise.all([
+          reader.invoice(id),
+          state.call(target, calldata('isClosed(bytes32)', id.slice(2)))
+        ]);
+        requirePay(invoice?.active && uint(words(closed, 1)[0], 8) === 0n && state.timestamp <= invoice.expiresAt,
+          'Invoice is unavailable, closed or expired');
+        return invoice;
+      });
+    },
     async accountBalances(snapshot: PaySnapshot, account: Hex, tokens: readonly { address: Hex; codeHash: Hex }[]) {
       const owner = address(account);
       return pinned(snapshot, async state => {

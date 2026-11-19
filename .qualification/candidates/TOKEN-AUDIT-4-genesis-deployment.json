@@ -1,0 +1,35 @@
+{
+  "step": "TOKEN-AUDIT-4",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "7038d52035869822d7df6929460b3b302235784b",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "scripts/token/deployment.py",
+    ".github/workflows/420token-deployment.yml",
+    ".qualification/candidates/TOKEN-AUDIT-4-genesis-deployment.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/deployment-operations.md",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/token/deployment.py qualify <fresh-output>",
+      "owner": "420Token release deployment"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-deployment.yml"
+  ],
+  "exit_criteria": [
+    "Verify frozen V3 authority, Genesis namespace, retained governance and Registry runtime/storage anchors",
+    "Materialize reproducible ABI, creation/runtime bytecode, immutable references, storage layouts, source commitments and constructor bindings",
+    "Read-only verified deployment plan and governance publication calldata",
+    "Two independent local EVM rehearsals with real Vault graph, governed Registry publication, all eight template CREATE2 addresses and exact runtime/fees"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

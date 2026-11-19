@@ -1,8 +1,8 @@
 # 420Token audit remediation roadmap
 
-Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT AND TOKEN-AUDIT-3 ECONOMIC QUALIFICATION COMPLETE; TOKEN-AUDIT-4 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
+Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 CONTRACT, TOKEN-AUDIT-3 ECONOMIC AND TOKEN-AUDIT-4 DEPLOYMENT QUALIFICATION COMPLETE; TOKEN-AUDIT-5 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
 
-Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation, TOKEN-AUDIT-2 contract qualification and TOKEN-AUDIT-3 economic qualification are complete; next: TOKEN-AUDIT-4.
+Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation, TOKEN-AUDIT-2 contract qualification, TOKEN-AUDIT-3 economic qualification and TOKEN-AUDIT-4 deployment preparation are complete; next: TOKEN-AUDIT-5.
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 
@@ -27,11 +27,12 @@ This audit preserves the frozen Genesis definition in `config/genesis-applicatio
 - Document the deployment trust boundary: vault ID validation alone is not live deployment identity proof; release qualification must bind the factory constructor to the verified registered Vault address/code/config.
 - Current qualification: `a7ce71b366804631a422388eb7dbbf9ca1ddffd4`, PR #1236, economic workflow run 44631438474 / job 135938798869 PASS. All 10 scoped tests passed, including 50,000 fuzz cases; all eight templates reconciled exact 42 native 420 against the real Vault registry, authorization, accounting, capability registry and deposit implementation. Evidence: `docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json`. No production contract change was required, no prior passing suite repeated. Live deployment identity remains TOKEN-AUDIT-4/8.
 
-## TOKEN-AUDIT-4 — deployment, Registry and address materialization
+## TOKEN-AUDIT-4 — deployment, Registry and address materialization — **COMPLETE (CURRENT REQUALIFICATION)**
 - Preserve `REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS`; never allocate or resurrect historical candidate address `0x0455`.
 - Materialize constructor/dependency order, GovernanceTimelock authority for the template registry, community Treasury Vault dependency, canonical component/service IDs, ProtocolRegistry publication requirements and release evidence fields.
 - Add executable repository verification for namespace, service ID, deployment graph and no-hard-coded-address rules.
 - Live deployed addresses/code hashes remain testnet evidence, not repository fiction.
+- Current qualification: `7ba349ad6f232034a4e789f8c6448f80a9097e3f`, PR #1237, deployment workflow run 44634134888 / job 135948178120 PASS. Frozen V3 authority and fixed anchor ABI, storage and executable bytes verified; 14 artifact commitments materialized reproducibly from 23 source/config inputs. Two independent local Anvil Cancun rehearsals produced identical deployment addresses, runtime hashes and Registry commitments; all eight templates reproduced their CREATE2 addresses and exact fee accounting in each run. Read-only unsigned planner and publication tooling: `scripts/token/deployment.py`. Durable evidence: `docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json`. Local evidence is not live approval.
 
 ## TOKEN-AUDIT-5 — Wallet-integrated user path
 - Implement a fail-closed Wallet runtime/handoff for `420/service/token/v1`.

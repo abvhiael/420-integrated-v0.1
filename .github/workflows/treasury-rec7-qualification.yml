@@ -1,0 +1,39 @@
+name: Treasury REC-7 qualification
+on:
+  pull_request:
+    paths:
+      - '420-indexer/**'
+      - 'analytics/indexerclient/**'
+      - 'explorer/indexerclient/**'
+      - 'indexer/treasuryread/**'
+      - 'scripts/verify-treasury-audit-5-descriptor.py'
+      - '.github/workflows/treasury-rec7-qualification.yml'
+permissions:
+  contents: read
+jobs:
+  qualify:
+    if: startsWith(github.head_ref, 'audit/treasury-rec-7')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Compile Treasury event contracts
+        working-directory: contracts
+        run: forge build src/treasury/TreasuryPolicyRegistry420.sol src/treasury/TreasuryBudgetRegistry420.sol src/treasury/TreasuryDisbursementRegistry420.sol
+      - run: python3 scripts/verify-treasury-audit-5-descriptor.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - working-directory: 420-indexer
+        run: |
+          npm ci
+          npm run build
+          node --test dist/test/treasury420-integration.test.js dist/test/http-transport.test.js dist/test/api-contract.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go test ./analytics/indexerclient ./explorer/indexerclient -run Treasury -count=1

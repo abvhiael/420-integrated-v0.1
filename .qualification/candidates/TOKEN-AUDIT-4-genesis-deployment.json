@@ -8,7 +8,12 @@
   "scope": [
     "scripts/token/deployment.py",
     ".github/workflows/420token-deployment.yml",
-    ".qualification/candidates/TOKEN-AUDIT-4-genesis-deployment.json"
+    ".qualification/candidates/TOKEN-AUDIT-4-genesis-deployment.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/deployment-operations.md",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json"
   ],
   "tests": [
     {

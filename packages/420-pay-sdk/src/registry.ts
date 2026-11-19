@@ -494,6 +494,32 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         return [native, ...balances];
       });
     },
+    async developerPaymentEvent(snapshot: PaySnapshot, txHash: Hex, logIndex: bigint) {
+      return pinned(snapshot, async state => {
+        const target = await state.component(paymentView.component);
+        const receipt = await rpc.request('eth_getTransactionReceipt', [hash(txHash)]) as {
+          blockHash?: unknown; transactionHash?: unknown; status?: unknown; logs?: unknown;
+        } | null;
+        requirePay(hash(receipt?.blockHash) === snapshot.blockHash && hash(receipt?.transactionHash) === txHash &&
+          quantity(receipt?.status) === 1n && Array.isArray(receipt?.logs), 'Unverified Pay receipt');
+        const topic = '0x' + hashText('PaymentSet(bytes32,bytes32,uint8)');
+        const log = receipt.logs.find(item => quantity(item.logIndex) === logIndex);
+        requirePay(log && address(log.address) === target && log.topics?.length === 3 && log.topics[0] === topic,
+          'Unverified Pay payment event');
+        const ledger = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+        const payment = await ledger.payment(hash(log.topics[1]));
+        requirePay(payment && payment.invoiceId === hash(log.topics[2]), 'Payment event conflicts with Pay state');
+        const invoiceTarget = await state.component(invoiceView.component);
+        const invoice = await createPayReader({ read: ({ calldata }) => state.call(invoiceTarget, calldata) }, snapshot)
+          .invoice(payment.invoiceId);
+        requirePay(invoice?.merchant === payment.merchant, 'Payment event has no canonical merchant');
+        const eventStatus = Number(uint(words(log.data, 1)[0], 8));
+        requirePay(eventStatus > 0 && eventStatus <= 8, 'Invalid Pay event status');
+        return { chainId: chainId.toString(), blockNumber: state.height.toString(), blockHash: snapshot.blockHash,
+          txHash, logIndex: logIndex.toString(), merchantId: invoice.merchantId, invoiceId: invoice.id,
+          paymentId: payment.id, status: eventStatus };
+      });
+    },
     async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint, merchantId?: Hex, accounting = false) {
       let owner = address(account);
       const tenant = merchantId && hash(merchantId);

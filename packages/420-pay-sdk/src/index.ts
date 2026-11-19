@@ -187,3 +187,4 @@ export { createPayRegistry, PAYMENT_ROUTER } from './registry.js';
 export type { PayDeployment, PayRegistry, PayRpc } from './registry.js';
 export { createPayWallet } from './wallet.js';
 export type { PayWalletProvider } from './wallet.js';
+export { createPayDeveloperClient, developerCheckout, PAY_API_VERSION } from './developer.js';

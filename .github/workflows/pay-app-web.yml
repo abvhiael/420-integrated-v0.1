@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'pay/web/**'
+      - 'pay/developer/**'
       - '420-indexer/src/pay-accounting-export.ts'
       - 'contracts/config/pay/accounting-export-schema.json'
       - 'packages/420-pay-sdk/src/**'
@@ -44,6 +45,7 @@ jobs:
           npm run build --prefix packages/420-pay-sdk
           npm run build --prefix pay/web
           npm test --prefix pay/web
+          node --test pay/developer/*.test.mjs
       - name: Qualify Chromium dashboard and accessibility
         working-directory: pay/web
         env:

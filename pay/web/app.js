@@ -143,6 +143,7 @@ function findWallet() {
 }
 
 ui.connect.addEventListener('click', async () => {
+  if (window.self !== window.top) return;
   if (connected) {
     const previous = connected;
     clearConnection('Disconnecting Wallet…');
@@ -248,6 +249,7 @@ async function download(payment, button) {
 
 draw();
 try {
+  if (window.self !== window.top) throw new Error('Open the hosted Pay page in a top-level tab.');
   const response = await fetch('./deployment.json', { credentials: 'same-origin', redirect: 'error', cache: 'no-store' });
   if (!response.ok) throw new Error();
   deployment = await response.json();

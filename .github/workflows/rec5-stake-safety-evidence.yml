@@ -1,0 +1,81 @@
+name: REC-5 affected Stake safety evidence
+on:
+  push:
+    branches: [audit/treasury-rec5-stake-safety-evidence]
+    paths: ['.github/workflows/rec5-stake-safety-evidence.yml']
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run only changed safety review closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -r docs/stake-security-evidence/slither-requirements.txt
+          test "$(slither --version)" = "0.11.3"
+          export SAFETY_ROOT="$RUNNER_TEMP/stake-safety"
+          export EVIDENCE="$PWD/docs/stake-security-evidence/rec5-safety"
+          mkdir -p "$EVIDENCE"
+          python3 - <<'PY'
+          import hashlib,importlib.util,json,os,shutil,subprocess
+          from pathlib import Path
+          root=Path.cwd()
+          spec=importlib.util.spec_from_file_location("isolated",root/"scripts/qualify-stake-isolated.py")
+          isolated=importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(isolated)
+          owners=[root/"contracts"/p for p in ["src/system/StakeSystemSafety420.sol","src/governance/GovernanceTimelock.sol","src/apps/ProtocolRegistry.sol"]]
+          test=root/"contracts/test/SecurityStakeSafety420.t.sol"
+          safety=isolated.closure(owners)
+          deps=isolated.closure([test])
+          dest=Path(os.environ["SAFETY_ROOT"])
+          for p in sorted(set(safety+deps)):
+              target=dest/p.relative_to(root/"contracts")
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,target)
+              assert target.read_bytes()==p.read_bytes()
+          shutil.copyfile(root/"contracts/foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          (dest/"Review.sol").write_text("// SPDX-License-Identifier: GPL-3.0\npragma solidity ^0.8.24;\n"+"".join('import "./'+str(p.relative_to(root/"contracts"))+'";\n' for p in owners))
+          def hashes(paths):return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+          e=Path(os.environ["EVIDENCE"])
+          (e/"inputs.json").write_text(json.dumps({"source_sha256":hashes(safety),"test_source_sha256":hashes(deps),"foundry_config_sha256":hashlib.sha256((root/"contracts/foundry.toml").read_bytes()).hexdigest(),"profile":"default","executionBase":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"runId":os.environ["GITHUB_RUN_ID"],"tools":{"forge":subprocess.check_output(["forge","--version"],text=True).strip(),"slither":subprocess.check_output(["slither","--version"],text=True).strip()}},sort_keys=True,indent=2)+"\n")
+          PY
+          FOUNDRY_PROFILE=default forge test --root "$SAFETY_ROOT" --match-path test/SecurityStakeSafety420.t.sol --match-test '^testSecurity' -vv | tee "$EVIDENCE/safety-tests.log"
+          grep -q '3 tests passed, 0 failed' "$EVIDENCE/safety-tests.log"
+          SOLC="$HOME/.svm/0.8.24/solc-0.8.24"
+          "$SOLC" --version | tee "$EVIDENCE/compiler.log"
+          grep -q '0.8.24+commit.e11b9ed9' "$EVIDENCE/compiler.log"
+          set +e
+          slither "$SAFETY_ROOT/Review.sol" --compile-force-framework solc --solc "$SOLC" --solc-args '--optimize --optimize-runs 200 --via-ir --evm-version cancun' --json "$EVIDENCE/safety-slither.json" > "$EVIDENCE/safety-slither.log" 2>&1
+          STATUS=$?
+          set -e
+          test "$STATUS" = 0 || test "$STATUS" = 255
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          e=Path(os.environ["EVIDENCE"])
+          raw=json.loads((e/"safety-slither.json").read_text())
+          assert raw["success"]
+          inp=json.loads((e/"inputs.json").read_text())
+          inp["logs"]={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in e.iterdir() if p.name!="inputs.json"}
+          (e/"inputs.json").write_text(json.dumps(inp,sort_keys=True,indent=2)+"\n")
+          for d in raw["results"]["detectors"]:
+              print(d["check"],d["impact"],d["description"])
+          PY
+      - name: Retain execution outputs without approving findings
+        run: |
+          git config user.name github-actions
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/stake-security-evidence/rec5-safety
+          git commit -m 'Retain REC-5 exact-source safety execution and raw static findings'
+          git push origin HEAD:refs/heads/audit/treasury-rec5-stake-safety-evidence

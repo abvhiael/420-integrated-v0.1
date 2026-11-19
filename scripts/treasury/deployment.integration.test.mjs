@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {JsonRpcProvider,Contract,ContractFactory,Wallet,ZeroAddress,id,keccak256} from 'ethers';
-import {materialize,makePlan,nextStep,recoverDeployment,submitDeployment,validateBundle} from './deployment.mjs';
+import {materialize,makePlan,nextStep,recoverDeployment,recoverGovernance,submitDeployment,validateBundle} from './deployment.mjs';
 import {createTreasuryClient420} from '../../wallet/web/core/treasury-client.js';
 
 const rpc=new JsonRpcProvider(process.env.TREASURY_RPC_URL,undefined,{cacheTimeout:0,batchMaxCount:1});
@@ -53,7 +53,7 @@ async function deploy(p=plan,j=journal,save=true){
  if(save)j[step.name]=r.hash;
  return {step,r};
 }
-async function govern(step,p=plan,j=journal,check=true){
+async function govern(step,p=plan,j=journal,check=true,save=true){
  assert.equal(step.authority.toLowerCase(),TIME.toLowerCase());
  if(check)assert.deepEqual((await next(p,j)).data,step.data);
  const op=id('REC8-local-operation-'+(++seq));
@@ -63,6 +63,7 @@ async function govern(step,p=plan,j=journal,check=true){
  if(check)assert.equal((await next(p,j)).data,step.data);
  const r=await receipt(timelock.connect(registrar).execute(op));
  governanceReceipts.push(record(schedule,step.stage+':scheduled'),record(r,step.stage+':executed'));
+ if(check&&save&&['INITIALIZE_CONTROLLER','REGISTER_ROUTER_COMPONENT','PUBLISH_SERVICE'].includes(step.stage))j[step.stage]=r.hash;
  return r;
 }
 async function capRegister(step,p=plan,j=journal){
@@ -103,7 +104,9 @@ test('Treasury REC-8 actual local deployment and recovery',async t=>{
   await govern(wrong,plan,journal,false);await reject(()=>next(),/incorrect irreversible controller/);
   assert.equal(await rpc.send('evm_revert',[snapshot]),true);governanceReceipts.splice(-2);
   await reject(()=>next(plan,{...journal,TreasuryRouter420:id('premature')}),/premature router/);
-  await govern(init);
+  const initReceipt=await govern(init,plan,journal,true,false);
+  await reject(()=>next(),/governed receipt recovery required/);
+  journal.INITIALIZE_CONTROLLER=(await recoverGovernance(rpc,bundle,plan,journal,'INITIALIZE_CONTROLLER',initReceipt.blockNumber,initReceipt.blockNumber)).transactionHash;
   await reject(()=>bud.connect(gov).setController.staticCall(registrar.address),/revert|Unauthorized/i);
   await deploy();await deploy();
   const step=await next();assert.equal(step.stage,'REGISTER_CAPABILITY_COMPONENT');
@@ -124,7 +127,9 @@ test('Treasury REC-8 actual local deployment and recovery',async t=>{
   await reject(()=>wallet.discover(),/inactive|zero Treasury address/);
   const publish=await next();assert.equal(publish.stage,'PUBLISH_SERVICE');
   await reject(()=>registry.connect(registrar).publishRegisteredService.staticCall(SID,publish.commitments.router,bundle.metadataHash,1,true,3,bundle.manifestHash,publish.commitments.dependencyRoot,bundle.interfaceHash),/revert|Unauthorized/i);
-  await govern(publish);
+  const publication=await govern(publish,plan,journal,true,false);
+  await reject(()=>next(),/governed receipt recovery required/);
+  journal.PUBLISH_SERVICE=(await recoverGovernance(rpc,bundle,plan,journal,'PUBLISH_SERVICE',publication.blockNumber,publication.blockNumber)).transactionHash;
   const complete=await next();assert.equal(complete.stage,'COMPLETE');
   assert.equal(complete.commitments.dependencyRoot,publish.commitments.dependencyRoot);
   assert.equal(complete.commitments.manifestHash,bundle.manifestHash);

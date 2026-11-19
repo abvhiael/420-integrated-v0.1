@@ -101,17 +101,13 @@ async function chainCheck(rpc,p){
 }
 const quantity=n=>'0x'+BigInt(n).toString(16);
 const code=(rpc,a,tag)=>rpc.send('eth_getCode',[a,tag]);
-function runtimeMatch(a,actual,args){
+function runtimeMatch(a,actual){
  const template=Buffer.from(a.runtime.slice(2),'hex'),bytes=Buffer.from(hex(actual).slice(2),'hex');
  req(bytes.length===template.length,'runtime length mismatch '+a.name);
- const allowed=args.map(x=>Buffer.from(abi.encode(['address'],[x]).slice(2),'hex'));
  const occupied=new Set();
  for(const group of Object.values(a.immutableReferences)){
-  let first;
   for(const ref of group){const {start,length}=ref;
    req(Number.isInteger(start)&&length===32&&start>=0&&start+length<=bytes.length,'invalid immutable reference');
-   const value=bytes.subarray(start,start+length);
-   req(allowed.some(x=>x.equals(value))&&(!first||first.equals(value)),'immutable runtime mismatch '+a.name);first=value;
    for(let i=start;i<start+length;i++){req(!occupied.has(i),'overlapping immutable reference');occupied.add(i);bytes[i]=template[i];}
   }
  }
@@ -125,17 +121,49 @@ async function verifyDeployment(rpc,b,p,d,txHash,tag){
  req(tx&&receipt&&eq(tx.hash,txHash)&&eq(receipt.transactionHash,txHash)&&eq(tx.from,p.deployer)&&eq(receipt.from,p.deployer)&&tx.to===null&&receipt.to===null&&BigInt(tx.value)===0n&&BigInt(tx.nonce)===BigInt(d.nonce)&&eq(tx.input,d.data),'deployment transaction mismatch '+d.name);
  req(BigInt(receipt.status)===1n&&eq(receipt.contractAddress,d.address)&&eq(receipt.blockHash,tx.blockHash)&&BigInt(receipt.blockNumber)===BigInt(tx.blockNumber)&&BigInt(tx.transactionIndex)===BigInt(receipt.transactionIndex)&&BigInt(receipt.blockNumber)<=BigInt(tag)&&BigInt(receipt.blockNumber)>=BigInt(p.startBlock),'deployment receipt mismatch '+d.name);
  const block=await rpc.send('eth_getBlockByNumber',[receipt.blockNumber,false]);req(eq(block?.hash,receipt.blockHash)&&eq(block.transactions[Number(BigInt(receipt.transactionIndex))],txHash),'orphan deployment receipt');
- const actual=await code(rpc,d.address,tag);runtimeMatch(b.artifacts[d.name],actual,d.args);
+ const actual=await code(rpc,d.address,tag);runtimeMatch(b.artifacts[d.name],actual);
+ // Re-execute exact creation input in historical canonical state. The optimizer
+ // may use differently transformed immutable words at distinct reference sites.
+ // Full byte-for-byte equality is required; masking alone is not identity.
+ const materialized=await rpc.send('eth_call',[{from:p.deployer,data:d.data,value:'0x0',gas:tx.gas},receipt.blockNumber]);
+ req(eq(actual,materialized),'exact constructor runtime mismatch '+d.name);
  const c=contract(rpc,b,d.name,d.address);
  if(d.name!==EXEC){req(await read(c,'systemName',[],tag)===d.name&&await read(c,'protocolVersion',[],tag)===1n,'Treasury identity mismatch');}
  const props={[AUTH]:['capabilityRegistry'],[POL]:['governanceTimelock'],[BUD]:['governanceTimelock','policy'],[DIS]:['governanceTimelock','authorization','policy','budgets'],[ROUTER]:['budgets','disbursements'],[EXEC]:['registry','operator']};
  for(let i=0;i<d.args.length;i++)await getter(c,props[d.name][i],d.args[i],tag);
- return {name:d.name,address:d.address,transactionHash:txHash,blockNumber:receipt.blockNumber,blockHash:receipt.blockHash,runtimeCodeHash:keccak256(actual)};
+ return {name:d.name,address:d.address,transactionHash:txHash,blockNumber:receipt.blockNumber,blockHash:receipt.blockHash,transactionIndex:receipt.transactionIndex,runtimeCodeHash:keccak256(actual)};
+}
+const govStages=['INITIALIZE_CONTROLLER','REGISTER_ROUTER_COMPONENT','PUBLISH_SERVICE'];
+const before=(a,b)=>BigInt(a.blockNumber)<BigInt(b.blockNumber)||BigInt(a.blockNumber)===BigInt(b.blockNumber)&&BigInt(a.transactionIndex)<BigInt(b.transactionIndex);
+function eventWitness(b,p,stage,evidence){
+ const dep=Object.fromEntries(p.deployments.map(d=>[d.name,d.address]));
+ const budget=new Interface(b.artifacts[BUD].abi),registry=new Interface(b.anchors[REG].abi);
+ if(stage==='INITIALIZE_CONTROLLER')return [{address:dep[BUD],...budget.encodeEventLog(budget.getEvent('ControllerSet'),[dep[DIS]])}];
+ req(evidence.length===6,'complete deployment receipts required for Registry event');
+ const runtime=evidence[4].runtimeCodeHash,rev=p.previousVersion+1;
+ const root=keccak256(abi.encode(Array(6).fill('address').concat(Array(5).fill('bytes32')),
+  [p.capabilityRegistry,...names.slice(0,5).map(n=>dep[n]),...evidence.slice(0,5).map(e=>e.runtimeCodeHash)]));
+ if(stage==='REGISTER_ROUTER_COMPONENT')return [{address:frozen.REG,...registry.encodeEventLog(registry.getEvent('ComponentRegistered'),[CID,dep[ROUTER],runtime,1,0,0,2])}];
+ req(stage==='PUBLISH_SERVICE','unknown governed stage');
+ return [
+  {address:frozen.REG,...registry.encodeEventLog(registry.getEvent('ServiceVersionPublished'),[SID,rev,dep[ROUTER],runtime,b.metadataHash,true])},
+  {address:frozen.REG,...registry.encodeEventLog(registry.getEvent('ServiceRegistrationProfilePublished'),[SID,rev,3,b.manifestHash,root,b.interfaceHash])}
+ ];
+}
+function matchesLog(l,w){return eq(l.address,w.address)&&eq(l.data,w.data)&&l.topics.length===w.topics.length&&l.topics.every((x,i)=>eq(x,w.topics[i]))&&!l.removed;}
+async function verifyGovernedEvent(rpc,b,p,stage,txHash,tag,evidence){
+ const expected=eventWitness(b,p,stage,evidence);
+ const receipt=await rpc.send('eth_getTransactionReceipt',[hash(txHash)]);
+ req(receipt&&eq(receipt.transactionHash,txHash)&&BigInt(receipt.status)===1n&&BigInt(receipt.blockNumber)<=BigInt(tag)&&BigInt(receipt.blockNumber)>=BigInt(p.startBlock),'governed receipt mismatch '+stage);
+ const block=await rpc.send('eth_getBlockByNumber',[receipt.blockNumber,false]);
+ req(eq(block?.hash,receipt.blockHash)&&eq(block.transactions[Number(BigInt(receipt.transactionIndex))],txHash),'orphan governed receipt');
+ for(const witness of expected)req(receipt.logs.filter(l=>matchesLog(l,witness)&&eq(l.blockHash,receipt.blockHash)&&eq(l.transactionHash,txHash)&&BigInt(l.transactionIndex)===BigInt(receipt.transactionIndex)&&BigInt(l.blockNumber)===BigInt(receipt.blockNumber)).length===1,'governed event mismatch '+stage);
+ return {stage,transactionHash:txHash,blockNumber:receipt.blockNumber,blockHash:receipt.blockHash,transactionIndex:receipt.transactionIndex};
 }
 function action(target,iface,method,args,authority,stage){return {stage,authority,target,value:'0',data:iface.encodeFunctionData(method,args)};}
 export async function nextStep(rpc,b,p,journal={}){
  checkedPlan(b,p);await chainCheck(rpc,p);
- req(journal&&typeof journal==='object'&&!Array.isArray(journal)&&Object.keys(journal).every(k=>names.includes(k)),'invalid deployment journal');
+ req(journal&&typeof journal==='object'&&!Array.isArray(journal)&&Object.keys(journal).every(k=>names.includes(k)||govStages.includes(k)),'invalid deployment journal');
  const block=await rpc.send('eth_getBlockByNumber',['latest',false]),tag=block.number;
  req(BigInt(tag)>=BigInt(p.startBlock),'deployment start block unavailable');
  const finish=async out=>{const end=await rpc.send('eth_getBlockByNumber',[tag,false]);req(eq(end?.hash,block.hash),'deployment snapshot reorganized');await chainCheck(rpc,p);return {...out,planHash:p.planHash,blockNumber:tag,blockHash:block.hash};};
@@ -158,16 +186,20 @@ export async function nextStep(rpc,b,p,journal={}){
  const componentIsNew=eq(component.implementation,dep[ROUTER]);
  if(componentIsNew)req(component.lifecycle===2n&&component.version.major===1n&&component.version.minor===0n&&component.version.patch===0n,'new component lifecycle/version mismatch');
  else req(!published&&(p.previousVersion===0?eq(component.implementation,ZeroAddress):eq(component.implementation,p.previousRouter)&&component.lifecycle!==2n),'unexpected active/foreign component');
- const evidence=[];
+ const evidence=[],governanceEvidence=[];
  for(let i=0;i<p.deployments.length;i++){
   const d=p.deployments[i];
   if(i===4){
    const budget=contract(rpc,b,BUD,dep[BUD]),controller=await read(budget,'controller',[],tag);
    if(eq(controller,ZeroAddress)){
-    req(!published&&!componentIsNew&&!names.slice(i).some(n=>journal[n]),'premature router/publication');
+    req(!published&&!componentIsNew&&!names.slice(i).some(n=>journal[n])&&!journal.INITIALIZE_CONTROLLER,'premature router/publication');
     return finish({...action(dep[BUD],budget.interface,'setController',[dep[DIS]],frozen.TIME,'INITIALIZE_CONTROLLER'),evidence});
    }
    req(eq(controller,dep[DIS]),'incorrect irreversible controller; corrective redeployment required');
+   req(journal.INITIALIZE_CONTROLLER,'governed receipt recovery required: INITIALIZE_CONTROLLER');
+   const init=await verifyGovernedEvent(rpc,b,p,'INITIALIZE_CONTROLLER',journal.INITIALIZE_CONTROLLER,tag,evidence);
+   req(before(evidence[3],init),'controller initialized before disbursement deployment');
+   governanceEvidence.push(init);
   }
   if(!journal[d.name]){
    req(!published&&!componentIsNew&&!names.slice(i+1).some(n=>journal[n]),'nonsequential or prematurely published deployment');
@@ -175,9 +207,11 @@ export async function nextStep(rpc,b,p,journal={}){
    req(await code(rpc,d.address,tag)==='0x'&&current===BigInt(d.nonce)&&pending===current,'deployment recovery required; do not retry or replace nonce');
    return finish({stage:'DEPLOY',name:d.name,expectedAddress:d.address,transaction:{chainId:p.chainId,from:p.deployer,nonce:d.nonce,to:null,value:'0',data:d.data},evidence});
   }
-  evidence.push(await verifyDeployment(rpc,b,p,d,journal[d.name],tag));
+  const deployment=await verifyDeployment(rpc,b,p,d,journal[d.name],tag);
+  if(i===4)req(before(governanceEvidence[0],deployment),'router deployed before controller initialization');
+  evidence.push(deployment);
  }
- req(evidence.every((e,i)=>i===0||BigInt(e.blockNumber)>BigInt(evidence[i-1].blockNumber)||BigInt(e.blockNumber)===BigInt(evidence[i-1].blockNumber)),'out of order deployment provenance');
+ req(evidence.every((e,i)=>i===0||before(evidence[i-1],e)),'out of order deployment provenance');
  const root=keccak256(abi.encode(Array(6).fill('address').concat(Array(5).fill('bytes32')),
   [p.capabilityRegistry,...names.slice(0,5).map(n=>dep[n]),...evidence.slice(0,5).map(e=>e.runtimeCodeHash)]));
  const commitments={serviceId:SID,componentId:CID,capabilityComponentId:CAPID,metadataHash:b.metadataHash,manifestHash:b.manifestHash,dependencyRoot:root,interfaceHash:b.interfaceHash,revision:Number(rev),router:dep[ROUTER]};
@@ -185,13 +219,21 @@ export async function nextStep(rpc,b,p,journal={}){
   req(!published&&!componentIsNew,'publication without capability component');
   return finish({...action(p.capabilityRegistry,caps.interface,'registerProtocolComponent',[CAPID,p.capabilityAuthority],registrar,'REGISTER_CAPABILITY_COMPONENT'),evidence,commitments});
  }
- if(!componentIsNew)return finish({...action(frozen.REG,registry.interface,'registerComponent',[CID,dep[ROUTER],[1,0,0],2],frozen.TIME,'REGISTER_ROUTER_COMPONENT'),evidence,commitments});
+ if(!componentIsNew){req(!journal.REGISTER_ROUTER_COMPONENT&&!journal.PUBLISH_SERVICE,'governed journal ahead of canonical state');return finish({...action(frozen.REG,registry.interface,'registerComponent',[CID,dep[ROUTER],[1,0,0],2],frozen.TIME,'REGISTER_ROUTER_COMPONENT'),evidence,commitments});}
  req(eq(component.runtimeCodeHash,evidence[4].runtimeCodeHash),'component runtime mismatch');
- if(!published)return finish({...action(frozen.REG,registry.interface,'publishRegisteredService',[SID,dep[ROUTER],b.metadataHash,rev,true,3,b.manifestHash,root,b.interfaceHash],frozen.TIME,'PUBLISH_SERVICE'),evidence,commitments});
+ req(journal.REGISTER_ROUTER_COMPONENT,'governed receipt recovery required: REGISTER_ROUTER_COMPONENT');
+ const registered=await verifyGovernedEvent(rpc,b,p,'REGISTER_ROUTER_COMPONENT',journal.REGISTER_ROUTER_COMPONENT,tag,evidence);
+ req(before(evidence[5],registered),'premature component registration');
+ governanceEvidence.push(registered);
+ if(!published){req(!journal.PUBLISH_SERVICE,'governed journal ahead of canonical state');return finish({...action(frozen.REG,registry.interface,'publishRegisteredService',[SID,dep[ROUTER],b.metadataHash,rev,true,3,b.manifestHash,root,b.interfaceHash],frozen.TIME,'PUBLISH_SERVICE'),evidence,commitments});}
+ req(journal.PUBLISH_SERVICE,'governed receipt recovery required: PUBLISH_SERVICE');
+ const publication=await verifyGovernedEvent(rpc,b,p,'PUBLISH_SERVICE',journal.PUBLISH_SERVICE,tag,evidence);
+ req(before(registered,publication),'service published before component registration');
+ governanceEvidence.push(publication);
  const profile=await read(registry,'getRegistrationProfile',[SID,rev],tag);
  const active=await read(registry,'resolveActive',[SID],tag);
  req(eq(service.codeHash,evidence[4].runtimeCodeHash)&&eq(service.metadataHash,b.metadataHash)&&profile.componentType===3n&&eq(profile.manifestHash,b.manifestHash)&&eq(profile.dependencyRoot,root)&&eq(profile.interfaceHash,b.interfaceHash)&&eq(active[0],dep[ROUTER])&&active[1]===rev&&eq(await read(registry,'resolve',[CID],tag),dep[ROUTER]),'published release commitment mismatch');
- return finish({stage:'COMPLETE',evidence,commitments,indexerBinding:{chainId:Number(p.chainId),genesisHash:p.genesisHash,addresses:{[POL]:dep[POL],[BUD]:dep[BUD],[DIS]:dep[DIS]}},releaseExecutor:{address:dep[EXEC],operator:p.operator,codeHash:evidence[5].runtimeCodeHash},authoritative:false,liveQualified:false});
+ return finish({stage:'COMPLETE',evidence,governanceEvidence,commitments,indexerBinding:{chainId:Number(p.chainId),genesisHash:p.genesisHash,addresses:{[POL]:dep[POL],[BUD]:dep[BUD],[DIS]:dep[DIS]}},releaseExecutor:{address:dep[EXEC],operator:p.operator,codeHash:evidence[5].runtimeCodeHash},authoritative:false,liveQualified:false});
 }
 // Bounded recovery only; the operator must provide a canonical review window.
 // Never infer success from predicted address alone or automatically reuse a nonce.
@@ -199,6 +241,7 @@ export async function recoverDeployment(rpc,b,p,name,from,to){
  checkedPlan(b,p);await chainCheck(rpc,p);
  req(Number.isSafeInteger(from)&&Number.isSafeInteger(to)&&from>=p.startBlock&&to>=from&&to-from<=2048,'invalid recovery window');
  const d=p.deployments.find(x=>x.name===name);req(d,'unknown deployment');
+ const end=await rpc.send('eth_getBlockByNumber',[quantity(to),false]);req(end,'missing recovery end block');
  let found=null;
  for(let i=from;i<=to;i++){
   const block=await rpc.send('eth_getBlockByNumber',[quantity(i),true]);req(block&&Array.isArray(block.transactions),'missing recovery block');
@@ -207,7 +250,25 @@ export async function recoverDeployment(rpc,b,p,name,from,to){
    found=await verifyDeployment(rpc,b,p,d,tx.hash,quantity(to));
   }
  }
- req(found,'no canonical deployment found in reviewed range; no automatic retry');await chainCheck(rpc,p);return found;
+ req(found,'no canonical deployment found in reviewed range; no automatic retry');
+ req(eq((await rpc.send('eth_getBlockByNumber',[quantity(to),false]))?.hash,end.hash),'recovery range reorganized');
+ await chainCheck(rpc,p);return found;
+}
+export async function recoverGovernance(rpc,b,p,journal,stage,from,to){
+ checkedPlan(b,p);await chainCheck(rpc,p);
+ req(govStages.includes(stage)&&Number.isSafeInteger(from)&&Number.isSafeInteger(to)&&from>=p.startBlock&&to>=from&&to-from<=2048,'invalid governed recovery window');
+ const tag=quantity(to),end=await rpc.send('eth_getBlockByNumber',[tag,false]);req(end,'missing recovery end block');
+ const evidence=[];
+ for(const d of p.deployments.slice(0,stage==='INITIALIZE_CONTROLLER'?4:6)){
+  req(journal[d.name],'deployment receipt required for governance recovery');
+  evidence.push(await verifyDeployment(rpc,b,p,d,journal[d.name],tag));
+ }
+ const witness=eventWitness(b,p,stage,evidence)[0];
+ const logs=await rpc.send('eth_getLogs',[{address:witness.address,topics:witness.topics,fromBlock:quantity(from),toBlock:tag}]);
+ const matches=logs.filter(l=>matchesLog(l,witness));req(matches.length===1,'no unique matching governed event in reviewed range');
+ const found=await verifyGovernedEvent(rpc,b,p,stage,matches[0].transactionHash,tag,evidence);
+ req(eq((await rpc.send('eth_getBlockByNumber',[tag,false]))?.hash,end.hash),'recovery range reorganized');
+ await chainCheck(rpc,p);return found;
 }
 // Signed deployment submission requires exact reviewed chain, nonce, sender and creation bytes.
 // Governance/registrar actions are never signed or executed by this utility.
@@ -229,6 +290,7 @@ async function main(){
   let result;
   if(cmd==='next')result=await nextStep(rpc,b,p,json(args[2]));
   else if(cmd==='recover')result=await recoverDeployment(rpc,b,p,args[2],Number(args[3]),Number(args[4]));
+  else if(cmd==='recover-governance')result=await recoverGovernance(rpc,b,p,json(args[2]),args[3],Number(args[4]),Number(args[5]));
   else if(cmd==='submit')result=await submitDeployment(rpc,b,p,json(args[2]),readFileSync(args[3],'utf8').trim());
   else throw Error('unknown command');
   console.log(JSON.stringify(result,null,2));

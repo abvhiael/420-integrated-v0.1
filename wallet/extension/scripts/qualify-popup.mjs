@@ -175,12 +175,14 @@ try{
   // EIP-1193 connection restoration, MetaMask coexistence and EIP-2255
   // same-origin grant/revocation in packaged Chromium. No signing is simulated.
   const dappOrigin='http://127.0.0.1:'+rpc.address().port;
-  await page.evaluate(async({dappOrigin,controller})=>{
+  const unrelatedGrant=await page.evaluate(async({dappOrigin,controller})=>{
     const key='420-wallet-origin-permissions-v1';
     const grants=(await chrome.storage.local.get(key))?.[key]||{};
     grants[dappOrigin]={accounts:[controller],chainId:'0x1a4',grantedAt:Date.now()};
     await chrome.storage.local.set({[key]:grants});
+    return grants['https://example.test'];
   },{dappOrigin,controller});
+  assert.ok(unrelatedGrant,'An unrelated site grant must be present before revocation');
   const dapp=await browser.newPage();
   await dapp.goto(dappOrigin+'/dapp',{waitUntil:'load'});
   const providerSnapshot=await dapp.evaluate(async()=>{
@@ -235,11 +237,26 @@ try{
   });
   assert.deepEqual(afterReload.accounts,[controller]);
   assert.equal(afterReload.chainId,'0x1a4');
+  const wrongChain = await dapp.evaluate(async from => {
+    try {
+      await window.__wallet420.request({method:'eth_sendTransaction',params:[{
+        from,to:from,chainId:'0x1',data:'0x',value:'0x0'
+      }]});
+      return false;
+    } catch (error) {
+      return error.code===4901;
+    }
+  },controller);
+  assert.equal(wrongChain,true,'Wallet must reject a mismatched transaction chain before approval');
   await dapp.evaluate(async()=>window.__wallet420.request({
     method:'wallet_revokePermissions',params:[{eth_accounts:{}}]
   }));
   await dapp.waitForFunction(()=>window.__accountsEvents?.some(x=>Array.isArray(x)&&x.length===0));
   assert.deepEqual(await dapp.evaluate(async()=>window.__wallet420.request({method:'eth_accounts'})),[]);
+  assert.deepEqual(await page.evaluate(async () => {
+    const key='420-wallet-origin-permissions-v1';
+    return (await chrome.storage.local.get(key))[key]['https://example.test'];
+  }),unrelatedGrant,'Revocation must preserve unrelated origin grants');
   const denied=await dapp.evaluate(async()=>{
     try{await window.__wallet420.request({method:'wallet_sendCalls',params:[]});return false;}
     catch(error){return error.code===4100;}

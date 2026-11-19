@@ -28,9 +28,10 @@ const topic = digest('PaymentSet(bytes32,bytes32,uint8)');
 const mime = { 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
 let status = 5;
 let balanceGate;
-const browser = await chromium.launch({ channel: 'chromium' });
+const browser = await chromium.launch({ channel: process.env.PAY_BROWSER_CHANNEL ?? 'chromium' });
 try {
-  const page = await browser.newPage({viewport: {width: 1440, height: 900}});
+  const context = await browser.newContext({viewport: {width: 1440, height: 900}});
+  const page = await context.newPage();
   let deployment = null;
   await page.route(origin + '/**', async route => {
     const file = new URL(route.request().url()).pathname.slice(1) || 'index.html';

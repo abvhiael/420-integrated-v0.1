@@ -41,9 +41,10 @@ jobs:
           npm run build --prefix packages/420-pay-sdk
           npm run build --prefix pay/web
           npm test --prefix pay/web
-      - name: Install Chromium
-        working-directory: pay/web
-        run: npx playwright install --with-deps chromium
       - name: Qualify Chromium dashboard and accessibility
         working-directory: pay/web
-        run: npm run browser
+        env:
+          PAY_BROWSER_CHANNEL: chrome
+        run: |
+          google-chrome --version
+          npm run browser

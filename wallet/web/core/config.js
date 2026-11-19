@@ -1,4 +1,5 @@
 import { GENESIS_APP_SERVICES } from './genesis-app-catalog.js';
+import { normalizeTokenWalletConfig420 } from './token-discovery.js';
 
 export const DEFAULT_NETWORK = Object.freeze({
   name: '420 Integrated',
@@ -44,6 +45,7 @@ export function validateRuntimeConfig(config) {
   optionalAddress(config.smartAccount.recoveryAuthority, 'smartAccount.recoveryAuthority');
   if (config.smartAccount.salt != null && !/^0x[0-9a-fA-F]{64}$/.test(config.smartAccount.salt)) throw new Error('smartAccount.salt must be bytes32');
   validateGasQuoteConfig420(config.gasQuote);
+  normalizeTokenWalletConfig420(config);
   if (config.treasury != null) {
     if (!config.network.chainId || typeof config.treasury !== 'object' || Array.isArray(config.treasury) ||
         !/^0x[0-9a-fA-F]{64}$/.test(config.treasury.registryCodeHash || '') || /^0x0{64}$/i.test(config.treasury.registryCodeHash))

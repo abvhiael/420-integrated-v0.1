@@ -20,7 +20,7 @@ function el(tag, className, text) {
   return node;
 }
 
-function makeAppCard(app, helpBundle) {
+function makeAppCard(app, helpBundle, tokenDiscovery) {
   const card = el(app.available ? 'a' : 'article', `app-card${app.available ? '' : ' unavailable'}`);
   if (app.available) {
     card.href = app.url;
@@ -36,8 +36,12 @@ function makeAppCard(app, helpBundle) {
 
   const description = el('p', 'app-description', app.description);
   const footer = el('div', 'app-card-footer');
-  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, app.available ? 'Verified' : (APP_RELEASE_STAGE_LABELS[app.releaseStage] || 'Not published'));
-  const action = el('span', 'app-open-label', app.available ? 'Open ↗' : 'Unavailable');
+  const tokenLabels = {unconfigured:'Release not configured',disconnected:'Connect Wallet to verify',checking:'Verifying Registry',verified:'Registry verified · read-only',blocked:'Runtime unavailable'};
+  const internalToken = app.walletIntegrated === true && app.serviceId === '420/service/token/v1';
+  const label = internalToken ? (tokenLabels[tokenDiscovery?.status] || tokenLabels.unconfigured) :
+    (app.available ? 'Verified' : (APP_RELEASE_STAGE_LABELS[app.releaseStage] || 'Not published'));
+  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, label);
+  const action = el('span', 'app-open-label', internalToken ? 'Wallet-integrated' : (app.available ? 'Open ↗' : 'Unavailable'));
   footer.append(verification, action);
   card.append(top, description, footer);
   if (app.helpContextId && !app.available) {
@@ -146,7 +150,7 @@ export async function loadVerifiedApps(fetchImpl = globalThis.fetch) {
   return { apps: buildAppCatalog(resolved), trust: 'Verified manifest' };
 }
 
-export function renderApps(section, apps, { query = '', category = 'all', trust = 'Verified manifest', helpBundle } = {}) {
+export function renderApps(section, apps, { query = '', category = 'all', trust = 'Verified manifest', helpBundle, tokenDiscovery } = {}) {
   ensurePage(section);
   const featured = section.querySelector('#featured-apps');
   const grid = section.querySelector('#services');
@@ -156,10 +160,10 @@ export function renderApps(section, apps, { query = '', category = 'all', trust 
   trustState.dataset.state = trust === 'Verified manifest' ? 'passed' : 'idle';
 
   const filtered = filterAppCatalog(apps, { query, category });
-  featured.replaceChildren(...filtered.filter((app) => app.featured && app.available).slice(0, 3).map((app) => makeAppCard(app, helpBundle)));
+  featured.replaceChildren(...filtered.filter((app) => app.featured && app.available).slice(0, 3).map((app) => makeAppCard(app, helpBundle, tokenDiscovery)));
   if (!featured.children.length) featured.append(el('p', 'muted', 'No featured verified services match this view.'));
 
-  grid.replaceChildren(...filtered.map((app) => makeAppCard(app, helpBundle)));
+  grid.replaceChildren(...filtered.map((app) => makeAppCard(app, helpBundle, tokenDiscovery)));
   if (!grid.children.length) grid.append(el('p', 'muted', 'No ecosystem apps match this search or category.'));
   // Named website shortcuts are always separate from manifest-verified services.
   const websites = filterEcosystemWebsites(query).filter((app) => category === 'all' || app.category === category);
@@ -173,6 +177,10 @@ export async function initAppsPage() {
   installAppsStylesheet();
   ensurePage(section);
 
+  let tokenDiscovery;
+  let refresh=()=>{};
+  const onWalletState=event=>{tokenDiscovery=event.detail?.tokenDiscovery;refresh();};
+  document.addEventListener('wallet:verification-state',onWalletState);
   const helpBundlePromise = loadWalletHelpBundle().catch(() => null);
   let apps;
   let trust;
@@ -186,7 +194,7 @@ export async function initAppsPage() {
   const helpBundle = await helpBundlePromise;
   let category = 'all';
   const search = section.querySelector('#apps-search');
-  const refresh = () => renderApps(section, apps, { query: search.value, category, trust, helpBundle });
+  refresh = () => renderApps(section, apps, { query: search.value, category, trust, helpBundle, tokenDiscovery });
   search.addEventListener('input', refresh);
   const chooseCategory=(value)=>{
     category=value;
@@ -207,6 +215,8 @@ export async function initAppsPage() {
   const observer = new MutationObserver(() => {
     if (!section.querySelector('#apps-search')) {
       observer.disconnect();
+      document.removeEventListener('wallet:verification-state',onWalletState);
+      delete section.dataset.appsPageInitialized;
       initAppsPage();
     }
   });

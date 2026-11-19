@@ -50,5 +50,6 @@
     "validatorRegistryAddress": null,
     "rewardControllerAddress": null
   },
-  "treasury": null
+  "treasury": null,
+  "token": null
 }

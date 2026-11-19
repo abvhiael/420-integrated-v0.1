@@ -3,6 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { validateNetworkManifest420 } from '../../../developer-hub/src/network-discovery.mjs';
+import { normalizeTokenWalletConfig420 } from '../core/token-discovery.js';
 
 const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
 const ZERO_SALT = '0x' + '00'.repeat(32);
@@ -138,8 +139,10 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
     assert420(faucetUrl === null, 'mainnet runtime must not expose Faucet service');
   }
 
-  return {
+  const config = {
     ...structuredClone(baseConfig),
+    // Never carry an old Token pin in from the base file or an ecosystem manifest.
+    token: null,
     network: {
       name: validatedManifest.network.name,
       chainId: decimalChainIdToHex420(validatedManifest.network.chainId),
@@ -170,6 +173,18 @@ export function buildWalletRuntimeConfig420({ manifest, inventory, baseConfig, m
       sourceInventoryPhase: inventory.phase,
     },
   };
+  const token = inventory.appAuthority?.token420;
+  if (token != null && token.deploymentVerified === true) {
+    assert420(token.status === 'BOUND' && token.environment === environment,
+      'Token deployment inventory authority is not bound to this environment');
+    config.token = {environment:token.environment,binding:structuredClone(token.binding)};
+    try {
+      config.token = normalizeTokenWalletConfig420(config);
+    } catch (error) {
+      throw new WalletRuntimeConfigGenerationError420('invalid Token release inventory: '+error.message);
+    }
+  }
+  return config;
 }
 
 function parseArgs420(argv) {

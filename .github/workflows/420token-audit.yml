@@ -16,7 +16,7 @@ on:
       - 'scripts/verify-420token-audit.py'
       - 'scripts/stage-420token-qualification.py'
       - 'wallet/web/core/token-*.js'
-      - 'wallet/web/test/token-*.test.js'
+      - 'wallet/web/test/token-*.js'
       - 'testnet/public-services/token/readiness.json'
       - '.github/workflows/420token-audit.yml'
       - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'
@@ -76,7 +76,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           python3 scripts/verify-420token-audit.py
       - name: Run Wallet Token SDK and runtime qualification
-        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js
+        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/w15-8-genesis-integration.test.js
   qualify:
     needs: scope
     if: needs.scope.outputs.contracts == 'true'

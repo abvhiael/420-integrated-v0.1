@@ -18,7 +18,10 @@ export async function prepareTokenDeploymentHandoff420(provider, controller, sma
   if (typeof request.target !== 'string' || request.target.toLowerCase() !== runtime.factory.address)
     throw Error('verified 420Token factory target required');
   let value;
-  try { value = BigInt(request.value ?? -1); } catch { throw Error('420Token deployment requires exactly 42 native 420'); }
+  try {
+    if (typeof request.value !== 'bigint' && !(typeof request.value === 'string' && /^(0|[1-9][0-9]*|0x[0-9a-fA-F]+)$/.test(request.value))) throw Error('inexact value');
+    value = BigInt(request.value);
+  } catch { throw Error('420Token deployment requires exactly 42 native 420'); }
   if (value !== TOKEN_CREATION_FEE_WEI_420) throw Error('420Token deployment requires exactly 42 native 420');
   if (typeof request.data !== 'string' || !/^0x(?:[0-9a-fA-F]{2})+$/.test(request.data))
     throw Error('420Token factory calldata required');
@@ -32,9 +35,10 @@ export async function prepareTokenDeploymentHandoff420(provider, controller, sma
     throw Error('SmartAccount420 chain differs from Token runtime');
   // Copy/freeze approved configuration before the first await. Do not trust mutable input objects.
   const binding = normalizeTokenReleaseBinding420(runtimeBinding);
+  const accountState = Object.freeze({...smartAccountState});
   const before = await verifyTokenRuntime420(provider,binding);
   if (!before.templates.find(t=>t.id===creation.template.id)?.enabled) throw Error('Token template disabled');
-  const prepared = await prepareSmartAccountExecution(provider, controller, smartAccountState, {
+  const prepared = await prepareSmartAccountExecution(provider, controller, accountState, {
     target:runtime.factory.address, value, data:creation.data, expectedChainId:runtime.chainId,
   });
   const after = await verifyTokenRuntime420(provider,binding);

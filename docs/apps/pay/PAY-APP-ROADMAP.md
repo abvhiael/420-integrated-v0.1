@@ -485,6 +485,9 @@ be opened through navigation until a Wallet session is available.
 
 Exit criteria: Shared SDK with native QR, verified Wallet links, secure sessions, notification privacy, build and device tests. Retain reproducible scoped qualification at exact implementation SHA.
 
+See [Android build and deployment](android.md) for qualification, App Links and Wallet transport dependencies.
+
+
 ## PAY-APP-14 — iOS application
 
 **Status:** PLANNED. **Testnet required:** No.

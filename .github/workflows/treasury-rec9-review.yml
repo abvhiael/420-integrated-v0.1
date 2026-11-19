@@ -1,0 +1,50 @@
+name: Treasury REC-9 retained security review
+on:
+  pull_request:
+    paths:
+      - 'docs/audit/420TREASURY-REC-9-STATIC-REVIEW.json'
+      - 'scripts/treasury/review-security.py'
+      - '.github/workflows/treasury-rec9-review.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  reviewed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Confirm source execution and artifact provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          gh api repos/${{ github.repository }}/actions/runs/44618114810 > /tmp/rec9-run.json
+          gh api repos/${{ github.repository }}/actions/artifacts/14576721283 > /tmp/rec9-artifact.json
+          python3 - <<'PY'
+          import json
+          r = json.load(open('/tmp/rec9-run.json'))
+          a = json.load(open('/tmp/rec9-artifact.json'))
+          assert r['head_sha'] == '282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c'
+          assert r['status'] == 'completed' and r['conclusion'] == 'failure'
+          assert a['id'] == 14576721283 and a['workflow_run']['id'] == r['id']
+          assert a['digest'] == 'sha256:bdc9e661ca31a746f583767b01b3c51e9fcfd78c329d5659dca2e506a276ece3'
+          assert not a['expired']
+          PY
+          gh api repos/${{ github.repository }}/actions/artifacts/14576721283/zip > /tmp/rec9.zip
+          echo 'bdc9e661ca31a746f583767b01b3c51e9fcfd78c329d5659dca2e506a276ece3  /tmp/rec9.zip' | sha256sum -c -
+          unzip -q /tmp/rec9.zip -d "$RUNNER_TEMP/rec9-evidence"
+      - name: Verify exact source, passing executable evidence, and all static dispositions
+        run: python3 scripts/treasury/review-security.py "$RUNNER_TEMP/rec9-evidence"
+      - name: Retain independent review supplement and original evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: treasury-rec9-reviewed-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/rec9-evidence/
+          if-no-files-found: error

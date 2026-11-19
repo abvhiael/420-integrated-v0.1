@@ -1,0 +1,642 @@
+{
+  "schema": "420-treasury-rec9-static-review-v1",
+  "sourceCommit": "282e2cf6d9f4cde8c3b3b7a027724de1e0d0a63c",
+  "runId": 44618114810,
+  "jobId": 135892147238,
+  "artifactId": 14576721283,
+  "artifactSha256": "bdc9e661ca31a746f583767b01b3c51e9fcfd78c329d5659dca2e506a276ece3",
+  "tool": "Slither 0.11.3",
+  "externalReviewComplete": false,
+  "findings": [
+    {
+      "check": "incorrect-equality",
+      "description": "ProtocolRegistry.resolveActive(bytes32) (src/apps/ProtocolRegistry.sol#273-277) uses a dangerous strict equality:\n\t- current.version == 0 || ! current.active (src/apps/ProtocolRegistry.sol#275)\n",
+      "id": "078653e6503d4d29e6251f3e1d7b9a787920e9ad319e615854d34eb6b15620df",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Version zero is the explicit unregistered sentinel; active service lookup must reject it and inactive entries. This is not an Ether balance equality.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-no-eth",
+      "description": "Reentrancy in TreasuryDisbursementRegistry420.schedule(bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#105-145):\n\tExternal calls:\n\t- budgets.reserve(budgetId,amount) (src/treasury/TreasuryDisbursementRegistry420.sol#128)\n\tState variables written after the call(s):\n\t- _disbursements[id] = Disbursement(budgetId,recipient,b.asset,amount,notBefore,expiresAt,civicActionHash,purposeHash,bytes32(0),State.SCHEDULED,true) (src/treasury/TreasuryDisbursementRegistry420.sol#129-141)\n\tTreasuryDisbursementRegistry420._disbursements (src/treasury/TreasuryDisbursementRegistry420.sol#37) can be used in cross function reentrancies:\n\t- TreasuryDisbursementRegistry420._get(bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#188-193)\n\t- TreasuryDisbursementRegistry420.schedule(bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#105-145)\n",
+      "id": "697c2b8657da91df8a83b2f3ae993669df5a5ee1df17f1d0bdceb88cb1ba8992",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Scheduling is Timelock-only and verifies canonical ID and absence before calling the constructor-bound concrete Budget registry. reserve is controller-only and updates accounting with no untrusted call, so it cannot reenter scheduling. A failed reserve reverts the whole disbursement creation.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-no-eth",
+      "description": "Reentrancy in TreasuryReleaseExecutor420.execute(bytes32,bytes32) (src/treasury/TreasuryReleaseExecutor420.sol#83-125):\n\tExternal calls:\n\t- vault.withdraw(e.operationId,e.asset,e.recipient,e.amount) (src/treasury/TreasuryReleaseExecutor420.sol#102)\n\t- disb.markExecuted(id,commitment) (src/treasury/TreasuryReleaseExecutor420.sol#122)\n\tState variables written after the call(s):\n\t- _entered = 0 (src/treasury/TreasuryReleaseExecutor420.sol#124)\n\tTreasuryReleaseExecutor420._entered (src/treasury/TreasuryReleaseExecutor420.sol#42) can be used in cross function reentrancies:\n\t- TreasuryReleaseExecutor420.execute(bytes32,bytes32) (src/treasury/TreasuryReleaseExecutor420.sol#83-125)\n",
+      "id": "fb868065d8de55740907c1128c950aa14b00f84c31d262dbec20d94fad073e5a",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The write is release of the executor's nonReentrant lock, set before any external calls. The independently authorized Vault repeats its own lock, the operation ID is single-use, and Treasury settlement and Vault debit revert together on failure.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "uninitialized-local",
+      "description": "VaultRegistry420.setState(bytes32,VaultRegistry420.VaultState).actionId (src/vault/VaultRegistry420.sol#129) is a local variable never initialized\n",
+      "id": "b1d3f2a0fc160bb0f418fd4fb35b3dc7f7a72294ffa71cbd5ee1b732f05ca375",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Every accepted lifecycle branch assigns its exact actionId before authorization; the final else reverts. Closing additionally requires canClose. No accepted path uses the zero default.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "TreasuryVaultBinding420._resolve(ProtocolRegistry,bytes32) (src/treasury/TreasuryVaultBinding420.sol#71-81) ignores return value by (implementation,None) = registry.resolveActive(serviceId) (src/treasury/TreasuryVaultBinding420.sol#76)\n",
+      "id": "9dca8a4818c84fe10900f1d612540f40a2e65c0d19559619b3098aade514b8e0",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The implementation returned by resolveActive is checked against the separately read active Service entry and code hash. The release binding intentionally needs the implementation, not the version return; the canonical trusted registry rejects unregistered/inactive services.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "AssetVault420.claim(bytes32,bytes32) (src/vault/AssetVault420.sol#159-169) ignores return value by accounting.recordClaim(vaultId,obligationId) (src/vault/AssetVault420.sol#166)\n",
+      "id": "ec6cfad7cc2e90a1654f7b7b5d15826af7fb3e72e76ccd4c425af5f0f841db58",
+      "impact": "Medium",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "previewClaim returns the immutable obligation asset, beneficiary and amount; recordClaim on the same concrete accounting registry uses those same stored fields, changes the state once, and has no intervening untrusted external call. The locked Vault sends precisely that tuple; any transfer failure reverts the claim.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-benign",
+      "description": "Reentrancy in AssetVault420.createObligation(bytes32,bytes32,address,address,uint256,bytes32,bytes32) (src/vault/AssetVault420.sol#121-139):\n\tExternal calls:\n\t- accounting.createObligation(vaultId,obligationId,asset,beneficiary,amount,obligationType,sourceRef) (src/vault/AssetVault420.sol#133)\n\tState variables written after the call(s):\n\t- payerSafetyController[obligationId] = msg.sender (src/vault/AssetVault420.sol#135)\n",
+      "id": "ae595fd80904c6e200bd2f01838bc6e2be58561112317c69c95f34833c0beb0a",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Vault createObligation uses the shared nonReentrant lock and a registered controller-only accounting contract. The payer binding is set before exiting the locked call, with operation replay already consumed. No untrusted callback before binding.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in TreasuryDisbursementRegistry420.cancel(bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#172-180):\n\tExternal calls:\n\t- budgets.release(d.budgetId,d.amount) (src/treasury/TreasuryDisbursementRegistry420.sol#177)\n\tEvent emitted after the call(s):\n\t- DisbursementCancelled(id) (src/treasury/TreasuryDisbursementRegistry420.sol#179)\n",
+      "id": "2694a4003be71497f544ee0a6dcea261b44f662b86abc9cabeefa3b18bb3b46b",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Cancel is governance-only, transitions scheduled state once before controller-only release; the concrete budgets implementation has no external callback. A failed release reverts the event and state.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in TreasuryReleaseExecutor420.execute(bytes32,bytes32) (src/treasury/TreasuryReleaseExecutor420.sol#83-125):\n\tExternal calls:\n\t- vault.withdraw(e.operationId,e.asset,e.recipient,e.amount) (src/treasury/TreasuryReleaseExecutor420.sol#102)\n\t- disb.markExecuted(id,commitment) (src/treasury/TreasuryReleaseExecutor420.sol#122)\n\tEvent emitted after the call(s):\n\t- VaultReleaseCommitted(id,e.operationId,commitment,abi.encode(e)) (src/treasury/TreasuryReleaseExecutor420.sol#123)\n",
+      "id": "2a3f7b649721a0f0d19b270cf365e11561c0fa5adb70adb5c767e5ce52929c35",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Executor lock spans withdrawal, commit and event; successful event describes the same exact operation and reviewed tuple. Any failure reverts both Vault and Treasury events/state; no event provides standalone payment authority.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in TreasuryDisbursementRegistry420.schedule(bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#105-145):\n\tExternal calls:\n\t- budgets.reserve(budgetId,amount) (src/treasury/TreasuryDisbursementRegistry420.sol#128)\n\tEvent emitted after the call(s):\n\t- DisbursementScheduled(id,budgetId,recipient,b.asset,amount,notBefore,expiresAt,civicActionHash,purposeHash) (src/treasury/TreasuryDisbursementRegistry420.sol#142-144)\n",
+      "id": "fc903007d1ce6d2564c431106efc7ecdc41a7ce2ea5d750d0e1285e2dda3d3df",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Schedule invokes the fixed concrete budget reserve with no callback; event follows the newly recorded exact canonical tuple. Failure leaves no disbursement or event.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in TreasuryDisbursementRegistry420.markExecuted(bytes32,bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#147-170):\n\tExternal calls:\n\t- budgets.settle(d.budgetId,d.amount) (src/treasury/TreasuryDisbursementRegistry420.sol#166)\n\tEvent emitted after the call(s):\n\t- DisbursementExecuted(id,vaultReleaseHash,msg.sender) (src/treasury/TreasuryDisbursementRegistry420.sol#169)\n",
+      "id": "fd63f2aaf2e6ce7f95eaff37e2e68902773e1f3f86c5ddc178dc5956caecc364",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Settlement marks state and epoch then invokes the controller-only concrete budget settlement, without an untrusted callback; failure rolls back state and event. The recorded commitment is not independent transfer proof.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "TreasuryBudgetRegistry420.reserve(bytes32,uint128) (src/treasury/TreasuryBudgetRegistry420.sol#28) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- ! _effective(b) || uint256(b.committed) + amount > b.ceiling (src/treasury/TreasuryBudgetRegistry420.sol#28)\n",
+      "id": "1c5b722c8874cc62e2e99e83560a5eb1ebe2e92c8a1eaa67eca15e5d2dec9841",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Reserve deliberately requires effective inclusive budget window and bounded uint256 addition before updating uint128 committed; timestamp is an eligibility input, not entropy.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "TreasuryDisbursementRegistry420.markExecuted(bytes32,bytes32) (src/treasury/TreasuryDisbursementRegistry420.sol#147-170) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- block.timestamp < d.notBefore || block.timestamp > d.expiresAt || vaultReleaseHash == bytes32(0) || ! budgets.isEffective(d.budgetId) || ! policy.isAllowed(d.asset,d.amount) (src/treasury/TreasuryDisbursementRegistry420.sol#154-155)\n",
+      "id": "36ea87b138c9ca5bc9e778487c9f33b0384cd1f09eb4929ad582be8451272a87",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execution intentionally checks inclusive validity windows, active budget, current policy and epoch capacity using canonical block time. It is not randomness. Exact disbursement authorization and commitment are separate requirements.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "TreasuryBudgetRegistry420._effective(TreasuryBudgetRegistry420.Budget) (src/treasury/TreasuryBudgetRegistry420.sol#34) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- b.active && block.timestamp >= b.validFrom && block.timestamp <= b.validUntil (src/treasury/TreasuryBudgetRegistry420.sol#34)\n",
+      "id": "660017c2ca40a56a1b319428f983c6246fec02efaa8eaa30242ca59b1e21faae",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The inclusive governed budget validity interval is intentionally evaluated using canonical chain time; no caller-provided time or randomness.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "TreasuryRouter420.isExecutable(bytes32) (src/treasury/TreasuryRouter420.sol#39-54) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- d.state != TreasuryDisbursementRegistry420.State.SCHEDULED || block.timestamp < d.notBefore || block.timestamp > d.expiresAt || ! budgets.isEffective(d.budgetId) || ! policy.isAllowed(d.asset,d.amount) (src/treasury/TreasuryRouter420.sol#45-47)\n\t- spent <= p.maxEpochDisbursement && d.amount <= uint256(p.maxEpochDisbursement) - spent (src/treasury/TreasuryRouter420.sol#53)\n",
+      "id": "6c419db7f02be73b1c6902ecc4bc3ff4302a598533efe8880961d4c6a1cd2acb",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Read-only Router mirrors execution eligibility including inclusive windows and current epoch capacity. The short-circuited spent <= cap prevents subtraction underflow after cap reduction; eligibility grants no authority.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "ProtocolRegistry._publish(bytes32,address,bytes32,bytes32,uint32,bool) (src/apps/ProtocolRegistry.sol#165-190) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- version != expected (src/apps/ProtocolRegistry.sol#177)\n",
+      "id": "7cc3fb5d5c7623a70ff276b91eef46fff72ce6ea83e8a34557b73e2dc0cb1587",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Registry publication checks sequential version, not block time. activatedAt is descriptive metadata. Publication is governed.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "TreasuryBudgetRegistry420.isEffective(bytes32) (src/treasury/TreasuryBudgetRegistry420.sol#32) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- b.exists && _effective(b) (src/treasury/TreasuryBudgetRegistry420.sol#32)\n",
+      "id": "8ce758d2a1678594d1ae9d2042170fe9caf8316a9e41a5c76baef6f7a0485d33",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Budget isEffective deliberately rejects missing budget and checks active inclusive validity against chain time; not a source of randomness.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "ProtocolRegistry.resolveActive(bytes32) (src/apps/ProtocolRegistry.sol#273-277) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- current.version == 0 || ! current.active (src/apps/ProtocolRegistry.sol#275)\n",
+      "id": "fd624c4139bfbac4a8eb886ec489dfb149eae8643c607b370ccbf7a2867040f2",
+      "impact": "Low",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The guard checks version and active state; the Service struct's activatedAt does not authorize resolution.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in AssetVault420._sendExact(address,address,uint256) (src/vault/AssetVault420.sol#220-237):\n\t- (ok,None) = address(recipient).call{value: amount}() (src/vault/AssetVault420.sol#222)\n",
+      "id": "81bd1e1133c8a4a91bf43dac9d206ccd6d2f89ef2924393d141ed0fd0de35e42",
+      "impact": "Informational",
+      "scope": "treasury-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Native call is necessary for Vault withdrawal, authorized by exact route or self-withdrawal, or recorded obligation beneficiary. Vault lock is active, accounting and replay marker precede the transfer, failure reverts.",
+      "evidence": "REC-9 independent state model and boundary tests; REC-3/4 real Vault and executor tests; source inspection"
+    },
+    {
+      "check": "reentrancy-eth",
+      "description": "Reentrancy in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\tExternal calls:\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n\tState variables written after the call(s):\n\t- executingCivicOperation = previousOperation (src/governance/GovernanceTimelock.sol#139)\n\tGovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35) can be used in cross function reentrancies:\n\t- GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143)\n\t- GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159)\n\t- GovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35)\n",
+      "id": "b889ad610f38fa6235d628f5e9ce3eb345625a53b2acf9ce3dff89a6761a7de2",
+      "impact": "High",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Operation.executed is set before the external call; a callback cannot replay that ID. Only the activated scheduler target gets the exact operation context, and each external action clears it. A distinct already-authorized mature operation may execute independently and restores the saved context; all nested effects roll back if the outer call fails.",
+      "evidence": "REC-9 nested mature context and atomic rollback tests; REC-5 real governance 62/62, including Stake safety 3/3"
+    },
+    {
+      "check": "reentrancy-eth",
+      "description": "Reentrancy in GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159):\n\tExternal calls:\n\t- (success,None) = target.call{value: msg.value}(data) (src/governance/GovernanceTimelock.sol#157)\n\tState variables written after the call(s):\n\t- executingCivicOperation = id (src/governance/GovernanceTimelock.sol#158)\n\tGovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35) can be used in cross function reentrancies:\n\t- GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143)\n\t- GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159)\n\t- GovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35)\n",
+      "id": "debb046b66b0a30b87ade491f0c50a27056e9a33f0700e6377d4b587005fd5d1",
+      "impact": "High",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Only the activated scheduler may dispatch the exact nonzero active operation; the Governor verifies Timelock caller, queued state, both committed action hashes and total value. Before calling an external target the context is zeroed, so a callback, including a target that invokes the Governor, cannot borrow it. Restoration to the original ID is necessary to dispatch the next committed action. Nested mature operations restore zero; a failed action reverts the entire batch.",
+      "evidence": "REC-9 nested mature context and atomic rollback tests; REC-5 real governance 62/62, including Stake safety 3/3"
+    },
+    {
+      "check": "divide-before-multiply",
+      "description": "CivicGovernor420._ceilBps(uint256,uint16) (src/governance/CivicGovernor420.sol#329-336) performs a multiplication on the result of a division:\n\t- whole = (total / BPS) * uint256(bps) (src/governance/CivicGovernor420.sol#333)\n",
+      "id": "a91c78ddd3ab38d5ca02c2871c2891b15eda23ca2fc957051bb489073d7fbaee",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Exact quotient/remainder decomposition computes ceil(total*bps/10000) without overflowing the intermediate total*bps. Remainder multiplication and rounding up restore the discarded fractional part; constitution bounds bps at 10000.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "incorrect-equality",
+      "description": "CivicGovernor420.createProposal(CivicIds420.ProposalClass,bytes32,bytes32) (src/governance/CivicGovernor420.sol#140-182) uses a dangerous strict equality:\n\t- block.number == 0 || block.number > type()(uint64).max - 2 (src/governance/CivicGovernor420.sol#146)\n",
+      "id": "8117da5fe935d165ac577e1147d342079f192dd8f5e55a23183d3e5c98a7af3e",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Block zero must be rejected to avoid underflow in snapshot block; uint64 upper bounds are explicit before casts. Equality is an intentional boundary.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "uninitialized-local",
+      "description": "CivicElectorateRegistry420.snapshotProposal(bytes32,uint64,bool).validator (src/governance/CivicElectorateRegistry420.sol#152) is a local variable never initialized\n",
+      "id": "613ede7c672fad39bcab0bd0671c4169d3823199a425c2cfecc366382397ff17",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Non-required validator house is intentionally zero-initialized; required validator house is assigned a captured nonzero source/root/weight and voting rejects an unrequired house.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "uninitialized-local",
+      "description": "CivicGovernor420.executeQueuedBatch(bytes32,CivicGovernor420.Action[]).expectedValue (src/governance/CivicGovernor420.sol#270) is a local variable never initialized\n",
+      "id": "ee66d8c93233d819dd5ab8045049554f463a9c4746271251447376511bab0c0b",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Solidity uint256 local defaults to zero, the intended sum identity. Each committed action value is added with checked arithmetic, and the sum must equal msg.value.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "CivicGovernor420.queue(bytes32,CivicGovernor420.Action[]) (src/governance/CivicGovernor420.sol#223-254) ignores return value by (None,class_,None,actionsHash,None,None,None,state,exists) = proposalRegistry.proposals(proposalId) (src/governance/CivicGovernor420.sol#232-233)\n",
+      "id": "9a23ae80320ddfd366ba34fe50fd2246d57e1e2e1e9d316218b8ab9b8c100411",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Queue reads only class, actions hash, state and exists; other tuple fields are irrelevant because frozen rules are separately retrieved and exact action commitment is verified.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "CivicVoting420.castVote(bytes32,CivicIds420.House,CivicVoting420.Support,bytes) (src/governance/CivicVoting420.sol#126-164) ignores return value by (None,None,None,None,None,voteStart,voteEnd,state,exists) = proposalRegistry.proposals(proposalId) (src/governance/CivicVoting420.sol#132-133)\n",
+      "id": "b1658b4112d037f747acf919f46f9702d14f005d80e1cea4050d6dd56c17be7d",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Voting reads existence, active state and vote window; voter weight and duplicate prevention are determined separately against the frozen electorate snapshot.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "CivicGovernor420.executeQueuedBatch(bytes32,CivicGovernor420.Action[]) (src/governance/CivicGovernor420.sol#257-286) ignores return value by (None,None,None,actionsHash,None,None,None,state,exists) = proposalRegistry.proposals(proposalId) (src/governance/CivicGovernor420.sol#262-263)\n",
+      "id": "ce9884035ba211462185a4ab1bddc6d27d1600eaebf00315c450bbfec601ea86",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execution uses only exists, queued state and actions hash from the proposal tuple, plus queued hash, exact Timelock context and value. Ignored proposal metadata is not needed for execution authorization.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "unused-return",
+      "description": "CivicGovernor420.finalize(bytes32) (src/governance/CivicGovernor420.sol#184-220) ignores return value by (None,None,None,None,None,None,voteEnd,state,exists) = proposalRegistry.proposals(proposalId) (src/governance/CivicGovernor420.sol#187)\n",
+      "id": "f8db28623b4c058380cb2fa524b60f0bd454958870316139daf3b328fe054ab0",
+      "impact": "Medium",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Finalization needs existence, active state and vote end; frozen rules, snapshot and actual vote tally are read from their canonical sources. Ignored tuple fields do not affect eligibility.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "calls-loop",
+      "description": "CivicGovernor420.executeQueuedBatch(bytes32,CivicGovernor420.Action[]) (src/governance/CivicGovernor420.sol#257-286) has external calls inside a loop: ok = timelock.executeCivicAction{value: actions[i_scope_0].value}(proposalId,actions[i_scope_0].target,actions[i_scope_0].data) (src/governance/CivicGovernor420.sol#278-280)\n",
+      "id": "0b0576a61e7f2efc207913269c3e118948483a869ee202983256aa10756aa7c5",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "A committed action batch is deliberately atomic, with exact bounded transaction gas; an oversized or reverting governed batch cannot partially execute. No untrusted caller can enlarge an already committed batch.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in CivicGovernor420.executeQueuedBatch(bytes32,CivicGovernor420.Action[]) (src/governance/CivicGovernor420.sol#257-286):\n\tExternal calls:\n\t- ok = timelock.executeCivicAction{value: actions[i_scope_0].value}(proposalId,actions[i_scope_0].target,actions[i_scope_0].data) (src/governance/CivicGovernor420.sol#278-280)\n\t- proposalRegistry.transition(proposalId,CivicIds420.ProposalState.EXECUTED) (src/governance/CivicGovernor420.sol#284)\n\tExternal calls sending eth:\n\t- ok = timelock.executeCivicAction{value: actions[i_scope_0].value}(proposalId,actions[i_scope_0].target,actions[i_scope_0].data) (src/governance/CivicGovernor420.sol#278-280)\n\tEvent emitted after the call(s):\n\t- CivicProposalExecuted(proposalId,computedHash) (src/governance/CivicGovernor420.sol#285)\n",
+      "id": "2b1fab1d21c0400408d83bc2da483b9b4a4b6cbadb34046cdcbdbf0079145b23",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Timelock context is cleared on each external action; the verified exact batch can finish only once, after all calls succeed. A failed nested or outer action rolls back the final event and lifecycle.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in CivicGovernor420.finalize(bytes32) (src/governance/CivicGovernor420.sol#184-220):\n\tExternal calls:\n\t- proposalRegistry.transition(proposalId,CivicIds420.ProposalState.PASSED) (src/governance/CivicGovernor420.sol#216-218)\n\t- proposalRegistry.transition(proposalId,CivicIds420.ProposalState.FAILED) (src/governance/CivicGovernor420.sol#216-218)\n\tEvent emitted after the call(s):\n\t- CivicProposalFinalized(proposalId,passed,community.passed,validatorPassed,rule.constitutionRevision) (src/governance/CivicGovernor420.sol#219)\n",
+      "id": "351f5bf32b128f898a728e43a366de0acb87f488301509398e3bbd1478866996",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Only the bound proposal registry transition writes final state; finalized outcomes are based on frozen rules and voting tally. The concrete transition is not an untrusted external callback.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in CivicGovernor420.queue(bytes32,CivicGovernor420.Action[]) (src/governance/CivicGovernor420.sol#223-254):\n\tExternal calls:\n\t- timelock.scheduleWithDelay(proposalId,address(this),totalValue,data,GovernanceTimelock.Class(uint8(class_)),rule.timelockDelay) (src/governance/CivicGovernor420.sol#249-251)\n\t- proposalRegistry.transition(proposalId,CivicIds420.ProposalState.QUEUED) (src/governance/CivicGovernor420.sol#252)\n\tEvent emitted after the call(s):\n\t- CivicProposalQueued(proposalId,computedHash,rule.timelockDelay,totalValue) (src/governance/CivicGovernor420.sol#253)\n",
+      "id": "77271e627a4e8c21721ff7551167468cbe91cfd3bc64025630f45e73fbe16869",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Queue first binds exact committed hash, schedules once in the canonical Timelock and transitions state via the bound registry. Both are concrete trusted dependencies, and failure rolls back the queue.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in CivicGovernor420.createProposal(CivicIds420.ProposalClass,bytes32,bytes32) (src/governance/CivicGovernor420.sol#140-182):\n\tExternal calls:\n\t- proposalRegistry.registerProposal(proposalId,msg.sender,class_,metadataHash,actionsHash,snapshotBlock,voteStart,voteEnd) (src/governance/CivicGovernor420.sol#174-176)\n\t- electorateRegistry.snapshotProposal(proposalId,snapshotBlock,rule.dualHouseRequired) (src/governance/CivicGovernor420.sol#177)\n\tEvent emitted after the call(s):\n\t- CivicProposalCreated(proposalId,msg.sender,class_,metadataHash,actionsHash,snapshotBlock,voteStart,voteEnd,rule.revision) (src/governance/CivicGovernor420.sol#179-181)\n",
+      "id": "b963cd239bcb787ad8c37a2b91973ae1e19805572988789c6a8afab24cb0880e",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Proposal nonce, frozen rule, registration and snapshot are atomic. Bound registries are trusted; electorate source captures use view calls. Event after success describes that exact proposal.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\tExternal calls:\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n\tEvent emitted after the call(s):\n\t- Executed(id) (src/governance/GovernanceTimelock.sol#141)\n",
+      "id": "bcaa9da9a18c51e8bd133d9e0b9729a515b1622f19c82665a6141d69fe65c0b3",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execution flag precedes dispatch; same ID replay fails, including nested callback. Executed event follows successful call, and outer revert removes nested events.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock.cancel(bytes32) (src/governance/GovernanceTimelock.sol#116-124) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(op.target != address(0) && ! op.executed && ! op.cancelled,invalid) (src/governance/GovernanceTimelock.sol#121)\n",
+      "id": "3a6be422f788790212c3efdaa90110bd31b06ace5d0db525ec6cee0164f6d766",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Cancellation is bootstrap-only before activation; target exists and not executed/cancelled. Timestamp taint from the operation struct is incidental, not cancellation authority.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(op.target != address(0),unknown) (src/governance/GovernanceTimelock.sol#130)\n\t- require(bool,string)(! op.executed && ! op.cancelled,closed) (src/governance/GovernanceTimelock.sol#131)\n\t- require(bool,string)(block.timestamp >= op.executeAfter,timelocked) (src/governance/GovernanceTimelock.sol#132)\n\t- require(bool,string)(address(this).balance >= op.value,insufficient balance) (src/governance/GovernanceTimelock.sol#133)\n",
+      "id": "9ed9b149fa9dd00539f6d29608bdc1dd9b144a4203ee7bc12b2262aeb60d687f",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Canonical block time is intentionally compared with immutable executeAfter; class delay is not entropy. Execute also checks operation status and funds.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock._schedule(bytes32,address,uint256,bytes,GovernanceTimelock.Class,uint64) (src/governance/GovernanceTimelock.sol#161-175) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(operations[id].target == address(0),exists) (src/governance/GovernanceTimelock.sol#169)\n\t- require(bool,string)(block.timestamp <= type()(uint64).max - delay,timestamp overflow) (src/governance/GovernanceTimelock.sol#171)\n",
+      "id": "e9df2dc54ef46293b661f01500b0ed74be80c0f87c63d029b8ec546de666f0b6",
+      "impact": "Low",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Schedule checks unique operation and uint64 timestamp overflow, then adds at least the canonical class delay. Scheduler-only authorization is independent of timestamp.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "cyclomatic-complexity",
+      "description": "CivicVoting420.castVote(bytes32,CivicIds420.House,CivicVoting420.Support,bytes) (src/governance/CivicVoting420.sol#126-164) has a high cyclomatic complexity (12).\n",
+      "id": "5f89f2683803842e7824a452bdc598c1bc3e3e0c16e5fb6723bb91e2626cca62",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Vote complexity comes from explicit lifecycle, window, electorate, weight and duplicate checks. Complexity is maintainability information, not an exploitable control flow.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159):\n\t- (success,None) = target.call{value: msg.value}(data) (src/governance/GovernanceTimelock.sol#157)\n",
+      "id": "12688712908a0a34a574595166d0581cb5525706d8054a09858ce1d67e85533f",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The low-level call is the necessary committed action dispatcher; only activated scheduler and exact nonzero context can call it, context clears through the call, and failure is checked by Governor.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in CivicElectorateRegistry420._isCanonicalSnapshotAuthority(address) (src/governance/CivicElectorateRegistry420.sol#125-137):\n\t- (electorateOk,electorateData) = authority.staticcall(abi.encodeWithSignature(electorateRegistry())) (src/governance/CivicElectorateRegistry420.sol#130-131)\n\t- (timelockOk,timelockData) = authority.staticcall(abi.encodeWithSignature(timelock())) (src/governance/CivicElectorateRegistry420.sol#132)\n",
+      "id": "52b9540db21591c20851ea4d415a95828c6346a8f40b4ca1ee880b808db61b2e",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Snapshot authority binding uses static introspection with checked success, length and matching canonical addresses; governance authorizes the binding.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in CivicProposalRegistry420._isCanonicalProposalAuthority(address) (src/governance/CivicProposalRegistry420.sol#77-89):\n\t- (proposalOk,proposalData) = authority.staticcall(abi.encodeWithSignature(proposalRegistry())) (src/governance/CivicProposalRegistry420.sol#82-83)\n\t- (timelockOk,timelockData) = authority.staticcall(abi.encodeWithSignature(timelock())) (src/governance/CivicProposalRegistry420.sol#84)\n",
+      "id": "56827a43e5d26578dd1b54d4920c2023756fa8965323190c3f248dfabf6b139a",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Proposal authority binding uses static introspection with checked success, length and matching canonical addresses; governance authorizes the binding.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock._isCanonicalCivicGovernor(address) (src/governance/GovernanceTimelock.sol#82-88):\n\t- (ok,data) = civicGovernor.staticcall(abi.encodeWithSignature(timelock())) (src/governance/GovernanceTimelock.sol#86)\n",
+      "id": "97c8025a27ca24696e7ca5d1d8ed2b95b7816b92a5d0c1dc8479360ec219c8d3",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Civic governor introspection is a staticcall; only immutable bootstrap authority may activate once, and result success/length/address are checked.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n",
+      "id": "f543c29569e0e011e8319bae0fe9e6090f1d47dbaad335afd6336fca34628c8e",
+      "impact": "Informational",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execute dispatches an authorized immutable stored target/value/data after maturity and premarks replay; success is checked and failure reverts.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicGovernor420.timelock (src/governance/CivicGovernor420.sol#48) should be immutable \n",
+      "id": "33aaddef514f9d751271eb704fc2550c9bd3b6c6e136ceac48920581bfb3efee",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed binding belongs to the adopted initialized Civic architecture. Optimization is not an authority defect; retain storage layout and frozen deployment assumptions.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicGovernor420.constitution (src/governance/CivicGovernor420.sol#44) should be immutable \n",
+      "id": "57861c7769ba2a1fcc3129291dda961dfbf05469c460ea2284be210f8a23ea90",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed constitution binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicGovernor420.electorateRegistry (src/governance/CivicGovernor420.sol#46) should be immutable \n",
+      "id": "59a781e87e8d46bdf76bcfa809e60e50d0005a228a840c7de4bee2a7965110ff",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed electorate binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicGovernor420.voting (src/governance/CivicGovernor420.sol#47) should be immutable \n",
+      "id": "92b6026b6c5e971a570f4bc9da82e19d2b6e66ccb6bb53a903d67d4e5a9647d8",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed voting binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicVoting420.proposalRegistry (src/governance/CivicVoting420.sol#50) should be immutable \n",
+      "id": "9c429ca410bd4fc2a2ec02dec5d978f7a3c8fee73419a61cd0bc139ae1787cda",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed proposal registry binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicGovernor420.proposalRegistry (src/governance/CivicGovernor420.sol#45) should be immutable \n",
+      "id": "d3b0a07c314e54390fcb67b8857bd87b080af5428f5de69f21f45940f046e614",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed proposal registry binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "immutable-states",
+      "description": "CivicVoting420.electorateRegistry (src/governance/CivicVoting420.sol#51) should be immutable \n",
+      "id": "d8cb0803535a8752bcbe27f0029fd935e32b7e33b28fd284522845f556bb197b",
+      "impact": "Optimization",
+      "scope": "governance-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Storage-backed electorate registry binding belongs to the adopted initialized Civic architecture. Preserve storage layout; optimization is not a security defect.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-eth",
+      "description": "Reentrancy in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\tExternal calls:\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n\tState variables written after the call(s):\n\t- executingCivicOperation = previousOperation (src/governance/GovernanceTimelock.sol#139)\n\tGovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35) can be used in cross function reentrancies:\n\t- GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143)\n\t- GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159)\n\t- GovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35)\n",
+      "id": "b889ad610f38fa6235d628f5e9ce3eb345625a53b2acf9ce3dff89a6761a7de2",
+      "impact": "High",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Operation.executed is set before the external call; a callback cannot replay that ID. Only the activated scheduler target gets the exact operation context, and each external action clears it. A distinct already-authorized mature operation may execute independently and restores the saved context; all nested effects roll back if the outer call fails.",
+      "evidence": "REC-9 nested mature context and atomic rollback tests; REC-5 real governance 62/62, including Stake safety 3/3"
+    },
+    {
+      "check": "reentrancy-eth",
+      "description": "Reentrancy in GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159):\n\tExternal calls:\n\t- (success,None) = target.call{value: msg.value}(data) (src/governance/GovernanceTimelock.sol#157)\n\tState variables written after the call(s):\n\t- executingCivicOperation = id (src/governance/GovernanceTimelock.sol#158)\n\tGovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35) can be used in cross function reentrancies:\n\t- GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143)\n\t- GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159)\n\t- GovernanceTimelock.executingCivicOperation (src/governance/GovernanceTimelock.sol#35)\n",
+      "id": "debb046b66b0a30b87ade491f0c50a27056e9a33f0700e6377d4b587005fd5d1",
+      "impact": "High",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Only the activated scheduler may dispatch the exact nonzero active operation; the Governor verifies Timelock caller, queued state, both committed action hashes and total value. Before calling an external target the context is zeroed, so a callback, including a target that invokes the Governor, cannot borrow it. Restoration to the original ID is necessary to dispatch the next committed action. Nested mature operations restore zero; a failed action reverts the entire batch.",
+      "evidence": "REC-9 nested mature context and atomic rollback tests; REC-5 real governance 62/62, including Stake safety 3/3"
+    },
+    {
+      "check": "incorrect-equality",
+      "description": "ProtocolRegistry.resolveActive(bytes32) (src/apps/ProtocolRegistry.sol#273-277) uses a dangerous strict equality:\n\t- current.version == 0 || ! current.active (src/apps/ProtocolRegistry.sol#275)\n",
+      "id": "078653e6503d4d29e6251f3e1d7b9a787920e9ad319e615854d34eb6b15620df",
+      "impact": "Medium",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Version zero is the explicit unregistered sentinel; active service lookup must reject it and inactive entries. This is not an Ether balance equality.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "reentrancy-events",
+      "description": "Reentrancy in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\tExternal calls:\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n\tEvent emitted after the call(s):\n\t- Executed(id) (src/governance/GovernanceTimelock.sol#141)\n",
+      "id": "bcaa9da9a18c51e8bd133d9e0b9729a515b1622f19c82665a6141d69fe65c0b3",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execution flag precedes dispatch; same ID replay fails, including nested callback. Executed event follows successful call, and outer revert removes nested events.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock.cancel(bytes32) (src/governance/GovernanceTimelock.sol#116-124) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(op.target != address(0) && ! op.executed && ! op.cancelled,invalid) (src/governance/GovernanceTimelock.sol#121)\n",
+      "id": "3a6be422f788790212c3efdaa90110bd31b06ace5d0db525ec6cee0164f6d766",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Cancellation is bootstrap-only before activation; target exists and not executed/cancelled. Timestamp taint from the operation struct is incidental, not cancellation authority.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "ProtocolRegistry._publish(bytes32,address,bytes32,bytes32,uint32,bool) (src/apps/ProtocolRegistry.sol#165-190) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- version != expected (src/apps/ProtocolRegistry.sol#177)\n",
+      "id": "7cc3fb5d5c7623a70ff276b91eef46fff72ce6ea83e8a34557b73e2dc0cb1587",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Registry publication checks sequential version, not block time. activatedAt is descriptive metadata. Publication is governed.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(op.target != address(0),unknown) (src/governance/GovernanceTimelock.sol#130)\n\t- require(bool,string)(! op.executed && ! op.cancelled,closed) (src/governance/GovernanceTimelock.sol#131)\n\t- require(bool,string)(block.timestamp >= op.executeAfter,timelocked) (src/governance/GovernanceTimelock.sol#132)\n\t- require(bool,string)(address(this).balance >= op.value,insufficient balance) (src/governance/GovernanceTimelock.sol#133)\n",
+      "id": "9ed9b149fa9dd00539f6d29608bdc1dd9b144a4203ee7bc12b2262aeb60d687f",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Canonical block time is intentionally compared with immutable executeAfter; class delay is not entropy. Execute also checks operation status and funds.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "GovernanceTimelock._schedule(bytes32,address,uint256,bytes,GovernanceTimelock.Class,uint64) (src/governance/GovernanceTimelock.sol#161-175) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- require(bool,string)(operations[id].target == address(0),exists) (src/governance/GovernanceTimelock.sol#169)\n\t- require(bool,string)(block.timestamp <= type()(uint64).max - delay,timestamp overflow) (src/governance/GovernanceTimelock.sol#171)\n",
+      "id": "e9df2dc54ef46293b661f01500b0ed74be80c0f87c63d029b8ec546de666f0b6",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Schedule checks unique operation and uint64 timestamp overflow, then adds at least the canonical class delay. Scheduler-only authorization is independent of timestamp.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "timestamp",
+      "description": "ProtocolRegistry.resolveActive(bytes32) (src/apps/ProtocolRegistry.sol#273-277) uses timestamp for comparisons\n\tDangerous comparisons:\n\t- current.version == 0 || ! current.active (src/apps/ProtocolRegistry.sol#275)\n",
+      "id": "fd624c4139bfbac4a8eb886ec489dfb149eae8643c607b370ccbf7a2867040f2",
+      "impact": "Low",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The guard checks version and active state; the Service struct's activatedAt does not authorize resolution.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock.executeCivicAction(bytes32,address,bytes) (src/governance/GovernanceTimelock.sol#148-159):\n\t- (success,None) = target.call{value: msg.value}(data) (src/governance/GovernanceTimelock.sol#157)\n",
+      "id": "12688712908a0a34a574595166d0581cb5525706d8054a09858ce1d67e85533f",
+      "impact": "Informational",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "The low-level call is the necessary committed action dispatcher; only activated scheduler and exact nonzero context can call it, context clears through the call, and failure is checked by Governor.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock._isCanonicalCivicGovernor(address) (src/governance/GovernanceTimelock.sol#82-88):\n\t- (ok,data) = civicGovernor.staticcall(abi.encodeWithSignature(timelock())) (src/governance/GovernanceTimelock.sol#86)\n",
+      "id": "97c8025a27ca24696e7ca5d1d8ed2b95b7816b92a5d0c1dc8479360ec219c8d3",
+      "impact": "Informational",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Civic governor introspection is a staticcall; only immutable bootstrap authority may activate once, and result success/length/address are checked.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    },
+    {
+      "check": "low-level-calls",
+      "description": "Low level call in GovernanceTimelock.execute(bytes32) (src/governance/GovernanceTimelock.sol#126-143):\n\t- (ok,out) = op.target.call{value: op.value}(op.data) (src/governance/GovernanceTimelock.sol#138)\n",
+      "id": "f543c29569e0e011e8319bae0fe9e6090f1d47dbaad335afd6336fca34628c8e",
+      "impact": "Informational",
+      "scope": "stake-safety-slither",
+      "disposition": "REVIEWED_NO_CHANGE",
+      "reason": "Execute dispatches an authorized immutable stored target/value/data after maturity and premarks replay; success is checked and failure reverts.",
+      "evidence": "REC-5 real governance and Stake safety regressions; REC-9 nested governance tests; source inspection"
+    }
+  ]
+}

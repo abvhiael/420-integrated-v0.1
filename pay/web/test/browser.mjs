@@ -394,7 +394,7 @@ try {
   await page.getByLabel('Invoice ID', {exact:true}).fill(builtInvoice);
   await page.getByLabel('Invoice amount in base units').fill('100');
   await page.getByLabel('Invoice expiry (local time)').fill('2028-01-01T10:00');
-  await page.getByLabel('Refund window ends (local time)').fill('2028-01-02T10:00');
+  await page.getByLabel('Refund window ends (local time)', {exact:true}).fill('2028-01-02T10:00');
   await page.getByLabel('Invoice mode').selectOption('2');
   await page.getByLabel('Optional tip policy commitment').fill(hash('2'));
   const callsBeforeDraft = await page.evaluate(() => window.calls.length);

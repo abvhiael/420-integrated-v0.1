@@ -1,6 +1,8 @@
 # 420Token audit remediation roadmap
 
-Status: **REPOSITORY AUDIT COMPLETE — TOKEN-AUDIT-8/9 DEFERRED TO LIVE TESTNET/GENESIS**
+Status: **CURRENT RECONCILIATION RECORDED — TOKEN-AUDIT-2 THROUGH TOKEN-AUDIT-7 REQUALIFICATION REQUIRED; TOKEN-AUDIT-8/9 REMAIN LIVE GATES**
+
+Current baseline and remediation ledger: `docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md`. October completion below is retained historical evidence, not a current release qualification claim. TOKEN-AUDIT-1 current reconciliation is recorded; next: TOKEN-AUDIT-2.
 Audit baseline: `main@f6a426fc386b21f871b1805e00a57b1dad2bf902`
 Historical implementation: PR #36, merged as `5dfb7dfecc0e14df0f7745f374395a4c7bba04d8`
 

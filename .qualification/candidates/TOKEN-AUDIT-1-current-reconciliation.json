@@ -1,0 +1,29 @@
+{
+  "step": "TOKEN-AUDIT-1",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L1",
+  "base_sha": "f7268738b5b5c8984d00a10dae750d58d12f2039",
+  "candidate_sha": "HEAD",
+  "classification": "evidence-only",
+  "scope": [
+    "docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    ".qualification/candidates/TOKEN-AUDIT-1-current-reconciliation.json"
+  ],
+  "tests": [
+    {
+      "command": "GitHub exact-ref blob comparison and 12 cross-file authority assertions (retained reconciliation evidence)",
+      "owner": "420Token inventory reconciliation"
+    }
+  ],
+  "required_workflows": [],
+  "exit_criteria": [
+    "Record current-main authority and dependency inventory and historical evidence provenance",
+    "Record application entry points, CI owners and remediation ledger without claiming fresh implementation qualification",
+    "Reconcile roadmap/readiness to next local step"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

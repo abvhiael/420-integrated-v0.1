@@ -14,12 +14,13 @@
     "factoryCustody": false,
     "templateSubstitution": false
   },
-  "status": "REPOSITORY_QUALIFIED_TESTNET_PENDING",
-  "repositoryQualified": true,
+  "status": "REPOSITORY_REQUALIFICATION_REQUIRED",
+  "repositoryQualified": false,
   "liveTestnetQualified": false,
-  "nextRoadmapStep": "TOKEN-AUDIT-8",
+  "nextRoadmapStep": "TOKEN-AUDIT-2",
   "blockers": [
+    "TOKEN-AUDIT-2 through TOKEN-AUDIT-7 local remediation and current-head qualification remain open",
     "TOKEN-AUDIT-8 requires the approved production-equivalent 420Integrated testnet and real Vault/Registry/Wallet infrastructure"
   ],
-  "note": "TOKEN-AUDIT-1 through TOKEN-AUDIT-7 are repository-complete and formally qualified. Unfinished TOKEN-AUDIT-8 live production-equivalent testnet qualification and TOKEN-AUDIT-9 Genesis/production closeout are handed off to the canonical testnet work roadmap in docs/ROADMAP.md. No live testnet evidence is claimed here."
+  "note": "October TOKEN-AUDIT-1 through TOKEN-AUDIT-7 qualification is historical evidence. Current reconciliation: docs/audit/420TOKEN-AUDIT-1-CURRENT-RECONCILIATION.md. No live testnet evidence or fresh contract qualification is claimed."
 }

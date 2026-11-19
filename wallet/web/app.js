@@ -469,7 +469,7 @@ $('#create-session-grant').addEventListener('click', async () => {
 function treasuryClient() {
   if (!state.provider || !state.config?.treasury || !state.config.network.chainId || state.network?.chainMismatch)
     throw new Error('Treasury requires a qualified chain-specific Registry deployment pin');
-  return createTreasuryClient420({provider:state.provider,chainId:state.config.network.chainId,...state.config.treasury});
+  return createTreasuryClient420({provider:state.provider,chainId:state.config.network.chainId,registryCodeHash:state.config.treasury.registryCodeHash,releaseExecutor:state.config.treasury.releaseExecutor});
 }
 function renderTreasury() {
   const ready=Boolean(state.controller && state.provider && state.config?.treasury && state.config.network.chainId && state.network && !state.network.chainMismatch);

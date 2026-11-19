@@ -94,7 +94,13 @@ export function createTreasuryClient420({provider, chainId, registryCodeHash, re
       await getter(budgets,'controller()',block)===disbursements,'Treasury constructor graph mismatch');
     for (const target of [budgets,disbursements,policy]) require(await getter(target,'governanceTimelock()',block)===TIMELOCK,'Treasury governance binding mismatch');
     const capabilityRegistry=await getter(authorization,'capabilityRegistry()',block);
+    require(![REGISTRY,router,budgets,disbursements,policy,authorization,TIMELOCK].includes(capabilityRegistry),'duplicate Treasury capability binding');
     await code(capabilityRegistry,block);
+    // Same ordered address/codehash tuple as TreasuryDeploymentBinding420 and AUDIT-6.
+    const dependencies=[capabilityRegistry,authorization,policy,budgets,disbursements,router];
+    const runtimeHashes=await Promise.all(dependencies.slice(1).map(target=>code(target,block)));
+    const root=hash('0x'+dependencies.map(aw).join('')+runtimeHashes.map(x=>x.slice(2)).join(''));
+    require(root==='0x'+profile[2],'Treasury dependency root mismatch');
     const current=await rpc('eth_getBlockByNumber',[block,false]);
     require(current?.hash?.toLowerCase()===b.hash.toLowerCase(),'Treasury discovery block reorganized');
     await checkChain();
@@ -112,7 +118,12 @@ export function createTreasuryClient420({provider, chainId, registryCodeHash, re
       d.notBefore>=word(b[6]) && d.expiresAt<=word(b[7]) && word(b[5])<=word(b[4]) && word(b[4])<=word(b[3]),'Treasury budget binding mismatch');
     return Object.freeze({...d,vaultId:id('0x'+b[0]),evidenceModel:TREASURY_EVIDENCE_420,independentTransferVerified:false});
   }
-  async function disbursement(i) {const c=await context();const d=await readDisbursement(c,i);await checkChain();return d;}
+  async function verifySnapshot(c) {
+    const end=await rpc('eth_getBlockByNumber',[c.block,false]);
+    require(end?.hash?.toLowerCase()===c.blockHash,'Treasury snapshot block reorganized');
+    await checkChain();
+  }
+  async function disbursement(i) {const c=await context();const d=await readDisbursement(c,i);await verifySnapshot(c);return d;}
   async function prepareGovernedAction(input) {
     const c=await context(); let target,calldata;
     switch(input.kind) {
@@ -138,7 +149,7 @@ export function createTreasuryClient420({provider, chainId, registryCodeHash, re
       }
       default: throw new Error('unsupported governed Treasury action');
     }
-    await checkChain();
+    await verifySnapshot(c);
     return Object.freeze({chainId:expected,authority:'GovernanceTimelock/Civic',action:Object.freeze({target,value:0n,data:calldata}),discovery:c});
   }
   async function prepareRelease(disbursementId, smartAccount) {

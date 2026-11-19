@@ -31,7 +31,7 @@ function fixture(overrides={}) {
  put(registry,'resolveActive(bytes32)',[sid],abi(router,1));
  put(registry,'component(bytes32)',[cid],abi(cid,router,codeHash,1,0,0,2));
  put(registry,'resolve(bytes32)',[cid],abi(router));
- put(registry,'getRegistrationProfile(bytes32,uint32)',[sid,1],abi(3,H(81),H(82),H(83)));
+ put(registry,'getRegistrationProfile(bytes32,uint32)',[sid,1],abi(3,H(81),hb(abi(cap,auth,policy,budgets,disb,router,codeHash,codeHash,codeHash,codeHash,codeHash)),H(83)));
  for(const [address,sig,value] of [[router,'budgets()',budgets],[router,'disbursements()',disb],[budgets,'policy()',policy],[disb,'authorization()',auth],[disb,'budgets()',budgets],[disb,'policy()',policy],[budgets,'controller()',disb],[auth,'capabilityRegistry()',cap],[executor,'registry()',registry],[executor,'operator()',account],[account,'owner()',owner]])put(address,sig,[],abi(value));
  for(const target of [budgets,disb,policy])put(target,'governanceTimelock()',[],abi(timelock));
  put(disb,'disbursement(bytes32)',[disbursement],abi(budget,recipient,asset,42,100,200,civic,purpose,H(0),1,1));
@@ -70,6 +70,8 @@ test('wrong chain, Registry runtime, component and controller mismatches reject 
  const f=fixture();f.put(registry,'component(bytes32)',[cid],abi(cid,budgets,codeHash,1,0,0,2));
  await assert.rejects(f.client.discover(),/component binding/);
  const g=fixture();g.put(budgets,'controller()',[],abi(executor));await assert.rejects(g.client.discover(),/constructor graph/);
+ const j=fixture();j.put(registry,'getRegistrationProfile(bytes32,uint32)',[sid,1],abi(3,H(81),H(82),H(83)));await assert.rejects(j.client.discover(),/dependency root mismatch/);
+ await assert.rejects(fixture({badCode:policy}).client.discover(),/dependency root mismatch/);
 });
 test('governed action preparation is typed, exact canonical ID and never broadcasts',async()=>{
  const {client,calls}=fixture();

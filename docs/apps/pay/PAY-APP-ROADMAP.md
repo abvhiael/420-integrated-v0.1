@@ -517,11 +517,16 @@ See [Security and accessibility qualification](qualification.md) for tested boun
 
 ## PAY-APP-17 — Documentation, deployment preparation and local closeout
 
-**Status:** PLANNED. **Testnet required:** No.
+**Status:** COMPLETE. **Testnet required:** No.
 
 Exit criteria: Operator/user/developer manuals; deterministic packages, exact-SHA CI, release gates, security review preparation, merge only qualified candidate. Retain reproducible scoped qualification at exact implementation SHA.
 
-See [local closeout](local-closeout.md) for release packaging, retained evidence and activation gates.
+Merged in `0d6b07d2ac1769f799a7438c04e6c3cee66f02a3` after [package
+qualification](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44475837432)
+and [documentation qualification](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44475837173)
+at `46a58d4f6194a8346733df5a8bc23115dee661e4`.
+See [local closeout](local-closeout.md) for packaging and retained evidence.
+Track the remaining live work under PAY-APP-18.
 
 
 ## PAY-APP-18 — Public testnet deployment and live acceptance
@@ -529,3 +534,18 @@ See [local closeout](local-closeout.md) for release packaging, retained evidence
 **Status:** PLANNED. **Testnet required:** Yes.
 
 Exit criteria: Bind deployed Pay/Wallet/Registry/Indexer; real receipts, runtime and recovery evidence, live web/mobile/POS flows; coordinate PAY-AUDIT-7 and -8 without duplicating authority. Retain reproducible scoped qualification at exact implementation SHA.
+
+### Deferred testnet work
+
+| Remaining work | Acceptance evidence |
+| --- | --- |
+| Contract deployment and Registry binding | Reconcile current Pay contract source, ABI and runtime against approved deployment candidates. Verify the frozen chain, Genesis configuration, governance, runtime hashes, dependency bindings, settlement health and actual Swap executor. Record deployment and activation receipts under [PAY-AUDIT-7](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-7--production-equivalent-testnet-qualification). |
+| Live checkout and POS | Bind the approved Pay and Wallet origins and finalized RPC. Exercise live web, PWA and POS flows with Wallet authorization and canonical receipts. Verify quote freshness, failed settlement, replay and invoice acceptance from chain evidence. |
+| Mobile release and Wallet handoff | Sign Android and iOS releases, publish the verified platform associations and finish the Wallet approval and return transport. Verify live handoff and canonical payment status on devices. Hosted checkout remains the approval path until live native evidence is available. |
+| Developer and Indexer integration | Configure operator credentials, approved webhook recipients and the production-equivalent Indexer feed. Verify signed delivery, replay, restart and compensating reorg events using canonical testnet evidence. |
+| Market, Commerce and accounting | Governance-approve the updated Market adapter and bind Commerce to the active Refund Manager. Verify actual refund delivery and stock reconciliation. Keep converted and tax-committed rows out of structured exports until their required evidence can be verified. |
+| Independent review | Use the local security qualification and live evidence in the existing [PAY-AUDIT-8](../../audit/420PAY-AUDIT-REMEDIATION-ROADMAP.md#pay-audit-8--independent-audit-and-genesisproduction-closeout) review. Retain the review outcome under that audit step. |
+
+This handoff preserves the original local qualification runs and assigns live
+acceptance to PAY-APP-18. It records outstanding work and carries no deployment,
+activation or live qualification evidence.

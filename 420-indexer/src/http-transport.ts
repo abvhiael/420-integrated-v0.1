@@ -160,6 +160,14 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     const aiReputationId = pathParam420(path, /^\/v1\/ai\/reputation\/([^/]+)$/);
     if (aiReputationId !== null) { const value = await api.aiReputation(chainId, aiReputationId); return value ? ok420(value) : error420(404, 'not_found', 'AI reputation not found'); }
 
+    const treasuryAsset = pathParam420(path, /^\/v1\/treasury\/asset-policies\/([^/]+)$/);
+    if (treasuryAsset !== null) {
+      if (!/^0x[0-9a-fA-F]{40}$/.test(treasuryAsset)) invalidRequest420('Treasury asset address invalid');
+      if (!api.treasuryAssetPolicy) return error420(503, 'unavailable', 'Treasury asset policy projection unavailable');
+      const policy = await api.treasuryAssetPolicy(chainId, treasuryAsset);
+      return policy ? ok420(policy) : error420(404, 'not_found', 'Treasury asset policy not found');
+    }
+
     const treasuryBudgetId = pathParam420(path, /^\/v1\/treasury\/budgets\/([^/]+)$/);
     if (treasuryBudgetId !== null) {
       const budget = await api.treasuryBudget(chainId, treasuryBudgetId);

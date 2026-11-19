@@ -38,6 +38,7 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/assets/activity",s.handleAssetActivity)
 	s.mux.HandleFunc("GET /v1/stake/activity",s.handleStakeActivity)
 	s.mux.HandleFunc("GET /v1/consensus",s.handleConsensus)
+ s.mux.HandleFunc("GET /v1/treasury/{kind}/{id}",s.handleTreasury)
 	s.mux.HandleFunc("/v1/",func(w http.ResponseWriter,r *http.Request){writeError(w,http.StatusNotFound,"unknown API route")})
 	s.mux.Handle("/", explorerweb.Handler())
 }
@@ -75,3 +76,11 @@ func (s *Server) handleConsensus(w http.ResponseWriter,r *http.Request){view,err
 func explorerErrorStatus(err error)int{switch{case errors.Is(err,explorerservice.ErrWrongChain),errors.Is(err,explorerservice.ErrIndexerStale),errors.Is(err,explorerservice.ErrIndexerDegraded),errors.Is(err,explorerservice.ErrIndexerInconsistent):return http.StatusServiceUnavailable;default:return http.StatusBadGateway}}
 func writeError(w http.ResponseWriter,status int,message string){writeJSON(w,status,errorResponse{Error:message})}
 func writeJSON(w http.ResponseWriter,status int,value any){w.Header().Set("Content-Type","application/json");w.Header().Set("Cache-Control","no-store");w.WriteHeader(status);_=json.NewEncoder(w).Encode(value)}
+
+func (s *Server) handleTreasury(w http.ResponseWriter,r *http.Request){
+ kind,id:=r.PathValue("kind"),r.PathValue("id")
+ if kind!="budgets"&&kind!="disbursements"&&kind!="asset-policies"{writeError(w,http.StatusNotFound,"unknown Treasury projection");return}
+ view,err:=s.service.Treasury(r.Context(),kind,id)
+ if err!=nil{writeError(w,explorerErrorStatus(err),"Treasury projection unavailable");return}
+ writeJSON(w,http.StatusOK,view)
+}

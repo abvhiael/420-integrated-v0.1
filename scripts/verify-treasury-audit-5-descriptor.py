@@ -27,7 +27,7 @@ expected_contracts = {
     "TreasuryDisbursementRegistry420",
 }
 contracts = descriptor.get("contracts", [])
-if {item.get("contractName") for item in contracts} != expected_contracts:
+if len(contracts) != len(expected_contracts) or {item.get("contractName") for item in contracts} != expected_contracts:
     fail("descriptor contract inventory drift")
 
 for item in contracts:
@@ -41,6 +41,8 @@ for item in contracts:
     actual = {}
     for event in abi_events:
         signature = event["name"] + "(" + ",".join(inp["type"] for inp in event.get("inputs", [])) + ")"
+        if event.get("anonymous") or signature in actual:
+            fail(f"{name} anonymous or duplicate ABI event: {signature}")
         actual[signature] = {
             "name": event["name"],
             "inputs": [
@@ -59,6 +61,8 @@ for item in contracts:
         }
         for event in item.get("events", [])
     }
+    if len(declared) != len(item.get("events", [])):
+        fail(f"{name} duplicate descriptor event")
     if set(actual) != set(declared):
         fail(f"{name} event signature set drift: actual={sorted(actual)} declared={sorted(declared)}")
         continue

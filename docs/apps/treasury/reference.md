@@ -234,3 +234,11 @@ Native `$420` uses `address(0)` consistently with `AssetVault420` and `PaymentRo
 - `docs/apps/treasury/operator-guide.md`.
 
 Production-equivalent evidence must correlate the commitment to the real Vault transaction/event/receipt.
+
+### Treasury event-history reconstruction (REC-7)
+
+The Indexer reconstruction validates canonical event positions and source identity, requires creation or scheduling before updates, and checks every budget accounting transition (not only the final totals). Asset-policy reconstruction is available through the Indexer public API as `treasuryAssetPolicyState420`: revision starts at 1, increases by one, and epoch duration is immutable. `createTreasuryIndexer420` accepts a verified chain/genesis identity and deployment-resolved addresses; it uses the shared SQL checkpoint and canonical history consumer. It does not resolve or activate production deployment addresses itself. `EXECUTED` and the nonzero `vaultReleaseHash` remain Treasury commitment evidence only, not proof of Vault transfer or independent settlement authority.
+
+The asset policy projection is exposed through `GET /v1/treasury/asset-policies/:asset?chainId=420` (including the zero address for the native asset).
+
+SDK consumers may use `createTreasuryProjectionClient420(chainId, read)` with an Indexer v1 GET transport. These typed projections are distinct from the canonical Treasury SDK and cannot authorize spending. Explorer returns `vaultReleaseVerified: false` with a commitment-only explanation; Analytics uses the same Indexer routes and reports execution commitments rather than verified Vault movements.

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+ "github.com/420integrated/420-integrated/indexer/treasuryread"
 )
 
 var (
@@ -63,6 +64,10 @@ type ProtocolObject struct {
 }
 
 type TreasuryBudget struct {
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
 	ChainID         string `json:"chainId"`
 	BudgetID        string `json:"budgetId"`
 	Asset           string `json:"asset"`
@@ -74,6 +79,10 @@ type TreasuryBudget struct {
 }
 
 type TreasuryDisbursement struct {
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
 	ChainID          string `json:"chainId"`
 	DisbursementID   string `json:"disbursementId"`
 	BudgetID         string `json:"budgetId"`
@@ -246,27 +255,15 @@ func (c *Client) ProtocolObject(ctx context.Context, protocol, objectKey string)
 }
 
 func (c *Client) TreasuryBudget(ctx context.Context, budgetID string) (TreasuryBudget, error) {
-	budgetID = strings.TrimSpace(budgetID)
-	if budgetID == "" { return TreasuryBudget{}, errors.New("Treasury budget id required") }
-	path := "/v1/treasury/budgets/" + url.PathEscape(budgetID) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
-	var out TreasuryBudget
-	if err := c.getData(ctx, path, &out); err != nil { return out, err }
-	if out.ChainID != strconv.FormatUint(c.requiredChainID, 10) { return out, ErrWrongChain }
-	if out.Authoritative { return out, ErrIndexerAuthoritative }
-	if strings.TrimSpace(out.BudgetID) == "" || strings.TrimSpace(out.BlockNumber) == "" { return out, ErrIndexerNotReady }
-	return out, nil
+ var out TreasuryBudget
+ err := c.treasuryRead(ctx,"budgets",budgetID,&out)
+ return out,err
 }
 
 func (c *Client) TreasuryDisbursement(ctx context.Context, disbursementID string) (TreasuryDisbursement, error) {
-	disbursementID = strings.TrimSpace(disbursementID)
-	if disbursementID == "" { return TreasuryDisbursement{}, errors.New("Treasury disbursement id required") }
-	path := "/v1/treasury/disbursements/" + url.PathEscape(disbursementID) + "?chainId=" + strconv.FormatUint(c.requiredChainID, 10)
-	var out TreasuryDisbursement
-	if err := c.getData(ctx, path, &out); err != nil { return out, err }
-	if out.ChainID != strconv.FormatUint(c.requiredChainID, 10) { return out, ErrWrongChain }
-	if out.Authoritative { return out, ErrIndexerAuthoritative }
-	if strings.TrimSpace(out.DisbursementID) == "" || strings.TrimSpace(out.BlockNumber) == "" { return out, ErrIndexerNotReady }
-	return out, nil
+ var out TreasuryDisbursement
+ err := c.treasuryRead(ctx,"disbursements",disbursementID,&out)
+ return out,err
 }
 
 func (c *Client) getData(ctx context.Context, path string, out any) error {
@@ -311,4 +308,37 @@ func (c *Client) getRaw(ctx context.Context, path string, out any) error {
 		return fmt.Errorf("decode 420Indexer response: %w", err)
 	}
 	return nil
+}
+
+func (c *Client) treasuryRead(ctx context.Context, kind,id string,out any) error {
+ var raw json.RawMessage
+ path:="/v1/treasury/"+kind+"/"+url.PathEscape(strings.TrimSpace(id))+"?chainId="+strconv.FormatUint(c.requiredChainID,10)
+ if err:=c.getData(ctx,path,&raw);err!=nil{return err}
+ if err:=treasuryread.Validate(raw,c.requiredChainID,kind,strings.TrimSpace(id));err!=nil {
+  if errors.Is(err,treasuryread.ErrWrongChain){return ErrWrongChain}
+  if errors.Is(err,treasuryread.ErrAuthority){return ErrIndexerAuthoritative}
+  return err
+ }
+ return json.Unmarshal(raw,out)
+}
+
+type TreasuryAssetPolicy struct {
+ ChainID string `json:"chainId"`
+ Asset string `json:"asset"`
+ Allowed bool `json:"allowed"`
+ MaxSingleDisbursement string `json:"maxSingleDisbursement"`
+ MaxEpochDisbursement string `json:"maxEpochDisbursement"`
+ EpochSeconds string `json:"epochSeconds"`
+ Revision string `json:"revision"`
+ BlockNumber string `json:"blockNumber"`
+ BlockHash string `json:"blockHash"`
+ TransactionHash string `json:"transactionHash"`
+ TransactionIndex uint64 `json:"transactionIndex"`
+ LogIndex uint64 `json:"logIndex"`
+ Authoritative bool `json:"authoritative"`
+}
+func (c *Client) TreasuryAssetPolicy(ctx context.Context,asset string)(TreasuryAssetPolicy,error){
+ var out TreasuryAssetPolicy
+ err:=c.treasuryRead(ctx,"asset-policies",asset,&out)
+ return out,err
 }

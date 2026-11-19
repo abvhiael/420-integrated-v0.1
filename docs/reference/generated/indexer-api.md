@@ -31,6 +31,9 @@ version: current
 | `/v1/assets/transfers` | `GET` | `chain` | true | `chainId, assetKey?, address?, beforeBlock?, cursor?, limit?, direction?` | paged normalized asset transfers |
 | `/v1/protocols/events` | `GET` | `chain` | true | `chainId, protocol?, objectKey?, cursor?, limit?, direction?` | paged typed protocol events |
 | `/v1/protocols/:protocol/objects/:key` | `GET` | `chain` | false | `chainId; path: protocol, key` | latest typed protocol object state |
+| `/v1/treasury/asset-policies/:asset` | `GET` | `chain` | false | `chainId; path: asset` | derived Treasury asset policy |
+| `/v1/treasury/budgets/:budgetId` | `GET` | `chain` | false | `chainId; path: budgetId` | derived Treasury budget |
+| `/v1/treasury/disbursements/:disbursementId` | `GET` | `chain` | false | `chainId; path: disbursementId` | derived Treasury disbursement commitment |
 | `/v1/ai/providers` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged non-authoritative AI provider projection |
 | `/v1/ai/providers/:providerId` | `GET` | `chain` | false | `chainId; path: providerId` | AI provider projection by id |
 | `/v1/ai/models` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged non-authoritative AI model projection |

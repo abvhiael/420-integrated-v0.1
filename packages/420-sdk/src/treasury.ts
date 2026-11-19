@@ -8,3 +8,5 @@ export function createTreasurySdk420(input:{sdk:Sdk420;provider:TreasuryProvider
       input.sdk.contracts.chainId!==input.sdk.network.chainId) throw new Error('canonical Treasury Registry and network required');
   return createTreasuryClient420({provider:input.provider,chainId:'0x'+input.sdk.network.chainId.toString(16),registryCodeHash:input.registryCodeHash,releaseExecutor:input.releaseExecutor??null});
 }
+
+export * from './treasury-projection.js';

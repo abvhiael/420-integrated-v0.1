@@ -49,3 +49,5 @@ export * from './compute-analytics.js';
 export * from './compute-app-read-model.js';
 
 export * from './bridge-descriptors.js';
+
+export * from './treasury-indexer.js';

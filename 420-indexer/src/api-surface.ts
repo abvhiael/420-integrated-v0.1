@@ -14,6 +14,7 @@ import {
 import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto.js';
 import { receiptByHash420 } from './receipt-log-service.js';
 import { protocolObjectState420 } from './protocol-object-service.js';
+import { treasuryAssetPolicyState420, type TreasuryAssetPolicyState420 } from './treasury-read-model.js';
 import { treasuryBudgetState420, treasuryDisbursementState420, type TreasuryBudgetState420, type TreasuryDisbursementState420 } from './treasury-read-model.js';
 import { grantsProgramState420, grantsApplicationState420, grantsAwardState420, grantsMilestoneState420, type GrantsProgramState420, type GrantsApplicationState420, type GrantsAwardState420, type GrantsMilestoneState420 } from './grants-read-model.js';
 import {
@@ -105,6 +106,7 @@ export interface IndexerPublicApi420 {
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null>;
+  treasuryAssetPolicy?(chainId: bigint, asset: string): Promise<TreasuryAssetPolicyState420 | null>;
   treasuryDisbursement(chainId: bigint, disbursementId: string): Promise<TreasuryDisbursementState420 | null>;
   grantsProgram(chainId: bigint, programId: string): Promise<GrantsProgramState420 | null>;
   grantsApplication(chainId: bigint, applicationId: string): Promise<GrantsApplicationState420 | null>;
@@ -232,6 +234,10 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null> {
     return treasuryBudgetState420(this.service.db, chainId, budgetId);
+  }
+
+  treasuryAssetPolicy(chainId: bigint, asset: string): Promise<TreasuryAssetPolicyState420 | null> {
+    return treasuryAssetPolicyState420(this.service.db, chainId, asset);
   }
 
   treasuryDisbursement(chainId: bigint, disbursementId: string): Promise<TreasuryDisbursementState420 | null> {

@@ -119,24 +119,24 @@ func TestProtocolObjectUsesOnlyPublicIndexerBoundary(t *testing.T) {
 func TestTreasuryReadModelsUseOnlyQualifiedNonAuthoritativeIndexerBoundary(t *testing.T) {
 	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/v1/treasury/budgets/0xbudget":
+		case "/v1/treasury/budgets/0xabababababababababababababababababababababababababababababababab":
 			if r.URL.Query().Get("chainId") != "420" { t.Fatalf("missing chain binding: %s", r.URL.RawQuery) }
-			writeData(t, w, map[string]any{"chainId":"420","budgetId":"0xbudget","asset":"0x420","ceiling":"1000","committed":"500","executed":"250","blockNumber":"90","authoritative":false})
-		case "/v1/treasury/disbursements/0xdisb":
+			writeData(t, w, map[string]any{"chainId":"420","budgetId":"0xabababababababababababababababababababababababababababababababab","asset":"0x1212121212121212121212121212121212121212","ceiling":"1000","committed":"500","executed":"250","blockNumber":"90","authoritative":false,"blockHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionIndex":0,"logIndex":1})
+		case "/v1/treasury/disbursements/0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd":
 			if r.URL.Query().Get("chainId") != "420" { t.Fatalf("missing chain binding: %s", r.URL.RawQuery) }
-			writeData(t, w, map[string]any{"chainId":"420","disbursementId":"0xdisb","budgetId":"0xbudget","asset":"0x420","amount":"250","state":"EXECUTED","vaultReleaseHash":"0xrelease","blockNumber":"91","authoritative":false})
+			writeData(t, w, map[string]any{"chainId":"420","disbursementId":"0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd","budgetId":"0xabababababababababababababababababababababababababababababababab","asset":"0x1212121212121212121212121212121212121212","amount":"250","state":"EXECUTED","vaultReleaseHash":"0x3434343434343434343434343434343434343434343434343434343434343434","executor":"0x1212121212121212121212121212121212121212","blockNumber":"91","authoritative":false,"blockHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionIndex":0,"logIndex":1})
 		default:
 			http.NotFound(w, r)
 		}
 	}))
 	defer s.Close()
 	c, _ := NewWithHTTPClient(s.URL, 420, time.Minute, s.Client())
-	budget, err := c.TreasuryBudget(context.Background(), "0xbudget")
+	budget, err := c.TreasuryBudget(context.Background(), "0xabababababababababababababababababababababababababababababababab")
 	if err != nil { t.Fatal(err) }
-	if budget.BudgetID != "0xbudget" || budget.Ceiling != "1000" || budget.Authoritative { t.Fatalf("unexpected budget: %+v", budget) }
-	disb, err := c.TreasuryDisbursement(context.Background(), "0xdisb")
+	if budget.BudgetID != "0xabababababababababababababababababababababababababababababababab" || budget.Ceiling != "1000" || budget.Authoritative { t.Fatalf("unexpected budget: %+v", budget) }
+	disb, err := c.TreasuryDisbursement(context.Background(), "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd")
 	if err != nil { t.Fatal(err) }
-	if disb.DisbursementID != "0xdisb" || disb.State != "EXECUTED" || disb.Authoritative { t.Fatalf("unexpected disbursement: %+v", disb) }
+	if disb.DisbursementID != "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd" || disb.State != "EXECUTED" || disb.Authoritative { t.Fatalf("unexpected disbursement: %+v", disb) }
 }
 
 func TestTreasuryReadModelsRejectAuthorityAndWrongChain(t *testing.T) {
@@ -145,15 +145,15 @@ func TestTreasuryReadModelsRejectAuthorityAndWrongChain(t *testing.T) {
 		payload map[string]any
 		want error
 	}{
-		{"authority", map[string]any{"chainId":"420","budgetId":"0xbudget","blockNumber":"90","authoritative":true}, ErrIndexerAuthoritative},
-		{"wrong-chain", map[string]any{"chainId":"421","budgetId":"0xbudget","blockNumber":"90","authoritative":false}, ErrWrongChain},
+		{"authority", map[string]any{"chainId":"420","budgetId":"0xabababababababababababababababababababababababababababababababab","blockNumber":"90","authoritative":true}, ErrIndexerAuthoritative},
+		{"wrong-chain", map[string]any{"chainId":"421","budgetId":"0xabababababababababababababababababababababababababababababababab","blockNumber":"90","authoritative":false,"blockHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionHash":"0x3434343434343434343434343434343434343434343434343434343434343434","transactionIndex":0,"logIndex":1}, ErrWrongChain},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { writeData(t, w, tc.payload) }))
 			defer s.Close()
 			c, _ := NewWithHTTPClient(s.URL, 420, time.Minute, s.Client())
-			_, err := c.TreasuryBudget(context.Background(), "0xbudget")
+			_, err := c.TreasuryBudget(context.Background(), "0xabababababababababababababababababababababababababababababababab")
 			if !errors.Is(err, tc.want) { t.Fatalf("expected %v, got %v", tc.want, err) }
 		})
 	}

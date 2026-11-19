@@ -38,6 +38,9 @@ Invalid client input returns `400 invalid_request`. Missing resources return `40
 | GET | `/v1/assets/transfers?chainId=` | yes | yes | normalized asset transfers |
 | GET | `/v1/protocols/events?chainId=` | yes | yes | typed protocol event journal |
 | GET | `/v1/protocols/:protocol/objects/:key?chainId=` | yes | no | latest typed protocol-object state |
+| GET | `/v1/treasury/asset-policies/:asset?chainId=` | yes | no | derived Treasury asset policy |
+| GET | `/v1/treasury/budgets/:budgetId?chainId=` | yes | no | derived Treasury budget |
+| GET | `/v1/treasury/disbursements/:disbursementId?chainId=` | yes | no | derived Treasury disbursement commitment |
 | GET | `/v1/ai/providers?chainId=` | yes | yes | 420AI provider projection |
 | GET | `/v1/ai/providers/:providerId?chainId=` | yes | no | 420AI provider |
 | GET | `/v1/ai/models?chainId=` | yes | yes | 420AI model projection |
@@ -81,3 +84,5 @@ The stable consumer boundary consists of the exported DTOs, `IndexerPublicApi420
 ## 420AI projection safety
 
 420AI DTOs use schema identifier `420-ai-read-v1`, are always non-authoritative, and are rebuilt from canonical AI protocol events after normal indexer rollback/replay. The public projection intentionally excludes plaintext prompts, payloads, documents, datasets, access tokens, credentials, private keys and raw model input/output bytes. Deployment-specific AI descriptor addresses are resolved from the canonical deployment/Registry configuration rather than hardcoded in the read model.
+
+Treasury projections are derived, with `authoritative: false` and block, transaction and log coordinates. `EXECUTED` reports a Treasury execution commitment; `vaultReleaseHash` is not evidence that Vault released funds. No Treasury projection authorizes spending or settlement.

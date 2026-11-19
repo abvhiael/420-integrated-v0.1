@@ -134,7 +134,10 @@ func run() error {
 	runtimeHealth := api.NewRuntimeHealth()
 	runtimeHealth.MarkHealthy()
 	backend := api.NewStoreBackend(durable, registryCatalog).WithConsensusProvider(consensusProvider).WithRuntimeHealth(runtimeHealth)
-	if sciencePath := os.Getenv("INDEXER_EXTERNAL_SCIENCE_SNAPSHOT_PATH"); sciencePath != "" {
+	if treasuryBinding := os.Getenv("INDEXER_TREASURY_DEPLOYMENT"); treasuryBinding != "" {
+  if err := backend.ConfigureTreasury(treasuryBinding); err != nil { return fmt.Errorf("Treasury deployment binding: %w", err) }
+ }
+ if sciencePath := os.Getenv("INDEXER_EXTERNAL_SCIENCE_SNAPSHOT_PATH"); sciencePath != "" {
 		backend.WithScienceReader(api.ScienceSnapshotReader{Path: sciencePath})
 	}
 	server := &http.Server{

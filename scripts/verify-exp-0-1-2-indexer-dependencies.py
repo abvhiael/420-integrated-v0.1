@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EXP-0.1.2 pinned-source reconciliation: Explorer 13 reads vs Indexer routes.
+"""EXP-0.1.2 pinned-source reconciliation: Explorer reader inventory vs Indexer routes.
 
 This proves only source-level inventory consistency. It does not qualify live
 Indexer deployment, contracts, consensus correctness or a production endpoint.
@@ -32,6 +32,7 @@ READS = {
     'Consensus': ('consensus.go', '/v1/consensus', 'consensusIndexerReader'),
     'Services': ('registry.go', '/v1/services', 'registryIndexerReader'),
     'Service': ('registry.go', '/v1/services/{service}', 'registryIndexerReader'),
+    'TreasuryRead': ('treasury.go', '/v1/treasury/{kind}/{id}', 'treasuryIndexerReader'),
     'StakeActivity': ('stake.go', '/v1/stake/activity', 'stakeIndexerReader'),
 }
 
@@ -42,6 +43,7 @@ SERVICE_FILES = {
     'contractReader': 'contractviews.go',
     'consensusIndexerReader': 'consensusviews.go',
     'registryIndexerReader': 'registryviews.go',
+    'treasuryIndexerReader': 'treasury.go',
     'stakeIndexerReader': 'stakeviews.go',
 }
 
@@ -78,8 +80,8 @@ def main() -> None:
             errors.append(f'missing interface {interface}')
         if re.search(r'\b' + method + r'\s*\(', service_text) is None:
             errors.append(f'{interface} missing {method}')
-    if len(READS) != 14 or sum(v[2] == 'IndexerReader' for v in READS.values()) != 7:
-        errors.append('must account for 7 core and 7 additional reads')
+    if len(READS) != 15 or sum(v[2] == 'IndexerReader' for v in READS.values()) != 7:
+        errors.append('must account for 7 core and 8 additional reads')
     required = set(genesis.get('indexerConsumer', {}).get('requiredEndpoints', []))
     if not required.issubset({v[1] for v in READS.values()}):
         errors.append(f'Genesis required routes not in actual client: {sorted(required - {v[1] for v in READS.values()})}')
@@ -100,7 +102,7 @@ def main() -> None:
     output = {
         'milestone': 'EXP-0.1.2', 'audited_commit': PINNED_COMMIT,
         'client_reads': len(READS), 'core_reader_methods': 7,
-        'additional_capability_methods': 7, 'route_matches': len(READS) if not errors else None,
+        'additional_capability_methods': 8, 'route_matches': len(READS) if not errors else None,
         'source_level_accounting_pass': not errors,
         'runtime_or_testnet_qualified': False, 'errors': errors,
     }

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Personal account · 420 Pay</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to account</a>
+  <header class="top">
+    <div class="bar">
+      <a href="./" class="brand"><span class="mark">420</span> Pay</a>
+      <nav aria-label="Dashboard">
+        <a href="#balances">Balances</a>
+        <a href="#activity">Activity</a>
+        <a href="#settings">Settings</a>
+      </nav>
+      <button type="button" id="connect">Connect 420 Wallet</button>
+    </div>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="intro" aria-labelledby="title">
+      <div>
+        <p class="mode" id="mode">Personal</p>
+        <h1 id="title">Your account</h1>
+        <p class="muted" id="account">Connect 420 Wallet to view your account.</p>
+      </div>
+      <button type="button" id="fixture" class="secondary">Open fixture mode</button>
+    </section>
+    <p id="banner" class="banner" hidden>Fixture mode · Sample balances, activity and receipts</p>
+    <p id="status" class="notice" role="status" aria-live="polite"></p>
+    <div class="grid">
+      <section id="balances" class="card balances" aria-labelledby="balance-title">
+        <div class="card-head">
+          <div><h2 id="balance-title">Wallet balances</h2><p class="muted">Available assets for your selected address</p></div>
+          <button type="button" id="refresh" class="secondary" disabled>Refresh</button>
+        </div>
+        <ul id="asset-list" class="rows"></ul>
+        <p class="empty" id="asset-empty">Balances appear when you connect.</p>
+      </section>
+      <section id="settings" class="card settings" aria-labelledby="settings-title">
+        <h2 id="settings-title">Settings</h2>
+        <fieldset>
+          <legend>Display preferences</legend>
+          <label class="toggle"><input id="privacy" type="checkbox"> Hide balances and payment amounts</label>
+        </fieldset>
+        <dl class="details">
+          <div><dt>Network</dt><dd id="network">Disconnected</dd></div>
+          <div><dt>Account mode</dt><dd>Personal</dd></div>
+        </dl>
+      </section>
+      <section id="activity" class="card activity" aria-labelledby="activity-title">
+        <div class="card-head">
+          <div><h2 id="activity-title">Payment activity</h2><p id="coverage" class="muted">Verified payment records and receipts</p></div>
+          <label class="filter">Show <select id="filter"><option value="all">All activity</option><option value="sent">Sent</option><option value="received">Received</option></select></label>
+        </div>
+        <ul id="history" class="rows"></ul>
+        <p id="history-empty" class="empty">Activity appears when you connect.</p>
+        <button id="older" class="secondary" type="button" hidden>Load earlier activity</button>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -15,4 +15,10 @@ The [approved product scope](PAY-APP-0-PRODUCT-SPECIFICATION.md) defines these s
 3. If terms change or the quote expires, refresh and review the replacement before signing.
 4. Check the canonical payment status. Submission and inclusion can precede settlement. Download a receipt from the qualified payment record.
 
+In the personal dashboard, connect 420 Wallet to view balances and payment
+activity for the selected address. Use **Load earlier activity** to check earlier
+blocks, the activity filter to show sent or received payments, and **Settings**
+to hide amounts on screen. **Download receipt** exports verified payment
+evidence. Fixture mode is explicitly labelled and exports sample data.
+
 See [permissions](permissions.md) and [recovery guidance](troubleshooting.md).

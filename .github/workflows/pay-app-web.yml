@@ -1,0 +1,47 @@
+name: PAY-APP consumer dashboard qualification
+
+on:
+  pull_request:
+    paths:
+      - 'pay/web/**'
+      - 'packages/420-pay-sdk/src/**'
+      - 'packages/420-pay-sdk/package*.json'
+      - 'packages/420-pay-sdk/tsconfig.json'
+      - 'wallet/extension/inpage.js'
+      - 'wallet/web/core/keccak.js'
+      - '.github/workflows/pay-app-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify checked-out revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            pay/web/package-lock.json
+            packages/420-pay-sdk/package-lock.json
+      - name: Build and test application
+        run: |
+          npm ci --prefix packages/420-pay-sdk --ignore-scripts --no-audit --no-fund
+          npm ci --prefix pay/web --ignore-scripts --no-audit --no-fund
+          npm run build --prefix packages/420-pay-sdk
+          npm run build --prefix pay/web
+          npm test --prefix pay/web
+      - name: Qualify Chromium dashboard and accessibility
+        working-directory: pay/web
+        run: |
+          npx playwright install --with-deps chromium
+          npm run browser

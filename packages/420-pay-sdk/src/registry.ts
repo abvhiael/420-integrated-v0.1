@@ -1,7 +1,7 @@
 import { keccak_256 } from '@noble/hashes/sha3';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
 import { invoiceView, paymentView } from './abi.js';
-import { PAY_SERVICE_ID, type Hex, type PayReadTransport, type PaySnapshot } from './index.js';
+import { PAY_SERVICE_ID, createPayReader, type Hex, type PayReadTransport, type PaySnapshot } from './index.js';
 
 export interface PayRpc {
   request(method: string, params: readonly unknown[]): Promise<unknown>;
@@ -113,6 +113,9 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     component(id: Component): Promise<Hex>;
     service(id: string, expected: ServiceBinding): Promise<Hex>;
     timestamp: bigint;
+    height: bigint;
+    blockTag: Readonly<{ blockHash: Hex; requireCanonical: boolean }>;
+    verifyCode(target: Hex, expected: Hex): Promise<void>;
   }) => Promise<T>): Promise<T> {
     requirePay(snapshot.chainId === chainId, 'Pay snapshot is on the wrong chain');
     const blockHash = hash(snapshot.blockHash);
@@ -122,10 +125,10 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
         hash?: unknown; number?: unknown; timestamp?: unknown;
       } | null;
       requirePay(hash(block?.hash) === blockHash, 'Pay snapshot is unavailable');
-      quantity(block?.number);
+      const heightNumber = quantity(block?.number);
       const height = await rpc.request('eth_getBlockByNumber', [block!.number, false]) as { hash?: unknown } | null;
       requirePay(hash(height?.hash) === blockHash, 'Pay snapshot is no longer canonical');
-      return quantity(block?.timestamp);
+      return { height: heightNumber, timestamp: quantity(block?.timestamp) };
     }
     async function verifyCode(target: Hex, expected: Hex) {
       const code = await rpc.request('eth_getCode', [target, blockTag]);
@@ -157,10 +160,10 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
       return target;
     }
     await verifyChain();
-    const timestamp = await blockTime();
+    const { timestamp, height } = await blockTime();
     await verifyCode(registry, registryCodeHash);
     await service(PAY_SERVICE_ID, pay);
-    const result = await operation({ call, component, service, timestamp });
+    const result = await operation({ call, component, service, timestamp, height, blockTag, verifyCode });
     await blockTime();
     await verifyChain();
     return result;
@@ -181,6 +184,69 @@ export function createPayRegistry(rpc: PayRpc, deployment: PayDeployment) {
     async paymentRouter(snapshot: PaySnapshot, applicationOrigin: string) {
       requirePay(applicationOrigin === origin, 'Pay origin does not match its verified deployment');
       return pinned(snapshot, state => state.component(PAYMENT_ROUTER));
+    },
+    async accountBalances(snapshot: PaySnapshot, account: Hex, tokens: readonly { address: Hex; codeHash: Hex }[]) {
+      const owner = address(account);
+      return pinned(snapshot, async state => {
+        const native = quantity(await rpc.request('eth_getBalance', [owner, state.blockTag]));
+        const balances = await Promise.all(tokens.map(async token => {
+          const target = address(token.address);
+          await state.verifyCode(target, hash(token.codeHash));
+          const [balance] = words(await state.call(target, calldata('balanceOf(address)', owner.slice(2).padStart(64, '0'))), 1);
+          return uint(balance, 256);
+        }));
+        return [native, ...balances];
+      });
+    },
+    async accountHistory(snapshot: PaySnapshot, account: Hex, through?: bigint) {
+      const owner = address(account);
+      return pinned(snapshot, async state => {
+        const last = through ?? state.height;
+        requirePay(last >= 0n && last <= state.height, 'Invalid Pay history range');
+        const first = last > 127n ? last - 127n : 0n;
+        const target = await state.component(paymentView.component);
+        const topic = '0x' + hashText('PaymentSet(bytes32,bytes32,uint8)');
+        const logs = await rpc.request('eth_getLogs', [{
+          address: target, topics: [topic], fromBlock: '0x' + first.toString(16), toBlock: '0x' + last.toString(16)
+        }]);
+        requirePay(Array.isArray(logs) && logs.length <= 4096, 'Pay history response is unavailable');
+        const entries = logs.map(log => {
+          const height = quantity(log?.blockNumber);
+          const index = quantity(log?.logIndex);
+          requirePay(log?.removed === false && address(log.address) === target && height >= first && height <= last &&
+            Array.isArray(log.topics) && log.topics.length === 3 && log.topics[0] === topic, 'Invalid Pay history event');
+          return { id: hash(log.topics[1]), invoice: hash(log.topics[2]), height, index, block: hash(log.blockHash) };
+        }).sort((a, b) => a.height === b.height ? (a.index > b.index ? -1 : a.index < b.index ? 1 : 0) : a.height > b.height ? -1 : 1);
+        const seen = new Set<Hex>();
+        const unique = entries.filter(event => {
+          if (seen.has(event.id)) return false;
+          seen.add(event.id);
+          return true;
+        });
+        const blocks = new Map<bigint, Hex>();
+        for (const event of entries) {
+          requirePay(!blocks.has(event.height) || blocks.get(event.height) === event.block, 'Conflicting Pay history blocks');
+          blocks.set(event.height, event.block);
+        }
+        const heights = [...blocks];
+        for (let offset = 0; offset < heights.length; offset += 12) {
+          await Promise.all(heights.slice(offset, offset + 12).map(async ([height, expected]) => {
+            const block = await rpc.request('eth_getBlockByNumber', ['0x' + height.toString(16), false]) as { hash?: unknown } | null;
+            requirePay(hash(block?.hash) === expected, 'Pay history block is no longer canonical');
+          }));
+        }
+        const reader = createPayReader({ read: ({ calldata }) => state.call(target, calldata) }, snapshot);
+        const payments = [];
+        for (let offset = 0; offset < unique.length; offset += 12) {
+          const group = await Promise.all(unique.slice(offset, offset + 12).map(async event => {
+            const payment = await reader.payment(event.id);
+            requirePay(payment && payment.invoiceId === event.invoice, 'Pay history conflicts with the canonical payment');
+            return payment.payer === owner || payment.merchant === owner ? payment : null;
+          }));
+          payments.push(...group.filter(payment => payment !== null));
+        }
+        return { payments, first, last, next: first === 0n ? null : first - 1n };
+      });
     },
     async resolveName(snapshot: PaySnapshot, input: string) {
       requirePay(typeof input === 'string' && /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.420$/.test(input.trim()),

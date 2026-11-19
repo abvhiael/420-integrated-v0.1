@@ -60,6 +60,7 @@ export async function qualifyPwa(chromium, channel) {
     assert.equal(await page.locator('#history li').count(), 0);
     await page.reload();
     await page.getByRole('heading', { name: 'Your account' }).waitFor();
+    await page.locator('#offline-notice').waitFor();
     assert.equal(await page.locator('#history li').count(), 0);
     assert.equal(await page.getByRole('button', { name: 'Connect 420 Wallet' }).isDisabled(), true);
     assert.equal(await page.evaluate(async () => {

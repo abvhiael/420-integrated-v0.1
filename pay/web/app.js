@@ -329,6 +329,6 @@ async function loadDeployment() {
 
 installPayApp();
 draw();
-await loadDeployment();
+if (online && !await loadDeployment()) online = false;
 guardRoute();
 draw();

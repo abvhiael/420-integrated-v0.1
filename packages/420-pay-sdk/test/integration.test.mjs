@@ -61,7 +61,7 @@ function fixture() {
       return state.block;
     }
     if (method === 'eth_getBlockByNumber') {
-      assert.ok(params[0] === 'latest' || params[0] === state.block?.number);
+      assert.ok(['latest', 'finalized', state.block?.number].includes(params[0]));
       return state.canonical ? state.block : { ...state.block, hash: hash('b') };
     }
     if (method === 'eth_getTransactionReceipt') return state.receipt;
@@ -432,4 +432,22 @@ test('developer webhook provenance is bound to the canonical receipt, invoice an
   log.address = address('7');
   state.canonical = false;
   await assert.rejects(application.developerPaymentEvent(snapshot, tx, 0n), /no longer canonical/);
+});
+
+test('downstream confirmation binds the canonical invoice, receipt and Wallet at the accepted snapshot', async () => {
+  const { application, account, replies, log } = fixture();
+  const invoice = hash('f'), payment = hash('6'), merchant = address('5');
+  const zero = hash('0');
+  replies.set(invoiceView.selector + invoice.slice(2), encode(hash('b'), merchant, zero, '0x' + '343230'.padEnd(64, '0'),
+    100, 100, 110, 0, 1, 0, 0, hash('1'), zero, zero, 1));
+  const setPayment = (receipt, owner = merchant) => replies.set(paymentView.selector + payment.slice(2), encode(
+    invoice, account, owner, address('0'), 100, address('0'), 100, hash('2'), 1, receipt, 0, 0, 5));
+  setPayment(hash('b'));
+  assert.equal((await application.checkoutConfirmation(invoice, payment, account)).status, 'SETTLED');
+  assert.ok(log.some(([method, args]) => method === 'eth_getBlockByNumber' && args[0] === 'finalized'));
+  await assert.rejects(application.checkoutConfirmation(invoice, payment, address('3')), /No matching payment/);
+  setPayment(zero);
+  await assert.rejects(application.checkoutConfirmation(invoice, payment, account), /receipt is unavailable/);
+  setPayment(hash('b'), address('3'));
+  await assert.rejects(application.checkoutConfirmation(invoice, payment, account), /No matching payment/);
 });

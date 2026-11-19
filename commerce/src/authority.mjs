@@ -13,7 +13,7 @@ export const ABIS = {
   InvoiceRegistry420: ['function getInvoice(bytes32) view returns(tuple(bytes32 merchantId,address merchant,bytes32 metadataHash,bytes3 currency,uint256 amount,uint64 expiresAt,uint64 refundUntil,uint8 mode,uint8 acceptance,bool partialPayments,uint16 quoteMaxSlippageBps,bytes32 acceptedAssetsHash,bytes32 settlementPlanHash,bytes32 tipPolicyHash,bool active))', 'function paidAmount(bytes32) view returns(uint256)', 'function isClosed(bytes32) view returns(bool)'],
   MarketPaySettlementAdapter420: ['function invoiceIdForOrder(bytes32) view returns(bytes32)', 'function orderPayment(bytes32) view returns(bytes32)', 'function refundReported(bytes32) view returns(bool)', 'function orders() view returns(address)', 'function payments() view returns(address)', 'function invoices() view returns(address)', 'function merchants() view returns(address)', 'function deploymentChainId() view returns(uint256)'],
 };
-const refundReadABI=['function fundedRefundExecuted(bytes32) view returns(bool)','function refunds(bytes32) view returns(bytes32 paymentId,address settlementAsset,address recipient,uint256 amount,bytes32 reasonHash,uint64 createdAt)'];
+const refundReadABI=['function deliveredByPayment(bytes32) view returns(uint256)','function paymentRegistry() view returns(address)','function fundedRefundExecuted(bytes32) view returns(bool)','function refunds(bytes32) view returns(bytes32 paymentId,address settlementAsset,address recipient,uint256 amount,bytes32 reasonHash,uint64 createdAt)'];
 const registryABI = ['function component(bytes32) view returns(tuple(bytes32 componentId,address implementation,bytes32 runtimeCodeHash,tuple(uint16 major,uint16 minor,uint16 patch) version,uint8 lifecycle))', 'function isActive(bytes32) view returns(bool)'];
 export const payComponents = Object.fromEntries(['Merchant','Payment','Invoice'].map(name => [name+'Registry420',keccak256(toUtf8Bytes('420/APP/420PAY/'+name.toUpperCase()+'_REGISTRY'))]));
 payComponents.RefundManager420=keccak256(toUtf8Bytes('420/APP/420PAY/REFUND_MANAGER'));
@@ -116,6 +116,11 @@ export class RpcAuthority {
         transaction: (contract,method,args) => ({chainId:this.config.chainId,target:this.config.contracts[contract].address,contract,method,args,data:new Interface(ABIS[contract]).encodeFunctionData(method,args),requiresWalletAuthorization:true,canonicalAuthority:false}),
         order: async orderId => record((await read('OrderRegistry420','getOrder',[bytes32(orderId)]))[0]),
         payment: async paymentId => record((await read('PaymentRegistry420','getPayment',[bytes32(paymentId)]))[0]),
+        deliveredRefund: this.config.contracts.RefundManager420?.componentId ? async paymentId => {
+          requireThat(wallet((await read('RefundManager420','paymentRegistry'))[0]) ===
+            wallet(this.config.contracts.PaymentRegistry420.address), 'refund_registry_mismatch', 503);
+          return (await read('RefundManager420','deliveredByPayment',[bytes32(paymentId)]))[0].toString();
+        } : null,
         fundedRefund: this.config.contracts.RefundManager420 ? async refundId => ({executed:(await read('RefundManager420','fundedRefundExecuted',[bytes32(refundId)]))[0],record:record(await read('RefundManager420','refunds',[bytes32(refundId)]))}) : null,
         invoice: async invoiceId => record((await read('InvoiceRegistry420','getInvoice',[bytes32(invoiceId)]))[0]),
         invoiceId: async orderId => (await read('MarketPaySettlementAdapter420','invoiceIdForOrder',[bytes32(orderId)]))[0],

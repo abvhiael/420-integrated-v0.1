@@ -278,9 +278,9 @@ export class CommerceService {
     actor=wallet(actor); const a=this.db.get('SELECT * FROM checkout_attempts WHERE attempt_id=?',objectID(attemptId)); requireThat(a,'not_found',404);
     const source=await this.source(),merchant=await source.merchant(a.merchant_id); requireThat(actor===a.customer_scope||actor===wallet(merchant.controller)&&merchant.active,'forbidden',403);
     const order=await source.order(a.order_id);
-    if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false,refundedBaseUnits:'0',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    if(Number(order.status)===0) return {attemptId,state:'ORDER_SIGNATURE_REQUIRED',paid:false,reserved:false,refundedBaseUnits:'0',refundAuthorizedBaseUnits:'0',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
     requireThat(order.listingId===a.listing_id&&Number(order.listingRevision)===a.listing_revision&&wallet(order.buyer)===a.customer_scope&&wallet(order.seller)===a.seller&&order.quantity===a.quantity&&wallet(order.paymentAsset)===a.asset&&order.totalAmount===a.total,'order_correlation',503);
-    let paid=false,invoiceId=null,receiptHash=null,paymentId=null,refundedBaseUnits='0',state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
+    let paid=false,invoiceId=null,receiptHash=null,paymentId=null,refundedBaseUnits='0',refundAuthorizedBaseUnits='0',state=orderStates[Number(order.status)]; requireThat(state,'unknown_order_state',503);
     if(state==='CREATED') {
       invoiceId=await source.invoiceId(a.order_id); const invoice=await source.invoice(invoiceId);
       const valid=invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&(invoice.expiresAt==='0'||BigInt(invoice.expiresAt)>BigInt(Math.floor(this.now()/1000)));
@@ -291,13 +291,19 @@ export class CommerceService {
       requireThat(bound===order.paymentRef&&payment.invoiceId===invoiceId&&wallet(payment.payer)===a.customer_scope&&wallet(payment.merchant)===a.seller&&wallet(payment.settlementAsset)===a.asset&&payment.settlementAmount===a.total&&payment.receiptHash!== '0x'+'0'.repeat(64)&&invoice.active&&invoice.merchantId===a.merchant_id&&wallet(invoice.merchant)===a.seller&&invoice.amount===a.total&&invoice.currency==='0x343230'&&Number(invoice.mode)===0&&Number(invoice.acceptance)>=1&&!invoice.partialPayments&&paidInvoice.amount===a.total&&paidInvoice.closed,'payment_correlation',503);
       const status=Number(payment.status);
       requireThat(state==='REFUNDED'?status===6&&BigInt(payment.refundedAmount)===BigInt(payment.settlementAmount)+BigInt(payment.tipAmount):[5,7].includes(status),'payment_finality',503);
-      requireThat(/^[0-9]+$/.test(String(payment.refundedAmount))&&BigInt(payment.refundedAmount)<=BigInt(a.total),'refund_accounting_mismatch',503);
-      refundedBaseUnits=String(payment.refundedAmount);
+      refundAuthorizedBaseUnits=String(payment.refundedAmount);
+      requireThat(/^[0-9]+$/.test(refundAuthorizedBaseUnits) &&
+        BigInt(refundAuthorizedBaseUnits)<=BigInt(payment.settlementAmount)+BigInt(payment.tipAmount),'refund_accounting_mismatch',503);
+      refundedBaseUnits=refundAuthorizedBaseUnits==='0'?'0':source.deliveredRefund?await source.deliveredRefund(paymentId):null;
+      requireThat(refundedBaseUnits===null || (/^[0-9]+$/.test(refundedBaseUnits) &&
+        BigInt(refundedBaseUnits)<=BigInt(refundAuthorizedBaseUnits)), 'refund_delivery_mismatch',503);
+      if(state==='REFUNDED') requireThat(refundedBaseUnits===refundAuthorizedBaseUnits &&
+        source.marketRefundReported && await source.marketRefundReported(a.order_id), 'refund_delivery_unverified',503);
       // Partial Pay refund keeps canonical Market status; never release SQL stock.
       paid=state!=='REFUNDED';
     }
     this.db.run('UPDATE checkout_attempts SET state=?,payment_id=?,quote_id=? WHERE attempt_id=?',state,order.paymentRef==='0x'+'0'.repeat(64)?null:order.paymentRef,null,attemptId);
-    return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,refundedBaseUnits,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
+    return {attemptId,orderId:a.order_id,merchantId:a.merchant_id,seller:a.seller,buyer:a.customer_scope,asset:a.asset,total:a.total,state,paid,reserved:['CREATED','PAYMENT_SIGNATURE_REQUIRED','MERCHANT_INVOICE_PENDING','PAID','FULFILLED','DISPUTED'].includes(state),invoiceId,paymentId,receiptHash,refundedBaseUnits,refundAuthorizedBaseUnits,paymentAllowed:state==='PAYMENT_SIGNATURE_REQUIRED',provenance:{chainId:this.chainId,blockHash:source.blockHash,blockNumber:source.blockNumber,finalized:true}};
   }
   // COM-6: projections only. Canonical Pay/Market remain financial authorities.
   async merchantOperations(actor,storeId,{offset=0,limit=25}={}) {

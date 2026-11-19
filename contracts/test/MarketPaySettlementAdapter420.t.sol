@@ -7,20 +7,17 @@ import "../src/market/InventoryReservation420.sol";
 import "./helpers/GenesisMocks420.sol";
 
 interface VmCommerce420 {
-    function prank(
-        address
-    ) external;
+    function prank(address) external;
     function expectRevert() external;
-    function chainId(
-        uint256
-    ) external;
+    function deal(address account, uint256 amount) external;
+    function chainId(uint256) external;
 }
 
 contract MarketPaySettlementAdapter420Test {
     VmCommerce420 constant vm = VmCommerce420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address constant BUYER = address(0xB0B);
     address constant SELLER = address(0x5E11);
-    address constant ASSET = address(0x420);
+    address constant ASSET = address(0);
     bytes32 constant ORDER = keccak256("order");
     bytes32 constant LISTING = keccak256("listing");
     bytes32 constant ADAPTER = keccak256("adapter");
@@ -33,6 +30,7 @@ contract MarketPaySettlementAdapter420Test {
     PaymentRegistry420 payments;
     InvoiceRegistry420 invoices;
     MerchantRegistry420 merchants;
+    RefundManager420 refunds;
     MarketPaySettlementAdapter420 reporter;
     bytes32 invoiceId;
 
@@ -44,6 +42,9 @@ contract MarketPaySettlementAdapter420Test {
         env.registerResident(address(payments), payments.componentId());
         env.registerResident(address(invoices), invoices.componentId());
         env.registerResident(address(merchants), merchants.componentId());
+        refunds = new RefundManager420(address(this), address(env.registry()), keccak256("genesis"));
+        env.registerResident(address(refunds), refunds.componentId());
+        refunds.setPaymentRegistry(address(payments));
         env.setSettlementAsset(ASSET, keccak256("420"), true);
         vm.prank(SELLER);
         merchants.register(MERCHANT, bytes32(0), bytes32(0), SELLER);
@@ -89,21 +90,14 @@ contract MarketPaySettlementAdapter420Test {
         invoices.createInvoice(invoiceId, i);
     }
 
-    function _payment(
-        bytes32 inv,
-        address buyer,
-        address seller,
-        uint256 amount,
-        uint256 nonce
-    ) internal returns (bytes32) {
+    function _payment(bytes32 inv, address buyer, address seller, uint256 amount, uint256 nonce)
+        internal
+        returns (bytes32)
+    {
         return payments.createPayment(inv, buyer, seller, ASSET, 100, ASSET, amount, bytes32(0), nonce);
     }
 
-    function _settle(
-        bytes32 id,
-        bytes32 inv,
-        uint256 amount
-    ) internal {
+    function _settle(bytes32 id, bytes32 inv, uint256 amount) internal {
         payments.recordFinalized(id, inv, keccak256("receipt"), ASSET, amount, 0);
         payments.recordSettled(id);
     }
@@ -114,12 +108,22 @@ contract MarketPaySettlementAdapter420Test {
         invoices.markPaid(invoiceId, 100);
     }
 
+    function _deliverRefund(bytes32 id, uint256 amount) private {
+        vm.deal(address(this), amount);
+        refunds.fundAuthorizedRefund{value: amount}(id, ASSET, amount);
+        refunds.executeFundedRefund(keccak256("refund"), id, ASSET, BUYER, amount, amount, bytes32(0));
+    }
+
     function testCanonicalPaymentAndFullRefundReleaseStock() public {
         bytes32 id = _ready();
         vm.prank(address(0x123));
         reporter.reportPayment(ORDER, id);
         require(orders.orderStatus(ORDER) == OrderRegistry420.Status.PAID, "paid");
         payments.applyRefund(id, 100, true);
+        vm.expectRevert();
+        reporter.reportRefund(ORDER);
+        require(orders.orderStatus(ORDER) == OrderRegistry420.Status.PAID, "authorization did not return assets");
+        _deliverRefund(id, 100);
         reporter.reportRefund(ORDER);
         require(orders.orderStatus(ORDER) == OrderRegistry420.Status.REFUNDED, "refund");
         require(inventory.available(LISTING) == 5 && inventory.conserved(LISTING), "stock");
@@ -133,6 +137,7 @@ contract MarketPaySettlementAdapter420Test {
         reporter.reportRefund(ORDER);
         require(inventory.available(LISTING) == 4 && inventory.conserved(LISTING), "stock");
         payments.applyRefund(id, 60, true);
+        _deliverRefund(id, 100);
         reporter.reportRefund(ORDER);
     }
 
@@ -207,6 +212,7 @@ contract MarketPaySettlementAdapter420Test {
         vm.expectRevert();
         reporter.reportPayment(ORDER, id);
         payments.applyRefund(id, 100, true);
+        _deliverRefund(id, 100);
         reporter.reportRefund(ORDER);
         vm.expectRevert();
         reporter.reportRefund(ORDER);
@@ -230,6 +236,7 @@ contract MarketPaySettlementAdapter420Test {
         reporter.reportPayment(ORDER, id);
         merchants.setStatus(MERCHANT, MerchantRegistry420.Status.REGISTERED, false);
         payments.applyRefund(id, 100, true);
+        _deliverRefund(id, 100);
         reporter.reportRefund(ORDER);
     }
 
@@ -253,14 +260,13 @@ contract MarketPaySettlementAdapter420Test {
         vm.prank(BUYER);
         orders.completeOrder(ORDER);
         payments.applyRefund(id, 100, true);
+        _deliverRefund(id, 100);
         vm.expectRevert();
         reporter.reportRefund(ORDER);
         require(inventory.available(LISTING) == 4 && inventory.conserved(LISTING), "sold stock");
     }
 
-    function _alternateInvoice(
-        InvoiceRegistry420.Invoice memory i
-    ) internal {
+    function _alternateInvoice(InvoiceRegistry420.Invoice memory i) internal {
         reporter = new MarketPaySettlementAdapter420(
             address(orders), address(payments), address(invoices), address(merchants)
         );
@@ -326,6 +332,7 @@ contract MarketPaySettlementAdapter420Test {
         vm.expectRevert();
         reporter.reportRefund(ORDER);
         payments.applyRefund(id, 10, true);
+        _deliverRefund(id, 110);
         reporter.reportRefund(ORDER);
     }
 
@@ -358,9 +365,8 @@ contract MarketPaySettlementAdapter420Test {
     }
 
     function testSwapInputCanDifferFromPinnedSettlementOutput() public {
-        bytes32 id = payments.createPayment(
-            invoiceId, BUYER, SELLER, address(0xCA420), 250, ASSET, 100, keccak256("quote"), 1
-        );
+        bytes32 id =
+            payments.createPayment(invoiceId, BUYER, SELLER, address(0xCA420), 250, ASSET, 100, keccak256("quote"), 1);
         _settle(id, invoiceId, 100);
         invoices.markPaid(invoiceId, 100);
         reporter.reportPayment(ORDER, id);
@@ -385,6 +391,7 @@ contract MarketPaySettlementAdapter420Test {
         vm.prank(BUYER);
         orders.disputeOrder(ORDER, keccak256("dispute"));
         payments.applyRefund(id, 100, true);
+        _deliverRefund(id, 100);
         policy.setSettlementAdapter(ADAPTER, address(reporter), bytes32(0), bytes32(0), false);
         vm.expectRevert();
         reporter.reportRefund(ORDER);
@@ -394,9 +401,7 @@ contract MarketPaySettlementAdapter420Test {
         require(inventory.conserved(LISTING), "stock");
     }
 
-    function testFuzzPartialRefundConservesReservation(
-        uint8 value
-    ) public {
+    function testFuzzPartialRefundConservesReservation(uint8 value) public {
         uint256 amount = 1 + uint256(value) % 99;
         bytes32 id = _ready();
         reporter.reportPayment(ORDER, id);
@@ -405,6 +410,7 @@ contract MarketPaySettlementAdapter420Test {
         reporter.reportRefund(ORDER);
         require(inventory.available(LISTING) == 4 && inventory.conserved(LISTING), "partial stock");
         payments.applyRefund(id, 100 - amount, true);
+        _deliverRefund(id, 100);
         reporter.reportRefund(ORDER);
         require(inventory.available(LISTING) == 5 && inventory.conserved(LISTING), "full stock");
     }

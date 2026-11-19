@@ -1,0 +1,35 @@
+name: PAY-APP ecosystem qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/market/MarketPaySettlementAdapter420.sol'
+      - 'contracts/config/commerce/market-pay-adapter.json'
+      - 'contracts/test/MarketPaySettlementAdapter420.t.sol'
+      - 'commerce/src/authority.mjs'
+      - 'commerce/src/service.mjs'
+      - 'commerce/test/service.test.mjs'
+      - '.github/workflows/pay-ecosystem.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ecosystem:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.9.0
+      - name: Qualify Market and Commerce at the exact revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/qualify-pay-regression.py --profile pr --match 'MarketPaySettlementAdapter420.t.sol' --output "$RUNNER_TEMP/market-pay"
+          npm ci --prefix commerce --omit=dev --ignore-scripts --no-audit --no-fund
+          node --test --test-name-pattern='reservation failure' commerce/test/service.test.mjs

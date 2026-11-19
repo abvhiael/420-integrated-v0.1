@@ -96,9 +96,14 @@ export function createPayDeveloperService({ file, origin, chainId, credentials, 
         if (block.hash !== event.blockHash) {
           const updated = db.prepare("UPDATE events SET state='retracted' WHERE id=? AND state='observed'").run(stored.id);
           if (!updated.changes) return;
-          const original = [...destinations.values()].filter(endpoint => endpoint.merchantId === event.merchantId &&
-            db.prepare('SELECT 1 FROM deliveries WHERE id=?').get(digest(JSON.stringify(
-              [endpoint.id, endpoint.merchantId, endpoint.url, stored.id, 'payment.changed']))));
+          const original = [...destinations.values()].filter(endpoint => {
+            if (endpoint.merchantId !== event.merchantId) return false;
+            const id = digest(JSON.stringify([endpoint.id, endpoint.merchantId, endpoint.url, stored.id, 'payment.changed']));
+            const delivery = db.prepare('SELECT attempts FROM deliveries WHERE id=?').get(id);
+            if (!delivery) return false;
+            db.prepare('UPDATE deliveries SET done=3 WHERE id=? AND done=0').run(id);
+            return delivery.attempts > 0;
+          });
           enqueue(stored.id, event, 'payment.retracted', original);
         } else if (block.finalized) {
           db.prepare("UPDATE events SET state='finalized' WHERE id=? AND state='observed'").run(stored.id);
@@ -134,9 +139,9 @@ export function createPayDeveloperService({ file, origin, chainId, credentials, 
         await response.body?.cancel();
       } catch {}
       if (accepted || delivery.attempts >= 11) {
-        db.prepare('UPDATE deliveries SET done=? WHERE seq=?').run(accepted ? 1 : 2, delivery.seq);
+        db.prepare('UPDATE deliveries SET done=? WHERE seq=? AND done=0').run(accepted ? 1 : 2, delivery.seq);
       } else {
-        db.prepare('UPDATE deliveries SET due=? WHERE seq=?').run(now() + Math.min(60_000, 1000 * 2 ** delivery.attempts), delivery.seq);
+        db.prepare('UPDATE deliveries SET due=? WHERE seq=? AND done=0').run(now() + Math.min(60_000, 1000 * 2 ** delivery.attempts), delivery.seq);
       }
     }
   }

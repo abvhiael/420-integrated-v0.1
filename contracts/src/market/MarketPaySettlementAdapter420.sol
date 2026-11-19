@@ -5,6 +5,7 @@ import "./OrderRegistry420.sol";
 import "../pay/PaymentRegistry420.sol";
 import "../pay/InvoiceRegistry420.sol";
 import "../pay/MerchantRegistry420.sol";
+import "../pay/RefundManager420.sol";
 
 /// @notice Permissionless submission of canonical Pay evidence to governance-approved Market authority.
 /// @dev No custody, financial finalization authority, mutable dependencies or privileged web reporter.
@@ -26,12 +27,7 @@ contract MarketPaySettlementAdapter420 {
     event PaymentReported(bytes32 indexed orderId, bytes32 indexed paymentId);
     event RefundReported(bytes32 indexed orderId, bytes32 indexed paymentId);
 
-    constructor(
-        address orders_,
-        address payments_,
-        address invoices_,
-        address merchants_
-    ) {
+    constructor(address orders_, address payments_, address invoices_, address merchants_) {
         if (
             orders_.code.length == 0 || payments_.code.length == 0 || invoices_.code.length == 0
                 || merchants_.code.length == 0
@@ -40,6 +36,9 @@ contract MarketPaySettlementAdapter420 {
         payments = PaymentRegistry420(payments_);
         invoices = InvoiceRegistry420(invoices_);
         merchants = MerchantRegistry420(merchants_);
+        if (payments.registry() != invoices.registry() || payments.registry() != merchants.registry()) {
+            revert InvalidDependency();
+        }
         deploymentChainId = block.chainid;
     }
 
@@ -48,9 +47,7 @@ contract MarketPaySettlementAdapter420 {
     }
 
     /// @notice Seller must issue a single-use Pay invoice at this exact domain-separated ID.
-    function invoiceIdForOrder(
-        bytes32 orderId
-    ) public view returns (bytes32) {
+    function invoiceIdForOrder(bytes32 orderId) public view returns (bytes32) {
         OrderRegistry420.Order memory o = orders.getOrder(orderId);
         if (orderId == bytes32(0) || o.buyer == address(0)) revert InvalidEvidence();
         return keccak256(
@@ -74,11 +71,26 @@ contract MarketPaySettlementAdapter420 {
         );
     }
 
-    function _evidence(
-        bytes32 orderId,
-        bytes32 paymentId
-    ) private view returns (OrderRegistry420.Order memory o, PaymentRegistry420.Payment memory p) {
+    function _activeBinding(bytes32 component) private view returns (address) {
+        Types420.ContractRef memory ref = IProtocolRegistry420(payments.registry()).component(component);
+        if (
+            ref.implementation == address(0) || ref.lifecycle != Types420.Lifecycle.ACTIVE
+                || ref.runtimeCodeHash == bytes32(0) || ref.implementation.codehash != ref.runtimeCodeHash
+        ) revert InvalidDependency();
+        return ref.implementation;
+    }
+
+    function _evidence(bytes32 orderId, bytes32 paymentId)
+        private
+        view
+        returns (OrderRegistry420.Order memory o, PaymentRegistry420.Payment memory p)
+    {
         if (block.chainid != deploymentChainId) revert InvalidChain();
+        if (
+            _activeBinding(PayIds420.PAYMENT_REGISTRY) != address(payments)
+                || _activeBinding(PayIds420.INVOICE_REGISTRY) != address(invoices)
+                || _activeBinding(PayIds420.MERCHANT_REGISTRY) != address(merchants)
+        ) revert InvalidDependency();
         o = orders.getOrder(orderId);
         p = payments.getPayment(paymentId);
         InvoiceRegistry420.Invoice memory i = invoices.getInvoice(p.invoiceId);
@@ -94,10 +106,7 @@ contract MarketPaySettlementAdapter420 {
         }
     }
 
-    function reportPayment(
-        bytes32 orderId,
-        bytes32 paymentId
-    ) external {
+    function reportPayment(bytes32 orderId, bytes32 paymentId) external {
         if (orderPayment[orderId] != bytes32(0) || paymentOrder[paymentId] != bytes32(0)) revert AlreadyReported();
         (OrderRegistry420.Order memory o, PaymentRegistry420.Payment memory p) = _evidence(orderId, paymentId);
         (address controller,,,, bool active,) = merchants.merchants(invoices.getInvoice(p.invoiceId).merchantId);
@@ -111,13 +120,16 @@ contract MarketPaySettlementAdapter420 {
         orders.recordPayment(orderId, paymentId);
     }
 
-    function reportRefund(
-        bytes32 orderId
-    ) external {
+    function reportRefund(bytes32 orderId) external {
         bytes32 paymentId = orderPayment[orderId];
         if (paymentId == bytes32(0) || refundReported[orderId]) revert InvalidEvidence();
         (, PaymentRegistry420.Payment memory p) = _evidence(orderId, paymentId);
         if (p.status != PaymentRegistry420.Status.REFUNDED || p.refundedAmount != p.settlementAmount + p.tipAmount) {
+            revert InvalidEvidence();
+        }
+        RefundManager420 refunds = RefundManager420(_activeBinding(PayIds420.REFUND_MANAGER));
+        if (refunds.paymentRegistry() != address(payments) || refunds.deliveredByPayment(paymentId) != p.refundedAmount)
+        {
             revert InvalidEvidence();
         }
         refundReported[orderId] = true;

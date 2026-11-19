@@ -108,7 +108,11 @@ test('reservation failure, included payment, forged receipt and unrelated order 
   order.status='2';order.paymentRef=b32(901);const payment={invoiceId:b32(900),payer:buyer.address.toLowerCase(),merchant:seller.address.toLowerCase(),settlementAsset:order.paymentAsset,settlementAmount:'100',receiptHash:b32(55),status:'2',refundedAmount:'0',tipAmount:'0'};f.payments.set(b32(901),payment);
   await rejects(()=>f.service.status(buyer.address,attempt.attemptId),'payment_finality');payment.status='5';assert.equal((await f.service.status(buyer.address,attempt.attemptId)).paid,true);
   payment.status='7';payment.refundedAmount='25';assert.equal((await f.service.status(buyer.address,attempt.attemptId)).state,'PAID');
-  order.status='7';await rejects(()=>f.service.status(buyer.address,attempt.attemptId),'payment_finality');payment.status='6';payment.refundedAmount='100';assert.equal((await f.service.status(buyer.address,attempt.attemptId)).paid,false);
+  order.status='7';await rejects(()=>f.service.status(buyer.address,attempt.attemptId),'payment_finality');payment.status='6';payment.refundedAmount='100';
+  await rejects(()=>f.service.status(buyer.address,attempt.attemptId),'refund_delivery_unverified');
+  f.source.deliveredRefund=async()=> '100';f.source.marketRefundReported=async()=>true;
+  const returned=await f.service.status(buyer.address,attempt.attemptId);
+  assert.equal(returned.paid,false);assert.equal(returned.refundedBaseUnits,'100');assert.equal(returned.refundAuthorizedBaseUnits,'100');
 });
 test('private delivery encrypted, purpose-scoped, audited and physically purged on retention',async t=>{
   const f=setup();t.after(()=>f.close());const {attempt,order}=await checkout(f);

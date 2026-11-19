@@ -103,3 +103,32 @@ test('webhooks authenticate raw bytes, retry with a stable ID and compensate aft
   assert.equal(seen[2].message.eventId, seen[1].message.eventId);
   assert.notEqual(seen[2].delivery, seen[1].delivery);
 });
+
+test('rollback suppresses unsent originals and compensates attempted delivery without retrying it', async t => {
+  let block = event.blockHash;
+  const messages = [];
+  const service = createPayDeveloperService({ ...options, canonicalBlock: async () => ({ hash: block, finalized: false }),
+    request: async (_, init) => {
+      messages.push(JSON.parse(init.body));
+      return new Response(null, { status: messages.length === 1 ? 503 : 204 });
+    }
+  });
+  t.after(service.close);
+  await call(service, '/internal/v1/events', token('b'), event, 'POST');
+  await service.deliver();
+  block = id('1');
+  await service.reconcile();
+  await service.deliver();
+  assert.deepEqual(messages.map(message => message.type), ['payment.changed', 'payment.retracted']);
+  let unsentAttempts = 0;
+  const neverSent = createPayDeveloperService({ ...options, canonicalBlock: async () => ({ hash: block, finalized: false }),
+    request: async () => { ++unsentAttempts; return new Response(null, { status: 204 }); }
+  });
+  t.after(neverSent.close);
+  block = event.blockHash;
+  await call(neverSent, '/internal/v1/events', token('b'), event, 'POST');
+  block = id('1');
+  await neverSent.reconcile();
+  await neverSent.deliver();
+  assert.equal(unsentAttempts, 0);
+});

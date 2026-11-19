@@ -156,17 +156,9 @@ export function createConsumerSource(config, provider) {
     },
     async checkoutConfirmation(account, invoiceId, paymentId) {
       await verify(account);
-      let snapshot = await registry.latestSnapshot();
-      const acceptance = await registry.invoiceAcceptance(snapshot, invoiceId);
-      if (acceptance === 'FINALIZED' || acceptance === 'HIGH_VALUE') {
-        snapshot = await registry.latestSnapshot('finalized');
-      }
-      const payment = await createPayReader(registry.transport, snapshot).payment(paymentId);
-      if (payment && (payment.invoiceId !== invoiceId || (payment.payer !== account && payment.merchant !== account))) {
-        throw new Error('No matching payment for this invoice and Wallet account.');
-      }
+      const result = await registry.checkoutConfirmation(invoiceId, paymentId, account);
       await verify(account);
-      return { status: payment?.status ?? null, snapshot, acceptance };
+      return result;
     },
     async sendNative(account, recipient, value) {
       await verify(account);

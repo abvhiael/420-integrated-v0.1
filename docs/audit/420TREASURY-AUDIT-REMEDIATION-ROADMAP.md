@@ -152,6 +152,13 @@ This roadmap records additive audit/remediation work for the canonical 420Treasu
 - Durable evidence: [TREASURY-REC-7 qualification](420TREASURY-REC-7-QUALIFICATION.md). Live deployment addresses and actual release/receipt evidence remain REC-8/AUDIT-8; REC-5 security closeout remains open.
 - Next canonical reconciliation step: **TREASURY-REC-8 — Release materialization and deployment preparation**.
 
+## TREASURY-REC-8 — Deployment and Release Materialization — COMPLETE (local scope)
+- Reconciled the exact five Treasury protocol deployments, the designated executor candidate and two internal libraries; preserved registry-resolved semantics, the frozen GovernanceTimelock and ProtocolRegistry identities, and the unmaterialized CapabilityRegistry candidate reservation. No production address, operator or receipt is fabricated.
+- Implemented reproducible release inputs and executable reviewed CREATE submission, canonical receipt recovery, exact constructor/runtime verification, one-time governed initialization and sequential component/service publication. Qualified corrective redeployment and Wallet-compatible dependency commitments.
+- Exact implementation SHA `70895129b186e98d98e3aa5bb4b02f4d139750a2`: [deployment qualification 44614034940](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614034940) PASS (6/6 Node tests including parent, two byte-identical builds, compiled ABI/namespace/docs verifiers); [native asset/Vault 44614034972](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614034972) PASS 48/48; [executor 44614035061](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44614035061) PASS 9/9 including parent.
+- Durable [qualification evidence](420TREASURY-REC-8-QUALIFICATION.md), [local rehearsal receipts and identities](420TREASURY-REC-8-REHEARSAL.json), and [operator deployment runbook](../apps/treasury/deployment.md). Live materialization and receipt/finality correlation remain AUDIT-8; REC-5 security closeout remains open.
+- Next canonical reconciliation step: **TREASURY-REC-9 — Security qualification and independent review preparation** (local review preparation; no live deployment required).
+
 ## TREASURY-AUDIT-8 — production-equivalent testnet qualification — BLOCKED UNTIL TESTNET
 Required live evidence:
 - chain ID/network/genesis identity;

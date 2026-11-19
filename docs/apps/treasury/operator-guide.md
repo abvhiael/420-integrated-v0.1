@@ -51,7 +51,7 @@ CapabilityRegistry420 currently has candidate reservation `0x0000000000000000000
 6. deploy `TreasuryRouter420(TreasuryBudgetRegistry420, TreasuryDisbursementRegistry420)`;
 7. publish `420/service/treasury/v1` through `ProtocolRegistry.publishRegisteredService` with the exact TreasuryRouter implementation and nonzero manifest/interface/dependency commitments.
 
-There is no adopted CREATE2 policy for this registry-resolved Treasury family. Do not invent production addresses or salts.
+There is no adopted CREATE2 policy for this registry-resolved Treasury family. Do not invent production addresses or salts. REC-8 supplies the [executable deployment and recovery runbook](deployment.md), including the designated release executor candidate after Router deployment and before governed publication.
 
 ## Roles and permissions
 

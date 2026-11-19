@@ -1,0 +1,80 @@
+name: Treasury REC-8 deployment and release materialization
+on:
+  pull_request:
+    paths:
+      - 'scripts/treasury/deployment*.mjs'
+      - 'scripts/treasury/materialize-deployment-closure.py'
+      - 'contracts/config/420treasury-genesis.json'
+      - 'contracts/config/treasury/**'
+      - 'contracts/src/treasury/**'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'contracts/config/predeploy/GovernanceTimelock-predeploy-state.json'
+      - 'contracts/config/predeploy/ProtocolRegistry-predeploy-state.json'
+      - '.github/workflows/treasury-rec8-release.yml'
+permissions:
+  contents: read
+jobs:
+  rehearse:
+    if: github.head_ref == 'audit/treasury-rec-8-release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci --prefix scripts/treasury
+      - name: Compile exact source closure twice
+        run: |
+          set -euo pipefail
+          mkdir -p rec8-evidence
+          git rev-parse HEAD > rec8-evidence/head.txt
+          forge --version > rec8-evidence/forge-version.txt
+          for n in a b; do
+            root="$RUNNER_TEMP/treasury-deployment-$n"
+            python3 scripts/treasury/materialize-deployment-closure.py "$root" > "rec8-evidence/source-hashes-$n.json"
+            forge build --root "$root" --extra-output storageLayout
+            node scripts/treasury/deployment.mjs materialize "$root" "rec8-evidence/release-$n.json"
+          done
+          cmp rec8-evidence/source-hashes-a.json rec8-evidence/source-hashes-b.json
+          cmp rec8-evidence/release-a.json rec8-evidence/release-b.json
+          echo "TREASURY_ROOT=$RUNNER_TEMP/treasury-deployment-a" >> "$GITHUB_ENV"
+          echo "TREASURY_ROOT_SECOND=$RUNNER_TEMP/treasury-deployment-b" >> "$GITHUB_ENV"
+          mkdir -p contracts/out
+          for n in TreasuryPolicyRegistry420 TreasuryBudgetRegistry420 TreasuryDisbursementRegistry420; do
+            cp -a "$RUNNER_TEMP/treasury-deployment-a/out/$n.sol" contracts/out/
+          done
+      - name: Verify retained Genesis, ABI and authority boundaries
+        run: |
+          python3 scripts/verify-treasury-audit-6-release.py
+          python3 scripts/verify-treasury-audit-5-descriptor.py
+          python3 scripts/verify-treasury-audit-7-docs.py
+      - name: Actual canonical-anchor Anvil deployment and recovery rehearsal
+        run: |
+          set -euo pipefail
+          anvil --host 127.0.0.1 --port 18545 --chain-id 31337 --silent > rec8-evidence/anvil.log 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          export TREASURY_RPC_URL=http://127.0.0.1:18545
+          for i in $(seq 1 60); do
+            if cast chain-id --rpc-url "$TREASURY_RPC_URL" >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          test "$(cast chain-id --rpc-url "$TREASURY_RPC_URL")" = 31337
+          export TREASURY_EVIDENCE="$PWD/rec8-evidence/rehearsal.json"
+          node --test scripts/treasury/deployment.integration.test.mjs | tee rec8-evidence/tests.log
+      - name: Retain release bundle and rehearsal receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: treasury-rec8-exact-head-release
+          path: rec8-evidence/
+          if-no-files-found: error

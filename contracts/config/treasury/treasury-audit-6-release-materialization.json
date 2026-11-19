@@ -112,7 +112,8 @@
       "contracts/out/TreasuryPolicyRegistry420.sol/TreasuryPolicyRegistry420.json",
       "contracts/out/TreasuryBudgetRegistry420.sol/TreasuryBudgetRegistry420.json",
       "contracts/out/TreasuryDisbursementRegistry420.sol/TreasuryDisbursementRegistry420.json",
-      "contracts/out/TreasuryRouter420.sol/TreasuryRouter420.json"
+      "contracts/out/TreasuryRouter420.sol/TreasuryRouter420.json",
+      "contracts/out/TreasuryReleaseExecutor420.sol/TreasuryReleaseExecutor420.json"
     ],
     "hash_evidence": "QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
   },
@@ -156,5 +157,16 @@
     "execution_capability_component_preimage": "420/TREASURY/COMPONENT/V1",
     "wallet_requires_active_service_and_component": "same router with matching runtime code hash, protocol version and constructor graph",
     "live_binding_owner": "TREASURY-AUDIT-8"
+  },
+  "release_tooling": {
+    "owner": "TREASURY-REC-8",
+    "compiler_inputs": "scripts/treasury/materialize-deployment-closure.py",
+    "materializer": "scripts/treasury/deployment.mjs",
+    "executor_candidate": "TreasuryReleaseExecutor420",
+    "executor_placement": "after router deployment, before governed service publication; no new service or fixed address",
+    "artifact_bundle": "420-treasury-release-inputs-v1",
+    "address_derivation": "ordinary CREATE from reviewed deployer nonce; no CREATE2",
+    "activation": "verified graph, controller, capability component, router component, then publishRegisteredService",
+    "commitment_encoding": "sorted-key canonical JSON UTF-8 Keccak-256 for metadata, release payload and Router ABI; existing ordered ABI dependency root unchanged"
   }
 }

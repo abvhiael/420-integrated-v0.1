@@ -99,3 +99,19 @@ Each region: **one capital (500 homes/100 businesses), two towns (200 homes/50 b
 - Any change to a locked rule requires **HC-WORLD-CHANGE-XXX**, explicit owner approval, updated version, affected-step impact list and separate scoped tests. No silent amendments.
 
 **Next authorized work:** HC-WORLD-01 geographic and settlement specification, starting with Emerald Coast. This file is a roadmap lock, not implementation acceptance.
+
+
+## I. Approved scoped amendment — Port Alder Old Town neighbourhood screen (2026-10-29)
+**Change:** HC-WORLD-CHANGE-OLDTOWN-ISO-01; owner-approved design decisions, implementation **not** implied. This is an explicit Old Town-specific exception and staged work mapping under existing numbered HC-WORLD-06/08/09/13/25; it does **not** reorder or renumber the locked 28-step programme.
+
+**Detailed execution/acceptance plan:** [HC-WORLD-OLD-TOWN-NEIGHBOURHOOD-SCREEN-ROADMAP-V1.md](./HC-WORLD-OLD-TOWN-NEIGHBOURHOOD-SCREEN-ROADMAP-V1.md).
+
+- HC-WORLD-06/08/09: deterministic 2:1, 64×32 px nominal isometric tiles; fixed surveyed coordinates, separately zoomed canonical PNG sprites, pan/zoom/minimap, no flattened low-resolution bitmap as a zoom source. Honour HC-WORLD-08 16×16 logical chunks; any 32×32 renderer chunks are nested or need separately approved versioning.
+- **Navigation exception** to prior C-section door/entrance wording for Old Town: **click the whole building** → public landmark screen (LM-01..05) or authorized lot view (HL/CR/WH), with optional contiguous same-owner joined view preserving independent titles. No door-pixel markers, walkways, public-road connections or freight maneuvers required to *open a screen*; they may remain separate gameplay/simulation concerns.
+- **Occupied footprints vs title footprint**: residential building 11×14 within 16×20 lot; storefront building 17×17 within 24×24 lot; warehouse building 22×22 within 32×32 lot. Basements exist only for residential and commercial storefronts and equal the same occupied-area tile dimensions; warehouses are **one floor, no basement**. This Old Town-specific rule supersedes conflicting generic per-building interior *dimension* proposals for these exact Genesis buildings, but does not lift cultivation limits/capacity admission or permanent-fixture land rules.
+- Owner-authorized building reposition inside its own title requires bounds, collision and state/rights checks, but not door/sidewalk alignment; preserve immutable title and existing property attachment/ownership rules. No movement between titles.
+- Preserve 54 Old Town private titles, five permanent public landmarks, B22 park, 20 prebuilt Genesis structures only, HL-05 not prebuilt, all previously approved assigned block placements. LM-03 stays harbourside; LM-04 Sail Loft is permanently public heritage; LM-05 Chapel and HL-03 Maple Bungalow are distinct.
+- Existing Coastline/road model remains provisionally authoritative **only for visual planning**, not for Genesis title issuance until separately approved. The Old Town screen may be developed and tested against flagged provisional geography without falsely upgrading title/survey certification.
+- Execution substeps OT-SCREEN-00..06, Level 1/2 checks, exact-SHA reconciliation and merge are defined in the linked roadmap; preserve other workstreams and passing CI evidence. No unnecessary full CI reruns.
+
+**Impact note:** Updates the Old Town portions of steps HC-WORLD-06, -08, -09, -13, -25. Replaces the previous Old Town doorway qualification gate and inherited mismatched floor dimensions, without altering rural land policy, world tile-ownership authority, economy, title issuance or other settlements. Future changes require a separately versioned owner-approved change.

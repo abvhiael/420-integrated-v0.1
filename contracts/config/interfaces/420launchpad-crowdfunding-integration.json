@@ -25,15 +25,28 @@
         "merchant == sale.proceedsReceiver",
         "settlementAsset == sale.paymentAsset",
         "settlementAmount == contributionAmount",
-        "receiptHash != bytes32(0)"
+        "receiptHash != bytes32(0)",
+        "invoiceId == chain/deployment/sale/participant/amount/nonce commitment",
+        "registered contribution intent predates invoice creation",
+        "single-use closed invoice and checkoutPaymentForInvoice(invoiceId) == paymentId"
       ],
       "paymentIdGlobalReplayProtection": true,
       "refundRequiredStatus": [
         "REFUNDED",
         "PARTIALLY_REFUNDED"
       ],
-      "refundRule": "Every canonical payment used for the participant/sale must show refundedAmount >= the contribution amount backed by that payment before the Launchpad refund batch can be prepared.",
-      "custodyAuthorityTransferredToLaunchpad": false
+      "refundRule": "Every payment backing a refund batch must have full delivered principal plus tip in canonical RefundManager420.deliveredByPayment, not merely PaymentRegistry420 authorization. Preparation and recording both revalidate canonical delivery.",
+      "custodyAuthorityTransferredToLaunchpad": false,
+      "canonicalSources": [
+        "PaymentRegistry420.payments(paymentId)",
+        "PaymentRegistry420.checkoutPaymentForInvoice(invoiceId)",
+        "InvoiceRegistry420.getInvoice(invoiceId)",
+        "RefundManager420.deliveredByPayment(paymentId)",
+        "ProtocolRegistry.resolve/runtimeCodeHash"
+      ],
+      "invoiceIdGlobalReplayProtection": true,
+      "unallocatedPaymentRecovery": "Participant reconciles a registered, funded checkout that never became a contribution only after canonical delivery of its refund; no contribution or raised increment.",
+      "reconciliation": "Gross V1 raised and contribution history retained; delivered principal checkpoints are monotonic and separately aggregated. Preflight does not reserve capacity."
     },
     "420Identity": {
       "canonicalSources": [
@@ -69,7 +82,7 @@
       "publication": "LaunchpadCrowdfundingIntegration420.ReputationEvidencePublished",
       "evidenceRefs": {
         "CONTRIBUTION": "canonical 420Pay paymentId",
-        "REWARD_DELIVERY": "replay-protected Launchpad deliveryCommitment"
+        "REWARD_DELIVERY": "project-controller-attested commitment acknowledged by participant; not independent physical-delivery proof"
       },
       "universalScoreAuthority": false,
       "settlementAuthority": false
@@ -98,7 +111,8 @@
     "participantSaleDispute": "one canonical linked case",
     "disputeOutcome": "one publication per case",
     "notificationEventId": "deterministic one-use",
-    "reputationEvidence": "deterministic one-use per evidence/sale/project/participant/profile/kind"
+    "reputationEvidence": "deterministic one-use per evidence/sale/project/participant/profile/kind",
+    "invoiceId": "global one-use contribution"
   },
   "securityBoundary": {
     "launchpadCustody": false,

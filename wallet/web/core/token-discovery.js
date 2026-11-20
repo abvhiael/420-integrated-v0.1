@@ -2,6 +2,7 @@
 // message, route parameter or cached result as deployment authority.
 import { normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-runtime.js';
 import { discoverSmartAccount } from './accounts.js';
+import {readCreatedTokenPage420} from './token-portfolio.js';
 import { readTokenDeployment420 } from './token-deployment.js';
 import { assertWalletChain420, normalizeTransactionHash420 } from './transaction-lifecycle.js';
 import { prepareTokenDeploymentHandoff420 } from './token-handoff.js';
@@ -108,12 +109,18 @@ export function createTokenDiscoverySession420() {
   let generation=0, snapshot=status('unconfigured'), context=null;
   const listeners=new Set(), transactionListeners=new Set(), issued=new WeakMap(), authorizations=new WeakMap();
   const records=[];let sending=false,checking=false;
+  const portfolioListeners=new Set();let portfolioAttempt=0,portfolioPage=null;
+  const emptyPortfolio=(status='idle',error='')=>Object.freeze({status,error,items:Object.freeze([]),page:null});
+  let portfolio=emptyPortfolio();
+  const publishPortfolio=v=>{portfolio=v;for(const fn of [...portfolioListeners])fn(v);return v;};
+  function subscribePortfolio(fn){portfolioListeners.add(fn);fn(portfolio);return()=>portfolioListeners.delete(fn);}
+  function clearPortfolio(){++portfolioAttempt;portfolioPage=null;publishPortfolio(emptyPortfolio());}
   const visible=()=>Object.freeze(records.filter(x=>snapshot.status==='verified'&&x.review.chainId===snapshot.runtime.chainId&&x.review.controller===snapshot.controller&&x.review.smartAccount===snapshot.smartAccount&&x.review.release.manifestHash===snapshot.runtime.release.manifestHash).map(x=>Object.freeze({txHash:x.txHash,status:x.status,error:x.error||'',confirmation:x.confirmation||null}))); 
   function emitTransactions(){for(const fn of [...transactionListeners])fn(visible());}
   function subscribeTransactions(fn){transactionListeners.add(fn);fn(visible());return()=>transactionListeners.delete(fn);}
   function publish(value) {
     if(snapshot!==value){for(const x of records){if(x.status==='confirmed'||x.status==='reverted'){x.status='unverified';x.confirmation=null;x.error='Wallet context refreshed. Recheck canonical receipt.';}}}
-    snapshot=value;
+    snapshot=value;clearPortfolio();
     for (const listener of [...listeners]) listener(value);
     emitTransactions();return value;
   }
@@ -253,6 +260,28 @@ export function createTokenDiscoverySession420() {
       controllerBalanceWei:controllerBalance.toString(),simulationPassed:true});
     issued.set(quote,{draft,expected,generation:attempt});return quote;
   }
+  async function refreshPortfolio(more=false){
+    if(!context||snapshot.status!=='verified'||portfolio.status==='checking'||(more&&(!portfolioPage||portfolioPage.complete)))return null;
+    const prior=more?portfolioPage:null,previousItems=more?portfolio.items:[],host=context,expected=snapshot,attempt=++portfolioAttempt,epoch=generation;
+    const active=()=>check(attempt===portfolioAttempt&&epoch===generation&&context===host&&snapshot===expected,'Portfolio context changed');
+    const deadline=Date.now()+60000,allowed=['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getLogs','eth_getTransactionReceipt'];
+    const provider={request:async(method,params=[])=>{
+      active();check(allowed.includes(method),'Non-portfolio RPC method');
+      const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Portfolio request timed out');
+      let timer;try{const v=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Portfolio RPC timed out')),remaining);})]);active();return v;}finally{clearTimeout(timer);}
+    }};
+    portfolioPage=null;publishPortfolio(emptyPortfolio('checking'));
+    try{
+      // Fresh runtime discovery on first page; following pages stay on the
+      // same canonical block and are never mixed with another snapshot.
+      const fresh=prior?expected:await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+      check(fresh.status==='verified'&&fresh.smartAccount===expected.smartAccount&&fresh.controller===expected.controller&&fresh.runtime.release.dependencyRoot===expected.runtime.release.dependencyRoot,'Portfolio Wallet context mismatch');
+      await selectedAccount(provider,expected.controller);
+      const page=await readCreatedTokenPage420(provider,normalizeTokenWalletConfig420(host.config).binding,expected.smartAccount,prior?.block??fresh.verificationBlock,prior);
+      await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,expected.runtime.chainId);active();
+      portfolioPage=page;return publishPortfolio(Object.freeze({status:'verified',error:'',page,items:Object.freeze([...previousItems,...page.items])}));
+    }catch(e){if(attempt===portfolioAttempt){portfolioPage=null;publishPortfolio(emptyPortfolio('blocked','Portfolio unavailable: '+String(e?.message||'Verification failed').slice(0,240)));}return null;}
+  }
   function recordAuthorization(auth,draft,expected){
     const issuedQuote=issued.get(auth.review);
     check(snapshot===expected&&issuedQuote?.draft===draft&&issuedQuote?.expected===expected&&issuedQuote?.generation===generation&&auth.authority==='EXPLICIT_TOKEN_CREATION_AUTHORIZATION'&&auth.maxGasWei===auth.review.estimatedGasWei&&auth.maxTotalWei===auth.review.estimatedTotalWei,'Invalid Wallet authorization');
@@ -295,7 +324,7 @@ export function createTokenDiscoverySession420() {
     catch(e){record.status='unverified';record.error='Deployment not verified: '+String(e?.message||'Unavailable').slice(0,240);return null;}
     finally{checking=false;emitTransactions();}
   }
-  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,revokeAuthorization,submitCurrent,checkTransaction,subscribeTransactions,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
+  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,revokeAuthorization,submitCurrent,checkTransaction,subscribeTransactions,subscribePortfolio,refreshPortfolio,getPortfolio:()=>portfolio,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
 
 // Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.

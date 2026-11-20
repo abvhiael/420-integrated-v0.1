@@ -105,3 +105,8 @@
 .token-fee-review-details dd { min-width:0; margin:0; overflow-wrap:anywhere; }
 .token-fee-review-status { margin-top:8px !important; overflow-wrap:anywhere; }
 @media(max-width:480px){.token-fee-review-details {grid-template-columns:minmax(0,1fr);gap:4px;} .token-fee-review-details dd {margin-bottom:8px;}}
+
+.token-created-portfolio { min-width:0; margin-top:12px; padding:12px; border:1px solid var(--wallet-border); border-radius:10px; }
+.token-created-portfolio [hidden] { display:none !important; }
+.token-created-portfolio-list { display:grid; gap:12px; }
+.token-created-portfolio-list .token-template-card, .token-created-portfolio-list h6 { min-width:0; overflow-wrap:anywhere; }

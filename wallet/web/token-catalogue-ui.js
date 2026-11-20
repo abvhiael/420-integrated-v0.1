@@ -2,6 +2,7 @@ import { createTokenCatalogue420 } from './core/token-catalogue.js';
 import { walletTokenDiscovery420 } from './core/token-discovery.js';
 import { mountERC20Wizard420 } from './token-erc20-wizard-ui.js';
 import { mountERC721Wizard420 } from './token-erc721-wizard-ui.js';
+import {mountTokenPortfolio420} from './token-portfolio-ui.js';
 import { mountERC1155Wizard420 } from './token-erc1155-wizard-ui.js';
 
 function el(tag,className,text){
@@ -46,6 +47,7 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
       if(record.confirmation?.tokenAddress)item.append(el('p','token-fee-review-status','Deployed token: '+record.confirmation.tokenAddress+' · '+record.confirmation.confirmations+' confirmations'));
       tracking.append(item);}
   });
+  const disposePortfolio=mountTokenPortfolio420(body,session);
   details.replaceChildren(summary,body);
   const cards=new Map();
   for(const profile of model.getSnapshot().profiles){
@@ -87,5 +89,5 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
   const unsubscribe=model.subscribe(render);
   refresh.addEventListener('click',()=>{void model.refresh();});
   details.addEventListener('toggle',()=>{if(details.open&&model.canRefresh())void model.refresh();});
-  return ()=>{unsubscribe();disposeTracking();disposeWizard();disposeCollectionWizard();disposeMultiWizard();model.dispose();};
+  return ()=>{unsubscribe();disposePortfolio();disposeTracking();disposeWizard();disposeCollectionWizard();disposeMultiWizard();model.dispose();};
 }

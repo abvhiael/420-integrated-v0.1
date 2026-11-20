@@ -266,6 +266,34 @@ try{
    await page.screenshot({path:resolve(artifacts,'token-tracking-'+width+'.png'),fullPage:true});
    console.log(JSON.stringify({width,tokenTracking:'PASS',pending:true,confirmed:true,reorg:true,keyboard:true,axe:trackingAxe.violations.length}));
 
+   // Independent historical portfolio, no dependence on the in-memory send hash.
+   await page.evaluate(async()=>{const {enableTokenPortfolioFixture420,portfolioRecord420}=await import('./test/token-connected-fixture.js');
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     const {account,addr}=await import('./test/token-test-fixture.js');
+     const rows=Array.from({length:18},(_,i)=>portfolioRecord420(i,TOKEN_TEMPLATES_420[i%8],i===0||i===17?account:addr(99),i===17?addr(98):undefined));
+     // Explicit creator/owner for unrelated rows and the retained first record.
+     rows[0].owner=account;
+     window.__tokenPortfolioFixture=enableTokenPortfolioFixture420(window.__tokenCatalogueFixture,rows);});
+   const created=token.getByRole('region',{name:'Created-token portfolio'}),refreshCreated=created.getByRole('button',{name:'Refresh created tokens'});
+   await refreshCreated.focus();await page.keyboard.press('Enter');
+   await created.getByText(/1 of 2 created tokens/).waitFor();
+   assert.match(await created.textContent(),/Partial scan/);assert.match(await created.textContent(),/Ownership transferred/);
+   assert.match(await created.textContent(),/42 native/);
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();
+   await created.getByText(/2 of 2 created tokens/).waitFor();assert.match(await created.textContent(),/Complete at snapshot/);
+   assert.match(await created.textContent(),/Creator retains ownership/);
+   const portfolioAxe=await page.evaluate(()=>window.axe.run(document.querySelector('[aria-label="Created-token portfolio"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   const portfolioOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(portfolioOverflow.scroll<=portfolioOverflow.client+1,'Created-token portfolio overflow');
+   for(const v of portfolioAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token portfolio '+v.id);
+   await page.screenshot({path:resolve(artifacts,'token-portfolio-'+width+'.png'),fullPage:true});
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.receiptUnavailable=true;});
+   await refreshCreated.click();await created.getByText(/1 of 2 created tokens/).waitFor();assert.match(await created.textContent(),/Not independently verified/);
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.reorg=true;});
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();await created.getByText(/Portfolio unavailable/).waitFor();
+   assert.equal(await created.locator('article').count(),0);
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.reorg=false;window.__tokenPortfolioFixture.receiptUnavailable=false;});
+   console.log(JSON.stringify({width,tokenPortfolio:'PASS',partial:true,complete:true,transferred:true,recordOnly:true,reorg:true,keyboard:true,overflow:portfolioOverflow,axe:portfolioAxe.violations.length}));
    const multiOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(multiOverflow.scroll<=multiOverflow.client+1,'ERC1155 wizard horizontal overflow');
    const multiAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc1155-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));

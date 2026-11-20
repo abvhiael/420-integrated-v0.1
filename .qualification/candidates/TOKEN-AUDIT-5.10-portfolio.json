@@ -1,0 +1,53 @@
+{
+  "step": "TOKEN-AUDIT-5.10",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "fbd2865a9b62b71f0000084a421daa4123202204",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-app.js",
+    "wallet/web/token-catalogue-ui.js",
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps.css",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "docs/apps/token/user-guide.md",
+    "wallet/web/core/token-portfolio.js",
+    "wallet/web/token-portfolio-ui.js",
+    "wallet/web/test/token-portfolio.test.js",
+    ".qualification/candidates/TOKEN-AUDIT-5.10-portfolio.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.10-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-portfolio.test.js",
+      "owner": "Token SDK portfolio and retained owner regression"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Actual Wallet portfolio and browser regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Reconstruct creator-bound created-token portfolio from canonical approved factory records; all eight templates; bounded explicit pagination; current owner distinct from original creator and holdings; context/chain/reorg failures clear evidence",
+    "Verify code, factory membership, template/version, config hash and deployment timestamp; optional independent canonical deployment and exact community Vault fee event receipt, otherwise explicitly record-only; no endorsement or signing",
+    "Mounted responsive portfolio, SDK and browser regression; retain unchanged contract/ABI evidence; no live readiness claim"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

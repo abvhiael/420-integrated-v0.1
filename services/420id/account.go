@@ -19,7 +19,7 @@ var (
  ErrInvalid = errors.New("invalid account input")
  ErrUnavailable = errors.New("account unavailable")
  ErrConflict = errors.New("account revision conflict")
- appPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,62}$`)
+ appPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,62}$`)
  uuidPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
 )
 

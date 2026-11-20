@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS account420.accounts (
 );
 CREATE TABLE IF NOT EXISTS account420.app_subjects (
  account_id uuid NOT NULL REFERENCES account420.accounts(id) ON DELETE RESTRICT,
- app_id text NOT NULL CHECK (app_id ~ '^[a-z][a-z0-9-]{0,62}$'),
+ app_id text NOT NULL CHECK (app_id ~ '^[a-z0-9][a-z0-9-]{0,62}$'),
  subject_id uuid NOT NULL UNIQUE,
  created_at timestamptz NOT NULL DEFAULT now(),
  PRIMARY KEY(account_id,app_id)

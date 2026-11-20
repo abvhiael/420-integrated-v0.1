@@ -15,7 +15,7 @@
 
 ## Implementation and qualification
 
-`account.go` provides the server-owned store and migration. Run the isolated database qualification against a **disposable** PostgreSQL database with `ACCOUNT420_TEST_DSN` (the test drops its account420 schema). `go test -race -count=1 ./services/420id` includes durable, multi-connection, state-transition and cross-app isolation tests. The dedicated pull-request workflow checks the exact commit. No live network or chain is required for this foundation.
+`account.go` provides the server-owned store and migration. Run the isolated database qualification against a **disposable** PostgreSQL database with `ACCOUNT420_TEST_DSN` (the integration suite requires the database name `account420_test` and never drops schemas). `go test -race -tags account420_integration -count=1 ./services/420id` includes durable, multi-connection, state-transition and cross-app isolation tests. The dedicated pull-request workflow checks the exact commit. No live network or chain is required for this foundation.
 
 ## Assigned workstream
 

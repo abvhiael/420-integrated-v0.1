@@ -7,6 +7,7 @@ import (
  "database/sql"
  "encoding/json"
  "errors"
+ "fmt"
  "net/http"
  "net/http/httptest"
  "net/url"
@@ -218,4 +219,24 @@ func TestReportsRemainPrivateToSocialRuntimeRole(t *testing.T){
   t.Fatalf("runtime grants violate moderation isolation: report=%v read=%v delete=%v hide=%v audit=%v",
    canReport,canReadReports,canDelete,canHide,canModerate)
  }
+}
+
+func TestLoginRateLimiterIgnoresEphemeralSourcePort(t *testing.T){
+ _,_,_,h:=fixture(t)
+ for i:=0;i<31;i++{
+  req:=httptest.NewRequest("GET","https://bonggoggles.420integrated.org/auth/start",nil)
+  req.RemoteAddr=fmt.Sprintf("198.51.100.101:%d",20000+i)
+  req.Header.Set("X-Forwarded-Proto","https")
+  wr:=httptest.NewRecorder()
+  h.ServeHTTP(wr,req)
+  want:=http.StatusSeeOther
+  if i==30{want=http.StatusTooManyRequests}
+  if wr.Code!=want{t.Fatalf("login rate count %d returned %d (want %d)",i,wr.Code,want)}
+ }
+ // A missing or malformed socket identity cannot obtain another budget.
+ req:=httptest.NewRequest("GET","https://bonggoggles.420integrated.org/auth/start",nil)
+ req.RemoteAddr="untrusted"
+ req.Header.Set("X-Forwarded-Proto","https")
+ wr:=httptest.NewRecorder();h.ServeHTTP(wr,req)
+ if wr.Code!=http.StatusTooManyRequests{t.Fatalf("invalid peer identity accepted: %d",wr.Code)}
 }

@@ -9,6 +9,7 @@ import (
  "encoding/json"
  "errors"
  "io"
+ "net"
  "net/http"
  "net/url"
  "strings"
@@ -232,6 +233,14 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
 // HMAC protects raw network addresses and pseudo-subjects from appearing in
 // rate-limit rows; the key is the server-only session encryption key.
 func (h *Handler) rate(ctx context.Context,action,principal string,limit int)bool{
+ if action=="login"{
+  // RemoteAddr includes an ephemeral TCP port; hashing the full value
+  // lets one client evade the rate limit by reconnecting. Trust only the
+  // actual ingress socket address, never unvalidated forwarded-IP headers.
+  host,_,err:=net.SplitHostPort(principal)
+  if err!=nil||net.ParseIP(host)==nil{return false}
+  principal=host
+ }
  mac:=hmac.New(sha256.New,h.SignOn.key[:]);_,_=mac.Write([]byte(principal))
  raw:=mac.Sum(nil)
  if len(action)>24{action="social-write"} // bounded DB schema enum length

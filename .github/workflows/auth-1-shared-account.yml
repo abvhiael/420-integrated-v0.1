@@ -1,12 +1,18 @@
-name: AUTH-1 Shared Account Architecture
+name: 420ID Shared Account and Authentication
 on:
   pull_request:
     paths:
       - 'services/420id/**'
+      - 'cmd/420id/**'
       - '.github/workflows/auth-1-shared-account.yml'
       - 'go.mod'
       - 'go.sum'
   workflow_dispatch:
+    inputs:
+      live_ingress:
+        description: Probe the restricted AUTH-2 deployment (no credentials or email sends)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -44,7 +50,37 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Shared account unit and PostgreSQL concurrency qualification
+      - name: Shared account and authentication unit and PostgreSQL qualification
         run: go test -race -tags account420_integration -count=1 -v ./services/420id
+      - name: Bounded WebAuthn CBOR fuzz qualification
+        run: |
+          go test ./services/420id -run '^$' -fuzz '^FuzzWebAuthnBoundedAttestation$' -fuzztime=5s -parallel=2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser WebAuthn adapter
+        run: node --test services/420id/browser.test.mjs
+      - name: Mail transport configuration tests
+        run: go test -race -count=1 -v ./cmd/420id
+      - name: Build restricted HTTPS acceptance service
+        run: go build -o /tmp/420id ./cmd/420id
+      - name: Verify startup fails closed without configuration
+        run: |
+          if env -u AUTH420_MODE /tmp/420id; then
+            echo "Service started without explicit activation"
+            exit 1
+          fi
       - name: Static analysis
-        run: go vet -tags account420_integration ./services/420id
+        run: go vet -tags account420_integration ./services/420id ./cmd/420id
+
+  live-ingress:
+    if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feature/auth-2-email-passkey') || (github.event_name == 'workflow_dispatch' && inputs.live_ingress) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Restricted live ingress security checks
+        run: python3 services/420id/live_ingress_check.py

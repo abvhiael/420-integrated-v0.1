@@ -1,0 +1,12 @@
+:root{color-scheme:light;font-family:system-ui,sans-serif;background:#f1f4ef;color:#19372a}
+body{margin:0}main{max-width:680px;margin:auto;padding:32px 20px 50px}
+header,section{background:white;border:1px solid #d4ded4;border-radius:16px;padding:22px;margin-bottom:16px}
+.brand{font-size:1.6rem;letter-spacing:-.05em;font-weight:850;color:#174d34;margin:0}.brand span{color:#71923d}
+h1{font-size:2rem;margin:10px 0}h2{font-size:1.15rem;margin:0 0 12px}
+p,li{line-height:1.55}label{display:block;font-weight:650;margin:10px 0 5px}
+input{display:block;box-sizing:border-box;width:100%;border:1px solid #82978a;border-radius:8px;font:inherit;padding:12px}
+button{background:#194d35;color:white;border:0;border-radius:9px;font:inherit;font-weight:650;padding:12px 16px;margin:12px 8px 0 0;cursor:pointer}
+button:disabled{background:#d3ddd3;color:#526556;cursor:not-allowed}
+:focus-visible{outline:3px solid #b27713;outline-offset:3px}
+#status{padding:12px;background:#eef4ed;border-radius:8px}
+li{overflow-wrap:anywhere}form[hidden]{display:none}

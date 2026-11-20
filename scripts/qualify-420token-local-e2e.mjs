@@ -109,7 +109,25 @@ async function prepare(p,i){
 }
 async function create(p,i){
   const start=sends(),accountBefore=await balance(account),vaultBefore=await balance(binding.communityTreasuryVault.address);
-  const {r,quote,auth,d}=await prepare(p,i);
+  const prepared=await prepare(p,i),{r,d}=prepared;let {quote,auth}=prepared;
+  // Selection deliberately refreshes Wallet context, downgrading retained
+  // included receipts until explicitly rechecked. Do not bypass that guard
+  // by opening a fresh session or resending an already-consumed approval.
+  if(results.creations.length){
+    let tracked;const unsubscribe=session.subscribeTransactions(v=>{tracked=v;});unsubscribe();
+    for(const previous of results.creations)assert.equal(tracked.find(x=>x.txHash===previous.txHash)?.status,'unverified');
+    if(results.creations.length===1){
+      await blocked('retained receipt must be rechecked after context refresh',async()=>{
+        assert.equal(await r.submit(auth),null);assert.match(r.getSnapshot().error,/Resolve existing Token submission/);
+      });
+      quote=await r.simulate();assert.ok(quote,r.getSnapshot().error);
+      auth=await r.authorize(quote);assert.ok(auth,r.getSnapshot().error);
+    }
+    for(const previous of results.creations){
+      const prior=await session.checkTransaction(previous.txHash);assert.ok(prior,'Prior receipt recheck unavailable');
+      assert.equal(prior.status,'confirmed');same(prior.tokenAddress,previous.token);
+    }
+  }
   const txHash=await r.submit(auth);assert.ok(txHash,r.getSnapshot().error);
   assert.equal(sends(),start+1);assert.equal(await r.submit(auth),null);assert.equal(sends(),start+1);
   const confirmation=await session.checkTransaction(txHash);assert.ok(confirmation,'Creation receipt not verified');

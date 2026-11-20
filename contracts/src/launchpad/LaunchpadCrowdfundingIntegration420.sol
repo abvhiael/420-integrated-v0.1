@@ -7,6 +7,7 @@ import "./LaunchpadAllocationRegistry420.sol";
 import "./LaunchpadIds420.sol";
 import "./LaunchpadProjectRegistry420.sol";
 import "./LaunchpadSaleRegistry420.sol";
+import "../pay/PayIds420.sol";
 
 interface ILaunchpadPaymentRegistry420 {
     function payments(
@@ -29,6 +30,25 @@ interface ILaunchpadPaymentRegistry420 {
             uint256 refundedAmount,
             uint8 status
         );
+}
+
+interface ILaunchpadPayAuthority420 {
+    function registry() external view returns (address);
+}
+
+interface ILaunchpadPayRegistryResolver420 {
+    function resolve(bytes32 componentId) external view returns (address);
+    function runtimeCodeHash(bytes32 componentId) external view returns (bytes32);
+}
+
+interface ILaunchpadInvoice420 {
+    function merchantOf(bytes32 invoiceId) external view returns (address);
+    function expiresAtOf(bytes32 invoiceId) external view returns (uint64);
+}
+
+interface ILaunchpadRefundDelivery420 {
+    function paymentRegistry() external view returns (address);
+    function deliveredByPayment(bytes32 paymentId) external view returns (uint256);
 }
 
 interface ILaunchpadIdentity420 is IIdentityCredential420 {
@@ -126,6 +146,11 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     mapping(address => bytes32) public profileByParticipant;
     mapping(bytes32 => mapping(address => bytes32)) public profileAtSale;
     mapping(bytes32 => bool) public usedPaymentId;
+    mapping(bytes32 => bool) public registeredContributionIntent;
+    mapping(bytes32 => bool) public usedInvoiceId;
+    mapping(bytes32 => bool) public unallocatedRefundRecorded;
+    mapping(bytes32 => mapping(address => bytes32)) public deliveryAttestation;
+    mapping(bytes32 => bool) public attestedDeliveryCommitment;
     mapping(bytes32 => uint128) public contributionAmountByPayment;
     mapping(bytes32 => mapping(address => bytes32[])) private _paymentIds;
     mapping(bytes32 => mapping(address => bytes32)) public preparedRefundCommitment;
@@ -149,6 +174,13 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     error DisputeOutcomeUnavailable();
 
     event CampaignModeSet(bytes32 indexed saleId, CampaignMode mode);
+    event ContributionIntentRegistered(
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed invoiceId, uint128 amount, uint256 nonce
+    );
+    event UnallocatedRefundReconciled(
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed paymentId, uint128 amount
+    );
+    event DeliveryAttested(bytes32 indexed saleId, address indexed participant, bytes32 indexed deliveryCommitment);
     event IdentityBound(address indexed participant, bytes32 indexed profileId);
     event ContributionSettlementBound(
         bytes32 indexed saleId,
@@ -203,9 +235,14 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
             allocations_ == address(0) || paymentRegistry_ == address(0) || identity_ == address(0)
                 || arbitrationCases_ == address(0) || arbitrationRulings_ == address(0)
         ) revert ZeroAddress();
+        if (
+            allocations_.code.length == 0 || paymentRegistry_.code.length == 0 || identity_.code.length == 0
+                || arbitrationCases_.code.length == 0 || arbitrationRulings_.code.length == 0
+        ) revert ZeroAddress();
         allocations = LaunchpadAllocationRegistry420(allocations_);
         sales = allocations.sales();
         projects = sales.projects();
+        if (sales.controller() != allocations_) revert OnlyAllocationRegistry();
         paymentRegistry = ILaunchpadPaymentRegistry420(paymentRegistry_);
         identity = ILaunchpadIdentity420(identity_);
         arbitrationCases = ILaunchpadArbitrationCases420(arbitrationCases_);
@@ -251,6 +288,67 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         emit IdentityBound(msg.sender, profileId);
     }
 
+    /// @notice The Pay invoice ID is deployment-, chain-, campaign-, participant-, amount- and nonce-specific.
+    function invoiceIdFor(bytes32 saleId, address participant, uint128 amount, uint256 nonce)
+        public view returns (bytes32)
+    {
+        return keccak256(abi.encode("420/LAUNCHPAD/CONTRIBUTION/INVOICE/V1", block.chainid, address(this),
+            saleId, participant, amount, nonce));
+    }
+
+    function _payComponent(bytes32 componentId) private view returns (address implementation) {
+        address registry = ILaunchpadPayAuthority420(address(paymentRegistry)).registry();
+        if (registry.code.length == 0) revert InvalidSettlement();
+        ILaunchpadPayRegistryResolver420 resolver = ILaunchpadPayRegistryResolver420(registry);
+        if (resolver.resolve(PayIds420.PAYMENT_REGISTRY) != address(paymentRegistry)
+            || resolver.runtimeCodeHash(PayIds420.PAYMENT_REGISTRY) != address(paymentRegistry).codehash) {
+            revert InvalidSettlement();
+        }
+        implementation = resolver.resolve(componentId);
+        if (implementation.code.length == 0 || resolver.runtimeCodeHash(componentId) != implementation.codehash) {
+            revert InvalidSettlement();
+        }
+    }
+
+    /// @notice Preflight before merchant invoice creation. This is NOT a capacity reservation or payment.
+    function registerContributionIntent(bytes32 saleId, uint128 amount, uint256 nonce)
+        external returns (bytes32 invoiceId)
+    {
+        LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        bytes32 profileId = profileByParticipant[msg.sender];
+        (address controller,,,,,, bool active) = identity.profiles(profileId);
+        if (profileId == bytes32(0) || controller != msg.sender || !active
+            || !identity.hasValidCredential(profileId, sale_.eligibilityPolicyHash)) revert InvalidIdentity();
+        if (allocations.crowdfundingIntegration() != address(this) || campaignMode[saleId] == CampaignMode.NONE
+            || sale_.state != LaunchpadSaleRegistry420.State.ACTIVE || block.timestamp < sale_.startsAt
+            || block.timestamp > sale_.endsAt || amount == 0 || nonce == 0
+            || uint256(allocations.contributed(saleId, msg.sender)) + amount > sale_.perWalletCap
+            || uint256(sale_.raised) + amount > sale_.hardCap
+            || !allocations.authorization().isAuthorized(msg.sender, saleId, LaunchpadIds420.ACTION_CONTRIBUTE, amount)) {
+            revert InvalidSettlement();
+        }
+        invoiceId = invoiceIdFor(saleId, msg.sender, amount, nonce);
+        if (registeredContributionIntent[invoiceId]) revert Replay();
+        // Reject pre-existing invoices: the participant must authorize these campaign terms before checkout.
+        if (ILaunchpadInvoice420(_payComponent(PayIds420.INVOICE_REGISTRY)).merchantOf(invoiceId) != address(0)) {
+            revert InvalidSettlement();
+        }
+        registeredContributionIntent[invoiceId] = true;
+        emit ContributionIntentRegistered(saleId, msg.sender, invoiceId, amount, nonce);
+    }
+
+    function _verifyInvoice(
+        bytes32 invoiceId, bytes32 saleId, address participant, uint128 amount, uint256 nonce,
+        LaunchpadSaleRegistry420.Sale memory sale_
+    ) private view {
+        if (nonce == 0 || invoiceId != invoiceIdFor(saleId, participant, amount, nonce)
+            || !registeredContributionIntent[invoiceId]) revert InvalidSettlement();
+        ILaunchpadInvoice420 invoices = ILaunchpadInvoice420(_payComponent(PayIds420.INVOICE_REGISTRY));
+        uint64 expiry = invoices.expiresAtOf(invoiceId);
+        if (invoices.merchantOf(invoiceId) != sale_.proceedsReceiver || expiry < sale_.startsAt
+            || expiry > sale_.endsAt) revert InvalidSettlement();
+    }
+
     function consumeContribution(
         address participant,
         bytes32 saleId,
@@ -276,24 +374,31 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         }
 
         (
-            ,
+            bytes32 invoiceId,
             address payer,
             address merchant,,,
             address settlementAsset,
-            uint256 settlementAmount,,,
-            bytes32 receiptHash,,,
+            uint256 settlementAmount,,
+            uint256 payerNonce,
+            bytes32 receiptHash,,
+            uint256 authorizedRefunded,
             uint8 status
         ) = paymentRegistry.payments(paymentId);
 
         if (
             status != PAY_STATUS_SETTLED || payer != participant || merchant != sale_.proceedsReceiver
                 || settlementAsset != sale_.paymentAsset || settlementAmount != amount || receiptHash == bytes32(0)
+                || authorizedRefunded != 0
         ) revert InvalidSettlement();
+
+        _verifyInvoice(invoiceId, saleId, participant, amount, payerNonce, sale_);
+        if (usedInvoiceId[invoiceId]) revert Replay();
 
         bytes32[] storage refs = _paymentIds[saleId][participant];
         if (refs.length >= MAX_PAYMENT_REFERENCES_PER_SALE) revert TooManyPaymentReferences();
 
         usedPaymentId[paymentId] = true;
+        usedInvoiceId[invoiceId] = true;
         contributionAmountByPayment[paymentId] = amount;
         refs.push(paymentId);
 
@@ -301,6 +406,38 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         _publishReputation(paymentId, saleId, sale_.projectId, participant, profileId, REPUTATION_KIND_CONTRIBUTION);
         _publishNotification(saleId, participant, NOTIFY_CONTRIBUTION, paymentId);
         return true;
+    }
+
+    function _refundDelivered(bytes32 paymentId, address participant, uint128 principal)
+        private view returns (bool)
+    {
+        (, address payer,,,,, uint256 settlementAmount,,,, uint256 tip, uint256 authorized, uint8 status) =
+            paymentRegistry.payments(paymentId);
+        if (payer != participant || settlementAmount != principal
+            || (status != PAY_STATUS_REFUNDED && status != PAY_STATUS_PARTIALLY_REFUNDED)) return false;
+        ILaunchpadRefundDelivery420 refunds = ILaunchpadRefundDelivery420(_payComponent(PayIds420.REFUND_MANAGER));
+        if (refunds.paymentRegistry() != address(paymentRegistry)) revert InvalidRefund();
+        uint256 delivered = refunds.deliveredByPayment(paymentId);
+        // Pay does not distinguish principal from tip when refunding. Conservatively require
+        // delivery of both before publishing a full principal refund. Authorization alone is not delivery.
+        uint256 required = uint256(principal) + tip;
+        return authorized == required && delivered == required;
+    }
+
+    /// @notice Reconcile a paid intent which never became a contribution (e.g. cap exhausted).
+    /// This records evidence only; the actual refund must already be delivered by 420Pay.
+    function reconcileUnallocatedRefund(bytes32 saleId, bytes32 paymentId) external {
+        if (paymentId == bytes32(0) || usedPaymentId[paymentId]) revert Replay();
+        LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        (bytes32 invoiceId, address payer, address merchant,,, address asset, uint256 amount,,
+            uint256 nonce, bytes32 receiptHash,,,) = paymentRegistry.payments(paymentId);
+        if (payer != msg.sender || merchant != sale_.proceedsReceiver || asset != sale_.paymentAsset
+            || amount == 0 || amount > type(uint128).max || receiptHash == bytes32(0)) revert InvalidRefund();
+        _verifyInvoice(invoiceId, saleId, payer, uint128(amount), nonce, sale_);
+        if (!_refundDelivered(paymentId, payer, uint128(amount))) revert InvalidRefund();
+        usedPaymentId[paymentId] = true;
+        unallocatedRefundRecorded[paymentId] = true;
+        emit UnallocatedRefundReconciled(saleId, payer, paymentId, uint128(amount));
     }
 
     function prepareRefund(
@@ -319,12 +456,8 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         uint256 canonicalRefundedContribution;
         for (uint256 i = 0; i < length; ++i) {
             bytes32 paymentId = refs[i];
-            (, address payer,,,,,,,,,, uint256 refundedAmount, uint8 status) = paymentRegistry.payments(paymentId);
             uint128 contributionAmount = contributionAmountByPayment[paymentId];
-            if (
-                payer != msg.sender || (status != PAY_STATUS_REFUNDED && status != PAY_STATUS_PARTIALLY_REFUNDED)
-                    || refundedAmount < contributionAmount
-            ) revert InvalidRefund();
+            if (!_refundDelivered(paymentId, msg.sender, contributionAmount)) revert InvalidRefund();
             canonicalRefundedContribution += contributionAmount;
         }
 
@@ -348,6 +481,11 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
                 || usedRefundCommitment[refundCommitment] || amount != allocations.contributed(saleId, participant)
         ) revert InvalidRefund();
 
+        bytes32[] storage refs = _paymentIds[saleId][participant];
+        if (refs.length == 0) revert InvalidRefund();
+        for (uint256 i = 0; i < refs.length; ++i) {
+            if (!_refundDelivered(refs[i], participant, contributionAmountByPayment[refs[i]])) revert InvalidRefund();
+        }
         usedRefundCommitment[refundCommitment] = true;
         delete preparedRefundCommitment[saleId][participant];
 
@@ -356,13 +494,28 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         return true;
     }
 
+    /// @notice Project controller attestation followed by participant acknowledgement.
+    /// Neither this attestation nor the subsequent claim proves independent physical delivery.
+    function attestDelivery(bytes32 saleId, address participant, bytes32 commitment) external {
+        LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        if (projects.project(sale_.projectId).controller != msg.sender
+            || sale_.state != LaunchpadSaleRegistry420.State.SUCCEEDED
+            || allocations.contributed(saleId, participant) == 0 || commitment == bytes32(0)
+            || deliveryAttestation[saleId][participant] != bytes32(0)
+            || attestedDeliveryCommitment[commitment]) revert InvalidDelivery();
+        deliveryAttestation[saleId][participant] = commitment;
+        attestedDeliveryCommitment[commitment] = true;
+        emit DeliveryAttested(saleId, participant, commitment);
+    }
+
     function recordDelivery(
         address participant,
         bytes32 saleId,
         uint128 tokenAmount,
         bytes32 deliveryCommitment
     ) external onlyAllocations {
-        if (deliveryCommitment == bytes32(0) || usedDeliveryCommitment[deliveryCommitment] || tokenAmount == 0) {
+        if (deliveryCommitment == bytes32(0) || usedDeliveryCommitment[deliveryCommitment] || tokenAmount == 0
+            || deliveryAttestation[saleId][participant] != deliveryCommitment) {
             revert InvalidDelivery();
         }
 
@@ -372,6 +525,14 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         bytes32 profileId = profileAtSale[saleId][participant];
         if (profileId == bytes32(0)) revert InvalidIdentity();
 
+        // A refunded or refund-authorized payment cannot also back a reward claim.
+        _payComponent(PayIds420.PAYMENT_REGISTRY);
+        bytes32[] storage refs = _paymentIds[saleId][participant];
+        if (refs.length == 0) revert InvalidDelivery();
+        for (uint256 i = 0; i < refs.length; ++i) {
+            (,,,,,,,,,,, uint256 authorized, uint8 status) = paymentRegistry.payments(refs[i]);
+            if (authorized != 0 || status != PAY_STATUS_SETTLED) revert InvalidDelivery();
+        }
         usedDeliveryCommitment[deliveryCommitment] = true;
         emit DeliveryEvidenceBound(saleId, participant, deliveryCommitment, tokenAmount);
         _publishReputation(

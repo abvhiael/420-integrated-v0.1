@@ -55,8 +55,12 @@ export async function prepareParticipant(rpc,runtime,kind,payload){
     const domain=await call(rpc,runtime.crowdfundingIntegrationAddress,'CROWDFUNDING_DOMAIN()');
     const component=await rpc.call('web3_sha3',[hexUtf8('420/COMPONENT/LAUNCHPAD/V1')]);
     const cases=decodeAddress(await call(rpc,runtime.crowdfundingIntegrationAddress,'arbitrationCases()'));
+    const policies=decodeAddress(await call(rpc,cases,'policies()'));
+    const policy=await call(rpc,policies,'getPolicy(bytes32)',[wordHex(domain)]);
+    if(!decodeBool(policy,5)||!decodeBool(policy,6))throw new Error('420Arbitration crowdfunding policy is inactive');
     const sel=await rpc.selector('openCase(bytes32,address,bytes32,bytes32,bytes32,bytes32)');
     const claim=bytes32(payload.claimHash),remedy=bytes32(payload.requestedRemedyHash);
+    if(!BigInt('0x'+claim)||!BigInt('0x'+remedy))throw new Error('nonzero dispute evidence and remedy commitments required');
     return review(kind,cases,encodeStatic(sel,[wordHex(domain),wordAddress(respondent),wordHex(component),sale,claim,remedy]),
       'Open a 420Arbitration case; recover the case ID from the confirmed CaseOpened event before linking it');
   }

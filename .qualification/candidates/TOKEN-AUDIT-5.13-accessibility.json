@@ -1,0 +1,53 @@
+{
+  "step": "TOKEN-AUDIT-5.13",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "8d622c74b65280831caf81afec27e6a84e63e893",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/token-management-ui.js",
+    "wallet/web/token-portfolio-ui.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "wallet/web/core/token-creation-wizard.js",
+    "wallet/web/core/token-erc20-wizard.js",
+    "wallet/web/core/token-erc721-wizard.js",
+    "wallet/web/core/token-erc1155-wizard.js",
+    "wallet/web/token-erc20-wizard-ui.js",
+    "wallet/web/token-erc721-wizard-ui.js",
+    "wallet/web/token-erc1155-wizard-ui.js",
+    "wallet/web/token-fee-review-ui.js",
+    "wallet/web/token-ui-accessibility.js",
+    "wallet/web/apps.css",
+    ".github/workflows/420token-audit.yml",
+    "docs/apps/token/user-guide.md",
+    "wallet/web/test/token-accessibility.test.js",
+    ".qualification/candidates/TOKEN-AUDIT-5.13-accessibility.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-accessibility.test.js",
+      "owner": "Field-level validation, focus and error-state helpers, inherited Token SDK regression"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Mounted responsive Token UI, keyboard, error states and accessibility regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Responsive mounted Token flows at desktop/tablet/mobile widths without clipping exact reviewed evidence; 44px controls; 200% desktop zoom; visible keyboard focus and live status",
+    "Field-specific errors with exact input preservation and correction; no spurious field attribution for runtime failures; clear actionable loading, unavailable, pending, reverted, reorganized and ambiguous outcomes; no automatic retry",
+    "Focus stays within appropriate context on selection, validation, asynchronous completion, cancellation and invalidation; preserve all prior transaction/permission authority controls and regressions"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

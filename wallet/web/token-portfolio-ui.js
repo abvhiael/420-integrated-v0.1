@@ -10,7 +10,7 @@ export function mountTokenPortfolio420(body,session){
   refresh.type=more.type='button';actions.append(refresh,more);
   const status=el('p','token-fee-review-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');tokenStatus420(status);
   const list=el('div','token-created-portfolio-list');panel.append(heading,intro,actions,status,list);body.append(panel);
-  const management=mountTokenManagement420(panel,session,()=>{const target=list.querySelector('button[data-manage-token]');if(!focusToken420(target))focusToken420(status);});
+  const management=mountTokenManagement420(panel,session,()=>{focusToken420(status);});
   let context=session.getSnapshot(),view=session.getPortfolio();
   function render(){
     if(list.contains(document.activeElement))focusToken420(status);

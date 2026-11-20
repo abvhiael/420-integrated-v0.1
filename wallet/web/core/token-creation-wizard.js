@@ -87,7 +87,7 @@ export function createTokenCreationWizard420(catalogue,session,{profiles,fields,
     busy=false;
     const current=binding(catalogue.getSnapshot(),session.getSnapshot(),profiles);
     if(!verified||!sameBinding(start,current)||!sameBinding(bound,current)){
-      values=blank();draft=null;error='Availability or Wallet account changed. Select a verified template again.';emit();return null;
+      values=blank();draft=null;errorField=null;error='Availability or Wallet account changed. Select a verified template again.';emit();return null;
     }
     bound=current;values=saved;
     try{

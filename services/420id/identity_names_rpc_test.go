@@ -99,7 +99,9 @@ func TestIdentityNamesFinalizedRPCAndBilateralBinding(t *testing.T){
  if ok,e:=rpc.ValidCredential(ctx,420,wallet,profile,"0x"+strings.Repeat("8",64));e!=nil||!ok{t.Fatal("fresh credential view",ok,e)}
  if calls<20{t.Fatal("missing mandatory chain checks",calls)}
  checkFail:=func(name string){t.Helper();if v,e:=rpc.Verify(ctx,420,wallet,profile,label);e==nil{t.Fatalf("%s accepted: %+v",name,v)}}
- controller="0x"+strings.Repeat("b",40);checkFail("wrong controller");controller=wallet
+ controller="0x"+strings.Repeat("b",40);checkFail("wrong controller")
+ if ok,e:=rpc.ValidCredential(ctx,420,wallet,profile,"0x"+strings.Repeat("8",64));ok||e==nil{t.Fatal("credential read accepted changed Identity controller")}
+ controller=wallet
  active=false;checkFail("inactive identity");active=true
  primary=zero32;checkFail("one-sided identity binding");primary=label
  nameProfile=zero32;checkFail("one-sided names binding");nameProfile=profile

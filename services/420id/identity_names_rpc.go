@@ -163,10 +163,19 @@ func (p *IdentityNamesRPC) Verify(ctx context.Context,chain int64,wallet,profile
 // freshly revalidated selected profile. It does not grant trust, KYC or app
 // authority. Its issuer/trust policy remains the chain's responsibility.
 func (p *IdentityNamesRPC) ValidCredential(ctx context.Context,chain int64,wallet,profileID,credentialType string)(bool,error){
- if _,e:=p.Verify(ctx,chain,wallet,profileID,"");e!=nil{return false,e}
+ addr,e:=canonicalWalletAddress(wallet)
+ if e!=nil||addr!=wallet{return false,ErrInvalid}
+ subject,e:=canonicalBytes32(profileID,false)
+ if e!=nil||subject!=profileID{return false,ErrInvalid}
  kind,e:=canonicalBytes32(credentialType,false);if e!=nil{return false,e}
  block,e:=p.preflight(ctx,chain);if e!=nil{return false,e}
- result,e:=p.call(ctx,p.identity,"hasValidCredential(bytes32,bytes32)",block,1,profileID,kind)
+ profile,e:=p.call(ctx,p.identity,"profiles(bytes32)",block,7,subject)
+ if e!=nil{return false,e}
+ controller,e:=wordAddress(profile[0]);if e!=nil||controller!=addr{return false,ErrAuthentication}
+ active,e:=wordBool(profile[6]);if e!=nil||!active{return false,ErrAuthentication}
+ // The controller/active proof and credential validity MUST refer to the
+ // identical canonical finalized block, not two successive RPC snapshots.
+ result,e:=p.call(ctx,p.identity,"hasValidCredential(bytes32,bytes32)",block,1,subject,kind)
  if e!=nil{return false,e}
  return wordBool(result[0])
 }

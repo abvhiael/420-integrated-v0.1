@@ -2,6 +2,10 @@
 
 420 Token deploys new ERC assets from a fixed set of versioned templates. It does not create native `$420`, and creating a token does not automatically list it on Swap/Exchange, approve a Launchpad sale, make it bridgeable, or make it endorsed by 420 Integrated.
 
+## Browse templates in Wallet
+
+In 420 Apps, select **Browse Token templates** on the 420 Token card (or expand **420Token template catalogue**). All eight frozen profiles are described even before connection. Availability unverified is not the same as disabled by governance. Connect to the correct Wallet network and use Refresh availability to inspect verified enablement at the displayed block; no profiles are selectable without verification. Selecting an enabled profile performs fresh verification and records only your display preference. If governance disables the template, the account/network changes, or verification fails, the choice is cleared or rejected. A non-owner or undeployed SmartAccount may browse without acquiring execution rights. Creation costs exactly 42 native 420 plus network gas; all creation-fee revenue goes to the community Treasury Vault. The current locally qualified catalogue does not yet implement the creation form or submission path below.
+
 ## Before you sign
 
 Use the Wallet-discovered 420 Token service rather than a copied contract address. Confirm the chain, factory identity, template/version, ownership recipient, token metadata and supply/cap settings. The deployment transaction must send **exactly 42 native 420**, in addition to the gas required by the Wallet/account execution path.

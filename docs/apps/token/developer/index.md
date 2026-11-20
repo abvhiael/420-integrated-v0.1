@@ -23,6 +23,10 @@ Use `discoverWalletTokenRuntime420(provider, walletConfig, controller, selectedS
 
 The live release process must prove that the factory's immutable dependencies point to the qualified template registry and the actually registered community AssetVault420. The factory constructor's `vaultId()` check is a protocol guard, but by itself is not deployment provenance.
 
+### Template catalogue and availability
+
+Import `TOKEN_CATALOGUE_PROFILES_420`, `describeTokenCatalogue420(snapshot)` and `createTokenCatalogue420(session)` from `wallet/web/core/token-app.js`. The immutable catalogue contains all eight frozen identities and descriptions, exact creation fee in base units, standard, version and feature semantics. `describeTokenCatalogue420` derives `enabled`, `disabled` or `unknown` only from a complete verified discovery snapshot, including the canonical block; malformed profile sets fail closed. The Wallet host session exposes `refreshCurrent()` and `canRefresh()` without exposing the retained provider/context. Refresh reuses a copied host-approved configuration; disconnect/chain/account invalidation clears it. `createTokenCatalogue420` provides read-only subscription, refresh, selection, snapshot and disposal. `select(key)` succeeds only after fresh verification of the same runtime/account and selected profile; selections are cleared by subsequent discovery updates. A selected profile has authority `DISPLAY_ONLY`; later creation preparation must independently verify runtime, template and canonical calldata and require explicit Wallet confirmation. Rendered UI and SDK evidence: `docs/audit/420TOKEN-AUDIT-5.3-QUALIFICATION.json`.
+
 ## Write path
 
 Prepare one of the factory entry points:

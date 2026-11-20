@@ -31,6 +31,7 @@ on:
       - 'wallet/web/test/apps.test.js'
       - 'wallet/web/test/runtime-config-generator.test.js'
       - 'wallet/web/test/token-*.js'
+      - 'wallet/web/scripts/qualify-token-encoding.mjs'
       - 'testnet/public-services/token/readiness.json'
       - '.github/workflows/420token-audit.yml'
       - '!contracts/test/TokenGatewayRouterIntegration420.t.sol'
@@ -90,7 +91,27 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           python3 scripts/verify-420token-audit.py
       - name: Run Wallet Token SDK and runtime qualification
-        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js
+        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-encoding.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js
+  abi-parity:
+    needs: scope
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.10.0
+      - name: Compare canonical Token factory ABI with independent Foundry Cast oracle
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          cast --version
+          node wallet/web/scripts/qualify-token-encoding.mjs
   qualify:
     needs: scope
     if: needs.scope.outputs.contracts == 'true'

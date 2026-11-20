@@ -33,7 +33,7 @@ export function installIdentityUI({get,post,run,status,isAuthenticated}){
   saved=result.preference;display(saved);get('identity-consent').checked=false;
   status('Stored a non-authoritative display preference. On-chain state is reverified on every read.');
   visible();
- }));
+ });});
  get('identity-current').addEventListener('click',()=>void run(async()=>{
   get('identity-result').textContent='Rechecking current finalized chain state.';
   const result=await post('/v1/identity/current',{});

@@ -8,7 +8,6 @@ import (
  "mime"
  "net/http"
  "net/url"
- "strings"
  "time"
 )
 
@@ -106,4 +105,3 @@ func (h *AcceptanceHandler) ssoBackendRoute(w http.ResponseWriter,r *http.Reques
  default:deny(w,404)
  }
 }
-var _ = strings.TrimSpace

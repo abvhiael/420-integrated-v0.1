@@ -117,7 +117,8 @@ func (h *AcceptanceHandler) serveAsset(w http.ResponseWriter,r *http.Request,fil
 }
 func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  securityHeaders(w)
- if r.URL.RawQuery!=""||r.URL.ForceQuery||r.URL.RawPath!=""{deny(w,400);return}
+ if (r.URL.RawQuery!=""||r.URL.ForceQuery||r.URL.RawPath!="") &&
+ !(h.sso!=nil&&r.Method=="GET"&&r.URL.Path=="/sso/authorize"){deny(w,400);return}
  // A minimal load-balancer probe exposes no application or credential data.
  if r.URL.Path=="/healthz"&&r.Method=="GET"{
   ctx,cancel:=context.WithTimeout(r.Context(),2*time.Second);defer cancel()

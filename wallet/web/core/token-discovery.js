@@ -106,12 +106,13 @@ const status = (state) => Object.freeze({status:state, authority:'DISCOVERY_ONLY
 // A disconnect, account/chain change or newer refresh invalidates the old result.
 export function createTokenDiscoverySession420() {
   let generation=0, snapshot=status('unconfigured'), context=null;
-  const listeners=new Set(), transactionListeners=new Set(), issued=new WeakSet(), authorizations=new WeakMap();
+  const listeners=new Set(), transactionListeners=new Set(), issued=new WeakMap(), authorizations=new WeakMap();
   const records=[];let sending=false,checking=false;
   const visible=()=>Object.freeze(records.filter(x=>snapshot.status==='verified'&&x.review.chainId===snapshot.runtime.chainId&&x.review.controller===snapshot.controller&&x.review.smartAccount===snapshot.smartAccount&&x.review.release.manifestHash===snapshot.runtime.release.manifestHash).map(x=>Object.freeze({txHash:x.txHash,status:x.status,error:x.error||'',confirmation:x.confirmation||null}))); 
   function emitTransactions(){for(const fn of [...transactionListeners])fn(visible());}
   function subscribeTransactions(fn){transactionListeners.add(fn);fn(visible());return()=>transactionListeners.delete(fn);}
   function publish(value) {
+    if(snapshot!==value){for(const x of records){if(x.status==='confirmed'||x.status==='reverted'){x.status='unverified';x.confirmation=null;x.error='Wallet context refreshed. Recheck canonical receipt.';}}}
     snapshot=value;
     for (const listener of [...listeners]) listener(value);
     emitTransactions();return value;
@@ -250,12 +251,14 @@ export function createTokenDiscoverySession420() {
       creationFeeWei:TOKEN_CREATION_FEE_WEI_420.toString(),gasUnits:gas.toString(),gasPriceWei:price.toString(),
       estimatedGasWei:gasCost.toString(),estimatedTotalWei:total.toString(),smartAccountBalanceWei:walletBalance.toString(),
       controllerBalanceWei:controllerBalance.toString(),simulationPassed:true});
-    issued.add(quote);return quote;
+    issued.set(quote,{draft,expected,generation:attempt});return quote;
   }
   function recordAuthorization(auth,draft,expected){
-    check(snapshot===expected&&issued.has(auth.review)&&auth.authority==='EXPLICIT_TOKEN_CREATION_AUTHORIZATION'&&auth.maxGasWei===auth.review.estimatedGasWei&&auth.maxTotalWei===auth.review.estimatedTotalWei,'Invalid Wallet authorization');
+    const issuedQuote=issued.get(auth.review);
+    check(snapshot===expected&&issuedQuote?.draft===draft&&issuedQuote?.expected===expected&&issuedQuote?.generation===generation&&auth.authority==='EXPLICIT_TOKEN_CREATION_AUTHORIZATION'&&auth.maxGasWei===auth.review.estimatedGasWei&&auth.maxTotalWei===auth.review.estimatedTotalWei,'Invalid Wallet authorization');
     authorizations.set(auth,{draft,expected,generation});
   }
+  function revokeAuthorization(auth){if(auth)authorizations.delete(auth);}
   async function submitCurrent(auth,stillAuthorized){
     const retained=authorizations.get(auth);check(retained&&retained.generation===generation&&retained.expected===snapshot&&!sending,'Authorization unavailable or already consumed');
     authorizations.delete(auth);sending=true;const host=context,expected=snapshot,attempt=generation,q=auth.review;
@@ -286,12 +289,13 @@ export function createTokenDiscoverySession420() {
       const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Token tracking timed out');
       const value=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Token tracking timed out')),remaining);})]);active();return value;
     }finally{clearTimeout(timer);}}};
+    const wasIncluded=record.status==='confirmed'||record.status==='reverted'||record.confirmation?.blockNumber!=null;
     record.confirmation=null;record.status='confirming';record.error='';emitTransactions();
-    try{const confirmation=await readTokenDeployment420(provider,record,normalizeTokenWalletConfig420(host.config).binding);active();record.status=confirmation.status;record.confirmation=confirmation;return confirmation;}
+    try{const confirmation=await readTokenDeployment420(provider,record,normalizeTokenWalletConfig420(host.config).binding);active();record.status=wasIncluded&&confirmation.status==='pending'?'reorganized':confirmation.status;record.confirmation=record.status===confirmation.status?confirmation:Object.freeze({...confirmation,status:record.status});return record.confirmation;}
     catch(e){record.status='unverified';record.error='Deployment not verified: '+String(e?.message||'Unavailable').slice(0,240);return null;}
     finally{checking=false;emitTransactions();}
   }
-  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,submitCurrent,checkTransaction,subscribeTransactions,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
+  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,revokeAuthorization,submitCurrent,checkTransaction,subscribeTransactions,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
 
 // Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.

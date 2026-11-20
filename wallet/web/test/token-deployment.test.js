@@ -19,7 +19,7 @@ function setup(profile=TOKEN_TEMPLATES_420[0]){
     if(method==='eth_chainId')return control.chain;
     if(method==='eth_getTransactionReceipt'){control.reads++;return structuredClone(control.receipt);}
     if(method==='eth_getTransactionByHash')return control.tx;
-    if(method==='eth_getBlockByNumber')return {number:'0x10',hash:control.blockHash};
+    if(method==='eth_getBlockByNumber')return args[0]==='0x0'?{number:'0x0',hash:r.genesisHash}:{number:'0x10',hash:control.blockHash};
     if(method==='eth_blockNumber')return control.tip;
     if(method==='eth_getCode'&&args[0]===token)return control.code;
     if(method==='eth_call')return abi(control.registered?1:0);

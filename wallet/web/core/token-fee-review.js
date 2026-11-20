@@ -10,7 +10,7 @@ export function createTokenFeeReview420(wizard,session){
   const listeners=new Set();
   const view=()=>Object.freeze({draft,quote,authorization,busy,error});
   const emit=()=>{const v=view();for(const listener of [...listeners])listener(v);return v;};
-  function clear(){++revision;quote=null;authorization=null;busy=false;error='';}
+  function clear(){++revision;session.revokeAuthorization(authorization);quote=null;authorization=null;busy=false;error='';}
   const stop=wizard.subscribe(v=>{if(draft!==v.draft){clear();draft=v.draft;emit();}});
   const stopSession=session.subscribe(()=>{clear();emit();});
   function subscribe(listener){if(disposed)throw Error('Token fee review disposed');listeners.add(listener);listener(view());return()=>listeners.delete(listener);}

@@ -5,7 +5,7 @@ import {TOKEN_TEMPLATES_420,createTokenDiscoverySession420,createTokenCatalogue4
 import {TOKEN_CREATION_FEE_WEI_420} from '../core/token-runtime.js';
 import {encodeExecute} from '../core/abi.js';
 import {tokenHashHex420,tokenReadCall420} from '../core/token-sdk.js';
-import {connected} from './token-connected-fixture.js';
+import {connected,enableTokenSubmissionFixture420} from './token-connected-fixture.js';
 import {controller,account,addr,digest,abi,serviceHash} from './token-test-fixture.js';
 const fixed=TOKEN_TEMPLATES_420[0],wei=TOKEN_CREATION_FEE_WEI_420;
 const start=(session,f)=>session.refresh({provider:f.provider,config:f.config,controller,smartAccount:f.selected});
@@ -152,4 +152,37 @@ test('host review rejects forged draft binding/fee/target or stale snapshot befo
   assert.equal(f.calls.filter(([m])=>m==='eth_estimateGas').length,0);
   const snapshot=session.getSnapshot();session.invalidate();
   await assert.rejects(session.simulateCurrent(draft,snapshot),/context unavailable/);x.dispose();
+});
+
+test('explicit Wallet submission consumes authorization once and tracks canonical deployment independently of draft',async()=>{
+  for(const profile of TOKEN_TEMPLATES_420){
+    const x=await setup(profile),{f,review,session,wizard}=x,control=enableTokenSubmissionFixture420(f);
+    const records=[];const stop=session.subscribeTransactions(v=>records.push(v));
+    const auth=await review.authorize(await review.simulate());assert.ok(auth);
+    assert.equal(await review.submit({...auth}),null);
+    const pending=review.submit(auth);assert.equal(await review.submit(auth),null);
+    const hash=await pending;assert.ok(hash,review.getSnapshot().error);assert.equal(await review.submit(auth),null);
+    const sends=f.calls.filter(([m])=>m==='eth_sendTransaction');assert.equal(sends.length,1);
+    assert.deepEqual(sends[0][1][0],{...auth.review.transaction,gas:'0x100000',gasPrice:'0x3b9aca00',type:'0x0',chainId:'0x1a4'});
+    control.pending=true;assert.equal((await session.checkTransaction(hash)).status,'pending');
+    control.pending=false;wizard.reset();assert.equal((await session.checkTransaction(hash)).tokenAddress,addr(77));
+    control.reorganized=true;assert.equal((await session.checkTransaction(hash)).status,'reorganized');assert.equal(records.at(-1)[0].confirmation.tokenAddress,null);
+    control.reorganized=false;assert.equal((await session.checkTransaction(hash)).status,'confirmed');
+    session.invalidate();assert.equal(records.at(-1).length,0);assert.equal(await session.checkTransaction(hash),null);
+    stop();x.dispose();
+  }
+});
+test('changed fee, cancellation, rejected and ambiguous Wallet prompts never silently retry',async()=>{
+  for(const mode of ['gas','cancel','rejected','unknown']){
+    const x=await setup(),{f,review,session}=x,control=enableTokenSubmissionFixture420(f);
+    const auth=await review.authorize(await review.simulate());assert.ok(auth);
+    if(mode==='gas')f.control.gasPrice='0x77359400';
+    if(mode==='rejected')control.sendError=Object.assign(Error('no'),{code:4001});
+    if(mode==='unknown')control.sendError=Error('transport lost');
+    const promise=review.submit(auth);if(mode==='cancel')review.cancel();
+    assert.equal(await promise,null);assert.equal(await review.submit(auth),null);
+    const sends=f.calls.filter(([m])=>m==='eth_sendTransaction');assert.equal(sends.length,['gas','cancel'].includes(mode)?0:1);
+    if(mode==='unknown'){const next=await review.authorize(await review.simulate());assert.ok(next);assert.equal(await review.submit(next),null);assert.equal(f.calls.filter(([m])=>m==='eth_sendTransaction').length,1);}
+    x.dispose();
+  }
 });

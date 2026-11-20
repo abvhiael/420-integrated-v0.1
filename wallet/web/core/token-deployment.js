@@ -20,6 +20,8 @@ export async function readTokenDeployment420(provider,submitted,binding,options=
   const r=normalizeTokenReleaseBinding420(binding),q=submitted.review,hash=normalizeTransactionHash420(submitted.txHash);
   check(q.chainId===r.chainId&&q.request.target===r.factory.address&&q.communityTreasuryVault===r.communityTreasuryVault.address&&
     ['metadataHash','manifestHash','interfaceHash','dependencyRoot'].every(k=>q.release[k]===r.release[k]),'Submitted Token release mismatch');
+  const genesis=await provider.request('eth_getBlockByNumber',['0x0',false]);
+  check(genesis?.number==='0x0'&&same(genesis.hash,r.genesisHash),'Token genesis identity mismatch');
   const state=await readWalletTransactionStatus420(provider,hash,{canonical:true,expectedChainId:r.chainId,confirmations:options.confirmations??1});
   if(!['confirmed','reverted'].includes(state.status))return result(hash,state.status,{confirmations:state.confirmations});
   const receipt=state.receipt,tag=receipt.blockNumber,blockHash=receipt.blockHash;
@@ -36,9 +38,12 @@ export async function readTokenDeployment420(provider,submitted,binding,options=
     'Transaction exceeded reviewed fee bounds');
   async function canonical(){
     const [block,again]=await Promise.all([provider.request('eth_getBlockByNumber',[tag,false]),provider.request('eth_getTransactionReceipt',[hash])]);
+    const currentGenesis=await provider.request('eth_getBlockByNumber',['0x0',false]);
     await assertWalletChain420(provider,r.chainId);
+    check(currentGenesis?.number==='0x0'&&same(currentGenesis.hash,r.genesisHash),'Token genesis identity changed');
     return block&&qty(block.number)===qty(tag)&&same(block.hash,blockHash)&&again&&same(again.transactionHash,hash)&&
       same(again.blockHash,blockHash)&&again.blockNumber===tag&&again.status===receipt.status&&
+      same(again.from,receipt.from)&&same(again.to,receipt.to)&&again.gasUsed===receipt.gasUsed&&again.effectiveGasPrice===receipt.effectiveGasPrice&&again.transactionIndex===receipt.transactionIndex&&
       JSON.stringify(again.logs)===JSON.stringify(receipt.logs);
   }
   if(state.status==='reverted')return await canonical()?result(hash,'reverted',{confirmations:state.confirmations}):result(hash,'reorganized');

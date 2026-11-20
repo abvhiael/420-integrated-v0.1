@@ -58,13 +58,22 @@ export class LaunchpadService {
     }
     return result;
   }
+  async conversionQuote(saleId,account,terms){
+    if(!HASH.test(saleId)||!ADDRESS.test(account))throw new Error('invalid conversion identity');
+    const q=new URLSearchParams({account,...terms});
+    const result=this._canonical(await json(this.fetch,this.baseUrl+'/v1/launchpad/campaigns/'+saleId+'/conversion-quote?'+q,{cache:'no-store'}),'420-launchpad-conversion-quote-v1');
+    if(result.saleId.toLowerCase()!==saleId.toLowerCase()||!HASH.test(result.quoteId||'')||!ADDRESS.test(result.paymentRouterAddress||'')||
+      !ADDRESS.test(result.approval?.to||'')||!ADDRESS.test(result.approval?.spender||'')||
+      !/^0x[0-9a-fA-F]+$/.test(result.transaction?.data||''))throw new Error('invalid canonical Pay conversion terms');
+    return result;
+  }
   async transaction(txHash,account){
     if(!HASH.test(txHash)||!ADDRESS.test(account))throw new Error('invalid transaction identity');
     const q=new URLSearchParams({account});
     return this._canonical(await json(this.fetch,this.baseUrl+'/v1/launchpad/transactions/'+txHash+'?'+q,{cache:'no-store'}),'420-launchpad-transaction-status-v1');
   }
   async prepare(kind,payload){
-    if(!['contribute','claim','refund','bind-identity','register-intent','open-dispute','link-dispute','publish-outcome','recover-unallocated','reconcile-refund'].includes(kind))throw new Error('unsupported Launchpad transaction kind');
+    if(!['approve-conversion','pay-conversion','contribute','claim','refund','bind-identity','register-intent','open-dispute','link-dispute','publish-outcome','recover-unallocated','reconcile-refund'].includes(kind))throw new Error('unsupported Launchpad transaction kind');
     const result=await json(this.fetch,this.baseUrl+'/v1/launchpad/prepare/'+kind,{
       method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
     });

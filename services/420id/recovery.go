@@ -20,9 +20,9 @@ func (m *SessionManager) BeginRecovery(ctx context.Context,p Authentication,bind
  e=tx.QueryRowContext(ctx,"SELECT i.email,i.user_handle FROM account420.email_identities i JOIN account420.passkeys p ON p.account_id=i.account_id WHERE i.account_id=$1 AND p.rp_id=$2",p.id,m.auth.rp).Scan(&email,&handle)
  if errors.Is(e,sql.ErrNoRows){return RegistrationOptions{},ErrAuthentication};if e!=nil{return RegistrationOptions{},e}
  id,e:=newID();if e!=nil{return RegistrationOptions{},e};ch,e:=randomBytes();if e!=nil{return RegistrationOptions{},e}
- _,e=tx.ExecContext(ctx,`INSERT INTO account420.recovery_challenges(id,account_id,account_revision,origin,rp_id,challenge,browser_digest,expires_at)
- VALUES($1,$2,$3,$4,$5,$6,$7,clock_timestamp()+interval '5 minutes') ON CONFLICT(account_id,rp_id)
- DO UPDATE SET id=EXCLUDED.id,account_revision=EXCLUDED.account_revision,origin=EXCLUDED.origin,challenge=EXCLUDED.challenge,browser_digest=EXCLUDED.browser_digest,expires_at=EXCLUDED.expires_at`,id,p.id,revision,m.auth.origin,m.auth.rp,ch,binding)
+ _,e=tx.ExecContext(ctx,`INSERT INTO account420.recovery_challenges(id,account_id,account_revision,origin,rp_id,app_id,challenge,browser_digest,expires_at)
+ VALUES($1,$2,$3,$4,$5,$6,$7,$8,clock_timestamp()+interval '5 minutes') ON CONFLICT(account_id,rp_id)
+ DO UPDATE SET id=EXCLUDED.id,account_revision=EXCLUDED.account_revision,origin=EXCLUDED.origin,app_id=EXCLUDED.app_id,challenge=EXCLUDED.challenge,browser_digest=EXCLUDED.browser_digest,expires_at=EXCLUDED.expires_at`,id,p.id,revision,m.auth.origin,m.auth.rp,m.app,ch,binding)
  if e!=nil{return RegistrationOptions{},e};if e=tx.Commit();e!=nil{return RegistrationOptions{},e}
  return RegistrationOptions{id,encodeBytes(ch),m.auth.rp,encodeBytes(handle),email},nil
 }
@@ -34,7 +34,7 @@ func (m *SessionManager) BeginRecovery(ctx context.Context,p Authentication,bind
 func (m *SessionManager) FinishRecovery(ctx context.Context,id string,binding []byte,r RegistrationResponse)error{
  if !validID(id)||len(binding)!=32{return ErrAuthentication}
  var c ceremony
- e:=m.auth.store.db.QueryRowContext(ctx,"DELETE FROM account420.recovery_challenges WHERE id=$1 AND browser_digest=$2 AND origin=$3 AND rp_id=$4 AND expires_at>clock_timestamp() RETURNING challenge,account_id,account_revision",id,binding,m.auth.origin,m.auth.rp).Scan(&c.challenge,&c.account,&c.revision)
+ e:=m.auth.store.db.QueryRowContext(ctx,"DELETE FROM account420.recovery_challenges WHERE id=$1 AND browser_digest=$2 AND origin=$3 AND rp_id=$4 AND app_id=$5 AND expires_at>clock_timestamp() RETURNING challenge,account_id,account_revision",id,binding,m.auth.origin,m.auth.rp,m.app).Scan(&c.challenge,&c.account,&c.revision)
  if errors.Is(e,sql.ErrNoRows){return ErrAuthentication};if e!=nil{return e}
  key,count,backup,e:=verifyRegistration(m.auth.origin,m.auth.rp,c.challenge,r);if e!=nil{return e}
  tx,e:=m.auth.store.db.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()

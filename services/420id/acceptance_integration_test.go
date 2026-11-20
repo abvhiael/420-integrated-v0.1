@@ -89,4 +89,5 @@ func TestAcceptanceHTTPAndBrowserIsolation(t *testing.T){
  if _,e=db.ExecContext(ctx,"INSERT INTO account420.acceptance_rate(scope,bucket,count) VALUES('mail-global-day',floor(extract(epoch from clock_timestamp())/86400)::bigint,90) ON CONFLICT(scope,bucket) DO UPDATE SET count=90");e!=nil{t.Fatal(e)}
  if e=h.Purge(ctx);e!=nil{t.Fatal(e)}
  if e=h2.limit(ctx,mustRandom(t),"127.0.0.2:12345",true);e!=errLimited{t.Fatal("daily email cap not enforced after cleanup",e)}
+ if _,e=db.ExecContext(ctx,"DELETE FROM account420.acceptance_rate WHERE scope=\'mail-global-day\' AND bucket=floor(extract(epoch from clock_timestamp())/86400)::bigint");e!=nil{t.Fatal(e)}
 }

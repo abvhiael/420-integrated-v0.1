@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS account420.recovery_challenges (
  account_revision bigint NOT NULL CHECK(account_revision >= 1),
  origin text NOT NULL,
  rp_id text NOT NULL,
+ app_id text NOT NULL,
  challenge bytea NOT NULL CHECK(octet_length(challenge)=32),
  browser_digest bytea NOT NULL CHECK(octet_length(browser_digest)=32),
  expires_at timestamptz NOT NULL,

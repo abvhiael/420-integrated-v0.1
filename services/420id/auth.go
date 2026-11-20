@@ -88,7 +88,9 @@ type EmailResult struct {
 
 // FinishEmail verifies mailbox possession before atomically creating or
 // resolving an account and authorizing initial passkey enrollment.
-func (a *Auth) FinishEmail(ctx context.Context,id,secret string)(EmailResult,error){
+func (a *Auth) FinishEmail(ctx context.Context,id,secret string)(EmailResult,error){return a.finishEmail(ctx,id,secret,false)}
+// Recovery cannot provision an unknown mailbox or silently enroll a first key.
+func (a *Auth) finishEmail(ctx context.Context,id,secret string,recoverOnly bool)(EmailResult,error){
  if !validID(id){return EmailResult{},ErrAuthentication}
  token,e:=decodeToken(secret);if e!=nil{return EmailResult{},e}
  digest:=sha256.Sum256(token)
@@ -110,6 +112,7 @@ func (a *Auth) FinishEmail(ctx context.Context,id,secret string)(EmailResult,err
  var acc Account;var handle []byte
  e=tx.QueryRowContext(ctx,"SELECT a.id,a.status,a.revision,i.user_handle FROM account420.email_identities i JOIN account420.accounts a ON a.id=i.account_id WHERE i.email=$1 FOR UPDATE OF a",email).Scan(&acc.ID,&acc.Status,&acc.Revision,&handle)
  if errors.Is(e,sql.ErrNoRows){
+  if recoverOnly{if e=tx.Commit();e!=nil{return EmailResult{},e};return EmailResult{},ErrAuthentication}
   newAccount,err:=newID();if err!=nil{return EmailResult{},err};handle,err=randomBytes();if err!=nil{return EmailResult{},err}
   e=tx.QueryRowContext(ctx,"INSERT INTO account420.accounts(id) VALUES($1) RETURNING id,status,revision",newAccount).Scan(&acc.ID,&acc.Status,&acc.Revision);if e!=nil{return EmailResult{},e}
   if _,e=tx.ExecContext(ctx,"INSERT INTO account420.email_identities(email,account_id,user_handle) VALUES($1,$2,$3)",email,acc.ID,handle);e!=nil{return EmailResult{},e}
@@ -118,6 +121,7 @@ func (a *Auth) FinishEmail(ctx context.Context,id,secret string)(EmailResult,err
  result:=EmailResult{Proof:Authentication{id:acc.ID,revision:acc.Revision,method:"email",proofID:id,issuer:a,issued:time.Now()}}
  var already bool
  if e=tx.QueryRowContext(ctx,"SELECT EXISTS(SELECT 1 FROM account420.passkeys WHERE account_id=$1 AND rp_id=$2)",acc.ID,a.rp).Scan(&already);e!=nil{return EmailResult{},e}
+ if recoverOnly&&!already{if e=tx.Commit();e!=nil{return EmailResult{},e};return EmailResult{},ErrAuthentication}
  if !already{
   cid,err:=newID();if err!=nil{return EmailResult{},err};challenge,err:=randomBytes();if err!=nil{return EmailResult{},err}
   if _,e=tx.ExecContext(ctx,"DELETE FROM account420.passkey_challenges WHERE purpose='register' AND account_id=$1 AND rp_id=$2",acc.ID,a.rp);e!=nil{return EmailResult{},e}

@@ -135,7 +135,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   var body struct{ChallengeID string;Secret string;Recover *bool};if !decodeRequest(raw,&body)||h.sessions==nil&&body.Recover!=nil{deny(w,400);return}
   if h.sessions!=nil&&!h.canLogin(ctx,w,r){return}
   if !h.bound(ctx,body.ChallengeID,"email",digest){deny(w,401);return}
-  result,e:=h.auth.FinishEmail(ctx,body.ChallengeID,body.Secret)
+  result,e:=h.auth.finishEmail(ctx,body.ChallengeID,body.Secret,body.Recover!=nil&&*body.Recover)
   if e!=nil||!h.approved(ctx,result.Proof.AccountID()){deny(w,401);return}
   if result.Registration!=nil&&h.bind(ctx,result.Registration.ChallengeID,"register",digest,5)!=nil{deny(w,503);return}
   receipt,e:=h.receipt(ctx,"email_verified");if e!=nil{deny(w,503);return}

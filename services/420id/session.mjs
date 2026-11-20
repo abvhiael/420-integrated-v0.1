@@ -5,7 +5,7 @@ const status=message=>{get('status').textContent=message;};
 function state(){
  for(const b of document.querySelectorAll('button')){
   b.disabled=busy||(b.id==='register'&&!registration)||(b.id==='replace'&&!recovery)
-   ||(['renew','list','logout','logout-all','revoke'].includes(b.id)&&!current)
+   ||((['renew','list','logout','logout-all'].includes(b.id)||b.dataset.revoke==='true')&&!current)
    ||(b.id==='login'&&!!current)||(b.closest('#email-start')!==null&&!!current);
  }
  get('signed-in').textContent=current?'Signed in · idle expiry '+new Date(current.idleUntil).toLocaleString()+' · absolute expiry '+new Date(current.expiresAt).toLocaleString():'Signed out';
@@ -55,7 +55,7 @@ get('list').addEventListener('click',()=>void run(async()=>{
  const r=await post('/v1/session/list',{});const list=get('sessions');list.replaceChildren();
  for(const session of r.sessions){
   const li=document.createElement('li');li.textContent=session.method+' · '+new Date(session.issuedAt).toLocaleString()+(session.id===current.id?' (current) ':' ');
-  const b=document.createElement('button');b.type='button';b.id='revoke';b.textContent='Revoke';
+  const b=document.createElement('button');b.type='button';b.dataset.revoke='true';b.textContent='Revoke';
   b.addEventListener('click',()=>void run(async()=>{await post('/v1/session/revoke',{sessionId:session.id});await refresh();status('Session revoked.');}));li.append(b);list.append(li);
  }
 }));

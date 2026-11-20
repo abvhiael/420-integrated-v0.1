@@ -44,8 +44,8 @@ func main(){
  }
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  mode:=os.Getenv("AUTH420_MODE")
- if mode!="acceptance"&&mode!="session-acceptance"{log.Fatal("420ID acceptance is not enabled")}
- sessionApp:="";if mode=="session-acceptance"{sessionApp="bong-goggles"}
+ if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"{log.Fatal("420ID acceptance is not enabled")}
+ sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"{sessionApp="bong-goggles"}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
  mail,e:=configuredMailer(os.Getenv)
  if e!=nil{log.Fatal(e)}
@@ -54,7 +54,7 @@ func main(){
  db,e:=database("AUTH420_DATABASE_URL");if e!=nil{log.Fatal(e)};defer db.Close()
  store,e:=account.NewStore(db,[]string{"bong-goggles"});if e!=nil{log.Fatal("Account store configuration rejected")}
  auth,e:=account.NewAuth(store,mail,origin,rp);if e!=nil{log.Fatal("HTTPS origin/RP configuration rejected")}
- h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp})
+ h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"})
  if e!=nil{log.Fatal("Acceptance configuration rejected")}
  ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
  preflight,stop:=context.WithTimeout(ctx,10*time.Second)

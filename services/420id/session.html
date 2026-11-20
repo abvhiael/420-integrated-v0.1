@@ -24,32 +24,8 @@
 <button id="replace" type="button" disabled>Replace lost passkey and revoke prior sessions</button>
 </section>
 <section aria-labelledby="session-heading"><h2 id="session-heading">3. Manage sessions</h2><p id="signed-in">Checking session…</p><button id="renew" type="button">Renew session</button><button id="list" type="button">List active sessions</button><button id="logout" type="button">Sign out</button><button id="logout-all" type="button">Sign out all sessions</button><ul id="sessions"></ul></section>
-<section id="profile-section" aria-labelledby="profile-heading" hidden>
-<h2 id="profile-heading">4. Universal 420ID profile</h2>
-<p>Shared across your approved 420ID applications. Private by default. Your username is not a .420 domain or wallet identity. Past usernames remain reserved to prevent impersonation.</p>
-<button type="button" data-profile="true" id="profile-load">Load my profile</button>
-<form id="profile-form">
-<label for="profile-username">Username (3–24 letters, digits or underscores; begins with a letter)</label>
-<input id="profile-username" maxlength="24" minlength="3" autocomplete="off" spellcheck="false">
-<label for="profile-display-name">Display name</label>
-<input id="profile-display-name" maxlength="80" autocomplete="nickname">
-<label for="profile-bio">Bio (500 characters maximum)</label>
-<textarea id="profile-bio" maxlength="500" rows="3"></textarea>
-<label for="profile-avatar">Avatar content reference (optional: sha256: followed by 64 lowercase hex digits)</label>
-<input id="profile-avatar" maxlength="71" spellcheck="false" autocomplete="off">
-<label><input id="profile-public" type="checkbox"> Make my profile publicly discoverable by username</label>
-<p id="profile-version">No saved profile</p>
-<button type="submit" data-profile="true">Save profile</button>
-</form>
-<form id="profile-lookup-form">
-<label for="profile-lookup-name">Look up an explicitly public username</label>
-<input id="profile-lookup-name" maxlength="24" required autocomplete="off" spellcheck="false">
-<button type="submit" data-profile="true">Look up</button>
-</form>
-<p id="profile-lookup-result" role="status"></p>
-</section>
 <section aria-labelledby="receipt-heading">
-<h2 id="receipt-heading">5. Acceptance receipts</h2>
+<h2 id="receipt-heading">4. Acceptance receipts</h2>
 <p id="status" role="status" aria-live="polite">Ready. Open this page in the browser you intend to test.</p>
 <ul id="receipts" aria-live="polite"></ul>
 <p>Receipts identify verified ceremony outcomes, not authenticator hardware type or production readiness. Record browser/OS and device type separately, without entering passwords or verification codes in a report.</p>

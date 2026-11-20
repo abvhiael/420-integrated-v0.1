@@ -41,3 +41,15 @@ func (h *AcceptanceHandler) profileRoute(ctx context.Context,w http.ResponseWrit
  default: deny(w,404)
  }
 }
+
+// Check new schema and runtime least-privilege grants at profile-mode startup.
+// The absence of migration 005 must not break AUTH-2 or AUTH-3 acceptance.
+func (h *AcceptanceHandler) profileReady(ctx context.Context)error{
+ var ready bool
+ e:=h.auth.store.db.QueryRowContext(ctx,`SELECT
+  COALESCE(has_table_privilege(current_user,to_regclass('account420.profiles'),'SELECT,INSERT,UPDATE'),false)
+  AND COALESCE(has_table_privilege(current_user,to_regclass('account420.profile_username_claims'),'SELECT,INSERT'),false)`).Scan(&ready)
+ if e!=nil{return e}
+ if !ready{return ErrUnavailable}
+ return nil
+}

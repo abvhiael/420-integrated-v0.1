@@ -292,8 +292,8 @@ func TestCuratedTokenDiscoveryAndCanonicalLaunchBoundary(t *testing.T) {
 	handler := svc.Handler()
 	for path, want := range map[string]string{
 		"/v1/apps/curated?q=token&category=finance": tokenID,
-		"/v1/apps/curated?category=other":        `"items":[]`,
-		"/v1/apps/curated?q=unlisted":            `"items":[]`,
+		"/v1/apps/curated?category=other":           `"items":[]`,
+		"/v1/apps/curated?q=unlisted":               `"items":[]`,
 	} {
 		body := requestBody(t, handler, path)
 		if !strings.Contains(body, want) {

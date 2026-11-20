@@ -6,6 +6,7 @@ on:
       - 'indexer/tokenread/**'
       - '420-indexer/src/token-read-model.ts'
       - '420-indexer/test/token-provenance.test.ts'
+      - '420-indexer/test/token-provenance.integration.ts'
       - 'explorer/**/token*'
       - 'search/**/token*'
       - 'appstore/curation/genesis-apps.json'
@@ -52,7 +53,7 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
-          node --test dist/test/token-provenance.test.js dist/test/api-contract.test.js dist/test/http-transport.test.js
+          node --test dist/test/token-provenance.test.js dist/test/token-provenance.integration.js dist/test/api-contract.test.js dist/test/http-transport.test.js
       - name: Canonical definitions and generated reference
         run: |
           python3 scripts/verify-genesis-dapps.py

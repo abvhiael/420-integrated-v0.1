@@ -2,6 +2,7 @@ name: 420Token economic qualification
 on:
   pull_request:
     paths:
+      - '.qualification/candidates/TOKEN-AUDIT-7-closeout.json'
       - 'contracts/test/token-economics/**'
       - 'contracts/src/token/**'
       - 'contracts/src/vault/**'
@@ -34,4 +35,14 @@ jobs:
       - name: Qualify exact-head real Vault economics
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: python3 scripts/qualify-420token-economics.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/qualify-420token-economics.py 2>&1 | tee "$RUNNER_TEMP/token-economics.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: token-economics-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/token-economics.log
+          if-no-files-found: warn
+          retention-days: 30

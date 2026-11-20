@@ -3,7 +3,7 @@ on:
   push:
     paths: ["wallet/web/**", ".github/workflows/wallet-w15-5-browser.yml"]
   pull_request:
-    paths: ["wallet/web/**", ".github/workflows/wallet-w15-5-browser.yml"]
+    paths: ["wallet/web/**", ".github/workflows/wallet-w15-5-browser.yml", ".qualification/candidates/TOKEN-AUDIT-7-closeout.json"]
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

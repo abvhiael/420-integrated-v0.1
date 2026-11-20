@@ -2,6 +2,7 @@ name: 420Token ecosystem integration
 on:
   pull_request:
     paths:
+      - '.qualification/candidates/TOKEN-AUDIT-7-closeout.json'
       - '.github/workflows/420token-ecosystem.yml'
       - 'indexer/tokenread/**'
       - '420-indexer/src/token-read-model.ts'

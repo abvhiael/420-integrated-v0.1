@@ -3,6 +3,7 @@ name: 420Token local EVM end-to-end qualification
 on:
   pull_request:
     paths:
+      - '.qualification/candidates/TOKEN-AUDIT-7-closeout.json'
       - 'scripts/stage-420token-local-e2e.py'
       - 'scripts/qualify-420token-local-e2e.mjs'
       - '.github/workflows/420token-local-e2e.yml'

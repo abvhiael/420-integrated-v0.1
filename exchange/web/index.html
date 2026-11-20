@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="light" />
   <meta name="description" content="420Exchange — the trading interface for 420 Integrated." />
   <title>420Exchange</title>
   <link rel="stylesheet" href="./styles.css" />
@@ -84,6 +84,7 @@
     </div>
 
     <div id="market-summary" class="market-summary" aria-live="polite"></div>
+    <div id="market-highlights" class="market-highlights" aria-label="Featured markets"></div>
 
     <div class="table-wrap market-table-wrap">
       <table class="exchange-table market-table">
@@ -108,6 +109,11 @@
     <div id="market-empty" class="empty-state" hidden>
       <strong>No markets match this view.</strong>
       <p>Change the search, sort, or watchlist filter. Market state is never synthesized to fill an empty result.</p>
+    </div>
+    <div class="market-overview-grid" id="market-overview" hidden>
+      <section class="component-card overview-chart"><div class="overview-heading"><h3 id="overview-pair">Market history</h3><button id="overview-open" type="button">Open market</button></div><p id="overview-history-source" class="muted" role="status">History unavailable</p><svg id="overview-chart" class="ohlcv-chart" hidden></svg></section>
+      <section class="component-card"><h3>Trade tape</h3><p id="overview-trades-empty" class="muted">No verified trades available.</p><ul id="overview-trades" class="trade-tape"></ul></section>
+      <section class="component-card"><h3>Source diagnostics</h3><dl id="overview-diagnostics" class="overview-diagnostics"></dl></section>
     </div>
   </template>
 

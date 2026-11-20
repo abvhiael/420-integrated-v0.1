@@ -19,7 +19,7 @@ const state={
   markets:[],marketSource:'unavailable',marketQuery:'',marketSort:'symbol:asc',watchOnly:false,
   watchlist:new Watchlist(globalThis.localStorage),
   detailSubjectId:sanitizeSubjectId(new URLSearchParams(window.location.search).get('subject')),
-  detailWindow:'1h',detailHistory:null,swapQuote:null,swapIntent:null,
+  detailWindow:'1h',detailHistory:null,overviewHistory:null,overviewRequest:0,swapQuote:null,swapIntent:null,
   swapLifecycle:new SwapLifecycle(),swapSlippageBps:100,orders:[],orderDraft:null,
   bridgeRoutes:[],bridgeSettlements:[],bridgeIntent:null,bridgeRouteId:null,bridgeSource:'unavailable',bridgeProvenance:null,
   portfolioBalances:[],portfolioActivity:[],
@@ -85,6 +85,44 @@ function refreshMarketView(root=document){
   const visible=currentMarkets();rows.replaceChildren(...visible.map(marketRow));root.querySelector('#market-empty').hidden=visible.length!==0;
   const source=root.querySelector('#market-source');if(source)source.textContent=state.marketSource==='demo'?'DEMO DATA · not live market state':state.marketSource==='api'?'V13 snapshot data':'No market source configured';
   const summary=root.querySelector('#market-summary');if(summary)summary.textContent=`${visible.length} market${visible.length===1?'':'s'} shown · ${state.watchlist.values().size} watched`;
+  renderMarketOverview(root,visible);
+}
+function renderMarketOverview(root,visible){
+  const highlights=root.querySelector('#market-highlights'),overview=root.querySelector('#market-overview');
+  if(!highlights||!overview)return;
+  highlights.replaceChildren(...visible.slice(0,4).map(market=>{
+    const card=document.createElement('button');card.type='button';card.className='market-highlight';card.dataset.openMarket=market.marketSubjectId;
+    const symbol=document.createElement('span');symbol.className='market-symbol';symbol.textContent=market.quoteSymbol||market.baseSymbol||'—';symbol.setAttribute('aria-hidden','true');
+    const info=document.createElement('span');info.className='highlight-info';
+    const name=document.createElement('strong');name.textContent=market.label;
+    const price=document.createElement('span');price.className='highlight-price';price.textContent=formatNumber(market.lastPrice,8);
+    const change=document.createElement('span');change.className='highlight-change';change.dataset.direction=market.changePct===null?'flat':market.changePct>=0?'up':'down';change.textContent=market.changePct===null?'Change unavailable':formatChange(market.changePct);
+    info.append(name,price,change);card.append(symbol,info);return card;
+  }));
+  const market=visible[0];overview.hidden=!market;if(!market){state.overviewRequest++;return;}
+  const subject=market.marketSubjectId;
+  root.querySelector('#overview-pair').textContent=market.label+' · Market history';
+  root.querySelector('#overview-open').dataset.openMarket=subject;
+  const diagnostics=root.querySelector('#overview-diagnostics');
+  const freshness=state.marketSource==='api'?freshnessState(market,Math.floor(Date.now()/1000)):'degraded';
+  diagnostics.replaceChildren(...[['Data source',state.marketSource==='api'?'V13 snapshots':state.marketSource==='demo'?'Demo catalogue (not live)':'Unavailable'],['Route',market.routeHealthy?'Healthy':'Not qualified'],['Settlement',market.settlementHealthy?'Healthy':'Not qualified'],['Freshness',freshness]].map(([label,value])=>{
+    const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;row.append(dt,dd);return row;
+  }));
+  const source=root.querySelector('#overview-history-source'),svg=root.querySelector('#overview-chart'),tape=root.querySelector('#overview-trades'),empty=root.querySelector('#overview-trades-empty');
+  const show=(history)=>{
+    const candles=history?.candles??[],trades=history?.trades??[];
+    svg.hidden=!candles.some(c=>c.active);if(!svg.hidden)drawCandles(svg,candles);else svg.replaceChildren();
+    source.textContent=history?.message??(svg.hidden?'No qualified history available.':'V13 historical query · active records');
+    tape.replaceChildren(...trades.slice(-8).reverse().map(trade=>{const li=document.createElement('li');li.textContent=trade.side.toUpperCase()+' · '+formatNumber(trade.amount)+' @ '+formatNumber(trade.price,8)+' · '+(trade.active?'canonical':'reorg');return li;}));empty.hidden=trades.length>0;
+  };
+  if(state.marketSource!=='api'||!state.dataLayer){state.overviewRequest++;show({message:'Pre-testnet catalogue · price history is not available.'});return;}
+  const request=++state.overviewRequest;
+  show({message:'Loading qualified market history…'});
+  state.dataLayer.loadHistory({kind:'TRADE',subjectId:subject,activeOnly:false,limit:100}).then(page=>{
+    if(request!==state.overviewRequest||state.route.id!=='markets'||!overview.isConnected)return;
+    const trades=page.records.map(normalizeTrade).filter(trade=>trade.subjectId===subject);
+    show({trades,candles:aggregateTradesToCandles(trades,bucketSecondsForWindow('1h'))});
+  }).catch(()=>{if(request===state.overviewRequest&&overview.isConnected)show({message:'History unavailable from the configured source.'});});
 }
 function renderMarkets(fragment){fragment.querySelector('#market-search').value=state.marketQuery;fragment.querySelector('#market-sort').value=state.marketSort;fragment.querySelector('#watch-only').checked=state.watchOnly;refreshMarketView(fragment);}
 function selectedMarket(){return state.markets.find(market=>market.marketSubjectId===state.detailSubjectId)??state.markets[0]??null;}
@@ -201,9 +239,9 @@ function renderPortfolio(fragment){
   fragment.querySelector('#portfolio-activity').replaceChildren(...state.portfolioActivity.map(record=>{const tr=document.createElement('tr');appendLabeledCells(tr,['Kind','Amount','State','Fee','Transaction'],[record.kind,record.amount===null?'—':`${formatNumber(record.amount)} ${record.assetSymbol??''}`,activityState(record),record.feeAmount===null?'—':formatNumber(record.feeAmount),record.txHash??'—']);const provenance=document.createElement('td'),href=explorerHref(state.config?.network?.explorerUrl,record.txHash);if(href){const a=document.createElement('a');a.href=href;a.textContent='Explorer';a.rel='noopener noreferrer';provenance.append(a);}else provenance.textContent='—';provenance.dataset.label='Provenance';tr.append(provenance);return tr;}));
 }
 function renderView(){
-  $('#page-title').textContent=state.route.label;const view=$('#app-view');view.replaceChildren();
+  $('#page-title').textContent=state.route.label;const view=$('#app-view');view.replaceChildren();document.body.dataset.exchangeRoute=state.route.id;
   if(state.bootError){$('#data-state').textContent='Degraded';$('#data-state').dataset.state='error';const card=document.createElement('div');card.className='error-state';const failure=classifyApiFailure(state.bootError);card.innerHTML='<strong>Exchange unavailable.</strong><p>No market or transaction state will be invented locally.</p>';const detail=document.createElement('p');detail.className='muted';detail.textContent=failure.message;card.append(detail);view.append(card);announce(failure.message,{assertive:true});return;}
-  $('#data-state').textContent=state.marketSource==='api'?'V13 data':state.marketSource==='demo'?'Demo':'Shell only';$('#data-state').dataset.state=state.marketSource==='api'?'ready':'degraded';
+  $('#data-state').textContent=state.marketSource==='api'?'V13 data':state.marketSource==='demo'?'Pre-testnet / demo data':'Shell only';$('#data-state').dataset.state=state.marketSource==='api'?'ready':'degraded';
   const views={markets:['markets','markets-template',renderMarkets],market:['marketDetail','market-detail-template',renderDetail],swap:['swap','swap-template',renderSwap],orders:['limitOrders','orders-template',renderOrders],bridge:['bridge','bridge-template',renderBridge],portfolio:['portfolio','portfolio-template',renderPortfolio]};
   const current=views[state.route.id];if(current&&availability(state.config,current[0])){const fragment=$(`#${current[1]}`).content.cloneNode(true);current[2](fragment);view.append(fragment);return;}
   const fragment=$('#gated-template').content.cloneNode(true);fragment.querySelector('#gated-title').textContent=`${state.route.label} is roadmap-gated`;fragment.querySelector('#gated-copy').textContent='The route is reserved now so navigation and deep links remain stable, but feature logic stays disabled until its V14 phase qualifies.';view.append(fragment);

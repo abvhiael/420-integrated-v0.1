@@ -2,10 +2,10 @@ import {readSale,call,address,hash} from './consumer.mjs';
 import {wordHex,decodeAddress,decodeUint,decodeBool,hexUtf8} from './abi.mjs';
 const MODES=['NONE','REWARD','DONATION','COMMUNITY_PROJECT','PRODUCT_PREORDER'];
 const LOGS=[
-  {name:'contributions',sig:'ContributionRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1},
-  {name:'claims',sig:'AllocationClaimed(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1},
-  {name:'refunds',sig:'RefundRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1},
-  {name:'fulfillment',sig:'DeliveryEvidenceBound(bytes32,address,bytes32,uint128)',from:'crowd',saleIndex:1},
+  {name:'contributions',sig:'ContributionRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
+  {name:'claims',sig:'AllocationClaimed(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
+  {name:'refunds',sig:'RefundRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
+  {name:'fulfillment',sig:'DeliveryEvidenceBound(bytes32,address,bytes32,uint128)',from:'crowd',saleIndex:1,amount:true},
   {name:'deliveryAttestations',sig:'DeliveryAttested(bytes32,address,bytes32)',from:'crowd',saleIndex:1},
   {name:'disputes',sig:'DisputeLinked(bytes32,address,bytes32)',from:'crowd',saleIndex:1},
   {name:'finalizedDisputeOutcomes',sig:'DisputeOutcomePublished(bytes32,address,bytes32,uint32,bytes32,bytes32)',from:'crowd',saleIndex:1},
@@ -51,9 +51,9 @@ export async function creatorReport(rpc,rt,account,saleId,{fromBlock=null}={}){
     ...spec,topic:(await rpc.call('web3_sha3',[hexUtf8(spec.sig)])).toLowerCase(),
     address:spec.from==='allocation'?rt.allocationRegistryAddress:rt.crowdfundingIntegrationAddress
   })));
-  const events=Object.fromEntries(LOGS.map(x=>[x.name,{count:0,participants:0}]));
+  const events=Object.fromEntries(LOGS.map(x=>[x.name,{count:0,participants:0,...(x.amount?{amount:'0'}:{})}]));
   const participants=Object.fromEntries(LOGS.map(x=>[x.name,new Set()]));
-  const result=[];
+  const seen=new Set();
   // Query in bounded slices for providers that enforce eth_getLogs range limits.
   for(let n=start;n<=end;n+=2000n){
     const until=n+1999n<end?n+1999n:end;
@@ -65,10 +65,17 @@ export async function creatorReport(rpc,rt,account,saleId,{fromBlock=null}={}){
       for(const log of logs){
         if(!addrEq(log.address||ZERO,spec.address)||!Array.isArray(log.topics)||
           log.topics[0]?.toLowerCase()!==spec.topic||log.topics[spec.saleIndex]?.toLowerCase()!==id||
-          !/^0x[0-9a-fA-F]{64}$/.test(log.blockHash||'')||!/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash||''))throw new Error('noncanonical creator event');
-        result.push({event:spec.name,tx:log.transactionHash,blockHash:log.blockHash,
-          logIndex:log.logIndex,topics:log.topics});
+          !/^0x[0-9a-fA-F]{64}$/.test(log.blockHash||'')||!/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash||'')||
+          log.removed===true||!/^0x[0-9a-fA-F]+$/.test(log.logIndex||''))throw new Error('noncanonical creator event');
+        const logKey=log.transactionHash.toLowerCase()+':'+log.logIndex.toLowerCase()+':'+spec.name;
+        if(seen.has(logKey))throw new Error('duplicate canonical creator event');seen.add(logKey);
         events[spec.name].count++;
+        if(spec.amount){
+          if(!/^0x[0-9a-fA-F]{128}$/.test(log.data||''))throw new Error('malformed creator event amount');
+          const raw=decodeUint(log.data);
+          if(raw>(1n<<128n)-1n)throw new Error('invalid creator event amount');
+          events[spec.name].amount=(BigInt(events[spec.name].amount)+raw).toString();
+        }
         if(spec.saleIndex===1&&log.topics[2])participants[spec.name].add(log.topics[2].toLowerCase());
       }
     }

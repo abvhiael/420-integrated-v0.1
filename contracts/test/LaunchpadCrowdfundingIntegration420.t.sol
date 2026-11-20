@@ -791,6 +791,34 @@ contract LaunchpadCrowdfundingIntegration420Test {
         require(allocations.contributed(saleId, ALICE) == 100, "canonical checkout not accepted");
     }
 
+    function testFuzzDeliveredRefundPrincipalConservation(uint128 rawTip, uint128 rawDelivered) public {
+        sales.activate(saleId);
+        vm.warp(10);
+        bytes32 paymentId = keccak256("payment/refund-fuzz");
+        uint128 principal = 100;
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, principal, 5, 0);
+        _bindPayment(saleId, paymentId, principal);
+        vm.prank(ALICE);
+        allocations.contribute(saleId, principal, paymentId);
+
+        uint256 tip = uint256(rawTip) % 101;
+        uint256 maximum = uint256(principal) + tip;
+        uint256 delivered = uint256(rawDelivered) % (maximum + 1);
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, principal, 6, maximum);
+        pay.setTip(paymentId, tip);
+        pay.setDelivered(paymentId, delivered);
+        uint128 expected = delivered > tip ? uint128(delivered - tip) : 0;
+        require(integration.reconcileRecordedRefund(paymentId) == expected, "conservative principal");
+        require(integration.reconcileRecordedRefund(paymentId) == expected, "idempotent retry");
+        require(integration.reconciledSaleRefundPrincipal(saleId) == expected, "aggregate conservation");
+        require(expected <= principal, "excess principal");
+        require(sales.sale(saleId).raised == principal, "gross history mutated");
+        pay.setDelivered(paymentId, maximum + 1);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
+        integration.reconcileRecordedRefund(paymentId);
+        require(integration.reconciledSaleRefundPrincipal(saleId) == expected, "invalid refund mutated aggregate");
+    }
+
     function testFuzzInvoiceBindingSeparatesAmountsAndNonces(uint128 raw, uint256 nonce) public view {
         uint128 amount = uint128(uint256(raw) % 599 + 1);
         bytes32 first = integration.invoiceIdFor(saleId, ALICE, amount, nonce);

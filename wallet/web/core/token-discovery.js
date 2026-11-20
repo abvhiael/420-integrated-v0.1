@@ -4,7 +4,7 @@ import { normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-
 import { discoverSmartAccount } from './accounts.js';
 import { assertWalletChain420 } from './transaction-lifecycle.js';
 import { prepareTokenDeploymentHandoff420 } from './token-handoff.js';
-import { validateTokenCreationEncoding420, tokenHashHex420 } from './token-sdk.js';
+import { validateTokenCreationEncoding420, tokenHashHex420, tokenReadCall420 } from './token-sdk.js';
 import { TOKEN_CREATION_FEE_WEI_420 } from './token-runtime.js';
 
 const environments = new Set(['local','devnet','testnet','mainnet']);
@@ -142,7 +142,7 @@ export function createTokenDiscoverySession420() {
   }
   // Only the host-retained provider/release/account can be used. No provider,
   // signer or context is returned. Every RPC is read-only and generation-bound.
-  async function simulateCurrent(draft,expected=snapshot,priorBlock=null){
+  async function simulateCurrent(draft,expected=snapshot,priorReview=null){
     check(context&&snapshot===expected&&expected.status==='verified'&&expected.controllerIsOwner&&expected.deployed,
       'Wallet review context unavailable');
     const attempt=generation,host=context;
@@ -174,16 +174,27 @@ export function createTokenDiscoverySession420() {
       check(b?.number===block.number&&b.hash?.toLowerCase()===block.hash,'Token review block reorganized');
     };
     await canonical(expected.verificationBlock);
-    if(priorBlock)await canonical(priorBlock);
+    if(priorReview){await canonical(priorReview.simulationBlock);await canonical(priorReview.verificationBlock);}
     const before=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
     const sameAccount=x=>x.controllerIsOwner&&x.deployed&&x.smartAccount===expected.smartAccount&&
       x.controller===expected.controller&&x.authorizationEpoch===expected.authorizationEpoch&&
       x.authorizationPolicyVersion===expected.authorizationPolicyVersion;
     check(sameAccount(before),'SmartAccount ownership or authorization epoch changed');
-    const fresh=await discoverSmartAccount(provider,host.controller,walletAccountConfig(host.config));
+    const simulationBlock=before.verificationBlock;
+    // Pin the simulation and estimate to the same canonical block as the
+    // release and account reads. No silent fallback to an unpinned estimate.
+    const pinned={request:(method,params=[])=>{
+      if(['eth_getBlockByNumber','eth_getCode','eth_call'].includes(method)){
+        const index=method==='eth_getBlockByNumber'?0:1;
+        if(params[index]==='latest'){params=[...params];params[index]=simulationBlock.number;}
+      }
+      if(method==='eth_estimateGas')params=[params[0],simulationBlock.number];
+      return provider.request(method,params);
+    }};
+    const fresh=await discoverSmartAccount(pinned,host.controller,walletAccountConfig(host.config));
     check(fresh.smartAccount===expected.smartAccount&&fresh.controllerIsOwner&&fresh.authorizationEpoch.toString()===before.authorizationEpoch&&
       fresh.authorizationPolicyVersion.toString()===before.authorizationPolicyVersion,'SmartAccount authority changed');
-    const prepared=await prepareTokenDeploymentHandoff420(provider,host.controller,{...fresh,expectedChainId:d.chainId},
+    const prepared=await prepareTokenDeploymentHandoff420(pinned,host.controller,{...fresh,expectedChainId:d.chainId},
       normalizeTokenWalletConfig420(host.config).binding,r);
     // execute() returns ABI bytes containing the factory's returned address.
     // Empty return data is not successful Token deployment simulation.
@@ -200,10 +211,18 @@ export function createTokenDiscoverySession420() {
     };
     const gas=quantity(prepared.simulation.gas,'gas estimate');check(gas>0n,'Invalid zero gas estimate');
     const price=quantity(await provider.request('eth_gasPrice',[]),'gas price');
-    const block=prepared.verificationBlock;
-    // All checks and the fee quote must refer to the same canonical tip; if a
-    // block arrives during review, retry rather than label a mixed snapshot.
-    check(before.verificationBlock.number===block.number&&before.verificationBlock.hash===block.hash,'Chain advanced during simulation; retry review');
+    check(prepared.verificationBlock.number===simulationBlock.number&&prepared.verificationBlock.hash===simulationBlock.hash,'Token simulation block mismatch');
+    const after=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    check(sameAccount(after)&&after.runtime.templates.find(p=>p.id===creation.template.id)?.enabled,
+      'SmartAccount authority or template availability changed during review');
+    const block=after.verificationBlock;
+    // A new block is normal. Verify the creator nonce did not advance between
+    // the simulation block and the latest verified release/account snapshot.
+    const nonceCall={to:prepared.target,data:tokenReadCall420('creatorNonce(address)',['address'],[expected.smartAccount])};
+    const nonceAt=async tag=>{const n=await provider.request('eth_call',[nonceCall,tag]);
+      check(typeof n==='string'&&/^0x[0-9a-fA-F]{64}$(?![\\s\\S])/.test(n),'Invalid creator nonce');return BigInt(n).toString();};
+    const creatorNonce=await nonceAt(simulationBlock.number);
+    check(creatorNonce===await nonceAt(block.number),'Creator nonce changed during simulation; retry review');
     const [walletBalance,controllerBalance]=await Promise.all([
       provider.request('eth_getBalance',[expected.smartAccount,block.number]).then(x=>quantity(x,'SmartAccount balance')),
       provider.request('eth_getBalance',[expected.controller,block.number]).then(x=>quantity(x,'controller balance')),
@@ -212,20 +231,17 @@ export function createTokenDiscoverySession420() {
     check(total<2n**256n,'Fee estimate overflow');
     check(walletBalance>=TOKEN_CREATION_FEE_WEI_420,'Insufficient SmartAccount balance for 42 native 420 fee');
     check(controllerBalance>=gasCost,'Insufficient controller balance for estimated network gas');
-    const after=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
-    check(sameAccount(after)&&after.runtime.templates.find(p=>p.id===creation.template.id)?.enabled,
-      'SmartAccount authority or template availability changed during review');
-    check(after.verificationBlock.number===block.number&&after.verificationBlock.hash===block.hash,'Chain advanced during review; retry review');
-    await canonical(expected.verificationBlock);if(priorBlock)await canonical(priorBlock);await canonical(block);
-    const tip=await provider.request('eth_getBlockByNumber',['latest',false]);
-    check(tip?.number===block.number&&tip.hash?.toLowerCase()===block.hash,'Chain advanced during review; retry review');
+    await canonical(expected.verificationBlock);if(priorReview){await canonical(priorReview.simulationBlock);await canonical(priorReview.verificationBlock);}
+    await canonical(simulationBlock);await canonical(block);
     await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,d.chainId);active();
     return Object.freeze({authority:'SIMULATED_REVIEW_ONLY',controller:expected.controller,smartAccount:expected.smartAccount,
       chainId:d.chainId,environment:d.environment,authorizationEpoch:after.authorizationEpoch,
       authorizationPolicyVersion:after.authorizationPolicyVersion,templateId:creation.template.id,configHash:creation.configHash,
       calldataHash:creation.calldataHash,executionHash:tokenHashHex420(prepared.transaction.data),
-      request:Object.freeze({...r,draft:creation.draft}),transaction:prepared.transaction,release:prepared.release,
-      verificationBlock:block,predictedAddress:predicted,communityTreasuryVault:prepared.communityTreasuryVault,
+      request:Object.freeze({serviceId:prepared.serviceId,target:prepared.target,value:prepared.value,data:prepared.data,
+        draft:creation.draft,templateId:creation.template.id,configHash:creation.configHash,calldataHash:creation.calldataHash}),
+      transaction:prepared.transaction,release:prepared.release,
+      simulationBlock,verificationBlock:block,creatorNonce,predictedAddress:predicted,communityTreasuryVault:prepared.communityTreasuryVault,
       creationFeeWei:TOKEN_CREATION_FEE_WEI_420.toString(),gasUnits:gas.toString(),gasPriceWei:price.toString(),
       estimatedGasWei:gasCost.toString(),estimatedTotalWei:total.toString(),smartAccountBalanceWei:walletBalance.toString(),
       controllerBalanceWei:controllerBalance.toString(),simulationPassed:true});

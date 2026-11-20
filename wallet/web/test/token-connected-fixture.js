@@ -1,6 +1,7 @@
 // Browser-safe deterministic connected Wallet RPC fixture shared by discovery and catalogue tests.
 import {encodeGetAddress,encodeAddressGetter,encodeUintGetter,encodeExecute,ZERO_ADDRESS,ZERO_BYTES32} from '../core/abi.js';
 import {fixture,abi,addr,controller,account,state} from './token-test-fixture.js';
+import {tokenReadCall420} from '../core/token-sdk.js';
 
 export function connected() {
   const f=fixture();
@@ -14,7 +15,7 @@ export function connected() {
   const control={accounts:[controller],owner:controller,account,accountDeployed:true,factoryDeployed:true,
     entryPoint:state.entryPoint,capabilityRegistry:config.deployment.capabilityRegistryAddress,afterAccountRead:null,epoch:1,policyVersion:1,gasPrice:'0x3b9aca00',gasEstimate:'0x100000',
     smartBalance:'0x'+(100n*10n**18n).toString(16),controllerBalance:'0x'+(10n**18n).toString(16),
-    simulationResult:abi(32,32,addr(77)),simulationError:null,estimateError:null,onEstimate:null};
+    simulationResult:abi(32,32,addr(77)),creatorNonce:0,simulationError:null,estimateError:null,onEstimate:null};
   const calls=[];
   const provider={request:async(method,args=[])=>{
     calls.push([method,args]);
@@ -22,12 +23,13 @@ export function connected() {
     if(method==='eth_gasPrice')return control.gasPrice;
     if(method==='eth_getBalance')return args[0]===control.account?control.smartBalance:args[0]===controller?control.controllerBalance:(()=>{throw Error('unexpected balance address')})();
     if(method==='eth_estimateGas'){if(control.estimateError)throw Error(control.estimateError);control.onEstimate?.();return control.gasEstimate;}
-    if(method==='eth_getCode' && args[1]==='latest'){
+    if(method==='eth_getCode' && (args[0]===state.factoryAddress||args[0]===control.account)&&(args[1]==='latest'||args[1]==='0x10')){
       if(args[0]===state.factoryAddress)return control.factoryDeployed?'0x6001':'0x';
       if(args[0]===control.account)return control.accountDeployed?'0x6002':'0x';
       throw Error('unexpected latest code read');
     }
-    if(method==='eth_call' && args[1]==='latest'){
+    if(method==='eth_call'&&args[0].to===f.binding.factory.address&&args[0].data===tokenReadCall420('creatorNonce(address)',['address'],[control.account]))return abi(control.creatorNonce);
+    if(method==='eth_call' && (args[0].to===state.factoryAddress||args[0].to===control.account)&&(args[1]==='latest'||args[1]==='0x10')){
       const {to,data}=args[0];
       if(to===state.factoryAddress){
         if(data!==encodeGetAddress(controller,ZERO_ADDRESS,ZERO_BYTES32))throw Error('unexpected factory calldata');

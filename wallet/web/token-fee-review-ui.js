@@ -27,13 +27,14 @@ export function mountTokenFeeReview420(section,wizard,session){
         ['SmartAccount balance',amount(q.smartAccountBalanceWei)],['Controller balance',amount(q.controllerBalanceWei)],
         ['SmartAccount',q.smartAccount],['Gas-paying controller',q.controller],['Network chain ID',String(q.chainId)],
         ['Factory',q.request.target],['Template ID',q.templateId],['Configuration hash',q.configHash],['Calldata hash',q.calldataHash],
-        ['SmartAccount execution hash',q.executionHash],['Authorization epoch',q.authorizationEpoch],
+        ['SmartAccount execution hash',q.executionHash],['Authorization epoch',q.authorizationEpoch],['Creator nonce',q.creatorNonce],
+        ['Simulation block',BigInt(q.simulationBlock.number).toString()+' · '+q.simulationBlock.hash],
         ['Simulated token address (not guaranteed)',q.predictedAddress],['Verified block',BigInt(q.verificationBlock.number).toString()+' · '+q.verificationBlock.hash]];
       for(const [label,value] of entries)details.append(el('dt',null,label),el('dd',null,value));
     }
     status.textContent=v.error||(v.busy?'Rechecking Wallet, Registry and simulation…':v.authorization?
       'Explicit authorization recorded. No transaction signed or submitted.':v.quote?
-      'Review both costs and the exact configuration above. Gas is an estimate, not a guaranteed maximum. Authorizing re-simulates and rejects changed costs or authority.':'Prepare a draft, then simulate to review costs.');
+      'Review both costs and the exact configuration above. Gas is an estimate; this authorization covers at most the displayed estimated gas and total. Higher costs require a new review. Authorizing re-simulates and rejects changed costs or authority.':'Prepare a draft, then simulate to review costs.');
   }
   const unsubscribe=model.subscribe(render);
   simulate.addEventListener('click',()=>{void model.simulate();});

@@ -134,12 +134,14 @@ jobs:
         working-directory: contracts
         env:
           FOUNDRY_TEST: test/.launchpad-ci
+          FOUNDRY_SRC: src/launchpad
         run: forge test --match-path 'test/.launchpad-ci/Launchpad*420.t.sol' -vvv
 
       - name: Audit-4 deployment and Registry binding qualification
         working-directory: contracts
         env:
           FOUNDRY_TEST: test/.launchpad-ci
+          FOUNDRY_SRC: src/launchpad
         run: forge test --match-path test/.launchpad-ci/LaunchpadDeploymentBinding420.t.sol -vvvv
 
       - name: Forbidden primitive and address-policy scan

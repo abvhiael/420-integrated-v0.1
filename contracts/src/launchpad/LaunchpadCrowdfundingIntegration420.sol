@@ -34,6 +34,7 @@ interface ILaunchpadPaymentRegistry420 {
 
 interface ILaunchpadPayAuthority420 {
     function registry() external view returns (address);
+    function checkoutPaymentForInvoice(bytes32 invoiceId) external view returns (bytes32);
 }
 
 interface ILaunchpadPayRegistryResolver420 {
@@ -42,8 +43,26 @@ interface ILaunchpadPayRegistryResolver420 {
 }
 
 interface ILaunchpadInvoice420 {
+    struct Invoice {
+        bytes32 merchantId;
+        address merchant;
+        bytes32 metadataHash;
+        bytes3 currency;
+        uint256 amount;
+        uint64 expiresAt;
+        uint64 refundUntil;
+        uint8 mode;
+        uint8 acceptance;
+        bool partialPayments;
+        uint16 quoteMaxSlippageBps;
+        bytes32 acceptedAssetsHash;
+        bytes32 settlementPlanHash;
+        bytes32 tipPolicyHash;
+        bool active;
+    }
     function merchantOf(bytes32 invoiceId) external view returns (address);
-    function expiresAtOf(bytes32 invoiceId) external view returns (uint64);
+    function getInvoice(bytes32 invoiceId) external view returns (Invoice memory);
+    function isClosed(bytes32 invoiceId) external view returns (bool);
 }
 
 interface ILaunchpadRefundDelivery420 {
@@ -149,6 +168,11 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     mapping(bytes32 => bool) public registeredContributionIntent;
     mapping(bytes32 => bool) public usedInvoiceId;
     mapping(bytes32 => bool) public unallocatedRefundRecorded;
+    mapping(bytes32 => bytes32) public recordedPaymentSale;
+    mapping(bytes32 => address) public recordedPaymentParticipant;
+    mapping(bytes32 => uint128) public reconciledRefundPrincipal;
+    mapping(bytes32 => uint128) public reconciledSaleRefundPrincipal;
+    mapping(bytes32 => mapping(address => uint128)) public reconciledParticipantRefundPrincipal;
     mapping(bytes32 => mapping(address => bytes32)) public deliveryAttestation;
     mapping(bytes32 => bool) public attestedDeliveryCommitment;
     mapping(bytes32 => uint128) public contributionAmountByPayment;
@@ -181,6 +205,10 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         bytes32 indexed saleId, address indexed participant, bytes32 indexed paymentId, uint128 amount
     );
     event DeliveryAttested(bytes32 indexed saleId, address indexed participant, bytes32 indexed deliveryCommitment);
+    event RecordedRefundReconciled(
+        bytes32 indexed saleId, address indexed participant, bytes32 indexed paymentId,
+        uint128 principalDelivered, uint128 principalDelta
+    );
     event IdentityBound(address indexed participant, bytes32 indexed profileId);
     event ContributionSettlementBound(
         bytes32 indexed saleId,
@@ -319,11 +347,15 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         (address controller,,,,,, bool active) = identity.profiles(profileId);
         if (profileId == bytes32(0) || controller != msg.sender || !active
             || !identity.hasValidCredential(profileId, sale_.eligibilityPolicyHash)) revert InvalidIdentity();
+        if (profileAtSale[saleId][msg.sender] != bytes32(0) && profileAtSale[saleId][msg.sender] != profileId) {
+            revert InvalidIdentity();
+        }
         if (allocations.crowdfundingIntegration() != address(this) || campaignMode[saleId] == CampaignMode.NONE
             || sale_.state != LaunchpadSaleRegistry420.State.ACTIVE || block.timestamp < sale_.startsAt
             || block.timestamp > sale_.endsAt || amount == 0 || nonce == 0
             || uint256(allocations.contributed(saleId, msg.sender)) + amount > sale_.perWalletCap
             || uint256(sale_.raised) + amount > sale_.hardCap
+            || _paymentIds[saleId][msg.sender].length >= MAX_PAYMENT_REFERENCES_PER_SALE
             || !allocations.authorization().isAuthorized(msg.sender, saleId, LaunchpadIds420.ACTION_CONTRIBUTE, amount)) {
             revert InvalidSettlement();
         }
@@ -338,15 +370,19 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
     }
 
     function _verifyInvoice(
-        bytes32 invoiceId, bytes32 saleId, address participant, uint128 amount, uint256 nonce,
+        bytes32 invoiceId, bytes32 paymentId, bytes32 saleId, address participant, uint128 amount, uint256 nonce,
         LaunchpadSaleRegistry420.Sale memory sale_
     ) private view {
         if (nonce == 0 || invoiceId != invoiceIdFor(saleId, participant, amount, nonce)
             || !registeredContributionIntent[invoiceId]) revert InvalidSettlement();
         ILaunchpadInvoice420 invoices = ILaunchpadInvoice420(_payComponent(PayIds420.INVOICE_REGISTRY));
-        uint64 expiry = invoices.expiresAtOf(invoiceId);
-        if (invoices.merchantOf(invoiceId) != sale_.proceedsReceiver || expiry < sale_.startsAt
-            || expiry > sale_.endsAt) revert InvalidSettlement();
+        ILaunchpadInvoice420.Invoice memory invoice = invoices.getInvoice(invoiceId);
+        if (invoice.merchant != sale_.proceedsReceiver || invoice.expiresAt < sale_.startsAt
+            || invoice.expiresAt > sale_.endsAt || invoice.mode != 0 || invoice.partialPayments
+            || !invoices.isClosed(invoiceId)
+            || ILaunchpadPayAuthority420(address(paymentRegistry)).checkoutPaymentForInvoice(invoiceId) != paymentId) {
+            revert InvalidSettlement();
+        }
     }
 
     function consumeContribution(
@@ -391,7 +427,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
                 || authorizedRefunded != 0
         ) revert InvalidSettlement();
 
-        _verifyInvoice(invoiceId, saleId, participant, amount, payerNonce, sale_);
+        _verifyInvoice(invoiceId, paymentId, saleId, participant, amount, payerNonce, sale_);
         if (usedInvoiceId[invoiceId]) revert Replay();
 
         bytes32[] storage refs = _paymentIds[saleId][participant];
@@ -400,6 +436,8 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         usedPaymentId[paymentId] = true;
         usedInvoiceId[invoiceId] = true;
         contributionAmountByPayment[paymentId] = amount;
+        recordedPaymentSale[paymentId] = saleId;
+        recordedPaymentParticipant[paymentId] = participant;
         refs.push(paymentId);
 
         emit ContributionSettlementBound(saleId, participant, paymentId, profileId, amount, receiptHash);
@@ -408,20 +446,54 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         return true;
     }
 
+    /// @notice Canonical refund progress. Principal delivery is conservative because Pay does
+    /// not distinguish principal and tip refunds: assume the tip is delivered first.
+    function refundProgress(bytes32 paymentId, address participant, uint128 principal)
+        public view returns (uint256 authorized, uint256 delivered, uint128 principalDelivered)
+    {
+        (, address payer,,,,, uint256 settlementAmount,,,, uint256 tip, uint256 authorized_, uint8 status) =
+            paymentRegistry.payments(paymentId);
+        if (payer != participant || settlementAmount != principal || principal == 0
+            || (status != PAY_STATUS_SETTLED && status != PAY_STATUS_REFUNDED
+                && status != PAY_STATUS_PARTIALLY_REFUNDED)) revert InvalidRefund();
+        ILaunchpadRefundDelivery420 refunds = ILaunchpadRefundDelivery420(_payComponent(PayIds420.REFUND_MANAGER));
+        if (refunds.paymentRegistry() != address(paymentRegistry)) revert InvalidRefund();
+        uint256 required = uint256(principal) + tip;
+        authorized = authorized_;
+        delivered = refunds.deliveredByPayment(paymentId);
+        if (authorized > required || delivered > authorized
+            || (status == PAY_STATUS_SETTLED && authorized != 0)
+            || (status == PAY_STATUS_REFUNDED && authorized != required)
+            || (status == PAY_STATUS_PARTIALLY_REFUNDED && (authorized == 0 || authorized >= required))) {
+            revert InvalidRefund();
+        }
+        if (delivered > tip) principalDelivered = uint128(delivered - tip);
+    }
+
     function _refundDelivered(bytes32 paymentId, address participant, uint128 principal)
         private view returns (bool)
     {
-        (, address payer,,,,, uint256 settlementAmount,,,, uint256 tip, uint256 authorized, uint8 status) =
-            paymentRegistry.payments(paymentId);
-        if (payer != participant || settlementAmount != principal
-            || (status != PAY_STATUS_REFUNDED && status != PAY_STATUS_PARTIALLY_REFUNDED)) return false;
-        ILaunchpadRefundDelivery420 refunds = ILaunchpadRefundDelivery420(_payComponent(PayIds420.REFUND_MANAGER));
-        if (refunds.paymentRegistry() != address(paymentRegistry)) revert InvalidRefund();
-        uint256 delivered = refunds.deliveredByPayment(paymentId);
-        // Pay does not distinguish principal from tip when refunding. Conservatively require
-        // delivery of both before publishing a full principal refund. Authorization alone is not delivery.
-        uint256 required = uint256(principal) + tip;
-        return authorized == required && delivered == required;
+        (,, uint128 principalDelivered) = refundProgress(paymentId, participant, principal);
+        return principalDelivered == principal;
+    }
+
+    /// @notice Records only newly delivered principal. Gross V1 contribution/raised history is not rewritten.
+    /// This is a reconciliation checkpoint; current refundProgress remains the canonical live read.
+    function reconcileRecordedRefund(bytes32 paymentId) public returns (uint128 principalDelivered) {
+        uint128 principal = contributionAmountByPayment[paymentId];
+        address participant = recordedPaymentParticipant[paymentId];
+        bytes32 saleId = recordedPaymentSale[paymentId];
+        if (principal == 0 || participant == address(0)) revert InvalidRefund();
+        (,, principalDelivered) = refundProgress(paymentId, participant, principal);
+        uint128 prior = reconciledRefundPrincipal[paymentId];
+        if (principalDelivered < prior) revert InvalidRefund();
+        uint128 delta = principalDelivered - prior;
+        if (delta != 0) {
+            reconciledRefundPrincipal[paymentId] = principalDelivered;
+            reconciledSaleRefundPrincipal[saleId] += delta;
+            reconciledParticipantRefundPrincipal[saleId][participant] += delta;
+            emit RecordedRefundReconciled(saleId, participant, paymentId, principalDelivered, delta);
+        }
     }
 
     /// @notice Reconcile a paid intent which never became a contribution (e.g. cap exhausted).
@@ -433,7 +505,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
             uint256 nonce, bytes32 receiptHash,,,) = paymentRegistry.payments(paymentId);
         if (payer != msg.sender || merchant != sale_.proceedsReceiver || asset != sale_.paymentAsset
             || amount == 0 || amount > type(uint128).max || receiptHash == bytes32(0)) revert InvalidRefund();
-        _verifyInvoice(invoiceId, saleId, payer, uint128(amount), nonce, sale_);
+        _verifyInvoice(invoiceId, paymentId, saleId, payer, uint128(amount), nonce, sale_);
         if (!_refundDelivered(paymentId, payer, uint128(amount))) revert InvalidRefund();
         usedPaymentId[paymentId] = true;
         unallocatedRefundRecorded[paymentId] = true;
@@ -458,6 +530,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
             bytes32 paymentId = refs[i];
             uint128 contributionAmount = contributionAmountByPayment[paymentId];
             if (!_refundDelivered(paymentId, msg.sender, contributionAmount)) revert InvalidRefund();
+            reconcileRecordedRefund(paymentId);
             canonicalRefundedContribution += contributionAmount;
         }
 
@@ -485,6 +558,7 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
         if (refs.length == 0) revert InvalidRefund();
         for (uint256 i = 0; i < refs.length; ++i) {
             if (!_refundDelivered(refs[i], participant, contributionAmountByPayment[refs[i]])) revert InvalidRefund();
+            reconcileRecordedRefund(refs[i]);
         }
         usedRefundCommitment[refundCommitment] = true;
         delete preparedRefundCommitment[saleId][participant];

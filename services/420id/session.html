@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>420ID · Session and recovery acceptance</title>
+<link rel="stylesheet" href="/acceptance.css">
+<script type="module" src="/session.mjs"></script>
+</head>
+<body>
+<main>
+<header><p class="brand">420<span>ID</span></p><h1>Verify your account</h1><p>Restricted BongGoggles-scoped session and recovery acceptance. Approved test mailboxes only. No social application, SSO or wallet permissions are enabled.</p></header>
+<section aria-labelledby="email-heading">
+<h2 id="email-heading">1. Verify email</h2>
+<form id="email-start"><label><input id="recover" type="checkbox"> Recover a previously enrolled passkey (sign out first)</label><label for="email">Approved email address</label><input id="email" type="email" autocomplete="email" required maxlength="254"><button type="submit">Send verification code</button></form>
+<form id="email-finish" hidden><label for="secret">Code received by email</label><input id="secret" type="password" autocomplete="one-time-code" required maxlength="43" minlength="43" spellcheck="false"><button type="submit">Verify email</button></form>
+</section>
+<section aria-labelledby="passkey-heading">
+<h2 id="passkey-heading">2. Create and test a passkey</h2>
+<p>Use your device's screen lock, biometric verification, or a compatible external security key. Creating a credential is not proof of login; test it separately.</p>
+<button id="register" type="button" disabled>Create passkey</button>
+<button id="login" type="button">Sign in with passkey</button>
+<button id="replace" type="button" disabled>Replace lost passkey and revoke prior sessions</button>
+</section>
+<section aria-labelledby="session-heading"><h2 id="session-heading">3. Manage sessions</h2><p id="signed-in">Checking session…</p><button id="renew" type="button">Renew session</button><button id="list" type="button">List active sessions</button><button id="logout" type="button">Sign out</button><button id="logout-all" type="button">Sign out all sessions</button><ul id="sessions"></ul></section>
+<section aria-labelledby="receipt-heading">
+<h2 id="receipt-heading">4. Acceptance receipts</h2>
+<p id="status" role="status" aria-live="polite">Ready. Open this page in the browser you intend to test.</p>
+<ul id="receipts" aria-live="polite"></ul>
+<p>Receipts identify verified ceremony outcomes, not authenticator hardware type or production readiness. Record browser/OS and device type separately, without entering passwords or verification codes in a report.</p>
+</section>
+</main>
+</body>
+</html>

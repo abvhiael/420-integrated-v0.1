@@ -93,3 +93,61 @@ fallback. The acceptance service preserves the approved-mailbox restriction
 and adds a durable global 90 email starts/UTC day cap. See LIVE-ACCEPTANCE.md.
 No provider account, deployment, DNS verification or external delivery is
 claimed by the repository implementation.
+
+
+## AUTH-3 — account recovery and application sessions
+
+The server-owned SessionManager consumes one fresh AUTH-2 proof (five-minute
+maximum age) per issuance or recovery, with durable one-time proof consumption,
+and binds opaque random 256-bit bearers to the approved application, exact RP,
+account revision and stable application subject. Only SHA-256 digests persist.
+Session policy: 24-hour idle window, seven-day absolute lifetime, explicit
+rotation on renewal (no grace window or rolling absolute expiry), maximum
+100 active sessions per account/application/RP. Each request rechecks current
+account activity and revision. Individual logout, listing, targeted revocation and
+all-session revocation are scoped to the current application/RP; recovery advances
+the account revision and revokes prior sessions across application scopes.
+Session validation is not a durable authorization grant; an application must
+validate each request and establish its own permissions in subsequent steps.
+
+Recovery is explicitly selected and uses the existing verified email login method
+as its independent recovery authority. It cannot provision unknown mailboxes,
+replace an existing passkey without a valid new user-verified WebAuthn registration,
+or use the old session as recovery proof. Five-minute recovery ceremonies bind to
+the initiating browser and application/RP; invalid or cancelled replacement leaves
+the old credential intact. Successful replacement atomically removes the old
+credential, installs the different key, advances revision, revokes all prior
+sessions and consumes outstanding email challenges, preserving account identity and
+app subjects. Sign in afresh after recovery. No wallet, asset or identity
+controller authority changes. Mailbox compromise remains a material risk of the
+already-authorized email authentication model; lost mailbox and passkey together
+have no bypass or administrator impersonation mechanism.
+
+The existing `AUTH420_MODE=acceptance` remains AUTH-2 only. Explicit
+`AUTH420_MODE=session-acceptance` exposes the restricted BongGoggles-scoped
+session and recovery harness; the server selects the app, never the client.
+The same approved mailbox allowlist, HTTPS/Origin checks, request limits,
+browser ceremony binding, security headers and rate caps apply. Secure HttpOnly
+SameSite Strict host-only session cookie; no bearer in JSON, JS storage or logs.
+Sign out before switching accounts or starting passkey recovery in that browser.
+The standalone acceptance page is not public social-application integration,
+cross-app SSO, a wallet session or unrestricted release.
+
+Before deploying the optional mode apply migration 004 using the privileged
+operator path, then separately extend the runtime role with only:
+```sql
+GRANT SELECT,INSERT ON account420.app_subjects TO account420_runtime;
+GRANT INSERT,DELETE ON account420.session_proof_uses TO account420_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON account420.sessions TO account420_runtime;
+GRANT SELECT,INSERT,UPDATE,DELETE ON account420.recovery_challenges TO account420_runtime;
+GRANT DELETE ON account420.passkeys TO account420_runtime;
+```
+Proof cleanup also requires SELECT(expires_at) on session_proof_uses; use
+`GRANT SELECT(expires_at) ON account420.session_proof_uses TO account420_runtime;`.
+Keep existing AUTH-2 runtime grants, do not grant DDL, and do not replace the
+qualified live AUTH-2 environment with this mode until deployment is authorized.
+No secret should be placed in source control. Existing testnet device and
+administrative deferrals are unchanged. The AUTH-3 repository-level qualification
+uses the existing exact-head PostgreSQL/race workflow with session and recovery
+integration tests; live mode acceptance is separate.
+

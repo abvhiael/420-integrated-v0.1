@@ -1,0 +1,47 @@
+{
+  "step": "TOKEN-AUDIT-5.12",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "3c6ba1f0da9e532b7986be882b3f754262d8ed6b",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-management.js",
+    "wallet/web/token-management-ui.js",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "wallet/web/core/token-app.js",
+    "wallet/web/apps.css",
+    "wallet/web/test/token-management.test.js",
+    "wallet/web/test/token-security.test.js",
+    ".github/workflows/420token-audit.yml",
+    "docs/apps/token/user-guide.md",
+    ".qualification/candidates/TOKEN-AUDIT-5.12-security.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-security.test.js",
+      "owner": "Token ownership and permission security and inherited SDK regressions"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Rendered ownership and permission controls and browser regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Verify canonical ownership and targeted on-chain permissions; no false comprehensive enumeration or creator-to-owner conflation; exact scoped revocation through existing Wallet authorization",
+    "Bind high-risk acknowledgements, current authority, recovery and runtime state to one current review; cancel stale and in-flight work; fail closed on forged context, unsafe mutation or receipt",
+    "Mounted responsive controls and adversarial tests; preserve frozen contracts and prior passing qualification; no live claim"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

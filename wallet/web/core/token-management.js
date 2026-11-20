@@ -222,7 +222,7 @@ export async function prepareTokenManagement420(provider,runtime,row,account,con
 }
 export function sameTokenManagementReview420(a,b){
   return ['controller','smartAccount','chainId','target','templateId','tokenCodeHash','action','executionHash','gasUnits','gasPriceWei','estimatedGasWei','authorizationEpoch','authorizationPolicyVersion'].every(k=>a[k]===b[k])&&
-    a.release.dependencyRoot===b.release.dependencyRoot&&a.release.manifestHash===b.release.manifestHash&&JSON.stringify(a.state)===JSON.stringify(b.state)&&JSON.stringify(a.events)===JSON.stringify(b.events)&&JSON.stringify(a.security)===JSON.stringify(b.security);
+    a.release.dependencyRoot===b.release.dependencyRoot&&a.release.manifestHash===b.release.manifestHash&&JSON.stringify(a.state)===JSON.stringify(b.state)&&JSON.stringify(a.events)===JSON.stringify(b.events)&&JSON.stringify(a.security)===JSON.stringify(b.security)&&JSON.stringify(a.accountAuthority)===JSON.stringify(b.accountAuthority);
 }
 export async function readTokenManagementReceipt420(provider,record,binding){
   const review=record.review,hash=normalizeTransactionHash420(record.txHash);

@@ -98,6 +98,7 @@ export async function discoverWalletTokenRuntime420(provider, config, controller
     controllerIsOwner:fresh.deployed && fresh.controllerIsOwner===true,
     authorizationEpoch:fresh.deployed?fresh.authorizationEpoch.toString():null,
     authorizationPolicyVersion:fresh.deployed?fresh.authorizationPolicyVersion.toString():null,
+    recoveryAuthority:fresh.deployed?fresh.recoveryAuthority:null,pendingRecoveryOwner:fresh.deployed?fresh.pendingRecoveryOwner:null,recoveryExecutableAt:fresh.deployed?fresh.recoveryExecutableAt.toString():null,
     runtime, verificationBlock:runtime.verificationBlock,
     // Discovery is not authorization or confirmation. Re-verify at handoff.
     authority:'DISCOVERY_ONLY', accountGrant:false, spendingAuthority:false,
@@ -300,17 +301,23 @@ export function createTokenDiscoverySession420() {
     const canonical=async b=>{const at=await provider.request('eth_getBlockByNumber',[b.number,false]);check(at?.number===b.number&&at.hash?.toLowerCase()===b.hash,'Management block reorganized');};
     await canonical(portfolio.page.block);if(prior)await canonical(prior.block);
     const fresh=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
-    const sameAccount=x=>x.deployed&&x.controllerIsOwner&&x.smartAccount===expected.smartAccount&&x.controller===expected.controller&&x.authorizationEpoch===expected.authorizationEpoch&&x.authorizationPolicyVersion===expected.authorizationPolicyVersion;
+    const sameAccount=x=>x.deployed&&x.controllerIsOwner&&x.smartAccount===expected.smartAccount&&x.controller===expected.controller&&x.authorizationEpoch===expected.authorizationEpoch&&x.authorizationPolicyVersion===expected.authorizationPolicyVersion&&x.recoveryAuthority===expected.recoveryAuthority&&x.pendingRecoveryOwner===expected.pendingRecoveryOwner&&x.recoveryExecutableAt===expected.recoveryExecutableAt;
     check(sameAccount(fresh)&&sameRelease(fresh.runtime,expected.runtime),'SmartAccount authority or Token release changed');
     const pinned={request:(method,params=[])=>{if(['eth_getCode','eth_call'].includes(method)&&params[1]==='latest')params=[params[0],fresh.verificationBlock.number];return provider.request(method,params);}};
     const pinnedAccount=await discoverSmartAccount(pinned,host.controller,walletAccountConfig(host.config));
-    check(pinnedAccount.smartAccount===expected.smartAccount&&pinnedAccount.controllerIsOwner&&pinnedAccount.deployed&&pinnedAccount.authorizationEpoch.toString()===expected.authorizationEpoch&&pinnedAccount.authorizationPolicyVersion.toString()===expected.authorizationPolicyVersion,'Pinned SmartAccount authority changed');
+    check(pinnedAccount.smartAccount===expected.smartAccount&&pinnedAccount.controllerIsOwner&&pinnedAccount.deployed&&pinnedAccount.authorizationEpoch.toString()===expected.authorizationEpoch&&pinnedAccount.authorizationPolicyVersion.toString()===expected.authorizationPolicyVersion&&pinnedAccount.recoveryAuthority===expected.recoveryAuthority&&pinnedAccount.pendingRecoveryOwner===expected.pendingRecoveryOwner&&pinnedAccount.recoveryExecutableAt.toString()===expected.recoveryExecutableAt,'Pinned SmartAccount authority changed');
+    const accountCode=await provider.request('eth_getCode',[expected.smartAccount,fresh.verificationBlock.number]);check(/^0x(?:[0-9a-fA-F]{2})+$/.test(accountCode)&&!/^0x0+$/i.test(accountCode),'Invalid SmartAccount runtime');
+    const accountAuthority=Object.freeze({owner:pinnedAccount.owner,epoch:expected.authorizationEpoch,policyVersion:expected.authorizationPolicyVersion,recoveryAuthority:expected.recoveryAuthority,pendingRecoveryOwner:expected.pendingRecoveryOwner,recoveryExecutableAt:expected.recoveryExecutableAt,codeHash:tokenHashHex420(accountCode)});
+    if(prior)check(JSON.stringify(prior.accountAuthority)===JSON.stringify(accountAuthority),'SmartAccount runtime or recovery state changed');
     const prepared=await prepareTokenManagement420(provider,fresh.runtime,row,fresh.smartAccount,fresh.controller,action,source);
     const after=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
     check(sameAccount(after)&&sameRelease(after.runtime,fresh.runtime)&&after.verificationBlock.hash===fresh.verificationBlock.hash&&after.verificationBlock.number===fresh.verificationBlock.number,'Management simulation block or authority changed; refresh review');
+    check(tokenHashHex420(await provider.request('eth_getCode',[expected.smartAccount,fresh.verificationBlock.number]))===accountAuthority.codeHash,'SmartAccount runtime changed');
     await canonical(fresh.verificationBlock);await canonical(portfolio.page.block);if(prior)await canonical(prior.block);
     await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,expected.runtime.chainId);active();
-    const quote=Object.freeze({...prepared,authorizationEpoch:fresh.authorizationEpoch,authorizationPolicyVersion:fresh.authorizationPolicyVersion});
+    const pending=accountAuthority.pendingRecoveryOwner!=='0x'+'0'.repeat(40);
+    const security=pending?Object.freeze({...prepared.security,warnings:Object.freeze([...prepared.security.warnings,'A SmartAccount recovery is pending. Review the recovery owner and executable time; management authority may change.'])}):prepared.security;
+    const quote=Object.freeze({...prepared,security,accountAuthority,authorizationEpoch:fresh.authorizationEpoch,authorizationPolicyVersion:fresh.authorizationPolicyVersion});
     managementQuotes.set(quote,{row,action,input:source,expected,portfolioVersion,attempt,revision});managementBindings.set(quote,revision);return quote;
   }
   async function inspectManagementPermissions(row,input={}){

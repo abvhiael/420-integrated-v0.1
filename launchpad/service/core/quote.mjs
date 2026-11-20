@@ -16,6 +16,7 @@ function positive(v){if(typeof v!=='string'||!/^[1-9][0-9]{0,77}$/.test(v)||BigI
 export async function convertedCheckoutQuote(rpc,rt,payload){
   const account=address(payload.account),saleId=hash(payload.saleId);
   const base=await checkoutContext(rpc,rt,saleId,account,payload.amount,payload.nonce);
+  if(!base.canContribute)throw new Error('campaign no longer eligible for new 420Pay checkout');
   if(!base.registered||!base.invoiceExists||base.paymentId)throw new Error('conversion requires a registered unpaid canonical invoice');
   const marketId=hash(payload.marketId),inputAsset=address(payload.inputAsset),maxInput=positive(String(payload.maxInput)),
     minOutput=positive(String(payload.minOutput));
@@ -46,9 +47,9 @@ export async function convertedCheckoutQuote(rpc,rt,payload){
     impact=decodeUint(data,8),merchant=decodeAddress(data,10),recipient=decodeAddress(data,11),
     invoiceAmount=decodeUint(data,12),expiresAt=decodeUint(data,13);
   if(!NONZERO.test(quoteId)||w(data,1)!==marketId||decodeAddress(data,2).toLowerCase()!==inputAsset||
-    decodeAddress(data,3).toLowerCase()!==settlement||decodeUint(data,4)!==maxInput||
+    decodeAddress(data,3).toLowerCase()!==settlement||decodeUint(data,4)!==maxInput||decodeUint(data,5)!==minOutput||
     quotedSettlement!==BigInt(base.amount)||invoiceAmount!==BigInt(base.amount)||
-    merchant.toLowerCase()!==sale.proceedsReceiver.toLowerCase()||
+    merchant.toLowerCase()!==sale.proceedsReceiver.toLowerCase()||recipient.toLowerCase()!==sale.proceedsReceiver.toLowerCase()||
     decodeUint(data,9)!==quotedAt||quotedAt>expiresAt)throw new Error('converted Pay quote does not settle exact campaign amount');
   if(conversionFee>maxInput||impact>10000n)throw new Error('invalid 420Pay fee or slippage');
   const allowed=decodeUint(await call(rpc,inputAsset,'allowance(address,address)',[wordAddress(account),wordAddress(pool)]));

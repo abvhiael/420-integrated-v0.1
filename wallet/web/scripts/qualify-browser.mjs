@@ -118,10 +118,60 @@ try{
    const wizardAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc20-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
    for(const v of wizardAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': ERC20 wizard '+v.id+' '+v.impact);
    await page.screenshot({path:resolve(artifacts,'erc20-wizard-'+width+'.png'),fullPage:true});
+   // ERC721 uses the same real Wallet catalogue and discovery fixture, not a separate test UI.
+   const nft=token.locator('#token-erc721-wizard');
+   assert.equal(await nft.locator('form').isVisible(),false);
+   const nftChoose=token.locator('button[data-template="ERC721_COLLECTION"]');
+   await nftChoose.click();
+   await token.locator('button[data-template="ERC721_COLLECTION"][aria-pressed="true"]').waitFor();
+   assert.equal(await wizard.locator('form').isVisible(),false);
+   assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
+   await nft.getByLabel('Collection name',{exact:true}).fill('Collection 🌿');
+   await nft.getByLabel('Collection symbol',{exact:true}).fill('NFT');
+   const uri=nft.getByLabel('Collection base URI',{exact:true});
+   await uri.fill('javascript:alert(1)');
+   await nft.getByRole('button',{name:'Prepare ERC721 draft'}).click();
+   assert.match(await nft.locator('#erc721-wizard-status').textContent(),/Executable URI/);
+   await uri.fill('ipfs://bafyexample/{id}.json');
+   await nft.getByRole('button',{name:'Prepare ERC721 draft'}).focus();
+   await page.keyboard.press('Enter');
+   await nft.getByRole('heading',{name:'Prepared collection draft — not submitted'}).waitFor();
+   assert.match(await nft.locator('.token-erc721-preview').textContent(),/ipfs:\/\/bafyexample\/\{id\}\.json/);
+   assert.match(await nft.locator('.token-erc721-preview').textContent(),/0 — minting is separate/);
+   assert.match(await nft.locator('.token-erc721-preview').textContent(),/does not append the ID/);
+   assert.match(await nft.locator('.token-erc721-preview').textContent(),/42 native/);
+   assert.equal(await nft.locator('.token-erc721-preview a, .token-erc721-preview img, .token-erc721-preview iframe').count(),0);
+   await uri.fill('');
+   assert.equal(await nft.locator('.token-erc721-preview').isVisible(),false);
+   await nft.getByRole('button',{name:'Prepare ERC721 draft'}).click();
+   await nft.getByRole('heading',{name:'Prepared collection draft — not submitted'}).waitFor();
+   assert.match(await nft.locator('.token-erc721-preview').textContent(),/Empty base URI/);
+   const nftOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(nftOverflow.scroll<=nftOverflow.client+1,'ERC721 wizard horizontal overflow');
+   const nftAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc721-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   for(const v of nftAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': ERC721 wizard '+v.id+' '+v.impact);
+   await page.screenshot({path:resolve(artifacts,'erc721-wizard-'+width+'.png'),fullPage:true});
+   await page.evaluate(async()=>{
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420.find(p=>p.key==='ERC721_COLLECTION'),false);
+   });
+   await nft.getByRole('button',{name:'Prepare ERC721 draft'}).click();
+   await token.locator('button[data-template="ERC721_COLLECTION"]:disabled').waitFor();
+   await nft.locator('.token-erc721-preview').waitFor({state:'hidden'});
+   assert.match(await nft.locator('#erc721-wizard-status').textContent(),/changed/);
+   await page.evaluate(async()=>{
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420.find(p=>p.key==='ERC721_COLLECTION'),true);
+   });
+   await token.getByRole('button',{name:'Refresh availability'}).click();
+   await token.locator('button[data-template="ERC721_COLLECTION"]:enabled').waitFor();
+   console.log(JSON.stringify({width,erc721Wizard:'PASS',exactURI:true,emptyURI:true,invalidURIRejected:true,zeroInitialSupply:true,
+     draftInvalidated:true,governanceDisabled:true,keyboard:true,nftOverflow,axe:nftAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
    // Re-select fixed so the retained 5.3 stale-selection test still exercises the same profile.
    await choose.click();
    await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
    assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
+   assert.equal(await nft.locator('form').isVisible(),false);
    console.log(JSON.stringify({width,erc20Wizard:'PASS',exactAmount:true,invalidPrecisionRejected:true,capRejected:true,
      draftInvalidated:true,keyboard:true,wizardOverflow,axe:wizardAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 
@@ -149,6 +199,8 @@ try{
    assert.match(await token.locator('#token-catalogue-status').textContent(),/Connect your Wallet/);
    assert.equal(await wizard.locator('form').isVisible(),false);
    assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
+   assert.equal(await nft.locator('form').isVisible(),false);
+   assert.equal(await nft.locator('.token-erc721-preview').isVisible(),false);
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

@@ -10,13 +10,14 @@ export function mountTokenFeeReview420(section,wizard,session){
   const actions=el('div','token-catalogue-controls');
   const simulate=el('button','ghost-button','Simulate and review fees');simulate.type='button';
   const authorize=el('button','ghost-button','Authorize reviewed creation');authorize.type='button';
+  const submit=el('button','ghost-button','Submit authorized creation');submit.type='button';
   const cancel=el('button','ghost-button','Cancel authorization');cancel.type='button';
   const details=el('dl','token-fee-review-details');
   const status=el('p','token-fee-review-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-  actions.append(simulate,authorize,cancel);panel.append(heading,help,details,actions,status);section.append(panel);
-  let shown=null;
+  actions.append(simulate,authorize,submit,cancel);panel.append(heading,help,details,actions,status);section.append(panel);
+  let shown=null,approved=null;
   function render(v){
-    panel.hidden=!v.draft;shown=v.quote;simulate.disabled=!v.draft||v.busy;
+    panel.hidden=!v.draft;shown=v.quote;approved=v.authorization;submit.disabled=!approved||v.busy;simulate.disabled=!v.draft||v.busy;
     authorize.disabled=!v.quote||v.busy||!!v.authorization;cancel.disabled=!v.quote&&!v.busy&&!v.authorization;
     details.replaceChildren();details.hidden=!v.quote;
     if(v.quote){
@@ -39,6 +40,7 @@ export function mountTokenFeeReview420(section,wizard,session){
   const unsubscribe=model.subscribe(render);
   simulate.addEventListener('click',()=>{void model.simulate();});
   authorize.addEventListener('click',()=>{void model.authorize(shown);});
+  submit.addEventListener('click',()=>{void model.submit(approved).then(hash=>{if(hash)void session.checkTransaction(hash);});});
   cancel.addEventListener('click',()=>model.cancel());
   return ()=>{unsubscribe();model.dispose();};
 }

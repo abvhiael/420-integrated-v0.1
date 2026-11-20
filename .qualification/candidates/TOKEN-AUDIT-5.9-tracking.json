@@ -1,0 +1,54 @@
+{
+  "step": "TOKEN-AUDIT-5.9",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "bf43214e5d4bcb541dc88264b0cb13341a0376b1",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-deployment.js",
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-fee-review.js",
+    "wallet/web/test/token-deployment.test.js",
+    "wallet/web/test/token-fee-review.test.js",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "docs/apps/token/user-guide.md",
+    "wallet/web/core/token-app.js",
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/token-fee-review-ui.js",
+    ".github/workflows/420token-audit.yml",
+    ".qualification/candidates/TOKEN-AUDIT-5.9-tracking.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.9-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-deployment.test.js wallet/web/test/token-fee-review.test.js",
+      "owner": "Token SDK and affected Wallet paths; canonical owner workflow includes prior SDK regressions"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Wallet browser tracking and retained regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "One-time explicit Wallet submission of reverified exact SmartAccount transaction with reviewed fee ceilings; no automated resend",
+    "Canonical receipt, transaction, deployment event, Treasury fee event and factory provenance evidence; fail closed on mismatch and reorg",
+    "Mounted Wallet tracking and responsive browser evidence; no live readiness or aggregate step 5 claim"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

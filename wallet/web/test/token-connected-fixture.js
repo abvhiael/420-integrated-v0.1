@@ -1,7 +1,7 @@
 // Browser-safe deterministic connected Wallet RPC fixture shared by discovery and catalogue tests.
 import {encodeGetAddress,encodeAddressGetter,encodeUintGetter,encodeExecute,ZERO_ADDRESS,ZERO_BYTES32} from '../core/abi.js';
-import {fixture,abi,addr,controller,account,state} from './token-test-fixture.js';
-import {tokenReadCall420} from '../core/token-sdk.js';
+import {fixture,abi,addr,controller,account,state,digest,vaultHash} from './token-test-fixture.js';
+import {tokenReadCall420,decodeTokenCreation420,tokenHashText420} from '../core/token-sdk.js';
 
 export function connected() {
   const f=fixture();
@@ -60,4 +60,33 @@ export function connected() {
     return f.provider.request(method,args);
   }};
   return {...f,config,selected,control,tokenControl:f.control,provider,calls};
+}
+
+ // Explicit opt-in synthetic broadcast/receipt fixture. Existing read-only tests
+ // never enable this adapter. The actual reviewed outer calldata is decoded.
+export function enableTokenSubmissionFixture420(f){
+  const original=f.provider.request;let sequence=500;
+  const transactions=new Map(),control={pending:false,reverted:false,reorganized:false,sendError:null,beforeSend:null};
+  f.provider.request=async(method,args=[])=>{
+    const hash=args[0],entry=transactions.get(hash);
+    if(method==='eth_sendTransaction'){
+      f.calls.push([method,args]);control.beforeSend?.();if(control.sendError)throw control.sendError;
+      const tx=args[0],len=Number(BigInt('0x'+tx.data.slice(202,266)));
+      const creation=decodeTokenCreation420('0x'+tx.data.slice(266,266+len*2));
+      const token=addr(77),h=digest(++sequence),blockHash=f.tokenControl.canonicalHash,blockNumber='0x10';
+      const common={address:f.binding.factory.address,blockHash,blockNumber,transactionHash:h,transactionIndex:'0x0',removed:false};
+      const receipt={transactionHash:h,blockHash,blockNumber,transactionIndex:'0x0',status:'0x1',from:tx.from,to:tx.to,gasUsed:'0x100',effectiveGasPrice:tx.gasPrice,logs:[
+        {...common,logIndex:'0x0',topics:[tokenHashText420('TokenDeployed(address,address,bytes32,uint32,bytes32,uint256)'),abi(token),abi(account),creation.template.id],data:abi(1,creation.configHash,42n*10n**18n)},
+        {...common,logIndex:'0x1',topics:[tokenHashText420('CreationFeeDeposited(address,bytes32,uint256)'),abi(f.binding.communityTreasuryVault.address),vaultHash],data:abi(42n*10n**18n)}]};
+      transactions.set(h,{tx:{...tx,hash:h,blockHash,blockNumber,input:tx.data},receipt});return h;
+    }
+    if(method==='eth_getTransactionByHash'){f.calls.push([method,args]);return entry?.tx??null;}
+    if(method==='eth_getTransactionReceipt'){f.calls.push([method,args]);if(!entry||control.pending)return null;return control.reverted?{...entry.receipt,status:'0x0',logs:[]}:structuredClone(entry.receipt);}
+    if(method==='eth_blockNumber'){f.calls.push([method,args]);return '0x10';}
+    if(method==='eth_getBlockByNumber'&&args[0]==='0x10'&&control.reorganized){f.calls.push([method,args]);return {number:'0x10',hash:digest(999)};}
+    if(method==='eth_getCode'&&args[0]===addr(77)&&args[1]==='0x10'){f.calls.push([method,args]);return '0x6001';}
+    if(method==='eth_call'&&args[0].to===f.binding.factory.address&&args[0].data===tokenReadCall420('isFactoryDeployment(address)',['address'],[addr(77)])){f.calls.push([method,args]);return abi(1);}
+    return original(method,args);
+  };
+  return control;
 }

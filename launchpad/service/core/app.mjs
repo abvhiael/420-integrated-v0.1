@@ -3,10 +3,15 @@ import {decodeAddress} from './abi.mjs';
 import {participantState,prepareParticipant,creatorRequest} from './planner.mjs';
 import {position,checkoutContext,transactionStatus} from './consumer.mjs';
 import {convertedCheckoutQuote,convertedCheckoutReview} from './quote.mjs';
+import {prepareCampaignRequest,creatorLifecycle} from './creator.mjs';
+import {creatorReport,creatorCampaigns} from './creator-report.mjs';
+import {CreatorQueue} from './creator-queue.mjs';
 function ok(body,status=200){return {status,body};}
 function fail(error){return {status:error.statusCode||400,body:{error:error.message||String(error)}};}
 const param=(q,key)=>q instanceof URLSearchParams?q.get(key):q?.[key];
-export function createApp({rpc,projection,registryAddress='0x0000000000000000000000000000000000000434',chainId}={}){
+export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.env.LAUNCHPAD_CREATOR_REQUEST_FILE),
+  creatorReportFromBlock=process.env.LAUNCHPAD_CREATOR_REPORT_FROM_BLOCK??null,
+  registryAddress='0x0000000000000000000000000000000000000434',chainId}={}){
   async function runtime(){
     const actualChainId=await rpc.call('eth_chainId',[]);
     if(chainId&&actualChainId.toLowerCase()!==chainId.toLowerCase())throw new Error('configured chainId does not match RPC');
@@ -47,6 +52,26 @@ export function createApp({rpc,projection,registryAddress='0x0000000000000000000
       if(method==='POST'&&m)return ok(await convertedCheckoutReview(rpc,await runtime(),m[1],body||{}));
       m=path.match(/^\/v1\/launchpad\/prepare\/(contribute|claim|refund|bind-identity|register-intent|open-dispute|link-dispute|publish-outcome|recover-unallocated|reconcile-refund)$/);
       if(method==='POST'&&m)return ok(await prepareParticipant(rpc,await runtime(),m[1],body||{}));
+      m=path.match(/^\/v1\/launchpad\/creator\/campaigns\/(0x[0-9a-fA-F]{40})$/);
+      if(method==='GET'&&m)return ok(await creatorCampaigns(rpc,await runtime(),projection,m[1]));
+      m=path.match(/^\/v1\/launchpad\/creator\/report\/(0x[0-9a-fA-F]{40})\/(0x[0-9a-fA-F]{64})$/);
+      if(method==='GET'&&m)return ok(await creatorReport(rpc,await runtime(),m[1],m[2],{fromBlock:creatorReportFromBlock}));
+      m=path.match(/^\/v1\/launchpad\/creator\/requests\/(0x[0-9a-fA-F]{40})$/);
+      if(method==='GET'&&m)return ok({schema:'420-launchpad-creator-receipts-v1',items:creatorQueue.list(m[1])});
+      if(method==='POST'&&path==='/v1/launchpad/creator/prepare'){
+        const rt=await runtime(),request=body?.kind==='LIFECYCLE'?
+          await creatorLifecycle(rpc,rt,body):
+          await prepareCampaignRequest(rpc,rt,body?.draft);
+        return ok(request);
+      }
+      if(method==='POST'&&path==='/v1/launchpad/creator/submit'){
+        const rt=await runtime(),request=body?.kind==='LIFECYCLE'?
+          await creatorLifecycle(rpc,rt,body):
+          await prepareCampaignRequest(rpc,rt,body?.draft);
+        if(body?.requestId?.toLowerCase()!==request.requestId.toLowerCase())
+          return fail(Object.assign(new Error('creator request changed after Wallet signature'),{statusCode:409}));
+        return ok(await creatorQueue.submit(rpc,request,body.signature),202);
+      }
       if(method==='POST'&&path==='/v1/launchpad/creator-requests')return ok(creatorRequest(body||{},await runtime()),202);
       return ok({error:'not found'},404);
     }catch(e){return fail(e);}

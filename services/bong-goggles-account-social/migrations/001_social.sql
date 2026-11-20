@@ -14,10 +14,11 @@ CREATE TABLE IF NOT EXISTS bg_account_social.posts (
  author uuid NOT NULL REFERENCES bg_account_social.members(subject),
  body text NOT NULL CHECK(char_length(body) BETWEEN 1 AND 2000),
  created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
- deleted_at timestamptz
+ deleted_at timestamptz,
+ hidden_at timestamptz
 );
 CREATE INDEX IF NOT EXISTS bg_social_posts_feed ON bg_account_social.posts(created_at DESC,id DESC)
- WHERE deleted_at IS NULL;
+ WHERE deleted_at IS NULL AND hidden_at IS NULL;
 CREATE INDEX IF NOT EXISTS bg_social_posts_author ON bg_account_social.posts(author,created_at DESC);
 CREATE TABLE IF NOT EXISTS bg_account_social.comments (
  id uuid PRIMARY KEY,
@@ -72,3 +73,23 @@ CREATE TABLE IF NOT EXISTS bg_account_social.login_flows (
  expires_at timestamptz NOT NULL
 );
 CREATE INDEX IF NOT EXISTS bg_social_flow_expiry ON bg_account_social.login_flows(expires_at);
+
+-- Persistent distributed rate limits, no raw IP, email or global account ID.
+CREATE TABLE IF NOT EXISTS bg_account_social.rate_buckets (
+ principal_digest bytea NOT NULL CHECK(octet_length(principal_digest)=32),
+ action text NOT NULL CHECK(char_length(action) BETWEEN 1 AND 24),
+ started_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+ requests integer NOT NULL CHECK(requests>0),
+ PRIMARY KEY(principal_digest,action)
+);
+-- Moderation is off-chain and separate from canonical BongGoggles contracts.
+-- Only privileged operators may write or inspect moderation records.
+CREATE TABLE IF NOT EXISTS bg_account_social.moderation_events (
+ id uuid PRIMARY KEY,
+ post_id uuid NOT NULL REFERENCES bg_account_social.posts(id),
+ action text NOT NULL CHECK(action IN ('hide','restore')),
+ reason text NOT NULL CHECK(char_length(reason) BETWEEN 1 AND 120),
+ operator_ref text NOT NULL CHECK(char_length(operator_ref) BETWEEN 1 AND 100),
+ created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+CREATE INDEX IF NOT EXISTS bg_social_moderation_history ON bg_account_social.moderation_events(post_id,created_at);

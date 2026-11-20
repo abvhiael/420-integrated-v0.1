@@ -3,6 +3,8 @@ package social
 import (
  "bytes"
  "context"
+ "crypto/hmac"
+ "crypto/sha256"
  "encoding/base64"
  "encoding/json"
  "errors"
@@ -94,6 +96,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if !h.allowed(r){deny(w,403);return}
  if r.URL.Path=="/healthz"&&r.Method=="GET"{writeJSON(w,200,map[string]bool{"ready":true});return}
  if r.URL.Path=="/auth/start"&&r.Method=="GET"{
+  if !h.rate(r.Context(),"login",r.RemoteAddr,30){deny(w,429);return}
   if r.URL.RawQuery!=""{deny(w,400);return}
   ctx,cancel:=context.WithTimeout(r.Context(),5*time.Second);defer cancel()
   destination,flow,e:=h.SignOn.Begin(ctx)
@@ -127,6 +130,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  viewer,e:=h.SignOn.Verify(ctx,cookie)
  if errors.Is(e,ErrForbidden)||errors.Is(e,ErrInvalid){deny(w,401);return}
  if e!=nil{deny(w,503);return}
+ if r.Method!="GET"&&!h.rate(ctx,r.URL.Path,viewer,60){deny(w,429);return}
  if r.URL.Path=="/auth/logout"&&r.Method=="POST"{
   if strictJSON(r,&struct{}{})!=nil{deny(w,400);return}
   e=h.SignOn.Logout(ctx,cookie)
@@ -223,4 +227,14 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   writeJSON(w,201,map[string]bool{"received":true});return
  }
  deny(w,404)
+}
+
+// HMAC protects raw network addresses and pseudo-subjects from appearing in
+// rate-limit rows; the key is the server-only session encryption key.
+func (h *Handler) rate(ctx context.Context,action,principal string,limit int)bool{
+ mac:=hmac.New(sha256.New,h.SignOn.key[:]);_,_=mac.Write([]byte(principal))
+ raw:=mac.Sum(nil)
+ if len(action)>24{action="social-write"} // bounded DB schema enum length
+ ok,e:=h.Store.Allow(ctx,raw,action,limit)
+ return e==nil&&ok
 }

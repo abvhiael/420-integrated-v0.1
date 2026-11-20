@@ -45,6 +45,13 @@ func main(){
   if e=social.Migrate(ctx,db);e!=nil{log.Fatal("operator migration failed")}
   log.Print("BongGoggles social schema migrated");return
  }
+ if len(os.Args)==5&&os.Args[1]=="moderate"{
+  db,e:=postgres(required("SOCIAL420_MIGRATION_DATABASE_URL"));if e!=nil{log.Fatal(e)};defer db.Close()
+  store,e:=social.NewStore(db);if e!=nil{log.Fatal(e)}
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second);defer done()
+  if e=store.Moderate(ctx,os.Args[2],os.Args[3],os.Args[4],required("SOCIAL420_OPERATOR_REF"));e!=nil{log.Fatal("Moderation operation denied")}
+  log.Print("Off-chain moderation decision recorded");return
+ }
  if len(os.Args)!=1||os.Getenv("SOCIAL420_MODE")!="restricted-acceptance"{
   log.Fatal("Wallet-independent social service not explicitly enabled")
  }

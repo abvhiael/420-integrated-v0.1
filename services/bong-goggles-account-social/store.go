@@ -50,7 +50,8 @@ func (s *Store) Ready(ctx context.Context)error{
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'SELECT,INSERT'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT,INSERT,DELETE'),false)`).Scan(&ok)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT,INSERT,DELETE'),false)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT,INSERT,UPDATE,DELETE'),false)`).Scan(&ok)
  if e!=nil{return e}
  if !ok{return ErrUnavailable}
  return nil
@@ -136,7 +137,7 @@ func (s *Store) Feed(ctx context.Context,viewer string,before time.Time,beforeID
  rows,e:=s.DB.QueryContext(ctx,`SELECT p.id,p.author,m.display_name,p.body,p.created_at,
  (SELECT count(*) FROM bg_account_social.reactions re WHERE re.post_id=p.id)
  FROM bg_account_social.posts p JOIN bg_account_social.members m ON m.subject=p.author
- WHERE p.deleted_at IS NULL AND (p.created_at,p.id)<($2,$3)
+ WHERE p.deleted_at IS NULL AND p.hidden_at IS NULL AND (p.created_at,p.id)<($2,$3)
  AND NOT EXISTS (SELECT 1 FROM bg_account_social.blocks b WHERE
   (b.blocker=$1 AND b.blocked=p.author) OR (b.blocker=p.author AND b.blocked=$1))
  ORDER BY p.created_at DESC,p.id DESC LIMIT $4`,viewer,before,beforeID,limit)
@@ -149,7 +150,7 @@ func (s *Store) Comments(ctx context.Context,viewer,postID string)([]Comment,err
  if !uuid.MatchString(viewer)||!uuid.MatchString(postID){return nil,ErrInvalid}
  var exists bool
  e:=s.DB.QueryRowContext(ctx,`SELECT EXISTS(
- SELECT 1 FROM bg_account_social.posts p WHERE p.id=$1 AND p.deleted_at IS NULL
+ SELECT 1 FROM bg_account_social.posts p WHERE p.id=$1 AND p.deleted_at IS NULL AND p.hidden_at IS NULL
  AND NOT EXISTS(SELECT 1 FROM bg_account_social.blocks b WHERE
  (b.blocker=$2 AND b.blocked=p.author) OR (b.blocker=p.author AND b.blocked=$2)))`,postID,viewer).Scan(&exists)
  if e!=nil{return nil,e};if !exists{return nil,ErrNotFound}
@@ -171,7 +172,7 @@ func (s *Store) NewComment(ctx context.Context,viewer,postID,body string)(Commen
  e=s.DB.QueryRowContext(ctx,`WITH inserted AS (
  INSERT INTO bg_account_social.comments(id,post_id,author,body)
  SELECT $1,p.id,$2,$3 FROM bg_account_social.posts p
- WHERE p.id=$4 AND p.deleted_at IS NULL AND NOT EXISTS(
+ WHERE p.id=$4 AND p.deleted_at IS NULL AND p.hidden_at IS NULL AND NOT EXISTS(
  SELECT 1 FROM bg_account_social.blocks b WHERE
  (b.blocker=$2 AND b.blocked=p.author) OR (b.blocker=p.author AND b.blocked=$2))
  RETURNING id,post_id,author,body,created_at)
@@ -189,7 +190,7 @@ func (s *Store) React(ctx context.Context,viewer,postID string,add bool)error{
  }
  var result string
  e:=s.DB.QueryRowContext(ctx,`INSERT INTO bg_account_social.reactions(post_id,subject)
- SELECT p.id,$2 FROM bg_account_social.posts p WHERE p.id=$1 AND p.deleted_at IS NULL
+ SELECT p.id,$2 FROM bg_account_social.posts p WHERE p.id=$1 AND p.deleted_at IS NULL AND p.hidden_at IS NULL
  AND NOT EXISTS(SELECT 1 FROM bg_account_social.blocks b WHERE
  (b.blocker=$2 AND b.blocked=p.author) OR (b.blocker=p.author AND b.blocked=$2))
  ON CONFLICT DO NOTHING RETURNING post_id`,postID,viewer).Scan(&result)
@@ -230,14 +231,55 @@ func (s *Store) Report(ctx context.Context,viewer,postID,reason string)error{
  id,e:=newID();if e!=nil{return e}
  var ret string
  e=s.DB.QueryRowContext(ctx,`INSERT INTO bg_account_social.reports(id,reporter,post_id,reason)
- SELECT $1,$2,p.id,$3 FROM bg_account_social.posts p WHERE p.id=$4 AND p.deleted_at IS NULL
+ SELECT $1,$2,p.id,$3 FROM bg_account_social.posts p WHERE p.id=$4 AND p.deleted_at IS NULL AND p.hidden_at IS NULL
  ON CONFLICT(reporter,post_id) DO NOTHING RETURNING id`,id,viewer,reason,postID).Scan(&ret)
  if errors.Is(e,sql.ErrNoRows){return ErrConflict}
  return e
 }
 func (s *Store) Purge(ctx context.Context)error{
  _,e:=s.DB.ExecContext(ctx,`DELETE FROM bg_account_social.login_flows WHERE expires_at<=clock_timestamp();
- DELETE FROM bg_account_social.sessions WHERE expires_at<=clock_timestamp()`)
+ DELETE FROM bg_account_social.sessions WHERE expires_at<=clock_timestamp();
+ DELETE FROM bg_account_social.rate_buckets WHERE started_at<clock_timestamp()-interval '2 minutes'`)
  return e
 }
 var _=hex.EncodeToString
+
+// Allow applies an atomic distributed one-minute write budget. Both rate-limit
+// dependencies and safety checks fail closed; the browser cannot choose the
+// principal hash or bypass the cap by sending another wallet/account ID.
+func (s *Store) Allow(ctx context.Context,key []byte,action string,limit int)(bool,error){
+ if len(key)!=32||action==""||len(action)>24||limit<1{return false,ErrInvalid}
+ var count int
+ e:=s.DB.QueryRowContext(ctx,`INSERT INTO bg_account_social.rate_buckets
+ (principal_digest,action,started_at,requests)
+ VALUES($1,$2,clock_timestamp(),1)
+ ON CONFLICT(principal_digest,action) DO UPDATE SET
+ requests=CASE WHEN bg_account_social.rate_buckets.started_at<clock_timestamp()-interval '1 minute'
+ THEN 1 ELSE bg_account_social.rate_buckets.requests+1 END,
+ started_at=CASE WHEN bg_account_social.rate_buckets.started_at<clock_timestamp()-interval '1 minute'
+ THEN clock_timestamp() ELSE bg_account_social.rate_buckets.started_at END
+ RETURNING requests`,key,action).Scan(&count)
+ if e!=nil{return false,e}
+ return count<=limit,nil
+}
+
+// Moderate is only for a separate operator credential/CLI, not the service
+// runtime role. It records each decision atomically and never alters the
+// canonical on-chain BongGoggles moderation system.
+func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator string)error{
+ if !uuid.MatchString(postID)||(action!="hide"&&action!="restore")||
+ !safeText(reason,120,false)||!safeText(operator,100,false){return ErrInvalid}
+ tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
+ id,e:=newID();if e!=nil{return e}
+ var affected string
+ value:=action=="hide"
+ e=tx.QueryRowContext(ctx,`UPDATE bg_account_social.posts SET hidden_at=
+ CASE WHEN $2 THEN clock_timestamp() ELSE NULL END
+ WHERE id=$1 AND deleted_at IS NULL RETURNING id`,postID,value).Scan(&affected)
+ if errors.Is(e,sql.ErrNoRows){return ErrNotFound}
+ if e!=nil{return e}
+ _,e=tx.ExecContext(ctx,`INSERT INTO bg_account_social.moderation_events
+ (id,post_id,action,reason,operator_ref) VALUES($1,$2,$3,$4,$5)`,id,postID,action,reason,operator)
+ if e!=nil{return e}
+ return tx.Commit()
+}

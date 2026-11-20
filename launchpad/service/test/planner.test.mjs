@@ -5,3 +5,27 @@ class FakeRpc{async selector(sig){return {'contribute(bytes32,uint128,bytes32)':
 test('participant transaction planner binds exact canonical targets',async()=>{const rpc=new FakeRpc();const contribution=await prepareParticipant(rpc,runtime,'contribute',{saleId:sale,amount:'100',paymentId:payment});assert.equal(contribution.transaction.to,runtime.allocationRegistryAddress);assert.match(contribution.transaction.data,/^0xaaaa0001/);const claim=await prepareParticipant(rpc,runtime,'claim',{saleId:sale,deliveryCommitment:delivery});assert.equal(claim.transaction.to,runtime.allocationRegistryAddress);const refund=await prepareParticipant(rpc,runtime,'refund',{saleId:sale});assert.equal(refund.transaction.to,runtime.crowdfundingIntegrationAddress);const record=await prepareParticipant(rpc,runtime,'refund',{saleId:sale,refundCommitment:payment});assert.equal(record.transaction.to,runtime.allocationRegistryAddress);assert.match(record.transaction.data,/^0xaaaa0004/);});
 test('participant status is read directly from allocation registry',async()=>{assert.deepEqual(await participantState(new FakeRpc(),runtime,sale,account),{contributed:'400',claimed:'25',refunded:true});});
 test('creator workflow remains a governance request, not a direct transaction',()=>{const r=creatorRequest({action:'activate',account,saleId:sale},runtime);assert.equal(r.requiresGovernance,true);assert.equal(r.authorityTarget,runtime.saleRegistryAddress);assert.equal(r.transaction,undefined);assert.throws(()=>creatorRequest({action:'steal',account},runtime),/unsupported/);});
+
+test('Identity, registered-intent, dispute-link and refund recovery reviews use canonical targets',async()=>{
+  const selectors=new Map([
+    ['bindIdentity(bytes32)','0x01020301'],['registerContributionIntent(bytes32,uint128,uint256)','0x01020302'],
+    ['linkDispute(bytes32,bytes32)','0x01020303'],['publishFinalizedDisputeOutcome(bytes32,address)','0x01020304'],
+    ['reconcileUnallocatedRefund(bytes32,bytes32)','0x01020305'],['reconcileRecordedRefund(bytes32)','0x01020306']
+  ]);
+  const rpc={selector:async name=>selectors.get(name)};
+  const expected=[
+    ['bind-identity',{profileId:payment},'0x01020301',runtime.crowdfundingIntegrationAddress],
+    ['register-intent',{amount:'40',nonce:'9'},'0x01020302',runtime.crowdfundingIntegrationAddress],
+    ['link-dispute',{caseId:payment},'0x01020303',runtime.crowdfundingIntegrationAddress],
+    ['publish-outcome',{},'0x01020304',runtime.crowdfundingIntegrationAddress],
+    ['recover-unallocated',{paymentId:payment},'0x01020305',runtime.crowdfundingIntegrationAddress],
+    ['reconcile-refund',{paymentId:payment},'0x01020306',runtime.crowdfundingIntegrationAddress]
+  ];
+  for(const [kind,payload,selector,target] of expected){
+    const result=await prepareParticipant(rpc,runtime,kind,{saleId:sale,account,...payload});
+    assert.equal(result.transaction.to,target);assert.ok(result.transaction.data.startsWith(selector));
+    assert.equal(result.canonical,true);
+  }
+  await assert.rejects(()=>prepareParticipant(rpc,runtime,'register-intent',{saleId:sale,account,amount:'0',nonce:'9'}),/invalid contribution intent/);
+  await assert.rejects(()=>prepareParticipant(rpc,runtime,'register-intent',{saleId:sale,account,amount:'1',nonce:'0'}),/invalid contribution intent/);
+});

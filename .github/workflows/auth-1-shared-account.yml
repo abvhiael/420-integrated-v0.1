@@ -1,0 +1,50 @@
+name: AUTH-1 Shared Account Architecture
+on:
+  pull_request:
+    paths:
+      - 'services/420id/**'
+      - '.github/workflows/auth-1-shared-account.yml'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: auth-1-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Shared account unit and PostgreSQL concurrency qualification
+        run: go test -race -tags account420_integration -count=1 -v ./services/420id
+      - name: Static analysis
+        run: go vet -tags account420_integration ./services/420id

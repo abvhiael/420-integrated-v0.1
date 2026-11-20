@@ -458,6 +458,38 @@ contract LaunchpadCrowdfundingIntegration420Test {
         allocations.setCrowdfundingIntegration(address(0x1234));
     }
 
+    function testCannotBindIntegrationToForeignAllocationGraph() public {
+        LaunchpadSaleRegistry420 otherSales = new LaunchpadSaleRegistry420(address(this), address(projects));
+        LaunchpadAllocationRegistry420 other = new LaunchpadAllocationRegistry420(
+            address(allocations.authorization()), address(otherSales)
+        );
+        otherSales.setController(address(other));
+        vm.expectRevert(LaunchpadAllocationRegistry420.InvalidIntegration.selector);
+        other.setCrowdfundingIntegration(address(integration));
+    }
+
+    function testCannotBindAfterOpaqueV1Contribution() public {
+        LaunchpadSaleRegistry420 otherSales = new LaunchpadSaleRegistry420(address(this), address(projects));
+        LaunchpadAllocationRegistry420 other = new LaunchpadAllocationRegistry420(
+            address(allocations.authorization()), address(otherSales)
+        );
+        otherSales.setController(address(other));
+        otherSales.createSale(
+            saleId, projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, ELIGIBILITY, bytes32(0)
+        );
+        otherSales.activate(saleId);
+        vm.warp(10);
+        vm.prank(ALICE);
+        other.contribute(saleId, 100, keccak256("opaque-payment"));
+        LaunchpadCrowdfundingIntegration420 newIntegration = new LaunchpadCrowdfundingIntegration420(
+            address(other), address(pay), address(identity), address(cases), address(rulings)
+        );
+        vm.expectRevert(LaunchpadAllocationRegistry420.InvalidIntegration.selector);
+        other.setCrowdfundingIntegration(address(newIntegration));
+        require(other.crowdfundingIntegration() == address(0), "late integration bound");
+        require(other.contributed(saleId, ALICE) == 100, "base contribution damaged");
+    }
+
     function testSettledPayAndIdentityAreRequiredForContribution() public {
         sales.activate(saleId);
         vm.warp(10);

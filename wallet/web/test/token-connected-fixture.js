@@ -1,7 +1,7 @@
 // Browser-safe deterministic connected Wallet RPC fixture shared by discovery and catalogue tests.
 import {encodeGetAddress,encodeAddressGetter,encodeUintGetter,encodeExecute,ZERO_ADDRESS,ZERO_BYTES32} from '../core/abi.js';
 import {fixture,abi,addr,controller,account,state,digest,vaultHash} from './token-test-fixture.js';
-import {tokenReadCall420,decodeTokenCreation420,tokenHashText420,TOKEN_TEMPLATES_420,tokenEncodeAbi420} from '../core/token-sdk.js';
+import {tokenReadCall420,decodeTokenCreation420,tokenHashText420,TOKEN_TEMPLATES_420,tokenEncodeAbi420,tokenSelector420} from '../core/token-sdk.js';
 
 export function connected() {
   const f=fixture();
@@ -137,3 +137,46 @@ export function enableTokenPortfolioFixture420(f,rows=[]){
   return controls;
 }
 export const portfolioRecord420=(n,profile=TOKEN_TEMPLATES_420[0],creator=account,owner=creator)=>({token:addr(1000+n),profile,creator,owner,configHash:digest(2000+n)});
+
+ // Independent management execution fixture; no automatic signing or sends.
+export function enableTokenManagementFixture420(f,portfolioControl){
+  const original=f.provider.request,txs=new Map();let next=29000;
+  const control={balance:1000000000000000000n,allowance:1000000000000000000n,supply:1000000000000000000n,cap:2000000000000000000n,
+    nftHolder:account,nftApproved:ZERO_ADDRESS,operator:false,delegate:ZERO_ADDRESS,simulationError:false,wrongReturn:false,wrongEvent:false,pending:false,reverted:false,reorg:false,sendError:null,expected:null};
+  const tag='0x10',blockHash=f.tokenControl.canonicalHash;
+  control.expect=(row,data,events,boolReturn=false)=>{control.expected={row,data,events,boolReturn};};
+  f.provider.request=async(method,args=[])=>{
+    const e=control.expected;
+    if(method==='eth_call'&&args[1]===tag){
+      const {to,data}=args[0],row=portfolioControl.rows.find(r=>r.token===to);
+      if(row){
+        const p=row.profile,ints={'mintable()':p.mintable?1:0,'burnable()':p.burnable?1:0,'permitEnabled()':p.permit?1:0,'votesEnabled()':p.votes?1:0,
+          'cap()':p.capped?control.cap:0,'totalSupply()':control.supply,'decimals()':18};
+        for(const [sig,v] of Object.entries(ints))if(data===tokenReadCall420(sig)){f.calls.push([method,args]);return abi(v);}
+        for(const [sig,v] of [['balanceOf(address)',control.balance],['balanceOf(address,uint256)',control.balance],['allowance(address,address)',control.allowance],
+          ['ownerOf(uint256)',control.nftHolder],['getApproved(uint256)',control.nftApproved],['isApprovedForAll(address,address)',control.operator?1:0],['delegates(address)',control.delegate]])
+          if(data.startsWith(tokenSelector420(sig))){f.calls.push([method,args]);return abi(v);}
+      }
+      if(e&&args[0].to===account&&args[0].from===controller&&data===encodeExecute(e.row.token,0n,e.data)){
+        f.calls.push([method,args]);if(control.simulationError)throw Error('management simulation reverted');
+        return control.wrongReturn?'0x':e.boolReturn?abi(32,32,1):abi(32,0);
+      }
+    }
+    if(method==='eth_estimateGas'&&e&&args[0].data===encodeExecute(e.row.token,0n,e.data)){
+      f.calls.push([method,args]);if(args[1]!==tag)throw Error('unpinned management estimate');return f.control.gasEstimate;
+    }
+    if(method==='eth_sendTransaction'&&e&&args[0].data===encodeExecute(e.row.token,0n,e.data)){
+      f.calls.push([method,args]);if(control.sendError)throw control.sendError;
+      const tx=args[0],hash=digest(++next),common={address:e.row.token,transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',removed:false};
+      const logs=e.events.map((v,i)=>({...common,logIndex:'0x'+i.toString(16),topics:[...v.topics],data:v.data}));
+      const receipt={transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',status:'0x1',from:tx.from,to:tx.to,gasUsed:'0x100',effectiveGasPrice:tx.gasPrice,logs};
+      txs.set(hash,{tx:{...tx,hash,blockHash,blockNumber:tag,input:tx.data},receipt});return hash;
+    }
+    if(method==='eth_getTransactionReceipt'&&txs.has(args[0])){f.calls.push([method,args]);if(control.pending)return null;const r=structuredClone(txs.get(args[0]).receipt);if(control.wrongEvent&&r.logs.length)r.logs[0].data='0xdead';if(control.reverted){r.status='0x0';r.logs=[];}return r;}
+    if(method==='eth_getTransactionByHash'&&txs.has(args[0])){f.calls.push([method,args]);return txs.get(args[0]).tx;}
+    if(method==='eth_blockNumber'){f.calls.push([method,args]);return tag;}
+    if(method==='eth_getBlockByNumber'&&args[0]===tag&&control.reorg){f.calls.push([method,args]);return {number:tag,hash:digest(999)};}
+    return original(method,args);
+  };
+  return control;
+}

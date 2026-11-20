@@ -2,12 +2,12 @@
 // message, route parameter or cached result as deployment authority.
 import { normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-runtime.js';
 import { discoverSmartAccount } from './accounts.js';
-import {prepareTokenManagement420,sameTokenManagementReview420,readTokenManagementReceipt420} from './token-management.js';
+import {prepareTokenManagement420,sameTokenManagementReview420,readTokenManagementReceipt420,tokenManagementActions420} from './token-management.js';
 import {readCreatedTokenPage420} from './token-portfolio.js';
 import { readTokenDeployment420 } from './token-deployment.js';
 import { assertWalletChain420, normalizeTransactionHash420 } from './transaction-lifecycle.js';
 import { prepareTokenDeploymentHandoff420 } from './token-handoff.js';
-import { validateTokenCreationEncoding420, tokenHashHex420, tokenReadCall420 } from './token-sdk.js';
+import { validateTokenCreationEncoding420, tokenHashHex420, tokenReadCall420, readTokenRecord420 } from './token-sdk.js';
 import { TOKEN_CREATION_FEE_WEI_420 } from './token-runtime.js';
 
 const environments = new Set(['local','devnet','testnet','mainnet']);
@@ -292,7 +292,8 @@ export function createTokenDiscoverySession420() {
     const provider={request:async(method,params=[])=>{active();check(allowed.includes(method),'Non-management RPC method');const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Management review timed out');let timer;try{
       const value=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Management RPC timed out')),remaining);})]);active();return value;
     }finally{clearTimeout(timer);}}};
-    const source=Object.freeze(structuredClone(input));
+    const actionSpec=tokenManagementActions420(row,expected.smartAccount).find(x=>x.key===action);check(actionSpec,'Management action is unavailable');
+    const source=Object.freeze(readTokenRecord420(input,actionSpec.fields.map(x=>x.name),'Token management fields'));
     const canonical=async b=>{const at=await provider.request('eth_getBlockByNumber',[b.number,false]);check(at?.number===b.number&&at.hash?.toLowerCase()===b.hash,'Management block reorganized');};
     await canonical(portfolio.page.block);if(prior)await canonical(prior.block);
     const fresh=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);

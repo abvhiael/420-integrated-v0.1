@@ -12,20 +12,20 @@ export function mountTokenManagement420(parent,session){
   let row=null,options=[],inputs=new Map(),quote=null,approval=null,busy=false,revision=0;
   function clear(){++revision;session.revokeManagement(approval);quote=null;approval=null;busy=false;details.replaceChildren();status.textContent='';buttons();}
   function buttons(){review.disabled=!row||busy||!select.value;authorize.disabled=busy||!quote||!!approval;submit.disabled=busy||!approval;cancel.disabled=!row;select.disabled=busy;for(const x of inputs.values())x.disabled=busy;}
-  function showFields(){clear();form.replaceChildren();inputs=new Map();const action=options.find(x=>x.key===select.value);if(!action)return;
+  function showFields(){clear();form.replaceChildren();inputs=new Map();const action=options.find(x=>x.key===select.value);if(!action){buttons();return;}
     if(action.key==='renounceOwnership'||action.key==='transferOwnership')form.append(el('p',null,'Warning: changing contract ownership can permanently remove your ability to manage owner-only actions.'));
     if(action.key==='mint'&&row.standard!=='ERC20')form.append(el('p',null,'Check the recipient and token ID. ERC721 mint does not check a receiver callback; ERC1155 mint requires compatible contract recipients.'));
     if(action.key==='approve'||action.key==='setApprovalForAll')form.append(el('p',null,'Warning: approvals grant spending or collection permissions. Set zero or false to revoke when applicable.'));
     for(const f of action.fields){const l=el('label',null,f.label),x=el('input');x.type='text';x.autocomplete='off';x.spellcheck=false;x.addEventListener('input',clear);l.append(x);form.append(l);inputs.set(f.name,x);}
     buttons();
   }
-  function selectRow(t){row=t;panel.hidden=false;options=tokenManagementActions420(t,session.getSnapshot().smartAccount);info.textContent=t.token+' · '+t.templateKey+' · current owner at portfolio snapshot: '+t.owner+(t.templateKey==='ERC20_PERMIT'||t.templateKey==='ERC20_VOTES'?' · EIP-2612 uses ECDSA holder signatures, not SmartAccount signatures. Use on-chain approval for this SmartAccount.':'');select.replaceChildren();
+  function selectRow(t){row=t;panel.hidden=false;options=tokenManagementActions420(t,session.getSnapshot().smartAccount);info.textContent=t.token+' · '+t.templateKey+' · current owner at portfolio snapshot: '+t.owner+(t.templateKey==='ERC20_PERMIT'||t.templateKey==='ERC20_VOTES'?' · EIP-2612 uses ECDSA holder signatures, not SmartAccount signatures. Use on-chain approval for this SmartAccount.':'');select.replaceChildren();const placeholder=el('option',null,'Choose an action');placeholder.value='';select.append(placeholder);
     for(const opt of options){const node=el('option',null,opt.label);node.value=opt.key;select.append(node);}showFields();select.focus();}
   function reset(){clear();row=null;panel.hidden=true;buttons();}
   select.addEventListener('change',showFields);
   review.addEventListener('click',async()=>{clear();const attempt=revision;busy=true;buttons();status.textContent='Verifying provenance, authority and simulation…';
     try{const q=await session.reviewManagement(row,select.value,Object.fromEntries([...inputs].map(([k,x])=>[k,x.value])));if(attempt!==revision)return;quote=q;
-      const entries=[['Action',q.label],['Token contract',q.target],['SmartAccount',q.smartAccount],['Gas-paying controller',q.controller],['Chain',String(q.chainId)],...Object.entries(q.params).map(([k,v])=>[k,Array.isArray(v)?v.join(', '):v]),['Exact execution hash',q.executionHash],['Creation fee','0 native $420'],['Gas units',q.gasUnits],['Gas price (wei)',q.gasPriceWei],['Maximum estimated gas',formatERC20Units420(q.estimatedGasWei)+' native $420'],['Simulation block',q.block.number+' · '+q.block.hash]];
+      const entries=[['Action',q.label],['Token contract',q.target],['SmartAccount',q.smartAccount],['Gas-paying controller',q.controller],['Chain',String(q.chainId)],...Object.entries(q.params).map(([k,v])=>[k==='amount'&&row.standard==='ERC20'?'Amount (exact base units)':k,Array.isArray(v)?v.join(', '):v]),['Exact execution hash',q.executionHash],['Creation fee','0 native $420'],['Gas units',q.gasUnits],['Gas price (wei)',q.gasPriceWei],['Maximum estimated gas',formatERC20Units420(q.estimatedGasWei)+' native $420'],['Simulation block',q.block.number+' · '+q.block.hash]];
       for(const [k,v] of entries)details.append(el('dt',null,k),el('dd',null,v));status.textContent='Review exact parameters and gas. Simulation passed; not submitted.';
     }catch(e){if(attempt===revision)status.textContent='Review rejected: '+String(e?.message||'Unavailable').slice(0,240);}
     finally{if(attempt===revision){busy=false;buttons();}}});

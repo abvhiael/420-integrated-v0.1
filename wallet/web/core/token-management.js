@@ -174,6 +174,6 @@ export async function readTokenManagementReceipt420(provider,record,binding){
   }
   const [again,block]=await Promise.all([provider.request('eth_getTransactionReceipt',[hash]),provider.request('eth_getBlockByNumber',[r.blockNumber,false])]);
   await genesis();await assertWalletChain420(provider,review.chainId);
-  if(!again||!same(again.transactionHash,hash)||!same(again.blockHash,r.blockHash)||again.blockNumber!==r.blockNumber||again.status!==r.status||JSON.stringify(again.logs)!==JSON.stringify(r.logs)||!same(block?.hash,r.blockHash)||block?.number!==r.blockNumber)return Object.freeze({txHash:hash,status:'reorganized',confirmations:0n});
+  if(!again||!same(again.transactionHash,hash)||!same(again.blockHash,r.blockHash)||again.blockNumber!==r.blockNumber||again.status!==r.status||JSON.stringify(again.logs)!==JSON.stringify(r.logs)||again.gasUsed!==r.gasUsed||again.effectiveGasPrice!==r.effectiveGasPrice||again.transactionIndex!==r.transactionIndex||!same(again.from,r.from)||!same(again.to,r.to)||!same(block?.hash,r.blockHash)||block?.number!==r.blockNumber)return Object.freeze({txHash:hash,status:'reorganized',confirmations:0n});
   return Object.freeze({txHash:hash,status:result.status,confirmations:result.confirmations,blockNumber:r.blockNumber,gasPaidWei:(used*effective).toString()});
 }

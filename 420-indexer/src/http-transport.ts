@@ -162,6 +162,8 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
 
     const tokenAddress = pathParam420(path, /^\/v1\/token\/deployments\/([^/]+)$/);
     if (tokenAddress !== null) {
+      const requestedChain=url.searchParams.getAll('chainId');
+      if(requestedChain.length!==1||requestedChain[0]!==chainId.toString())return error420(400,'invalid_request','invalid Token chain');
       const token=tokenAddress.toLowerCase();
       if(!/^0x[0-9a-f]{40}$/.test(token)||BigInt(token)===0n) return error420(400,'invalid_request','invalid Token address');
       if(!api.tokenDeployment) return error420(503,'unavailable','Token deployment evidence unavailable');

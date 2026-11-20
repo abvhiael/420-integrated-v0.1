@@ -241,6 +241,7 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   }
 
   async tokenDeployment(chainId: bigint, token: string): Promise<TokenDeployment420|null> {
+    if(this.operational.runtimeState&&!(await this.readiness(chainId)).ready)throw new Error('Token Indexer runtime unavailable');
     return tokenDeploymentState420(this.service.db,chainId,this.tokenBinding,token);
   }
 

@@ -16,6 +16,7 @@ Launchpad does not make a project safe, legitimate, profitable or endorsed merel
 
 - [Getting started](getting-started.md)
 - [User guide](user-guide.md)
+- [Creator studio and governance submission](creator-guide.md)
 - [Concepts](concepts.md)
 - [Architecture](architecture.md)
 - [Permissions](permissions.md)

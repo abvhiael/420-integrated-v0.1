@@ -17,7 +17,7 @@ import (
  "time"
 )
 
-//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css
+//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs
 var acceptanceAssets embed.FS
 
 // AcceptanceConfig deliberately enables only named test mailboxes. The
@@ -25,6 +25,7 @@ var acceptanceAssets embed.FS
 type AcceptanceConfig struct {
  Emails []string
  RateKey []byte
+ SessionApp string // empty preserves AUTH-2; nonempty explicitly enables restricted AUTH-3
  TrustedTLSProxy bool // only for a TLS-terminating, non-bypassable trusted ingress
 }
 type AcceptanceHandler struct {
@@ -32,6 +33,7 @@ type AcceptanceHandler struct {
  emails map[string]bool
  rateKey []byte
  proxy bool
+ sessions *SessionManager
 }
 func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,error){
  if auth==nil||len(c.Emails)==0||len(c.Emails)>50||len(c.RateKey)!=32{return nil,ErrInvalid}
@@ -39,6 +41,7 @@ func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,erro
  for _,email:=range c.Emails{
   normalized,e:=normalizeEmail(email);if e!=nil||h.emails[normalized]{return nil,ErrInvalid};h.emails[normalized]=true
  }
+ if c.SessionApp!=""{var e error;h.sessions,e=NewSessionManager(auth,c.SessionApp);if e!=nil{return nil,e}}
  return h,nil
 }
 
@@ -75,7 +78,7 @@ func browserDigest(r *http.Request)([]byte,error){
  token,e:=decodeToken(found.Value);if e!=nil{return nil,e};d:=sha256.Sum256(token);return d[:],nil
 }
 func (h *AcceptanceHandler) serveAsset(w http.ResponseWriter,r *http.Request,file,content string){
- if file=="acceptance.html"{
+ if file=="acceptance.html"||file=="session.html"{
   if _,e:=browserDigest(r);e!=nil{
    token,err:=randomBytes();if err!=nil{deny(w,503);return}
    http.SetCookie(w,&http.Cookie{Name:flowCookie,Value:encodeBytes(token),Path:"/",Secure:true,HttpOnly:true,SameSite:http.SameSiteStrictMode,MaxAge:1800})
@@ -95,7 +98,8 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if !h.secure(r){deny(w,403);return}
  if r.Method=="GET"{
   switch r.URL.Path{
-  case "/":h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")
+  case "/":if h.sessions!=nil{h.serveAsset(w,r,"session.html","text/html; charset=utf-8")}else{h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")}
+  case "/session.mjs":if h.sessions==nil{deny(w,404);return};h.serveAsset(w,r,"session.mjs","text/javascript; charset=utf-8")
   case "/acceptance.mjs":h.serveAsset(w,r,"acceptance.mjs","text/javascript; charset=utf-8")
   case "/browser.mjs":h.serveAsset(w,r,"browser.mjs","text/javascript; charset=utf-8")
   case "/acceptance.css":h.serveAsset(w,r,"acceptance.css","text/css; charset=utf-8")
@@ -103,7 +107,9 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   };return
  }
  if r.Method!="POST"{deny(w,405);return}
- switch r.URL.Path{case "/v1/email/start","/v1/email/finish","/v1/passkey/register","/v1/passkey/start","/v1/passkey/finish":default:deny(w,404);return}
+ switch r.URL.Path{case "/v1/email/start","/v1/email/finish","/v1/passkey/register","/v1/passkey/start","/v1/passkey/finish":
+ case "/v1/session/status","/v1/session/renew","/v1/session/list","/v1/session/logout","/v1/session/revoke","/v1/session/revoke-all","/v1/recovery/finish":if h.sessions==nil{deny(w,404);return}
+ default:deny(w,404);return}
  // Exact Origin, no credentialed CORS, no alternate host or cross-site POST.
  if len(r.Header.Values("Origin"))!=1||r.Header.Get("Origin")!=h.auth.origin||r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{deny(w,403);return}
  typ,params,e:=mime.ParseMediaType(r.Header.Get("Content-Type"));if e!=nil||typ!="application/json"||len(params)!=0&&!(len(params)==1&&strings.EqualFold(params["charset"],"utf-8"))||r.Header.Get("Content-Encoding")!=""{deny(w,415);return}
@@ -113,6 +119,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if r.ContentLength>maxRequest{deny(w,413);return}
  raw,e:=io.ReadAll(http.MaxBytesReader(w,r.Body,maxRequest));if e!=nil{deny(w,413);return}
  if !uniqueObject(raw){deny(w,400);return}
+ if h.sessions!=nil&&(strings.HasPrefix(r.URL.Path,"/v1/session/")||r.URL.Path=="/v1/recovery/finish"){h.sessionRoute(ctx,w,r,raw,digest);return}
  switch r.URL.Path{
  case "/v1/email/start":
   var body struct{Email string};if !decodeRequest(raw,&body){deny(w,400);return}
@@ -125,13 +132,27 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   }
   reply(w,200,EmailStart{id})
  case "/v1/email/finish":
-  var body struct{ChallengeID string;Secret string};if !decodeRequest(raw,&body){deny(w,400);return}
+  var body struct{ChallengeID string;Secret string;Recover *bool};if !decodeRequest(raw,&body)||h.sessions==nil&&body.Recover!=nil{deny(w,400);return}
+  if h.sessions!=nil&&!h.canLogin(ctx,w,r){return}
   if !h.bound(ctx,body.ChallengeID,"email",digest){deny(w,401);return}
   result,e:=h.auth.FinishEmail(ctx,body.ChallengeID,body.Secret)
   if e!=nil||!h.approved(ctx,result.Proof.AccountID()){deny(w,401);return}
   if result.Registration!=nil&&h.bind(ctx,result.Registration.ChallengeID,"register",digest,5)!=nil{deny(w,503);return}
   receipt,e:=h.receipt(ctx,"email_verified");if e!=nil{deny(w,503);return}
-  reply(w,200,map[string]any{"verified":true,"registration":result.Registration,"receipt":receipt})
+  response:=map[string]any{"verified":true,"registration":result.Registration,"receipt":receipt}
+  if h.sessions!=nil{
+   if body.Recover!=nil&&*body.Recover{
+    // A new account can use its initial registration; recovery itself requires
+    // an existing credential. Do not issue a session on a recovery proof.
+    if result.Registration!=nil{deny(w,401);return}
+    options,e:=h.sessions.BeginRecovery(ctx,result.Proof,digest);if e!=nil{deny(w,401);return}
+    response["recovery"]=options
+   }else{
+    grant,e:=h.sessions.Issue(ctx,result.Proof);if e!=nil{deny(w,503);return}
+    setSessionCookie(w,grant);response["session"]=grant.Session
+   }
+  }
+  reply(w,200,response)
  case "/v1/passkey/register":
   var body struct{ChallengeID string;RegistrationResponse};if !decodeRequest(raw,&body){deny(w,400);return}
   if !h.bound(ctx,body.ChallengeID,"register",digest)||!h.registrationApproved(ctx,body.ChallengeID){deny(w,401);return}
@@ -143,10 +164,13 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   if h.bind(ctx,options.ChallengeID,"login",digest,5)!=nil{deny(w,503);return};reply(w,200,options)
  case "/v1/passkey/finish":
   var body struct{ChallengeID string;AssertionResponse};if !decodeRequest(raw,&body){deny(w,400);return}
+  if h.sessions!=nil&&!h.canLogin(ctx,w,r){return}
   if !h.bound(ctx,body.ChallengeID,"login",digest){deny(w,401);return}
   result,e:=h.auth.FinishPasskeyLogin(ctx,body.ChallengeID,body.AssertionResponse)
   if e!=nil||!h.approved(ctx,result.AccountID()){deny(w,401);return}
-  receipt,e:=h.receipt(ctx,"passkey_verified");if e!=nil{deny(w,503);return};reply(w,200,map[string]any{"verified":true,"receipt":receipt})
+  receipt,e:=h.receipt(ctx,"passkey_verified");if e!=nil{deny(w,503);return};response:=map[string]any{"verified":true,"receipt":receipt}
+  if h.sessions!=nil{grant,e:=h.sessions.Issue(ctx,result);if e!=nil{deny(w,503);return};setSessionCookie(w,grant);response["session"]=grant.Session}
+  reply(w,200,response)
  }
 }
 // Flat request objects have no ambiguous duplicate fields, even with Go's
@@ -194,6 +218,7 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
  return tx.Commit()
 }
 func (h *AcceptanceHandler) Purge(ctx context.Context)error{
+ if h.sessions!=nil{if e:=h.sessions.PurgeExpired(ctx);e!=nil{return e}}
  if e:=h.auth.PurgeExpired(ctx);e!=nil{return e}
  for _,q:=range []string{
  "DELETE FROM account420.acceptance_flows WHERE expires_at<=clock_timestamp()",

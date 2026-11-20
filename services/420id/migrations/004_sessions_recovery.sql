@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS account420.sessions (
  id uuid PRIMARY KEY,
  account_id uuid NOT NULL REFERENCES account420.accounts(id) ON DELETE RESTRICT,
  app_id text NOT NULL,
+ rp_id text NOT NULL,
  account_revision bigint NOT NULL CHECK(account_revision >= 1),
  token_digest bytea NOT NULL UNIQUE CHECK(octet_length(token_digest)=32),
  method text NOT NULL CHECK(method IN ('email','passkey')),
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS account420.sessions (
  FOREIGN KEY(account_id,app_id) REFERENCES account420.app_subjects(account_id,app_id) ON DELETE RESTRICT,
  CHECK(issued_at < idle_until AND idle_until <= expires_at)
 );
-CREATE INDEX IF NOT EXISTS account420_sessions_account ON account420.sessions(account_id,app_id);
+CREATE INDEX IF NOT EXISTS account420_sessions_account ON account420.sessions(account_id,app_id,rp_id);
 CREATE INDEX IF NOT EXISTS account420_sessions_expiry ON account420.sessions(expires_at);
 CREATE TABLE IF NOT EXISTS account420.recovery_challenges (
  id uuid PRIMARY KEY,

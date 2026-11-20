@@ -81,26 +81,28 @@ func (m *SessionManager) Issue(ctx context.Context,p Authentication)(SessionGran
  tx,e:=m.auth.store.db.BeginTx(ctx,nil);if e!=nil{return SessionGrant{},e};defer tx.Rollback()
  rev,e:=m.lockAccount(ctx,tx,p.id);if e!=nil{return SessionGrant{},e}
  if e=m.consumeProof(ctx,tx,p,rev);e!=nil{return SessionGrant{},e}
+ var active int
+ if e=tx.QueryRowContext(ctx,"SELECT count(*) FROM account420.sessions WHERE account_id=$1 AND app_id=$2 AND rp_id=$3 AND account_revision=$4 AND revoked_at IS NULL AND idle_until>clock_timestamp() AND expires_at>clock_timestamp()",p.id,m.app,m.auth.rp,rev).Scan(&active);e!=nil{return SessionGrant{},e};if active>=100{return SessionGrant{},ErrUnavailable}
  subject,e:=newID();if e!=nil{return SessionGrant{},e}
  if _,e=tx.ExecContext(ctx,"INSERT INTO account420.app_subjects(account_id,app_id,subject_id) VALUES($1,$2,$3) ON CONFLICT(account_id,app_id) DO NOTHING",p.id,m.app,subject);e!=nil{return SessionGrant{},e}
  id,e:=newID();if e!=nil{return SessionGrant{},e}
  token,digest,e:=newSessionToken();if e!=nil{return SessionGrant{},e}
  s,e:=scanSession(tx.QueryRowContext(ctx,`WITH inserted AS (
- INSERT INTO account420.sessions(id,account_id,app_id,account_revision,token_digest,method,issued_at,idle_until,expires_at)
- VALUES($1,$2,$3,$4,$5,$6,statement_timestamp(),statement_timestamp()+interval '24 hours',statement_timestamp()+interval '7 days') RETURNING *)
- SELECT `+sessionColumns+` FROM inserted s JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id`,id,p.id,m.app,rev,digest,p.method))
+ INSERT INTO account420.sessions(id,account_id,app_id,account_revision,rp_id,token_digest,method,issued_at,idle_until,expires_at)
+ VALUES($1,$2,$3,$4,$5,$6,$7,statement_timestamp(),statement_timestamp()+interval '24 hours',statement_timestamp()+interval '7 days') RETURNING *)
+ SELECT `+sessionColumns+` FROM inserted s JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id`,id,p.id,m.app,rev,m.auth.rp,digest,p.method))
  if e!=nil{return SessionGrant{},e};if e=tx.Commit();e!=nil{return SessionGrant{},e}
  return SessionGrant{s.Session,token},nil
 }
 
 const liveSession = "s.revoked_at IS NULL AND s.idle_until>clock_timestamp() AND s.expires_at>clock_timestamp() AND a.status='active' AND a.revision=s.account_revision"
-const sessionJoin = " FROM account420.sessions s JOIN account420.accounts a ON a.id=s.account_id JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id WHERE s.token_digest=$1 AND s.app_id=$2 AND "+liveSession
+const sessionJoin = " FROM account420.sessions s JOIN account420.accounts a ON a.id=s.account_id JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id WHERE s.token_digest=$1 AND s.app_id=$2 AND s.rp_id=$3 AND "+liveSession
 
 // Validate rechecks lifecycle, revision and expiry on every use. The returned
 // projection is not a durable grant: consumers must validate each request.
 func (m *SessionManager) Validate(ctx context.Context,token string)(Session,error){
  d,e:=tokenDigest(token);if e!=nil{return Session{},e}
- s,e:=scanSession(m.auth.store.db.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin,d,m.app))
+ s,e:=scanSession(m.auth.store.db.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin,d,m.app,m.auth.rp))
  return s.Session,e
 }
 
@@ -110,10 +112,10 @@ func (m *SessionManager) Validate(ctx context.Context,token string)(Session,erro
 func (m *SessionManager) lockedSession(ctx context.Context,tx *sql.Tx,token string)(sessionRecord,error){
  d,e:=tokenDigest(token);if e!=nil{return sessionRecord{},e}
  var id AccountID
- e=tx.QueryRowContext(ctx,"SELECT account_id FROM account420.sessions WHERE token_digest=$1 AND app_id=$2",d,m.app).Scan(&id)
+ e=tx.QueryRowContext(ctx,"SELECT account_id FROM account420.sessions WHERE token_digest=$1 AND app_id=$2 AND rp_id=$3",d,m.app,m.auth.rp).Scan(&id)
  if errors.Is(e,sql.ErrNoRows){return sessionRecord{},ErrAuthentication};if e!=nil{return sessionRecord{},e}
  if _,e=m.lockAccount(ctx,tx,id);e!=nil{return sessionRecord{},e}
- return scanSession(tx.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin+" FOR UPDATE OF s",d,m.app))
+ return scanSession(tx.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin+" FOR UPDATE OF s",d,m.app,m.auth.rp))
 }
 
 // Renew rotates the bearer atomically. Old tokens immediately cease to work;
@@ -132,7 +134,7 @@ func (m *SessionManager) Renew(ctx context.Context,token string)(SessionGrant,er
 func (m *SessionManager) List(ctx context.Context,token string)([]Session,error){
  tx,e:=m.auth.store.db.BeginTx(ctx,nil);if e!=nil{return nil,e};defer tx.Rollback()
  s,e:=m.lockedSession(ctx,tx,token);if e!=nil{return nil,e}
- rows,e:=tx.QueryContext(ctx,"SELECT "+sessionColumns+" FROM account420.sessions s JOIN account420.accounts a ON a.id=s.account_id JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id WHERE s.account_id=$1 AND s.app_id=$2 AND "+liveSession+" ORDER BY s.issued_at,s.id LIMIT 100",s.account,m.app)
+ rows,e:=tx.QueryContext(ctx,"SELECT "+sessionColumns+" FROM account420.sessions s JOIN account420.accounts a ON a.id=s.account_id JOIN account420.app_subjects p ON p.account_id=s.account_id AND p.app_id=s.app_id WHERE s.account_id=$1 AND s.app_id=$2 AND s.rp_id=$3 AND "+liveSession+" ORDER BY s.issued_at,s.id LIMIT 100",s.account,m.app,m.auth.rp)
  if e!=nil{return nil,e};defer rows.Close()
  result:=[]Session{}
  for rows.Next(){v,e:=scanSession(rows);if e!=nil{return nil,e};result=append(result,v.Session)}
@@ -154,7 +156,7 @@ func (m *SessionManager) revoke(ctx context.Context,token,target string,all,self
  s,e:=m.lockedSession(ctx,tx,token);if e!=nil{return e}
  if self{target=s.ID}
  var r sql.Result
- if all{r,e=tx.ExecContext(ctx,"UPDATE account420.sessions SET revoked_at=clock_timestamp() WHERE account_id=$1 AND app_id=$2 AND revoked_at IS NULL",s.account,m.app)}else{r,e=tx.ExecContext(ctx,"UPDATE account420.sessions SET revoked_at=clock_timestamp() WHERE account_id=$1 AND app_id=$2 AND id=$3 AND revoked_at IS NULL",s.account,m.app,target)}
+ if all{r,e=tx.ExecContext(ctx,"UPDATE account420.sessions SET revoked_at=clock_timestamp() WHERE account_id=$1 AND app_id=$2 AND rp_id=$3 AND revoked_at IS NULL",s.account,m.app,m.auth.rp)}else{r,e=tx.ExecContext(ctx,"UPDATE account420.sessions SET revoked_at=clock_timestamp() WHERE account_id=$1 AND app_id=$2 AND id=$3 AND rp_id=$4 AND revoked_at IS NULL",s.account,m.app,target,m.auth.rp)}
  if e!=nil{return e};n,e:=r.RowsAffected();if e!=nil{return e};if n==0{return ErrAuthentication};return tx.Commit()
 }
 

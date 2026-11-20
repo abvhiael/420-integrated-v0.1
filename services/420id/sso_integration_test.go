@@ -101,6 +101,8 @@ func TestSSODurableAppScopedTokenAndParentLifecycle(t *testing.T){
  // even when the target app bearer itself is not expired.
  if _,e=db.ExecContext(ctx,"UPDATE account420.sessions SET issued_at=clock_timestamp()-interval '2 days',idle_until=clock_timestamp()-interval '1 second' WHERE id=$1",grant.Session.ID);e!=nil{t.Fatal(e)}
  if state,e:=s2.Introspect(ctx,town,other.AccessToken);e!=nil||state.Active{t.Fatal("expired central session did not invalidate child",e)}
+ target,e:=NewSessionManager(a,"420town");if e!=nil{t.Fatal(e)}
+ deniedSession(t,target,other.AccessToken)
  if e=source.PurgeExpired(ctx);e!=nil{t.Fatal("cleanup",e)}
  if state,e:=s2.Introspect(ctx,town,other.AccessToken);e!=nil||state.Active{t.Fatal("orphan app session survived cleanup",e)}
 }

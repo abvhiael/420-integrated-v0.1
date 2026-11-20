@@ -103,7 +103,13 @@ const sessionJoin = " FROM account420.sessions s JOIN account420.accounts a ON a
 func (m *SessionManager) Validate(ctx context.Context,token string)(Session,error){
  d,e:=tokenDigest(token);if e!=nil{return Session{},e}
  s,e:=scanSession(m.auth.store.db.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin,d,m.app,m.auth.rp))
- return s.Session,e
+ if e!=nil{return Session{},e}
+ if s.Method=="sso"{
+  ok,e:=m.ssoParentActive(ctx,d)
+  if e!=nil{return Session{},e}
+  if !ok{return Session{},ErrAuthentication}
+ }
+ return s.Session,nil
 }
 
 // Every mutating operation acquires the account lock first, then rereads the
@@ -115,7 +121,14 @@ func (m *SessionManager) lockedSession(ctx context.Context,tx *sql.Tx,token stri
  e=tx.QueryRowContext(ctx,"SELECT account_id FROM account420.sessions WHERE token_digest=$1 AND app_id=$2 AND rp_id=$3",d,m.app,m.auth.rp).Scan(&id)
  if errors.Is(e,sql.ErrNoRows){return sessionRecord{},ErrAuthentication};if e!=nil{return sessionRecord{},e}
  if _,e=m.lockAccount(ctx,tx,id);e!=nil{return sessionRecord{},e}
- return scanSession(tx.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin+" FOR UPDATE OF s",d,m.app,m.auth.rp))
+ result,e:=scanSession(tx.QueryRowContext(ctx,"SELECT "+sessionColumns+sessionJoin+" FOR UPDATE OF s",d,m.app,m.auth.rp))
+ if e!=nil{return sessionRecord{},e}
+ if result.Method=="sso"{
+  ok,e:=m.ssoParentActive(ctx,d)
+  if e!=nil{return sessionRecord{},e}
+  if !ok{return sessionRecord{},ErrAuthentication}
+ }
+ return result,nil
 }
 
 // Renew rotates the bearer atomically. Old tokens immediately cease to work;
@@ -168,4 +181,26 @@ func (m *SessionManager) PurgeExpired(ctx context.Context)error{
   "DELETE FROM account420.sessions WHERE expires_at<=clock_timestamp() OR idle_until<=clock_timestamp() OR revoked_at IS NOT NULL",
  }{if _,e=tx.ExecContext(ctx,q);e!=nil{return e}}
  return tx.Commit()
+}
+
+
+// SSO sessions are never independently authoritative once the original
+// verified central session expires, is revoked, or changes account revision.
+// The check is conditional so previously qualified AUTH-2–6 modes do not
+// require migration 008 merely to validate existing email/passkey sessions.
+func (m *SessionManager) ssoParentActive(ctx context.Context,digest []byte)(bool,error){
+ var live bool
+ e:=m.auth.store.db.QueryRowContext(ctx,`SELECT EXISTS(
+ SELECT 1 FROM account420.sessions child
+ JOIN account420.sessions parent ON parent.id=child.sso_source_id
+ JOIN account420.accounts a ON a.id=child.account_id
+ WHERE child.token_digest=$1 AND child.app_id=$2 AND child.rp_id=$3
+ AND child.method='sso' AND child.revoked_at IS NULL
+ AND child.idle_until>clock_timestamp() AND child.expires_at>clock_timestamp()
+ AND parent.account_id=child.account_id AND parent.account_revision=child.account_revision
+ AND parent.rp_id=child.rp_id AND parent.method IN ('email','passkey')
+ AND parent.revoked_at IS NULL AND parent.idle_until>clock_timestamp()
+ AND parent.expires_at>clock_timestamp()
+ AND a.status='active' AND a.revision=child.account_revision)`,digest,m.app,m.auth.rp).Scan(&live)
+ return live,e
 }

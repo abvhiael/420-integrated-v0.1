@@ -73,6 +73,7 @@ func NewSSOManager(source *SessionManager,approved []SSOClient)(*SSOManager,erro
  if source==nil||source.auth==nil||len(approved)==0||len(approved)>20{return nil,ErrInvalid}
  clients:=make(map[string]ssoClient,len(approved))
  usedRedirect:=map[string]bool{}
+ usedSecret:=map[[32]byte]bool{}
  for _,c:=range approved{
   secret,e:=decodeToken(c.Secret)
   if e!=nil||!appPattern.MatchString(c.App)||!source.auth.store.allowed(c.App)||
@@ -80,6 +81,8 @@ func NewSSOManager(source *SessionManager,approved []SSOClient)(*SSOManager,erro
    strings.ContainsAny(c.Name,"<>\r\n")||!validClientRedirect(c.RedirectURI)||
    usedRedirect[c.RedirectURI]||clients[c.App].app!=""{return nil,ErrInvalid}
   digest:=sha256.Sum256(secret)
+  if usedSecret[digest]{return nil,ErrInvalid}
+  usedSecret[digest]=true
   clients[c.App]=ssoClient{app:c.App,name:c.Name,redirect:c.RedirectURI,secretHash:digest}
   usedRedirect[c.RedirectURI]=true
  }

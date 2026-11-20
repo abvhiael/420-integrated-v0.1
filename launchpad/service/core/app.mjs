@@ -1,4 +1,5 @@
 import {resolveLaunchpad} from './rpc.mjs';
+import {decodeAddress} from './abi.mjs';
 import {participantState,prepareParticipant,creatorRequest} from './planner.mjs';
 import {position,checkoutContext,transactionStatus} from './consumer.mjs';
 function ok(body,status=200){return {status,body};}
@@ -9,7 +10,8 @@ export function createApp({rpc,projection,registryAddress='0x0000000000000000000
     const actualChainId=await rpc.call('eth_chainId',[]);
     if(chainId&&actualChainId.toLowerCase()!==chainId.toLowerCase())throw new Error('configured chainId does not match RPC');
     const resolved=await resolveLaunchpad(rpc,{registryAddress});
-    return {schema:'420-launchpad-runtime-v1',canonical:true,chainId:actualChainId,...resolved};
+    const arbitrationCasesAddress=decodeAddress(await rpc.ethCall(resolved.crowdfundingIntegrationAddress,await rpc.selector('arbitrationCases()')));
+    return {schema:'420-launchpad-runtime-v1',canonical:true,chainId:actualChainId,...resolved,arbitrationCasesAddress};
   }
   return async function dispatch({method='GET',path='/',query={},body=null}={}){
     try{

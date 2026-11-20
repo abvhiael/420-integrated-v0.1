@@ -51,3 +51,5 @@ export * from './compute-app-read-model.js';
 export * from './bridge-descriptors.js';
 
 export * from './treasury-indexer.js';
+
+export * from './token-read-model.js';

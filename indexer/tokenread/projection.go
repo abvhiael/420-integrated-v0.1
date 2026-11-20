@@ -138,7 +138,7 @@ func Project(b Binding,cp model.ChainCheckpoint,token string,logs []model.LogRec
  for _,raw:=range logs{
   l:=normalized(raw)
   if l.Address!=Registry&&l.Address!=b.Factory&&l.Address!=b.Vault&&l.Address!=b.Accounting{continue}
-  if l.ChainID!=cp.ChainID||l.BlockNumber>cp.IndexedHeight||!validHash(l.BlockHash)||!validHash(l.TransactionHash){return out,ErrInvalid}
+  if l.ChainID!=cp.ChainID||l.BlockNumber>cp.IndexedHeight||(l.BlockNumber==cp.IndexedHeight&&l.BlockHash!=cp.IndexedHash)||!validHash(l.BlockHash)||!validHash(l.TransactionHash){return out,ErrInvalid}
   key:=strconv.FormatUint(l.BlockNumber,10)+":"+strconv.FormatUint(l.LogIndex,10)
   if seen[key]{return out,ErrInvalid};seen[key]=true;normalizedLogs=append(normalizedLogs,l)
   if l.Address==Registry&&len(l.Topics)>=2&&l.Topics[1]==ServiceID&&(topic(l,Published)||topic(l,Profile)){
@@ -162,11 +162,11 @@ func Project(b Binding,cp model.ChainCheckpoint,token string,logs []model.LogRec
  if !before(*profile,c)||len(c.Topics)!=4||!word(c.Topics[2])||!strings.HasPrefix(c.Topics[2],"0x"+strings.Repeat("0",24))||templates[c.Topics[3]]==""||fields==nil||fields[0]!="0x"+w(1)||fields[2]!="0x"+FeeWord{return out,ErrInvalid}
  creator:="0x"+c.Topics[2][26:]
  var accounting,vault,fee *model.LogRecord
+ var next uint64;hasNext:=false
+ for _,l:=range normalizedLogs{if sameTx(c,l)&&l.Address==b.Factory&&topic(l,Deployed)&&l.LogIndex>c.LogIndex&&(!hasNext||l.LogIndex<next){next=l.LogIndex;hasNext=true}}
  for _,l:=range normalizedLogs{
   if !sameTx(c,l){continue}
-  // Reject multiple factory deployments in the same transaction in this V1
-  // evidence path: fee events are not individually keyed by token address.
-  if l.Address==b.Factory&&topic(l,Deployed)&&l.LogIndex!=c.LogIndex{return out,ErrInvalid}
+  if l.LogIndex<=c.LogIndex||(hasNext&&l.LogIndex>=next){continue}
   if l.Address==b.Factory&&topic(l,Fee){
    if fee!=nil||len(l.Topics)!=3||l.Topics[1]!=aw(b.Vault)||l.Topics[2]!=VaultID||l.Data!="0x"+FeeWord{return out,ErrInvalid};v:=l;fee=&v
   }

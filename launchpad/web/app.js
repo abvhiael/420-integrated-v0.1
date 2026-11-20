@@ -85,6 +85,42 @@ function renderQuote(){const q=state.quote;
     '. Refresh quote after approval or expiry. Gas fees are reviewed in Wallet.':
     'No verified 420Pay conversion quote. The merchant must first create the exact intent invoice.');
   actionState();}
+function localIntentKey(){
+  return state.wallet&&state.selected?'launchpad.intents.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+
+    '.'+state.selected.saleId.toLowerCase():null;
+}
+function savedIntents(){
+  const key=localIntentKey();if(!key)return [];
+  try{
+    const value=JSON.parse(localStorage.getItem(key)||'[]');
+    return Array.isArray(value)?value.filter(v=>v&&/^[1-9][0-9]*$/.test(v.amount)&&/^[1-9][0-9]*$/.test(v.nonce)).slice(-32):[];
+  }catch{return [];}
+}
+function renderLocalIntents(){
+  const node=$('#previous-intents');if(!node)return;
+  node.replaceChildren();
+  const initial=document.createElement('option');initial.value='';initial.textContent='Select an earlier amount and nonce';
+  node.append(initial);
+  const items=savedIntents();
+  for(let i=items.length-1;i>=0;i--){
+    const option=document.createElement('option');option.value=String(i);
+    option.textContent='Amount '+items[i].amount+' / nonce '+items[i].nonce;
+    node.append(option);
+  }
+}
+function persistIntent(){
+  const key=localIntentKey(),amount=$('#contribution-amount')?.value,nonce=$('#intent-nonce')?.value;
+  if(!key||!/^[1-9][0-9]*$/.test(amount||'')||!/^[1-9][0-9]*$/.test(nonce||''))return;
+  const entries=savedIntents().filter(v=>v.nonce!==nonce);
+  entries.push({amount,nonce});localStorage.setItem(key,JSON.stringify(entries.slice(-32)));
+  renderLocalIntents();
+}
+function restoreIntent(){
+  const entries=savedIntents(),last=entries.at(-1);
+  if(last){$('#contribution-amount').value=last.amount;$('#intent-nonce').value=last.nonce;}
+  else{$('#contribution-amount').value='0';$('#intent-nonce').value='';}
+  renderLocalIntents();state.checkout=null;state.quote=null;renderCheckout();renderQuote();
+}
 function renderCheckout(){
   const c=state.checkout;setText('#invoice-id',c?.invoiceId||'-');
   $('#payment-id').value=c?.paymentId||'';
@@ -173,7 +209,7 @@ async function openCampaign(saleId){
   setBusy(true);status('Loading campaign...');
   try{
     const p=await state.service.campaign(saleId);state.selected=normalizeCampaign(p.campaign);
-    state.position=null;state.checkout=null;state.quote=null;state.review=null;renderCheckout();renderQuote();
+    state.position=null;state.checkout=null;state.quote=null;state.review=null;restoreIntent();
     if(state.wallet){
       await refreshPosition();
       const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+saleId.toLowerCase();
@@ -250,14 +286,14 @@ async function checkCheckout(){
   try{
     const q=await state.service.checkout(state.selected.saleId,state.wallet.account,$('#contribution-amount').value,$('#intent-nonce').value);
     if(q.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase())throw new Error('420Pay checkout chain mismatch');
-    state.checkout=q;state.quote=null;renderCheckout();renderQuote();renderRecovery();status('Verified canonical 420Pay invoice and contribution status.');
+    state.checkout=q;state.quote=null;persistIntent();renderCheckout();renderQuote();renderRecovery();status('Verified canonical 420Pay invoice and contribution status.');
   }catch(e){state.checkout=null;renderCheckout();status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
 }
 function newNonce(){
   if(!globalThis.crypto?.getRandomValues)throw new Error('secure nonce generation unavailable');
   const a=new Uint32Array(2);crypto.getRandomValues(a);const value=(BigInt(a[0])<<32n)|BigInt(a[1]);
-  $('#intent-nonce').value=(value||1n).toString();state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();
+  $('#intent-nonce').value=(value||1n).toString();state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();
 }
 const CREATOR=new Set(['setCampaignMode','activate','finalize','cancel']);
 async function creator(event){
@@ -296,7 +332,13 @@ $('#campaign-filters')?.addEventListener('submit',e=>{e.preventDefault();const f
   search:String(f.get('search')||''),mode:String(f.get('mode')||''),state:String(f.get('state')||'')};loadCampaigns(true);});
 $('#refresh-position')?.addEventListener('click',()=>refreshPosition().catch(e=>status(e.message,true)));
 $('#new-intent')?.addEventListener('click',()=>{try{newNonce();}catch(e){status(e.message,true);}});
-$('#contribution-amount')?.addEventListener('input',()=>{state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();});
+$('#contribution-amount')?.addEventListener('input',()=>{state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();});
+$('#previous-intents')?.addEventListener('change',e=>{const i=Number(e.currentTarget.value),entries=savedIntents();
+  if(e.currentTarget.value!==''&&Number.isSafeInteger(i)&&entries[i]){
+    $('#contribution-amount').value=entries[i].amount;$('#intent-nonce').value=entries[i].nonce;
+    state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();
+  }
+});
 for(const id of ['#pay-input-asset','#pay-market','#pay-max-input','#pay-min-output'])$(id)?.addEventListener('input',()=>{state.quote=null;renderQuote();actionState();});
 $('#get-conversion-quote')?.addEventListener('click',checkConversion);
 $('#approve-conversion')?.addEventListener('click',()=>prepare('approve-conversion',conversionTerms()));

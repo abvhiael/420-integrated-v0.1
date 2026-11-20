@@ -3,7 +3,7 @@ import {renderCommunityDirectory} from './community-ui.js';
 import {renderRecommendations} from './discovery-ui.js';
 import {APP_ART,selectGreeting,greetingSrc} from './dashboard-art.js';
 const featured=[["420Exchange","https://420exchange.420integrated.org/"],["420Pay","https://420pay.420integrated.org/"],["420TownSquare","https://town.420integrated.org/"],["DoobTube","https://doobtube.420integrated.org/"],["PuffBuddies","https://puffbuddies.420integrated.org/"],["420Media","https://420media.420integrated.org/"],["420Hz","https://420hz.420integrated.org/"]];
-const extra=[["420Travel","https://420travel.420integrated.org/"],["20Mail","https://20mail.420integrated.org/"],["420Grow","https://420grow.420integrated.org/"],["DOOBr","https://doobr.420integrated.org/"],["Liftd","https://liftd.420integrated.org/"],["420BnB","https://420bnb.420integrated.org/"],["420Bet","https://420bet.420integrated.org/"]];
+const extra=[["420Travel","https://420travel.420integrated.org/"],["20Mail","https://420mail.420integrated.org/"],["420Grow","https://grow.420integrated.org/"],["DOOBr","https://doobr.420integrated.org/"],["Liftd","https://liftd.420integrated.org/"],["420BnB","https://420bnb.420integrated.org/"],["420Bet","https://420bet.420integrated.org/"]];
 export const NAV_LABELS=Object.freeze({home:'Feed',profile:'My Profile',groups:'Communities',pages:'Pages'});
 export function appIcon(name){const key=Object.hasOwn(APP_ART,name)?APP_ART[name]:APP_ART['More dApps'];return '<img class="ecosystem-icon" src="/assets/apps/'+key+'.webp" width="32" height="32" alt="" decoding="async">';}
 export function topNavigation(nav,active){

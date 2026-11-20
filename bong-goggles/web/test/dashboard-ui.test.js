@@ -17,5 +17,5 @@ test('greetings select the visitor local time and retain meaningful alternative 
 test('approved artwork inventory is exact and icons never invent a destination',()=>{
  assert.equal(DASHBOARD_ASSETS.length,14);assert.equal(new Set(DASHBOARD_ASSETS).size,14);
  assert.match(appIcon('420Pay'),/420pay.webp/);assert.match(appIcon('Unknown'),/more-dapps.webp/);
- const rail=ecosystemRail();assert.match(rail,/420arcade.webp/);assert.match(rail,/Launch URL pending/);assert.doesNotMatch(rail,/href="https:\/\/420arcade/);
+ const rail=ecosystemRail();assert.ok(rail.includes('href="https://grow.420integrated.org/"'));assert.ok(rail.includes('href="https://420mail.420integrated.org/"'));assert.ok(!rail.includes('href="https://420grow.420integrated.org/"'));assert.ok(!rail.includes('href="https://20mail.420integrated.org/"'));assert.match(rail,/420arcade.webp/);assert.match(rail,/Launch URL pending/);assert.doesNotMatch(rail,/href="https:\/\/420arcade/);
 });

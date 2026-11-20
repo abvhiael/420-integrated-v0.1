@@ -17,7 +17,7 @@ import (
  "time"
 )
 
-//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs profile.html profile-session.mjs profile-ui.mjs
+//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs profile.html profile-session.mjs profile-ui.mjs wallet.html wallet-session.mjs wallet-ui.mjs
 var acceptanceAssets embed.FS
 
 // AcceptanceConfig deliberately enables only named test mailboxes. The
@@ -27,6 +27,9 @@ type AcceptanceConfig struct {
  RateKey []byte
  SessionApp string // empty preserves AUTH-2; nonempty explicitly enables restricted AUTH-3
  ProfileMode bool // only in explicit profile-acceptance mode with an approved SessionApp
+ WalletMode bool // only in explicitly configured wallet-acceptance mode
+ WalletChainID int64 // positive, server-pinned chain ID
+ ContractVerifier ContractSignatureVerifier // optional verified finalized-chain EIP-1271 client
  TrustedTLSProxy bool // only for a TLS-terminating, non-bypassable trusted ingress
 }
 type AcceptanceHandler struct {
@@ -36,6 +39,7 @@ type AcceptanceHandler struct {
  proxy bool
  sessions *SessionManager
  profiles bool
+ wallet *WalletLinkManager
 }
 func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,error){
  if auth==nil||len(c.Emails)==0||len(c.Emails)>50||len(c.RateKey)!=32{return nil,ErrInvalid}
@@ -46,6 +50,11 @@ func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,erro
  if c.SessionApp!=""{var e error;h.sessions,e=NewSessionManager(auth,c.SessionApp);if e!=nil{return nil,e}}
  if c.ProfileMode&&h.sessions==nil{return nil,ErrInvalid}
  h.profiles=c.ProfileMode
+ if c.WalletMode{
+  if !h.profiles||h.sessions==nil||c.WalletChainID<=0{return nil,ErrInvalid}
+  var err error;h.wallet,err=NewWalletLinkManager(h.sessions,c.WalletChainID,c.ContractVerifier)
+  if err!=nil{return nil,err}
+ }
  return h,nil
 }
 
@@ -82,7 +91,7 @@ func browserDigest(r *http.Request)([]byte,error){
  token,e:=decodeToken(found.Value);if e!=nil{return nil,e};d:=sha256.Sum256(token);return d[:],nil
 }
 func (h *AcceptanceHandler) serveAsset(w http.ResponseWriter,r *http.Request,file,content string){
- if file=="acceptance.html"||file=="session.html"||file=="profile.html"{
+ if file=="acceptance.html"||file=="session.html"||file=="profile.html"||file=="wallet.html"{
   if _,e:=browserDigest(r);e!=nil{
    token,err:=randomBytes();if err!=nil{deny(w,503);return}
    http.SetCookie(w,&http.Cookie{Name:flowCookie,Value:encodeBytes(token),Path:"/",Secure:true,HttpOnly:true,SameSite:http.SameSiteStrictMode,MaxAge:1800})
@@ -102,10 +111,12 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if !h.secure(r){deny(w,403);return}
  if r.Method=="GET"{
   switch r.URL.Path{
-  case "/":if h.profiles{h.serveAsset(w,r,"profile.html","text/html; charset=utf-8")}else if h.sessions!=nil{h.serveAsset(w,r,"session.html","text/html; charset=utf-8")}else{h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")}
+  case "/":if h.wallet!=nil{h.serveAsset(w,r,"wallet.html","text/html; charset=utf-8")}else if h.profiles{h.serveAsset(w,r,"profile.html","text/html; charset=utf-8")}else if h.sessions!=nil{h.serveAsset(w,r,"session.html","text/html; charset=utf-8")}else{h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")}
   case "/session.mjs":if h.sessions==nil{deny(w,404);return};h.serveAsset(w,r,"session.mjs","text/javascript; charset=utf-8")
   case "/profile-session.mjs":if !h.profiles{deny(w,404);return};h.serveAsset(w,r,"profile-session.mjs","text/javascript; charset=utf-8")
   case "/profile-ui.mjs":if !h.profiles{deny(w,404);return};h.serveAsset(w,r,"profile-ui.mjs","text/javascript; charset=utf-8")
+  case "/wallet-session.mjs":if h.wallet==nil{deny(w,404);return};h.serveAsset(w,r,"wallet-session.mjs","text/javascript; charset=utf-8")
+  case "/wallet-ui.mjs":if h.wallet==nil{deny(w,404);return};h.serveAsset(w,r,"wallet-ui.mjs","text/javascript; charset=utf-8")
   case "/acceptance.mjs":h.serveAsset(w,r,"acceptance.mjs","text/javascript; charset=utf-8")
   case "/browser.mjs":h.serveAsset(w,r,"browser.mjs","text/javascript; charset=utf-8")
   case "/acceptance.css":h.serveAsset(w,r,"acceptance.css","text/css; charset=utf-8")
@@ -116,6 +127,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  switch r.URL.Path{case "/v1/email/start","/v1/email/finish","/v1/passkey/register","/v1/passkey/start","/v1/passkey/finish":
  case "/v1/session/status","/v1/session/renew","/v1/session/list","/v1/session/logout","/v1/session/revoke","/v1/session/revoke-all","/v1/recovery/finish":if h.sessions==nil{deny(w,404);return}
  case "/v1/profile/me","/v1/profile/update","/v1/profile/lookup":if !h.profiles{deny(w,404);return}
+ case "/v1/wallet/current","/v1/wallet/start","/v1/wallet/finish","/v1/wallet/unlink":if h.wallet==nil{deny(w,404);return}
  default:deny(w,404);return}
  // Exact Origin, no credentialed CORS, no alternate host or cross-site POST.
  if len(r.Header.Values("Origin"))!=1||r.Header.Get("Origin")!=h.auth.origin||r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{deny(w,403);return}
@@ -126,6 +138,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  if r.ContentLength>maxRequest{deny(w,413);return}
  raw,e:=io.ReadAll(http.MaxBytesReader(w,r.Body,maxRequest));if e!=nil{deny(w,413);return}
  if !uniqueObject(raw){deny(w,400);return}
+ if h.wallet!=nil&&strings.HasPrefix(r.URL.Path,"/v1/wallet/"){h.walletRoute(ctx,w,r,raw,digest);return}
  if h.profiles&&strings.HasPrefix(r.URL.Path,"/v1/profile/"){h.profileRoute(ctx,w,r,raw);return}
  if h.sessions!=nil&&(strings.HasPrefix(r.URL.Path,"/v1/session/")||r.URL.Path=="/v1/recovery/finish"){h.sessionRoute(ctx,w,r,raw,digest);return}
  switch r.URL.Path{
@@ -227,6 +240,7 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
 }
 func (h *AcceptanceHandler) Purge(ctx context.Context)error{
  if h.profiles{if e:=h.profileReady(ctx);e!=nil{return e}}
+ if h.wallet!=nil{if e:=h.wallet.Ready(ctx);e!=nil{return e};if e:=h.wallet.Purge(ctx);e!=nil{return e}}
  if h.sessions!=nil{if e:=h.sessions.PurgeExpired(ctx);e!=nil{return e}}
  if e:=h.auth.PurgeExpired(ctx);e!=nil{return e}
  for _,q:=range []string{

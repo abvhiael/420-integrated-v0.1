@@ -54,6 +54,16 @@
       "binding": "LaunchpadCrowdfundingIntegration420.arbitrationRulings",
       "production_source": "qualified 420Arbitration deployment plus ProtocolRegistry/live manifest",
       "fixed_address_claim": null
+    },
+    "InvoiceRegistry420": {
+      "binding": "Canonical PaymentRegistry420.registry -> ProtocolRegistry active InvoiceRegistry420 with matching runtime hash",
+      "production_source": "qualified 420Pay deployment plus ProtocolRegistry/live manifest",
+      "fixed_address_claim": null
+    },
+    "RefundManager420": {
+      "binding": "Canonical PaymentRegistry420.registry -> ProtocolRegistry active RefundManager420 with matching runtime hash and paymentRegistry binding",
+      "production_source": "qualified 420Pay deployment plus ProtocolRegistry/live manifest",
+      "fixed_address_claim": null
     }
   },
   "deployment_order": [
@@ -61,35 +71,47 @@
       "order": 1,
       "contract": "LaunchpadAuthorization420",
       "source": "contracts/src/launchpad/LaunchpadAuthorization420.sol",
-      "constructor": ["CapabilityRegistry420"],
+      "constructor": [
+        "CapabilityRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 2,
       "contract": "LaunchpadProjectRegistry420",
       "source": "contracts/src/launchpad/LaunchpadProjectRegistry420.sol",
-      "constructor": ["GovernanceTimelock"],
+      "constructor": [
+        "GovernanceTimelock"
+      ],
       "post_init": []
     },
     {
       "order": 3,
       "contract": "LaunchpadSaleRegistry420",
       "source": "contracts/src/launchpad/LaunchpadSaleRegistry420.sol",
-      "constructor": ["GovernanceTimelock", "LaunchpadProjectRegistry420"],
+      "constructor": [
+        "GovernanceTimelock",
+        "LaunchpadProjectRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 4,
       "contract": "LaunchpadAllocationRegistry420",
       "source": "contracts/src/launchpad/LaunchpadAllocationRegistry420.sol",
-      "constructor": ["LaunchpadAuthorization420", "LaunchpadSaleRegistry420"],
+      "constructor": [
+        "LaunchpadAuthorization420",
+        "LaunchpadSaleRegistry420"
+      ],
       "post_init": []
     },
     {
       "order": 5,
       "contract": "LaunchpadSaleRegistry420",
       "action": "setController",
-      "args": ["LaunchpadAllocationRegistry420"],
+      "args": [
+        "LaunchpadAllocationRegistry420"
+      ],
       "one_time": true
     },
     {
@@ -109,14 +131,19 @@
       "order": 7,
       "contract": "LaunchpadAllocationRegistry420",
       "action": "setCrowdfundingIntegration",
-      "args": ["LaunchpadCrowdfundingIntegration420"],
+      "args": [
+        "LaunchpadCrowdfundingIntegration420"
+      ],
       "one_time": true
     },
     {
       "order": 8,
       "contract": "LaunchpadRouter420",
       "source": "contracts/src/launchpad/LaunchpadRouter420.sol",
-      "constructor": ["LaunchpadSaleRegistry420", "LaunchpadAllocationRegistry420"],
+      "constructor": [
+        "LaunchpadSaleRegistry420",
+        "LaunchpadAllocationRegistry420"
+      ],
       "post_init": []
     },
     {

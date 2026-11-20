@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { bindExchangeRuntime } from '../core/deployment.js';
+import { TOKEN_ICON_FILES } from '../core/token-icons.js';
 
 const root=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const dist=path.join(root,'dist');
@@ -51,7 +52,7 @@ let builtHtml=html.replace(marker,'<script type="module" src="./browser-wallet-u
 // Preserve the approved artwork and existing shell route hooks while adding branding.
 const logo='assets/420exchange-logo.png';
 const botanicalArtwork=['assets/sidebar-botanical.png','assets/header-botanical.png','assets/market-card-botanical.png'];
-for(const asset of [logo,...botanicalArtwork]){
+for(const asset of [logo,...botanicalArtwork,...TOKEN_ICON_FILES]){
   const target=path.join(dist,asset);
   if(!fs.existsSync(target)) throw new Error(`approved 420Exchange artwork missing: ${asset}`);
   const bytes=fs.readFileSync(target);
@@ -123,7 +124,7 @@ const buildMeta={
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo,...botanicalArtwork];
+const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo,...botanicalArtwork,...TOKEN_ICON_FILES];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

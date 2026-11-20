@@ -1,4 +1,5 @@
 import {QuoteReviewSession} from './core/quote-review-session.js';
+import {createTokenPairIcons} from './core/token-icons.js';
 import {assertCandidateMatchesEntry,buildMetadataSwapReviewRequest,normalizeReviewCatalogue} from './core/read-only-swap-entry.js';
 
 const full=value=>typeof value==='string'?value:String(value??'');
@@ -46,7 +47,7 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
 
   const form=documentRef.createElement('div');form.className='pre03-entry-grid';
   const marketLabel=documentRef.createElement('label');marketLabel.textContent='Qualified market';
-  const market=documentRef.createElement('select');market.id='v15-review-market';market.setAttribute('aria-label','Qualified market');marketLabel.append(market);form.append(marketLabel);
+  const market=documentRef.createElement('select');market.id='v15-review-market';market.setAttribute('aria-label','Qualified market');marketLabel.append(market);const marketIcons=documentRef.createElement('span');marketIcons.className='selected-market-icons';marketLabel.append(marketIcons);form.append(marketLabel);
   const amountLabel=documentRef.createElement('label');amountLabel.textContent='Input amount';
   const amount=documentRef.createElement('input');amount.id='v15-review-amount';amount.inputMode='decimal';amount.autocomplete='off';amount.setAttribute('aria-label','Input amount');amountLabel.append(amount);form.append(amountLabel);
   const minimumLabel=documentRef.createElement('label');minimumLabel.textContent='Minimum net output';
@@ -87,7 +88,9 @@ export function mountReadOnlySwapReview({documentRef,controller,fetchReview,nowS
   }
   function previewRaw(){
     const cat=catalogue??loadCatalogue(),selected=cat?.markets.find(item=>item.marketId===market.value);
+    marketIcons.replaceChildren();
     if(!selected){raw.textContent='Select a qualified configured market to derive canonical raw units.';return;}
+    marketIcons.append(createTokenPairIcons(documentRef,selected.input.symbol,selected.output.symbol));
     try{
       const entry=buildMetadataSwapReviewRequest({
         runtime:controller.runtime,account:controller.wallet?.session?.account,marketId:selected.marketId,

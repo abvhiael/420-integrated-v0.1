@@ -1,4 +1,5 @@
 import { availability, validateRuntimeConfig } from './core/config.js';
+import { createTokenIcon, createTokenPairIcons } from './core/token-icons.js';
 import { createStatusBadge } from './core/design-system.js';
 import { ExchangeDataLayer } from './core/exchange-data.js';
 import { Watchlist, filterMarkets, freshnessState, normalizeMarket, sortMarkets } from './core/markets.js';
@@ -69,7 +70,7 @@ function marketRow(market){
   watchButton.setAttribute('aria-pressed',String(watched));watchButton.textContent=watched?'★':'☆';watch.append(watchButton);
   const name=document.createElement('td'),marketName=document.createElement('strong'),marketId=document.createElement('small'),marketLink=document.createElement('button');
   marketName.textContent=market.label;marketId.className='market-id';marketId.textContent=market.marketSubjectId;
-  marketLink.type='button';marketLink.className='market-link';marketLink.dataset.openMarket=market.marketSubjectId;marketLink.append(marketName,marketId);name.append(marketLink);
+  marketLink.type='button';marketLink.className='market-link';marketLink.dataset.openMarket=market.marketSubjectId;const pairText=document.createElement('span');pairText.className='market-pair-text';pairText.append(marketName,marketId);marketLink.append(createTokenPairIcons(document,market.baseSymbol,market.quoteSymbol),pairText);name.append(marketLink);
   const last=document.createElement('td');last.className='numeric';last.textContent=formatNumber(market.lastPrice,8);
   const change=document.createElement('td');change.className='numeric';change.textContent=formatChange(market.changePct);change.dataset.direction=market.changePct===null?'flat':market.changePct>=0?'up':'down';
   const spread=document.createElement('td');spread.className='numeric';spread.textContent=`${formatNumber(market.bestBid,8)} / ${formatNumber(market.bestAsk,8)}`;
@@ -92,7 +93,7 @@ function renderMarketOverview(root,visible){
   if(!highlights||!overview)return;
   highlights.replaceChildren(...visible.slice(0,4).map(market=>{
     const card=document.createElement('button');card.type='button';card.className='market-highlight';card.dataset.openMarket=market.marketSubjectId;
-    const symbol=document.createElement('span');symbol.className='market-symbol';symbol.textContent=market.quoteSymbol||market.baseSymbol||'—';symbol.setAttribute('aria-hidden','true');
+    const symbol=createTokenPairIcons(document,market.baseSymbol,market.quoteSymbol);
     const info=document.createElement('span');info.className='highlight-info';
     const name=document.createElement('strong');name.textContent=market.label;
     const price=document.createElement('span');price.className='highlight-price';price.textContent=formatNumber(market.lastPrice,8);
@@ -101,7 +102,7 @@ function renderMarketOverview(root,visible){
   }));
   const market=visible[0];overview.hidden=!market;if(!market){state.overviewRequest++;return;}
   const subject=market.marketSubjectId;
-  root.querySelector('#overview-pair').textContent=market.label+' · Market history';
+  const overviewTitle=root.querySelector('#overview-pair');overviewTitle.textContent=market.label+' · Market history';overviewTitle.prepend(createTokenPairIcons(document,market.baseSymbol,market.quoteSymbol));
   root.querySelector('#overview-open').dataset.openMarket=subject;
   const diagnostics=root.querySelector('#overview-diagnostics');
   const freshness=state.marketSource==='api'?freshnessState(market,Math.floor(Date.now()/1000)):'degraded';
@@ -142,6 +143,7 @@ function renderDetail(fragment){
   const market=selectedMarket();if(!market)return;
   const fields={'#detail-pair':market.label,'#detail-market-id':market.marketSubjectId,'#detail-last':formatNumber(market.lastPrice,8),'#detail-bid':formatNumber(market.bestBid,8),'#detail-ask':formatNumber(market.bestAsk,8),'#detail-volume':formatNumber(market.quoteVolume),'#detail-liquidity':formatNumber(market.liquidity)};
   for(const [selector,value]of Object.entries(fields))fragment.querySelector(selector).textContent=value;
+  fragment.querySelector('#detail-pair').prepend(createTokenPairIcons(document,market.baseSymbol,market.quoteSymbol));
   fragment.querySelector('#detail-window').value=state.detailWindow;fragment.querySelector('#detail-source').textContent=state.detailHistory?.source==='demo'?'DEMO HISTORY · not live':'V13 historical query';
   const fresh=state.marketSource==='demo'?'degraded':freshnessState(market,Math.floor(Date.now()/1000));
   fragment.querySelector('#detail-status').append(createStatusBadge(document,fresh==='canonical'?'canonical':fresh==='stale'?'stale':'degraded'));
@@ -160,6 +162,7 @@ function renderSwap(fragment){
   const quote=state.swapQuote,market=state.markets.find(item=>item.marketSubjectId===quote?.marketSubjectId)??state.markets[0]??null;
   const fields={'#swap-market':market?.label??quote?.marketSubjectId??'—','#swap-amount-in':formatNumber(quote?.amountIn),'#swap-gross-out':formatNumber(quote?.grossAmountOut),'#swap-fee':formatNumber(quote?.feeAmount),'#swap-net-out':formatNumber(quote?.netAmountOut),'#swap-min-out':formatNumber(quote?.finalMinAmountOut)};
   for(const [selector,value]of Object.entries(fields))fragment.querySelector(selector).textContent=value;
+  if(quote)fragment.querySelector('#swap-market').prepend(createTokenPairIcons(document,quote.inputToken,quote.outputToken));
   fragment.querySelector('#swap-slippage').value=String(state.swapSlippageBps/100);
   fragment.querySelector('#swap-source').textContent=quote?.demo?'DEMO QUOTE · review only':'Quote display · execution not qualified';
   fragment.querySelector('#swap-route').replaceChildren(...(quote?.hops??[]).map((hop,index)=>{const li=document.createElement('li');li.textContent=`Hop ${index+1}: ${hop.inputToken} → ${hop.outputToken} · min ${formatNumber(hop.minAmountOut)}`;return li;}));
@@ -234,7 +237,7 @@ async function loadPortfolioData(){
 function renderPortfolio(fragment){
   fragment.querySelector('#portfolio-source').textContent='DEMO PORTFOLIO · not live wallet state';const summary=portfolioSummary(state.portfolioBalances);
   fragment.querySelector('#portfolio-assets').textContent=String(summary.assetCount);fragment.querySelector('#portfolio-canonical-assets').textContent=String(summary.canonicalAssetCount);fragment.querySelector('#portfolio-locked').textContent=formatNumber(summary.totalLocked);
-  fragment.querySelector('#portfolio-balances').replaceChildren(...state.portfolioBalances.map(balance=>{const card=document.createElement('article');card.className='component-card balance-card';const title=document.createElement('h3');title.textContent=balance.symbol;const total=document.createElement('strong');total.textContent=formatNumber(balance.balance);const meta=document.createElement('p');meta.className='muted';meta.textContent=`Available ${formatNumber(balance.available)} · Locked ${formatNumber(balance.locked)} · Source ${balance.source}`;card.append(title,total,meta,createStatusBadge(document,balance.canonical?'canonical':'degraded'));return card;}));
+  fragment.querySelector('#portfolio-balances').replaceChildren(...state.portfolioBalances.map(balance=>{const card=document.createElement('article');card.className='component-card balance-card';const title=document.createElement('h3');title.textContent=balance.symbol;title.prepend(createTokenIcon(document,balance.symbol));const total=document.createElement('strong');total.textContent=formatNumber(balance.balance);const meta=document.createElement('p');meta.className='muted';meta.textContent=`Available ${formatNumber(balance.available)} · Locked ${formatNumber(balance.locked)} · Source ${balance.source}`;card.append(title,total,meta,createStatusBadge(document,balance.canonical?'canonical':'degraded'));return card;}));
   fragment.querySelector('#portfolio-orders').replaceChildren(...state.orders.filter(order=>order.state==='OPEN'||order.state==='PARTIAL').map(order=>{const tr=document.createElement('tr');appendLabeledCells(tr,['Order hash','Sell','Minimum buy','State'],[order.orderHash||'—',`${order.sellAmount} ${order.sellToken}`,`${order.minTotalBuyAmount} ${order.buyToken}`,order.state]);return tr;}));
   fragment.querySelector('#portfolio-activity').replaceChildren(...state.portfolioActivity.map(record=>{const tr=document.createElement('tr');appendLabeledCells(tr,['Kind','Amount','State','Fee','Transaction'],[record.kind,record.amount===null?'—':`${formatNumber(record.amount)} ${record.assetSymbol??''}`,activityState(record),record.feeAmount===null?'—':formatNumber(record.feeAmount),record.txHash??'—']);const provenance=document.createElement('td'),href=explorerHref(state.config?.network?.explorerUrl,record.txHash);if(href){const a=document.createElement('a');a.href=href;a.textContent='Explorer';a.rel='noopener noreferrer';provenance.append(a);}else provenance.textContent='—';provenance.dataset.label='Provenance';tr.append(provenance);return tr;}));
 }

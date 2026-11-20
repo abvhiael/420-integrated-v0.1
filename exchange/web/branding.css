@@ -149,3 +149,25 @@ body[data-exchange-route=markets] #app-view .market-toolbar {margin:8px 0 10px;}
  .brand .exchange-brand-logo {max-height:116px;}
  .topbar {padding:12px 8px 16px;}
 }
+
+/* Asset icons are decorative; the authoritative market labels remain visible. */
+.token-icon {display:inline-grid;place-items:center;position:relative;flex:none;width:36px;height:36px;vertical-align:middle;border-radius:50%;}
+.token-icon img {display:block;width:100%;height:100%;object-fit:contain;}
+.token-icon-fallback {display:grid;place-items:center;width:100%;height:100%;border:1px solid #b9cfad;border-radius:50%;background:#e3ecd9;color:#1c4e30;font-size:10px;font-weight:750;}
+.token-pair-icons {display:inline-flex;align-items:center;flex:none;vertical-align:middle;isolation:isolate;}
+.token-pair-icons .token-icon+.token-icon {margin-left:-11px;z-index:1;}
+.market-highlight .token-icon {width:35px;height:35px;}
+.market-highlight {gap:9px;}
+.market-link {display:inline-flex;align-items:center;gap:8px;}
+.market-pair-text {min-width:0;display:block;}
+.market-table .token-icon {width:24px;height:24px;}
+.market-table .token-pair-icons .token-icon+.token-icon {margin-left:-7px;}
+#overview-pair,#detail-pair,#swap-market,.balance-card h3 {display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+#overview-pair .token-icon {width:26px;height:26px;}
+.selected-market-icons {display:flex;align-items:center;min-width:0;}
+.selected-market-icons:empty {display:none;}
+@media(max-width:520px){
+ .market-highlight {flex-direction:column;gap:6px;}
+ .market-highlight .token-icon {width:28px;height:28px;}
+ .market-highlight .token-pair-icons .token-icon+.token-icon {margin-left:-8px;}
+}

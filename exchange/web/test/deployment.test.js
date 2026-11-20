@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { TOKEN_ICON_FILES } from '../core/token-icons.js';
 
 test('production artifact build emits domain, fallback, headers, runtime and build metadata',()=>{
   execFileSync(process.execPath,['scripts/build.mjs'],{
@@ -34,6 +35,13 @@ test('production artifact build emits domain, fallback, headers, runtime and bui
     assert.ok(manifest.cachePolicy.immutableAssets.includes(asset),asset);
     if(asset!==artwork[0])assert.ok(css.includes('url("./'+asset+'")'),asset);
   }
+  assert.equal(TOKEN_ICON_FILES.length,13);
+  for(const asset of TOKEN_ICON_FILES){
+    assert.deepEqual(fs.readFileSync(path.join(root,asset)),fs.readFileSync(path.join(root,'..',asset)));
+    assert.ok(manifest.files.includes(asset),asset);
+    assert.ok(manifest.cachePolicy.immutableAssets.includes(asset),asset);
+  }
+  assert.ok(manifest.files.includes('core/token-icons.js'));
   assert.equal(fs.readFileSync(path.join(root,'404.html'),'utf8'),html);
 });
 

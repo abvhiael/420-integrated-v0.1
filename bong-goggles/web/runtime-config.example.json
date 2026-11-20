@@ -16,6 +16,7 @@
     "messaging": true,
     "games": true,
     "rewards": true,
-    "moderation": true
+    "moderation": true,
+    "accountSocial": false
   }
 }

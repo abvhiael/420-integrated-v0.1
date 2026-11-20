@@ -13,7 +13,7 @@ export function connected() {
     token:{environment:'testnet',binding:f.binding}};
   const selected={...state,expectedChainId:'0x1a4',capabilityRegistry:config.deployment.capabilityRegistryAddress};
   const control={accounts:[controller],owner:controller,account,accountDeployed:true,factoryDeployed:true,
-    entryPoint:state.entryPoint,capabilityRegistry:config.deployment.capabilityRegistryAddress,afterAccountRead:null,epoch:1,policyVersion:1,gasPrice:'0x3b9aca00',gasEstimate:'0x100000',
+    entryPoint:state.entryPoint,capabilityRegistry:config.deployment.capabilityRegistryAddress,afterAccountRead:null,epoch:1,policyVersion:1,recoveryAuthority:ZERO_ADDRESS,pendingRecoveryOwner:ZERO_ADDRESS,recoveryExecutableAt:0,accountCode:'0x6002',gasPrice:'0x3b9aca00',gasEstimate:'0x100000',
     smartBalance:'0x'+(100n*10n**18n).toString(16),controllerBalance:'0x'+(10n**18n).toString(16),
     simulationResult:abi(32,32,addr(77)),creatorNonce:0,simulationError:null,estimateError:null,onEstimate:null};
   const calls=[];
@@ -25,7 +25,7 @@ export function connected() {
     if(method==='eth_estimateGas'){if(control.estimateError)throw Error(control.estimateError);control.onEstimate?.();return control.gasEstimate;}
     if(method==='eth_getCode' && (args[0]===state.factoryAddress||args[0]===control.account)&&(args[1]==='latest'||args[1]==='0x10')){
       if(args[0]===state.factoryAddress)return control.factoryDeployed?'0x6001':'0x';
-      if(args[0]===control.account)return control.accountDeployed?'0x6002':'0x';
+      if(args[0]===control.account)return control.accountDeployed?control.accountCode:'0x';
       throw Error('unexpected latest code read');
     }
     if(method==='eth_call'&&args[0].to===f.binding.factory.address&&args[0].data===tokenReadCall420('creatorNonce(address)',['address'],[control.account]))return abi(control.creatorNonce);
@@ -38,11 +38,11 @@ export function connected() {
       if(to===control.account){
         const getters=new Map([
           [encodeAddressGetter('owner'),abi(control.owner)],
-          [encodeAddressGetter('recoveryAuthority'),abi(ZERO_ADDRESS)],
+          [encodeAddressGetter('recoveryAuthority'),abi(control.recoveryAuthority)],
           [encodeUintGetter('authorizationEpoch'),abi(control.epoch)],
           [encodeUintGetter('authorizationPolicyVersion'),abi(control.policyVersion)],
-          [encodeAddressGetter('pendingRecoveryOwner'),abi(ZERO_ADDRESS)],
-          [encodeUintGetter('recoveryExecutableAt'),abi(0)],
+          [encodeAddressGetter('pendingRecoveryOwner'),abi(control.pendingRecoveryOwner)],
+          [encodeUintGetter('recoveryExecutableAt'),abi(control.recoveryExecutableAt)],
           [encodeAddressGetter('entryPoint'),abi(control.entryPoint)],
           [encodeAddressGetter('capabilityRegistry'),abi(control.capabilityRegistry)],
         ]);
@@ -142,10 +142,11 @@ export const portfolioRecord420=(n,profile=TOKEN_TEMPLATES_420[0],creator=accoun
 export function enableTokenManagementFixture420(f,portfolioControl){
   const original=f.provider.request,txs=new Map();let next=29000;
   const control={balance:1000000000000000000n,allowance:1000000000000000000n,supply:1000000000000000000n,cap:2000000000000000000n,
-    nftHolder:account,nftApproved:ZERO_ADDRESS,operator:false,delegate:ZERO_ADDRESS,simulationError:false,wrongReturn:false,wrongEvent:false,pending:false,reverted:false,reorg:false,sendError:null,expected:null};
+    nftHolder:account,nftApproved:ZERO_ADDRESS,operator:false,operatorRaw:null,delegate:ZERO_ADDRESS,permitNonce:0n,onRead:null,duplicateEvent:false,simulationError:false,wrongReturn:false,wrongEvent:false,pending:false,reverted:false,reorg:false,sendError:null,expected:null};
   const tag='0x10',blockHash=f.tokenControl.canonicalHash;
   control.expect=(row,data,events,boolReturn=false)=>{control.expected={row,data,events,boolReturn};};
   f.provider.request=async(method,args=[])=>{
+    await control.onRead?.(method,args);
     const e=control.expected;
     if(method==='eth_call'&&args[1]===tag){
       const {to,data}=args[0],row=portfolioControl.rows.find(r=>r.token===to);
@@ -154,7 +155,7 @@ export function enableTokenManagementFixture420(f,portfolioControl){
           'cap()':p.capped?control.cap:0,'totalSupply()':control.supply,'decimals()':18};
         for(const [sig,v] of Object.entries(ints))if(data===tokenReadCall420(sig)){f.calls.push([method,args]);return abi(v);}
         for(const [sig,v] of [['balanceOf(address)',control.balance],['balanceOf(address,uint256)',control.balance],['allowance(address,address)',control.allowance],
-          ['ownerOf(uint256)',control.nftHolder],['getApproved(uint256)',control.nftApproved],['isApprovedForAll(address,address)',control.operator?1:0],['delegates(address)',control.delegate]])
+          ['ownerOf(uint256)',control.nftHolder],['getApproved(uint256)',control.nftApproved],['isApprovedForAll(address,address)',control.operatorRaw??(control.operator?1:0)],['delegates(address)',control.delegate],['nonces(address)',control.permitNonce]])
           if(data.startsWith(tokenSelector420(sig))){f.calls.push([method,args]);return abi(v);}
       }
       if(e&&args[0].to===account&&args[0].from===controller&&data===encodeExecute(e.row.token,0n,e.data)){
@@ -172,7 +173,7 @@ export function enableTokenManagementFixture420(f,portfolioControl){
       const receipt={transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',status:'0x1',from:tx.from,to:tx.to,gasUsed:'0x100',effectiveGasPrice:tx.gasPrice,logs};
       txs.set(hash,{tx:{...tx,hash,blockHash,blockNumber:tag,input:tx.data},receipt});return hash;
     }
-    if(method==='eth_getTransactionReceipt'&&txs.has(args[0])){f.calls.push([method,args]);if(control.pending)return null;const r=structuredClone(txs.get(args[0]).receipt);if(control.wrongEvent&&r.logs.length)r.logs[0].data='0xdead';if(control.reverted){r.status='0x0';r.logs=[];}return r;}
+    if(method==='eth_getTransactionReceipt'&&txs.has(args[0])){f.calls.push([method,args]);if(control.pending)return null;const r=structuredClone(txs.get(args[0]).receipt);if(control.wrongEvent&&r.logs.length)r.logs[0].data='0xdead';if(control.duplicateEvent&&r.logs.length)r.logs.push({...r.logs[0],data:'0xdead'});if(control.reverted){r.status='0x0';r.logs=[];}return r;}
     if(method==='eth_getTransactionByHash'&&txs.has(args[0])){f.calls.push([method,args]);return txs.get(args[0]).tx;}
     if(method==='eth_blockNumber'){f.calls.push([method,args]);return tag;}
     if(method==='eth_getBlockByNumber'&&args[0]===tag&&control.reorg){f.calls.push([method,args]);return {number:tag,hash:digest(999)};}

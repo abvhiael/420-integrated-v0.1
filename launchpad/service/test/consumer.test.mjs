@@ -57,3 +57,13 @@ test('expired or exhausted campaigns allow existing invoice recovery but not new
   assert.equal(state.canContribute,false);assert.equal(state.next,'RECOVER_OR_EXPIRED');
   assert.equal(state.invoiceId,I);
 });
+
+test('loss of sale-scoped contribution capability blocks new checkout while retaining paid-intent lookup',async()=>{
+  const rpc=makeRpc();
+  rpc.set('isAuthorized(address,bytes32,bytes32,uint256)',out(0));
+  const result=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(result.capabilityAuthorized,false);
+  assert.equal(result.canContribute,false);
+  assert.equal(result.invoiceId,I);
+  assert.equal(result.next,'RECOVER_OR_EXPIRED');
+});

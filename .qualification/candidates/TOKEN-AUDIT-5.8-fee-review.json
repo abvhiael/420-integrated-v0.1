@@ -18,7 +18,14 @@
     "wallet/web/token-fee-review-ui.js",
     "wallet/web/test/token-fee-review.test.js",
     "wallet/web/scripts/qualify-browser.mjs",
-    ".qualification/candidates/TOKEN-AUDIT-5.8-fee-review.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.8-fee-review.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.8-QUALIFICATION.json"
   ],
   "tests": [
     {

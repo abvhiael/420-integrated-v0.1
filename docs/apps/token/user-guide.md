@@ -4,13 +4,13 @@
 
 ## Browse templates in Wallet
 
-In 420 Apps, select **Browse Token templates** on the 420 Token card (or expand **420Token template catalogue**). All eight frozen profiles are described even before connection. Availability unverified is not the same as disabled by governance. Connect to the correct Wallet network and use Refresh availability to inspect verified enablement at the displayed block; no profiles are selectable without verification. Selecting an enabled profile performs fresh verification and records only your display preference. If governance disables the template, the account/network changes, or verification fails, the choice is cleared or rejected. A non-owner or undeployed SmartAccount may browse without acquiring execution rights. Creation costs exactly 42 native 420 plus network gas; all creation-fee revenue goes to the community Treasury Vault. All eight profiles have locally qualified creation draft wizards, described below. Transaction simulation, confirmation and submission remain subsequent work.
+In 420 Apps, select **Browse Token templates** on the 420 Token card (or expand **420Token template catalogue**). All eight frozen profiles are described even before connection. Availability unverified is not the same as disabled by governance. Connect to the correct Wallet network and use Refresh availability to inspect verified enablement at the displayed block; no profiles are selectable without verification. Selecting an enabled profile performs fresh verification and records only your display preference. If governance disables the template, the account/network changes, or verification fails, the choice is cleared or rejected. A non-owner or undeployed SmartAccount may browse without acquiring execution rights. Creation costs exactly 42 native 420 plus network gas; all creation-fee revenue goes to the community Treasury Vault. All eight profiles have locally qualified creation draft wizards and fee review/authorization controls, described below. Signing and submission remain subsequent work.
 
 ## Configure an ERC20 token
 
 Select an enabled ERC20 profile while connected as the verified owner of a deployed SmartAccount. Enter token name, symbol, plain decimal initial supply with up to 18 fractional digits, maximum supply only for the capped template, and bytes32 deployment salt (secure random default, editable or regenerable). Amounts are converted exactly; no rounding, commas or scientific notation. The cap must be positive and at least the initial supply; the votes profile has a contract-enforced uint208 supply limit. Zero supply is valid, but a nonmintable template cannot mint additional units. Names and symbols are not unique asset identities.
 
-Choose Prepare ERC20 draft. The wizard rechecks the selected template, approved deployment and account. Review the profile, exact base-unit amounts, intended SmartAccount owner, factory, chain, salt, configuration/calldata hashes and 42 native 420 fee (gas separate and not estimated). Editing, changing profile/account/chain, or a failed refresh invalidates the draft. Clear draft resets the form. A prepared draft has not been simulated, signed, broadcast or created on-chain. Independent Wallet verification, simulation, confirmation and submission remain separate.
+Choose Prepare ERC20 draft. The wizard rechecks the selected template, approved deployment and account. Review the profile, exact base-unit amounts, intended SmartAccount owner, factory, chain, salt, configuration/calldata hashes and 42 native 420 fee (gas separate and not estimated). Editing, changing profile/account/chain, or a failed refresh invalidates the draft. Clear draft resets the form. A prepared draft has not been simulated, signed, broadcast or created on-chain. Continue with the separate fee review, simulation and authorization controls below; submission remains separate.
 
 ## Configure an ERC721 collection
 
@@ -18,7 +18,7 @@ Select the enabled NFT collection (ERC721_COLLECTION V1) profile while connected
 
 **Important:** the frozen V1 contract returns the exact same stored base URI for every minted NFT, does not append IDs or substitute placeholders, and has no URI setter. External content may change or become unavailable. Creation deploys an empty collection owned by your SmartAccount; minting NFTs is a separate owner action. No initial supply, mint recipient, token ID or custom owner is accepted in this creation form.
 
-Choose Prepare ERC721 draft to reverify the template, release and account. Review collection metadata, intended owner, zero initial supply, mint/burn authority, factory, chain, salt, configuration/calldata commitments and exact 42 native 420 creation fee (gas separate, not estimated). Editing, changing selection/account/chain, governance disablement or failed refresh invalidates the draft. Clear collection draft resets the form. A draft has not been simulated, signed, submitted or deployed; no NFT has been minted. Independent Wallet execution and explicit confirmation remain separate.
+Choose Prepare ERC721 draft to reverify the template, release and account. Review collection metadata, intended owner, zero initial supply, mint/burn authority, factory, chain, salt, configuration/calldata commitments and exact 42 native 420 creation fee (gas separate, not estimated). Editing, changing selection/account/chain, governance disablement or failed refresh invalidates the draft. Clear collection draft resets the form. A draft has not been simulated, signed, submitted or deployed; no NFT has been minted. Continue with the separate fee review and authorization controls below; submission remains separate.
 
 ## Configure an ERC1155 multi-token contract
 
@@ -26,7 +26,13 @@ Select the enabled Multi-token collection (ERC1155_MULTI V1) profile as verified
 
 The stored URI is immutable. Both URI getters return the exact string for every ID, even an unminted ID. To serve separate metadata per ID, use literal `{id}` (for example, `ipfs://example/{id}.json`); compatible clients substitute the ID as a lowercase 64-digit hexadecimal number without `0x`. The wizard shows the resolved example for ID 1 without fetching it. Empty URI and URI without the placeholder are allowed with warnings. External content can change or disappear. Nonempty URI must pass the same safe-text/absolute URI guards as ERC721.
 
-Choose Prepare ERC1155 draft. Review exact stored URI, example resolution, zero initial balances, mint/burn and transfer capabilities, SmartAccount owner, chain, factory, salt, hashes and exact 42 native 420 fee (gas separate, not estimated). Edit, clear, switch profiles/account/chain or failed verification invalidates the draft. Nothing is simulated, signed, submitted or minted by the wizard; further Wallet execution and explicit confirmation are required.
+Choose Prepare ERC1155 draft. Review exact stored URI, example resolution, zero initial balances, mint/burn and transfer capabilities, SmartAccount owner, chain, factory, salt, hashes and exact 42 native 420 fee (gas separate, not estimated). Edit, clear, switch profiles/account/chain or failed verification invalidates the draft. The draft step does not simulate, sign, submit or mint. Continue with fee review and authorization below; submission remains separate.
+
+## Review fees, simulate and authorize
+
+After preparing any of the eight profile drafts, choose **Simulate and review fees** in the same Wallet form. Review the exact 42 native 420 creation fee paid by your SmartAccount to the verified community Treasury Vault, network gas units and gas-price estimates paid by your connected controller, and the combined estimated cost. The Wallet checks each payer's available balance independently. Gas is an estimate, not a guaranteed final charge. The displayed simulated address is not guaranteed until a deployment succeeds. Review the owner, chain, factory, template and configuration/calldata commitments as well as the simulation and verification blocks.
+
+Choose **Authorize reviewed creation** only after reviewing the displayed request and costs. The Wallet independently re-simulates the exact request; changed costs, creator nonce or simulated address require reviewing the updated quote and authorizing again. Governance disablement, changed account authority, chain changes, reorganization, failed simulation and insufficient balances reject the review. **Cancel authorization**, editing, switching profiles, a refresh or disconnect clears the local approval. The approved cost ceilings are recorded in memory for later Wallet submission; this step never signs, broadcasts or creates tokens. Higher costs require new consent. Pinned simulation estimates must be supported by the connected RPC. Live submission remains subsequent work.
 
 ## Before you sign
 
@@ -50,8 +56,8 @@ Names and symbols are presentation metadata. The deployed contract address is th
 1. Open 420 Token from the verified Wallet/Registry application entry.
 2. Select a currently enabled template and review its version/profile.
 3. Enter the template configuration.
-4. Review the creator/owner address and the exact 42-native-420 creation fee.
-5. Approve the Wallet transaction only when the verified target is the current TokenFactory420.
+4. Review the creator/owner address, exact 42-native-420 creation fee and separate gas estimate using the simulation controls.
+5. Explicitly authorize the unchanged reviewed creation. Actual Wallet signing/submission remains a subsequent step; only the verified current TokenFactory420 may be targeted.
 6. Wait for a successful receipt. If deployment or Treasury forwarding fails, the whole transaction reverts.
 7. Record the deployed token address and provenance: creator, template ID/version and configuration hash.
 

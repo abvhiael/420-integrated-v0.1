@@ -27,8 +27,10 @@ test('unregistered invoice and invalid settlement payout cannot enter canonical 
 });
 test('checkout refuses unavailable capacity, missing eligibility, and bad invoice terms',async()=>{
   const rpc=makeRpc();
-  const exhausted=await checkoutContext(rpc,runtime,S,USER,'90','9');
+  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,200,210,POLICY,PROFILE,70,2,1));
+  const exhausted=await checkoutContext(rpc,runtime,S,USER,'42','9');
   assert.equal(exhausted.canContribute,false);assert.equal(exhausted.next,'RECOVER_OR_EXPIRED');
+  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,200,210,POLICY,PROFILE,12,2,1));
   rpc.set('hasValidCredential(bytes32,bytes32)',out(0));
   const revoked=await checkoutContext(rpc,runtime,S,USER,'42','9');
   assert.equal(revoked.canContribute,false);assert.equal(revoked.invoiceId,I);
@@ -50,7 +52,7 @@ test('reorg and revert are explicit transaction recovery states',async()=>{
 
 test('expired or exhausted campaigns allow existing invoice recovery but not new checkout',async()=>{
   const rpc=makeRpc();
-  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,140,210,POLICY,PROFILE,12,2,1));
+  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,200,210,POLICY,PROFILE,12,4,1));
   const state=await checkoutContext(rpc,runtime,S,USER,'42','9');
   assert.equal(state.canContribute,false);assert.equal(state.next,'RECOVER_OR_EXPIRED');
   assert.equal(state.invoiceId,I);

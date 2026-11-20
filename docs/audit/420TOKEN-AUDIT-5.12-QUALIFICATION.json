@@ -1,0 +1,905 @@
+{
+  "schema": "420token-qualification-v1",
+  "step": "TOKEN-AUDIT-5.12",
+  "status": "PASS_REPOSITORY_SCOPE",
+  "level": "L2",
+  "base_sha": "3c6ba1f0da9e532b7986be882b3f754262d8ed6b",
+  "tested_sha": "d55f05cc452698fb0cf50ef793cc08343b67ab93",
+  "pull_request": 1255,
+  "branch": "audit/token-audit-5-12-security",
+  "reconciled_main_sha": "3c6ba1f0da9e532b7986be882b3f754262d8ed6b",
+  "concurrent_main_changes": {
+    "commits": 0,
+    "files": [],
+    "scope": "No concurrent main changes at closeout"
+  },
+  "scope": "Canonical targeted ownership/permission inspection, scoped revocation, explicit risk acknowledgement, state-bound Wallet authorization, cancellation and receipt integrity; frozen contracts and creation ABI unchanged",
+  "workflows": [
+    {
+      "name": "420Token audit qualification",
+      "run_id": 44664933275,
+      "conclusion": "success",
+      "jobs": [
+        {
+          "name": "scope",
+          "id": 136051797007,
+          "conclusion": "success"
+        },
+        {
+          "name": "wallet-sdk",
+          "id": 136052013680,
+          "conclusion": "success",
+          "tests": 170,
+          "pass": 170,
+          "fail": 0,
+          "skipped": 0,
+          "new_tests": [
+            "ok 151 - targeted owner and permission lookup across all eight profiles is immutable and read-only, not an inventory",
+            "ok 152 - transferred or renounced owner does not grant token ownership, NFT holder authority or collection revocation",
+            "ok 153 - exact revocation targets and zero values use ordinary Wallet approval and canonical confirmation, not local cancellation",
+            "ok 154 - risk disclosures cover unlimited, allowance replacement, burn grant, operator, NFT and irreversible ownership",
+            "ok 155 - permission or risk state changes, owner, controller epoch, recovery state and destination code changes invalidate approval",
+            "ok 156 - a new review, explicit cancellation or revoked in-flight review/approval prevents broadcast",
+            "ok 157 - malformed, forged, reorganized and stale permission lookup fails closed without authority",
+            "ok 158 - duplicate receipt log index cannot establish canonical management permission change"
+          ],
+          "summary": [
+            "# tests 170",
+            "# pass 170",
+            "# fail 0",
+            "# cancelled 0",
+            "# skipped 0",
+            "# todo 0",
+            "# duration_ms 13688.705922"
+          ]
+        },
+        {
+          "name": "qualify",
+          "id": 136052015485,
+          "conclusion": "skipped",
+          "reason": "Unchanged frozen contracts"
+        },
+        {
+          "name": "security",
+          "id": 136052015403,
+          "conclusion": "skipped",
+          "reason": "Unchanged frozen contract security inputs"
+        },
+        {
+          "name": "abi-parity",
+          "id": 136052015237,
+          "conclusion": "skipped",
+          "reason": "Unchanged creation ABI"
+        }
+      ]
+    },
+    {
+      "name": "420Wallet W15.5 Browser Accessibility Qualification",
+      "run_id": 44664933269,
+      "conclusion": "success",
+      "job_id": 136051797040,
+      "viewport_widths": [
+        1440,
+        1024,
+        768,
+        390,
+        320
+      ],
+      "security_scenarios": 5,
+      "artifact": {
+        "id": 14596349596,
+        "digest": "sha256:1515ffbaafcef2f55be0e0830272f7787f06823f9a4db1488156aa5e97a5f562",
+        "url": "https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44664933269/artifacts/14596349596"
+      },
+      "results": [
+        {
+          "width": 1440,
+          "standard": "ERC20",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "standard": "ERC721",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "standard": "ERC1155",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "tokenTracking": "PASS",
+          "pending": true,
+          "confirmed": true,
+          "reorg": true,
+          "keyboard": true,
+          "axe": 0
+        },
+        {
+          "width": 1440,
+          "tokenPortfolio": "PASS",
+          "partial": true,
+          "complete": true,
+          "transferred": true,
+          "recordOnly": true,
+          "reorg": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": 0
+        },
+        {
+          "width": 1440,
+          "tokenManagement": "PASS",
+          "fixedMintBlocked": true,
+          "explicitAuthorization": true,
+          "confirmed": true,
+          "keyboard": true,
+          "axe": 0,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          }
+        },
+        {
+          "width": 1440,
+          "tokenSecurity": "PASS",
+          "unlimitedLookup": true,
+          "revocationPrepared": true,
+          "cancelled": true,
+          "typedAcknowledgement": true,
+          "axe": 0,
+          "overflow": {
+            "client": 1440,
+            "scroll": 1440
+          }
+        },
+        {
+          "width": 1440,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1440,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "standard": "ERC20",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "standard": "ERC721",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "standard": "ERC1155",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "tokenTracking": "PASS",
+          "pending": true,
+          "confirmed": true,
+          "reorg": true,
+          "keyboard": true,
+          "axe": 0
+        },
+        {
+          "width": 1024,
+          "tokenPortfolio": "PASS",
+          "partial": true,
+          "complete": true,
+          "transferred": true,
+          "recordOnly": true,
+          "reorg": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": 0
+        },
+        {
+          "width": 1024,
+          "tokenManagement": "PASS",
+          "fixedMintBlocked": true,
+          "explicitAuthorization": true,
+          "confirmed": true,
+          "keyboard": true,
+          "axe": 0,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          }
+        },
+        {
+          "width": 1024,
+          "tokenSecurity": "PASS",
+          "unlimitedLookup": true,
+          "revocationPrepared": true,
+          "cancelled": true,
+          "typedAcknowledgement": true,
+          "axe": 0,
+          "overflow": {
+            "client": 1024,
+            "scroll": 1024
+          }
+        },
+        {
+          "width": 1024,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "standard": "ERC20",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "standard": "ERC721",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "standard": "ERC1155",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "tokenTracking": "PASS",
+          "pending": true,
+          "confirmed": true,
+          "reorg": true,
+          "keyboard": true,
+          "axe": 0
+        },
+        {
+          "width": 768,
+          "tokenPortfolio": "PASS",
+          "partial": true,
+          "complete": true,
+          "transferred": true,
+          "recordOnly": true,
+          "reorg": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": 0
+        },
+        {
+          "width": 768,
+          "tokenManagement": "PASS",
+          "fixedMintBlocked": true,
+          "explicitAuthorization": true,
+          "confirmed": true,
+          "keyboard": true,
+          "axe": 0,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          }
+        },
+        {
+          "width": 768,
+          "tokenSecurity": "PASS",
+          "unlimitedLookup": true,
+          "revocationPrepared": true,
+          "cancelled": true,
+          "typedAcknowledgement": true,
+          "axe": 0,
+          "overflow": {
+            "client": 768,
+            "scroll": 768
+          }
+        },
+        {
+          "width": 768,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "standard": "ERC20",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "standard": "ERC721",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "standard": "ERC1155",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "tokenTracking": "PASS",
+          "pending": true,
+          "confirmed": true,
+          "reorg": true,
+          "keyboard": true,
+          "axe": 0
+        },
+        {
+          "width": 390,
+          "tokenPortfolio": "PASS",
+          "partial": true,
+          "complete": true,
+          "transferred": true,
+          "recordOnly": true,
+          "reorg": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": 0
+        },
+        {
+          "width": 390,
+          "tokenManagement": "PASS",
+          "fixedMintBlocked": true,
+          "explicitAuthorization": true,
+          "confirmed": true,
+          "keyboard": true,
+          "axe": 0,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          }
+        },
+        {
+          "width": 390,
+          "tokenSecurity": "PASS",
+          "unlimitedLookup": true,
+          "revocationPrepared": true,
+          "cancelled": true,
+          "typedAcknowledgement": true,
+          "axe": 0,
+          "overflow": {
+            "client": 390,
+            "scroll": 390
+          }
+        },
+        {
+          "width": 390,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "standard": "ERC20",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "standard": "ERC721",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "standard": "ERC1155",
+          "tokenFeeReview": "PASS",
+          "changedFeesRejected": true,
+          "explicitAuthorization": true,
+          "cancelled": true,
+          "simulationFailureRejected": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "tokenTracking": "PASS",
+          "pending": true,
+          "confirmed": true,
+          "reorg": true,
+          "keyboard": true,
+          "axe": 0
+        },
+        {
+          "width": 320,
+          "tokenPortfolio": "PASS",
+          "partial": true,
+          "complete": true,
+          "transferred": true,
+          "recordOnly": true,
+          "reorg": true,
+          "keyboard": true,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": 0
+        },
+        {
+          "width": 320,
+          "tokenManagement": "PASS",
+          "fixedMintBlocked": true,
+          "explicitAuthorization": true,
+          "confirmed": true,
+          "keyboard": true,
+          "axe": 0,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          }
+        },
+        {
+          "width": 320,
+          "tokenSecurity": "PASS",
+          "unlimitedLookup": true,
+          "revocationPrepared": true,
+          "cancelled": true,
+          "typedAcknowledgement": true,
+          "axe": 0,
+          "overflow": {
+            "client": 320,
+            "scroll": 320
+          }
+        },
+        {
+          "width": 320,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        }
+      ]
+    }
+  ],
+  "executable_changes": [
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps.css",
+    "wallet/web/core/token-app.js",
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-management.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/test/token-management.test.js",
+    "wallet/web/test/token-security.test.js",
+    "wallet/web/token-management-ui.js"
+  ],
+  "qualification_limitations": [
+    "Deterministic RPC fixtures, not live Wallet signing or public testnet acceptance",
+    "All eight templates covered by SDK tests; browser security scenario exercises ERC20 fixed permission lookup/revocation preparation and ownership acknowledgement/cancellation at five widths",
+    "Targeted permission inspection is not an exhaustive enumerable approval inventory",
+    "Local cancellation does not revoke on-chain permission; revocation requires confirmed Wallet execution",
+    "Fresh reviewed state is revalidated before broadcast, not guaranteed unchanged after broadcast; canonical receipt inclusion is not finality",
+    "Aggregate TOKEN-AUDIT-5 and live testnet qualification remain open"
+  ],
+  "next_assigned_substep": "TOKEN-AUDIT-5.13 — Responsive design, accessibility and error states",
+  "evidence_only_closeout": true
+}

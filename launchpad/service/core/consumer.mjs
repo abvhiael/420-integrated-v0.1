@@ -1,4 +1,4 @@
-import {encodeStatic,wordHex,wordAddress,wordUint,decodeAddress,decodeUint,decodeBool,strip0x} from './abi.mjs';
+import {encodeStatic,wordHex,wordAddress,wordUint,decodeAddress,decodeUint,decodeBool,strip0x,hexUtf8} from './abi.mjs';
 
 const HASH=/^0x[0-9a-fA-F]{64}$/;
 const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
@@ -111,8 +111,22 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   const p=await position(rpc,rt,saleId,who),sale=p.sale;
   // Historical invoice recovery must remain available after expiry, exhaustion or identity revocation.
   // These gates control NEW contributions, not read-only recovery of an already paid intent.
-  const canContribute=sale.state==='ACTIVE'&&p.source.at>=sale.startsAt&&p.source.at<=sale.endsAt&&
+  const basicEligibility=sale.state==='ACTIVE'&&p.source.at>=sale.startsAt&&p.source.at<=sale.endsAt&&
     principal<=BigInt(p.remaining)&&principal<=BigInt(p.walletRemaining)&&p.identity.bound;
+  // Authorization is amount- and sale-scoped, separate from the Identity credential.
+  // A lost capability must deny a NEW checkout but must not hide an earlier paid invoice.
+  let capabilityAuthorized=false;
+  if(basicEligibility){
+    try {
+      const auth=await readAddress(rpc,rt.allocationRegistryAddress,'authorization()');
+      const action=await rpc.call('web3_sha3',[hexUtf8('420/LAUNCHPAD/ACTION/CONTRIBUTE/V1')]);
+      capabilityAuthorized=await readBool(rpc,auth,'isAuthorized(address,bytes32,bytes32,uint256)',
+        [wordAddress(who),wordHex(sale.saleId),wordHex(action),wordUint(principal)]);
+    }catch {
+      capabilityAuthorized=false;
+    }
+  }
+  const canContribute=basicEligibility&&capabilityAuthorized;
   const crowd=rt.crowdfundingIntegrationAddress,args=[wordHex(sale.saleId),wordAddress(who),wordUint(principal),wordUint(nonce)];
   const invoiceId=await readSingle(rpc,crowd,'invoiceIdFor(bytes32,address,uint128,uint256)',args);
   const registered=await readBool(rpc,crowd,'registeredContributionIntent(bytes32)',[wordHex(invoiceId)]);
@@ -142,7 +156,7 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   return {schema:'420-launchpad-checkout-v1',canonical:true,source:p.source,saleId:sale.saleId,amount:principal.toString(),nonce:nonce.toString(),
     invoiceId,registered,invoiceExists,paymentId:zero(paymentId)?null:paymentId,
     paymentStatus:confirmedPayment?.status||null,recorded:confirmedPayment?await readBool(rpc,crowd,'usedPaymentId(bytes32)',[wordHex(paymentId)]):false,
-    canContribute,checkoutUrl:registered&&invoiceExists&&/^0x0{40}$/i.test(sale.paymentAsset)?'https://420pay.420integrated.org/#pay?v=1&kind=invoice&chain='+BigInt(p.source.chainId).toString()+'&id='+invoiceId:null,
+    canContribute,capabilityAuthorized,checkoutUrl:registered&&invoiceExists&&/^0x0{40}$/i.test(sale.paymentAsset)?'https://420pay.420integrated.org/#pay?v=1&kind=invoice&chain='+BigInt(p.source.chainId).toString()+'&id='+invoiceId:null,
     next:!registered?(canContribute?'REGISTER_INTENT':'CONTRIBUTION_UNAVAILABLE'):!invoiceExists?'WAIT_FOR_MERCHANT_INVOICE':!confirmedPayment?(canContribute?'QUOTE_CONVERSION':'RECOVER_OR_EXPIRED'):
       confirmedPayment.status!=='SETTLED'?'AWAIT_CANONICAL_SETTLEMENT':'RECORD_CONTRIBUTION',fees:p.fees};
 }

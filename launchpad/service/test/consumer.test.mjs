@@ -67,3 +67,16 @@ test('loss of sale-scoped contribution capability blocks new checkout while reta
   assert.equal(result.invoiceId,I);
   assert.equal(result.next,'RECOVER_OR_EXPIRED');
 });
+
+test('campaign mode and integration binding are mandatory for NEW checkout, not historical recovery',async()=>{
+  const rpc=makeRpc();
+  rpc.set('campaignMode(bytes32)',out(0));
+  const missingMode=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(missingMode.canContribute,false);assert.equal(missingMode.invoiceId,I);
+  rpc.set('campaignMode(bytes32)',out(1));
+  rpc.set('crowdfundingIntegration()',out('0x0000000000000000000000000000000000009999'));
+  const wrongIntegration=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(wrongIntegration.canContribute,false);
+  rpc.set('crowdfundingIntegration()',out(A.crowd));
+  assert.equal((await checkoutContext(rpc,runtime,S,USER,'42','9')).canContribute,true);
+});

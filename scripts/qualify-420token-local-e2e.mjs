@@ -19,12 +19,12 @@ import {encodeExecute,ZERO_ADDRESS as ZERO,ZERO_BYTES32 as Z32} from '../wallet/
 const [stage,dest]=process.argv.slice(2);
 assert.ok(stage&&dest,'Usage: node scripts/qualify-420token-local-e2e.mjs STAGE OUTPUT');
 const root=resolve(stage),out=resolve(dest);mkdirSync(out,{recursive:true});
-const local='http://127.0.0.1:18545',chainId=420,chain='0x1a4',fee=TOKEN_CREATION_FEE_WEI_420,unit=10n**18n;
+const local='http://127.0.0.1:18545',chainId=31337,chain='0x7a69',fee=TOKEN_CREATION_FEE_WEI_420,unit=10n**18n;
 const timelock='0x0000000000000000000000000000000000000429',registry='0x0000000000000000000000000000000000000434';
 const A='address',U='uint256',B='bytes32',q=n=>'0x'+BigInt(n).toString(16);
 const json=x=>JSON.stringify(x,(_,v)=>typeof v==='bigint'?v.toString():v,2);
 const same=(a,b)=>assert.equal(a.toLowerCase(),b.toLowerCase());
-const results={schema:'420token-local-e2e-v1',head:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),chainId,mode:'local Anvil real EVM, no public deployment',bootstrap:[],creations:[],management:[],negative:[],portfolio:null,reorg:null,status:'FAIL'};
+const results={schema:'420token-local-e2e-v1',head:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),chainId,mode:'isolated Ethereum Cancun Anvil chain 31337, no public deployment; chain 420 is auto-classified as Optimism by Foundry',bootstrap:[],creations:[],management:[],negative:[],portfolio:null,reorg:null,status:'FAIL'};
 let id=0;
 async function rpc(method,params=[]){
   const response=await fetch(local,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:++id,method,params}),signal:AbortSignal.timeout(10000)});

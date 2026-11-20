@@ -1,4 +1,4 @@
-import {call,checkoutContext,hash,address} from './consumer.mjs';
+import {call,checkoutContext,hash,address,readSale} from './consumer.mjs';
 import {hexUtf8,wordHex,wordAddress,wordUint,decodeUint,decodeAddress,strip0x,encodeStatic} from './abi.mjs';
 const NONZERO=/^0x(?!0{64}$)[0-9a-fA-F]{64}$/;
 function w(data,index){const s=strip0x(data),v=s.slice(index*64,(index+1)*64);if(v.length!==64)throw new Error('truncated quote ABI');return '0x'+v.toLowerCase();}
@@ -19,7 +19,7 @@ export async function convertedCheckoutQuote(rpc,rt,payload){
   if(!base.registered||!base.invoiceExists||base.paymentId)throw new Error('conversion requires a registered unpaid canonical invoice');
   const marketId=hash(payload.marketId),inputAsset=address(payload.inputAsset),maxInput=positive(String(payload.maxInput)),
     minOutput=positive(String(payload.minOutput));
-  const settlement=address((await call(rpc,rt.saleRegistryAddress,'sale(bytes32)',[wordHex(saleId)])).slice(66,130).replace(/^/,'0x').slice(-42));
+  const sale=await readSale(rpc,rt,saleId),settlement=address(sale.paymentAsset);
   // The requested minimum must cover the exact Launchpad invoice principal.
   if(minOutput<BigInt(base.amount))throw new Error('minimum conversion output below campaign principal');
   if(inputAsset===settlement||/^0x0{40}$/i.test(inputAsset))throw new Error('invalid canonical conversion input asset');
@@ -48,7 +48,7 @@ export async function convertedCheckoutQuote(rpc,rt,payload){
   if(!NONZERO.test(quoteId)||w(data,1)!==marketId||decodeAddress(data,2).toLowerCase()!==inputAsset||
     decodeAddress(data,3).toLowerCase()!==settlement||decodeUint(data,4)!==maxInput||
     quotedSettlement!==BigInt(base.amount)||invoiceAmount!==BigInt(base.amount)||
-    merchant.toLowerCase()!==base.saleReceiver?.toLowerCase()&&merchant.toLowerCase()!==(await call(rpc,rt.saleRegistryAddress,'sale(bytes32)',[wordHex(saleId)])).slice(152,194).toLowerCase().replace(/^/,'0x')||
+    merchant.toLowerCase()!==sale.proceedsReceiver.toLowerCase()||
     decodeUint(data,9)!==quotedAt||quotedAt>expiresAt)throw new Error('converted Pay quote does not settle exact campaign amount');
   if(conversionFee>maxInput||impact>10000n)throw new Error('invalid 420Pay fee or slippage');
   const allowed=decodeUint(await call(rpc,inputAsset,'allowance(address,address)',[wordAddress(account),wordAddress(pool)]));
@@ -67,7 +67,7 @@ export async function convertedCheckoutQuote(rpc,rt,payload){
 export async function convertedCheckoutReview(rpc,rt,kind,payload){
   const q=await convertedCheckoutQuote(rpc,rt,payload);
   if(q.expiresAt<=q.source.at)throw new Error('420Pay quote expired; refresh');
-  if(q.balance<q.maxInput&&BigInt(q.balance)<BigInt(q.maxInput))throw new Error('insufficient token balance');
+  if(BigInt(q.balance)<BigInt(q.maxInput))throw new Error('insufficient token balance');
   if(kind==='approve-conversion'){
     if(!q.approveRequired)throw new Error('current token allowance already sufficient');
     const sel=await rpc.selector('approve(address,uint256)');

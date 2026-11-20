@@ -39,7 +39,7 @@ function fakeRpc(){
       if(method==='eth_getLogs'){
         const filter=params[0],name=[...topics.entries()].find(([,id])=>id===filter.topics[0])?.[0]||'';
         if(!name.startsWith('ContributionRecorded('))return [];
-        return [{address:A.allocation,topics:[filter.topics[0],SALE,'0x'+wordHex(OWNER)],blockHash:B,transactionHash:TX,logIndex:'0x0'}];
+        return [{address:A.allocation,topics:[filter.topics[0],SALE,'0x'+wordHex(OWNER)],blockHash:B,transactionHash:TX,logIndex:'0x0',data:out(17,B)}];
       }
       throw Error('unexpected RPC '+method);
     }
@@ -56,6 +56,7 @@ test('creator report verifies ownership, mode, state, gross funding and refund c
 test('creator report scans actual canonical event logs and marks complete vs partial coverage',async()=>{
   const r=fakeRpc(),full=await creatorReport(r,rt,OWNER,SALE,{fromBlock:'0'});
   assert.equal(full.events.contributions.count,1);
+  assert.equal(full.events.contributions.amount,'17');
   assert.equal(full.events.contributions.participants,1);
   assert.equal(full.events.disputes.count,0);assert.equal(full.events.reputationEvidence.count,0);
   assert.equal(full.coverage.completeFromGenesis,true);
@@ -65,7 +66,7 @@ test('creator report scans actual canonical event logs and marks complete vs par
 });
 test('creator report fails closed when canonical block reorgs mid-scan',async()=>{
   const r=fakeRpc(),original=r.call.bind(r);let scanned=false;
-  r.call=async(name,args)=>{const result=await original(name,args);if(name==='eth_getLogs')scanned=true;if(name==='eth_getBlockByNumber'&&scanned)r.reorg();return result;};
+  r.call=async(name,args)=>{if(name==='eth_getBlockByNumber'&&scanned)r.reorg();const result=await original(name,args);if(name==='eth_getLogs')scanned=true;return result;};
   await assert.rejects(()=>creatorReport(r,rt,OWNER,SALE,{fromBlock:'0'}),/reorged/);
 });
 test('creator discovery only returns canonical-controller-owned projection matches',async()=>{

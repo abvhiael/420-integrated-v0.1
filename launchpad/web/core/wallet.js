@@ -14,7 +14,8 @@ export function executionGate({config,wallet,review}={}){
   const allowed=new Set([
     config.registry.launchpadRouterAddress.toLowerCase(),
     config.registry.allocationRegistryAddress.toLowerCase(),
-    config.registry.crowdfundingIntegrationAddress.toLowerCase()
+    config.registry.crowdfundingIntegrationAddress.toLowerCase(),
+    ...(config.registry.arbitrationCasesAddress?[config.registry.arbitrationCasesAddress.toLowerCase()]:[])
   ]);
   if(!allowed.has(review.transaction.to.toLowerCase()))return {ok:false,reason:'UNEXPECTED_TRANSACTION_TARGET'};
   return {ok:true,reason:null};

@@ -1,10 +1,11 @@
 import {card,emptyState,escapeHtml,button} from './design-system.js';
 import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} from './games.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
+export function renderGameCatalogue(){return card({title:'Social games',body:'<p>Two-player, zero-wager games. Interactive boards and challenges require qualified game integration.</p><div class="dashboard-games">'+GAME_TYPES.map(x=>'<div><strong>'+escapeHtml(label(x))+'</strong><small>Ruleset registered · play not enabled</small></div>').join('')+'</div>'});}
 function entries(items,title){return card({title,body:items.length?`<div class="games-list">${items.map(s=>`<a class="games-card" href="${gameLink(s.sessionId)}" data-game-session="${escapeHtml(s.sessionId)}"><strong>${escapeHtml(label(s.gameType))}</strong><span>${escapeHtml(label(s.state))}</span><small>Opponent ${escapeHtml(s.peer)}</small><small>Next move #${s.nextMoveNumber}</small></a>`).join('')}</div>`:emptyState({title:'No games',message:'No canonical sessions are available in this category.'})});}
 export function renderGamesHub({projection=null,viewer=null,walletView=null}={}){
  if(!walletView?.connected||!viewer)return card({title:'Games',body:emptyState({title:'420Wallet required',message:'Connect on the configured 420 network to view your game sessions.'})});
- if(!projection?.sessions)return card({title:'Games service unavailable',body:emptyState({title:'No canonical game data',message:'Bong Goggles will not invent invites, moves, winners or rewards.'})});
+ if(!projection?.sessions)return card({title:'Games service unavailable',body:emptyState({title:'No canonical game data',message:'Bong Goggles will not invent invites, moves, winners or rewards.'})+renderGameCatalogue()});
  const hub=normalizeGameHub({viewer,sessions:projection.sessions,leaderboards:projection.leaderboards,statistics:projection.statistics});
  const invite=card({title:'Challenge a friend',body:`<p>Supported zero-wager games: ${GAME_TYPES.map(label).join(', ')}.</p><p>Game invites are available after a qualified ruleset and current friend/game policy are confirmed through the game service and 420Wallet.</p>${button({label:'New challenge',action:'game-invite',disabled:true})}`});
  const stats=hub.statistics?card({title:'Statistics',body:'<p>Qualified statistics projection available. Game outcomes remain canonical.</p>'}):'';

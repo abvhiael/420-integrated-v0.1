@@ -305,3 +305,100 @@ Relevant tests: `TestEOAWalletSignatureCryptography`,
 PostgreSQL/race and HTTP qualification. No additional roadmap phase or
 wallet-based recovery mechanism is introduced here.
 
+
+
+## AUTH-6 — optional 420Identity and 420Names presentation integration
+
+This integration is **read-only**, wallet-optional and explicitly separate from
+AUTH-1–5. A 420ID account remains an off-chain account. It is not an
+Identity420 profile, 420Names owner, legal identity, 420Names registration,
+governance-authorized credential, wallet permission, recovery authority,
+financial entitlement or SSO credential. No on-chain state is written and
+no wallet is required to enroll, sign in, recover or use 420ID.
+
+Owners with a previously consented, cryptographically signed AUTH-5 wallet link
+may voluntarily select an on-chain **Identity420 profile ID** (32-byte hash)
+and optionally a **Names420 label hash** (not human-readable name text). The
+isolated AUTH-6 verifier requires a **pinned exact chain ID**, HTTPS RPC,
+operator-reviewed nonzero Identity420 and Names420 deployment addresses, both
+pinned runtime Keccak-256 code hashes, and contract protocolVersion() == 3.
+All reads use the same **canonical finalized block hash**, passed via EIP-1898
+`{blockHash,requireCanonical:true}`, with finality observation at most 30
+minutes old; RPC failures, missing finalized support, hash/code/protocol drift
+and unexpected ABI fail closed. User-provided profile/name identifiers cannot
+override the configured chain, contract, block or wallet.
+
+Identity420's canonical `profiles(bytes32)` is authoritative for the
+profile's current controller and active state. That controller must match the
+currently signed/linked wallet. A .420 presentation is verified **only** when
+all of these match at the same finalized state:
+
+1. Identity420 profile is active and its primaryName equals the chosen label
+   hash;
+2. Names420 `resolve(labelHash)` returns an unexpired name whose profileId is
+   the chosen Identity420 profile and whose resolvedAddress is the linked
+   wallet; name owner is nonzero;
+3. Names420 `reverseResolve(linkedWallet)` returns the same label hash; and
+4. Names420 `nameClaimsProfile(labelHash,profileId)` returns true.
+
+Names ownership need not equal the Identity controller; the authoritative
+Names contract controls name ownership, transfer and expiration. Name transfer
+and expiry invalidate derived presentation immediately. A profile-only
+verification never implies any .420 name. No credential, issuer trust class or
+assurance status is synthesized from profile visibility or name agreement.
+Identity420 `hasValidCredential` remains a separate read-only contract query,
+never an application authorization grant.
+
+`account420.identity_names_preferences` stores only a voluntarily selected
+presentation preference for the private account, bound to the then-active
+wallet and chain. It is NOT authority and is **reverified on every retrieval**.
+If the wallet unlinks, account/session is revoked, controller moves,
+profile deactivates, name expires/transfers, any bilateral link breaks, or
+chain evidence becomes unavailable/stale, the old preference is not displayed
+as verified. Saving uses an explicit consent flag, the current AUTH-3
+session, the active AUTH-5 wallet link, account lock, and optimistic revision.
+Clearing a preference needs only an authenticated account session; it does not
+alter blockchain records or unlink a wallet. No internal account IDs, email,
+bearer tokens or secrets appear in the projection.
+
+The existing `acceptance`, `session-acceptance`, `profile-acceptance`
+and `wallet-acceptance` modes remain unchanged. **Only**
+`AUTH420_MODE=identity-acceptance` enables the new restricted
+`/v1/identity/preview`, `/v1/identity/save`,
+`/v1/identity/current`, `/v1/identity/clear` POST endpoints and
+optional browser UI. They inherit the host/RP/Origin, approved-mailbox,
+flow-cookie, 420ID session, rate-limit, no-store and request-size controls.
+The UI shows exact hash identifiers, not invented human-readable names.
+No application social profile is publicly published by this integration.
+
+Before optionally activating AUTH-6 in restricted acceptance, an operator
+must apply `007_identity_names_preferences.sql` through the separate
+migration credential, then grant **only** the new table privileges:
+
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE
+ ON account420.identity_names_preferences TO account420_runtime;
+```
+
+At startup, AUTH-6 requires migration 007 and grants, in addition to
+retained AUTH-2–5 schema and runtime grants. Existing modes do not query
+migration 007. Required explicit configuration (no defaults or guessed
+addresses): `AUTH420_WALLET_CHAIN_ID`,
+`AUTH420_IDENTITY_NAMES_RPC_URL` (HTTPS, canonical finalized state),
+`AUTH420_IDENTITY_ADDRESS`, `AUTH420_IDENTITY_CODE_HASH`,
+`AUTH420_NAMES_ADDRESS`, and `AUTH420_NAMES_CODE_HASH`.
+Hashes are Keccak-256 over the exact runtime contract code, not Solidity
+source, ABI or predeploy artifacts. Use qualified frozen deployment
+records and validate against actual finalized chain state; do not silently
+replace frozen contract choices. Wallet EIP-1271 linkage remains subject
+to its independently configured pinned chain verifier.
+
+Repository tests use an actual TLS JSON-RPC fixture to exercise every
+contract ABI and fail-closed binding, and PostgreSQL 16/race/HTTP tests
+for consent, optionality, session isolation, concurrent revisions and
+live revalidation. They do **not** certify an independently deployed
+testnet node, real contract finality, code hash, on-chain transaction,
+physical wallet or public service deployment. All applicable pending
+live-testnet and deployment-security checks remain deferred without
+being marked PASS. AUTH-7 cross-application SSO is separate and not
+implemented by AUTH-6.

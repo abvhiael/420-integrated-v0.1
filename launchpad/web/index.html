@@ -39,7 +39,7 @@
 <p>Enter an amount in the settlement asset's smallest units. Register the intent first, then the merchant must create the exact single-use 420Pay invoice. Review 420Pay's live quote, protocol fees, gas and final settlement before signing.</p>
 <div class="actions"><label>Contribution amount <input id="contribution-amount" inputmode="numeric" autocomplete="off" value="0"></label>
 <label>Unique intent nonce <input id="intent-nonce" inputmode="numeric" autocomplete="off" readonly></label>
-<button id="new-intent">New nonce</button><button id="register-intent" disabled>Review intent registration</button></div>
+<button id="new-intent">New nonce</button><label>Recent local intents <select id="previous-intents"><option value="">Select an earlier amount and nonce</option></select></label><button id="register-intent" disabled>Review intent registration</button></div>
 <div class="actions"><button id="check-checkout" disabled>Check invoice and payment</button><a id="pay-checkout-link" hidden rel="noopener noreferrer" target="_blank">Open canonical 420Pay checkout</a></div>
 <div class="subpanel" id="conversion-panel"><h4>Qualified 420Pay conversion</h4>
 <p>Launchpad sales settle in an approved ERC-20. Choose a canonical token market; the quote must deliver exactly your campaign contribution amount. Input amounts and fees are in raw token units, and Wallet approval is always separate.</p>

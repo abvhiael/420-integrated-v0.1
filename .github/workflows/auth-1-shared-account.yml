@@ -66,6 +66,8 @@ jobs:
           node --check services/420id/profile-ui.mjs
           node --check services/420id/wallet-session.mjs
           node --check services/420id/wallet-ui.mjs
+          node --check services/420id/identity-session.mjs
+          node --check services/420id/identity-ui.mjs
       - name: Mail transport configuration tests
         run: go test -race -count=1 -v ./cmd/420id
       - name: Build restricted HTTPS acceptance service

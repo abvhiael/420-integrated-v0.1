@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>420ID · Identity and Names verification acceptance</title>
+<link rel="stylesheet" href="/acceptance.css">
+<script type="module" src="/identity-session.mjs"></script>
+</head>
+<body>
+<main>
+<header><p class="brand">420<span>ID</span></p><h1>Verify your account</h1><p>Restricted BongGoggles-scoped session and recovery acceptance. Approved test mailboxes only. No social application, SSO or wallet permissions are enabled.</p></header>
+<section aria-labelledby="email-heading">
+<h2 id="email-heading">1. Verify email</h2>
+<form id="email-start"><label><input id="recover" type="checkbox"> Recover a previously enrolled passkey (sign out first)</label><label for="email">Approved email address</label><input id="email" type="email" autocomplete="email" required maxlength="254"><button type="submit">Send verification code</button></form>
+<form id="email-finish" hidden><label for="secret">Code received by email</label><input id="secret" type="password" autocomplete="one-time-code" required maxlength="43" minlength="43" spellcheck="false"><button type="submit">Verify email</button></form>
+</section>
+<section aria-labelledby="passkey-heading">
+<h2 id="passkey-heading">2. Create and test a passkey</h2>
+<p>Use your device's screen lock, biometric verification, or a compatible external security key. Creating a credential is not proof of login; test it separately.</p>
+<button id="register" type="button" disabled>Create passkey</button>
+<button id="login" type="button">Sign in with passkey</button>
+<button id="replace" type="button" disabled>Replace lost passkey and revoke prior sessions</button>
+</section>
+<section aria-labelledby="session-heading"><h2 id="session-heading">3. Manage sessions</h2><p id="signed-in">Checking session…</p><button id="renew" type="button">Renew session</button><button id="list" type="button">List active sessions</button><button id="logout" type="button">Sign out</button><button id="logout-all" type="button">Sign out all sessions</button><ul id="sessions"></ul></section>
+<section id="profile-section" aria-labelledby="profile-heading" hidden>
+<h2 id="profile-heading">4. Universal 420ID profile</h2>
+<p>Shared across your approved 420ID applications. Private by default. Your username is not a .420 domain or wallet identity. Past usernames remain reserved to prevent impersonation.</p>
+<button type="button" data-profile="true" id="profile-load">Load my profile</button>
+<form id="profile-form">
+<label for="profile-username">Username (3–24 letters, digits or underscores; begins with a letter)</label>
+<input id="profile-username" maxlength="24" minlength="3" autocomplete="off" spellcheck="false">
+<label for="profile-display-name">Display name</label>
+<input id="profile-display-name" maxlength="80" autocomplete="nickname">
+<label for="profile-bio">Bio (500 characters maximum)</label>
+<textarea id="profile-bio" maxlength="500" rows="3"></textarea>
+<label for="profile-avatar">Avatar content reference (optional: sha256: followed by 64 lowercase hex digits)</label>
+<input id="profile-avatar" maxlength="71" spellcheck="false" autocomplete="off">
+<label><input id="profile-public" type="checkbox"> Make my profile publicly discoverable by username</label>
+<p id="profile-version">No saved profile</p>
+<button type="submit" data-profile="true">Save profile</button>
+</form>
+<form id="profile-lookup-form">
+<label for="profile-lookup-name">Look up an explicitly public username</label>
+<input id="profile-lookup-name" maxlength="24" required autocomplete="off" spellcheck="false">
+<button type="submit" data-profile="true">Look up</button>
+</form>
+<p id="profile-lookup-result" role="status"></p>
+</section>
+<section aria-labelledby="wallet-heading" id="wallet-section" hidden>
+<h2 id="wallet-heading">5. Optional 420Wallet linking</h2>
+<p>This only associates a signed wallet address with your existing 420ID account. It does not grant login, transaction, spending, approvals, 420Names ownership or on-chain rights. You can continue without connecting a wallet.</p>
+<p id="wallet-current">No wallet linked.</p>
+<button type="button" id="wallet-refresh" data-wallet="true">Refresh linked wallet</button>
+<form id="wallet-form">
+<label for="wallet-kind">Wallet type</label>
+<select id="wallet-kind"><option value="eoa">EOA (standard personal_sign)</option><option value="contract">Smart Account (EIP-1271; requires finalized chain RPC)</option></select>
+<label><input type="checkbox" id="wallet-consent"> I explicitly consent to associate my selected wallet with this 420ID account, without granting wallet permissions.</label>
+<button type="submit" data-wallet="true">Connect and sign wallet-link request</button>
+</form>
+<button type="button" id="wallet-unlink" data-wallet="true">Unlink wallet association</button>
+<p id="wallet-note" role="status"></p>
+</section>
+<section id="identity-section" aria-labelledby="identity-heading" hidden>
+<h2 id="identity-heading">6. Optional on-chain 420Identity and 420Names</h2>
+<p>420ID is not an on-chain Identity420 credential or a .420 name. Only the controller of your linked wallet can claim an active Identity420 profile. 420Names verification additionally requires live, bilateral Identity420 and Names420 consent. No credentials, identity scores, legal identity, wallet control, name ownership, rewards or spending authority are granted here.</p>
+<p>Choose an Identity420 profile ID and, optionally, the exact .420 label hash from the qualified 420Wallet/Names record. These are 32-byte on-chain identifiers, <strong>not</strong> your 420ID username or a readable .420 label. Unverified or unavailable state will not display as verified.</p>
+<form id="identity-form">
+<label for="identity-profile-id">Identity420 profile ID (0x + 64 hexadecimal characters)</label>
+<input id="identity-profile-id" required minlength="66" maxlength="66" autocomplete="off" spellcheck="false">
+<label for="identity-label-hash">Optional 420Names label hash (0x + 64 hexadecimal characters)</label>
+<input id="identity-label-hash" minlength="66" maxlength="66" autocomplete="off" spellcheck="false">
+<label><input type="checkbox" id="identity-consent"> I consent to saving this independently verified presentation preference to my 420ID account (no on-chain changes).</label>
+<button type="button" id="identity-preview" data-identity="true">Verify at finalized chain state</button>
+<button type="submit" data-identity="true">Save verified preference</button>
+</form>
+<p id="identity-result" role="status" aria-live="polite">No on-chain presentation verified.</p>
+<button type="button" id="identity-current" data-identity="true">Recheck my saved preference</button>
+<button type="button" id="identity-clear" data-identity="true">Clear my preference</button>
+</section>
+<section aria-labelledby="receipt-heading">
+<h2 id="receipt-heading">7. Acceptance receipts</h2>
+<p id="status" role="status" aria-live="polite">Ready. Open this page in the browser you intend to test.</p>
+<ul id="receipts" aria-live="polite"></ul>
+<p>Receipts identify verified ceremony outcomes, not authenticator hardware type or production readiness. Record browser/OS and device type separately, without entering passwords or verification codes in a report.</p>
+</section>
+</main>
+</body>
+</html>

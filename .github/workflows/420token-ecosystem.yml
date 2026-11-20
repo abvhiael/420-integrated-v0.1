@@ -1,0 +1,60 @@
+name: 420Token ecosystem integration
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/420token-ecosystem.yml'
+      - 'indexer/tokenread/**'
+      - '420-indexer/src/token-read-model.ts'
+      - '420-indexer/test/token-provenance.test.ts'
+      - 'explorer/**/token*'
+      - 'search/**/token*'
+      - 'appstore/curation/genesis-apps.json'
+      - 'docs/apps/token/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      INDEXER_PG_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Go ecosystem boundary and affected package regressions
+        run: go test -v ./indexer/tokenread ./indexer/store ./indexer/api ./explorer/indexerclient ./explorer/service ./explorer/api ./search/indexerclient ./search/discovery ./search/runtime ./appstore/curation ./appstore/publicservice
+      - name: AppStore and Explorer presentation
+        run: node --test appstore/web/catalogue.test.cjs explorer/web/token-presentation.test.mjs explorer/web/workflow-presentation.test.mjs
+      - name: PostgreSQL projection and Indexer transport
+        working-directory: 420-indexer
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          node --test dist/test/token-provenance.test.js dist/test/api-contract.test.js dist/test/http-transport.test.js
+      - name: Canonical definitions and generated reference
+        run: |
+          python3 scripts/verify-genesis-dapps.py
+          python3 scripts/reference_indexer_renderer.py
+          git diff --exit-code -- docs/reference/generated/indexer-api.md

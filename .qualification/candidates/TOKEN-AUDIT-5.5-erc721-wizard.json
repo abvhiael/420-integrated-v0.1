@@ -16,7 +16,14 @@
     "wallet/web/core/token-erc721-wizard.js",
     "wallet/web/token-erc721-wizard-ui.js",
     "wallet/web/test/token-erc721-wizard.test.js",
-    ".qualification/candidates/TOKEN-AUDIT-5.5-erc721-wizard.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.5-erc721-wizard.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.5-QUALIFICATION.json"
   ],
   "tests": [
     {

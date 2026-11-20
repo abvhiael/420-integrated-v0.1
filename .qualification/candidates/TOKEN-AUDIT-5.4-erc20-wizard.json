@@ -2,7 +2,7 @@
   "step": "TOKEN-AUDIT-5.4",
   "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
   "level": "L2",
-  "base_sha": "c0bd747ab46ff6efc021f7748fadb02c3268247d",
+  "base_sha": "d42bc921e2c4a207f739a6948663db2f99164a1e",
   "candidate_sha": "HEAD",
   "classification": "implementation",
   "scope": [
@@ -15,7 +15,14 @@
     "wallet/web/token-erc20-wizard-ui.js",
     "wallet/web/test/token-erc20-wizard.test.js",
     "wallet/web/scripts/qualify-browser.mjs",
-    ".qualification/candidates/TOKEN-AUDIT-5.4-erc20-wizard.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.4-erc20-wizard.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.4-QUALIFICATION.json"
   ],
   "tests": [
     {

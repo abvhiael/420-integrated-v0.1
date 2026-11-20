@@ -49,8 +49,14 @@ const marker='<script type="module" src="./app.js"></script>';
 if(html.split(marker).length!==2) throw new Error('Exchange app entrypoint missing or duplicated');
 let builtHtml=html.replace(marker,'<script type="module" src="./browser-wallet-ui.js"></script>\n  '+marker);
 // Preserve the approved artwork and existing shell route hooks while adding branding.
-const logo='assets/83898904-fde8-4614-89ae-478db91d5fad.jpg';
-if(!fs.existsSync(path.join(dist,logo))) throw new Error(`approved 420Exchange logo missing: ${logo}`);
+const logo='assets/420exchange-logo.png';
+const botanicalArtwork=['assets/sidebar-botanical.png','assets/header-botanical.png','assets/market-card-botanical.png'];
+for(const asset of [logo,...botanicalArtwork]){
+  const target=path.join(dist,asset);
+  if(!fs.existsSync(target)) throw new Error(`approved 420Exchange artwork missing: ${asset}`);
+  const bytes=fs.readFileSync(target);
+  if(bytes.length<24||!bytes.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) throw new Error(`invalid Exchange PNG artwork: ${asset}`);
+}
 const oldBrand='<span class="brand-mark">420</span>\n        <span><strong>Exchange</strong><small>Integrated</small></span>';
 if(!builtHtml.includes(oldBrand)) throw new Error('Exchange brand insertion point changed; review shell before deploying');
 builtHtml=builtHtml.replace(oldBrand,`<img class="exchange-brand-logo" src="./${logo}" alt="420Exchange — Cannabis. Powers Progress" width="400" height="400" />\n        <span class="exchange-brand-label">420 Integrated · Exchange</span>`);
@@ -117,7 +123,7 @@ const buildMeta={
 };
 fs.writeFileSync(path.join(dist,'build-meta.json'),JSON.stringify(buildMeta,null,2)+'\n');
 
-const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo];
+const immutable=['app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css',logo,...botanicalArtwork];
 const manifest={
   schema:'420-exchange-deployment-artifact-v14.13',
   sourceSha:sha,

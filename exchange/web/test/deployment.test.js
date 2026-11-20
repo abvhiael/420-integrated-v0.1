@@ -22,6 +22,19 @@ test('production artifact build emits domain, fallback, headers, runtime and bui
   const runtime=JSON.parse(fs.readFileSync(path.join(root,'runtime-config.json'),'utf8'));
   assert.equal(runtime.network.chainId,'0x1a4');
   assert.match(runtime.api.streamUrl,/^wss:/);
+  const artwork=['420exchange-logo.png','sidebar-botanical.png','header-botanical.png','market-card-botanical.png'].map(name=>'assets/'+name);
+  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+  const css=fs.readFileSync(path.join(root,'branding.css'),'utf8');
+  const manifest=JSON.parse(fs.readFileSync(path.join(root,'deployment-manifest.json'),'utf8'));
+  assert.ok(html.includes('class="exchange-brand-logo" src="./assets/420exchange-logo.png"'));
+  assert.doesNotMatch(html,/83898904-fde8-4614-89ae-478db91d5fad/);
+  for(const asset of artwork){
+    assert.deepEqual(fs.readFileSync(path.join(root,asset)),fs.readFileSync(path.join(root,'..',asset)));
+    assert.ok(manifest.files.includes(asset),asset);
+    assert.ok(manifest.cachePolicy.immutableAssets.includes(asset),asset);
+    if(asset!==artwork[0])assert.ok(css.includes('url("./'+asset+'")'),asset);
+  }
+  assert.equal(fs.readFileSync(path.join(root,'404.html'),'utf8'),html);
 });
 
 test('real deployment mode fails closed when production variables are absent',()=>{

@@ -1,3 +1,4 @@
+import {mountTokenManagement420} from './token-management-ui.js';
 import {formatERC20Units420} from './core/token-erc20-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
 export function mountTokenPortfolio420(body,session){
@@ -8,6 +9,7 @@ export function mountTokenPortfolio420(body,session){
   refresh.type=more.type='button';actions.append(refresh,more);
   const status=el('p','token-fee-review-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   const list=el('div','token-created-portfolio-list');panel.append(heading,intro,actions,status,list);body.append(panel);
+  const management=mountTokenManagement420(panel,session);
   let context=session.getSnapshot(),view=session.getPortfolio();
   function render(){
     refresh.disabled=context.status!=='verified'||view.status==='checking';
@@ -32,11 +34,13 @@ export function mountTokenPortfolio420(body,session){
       else fields.push(['Creation receipt','Not independently verified — canonical factory record only']);
       fields.push(['Evidence boundary','Canonical factory record at snapshot; no automatic asset approval or listing']);
       for(const [k,v] of fields)details.append(el('dt',null,k),el('dd',null,v));
-      item.append(title,details);list.append(item);
+      item.append(title,details);
+      if(context.controllerIsOwner&&context.deployed){const manage=el('button','ghost-button','Manage '+t.templateKey+' '+t.token);manage.type='button';manage.addEventListener('click',()=>management.select(t));item.append(manage);}
+      list.append(item);
     }
   }
   const stop=session.subscribe(s=>{context=s;render();}),stopPortfolio=session.subscribePortfolio(v=>{view=v;render();});
   refresh.addEventListener('click',()=>{void session.refreshPortfolio();});
   more.addEventListener('click',()=>{void session.refreshPortfolio(true);});
-  return()=>{stop();stopPortfolio();};
+  return()=>{stop();stopPortfolio();management.dispose();};
 }

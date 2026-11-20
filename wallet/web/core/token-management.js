@@ -95,7 +95,7 @@ export function encodeTokenManagement420(row,account,action,input){
 }
 // Every review re-reads the retained factory row, template, code, current
 // contract ownership and operation-specific state at the verified block.
-export async function prepareTokenManagement420(provider,runtime,row,account,controller,action,input){
+async function verifiedManagementRecord(provider,runtime,row,account){
   const block=runtime.verificationBlock,tag=block.number,target=addr(row.token);
   const read=(to,sig,types=[],values=[])=>provider.request('eth_call',[{to,data:tokenReadCall420(sig,types,values)},tag]);
   const readWords=async(to,sig,n,types=[],values=[])=>words(await read(to,sig,types,values),n);
@@ -103,7 +103,73 @@ export async function prepareTokenManagement420(provider,runtime,row,account,con
     provider.request('eth_getCode',[target,tag]),readWords(target,'templateId()',1),readWords(target,'owner()',1)]);
   check(asAddr(rec[0])===target&&asAddr(rec[1])===account&&rec[2]===row.templateId&&BigInt(rec[3])===1n&&rec[4]===row.configHash&&BigInt(rec[5]).toString()===row.deployedAt&&BigInt(member[0])===1n&&same(template[0],row.templateId),'Factory provenance changed');
   check(typeof code==='string'&&/^0x(?:[0-9a-fA-F]{2})+$/.test(code)&&!/^0x0+$/.test(code)&&tokenHashHex420(code)===row.codeHash,'Token runtime identity changed');
-  const owner=asAddr(ownerRaw[0]),op=encodeTokenManagement420({...row,owner},account,action,input),v=op.params,p=op.profile;
+  const owner=asAddr(ownerRaw[0]);const profile=TOKEN_TEMPLATES_420.find(p=>p.id===row.templateId&&p.version===row.version);
+  check(profile&&(owner!==ZERO_ADDRESS||profile.standard==='ERC20'),'Invalid token owner or template');
+  return {target,owner,profile,block,tag,readWords};
+}
+
+// Explicit target-by-target permission inspection, from a fresh verified block.
+// These mappings are not enumerable; never imply a complete approvals inventory.
+export async function inspectTokenPermissions420(provider,runtime,row,account,input={}){
+  const query=readTokenRecord420(input,['spender','id'],'Permission lookup');
+  const {target,owner,profile:p,block,readWords}=await verifiedManagementRecord(provider,runtime,row,account);
+  const spender=query.spender==null||query.spender===''?null:addr(query.spender);
+  const id=query.id==null||query.id===''?null:uint(query.id);
+  check(p.standard!=='ERC20'||id===null,'Token ID not applicable to ERC20');
+  const one=async(sig,types=[],values=[])=>(await readWords(target,sig,1,types,values))[0];
+  const n=async(...args)=>BigInt(await one(...args));const A='address',U='uint256';
+  const flag=async(...args)=>{const v=await n(...args);check(v<=1n,'Malformed permission flag');return v===1n;};
+  const revocations=[];const revoke=(action,params,label)=>revocations.push(Object.freeze({action,params:Object.freeze(params),label}));
+  const result={authority:'PERMISSION_SNAPSHOT_ONLY',target,account,chainId:runtime.chainId,block,templateId:p.id,standard:p.standard,owner,
+    ownership:owner===account?'owner':owner===ZERO_ADDRESS?'renounced':'transferred',spender,id,allowance:null,operator:null,nftOwner:null,nftApproved:null,nftOperatorForHolder:null,balance:null,delegation:null,permitNonce:null};
+  if(p.standard==='ERC20'){
+    check(await n('decimals()')===18n,'Unexpected token decimals');
+    for(const [key,sig] of [['mintable','mintable()'],['burnable','burnable()'],['permit','permitEnabled()'],['votes','votesEnabled()']])check(await n(sig)===(p[key]?1n:0n),'Template feature mismatch');
+    result.balance=(await n('balanceOf(address)',[A],[account])).toString();
+    if(spender!==null){result.allowance=(await n('allowance(address,address)',[A,A],[account,spender])).toString();if(BigInt(result.allowance)>0n)revoke('approve',{spender,amount:'0'},'Revoke ERC20 allowance');}
+    if(p.permit)result.permitNonce=(await n('nonces(address)',[A],[account])).toString();
+    if(p.votes){result.delegation=asAddr(await one('delegates(address)',[A],[account]));if(result.delegation!==ZERO_ADDRESS)revoke('delegate',{to:ZERO_ADDRESS},'Clear voting delegation');}
+  }else{
+    if(spender!==null){result.operator=await flag('isApprovedForAll(address,address)',[A,A],[account,spender]);if(result.operator)revoke('setApprovalForAll',{spender,approved:'false'},'Revoke collection-wide operator');}
+    if(p.standard==='ERC721'){
+      result.balance=(await n('balanceOf(address)',[A],[account])).toString();
+      if(id!==null){result.nftOwner=asAddr(await one('ownerOf(uint256)',[U],[id]));check(result.nftOwner!==ZERO_ADDRESS,'Invalid NFT holder');result.nftApproved=asAddr(await one('getApproved(uint256)',[U],[id]));
+        result.nftOperatorForHolder=await flag('isApprovedForAll(address,address)',[A,A],[result.nftOwner,account]);
+        if(result.nftApproved!==ZERO_ADDRESS&&(result.nftOwner===account||result.nftOperatorForHolder))revoke('approve',{spender:ZERO_ADDRESS,id},'Revoke NFT-specific approval');}
+    }else if(id!==null)result.balance=(await n('balanceOf(address,uint256)',[A,U],[account,id])).toString();
+  }
+  return Object.freeze({...result,revocations:Object.freeze(revocations)});
+}
+
+export function describeTokenManagementRisk420(op,state,account){
+  const {action,params:v,profile:p}=op;const risks=[];let acknowledgement=null,classification='ordinary';
+  const high=(kind,phrase,warning)=>{classification=kind;acknowledgement=phrase;risks.push(warning);};
+  if(action==='transferOwnership')high('ownership','TRANSFER OWNERSHIP','Immediate contract ownership transfer. The new owner receives all owner-only powers; the original creator record does not change. The transfer may be irreversible.');
+  else if(action==='renounceOwnership')high('irreversible','RENOUNCE OWNERSHIP','Permanent ownership renunciation to the zero address. Owner-only functions cannot be restored by this Wallet. Existing holder approvals and balances are not revoked.');
+  else if(action==='approve'&&p.standard==='ERC20'){
+    const old=BigInt(state.allowance),next=BigInt(v.amount);
+    if(next===0n){classification='revocation';risks.push('Sets only this spender allowance to zero; other approvals, prior spending and already signed permits are not cancelled.');}
+    else {high('permission','GRANT PERMISSION',next===2n**256n-1n?'Unlimited allowance: this spender can spend future balances without repeated approval.':'The spender can transfer approved token units without another Wallet confirmation.');if(old>0n&&old!==next)risks.push('Replacing a nonzero allowance may let the spender use both old and new allowances around confirmation. Consider confirming a zero revocation before granting a new allowance.');if(p.burnable)risks.push('This allowance also permits burnFrom: the spender can destroy authorized units.');}
+  }else if(action==='approve'&&p.standard==='ERC721'){
+    if(v.spender===ZERO_ADDRESS){classification='revocation';risks.push('Clears only this NFT approval. Collection-wide operators remain authorized.');}
+    else high('permission','GRANT PERMISSION','This address can transfer or burn the specified NFT. Existing collection operators retain their permissions.');
+  }else if(action==='setApprovalForAll'){
+    if(v.approved==='false'){classification='revocation';risks.push('Revokes only this operator for the selected holder and collection. Other operators and NFT-specific approvals remain.');}
+    else high('permission','GRANT PERMISSION','Collection-wide operator authority covers all current and future NFTs or units of this collection; it can transfer or burn them without further Wallet confirmation.');
+  }else if(action==='burn'||action==='burnFrom')high('irreversible','BURN TOKENS','This destroys the specified holdings permanently. Contract ownership does not grant authority to burn other holders’ assets.');
+  else if(action==='mint')high('supply','MINT TOKENS','Minting increases supply or creates a new item. Verify recipient, token ID and amount. This is not asset approval or a guarantee of value.');
+  else if(action==='delegate'){
+    if(v.to===ZERO_ADDRESS){classification='revocation';risks.push('Clears this account’s voting delegation only; past checkpoints remain.');}
+    else high('delegation','DELEGATE VOTES','Delegates voting power, not ownership or spending authority; the delegate can exercise current delegated votes.');
+  }else if(v.from&&v.from!==account)high('third-party','USE HOLDER PERMISSION','This operation uses an allowance or operator grant from another holder. Verify its intended source and destination.');
+  if(state.destinationCode==='contract')risks.push('The destination has deployed contract code at the reviewed block. A contract address is not proof of trust or ability to manage ownership.');
+  else if(state.destinationCode==='no-code')risks.push('The destination has no deployed code at this block. This is not proof of identity, custody or future code.');
+  if(action==='mint'&&p.standard==='ERC721'&&state.destinationCode==='contract')risks.push('ERC721 mint does not check the receiver callback; the NFT may be stranded.');
+  return Object.freeze({classification,acknowledgement,warnings:Object.freeze(risks)});
+}
+export async function prepareTokenManagement420(provider,runtime,row,account,controller,action,input){
+  const {target,owner,block,tag,readWords}=await verifiedManagementRecord(provider,runtime,row,account);
+  const op=encodeTokenManagement420({...row,owner},account,action,input),v=op.params,p=op.profile;
   const state={owner};const readOne=async(sig,types=[],values=[])=> (await readWords(target,sig,1,types,values))[0];
   async function get(key,sig,types=[],values=[]){const value=await readOne(sig,types,values);state[key]=value;return value;}
   const n=async(...args)=>BigInt(await get(...args)),A='address',U='uint256';
@@ -137,6 +203,13 @@ export async function prepareTokenManagement420(provider,runtime,row,account,con
   }
   if(action==='setApprovalForAll')check(await n('operator','isApprovedForAll(address,address)',[A,A],[account,v.spender])<=1n,'Malformed operator flag');
   check(events.length>0,'Missing management event expectation');
+  const destination=v.to??v.spender;
+  if(destination&&destination!==ZERO_ADDRESS){
+    const code=await provider.request('eth_getCode',[destination,tag]);
+    check(typeof code==='string'&&/^0x(?:[0-9a-fA-F]{2})*$/.test(code),'Malformed destination code');
+    state.destinationCode=code==='0x'?'no-code':'contract';state.destinationCodeHash=tokenHashHex420(code);
+  }
+  const security=describeTokenManagementRisk420(op,state,account);
   const transaction=Object.freeze({from:controller,to:account,value:'0x0',data:encodeExecute(target,0n,op.data)});
   const simulated=await provider.request('eth_call',[transaction,tag]);
   const expected='0x'+tokenWord420(32)+tokenWord420(op.boolReturn?32:0)+(op.boolReturn?tokenWord420(1):'');
@@ -144,12 +217,12 @@ export async function prepareTokenManagement420(provider,runtime,row,account,con
   const gas=q(await provider.request('eth_estimateGas',[transaction,tag])),price=q(await provider.request('eth_gasPrice',[]));check(gas>0n&&gas*price<2n**256n,'Invalid management gas estimate');
   check(q(await provider.request('eth_getBalance',[controller,tag]))>=gas*price,'Insufficient controller balance for network gas');
   return Object.freeze({authority:'SIMULATED_MANAGEMENT_ONLY',controller,smartAccount:account,chainId:runtime.chainId,release:runtime.release,block,target,tokenCodeHash:row.codeHash,
-    templateId:row.templateId,action,label:op.label,params:v,transaction,events:Object.freeze(events),state:Object.freeze(state),executionHash:tokenHashHex420(transaction.data),
+    templateId:row.templateId,action,label:op.label,params:v,transaction,events:Object.freeze(events),state:Object.freeze(state),security,executionHash:tokenHashHex420(transaction.data),
     gasUnits:gas.toString(),gasPriceWei:price.toString(),estimatedGasWei:(gas*price).toString(),creationFeeWei:'0'});
 }
 export function sameTokenManagementReview420(a,b){
   return ['controller','smartAccount','chainId','target','templateId','tokenCodeHash','action','executionHash','gasUnits','gasPriceWei','estimatedGasWei','authorizationEpoch','authorizationPolicyVersion'].every(k=>a[k]===b[k])&&
-    a.release.dependencyRoot===b.release.dependencyRoot&&a.release.manifestHash===b.release.manifestHash&&JSON.stringify(a.state)===JSON.stringify(b.state)&&JSON.stringify(a.events)===JSON.stringify(b.events);
+    a.release.dependencyRoot===b.release.dependencyRoot&&a.release.manifestHash===b.release.manifestHash&&JSON.stringify(a.state)===JSON.stringify(b.state)&&JSON.stringify(a.events)===JSON.stringify(b.events)&&JSON.stringify(a.security)===JSON.stringify(b.security);
 }
 export async function readTokenManagementReceipt420(provider,record,binding){
   const review=record.review,hash=normalizeTransactionHash420(record.txHash);
@@ -166,6 +239,8 @@ export async function readTokenManagementReceipt420(provider,record,binding){
   if(result.status==='confirmed'){
     check(tokenHashHex420(await provider.request('eth_getCode',[review.target,r.blockNumber]))===review.tokenCodeHash,'Historical management token code mismatch');
     check(Array.isArray(r.logs)&&r.logs.length<=4096,'Missing management receipt logs');
+    const targetLogs=r.logs.filter(l=>same(l?.address,review.target));const indices=new Set();
+    for(const l of targetLogs){const index=q(l.logIndex).toString();check(!indices.has(index)&&l.removed===false&&same(l.transactionHash,hash)&&same(l.blockHash,r.blockHash)&&l.blockNumber===r.blockNumber&&q(l.transactionIndex)===q(r.transactionIndex),'Duplicate or unbound management log');indices.add(index);}
     for(const event of review.events){
       const matches=r.logs.filter(l=>same(l.address,review.target)&&Array.isArray(l.topics)&&l.topics.length===event.topics.length&&l.topics.every((x,i)=>same(x,event.topics[i]))&&same(l.data,event.data));
       check(matches.length===1,'Missing or duplicate expected management event');

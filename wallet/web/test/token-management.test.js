@@ -56,7 +56,7 @@ test('explicit one-use review, authorization, zero-value Wallet submission and c
   for(const [p,action,args,data,events,returns] of cases){
     const {f,r,mc,session,item}=await setup(p);mc.expect(r,data,events,returns);
     const quote=await session.reviewManagement(item,action,args);assert.equal(quote.creationFeeWei,'0');assert.equal(quote.transaction.data,encodeExecute(r.token,0n,data));assert.equal(quote.transaction.value,'0x0');assert.deepEqual(quote.events,events);
-    await assert.rejects(session.authorizeManagement({...quote}));const approval=await session.authorizeManagement(quote);await assert.rejects(session.authorizeManagement(quote));
+    await assert.rejects(session.authorizeManagement({...quote}));const approval=await session.authorizeManagement(quote,()=>true,quote.security.acknowledgement);await assert.rejects(session.authorizeManagement(quote,()=>true,quote.security.acknowledgement));
     assert.ok(f.calls.every(([m])=>! /send|sign|requestAccounts/i.test(m)));const hash=await session.submitManagement(approval);assert.ok(hash);await assert.rejects(session.submitManagement(approval));
     const sends=f.calls.filter(([m])=>m==='eth_sendTransaction');assert.equal(sends.length,1);assert.deepEqual(sends[0][1][0],{...quote.transaction,gas:'0x100000',gasPrice:'0x3b9aca00',type:'0x0',chainId:'0x1a4'});
     mc.pending=true;assert.equal((await session.checkTransaction(hash)).status,'pending');mc.pending=false;assert.equal((await session.checkTransaction(hash)).status,'confirmed');
@@ -72,7 +72,7 @@ test('owner, cap, balance, operator, changed fee, wrong return and forged record
     mc.expect(r,data,events,ret);
     if(mode==='owner')pc.rows[0].owner=to;if(mode==='cap')mc.cap=10n**18n;if(mode==='balance')mc.balance=0n;if(mode==='return')mc.wrongReturn=true;if(mode==='feature')r.profile={...r.profile,mintable:true};
     if(['fee','cancel','reorg','disconnect'].includes(mode)){
-      const q=await session.reviewManagement(item,action,args),approval=await session.authorizeManagement(q);
+      const q=await session.reviewManagement(item,action,args),approval=await session.authorizeManagement(q,()=>true,q.security.acknowledgement);
       if(mode==='fee')f.control.gasPrice='0x77359400';if(mode==='reorg')pc.reorg=true;if(mode==='disconnect')session.invalidate();
       await assert.rejects(session.submitManagement(approval,()=>mode!=='cancel'));
     }else await assert.rejects(session.reviewManagement(mode==='forged'?{...item}:item,action,args));
@@ -97,14 +97,14 @@ test('allowance transfer and burn, approved NFT operations, operator and batch m
     const {r,mc,session,item}=await setup(p);mc.operator=true;mc.nftHolder=holder;mc.nftApproved=account;
     const op=encodeTokenManagement420(item,account,action,args);mc.expect(r,op.data,op.events,op.boolReturn);
     const q=await session.reviewManagement(item,action,args);assert.ok(q.events.length>0);assert.equal(q.transaction.data,encodeExecute(r.token,0n,op.data));
-    if(['burnFrom','transferFrom'].includes(action)){mc.allowance=0n;await assert.rejects(session.authorizeManagement(q));}
-    else if(['batchTransfer'].includes(action)||action==='burn'&&p==='ERC1155_MULTI'){mc.operator=false;await assert.rejects(session.authorizeManagement(q));}
+    if(['burnFrom','transferFrom'].includes(action)){mc.allowance=0n;await assert.rejects(session.authorizeManagement(q,()=>true,q.security.acknowledgement));}
+    else if(['batchTransfer'].includes(action)||action==='burn'&&p==='ERC1155_MULTI'){mc.operator=false;await assert.rejects(session.authorizeManagement(q,()=>true,q.security.acknowledgement));}
   }
 });
 test('receipt mismatch is unverified, reverted is not confirmed, unknown prompt never retries',async()=>{
   for(const mode of ['wrongEvent','reverted','unknown','rejected']){
     const {f,r,mc,session,item}=await setup();mc.expect(r,call('transfer(address,uint256)',['address','uint256'],[to,1]),[transfer(account,to,1)],true);
-    const q=await session.reviewManagement(item,'transfer',{to,amount:'0.000000000000000001'}),approval=await session.authorizeManagement(q);
+    const q=await session.reviewManagement(item,'transfer',{to,amount:'0.000000000000000001'}),approval=await session.authorizeManagement(q,()=>true,q.security.acknowledgement);
     if(mode==='unknown'||mode==='rejected')mc.sendError=Object.assign(Error('prompt failed'),mode==='rejected'?{code:4001}:{});
     const hash=await session.submitManagement(approval);
     if(mode==='wrongEvent'){mc.wrongEvent=true;assert.equal(await session.checkTransaction(hash),null);let last;const stop=session.subscribeTransactions(x=>last=x);assert.equal(last[0].status,'unverified');stop();}

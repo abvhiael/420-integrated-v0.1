@@ -116,3 +116,7 @@
 .token-management-fields { display:grid; gap:8px; margin:10px 0; }
 .token-management label { display:grid; gap:4px; min-width:0; }
 .token-management input,.token-management select { max-width:100%; min-width:0; }
+
+.token-permission-controls { border:1px solid var(--wallet-border); border-radius:8px; padding:10px; margin:10px 0; min-width:0; display:grid; gap:8px; }
+.token-management-risk { border:1px solid currentColor; border-radius:8px; padding:10px; margin:8px 0; overflow-wrap:anywhere; }
+.token-management [hidden] { display:none!important; }

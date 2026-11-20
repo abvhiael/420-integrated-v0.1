@@ -69,7 +69,7 @@ test('partial, substituted, duplicated, malformed and stale-block profile result
     s=>s.runtime.templates[0].version=2,
     s=>s.runtime.templates[0].standard='ERC721',
     s=>s.runtime.templates[0].enabled='true',
-    s=>s.verificationBlock.hash=digest(4),
+    s=>s.verificationBlock={...s.verificationBlock,hash:digest(4)},
     s=>s.accountGrant=true,
     s=>s.spendingAuthority=true,
     s=>s.serviceId='420/service/other/v1',

@@ -43,7 +43,7 @@ function makeAppCard(app, helpBundle, tokenDiscovery) {
   const tokenLabels = {unconfigured:'Release not configured',disconnected:'Connect Wallet to verify',checking:'Verifying Registry',verified:'Registry verified · read-only',blocked:'Runtime unavailable'};
   const label = internalToken ? (tokenLabels[tokenDiscovery?.status] || tokenLabels.unconfigured) :
     (app.available ? 'Verified' : (APP_RELEASE_STAGE_LABELS[app.releaseStage] || 'Not published'));
-  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, label);
+  const verification = el('span', `verification-badge ${available ? 'verified' : 'unavailable'}`, label);
   const action = el('span', 'app-open-label', internalToken ? 'Wallet-integrated' : (app.available ? 'Open ↗' : 'Unavailable'));
   footer.append(verification, action);
   card.append(top, description, footer);

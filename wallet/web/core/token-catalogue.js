@@ -40,7 +40,8 @@ function verifiedProfiles(snapshot) {
   const r=snapshot.runtime,b=snapshot.verificationBlock;
   if(r?.serviceId!==TOKEN_SERVICE_ID_420||r.version!==1||!b||
     !/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$/.test(b.number)||
-    !/^0x[0-9a-fA-F]{64}$/.test(b.hash)||
+    !/^0x[0-9a-fA-F]{64}$/.test(b.hash)||/^0x0{64}$/.test(b.hash)||
+    !Number.isSafeInteger(r.chainId)||r.chainId<=0||
     b.hash!==r.verificationBlock?.hash||b.number!==r.verificationBlock?.number||
     !Array.isArray(r.templates)||r.templates.length!==catalogue.length) return null;
   const byId=new Map(r.templates.map(p=>[p?.id,p]));

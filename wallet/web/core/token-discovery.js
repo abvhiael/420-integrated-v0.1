@@ -99,7 +99,7 @@ const status = (state) => Object.freeze({status:state, authority:'DISCOVERY_ONLY
   accountGrant:false, spendingAuthority:false});
 // A disconnect, account/chain change or newer refresh invalidates the old result.
 export function createTokenDiscoverySession420() {
-  let generation=0, snapshot=status('unconfigured');
+  let generation=0, snapshot=status('unconfigured'), context=null;
   const listeners=new Set();
   function publish(value) {
     snapshot=value;
@@ -111,14 +111,17 @@ export function createTokenDiscoverySession420() {
     listeners.add(listener); listener(snapshot);
     return ()=>listeners.delete(listener);
   }
-  function invalidate(reason='disconnected') { generation++; return publish(status(reason)); }
+  function invalidate(reason='disconnected') { generation++; context=null; return publish(status(reason)); }
   async function refresh({provider,config,controller,smartAccount}={}) {
     const attempt=++generation;
+    context=null;
     if (config?.token==null) return publish(status('unconfigured'));
     if (!provider || !controller || !smartAccount) return publish(status('disconnected'));
-    publish(status('checking'));
     try {
-      const result=await discoverWalletTokenRuntime420(provider,config,controller,smartAccount);
+      // Only the host's last connected inputs may be reused by a read-only refresh.
+      context={provider,config:structuredClone(config),controller,smartAccount:structuredClone(smartAccount)};
+      publish(status('checking'));
+      const result=await discoverWalletTokenRuntime420(provider,context.config,controller,context.smartAccount);
       if (attempt!==generation) return snapshot;
       return publish(result);
     } catch {
@@ -126,7 +129,13 @@ export function createTokenDiscoverySession420() {
       return publish(status('blocked'));
     }
   }
-  return Object.freeze({refresh,invalidate,subscribe,getSnapshot:()=>snapshot});
+  async function refreshCurrent(){
+    if(!context)return null;
+    const expected=generation+1;
+    const result=await refresh(context);
+    return generation===expected&&snapshot===result?result:null;
+  }
+  return Object.freeze({refresh,refreshCurrent,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
 
 // Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.

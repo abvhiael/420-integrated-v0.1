@@ -53,6 +53,60 @@ try{
    const serious=axe.violations.filter(v=>['serious','critical'].includes(v.impact));
    for(const v of serious)failures.push(width+': '+v.id+' '+v.impact+' '+v.nodes.slice(0,4).map(n=>n.target.join(' ')).join(', '));
    console.log(JSON.stringify({width,info,focus,banner,axe:axe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
+   // Exercise the actual mounted Token catalogue with the same deterministic connected
+   // Wallet RPC fixture used by the discovery tests. Production config remains unbound.
+   const token=page.locator('#token-template-catalogue');
+   const browse=page.getByRole('button',{name:'Browse Token templates'});
+   await browse.click();
+   await token.locator('summary').waitFor({state:'visible'});
+   assert.equal(await token.evaluate(e=>e.open),true);
+   assert.equal(await token.locator('.token-template-card').count(),8);
+   assert.equal(await token.locator('button[data-template]:disabled').count(),8);
+   assert.equal(await token.locator('[data-availability="unknown"]').count(),8);
+   assert.match(await token.locator('#token-catalogue-status').textContent(),/Release not configured/);
+   assert.equal(await token.getByRole('button',{name:'Refresh availability'}).isDisabled(),true);
+   assert.equal(await page.locator('#services .token-integrated a[href]').count(),0);
+   await page.evaluate(async()=>{
+     const {connected}=await import('./test/token-connected-fixture.js');
+     const {walletTokenDiscovery420}=await import('./core/token-discovery.js');
+     const {controller}=await import('./test/token-test-fixture.js');
+     const f=connected();
+     window.__tokenCatalogueFixture=f;
+     await walletTokenDiscovery420.refresh({provider:f.provider,config:f.config,controller,smartAccount:f.selected});
+   });
+   await token.locator('[data-availability="enabled"]').first().waitFor();
+   assert.equal(await token.locator('[data-availability="enabled"]').count(),8);
+   assert.match(await token.locator('#token-catalogue-status').textContent(),/8 of 8 enabled/);
+   const choose=token.locator('button[data-template="ERC20_FIXED"]');
+   await choose.focus();
+   await page.keyboard.press('Enter');
+   await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
+   assert.match(await token.locator('.token-catalogue-selection').textContent(),/Selected ERC20_FIXED/);
+   await page.evaluate(async()=>{
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420[0],false);
+   });
+   // Availability goes stale between display and selection; the new selection must reverify.
+   await choose.click();
+   await token.locator('article[data-availability="disabled"]').waitFor();
+   assert.equal(await choose.isDisabled(),true);
+   assert.equal(await token.locator('button[aria-pressed="true"]').count(),0);
+   assert.match(await token.locator('#token-catalogue-status').textContent(),/7 of 8 enabled/);
+   const catalogueOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(catalogueOverflow.scroll<=catalogueOverflow.client+1,'open Token catalogue horizontal overflow');
+   const tokenAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-template-catalogue'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact);
+   await page.screenshot({path:resolve(artifacts,'token-catalogue-'+width+'.png'),fullPage:true});
+   await page.evaluate(async()=>{
+     const {walletTokenDiscovery420}=await import('./core/token-discovery.js');
+     walletTokenDiscovery420.invalidate();
+   });
+   assert.equal(await token.locator('button[data-template]:disabled').count(),8);
+   assert.equal(await token.locator('[data-availability="unknown"]').count(),8);
+   assert.match(await token.locator('#token-catalogue-status').textContent(),/Connect your Wallet/);
+   console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
+     staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
+
   }catch(e){failures.push(width+': '+(e.stack||e));await page.screenshot({path:resolve(artifacts,'wallet-'+width+'-error.png'),fullPage:true}).catch(()=>{});}
   finally{await ctx.close();}
  }

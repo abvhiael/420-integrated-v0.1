@@ -1,6 +1,7 @@
 import { APP_CATEGORIES, APP_SERVICES, buildAppCatalog, filterAppCatalog } from './core/apps.js';
 import { APP_RELEASE_STAGE_LABELS } from './core/genesis-app-catalog.js';
 import { walletTokenDiscovery420 } from './core/token-discovery.js';
+import { mountTokenCatalogue420 } from './token-catalogue-ui.js';
 import { loadWalletHelpBundle, resolveWalletHelp } from './core/docs-help.js';
 import { resolveServices } from './core/services.js';
 import { filterEcosystemWebsites, isApprovedEcosystemWebsite } from './core/ecosystem-websites.js';
@@ -22,8 +23,10 @@ function el(tag, className, text) {
 }
 
 function makeAppCard(app, helpBundle, tokenDiscovery) {
-  const card = el(app.available ? 'a' : 'article', `app-card${app.available ? '' : ' unavailable'}`);
-  if (app.available) {
+  const internalToken = app.walletIntegrated === true && app.serviceId === '420/service/token/v1';
+  const available = app.available && !internalToken;
+  const card = el(available ? 'a' : 'article', `app-card${available ? '' : ' unavailable'}${internalToken ? ' token-integrated' : ''}`);
+  if (available) {
     card.href = app.url;
     card.target = '_blank';
     card.rel = 'noopener noreferrer';
@@ -38,13 +41,20 @@ function makeAppCard(app, helpBundle, tokenDiscovery) {
   const description = el('p', 'app-description', app.description);
   const footer = el('div', 'app-card-footer');
   const tokenLabels = {unconfigured:'Release not configured',disconnected:'Connect Wallet to verify',checking:'Verifying Registry',verified:'Registry verified · read-only',blocked:'Runtime unavailable'};
-  const internalToken = app.walletIntegrated === true && app.serviceId === '420/service/token/v1';
   const label = internalToken ? (tokenLabels[tokenDiscovery?.status] || tokenLabels.unconfigured) :
     (app.available ? 'Verified' : (APP_RELEASE_STAGE_LABELS[app.releaseStage] || 'Not published'));
-  const verification = el('span', `verification-badge ${app.available ? 'verified' : 'unavailable'}`, label);
+  const verification = el('span', `verification-badge ${available ? 'verified' : 'unavailable'}`, label);
   const action = el('span', 'app-open-label', internalToken ? 'Wallet-integrated' : (app.available ? 'Open ↗' : 'Unavailable'));
   footer.append(verification, action);
   card.append(top, description, footer);
+  if(internalToken){
+    const browse=el('button','ghost-button','Browse Token templates');browse.type='button';
+    browse.addEventListener('click',()=>{
+      const catalogue=card.closest('#services-section')?.querySelector('#token-template-catalogue');
+      if(catalogue){catalogue.open=true;catalogue.querySelector('summary')?.focus();}
+    });
+    card.append(browse);
+  }
   if (app.helpContextId && !app.available) {
     const help = resolveWalletHelp(helpBundle, app.helpContextId, 'genesis');
     if (help.available) {
@@ -135,7 +145,9 @@ function ensurePage(section) {
   const websiteNote = el('p', 'muted', 'Website shortcuts are not verified Registry services. Visiting a site never connects your wallet or grants signing or spending permission. Links may be offline until deployed.');
   const websiteGrid = el('div', 'app-grid');
   websiteGrid.id = 'ecosystem-websites';
-  section.append(heading, gateway, controls, featuredHeading, featured, allHeading, grid, note, websitesHeading, websiteNote, websiteGrid);
+  const tokenCatalogue=el('details','token-catalogue account-card');
+  tokenCatalogue.id='token-template-catalogue';
+  section.append(heading, gateway, controls, tokenCatalogue, featuredHeading, featured, allHeading, grid, note, websitesHeading, websiteNote, websiteGrid);
 }
 
 export async function loadVerifiedApps(fetchImpl = globalThis.fetch) {
@@ -177,6 +189,7 @@ export async function initAppsPage() {
   if (!section) return;
   installAppsStylesheet();
   ensurePage(section);
+  const disposeCatalogue=mountTokenCatalogue420(section.querySelector('#token-template-catalogue'));
 
   let tokenDiscovery;
   let refresh=()=>{};
@@ -216,6 +229,7 @@ export async function initAppsPage() {
     if (!section.querySelector('#apps-search')) {
       observer.disconnect();
       unsubscribe();
+      disposeCatalogue();
       delete section.dataset.appsPageInitialized;
       initAppsPage();
     }

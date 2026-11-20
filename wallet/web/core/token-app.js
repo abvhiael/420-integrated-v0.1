@@ -5,3 +5,4 @@ export { TOKEN_SERVICE_ID_420, TOKEN_COMMUNITY_VAULT_ID_420, TOKEN_CREATION_FEE_
   normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-runtime.js';
 export { buildTokenDeploymentRequest420, prepareTokenDeploymentHandoff420 } from './token-handoff.js';
 export { normalizeTokenWalletConfig420, discoverWalletTokenRuntime420, createTokenDiscoverySession420 } from './token-discovery.js';
+export { TOKEN_CATALOGUE_PROFILES_420, describeTokenCatalogue420, createTokenCatalogue420 } from './token-catalogue.js';

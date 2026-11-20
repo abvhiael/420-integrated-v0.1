@@ -92,7 +92,8 @@ Minimal runtime privileges for a dedicated `bonggoggles_social_runtime` role
 ```sql
 GRANT USAGE ON SCHEMA bg_account_social TO bonggoggles_social_runtime;
 GRANT SELECT, INSERT ON bg_account_social.members, bg_account_social.posts,
-  bg_account_social.comments, bg_account_social.reports TO bonggoggles_social_runtime;
+  bg_account_social.comments TO bonggoggles_social_runtime;
+GRANT INSERT ON bg_account_social.reports TO bonggoggles_social_runtime;
 GRANT UPDATE(display_name,bio) ON bg_account_social.members TO bonggoggles_social_runtime;
 GRANT UPDATE(deleted_at) ON bg_account_social.posts TO bonggoggles_social_runtime;
 GRANT SELECT, INSERT, DELETE ON bg_account_social.reactions,

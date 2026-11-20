@@ -187,3 +187,35 @@ func TestOffChainModerationAndDistributedRateLimits(t *testing.T){
   if e!=nil||ok!=(i<2){t.Fatal("distributed rate limit",i,ok,e)}
  }
 }
+
+func TestReportsRemainPrivateToSocialRuntimeRole(t *testing.T){
+ store,_,_,_:=fixture(t)
+ // Real PostgreSQL least-privilege exercise. Owner/migration access is not
+ // transferred to the HTTP runtime role; public server cannot read reports
+ // or change the moderation-hidden status of a post.
+ db:=store.DB
+ role:="bg_social_least_privilege_test"
+ if _,e:=db.Exec("CREATE ROLE "+role+" NOLOGIN");e!=nil{t.Fatal("test role",e)}
+ grants:=[]string{
+  "GRANT USAGE ON SCHEMA bg_account_social TO "+role,
+  "GRANT SELECT,INSERT ON bg_account_social.members,bg_account_social.posts,bg_account_social.comments TO "+role,
+  "GRANT INSERT ON bg_account_social.reports TO "+role,
+  "GRANT UPDATE(display_name,bio) ON bg_account_social.members TO "+role,
+  "GRANT UPDATE(deleted_at) ON bg_account_social.posts TO "+role,
+  "GRANT SELECT,INSERT,DELETE ON bg_account_social.reactions,bg_account_social.follows,bg_account_social.blocks,bg_account_social.sessions,bg_account_social.login_flows TO "+role,
+  "GRANT SELECT,INSERT,UPDATE,DELETE ON bg_account_social.rate_buckets TO "+role,
+ }
+ for _,sqlStatement:=range grants{if _,e:=db.Exec(sqlStatement);e!=nil{t.Fatal("least privilege grant",e)}}
+ var canReport,canReadReports,canDelete,canHide,canModerate bool
+ e:=db.QueryRow("SELECT has_table_privilege($1,'bg_account_social.reports','INSERT'),"+
+  "has_table_privilege($1,'bg_account_social.reports','SELECT'),"+
+  "has_column_privilege($1,'bg_account_social.posts','deleted_at','UPDATE'),"+
+  "has_column_privilege($1,'bg_account_social.posts','hidden_at','UPDATE'),"+
+  "has_table_privilege($1,'bg_account_social.moderation_events','INSERT')",role).
+  Scan(&canReport,&canReadReports,&canDelete,&canHide,&canModerate)
+ if e!=nil{t.Fatal(e)}
+ if !canReport||canReadReports||!canDelete||canHide||canModerate{
+  t.Fatalf("runtime grants violate moderation isolation: report=%v read=%v delete=%v hide=%v audit=%v",
+   canReport,canReadReports,canDelete,canHide,canModerate)
+ }
+}

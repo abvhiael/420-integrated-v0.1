@@ -51,7 +51,7 @@ func (s *Store) Ready(ctx context.Context)error{
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'SELECT,INSERT'),false)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'INSERT'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT,INSERT,UPDATE,DELETE'),false)`).Scan(&ok)

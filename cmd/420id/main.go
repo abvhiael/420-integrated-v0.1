@@ -44,8 +44,8 @@ func main(){
  }
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  mode:=os.Getenv("AUTH420_MODE")
- if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"{log.Fatal("420ID acceptance is not enabled")}
- sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"{sessionApp="bong-goggles"}
+ if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"{log.Fatal("420ID acceptance is not enabled")}
+ sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"{sessionApp="bong-goggles"}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
  mail,e:=configuredMailer(os.Getenv)
  if e!=nil{log.Fatal(e)}
@@ -56,14 +56,21 @@ func main(){
  auth,e:=account.NewAuth(store,mail,origin,rp);if e!=nil{log.Fatal("HTTPS origin/RP configuration rejected")}
  var chain int64
  var contract account.ContractSignatureVerifier
- if mode=="wallet-acceptance"{
+ if mode=="wallet-acceptance"||mode=="identity-acceptance"{
   chain,e=strconv.ParseInt(required("AUTH420_WALLET_CHAIN_ID"),10,64)
   if e!=nil||chain<=0{log.Fatal("Invalid explicit wallet chain ID")}
   if rpcURL:=os.Getenv("AUTH420_WALLET_RPC_URL");rpcURL!=""{
    contract,e=account.NewWallet1271RPC(rpcURL,chain,nil);if e!=nil{log.Fatal("Unsafe contract verifier RPC configuration")}
   }
  }
- h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance",WalletMode:mode=="wallet-acceptance",WalletChainID:chain,ContractVerifier:contract})
+ var identity account.IdentityNamesReader
+ if mode=="identity-acceptance"{
+  identity,e=account.NewIdentityNamesRPC(required("AUTH420_IDENTITY_NAMES_RPC_URL"),chain,
+   required("AUTH420_IDENTITY_ADDRESS"),required("AUTH420_IDENTITY_CODE_HASH"),
+   required("AUTH420_NAMES_ADDRESS"),required("AUTH420_NAMES_CODE_HASH"),nil)
+  if e!=nil{log.Fatal("Invalid pinned Identity420/Names420 configuration")}
+ }
+ h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance",WalletMode:mode=="wallet-acceptance"||mode=="identity-acceptance",WalletChainID:chain,ContractVerifier:contract,IdentityMode:mode=="identity-acceptance",IdentityReader:identity})
  if e!=nil{log.Fatal("Acceptance configuration rejected")}
  ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
  preflight,stop:=context.WithTimeout(ctx,10*time.Second)

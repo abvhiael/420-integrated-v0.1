@@ -167,11 +167,65 @@ try{
    await token.locator('button[data-template="ERC721_COLLECTION"]:enabled').waitFor();
    console.log(JSON.stringify({width,erc721Wizard:'PASS',exactURI:true,emptyURI:true,invalidURIRejected:true,zeroInitialSupply:true,
      draftInvalidated:true,governanceDisabled:true,keyboard:true,nftOverflow,axe:nftAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
+   const multi=token.locator('#token-erc1155-wizard');
+   assert.equal(await multi.locator('form').isVisible(),false);
+   const multiChoose=token.locator('button[data-template="ERC1155_MULTI"]');
+   await multiChoose.click();
+   await token.locator('button[data-template="ERC1155_MULTI"][aria-pressed="true"]').waitFor();
+   assert.equal(await nft.locator('form').isVisible(),false);
+   assert.equal(await wizard.locator('form').isVisible(),false);
+   const multiURI=multi.getByLabel('Multi-token metadata URI',{exact:true});
+   assert.equal(await multi.locator('input').count(),2);
+   await multiURI.fill('javascript:alert(1)');
+   await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
+   assert.match(await multi.locator('#erc1155-wizard-status').textContent(),/Executable URI/);
+   await multiURI.fill('ipfs://bafyexample/{id}.json');
+   await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).focus();
+   await page.keyboard.press('Enter');
+   await multi.getByRole('heading',{name:'Prepared multi-token draft — not submitted'}).waitFor();
+   const multiPreview=multi.locator('.token-erc1155-preview');
+   assert.ok((await multiPreview.textContent()).includes('ipfs://bafyexample/{id}.json'));
+   assert.ok((await multiPreview.textContent()).includes('ipfs://bafyexample/'+'1'.padStart(64,'0')+'.json'));
+   assert.match(await multiPreview.textContent(),/0 — minting is separate/);
+   assert.match(await multiPreview.textContent(),/42 native/);
+   assert.equal(await multiPreview.locator('a,img,iframe').count(),0);
+   await multiURI.fill('https://example.org/shared.json');
+   assert.equal(await multiPreview.isVisible(),false);
+   await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
+   await multi.getByRole('heading',{name:'Prepared multi-token draft — not submitted'}).waitFor();
+   assert.match(await multiPreview.textContent(),/No \{id\} placeholder/);
+   await multiURI.fill('');
+   await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
+   await multi.getByRole('heading',{name:'Prepared multi-token draft — not submitted'}).waitFor();
+   assert.match(await multiPreview.textContent(),/Empty URI/);
+   const multiOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(multiOverflow.scroll<=multiOverflow.client+1,'ERC1155 wizard horizontal overflow');
+   const multiAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc1155-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   for(const v of multiAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': ERC1155 wizard '+v.id+' '+v.impact);
+   await page.screenshot({path:resolve(artifacts,'erc1155-wizard-'+width+'.png'),fullPage:true});
+   await page.evaluate(async()=>{
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420.find(p=>p.key==='ERC1155_MULTI'),false);
+   });
+   await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
+   await token.locator('button[data-template="ERC1155_MULTI"]:disabled').waitFor();
+   await multiPreview.waitFor({state:'hidden'});
+   assert.match(await multi.locator('#erc1155-wizard-status').textContent(),/changed/);
+   await page.evaluate(async()=>{
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420.find(p=>p.key==='ERC1155_MULTI'),true);
+   });
+   await token.getByRole('button',{name:'Refresh availability'}).click();
+   await token.locator('button[data-template="ERC1155_MULTI"]:enabled').waitFor();
+   console.log(JSON.stringify({width,erc1155Wizard:'PASS',exactURI:true,clientSubstitution:true,emptyURI:true,sharedURI:true,
+     invalidURIRejected:true,zeroInitialBalances:true,draftInvalidated:true,governanceDisabled:true,keyboard:true,multiOverflow,
+     axe:multiAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
    // Re-select fixed so the retained 5.3 stale-selection test still exercises the same profile.
    await choose.click();
    await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
    assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
    assert.equal(await nft.locator('form').isVisible(),false);
+   assert.equal(await multi.locator('form').isVisible(),false);
    console.log(JSON.stringify({width,erc20Wizard:'PASS',exactAmount:true,invalidPrecisionRejected:true,capRejected:true,
      draftInvalidated:true,keyboard:true,wizardOverflow,axe:wizardAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 
@@ -201,6 +255,8 @@ try{
    assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
    assert.equal(await nft.locator('form').isVisible(),false);
    assert.equal(await nft.locator('.token-erc721-preview').isVisible(),false);
+   assert.equal(await multi.locator('form').isVisible(),false);
+   assert.equal(await multiPreview.isVisible(),false);
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

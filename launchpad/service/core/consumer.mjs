@@ -91,8 +91,11 @@ export async function position(rpc,rt,saleId,account){
   if(linked){
     const cases=await readAddress(rpc,crowd,'arbitrationCases()');
     const origin=await call(rpc,cases,'caseOrigin(bytes32)',[wordHex(linked)]);
+    const domain=await readSingle(rpc,crowd,'CROWDFUNDING_DOMAIN()');
+    const component=await rpc.call('web3_sha3',[hexUtf8('420/COMPONENT/LAUNCHPAD/V1')]);
     if(decodeAddress(origin,0).toLowerCase()!==who||decodeAddress(origin,1).toLowerCase()!==project.controller.toLowerCase()
-       ||word(origin,4)!==sale.saleId)throw new Error('arbitration origin mismatch');
+       ||word(origin,2)!==domain||word(origin,3)!==component.toLowerCase()||
+       word(origin,4)!==sale.saleId)throw new Error('arbitration origin mismatch');
     const dstate=['NONE','OPEN','RULED','FINALIZED'][Number(decodeUint(origin,5))];
     if(!dstate)throw new Error('invalid arbitration state');
     const published=await readBool(rpc,crowd,'publishedDisputeOutcome(bytes32)',[wordHex(linked)]);
@@ -203,7 +206,10 @@ export async function transactionStatus(rpc,rt,txHash,account){
   let caseId=null;
   if(confirmed&&address(tx.to||'')===address(await readAddress(rpc,rt.crowdfundingIntegrationAddress,'arbitrationCases()'))){
     const topic=(await rpc.call('web3_sha3',['0x'+Buffer.from('CaseOpened(bytes32,bytes32,address,address,bytes32,bytes32)').toString('hex')])).toLowerCase();
-    const match=(receipt.logs||[]).find(log=>address(log.address)===address(tx.to)&&log.topics?.[0]?.toLowerCase()===topic&&HASH.test(log.topics?.[1]||''));
+    const domain=await readSingle(rpc,rt.crowdfundingIntegrationAddress,'CROWDFUNDING_DOMAIN()');
+    const match=(receipt.logs||[]).find(log=>address(log.address)===address(tx.to)&&
+      log.topics?.[0]?.toLowerCase()===topic&&HASH.test(log.topics?.[1]||'')&&
+      log.topics?.[2]?.toLowerCase()===domain&&log.topics?.[3]?.toLowerCase()==='0x'+wordAddress(who));
     if(match)caseId=match.topics[1].toLowerCase();
   }
   return {schema:'420-launchpad-transaction-status-v1',canonical:true,source,txHash:id,

@@ -3,6 +3,9 @@
 import { normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-runtime.js';
 import { discoverSmartAccount } from './accounts.js';
 import { assertWalletChain420 } from './transaction-lifecycle.js';
+import { prepareTokenDeploymentHandoff420 } from './token-handoff.js';
+import { validateTokenCreationEncoding420, tokenHashHex420 } from './token-sdk.js';
+import { TOKEN_CREATION_FEE_WEI_420 } from './token-runtime.js';
 
 const environments = new Set(['local','devnet','testnet','mainnet']);
 const check = (ok, message) => { if (!ok) throw Error(message); };
@@ -90,6 +93,8 @@ export async function discoverWalletTokenRuntime420(provider, config, controller
     status:'verified', serviceId:runtime.serviceId, environment:approved.environment,
     controller:owner, smartAccount:selected, deployed:fresh.deployed,
     controllerIsOwner:fresh.deployed && fresh.controllerIsOwner===true,
+    authorizationEpoch:fresh.deployed?fresh.authorizationEpoch.toString():null,
+    authorizationPolicyVersion:fresh.deployed?fresh.authorizationPolicyVersion.toString():null,
     runtime, verificationBlock:runtime.verificationBlock,
     // Discovery is not authorization or confirmation. Re-verify at handoff.
     authority:'DISCOVERY_ONLY', accountGrant:false, spendingAuthority:false,
@@ -135,7 +140,97 @@ export function createTokenDiscoverySession420() {
     const result=await refresh(context);
     return generation===expected&&snapshot===result?result:null;
   }
-  return Object.freeze({refresh,refreshCurrent,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
+  // Only the host-retained provider/release/account can be used. No provider,
+  // signer or context is returned. Every RPC is read-only and generation-bound.
+  async function simulateCurrent(draft,expected=snapshot,priorBlock=null){
+    check(context&&snapshot===expected&&expected.status==='verified'&&expected.controllerIsOwner&&expected.deployed,
+      'Wallet review context unavailable');
+    const attempt=generation,host=context;
+    const active=()=>check(attempt===generation&&context===host&&snapshot===expected,'Wallet review context changed');
+    const deadline=Date.now()+60000;
+    const allowed=['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_estimateGas','eth_gasPrice','eth_getBalance'];
+    const provider={request:async(method,params=[])=>{
+      active();check(allowed.includes(method),'non-review RPC method');
+      const remaining=Math.min(10000,deadline-Date.now());
+      check(remaining>0,'Token review timed out');
+      let timer;
+      try{
+        const result=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),
+          new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Token review RPC timed out')),remaining);})]);
+        active();return result;
+      }finally{clearTimeout(timer);}
+    }};
+    const d=structuredClone(draft), r=d?.request;
+    check(d?.authority==='DRAFT_ONLY'&&d.confirmationRequired===true&&d.owner===expected.smartAccount&&
+      d.controller===expected.controller&&d.chainId===expected.runtime.chainId&&d.environment===expected.environment&&
+      d.verificationBlock?.number===expected.verificationBlock.number&&d.verificationBlock?.hash===expected.verificationBlock.hash&&
+      ['manifestHash','dependencyRoot','metadataHash','interfaceHash'].every(k=>d.release?.[k]===expected.runtime.release[k]),
+      'Token draft does not match Wallet review context');
+    const creation=validateTokenCreationEncoding420(r?.draft,{data:r?.data,templateId:r?.templateId,configHash:r?.configHash,calldataHash:r?.calldataHash});
+    check(d.profile?.id===creation.template.id&&expected.runtime.templates.find(p=>p.id===creation.template.id)?.enabled,
+      'Token draft template is not verified');
+    const canonical=async block=>{
+      const b=await provider.request('eth_getBlockByNumber',[block.number,false]);
+      check(b?.number===block.number&&b.hash?.toLowerCase()===block.hash,'Token review block reorganized');
+    };
+    await canonical(expected.verificationBlock);
+    if(priorBlock)await canonical(priorBlock);
+    const before=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    const sameAccount=x=>x.controllerIsOwner&&x.deployed&&x.smartAccount===expected.smartAccount&&
+      x.controller===expected.controller&&x.authorizationEpoch===expected.authorizationEpoch&&
+      x.authorizationPolicyVersion===expected.authorizationPolicyVersion;
+    check(sameAccount(before),'SmartAccount ownership or authorization epoch changed');
+    const fresh=await discoverSmartAccount(provider,host.controller,walletAccountConfig(host.config));
+    check(fresh.smartAccount===expected.smartAccount&&fresh.controllerIsOwner&&fresh.authorizationEpoch.toString()===before.authorizationEpoch&&
+      fresh.authorizationPolicyVersion.toString()===before.authorizationPolicyVersion,'SmartAccount authority changed');
+    const prepared=await prepareTokenDeploymentHandoff420(provider,host.controller,{...fresh,expectedChainId:d.chainId},
+      normalizeTokenWalletConfig420(host.config).binding,r);
+    // execute() returns ABI bytes containing the factory's returned address.
+    // Empty return data is not successful Token deployment simulation.
+    const result=prepared.simulation.result;
+    check(typeof result==='string'&&/^0x[0-9a-fA-F]{192}$(?![\s\S])/.test(result)&&
+      BigInt('0x'+result.slice(2,66))===32n&&BigInt('0x'+result.slice(66,130))===32n&&
+      /^0{24}[0-9a-fA-F]{40}$/.test(result.slice(130)),'Malformed Token simulation return');
+    const predicted=address('0x'+result.slice(-40));
+    check(![expected.controller,expected.smartAccount,...Object.values(expected.runtime.dependencies).map(x=>x.address)].includes(predicted),
+      'Token simulation returned an authority address');
+    const quantity=(x,label)=>{
+      check(typeof x==='string'&&x.length<=66&&/^0x(?:0|[1-9a-fA-F][0-9a-fA-F]*)$(?![\s\S])/.test(x),'Invalid '+label);
+      return BigInt(x);
+    };
+    const gas=quantity(prepared.simulation.gas,'gas estimate');check(gas>0n,'Invalid zero gas estimate');
+    const price=quantity(await provider.request('eth_gasPrice',[]),'gas price');
+    const block=prepared.verificationBlock;
+    // All checks and the fee quote must refer to the same canonical tip; if a
+    // block arrives during review, retry rather than label a mixed snapshot.
+    check(before.verificationBlock.number===block.number&&before.verificationBlock.hash===block.hash,'Chain advanced during simulation; retry review');
+    const [walletBalance,controllerBalance]=await Promise.all([
+      provider.request('eth_getBalance',[expected.smartAccount,block.number]).then(x=>quantity(x,'SmartAccount balance')),
+      provider.request('eth_getBalance',[expected.controller,block.number]).then(x=>quantity(x,'controller balance')),
+    ]);
+    const gasCost=gas*price,total=TOKEN_CREATION_FEE_WEI_420+gasCost;
+    check(total<2n**256n,'Fee estimate overflow');
+    check(walletBalance>=TOKEN_CREATION_FEE_WEI_420,'Insufficient SmartAccount balance for 42 native 420 fee');
+    check(controllerBalance>=gasCost,'Insufficient controller balance for estimated network gas');
+    const after=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    check(sameAccount(after)&&after.runtime.templates.find(p=>p.id===creation.template.id)?.enabled,
+      'SmartAccount authority or template availability changed during review');
+    check(after.verificationBlock.number===block.number&&after.verificationBlock.hash===block.hash,'Chain advanced during review; retry review');
+    await canonical(expected.verificationBlock);if(priorBlock)await canonical(priorBlock);await canonical(block);
+    const tip=await provider.request('eth_getBlockByNumber',['latest',false]);
+    check(tip?.number===block.number&&tip.hash?.toLowerCase()===block.hash,'Chain advanced during review; retry review');
+    await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,d.chainId);active();
+    return Object.freeze({authority:'SIMULATED_REVIEW_ONLY',controller:expected.controller,smartAccount:expected.smartAccount,
+      chainId:d.chainId,environment:d.environment,authorizationEpoch:after.authorizationEpoch,
+      authorizationPolicyVersion:after.authorizationPolicyVersion,templateId:creation.template.id,configHash:creation.configHash,
+      calldataHash:creation.calldataHash,executionHash:tokenHashHex420(prepared.transaction.data),
+      request:Object.freeze({...r,draft:creation.draft}),transaction:prepared.transaction,release:prepared.release,
+      verificationBlock:block,predictedAddress:predicted,communityTreasuryVault:prepared.communityTreasuryVault,
+      creationFeeWei:TOKEN_CREATION_FEE_WEI_420.toString(),gasUnits:gas.toString(),gasPriceWei:price.toString(),
+      estimatedGasWei:gasCost.toString(),estimatedTotalWei:total.toString(),smartAccountBalanceWei:walletBalance.toString(),
+      controllerBalanceWei:controllerBalance.toString(),simulationPassed:true});
+  }
+  return Object.freeze({refresh,refreshCurrent,simulateCurrent,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
 
 // Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.

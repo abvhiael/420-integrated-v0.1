@@ -1,3 +1,4 @@
+import {mountTokenFeeReview420} from './token-fee-review-ui.js';
 import {createERC1155Wizard420} from './core/token-erc1155-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
 export function mountERC1155Wizard420(section,catalogue,session){
@@ -55,7 +56,8 @@ export function mountERC1155Wizard420(section,catalogue,session){
     }
   }
   const unsubscribe=model.subscribe(render);
+  const disposeFeeReview=mountTokenFeeReview420(section,model,session);
   form.addEventListener('submit',e=>{e.preventDefault();void model.review();});
   renew.addEventListener('click',()=>model.renewSalt());reset.addEventListener('click',()=>model.reset());
-  return ()=>{unsubscribe();model.dispose();};
+  return ()=>{unsubscribe();disposeFeeReview();model.dispose();};
 }

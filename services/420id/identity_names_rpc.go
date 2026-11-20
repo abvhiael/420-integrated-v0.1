@@ -5,7 +5,6 @@ import (
  "context"
  "encoding/hex"
  "encoding/json"
- "errors"
  "io"
  "net/http"
  "strconv"
@@ -59,7 +58,6 @@ func (p *IdentityNamesRPC) finalized(ctx context.Context)(finalizedIdentityBlock
   Number string `json:"number"`
   Timestamp string `json:"timestamp"`
  }
- dec=json.NewDecoder(bytes.NewReader(envelope.Result));dec.DisallowUnknownFields()
  // Most EVM blocks contain additional fields; decode only needed fields
  // and reject malformed/nullable/oversized values, not legitimate metadata.
  if json.Unmarshal(envelope.Result,&block)!=nil{return none,ErrUnavailable}
@@ -173,4 +171,3 @@ func (p *IdentityNamesRPC) ValidCredential(ctx context.Context,chain int64,walle
  return wordBool(result[0])
 }
 var _ IdentityNamesReader=(*IdentityNamesRPC)(nil)
-var _ = errors.Is

@@ -39,7 +39,7 @@ function actionState(){
   actionable('#refresh',!!state.service);actionable('#load-more',!!state.cursor);
   actionable('#refresh-position',w&&!!c);
   actionable('#bind-identity',w&&!!c&&HASH.test($('#identity-profile').value));
-  actionable('#register-intent',eligible&&amountOk&&!!nonce);
+  actionable('#register-intent',eligible&&amountOk&&!!nonce&&!checkout?.registered);
   actionable('#check-checkout',eligible&&amountOk&&!!nonce);
   actionable('#new-intent',w&&!!c);
   const terms=conversionTerms();const hasTerms=HASH.test(terms.marketId)&&/^0x[0-9a-fA-F]{40}$/.test(terms.inputAsset)&&
@@ -93,6 +93,8 @@ function renderCheckout(){
   const messages={REGISTER_INTENT:'Intent is not yet registered. Review and confirm the registration transaction.',
     WAIT_FOR_MERCHANT_INVOICE:'Intent registered. Merchant must create the exact canonical single-use invoice before payment.',
     QUOTE_CONVERSION:'Invoice ready. Use a qualified ERC-20 market conversion quote below; native 420 checkout cannot settle a Launchpad sale.',
+    CONTRIBUTION_UNAVAILABLE:'A new contribution is unavailable due to sale status, capacity or eligibility. Existing paid intents can still be recovered.',
+    RECOVER_OR_EXPIRED:'Do not pay this invoice: the contribution window or eligibility is no longer valid. Check Pay refund and recovery.',
     AWAIT_CANONICAL_SETTLEMENT:'420Pay payment is not yet settled. Verify canonical payment and Wallet history before any retry.',
     RECORD_CONTRIBUTION:'420Pay shows a matching settled payment. Review recording the Launchpad contribution.'};
   setText('#checkout-state',c?(messages[c.next]||('Payment recorded: '+c.paymentStatus)):'No checkout context loaded.');

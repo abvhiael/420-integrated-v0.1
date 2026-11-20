@@ -1,0 +1,318 @@
+{
+  "schema": "420token-qualification-v1",
+  "step": "TOKEN-AUDIT-6",
+  "status": "PASS_REPOSITORY_SCOPE",
+  "level": "L2",
+  "base_sha": "f6658e4c1627b424848b8fe42c55efa015560f61",
+  "tested_sha": "54f21e8902b5c34583148b6fcfa7e5c167b96d85",
+  "pull_request": 1258,
+  "branch": "audit/token-audit-6-integration",
+  "reconciled_main_sha": "f6658e4c1627b424848b8fe42c55efa015560f61",
+  "concurrent_main_changes": {
+    "commits": 0,
+    "files": []
+  },
+  "scope": "Locally executable ecosystem discovery, historical factory creation and community Vault fee projection, consumer integrations and documentation reconciliation",
+  "changed_implementation_files": [
+    ".github/workflows/420token-ecosystem.yml",
+    "420-indexer/src/api-contract.ts",
+    "420-indexer/src/api-surface.ts",
+    "420-indexer/src/http-transport.ts",
+    "420-indexer/src/index.ts",
+    "420-indexer/src/token-read-model.ts",
+    "420-indexer/test/token-provenance.integration.ts",
+    "420-indexer/test/token-provenance.test.ts",
+    "appstore/curation/genesis-apps.json",
+    "appstore/curation/genesis_test.go",
+    "appstore/publicservice/service_test.go",
+    "appstore/web/catalogue.test.cjs",
+    "deployments/indexer/docker-compose.yml",
+    "docs/420INDEXER-API-V1.md",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/deployment-operations.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/security.md",
+    "docs/apps/token/troubleshooting.md",
+    "docs/apps/token/user-guide.md",
+    "docs/architecture/protocols/pay-token-exchange-bridge.md",
+    "docs/audit/EXP-0.1.2-indexer-dependency-reconciliation.md",
+    "docs/reference/generated/indexer-api.md",
+    "explorer/api/exp_2_2_contract_test.go",
+    "explorer/api/server.go",
+    "explorer/indexerclient/token.go",
+    "explorer/service/token.go",
+    "explorer/web/static/app.js",
+    "explorer/web/static/token-presentation.mjs",
+    "explorer/web/token-presentation.test.mjs",
+    "indexer/api/backend.go",
+    "indexer/api/server.go",
+    "indexer/api/token.go",
+    "indexer/api/token_test.go",
+    "indexer/cmd/indexer420/main.go",
+    "indexer/store/treasury.go",
+    "indexer/tokenread/client.go",
+    "indexer/tokenread/client_test.go",
+    "indexer/tokenread/projection.go",
+    "indexer/tokenread/projection_test.go",
+    "scripts/reference_indexer_renderer.py",
+    "scripts/verify-exp-0-1-2-indexer-dependencies.py",
+    "search/discovery/token.go",
+    "search/discovery/token_test.go",
+    "search/indexerclient/token.go",
+    "search/runtime/service.go"
+  ],
+  "workflows": [
+    {
+      "name": "420Indexer",
+      "run_id": 44678293365,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-6",
+      "run_id": 44678293317,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-2.3",
+      "run_id": 44678293548,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-2.2",
+      "run_id": 44678293310,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer Cloudflare",
+      "run_id": 44678293277,
+      "conclusion": "success"
+    },
+    {
+      "name": "Commerce service fast qualification",
+      "run_id": 44678293047,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Docs Qualification",
+      "run_id": 44678293399,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Treasury audit qualification",
+      "run_id": 44678293409,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Explorer EXP-2.1",
+      "run_id": 44678293386,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "Treasury REC-7 qualification",
+      "run_id": 44678293204,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Governance audit qualification",
+      "run_id": 44678293244,
+      "conclusion": "skipped"
+    },
+    {
+      "name": "420Explorer EXP-2.4",
+      "run_id": 44678293369,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Town audit",
+      "run_id": 44678293373,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-2.6",
+      "run_id": 44678293441,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Token ecosystem integration",
+      "run_id": 44678293565,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Search audit qualification",
+      "run_id": 44678293331,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-NEXT.1 Registry Descriptor Provenance",
+      "run_id": 44678293461,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-2.5",
+      "run_id": 44678293537,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Rights audit qualification",
+      "run_id": 44678293271,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Identity ID-AUDIT-4",
+      "run_id": 44678293347,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Token audit qualification",
+      "run_id": 44678293419,
+      "conclusion": "success"
+    },
+    {
+      "name": "420AppStore Audit Qualification",
+      "run_id": 44678293420,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-NEXT.3 Cross Resource Browser",
+      "run_id": 44678293202,
+      "conclusion": "success"
+    },
+    {
+      "name": "CMP External Science Read Endpoint",
+      "run_id": 44678293402,
+      "conclusion": "success"
+    },
+    {
+      "name": "EXP-1.7 Cross-Layer Traceability Qualification",
+      "run_id": 44678293306,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Grants Audit Qualification",
+      "run_id": 44678293328,
+      "conclusion": "success"
+    },
+    {
+      "name": "EXP-1.8 Runtime Negative Divergence Qualification",
+      "run_id": 44678293389,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Compute App Qualification",
+      "run_id": 44678293404,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Explorer EXP-NEXT.2 Fee and Raw Event Browser",
+      "run_id": 44678293329,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Registry REG-AUDIT-7",
+      "run_id": 44678293477,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Identity ID-AUDIT-6",
+      "run_id": 44678293391,
+      "conclusion": "success"
+    },
+    {
+      "name": "420Stake STAKE-AUDIT-6",
+      "run_id": 44678293454,
+      "conclusion": "success"
+    }
+  ],
+  "required_job_evidence": [
+    {
+      "run_id": 44678293565,
+      "job_id": 136095298383,
+      "conclusion": "success",
+      "go": {
+        "top_level_pass": 229,
+        "subtest_pass": 61,
+        "failures": 0,
+        "skips": 0,
+        "packages_with_tests": 10,
+        "compile_only_packages": 1
+      },
+      "frontend": {
+        "pass": 14,
+        "fail": 0,
+        "skip": 0
+      },
+      "typescript": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0,
+        "postgresql_integration": "PASS"
+      },
+      "canonical_genesis_definitions": "PASS",
+      "generated_indexer_api_reference": "PASS"
+    },
+    {
+      "run_id": 44678293365,
+      "job_id": 136095503996,
+      "conclusion": "success",
+      "typescript": {
+        "pass": 304,
+        "fail": 0,
+        "skip": 0
+      },
+      "explorer_inventory": {
+        "client_reads": 16,
+        "route_matches": 16,
+        "source_level_accounting_pass": true
+      }
+    },
+    {
+      "run_id": 44678293331,
+      "job_id": 136095297660,
+      "conclusion": "success"
+    },
+    {
+      "run_id": 44678293420,
+      "job_id": 136095298082,
+      "conclusion": "success"
+    },
+    {
+      "run_id": 44678293419,
+      "job_id": 136095539393,
+      "conclusion": "success",
+      "wallet_sdk": {
+        "pass": 174,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    {
+      "run_id": 44678293277,
+      "job_id": 136095297416,
+      "conclusion": "success"
+    }
+  ],
+  "workflow_totals": {
+    "success": 26,
+    "scope_skipped": 6,
+    "failure": 0
+  },
+  "qualification_boundaries": {
+    "fixtures": "Local Go file-store and HTTP fixtures; real PostgreSQL with synthetic canonical chain event fixtures; frontend presentation tests, not live mounted browser acceptance or a live network.",
+    "retained_local_evm_evidence": "docs/audit/420TOKEN-AUDIT-5.14-QUALIFICATION.json",
+    "read_only": true,
+    "current_ownership_or_financial_admission_authority": false,
+    "live_testnet_qualified": false,
+    "genesis_qualified": false,
+    "production_qualified": false,
+    "whole_application_closeout_complete": false,
+    "independent_operator_approved_indexer_binding_required": true,
+    "contract_or_frozen_economic_changes": false
+  },
+  "previous_failures_resolved": [
+    "Explorer advertised API route and historical dependency inventory drift; corrected exhaustive inventory and formatted client signature.",
+    "Search and AppStore formatting; corrected without weakening assertions.",
+    "General database-free Indexer suites lacked PostgreSQL; separate mandatory database-specific integration test runs with PostgreSQL and zero skips in dedicated gate."
+  ],
+  "next": "TOKEN-AUDIT-7",
+  "evidence_closeout": "Only evidence, roadmap and readiness metadata change after exact tested SHA; no executable implementation, test, workflow or deployment config changes."
+}

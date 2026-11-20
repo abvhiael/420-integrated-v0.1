@@ -117,11 +117,11 @@ jobs:
 
       - name: Level 1 Launchpad regression qualification
         working-directory: contracts
-        run: forge test --match-path 'test/Launchpad*420.t.sol' -vvv
+        run: forge test --skip 'test/fixtures/cadc/upstream/**' --match-path 'test/Launchpad*420.t.sol' -vvv
 
       - name: Audit-4 deployment and Registry binding qualification
         working-directory: contracts
-        run: forge test --match-path test/LaunchpadDeploymentBinding420.t.sol -vvvv
+        run: forge test --skip 'test/fixtures/cadc/upstream/**' --match-path test/LaunchpadDeploymentBinding420.t.sol -vvvv
 
       - name: Forbidden primitive and address-policy scan
         shell: bash

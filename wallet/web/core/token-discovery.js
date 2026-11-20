@@ -220,7 +220,7 @@ export function createTokenDiscoverySession420() {
     // the simulation block and the latest verified release/account snapshot.
     const nonceCall={to:prepared.target,data:tokenReadCall420('creatorNonce(address)',['address'],[expected.smartAccount])};
     const nonceAt=async tag=>{const n=await provider.request('eth_call',[nonceCall,tag]);
-      check(typeof n==='string'&&/^0x[0-9a-fA-F]{64}$(?![\\s\\S])/.test(n),'Invalid creator nonce');return BigInt(n).toString();};
+      check(typeof n==='string'&&/^0x[0-9a-fA-F]{64}$(?![\s\S])/.test(n),'Invalid creator nonce');return BigInt(n).toString();};
     const creatorNonce=await nonceAt(simulationBlock.number);
     check(creatorNonce===await nonceAt(block.number),'Creator nonce changed during simulation; retry review');
     const [walletBalance,controllerBalance]=await Promise.all([

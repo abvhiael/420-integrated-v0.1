@@ -1,0 +1,48 @@
+{
+  "step": "TOKEN-AUDIT-5.8",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "da5ad1605a6a955e9eb2668afd7f2cf5753cc1d0",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps.css",
+    "wallet/web/core/token-app.js",
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-fee-review.js",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/token-erc1155-wizard-ui.js",
+    "wallet/web/token-erc20-wizard-ui.js",
+    "wallet/web/token-erc721-wizard-ui.js",
+    "wallet/web/token-fee-review-ui.js",
+    "wallet/web/test/token-fee-review.test.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    ".qualification/candidates/TOKEN-AUDIT-5.8-fee-review.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-encoding.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/token-fee-review.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js",
+      "owner": "Token SDK and affected Wallet paths"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Actual Wallet fee review for all three standards and browser regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Review exact 42 native 420 community Treasury fee and separate controller-funded gas estimate across all eight profiles. Canonical owner-bound SmartAccount execute simulation, block-pinned, complete verified release and fee balance checks",
+    "Explicit separate user authorization only after fresh simulation of unchanged reviewed request, fee bounds and account authority; stale review, nonce changes, reorg, edits, cancellation, disconnect and failures reject or invalidate. No signing or broadcast",
+    "Actual mounted forms for all three standards, targeted SDK and responsive browser evidence. Preserve frozen contracts and prior ABI evidence; no aggregate step 5 or live qualification claim"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

@@ -113,6 +113,42 @@ try{
    await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
    await wizard.getByRole('heading',{name:'Prepared draft — not submitted'}).waitFor();
    assert.match(await wizard.locator('.token-erc20-preview').textContent(),/200500000000000000000/);
+   // Reuse the actual mounted form review for each standard. No signing RPCs.
+   async function exerciseFeeReview(w,standard){
+     const panel=w.locator('.token-fee-review'),simulate=panel.getByRole('button',{name:'Simulate and review fees'}),
+       authorize=panel.getByRole('button',{name:'Authorize reviewed creation'});
+     assert.equal(await panel.isVisible(),true);assert.equal(await authorize.isDisabled(),true);
+     await simulate.focus();await page.keyboard.press('Enter');
+     await panel.locator('.token-fee-review-details').waitFor({state:'visible'});
+     assert.match(await panel.textContent(),/42 native/);
+     assert.match(await panel.textContent(),/0\.001048576 native/);
+     assert.match(await panel.textContent(),/42\.001048576 native/);
+     assert.equal(await authorize.isEnabled(),true);
+     // Changed gas price requires a second deliberate approval.
+     await page.evaluate(()=>{window.__tokenCatalogueFixture.control.gasPrice='0x77359400';});
+     await authorize.click();
+     await panel.getByText(/Review changed\. Inspect/).waitFor();
+     assert.match(await panel.textContent(),/42\.002097152 native/);
+     await authorize.focus();await page.keyboard.press('Enter');
+     await panel.getByText(/Explicit authorization recorded/).waitFor();
+     assert.equal(await authorize.isDisabled(),true);
+     assert.match(await panel.textContent(),/No transaction signed or submitted/);
+     const overflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+     assert.ok(overflow.scroll<=overflow.client+1,'Token fee review horizontal overflow');
+     const axe=await page.evaluate(id=>window.axe.run(document.querySelector(id+' .token-fee-review'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}),'#token-'+standard.toLowerCase()+'-wizard');
+     for(const v of axe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': '+standard+' fee review '+v.id+' '+v.impact);
+     await page.screenshot({path:resolve(artifacts,'fee-review-'+standard+'-'+width+'.png'),fullPage:true});
+     await panel.getByRole('button',{name:'Cancel authorization'}).click();
+     assert.equal(await authorize.isDisabled(),true);
+     await page.evaluate(()=>{const f=window.__tokenCatalogueFixture;f.control.gasPrice='0x3b9aca00';f.control.simulationError='revert';});
+     await simulate.click();await panel.getByText(/Simulation or fee review failed/).waitFor();
+     assert.equal(await authorize.isDisabled(),true);
+     await page.evaluate(()=>{const f=window.__tokenCatalogueFixture;f.control.simulationError=null;
+       if(f.calls.some(([m])=>/send|sign|requestAccounts/i.test(m)))throw Error('unexpected write or signing RPC');});
+     console.log(JSON.stringify({width,standard,tokenFeeReview:'PASS',changedFeesRejected:true,explicitAuthorization:true,cancelled:true,
+       simulationFailureRejected:true,keyboard:true,overflow,axe:axe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
+   }
+   await exerciseFeeReview(wizard,'ERC20');
    const wizardOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(wizardOverflow.scroll<=wizardOverflow.client+1,'ERC20 wizard horizontal overflow');
    const wizardAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc20-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
@@ -146,6 +182,7 @@ try{
    await nft.getByRole('button',{name:'Prepare ERC721 draft'}).click();
    await nft.getByRole('heading',{name:'Prepared collection draft — not submitted'}).waitFor();
    assert.match(await nft.locator('.token-erc721-preview').textContent(),/Empty base URI/);
+   await exerciseFeeReview(nft,'ERC721');
    const nftOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(nftOverflow.scroll<=nftOverflow.client+1,'ERC721 wizard horizontal overflow');
    const nftAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc721-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
@@ -198,6 +235,7 @@ try{
    await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
    await multi.getByRole('heading',{name:'Prepared multi-token draft — not submitted'}).waitFor();
    assert.match(await multiPreview.textContent(),/Empty URI/);
+   await exerciseFeeReview(multi,'ERC1155');
    const multiOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(multiOverflow.scroll<=multiOverflow.client+1,'ERC1155 wizard horizontal overflow');
    const multiAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc1155-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
@@ -257,6 +295,7 @@ try{
    assert.equal(await nft.locator('.token-erc721-preview').isVisible(),false);
    assert.equal(await multi.locator('form').isVisible(),false);
    assert.equal(await multiPreview.isVisible(),false);
+   assert.equal(await token.locator('.token-fee-review:visible').count(),0);
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

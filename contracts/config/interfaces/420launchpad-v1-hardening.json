@@ -7,7 +7,7 @@
       "requiredNonzero": true,
       "uniquenessEnforcedByBaseV1": false,
       "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
-      "crowdfundingBinding": "CANONICAL_420PAY_SETTLED_PAYMENT_ID",
+      "crowdfundingBinding": "CANONICAL_420PAY_FUNDED_SINGLE_USE_CHECKOUT_AND_REGISTERED_CAMPAIGN_INTENT",
       "crowdfundingReplayProtection": true,
       "canonicalSettlementBindingImplementedBy": "LaunchpadCrowdfundingIntegration420"
     },
@@ -15,7 +15,7 @@
       "requiredNonzero": true,
       "uniquenessEnforcedByBaseV1": false,
       "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
-      "crowdfundingBinding": "REPLAY_PROTECTED_DELIVERY_EVIDENCE",
+      "crowdfundingBinding": "REPLAY_PROTECTED_CONTROLLER_ATTESTATION_AND_PARTICIPANT_ACKNOWLEDGEMENT",
       "crowdfundingReplayProtection": true,
       "canonicalDeliveryExecution": false,
       "reputationPublicationImplementedBy": "LaunchpadCrowdfundingIntegration420"
@@ -24,7 +24,7 @@
       "requiredNonzero": true,
       "uniquenessEnforcedByBaseV1": false,
       "baseSemantics": "OPAQUE_AUDIT_REFERENCE_WHEN_CROWDFUNDING_INTEGRATION_UNBOUND",
-      "crowdfundingBinding": "CANONICAL_420PAY_REFUND_BATCH",
+      "crowdfundingBinding": "CANONICAL_420PAY_DELIVERED_REFUND_BATCH",
       "crowdfundingReplayProtection": true,
       "canonicalRefundExecution": false,
       "canonicalRefundBindingImplementedBy": "LaunchpadCrowdfundingIntegration420"
@@ -35,7 +35,8 @@
     "participantClaimsNeverExceedAllocation": true,
     "residualDust": "UNASSIGNED_ACCOUNTING_DUST",
     "dustCustody": false,
-    "sweepAuthority": false
+    "sweepAuthority": false,
+    "zeroAllocationClaim": "REVERT_NOT_CLAIMABLE"
   },
   "projectActive": {
     "semantics": "IMMUTABLE_REGISTRATION_MARKER",

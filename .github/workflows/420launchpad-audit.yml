@@ -115,13 +115,34 @@ jobs:
               },sort_keys=True))
           PY
 
+      # Foundry compiles the configured test tree before match-path filtering.  The
+      # shared test/ tree contains unrelated vendored CADC/LayerZero fixtures and
+      # other app tests, so stage the five real Launchpad test files verbatim
+      # (except the relative import depth) as the exact qualification inventory.
+      - name: Materialize scoped Launchpad tests
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test/.launchpad-ci
+          for source in test/Launchpad*420.t.sol; do
+            sed 's#"../src/#"../../src/#g' "$source" > "test/.launchpad-ci/${source##*/}"
+          done
+          test "$(find test/.launchpad-ci -maxdepth 1 -name 'Launchpad*420.t.sol' | wc -l)" -eq 5
+
       - name: Level 1 Launchpad regression qualification
         working-directory: contracts
-        run: forge test --match-path 'test/Launchpad*420.t.sol' -vvv
+        env:
+          FOUNDRY_TEST: test/.launchpad-ci
+          FOUNDRY_SRC: src/launchpad
+        run: forge test --match-path 'test/.launchpad-ci/Launchpad*420.t.sol' -vvv
 
       - name: Audit-4 deployment and Registry binding qualification
         working-directory: contracts
-        run: forge test --match-path test/LaunchpadDeploymentBinding420.t.sol -vvvv
+        env:
+          FOUNDRY_TEST: test/.launchpad-ci
+          FOUNDRY_SRC: src/launchpad
+        run: forge test --match-path test/.launchpad-ci/LaunchpadDeploymentBinding420.t.sol -vvvv
 
       - name: Forbidden primitive and address-policy scan
         shell: bash

@@ -5,7 +5,6 @@ import (
  "crypto/sha256"
  "crypto/subtle"
  "database/sql"
- "encoding/base64"
  "errors"
  "net"
  "net/url"

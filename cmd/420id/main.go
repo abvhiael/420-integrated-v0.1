@@ -4,6 +4,9 @@ package main
 import (
  "context"
  "database/sql"
+ "encoding/json"
+ "bytes"
+ "io"
  "encoding/base64"
  "errors"
  "log"
@@ -44,15 +47,25 @@ func main(){
  }
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  mode:=os.Getenv("AUTH420_MODE")
- if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"{log.Fatal("420ID acceptance is not enabled")}
- sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"{sessionApp="bong-goggles"}
+ if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"&&mode!="sso-acceptance"{log.Fatal("420ID acceptance is not enabled")}
+ sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"||mode=="sso-acceptance"{sessionApp="bong-goggles"}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
  mail,e:=configuredMailer(os.Getenv)
  if e!=nil{log.Fatal(e)}
  rate,e:=base64.RawURLEncoding.Strict().DecodeString(required("AUTH420_RATE_KEY"));if e!=nil||len(rate)!=32{log.Fatal("AUTH420_RATE_KEY must be a random 32-byte base64url key")}
  if os.Getenv("AUTH420_TLS_TERMINATION")!="trusted-proxy"{log.Fatal("Trusted TLS ingress must be configured explicitly")}
  db,e:=database("AUTH420_DATABASE_URL");if e!=nil{log.Fatal(e)};defer db.Close()
- store,e:=account.NewStore(db,[]string{"bong-goggles"});if e!=nil{log.Fatal("Account store configuration rejected")}
+ var ssoClients []account.SSOClient
+ approvedApps:=[]string{"bong-goggles"}
+ if mode=="sso-acceptance"{
+  raw:=required("AUTH420_SSO_CLIENTS")
+  if len(raw)>16384{log.Fatal("SSO client manifest too large")}
+  parser:=json.NewDecoder(bytes.NewReader([]byte(raw)));parser.DisallowUnknownFields()
+  if parser.Decode(&ssoClients)!=nil||len(ssoClients)==0||len(ssoClients)>20{log.Fatal("SSO client manifest invalid")}
+  if parser.Decode(&struct{}{})!=io.EOF{log.Fatal("SSO client manifest contains trailing data")}
+  for _,c:=range ssoClients{approvedApps=append(approvedApps,c.App)}
+ }
+ store,e:=account.NewStore(db,approvedApps);if e!=nil{log.Fatal("Account store configuration rejected")}
  auth,e:=account.NewAuth(store,mail,origin,rp);if e!=nil{log.Fatal("HTTPS origin/RP configuration rejected")}
  var chain int64
  var contract account.ContractSignatureVerifier
@@ -70,7 +83,7 @@ func main(){
    required("AUTH420_NAMES_ADDRESS"),required("AUTH420_NAMES_CODE_HASH"),nil)
   if e!=nil{log.Fatal("Invalid pinned Identity420/Names420 configuration")}
  }
- h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance",WalletMode:mode=="wallet-acceptance"||mode=="identity-acceptance",WalletChainID:chain,ContractVerifier:contract,IdentityMode:mode=="identity-acceptance",IdentityReader:identity})
+ h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance",WalletMode:mode=="wallet-acceptance"||mode=="identity-acceptance",WalletChainID:chain,ContractVerifier:contract,IdentityMode:mode=="identity-acceptance",IdentityReader:identity,SSOClients:ssoClients})
  if e!=nil{log.Fatal("Acceptance configuration rejected")}
  ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
  preflight,stop:=context.WithTimeout(ctx,10*time.Second)

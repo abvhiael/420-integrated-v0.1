@@ -216,3 +216,92 @@ private/public transitions, cross-app session isolation, stale tokens,
 suspension, validation and HTTP controls. Run focused browser syntax checks
 for `profile-session.mjs` and `profile-ui.mjs`, and retain existing
 authentication regressions on the exact branch head.
+
+## AUTH-5 — optional 420Wallet linking (repository implementation)
+
+420ID accounts are **wallet-independent**. Link creation is always optional:
+verified-email or passkey enrollment, sign-in, profile usage and session
+recovery do not require a wallet. A wallet link is **not** an authentication
+method for 420ID, proof of 420Names ownership, 420Identity credential,
+wallet controller, spending delegation, application capability, token balance
+or on-chain right. The association is private to the authenticated owner;
+it is NOT included in any universal public profile or social lookup.
+
+A signed wallet association requires BOTH:
+1. A live app/RP-scoped AUTH-3 session issued through independent email or
+   WebAuthn verification, checked again at each wallet API request; and
+2. Explicit user consent plus a fresh wallet proof over an exact server-written
+   EIP-191 `personal_sign` message. The message binds the HTTPS origin,
+   relying-party hostname, approved app, opaque app subject, session UUID,
+   configured EIP-155 chain ID, selected wallet address/type, random 256-bit
+   nonce and 5-minute DB-time expiry. It disclaims login, spending, on-chain
+   authorization and wallet permissions. Client-originated account IDs, chain
+   selection, message bodies, expiry and subject identities are rejected.
+
+EOA signatures are verified locally with legacy Ethereum Keccak-256 and
+secp256k1 public-key recovery, canonical low-s scalars and 27/28 or 0/1
+recovery parity. The EOA validator is tested using the repository's separate
+`compute/worker` real secp256k1 signer, not a Boolean mock. CONTRACT wallet
+links are supported via configured EIP-1271 verification: a real HTTPS RPC
+must return the pinned `eth_chainId`, deployed `eth_getCode` at the
+`finalized` block, and an `eth_call` of
+`isValidSignature(bytes32,bytes)` with the EIP-191 digest at `finalized`
+that returns the 32-byte ABI-encoded magic `0x1626ba7e`. Unconfigured,
+wrong-chain, missing-code, unavailable-finality, stale/redirected, invalid TLS,
+malformed, reverted or failed RPC checks FAIL CLOSED, never falling back to an
+EOA or simulated response. This intentionally excludes undeployed
+counterfactual/EIP-6492 accounts until a separate chain-qualified integration.
+
+The server first verifies the signature and then revalidates the **same**
+challenge under the database account lock before consuming it and inserting
+the link atomically. PostgreSQL partial unique indexes enforce at most one
+active wallet per 420ID account and one owner per chain+address. Losing a
+race cannot steal a wallet. Revoked sessions, mismatched app/RP,
+different browser-flow cookie, incorrect session or account revision,
+changed/expired/superseded nonce, forged signature, wrong chain or wrong
+wallet cannot commit. Link history is retained with an `unlinked_at`
+tombstone; unlink requires only the current authenticated 420ID session
+and never destroys an account, login, profile or the wallet itself. A new
+signature is mandatory for a later relink. No private keys, seed phrases,
+signatures, on-chain calls or bearer cookies are persisted in browser storage.
+
+The original `AUTH420_MODE=acceptance`, `session-acceptance` and
+`profile-acceptance` entry pages and security boundaries remain
+unchanged. The NEW opt-in `AUTH420_MODE=wallet-acceptance` requires
+`AUTH420_WALLET_CHAIN_ID` (a positive explicitly configured decimal
+EIP-155 chain ID; no guessed network), and optionally
+`AUTH420_WALLET_RPC_URL` for deployed smart accounts. The latter MUST be
+HTTPS with trusted certificate, no URL credentials or query/fragment, and
+MUST be a chain-pinned trusted canonical execution provider supporting
+finalized block tags. Without it, contract-wallet linking is unavailable;
+EOA linking still works. The mode keeps the existing approved test mailbox
+allowlist, same-origin HTTPS/CSP/no-store protections, request limits and
+daily abuse caps; it does NOT launch public wallet registrations or SSO.
+
+Migration `006_optional_wallet_links.sql` requires the operator database
+credential and MUST NOT be applied using the unprivileged runtime service.
+Before activating wallet-acceptance, extend the previously qualified
+AUTH-2/3/4 runtime grants with ONLY these grants:
+
+```sql
+GRANT SELECT, INSERT, UPDATE ON account420.wallet_links TO account420_runtime;
+GRANT SELECT, INSERT, UPDATE, DELETE ON account420.wallet_link_challenges TO account420_runtime;
+```
+
+Runtime startup checks the actual table/grant readiness and fails closed
+without them. Mode changes and real deployed EOA/EIP-1271 ceremony acceptance
+remain separate from repository qualification and are NOT claimed live.
+The 420Wallet provider is requested through the standard user-initiated
+EIP-1193 `eth_requestAccounts`, then `eth_chainId` and `personal_sign`
+operations, not a silent wallet connection. SmartAccount/EIP-1271 requires
+live chain RPC and physical-wallet acceptance when testnet is available;
+that external work remains in the existing live-testnet acceptance queue.
+
+Relevant tests: `TestEOAWalletSignatureCryptography`,
+`TestEIP1271FinalizedChainVerifier`,
+`TestOptionalWalletLifecycleAndIsolation`,
+`TestOptionalWalletActiveOwnershipRace`, and
+`TestWalletHTTPRequiresConsentAndAUTH3`, with retained AUTH-1–4
+PostgreSQL/race and HTTP qualification. No additional roadmap phase or
+wallet-based recovery mechanism is introduced here.
+

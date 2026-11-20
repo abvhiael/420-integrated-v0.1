@@ -23,7 +23,7 @@ export class AccountSocialController {
    if(page.status!==200)throw Error('Feed unavailable');
    const normalized=normalizeAccountSocialFeed(page.data);
    if(!normalized)throw Error('Unverified off-chain feed');
-   return this.emit({status:'ready',profile:me.data.profile,...normalized,notice:''});
+   return this.emit({status:'ready',profile:me.data.profile,...normalized,notice:'',comments:{}});
   }catch{
    if(gen===this.generation)return this.emit({status:'error'});
   }
@@ -35,6 +35,12 @@ export class AccountSocialController {
   const mutation=(path,method,body)=>this.client.request(path,{method,body});
   let result;
   switch(action){
+   case 'comments':{
+    if(!isSubjectID(id))throw Error('Invalid post ID');
+    const read=await this.client.request('/v1/posts/'+id+'/comments');
+    if(read.status!==200||!Array.isArray(read.data?.comments)||read.data.comments.length>100)throw Error('Comments unavailable');
+    return this.emit({...this.state,comments:{...this.state.comments,[id]:read.data.comments}});
+   }
    case 'post':result=await mutation('/v1/posts','POST',{body:socialInput(details.body,'post')});break;
    case 'profile':result=await mutation('/v1/me','PUT',{displayName:socialInput(details.displayName,'displayName'),bio:socialInput(details.bio,'bio')});break;
    case 'comment':

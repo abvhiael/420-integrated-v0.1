@@ -5,7 +5,7 @@ const LIMITS={post:2000,comment:500,displayName:80,bio:500};
 export function createAccountSocialClient({enabled=false,fetchImpl=fetch}={}){
  if(enabled!==true)return Object.freeze({enabled:false});
  async function request(path,{method='GET',body,signal}={}){
-  if(!/^\/v1\/[a-z0-9/_-]+(?:\?cursor=[A-Za-z0-9_-]+)?$/.test(path)||
+  if(!(path==='/auth/logout'||/^\/v1\/[a-z0-9/_-]+(?:\?cursor=[A-Za-z0-9_-]+)?$/.test(path))||
    path.startsWith('//')||path.includes('..'))throw new Error('Invalid account-social route');
   const response=await fetchImpl('/social-api'+path,{
    method,credentials:'same-origin',cache:'no-store',redirect:'error',signal,
@@ -39,7 +39,7 @@ export function normalizeAccountSocialFeed(result){
  return {posts,nextCursor:result.nextCursor};
 }
 const heading=title=>'<p class="eyebrow">Account-based · off-chain · wallet optional</p><h2>'+escapeHtml(title)+'</h2>';
-function postMarkup(p,me){
+function postMarkup(p,me,comments){
  const own=p.author===me;
  return '<article class="social-post"><header><strong>'+escapeHtml(p.displayName)+'</strong><small> '+escapeHtml(p.author.slice(0,8))+' · '+escapeHtml(p.createdAt)+'</small></header>'+
   '<p class="social-post__body">'+escapeHtml(p.body)+'</p>'+
@@ -49,7 +49,7 @@ function postMarkup(p,me){
   '<button type="button" data-social-action="block" data-subject-id="'+p.author+'" '+(own?'disabled':'')+'>Block</button>'+
   '<button type="button" data-social-action="report" data-post-id="'+p.id+'">Report</button>'+
   (own?'<button type="button" data-social-action="delete" data-post-id="'+p.id+'">Delete</button>':'')+
-  '</div><form data-social-comment="'+p.id+'"><label>Comment<textarea name="body" maxlength="500" required></textarea></label><button type="submit">Post comment</button></form></article>';
+  '</div>'+(Array.isArray(comments)?'<ul class="social-comments">'+comments.map(c=>'<li><strong>'+escapeHtml(c.displayName)+'</strong>: '+escapeHtml(c.body)+'</li>').join('')+'</ul>':'')+'<form data-social-comment="'+p.id+'"><label>Comment<textarea name="body" maxlength="500" required></textarea></label><button type="submit">Post comment</button></form></article>';
 }
 export function renderAccountSocial(state,{enabled=false}={}){
  if(!enabled)return card({title:'Account social not activated',eyebrow:'Wallet-independent BongGoggles',body:emptyState({title:'Unavailable',message:'The separate account-social backend and 420ID callback have not been qualified for this deployment. Existing on-chain features remain independent.'})});
@@ -65,7 +65,7 @@ export function renderAccountSocial(state,{enabled=false}={}){
  '<form data-social-post><label>Write a post<textarea name="body" required maxlength="2000"></textarea></label><button type="submit">Publish off-chain post</button></form>'+
  '<div class="actions"><button data-social-action="refresh" type="button">Refresh</button><button data-social-action="logout" type="button">Sign out</button></div>'+
  (state.notice?'<p role="status">'+escapeHtml(state.notice)+'</p>':'')+
- '<section aria-label="Community posts">'+(state.posts?.length?state.posts.map(p=>postMarkup(p,profile.subject)).join(''):emptyState({title:'No community posts',message:'Only authenticated community posts appear here.'}))+'</section>'+
+ '<section aria-label="Community posts">'+(state.posts?.length?state.posts.map(p=>postMarkup(p,profile.subject,state.comments?.[p.id])).join(''):emptyState({title:'No community posts',message:'Only authenticated community posts appear here.'}))+'</section>'+
  (state.nextCursor?'<button type="button" data-social-action="more">Load more</button>':'')+'</section>';
 }
 export function socialInput(value,kind){

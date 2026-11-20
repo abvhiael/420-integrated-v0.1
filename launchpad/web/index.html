@@ -1,1 +1,73 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>420 Launchpad</title><link rel="stylesheet" href="./styles.css"></head><body><a class="skip" href="#main">Skip to content</a><header><div><span class="eyebrow">420 Integrated</span><h1>420 Launchpad</h1><p>Reward, donation, community-project & product-preorder crowdfunding.</p></div><div class="header-actions"><span id="runtime-state" class="pill">Runtime unresolved</span><button id="connect-wallet">Connect wallet</button><span id="wallet-state">Not connected</span></div></header><main id="main"><section class="notice"><strong>Registration is not endorsement.</strong> Verify controller, payment asset, terms, eligibility, transaction target & calldata before authorizing funds.</section><div id="status" role="status" aria-live="polite">Loadingâ¦</div><section><div class="section-head"><div><span class="eyebrow">Discover</span><h2>Campaigns</h2></div><button id="refresh">Refresh</button></div><div id="campaign-grid" class="campaign-grid"></div><p id="empty-state" hidden>No campaigns are currently published.</p></section><section id="detail" hidden><div class="section-head"><div><span id="detail-mode" class="eyebrow"></span><h2 id="detail-title"></h2></div><span id="detail-state" class="pill"></span></div><p id="detail-summary"></p><div class="facts"><div><small>Raised / hard cap</small><strong><span id="detail-raised"></span> / <span id="detail-hardcap"></span></strong></div><div><small>Soft cap</small><strong id="detail-softcap"></strong></div><div><small>Payment asset</small><code id="detail-payment"></code></div><div><small>Receiver</small><code id="detail-receiver"></code></div></div><details><summary>Canonical identifiers</summary><dl><dt>Sale</dt><dd><code id="detail-sale"></code></dd><dt>Project</dt><dd><code id="detail-project"></code></dd><dt>Controller</dt><dd><code id="detail-controller"></code></dd><dt>Eligibility policy</dt><dd><code id="detail-policy"></code></dd></dl></details><div class="account-panel"><h3>Your position</h3><p id="participant-state">Connect wallet for participant status</p><div class="actions"><label>Contribution amount<input id="contribution-amount" inputmode="numeric" value="0"></label><label>Canonical 420Pay payment ID<input id="payment-id" autocomplete="off"></label><button id="contribute" disabled>Review contribution</button></div><div class="actions"><label>Delivery commitment<input id="delivery-commitment" autocomplete="off"></label><button id="claim" disabled>Review claim</button><label>Prepared refund commitment<input id="refund-commitment" autocomplete="off"></label><button id="refund" disabled>Prepare / record refund</button></div></div></section><section><span class="eyebrow">Creator</span><h2>Campaign management</h2><p>Creator requests are bounded to canonical Launchpad lifecycle actions. Project registration and sale lifecycle remain governance-only.</p><form id="creator-form" class="creator-form"><label>Action<select name="action"><option>setCampaignMode</option><option>activate</option><option>finalize</option><option>cancel</option></select></label><label>Project ID<input name="projectId"></label><label>Sale ID<input name="saleId"></label><label>Metadata hash<input name="metadataHash"></label><label>Mode<select name="mode"><option value="">n/a</option><option>REWARD</option><option>DONATION</option><option>COMMUNITY_PROJECT</option><option>PRODUCT_PREORDER</option></select></label><button type="submit">Prepare governance request</button></form><p id="creator-request-state">No creator request prepared.</p></section><section id="review" class="review" hidden><div class="section-head"><h2>Transaction review</h2><button id="close-review">Close</button></div><p><strong id="review-kind"></strong> Â· <span id="review-summary"></span></p><dl><dt>Target</dt><dd><code id="review-to"></code></dd><dt>Value</dt><dd><code id="review-value"></code></dd><dt>Calldata</dt><dd><code id="review-data"></code></dd></dl><p id="review-gate"></p><button id="submit-review" disabled>Send to wallet</button><p>Submitted tx: <code id="tx-hash">â</code></p></section></main><script type="module" src="./app.js"></script></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>420 Launchpad | Crowdfunding</title><link rel="stylesheet" href="./styles.css"></head>
+<body><a class="skip" href="#main">Skip to content</a>
+<header><div><span class="eyebrow">420 Integrated</span><h1>420 Launchpad</h1><p>Reward, donation, community-project &amp; product-preorder crowdfunding.</p></div>
+  <div class="header-actions"><span id="runtime-state" class="pill">Runtime unresolved</span><button id="connect-wallet">Connect wallet</button><span id="wallet-state">Not connected</span></div>
+</header>
+<main id="main">
+<section class="notice"><strong>Registration is not endorsement.</strong> Verify the project controller, payment asset, campaign terms, eligibility, 420Pay invoice, transaction target and calldata before authorizing funds. Only Wallet can submit transactions.</section>
+<div id="status" role="status" aria-live="polite">Loading...</div>
+<section aria-labelledby="browse-heading"><div class="section-head"><div><span class="eyebrow">Discover</span><h2 id="browse-heading">Campaigns</h2></div><button id="refresh">Refresh</button></div>
+<form id="campaign-filters" class="filters" role="search"><label>Search<input name="search" id="campaign-search" type="search" maxlength="80" placeholder="Campaign title, project, keywords"></label>
+<label>Type<select name="mode"><option value="">All types</option><option>REWARD</option><option>DONATION</option><option>COMMUNITY_PROJECT</option><option>PRODUCT_PREORDER</option></select></label>
+<label>State<select name="state"><option value="">All states</option><option>ACTIVE</option><option>SCHEDULED</option><option>SUCCEEDED</option><option>FAILED</option><option>CANCELLED</option></select></label>
+<button type="submit">Search</button></form>
+<div id="campaign-grid" class="campaign-grid"></div><p id="empty-state" hidden>No campaigns match these filters.</p>
+<button id="load-more" hidden>Load more campaigns</button><p id="campaign-count" class="muted" aria-live="polite"></p>
+</section>
+<section id="detail" hidden aria-labelledby="detail-title"><div class="section-head"><div><span id="detail-mode" class="eyebrow"></span><h2 id="detail-title"></h2></div><span id="detail-state" class="pill"></span></div>
+<p id="detail-summary"></p><div class="facts">
+<div><small>Raised / hard cap</small><strong><span id="detail-raised"></span> / <span id="detail-hardcap"></span></strong></div>
+<div><small>Remaining capacity</small><strong id="detail-remaining"></strong></div>
+<div><small>Soft cap</small><strong id="detail-softcap"></strong></div>
+<div><small>Payment asset</small><code id="detail-payment"></code></div>
+<div><small>Receiver</small><code id="detail-receiver"></code></div>
+</div>
+<details><summary>Canonical campaign identifiers</summary><dl><dt>Sale</dt><dd><code id="detail-sale"></code></dd><dt>Project</dt><dd><code id="detail-project"></code></dd><dt>Controller</dt><dd><code id="detail-controller"></code></dd><dt>Eligibility policy</dt><dd><code id="detail-policy"></code></dd></dl></details>
+<div class="account-panel"><h3>Your participation</h3><p id="participant-state" role="status">Connect your wallet to read your canonical contribution history.</p><div class="facts">
+<div><small>Eligibility</small><strong id="identity-state">Not connected</strong></div>
+<div><small>Your remaining cap</small><strong id="wallet-capacity">-</strong></div>
+<div><small>Fees</small><strong id="fee-state">420Pay quote and Wallet gas required</strong></div>
+<div><small>Fulfillment / claim</small><strong id="fulfillment-state">Not available</strong></div>
+</div>
+<section class="subpanel" aria-labelledby="identity-heading"><h4 id="identity-heading">1. Identity and eligibility</h4>
+<p id="profile-state">Your Identity profile and credential are verified on-chain.</p>
+<label>Owned 420Identity profile ID <input id="identity-profile" autocomplete="off" placeholder="0x..."></label>
+<button id="bind-identity" disabled>Review profile binding</button></section>
+<section class="subpanel" aria-labelledby="contribution-heading"><h4 id="contribution-heading">2. Register invoice intent and pay</h4>
+<p>Enter an amount in the settlement asset's smallest units. Register the intent first, then the merchant must create the exact single-use 420Pay invoice. Review 420Pay's live quote, protocol fees, gas and final settlement before signing.</p>
+<div class="actions"><label>Contribution amount <input id="contribution-amount" inputmode="numeric" autocomplete="off" value="0"></label>
+<label>Unique intent nonce <input id="intent-nonce" inputmode="numeric" autocomplete="off" readonly></label>
+<button id="new-intent">New nonce</button><button id="register-intent" disabled>Review intent registration</button></div>
+<div class="actions"><button id="check-checkout" disabled>Check invoice and payment</button><a id="pay-checkout-link" hidden rel="noopener noreferrer" target="_blank">Open canonical 420Pay checkout</a></div>
+<p id="checkout-state" aria-live="polite">Register an intent to begin. Your merchant must create the matching invoice before checkout.</p>
+<dl><dt>Invoice ID</dt><dd><code id="invoice-id">-</code></dd><dt>Canonical payment ID</dt><dd><input id="payment-id" aria-label="Canonical payment ID" readonly></dd></dl>
+<button id="contribute" disabled>Review contribution recording</button>
+</section>
+<section class="subpanel" aria-labelledby="history-heading"><h4 id="history-heading">3. Contribution history</h4>
+<div id="contribution-history" aria-live="polite">No canonical payments loaded.</div></section>
+<section class="subpanel" aria-labelledby="claim-heading"><h4 id="claim-heading">4. Claim and delivery evidence</h4>
+<p>A claim requires a successful sale, the claim period, controller attestation and participant acknowledgement. A recorded claim is not independent proof of physical delivery.</p>
+<label>Controller-attested delivery commitment <input id="delivery-commitment" readonly></label>
+<button id="claim" disabled>Review claim</button></section>
+<section class="subpanel" aria-labelledby="refund-heading"><h4 id="refund-heading">5. Refund and recovery</h4>
+<p>420Pay must deliver refunds before Launchpad can prepare and record its batch. The reference is retrieved from canonical contract state.</p>
+<label>Prepared canonical refund commitment <input id="refund-commitment" readonly></label>
+<div class="actions"><button id="refund" disabled>Review refund preparation</button><button id="record-refund" disabled>Review refund recording</button></div>
+<p id="refund-state" aria-live="polite"></p><div id="recovery-actions"></div></section>
+<section class="subpanel" aria-labelledby="dispute-heading"><h4 id="dispute-heading">6. 420Arbitration disputes</h4>
+<p>Opening a dispute does not automatically cancel a sale or authorize a refund. A confirmed case must be linked to your campaign and tracked separately.</p>
+<div class="actions"><label>Claim evidence hash <input id="dispute-claim" placeholder="0x..." autocomplete="off"></label><label>Requested remedy hash <input id="dispute-remedy" placeholder="0x..." autocomplete="off"></label></div>
+<div class="actions"><button id="open-dispute" disabled>Review dispute opening</button><button id="link-dispute" disabled>Link confirmed case</button><button id="publish-outcome" disabled>Publish finalized ruling</button></div>
+<p id="dispute-state" aria-live="polite">No linked case.</p><label>Arbitration case ID <input id="dispute-case" readonly></label></section>
+<button id="refresh-position" disabled>Refresh verified position</button>
+</div></section>
+<section><span class="eyebrow">Creator</span><h2>Campaign management</h2><p>Project registration and sale lifecycle remain governance-only. Creator requests are drafts, not direct mutations.</p>
+<form id="creator-form" class="creator-form"><label>Action<select name="action"><option>setCampaignMode</option><option>activate</option><option>finalize</option><option>cancel</option></select></label><label>Project ID<input name="projectId"></label><label>Sale ID<input name="saleId"></label><label>Metadata hash<input name="metadataHash"></label><label>Mode<select name="mode"><option value="">n/a</option><option>REWARD</option><option>DONATION</option><option>COMMUNITY_PROJECT</option><option>PRODUCT_PREORDER</option></select></label><button type="submit">Prepare governance request</button></form><p id="creator-request-state">No creator request prepared.</p></section>
+<section id="review" class="review" hidden><div class="section-head"><h2>Transaction review</h2><button id="close-review">Close</button></div><p><strong id="review-kind"></strong> - <span id="review-summary"></span></p>
+<dl><dt>Target</dt><dd><code id="review-to"></code></dd><dt>Value</dt><dd><code id="review-value"></code></dd><dt>Calldata</dt><dd><code id="review-data"></code></dd></dl>
+<p id="review-gate"></p><button id="submit-review" disabled>Send to wallet</button>
+<p>Submitted tx: <code id="tx-hash">-</code></p><button id="refresh-tx" disabled>Check canonical transaction status</button>
+<p id="tx-state" role="status" aria-live="polite">No transaction submitted.</p><p id="next-recovery"></p>
+</section></main><script type="module" src="./app.js"></script></body></html>

@@ -70,3 +70,15 @@ bounded CBOR fuzzing and browser adapter tests. Real provider deliverability
 and physical authenticator testing require deployment configuration and are
 not claimed by synthetic test fixtures. WebAuthn verification profile follows
 https://www.w3.org/TR/webauthn-3/ with intentionally unsupported features rejected.
+
+## AUTH-2 live acceptance supplement
+
+The restricted public HTTP boundary and deployable 420ID binary are now
+provided by acceptance.go, acceptance.html, acceptance.mjs and cmd/420id.
+It is intentionally acceptance-only until AUTH-3 and subsequent integration:
+proof of email or passkey authentication is not an app session. The public
+listener requires an explicit acceptance mode and a server-owned test mailbox
+allowlist. See [LIVE-ACCEPTANCE.md](LIVE-ACCEPTANCE.md) for configuration,
+verified TLS, relay, database permissions, DNS, browser/device qualification
+and evidence handling. Never expose the internal Store/Auth primitives to
+untrusted callers or deploy the acceptance service with real-user data.

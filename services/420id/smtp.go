@@ -3,6 +3,7 @@ package account
 import (
  "context"
  "crypto/tls"
+ "crypto/x509"
  "net"
  "net/smtp"
  "strconv"
@@ -12,17 +13,17 @@ import (
 
 // SMTPMailer uses implicit TLS with certificate/hostname validation, a fixed
 // authenticated relay, a bounded deadline, and no plaintext fallback.
-type SMTPMailer struct{host,address,user,password,from string}
+type SMTPMailer struct{host,address,user,password,from string; roots *x509.CertPool}
 func NewSMTPMailer(host string,port int,user,password,from string)(*SMTPMailer,error){
  clean,e:=normalizeEmail(from)
  if e!=nil||!validDomain(host)||port<1||port>65535||user==""||password==""||strings.ContainsAny(user+password,"\r\n\x00"){return nil,ErrInvalid}
- return &SMTPMailer{host,net.JoinHostPort(host,strconv.Itoa(port)),user,password,clean},nil
+ return &SMTPMailer{host:host,address:net.JoinHostPort(host,strconv.Itoa(port)),user:user,password:password,from:clean},nil
 }
 func (m *SMTPMailer) SendVerification(ctx context.Context,recipient,secret string)error{
  email,e:=normalizeEmail(recipient);if e!=nil{return e}
  if _,e=decodeToken(secret);e!=nil{return e}
  ctx,cancel:=context.WithTimeout(ctx,10*time.Second);defer cancel()
- d:=tls.Dialer{NetDialer:&net.Dialer{},Config:&tls.Config{ServerName:m.host,MinVersion:tls.VersionTLS12}}
+ d:=tls.Dialer{NetDialer:&net.Dialer{},Config:&tls.Config{ServerName:m.host,MinVersion:tls.VersionTLS12,RootCAs:m.roots}}
  conn,e:=d.DialContext(ctx,"tcp",m.address);if e!=nil{return ErrUnavailable};defer conn.Close()
  deadline,_:=ctx.Deadline();if e=conn.SetDeadline(deadline);e!=nil{return ErrUnavailable}
  stop:=context.AfterFunc(ctx,func(){_ = conn.Close()});defer stop()

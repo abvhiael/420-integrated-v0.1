@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'services/420id/**'
+      - 'cmd/420id/**'
       - '.github/workflows/auth-1-shared-account.yml'
       - 'go.mod'
       - 'go.sum'
@@ -54,5 +55,13 @@ jobs:
           node-version: '22'
       - name: Browser WebAuthn adapter
         run: node --test services/420id/browser.test.mjs
+      - name: Build restricted HTTPS acceptance service
+        run: go build -o /tmp/420id ./cmd/420id
+      - name: Verify startup fails closed without configuration
+        run: |
+          if env -u AUTH420_MODE /tmp/420id; then
+            echo "Service started without explicit activation"
+            exit 1
+          fi
       - name: Static analysis
-        run: go vet -tags account420_integration ./services/420id
+        run: go vet -tags account420_integration ./services/420id ./cmd/420id

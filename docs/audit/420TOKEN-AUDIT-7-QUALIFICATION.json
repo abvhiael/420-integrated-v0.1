@@ -1,0 +1,465 @@
+{
+  "schema": "420-token-audit-7-exact-head-qualification-v1",
+  "step": "TOKEN-AUDIT-7",
+  "status": "QUALIFIED",
+  "qualified_implementation_sha": "bccb7db8ae69e5d54e098479836c47af428255df",
+  "reconciled_main": "0e828e9a8d1c813d63944e246d8064a8d28229f0",
+  "original_test_base": "cd100bb7f3acde71018f3f3fccaf989bdee3ae13",
+  "pr": 1259,
+  "qualification": {
+    "workflows": [
+      {
+        "run_id": 44684439846,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115305891,
+            "name": "scope",
+            "conclusion": "success"
+          },
+          {
+            "id": 136115626015,
+            "name": "security",
+            "conclusion": "success"
+          },
+          {
+            "id": 136115626019,
+            "name": "qualify",
+            "conclusion": "success"
+          },
+          {
+            "id": 136115626022,
+            "name": "abi-parity",
+            "conclusion": "success"
+          },
+          {
+            "id": 136115626061,
+            "name": "wallet-sdk",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 14605802058,
+            "name": "contract-pr",
+            "digest": "sha256:fc19826529b144e5f2ba508484b75753641e106db829f6c9e3f5d0ad39a63461",
+            "expires_at": "2026-11-27T05:57:28Z"
+          },
+          {
+            "id": 14605229958,
+            "name": "contract-hardening",
+            "digest": "sha256:fde826955a3915e906cc4725f4a13bdef0dc8f5fa8cd880ba82ec1c5a5d15770",
+            "expires_at": "2026-11-27T05:57:28Z"
+          }
+        ]
+      },
+      {
+        "run_id": 44684439836,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115305759,
+            "name": "economics",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 14605697248,
+            "name": "economics",
+            "digest": "sha256:bf0b4aea4190b76b88658b72c85a8dc1ea98420b85855311ac0487212d474a5c",
+            "expires_at": "2026-11-27T05:57:28Z"
+          }
+        ]
+      },
+      {
+        "run_id": 44684439924,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115306268,
+            "name": "deployment",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 14606250487,
+            "name": "deployment",
+            "digest": "sha256:d5c87c3e5973bd90e3496bf4e5e3de0c4643c53d7f5b48dab90d3d078a6e322d",
+            "expires_at": "2026-11-27T05:57:28Z"
+          }
+        ]
+      },
+      {
+        "run_id": 44684439847,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115305649,
+            "name": "local-evm",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 14606090719,
+            "name": "local-e2e",
+            "digest": "sha256:4eb340bf170fc23d56a59bfd0983db0b21786467f16f1e46e47870588b0c0c93",
+            "expires_at": "2026-11-27T05:57:28Z"
+          }
+        ]
+      },
+      {
+        "run_id": 44684439800,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115305839,
+            "name": "integration",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": []
+      },
+      {
+        "run_id": 44684439782,
+        "conclusion": "success",
+        "jobs": [
+          {
+            "id": 136115306049,
+            "name": "browser-accessibility",
+            "conclusion": "success"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": 14605752487,
+            "name": "browser",
+            "digest": "sha256:13ef55f7c7176e546fe78555e049aa8aad1de00273710193f97ea5eb731cd2ec",
+            "expires_at": "2026-11-27T05:57:28Z"
+          }
+        ]
+      }
+    ],
+    "contract_pr": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "fuzz_properties": 4,
+      "fuzz_runs_each": 2500,
+      "invariant_campaigns": 3,
+      "invariant_runs_each": 128,
+      "invariant_calls_each": 8192,
+      "invariant_reverts": 0
+    },
+    "contract_hardening": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0,
+      "fuzz_properties": 4,
+      "fuzz_runs_each": 100000,
+      "invariant_campaigns": 3,
+      "invariant_runs_each": 4096,
+      "invariant_calls_each": 1572864,
+      "invariant_reverts": 0
+    },
+    "slither": {
+      "gate": "PASS",
+      "high": 0,
+      "medium": 1,
+      "low": 1,
+      "informational": 1,
+      "findings": [
+        "incorrect-equality",
+        "timestamp",
+        "naming-convention"
+      ],
+      "dispositions": "Unchanged intentional semantics documented in docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json"
+    },
+    "wallet_sdk": {
+      "passed": 174,
+      "failed": 0
+    },
+    "abi_parity": {
+      "profiles": 8,
+      "vectors": 32
+    },
+    "economics": {
+      "passed": 10,
+      "fuzz_runs": 50000,
+      "fee_native": 42
+    },
+    "deployment": {
+      "anchorRuntimeHashes": {
+        "GovernanceTimelock": "0xa7e3f9407735669c1ea106fcf0cdc078a2de80c6f87a24537ef98d2aced12285",
+        "ProtocolRegistry": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330"
+      },
+      "artifactCommitments": {
+        "AssetVault420": {
+          "abiHash": "0x3417661dee417f4ed2b2f8ccd9b456741f47d9f2ce55e59d38bc4aaeb832e5fa",
+          "creationHash": "0x73dec24f16b7de925dcabc64ea88b27ee14087d46f6394b46e264fb3adf837a3",
+          "immutableReferencesHash": "0x215cf819812f36ac8ffb6079c203a44389306130d8a90308f7dcafb86df33902",
+          "runtimeTemplateHash": "0xf738319aaa0ccf74b5cb940888713ce059b702197b7d6574c4bdf3f3d5e9f1ee",
+          "storageLayoutHash": "0x3c41b7672d71524f71e83dc5defef97026434f54b08f0e322de8b1fe5141621e"
+        },
+        "CapabilityRegistry420": {
+          "abiHash": "0x748d9da4d70add5bd01347671b05cc0f1ba43ea37f8f6376f1ac502cc65591b2",
+          "creationHash": "0xdd3255f9aa63435340c8d22737172ff549c18d4c487e90bf245c33489c5dd58e",
+          "immutableReferencesHash": "0xb48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d",
+          "runtimeTemplateHash": "0x19b69d70dce639da95f5586187307bd4b9612be3749f807676d7fe628f3939cf",
+          "storageLayoutHash": "0x98b4dc44f16b735ec243894c49a98e91306185a25548b3255f449965bbca2ecd"
+        },
+        "ERC1155Template420": {
+          "abiHash": "0xa9364e1cf5f886201f172f860bb5cc8f7204aeb57739bb9f474d07f41eccdefd",
+          "creationHash": "0x3844457bf16b1041cf3357a474b7ffa3e206e9aaa14075d7c9b294029deff683",
+          "immutableReferencesHash": "0x1ec898614ebf22d2ed41985718226118653a82e6ce20e2afeb242307870598e7",
+          "runtimeTemplateHash": "0x49951d0f790db110bb96b43d4a61c6240a0062b664b5d21cc5949e7b07d11148",
+          "storageLayoutHash": "0x9f2d451bc2e48d2e395797f3cc5a2e4221daf78a489490bae87790f4848c90a3"
+        },
+        "ERC20Template420": {
+          "abiHash": "0xfcbd7e86f203925023298ac54d45087ebc4c51e1ea2d2b0340e9bf8a26bf285f",
+          "creationHash": "0x52462902bec81cbd63750d9c8c7ecce18033e93d75e6ded45ea1cc0d40070ee1",
+          "immutableReferencesHash": "0xf40aaa65f3c1a201afb4112f0be60ae18f864073cd988ea6158aba37bd8a9961",
+          "runtimeTemplateHash": "0xc1a46dc620e9efbe6c99c004a3cb540c3b6bca825c529c32f5886541c5424ba2",
+          "storageLayoutHash": "0xfdbf7a2138a4f5a5b851e1cf62a8cc0d676170d8f55304c071016367249f6f94"
+        },
+        "ERC721Template420": {
+          "abiHash": "0x2167e761cdafc9e2a1818d091880d2dd0ae272adde384efcb2cb209579891706",
+          "creationHash": "0x175dd67ad6fd0d06064035f9102403a9f815af060c0db0d6644fc092f9e682df",
+          "immutableReferencesHash": "0x7880faaaed8a22448aba768fd1cbc2c1c2ee327cbbaecd11b73ca03ccfcebe91",
+          "runtimeTemplateHash": "0x299ee1499fd01072baaebd89a4ea1341dfe1e9ec368602da4e21e91e670021d0",
+          "storageLayoutHash": "0x03198e35051042d9f36bae4483562a78d04e65463f4f20c2f12e179c70a1682a"
+        },
+        "GovernanceTimelock": {
+          "abiHash": "0x1178e6bb3a81d95a36ac2caccea160cc7342ef869fc291a4853dcba7c1ed0edf",
+          "creationHash": "0x7e82f7a921b237578bb31b2e63e45d6cdb389efcba1e1873ff7d06753cdb0035",
+          "immutableReferencesHash": "0x256cb1e937cee4a16e40ac669583f8360913c1937381c4d6c778b84ff367c6a3",
+          "runtimeTemplateHash": "0x5abef6410ae3e5803478d905535a87ff3f99376ecd9e2f8d53d447377b0329c7",
+          "storageLayoutHash": "0xb150d796f934edb046cb2ef1a7889a758608cab019da7fb0bab4b5dde717d971"
+        },
+        "ProtocolRegistry": {
+          "abiHash": "0xa20fa5f9e654be24d0774bf4b5b7536671b7e2eea78f2f0cbd0b1bedd164b6cd",
+          "creationHash": "0x683448312a32bc553d216422bbff5480ffe22ea4a19ac39f3b2d6e0819f642bc",
+          "immutableReferencesHash": "0xdb092f270c13c5c93ff706961f39ce2fff794cb36ee5f1adca246a2a3517b273",
+          "runtimeTemplateHash": "0xaa0a02e862b452dd35006ee50aac722342bb5d5b683a4f6c380f3efe2b8d1950",
+          "storageLayoutHash": "0x4679fb89e45e12b7c8afdfc184d2474ad4279fc12da39cc0ca4a9075831960a6"
+        },
+        "TokenFactory420": {
+          "abiHash": "0xcc878a0e90ad59a04e3120f53231e366260779304014f45286e975e4e39b3b2d",
+          "creationHash": "0x0c236c9020d0fd98dd821dd11cd950c5562724843d56502cb4d2b43fd78fbc52",
+          "immutableReferencesHash": "0x03743ff6353e5498ee1ddfe1666b1177f1d334845856063c9f5658592a1d0917",
+          "runtimeTemplateHash": "0x2fc78df878b04f22d426f04fa869ca3f8a7f4f8480a70a30038f0a9cd7b04cd0",
+          "storageLayoutHash": "0x7f1a61ed32132c4402d7d444b057bc40d4700248cf975f15d00f2a52c8279c2c"
+        },
+        "TokenIds420": {
+          "abiHash": "0x518674ab2b227e5f11e9084f615d57663cde47bce1ba168b4c19c7ee22a73d70",
+          "creationHash": "0x9beb72563ae3c149744a4413ee4e9d053a346d809af31864bd10fb902a7dfdaf",
+          "immutableReferencesHash": "0xb48d38f93eaa084033fc5970bf96e559c33c4cdc07d889ab00b4d63f9590739d",
+          "runtimeTemplateHash": "0xd81dc4d0be64de29ad51937e999a87b5f04f522260b79bac110996bf77d2da0c",
+          "storageLayoutHash": "0x790d9bf2fafa353a6cc196ceaf7f20304cb6268a1611e88e13888ce93e003153"
+        },
+        "TokenTemplateRegistry420": {
+          "abiHash": "0x4d0e671f29ada87f24e1acb9c1e1905af84850f1c8c5db049caeccaf2399da76",
+          "creationHash": "0x841ae906c06711c07fca5f96b49175e14b6d3a5c42a953d87fa2a9292f4f4c54",
+          "immutableReferencesHash": "0x9e70ab2d19a8bbe94fe51ae1a9bebfd09c49be76709cfd9caddf3b92c23d9014",
+          "runtimeTemplateHash": "0x92b27db06b6b200472ba70482e5df2d94fb615ea53dd2a48bf485da1b2ba479d",
+          "storageLayoutHash": "0xdd5ee18eb80a22eb000fcdfd23340641541f379ecf605e3083c56e3b98872a3c"
+        },
+        "VaultAccounting420": {
+          "abiHash": "0x8b08025cd530545e2093d12b99aee2ee24190c1c5af2a093e9e6d5652d98e93f",
+          "creationHash": "0x7eeba99bea7b704c993684ab9e79d5a99f747ef9fac0bfa8838fba86fa28b654",
+          "immutableReferencesHash": "0x2964bb3e22bc0436b94357c6f905b18c9ad114004d68f1bc2567c7acbd2705c6",
+          "runtimeTemplateHash": "0xb1b3759629535539de7e4cfef8b0e9acaa96d52effbcfb6efc45ca75be066624",
+          "storageLayoutHash": "0xc7e4b99ae78d30894472612d607ec541aff0ff292443bcb193f609355a2ee26d"
+        },
+        "VaultAuthorization420": {
+          "abiHash": "0x7f79fae67ec431db592c593f1814984fb4ae92087755b41a5743e61cd29c9694",
+          "creationHash": "0x07ed98890e0da85b200d3fe3a7b4198c6af5ddbb40685bb8d0790e33dc3b53e9",
+          "immutableReferencesHash": "0x162c78303848bdedc5737b583b52da46e447c0c4ecd65390cc67c2b5d88ecd94",
+          "runtimeTemplateHash": "0xaf19c81ad781076c68a2be519a4751afbd3f735d87d22ae47fd5ebda3f1ee50c",
+          "storageLayoutHash": "0x790d9bf2fafa353a6cc196ceaf7f20304cb6268a1611e88e13888ce93e003153"
+        },
+        "VaultPolicyRegistry420": {
+          "abiHash": "0x9e4551785ea8122cbddfa644e9f6a0be39239cf04fd91614194ef731915bfabe",
+          "creationHash": "0xdf3cb2fb18e06b4f402cd449bd5ec2e207623406d701fce286ed4185347d45fe",
+          "immutableReferencesHash": "0xd3f201139ae891bafb2a94593ef90e8144f8769216053992de9762e830f669e9",
+          "runtimeTemplateHash": "0xb6c963b316b19999ead3a0609966b32a17e90eb9e9444dfa1717177133304c91",
+          "storageLayoutHash": "0x67a7592efd27a9c9794a1797e97834049feb80a3c880785981a28b6573f5e6cf"
+        },
+        "VaultRegistry420": {
+          "abiHash": "0x449dd04daec06e51619bac4ba138e922ac7059362a4b7ab44b7e7230d13777ba",
+          "creationHash": "0x748bf9222f8930012413da775d3de8309f9a9375fa94a1404053ad79898563bd",
+          "immutableReferencesHash": "0x06e951355a18780670d3998a634b98aae0e1b9cdab02dcb593d813503861cdfc",
+          "runtimeTemplateHash": "0xcfaf6a853a0e3e2a3e0167637f806fc5ae895667c09fa9f0b36b4f8c5250e997",
+          "storageLayoutHash": "0x7d4613d3d2f0207123e99f8fad8b505a7d5d7078d722fcbb18d9e544bcc01142"
+        }
+      },
+      "genesisConfigHash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
+      "head": "bccb7db8ae69e5d54e098479836c47af428255df",
+      "interfaceHash": "0xcc878a0e90ad59a04e3120f53231e366260779304014f45286e975e4e39b3b2d",
+      "liveQualified": false,
+      "localResult": {
+        "actions": [
+          {
+            "data": "0x93ea85b2159943a2d23d0ad26b19c09e8c702c0c11e52494ff32265b8d97983048a0802b000000000000000000000000a51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c00000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002",
+            "target": "0x0000000000000000000000000000000000000434",
+            "value": 0
+          },
+          {
+            "data": "0xd553b13a76b0de4fe89da68b19741e7d8ae6273b3ea40d74f544a0f28511091c6238a879000000000000000000000000a51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c01878860ed77e8b76b8deb2b759b79fcc760b8e93057193a2fe8da661a3c158c4000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000003ccc1a6ddb970f03b90e1ecac59628c3a5e39f4b443e523bd208fc1942b750d957632b23d3e5f5914163ca5634ea778ef7433db10c7f7865b7b353722570c5d53cc878a0e90ad59a04e3120f53231e366260779304014f45286e975e4e39b3b2d",
+            "target": "0x0000000000000000000000000000000000000434",
+            "value": 0
+          }
+        ],
+        "addresses": {
+          "AssetVault420": "0x5fc8d32690cc91d4c39d9d3abcbd16989f875707",
+          "CapabilityRegistry420": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+          "GovernanceTimelock": "0x0000000000000000000000000000000000000429",
+          "ProtocolRegistry": "0x0000000000000000000000000000000000000434",
+          "TokenFactory420": "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0",
+          "TokenTemplateRegistry420": "0xb7f8bc63bbcad18155201308c8f3540b07f84f5e",
+          "VaultAccounting420": "0xdc64a140aa3e981100a9beca4e685f962f0cf6c9",
+          "VaultAuthorization420": "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+          "VaultPolicyRegistry420": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
+          "VaultRegistry420": "0xcf7ed3acca5a467e9e704c703e8d87f634fb0fc9"
+        },
+        "creationInputs": [
+          "0xf39bbbf6129bbf2a024d1496b9fd8749692908eda27fb7d88448dfe95528af9f",
+          "0x0b1a0de3b599d7f186845b1f02fa305c00730fd0732a739813112a375a004e90"
+        ],
+        "dependencyRoot": "0x7632b23d3e5f5914163ca5634ea778ef7433db10c7f7865b7b353722570c5d53",
+        "recordedCreationFees": "336000000000000000000",
+        "runtimeCodeHashes": {
+          "AssetVault420": "0x2680c2ff62a59a062895b918c722b2b1ee61d23755fa797e5c09dcd49987c0c2",
+          "CapabilityRegistry420": "0x19b69d70dce639da95f5586187307bd4b9612be3749f807676d7fe628f3939cf",
+          "GovernanceTimelock": "0xa7e3f9407735669c1ea106fcf0cdc078a2de80c6f87a24537ef98d2aced12285",
+          "ProtocolRegistry": "0x9f9e5f794296cf9faf5f8c8d17cd815f3c19c004a158c15cb61b5a29eaacb330",
+          "TokenFactory420": "0x0c01dbf1d6c51cb7fcbebb98ed99e6fbfc871a04da8a13ef615ff0719a117299",
+          "TokenTemplateRegistry420": "0x294e35bfaf71147531ea22244023069eaf0bbae671832ad4a17fc9aa6c1c181a",
+          "VaultAccounting420": "0xaaf61d2d18008b010cfc6eec596264c65dbe108b76a9051bbe0c81c2acc4e36e",
+          "VaultAuthorization420": "0xd2f539a7f946c767c427a87530bb2f18d9a6fb22c3a942a9d299b90efc3a4077",
+          "VaultPolicyRegistry420": "0x508d2cd37e1ebb506d75282b34736c3169b4dc15f6ecd36537d351edcf6798e6",
+          "VaultRegistry420": "0x7c71c4248e323f970a81039ff45e6188a4aae84180784df3c17d52b9aaa29f8e"
+        },
+        "tokens": [
+          {
+            "address": "0x932236e273e82cf1e4e13bb220e4ca2ba06e20ed",
+            "runtimeCodeHash": "0x2bb010c57aad16812138f553bff961ee4c789848b282426087758a24984aed37",
+            "template": "erc20-fixed"
+          },
+          {
+            "address": "0x10b321ae385158e88afdc2aa5ce7306a0b77b304",
+            "runtimeCodeHash": "0xa6044a2e13aea848294b15a84b8303f136b8ff6f63972ff9d42fa5ea60d626ba",
+            "template": "erc20-mintable"
+          },
+          {
+            "address": "0xe431af1b44491194913b829a429bbb7cb4b9e268",
+            "runtimeCodeHash": "0xec09f725eb17be1a4d32f06fa704413d3392bdbc2524566e2c12230054a9c302",
+            "template": "erc20-capped"
+          },
+          {
+            "address": "0x9fd8e461e064aeab3e290f46b79240db666d806c",
+            "runtimeCodeHash": "0x547e356a5c58fa8fa546a63bd9d1cbbfb21f4db4823861ab867db0f1498012e7",
+            "template": "erc20-burnable"
+          },
+          {
+            "address": "0x24bede0e911195e61ad99ca59898a5ee19f4d193",
+            "runtimeCodeHash": "0xc07d8dd3cf12c530872a02d749a51de17fe1dcdc01b2190676f7ac51281f13b2",
+            "template": "erc20-permit"
+          },
+          {
+            "address": "0x52f734468b0af46d84b8c90b76ce8c97b7652528",
+            "runtimeCodeHash": "0x7c34af9324bae3d38af27139945fcd0db25b0a888f5a86cfa14eb5a1e17f9127",
+            "template": "erc20-votes"
+          },
+          {
+            "address": "0x39bf54f12322ab3752ca9068f6146c3e12ad661c",
+            "runtimeCodeHash": "0xfb8cb69c9f00ce1948221651d6327095ff5cb74aa0f8a0c31407b14638e87e25",
+            "template": "erc721-collection"
+          },
+          {
+            "address": "0xb5d604532453c7a0e73b279c1e60b14b3477a033",
+            "runtimeCodeHash": "0xef4939c4b9cb230af1bf4aa2e952b0b263cfdab29440ed7f2f813d4c3f73e00c",
+            "template": "erc1155-multi"
+          }
+        ]
+      },
+      "manifestHash": "0xccc1a6ddb970f03b90e1ecac59628c3a5e39f4b443e523bd208fc1942b750d95",
+      "metadataHash": "0x1878860ed77e8b76b8deb2b759b79fcc760b8e93057193a2fe8da661a3c158c4",
+      "reproducibleBuilds": 2,
+      "reproducibleLocalEVMs": 2,
+      "sourceClosure": {
+        "foundry.toml": "7998cf0663907daced5812fbef76484e4d2dc1ca7df24c847f6c2ea3119d7d04",
+        "src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+        "src/governance/GovernanceTimelock.sol": "7fa9cbb5c9088f666f03b42e901ae9f0690ed10b12346f25c26d19d99fa16bc1",
+        "src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+        "src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431",
+        "src/interfaces/genesis/ICapabilityRegistryExtended420.sol": "2ab13853023a734c75adc0c19bdd7483d77d7aaf75fe8daa079f7258771fdf85",
+        "src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+        "src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+        "src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+        "src/system/CapabilityRegistry420.sol": "eec70c83ff91b2c7a5fd3fc10728db06d402642be0f8e0c48c4530ac96e7b7ef",
+        "src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+        "src/token/ERC1155Template420.sol": "68cebe24f4c40b4c037ecd33698934d2543caf74797851d2e82579a7cb3b3d0a",
+        "src/token/ERC20Template420.sol": "8f9a950e8b2ce8d76c45a7a50e4405e476e664b1bed044e4e89c4bd8bc04e303",
+        "src/token/ERC721Template420.sol": "afa0e5328e5bfdb6a6ec1998fa48fda86d24f34da91b75324fff3389ff9a88a3",
+        "src/token/TokenFactory420.sol": "6d41bd48ac71e742e1e670b0e56dd06729f355e8f00f65923366b83b77f50b5d",
+        "src/token/TokenIds420.sol": "c25c894640430023d01123830e65053330baefcacb877dde3e16f50446e58e70",
+        "src/token/TokenTemplateRegistry420.sol": "1c91296ed22c6f4dadae0da432ca713b9f723d0e04a675b156d05cdc72c553b1",
+        "src/vault/AssetVault420.sol": "e660cafd7873e04e036173f403b1bdd699b442550e2f38263c0e75751a565b94",
+        "src/vault/VaultAccounting420.sol": "7f6d8f702a973993708ba1925a5b8548df37379a7982df428c241b1501a99841",
+        "src/vault/VaultAuthorization420.sol": "2610d34dc2371bb37fd543f5de1e72f81f262bb522b32ba45afc4495f2bff9e0",
+        "src/vault/VaultIds420.sol": "b21e293c4b7c17e7557f0f07b7f53cf6ef73d66ce5a1cd3d59190e52d565ce75",
+        "src/vault/VaultPolicyRegistry420.sol": "ee917cf0b84d8c2e06c2276dc6e2eaa4730dcbaa6bd239fff3089e4266e4eac2",
+        "src/vault/VaultRegistry420.sol": "d1960f8cbd0caa947bf0b0b152eb0ac0533529cf7cd1a5c2478b1fffe919e718"
+      },
+      "status": "PASS",
+      "verifiedTemplatesPerRun": 8
+    },
+    "local_evm": {
+      "creations": 8,
+      "management": 16,
+      "negative": 14,
+      "portfolio": 8,
+      "feeWei": "336000000000000000000",
+      "reorg": true,
+      "walletSubmissions": 24
+    },
+    "ecosystem": {
+      "go_tests": 229,
+      "go_subtests": 61,
+      "frontend_tests": 14,
+      "typescript_tests": 22
+    },
+    "browser": {
+      "viewports": [
+        1440,
+        1024,
+        768,
+        390,
+        320
+      ],
+      "axe_violations": 0,
+      "horizontal_overflow": false
+    }
+  },
+  "reconciliation": {
+    "concurrent_main_changes": [
+      "docs/ROADMAP.md"
+    ],
+    "disposition": "Concurrent documentation changes preserved; no executable or qualification inputs changed. Closeout changes are evidence and readiness only."
+  },
+  "prior_evidence": [
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.14-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-6-QUALIFICATION.json"
+  ],
+  "repository_release_qualified": true,
+  "live_testnet_qualified": false,
+  "genesis_production_qualified": false,
+  "next_step": "TOKEN-AUDIT-8",
+  "publication": "Original results retained at tested SHA; artifact digests GitHub-reported; deployment commitments and local rehearsal report retained durably. Live governance, real providers and release security gate remain separate."
+}

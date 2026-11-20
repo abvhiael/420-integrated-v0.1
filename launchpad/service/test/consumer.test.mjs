@@ -35,6 +35,7 @@ function makeRpc(){
     'deliveryAttestation(bytes32,address)':out('0x'+'0'.repeat(64)),
     'disputeCase(bytes32,address)':out('0x'+'0'.repeat(64)),
     'paymentRegistry()':out(A.payments),
+    'arbitrationCases()':out('0x0000000000000000000000000000000000001010'),
     'invoiceIdFor(bytes32,address,uint128,uint256)':out(I),
     'registeredContributionIntent(bytes32)':out(1),
     'checkoutPaymentForInvoice(bytes32)':out('0x'+'0'.repeat(64)),

@@ -9,7 +9,7 @@ import (
 
 func TestGenesisPayMatchesCanonicalCatalogueWalletRegistryAndHelp(t *testing.T) {
 	apps, err := GenesisApplications()
-	if err != nil || len(apps) != 1 {
+	if err != nil || len(apps) != 2 {
 		t.Fatalf("curated Genesis entries: %v, %v", apps, err)
 	}
 	pay := apps[0]
@@ -92,4 +92,13 @@ func readSource(t *testing.T, path string) []byte {
 		t.Fatal(err)
 	}
 	return data
+}
+
+func TestTokenCuratedIdentity(t *testing.T) {
+ apps,err:=GenesisApplications();if err!=nil{t.Fatal(err)}
+ token:=apps[1]
+ if token.ServiceID!="420/service/token/v1"||token.Name!="420 Token"||token.Category!="finance"||token.Classification!="GENESIS_PROTOCOL_AND_USER_APP"||token.HelpRoute!="apps/token/user-guide/"||len(token.Expressions)!=2{t.Fatalf("Token identity: %+v",token)}
+ wallet:=string(readSource(t,"../../wallet/web/core/genesis-app-catalog.js"));registry:=string(readSource(t,"../../contracts/src/libraries/ServiceIds420.sol"));help:=string(readSource(t,"../../packages/420-docs-context/genesis-dapps.json"))
+ if !strings.Contains(wallet,"id: 'token', name: '420 Token', serviceId: '420/service/token/v1'")||!strings.Contains(registry,`TOKEN = keccak256("420/service/token/v1")`)||!strings.Contains(help,token.HelpRoute){t.Fatal("Token catalogue, Registry or help drift")}
+ for _,x:=range token.Expressions{if x.Status!=LocallyImplemented{t.Fatal("curation promoted Token release availability")}}
 }

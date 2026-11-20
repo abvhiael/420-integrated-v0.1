@@ -271,6 +271,8 @@ func (s *Service) protocolObject(ctx context.Context, protocol, objectKey string
 		return s.typedExact(ctx, architecture.DomainPublicIdentity, objectKey)
 	case "420stake":
 		return s.typedExact(ctx, architecture.DomainValidator, objectKey)
+ case "420token":
+  return s.assetsValidators.ResolveToken(ctx,objectKey)
 	case "420market":
 		return s.typedExact(ctx, architecture.DomainMarketListing, objectKey)
 	case "420rights":

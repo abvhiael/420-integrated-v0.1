@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+ "github.com/420integrated/420-integrated/indexer/tokenread"
 
 	explorerservice "github.com/420integrated/420-integrated/explorer/service"
 	explorerweb "github.com/420integrated/420-integrated/explorer/web"
@@ -39,12 +40,13 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/stake/activity",s.handleStakeActivity)
 	s.mux.HandleFunc("GET /v1/consensus",s.handleConsensus)
  s.mux.HandleFunc("GET /v1/treasury/{kind}/{id}",s.handleTreasury)
+ s.mux.HandleFunc("GET /v1/token/deployments/{token}",s.handleTokenDeployment)
 	s.mux.HandleFunc("/v1/",func(w http.ResponseWriter,r *http.Request){writeError(w,http.StatusNotFound,"unknown API route")})
 	s.mux.Handle("/", explorerweb.Handler())
 }
 func (s *Server) handleHealth(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,healthResponse{Service:"420Explorer",Status:"LIVE",CanonicalAuthority:false,DataSource:"420Indexer"})}
 func (s *Server) handleReady(w http.ResponseWriter,r *http.Request){status,err:=s.service.NetworkStatus(r.Context());if err!=nil{issue:=operationalIssue(err);if issue.Retryable{w.Header().Set("Retry-After","15")};writeJSON(w,http.StatusServiceUnavailable,readinessResponse{Ready:false,Status:status,Issue:&issue});return};writeJSON(w,http.StatusOK,readinessResponse{Ready:true,Status:status})}
-func (s *Server) handleCapabilities(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,capabilitiesResponse{Service:"420Explorer",Qualification:"QUALIFIED_INDEXER_API_CONSUMER",CanonicalAuthority:false,DataSource:"420Indexer",Endpoints:[]string{"/v1/health","/v1/ready","/v1/status","/v1/blocks","/v1/blocks/{number}","/v1/blocks/{number}/trace","/v1/transactions/{hash}","/v1/receipts/{hash}","/v1/addresses/{address}","/v1/contracts/{address}","/v1/services","/v1/services/{service}","/v1/services/{service}/versions/{version}","/v1/assets/activity","/v1/stake/activity","/v1/consensus","/v1/treasury/{kind}/{id}"}})}
+func (s *Server) handleCapabilities(w http.ResponseWriter,r *http.Request){writeJSON(w,http.StatusOK,capabilitiesResponse{Service:"420Explorer",Qualification:"QUALIFIED_INDEXER_API_CONSUMER",CanonicalAuthority:false,DataSource:"420Indexer",Endpoints:[]string{"/v1/health","/v1/ready","/v1/status","/v1/blocks","/v1/blocks/{number}","/v1/blocks/{number}/trace","/v1/transactions/{hash}","/v1/receipts/{hash}","/v1/addresses/{address}","/v1/contracts/{address}","/v1/services","/v1/services/{service}","/v1/services/{service}/versions/{version}","/v1/assets/activity","/v1/stake/activity","/v1/consensus","/v1/treasury/{kind}/{id}","/v1/token/deployments/{token}"}})}
 func (s *Server) handleStatus(w http.ResponseWriter,r *http.Request){status,err:=s.service.NetworkStatus(r.Context());if err!=nil{issue:=operationalIssue(err);if issue.Retryable{w.Header().Set("Retry-After","15")};writeJSON(w,explorerErrorStatus(err),statusFailureResponse{Status:status,Issue:issue});return};writeJSON(w,http.StatusOK,status)}
 func (s *Server) handleBlocks(w http.ResponseWriter,r *http.Request){var limit uint64;var err error;if raw:=strings.TrimSpace(r.URL.Query().Get("limit"));raw!=""{limit,err=strconv.ParseUint(raw,10,32);if err!=nil||limit==0||limit>250{writeError(w,http.StatusBadRequest,"invalid limit");return}};page,err:=s.service.BlockPage(r.Context(),uint32(limit),r.URL.Query().Get("cursor"));if err!=nil{writeError(w,explorerErrorStatus(err),err.Error());return};writeJSON(w,http.StatusOK,page)}
 func (s *Server) handleBlock(w http.ResponseWriter,r *http.Request){number,err:=strconv.ParseUint(r.PathValue("number"),10,64);if err!=nil{writeError(w,http.StatusBadRequest,"invalid block number");return};view,err:=s.service.BlockDetail(r.Context(),number);if err!=nil{writeError(w,explorerErrorStatus(err),err.Error());return};writeJSON(w,http.StatusOK,view)}
@@ -83,4 +85,11 @@ func (s *Server) handleTreasury(w http.ResponseWriter,r *http.Request){
  view,err:=s.service.Treasury(r.Context(),kind,id)
  if err!=nil{writeError(w,explorerErrorStatus(err),"Treasury projection unavailable");return}
  writeJSON(w,http.StatusOK,view)
+}
+
+func(s *Server) handleTokenDeployment(w http.ResponseWriter,r *http.Request){
+ w.Header().Set("Cache-Control","no-store")
+ token:=strings.ToLower(r.PathValue("token"));if !tokenread.ValidAddress(token){writeError(w,400,"invalid Token address");return}
+ out,err:=s.service.TokenDeployment(r.Context(),token);if err!=nil{writeError(w,503,"Token deployment evidence unavailable");return}
+ writeJSON(w,200,out)
 }

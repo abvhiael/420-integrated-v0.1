@@ -51,7 +51,7 @@ function actionState(){
   actionable('#pay-conversion',canQuote&&!!state.quote?.canPay);
   actionable('#contribute',eligible&&checkout?.canContribute===true&&checkout?.registered&&checkout?.invoiceExists&&checkout?.paymentStatus==='SETTLED'&&!checkout?.recorded&&checkout.amount===amount);
   actionable('#claim',w&&!!p?.claimable);
-  const refundable=w&&p&&!p.refunded&&['FAILED','CANCELLED'].includes(p.sale.state)&&p.history.length>0;
+  const refundable=w&&p&&p.permissions?.refund===true&&!p.refunded&&['FAILED','CANCELLED'].includes(p.sale.state)&&p.history.length>0;
   const fullyDelivered=refundable&&p.history.every(x=>BigInt(x.refundPrincipalDelivered)===BigInt(x.settlementAmount));
   actionable('#refund',fullyDelivered&&!p.preparedRefundCommitment);
   actionable('#record-refund',fullyDelivered&&!!p.preparedRefundCommitment);
@@ -133,8 +133,11 @@ function renderCheckout(){
     CONTRIBUTION_UNAVAILABLE:'A new contribution is unavailable due to sale status, capacity or eligibility. Existing paid intents can still be recovered.',
     RECOVER_OR_EXPIRED:'Do not pay this invoice: the contribution window or eligibility is no longer valid. Check Pay refund and recovery.',
     AWAIT_CANONICAL_SETTLEMENT:'420Pay payment is not yet settled. Verify canonical payment and Wallet history before any retry.',
+    REFUND_RECOVERY:'Payment is refunded or partially refunded. Check delivered principal before unallocated reconciliation; never record it as a contribution.',
     RECORD_CONTRIBUTION:'420Pay shows a matching settled payment. Review recording the Launchpad contribution.'};
-  setText('#checkout-state',c?(messages[c.next]||('Payment recorded: '+c.paymentStatus)):'No checkout context loaded.');
+  setText('#checkout-state',c?((messages[c.next]||('Payment recorded: '+c.paymentStatus))+
+    (c.unallocatedRefund?' | Pay refund authorized '+c.unallocatedRefund.authorized+'; delivered '+c.unallocatedRefund.delivered+
+      '; principal delivered '+c.unallocatedRefund.principalDelivered+' of '+c.amount:'')):'No checkout context loaded.');
 }
 function renderPosition(){
   const p=state.position;
@@ -170,7 +173,7 @@ function renderRecovery(){
       b.disabled=state.busy;b.addEventListener('click',()=>prepare('reconcile-refund',{paymentId:payment.paymentId}));node.append(b);
     }
   }
-  if(state.checkout?.paymentId&&!state.checkout.recorded&&
+  if(state.checkout?.paymentId&&!state.checkout.recorded&&state.checkout.unallocatedRefund?.complete===true&&
     ['REFUNDED','PARTIALLY_REFUNDED'].includes(state.checkout.paymentStatus)){
     const b=document.createElement('button');b.type='button';b.textContent='Review unallocated payment refund recovery';
     b.addEventListener('click',()=>prepare('recover-unallocated',{paymentId:state.checkout.paymentId}));node.append(b);
@@ -202,15 +205,18 @@ async function loadCampaigns(reset=true){
 async function refreshPosition(){
   if(!state.wallet||!state.selected)return;
   const p=await state.service.position(state.selected.saleId,state.wallet.account);
-  if(p.sale.saleId.toLowerCase()!==state.selected.saleId.toLowerCase()||p.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase())
-    throw new Error('canonical position identity or chain mismatch');
+  if(p.sale.saleId.toLowerCase()!==state.selected.saleId.toLowerCase()||p.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase()||
+    p.sale.projectId.toLowerCase()!==state.selected.projectId.toLowerCase()||
+    (state.selected.mode!=='UNKNOWN'&&state.selected.mode!==p.campaignMode))
+    throw new Error('Campaign projection differs from canonical project or mode; refresh discovery before transacting.');
   state.position=p;renderDetail();
 }
 async function openCampaign(saleId){
   setBusy(true);status('Loading campaign...');
   try{
     const p=await state.service.campaign(saleId);state.selected=normalizeCampaign(p.campaign);
-    state.position=null;state.checkout=null;state.quote=null;state.review=null;restoreIntent();
+    state.position=null;state.checkout=null;state.quote=null;state.review=null;state.lastTx=null;
+    setText('#tx-hash','-');setText('#tx-state','No transaction selected.');restoreIntent();
     if(state.wallet){
       await refreshPosition();
       const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+saleId.toLowerCase();

@@ -61,7 +61,8 @@ async function snapshot(rpc){
 }
 export async function position(rpc,rt,saleId,account){
   const who=address(account),sale=await readSale(rpc,rt,saleId),args=[wordHex(sale.saleId),wordAddress(who)],crowd=rt.crowdfundingIntegrationAddress;
-  const [source,identity,project,contributed,claimed,refunded,refsData,prepared,attested,caseId,payRegistry]=await Promise.all([
+  const [source,identity,project,contributed,claimed,refunded,refsData,prepared,attested,caseId,payRegistry,
+    modeRaw,activeIntegration,maxReferences]=await Promise.all([
     snapshot(rpc),identityStatus(rpc,rt,sale,who),readProject(rpc,rt,sale.projectId),
     readNum(rpc,rt.allocationRegistryAddress,'contributed(bytes32,address)',args),
     readNum(rpc,rt.allocationRegistryAddress,'claimed(bytes32,address)',args),
@@ -69,7 +70,12 @@ export async function position(rpc,rt,saleId,account){
     call(rpc,crowd,'paymentIds(bytes32,address)',args),
     readSingle(rpc,crowd,'preparedRefundCommitment(bytes32,address)',args),
     readSingle(rpc,crowd,'deliveryAttestation(bytes32,address)',args),
-    readSingle(rpc,crowd,'disputeCase(bytes32,address)',args),paymentRegistry(rpc,rt)]);
+    readSingle(rpc,crowd,'disputeCase(bytes32,address)',args),paymentRegistry(rpc,rt),
+    readNum(rpc,crowd,'campaignMode(bytes32)',[wordHex(sale.saleId)]),
+    readAddress(rpc,rt.allocationRegistryAddress,'crowdfundingIntegration()'),
+    readNum(rpc,crowd,'MAX_PAYMENT_REFERENCES_PER_SALE()')]);
+  const mode=['NONE','REWARD','DONATION','COMMUNITY_PROJECT','PRODUCT_PREORDER'][Number(modeRaw)];
+  if(!mode||maxReferences===0n||maxReferences>1024n)throw new Error('invalid on-chain campaign configuration');
   const refs=decodeRefs(refsData),history=[];
   for(const paymentId of refs){
     const p=await payment(rpc,payRegistry,paymentId);
@@ -98,6 +104,8 @@ export async function position(rpc,rt,saleId,account){
   return {schema:'420-launchpad-position-v1',canonical:true,source,sale,project,identity,
     contributed:contributed.toString(),claimed:claimed.toString(),refunded,
     remaining:remaining.toString(),walletRemaining:walletRemaining.toString(),history,
+    campaignMode:mode,integrated:activeIntegration.toLowerCase()===crowd.toLowerCase(),
+    paymentReferenceLimit:Number(maxReferences),
     preparedRefundCommitment:zero(prepared)?null:prepared,deliveryAttestation:zero(attested)?null:attested,
     claimable:sale.state==='SUCCEEDED'&&source.at>=sale.claimStartsAt&&contributed>0n&&claimed===0n
       &&expectedClaim>0n&&!refunded&&!!attested&&history.every(p=>p.status==='SETTLED'),
@@ -112,7 +120,8 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   // Historical invoice recovery must remain available after expiry, exhaustion or identity revocation.
   // These gates control NEW contributions, not read-only recovery of an already paid intent.
   const basicEligibility=sale.state==='ACTIVE'&&p.source.at>=sale.startsAt&&p.source.at<=sale.endsAt&&
-    principal<=BigInt(p.remaining)&&principal<=BigInt(p.walletRemaining)&&p.identity.bound;
+    principal<=BigInt(p.remaining)&&principal<=BigInt(p.walletRemaining)&&p.identity.bound&&
+    p.integrated&&p.campaignMode!=='NONE'&&p.history.length<p.paymentReferenceLimit;
   // Authorization is amount- and sale-scoped, separate from the Identity credential.
   // A lost capability must deny a NEW checkout but must not hide an earlier paid invoice.
   let capabilityAuthorized=false;

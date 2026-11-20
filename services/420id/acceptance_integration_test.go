@@ -86,7 +86,7 @@ func TestAcceptanceHTTPAndBrowserIsolation(t *testing.T){
  if !limited{t.Fatal("multi-instance rate cap bypass")}
  if e=h.Purge(ctx);e!=nil{t.Fatal(e)}
  // The daily cap must survive cleanup and process changes. Use a fresh browser digest.
- if _,e=db.ExecContext(ctx,"INSERT INTO account420.acceptance_rate(scope,bucket,count) VALUES(\'mail-global-day\',floor(extract(epoch from clock_timestamp())/86400)::bigint,90) ON CONFLICT(scope,bucket) DO UPDATE SET count=90");e!=nil{t.Fatal(e)}
+ if _,e=db.ExecContext(ctx,"INSERT INTO account420.acceptance_rate(scope,bucket,count) VALUES('mail-global-day',floor(extract(epoch from clock_timestamp())/86400)::bigint,90) ON CONFLICT(scope,bucket) DO UPDATE SET count=90");e!=nil{t.Fatal(e)}
  if e=h.Purge(ctx);e!=nil{t.Fatal(e)}
  if e=h2.limit(ctx,mustRandom(t),"127.0.0.2:12345",true);e!=errLimited{t.Fatal("daily email cap not enforced after cleanup",e)}
 }

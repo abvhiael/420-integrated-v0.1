@@ -123,3 +123,24 @@ test('Arbitration transaction receipt recovers only the sale-specific crowdfundi
     logs:[{address:cases,topics:[topic,caseId,PROFILE,claimant]}]});
   assert.equal((await transactionStatus(rpc,runtime,TX,USER)).caseId,null);
 });
+
+test('claim readiness is gated by recorded payment, delivery attestation and sale-scoped capability',async()=>{
+  const rpc=makeRpc(),paymentId='0x'+'ae'.repeat(32);
+  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,130,140,POLICY,PROFILE,12,3,1));
+  rpc.set('deliveryAttestation(bytes32,address)',out(PROFILE));
+  rpc.set('paymentIds(bytes32,address)',out(32,1,paymentId));
+  rpc.set('payments(bytes32)',out(I,USER,MERCHANT,TOKEN,10,TOKEN,10,P,9,PROFILE,0,0,5));
+  rpc.set('refundProgress(bytes32,address,uint128)',out(0,0,0));
+  const eligible=await position(rpc,runtime,S,USER);
+  assert.equal(eligible.claimable,true);assert.equal(eligible.history.length,1);
+  assert.equal(eligible.history[0].status,'SETTLED');
+  assert.equal(eligible.permissions.claim,true);
+  rpc.set('isAuthorized(address,bytes32,bytes32,uint256)',out(0));
+  const revoked=await position(rpc,runtime,S,USER);
+  assert.equal(revoked.claimable,false);assert.equal(revoked.permissions.claim,false);
+  assert.equal(revoked.history.length,1);
+  rpc.set('isAuthorized(address,bytes32,bytes32,uint256)',out(1));
+  rpc.set('payments(bytes32)',out(I,USER,MERCHANT,TOKEN,10,TOKEN,10,P,9,PROFILE,0,10,6));
+  rpc.set('refundProgress(bytes32,address,uint128)',out(10,10,10));
+  assert.equal((await position(rpc,runtime,S,USER)).claimable,false);
+});

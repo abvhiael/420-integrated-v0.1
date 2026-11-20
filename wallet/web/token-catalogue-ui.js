@@ -37,6 +37,15 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
   const disposeWizard=mountERC20Wizard420(wizard,model,session);
   const disposeCollectionWizard=mountERC721Wizard420(collectionWizard,model,session);
   const disposeMultiWizard=mountERC1155Wizard420(multiWizard,model,session);
+  const tracking=el('section','token-fee-review');tracking.hidden=true;tracking.setAttribute('aria-label','Token deployment transaction tracking');body.append(tracking);
+  const disposeTracking=session.subscribeTransactions(records=>{
+    tracking.hidden=records.length===0;tracking.replaceChildren(el('h5',null,'Token deployment transactions'));
+    for(const record of records){const item=el('article');const status=el('p','token-fee-review-status',record.status==='confirmed'?'Canonical deployment confirmed (not finality or listing approval).':record.status==='unknown'?'Submission outcome unknown — check Wallet activity; do not resubmit automatically.':record.status);status.setAttribute('role','status');item.append(status);
+      if(record.txHash){item.append(el('p','token-fee-review-status','Transaction: '+record.txHash));const check=el('button','ghost-button','Check deployment confirmation');check.type='button';check.addEventListener('click',()=>{void session.checkTransaction(record.txHash);});item.append(check);}
+      if(record.error)item.append(el('p','token-fee-review-status',record.error));
+      if(record.confirmation?.tokenAddress)item.append(el('p','token-fee-review-status','Deployed token: '+record.confirmation.tokenAddress+' · '+record.confirmation.confirmations+' confirmations'));
+      tracking.append(item);}
+  });
   details.replaceChildren(summary,body);
   const cards=new Map();
   for(const profile of model.getSnapshot().profiles){
@@ -78,5 +87,5 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
   const unsubscribe=model.subscribe(render);
   refresh.addEventListener('click',()=>{void model.refresh();});
   details.addEventListener('toggle',()=>{if(details.open&&model.canRefresh())void model.refresh();});
-  return ()=>{unsubscribe();disposeWizard();disposeCollectionWizard();disposeMultiWizard();model.dispose();};
+  return ()=>{unsubscribe();disposeTracking();disposeWizard();disposeCollectionWizard();disposeMultiWizard();model.dispose();};
 }

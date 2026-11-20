@@ -11,3 +11,4 @@ export { parseERC20Units420, formatERC20Units420, generateERC20Salt420, validate
 export { validateERC721WizardFields420, createERC721Wizard420 } from './token-erc721-wizard.js';
 export { resolveERC1155MetadataURI420, validateERC1155WizardFields420, createERC1155Wizard420 } from './token-erc1155-wizard.js';
 export { createTokenFeeReview420 } from './token-fee-review.js';
+export { readTokenDeployment420 } from './token-deployment.js';

@@ -36,10 +36,19 @@ export function createTokenFeeReview420(wizard,session){
         // This is a review record only. A downstream Wallet submission must
         // independently verify it, enforce fee bounds and consume it once.
         submissionRequired:true});
+      session.recordAuthorization(authorization,source,expected);
       emit();return authorization;
     }catch(e){if(!disposed&&attempt===revision){busy=false;quote=null;authorization=null;error='Authorization rejected: '+String(e?.message||'Unavailable').slice(0,240);emit();}return null;}
   }
+  async function submit(approved){
+    if(disposed||busy||!authorization||approved!==authorization)return null;
+    const attempt=revision;busy=true;error='';emit();
+    const active=()=>!disposed&&attempt===revision&&authorization===approved;
+    try{return await session.submitCurrent(approved,active);}
+    catch(e){if(active())error='Submission rejected: '+String(e?.message||'Unavailable').slice(0,240);return null;}
+    finally{if(active()){authorization=null;quote=null;busy=false;emit();}}
+  }
   function cancel(){if(!disposed){clear();emit();}}
   function dispose(){disposed=true;clear();draft=null;stop();stopSession();listeners.clear();}
-  return Object.freeze({subscribe,simulate,authorize,cancel,getSnapshot:view,dispose});
+  return Object.freeze({subscribe,simulate,authorize,submit,cancel,getSnapshot:view,dispose});
 }

@@ -8,15 +8,15 @@ Timeouts and UI errors do not prove a write failed. Check canonical transaction 
 
 ## Crowdfunding dependency controls
 
-For the Genesis crowdfunding modes, contribution evidence must resolve to a canonical 420Pay payment already in `SETTLED` state with exact participant, recipient, settlement asset and amount binding. Payment IDs are globally one-use at the Launchpad crowdfunding boundary.
+For the Genesis crowdfunding modes, contribution evidence must resolve to a canonical 420Pay payment already in `SETTLED` state with exact participant, recipient, settlement asset and amount binding. Before checkout the participant registers a contribution intent with an invoice ID derived from chain ID, integration address, sale ID, participant, amount and payer nonce. The merchant must subsequently create the single-use invoice; the contract checks its expiry, closure and exact canonical 420Pay checkout payment pointer. Both payment IDs and invoice IDs are globally one-use for contribution recording. The preflight is not a reservation of capacity. If checkout succeeds but the contribution cannot be recorded, the participant can reconcile the unallocated payment after Pay actually delivers its refund; the recovery does not increase campaign raised balances.
 
 The Identity profile bound to a participant must remain active, controlled by that participant and hold a currently valid credential whose type equals the sale's `eligibilityPolicyHash`. CapabilityRegistry authorization remains independently required.
 
-Refund recording is fail-closed until the canonical Pay records backing the participant's contribution show sufficient refunded amounts. Launchpad records refund evidence but cannot execute the refund itself.
+Refund recording is fail-closed until the canonical RefundManager420 delivery ledger proves reimbursement of every backing payment, including tips where present. Pay authorization and actual delivery are distinct. Both preparation and recording recheck delivery. Permissionless per-payment reconciliation checkpoints track delivered principal separately from gross V1 contribution and raised history. Launchpad records evidence but cannot execute refunds. A later refund authorization prevents a new crowdfunding claim against the affected payment. Gross sale finalization remains based on the V1 recorded contributions; these checkpoints do not establish a continuously current net funding total.
 
 Disputes are linked only to canonical Arbitration cases with the exact crowdfunding domain, Launchpad component, sale ID, participant claimant and project-controller respondent. Finalized rulings are evidence; they do not grant Launchpad ruling, confiscation, cancellation or Pay authority.
 
-Reputation and Notifications outputs are derived application evidence. They cannot authorize settlement, identity, wallet execution, governance, campaign state or universal scoring.
+Project-controller delivery attestation and participant acknowledgement must match before a crowdfunding reward claim is recorded. A zero floor allocation is not claimable. Bilateral delivery evidence is not independently verified physical delivery. Reputation and Notifications outputs are derived application evidence. They cannot authorize settlement, identity, wallet execution, governance, campaign state or universal scoring.
 
 Replay protection covers payment IDs, refund batches, delivery commitments, dispute linkage/outcome publication, Reputation evidence and notification event IDs.
 

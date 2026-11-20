@@ -1,0 +1,48 @@
+{
+  "step": "TOKEN-AUDIT-5.3",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "671c7065d7a0e2e97fecd8d074d500246e63a720",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps-page.js",
+    "wallet/web/apps.css",
+    "wallet/web/core/token-app.js",
+    "wallet/web/core/token-catalogue.js",
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/test/token-discovery.test.js",
+    "wallet/web/test/token-catalogue.test.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    ".qualification/candidates/TOKEN-AUDIT-5.3-template-catalogue.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js",
+      "owner": "Wallet Token and affected configuration/navigation"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Rendered Wallet Token catalogue and existing accessibility acceptance"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Expose all eight and only frozen V1 profiles with correct feature semantics and fee; no external Token launch or invented live addresses",
+    "Display verified enabled/disabled states from complete Registry discovery; unknown/unconfigured/blocked states never imply availability",
+    "Reverify availability on selection and refresh, invalidate pending/selected state on new discovery, disablement, account/chain change, reorg or RPC failure; read-only selection, no transaction authority",
+    "Qualify actual Wallet DOM keyboard/responsive/accessibility and targeted adversarial tests, preserve prior qualification and leave aggregate step 5 open"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

@@ -380,6 +380,33 @@ contract LaunchpadAudit420Test {
         require(allocations.refunded(saleId, ALICE), "cancelled sale refundable");
     }
 
+    function testFuzzZeroFloorAllocationCannotEmitRepeatedClaim(
+        uint128 raw
+    ) public {
+        bytes32 policy = keccak256("audit/eligibility");
+        bytes32 small = sales.canonicalId(
+            projectId, PAYMENT, RECEIVER, 1, 1000, 600, 1, 10, 20, 30, policy, bytes32(0)
+        );
+        sales.createSale(small, projectId, PAYMENT, RECEIVER, 1, 1000, 600, 1, 10, 20, 30, policy, bytes32(0));
+        caps.setAllowed(true);
+        sales.activate(small);
+        vm.warp(10);
+        vm.prank(ALICE);
+        allocations.contribute(small, 1, keccak256("zero-floor/alice"));
+        vm.prank(BOB);
+        allocations.contribute(small, uint128(1 + uint256(raw) % 600), keccak256("zero-floor/bob"));
+        vm.warp(21);
+        sales.finalize(small);
+        vm.warp(30);
+        for (uint256 i; i < 2; ++i) {
+            vm.prank(ALICE);
+            vm.expectRevert(LaunchpadAllocationRegistry420.NotClaimable.selector);
+            allocations.claim(small, keccak256(abi.encode("zero-floor/claim", i)));
+        }
+        require(allocations.claimed(small, ALICE) == 0, "zero allocation claimed");
+        require(sales.sale(small).raised <= 601, "gross cap");
+    }
+
     function testFuzzCapsAndAllocationConservation(
         uint128 aRaw,
         uint128 bRaw

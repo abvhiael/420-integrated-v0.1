@@ -50,7 +50,7 @@ func NewAuth(s *Store,m Mailer,origin,rp string)(*Auth,error){
 }
 // Authentication is an ephemeral server-only result, not a browser token,
 // session, recovery credential or financial permission.
-type Authentication struct {id AccountID; revision int64; method string}
+type Authentication struct {id AccountID; revision int64; method string; proofID string; issuer *Auth; issued time.Time}
 func (p Authentication) AccountID()AccountID{return p.id}
 func (p Authentication) Revision()int64{return p.revision}
 func (p Authentication) Method()string{return p.method}
@@ -115,7 +115,7 @@ func (a *Auth) FinishEmail(ctx context.Context,id,secret string)(EmailResult,err
   if _,e=tx.ExecContext(ctx,"INSERT INTO account420.email_identities(email,account_id,user_handle) VALUES($1,$2,$3)",email,acc.ID,handle);e!=nil{return EmailResult{},e}
  } else if e!=nil{return EmailResult{},e}
  if acc.Status!=Active{if e=tx.Commit();e!=nil{return EmailResult{},e};return EmailResult{},ErrAuthentication}
- result:=EmailResult{Proof:Authentication{acc.ID,acc.Revision,"email"}}
+ result:=EmailResult{Proof:Authentication{id:acc.ID,revision:acc.Revision,method:"email",proofID:id,issuer:a,issued:time.Now()}}
  var already bool
  if e=tx.QueryRowContext(ctx,"SELECT EXISTS(SELECT 1 FROM account420.passkeys WHERE account_id=$1 AND rp_id=$2)",acc.ID,a.rp).Scan(&already);e!=nil{return EmailResult{},e}
  if !already{
@@ -163,7 +163,7 @@ func (a *Auth) FinishPasskeyLogin(ctx context.Context,id string,r AssertionRespo
  if errors.Is(e,sql.ErrNoRows)||e==nil&&(acc.Status!=Active||subtle.ConstantTimeCompare(handle,r.UserHandle)!=1){return Authentication{},ErrAuthentication};if e!=nil{return Authentication{},e}
  next,e:=verifyAssertion(a.origin,a.rp,c.challenge,r,key,uint32(count),backup);if e!=nil{return Authentication{},e}
  if _,e=tx.ExecContext(ctx,"UPDATE account420.passkeys SET sign_count=$2 WHERE credential_id=$1",r.CredentialID,int64(next));e!=nil{return Authentication{},e}
- if e=tx.Commit();e!=nil{return Authentication{},e};return Authentication{acc.ID,acc.Revision,"passkey"},nil
+ if e=tx.Commit();e!=nil{return Authentication{},e};return Authentication{id:acc.ID,revision:acc.Revision,method:"passkey",proofID:id,issuer:a,issued:time.Now()},nil
 }
 
 // PurgeExpired is an internal operator job; no account or credential deleted.

@@ -158,3 +158,17 @@ body{background:var(--bg);color:var(--text)}
 @media(max-width:620px){
   .community-grid{grid-template-columns:1fr}
 }
+
+/* AUTH-8: account-only off-chain surface, independent of wallet UI. */
+.account-social {display:grid;gap:1rem;max-width:920px}
+.account-social form,.social-post {display:grid;gap:.65rem;padding:1rem;border:1px solid var(--border,rgba(255,255,255,.18));border-radius:12px}
+.account-social label {display:grid;gap:.35rem}
+.account-social textarea,.account-social input {box-sizing:border-box;width:100%;max-width:100%;padding:.65rem;border-radius:7px}
+.account-social textarea {min-height:5rem;resize:vertical}
+.account-social .actions {display:flex;flex-wrap:wrap;gap:.5rem}
+.account-social .actions button {max-width:100%}
+.social-post__body {white-space:pre-wrap;overflow-wrap:anywhere}
+.social-post small {overflow-wrap:anywhere}
+.social-comments {display:grid;gap:.5rem;list-style:none;padding:0;margin:0}
+.social-comments li {white-space:pre-wrap;overflow-wrap:anywhere}
+@media (max-width:650px){.account-social form,.social-post{padding:.75rem}}

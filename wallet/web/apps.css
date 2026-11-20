@@ -110,3 +110,9 @@
 .token-created-portfolio [hidden] { display:none !important; }
 .token-created-portfolio-list { display:grid; gap:12px; }
 .token-created-portfolio-list .token-template-card, .token-created-portfolio-list h6 { min-width:0; overflow-wrap:anywhere; }
+
+.token-management { margin-top:12px; min-width:0; padding:12px; border:1px solid var(--wallet-border); border-radius:10px; }
+.token-management[hidden] { display:none!important; }
+.token-management-fields { display:grid; gap:8px; margin:10px 0; }
+.token-management label { display:grid; gap:4px; min-width:0; }
+.token-management input,.token-management select { max-width:100%; min-width:0; }

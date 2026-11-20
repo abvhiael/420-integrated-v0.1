@@ -29,7 +29,7 @@ func (f *identityNamesFixture) Verify(_ context.Context,chain int64,wallet,profi
 }
 func TestIdentityNamesPreferenceRequiresLinkedWalletAndFreshChain(t *testing.T){
  ctx:=context.Background();db:=sessionDB(t);db2:=sessionDB(t)
- a,mail:=sessionAuth(t,db,testOrigin,testRP);a2,_:=sessionAuth(t,db2,testOrigin,testRP)
+ a,mail:=sessionAuth(t,db,testOrigin,testRP);a2,mail2:=sessionAuth(t,db2,testOrigin,testRP)
  s:=sessionManager(t,a,"bong-goggles");s2:=sessionManager(t,a2,"bong-goggles")
  w,_:=NewWalletLinkManager(s,420,nil);w2,_:=NewWalletLinkManager(s2,420,nil)
  fixture:=&identityNamesFixture{}
@@ -52,7 +52,7 @@ func TestIdentityNamesPreferenceRequiresLinkedWalletAndFreshChain(t *testing.T){
  if e!=nil||!verified.BilateralNameVerified||!verified.IdentityActive{t.Fatal("bilateral verification",e)}
  pref,e:=manager.Save(ctx,grant.Token,profile,label,true,0)
  if e!=nil||pref.Revision!=1{t.Fatal("saved preference",pref,e)}
- otherSession:=mustIssueSession(t,s2,freshEmail(t,a,mail,email).Proof)
+ otherSession:=mustIssueSession(t,s2,freshEmail(t,a2,mail2,email).Proof)
  got,e:=second.Current(ctx,otherSession.Token)
  if e!=nil||got==nil||got.Revision!=1||got.NameLabelHash!=label{t.Fatal("cross-instance stored preference",got,e)}
  if _,e=manager.Save(ctx,grant.Token,profile,label,true,0);!errors.Is(e,ErrConflict){t.Fatal("stale revision accepted",e)}

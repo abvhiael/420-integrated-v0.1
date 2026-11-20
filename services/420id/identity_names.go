@@ -46,7 +46,8 @@ var bytes32Hex = regexp.MustCompile(`^0x[0-9a-f]{64}$`)
 const zero32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 func canonicalBytes32(input string,allowEmpty bool)(string,error){
  if input==""&&allowEmpty{return "",nil}
- v:=strings.ToLower(input)
+ if !strings.HasPrefix(input,"0x"){return "",ErrInvalid}
+ v:="0x"+strings.ToLower(input[2:])
  if !bytes32Hex.MatchString(v)||v==zero32{return "",ErrInvalid}
  return v,nil
 }

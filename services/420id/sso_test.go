@@ -58,6 +58,10 @@ func TestSSOClientAndRequestValidation(t *testing.T){
  if _,e:=NewSSOManager(a,[]SSOClient{{App:"nonexistent",Name:"Unknown",RedirectURI:c.redirect,Secret:secret}});e==nil{t.Fatal("unapproved app accepted")}
  if _,e:=NewSSOManager(a,[]SSOClient{{App:"doobtube",Name:"A",RedirectURI:c.redirect,Secret:secret},{App:"doobtube",Name:"B",RedirectURI:c.redirect,Secret:secret}});e==nil{t.Fatal("duplicate client accepted")}
  if _,e:=NewSSOManager(a,[]SSOClient{{App:"doobtube",Name:"A",RedirectURI:c.redirect,Secret:"short"}});e==nil{t.Fatal("weak client secret accepted")}
+ if _,e:=NewSSOManager(a,[]SSOClient{
+  {App:"doobtube",Name:"A",RedirectURI:c.redirect,Secret:secret},
+  {App:"420town",Name:"B",RedirectURI:"https://town.420integrated.org/auth/callback",Secret:secret},
+ });e==nil{t.Fatal("shared confidential client secret accepted")}
 }
 func TestSSOAuthorizationQueryStrictParsing(t *testing.T){
  s:=ssoUnitManager(t);client,_:=s.client("doobtube")

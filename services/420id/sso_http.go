@@ -8,7 +8,6 @@ import (
  "mime"
  "net/http"
  "net/url"
- "time"
 )
 
 // A browser initiates a top-level navigation to the 420ID first-party host.

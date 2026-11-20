@@ -109,9 +109,10 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   const who=address(account),principal=amount(rawAmount),nonce=BigInt(rawNonce);
   if(!/^[1-9][0-9]{0,77}$/.test(String(rawNonce))||nonce>=2n**256n)throw new Error('invalid contribution nonce');
   const p=await position(rpc,rt,saleId,who),sale=p.sale;
-  if(sale.state!=='ACTIVE'||p.source.at<sale.startsAt||p.source.at>sale.endsAt)throw new Error('contribution window closed');
-  if(principal>BigInt(p.remaining)||principal>BigInt(p.walletRemaining))throw new Error('contribution exceeds canonical capacity');
-  if(!p.identity.bound)throw new Error('identity eligibility not satisfied');
+  // Historical invoice recovery must remain available after expiry, exhaustion or identity revocation.
+  // These gates control NEW contributions, not read-only recovery of an already paid intent.
+  const canContribute=sale.state==='ACTIVE'&&p.source.at>=sale.startsAt&&p.source.at<=sale.endsAt&&
+    principal<=BigInt(p.remaining)&&principal<=BigInt(p.walletRemaining)&&p.identity.bound;
   const crowd=rt.crowdfundingIntegrationAddress,args=[wordHex(sale.saleId),wordAddress(who),wordUint(principal),wordUint(nonce)];
   const invoiceId=await readSingle(rpc,crowd,'invoiceIdFor(bytes32,address,uint128,uint256)',args);
   const registered=await readBool(rpc,crowd,'registeredContributionIntent(bytes32)',[wordHex(invoiceId)]);
@@ -141,8 +142,8 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   return {schema:'420-launchpad-checkout-v1',canonical:true,source:p.source,saleId:sale.saleId,amount:principal.toString(),nonce:nonce.toString(),
     invoiceId,registered,invoiceExists,paymentId:zero(paymentId)?null:paymentId,
     paymentStatus:confirmedPayment?.status||null,recorded:confirmedPayment?await readBool(rpc,crowd,'usedPaymentId(bytes32)',[wordHex(paymentId)]):false,
-    checkoutUrl:registered&&invoiceExists&&/^0x0{40}$/i.test(sale.paymentAsset)?'https://420pay.420integrated.org/#pay?v=1&kind=invoice&chain='+BigInt(p.source.chainId).toString()+'&id='+invoiceId:null,
-    next:!registered?'REGISTER_INTENT':!invoiceExists?'WAIT_FOR_MERCHANT_INVOICE':!confirmedPayment?'QUOTE_CONVERSION':
+    canContribute,checkoutUrl:registered&&invoiceExists&&/^0x0{40}$/i.test(sale.paymentAsset)?'https://420pay.420integrated.org/#pay?v=1&kind=invoice&chain='+BigInt(p.source.chainId).toString()+'&id='+invoiceId:null,
+    next:!registered?(canContribute?'REGISTER_INTENT':'CONTRIBUTION_UNAVAILABLE'):!invoiceExists?'WAIT_FOR_MERCHANT_INVOICE':!confirmedPayment?(canContribute?'QUOTE_CONVERSION':'RECOVER_OR_EXPIRED'):
       confirmedPayment.status!=='SETTLED'?'AWAIT_CANONICAL_SETTLEMENT':'RECORD_CONTRIBUTION',fees:p.fees};
 }
 export async function transactionStatus(rpc,rt,txHash,account){

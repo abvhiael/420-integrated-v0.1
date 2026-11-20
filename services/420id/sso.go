@@ -165,9 +165,14 @@ func (s *SSOManager) Exchange(ctx context.Context,c ssoClient,code,verifier,redi
  if errors.Is(e,sql.ErrNoRows){return none,ErrAuthentication};if e!=nil{return none,e}
  if sourceApp!=s.source.app||sourceRP!=s.source.auth.rp{return none,ErrAuthentication}
  var active int
- e=tx.QueryRowContext(ctx,`SELECT count(*) FROM account420.sessions WHERE account_id=$1
-  AND app_id=$2 AND rp_id=$3 AND revoked_at IS NULL AND idle_until>clock_timestamp()
-  AND expires_at>clock_timestamp()`,accountID,c.app,s.source.auth.rp).Scan(&active)
+ e=tx.QueryRowContext(ctx,`SELECT count(*) FROM account420.sessions child WHERE child.account_id=$1
+  AND child.app_id=$2 AND child.rp_id=$3 AND child.revoked_at IS NULL
+  AND child.idle_until>clock_timestamp() AND child.expires_at>clock_timestamp()
+  AND (child.method<>'sso' OR EXISTS (
+    SELECT 1 FROM account420.sessions parent WHERE parent.id=child.sso_source_id
+    AND parent.account_id=child.account_id AND parent.account_revision=child.account_revision
+    AND parent.revoked_at IS NULL AND parent.idle_until>clock_timestamp()
+    AND parent.expires_at>clock_timestamp()))`,accountID,c.app,s.source.auth.rp).Scan(&active)
  if e!=nil{return none,e};if active>=100{return none,ErrUnavailable}
  subjectID,e:=newID();if e!=nil{return none,e}
  _,e=tx.ExecContext(ctx,`INSERT INTO account420.app_subjects(account_id,app_id,subject_id)

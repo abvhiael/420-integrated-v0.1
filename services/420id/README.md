@@ -402,3 +402,144 @@ physical wallet or public service deployment. All applicable pending
 live-testnet and deployment-security checks remain deferred without
 being marked PASS. AUTH-7 cross-application SSO is separate and not
 implemented by AUTH-6.
+
+
+## AUTH-7 — approved cross-application single sign-on
+
+**Implementation:** an opt-in, server-only confidential OAuth-style
+authorization-code + PKCE S256 flow, not a shared cookie or wallet login.
+Existing AUTH-2–6 modes and their web entry pages remain unchanged.
+A verified central 420ID email/passkey session is required at
+`https://auth.420integrated.org` (approved test email allowlist in acceptance),
+followed by **explicit first-party user consent for a named destination**.
+Authorization never occurs silently on a GET or as a side effect of a
+Wallet/Names/Identity link, universal profile, or social app visit.
+
+### Strict authorization flow and trust boundaries
+
+1. Each participating application's confidential backend registers its
+   immutable app ID, human-readable display name, **one exact HTTPS callback
+   URL** under `*.420integrated.org`, and an independent cryptographically
+   random **32-byte base64url client secret** at the central 420ID deployment.
+   Wildcards, HTTP callbacks, callback parameters/fragments, localhost, URL
+   userinfo, IP literals, ambiguous paths and duplicate client IDs/secrets
+   are rejected. Applications must be explicitly approved in the 420ID
+   Store, not chosen from a browser-supplied account identifier.
+2. The approved application's **backend** generates an independent 256-bit
+   CSRF `state`, PKCE `codeVerifier` and S256 code challenge. Persist
+   the verifier/state in its authenticated server-side flow store with a
+   short lifetime and single-use redemption; never use localStorage, URLs or
+   client-side secrets. Redirect the browser by a **top-level navigation**:
+   `GET /sso/authorize?app=<app>&redirect_uri=<exact>&state=<43-char>&code_challenge=<43-char>&code_challenge_method=S256`.
+   The central authority serves a static authorization page only for an exact
+   registered client/callback and a strictly valid S256 request. No
+   user-supplied query is reflected in HTML.
+3. Sign in at 420ID with verified email or a passkey if no central session
+   exists. The page displays the **server-registered** application name and
+   asks the user to approve or cancel. The explicit same-origin
+   `POST /v1/sso/authorize` checks the approved mailbox, central session,
+   Origin, host, browser flow cookie, current account revision and consent.
+   It creates a one-time random 256-bit authorization code, stores **only its
+   SHA-256 digest**, with the source session, exact target app/callback,
+   PKCE digest, browser binding and **90-second PostgreSQL expiry**.
+   Reissuing for the same source/app replaces the previous code. No session
+   bearer, account ID, passkey, wallet or cross-app subject enters the
+   redirect query.
+4. The browser is redirected only to the registered HTTPS app callback
+   with `?code=...&state=...`. The app backend verifies its stored
+   single-use `state`, then POSTs **from its backend** to
+   `/v1/sso/token` with confidential HTTP Basic client authentication,
+   the code, PKCE verifier and exact callback. Browsers, cookies, Origin
+   requests, credentialed CORS, unknown apps and mismatched callbacks are
+   denied. Under the account lock, 420ID atomically consumes the code and
+   validates the **still-active** original central email/passkey session
+   and account revision before minting a **distinct application-only
+   256-bit opaque bearer** (digest-only at rest) and **opaque app-specific
+   subject**. Target session idle expiry is at most 24 hours and absolute
+   expiry at most seven days, **both capped by the source session**.
+5. A participating application stores the received opaque bearer in its
+   **backend** session store and sets a separate Secure, HttpOnly, SameSite
+   app-host cookie. Each authenticated application request must call
+   confidential `POST /v1/sso/introspect` with that app's client secret.
+   Responses contain only `active`, its own `{app,sub}` subject, method and
+   expiry, not internal account ID or linked wallet/identity. Tokens are
+   not portable between app IDs. The original verified central session and
+   current app session are jointly checked; revoking, suspending, expiring
+   or recovering an account invalidates dependent SSO sessions.
+6. Apps may call `POST /v1/sso/revoke` for their **own token only**.
+   The 420ID browser offers explicit `POST /v1/sso/logout-all` to invalidate
+   the account's central and app sessions and outstanding codes. Ordinary
+   app logout does not revoke other applications. Ordinary central logout
+   invalidates dependent SSO tokens through the parent-session check.
+   Server-generated SSO codes/tokens are never permissions, spending approval,
+   wallet controller evidence, identity credential, on-chain identity,
+   paid entitlement or cross-app data-reading capability.
+
+### Deployment controls
+
+A separate `AUTH420_MODE=sso-acceptance` enables only the central
+authorization surface and backend endpoints. Existing
+`acceptance`, `session-acceptance`, `profile-acceptance`,
+`wallet-acceptance`, and `identity-acceptance` modes remain unchanged.
+The central source account is scoped to the existing
+`bong-goggles` acceptance app, while authorized targets receive independent
+SSO app subjects; any other target must be explicitly registered.
+
+Set `AUTH420_SSO_CLIENTS` to a protected **server environment** JSON
+array, using the schema:
+```json
+[
+  {
+    "app": "doobtube",
+    "name": "DoobTube",
+    "redirectUri": "https://doobtube.420integrated.org/auth/420id/callback",
+    "secret": "<generate-a-distinct-32-byte-base64url-random-secret>"
+  }
+]
+```
+This is a format example **not** proof that such a live callback is installed,
+or a request to register/deploy it. The operator must verify the real
+recipient backend implements the callback before enabling the client.
+Never commit real client secrets, publish them to JavaScript, or let a browser
+call confidential token/introspection/revocation APIs. The shared
+`sso-client.mjs` adapter has server-side exchange/introspection/revoke
+helpers and a PKCE initiation helper; `sso-client.test.mjs` qualifies
+callback CSRF/redirect and app-token scope. The consuming app must implement
+its own server-side one-use flow storage and host-only app-session cookie;
+**no existing BongGoggles, 420Town, DoobTube or other public frontend is
+claimed integrated or deployed by this repository-only AUTH-7 task**.
+
+Apply `008_sso.sql` through the existing **operator-only** migration
+credential, not the running server. On top of the retained AUTH-2–6 grants:
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE
+ ON account420.sso_codes TO account420_runtime;
+GRANT SELECT, INSERT
+ (sso_source_id) ON account420.sessions TO account420_runtime;
+```
+The second grant is redundant where the AUTH-3 runtime role already has
+whole-table SELECT/INSERT, and may be omitted in that case. SSO-mode
+startup checks the actual schema and privileges and fails closed until ready.
+No application gets direct database access. Client secrets are never stored in
+the account database; the configured manifest is protected by Render secret
+custody. The existing allowlisted live AUTH-2 service remains unchanged until
+an explicitly authorized deployment. Additional app backend callback
+configuration, restricted live acceptance, provider and credential custody
+and physical-device testing remain separate deployment/acceptance work.
+
+### Qualification and adversarial coverage
+
+`go test -race -tags account420_integration -count=1 -v ./services/420id`
+with isolated PostgreSQL 16 covers code exchange, atomic replay races across
+database connections, authorization consent, strict app and callback
+registration, 90-second expiry, PKCE substitution, cross-app token
+introspection, source session logout, recovery/revision suppression, app-only
+logout and explicit global logout; also retains AUTH-1–6 tests. The dedicated
+workflow adds `node --check` for the SSO UI and
+`node --test services/420id/sso-client.test.mjs` for app integration
+helpers, plus the existing browser/WebAuthn fuzz, build and static checks.
+Simulated HTTP acceptance and local PostgreSQL tests do not establish
+deployed cross-domain browser, TLS, client-backend or live provider acceptance.
+
+**Next canonical step after AUTH-7: AUTH-8 wallet-independent BongGoggles
+social activity.** AUTH-8 is not implemented by SSO.

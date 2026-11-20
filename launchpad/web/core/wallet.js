@@ -14,13 +14,22 @@ export function executionGate({config,wallet,review}={}){
   const allowed=new Set([
     config.registry.launchpadRouterAddress.toLowerCase(),
     config.registry.allocationRegistryAddress.toLowerCase(),
-    config.registry.crowdfundingIntegrationAddress.toLowerCase()
+    config.registry.crowdfundingIntegrationAddress.toLowerCase(),
+    ...(config.registry.arbitrationCasesAddress?[config.registry.arbitrationCasesAddress.toLowerCase()]:[]),
+    ...(config.registry.payRouterAddress?[config.registry.payRouterAddress.toLowerCase()]:[]),
+    ...(config.registry.approvedInputAsset?[config.registry.approvedInputAsset.toLowerCase()]:[])
   ]);
   if(!allowed.has(review.transaction.to.toLowerCase()))return {ok:false,reason:'UNEXPECTED_TRANSACTION_TARGET'};
   return {ok:true,reason:null};
 }
 export async function submitReviewedTransaction({ethereum,config,wallet,review}={}){
   const gate=executionGate({config,wallet,review});if(!gate.ok)throw new Error(gate.reason);
+  const [currentChain,accounts]=await Promise.all([
+    ethereum.request({method:'eth_chainId'}),ethereum.request({method:'eth_accounts'})
+  ]);
+  if(currentChain?.toLowerCase()!==wallet.chainId.toLowerCase()||!Array.isArray(accounts)||
+    accounts.length!==1||accounts[0]?.toLowerCase()!==wallet.account.toLowerCase())throw new Error('WALLET_SESSION_CHANGED');
+  if(!/^0x[0-9a-fA-F]*$/.test(review.transaction.data||''))throw new Error('INVALID_CANONICAL_CALLDATA');
   const tx={from:wallet.account,to:review.transaction.to,data:review.transaction.data,value:review.transaction.value||'0x0'};
   return ethereum.request({method:'eth_sendTransaction',params:[tx]});
 }

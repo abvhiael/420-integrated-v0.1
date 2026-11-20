@@ -13,7 +13,7 @@ http.createServer(async(req,res)=>{
   let body=null;
   try{
     if(req.method==='POST'){let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>65536){res.writeHead(413,headers);return res.end(JSON.stringify({error:'payload too large'}));}}body=raw?JSON.parse(raw):{};}
-    const result=await dispatch({method:req.method,path:new URL(req.url,'https://launchpad.invalid').pathname,body});
+    const result=await dispatch({method:req.method,path:new URL(req.url,'https://launchpad.invalid').pathname,query:new URL(req.url,'https://launchpad.invalid').searchParams,body});
     res.writeHead(result.status,headers);res.end(JSON.stringify(result.body));
   }catch(error){res.writeHead(400,headers);res.end(JSON.stringify({error:error.message||'invalid request'}));}
 }).listen(port,()=>console.log('420Launchpad service listening on '+port));

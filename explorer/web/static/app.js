@@ -1,3 +1,4 @@
+import { tokenPresentation420 } from './token-presentation.mjs';
 import { inspectableRaw420, renderFeeSummary420, renderRawLogs420, transactionDetailPresentation420 } from './presentation.mjs';
 import { addressHistoryPresentation420, assetTransfersPresentation420, contractPresentation420, diagnosticPresentation420, producerPresentation420, registryServicePresentation420, registryVersionPresentation420, routeLink420 } from './workflow-presentation.mjs';
 const app = document.querySelector('#route-content');
@@ -160,6 +161,7 @@ async function addressDetail(address) {
   const qualifiedRows = addressHistoryPresentation420(txs, normalized);
   app.innerHTML = title('Address', `${view.txCount ?? txs.length} indexed transactions`) + `<div class="panel">${detailRows([
     ['Address', mono(normalized), true],
+    ['Token factory provenance', routeLink420(['tokens',normalized],'Check deployment evidence'), true],
     ['Snapshot height', view.meta?.snapshotHeight],
     ['Safe height', view.meta?.safeHeight],
     ['Finalized height', view.meta?.finalizedHeight]
@@ -169,6 +171,19 @@ async function addressDetail(address) {
 function addressTxTable(rows) {
   if (!rows.length) return '<p class="muted">No indexed transaction history for this address.</p>';
   return `<div class="table-wrap"><table><thead><tr><th>Hash</th><th>Block</th><th>Direction</th><th>Counterparty</th><th>Value (wei)</th></tr></thead><tbody>${rows.map(({tx,outgoing,counterparty,txLink,blockLink}) => `<tr><td>${txLink}</td><td>${blockLink}</td><td><span class="badge ${outgoing?'badge-out':'badge-in'}">${outgoing?'OUT':'IN'}</span></td><td>${counterparty ? routeLink420(['addresses',counterparty],short(counterparty)) : 'contract creation'}</td><td>${mono(tx.valueWei || '0')}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+async function tokenDetail(address) {
+  if(!/^0x[0-9a-f]{40}$/i.test(address))throw new Error('Invalid Token address');
+  const p=tokenPresentation420(await api('/v1/token/deployments/'+encodeURIComponent(address)), address);
+  const d=p.data;
+  app.innerHTML=title('420Token deployment','Derived historical evidence')+'<div class="panel">'+detailRows([
+    ['Token',mono(d.token),true],['Creator at deployment',mono(d.creator),true],['Template',d.template+' V'+d.templateVersion],
+    ['Factory',mono(d.factory),true],['Community Vault',mono(d.vault),true],['Vault accounting',mono(d.accounting),true],
+    ['Creation fee (wei)',d.creationFeeWei],['Configuration hash',mono(d.configHash),true],
+    ['Transaction',link(p.transactionPath,d.transactionHash),true],['Block',link(p.blockPath,d.blockNumber),true],
+    ['Block hash',mono(d.blockHash),true],['Chain',d.chainId],['Indexed checkpoint',d.snapshotHeight],['Checkpoint hash',mono(d.snapshotHash),true]
+  ])+'<p class="muted">'+esc(p.warning)+'</p></div>';
 }
 
 async function contractDetail(address) {
@@ -338,6 +353,7 @@ async function route() {
     if (root === 'transactions' && parts[1]) return await transactionDetail(parts.slice(1).join('/'));
     if (root === 'transactions') return transactionsLanding();
     if (root === 'addresses' && parts[1]) return await addressDetail(parts[1]);
+    if (root === 'tokens' && parts[1]) return await tokenDetail(parts[1]);
     if (root === 'contracts' && parts[1]) return await contractDetail(parts[1]);
     if (root === 'registry' && parts[1] && parts[2] === 'versions' && parts[3]) return await registryVersion(decodeURIComponent(parts[1]),parts[3]);
     if (root === 'registry' && parts[1]) return await registryService(decodeURIComponent(parts[1]));
@@ -356,11 +372,12 @@ searchForm.addEventListener('submit', event => {
   event.preventDefault();
   const q = searchInput.value.trim();
   if (!q) return;
-  if (/^\d+$/.test(q)) location.hash = `#/blocks/${q}`;
+  if (/^420token:0x[0-9a-f]{40}$/i.test(q)) location.hash = '#/tokens/'+q.slice(9).toLowerCase();
+  else if (/^\d+$/.test(q)) location.hash = `#/blocks/${q}`;
   else if (/^0x[0-9a-fA-F]{40}$/.test(q)) location.hash = `#/addresses/${q}`;
   else if (/^0x[0-9a-fA-F]{64}$/.test(q)) location.hash = `#/transactions/${q}`;
   else {
-    app.innerHTML = title('Search') + '<div class="panel error"><strong>UNRECOGNIZED_QUERY</strong><p>Search accepts a decimal block number, 32-byte transaction hash, or 20-byte address.</p></div>';
+    app.innerHTML = title('Search') + '<div class="panel error"><strong>UNRECOGNIZED_QUERY</strong><p>Search accepts a decimal block number, 32-byte transaction hash, 20-byte address, or 420token: followed by a token address.</p></div>';
   }
 });
 

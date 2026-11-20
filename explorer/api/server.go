@@ -90,6 +90,6 @@ func (s *Server) handleTreasury(w http.ResponseWriter,r *http.Request){
 func(s *Server) handleTokenDeployment(w http.ResponseWriter,r *http.Request){
  w.Header().Set("Cache-Control","no-store")
  token:=strings.ToLower(r.PathValue("token"));if !tokenread.ValidAddress(token){writeError(w,400,"invalid Token address");return}
- out,err:=s.service.TokenDeployment(r.Context(),token);if err!=nil{writeError(w,503,"Token deployment evidence unavailable");return}
+ out,err:=s.service.TokenDeployment(r.Context(),token);if errors.Is(err,tokenread.ErrNotFound){writeError(w,404,"Token deployment not observed");return};if err!=nil{writeError(w,503,"Token deployment evidence unavailable");return}
  writeJSON(w,200,out)
 }

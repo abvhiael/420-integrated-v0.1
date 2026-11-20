@@ -1,6 +1,7 @@
 package discovery
 import(
  "context"
+ "errors"
  "strconv"
  "strings"
  "github.com/420integrated/420-integrated/indexer/tokenread"
@@ -12,7 +13,7 @@ func(d *AssetValidatorDiscovery) ResolveToken(ctx context.Context,token string)(
  token=strings.ToLower(token);if !tokenread.ValidAddress(token){return nil,tokenread.ErrInvalid}
  reader,ok:=d.reader.(tokenReader);if !ok{return nil,tokenread.ErrUnavailable}
  status,indexed,safe,err:=d.qualifiedStatus(ctx);if err!=nil{return nil,err}
- p,err:=reader.TokenDeployment(ctx,token);if err!=nil{return nil,err}
+ p,err:=reader.TokenDeployment(ctx,token);if errors.Is(err,tokenread.ErrNotFound){return []searchresult.Result{},nil};if err!=nil{return nil,err}
  chain,err:=strconv.ParseUint(status.ChainID,10,64);if err!=nil{return nil,err}
  if err=p.Validate(chain,token);err!=nil{return nil,err}
  if p.SnapshotHeight!=status.IndexedHead||!strings.EqualFold(p.SnapshotHash,status.IndexedHeadHash){return nil,tokenread.ErrUnavailable}

@@ -47,11 +47,8 @@ jobs:
       - name: Shared account and authentication unit and PostgreSQL qualification
         run: go test -race -tags account420_integration -count=1 -v ./services/420id
       - name: Bounded WebAuthn CBOR fuzz qualification
-        run: go test ./services/420id -run '^
-        run: go vet -tags account420_integration ./services/420id
- -fuzz '^FuzzWebAuthnBoundedAttestation
-        run: go vet -tags account420_integration ./services/420id
- -fuzztime=5s -parallel=2
+        run: |
+          go test ./services/420id -run '^$' -fuzz '^FuzzWebAuthnBoundedAttestation$' -fuzztime=5s -parallel=2
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

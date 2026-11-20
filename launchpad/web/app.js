@@ -4,7 +4,7 @@ import {connectWallet,executionGate,submitReviewedTransaction} from './core/wall
 
 const HASH=/^0x[0-9a-fA-F]{64}$/;
 const state={config:null,service:null,wallet:null,campaigns:[],selected:null,position:null,checkout:null,
-  review:null,filters:{},cursor:null,total:0,lastTx:null,busy:false};
+  review:null,quote:null,filters:{},cursor:null,total:0,lastTx:null,busy:false};
 const $=s=>document.querySelector(s);
 const setText=(s,v)=>{const n=$(s);if(n)n.textContent=String(v??'');};
 function status(message,error=false){setText('#status',message);$('#status')?.setAttribute('data-state',error?'error':'ready');}
@@ -42,6 +42,12 @@ function actionState(){
   actionable('#register-intent',eligible&&amountOk&&!!nonce);
   actionable('#check-checkout',eligible&&amountOk&&!!nonce);
   actionable('#new-intent',w&&!!c);
+  const terms=conversionTerms();const hasTerms=HASH.test(terms.marketId)&&/^0x[0-9a-fA-F]{40}$/.test(terms.inputAsset)&&
+    /^[1-9][0-9]*$/.test(terms.maxInput)&&/^[1-9][0-9]*$/.test(terms.minOutput);
+  const canQuote=eligible&&checkout?.registered&&checkout?.invoiceExists&&!checkout?.paymentId&&hasTerms;
+  actionable('#get-conversion-quote',canQuote);
+  actionable('#approve-conversion',canQuote&&!!state.quote?.approveRequired&&BigInt(state.quote.balance)>=BigInt(state.quote.maxInput));
+  actionable('#pay-conversion',canQuote&&!!state.quote?.canPay);
   actionable('#contribute',eligible&&checkout?.registered&&checkout?.invoiceExists&&checkout?.paymentStatus==='SETTLED'&&!checkout?.recorded&&checkout.amount===amount);
   actionable('#claim',w&&!!p?.claimable);
   const refundable=w&&p&&!p.refunded&&['FAILED','CANCELLED'].includes(p.sale.state)&&p.history.length>0;
@@ -69,6 +75,16 @@ function renderHistory(){
     node.append(row);
   }
 }
+function conversionTerms(){return {amount:$('#contribution-amount')?.value||'',nonce:$('#intent-nonce')?.value||'',
+  marketId:$('#pay-market')?.value.trim()||'',inputAsset:$('#pay-input-asset')?.value.trim()||'',
+  maxInput:$('#pay-max-input')?.value.trim()||'',minOutput:$('#pay-min-output')?.value.trim()||''};}
+function renderQuote(){const q=state.quote;
+  setText('#conversion-state',q?'420Pay quote '+q.quoteId+' | spend '+q.maxInput+' input token units | exactly '+q.quotedSettlement+
+    ' settlement units | conversion fee '+q.conversionFee+' input units | price impact '+q.slippageBps+
+    ' bps | pool allowance '+q.allowance+' | balance '+q.balance+' | expires '+new Date(q.expiresAt*1000).toISOString()+
+    '. Refresh quote after approval or expiry. Gas fees are reviewed in Wallet.':
+    'No verified 420Pay conversion quote. The merchant must first create the exact intent invoice.');
+  actionState();}
 function renderCheckout(){
   const c=state.checkout;setText('#invoice-id',c?.invoiceId||'-');
   $('#payment-id').value=c?.paymentId||'';
@@ -76,7 +92,7 @@ function renderCheckout(){
   link.hidden=!c?.checkoutUrl;if(c?.checkoutUrl)link.href=c.checkoutUrl;else link.removeAttribute('href');
   const messages={REGISTER_INTENT:'Intent is not yet registered. Review and confirm the registration transaction.',
     WAIT_FOR_MERCHANT_INVOICE:'Intent registered. Merchant must create the exact canonical single-use invoice before payment.',
-    CHECKOUT_420PAY:'Invoice is present. Review the canonical 420Pay quote and gas before wallet approval.',
+    QUOTE_CONVERSION:'Invoice ready. Use a qualified ERC-20 market conversion quote below; native 420 checkout cannot settle a Launchpad sale.',
     AWAIT_CANONICAL_SETTLEMENT:'420Pay payment is not yet settled. Verify canonical payment and Wallet history before any retry.',
     RECORD_CONTRIBUTION:'420Pay shows a matching settled payment. Review recording the Launchpad contribution.'};
   setText('#checkout-state',c?(messages[c.next]||('Payment recorded: '+c.paymentStatus)):'No checkout context loaded.');
@@ -155,7 +171,7 @@ async function openCampaign(saleId){
   setBusy(true);status('Loading campaign...');
   try{
     const p=await state.service.campaign(saleId);state.selected=normalizeCampaign(p.campaign);
-    state.position=null;state.checkout=null;state.review=null;renderCheckout();
+    state.position=null;state.checkout=null;state.quote=null;state.review=null;renderCheckout();renderQuote();
     if(state.wallet){
       await refreshPosition();
       const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+saleId.toLowerCase();
@@ -216,19 +232,30 @@ async function checkTransaction(){
   }catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
 }
+async function checkConversion(){
+  if(!state.selected||!state.wallet)return;setBusy(true);
+  try{const q=await state.service.conversionQuote(state.selected.saleId,state.wallet.account,conversionTerms());
+    if(q.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase()||q.invoiceId!==state.checkout?.invoiceId||
+      q.amount!==state.checkout.amount)throw new Error('420Pay conversion quote changed identity');
+    state.quote=q;state.config={...state.config,registry:{...state.config.registry,
+      payRouterAddress:q.paymentRouterAddress,approvedInputAsset:q.inputAsset}};
+    renderQuote();status('420Pay conversion quote verified. Review exact token allowance, fee, slippage and Wallet gas.');
+  }catch(e){state.quote=null;renderQuote();status(e.message||String(e),true);}
+  finally{setBusy(false);actionState();}
+}
 async function checkCheckout(){
   if(!state.selected||!state.wallet)return;setBusy(true);
   try{
     const q=await state.service.checkout(state.selected.saleId,state.wallet.account,$('#contribution-amount').value,$('#intent-nonce').value);
     if(q.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase())throw new Error('420Pay checkout chain mismatch');
-    state.checkout=q;renderCheckout();renderRecovery();status('Verified canonical 420Pay invoice and contribution status.');
+    state.checkout=q;state.quote=null;renderCheckout();renderQuote();renderRecovery();status('Verified canonical 420Pay invoice and contribution status.');
   }catch(e){state.checkout=null;renderCheckout();status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
 }
 function newNonce(){
   if(!globalThis.crypto?.getRandomValues)throw new Error('secure nonce generation unavailable');
   const a=new Uint32Array(2);crypto.getRandomValues(a);const value=(BigInt(a[0])<<32n)|BigInt(a[1]);
-  $('#intent-nonce').value=(value||1n).toString();state.checkout=null;renderCheckout();actionState();
+  $('#intent-nonce').value=(value||1n).toString();state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();
 }
 const CREATOR=new Set(['setCampaignMode','activate','finalize','cancel']);
 async function creator(event){
@@ -267,7 +294,11 @@ $('#campaign-filters')?.addEventListener('submit',e=>{e.preventDefault();const f
   search:String(f.get('search')||''),mode:String(f.get('mode')||''),state:String(f.get('state')||'')};loadCampaigns(true);});
 $('#refresh-position')?.addEventListener('click',()=>refreshPosition().catch(e=>status(e.message,true)));
 $('#new-intent')?.addEventListener('click',()=>{try{newNonce();}catch(e){status(e.message,true);}});
-$('#contribution-amount')?.addEventListener('input',()=>{state.checkout=null;renderCheckout();actionState();});
+$('#contribution-amount')?.addEventListener('input',()=>{state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();});
+for(const id of ['#pay-input-asset','#pay-market','#pay-max-input','#pay-min-output'])$(id)?.addEventListener('input',()=>{state.quote=null;renderQuote();actionState();});
+$('#get-conversion-quote')?.addEventListener('click',checkConversion);
+$('#approve-conversion')?.addEventListener('click',()=>prepare('approve-conversion',conversionTerms()));
+$('#pay-conversion')?.addEventListener('click',()=>prepare('pay-conversion',conversionTerms()));
 $('#identity-profile')?.addEventListener('input',actionState);
 $('#dispute-claim')?.addEventListener('input',actionState);
 $('#dispute-remedy')?.addEventListener('input',actionState);

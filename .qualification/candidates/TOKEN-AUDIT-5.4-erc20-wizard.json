@@ -1,0 +1,46 @@
+{
+  "step": "TOKEN-AUDIT-5.4",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "c0bd747ab46ff6efc021f7748fadb02c3268247d",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps.css",
+    "wallet/web/core/token-app.js",
+    "wallet/web/core/token-erc20-wizard.js",
+    "wallet/web/core/token-sdk.js",
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/token-erc20-wizard-ui.js",
+    "wallet/web/test/token-erc20-wizard.test.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    ".qualification/candidates/TOKEN-AUDIT-5.4-erc20-wizard.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js",
+      "owner": "Token SDK and affected Wallet paths"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Rendered Wallet and ERC20 wizard accessibility"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Actual Wallet wizard for six frozen ERC20 profiles with exact decimal supply, cap rules, metadata and salt validation, vote checkpoint bound and canonical SDK encoding",
+    "Fresh verified selected profile, deployed SmartAccount owner, approved release, fixed fee and canonical reviewable draft without independent signing or broadcasting",
+    "Reject stale or invalid inputs, disabled templates, changes of Wallet identity/chain and duplicate/superseded review; clear drafts after edits/invalidation",
+    "Qualify unit and rendered browser cases; preserve historic evidence and do not claim aggregate step 5 or live release"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

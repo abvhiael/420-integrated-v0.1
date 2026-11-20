@@ -32,7 +32,7 @@ func (m *SMTPMailer) SendVerification(ctx context.Context,recipient,secret strin
  if e=client.Mail(m.from);e!=nil{return ErrUnavailable}
  if e=client.Rcpt(email);e!=nil{return ErrUnavailable}
  writer,e:=client.Data();if e!=nil{return ErrUnavailable}
- message:="From: "+m.from+"\r\nTo: "+email+"\r\nSubject: Your 420ID sign-in code\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\nEnter this one-time code in the browser where you requested it:\r\n\r\n"+secret+"\r\n\r\nIt expires in 10 minutes. Never share the code. If you did not request it, ignore this email.\r\n"
+ message:="From: "+m.from+"\r\nTo: "+email+"\r\nSubject: Your 420ID sign-in code\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n"+verificationText(secret)
  if _,e=writer.Write([]byte(message));e!=nil{return ErrUnavailable}
  if e=writer.Close();e!=nil{return ErrUnavailable}
  // The DATA acceptance, not QUIT, determines successful submission.

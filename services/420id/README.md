@@ -82,3 +82,14 @@ allowlist. See [LIVE-ACCEPTANCE.md](LIVE-ACCEPTANCE.md) for configuration,
 verified TLS, relay, database permissions, DNS, browser/device qualification
 and evidence handling. Never expose the internal Store/Auth primitives to
 untrusted callers or deploy the acceptance service with real-user data.
+
+## Free-hosting acceptance transport
+
+Explicit AUTH420_MAIL_TRANSPORT=resend-https enables the fixed HTTPS
+transactional-mail endpoint on port 443 without needing SMTP ports or paid
+compute. AUTH420_RESEND_API_KEY and AUTH420_MAIL_FROM must be configured in
+the deployment secret manager. SMTP remains selectable via smtp, never a
+fallback. The acceptance service preserves the approved-mailbox restriction
+and adds a durable global 90 email starts/UTC day cap. See LIVE-ACCEPTANCE.md.
+No provider account, deployment, DNS verification or external delivery is
+claimed by the repository implementation.

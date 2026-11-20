@@ -14,7 +14,7 @@ mailboxes; never point the harness at a real-user account database.
 
 ## Deployment preparation
 
-Render native Go service (paid plan permitting outbound TCP 465):
+Render native Go service, Free compute for initial acceptance (HTTPS email):
 - Repository: abvhiael/420-integrated-v0.1; deploy the explicitly qualified
   revision/branch; record the deploy ID and git SHA.
 - Build command: go build -trimpath -o 420id ./cmd/420id
@@ -22,9 +22,18 @@ Render native Go service (paid plan permitting outbound TCP 465):
 - Health check: /healthz; port from PORT (default 10000).
 - Alternatively build services/420id/Dockerfile with repository root context.
   The image runs as non-root and includes system CA certificates.
-- Do not use Render's free compute plan for SMTP: it blocks ports 25, 465
-  and 587. The service requires implicit TLS on port 465. No plaintext or
-  anonymous mail delivery fallback exists.
+- Select Free compute and the explicit resend-https transport. The adapter
+  sends transactional email via https://api.resend.com/emails (TCP 443).
+  Render free compute blocks SMTP ports 25, 465 and 587; SMTP remains an
+  explicit paid-hosting alternative, never an automatic fallback.
+- Free compute can sleep after 15 minutes of inactivity, has workspace-wide
+  usage limits and is suitable for acceptance, not a production availability
+  guarantee. Use an external persistent database (e.g. a dedicated Neon Free
+  project); do not store accounts on the ephemeral local filesystem.
+- Check the provider's acceptable-use policy and obtain approval if necessary
+  for the actual 420Integrated use case before configuring Resend. Do not use
+  the provider for prohibited content or purposes. The selected integration
+  sends only requested neutral account verification messages.
 
 Add the approved custom hostname in Render and use the exact target displayed
 by Render to configure DNS at the authoritative provider. For Cloudflare,
@@ -52,25 +61,37 @@ browser code or chat transcripts. No sample credential authenticates.
 | AUTH420_TLS_TERMINATION | trusted-proxy, only with verified ingress |
 | AUTH420_DATABASE_URL | Dedicated acceptance DB runtime PostgreSQL URL, sslmode=verify-full, explicit trusted CA as necessary |
 | AUTH420_MIGRATION_DATABASE_URL | Separate operator PostgreSQL URL for migration only; never add this credential to the serving runtime |
-| AUTH420_SMTP_HOST | Actual verified transactional relay SMTP hostname |
-| AUTH420_SMTP_PORT | 465 |
-| AUTH420_SMTP_USERNAME | Actual scoped SMTP credential |
-| AUTH420_SMTP_PASSWORD | Actual scoped SMTP secret |
-| AUTH420_SMTP_FROM | Verified sender address authorized by that provider |
+| AUTH420_MAIL_TRANSPORT | resend-https (Free compute) or smtp (paid alternative) |
+| AUTH420_RESEND_API_KEY | Restricted Resend sending key, only in resend-https mode |
+| AUTH420_MAIL_FROM | Verified sender email address, only in resend-https mode |
+| AUTH420_SMTP_HOST | Actual verified relay SMTP hostname, only in smtp mode |
+| AUTH420_SMTP_PORT | 465, only in smtp mode |
+| AUTH420_SMTP_USERNAME | Actual scoped SMTP credential, only in smtp mode |
+| AUTH420_SMTP_PASSWORD | Actual scoped SMTP secret, only in smtp mode |
+| AUTH420_SMTP_FROM | Verified sender address, only in smtp mode |
 | AUTH420_ACCEPTANCE_EMAILS | Comma-separated approved controlled test mailboxes, max 50 |
 | AUTH420_RATE_KEY | 32 random bytes, base64url without padding, same secret across replicas |
 
 Generate a rate key in the operator's trusted secret provisioning environment
 (e.g. Python: import secrets; print(secrets.token_urlsafe(32))). Do not emit
 the generated value to application logs. Rotate deliberately; the global
-limits remain intact. The SMTP credentials must be created through the
-chosen mail provider's authenticated console and kept separate from a
+limits remain intact. For Free compute, register and verify the chosen sender domain in Resend,
+create a domain-restricted sending key in its dashboard and store it only in
+Render's secret environment variables. Proposed sender: accounts@auth.420integrated.org.
+Enable only requested verification messages to controlled allowlisted test
+mailboxes. Review provider approval, usage limits and billing settings before
+activation. Free tier currently advertises 100 emails/day and 3,000/month;
+420ID additionally caps all acceptance email starts at 90 per UTC day and 30
+per hour across instances. These are attempt caps, not a guarantee against
+charges from other uses of the same provider account. No automatic upgrade,
+retry or SMTP fallback is implemented. For SMTP mode, credentials must be
+created through the chosen relay's authenticated console, separate from a
 personal mailbox password. Configure the provider's exact sender-domain
 verification, DKIM, SPF and return-path records; reconcile existing SPF
 rather than adding a contradictory second SPF record. Configure DMARC with
 the domain operator's existing policy. Never copy example DNS values into
 a real domain. Verify provider status and domain alignment from actual mail
-headers. SMTP queue's 250 response alone is not inbox delivery.
+headers. SMTP queue's 250 response or the HTTPS API's accepted message ID alone is not inbox delivery. Disable click/open tracking for authentication messages if configured in the provider.
 
 ## Database
 
@@ -115,7 +136,7 @@ Email start returns a generic challenge for unknown/nonapproved/throttled
 addresses; only allowlisted mailboxes can receive real codes. A code and
 challenge may only verify together from the initiating browser. Server
 enforces per-recipient cooldown, per-challenge attempts, per-browser,
-immediate-peer and global limits (including 30 email starts/hour).
+immediate-peer and global limits (including 30 email starts/hour and 90/UTC day).
 Immediate-peer limits deliberately do not trust forwarded client IP
 headers; reverse-proxy source addresses may be shared. Apply ingress
 DDoS/source protections before opening general access. Rate limits are
@@ -173,7 +194,10 @@ Run the repository account/auth tests against disposable PostgreSQL
 account420_test (ACCOUNT420_TEST_DSN):
 go test -race -tags account420_integration -count=1 -v ./services/420id
 
-The SMTP socket regression uses an in-process TLS relay with disposable
+The HTTPS adapter regression uses a locally trusted TLS HTTP fixture to check
+request shape, Bearer credentials, opaque idempotency, generic rejection,
+no redirects, certificate validation and bounded response parsing. It is
+not evidence of real Resend delivery. The SMTP socket regression uses an in-process TLS relay with disposable
 credentials and a locally generated CA; it tests real encrypted transport
 and certificate rejection, NOT external recipient deliverability. The
 HTTP integration suite verifies same-origin, host, cookie, cross-browser,

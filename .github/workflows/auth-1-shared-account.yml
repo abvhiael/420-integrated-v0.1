@@ -55,6 +55,8 @@ jobs:
           node-version: '22'
       - name: Browser WebAuthn adapter
         run: node --test services/420id/browser.test.mjs
+      - name: Mail transport configuration tests
+        run: go test -race -count=1 -v ./cmd/420id
       - name: Build restricted HTTPS acceptance service
         run: go build -o /tmp/420id ./cmd/420id
       - name: Verify startup fails closed without configuration

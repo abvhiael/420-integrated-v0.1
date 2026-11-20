@@ -185,7 +185,7 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
  if e=tx.QueryRowContext(ctx,"SELECT floor(extract(epoch from clock_timestamp())/60)::bigint").Scan(&minute);e!=nil{return e}
  type item struct{scope string;bucket int64;max int}
  limits:=[]item{{"global",minute,120},{"peer:"+h.scopedHash(host),minute,60},{"browser:"+encodeBytes(digest),minute,30}}
- if mail{limits=append(limits,item{"mail-global-hour",minute/60,30})}
+ if mail{limits=append(limits,item{"mail-global-hour",minute/60,30},item{"mail-global-day",minute/1440,90})}
  for _,v:=range limits{
   var count int
   e=tx.QueryRowContext(ctx,"INSERT INTO account420.acceptance_rate(scope,bucket,count) VALUES($1,$2,1) ON CONFLICT(scope,bucket) DO UPDATE SET count=account420.acceptance_rate.count+1 WHERE account420.acceptance_rate.count<$3 RETURNING count",v.scope,v.bucket,v.max).Scan(&count)
@@ -197,7 +197,7 @@ func (h *AcceptanceHandler) Purge(ctx context.Context)error{
  if e:=h.auth.PurgeExpired(ctx);e!=nil{return e}
  for _,q:=range []string{
  "DELETE FROM account420.acceptance_flows WHERE expires_at<=clock_timestamp()",
- "DELETE FROM account420.acceptance_rate WHERE (scope='mail-global-hour' AND bucket<floor(extract(epoch from clock_timestamp())/3600)-1) OR (scope<>'mail-global-hour' AND bucket<floor(extract(epoch from clock_timestamp())/60)-1)",
+ "DELETE FROM account420.acceptance_rate WHERE (scope='mail-global-hour' AND bucket<floor(extract(epoch from clock_timestamp())/3600)-1) OR (scope='mail-global-day' AND bucket<floor(extract(epoch from clock_timestamp())/86400)-1) OR (scope NOT IN ('mail-global-hour','mail-global-day') AND bucket<floor(extract(epoch from clock_timestamp())/60)-1)",
  "DELETE FROM account420.acceptance_receipts WHERE created_at<clock_timestamp()-interval '30 days'",
  }{if _,e:=h.auth.store.db.ExecContext(ctx,q);e!=nil{return e}}
  return nil

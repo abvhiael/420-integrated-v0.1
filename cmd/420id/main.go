@@ -45,9 +45,8 @@ func main(){
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  if os.Getenv("AUTH420_MODE")!="acceptance"{log.Fatal("420ID acceptance is not enabled")}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
- port,e:=strconv.Atoi(required("AUTH420_SMTP_PORT"));if e!=nil||port!=465{log.Fatal("Implicit TLS SMTP port 465 required")}
- mail,e:=account.NewSMTPMailer(required("AUTH420_SMTP_HOST"),port,required("AUTH420_SMTP_USERNAME"),required("AUTH420_SMTP_PASSWORD"),required("AUTH420_SMTP_FROM"))
- if e!=nil{log.Fatal("SMTP configuration rejected")}
+ mail,e:=configuredMailer(os.Getenv)
+ if e!=nil{log.Fatal(e)}
  rate,e:=base64.RawURLEncoding.Strict().DecodeString(required("AUTH420_RATE_KEY"));if e!=nil||len(rate)!=32{log.Fatal("AUTH420_RATE_KEY must be a random 32-byte base64url key")}
  if os.Getenv("AUTH420_TLS_TERMINATION")!="trusted-proxy"{log.Fatal("Trusted TLS ingress must be configured explicitly")}
  db,e:=database("AUTH420_DATABASE_URL");if e!=nil{log.Fatal(e)};defer db.Close()

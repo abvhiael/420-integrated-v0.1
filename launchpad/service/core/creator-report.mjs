@@ -2,7 +2,7 @@ import {readSale,call,address,hash} from './consumer.mjs';
 import {wordHex,decodeAddress,decodeUint,decodeBool,hexUtf8} from './abi.mjs';
 const MODES=['NONE','REWARD','DONATION','COMMUNITY_PROJECT','PRODUCT_PREORDER'];
 const LOGS=[
-  {name:'contributions',sig:'ContributionRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
+  {name:'contributions',sig:'ContributionRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true,amountWords:2},
   {name:'claims',sig:'AllocationClaimed(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
   {name:'refunds',sig:'RefundRecorded(bytes32,address,uint128,bytes32)',from:'allocation',saleIndex:1,amount:true},
   {name:'fulfillment',sig:'DeliveryEvidenceBound(bytes32,address,bytes32,uint128)',from:'crowd',saleIndex:1,amount:true},
@@ -71,7 +71,8 @@ export async function creatorReport(rpc,rt,account,saleId,{fromBlock=null}={}){
         if(seen.has(logKey))throw new Error('duplicate canonical creator event');seen.add(logKey);
         events[spec.name].count++;
         if(spec.amount){
-          if(!/^0x[0-9a-fA-F]{128}$/.test(log.data||''))throw new Error('malformed creator event amount');
+          if(typeof log.data!=='string'||!/^0x[0-9a-fA-F]+$/.test(log.data)||
+            log.data.length!==2+64*spec.amountWords)throw new Error('malformed creator event amount');
           const raw=decodeUint(log.data);
           if(raw>(1n<<128n)-1n)throw new Error('invalid creator event amount');
           events[spec.name].amount=(BigInt(events[spec.name].amount)+raw).toString();

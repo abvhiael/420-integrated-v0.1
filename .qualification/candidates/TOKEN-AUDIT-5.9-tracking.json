@@ -18,7 +18,13 @@
     "wallet/web/token-catalogue-ui.js",
     "wallet/web/token-fee-review-ui.js",
     ".github/workflows/420token-audit.yml",
-    ".qualification/candidates/TOKEN-AUDIT-5.9-tracking.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.9-tracking.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.9-QUALIFICATION.json"
   ],
   "tests": [
     {

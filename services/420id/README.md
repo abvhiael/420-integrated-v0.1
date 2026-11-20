@@ -151,3 +151,68 @@ administrative deferrals are unchanged. The AUTH-3 repository-level qualificatio
 uses the existing exact-head PostgreSQL/race workflow with session and recovery
 integration tests; live mode acceptance is separate.
 
+
+## AUTH-4 — universal profiles and usernames (repository implementation)
+
+420ID is the server-side authority for a single optional, account-owned
+universal profile across approved app sessions. Profile fields: optional
+globally unique case-insensitive ASCII username, display name (80 Unicode
+characters), bio (500 characters), opaque content-addressed avatar reference
+(`sha256:` + 64 lowercase hex digits), visibility, and optimistic revision.
+The independent opaque profile ID is **not** an internal account ID, wallet
+address, 420Names registration, or authentication credential. Private is the
+default: no automatic public directory. Public lookup returns only the
+deliberately published profile projection for **current** usernames of active
+accounts; it never returns email or internal IDs. Reading one's own profile
+does not create a database record.
+
+Usernames are canonicalized to lowercase ASCII `[a-z][a-z0-9_]{2,23}`,
+case-insensitively unique in PostgreSQL, with reserved administrative names
+blocked. A rename is allowed at most every 30 days. Previously claimed
+usernames stay permanently reserved to the original owner to prevent
+impersonation and alias takeover; they are not public redirects. Username
+changes, profile edits and visibility switches require an active AUTH-3
+application/RP-scoped session and an exact profile revision. Account locks
+serialize those changes across applications, competing sessions and
+suspension/recovery. Public lookup excludes suspended and closed accounts.
+A browser cannot select another app, an internal account ID, or a profile
+owner. Display names and bios reject controls/invisible formatting;
+avatar references are **not** remote URLs, upload operations or a media-host
+endorsement. Later Storage/420Media integration may resolve these references.
+
+The previously qualified modes `AUTH420_MODE=acceptance` (AUTH-2) and
+`AUTH420_MODE=session-acceptance` (AUTH-3) are byte-for-byte compatible at
+the browser entry points and do not depend on migration 005. The **explicit**
+`AUTH420_MODE=profile-acceptance` enables an additional restricted profile
+editor and same-origin POST endpoints `/v1/profile/me`,
+`/v1/profile/update`, `/v1/profile/lookup`. It keeps the approved-email
+allowlist, session cookie, exact Origin/RP, browser flow binding, request-size,
+rate-limit, no-store and security-header enforcement. The lookup endpoint
+requires a valid allowlisted app session even for public profiles; no
+unrestricted directory, profile search, social graph, cross-app SSO, reward,
+wallet or on-chain authority is enabled.
+
+Install migration `005_universal_profiles.sql` using the separate operator
+credential before switching an acceptance environment to this mode. Extend
+the `account420_runtime` role **only** with these table privileges (in
+addition to the previously qualified AUTH-2/3 grants):
+
+```sql
+GRANT SELECT, INSERT, UPDATE ON account420.profiles TO account420_runtime;
+GRANT SELECT, INSERT ON account420.profile_username_claims TO account420_runtime;
+```
+
+Profile-mode startup checks for both tables and required grants and fails
+closed without them. AUTH-3 and AUTH-2 startup do not require these tables.
+No schema DDL, mailbox secrets or migration credentials belong in the
+running server. The new mode is **not live deployed** by the repository
+commit; do not turn on public registrations or claim device/production
+acceptance. AUTH-5 optional Wallet linking and AUTH-6 420Identity/420Names
+remain separate and are not implied by usernames.
+
+Qualification: `go test -race -tags account420_integration -count=1 ./services/420id`
+with PostgreSQL 16 verifies username claim collisions, optimistic races,
+private/public transitions, cross-app session isolation, stale tokens,
+suspension, validation and HTTP controls. Run focused browser syntax checks
+for `profile-session.mjs` and `profile-ui.mjs`, and retain existing
+authentication regressions on the exact branch head.

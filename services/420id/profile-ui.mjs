@@ -24,7 +24,7 @@ export function installProfileUI({get,post,run,status,isAuthenticated}){
  get('profile-load').addEventListener('click',()=>void run(load));
  get('profile-form').addEventListener('submit',event=>{event.preventDefault();void run(async()=>{
   // A save must never guess the revision of an unobserved profile.
-  if(!profile){await load();}
+  if(!profile){throw new Error('Load your profile before saving changes.');}
   const body={
    username:get('profile-username').value,
    displayName:get('profile-display-name').value,

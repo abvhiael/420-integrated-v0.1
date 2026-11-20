@@ -166,3 +166,24 @@ func TestSSOCallbackOneUseAcrossWorkersAndFailureClosed(t *testing.T){
  broker.mu.Lock();broker.offline=true;broker.mu.Unlock()
  if w:=request(h,"GET","/v1/me","",user);w.Code!=503{t.Fatal("SSO outage did not fail closed",w.Code)}
 }
+
+func TestOffChainModerationAndDistributedRateLimits(t *testing.T){
+ store,broker,_,handler:=fixture(t)
+ cookie:=login(t,handler,broker,memberA)
+ post:=decodePost(t,request(handler,"POST","/v1/posts",body(map[string]string{"body":"Reviewable post"}),cookie))
+ if e:=store.Moderate(context.Background(),post.ID,"hide","community safety","reviewer-1");e!=nil{t.Fatal("moderation hide",e)}
+ if w:=request(handler,"GET","/v1/feed","",cookie);w.Code!=200||strings.Contains(w.Body.String(),post.ID){t.Fatal("hidden post leaked",w.Code)}
+ if w:=request(handler,"GET","/v1/posts/"+post.ID+"/comments","",cookie);w.Code!=404{t.Fatal("hidden comments readable",w.Code)}
+ if w:=request(handler,"POST","/v1/posts/"+post.ID+"/comments",body(map[string]string{"body":"bypass"}),cookie);w.Code!=404{t.Fatal("commented on hidden post",w.Code)}
+ if w:=request(handler,"PUT","/v1/posts/"+post.ID+"/reaction","{}",cookie);w.Code!=409{t.Fatal("reacted to hidden post",w.Code)}
+ if e:=store.Moderate(context.Background(),post.ID,"restore","review complete","reviewer-2");e!=nil{t.Fatal("moderation restore",e)}
+ if w:=request(handler,"GET","/v1/feed","",cookie);w.Code!=200||!strings.Contains(w.Body.String(),post.ID){t.Fatal("restored post not visible",w.Code)}
+ var events int
+ if e:=store.DB.QueryRow("SELECT count(*) FROM bg_account_social.moderation_events WHERE post_id=$1",post.ID).Scan(&events);e!=nil||events!=2{t.Fatal("moderation history missing",events,e)}
+ if e:=store.Moderate(context.Background(),post.ID,"promote","not allowed","reviewer");!errors.Is(e,ErrInvalid){t.Fatal("unapproved moderation operation")}
+ principal:=make([]byte,32);principal[0]=0xaa
+ for i:=0;i<3;i++{
+  ok,e:=store.Allow(context.Background(),principal,"post",2)
+  if e!=nil||ok!=(i<2){t.Fatal("distributed rate limit",i,ok,e)}
+ }
+}

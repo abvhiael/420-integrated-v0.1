@@ -17,7 +17,13 @@
     "wallet/web/core/token-portfolio.js",
     "wallet/web/token-portfolio-ui.js",
     "wallet/web/test/token-portfolio.test.js",
-    ".qualification/candidates/TOKEN-AUDIT-5.10-portfolio.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.10-portfolio.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.10-QUALIFICATION.json"
   ],
   "tests": [
     {

@@ -1,6 +1,7 @@
 // BG-19.13 deterministic build qualification: not a browser or network performance benchmark.
 import {readFile,readdir,stat} from 'node:fs/promises';
 import {resolve,relative} from 'node:path';
+import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 const root=resolve(import.meta.dirname,'..','dist');
 const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,total:1024*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
@@ -10,6 +11,8 @@ for(const file of files){const name=relative(root,file.path);if(name.endsWith('.
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
+for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
+for(const name of names.keys())if(name.startsWith('assets/')&&!DASHBOARD_ASSETS.includes(name))throw new Error('unexpected dashboard asset: '+name);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');
 for(const asset of ['bong-goggles-header-256.webp','bong-goggles-browser-512.webp','favicon-32.png','favicon-192.png']){
   const size=names.get(asset);

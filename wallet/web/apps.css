@@ -43,3 +43,21 @@
 .token-template-card[data-availability="disabled"] .token-template-availability { color: var(--wallet-warning); }
 .token-template-card button[aria-pressed="true"] { outline: 2px solid var(--wallet-accent); }
 .token-catalogue-selection { overflow-wrap: anywhere; }
+
+/* ERC20 draft wizard: exact decimal text input, wrapping review data. */
+.token-erc20-wizard { min-width: 0; border-top: 1px solid var(--wallet-border); padding-top: 16px; }
+.token-erc20-wizard h4, .token-erc20-wizard h5 { margin: 0 0 8px; color: var(--wallet-text); }
+.token-erc20-form { display: grid; gap: 14px; margin-top: 12px; min-width: 0; }
+.token-erc20-wizard [hidden] { display: none !important; }
+.token-erc20-context { overflow-wrap: anywhere; }
+.token-erc20-fields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,250px),1fr)); gap: 12px; }
+.token-erc20-field { display: grid; gap: 5px; min-width: 0; }
+.token-erc20-field label { font-weight: 600; color: var(--wallet-text); }
+.token-erc20-field input { width: 100%; min-width: 0; box-sizing: border-box; }
+.token-erc20-hint { font-size: .82rem; }
+.token-erc20-preview { min-width: 0; padding: 12px; border: 1px solid var(--wallet-border); border-radius: 10px; }
+.token-erc20-review { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,2fr); gap: 8px; margin: 0 0 12px; }
+.token-erc20-review dt { font-weight: 600; }
+.token-erc20-review dd { margin: 0; overflow-wrap: anywhere; min-width: 0; }
+.token-erc20-warning { color: var(--wallet-warning); font-weight: 600; }
+@media(max-width: 480px) { .token-erc20-review { grid-template-columns: minmax(0,1fr); gap: 4px; } .token-erc20-review dd { margin-bottom: 8px; } }

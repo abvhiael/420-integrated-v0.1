@@ -6,3 +6,4 @@ export { TOKEN_SERVICE_ID_420, TOKEN_COMMUNITY_VAULT_ID_420, TOKEN_CREATION_FEE_
 export { buildTokenDeploymentRequest420, prepareTokenDeploymentHandoff420 } from './token-handoff.js';
 export { normalizeTokenWalletConfig420, discoverWalletTokenRuntime420, createTokenDiscoverySession420 } from './token-discovery.js';
 export { TOKEN_CATALOGUE_PROFILES_420, describeTokenCatalogue420, createTokenCatalogue420 } from './token-catalogue.js';
+export { parseERC20Units420, formatERC20Units420, generateERC20Salt420, validateERC20WizardFields420, createERC20Wizard420 } from './token-erc20-wizard.js';

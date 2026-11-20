@@ -67,6 +67,28 @@ contract MockLaunchpadPay420 is ILaunchpadPaymentRegistry420 {
     }
 
     mapping(bytes32 => PaymentData) internal records;
+    mapping(bytes32 => address) public merchantOf;
+    mapping(bytes32 => uint64) public expiresAtOf;
+    mapping(bytes32 => uint256) public deliveredByPayment;
+
+    function registry() external view returns (address) { return address(this); }
+    function paymentRegistry() external view returns (address) { return address(this); }
+    function resolve(bytes32) external view returns (address) { return address(this); }
+    function runtimeCodeHash(bytes32) external view returns (bytes32) { return address(this).codehash; }
+
+    function setInvoice(bytes32 paymentId, bytes32 invoiceId, uint64 expiry) external {
+        records[paymentId].invoiceId = invoiceId;
+        merchantOf[invoiceId] = records[paymentId].merchant;
+        expiresAtOf[invoiceId] = expiry;
+    }
+
+    function setDelivered(bytes32 paymentId, uint256 amount) external {
+        deliveredByPayment[paymentId] = amount;
+    }
+
+    function setTip(bytes32 paymentId, uint256 amount) external {
+        records[paymentId].tipAmount = amount;
+    }
 
     function setPayment(
         bytes32 paymentId,
@@ -78,7 +100,8 @@ contract MockLaunchpadPay420 is ILaunchpadPaymentRegistry420 {
         uint256 refundedAmount
     ) external {
         records[paymentId] = PaymentData({
-            invoiceId: keccak256(abi.encode("invoice", paymentId)),
+            invoiceId: records[paymentId].invoiceId == bytes32(0)
+                ? keccak256(abi.encode("invoice", paymentId)) : records[paymentId].invoiceId,
             payer: payer,
             merchant: merchant,
             inputAsset: settlementAsset,
@@ -86,7 +109,7 @@ contract MockLaunchpadPay420 is ILaunchpadPaymentRegistry420 {
             settlementAsset: settlementAsset,
             settlementAmount: settlementAmount,
             quoteId: bytes32(0),
-            payerNonce: 1,
+            payerNonce: uint256(paymentId),
             receiptHash: keccak256(abi.encode("receipt", paymentId)),
             tipAmount: 0,
             refundedAmount: refundedAmount,
@@ -390,8 +413,11 @@ contract LaunchpadCrowdfundingIntegration420Test {
         bytes32 communityPayment = keccak256("payment/community");
         bytes32 preorderPayment = keccak256("payment/preorder");
         pay.setPayment(donationPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        _bindPayment(donation, donationPayment, 100);
         pay.setPayment(communityPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        _bindPayment(community, communityPayment, 100);
         pay.setPayment(preorderPayment, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        _bindPayment(preorder, preorderPayment, 100);
 
         vm.prank(ALICE);
         allocations.contribute(donation, 100, donationPayment);
@@ -423,6 +449,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
 
         bytes32 paymentId = keccak256("payment/settled");
         pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 500, 5, 0);
+        _bindPayment(saleId, paymentId, 500);
 
         vm.prank(ALICE);
         allocations.contribute(saleId, 500, paymentId);
@@ -492,6 +519,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
         vm.warp(10);
         bytes32 paymentId = keccak256("payment/replay");
         pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        _bindPayment(saleId, paymentId, 100);
 
         vm.prank(ALICE);
         allocations.contribute(saleId, 100, paymentId);
@@ -508,7 +536,9 @@ contract LaunchpadCrowdfundingIntegration420Test {
         bytes32 paymentA = keccak256("payment/refund/a");
         bytes32 paymentB = keccak256("payment/refund/b");
         pay.setPayment(paymentA, ALICE, RECEIVER, PAYMENT_ASSET, 200, 5, 0);
+        _bindPayment(saleId, paymentA, 200);
         pay.setPayment(paymentB, ALICE, RECEIVER, PAYMENT_ASSET, 200, 5, 0);
+        _bindPayment(saleId, paymentB, 200);
 
         vm.prank(ALICE);
         allocations.contribute(saleId, 200, paymentA);
@@ -525,8 +555,26 @@ contract LaunchpadCrowdfundingIntegration420Test {
         pay.setPayment(paymentA, ALICE, RECEIVER, PAYMENT_ASSET, 200, 6, 200);
         pay.setPayment(paymentB, ALICE, RECEIVER, PAYMENT_ASSET, 200, 6, 200);
 
+        // Canonical authorization and a partially delivered refund are insufficient.
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
+        integration.prepareRefund(saleId);
+        pay.setDelivered(paymentA, 100);
+        pay.setDelivered(paymentB, 200);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
+        integration.prepareRefund(saleId);
+        pay.setDelivered(paymentA, 200);
+
         vm.prank(ALICE);
         bytes32 refundCommitment = integration.prepareRefund(saleId);
+
+        // Verify the second phase checks the live canonical delivery ledger again.
+        pay.setDelivered(paymentA, 100);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
+        allocations.recordRefund(saleId, refundCommitment);
+        pay.setDelivered(paymentA, 200);
 
         vm.prank(ALICE);
         allocations.recordRefund(saleId, refundCommitment);
@@ -540,6 +588,7 @@ contract LaunchpadCrowdfundingIntegration420Test {
         vm.warp(10);
         bytes32 paymentId = keccak256("payment/delivery");
         pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 500, 5, 0);
+        _bindPayment(saleId, paymentId, 500);
 
         vm.prank(ALICE);
         allocations.contribute(saleId, 500, paymentId);
@@ -550,10 +599,21 @@ contract LaunchpadCrowdfundingIntegration420Test {
 
         bytes32 delivery = keccak256("delivery/reward");
         vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidDelivery.selector);
+        allocations.claim(saleId, delivery);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidDelivery.selector);
+        integration.attestDelivery(saleId, ALICE, delivery);
+
+        integration.attestDelivery(saleId, ALICE, delivery);
+        vm.prank(ALICE);
         allocations.claim(saleId, delivery);
 
         require(integration.usedDeliveryCommitment(delivery), "delivery replay lock");
         require(allocations.claimed(saleId, ALICE) == 10000, "allocation claimed");
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadAllocationRegistry420.NotClaimable.selector);
+        allocations.claim(saleId, delivery);
     }
 
     function testDisputeMustMatchCanonicalArbitrationOriginAndProjectController() public {
@@ -627,6 +687,87 @@ contract LaunchpadCrowdfundingIntegration420Test {
             sales.sale(saleId).state == LaunchpadSaleRegistry420.State.SCHEDULED,
             "arbitration cannot cancel sale directly"
         );
+    }
+
+    function testRegisteredCampaignInvoiceCannotBeSubstituted() public {
+        bytes32 other = sales.canonicalId(
+            projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, ELIGIBILITY, bytes32(uint256(9))
+        );
+        sales.createSale(
+            other, projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30,
+            ELIGIBILITY, bytes32(uint256(9))
+        );
+        integration.setCampaignMode(other, LaunchpadCrowdfundingIntegration420.CampaignMode.REWARD);
+        sales.activate(other);
+        sales.activate(saleId);
+        vm.warp(10);
+        bytes32 paymentId = keccak256("payment/unrelated");
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidSettlement.selector);
+        allocations.contribute(saleId, 100, paymentId);
+
+        _bindPayment(saleId, paymentId, 100);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidSettlement.selector);
+        allocations.contribute(other, 100, paymentId);
+        require(sales.sale(other).raised == 0 && !integration.usedPaymentId(paymentId), "substitution changed state");
+        vm.prank(ALICE);
+        allocations.contribute(saleId, 100, paymentId);
+        require(sales.sale(saleId).raised == 100, "original campaign not recorded");
+    }
+
+    function testUnallocatedPaymentRefundRecoveryDoesNotIncreaseRaised() public {
+        sales.activate(saleId);
+        vm.warp(10);
+        bytes32 paymentId = keccak256("payment/late");
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 200, 5, 0);
+        _bindPayment(saleId, paymentId, 200);
+        vm.warp(21);
+        sales.finalize(saleId);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadAllocationRegistry420.InvalidContribution.selector);
+        allocations.contribute(saleId, 200, paymentId);
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 200, 6, 210);
+        pay.setTip(paymentId, 10);
+        pay.setDelivered(paymentId, 200);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
+        integration.reconcileUnallocatedRefund(saleId, paymentId);
+        pay.setDelivered(paymentId, 210);
+        vm.prank(ALICE);
+        integration.reconcileUnallocatedRefund(saleId, paymentId);
+        require(integration.unallocatedRefundRecorded(paymentId), "missing recovery");
+        require(sales.sale(saleId).raised == 0 && allocations.contributed(saleId, ALICE) == 0, "false contribution");
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.Replay.selector);
+        integration.reconcileUnallocatedRefund(saleId, paymentId);
+    }
+
+    function testRefundAuthorizedAfterSuccessCannotAlsoClaim() public {
+        sales.activate(saleId);
+        vm.warp(10);
+        bytes32 paymentId = keccak256("payment/claim-refund");
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 500, 5, 0);
+        _bindPayment(saleId, paymentId, 500);
+        vm.prank(ALICE);
+        allocations.contribute(saleId, 500, paymentId);
+        vm.warp(21);
+        sales.finalize(saleId);
+        vm.warp(30);
+        bytes32 delivery = keccak256("attested/claim-refund");
+        integration.attestDelivery(saleId, ALICE, delivery);
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 500, 7, 1);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidDelivery.selector);
+        allocations.claim(saleId, delivery);
+        require(allocations.claimed(saleId, ALICE) == 0, "claim mutation survived revert");
+    }
+
+    function _bindPayment(bytes32 campaign, bytes32 paymentId, uint128 amount) private {
+        vm.prank(ALICE);
+        bytes32 invoiceId = integration.registerContributionIntent(campaign, amount, uint256(paymentId));
+        pay.setInvoice(paymentId, invoiceId, sales.sale(campaign).endsAt);
     }
 
     function _createModeSale(

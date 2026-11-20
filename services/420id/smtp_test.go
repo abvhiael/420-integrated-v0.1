@@ -12,7 +12,6 @@ import (
  "encoding/base64"
  "fmt"
  "math/big"
- "net"
  "strings"
  "testing"
  "time"

@@ -39,16 +39,17 @@ function actionState(){
   actionable('#refresh',!!state.service);actionable('#load-more',!!state.cursor);
   actionable('#refresh-position',w&&!!c);
   actionable('#bind-identity',w&&!!c&&HASH.test($('#identity-profile').value));
-  actionable('#register-intent',eligible&&amountOk&&!!nonce&&!checkout?.registered);
-  actionable('#check-checkout',eligible&&amountOk&&!!nonce);
+  actionable('#register-intent',eligible&&amountOk&&!!nonce&&checkout?.canContribute===true&&checkout?.amount===amount&&!checkout.registered);
+  // Read-only invoice recovery stays enabled even if identity is revoked, the cap fills or the sale ends.
+  actionable('#check-checkout',w&&!!c&&/^[1-9][0-9]*$/.test(amount)&&!!nonce);
   actionable('#new-intent',w&&!!c);
   const terms=conversionTerms();const hasTerms=HASH.test(terms.marketId)&&/^0x[0-9a-fA-F]{40}$/.test(terms.inputAsset)&&
     /^[1-9][0-9]*$/.test(terms.maxInput)&&/^[1-9][0-9]*$/.test(terms.minOutput);
-  const canQuote=eligible&&checkout?.registered&&checkout?.invoiceExists&&!checkout?.paymentId&&hasTerms;
+  const canQuote=eligible&&checkout?.canContribute===true&&checkout?.amount===amount&&checkout?.registered&&checkout?.invoiceExists&&!checkout?.paymentId&&hasTerms;
   actionable('#get-conversion-quote',canQuote);
   actionable('#approve-conversion',canQuote&&!!state.quote?.approveRequired&&BigInt(state.quote.balance)>=BigInt(state.quote.maxInput));
   actionable('#pay-conversion',canQuote&&!!state.quote?.canPay);
-  actionable('#contribute',eligible&&checkout?.registered&&checkout?.invoiceExists&&checkout?.paymentStatus==='SETTLED'&&!checkout?.recorded&&checkout.amount===amount);
+  actionable('#contribute',eligible&&checkout?.canContribute===true&&checkout?.registered&&checkout?.invoiceExists&&checkout?.paymentStatus==='SETTLED'&&!checkout?.recorded&&checkout.amount===amount);
   actionable('#claim',w&&!!p?.claimable);
   const refundable=w&&p&&!p.refunded&&['FAILED','CANCELLED'].includes(p.sale.state)&&p.history.length>0;
   const fullyDelivered=refundable&&p.history.every(x=>BigInt(x.refundPrincipalDelivered)===BigInt(x.settlementAmount));

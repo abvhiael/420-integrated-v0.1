@@ -120,3 +120,31 @@
 .token-permission-controls { border:1px solid var(--wallet-border); border-radius:8px; padding:10px; margin:10px 0; min-width:0; display:grid; gap:8px; }
 .token-management-risk { border:1px solid currentColor; border-radius:8px; padding:10px; margin:8px 0; overflow-wrap:anywhere; }
 .token-management [hidden] { display:none!important; }
+
+/* Token responsive and keyboard accessibility: keep exact evidence visible,
+   including long hashes, addresses and UTF-8 metadata; never clip disclosures. */
+.token-catalogue,.token-catalogue-body,.token-catalogue-body>* { min-width:0; max-width:100%; box-sizing:border-box; }
+.token-catalogue-body { grid-template-columns:minmax(0,1fr); overflow-wrap:anywhere; }
+.token-catalogue-body h4,.token-catalogue-body h5,.token-catalogue-body h6 { color:var(--wallet-text); line-height:1.35; }
+.token-catalogue-body h6 { font-size:1rem; margin:0; }
+.token-catalogue-body button,.token-catalogue-body input,.token-catalogue-body select { box-sizing:border-box; max-width:100%; min-height:44px; font-size:1rem; }
+.token-catalogue-body button { white-space:normal; overflow-wrap:anywhere; line-height:1.35; }
+.token-catalogue-body input,.token-catalogue-body select { width:100%; min-width:0; }
+.token-catalogue-body :is(button,input,select,summary,[tabindex="-1"]):focus-visible { outline:3px solid var(--wallet-accent); outline-offset:3px; scroll-margin-block:16px; }
+.token-catalogue-body [role="status"][data-state="error"] { border-inline-start:3px solid currentColor; padding-inline-start:10px; font-weight:600; color:var(--wallet-text); }
+.token-catalogue-body [role="status"][data-state="busy"] { font-weight:600; }
+.token-catalogue-body [aria-invalid="true"] { border:2px solid var(--wallet-warning); }
+.token-catalogue-body .token-catalogue-controls { align-items:start; gap:8px; }
+.token-catalogue-body .token-template-card,.token-catalogue-body .token-permission-controls { min-width:0; }
+.token-catalogue-body dt,.token-catalogue-body dd { min-width:0; overflow-wrap:anywhere; }
+.token-catalogue-body [hidden] { display:none!important; }
+@media(max-width:480px) {
+ .token-catalogue {padding:10px;}
+ .token-catalogue-body .token-catalogue-controls {display:grid;grid-template-columns:minmax(0,1fr);width:100%;}
+ .token-catalogue-body .token-catalogue-controls button {width:100%;}
+ .token-catalogue-body .token-template-card,.token-catalogue-body .token-fee-review,.token-catalogue-body .token-created-portfolio,.token-catalogue-body .token-management,.token-catalogue-body .token-permission-controls {padding:10px;}
+}
+@media(forced-colors:active) {
+ .token-catalogue-body :is(button,input,select,[tabindex="-1"]):focus-visible {outline-color:Highlight;}
+ .token-catalogue-body [aria-invalid="true"],.token-catalogue-body [data-state="error"] {border-color:CanvasText;}
+}

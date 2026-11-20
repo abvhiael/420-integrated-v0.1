@@ -76,7 +76,7 @@ func Migrate(ctx context.Context,db *sql.DB) error {
  if db==nil{return ErrInvalid}
  tx,err:=db.BeginTx(ctx,nil);if err!=nil{return err};defer tx.Rollback()
  if _,err=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420000001)");err!=nil{return err}
- for _,name:=range []string{"001_accounts.sql","002_authentication.sql","003_acceptance_ingress.sql","004_sessions_recovery.sql","005_universal_profiles.sql"} {
+ for _,name:=range []string{"001_accounts.sql","002_authentication.sql","003_acceptance_ingress.sql","004_sessions_recovery.sql","005_universal_profiles.sql","006_optional_wallet_links.sql"} {
   body,err:=migration.ReadFile("migrations/"+name);if err!=nil{return err}
   if _,err=tx.ExecContext(ctx,string(body));err!=nil{return err}
  }

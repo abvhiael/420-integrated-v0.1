@@ -12,7 +12,13 @@
     "wallet/web/test/token-encoding.test.js",
     "wallet/web/scripts/qualify-token-encoding.mjs",
     ".qualification/candidates/TOKEN-AUDIT-5.7-configuration-abi.json",
-    "wallet/web/core/token-app.js"
+    "wallet/web/core/token-app.js",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.7-QUALIFICATION.json"
   ],
   "tests": [
     {

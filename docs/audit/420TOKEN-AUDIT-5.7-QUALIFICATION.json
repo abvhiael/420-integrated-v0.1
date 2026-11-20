@@ -1,0 +1,874 @@
+{
+  "schema": "420-token-audit-5.7-exact-implementation-qualification-v1",
+  "step": "TOKEN-AUDIT-5.7",
+  "status": "QUALIFIED_CONFIGURATION_VALIDATION_AND_ABI_ENCODING_ONLY",
+  "qualified_implementation_sha": "83e321b301b97b4013d103dec2b8cd038b0086bb",
+  "reconciled_main": "727fad0a11d063c53d08c4f4018e336252ec6fc4",
+  "pr": 1246,
+  "qualification": {
+    "workflow": ".github/workflows/420token-audit.yml",
+    "run_id": 44655345472,
+    "jobs": {
+      "scope": {
+        "id": 136020064960,
+        "conclusion": "success"
+      },
+      "wallet-sdk": {
+        "id": 136020439628,
+        "conclusion": "success"
+      },
+      "abi-parity": {
+        "id": 136020439623,
+        "conclusion": "success"
+      },
+      "security": {
+        "id": 136020441243,
+        "conclusion": "skipped"
+      },
+      "qualify": {
+        "id": 136020441260,
+        "conclusion": "skipped"
+      }
+    },
+    "exact_head_checkout": true,
+    "repository_verifier": "PASS",
+    "tests_passed": 134,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "tests_cancelled": 0,
+    "new_encoding_tests": 9,
+    "passed_test_names": [
+      "app catalog includes expected core ecosystem gateways and metadata",
+      "app filtering supports category and free-text search without changing trust state",
+      "420 Apps discovery enables only services from a verified manifest",
+      "420 Apps discovery fails closed on unverified manifest",
+      "420 Apps discovery leaves everything unavailable until a manifest is configured",
+      "Pay discovery presents the approved catalogue entry without allowing manifest-only launch",
+      "Token is Wallet-integrated and never gains an external link from a manifest or generic Registry navigation",
+      "runtime config accepts deferred production endpoints and smart account deployment",
+      "runtime config rejects malformed canonical smart account factory address",
+      "verified manifest resolves known core services and leaves missing services unavailable",
+      "unverified ecosystem manifest fails closed",
+      "json rpc provider sends standard JSON-RPC request",
+      "factory calldata uses canonical SmartAccountFactory420 selectors",
+      "smart account discovery fails closed when canonical factory has no code",
+      "counterfactual smart account discovery predicts through deployed factory and confirms no account code",
+      "deployed smart account state is read from SmartAccount420 getters",
+      "creation preparation builds only the canonical factory transaction for a counterfactual account",
+      "creation send requires explicit provider transaction approval and returns hash",
+      "creation is idempotent and does not send when account is already deployed",
+      "confirmed creation re-reads SmartAccount420 and verifies controller ownership",
+      "confirmed creation fails closed on reverted receipt",
+      "confirmed creation fails closed when resulting owner differs from controller",
+      "creation rejects malformed provider transaction hashes",
+      "network reads flag a chain mismatch fail-closed condition",
+      "portfolio reads native balances for controller and smart account",
+      "ABI address decoder rejects malformed responses",
+      "remote JSON-RPC transport cannot become a server-side signing or broadcasting authority",
+      "RPC transport rejects mismatched JSON-RPC ids and malformed code assertions",
+      "Wallet accepts disabled sponsorship or HTTPS quote endpoint without credentials in static config",
+      "Wallet refuses insecure remote quote endpoint and embedded service credentials",
+      "W14.5 Wallet catalogue uses only canonical Genesis service IDs",
+      "W14.5 reconciles required Wallet-visible Genesis services",
+      "W14.5 removes stale noncanonical service aliases from verified app gateway",
+      "W14.5 records named Genesis products that still lack distinct canonical service IDs",
+      "W14.5 catalogue has unique ids and service IDs",
+      "W14.2 builds deterministic live-testnet runtime config from qualified inputs",
+      "W14.2 fails closed against the current unresolved W14.1 inventory",
+      "W14.2 rejects manifest chain-id drift",
+      "W14.2 rejects insecure public RPC endpoints",
+      "W14.2 rejects unresolved authority states even when release gates claim ready",
+      "W14.2 requires Explorer and Faucet publication for testnet",
+      "W14.2 refuses live Stake runtime binding when frozen app addresses are not chain-verified",
+      "qualified runtime generator rejects retired Wallet factory authority",
+      "qualified runtime generator rejects fake unverified Wallet deployment",
+      "qualified runtime generator preserves canonical Registry, Names and Identity",
+      "Token runtime generation uses only bound deployment inventory and clears stale base pins",
+      "catalogue displays only the eight canonical templates with accurate features, permanent IDs and exact fee",
+      "unconfigured, disconnected, checking and blocked states never infer enablement or selection",
+      "verified availability supports mixed and all-disabled states without changing catalogued profiles",
+      "partial, substituted, duplicated, malformed and stale-block profile results fail closed",
+      "every enabled profile can be selected only after a fresh verified read, without transaction authority",
+      "governance disablement between display and selection rejects and updates availability; reenable requires a refresh",
+      "deactivated service, reorganization and RPC failure clear selection and availability; retry uses same approved context",
+      "superseded selection cannot survive a disconnect, newer host context or disposed catalogue",
+      "counterfactual and non-owner status is separate from Registry enablement",
+      "read-only refresh cannot restore invalidated host context or substitute external config",
+      "offline Wallet production defaults contain no Token release candidate or live address",
+      "same-origin Wallet config requires full approved release, environment, chain and shared authority binding",
+      "connected Wallet discovers the active Registry release, all template profiles and fresh selected SmartAccount",
+      "counterfactual account discovery and non-owner accounts remain read-only",
+      "discovery rejects changed controller, account, chain, missing factory, wrong EntryPoint and capability bindings",
+      "discovery rejects late account, chain, canonical-block changes after runtime verification",
+      "Registry deactivation, wrong code, disabled templates and RPC failure are handled without stale availability",
+      "inflight discovery cannot resurrect stale state after disconnect or a newer discovery",
+      "discovery results do not grant signing or spending authority and are not accepted from wallet catalogue events",
+      "all eight templates round trip canonical factory bytes and exact immutable JSON drafts",
+      "draft schema rejects inherited/accessor/hidden/symbol fields without evaluating getters",
+      "integer, salt and hex conversion reject trailing newline, noncanonical quantities and overflow",
+      "supply/cap rules match actual constructor bounds; omitted uncapped cap becomes zero, explicit null is not a quantity",
+      "aggregate ABI calldata size is enforced by normalization and decoding including selector and padding",
+      "canonical empty strings, UTF8 byte boundaries, BOM and embedded null preserve exact metadata bytes",
+      "decoder rejects malformed offsets, lengths, padding, trailing bytes and invalid UTF8",
+      "configuration hash is not template or salt identity: complete commitments bind exact calldata",
+      "handoff rejects omitted/tampered commitments, extra fields and accessors before any RPC",
+      "ERC1155 codec matches canonical ABI, exact immutable URI and zero balances",
+      "ERC1155 client substitutes literal placeholders with full uint256 lowercase hex, never changes stored URI",
+      "reject malformed URI, salt, oversize calldata and arbitrary ERC1155 configuration fields",
+      "verified ERC1155 wizard prepares immutable canonical collection draft, exact fee and owner after fresh read",
+      "empty URI draft, edits, salt regeneration and reset clear prepared collection",
+      "all three wizard states remain isolated during selection, refresh and canonical draft preparation",
+      "unconfigured, nonowner, counterfactual and wrong profile cannot enter collection wizard",
+      "fresh collection review rejects disabled template, revoked Registry, wrong owner/chain, reorg and RPC failure",
+      "pending collection review cannot resurrect after disconnect, newer context, reset or disposal",
+      "invalid form does not call RPC and cannot inject owner, mint or transaction parameters",
+      "ERC20 amount conversion preserves every base unit and uint256 boundary without floating point",
+      "all six ERC20 wizard profiles encode exactly the canonical SDK draft, fixed 18 decimals and correct cap",
+      "wizard rejects malformed metadata, arbitrary fields and non-ERC20 profiles",
+      "cap must be positive, at least the supply, and only belongs to capped profile; votes bound matches contract",
+      "zero supply is valid but non-mintable templates warn permanently; salt is secure bytes32",
+      "all six actual wizard selections produce exact fee, immutable owner-bound canonical draft after fresh read",
+      "editing, salt regeneration, reset, NFT selection and refresh clear any prepared draft",
+      "unconfigured, counterfactual and non-owner contexts never enter ERC20 creation wizard",
+      "fresh draft preparation rejects disabled template, revoked service, ownership change, chain and reorg",
+      "disconnect, fresh host context and reset cannot resurrect a pending draft",
+      "invalid form does not start re-verification, arbitrary form fields cannot be injected",
+      "ERC721 collection codec matches exact frozen ABI/config commitments and template semantics",
+      "empty URI and absolute URI bytes are preserved, no substitution or metadata fetch",
+      "reject malformed metadata, URI, salt, oversize calldata and unapproved configuration fields",
+      "verified ERC721 wizard prepares immutable canonical collection draft, exact fee and owner after fresh read",
+      "empty URI draft, edits, salt regeneration and reset clear prepared collection",
+      "ERC20 and ERC721 wizard state is isolated across profile selection and refresh",
+      "unconfigured, nonowner, counterfactual and wrong profile cannot enter collection wizard",
+      "fresh collection review rejects disabled template, revoked Registry, wrong owner/chain, reorg and RPC failure",
+      "pending collection review cannot resurrect after disconnect, newer context, reset or disposal",
+      "invalid form does not call RPC and cannot inject owner, mint or transaction parameters",
+      "420Token runtime requires distinct verified factory, registry and Vault identities",
+      "420Token runtime fails closed on wrong service, version or Vault identity",
+      "420Token handoff preserves SmartAccount420 authority and exact fee",
+      "420Token handoff rejects wrong factory, fee and empty calldata before wallet execution",
+      "shape-only or aliased release records cannot authorize a handoff",
+      "canonical eight SDK profiles agree with frozen Genesis config, Solidity identity and profile commitments",
+      "ERC20 encoding uses exact Solidity ABI words, dynamic offsets, UTF-8 and base-unit supply",
+      "ERC721 and ERC1155 encodings use exact ABI layouts and distinct config hashes",
+      "all eight drafts are canonical, immutable, JSON-safe and distinguish feature semantics",
+      "draft validation rejects noncanonical templates, cap misuse, unsafe numeric values and oversized or malformed fields",
+      "real TOKEN-AUDIT-4 Registry dependency commitment is reproduced exactly by the SDK",
+      "runtime verifies all dependencies, active Registry records, every template and canonical block",
+      "every frozen profile prepares exact SmartAccount calldata, fee, configuration and explicit-review state",
+      "runtime rejects wrong chain, wrong genesis, absent code, wrong code and reorganized snapshots",
+      "runtime rejects wrong service, component, release commitments, immutables, Vault registration and template profiles",
+      "disabled templates are visible but cannot be prepared; a disable during simulation rejects the handoff",
+      "SmartAccount simulation, gas failures, ownership and chain changes remain fail-closed",
+      "W15.8 catalogue identities come from canonical Solidity service IDs, not aliases or named products",
+      "live ProtocolRegistry service identity, implementation code, metadata and navigation are independently verified",
+      "malformed, revoked, stale and counterfeit Registry records fail closed",
+      "service manifest spoofing and malformed destinations cannot enter verified directory",
+      "verified directory omits unavailable services, rejects duplicate identities and ignores stale registry data",
+      "launch rechecks immutable URL, version, implementation and account/network; no implicit grant",
+      "existing Names name normalizer blocks unicode and case lookalikes and catches retargeting between checks",
+      "420Gas funding offers and 420Token deployment remain outside app navigation authority",
+      "Identity420 binding is current, scoped, read-only, bilateral if claimed, never owner/signing authority",
+      "Pay release discovery uses the canonical Registry key and a credential-free endpoint check",
+      "Pay discovery blocks unreleased, wrong-chain, unresolved and disabled entries before probing",
+      "Pay is omitted from discovery when its endpoint is unreachable or redirected"
+    ],
+    "changed_paths": [
+      ".github/workflows/420token-audit.yml",
+      ".qualification/candidates/TOKEN-AUDIT-5.7-configuration-abi.json",
+      "wallet/web/core/token-app.js",
+      "wallet/web/core/token-handoff.js",
+      "wallet/web/core/token-sdk.js",
+      "wallet/web/scripts/qualify-token-encoding.mjs",
+      "wallet/web/test/token-encoding.test.js"
+    ]
+  },
+  "independent_abi_oracle": {
+    "version": "Foundry Cast 1.10.0",
+    "status": "PASS",
+    "oracle": "Foundry Cast",
+    "profiles": 8,
+    "vectors": 32,
+    "results": [
+      {
+        "template": "ERC20_FIXED",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb0397beeb642aeb009c6cfc1c629f969dbc01bce293d967229b756f74537ca0b",
+        "calldataHash": "0xdcc3920050dd8e28efc692e284d1b27ff32b73018ef8bd18b82273fc0e670daf"
+      },
+      {
+        "template": "ERC20_FIXED",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x84809c569fe6ef885920335dea695ef62d7c3511fee4b3684f49a60aaa7668a4",
+        "calldataHash": "0x6854f0ab3887e8dcf6f49aed82d799fa5beea3dcb2715fa94efcfb69abbe9263"
+      },
+      {
+        "template": "ERC20_FIXED",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xf62d0c252ff28cbe64f660813285f290fce8f2822cf31f34153165c0979c2a82",
+        "calldataHash": "0x83b1a8055d45f914bcfbf0fe57d83789a476971f294e352bb34f6fa9a17e01c5"
+      },
+      {
+        "template": "ERC20_FIXED",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x7da6763c0e119004d4f6a2950885d41bffd7857d1d639d2db228961d82e4d943",
+        "calldataHash": "0xc1068ec368076e01328d04e6ef34334114451148340dcdf0e7d1ab8c11ae8e8d"
+      },
+      {
+        "template": "ERC20_MINTABLE",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb0397beeb642aeb009c6cfc1c629f969dbc01bce293d967229b756f74537ca0b",
+        "calldataHash": "0xf0fa12a02a169580b5d3c382e7539c9eb01e2253beedc385c777de853ae9ff74"
+      },
+      {
+        "template": "ERC20_MINTABLE",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x84809c569fe6ef885920335dea695ef62d7c3511fee4b3684f49a60aaa7668a4",
+        "calldataHash": "0xef0b043f322ebcbdc799223a9a322f0ef731111b9556accb972149fe948673c2"
+      },
+      {
+        "template": "ERC20_MINTABLE",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xf62d0c252ff28cbe64f660813285f290fce8f2822cf31f34153165c0979c2a82",
+        "calldataHash": "0x32af2bfebc4516de40583214ed9fe2d35ba6f378452ecaa32ee7bbd22e3dcf4f"
+      },
+      {
+        "template": "ERC20_MINTABLE",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x7da6763c0e119004d4f6a2950885d41bffd7857d1d639d2db228961d82e4d943",
+        "calldataHash": "0x66546f42d34d372224287b90bb1bf3c0a2b61ac5cedb2414a08066c8e77e48b2"
+      },
+      {
+        "template": "ERC20_CAPPED",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb5585a02b414012d5f9001c68968da30ba5a2b1d94580e2c8dfc38d817f20f40",
+        "calldataHash": "0x852c768f31baa0c9193bfef5a3abfe71aaa2cedd4482cfa397a4a5376d68e42a"
+      },
+      {
+        "template": "ERC20_CAPPED",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x0b58bbbff71f1fec0e6fb0d2df94e78ff8f8963a933019fe7938fa696f6f2e48",
+        "calldataHash": "0x11ea205516561b7fb9959118ec8e38530a789f74ac99f56503858848b3a86db3"
+      },
+      {
+        "template": "ERC20_CAPPED",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xc160a2b73d8db9d4107e1cc9cb35fae2fefc5301d81eb69a39b8a3419cd537c4",
+        "calldataHash": "0x12315c6e8f4b4a9a850961616baeca8c259cd756a44c91a6d38c57a4f48cc16d"
+      },
+      {
+        "template": "ERC20_CAPPED",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x4ae9d3dc1fc0ce572e7875af0029b8e8b3c5b3c7d1387abcf00d98d6f946c71a",
+        "calldataHash": "0x3c9ddaf329bddd51e0ef91f14ac88c69bc9532fd249d1055c3e692f727457658"
+      },
+      {
+        "template": "ERC20_BURNABLE",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb0397beeb642aeb009c6cfc1c629f969dbc01bce293d967229b756f74537ca0b",
+        "calldataHash": "0x087eecffca000c1bfe9e1c405fb9cd5ee9b8716f208b8abd6ff530703b1ee2e8"
+      },
+      {
+        "template": "ERC20_BURNABLE",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x84809c569fe6ef885920335dea695ef62d7c3511fee4b3684f49a60aaa7668a4",
+        "calldataHash": "0x6c2890704719bc35427e0c9118b37f5e381fdd149c98c7ff56a7eb0fe71fdb15"
+      },
+      {
+        "template": "ERC20_BURNABLE",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xf62d0c252ff28cbe64f660813285f290fce8f2822cf31f34153165c0979c2a82",
+        "calldataHash": "0xf5d37f4ac31a39f66ce8df9ec9b16c6c619ba4b7e2b8bc9686cafbc48c74b335"
+      },
+      {
+        "template": "ERC20_BURNABLE",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x7da6763c0e119004d4f6a2950885d41bffd7857d1d639d2db228961d82e4d943",
+        "calldataHash": "0x2933f5075014822a0347b2ec170a45cf15b8c0b80f362b29227697ff1439852d"
+      },
+      {
+        "template": "ERC20_PERMIT",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb0397beeb642aeb009c6cfc1c629f969dbc01bce293d967229b756f74537ca0b",
+        "calldataHash": "0x4ec2fc5fdb91e216263ae058da0d1b91f52ee3cb3d2c7ef2d06c7c9487d07066"
+      },
+      {
+        "template": "ERC20_PERMIT",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x84809c569fe6ef885920335dea695ef62d7c3511fee4b3684f49a60aaa7668a4",
+        "calldataHash": "0x7158f9dd10ee686d1d301aea9b413809d41ede63a0ea705c69dfe778108ae141"
+      },
+      {
+        "template": "ERC20_PERMIT",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xf62d0c252ff28cbe64f660813285f290fce8f2822cf31f34153165c0979c2a82",
+        "calldataHash": "0xa9bfc7cb90a738122a5696cdf8b3ed733c57e06b8c21f5d7b56a0e70ed80fdd1"
+      },
+      {
+        "template": "ERC20_PERMIT",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x7da6763c0e119004d4f6a2950885d41bffd7857d1d639d2db228961d82e4d943",
+        "calldataHash": "0x4354721c98e6c2f9b8283f843885ecf103e1c456333fd7d30ac347cfb928c958"
+      },
+      {
+        "template": "ERC20_VOTES",
+        "vector": 0,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0xb0397beeb642aeb009c6cfc1c629f969dbc01bce293d967229b756f74537ca0b",
+        "calldataHash": "0x80e7b5665307ee5754310b5647d2514da40783a5660619b04bad5f523549d8d8"
+      },
+      {
+        "template": "ERC20_VOTES",
+        "vector": 1,
+        "selector": "0x579578ed",
+        "bytes": 324,
+        "configHash": "0x376b0b3e9227cd9d7fc22e75591204ba71f4cb6aca9e7bace8d5e873f1d7fbea",
+        "calldataHash": "0x53d65ca0f76c2df617fc7e9a43aecdf1f55d22f8cae3956e14959e0a6dec734e"
+      },
+      {
+        "template": "ERC20_VOTES",
+        "vector": 2,
+        "selector": "0x579578ed",
+        "bytes": 260,
+        "configHash": "0xf62d0c252ff28cbe64f660813285f290fce8f2822cf31f34153165c0979c2a82",
+        "calldataHash": "0x51134b79a775ede40a86b8917c0ed91bd0574293693e7695e893763d4e7b5970"
+      },
+      {
+        "template": "ERC20_VOTES",
+        "vector": 3,
+        "selector": "0x579578ed",
+        "bytes": 356,
+        "configHash": "0x7da6763c0e119004d4f6a2950885d41bffd7857d1d639d2db228961d82e4d943",
+        "calldataHash": "0x4006a7df6c25d0ad17c0233561424a07e782506bf140cd2819949fdc4aee5734"
+      },
+      {
+        "template": "ERC721_COLLECTION",
+        "vector": 0,
+        "selector": "0xd7efca2b",
+        "bytes": 324,
+        "configHash": "0xd375ffb9afc1f0ea61c65ce040be6c5507f8f5154defbfd2e0a6dfec52251281",
+        "calldataHash": "0xc864f59afe90cbbfdf2f3e1a1e7deefffa1cfc324699b33a3b01ce69ff2d838b"
+      },
+      {
+        "template": "ERC721_COLLECTION",
+        "vector": 1,
+        "selector": "0xd7efca2b",
+        "bytes": 324,
+        "configHash": "0x453f088255327f43368a0149b0459e4d2548a69a7e1359e12f6b9b6fed108cf3",
+        "calldataHash": "0x99a9eb9da87170801cd4c9424e6753cdc6031914400afbab4bc52ee3607a8753"
+      },
+      {
+        "template": "ERC721_COLLECTION",
+        "vector": 2,
+        "selector": "0xd7efca2b",
+        "bytes": 228,
+        "configHash": "0x9915489080799234d12c818dbd017442406686b38ae33288e035c18102ae4781",
+        "calldataHash": "0x528dc4643118e8641514d1ebc6485eac18b10aebb59c9e69e2a5bf3f333f381a"
+      },
+      {
+        "template": "ERC721_COLLECTION",
+        "vector": 3,
+        "selector": "0xd7efca2b",
+        "bytes": 420,
+        "configHash": "0xf4e86695c4ffdca1a7c25fb6480d281a6470f45991fb5099f92dcff8fdbcae4e",
+        "calldataHash": "0x70437cce3a0f6eceaedc3d9dadab70ee7b0a05decbec493b1fa2e6583377370e"
+      },
+      {
+        "template": "ERC1155_MULTI",
+        "vector": 0,
+        "selector": "0xd47b3ebf",
+        "bytes": 132,
+        "configHash": "0x7afe2afe5e5ce41a28aa142b6d18330a9214565584f8ea3a7eb8260004593db8",
+        "calldataHash": "0x59a571fa1cdf6746ec583137437023b65a907b38d4da8d0f4a3dbb9ed9526205"
+      },
+      {
+        "template": "ERC1155_MULTI",
+        "vector": 1,
+        "selector": "0xd47b3ebf",
+        "bytes": 132,
+        "configHash": "0x1beeb48a0715309ab4cb6db159345d057e98c4c415ef2a2aa2a01a96a4b58c85",
+        "calldataHash": "0xab8c05484d76ce82bc5a31f78d0bbd04b103ca22d640deee678536a91425b44a"
+      },
+      {
+        "template": "ERC1155_MULTI",
+        "vector": 2,
+        "selector": "0xd47b3ebf",
+        "bytes": 100,
+        "configHash": "0x569e75fc77c1a856f6daaf9e69d8a9566ca34aa47f9133711ce065a571af0cfd",
+        "calldataHash": "0x5b843faac69b39acb414b967b10a4c8854f112f7c98e872d7aaaf39cf1529784"
+      },
+      {
+        "template": "ERC1155_MULTI",
+        "vector": 3,
+        "selector": "0xd47b3ebf",
+        "bytes": 196,
+        "configHash": "0xd0b7af18857cbf9b004425513e7f3cea9d0f9aa7fc9bab7819066d437672f2b6",
+        "calldataHash": "0x03898f3a65e9b8cdafdf3e8bc8c4db8ce746a0fc6de9cd7a873411210cf2bae3"
+      }
+    ]
+  },
+  "browser": {
+    "workflow": ".github/workflows/wallet-w15-5-browser.yml",
+    "run_id": 44655345336,
+    "job_id": 136020064720,
+    "conclusion": "success",
+    "fixture": "Actual mounted Wallet with deterministic RPC fixture; no live deployment",
+    "viewports": {
+      "erc20Wizard": [
+        {
+          "width": 1440,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "erc20Wizard": "PASS",
+          "exactAmount": true,
+          "invalidPrecisionRejected": true,
+          "capRejected": true,
+          "draftInvalidated": true,
+          "keyboard": true,
+          "wizardOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        }
+      ],
+      "erc721Wizard": [
+        {
+          "width": 1440,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "erc721Wizard": "PASS",
+          "exactURI": true,
+          "emptyURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialSupply": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "nftOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        }
+      ],
+      "erc1155Wizard": [
+        {
+          "width": 1440,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "erc1155Wizard": "PASS",
+          "exactURI": true,
+          "clientSubstitution": true,
+          "emptyURI": true,
+          "sharedURI": true,
+          "invalidURIRejected": true,
+          "zeroInitialBalances": true,
+          "draftInvalidated": true,
+          "governanceDisabled": true,
+          "keyboard": true,
+          "multiOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        }
+      ],
+      "tokenCatalogue": [
+        {
+          "width": 1440,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "axe": []
+        },
+        {
+          "width": 768,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 768,
+            "scroll": 768
+          },
+          "axe": []
+        },
+        {
+          "width": 390,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 390,
+            "scroll": 390
+          },
+          "axe": []
+        },
+        {
+          "width": 320,
+          "tokenCatalogue": "PASS",
+          "profiles": 8,
+          "verified": 8,
+          "governanceDisabled": 1,
+          "staleSelectionRejected": true,
+          "disconnectInvalidated": true,
+          "catalogueOverflow": {
+            "client": 320,
+            "scroll": 320
+          },
+          "axe": []
+        }
+      ],
+      "baseline": [
+        {
+          "width": 1440,
+          "info": {
+            "client": 1440,
+            "scroll": 1440
+          },
+          "focus": "security-centre",
+          "banner": "Deployment unconfigured",
+          "axe": []
+        },
+        {
+          "width": 1024,
+          "info": {
+            "client": 1024,
+            "scroll": 1024
+          },
+          "focus": "security-centre",
+          "banner": "Deployment unconfigured",
+          "axe": []
+        },
+        {
+          "width": 768,
+          "info": {
+            "client": 768,
+            "scroll": 768
+          },
+          "focus": "security-centre",
+          "banner": "Deployment unconfigured",
+          "axe": []
+        },
+        {
+          "width": 390,
+          "info": {
+            "client": 390,
+            "scroll": 390
+          },
+          "focus": "security-centre",
+          "banner": "Deployment unconfigured",
+          "axe": []
+        },
+        {
+          "width": 320,
+          "info": {
+            "client": 320,
+            "scroll": 320
+          },
+          "focus": "security-centre",
+          "banner": "Deployment unconfigured",
+          "axe": []
+        }
+      ]
+    },
+    "artifact": {
+      "id": 14591769900,
+      "name": "wallet-w15-5-browser-0458a1ceaadcde1ae4c65289b57e1e9f8bd27281",
+      "digest": "sha256:440571bb58c98f354efb3a4b41cad341840fbc935636707d3685eac700484f14",
+      "size_in_bytes": 95127075,
+      "expires_at": "2026-11-27T01:40:39Z"
+    }
+  },
+  "incidental_automatic_workflows": [
+    {
+      "id": 44655345419,
+      "name": "420 Wallet Web Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44655345450,
+      "name": "420 Wallet Extension Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44655345310,
+      "name": "420 Wallet Mobile Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "retained_prior_evidence": [
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.4-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.5-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.6-QUALIFICATION.json"
+  ],
+  "trust_boundary": "Own enumerable data-field snapshots only; no inherited/accessor/hidden/symbol fields; exact uint256 quantities, cap and uint208 voting constraints, bytes32 salts, UTF-8 round trip, aggregate 4096-byte calldata limit including selector and padding. Canonical factory decoder verifies offsets/lengths/UTF-8 and re-encodes byte-for-byte to reject aliasing, padding and trailing bytes. All four commitments (data, templateId, configHash, calldataHash) are mandatory before handoff RPC; configHash alone excludes salt and template by frozen design. Independent Cast compares selectors, entire calldata and both hashes on 32 vectors across all eight profiles. No contract, fee, registry authority or live binding changes. No new transaction execution authority.",
+  "aggregate_token_audit_5_complete": false,
+  "repository_release_qualified": false,
+  "live_testnet_qualified": false,
+  "next_canonical_step": "TOKEN-AUDIT-5 remaining Wallet-integrated work; no separately numbered 5.8 description in canonical repository roadmap",
+  "publication": "Documentation and evidence closeout only; exact executable/test inputs unchanged; no redundant qualification dispatched."
+}

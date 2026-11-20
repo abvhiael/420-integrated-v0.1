@@ -18,4 +18,4 @@
 
 Always verify canonical transaction/receipt state before resubmitting a transaction after a timeout, network change or reorg. Project registration and lifecycle actions remain governed; the creator panel prepares requests rather than mutating governance state.
 
-See the [consumer guide](user-guide.md), [fee explanation](fees.md), [security notes](security.md) and [recovery guidance](troubleshooting.md). Never disclose signing keys, recovery phrases or other secrets.
+For campaign creators, use the [Creator studio and governance guide](creator-guide.md). See the [consumer guide](user-guide.md), [fee explanation](fees.md), [security notes](security.md) and [recovery guidance](troubleshooting.md). Never disclose signing keys, recovery phrases or other secrets.

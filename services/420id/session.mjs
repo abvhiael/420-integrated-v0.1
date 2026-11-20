@@ -1,13 +1,17 @@
+import {installProfileUI} from './profile-ui.mjs';
 import {create420IDPasskey,authenticate420IDPasskey} from './browser.mjs';
 const get=id=>document.getElementById(id);
 let emailChallenge=null,registration=null,recovery=null,current=null,busy=false;
+let profileUI=null;
 const status=message=>{get('status').textContent=message;};
 function state(){
  for(const b of document.querySelectorAll('button')){
   b.disabled=busy||(b.id==='register'&&!registration)||(b.id==='replace'&&!recovery)
    ||((['renew','list','logout','logout-all'].includes(b.id)||b.dataset.revoke==='true')&&!current)
-   ||(b.id==='login'&&!!current)||(b.closest('#email-start')!==null&&!!current);
+   ||(b.id==='login'&&!!current)||(b.closest('#email-start')!==null&&!!current)
+   ||(b.dataset.profile==='true'&&!current);
  }
+ if(profileUI)profileUI.visibility();
  get('signed-in').textContent=current?'Signed in · idle expiry '+new Date(current.idleUntil).toLocaleString()+' · absolute expiry '+new Date(current.expiresAt).toLocaleString():'Signed out';
 }
 async function post(path,body){
@@ -20,7 +24,13 @@ function receipt(label,id){
  const li=document.createElement('li');li.textContent=label+': '+id;get('receipts').append(li);
 }
 function clearCeremonies(){emailChallenge=null;registration=null;recovery=null;get('secret').value='';get('email-finish').hidden=true;}
-async function refresh(){const r=await post('/v1/session/status',{});current=r.authenticated?r.session:null;get('sessions').replaceChildren();}
+async function refresh(){
+ const previous=current?.id??null;
+ const r=await post('/v1/session/status',{});
+ current=r.authenticated?r.session:null;
+ get('sessions').replaceChildren();
+ if(profileUI&&(current?.id??null)!==previous)profileUI.clear();
+}
 async function run(action){
  if(busy)return;busy=true;state();
  try{await action()}catch(error){status(error instanceof Error?error.message:'Request could not be completed.');try{await refresh()}catch{}}
@@ -34,6 +44,7 @@ get('email-finish').addEventListener('submit',event=>{event.preventDefault();voi
  const secret=get('secret').value;get('secret').value='';
  const r=await post('/v1/email/finish',{challengeId:emailChallenge,secret,recover:get('recover').checked});
  clearCeremonies();receipt('Email verified',r.receipt);registration=r.registration??null;recovery=r.recovery??null;current=r.session??null;
+ profileUI.clear();
  status(recovery?'Mailbox verified. Confirm replacement with a different passkey. Existing credentials remain valid until successful replacement.':'Signed in. You may create an initial passkey if offered.');
 })});
 get('register').addEventListener('click',()=>void run(async()=>{
@@ -44,11 +55,11 @@ get('replace').addEventListener('click',()=>void run(async()=>{
  const options=recovery;recovery=null;
  const r=await post('/v1/recovery/finish',await create420IDPasskey(options));
  if(!r.recovered)throw new Error('Replacement failed.');
- current=null;status('Passkey replaced and prior sessions revoked. Sign in using your new passkey.');
+ current=null;profileUI.clear();status('Passkey replaced and prior sessions revoked. Sign in using your new passkey.');
 }));
 get('login').addEventListener('click',()=>void run(async()=>{
  const opt=await post('/v1/passkey/start',{});const r=await post('/v1/passkey/finish',await authenticate420IDPasskey(opt));
- receipt('Passkey verified',r.receipt);current=r.session;clearCeremonies();status('Signed in with passkey.');
+ receipt('Passkey verified',r.receipt);current=r.session;profileUI.clear();clearCeremonies();status('Signed in with passkey.');
 }));
 get('renew').addEventListener('click',()=>void run(async()=>{current=(await post('/v1/session/renew',{})).session;status('Session renewed.');}));
 get('list').addEventListener('click',()=>void run(async()=>{
@@ -60,6 +71,7 @@ get('list').addEventListener('click',()=>void run(async()=>{
  }
 }));
 for(const [button,path] of [['logout','/v1/session/logout'],['logout-all','/v1/session/revoke-all']]){
- get(button).addEventListener('click',()=>void run(async()=>{await post(path,{});current=null;clearCeremonies();get('sessions').replaceChildren();status('Signed out.');}));
+ get(button).addEventListener('click',()=>void run(async()=>{await post(path,{});current=null;profileUI.clear();clearCeremonies();get('sessions').replaceChildren();status('Signed out.');}));
 }
+profileUI=installProfileUI({get,post,run,status,isAuthenticated:()=>!!current});
 void run(refresh);

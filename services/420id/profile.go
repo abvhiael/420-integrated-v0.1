@@ -80,17 +80,14 @@ func scanProfile(row interface{Scan(...any)error})(UniversalProfile,error){
 // MyProfile requires a current, application-scoped AUTH-3 session. It does
 // not create a profile row as a side-effect of a read.
 func (m *SessionManager) MyProfile(ctx context.Context,token string)(UniversalProfile,error){
- tx,e:=m.auth.store.db.BeginTx(ctx,&sql.TxOptions{ReadOnly:true})
+ tx,e:=m.auth.store.db.BeginTx(ctx,nil)
  if e!=nil{return UniversalProfile{},e}
  defer tx.Rollback()
- // The standard session lock requires a write-capable transaction, so use
- // one consistent joined view for both session and profile authorization.
- digest,e:=tokenDigest(token);if e!=nil{return UniversalProfile{},e}
- var accountID AccountID
- e=tx.QueryRowContext(ctx,"SELECT s.account_id FROM account420.sessions s JOIN account420.accounts a ON a.id=s.account_id WHERE s.token_digest=$1 AND s.app_id=$2 AND s.rp_id=$3 AND s.revoked_at IS NULL AND s.idle_until>clock_timestamp() AND s.expires_at>clock_timestamp() AND a.status='active' AND a.revision=s.account_revision",digest,m.app,m.auth.rp).Scan(&accountID)
- if errors.Is(e,sql.ErrNoRows){return UniversalProfile{},ErrAuthentication}
+ // Lock the same AUTH-3 account/session boundary used for mutations so a
+ // lifecycle transition or token revocation cannot race this owner read.
+ session,e:=m.lockedSession(ctx,tx,token)
  if e!=nil{return UniversalProfile{},e}
- result,e:=scanProfile(tx.QueryRowContext(ctx,"SELECT "+profileColumns+" FROM account420.profiles WHERE account_id=$1",accountID))
+ result,e:=scanProfile(tx.QueryRowContext(ctx,"SELECT "+profileColumns+" FROM account420.profiles WHERE account_id=$1",session.account))
  if errors.Is(e,sql.ErrNoRows){result=UniversalProfile{Visibility:"private",Revision:0};e=nil}
  if e!=nil{return UniversalProfile{},e}
  if e=tx.Commit();e!=nil{return UniversalProfile{},e}
@@ -161,7 +158,7 @@ func (m *SessionManager) LookupPublicProfile(ctx context.Context,username string
  normalized,e:=canonicalUsername(username)
  if e!=nil||normalized==""{return UniversalProfile{},ErrInvalid}
  p,e:=scanProfile(m.auth.store.db.QueryRowContext(ctx,
-  "SELECT "+profileColumns+" FROM account420.profiles p JOIN account420.accounts a ON a.id=p.account_id WHERE p.username=$1 AND p.visibility='public' AND a.status='active'",normalized))
+  "SELECT p.profile_id,COALESCE(p.username,''),p.display_name,p.bio,p.avatar_ref,p.visibility,p.revision FROM account420.profiles p JOIN account420.accounts a ON a.id=p.account_id WHERE p.username=$1 AND p.visibility='public' AND a.status='active'",normalized))
  if errors.Is(e,sql.ErrNoRows){return UniversalProfile{},ErrUnavailable}
  return p,e
 }

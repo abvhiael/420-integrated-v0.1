@@ -12,7 +12,7 @@ export function validateRuntimeConfig(config){
   if(config.network?.chainId!==null&&!HEX_CHAIN.test(config.network.chainId))throw new Error('invalid chainId');
   for(const key of ['rpcUrl','explorerUrl'])if(!nullableHttps(config.network?.[key]))throw new Error('invalid network URL');
   if(!nullableHttps(config.api?.baseUrl))throw new Error('invalid Launchpad API URL');
-  for(const key of ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress']){
+  for(const key of ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress','payRouterAddress','approvedInputAsset']){
     const v=config.registry?.[key];if(v!==null&&!ADDRESS.test(v))throw new Error('invalid configured contract address');
   }
   return config;

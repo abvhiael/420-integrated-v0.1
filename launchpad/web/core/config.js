@@ -13,7 +13,7 @@ export function validateRuntimeConfig(config){
   for(const key of ['rpcUrl','explorerUrl'])if(!nullableHttps(config.network?.[key]))throw new Error('invalid network URL');
   if(!nullableHttps(config.api?.baseUrl))throw new Error('invalid Launchpad API URL');
   for(const key of ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress','payRouterAddress','approvedInputAsset']){
-    const v=config.registry?.[key];if(v!==null&&!ADDRESS.test(v))throw new Error('invalid configured contract address');
+    const v=config.registry?.[key];if(v!=null&&!ADDRESS.test(v))throw new Error('invalid configured contract address');
   }
   return config;
 }

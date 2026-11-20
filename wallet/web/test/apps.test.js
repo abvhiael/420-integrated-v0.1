@@ -70,3 +70,25 @@ test('Pay discovery presents the approved catalogue entry without allowing manif
   assert.equal(pay.releaseStage, 'approved');
   assert.equal(pay.classification, 'GENESIS_PROTOCOL_AND_USER_APP');
 });
+
+test('Token is Wallet-integrated and never gains an external link from a manifest or generic Registry navigation',async()=>{
+  const {normalizeGenesisServiceEntry420,discoverGenesisServices420}=await import('../core/genesis-wallet-integration420.js');
+  const token=APP_SERVICES.find(app=>app.id==='token');
+  assert.equal(token.walletIntegrated,true);
+  assert.equal(token.requiresVerifiedRegistry,true);
+  const candidate={id:token.id,name:token.name,serviceId:token.serviceId,approved:true,available:true,verified:true,
+    origin:'https://fake-token.example',url:'https://fake-token.example/',chainId:'0x1a4',version:1,releaseStage:'testnet'};
+  const responses=[{manifest:{url:'https://manifest.example/apps.json'}},
+    {schema:'420-ecosystem-manifest-v1',verified:true,services:[candidate]}];
+  const {apps}=await loadVerifiedApps(async()=>({ok:true,json:async()=>responses.shift()}));
+  const t=apps.find(app=>app.id==='token');
+  assert.equal(t.available,false);assert.equal(t.url,null);assert.equal(t.verified,false);
+  assert.equal(buildAppCatalog([candidate])[0].url,null);
+  assert.throws(()=>normalizeGenesisServiceEntry420(candidate,'0x1a4'),/dedicated runtime discovery/);
+  let reads=0;
+  const verified=await discoverGenesisServices420({request:async()=>{reads++;throw Error('unexpected RPC')}},
+    {registry:{address:'0x'+'11'.repeat(20),codeHash:'0x'+'22'.repeat(32),chainId:'0x1a4',environment:'testnet'},
+      services:[candidate],chainId:'0x1a4'});
+  assert.deepEqual(verified,[]);
+  assert.equal(reads,0);
+});

@@ -32,6 +32,7 @@ export function normalizeGenesisServiceEntry420(entry,selectedChain){
  check(entry&&entry.approved===true,'Genesis service has not been release-approved');
  check(typeof entry.serviceId==='string'&&canonical.has(entry.serviceId),'Unknown or noncanonical Genesis service ID');
  const meta=canonical.get(entry.serviceId);
+ check(meta.walletIntegrated!==true,'Wallet-integrated service requires its dedicated runtime discovery');
  check(entry.id===meta.id&&entry.name===meta.name,'Genesis catalogue identity mismatch');
  check(chainId(entry.chainId)===chainId(selectedChain),'Service published on a different chain');
  check(Number.isSafeInteger(entry.version)&&entry.version>0&&entry.version<=0xffffffff,'Invalid service version');

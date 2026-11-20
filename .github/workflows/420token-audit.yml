@@ -16,6 +16,15 @@ on:
       - 'scripts/verify-420token-audit.py'
       - 'scripts/stage-420token-qualification.py'
       - 'wallet/web/core/token-*.js'
+      - 'wallet/web/core/config.js'
+      - 'wallet/web/core/genesis-app-catalog.js'
+      - 'wallet/web/core/genesis-wallet-integration420.js'
+      - 'wallet/web/runtime-config.json'
+      - 'wallet/web/scripts/generate-runtime-config.mjs'
+      - 'wallet/web/app.js'
+      - 'wallet/web/apps-page.js'
+      - 'wallet/web/test/apps.test.js'
+      - 'wallet/web/test/runtime-config-generator.test.js'
       - 'wallet/web/test/token-*.js'
       - 'testnet/public-services/token/readiness.json'
       - '.github/workflows/420token-audit.yml'
@@ -76,7 +85,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           python3 scripts/verify-420token-audit.py
       - name: Run Wallet Token SDK and runtime qualification
-        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/w15-8-genesis-integration.test.js
+        run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-discovery.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js
   qualify:
     needs: scope
     if: needs.scope.outputs.contracts == 'true'

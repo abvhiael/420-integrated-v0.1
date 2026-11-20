@@ -1,5 +1,7 @@
 import { CORE_SERVICES, validateRuntimeConfig } from './core/config.js';
 import { InjectedProvider420 } from './core/provider.js';
+import { walletTokenDiscovery420 as tokenDiscovery } from './core/token-discovery.js';
+import { installProviderLifecycle } from './core/provider-lifecycle.js';
 import { discoverSmartAccount } from './core/accounts.js';
 import { inspectCapabilityGrant } from './core/capabilities.js';
 import {
@@ -47,6 +49,8 @@ const state = {
   treasurySubmitted: null,
   treasuryBusy: false,
 };
+
+let detachTokenLifecycle = ()=>{};
 
 const $ = (selector) => document.querySelector(selector);
 const shortAddress = (address) => address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '—';
@@ -244,6 +248,8 @@ function render() {
   publishWalletVerificationState420();
 
   const list = $('#services');
+  // The dedicated Apps page owns the grid once initialized.
+  if (!list || list.closest('#services-section')?.dataset.appsPageInitialized === 'true') return;
   list.replaceChildren();
   for (const service of state.services) {
     const item = document.createElement('a');
@@ -264,6 +270,7 @@ async function loadConfig() {
   const config = await response.json();
   validateRuntimeConfig(config);
   state.config = config;
+  tokenDiscovery.invalidate(config.token ? 'disconnected' : 'unconfigured');
   if (config.manifest?.url) {
     const manifestResponse = await fetch(config.manifest.url, { cache: 'no-store' });
     if (!manifestResponse.ok) throw new Error(`ecosystem manifest ${manifestResponse.status}`);
@@ -272,6 +279,7 @@ async function loadConfig() {
 }
 
 async function refreshConnectedState() {
+  tokenDiscovery.invalidate('disconnected');
   state.network = null;
   state.smartAccount = null;
   state.portfolio = { native: [], tokens: [] };
@@ -293,11 +301,20 @@ async function refreshConnectedState() {
   state.lastSimulation = null;
   state.capabilityInspection = null;
   render();
+  // Keep the main Wallet usable while read-only Token verification runs.
+  void tokenDiscovery.refresh({provider:state.provider,config:state.config,controller:state.controller,smartAccount:state.smartAccount});
 }
 
 async function connectInjectedWallet() {
   if (!globalThis.ethereum) throw new Error('No injected EIP-1193 wallet found');
+  detachTokenLifecycle();
+  tokenDiscovery.invalidate('disconnected');
   state.provider = new InjectedProvider420(globalThis.ethereum);
+  detachTokenLifecycle = installProviderLifecycle(state.provider,{
+    accountsChanged:()=>tokenDiscovery.invalidate('disconnected'),
+    chainChanged:()=>tokenDiscovery.invalidate('disconnected'),
+    disconnect:()=>tokenDiscovery.invalidate('disconnected'),
+  });
   const accounts = await state.provider.requestAccounts();
   state.controller = accounts?.[0]?.toLowerCase() || null;
   if (!state.controller) throw new Error('No account authorized');
@@ -315,6 +332,7 @@ $('#connect').addEventListener('click', async () => {
         ? 'Canonical Smart Account loaded. Guarded owner execution, capability management, and session-key administration are available.'
         : 'Counterfactual Smart Account discovered. Creation is available with explicit wallet approval.';
   } catch (error) {
+    tokenDiscovery.invalidate('blocked');
     state.smartAccount = null;
     state.portfolio = { native: [], tokens: [] };
     $('#status').textContent = error.message;
@@ -529,6 +547,7 @@ $('#treasury-check-receipt').addEventListener('click',()=>treasuryOperation(asyn
 loadConfig().then(() => {
   render();
 }).catch((error) => {
+  tokenDiscovery.invalidate('blocked');
   $('#status').textContent = `Configuration warning: ${error.message}`;
   render();
   publishWalletVerificationState420('failure',error.message);

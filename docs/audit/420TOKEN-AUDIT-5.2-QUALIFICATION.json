@@ -1,0 +1,212 @@
+{
+  "schema": "420-token-audit-5.2-exact-implementation-qualification-v1",
+  "step": "TOKEN-AUDIT-5.2",
+  "status": "QUALIFIED_VERIFIED_RUNTIME_DISCOVERY_ONLY",
+  "qualified_implementation_sha": "44da87e1e8e2d6999a6742428059f2511dd5adae",
+  "reconciled_main": "8df7987819bbb7c5dd70ee1dfee1a1793d02161f",
+  "pr": 1239,
+  "qualification": {
+    "workflow": ".github/workflows/420token-audit.yml",
+    "run_id": 44638784126,
+    "jobs": {
+      "scope": {
+        "id": 135964103178,
+        "conclusion": "success"
+      },
+      "wallet-sdk": {
+        "id": 135964436735,
+        "conclusion": "success"
+      },
+      "qualify": {
+        "id": 135964438736,
+        "conclusion": "skipped"
+      },
+      "security": {
+        "id": 135964438951,
+        "conclusion": "skipped"
+      }
+    },
+    "exact_head_checkout": true,
+    "repository_verifier": "PASS",
+    "tests_passed": 84,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "tests_cancelled": 0,
+    "new_discovery_tests": 9,
+    "new_inventory_generator_tests": 1,
+    "new_catalogue_bypass_tests": 1,
+    "passed_test_names": [
+      "app catalog includes expected core ecosystem gateways and metadata",
+      "app filtering supports category and free-text search without changing trust state",
+      "420 Apps discovery enables only services from a verified manifest",
+      "420 Apps discovery fails closed on unverified manifest",
+      "420 Apps discovery leaves everything unavailable until a manifest is configured",
+      "Pay discovery presents the approved catalogue entry without allowing manifest-only launch",
+      "Token is Wallet-integrated and never gains an external link from a manifest or generic Registry navigation",
+      "runtime config accepts deferred production endpoints and smart account deployment",
+      "runtime config rejects malformed canonical smart account factory address",
+      "verified manifest resolves known core services and leaves missing services unavailable",
+      "unverified ecosystem manifest fails closed",
+      "json rpc provider sends standard JSON-RPC request",
+      "factory calldata uses canonical SmartAccountFactory420 selectors",
+      "smart account discovery fails closed when canonical factory has no code",
+      "counterfactual smart account discovery predicts through deployed factory and confirms no account code",
+      "deployed smart account state is read from SmartAccount420 getters",
+      "creation preparation builds only the canonical factory transaction for a counterfactual account",
+      "creation send requires explicit provider transaction approval and returns hash",
+      "creation is idempotent and does not send when account is already deployed",
+      "confirmed creation re-reads SmartAccount420 and verifies controller ownership",
+      "confirmed creation fails closed on reverted receipt",
+      "confirmed creation fails closed when resulting owner differs from controller",
+      "creation rejects malformed provider transaction hashes",
+      "network reads flag a chain mismatch fail-closed condition",
+      "portfolio reads native balances for controller and smart account",
+      "ABI address decoder rejects malformed responses",
+      "remote JSON-RPC transport cannot become a server-side signing or broadcasting authority",
+      "RPC transport rejects mismatched JSON-RPC ids and malformed code assertions",
+      "Wallet accepts disabled sponsorship or HTTPS quote endpoint without credentials in static config",
+      "Wallet refuses insecure remote quote endpoint and embedded service credentials",
+      "W14.5 Wallet catalogue uses only canonical Genesis service IDs",
+      "W14.5 reconciles required Wallet-visible Genesis services",
+      "W14.5 removes stale noncanonical service aliases from verified app gateway",
+      "W14.5 records named Genesis products that still lack distinct canonical service IDs",
+      "W14.5 catalogue has unique ids and service IDs",
+      "W14.2 builds deterministic live-testnet runtime config from qualified inputs",
+      "W14.2 fails closed against the current unresolved W14.1 inventory",
+      "W14.2 rejects manifest chain-id drift",
+      "W14.2 rejects insecure public RPC endpoints",
+      "W14.2 rejects unresolved authority states even when release gates claim ready",
+      "W14.2 requires Explorer and Faucet publication for testnet",
+      "W14.2 refuses live Stake runtime binding when frozen app addresses are not chain-verified",
+      "qualified runtime generator rejects retired Wallet factory authority",
+      "qualified runtime generator rejects fake unverified Wallet deployment",
+      "qualified runtime generator preserves canonical Registry, Names and Identity",
+      "Token runtime generation uses only bound deployment inventory and clears stale base pins",
+      "offline Wallet production defaults contain no Token release candidate or live address",
+      "same-origin Wallet config requires full approved release, environment, chain and shared authority binding",
+      "connected Wallet discovers the active Registry release, all template profiles and fresh selected SmartAccount",
+      "counterfactual account discovery and non-owner accounts remain read-only",
+      "discovery rejects changed controller, account, chain, missing factory, wrong EntryPoint and capability bindings",
+      "discovery rejects late account, chain, canonical-block changes after runtime verification",
+      "Registry deactivation, wrong code, disabled templates and RPC failure are handled without stale availability",
+      "inflight discovery cannot resurrect stale state after disconnect or a newer discovery",
+      "discovery results do not grant signing or spending authority and are not accepted from wallet catalogue events",
+      "420Token runtime requires distinct verified factory, registry and Vault identities",
+      "420Token runtime fails closed on wrong service, version or Vault identity",
+      "420Token handoff preserves SmartAccount420 authority and exact fee",
+      "420Token handoff rejects wrong factory, fee and empty calldata before wallet execution",
+      "shape-only or aliased release records cannot authorize a handoff",
+      "canonical eight SDK profiles agree with frozen Genesis config, Solidity identity and profile commitments",
+      "ERC20 encoding uses exact Solidity ABI words, dynamic offsets, UTF-8 and base-unit supply",
+      "ERC721 and ERC1155 encodings use exact ABI layouts and distinct config hashes",
+      "all eight drafts are canonical, immutable, JSON-safe and distinguish feature semantics",
+      "draft validation rejects noncanonical templates, cap misuse, unsafe numeric values and oversized or malformed fields",
+      "real TOKEN-AUDIT-4 Registry dependency commitment is reproduced exactly by the SDK",
+      "runtime verifies all dependencies, active Registry records, every template and canonical block",
+      "every frozen profile prepares exact SmartAccount calldata, fee, configuration and explicit-review state",
+      "runtime rejects wrong chain, wrong genesis, absent code, wrong code and reorganized snapshots",
+      "runtime rejects wrong service, component, release commitments, immutables, Vault registration and template profiles",
+      "disabled templates are visible but cannot be prepared; a disable during simulation rejects the handoff",
+      "SmartAccount simulation, gas failures, ownership and chain changes remain fail-closed",
+      "W15.8 catalogue identities come from canonical Solidity service IDs, not aliases or named products",
+      "live ProtocolRegistry service identity, implementation code, metadata and navigation are independently verified",
+      "malformed, revoked, stale and counterfeit Registry records fail closed",
+      "service manifest spoofing and malformed destinations cannot enter verified directory",
+      "verified directory omits unavailable services, rejects duplicate identities and ignores stale registry data",
+      "launch rechecks immutable URL, version, implementation and account/network; no implicit grant",
+      "existing Names name normalizer blocks unicode and case lookalikes and catches retargeting between checks",
+      "420Gas funding offers and 420Token deployment remain outside app navigation authority",
+      "Identity420 binding is current, scoped, read-only, bilateral if claimed, never owner/signing authority",
+      "Pay release discovery uses the canonical Registry key and a credential-free endpoint check",
+      "Pay discovery blocks unreleased, wrong-chain, unresolved and disabled entries before probing",
+      "Pay is omitted from discovery when its endpoint is unreachable or redirected"
+    ],
+    "changed_paths": [
+      ".github/workflows/420token-audit.yml",
+      ".qualification/candidates/TOKEN-AUDIT-5.2-runtime-discovery.json",
+      "wallet/web/app.js",
+      "wallet/web/apps-page.js",
+      "wallet/web/core/config.js",
+      "wallet/web/core/genesis-app-catalog.js",
+      "wallet/web/core/genesis-wallet-integration420.js",
+      "wallet/web/core/token-app.js",
+      "wallet/web/core/token-discovery.js",
+      "wallet/web/runtime-config.json",
+      "wallet/web/scripts/generate-runtime-config.mjs",
+      "wallet/web/test/apps.test.js",
+      "wallet/web/test/runtime-config-generator.test.js",
+      "wallet/web/test/token-discovery.test.js"
+    ],
+    "rpc_tests": "Deterministic simulated RPC responses, including real SDK release checks, fresh account discovery and stale block/account/chain adversaries; no live network claims."
+  },
+  "incidental_automatic_workflows": [
+    {
+      "id": 44638784160,
+      "name": "420 Wallet Web Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44638784151,
+      "name": "420 Wallet Mobile Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44638784009,
+      "name": "420 Wallet Extension Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44638783963,
+      "name": "420Stake STAKE-AUDIT-5",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44638784038,
+      "name": "420Identity ID-AUDIT-7",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44638784070,
+      "name": "420Wallet W15.5 Browser Accessibility Qualification",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 44638784003,
+      "name": "420Grants Audit Qualification",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "retained_wallet_full_regression": {
+    "run_id": 44638784038,
+    "job_id": 135964103004,
+    "tests_passed": 629,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "conclusion": "success",
+    "scope": "Automatically triggered Identity qualification, not manually dispatched."
+  },
+  "browser_regression": {
+    "run_id": 44638784070,
+    "job_id": 135964102781,
+    "conclusion": "success"
+  },
+  "retained_prior_evidence": [
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json"
+  ],
+  "trust_boundary": "Token pins are supplied only from the Wallet's verified deployment inventory at runtime config generation, not a public ecosystem service manifest. Same-origin Wallet config is a trusted deployment input, not live proof. Discovery reuses the canonical read-only Wallet provider and fresh SmartAccount resolution; result is informational only and grants no account, signing or spending authority. The Wallet catalogue has no external Token launch URL. No production/testnet pin exists in the repository default. Actual live evidence and subsequent application creation/review/submission UI remain open.",
+  "aggregate_token_audit_5_complete": false,
+  "repository_release_qualified": false,
+  "live_testnet_qualified": false,
+  "next_canonical_step": "TOKEN-AUDIT-5 (remaining Wallet-integrated work; no separately numbered 5.3 description exists in current canonical roadmap)",
+  "publication": "Evidence-only closeout; exact tested executable inputs unchanged. Automatic cross-app qualification is recorded as observed; unrelated Solidity jobs were not manually dispatched."
+}

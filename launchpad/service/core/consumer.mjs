@@ -101,14 +101,26 @@ export async function position(rpc,rt,saleId,account){
   const remaining=BigInt(sale.hardCap)-BigInt(sale.raised),walletRemaining=BigInt(sale.perWalletCap)-contributed;
   if(remaining<0n||walletRemaining<0n)throw new Error('invalid sale capacity');
   const expectedClaim=BigInt(sale.raised)>0n?BigInt(sale.tokenAllocation)*contributed/BigInt(sale.raised):0n;
+  // Claim and refund authorizations are distinct sale-scoped capabilities.
+  // A valid Identity credential alone never grants these actions.
+  const auth=await readAddress(rpc,rt.allocationRegistryAddress,'authorization()');
+  async function allowed(action,quantity){
+    const actionId=await rpc.call('web3_sha3',[hexUtf8(action)]);
+    return readBool(rpc,auth,'isAuthorized(address,bytes32,bytes32,uint256)',
+      [wordAddress(who),wordHex(sale.saleId),wordHex(actionId),wordUint(quantity)]).catch(()=>false);
+  }
+  const [claimAuthorized,refundAuthorized]=await Promise.all([
+    allowed('420/LAUNCHPAD/ACTION/CLAIM/V1',0n),
+    contributed>0n?allowed('420/LAUNCHPAD/ACTION/REFUND/V1',contributed):Promise.resolve(false)]);
   return {schema:'420-launchpad-position-v1',canonical:true,source,sale,project,identity,
+    permissions:{claim:claimAuthorized,refund:refundAuthorized},
     contributed:contributed.toString(),claimed:claimed.toString(),refunded,
     remaining:remaining.toString(),walletRemaining:walletRemaining.toString(),history,
     campaignMode:mode,integrated:activeIntegration.toLowerCase()===crowd.toLowerCase(),
     paymentReferenceLimit:Number(maxReferences),
     preparedRefundCommitment:zero(prepared)?null:prepared,deliveryAttestation:zero(attested)?null:attested,
     claimable:sale.state==='SUCCEEDED'&&source.at>=sale.claimStartsAt&&contributed>0n&&claimed===0n
-      &&expectedClaim>0n&&!refunded&&!!attested&&history.every(p=>p.status==='SETTLED'),
+      &&expectedClaim>0n&&!refunded&&!!attested&&claimAuthorized&&history.length>0&&history.every(p=>p.status==='SETTLED'),
     expectedClaim:expectedClaim.toString(),dispute,
     eligibility:identity.bound?'ELIGIBLE':!identity.profileId?'IDENTITY_PROFILE_NOT_BOUND':!identity.owner?'PROFILE_NOT_OWNED':!identity.active?'PROFILE_INACTIVE':!identity.credentialValid?'CREDENTIAL_INVALID':'SALE_PROFILE_MISMATCH',
     fees:{known:false,reason:'Final 420Pay checkout quote and wallet gas fees must be reviewed in 420Pay and Wallet'}};
@@ -141,13 +153,19 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   const registered=await readBool(rpc,crowd,'registeredContributionIntent(bytes32)',[wordHex(invoiceId)]);
   const registry=await paymentRegistry(rpc,rt);
   const paymentId=await readSingle(rpc,registry,'checkoutPaymentForInvoice(bytes32)',[wordHex(invoiceId)]);
-  let confirmedPayment=null;
+  let confirmedPayment=null,unallocatedRefund=null;
   if(!zero(paymentId)){
     confirmedPayment=await payment(rpc,registry,paymentId);
     if(confirmedPayment.invoiceId!==invoiceId||confirmedPayment.payer.toLowerCase()!==who||
        confirmedPayment.merchant.toLowerCase()!==sale.proceedsReceiver.toLowerCase()||
        confirmedPayment.settlementAmount!==principal.toString()||
        confirmedPayment.settlementAsset.toLowerCase()!==sale.paymentAsset.toLowerCase())throw new Error('payment does not match the campaign intent');
+    if(['SETTLED','REFUNDED','PARTIALLY_REFUNDED'].includes(confirmedPayment.status)){
+      const d=await call(rpc,crowd,'refundProgress(bytes32,address,uint128)',
+        [wordHex(paymentId),wordAddress(who),wordUint(principal)]);
+      unallocatedRefund={authorized:numeric(decodeUint(d,0)),delivered:numeric(decodeUint(d,1)),
+        principalDelivered:numeric(decodeUint(d,2)),complete:decodeUint(d,2)===principal};
+    }
   }
   const payRegistry=await readAddress(rpc,registry,'registry()');
   const key=await rpc.call('web3_sha3',['0x'+Buffer.from('420/APP/420PAY/INVOICE_REGISTRY').toString('hex')]);
@@ -164,10 +182,12 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
   if(!registered&&(invoiceExists||confirmedPayment))throw new Error('unregistered payment intent');
   return {schema:'420-launchpad-checkout-v1',canonical:true,source:p.source,saleId:sale.saleId,amount:principal.toString(),nonce:nonce.toString(),
     invoiceId,registered,invoiceExists,paymentId:zero(paymentId)?null:paymentId,
-    paymentStatus:confirmedPayment?.status||null,recorded:confirmedPayment?await readBool(rpc,crowd,'usedPaymentId(bytes32)',[wordHex(paymentId)]):false,
+    paymentStatus:confirmedPayment?.status||null,unallocatedRefund,recorded:confirmedPayment?await readBool(rpc,crowd,'usedPaymentId(bytes32)',[wordHex(paymentId)]):false,
     canContribute,capabilityAuthorized,checkoutUrl:registered&&invoiceExists&&/^0x0{40}$/i.test(sale.paymentAsset)?'https://420pay.420integrated.org/#pay?v=1&kind=invoice&chain='+BigInt(p.source.chainId).toString()+'&id='+invoiceId:null,
     next:!registered?(canContribute?'REGISTER_INTENT':'CONTRIBUTION_UNAVAILABLE'):!invoiceExists?'WAIT_FOR_MERCHANT_INVOICE':!confirmedPayment?(canContribute?'QUOTE_CONVERSION':'RECOVER_OR_EXPIRED'):
-      confirmedPayment.status!=='SETTLED'?'AWAIT_CANONICAL_SETTLEMENT':'RECORD_CONTRIBUTION',fees:p.fees};
+      confirmedPayment.status==='REFUNDED'||confirmedPayment.status==='PARTIALLY_REFUNDED'?'REFUND_RECOVERY':
+      confirmedPayment.status!=='SETTLED'?'AWAIT_CANONICAL_SETTLEMENT':
+      !canContribute?'RECOVER_OR_EXPIRED':'RECORD_CONTRIBUTION',fees:p.fees};
 }
 export async function transactionStatus(rpc,rt,txHash,account){
   const id=hash(txHash),who=address(account);

@@ -12,3 +12,6 @@ export { validateERC721WizardFields420, createERC721Wizard420 } from './token-er
 export { resolveERC1155MetadataURI420, validateERC1155WizardFields420, createERC1155Wizard420 } from './token-erc1155-wizard.js';
 export { createTokenFeeReview420 } from './token-fee-review.js';
 export { readTokenDeployment420 } from './token-deployment.js';
+export {readCreatedTokenPage420,TOKEN_PORTFOLIO_PAGE_SIZE_420} from './token-portfolio.js';
+export {tokenManagementActions420,encodeTokenManagement420,prepareTokenManagement420,sameTokenManagementReview420,readTokenManagementReceipt420} from './token-management.js';
+export {inspectTokenPermissions420,describeTokenManagementRisk420} from './token-management.js';

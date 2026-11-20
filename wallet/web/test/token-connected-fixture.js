@@ -1,7 +1,7 @@
 // Browser-safe deterministic connected Wallet RPC fixture shared by discovery and catalogue tests.
 import {encodeGetAddress,encodeAddressGetter,encodeUintGetter,encodeExecute,ZERO_ADDRESS,ZERO_BYTES32} from '../core/abi.js';
 import {fixture,abi,addr,controller,account,state,digest,vaultHash} from './token-test-fixture.js';
-import {tokenReadCall420,decodeTokenCreation420,tokenHashText420} from '../core/token-sdk.js';
+import {tokenReadCall420,decodeTokenCreation420,tokenHashText420,TOKEN_TEMPLATES_420,tokenEncodeAbi420,tokenSelector420} from '../core/token-sdk.js';
 
 export function connected() {
   const f=fixture();
@@ -13,7 +13,7 @@ export function connected() {
     token:{environment:'testnet',binding:f.binding}};
   const selected={...state,expectedChainId:'0x1a4',capabilityRegistry:config.deployment.capabilityRegistryAddress};
   const control={accounts:[controller],owner:controller,account,accountDeployed:true,factoryDeployed:true,
-    entryPoint:state.entryPoint,capabilityRegistry:config.deployment.capabilityRegistryAddress,afterAccountRead:null,epoch:1,policyVersion:1,gasPrice:'0x3b9aca00',gasEstimate:'0x100000',
+    entryPoint:state.entryPoint,capabilityRegistry:config.deployment.capabilityRegistryAddress,afterAccountRead:null,epoch:1,policyVersion:1,recoveryAuthority:ZERO_ADDRESS,pendingRecoveryOwner:ZERO_ADDRESS,recoveryExecutableAt:0,accountCode:'0x6002',gasPrice:'0x3b9aca00',gasEstimate:'0x100000',
     smartBalance:'0x'+(100n*10n**18n).toString(16),controllerBalance:'0x'+(10n**18n).toString(16),
     simulationResult:abi(32,32,addr(77)),creatorNonce:0,simulationError:null,estimateError:null,onEstimate:null};
   const calls=[];
@@ -25,7 +25,7 @@ export function connected() {
     if(method==='eth_estimateGas'){if(control.estimateError)throw Error(control.estimateError);control.onEstimate?.();return control.gasEstimate;}
     if(method==='eth_getCode' && (args[0]===state.factoryAddress||args[0]===control.account)&&(args[1]==='latest'||args[1]==='0x10')){
       if(args[0]===state.factoryAddress)return control.factoryDeployed?'0x6001':'0x';
-      if(args[0]===control.account)return control.accountDeployed?'0x6002':'0x';
+      if(args[0]===control.account)return control.accountDeployed?control.accountCode:'0x';
       throw Error('unexpected latest code read');
     }
     if(method==='eth_call'&&args[0].to===f.binding.factory.address&&args[0].data===tokenReadCall420('creatorNonce(address)',['address'],[control.account]))return abi(control.creatorNonce);
@@ -38,11 +38,11 @@ export function connected() {
       if(to===control.account){
         const getters=new Map([
           [encodeAddressGetter('owner'),abi(control.owner)],
-          [encodeAddressGetter('recoveryAuthority'),abi(ZERO_ADDRESS)],
+          [encodeAddressGetter('recoveryAuthority'),abi(control.recoveryAuthority)],
           [encodeUintGetter('authorizationEpoch'),abi(control.epoch)],
           [encodeUintGetter('authorizationPolicyVersion'),abi(control.policyVersion)],
-          [encodeAddressGetter('pendingRecoveryOwner'),abi(ZERO_ADDRESS)],
-          [encodeUintGetter('recoveryExecutableAt'),abi(0)],
+          [encodeAddressGetter('pendingRecoveryOwner'),abi(control.pendingRecoveryOwner)],
+          [encodeUintGetter('recoveryExecutableAt'),abi(control.recoveryExecutableAt)],
           [encodeAddressGetter('entryPoint'),abi(control.entryPoint)],
           [encodeAddressGetter('capabilityRegistry'),abi(control.capabilityRegistry)],
         ]);
@@ -86,6 +86,97 @@ export function enableTokenSubmissionFixture420(f){
     if(method==='eth_getBlockByNumber'&&args[0]==='0x10'&&control.reorganized){f.calls.push([method,args]);return {number:'0x10',hash:digest(999)};}
     if(method==='eth_getCode'&&args[0]===addr(77)&&args[1]==='0x10'){f.calls.push([method,args]);return '0x6001';}
     if(method==='eth_call'&&args[0].to===f.binding.factory.address&&args[0].data===tokenReadCall420('isFactoryDeployment(address)',['address'],[addr(77)])){f.calls.push([method,args]);return abi(1);}
+    return original(method,args);
+  };
+  return control;
+}
+
+ // Canonical factory portfolio fixture: deliberately independent of send history.
+export function enableTokenPortfolioFixture420(f,rows=[]){
+  const original=f.provider.request,controls={rows,receiptUnavailable:false,corruptFee:false,corruptTemplate:false,reorg:false,duplicate:false,wrongCount:null,unsafeMetadata:false,onRead:null};
+  const txs=new Map();const blockHash=f.tokenControl.canonicalHash,tag='0x10',timestamp='0x64';
+  const topic=tokenHashText420('TokenDeployed(address,address,bytes32,uint32,bytes32,uint256)'),feeTopic=tokenHashText420('CreationFeeDeposited(address,bytes32,uint256)');
+  const factory=f.binding.factory.address,vault=f.binding.communityTreasuryVault.address;
+  const data=(...x)=>abi(...x);
+  const refreshTxs=()=>{
+    txs.clear();for(let i=0;i<controls.rows.length;i++){
+      const row=controls.rows[i],hash=digest(10000+i),common={address:factory,transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',removed:false};
+      const event={...common,logIndex:'0x0',topics:[topic,abi(row.token),abi(row.creator),row.profile.id],data:data(1,row.configHash,42n*10n**18n)};
+      const fee={...common,logIndex:'0x1',topics:[feeTopic,abi(vault),vaultHash],data:data(controls.corruptFee?41n*10n**18n:42n*10n**18n)};
+      txs.set(hash,{event,receipt:{status:'0x1',transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',logs:[event,fee]}});
+    }
+  };
+  f.provider.request=async(method,args=[])=>{
+    controls.onRead?.(method,args);
+    if(method==='eth_getBlockByNumber'&&(args[0]===tag||args[0]==='latest')){f.calls.push([method,args]);return {number:tag,hash:controls.reorg?digest(999):blockHash,timestamp};}
+    if(method==='eth_getLogs'){f.calls.push([method,args]);if(controls.receiptUnavailable)throw Error('history range unavailable');refreshTxs();return [...txs.values()].map(v=>v.event).filter(e=>args[0].topics.every((v,i)=>e.topics[i]===v));}
+    if(method==='eth_getTransactionReceipt'&&txs.has(args[0])){f.calls.push([method,args]);return structuredClone(txs.get(args[0]).receipt);}
+    const row=controls.rows.find(r=>r.token===args[0]?.to||r.token===args[0]);
+    if(method==='eth_getCode'&&row&&args[1]===tag){f.calls.push([method,args]);return '0x6001';}
+    if(method==='eth_call'&&args[1]===tag){
+      const {to,data:input}=args[0];let out;
+      if(to===factory){
+        if(input===tokenReadCall420('deploymentCount()'))out=abi(controls.rows.length);
+        else if(input===tokenReadCall420('creatorNonce(address)',['address'],[account]))out=abi(controls.wrongCount??controls.rows.filter(r=>r.creator===account).length);
+        else for(let i=0;i<controls.rows.length;i++){
+          const row=controls.rows[i],r=controls.duplicate&&i===0?controls.rows[1]:row;
+          if(input===tokenReadCall420('deployment(uint256)',['uint256'],[BigInt(i)])){out=abi(r.token,r.creator,r.profile.id,1,r.configHash,100);break;}
+          if(input===tokenReadCall420('isFactoryDeployment(address)',['address'],[row.token])){out=abi(1);break;}
+        }
+      }else if(row){
+        const strings={'name()':controls.unsafeMetadata?'Bad\u202eName':'Created token '+row.token.slice(-2),'symbol()':'TOK','uri()':'ipfs://example/{id}.json'};
+        const ints={'templateId()':controls.corruptTemplate?digest(999):row.profile.id,'owner()':row.owner,'totalSupply()':1000000000000000000n,'decimals()':18};
+        for(const [sig,v] of Object.entries(strings))if(input===tokenReadCall420(sig))out=tokenEncodeAbi420(['string'],[v]);
+        for(const [sig,v] of Object.entries(ints))if(input===tokenReadCall420(sig))out=abi(v);
+        if(input===tokenReadCall420('balanceOf(address)',['address'],[account]))out=abi(1n);
+      }
+      if(out!=null){f.calls.push([method,args]);return out;}
+    }
+    return original(method,args);
+  };
+  return controls;
+}
+export const portfolioRecord420=(n,profile=TOKEN_TEMPLATES_420[0],creator=account,owner=creator)=>({token:addr(1000+n),profile,creator,owner,configHash:digest(2000+n)});
+
+ // Independent management execution fixture; no automatic signing or sends.
+export function enableTokenManagementFixture420(f,portfolioControl){
+  const original=f.provider.request,txs=new Map();let next=29000;
+  const control={balance:1000000000000000000n,allowance:1000000000000000000n,supply:1000000000000000000n,cap:2000000000000000000n,
+    nftHolder:account,nftApproved:ZERO_ADDRESS,operator:false,operatorRaw:null,delegate:ZERO_ADDRESS,permitNonce:0n,onRead:null,duplicateEvent:false,simulationError:false,wrongReturn:false,wrongEvent:false,pending:false,reverted:false,reorg:false,sendError:null,expected:null};
+  const tag='0x10',blockHash=f.tokenControl.canonicalHash;
+  control.expect=(row,data,events,boolReturn=false)=>{control.expected={row,data,events,boolReturn};};
+  f.provider.request=async(method,args=[])=>{
+    await control.onRead?.(method,args);
+    const e=control.expected;
+    if(method==='eth_call'&&args[1]===tag){
+      const {to,data}=args[0],row=portfolioControl.rows.find(r=>r.token===to);
+      if(row){
+        const p=row.profile,ints={'mintable()':p.mintable?1:0,'burnable()':p.burnable?1:0,'permitEnabled()':p.permit?1:0,'votesEnabled()':p.votes?1:0,
+          'cap()':p.capped?control.cap:0,'totalSupply()':control.supply,'decimals()':18};
+        for(const [sig,v] of Object.entries(ints))if(data===tokenReadCall420(sig)){f.calls.push([method,args]);return abi(v);}
+        for(const [sig,v] of [['balanceOf(address)',control.balance],['balanceOf(address,uint256)',control.balance],['allowance(address,address)',control.allowance],
+          ['ownerOf(uint256)',control.nftHolder],['getApproved(uint256)',control.nftApproved],['isApprovedForAll(address,address)',control.operatorRaw??(control.operator?1:0)],['delegates(address)',control.delegate],['nonces(address)',control.permitNonce]])
+          if(data.startsWith(tokenSelector420(sig))){f.calls.push([method,args]);return abi(v);}
+      }
+      if(e&&args[0].to===account&&args[0].from===controller&&data===encodeExecute(e.row.token,0n,e.data)){
+        f.calls.push([method,args]);if(control.simulationError)throw Error('management simulation reverted');
+        return control.wrongReturn?'0x':e.boolReturn?abi(32,32,1):abi(32,0);
+      }
+    }
+    if(method==='eth_estimateGas'&&e&&args[0].data===encodeExecute(e.row.token,0n,e.data)){
+      f.calls.push([method,args]);if(args[1]!==tag)throw Error('unpinned management estimate');return f.control.gasEstimate;
+    }
+    if(method==='eth_sendTransaction'&&e&&args[0].data===encodeExecute(e.row.token,0n,e.data)){
+      f.calls.push([method,args]);if(control.sendError)throw control.sendError;
+      const tx=args[0],hash=digest(++next),common={address:e.row.token,transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',removed:false};
+      const logs=e.events.map((v,i)=>({...common,logIndex:'0x'+i.toString(16),topics:[...v.topics],data:v.data}));
+      const receipt={transactionHash:hash,blockHash,blockNumber:tag,transactionIndex:'0x0',status:'0x1',from:tx.from,to:tx.to,gasUsed:'0x100',effectiveGasPrice:tx.gasPrice,logs};
+      txs.set(hash,{tx:{...tx,hash,blockHash,blockNumber:tag,input:tx.data},receipt});return hash;
+    }
+    if(method==='eth_getTransactionReceipt'&&txs.has(args[0])){f.calls.push([method,args]);if(control.pending)return null;const r=structuredClone(txs.get(args[0]).receipt);if(control.wrongEvent&&r.logs.length)r.logs[0].data='0xdead';if(control.duplicateEvent&&r.logs.length)r.logs.push({...r.logs[0],data:'0xdead'});if(control.reverted){r.status='0x0';r.logs=[];}return r;}
+    if(method==='eth_getTransactionByHash'&&txs.has(args[0])){f.calls.push([method,args]);return txs.get(args[0]).tx;}
+    if(method==='eth_blockNumber'){f.calls.push([method,args]);return tag;}
+    if(method==='eth_getBlockByNumber'&&args[0]===tag&&control.reorg){f.calls.push([method,args]);return {number:tag,hash:digest(999)};}
     return original(method,args);
   };
   return control;

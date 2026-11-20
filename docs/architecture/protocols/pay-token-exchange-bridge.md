@@ -300,3 +300,7 @@ A reorg or provider disagreement must never be resolved by an indexer inventing 
 - [Transactions](../chain/transactions.md)
 - [Wallet signing and transaction review](../../users/wallet/signing-and-transaction-review.md)
 - [Oracle and external-provider infrastructure](../infrastructure/oracle-external-provider-infrastructure.md)
+
+### Token ecosystem evidence is not financial admission
+
+Wallet independently verifies the Registry-resolved Token factory, template registry and real community Treasury Vault binding. Both Indexer runtimes can reconstruct the historical factory creation and exact 42-native-420 fee trail at a canonical checkpoint; Explorer and Search display derived evidence, and AppStore curation is informational only. The full fee routes to the community Treasury Vault, not the Development Compensation Vault. No creation record or read API result writes to ExchangeAssetRegistry420, ApprovedQuoteAssetRegistry, BridgeAssetRegistry, LaunchpadProjectRegistry420 or Pay settlement admission. Each owning protocol continues to require its existing explicit eligibility and authorization checks. No automatic listing, settlement asset approval, liquidity, sale approval, bridge backing, investment endorsement or legal-status claim follows.

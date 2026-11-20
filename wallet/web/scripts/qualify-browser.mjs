@@ -82,6 +82,7 @@ try{
    await page.keyboard.press('Enter');
    await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
    assert.match(await token.locator('.token-catalogue-selection').textContent(),/Selected ERC20_FIXED/);
+   await page.waitForFunction(()=>document.activeElement?.id==='erc20-wizard-title');
    const wizard=token.locator('#token-erc20-wizard');
    await wizard.getByLabel('Token name',{exact:true}).fill('Example 🌿');
    await wizard.getByLabel('Token symbol',{exact:true}).fill('EX');
@@ -89,11 +90,14 @@ try{
    await supply.fill('1.0000000000000000001');
    await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
    assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/18 fractional digits/);
+   assert.equal(await supply.getAttribute('aria-invalid'),'true');assert.equal(await supply.getAttribute('aria-errormessage'),'erc20-wizard-status');
+   await page.waitForFunction(()=>document.activeElement?.id==='erc20-supply');assert.equal(await supply.inputValue(),'1.0000000000000000001');
    assert.equal(await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).isVisible(),false);
-   await supply.fill('9007199254740993.000000000000000001');
+   await supply.fill('9007199254740993.000000000000000001');assert.equal(await supply.getAttribute('aria-invalid'),null);
    await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).focus();
    await page.keyboard.press('Enter');
    await wizard.getByRole('heading',{name:'Prepared draft — not submitted'}).waitFor();
+   await page.waitForFunction(()=>document.activeElement?.textContent==='Prepared draft — not submitted' && document.activeElement?.tagName==='H5');
    assert.match(await wizard.locator('.token-erc20-preview').textContent(),/9007199254740993000000000000000001/);
    assert.match(await wizard.locator('.token-erc20-preview').textContent(),/42 native/);
    assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/No transaction simulated, signed or submitted/);
@@ -109,6 +113,7 @@ try{
    await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).fill('100');
    await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
    assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/invalid cap/);
+   assert.equal(await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).getAttribute('aria-invalid'),'true');
    await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).fill('200.5');
    await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
    await wizard.getByRole('heading',{name:'Prepared draft — not submitted'}).waitFor();
@@ -142,6 +147,8 @@ try{
      assert.equal(await authorize.isDisabled(),true);
      await page.evaluate(()=>{const f=window.__tokenCatalogueFixture;f.control.gasPrice='0x3b9aca00';f.control.simulationError='revert';});
      await simulate.click();await panel.getByText(/Simulation or fee review failed/).waitFor();
+     assert.equal(await panel.locator('[role="status"]').getAttribute('data-state'),'error');assert.equal(await panel.locator('[role="status"]').getAttribute('aria-atomic'),'true');
+     assert.match(await panel.locator('[role="status"]').textContent(),/simulate again/);assert.equal(await panel.getByRole('button',{name:'Submit authorized creation'}).isDisabled(),true);
      assert.equal(await authorize.isDisabled(),true);
      await page.evaluate(()=>{const f=window.__tokenCatalogueFixture;f.control.simulationError=null;
        if(f.calls.some(([m])=>/send|sign|requestAccounts/i.test(m)))throw Error('unexpected write or signing RPC');});
@@ -167,7 +174,8 @@ try{
    const uri=nft.getByLabel('Collection base URI',{exact:true});
    await uri.fill('javascript:alert(1)');
    await nft.getByRole('button',{name:'Prepare ERC721 draft'}).click();
-   assert.match(await nft.locator('#erc721-wizard-status').textContent(),/Executable URI/);
+   assert.match(await nft.locator('#erc721-wizard-status').textContent(),/Executable URI/);assert.equal(await uri.getAttribute('aria-invalid'),'true');
+   await page.waitForFunction(()=>document.activeElement?.id==='erc721-baseURI');
    await uri.fill('ipfs://bafyexample/{id}.json');
    await nft.getByRole('button',{name:'Prepare ERC721 draft'}).focus();
    await page.keyboard.press('Enter');
@@ -215,7 +223,8 @@ try{
    assert.equal(await multi.locator('input').count(),2);
    await multiURI.fill('javascript:alert(1)');
    await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).click();
-   assert.match(await multi.locator('#erc1155-wizard-status').textContent(),/Executable URI/);
+   assert.match(await multi.locator('#erc1155-wizard-status').textContent(),/Executable URI/);assert.equal(await multiURI.getAttribute('aria-invalid'),'true');
+   await page.waitForFunction(()=>document.activeElement?.id==='erc1155-uri');
    await multiURI.fill('ipfs://bafyexample/{id}.json');
    await multi.getByRole('button',{name:'Prepare ERC1155 draft'}).focus();
    await page.keyboard.press('Enter');
@@ -247,7 +256,7 @@ try{
    await creationPanel.getByText(/Explicit authorization recorded/).waitFor();
    await send.focus();await page.keyboard.press('Enter');
    const tracking=token.getByRole('region',{name:'Token deployment transaction tracking'});
-   await tracking.getByText('pending',{exact:true}).waitFor();
+   await tracking.getByText('pending',{exact:true}).waitFor();assert.match(await tracking.textContent(),/waiting for canonical inclusion/);
    assert.equal(await send.isDisabled(),true);
    assert.equal(await tracking.getByText(/Deployed token:/).count(),0);
    await page.evaluate(()=>{window.__tokenSubmissionFixture.pending=false;});
@@ -256,7 +265,7 @@ try{
    await tracking.getByText(/Deployed token:/).waitFor();
    await page.evaluate(()=>{window.__tokenSubmissionFixture.reorganized=true;});
    await tracking.getByRole('button',{name:'Check deployment confirmation'}).click();
-   await tracking.getByText('reorganized',{exact:true}).waitFor();
+   await tracking.getByText('reorganized',{exact:true}).waitFor();assert.match(await tracking.textContent(),/Prior confirmation is no longer established/);assert.equal(await page.evaluate(()=>document.activeElement?.id),'token-tracking-status');
    assert.equal(await tracking.getByText(/Deployed token:/).count(),0);
    await page.evaluate(()=>{window.__tokenSubmissionFixture.reorganized=false;});
    await tracking.getByRole('button',{name:'Check deployment confirmation'}).click();
@@ -266,6 +275,99 @@ try{
    await page.screenshot({path:resolve(artifacts,'token-tracking-'+width+'.png'),fullPage:true});
    console.log(JSON.stringify({width,tokenTracking:'PASS',pending:true,confirmed:true,reorg:true,keyboard:true,axe:trackingAxe.violations.length}));
 
+   // Independent historical portfolio, no dependence on the in-memory send hash.
+   await page.evaluate(async()=>{const {enableTokenPortfolioFixture420,portfolioRecord420}=await import('./test/token-connected-fixture.js');
+     const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
+     const {account,addr}=await import('./test/token-test-fixture.js');
+     const rows=Array.from({length:18},(_,i)=>portfolioRecord420(i,TOKEN_TEMPLATES_420[i%8],i===0||i===17?account:addr(99),i===17?addr(98):undefined));
+     // Explicit creator/owner for unrelated rows and the retained first record.
+     rows[0].owner=account;
+     window.__tokenPortfolioFixture=enableTokenPortfolioFixture420(window.__tokenCatalogueFixture,rows);});
+   const created=token.getByRole('region',{name:'Created-token portfolio'}),refreshCreated=created.getByRole('button',{name:'Refresh created tokens'});
+   await refreshCreated.focus();await page.keyboard.press('Enter');
+   await created.getByText(/1 of 2 created tokens/).waitFor();
+   assert.match(await created.textContent(),/Partial scan/);assert.match(await created.textContent(),/Ownership transferred/);
+   assert.match(await created.textContent(),/42 native/);
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();
+   await created.getByText(/2 of 2 created tokens/).waitFor();assert.match(await created.textContent(),/Complete at snapshot/);
+   assert.match(await created.textContent(),/Creator retains ownership/);
+   const portfolioAxe=await page.evaluate(()=>window.axe.run(document.querySelector('[aria-label="Created-token portfolio"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   const portfolioOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(portfolioOverflow.scroll<=portfolioOverflow.client+1,'Created-token portfolio overflow');
+   for(const v of portfolioAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token portfolio '+v.id);
+   await page.screenshot({path:resolve(artifacts,'token-portfolio-'+width+'.png'),fullPage:true});
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.receiptUnavailable=true;});
+   await refreshCreated.click();await created.getByText(/1 of 2 created tokens/).waitFor();assert.match(await created.textContent(),/Not independently verified/);
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.reorg=true;});
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();await created.getByText(/Portfolio unavailable/).waitFor();
+   assert.equal(await created.locator('article').count(),0);assert.match(await created.textContent(),/Refresh created tokens to start a new verified snapshot/);assert.equal(await created.locator('.token-fee-review-status[data-state="error"]').count(),1);
+   await page.evaluate(()=>{window.__tokenPortfolioFixture.reorg=false;window.__tokenPortfolioFixture.receiptUnavailable=false;});
+   console.log(JSON.stringify({width,tokenPortfolio:'PASS',partial:true,complete:true,transferred:true,recordOnly:true,reorg:true,keyboard:true,overflow:portfolioOverflow,axe:portfolioAxe.violations.length}));
+   // Exercise real mounted owner/holder management from the reconstructed portfolio.
+   await refreshCreated.click();await created.getByText(/1 of 2 created tokens/).waitFor();
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();await created.getByText(/2 of 2 created tokens/).waitFor();
+   await page.evaluate(async()=>{const {enableTokenManagementFixture420}=await import('./test/token-connected-fixture.js');
+     const {account,addr,abi}=await import('./test/token-test-fixture.js'),{tokenHashText420,tokenReadCall420}=await import('./core/token-sdk.js');
+     const pc=window.__tokenPortfolioFixture,mc=enableTokenManagementFixture420(window.__tokenCatalogueFixture,pc),row=pc.rows[0],to=addr(90);
+     mc.expect(row,tokenReadCall420('transfer(address,uint256)',['address','uint256'],[to,1]),[{topics:[tokenHashText420('Transfer(address,address,uint256)'),abi(account),abi(to)],data:abi(1)}],true);
+     window.__tokenManagementFixture=mc;window.__tokenManagementTo=to;});
+   await created.getByRole('button',{name:/Manage ERC20_FIXED/}).click();
+   const management=created.getByRole('region',{name:'Template-specific token management'});
+   const action=management.getByLabel('Management action');
+   assert.equal(await action.locator('option[value="mint"]').count(),0);
+   await action.selectOption('transfer');await management.getByLabel('Recipient / new owner / delegate address',{exact:true}).fill(await page.evaluate(()=>window.__tokenManagementTo));
+   await management.getByLabel('Amount (tokens for ERC20; integer units for ERC1155)',{exact:true}).fill('0.000000000000000001');
+   const sim=management.getByRole('button',{name:'Simulate management action'}),auth=management.getByRole('button',{name:'Authorize management action'}),sendManagement=management.getByRole('button',{name:'Submit management action'});
+   assert.equal(await sendManagement.isDisabled(),true);
+   await sim.focus();await page.keyboard.press('Enter');await management.getByText(/Simulation passed; not submitted/).waitFor();assert.match(await management.textContent(),/0 native/);
+   await auth.click();await management.getByText(/Explicit management authorization recorded/).waitFor();
+   assert.equal(await sendManagement.isEnabled(),true);
+   const managementAxe=await page.evaluate(()=>window.axe.run(document.querySelector('[aria-label="Template-specific token management"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   const managementOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(managementOverflow.scroll<=managementOverflow.client+1,'Token management overflow');
+   for(const v of managementAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token management '+v.id);
+   await page.screenshot({path:resolve(artifacts,'token-management-'+width+'.png'),fullPage:true});
+   await sendManagement.click();await tracking.getByText(/Canonical management transaction confirmed/).waitFor();
+   assert.equal(await management.isVisible(),false);
+   console.log(JSON.stringify({width,tokenManagement:'PASS',fixedMintBlocked:true,explicitAuthorization:true,confirmed:true,keyboard:true,axe:managementAxe.violations.length,overflow:managementOverflow}));
+   // Permission inspection + acknowledgement + revocation through actual Wallet UI.
+   await refreshCreated.click();await created.getByText(/1 of 2 created tokens/).waitFor();
+   await created.getByRole('button',{name:'Scan next deployment page'}).click();await created.getByText(/2 of 2 created tokens/).waitFor();
+   await page.evaluate(async()=>{const {account,addr,abi}=await import('./test/token-test-fixture.js'),{tokenHashText420,tokenReadCall420}=await import('./core/token-sdk.js');
+     const mc=window.__tokenManagementFixture,row=window.__tokenPortfolioFixture.rows[0],spender=addr(91);
+     mc.allowance=2n**256n-1n;mc.expect(row,tokenReadCall420('approve(address,uint256)',['address','uint256'],[spender,0]),[{topics:[tokenHashText420('Approval(address,address,uint256)'),abi(account),abi(spender)],data:abi(0)}],true);
+     window.__tokenPermissionSpender=spender;});
+   await created.getByRole('button',{name:/Manage ERC20_FIXED/}).click();
+   const permissions=management.getByRole('region',{name:'Ownership and permission security'});
+   const permissionAddress=permissions.getByLabel('Permission lookup address (optional)');
+   await permissionAddress.fill('0x123');await permissions.getByRole('button',{name:'Check current permissions'}).click();
+   await permissions.getByText(/Permissions unavailable/).waitFor();assert.match(await permissions.locator('[role="status"]').textContent(),/Check the address or token ID/);assert.equal(await permissions.locator('[role="status"]').getAttribute('data-state'),'error');assert.equal(await permissionAddress.inputValue(),'0x123');
+   await permissionAddress.fill(await page.evaluate(()=>window.__tokenPermissionSpender));await permissions.getByRole('button',{name:'Check current permissions'}).click();
+   await permissions.getByText('Unlimited (uint256 max)',{exact:true}).waitFor();
+   await permissions.getByRole('button',{name:'Revoke ERC20 allowance'}).click();
+   assert.equal(await action.inputValue(),'approve');assert.equal(await management.getByLabel('Amount (tokens for ERC20; integer units for ERC1155)',{exact:true}).inputValue(),'0');
+   assert.equal(await sendManagement.isDisabled(),true);
+   await sim.click();await management.getByText(/Simulation passed; not submitted/).waitFor();
+   assert.match(await management.textContent(),/already signed permits are not cancelled/);
+   await auth.click();await management.getByText(/Explicit management authorization recorded/).waitFor();
+   // Changing the action revokes the previous authorization and requires a fresh review.
+   await action.selectOption('transferOwnership');assert.equal(await sendManagement.isDisabled(),true);
+   await page.evaluate(async()=>{const {account,abi,addr}=await import('./test/token-test-fixture.js'),{tokenHashText420,tokenReadCall420}=await import('./core/token-sdk.js');
+     const mc=window.__tokenManagementFixture,row=window.__tokenPortfolioFixture.rows[0],to=addr(90);
+     mc.expect(row,tokenReadCall420('transferOwnership(address)',['address'],[to]),[{topics:[tokenHashText420('OwnershipTransferred(address,address)'),abi(account),abi(to)],data:'0x'}],false);});
+   await management.getByLabel('Recipient / new owner / delegate address',{exact:true}).fill(await page.evaluate(()=>window.__tokenManagementTo));
+   await sim.click();await management.getByText(/Simulation passed; not submitted/).waitFor();
+   const ack=management.getByLabel(/Type TRANSFER OWNERSHIP to acknowledge/);
+   assert.equal(await auth.isDisabled(),true);await ack.fill('TRANSFER');assert.equal(await auth.isDisabled(),true);
+   await ack.fill('TRANSFER OWNERSHIP');assert.equal(await auth.isEnabled(),true);
+   const securityAxe=await page.evaluate(()=>window.axe.run(document.querySelector('[aria-label="Template-specific token management"]'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   const securityOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));assert.ok(securityOverflow.scroll<=securityOverflow.client+1,'Token ownership/permission overflow');
+   for(const v of securityAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token security '+v.id);
+   await page.screenshot({path:resolve(artifacts,'token-security-'+width+'.png'),fullPage:true});
+   await auth.click();await management.getByText(/Explicit management authorization recorded/).waitFor();
+   await management.getByRole('button',{name:'Cancel management action'}).click();
+   assert.equal(await management.isVisible(),false);await page.waitForFunction(()=>document.activeElement?.matches('button[data-manage-token]'));
+   console.log(JSON.stringify({width,tokenSecurity:'PASS',unlimitedLookup:true,revocationPrepared:true,cancelled:true,typedAcknowledgement:true,axe:securityAxe.violations.length,overflow:securityOverflow}));
    const multiOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(multiOverflow.scroll<=multiOverflow.client+1,'ERC1155 wizard horizontal overflow');
    const multiAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc1155-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
@@ -307,11 +409,31 @@ try{
    assert.equal(await choose.isDisabled(),true);
    assert.equal(await token.locator('button[aria-pressed="true"]').count(),0);
    assert.match(await token.locator('#token-catalogue-status').textContent(),/7 of 8 enabled/);
+   assert.match(await token.locator('.token-catalogue-selection').textContent(),/Selection unavailable/);
+   // Runtime failure is explicit and recoverable, never interpreted as approval.
+   await page.evaluate(()=>{window.__tokenCatalogueFixture.tokenControl.chain='0x1';});
+   await token.getByRole('button',{name:'Refresh availability'}).click();await token.locator('#token-catalogue-status[data-state="error"]').waitFor();
+   assert.match(await token.locator('#token-catalogue-status').textContent(),/Check the connected network/);assert.equal(await token.locator('button[data-template]:disabled').count(),8);
+   await page.evaluate(()=>{window.__tokenCatalogueFixture.tokenControl.chain='0x1a4';});
+   await token.getByRole('button',{name:'Refresh availability'}).click();await token.locator('#token-catalogue-status[data-state="success"]').waitFor();assert.equal(await token.locator('button[data-template]:enabled').count(),7);
+   const layout=await token.evaluate(el=>{
+     const visible=n=>n.getClientRects().length>0&&getComputedStyle(n).visibility!=='hidden';
+     const controls=[...el.querySelectorAll('button,input,select')].filter(visible);
+     return {controls:controls.length,undersized:controls.filter(n=>n.getBoundingClientRect().height<43.9).map(n=>n.textContent||n.name),live:[...el.querySelectorAll('[role="status"]')].filter(visible).every(n=>n.getAttribute('aria-atomic')==='true'),client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth};
+   });
+   assert.ok(layout.controls>=9);assert.deepEqual(layout.undersized,[]);assert.equal(layout.live,true);assert.ok(layout.scroll<=layout.client+1);
+   // Test explicitly visible focus and 200% zoom at desktop; preserve exact visible text.
+   await token.locator('summary').focus();await page.keyboard.press('Tab');
+   const focusStyle=await page.evaluate(()=>{const n=document.activeElement,s=getComputedStyle(n);return {inToken:!!n.closest('#token-template-catalogue'),outline:s.outlineStyle,width:parseFloat(s.outlineWidth)};});
+   assert.ok(focusStyle.inToken&&focusStyle.outline!=='none'&&focusStyle.width>=2,'Visible keyboard focus required');
+   if(width===1440){await page.evaluate(()=>{document.documentElement.style.zoom='2';});const zoom=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));assert.ok(zoom.scroll<=zoom.client+1,'200% zoom horizontal overflow');await page.screenshot({path:resolve(artifacts,'token-zoom-200.png'),fullPage:true});await page.evaluate(()=>{document.documentElement.style.zoom='';});}
    const catalogueOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(catalogueOverflow.scroll<=catalogueOverflow.client+1,'open Token catalogue horizontal overflow');
    const tokenAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-template-catalogue'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
    for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact);
+   assert.equal(tokenAxe.violations.length,0,'Token accessibility violations: '+tokenAxe.violations.map(v=>v.id).join(', '));
    await page.screenshot({path:resolve(artifacts,'token-catalogue-'+width+'.png'),fullPage:true});
+   await token.locator('button[data-template="ERC20_MINTABLE"]').focus();
    await page.evaluate(async()=>{
      const {walletTokenDiscovery420}=await import('./core/token-discovery.js');
      walletTokenDiscovery420.invalidate();
@@ -326,6 +448,8 @@ try{
    assert.equal(await multi.locator('form').isVisible(),false);
    assert.equal(await multiPreview.isVisible(),false);
    assert.equal(await token.locator('.token-fee-review:visible').count(),0);
+   assert.equal(await page.evaluate(()=>document.activeElement?.id),'token-catalogue-status');
+   console.log(JSON.stringify({width,tokenAccessibility:'PASS',fieldErrors:true,focusRestoration:true,actionableErrors:true,networkRecovery:true,disabledUnavailable:true,liveRegions:true,controlHeight44:true,keyboardFocus:true,zoom200:width===1440,axe:tokenAxe.violations.length,overflow:layout}));
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

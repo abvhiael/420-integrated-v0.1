@@ -4,9 +4,9 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 
 const script = readFileSync(require.resolve('./static/app.js'), 'utf8');
-const [pay] = require('../curation/genesis-apps.json');
+const [pay, token] = require('../curation/genesis-apps.json');
 
-async function render(hash, { registryAvailable = true } = {}) {
+async function render(hash, { registryAvailable = true, app = pay } = {}) {
   const route = { innerHTML: '' };
   const requests = [];
   await vm.runInNewContext(script, {
@@ -17,7 +17,7 @@ async function render(hash, { registryAvailable = true } = {}) {
     fetch: async path => {
       requests.push(path);
       const curated = path.startsWith('/v1/apps/curated');
-      const items = curated ? [pay] : [{ serviceId: pay.serviceId, active: true, version: 1 }];
+      const items = curated ? [app] : [{ serviceId: app.serviceId, active: true, version: 1 }];
       return { ok: curated || registryAvailable, status: 503, json: async () => ({ items }) };
     },
   });
@@ -48,4 +48,14 @@ test('curated Pay remains visible during Registry outage and exposes only naviga
   for (const expression of pay.expressions) assert.ok(html.includes(expression.name));
   assert.equal((html.match(/>Planned</g) || []).length, 7);
   assert.doesNotMatch(html, /pay\.420integrated\.org|Open in 420Wallet|Direct app/);
+});
+
+test('Token is discoverable without duplicating a Registry listing or enabling launch',async()=>{
+ for(const [hash,path] of [['#/browse','/v1/apps/curated'],['#/search/token','/v1/apps/curated?q=token'],['#/category/finance','/v1/apps/curated?category=finance']]){
+  const {html,requests}=await render(hash,{app:token});assert.ok(requests.includes(path));assert.equal((html.match(/<h2>420 Token<\/h2>/g)||[]).length,1);
+ }
+ const {html}=await render('#/curated/'+encodeURIComponent(token.serviceId),{app:token,registryAvailable:false});
+ assert.match(html,/apps\/token\/user-guide\//);assert.match(html,/Check Registry-backed details/);
+ for(const e of token.expressions)assert.ok(html.includes(e.name));
+ assert.doesNotMatch(html,/Open in 420Wallet|Direct app|Production ready/);
 });

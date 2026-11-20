@@ -2,10 +2,12 @@
 // message, route parameter or cached result as deployment authority.
 import { normalizeTokenReleaseBinding420, verifyTokenRuntime420 } from './token-runtime.js';
 import { discoverSmartAccount } from './accounts.js';
+import {prepareTokenManagement420,sameTokenManagementReview420,readTokenManagementReceipt420,tokenManagementActions420,inspectTokenPermissions420} from './token-management.js';
+import {readCreatedTokenPage420} from './token-portfolio.js';
 import { readTokenDeployment420 } from './token-deployment.js';
 import { assertWalletChain420, normalizeTransactionHash420 } from './transaction-lifecycle.js';
 import { prepareTokenDeploymentHandoff420 } from './token-handoff.js';
-import { validateTokenCreationEncoding420, tokenHashHex420, tokenReadCall420 } from './token-sdk.js';
+import { validateTokenCreationEncoding420, tokenHashHex420, tokenReadCall420, readTokenRecord420 } from './token-sdk.js';
 import { TOKEN_CREATION_FEE_WEI_420 } from './token-runtime.js';
 
 const environments = new Set(['local','devnet','testnet','mainnet']);
@@ -96,6 +98,7 @@ export async function discoverWalletTokenRuntime420(provider, config, controller
     controllerIsOwner:fresh.deployed && fresh.controllerIsOwner===true,
     authorizationEpoch:fresh.deployed?fresh.authorizationEpoch.toString():null,
     authorizationPolicyVersion:fresh.deployed?fresh.authorizationPolicyVersion.toString():null,
+    recoveryAuthority:fresh.deployed?fresh.recoveryAuthority:null,pendingRecoveryOwner:fresh.deployed?fresh.pendingRecoveryOwner:null,recoveryExecutableAt:fresh.deployed?fresh.recoveryExecutableAt.toString():null,
     runtime, verificationBlock:runtime.verificationBlock,
     // Discovery is not authorization or confirmation. Re-verify at handoff.
     authority:'DISCOVERY_ONLY', accountGrant:false, spendingAuthority:false,
@@ -108,12 +111,21 @@ export function createTokenDiscoverySession420() {
   let generation=0, snapshot=status('unconfigured'), context=null;
   const listeners=new Set(), transactionListeners=new Set(), issued=new WeakMap(), authorizations=new WeakMap();
   const records=[];let sending=false,checking=false;
-  const visible=()=>Object.freeze(records.filter(x=>snapshot.status==='verified'&&x.review.chainId===snapshot.runtime.chainId&&x.review.controller===snapshot.controller&&x.review.smartAccount===snapshot.smartAccount&&x.review.release.manifestHash===snapshot.runtime.release.manifestHash).map(x=>Object.freeze({txHash:x.txHash,status:x.status,error:x.error||'',confirmation:x.confirmation||null}))); 
+  const managementQuotes=new WeakMap(),managementApprovals=new WeakMap(),managementBindings=new WeakMap();let managementRevision=0,permissionRevision=0;
+  function cancelManagement(){++managementRevision;++permissionRevision;}
+  const sameRelease=(a,b)=>['metadataHash','manifestHash','interfaceHash','dependencyRoot'].every(k=>a.release[k]===b.release[k]);
+  const portfolioListeners=new Set();let portfolioAttempt=0,portfolioPage=null;
+  const emptyPortfolio=(status='idle',error='')=>Object.freeze({status,error,items:Object.freeze([]),page:null});
+  let portfolio=emptyPortfolio();
+  const publishPortfolio=v=>{portfolio=v;for(const fn of [...portfolioListeners])fn(v);return v;};
+  function subscribePortfolio(fn){portfolioListeners.add(fn);fn(portfolio);return()=>portfolioListeners.delete(fn);}
+  function clearPortfolio(){cancelManagement();++portfolioAttempt;portfolioPage=null;publishPortfolio(emptyPortfolio());}
+  const visible=()=>Object.freeze(records.filter(x=>snapshot.status==='verified'&&x.review.chainId===snapshot.runtime.chainId&&x.review.controller===snapshot.controller&&x.review.smartAccount===snapshot.smartAccount&&x.review.release.manifestHash===snapshot.runtime.release.manifestHash).map(x=>Object.freeze({txHash:x.txHash,status:x.status,error:x.error||'',confirmation:x.confirmation||null,kind:x.kind||'creation',label:x.review.label||null}))); 
   function emitTransactions(){for(const fn of [...transactionListeners])fn(visible());}
   function subscribeTransactions(fn){transactionListeners.add(fn);fn(visible());return()=>transactionListeners.delete(fn);}
   function publish(value) {
     if(snapshot!==value){for(const x of records){if(x.status==='confirmed'||x.status==='reverted'){x.status='unverified';x.confirmation=null;x.error='Wallet context refreshed. Recheck canonical receipt.';}}}
-    snapshot=value;
+    snapshot=value;clearPortfolio();
     for (const listener of [...listeners]) listener(value);
     emitTransactions();return value;
   }
@@ -253,6 +265,107 @@ export function createTokenDiscoverySession420() {
       controllerBalanceWei:controllerBalance.toString(),simulationPassed:true});
     issued.set(quote,{draft,expected,generation:attempt});return quote;
   }
+  async function refreshPortfolio(more=false){
+    if(!context||snapshot.status!=='verified'||portfolio.status==='checking'||(more&&(!portfolioPage||portfolioPage.complete)))return null;
+    const prior=more?portfolioPage:null,previousItems=more?portfolio.items:[],host=context,expected=snapshot,attempt=++portfolioAttempt,epoch=generation;
+    const active=()=>check(attempt===portfolioAttempt&&epoch===generation&&context===host&&snapshot===expected,'Portfolio context changed');
+    const deadline=Date.now()+60000,allowed=['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_getLogs','eth_getTransactionReceipt'];
+    const provider={request:async(method,params=[])=>{
+      active();check(allowed.includes(method),'Non-portfolio RPC method');
+      const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Portfolio request timed out');
+      let timer;try{const v=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Portfolio RPC timed out')),remaining);})]);active();return v;}finally{clearTimeout(timer);}
+    }};
+    portfolioPage=null;publishPortfolio(emptyPortfolio('checking'));
+    try{
+      // Fresh runtime discovery on first page; following pages stay on the
+      // same canonical block and are never mixed with another snapshot.
+      const fresh=prior?expected:await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+      check(fresh.status==='verified'&&fresh.smartAccount===expected.smartAccount&&fresh.controller===expected.controller&&fresh.runtime.release.dependencyRoot===expected.runtime.release.dependencyRoot,'Portfolio Wallet context mismatch');
+      await selectedAccount(provider,expected.controller);
+      const page=await readCreatedTokenPage420(provider,normalizeTokenWalletConfig420(host.config).binding,expected.smartAccount,prior?.block??fresh.verificationBlock,prior);
+      await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,expected.runtime.chainId);active();
+      portfolioPage=page;return publishPortfolio(Object.freeze({status:'verified',error:'',page,items:Object.freeze([...previousItems,...page.items])}));
+    }catch(e){if(attempt===portfolioAttempt){portfolioPage=null;publishPortfolio(emptyPortfolio('blocked','Portfolio unavailable: '+String(e?.message||'Verification failed').slice(0,240)));}return null;}
+  }
+  async function reviewManagement(row,action,input){return reviewManagementAt(row,action,input,null,++managementRevision);}
+  async function reviewManagementAt(row,action,input,prior,revision){
+    check(context&&snapshot.status==='verified'&&snapshot.controllerIsOwner&&snapshot.deployed&&portfolio.status==='verified'&&portfolio.items.includes(row),'Verified created-token record and Wallet owner required');
+    const expected=snapshot,host=context,attempt=generation,portfolioVersion=portfolioAttempt,deadline=Date.now()+60000;
+    const active=()=>check(snapshot===expected&&context===host&&generation===attempt&&portfolioAttempt===portfolioVersion&&managementRevision===revision,'Management context changed');
+    const allowed=['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call','eth_estimateGas','eth_gasPrice','eth_getBalance'];
+    const provider={request:async(method,params=[])=>{active();check(allowed.includes(method),'Non-management RPC method');const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Management review timed out');let timer;try{
+      const value=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Management RPC timed out')),remaining);})]);active();return value;
+    }finally{clearTimeout(timer);}}};
+    const actionSpec=tokenManagementActions420(row,expected.smartAccount).find(x=>x.key===action);check(actionSpec,'Management action is unavailable');
+    const source=Object.freeze(readTokenRecord420(input,actionSpec.fields.map(x=>x.name),'Token management fields'));
+    const canonical=async b=>{const at=await provider.request('eth_getBlockByNumber',[b.number,false]);check(at?.number===b.number&&at.hash?.toLowerCase()===b.hash,'Management block reorganized');};
+    await canonical(portfolio.page.block);if(prior)await canonical(prior.block);
+    const fresh=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    const sameAccount=x=>x.deployed&&x.controllerIsOwner&&x.smartAccount===expected.smartAccount&&x.controller===expected.controller&&x.authorizationEpoch===expected.authorizationEpoch&&x.authorizationPolicyVersion===expected.authorizationPolicyVersion&&x.recoveryAuthority===expected.recoveryAuthority&&x.pendingRecoveryOwner===expected.pendingRecoveryOwner&&x.recoveryExecutableAt===expected.recoveryExecutableAt;
+    check(sameAccount(fresh)&&sameRelease(fresh.runtime,expected.runtime),'SmartAccount authority or Token release changed');
+    const pinned={request:(method,params=[])=>{if(['eth_getCode','eth_call'].includes(method)&&params[1]==='latest')params=[params[0],fresh.verificationBlock.number];return provider.request(method,params);}};
+    const pinnedAccount=await discoverSmartAccount(pinned,host.controller,walletAccountConfig(host.config));
+    check(pinnedAccount.smartAccount===expected.smartAccount&&pinnedAccount.controllerIsOwner&&pinnedAccount.deployed&&pinnedAccount.authorizationEpoch.toString()===expected.authorizationEpoch&&pinnedAccount.authorizationPolicyVersion.toString()===expected.authorizationPolicyVersion&&pinnedAccount.recoveryAuthority===expected.recoveryAuthority&&pinnedAccount.pendingRecoveryOwner===expected.pendingRecoveryOwner&&pinnedAccount.recoveryExecutableAt.toString()===expected.recoveryExecutableAt,'Pinned SmartAccount authority changed');
+    const accountCode=await provider.request('eth_getCode',[expected.smartAccount,fresh.verificationBlock.number]);check(/^0x(?:[0-9a-fA-F]{2})+$/.test(accountCode)&&!/^0x0+$/i.test(accountCode),'Invalid SmartAccount runtime');
+    const accountAuthority=Object.freeze({owner:pinnedAccount.owner,epoch:expected.authorizationEpoch,policyVersion:expected.authorizationPolicyVersion,recoveryAuthority:expected.recoveryAuthority,pendingRecoveryOwner:expected.pendingRecoveryOwner,recoveryExecutableAt:expected.recoveryExecutableAt,codeHash:tokenHashHex420(accountCode)});
+    if(prior)check(JSON.stringify(prior.accountAuthority)===JSON.stringify(accountAuthority),'SmartAccount runtime or recovery state changed');
+    const prepared=await prepareTokenManagement420(provider,fresh.runtime,row,fresh.smartAccount,fresh.controller,action,source);
+    const after=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    check(sameAccount(after)&&sameRelease(after.runtime,fresh.runtime)&&after.verificationBlock.hash===fresh.verificationBlock.hash&&after.verificationBlock.number===fresh.verificationBlock.number,'Management simulation block or authority changed; refresh review');
+    check(tokenHashHex420(await provider.request('eth_getCode',[expected.smartAccount,fresh.verificationBlock.number]))===accountAuthority.codeHash,'SmartAccount runtime changed');
+    await canonical(fresh.verificationBlock);await canonical(portfolio.page.block);if(prior)await canonical(prior.block);
+    await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,expected.runtime.chainId);active();
+    const pending=accountAuthority.pendingRecoveryOwner!=='0x'+'0'.repeat(40);
+    const security=pending?Object.freeze({...prepared.security,warnings:Object.freeze([...prepared.security.warnings,'A SmartAccount recovery is pending. Review the recovery owner and executable time; management authority may change.'])}):prepared.security;
+    const quote=Object.freeze({...prepared,security,accountAuthority,authorizationEpoch:fresh.authorizationEpoch,authorizationPolicyVersion:fresh.authorizationPolicyVersion});
+    managementQuotes.set(quote,{row,action,input:source,expected,portfolioVersion,attempt,revision});managementBindings.set(quote,revision);return quote;
+  }
+  async function inspectManagementPermissions(row,input={}){
+    check(context&&snapshot.status==='verified'&&portfolio.status==='verified'&&portfolio.items.includes(row),'Verified created-token record required');
+    const expected=snapshot,host=context,attempt=generation,portfolioVersion=portfolioAttempt,revision=++permissionRevision,deadline=Date.now()+60000;
+    const active=()=>check(context===host&&snapshot===expected&&generation===attempt&&portfolioVersion===portfolioAttempt&&permissionRevision===revision,'Permission lookup context changed');
+    const query=Object.freeze(readTokenRecord420(input,['spender','id'],'Permission lookup'));
+    const provider={request:async(method,params=[])=>{active();check(['eth_accounts','eth_chainId','eth_getBlockByNumber','eth_getCode','eth_call'].includes(method),'Non-permission RPC method');let timer;try{const remaining=Math.min(10000,deadline-Date.now());check(remaining>0,'Permission lookup timed out');const value=await Promise.race([Promise.resolve().then(()=>host.provider.request(method,params)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Permission RPC timed out')),remaining);})]);active();return value;}finally{clearTimeout(timer);}}};
+    const canonical=async b=>{const at=await provider.request('eth_getBlockByNumber',[b.number,false]);check(at?.number===b.number&&at.hash?.toLowerCase()===b.hash,'Permission lookup block reorganized');};
+    await canonical(portfolio.page.block);
+    const fresh=await discoverWalletTokenRuntime420(provider,host.config,host.controller,host.smartAccount);
+    check(fresh.smartAccount===expected.smartAccount&&fresh.controller===expected.controller&&sameRelease(fresh.runtime,expected.runtime),'Permission lookup release or account changed');
+    const view=await inspectTokenPermissions420(provider,fresh.runtime,row,fresh.smartAccount,query);
+    await canonical(fresh.verificationBlock);await canonical(portfolio.page.block);await selectedAccount(provider,expected.controller);await assertWalletChain420(provider,expected.runtime.chainId);active();
+    return view;
+  }
+  function managementSource(quote){
+    const source=managementQuotes.get(quote);
+    check(source&&source.expected===snapshot&&source.attempt===generation&&source.portfolioVersion===portfolioAttempt&&source.revision===managementRevision&&portfolio.items.includes(source.row),'Management review unavailable or stale');
+    return source;
+  }
+  async function authorizeManagement(quote,active=()=>true,acknowledgement=null){
+    const source=managementSource(quote);managementQuotes.delete(quote);
+    check(active(),'Management authorization cancelled');
+    check(quote.security.acknowledgement===null||acknowledgement===quote.security.acknowledgement,'Exact management risk acknowledgement required');
+    const fresh=await reviewManagementAt(source.row,source.action,source.input,quote,source.revision);
+    managementQuotes.delete(fresh);check(active()&&source.revision===managementRevision&&sameTokenManagementReview420(quote,fresh),'Management review changed or cancelled; review again');
+    const approval=Object.freeze({authority:'EXPLICIT_TOKEN_MANAGEMENT_AUTHORIZATION',review:fresh});
+    managementApprovals.set(approval,{...source,quote:fresh});managementBindings.set(approval,source.revision);return approval;
+  }
+  function revokeManagement(value){if(!value)return;managementApprovals.delete(value);managementQuotes.delete(value);if(managementBindings.get(value)===managementRevision)cancelManagement();}
+  async function submitManagement(approval,active=()=>true){
+    const source=managementApprovals.get(approval);managementApprovals.delete(approval);
+    check(source&&source.expected===snapshot&&source.attempt===generation&&source.portfolioVersion===portfolioAttempt&&source.revision===managementRevision&&!sending&&active(),'Management authorization unavailable, stale or consumed');
+    const host=context,q=source.quote;let record=null;sending=true;
+    try{
+      check(!records.some(x=>x.review.chainId===q.chainId&&x.review.smartAccount===q.smartAccount&&['submitting','pending','confirming','reorganized','unknown','unverified'].includes(x.status)),'Resolve existing Token submission first');
+      const fresh=await reviewManagementAt(source.row,source.action,source.input,q,source.revision);managementQuotes.delete(fresh);
+      check(active()&&context===host&&generation===source.attempt&&portfolioAttempt===source.portfolioVersion&&source.revision===managementRevision&&sameTokenManagementReview420(q,fresh),'Management review changed or cancelled; review again');
+      record={kind:'management',review:q,txHash:null,status:'submitting'};records.push(record);emitTransactions();
+      const tx={...q.transaction,gas:'0x'+BigInt(q.gasUnits).toString(16),gasPrice:'0x'+BigInt(q.gasPriceWei).toString(16),type:'0x0',chainId:'0x'+q.chainId.toString(16)};
+      check(active()&&context===host&&generation===source.attempt&&portfolioAttempt===source.portfolioVersion&&source.revision===managementRevision,'Management authorization cancelled');
+      try{record.txHash=normalizeTransactionHash420(await host.provider.request('eth_sendTransaction',[tx]));record.status='pending';}
+      catch(e){record.status=e?.code===4001?'rejected':'unknown';record.error=record.status==='rejected'?'Wallet rejected the request.':'Submission outcome unknown. Check Wallet activity; do not resubmit automatically.';}
+      emitTransactions();if(record.status!=='rejected')clearPortfolio();return record.txHash;
+    }catch(e){if(record&&record.status==='submitting'){record.status='rejected';emitTransactions();}throw e;}
+    finally{sending=false;}
+  }
   function recordAuthorization(auth,draft,expected){
     const issuedQuote=issued.get(auth.review);
     check(snapshot===expected&&issuedQuote?.draft===draft&&issuedQuote?.expected===expected&&issuedQuote?.generation===generation&&auth.authority==='EXPLICIT_TOKEN_CREATION_AUTHORIZATION'&&auth.maxGasWei===auth.review.estimatedGasWei&&auth.maxTotalWei===auth.review.estimatedTotalWei,'Invalid Wallet authorization');
@@ -291,11 +404,12 @@ export function createTokenDiscoverySession420() {
     }finally{clearTimeout(timer);}}};
     const wasIncluded=record.status==='confirmed'||record.status==='reverted'||record.confirmation?.blockNumber!=null;
     record.confirmation=null;record.status='confirming';record.error='';emitTransactions();
-    try{const confirmation=await readTokenDeployment420(provider,record,normalizeTokenWalletConfig420(host.config).binding);active();record.status=wasIncluded&&confirmation.status==='pending'?'reorganized':confirmation.status;record.confirmation=record.status===confirmation.status?confirmation:Object.freeze({...confirmation,status:record.status});return record.confirmation;}
-    catch(e){record.status='unverified';record.error='Deployment not verified: '+String(e?.message||'Unavailable').slice(0,240);return null;}
+    try{const binding=normalizeTokenWalletConfig420(host.config).binding;
+      const confirmation=await (record.kind==='management'?readTokenManagementReceipt420(provider,record,binding):readTokenDeployment420(provider,record,binding));active();record.status=wasIncluded&&confirmation.status==='pending'?'reorganized':confirmation.status;record.confirmation=record.status===confirmation.status?confirmation:Object.freeze({...confirmation,status:record.status});return record.confirmation;}
+    catch(e){record.status='unverified';record.error=(record.kind==='management'?'Management transaction not verified: ':'Deployment not verified: ')+String(e?.message||'Unavailable').slice(0,240);return null;}
     finally{checking=false;emitTransactions();}
   }
-  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,revokeAuthorization,submitCurrent,checkTransaction,subscribeTransactions,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
+  return Object.freeze({refresh,refreshCurrent,simulateCurrent,recordAuthorization,revokeAuthorization,submitCurrent,checkTransaction,subscribeTransactions,subscribePortfolio,refreshPortfolio,reviewManagement,authorizeManagement,revokeManagement,submitManagement,cancelManagement,inspectManagementPermissions,getPortfolio:()=>portfolio,canRefresh:()=>context!==null,invalidate,subscribe,getSnapshot:()=>snapshot});
 }
 
 // Shared by the privileged Wallet web host and its own catalogue, not a DOM event or external dApp API.

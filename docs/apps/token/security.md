@@ -33,3 +33,7 @@ Template approval means the implementation profile passed the applicable reposit
 ## Residual / release-stage risks
 
 Repository-local tests and static analysis cannot prove the correctness of an undeployed production/testnet Registry/Vault binding, governance key custody, RPC integrity, reorg behavior or real transaction operations. Those are explicit TOKEN-AUDIT-8/9 gates.
+
+## Non-authoritative ecosystem evidence
+
+Indexer, Explorer, Search, AppStore and Analytics cannot approve a token, sign a request, confer owner/operator rights or establish a market. The deployment read API is verified against the configured release's historical Registry publication and checkpoint-bounded successful receipt evidence; it is not a substitute for Wallet's runtime-code and current-state checks. Reject missing, malformed, stale, wrong-chain or conflicting evidence. Financial protocols independently qualify assets; a token with legitimate factory provenance can still be unsuitable or unapproved for trading, payment, sale or bridging. Do not automatically retry ambiguous submissions; resolve the prior outcome first.

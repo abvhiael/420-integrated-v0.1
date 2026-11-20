@@ -1,0 +1,54 @@
+{
+  "step": "TOKEN-AUDIT-5.11",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "09de54a265bc511fef58515242f8a49fb9e9d928",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-discovery.js",
+    "wallet/web/core/token-management.js",
+    "wallet/web/token-management-ui.js",
+    "wallet/web/test/token-connected-fixture.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    "wallet/web/core/token-app.js",
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/token-portfolio-ui.js",
+    "wallet/web/apps.css",
+    ".github/workflows/420token-audit.yml",
+    "docs/apps/token/user-guide.md",
+    "wallet/web/test/token-management.test.js",
+    ".qualification/candidates/TOKEN-AUDIT-5.11-management.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/audit/420TOKEN-AUDIT-5.11-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-management.test.js",
+      "owner": "Token management and inherited SDK regression"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Mounted management UI and browser regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Template-specific owner/holder/operator operations for all eight frozen profiles; exact typed ABI and bounds; distinguish ECDSA permits from SmartAccount authority",
+    "Fresh canonical factory provenance, owner/holder/operator state and simulation at every review; exact single-use authorization and zero-value Wallet submission with explicit fee bounds; independently verified canonical receipt and expected token events",
+    "Actual mounted responsive management UI and negative/adversarial tests; preserve prior evidence and no live qualification claim"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

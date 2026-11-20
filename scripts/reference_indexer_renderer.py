@@ -44,6 +44,7 @@ def query_params(route_id: str) -> str:
         "asset-transfers": "chainId, assetKey?, address?, beforeBlock?, cursor?, limit?, direction?",
         "protocol-events": "chainId, protocol?, objectKey?, cursor?, limit?, direction?",
         "protocol-object": "chainId; path: protocol, key",
+        "token-deployment": "chainId; path: token",
         "treasury-asset-policy": "chainId; path: asset",
         "treasury-budget": "chainId; path: budgetId",
         "treasury-disbursement": "chainId; path: disbursementId",

@@ -24,6 +24,7 @@ export const INDEXER_V1_ROUTES_420: readonly IndexerApiRoute420[] = [
   { id: 'asset-transfers', method: 'GET', path: '/v1/assets/transfers', scope: 'chain', paged: true, description: 'paged normalized asset transfers' },
   { id: 'protocol-events', method: 'GET', path: '/v1/protocols/events', scope: 'chain', paged: true, description: 'paged typed protocol events' },
   { id: 'protocol-object', method: 'GET', path: '/v1/protocols/:protocol/objects/:key', scope: 'chain', paged: false, description: 'latest typed protocol object state' },
+  { id: 'token-deployment', method: 'GET', path: '/v1/token/deployments/:token', scope: 'chain', paged: false, description: 'derived Token factory creation and fee evidence' },
   { id: 'treasury-asset-policy', method: 'GET', path: '/v1/treasury/asset-policies/:asset', scope: 'chain', paged: false, description: 'derived Treasury asset policy' },
   { id: 'treasury-budget', method: 'GET', path: '/v1/treasury/budgets/:budgetId', scope: 'chain', paged: false, description: 'derived Treasury budget' },
   { id: 'treasury-disbursement', method: 'GET', path: '/v1/treasury/disbursements/:disbursementId', scope: 'chain', paged: false, description: 'derived Treasury disbursement commitment' },

@@ -24,6 +24,12 @@ export function executionGate({config,wallet,review}={}){
 }
 export async function submitReviewedTransaction({ethereum,config,wallet,review}={}){
   const gate=executionGate({config,wallet,review});if(!gate.ok)throw new Error(gate.reason);
+  const [currentChain,accounts]=await Promise.all([
+    ethereum.request({method:'eth_chainId'}),ethereum.request({method:'eth_accounts'})
+  ]);
+  if(currentChain?.toLowerCase()!==wallet.chainId.toLowerCase()||!Array.isArray(accounts)||
+    accounts.length!==1||accounts[0]?.toLowerCase()!==wallet.account.toLowerCase())throw new Error('WALLET_SESSION_CHANGED');
+  if(!/^0x[0-9a-fA-F]*$/.test(review.transaction.data||''))throw new Error('INVALID_CANONICAL_CALLDATA');
   const tx={from:wallet.account,to:review.transaction.to,data:review.transaction.data,value:review.transaction.value||'0x0'};
   return ethereum.request({method:'eth_sendTransaction',params:[tx]});
 }

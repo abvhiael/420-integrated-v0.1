@@ -27,9 +27,11 @@ test('unregistered invoice and invalid settlement payout cannot enter canonical 
 });
 test('checkout refuses unavailable capacity, missing eligibility, and bad invoice terms',async()=>{
   const rpc=makeRpc();
-  await assert.rejects(()=>checkoutContext(rpc,runtime,S,USER,'90','9'),/exceeds canonical capacity/);
+  const exhausted=await checkoutContext(rpc,runtime,S,USER,'90','9');
+  assert.equal(exhausted.canContribute,false);assert.equal(exhausted.next,'RECOVER_OR_EXPIRED');
   rpc.set('hasValidCredential(bytes32,bytes32)',out(0));
-  await assert.rejects(()=>checkoutContext(rpc,runtime,S,USER,'42','9'),/identity eligibility/);
+  const revoked=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(revoked.canContribute,false);assert.equal(revoked.invoiceId,I);
   rpc.set('hasValidCredential(bytes32,bytes32)',out(1));
   rpc.set('getInvoice(bytes32)',out(PROFILE,MERCHANT,PROFILE,'0x343230',99,190,200,0,1,0,0,PROFILE,PROFILE,PROFILE,1));
   await assert.rejects(()=>checkoutContext(rpc,runtime,S,USER,'42','9'),/canonical invoice terms mismatch/);
@@ -44,4 +46,12 @@ test('reorg and revert are explicit transaction recovery states',async()=>{
   assert.equal((await transactionStatus(rpc,runtime,TX,USER)).state,'REORGED');
   const bad=makeRpc();bad.setTransaction(t,{status:'0x0',blockNumber:'0x10',blockHash:BLOCK,logs:[]});
   assert.equal((await transactionStatus(bad,runtime,TX,USER)).state,'REVERTED');
+});
+
+test('expired or exhausted campaigns allow existing invoice recovery but not new checkout',async()=>{
+  const rpc=makeRpc();
+  rpc.set('sale(bytes32)',out(P,TOKEN,MERCHANT,20,100,80,10,100,140,210,POLICY,PROFILE,12,2,1));
+  const state=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(state.canContribute,false);assert.equal(state.next,'RECOVER_OR_EXPIRED');
+  assert.equal(state.invoiceId,I);
 });

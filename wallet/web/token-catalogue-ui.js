@@ -2,6 +2,7 @@ import { createTokenCatalogue420 } from './core/token-catalogue.js';
 import { walletTokenDiscovery420 } from './core/token-discovery.js';
 import { mountERC20Wizard420 } from './token-erc20-wizard-ui.js';
 import { mountERC721Wizard420 } from './token-erc721-wizard-ui.js';
+import { mountERC1155Wizard420 } from './token-erc1155-wizard-ui.js';
 
 function el(tag,className,text){
   const node=document.createElement(tag);
@@ -31,9 +32,11 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
   controls.append(refresh,status);
   const wizard=el('section','token-erc20-wizard');wizard.id='token-erc20-wizard';
   const collectionWizard=el('section','token-erc721-wizard');collectionWizard.id='token-erc721-wizard';
-  body.append(intro,controls,account,grid,selection,wizard,collectionWizard);
+  const multiWizard=el('section','token-erc1155-wizard');multiWizard.id='token-erc1155-wizard';
+  body.append(intro,controls,account,grid,selection,wizard,collectionWizard,multiWizard);
   const disposeWizard=mountERC20Wizard420(wizard,model,session);
   const disposeCollectionWizard=mountERC721Wizard420(collectionWizard,model,session);
+  const disposeMultiWizard=mountERC1155Wizard420(multiWizard,model,session);
   details.replaceChildren(summary,body);
   const cards=new Map();
   for(const profile of model.getSnapshot().profiles){
@@ -75,5 +78,5 @@ export function mountTokenCatalogue420(details,session=walletTokenDiscovery420){
   const unsubscribe=model.subscribe(render);
   refresh.addEventListener('click',()=>{void model.refresh();});
   details.addEventListener('toggle',()=>{if(details.open&&model.canRefresh())void model.refresh();});
-  return ()=>{unsubscribe();disposeWizard();disposeCollectionWizard();model.dispose();};
+  return ()=>{unsubscribe();disposeWizard();disposeCollectionWizard();disposeMultiWizard();model.dispose();};
 }

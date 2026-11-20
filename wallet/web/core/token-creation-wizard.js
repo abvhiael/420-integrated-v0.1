@@ -92,3 +92,22 @@ export function createTokenCreationWizard420(catalogue,session,{profiles,fields,
   function dispose(){disposed=true;revision++;busy=false;draft=null;values=blank();bound=null;stop();listeners.clear();}
   return Object.freeze({subscribe,setField,renewSalt,reset,review,getSnapshot:view,dispose});
 }
+
+// Shared URI input guard. Preserve exact bytes; never retrieve metadata.
+export function validateTokenWizardURI420(uri){
+  // Empty metadata is a valid V1 configuration. Nonempty URI text is stored
+  // exactly and displayed as inert text. Never fetch, resolve or dereference it.
+  check(typeof uri==='string','Collection base URI must be a string.');
+  if(uri!==''){
+    validateTokenWizardMetadata420(uri,'Collection base URI');
+    check(/^[A-Za-z][A-Za-z0-9+.-]*:.+$/u.test(uri)&&!/[\s\u007f]/u.test(uri)&&!/%(?![0-9a-fA-F]{2})/u.test(uri),
+      'Enter an absolute collection URI without spaces or malformed percent escapes, or leave it empty.');
+    check(!/^(javascript|vbscript):/i.test(uri),'Executable URI schemes are not supported in this wizard.');
+    if(/^https?:/i.test(uri)){
+      let url;try{url=new URL(uri);}catch{throw Error('Invalid HTTP collection URI.');}
+      check(/^https?:\/\//i.test(uri)&&url.hostname&&!url.username&&!url.password&&!uri.includes('\\'),
+        'HTTP collection URI must contain a host without embedded credentials.');
+    }
+  }
+  return uri;
+}

@@ -25,3 +25,7 @@ POST /v1/launchpad/creator-requests produces governance **drafts** only. Creator
 Do not infer that a paid 420Pay checkout is a recorded contribution: checkout and Launchpad recording are non-atomic. Do not treat an authorized Pay refund as delivered, a partial refund as a complete batch, or an arbitration ruling as refund/cancellation authority. Historical gross funding remains gross even after delivered-refund reconciliation.
 
 The service stores no keys; it never generates real transactions without an explicit client Wallet submission. Production needs the real RPC, chain, service API and canonical projection; local application qualification alone is not live deployment evidence.
+
+## Creator studio and signed governance requests
+
+REC-3 adds `/v1/launchpad/creator/prepare` and `/v1/launchpad/creator/submit` for validated, signature-bound governance review intake, `GET /v1/launchpad/creator/campaigns/:account` for on-chain-controller-filtered discovery, `GET /v1/launchpad/creator/report/:account/:saleId` for current lifecycle and provenance-labeled reporting, and `GET /v1/launchpad/creator/requests/:account` for review-receipt status. These do not execute privileged on-chain calls. See [Creator guide](../creator-guide.md).

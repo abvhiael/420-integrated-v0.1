@@ -8,9 +8,10 @@ import (
 
  worker "github.com/420integrated/420-integrated/compute/worker"
 )
-func walletTestKey(t *testing.T)*worker.Secp256k1ExecutionKey{
- t.Helper();k,e:=worker.NewSecp256k1ExecutionKey(bytes.Repeat([]byte{0x42},32));if e!=nil{t.Fatal(e)};return k
+func walletTestKeyNumber(t *testing.T,n byte)*worker.Secp256k1ExecutionKey{
+ t.Helper();k,e:=worker.NewSecp256k1ExecutionKey(bytes.Repeat([]byte{n},32));if e!=nil{t.Fatal(e)};return k
 }
+func walletTestKey(t *testing.T)*worker.Secp256k1ExecutionKey{return walletTestKeyNumber(t,0x42)}
 func walletTestSign(t *testing.T,k *worker.Secp256k1ExecutionKey,msg string)string{
  t.Helper();sig,e:=k.SignDigest(walletMessageDigest(msg));if e!=nil{t.Fatal(e)};return "0x"+hex.EncodeToString(sig)
 }

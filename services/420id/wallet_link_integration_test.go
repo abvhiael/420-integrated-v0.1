@@ -68,7 +68,7 @@ func TestOptionalWalletActiveOwnershipRace(t *testing.T){
  a,mail:=sessionAuth(t,db,testOrigin,testRP);a2,mail2:=sessionAuth(t,db2,testOrigin,testRP)
  m:=sessionManager(t,a,"bong-goggles");m2:=sessionManager(t,a2,"bong-goggles")
  w,_:=NewWalletLinkManager(m,420,nil);w2,_:=NewWalletLinkManager(m2,420,nil)
- key:=walletTestKey(t);bind:=mustRandom(t);id1,_:=newID();id2,_:=newID()
+ key:=walletTestKeyNumber(t,0x43);bind:=mustRandom(t);id1,_:=newID();id2,_:=newID()
  g1:=mustIssueSession(t,m,freshEmail(t,a,mail,id1+"@example.org").Proof)
  g2:=mustIssueSession(t,m2,freshEmail(t,a2,mail2,id2+"@example.org").Proof)
  ch1,e:=w.Begin(ctx,g1.Token,key.Address(),"eoa",true,bind);if e!=nil{t.Fatal(e)}

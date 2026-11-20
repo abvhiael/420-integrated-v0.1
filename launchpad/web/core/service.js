@@ -82,6 +82,50 @@ export class LaunchpadService {
     if(!/^0x[0-9a-fA-F]*$/.test(result?.transaction?.data||''))throw new Error('invalid transaction calldata');
     return result;
   }
+  async creatorPrepare(payload){
+    const r=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator/prepare',{
+      method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
+    });
+    if(r?.schema!=='420-launchpad-creator-preparation-v1'||r.canonical!==true||
+      r.requiresGovernance!==true||!HASH.test(r.requestId||'')||
+      !HASH.test(r.saleId||'')||!HASH.test(r.projectId||'')||
+      r.status!=='PREPARED_NOT_SUBMITTED'||!Array.isArray(r.governanceRequest?.calls)||
+      !r.governanceRequest.calls.length)throw new Error('invalid creator governance preparation');
+    for(const c of r.governanceRequest.calls)
+      if(!ADDRESS.test(c.target||'')||!/^0x[0-9a-fA-F]+$/.test(c.data||'')||
+         c.value!=='0x0')throw new Error('unexpected governance calldata');
+    return r;
+  }
+  async creatorSubmit(payload){
+    const r=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator/submit',{
+      method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
+    });
+    if(r?.schema!=='420-launchpad-governance-receipt-v1'||r.canonical!==true||
+      !HASH.test(r.requestId||'')||r.status!=='RECEIVED_FOR_GOVERNANCE_REVIEW')throw new Error('unverified governance request receipt');
+    return r;
+  }
+  async creatorCampaigns(account){
+    if(!ADDRESS.test(account))throw new Error('invalid creator account');
+    const r=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator/campaigns/'+account,{cache:'no-store'});
+    if(r?.schema!=='420-launchpad-creator-campaigns-v1'||r.canonical!==true||
+      !Array.isArray(r.items)||!HASH.test(r?.source?.blockHash||''))throw new Error('untrusted creator campaign discovery');
+    return r;
+  }
+  async creatorReport(account,saleId){
+    if(!ADDRESS.test(account)||!HASH.test(saleId))throw new Error('invalid creator report identity');
+    const r=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator/report/'+account+'/'+saleId,{cache:'no-store'});
+    if(r?.schema!=='420-launchpad-creator-report-v1'||r.canonical!==true||
+      r.account.toLowerCase()!==account.toLowerCase()||
+      r.saleId.toLowerCase()!==saleId.toLowerCase()||
+      !HASH.test(r?.source?.blockHash||''))throw new Error('untrusted creator report');
+    return r;
+  }
+  async creatorReceipts(account){
+    if(!ADDRESS.test(account))throw new Error('invalid creator account');
+    const r=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator/requests/'+account,{cache:'no-store'});
+    if(r?.schema!=='420-launchpad-creator-receipts-v1'||!Array.isArray(r.items))throw new Error('invalid request status ledger');
+    return r.items;
+  }
   async creatorRequest(payload){
     const result=await json(this.fetch,this.baseUrl+'/v1/launchpad/creator-requests',{
       method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)

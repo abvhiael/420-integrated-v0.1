@@ -82,6 +82,49 @@ try{
    await page.keyboard.press('Enter');
    await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
    assert.match(await token.locator('.token-catalogue-selection').textContent(),/Selected ERC20_FIXED/);
+   const wizard=token.locator('#token-erc20-wizard');
+   await wizard.getByLabel('Token name',{exact:true}).fill('Example 🌿');
+   await wizard.getByLabel('Token symbol',{exact:true}).fill('EX');
+   const supply=wizard.getByLabel('Initial supply (tokens)',{exact:true});
+   await supply.fill('1.0000000000000000001');
+   await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
+   assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/18 fractional digits/);
+   assert.equal(await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).isVisible(),false);
+   await supply.fill('9007199254740993.000000000000000001');
+   await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).focus();
+   await page.keyboard.press('Enter');
+   await wizard.getByRole('heading',{name:'Prepared draft — not submitted'}).waitFor();
+   assert.match(await wizard.locator('.token-erc20-preview').textContent(),/9007199254740993000000000000000001/);
+   assert.match(await wizard.locator('.token-erc20-preview').textContent(),/42 native/);
+   assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/No transaction simulated, signed or submitted/);
+   await wizard.getByLabel('Token symbol',{exact:true}).fill('EDIT');
+   assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
+   const capChoose=token.locator('button[data-template="ERC20_CAPPED"]');
+   await capChoose.click();
+   await token.locator('button[data-template="ERC20_CAPPED"][aria-pressed="true"]').waitFor();
+   assert.equal(await wizard.getByLabel('Token name',{exact:true}).inputValue(),'');
+   await wizard.getByLabel('Token name',{exact:true}).fill('Capped token');
+   await wizard.getByLabel('Token symbol',{exact:true}).fill('CAP');
+   await supply.fill('100.25');
+   await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).fill('100');
+   await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
+   assert.match(await wizard.locator('#erc20-wizard-status').textContent(),/invalid cap/);
+   await wizard.getByLabel('Maximum supply (tokens)',{exact:true}).fill('200.5');
+   await wizard.getByRole('button',{name:'Prepare ERC20 draft'}).click();
+   await wizard.getByRole('heading',{name:'Prepared draft — not submitted'}).waitFor();
+   assert.match(await wizard.locator('.token-erc20-preview').textContent(),/200500000000000000000/);
+   const wizardOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+   assert.ok(wizardOverflow.scroll<=wizardOverflow.client+1,'ERC20 wizard horizontal overflow');
+   const wizardAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-erc20-wizard'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   for(const v of wizardAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': ERC20 wizard '+v.id+' '+v.impact);
+   await page.screenshot({path:resolve(artifacts,'erc20-wizard-'+width+'.png'),fullPage:true});
+   // Re-select fixed so the retained 5.3 stale-selection test still exercises the same profile.
+   await choose.click();
+   await token.locator('button[data-template="ERC20_FIXED"][aria-pressed="true"]').waitFor();
+   assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
+   console.log(JSON.stringify({width,erc20Wizard:'PASS',exactAmount:true,invalidPrecisionRejected:true,capRejected:true,
+     draftInvalidated:true,keyboard:true,wizardOverflow,axe:wizardAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
+
    await page.evaluate(async()=>{
      const {TOKEN_TEMPLATES_420}=await import('./core/token-sdk.js');
      window.__tokenCatalogueFixture.enable(TOKEN_TEMPLATES_420[0],false);
@@ -104,6 +147,8 @@ try{
    assert.equal(await token.locator('button[data-template]:disabled').count(),8);
    assert.equal(await token.locator('[data-availability="unknown"]').count(),8);
    assert.match(await token.locator('#token-catalogue-status').textContent(),/Connect your Wallet/);
+   assert.equal(await wizard.locator('form').isVisible(),false);
+   assert.equal(await wizard.locator('.token-erc20-preview').isVisible(),false);
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

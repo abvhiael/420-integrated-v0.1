@@ -99,6 +99,8 @@ export function normalizeTokenDraft420(input) {
     const supply = BigInt('0x' + tokenWord420(input.initialSupply));
     const cap = BigInt('0x' + tokenWord420(input.cap ?? 0n));
     if (p.capped ? cap === 0n || supply > cap : cap !== 0n) throw Error('invalid cap for frozen Token template');
+    // ERC20Template420._mint enforces the uint208 vote checkpoint supply bound.
+    if (p.votes && supply >= (1n << 208n)) throw Error('voting supply exceeds uint208 checkpoint limit');
     Object.assign(d, {name: input.name, symbol: input.symbol, initialSupply: supply.toString(), cap: cap.toString()});
   } else if (p.standard === 'ERC721') {
     exactKeys(input, ['template', 'userSalt', 'name', 'symbol', 'baseURI']);

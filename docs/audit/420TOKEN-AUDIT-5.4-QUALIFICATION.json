@@ -1,0 +1,413 @@
+{
+  "schema": "420-token-audit-5.4-exact-implementation-qualification-v1",
+  "step": "TOKEN-AUDIT-5.4",
+  "status": "QUALIFIED_ERC20_CREATION_WIZARD_ONLY",
+  "qualified_implementation_sha": "f017d44633f29d1e7758618c1188fc2e001e6b64",
+  "tested_base": "c0bd747ab46ff6efc021f7748fadb02c3268247d",
+  "reconciled_main": "d42bc921e2c4a207f739a6948663db2f99164a1e",
+  "pr": 1242,
+  "qualification": {
+    "workflow": ".github/workflows/420token-audit.yml",
+    "run_id": 44646220685,
+    "jobs": {
+      "scope": {
+        "id": 135989370747,
+        "conclusion": "success"
+      },
+      "wallet-sdk": {
+        "id": 135989683837,
+        "conclusion": "success"
+      },
+      "qualify": {
+        "id": 135989685761,
+        "conclusion": "skipped"
+      },
+      "security": {
+        "id": 135989686275,
+        "conclusion": "skipped"
+      }
+    },
+    "exact_head_checkout": true,
+    "repository_verifier": "PASS",
+    "tests_passed": 105,
+    "tests_failed": 0,
+    "tests_skipped": 0,
+    "tests_cancelled": 0,
+    "new_wizard_tests": 11,
+    "erc20_profiles": 6,
+    "passed_test_names": [
+      "app catalog includes expected core ecosystem gateways and metadata",
+      "app filtering supports category and free-text search without changing trust state",
+      "420 Apps discovery enables only services from a verified manifest",
+      "420 Apps discovery fails closed on unverified manifest",
+      "420 Apps discovery leaves everything unavailable until a manifest is configured",
+      "Pay discovery presents the approved catalogue entry without allowing manifest-only launch",
+      "Token is Wallet-integrated and never gains an external link from a manifest or generic Registry navigation",
+      "runtime config accepts deferred production endpoints and smart account deployment",
+      "runtime config rejects malformed canonical smart account factory address",
+      "verified manifest resolves known core services and leaves missing services unavailable",
+      "unverified ecosystem manifest fails closed",
+      "json rpc provider sends standard JSON-RPC request",
+      "factory calldata uses canonical SmartAccountFactory420 selectors",
+      "smart account discovery fails closed when canonical factory has no code",
+      "counterfactual smart account discovery predicts through deployed factory and confirms no account code",
+      "deployed smart account state is read from SmartAccount420 getters",
+      "creation preparation builds only the canonical factory transaction for a counterfactual account",
+      "creation send requires explicit provider transaction approval and returns hash",
+      "creation is idempotent and does not send when account is already deployed",
+      "confirmed creation re-reads SmartAccount420 and verifies controller ownership",
+      "confirmed creation fails closed on reverted receipt",
+      "confirmed creation fails closed when resulting owner differs from controller",
+      "creation rejects malformed provider transaction hashes",
+      "network reads flag a chain mismatch fail-closed condition",
+      "portfolio reads native balances for controller and smart account",
+      "ABI address decoder rejects malformed responses",
+      "remote JSON-RPC transport cannot become a server-side signing or broadcasting authority",
+      "RPC transport rejects mismatched JSON-RPC ids and malformed code assertions",
+      "Wallet accepts disabled sponsorship or HTTPS quote endpoint without credentials in static config",
+      "Wallet refuses insecure remote quote endpoint and embedded service credentials",
+      "W14.5 Wallet catalogue uses only canonical Genesis service IDs",
+      "W14.5 reconciles required Wallet-visible Genesis services",
+      "W14.5 removes stale noncanonical service aliases from verified app gateway",
+      "W14.5 records named Genesis products that still lack distinct canonical service IDs",
+      "W14.5 catalogue has unique ids and service IDs",
+      "W14.2 builds deterministic live-testnet runtime config from qualified inputs",
+      "W14.2 fails closed against the current unresolved W14.1 inventory",
+      "W14.2 rejects manifest chain-id drift",
+      "W14.2 rejects insecure public RPC endpoints",
+      "W14.2 rejects unresolved authority states even when release gates claim ready",
+      "W14.2 requires Explorer and Faucet publication for testnet",
+      "W14.2 refuses live Stake runtime binding when frozen app addresses are not chain-verified",
+      "qualified runtime generator rejects retired Wallet factory authority",
+      "qualified runtime generator rejects fake unverified Wallet deployment",
+      "qualified runtime generator preserves canonical Registry, Names and Identity",
+      "Token runtime generation uses only bound deployment inventory and clears stale base pins",
+      "catalogue displays only the eight canonical templates with accurate features, permanent IDs and exact fee",
+      "unconfigured, disconnected, checking and blocked states never infer enablement or selection",
+      "verified availability supports mixed and all-disabled states without changing catalogued profiles",
+      "partial, substituted, duplicated, malformed and stale-block profile results fail closed",
+      "every enabled profile can be selected only after a fresh verified read, without transaction authority",
+      "governance disablement between display and selection rejects and updates availability; reenable requires a refresh",
+      "deactivated service, reorganization and RPC failure clear selection and availability; retry uses same approved context",
+      "superseded selection cannot survive a disconnect, newer host context or disposed catalogue",
+      "counterfactual and non-owner status is separate from Registry enablement",
+      "read-only refresh cannot restore invalidated host context or substitute external config",
+      "offline Wallet production defaults contain no Token release candidate or live address",
+      "same-origin Wallet config requires full approved release, environment, chain and shared authority binding",
+      "connected Wallet discovers the active Registry release, all template profiles and fresh selected SmartAccount",
+      "counterfactual account discovery and non-owner accounts remain read-only",
+      "discovery rejects changed controller, account, chain, missing factory, wrong EntryPoint and capability bindings",
+      "discovery rejects late account, chain, canonical-block changes after runtime verification",
+      "Registry deactivation, wrong code, disabled templates and RPC failure are handled without stale availability",
+      "inflight discovery cannot resurrect stale state after disconnect or a newer discovery",
+      "discovery results do not grant signing or spending authority and are not accepted from wallet catalogue events",
+      "ERC20 amount conversion preserves every base unit and uint256 boundary without floating point",
+      "all six ERC20 wizard profiles encode exactly the canonical SDK draft, fixed 18 decimals and correct cap",
+      "wizard rejects malformed metadata, arbitrary fields and non-ERC20 profiles",
+      "cap must be positive, at least the supply, and only belongs to capped profile; votes bound matches contract",
+      "zero supply is valid but non-mintable templates warn permanently; salt is secure bytes32",
+      "all six actual wizard selections produce exact fee, immutable owner-bound canonical draft after fresh read",
+      "editing, salt regeneration, reset, NFT selection and refresh clear any prepared draft",
+      "unconfigured, counterfactual and non-owner contexts never enter ERC20 creation wizard",
+      "fresh draft preparation rejects disabled template, revoked service, ownership change, chain and reorg",
+      "disconnect, fresh host context and reset cannot resurrect a pending draft",
+      "invalid form does not start re-verification, arbitrary form fields cannot be injected",
+      "420Token runtime requires distinct verified factory, registry and Vault identities",
+      "420Token runtime fails closed on wrong service, version or Vault identity",
+      "420Token handoff preserves SmartAccount420 authority and exact fee",
+      "420Token handoff rejects wrong factory, fee and empty calldata before wallet execution",
+      "shape-only or aliased release records cannot authorize a handoff",
+      "canonical eight SDK profiles agree with frozen Genesis config, Solidity identity and profile commitments",
+      "ERC20 encoding uses exact Solidity ABI words, dynamic offsets, UTF-8 and base-unit supply",
+      "ERC721 and ERC1155 encodings use exact ABI layouts and distinct config hashes",
+      "all eight drafts are canonical, immutable, JSON-safe and distinguish feature semantics",
+      "draft validation rejects noncanonical templates, cap misuse, unsafe numeric values and oversized or malformed fields",
+      "real TOKEN-AUDIT-4 Registry dependency commitment is reproduced exactly by the SDK",
+      "runtime verifies all dependencies, active Registry records, every template and canonical block",
+      "every frozen profile prepares exact SmartAccount calldata, fee, configuration and explicit-review state",
+      "runtime rejects wrong chain, wrong genesis, absent code, wrong code and reorganized snapshots",
+      "runtime rejects wrong service, component, release commitments, immutables, Vault registration and template profiles",
+      "disabled templates are visible but cannot be prepared; a disable during simulation rejects the handoff",
+      "SmartAccount simulation, gas failures, ownership and chain changes remain fail-closed",
+      "W15.8 catalogue identities come from canonical Solidity service IDs, not aliases or named products",
+      "live ProtocolRegistry service identity, implementation code, metadata and navigation are independently verified",
+      "malformed, revoked, stale and counterfeit Registry records fail closed",
+      "service manifest spoofing and malformed destinations cannot enter verified directory",
+      "verified directory omits unavailable services, rejects duplicate identities and ignores stale registry data",
+      "launch rechecks immutable URL, version, implementation and account/network; no implicit grant",
+      "existing Names name normalizer blocks unicode and case lookalikes and catches retargeting between checks",
+      "420Gas funding offers and 420Token deployment remain outside app navigation authority",
+      "Identity420 binding is current, scoped, read-only, bilateral if claimed, never owner/signing authority",
+      "Pay release discovery uses the canonical Registry key and a credential-free endpoint check",
+      "Pay discovery blocks unreleased, wrong-chain, unresolved and disabled entries before probing",
+      "Pay is omitted from discovery when its endpoint is unreachable or redirected"
+    ],
+    "changed_paths": [
+      ".github/workflows/420token-audit.yml",
+      ".qualification/candidates/TOKEN-AUDIT-5.4-erc20-wizard.json",
+      "wallet/web/apps.css",
+      "wallet/web/core/token-app.js",
+      "wallet/web/core/token-erc20-wizard.js",
+      "wallet/web/core/token-sdk.js",
+      "wallet/web/scripts/qualify-browser.mjs",
+      "wallet/web/test/token-erc20-wizard.test.js",
+      "wallet/web/token-catalogue-ui.js",
+      "wallet/web/token-erc20-wizard-ui.js"
+    ]
+  },
+  "browser": {
+    "workflow": ".github/workflows/wallet-w15-5-browser.yml",
+    "run_id": 44646220776,
+    "job_id": 135989370849,
+    "conclusion": "success",
+    "fixture": "Actual mounted Wallet wizard using deterministic connected Wallet RPC responses; not live deployment or transaction simulation",
+    "wizard_viewports": [
+      {
+        "width": 1440,
+        "erc20Wizard": "PASS",
+        "exactAmount": true,
+        "invalidPrecisionRejected": true,
+        "capRejected": true,
+        "draftInvalidated": true,
+        "keyboard": true,
+        "wizardOverflow": {
+          "client": 1440,
+          "scroll": 1440
+        },
+        "axe": []
+      },
+      {
+        "width": 1024,
+        "erc20Wizard": "PASS",
+        "exactAmount": true,
+        "invalidPrecisionRejected": true,
+        "capRejected": true,
+        "draftInvalidated": true,
+        "keyboard": true,
+        "wizardOverflow": {
+          "client": 1024,
+          "scroll": 1024
+        },
+        "axe": []
+      },
+      {
+        "width": 768,
+        "erc20Wizard": "PASS",
+        "exactAmount": true,
+        "invalidPrecisionRejected": true,
+        "capRejected": true,
+        "draftInvalidated": true,
+        "keyboard": true,
+        "wizardOverflow": {
+          "client": 768,
+          "scroll": 768
+        },
+        "axe": []
+      },
+      {
+        "width": 390,
+        "erc20Wizard": "PASS",
+        "exactAmount": true,
+        "invalidPrecisionRejected": true,
+        "capRejected": true,
+        "draftInvalidated": true,
+        "keyboard": true,
+        "wizardOverflow": {
+          "client": 390,
+          "scroll": 390
+        },
+        "axe": []
+      },
+      {
+        "width": 320,
+        "erc20Wizard": "PASS",
+        "exactAmount": true,
+        "invalidPrecisionRejected": true,
+        "capRejected": true,
+        "draftInvalidated": true,
+        "keyboard": true,
+        "wizardOverflow": {
+          "client": 320,
+          "scroll": 320
+        },
+        "axe": []
+      }
+    ],
+    "catalogue_viewports": [
+      {
+        "width": 1440,
+        "tokenCatalogue": "PASS",
+        "profiles": 8,
+        "verified": 8,
+        "governanceDisabled": 1,
+        "staleSelectionRejected": true,
+        "disconnectInvalidated": true,
+        "catalogueOverflow": {
+          "client": 1440,
+          "scroll": 1440
+        },
+        "axe": []
+      },
+      {
+        "width": 1024,
+        "tokenCatalogue": "PASS",
+        "profiles": 8,
+        "verified": 8,
+        "governanceDisabled": 1,
+        "staleSelectionRejected": true,
+        "disconnectInvalidated": true,
+        "catalogueOverflow": {
+          "client": 1024,
+          "scroll": 1024
+        },
+        "axe": []
+      },
+      {
+        "width": 768,
+        "tokenCatalogue": "PASS",
+        "profiles": 8,
+        "verified": 8,
+        "governanceDisabled": 1,
+        "staleSelectionRejected": true,
+        "disconnectInvalidated": true,
+        "catalogueOverflow": {
+          "client": 768,
+          "scroll": 768
+        },
+        "axe": []
+      },
+      {
+        "width": 390,
+        "tokenCatalogue": "PASS",
+        "profiles": 8,
+        "verified": 8,
+        "governanceDisabled": 1,
+        "staleSelectionRejected": true,
+        "disconnectInvalidated": true,
+        "catalogueOverflow": {
+          "client": 390,
+          "scroll": 390
+        },
+        "axe": []
+      },
+      {
+        "width": 320,
+        "tokenCatalogue": "PASS",
+        "profiles": 8,
+        "verified": 8,
+        "governanceDisabled": 1,
+        "staleSelectionRejected": true,
+        "disconnectInvalidated": true,
+        "catalogueOverflow": {
+          "client": 320,
+          "scroll": 320
+        },
+        "axe": []
+      }
+    ],
+    "baseline_viewports": [
+      {
+        "width": 1440,
+        "info": {
+          "client": 1440,
+          "scroll": 1440
+        },
+        "focus": "security-centre",
+        "banner": "Deployment unconfigured",
+        "axe": []
+      },
+      {
+        "width": 1024,
+        "info": {
+          "client": 1024,
+          "scroll": 1024
+        },
+        "focus": "security-centre",
+        "banner": "Deployment unconfigured",
+        "axe": []
+      },
+      {
+        "width": 768,
+        "info": {
+          "client": 768,
+          "scroll": 768
+        },
+        "focus": "security-centre",
+        "banner": "Deployment unconfigured",
+        "axe": []
+      },
+      {
+        "width": 390,
+        "info": {
+          "client": 390,
+          "scroll": 390
+        },
+        "focus": "security-centre",
+        "banner": "Deployment unconfigured",
+        "axe": []
+      },
+      {
+        "width": 320,
+        "info": {
+          "client": 320,
+          "scroll": 320
+        },
+        "focus": "security-centre",
+        "banner": "Deployment unconfigured",
+        "axe": []
+      }
+    ],
+    "artifact": {
+      "id": 14587414983,
+      "name": "wallet-w15-5-browser-f14a07f64518303c9d5cdc683d57fc64ba691813",
+      "digest": "sha256:e79f822372ee8dd094a1fbd3e70f1f7b17c0a629ec65b47cacdcb5fd4ed2e44d",
+      "size_in_bytes": 55155718,
+      "expires_at": "2026-11-27T00:29:05Z",
+      "files": 16
+    }
+  },
+  "incidental_automatic_workflows": [
+    {
+      "id": 44646220728,
+      "name": "420 Wallet Extension Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44646220684,
+      "name": "420 Wallet Web Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 44646220734,
+      "name": "420 Wallet Mobile Verification",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "retained_prior_evidence": [
+    "docs/audit/420TOKEN-AUDIT-2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-3-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-4-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.1-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.2-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-5.3-QUALIFICATION.json"
+  ],
+  "reconciliation": {
+    "merge_commit": "d27e0982f0308e3a9796130e8bc02aecd32ff99c",
+    "concurrent_main": "d42bc921e2c4a207f739a6948663db2f99164a1e",
+    "concurrent_paths": [
+      "exchange/web/app.js",
+      "exchange/web/branding.css",
+      "exchange/web/index.html"
+    ],
+    "disposition": "Two concurrent main commits touched Exchange web only; exact new-main blobs preserved in two-parent reconciliation commit. Tested Token/Wallet inputs unchanged."
+  },
+  "trust_boundary": "Six frozen ERC20 profiles; integer arithmetic for exact 18-decimal base units; uint256 and actual uint208 voting supply limits, cap rules, metadata and bytes32 salt. Verified deployed SmartAccount owner and fresh same-release/account/profile selection required. Canonical factory target/calldata/config hash and exact fee; SmartAccount owner, not arbitrary input. Edits, reset, template/Wallet changes, disconnect, reorg, disablement and superseded verification clear or reject draft. No signing, gas estimation, transaction simulation, broadcast, persistent draft storage, live release binding or end-to-end transaction claimed. Nonblank/control-character metadata validation is a wizard UI guard, not modified protocol semantics.",
+  "aggregate_token_audit_5_complete": false,
+  "repository_release_qualified": false,
+  "live_testnet_qualified": false,
+  "next_canonical_step": "TOKEN-AUDIT-5 (remaining Wallet-integrated work; no separate numbered 5.5 description in current canonical roadmap)",
+  "publication": "Documentation/evidence-only closeout after Exchange-only main reconciliation. Qualified executable/test inputs unchanged."
+}

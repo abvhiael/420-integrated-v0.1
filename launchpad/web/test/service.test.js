@@ -33,3 +33,40 @@ test('a conversion quote cannot be substituted with a different target or missin
   fixture.source.blockHash='unknown';
   await assert.rejects(()=>s.conversionQuote(sale,account,{amount:'50',nonce:'20'}),/untrusted/);
 });
+
+test('creator wizard validates canonical governance calls and signed receipt identity',async()=>{
+  const ID='0x'+'aa'.repeat(32),ACCOUNT='0x000000000000000000000000000000000000c111',
+    SALE='0x'+'bb'.repeat(32),PROJECT='0x'+'cc'.repeat(32);
+  const request={schema:'420-launchpad-creator-preparation-v1',canonical:true,requiresGovernance:true,
+    status:'PREPARED_NOT_SUBMITTED',requestId:ID,projectId:PROJECT,saleId:SALE,
+    governanceRequest:{requester:ACCOUNT,calls:[{target:ACCOUNT,value:'0x0',data:'0xdeadbeef'}]}};
+  const calls=[];
+  const s=new LaunchpadService({baseUrl:'https://launchpad.example',fetchImpl:async(url,options)=>{
+    calls.push({url,options});return response(url.includes('/creator/submit')?
+      {schema:'420-launchpad-governance-receipt-v1',canonical:true,status:'RECEIVED_FOR_GOVERNANCE_REVIEW',requestId:ID}:request);
+  }});
+  assert.equal((await s.creatorPrepare({kind:'CREATE_CAMPAIGN',draft:{}})).requestId,ID);
+  assert.equal((await s.creatorSubmit({requestId:ID,signature:'0x11'})).status,'RECEIVED_FOR_GOVERNANCE_REVIEW');
+  assert.equal(calls.length,2);
+  assert.match(calls[0].url,/\/creator\/prepare$/);
+  assert.match(calls[1].url,/\/creator\/submit$/);
+  request.governanceRequest.calls[0].target='bad';
+  await assert.rejects(()=>s.creatorPrepare({}),/unexpected governance calldata/);
+  request.governanceRequest.calls[0].target=ACCOUNT;
+  request.governanceRequest.calls[0].value='0x1';
+  await assert.rejects(()=>s.creatorPrepare({}),/unexpected governance calldata/);
+});
+test('creator dashboard and reports enforce on-chain identity and canonical provenance',async()=>{
+  const account='0x000000000000000000000000000000000000c111',id='0x'+'22'.repeat(32),
+    source={chainId:'0x1a4',blockHash:'0x'+'33'.repeat(32)};
+  let responseBody={schema:'420-launchpad-creator-report-v1',canonical:true,
+    account,saleId:id,source,events:null};
+  const s=new LaunchpadService({baseUrl:'https://launchpad.example',fetchImpl:async()=>response(responseBody)});
+  assert.equal((await s.creatorReport(account,id)).saleId,id);
+  responseBody={...responseBody,account:'0x000000000000000000000000000000000000beef'};
+  await assert.rejects(()=>s.creatorReport(account,id),/untrusted creator report/);
+  responseBody={schema:'420-launchpad-creator-campaigns-v1',canonical:true,source,items:[]};
+  assert.equal((await s.creatorCampaigns(account)).items.length,0);
+  responseBody={schema:'420-launchpad-creator-receipts-v1',items:[]};
+  assert.deepEqual(await s.creatorReceipts(account),[]);
+});

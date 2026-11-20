@@ -1,0 +1,76 @@
+name: 420Token local EVM end-to-end qualification
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/stage-420token-local-e2e.py'
+      - 'scripts/qualify-420token-local-e2e.mjs'
+      - '.github/workflows/420token-local-e2e.yml'
+      - 'wallet/web/core/token-*.js'
+      - 'wallet/web/core/accounts.js'
+      - 'wallet/web/core/execution.js'
+      - 'wallet/web/core/abi.js'
+      - 'wallet/web/core/transaction-lifecycle.js'
+      - 'contracts/src/token/**'
+      - 'contracts/src/accounts/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/system/**'
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/interfaces/genesis/**'
+      - 'contracts/foundry.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: token-local-e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-evm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.10.0
+      - name: Verify exact head and stage actual contract closure
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/verify-420token-audit.py
+          python3 scripts/stage-420token-local-e2e.py "$RUNNER_TEMP/token-local"
+      - name: Build actual local EVM contract graph
+        run: forge build --root "$RUNNER_TEMP/token-local"
+      - name: Execute Wallet end-to-end path against real local Anvil
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/token-e2e-results"
+          cp "$RUNNER_TEMP/token-local/source-closure.json" "$RUNNER_TEMP/token-e2e-results/"
+          anvil --host 127.0.0.1 --port 18545 --chain-id 31337 --hardfork cancun --base-fee 0 --gas-price 1000000000 --gas-limit 30000000 > "$RUNNER_TEMP/token-e2e-results/anvil.log" 2>&1 &
+          ANVIL_PID=$!
+          trap 'kill "$ANVIL_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 50); do
+            if cast chain-id --rpc-url http://127.0.0.1:18545 >/dev/null 2>&1; then break; fi
+            if ! kill -0 "$ANVIL_PID" 2>/dev/null; then cat "$RUNNER_TEMP/token-e2e-results/anvil.log"; exit 1; fi
+            sleep 1
+          done
+          test "$(cast chain-id --rpc-url http://127.0.0.1:18545)" = 31337
+          node scripts/qualify-420token-local-e2e.mjs "$RUNNER_TEMP/token-local" "$RUNNER_TEMP/token-e2e-results"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: token-local-e2e-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/token-e2e-results/
+          if-no-files-found: warn
+          retention-days: 30

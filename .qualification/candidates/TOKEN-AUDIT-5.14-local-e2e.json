@@ -1,0 +1,49 @@
+{
+  "step": "TOKEN-AUDIT-5.14",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "b1dff4100e241138eb8542a5b3abac5ba431b672",
+  "candidate_sha": "HEAD",
+  "classification": "integration-qualification",
+  "scope": [
+    "scripts/stage-420token-local-e2e.py",
+    "scripts/qualify-420token-local-e2e.mjs",
+    ".github/workflows/420token-local-e2e.yml",
+    ".qualification/candidates/TOKEN-AUDIT-5.14-local-e2e.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.14-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "python3 scripts/stage-420token-local-e2e.py \"$RUNNER_TEMP/token-local\" && forge build --root \"$RUNNER_TEMP/token-local\"",
+      "owner": "Exact unchanged Solidity closure"
+    },
+    {
+      "command": "node scripts/qualify-420token-local-e2e.mjs \"$RUNNER_TEMP/token-local\" \"$RUNNER_TEMP/token-e2e-results\"",
+      "owner": "Actual local EVM Wallet-to-SmartAccount-to-Token-to-community-Vault lifecycle"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-local-e2e.yml"
+  ],
+  "exit_criteria": [
+    "All eight frozen templates create through actual connected Wallet model review, simulation, separate authorization, SmartAccount submission and canonical real receipt",
+    "Reconcile actual native fee and Treasury accounting, creator nonce, portfolio reconstruction and management/permissions against real state",
+    "Fail closed on wrong chain/release/dependency/service/fee/calldata, disabled governance and ownership/cap/operator failures; actual local rollback and tracking; retain prior SDK/browser/contract evidence without redundant runs"
+  ],
+  "frozen_inputs": {
+    "genesisConfigHash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+  },
+  "external_gates": [
+    "Public testnet and Genesis/production release qualification separate"
+  ]
+}

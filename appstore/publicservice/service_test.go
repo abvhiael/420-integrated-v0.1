@@ -277,3 +277,41 @@ func TestCuratedPayDiscoveryAndCanonicalLaunchBoundary(t *testing.T) {
 		t.Fatalf("Pay provenance changed or launch leaked: %+v", got)
 	}
 }
+
+func TestCuratedTokenDiscoveryAndCanonicalLaunchBoundary(t *testing.T) {
+	const tokenID = "420/service/token/v1"
+	view := publicView(t)
+	view.Listing.Canonical.ServiceID = tokenID
+	view.Listing.Curation.ServiceID = tokenID
+	view.Security.ServiceID = tokenID
+	deps := NewDependencyState(hardening.Dependencies{})
+	svc, err := New(qualifiedRuntime(t), staticViews{views: []appstoreapi.ApplicationView{view}}, deps, Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	handler := svc.Handler()
+	for path, want := range map[string]string{
+		"/v1/apps/curated?q=token&category=finance": tokenID,
+		"/v1/apps/curated?category=other":           `"items":[]`,
+		"/v1/apps/curated?q=unlisted":               `"items":[]`,
+	} {
+		body := requestBody(t, handler, path)
+		if !strings.Contains(body, want) {
+			t.Fatalf("%s: %s", path, body)
+		}
+		for _, key := range []string{`"implementation"`, `"wallet"`, `"direct"`, `"version"`} {
+			if strings.Contains(body, key) {
+				t.Fatalf("curated result exposed %s", key)
+			}
+		}
+	}
+	deps.Set(hardening.Dependencies{Registry: true, RPC: true, Store: true, Search: true, Verify: true})
+	var response appstoreapi.DetailResponse
+	if err := json.Unmarshal([]byte(requestBody(t, handler, "/v1/apps/"+tokenID)), &response); err != nil {
+		t.Fatal(err)
+	}
+	got := response.Application
+	if got.Listing.Canonical != view.Listing.Canonical || got.Links.Direct != "" || got.Wallet.URI != "" {
+		t.Fatalf("Token provenance changed or launch leaked: %+v", got)
+	}
+}

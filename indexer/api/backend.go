@@ -10,6 +10,7 @@ import (
 	"github.com/420integrated/420-integrated/indexer/decoder"
 	"github.com/420integrated/420-integrated/indexer/model"
  "github.com/420integrated/420-integrated/indexer/treasuryread"
+ "github.com/420integrated/420-integrated/indexer/tokenread"
 )
 
 type ReadStore interface {
@@ -55,6 +56,7 @@ type StoreBackend struct {
 	runtimeHealth *RuntimeHealth
 	scienceReader scienceReader
  treasuryBinding *treasuryread.Binding
+ tokenBinding *tokenread.Binding
 }
 func NewStoreBackend(store ReadStore, catalog *decoder.Catalog) *StoreBackend { if catalog == nil { catalog = decoder.NewCatalog() }; return &StoreBackend{store: store, catalog: catalog} }
 func (b *StoreBackend) ReplaceRegistryCatalog(catalog *decoder.Catalog) {

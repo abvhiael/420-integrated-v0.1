@@ -15,5 +15,17 @@
       {"id":"ios","name":"iOS","status":"planned","description":"Scan and share payment requests with verified Wallet handoff."},
       {"id":"developer-integrations","name":"Developer integrations","status":"planned","description":"Integrate through the Pay SDK, merchant API, and signed webhooks."}
     ]
+  },
+  {
+    "serviceId": "420/service/token/v1",
+    "name": "420 Token",
+    "classification": "GENESIS_PROTOCOL_AND_USER_APP",
+    "category": "finance",
+    "description": "Wallet-integrated token creation from eight frozen templates; deployment provenance is not endorsement, listing or liquidity.",
+    "helpRoute": "apps/token/user-guide/",
+    "expressions": [
+      {"id":"token-creation","name":"Token creation in 420Wallet","status":"locally-implemented","description":"Prepare and review exact 42 native 420 creation fees, authorize in Wallet and track deployment receipts."},
+      {"id":"token-management","name":"Created-token management","status":"locally-implemented","description":"Inspect factory provenance, manage supported tokens and review ownership and permissions in Wallet."}
+    ]
   }
 ]

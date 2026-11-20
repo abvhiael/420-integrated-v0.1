@@ -14,6 +14,7 @@ import {
 import { logDto420, type LogDto420, type ReceiptDto420 } from './receipt-log-dto.js';
 import { receiptByHash420 } from './receipt-log-service.js';
 import { protocolObjectState420 } from './protocol-object-service.js';
+import { parseTokenBinding420, tokenDeploymentState420, type TokenBinding420, type TokenDeployment420 } from './token-read-model.js';
 import { treasuryAssetPolicyState420, type TreasuryAssetPolicyState420 } from './treasury-read-model.js';
 import { treasuryBudgetState420, treasuryDisbursementState420, type TreasuryBudgetState420, type TreasuryDisbursementState420 } from './treasury-read-model.js';
 import { grantsProgramState420, grantsApplicationState420, grantsAwardState420, grantsMilestoneState420, type GrantsProgramState420, type GrantsApplicationState420, type GrantsAwardState420, type GrantsMilestoneState420 } from './grants-read-model.js';
@@ -84,6 +85,7 @@ export interface SearchResult420 {
 }
 
 export interface IndexerPublicApiOperationalOptions420 {
+  tokenDeployment?: string;
   runtimeState?: IndexerRuntimeState420;
   aiExpectedChainId?: bigint;
   maxIngestStaleMs?: number;
@@ -106,6 +108,7 @@ export interface IndexerPublicApi420 {
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null>;
+  tokenDeployment?(chainId: bigint, token: string): Promise<TokenDeployment420|null>;
   treasuryAssetPolicy?(chainId: bigint, asset: string): Promise<TreasuryAssetPolicyState420 | null>;
   treasuryDisbursement(chainId: bigint, disbursementId: string): Promise<TreasuryDisbursementState420 | null>;
   grantsProgram(chainId: bigint, programId: string): Promise<GrantsProgramState420 | null>;
@@ -158,11 +161,12 @@ function searchResult420(row: QueryRow420): SearchResult420 {
 export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   readonly version = INDEXER_API_VERSION_420;
 
+  private readonly tokenBinding?: TokenBinding420;
   constructor(
     readonly service: IndexerQueryService420,
     readonly finalityPolicy: FinalityPolicy420 = { mode: 'head' },
     readonly operational: IndexerPublicApiOperationalOptions420 = {}
-  ) {}
+  ) { const raw=operational.tokenDeployment ?? process.env.INDEXER_TOKEN_DEPLOYMENT; if(raw) this.tokenBinding=parseTokenBinding420(raw); }
 
   private operationalContext(): IndexerOperationalContext420 {
     if (!this.operational.runtimeState) return {};
@@ -234,6 +238,11 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null> {
     return treasuryBudgetState420(this.service.db, chainId, budgetId);
+  }
+
+  async tokenDeployment(chainId: bigint, token: string): Promise<TokenDeployment420|null> {
+    if(this.operational.runtimeState&&!(await this.readiness(chainId)).ready)throw new Error('Token Indexer runtime unavailable');
+    return tokenDeploymentState420(this.service.db,chainId,this.tokenBinding,token);
   }
 
   treasuryAssetPolicy(chainId: bigint, asset: string): Promise<TreasuryAssetPolicyState420 | null> {

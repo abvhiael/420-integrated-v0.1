@@ -160,6 +160,19 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     const aiReputationId = pathParam420(path, /^\/v1\/ai\/reputation\/([^/]+)$/);
     if (aiReputationId !== null) { const value = await api.aiReputation(chainId, aiReputationId); return value ? ok420(value) : error420(404, 'not_found', 'AI reputation not found'); }
 
+    const tokenAddress = pathParam420(path, /^\/v1\/token\/deployments\/([^/]+)$/);
+    if (tokenAddress !== null) {
+      const requestedChain=url.searchParams.getAll('chainId');
+      if(requestedChain.length!==1||requestedChain[0]!==chainId.toString())return error420(400,'invalid_request','invalid Token chain');
+      const token=tokenAddress.toLowerCase();
+      if(!/^0x[0-9a-f]{40}$/.test(token)||BigInt(token)===0n) return error420(400,'invalid_request','invalid Token address');
+      if(!api.tokenDeployment) return error420(503,'unavailable','Token deployment evidence unavailable');
+      try {
+        const value=await api.tokenDeployment(chainId,token);
+        const response=value?ok420(value):error420(404,'not_found','Token deployment not observed');
+        return {...response,headers:{...response.headers,'cache-control':'no-store'}};
+      } catch { return error420(503,'unavailable','Token deployment evidence unavailable'); }
+    }
     const treasuryAsset = pathParam420(path, /^\/v1\/treasury\/asset-policies\/([^/]+)$/);
     if (treasuryAsset !== null) {
       if (!/^0x[0-9a-fA-F]{40}$/.test(treasuryAsset)) invalidRequest420('Treasury asset address invalid');

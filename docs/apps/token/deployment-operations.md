@@ -68,4 +68,25 @@ Alert on failed Treasury forwarding, unexpected service implementation/code-hash
 
 ## Recovery
 
-A failed deployment transaction is atomic and can be safely retried after the underlying cause is corrected. A deprecated or compromised service release must fail closed in clients until a newly qualified active Registry publication is available. Never recover by hard-coding a replacement address into Wallet or documentation.
+A canonically confirmed reverted deployment is atomic. After resolving the underlying cause and any prior submission outcome, prepare a fresh review and explicitly authorize a new submission; never automatically retry an ambiguous or pending submission. A deprecated or compromised service release must fail closed in clients until a newly qualified active Registry publication is available. Never recover by hard-coding a replacement address into Wallet or documentation.
+
+## Configure the read-only ecosystem projection
+
+After obtaining independently approved release evidence, set `INDEXER_TOKEN_DEPLOYMENT` to a JSON object containing the following exact fields. The Go Indexer reads this at process startup; the TypeScript Indexer adapter supports the same environment variable or an explicit `operational.tokenDeployment` JSON string.
+
+| Field | Source in approved Wallet Token binding |
+| --- | --- |
+| chainId | numeric chainId |
+| genesisHash | exact genesisHash |
+| factory | factory.address |
+| vault | communityTreasuryVault.address |
+| accounting | vaultGraph.VaultAccounting420.address |
+| factoryCodeHash | factory.codeHash |
+| metadataHash | release.metadataHash |
+| manifestHash | release.manifestHash |
+| dependencyRoot | release.dependencyRoot |
+| interfaceHash | release.interfaceHash |
+
+Use lowercase canonical hex, distinct non-reserved addresses and actual verified release commitments. No address defaults or live values are introduced. An invalid supplied binding fails startup; absent binding leaves the Token projection unavailable while other Indexer functions remain usable. The Docker Compose Indexer environment forwards the variable. Keep release changes synchronized with Wallet's independently approved binding; do not use Anvil data on a live chain. Explorer and Search require their configured Indexer endpoint and expected chain; no separate signer or token-specific RPC credentials are needed. Probe the exact deployment read API and Explorer/Search before announcing availability.
+
+Monitor checkpoint lag and hash, genesis mismatch, Registry publication/profile mismatch, missing or failed receipts, duplicate or out-of-order logs, fee/Vault/accounting inconsistencies and 503 rates. Reconcile the exact 42 native 420 fee to the community Vault's accounting event for every successful creation; withdrawals and other deposits mean lifetime creation revenue is not necessarily the current Vault balance. On mismatch suspend claims of verified evidence, reconcile with canonical chain and rebuild or rollback the Indexer checkpoint using the existing ingestion procedures. Development Compensation Vault receives none of the Token V1 creation fee. Do not represent local bootstrap or a projection response as live release qualification.

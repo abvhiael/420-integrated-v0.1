@@ -49,6 +49,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("GET /v1/services/{service}/versions/{version}", s.serviceVersion)
 	mux.HandleFunc("GET /v1/stake/activity", s.stakeActivity)
  mux.HandleFunc("GET /v1/treasury/{kind}/{id}", s.treasury)
+ mux.HandleFunc("GET /v1/token/deployments/{token}", s.tokenDeployment)
 	return mux
 }
 

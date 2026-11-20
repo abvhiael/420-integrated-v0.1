@@ -2,6 +2,7 @@ import {resolveLaunchpad} from './rpc.mjs';
 import {decodeAddress} from './abi.mjs';
 import {participantState,prepareParticipant,creatorRequest} from './planner.mjs';
 import {position,checkoutContext,transactionStatus} from './consumer.mjs';
+import {convertedCheckoutQuote,convertedCheckoutReview} from './quote.mjs';
 function ok(body,status=200){return {status,body};}
 function fail(error){return {status:error.statusCode||400,body:{error:error.message||String(error)}};}
 const param=(q,key)=>q instanceof URLSearchParams?q.get(key):q?.[key];
@@ -25,6 +26,11 @@ export function createApp({rpc,projection,registryAddress='0x0000000000000000000
       if(method==='GET'&&m)return ok(await position(rpc,await runtime(),m[1],m[2]));
       m=path.match(/^\/v1\/launchpad\/campaigns\/(0x[0-9a-fA-F]{64})\/checkout$/);
       if(method==='GET'&&m)return ok(await checkoutContext(rpc,await runtime(),m[1],param(query,'account'),param(query,'amount'),param(query,'nonce')));
+      m=path.match(/^\/v1\/launchpad\/campaigns\/(0x[0-9a-fA-F]{64})\/conversion-quote$/);
+      if(method==='GET'&&m)return ok(await convertedCheckoutQuote(rpc,await runtime(),{
+        saleId:m[1],account:param(query,'account'),amount:param(query,'amount'),nonce:param(query,'nonce'),
+        marketId:param(query,'marketId'),inputAsset:param(query,'inputAsset'),maxInput:param(query,'maxInput'),minOutput:param(query,'minOutput')
+      }));
       m=path.match(/^\/v1\/launchpad\/transactions\/(0x[0-9a-fA-F]{64})$/);
       if(method==='GET'&&m)return ok(await transactionStatus(rpc,await runtime(),m[1],param(query,'account')));
       // Audit-5 compatibility endpoint: canonical participant ledger read only.
@@ -37,6 +43,8 @@ export function createApp({rpc,projection,registryAddress='0x0000000000000000000
         return ok({schema:'420-launchpad-projection-v1',canonical:true,
           source:{chainId:rt.chainId,blockHash:block.hash},participant});
       }
+      m=path.match(/^\/v1\/launchpad\/prepare\/(approve-conversion|pay-conversion)$/);
+      if(method==='POST'&&m)return ok(await convertedCheckoutReview(rpc,await runtime(),m[1],body||{}));
       m=path.match(/^\/v1\/launchpad\/prepare\/(contribute|claim|refund|bind-identity|register-intent|open-dispute|link-dispute|publish-outcome|recover-unallocated|reconcile-refund)$/);
       if(method==='POST'&&m)return ok(await prepareParticipant(rpc,await runtime(),m[1],body||{}));
       if(method==='POST'&&path==='/v1/launchpad/creator-requests')return ok(creatorRequest(body||{},await runtime()),202);

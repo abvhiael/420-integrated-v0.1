@@ -1,3 +1,4 @@
+import {tokenStatus420,setTokenStatus420,runTokenAction420,tokenHidingFocus420} from './token-ui-accessibility.js';
 import {createTokenFeeReview420} from './core/token-fee-review.js';
 import {formatERC20Units420} from './core/token-erc20-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
@@ -13,13 +14,14 @@ export function mountTokenFeeReview420(section,wizard,session){
   const submit=el('button','ghost-button','Submit authorized creation');submit.type='button';
   const cancel=el('button','ghost-button','Cancel authorization');cancel.type='button';
   const details=el('dl','token-fee-review-details');
-  const status=el('p','token-fee-review-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+  const status=el('p','token-fee-review-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');tokenStatus420(status);
   actions.append(simulate,authorize,submit,cancel);panel.append(heading,help,details,actions,status);section.append(panel);
   let shown=null,approved=null;
   function render(v){
+    if(!v.draft)tokenHidingFocus420(panel,section.querySelector('[role="status"]'));
     panel.hidden=!v.draft;shown=v.quote;approved=v.authorization;submit.disabled=!approved||v.busy;simulate.disabled=!v.draft||v.busy;
     authorize.disabled=!v.quote||v.busy||!!v.authorization;cancel.disabled=!v.quote&&!v.busy&&!v.authorization;
-    details.replaceChildren();details.hidden=!v.quote;
+    details.replaceChildren();details.hidden=!v.quote;details.setAttribute('aria-busy',String(v.busy));
     if(v.quote){
       const q=v.quote;
       const entries=[['Simulation','Passed — not submitted'],['Creation fee (SmartAccount)',amount(q.creationFeeWei)],
@@ -33,14 +35,14 @@ export function mountTokenFeeReview420(section,wizard,session){
         ['Simulated token address (not guaranteed)',q.predictedAddress],['Verified block',BigInt(q.verificationBlock.number).toString()+' · '+q.verificationBlock.hash]];
       for(const [label,value] of entries)details.append(el('dt',null,label),el('dd',null,value));
     }
-    status.textContent=v.error||(v.busy?'Rechecking Wallet, Registry and simulation…':v.authorization?
+    setTokenStatus420(status,v.error?(v.error+' No new transaction is authorized by this error. Review the current estimate or simulate again; if submission was attempted, check Wallet activity before retrying.'):(v.busy?'Rechecking Wallet, Registry and simulation…':v.authorization?
       'Explicit authorization recorded. No transaction signed or submitted.':v.quote?
-      'Review both costs and the exact configuration above. Gas is an estimate; this authorization covers at most the displayed estimated gas and total. Higher costs require a new review. Authorizing re-simulates and rejects changed costs or authority.':'Prepare a draft, then simulate to review costs.');
+      'Review both costs and the exact configuration above. Gas is an estimate; this authorization covers at most the displayed estimated gas and total. Higher costs require a new review. Authorizing re-simulates and rejects changed costs or authority.':'Prepare a draft, then simulate to review costs.'),v.error?'error':v.busy?'busy':v.authorization||v.quote?'success':'idle');
   }
   const unsubscribe=model.subscribe(render);
-  simulate.addEventListener('click',()=>{void model.simulate();});
-  authorize.addEventListener('click',()=>{void model.authorize(shown);});
-  submit.addEventListener('click',()=>{void model.submit(approved).then(hash=>{if(hash)void session.checkTransaction(hash);});});
-  cancel.addEventListener('click',()=>model.cancel());
+  simulate.addEventListener('click',()=>{void runTokenAction420(simulate,status,()=>model.simulate());});
+  authorize.addEventListener('click',()=>{void runTokenAction420(authorize,status,()=>model.authorize(shown));});
+  submit.addEventListener('click',()=>{void runTokenAction420(submit,status,()=>model.submit(approved).then(hash=>{if(hash)void session.checkTransaction(hash);}));});
+  cancel.addEventListener('click',()=>{void runTokenAction420(cancel,status,()=>{model.cancel();setTokenStatus420(status,'Authorization cancelled. Nothing was submitted by this cancellation. Simulate again to prepare a new review.','idle');});});
   return ()=>{unsubscribe();model.dispose();};
 }

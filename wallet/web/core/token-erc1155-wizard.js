@@ -1,6 +1,6 @@
 // Frozen ERC1155 V1 creation: immutable URI and deployment salt.
 import {TOKEN_TEMPLATES_420,encodeTokenCreation420,tokenWord420} from './token-sdk.js';
-import {createTokenCreationWizard420,generateTokenCreationSalt420,validateTokenWizardURI420} from './token-creation-wizard.js';
+import {createTokenCreationWizard420,generateTokenCreationSalt420,validateTokenWizardURI420,tokenWizardTextField420,tokenWizardSaltField420} from './token-creation-wizard.js';
 const profile=TOKEN_TEMPLATES_420.find(p=>p.key==='ERC1155_MULTI');
 const profiles=new Map([[profile.key,profile]]);
 const fields=['uri','userSalt'];
@@ -14,8 +14,8 @@ export function validateERC1155WizardFields420(key,input){
   check(key===profile.key,'Select the frozen ERC1155 multi-token template.');
   check(input&&typeof input==='object'&&!Array.isArray(input)&&Object.keys(input).every(k=>fields.includes(k)),
     'Unexpected ERC1155 wizard field.');
-  const uri=validateTokenWizardURI420(input.uri);
-  const result=encodeTokenCreation420({template:profile.key,uri,userSalt:input.userSalt});
+  const uri=tokenWizardTextField420('uri',input.uri,'Multi-token metadata URI',true);
+  const result=encodeTokenCreation420({template:profile.key,uri,userSalt:tokenWizardSaltField420(input.userSalt)});
   const collection=Object.freeze({initialSupply:'0',ownerMintable:true,holderOrApprovedOperatorBurn:true,
     ownershipTransferable:true,safeBatchTransfers:true,uriMutable:false,uriMode:'CLIENT_ID_SUBSTITUTION',
     hasIdPlaceholder:uri.includes('{id}'),exampleId:'1',exampleURI:resolveERC1155MetadataURI420(uri,'1')});

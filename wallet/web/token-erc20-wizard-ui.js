@@ -1,10 +1,11 @@
+import {tokenStatus420,setTokenStatus420,focusToken420,runTokenAction420,tokenHidingFocus420,tokenFieldError420} from './token-ui-accessibility.js';
 import {mountTokenFeeReview420} from './token-fee-review-ui.js';
 import {createERC20Wizard420} from './core/token-erc20-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
 export function mountERC20Wizard420(section,catalogue,session){
   const model=createERC20Wizard420(catalogue,session);
   const heading=el('h4',null,'Create ERC20 token');
-  heading.id='erc20-wizard-title';section.setAttribute('aria-labelledby',heading.id);
+  heading.id='erc20-wizard-title';heading.tabIndex=-1;section.setAttribute('aria-labelledby',heading.id);
   const explanation=el('p',null,'Select an enabled ERC20 template with a verified, deployed SmartAccount owner to configure a draft.');
   const form=el('form','token-erc20-form');form.noValidate=true;form.hidden=true;
   const context=el('p','token-erc20-context');
@@ -12,6 +13,7 @@ export function mountERC20Wizard420(section,catalogue,session){
   const controls=el('div','token-catalogue-controls');
   const status=el('p','token-erc20-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   status.id='erc20-wizard-status';
+  tokenStatus420(status);
   const inputs={};
   function field(key,label,hint,decimal=false){
     const wrap=el('div','token-erc20-field'),id='erc20-'+key;
@@ -36,7 +38,8 @@ export function mountERC20Wizard420(section,catalogue,session){
   const preview=el('section','token-erc20-preview');preview.hidden=true;preview.setAttribute('aria-label','Prepared ERC20 draft');
   form.append(context,grid,controls,preview);section.replaceChildren(heading,explanation,form,status);
   function render(v){
-    form.hidden=!v.ready&&!v.busy;
+    if(!v.ready&&!v.busy)tokenHidingFocus420(form,status);
+    form.hidden=!v.ready&&!v.busy;form.setAttribute('aria-busy',String(v.busy));
     explanation.textContent=v.ready?'Configure the frozen ERC20 profile. Draft preparation is read-only and does not simulate, sign or submit a transaction.':
       v.busy?'Rechecking the selected template and Wallet account…':
       'Select an enabled ERC20 template with a verified, deployed SmartAccount owner to configure a draft.';
@@ -44,15 +47,15 @@ export function mountERC20Wizard420(section,catalogue,session){
     for(const [key,{wrap,input}] of Object.entries(inputs)){
       if(input.value!==v.fields[key])input.value=v.fields[key];
       wrap.hidden=key==='cap'&&!v.profile?.capped;
-      input.disabled=v.busy||!v.ready||wrap.hidden;
+      input.disabled=v.busy||!v.ready||wrap.hidden;tokenFieldError420(input,status,!!v.error&&v.errorField===key&&!wrap.hidden);
     }
     renew.disabled=review.disabled=reset.disabled=!v.ready||v.busy;
-    status.textContent=v.error||(v.busy?'Rechecking Registry and Wallet…':v.draft?'Draft prepared. Draft step: No transaction simulated, signed or submitted.':'');
+    setTokenStatus420(status,v.error?(v.error+(v.errorField?' Correct the highlighted field and prepare the draft again.':' Select or refresh the verified template and prepare again.')):(v.busy?'Rechecking Registry and Wallet…':v.draft?'Draft prepared. Draft step: No transaction simulated, signed or submitted.':''),v.error?'error':v.busy?'busy':v.draft?'success':'idle');
     preview.hidden=!v.draft;preview.replaceChildren();
     if(v.draft){
       const d=v.draft,r=d.request;
       const title=el('h5',null,'Prepared draft — not submitted');
-      const dl=el('dl','token-erc20-review');
+      title.tabIndex=-1;const dl=el('dl','token-erc20-review');
       const entries=[['Template',d.profile.key+' · V'+d.profile.version],['Template ID',d.profile.id],
         ['Name',r.draft.name],['Symbol',r.draft.symbol],['Decimals','18'],['Initial supply',d.displaySupply],
         ['Initial supply (base units)',r.draft.initialSupply],['Cap',d.displayCap??'No cap'],
@@ -68,7 +71,7 @@ export function mountERC20Wizard420(section,catalogue,session){
   }
   const unsubscribe=model.subscribe(render);
   const disposeFeeReview=mountTokenFeeReview420(section,model,session);
-  form.addEventListener('submit',e=>{e.preventDefault();void model.review();});
+  form.addEventListener('submit',e=>{e.preventDefault();void runTokenAction420(document.activeElement,status,()=>model.review(),()=>{const v=model.getSnapshot();return v.errorField?inputs[v.errorField]?.input:v.draft?preview.querySelector('h5'):null;});});
   renew.addEventListener('click',()=>model.renewSalt());
   reset.addEventListener('click',()=>model.reset());
   return ()=>{unsubscribe();disposeFeeReview();model.dispose();};

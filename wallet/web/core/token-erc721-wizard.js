@@ -1,7 +1,7 @@
 // ERC721 V1 collection draft. Its contract returns the exact stored baseURI for
 // every minted ID; no automatic token-ID suffix, URI resolution or minting.
 import {TOKEN_TEMPLATES_420,encodeTokenCreation420} from './token-sdk.js';
-import {createTokenCreationWizard420,generateTokenCreationSalt420,validateTokenWizardMetadata420,validateTokenWizardURI420} from './token-creation-wizard.js';
+import {createTokenCreationWizard420,generateTokenCreationSalt420,tokenWizardTextField420,tokenWizardSaltField420} from './token-creation-wizard.js';
 const profile=TOKEN_TEMPLATES_420.find(p=>p.key==='ERC721_COLLECTION');
 const profiles=new Map([[profile.key,profile]]);
 const fields=['name','symbol','baseURI','userSalt'];
@@ -10,11 +10,10 @@ export function validateERC721WizardFields420(key,input){
   check(key===profile.key,'Select the frozen ERC721 collection template.');
   check(input&&typeof input==='object'&&!Array.isArray(input)&&Object.keys(input).every(k=>fields.includes(k)),
     'Unexpected ERC721 wizard field.');
-  const name=validateTokenWizardMetadata420(input.name,'Collection name');
-  const symbol=validateTokenWizardMetadata420(input.symbol,'Collection symbol');
-  const uri=input.baseURI;
-  validateTokenWizardURI420(uri);
-  const result=encodeTokenCreation420({template:profile.key,name,symbol,baseURI:uri,userSalt:input.userSalt});
+  const name=tokenWizardTextField420('name',input.name,'Collection name');
+  const symbol=tokenWizardTextField420('symbol',input.symbol,'Collection symbol');
+  const uri=tokenWizardTextField420('baseURI',input.baseURI,'Collection base URI',true);
+  const result=encodeTokenCreation420({template:profile.key,name,symbol,baseURI:uri,userSalt:tokenWizardSaltField420(input.userSalt)});
   const collection=Object.freeze({initialSupply:'0',ownerMintable:true,holderOrApprovedOperatorBurn:true,
     ownershipTransferable:true,uriMutable:false,uriMode:'EXACT_SHARED_URI'});
   const warnings=Object.freeze([

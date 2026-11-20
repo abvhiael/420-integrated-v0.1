@@ -16,3 +16,15 @@ body{background:var(--bg);color:var(--text)}
 @media(max-width:980px){.app-layout{grid-template-columns:175px minmax(0,1fr)}.app-rail{grid-column:2;position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-topnav{display:none}.dashboard-search{margin-left:auto}}
 @media(max-width:760px){.app-header{padding:8px 12px;min-height:60px}.brand__mark{width:42px;height:42px}.brand-wordmark strong{font-size:1.4rem}.brand-wordmark small{display:block;font-size:.65rem}.dashboard-search span{display:none}.dashboard-search{padding:8px 11px}.app-layout{display:flex;flex-direction:column;gap:12px;padding:10px 10px 100px}.app-content{order:0}.app-sidebar{order:1;display:block;position:static;width:100%}.app-nav--desktop{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.app-rail{order:2;display:grid;width:100%;grid-template-columns:1fr}.ecosystem-rail{order:3;width:100%}.dashboard-welcome{min-height:145px;gap:9px;padding:12px}.welcome-copy h1{font-size:1.7rem}.welcome-copy strong{font-size:.65rem}.welcome-copy small{font-size:.66rem}.account-chip{max-width:88px}}
 @media(forced-colors:active){.dashboard-welcome,.dashboard-panel,.ecosystem-rail,.app-sidebar{border:1px solid CanvasText}.welcome-art{display:none}}
+
+/* Custom greeting works at its complete aspect ratio: never crop embedded lettering. */
+.dashboard-welcome--art{display:block;min-height:0;padding:0;aspect-ratio:auto;background:#082d24;isolation:auto}
+.dashboard-welcome--art .greeting-image{display:block;width:100%;height:auto;max-width:none;border-radius:inherit;aspect-ratio:1000/563;object-fit:contain}
+.dashboard-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.app-sidebar{background:linear-gradient(180deg,rgba(255,254,249,.97) 0%,rgba(255,254,249,.91) 61%,rgba(255,254,249,.67) 100%),url('/assets/sidebars/botanical-light.webp') center bottom/cover no-repeat}
+.ecosystem-rail{background:linear-gradient(180deg,rgba(5,35,25,.94) 0%,rgba(5,35,25,.85) 65%,rgba(5,35,25,.36) 100%),url('/assets/sidebars/botanical-dark.webp') center bottom/cover no-repeat}
+.ecosystem-link .ecosystem-icon,.ecosystem-brand .ecosystem-icon,.ecosystem-rail summary .ecosystem-icon,.sidebar-ecosystem .ecosystem-icon{display:block;flex:none;width:32px;height:32px;object-fit:contain;border:0;border-radius:7px;background:transparent}
+.ecosystem-brand .ecosystem-icon{width:40px;height:40px}.ecosystem-rail summary{display:flex;align-items:center;gap:8px}.ecosystem-rail summary::after{content:'›';margin-left:auto}.ecosystem-rail details[open] summary::after{content:'⌄'}
+.ecosystem-unavailable{opacity:.85}.ecosystem-unavailable small{display:block;font-size:.66rem;font-weight:400;color:#d4e5d6}
+.sidebar-ecosystem a{display:flex;align-items:center;gap:8px}
+@media(forced-colors:active){.app-sidebar,.ecosystem-rail{background:Canvas;color:CanvasText}.ecosystem-rail a,.ecosystem-rail summary,.ecosystem-unavailable small,.ecosystem-brand small,.ecosystem-note{color:CanvasText}}

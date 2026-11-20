@@ -1,5 +1,6 @@
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
-import {resolve} from 'node:path';
+import {resolve,dirname} from 'node:path';
+import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import sharp from 'sharp';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
@@ -14,6 +15,15 @@ validateRuntimeConfig(example);
 
 for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
+}
+// Only the approved 14 assets are published; ignore upload placeholders or unrelated files.
+for(const asset of DASHBOARD_ASSETS){
+  const source=resolve(root,asset),target=resolve(out,asset);
+  const metadata=await sharp(source).metadata();
+  if(metadata.format!=='webp'||!metadata.width||!metadata.height||(await stat(source)).size>128*1024)throw new Error('invalid dashboard artwork: '+asset);
+  if(asset.startsWith('assets/apps/')&&!metadata.hasAlpha)throw new Error('app icon must preserve transparency: '+asset);
+  await mkdir(dirname(target),{recursive:true});
+  await cp(source,target);
 }
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.

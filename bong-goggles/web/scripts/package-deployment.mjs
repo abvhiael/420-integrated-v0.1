@@ -1,6 +1,7 @@
 import {readFile,readdir,writeFile,cp,mkdir,rm} from 'node:fs/promises';
 import {resolve,relative} from 'node:path';
 import {createHash} from 'node:crypto';
+import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {validateDeploymentCandidate} from '../core/deployment-readiness.js';
 
 // Run `npm run build` first. This script does not deploy, approve a launch or emit secrets.
@@ -13,7 +14,7 @@ if(!configPath||!target)throw new Error('BG_WEB_RUNTIME_CONFIG and BG_WEB_DEPLOY
 if(resolve(configPath)===resolve(root,'runtime-config.example.json'))throw new Error('example runtime configuration cannot be deployed');
 const supplied=JSON.parse(await readFile(resolve(configPath),'utf8'));
 const validated=validateDeploymentCandidate(supplied,{expectedEnvironment:target});
-for(const file of ['index.html','app.js','styles.css','settings.css','_headers'])await readFile(resolve(source,file));
+for(const file of ['index.html','app.js','styles.css','settings.css','dashboard.css','_headers',...DASHBOARD_ASSETS])await readFile(resolve(source,file));
 await rm(destination,{recursive:true,force:true});
 await mkdir(destination,{recursive:true});
 await cp(source,destination,{recursive:true});

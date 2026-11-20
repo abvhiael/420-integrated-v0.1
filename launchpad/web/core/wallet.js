@@ -15,7 +15,9 @@ export function executionGate({config,wallet,review}={}){
     config.registry.launchpadRouterAddress.toLowerCase(),
     config.registry.allocationRegistryAddress.toLowerCase(),
     config.registry.crowdfundingIntegrationAddress.toLowerCase(),
-    ...(config.registry.arbitrationCasesAddress?[config.registry.arbitrationCasesAddress.toLowerCase()]:[])
+    ...(config.registry.arbitrationCasesAddress?[config.registry.arbitrationCasesAddress.toLowerCase()]:[]),
+    ...(config.registry.payRouterAddress?[config.registry.payRouterAddress.toLowerCase()]:[]),
+    ...(config.registry.approvedInputAsset?[config.registry.approvedInputAsset.toLowerCase()]:[])
   ]);
   if(!allowed.has(review.transaction.to.toLowerCase()))return {ok:false,reason:'UNEXPECTED_TRANSACTION_TARGET'};
   return {ok:true,reason:null};

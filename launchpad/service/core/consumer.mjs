@@ -135,8 +135,8 @@ export async function checkoutContext(rpc,rt,saleId,account,rawAmount,rawNonce){
     if(merchant.toLowerCase()!==sale.proceedsReceiver.toLowerCase())throw new Error('invoice merchant mismatches campaign');
     const invoice=await call(rpc,invoices,'getInvoice(bytes32)',[wordHex(invoiceId)]);
     if(decodeUint(invoice,4)!==principal||Number(decodeUint(invoice,7))!==0||
-      decodeBool(invoice,9)||decodeUint(invoice,6)<BigInt(sale.startsAt)||
-      decodeUint(invoice,6)>BigInt(sale.endsAt))throw new Error('canonical invoice terms mismatch');
+      decodeBool(invoice,9)||decodeUint(invoice,5)<BigInt(sale.startsAt)||
+      decodeUint(invoice,5)>BigInt(sale.endsAt))throw new Error('canonical invoice terms mismatch');
   }
   if(!registered&&(invoiceExists||confirmedPayment))throw new Error('unregistered payment intent');
   return {schema:'420-launchpad-checkout-v1',canonical:true,source:p.source,saleId:sale.saleId,amount:principal.toString(),nonce:nonce.toString(),

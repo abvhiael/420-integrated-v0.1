@@ -14,19 +14,23 @@ function cleanSignature(signature){
   return {r,s,v,raw:signature.toLowerCase()};
 }
 export async function verifyCreatorSignature(rpc,requestId,account,signature){
-  const {r,s,v,raw}=cleanSignature(signature),who=address(account),message=hash(requestId);
+  const who=address(account),message=hash(requestId);
+  if(typeof signature!=='string'||!/^0x(?:[a-fA-F0-9]{2}){1,1024}$/.test(signature))reject('invalid Wallet signature');
   const prefix=hexUtf8('\x19Ethereum Signed Message:\n32').slice(2);
   const digest=hash(await rpc.call('web3_sha3',['0x'+prefix+message.slice(2)]));
   const code=await rpc.call('eth_getCode',[who,'latest']);
   if(typeof code!=='string'||!/^0x[0-9a-fA-F]*$/.test(code))throw new Error('unverifiable requester code');
   if(code!=='0x'&&code!=='0x0'&&code!=='0x00'){
     const selector=await rpc.selector('isValidSignature(bytes32,bytes)');
-    const data=selector+wordHex(digest)+wordUint(64)+wordUint(65)+raw.slice(2).padEnd(192,'0');
+    const length=(signature.length-2)/2;
+    const padded=signature.slice(2).padEnd(Math.ceil(length/32)*64,'0');
+    const data=selector+wordHex(digest)+wordUint(64)+wordUint(length)+padded;
     let result;
     try{result=await rpc.ethCall(who,data);}catch{reject('Wallet contract signature not verified');}
     if(String(result).slice(0,10).toLowerCase()!=='0x1626ba7e')reject('Wallet contract signature not verified');
     return {kind:'EIP1271',requester:who,requestId:message};
   }
+  const {r,s,v}=cleanSignature(signature);
   const precompileData='0x'+wordHex(digest)+wordUint(v)+wordUint(r)+wordUint(s);
   let recovered;
   try{recovered=await rpc.ethCall(ONE,precompileData);}catch{reject('Wallet EOA signature not verified');}

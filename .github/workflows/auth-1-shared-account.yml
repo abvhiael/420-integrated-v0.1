@@ -8,6 +8,11 @@ on:
       - 'go.mod'
       - 'go.sum'
   workflow_dispatch:
+    inputs:
+      live_ingress:
+        description: Probe the restricted AUTH-2 deployment (no credentials or email sends)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -67,3 +72,15 @@ jobs:
           fi
       - name: Static analysis
         run: go vet -tags account420_integration ./services/420id ./cmd/420id
+
+  live-ingress:
+    if: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'feature/auth-2-email-passkey') || (github.event_name == 'workflow_dispatch' && inputs.live_ingress) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Restricted live ingress security checks
+        run: python3 services/420id/live_ingress_check.py

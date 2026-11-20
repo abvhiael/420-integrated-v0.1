@@ -1,4 +1,4 @@
-name: AUTH-1 Shared Account Architecture
+name: 420ID Shared Account and Authentication
 on:
   pull_request:
     paths:
@@ -44,7 +44,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Shared account unit and PostgreSQL concurrency qualification
+      - name: Shared account and authentication unit and PostgreSQL qualification
         run: go test -race -tags account420_integration -count=1 -v ./services/420id
+      - name: Bounded WebAuthn CBOR fuzz qualification
+        run: go test ./services/420id -run '^
+        run: go vet -tags account420_integration ./services/420id
+ -fuzz '^FuzzWebAuthnBoundedAttestation
+        run: go vet -tags account420_integration ./services/420id
+ -fuzztime=5s -parallel=2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser WebAuthn adapter
+        run: node --test services/420id/browser.test.mjs
       - name: Static analysis
         run: go vet -tags account420_integration ./services/420id

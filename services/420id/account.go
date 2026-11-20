@@ -12,7 +12,7 @@ import (
  "regexp"
 )
 
-//go:embed migrations/001_accounts.sql
+//go:embed migrations/*.sql
 var migration embed.FS
 
 var (
@@ -74,10 +74,12 @@ func newID() (string,error) {
 // is installed atomically. The advisory lock serializes concurrent installers.
 func Migrate(ctx context.Context,db *sql.DB) error {
  if db==nil{return ErrInvalid}
- body,err:=migration.ReadFile("migrations/001_accounts.sql");if err!=nil{return err}
  tx,err:=db.BeginTx(ctx,nil);if err!=nil{return err};defer tx.Rollback()
  if _,err=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420000001)");err!=nil{return err}
- if _,err=tx.ExecContext(ctx,string(body));err!=nil{return err}
+ for _,name:=range []string{"001_accounts.sql","002_authentication.sql"} {
+  body,err:=migration.ReadFile("migrations/"+name);if err!=nil{return err}
+  if _,err=tx.ExecContext(ctx,string(body));err!=nil{return err}
+ }
  return tx.Commit()
 }
 

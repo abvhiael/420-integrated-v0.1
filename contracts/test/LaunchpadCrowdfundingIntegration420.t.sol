@@ -69,6 +69,19 @@ contract MockLaunchpadPay420 is ILaunchpadPaymentRegistry420 {
     mapping(bytes32 => PaymentData) internal records;
     mapping(bytes32 => address) public merchantOf;
     mapping(bytes32 => uint64) public expiresAtOf;
+    mapping(bytes32 => bytes32) public checkoutPaymentForInvoice;
+    mapping(bytes32 => bool) public isClosed;
+    mapping(bytes32 => uint8) public invoiceMode;
+
+    function getInvoice(bytes32 invoiceId) external view returns (ILaunchpadInvoice420.Invoice memory invoice) {
+        invoice.merchant = merchantOf[invoiceId];
+        invoice.expiresAt = expiresAtOf[invoiceId];
+        invoice.mode = invoiceMode[invoiceId];
+        invoice.active = true;
+    }
+
+    function setInvoiceMode(bytes32 invoiceId, uint8 mode) external { invoiceMode[invoiceId] = mode; }
+    function setCheckout(bytes32 invoiceId, bytes32 paymentId) external { checkoutPaymentForInvoice[invoiceId] = paymentId; }
     mapping(bytes32 => uint256) public deliveredByPayment;
 
     function registry() external view returns (address) { return address(this); }
@@ -80,6 +93,8 @@ contract MockLaunchpadPay420 is ILaunchpadPaymentRegistry420 {
         records[paymentId].invoiceId = invoiceId;
         merchantOf[invoiceId] = records[paymentId].merchant;
         expiresAtOf[invoiceId] = expiry;
+        checkoutPaymentForInvoice[invoiceId] = paymentId;
+        isClosed[invoiceId] = true;
     }
 
     function setDelivered(bytes32 paymentId, uint256 amount) external {
@@ -561,6 +576,9 @@ contract LaunchpadCrowdfundingIntegration420Test {
         integration.prepareRefund(saleId);
         pay.setDelivered(paymentA, 100);
         pay.setDelivered(paymentB, 200);
+        require(integration.reconcileRecordedRefund(paymentA) == 100, "partial delivered principal");
+        require(integration.reconcileRecordedRefund(paymentA) == 100, "idempotent partial reconciliation");
+        require(integration.reconciledSaleRefundPrincipal(saleId) == 100, "partial accounting doubled");
         vm.prank(ALICE);
         vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidRefund.selector);
         integration.prepareRefund(saleId);
@@ -581,6 +599,8 @@ contract LaunchpadCrowdfundingIntegration420Test {
 
         require(allocations.refunded(saleId, ALICE), "refund recorded");
         require(integration.usedRefundCommitment(refundCommitment), "refund replay lock");
+        require(integration.reconciledSaleRefundPrincipal(saleId) == 400, "delivered aggregate");
+        require(integration.reconciledParticipantRefundPrincipal(saleId, ALICE) == 400, "participant aggregate");
     }
 
     function testSuccessfulClaimPublishesReplayProtectedDeliveryEvidence() public {
@@ -715,6 +735,36 @@ contract LaunchpadCrowdfundingIntegration420Test {
         vm.prank(ALICE);
         allocations.contribute(saleId, 100, paymentId);
         require(sales.sale(saleId).raised == 100, "original campaign not recorded");
+    }
+
+    function testInvoiceMustBeSingleUseAndLinkedToFundedCheckout() public {
+        sales.activate(saleId);
+        vm.warp(10);
+        bytes32 paymentId = keccak256("payment/funded-checkout");
+        pay.setPayment(paymentId, ALICE, RECEIVER, PAYMENT_ASSET, 100, 5, 0);
+        _bindPayment(saleId, paymentId, 100);
+        bytes32 invoiceId = integration.invoiceIdFor(saleId, ALICE, 100, uint256(paymentId));
+        pay.setInvoiceMode(invoiceId, 1);
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidSettlement.selector);
+        allocations.contribute(saleId, 100, paymentId);
+        pay.setInvoiceMode(invoiceId, 0);
+        pay.setCheckout(invoiceId, keccak256("unrelated-payment"));
+        vm.prank(ALICE);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.InvalidSettlement.selector);
+        allocations.contribute(saleId, 100, paymentId);
+        pay.setCheckout(invoiceId, paymentId);
+        vm.prank(ALICE);
+        allocations.contribute(saleId, 100, paymentId);
+        require(allocations.contributed(saleId, ALICE) == 100, "canonical checkout not accepted");
+    }
+
+    function testFuzzInvoiceBindingSeparatesAmountsAndNonces(uint128 raw, uint256 nonce) public view {
+        uint128 amount = uint128(uint256(raw) % 599 + 1);
+        bytes32 first = integration.invoiceIdFor(saleId, ALICE, amount, nonce);
+        require(first != integration.invoiceIdFor(saleId, ALICE, amount + 1, nonce), "amount collision");
+        require(first != integration.invoiceIdFor(saleId, BOB, amount, nonce), "payer collision");
+        require(first != integration.invoiceIdFor(saleId, ALICE, amount, nonce ^ 1), "nonce collision");
     }
 
     function testUnallocatedPaymentRefundRecoveryDoesNotIncreaseRaised() public {

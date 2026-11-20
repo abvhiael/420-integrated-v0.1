@@ -1,6 +1,6 @@
 const prefix = '420pay-shell-';
 const cacheName = prefix + '__PAY_SHELL_REVISION__';
-const files = ['index.html', 'app.js', 'style.css', 'manifest.webmanifest', 'icons/pay-192.png', 'icons/pay-512.png'];
+const files = ['index.html', 'app.js', 'style.css', 'manifest.webmanifest', 'icons/pay-192.png', 'icons/pay-512.png', 'icons/pay-brand.webp', 'icons/pay-favicon.png'];
 const scope = new URL(self.registration.scope);
 const shell = new URL('index.html', scope).href;
 const allowlist = new Set(files.map(file => new URL(file, scope).href));

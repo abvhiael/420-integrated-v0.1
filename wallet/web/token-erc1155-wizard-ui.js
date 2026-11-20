@@ -1,3 +1,4 @@
+import {mountTokenFeeReview420} from './token-fee-review-ui.js';
 import {createERC1155Wizard420} from './core/token-erc1155-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
 export function mountERC1155Wizard420(section,catalogue,session){
@@ -35,7 +36,7 @@ export function mountERC1155Wizard420(section,catalogue,session){
     context.textContent=v.ready?'ERC1155_MULTI · V1 · SmartAccount owner '+v.owner+' · chain '+v.chainId+' · creation fee 42 native $420 (gas separate).':'';
     for(const [key,input] of Object.entries(inputs)){if(input.value!==v.fields[key])input.value=v.fields[key];input.disabled=v.busy||!v.ready;}
     renew.disabled=review.disabled=reset.disabled=!v.ready||v.busy;
-    status.textContent=v.error||(v.busy?'Rechecking Registry and Wallet…':v.draft?'Multi-token draft prepared. No transaction simulated, signed or submitted.':'');
+    status.textContent=v.error||(v.busy?'Rechecking Registry and Wallet…':v.draft?'Multi-token draft prepared. Draft step: No transaction simulated, signed or submitted.':'');
     preview.hidden=!v.draft;preview.replaceChildren();
     if(v.draft){
       const d=v.draft,r=d.request;const title=el('h5',null,'Prepared multi-token draft — not submitted');
@@ -45,7 +46,7 @@ export function mountERC1155Wizard420(section,catalogue,session){
         ['Example resolved URI (ID 1)',d.collection.exampleURI||'(empty)'],['Initial balances','0 — minting is separate'],
         ['Token IDs','uint256; quantities per ID'],['Mint authority','Multi-token owner'],['Burn authority','Holder or approved operator'],
         ['Transfers','Safe single and batch transfers'],['Multi-token owner',d.owner],
-        ['Factory',r.target],['Chain',String(d.chainId)],['Creation fee','42 native $420 (network gas separate; not estimated)'],
+        ['Factory',r.target],['Chain',String(d.chainId)],['Creation fee','42 native $420 (network gas separate; see fee review)'],
         ['Deployment salt',r.draft.userSalt],['Configuration hash',r.configHash],['Calldata hash',r.calldataHash],
         ['Verified block',BigInt(d.verificationBlock.number).toString()+' · '+d.verificationBlock.hash]];
       for(const [label,value] of entries)dl.append(el('dt',null,label),el('dd',null,value));
@@ -55,7 +56,8 @@ export function mountERC1155Wizard420(section,catalogue,session){
     }
   }
   const unsubscribe=model.subscribe(render);
+  const disposeFeeReview=mountTokenFeeReview420(section,model,session);
   form.addEventListener('submit',e=>{e.preventDefault();void model.review();});
   renew.addEventListener('click',()=>model.renewSalt());reset.addEventListener('click',()=>model.reset());
-  return ()=>{unsubscribe();model.dispose();};
+  return ()=>{unsubscribe();disposeFeeReview();model.dispose();};
 }

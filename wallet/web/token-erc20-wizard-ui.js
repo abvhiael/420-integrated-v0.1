@@ -1,3 +1,4 @@
+import {mountTokenFeeReview420} from './token-fee-review-ui.js';
 import {createERC20Wizard420} from './core/token-erc20-wizard.js';
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!=null)node.textContent=text;return node;}
 export function mountERC20Wizard420(section,catalogue,session){
@@ -46,7 +47,7 @@ export function mountERC20Wizard420(section,catalogue,session){
       input.disabled=v.busy||!v.ready||wrap.hidden;
     }
     renew.disabled=review.disabled=reset.disabled=!v.ready||v.busy;
-    status.textContent=v.error||(v.busy?'Rechecking Registry and Wallet…':v.draft?'Draft prepared. No transaction simulated, signed or submitted.':'');
+    status.textContent=v.error||(v.busy?'Rechecking Registry and Wallet…':v.draft?'Draft prepared. Draft step: No transaction simulated, signed or submitted.':'');
     preview.hidden=!v.draft;preview.replaceChildren();
     if(v.draft){
       const d=v.draft,r=d.request;
@@ -56,7 +57,7 @@ export function mountERC20Wizard420(section,catalogue,session){
         ['Name',r.draft.name],['Symbol',r.draft.symbol],['Decimals','18'],['Initial supply',d.displaySupply],
         ['Initial supply (base units)',r.draft.initialSupply],['Cap',d.displayCap??'No cap'],
         ['Cap (base units)',r.draft.cap],['Owner and initial token recipient',d.owner],['Factory',r.target],
-        ['Chain',String(d.chainId)],['Creation fee','42 native $420 (network gas separate; not estimated)'],
+        ['Chain',String(d.chainId)],['Creation fee','42 native $420 (network gas separate; see fee review)'],
         ['Deployment salt',r.draft.userSalt],['Configuration hash',r.configHash],['Calldata hash',r.calldataHash],
         ['Verified block',BigInt(d.verificationBlock.number).toString()+' · '+d.verificationBlock.hash]];
       for(const [label,value] of entries)dl.append(el('dt',null,label),el('dd',null,value));
@@ -66,8 +67,9 @@ export function mountERC20Wizard420(section,catalogue,session){
     }
   }
   const unsubscribe=model.subscribe(render);
+  const disposeFeeReview=mountTokenFeeReview420(section,model,session);
   form.addEventListener('submit',e=>{e.preventDefault();void model.review();});
   renew.addEventListener('click',()=>model.renewSalt());
   reset.addEventListener('click',()=>model.reset());
-  return ()=>{unsubscribe();model.dispose();};
+  return ()=>{unsubscribe();disposeFeeReview();model.dispose();};
 }

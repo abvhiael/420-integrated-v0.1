@@ -97,3 +97,11 @@
 .token-erc1155-review dd { margin: 0; overflow-wrap: anywhere; min-width: 0; }
 .token-erc1155-warning { color: var(--wallet-warning); font-weight: 600; }
 @media(max-width: 480px) { .token-erc1155-review { grid-template-columns: minmax(0,1fr); gap: 4px; } .token-erc1155-review dd { margin-bottom: 8px; } }
+
+.token-fee-review { min-width:0; margin-top:12px; padding:12px; border:1px solid var(--wallet-border); border-radius:10px; }
+.token-fee-review[hidden], .token-fee-review [hidden] { display:none !important; }
+.token-fee-review-details { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:8px; margin:12px 0; }
+.token-fee-review-details dt { font-weight:600; }
+.token-fee-review-details dd { min-width:0; margin:0; overflow-wrap:anywhere; }
+.token-fee-review-status { margin-top:8px !important; overflow-wrap:anywhere; }
+@media(max-width:480px){.token-fee-review-details {grid-template-columns:minmax(0,1fr);gap:4px;} .token-fee-review-details dd {margin-bottom:8px;}}

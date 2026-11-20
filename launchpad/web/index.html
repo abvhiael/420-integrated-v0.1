@@ -41,6 +41,16 @@
 <label>Unique intent nonce <input id="intent-nonce" inputmode="numeric" autocomplete="off" readonly></label>
 <button id="new-intent">New nonce</button><button id="register-intent" disabled>Review intent registration</button></div>
 <div class="actions"><button id="check-checkout" disabled>Check invoice and payment</button><a id="pay-checkout-link" hidden rel="noopener noreferrer" target="_blank">Open canonical 420Pay checkout</a></div>
+<div class="subpanel" id="conversion-panel"><h4>Qualified 420Pay conversion</h4>
+<p>Launchpad sales settle in an approved ERC-20. Choose a canonical token market; the quote must deliver exactly your campaign contribution amount. Input amounts and fees are in raw token units, and Wallet approval is always separate.</p>
+<div class="actions"><label>Input token address<input id="pay-input-asset" autocomplete="off" placeholder="0x..."></label>
+<label>Canonical market ID<input id="pay-market" autocomplete="off" placeholder="0x..."></label>
+<label>Maximum input token units<input id="pay-max-input" inputmode="numeric" autocomplete="off" placeholder="0"></label>
+<label>Minimum settlement units<input id="pay-min-output" inputmode="numeric" autocomplete="off" placeholder="0"></label></div>
+<div class="actions"><button id="get-conversion-quote" disabled>Get canonical 420Pay quote</button>
+<button id="approve-conversion" disabled>Review exact token allowance</button>
+<button id="pay-conversion" disabled>Review 420Pay checkout</button></div>
+<p id="conversion-state" role="status" aria-live="polite">A canonical approved market and input token are required. Quote fees are not estimated.</p></div>
 <p id="checkout-state" aria-live="polite">Register an intent to begin. Your merchant must create the matching invoice before checkout.</p>
 <dl><dt>Invoice ID</dt><dd><code id="invoice-id">-</code></dd><dt>Canonical payment ID</dt><dd><input id="payment-id" aria-label="Canonical payment ID" readonly></dd></dl>
 <button id="contribute" disabled>Review contribution recording</button>

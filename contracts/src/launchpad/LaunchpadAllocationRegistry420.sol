@@ -17,6 +17,7 @@ contract LaunchpadAllocationRegistry420 is I420System {
     LaunchpadAuthorization420 public immutable authorization;
     LaunchpadSaleRegistry420 public immutable sales;
     address public crowdfundingIntegration;
+    bool public hasRecordedContribution;
 
     mapping(bytes32 => mapping(address => uint128)) public contributed;
     mapping(bytes32 => mapping(address => uint128)) public claimed;
@@ -58,7 +59,8 @@ contract LaunchpadAllocationRegistry420 is I420System {
         address integration_
     ) external {
         if (msg.sender != sales.governanceTimelock()) revert UnauthorizedAction();
-        if (crowdfundingIntegration != address(0) || integration_ == address(0) || integration_.code.length == 0) {
+        if (crowdfundingIntegration != address(0) || hasRecordedContribution || integration_ == address(0)
+            || integration_.code.length == 0) {
             revert InvalidIntegration();
         }
         ILaunchpadIntegrationBinding420 binding = ILaunchpadIntegrationBinding420(integration_);
@@ -90,6 +92,7 @@ contract LaunchpadAllocationRegistry420 is I420System {
                     .consumeContribution(msg.sender, saleId, amount, paymentCommitment)
         ) revert InvalidContribution();
 
+        hasRecordedContribution = true;
         contributed[saleId][msg.sender] += amount;
         sales.recordContribution(saleId, amount);
         emit ContributionRecorded(saleId, msg.sender, amount, paymentCommitment);

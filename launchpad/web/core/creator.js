@@ -108,7 +108,7 @@ export class CreatorStudio{
     await check();
     const signature=await provider.request({method:'personal_sign',params:[this.prepared.requestId,wallet.account]});
     await check();
-    if(!/^0x[0-9a-fA-F]{130}$/.test(signature||''))throw Error('Unsupported Wallet signature format');
+    if(!/^0x(?:[0-9a-fA-F]{2}){1,1024}$/.test(signature||''))throw Error('Unsupported Wallet signature format');
     const receipt=await service.creatorSubmit({...this.payload,requestId:this.prepared.requestId,signature});
     if(receipt.requestId!==this.prepared.requestId)throw Error('Governance receipt does not match signed request');
     $('#creator-submit').disabled=true;

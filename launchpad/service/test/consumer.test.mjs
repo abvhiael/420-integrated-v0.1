@@ -80,3 +80,46 @@ test('campaign mode and integration binding are mandatory for NEW checkout, not 
   rpc.set('crowdfundingIntegration()',out(A.crowd));
   assert.equal((await checkoutContext(rpc,runtime,S,USER,'42','9')).canContribute,true);
 });
+
+test('unallocated Pay refunds report delivered principal and never mark partially delivered refunds complete',async()=>{
+  const rpc=makeRpc(),paymentId='0x'+'af'.repeat(32);
+  rpc.set('checkoutPaymentForInvoice(bytes32)',out(paymentId));
+  rpc.set('payments(bytes32)',out(I,USER,MERCHANT,TOKEN,42,TOKEN,42,P,9,PROFILE,0,42,6));
+  rpc.set('usedPaymentId(bytes32)',out(0));
+  rpc.set('refundProgress(bytes32,address,uint128)',out(42,20,20));
+  const partial=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(partial.paymentId,paymentId);
+  assert.equal(partial.next,'REFUND_RECOVERY');
+  assert.equal(partial.unallocatedRefund.principalDelivered,'20');
+  assert.equal(partial.unallocatedRefund.complete,false);
+  rpc.set('refundProgress(bytes32,address,uint128)',out(42,42,42));
+  const delivered=await checkoutContext(rpc,runtime,S,USER,'42','9');
+  assert.equal(delivered.unallocatedRefund.complete,true);
+  rpc.set('payments(bytes32)',out(I,USER,MERCHANT,TOKEN,42,USER,42,P,9,PROFILE,0,42,6));
+  await assert.rejects(()=>checkoutContext(rpc,runtime,S,USER,'42','9'),/payment does not match the campaign intent/);
+});
+
+test('linked Arbitration status requires matching claimant, controller, domain, component and sale',async()=>{
+  const rpc=makeRpc(),caseId='0x'+'bb'.repeat(32),domain='0x'+'dd'.repeat(32),component='0x'+'99'.repeat(32);
+  rpc.set('disputeCase(bytes32,address)',out(caseId));
+  rpc.set('caseOrigin(bytes32)',out(USER,MERCHANT,domain,component,S,1));
+  rpc.set('publishedDisputeOutcome(bytes32)',out(0));
+  const linked=await position(rpc,runtime,S,USER);
+  assert.equal(linked.dispute.caseId,caseId);assert.equal(linked.dispute.state,'OPEN');
+  rpc.set('caseOrigin(bytes32)',out(USER,MERCHANT,PROFILE,component,S,1));
+  await assert.rejects(()=>position(rpc,runtime,S,USER),/arbitration origin mismatch/);
+  rpc.set('caseOrigin(bytes32)',out(USER,MERCHANT,domain,PROFILE,S,1));
+  await assert.rejects(()=>position(rpc,runtime,S,USER),/arbitration origin mismatch/);
+});
+test('Arbitration transaction receipt recovers only the sale-specific crowdfunding case-opening event',async()=>{
+  const rpc=makeRpc(),caseId='0x'+'bb'.repeat(32),domain='0x'+'dd'.repeat(32);
+  const cases='0x0000000000000000000000000000000000001010';
+  const topic='0x'+'99'.repeat(32),claimant='0x'+USER.slice(2).padStart(64,'0');
+  rpc.setTransaction({from:USER,to:cases},{status:'0x1',blockNumber:'0x10',blockHash:BLOCK,
+    logs:[{address:cases,topics:[topic,caseId,domain,claimant]}]});
+  const valid=await transactionStatus(rpc,runtime,TX,USER);
+  assert.equal(valid.caseId,caseId);
+  rpc.setTransaction({from:USER,to:cases},{status:'0x1',blockNumber:'0x10',blockHash:BLOCK,
+    logs:[{address:cases,topics:[topic,caseId,PROFILE,claimant]}]});
+  assert.equal((await transactionStatus(rpc,runtime,TX,USER)).caseId,null);
+});

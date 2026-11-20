@@ -114,8 +114,8 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  }
  if r.Method!="POST"{deny(w,405);return}
  switch r.URL.Path{case "/v1/email/start","/v1/email/finish","/v1/passkey/register","/v1/passkey/start","/v1/passkey/finish":
- case "/v1/session/status","/v1/session/renew","/v1/session/list","/v1/session/logout","/v1/session/revoke","/v1/session/revoke-all","/v1/recovery/finish",
-      "/v1/profile/me","/v1/profile/update","/v1/profile/lookup":if !h.profiles{deny(w,404);return}
+ case "/v1/session/status","/v1/session/renew","/v1/session/list","/v1/session/logout","/v1/session/revoke","/v1/session/revoke-all","/v1/recovery/finish":if h.sessions==nil{deny(w,404);return}
+ case "/v1/profile/me","/v1/profile/update","/v1/profile/lookup":if !h.profiles{deny(w,404);return}
  default:deny(w,404);return}
  // Exact Origin, no credentialed CORS, no alternate host or cross-site POST.
  if len(r.Header.Values("Origin"))!=1||r.Header.Get("Origin")!=h.auth.origin||r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{deny(w,403);return}

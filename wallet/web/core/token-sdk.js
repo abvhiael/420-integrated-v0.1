@@ -26,12 +26,12 @@ const definitions = [
 
 export function tokenHashText420(value) { return keccak256Hex(encoder.encode(value)); }
 export function tokenHashHex420(value) {
-  if (typeof value !== 'string' || !/^0x(?:[0-9a-fA-F]{2})*$/.test(value)) throw Error('invalid hex bytes');
+  if (typeof value !== 'string' || !/^0x(?:[0-9a-fA-F]{2})*$(?![\s\S])/.test(value)) throw Error('invalid hex bytes');
   return keccak256Hex(Uint8Array.from(value.slice(2).match(/../g) || [], x => parseInt(x, 16)));
 }
 export function tokenSelector420(signature) { return tokenHashText420(signature).slice(0, 10); }
 export function tokenWord420(value) {
-  if (typeof value !== 'bigint' && !(typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value))
+  if (typeof value !== 'bigint' && !(typeof value === 'string' && /^(0|[1-9][0-9]*)$(?![\s\S])/.test(value))
       && !(typeof value === 'number' && Number.isSafeInteger(value))) throw Error('uint256 must be an exact integer');
   if (typeof value === 'string' && value.length > 78) throw Error('uint256 out of range');
   const n = BigInt(value);
@@ -39,11 +39,11 @@ export function tokenWord420(value) {
   return n.toString(16).padStart(64, '0');
 }
 export function tokenHashWord420(value) {
-  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(value)) throw Error('invalid bytes32');
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{64}$(?![\s\S])/.test(value)) throw Error('invalid bytes32');
   return value.slice(2).toLowerCase();
 }
 export function tokenAddressWord420(value) {
-  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{40}$/.test(value)) throw Error('invalid address');
+  if (typeof value !== 'string' || !/^0x[0-9a-fA-F]{40}$(?![\s\S])/.test(value)) throw Error('invalid address');
   return value.slice(2).toLowerCase().padStart(64, '0');
 }
 function utf8(value) {
@@ -88,7 +88,7 @@ export const TOKEN_TEMPLATES_420 = Object.freeze(definitions.map(([key, slug, st
 })));
 const byKey = new Map(TOKEN_TEMPLATES_420.map(t => [t.key, t]));
 // Snapshot own enumerable data fields exactly once. Reject exotic objects,
- // inherited configuration, accessors, hidden keys and symbols at trust boundaries.
+// inherited configuration, accessors, hidden keys and symbols at trust boundaries.
 export function readTokenRecord420(input, allowed, label='token draft') {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error(label+' required');
   const prototype=Object.getPrototypeOf(input);
@@ -167,7 +167,7 @@ const selectorStandard=new Map(Object.entries(signatures).map(([standard,signatu
 // re-encoding check rejects offset aliases, gaps, reordered tails, nonzero
 // padding and trailing bytes, even when a permissive ABI decoder accepts them.
 export function decodeTokenCreation420(data) {
-  if(typeof data!=='string'||data.length>2+MAX_BYTES*2||!/^0x(?:[0-9a-fA-F]{2})+$/.test(data))
+  if(typeof data!=='string'||data.length>2+MAX_BYTES*2||!/^0x(?:[0-9a-fA-F]{2})+$(?![\s\S])/.test(data))
     throw Error('invalid Token factory calldata');
   const canonical=data.toLowerCase(), standard=selectorStandard.get(canonical.slice(0,10));
   if(!standard)throw Error('unknown Token creation selector');

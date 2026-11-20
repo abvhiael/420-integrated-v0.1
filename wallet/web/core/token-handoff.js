@@ -20,11 +20,11 @@ export async function prepareTokenDeploymentHandoff420(provider, controller, sma
     throw Error('verified 420Token factory target required');
   let value;
   try {
-    if (typeof request.value !== 'bigint' && !(typeof request.value === 'string' && request.value.length<=78 && /^(0|[1-9][0-9]*|0x[0-9a-fA-F]+)$/.test(request.value))) throw Error('inexact value');
+    if (typeof request.value !== 'bigint' && !(typeof request.value === 'string' && request.value.length<=78 && /^(0|[1-9][0-9]*|0x[0-9a-fA-F]+)$(?![\s\S])/.test(request.value))) throw Error('inexact value');
     value = BigInt(request.value);
   } catch { throw Error('420Token deployment requires exactly 42 native 420'); }
   if (value !== TOKEN_CREATION_FEE_WEI_420) throw Error('420Token deployment requires exactly 42 native 420');
-  if (typeof request.data !== 'string' || request.data.length>2+TOKEN_MAX_CALLDATA_BYTES_420*2 || !/^0x(?:[0-9a-fA-F]{2})+$/.test(request.data))
+  if (typeof request.data !== 'string' || request.data.length>2+TOKEN_MAX_CALLDATA_BYTES_420*2 || !/^0x(?:[0-9a-fA-F]{2})+$(?![\s\S])/.test(request.data))
     throw Error('420Token factory calldata required');
   const creation = validateTokenCreationEncoding420(request.draft,{data:request.data,
     templateId:request.templateId,configHash:request.configHash,calldataHash:request.calldataHash});

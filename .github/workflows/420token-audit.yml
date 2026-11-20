@@ -50,6 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       contracts: ${{ steps.paths.outputs.contracts }}
+      encoding: ${{ steps.paths.outputs.encoding }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,12 +67,18 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
           if [ "$EVENT" != pull_request ]; then
             echo 'contracts=true' >> "$GITHUB_OUTPUT"
+            echo 'encoding=true' >> "$GITHUB_OUTPUT"
           else
             git diff --name-only "$BASE...HEAD" > "$RUNNER_TEMP/token-paths.txt"
             if grep -Eq '^(contracts/|scripts/stage-420token-qualification\.py$)' "$RUNNER_TEMP/token-paths.txt"; then
               echo 'contracts=true' >> "$GITHUB_OUTPUT"
             else
               echo 'contracts=false' >> "$GITHUB_OUTPUT"
+            fi
+            if grep -Eq '^(wallet/web/core/(token-sdk|token-handoff)\.js$|wallet/web/(scripts/qualify-token-encoding\.mjs|test/token-encoding\.test\.js)$|contracts/src/token/|\.github/workflows/420token-audit\.yml$)' "$RUNNER_TEMP/token-paths.txt"; then
+              echo 'encoding=true' >> "$GITHUB_OUTPUT"
+            else
+              echo 'encoding=false' >> "$GITHUB_OUTPUT"
             fi
           fi
   wallet-sdk:
@@ -94,6 +101,7 @@ jobs:
         run: node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-encoding.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js
   abi-parity:
     needs: scope
+    if: needs.scope.outputs.encoding == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

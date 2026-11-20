@@ -1,0 +1,46 @@
+{
+  "step": "TOKEN-AUDIT-5.7",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "727fad0a11d063c53d08c4f4018e336252ec6fc4",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    "wallet/web/core/token-sdk.js",
+    "wallet/web/core/token-handoff.js",
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/test/token-encoding.test.js",
+    "wallet/web/scripts/qualify-token-encoding.mjs",
+    ".qualification/candidates/TOKEN-AUDIT-5.7-configuration-abi.json",
+    "wallet/web/core/token-app.js"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-encoding.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js",
+      "owner": "Token SDK and affected Wallet paths"
+    },
+    {
+      "command": "node wallet/web/scripts/qualify-token-encoding.mjs",
+      "owner": "Independent Foundry Cast ABI parity"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Existing browser regression"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Canonical typed configuration snapshot for all eight frozen profiles; exact integers, caps, salts, UTF-8 and aggregate Wallet calldata bound",
+    "Strict canonical ABI decoding, re-encoding, config and calldata hash commitments; reject missing/tampered request commitments before RPC",
+    "Independent Foundry Cast byte and hash comparison for all profiles and boundaries; adversarial SDK tests and existing wizard regression; no contract or live release change"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

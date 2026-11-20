@@ -9,7 +9,14 @@
     "scripts/stage-420token-local-e2e.py",
     "scripts/qualify-420token-local-e2e.mjs",
     ".github/workflows/420token-local-e2e.yml",
-    ".qualification/candidates/TOKEN-AUDIT-5.14-local-e2e.json"
+    ".qualification/candidates/TOKEN-AUDIT-5.14-local-e2e.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.14-QUALIFICATION.json"
   ],
   "tests": [
     {

@@ -3,7 +3,22 @@ name: 420Token audit qualification
 on:
   pull_request:
     paths:
+      - '.qualification/candidates/TOKEN-AUDIT-7-closeout.json'
       - 'contracts/src/token/**'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+      - 'contracts/src/interfaces/I420System.sol'
+      - 'contracts/src/interfaces/genesis/ICapabilityRegistry420.sol'
+      - 'contracts/src/interfaces/genesis/IProtocolRegistry420.sol'
+      - 'contracts/src/interfaces/genesis/Types420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+      - 'contracts/src/vault/AssetVault420.sol'
+      - 'contracts/src/vault/VaultAccounting420.sol'
+      - 'contracts/src/vault/VaultAuthorization420.sol'
+      - 'contracts/src/vault/VaultIds420.sol'
+      - 'contracts/src/vault/VaultPolicyRegistry420.sol'
+      - 'contracts/src/vault/VaultRegistry420.sol'
+      - 'contracts/test/helpers/InvariantTarget420.sol'
+      - 'contracts/foundry.toml'
       - 'contracts/test/Token*.t.sol'
       - 'contracts/config/420token-genesis.json'
       - 'contracts/config/token/**'
@@ -69,12 +84,12 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
-          if [ "$EVENT" != pull_request ]; then
+          if [ "$EVENT" != pull_request ] || git diff --name-only "$BASE...HEAD" | grep -Fxq '.qualification/candidates/TOKEN-AUDIT-7-closeout.json'; then
             echo 'contracts=true' >> "$GITHUB_OUTPUT"
             echo 'encoding=true' >> "$GITHUB_OUTPUT"
           else
             git diff --name-only "$BASE...HEAD" > "$RUNNER_TEMP/token-paths.txt"
-            if grep -Eq '^(contracts/|scripts/stage-420token-qualification\.py$)' "$RUNNER_TEMP/token-paths.txt"; then
+            if grep -Eq '^(contracts/|scripts/stage-420token-qualification\.py$|\.github/workflows/420token-audit\.yml$)' "$RUNNER_TEMP/token-paths.txt"; then
               echo 'contracts=true' >> "$GITHUB_OUTPUT"
             else
               echo 'contracts=false' >> "$GITHUB_OUTPUT"
@@ -157,7 +172,11 @@ jobs:
           python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
           python3 scripts/test-reg-audit-4-genesis-address-namespace.py
       - name: Run Token Foundry qualification
-        run: forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge --version | tee "$RUNNER_TEMP/token-contracts/forge-version.txt"
+          forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv 2>&1 | tee "$RUNNER_TEMP/token-contracts/pr-tests.log"
       - name: Reject dangerous Token primitives
         run: |
           set -euo pipefail
@@ -165,6 +184,17 @@ jobs:
             echo 'Forbidden primitive found in 420Token sources' >&2
             exit 1
           fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: token-contract-pr-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/token-contracts/token-source-closure.json
+            ${{ runner.temp }}/token-contracts/forge-version.txt
+            ${{ runner.temp }}/token-contracts/pr-tests.log
+          if-no-files-found: warn
+          retention-days: 30
 
   security:
     needs: scope
@@ -187,7 +217,11 @@ jobs:
       - name: Stage exact Token test and source closure
         run: python3 scripts/stage-420token-qualification.py "$RUNNER_TEMP/token-contracts"
       - name: Run Token hardening suite
-        run: forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv
+        shell: bash
+        run: |
+          set -euo pipefail
+          forge --version | tee "$RUNNER_TEMP/token-contracts/forge-version.txt"
+          forge test --root "$RUNNER_TEMP/token-contracts" --match-path 'test/Token*.t.sol' -vvv 2>&1 | tee "$RUNNER_TEMP/token-contracts/hardening-tests.log"
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
       - name: Targeted Token Slither high-severity gate
@@ -224,3 +258,16 @@ jobs:
           print(json.dumps(findings,indent=2))
           if any(x[0]=='High' for x in findings): raise SystemExit('High-severity Slither finding in Token source')
           PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: token-contract-hardening-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/token-contracts/token-source-closure.json
+            ${{ runner.temp }}/token-contracts/forge-version.txt
+            ${{ runner.temp }}/token-contracts/hardening-tests.log
+            /tmp/token-slither.json
+            /tmp/token-slither.txt
+          if-no-files-found: warn
+          retention-days: 30

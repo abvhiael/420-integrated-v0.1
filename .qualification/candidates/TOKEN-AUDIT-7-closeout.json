@@ -1,0 +1,94 @@
+{
+  "step": "TOKEN-AUDIT-7",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L3",
+  "base_sha": "cd100bb7f3acde71018f3f3fccaf989bdee3ae13",
+  "candidate_sha": "HEAD",
+  "classification": "ci-infrastructure",
+  "scope": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/420token-economics.yml",
+    ".github/workflows/420token-deployment.yml",
+    ".github/workflows/420token-local-e2e.yml",
+    ".github/workflows/420token-ecosystem.yml",
+    ".github/workflows/wallet-w15-5-browser.yml",
+    ".qualification/candidates/TOKEN-AUDIT-7-closeout.json",
+    "docs/audit/420TOKEN-AUDIT-7-QUALIFICATION.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json"
+  ],
+  "tests": [
+    {
+      "command": "420token-audit.yml: scope, wallet-sdk, abi-parity, qualify, security",
+      "owner": "Token contract/SDK owner; PR and hardening profiles and Slither"
+    },
+    {
+      "command": "python3 scripts/qualify-420token-economics.py",
+      "owner": "Token real Vault economics (50,000 fuzz cases)"
+    },
+    {
+      "command": "python3 scripts/token/deployment.py qualify <fresh-output>",
+      "owner": "Token V3 deployment artifact reproducibility and two local rehearsals"
+    },
+    {
+      "command": "420token-local-e2e.yml: local-evm",
+      "owner": "Wallet to SmartAccount to Token to Vault actual local EVM"
+    },
+    {
+      "command": "420token-ecosystem.yml: integration",
+      "owner": "Indexer, Explorer, Search, AppStore; actual PostgreSQL and affected packages"
+    },
+    {
+      "command": "wallet/web/scripts/qualify-browser.mjs",
+      "owner": "Shared rendered Wallet browser acceptance"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/420token-economics.yml",
+    ".github/workflows/420token-deployment.yml",
+    ".github/workflows/420token-local-e2e.yml",
+    ".github/workflows/420token-ecosystem.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "All scoped owners pass at exact candidate SHA; preserve historical per-step results with no unscoped repository qualification",
+    "Contract PR and hardening fuzz/invariant counts retained, high-severity Slither gate passes, economic closure passes",
+    "Canonical V3 artifact commitments and local deployment reproducibility retained; Wallet SDK, independent ABI parity, mounted browser and real local EVM pass",
+    "Ecosystem read models and trust boundaries qualified; exact SHA, run/job/artifact IDs and reproducibility evidence recorded; live gates remain separate"
+  ],
+  "frozen_inputs": {
+    "contracts/foundry.toml": "7998cf0663907daced5812fbef76484e4d2dc1ca7df24c847f6c2ea3119d7d04",
+    "contracts/src/apps/ProtocolRegistry.sol": "22eef7a584eb2054adcbfbd625b50560a9f3ca31b50c30b43ecdee9aa993b7fb",
+    "contracts/src/interfaces/I420System.sol": "02e1ef2bec417289bc13c53c3c7453b132442be6932162683099c301f624ed02",
+    "contracts/src/interfaces/genesis/ICapabilityRegistry420.sol": "0731b19a560a63242e2afeb177eb3c8e1f2ace8abd3612abc0b0eb50a6910431",
+    "contracts/src/interfaces/genesis/IProtocolRegistry420.sol": "ba08070073f1237ebae0daf7a22dafcd0b9b9f2da68e63bb52cb58301f564224",
+    "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
+    "contracts/src/libraries/ServiceIds420.sol": "7f53fb5effa3c3b4371cec1f3cd331e584c6564fd1cbf66a858950b4937890b0",
+    "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223",
+    "contracts/src/token/ERC1155Template420.sol": "68cebe24f4c40b4c037ecd33698934d2543caf74797851d2e82579a7cb3b3d0a",
+    "contracts/src/token/ERC20Template420.sol": "8f9a950e8b2ce8d76c45a7a50e4405e476e664b1bed044e4e89c4bd8bc04e303",
+    "contracts/src/token/ERC721Template420.sol": "afa0e5328e5bfdb6a6ec1998fa48fda86d24f34da91b75324fff3389ff9a88a3",
+    "contracts/src/token/TokenFactory420.sol": "6d41bd48ac71e742e1e670b0e56dd06729f355e8f00f65923366b83b77f50b5d",
+    "contracts/src/token/TokenIds420.sol": "c25c894640430023d01123830e65053330baefcacb877dde3e16f50446e58e70",
+    "contracts/src/token/TokenTemplateRegistry420.sol": "1c91296ed22c6f4dadae0da432ca713b9f723d0e04a675b156d05cdc72c553b1",
+    "contracts/src/vault/AssetVault420.sol": "e660cafd7873e04e036173f403b1bdd699b442550e2f38263c0e75751a565b94",
+    "contracts/src/vault/VaultAccounting420.sol": "7f6d8f702a973993708ba1925a5b8548df37379a7982df428c241b1501a99841",
+    "contracts/src/vault/VaultAuthorization420.sol": "2610d34dc2371bb37fd543f5de1e72f81f262bb522b32ba45afc4495f2bff9e0",
+    "contracts/src/vault/VaultIds420.sol": "b21e293c4b7c17e7557f0f07b7f53cf6ef73d66ce5a1cd3d59190e52d565ce75",
+    "contracts/src/vault/VaultPolicyRegistry420.sol": "ee917cf0b84d8c2e06c2276dc6e2eaa4730dcbaa6bd239fff3089e4266e4eac2",
+    "contracts/src/vault/VaultRegistry420.sol": "d1960f8cbd0caa947bf0b0b152eb0ac0533529cf7cd1a5c2478b1fffe919e718",
+    "contracts/test/TokenAudit420.t.sol": "040916a9fc4456c8074a4ebc858e853fb5e86011ee79b99e12badf03eafa5d4c",
+    "contracts/test/TokenCompliance420.t.sol": "51c9feb825aba7b7530e0f3ca8f5644f969867f47195b5c0bd9b2d8fa5f49519",
+    "contracts/test/TokenDeploymentBinding420.t.sol": "7b8bf8a43a8c5d5f937470a23a81ee153dd96dc34c1105f03bbdb3789fd9c76b",
+    "contracts/test/TokenGenesis420.t.sol": "240d9764c2bda2d0a1a5a68da23a95a7dbcd75538f1f19bb039cc6787a60d4e6",
+    "contracts/test/TokenTemplateInvariant420.t.sol": "31a21ef5732b4fb7d28cfcb80869f8443db6406c8edee6b27715ad000f3b0853",
+    "contracts/test/TokenVaultIntegration420.t.sol": "da3ca18423da971d9e158a9882417402ebe766a037007214716ec08982f85198",
+    "contracts/test/helpers/InvariantTarget420.sol": "e5d3f1e937d8385ff175425e37160208b192d99b954186d2cb3c7ca78b4cd550"
+  },
+  "external_gates": [
+    "TOKEN-AUDIT-8 production-equivalent testnet deployment and real infrastructure",
+    "TOKEN-AUDIT-9 Genesis/production and independent security review as required"
+  ]
+}

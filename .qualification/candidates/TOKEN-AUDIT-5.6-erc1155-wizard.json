@@ -1,0 +1,54 @@
+{
+  "step": "TOKEN-AUDIT-5.6",
+  "roadmap": "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+  "level": "L2",
+  "base_sha": "e4cecf851ee9052839db19e2f17fa60b06d16b8b",
+  "candidate_sha": "HEAD",
+  "classification": "implementation",
+  "scope": [
+    ".github/workflows/420token-audit.yml",
+    "wallet/web/apps.css",
+    "wallet/web/core/token-app.js",
+    "wallet/web/core/token-creation-wizard.js",
+    "wallet/web/core/token-erc1155-wizard.js",
+    "wallet/web/core/token-erc721-wizard.js",
+    "wallet/web/token-catalogue-ui.js",
+    "wallet/web/token-erc1155-wizard-ui.js",
+    "wallet/web/test/token-erc1155-wizard.test.js",
+    "wallet/web/scripts/qualify-browser.mjs",
+    ".qualification/candidates/TOKEN-AUDIT-5.6-erc1155-wizard.json",
+    "docs/audit/420TOKEN-AUDIT-REMEDIATION-ROADMAP.md",
+    "docs/ROADMAP.md",
+    "testnet/public-services/token/readiness.json",
+    "docs/apps/token/architecture.md",
+    "docs/apps/token/developer/index.md",
+    "docs/apps/token/user-guide.md",
+    "docs/audit/420TOKEN-AUDIT-5.6-QUALIFICATION.json"
+  ],
+  "tests": [
+    {
+      "command": "python3 scripts/verify-420token-audit.py",
+      "owner": "Token repository verifier"
+    },
+    {
+      "command": "node --test wallet/web/test/token-runtime.test.js wallet/web/test/token-sdk.test.js wallet/web/test/token-discovery.test.js wallet/web/test/token-catalogue.test.js wallet/web/test/token-erc20-wizard.test.js wallet/web/test/token-erc721-wizard.test.js wallet/web/test/token-erc1155-wizard.test.js wallet/web/test/w15-8-genesis-integration.test.js wallet/web/test/apps.test.js wallet/web/test/runtime-config-generator.test.js wallet/web/test/core.test.js wallet/web/test/gas-runtime-config.test.js wallet/web/test/genesis-app-catalog.test.js",
+      "owner": "Token SDK and affected Wallet paths"
+    },
+    {
+      "command": "cd wallet/web && node scripts/qualify-browser.mjs",
+      "owner": "Rendered Wallet and ERC1155 wizard accessibility"
+    }
+  ],
+  "required_workflows": [
+    ".github/workflows/420token-audit.yml",
+    ".github/workflows/wallet-w15-5-browser.yml"
+  ],
+  "exit_criteria": [
+    "Wallet-integrated frozen ERC1155 V1 form accepting only URI and salt; exact canonical ABI and fee; zero initial balances; immutable URI and correct client-side uint256 substitution",
+    "Fresh verified template/release/SmartAccount owner; draft only; no independent signer, metadata fetch, mint or broadcast",
+    "Reject malformed inputs and stale governance/account/network changes; isolate all three forms; preserve ERC20/721 regression",
+    "Qualify targeted SDK and rendered browser; retain previous evidence and leave aggregate step 5 open"
+  ],
+  "frozen_inputs": {},
+  "external_gates": []
+}

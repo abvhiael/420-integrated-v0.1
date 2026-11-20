@@ -1,7 +1,7 @@
 // ERC721 V1 collection draft. Its contract returns the exact stored baseURI for
 // every minted ID; no automatic token-ID suffix, URI resolution or minting.
 import {TOKEN_TEMPLATES_420,encodeTokenCreation420} from './token-sdk.js';
-import {createTokenCreationWizard420,generateTokenCreationSalt420,validateTokenWizardMetadata420} from './token-creation-wizard.js';
+import {createTokenCreationWizard420,generateTokenCreationSalt420,validateTokenWizardMetadata420,validateTokenWizardURI420} from './token-creation-wizard.js';
 const profile=TOKEN_TEMPLATES_420.find(p=>p.key==='ERC721_COLLECTION');
 const profiles=new Map([[profile.key,profile]]);
 const fields=['name','symbol','baseURI','userSalt'];
@@ -13,20 +13,7 @@ export function validateERC721WizardFields420(key,input){
   const name=validateTokenWizardMetadata420(input.name,'Collection name');
   const symbol=validateTokenWizardMetadata420(input.symbol,'Collection symbol');
   const uri=input.baseURI;
-  // Empty metadata is a valid V1 configuration. Nonempty URI text is stored
-  // exactly and displayed as inert text. Never fetch, resolve or dereference it.
-  check(typeof uri==='string','Collection base URI must be a string.');
-  if(uri!==''){
-    validateTokenWizardMetadata420(uri,'Collection base URI');
-    check(/^[A-Za-z][A-Za-z0-9+.-]*:.+$/u.test(uri)&&!/[\s\u007f]/u.test(uri)&&!/%(?![0-9a-fA-F]{2})/u.test(uri),
-      'Enter an absolute collection URI without spaces or malformed percent escapes, or leave it empty.');
-    check(!/^(javascript|vbscript):/i.test(uri),'Executable URI schemes are not supported in this wizard.');
-    if(/^https?:/i.test(uri)){
-      let url;try{url=new URL(uri);}catch{throw Error('Invalid HTTP collection URI.');}
-      check(/^https?:\/\//i.test(uri)&&url.hostname&&!url.username&&!url.password&&!uri.includes('\\'),
-        'HTTP collection URI must contain a host without embedded credentials.');
-    }
-  }
+  validateTokenWizardURI420(uri);
   const result=encodeTokenCreation420({template:profile.key,name,symbol,baseURI:uri,userSalt:input.userSalt});
   const collection=Object.freeze({initialSupply:'0',ownerMintable:true,holderOrApprovedOperatorBurn:true,
     ownershipTransferable:true,uriMutable:false,uriMode:'EXACT_SHARED_URI'});

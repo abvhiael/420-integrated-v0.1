@@ -90,8 +90,7 @@ test('central session and feed are mandatory for authenticated actions',async()=
  await assert.rejects(controller.act('post',{body:'Cannot write'}));
 });
 test('content inputs reject invisible controls and oversized data',()=>{
- for(const text of ['<hello>',"Hello
-World"])assert.equal(socialInput(text,'post'),text);
+ for(const text of ['<hello>',"Hello\nWorld"])assert.equal(socialInput(text,'post'),text);
  for(const text of ['   ',' leading','bad\x00','bad\u202e','x'.repeat(2001)])
   assert.throws(()=>socialInput(text,'post'));
  assert.equal(socialInput('','bio'),'');

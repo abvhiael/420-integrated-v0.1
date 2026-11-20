@@ -144,7 +144,7 @@ func TestSocialBlockScopeAndBrowserCSRF(t *testing.T){
  w:=httptest.NewRecorder();h.ServeHTTP(w,req);if w.Code!=403{t.Fatal("cross-site write",w.Code)}
  req=httptest.NewRequest("GET","https://evil.invalid/v1/me",nil);req.Header.Set("X-Forwarded-Proto","https");req.AddCookie(one)
  w=httptest.NewRecorder();h.ServeHTTP(w,req);if w.Code!=403{t.Fatal("cross-host session leak",w.Code)}
- req=httptest.NewRequest("GET","https://bonggoggles.420integrated.org/v1/me",nil);req.AddCookie(one)
+ req=httptest.NewRequest("GET","https://bonggoggles.420integrated.org/v1/me",nil);req.TLS=nil;req.AddCookie(one)
  w=httptest.NewRecorder();h.ServeHTTP(w,req);if w.Code!=403{t.Fatal("insecure ingress",w.Code)}
 }
 func TestSSOCallbackOneUseAcrossWorkersAndFailureClosed(t *testing.T){

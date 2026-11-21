@@ -8,6 +8,7 @@ import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
+import {CHAOS_VEHICLES,applyChaosVehicleSelection} from './core/chaos-vehicles.js';
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
 import {AccountExtrasController} from './core/account-extras.js';
@@ -78,6 +79,17 @@ async function runExtra(action,details){
 
 function bindChaos(){
  if(window.location.pathname!=='/classics/cross-country-chaos')return;
+ const countSelect=root.querySelector('#ccc-count');
+ const updateSeats=()=>{
+  const count=Number(countSelect?.value||4);
+  for(const row of root.querySelectorAll('[data-chaos-driver]'))row.hidden=Number(row.dataset.chaosDriver)>=count;
+ };
+ countSelect?.addEventListener('change',updateSeats);updateSeats();
+ for(const select of root.querySelectorAll('[data-chaos-vehicle-pick]'))select.addEventListener('change',()=>{
+  const selected=CHAOS_VEHICLES.find(v=>v.id===select.value);
+  const preview=select.closest('.ccc-driver-setup')?.querySelector('.ccc-vehicle-picker-preview');
+  if(selected&&preview)preview.src=selected.src;
+ });
  root.querySelector('[data-chaos-start]')?.addEventListener('submit',event=>{
   event.preventDefault();
   const data=new FormData(event.currentTarget),count=Number(data.get('count'));
@@ -85,7 +97,8 @@ function bindChaos(){
    if(!Number.isInteger(count)||count<2||count>4)throw new Error('Choose two to four drivers.');
    const names=Array.from({length:count},(_,i)=>String(data.get('player'+i)||'').trim()||'Driver '+(i+1));
    const seed=window.crypto?.getRandomValues?window.crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*0xffffffff);
-   chaosGame=createChaosGame({names,seed});
+   const vehicleIds=Array.from({length:count},(_,i)=>String(data.get('vehicle'+i)||''));
+   chaosGame=applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds);
    chaosRevealed=false;chaosError=null;renderCurrent();
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });

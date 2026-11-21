@@ -3,6 +3,8 @@ import {resolve,dirname} from 'node:path';
 import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
 import {CHAOS_MAP_ASSETS} from '../core/chaos-map-art.js';
+import {CHAOS_VEHICLE_ASSETS} from '../core/chaos-vehicles.js';
+import {verifyChaosVehicleArt} from './verify-chaos-vehicle-art.mjs';
 import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
@@ -18,6 +20,8 @@ console.log('CCC-2 source and physical-deck qualification:',JSON.stringify(ccc2)
 // Preserve CCC-ART-2 source hashes and alpha before publishing the staged web build.
 const atlas=await verifyChaosMapArt();
 console.log('CCC-ART-2 regional-map qualification:',JSON.stringify(atlas));
+const vehicles=await verifyChaosVehicleArt();
+console.log('CCC-ART-3 vehicle-art qualification:',JSON.stringify(vehicles));
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
@@ -60,6 +64,12 @@ for(const layer of CHAOS_MAP_ASSETS){
  await mkdir(dirname(destination),{recursive:true});
  await cp(source,destination);
 }
+// Copy only the pinned, self-contained vintage vehicle tokens after source validation.
+for(const asset of CHAOS_VEHICLE_ASSETS){
+ const target=resolve(out,asset);
+ await mkdir(dirname(target),{recursive:true});
+ await cp(resolve(root,asset),target);
+}
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.
 const variants=[
@@ -76,4 +86,4 @@ for(const variant of variants){
 // The build retains illustrative service origins from the example config.
 // Off-chain account opt-in does not authorize a production or on-chain release.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(runtimeConfig,null,2)+'\n');
-console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards and 6 verified atlas layers; accountSocial='+runtimeConfig.features.accountSocial+'; example service origins; NOT a release authorization)');
+console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards, 6 verified atlas layers and 6 vehicle tokens; accountSocial='+runtimeConfig.features.accountSocial+'; example service origins; NOT a release authorization)');

@@ -55,7 +55,7 @@ export class ProtocolDecoderRegistry420 {
   }
 
   register(descriptor: ProtocolEventDescriptor420): void {
-    if ((descriptor.protocol === '420Launchpad' || descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName)) && (!descriptor.contractAddress || !/^0x[0-9a-fA-F]{40}$/.test(descriptor.contractAddress) || /^0x0{40}$/.test(descriptor.contractAddress))) throw new Error('Treasury descriptor requires deployment address');
+    if ((descriptor.protocol === '420Launchpad' || descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName)) && (!descriptor.contractAddress || !/^0x[0-9a-fA-F]{40}$/.test(descriptor.contractAddress) || /^0x0{40}$/.test(descriptor.contractAddress))) throw new Error(descriptor.protocol === '420Launchpad' ? 'Launchpad descriptor requires deployment address' : 'Treasury descriptor requires deployment address');
     const key = descriptor.topic0.toLowerCase();
     const existing = this.byTopic.get(key) ?? [];
     const normalizedAddress = descriptor.contractAddress?.toLowerCase();
@@ -98,7 +98,7 @@ export class ProtocolDecoderRegistry420 {
     const strictTreasury = descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName);
     const strictLaunchpad = descriptor.protocol === '420Launchpad';
     const strict = strictTreasury || strictLaunchpad;
-    if (strict && (!/^0x[0-9a-fA-F]{64}$/.test(log.blockHash) || !/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash) || log.blockNumber < 0n || !Number.isSafeInteger(log.transactionIndex) || log.transactionIndex < 0 || !Number.isSafeInteger(log.logIndex) || log.logIndex < 0)) throw new Error('malformed canonical Treasury provenance');
+    if (strict && (!/^0x[0-9a-fA-F]{64}$/.test(log.blockHash) || !/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash) || log.blockNumber < 0n || !Number.isSafeInteger(log.transactionIndex) || log.transactionIndex < 0 || !Number.isSafeInteger(log.logIndex) || log.logIndex < 0)) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad provenance' : 'malformed canonical Treasury provenance');
     if (descriptor.protocol === '420Bridge' || strict) {
       const indexed = descriptor.fields.filter(field => field.indexed).length;
       const dataWords = descriptor.fields.length - indexed;

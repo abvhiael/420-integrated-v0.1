@@ -243,7 +243,7 @@ test('CCC-3: all stage transitions replace the highway and visible table but pre
   assert.ok(next.includes('data-region="'+LEGS[leg].id+'"'));
  }
 });
-test('CCC-3: keep the current player's hand open through draw/play/discard, then hide it at a true seat handoff',()=>{
+test('CCC-3: retain the active hand within a turn and conceal it at a seat handoff',()=>{
  let s=starter(2);
  let next=play(s,'pass');
  assert.equal(keepChaosHandRevealed(s,next,true),true);

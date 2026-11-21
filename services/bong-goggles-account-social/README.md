@@ -395,3 +395,24 @@ reward.
 database migration/grants, confidential SSO client, reverse proxy and real
 browser integration are external deployment/acceptance boundaries; this
 repository change does not activate accounts, campaigns or payouts.
+
+
+## AUTH-12 — restricted runtime safety and privacy
+
+`Store.ReadyRuntime` now enforces both the **required** permissions and
+the absence of forbidden powers for the public serving credential.
+PostgreSQL's `has_table_privilege(...,'SELECT,INSERT')` accepts either
+privilege; readiness now requires the individual SELECT and INSERT
+permissions, and likewise tests each other required grant. The public
+social role must not read/change reports, write moderation events, set
+`posts.hidden_at`, update/delete whole posts or comments, or delete
+members. Full-table UPDATE on comments was unused by the application
+and is no longer required or accepted: grant **SELECT,INSERT only**.
+
+Request JSON property names must be ASCII and unique after
+case-folding; Unicode and escaped duplicate aliases, oversized bodies
+and trailing JSON are rejected. Existing Origin, TLS, rate, 420ID SSO
+and app-session boundaries remain unchanged. No changes authorize
+paid features, wallet spending, token payout or XP-to-420 conversion.
+
+See `docs/audit/AUTH-12-SECURITY-PRIVACY-QUALIFICATION.md`.

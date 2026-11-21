@@ -1,4 +1,5 @@
 import {classicGameById} from './classics.js';
+import {GAME_SUBSCREENS} from './shared-game-ui.js';
 
 export const ROUTES=Object.freeze([
   {id:'home',path:'/',label:'Home',icon:'⌂',requiresSession:false},
@@ -28,10 +29,12 @@ export function resolveRoute(pathname='/'){
   const fixed=BY_PATH.get(normalized);
   if(fixed)return fixed;
   if(normalized.startsWith('/games/')){
-    const slug=normalized.slice('/games/'.length);
-    if(slug&&!slug.includes('/')){
-      const game=classicGameById(slug);
-      if(game)return Object.freeze({id:'classic-game',path:normalized,label:game.title,gameId:game.id,icon:'✦',requiresSession:false});
+    const segments=normalized.slice('/games/'.length).split('/');
+    if(segments.length<=2&&segments[0]&&
+       (segments.length===1||GAME_SUBSCREENS.includes(segments[1]))){
+      const game=classicGameById(segments[0]);
+      if(game)return Object.freeze({id:'classic-game',path:normalized,label:game.title,
+        gameId:game.id,screen:segments[1]??'intro',icon:'✦',requiresSession:false});
     }
   }
   return Object.freeze({id:'not-found',path:normalized,label:'Not found',icon:'?',requiresSession:false});

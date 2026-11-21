@@ -136,6 +136,22 @@ def verify_artifacts(out_dir, source_sha):
                 artifact.get("deployedBytecode", {}).get("immutableReferences", {}).values()),
         })
     require(len(manifest["contracts"]) == 6, "incomplete release artifact inventory")
+    pinned_path = ROOT / "contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json"
+    if pinned_path.is_file():
+        pinned = data(pinned_path)
+        require(pinned.get("schema") == "420-launchpad-rec-6-frozen-artifact-identities-v1",
+                "frozen release artifact schema drift")
+        require(pinned.get("chain_evidence") is None and
+                pinned.get("release_intent") == "REPOSITORY_LOCAL_EVM_ONLY_NOT_LIVE_CODEHASH",
+                "frozen release artifact promoted to live evidence")
+        require(pinned.get("compiler") == manifest["compiler"] and
+                pinned.get("evm") == manifest["evm"] and
+                pinned.get("optimizer_runs") == manifest["optimizer_runs"] and
+                pinned.get("via_ir") == manifest["via_ir"], "frozen release compiler drift")
+        require(pinned.get("runtime_hash_type") == manifest["runtime_hash_type"],
+                "runtime template identity type drift")
+        require(pinned.get("contracts") == manifest["contracts"],
+                "actual compiled ABI/creation/runtime artifact differs from frozen REC-6 inventory")
     return manifest
 
 

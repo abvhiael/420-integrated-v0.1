@@ -42,12 +42,12 @@ contract FounderWalletClaimsAndCompensation420Test {
     }
 
     function testRejectReservedAndDuplicatedFounderWallets() public {
-        (bool same,) = address(this).call(abi.encodePacked(type(FoundingWalletClaims420).creationCode,
-            abi.encode(ADMIN, ADMIN, JANET, bytes32(uint256(1)))));
-        require(!same, "duplicate identities");
-        (bool reserved,) = address(this).call(abi.encodePacked(type(FoundingWalletClaims420).creationCode,
-            abi.encode(address(0x0423), ANDREW, JANET, bytes32(uint256(1)))));
-        require(!reserved, "protocol identity claimed as founder");
+        try new FoundingWalletClaims420(ADMIN, ADMIN, JANET, bytes32(uint256(1))) {
+            revert("duplicate identities permitted");
+        } catch {}
+        try new FoundingWalletClaims420(address(0x0423), ANDREW, JANET, bytes32(uint256(1))) {
+            revert("system identity permitted");
+        } catch {}
     }
 
     function testNativeSplitIsAccumulativeAndWithdrawableOnlyByEachPayee() public {

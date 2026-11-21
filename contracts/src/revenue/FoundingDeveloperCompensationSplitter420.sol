@@ -107,6 +107,6 @@ contract FoundingDeveloperCompensationSplitter420 {
     function _reserved(address wallet) private pure returns (bool) {
         uint160 addr = uint160(wallet);
         return addr >= 0x041f && addr <= 0x04ff
-            || wallet == 0xfffffffffffffffffffffffffffffffffffffffe;
+            || uint160(wallet) == type(uint160).max - 1;
     }
 }

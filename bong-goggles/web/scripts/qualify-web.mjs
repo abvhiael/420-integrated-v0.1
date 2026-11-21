@@ -14,7 +14,8 @@ const root=resolve(import.meta.dirname,'..','dist');
 // adds 5,138 B (combined 1,081,507 B). Reserve exactly 5 KiB for this UI;
 // retain unchanged per-file, card, map and vehicle ceilings.
 // CCC-ART-6 separately reserves +20 KiB for road motion and event-rendering code.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1077*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-ART-7 separately reserves +16 KiB for original local results and podium UI.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1093*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -92,6 +93,21 @@ if(chaosEffectKinds().length!==12||!gameFx.includes('deriveChaosGameEffects')||
  !tabletopCss.includes('@media(prefers-reduced-motion:reduce)')||
  /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|eval\s*\()/.test((gameFx+motionFx).replaceAll('http://www.w3.org/2000/svg','')))
  throw new Error('CCC-ART-6 local animation/privacy/accessibility qualification failed');
+// CCC-ART-7: scoreboard and podium remain local, read-only and accessible.
+const resultsSource=await readFile(resolve(root,'core/chaos-results.js'),'utf8');
+const resultsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');
+if(!resultsSource.includes('chaosChampionshipPlacings')||
+ !resultsSource.includes('renderChaosRegionalResults')||
+ !resultsSource.includes('renderChaosChampionshipResults')||
+ !resultsUi.includes('renderChaosRegionalResults(game)')||
+ !resultsUi.includes('renderChaosChampionshipResults(game)')||
+ !tabletopCss.includes('ccc-results-table-scroll')||
+ !tabletopCss.includes('ccc-championship-podium')||
+ !tabletopCss.includes('@media(max-width:660px)')||
+ !tabletopCss.includes('[data-motion="reduce"]')||
+ !tabletopCss.includes('@media(forced-colors:active)')||
+ /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|\beval\s*\()/.test(resultsSource))
+ throw new Error('CCC-ART-7 local results/accessibility qualification failed');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}

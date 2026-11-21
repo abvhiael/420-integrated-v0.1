@@ -235,7 +235,7 @@ test('CCC-ART-4: translucent table graphics are scoped, responsive, reduced-moti
  assert.ok(Buffer.byteLength(originalCss,'utf8')<35000,'CCC-ART-1 stylesheet budget is unchanged');
  assert.match(html,/href="\/ccc-tabletop\.css"/);
  assert.match(build,/'ccc-tabletop\.css'/);
- assert.match(qualify,/baseTotal:1077\*1024/);
+ assert.match(qualify,/baseTotal:1093\*1024/);
  assert.match(qualify,/readFile\(resolve\(root,'ccc-tabletop\.css'\)/);
  assert.match(app,/chaosRepairCue=deriveChaosTableFeedback/);
  assert.match(shell,/chaosRepairCue/);

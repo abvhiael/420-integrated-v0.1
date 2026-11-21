@@ -387,3 +387,80 @@
  .ccc-wrap--roadtrip .ccc-finish-confetti,
  .ccc-wrap--roadtrip .ccc-game-effect-auras{display:none}
 }
+
+
+/* CCC-ART-7: result screens are decorative projections of canonical public scores. */
+.ccc-wrap--roadtrip .ccc-results-screen{
+ display:grid;gap:1rem;margin:1rem 0;padding:1rem;
+ border:2px solid #a99664;border-radius:.9rem;color:#f6efd7;
+ background:repeating-linear-gradient(0deg,#1a3e31 0 4px,#1d4635 4px 8px);
+}
+.ccc-wrap--roadtrip .ccc-results-banner{
+ display:grid;grid-template-columns:minmax(0,1fr) 195px;align-items:center;gap:1rem;
+ border:3px double #e8cd88;border-radius:.7rem;padding:1.1rem;
+ background:linear-gradient(135deg,#244b3a,#142e25);
+}
+.ccc-wrap--roadtrip .ccc-results-banner--final{background:linear-gradient(135deg,#3e5033,#1b392c 70%,#59462c)}
+.ccc-wrap--roadtrip .ccc-results-overline{font:900 .78rem/1.5 var(--ccc-sign);letter-spacing:.1em;color:#ffe3a1;margin:0 0 .4rem}
+.ccc-wrap--roadtrip .ccc-results-banner h3{font:900 clamp(1.5rem,4vw,2.5rem)/1.15 var(--ccc-display);color:#fff0c5;margin:.2rem 0}
+.ccc-wrap--roadtrip .ccc-results-banner p{margin:.35rem 0}
+.ccc-wrap--roadtrip .ccc-results-winner-label{color:#ffdc8a;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+.ccc-wrap--roadtrip .ccc-results-winner-names{font:900 clamp(1.25rem,3vw,2.15rem)/1.22 var(--ccc-display);color:#fff3b9;overflow-wrap:anywhere}
+.ccc-wrap--roadtrip .ccc-results-emblem{position:relative;display:grid;place-items:center;min-height:155px}
+.ccc-wrap--roadtrip .ccc-result-trophy{width:150px;max-width:100%;height:auto;filter:drop-shadow(0 4px 4px #0007)}
+.ccc-wrap--roadtrip .ccc-result-flag{position:absolute;width:115px;top:-2px;right:-7px;opacity:.85}
+.ccc-wrap--roadtrip .ccc-results-victors{display:flex;flex-wrap:wrap;justify-content:center;gap:.75rem}
+.ccc-wrap--roadtrip .ccc-results-victor{display:flex;align-items:center;gap:.6rem;flex:1 1 190px;max-width:360px;margin:0;padding:.75rem;border:2px solid #e7c777;border-radius:.6rem;background:#294734}
+.ccc-wrap--roadtrip .ccc-results-victor figcaption{font-weight:900;overflow-wrap:anywhere}
+.ccc-wrap--roadtrip .ccc-results-victor small{display:block;font-weight:500;color:#e8e0c3}
+.ccc-wrap--roadtrip .ccc-results-ride{display:inline-grid;justify-items:center;flex:none;border-bottom:3px solid var(--ccc-seat-color);min-width:65px}
+.ccc-wrap--roadtrip .ccc-results-ride img{width:75px;height:48px;object-fit:contain}
+.ccc-wrap--roadtrip .ccc-results-ride small{font:900 .7rem/1.2 var(--ccc-sign);color:#f8eac2}
+.ccc-wrap--roadtrip .ccc-results-scorecard{background:#1b3529;border:1px solid #92a17f;margin:0;padding:.9rem}
+.ccc-wrap--roadtrip .ccc-results-scorecard h4,.ccc-wrap--roadtrip .ccc-results-screen>h4{font:900 1.25rem/1.3 var(--ccc-display);color:#ffe3a1;margin:.25rem 0 .7rem}
+.ccc-wrap--roadtrip .ccc-results-table-scroll{max-width:100%;overflow-x:auto;border:1px solid #7a9278;border-radius:.4rem}
+.ccc-wrap--roadtrip .ccc-results-table-scroll:focus-visible{outline:3px solid var(--ccc-gold);outline-offset:2px}
+.ccc-wrap--roadtrip .ccc-results-table{min-width:680px;width:100%;border-collapse:collapse;text-align:left;color:#faf0d7;font-variant-numeric:tabular-nums}
+.ccc-wrap--roadtrip .ccc-results-table caption{text-align:left;background:#234334;color:#ffe4a4;font-weight:850;padding:.6rem}
+.ccc-wrap--roadtrip .ccc-results-table th,.ccc-wrap--roadtrip .ccc-results-table td{padding:.6rem .5rem;border-bottom:1px solid #6a806c;vertical-align:middle}
+.ccc-wrap--roadtrip .ccc-results-table thead th{background:#31513c;color:#fff1c9;font-weight:850;white-space:nowrap}
+.ccc-wrap--roadtrip .ccc-results-table tbody tr:last-child>*{border-bottom:0}
+.ccc-wrap--roadtrip .ccc-result-winner{background:#594f32;color:#fff5ca}
+.ccc-wrap--roadtrip .ccc-results-driver{display:flex;align-items:center;gap:.55rem;min-width:120px;overflow-wrap:anywhere}
+.ccc-wrap--roadtrip .ccc-results-meter{display:block;width:100%;height:.5rem;margin-top:.2rem;border:1px solid #c7cfb4;border-radius:1rem;overflow:hidden;background:#10251d}
+.ccc-wrap--roadtrip .ccc-results-meter>span{display:block;height:100%;background:#f6cd71}
+.ccc-wrap--roadtrip .ccc-results-note{font-size:.82rem;line-height:1.45;color:#e4dfcb;margin:.7rem 0 0}
+.ccc-wrap--roadtrip .ccc-championship-podium{list-style:none;display:flex;justify-content:center;align-items:end;flex-wrap:wrap;gap:.75rem;margin:0;padding:0}
+.ccc-wrap--roadtrip .ccc-podium-place{display:flex;flex:1 1 155px;max-width:270px;min-width:0;align-items:center;flex-direction:column;gap:.35rem;text-align:center;margin:0;padding:1rem .4rem 0;border:2px solid #a8a992;border-radius:.65rem .65rem .1rem .1rem;background:#2b4737;overflow:hidden}
+.ccc-wrap--roadtrip .ccc-podium-place--champion{border-color:#f6cd71;background:#504d2d}
+.ccc-wrap--roadtrip .ccc-podium-place strong{font:900 1.1rem/1.25 var(--ccc-display);overflow-wrap:anywhere}
+.ccc-wrap--roadtrip .ccc-podium-medal{font-size:2rem;color:#f6cd71}
+.ccc-wrap--roadtrip .ccc-podium-plinth{display:grid;place-items:center;width:100%;margin-top:.4rem;height:52px;border-top:4px double #ffe1a0;background:#615b3e;font:900 2rem/1 var(--ccc-display)}
+.ccc-wrap--roadtrip .ccc-podium-place--2 .ccc-podium-plinth{height:68px}
+.ccc-wrap--roadtrip .ccc-podium-place--champion .ccc-podium-plinth{height:90px;background:#856733}
+.ccc-wrap--roadtrip .ccc-results-history,.ccc-wrap--roadtrip .ccc-results-board{border:1px solid #9cac85;border-radius:.6rem;padding:.8rem;margin:.9rem 0;background:#1b382e;color:#f7eed9}
+.ccc-wrap--roadtrip .ccc-results-history summary,.ccc-wrap--roadtrip .ccc-results-board summary{cursor:pointer;font-weight:850}
+.ccc-wrap--roadtrip .ccc-results-history summary:focus-visible,.ccc-wrap--roadtrip .ccc-results-board summary:focus-visible{outline:3px solid var(--ccc-gold);outline-offset:2px}
+.ccc-wrap--roadtrip .ccc-results-history .ccc-results-scorecard{margin:.7rem 0}
+@media(max-width:660px){
+ .ccc-wrap--roadtrip .ccc-results-screen{padding:.55rem}
+ .ccc-wrap--roadtrip .ccc-results-banner{grid-template-columns:1fr;padding:.75rem}
+ .ccc-wrap--roadtrip .ccc-results-emblem{min-height:110px;max-height:130px}
+ .ccc-wrap--roadtrip .ccc-result-trophy{width:105px}
+ .ccc-wrap--roadtrip .ccc-result-flag{width:92px}
+ .ccc-wrap--roadtrip .ccc-podium-place{flex:1 1 130px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ccc-wrap--roadtrip .ccc-results-screen *{animation:none!important;transition:none!important}
+}
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-results-screen *{animation:none!important;transition:none!important}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-results-screen,.ccc-wrap--roadtrip .ccc-results-banner,
+ .ccc-wrap--roadtrip .ccc-results-scorecard,.ccc-wrap--roadtrip .ccc-podium-place,
+ .ccc-wrap--roadtrip .ccc-results-table th,.ccc-wrap--roadtrip .ccc-results-table td{
+ background:Canvas!important;color:CanvasText!important;border:2px solid CanvasText!important;box-shadow:none!important}
+ .ccc-wrap--roadtrip .ccc-results-emblem{display:none}
+ .ccc-wrap--roadtrip .ccc-results-note,.ccc-wrap--roadtrip .ccc-results-winner-names{color:CanvasText!important}
+ .ccc-wrap--roadtrip .ccc-results-meter{border:2px solid CanvasText}
+ .ccc-wrap--roadtrip .ccc-results-meter>span{background:Highlight}
+}

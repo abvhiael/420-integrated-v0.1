@@ -45,7 +45,7 @@ test('home feed foreground palette has at least enhanced 7:1 text contrast',()=>
   ['#c5e2ce','#153b2a','composer helper text'],
   ['#b9fac8','#153b2a','visited and unvisited profile links'],
   ['#172d23','#fffef9','composer text area'],
-  ['#52665a','#fffef9','composer placeholder']
+  ['#40594a','#fffef9','composer placeholder']
  ]){
   assert.ok(contrast(fg,bg)>=7,purpose+' contrast '+contrast(fg,bg).toFixed(2)+' < 7');
  }

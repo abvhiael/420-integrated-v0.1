@@ -1,6 +1,7 @@
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
+import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
 import sharp from 'sharp';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
@@ -16,7 +17,8 @@ validateRuntimeConfig(example);
 for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
-// Only the approved 14 assets are published; ignore upload placeholders or unrelated files.
+// Only approved dashboard assets and explicitly mapped optimized game cards are published.
+// Uploaded source PNGs, manifests, and placeholder files are never shipped.
 for(const asset of DASHBOARD_ASSETS){
   const source=resolve(root,asset),target=resolve(out,asset);
   const metadata=await sharp(source).metadata();
@@ -24,6 +26,21 @@ for(const asset of DASHBOARD_ASSETS){
   if(asset.startsWith('assets/apps/')&&!metadata.hasAlpha)throw new Error('app icon must preserve transparency: '+asset);
   await mkdir(dirname(target),{recursive:true});
   await cp(source,target);
+}
+if(CHAOS_CARD_ART_SOURCES.length!==49||CHAOS_CARD_ART_OUTPUTS.length!==49||
+   new Set(CHAOS_CARD_ART_OUTPUTS).size!==49)throw new Error('Cross-Country Chaos card allowlist mismatch');
+for(let i=0;i<CHAOS_CARD_ART_SOURCES.length;i++){
+ const source=resolve(root,CHAOS_CARD_ART_SOURCES[i]);
+ const target=resolve(out,CHAOS_CARD_ART_OUTPUTS[i]);
+ const metadata=await sharp(source).metadata();
+ if(metadata.format!=='png'||metadata.width!==640||metadata.height!==1080||!metadata.hasAlpha||
+    (await stat(source)).size>2*1024*1024)throw new Error('Invalid Cross-Country Chaos card source: '+CHAOS_CARD_ART_SOURCES[i]);
+ await mkdir(dirname(target),{recursive:true});
+ await sharp(source).resize({width:480}).webp({quality:78,effort:6}).toFile(target);
+ const optimized=await sharp(target).metadata();
+ if(optimized.format!=='webp'||optimized.width!==480||optimized.height!==810||
+    !optimized.hasAlpha||(await stat(target)).size>128*1024)
+  throw new Error('Cross-Country Chaos card exceeded published asset budget: '+CHAOS_CARD_ART_OUTPUTS[i]);
 }
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.
@@ -40,4 +57,4 @@ for(const variant of variants){
 }
 // Example config makes the ordinary CI artifact illustrative, NEVER a deployable candidate.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(example,null,2)+'\n');
-console.log('Bong Goggles web build created dist/ (optimized approved branding; example config; NOT a release artifact)');
+console.log('Bong Goggles web build created dist/ (approved branding and 49 optimized game cards; example config; NOT a release artifact)');

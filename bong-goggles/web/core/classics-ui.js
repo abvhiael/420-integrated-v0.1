@@ -1,6 +1,7 @@
 import {escapeHtml as esc,card} from './design-system.js';
 import {CLASSIC_COLLECTIONS} from './classics.js';
 import {LEGS,chaosLeaders,chaosActionOptions} from './cross-country-chaos.js';
+import {chaosCardArt,chaosUpgradeArt,chaosLegendaryArt,chaosHazardArt} from './chaos-card-art.js';
 const link='<a href="/classics" data-route="classics">← All Classics</a>';
 const badge=s=>'<span class="ccc-badge">'+esc(s)+'</span>';
 export function renderClassicsCatalogue(){
@@ -9,7 +10,14 @@ export function renderClassicsCatalogue(){
 }
 const stats=(s)=>'<div class="ccc-stats">'+s.players.map(p=>'<div class="ccc-player"><strong>'+esc(p.name)+'</strong><span>'+p.km.toLocaleString('en-CA')+' km</span><span>'+p.points+' championship pts</span><small>'+esc(p.status?.name||'On the road')+'</small></div>').join('')+'</div>';
 const history=s=>'<details class="ccc-history"><summary>Roadside radio / game log</summary><ol>'+s.log.map(entry=>'<li>'+esc(entry)+'</li>').join('')+'</ol></details>';
-const equipment=p=>'<section class="ccc-equip"><h3>Vehicle equipment (persists)</h3><div class="ccc-gear">'+p.upgrades.map(u=>'<span title="'+esc(u.description)+'">'+esc(u.name)+(p.used.includes(u.id)?' · used this leg':' · ready')+'</span>').join('')+'</div><p><strong>Legendary:</strong> '+(p.legendary?esc(p.legendary.name)+' — '+esc(p.legendary.description):'Already used')+'</p><p><strong>Road condition:</strong> '+(p.status?esc(p.status.name)+' ('+esc(p.status.category)+')':'Clear')+(p.shield?' · '+p.shield+' shields remaining':'')+'</p></section>';
+const artImage=(path,kind='card')=>path?'<img class="ccc-card-image ccc-card-image--'+esc(kind)+'" src="'+esc(path)+'" width="480" height="810" alt="" loading="lazy" decoding="async">':'';
+const equipment=(p,legId)=>'<section class="ccc-equip"><h3>Vehicle equipment (persists)</h3><div class="ccc-gear">'
+ +p.upgrades.map(u=>'<figure class="ccc-equipped-card">'+artImage(chaosUpgradeArt(u.id),'upgrade')+'<figcaption><strong>'+esc(u.name)+'</strong><small>'+(p.used.includes(u.id)?'Used this leg':'Ready')+'</small></figcaption></figure>').join('')
+ +'</div><div class="ccc-conditions">'
+ +(p.legendary?'<figure class="ccc-equipped-card ccc-equipped-card--legendary">'+artImage(chaosLegendaryArt(p.legendary.id),'legendary')+'<figcaption><strong>'+esc(p.legendary.name)+'</strong><small>Single use · carries into later stages</small></figcaption></figure>':'<p>Legendary card already used.</p>')
+ +(p.status?'<figure class="ccc-equipped-card ccc-equipped-card--hazard">'+artImage(chaosHazardArt(legId,p.status.id),'hazard')+'<figcaption><strong>'+esc(p.status.name)+'</strong><small>Active '+esc(p.status.category)+' hazard</small></figcaption></figure>':'<p>Road condition: Clear</p>')
+ +(p.shield?'<p>'+p.shield+' hazard shields remaining</p>':'')
+ +'</div></section>';
 const stageResults=s=>s.results.map(result=>'<section class="ccc-standings"><h3>'+esc(LEGS[result.leg].name)+' results</h3><ol>'+result.standings.map(p=>'<li>'+esc(p.name)+' · '+p.km+' km · +'+p.earned+' points</li>').join('')+'</ol></section>').join('');
 export function renderChaosGame({game=null,revealed=false,error=null}={}){
  if(!game)return '<div class="ccc-wrap">'+link+'<div class="ccc-hero"><p class="eyebrow">BongGoggles Canadian Classics</p><h2>Cross-Country Chaos</h2><p>Race from St. John\'s to Vancouver: the East (2,200 km), Ontario (2,100 km), and the West (2,700 km). Drive, sabotage, recover, and bring your trusty upgrades across all three legs.</p><p><strong>Local pass-and-play only.</strong> No online rooms, wallet, staking, rewards, or wagers. This session is kept in this tab and resets on reload.</p></div><form class="ccc-setup" data-chaos-start><h3>Start your road trip</h3><label for="ccc-count">Drivers</label><select id="ccc-count" name="count"><option value="2">2 drivers</option><option value="3">3 drivers</option><option value="4" selected>4 drivers</option></select><div class="ccc-names">'+[0,1,2,3].map(i=>'<label>Driver '+(i+1)+' <input name="player'+i+'" maxlength="24" placeholder="Driver '+(i+1)+'" autocomplete="off"></label>').join('')+'</div><button type="submit">Start the cross-Canada championship</button></form></div>';
@@ -26,10 +34,10 @@ export function renderChaosGame({game=null,revealed=false,error=null}={}){
   if(c.type==='mileage'&&allowed)controls='<form data-chaos-move="drive" data-card="'+i+'">'+(canBoost?'<label class="ccc-boost"><input type="checkbox" name="boost"> Use Shortcut Specialist (+100 km)</label>':'')+'<button type="submit">Drive '+c.km+' km</button></form>';
   if(c.type==='hazard'&&allowed)controls='<form data-chaos-move="hazard" data-card="'+i+'"><label>Target <select name="target">'+game.players.filter(q=>q.id!==p.id&&!q.status).map(q=>'<option value="'+q.id+'">'+esc(q.name)+'</option>').join('')+'</select></label><button type="submit">Cause chaos</button></form>';
   if(c.type==='fix'&&allowed)controls='<button data-chaos-action="fix" data-card="'+i+'">Use repair</button>';
-  return '<article class="ccc-hand-card ccc-'+esc(c.type)+'"><small>'+esc(c.type==='mileage'?'MILEAGE':c.type==='hazard'?'HAZARD':'FIX')+'</small><strong>'+esc(c.type==='mileage'?c.km+' km':c.name)+'</strong><span>'+esc(c.type==='mileage'?(c.km>300?'Risky: regional hazard draw':'Safe highway travel'):c.type==='hazard'?c.category+' · '+c.kind:c.category+' repair')+'</span>'+controls+'</article>';
+  return '<article class="ccc-hand-card ccc-'+esc(c.type)+'">'+artImage(chaosCardArt(c,leg.id),c.type)+'<div class="ccc-card-details"><small>'+esc(c.type==='mileage'?'MILEAGE':c.type==='hazard'?'HAZARD':'FIX')+'</small><strong>'+esc(c.type==='mileage'?c.km+' km':c.name)+'</strong><span>'+esc(c.type==='mileage'?(c.km>300?'Risky: regional hazard draw':'Safe highway travel'):c.type==='hazard'?c.category+' · '+c.kind:c.category+' repair')+'</span>'+controls+'</div></article>';
  }).join('');
  const legendary=p.legendary?'<button data-chaos-action="legendary">Use '+esc(p.legendary.name)+'</button>':'';
- return top+notice+'<div class="ccc-panel"><h3>'+esc(p.name)+' — your turn</h3>'+equipment(p)+'<p>Play one card or action, then pass the device. Aggressive drives over 300 km trigger a regional hazard. Every breakdown can be cleared by waiting one turn.</p><div class="ccc-hand">'+cards+'</div><div class="ccc-actions">'+(p.status?'<button data-chaos-action="recover">Emergency recovery (spend turn)</button>':'')+legendary+'<button data-chaos-action="pass">Pit stop / pass</button></div></div>'+history(game)+'</div>';
+ return top+notice+'<div class="ccc-panel"><h3>'+esc(p.name)+' — your turn</h3>'+equipment(p,leg.id)+'<p>Play one card or action, then pass the device. Aggressive drives over 300 km trigger a regional hazard. Every breakdown can be cleared by waiting one turn.</p><div class="ccc-hand">'+cards+'</div><div class="ccc-actions">'+(p.status?'<button data-chaos-action="recover">Emergency recovery (spend turn)</button>':'')+legendary+'<button data-chaos-action="pass">Pit stop / pass</button></div></div>'+history(game)+'</div>';
 }
 export function renderClassicsRoute({pathname,game,revealed,error}={}){
  return pathname==='/classics/cross-country-chaos'?renderChaosGame({game,revealed,error}):renderClassicsCatalogue();

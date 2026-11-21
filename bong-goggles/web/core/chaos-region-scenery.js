@@ -73,7 +73,7 @@ const pass='<g stroke-linejoin="round" stroke-linecap="round">'+
 const art=Object.freeze({ferry,moose,forest,goose,elevators,potholes,mountains,pass});
 const feature=(id,label,x,y,scale)=>Object.freeze({id,label,x,y,scale});
 export const CHAOS_SCENERY=Object.freeze({
- east:Object.freeze([feature('ferry','Atlantic ferry',337,368,.85),feature('moose','Eastern moose',521,115,.92)]),
+ east:Object.freeze([feature('ferry','Atlantic ferry',400,368,.85),feature('moose','Eastern moose',521,115,.92)]),
  ontario:Object.freeze([feature('forest','Northern Ontario forest',337,97,1.03),feature('goose','Wawa Goose',583,108,.98)]),
  west:Object.freeze([feature('elevators','Prairie grain elevators',280,344,.98),
   feature('potholes','Saskatchewan potholes',432,352,.80),

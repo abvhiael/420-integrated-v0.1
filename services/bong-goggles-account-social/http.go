@@ -138,6 +138,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   http.Redirect(w,r,destination,http.StatusSeeOther);return
  }
  if r.URL.Path=="/auth/callback"&&r.Method=="GET"{
+  // Callback codes may be attacker-supplied. Budget attempts by the
+  // actual ingress socket IP, not its changing port or forwarded headers,
+  // before decrypting any flow or contacting the central identity broker.
+  if !h.rate(r.Context(),"callback",r.RemoteAddr,60){deny(w,429);return}
   if r.URL.Query().Has("error")||len(r.URL.Query())!=2||len(r.URL.Query()["code"])!=1||
    len(r.URL.Query()["state"])!=1{deny(w,400);return}
   flow:=getCookie(r,flowCookieName)
@@ -287,7 +291,7 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
 // HMAC protects raw network addresses and pseudo-subjects from appearing in
 // rate-limit rows; the key is the server-only session encryption key.
 func (h *Handler) rate(ctx context.Context,action,principal string,limit int)bool{
- if action=="login"{
+ if action=="login"||action=="callback"{
   // RemoteAddr includes an ephemeral TCP port; hashing the full value
   // lets one client evade the rate limit by reconnecting. Trust only the
   // actual ingress socket address, never unvalidated forwarded-IP headers.

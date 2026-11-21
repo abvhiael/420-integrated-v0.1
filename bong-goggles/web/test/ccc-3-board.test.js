@@ -29,7 +29,7 @@ test('CCC-3: all three 2,500-km route maps have their own scenery and named sche
   assert.match(html,/schematic, not to scale/);
   assert.match(html,/role="img"/);
   assert.match(html,/class="ccc-highway-centre"/);
-  for(const stop of stops[leg])assert.ok(html.toLowerCase().includes(stop.toLowerCase()),stop);
+  for(const stop of stops[leg])assert.ok(html.toLowerCase().includes(stop.replaceAll("'",'&#39;').toLowerCase()),stop);
   assert.equal((html.match(/class="ccc-map-vehicle /g)||[]).length,4);
   assert.equal((html.match(/class="ccc-road-driver"/g)||[]).length,4);
  }
@@ -131,7 +131,7 @@ test('CCC-3: each of 24 regional hazard cards applies the corresponding block, s
    }else{
     assert.equal(victim.status.id,h.id);
     assert.equal(victim.km,1000);
-    assert.ok(renderChaosTable(s).includes(chaosCardArt(h,LEGS[leg].id)),h.id);
+    assert.ok(renderChaosTable(s).includes(chaosCardArt({...h,type:'hazard'},LEGS[leg].id)),h.id);
     if(h.kind==='slow'){
      s=moveTo(s,1);
      s=replace(s,1,fixture('mileage',{km:200}));

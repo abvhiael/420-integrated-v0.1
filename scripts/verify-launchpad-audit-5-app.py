@@ -11,9 +11,10 @@ def read(path): return (ROOT/path).read_text(encoding="utf-8")
 required=[
 "launchpad/web/package.json","launchpad/web/runtime-config.json","launchpad/web/index.html","launchpad/web/styles.css",
 "launchpad/web/app.js","launchpad/web/core/config.js","launchpad/web/core/service.js","launchpad/web/core/wallet.js",
-"launchpad/web/scripts/build.mjs","launchpad/web/scripts/check.mjs",
+"launchpad/web/scripts/build.mjs","launchpad/web/scripts/check.mjs","launchpad/web/core/creator.js",
 "launchpad/service/package.json","launchpad/service/server.mjs","launchpad/service/core/abi.mjs",
-"launchpad/service/core/rpc.mjs","launchpad/service/core/projection.mjs","launchpad/service/core/planner.mjs","launchpad/service/core/app.mjs"
+"launchpad/service/core/rpc.mjs","launchpad/service/core/projection.mjs","launchpad/service/core/planner.mjs","launchpad/service/core/app.mjs",
+"launchpad/service/core/creator.mjs","launchpad/service/core/creator-queue.mjs","launchpad/service/core/creator-report.mjs"
 ]
 for p in required: need((ROOT/p).is_file(),f"missing Audit-5 file: {p}")
 
@@ -38,10 +39,24 @@ need("prefers-reduced-motion" in css,"reduced-motion accessibility baseline miss
 need(":focus" in css,"keyboard focus baseline missing")
 
 app=read("launchpad/web/app.js")
-for token in ("loadCampaigns","openCampaign","connectWallet","prepare('contribute'","prepare('claim'","prepare('refund'","creatorRequest","submitReviewedTransaction","service.runtime()"):
+for token in ("loadCampaigns","openCampaign","connectWallet","prepare('contribute'","prepare('claim'","prepare('refund'","submitReviewedTransaction","service.runtime()"):
     need(token in app,f"browser workflow missing: {token}")
-need("Creator governance request prepared" in app,"creator governance boundary missing")
-need("service.prepare('creator'" not in app,"creator flow must not masquerade as direct transaction")
+creator_ui=read("launchpad/web/core/creator.js")
+creator_api=read("launchpad/service/core/creator.mjs")
+creator_queue=read("launchpad/service/core/creator-queue.mjs")
+creator_report=read("launchpad/service/core/creator-report.mjs")
+need("new CreatorStudio(" in app and "creatorPrepare(" in creator_ui and "creatorSubmit(" in creator_ui,
+    "creator wizard/governance workflow missing")
+need("Creator governance request prepared" in creator_ui and "requiresGovernance:true" in creator_api,
+    "creator governance authority boundary missing")
+need("verifyCreatorSignature" in creator_queue and "isValidSignature(bytes32,bytes)" in creator_queue and
+    "eth_getCode" in creator_queue and "RECEIVED_FOR_GOVERNANCE_REVIEW" in creator_queue,
+    "signed governance request queue cannot authenticate Wallet or retain review-only status")
+need("readSale" in creator_report and "project(bytes32)" in creator_report and
+    "reconciledSaleRefundPrincipal(bytes32)" in creator_report and "eth_getLogs" in creator_report,
+    "creator reporting lacks owner-verified canonical chain evidence")
+need("service.prepare('creator'" not in app and "eth_sendTransaction" not in creator_ui,
+    "creator flow must not masquerade as direct transaction")
 
 service=read("launchpad/service/core/service.js") if (ROOT/"launchpad/service/core/service.js").exists() else ""
 rpc=read("launchpad/service/core/rpc.mjs")
@@ -76,5 +91,5 @@ if errors:
     raise SystemExit(1)
 print("420Launchpad Audit-5 verification PASS")
 print("User surface: project/campaign discovery + detail + participant status + reviewed contribution/claim/refund")
-print("Creator boundary: governance request only")
+print("Creator boundary: EOA/EIP-1271-signed governance review only, no privileged Wallet execution")
 print("Canonical discovery: ProtocolRegistry -> Router -> Sale/Allocation/Crowdfunding/Project bindings")

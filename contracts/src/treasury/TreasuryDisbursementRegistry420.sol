@@ -34,6 +34,8 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     TreasuryPolicyRegistry420 public immutable policy;
     TreasuryBudgetRegistry420 public immutable budgets;
 
+    address public immutable genesisConfigurator;
+    address public foundingAuthority;
     mapping(bytes32 => Disbursement) private _disbursements;
     mapping(address => mapping(uint256 => uint256)) public epochSpent;
 
@@ -58,6 +60,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     );
     event DisbursementExecuted(bytes32 indexed disbursementId, bytes32 vaultReleaseHash, address indexed executor);
     event DisbursementCancelled(bytes32 indexed disbursementId);
+    event FoundingAuthorityBound(address indexed authority);
 
     constructor(
         address timelock_,
@@ -69,6 +72,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         authorization = TreasuryAuthorization420(authorization_);
         policy = TreasuryPolicyRegistry420(policy_);
         budgets = TreasuryBudgetRegistry420(budgets_);
+        genesisConfigurator = msg.sender;
     }
 
     function systemName() external pure returns (string memory) {
@@ -77,6 +81,24 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
 
     function protocolVersion() external pure returns (uint32) {
         return 1;
+    }
+
+    function bindFoundingAuthority(address candidate) external {
+        if (msg.sender != genesisConfigurator || foundingAuthority != address(0)
+            || candidate.code.length == 0) revert ExecutionUnauthorized();
+        (bool ok, bytes memory data) = candidate.staticcall(abi.encodeWithSignature("disbursementRegistry()"));
+        if (!ok || data.length != 32 || abi.decode(data, (address)) != address(this)) revert ExecutionUnauthorized();
+        foundingAuthority = candidate;
+        emit FoundingAuthorityBound(candidate);
+    }
+
+    modifier onlyGovernanceOrFounding() {
+        if (msg.sender != governanceTimelock) {
+            if (msg.sender != foundingAuthority || foundingAuthority == address(0)) revert ExecutionUnauthorized();
+            (bool ok, bytes memory data) = foundingAuthority.staticcall(abi.encodeWithSignature("retired()"));
+            if (!ok || data.length != 32 || abi.decode(data, (bool))) revert ExecutionUnauthorized();
+        }
+        _;
     }
 
     function canonicalId(
@@ -111,7 +133,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         uint64 expiresAt,
         bytes32 civicActionHash,
         bytes32 purposeHash
-    ) external onlyGovernance {
+    ) external onlyGovernanceOrFounding {
         if (
             id == bytes32(0) || recipient == address(0) || amount == 0 || civicActionHash == bytes32(0)
                 || purposeHash == bytes32(0) || expiresAt <= notBefore

@@ -37,7 +37,7 @@ test('all mileage, fix, upgrade, legendary and regional hazard identities resolv
  assert.equal(chaosCardArt({type:'unknown',id:'truck'},'east'),null);
  assert.equal(chaosCardArt(null,'west'),null);
 });
-test('existing game hand, equipment and active regional hazard show approved images only after private reveal',()=>{
+test('CCC-1 hand, installed equipment and regional hazards show approved images only after private reveal',()=>{
  const game=createChaosGame({names:['Alice','Bob','Charlie','Dana'],seed:10});
  const hidden=renderChaosGame({game,revealed:false});
  assert.doesNotMatch(hidden,/ccc-card-image/,'hidden hands and powers must not be exposed at player handoff');
@@ -45,8 +45,14 @@ test('existing game hand, equipment and active regional hazard show approved ima
  assert.match(shown,/ccc-card-image/);
  assert.match(shown,/<img[^>]+loading="lazy"[^>]+decoding="async"/);
  assert.ok(game.players[0].hand.some(c=>shown.includes(chaosCardArt(c,'east'))));
- assert.ok(shown.includes(chaosUpgradeArt(game.players[0].upgrades[0].id)));
- assert.ok(shown.includes(chaosLegendaryArt(game.players[0].legendary.id)));
+ assert.equal(game.players[0].upgrades.length,0,'CCC-1 does not pre-award vehicle upgrades');
+ assert.ok(!game.players[0].legendary,'CCC-1 does not pre-award legendary powers');
+ game.players[0].upgrades.push({...UPGRADES[0],type:'upgrade',uid:912345});
+ const equipped=renderChaosGame({game,revealed:true});
+ assert.ok(equipped.includes(chaosUpgradeArt(UPGRADES[0].id)));
+ game.players[0].hand[0]={...LEGENDARIES[0],type:'legendary',uid:923456};
+ const powerHand=renderChaosGame({game,revealed:true});
+ assert.ok(powerHand.includes(chaosLegendaryArt(LEGENDARIES[0].id)),'hand legendary uses approved artwork');
  game.players[0].status={...HAZARDS.east[0],type:'hazard'};
  assert.ok(renderChaosGame({game,revealed:true}).includes(chaosHazardArt('east','ferry')));
  game.leg=1;

@@ -35,7 +35,7 @@ export async function forwardSocialRequest(request, env, fetchImpl = fetch) {
  headers.set("x-social420-edge-key",env.SOCIAL420_EDGE_SECRET);
  headers.set("x-forwarded-proto","https");
  try {
-  const upstream = new Request(target, {
+  const upstream = new Request(target.toString(), {
    method:request.method,
    headers,
    body:["GET","HEAD"].includes(request.method)?undefined:request.body,

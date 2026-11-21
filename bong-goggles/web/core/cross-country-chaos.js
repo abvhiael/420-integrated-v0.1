@@ -148,7 +148,7 @@ function atStartOfTurn(s){
  if(wagon&&p.status?.kind==='block'&&p.status.category==='mechanical'){
   p.used.push(wagon.id);p.status=null;log(s,p.name+' repaired a mechanical breakdown with the Station Wagon.');
  }
- s.step=s.opening?'play':'draw';s.opening=false;s.fresh=[];s.discardsLeft=0;
+ s.step=p.openingTurn?'play':'draw';p.openingTurn=false;s.fresh=[];s.discardsLeft=0;
 }
 function finishStage(s){
  const ranked=[...s.players].sort((a,b)=>b.km-a.km||b.played.reduce((z,c)=>z+c.km,0)-a.played.reduce((z,c)=>z+c.km,0)||a.id-b.id);
@@ -199,10 +199,10 @@ export function createChaosGame({names=['Driver 1','Driver 2'],seed=1}={}){
   throw Error('Provide 2–4 driver names, maximum 24 characters.');
  if(!Number.isSafeInteger(seed)||seed<0||seed>0xffffffff)throw Error('Invalid shuffle seed.');
  if(new Set(names.map(n=>n.trim().toLocaleLowerCase())).size!==names.length)throw Error('Drivers need distinct names.');
- const s={version:2,seed:seed||1,serial:0,leg:0,phase:'playing',step:'play',opening:true,
+ const s={version:2,seed:seed||1,serial:0,leg:0,phase:'playing',step:'play',
   turn:0,roundStart:0,turns:0,finishPending:false,discardsLeft:0,fresh:[],
   players:names.map((name,id)=>({id,name:name.trim(),km:0,score:0,hand:[],played:[],bonusKm:0,slowLoss:0,detourLoss:0,
-   status:null,upgrades:[],used:[],shield:0,wins:0})),
+   status:null,upgrades:[],used:[],shield:0,wins:0,openingTurn:true})),
   results:[],log:[],deck:[],discard:[],spent:[],retiredLegendaries:[],legendaryByLeg:[]};
  s.legendaryByLeg=distributeLegendaries(s);
  s.deck=regionalDeck(s);deal(s);atStartOfTurn(s);
@@ -289,11 +289,11 @@ export function takeChaosTurn(previous,{player,action,index=null,target=null,cho
 export function advanceChaosLeg(previous){
  if(previous?.version!==2||previous.phase!=='between')throw Error('No completed stage to advance.');
  const s=clone(previous);s.leg++;s.phase='playing';s.roundStart=s.leg%s.players.length;
- s.turn=s.roundStart;s.finishPending=false;s.opening=true;
+ s.turn=s.roundStart;s.finishPending=false;
  s.deck=regionalDeck(s);s.discard=[];s.spent=[];s.fresh=[];
  for(const p of s.players){
   p.km=0;p.hand=[];p.played=[];p.bonusKm=0;p.slowLoss=0;p.detourLoss=0;
-  p.status=null;p.upgrades=[];p.used=[];p.shield=0;
+  p.status=null;p.upgrades=[];p.used=[];p.shield=0;p.openingTurn=true;
  }
  deal(s);atStartOfTurn(s);
  log(s,'New region: '+LEGS[s.leg].name+'. All upgrades and active hazards reset.');

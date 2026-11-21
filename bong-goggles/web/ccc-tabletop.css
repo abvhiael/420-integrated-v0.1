@@ -464,3 +464,14 @@
  .ccc-wrap--roadtrip .ccc-results-meter{border:2px solid CanvasText}
  .ccc-wrap--roadtrip .ccc-results-meter>span{background:Highlight}
 }
+
+
+/* CCC-ART-8: mobile media ratios; all master/export dimensions have separate build gates. */
+.ccc-wrap--roadtrip .ccc-card-image{max-inline-size:100%;object-fit:contain}
+.ccc-wrap--roadtrip .ccc-vehicle-picker-preview,
+.ccc-wrap--roadtrip .ccc-results-ride img{max-inline-size:100%;object-fit:contain}
+@media(max-width:480px){
+ .ccc-wrap--roadtrip .ccc-highway-svg{display:block;max-inline-size:100%;block-size:auto}
+ .ccc-wrap--roadtrip .ccc-results-ride img{inline-size:min(75px,23vw);block-size:auto;aspect-ratio:25/16}
+ .ccc-wrap--roadtrip .ccc-hand-card{min-inline-size:0}
+}

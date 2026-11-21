@@ -7,6 +7,7 @@ import {CHAOS_MAP_ASSETS,CHAOS_MAP_DIMENSIONS} from '../core/chaos-map-art.js';
 import {CHAOS_VEHICLE_ASSETS,CHAOS_VEHICLE_SOURCE_SHA} from '../core/chaos-vehicles.js';
 import {CHAOS_SCENERY,CHAOS_SCENERY_COUNT} from '../core/chaos-region-scenery.js';
 import {chaosEffectKinds} from '../core/chaos-game-effects.js';
+import {CHAOS_IMAGE_MANIFEST_PATH,verifyChaosPublishedImageManifest} from './verify-chaos-image-manifest.mjs';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 const root=resolve(import.meta.dirname,'..','dist');
@@ -15,7 +16,8 @@ const root=resolve(import.meta.dirname,'..','dist');
 // retain unchanged per-file, card, map and vehicle ceilings.
 // CCC-ART-6 separately reserves +20 KiB for road motion and event-rendering code.
 // CCC-ART-7 separately reserves +16 KiB for original local results and podium UI.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1093*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-ART-8 permits +32 KiB strictly for a published and independently verified image manifest.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1125*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -111,7 +113,7 @@ if(!resultsSource.includes('chaosChampionshipPlacings')||
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
-for(const name of names.keys())if(name.startsWith('assets/')&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name))
+for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name))
  throw new Error('unexpected published asset: '+name);
 for(const asset of CHAOS_CARD_ART_OUTPUTS)if(!names.has(asset))throw new Error('missing approved card art: '+asset);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');
@@ -121,4 +123,6 @@ for(const asset of ['bong-goggles-header-256.webp','bong-goggles-browser-512.web
 }
 for(const asset of ['favicon-32.png','favicon-192.png','bong-goggles-browser-512.webp'])if(!html.includes('/'+asset))throw new Error(`missing HTML brand asset reference: ${asset}`);
 if(!branding.includes('/bong-goggles-header-256.webp'))throw new Error('missing optimized header logo reference');
+const cccImageManifest=await verifyChaosPublishedImageManifest({sourceRoot:resolve(root,'..'),outputRoot:root});
+console.log('CCC-ART-8 published image manifest qualification:',JSON.stringify(cccImageManifest));
 console.log(`BG-19.13 static build gates passed: ${files.length} files; ${total} bytes; max JS ${limits.singleJs}, CSS ${limits.singleCss}, base assets ${baseTotal}/${limits.baseTotal}, 49 card assets ${cardTotal}/${limits.cardTotal}, 6 atlas layers ${mapTotal}/${limits.mapTotal}, 6 vehicle tokens ${vehicleTotal}/${limits.vehicleTotal}; optimized brand assets verified`);

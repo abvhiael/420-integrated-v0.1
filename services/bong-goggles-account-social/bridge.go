@@ -154,7 +154,7 @@ func (b *HTTPBroker) Monetization(ctx context.Context,token string)(string,bool,
  result,e:=b.inspect(ctx,token)
  if e!=nil{return "",false,nil,e}
  if !result.Active{return "",false,nil,nil}
- if !validateMonetizationStatus(result.Monetization){return "",false,nil,ErrUnavailable}
+ if result.Monetization==nil||!validateMonetizationStatus(result.Monetization){return "",false,nil,ErrUnavailable}
  return result.Subject.ID,true,result.Monetization,nil
 }
 func (b *HTTPBroker) Revoke(ctx context.Context,token string)error{

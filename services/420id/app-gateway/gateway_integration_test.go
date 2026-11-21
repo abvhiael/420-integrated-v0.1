@@ -49,11 +49,11 @@ func (s *upstreamState) reply(t *testing.T,app string)transport{
   result:=map[string]any{}
   switch r.URL.Path{
   case "/v1/sso/token":
-   if body["code"]!=strings.Repeat("C",43)||len(body["codeVerifier"])!=43||
+   if body["code"]!=encode(bytes.Repeat([]byte{67},32))||len(body["codeVerifier"])!=43||
     body["redirectUri"]!="https://town.420integrated.org/420id-api/auth/callback"{
     t.Error("invalid exchange binding")
    }
-   result=map[string]any{"accessToken":strings.Repeat("T",43),"tokenType":"Bearer",
+   result=map[string]any{"accessToken":encode(bytes.Repeat([]byte{84},32)),"tokenType":"Bearer",
     "session":map[string]any{
      "id":"12345678-1234-4123-8123-123456789abc",
      "subject":map[string]string{"app":app,"sub":"23456789-1234-4234-8234-123456789abc"},
@@ -61,14 +61,14 @@ func (s *upstreamState) reply(t *testing.T,app string)transport{
      "idleUntil":time.Now().Add(30*time.Minute).UTC(),
     }}
   case "/v1/sso/introspect":
-   if body["token"]!=strings.Repeat("T",43){t.Error("unknown token introspected")}
+   if body["token"]!=encode(bytes.Repeat([]byte{84},32)){t.Error("unknown token introspected")}
    if s.active{result=map[string]any{"active":true,
     "subject":map[string]string{"app":app,"sub":"23456789-1234-4234-8234-123456789abc"},
     "method":"sso","expiresAt":time.Now().Add(time.Hour).UTC(),
     "idleUntil":time.Now().Add(30*time.Minute).UTC(),
    }}else{result=map[string]any{"active":false}}
   case "/v1/sso/revoke":
-   if body["token"]!=strings.Repeat("T",43){t.Error("wrong token revoked")}
+   if body["token"]!=encode(bytes.Repeat([]byte{84},32)){t.Error("wrong token revoked")}
    s.active=false;result=map[string]any{"revoked":true}
   default:t.Errorf("unknown SSO confidential operation: %s",r.URL.Path)
   }
@@ -98,8 +98,8 @@ func TestAUTH13IsolatedDurableCrossInstanceSSOAndRevocation(t *testing.T){
  if len(flowCookies)!=1||flowCookies[0].Name!=CookieFlow||!flowCookies[0].Secure||!flowCookies[0].HttpOnly{
   t.Fatal("unsafe flow cookie",flowCookies)
  }
- callback:=APIPath+"auth/callback?code="+strings.Repeat("C",43)+"&state="+location.Query().Get("state")
- attempt:=browserRequest("GET",APIPath+"auth/callback?code="+strings.Repeat("C",43)+"&state="+strings.Repeat("E",43),"198.51.100.222:15001")
+ callback:=APIPath+"auth/callback?code="+encode(bytes.Repeat([]byte{67},32))+"&state="+location.Query().Get("state")
+ attempt:=browserRequest("GET",APIPath+"auth/callback?code="+encode(bytes.Repeat([]byte{67},32))+"&state="+strings.Repeat("E",43),"198.51.100.222:15001")
  attempt.AddCookie(flowCookies[0])
  refused:=httptest.NewRecorder()
  second.ServeHTTP(refused,attempt)
@@ -122,7 +122,7 @@ func TestAUTH13IsolatedDurableCrossInstanceSSOAndRevocation(t *testing.T){
  verified:=httptest.NewRecorder()
  first.ServeHTTP(verified,req)
  if verified.Code!=200||!strings.Contains(verified.Body.String(),`"subject":"23456789-1234-4234-8234-123456789abc"`)||
-  strings.Contains(verified.Body.String(),strings.Repeat("T",43))||
+  strings.Contains(verified.Body.String(),encode(bytes.Repeat([]byte{84},32)))||
   strings.Contains(verified.Body.String(),`walletLinked`)||
   strings.Contains(verified.Body.String(),`"financialAuthority":true`){
   t.Fatal("unsafe public app session",verified.Code,verified.Body.String())

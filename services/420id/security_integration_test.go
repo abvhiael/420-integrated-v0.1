@@ -61,7 +61,25 @@ func TestAUTH12AccountRuntimeLeastPrivilegeAndMissingGrants(t *testing.T){
   if e=privacy.ReadyRuntime(ctx);!errors.Is(e,ErrUnavailable){t.Fatal("missing consent grant accepted",v.revoke,e)}
   if _,e=db.ExecContext(ctx,v.grant);e!=nil{t.Fatal(e)}
  }
- if e=privacy.ReadyRuntime(ctx);e!=nil{t.Fatal("restored restricted consent role rejected",e)}
+ // PostgreSQL may revoke column grants when revoking a prior broad
+ // table-level UPDATE in the same role. Re-establish the original scoped
+ // fixture before the final positive check; any *extra* privilege must
+ // still cause the runtime readiness gate to fail closed.
+ for _,stmt:=range grants{if _,e=db.ExecContext(ctx,stmt);e!=nil{t.Fatal("restore exact scoped fixture grants",e)}}
+ if e=privacy.ReadyRuntime(ctx);e!=nil{
+  var read,appendOK,tableUpdate,del,trunc,owner,app,revEdit bool
+  diagnostic:=probe.QueryRowContext(ctx,`SELECT
+   has_table_privilege(current_user,'account420.monetization_consents','SELECT'),
+   has_table_privilege(current_user,'account420.monetization_consents','INSERT'),
+   has_table_privilege(current_user,'account420.monetization_consents','UPDATE'),
+   has_table_privilege(current_user,'account420.monetization_consents','DELETE'),
+   has_table_privilege(current_user,'account420.monetization_consents','TRUNCATE'),
+   has_column_privilege(current_user,'account420.monetization_consents','account_id','UPDATE'),
+   has_column_privilege(current_user,'account420.monetization_consents','app_id','UPDATE'),
+   has_column_privilege(current_user,'account420.monetization_consents','revision','UPDATE')`)
+  diagErr:=diagnostic.Scan(&read,&appendOK,&tableUpdate,&del,&trunc,&owner,&app,&revEdit)
+  t.Fatalf("restored scoped role rejected %v (diagnostic=%v read=%v append=%v update=%v delete=%v truncate=%v owner=%v app=%v revision=%v)",e,diagErr,read,appendOK,tableUpdate,del,trunc,owner,app,revEdit)
+ }
  if e=mon.Ready(ctx);e!=nil{t.Fatal("original privileged operator lost migration access",e)}
 
  // These earlier modes used the PostgreSQL multi-privilege OR check.

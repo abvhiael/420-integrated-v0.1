@@ -36,6 +36,7 @@ function sampleCard(item){
 function renderCards(){
   const featured=examples.slice(0,4);
   $('#home-samples')?.replaceChildren(...featured.map(sampleCard));
+  $('#dashboard-examples')?.replaceChildren(...examples.slice(0,3).map(sampleCard));
   $('#overview-examples')?.replaceChildren(...examples.slice(0,3).map(c=>{
     const a=element('a','overview-entry');
     a.href='#/campaign/'+c.slug;
@@ -87,7 +88,7 @@ function navigate(){
     if(active)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');
   });
   const titles={home:'420 Launchpad',discover:'Discover Examples',campaign:bySlug(route.slug)?.title||'Campaign',
-    creator:'Creator Studio',overview:'My Overview',live:'Verified Workspace','not-found':'Not Found'};
+    creator:'Creator Studio',dashboard:'Creator Dashboard',overview:'My Overview',live:'Verified Workspace','not-found':'Not Found'};
   document.title=(titles[route.page]||'420 Launchpad')+' | 420 Integrated';
   window.scrollTo?.({top:0,behavior:'instant'});
 }

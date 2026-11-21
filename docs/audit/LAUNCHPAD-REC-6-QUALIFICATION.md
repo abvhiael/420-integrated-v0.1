@@ -1,6 +1,6 @@
 # LAUNCHPAD-REC-6 — final local pre-testnet qualification
 
-**Status:** PENDING EXACT-HEAD REC-6 QUALIFICATION. This document is updated only after the new deterministic release, standalone application and service workflow passes.
+**Status: COMPLETE — locally repository-qualified, exact-head verified; public testnet, Genesis and production NOT qualified.** PR [#1273](https://github.com/abvhiael/420-integrated-v0.1/pull/1273) is intentionally **OPEN, UNMERGED** pending a separate merge instruction.
 
 ## Scope and frozen authority
 
@@ -15,17 +15,19 @@
 - The current machine-readable states in `contracts/config/420launchpad-genesis.json`, `contracts/config/launchpad/launchpad-audit-4-release-materialization.json` and `testnet/public-services/launchpad/readiness.json` must agree: repository-qualified locally **true**; live-qualified, Genesis-ready and production-ready **false**.
 - Recovery and rollback procedures: [Launchpad deployment and operations](../apps/launchpad/deployment-operations.md). No live chain, funded production contribution, Cloudflare deployment, live indexing/reorg, deployed hash, Genesis-readiness claim or independent external audit claimed here.
 
-## Qualification evidence (to be filled from confirmed workflow results)
+## Verified exact-commit qualification
 
-- Exact executable SHA: pending.
-- `LAUNCHPAD-REC-6 final pre-testnet closeout` workflow run and job IDs: pending.
-- Deterministic two-pass compiler/ABI/runtime/constructor attestation: pending.
-- ABI/compiler tamper adversarial checks: pending.
-- Real local Registry/constructor wiring regression: pending.
-- Clean standalone production application build, web regression and static-output source matching: pending.
-- Full Launchpad service regression: pending.
-- Machine-readable readiness, Audit-4/Audit-5 retained verifier gates: pending.
-- Previously qualified REC-5 real multi-system local-EVM and downstream consumer evidence: [REC-5](LAUNCHPAD-REC-5-QUALIFICATION.md); executable SHA `1531a8ada470a3f79e36ca9879502a4a39760ffc`, [run #44849506236](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44849506236). Existing merged Launchpad audit 48+3 / 420Indexer CI evidence remains retained independently.
+- **Exact executed Git SHA:** `9dfa73a81517798dd5b21d0417ae3d46c0fdb303`.
+- **GitHub Actions workflow:** [LAUNCHPAD-REC-6 run #44852520909](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44852520909), `completed/success` at that exact SHA.
+- **Contract/release job:** `136686996381` — Solidity 0.8.24 / Cancun / optimizer 200 / via-IR; all six real contract compiler metadata, immutable constructor argument types, required ABI functions/events, creation/runtime template bytecode identities and no unresolved libraries; **two independent clean Foundry builds emitted byte-identical manifest data matching the committed frozen six-contract inventory**. Adversarial verifier suite **7/7 passed**, focused real local Registry/constructor/state binding Foundry suite **3/3 passed**, 0 failed/0 skipped.
+- **Browser/service job:** `136686995975` — source/policy and Audit-5 verifiers **PASS**, clean standalone web **19/19 tests passed**, browser security/static check **PASS**, full source-to-dist equality and fail-closed runtime/build-SHA verification **PASS**, complete Launchpad API/creator/RPC/projection/indexer service tests **44/44 passed**.
+- **Machine-readable frozen artifacts:** [real two-pass fingerprint inventory](../../contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json). Its originating exact artifact-build commit was `6714a5d8ebe86feaacc1a08e88b2d15bc57f3705` ([prior success #44852254114](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44852254114)); all six fingerprints were reverified against real bytecode at the above **9dfa** executable SHA.
+- **Exact-head retained contract manifest:** GitHub Actions artifact `launchpad-rec6-contract-attestation-9dfa73a81517798dd5b21d0417ae3d46c0fdb303`, artifact ID `14685652600`, attached to run #44852520909.
+- **Exact-head standalone artifact manifest:** `launchpad-rec6-web-attestation-9dfa73a81517798dd5b21d0417ae3d46c0fdb303`, artifact ID `14685852787`, same run.
+- **Retained previously-qualified affected contract/system suites:** [REC-5](LAUNCHPAD-REC-5-QUALIFICATION.md) real local Pay/Wallet/Identity/Arbitration and Reputation/Notifications/Explorer consumer tests ([run #44849506236](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44849506236)); [merged Launchpad audit #44850089210](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44850089210) qualified 48/48 base contract and 3/3 real Registry deployment tests. No production Solidity contract source, protocol authority or Genesis address was changed by REC-6, so unrelated suites were not repeated.
+- **Status reconciliation:** `contracts/config/420launchpad-genesis.json`, `contracts/config/launchpad/launchpad-audit-4-release-materialization.json`, and `testnet/public-services/launchpad/readiness.json` all retain repository-qualified **true**, live qualified **false**, Genesis-ready **false**, production-ready **false**. The previous stale `REPOSITORY_MATERIALIZATION_PENDING_QUALIFICATION`, `IMPLEMENTATION_QUALIFICATION`, "Reputation missing" and REC-5 "not merged" claims have been corrected.
+- **Documentation and operator runbooks:** [Launchpad deployment and operations](../apps/launchpad/deployment-operations.md) includes exact deployment graph and Registry publication distinction, real release document/ABI hashes vs local fixture markers, clean static build, intake backup, projection reorg/stale recovery, canonical payment/refund ambiguity, incident stop/rollback and monitoring.
+- **Merge:** not merged or requested as part of this REC-6 task. `main` at the original assignment: `0f7c978a8904303816bd52551ef711355fc9d5e2`.
 
 ## Live-only handoff
 

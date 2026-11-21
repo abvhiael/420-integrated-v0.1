@@ -30,7 +30,11 @@ Authority transactions: `setHouseSource(House,address)` (Timelock), `bindSnapsho
 
 Reads: `delayFloor(ProposalClass)`, `ruleFor(ProposalClass)`.
 
-Transaction: `setRule(...)` — Timelock-only.
+Transaction: `setRule(...)` — Timelock-only. The voting-period argument is a **positive** `uint64` block count, including `1`. The protocol does not impose a higher minimum.
+
+## Voting-window and finalization boundaries
+
+For a proposal created at block `N`, the Governor freezes its electorate at `snapshotBlock = N - 1` and sets `voteStart = N + 1` and `voteEnd = voteStart + votingPeriodBlocks - 1` (an **inclusive** interval). `CivicProposalRegistry420.registerProposal` allows `voteEnd == voteStart` and rejects `voteEnd < voteStart` or `voteStart <= snapshotBlock`. `CivicVoting420.castVote` rejects ballots before `voteStart` or after `voteEnd`. `CivicGovernor420.finalize` is allowed only when `block.number > voteEnd` (the first finalizable block is `voteEnd + 1`). Creation reverts on zero block or an absolute `uint64` start/end overflow; it does not change or reduce a Constitution-approved positive voting period. The canonical initial G1–G4 periods remain **17,640 / 35,280 / 35,280 / 105,840** blocks.
 
 ## GovernanceTimelock
 

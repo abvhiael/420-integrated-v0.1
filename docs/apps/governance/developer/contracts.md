@@ -14,7 +14,7 @@ Stores G1–G4 voting period, Timelock delay, COMMUNITY/VALIDATOR quorum/approva
 
 ## CivicProposalRegistry420
 
-Stores proposal identity, commitments, block window and lifecycle. Proposal authority is bound once to CivicGovernor420.
+Stores proposal identity, commitments, **inclusive** voting block window and lifecycle. A one-block period is valid (`voteStart == voteEnd`); the registry rejects `voteEnd < voteStart` and voting that begins on or before the frozen electorate snapshot block. Proposal authority is bound once to CivicGovernor420.
 
 Canonical transitions: ACTIVE→PASSED/FAILED, PASSED→QUEUED, QUEUED→EXECUTED.
 

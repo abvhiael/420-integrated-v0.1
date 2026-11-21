@@ -31,7 +31,7 @@ Any later target, native value, calldata, ordering or array-length change produc
 Before `castVote`:
 
 - confirm proposal is ACTIVE;
-- confirm the current block is within the voting window;
+- confirm the current block is within the **inclusive** voting window (`voteStart <= block.number <= voteEnd`); a one-block period has `voteStart == voteEnd` and permits a vote at that block only;
 - confirm the house is required;
 - obtain proof data for the frozen electorate source;
 - confirm no prior ballot exists;

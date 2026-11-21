@@ -143,7 +143,9 @@ contract CivicGovernor420 is I420System {
         bytes32 actionsHash
     ) external returns (bytes32 proposalId) {
         if (metadataHash == bytes32(0) || actionsHash == bytes32(0)) revert InvalidCommitment();
-        if (block.number == 0 || block.number > type(uint64).max - 2) revert BlockNumberOverflow();
+        // A one-block window is still representable at block uint64.max - 1.
+        // Reject only an unrepresentable next-block start; check longer windows below.
+        if (block.number == 0 || block.number >= type(uint64).max) revert BlockNumberOverflow();
 
         CivicConstitution420.Rule memory rule = constitution.ruleFor(class_);
         if (!rule.exists || rule.votingPeriodBlocks == 0) revert ConstitutionRuleMissing();

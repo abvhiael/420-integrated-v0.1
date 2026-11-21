@@ -204,7 +204,16 @@ def verify_web(dist, source_sha):
             "incorrect production service identity")
     require(runtime.get("network", {}).get("chainId") is None,
             "unqualified concrete chain injected into pre-testnet production build")
-    checks = ["index.html", "app.js", "styles.css", "runtime-config.json"]
+    checks = ["index.html", "app.js", "showcase.js", "sample-catalog.js",
+              "styles.css", "artwork.css", "runtime-config.json"]
+    # The final visual bundle is part of exact-head qualification, not a decorative
+    # upload that can be omitted or substituted during Cloudflare publication.
+    art_names = ["hero-launch.webp", "wallpaper-moonlit-hills.webp",
+                 "border-botanical-left.png", "border-botanical-right.png",
+                 "rocket-420integrated.png", "campaign-greenroots.webp",
+                 "campaign-aeroleaf.webp", "campaign-justice-fund.webp",
+                 "campaign-innovation-hub.webp", "campaign-sunridge.webp"]
+    checks += [str(Path("assets") / name) for name in art_names]
     sources = list((web / "core").rglob("*"))
     require(all(p.is_file() for p in sources), "unexpected core source entry")
     checks += [str(Path("core") / path.relative_to(web / "core")) for path in sources]

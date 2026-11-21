@@ -194,8 +194,8 @@ func (w *WalletLinkManager) Purge(ctx context.Context)error{
 func (w *WalletLinkManager) Ready(ctx context.Context)error{
  var ok bool
  e:=w.sessions.auth.store.db.QueryRowContext(ctx,`SELECT
-  COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_links'),'SELECT,INSERT,UPDATE'),false)
-  AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_link_challenges'),'SELECT,INSERT,UPDATE,DELETE'),false)`).Scan(&ok)
+  (COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_links'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_links'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_links'),'UPDATE'),false))
+  AND (COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_link_challenges'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_link_challenges'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_link_challenges'),'UPDATE'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.wallet_link_challenges'),'DELETE'),false))`).Scan(&ok)
  if e!=nil{return e}
  if !ok{return ErrUnavailable}
  return nil

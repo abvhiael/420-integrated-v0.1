@@ -96,6 +96,18 @@ func TestAUTH11ConcurrentConsentVersionAndNoFinancialAuthority(t *testing.T){
 }
 func TestAUTH11OwnerOnlyConsentHTTPAndFailClosedMode(t *testing.T){
  ctx:=context.Background();source,mon,_,auth,grant:=auth11Setup(t)
+ // All acceptance HTTP fixtures share a disposable PostgreSQL database and
+ // a single current-minute global test rate bucket. Avoid leaking this
+ // scenario's extra requests into unrelated retained acceptance tests.
+ var priorGlobal int64
+ e:=auth.store.db.QueryRowContext(ctx,`SELECT COALESCE((SELECT count FROM account420.acceptance_rate
+ WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint),0)`).Scan(&priorGlobal)
+ if e!=nil{t.Fatal(e)}
+ t.Cleanup(func(){
+  _,err:=auth.store.db.ExecContext(context.Background(),`UPDATE account420.acceptance_rate
+  SET count=$1 WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint`,priorGlobal)
+  if err!=nil{t.Error("restore global acceptance counter",err)}
+ })
  clients:=auth11Clients()[:1]
  cfg:=AcceptanceConfig{Emails:[]string{},RateKey:mustRandom(t),SessionApp:"420id",ProfileMode:true,WalletMode:true,WalletChainID:420,SSOClients:clients,MonetizationMode:true}
  var email string

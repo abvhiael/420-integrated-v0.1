@@ -181,6 +181,6 @@ test('CCC-4: human setup, bot controls, accessibility and privacy integrate with
  assert.match(css,/\.ccc-computer-turn/);
  assert.match(css,/@media\(max-width:650px\)/);
  assert.match(css,/@media\(forced-colors:active\)/);
- assert.match(gate,/baseTotal:1157\*1024/);
+ assert.match(gate,/baseTotal:1189\*1024/);
  assert.doesNotMatch(rule,/computerDifficulty|controller==='computer'/);
 });

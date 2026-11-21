@@ -324,6 +324,6 @@ test('public local game route remains separate from wallet-only and wager-bearin
  assert.equal(resolveRoute('/classics').requiresSession,false);
  assert.equal(routeAccess(resolveRoute('/classics/cross-country-chaos'),{connected:false}).allowed,true);
  const html=renderApplicationShell({pathname:'/classics/cross-country-chaos',walletView:{connected:false}});
- assert.match(html,/Cross-Country Chaos/);assert.match(html,/Local pass-and-play only/);
+ assert.match(html,/Cross-Country Chaos/);assert.match(html,/Account multiplayer/);assert.doesNotMatch(html,/Local pass-and-play only|Pass the device/);
  assert.match(renderApplicationShell({pathname:'/games',walletView:{connected:false}}),/Canadian Classics/);
 });

@@ -538,3 +538,76 @@
  .ccc-wrap--roadtrip .ccc-save-panel{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}
  .ccc-wrap--roadtrip .ccc-save-panel button{border:2px solid ButtonText}
 }
+
+/* CCC account multiplayer — the public route uses one private hand per account. */
+.app-shell[data-route="chaos-game"] .app-layout{display:block}
+.app-shell[data-route="chaos-game"] .app-sidebar,
+.app-shell[data-route="chaos-game"] .app-rail,
+.app-shell[data-route="chaos-game"] .ecosystem-rail,
+.app-shell[data-route="chaos-game"] .route-heading{display:none!important}
+.app-shell[data-route="chaos-game"] .app-content{width:min(100%,1480px);max-width:1480px;margin:0 auto;padding:12px 18px}
+.ccc-online{--road:#102f26;--gold:#ffd580;--ink:#faf3d9;color:var(--ink);
+ background:linear-gradient(135deg,#102f26,#204635);border:2px solid #8cbba5;
+ border-radius:14px;padding:16px;min-width:0;overflow:hidden}
+.ccc-online *{box-sizing:border-box}
+.ccc-online-header{display:flex;align-items:center;justify-content:space-between;gap:14px;
+ border-bottom:1px solid #7fa28b;padding:0 0 12px}
+.ccc-online-header h2{color:#fff3d2;font-size:clamp(1.45rem,2.4vw,2.5rem);margin:0}
+.ccc-online-header p{margin:3px 0;line-height:1.3}
+.ccc-online button,.ccc-online input,.ccc-online select{min-height:44px;touch-action:manipulation;font:inherit}
+.ccc-online button{cursor:pointer;border:1px solid #f2ce80;border-radius:8px;padding:8px 14px;
+ background:#ffd580;color:#18281f;font-weight:800}
+.ccc-online button:disabled{opacity:.55;cursor:not-allowed}
+.ccc-online button:focus-visible,.ccc-online select:focus-visible,.ccc-online input:focus-visible{
+ outline:3px solid #fff;outline-offset:3px}
+.ccc-online-home{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,1fr) minmax(220px,1fr);
+ gap:14px;margin-top:14px}
+.ccc-online-home>section,.ccc-online-home>form,.ccc-online-lobby,.ccc-online-results,
+.ccc-online-message{border:1px solid #7caa96;padding:14px;border-radius:12px;
+ background:#122e28;min-width:0}
+.ccc-online form label{display:flex;flex-direction:column;gap:5px;margin:8px 0}
+.ccc-online input,.ccc-online select{width:100%;max-width:100%;padding:7px;border-radius:7px}
+.ccc-online-room{border-bottom:1px solid #648a77;padding:8px 0}
+.ccc-online-room p{margin:4px 0}
+.ccc-online-error{background:#552b2b;color:#fff2e9;padding:10px;border-radius:8px}
+.ccc-online-standings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0}
+.ccc-online-seat{display:flex;flex-direction:column;gap:4px;border:1px solid #7da68a;
+ border-radius:10px;padding:8px;background:#17362e;min-width:0;overflow-wrap:anywhere}
+.ccc-online-seat span{font-weight:700}.ccc-online-seat small{opacity:.9}
+.ccc-online-seat--mine{border-color:#ffd580}
+.ccc-online-seat--turn{box-shadow:inset 0 0 0 2px #ffd580}
+.ccc-online-play{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:12px}
+.ccc-online-public,.ccc-online-hand{background:#16372d;border:1px solid #78a68b;padding:12px;border-radius:10px;min-width:0}
+.ccc-online-public h3,.ccc-online-hand h3{margin:0 0 8px;color:#fff1cc}
+.ccc-online-discard{display:flex;align-items:center;gap:9px}
+.ccc-online-discard img{width:48px;height:81px;object-fit:contain}
+.ccc-online-finish{color:#ffe29e;font-weight:800}
+.ccc-online-actions{display:grid;gap:7px}
+.ccc-online-cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.ccc-online-card{display:flex;flex-direction:column;align-items:center;text-align:center;
+ gap:5px;padding:7px 4px;min-width:0;background:#225142;border:1px solid #789b78;border-radius:8px}
+.ccc-online-card>img{width:100%;max-width:88px;height:130px;object-fit:contain}
+.ccc-online-card strong{font-size:.85rem;line-height:1.2;overflow-wrap:anywhere}
+.ccc-online-card-actions{display:grid;gap:4px;width:100%;max-height:148px;overflow-y:auto}
+.ccc-online-card-actions button{padding:6px 3px;font-size:.75rem;min-height:38px;white-space:normal}
+.ccc-online-log{margin-top:9px;max-height:90px;overflow:auto}
+.ccc-online-results{margin-top:12px}
+@media(min-width:980px){.ccc-online{min-height:calc(100vh - 134px)}}
+@media(max-width:1150px){.ccc-online-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:800px){
+ .app-shell[data-route="chaos-game"] .app-content{padding:7px}
+ .ccc-online{padding:9px}.ccc-online-home{grid-template-columns:1fr}
+ .ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-play{grid-template-columns:1fr}
+ .ccc-online-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:450px){
+ .ccc-online-header{align-items:flex-start;flex-direction:column}
+ .ccc-online-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-seat{font-size:.9rem}
+}
+@media(forced-colors:active){
+ .ccc-online,.ccc-online>*,.ccc-online-seat,.ccc-online-card,.ccc-online-public,.ccc-online-hand{
+  color:CanvasText!important;background:Canvas!important;border-color:CanvasText!important}
+ .ccc-online button{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}
+}

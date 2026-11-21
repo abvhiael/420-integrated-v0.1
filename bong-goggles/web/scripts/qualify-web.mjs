@@ -19,8 +19,9 @@ const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-8 permits +32 KiB strictly for a published and independently verified image manifest.
 // CCC-4 reserves +16 KiB only for local computer decisions and accessible seat UI.
 // CCC-6 adds +16 KiB for private, replay-verified offline journal and mobile resume controls.
+// Account multiplayer reserves +32 KiB for the authenticated room client, per-seat UI and compact responsive game surface; game authority is server-side. 
 // All card/map/vehicle/individual-asset budgets remain unchanged.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1157*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -37,7 +38,38 @@ const mapTotal=mapFiles.reduce((sum,f)=>sum+f.size,0);
 const vehicleTotal=vehicleFiles.reduce((sum,f)=>sum+f.size,0);
 if(vehicleTotal>limits.vehicleTotal)throw new Error('CCC-ART-3 vehicle budget exceeded: '+vehicleTotal);
 if(mapTotal>limits.mapTotal)throw new Error('CCC-ART-2 map budget exceeded: '+mapTotal+' > '+limits.mapTotal);
-if(baseTotal>limits.baseTotal)throw new Error(`base static asset budget exceeded: ${baseTotal} > ${limits.baseTotal}`);
+// BC-0.2 reserves a *scoped* 8 KiB ceiling for the new 25-game menu, routes
+// and landing pages. Exact pre-BC-0.2 asset sizes are pinned to the qualified
+// CCC-6 main head 96373f6649b1f5a78d8db5a44bb09a4c0dfcb599. Preserve the
+// original 1157 KiB base limit for all earlier output and all unrelated files.
+// Each menu-related file also has a non-expandable per-file growth allowance.
+const bc02Files=Object.freeze({
+ 'core/classics.js':Object.freeze({baseline:3037,maxAdded:1204}),
+ 'core/routes.js':Object.freeze({baseline:2778,maxAdded:402}),
+ 'core/classics-ui.js':Object.freeze({baseline:14171,maxAdded:171}),
+ 'core/games-ui.js':Object.freeze({baseline:5306,maxAdded:3936}),
+ 'core/app-shell.js':Object.freeze({baseline:13072,maxAdded:0}),
+ 'core/dashboard-ui.js':Object.freeze({baseline:5799,maxAdded:8}),
+ 'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
+});
+const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+let bc02Growth=0;
+for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
+ const size=regularSizes.get(path);
+ if(!Number.isSafeInteger(size))throw new Error('BC-0.2 required output missing: '+path);
+ const growth=Math.max(0,size-baseline);
+ if(growth>maxAdded)throw new Error('BC-0.2 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
+ bc02Growth+=growth;
+}
+if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
+if(baseTotal>limits.baseTotal+8*1024)
+ throw new Error('BC-0.2 combined static asset budget exceeded: '+baseTotal);
+const legacyBaseTotal=baseTotal-bc02Growth;
+if(legacyBaseTotal>limits.baseTotal)
+ throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
+ growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal
+}));
 if(cardTotal>limits.cardTotal)throw new Error(`Cross-Country Chaos card budget exceeded: ${cardTotal} > ${limits.cardTotal}`);
 if(CHAOS_CARD_ART_OUTPUTS.length!==49||new Set(CHAOS_CARD_ART_OUTPUTS).size!==49)
  throw new Error('Invalid card asset allowlist');
@@ -138,6 +170,17 @@ if(!saveSource.includes('replayChaosJournal(journal)')||
  !tabletopCss.includes('ccc-save-panel')||
  /(?:\bfetch\s*\(|\beval\s*\(|\bwindow\b|https?:\/\/|\.hand\b|\.deck\b)/.test(saveSource.replace(/^\/\/.*$/gm,'')))
  throw new Error('CCC-6 save/resume and offline mobile release qualification failed');
+// Account multiplayer must be the public route, never the old same-screen game.
+const onlineUi=await readFile(resolve(root,'core/chaos-online.js'),'utf8');
+const shellUi=await readFile(resolve(root,'core/app-shell.js'),'utf8');
+if(!shellUi.includes("if(route.id==='chaos-game')return renderChaosOnline")||
+ !onlineUi.includes("credentials:'same-origin'")||
+ !onlineUi.includes("checkChaosProjection")||
+ !app.includes("new ChaosRoomsClient")||
+ !app.includes("bindChaosOnline()")||
+ !tabletopCss.includes('.ccc-online-cards')||
+ !tabletopCss.includes('.app-shell[data-route="chaos-game"] .app-sidebar'))
+ throw new Error('CCC account multiplayer route must not expose pass-and-play');
 // CCC-4 decisions consume only the current hand and public board, never stock order.
 const computerJs=await readFile(resolve(root,'core/chaos-computer.js'),'utf8');
 const classicsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');

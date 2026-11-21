@@ -21,6 +21,7 @@ type Handler struct{
  SignOn *SignOn
  Messages *MessageService
  Games *AccountGames
+ Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
  Origin string
@@ -211,6 +212,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 }
 func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,viewer string){
  path:=r.URL.Path
+ if strings.HasPrefix(path,"/v1/chaos/"){
+  h.chaosAPI(ctx,w,r,viewer);return
+ }
  if strings.HasPrefix(path,"/v1/messages")||strings.HasPrefix(path,"/v1/account-games"){
   h.accountExtras(ctx,w,r,viewer);return
  }

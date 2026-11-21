@@ -104,6 +104,13 @@ func main(){
  }else if os.Getenv("SOCIAL420_XP_MODE")!=""&&os.Getenv("SOCIAL420_XP_MODE")!="disabled"{
   log.Fatal("Unrecognized XP activation mode")
  }
+ if os.Getenv("SOCIAL420_CHAOS_MODE")=="restricted-acceptance"{
+  if e=handler.EnableChaosProxy(required("SOCIAL420_CHAOS_ORIGIN"),required("SOCIAL420_CHAOS_PROXY_KEY"));e!=nil{
+   log.Fatal("CCC multiplayer trusted proxy configuration invalid")
+  }
+ }else if os.Getenv("SOCIAL420_CHAOS_MODE")!=""&&os.Getenv("SOCIAL420_CHAOS_MODE")!="disabled"{
+  log.Fatal("Unsupported CCC multiplayer mode")
+ }
  // AUTH-11 is an independent opt-in. The 420ID server must support
  // confidential, consent-scoped monetization introspection; no local
  // entitlements, payouts, invoices or 420Token entries can be created.

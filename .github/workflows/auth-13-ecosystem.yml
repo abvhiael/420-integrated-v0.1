@@ -99,6 +99,8 @@ jobs:
           done
       - name: Verify payment app build includes wallet-independent 420ID UI
         run: |
+          npm ci --ignore-scripts --prefix packages/420-pay-sdk
+          npm run build --prefix packages/420-pay-sdk
           npm ci --ignore-scripts --prefix pay/web
           (cd pay/web && node build.mjs)
           test -f pay/web/dist/420id-client.mjs

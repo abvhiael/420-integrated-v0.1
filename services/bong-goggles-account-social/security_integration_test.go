@@ -6,6 +6,9 @@ import (
  "context"
  "database/sql"
  "errors"
+ "fmt"
+ "net/http"
+ "net/http/httptest"
  "os"
  "strings"
  "testing"
@@ -63,4 +66,24 @@ func TestAUTH12SocialRuntimeRejectsMissingAndForbiddenGrants(t *testing.T){
   if _,e=store.DB.ExecContext(ctx,v.revoke);e!=nil{t.Fatal(e)}
  }
  if e=subject.ReadyRuntime(ctx);e!=nil{t.Fatal("restored least-privilege grants rejected",e)}
+}
+
+func TestAUTH12SSOCallbackBruteForceBoundedBySocketIP(t *testing.T){
+ _,_,_,h:=fixture(t)
+ for i:=0;i<61;i++{
+  req:=httptest.NewRequest("GET",
+   "https://bonggoggles.420integrated.org/auth/callback?code=invalid&state=invalid",nil)
+  req.RemoteAddr=fmt.Sprintf("198.51.100.84:%d",19000+i)
+  req.Header.Set("X-Forwarded-Proto","https")
+  w:=httptest.NewRecorder();h.ServeHTTP(w,req)
+  expected:=http.StatusUnauthorized
+  if i==60{expected=http.StatusTooManyRequests}
+  if w.Code!=expected{t.Fatalf("callback attempt %d: %d, expected %d",i,w.Code,expected)}
+ }
+ req:=httptest.NewRequest("GET",
+  "https://bonggoggles.420integrated.org/auth/callback?code=invalid&state=invalid",nil)
+ req.RemoteAddr="spoofed-peer"
+ req.Header.Set("X-Forwarded-Proto","https")
+ w:=httptest.NewRecorder();h.ServeHTTP(w,req)
+ if w.Code!=http.StatusTooManyRequests{t.Fatal("malformed network peer bypassed callback rate cap",w.Code)}
 }

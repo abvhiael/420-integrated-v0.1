@@ -60,7 +60,7 @@ jobs:
           test -f contracts/test/fixtures/cadc/upstream/@openzeppelin/contracts/utils/introspection/IERC165.sol
           test -f contracts/test/fixtures/cadc/upstream/@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol
           test -f contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/contracts/BytesLib.sol
-          grep -F 'FOUNDRY_REMAPPINGS' contracts/scripts/qualify-foundry-shard.sh
+          grep -F 'FOUNDRY_REMAPPINGS' contracts/scripts/cadc-foundry-env.sh
       - name: Compile retained CADC LayerZero import closure with shared shard remappings
         working-directory: contracts
         run: |

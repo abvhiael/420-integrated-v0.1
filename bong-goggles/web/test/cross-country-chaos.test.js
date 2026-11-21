@@ -242,6 +242,26 @@ test('winner banks 2,500 km, others bank capped effective mileage, and final rou
  assert.equal(progressed.players[1].hand.length,7);
  assert.equal(progressed.step,'play');
 });
+test('exact stage ties share 2,500 km, while equal effective mileage uses raw played mileage to break ties',()=>{
+ let shared=start(2);
+ setDistance(shared.players[0],2400);setDistance(shared.players[1],2400);
+ put(shared,0,card('mileage',{km:100}));put(shared,1,card('mileage',{km:100}));
+ shared=takeChaosTurn(shared,{player:0,action:'drive',index:0});shared=discard(shared);
+ shared=takeChaosTurn(shared,{player:1,action:'drive',index:0});shared=discard(shared);
+ assert.equal(shared.phase,'between');
+ assert.deepEqual(shared.results[0].winners,[0,1]);
+ assert.deepEqual(shared.players.map(p=>p.score),[2500,2500]);
+ assert.deepEqual(shared.players.map(p=>p.wins),[1,1]);
+ let raw=start(2);
+ setDistance(raw.players[0],2400);setDistance(raw.players[1],2600);
+ raw.players[1].detourLoss=200;raw.players[1].km=2400;
+ put(raw,0,card('mileage',{km:100}));put(raw,1,card('mileage',{km:100}));
+ raw=takeChaosTurn(raw,{player:0,action:'drive',index:0});raw=discard(raw);
+ raw=takeChaosTurn(raw,{player:1,action:'drive',index:0});raw=discard(raw);
+ assert.deepEqual(raw.results[0].winners,[1]);
+ assert.equal(raw.results[0].standings[0].id,1);
+ assert.equal(raw.results[0].standings[0].rawKm,2700);
+});
 test('all stage results persist; championship orders by total km, wins and west-stage km',()=>{
  let s=start(2);
  for(let leg=0;leg<3;leg++){

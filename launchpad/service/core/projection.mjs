@@ -8,7 +8,7 @@ const DECIMAL=/^(?:0|[1-9][0-9]{0,77})$/;
 function validCampaign(x){
   if(!x||!HASH.test(x.saleId)||!HASH.test(x.projectId)||!MODES.has(x.mode)||!STATES.has(x.state))return false;
   for(const k of ['title','summary'])if(x[k]!==undefined&&
-    (typeof x[k]!=='string'||x[k].length>1024||/[\\u0000-\\u001f]/.test(x[k])))return false;
+    (typeof x[k]!=='string'||x[k].length>1024||/[\u0000-\u001f]/.test(x[k])))return false;
   for(const k of ['raised','hardCap','softCap','perWalletCap','tokenAllocation'])
     if(x[k]!==undefined&&(typeof x[k]!=='string'||!DECIMAL.test(x[k])))return false;
   for(const k of ['paymentAsset','proceedsReceiver','controller'])

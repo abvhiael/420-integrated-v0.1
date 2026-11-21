@@ -1,0 +1,70 @@
+name: AUTH-8 Wallet-Independent BongGoggles Social
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'cmd/420id/**'
+      - 'bong-goggles/web/**'
+      - '.github/workflows/auth-8-wallet-independent-social.yml'
+      - 'go.mod'
+      - 'go.sum'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: auth-8-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify-social:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact implementation SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Social API PostgreSQL and race qualification
+        run: go test -race -tags account420_integration -count=1 -v ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Social API static analysis
+        run: go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Build restricted social service
+        run: go build -o /tmp/bg-social ./cmd/bong-goggles-social
+      - name: Verify no implicit production startup
+        run: |
+          if env -u SOCIAL420_MODE /tmp/bg-social; then
+            echo "Social service started without explicit restriction"
+            exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Focused wallet-independent browser tests
+        run: |
+          node --check bong-goggles/web/app.js
+          node --check bong-goggles/web/core/account-social.js
+          node --check bong-goggles/web/core/account-social-controller.js
+          node --test bong-goggles/web/test/account-social.test.js

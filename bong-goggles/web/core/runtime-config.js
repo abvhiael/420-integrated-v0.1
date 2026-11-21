@@ -22,7 +22,7 @@ export function validateRuntimeConfig(input){
   if(!Number.isSafeInteger(chainId)||chainId<=0) throw new Error('chainId must be a positive safe integer');
 
   const allowLocalhost=environment!=='production';
-  const features=Object.freeze({...input.features});
+  const features=Object.freeze({...input.features,accountSocial:input.features?.accountSocial===true});
   const socialEnabled=features.publicDiscoverFeed===true;
   const socialApiUrl=input.socialApiUrl==null?null:httpsUrl(input.socialApiUrl,'socialApiUrl',{allowLocalhost});
   if(socialEnabled&&!socialApiUrl) throw new Error('qualified socialApiUrl required for publicDiscoverFeed');

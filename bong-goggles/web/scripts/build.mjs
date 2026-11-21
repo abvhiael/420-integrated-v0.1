@@ -13,7 +13,7 @@ await mkdir(out,{recursive:true});
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
 validateRuntimeConfig(example);
 
-for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // Only the approved 14 assets are published; ignore upload placeholders or unrelated files.

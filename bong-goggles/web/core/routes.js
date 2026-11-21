@@ -14,6 +14,8 @@ export const ROUTES=Object.freeze([
   {id:'pages',path:'/pages',label:'Pages',icon:'▤',requiresSession:false},
   {id:'events',path:'/events',label:'Events',icon:'◇',requiresSession:false},
   {id:'games',path:'/games',label:'Games',icon:'✦',requiresSession:true},
+  {id:'classics',path:'/classics',label:'Classics',icon:'♠',requiresSession:false},
+  {id:'chaos-game',path:'/classics/cross-country-chaos',label:'Cross-Country Chaos',icon:'🚙',requiresSession:false},
   {id:'rewards',path:'/rewards',label:'Rewards',icon:'◈',requiresSession:true},
   {id:'safety',path:'/safety',label:'Safety and appeals',icon:'⚑',requiresSession:true},
   {id:'settings',path:'/settings',label:'Settings',icon:'⚙',requiresSession:true}

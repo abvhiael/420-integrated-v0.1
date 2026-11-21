@@ -62,7 +62,7 @@ const html=await readFile(resolve(root,'index.html'),'utf8');const app=await rea
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');
 if(!html.includes('href="/ccc-tabletop.css"')||!tabletopCss.includes('ccc-tabletop--road-atlas')||
   !tabletopCss.includes('prefers-reduced-motion:reduce')||!tabletopCss.includes('forced-colors:active')||
-  /@import\\s+url\\(|https?:\\/\\//i.test(tabletopCss))
+  tabletopCss.includes('@import')||tabletopCss.includes('https://')||tabletopCss.includes('http://'))
  throw new Error('Missing or unsafe CCC-ART-4 tabletop stylesheet');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));

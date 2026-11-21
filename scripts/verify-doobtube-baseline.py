@@ -103,6 +103,7 @@ allowed_doobtube_files = {
     "doobtube/web/styles.css",
     "doobtube/web/index.html",
     "doobtube/web/app.js",
+    "doobtube/web/420id-client.mjs",
     "doobtube/web/core/config.js",
     "doobtube/web/core/wallet.js",
     "doobtube/web/core/routes.js",

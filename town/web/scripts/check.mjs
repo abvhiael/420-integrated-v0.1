@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
 const root=new URL('../',import.meta.url);
-const required=['index.html','styles.css','app.js','runtime-config.json','runtime-config.example.json','security-headers.json','brand/420townsquare.png','core/config.js','core/abi.js','core/wallet.js','core/authority.js','core/service.js','core/state.js'];
+const required=['index.html','styles.css','app.js','420id-client.mjs','runtime-config.json','runtime-config.example.json','security-headers.json','brand/420townsquare.png','core/config.js','core/abi.js','core/wallet.js','core/authority.js','core/service.js','core/state.js'];
 for(const p of required)readFileSync(new URL(p,root));
 for(const p of ['app.js','core/config.js','core/abi.js','core/wallet.js','core/authority.js','core/service.js','core/state.js']){
   const r=spawnSync(process.execPath,['--check',new URL(p,root).pathname],{encoding:'utf8'});

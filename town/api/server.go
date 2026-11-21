@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	appgateway "github.com/420integrated/420-integrated/services/420id/app-gateway"
 	"io"
 	"net/http"
 	"strconv"
@@ -91,6 +92,7 @@ type Server struct {
 	auth        Authenticator
 	viewers     ViewerResolver
 	moderation  ModerationBackend
+	account420  *appgateway.Gateway // optional wallet-free account identity only
 
 	requests     atomic.Uint64
 	errors       atomic.Uint64
@@ -110,6 +112,66 @@ func NewServer(backend ContentBackend, projections ProjectionReader, auth Authen
 }
 
 func (s *Server) SetModerationBackend(backend ModerationBackend) { s.moderation = backend }
+
+// Enable420ID accepts only the separately configured confidential 420Town
+// gateway. A 420ID member's off-chain actor never receives an on-chain
+// wallet, moderation, subscription or administrative capability by default.
+func (s *Server) Enable420ID(g *appgateway.Gateway) error {
+	if s == nil || g == nil || g.App.ID != "420town" || g.App.Origin != "https://town.420integrated.org" {
+		return ErrAuthInvalid
+	}
+	s.account420 = g
+	return nil
+}
+
+// Only unprivileged off-chain Town content and report endpoints may be
+// used with a 420ID account session. Moderation casework, entitlement,
+// subscription, membership and other authority paths retain existing auth.
+func allow420IDTown(r *http.Request) bool {
+	if r == nil {
+		return false
+	}
+	if r.Method == http.MethodPost && r.URL.Path == "/v1/moderation/reports" {
+		return true
+	}
+	prefix := false
+	switch {
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/posts/"):
+		prefix = true
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/communities/") && strings.HasSuffix(r.URL.Path, "/posts"):
+		prefix = true
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/threads"):
+		prefix = true
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/threads/") && strings.HasSuffix(r.URL.Path, "/comments"):
+		prefix = true
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/votes"):
+		prefix = true
+	}
+	if !prefix {
+		return false
+	}
+	// Reject guessed path aliases with extra segments. ServeMux still selects
+	// exact routes; this is defense in depth if consumers call authenticate.
+	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	return len(segments) == 3 && (r.Method == http.MethodGet) ||
+		len(segments) == 4 && r.Method == http.MethodPost
+}
+func (s *Server) authenticate(r *http.Request) (model.ObjectID, error) {
+	// Existing bearer/legacy authentication retains priority. An invalid
+	// explicit Authorization header cannot be silently rescued by a cookie.
+	actor, e := s.auth.Authenticate(r)
+	if e == nil {
+		return actor, nil
+	}
+	if s.account420 == nil || r.Header.Get("Authorization") != "" || !allow420IDTown(r) {
+		return "", e
+	}
+	subject, e := s.account420.Current(r.Context(), r)
+	if e != nil {
+		return "", ErrAuthRequired
+	}
+	return model.ObjectID("420id:" + subject), nil
+}
 
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
@@ -238,13 +300,17 @@ func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleGetPost(w http.ResponseWriter, r *http.Request) {
 	var actor model.ObjectID
 	if strings.TrimSpace(r.Header.Get("Authorization")) != "" {
-		id, err := s.auth.Authenticate(r)
+		id, err := s.authenticate(r)
 		if err != nil {
 			s.authFailures.Add(1)
 			s.fail(w, http.StatusUnauthorized, "invalid authentication")
 			return
 		}
 		actor = id
+	} else if s.account420 != nil {
+		if member, err := s.authenticate(r); err == nil {
+			actor = member
+		}
 	}
 
 	id := model.ObjectID(r.PathValue("post"))
@@ -564,7 +630,7 @@ func (s *Server) moderationError(w http.ResponseWriter, err error) {
 }
 
 func (s *Server) requireActor(w http.ResponseWriter, r *http.Request) (model.ObjectID, bool) {
-	id, err := s.auth.Authenticate(r)
+	id, err := s.authenticate(r)
 	if err != nil {
 		s.authFailures.Add(1)
 		s.fail(w, http.StatusUnauthorized, "authentication required")

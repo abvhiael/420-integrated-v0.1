@@ -1,0 +1,114 @@
+name: AUTH-13 Ecosystem 420ID Application Integration
+on:
+  pull_request:
+    paths:
+      - 'services/420id/app-gateway/**'
+      - 'cmd/420id-app-gateway/**'
+      - 'town/web/**'
+      - 'doobtube/web/**'
+      - 'mail/web/**'
+      - 'grow/web/**'
+      - 'pay/web/**'
+      - 'exchange/web/**'
+      - 'media/web/**'
+      - '.github/workflows/auth-13-ecosystem.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: auth-13-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  confidential-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact application integration SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Confidential multi-instance SSO integration with PostgreSQL and race detector
+        run: go test -race -tags account420_integration -count=1 -v ./services/420id/app-gateway ./cmd/420id-app-gateway
+      - name: Gateway static analysis
+        run: go vet -tags account420_integration ./services/420id/app-gateway ./cmd/420id-app-gateway
+      - name: Build application gateway
+        run: go build -o /tmp/420id-app-gateway ./cmd/420id-app-gateway
+      - name: Deny implicit or unknown application startup
+        run: |
+          if env -u APP420_MODE /tmp/420id-app-gateway; then
+            echo 'App gateway incorrectly started without operator activation'
+            exit 1
+          fi
+          if env APP420_MODE=restricted-acceptance APP420_TLS_TERMINATION=trusted-proxy APP420_APP_ID=unapproved /tmp/420id-app-gateway; then
+            echo 'Unknown application was accepted'
+            exit 1
+          fi
+  app-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact browser integration SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Browser privacy and wallet boundary tests
+        run: |
+          node --check services/420id/app-gateway/client.mjs
+          node --test services/420id/app-gateway/client.test.mjs
+          for app in town doobtube mail grow pay exchange media; do
+            node --check "$app/web/420id-client.mjs"
+          done
+      - name: Verify copied modules are included in generated app sites
+        run: |
+          node town/web/scripts/check.mjs
+          node doobtube/web/scripts/build.mjs
+          node grow/web/scripts/build.mjs
+          node media/web/scripts/build.mjs
+          for app in doobtube grow media; do
+            test -f "$app/web/dist/420id-client.mjs"
+          done
+      - name: Verify payment app build includes wallet-independent 420ID UI
+        run: |
+          npm ci --ignore-scripts --prefix packages/420-pay-sdk
+          npm run build --prefix packages/420-pay-sdk
+          npm ci --ignore-scripts --prefix pay/web
+          (cd pay/web && node build.mjs)
+          test -f pay/web/dist/420id-client.mjs
+          cmp pay/web/dist/420id-client.mjs services/420id/app-gateway/client.mjs
+      - name: Verify Exchange build retains isolated finance boundary
+        env:
+          EXCHANGE_DEPLOYMENT_MODE: qualification
+        run: |
+          (cd exchange/web && node scripts/build.mjs)
+          test -f exchange/web/dist/420id-client.mjs
+          cmp exchange/web/dist/420id-client.mjs services/420id/app-gateway/client.mjs

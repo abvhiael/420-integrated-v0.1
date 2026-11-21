@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	appgateway "github.com/420integrated/420-integrated/services/420id/app-gateway"
 )
 
 type AuthenticateFunc func(*http.Request) (string, error)
@@ -14,6 +16,7 @@ type AuthenticateFunc func(*http.Request) (string, error)
 type HTTPHandler struct {
 	Service          *Service
 	Authenticate     AuthenticateFunc
+	Account420       *appgateway.Gateway // explicit optional wallet-free inbox SSO, no other rights
 	Onboarding       *OnboardingService
 	Security         *SecurityService
 	WalletActions    *WalletActionService
@@ -26,6 +29,20 @@ type HTTPHandler struct {
 	SignalShare      *SignalShareService
 }
 
+// Enable420ID binds 420Mail's wallet-independent personal mailbox access
+// to an exact approved confidential 420ID application. This is not a mail
+// forwarding, organization, wallet, connectors or moderation permission.
+func (h *HTTPHandler) Enable420ID(g *appgateway.Gateway) error {
+	if h == nil || g == nil || g.App.ID != "420mail" || g.App.Origin != "https://420mail.420integrated.org" {
+		return ErrUnauthorized
+	}
+	h.Account420 = g
+	return nil
+}
+func allow420IDMailbox(r *http.Request) bool {
+	return r.Method == http.MethodGet && r.URL.Path == "/v1/inbox" ||
+		r.Method == http.MethodPost && r.URL.Path == "/v1/messages"
+}
 func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(r.URL.Path, "/v1/onboarding/") {
 		if h.Onboarding == nil {
@@ -48,6 +65,16 @@ func (h HTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actor, err := h.Authenticate(r)
+	// Legacy authentication is always authoritative when supplied. A
+	// 420ID app-only cookie may access the *separate* personal mailbox
+	// subject only at the two explicitly approved off-chain routes.
+	if (err != nil || strings.TrimSpace(actor) == "") && h.Account420 != nil &&
+		strings.TrimSpace(r.Header.Get("Authorization")) == "" && allow420IDMailbox(r) {
+		if subject, e := h.Account420.Current(r.Context(), r); e == nil {
+			actor = "420id:" + subject
+			err = nil
+		}
+	}
 	if err != nil || strings.TrimSpace(actor) == "" {
 		writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
 		return

@@ -9,7 +9,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
   item('deux-cents','Deux Cents (200)','4','planned','Quebec and New Brunswick partnership card game.'),
   item('hola','Hola','2 or 4','planned','Ukrainian-Canadian Prairie card tradition.'),
   item('rook','Rook','4','planned','Traditional numbered-deck partnership game.'),
-  item('nines','Nines (Le Neuf)','3–4','planned','Regional trick-taking game.'),
+  item('nines','Nines','3–4','planned','Also called Le Neuf; regional trick-taking game.'),
   item('cross-country-chaos','Cross-Country Chaos','2–4','local','Three regional races, one national champion. Local pass-and-play.')
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([

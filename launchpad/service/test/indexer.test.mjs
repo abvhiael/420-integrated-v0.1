@@ -11,6 +11,7 @@ const topic='0x'+'99'.repeat(32);
 function fixture(){
   const rpc=makeRpc();
   rpc.set('resolveActive(bytes32)',out(ROUTER,1));
+  rpc.set('getService(bytes32)',out(ROUTER,topic,topic,1,100,1));
   rpc.set('sales()',out(A.sales));
   rpc.set('allocations()',out(A.allocations));
   rpc.set('projects()',out(A.project));

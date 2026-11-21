@@ -49,7 +49,7 @@ func (s *Store) Ready(ctx context.Context)error{
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.members','bio','UPDATE'),false)
  AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'INSERT'),false))
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.posts','deleted_at','UPDATE'),false)
- AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'UPDATE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'INSERT'),false))
  AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'DELETE'),false))
  AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'DELETE'),false))
  AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'DELETE'),false))
@@ -79,6 +79,7 @@ func (s *Store) ReadyRuntime(ctx context.Context)error{
  OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'DELETE'),false)
  OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'DELETE'),false)
  OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'UPDATE'),false)
  OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'UPDATE'),false)`).Scan(&unsafe)
  if e!=nil{return e};if unsafe{return ErrUnavailable}
  return nil

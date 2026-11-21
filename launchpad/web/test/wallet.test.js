@@ -17,6 +17,8 @@ function review(kind,selector,target,args,request={}){
 const contribute=()=>review('contribute','91d216e2','allocationRegistryAddress',[saleId,42,payment],{amount:'42',paymentId:payment});
 test('exact audited selector, target, value and arguments are enforced independent of the API',()=>{
   assert.equal(executionGate({config,wallet,review:contribute()}).ok,true);
+  const unexpected=contribute();unexpected.transaction.to=ADDR('9999');
+  assert.equal(executionGate({config,wallet,review:unexpected}).reason,'UNEXPECTED_TRANSACTION_TARGET_OR_VALUE');
   for(const mutate of [
     x=>x.transaction.data='0xdeadbeef'+x.transaction.data.slice(10),
     x=>x.transaction.data=x.transaction.data.slice(0,-2),

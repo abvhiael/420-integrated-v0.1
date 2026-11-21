@@ -1,0 +1,7 @@
+{
+  "accountSocial": true,
+  "accountMessaging": true,
+  "accountGames": true,
+  "accountXP": true,
+  "accountMonetization": false
+}

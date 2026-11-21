@@ -1,6 +1,6 @@
 
 /* Community dashboard: approved forest-green / warm ivory design direction. */
-:root{color-scheme:light;--bg:#eeeee5;--surface:#fffef9;--surface-2:#f2f3eb;--line:#dce2d5;--text:#172d23;--muted:#52665a;--brand-green:#297c43;--brand-yellow:#ffe070}
+:root{color-scheme:light;--bg:#eeeee5;--surface:#fffef9;--surface-2:#f2f3eb;--line:#dce2d5;--text:#172d23;--muted:#40594a;--brand-green:#297c43;--brand-yellow:#ffe070}
 body{background:var(--bg);color:var(--text)}
 .app-shell{display:flex;flex-direction:column}.app-header{background:#082d24;color:#fff;min-height:78px;gap:16px;padding:10px 22px;border-color:#245543}
 .brand{color:white;flex:none}.brand__mark{width:56px;height:56px;border:0;box-shadow:none}.brand-wordmark strong{font-size:1.8rem;letter-spacing:-.07em;line-height:1}.brand-wordmark small{color:white;font-size:.83rem;font-weight:800;letter-spacing:.24em}
@@ -48,7 +48,7 @@ body{background:var(--bg);color:var(--text)}
 .home-social.ui-card a:hover{color:#fff}
 .home-social.ui-card .home-social__composer textarea,
 .home-social.ui-card .social-post textarea{background:#fffef9;color:#172d23;border:1px solid #9db5a4}
-.home-social.ui-card textarea::placeholder{color:#52665a}
+.home-social.ui-card textarea::placeholder{color:#40594a}
 .home-social.ui-card a:focus-visible,
 .home-social.ui-card button:focus-visible,
 .home-social.ui-card textarea:focus-visible{outline:3px solid #ffe070;outline-offset:2px}

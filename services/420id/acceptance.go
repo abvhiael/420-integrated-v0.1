@@ -296,6 +296,12 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
  }
  return tx.Commit()
 }
+// Only the combined AUTH-11/12 runtime needs these additional grants.
+// Tests and operator migrations keep the separately privileged Ready path.
+func (h *AcceptanceHandler) ReadyMonetizationRuntime(ctx context.Context)error{
+ if h==nil||h.monetization==nil{return ErrUnavailable}
+ return h.monetization.ReadyRuntime(ctx)
+}
 func (h *AcceptanceHandler) Purge(ctx context.Context)error{
  if h.profiles{if e:=h.profileReady(ctx);e!=nil{return e}}
  if h.wallet!=nil{if e:=h.wallet.Ready(ctx);e!=nil{return e};if e:=h.wallet.Purge(ctx);e!=nil{return e}}

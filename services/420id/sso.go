@@ -205,8 +205,13 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  none:=SSOIntrospection{Active:false}
  if c.app==""{return none,ErrAuthentication}
  digest,e:=tokenDigest(token);if e!=nil{return none,nil}
+ // Lock the source account and both session rows in one transaction,
+ // including the subsequent consent/wallet projection. A concurrent
+ // account suspension, session revocation, opt-out or unlink must serialize
+ // before (or after) this complete introspection result, not between reads.
+ tx,e:=s.source.auth.store.db.BeginTx(ctx,nil);if e!=nil{return none,e};defer tx.Rollback()
  var subject Subject;var expires,idle time.Time;var method string;var accountID AccountID
- e=s.source.auth.store.db.QueryRowContext(ctx,`SELECT p.app_id,p.subject_id,t.expires_at,t.idle_until,t.method,t.account_id
+ e=tx.QueryRowContext(ctx,`SELECT p.app_id,p.subject_id,t.expires_at,t.idle_until,t.method,t.account_id
  FROM account420.sessions t
  JOIN account420.sessions parent ON parent.id=t.sso_source_id
  JOIN account420.accounts a ON a.id=t.account_id AND a.id=parent.account_id
@@ -217,7 +222,8 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  AND a.revision=t.account_revision AND a.revision=parent.account_revision
  AND parent.app_id=$4 AND parent.rp_id=$3 AND parent.method IN ('email','passkey')
  AND parent.revoked_at IS NULL AND parent.idle_until>clock_timestamp()
- AND parent.expires_at>clock_timestamp()`,
+ AND parent.expires_at>clock_timestamp()
+ FOR SHARE OF a,parent,t`,
  digest,c.app,s.source.auth.rp,s.source.app).Scan(&subject.App,&subject.ID,&expires,&idle,&method,&accountID)
  if errors.Is(e,sql.ErrNoRows){return none,nil}
  if e!=nil{return none,e}
@@ -226,12 +232,13 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  // owner-consented readiness snapshot. No wallet address, payout authority,
  // account identifier, XP balance or private 420ID token is shared.
  if s.monetization!=nil&&c.app==monetizationApp{
-  status,e:=s.monetization.forBongGoggles(ctx,accountID)
+  status,e:=s.monetization.byAccount(ctx,tx,accountID)
   if e!=nil{return none,e}
   // Without consent, do not reveal even whether a wallet is associated.
   if !status.RewardOptIn&&!status.CreatorOptIn{status.WalletLinked=false}
   out.Monetization=&status
  }
+ if e=tx.Commit();e!=nil{return none,e}
  return out,nil
 }
 func (s *SSOManager) Revoke(ctx context.Context,c ssoClient,token string)error{

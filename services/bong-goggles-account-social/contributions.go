@@ -45,11 +45,24 @@ func NewContributions(store *Store)(*Contributions,error){
  if store==nil||store.DB==nil{return nil,ErrInvalid}
  return &Contributions{Store:store},nil
 }
+// Read and append privileges are BOTH required. PostgreSQL treats a
+// comma-separated has_table_privilege argument as OR, not AND.
 func (s *Store) ReadyXP(ctx context.Context)error{
- var ok bool
- e:=s.DB.QueryRowContext(ctx,`SELECT COALESCE(
- has_table_privilege(current_user,to_regclass('bg_account_social.contribution_xp_events'),'SELECT,INSERT'),false)`).Scan(&ok)
- if e!=nil{return e};if !ok{return ErrUnavailable};return nil
+ var canRead,canAppend bool
+ e:=s.DB.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.contribution_xp_events'),'SELECT'),false),
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.contribution_xp_events'),'INSERT'),false)`).Scan(&canRead,&canAppend)
+ if e!=nil{return e};if !canRead||!canAppend{return ErrUnavailable};return nil
+}
+// Runtime must never mutate or erase the append-only journal. The separate
+// operator connection may own the table in order to run migrations/moderation.
+func (s *Store) ReadyXPRuntime(ctx context.Context)error{
+ if e:=s.ReadyXP(ctx);e!=nil{return e}
+ var mutable bool
+ e:=s.DB.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.contribution_xp_events'),'UPDATE,DELETE,TRUNCATE'),false)
+ OR COALESCE(has_any_column_privilege(current_user,to_regclass('bg_account_social.contribution_xp_events'),'UPDATE'),false)`).Scan(&mutable)
+ if e!=nil{return e};if mutable{return ErrUnavailable};return nil
 }
 func eligibleXP(kind,body string,ownThread bool)(int,int){
  runes:=utf8.RuneCountInString(strings.TrimSpace(body))

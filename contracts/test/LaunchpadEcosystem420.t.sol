@@ -236,13 +236,15 @@ contract LaunchpadEcosystem420Test {
         uint256 nonce = 9;
         vm.prank(BACKER);
         bytes32 invoiceId = crowdfunding.registerContributionIntent(saleId, PRINCIPAL, nonce);
+        bytes32 acceptedAssets = quotes.conversionAssetCommitment(
+            MARKET, address(inputToken), address(settleToken));
         vm.prank(CREATOR);
         invoices.createInvoice(invoiceId, InvoiceRegistry420.Invoice({
             merchantId: MERCHANT, merchant: CREATOR, metadataHash: bytes32(0), currency: bytes3("CAD"),
             amount: PRINCIPAL, expiresAt: 999, refundUntil: 1100,
             mode: InvoiceRegistry420.Mode.SINGLE_USE, acceptance: InvoiceRegistry420.Acceptance.FINALIZED,
             partialPayments: false, quoteMaxSlippageBps: 42,
-            acceptedAssetsHash: quotes.conversionAssetCommitment(MARKET, address(inputToken), address(settleToken)),
+            acceptedAssetsHash: acceptedAssets,
             settlementPlanHash: bytes32(0), tipPolicyHash: bytes32(0), active: true
         }));
         uint64 quotedAt = uint64(block.timestamp);

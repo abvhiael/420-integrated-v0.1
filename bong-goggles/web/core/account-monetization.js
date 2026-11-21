@@ -35,7 +35,11 @@ export class AccountMonetizationController{
    if(me.status!==200||me.data?.walletRequired!==false||!isSubjectID(me.data?.profile?.subject))throw Error('No 420ID app session');
    const response=await this.client.request('/v1/monetization');
    if(gen!==this.generation)return this.state;
-   const status=response.status===200?parseMonetization(response.data):null;
+   // The two separate requests may straddle a 420ID account switch
+   // in another tab. Never display private programme state for a subject
+   // different from the freshly checked /v1/me identity.
+   const sameMember=response.data?.subject===me.data.profile.subject;
+   const status=response.status===200&&sameMember?parseMonetization(response.data?.programme):null;
    if(!status)throw Error('Unverified programme state');
    return this.emit({status:'ready',programme:status});
   }catch{if(gen===this.generation)return this.emit({status:'error'});return this.state}

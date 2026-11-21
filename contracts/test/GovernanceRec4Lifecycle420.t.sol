@@ -25,7 +25,6 @@ interface VmGovernanceRec4 {
     function store(address, bytes32, bytes32) external;
     function prank(address) external;
     function deal(address, uint256) external;
-    function targetContract(address) external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
 }
@@ -570,7 +569,11 @@ contract GovernanceRec4PostHandoffInvariant420Test {
         );
         timelock.activateCivicAuthority(address(governor));
         handler = new GovRec4UnauthorizedHandler(timelock, address(governor));
-        vm.targetContract(address(handler));
+    }
+
+    function targetContracts() public view returns (address[] memory targets) {
+        targets = new address[](1);
+        targets[0] = address(handler);
     }
 
     function invariant_SchedulerAndCivicHandoffNeverRevertToBootstrap() public view {

@@ -317,12 +317,18 @@ The operator must never manually hide eligible posts in SQL
 without the XP-aware moderation path; the public runtime account
 cannot update `hidden_at`.
 
-Grant only to the dedicated social runtime role:
+Grant both read and append rights to the dedicated social runtime role:
 ```sql
 GRANT SELECT, INSERT ON bg_account_social.contribution_xp_events
  TO bonggoggles_social_runtime;
 ```
-Do **not** grant UPDATE/DELETE on the journal or direct browser access.
+The startup gate verifies **SELECT and INSERT independently**, because
+PostgreSQL treats a comma-separated privilege check as *either* privilege.
+It also rejects UPDATE, DELETE, TRUNCATE and column-level UPDATE on the
+journal for the runtime connection. Keep the operator/migration owner
+separate: it uses the privileged `SOCIAL420_MIGRATION_DATABASE_URL` for
+schema maintenance and XP-aware moderation, not the runtime connection.
+Do **not** grant mutation privileges on the journal or direct browser access.
 The operator credential may manage schema, inspect reports and execute
 moderation; no extra app identity, wallet or CORS audience is added.
 

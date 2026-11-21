@@ -6,6 +6,7 @@ import {renderChaosTable} from './chaos-board.js';
 import {CHAOS_ART_DIRECTION,chaosRegionArt} from './chaos-visual-style.js';
 import {CHAOS_VEHICLES,chaosVehicle} from './chaos-vehicles.js';
 import {renderChaosGameEffects,renderChaosFinishEffects} from './chaos-game-effects.js';
+import {renderChaosRegionalResults,renderChaosChampionshipResults,renderChaosResultsHistory} from './chaos-results.js';
 const link='<a href="/classics" data-route="classics">← All Classics</a>';
 const badge=s=>'<span class="ccc-badge">'+esc(s)+'</span>';
 export function renderClassicsCatalogue(){
@@ -21,7 +22,6 @@ const vehicleChoice=i=>'<div class="ccc-driver-setup" data-chaos-driver="'+i+'">
  '<label>Choose your ride <select name="vehicle'+i+'" data-chaos-vehicle-pick="'+i+'">'+
  CHAOS_VEHICLES.map((v,j)=>'<option value="'+v.id+'"'+(j===i?' selected':'')+'>'+esc(v.name)+'</option>').join('')+
  '</select></label><img class="ccc-vehicle-picker-preview" src="'+chaosVehicle(null,i).src+'" alt="" width="100" height="64" loading="lazy"></div>';
-const stageResults=s=>s.results.map(result=>'<section class="ccc-standings"><h3>'+esc(LEGS[result.leg].name)+' — 2,500 km stage</h3><ol>'+result.standings.map(p=>'<li>'+esc(p.name)+(p.winner?' 🏆':'')+' · '+p.km.toLocaleString('en-CA')+' effective km · banked '+p.banked.toLocaleString('en-CA')+' km · total '+p.total.toLocaleString('en-CA')+' km</li>').join('')+'</ol></section>').join('');
 const discardTop=s=>s.discard.length?s.discard[s.discard.length-1]:null;
 const handCards=(p,leg,options,s)=>{
  return '<div class="ccc-hand">'+p.hand.map((c,i)=>{
@@ -47,16 +47,14 @@ export function renderChaosGame({game=null,revealed=false,error=null,feedback=nu
  if(!game)return '<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--east">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">CANADIAN CLASSICS · NO DETOURS GUARANTEED</span></div><p class="eyebrow">BongGoggles Canadian Classics</p><h2>Cross-Country Chaos</h2><p class="ccc-hero-quip">'+esc(CHAOS_ART_DIRECTION.title)+'</p><p>Race from St. John\'s to Vancouver: three regions, 2,500 km each. Draw to seven, play, then discard. Hazards and detours can derail the race; championship kilometres decide the winner.</p><p><strong>Local pass-and-play only.</strong> No online rooms, wallet, staking, rewards, or wagers. This session is kept in this tab and resets on reload.</p></div><form class="ccc-setup" data-chaos-start><h3>Start your road trip</h3><label for="ccc-count">Drivers</label><select id="ccc-count" name="count"><option value="2">2 drivers</option><option value="3">3 drivers</option><option value="4" selected>4 drivers</option></select><div class="ccc-names">'+[0,1,2,3].map(vehicleChoice).join('')+'</div><button type="submit">Start the cross-Canada championship</button></form></div>';
  const leg=LEGS[game.leg],p=game.players[game.turn],leaders=chaosLeaders(game);
  const regionArt=chaosRegionArt(leg.id);
- const top='<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--'+leg.id+'">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">'+esc(regionArt.shield)+' · ROUND '+(game.leg+1)+'/3</span></div><p class="eyebrow">Cross-Country Chaos · Stage '+(game.leg+1)+' of 3</p><h2>'+esc(leg.name)+'</h2><p class="ccc-hero-quip">'+esc(regionArt.line)+'</p><p>'+esc(leg.from)+' → '+esc(leg.to)+' · 2,500 km target</p><p>Three regional decks · four legendary cards across the championship · no wallet or cash prizes</p>'+(game.finishPending?'<strong role="status">FINAL ROUND — finish the current turn cycle!</strong>':'')+'</div>'+stats(game)+renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+
-  renderChaosTable(game,{revealed,feedback,effects})+renderChaosFinishEffects(effects);
+ const top='<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--'+leg.id+'">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">'+esc(regionArt.shield)+' · ROUND '+(game.leg+1)+'/3</span></div><p class="eyebrow">Cross-Country Chaos · Stage '+(game.leg+1)+' of 3</p><h2>'+esc(leg.name)+'</h2><p class="ccc-hero-quip">'+esc(regionArt.line)+'</p><p>'+esc(leg.from)+' → '+esc(leg.to)+' · 2,500 km target</p><p>Three regional decks · four legendary cards across the championship · no wallet or cash prizes</p>'+(game.finishPending?'<strong role="status">FINAL ROUND — finish the current turn cycle!</strong>':'')+'</div>'+(game.phase==='playing'?stats(game)+renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+
+  renderChaosTable(game,{revealed,feedback,effects}):'')+renderChaosFinishEffects(effects);
+ const completedBoard='<details class="ccc-results-board"><summary>Review the completed road board</summary>'+renderChaosTable(game,{revealed:false,feedback:null,effects:null})+'</details>';
  const notice=error?'<p class="ccc-error" role="alert">'+esc(error)+'</p>':'';
- if(game.phase==='between')return top+notice+'<div class="ccc-panel"><h3>Regional finish line!</h3>'+stageResults(game)+'<p>Championship kilometres carry forward. All mileage, upgrades, hazards, and unused regional cards reset.</p><button data-chaos-action="next">Continue to '+esc(LEGS[game.leg+1].name)+'</button></div>'+history(game)+'</div>';
- if(game.phase==='finished'){
-  const best=leaders[0];
-  const west=driver=>game.results[2]?.standings.find(x=>x.id===driver.id)?.banked||0;
-  const champions=leaders.filter(q=>q.score===best.score&&q.wins===best.wins&&west(q)===west(best));
-  return top+notice+'<div class="ccc-panel"><h3>Coast-to-coast championship complete</h3><p><strong>Grand champion:</strong> '+esc(champions.map(q=>q.name).join(' & '))+'</p><ol>'+leaders.map(q=>'<li>'+esc(q.name)+' — '+q.score.toLocaleString('en-CA')+' championship km, '+q.wins+' stage wins</li>').join('')+'</ol>'+stageResults(game)+'<button data-chaos-action="restart">New championship</button></div>'+history(game)+'</div>';
- }
+ if(game.phase==='between')return top+notice+renderChaosRegionalResults(game)+renderChaosResultsHistory(game)+
+  '<div class="ccc-panel"><p>Championship kilometres carry forward. All mileage, upgrades, hazards, and unused regional cards reset.</p><button data-chaos-action="next">Continue to '+esc(LEGS[game.leg+1].name)+'</button></div>'+completedBoard+history(game)+'</div>';
+ if(game.phase==='finished')return top+notice+renderChaosChampionshipResults(game)+renderChaosResultsHistory(game)+
+  '<div class="ccc-panel"><button data-chaos-action="restart">New championship</button></div>'+completedBoard+history(game)+'</div>';
  if(!revealed)return top+notice+'<div class="ccc-panel ccc-private"><h3>Pass the device to '+esc(p.name)+'</h3><p>Everyone else should look away. Only '+esc(p.name)+' should reveal their cards.</p><button data-chaos-action="reveal">I am '+esc(p.name)+' — reveal my hand</button></div>'+history(game)+'</div>';
  const options=chaosActionOptions(game),discard=discardTop(game);
  const pile='<div class="ccc-pile-status"><strong>Draw deck: '+game.deck.length+' cards</strong> · <strong>Discard pile: '+game.discard.length+' cards</strong>'+(discard?'<span class="ccc-discard-top">'+artImage(cardArt(discard,leg.id),'discard')+'Top discard: '+esc(discard.type==='mileage'?discard.km+' km':discard.name)+'</span>':'')+'</div>';

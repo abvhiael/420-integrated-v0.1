@@ -256,7 +256,7 @@ test('CCC-ART-6: event CSS, preference suppression and bounded production qualif
  assert.match(app,/chaosEffects=deriveChaosGameEffects\(previous,updated,move\)/);
  assert.match(app,/playChaosMotion\(root,effect,chaosGame,\{reducedMotion:reduced\}\)/);
  assert.match(app,/chaosEffects=null;chaosRepairCue=null/);
- assert.match(gate,/baseTotal:1077\*1024/);
+ assert.match(gate,/baseTotal:1093\*1024/);
  assert.match(gate,/^const limits=Object\.freeze\(\{singleJs:/m,'asset cap declaration must remain executable');
  assert.match(gate,/chaosEffectKinds\(\).length!==12/);
  assert.match(gate,/!tabletopCss.includes\('\[data-motion="reduce"\]'\)/);

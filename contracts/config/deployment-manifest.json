@@ -178,8 +178,8 @@
       "name": "Governance420",
       "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/Governance420.json",
-      "runtime_code_hash": "0xf7eb7707e44b888e63b19db85e15f65d485d0852f45e9da05d9800980f80c6b2",
-      "source_blob_sha1": "0cf9291057d704209562979bdbdc3b4d0b8e92d3"
+      "runtime_code_hash": "0xbdbe1093962036ab176525f276899705d5e6fce3e767a7446755ee26831fa1bc",
+      "source_blob_sha1": "9ea85f7912d69ee1c318dad0f902dd69639266da"
     },
     {
       "address": "0x0000000000000000000000000000000000000438",

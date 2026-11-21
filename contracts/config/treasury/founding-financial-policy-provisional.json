@@ -1,0 +1,51 @@
+{
+  "schema": "420-founding-financial-authority-provisional-v1",
+  "status": "CODE_CANDIDATE_NOT_DEPLOYED_GENESIS_ALLOCATION_NOT_FINAL",
+  "modeledGenesisSupply": "42000000",
+  "token": "420",
+  "operations": {
+    "allocation": "4200000",
+    "singleRoutineLimit": "105000",
+    "exceptionalLimit": "420000",
+    "rolling30DayLimit": "840000",
+    "approval": "founding-administrator routine; any two of three founders exceptional",
+    "exceptionalNoticeHours": 48
+  },
+  "contingency": {
+    "allocation": "840000",
+    "singleIncidentLimit": "210000",
+    "rolling30DayLimit": "420000",
+    "approval": "any two distinct founders; three founders to waive 48-hour notice",
+    "eligiblePurposes": [
+      "infrastructure",
+      "application_recovery",
+      "security"
+    ]
+  },
+  "founderWallets": {
+    "administrator": null,
+    "andrew": null,
+    "janet": null
+  },
+  "developerCompensationSplitBps": {
+    "administrator": 5000,
+    "andrew": 2500,
+    "janet": 2500
+  },
+  "sponsoredValidator": {
+    "protocolOwnedCreditMax": "42000",
+    "fullySponsoredRewardShareToCommunityBps": 1000,
+    "principalReturnDestination": "CommunityValidatorReserve",
+    "sourceOfFunds": "CommunityValidatorReserve"
+  },
+  "retirement": {
+    "minimumEligibleIndependentValidatorOwners": 60,
+    "minimumVerifiedCommitteeMembers": 15,
+    "continuousDays": 30,
+    "onChainVerifier": "PENDING",
+    "civicHandoffRequired": true,
+    "unspentFundsDestination": "community_governed_reserve",
+    "irreversible": true
+  },
+  "codeStatus": "Treasury candidate supports founding budget creation and scheduling; validator reward/slashing integration and genesis bootstrap remain separate required work"
+}

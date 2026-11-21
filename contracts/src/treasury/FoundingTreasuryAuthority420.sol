@@ -141,6 +141,14 @@ contract FoundingTreasuryAuthority420 {
         return a == foundingAdministrator || a == founderAndrew || a == founderJanet;
     }
 
+    /// @notice Install the fixed, default-deny native asset budget limits once.
+    /// The deployment registrar must first bind this controller in the policy registry.
+    function initializeNativePolicy() external onlyFounder {
+        if (msg.sender != foundingAdministrator) revert UnauthorizedFounder();
+        if (policyRegistry.foundingAuthority() != address(this)) revert InvalidConfiguration();
+        policyRegistry.initializeFoundingNativePolicy();
+    }
+
     /// @notice One-time native-420 budget setup. Requires the independently installed native asset
     /// policy, two registered Treasury Vaults and both Treasury registries bound to this authority.
     function initializeBudgets() external onlyFounder {

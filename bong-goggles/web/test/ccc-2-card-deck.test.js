@@ -128,5 +128,7 @@ test('CCC-2: played mileage artwork is stacked highest first and the discard top
  assert.match(revealed,/class="ccc-discard-top"/);
  assert.match(revealed,/fix-jerry\.webp/);
  const privateView=renderChaosGame({game,revealed:false});
- assert.doesNotMatch(privateView,/class="ccc-discard-top"|ccc-mileage-card-stack/);
+ assert.match(privateView,/ccc-discard-public/,'public discard remains on playing surface');
+ assert.match(privateView,/ccc-mileage-card-stack/,'played mileage stays visible');
+ assert.doesNotMatch(privateView,/ccc-hand-card|data-chaos-move/,'private hand controls are concealed');
 });

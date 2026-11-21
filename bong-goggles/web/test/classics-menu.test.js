@@ -75,7 +75,9 @@ test('BC-0.2 preserves /classics, Cross-Country Chaos and previous unrelated ent
  assert.equal(resolveRoute('/classics').id,'classics');
  assert.equal(resolveRoute('/classics/cross-country-chaos').id,'chaos-game');
  assert.equal(resolveRoute('/account/games').id,'account-games');
- assert.match(renderApplicationShell({pathname:'/classics/cross-country-chaos'}),/data-chaos-start/);
+ const accountView=renderApplicationShell({pathname:'/classics/cross-country-chaos'});
+ assert.match(accountView,/420ID Account multiplayer/);
+ assert.doesNotMatch(accountView,/data-chaos-start|Pass the device/);
 });
 test('BC-0.2 unknown and nested game slugs fail closed',()=>{
  for(const path of ['/games/unknown','/games/cribbage/move','/games/%2e%2e','/games/cribbage%2Fother']){

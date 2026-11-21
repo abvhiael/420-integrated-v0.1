@@ -228,7 +228,8 @@ test('CCC-6: responsive UI and release build ship no hidden hands or auto-enroll
  assert.doesNotMatch(active,/Save on this device<\/button>/);
  assert.match(app,/refreshChaosRecovery\(\)/);
  assert.match(app,/function restoreChaosOnGameRoute\(\)/);
- assert.match(app,/applyViewPreferences\(\);restoreChaosOnGameRoute\(\);renderCurrent\(\)/);
+ assert.match(app,/applyViewPreferences\(\);renderCurrent\(\);if\(window\.location\.pathname===/);
+ assert.doesNotMatch(app,/applyViewPreferences\(\);restoreChaosOnGameRoute\(\);renderCurrent\(\)/);
  assert.match(app,/recordChaosTransition\(before,result\.game,events\)/);
  assert.match(app,/recordChaosTransition\(previous,updated,/);
  assert.match(app,/recordChaosTransition\(before,after,/);

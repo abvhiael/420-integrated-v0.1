@@ -12,6 +12,11 @@ export function createAccountSocialClient({enabled=false,fetchImpl=fetch}={}){
    headers:{Accept:'application/json',...(body===undefined?{}:{'Content-Type':'application/json'})},
    body:body===undefined?undefined:JSON.stringify(body)
   });
+  // Render Free can return an HTML 502/503/504 during cold start. Preserve
+  // the transport status so only read-only session/feed checks can recover.
+  // Never reissue the caller's POST/PUT/DELETE or one-use login callback.
+  if(method==='GET'&&[502,503,504].includes(response.status))
+   return {status:response.status,data:null};
   const type=response.headers?.get?.('content-type')??'';
   if(!type.startsWith('application/json'))throw new Error('Social service response unavailable');
   const data=await response.json();

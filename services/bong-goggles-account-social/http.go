@@ -157,6 +157,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   if !h.rate(r.Context(),"login",r.RemoteAddr,30){deny(w,429);return}
   if r.URL.RawQuery!=""{deny(w,400);return}
   ctx,cancel:=context.WithTimeout(r.Context(),5*time.Second);defer cancel()
+  // Only the pinned HTTP 420ID broker implements readiness. Tests and local
+  // in-process brokers can still run without an external identity service.
+  // A sleeping 420ID must not receive a browser redirect until it is awake:
+  // returning 503 lets the bounded Cloudflare login-start page retry safely.
+  if broker,ok:=h.SignOn.Broker.(interface{Ready(context.Context)error});ok{
+   if e:=broker.Ready(ctx);e!=nil{deny(w,503);return}
+  }
   destination,flow,e:=h.SignOn.Begin(ctx)
   if e!=nil{deny(w,503);return}
   setCookie(w,flowCookieName,flow,300)

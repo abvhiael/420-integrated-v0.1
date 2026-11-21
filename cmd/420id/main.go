@@ -48,7 +48,8 @@ func main(){
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  mode:=os.Getenv("AUTH420_MODE")
  if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"&&mode!="sso-acceptance"{log.Fatal("420ID acceptance is not enabled")}
- sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"||mode=="sso-acceptance"{sessionApp="bong-goggles"}
+ sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"{sessionApp="bong-goggles"}
+ if mode=="sso-acceptance"{sessionApp="420id"}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
  mail,e:=configuredMailer(os.Getenv)
  if e!=nil{log.Fatal(e)}
@@ -57,6 +58,7 @@ func main(){
  db,e:=database("AUTH420_DATABASE_URL");if e!=nil{log.Fatal(e)};defer db.Close()
  var ssoClients []account.SSOClient
  approvedApps:=[]string{"bong-goggles"}
+ if mode=="sso-acceptance"{approvedApps=[]string{"420id"}}
  if mode=="sso-acceptance"{
   raw:=required("AUTH420_SSO_CLIENTS")
   if len(raw)>16384{log.Fatal("SSO client manifest too large")}

@@ -7,7 +7,7 @@ const config={network:{chainId:'0x1a4'},registry:{
   crowdfundingIntegrationAddress:ADDR('1003'),arbitrationCasesAddress:ADDR('1004'),
   payRouterAddress:ADDR('1005'),approvedInputAsset:ADDR('1006')}};
 const wallet={account:ADDR('a11c'),chainId:'0x1a4'},saleId=HASH('1'),payment=HASH('2');
-const word=s=>String(s).replace(/^0x/,'').padStart(64,'0');
+const word=s=>(typeof s==='number'?BigInt(s).toString(16):String(s).replace(/^0x/,'')).padStart(64,'0');
 function review(kind,selector,target,args,request={}){
   const req={saleId,account:wallet.account,...request};
   return {schema:'420-launchpad-transaction-review-v1',canonical:true,kind,

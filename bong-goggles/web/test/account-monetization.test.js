@@ -54,7 +54,7 @@ test('AUTH-11 checks 420ID subject before private response and forgets on failur
  const client=new AccountMonetizationController({enabled:true,fetchImpl:async(url,options)=>{
   calls.push({url,options});
   if(url.endsWith('/v1/me'))return authenticated?ok({walletRequired:false,profile:{subject}}):ok({},401);
-  if(url.endsWith('/v1/monetization'))return ok(valid?status:{...status,paid:true});
+  if(url.endsWith('/v1/monetization'))return ok({subject,programme:valid?status:{...status,paid:true}});
   throw Error('unexpected URL');
  }});
  await client.refresh();assert.equal(client.state.status,'ready');
@@ -68,10 +68,23 @@ test('AUTH-11 rejects spoofed user subject and no-wallet financial authority',as
  const invalidMe=[{walletRequired:false,profile:{subject:'other'}},{walletRequired:true,profile:{subject}},{profile:{subject}}];
  for(const me of invalidMe){
   const client=new AccountMonetizationController({enabled:true,fetchImpl:async url=>
-   url.endsWith('/v1/me')?ok(me):ok(status)});
+   url.endsWith('/v1/me')?ok(me):ok({subject,programme:status})});
   await client.refresh();assert.equal(client.state.status,'error');
  }
  const unchanged=renderAccountMonetization({status:'ready',programme:{...status,canClaim:true}},{enabled:true});
  assert.doesNotMatch(unchanged,/Optional verified wallet required/);
  assert.match(unchanged,/verification unavailable/i);
+});
+test('AUTH-12 rejects a stale private programme projection after cross-tab account switch',async()=>{
+ const attacker='34567890-1234-4345-8345-123456789abc';
+ const c=new AccountMonetizationController({enabled:true,fetchImpl:async url=>
+  url.endsWith('/v1/me')?ok({walletRequired:false,profile:{subject}}):
+   ok({subject:attacker,programme:{...status,version:32}})});
+ await c.refresh();
+ assert.equal(c.state.status,'error');
+ assert.equal(c.state.programme,undefined);
+ const oldShape=new AccountMonetizationController({enabled:true,fetchImpl:async url=>
+  url.endsWith('/v1/me')?ok({walletRequired:false,profile:{subject}}):ok(status)});
+ await oldShape.refresh();
+ assert.equal(oldShape.state.status,'error');
 });

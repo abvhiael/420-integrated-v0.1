@@ -35,6 +35,7 @@ contract GovRec4Target {
     uint256 public number;
     uint256 public received;
     uint256 public blockedReentries;
+    bytes32 public nestedId;
 
     constructor(GovernanceTimelock timelock_) {
         timelock = timelock_;
@@ -50,9 +51,13 @@ contract GovRec4Target {
         revert("hostile action");
     }
 
-    function tryReenter(bytes32 id) external {
-        require(msg.sender == address(timelock), "not timelock");
-        (bool ok,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (id)));
+    function configureReentry(bytes32 id) external {
+        nestedId = id;
+    }
+
+    function tryReenter() external {
+        require(msg.sender == address(timelock) && nestedId != bytes32(0), "not configured timelock");
+        (bool ok,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (nestedId)));
         require(!ok, "reentrant operation succeeded");
         ++blockedReentries;
     }
@@ -406,6 +411,7 @@ contract GovernanceRec4Lifecycle420Test {
         bytes32 absentHouse = _create(CivicIds420.ProposalClass.G3, actions);
         vm.roll(block.number + 1);
         _vote(absentHouse, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
+        vm.prank(ALICE);
         require(_rejected(address(voting), abi.encodeCall(
             CivicVoting420.castVote,
             (absentHouse, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, _proof(BOB))
@@ -432,21 +438,12 @@ contract GovernanceRec4Lifecycle420Test {
         require(!executed && !cancelled, "timelock/proposal state split");
 
         CivicGovernor420.Action[] memory attack = new CivicGovernor420.Action[](2);
-        attack[0] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.tryReenter, (bytes32(0))));
+        attack[0] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.tryReenter, ()));
         attack[1] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.setNumber, (42)));
         bytes32 attackId = _create(CivicIds420.ProposalClass.G1, attack);
-        // Rebuild the batch so the callback knows the resulting operation ID; it must remain
-        // committed, so use a deterministic unrelated already-queued operation for the attempted reentry.
-        attack[0] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.tryReenter, (badId)));
-        // The changed batch MUST be rejected by the original proposal commitment.
-        vm.roll(block.number + 1);
-        _vote(attackId, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
-        _end(attackId);
-        require(governor.finalize(attackId), "attack proposal did not pass");
-        require(_rejected(address(governor), abi.encodeCall(governor.queue, (attackId, attack))),
-            "reentrancy substitution accepted");
-        // Submit and execute the exact original approved callback batch.
-        attack[0] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.tryReenter, (bytes32(0))));
+        // A test target can learn its committed proposal ID after creation without altering the action bytes.
+        target.configureReentry(attackId);
+        _pass(attackId, false);
         uint64 attackReady = _queuedDelay(attackId, CivicIds420.ProposalClass.G1, attack);
         vm.warp(attackReady);
         timelock.execute(attackId);

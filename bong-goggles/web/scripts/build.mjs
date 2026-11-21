@@ -3,11 +3,15 @@ import {resolve,dirname} from 'node:path';
 import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
 import sharp from 'sharp';
+import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 const master=resolve(root,'bong-goggles-logo.png');
+// Fail before build output if a card image, legend, region or declared identity was swapped.
+const ccc2=await verifyChaosCardCatalog();
+console.log('CCC-2 source and physical-deck qualification:',JSON.stringify(ccc2));
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 

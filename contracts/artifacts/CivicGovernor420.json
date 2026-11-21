@@ -747,7 +747,7 @@
         "label": "timelock",
         "offset": 0,
         "slot": "4",
-        "type": "t_contract(GovernanceTimelock)6348"
+        "type": "t_contract(GovernanceTimelock)6424"
       },
       {
         "astId": 1022,
@@ -810,7 +810,7 @@
         "label": "contract CivicVoting420",
         "numberOfBytes": "20"
       },
-      "t_contract(GovernanceTimelock)6348": {
+      "t_contract(GovernanceTimelock)6424": {
         "encoding": "inplace",
         "label": "contract GovernanceTimelock",
         "numberOfBytes": "20"

@@ -272,4 +272,35 @@ contract CivicVoting420Test {
         vm.expectRevert(CivicVoting420.ProposalNotActive.selector);
         voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
     }
+
+    function testOverweightAndOverSubscribedBallotsRejectWithoutChangingTally() public {
+        bytes32 proposalId = keccak256("GOV-REC-2-OVERWEIGHT");
+        community.setWeight(ROOT_A, ALICE, 101);
+        _register(proposalId, false);
+        vm.roll(101);
+
+        vm.prank(ALICE);
+        (bool overweight,) = address(voting)
+            .call(
+                abi.encodeCall(
+                    CivicVoting420.castVote, (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "")
+                )
+            );
+        require(!overweight, "weight exceeding total electorate accepted");
+        require(voting.participation(proposalId, CivicIds420.House.COMMUNITY) == 0, "failed vote changed tally");
+
+        community.setWeight(ROOT_A, ALICE, 100);
+        vm.prank(ALICE);
+        voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        community.setWeight(ROOT_A, BOB, 1);
+        vm.prank(BOB);
+        (bool oversubscribed,) = address(voting)
+            .call(
+                abi.encodeCall(
+                    CivicVoting420.castVote, (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "")
+                )
+            );
+        require(!oversubscribed, "over-subscribed electorate tally accepted");
+        require(voting.participation(proposalId, CivicIds420.House.COMMUNITY) == 100, "overweight mutated tally");
+    }
 }

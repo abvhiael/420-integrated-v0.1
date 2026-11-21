@@ -20,6 +20,10 @@ on:
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'scripts/build-governance-rec-2-electorates.py'
+      - 'scripts/test-governance-rec-2-electorates.py'
+      - 'contracts/test/fixtures/governance-rec-2-members.json'
+      - 'contracts/test/fixtures/governance-rec-2-vectors.json'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
       - 'contracts/artifacts/CivicConstitution420.json'
@@ -50,6 +54,10 @@ on:
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'scripts/build-governance-rec-2-electorates.py'
+      - 'scripts/test-governance-rec-2-electorates.py'
+      - 'contracts/test/fixtures/governance-rec-2-members.json'
+      - 'contracts/test/fixtures/governance-rec-2-vectors.json'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
       - 'contracts/artifacts/CivicConstitution420.json'
@@ -94,6 +102,10 @@ jobs:
           version: stable
       - name: Verify pinned deployment/discovery specification
         run: python3 scripts/verify-governance-audit-6.py
+      - name: GOV-REC-2 deterministic electorate fixture and provenance checks
+        run: |
+          python3 scripts/test-governance-rec-2-electorates.py
+          python3 scripts/build-governance-rec-2-electorates.py --input contracts/test/fixtures/governance-rec-2-members.json --output contracts/test/fixtures/governance-rec-2-vectors.json --check
       - name: Verify affected Genesis address and predeploy authority
         run: |
           python3 scripts/verify-genesis-canonical-addresses.py

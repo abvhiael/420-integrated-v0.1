@@ -103,19 +103,19 @@ def main(argv=None):
     required_order_tokens = [
         "materialize GovernanceTimelock",
         "materialize Governance420",
+        "materialize the chain-specific approved Civic bootstrap plan",
         "deploy CivicConstitution420",
         "deploy CivicProposalRegistry420",
         "deploy CivicElectorateRegistry420",
-        "configure COMMUNITY electorate source",
-        "install canonical initial constitutional rules G1-G4",
+        "deploy COMMUNITY and VALIDATOR",
         "deploy CivicVoting420",
         "deploy CivicGovernor420",
-        "bind CivicProposalRegistry420 proposalAuthority",
-        "bind CivicElectorateRegistry420 snapshotAuthority",
-        "bind Governance420 compatibility civicGovernor pointer",
-        "register five core Civic component IDs plus two electorate-source component IDs",
-        "publish governance service profile",
+        "verify clean uninitialized component graph",
+        "scheduleCanonicalCivicBootstrap",
+        "execute fixed Timelock operations 0..18",
+        "verify initial electorate checkpoints",
         "activate GovernanceTimelock Civic authority last",
+        "verify scheduler == CivicGovernor420",
     ]
     cursor = -1
     for token in required_order_tokens:

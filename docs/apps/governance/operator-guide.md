@@ -102,7 +102,7 @@ The exact deployment specification remains authoritative where this summary omit
 
 ## Bootstrap recovery
 
-Before activation, bootstrap Timelock operations may be cancelled through the canonical bootstrap authority. If verification is wrong, discard the candidate deployment and reproduce it from retained artifacts/configuration.
+Before activation, any incomplete but otherwise valid one-shot bootstrap must be recovered by executing its **original** remaining operation IDs through the real GovernanceTimelock after their G1 delay; every `execute` call is permissionless, and the Timelock calls the target with its actual authority. Do not impersonate the Timelock or reschedule a second bootstrap. Although GovernanceTimelock has a bootstrap-only `cancel` selector, its caller must be Governance420 and the compatibility contract has **no public arbitrary-cancel forwarding path**. An externally submitted cancellation is not an available recovery option. If a scheduled operation is permanently wrong or cannot be executed, abandon and reproducibly regenerate that Genesis candidate from the approved commitments; do not bypass bootstrap checks or invent a new operator key.
 
 After activation the handoff is one-way. Bootstrap cancellation is disabled. Recovery must use canonical Civic governance.
 
@@ -139,3 +139,32 @@ For an actual Genesis candidate, first establish the final chain ID, exact seven
 The canonical schedule contains **19** fixed G1 Timelock operations, indices `0..18`. Original operations `0..16` remain unchanged. Indices `17` and `18` publish the one-time Community and Validator checkpoints through the actual Timelock, effective from the next block; subsequent checkpoints remain prospective and governance-controlled. Execute every required initialization and checkpoint operation and advance past both checkpoint-effective blocks before calling `activateCanonicalCivic`. The handoff rejects uninitialized or mismatched electorates.
 
 `--require-ready` checks reproducible offline deployment and contract policy; `--require-activation-ready` additionally enforces nonzero, complete, real Genesis release commitments. **Default zero fields are deliberately pending actual membership and chain-specific deployment data and do not signify live-testnet readiness.**
+
+## GOV-REC-2 — initial eligibility evidence, deterministic roots and cold-start recovery
+
+**Release truth:** The repository does **not** contain an authenticated real Genesis Community owner roster, active-validator owner roster, or chain-specific electorate source-state commitment. The five materialization slots in `contracts/config/governance-deployment-v1.json#genesisBootstrapCommitment` deliberately remain zero and `genesisActivationReady=false`. Synthetic voter addresses and roots under `contracts/test/fixtures/governance-rec-2-*` are **test fixtures only** and must never be substituted into a live Genesis release.
+
+To build a genuine release candidate, independently obtain and verify both eligibility snapshots against their authoritative membership and active-validator-owner records at the **same finalized chain/genesis identity**. For each unique eligible owner address, retain the source record reference, record hash and evidence of eligibility at the frozen snapshot. Exclude inactive/nonowner validator records, normalize addresses case-insensitively, reject duplicate owners, and count **one eligible owner as one vote** regardless of stake or token holdings. Require nonempty Community and Validator electorates. Evidence must be authenticated by the authoritative source; a self-declared `eligible=true` field is not proof by itself.
+
+Run the deterministic builder for the verified source inventory:
+
+```bash
+python3 scripts/build-governance-rec-2-electorates.py --input <verified-eligibility-input.json> --output <candidate-proof-vectors.json>
+```
+
+The input schema is `420-civic-electorate-input-v1`, with `fixtureOnly=false`, a positive target `chainId`, `eligibilitySource.reference` and `eligibilitySource.snapshotHash`, and exactly `COMMUNITY` and `VALIDATOR` houses. Each house needs `totalWeight` equal to its independently verified unique-member count and a `members` list of nonzero `address` entries with source `evidence.reference`, `evidence.recordHash` and eligible status. An optional `expectedRoot` enforces comparison to an independent approval. The tool uses Ethereum Keccak-256 (not NIST SHA3), a numerically sorted address list, `keccak256(abi.encode(address))` leaves, sorted-pair inner hashing and promotion of odd nodes. It emits one membership proof per address and the canonical source-input SHA-256 digest. **This tool checks structural consistency and reproducible proofs, not whether external records are true.** The approved evidence and generator output must be independently reconciled before a release decision.
+
+Copy **only** independently approved Community/Validator roots and unique-member totals into the five Genesis materialization fields, paired with the verified full chain-specific plan hash over the seven deployable components and code hashes. Re-run `scripts/generate-governance-audit-6-artifacts.py --write --check`, verify the frozen predeploy storage slots against the release approval, and require `scripts/verify-governance-audit-6.py --require-activation-ready` to pass. Never initialize release storage from `fixtureOnly=true` data.
+
+**Execution sequence:** After Genesis graph preflight and a successful one-shot schedule, any account can call `GovernanceTimelock.execute` on each fixed operation ID after its G1 timestamp floor. Indices 17 and 18 invoke `publishInitialCheckpoint` from the **real Timelock** to the two role-bound Merkle sources. Each initial checkpoint's `effectiveBlock` is computed as its **actual execution block + 1**, not when the operation was scheduled; it is not usable until the first proposal's snapshot at `block.number - 1` includes it. If either operation is missing, failed or not yet effective, `activateCanonicalCivic` must revert and leave the bootstrap authority unchanged. Execute any outstanding original operations, advance until both initial snapshots are effective, verify checkpoint count one, root, total weight and source revisions, and only then invoke the irreversible activation. Reverting activation is recoverable; an invalid committed operation requires discarding the candidate, not silently editing its commitments.
+
+**First-vote proof:** Create a normal G3/G4 proposal only after activation, inspect the immutable Community and Validator `HouseSnapshot` values, and vote as actual eligible wallet addresses using the appropriate Merkle sibling paths. Invalid membership, replayed ballots, overweight tallies and votes outside the window must fail. Later electorate changes must go through an independently passed Civic proposal, be prospectively checkpointed and/or source-replaced by a Governor-queued Timelock batch; a previous proposal's source, root, total and revision remain immutable.
+
+**Offline checks:**
+
+```bash
+python3 scripts/test-governance-rec-2-electorates.py
+python3 scripts/build-governance-rec-2-electorates.py --input contracts/test/fixtures/governance-rec-2-members.json --output contracts/test/fixtures/governance-rec-2-vectors.json --check
+```
+
+Both bundled houses have two synthetic members solely to test the first real, authority-correct Governance voting path. No user or developer is required to impersonate the Timelock in that end-to-end test. Neither these fixtures nor offline Foundry passes assert that a public electorate exists.

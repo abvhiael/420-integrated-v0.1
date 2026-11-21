@@ -5,6 +5,7 @@ import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-
 import {CHAOS_MAP_ASSETS} from '../core/chaos-map-art.js';
 import {CHAOS_VEHICLE_ASSETS} from '../core/chaos-vehicles.js';
 import {verifyChaosVehicleArt} from './verify-chaos-vehicle-art.mjs';
+import {CHAOS_IMAGE_MANIFEST_PATH,createChaosImageManifest} from './verify-chaos-image-manifest.mjs';
 import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
@@ -83,6 +84,9 @@ for(const variant of variants){
   await sharp(master).resize(variant.width,variant.width,{fit:'contain',background:'#ffffff'}).flatten({background:'#ffffff'}).toFormat(variant.format,variant.options).toFile(path);
   if((await stat(path)).size>128*1024)throw new Error(`optimized branding asset exceeds 128 KiB: ${variant.name}`);
 }
+// CCC-ART-8: publish a manifest derived from approved PNG masters and actual WebP/SVG exports.
+const imageManifest=await createChaosImageManifest({sourceRoot:root,outputRoot:out});
+await writeFile(resolve(out,CHAOS_IMAGE_MANIFEST_PATH),JSON.stringify(imageManifest)+'\n');
 // The build retains illustrative service origins from the example config.
 // Off-chain account opt-in does not authorize a production or on-chain release.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(runtimeConfig,null,2)+'\n');

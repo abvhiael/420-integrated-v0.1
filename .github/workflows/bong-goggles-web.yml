@@ -37,9 +37,18 @@ jobs:
       - name: Public social feed HTTP route regression tests
         working-directory: services/bong-goggles-indexer-v1
         run: node --test test/publicFeedHttp.test.js
-      - name: Production shell build
+      - name: Default web build keeps account features disabled
         working-directory: bong-goggles/web
-        run: npm run build
+        run: |
+          npm run build
+          node scripts/verify-account-social-output.mjs disabled
+      - name: Explicit Cloudflare account-social activation build
+        working-directory: bong-goggles/web
+        env:
+          BG_ACCOUNT_SOCIAL_ACTIVATION: "true"
+        run: |
+          npm run build
+          node scripts/verify-account-social-output.mjs enabled
       - name: BG-19.13 static asset and accessibility qualification
         working-directory: bong-goggles/web
         run: node scripts/qualify-web.mjs

@@ -7,6 +7,7 @@ import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
+import {ACCOUNT_SOCIAL_BUILD_FLAG,withAccountSocialBuildFlags} from './account-social-build-config.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
@@ -21,7 +22,8 @@ await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
-validateRuntimeConfig(example);
+const runtimeConfig=withAccountSocialBuildFlags(example,process.env[ACCOUNT_SOCIAL_BUILD_FLAG]);
+validateRuntimeConfig(runtimeConfig);
 
 for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
@@ -71,6 +73,7 @@ for(const variant of variants){
   await sharp(master).resize(variant.width,variant.width,{fit:'contain',background:'#ffffff'}).flatten({background:'#ffffff'}).toFormat(variant.format,variant.options).toFile(path);
   if((await stat(path)).size>128*1024)throw new Error(`optimized branding asset exceeds 128 KiB: ${variant.name}`);
 }
-// Example config makes the ordinary CI artifact illustrative, NEVER a deployable candidate.
-await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(example,null,2)+'\n');
-console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards and 6 verified atlas layers; example config; NOT a release artifact)');
+// The build retains illustrative service origins from the example config.
+// Off-chain account opt-in does not authorize a production or on-chain release.
+await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(runtimeConfig,null,2)+'\n');
+console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards and 6 verified atlas layers; accountSocial='+runtimeConfig.features.accountSocial+'; example service origins; NOT a release authorization)');

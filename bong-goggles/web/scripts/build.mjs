@@ -15,8 +15,37 @@ console.log('CCC-2 source and physical-deck qualification:',JSON.stringify(ccc2)
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
-const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
-validateRuntimeConfig(example);
+
+const example = JSON.parse(
+  await readFile(resolve(root, 'runtime-config.example.json'), 'utf8')
+);
+
+const activation = process.env.BG_ACCOUNT_SOCIAL_ACTIVATION;
+
+if (
+  activation !== undefined &&
+  activation !== 'true' &&
+  activation !== 'false'
+) {
+  throw new Error('Invalid BG_ACCOUNT_SOCIAL_ACTIVATION');
+}
+
+const enabled = activation === 'true';
+
+const runtimeConfig = {
+  ...example,
+  features: {
+    ...example.features,
+    accountSocial: enabled,
+    accountMessaging: enabled,
+    accountGames: enabled,
+    accountXP: enabled,
+    accountMonetization: false
+  }
+};
+
+validateRuntimeConfig(runtimeConfig);
+
 
 for(const item of ['index.html','app.js','styles.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
@@ -60,5 +89,5 @@ for(const variant of variants){
   if((await stat(path)).size>128*1024)throw new Error(`optimized branding asset exceeds 128 KiB: ${variant.name}`);
 }
 // Example config makes the ordinary CI artifact illustrative, NEVER a deployable candidate.
-await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(example,null,2)+'\n');
+await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(runtimeConfig,null,2)+'\n');
 console.log('Bong Goggles web build created dist/ (approved branding and 49 optimized game cards; example config; NOT a release artifact)');

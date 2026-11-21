@@ -47,9 +47,9 @@ func main(){
  }
  if len(os.Args)!=1{log.Fatal("Unsupported operation")}
  mode:=os.Getenv("AUTH420_MODE")
- if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"&&mode!="sso-acceptance"{log.Fatal("420ID acceptance is not enabled")}
+ if mode!="acceptance"&&mode!="session-acceptance"&&mode!="profile-acceptance"&&mode!="wallet-acceptance"&&mode!="identity-acceptance"&&mode!="sso-acceptance"&&mode!="monetization-acceptance"{log.Fatal("420ID acceptance is not enabled")}
  sessionApp:="";if mode=="session-acceptance"||mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"{sessionApp="bong-goggles"}
- if mode=="sso-acceptance"{sessionApp="420id"}
+ if mode=="sso-acceptance"||mode=="monetization-acceptance"{sessionApp="420id"}
  origin,rp:=required("AUTH420_ORIGIN"),required("AUTH420_RP_ID")
  mail,e:=configuredMailer(os.Getenv)
  if e!=nil{log.Fatal(e)}
@@ -58,8 +58,8 @@ func main(){
  db,e:=database("AUTH420_DATABASE_URL");if e!=nil{log.Fatal(e)};defer db.Close()
  var ssoClients []account.SSOClient
  approvedApps:=[]string{"bong-goggles"}
- if mode=="sso-acceptance"{approvedApps=[]string{"420id"}}
- if mode=="sso-acceptance"{
+ if mode=="sso-acceptance"||mode=="monetization-acceptance"{approvedApps=[]string{"420id"}}
+ if mode=="sso-acceptance"||mode=="monetization-acceptance"{
   raw:=required("AUTH420_SSO_CLIENTS")
   if len(raw)>16384{log.Fatal("SSO client manifest too large")}
   parser:=json.NewDecoder(bytes.NewReader([]byte(raw)));parser.DisallowUnknownFields()
@@ -71,7 +71,7 @@ func main(){
  auth,e:=account.NewAuth(store,mail,origin,rp);if e!=nil{log.Fatal("HTTPS origin/RP configuration rejected")}
  var chain int64
  var contract account.ContractSignatureVerifier
- if mode=="wallet-acceptance"||mode=="identity-acceptance"{
+ if mode=="wallet-acceptance"||mode=="identity-acceptance"||mode=="monetization-acceptance"{
   chain,e=strconv.ParseInt(required("AUTH420_WALLET_CHAIN_ID"),10,64)
   if e!=nil||chain<=0{log.Fatal("Invalid explicit wallet chain ID")}
   if rpcURL:=os.Getenv("AUTH420_WALLET_RPC_URL");rpcURL!=""{
@@ -85,7 +85,7 @@ func main(){
    required("AUTH420_NAMES_ADDRESS"),required("AUTH420_NAMES_CODE_HASH"),nil)
   if e!=nil{log.Fatal("Invalid pinned Identity420/Names420 configuration")}
  }
- h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance",WalletMode:mode=="wallet-acceptance"||mode=="identity-acceptance",WalletChainID:chain,ContractVerifier:contract,IdentityMode:mode=="identity-acceptance",IdentityReader:identity,SSOClients:ssoClients})
+ h,e:=account.NewAcceptanceHandler(auth,account.AcceptanceConfig{Emails:strings.Split(required("AUTH420_ACCEPTANCE_EMAILS"),","),RateKey:rate,TrustedTLSProxy:true,SessionApp:sessionApp,ProfileMode:mode=="profile-acceptance"||mode=="wallet-acceptance"||mode=="identity-acceptance"||mode=="monetization-acceptance",WalletMode:mode=="wallet-acceptance"||mode=="identity-acceptance"||mode=="monetization-acceptance",WalletChainID:chain,ContractVerifier:contract,IdentityMode:mode=="identity-acceptance",IdentityReader:identity,SSOClients:ssoClients,MonetizationMode:mode=="monetization-acceptance"})
  if e!=nil{log.Fatal("Acceptance configuration rejected")}
  ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
  preflight,stop:=context.WithTimeout(ctx,10*time.Second)

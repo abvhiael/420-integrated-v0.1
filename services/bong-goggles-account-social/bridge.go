@@ -94,20 +94,68 @@ func (b *HTTPBroker) Exchange(ctx context.Context,code,verifier string)(string,s
  if !until.After(time.Now()){return "","",time.Time{},ErrUnavailable}
  return result.AccessToken,result.Session.Subject.ID,until,nil
 }
-func (b *HTTPBroker) Introspect(ctx context.Context,token string)(string,bool,error){
- if !tokenPattern.MatchString(token){return "",false,ErrInvalid}
- var result struct{
-  Active bool `json:"active"`
-  Subject *struct{App string `json:"app"`;ID string `json:"sub"`} `json:"subject"`
-  ExpiresAt time.Time `json:"expiresAt"`
-  IdleUntil time.Time `json:"idleUntil"`
-  Method string `json:"method"`
- }
- if e:=b.exchange(ctx,"/v1/sso/introspect",map[string]string{"token":token},&result);e!=nil{return "",false,e}
- if !result.Active{return "",false,nil}
+// Explicit AUTH-11 data is private readiness, not token entitlement.
+type MonetizationStatus struct {
+ App string `json:"app"`
+ PolicyVersion int `json:"policyVersion"`
+ Version int64 `json:"version"`
+ RewardOptIn bool `json:"rewardOptIn"`
+ CreatorOptIn bool `json:"creatorOptIn"`
+ WalletLinked bool `json:"walletLinked"`
+ RewardStage string `json:"rewardStage"`
+ CreatorStage string `json:"creatorStage"`
+ CanClaim bool `json:"canClaim"`
+ Paid bool `json:"paid"`
+ PaymentAuthorized bool `json:"paymentAuthorized"`
+ FinancialAuthority bool `json:"financialAuthority"`
+ Source string `json:"source"`
+}
+type ssoInspect struct {
+ Active bool `json:"active"`
+ Subject *struct{App string `json:"app"`;ID string `json:"sub"`} `json:"subject"`
+ ExpiresAt time.Time `json:"expiresAt"`
+ IdleUntil time.Time `json:"idleUntil"`
+ Method string `json:"method"`
+ Monetization *MonetizationStatus `json:"monetization,omitempty"`
+}
+func (b *HTTPBroker) inspect(ctx context.Context,token string)(ssoInspect,error){
+ var result ssoInspect
+ if !tokenPattern.MatchString(token){return result,ErrInvalid}
+ if e:=b.exchange(ctx,"/v1/sso/introspect",map[string]string{"token":token},&result);e!=nil{return result,e}
+ if !result.Active{return result,nil}
  if result.Subject==nil||result.Subject.App!=b.clientID||!uuid.MatchString(result.Subject.ID)||
- result.Method!="sso"||!result.ExpiresAt.After(time.Now())||!result.IdleUntil.After(time.Now()){return "",false,ErrUnavailable}
+ result.Method!="sso"||!result.ExpiresAt.After(time.Now())||!result.IdleUntil.After(time.Now()){
+  return ssoInspect{},ErrUnavailable
+ }
+ return result,nil
+}
+func (b *HTTPBroker) Introspect(ctx context.Context,token string)(string,bool,error){
+ result,e:=b.inspect(ctx,token)
+ if e!=nil{return "",false,e}
+ if !result.Active{return "",false,nil}
  return result.Subject.ID,true,nil
+}
+func validateMonetizationStatus(s *MonetizationStatus)bool{
+ if s==nil{return true}
+ if s.App!="bong-goggles"||s.PolicyVersion!=1||s.Version<0||
+  s.Source!="420id-consent-v1"||s.CanClaim||s.Paid||s.PaymentAuthorized||s.FinancialAuthority{return false}
+ switch s.RewardStage{case "not_enrolled","wallet_required","canonical_verification_required":default:return false}
+ switch s.CreatorStage{case "not_enrolled","operator_programme_required":default:return false}
+ if (!s.RewardOptIn&&s.RewardStage!="not_enrolled")||
+   (s.RewardOptIn&&!s.WalletLinked&&s.RewardStage!="wallet_required")||
+   (s.RewardOptIn&&s.WalletLinked&&s.RewardStage!="canonical_verification_required")||
+   (!s.CreatorOptIn&&s.CreatorStage!="not_enrolled")||
+   (s.CreatorOptIn&&s.CreatorStage!="operator_programme_required"){return false}
+ return true
+}
+// Only returned to the verified same-app session. Never accepts caller
+// wallet claims; the central 420ID confidential authority decides readiness.
+func (b *HTTPBroker) Monetization(ctx context.Context,token string)(string,bool,*MonetizationStatus,error){
+ result,e:=b.inspect(ctx,token)
+ if e!=nil{return "",false,nil,e}
+ if !result.Active{return "",false,nil,nil}
+ if result.Monetization==nil||!validateMonetizationStatus(result.Monetization){return "",false,nil,ErrUnavailable}
+ return result.Subject.ID,true,result.Monetization,nil
 }
 func (b *HTTPBroker) Revoke(ctx context.Context,token string)error{
  if !tokenPattern.MatchString(token){return ErrInvalid}

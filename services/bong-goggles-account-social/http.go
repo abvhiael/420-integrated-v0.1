@@ -22,6 +22,7 @@ type Handler struct{
  Messages *MessageService
  Games *AccountGames
  XP *Contributions
+ MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
  Origin string
  host string
 }
@@ -44,6 +45,12 @@ func (h *Handler) EnableAccountExtras(messages *MessageService,games *AccountGam
 func (h *Handler) EnableXP(x *Contributions)error{
  if h==nil||x==nil||x.Store!=h.Store{return ErrInvalid}
  h.XP=x
+ return nil
+}
+func (h *Handler) EnableMonetization()error{
+ if h==nil||h.SignOn==nil||h.SignOn.Broker==nil{return ErrInvalid}
+ if _,ok:=h.SignOn.Broker.(monetizationBroker);!ok{return ErrUnavailable}
+ h.MonetizationEnabled=true
  return nil
 }
 func writeJSON(w http.ResponseWriter,code int,value any){
@@ -164,6 +171,12 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   h.accountExtras(ctx,w,r,viewer);return
  }
  switch{
+ case path=="/v1/monetization"&&r.Method=="GET":
+  if !h.MonetizationEnabled{deny(w,404);return}
+  result,e:=h.SignOn.CurrentMonetization(ctx,getCookie(r,sessionCookieName))
+  if errors.Is(e,ErrForbidden){deny(w,401);return}
+  if e!=nil{deny(w,503);return}
+  writeJSON(w,200,result);return
  case path=="/v1/xp"&&r.Method=="GET":
   if h.XP==nil{deny(w,404);return}
   result,e:=h.XP.Summary(ctx,viewer)

@@ -543,3 +543,83 @@ deployed cross-domain browser, TLS, client-backend or live provider acceptance.
 
 **Next canonical step after AUTH-7: AUTH-8 wallet-independent BongGoggles
 social activity.** AUTH-8 is not implemented by SSO.
+
+
+## AUTH-11 — Monetization and reward activation (restricted foundation)
+
+**Scope and existing canonical authority:** The already-merged BongGoggles
+BG-18 reward framework, `ContributionRegistry420`,
+`BongGogglesContributionVerifier420`, `BongGogglesRewardsAdapter420`,
+`RewardCampaignRegistry420`, `RewardDistributor420` and `RewardPool420`
+remain authoritative for reward qualification, campaign funding, accrual,
+claim and release. AUTH-10 XP is private and non-economic and is **never**
+an accepted source of reward claims, paid status, subscription balances
+or token amounts. AUTH-11 does not deploy or fund those contracts and does
+not automatically convert off-chain 420ID posts into on-chain contributions.
+
+**Repository implementation:** `009_monetization_consents.sql` adds a
+private account-owned, BongGoggles-only consent record with explicit
+reward/creator programme opt-ins and an optimistic revision for
+cross-instance replay protection. A 420ID-verified user can opt in **with
+no wallet linked**, later link an optional wallet with the separate
+AUTH-5 EIP-191/EIP-1271 flow, withdraw consent, or remain entirely
+unenrolled. Opt-in alone is not eligibility, a claim, spend authority,
+a payment authorization, a funded campaign or a grant of paid features.
+Revocation updates the confidential introspection status on the next read;
+a previously issued SSO session never carries a durable financial grant.
+
+**Two read surfaces / privilege boundaries:**
+
+- New isolated `AUTH420_MODE=monetization-acceptance` composes the
+  previously qualified central `420id` SSO source with restricted universal
+  profiles, optional wallet signing and an independent account-only
+  `POST /v1/monetization/status` and
+  `POST /v1/monetization/consent`. It requires the approved
+  `bong-goggles` confidential SSO client manifest, pinned
+  `AUTH420_WALLET_CHAIN_ID`, and all retained email/session
+  allowlist, CSRF, HTTPS, rate limits and backend secret boundaries.
+  Existing `AUTH420_MODE` values remain unchanged.
+- Authenticated confidential `/v1/sso/introspect` includes a
+  wallet-address-free, nonfinancial readiness projection **only** for
+  BongGoggles. Other clients never receive this field; an invalid or
+  inactive source session never receives it. No browser supplies app IDs,
+  wallet links or reward status to this backend.
+- Opt-in `rewardStage`: `not_enrolled`, `wallet_required`, or
+  `canonical_verification_required`. Creator stage:
+  `not_enrolled` or `operator_programme_required`.
+  `canClaim`, `paid`, `paymentAuthorized`, and
+  `financialAuthority` are always false. These stages are review
+  readiness and **not** eligibility or accrued balances.
+
+**Migration and privilege boundary (operator credential only):**
+
+```sql
+GRANT SELECT, INSERT ON account420.monetization_consents TO account420_runtime;
+GRANT UPDATE(reward_opt_in,creator_opt_in,revision,updated_at)
+ ON account420.monetization_consents TO account420_runtime;
+```
+
+The runtime role must not receive DELETE or unrestricted UPDATE privileges,
+and must have the previously qualified AUTH-5/7 wallet and SSO privileges.
+Only the operator may migrate. The runtime is disabled until these
+requirements pass its separate readiness gate.
+
+**Economic boundary / next integration:** A canonical reward can only be
+accrued through the on-chain verifier and correctly funded campaign,
+and paid after wallet-confirmed canonical claim and actual release.
+No local 420ID consent or XP is a substitute for that protocol. Paid creator
+features, pricing, payment checkout, merchant receivables or sponsor
+activation require separately verified product/economic configuration and
+an authoritative 420Pay or contract settlement record. This step
+introduces no unapproved paid tiers or token distributions.
+
+**Live status:** This repository-only implementation is not evidence that
+Neon 009 grants, Render 420ID combined mode, Render social service,
+Cloudflare same-host `/social-api` ingress, or canonical funded reward
+campaigns are deployed. Keep new features disabled until actual browser,
+operator, SSO, privacy and rollback acceptance is qualified.
+
+**Qualification:** The account and social workflows run real PostgreSQL 16,
+Go race and HTTP/consent/revocation tests, with new browser and
+BongGoggles routing regressions. Record exact successful head and run IDs
+on the AUTH-11 PR, not as unverified claims in this document.

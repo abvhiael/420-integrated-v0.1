@@ -17,7 +17,7 @@ import (
  "time"
 )
 
-//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs profile.html profile-session.mjs profile-ui.mjs wallet.html wallet-session.mjs wallet-ui.mjs identity.html identity-session.mjs identity-ui.mjs sso.html sso-session.mjs sso-ui.mjs
+//go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs profile.html profile-session.mjs profile-ui.mjs wallet.html wallet-session.mjs wallet-ui.mjs identity.html identity-session.mjs identity-ui.mjs sso.html sso-session.mjs sso-ui.mjs monetization.html monetization-ui.mjs
 var acceptanceAssets embed.FS
 
 // AcceptanceConfig deliberately enables only named test mailboxes. The
@@ -33,6 +33,7 @@ type AcceptanceConfig struct {
  IdentityMode bool // only explicit identity-acceptance with wallet mode
  IdentityReader IdentityNamesReader // independent pinned-finalized contract verifier
  SSOClients []SSOClient // explicit confidential cross-application clients; nil disables SSO
+ MonetizationMode bool // AUTH-11: only approved central source with verified wallet linking and SSO
  TrustedTLSProxy bool // only for a TLS-terminating, non-bypassable trusted ingress
 }
 type AcceptanceHandler struct {
@@ -45,6 +46,7 @@ type AcceptanceHandler struct {
  wallet *WalletLinkManager
  identity *IdentityNamesManager
  sso *SSOManager
+ monetization *MonetizationManager
 }
 func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,error){
  if auth==nil||len(c.Emails)==0||len(c.Emails)>50||len(c.RateKey)!=32{return nil,ErrInvalid}
@@ -69,6 +71,16 @@ func NewAcceptanceHandler(auth *Auth,c AcceptanceConfig)(*AcceptanceHandler,erro
   if h.sessions==nil{return nil,ErrInvalid}
   var err error;h.sso,err=NewSSOManager(h.sessions,c.SSOClients)
   if err!=nil{return nil,err}
+ }
+ if c.MonetizationMode{
+  if h.sso==nil||h.wallet==nil||h.sessions==nil||h.sessions.app!="420id"{
+   return nil,ErrInvalid
+  }
+  if _,ok:=h.sso.clients[monetizationApp];!ok{return nil,ErrInvalid}
+  var err error
+  h.monetization,err=NewMonetizationManager(h.sessions)
+  if err!=nil{return nil,err}
+  h.sso.monetization=h.monetization
  }
  return h,nil
 }
@@ -106,7 +118,7 @@ func browserDigest(r *http.Request)([]byte,error){
  token,e:=decodeToken(found.Value);if e!=nil{return nil,e};d:=sha256.Sum256(token);return d[:],nil
 }
 func (h *AcceptanceHandler) serveAsset(w http.ResponseWriter,r *http.Request,file,content string){
- if file=="acceptance.html"||file=="session.html"||file=="profile.html"||file=="wallet.html"||file=="identity.html"||file=="sso.html"{
+ if file=="acceptance.html"||file=="session.html"||file=="profile.html"||file=="wallet.html"||file=="identity.html"||file=="sso.html"||file=="monetization.html"{
   if _,e:=browserDigest(r);e!=nil{
    token,err:=randomBytes();if err!=nil{deny(w,503);return}
    http.SetCookie(w,&http.Cookie{Name:flowCookie,Value:encodeBytes(token),Path:"/",Secure:true,HttpOnly:true,SameSite:http.SameSiteStrictMode,MaxAge:1800})
@@ -138,7 +150,9 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  }
  if r.Method=="GET"{
   switch r.URL.Path{
-  case "/":if h.identity!=nil{h.serveAsset(w,r,"identity.html","text/html; charset=utf-8")}else if h.wallet!=nil{h.serveAsset(w,r,"wallet.html","text/html; charset=utf-8")}else if h.profiles{h.serveAsset(w,r,"profile.html","text/html; charset=utf-8")}else if h.sessions!=nil{h.serveAsset(w,r,"session.html","text/html; charset=utf-8")}else{h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")}
+  case "/":if h.monetization!=nil{h.serveAsset(w,r,"monetization.html","text/html; charset=utf-8")}else if h.identity!=nil{h.serveAsset(w,r,"identity.html","text/html; charset=utf-8")}else if h.wallet!=nil{h.serveAsset(w,r,"wallet.html","text/html; charset=utf-8")}else if h.profiles{h.serveAsset(w,r,"profile.html","text/html; charset=utf-8")}else if h.sessions!=nil{h.serveAsset(w,r,"session.html","text/html; charset=utf-8")}else{h.serveAsset(w,r,"acceptance.html","text/html; charset=utf-8")}
+  case "/wallet-setup":if h.monetization==nil{deny(w,404);return};h.serveAsset(w,r,"wallet.html","text/html; charset=utf-8")
+  case "/monetization-ui.mjs":if h.monetization==nil{deny(w,404);return};h.serveAsset(w,r,"monetization-ui.mjs","text/javascript; charset=utf-8")
   case "/session.mjs":if h.sessions==nil{deny(w,404);return};h.serveAsset(w,r,"session.mjs","text/javascript; charset=utf-8")
   case "/profile-session.mjs":if !h.profiles{deny(w,404);return};h.serveAsset(w,r,"profile-session.mjs","text/javascript; charset=utf-8")
   case "/profile-ui.mjs":if !h.profiles{deny(w,404);return};h.serveAsset(w,r,"profile-ui.mjs","text/javascript; charset=utf-8")
@@ -161,6 +175,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  case "/v1/wallet/current","/v1/wallet/start","/v1/wallet/finish","/v1/wallet/unlink":if h.wallet==nil{deny(w,404);return}
  case "/v1/identity/preview","/v1/identity/save","/v1/identity/current","/v1/identity/clear":if h.identity==nil{deny(w,404);return}
  case "/v1/sso/prepare","/v1/sso/authorize","/v1/sso/logout-all":if h.sso==nil{deny(w,404);return}
+ case "/v1/monetization/status","/v1/monetization/consent":if h.monetization==nil{deny(w,404);return}
  default:deny(w,404);return}
  // Exact Origin, no credentialed CORS, no alternate host or cross-site POST.
  if len(r.Header.Values("Origin"))!=1||r.Header.Get("Origin")!=h.auth.origin||r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{deny(w,403);return}
@@ -172,6 +187,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  raw,e:=io.ReadAll(http.MaxBytesReader(w,r.Body,maxRequest));if e!=nil{deny(w,413);return}
  if !uniqueObject(raw){deny(w,400);return}
  if h.sso!=nil&&strings.HasPrefix(r.URL.Path,"/v1/sso/"){h.ssoBrowserRoute(ctx,w,r,raw,digest);return}
+ if h.monetization!=nil&&strings.HasPrefix(r.URL.Path,"/v1/monetization/"){h.monetizationRoute(ctx,w,r,raw);return}
  if h.identity!=nil&&strings.HasPrefix(r.URL.Path,"/v1/identity/"){h.identityRoute(ctx,w,r,raw);return}
  if h.wallet!=nil&&strings.HasPrefix(r.URL.Path,"/v1/wallet/"){h.walletRoute(ctx,w,r,raw,digest);return}
  if h.profiles&&strings.HasPrefix(r.URL.Path,"/v1/profile/"){h.profileRoute(ctx,w,r,raw);return}
@@ -278,6 +294,7 @@ func (h *AcceptanceHandler) Purge(ctx context.Context)error{
  if h.wallet!=nil{if e:=h.wallet.Ready(ctx);e!=nil{return e};if e:=h.wallet.Purge(ctx);e!=nil{return e}}
  if h.identity!=nil{if e:=h.identity.Ready(ctx);e!=nil{return e}}
  if h.sso!=nil{if e:=h.sso.Ready(ctx);e!=nil{return e};if e:=h.sso.Purge(ctx);e!=nil{return e}}
+ if h.monetization!=nil{if e:=h.monetization.Ready(ctx);e!=nil{return e}}
  if h.sessions!=nil{if e:=h.sessions.PurgeExpired(ctx);e!=nil{return e}}
  if e:=h.auth.PurgeExpired(ctx);e!=nil{return e}
  for _,q:=range []string{

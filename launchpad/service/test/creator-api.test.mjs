@@ -39,7 +39,7 @@ function rpc(){
       throw Error('unmocked contract '+sig+' at '+to);
     },
     async call(method){
-      if(method==='eth_chainId')return '0x1a4';
+      if(method==='eth_chainId')return '0x1a4';if(method==='eth_getCode')return '0x6001';
       if(method==='web3_sha3')return ID;
       if(method==='eth_getBlockByNumber')return {hash:BLOCK,number:'0x9',timestamp:'0x5'};
       throw Error('unmocked RPC '+method);

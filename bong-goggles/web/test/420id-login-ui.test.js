@@ -15,8 +15,8 @@ test('header exposes a prominent same-origin 420ID login with no Wallet requirem
  for(const state of [null,{status:'loading'},{status:'guest'},{status:'error'}]){
   for(const route of ['/', '/social','/discover']){
    const html=shell(route,state);
-   assert.match(html,/<a class="account-auth-link" href="\/social-api\/auth\/start">Sign in with 420ID<\/a>/);
-   assert.doesNotMatch(html,/<a class="account-auth-link"[^>]*href="https?:/);
+   assert.match(html,/<a class="account-auth-link account-auth-link--login" href="\/social-api\/auth\/start"><span aria-hidden="true" class="account-auth-link__icon">↪<\/span><span>Log in with 420ID<\/span><\/a>/);
+   assert.doesNotMatch(html,/<a class="account-auth-link[^"]*"[^>]*href="https?:/);
    assert.doesNotMatch(html,/Private post &lt;script&gt;/);
   }
  }
@@ -49,8 +49,8 @@ test('Home offers login and retry when backend times out; no cached community po
 
 test('verified 420ID member is not mislabelled as Wallet guest, and untrusted display name is escaped',()=>{
  const html=shell('/social',ready);
- assert.match(html,/class="account-auth-link" href="\/social" data-route="social">420ID: Member &lt;script&gt;/);
- assert.doesNotMatch(html,/class="account-auth-link" href="\/social-api\/auth\/start"/);
+ assert.match(html,/class="account-auth-link account-auth-link--account" href="\/social" data-route="social" aria-label="Open your 420ID account"><span aria-hidden="true" class="account-auth-link__icon">●<\/span><span>My account: Member &lt;script&gt;/);
+ assert.doesNotMatch(html,/class="account-auth-link account-auth-link--login" href="\/social-api\/auth\/start"/);
  assert.match(html,/420ID account · wallet optional/);
  assert.doesNotMatch(html,/Welcome, guest/);
  assert.doesNotMatch(html,/<script>alert\(1\)<\/script>/);
@@ -89,4 +89,19 @@ test('existing click binding supports Retry while disabled account social never 
  const app=await readFile(new URL('../app.js',import.meta.url),'utf8');
  assert.match(app,/if\(action==='refresh'\)\{void socialController\.refresh\(\);return;\}/);
  assert.match(app,/if\(!isAccountSocialSurface\(\)\|\|!socialController\?\.client\.enabled\)return/);
+});
+
+test('login and account actions remain obvious and keyboard-accessible at mobile sizes',async()=>{
+ const css=await readFile(new URL('../dashboard.css',import.meta.url),'utf8');
+ assert.match(css,/\.app-header \.account-auth-link--login\{background:#ffdf68;color:#0a2b1d/);
+ assert.match(css,/\.app-header \.account-auth-link\{[^}]*min-height:44px/);
+ assert.match(css,/@media\(max-width:760px\)\{[\s\S]*?\.app-header \.header-state\{order:3;flex:1 0 100%;min-width:0\}/);
+ assert.match(css,/\.app-header \.account-auth-link\{width:100%;min-height:46px/);
+ assert.match(css,/\.app-header \.account-auth-link:focus-visible\{outline:3px solid #fff/);
+ assert.match(css,/@media\(forced-colors:active\)/);
+ const loggedOut=shell('/',{status:'guest'});
+ const loggedIn=shell('/',ready);
+ assert.match(loggedOut,/Log in with 420ID/);
+ assert.match(loggedIn,/My account:/);
+ assert.doesNotMatch(loggedIn,/class="account-auth-link account-auth-link--login"/);
 });

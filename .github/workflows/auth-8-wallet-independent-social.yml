@@ -1,4 +1,4 @@
-name: AUTH-8/9/10 Wallet-Independent BongGoggles Social
+name: AUTH-8/9/10/11 Wallet-Independent BongGoggles Social
 on:
   pull_request:
     paths:

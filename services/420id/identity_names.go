@@ -130,7 +130,6 @@ func (m *IdentityNamesManager) Clear(ctx context.Context,token string)error{
 
 func (m *IdentityNamesManager) Ready(ctx context.Context)error{
  var ok bool
- e:=m.sessions.auth.store.db.QueryRowContext(ctx,`SELECT COALESCE(
- has_table_privilege(current_user,to_regclass('account420.identity_names_preferences'),'SELECT,INSERT,UPDATE,DELETE'),false)`).Scan(&ok)
+ e:=m.sessions.auth.store.db.QueryRowContext(ctx,`SELECT (COALESCE(has_table_privilege(current_user,to_regclass('account420.identity_names_preferences'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.identity_names_preferences'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.identity_names_preferences'),'UPDATE'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.identity_names_preferences'),'DELETE'),false))`).Scan(&ok)
  if e!=nil{return e};if !ok{return ErrUnavailable};return nil
 }

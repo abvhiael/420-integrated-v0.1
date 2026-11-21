@@ -7,8 +7,8 @@
 - Repository: `abvhiael/420-integrated-v0.1`
 - Implementation branch: `audit/420governance-rec-4-lifecycle-20261121`
 - **Exact tested implementation SHA:** `e49839854b4055cb946e8194466ddb6831fc4360`
-- Parent GOV-REC-3 implementation: `338cb8a41d60c52e4ef9e7ee791dedc046f1b11a`, open PR #1293
-- GOV-REC-4 pull request: #1294 (open, base GOV-REC-3; **not merged**)
+- Parent GOV-REC-3 implementation: `338cb8a41d60c52e4ef9e7ee791dedc046f1b11a`, PR #1293 merged via `009b974617014d453be5ce3015963b708ad4a75e`
+- GOV-REC-4 pull request: #1294 (initially stacked on GOV-REC-3; **merged to main** via `af69f95602e8937557fffa39f7361e2b762f9624`)
 - Evidence-only bookkeeping after qualified code head is permitted by `docs/apps/governance/qualification.md`; no new executable code, tests, configuration, artifacts or protocol rules are changed by this document.
 
 ## Authoritative executed qualification
@@ -49,7 +49,7 @@ The clean execution test records actual emitted `CivicProposalRegistered`, `Civi
 
 The two-member Community and Validator fixtures are explicitly **synthetic** test data, never authenticated Genesis electorate lists or a production deployment approval. The retained release approval defaults to zero and intentionally fails closed until independently authorized chain-specific Genesis materialization. Nothing in this qualification asserts that the live testnet exists or that live governance activation has occurred.
 
-The GOV-REC-4 implementation is stacked on open GOV-REC-3 PR #1293. At qualification, `main` advanced from the REC-3 baseline only in BongGoggles web, build, workflow and game documentation files; the eight concurrent main commits observed introduce no overlapping Governance changes. Do not silently merge/rewrite either branch. Merge requires separate explicit user instruction and appropriate prerequisite qualification.
+At initial qualification, GOV-REC-4 was stacked on GOV-REC-3 PR #1293. At that time, `main` had advanced from the REC-3 baseline only in BongGoggles web, build, workflow and game documentation, with no overlapping Governance changes. Under the user's explicit merge request, PR #1293 merged first, and PR #1294 was then retargeted to `main` and merged. GitHub confirmed both merges. The retargeted PR #1294 passed Governance workflow [#44929464247](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44929464247), job `136922729782`, on its exact head `e06bf8f422fcc2183aef22024e3db004a2297363` before merge. This post-qualification reconciliation adds no new executable changes or live Genesis authorization.
 
 ## Next gate
 

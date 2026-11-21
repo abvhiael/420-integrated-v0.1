@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+ appgateway "github.com/420integrated/420-integrated/services/420id/app-gateway"
 	"errors"
 	"io"
 	"net/http"
@@ -91,6 +92,7 @@ type Server struct {
 	auth        Authenticator
 	viewers     ViewerResolver
 	moderation  ModerationBackend
+ account420   *appgateway.Gateway // optional wallet-free account identity only
 
 	requests     atomic.Uint64
 	errors       atomic.Uint64
@@ -110,6 +112,27 @@ func NewServer(backend ContentBackend, projections ProjectionReader, auth Authen
 }
 
 func (s *Server) SetModerationBackend(backend ModerationBackend) { s.moderation = backend }
+
+// Enable420ID accepts only the separately configured confidential 420Town
+// gateway. A 420ID member's off-chain actor never receives an on-chain
+// wallet, moderation, subscription or administrative capability by default.
+func (s *Server) Enable420ID(g *appgateway.Gateway)error{
+ if s==nil||g==nil||g.App.ID!="420town"||g.App.Origin!="https://town.420integrated.org"{
+  return ErrAuthInvalid
+ }
+ s.account420=g
+ return nil
+}
+func (s *Server) authenticate(r *http.Request)(model.ObjectID,error){
+ // Existing bearer/legacy authentication retains priority. An invalid
+ // explicit Authorization header cannot be silently rescued by a cookie.
+ actor,e:=s.auth.Authenticate(r)
+ if e==nil{return actor,nil}
+ if s.account420==nil||r.Header.Get("Authorization")!=""{return "",e}
+ subject,e:=s.account420.Current(r.Context(),r)
+ if e!=nil{return "",ErrAuthRequired}
+ return model.ObjectID("420id:"+subject),nil
+}
 
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
@@ -238,7 +261,7 @@ func (s *Server) handleCreatePost(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleGetPost(w http.ResponseWriter, r *http.Request) {
 	var actor model.ObjectID
 	if strings.TrimSpace(r.Header.Get("Authorization")) != "" {
-		id, err := s.auth.Authenticate(r)
+		id, err := s.authenticate(r)
 		if err != nil {
 			s.authFailures.Add(1)
 			s.fail(w, http.StatusUnauthorized, "invalid authentication")

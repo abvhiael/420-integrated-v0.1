@@ -27,6 +27,13 @@ test('filtered discovery paginates deterministically and rejects stale cursors a
   assert.throws(()=>store.campaigns({search:'green',mode:'REWARD',state:'ACTIVE',limit:1,cursor:first.nextCursor}),/stale campaign cursor/);
   data.items.push({...data.items[0]});fs.writeFileSync(file,JSON.stringify(data));
   assert.throws(()=>store.read(),/invalid campaign projection inventory/);
+  data.items.pop();
+  for(const invalid of [{raised:'NaN'},{title:'A'.repeat(1200)},{controller:'not-an-address'},
+    {startsAt:1.5},{summary:'Line\\u0000break'}]){
+    data.items[0]={saleId:sale(1),projectId:project(1),title:'Green forest',mode:'REWARD',state:'ACTIVE',...invalid};
+    fs.writeFileSync(file,JSON.stringify(data));
+    assert.throws(()=>store.read(),/invalid campaign projection inventory/);
+  }
 });
 
 test('projection verification rejects reorgs, stale heads, cross-network and wrong Registry bindings',async()=>{

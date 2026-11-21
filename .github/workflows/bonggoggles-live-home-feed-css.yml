@@ -1,0 +1,37 @@
+name: BongGoggles live Home feed CSS
+on:
+  push:
+    branches: [main]
+    paths:
+      - bong-goggles/web/dashboard.css
+      - .github/workflows/bonggoggles-live-home-feed-css.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  published-feed-contrast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify live Cloudflare Pages serves the accessible dark-feed override
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://bonggoggles.420integrated.org/dashboard.css"
+          for attempt in {1..20}; do
+            response="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-dashboard.css --write-out '%{http_code}' "$url?release=${GITHUB_SHA}" || true)"
+            if [[ "$response" == "200" ]] &&
+               grep -Fq 'The dashboard uses dark ink on ivory' /tmp/bg-dashboard.css &&
+               grep -Fq '.home-social.ui-card{color:#f1faef}' /tmp/bg-dashboard.css &&
+               grep -Fq '.home-social.ui-card .social-post__body' /tmp/bg-dashboard.css; then
+              echo "PASS: live BongGoggles stylesheet exposes readable off-chain post styling (HTTP 200)."
+              exit 0
+            fi
+            echo "Attempt $attempt/20: HTTP $response, production CSS not yet updated."
+            [[ "$attempt" -eq 20 ]] && break
+            sleep 15
+          done
+          echo "::error::Production CSS is not updated. Investigate Cloudflare Pages build/deploy and cache, not account content or 420ID."
+          exit 1

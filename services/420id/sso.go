@@ -228,7 +228,9 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  if s.monetization!=nil&&c.app==monetizationApp{
   status,e:=s.monetization.forBongGoggles(ctx,accountID)
   if e!=nil{return none,e}
-  if status.RewardOptIn||status.CreatorOptIn{out.Monetization=&status}
+  // Without consent, do not reveal even whether a wallet is associated.
+  if !status.RewardOptIn&&!status.CreatorOptIn{status.WalletLinked=false}
+  out.Monetization=&status
  }
  return out,nil
 }

@@ -7,6 +7,7 @@ import {chaosRegionArt} from './chaos-visual-style.js';
 import {chaosMapArt} from './chaos-map-art.js';
 import {CHAOS_VEHICLE_COLORS,chaosVehicle,chaosVehicleHeading} from './chaos-vehicles.js';
 import {renderChaosTableFeedback} from './chaos-table-art.js';
+import {chaosSceneryFeatures,renderChaosScenery} from './chaos-region-scenery.js';
 
 // Keep the current hand visible only while the same human driver continues their turn.
 // A new seat or completed stage always returns to the privacy handoff screen.
@@ -118,6 +119,7 @@ export function renderChaosHighway(game){
   '<span>0–2,500 game km · schematic, not to scale</span></div>'+
   '<svg class="ccc-highway-svg" viewBox="0 0 '+WIDTH+' '+HEIGHT+'" role="img" aria-label="'+esc(leg.name)+': '+esc(caption)+'">'+
   '<title>'+esc(leg.name)+' — '+esc(caption)+'</title>'+
+  '<desc>Illustrated roadside scenery: '+chaosSceneryFeatures(region).map(f=>esc(f.label)).join(', ')+'. The road, towns and vehicles are live game elements.</desc>'+
   '<rect x="0" y="0" width="'+WIDTH+'" height="'+HEIGHT+'" class="ccc-highway-canvas"/>'+
   '<path d="M0 107 Q260 -25 480 95 T960 63 L960 0 H0Z" fill="#41634d" opacity=".65"/>'+
   landscape(region)+
@@ -125,6 +127,8 @@ export function renderChaosHighway(game){
   // The old SVG scenery is retained as a fallback if artwork does not load.
   '<image class="ccc-map-underlay" href="'+mapLayers.underlay.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
   '<image class="ccc-map-foreground" href="'+mapLayers.foreground.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
+  // Eight region-specific vintage roadside features are decorative and noninteractive.
+  renderChaosScenery(region)+
   '<path class="ccc-highway-shadow" d="'+route+'"/>'+
   '<path class="ccc-highway-road" d="'+route+'"/>'+
   '<path class="ccc-highway-centre" d="'+route+'"/>'+

@@ -69,6 +69,12 @@ export async function resolveLaunchpad(rpc,{registryAddress,serviceId='420/servi
   const resolved=await rpc.ethCall(registryAddress,encodeStatic(resolveSel,[wordHex(serviceHash)]));
   const router=decodeAddress(resolved,0),version=Number(decodeUint(resolved,1));
   if(/^0x0{40}$/i.test(router)||!Number.isSafeInteger(version)||version<1)throw new Error('Launchpad service unresolved');
+  const serviceRecord=await rpc.ethCall(registryAddress,encodeStatic(await rpc.selector('getService(bytes32)'),[wordHex(serviceHash)]));
+  const publishedRouter=decodeAddress(serviceRecord,0),publishedVersion=decodeUint(serviceRecord,3),
+    publishedActive=decodeUint(serviceRecord,5),publishedCodeHash='0x'+serviceRecord.slice(66,130);
+  if(publishedRouter.toLowerCase()!==router.toLowerCase()||publishedVersion!==BigInt(version)||
+    publishedActive!==1n||!HASH.test(publishedCodeHash)||/^0x0{64}$/i.test(publishedCodeHash))
+    throw new Error('Registry publication identity or lifecycle mismatch');
   async function getter(from,name){return decodeAddress(await rpc.ethCall(from,await rpc.selector(name+'()')));}
   const [sales,allocations]=await Promise.all([getter(router,'sales'),getter(router,'allocations')]);
   const [crowdfundingIntegration,allocationSales,projectRegistry]=await Promise.all([
@@ -85,6 +91,10 @@ export async function resolveLaunchpad(rpc,{registryAddress,serviceId='420/servi
   for(const addr of [router,sales,allocations,crowdfundingIntegration,projectRegistry,registryAddress]){
     const code=await rpc.call('eth_getCode',[addr,'latest']);
     if(!HEX.test(code)||code==='0x')throw new Error('missing canonical Launchpad runtime code');
+    if(addr.toLowerCase()===router.toLowerCase()){
+      const codeHash=await rpc.call('web3_sha3',[code]);
+      if(codeHash.toLowerCase()!==publishedCodeHash.toLowerCase())throw new Error('Registry published Launchpad codehash mismatch');
+    }
   }
   return {serviceId,version,launchpadRouterAddress:router,saleRegistryAddress:sales,allocationRegistryAddress:allocations,crowdfundingIntegrationAddress:crowdfundingIntegration,projectRegistryAddress:projectRegistry};
 }

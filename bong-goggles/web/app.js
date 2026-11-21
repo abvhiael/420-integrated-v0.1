@@ -6,6 +6,7 @@ import {deriveBootstrapState} from './core/bootstrap.js';
 import {createTelemetrySink} from './core/telemetry.js';
 import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from './core/wallet-session.js';
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
+import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
 import {AccountExtrasController} from './core/account-extras.js';
@@ -18,6 +19,7 @@ let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader
 let indexerStatus={status:'checking',data:null};
 let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
+let chaosGame=null,chaosRevealed=false,chaosError=null;
 function shortAccount(value){return value?`${value.slice(0,6)}…${value.slice(-4)}`:'Not connected';}
 function applyViewPreferences(){document.documentElement.dataset.textSize=viewPreferences.textSize;document.documentElement.dataset.contrast=viewPreferences.contrast;document.documentElement.dataset.motion=viewPreferences.motion;}
 function updateRobots(){let tag=document.querySelector('meta[name="robots"]');if(!tag){tag=document.createElement('meta');tag.name='robots';document.head.append(tag);}tag.content=documentIndexingPolicy(window.location.pathname);}
@@ -72,12 +74,46 @@ async function runExtra(action,details){
  try{await controller.act(action,details);}catch{controller.emit({status:'error'});}
 }
 
+
+function bindChaos(){
+ if(window.location.pathname!=='/classics/cross-country-chaos')return;
+ root.querySelector('[data-chaos-start]')?.addEventListener('submit',event=>{
+  event.preventDefault();
+  const data=new FormData(event.currentTarget),count=Number(data.get('count'));
+  try{
+   if(!Number.isInteger(count)||count<2||count>4)throw new Error('Choose two to four drivers.');
+   const names=Array.from({length:count},(_,i)=>String(data.get('player'+i)||'').trim()||'Driver '+(i+1));
+   const seed=window.crypto?.getRandomValues?window.crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*0xffffffff);
+   chaosGame=createChaosGame({names,seed});
+   chaosRevealed=false;chaosError=null;renderCurrent();
+  }catch(error){chaosError=error.message;renderCurrent(chaosError);}
+ });
+ const apply=move=>{try{
+  chaosGame=takeChaosTurn(chaosGame,{player:chaosGame.players[chaosGame.turn].id,...move});
+  chaosRevealed=false;chaosError=null;renderCurrent();
+ }catch(error){chaosError=error.message;renderCurrent(chaosError);}};
+ for(const control of root.querySelectorAll('[data-chaos-action]'))control.addEventListener('click',()=>{
+  const action=control.dataset.chaosAction;
+  try{
+   if(action==='reveal'){chaosRevealed=true;chaosError=null;renderCurrent();return;}
+   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosError=null;renderCurrent();return;}
+   if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosError=null;renderCurrent();return;}
+   apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card)});
+  }catch(error){chaosError=error.message;renderCurrent(chaosError);}
+ });
+ for(const form of root.querySelectorAll('[data-chaos-move]'))form.addEventListener('submit',event=>{
+  event.preventDefault();
+  const data=new FormData(form);
+  apply({action:form.dataset.chaosMove,index:Number(form.dataset.card),target:data.has('target')?Number(data.get('target')):null,useBoost:data.has('boost')});
+ });
+}
+
 function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice(),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
  accountMessagesState:accountExtras?.messages.state,accountGamesState:accountExtras?.games.state,
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();}
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();}
 // Re-fetching clears the previous page first: withdrawn/hidden content is not
 // retained after a failed refresh or restored from a browser cache. This is a
 // sampled public feed, not a real-time revocation stream or guaranteed freshness.
@@ -93,6 +129,7 @@ async function refreshPublicFeed(){
 }
 function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(!image)return;const greeting=selectGreeting();const src=greetingSrc(greeting);if(image.getAttribute('src')!==src){image.src=src;image.alt=greeting.label;}}
 function onRouteChange(){
+ chaosRevealed=false;
  monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
  if(window.location.pathname==='/')void refreshPublicFeed();

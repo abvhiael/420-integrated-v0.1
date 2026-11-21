@@ -27,6 +27,15 @@ interface VmGovAudit6 {
     function roll(
         uint256
     ) external;
+    function prank(
+        address
+    ) external;
+    function mockCall(
+        address callee,
+        bytes calldata data,
+        bytes calldata returnData
+    ) external;
+    function clearMockedCalls() external;
 }
 
 contract GovAudit6PairFactory {
@@ -49,6 +58,31 @@ contract GovAudit6PairFactory {
     }
 }
 
+/// @dev Deliberately exposes the canonical getters and version, but its runtime is not approved.
+contract GovRec1SpoofConstitution {
+    address public immutable governanceTimelock;
+
+    constructor(
+        address timelock_
+    ) {
+        governanceTimelock = timelock_;
+    }
+
+    function systemName() external pure returns (string memory) {
+        return "CivicConstitution420";
+    }
+
+    function protocolVersion() external pure returns (uint32) {
+        return 1;
+    }
+
+    function ruleFor(
+        CivicIds420.ProposalClass
+    ) external pure returns (CivicConstitution420.Rule memory rule) {
+        return rule;
+    }
+}
+
 contract GovernanceAudit6Deployment420Test {
     VmGovAudit6 private constant vm = VmGovAudit6(address(uint160(uint256(keccak256("hevm cheat code")))));
     address private constant REGISTRY = 0x0000000000000000000000000000000000000434;
@@ -62,6 +96,16 @@ contract GovernanceAudit6Deployment420Test {
     CivicGovernor420 private governor;
     CivicMerkleElectorateSource420 private community;
     CivicMerkleElectorateSource420 private validator;
+
+    struct BootstrapGraph {
+        address constitution;
+        address proposals;
+        address electorates;
+        address voting;
+        address governor;
+        address community;
+        address validator;
+    }
 
     function _deployCanonicalGraph() private {
         GovAudit6PairFactory factory = new GovAudit6PairFactory();
@@ -101,6 +145,63 @@ contract GovernanceAudit6Deployment420Test {
             address(validator)
         );
         vm.store(address(compatibility), bytes32(uint256(4)), approved);
+    }
+
+    function _approvedGraph() private view returns (BootstrapGraph memory graph) {
+        graph = BootstrapGraph({
+            constitution: address(constitution),
+            proposals: address(proposals),
+            electorates: address(electorates),
+            voting: address(voting),
+            governor: address(governor),
+            community: address(community),
+            validator: address(validator)
+        });
+    }
+
+    function _trySchedule(
+        BootstrapGraph memory graph
+    ) private returns (bool ok) {
+        (ok,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        graph.constitution,
+                        graph.proposals,
+                        graph.electorates,
+                        graph.voting,
+                        graph.governor,
+                        graph.community,
+                        graph.validator
+                    )
+                )
+            );
+    }
+
+    function _requireNoCapture() private view {
+        require(!compatibility.bootstrapPlanScheduled(), "failed call captured bootstrap");
+        require(compatibility.bootstrapPlanHash() == bytes32(0), "failed call persisted a plan");
+        require(compatibility.civicGovernor() == address(0), "failed call bound a governor");
+    }
+
+    function _shadowGraph() private returns (BootstrapGraph memory graph) {
+        graph.constitution = address(new CivicConstitution420(address(timelock)));
+        graph.proposals = address(new CivicProposalRegistry420(address(timelock)));
+        graph.electorates = address(new CivicElectorateRegistry420(address(timelock)));
+        graph.voting = address(new CivicVoting420(graph.proposals, graph.electorates));
+        graph.governor =
+            address(new CivicGovernor420(graph.constitution, graph.proposals, graph.electorates, graph.voting));
+        graph.community = address(
+            new CivicMerkleElectorateSource420(
+                address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
+            )
+        );
+        graph.validator = address(
+            new CivicMerkleElectorateSource420(
+                address(timelock), keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1")
+            )
+        );
     }
 
     function testCanonicalBootstrapSchedulesExactPlanAndRetiresToCivicGovernor() public {
@@ -276,5 +377,209 @@ contract GovernanceAudit6Deployment420Test {
             address(validator)
         );
         require(compatibility.bootstrapPlanScheduled(), "approved bootstrap not scheduled");
+    }
+
+    function testApprovedPlanRemainsPermissionlessAfterCompetingCallerFails() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        BootstrapGraph memory competing = _approvedGraph();
+        competing.constitution = address(new CivicConstitution420(address(timelock)));
+
+        vm.prank(address(0xBAD));
+        require(!_trySchedule(competing), "unauthorized graph accepted first");
+        _requireNoCapture();
+
+        vm.prank(address(0xBEE));
+        require(_trySchedule(_approvedGraph()), "approved caller rejected");
+        bytes32 approved = compatibility.approvedBootstrapPlanHash();
+        require(compatibility.bootstrapPlanHash() == approved, "incorrect plan recorded");
+
+        vm.prank(address(0xBAD));
+        require(!_trySchedule(competing), "competing caller replaced approved plan");
+        require(compatibility.bootstrapPlanHash() == approved, "competing caller modified plan");
+    }
+
+    function testRejectsIdenticalRuntimeAtUnapprovedGraphAddresses() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        BootstrapGraph memory alternative = _shadowGraph();
+
+        require(alternative.constitution != address(constitution), "graph addresses not distinct");
+        require(alternative.constitution.codehash == address(constitution).codehash, "runtime provenance differs");
+        require(alternative.governor.codehash == address(governor).codehash, "governor runtime differs");
+        require(alternative.community.codehash == address(community).codehash, "source runtime differs");
+        require(!_trySchedule(alternative), "unapproved addresses with identical runtime accepted");
+        _requireNoCapture();
+        require(_trySchedule(_approvedGraph()), "approved graph blocked by alternate addresses");
+    }
+
+    function testRejectsCorrectInterfaceWithUnapprovedRuntimeAtApprovedAddress() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        bytes memory approvedRuntime = address(constitution).code;
+        GovRec1SpoofConstitution spoof = new GovRec1SpoofConstitution(address(timelock));
+        vm.etch(address(constitution), address(spoof).code);
+
+        require(constitution.governanceTimelock() == address(timelock), "spoof lacks expected authority");
+        require(constitution.protocolVersion() == 1, "spoof lacks expected interface version");
+        require(!_trySchedule(_approvedGraph()), "unapproved runtime accepted");
+        _requireNoCapture();
+
+        vm.etch(address(constitution), approvedRuntime);
+        require(_trySchedule(_approvedGraph()), "approved runtime blocked after invalid candidate");
+    }
+
+    function testRejectsWrongTimelockAtTheApprovedComponentAddress() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        bytes memory approvedRuntime = address(constitution).code;
+        GovRec1SpoofConstitution wrong = new GovRec1SpoofConstitution(address(0xDEAD));
+        vm.etch(address(constitution), address(wrong).code);
+
+        require(!_trySchedule(_approvedGraph()), "incorrect constructor authority accepted");
+        _requireNoCapture();
+        vm.etch(address(constitution), approvedRuntime);
+        require(_trySchedule(_approvedGraph()), "wrong Timelock attempt consumed approval");
+    }
+
+    function testRejectsMixedInternalModuleGraph() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        BootstrapGraph memory mixed = _approvedGraph();
+        CivicElectorateRegistry420 foreignElectorates = new CivicElectorateRegistry420(address(timelock));
+        mixed.voting = address(new CivicVoting420(address(proposals), address(foreignElectorates)));
+
+        require(!_trySchedule(mixed), "mixed internal dependencies accepted");
+        _requireNoCapture();
+        require(_trySchedule(_approvedGraph()), "mixed graph captured approved bootstrap");
+    }
+
+    function testRejectsIncorrectVersionWithoutChangingApprovedRuntime() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        vm.mockCall(
+            address(constitution), abi.encodeCall(CivicConstitution420.protocolVersion, ()), abi.encode(uint32(2))
+        );
+        require(!_trySchedule(_approvedGraph()), "wrong interface version accepted");
+        _requireNoCapture();
+        vm.clearMockedCalls();
+        require(_trySchedule(_approvedGraph()), "version spoof blocked approved graph");
+    }
+
+    function testRejectsMissingOrPartiallyMaterializedGenesisApproval() public {
+        _deployCanonicalGraph();
+        require(!_trySchedule(_approvedGraph()), "missing Genesis commitment accepted");
+        _requireNoCapture();
+
+        _seedApprovedGenesisPlan();
+        vm.store(address(compatibility), bytes32(uint256(7)), bytes32(0));
+        require(!_trySchedule(_approvedGraph()), "partial electorate commitment accepted");
+        _requireNoCapture();
+
+        _seedApprovedGenesisPlan();
+        vm.store(address(compatibility), bytes32(uint256(4)), bytes32(0));
+        require(!_trySchedule(_approvedGraph()), "missing approval hash accepted");
+        _requireNoCapture();
+
+        _seedApprovedGenesisPlan();
+        require(_trySchedule(_approvedGraph()), "valid commitment rejected after partial candidates");
+    }
+
+    function testRejectsAbsentOrIncorrectProtocolRegistry() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        bytes memory registryRuntime = REGISTRY.code;
+
+        vm.etch(REGISTRY, hex"");
+        require(!_trySchedule(_approvedGraph()), "missing frozen Registry accepted");
+        _requireNoCapture();
+
+        ProtocolRegistry wrongRegistry = new ProtocolRegistry(address(0xDEAD));
+        vm.etch(REGISTRY, address(wrongRegistry).code);
+        require(!_trySchedule(_approvedGraph()), "Registry with wrong Timelock accepted");
+        _requireNoCapture();
+
+        vm.etch(REGISTRY, registryRuntime);
+        require(_trySchedule(_approvedGraph()), "approved Registry blocked after failed candidates");
+    }
+
+    function testRejectsPrematureGovernanceServicePublication() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        ProtocolRegistry registry = ProtocolRegistry(REGISTRY);
+
+        vm.prank(address(timelock));
+        registry.publishService(
+            compatibility.GOVERNANCE_SERVICE_ID(),
+            address(governor),
+            address(governor).codehash,
+            keccak256("metadata"),
+            1,
+            true
+        );
+
+        require(!_trySchedule(_approvedGraph()), "partially initialized Registry service accepted");
+        _requireNoCapture();
+    }
+
+    function testRejectsPreconfiguredConstitution() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        vm.prank(address(timelock));
+        constitution.setRule(CivicIds420.ProposalClass.G1, 17_640, 7 days, 1000, 5001, 0, 0, false);
+
+        require(!_trySchedule(_approvedGraph()), "already initialized rule accepted");
+        _requireNoCapture();
+    }
+
+    function testRejectsPreconfiguredProposalAuthority() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        vm.prank(address(timelock));
+        proposals.bindProposalAuthority(address(governor));
+
+        require(!_trySchedule(_approvedGraph()), "prebound proposal authority accepted");
+        _requireNoCapture();
+    }
+
+    function testRejectsPrepublishedElectorateCheckpoint() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        vm.prank(address(timelock));
+        community.publishInitialCheckpoint(compatibility.initialCommunityRoot(), 1);
+
+        require(!_trySchedule(_approvedGraph()), "already initialized electorate accepted");
+        _requireNoCapture();
+    }
+
+    function testRejectsCompetingRescheduleBeforeActivation() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        require(_trySchedule(_approvedGraph()), "approved plan rejected");
+        bytes32 approved = compatibility.bootstrapPlanHash();
+
+        vm.prank(address(0xBAD));
+        require(!_trySchedule(_approvedGraph()), "duplicate bootstrap accepted");
+        require(compatibility.bootstrapPlanHash() == approved, "duplicate changed bootstrap");
+    }
+
+    function testTimelockScheduleFailureRollsBackEveryEarlierOperation() public {
+        _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
+        bytes32 plan = compatibility.approvedBootstrapPlanHash();
+        bytes32 collision = compatibility.bootstrapOperationId(plan, 2);
+
+        // Arrange an operation collision after operations 0 and 1 would have been scheduled.
+        // This artificial scheduler prank is only a fault injection; it is not public authority.
+        vm.prank(address(compatibility));
+        timelock.schedule(collision, address(compatibility), 0, "", GovernanceTimelock.Class.G1);
+
+        require(!_trySchedule(_approvedGraph()), "schedule collision not rejected");
+        _requireNoCapture();
+        (address op0,,,,,,) = timelock.operations(compatibility.bootstrapOperationId(plan, 0));
+        (address op1,,,,,,) = timelock.operations(compatibility.bootstrapOperationId(plan, 1));
+        (address op2,,,,,,) = timelock.operations(collision);
+        require(op0 == address(0) && op1 == address(0), "partial timelock operations survived revert");
+        require(op2 == address(compatibility), "failed scheduling mutated prior Timelock state");
     }
 }

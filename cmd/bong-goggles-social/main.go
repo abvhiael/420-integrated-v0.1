@@ -49,7 +49,14 @@ func main(){
   db,e:=postgres(required("SOCIAL420_MIGRATION_DATABASE_URL"));if e!=nil{log.Fatal(e)};defer db.Close()
   store,e:=social.NewStore(db);if e!=nil{log.Fatal(e)}
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second);defer done()
-  if e=store.Moderate(ctx,os.Args[2],os.Args[3],os.Args[4],required("SOCIAL420_OPERATOR_REF"));e!=nil{log.Fatal("Moderation operation denied")}
+  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
+   xp,e:=social.NewContributions(store);if e!=nil{log.Fatal(e)}
+   if e=store.ReadyXP(ctx);e!=nil{log.Fatal("AUTH-10 schema/grants unavailable")}
+   e=xp.Moderate(ctx,os.Args[2],os.Args[3],os.Args[4],required("SOCIAL420_OPERATOR_REF"))
+   if e!=nil{log.Fatal("Moderation / XP reversal denied")}
+  }else{
+   if e=store.Moderate(ctx,os.Args[2],os.Args[3],os.Args[4],required("SOCIAL420_OPERATOR_REF"));e!=nil{log.Fatal("Moderation operation denied")}
+  }
   log.Print("Off-chain moderation decision recorded");return
  }
  if len(os.Args)!=1||os.Getenv("SOCIAL420_MODE")!="restricted-acceptance"{
@@ -82,6 +89,15 @@ func main(){
   if e=handler.EnableAccountExtras(messages,games);e!=nil{log.Fatal(e)}
  }else if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!=""&&os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!="disabled"{
   log.Fatal("Unrecognized account messaging/game activation mode")
+ }
+ if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyXP(ctx);e!=nil{done();log.Fatal("AUTH-10 XP schema/grants unavailable")}
+  done()
+  xp,e:=social.NewContributions(store);if e!=nil{log.Fatal(e)}
+  if e=handler.EnableXP(xp);e!=nil{log.Fatal(e)}
+ }else if os.Getenv("SOCIAL420_XP_MODE")!=""&&os.Getenv("SOCIAL420_XP_MODE")!="disabled"{
+  log.Fatal("Unrecognized XP activation mode")
  }
  mux:=http.NewServeMux()
  mux.Handle("/social-api/",http.StripPrefix("/social-api",handler))

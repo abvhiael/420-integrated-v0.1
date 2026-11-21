@@ -390,6 +390,8 @@ contract GovernanceRec4Lifecycle420Test {
         bytes32 threshold = _create(CivicIds420.ProposalClass.G4, actions);
         vm.roll(block.number + 1);
         _vote(threshold, CivicIds420.House.COMMUNITY, ALICE, CivicVoting420.Support.FOR);
+        CivicGovernor420.HouseResult memory exact = governor.resultFor(threshold, CivicIds420.House.COMMUNITY);
+        require(exact.participation == 1 && exact.quorumMet, "exact 50 percent quorum");
         _vote(threshold, CivicIds420.House.COMMUNITY, BOB, CivicVoting420.Support.AGAINST);
         _vote(threshold, CivicIds420.House.VALIDATOR, CAROL, CivicVoting420.Support.FOR);
         _vote(threshold, CivicIds420.House.VALIDATOR, DAVE, CivicVoting420.Support.ABSTAIN);

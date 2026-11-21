@@ -92,7 +92,7 @@ body{background:var(--bg);color:var(--text)}
   .brand small,.header-state .status{display:none}
   .app-layout{display:block;padding:16px 14px 88px}
   .app-sidebar{display:none}
-  .app-nav--mobile{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:max(8px,env(safe-area-inset-bottom)) 6px 8px;border-top:1px solid var(--line);background:rgba(11,11,11,.96);backdrop-filter:blur(12px)}
+  .app-nav--mobile{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:max(8px,env(safe-area-inset-bottom)) 6px 8px;border-top:1px solid var(--line);background:rgba(11,11,11,.96);backdrop-filter:blur(12px)}
   .app-nav--mobile .app-nav__item{flex-direction:column;gap:2px;padding:7px 4px;font-size:.7rem}
 }
 
@@ -172,3 +172,11 @@ body{background:var(--bg);color:var(--text)}
 .social-comments {display:grid;gap:.5rem;list-style:none;padding:0;margin:0}
 .social-comments li {white-space:pre-wrap;overflow-wrap:anywhere}
 @media (max-width:650px){.account-social form,.social-post{padding:.75rem}}
+
+/* AUTH-9: separate free, off-chain account quick games. */
+.account-game-board {display:grid;gap:.15rem;max-width:390px;padding:.6rem;border:1px solid var(--border,rgba(255,255,255,.18));border-radius:10px;overflow-x:auto}
+.account-game-board .game-row {display:flex;gap:.15rem}
+.account-game-board .game-cell {display:flex;align-items:center;justify-content:center;min-width:2rem;min-height:2.2rem;flex:1;border:1px solid currentColor;border-radius:4px;font-size:1.1rem;font-weight:700}
+.game-choices {display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.4rem;max-width:560px}
+.account-social select {box-sizing:border-box;max-width:100%;padding:.5rem}
+.account-social article {overflow-wrap:anywhere}

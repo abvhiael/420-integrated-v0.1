@@ -17,6 +17,8 @@
     "games": true,
     "rewards": true,
     "moderation": true,
-    "accountSocial": false
+    "accountSocial": false,
+    "accountMessaging": false,
+    "accountGames": false
   }
 }

@@ -35,8 +35,10 @@ func Migrate(ctx context.Context,db *sql.DB)error{
  if db==nil{return ErrInvalid}
  tx,e:=db.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
  if _,e=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420000008)");e!=nil{return e}
- sqlText,e:=migrations.ReadFile("migrations/001_social.sql");if e!=nil{return e}
- if _,e=tx.ExecContext(ctx,string(sqlText));e!=nil{return e}
+ for _,path:=range []string{"migrations/001_social.sql","migrations/002_account_messages_games.sql"}{
+  sqlText,e:=migrations.ReadFile(path);if e!=nil{return e}
+  if _,e=tx.ExecContext(ctx,string(sqlText));e!=nil{return e}
+ }
  return tx.Commit()
 }
 func (s *Store) Ready(ctx context.Context)error{
@@ -54,7 +56,8 @@ func (s *Store) Ready(ctx context.Context)error{
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'INSERT'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'SELECT,INSERT,DELETE'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT,INSERT,UPDATE,DELETE'),false)`).Scan(&ok)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT,INSERT,UPDATE,DELETE'),false)
+`).Scan(&ok)
  if e!=nil{return e}
  if !ok{return ErrUnavailable}
  return nil
@@ -285,4 +288,19 @@ func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator strin
  (id,post_id,action,reason,operator_ref) VALUES($1,$2,$3,$4,$5)`,id,postID,action,reason,operator)
  if e!=nil{return e}
  return tx.Commit()
+}
+
+// ReadyAccountExtras is opt-in so existing AUTH-8 restricted service never
+// requires migration 002 or additional runtime privileges until activated.
+func (s *Store) ReadyAccountExtras(ctx context.Context)error{
+ var ok bool
+ e:=s.DB.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.direct_messages'),'SELECT,INSERT'),false)
+ AND COALESCE(has_column_privilege(current_user,'bg_account_social.direct_messages','sender_deleted_at','UPDATE'),false)
+ AND COALESCE(has_column_privilege(current_user,'bg_account_social.direct_messages','recipient_deleted_at','UPDATE'),false)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_games'),'SELECT,INSERT,UPDATE'),false)
+ AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_game_moves'),'SELECT,INSERT'),false)`).Scan(&ok)
+ if e!=nil{return e}
+ if !ok{return ErrUnavailable}
+ return nil
 }

@@ -19,7 +19,7 @@ const setDistance=(p,km)=>{p.played=[{type:'mileage',km,uid:123456}];p.km=km;};
 test('Canadian Classics catalogue retains planned/registry boundaries without expanding on-chain enum',()=>{
  const group=CLASSIC_COLLECTIONS.find(x=>x.id==='canadian');
  assert.deepEqual(group.games.map(x=>x.title),['Kaiser','Tarabish','Forty-Fives (45s)','120s','Deux Cents (200)','Hola','Rook','Nines','Cross-Country Chaos']);
- assert.equal(group.games.filter(x=>x.status==='local').length,1);
+ assert.equal(group.games.filter(x=>x.status==='account').length,1);
  for(const name of ['Crazy Eights','Euchre','Go Fish','Hearts','Spades','500','Canasta','Rummy','Asshole','Go','Four-Player Mahjong'])
   assert.ok(ALL_CLASSICS.some(x=>x.title===name),name);
  assert.equal(GAME_TYPES.length,7);

@@ -10,7 +10,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
   item('hola','Hola','2 or 4','planned','Ukrainian-Canadian Prairie card tradition.'),
   item('rook','Rook','4','planned','Traditional numbered-deck partnership game.'),
   item('nines','Nines','3–4','planned','Also called Le Neuf; regional trick-taking game.'),
-  item('cross-country-chaos','Cross-Country Chaos','2–4','local','Three regional races, one national champion. Local pass-and-play.')
+  item('cross-country-chaos','Cross-Country Chaos','2–4','account','Three regional races, one national champion. Separate 420ID accounts.')
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([
   item('cribbage','Cribbage','2–4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),

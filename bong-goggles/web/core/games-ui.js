@@ -2,7 +2,7 @@ import {card,emptyState,escapeHtml,button} from './design-system.js';
 import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} from './games.js';
 import {CLASSIC_ROADMAP,ALL_CLASSICS,classicGameById} from './classics.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
-const statusText=game=>game.status==='local'?'Playable locally':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
+const statusText=game=>game.status==='account'?'Account multiplayer':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
 const gameTile=game=>{
  const url='/games/'+game.id;
  return '<article class="games-catalogue__tile"><div><small class="games-catalogue__phase">'+escapeHtml(game.milestone??'More games')+'</small><h3><a href="'+escapeHtml(url)+'" data-route="classic-game">'+escapeHtml(game.title)+'</a></h3><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p></div><p class="games-catalogue__meta">'+escapeHtml(game.players)+' players · '+escapeHtml(statusText(game))+'</p></article>';
@@ -15,16 +15,16 @@ export function renderGameCatalogue(){
  return '<div class="games-catalogue"><div class="games-catalogue__intro"><p class="eyebrow">BongGoggles · Free-to-play game night</p><h2>Games</h2><p>Explore all 25 Classics in their development order. Each game has its own page; listed or registered games are not playable until a verified engine and multiplayer service are released.</p><nav aria-label="Games collections"><a href="#main-classics">Main Classics</a><a href="#canadian-classics">Canadian Classics</a><a href="#other-games">Other games</a><a href="/classics" data-route="classics">Classic catalogue</a></nav></div>'+
  section('main-classics','Main Classics',main)+section('canadian-classics','Canadian Classics',canadian)+
  section('other-games','More BongGoggles games',extras)+
- '<p class="games-catalogue__footnote">No wagers or rewards. Browse without a wallet. For existing wallet-independent two-player quick games, visit <a href="/account/games" data-route="account-games">Account Games</a>. Cross-Country Chaos is playable locally from its game page.</p></div>';
+ '<p class="games-catalogue__footnote">No wagers or rewards. Browse without a wallet. For existing wallet-independent two-player quick games, visit <a href="/account/games" data-route="account-games">Account Games</a>. Cross-Country Chaos uses private 420ID account rooms.</p></div>';
 }
 export function renderClassicGamePage(gameId){
  const game=classicGameById(gameId);
  if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
  const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
- const playLink=game.status==='local'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos (local)</a>':'';
- const status=game.status==='local'?'Playable locally — human pass-and-play with optional computer opponents':statusText(game);
+ const playLink=game.status==='account'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos</a>':'';
+ const status=game.status==='account'?'Online multiplayer — separate 420ID accounts':statusText(game);
  const note=game.status==='registry'?'The legacy on-chain session type exists, but no qualified interactive game board or match creation is available.':
-  game.status==='local'?'Use the existing Cross-Country Chaos game page; online multiplayer is not implemented.':
+  game.status==='account'?'Sign in with 420ID to create or join a private room; the game service must be online.':
   'The game page is available, but the rules engine, computer opponents and online multiplayer are not released.';
  return '<section class="games-game-page"><p><a href="/games" data-route="games">← All Games</a> · <a href="/classics" data-route="classics">Classics catalogue</a></p><p class="eyebrow">BongGoggles · '+escapeHtml(step?.milestone??'Other games')+'</p><h2>'+escapeHtml(game.title)+'</h2><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p><dl class="games-game-page__facts"><div><dt>Players</dt><dd>'+escapeHtml(game.players)+'</dd></div><div><dt>Availability</dt><dd>'+escapeHtml(status)+'</dd></div></dl><p class="games-game-page__notice" role="status">'+escapeHtml(note)+'</p>'+playLink+'<p class="games-catalogue__footnote">Zero-wager game. A wallet is not required to browse. This page does not create a match or claim a finished game engine.</p></section>';
 }

@@ -159,6 +159,64 @@ test('protective upgrades and legendary shields block eligible hazards and reset
  assert.equal(s.players[0].shield,2);
  assert.deepEqual(s.retiredLegendaries,['rodeo']);
 });
+test('Truck, Sunshine and risky legendary Shortcut have exact one-use consequences',()=>{
+ let truck=start();truck.players[0].status={id:'flat',name:'Flat tire',kind:'block',category:'mechanical'};
+ put(truck,0,card('legendary',{id:'truck',name:'A Guy I Know Has a Truck'}));
+ truck=takeChaosTurn(truck,{player:0,action:'power',index:0});
+ assert.equal(truck.players[0].status,null);assert.equal(truck.players[0].km,100);
+ assert.deepEqual(truck.retiredLegendaries,['truck']);
+ let sun=start();sun.players[1].status={id:'fog',name:'Fog',category:'weather',kind:'slow',amount:150};
+ sun.players[2].status={id:'whiteout',name:'Whiteout',category:'weather',kind:'block'};
+ sun.players[3].status={id:'pothole',name:'Pothole',category:'mechanical',kind:'block'};
+ put(sun,0,card('legendary',{id:'sunshine',name:'Would You Look at That!'}));
+ sun=takeChaosTurn(sun,{player:0,action:'power',index:0});
+ assert.equal(sun.players[1].status,null);assert.equal(sun.players[2].status,null);
+ assert.ok(sun.players[3].status);assert.equal(sun.players[0].km,100);
+ let shortcut=start();put(shortcut,0,card('legendary',{id:'shortcut',name:'Trust Me, I Know a Shortcut'}));
+ shortcut=takeChaosTurn(shortcut,{player:0,action:'power',index:0});
+ assert.equal(shortcut.players[0].bonusKm,300);
+ assert.ok(shortcut.players[0].status||shortcut.players[0].detourLoss>0);
+ assert.deepEqual(shortcut.retiredLegendaries,['shortcut']);
+});
+test('Station Wagon repairs only on owners turn and Shortcut Specialist boosts a single mileage action',()=>{
+ let s=start();
+ s.players[1].upgrades=[{id:'station-wagon',name:'Station Wagon',category:'mechanical'}];
+ s.players[1].status={id:'flat',name:'Flat',category:'mechanical',kind:'block'};
+ s=takeChaosTurn(s,{player:0,action:'pass'});s=endDiscard(s);
+ assert.equal(s.turn,1);assert.equal(s.players[1].status,null);
+ assert.ok(s.players[1].used.includes('station-wagon'));
+ let boost=start();boost.players[0].upgrades=[{id:'shortcut-specialist',name:'Shortcut Specialist',category:'boost'}];
+ put(boost,0,card('mileage',{km:200}));
+ boost=takeChaosTurn(boost,{player:0,action:'drive',index:0,useBoost:true});
+ assert.equal(boost.players[0].km,300);assert.ok(boost.players[0].used.includes('shortcut-specialist'));
+ boost.step='play';put(boost,0,card('mileage',{km:100}));
+ assert.throws(()=>takeChaosTurn(boost,{player:0,action:'drive',index:0,useBoost:true}),/boost unavailable/);
+});
+test('illegal extra upgrades, invalid targets and out-of-phase moves fail without mutating state',()=>{
+ let s=start();
+ s.players[0].upgrades=[{id:'thermos',name:'Thermos',category:'all'}];
+ put(s,0,card('upgrade',{id:'thermos',name:'Thermos',category:'all'}));
+ const before=structuredClone(s);
+ assert.throws(()=>takeChaosTurn(s,{player:0,action:'power',index:0}),/already installed/);
+ assert.deepEqual(s,before);
+ put(s,0,card('hazard',{id:'pothole',name:'Pothole',kind:'block',category:'mechanical'}));
+ assert.throws(()=>takeChaosTurn(s,{player:0,action:'hazard',index:0,target:0}),/eligible opponent/);
+ s.players[1].status={id:'fog',name:'Fog',kind:'slow',category:'weather',amount:150};
+ assert.throws(()=>takeChaosTurn(s,{player:0,action:'hazard',index:0,target:1}),/eligible opponent/);
+ const submitted=takeChaosTurn(s,{player:0,action:'pass'});
+ assert.throws(()=>takeChaosTurn(submitted,{player:0,action:'power',index:0}),/Discard one card/);
+});
+test('detours at zero do not create future debt; 400 km drive risks a regional self-hazard',()=>{
+ let s=start();
+ put(s,0,card('hazard',{id:'cabot',name:'Cabot',kind:'detour',amount:150,category:'navigation'}));
+ s=takeChaosTurn(s,{player:0,action:'hazard',index:0,target:1});
+ assert.equal(s.players[1].km,0);assert.equal(s.players[1].detourLoss,0);
+ let risk=start();put(risk,0,card('mileage',{km:400}));
+ risk=takeChaosTurn(risk,{player:0,action:'drive',index:0});
+ assert.equal(risk.players[0].played[0].km,400);
+ assert.ok(risk.players[0].status||risk.players[0].detourLoss>0);
+ assert.ok(risk.log.some(message=>message.includes('risked a 400 km drive')));
+});
 test('winner banks 2,500 km, others bank capped effective mileage, and final round completes in equal turns',()=>{
  let s=start();setDistance(s.players[0],2350);setDistance(s.players[1],2450);
  setDistance(s.players[2],1950);setDistance(s.players[3],1000);

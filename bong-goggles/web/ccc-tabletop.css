@@ -1,0 +1,241 @@
+/* CCC-ART-4 — Hand-built vintage Canadian tabletop. Everything is CSS/SVG;
+   approved card illustrations remain the single source for card faces. */
+.ccc-wrap--roadtrip .ccc-tabletop--road-atlas{
+ position:relative;isolation:isolate;overflow:hidden;min-width:0;
+ padding:clamp(.6rem,1.6vw,1rem);border:3px solid #b49a61;border-radius:1.1rem;
+ background:repeating-linear-gradient(89deg,#392a1a 0 7px,#422f1c 7px 16px,#382a1b 16px 23px);
+ box-shadow:inset 0 0 0 5px #1b382b,0 10px 26px #09150fa0;
+}
+.ccc-wrap--roadtrip .ccc-tabletop--road-atlas::before{
+ content:"";position:absolute;inset:8px;z-index:-1;pointer-events:none;
+ border-radius:.75rem;background:radial-gradient(ellipse at 43% 22%,#ffffff0b,transparent 75%),
+ repeating-linear-gradient(132deg,#ffffff05 0 1px,transparent 1px 6px),#173a2b;
+}
+.ccc-wrap--roadtrip .ccc-table-piles{
+ position:relative;border:2px solid #9f8a5c;border-radius:.75rem;
+ padding:1.1rem .8rem;background:radial-gradient(ellipse at center,#2f543bb0,#183d2b 80%);
+ box-shadow:0 4px 0 #092017, inset 0 0 0 4px #153c2a;
+}
+.ccc-wrap--roadtrip .ccc-table-piles::after{
+ content:"ROAD KIT  •  THE LONG WAY HOME";position:absolute;right:.8rem;bottom:.16rem;
+ font:800 .57rem var(--ccc-sign);letter-spacing:.14em;color:#bdc7aa;pointer-events:none;
+}
+.ccc-wrap--roadtrip .ccc-stock,.ccc-wrap--roadtrip .ccc-discard-public{
+ min-width:0;position:relative;justify-content:start;align-items:center;
+ padding:.5rem .3rem;border-radius:.6rem;gap:.45rem;
+}
+.ccc-wrap--roadtrip button.ccc-pile-control{
+ appearance:none;display:flex;flex-direction:column;text-align:center;
+ color:#f9f1d8!important;background:#245038;border:2px solid #c7ac71;
+ box-shadow:inset 0 0 0 3px #123323,0 3px 0 #09180f;cursor:pointer;
+ padding:.5rem .3rem;line-height:1.4;font-weight:inherit;letter-spacing:normal;
+}
+.ccc-wrap--roadtrip button.ccc-pile-control:hover{
+ background:#2f6045;border-color:#ffdf8e;
+ box-shadow:inset 0 0 0 3px #173e2d,0 3px 0 #09180f;
+}
+.ccc-wrap--roadtrip button.ccc-pile-control:focus-visible{
+ outline:3px solid #fff3b3;outline-offset:3px;
+}
+.ccc-wrap--roadtrip .ccc-stock-back,
+.ccc-wrap--roadtrip .ccc-pile-face{
+ position:relative;isolation:isolate;flex:none;
+ border:3px solid #ead5a6;border-radius:.5rem;transform:rotate(-2deg);
+ box-shadow:3px 4px 0 #a18c6f,6px 7px 0 #c3b69c,8px 10px 15px #05150dbb;
+}
+.ccc-wrap--roadtrip .ccc-pile-face{
+ transform:rotate(2deg);box-shadow:3px 5px 0 #a28d71,5px 8px 11px #071a10b0;
+}
+.ccc-wrap--roadtrip .ccc-stock-back::before{
+ content:"";position:absolute;inset:5px;border:1px dashed #fff5c1;border-radius:.27rem;
+ pointer-events:none;
+}
+.ccc-wrap--roadtrip .ccc-stock-back::after{
+ content:"";position:absolute;inset:18% 14%;border:1px solid #f4d98caa;
+ border-radius:50%;pointer-events:none;
+}
+.ccc-wrap--roadtrip .ccc-stock-back .ccc-stock-symbol{
+ color:#fff0ae;font-size:1.1rem;line-height:1;z-index:1;
+}
+.ccc-wrap--roadtrip .ccc-stock-back span:nth-child(2){
+ color:#fff1ae;font:900 1.15rem/1.1 var(--ccc-display);z-index:1;
+}
+.ccc-wrap--roadtrip .ccc-stock-back span:nth-child(3){
+ color:#fce8b6;font:800 .6rem var(--ccc-sign);letter-spacing:.12em;z-index:1;
+}
+.ccc-wrap--roadtrip .ccc-table-piles strong{
+ color:#f7ebc8;font:850 .83rem/1.3 var(--ccc-sign);
+ text-transform:uppercase;letter-spacing:.05em;
+}
+.ccc-wrap--roadtrip .ccc-table-piles small{color:#e4dfc6;line-height:1.4;}
+.ccc-wrap--roadtrip .ccc-pile-instruction{
+ display:block;font:800 .7rem/1.3 var(--ccc-sign);
+ color:#163322;background:var(--ccc-gold);padding:.2rem .45rem;border-radius:99px;
+}
+.ccc-wrap--roadtrip .ccc-spent-tray{
+ min-width:0;min-height:115px;padding:.5rem;
+ border:1px dashed #9caa87;border-radius:.5rem;
+ background:repeating-linear-gradient(60deg,#e5e1b807 0 4px,transparent 4px 9px),#0d2c2288;
+}
+.ccc-wrap--roadtrip .ccc-spent-card{transform:rotate(-2deg)}
+.ccc-wrap--roadtrip .ccc-spent-card:nth-child(even){transform:rotate(3deg)}
+.ccc-wrap--roadtrip .ccc-player-table{align-items:stretch;gap:1rem}
+.ccc-wrap--roadtrip .ccc-seat-mat{
+ position:relative;isolation:isolate;overflow:hidden;
+ border:2px solid #bba470;border-radius:.8rem;
+ box-shadow:inset 0 0 0 4px #153928,0 3px 0 #071a15,0 9px 17px #020d096b;
+}
+.ccc-wrap--roadtrip .ccc-seat-mat::before{
+ content:"";position:absolute;inset:9px;z-index:-1;
+ border:1px dashed #b5ab7f7d;border-radius:.35rem;pointer-events:none;
+}
+.ccc-wrap--roadtrip .ccc-seat-mat>header{
+ position:relative;border-bottom:2px solid #b49e62;padding:.3rem .25rem .7rem;
+}
+.ccc-wrap--roadtrip .ccc-seat-mat--active{
+ border-color:#f5d78e;box-shadow:inset 0 0 0 4px #244a34,0 0 0 2px #ffe8a5,0 8px 15px #08160dad;
+}
+.ccc-wrap--roadtrip .ccc-seat-areas{gap:.75rem}
+.ccc-wrap--roadtrip .ccc-art-zone{
+ min-height:112px;padding:.65rem .7rem;border-radius:.5rem;
+ border:1px solid #9b9c7399;background:linear-gradient(155deg,#0d291f88,#31513a44);
+}
+.ccc-wrap--roadtrip .ccc-art-zone h5{
+ margin:0 0 .55rem;display:flex;align-items:center;gap:.4rem;
+ font:900 .72rem/1.35 var(--ccc-sign);letter-spacing:.085em;
+}
+.ccc-wrap--roadtrip .ccc-art-zone h5::before{
+ content:"✦";color:var(--ccc-gold);font-size:.85rem;line-height:1;
+}
+.ccc-wrap--roadtrip .ccc-art-zone--hazard{
+ background:repeating-linear-gradient(135deg,#e0a8580b 0 6px,transparent 6px 17px),#302d2388;
+}
+.ccc-wrap--roadtrip .ccc-hazard-slot{
+ min-height:86px;display:flex;align-items:center;gap:.6rem;
+ border:2px dashed #d3a25f;border-radius:.4rem;padding:.45rem;
+ background:#11271d7d;position:relative;
+}
+.ccc-wrap--roadtrip .ccc-hazard-slot::after{
+ content:"ROADWORK";position:absolute;right:.4rem;top:.3rem;
+ font:800 .53rem var(--ccc-sign);letter-spacing:.14em;color:#e1bd84a6;
+}
+.ccc-wrap--roadtrip .ccc-hazard-clear{
+ display:flex;align-items:center;gap:.5rem;color:#e5eed6;min-height:65px;
+}
+.ccc-wrap--roadtrip .ccc-clear-stamp{
+ display:inline-grid;place-items:center;width:38px;height:38px;flex:none;
+ border:2px solid #b2d9b2;color:#daf7d3;border-radius:50%;
+ font:900 1.1rem var(--ccc-sign);transform:rotate(-14deg);
+}
+.ccc-wrap--roadtrip .ccc-mini-card--hazard{
+ position:relative;border:2px solid #e3a65b;border-radius:.45rem;padding:.25rem;
+ background:#422b1f;max-width:95px;
+}
+.ccc-wrap--roadtrip .ccc-hazard-ribbon{
+ position:absolute;top:1px;right:0;z-index:1;
+ padding:.15rem .28rem;border-radius:0 .2rem 0 .2rem;
+ background:#e4af69;color:#282114;font:900 .56rem var(--ccc-sign);letter-spacing:.04em;
+}
+.ccc-wrap--roadtrip .ccc-art-zone--mileage{min-height:135px}
+.ccc-wrap--roadtrip .ccc-mileage-card-stack{
+ position:relative;isolation:isolate;min-width:0;
+ padding:.28rem .28rem .45rem;margin:.2rem .1rem .4rem;
+ background:#d7c8a4;border:1px solid #bba77d;border-radius:.36rem;
+ box-shadow:3px 3px 0 #807253,5px 6px 0 #d0c09e,6px 10px 12px #0007;
+}
+.ccc-wrap--roadtrip .ccc-mileage-card-stack::before{
+ content:"";position:absolute;inset:-3px 0 3px -3px;z-index:-1;
+ background:#f1e1bf;border:1px solid #a88e63;border-radius:.3rem;transform:rotate(-4deg);
+}
+.ccc-wrap--roadtrip .ccc-mileage-card-stack[data-stack-count="1"]::before{
+ transform:rotate(-1deg);
+}
+.ccc-wrap--roadtrip .ccc-mileage-card-stack img{
+ display:block;width:100%;border-radius:.25rem;box-shadow:0 2px 4px #0005;
+}
+.ccc-wrap--roadtrip .ccc-mileage-card-stack figcaption{
+ margin:.15rem -.15rem -.24rem;color:#27392e;text-align:center;
+ font:900 .68rem/1.45 var(--ccc-sign);font-variant-numeric:tabular-nums;
+}
+.ccc-wrap--roadtrip .ccc-mileage-stack-paper{display:none}
+.ccc-wrap--roadtrip .ccc-art-zone--power{
+ border-color:#b9a06b;background:linear-gradient(145deg,#1d362e,#142a2477);
+}
+.ccc-wrap--roadtrip .ccc-power-rack{
+ position:relative;min-height:91px;align-content:start;
+ padding:.6rem;border-radius:.45rem;border:2px dashed #b6a577a8;
+ background:linear-gradient(115deg,#d3b77e0d,transparent 50%),#142c22bd;
+}
+.ccc-wrap--roadtrip .ccc-power-rack--empty{
+ display:flex;align-items:center;color:#e6e8d5;
+}
+.ccc-wrap--roadtrip .ccc-mini-card--equipped{
+ position:relative;min-width:65px;width:76px;max-width:85px;
+ background:#eadab4;border:1px solid #e5cb83;border-radius:.4rem;
+ padding:.22rem;box-shadow:2px 3px 6px #001b0eaa;
+}
+.ccc-wrap--roadtrip .ccc-mini-card--equipped figcaption{
+ color:#263c2c;font-weight:800;padding:.15rem .08rem;
+}
+.ccc-wrap--roadtrip .ccc-mini-card--used{filter:saturate(.55)}
+.ccc-wrap--roadtrip .ccc-power-stamp{
+ position:absolute;top:.18rem;right:.15rem;
+ background:#eac973;color:#183223;
+ padding:.1rem .17rem;border-radius:.2rem;
+ font:900 .53rem var(--ccc-sign);letter-spacing:.04em;box-shadow:0 1px 3px #0007;
+}
+.ccc-wrap--roadtrip .ccc-power-stamp--used{background:#bfc5b9;color:#26342b}
+.ccc-wrap--roadtrip .ccc-shield{
+ display:flex;gap:.3rem;align-items:center;margin:.45rem 0 0;
+ font-weight:800;color:#f6deb0;
+}
+.ccc-wrap--roadtrip .ccc-shield-emblem{font-size:1.25rem;color:#ffe69c}
+.ccc-wrap--roadtrip .ccc-repair-feedback{
+ display:flex;align-items:center;gap:.5rem;position:relative;
+ overflow:hidden;margin:.65rem 0;padding:.55rem .65rem;
+ border:2px solid #f3d48b;border-radius:.45rem;
+ background:linear-gradient(125deg,#305b43,#204334);color:#fff7d8;
+ box-shadow:inset 0 0 0 2px #143628,0 4px 10px #0005;
+ animation:ccc-repair-appear .5s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-repair-feedback>div{display:grid;gap:.14rem;min-width:0}
+.ccc-wrap--roadtrip .ccc-repair-feedback strong{
+ font:900 .83rem/1.2 var(--ccc-display);color:#fff5cf;
+}
+.ccc-wrap--roadtrip .ccc-repair-feedback span{font-size:.73rem;line-height:1.35}
+.ccc-wrap--roadtrip .ccc-repair-glyph{flex:none;color:#f7d98b;animation:ccc-repair-turn .8s ease-out both}
+.ccc-wrap--roadtrip .ccc-repair-spark{
+ position:absolute;left:3.7rem;top:.18rem;color:#ffe8aa;
+ animation:ccc-repair-spark .85s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-repair-feedback--shortcut{border-color:#8ad1e0}
+.ccc-wrap--roadtrip .ccc-repair-feedback--recovery{border-color:#dec19e}
+@keyframes ccc-repair-appear{from{opacity:.45;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ccc-repair-turn{from{transform:rotate(-38deg) scale(.8)}to{transform:rotate(0) scale(1)}}
+@keyframes ccc-repair-spark{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@media(max-width:700px){
+ .ccc-wrap--roadtrip .ccc-tabletop--road-atlas{padding:.5rem}
+ .ccc-wrap--roadtrip .ccc-table-piles{grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem}
+ .ccc-wrap--roadtrip .ccc-used-area{grid-column:1/-1}
+}
+@media(max-width:440px){
+ .ccc-wrap--roadtrip .ccc-seat-mat{padding:.6rem}
+ .ccc-wrap--roadtrip .ccc-art-zone{padding:.5rem}
+ .ccc-wrap--roadtrip .ccc-mileage-card-stack{max-width:68px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ccc-wrap--roadtrip .ccc-repair-feedback,
+ .ccc-wrap--roadtrip .ccc-repair-glyph,
+ .ccc-wrap--roadtrip .ccc-repair-spark{animation:none!important;transition:none!important}
+}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-tabletop--road-atlas,
+ .ccc-wrap--roadtrip .ccc-art-zone,
+ .ccc-wrap--roadtrip .ccc-hazard-slot,
+ .ccc-wrap--roadtrip .ccc-mileage-card-stack,
+ .ccc-wrap--roadtrip .ccc-power-rack,
+ .ccc-wrap--roadtrip .ccc-repair-feedback{border:2px solid CanvasText;box-shadow:none}
+ .ccc-wrap--roadtrip button.ccc-pile-control{background:ButtonFace;color:ButtonText!important;border:2px solid ButtonText}
+ .ccc-wrap--roadtrip .ccc-repair-glyph,.ccc-wrap--roadtrip .ccc-power-stamp{color:CanvasText}
+ .ccc-wrap--roadtrip .ccc-stock-back::after{display:none}
+}

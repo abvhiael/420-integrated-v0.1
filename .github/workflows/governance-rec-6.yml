@@ -74,7 +74,7 @@ jobs:
           python3 scripts/verify-governance-audit-7.py
       - name: Cold-start 19 actual Timelock operations, dual-house lifecycle and adversarial invariants
         working-directory: contracts
-        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test forge test --match-path test/GovernanceRec4Lifecycle420.t.sol -vvv
+        run: bash ../scripts/qualify-governance-focused.sh
       - name: Forbidden authority primitive scan
         run: |
           if grep -R -nE 'tx\.origin|selfdestruct[[:space:]]*\(|\.delegatecall[[:space:]]*\(' contracts/src/governance; then

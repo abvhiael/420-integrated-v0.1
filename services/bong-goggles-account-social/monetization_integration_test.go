@@ -32,10 +32,14 @@ func TestAUTH11PrivateMonetizationStatusRevocationAndModeGate(t *testing.T){
  if result:=request(h,"GET","/v1/monetization","",a);result.Code!=200{
   t.Fatal("420ID confidential status unavailable",result.Code,result.Body.String())
  }else if result.Header().Get("Cache-Control")!="no-store"||
-  !containsAll(result.Body.String(),`"rewardOptIn":true`,`"walletLinked":false`,`"canClaim":false`,`"financialAuthority":false`){
+  !containsAll(result.Body.String(),`"subject":"`+memberA+`"`,`"programme":{`,`"rewardOptIn":true`,`"walletLinked":false`,`"canClaim":false`,`"financialAuthority":false`){
   t.Fatal("status claims paid authority",result.Body.String())
  }
- if result:=request(h,"GET","/v1/monetization","",b);result.Code!=200{t.Fatal("other app member denied",result.Code)}
+ if result:=request(h,"GET","/v1/monetization","",b);result.Code!=200||
+ !strings.Contains(result.Body.String(),`"subject":"`+memberB+`"`)||
+ strings.Contains(result.Body.String(),`"subject":"`+memberA+`"`){
+  t.Fatal("cross-account programme response",result.Code,result.Body.String())
+ }
  broker.mu.Lock();broker.tokens=map[string]string{};broker.mu.Unlock()
  if result:=request(h,"GET","/v1/monetization","",a);result.Code!=401{t.Fatal("revoked parent retained monetization",result.Code)}
 }

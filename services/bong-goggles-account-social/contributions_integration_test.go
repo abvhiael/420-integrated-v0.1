@@ -4,6 +4,9 @@ package social
 
 import (
  "context"
+ "database/sql"
+ "os"
+ "strings"
  "encoding/json"
  "fmt"
  "net/http"
@@ -153,4 +156,40 @@ func TestAUTH10BlockedCommentCannotCreateXP(t *testing.T){
   t.Fatal("unblocked qualifying comment rejected",r.Code,r.Body.String())
  }
  if after= xpSummary(t,h,peer);after.Total!=before.Total+2{t.Fatal("peer contribution not counted after unblock",after)}
+}
+
+func TestAUTH10XPStartupRejectsMissingAndMutablePrivileges(t *testing.T){
+ store,_,_,_:=fixture(t)
+ marker,e:=newID();if e!=nil{t.Fatal(e)}
+ role:="bg_xp_check_"+strings.ReplaceAll(marker,"-","")
+ ctx:=context.Background()
+ if _,e=store.DB.ExecContext(ctx,"CREATE ROLE "+role+" NOLOGIN");e!=nil{t.Fatal(e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT USAGE ON SCHEMA bg_account_social TO "+role);e!=nil{t.Fatal(e)}
+ probe,e:=sql.Open("postgres",os.Getenv("ACCOUNT420_TEST_DSN"));if e!=nil{t.Fatal(e)}
+ probe.SetMaxOpenConns(1)
+ t.Cleanup(func(){
+  _=probe.Close()
+  if _,e:=store.DB.Exec("REVOKE ALL ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Error("revoke privileges",e)}
+  if _,e:=store.DB.Exec("REVOKE USAGE ON SCHEMA bg_account_social FROM "+role);e!=nil{t.Error("revoke schema",e)}
+  if _,e:=store.DB.Exec("DROP ROLE "+role);e!=nil{t.Error("drop test role",e)}
+ })
+ if _,e=probe.ExecContext(ctx,"SET ROLE "+role);e!=nil{t.Fatal("probe role",e)}
+ xpProbe,_:=NewStore(probe)
+ if e=xpProbe.ReadyXP(ctx);e!=ErrUnavailable{t.Fatal("no grants accepted",e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT SELECT ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXP(ctx);e!=ErrUnavailable{t.Fatal("read-only role accepted",e)}
+ if _,e=store.DB.ExecContext(ctx,"REVOKE SELECT ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Fatal(e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT INSERT ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXP(ctx);e!=ErrUnavailable{t.Fatal("append-only role accepted",e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT SELECT ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXP(ctx);e!=nil{t.Fatal("read/append role rejected",e)}
+ if e=xpProbe.ReadyXPRuntime(ctx);e!=nil{t.Fatal("least privilege role rejected",e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT UPDATE ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXPRuntime(ctx);e!=ErrUnavailable{t.Fatal("mutable role accepted",e)}
+ if _,e=store.DB.ExecContext(ctx,"REVOKE UPDATE ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Fatal(e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT DELETE ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXPRuntime(ctx);e!=ErrUnavailable{t.Fatal("delete-capable role accepted",e)}
+ if _,e=store.DB.ExecContext(ctx,"REVOKE DELETE ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Fatal(e)}
+ if _,e=store.DB.ExecContext(ctx,"GRANT UPDATE (points) ON bg_account_social.contribution_xp_events TO "+role);e!=nil{t.Fatal(e)}
+ if e=xpProbe.ReadyXPRuntime(ctx);e!=ErrUnavailable{t.Fatal("column-mutable role accepted",e)}
 }

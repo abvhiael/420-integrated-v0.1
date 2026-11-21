@@ -623,3 +623,30 @@ operator, SSO, privacy and rollback acceptance is qualified.
 Go race and HTTP/consent/revocation tests, with new browser and
 BongGoggles routing regressions. Record exact successful head and run IDs
 on the AUTH-11 PR, not as unverified claims in this document.
+
+
+## AUTH-12 — security, privacy and adversarial hardening
+
+The secure acceptance paths now reject non-ASCII JSON field names,
+case-folded duplicate keys and decoded key aliases. No registration,
+authorization, SSO exchange or monetization opt-in can exploit Go's
+case-insensitive struct field matching to override a checked value.
+SSO and wallet schema preflights check each PostgreSQL privilege
+independently; the previous multiple-privilege string incorrectly
+treated one existing grant as sufficient.
+
+The explicit `monetization-acceptance` serving path now rejects a database
+role that can DELETE/TRUNCATE any consent, UPDATE the entire consent
+table, or modify `account_id`/`app_id`. Use `SELECT,INSERT` and
+column-scoped `UPDATE(reward_opt_in,creator_opt_in,revision,updated_at)`
+only. Operator migrations remain privileged and separate.
+
+Confidential SSO introspection locks the current account, source session
+and child session while calculating the app-scoped readiness state. This
+prevents a revoked source session and a new opt-in/unlink state being read
+from two inconsistent snapshots. Browser opt-in controls clear on sign-out,
+tab visibility loss and rejected data, and ignore a late response issued by
+the prior session.
+
+See `docs/audit/AUTH-12-SECURITY-PRIVACY-QUALIFICATION.md` for the
+threat model, retained tests and non-production release boundary.

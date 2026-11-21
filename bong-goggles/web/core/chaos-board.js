@@ -4,6 +4,13 @@ import {LEGS} from './cross-country-chaos.js';
 import {chaosCardArt} from './chaos-card-art.js';
 import {escapeHtml as esc} from './design-system.js';
 
+// Keep the current hand visible only while the same human driver continues their turn.
+// A new seat or completed stage always returns to the privacy handoff screen.
+export function keepChaosHandRevealed(before,after,wasRevealed){
+ return Boolean(wasRevealed&&before?.phase==='playing'&&after?.phase==='playing'&&
+  before.turn===after.turn&&before.leg===after.leg&&
+  before.players?.[before.turn]?.id===after.players?.[after.turn]?.id);
+}
 const WIDTH=960,HEIGHT=415,FINISH=2500;
 const VEHICLE_COLORS=Object.freeze(['#f4bf57','#83d4fc','#ffa3a1','#c7a0ff']);
 const ROUTES=Object.freeze({

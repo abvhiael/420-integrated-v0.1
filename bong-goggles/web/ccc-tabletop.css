@@ -239,3 +239,21 @@
  .ccc-wrap--roadtrip .ccc-repair-glyph,.ccc-wrap--roadtrip .ccc-power-stamp{color:CanvasText}
  .ccc-wrap--roadtrip .ccc-stock-back::after{display:none}
 }
+
+/* CCC-ART-5: scenic atlas vignettes rest between the painted maps and live
+   highway lines. No event capture, no motion, no dependency on private cards. */
+.ccc-wrap--roadtrip .ccc-illustrated-scenery,
+.ccc-wrap--roadtrip .ccc-scenery-vignette{pointer-events:none}
+.ccc-wrap--roadtrip .ccc-scenery-vignette{
+ filter:drop-shadow(1px 2px 1px #0e29267a);
+}
+.ccc-wrap--roadtrip .ccc-scenery-label{
+ font-family:var(--ccc-sign);font-size:11px;font-weight:900;letter-spacing:.65px;
+ fill:#f9ebc1;stroke:#172f27;stroke-width:3.3px;stroke-linejoin:round;
+ paint-order:stroke;opacity:.96;
+}
+.ccc-wrap--roadtrip .ccc-scenery--potholes .ccc-scenery-label,
+.ccc-wrap--roadtrip .ccc-scenery--ferry .ccc-scenery-label{fill:#fff1ca}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-illustrated-scenery{display:none}
+}

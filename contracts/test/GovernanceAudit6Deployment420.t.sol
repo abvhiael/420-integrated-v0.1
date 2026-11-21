@@ -230,33 +230,50 @@ contract GovernanceAudit6Deployment420Test {
 
     function testUnapprovedBootstrapFailsClosedAndCannotCaptureTheFirstCaller() public {
         _deployCanonicalGraph();
-        (bool unapproved,) = address(compatibility).call(
-            abi.encodeCall(
-                Governance420.scheduleCanonicalCivicBootstrap,
-                (
-                    address(constitution), address(proposals), address(electorates), address(voting),
-                    address(governor), address(community), address(validator)
+        (bool unapproved,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(constitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
                 )
-            )
-        );
+            );
         require(!unapproved && !compatibility.bootstrapPlanScheduled(), "missing Genesis approval accepted");
 
         _seedApprovedGenesisPlan();
         CivicConstitution420 competingConstitution = new CivicConstitution420(address(timelock));
-        (bool competing,) = address(compatibility).call(
-            abi.encodeCall(
-                Governance420.scheduleCanonicalCivicBootstrap,
-                (
-                    address(competingConstitution), address(proposals), address(electorates), address(voting),
-                    address(governor), address(community), address(validator)
+        (bool competing,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(competingConstitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
                 )
-            )
-        );
+            );
         require(!competing && !compatibility.bootstrapPlanScheduled(), "unapproved graph captured bootstrap");
 
         compatibility.scheduleCanonicalCivicBootstrap(
-            address(constitution), address(proposals), address(electorates), address(voting),
-            address(governor), address(community), address(validator)
+            address(constitution),
+            address(proposals),
+            address(electorates),
+            address(voting),
+            address(governor),
+            address(community),
+            address(validator)
         );
         require(compatibility.bootstrapPlanScheduled(), "approved bootstrap not scheduled");
     }

@@ -49,7 +49,17 @@ test('CCC-4: Easy, Normal and Hard only submit action choices accepted by the CC
 test('CCC-4: each difficulty resolves the draw, play and discard phases legally',()=>{
  for(const level of CHAOS_COMPUTER_LEVELS){
   let s=game([level,'human']);
-  s.step='draw';s.players[0].openingTurn=false;s.discard=[card('mileage',{km:300})];
+  // Reach a genuine subsequent draw-to-seven: both seats passed and discarded
+  // two cards, keeping five in each hand. Never synthesize an impossible
+  // seven-card 'draw' state that the authoritative engine must reject.
+  for(const id of [0,1]){
+   s=takeChaosTurn(s,{player:id,action:'pass'});
+   while(s.turn===id&&s.step==='discard')
+    s=takeChaosTurn(s,{player:id,action:'discard',index:0});
+  }
+  assert.equal(s.turn,0);
+  assert.equal(s.step,'draw');
+  assert.equal(s.players[0].hand.length,5);
   let result=chooseMove(s);
   assert.equal(result.action,'draw');
   s=takeChaosTurn(s,{player:0,...result});

@@ -115,7 +115,7 @@ function bindChaos(){
  const countSelect=root.querySelector('#ccc-count');
  const updateSeats=()=>{
   const count=Number(countSelect?.value||4);
-  for(const row of root.querySelectorAll('[data-chaos-seat]'))row.hidden=Number(row.dataset.chaosSeat)>=count;
+  for(const row of root.querySelectorAll('[data-chaos-driver]'))row.parentElement.hidden=Number(row.dataset.chaosDriver)>=count;
  };
  countSelect?.addEventListener('change',updateSeats);updateSeats();
  for(const select of root.querySelectorAll('[data-chaos-vehicle-pick]'))select.addEventListener('change',()=>{

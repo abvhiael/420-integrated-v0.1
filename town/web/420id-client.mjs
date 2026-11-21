@@ -62,7 +62,7 @@ export function mountAppSession({root,app,enabled=false,
  const client=createAppSessionClient({app,fetchImpl});
  login.setAttribute('href',client.loginPath);
  root.hidden=false;
- let epoch=0,busy=false;
+ let epoch=0,busy=false,loggingOut=false;
  const display=(message,signedIn=false)=>{
   status.textContent=message;
   login.hidden=signedIn;logout.hidden=!signedIn;
@@ -72,7 +72,7 @@ export function mountAppSession({root,app,enabled=false,
   display('420ID session not verified.');
  };
  async function read(){
-  if(busy)return;
+  if(busy||loggingOut)return;
   const ticket=++epoch;busy=true;
   display('Verifying your 420ID account…');
   try{
@@ -86,14 +86,16 @@ export function mountAppSession({root,app,enabled=false,
   }finally{busy=false}
  }
  async function signOut(){
-  if(busy)return;
-  invalidate();busy=true;
+  if(loggingOut)return;
+  // Logout must still invalidate a pending status response: an old
+  // identity may never return to the screen after account switching.
+  loggingOut=true;invalidate();busy=true;
   try{
    await client.logout();
    display('Signed out of this app. Other application sessions are unchanged.');
   }catch{
    display('Sign-out could not be verified. Refresh your account status.');
-  }finally{busy=false}
+  }finally{busy=false;loggingOut=false}
  }
  logout.addEventListener('click',()=>void signOut());
  refresh.addEventListener('click',()=>void read());

@@ -55,7 +55,7 @@ export class ProtocolDecoderRegistry420 {
   }
 
   register(descriptor: ProtocolEventDescriptor420): void {
-    if (descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName) && (!descriptor.contractAddress || !/^0x[0-9a-fA-F]{40}$/.test(descriptor.contractAddress) || /^0x0{40}$/.test(descriptor.contractAddress))) throw new Error('Treasury descriptor requires deployment address');
+    if ((descriptor.protocol === '420Launchpad' || descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName)) && (!descriptor.contractAddress || !/^0x[0-9a-fA-F]{40}$/.test(descriptor.contractAddress) || /^0x0{40}$/.test(descriptor.contractAddress))) throw new Error('Treasury descriptor requires deployment address');
     const key = descriptor.topic0.toLowerCase();
     const existing = this.byTopic.get(key) ?? [];
     const normalizedAddress = descriptor.contractAddress?.toLowerCase();
@@ -96,11 +96,13 @@ export class ProtocolDecoderRegistry420 {
     }
 
     const strictTreasury = descriptor.protocol === '420Treasury' && MODERN_TREASURY_EVENTS_420.has(descriptor.eventName);
-    if (strictTreasury && (!/^0x[0-9a-fA-F]{64}$/.test(log.blockHash) || !/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash) || log.blockNumber < 0n || !Number.isSafeInteger(log.transactionIndex) || log.transactionIndex < 0 || !Number.isSafeInteger(log.logIndex) || log.logIndex < 0)) throw new Error('malformed canonical Treasury provenance');
-    if (descriptor.protocol === '420Bridge' || strictTreasury) {
+    const strictLaunchpad = descriptor.protocol === '420Launchpad';
+    const strict = strictTreasury || strictLaunchpad;
+    if (strict && (!/^0x[0-9a-fA-F]{64}$/.test(log.blockHash) || !/^0x[0-9a-fA-F]{64}$/.test(log.transactionHash) || log.blockNumber < 0n || !Number.isSafeInteger(log.transactionIndex) || log.transactionIndex < 0 || !Number.isSafeInteger(log.logIndex) || log.logIndex < 0)) throw new Error('malformed canonical Treasury provenance');
+    if (descriptor.protocol === '420Bridge' || strict) {
       const indexed = descriptor.fields.filter(field => field.indexed).length;
       const dataWords = descriptor.fields.length - indexed;
-      if (log.topics.length !== indexed + 1 || !/^0x[0-9a-fA-F]*$/.test(log.data) || log.data.length !== 2 + dataWords * 64) throw new Error(strictTreasury ? 'malformed canonical Treasury log' : 'malformed canonical bridge log');
+      if (log.topics.length !== indexed + 1 || !/^0x[0-9a-fA-F]*$/.test(log.data) || log.data.length !== 2 + dataWords * 64) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad log' : strictTreasury ? 'malformed canonical Treasury log' : 'malformed canonical bridge log');
     }
     const fields: Record<string, string | bigint | boolean> = {};
     let indexedIndex = 1;
@@ -108,11 +110,11 @@ export class ProtocolDecoderRegistry420 {
     for (const field of descriptor.fields) {
       const encoded = field.indexed ? log.topics[indexedIndex++] : word(log.data, dataIndex++);
       if (!encoded || encoded.length !== 66) throw new Error(`malformed ${descriptor.protocol}.${descriptor.eventName} log`);
-      if (descriptor.protocol === '420Bridge' || strictTreasury) {
-        if (!/^0x[0-9a-fA-F]{64}$/.test(encoded)) throw new Error(strictTreasury ? 'malformed canonical Treasury word' : 'malformed canonical bridge word');
-        if (field.kind === 'bool' && BigInt(encoded) > 1n) throw new Error(strictTreasury ? 'noncanonical Treasury boolean' : 'noncanonical bridge boolean');
-        if (field.kind.startsWith('uint') && BigInt(encoded) >= (1n << BigInt(field.kind.slice(4)))) throw new Error(strictTreasury ? 'noncanonical Treasury integer' : 'noncanonical bridge integer');
-        if (field.kind === 'address' && BigInt(encoded) >= (1n << 160n)) throw new Error(strictTreasury ? 'noncanonical Treasury address' : 'noncanonical bridge address');
+      if (descriptor.protocol === '420Bridge' || strict) {
+        if (!/^0x[0-9a-fA-F]{64}$/.test(encoded)) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad word' : strictTreasury ? 'malformed canonical Treasury word' : 'malformed canonical bridge word');
+        if (field.kind === 'bool' && BigInt(encoded) > 1n) throw new Error(strictLaunchpad ? 'noncanonical Launchpad boolean' : strictTreasury ? 'noncanonical Treasury boolean' : 'noncanonical bridge boolean');
+        if (field.kind.startsWith('uint') && BigInt(encoded) >= (1n << BigInt(field.kind.slice(4)))) throw new Error(strictLaunchpad ? 'noncanonical Launchpad integer' : strictTreasury ? 'noncanonical Treasury integer' : 'noncanonical bridge integer');
+        if (field.kind === 'address' && BigInt(encoded) >= (1n << 160n)) throw new Error(strictLaunchpad ? 'noncanonical Launchpad address' : strictTreasury ? 'noncanonical Treasury address' : 'noncanonical bridge address');
       }
       fields[field.name] = decodeValue420(field.kind, encoded);
     }
@@ -132,5 +134,5 @@ export class ProtocolDecoderRegistry420 {
 }
 
 export const GENESIS_PROTOCOLS_420 = [
-  '420Registry','420Names','420Identity','420Stake','420Governance','420Treasury','420Grants','420Pay','420Swap','420Exchange','420Bridge','420Rights','420Randomness','420AI'
+  '420Registry','420Names','420Identity','420Stake','420Governance','420Treasury','420Grants','420Pay','420Swap','420Exchange','420Bridge','420Rights','420Randomness','420AI','420Launchpad'
 ] as const;

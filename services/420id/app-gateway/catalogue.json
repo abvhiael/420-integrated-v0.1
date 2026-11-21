@@ -1,0 +1,14 @@
+{
+  "schema": "420id-application-integration-v1",
+  "authority": "https://auth.420integrated.org/",
+  "gatewayPath": "/420id-api",
+  "apps": [
+    {"id":"420town","name":"420Town","origin":"https://town.420integrated.org","capability":"community-account-only"},
+    {"id":"doobtube","name":"DoobTube","origin":"https://doobtube.420integrated.org","capability":"account-only"},
+    {"id":"420mail","name":"420Mail","origin":"https://420mail.420integrated.org","capability":"account-only"},
+    {"id":"420grow","name":"420Grow","origin":"https://grow.420integrated.org","capability":"account-only"},
+    {"id":"420pay","name":"420Pay","origin":"https://420pay.420integrated.org","capability":"account-only"},
+    {"id":"420exchange","name":"420Exchange","origin":"https://420exchange.420integrated.org","capability":"account-only"},
+    {"id":"420launchpad","name":"420Launchpad","origin":"https://launchpad.420integrated.org","capability":"account-only"}
+  ]
+}

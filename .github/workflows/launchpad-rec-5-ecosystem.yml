@@ -6,6 +6,9 @@ on:
       - 'feature/launchpad-rec-5-*'
     paths:
       - 'contracts/test/LaunchpadEcosystem420.t.sol'
+      - '420-indexer/src/launchpad-indexer.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/test/launchpad-indexer.test.ts'
       - 'launchpad/service/**'
       - 'launchpad/web/**'
       - 'notifications/replay/**'
@@ -15,6 +18,9 @@ on:
   pull_request:
     paths:
       - 'contracts/test/LaunchpadEcosystem420.t.sol'
+      - '420-indexer/src/launchpad-indexer.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/test/launchpad-indexer.test.ts'
       - 'launchpad/service/**'
       - 'launchpad/web/**'
       - 'notifications/replay/**'
@@ -90,3 +96,28 @@ jobs:
         run: go test ./reputation/interactions ./notifications/replay
       - name: Exercise 420Explorer canonical raw-log views
         run: go test ./explorer/service -run 'Launchpad|RawLog'
+
+  indexer-event-boundary:
+    name: Registry-attested 420Indexer Launchpad event qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Pin exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Qualify artifact-bound Launchpad event decoding and canonical history
+        working-directory: 420-indexer
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+          node --test dist/test/launchpad-indexer.test.js

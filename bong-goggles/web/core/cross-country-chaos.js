@@ -283,7 +283,11 @@ export function takeChaosTurn(previous,{player,action,index=null,target=null,cho
   log(s,p.name+' spent a turn clearing '+p.status.name+'.');p.status=null;
  }else if(action!=='pass')throw Error('Unsupported action.');
  markFinish(s);
- s.fresh=[];s.step='discard';s.discardsLeft=(action==='pass'||action==='recover')?2:1;
+ s.fresh=[];s.step='discard';
+ // A genuinely exhausted stock can leave fewer cards than the normal hand size.
+ // Never demand an impossible discard or strand the entire turn cycle.
+ s.discardsLeft=Math.min(p.hand.length,(action==='pass'||action==='recover')?2:1);
+ if(s.discardsLeft===0)finishPlayerTurn(s);
  return s;
 }
 export function advanceChaosLeg(previous){

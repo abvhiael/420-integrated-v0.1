@@ -104,7 +104,7 @@ contract CivicProposalRegistry420 is SystemAccess, I420System {
         ) {
             revert InvalidId();
         }
-        if (voteStart <= snapshotBlock || voteEnd <= voteStart) revert InvalidWindow();
+        if (voteStart <= snapshotBlock || voteEnd < voteStart) revert InvalidWindow();
         if (proposals[proposalId].exists) revert AlreadyExists();
 
         proposals[proposalId] = Proposal({

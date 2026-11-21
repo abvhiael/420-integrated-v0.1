@@ -250,8 +250,8 @@ func (s *SSOManager) LogoutAll(ctx context.Context,sourceToken string)error{
 func (s *SSOManager) Ready(ctx context.Context)error{
  var ready bool
  e:=s.source.auth.store.db.QueryRowContext(ctx,`SELECT
-  COALESCE(has_table_privilege(current_user,to_regclass('account420.sso_codes'),'SELECT,INSERT,UPDATE,DELETE'),false)
-  AND COALESCE(has_column_privilege(current_user,'account420.sessions','sso_source_id','INSERT,SELECT'),false)`).Scan(&ready)
+  (COALESCE(has_table_privilege(current_user,to_regclass('account420.sso_codes'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.sso_codes'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.sso_codes'),'UPDATE'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('account420.sso_codes'),'DELETE'),false))
+  AND (COALESCE(has_column_privilege(current_user,'account420.sessions','sso_source_id','INSERT'),false) AND COALESCE(has_column_privilege(current_user,'account420.sessions','sso_source_id','SELECT'),false))`).Scan(&ready)
  if e!=nil{return e}
  if !ready{return ErrUnavailable}
  return nil

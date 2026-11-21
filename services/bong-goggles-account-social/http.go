@@ -184,7 +184,10 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   result,e:=h.SignOn.CurrentMonetization(ctx,getCookie(r,sessionCookieName))
   if errors.Is(e,ErrForbidden){deny(w,401);return}
   if e!=nil{deny(w,503);return}
-  writeJSON(w,200,result);return
+  // Bind the private 420ID projection to this exact verified
+  // BongGoggles app subject. A browser must reject a response from an
+  // earlier cookie/account even if it arrives after a later /v1/me.
+  writeJSON(w,200,map[string]any{"subject":viewer,"programme":result});return
  case path=="/v1/xp"&&r.Method=="GET":
   if h.XP==nil{deny(w,404);return}
   result,e:=h.XP.Summary(ctx,viewer)

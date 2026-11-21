@@ -316,6 +316,12 @@ jobs:
       contents: read
     env:
       FOUNDRY_PROFILE: pr
+      # Retained CADC upstream source tree supplies these exact audited imports.
+      # Newline-separated Foundry remappings preserve the complete primary test inventory.
+      FOUNDRY_REMAPPINGS: |
+        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
+        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
+        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -366,6 +372,12 @@ jobs:
     env:
       FOUNDRY_PROFILE: ci
       FOUNDRY_SPARSE_MODE: 'true'
+      # Retained CADC upstream source tree supplies these exact audited imports.
+      # Newline-separated Foundry remappings preserve the complete primary test inventory.
+      FOUNDRY_REMAPPINGS: |
+        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
+        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
+        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -423,6 +435,12 @@ jobs:
     env:
       FOUNDRY_PROFILE: ci
       FOUNDRY_SPARSE_MODE: 'true'
+      # Retained CADC upstream source tree supplies these exact audited imports.
+      # Newline-separated Foundry remappings preserve the complete primary test inventory.
+      FOUNDRY_REMAPPINGS: |
+        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
+        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
+        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4

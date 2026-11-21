@@ -508,9 +508,10 @@ contract GovernanceAudit6Deployment420Test {
         _seedApprovedGenesisPlan();
         ProtocolRegistry registry = ProtocolRegistry(REGISTRY);
 
+        bytes32 serviceId = compatibility.GOVERNANCE_SERVICE_ID();
         vm.prank(address(timelock));
         registry.publishService(
-            compatibility.GOVERNANCE_SERVICE_ID(),
+            serviceId,
             address(governor),
             address(governor).codehash,
             keccak256("metadata"),
@@ -545,8 +546,9 @@ contract GovernanceAudit6Deployment420Test {
     function testRejectsPrepublishedElectorateCheckpoint() public {
         _deployCanonicalGraph();
         _seedApprovedGenesisPlan();
+        bytes32 committedRoot = compatibility.initialCommunityRoot();
         vm.prank(address(timelock));
-        community.publishInitialCheckpoint(compatibility.initialCommunityRoot(), 1);
+        community.publishInitialCheckpoint(committedRoot, 1);
 
         require(!_trySchedule(_approvedGraph()), "already initialized electorate accepted");
         _requireNoCapture();

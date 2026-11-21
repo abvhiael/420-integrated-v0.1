@@ -244,7 +244,7 @@ test('CCC-6: responsive UI and release build ship no hidden hands or auto-enroll
  assert.match(gate,/CCC-6 save\/resume and offline mobile release qualification failed/);
  assert.match(gate,/baseTotal:1189\*1024/);
  const shellOutput=renderApplicationShell({pathname:'/classics/cross-country-chaos',
-  walletView:{connected:false},chaosSaveInfo:{available:true},chaosOnlineState:{status:'guest'}});
+  walletView:{connected:false},chaosSaveInfo:{available:true},online:{status:'guest'}});
  assert.match(shellOutput,/Every human player needs their own 420ID account/);
  assert.doesNotMatch(shellOutput,/Resume saved championship|Pass the device/);
  assert.doesNotMatch(shellOutput,/Wallet.*required.*Cross-Country Chaos/);

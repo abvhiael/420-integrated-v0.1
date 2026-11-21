@@ -22,12 +22,12 @@ const game={...lobby,revision:3,status:'playing',host:false,seat:1,joinCode:null
  legal:[{action:'drive',index:0},{action:'pass'}],discardRemaining:0};
 test('Account-only game route never renders pass-and-play or reveals any shared browser hand',()=>{
  const shell=renderApplicationShell({pathname:'/classics/cross-country-chaos',
-  walletView:{connected:false},accountSocialEnabled:true,chaosOnlineState:{status:'guest'}});
+  walletView:{connected:false},accountSocialEnabled:true,online:{status:'guest'}});
  assert.match(shell,/Every human player needs their own 420ID account/);
  assert.match(shell,/Log in with 420ID/);
  assert.doesNotMatch(shell,/Pass the device|Start the cross-Canada championship|Local pass-and-play only|data-chaos-start/);
  const disabled=renderApplicationShell({pathname:'/classics/cross-country-chaos',
-  chaosOnlineState:{status:'unavailable'}});
+  online:{status:'unavailable'}});
  assert.match(disabled,/Account multiplayer is not available yet/);
  assert.doesNotMatch(disabled,/Pass the device|data-chaos-start/);
 });

@@ -285,7 +285,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo(),chaosOnlineState:chaosOnline?.state});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo(),online:chaosOnline?.state});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){

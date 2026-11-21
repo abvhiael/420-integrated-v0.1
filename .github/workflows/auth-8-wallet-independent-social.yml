@@ -70,4 +70,4 @@ jobs:
           node --check bong-goggles/web/core/account-extras.js
           node --check bong-goggles/web/core/account-xp.js
           node --check bong-goggles/web/core/account-monetization.js
-          node --test bong-goggles/web/test/account-social.test.js bong-goggles/web/test/account-extras.test.js bong-goggles/web/test/account-xp.test.js
+          node --test bong-goggles/web/test/account-social.test.js bong-goggles/web/test/account-extras.test.js bong-goggles/web/test/account-xp.test.js bong-goggles/web/test/account-monetization.test.js

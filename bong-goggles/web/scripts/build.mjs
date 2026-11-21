@@ -2,6 +2,8 @@ import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
 import {resolve,dirname} from 'node:path';
 import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
+import {CHAOS_MAP_ASSETS} from '../core/chaos-map-art.js';
+import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
@@ -12,6 +14,9 @@ const master=resolve(root,'bong-goggles-logo.png');
 // Fail before build output if a card image, legend, region or declared identity was swapped.
 const ccc2=await verifyChaosCardCatalog();
 console.log('CCC-2 source and physical-deck qualification:',JSON.stringify(ccc2));
+// Preserve CCC-ART-2 source hashes and alpha before publishing the staged web build.
+const atlas=await verifyChaosMapArt();
+console.log('CCC-ART-2 regional-map qualification:',JSON.stringify(atlas));
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
@@ -46,6 +51,13 @@ for(let i=0;i<CHAOS_CARD_ART_SOURCES.length;i++){
     !optimized.hasAlpha||(await stat(target)).size>128*1024)
   throw new Error('Cross-Country Chaos card exceeded published asset budget: '+CHAOS_CARD_ART_OUTPUTS[i]);
 }
+// Copy only the six pinned, already-optimized WebP atlas layers. They are independent
+// of the 49-card art budget and all live highway/vehicle SVG geometry.
+for(const layer of CHAOS_MAP_ASSETS){
+ const source=resolve(root,layer.path),destination=resolve(out,layer.path);
+ await mkdir(dirname(destination),{recursive:true});
+ await cp(source,destination);
+}
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.
 const variants=[
@@ -61,4 +73,4 @@ for(const variant of variants){
 }
 // Example config makes the ordinary CI artifact illustrative, NEVER a deployable candidate.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(example,null,2)+'\n');
-console.log('Bong Goggles web build created dist/ (approved branding and 49 optimized game cards; example config; NOT a release artifact)');
+console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards and 6 verified atlas layers; example config; NOT a release artifact)');

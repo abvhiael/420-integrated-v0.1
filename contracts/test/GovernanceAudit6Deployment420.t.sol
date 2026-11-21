@@ -511,12 +511,7 @@ contract GovernanceAudit6Deployment420Test {
         bytes32 serviceId = compatibility.GOVERNANCE_SERVICE_ID();
         vm.prank(address(timelock));
         registry.publishService(
-            serviceId,
-            address(governor),
-            address(governor).codehash,
-            keccak256("metadata"),
-            1,
-            true
+            serviceId, address(governor), address(governor).codehash, keccak256("metadata"), 1, true
         );
 
         require(!_trySchedule(_approvedGraph()), "partially initialized Registry service accepted");

@@ -379,3 +379,12 @@
  .ccc-wrap--roadtrip .ccc-hero-quip,.ccc-wayfinding-sign{color:CanvasText}
  .ccc-wrap--roadtrip button{border:2px solid ButtonText;background:ButtonFace;color:ButtonText!important}
 }
+
+/* CCC-ART-2: approved 1920x830 atlas scenery is decorative, never interactive. */
+.ccc-wrap--roadtrip .ccc-map-underlay,
+.ccc-wrap--roadtrip .ccc-map-foreground{pointer-events:none;image-rendering:auto}
+.ccc-wrap--roadtrip .ccc-map-foreground{opacity:1}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-map-underlay,
+ .ccc-wrap--roadtrip .ccc-map-foreground{display:none}
+}

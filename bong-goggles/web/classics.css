@@ -402,3 +402,4 @@
 .ccc-seat-chip{line-height:1.3}
 @media(max-width:600px){.ccc-driver-setup{grid-template-columns:minmax(0,1fr) auto}.ccc-driver-setup label:nth-child(2){grid-column:1}.ccc-vehicle-picker-preview{grid-column:2;grid-row:1/3;width:76px}}
 @media(forced-colors:active){.ccc-map-vehicle .ccc-vehicle-art{display:none}.ccc-map-vehicle .ccc-vehicle-fallback{opacity:1;fill:CanvasText;stroke:Canvas}.ccc-map-vehicle .ccc-vehicle-number-disc{fill:Canvas;stroke:CanvasText}.ccc-map-vehicle .ccc-map-seat{fill:CanvasText}.ccc-vehicle-picker-preview{filter:none}}
+

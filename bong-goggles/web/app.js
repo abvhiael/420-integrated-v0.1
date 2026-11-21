@@ -8,6 +8,7 @@ import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
+import {deriveChaosTableFeedback} from './core/chaos-table-art.js';
 import {CHAOS_VEHICLES,applyChaosVehicleSelection} from './core/chaos-vehicles.js';
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
@@ -21,7 +22,7 @@ let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader
 let indexerStatus={status:'checking',data:null};
 let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
-let chaosGame=null,chaosRevealed=false,chaosError=null;
+let chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null;
 function shortAccount(value){return value?`${value.slice(0,6)}…${value.slice(-4)}`:'Not connected';}
 function applyViewPreferences(){document.documentElement.dataset.textSize=viewPreferences.textSize;document.documentElement.dataset.contrast=viewPreferences.contrast;document.documentElement.dataset.motion=viewPreferences.motion;}
 function updateRobots(){let tag=document.querySelector('meta[name="robots"]');if(!tag){tag=document.createElement('meta');tag.name='robots';document.head.append(tag);}tag.content=documentIndexingPolicy(window.location.pathname);}
@@ -99,21 +100,22 @@ function bindChaos(){
    const seed=window.crypto?.getRandomValues?window.crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*0xffffffff);
    const vehicleIds=Array.from({length:count},(_,i)=>String(data.get('vehicle'+i)||''));
    chaosGame=applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds);
-   chaosRevealed=false;chaosError=null;renderCurrent();
+   chaosRevealed=false;chaosError=null;chaosRepairCue=null;renderCurrent();
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
  const apply=move=>{try{
   const previous=chaosGame;
   const updated=takeChaosTurn(previous,{player:previous.players[previous.turn].id,...move});
+  chaosRepairCue=deriveChaosTableFeedback(previous,updated,move);
   chaosRevealed=keepChaosHandRevealed(previous,updated,chaosRevealed);
   chaosGame=updated;chaosError=null;renderCurrent();
- }catch(error){chaosError=error.message;renderCurrent(chaosError);}};
+ }catch(error){chaosRepairCue=null;chaosError=error.message;renderCurrent(chaosError);}};
  for(const control of root.querySelectorAll('[data-chaos-action]'))control.addEventListener('click',()=>{
   const action=control.dataset.chaosAction;
   try{
-   if(action==='reveal'){chaosRevealed=true;chaosError=null;renderCurrent();return;}
-   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosError=null;renderCurrent();return;}
-   if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosError=null;renderCurrent();return;}
+   if(action==='reveal'){chaosRevealed=true;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
+   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
+   if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
    apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card),choice:control.dataset.choice||null});
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
@@ -129,7 +131,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();}
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();}
 // Re-fetching clears the previous page first: withdrawn/hidden content is not
 // retained after a failed refresh or restored from a browser cache. This is a
 // sampled public feed, not a real-time revocation stream or guaranteed freshness.
@@ -145,7 +147,7 @@ async function refreshPublicFeed(){
 }
 function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(!image)return;const greeting=selectGreeting();const src=greetingSrc(greeting);if(image.getAttribute('src')!==src){image.src=src;image.alt=greeting.label;}}
 function onRouteChange(){
- chaosRevealed=false;
+ chaosRevealed=false;chaosRepairCue=null;
  monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
  if(window.location.pathname==='/')void refreshPublicFeed();

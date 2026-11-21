@@ -6,6 +6,7 @@ import {escapeHtml as esc} from './design-system.js';
 import {chaosRegionArt} from './chaos-visual-style.js';
 import {chaosMapArt} from './chaos-map-art.js';
 import {CHAOS_VEHICLE_COLORS,chaosVehicle,chaosVehicleHeading} from './chaos-vehicles.js';
+import {renderChaosTableFeedback} from './chaos-table-art.js';
 
 // Keep the current hand visible only while the same human driver continues their turn.
 // A new seat or completed stage always returns to the privacy handoff screen.
@@ -137,44 +138,60 @@ const mileageStacks=(p,region)=>{
  if(!amounts.length)return '<p class="ccc-empty-area">No mileage driven yet</p>';
  return '<div class="ccc-public-miles">'+amounts.map(km=>{
   const qty=p.played.filter(c=>c.km===km).length;
-  return '<figure class="ccc-mileage-card-stack">'+image({type:'mileage',km},region)+
+  return '<figure class="ccc-mileage-card-stack" data-stack-count="'+qty+'" aria-label="'+qty+' played '+km+' kilometre cards">'+
+   '<span class="ccc-mileage-stack-paper" aria-hidden="true"></span>'+image({type:'mileage',km},region)+
    '<figcaption>'+km+' km × '+qty+'</figcaption></figure>';
  }).join('')+'</div>';
 };
-function seatMat(p,region,i,current){
+function seatMat(p,region,i,current,feedback=null){
  const status=p.status;
- const upgrades=p.upgrades.map(u=>
-  '<figure class="ccc-mini-card">'+image(u,region)+
-  '<figcaption>'+esc(u.name)+' · '+(p.used.includes(u.id)?'Used':'Ready')+'</figcaption></figure>').join('');
+ const upgrades=p.upgrades.map(u=>{
+  const used=p.used.includes(u.id);
+  return '<figure class="ccc-mini-card ccc-mini-card--equipped ccc-mini-card--'+(used?'used':'ready')+'">'+
+    image(u,region)+'<figcaption>'+esc(u.name)+' · '+(used?'Used':'Ready')+'</figcaption>'+
+    '<span class="ccc-power-stamp ccc-power-stamp--'+(used?'used':'ready')+'">'+(used?'USED':'READY')+'</span></figure>';
+ }).join('');
+ const hazard=status?'<figure class="ccc-mini-card ccc-mini-card--hazard ccc-hazard--'+esc(status.kind||'block')+'">'+
+  image(status,region)+'<figcaption>'+esc(status.name)+'</figcaption>'+
+  '<span class="ccc-hazard-ribbon">'+esc(status.kind==='detour'?'DETOUR':status.kind==='slow'?'SLOW':'STOP')+'</span></figure>':
+  '<div class="ccc-hazard-clear"><span class="ccc-clear-stamp" aria-hidden="true">✓</span><p class="ccc-empty-area">Clear highway</p></div>';
  return '<section class="ccc-seat-mat'+(current===p.id?' ccc-seat-mat--active':'')+'" aria-label="'+esc(p.name)+' public playing area">'+
   '<header><span class="ccc-seat-chip" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'">Car '+(i+1)+' · '+esc(chaosVehicle(p.vehicle,i).name)+'</span>'+
   '<h4>'+esc(p.name)+'</h4><strong>'+p.km.toLocaleString('en-CA')+' km</strong></header>'+
-  '<div class="ccc-seat-areas"><section aria-label="Mileage stacks"><h5>Mileage · highest first</h5>'+mileageStacks(p,region)+'</section>'+
-  '<section aria-label="Active hazards"><h5>Road conditions</h5>'+
-  (status?'<figure class="ccc-mini-card ccc-mini-card--hazard">'+image(status,region)+
-   '<figcaption>'+esc(status.name)+'</figcaption></figure>':'<p class="ccc-empty-area">Clear highway</p>')+
+  renderChaosTableFeedback(feedback,p.id)+
+  '<div class="ccc-seat-areas"><section aria-label="Mileage stacks" class="ccc-art-zone ccc-art-zone--mileage">'+
+  '<h5>Mileage · highest first</h5>'+mileageStacks(p,region)+'</section>'+
+  '<section aria-label="Active hazards" class="ccc-art-zone ccc-art-zone--hazard"><h5>Road conditions</h5>'+
+  '<div class="ccc-hazard-slot" data-slot="hazard">'+hazard+'</div>'+
   ((p.detourLoss||p.slowLoss)?'<p class="ccc-losses">Detours −'+p.detourLoss+' km · Slowdowns −'+p.slowLoss+' km</p>':'')+
-  '</section><section aria-label="Installed upgrades"><h5>Vehicle equipment · upgrades</h5>'+
-  (upgrades?'<div class="ccc-mini-card-row">'+upgrades+'</div>':'<p class="ccc-empty-area">None equipped</p>')+
-  (p.shield?'<p class="ccc-shield">Legendary hazard shields: '+p.shield+'</p>':'')+
+  '</section><section aria-label="Installed upgrades" class="ccc-art-zone ccc-art-zone--power"><h5>Vehicle equipment · upgrades</h5>'+
+  (upgrades?'<div class="ccc-mini-card-row ccc-power-rack">'+upgrades+'</div>':
+  '<div class="ccc-power-rack ccc-power-rack--empty"><p class="ccc-empty-area">None equipped</p></div>')+
+  (p.shield?'<p class="ccc-shield"><span class="ccc-shield-emblem" aria-hidden="true">✦</span>Legendary hazard shields: '+p.shield+'</p>':'')+
   '</section></div></section>';
 }
-export function renderChaosTable(game){
+export function renderChaosTable(game,{revealed=false,feedback=null}={}){
  const region=LEGS[game.leg]?.id;
  if(!region)throw new Error('Invalid tabletop stage.');
  const top=game.discard.at(-1);
  const used=game.spent.slice(-5).reverse();
- return '<div class="ccc-tabletop" data-region="'+region+'">'+renderChaosHighway(game)+
+ const canDraw=Boolean(revealed&&game.phase==='playing'&&game.step==='draw');
+ const stockOpen=canDraw?'<button type="button" class="ccc-stock ccc-pile-control" data-chaos-action="draw" data-choice="deck" aria-label="Draw two face-down regional cards">':'<div class="ccc-stock">';
+ const discardOpen=canDraw&&top?'<button type="button" class="ccc-discard-public ccc-pile-control" data-chaos-action="draw" data-choice="discard" aria-label="Take the top discard and draw one face-down card">':'<div class="ccc-discard-public">';
+ return '<div class="ccc-tabletop ccc-tabletop--road-atlas" data-region="'+region+'">'+renderChaosHighway(game)+
   '<section class="ccc-table-piles" aria-label="Regional decks and played cards">'+
-  '<div class="ccc-stock"><div class="ccc-stock-back" aria-hidden="true"><span>CCC</span><span>ROAD TRIP</span></div>'+
-  '<strong>Regional draw deck</strong><small>'+game.deck.length+' face-down cards</small></div>'+
-  '<div class="ccc-discard-public"><div class="ccc-pile-face">'+(top?image(top,region):'<span>Empty discard</span>')+'</div>'+
-  '<strong>Face-up discard</strong><small>'+game.discard.length+' cards'+(top?' · '+esc(cardLabel(top)):'')+'</small></div>'+
-  '<div class="ccc-used-area"><strong>Recently played cards</strong><div class="ccc-mini-card-row">'+
-  (used.length?used.map(c=>'<figure class="ccc-mini-card">'+image(c,region)+
+  stockOpen+'<span class="ccc-stock-back" aria-hidden="true"><span class="ccc-stock-symbol">✦</span><span>CCC</span><span>ROAD TRIP</span></span>'+
+  '<strong>Regional draw deck</strong><small>'+game.deck.length+' face-down cards</small>'+(canDraw?'<span class="ccc-pile-instruction">Tap to draw two</span>':'')+
+  (canDraw?'</button>':'</div>')+
+  discardOpen+'<span class="ccc-pile-face">'+(top?image(top,region):'<span>Empty discard</span>')+'</span>'+
+  '<strong>Face-up discard</strong><small>'+game.discard.length+' cards'+(top?' · '+esc(cardLabel(top)):'')+'</small>'+
+  (canDraw&&top?'<span class="ccc-pile-instruction">Take this + draw one</span>':'')+
+  (canDraw&&top?'</button>':'</div>')+
+  '<div class="ccc-used-area"><strong>Recently played cards</strong><div class="ccc-mini-card-row ccc-spent-tray">'+
+  (used.length?used.map(c=>'<figure class="ccc-mini-card ccc-spent-card">'+image(c,region)+
    '<figcaption>'+esc(cardLabel(c))+'</figcaption></figure>').join(''):'<span class="ccc-empty-area">No used cards yet</span>')+
   '</div></div></section>'+
   '<section class="ccc-player-table" aria-label="All drivers public card layouts">'+
-  game.players.map((p,i)=>seatMat(p,region,i,game.phase==='playing'?game.players[game.turn].id:-1)).join('')+
+  game.players.map((p,i)=>seatMat(p,region,i,game.phase==='playing'?game.players[game.turn].id:-1,feedback)).join('')+
   '</section></div>';
 }

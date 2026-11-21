@@ -24,6 +24,7 @@ on:
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'scripts/qualify-governance-focused.sh'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
       - 'contracts/artifacts/CivicConstitution420.json'
@@ -86,6 +87,7 @@ on:
       - 'scripts/verify-genesis-predeploy-authority.py'
       - 'scripts/verify-genesis-canonical-addresses.py'
       - 'scripts/generate-governance-audit-6-artifacts.py'
+      - 'scripts/qualify-governance-focused.sh'
       - 'contracts/artifacts/GovernanceTimelock.json'
       - 'contracts/artifacts/Governance420.json'
       - 'contracts/artifacts/CivicConstitution420.json'
@@ -221,9 +223,7 @@ jobs:
 
       - name: Run Civic contract qualification
         working-directory: contracts
-        run: |
-          forge test --match-path 'test/Civic*.t.sol' -vvv
-          forge test --match-path 'test/Governance*.t.sol' -vvv
+        run: bash ../scripts/qualify-governance-focused.sh
 
       - name: Governance forbidden primitive scan
         working-directory: contracts

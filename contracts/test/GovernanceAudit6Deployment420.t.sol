@@ -19,6 +19,14 @@ interface VmGovAudit6 {
         address target,
         bytes calldata code
     ) external;
+    function store(
+        address target,
+        bytes32 slot,
+        bytes32 value
+    ) external;
+    function roll(
+        uint256
+    ) external;
 }
 
 contract GovAudit6PairFactory {
@@ -76,12 +84,32 @@ contract GovernanceAudit6Deployment420Test {
         );
     }
 
+    function _seedApprovedGenesisPlan() private {
+        bytes32 root = keccak256(abi.encode(address(this)));
+        // Slots 4-8 are the five immutable-from-Genesis bootstrap commitment values.
+        vm.store(address(compatibility), bytes32(uint256(5)), root);
+        vm.store(address(compatibility), bytes32(uint256(6)), bytes32(uint256(1)));
+        vm.store(address(compatibility), bytes32(uint256(7)), root);
+        vm.store(address(compatibility), bytes32(uint256(8)), bytes32(uint256(1)));
+        bytes32 approved = compatibility.canonicalBootstrapPlanHash(
+            address(constitution),
+            address(proposals),
+            address(electorates),
+            address(voting),
+            address(governor),
+            address(community),
+            address(validator)
+        );
+        vm.store(address(compatibility), bytes32(uint256(4)), approved);
+    }
+
     function testCanonicalBootstrapSchedulesExactPlanAndRetiresToCivicGovernor() public {
         _deployCanonicalGraph();
 
         require(timelock.bootstrapGovernor() == address(compatibility), "bootstrap identity");
         require(timelock.scheduler() == address(compatibility), "bootstrap scheduler");
         require(!timelock.civicAuthorityActivated(), "premature activation");
+        _seedApprovedGenesisPlan();
 
         compatibility.scheduleCanonicalCivicBootstrap(
             address(constitution),
@@ -97,10 +125,11 @@ contract GovernanceAudit6Deployment420Test {
         require(plan != bytes32(0) && compatibility.bootstrapPlanScheduled(), "plan not scheduled");
 
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
-        for (uint8 i = 0; i < 17; ++i) {
+        for (uint8 i = 0; i < 19; ++i) {
             timelock.execute(compatibility.bootstrapOperationId(plan, i));
         }
 
+        vm.roll(block.number + 2);
         compatibility.activateCanonicalCivic(
             address(constitution),
             address(proposals),
@@ -117,6 +146,16 @@ contract GovernanceAudit6Deployment420Test {
         require(timelock.scheduler() == address(governor), "scheduler not Civic governor");
         require(proposals.proposalAuthority() == address(governor), "proposal authority");
         require(electorates.snapshotAuthority() == address(governor), "snapshot authority");
+        require(community.checkpointCount() == 1 && validator.checkpointCount() == 1, "first electorate checkpoints");
+        bytes32 proposalId = governor.createProposal(
+            CivicIds420.ProposalClass.G3, keccak256("genesis metadata"), keccak256("genesis actions")
+        );
+        vm.roll(block.number + 1);
+        bytes32[] memory proof = new bytes32[](0);
+        voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, abi.encode(proof));
+        voting.castVote(proposalId, CivicIds420.House.VALIDATOR, CivicVoting420.Support.FOR, abi.encode(proof));
+        require(voting.participation(proposalId, CivicIds420.House.COMMUNITY) == 1, "community ballot");
+        require(voting.participation(proposalId, CivicIds420.House.VALIDATOR) == 1, "validator ballot");
 
         CivicConstitution420.Rule memory g1 = constitution.ruleFor(CivicIds420.ProposalClass.G1);
         CivicConstitution420.Rule memory g4 = constitution.ruleFor(CivicIds420.ProposalClass.G4);
@@ -170,6 +209,7 @@ contract GovernanceAudit6Deployment420Test {
 
     function testBootstrapRejectsWrongElectorateRole() public {
         _deployCanonicalGraph();
+        _seedApprovedGenesisPlan();
         (bool ok,) = address(compatibility)
             .call(
                 abi.encodeCall(
@@ -186,5 +226,55 @@ contract GovernanceAudit6Deployment420Test {
                 )
             );
         require(!ok, "swapped electorate roles accepted");
+    }
+
+    function testUnapprovedBootstrapFailsClosedAndCannotCaptureTheFirstCaller() public {
+        _deployCanonicalGraph();
+        (bool unapproved,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(constitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
+                )
+            );
+        require(!unapproved && !compatibility.bootstrapPlanScheduled(), "missing Genesis approval accepted");
+
+        _seedApprovedGenesisPlan();
+        CivicConstitution420 competingConstitution = new CivicConstitution420(address(timelock));
+        (bool competing,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.scheduleCanonicalCivicBootstrap,
+                    (
+                        address(competingConstitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
+                )
+            );
+        require(!competing && !compatibility.bootstrapPlanScheduled(), "unapproved graph captured bootstrap");
+
+        compatibility.scheduleCanonicalCivicBootstrap(
+            address(constitution),
+            address(proposals),
+            address(electorates),
+            address(voting),
+            address(governor),
+            address(community),
+            address(validator)
+        );
+        require(compatibility.bootstrapPlanScheduled(), "approved bootstrap not scheduled");
     }
 }

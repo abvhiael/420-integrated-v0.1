@@ -124,6 +124,14 @@ contract Governance420 is SystemAccess, I420System {
     bool public bootstrapPlanScheduled;
     bool public bootstrapRetired;
 
+    // These slots are populated only by the immutable Genesis predeploy state. There is no setter.
+    // A zero approval fails closed until the canonical release graph and electorates are committed.
+    bytes32 public approvedBootstrapPlanHash;
+    bytes32 public initialCommunityRoot;
+    uint256 public initialCommunityTotalWeight;
+    bytes32 public initialValidatorRoot;
+    uint256 public initialValidatorTotalWeight;
+
     error LegacySurfaceRetired();
     error InvalidCivicGovernor();
     error CivicGovernorAlreadyBound();
@@ -156,9 +164,46 @@ contract Governance420 is SystemAccess, I420System {
         emit CivicGovernorBound(governor);
     }
 
+    /// @notice Hash the exact Genesis-approved graph, bytecode identities and initial electorates.
+    /// @dev Runtime code hashes prevent a different implementation at the same candidate address.
+    function canonicalBootstrapPlanHash(
+        address constitution_,
+        address proposals_,
+        address electorates_,
+        address voting_,
+        address governor_,
+        address communitySource_,
+        address validatorSource_
+    ) public view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                BOOTSTRAP_DOMAIN,
+                block.chainid,
+                constitution_,
+                proposals_,
+                electorates_,
+                voting_,
+                governor_,
+                communitySource_,
+                validatorSource_,
+                constitution_.codehash,
+                proposals_.codehash,
+                electorates_.codehash,
+                voting_.codehash,
+                governor_.codehash,
+                communitySource_.codehash,
+                validatorSource_.codehash,
+                initialCommunityRoot,
+                initialCommunityTotalWeight,
+                initialValidatorRoot,
+                initialValidatorTotalWeight
+            )
+        );
+    }
+
     /// @notice Permissionless scheduling of the exact canonical initialization plan.
-    /// @dev Safety comes from the frozen 0x0437 bootstrap identity plus exact graph/source validation and
-    /// hard-coded initial constitutional rules. No caller-selected rule, Registry ID, or authority is accepted.
+    /// @dev A nonzero, Genesis-materialized approval must match the graph, deployed code hashes and
+    /// initial electorates. The first caller cannot select or approve a competing graph.
     function scheduleCanonicalCivicBootstrap(
         address constitution_,
         address proposals_,
@@ -204,19 +249,16 @@ contract Governance420 is SystemAccess, I420System {
                 || validator.sourceType() != validator.VALIDATOR_SOURCE_TYPE()
         ) revert InvalidElectorateSource();
 
-        bytes32 plan = keccak256(
-            abi.encode(
-                BOOTSTRAP_DOMAIN,
-                block.chainid,
-                constitution_,
-                proposals_,
-                electorates_,
-                voting_,
-                governor_,
-                communitySource_,
-                validatorSource_
-            )
+        if (
+            initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0 || initialValidatorRoot == bytes32(0)
+                || initialValidatorTotalWeight == 0
+        ) revert InvalidElectorateSource();
+        bytes32 plan = canonicalBootstrapPlanHash(
+            constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_
         );
+        if (approvedBootstrapPlanHash == bytes32(0) || plan != approvedBootstrapPlanHash) {
+            revert InvalidBootstrapGraph();
+        }
         bootstrapPlanHash = plan;
         bootstrapPlanScheduled = true;
 
@@ -431,6 +473,28 @@ contract Governance420 is SystemAccess, I420System {
             )
         );
 
+        // Commit both first electorates through the only authorized Timelock before retirement.
+        _schedule(
+            timelock,
+            plan,
+            17,
+            communitySource_,
+            abi.encodeCall(
+                CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                (initialCommunityRoot, initialCommunityTotalWeight)
+            )
+        );
+        _schedule(
+            timelock,
+            plan,
+            18,
+            validatorSource_,
+            abi.encodeCall(
+                CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                (initialValidatorRoot, initialValidatorTotalWeight)
+            )
+        );
+
         emit CivicBootstrapPlanScheduled(plan, governor_);
     }
 
@@ -446,20 +510,10 @@ contract Governance420 is SystemAccess, I420System {
         address validatorSource_
     ) external {
         if (!bootstrapPlanScheduled || bootstrapRetired || civicGovernor != governor_) revert InvalidBootstrapState();
-        bytes32 plan = keccak256(
-            abi.encode(
-                BOOTSTRAP_DOMAIN,
-                block.chainid,
-                constitution_,
-                proposals_,
-                electorates_,
-                voting_,
-                governor_,
-                communitySource_,
-                validatorSource_
-            )
+        bytes32 plan = canonicalBootstrapPlanHash(
+            constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_
         );
-        if (plan != bootstrapPlanHash) revert InvalidBootstrapGraph();
+        if (plan != bootstrapPlanHash || plan != approvedBootstrapPlanHash) revert InvalidBootstrapGraph();
 
         CivicConstitution420 constitution = CivicConstitution420(constitution_);
         CivicProposalRegistry420 proposalsContract = CivicProposalRegistry420(proposals_);
@@ -515,6 +569,22 @@ contract Governance420 is SystemAccess, I420System {
         ) revert InvalidBootstrapGraph();
         (address serviceImplementation, uint32 serviceVersion) = registry.resolveActive(GOVERNANCE_SERVICE_ID);
         if (serviceImplementation != governor_ || serviceVersion != 1) revert InvalidBootstrapGraph();
+
+        // No proposal can be created until both checkpoints are effective for snapshotBlock = block.number - 1.
+        CivicMerkleElectorateSource420 community = CivicMerkleElectorateSource420(communitySource_);
+        CivicMerkleElectorateSource420 validator = CivicMerkleElectorateSource420(validatorSource_);
+        if (community.checkpointCount() == 0 || validator.checkpointCount() == 0) {
+            revert InvalidElectorateSource();
+        }
+        CivicMerkleElectorateSource420.Checkpoint memory communityInitial = community.checkpoint(0);
+        CivicMerkleElectorateSource420.Checkpoint memory validatorInitial = validator.checkpoint(0);
+        if (
+            communityInitial.electorateRoot != initialCommunityRoot
+                || communityInitial.totalWeight != initialCommunityTotalWeight
+                || validatorInitial.electorateRoot != initialValidatorRoot
+                || validatorInitial.totalWeight != initialValidatorTotalWeight
+                || communityInitial.effectiveBlock >= block.number || validatorInitial.effectiveBlock >= block.number
+        ) revert InvalidElectorateSource();
 
         GovernanceTimelock(payable(governanceTimelock)).activateCivicAuthority(governor_);
         bootstrapRetired = true;

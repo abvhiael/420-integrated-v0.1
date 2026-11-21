@@ -112,15 +112,50 @@ def timelock_state(rec):
  }
 
 def governance_state(rec):
+ cfg=json.loads(CFG.read_text())
+ candidate=cfg.get("genesisBootstrapCommitment",{})
+ labels=(
+  ("approvedBootstrapPlanHash","approvedPlanHash"),
+  ("initialCommunityRoot","communityRoot"),
+  ("initialCommunityTotalWeight","communityTotalWeight"),
+  ("initialValidatorRoot","validatorRoot"),
+  ("initialValidatorTotalWeight","validatorTotalWeight"),
+ )
+ layout={item["label"]:item for item in rec["storageLayout"]["storage"]}
+ encoded={}
+ values=[]
+ for label,key in labels:
+  raw=candidate.get(key)
+  if key.endswith("Weight"):
+   if type(raw) is not int or raw<0 or raw>=2**256: fail("invalid Genesis "+key)
+   value=raw
+  else:
+   if not isinstance(raw,str) or len(raw)!=66 or not raw.startswith("0x"):
+    fail("invalid Genesis "+key)
+   try: value=int(raw,16)
+   except ValueError: fail("invalid Genesis "+key)
+  item=layout.get(label)
+  if item is None or int(item["offset"])!=0: fail("Genesis storage layout mismatch: "+label)
+  slot="0x"+int(item["slot"]).to_bytes(32,"big").hex()
+  encoded[slot]="0x"+value.to_bytes(32,"big").hex()
+  values.append(value)
+ ready=all(values)
+ if any(values) and not ready: fail("partial Genesis bootstrap approval")
  return {
   "schema":"420-governance420-predeploy-state-v1","status":"GOV_AUDIT_6_PREDEPLOY_READY",
   "contractName":"Governance420","address":GOV420,
   "runtimeArtifact":"contracts/artifacts/Governance420.json","runtimeCodeHash":rec["runtimeCodeHash"],
   "constructorMaterialization":{"governanceTimelock":TIMELOCK},
-  "storage":{},"storageSlotCount":0,
-  "invariants":["all compatibility/bootstrap mutable state begins zero/false",
-                "governanceTimelock immutable is 0x0429",
-                "runtimeCodeHash equals keccak256(materialized deployed bytecode)"]
+  "storage":encoded,"storageSlotCount":len(encoded),
+  "genesisBootstrapApprovalReady":bool(ready),
+  "invariants":[
+   "bootstrap/compatibility state begins zero/false",
+   "approvedBootstrapPlanHash is supplied only through Genesis materialization; no runtime setter exists",
+   "approved plan commits target chain, seven graph addresses/code hashes and both initial electorate roots/weights",
+   "missing or partially populated commitment fails closed",
+   "governanceTimelock immutable is 0x0429",
+   "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
+  ]
  }
 
 def update_manifest(records):

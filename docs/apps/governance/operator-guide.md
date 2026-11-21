@@ -32,6 +32,8 @@ python3 scripts/verify-governance-audit-1.py
 python3 scripts/verify-governance-audit-2.py
 python3 scripts/verify-governance-audit-3.py
 python3 scripts/verify-governance-audit-6.py --require-ready
+# Strict final-chain gate: expected to fail while actual authorized electorates are uncommitted.
+python3 scripts/verify-governance-audit-6.py --require-activation-ready
 python3 scripts/verify-governance-audit-7.py
 python3 scripts/verify-genesis-interface-layer.py
 python3 scripts/verify-genesis-canonical-addresses.py
@@ -130,3 +132,13 @@ If a Registry component unexpectedly resolves elsewhere, treat discovery as fail
 If a target action reverts, do not mutate the proposal commitment; diagnose the target and retry the same queued action batch when valid.
 
 If a canonical runtime hash or fixed predeploy differs from retained authority, stop deployment/operation and treat it as a release-integrity failure.
+
+## Canonical Genesis bootstrap commitment and first electorate checkpoint (GOV-REC-1/2)
+
+The compatibility predeploy at `0x0437` contains five Genesis-materialized, non-writable state fields: `approvedBootstrapPlanHash`, `initialCommunityRoot`, `initialCommunityTotalWeight`, `initialValidatorRoot` and `initialValidatorTotalWeight`. Their sole source is `contracts/config/governance-deployment-v1.json#genesisBootstrapCommitment`; `scripts/generate-governance-audit-6-artifacts.py` populates the corresponding five Solidity storage slots from the actual artifact layout. The initial all-zero values deliberately **reject any first-caller bootstrap**. No operator setter, new owner, or emergency bypass may initialize them after Genesis.
+
+For an actual Genesis candidate, first establish the final chain ID, exact seven Civic module/source addresses and runtime code hashes, then authenticate both sets of eligible community and active-validator owner voters. Build equal-weight Merkle roots using `keccak256(abi.encode(address))` leaves and sorted-pair parent hashes. Count unique eligible addresses, not token/stake amounts. Independently verify the roots and weight counts. Set **all five** Genesis fields at once. With those values materialized into `0x0437`, compute and compare `Governance420.canonicalBootstrapPlanHash` against the immutable approved value *before chain activation*. Neither an external caller nor a competing graph may establish its own plan approval.
+
+The canonical schedule contains **19** fixed G1 Timelock operations, indices `0..18`. Original operations `0..16` remain unchanged. Indices `17` and `18` publish the one-time Community and Validator checkpoints through the actual Timelock, effective from the next block; subsequent checkpoints remain prospective and governance-controlled. Execute every required initialization and checkpoint operation and advance past both checkpoint-effective blocks before calling `activateCanonicalCivic`. The handoff rejects uninitialized or mismatched electorates.
+
+`--require-ready` checks reproducible offline deployment and contract policy; `--require-activation-ready` additionally enforces nonzero, complete, real Genesis release commitments. **Default zero fields are deliberately pending actual membership and chain-specific deployment data and do not signify live-testnet readiness.**

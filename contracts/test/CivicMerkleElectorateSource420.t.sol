@@ -96,4 +96,26 @@ contract CivicMerkleElectorateSource420Test {
             );
         require(!ok, "non-prospective checkpoint accepted");
     }
+
+    function testInitialCheckpointIsProspectiveOneShotAndTimelockOnly() public {
+        GovernanceTimelock timelock = new GovernanceTimelock(address(this));
+        CivicMerkleElectorateSource420 source = new CivicMerkleElectorateSource420(
+            address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
+        );
+        bytes32 root = _leaf(address(this));
+        (bool unauth,) = address(source)
+            .call(abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))));
+        require(!unauth, "unauthorized checkpoint");
+        vm.prank(address(timelock));
+        source.publishInitialCheckpoint(root, 1);
+        CivicMerkleElectorateSource420.Checkpoint memory cp = source.checkpoint(0);
+        require(cp.effectiveBlock == block.number + 1 && cp.electorateRoot == root, "prospective root");
+        vm.prank(address(timelock));
+        (bool second,) = address(source)
+            .call(abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))));
+        require(!second, "initial checkpoint overwritten");
+        vm.roll(block.number + 1);
+        (bytes32 observed, uint256 total) = source.snapshotAt(uint64(block.number));
+        require(observed == root && total == 1, "initial snapshot");
+    }
 }

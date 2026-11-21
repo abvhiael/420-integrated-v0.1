@@ -69,6 +69,21 @@ contract CivicMerkleElectorateSource420 is SystemAccess, ICivicElectorateSource4
         emit ElectorateCheckpointPublished(effectiveBlock, electorateRoot, totalWeight);
     }
 
+    /// @notice One-time Timelock-only, prospective checkpoint used by canonical Genesis bootstrap.
+    /// @dev The first eligible snapshot is the block after publication, never a historical block.
+    function publishInitialCheckpoint(
+        bytes32 electorateRoot,
+        uint256 totalWeight
+    ) external onlyGovernance {
+        if (
+            _checkpoints.length != 0 || electorateRoot == bytes32(0) || totalWeight == 0
+                || block.number >= type(uint64).max
+        ) revert InvalidCheckpoint();
+        uint64 effectiveBlock = uint64(block.number + 1);
+        _checkpoints.push(Checkpoint(effectiveBlock, electorateRoot, totalWeight));
+        emit ElectorateCheckpointPublished(effectiveBlock, electorateRoot, totalWeight);
+    }
+
     function snapshotAt(
         uint64 snapshotBlock
     ) external view returns (bytes32 electorateRoot, uint256 totalWeight) {

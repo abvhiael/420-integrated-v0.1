@@ -31,6 +31,64 @@ class EvidenceBoundary(unittest.TestCase):
             for segment, group in enumerate(groups):
                 self.assertEqual(group, inventory[shard + segment * 4::64])
 
+    def test_bounded_batches_preserve_real_import_closure(self):
+        import os
+        names = ["script/D.s.sol", "src/A.sol", "src/B.sol", "test/C.t.sol"]
+        graph = {"script/D.s.sol": {"imports": ["src/A.sol"]},
+                 "src/A.sol": {"imports": []}, "src/B.sol": {"imports": ["src/A.sol"]},
+                 "test/C.t.sol": {"imports": ["src/B.sol"]}}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory, "evidence")
+            root.mkdir()
+            (root / "primary-inventory-shard-0.txt").write_text("\n".join(names) + "\n")
+            (root / "shard-0-targets.txt").write_text("\n".join(names) + "\n")
+            Path(directory, "cache").mkdir()
+            old = os.getcwd()
+            try:
+                os.chdir(directory)
+                for segment in range(2):
+                    live = {p: graph[p] for p in names[segment::2]}
+                    live["src/A.sol"] = graph["src/A.sol"]
+                    if segment == 1:
+                        live["src/B.sol"] = graph["src/B.sol"]
+                    Path("cache/solidity-files-cache.json").write_text(json.dumps({"files": live}))
+                    partition_module.capture_compiled_batch(root, 0, 1, segment, 2, "a" * 40, "ci")
+                partition_module.snapshot_compiled_batches(root, 0, 1, "a" * 40, "ci")
+                retained = partition_module.read_graph_snapshot(
+                    root / "compilation-graph-shard-0.json", names, "a" * 40, 0, 1)
+                self.assertEqual(set(retained), set(names))
+                with self.assertRaises(ValueError):
+                    partition_module.snapshot_compiled_batches(root, 0, 1, "b" * 40, "ci")
+            finally:
+                os.chdir(old)
+
+    def test_missing_or_wrong_sha_compilation_batch_fails_closed(self):
+        import os
+        names = ["src/A.sol", "test/B.t.sol"]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory, "evidence")
+            root.mkdir()
+            (root / "primary-inventory-shard-0.txt").write_text("\n".join(names) + "\n")
+            (root / "shard-0-targets.txt").write_text("\n".join(names) + "\n")
+            Path(directory, "cache").mkdir()
+            old = os.getcwd()
+            try:
+                os.chdir(directory)
+                Path("cache/solidity-files-cache.json").write_text(json.dumps({
+                    "files": {"src/A.sol": {"imports": []}}}))
+                partition_module.capture_compiled_batch(root, 0, 1, 0, 2, "a" * 40, "ci")
+                with self.assertRaises(ValueError):
+                    partition_module.snapshot_compiled_batches(root, 0, 1, "a" * 40, "ci")
+                with self.assertRaises(ValueError):
+                    partition_module.capture_compiled_batch(root, 0, 1, 1, 2, "b" * 40, "ci")
+                Path("cache/solidity-files-cache.json").write_text(json.dumps({
+                    "files": {"src/A.sol": {"imports": []},
+                              "test/B.t.sol": {"imports": ["src/A.sol"]}}}))
+                partition_module.capture_compiled_batch(root, 0, 1, 1, 2, "a" * 40, "ci")
+                partition_module.snapshot_compiled_batches(root, 0, 1, "a" * 40, "ci")
+            finally:
+                os.chdir(old)
+
     def test_transitive_and_cyclic_imports_retain_all_runtime_dependencies(self):
         cache = {"test/A.t.sol": {"imports": ["src/B.sol"]},
                  "src/B.sol": {"imports": ["src/C.sol"]},

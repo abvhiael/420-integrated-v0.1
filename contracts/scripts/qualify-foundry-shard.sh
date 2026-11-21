@@ -28,14 +28,34 @@ printf 'Shard %s/%s: %s primary units, %s deployable sources and %s test sources
   "$shard" "$count" "${#targets[@]}" "${#sources[@]}" "${#tests[@]}" "${#all[@]}"
 printf '%s\n' "${targets[@]}" > "../artifacts/contracts/shard-${shard}-targets.txt"
 printf '%s\n' "${all[@]}" > "../artifacts/contracts/primary-inventory-shard-${shard}.txt"
-# Compile all assigned sources, tests and scripts; compiler errors fail immediately.
-forge build "${targets[@]}"
-# Retain the complete graph before sparse test commands prune the live cache.
+# Compile the complete assigned primary inventory in bounded deterministic
+# batches. A single large via-IR compiler invocation expands to ~1000 sources
+# and repeatedly loses hosted runners. No targets or assertions are omitted.
+contexts=16
+for (( segment=0; segment<contexts; segment++ )); do
+  batch=()
+  for (( i=segment; i<${#targets[@]}; i+=contexts )); do
+    batch+=("${targets[i]}")
+  done
+  if (( ${#batch[@]} == 0 )); then echo "Empty batch $segment" >&2; exit 1; fi
+  echo "=== COMPILE BATCH $segment/$contexts: ${#batch[@]} primaries ==="
+  forge build "${batch[@]}"
+  python3 scripts/coverage-foundry-shard.py --capture-compiled-batch "$shard" "$count" "$segment" "$contexts"
+done
+# The canonical dependency graph is the exact-SHA union of real compiler caches.
 python3 scripts/coverage-foundry-shard.py --snapshot-canonical-graph "$shard" "$count"
-# Enforce deployable runtime/initcode limits on production sources only. Reuse the\n# first build cache rather than forcing a second cold compilation.
+# Preserve full deployable bytecode size checks, in bounded source-only batches.
 if (( ${#sources[@]} )); then
-  echo "=== DEPLOYABLE SOURCE SIZE CHECK: ${#sources[@]} sources ==="
-  forge build --sizes "${sources[@]}"
+  for (( segment=0; segment<contexts; segment++ )); do
+    source_batch=()
+    for (( i=segment; i<${#sources[@]}; i+=contexts )); do
+      source_batch+=("${sources[i]}")
+    done
+    if (( ${#source_batch[@]} )); then
+      echo "=== DEPLOYABLE SIZE BATCH $segment/$contexts: ${#source_batch[@]} primaries ==="
+      forge build --sizes "${source_batch[@]}"
+    fi
+  done
 fi
 # Run EVERY assigned test file, even if an earlier file fails, to expose the
 # complete list of failing test files in one CI pass. Never hide the failure:

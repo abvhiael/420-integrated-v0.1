@@ -3,10 +3,10 @@ import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 
 const icons = ['icons/pay-192.png', 'icons/pay-512.png'];
-const shell = ['index.html', 'app.js', 'style.css', 'manifest.webmanifest', ...icons];
+const shell = ['index.html', 'app.js', '420id-client.mjs', 'style.css', 'manifest.webmanifest', ...icons];
 await mkdir('dist/icons', { recursive: true });
 await Promise.all([
-  ...['index.html', 'checkout-embed.html', 'style.css', 'deployment.json', 'manifest.webmanifest', ...icons]
+  ...['index.html', 'checkout-embed.html', '420id-client.mjs', 'style.css', 'deployment.json', 'manifest.webmanifest', ...icons]
     .map(file => copyFile(file, 'dist/' + file)),
   build({ entryPoints: ['app.js', 'checkout-embed.js'], outdir: 'dist', bundle: true, format: 'esm', target: 'es2022' })
 ]);

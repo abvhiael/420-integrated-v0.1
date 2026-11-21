@@ -20,6 +20,7 @@ export class AccountSocialController {
    if(me.status!==200||me.data?.walletRequired!==false||!isSubjectID(me.data.profile?.subject))throw Error('Unverified account');
    const page=await this.client.request('/v1/feed');
    if(gen!==this.generation)return this.state;
+   if(page.status===401)return this.emit({status:'guest'});
    if(page.status!==200)throw Error('Feed unavailable');
    const normalized=normalizeAccountSocialFeed(page.data);
    if(!normalized)throw Error('Unverified off-chain feed');

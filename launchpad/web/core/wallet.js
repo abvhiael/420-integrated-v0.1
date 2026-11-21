@@ -86,7 +86,7 @@ export function executionGate({config,wallet,review}={}){
   try{validateTransaction(config,review);}catch(e){return {ok:false,reason:e.message};}
   return {ok:true,reason:null};
 }
-export async function submitReviewedTransaction({ethereum,config,wallet,review,revalidate}={}){
+export async function submitReviewedTransaction({ethereum,config,wallet,review,revalidate,sessionValid}={}){
   const gate=executionGate({config,wallet,review});if(!gate.ok)throw new Error(gate.reason);
   if(typeof revalidate==='function')await revalidate();
   const freshGate=executionGate({config,wallet,review});if(!freshGate.ok)throw new Error(freshGate.reason);
@@ -94,7 +94,7 @@ export async function submitReviewedTransaction({ethereum,config,wallet,review,r
     ethereum.request({method:'eth_chainId'}),ethereum.request({method:'eth_accounts'})
   ]);
   if(!same(currentChain,wallet.chainId)||!Array.isArray(accounts)||accounts.length!==1||
-    !same(accounts[0],wallet.account))throw new Error('WALLET_SESSION_CHANGED');
+    !same(accounts[0],wallet.account)|| (sessionValid&&!sessionValid()))throw new Error('WALLET_SESSION_CHANGED');
   const tx={from:wallet.account,to:review.transaction.to,data:review.transaction.data,value:review.transaction.value};
   return ethereum.request({method:'eth_sendTransaction',params:[tx]});
 }

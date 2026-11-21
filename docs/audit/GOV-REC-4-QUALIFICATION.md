@@ -8,7 +8,7 @@
 - Implementation branch: `audit/420governance-rec-4-lifecycle-20261121`
 - **Exact tested implementation SHA:** `e49839854b4055cb946e8194466ddb6831fc4360`
 - Parent GOV-REC-3 implementation: `338cb8a41d60c52e4ef9e7ee791dedc046f1b11a`, PR #1293 subsequently merged into `main` at `009b974617014d453be5ce3015963b708ad4a75e`
-- GOV-REC-4 pull request: #1294 (open, now base `main` after PR #1293 merged; **not merged**)
+- GOV-REC-4 pull request: #1294 (**merged into `main`** at `af69f95602e8937557fffa39f7361e2b762f9624`, after PR #1293 merged)
 - Evidence-only bookkeeping after qualified code head is permitted by `docs/apps/governance/qualification.md`; no new executable code, tests, configuration, artifacts or protocol rules are changed by this document.
 
 ## Authoritative executed qualification
@@ -49,7 +49,7 @@ The clean execution test records actual emitted `CivicProposalRegistered`, `Civi
 
 The two-member Community and Validator fixtures are explicitly **synthetic** test data, never authenticated Genesis electorate lists or a production deployment approval. The retained release approval defaults to zero and intentionally fails closed until independently authorized chain-specific Genesis materialization. Nothing in this qualification asserts that the live testnet exists or that live governance activation has occurred.
 
-After the passing implementation run, GOV-REC-3 PR #1293 was independently merged into `main` at `009b974617014d453be5ce3015963b708ad4a75e`. GitHub automatically retargeted open GOV-REC-4 PR #1294 to `main`. The verified comparison shows only the new REC-4 test and its two documentation/evidence files in the PR diff, without conflicts. GOV-REC-4 itself remains unmerged; merging requires separate explicit user instruction.
+After the passing implementation run, GOV-REC-3 PR #1293 was independently merged into `main` at `009b974617014d453be5ce3015963b708ad4a75e`. GitHub automatically retargeted open GOV-REC-4 PR #1294 to `main`. The verified comparison shows only the new REC-4 test and its two documentation/evidence files in the PR diff, without conflicts. GOV-REC-4 PR #1294 was subsequently merged independently into `main` at `af69f95602e8937557fffa39f7361e2b762f9624` on 2026-11-21. This documentation-only evidence correction remains in open PR #1296, not merged. Neither merge was initiated by this qualification bookkeeping.
 
 ## Next gate
 

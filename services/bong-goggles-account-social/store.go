@@ -276,6 +276,15 @@ func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator strin
  if !uuid.MatchString(postID)||(action!="hide"&&action!="restore")||
  !safeText(reason,120,false)||!safeText(operator,100,false){return ErrInvalid}
  tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
+ // Lock the parent before checking any grants: concurrent XP-bearing
+ // comments must commit before the legacy guard checks outstanding awards.
+ if action=="hide"{
+  var parent string
+  e=tx.QueryRowContext(ctx,`SELECT id FROM bg_account_social.posts
+  WHERE id=$1 AND deleted_at IS NULL FOR UPDATE`,postID).Scan(&parent)
+  if errors.Is(e,sql.ErrNoRows){return ErrNotFound}
+  if e!=nil{return e}
+ }
  // A legacy operator cannot hide already awarded content without writing
  // its compensating journal entries. Require the XP-aware moderation path.
  // Pre-AUTH-10 operator databases without migration 003 stay compatible.

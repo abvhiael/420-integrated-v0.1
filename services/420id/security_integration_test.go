@@ -85,6 +85,16 @@ func TestAUTH12AccountRuntimeLeastPrivilegeAndMissingGrants(t *testing.T){
  if _,e=db.ExecContext(ctx,"GRANT UPDATE ON account420.wallet_links TO "+role);e!=nil{t.Fatal(e)}
  if _,e=db.ExecContext(ctx,"REVOKE DELETE ON account420.wallet_link_challenges FROM "+role);e!=nil{t.Fatal(e)}
  if e=wallet.Ready(ctx);!errors.Is(e,ErrUnavailable){t.Fatal("wallet missing DELETE accepted",e)}
+
+ // Identity/Names display preferences are also a four-operation runtime
+ // path. One SELECT grant must not be enough to pass its readiness gate.
+ identity:=&IdentityNamesManager{sessions:session}
+ if _,e=db.ExecContext(ctx,"GRANT SELECT ON account420.identity_names_preferences TO "+role);e!=nil{t.Fatal(e)}
+ if e=identity.Ready(ctx);!errors.Is(e,ErrUnavailable){t.Fatal("identity partial grants accepted",e)}
+ if _,e=db.ExecContext(ctx,"GRANT INSERT,UPDATE,DELETE ON account420.identity_names_preferences TO "+role);e!=nil{t.Fatal(e)}
+ if e=identity.Ready(ctx);e!=nil{t.Fatal("complete identity grants rejected",e)}
+ if _,e=db.ExecContext(ctx,"REVOKE UPDATE ON account420.identity_names_preferences FROM "+role);e!=nil{t.Fatal(e)}
+ if e=identity.Ready(ctx);!errors.Is(e,ErrUnavailable){t.Fatal("identity missing UPDATE accepted",e)}
 }
 
 func TestAUTH12IntrospectionSerializesRevocationBeforePrivateRead(t *testing.T){

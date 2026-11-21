@@ -68,6 +68,9 @@ func TestAUTH10ModerationReversalAndNoRestoreFarming(t *testing.T){
  if comment.Code!=201{t.Fatal("peer comment",comment.Code)}
  beforeA,beforeB:=xpSummary(t,h,a),xpSummary(t,h,b)
  if beforeA.Total<5||beforeB.Total<2{t.Fatal("eligible content missing XP",beforeA,beforeB)}
+ if e=store.Moderate(context.Background(),post.ID,"hide","legacy bypass","moderator");e!=ErrForbidden{
+  t.Fatal("legacy moderation bypassed XP compensation",e)
+ }
  if e=svc.Moderate(context.Background(),post.ID,"hide","spam review","moderator");e!=nil{t.Fatal(e)}
  afterA,afterB:=xpSummary(t,h,a),xpSummary(t,h,b)
  if afterA.Total!=beforeA.Total-5||afterB.Total!=beforeB.Total-2{t.Fatal("moderation failed to reverse both authors",afterA,afterB)}

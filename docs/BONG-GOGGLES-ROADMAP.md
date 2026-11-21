@@ -10,6 +10,8 @@
 
 **BC-0.1 inventory:** [Repository reconciliation and reusable-component inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md), source snapshot `1cd6ceb5fe5f6bc47ae7662ab2d4b14a776f0eb0`. Main's BG-15/BG-19 PRs are merged; open [CCC-6 PR #1313](https://github.com/abvhiael/420-integrated-v0.1/pull/1313) is not on `main` at this snapshot. BC-0.2–BC-0.12 remain unfinished.
 
+**BC-0.2 code qualification (2026-11-21):** [Unified Games menu evidence](games/classics/BC-0-2-QUALIFICATION.md) and [Web Verification #44953039287](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44953039287) PASS at `822dcbd40048c49e07bd2bfff79e305ed4b750ea`. `/games` is now a public 25-title catalogue with separately guarded wallet sessions and preserved `/classics`. CCC-6 [PR #1313](https://github.com/abvhiael/420-integrated-v0.1/pull/1313) was merged into main before BC-0.2 and its save/resume code was retained. BC-0.3–BC-0.12 and live browser deployment remain open; no Classics engine is marked playable.
+
 **Execution guardrails:** Each game requires the rules/scoring engine, Easy/Medium/Hard non-cheating AI, authenticated human and mixed-seat multiplayer, responsive playable UI, saved/reconnectable state, result history/rematches and actual live-browser qualification before marking it Playable or advancing. Off-chain 420ID account matches are wallet-optional and distinct from existing on-chain BG-15 canonical sessions. No wagers or unverified rewards; retain Cross-Country Chaos and other existing games. **Current status: ROADMAP ONLY; BC-0 through BC-25 not completed by adoption.**
 
 ---

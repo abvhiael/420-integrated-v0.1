@@ -2,7 +2,7 @@
 
 **Roadmap ID:** BG-CLASSICS (BC-0 through BC-25)
 **Adopted:** 2026-11-21
-**Status:** Roadmap established; implementation milestones NOT claimed complete by this document.
+**Status:** BC-0.1 inventory and BC-0.2 unified catalogue qualified in the repository; BC-0.3–BC-0.12 and all 25 game engines remain unimplemented. Live deployment is not asserted.
 **Repository:** `abvhiael/420-integrated-v0.1`
 **Product:** `https://bonggoggles.420integrated.org/`
 
@@ -20,7 +20,7 @@ Games are zero-wager and require no blockchain transaction or mandatory 420Walle
 - `bong-goggles/web/core/classics-ui.js` and `bong-goggles/web/core/routes.js` serve the current Classics catalogue and Cross-Country Chaos local game; existing live navigation must not regress.
 - `bong-goggles/web/core/games.js`, `games-ui.js` and `services/bong-goggles-games-v1/` contain qualified BG-15 projection/intent and versioned seven-type infrastructure; these are not proof of real online game boards or wallet-independent account multiplayer.
 - `BongGogglesGameSessionRegistry420` keeps its established canonical session/move authority for eligible wallet/on-chain games. Do not mutate its existing enum or change immutable ruleset bindings casually.
-- `/games` currently has wallet-gated BG-15 presentation; BC-0 must present the account-accessible Classics catalogue while preserving legacy on-chain session details and link paths.
+- BC-0.2 makes `/games` a publicly browsable 25-game catalogue with strict game detail links. Legacy wallet/on-chain BG-15 session detail remains gated; account gameplay is still independently controlled at `/account/games`.
 - Cross-Country Chaos already has local Easy/Normal/Hard computer-seat functionality. New Classics use **Easy/Medium/Hard** terminology; do not break the existing game.
 
 ## BC-0 — mandatory shared gaming platform (FIRST)
@@ -28,7 +28,7 @@ Games are zero-wager and require no blockchain transaction or mandatory 420Walle
 | Substep | Gate | Required deliverable |
 |---|---|---|
 | BC-0.1 | Baseline inventory — **QUALIFIED** ([source-backed inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md)) | Reconcile main, open PRs, BG-15 session/engine framework, web routes, current Classics assets/tests, account-social/420ID flows, and deployed-service boundaries. Retain exact commit provenance. |
-| BC-0.2 | One coherent games menu | Make /games the principal browse destination with all 25 titles visibly present and individually navigable to /games/:slug (or equivalent routed path). Keep /classics aliases and Cross-Country Chaos; Canadian Classics has its own category. Never falsely label unfinished games playable. |
+| BC-0.2 | One coherent games menu — **QUALIFIED** ([evidence](games/classics/BC-0-2-QUALIFICATION.md)) | Make /games the principal browse destination with all 25 titles visibly present and individually navigable to /games/:slug (or equivalent routed path). Keep /classics aliases and Cross-Country Chaos; Canadian Classics has its own category. Never falsely label unfinished games playable. |
 | BC-0.3 | Shared UI | Build game landing page, rules and active-variant labels, New Game, opponent/seat setup, tabletop, history, resume, results, rematch, and accessible mobile layouts. |
 | BC-0.4 | Account integration | Use 420ID-backed BongGoggles identities and existing account sessions for wallet-optional games. Keep an obvious login path, log-out, session renewal and policy/block checks. No mandatory 420Wallet connection for off-chain matches. |
 | BC-0.5 | Invites and seating | Private/public rooms; friend invitations; accept/decline/cancel; 2-4 or game-specific seat counts; team assignment; seat-specific human or bot control and per-bot difficulty; human-human and mixed human-bot play. |
@@ -139,8 +139,9 @@ The main `Games` link must be accessible to logged-out visitors for browsing, 42
 
 | Milestone | Status | Exact SHA | CI / E2E / deployment evidence | Remaining blockers |
 |---|---|---|---|---|
-| BC-0 | IN PROGRESS | — | BC-0.1 inventory qualified; BC-0.2–BC-0.12 unimplemented | BC-0 shared platform and release criteria remain open |
+| BC-0 | IN PROGRESS | — | BC-0.1 inventory and BC-0.2 catalogue qualified; BC-0.3–BC-0.12 not implemented | BC-0 shared platform and release criteria remain open |
 | BC-0.1 | QUALIFIED | Inventory commit `e399434763cf07d130d486cc05cfe18ae0d75b4e`; baseline `1cd6ceb5fe5f6bc47ae7662ab2d4b14a776f0eb0` | [Inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md); [420Docs Qualification #44948290256](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44948290256) PASS at inventory SHA; 18/18 critical source files verified | BC-0.2 next; BC-0 overall incomplete |
+| BC-0.2 | QUALIFIED (repository; live browser not attested) | `822dcbd40048c49e07bd2bfff79e305ed4b750ea` | [Run #44953039287](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44953039287) PASS: 363 web tests, 4 HTTP tests, both builds, assets/accessibility, secret scan; [evidence](games/classics/BC-0-2-QUALIFICATION.md) | BC-0.3 next; BC-0 deployment remains unverified |
 | BC-1 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-2 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-3 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |

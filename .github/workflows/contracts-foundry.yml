@@ -2,13 +2,6 @@
 name: Solidity Contracts
 
 on:
-  pull_request:
-    paths:
-      - 'scripts/verify-governance-rec-6.py'
-      - 'scripts/test-governance-rec-6.py'
-      - 'docs/apps/governance/**'
-      - 'docs/audit/GOV-REC-6*'
-      - '.github/workflows/contracts-foundry.yml'
   workflow_dispatch:
 
 concurrency:
@@ -303,7 +296,7 @@ jobs:
   # Non-Compute or mixed Solidity PRs still qualify the complete inventory.
   pr-shards:
     needs: classify-pr
-    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && needs.classify-pr.outputs.sports_5d3_only != 'true' && needs.classify-pr.outputs.sports_5d4_only != 'true' && needs.classify-pr.outputs.sports_5d5_only != 'true' && needs.classify-pr.outputs.sports_5d6_only != 'true' && needs.classify-pr.outputs.sports_5d7_only != 'true' && needs.classify-pr.outputs.sports_5d8_only != 'true' && needs.classify-pr.outputs.sports_5d9_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006' || startsWith(github.head_ref, 'audit/420governance-rec-6-'))
+    if: github.event_name == 'pull_request' && github.head_ref != 'qualification/bnb-phase3-level3-20261013' && github.head_ref != 'qualification/highcountry-r04-level3-main-20261013' && needs.classify-pr.outputs.compute_only != 'true' && needs.classify-pr.outputs.organization_only != 'true' && needs.classify-pr.outputs.cooperative_only != 'true' && needs.classify-pr.outputs.competition_only != 'true' && needs.classify-pr.outputs.sports_5d3_only != 'true' && needs.classify-pr.outputs.sports_5d4_only != 'true' && needs.classify-pr.outputs.sports_5d5_only != 'true' && needs.classify-pr.outputs.sports_5d6_only != 'true' && needs.classify-pr.outputs.sports_5d7_only != 'true' && needs.classify-pr.outputs.sports_5d8_only != 'true' && needs.classify-pr.outputs.sports_5d9_only != 'true' && (!(startsWith(github.head_ref, 'audit/') || contains(github.head_ref, '-audit-')) || github.head_ref == 'audit/420launchpad-remediation' || github.head_ref == 'audit/420verify-20261003' || github.head_ref == 'audit/420token-complete-20261004' || github.head_ref == 'audit/420town-complete-20261004' || github.head_ref == 'audit/420media-complete-20261006' || github.head_ref == 'audit/doobtube-baseline-20261006')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -316,12 +309,6 @@ jobs:
       contents: read
     env:
       FOUNDRY_PROFILE: pr
-      # Retained CADC upstream source tree supplies these exact audited imports.
-      # Newline-separated Foundry remappings preserve the complete primary test inventory.
-      FOUNDRY_REMAPPINGS: |
-        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
-        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
-        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -358,7 +345,7 @@ jobs:
   # with the full CI fuzz/invariant settings. The fixture runs only after all
   # shards succeed and their combined inventory matches the repository exactly.
   level3-shards:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013' || github.head_ref == 'audit/highcountry-r06-1-browser-shell-20261014' || startsWith(github.head_ref, 'audit/420governance-rec-6-')))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013' || github.head_ref == 'audit/highcountry-r06-1-browser-shell-20261014'))
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
@@ -372,12 +359,6 @@ jobs:
     env:
       FOUNDRY_PROFILE: ci
       FOUNDRY_SPARSE_MODE: 'true'
-      # Retained CADC upstream source tree supplies these exact audited imports.
-      # Newline-separated Foundry remappings preserve the complete primary test inventory.
-      FOUNDRY_REMAPPINGS: |
-        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
-        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
-        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -426,7 +407,7 @@ jobs:
           retention-days: 30
 
   level3-fixture:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013' || github.head_ref == 'audit/highcountry-r06-1-browser-shell-20261014' || startsWith(github.head_ref, 'audit/420governance-rec-6-')))
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && (github.head_ref == 'audit/420commerce-com-2-upstream-adaptations' || github.head_ref == 'audit/doobr-audit-1-inventory-20261009' || github.head_ref == 'review/high-country-complete-audit-20261009' || github.head_ref == 'qualification/highcountry-r03-main-merge-20261010' || github.head_ref == 'qualification/bnb-phase3-level3-20261013' || github.head_ref == 'qualification/highcountry-r04-level3-main-20261013' || github.head_ref == 'audit/highcountry-r06-1-browser-shell-20261014'))
     needs: level3-shards
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -435,12 +416,6 @@ jobs:
     env:
       FOUNDRY_PROFILE: ci
       FOUNDRY_SPARSE_MODE: 'true'
-      # Retained CADC upstream source tree supplies these exact audited imports.
-      # Newline-separated Foundry remappings preserve the complete primary test inventory.
-      FOUNDRY_REMAPPINGS: |
-        @openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/
-        @layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/
-        solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4

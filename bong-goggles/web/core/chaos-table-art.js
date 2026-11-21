@@ -11,8 +11,8 @@ export function deriveChaosTableFeedback(before,after,move){
  if(move.action==='fix'){
   const card=player.hand[move.index];
   if(card?.type!=='fix')return null;
-  if(card.id==='atlas'&&updated.km===player.km+150)
-   return cue('shortcut',[player.id],'Shortcut found','+150 km · Permanent detours remain');
+  if(card.id==='atlas'&&updated.bonusKm===player.bonusKm+150&&updated.detourLoss===player.detourLoss)
+   return cue('shortcut',[player.id],'Shortcut found','+150 km card bonus · Permanent detours remain');
   if(player.status&&!updated.status)
    return cue('repair',[player.id],'Roadside repair complete',card.name+' cleared '+player.status.name);
  }

@@ -16,6 +16,13 @@ interface VmStakeValidatorGenesis420 {
     function etch(address account, bytes calldata code) external;
 }
 
+/// @dev Synthetic canonical 0x0423 owner checker for reward accounting only.
+contract SponsoredOwnerProbe420 {
+    function isFullyProtocolSponsoredOwner(address owner) external pure returns (bool) {
+        return owner == address(0xABCD);
+    }
+}
+
 contract StakeValidatorGenesis420Test {
     VmStakeValidatorGenesis420 internal constant vm = VmStakeValidatorGenesis420(address(uint160(uint256(keccak256("hevm cheat code")))));
     ValidatorRegistry internal registry;
@@ -82,6 +89,22 @@ contract StakeValidatorGenesis420Test {
         require(address(registry).balance == 42_000 ether, "real effective bond");
         require(registry.totalPendingProtocolCredit() == 0, "pending consumed");
         _assertSolvent();
+    }
+
+    function testFullySponsoredRewardCreditsCommunityTenPercent() public {
+        SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
+        vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
+        vm.roll(999);
+        address[] memory participants = new address[](1);
+        participants[0] = address(0xBEEF);
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(
+            uint64(block.number), address(0xABCD), participants, 100 ether, 50 ether, 0, 0
+        );
+        require(rewards.validatorAccrued(address(0xABCD)) == 90 ether, "operator nets 90 pct");
+        require(rewards.validatorAccrued(address(0xBEEF)) == 50 ether, "ordinary validator unaffected");
+        require(rewards.communityRewardAccrued() == 10 ether, "community accrues 10 pct");
+        require(rewards.grossSecurityIssued() == 150 ether, "no issuance changes");
     }
 
     function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {

@@ -1,0 +1,154 @@
+name: 420Governance GOV-REC-6 Pre-Testnet Software Qualification
+
+on:
+  push:
+    branches: ['audit/420governance-rec-6-*']
+    paths:
+      - 'scripts/verify-governance-rec-6.py'
+      - 'scripts/test-governance-rec-6.py'
+      - 'docs/apps/governance/**'
+      - 'docs/audit/GOV-REC-6*'
+      - '.github/workflows/governance-rec-6.yml'
+      - 'contracts/src/governance/**'
+      - 'contracts/config/governance-deployment-v1.json'
+      - 'contracts/config/predeploy/Governance*'
+  pull_request:
+    paths:
+      - 'scripts/verify-governance-rec-6.py'
+      - 'scripts/test-governance-rec-6.py'
+      - 'docs/apps/governance/**'
+      - 'docs/audit/GOV-REC-6*'
+      - '.github/workflows/governance-rec-6.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-rec-6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reproducible-cold-start:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Clean pinned compiler build
+        working-directory: contracts
+        run: |
+          forge --version
+          forge clean
+          forge build src/governance
+      - name: Exact ABI and bytecode, immutable/storage layout, five-field Genesis and descriptor verification
+        run: |
+          python3 scripts/test-governance-rec-6.py
+          python3 scripts/verify-governance-rec-6.py
+          python3 scripts/generate-governance-audit-6-artifacts.py --check --print
+          python3 scripts/verify-governance-audit-6.py --require-ready
+          python3 scripts/verify-governance-audit-4.py
+          git diff --exit-code -- contracts/artifacts contracts/config/governance-deployment-v1.json contracts/config/predeploy contracts/config/deployment-manifest.json
+      - name: Frozen Genesis address, electrolyte fixture and authority checks
+        run: |
+          python3 scripts/test-governance-rec-2-electorates.py
+          python3 scripts/build-governance-rec-2-electorates.py --input contracts/test/fixtures/governance-rec-2-members.json --output contracts/test/fixtures/governance-rec-2-vectors.json --check
+          python3 scripts/verify-genesis-interface-layer.py
+          python3 scripts/verify-genesis-canonical-addresses.py
+          python3 scripts/verify-genesis-predeploy-authority.py
+          python3 scripts/audit-genesis-address-collisions.py
+          python3 scripts/verify-governance-audit-7.py
+      - name: Cold-start 19 actual Timelock operations, dual-house lifecycle and adversarial invariants
+        working-directory: contracts
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test forge test --match-path test/GovernanceRec4Lifecycle420.t.sol -vvv
+      - name: Forbidden authority primitive scan
+        run: |
+          if grep -R -nE 'tx\.origin|selfdestruct[[:space:]]*\(|\.delegatecall[[:space:]]*\(' contracts/src/governance; then
+            echo "Forbidden authority opcode" >&2
+            exit 1
+          fi
+
+  wallet-indexer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Governance Wallet and retained regression inventory
+        working-directory: wallet/web
+        run: |
+          node scripts/check-governance.mjs
+          node --test --test-concurrency=1 test/governance-management.test.js test/governance-management-ui.test.js
+          npm run check
+          npm test
+      - name: Governance Indexer build, descriptors, reorg/replay and projections
+        working-directory: 420-indexer
+        run: |
+          npm install
+          npm run build
+          node --test --test-concurrency=1 dist/test/abi-manifest.test.js dist/test/governance-descriptors.test.js dist/test/lifecycle-reducer.test.js dist/test/protocol-projections.test.js dist/test/protocol-object-service.test.js dist/test/query-service.test.js dist/test/event-stream.test.js dist/test/event-subscription.test.js
+
+  treasury-vault:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Build Governance, Registry, Stake, Treasury and Vault
+        working-directory: contracts
+        run: |
+          forge build src/governance src/apps/ProtocolRegistry.sol src/system/ValidatorRegistry.sol src/treasury src/vault
+          FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-7 forge test --match-path test-governance-audit-7/GovernanceAudit7Integration420.t.sol -vvv
+      - name: Registry Stake Treasury Vault Search Explorer Notifications authority
+        run: python3 scripts/verify-governance-audit-7.py
+
+  documentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Documentation requirements
+        run: pip install -r requirements-docs.txt
+      - name: Repository documentation qualification
+        run: python3 scripts/qualify-documentation.py

@@ -8,8 +8,8 @@ import { ProtocolDecoderRegistry420 } from '../src/protocol-decoder.js';
 import { ProtocolProjection420 } from '../src/protocol-projections.js';
 import type { SqlExecutor420, TransactionalSql420 } from '../src/core-projections.js';
 
-const a=(n:number):Hex=('0x'+n.toString(16).padStart(40,'0')) as Hex;
-const h=(n:number):Hex=('0x'+n.toString(16).padStart(64,'0')) as Hex;
+const a=(n:number):Hex => ('0x'+n.toString(16).padStart(40,'0')) as Hex;
+const h=(n:number):Hex => ('0x'+n.toString(16).padStart(64,'0')) as Hex;
 const R=a(0x434),ROUTER=a(0x1001),SALES=a(0x1002),ALLOC=a(0x1003),PROJECTS=a(0x1004),CROWD=a(0x1005);
 const genesis=h(12),code='0x6001' as Hex,codeHash=keccak256(code);
 const registryAbi=new Interface([

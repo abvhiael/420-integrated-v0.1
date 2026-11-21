@@ -17,7 +17,7 @@ test('each example has a unique safe deep-link and explicit fictional metadata',
 test('route parsing is bounded to declared views and known sample campaign identifiers',()=>{
   assert.deepEqual(parseRoute(''),{page:'home'});
   assert.deepEqual(parseRoute('#/home'),{page:'home'});
-  for(const page of ['discover','creator','overview','live'])
+  for(const page of ['discover','creator','dashboard','overview','live'])
     assert.deepEqual(parseRoute('#/'+page),{page});
   assert.deepEqual(parseRoute('#/campaign/greenroots'),{page:'campaign',slug:'greenroots'});
   assert.deepEqual(parseRoute('#/campaign/not-real'),{page:'not-found'});
@@ -38,6 +38,7 @@ test('sample routes visibly prohibit payment and preserve the real workspace',()
   assert.match(html,/FICTIONAL EXAMPLE — NOT FUNDRAISING/);
   assert.match(html,/contributions disabled/);
   assert.match(html,/id="view-live"/);
+  assert.match(html,/id="view-dashboard"/);
   assert.match(html,/id="creator-form"/);
   assert.match(html,/id="review-gate"/);
   assert.match(html,/id="connect-wallet"/);

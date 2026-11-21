@@ -86,22 +86,19 @@ Never invent fixed addresses for Registry-resolved outputs.
 
 ## Initialization order
 
-1. materialize GovernanceTimelock at 0x0429 with bootstrapGovernor 0x0437;
-2. materialize Governance420 at 0x0437 bound to Timelock;
-3. deploy Constitution, Proposal Registry and Electorate Registry;
-4. deploy/configure COMMUNITY and VALIDATOR equal-weight electorate sources;
-5. install frozen revision-1 G1–G4 rules;
-6. deploy Voting and Governor with the exact graph;
-7. bind Proposal Registry proposal authority to Governor;
-8. bind Electorate Registry snapshot authority to Governor;
-9. bind Governance420 compatibility pointer;
-10. publish five Civic core plus two electorate-source component IDs;
-11. publish active `420/service/governance/v1` pointing to CivicGovernor420;
-12. verify graph/rules/sources/Registry records;
-13. activate Civic authority last;
-14. verify Timelock scheduler is CivicGovernor420 and `civicAuthorityActivated == true`.
+1. Materialize GovernanceTimelock at frozen `0x0429` with bootstrapGovernor/scheduler `Governance420@0x0437`.
+2. Materialize Governance420 at frozen `0x0437`, bound to Timelock, with the **previously Genesis-approved** plan hash and authentic Community/Validator Merkle roots and totals. An unset/partial commitment must fail closed; no external caller may set it.
+3. Ensure the actual ProtocolRegistry is installed at frozen `0x0434`, bound to the same Timelock and reporting protocol version 4. The Governance service version and all **seven** Civic component revisions must still be zero. Other unrelated Registry services do not need to be empty.
+4. Deploy the Constitution, Proposal Registry and Electorate Registry with the exact Timelock, leaving G1–G4 constitutional rules absent, proposal/snapshot authorities unset and both electorate house sources unconfigured.
+5. Deploy separate Community and Validator equal-weight Merkle electorate sources with their correct source types and the exact Timelock. Both source checkpoint lists must initially be empty.
+6. Deploy CivicVoting420 and CivicGovernor420 with matching Proposal/Electorate/Constitution/Voting dependencies. All five core Civic modules must report protocol version 1.
+7. Verify all seven addresses, actual runtime code hashes, constructor/dependency relationships and initial electorate commitments against the pre-seeded, chain-specific `Governance420.canonicalBootstrapPlanHash`. Wrong addresses with the same bytecode are not acceptable.
+8. **Only then** allow any caller to invoke `scheduleCanonicalCivicBootstrap`. Scheduling exactly 19 G1 Timelock operations must succeed atomically or revert without setting `bootstrapPlanScheduled`, `bootstrapPlanHash` or partial operations.
+9. After the Timelock floor, execute scheduled operations `0..18` in order. They configure both sources, set frozen revision-1 G1–G4 rules, bind the authorities and compatibility pointer, register the seven Civic components, publish the Governance service, and publish the two initial electorate checkpoints. **Do not perform these mutations manually before scheduling**: the preflight deliberately rejects a partially initialized graph.
+10. Advance beyond the two initial checkpoints' effective blocks, and verify both roots/totals, constitutional rules, Registry resolutions, service version and Timelock scheduler preconditions.
+11. Invoke `activateCanonicalCivic` only after all preconditions are proven; verify permanent handoff to CivicGovernor420, `bootstrapRetired == true` and `civicAuthorityActivated == true`.
 
-The exact deployment specification is authoritative where this summary omits detail.
+The exact deployment specification remains authoritative where this summary omits detail. The initial storage approval cannot be selected or replaced by the transaction sender; competing, duplicate and post-activation bootstrap requests revert without creating new authority.
 
 ## Bootstrap recovery
 

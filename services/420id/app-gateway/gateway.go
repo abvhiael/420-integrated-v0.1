@@ -257,6 +257,11 @@ func (g *Gateway) validSession(v scopedSession)bool{
 // Current returns only this application's private subject, never 420ID's
 // global account ID, provider bearer, email, wallet or any entitlement.
 func (g *Gateway) Current(ctx context.Context,r *http.Request)(string,error){
+ // An existing first-party app HTTP handler may reuse this verifier for
+ // account-only activity. Never accept a cookie over an untrusted host,
+ // scheme or a cross-site unsafe method (CSRF).
+ if !g.secure(r){return "",ErrNotAuthenticated}
+ if r.Method!="GET"&&r.Method!="HEAD"&&!g.sameOrigin(r){return "",ErrNotAuthenticated}
  raw,e:=decode(cookie(r,CookieSession));if e!=nil{return "",ErrNotAuthenticated}
  d:=digest(raw)
  tx,e:=g.db.BeginTx(ctx,nil)

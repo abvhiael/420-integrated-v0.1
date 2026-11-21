@@ -14,7 +14,7 @@ func TestAUTH12RejectsCaseFoldedAndUnicodeSocialJSONKeys(t *testing.T){
   `{"body":"good","BODY":"override"}`,
   `{"body":"good","Body":"override"}`,
   `{"consentAccepted":false,"ConsentAccepted":true}`,
-  `{"body":"safe","b\\u006fdy":"shadow"}`,
+  `{"body":"safe","b\u006fdy":"shadow"}`,
   `{"body":"safe","boɗy":"unicode"}`,
   `{"body":"safe","body":""}`,
   `{"body":"safe","extra":1}`,

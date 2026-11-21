@@ -44,22 +44,44 @@ func Migrate(ctx context.Context,db *sql.DB)error{
 func (s *Store) Ready(ctx context.Context)error{
  var ok bool
  e:=s.DB.QueryRowContext(ctx,`SELECT
- COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'SELECT,INSERT'),false)
+ (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'INSERT'),false))
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.members','display_name','UPDATE'),false)
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.members','bio','UPDATE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'SELECT,INSERT'),false)
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'INSERT'),false))
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.posts','deleted_at','UPDATE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'SELECT,INSERT,UPDATE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'SELECT,INSERT,DELETE'),false)
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'INSERT'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reactions'),'DELETE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.follows'),'DELETE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.blocks'),'DELETE'),false))
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'INSERT'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT,INSERT,DELETE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT,INSERT,UPDATE,DELETE'),false)
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.sessions'),'DELETE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.login_flows'),'DELETE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'UPDATE'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.rate_buckets'),'DELETE'),false))
 `).Scan(&ok)
  if e!=nil{return e}
  if !ok{return ErrUnavailable}
+ return nil
+}
+// AUTH-12: the serving role may perform user actions but must never
+// inspect private abuse reports or forge operator moderation events, and
+// must not gain unapproved whole-table delete/update capabilities.
+func (s *Store) ReadyRuntime(ctx context.Context)error{
+ if e:=s.Ready(ctx);e!=nil{return e}
+ var unsafe bool
+ e:=s.DB.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'SELECT'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'DELETE'),false)
+ OR COALESCE(has_column_privilege(current_user,'bg_account_social.posts','hidden_at','UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'INSERT'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'UPDATE'),false)`).Scan(&unsafe)
+ if e!=nil{return e};if unsafe{return ErrUnavailable}
  return nil
 }
 func newID()(string,error){
@@ -326,11 +348,11 @@ func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator strin
 func (s *Store) ReadyAccountExtras(ctx context.Context)error{
  var ok bool
  e:=s.DB.QueryRowContext(ctx,`SELECT
- COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.direct_messages'),'SELECT,INSERT'),false)
+ (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.direct_messages'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.direct_messages'),'INSERT'),false))
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.direct_messages','sender_deleted_at','UPDATE'),false)
  AND COALESCE(has_column_privilege(current_user,'bg_account_social.direct_messages','recipient_deleted_at','UPDATE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_games'),'SELECT,INSERT,UPDATE'),false)
- AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_game_moves'),'SELECT,INSERT'),false)`).Scan(&ok)
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_games'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_games'),'INSERT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_games'),'UPDATE'),false))
+ AND (COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_game_moves'),'SELECT'),false) AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.account_game_moves'),'INSERT'),false))`).Scan(&ok)
  if e!=nil{return e}
  if !ok{return ErrUnavailable}
  return nil

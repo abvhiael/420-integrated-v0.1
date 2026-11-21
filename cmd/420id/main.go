@@ -89,7 +89,11 @@ func main(){
  if e!=nil{log.Fatal("Acceptance configuration rejected")}
  ctx,cancel:=signal.NotifyContext(context.Background(),os.Interrupt,syscall.SIGTERM);defer cancel()
  preflight,stop:=context.WithTimeout(ctx,10*time.Second)
- if h.Purge(preflight)!=nil{stop();log.Fatal("Acceptance schema or runtime grants unavailable")};stop()
+ if h.Purge(preflight)!=nil{stop();log.Fatal("Acceptance schema or runtime grants unavailable")}
+ if mode=="monetization-acceptance"&&h.ReadyMonetizationRuntime(preflight)!=nil{
+  stop();log.Fatal("AUTH-12 monetization runtime credential grants unsafe")
+ }
+ stop()
  go func(){ticker:=time.NewTicker(time.Minute);defer ticker.Stop();for{select{case <-ctx.Done():return;case <-ticker.C:
   cleanup,done:=context.WithTimeout(ctx,10*time.Second);if h.Purge(cleanup)!=nil{log.Print("Acceptance cleanup failed")};done()
  }}}()

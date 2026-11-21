@@ -250,7 +250,14 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 func uniqueObject(raw []byte)bool{
  d:=json.NewDecoder(bytes.NewReader(raw));t,e:=d.Token();if e!=nil||t!=json.Delim('{'){return false}
  seen:=map[string]bool{}
- for d.More(){k,e:=d.Token();s,ok:=k.(string);s=strings.ToLower(s);if e!=nil||!ok||seen[s]{return false};seen[s]=true;var v json.RawMessage;if d.Decode(&v)!=nil{return false}}
+ for d.More(){k,e:=d.Token();s,ok:=k.(string);if e!=nil||!ok{return false}
+  // Go's encoding/json matches JSON keys to struct fields without
+  // case sensitivity, including Unicode fold equivalents. Only ASCII
+  // property names are part of the accepted wire API.
+  for _,ch:=range s{
+   if ch!='_'&&(ch<'A'||ch>'Z')&&(ch<'a'||ch>'z')&&(ch<'0'||ch>'9'){return false}
+  }
+  s=strings.ToLower(s);if seen[s]{return false};seen[s]=true;var v json.RawMessage;if d.Decode(&v)!=nil{return false}}
  end,e:=d.Token();if e!=nil||end!=json.Delim('}'){return false};_,e=d.Token();return e==io.EOF
 }
 func decodeRequest(raw []byte,target any)bool{d:=json.NewDecoder(bytes.NewReader(raw));d.DisallowUnknownFields();return d.Decode(target)==nil}
@@ -288,6 +295,12 @@ func (h *AcceptanceHandler) limit(ctx context.Context,digest []byte,remote strin
   if errors.Is(e,sql.ErrNoRows){return errLimited};if e!=nil{return e}
  }
  return tx.Commit()
+}
+// Only the combined AUTH-11/12 runtime needs these additional grants.
+// Tests and operator migrations keep the separately privileged Ready path.
+func (h *AcceptanceHandler) ReadyMonetizationRuntime(ctx context.Context)error{
+ if h==nil||h.monetization==nil{return ErrUnavailable}
+ return h.monetization.ReadyRuntime(ctx)
 }
 func (h *AcceptanceHandler) Purge(ctx context.Context)error{
  if h.profiles{if e:=h.profileReady(ctx);e!=nil{return e}}

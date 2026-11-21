@@ -68,7 +68,7 @@ func main(){
  db,e:=postgres(required("SOCIAL420_DATABASE_URL"));if e!=nil{log.Fatal(e)};defer db.Close()
  store,e:=social.NewStore(db);if e!=nil{log.Fatal(e)}
  ctx,stop:=context.WithTimeout(context.Background(),10*time.Second)
- if e=store.Ready(ctx);e!=nil{stop();log.Fatal("Runtime schema/grants unavailable")}
+ if e=store.ReadyRuntime(ctx);e!=nil{stop();log.Fatal("AUTH-12 runtime grants or moderation separation unsafe")}
  stop()
  key,e:=base64.RawURLEncoding.Strict().DecodeString(required("SOCIAL420_SESSION_KEY"))
  if e!=nil||len(key)!=32{log.Fatal("SOCIAL420_SESSION_KEY must be random 32-byte base64url")}

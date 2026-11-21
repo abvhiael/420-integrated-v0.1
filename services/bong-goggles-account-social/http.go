@@ -70,7 +70,15 @@ func strictJSON(r *http.Request,dst any)error{
  seen:=map[string]bool{}
  for dec.More(){
   token,e:=dec.Token();if e!=nil{return ErrInvalid}
-  name,ok:=token.(string);if !ok||seen[name]{return ErrInvalid}
+  name,ok:=token.(string);if !ok{return ErrInvalid}
+  // encoding/json accepts case-insensitive struct field names. Reject
+  // differently-cased duplicates and Unicode key aliases rather than
+  // letting a later JSON spelling override authorization-sensitive values.
+  for _,ch:=range name{
+   if ch!='_'&&(ch<'A'||ch>'Z')&&(ch<'a'||ch>'z')&&(ch<'0'||ch>'9'){return ErrInvalid}
+  }
+  name=strings.ToLower(name)
+  if seen[name]{return ErrInvalid}
   seen[name]=true
   var v json.RawMessage
   if dec.Decode(&v)!=nil{return ErrInvalid}
@@ -130,6 +138,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   http.Redirect(w,r,destination,http.StatusSeeOther);return
  }
  if r.URL.Path=="/auth/callback"&&r.Method=="GET"{
+  // Callback codes may be attacker-supplied. Budget attempts by the
+  // actual ingress socket IP, not its changing port or forwarded headers,
+  // before decrypting any flow or contacting the central identity broker.
+  if !h.rate(r.Context(),"callback",r.RemoteAddr,60){deny(w,429);return}
   if r.URL.Query().Has("error")||len(r.URL.Query())!=2||len(r.URL.Query()["code"])!=1||
    len(r.URL.Query()["state"])!=1{deny(w,400);return}
   flow:=getCookie(r,flowCookieName)
@@ -176,7 +188,10 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   result,e:=h.SignOn.CurrentMonetization(ctx,getCookie(r,sessionCookieName))
   if errors.Is(e,ErrForbidden){deny(w,401);return}
   if e!=nil{deny(w,503);return}
-  writeJSON(w,200,result);return
+  // Bind the private 420ID projection to this exact verified
+  // BongGoggles app subject. A browser must reject a response from an
+  // earlier cookie/account even if it arrives after a later /v1/me.
+  writeJSON(w,200,map[string]any{"subject":viewer,"programme":result});return
  case path=="/v1/xp"&&r.Method=="GET":
   if h.XP==nil{deny(w,404);return}
   result,e:=h.XP.Summary(ctx,viewer)
@@ -276,7 +291,7 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
 // HMAC protects raw network addresses and pseudo-subjects from appearing in
 // rate-limit rows; the key is the server-only session encryption key.
 func (h *Handler) rate(ctx context.Context,action,principal string,limit int)bool{
- if action=="login"{
+ if action=="login"||action=="callback"{
   // RemoteAddr includes an ephemeral TCP port; hashing the full value
   // lets one client evade the rate limit by reconnecting. Trust only the
   // actual ingress socket address, never unvalidated forwarded-IP headers.

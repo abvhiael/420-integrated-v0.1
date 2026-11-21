@@ -2,13 +2,13 @@
 
 ## Disposition
 
-**REPOSITORY PRE-TESTNET QUALIFIED — PR #1297 open as draft; NOT MERGED.** This milestone requalifies the existing Wallet Governance inspect/vote user surface and cross-protocol read/projection integration on the corrected GOV-REC-1 through GOV-REC-4 Governance contracts. No live testnet or approved electorate was used. No critical/high finding remains in the executed GOV-REC-5 regressions.
+**REPOSITORY PRE-TESTNET QUALIFIED — PR #1297 MERGED INTO MAIN.** This milestone requalifies the existing Wallet Governance inspect/vote user surface and cross-protocol read/projection integration on the corrected GOV-REC-1 through GOV-REC-4 Governance contracts. No live testnet or approved electorate was used. No critical/high finding remains in the executed GOV-REC-5 regressions.
 
 - Repository: `abvhiael/420-integrated-v0.1`
 - Canonical inherited main base: `d02a5c83967d4239b6f55be59e9f50050b8c559f` (GOV-REC-3/4 already merged)
 - **Exact implementation and CI qualification SHA:** `ee7bfc86b5ce00f10314438cd626a65b3294eaf1`
 - Branch: `audit/420governance-rec-5-wallet-20261121`
-- Pull request: [#1297](https://github.com/abvhiael/420-integrated-v0.1/pull/1297) (draft; no merge authorized)
+- Pull request: [#1297](https://github.com/abvhiael/420-integrated-v0.1/pull/1297) — merged after explicit user authorization; merge commit `e60f427bdab08ed15122a63167c6b726943aea42`
 - This document and the ledger entry are evidence-only bookkeeping: no executed contracts, test suites, Wallet sources, workflow definitions, runtime config or artifacts changed after the tested implementation SHA.
 
 ## Actual changes
@@ -38,4 +38,10 @@ The browser suite checks the broader Wallet shell and responsive controls; it is
 
 This qualification does not populate the five intentionally fail-closed Genesis bootstrap approval fields, approve live Community/Validator electorates, or validate a chain-specific deployment. No alternate owner, signer or Civic authority was introduced.
 
-GOV-AUDIT-9 — production-equivalent testnet deployment qualification — remains the next canonical Governance audit stage and is not started here. Do not treat synthetic or repository evidence as testnet/Genesis readiness. Do not merge PR #1297 until separately requested.
+GOV-AUDIT-9 — production-equivalent testnet deployment qualification — remains the next canonical Governance audit stage and is not started here. Do not treat synthetic or repository evidence as testnet/Genesis readiness. PR #1297 was merged only after a separate explicit user request and passing applicable GitHub Actions test workflows.
+
+## Final PR-head verification and merge
+
+GitHub verified PR #1297 merged to `main` at `e60f427bdab08ed15122a63167c6b726943aea42` from evidence-only PR head `277adc91f2dcb754ddd68534f81d2dbc41c2da71`. In addition to the original implementation-SHA runs above, the final PR head passed: [Governance audit #44932797235](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44932797235), [Wallet #44932797270](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44932797270), [GOV-REC-5 ecosystem #44932797220](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44932797220), [Governance cross-protocol integration #44932797213](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44932797213), and [Chromium browser/accessibility #44932797157](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44932797157). Skipped workflows unrelated to the changed surfaces are not represented as passing tests.
+
+At the merge decision, separate Cloudflare Workers deployment builds for 420Wallet, 420 Integrated Status, DoobTube, ReeferReview and Explorer had failed; 420Pay's build succeeded. These external builds are not the executed Governance/Wallet regression tests, but their failure remains a deployment limitation. This is not proof that the merged Wallet was deployed or that any live testnet Governance configuration was activated.

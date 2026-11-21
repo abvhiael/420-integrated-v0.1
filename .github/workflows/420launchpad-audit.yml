@@ -119,6 +119,8 @@ jobs:
       # shared test/ tree contains unrelated vendored CADC/LayerZero fixtures and
       # other app tests, so stage the five real Launchpad test files verbatim
       # (except the relative import depth) as the exact qualification inventory.
+      # REC-5's additional real-contract test is separately compiled and exercised
+      # by launchpad-rec-5-ecosystem.yml; do not dilute the retained 5-test baseline.
       - name: Materialize scoped Launchpad tests
         working-directory: contracts
         shell: bash
@@ -126,6 +128,11 @@ jobs:
           set -euo pipefail
           mkdir -p test/.launchpad-ci
           for source in test/Launchpad*420.t.sol; do
+            # The REC-5 integration suite owns this sixth real deployment test.
+            # Preserve all five already-qualified baseline tests and their exact count.
+            if [[ "$source" == test/LaunchpadEcosystem420.t.sol ]]; then
+              continue
+            fi
             sed 's#"../src/#"../../src/#g' "$source" > "test/.launchpad-ci/${source##*/}"
           done
           test "$(find test/.launchpad-ci -maxdepth 1 -name 'Launchpad*420.t.sol' | wc -l)" -eq 5

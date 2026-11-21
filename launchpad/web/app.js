@@ -1,6 +1,7 @@
 import {validateRuntimeConfig,runtimeReadiness} from './core/config.js';
 import {LaunchpadService,normalizeCampaign,progress,remaining} from './core/service.js';
 import {connectWallet,executionGate,submitReviewedTransaction} from './core/wallet.js';
+import {explorerTransactionLink420} from './core/explorer.js';
 import {CreatorStudio} from './core/creator.js';
 
 const HASH=/^0x[0-9a-fA-F]{64}$/;
@@ -13,7 +14,16 @@ function status(message,error=false){setText('#status',message);$('#status')?.se
 function setBusy(b){state.busy=b;for(const el of document.querySelectorAll('button'))el.disabled=b||el.dataset.blocked==='true';}
 function label(v){return String(v||'UNKNOWN').replaceAll('_',' ');}
 function renderRuntime(){const r=runtimeReadiness(state.config,{walletChainId:state.wallet?.chainId});setText('#runtime-state',r.ready?'Canonical runtime resolved':'Execution locked - '+r.missing.join(', '));}
-function renderWallet(){setText('#wallet-state',state.wallet?state.wallet.account.slice(0,6)+'...'+state.wallet.account.slice(-4):'Not connected');renderRuntime();}
+function renderExplorerLink(){
+  const el=$('#explorer-transaction');if(!el)return;
+  el.hidden=true;el.removeAttribute('href');
+  try{
+    if(!state.lastTx?.hash)return;
+    el.href=explorerTransactionLink420({config:state.config,wallet:state.wallet,txHash:state.lastTx.hash});
+    el.hidden=false;
+  }catch{ /* No authority or fallback URL is inferred from an unconfigured Explorer. */ }
+}
+function renderWallet(){setText('#wallet-state',state.wallet?state.wallet.account.slice(0,6)+'...'+state.wallet.account.slice(-4):'Not connected');renderRuntime();renderExplorerLink();}
 function card(c){
   const b=document.createElement('button');b.type='button';b.className='campaign-card';
   b.innerHTML='<span class="mode"></span><strong></strong><span class="state"></span><p></p><div class="meter"><span></span></div><small></small>';
@@ -221,13 +231,13 @@ async function openCampaign(saleId){
     if(p.source.chainId.toLowerCase()!==state.config.network.chainId.toLowerCase())throw new Error('Campaign discovery network mismatch');
     state.selected=normalizeCampaign(p.campaign);
     state.position=null;state.checkout=null;state.quote=null;state.review=null;$('#review').hidden=true;state.lastTx=null;
-    setText('#tx-hash','-');setText('#tx-state','No transaction selected.');restoreIntent();
+    setText('#tx-hash','-');setText('#tx-state','No transaction selected.');restoreIntent();renderExplorerLink();
     if(state.wallet){
       await refreshPosition();
       const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+saleId.toLowerCase();
       const previous=localStorage.getItem(key);if(previous&&HASH.test(previous)){state.lastTx={hash:previous};setText('#tx-hash',previous);}
     }
-    renderDetail();status('Campaign detail loaded. Check live chain position before signing.');
+    renderExplorerLink();renderDetail();status('Campaign detail loaded. Check live chain position before signing.');
   }catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
 }
@@ -291,7 +301,7 @@ async function submit(){
     if(!HASH.test(tx))throw new Error('Wallet transaction ID could not be validated; check Wallet activity before retrying.');
     state.lastTx={hash:tx,state:'PENDING'};state.review=null;
     const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+state.selected.saleId.toLowerCase();
-    localStorage.setItem(key,tx);setText('#tx-hash',tx);setText('#tx-state','Submitted, not yet finalized.');
+    localStorage.setItem(key,tx);setText('#tx-hash',tx);setText('#tx-state','Submitted, not yet finalized.');renderExplorerLink();
     status('Transaction submitted. Verify canonical receipt and refreshed state before retrying.');
   }catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
@@ -301,7 +311,7 @@ async function checkTransaction(){
   try{
     const p=await state.service.transaction(state.lastTx.hash,state.wallet.account);
     if(p.source.chainId.toLowerCase()!==state.wallet.chainId.toLowerCase())throw new Error('transaction chain mismatch');
-    state.lastTx={...state.lastTx,...p};setText('#tx-state',p.state);
+    state.lastTx={...state.lastTx,...p};setText('#tx-state',p.state);renderExplorerLink();
     if(p.caseId){$('#dispute-case').value=p.caseId;setText('#next-recovery','Dispute case recovered from canonical CaseOpened event. Review linking it to the campaign.');}
     else setText('#next-recovery',['UNKNOWN','PENDING','REORGED'].includes(p.state)?
       'Outcome is not definitive. Check Wallet activity and canonical state before any resubmission.':

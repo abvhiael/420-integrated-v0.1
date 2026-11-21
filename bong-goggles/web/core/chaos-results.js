@@ -97,3 +97,28 @@ export function renderChaosResultsHistory(s){
  return '<details class="ccc-results-history"><summary>View '+records.length+' completed regional scoreboard'+(records.length===1?'':'s')+'</summary>'+
  records.map(r=>renderChaosStageScoreboard(s,r)).join('')+'</details>';
 }
+
+// CCC-5: provisional *public* cumulative standings after a regional finish.
+// Final champions are awarded only by the three-stage result path above.
+export function chaosProvisionalPlacings(s){
+ if(s?.phase!=='between'||!Number.isInteger(s.leg)||s.leg<0||s.leg>=2||
+    s.results?.length!==s.leg+1)return Object.freeze([]);
+ const ordered=chaosLeaders(s);
+ return Object.freeze(ordered.map(p=>Object.freeze({
+  id:p.id,name:p.name,score:p.score,wins:p.wins,
+  seat:s.players.findIndex(q=>q.id===p.id),
+  place:1+ordered.filter(q=>q.score>p.score||(q.score===p.score&&q.wins>p.wins)).length
+ })));
+}
+export function renderChaosCumulativeStandings(s){
+ const ranked=chaosProvisionalPlacings(s);
+ if(!ranked.length)return '';
+ return '<section class="ccc-standings ccc-results-scorecard ccc-cumulative-standings" aria-label="Provisional championship standings">'+
+ '<h4>Championship standings · '+(s.leg+1)+' of 3 stages completed</h4>'+
+ '<div class="ccc-results-table-scroll" role="region" tabindex="0" aria-label="Cumulative mileage table">'+
+ '<table class="ccc-results-table"><caption>Banked championship kilometres after stage '+(s.leg+1)+'</caption>'+
+ '<thead><tr><th scope="col">Place</th><th scope="col">Driver</th><th scope="col">Banked km total</th><th scope="col">Stage wins</th></tr></thead><tbody>'+
+ ranked.map(p=>'<tr><td>'+p.place+'</td><th scope="row"><span class="ccc-results-driver">'+car(s.players[p.seat],p.seat)+esc(p.name)+'</span></th>'+
+ '<td><strong>'+fmt(p.score)+' km</strong></td><td>'+p.wins+'</td></tr>').join('')+
+ '</tbody></table></div><p class="ccc-results-note">Provisional standings: regional kilometres are banked, not placement points. Final championship tie-breaks apply after all three stages.</p></section>';
+}

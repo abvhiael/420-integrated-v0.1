@@ -210,7 +210,7 @@ function activatePower(s,p,card){
  s.retiredLegendaries.push(card.id);
  if(card.id==='truck'){p.status=null;gain(p,100);}
  else if(card.id==='rodeo')p.shield+=2;
- else if(card.id==='shortcut'){gain(p,300);risky(s,p,500);}
+ else if(card.id==='shortcut'){gain(p,300);markFinish(s);risky(s,p,500);}
  else if(card.id==='sunshine'){for(const driver of s.players)if(driver.status?.category==='weather')driver.status=null;gain(p,100);}
  log(s,p.name+' activated '+card.name+'.');
 }
@@ -283,7 +283,9 @@ export function takeChaosTurn(previous,{player,action,index=null,target=null,cho
    if(!u)throw Error('Shortcut boost unavailable.');
    p.used.push(u.id);p.bonusKm+=100;
   }
-  refresh(p);risky(s,p,c.km);log(s,p.name+' drove '+c.km+' km.');
+  // A risky drive crossing 2,500 km latches the final round *before* its immediate
+  // self-hazard; a subsequent detour cannot retract the already reached threshold.
+  refresh(p);markFinish(s);risky(s,p,c.km);log(s,p.name+' drove '+c.km+' km.');
  }else if(action==='hazard'){
   const victim=s.players.find(q=>q.id===target);
   const c=p.hand[index];
@@ -345,4 +347,16 @@ export function chaosActionOptions(s){
  if(p.status)options.push({action:'recover'});
  options.push({action:'pass'});
  return options;
+}
+
+// CCC-5: public-only, read-only countdown of driver turns remaining in a latched
+// regional finish cycle. The active driver's turn (including its discards) counts.
+export function chaosFinalRoundProgress(s){
+ if(s?.version!==2||s.phase!=='playing'||s.finishPending!==true)return null;
+ const n=s.players?.length;
+ if(!Number.isInteger(n)||n<2||n>4||!Number.isInteger(s.turn)||
+    !Number.isInteger(s.roundStart)||s.turn<0||s.turn>=n||
+    s.roundStart<0||s.roundStart>=n)return null;
+ return Object.freeze({roundStart:s.roundStart,activeSeat:s.turn,
+  turnsRemaining:1+((s.roundStart-s.turn+n-1)%n)});
 }

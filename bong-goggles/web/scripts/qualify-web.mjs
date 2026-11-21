@@ -111,6 +111,15 @@ if(!resultsSource.includes('chaosChampionshipPlacings')||
  !tabletopCss.includes('@media(forced-colors:active)')||
  /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|\beval\s*\()/.test(resultsSource.replaceAll('http://www.w3.org/2000/svg','')))
  throw new Error('CCC-ART-7 local results/accessibility qualification failed');
+// CCC-5: championship finish, provisional standings and accessible countdown remain local.
+const championshipEngine=await readFile(resolve(root,'core/cross-country-chaos.js'),'utf8');
+if(!championshipEngine.includes('chaosFinalRoundProgress(s)')||
+ !championshipEngine.includes('gain(p,300);markFinish(s);risky(s,p,500)')||
+ !championshipEngine.includes('refresh(p);markFinish(s);risky(s,p,c.km)')||
+ !resultsSource.includes('renderChaosCumulativeStandings(s)')||
+ !resultsUi.includes('renderChaosCumulativeStandings(game)')||
+ !tabletopCss.includes('ccc-final-round'))
+ throw new Error('CCC-5 championship final-round and standings qualification failed');
 // CCC-4 decisions consume only the current hand and public board, never stock order.
 const computerJs=await readFile(resolve(root,'core/chaos-computer.js'),'utf8');
 const classicsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');

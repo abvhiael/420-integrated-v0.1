@@ -506,3 +506,10 @@
   color:CanvasText!important
  }
 }
+
+/* CCC-5: readable public-only final-round countdown; never covers private hands. */
+.ccc-wrap--roadtrip .ccc-final-round{border:2px solid #f6cd71;border-radius:.7rem;padding:.7rem 1rem;margin-block:.75rem;background:#243f32;color:#fff4d5}
+.ccc-wrap--roadtrip .ccc-final-round strong{display:block;color:#ffe69c}
+.ccc-wrap--roadtrip .ccc-final-round p{margin:.35rem 0 0}
+@media(max-width:650px){.ccc-wrap--roadtrip .ccc-final-round{padding:.65rem}}
+@media(forced-colors:active){.ccc-wrap--roadtrip .ccc-final-round{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}.ccc-wrap--roadtrip .ccc-final-round strong{color:CanvasText!important}}

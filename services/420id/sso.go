@@ -30,6 +30,7 @@ type ssoClient struct {
 type SSOManager struct {
  source *SessionManager
  clients map[string]ssoClient
+ monetization *MonetizationManager // nil in all AUTH-7 and prior modes
 }
 type SSORequest struct {
  App string `json:"app"`
@@ -54,6 +55,7 @@ type SSOIntrospection struct {
  ExpiresAt time.Time `json:"expiresAt,omitempty"`
  IdleUntil time.Time `json:"idleUntil,omitempty"`
  Method string `json:"method,omitempty"`
+ Monetization *MonetizationStatus `json:"monetization,omitempty"` // only explicit BongGoggles consent; not an entitlement
 }
 var pkceVerifierPattern=regexp.MustCompile(`^[A-Za-z0-9._~-]{43,128}$`)
 
@@ -203,8 +205,8 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  none:=SSOIntrospection{Active:false}
  if c.app==""{return none,ErrAuthentication}
  digest,e:=tokenDigest(token);if e!=nil{return none,nil}
- var subject Subject;var expires,idle time.Time;var method string
- e=s.source.auth.store.db.QueryRowContext(ctx,`SELECT p.app_id,p.subject_id,t.expires_at,t.idle_until,t.method
+ var subject Subject;var expires,idle time.Time;var method string;var accountID AccountID
+ e=s.source.auth.store.db.QueryRowContext(ctx,`SELECT p.app_id,p.subject_id,t.expires_at,t.idle_until,t.method,t.account_id
  FROM account420.sessions t
  JOIN account420.sessions parent ON parent.id=t.sso_source_id
  JOIN account420.accounts a ON a.id=t.account_id AND a.id=parent.account_id
@@ -216,10 +218,19 @@ func (s *SSOManager) Introspect(ctx context.Context,c ssoClient,token string)(SS
  AND parent.app_id=$4 AND parent.rp_id=$3 AND parent.method IN ('email','passkey')
  AND parent.revoked_at IS NULL AND parent.idle_until>clock_timestamp()
  AND parent.expires_at>clock_timestamp()`,
- digest,c.app,s.source.auth.rp,s.source.app).Scan(&subject.App,&subject.ID,&expires,&idle,&method)
+ digest,c.app,s.source.auth.rp,s.source.app).Scan(&subject.App,&subject.ID,&expires,&idle,&method,&accountID)
  if errors.Is(e,sql.ErrNoRows){return none,nil}
  if e!=nil{return none,e}
- return SSOIntrospection{Active:true,Subject:&subject,ExpiresAt:expires,IdleUntil:idle,Method:method},nil
+ out:=SSOIntrospection{Active:true,Subject:&subject,ExpiresAt:expires,IdleUntil:idle,Method:method}
+ // Only the exact approved BongGoggles confidential backend can see an
+ // owner-consented readiness snapshot. No wallet address, payout authority,
+ // account identifier, XP balance or private 420ID token is shared.
+ if s.monetization!=nil&&c.app==monetizationApp{
+  status,e:=s.monetization.forBongGoggles(ctx,accountID)
+  if e!=nil{return none,e}
+  if status.RewardOptIn||status.CreatorOptIn{out.Monetization=&status}
+ }
+ return out,nil
 }
 func (s *SSOManager) Revoke(ctx context.Context,c ssoClient,token string)error{
  if c.app==""{return ErrAuthentication}

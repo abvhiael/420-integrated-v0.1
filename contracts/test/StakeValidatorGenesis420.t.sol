@@ -90,7 +90,7 @@ contract StakeValidatorGenesis420Test {
         reserve.assignCredit(id, operator, 42_000 ether);
         reserve.fundCredit(id);
         vm.prank(operator);
-        registry.register{value: 0}(id, _bls(77), operator, keccak256("full-sponsored"));
+        registry.register{value: 0}(id, _pubkey(77), operator, keccak256("full-sponsored"));
         ValidatorRegistry.Validator memory v = registry.getValidator(id);
         require(v.owner == operator && v.ownedBond == 0 && v.protocolCredit == 42_000 ether, "full credit");
         require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor identity");

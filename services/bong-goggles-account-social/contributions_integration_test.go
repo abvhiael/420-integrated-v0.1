@@ -169,6 +169,7 @@ func TestAUTH10XPStartupRejectsMissingAndMutablePrivileges(t *testing.T){
  probe.SetMaxOpenConns(1)
  t.Cleanup(func(){
   _=probe.Close()
+  if _,e:=store.DB.Exec("REVOKE UPDATE (points) ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Error("revoke column privilege",e)}
   if _,e:=store.DB.Exec("REVOKE ALL ON bg_account_social.contribution_xp_events FROM "+role);e!=nil{t.Error("revoke privileges",e)}
   if _,e:=store.DB.Exec("REVOKE USAGE ON SCHEMA bg_account_social FROM "+role);e!=nil{t.Error("revoke schema",e)}
   if _,e:=store.DB.Exec("DROP ROLE "+role);e!=nil{t.Error("drop test role",e)}

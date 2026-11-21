@@ -70,6 +70,16 @@ func main(){
  if e!=nil{log.Fatal("Unsafe central 420ID client configuration")}
  sso,e:=social.NewSignOn(store,broker,key);if e!=nil{log.Fatal(e)}
  handler,e:=social.NewHandler(store,sso,required("SOCIAL420_ORIGIN"));if e!=nil{log.Fatal(e)}
+ if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")=="restricted-acceptance"{
+  messageKey,e:=base64.RawURLEncoding.Strict().DecodeString(required("SOCIAL420_MESSAGE_KEY"))
+  if e!=nil||len(messageKey)!=32{log.Fatal("SOCIAL420_MESSAGE_KEY must be an independent 32-byte base64url secret")}
+  if string(messageKey)==string(key){log.Fatal("Message key and session key must be independent")}
+  messages,e:=social.NewMessageService(store,messageKey);if e!=nil{log.Fatal(e)}
+  games,e:=social.NewAccountGames(store);if e!=nil{log.Fatal(e)}
+  if e=handler.EnableAccountExtras(messages,games);e!=nil{log.Fatal(e)}
+ }else if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!=""&&os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!="disabled"{
+  log.Fatal("Unrecognized account messaging/game activation mode")
+ }
  mux:=http.NewServeMux()
  mux.Handle("/social-api/",http.StripPrefix("/social-api",handler))
  port:=os.Getenv("PORT");if port==""{port="10000"}

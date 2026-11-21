@@ -57,3 +57,26 @@ body{background:var(--bg);color:var(--text)}
   .home-social.ui-card textarea{color:CanvasText;background:Canvas}
   .home-social.ui-card a{color:LinkText}
 }
+
+/* High-visibility 420ID access: visible on every route, including mobile.
+   This is account authentication, not a 420Wallet connection. */
+.app-header .header-state{flex-shrink:0}
+.app-header .account-auth-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;box-sizing:border-box;padding:9px 16px;border-radius:12px;font-size:.92rem;font-weight:850;line-height:1.25;text-align:center;text-decoration:none;box-shadow:0 2px 0 #0003;white-space:normal}
+.app-header .account-auth-link--login{background:#ffdf68;color:#0a2b1d;border:2px solid #fff3b0}
+.app-header .account-auth-link--login:hover{background:#fff0a0;color:#092719;border-color:white}
+.app-header .account-auth-link--account{background:#b8f2c4;color:#09291b;border:2px solid #e5ffe9}
+.app-header .account-auth-link--account:hover{background:#d8ffde;color:#09291b}
+.app-header .account-auth-link__icon{display:inline-grid;place-items:center;min-width:1.1rem;font-size:1.15rem;line-height:1}
+.app-header .account-auth-link:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@media(max-width:1270px){.app-header .header-state .status{display:none}}
+@media(max-width:980px){.app-header .header-state .account-chip{display:none}}
+@media(max-width:760px){
+  .app-header{flex-wrap:wrap;gap:8px}
+  .app-header .header-state{order:3;flex:1 0 100%;min-width:0}
+  .app-header .account-auth-link{width:100%;min-height:46px;padding:11px 14px;font-size:1rem}
+  .app-header .account-auth-link--account span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+@media(forced-colors:active){
+  .app-header .account-auth-link{border:2px solid LinkText;background:Canvas;color:LinkText;box-shadow:none}
+  .app-header .account-auth-link:focus-visible{outline:3px solid Highlight}
+}

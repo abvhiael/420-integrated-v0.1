@@ -1,0 +1,100 @@
+{
+  "schema": "420-launchpad-rec-6-frozen-artifact-identities-v1",
+  "qualifying_executable_sha": "6714a5d8ebe86feaacc1a08e88b2d15bc57f3705",
+  "qualification_run_id": 44852254114,
+  "release_intent": "REPOSITORY_LOCAL_EVM_ONLY_NOT_LIVE_CODEHASH",
+  "compiler": "0.8.24",
+  "evm": "cancun",
+  "optimizer_runs": 200,
+  "via_ir": true,
+  "source_evidence": "GitHub Actions 44852254114 two clean compilations and compiled artifact tamper tests",
+  "runtime_hash_type": "SHA256_OF_UNLINKED_RUNTIME_TEMPLATE_NOT_DEPLOYED_EXTCODEHASH",
+  "chain_evidence": null,
+  "contracts": [
+    {
+      "abi_sha256": "2a58302500c03b34ec4f15eee82ef72a40bca1b072d99363075150a291b16ad6",
+      "artifact_sha256": "92488b7fcf5aa7a290b31e34d024f5828a26864d2c0206eba161ef6617f12811",
+      "constructor": [
+        "address"
+      ],
+      "creation_bytecode_sha256": "179a86155367f83d8bd480a897b2abce4ff9a99c5ba8b254d6873b5ed295a0a5",
+      "creation_bytes": 796,
+      "immutable_reference_slots": 2,
+      "name": "LaunchpadAuthorization420",
+      "runtime_template_bytes": 633,
+      "runtime_template_sha256": "db682cefa06164f55900a69c09f62a5cee5c41e4b9b5d951c087ef51735a9e1b"
+    },
+    {
+      "abi_sha256": "193bd93ca28dd32bcd7fa3210e12e005488b9bc5a3729c704cbc3be5a19ebf53",
+      "artifact_sha256": "acad688d5e01cec4cc69839d053b70a8b22f8644e7cd3b46007bfb66be55002e",
+      "constructor": [
+        "address"
+      ],
+      "creation_bytecode_sha256": "12d2e7e8554513b82e12bb94265253caa4e9ef563f4fc9ced4c90ec3719aa7db",
+      "creation_bytes": 1552,
+      "immutable_reference_slots": 2,
+      "name": "LaunchpadProjectRegistry420",
+      "runtime_template_bytes": 1391,
+      "runtime_template_sha256": "5d427ec5789e13cbbc1a0e1dcdede45bbfcb017b8279395e73677d89490c287b"
+    },
+    {
+      "abi_sha256": "b40ecca81e3371d831abb4a223b95aaf8cbbf41c2b95ed5bbb949a5db6ca699b",
+      "artifact_sha256": "951a7ddf0aa8a7a156682084ee9240742d09fa4d13ac8adf2947bebf0888e84a",
+      "constructor": [
+        "address",
+        "address"
+      ],
+      "creation_bytecode_sha256": "af86d770b25b1d6f4e97ec1c23052c6adfef1bd5e331b7adcdb32b51ca711d4b",
+      "creation_bytes": 4861,
+      "immutable_reference_slots": 8,
+      "name": "LaunchpadSaleRegistry420",
+      "runtime_template_bytes": 4562,
+      "runtime_template_sha256": "f5631f38313600a1d341fcc8ec682c779075928e3039df2832d68f027414c578"
+    },
+    {
+      "abi_sha256": "2251759269c3cca0850eb876bbb3437e8a4218e9947a6bef9f9418c4cc95445a",
+      "artifact_sha256": "7170eb9f89580e0eefb3f17c0257655b8ca5888e16c07c4ddca6421b43156d43",
+      "constructor": [
+        "address",
+        "address"
+      ],
+      "creation_bytecode_sha256": "3918f17f65ecc9051fce36c54651e67ee6a40ee5077dbd189d12648f276a28ee",
+      "creation_bytes": 5325,
+      "immutable_reference_slots": 9,
+      "name": "LaunchpadAllocationRegistry420",
+      "runtime_template_bytes": 5023,
+      "runtime_template_sha256": "d8ffc5df81edc7c9be1bf4c38a0f781b670258895bc0a9bfd3ef546fed693ded"
+    },
+    {
+      "abi_sha256": "25fdfae8309c6d06f587989d12b061fbe5c3b67230740c055fa353181d5826d3",
+      "artifact_sha256": "11fcfdf07d9b9616f1d7988a2c1c8f0ed93cc82dd8ce4084ff097cb1e5e6427a",
+      "constructor": [
+        "address",
+        "address",
+        "address",
+        "address",
+        "address"
+      ],
+      "creation_bytecode_sha256": "935cdac1104cc5ea3885f497fb46038018a3117cc517b22f4ab9c0f0fe1d97ee",
+      "creation_bytes": 20233,
+      "immutable_reference_slots": 39,
+      "name": "LaunchpadCrowdfundingIntegration420",
+      "runtime_template_bytes": 18996,
+      "runtime_template_sha256": "38ffb410359ccd8722d45e275f9c8192361edb8a4a88693b87d602030f0d6dc0"
+    },
+    {
+      "abi_sha256": "0220e19456d8f2d0ec0c5fc84619bfb43434ca5aa6d3b208427b7cf0702b39ce",
+      "artifact_sha256": "4d38e536bdae814fa43506e0435a29ea8c1a6c199244ae8494eaf09de9ec11f2",
+      "constructor": [
+        "address",
+        "address"
+      ],
+      "creation_bytecode_sha256": "f32641540a7fad67348d14873742381d76281ddd7f8374d45dcc4ca0b9f70b5b",
+      "creation_bytes": 1552,
+      "immutable_reference_slots": 5,
+      "name": "LaunchpadRouter420",
+      "runtime_template_bytes": 1280,
+      "runtime_template_sha256": "2e1abc1a1865c46fea6c2619654738ea5f030c85df126104732af38cb9c2d8af"
+    }
+  ]
+}

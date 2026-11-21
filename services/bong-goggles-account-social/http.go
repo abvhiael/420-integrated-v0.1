@@ -19,6 +19,8 @@ import (
 type Handler struct{
  Store *Store
  SignOn *SignOn
+ Messages *MessageService
+ Games *AccountGames
  Origin string
  host string
 }
@@ -28,6 +30,13 @@ func NewHandler(store *Store,sso *SignOn,origin string)(*Handler,error){
  u.Port()!=""||u.Path!=""&&u.Path!="/"||u.RawQuery!=""||u.Fragment!=""||u.User!=nil||
  store==nil||sso==nil||sso.Store!=store{return nil,ErrInvalid}
  return &Handler{Store:store,SignOn:sso,Origin:strings.TrimSuffix(origin,"/"),host:u.Host},nil
+}
+// EnableAccountExtras is opt-in; legacy AUTH-8 behavior has no message or
+// off-chain game authority. Both services must share this authenticated store.
+func (h *Handler) EnableAccountExtras(messages *MessageService,games *AccountGames)error{
+ if h==nil||messages==nil||games==nil||messages.Store!=h.Store||games.Store!=h.Store{return ErrInvalid}
+ h.Messages=messages;h.Games=games
+ return nil
 }
 func writeJSON(w http.ResponseWriter,code int,value any){
  w.Header().Set("Content-Type","application/json; charset=utf-8")
@@ -143,6 +152,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 }
 func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,viewer string){
  path:=r.URL.Path
+ if strings.HasPrefix(path,"/v1/messages")||strings.HasPrefix(path,"/v1/account-games"){
+  h.accountExtras(ctx,w,r,viewer);return
+ }
  switch{
  case path=="/v1/me"&&r.Method=="GET":
   m,e:=h.Store.MyProfile(ctx,viewer)

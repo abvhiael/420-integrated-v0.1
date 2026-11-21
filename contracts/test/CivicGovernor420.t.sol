@@ -259,14 +259,145 @@ contract CivicGovernor420Test {
             .createProposal(
                 CivicIds420.ProposalClass.G1, keccak256("one block metadata"), keccak256("one block actions")
             );
-        (,,,,, uint64 start, uint64 end,,) = s.proposals.proposals(proposalId);
+        (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(proposalId);
+        require(snapshot == 99, "one-block electorate freezes at prior block");
         require(start == 101 && end == 101, "inclusive one-block window");
-        vm.roll(101);
+
+        vm.prank(ALICE);
+        vm.expectRevert(CivicVoting420.VotingNotStarted.selector);
+        s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+
+        vm.roll(start);
+        vm.prank(ALICE);
+        require(
+            s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "") == 100,
+            "first eligible block must accept the full ballot"
+        );
+        vm.expectRevert(CivicGovernor420.VotingStillActive.selector);
+        s.governor.finalize(proposalId);
+
+        vm.roll(uint256(end) + 1);
+        vm.prank(BOB);
+        vm.expectRevert(CivicVoting420.VotingEnded.selector);
+        s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+        require(s.governor.finalize(proposalId), "single-block proposal should pass at end + 1");
+    }
+
+    function testOneBlockWindowAtLastRepresentableStartCanVoteAndFinalize() public {
+        Stack memory s = _stack(false);
+        s.community.setWeight(ALICE, 100);
+        vm.prank(address(s.timelock));
+        s.constitution.setRule(CivicIds420.ProposalClass.G1, 1, 7 days, 5000, 6000, 0, 0, false);
+
+        vm.roll(uint256(type(uint64).max) - 1);
+        bytes32 proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("last valid start"), keccak256("last valid actions")
+            );
+        (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(proposalId);
+        require(snapshot == type(uint64).max - 2, "last snapshot");
+        require(start == type(uint64).max && end == start, "last uint64 voting block");
+
+        vm.roll(uint256(start));
         vm.prank(ALICE);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
         vm.expectRevert(CivicGovernor420.VotingStillActive.selector);
         s.governor.finalize(proposalId);
-        vm.roll(102);
-        require(s.governor.finalize(proposalId), "single-block proposal should pass");
+        vm.roll(uint256(end) + 1);
+        require(s.governor.finalize(proposalId), "finalization cannot overflow its block comparison");
+    }
+
+    function testZeroPeriodAndOverflowingGovernorWindowsFailWithoutConsumingNonce() public {
+        Stack memory s = _stack(false);
+        vm.prank(address(s.timelock));
+        vm.expectRevert(CivicConstitution420.InvalidVotingPeriod.selector);
+        s.constitution.setRule(CivicIds420.ProposalClass.G1, 0, 7 days, 5000, 6000, 0, 0, false);
+
+        vm.prank(address(s.timelock));
+        s.constitution.setRule(CivicIds420.ProposalClass.G1, type(uint64).max, 7 days, 5000, 6000, 0, 0, false);
+        vm.roll(1);
+        vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
+        s.governor
+            .createProposal(CivicIds420.ProposalClass.G1, keccak256("overflow metadata"), keccak256("overflow actions"));
+        require(s.governor.proposerNonces(address(this)) == 0, "overflow must not consume proposal nonce");
+
+        vm.prank(address(s.timelock));
+        s.constitution.setRule(CivicIds420.ProposalClass.G1, type(uint64).max - 1, 7 days, 5000, 6000, 0, 0, false);
+        bytes32 lastEnd = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("maximum valid period"), keccak256("maximum valid actions")
+            );
+        (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(lastEnd);
+        require(snapshot == 0 && start == 2 && end == type(uint64).max, "largest representable voting window");
+
+        vm.prank(address(s.timelock));
+        s.constitution.setRule(CivicIds420.ProposalClass.G1, 1, 7 days, 5000, 6000, 0, 0, false);
+        vm.roll(uint256(type(uint64).max));
+        vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
+        s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("next-block overflow"), keccak256("next-block actions")
+            );
+
+        vm.roll(0);
+        vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
+        s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("genesis block invalid"), keccak256("genesis actions")
+            );
+        require(s.governor.proposerNonces(address(this)) == 1, "overflow unexpectedly advanced nonce");
+    }
+
+    function testFrozenGenesisG1ThroughG4WindowsAndFinalizationBoundaries() public {
+        Stack memory s = _stack(true);
+        s.community.setWeight(ALICE, 100);
+        s.validators.setWeight(CAROL, 10);
+        uint64[4] memory periods = [uint64(17_640), uint64(35_280), uint64(35_280), uint64(105_840)];
+        uint64[4] memory delays = [uint64(7 days), uint64(14 days), uint64(14 days), uint64(42 days)];
+        uint16[4] memory quorums = [uint16(1000), uint16(2000), uint16(3334), uint16(5000)];
+        uint16[4] memory approvals = [uint16(5001), uint16(6000), uint16(6667), uint16(7500)];
+
+        for (uint8 i = 0; i < 4; ++i) {
+            CivicIds420.ProposalClass class_ = CivicIds420.ProposalClass(i);
+            bool dual = i >= 2;
+            vm.prank(address(s.timelock));
+            s.constitution
+                .setRule(
+                    class_,
+                    periods[i],
+                    delays[i],
+                    quorums[i],
+                    approvals[i],
+                    dual ? quorums[i] : 0,
+                    dual ? approvals[i] : 0,
+                    dual
+                );
+
+            vm.roll(100 + uint256(i) * 200_000);
+            bytes32 id = s.governor
+                .createProposal(
+                    class_,
+                    keccak256(abi.encode("genesis class metadata", i)),
+                    keccak256(abi.encode("genesis class actions", i))
+                );
+            (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(id);
+            require(uint256(snapshot) + 1 == block.number, "Genesis class snapshot");
+            require(uint256(start) == block.number + 1, "Genesis class vote start");
+            require(uint256(end) == uint256(start) + periods[i] - 1, "Genesis class inclusive vote end");
+
+            vm.roll(start);
+            vm.prank(ALICE);
+            s.voting.castVote(id, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
+            if (dual) {
+                vm.prank(CAROL);
+                s.voting.castVote(id, CivicIds420.House.VALIDATOR, CivicVoting420.Support.FOR, "");
+            }
+
+            vm.roll(end);
+            vm.expectRevert(CivicGovernor420.VotingStillActive.selector);
+            s.governor.finalize(id);
+            vm.roll(uint256(end) + 1);
+            require(s.governor.finalize(id), "Genesis class must finalize after inclusive vote end");
+        }
     }
 }

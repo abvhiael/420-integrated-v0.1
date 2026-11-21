@@ -270,7 +270,7 @@
     },
     "Governance420": {
       "path": "contracts/artifacts/Governance420.json",
-      "runtimeCodeHash": "0xccdebd2aca52026c50330016c76570d80a434f7e132bdffdcdd6e6fd0a37dd2d",
+      "runtimeCodeHash": "0x5e85c020c7429ef1b17e9b57c301b890ee2bd9f39b419df91540f946191951cd",
       "sourceBlobSha1": "4a5adab3d41c4c1fe2d4dda9ff76d16d16c12b06"
     },
     "CivicConstitution420": {
@@ -295,8 +295,8 @@
     },
     "CivicGovernor420": {
       "path": "contracts/artifacts/CivicGovernor420.json",
-      "runtimeCodeHash": "0x94aa0332c646085231186a5a3c20dc42f814d384fa3a16186a31cf962cc942a2",
-      "sourceBlobSha1": "049d35562bbd74980976a7a25772634c40edd50a"
+      "runtimeCodeHash": "0x57be820bef64e66a587011f40484a8fdb4da7ced0ede0af999e9b1a704324a67",
+      "sourceBlobSha1": "6f9a19ca711fd9d0eb5bf7a879d0280c2f79ae12"
     },
     "CivicMerkleElectorateSource420": {
       "path": "contracts/artifacts/CivicMerkleElectorateSource420.json",

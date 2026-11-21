@@ -43,6 +43,24 @@ func NewHTTPBroker(authority,callback,clientID,secret string,client *http.Client
  cloned.CheckRedirect=func(_ *http.Request,_ []*http.Request)error{return errors.New("redirect forbidden")}
  return &HTTPBroker{base:strings.TrimSuffix(authority,"/"),callback:callback,clientID:clientID,secret:secret,httpClient:&cloned},nil
 }
+// Ready probes the same pinned TLS identity authority that will receive the
+// browser's SSO authorization redirect. The Render Free instance can be asleep
+// even after BongGoggles Social has recovered. A failing health check returns
+// a 503 to the existing Cloudflare bounded login-retry page instead of
+// redirecting the browser into an unready identity service. It never carries
+// cookies, SSO codes or confidential client credentials.
+func (b *HTTPBroker) Ready(ctx context.Context)error{
+ if b==nil||b.httpClient==nil{return ErrUnavailable}
+ request,e:=http.NewRequestWithContext(ctx,http.MethodGet,b.base+"/healthz",nil)
+ if e!=nil{return ErrUnavailable}
+ request.Header.Set("Accept","application/json")
+ request.Header.Set("Cache-Control","no-store")
+ response,e:=b.httpClient.Do(request)
+ if e!=nil{return ErrUnavailable}
+ defer response.Body.Close()
+ if response.StatusCode!=http.StatusOK{return ErrUnavailable}
+ return nil
+}
 func (b *HTTPBroker) Authorize(state,challenge string)string{
  u,_:=url.Parse(b.base+"/sso/authorize")
  q:=u.Query()

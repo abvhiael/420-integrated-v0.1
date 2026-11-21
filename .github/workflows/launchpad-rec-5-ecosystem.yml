@@ -84,7 +84,7 @@ jobs:
           go-version-file: go.mod
       - name: Qualify Launchpad Wallet and API integration
         run: |
-          node --test launchpad/web/test/wallet.test.js launchpad/web/test/service.test.js
+          node --test launchpad/web/test/wallet.test.js launchpad/web/test/service.test.js launchpad/web/test/explorer.test.js
           node --test launchpad/service/test/rpc.test.mjs launchpad/service/test/indexer.test.mjs
       - name: Exercise 420Reputation and 420Notifications evidence consumers
         run: go test ./reputation/interactions ./notifications/replay

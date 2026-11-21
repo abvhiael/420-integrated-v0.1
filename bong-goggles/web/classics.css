@@ -92,3 +92,66 @@
 .ccc-pile-status .ccc-discard-top{display:inline-flex;align-items:center;gap:.6rem;max-width:100%;font-size:.8rem}
 .ccc-pile-status .ccc-discard-top .ccc-card-image{width:42px;max-height:76px;object-fit:contain;border-radius:.25rem}
 @media(max-width:650px){.ccc-mileage-card-stack{flex-basis:68px}.ccc-pile-status .ccc-discard-top .ccc-card-image{width:36px}}
+
+/* CCC-3 — illustrated, responsive Trans-Canada tabletop. Everything below is
+   public game state: hidden hands are never rendered in these areas. */
+.ccc-tabletop{display:grid;gap:1rem;min-width:0}
+.ccc-highway{border:1px solid #617f69;border-radius:1rem;overflow:hidden;background:#172f2c;color:#f2f7e5;box-shadow:0 8px 25px #05140e4a}
+.ccc-highway-head{display:flex;justify-content:space-between;gap:.7rem;flex-wrap:wrap;align-items:center;padding:.7rem 1rem;background:#203b32}
+.ccc-highway-head h3{font-size:1.05rem;line-height:1.3;margin:0}
+.ccc-highway-head span{font-size:.76rem;color:#d2dfcf}
+.ccc-highway-svg{display:block;width:100%;height:auto;max-height:470px;overflow:visible}
+.ccc-highway-shadow{fill:none;stroke:#101b17;stroke-width:24;stroke-linecap:round;stroke-linejoin:round}
+.ccc-highway-road{fill:none;stroke:#546963;stroke-width:17;stroke-linecap:round;stroke-linejoin:round}
+.ccc-highway-centre{fill:none;stroke:#fbe394;stroke-width:2;stroke-dasharray:9 11;stroke-linecap:round}
+.ccc-map-stop circle{fill:#ffdd8b;stroke:#24352d;stroke-width:2}
+.ccc-map-stop text{font-size:13px;fill:#f8ffed;font-weight:750;paint-order:stroke;stroke:#1c2e28;stroke-width:4px;stroke-linejoin:round}
+.ccc-map-landmark{fill:#e9f1dc;opacity:.82;font-size:14px;font-weight:800;letter-spacing:2px}
+.ccc-map-vehicle{filter:drop-shadow(1px 3px 2px #0a1b169c)}
+.ccc-map-seat{fill:#fff;font-size:14px;font-weight:800}
+.ccc-road-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,185px),1fr));gap:.5rem;padding:.75rem 1rem;background:#19362a}
+.ccc-road-driver{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem;font-size:.8rem}
+.ccc-road-driver i{display:inline-block;background:var(--ccc-car-color);width:13px;height:13px;border-radius:4px;border:1px solid #11251c;flex:none}
+.ccc-table-piles{display:grid;grid-template-columns:minmax(110px,145px) minmax(110px,145px) minmax(0,1fr);gap:.75rem;padding:.85rem;border:1px solid #506f57;background:#183126;border-radius:1rem;color:#f2f9e5}
+.ccc-stock,.ccc-discard-public,.ccc-used-area{display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;min-width:0}
+.ccc-stock strong,.ccc-discard-public strong,.ccc-used-area strong{font-size:.85rem;line-height:1.3}
+.ccc-stock small,.ccc-discard-public small{font-size:.73rem;color:#c5dec8}
+.ccc-stock-back,.ccc-pile-face{width:min(100%,96px);aspect-ratio:16/27;border-radius:.6rem;border:2px solid #96c78e;box-shadow:0 3px 9px #0006;overflow:hidden}
+.ccc-stock-back{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;background:repeating-linear-gradient(32deg,#214b37,#214b37 8px,#346341 8px,#346341 12px);color:#e7fac6;font-weight:900;font-size:1.1rem}
+.ccc-stock-back span+span{font-size:.6rem;letter-spacing:.1em}
+.ccc-pile-face{display:flex;align-items:center;justify-content:center;font-size:.72rem;background:#294737}
+.ccc-pile-face .ccc-card-image{width:100%;height:100%}
+.ccc-used-area{align-items:flex-start;text-align:left;min-height:120px}
+.ccc-mini-card-row{display:flex;gap:.45rem;align-items:flex-start;flex-wrap:wrap}
+.ccc-mini-card{display:grid;gap:.3rem;width:69px;margin:0}
+.ccc-mini-card .ccc-card-image{width:100%;height:auto;border-radius:.4rem;box-shadow:0 2px 7px #0006}
+.ccc-mini-card figcaption{font-size:.69rem;color:#e0eada;line-height:1.25;overflow-wrap:anywhere}
+.ccc-player-table{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem}
+.ccc-seat-mat{min-width:0;border:1px solid #62816b;background:linear-gradient(160deg,#264438,#1a362c 60%,#1d392b);border-radius:1rem;color:#f0f6e8;padding:.8rem;box-shadow:0 3px 12px #0a211b35}
+.ccc-seat-mat--active{border-color:#e5c77d;box-shadow:0 0 0 1px #e5c77d,0 3px 12px #0a211b35}
+.ccc-seat-mat>header{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;border-bottom:1px solid #5e8168;padding-bottom:.65rem}
+.ccc-seat-mat>header h4{margin:0;flex:1;min-width:60px;font-size:.98rem;overflow-wrap:anywhere}
+.ccc-seat-mat>header strong{font-variant-numeric:tabular-nums;font-size:.92rem}
+.ccc-seat-chip{border:1px solid #123324;background:var(--ccc-car-color);border-radius:.4rem;padding:.2rem .4rem;color:#132c20;font-size:.72rem;font-weight:800}
+.ccc-seat-areas{display:grid;gap:.65rem;padding-top:.6rem}
+.ccc-seat-areas>section{min-width:0}
+.ccc-seat-areas h5{font-size:.77rem;letter-spacing:.02em;color:#c9f0c4;margin:.15rem 0 .4rem;font-weight:800}
+.ccc-public-miles{display:flex;flex-wrap:wrap;gap:.5rem}
+.ccc-public-miles .ccc-mileage-card-stack{flex-basis:65px;max-width:78px}
+.ccc-public-miles .ccc-mileage-card-stack figcaption{font-size:.71rem}
+.ccc-empty-area{font-size:.78rem;color:#cedfcd;margin:.25rem 0}
+.ccc-losses{font-size:.73rem;color:#ffcbab;margin:.45rem 0}
+.ccc-shield{font-size:.75rem;color:#eedda1;margin:.4rem 0}
+@media(max-width:650px){
+ .ccc-highway-head{padding:.6rem .75rem}
+ .ccc-map-stop text{font-size:15px}
+ .ccc-table-piles{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-used-area{grid-column:1/-1}
+ .ccc-player-table{grid-template-columns:1fr}
+ .ccc-seat-mat{padding:.7rem}
+}
+@media(forced-colors:active){
+ .ccc-map-vehicle{filter:none}
+ .ccc-map-stop text{paint-order:normal;stroke:none}
+ .ccc-stock-back,.ccc-seat-mat{border:2px solid CanvasText}
+}

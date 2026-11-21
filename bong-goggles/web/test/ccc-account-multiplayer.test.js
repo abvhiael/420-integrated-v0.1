@@ -26,6 +26,9 @@ test('Account-only game route never renders pass-and-play or reveals any shared 
  assert.match(shell,/Every human player needs their own 420ID account/);
  assert.match(shell,/Log in with 420ID/);
  assert.doesNotMatch(shell,/Pass the device|Start the cross-Canada championship|Local pass-and-play only|data-chaos-start/);
+ const loading=renderApplicationShell({pathname:'/classics/cross-country-chaos'});
+ assert.match(loading,/Checking your 420ID session and current matches/);
+ assert.doesNotMatch(loading,/Pass the device|data-chaos-start/);
  const disabled=renderApplicationShell({pathname:'/classics/cross-country-chaos',
   online:{status:'unavailable'}});
  assert.match(disabled,/Account multiplayer is not available yet/);

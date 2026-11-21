@@ -165,6 +165,7 @@ function roomDetails(room){
   (room.log||[]).map(s=>'<li>'+escape(s)+'</li>').join('')+'</ol></details></section>';
 }
 export function renderChaosOnline(state={status:'loading'}){
+ state??={status:'loading'};
  const header='<header class="ccc-online-header"><div><p class="eyebrow">420ID Account multiplayer · zero wager</p>'+
   '<h2>Cross-Country Chaos</h2><p>One driver per account. Your hand is private; the server handles the race.</p></div>'+
   (state.room?'<button type="button" data-chaos-online-action="back">My matches</button>':'')+'</header>';

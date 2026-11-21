@@ -83,3 +83,50 @@ the proxy until both configurations match.
 The existing social PostgreSQL/race workflow and BongGoggles web suite
 also run these tests. Automated tests do **not** certify live Cloudflare
 routing, real SSO browser sign-in, rate/bot rules or production release.
+
+
+## Free Render cold-start login recovery (November 21, 2026)
+
+**Why users saw 502:** Both `bonggoggles-social` and `420id` were
+running on Render Free. Render deliberately suspends a free web service after
+15 minutes without incoming requests and may need approximately one minute
+to wake it. A successful Render deployment or `/social-api/healthz` response
+does not make the service continuously available. The social `/auth/start`
+handler first inserts a short-lived flow into Neon; it does **not** call 420ID
+until the browser has followed the redirect. Consequently, a Render-generated
+502 on `/social-api/auth/start` is **not fixed** by adding frontend login
+buttons or redeploying 420ID.
+
+This Worker has a **bounded** browser recovery page for only the exact,
+no-query `GET /social-api/auth/start` navigation. If Render returns 502,
+503, or 504 (or its HTTPS fetch fails), it serves an uncacheable 503 document,
+which retries the normal login entry point after 12 seconds, at most seven
+automatic times. The retry count uses a short-lived, Secure/HttpOnly/SameSite
+cookie scoped to the exact login path. When Render returns its real 303 SSO
+redirect, its original Set-Cookie/Location are preserved and the wake cookie
+is cleared. It does not replay a one-use SSO callback, logout, POST or other
+request, never caches private data, never loosens Worker edge credentials,
+and does not embed SSO tokens or secrets in the page.
+
+**This is a mitigation, not always-on hosting.** It reduces the naked
+Render 502 seen by browsers during a social-service cold start. It cannot
+prevent the *separate* Render-hosted 420ID service from sleeping when the
+browser reaches its own hostname. For reliable public/team sign-in, migrate
+or upgrade **both** Render Free web services to always-on hosting only after
+the operator approves any recurring charges and validates the new deployment.
+
+**Required manual release:** changes to this GitHub file do not automatically
+replace the deployed Cloudflare Worker. After GitHub tests pass and the change
+is merged, open Cloudflare → Workers & Pages → **bonggoggles-social-proxy**
+→ Edit Code, replace the code with the **complete** latest
+`bong-goggles/cloudflare/social-proxy/worker.mjs`, and deploy. Do not touch
+the Cloudflare Pages project, the route, the existing
+`SOCIAL420_EDGE_SECRET` secret, or the backend Render configuration.
+The correct Worker route remains `bonggoggles.420integrated.org/social-api/*`.
+
+Acceptance: verify an awake SSO flow still forwards a 303 with its secure
+flow cookie; while social is cold a browser receives the bounded startup
+page instead of Render's bare 502; a disconnected origin still fails closed;
+a POST, one-use auth callback or authenticated feed is **not** retried; and
+after the service wakes, 420ID sign-in/callback, logout and existing feed
+work end to end. Do not claim a successful live fix without completing these.

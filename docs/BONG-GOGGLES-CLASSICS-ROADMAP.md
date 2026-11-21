@@ -2,7 +2,7 @@
 
 **Roadmap ID:** BG-CLASSICS (BC-0 through BC-25)
 **Adopted:** 2026-11-21
-**Status:** BC-0.1–BC-0.3 qualified in the repository; BC-0.4–BC-0.12 and all 25 game engines remain unimplemented. Live browser deployment is not independently attested.
+**Status:** BC-0.1–BC-0.4 qualified in the repository; BC-0.5–BC-0.12 and all 25 game engines remain unimplemented. BC-0.4 live source/CSS check passed; full account-browser end-to-end acceptance is not attested.
 **Repository:** `abvhiael/420-integrated-v0.1`
 **Product:** `https://bonggoggles.420integrated.org/`
 
@@ -30,7 +30,7 @@ Games are zero-wager and require no blockchain transaction or mandatory 420Walle
 | BC-0.1 | Baseline inventory — **QUALIFIED** ([source-backed inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md)) | Reconcile main, open PRs, BG-15 session/engine framework, web routes, current Classics assets/tests, account-social/420ID flows, and deployed-service boundaries. Retain exact commit provenance. |
 | BC-0.2 | One coherent games menu — **QUALIFIED** ([evidence](games/classics/BC-0-2-QUALIFICATION.md)) | Make /games the principal browse destination with all 25 titles visibly present and individually navigable to /games/:slug (or equivalent routed path). Keep /classics aliases and Cross-Country Chaos; Canadian Classics has its own category. Never falsely label unfinished games playable. |
 | BC-0.3 | Shared UI — **QUALIFIED** ([evidence](games/classics/BC-0-3-QUALIFICATION.md)) | Build game landing page, rules and active-variant labels, New Game, opponent/seat setup, tabletop, history, resume, results, rematch, and accessible mobile layouts. |
-| BC-0.4 | Account integration | Use 420ID-backed BongGoggles identities and existing account sessions for wallet-optional games. Keep an obvious login path, log-out, session renewal and policy/block checks. No mandatory 420Wallet connection for off-chain matches. |
+| BC-0.4 | Account integration — **QUALIFIED** ([evidence](games/classics/BC-0-4-QUALIFICATION.md)) | Use 420ID-backed BongGoggles identities and existing account sessions for wallet-optional games. Keep an obvious login path, log-out, session renewal and policy/block checks. No mandatory 420Wallet connection for off-chain matches. |
 | BC-0.5 | Invites and seating | Private/public rooms; friend invitations; accept/decline/cancel; 2-4 or game-specific seat counts; team assignment; seat-specific human or bot control and per-bot difficulty; human-human and mixed human-bot play. |
 | BC-0.6 | Authoritative off-chain sessions | Qualified server-side match authority for account matches: create/start/turn/validate/end/cancel/resign/timeout, strictly increasing action sequence, durable persistence, idempotency and authorization; do not treat client scores as authoritative. |
 | BC-0.7 | Rules/AI contracts | Versioned deterministic game-state codecs and ruleset hashes; legal actions, apply/score/isTerminal, public vs per-seat/private views, seeded/replayable randomness, AI chooseMove(stateForSeat,difficulty), bounded compute budgets. |
@@ -139,10 +139,11 @@ The main `Games` link must be accessible to logged-out visitors for browsing, 42
 
 | Milestone | Status | Exact SHA | CI / E2E / deployment evidence | Remaining blockers |
 |---|---|---|---|---|
-| BC-0 | IN PROGRESS | — | BC-0.1–BC-0.3 repository qualified; BC-0.4–BC-0.12 not implemented | BC-0 shared platform and release criteria remain open |
+| BC-0 | IN PROGRESS | — | BC-0.1–BC-0.4 repository qualified; BC-0.5–BC-0.12 not implemented | BC-0 shared platform and release criteria remain open |
 | BC-0.1 | QUALIFIED | Inventory commit `e399434763cf07d130d486cc05cfe18ae0d75b4e`; baseline `1cd6ceb5fe5f6bc47ae7662ab2d4b14a776f0eb0` | [Inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md); [420Docs Qualification #44948290256](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44948290256) PASS at inventory SHA; 18/18 critical source files verified | BC-0.2 next; BC-0 overall incomplete |
 | BC-0.2 | QUALIFIED (repository; live browser not attested) | `822dcbd40048c49e07bd2bfff79e305ed4b750ea` | [Run #44953039287](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44953039287) PASS: 363 web tests, 4 HTTP tests, both builds, assets/accessibility, secret scan; [evidence](games/classics/BC-0-2-QUALIFICATION.md) | BC-0.3 next; BC-0 deployment remains unverified |
 | BC-0.3 | QUALIFIED (repository; live browser not attested) | `38732671ecf1adf22c50d605657a6dbf85476e15` | [Web Verification #44955770348](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44955770348) PASS: 373 web tests, 4 HTTP tests, both builds, scoped asset/accessibility and secret scan; [evidence](games/classics/BC-0-3-QUALIFICATION.md) | BC-0.4 next; 420ID/game authority and deployment remain separate |
+| BC-0.4 | QUALIFIED (repository; live account source/CSS checked) | `ae010bdba302dab52313102fb9e875fb9511a9e7` | [Web Verification #44964060589](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44964060589) PASS: 386 web + 4 HTTP, both builds, static asset/security; [live header #44964060528](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44964060528) PASS; [evidence](games/classics/BC-0-4-QUALIFICATION.md) | BC-0.5 next; human game match acceptance separate |
 | BC-1 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-2 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-3 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |

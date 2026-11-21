@@ -566,9 +566,12 @@ contract Governance420 is SystemAccess, I420System {
             electorates.sourceFor(CivicIds420.House.COMMUNITY);
         CivicElectorateRegistry420.SourceConfig memory validatorConfig =
             electorates.sourceFor(CivicIds420.House.VALIDATOR);
-        if (communityConfig.source != communitySource_ || validatorConfig.source != validatorSource_) {
-            revert InvalidBootstrapGraph();
-        }
+        if (
+            communityConfig.source != communitySource_ || validatorConfig.source != validatorSource_
+                || communityConfig.sourceType != CivicMerkleElectorateSource420(communitySource_).COMMUNITY_SOURCE_TYPE()
+                || validatorConfig.sourceType != CivicMerkleElectorateSource420(validatorSource_).VALIDATOR_SOURCE_TYPE()
+                || communityConfig.revision != 1 || validatorConfig.revision != 1
+        ) revert InvalidBootstrapGraph();
 
         _requireRule(
             constitution.ruleFor(CivicIds420.ProposalClass.G1), ROTATION_BLOCKS, 7 days, 1000, 5001, 0, 0, false
@@ -612,7 +615,7 @@ contract Governance420 is SystemAccess, I420System {
         // No proposal can be created until both checkpoints are effective for snapshotBlock = block.number - 1.
         CivicMerkleElectorateSource420 community = CivicMerkleElectorateSource420(communitySource_);
         CivicMerkleElectorateSource420 validator = CivicMerkleElectorateSource420(validatorSource_);
-        if (community.checkpointCount() == 0 || validator.checkpointCount() == 0) {
+        if (community.checkpointCount() != 1 || validator.checkpointCount() != 1) {
             revert InvalidElectorateSource();
         }
         CivicMerkleElectorateSource420.Checkpoint memory communityInitial = community.checkpoint(0);
@@ -623,6 +626,15 @@ contract Governance420 is SystemAccess, I420System {
                 || validatorInitial.electorateRoot != initialValidatorRoot
                 || validatorInitial.totalWeight != initialValidatorTotalWeight
                 || communityInitial.effectiveBlock >= block.number || validatorInitial.effectiveBlock >= block.number
+        ) revert InvalidElectorateSource();
+
+        // The first proposal snapshots block.number - 1. Verify the *effective* electorate
+        // at that exact snapshot, not merely the historical checkpoint at index zero.
+        (bytes32 communityRoot, uint256 communityWeight) = community.snapshotAt(uint64(block.number - 1));
+        (bytes32 validatorRoot, uint256 validatorWeight) = validator.snapshotAt(uint64(block.number - 1));
+        if (
+            communityRoot != initialCommunityRoot || communityWeight != initialCommunityTotalWeight
+                || validatorRoot != initialValidatorRoot || validatorWeight != initialValidatorTotalWeight
         ) revert InvalidElectorateSource();
 
         GovernanceTimelock(payable(governanceTimelock)).activateCivicAuthority(governor_);

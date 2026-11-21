@@ -1,0 +1,41 @@
+{
+  "schema": "420-civic-electorate-input-v1",
+  "fixtureOnly": true,
+  "chainId": 31337,
+  "houses": {
+    "COMMUNITY": {
+      "totalWeight": 2,
+      "members": [
+        {
+          "address": "0x00000000000000000000000000000000000A11CE",
+          "evidence": {
+            "reference": "TEST_ONLY:community-alice"
+          }
+        },
+        {
+          "address": "0x0000000000000000000000000000000000000B0B",
+          "evidence": {
+            "reference": "TEST_ONLY:community-bob"
+          }
+        }
+      ]
+    },
+    "VALIDATOR": {
+      "totalWeight": 2,
+      "members": [
+        {
+          "address": "0x000000000000000000000000000000000000D00D",
+          "evidence": {
+            "reference": "TEST_ONLY:validator-dana"
+          }
+        },
+        {
+          "address": "0x000000000000000000000000000000000000CAFE",
+          "evidence": {
+            "reference": "TEST_ONLY:validator-cara"
+          }
+        }
+      ]
+    }
+  }
+}

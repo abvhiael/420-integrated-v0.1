@@ -11,6 +11,9 @@ interface VmCivicSource {
     function prank(
         address
     ) external;
+    function warp(
+        uint256
+    ) external;
 }
 
 contract CivicMerkleElectorateSource420Test {
@@ -117,5 +120,94 @@ contract CivicMerkleElectorateSource420Test {
         vm.roll(block.number + 1);
         (bytes32 observed, uint256 total) = source.snapshotAt(uint64(block.number));
         require(observed == root && total == 1, "initial snapshot");
+    }
+
+    function testRealTimelockInitialCheckpointWaitsForDelayAndExecutionBlock() public {
+        GovernanceTimelock timelock = new GovernanceTimelock(address(this));
+        CivicMerkleElectorateSource420 source = new CivicMerkleElectorateSource420(
+            address(timelock), keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1")
+        );
+        bytes32 root = _leaf(address(0xCAFE));
+        bytes32 id = keccak256("GOV-REC-2-real-initial-checkpoint");
+        timelock.schedule(
+            id,
+            address(source),
+            0,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))),
+            GovernanceTimelock.Class.G1
+        );
+        (bool early,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (id)));
+        require(!early && source.checkpointCount() == 0, "executed before Timelock floor");
+
+        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
+        vm.roll(1000);
+        timelock.execute(id);
+        CivicMerkleElectorateSource420.Checkpoint memory cp = source.checkpoint(0);
+        require(cp.effectiveBlock == 1001 && cp.totalWeight == 1 && cp.electorateRoot == root, "late checkpoint");
+        (bool before,) = address(source).staticcall(
+            abi.encodeCall(CivicMerkleElectorateSource420.snapshotAt, (uint64(1000)))
+        );
+        require(!before, "accepted snapshot before effective block");
+
+        vm.roll(1001);
+        (bytes32 observed, uint256 weight) = source.snapshotAt(uint64(1001));
+        require(observed == root && weight == 1, "effective snapshot not usable");
+
+        bytes32 again = keccak256("GOV-REC-2-repeat-initial");
+        timelock.schedule(
+            again,
+            address(source),
+            0,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))),
+            GovernanceTimelock.Class.G1
+        );
+        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
+        (bool repeat,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (again)));
+        require(!repeat && source.checkpointCount() == 1, "duplicate first checkpoint accepted");
+    }
+
+    function testInitialCheckpointRejectsZeroRootEmptyWeightAndBlockOverflowAtomically() public {
+        GovernanceTimelock timelock = new GovernanceTimelock(address(this));
+        CivicMerkleElectorateSource420 source = new CivicMerkleElectorateSource420(
+            address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
+        );
+        bytes32 root = _leaf(address(0xA11CE));
+        bytes32 missingRoot = keccak256("GOV-REC-2-zero-root");
+        bytes32 missingWeight = keccak256("GOV-REC-2-zero-weight");
+        bytes32 late = keccak256("GOV-REC-2-overflow");
+        timelock.schedule(
+            missingRoot,
+            address(source),
+            0,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (bytes32(0), uint256(1))),
+            GovernanceTimelock.Class.G1
+        );
+        timelock.schedule(
+            missingWeight,
+            address(source),
+            0,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(0))),
+            GovernanceTimelock.Class.G1
+        );
+        timelock.schedule(
+            late,
+            address(source),
+            0,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))),
+            GovernanceTimelock.Class.G1
+        );
+        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
+        vm.roll(type(uint64).max);
+
+        (bool zeroRoot,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (missingRoot)));
+        (bool zeroWeight,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (missingWeight)));
+        (bool overflow,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (late)));
+        require(!zeroRoot && !zeroWeight && !overflow, "invalid initial checkpoint accepted");
+        require(source.checkpointCount() == 0, "failed initial checkpoint mutated source");
+
+        vm.roll(500);
+        timelock.execute(late);
+        CivicMerkleElectorateSource420.Checkpoint memory first = source.checkpoint(0);
+        require(first.effectiveBlock == 501 && first.electorateRoot == root, "failed operation cannot recover");
     }
 }

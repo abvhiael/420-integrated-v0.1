@@ -1,0 +1,45 @@
+{
+  "chainId": 31337,
+  "fixtureOnly": true,
+  "houses": {
+    "COMMUNITY": {
+      "members": [
+        {
+          "address": "0x0000000000000000000000000000000000000b0b",
+          "proof": [
+            "0x8a75fa4fda1ed9d0669e73d0fc87781f92cbed0069e0301b88d6ea1e0d1c070a"
+          ]
+        },
+        {
+          "address": "0x00000000000000000000000000000000000a11ce",
+          "proof": [
+            "0xf9f00615e0feb5664eb1b004bfb45f8183875b66a27b01cc0e649e6523e0a5ef"
+          ]
+        }
+      ],
+      "root": "0xda9e544e4add47789b40c8b0be82f1761605345aead2d6db1f001f77e1cbb8e0",
+      "totalWeight": 2
+    },
+    "VALIDATOR": {
+      "members": [
+        {
+          "address": "0x000000000000000000000000000000000000cafe",
+          "proof": [
+            "0x3eeecd9eff13f52f801a6b48b74ae13b984d92d0beffe67d6a760515ae193980"
+          ]
+        },
+        {
+          "address": "0x000000000000000000000000000000000000d00d",
+          "proof": [
+            "0x8df71626934cd7df86b25cfcdd8b99509ba874e3fde87ac97032f9a81662c544"
+          ]
+        }
+      ],
+      "root": "0xc2ad5a359d781e8a6bffad53196158ac0be6ddf30350c23f51adf3507470c3f3",
+      "totalWeight": 2
+    }
+  },
+  "schema": "420-civic-electorate-vectors-v1",
+  "sourceDigestSha256": "0xa3b45676a89be769f303c5e1e085012ec5c711dae446c0d4d87511a7c946b046",
+  "sourceSchema": "420-civic-electorate-input-v1"
+}

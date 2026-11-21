@@ -8,6 +8,7 @@ on:
       - 'contracts/config/launchpad/**'
       - 'contracts/config/420launchpad-genesis.json'
       - 'scripts/verify-launchpad-rec-6.py'
+      - 'scripts/test_launchpad_rec_6.py'
       - 'launchpad/web/**'
       - 'launchpad/service/**'
       - 'testnet/public-services/launchpad/**'
@@ -60,6 +61,8 @@ jobs:
           forge build src/launchpad src/apps/ProtocolRegistry.sol src/system/CapabilityRegistry420.sol
           cd ..
           python3 scripts/verify-launchpad-rec-6.py artifacts --sha "$QUALIFIED_SHA" --output /tmp/launchpad-rec6-artifacts-first.json
+      - name: Reject tampered ABI, constructor, compiler and unlinked runtime artifacts
+        run: python3 scripts/test_launchpad_rec_6.py
       - name: Rebuild clean and compare every artifact identity
         working-directory: contracts
         run: |

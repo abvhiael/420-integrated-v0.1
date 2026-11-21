@@ -140,9 +140,7 @@ jobs:
         run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 timeout 180s forge test --match-path test-governance-audit-6/GovernanceAudit6Deployment420.t.sol -vv
       - name: Retained Governance authority and lifecycle regressions
         working-directory: contracts
-        run: |
-          forge test --match-path 'test/Civic*.t.sol' -vv
-          forge test --match-path 'test/Governance*420.t.sol' -vv
+        run: bash ../scripts/qualify-governance-focused.sh
       - name: Emit reproducible runtime-template hashes
         working-directory: contracts
         run: |

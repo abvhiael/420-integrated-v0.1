@@ -102,6 +102,8 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     uint256 public totalOwnedWithdrawn;
 
     uint256 public eligibleValidatorCount;
+    uint64 public retirementEligiblePoolSince;
+    mapping(bytes32 => uint64) public retirementValidatorEligibleSince;
     uint16 public activeTarget;
     uint16 public pendingActiveTarget;
     uint8 public pendingTargetSnapshots;
@@ -311,6 +313,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             else --eligibleValidatorCount;
         }
 
+        _updateRetirementEligibility(validatorId, wasEligible, nowEligible);
         v.status = newStatus;
         v.effectiveSlot = effectiveSlot;
         v.activationRotation = activationRotation;
@@ -369,6 +372,8 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             if (nowEligible) ++eligibleValidatorCount;
             else --eligibleValidatorCount;
         }
+
+        _updateRetirementEligibility(validatorId, wasEligible, nowEligible);
 
         if (ownedSlashed != 0) {
             totalOwnedCustody -= ownedSlashed;
@@ -462,6 +467,29 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
         Validator storage v = _validators[id];
         return v.owner == owner && originallyFullySponsored[id] && v.protocolCredit != 0
             && v.status != Status.EXITED && v.status != Status.WITHDRAWABLE;
+    }
+
+    /// @notice On-chain evidence of uninterrupted validator eligibility.
+    /// Losing or changing out of the selectable pool resets the 30-day clock.
+    function retirementOwnerStatus(bytes32 validatorId)
+        external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince)
+    {
+        Validator storage v = _validators[validatorId];
+        owner = v.owner;
+        eligible = _countsAsEligible(v.status);
+        continuouslyEligibleSince = retirementValidatorEligibleSince[validatorId];
+    }
+
+    function _updateRetirementEligibility(bytes32 id, bool wasEligible, bool nowEligible) private {
+        if (wasEligible != nowEligible) {
+            if (nowEligible) retirementValidatorEligibleSince[id] = uint64(block.timestamp);
+            else retirementValidatorEligibleSince[id] = 0;
+        }
+        if (eligibleValidatorCount < MIN_BONDED_ELIGIBLE) {
+            retirementEligiblePoolSince = 0;
+        } else if (retirementEligiblePoolSince == 0) {
+            retirementEligiblePoolSince = uint64(block.timestamp);
+        }
     }
 
     function custodyInvariant() external view returns (bool) {

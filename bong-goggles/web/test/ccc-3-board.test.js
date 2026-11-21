@@ -8,7 +8,7 @@ import {
 } from '../core/cross-country-chaos.js';
 import {chaosCardArt} from '../core/chaos-card-art.js';
 import {renderChaosGame} from '../core/classics-ui.js';
-import {chaosRoutePosition,renderChaosHighway,renderChaosTable} from '../core/chaos-board.js';
+import {chaosRoutePosition,renderChaosHighway,renderChaosTable,keepChaosHandRevealed} from '../core/chaos-board.js';
 
 const names=['Alice','Bob','Charlie','Dana'];
 let uid=100000;
@@ -242,6 +242,23 @@ test('CCC-3: all stage transitions replace the highway and visible table but pre
   assert.notEqual(next,a);
   assert.ok(next.includes('data-region="'+LEGS[leg].id+'"'));
  }
+});
+test('CCC-3: keep the current player's hand open through draw/play/discard, then hide it at a true seat handoff',()=>{
+ let s=starter(2);
+ let next=play(s,'pass');
+ assert.equal(keepChaosHandRevealed(s,next,true),true);
+ assert.equal(keepChaosHandRevealed(s,next,false),false);
+ assert.equal(keepChaosHandRevealed(null,next,true),false);
+ next=play(next,'discard',{index:0});
+ assert.equal(keepChaosHandRevealed(s,next,true),true);
+ const previous=next;
+ next=play(next,'discard',{index:0});
+ assert.equal(next.turn,1);
+ assert.equal(keepChaosHandRevealed(previous,next,true),false);
+ const afterStage=structuredClone(previous);afterStage.phase='between';
+ assert.equal(keepChaosHandRevealed(previous,afterStage,true),false);
+ const nextLeg=structuredClone(previous);nextLeg.leg=1;
+ assert.equal(keepChaosHandRevealed(previous,nextLeg,true),false);
 });
 test('CCC-3: renderers escape hostile names, remain wallet-free, and support mobile/reduced-motion/forced-colors styling',async()=>{
  let s=createChaosGame({names:['<b>X</b>','Bob'],seed:5});

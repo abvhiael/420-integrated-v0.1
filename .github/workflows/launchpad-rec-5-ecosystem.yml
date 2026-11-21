@@ -118,9 +118,6 @@ jobs:
       - name: Qualify artifact-bound Launchpad event decoding and canonical history
         working-directory: 420-indexer
         run: |
-          # Recover the missing pg entries in the existing indexer lock without modifying dependencies.
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          node -e "console.log('REC5_LOCK_START'+JSON.stringify(JSON.parse(require('node:fs').readFileSync('package-lock.json','utf8')))+'REC5_LOCK_END')"
           npm ci --ignore-scripts
           npm run build
           node --test dist/test/launchpad-indexer.test.js

@@ -27,7 +27,7 @@ Games are zero-wager and require no blockchain transaction or mandatory 420Walle
 
 | Substep | Gate | Required deliverable |
 |---|---|---|
-| BC-0.1 | Baseline inventory | Reconcile main, open PRs, BG-15 session/engine framework, web routes, current Classics assets/tests, account-social/420ID flows, and deployed-service boundaries. Retain exact commit provenance. |
+| BC-0.1 | Baseline inventory — **IMPLEMENTED** ([source-backed inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md)) | Reconcile main, open PRs, BG-15 session/engine framework, web routes, current Classics assets/tests, account-social/420ID flows, and deployed-service boundaries. Retain exact commit provenance. |
 | BC-0.2 | One coherent games menu | Make /games the principal browse destination with all 25 titles visibly present and individually navigable to /games/:slug (or equivalent routed path). Keep /classics aliases and Cross-Country Chaos; Canadian Classics has its own category. Never falsely label unfinished games playable. |
 | BC-0.3 | Shared UI | Build game landing page, rules and active-variant labels, New Game, opponent/seat setup, tabletop, history, resume, results, rematch, and accessible mobile layouts. |
 | BC-0.4 | Account integration | Use 420ID-backed BongGoggles identities and existing account sessions for wallet-optional games. Keep an obvious login path, log-out, session renewal and policy/block checks. No mandatory 420Wallet connection for off-chain matches. |
@@ -139,7 +139,8 @@ The main `Games` link must be accessible to logged-out visitors for browsing, 42
 
 | Milestone | Status | Exact SHA | CI / E2E / deployment evidence | Remaining blockers |
 |---|---|---|---|---|
-| BC-0 | NOT STARTED | — | — | Inventory and implement foundation |
+| BC-0 | IN PROGRESS | — | BC-0.1 inventory committed; BC-0.2–BC-0.12 unimplemented | BC-0 shared platform and release criteria remain open |
+| BC-0.1 | IMPLEMENTED | `1cd6ceb5fe5f6bc47ae7662ab2d4b14a776f0eb0` (source snapshot) | [BC-0.1 inventory](games/classics/BC-0-1-REPOSITORY-INVENTORY.md); docs check on inventory commit pending | No game implementation; BC-0.2 next |
 | BC-1 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-2 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |
 | BC-3 | NOT STARTED | — | — | Prerequisite milestone and per-game release gate |

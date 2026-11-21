@@ -82,7 +82,24 @@ function distributeLegendaries(s){
  allocation[extra].push(order[3]);
  return allocation;
 }
+// The four physical legendary cards are allocated once for the whole championship.
+// Never accept a manipulated regional roster that duplicates or respawns a legend.
+export function assertLegendaryAllocation(allocation){
+ if(!Array.isArray(allocation)||allocation.length!==LEGS.length||
+    allocation.some(x=>!Array.isArray(x))||
+    allocation.map(x=>x.length).sort((a,b)=>a-b).join(',')!=='1,1,2')
+  throw new Error('Invalid championship legendary distribution.');
+ const assigned=allocation.flat();
+ const expected=LEGENDARIES.map(x=>x.id);
+ if(assigned.length!==4||new Set(assigned).size!==4||
+    assigned.some(id=>!expected.includes(id)))
+  throw new Error('Four unique legendary cards are required across all regions.');
+ return true;
+}
 export function regionalDeck(s){
+ if(!Number.isInteger(s?.leg)||s.leg<0||s.leg>=LEGS.length)
+  throw new Error('Invalid regional stage.');
+ assertLegendaryAllocation(s.legendaryByLeg);
  const leg=LEGS[s.leg].id;
  const cards=[
   ...MILEAGE_COUNTS.flatMap(([km,count])=>Array.from({length:count},()=>({type:'mileage',km}))),

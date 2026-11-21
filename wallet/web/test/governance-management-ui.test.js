@@ -48,3 +48,19 @@ test('ordinary Wallet Governance UI does not expose proposal creation queue or e
     assert.equal(html.includes(forbidden),false,forbidden);
   }
 });
+
+test('GOV-REC-5 verified eligibility gates ballot buttons after busy transitions',()=>{
+  assert.match(source,/eligibleVote\.proposalId!==selected\.proposalId/);
+  assert.match(source,/eligibleVote\.house!==Number/);
+  assert.match(source,/eligibleVote\.proofData!==/);
+  assert.match(source,/eligibleVote\.epoch!==sessionEpoch/);
+  assert.match(source,/if\(result\.eligible\)eligibleVote=/);
+});
+
+test('GOV-REC-5 in-flight account/network changes invalidate asynchronous proposal and eligibility views',()=>{
+  for(const marker of [
+    'sessionEpoch+=1', 'account changed during proposal refresh',
+    'account changed during proposal read', 'account changed during connection',
+    'ballot selection changed during eligibility check', 'eligibleVote=null'
+  ])assert.ok(source.includes(marker),marker);
+});

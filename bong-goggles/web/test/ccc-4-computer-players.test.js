@@ -70,7 +70,8 @@ test('CCC-4: each difficulty resolves the draw, play and discard phases legally'
    s=takeChaosTurn(s,{player:0,...move});
   }
   assert.equal(s.turn,1,'bot turn did not resolve');
-  assert.equal(s.step,'play');
+  assert.equal(s.step,'draw','the human already completed an opening turn and must draw to seven');
+  assert.equal(s.players[1].hand.length,5,'human retained exactly five cards');
  }
 });
 test('CCC-4: Easy decisions vary deterministically without accessing hidden deck seed',()=>{

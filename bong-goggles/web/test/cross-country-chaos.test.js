@@ -105,10 +105,17 @@ test('free newly drawn power installs immediately, replaces itself, chains, and 
  s=takeChaosTurn(s,{player:0,action:'power',index:s.players[0].hand.findIndex(c=>c.uid===b.uid)});
  assert.equal(s.step,'play');assert.equal(s.players[0].upgrades.length,2);
  assert.throws(()=>takeChaosTurn(s,{player:0,action:'power',index:99}),/Select a power card/);
- // A power received in the opening deal is paid for with the normal action.
- let opening=start();put(opening,0,card('upgrade',{id:'thermos',name:'Thermos',category:'all'}));
- opening=takeChaosTurn(opening,{player:0,action:'power',index:0});
- assert.equal(opening.step,'discard');assert.equal(opening.discardsLeft,1);
+ // Opening seven-card deals are also physical deck draws, so their powers can be free.
+ const dealt=Array.from({length:80},(_,i)=>start(2,i+1)).find(g=>g.players[0].hand.some(c=>['upgrade','legendary'].includes(c.type)));
+ assert.ok(dealt,'some deterministic opening hand should contain a power');
+ const idx=dealt.players[0].hand.findIndex(c=>['upgrade','legendary'].includes(c.type));
+ assert.ok(dealt.fresh.includes(dealt.players[0].hand[idx].uid));
+ const activated=takeChaosTurn(dealt,{player:0,action:'power',index:idx});
+ assert.equal(activated.step,'play');assert.equal(activated.players[0].hand.length,7);
+ // A power kept past its immediate draw opportunity costs the normal play.
+ let saved=start();put(saved,0,card('upgrade',{id:'thermos',name:'Thermos',category:'all'}));saved.fresh=[];
+ saved=takeChaosTurn(saved,{player:0,action:'power',index:0});
+ assert.equal(saved.step,'discard');assert.equal(saved.discardsLeft,1);
 });
 test('repairs only on owners turn; breakdown, road slowdown and permanent detours behave independently',()=>{
  let s=start();

@@ -1,12 +1,12 @@
 import {escapeHtml as esc,card} from './design-system.js';
 import {CLASSIC_COLLECTIONS} from './classics.js';
-import {LEGS,chaosLeaders,chaosActionOptions} from './cross-country-chaos.js';
+import {LEGS,chaosLeaders,chaosActionOptions,chaosFinalRoundProgress} from './cross-country-chaos.js';
 import {chaosCardArt} from './chaos-card-art.js';
 import {renderChaosTable} from './chaos-board.js';
 import {CHAOS_ART_DIRECTION,chaosRegionArt} from './chaos-visual-style.js';
 import {CHAOS_VEHICLES,chaosVehicle} from './chaos-vehicles.js';
 import {renderChaosGameEffects,renderChaosFinishEffects} from './chaos-game-effects.js';
-import {renderChaosRegionalResults,renderChaosChampionshipResults,renderChaosResultsHistory} from './chaos-results.js';
+import {renderChaosRegionalResults,renderChaosChampionshipResults,renderChaosResultsHistory,renderChaosCumulativeStandings} from './chaos-results.js';
 import {isChaosComputer} from './chaos-computer.js';
 const link='<a href="/classics" data-route="classics">← All Classics</a>';
 const badge=s=>'<span class="ccc-badge">'+esc(s)+'</span>';
@@ -50,13 +50,13 @@ const handCards=(p,leg,options,s)=>{
 export function renderChaosGame({game=null,revealed=false,error=null,feedback=null,effects=null}={}){
  if(!game)return '<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--east">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">CANADIAN CLASSICS · NO DETOURS GUARANTEED</span></div><p class="eyebrow">BongGoggles Canadian Classics</p><h2>Cross-Country Chaos</h2><p class="ccc-hero-quip">'+esc(CHAOS_ART_DIRECTION.title)+'</p><p>Race from St. John\'s to Vancouver: three regions, 2,500 km each. Draw to seven, play, then discard. Hazards and detours can derail the race; championship kilometres decide the winner.</p><p><strong>Local pass-and-play only for human seats; computer opponents are also available.</strong> Choose Easy, Normal or Hard for computer drivers. At least one human is required. No online rooms, wallet, staking, rewards, or wagers. This session is kept in this tab and resets on reload.</p></div>'+(error?'<p class="ccc-error" role="alert">'+esc(error)+'</p>':'')+'<form class="ccc-setup" data-chaos-start><h3>Start your road trip</h3><label for="ccc-count">Drivers</label><select id="ccc-count" name="count"><option value="2">2 drivers</option><option value="3">3 drivers</option><option value="4" selected>4 drivers</option></select><div class="ccc-names">'+[0,1,2,3].map(vehicleChoice).join('')+'</div><button type="submit">Start the cross-Canada championship</button></form></div>';
  const leg=LEGS[game.leg],p=game.players[game.turn],leaders=chaosLeaders(game);
- const computer=isChaosComputer(p);
+ const computer=isChaosComputer(p),finalRound=chaosFinalRoundProgress(game);
  const regionArt=chaosRegionArt(leg.id);
- const top='<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--'+leg.id+'">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">'+esc(regionArt.shield)+' · ROUND '+(game.leg+1)+'/3</span></div><p class="eyebrow">Cross-Country Chaos · Stage '+(game.leg+1)+' of 3</p><h2>'+esc(leg.name)+'</h2><p class="ccc-hero-quip">'+esc(regionArt.line)+'</p><p>'+esc(leg.from)+' → '+esc(leg.to)+' · 2,500 km target</p><p>Three regional decks · four legendary cards across the championship · no wallet or cash prizes</p>'+(game.finishPending?'<strong role="status">FINAL ROUND — finish the current turn cycle!</strong>':'')+'</div>'+(game.phase==='playing'?stats(game)+renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+
+ const top='<div class="ccc-wrap ccc-wrap--roadtrip ccc-region--'+leg.id+'">'+link+'<div class="ccc-hero ccc-hero--roadtrip"><div class="ccc-road-brand"><span class="ccc-highway-shield" aria-label="Trans-Canada-inspired road trip">🍁 <b>TCH</b></span><span class="ccc-road-brandline">'+esc(regionArt.shield)+' · ROUND '+(game.leg+1)+'/3</span></div><p class="eyebrow">Cross-Country Chaos · Stage '+(game.leg+1)+' of 3</p><h2>'+esc(leg.name)+'</h2><p class="ccc-hero-quip">'+esc(regionArt.line)+'</p><p>'+esc(leg.from)+' → '+esc(leg.to)+' · 2,500 km target</p><p>Three regional decks · four legendary cards across the championship · no wallet or cash prizes</p>'+(finalRound?'<div class="ccc-final-round" role="status" aria-live="polite"><strong>FINAL ROUND — finish the current turn cycle!</strong><p>'+finalRound.turnsRemaining+' driver turn'+(finalRound.turnsRemaining===1?'':'s')+' remaining, including the current driver. Resolve every final discard.</p></div>':'')+'</div>'+(game.phase==='playing'?stats(game)+renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+
   renderChaosTable(game,{revealed:revealed&&!computer,feedback,effects}):'')+renderChaosFinishEffects(effects);
  const completedBoard='<details class="ccc-results-board"><summary>Review the completed road board</summary>'+renderChaosTable(game,{revealed:false,feedback:null,effects:null})+'</details>';
  const notice=error?'<p class="ccc-error" role="alert">'+esc(error)+'</p>':'';
- if(game.phase==='between')return top+notice+renderChaosRegionalResults(game)+renderChaosResultsHistory(game)+
+ if(game.phase==='between')return top+notice+renderChaosRegionalResults(game)+renderChaosCumulativeStandings(game)+renderChaosResultsHistory(game)+
   '<div class="ccc-panel"><p>Championship kilometres carry forward. All mileage, upgrades, hazards, and unused regional cards reset.</p><button data-chaos-action="next">Continue to '+esc(LEGS[game.leg+1].name)+'</button></div>'+completedBoard+history(game)+'</div>';
  if(game.phase==='finished')return top+notice+renderChaosChampionshipResults(game)+renderChaosResultsHistory(game)+
   '<div class="ccc-panel"><button data-chaos-action="restart">New championship</button></div>'+completedBoard+history(game)+'</div>';

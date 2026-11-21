@@ -28,7 +28,11 @@
     "exact_head_evidence": "docs/audit/LAUNCHPAD-REC-6-QUALIFICATION.md",
     "retained_local_integration": "docs/audit/LAUNCHPAD-REC-5-QUALIFICATION.md",
     "web_runtime": "launchpad/web/runtime-config.json",
-    "default_web_execution": "DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED"
+    "default_web_execution": "DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED",
+    "qualified_executable_sha": "9dfa73a81517798dd5b21d0417ae3d46c0fdb303",
+    "exact_head_run_id": 44852520909,
+    "machine_evidence": "docs/audit/LAUNCHPAD-REC-6-QUALIFICATION.json",
+    "frozen_compiled_artifacts": "contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json"
   },
   "testnet_blocker": "LAUNCHPAD-AUDIT-6 requires an approved running 420 Integrated public testnet and independently retained live chain/genesis, Registry, deployment/receipt, funding, app, recovery, and Notifications/Reputation evidence.",
   "next_canonical_step": "LAUNCHPAD-AUDIT-6"

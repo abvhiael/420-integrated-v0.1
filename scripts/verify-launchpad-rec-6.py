@@ -20,6 +20,28 @@ CONTRACTS = [
     ("LaunchpadCrowdfundingIntegration420", ["address"] * 5),
     ("LaunchpadRouter420", ["address", "address"]),
 ]
+REQUIRED_FUNCTIONS = {
+    "LaunchpadAuthorization420": ["scopeSale(bytes32)"],
+    "LaunchpadProjectRegistry420": ["registerProject(bytes32,address,address,bytes32,bytes32)"],
+    "LaunchpadSaleRegistry420": ["setController(address)", "controller()", "projects()"],
+    "LaunchpadAllocationRegistry420": [
+        "setCrowdfundingIntegration(address)", "contribute(bytes32,uint128,bytes32)",
+        "claim(bytes32,bytes32)", "recordRefund(bytes32,bytes32)", "crowdfundingIntegration()"],
+    "LaunchpadCrowdfundingIntegration420": [
+        "bindIdentity(bytes32)", "registerContributionIntent(bytes32,uint128,uint256)",
+        "publishFinalizedDisputeOutcome(bytes32,address)", "paymentRegistry()",
+        "identity()", "arbitrationCases()", "arbitrationRulings()"],
+    "LaunchpadRouter420": [
+        "remainingSaleCapacity(bytes32)", "remainingWalletCapacity(bytes32,address)",
+        "sales()", "allocations()"],
+}
+REQUIRED_EVENTS = {
+    "LaunchpadProjectRegistry420": ["ProjectRegistered"],
+    "LaunchpadSaleRegistry420": ["SaleCreated", "SaleStateChanged"],
+    "LaunchpadAllocationRegistry420": ["ContributionRecorded", "AllocationClaimed", "RefundRecorded"],
+    "LaunchpadCrowdfundingIntegration420": ["ContributionSettlementBound",
+        "DisputeOutcomePublished", "ReputationEvidencePublished", "NotificationPublished"],
+}
 CONTRACT_NAMES = [name for name, _ in CONTRACTS]
 HEX = re.compile(r"^0x[0-9a-fA-F]*$")
 EXPECTED_FLAGS = {"optimizer": {"enabled": True, "runs": 200}, "evmVersion": "cancun", "viaIR": True}
@@ -77,6 +99,18 @@ def verify_artifacts(out_dir, source_sha):
         require(found == inputs, f"{name}: constructor ABI does not match frozen dependency sequence")
         require(constructors[0].get("stateMutability") == "nonpayable",
                 f"{name}: constructor unexpectedly payable")
+        functions = set()
+        events = set()
+        for item in abi:
+            if item.get("type") == "function":
+                functions.add(item["name"] + "(" +
+                              ",".join(param["type"] for param in item.get("inputs", [])) + ")")
+            elif item.get("type") == "event":
+                events.add(item["name"])
+        for signature in REQUIRED_FUNCTIONS[name]:
+            require(signature in functions, f"{name}: required canonical ABI function missing: {signature}")
+        for event in REQUIRED_EVENTS.get(name, []):
+            require(event in events, f"{name}: required canonical ABI event missing: {event}")
         metadata = artifact.get("metadata")
         require(isinstance(metadata, (str, dict)) and metadata, f"{name}: compiler metadata missing")
         metadata = json.loads(metadata) if isinstance(metadata, str) else metadata

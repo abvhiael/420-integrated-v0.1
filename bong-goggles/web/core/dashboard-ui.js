@@ -10,12 +10,14 @@ export function topNavigation(nav,active){
  const items=['home','groups','discover','messages','notifications'].map(id=>nav.find(x=>x.id===id));
  return '<nav class="dashboard-topnav" aria-label="Primary header">'+items.map(x=>'<a href="'+x.path+'" data-route="'+x.id+'" aria-current="'+(active===x.id?'page':'false')+'"><span aria-hidden="true">'+escapeHtml(x.icon)+'</span>'+escapeHtml(x.id==='home'?'Home':NAV_LABELS[x.id]??x.label)+'</a>').join('')+'</nav>';
 }
-export function profileSummary(wallet,profile,walletHref){
+export function profileSummary(wallet,profile,walletHref,accountSocialState=null){
  const connected=wallet?.connected===true;
+ const socialProfile=accountSocialState?.status==='ready'?accountSocialState.profile:null;
  const own=connected&&typeof profile?.account==='string'&&profile.account.toLowerCase()===wallet.account?.toLowerCase();
- const name=own&&profile.displayName?profile.displayName:connected?'My account':'Welcome, guest';
- const detail=connected?String(wallet.account).slice(0,6)+'…'+String(wallet.account).slice(-4):'Explore the community';
- return '<section class="dashboard-profile"><span class="dashboard-avatar" aria-hidden="true">'+escapeHtml(connected?String(name).slice(0,2).toUpperCase():'BG')+'</span><div><a href="/profile" data-route="profile"><strong>'+escapeHtml(name)+'</strong></a><small>'+escapeHtml(detail)+'</small>'+(!connected&&walletHref?linkButton({label:'Connect wallet (optional)',href:walletHref}):'')+'</div></section>';
+ const name=own&&profile.displayName?profile.displayName:connected?'My account':socialProfile?.displayName??'Welcome, guest';
+ const detail=connected?String(wallet.account).slice(0,6)+'…'+String(wallet.account).slice(-4):socialProfile?'420ID account · wallet optional':'Explore the community';
+ const route=!connected&&socialProfile?'social':'profile';
+ return '<section class="dashboard-profile"><span class="dashboard-avatar" aria-hidden="true">'+escapeHtml(connected?String(name).slice(0,2).toUpperCase():'BG')+'</span><div><a href="/'+(route==='social'?'social':'profile')+'" data-route="'+route+'"><strong>'+escapeHtml(name)+'</strong></a><small>'+escapeHtml(detail)+'</small>'+(!connected&&walletHref?linkButton({label:'Connect wallet (optional)',href:walletHref}):'')+'</div></section>';
 }
 export function welcomeHero(date=new Date()){
  const greeting=selectGreeting(date);

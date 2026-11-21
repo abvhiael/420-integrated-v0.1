@@ -1,32 +1,62 @@
 import {createAccountSocialClient,normalizeAccountSocialFeed,socialInput,isSubjectID} from './account-social.js';
 
+// Render Free can suspend its web service. Retrying authenticated GETs while
+// waking is safe; repeating mutations, SSO callbacks or logout is not.
+const WAKE_RETRY_DELAYS_MS=Object.freeze([2000,4000,8000,12000,12000,12000,12000,12000]);
+const temporaryGateway=response=>[502,503,504].includes(response?.status);
+function defaultWakeScheduler(callback,delay){
+ const timer=setTimeout(callback,delay);
+ timer?.unref?.(); // Do not leave a Node test worker alive just for a retry.
+}
 export class AccountSocialController {
- constructor({enabled=false,fetchImpl=fetch,onChange=()=>{}}={}){
+ constructor({enabled=false,fetchImpl=fetch,onChange=()=>{},wakeRetryDelays=WAKE_RETRY_DELAYS_MS,scheduleWakeRetry=defaultWakeScheduler}={}){
   this.client=createAccountSocialClient({enabled,fetchImpl});
   this.onChange=onChange;
   this.state={status:enabled?'loading':'disabled'};
   this.generation=0;
+  this.wakeAttempts=0;
+  this.wakeRetryDelays=wakeRetryDelays;
+  this.scheduleWakeRetry=scheduleWakeRetry;
  }
  emit(next){this.state={...next};this.onChange(this.state);return this.state;}
- invalidate(){this.generation++;this.emit({status:'loading'});}
- async refresh(){
+ invalidate(){this.generation++;this.wakeAttempts=0;this.emit({status:'loading'});}
+ transient(gen){
+  const delay=this.wakeRetryDelays[this.wakeAttempts];
+  if(Number.isInteger(delay)&&delay>=0){
+   this.wakeAttempts++;
+   this.scheduleWakeRetry(()=>{
+    if(gen===this.generation&&this.state.status==='error')void this.refresh({waking:true});
+   },delay);
+  }
+  return this.emit({status:'error',temporary:true});
+ }
+ async refresh({waking=false}={}){
   if(!this.client.enabled)return this.emit({status:'disabled'});
+  if(!waking)this.wakeAttempts=0;
   const gen=++this.generation;
   this.emit({status:'loading'});
   try{
    const me=await this.client.request('/v1/me');
    if(gen!==this.generation)return this.state;
-   if(me.status===401)return this.emit({status:'guest'});
+   if(me.status===401){this.wakeAttempts=0;return this.emit({status:'guest'});}
+   if(temporaryGateway(me))return this.transient(gen);
    if(me.status!==200||me.data?.walletRequired!==false||!isSubjectID(me.data.profile?.subject))throw Error('Unverified account');
    const page=await this.client.request('/v1/feed');
    if(gen!==this.generation)return this.state;
-   if(page.status===401)return this.emit({status:'guest'});
+   if(page.status===401){this.wakeAttempts=0;return this.emit({status:'guest'});}
+   if(temporaryGateway(page))return this.transient(gen);
    if(page.status!==200)throw Error('Feed unavailable');
    const normalized=normalizeAccountSocialFeed(page.data);
    if(!normalized)throw Error('Unverified off-chain feed');
+   this.wakeAttempts=0;
    return this.emit({status:'ready',profile:me.data.profile,...normalized,notice:'',comments:{}});
-  }catch{
-   if(gen===this.generation)return this.emit({status:'error'});
+  }catch(e){
+   if(gen===this.generation){
+    // Fetch throws TypeError on offline/network failure; keep data private
+    // and retry only read requests rather than misreporting a signed-out user.
+    if(e instanceof TypeError)return this.transient(gen);
+    return this.emit({status:'error'});
+   }
   }
   return this.state;
  }

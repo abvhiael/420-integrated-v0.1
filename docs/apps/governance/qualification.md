@@ -41,3 +41,11 @@ After the exact implementation SHA is fully qualified, an evidence-only commit m
 Repository Level 3 qualification proves the accumulated app phase against source/configuration and CI. It does not satisfy the later live production-equivalent testnet requirement in GOV-AUDIT-9.
 
 The ordinary Wallet Governance UI remains intentionally limited to discovery, proposal inspection, eligibility and voting; proposal creation, queue and execution remain contract/developer/operator surfaces.
+
+## Post-audit pre-testnet remediation
+
+| Step | Status | Durable evidence |
+|---|---|---|
+| GOV-REC-4 — Governance lifecycle and adversarial qualification | **REPOSITORY QUALIFIED (synthetic clean deployment); PR #1294 open and unmerged, dependent on #1293** | `docs/audit/GOV-REC-4-QUALIFICATION.md` — implementation `e49839854b4055cb946e8194466ddb6831fc4360`, passing Governance workflow #44929091486 |
+
+This branch-only result does not establish approved production electorate membership or satisfy **GOV-AUDIT-9 — production-equivalent testnet qualification**. GOV-AUDIT-9 is the next canonical roadmap stage and remains unstarted here.

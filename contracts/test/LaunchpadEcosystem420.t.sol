@@ -70,7 +70,11 @@ contract LaunchpadEcosystem420Test {
     address internal constant CREATOR = address(0xBEEF);
     address internal constant OTHER = address(0xBAD);
     uint128 internal constant PRINCIPAL = 3 ether;
-    uint256 internal constant MAX_INPUT = 4 ether;
+    // The canonical constant-product pool quotes exactly 3e18 settlement units
+    // for this raw-token input against 10_000e18 / 10_000e18 reserves at 10 bps.
+    // Launchpad must reject over-delivery as well as under-delivery: Pay's actual
+    // settled principal is invoice-bound, not an arbitrary minimum-output quote.
+    uint256 internal constant MAX_INPUT = 3_003_904_174_255_279_587;
     bytes32 internal constant ISSUER = keccak256("launchpad issuer");
     bytes32 internal constant PROFILE = keccak256("launchpad backer profile");
     bytes32 internal constant ELIGIBILITY = keccak256("launchpad eligibility");
@@ -252,6 +256,7 @@ contract LaunchpadEcosystem420Test {
             CanonicalPayQuote420.ConversionRequest(invoiceId, BACKER, nonce, quotedAt,
                 MARKET, address(inputToken), address(settleToken), MAX_INPUT, PRINCIPAL);
         CanonicalPayQuote420.ConversionQuote memory quote = quotes.quoteConversion(request_);
+        require(quote.swap.quotedSettlementAmount == PRINCIPAL, "Launchpad requires exact canonical Pay settlement");
         vm.prank(BACKER);
         inputToken.approve(address(pool), MAX_INPUT);
         vm.prank(BACKER);

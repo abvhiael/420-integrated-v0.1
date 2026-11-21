@@ -13,6 +13,7 @@ interface VmStakeValidatorGenesis420 {
     function prank(address msgSender) external;
     function roll(uint256 newHeight) external;
     function deal(address account, uint256 newBalance) external;
+    function etch(address account, bytes calldata code) external;
 }
 
 contract StakeValidatorGenesis420Test {
@@ -81,6 +82,30 @@ contract StakeValidatorGenesis420Test {
         require(address(registry).balance == 42_000 ether, "real effective bond");
         require(registry.totalPendingProtocolCredit() == 0, "pending consumed");
         _assertSolvent();
+    }
+
+    function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {
+        (bytes32 id, address operator) = _matchedId("full-sponsored", 77);
+        uint256 originalReserve = address(reserve).balance;
+        reserve.assignCredit(id, operator, 42_000 ether);
+        reserve.fundCredit(id);
+        vm.prank(operator);
+        registry.register{value: 0}(id, _bls(77), operator, keccak256("full-sponsored"));
+        ValidatorRegistry.Validator memory v = registry.getValidator(id);
+        require(v.owner == operator && v.ownedBond == 0 && v.protocolCredit == 42_000 ether, "full credit");
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor identity");
+        require(address(reserve).balance == originalReserve - 42_000 ether, "actual reserve deposit");
+        require(registry.totalProtocolCreditCustody() == 42_000 ether, "custody");
+        require(registry.custodyInvariant(), "solvent");
+
+        vm.deal(operator, 10_000 ether);
+        vm.prank(operator);
+        registry.replaceProtocolCredit{value: 10_000 ether}(id);
+        v = registry.getValidator(id);
+        require(v.ownedBond == 10_000 ether && v.protocolCredit == 32_000 ether, "replacement");
+        require(address(reserve).balance == originalReserve - 32_000 ether, "return to community");
+        require(!registry.isFullyProtocolSponsoredOwner(operator), "fully sponsored only while 42k credited");
+        require(registry.custodyInvariant(), "post-replacement solvency");
     }
 
     function testAssignedReserveCollateralCannotBeTreasurySpent() public {

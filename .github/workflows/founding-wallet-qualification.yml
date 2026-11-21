@@ -1,0 +1,75 @@
+name: Founding wallet claim and compensation qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/founder-wallet-reservations.json'
+      - 'contracts/config/system-addresses.json'
+      - 'contracts/config/genesis-canonical-addresses.json'
+      - 'contracts/src/governance/FoundingWalletClaims420.sol'
+      - 'contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol'
+      - 'contracts/test/FounderWalletClaimsAndCompensation420.t.sol'
+      - 'scripts/verify-founder-wallet-reservations.py'
+      - '.github/workflows/founding-wallet-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: founding-wallet-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact Git head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify public wallet reservation structure
+        run: |
+          python3 scripts/verify-founder-wallet-reservations.py
+          if python3 scripts/verify-founder-wallet-reservations.py --require-deployment; then
+            echo "ERROR: unclaimed founder wallets were accepted for Genesis" >&2
+            exit 1
+          fi
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Prepare exact Solidity import closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FOUNDERS_ROOT="$RUNNER_TEMP/founding-wallets"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["FOUNDERS_ROOT"])
+          pending=[source/"test/FounderWalletClaimsAndCompensation420.t.sol"]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(source) or not p.is_file(): raise RuntimeError(f"missing import {p}")
+              seen.add(p)
+              for name in pattern.findall(p.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else p.parent/name)
+          for p in sorted(seen):
+              q=dest/p.relative_to(source)
+              q.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,q)
+              assert q.read_bytes()==p.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          echo "FOUNDERS_ROOT=$FOUNDERS_ROOT" >> "$GITHUB_ENV"
+      - name: Execute founder registration and 50/25/25 payouts
+        run: forge test --root "$FOUNDERS_ROOT" --match-path test/FounderWalletClaimsAndCompensation420.t.sol -vvv

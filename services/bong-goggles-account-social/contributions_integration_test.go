@@ -127,3 +127,30 @@ func TestAUTH10XPJournalRuntimeOnlySelectInsert(t *testing.T){
  Scan(&canRead,&canAppend,&canEdit,&canErase)
  if e!=nil||!canRead||!canAppend||canEdit||canErase{t.Fatal("XP journal runtime privileges unsafe",canRead,canAppend,canEdit,canErase,e)}
 }
+
+func TestAUTH10BlockedCommentCannotCreateXP(t *testing.T){
+ store,broker,_,h:=fixture(t)
+ svc,e:=NewContributions(store);if e!=nil{t.Fatal(e)}
+ if e=h.EnableXP(svc);e!=nil{t.Fatal(e)}
+ author:=login(t,h,broker,memberA)
+ peer:=login(t,h,broker,memberB)
+ marker,_:=newID()
+ post:=decodePost(t,request(h,"POST","/v1/posts",body(map[string]string{"body":xpPostBody(marker)}),author))
+ t.Cleanup(func(){if e:=store.Relationship(context.Background(),memberB,memberA,"block",false);e!=nil{t.Error("block cleanup",e)}})
+ if r:=request(h,"PUT","/v1/relationships/block/"+memberA,"{}",peer);r.Code!=200{t.Fatal("block rejected",r.Code)}
+ before:=xpSummary(t,h,peer)
+ if r:=request(h,"POST","/v1/posts/"+post.ID+"/comments",
+ body(map[string]string{"body":"Attempted contribution after receiving block"}),peer);r.Code!=404{
+  t.Fatal("blocked comment accepted despite fresh 420ID session",r.Code)
+ }
+ after:=xpSummary(t,h,peer)
+ if after.Total!=before.Total||after.TodayComments!=before.TodayComments{
+  t.Fatal("blocked action minted community XP",before,after)
+ }
+ if r:=request(h,"DELETE","/v1/relationships/block/"+memberA,"{}",peer);r.Code!=200{t.Fatal("unblock",r.Code)}
+ if r:=request(h,"POST","/v1/posts/"+post.ID+"/comments",
+ body(map[string]string{"body":"Helpful reply after mutual unblock "+marker}),peer);r.Code!=201{
+  t.Fatal("unblocked qualifying comment rejected",r.Code,r.Body.String())
+ }
+ if after= xpSummary(t,h,peer);after.Total!=before.Total+2{t.Fatal("peer contribution not counted after unblock",after)}
+}

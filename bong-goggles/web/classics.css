@@ -74,3 +74,12 @@
 .ccc-equipped-card--legendary{border-color:#e9c06a}
 .ccc-equipped-card--hazard{border-color:#dd8a6d}
 @media(max-width:650px){.ccc-equipped-card{flex-basis:110px}.ccc-hand-card{padding:.2rem}.ccc-card-details{padding:.5rem .3rem}}
+
+/* CCC-1 hand lifecycle and visible mileage accounting. Dedicated road-map art is CCC-ART. */
+.ccc-pile-status{display:flex;align-items:center;flex-wrap:wrap;gap:.55rem;padding:.8rem 1rem;border:1px solid #5c8b70;border-radius:.7rem;background:#112b20;color:#def1dd;font-size:.85rem}
+.ccc-pile-status span{padding:.28rem .55rem;border-radius:.4rem;background:#d8eaa7;color:#1a3222;font-weight:750}
+.ccc-mileage-played{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;min-height:1.5rem}
+.ccc-mileage-stack{display:inline-flex;background:#d1ebaf;color:#182d1f;border:1px solid #9cc983;border-radius:.3rem;padding:.3rem .5rem;font-size:.78rem;font-weight:800;font-variant-numeric:tabular-nums}
+.ccc-hand-card.ccc-upgrade{background:#f5eabb;border-color:#b5a555}
+.ccc-hand-card.ccc-legendary{background:#eedbc0;border-color:#d6ab53}
+.ccc-actions button,.ccc-hand-card button{min-height:2.75rem}

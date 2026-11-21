@@ -1,10 +1,12 @@
-// Cross-Country Chaos: local pass-and-play rules. Zero wagers, no wallet or network authority.
+// Cross-Country Chaos CCC-1: deterministic, local-only rules. No wallet or wager authority.
+// All round and championship accounting derives exclusively from this state machine.
 export const LEGS=Object.freeze([
- {id:'east',name:'The Down East Disaster',from:"St. John's",to:'Montréal',target:2200},
- {id:'ontario',name:'The Never-Ending Ontario',from:'Montréal',to:'Kenora',target:2100},
- {id:'west',name:'Prairie Madness & Mountain Mayhem',from:'Kenora',to:'Vancouver',target:2700}
+ {id:'east',name:'The Down East Disaster',from:"St. John's",to:'Montréal',target:2500},
+ {id:'ontario',name:'The Never-Ending Ontario',from:'Montréal',to:'Kenora',target:2500},
+ {id:'west',name:'Prairie Madness & Mountain Mayhem',from:'Kenora',to:'Vancouver',target:2500}
 ]);
 export const MILEAGE_VALUES=Object.freeze([100,150,200,250,300,400,500]);
+export const MILEAGE_COUNTS=Object.freeze([[100,30],[150,26],[200,22],[250,18],[300,14],[400,10],[500,6]]);
 export const HAZARDS=Object.freeze({
  east:[
   {id:'ferry',name:"Ferry Cancelled, B'y!",category:'road',kind:'block'},
@@ -51,7 +53,7 @@ export const UPGRADES=Object.freeze([
  {id:'winter-tires',name:'Canadian Winter Tires',category:'weather',description:'Negate one weather hazard each leg.'},
  {id:'jerry-can',name:'The Emergency Jerry Can',category:'fuel',description:'Negate one fuel hazard each leg.'},
  {id:'cb-radio',name:'CB Radio',category:'road',description:'Negate one road hazard each leg.'},
- {id:'station-wagon',name:'The Indestructible Station Wagon',category:'mechanical',description:'Negate one mechanical hazard each leg.'},
+ {id:'station-wagon',name:'The Indestructible Station Wagon',category:'mechanical',description:'Automatically repair one mechanical breakdown at the beginning of your turn.'},
  {id:'thermos',name:'Bottomless Thermos',category:'all',description:'Negate one hazard of any type each leg.'},
  {id:'shortcut-specialist',name:'Shortcut Specialist',category:'boost',description:'Add 100 km to one drive each leg.'}
 ]);
@@ -61,125 +63,269 @@ export const LEGENDARIES=Object.freeze([
  {id:'shortcut',name:'Trust Me, I Know a Shortcut',description:'Advance 300 km and face one regional hazard.'},
  {id:'sunshine',name:'Would You Look at That!',description:'Clear every active weather hazard; advance 100 km.'}
 ]);
-const MILEAGE_PRINT=[100,100,100,100,100,100,150,150,150,150,150,150,200,200,200,200,200,250,250,250,250,300,300,300,300,400,400,400,500,500];
+
+export const STANDARD_DECK_SIZE=278;
 const clone=x=>JSON.parse(JSON.stringify(x));
-function roll(s){s.seed=(Math.imul(1664525,s.seed)+1013904223)>>>0;return s.seed/4294967296;}
-function shuffled(s,items){const result=items.map(clone);for(let i=result.length-1;i>0;i--){const j=Math.floor(roll(s)*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;}
-function makeDeck(s,type){
- if(type==='mileage')return shuffled(s,MILEAGE_PRINT.map(km=>({type:'mileage',km})));
- if(type==='chaos')return shuffled(s,[...HAZARDS[LEGS[s.leg].id].map(x=>({...x,type:'hazard'})),...FIXES.flatMap(x=>[{...x,type:'fix'},{...x,type:'fix'}])]);
- if(type==='power')return shuffled(s,UPGRADES);
- throw new Error('unknown deck');
+function log(s,message){s.log.unshift(message);s.log.length=Math.min(s.log.length,30);}
+function roll(s){s.seed=(Math.imul(s.seed,1664525)+1013904223)>>>0;return s.seed/4294967296;}
+function shuffle(s,cards){
+ const shuffled=cards.map(clone);
+ for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(roll(s)*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+ return shuffled;
 }
-function draw(s,type){if(!s.decks[type].length)s.decks[type]=makeDeck(s,type);return s.decks[type].pop();}
-function drawLegendary(s){if(!s.decks.legendary.length)s.decks.legendary=shuffled(s,LEGENDARIES);return s.decks.legendary.pop();}
-function deal(s,p){for(let i=0;i<3;i++)p.hand.push(draw(s,'mileage'));for(let i=0;i<2;i++)p.hand.push(draw(s,'chaos'));}
-function log(s,message){s.log.unshift(message);s.log=s.log.slice(0,18);}
-export function createChaosGame({names=['Driver 1','Driver 2'],seed=1}={}){
- if(!Array.isArray(names)||names.length<2||names.length>4||names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>24))throw new Error('Provide 2–4 driver names, maximum 24 characters.');
- if(!Number.isSafeInteger(seed)||seed<0||seed>0xffffffff)throw new Error('Invalid shuffle seed.');
- if(new Set(names.map(n=>n.trim().toLocaleLowerCase())).size!==names.length)throw new Error('Drivers need distinct names.');
- const s={version:1,seed:seed||1,leg:0,phase:'playing',turn:0,turns:0,players:names.map((n,i)=>({id:i,name:n.trim(),km:0,points:0,hand:[],status:null,upgrades:[],used:[],legendary:null,shield:0,wins:0})),results:[],log:[],decks:{mileage:[],chaos:[],power:[],legendary:[]}};
- s.decks.mileage=makeDeck(s,'mileage');s.decks.chaos=makeDeck(s,'chaos');s.decks.power=makeDeck(s,'power');s.decks.legendary=shuffled(s,LEGENDARIES);
- for(const p of s.players){p.upgrades.push(draw(s,'power'));p.legendary=drawLegendary(s);deal(s,p);}
- log(s,'Welcome to St. John\'s. The cross-country chaos begins!');
- return s;
+function instance(s,card){return {...card,uid:++s.serial};}
+function distributeLegendaries(s){
+ const order=shuffle(s,LEGENDARIES.map(x=>x.id));
+ const extra=Math.floor(roll(s)*LEGS.length);
+ const allocation=[[],[],[]];
+ for(let i=0;i<3;i++)allocation[i].push(order[i]);
+ allocation[extra].push(order[3]);
+ return allocation;
 }
-export function canFix(status,fix){return Boolean(status&&fix&&fix.type==='fix'&&(fix.category===status.category||fix.category==='all'));}
-function protectedBy(s,p,hazard){
- if(p.shield>0){p.shield--;log(s,p.name+' avoided '+hazard.name+' (Not My First Rodeo).');return true;}
- const upgrade=p.upgrades.find(u=>(u.category===hazard.category||u.category==='all')&&!p.used.includes(u.id));
- if(upgrade){p.used.push(upgrade.id);log(s,p.name+' avoided '+hazard.name+' using '+upgrade.name+'.');return true;}
+export function regionalDeck(s){
+ const leg=LEGS[s.leg].id;
+ const cards=[
+  ...MILEAGE_COUNTS.flatMap(([km,count])=>Array.from({length:count},()=>({type:'mileage',km}))),
+  ...HAZARDS[leg].flatMap(card=>Array.from({length:9},()=>({...card,type:'hazard'}))),
+  ...FIXES.flatMap(card=>Array.from({length:12},()=>({...card,type:'fix'}))),
+  ...UPGRADES.map(card=>({...card,type:'upgrade'})),
+  ...s.legendaryByLeg[s.leg].map(id=>({...LEGENDARIES.find(x=>x.id===id),type:'legendary'}))
+ ];
+ if(cards.length!==STANDARD_DECK_SIZE+s.legendaryByLeg[s.leg].length)throw Error('Invalid regional deck configuration.');
+ return shuffle(s,cards.map(c=>instance(s,c)));
+}
+function deckDraw(s){
+ if(!s.deck.length&&s.discard.length>1){
+  const last=s.discard.pop();
+  s.deck=shuffle(s,s.discard);
+  s.discard=[last];
+  log(s,'Reshuffled eligible discards; the top discard remains visible.');
+ }
+ return s.deck.pop()||null;
+}
+function deal(s){for(const p of s.players)for(let i=0;i<7;i++){const c=deckDraw(s);if(!c)throw Error('Regional deck could not deal seven cards.');p.hand.push(c);}}
+function effective(p){
+ return Math.max(0,p.played.reduce((sum,c)=>sum+c.km,0)+p.bonusKm-p.slowLoss-p.detourLoss);
+}
+function refresh(p){p.km=effective(p);}
+function gain(p,km){p.bonusKm+=km;refresh(p);}
+function discardPlayed(s,card){s.spent.push(card);}
+function canTarget(p,h){
+ return h.kind==='detour'||!p.status;
+}
+export function canFix(status,fix){
+ return Boolean(status&&fix?.type==='fix'&&fix.id!=='atlas'&&(fix.category===status.category||fix.category==='all'));
+}
+function protectedBy(s,p,h){
+ const usable=p.upgrades.find(u=>u.id!=='station-wagon'&&u.id!=='shortcut-specialist'&&u.category===h.category&&!p.used.includes(u.id))
+  ||p.upgrades.find(u=>u.category==='all'&&!p.used.includes(u.id));
+ if(usable){p.used.push(usable.id);log(s,p.name+' blocked '+h.name+' with '+usable.name+'.');return true;}
+ if(p.shield>0){p.shield--;log(s,p.name+' blocked '+h.name+' using a legendary shield.');return true;}
  return false;
 }
-function hit(s,p,hazard){
- if(protectedBy(s,p,hazard))return;
- if(hazard.kind==='detour'){p.km=Math.max(0,p.km-hazard.amount);log(s,p.name+': '+hazard.name+' (-'+hazard.amount+' km).');return;}
- if(p.status){log(s,p.name+' already has a road hazard. The new '+hazard.name+' had no extra effect.');return;}
- p.status=clone(hazard);log(s,p.name+' hit by '+hazard.name+'.');
+function hit(s,p,h){
+ if(!canTarget(p,h))throw Error('Target already has an ongoing hazard.');
+ if(protectedBy(s,p,h))return;
+ if(h.kind==='detour'){
+  const lost=Math.min(p.km,h.amount);
+  p.detourLoss+=lost;refresh(p);
+  log(s,p.name+': '+h.name+' (permanent -'+lost+' km this stage).');
+  return;
+ }
+ p.status=clone(h);
+ log(s,p.name+' hit by '+h.name+'.');
 }
-function risky(s,p,km){
- if(km<=300)return;
- const hazards=HAZARDS[LEGS[s.leg].id];
+function risky(s,p,printedKm){
+ if(printedKm<=300)return;
+ const hazards=HAZARDS[LEGS[s.leg].id].filter(h=>canTarget(p,h));
  const hazard=hazards[Math.floor(roll(s)*hazards.length)];
- log(s,p.name+' pushed their luck driving '+km+' km.');
- hit(s,p,hazard);
+ log(s,p.name+' risked a '+printedKm+' km drive.');
+ hit(s,p,{...hazard,type:'hazard'});
 }
-function removeCard(p,index,type){
- if(!Number.isInteger(index)||index<0||index>=p.hand.length||p.hand[index].type!==type)throw new Error('Invalid card selection.');
+function atStartOfTurn(s){
+ const p=s.players[s.turn];
+ const wagon=p.upgrades.find(u=>u.id==='station-wagon'&&!p.used.includes(u.id));
+ if(wagon&&p.status?.kind==='block'&&p.status.category==='mechanical'){
+  p.used.push(wagon.id);p.status=null;log(s,p.name+' repaired a mechanical breakdown with the Station Wagon.');
+ }
+ const opening=p.openingTurn;
+ s.step=opening?'play':'draw';p.openingTurn=false;
+ s.fresh=opening?p.hand.filter(c=>c.type==='upgrade'||c.type==='legendary').map(c=>c.uid):[];
+ s.discardsLeft=0;
+}
+function finishStage(s){
+ const ranked=[...s.players].sort((a,b)=>b.km-a.km||b.played.reduce((z,c)=>z+c.km,0)-a.played.reduce((z,c)=>z+c.km,0)||a.id-b.id);
+ const best=ranked[0],bestRaw=best.played.reduce((z,c)=>z+c.km,0);
+ const winners=ranked.filter(p=>p.km===best.km&&p.played.reduce((z,c)=>z+c.km,0)===bestRaw);
+ const standings=ranked.map(p=>{
+  const place=1+ranked.filter(q=>q.km>p.km||(q.km===p.km&&q.played.reduce((z,c)=>z+c.km,0)>p.played.reduce((z,c)=>z+c.km,0))).length;
+  const winner=winners.some(q=>q.id===p.id);
+  const banked=winner?2500:Math.min(2500,p.km);
+  p.score+=banked;if(winner)p.wins++;
+  return {id:p.id,name:p.name,place,km:p.km,rawKm:p.played.reduce((z,c)=>z+c.km,0),banked,total:p.score,winner};
+ });
+ s.results.push({leg:s.leg,standings,winners:winners.map(p=>p.id)});
+ s.phase=s.leg===2?'finished':'between';s.step=null;s.fresh=[];
+ log(s,LEGS[s.leg].name+' completed. '+winners.map(p=>p.name).join(' & ')+' banked 2,500 km.');
+}
+function finishPlayerTurn(s){
+ const p=s.players[s.turn];if(p.hand.length>5)throw Error('Turn ended with more than five cards.');
+ s.turns++;
+ const next=(s.turn+1)%s.players.length;
+ if(s.finishPending&&next===s.roundStart){finishStage(s);return;}
+ s.turn=next;atStartOfTurn(s);
+}
+function takeCard(s,p,index,type){
+ if(!Number.isInteger(index)||index<0||index>=p.hand.length||p.hand[index].type!==type)
+  throw Error('Invalid card selection.');
  return p.hand.splice(index,1)[0];
 }
-function finishLeg(s){
- const ranked=[...s.players].sort((a,b)=>b.km-a.km||a.id-b.id);
- const standings=ranked.map(p=>{const place=1+ranked.filter(q=>q.km>p.km).length;const earned=[5,3,2,1][place-1];p.points+=earned;if(place===1)p.wins++;return {id:p.id,name:p.name,place,km:p.km,earned,total:p.points};});
- s.results.push({leg:s.leg,standings});
- s.phase=s.leg===2?'finished':'between';
- log(s,LEGS[s.leg].name+' completed. '+ranked[0].name+' reached the finish line!');
+function markFinish(s){if(s.players.some(p=>p.km>=2500))s.finishPending=true;}
+function activatePower(s,p,card){
+ if(card.type==='upgrade'){
+  if(p.upgrades.some(u=>u.id===card.id))throw Error('That upgrade is already installed.');
+  p.upgrades.push(card);
+  log(s,p.name+' installed '+card.name+'.');
+  return;
+ }
+ if(card.type!=='legendary')throw Error('Not a power card.');
+ if(s.retiredLegendaries.includes(card.id))throw Error('Legendary has already been retired.');
+ s.retiredLegendaries.push(card.id);
+ if(card.id==='truck'){p.status=null;gain(p,100);}
+ else if(card.id==='rodeo')p.shield+=2;
+ else if(card.id==='shortcut'){gain(p,300);risky(s,p,500);}
+ else if(card.id==='sunshine'){for(const driver of s.players)if(driver.status?.category==='weather')driver.status=null;gain(p,100);}
+ log(s,p.name+' activated '+card.name+'.');
 }
-function refill(s,p){
- p.hand.push(draw(s,'mileage'),draw(s,'chaos'));
- while(p.hand.length>9)p.hand.shift();
+export function createChaosGame({names=['Driver 1','Driver 2'],seed=1}={}){
+ if(!Array.isArray(names)||names.length<2||names.length>4||names.some(n=>typeof n!=='string'||!n.trim()||n.trim().length>24))
+  throw Error('Provide 2–4 driver names, maximum 24 characters.');
+ if(!Number.isSafeInteger(seed)||seed<0||seed>0xffffffff)throw Error('Invalid shuffle seed.');
+ if(new Set(names.map(n=>n.trim().toLocaleLowerCase())).size!==names.length)throw Error('Drivers need distinct names.');
+ const s={version:2,seed:seed||1,serial:0,leg:0,phase:'playing',step:'play',
+  turn:0,roundStart:0,turns:0,finishPending:false,discardsLeft:0,fresh:[],
+  players:names.map((name,id)=>({id,name:name.trim(),km:0,score:0,hand:[],played:[],bonusKm:0,slowLoss:0,detourLoss:0,
+   status:null,upgrades:[],used:[],shield:0,wins:0,openingTurn:true})),
+  results:[],log:[],deck:[],discard:[],spent:[],retiredLegendaries:[],legendaryByLeg:[]};
+ s.legendaryByLeg=distributeLegendaries(s);
+ s.deck=regionalDeck(s);deal(s);atStartOfTurn(s);
+ log(s,"Welcome to St. John's. Reach 2,500 km and finish the round!");
+ return s;
 }
-export function takeChaosTurn(previous,{player,action,index=null,target=null,useBoost=false}={}){
- if(previous?.version!==1||previous.phase!=='playing')throw new Error('Race is not accepting turns.');
+export function takeChaosTurn(previous,{player,action,index=null,target=null,choice=null,useBoost=false}={}){
+ if(previous?.version!==2||previous.phase!=='playing')throw Error('Race is not accepting turns.');
  const s=clone(previous),p=s.players[s.turn];
- if(player!==p.id)throw new Error('Not this driver\'s turn.');
- if(!['drive','hazard','fix','recover','legendary','pass'].includes(action))throw new Error('Unsupported action.');
- if(action==='drive'){
-  if(p.status?.kind==='block')throw new Error('Repair the breakdown before driving.');
-  const card=removeCard(p,index,'mileage');
-  let km=card.km;
-  if(p.status?.kind==='slow'){km=Math.max(0,km-p.status.amount);log(s,p.name+' slowed by '+p.status.name+'.');p.status=null;}
-  if(useBoost){const u=p.upgrades.find(x=>x.id==='shortcut-specialist');if(!u||p.used.includes(u.id))throw new Error('Shortcut boost unavailable.');p.used.push(u.id);km+=100;}
-  p.km+=km;log(s,p.name+' drove '+km+' km.');
-  risky(s,p,card.km);
- } else if(action==='hazard'){
+ if(player!==p.id)throw Error("Not this driver's turn.");
+ if(s.step==='draw'){
+  if(action!=='draw'||!['deck','discard'].includes(choice))throw Error('Choose how to draw to seven.');
+  if(choice==='discard'&&!s.discard.length)throw Error('Discard pile is empty.');
+  if(choice==='discard')p.hand.push(s.discard.pop());
+  const count=choice==='deck'?2:1;
+  for(let i=0;i<count;i++){const c=deckDraw(s);if(c)p.hand.push(c);}
+  if(p.hand.length>7)throw Error('Draw exceeded seven cards.');
+  s.fresh=p.hand.filter(c=>(c.type==='upgrade'||c.type==='legendary')).map(c=>c.uid)
+   .filter(id=>!previous.players[previous.turn].hand.some(c=>c.uid===id));
+  s.step='play';log(s,p.name+' drew to '+p.hand.length+' cards.');
+  return s;
+ }
+ if(s.step==='discard'){
+  if(action!=='discard')throw Error('Discard one card to finish your turn.');
+  if(!Number.isInteger(index)||index<0||index>=p.hand.length)throw Error('Invalid discard selection.');
+  s.discard.push(p.hand.splice(index,1)[0]);s.discardsLeft--;
+  if(s.discardsLeft===0)finishPlayerTurn(s);
+  return s;
+ }
+ if(s.step!=='play')throw Error('Invalid turn phase.');
+ if(action==='power'){
+  const c=p.hand[index];
+  if(!c||!['upgrade','legendary'].includes(c.type))throw Error('Select a power card.');
+  if(c.type==='upgrade'&&p.upgrades.some(u=>u.id===c.id))throw Error('That upgrade is already installed.');
+  const free=s.fresh.includes(c.uid);
+  const used=p.hand.splice(index,1)[0];
+  s.fresh=s.fresh.filter(id=>id!==used.uid);
+  activatePower(s,p,used);
+  discardPlayed(s,used);
+  if(free){
+   const replacement=deckDraw(s);
+   if(replacement){
+    p.hand.push(replacement);
+    if(['upgrade','legendary'].includes(replacement.type))s.fresh.push(replacement.uid);
+   }
+   markFinish(s);return s;
+  }
+ }else if(action==='drive'){
+  if(p.status?.kind==='block')throw Error('Repair the breakdown before driving.');
+  const c=takeCard(s,p,index,'mileage');
+  p.played.push(c);
+  if(p.status?.kind==='slow'){
+   const lost=Math.min(c.km,p.status.amount);p.slowLoss+=lost;
+   log(s,p.name+' slowed by '+p.status.name+' (-'+lost+' km).');p.status=null;
+  }
+  if(useBoost){
+   const u=p.upgrades.find(u=>u.id==='shortcut-specialist'&&!p.used.includes(u.id));
+   if(!u)throw Error('Shortcut boost unavailable.');
+   p.used.push(u.id);p.bonusKm+=100;
+  }
+  refresh(p);risky(s,p,c.km);log(s,p.name+' drove '+c.km+' km.');
+ }else if(action==='hazard'){
   const victim=s.players.find(q=>q.id===target);
-  if(!victim||victim.id===p.id||victim.status)throw new Error('Select an opponent without an active hazard.');
-  const card=removeCard(p,index,'hazard');
-  hit(s,victim,card);
- } else if(action==='fix'){
-  const card=p.hand[index];if(!canFix(p.status,card))throw new Error('This fix does not match your current hazard.');
-  removeCard(p,index,'fix');log(s,p.name+' repaired '+p.status.name+' using '+card.name+'.');p.status=null;
- } else if(action==='recover'){
-  if(!p.status)throw new Error('No active hazard to recover from.');
+  const c=p.hand[index];
+  if(!victim||victim.id===p.id||!c||c.type!=='hazard'||!canTarget(victim,c))
+   throw Error('Select an eligible opponent.');
+  takeCard(s,p,index,'hazard');hit(s,victim,c);discardPlayed(s,c);
+ }else if(action==='fix'){
+  const c=p.hand[index];
+  if(!c||c.type!=='fix'||(c.id!=='atlas'&&!canFix(p.status,c)))
+   throw Error('This repair cannot be used right now.');
+  takeCard(s,p,index,'fix');
+  if(c.id==='atlas'){gain(p,150);log(s,p.name+' took a local shortcut (+150 km; detours remain permanent).');}
+  else {log(s,p.name+' repaired '+p.status.name+'.');p.status=null;}
+  discardPlayed(s,c);
+ }else if(action==='recover'){
+  if(!p.status)throw Error('No ongoing hazard to recover from.');
   log(s,p.name+' spent a turn clearing '+p.status.name+'.');p.status=null;
- } else if(action==='legendary'){
-  if(!p.legendary)throw new Error('No legendary card available.');
-  const id=p.legendary.id;
-  p.legendary=null;
-  if(id==='truck'){p.status=null;p.km+=100;log(s,p.name+' called a guy with a truck (+100 km).');}
-  if(id==='rodeo'){p.shield+=2;log(s,p.name+' gained two hazard shields.');}
-  if(id==='shortcut'){p.km+=300;log(s,p.name+' took the sketchy shortcut (+300 km).');risky(s,p,500);}
-  if(id==='sunshine'){for(const driver of s.players)if(driver.status?.category==='weather')driver.status=null;p.km+=100;log(s,p.name+' cleared the weather (+100 km).');}
- } else log(s,p.name+' took a pit stop.');
- s.turns++;
- if(s.players.some(q=>q.km>=LEGS[s.leg].target))finishLeg(s);
- else {refill(s,p);s.turn=(s.turn+1)%s.players.length;}
+ }else if(action!=='pass')throw Error('Unsupported action.');
+ markFinish(s);
+ s.fresh=[];s.step='discard';
+ // A genuinely exhausted stock can leave fewer cards than the normal hand size.
+ // Never demand an impossible discard or strand the entire turn cycle.
+ s.discardsLeft=Math.min(p.hand.length,(action==='pass'||action==='recover')?2:1);
+ if(s.discardsLeft===0)finishPlayerTurn(s);
  return s;
 }
 export function advanceChaosLeg(previous){
- if(previous?.version!==1||previous.phase!=='between')throw new Error('No completed leg to advance.');
- const s=clone(previous);s.leg++;s.phase='playing';s.turn=s.leg%s.players.length;s.decks.mileage=makeDeck(s,'mileage');s.decks.chaos=makeDeck(s,'chaos');
+ if(previous?.version!==2||previous.phase!=='between')throw Error('No completed stage to advance.');
+ const s=clone(previous);s.leg++;s.phase='playing';s.roundStart=s.leg%s.players.length;
+ s.turn=s.roundStart;s.finishPending=false;
+ s.deck=regionalDeck(s);s.discard=[];s.spent=[];s.fresh=[];
  for(const p of s.players){
-  p.km=0;p.status=null;p.shield=0;p.used=[];p.hand=[];
-  if(s.leg===1&&p.upgrades.length<2){let choice=draw(s,'power');while(p.upgrades.some(u=>u.id===choice.id))choice=draw(s,'power');p.upgrades.push(choice);}
-  deal(s,p);
+  p.km=0;p.hand=[];p.played=[];p.bonusKm=0;p.slowLoss=0;p.detourLoss=0;
+  p.status=null;p.upgrades=[];p.used=[];p.shield=0;p.openingTurn=true;
  }
- log(s,'Onward to '+LEGS[s.leg].name+'! Permanent upgrades recharged; legends carried over.');
+ deal(s);atStartOfTurn(s);
+ log(s,'New region: '+LEGS[s.leg].name+'. All upgrades and active hazards reset.');
  return s;
 }
-export function chaosLeaders(s){return [...s.players].sort((a,b)=>b.points-a.points||b.wins-a.wins||b.km-a.km);}
+export function chaosLeaders(s){
+ const west=(p)=>s.results.find(r=>r.leg===2)?.standings.find(r=>r.id===p.id)?.banked||0;
+ return [...s.players].sort((a,b)=>b.score-a.score||b.wins-a.wins||west(b)-west(a)||a.id-b.id);
+}
 export function chaosActionOptions(s){
- if(!s||s.phase!=='playing')return [];
- const p=s.players[s.turn];const actions=[];
- p.hand.forEach((c,i)=>{
-  if(c.type==='mileage'&&p.status?.kind!=='block')actions.push({action:'drive',index:i});
-  if(c.type==='hazard'&&s.players.some(q=>q.id!==p.id&&!q.status))actions.push({action:'hazard',index:i});
-  if(canFix(p.status,c))actions.push({action:'fix',index:i});
+ if(!s||s.version!==2||s.phase!=='playing')return [];
+ if(s.step==='draw')return [{action:'draw',choice:'deck'},...(s.discard.length?[{action:'draw',choice:'discard'}]:[])];
+ const p=s.players[s.turn];
+ if(s.step==='discard')return p.hand.map((_,index)=>({action:'discard',index}));
+ if(s.step!=='play')return [];
+ const options=[];
+ p.hand.forEach((c,index)=>{
+  if(c.type==='mileage'&&p.status?.kind!=='block')options.push({action:'drive',index});
+  if(c.type==='hazard')for(const victim of s.players)
+   if(victim.id!==p.id&&canTarget(victim,c))options.push({action:'hazard',index,target:victim.id});
+  if(c.type==='fix'&&(c.id==='atlas'||canFix(p.status,c)))options.push({action:'fix',index});
+  if(['upgrade','legendary'].includes(c.type)&&!(c.type==='upgrade'&&p.upgrades.some(u=>u.id===c.id)))
+   options.push({action:'power',index,free:s.fresh.includes(c.uid)});
  });
- if(p.status)actions.push({action:'recover'});
- if(p.legendary)actions.push({action:'legendary'});
- actions.push({action:'pass'});
- return actions;
+ if(p.status)options.push({action:'recover'});
+ options.push({action:'pass'});
+ return options;
 }

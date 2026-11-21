@@ -49,8 +49,8 @@ contract StakeValidatorGenesis420Test {
 
     function testGenesisBondLifecycleAndDelegationPolicy() public view {
         require(registry.EFFECTIVE_BOND() == 42_000 ether, "effective bond");
-        require(registry.MIN_OWNED_BOND() == 21_000 ether, "owned floor");
-        require(registry.MAX_PROTOCOL_CREDIT() == 21_000 ether, "credit cap");
+        require(registry.MIN_OWNED_BOND() == 0, "owned floor");
+        require(registry.MAX_PROTOCOL_CREDIT() == 42_000 ether, "credit cap");
         require(registry.ACTIVATION_DELAY_BLOCKS() == 17_640, "activation delay");
         require(registry.EXIT_NOTICE_ROTATIONS() == 1, "exit notice");
         require(registry.WITHDRAWAL_DELAY_BLOCKS() == 105_840, "withdrawal delay");

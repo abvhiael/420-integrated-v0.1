@@ -14,8 +14,8 @@ interface ICommunityValidatorReserve420 {
 /// finality, randomness and slash adjudication. Economic balances here are backed by native 420 custody.
 contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420, I420System {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
-    uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
-    uint256 public constant MIN_OWNED_BOND = 21_000 ether;
+    uint256 public constant MAX_PROTOCOL_CREDIT = 42_000 ether;
+    uint256 public constant MIN_OWNED_BOND = 0;
     address public constant PROTOCOL_RESERVE = 0x0000000000000000000000000000000000000424;
 
     uint64 public constant EPOCH_BLOCKS = 420;
@@ -452,6 +452,15 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     }
 
     function getValidator(bytes32 validatorId) external view returns (Validator memory) { return _validators[validatorId]; }
+
+    /// @notice Full protocol-funded owner eligibility for consensus reward allocation.
+    function isFullyProtocolSponsoredOwner(address owner) external view returns (bool) {
+        bytes32 id = ownerValidatorId[owner];
+        if (id == bytes32(0)) return false;
+        Validator storage v = _validators[id];
+        return v.owner == owner && v.protocolCredit == EFFECTIVE_BOND && v.ownedBond == 0
+            && v.status != Status.EXITED && v.status != Status.WITHDRAWABLE;
+    }
 
     function custodyInvariant() external view returns (bool) {
         return address(this).balance >= totalOwnedCustody + totalProtocolCreditCustody;

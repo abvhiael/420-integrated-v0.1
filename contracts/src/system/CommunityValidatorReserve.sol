@@ -11,7 +11,7 @@ interface IValidatorCreditReceiver420 {
 
 contract CommunityValidatorReserve is ProtocolTreasury, I420System {
     uint256 public constant GENESIS_RESERVE = 6_300_000 ether;
-    uint256 public constant MAX_CREDIT_PER_VALIDATOR = 21_000 ether;
+    uint256 public constant MAX_CREDIT_PER_VALIDATOR = 42_000 ether;
 
     address public validatorRegistry;
     bool public validatorRegistryBound;
@@ -21,6 +21,10 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
     mapping(bytes32 => address) public creditBeneficiary;
     uint256 public totalAssigned;
     uint256 public totalFunded;
+
+    // Genesis materialization ONLY: absence of a sponsor authority fails closed.
+    // Must be authorized by the signed release manifest, never writable after genesis.
+    address public genesisFoundingSponsorAuthority;
 
     event ValidatorRegistryBound(address indexed validatorRegistry);
     event CreditAssigned(bytes32 indexed validatorId, address indexed beneficiary, uint256 amount);
@@ -38,6 +42,16 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
 
     constructor(address timelock_) ProtocolTreasury(timelock_) {}
 
+    modifier onlyGovernanceOrFoundingSponsor() {
+        if (msg.sender != governanceTimelock) {
+            address sponsor = genesisFoundingSponsorAuthority;
+            if (sponsor == address(0) || msg.sender != sponsor) revert Unauthorized();
+            (bool ok, bytes memory data) = sponsor.staticcall(abi.encodeWithSignature("retired()"));
+            if (!ok || data.length != 32 || abi.decode(data, (bool))) revert Unauthorized();
+        }
+        _;
+    }
+
     function systemName() external pure returns (string memory) { return "CommunityValidatorReserve"; }
     function protocolVersion() external pure returns (uint32) { return 2; }
 
@@ -49,7 +63,7 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         emit ValidatorRegistryBound(validatorRegistry_);
     }
 
-    function assignCredit(bytes32 validatorId, address beneficiary, uint256 amount) external onlyGovernance {
+    function assignCredit(bytes32 validatorId, address beneficiary, uint256 amount) external onlyGovernanceOrFoundingSponsor {
         if (validatorId == bytes32(0) || beneficiary == address(0) || amount == 0 || amount > MAX_CREDIT_PER_VALIDATOR) revert InvalidCredit();
         if (assignedCredit[validatorId] != 0 || fundedCredit[validatorId] != 0) revert InvalidCredit();
         if (amount > unencumberedBalance()) revert ReservedCollateral();
@@ -59,7 +73,7 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
         emit CreditAssigned(validatorId, beneficiary, amount);
     }
 
-    function fundCredit(bytes32 validatorId) external onlyGovernance {
+    function fundCredit(bytes32 validatorId) external onlyGovernanceOrFoundingSponsor {
         if (!validatorRegistryBound) revert NotValidatorRegistry();
         uint256 amount = assignedCredit[validatorId];
         address beneficiary = creditBeneficiary[validatorId];

@@ -4,10 +4,19 @@ pragma solidity ^0.8.24;
 import "./ConsensusSystemAccess420.sol";
 import "../interfaces/I420System.sol";
 
+interface IFullSponsoredValidator420 {
+    function isFullyProtocolSponsoredOwner(address owner) external view returns (bool);
+}
+
 /// @notice Execution receiver/accounting contract for native consensus issuance.
 /// @dev Reward arithmetic is computed by fourtwentyd. Only the bound native system-call path may apply it.
 contract RewardController is ConsensusSystemAccess420, I420System {
     address public constant ATTENTION_TREASURY = 0x0000000000000000000000000000000000000421;
+    address public constant VALIDATOR_REGISTRY = 0x0000000000000000000000000000000000000423;
+    address public constant COMMUNITY_REWARD_RESERVE = 0x0000000000000000000000000000000000000426;
+    uint256 public constant FULL_SPONSOR_COMMUNITY_BPS = 1000;
+    uint256 public communityRewardAccrued;
+    event SponsoredValidatorRewardAllocated(address indexed owner, address indexed communityFund, uint256 gross, uint256 communityShare);
     address public constant DEVELOPMENT_TREASURY = 0x0000000000000000000000000000000000000422;
     uint256 public constant MAX_ACTIVE_VALIDATORS = 30;
 
@@ -59,10 +68,10 @@ contract RewardController is ConsensusSystemAccess420, I420System {
         }
 
         rewardApplied[blockNumber] = true;
-        validatorAccrued[proposer] += proposerAmount;
+        _accrueSecurityReward(proposer, proposerAmount);
         uint256 participantsIssued;
         for (uint256 i; i < participants.length; ++i) {
-            validatorAccrued[participants[i]] += perParticipantAmount;
+            _accrueSecurityReward(participants[i], perParticipantAmount);
             participantsIssued += perParticipantAmount;
         }
         grossSecurityIssued += proposerAmount + participantsIssued;
@@ -77,5 +86,18 @@ contract RewardController is ConsensusSystemAccess420, I420System {
             attentionAmount,
             developmentAmount
         );
+    }
+    /// @notice Accrual split, never an after-the-fact operator deduction. Actual native
+    /// issuance/settlement into CommunityRewardReserve requires consensus reconciliation.
+    function _accrueSecurityReward(address owner, uint256 gross) private {
+        if (VALIDATOR_REGISTRY.code.length > 0
+            && IFullSponsoredValidator420(VALIDATOR_REGISTRY).isFullyProtocolSponsoredOwner(owner)) {
+            uint256 share = gross * FULL_SPONSOR_COMMUNITY_BPS / 10_000;
+            validatorAccrued[owner] += gross - share;
+            communityRewardAccrued += share;
+            emit SponsoredValidatorRewardAllocated(owner, COMMUNITY_REWARD_RESERVE, gross, share);
+        } else {
+            validatorAccrued[owner] += gross;
+        }
     }
 }

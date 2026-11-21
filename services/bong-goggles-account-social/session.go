@@ -115,3 +115,32 @@ func (s *SignOn) Logout(ctx context.Context,cookie string)error{
  if e=s.Broker.Revoke(ctx,string(token));e!=nil{return ErrUnavailable}
  return nil
 }
+
+type monetizationBroker interface {
+ Monetization(ctx context.Context,token string)(subject string,active bool,status *MonetizationStatus,err error)
+}
+// A social session's encrypted SSO token is usable only server-side. Do not
+// expose a readiness result when the identity authority cannot be refreshed.
+func (s *SignOn) CurrentMonetization(ctx context.Context,cookie string)(MonetizationStatus,error){
+ reader,ok:=s.Broker.(monetizationBroker);if !ok{return MonetizationStatus{},ErrUnavailable}
+ raw,e:=decodeToken(cookie);if e!=nil{return MonetizationStatus{},ErrForbidden}
+ d:=digestValue(raw)
+ var subject string;var sealed []byte
+ e=s.Store.DB.QueryRowContext(ctx,`SELECT subject,token_cipher FROM bg_account_social.sessions
+ WHERE cookie_digest=$1 AND expires_at>clock_timestamp()`,d[:]).Scan(&subject,&sealed)
+ if errors.Is(e,sql.ErrNoRows){return MonetizationStatus{},ErrForbidden}
+ if e!=nil{return MonetizationStatus{},e}
+ token,e:=s.open(sealed);if e!=nil{return MonetizationStatus{},e}
+ actual,active,status,e:=reader.Monetization(ctx,string(token))
+ if e!=nil{return MonetizationStatus{},ErrUnavailable}
+ if !active||actual!=subject||!uuid.MatchString(actual){
+  _,_=s.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.sessions WHERE cookie_digest=$1",d[:])
+  return MonetizationStatus{},ErrForbidden
+ }
+ if !validateMonetizationStatus(status){return MonetizationStatus{},ErrUnavailable}
+ if status==nil{return MonetizationStatus{
+  App:"bong-goggles",PolicyVersion:1,RewardStage:"not_enrolled",
+  CreatorStage:"not_enrolled",Source:"420id-consent-v1",
+ },nil}
+ return *status,nil
+}

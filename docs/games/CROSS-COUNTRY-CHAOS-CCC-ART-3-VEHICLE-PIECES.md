@@ -34,4 +34,4 @@ The six SVGs live in `bong-goggles/web/assets/games/cross-country-chaos/vehicles
 
 **Exit criteria:** six independent selectable transparent vector vehicle pieces, shadows, eight orientation classes with live-angle rotation, four readable colour IDs and numbered badges, preserved working 3-stage road game and approved media, exact-head CI qualification. No merger or deployment implied.
 
-**Next canonical artwork step:** CCC-ART-4 — roadside hazards, animations and illustrated event feedback. Not begun.
+**Next art-roadmap milestone:** CCC-ART-4. Its detailed scope must be verified against the authoritative roadmap before execution; CCC-ART-3 does not create or approve additional requirements.

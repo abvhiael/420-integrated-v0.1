@@ -71,6 +71,7 @@ jobs:
           node --check services/420id/sso-session.mjs
           node --check services/420id/sso-ui.mjs
           node --check services/420id/sso-client.mjs
+          node --check services/420id/monetization-ui.mjs
           node --test services/420id/sso-client.test.mjs
       - name: Mail transport configuration tests
         run: go test -race -count=1 -v ./cmd/420id

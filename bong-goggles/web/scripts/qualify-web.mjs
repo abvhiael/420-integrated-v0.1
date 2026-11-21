@@ -5,10 +5,11 @@ import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
 import {CHAOS_MAP_ASSETS,CHAOS_MAP_DIMENSIONS} from '../core/chaos-map-art.js';
 import {CHAOS_VEHICLE_ASSETS,CHAOS_VEHICLE_SOURCE_SHA} from '../core/chaos-vehicles.js';
+import {CHAOS_SCENERY,CHAOS_SCENERY_COUNT} from '../core/chaos-region-scenery.js';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 const root=resolve(import.meta.dirname,'..','dist');
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1048*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1052*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -64,6 +65,17 @@ if(!html.includes('href="/ccc-tabletop.css"')||!tabletopCss.includes('ccc-tablet
   !tabletopCss.includes('prefers-reduced-motion:reduce')||!tabletopCss.includes('forced-colors:active')||
   tabletopCss.includes('@import')||tabletopCss.includes('https://')||tabletopCss.includes('http://'))
  throw new Error('Missing or unsafe CCC-ART-4 tabletop stylesheet');
+// CCC-ART-5 only introduces eight local inline-vector illustrations; no
+// remotely fetched art or changed card/map/vehicle asset manifest is permitted.
+const scenicSource=await readFile(resolve(root,'core/chaos-region-scenery.js'),'utf8');
+const scenicBoard=await readFile(resolve(root,'core/chaos-board.js'),'utf8');
+if(CHAOS_SCENERY_COUNT!==8||Object.keys(CHAOS_SCENERY).sort().join(',')!=='east,ontario,west'||
+  !Object.values(CHAOS_SCENERY).every(group=>Object.isFrozen(group))||
+  !scenicBoard.includes('renderChaosScenery(region)')||
+  !tabletopCss.includes('.ccc-illustrated-scenery{display:none}')||
+  Buffer.byteLength(scenicSource,'utf8')>12*1024||
+  /<script|<foreignObject|https?:\/\/|@import/.test(scenicSource))
+ throw new Error('CCC-ART-5 inline scenery qualification failed');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}

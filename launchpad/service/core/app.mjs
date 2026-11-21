@@ -7,7 +7,11 @@ import {prepareCampaignRequest,creatorLifecycle} from './creator.mjs';
 import {creatorReport,creatorCampaigns} from './creator-report.mjs';
 import {CreatorQueue} from './creator-queue.mjs';
 function ok(body,status=200){return {status,body};}
-function fail(error){return {status:error.statusCode||400,body:{error:error.message||String(error)}};}
+function fail(error){
+  const status=Number.isSafeInteger(error?.statusCode)&&[400,403,404,409,413,429].includes(error.statusCode)?
+    error.statusCode:503;
+  return {status,body:{error:status===503?'Launchpad canonical service temporarily unavailable':error.message}};
+}
 const param=(q,key)=>q instanceof URLSearchParams?q.get(key):q?.[key];
 export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.env.LAUNCHPAD_CREATOR_REQUEST_FILE),
   creatorReportFromBlock=process.env.LAUNCHPAD_CREATOR_REPORT_FROM_BLOCK??null,

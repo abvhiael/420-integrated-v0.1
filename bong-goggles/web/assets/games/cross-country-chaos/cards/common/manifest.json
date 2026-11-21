@@ -1,0 +1,93 @@
+[
+  {
+    "file": "mileage-100.png",
+    "card": "100 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "c79507b736c9f55408e5310899ebe71a55643d38b45036fcb2e0b81012e9baf2"
+  },
+  {
+    "file": "mileage-150.png",
+    "card": "150 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "dbf2dd883011e196a699f161d8fbf270b0f79a371db8616b6b4979686eec8af5"
+  },
+  {
+    "file": "mileage-200.png",
+    "card": "200 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "485dfda278e4754e125f20ffdb5c84536c573af404985d92bf93fe773f7ee130"
+  },
+  {
+    "file": "mileage-250.png",
+    "card": "250 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "e90494843f218e5a7b0cd13909f01010f25d2d07bde8f3bebad63a48a074cf37"
+  },
+  {
+    "file": "mileage-300.png",
+    "card": "300 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "93442acab9227a67aeac9bf57543d1dbf7accda0f166deea34f9b083bdbb72c2"
+  },
+  {
+    "file": "mileage-400.png",
+    "card": "400 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "965bea2704337f34f3fa190a3406dff80f273dd5f13ee527d34d8e3133c8a27f"
+  },
+  {
+    "file": "mileage-500.png",
+    "card": "500 km",
+    "kind": "mileage",
+    "size": "640x1080",
+    "sha256": "221e5777a6059b8507f763e511dedf0907c5d92575b67be08282b972d2239b50"
+  },
+  {
+    "file": "fix-toolbox.png",
+    "card": "Emergency Repair Kit",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "f2dc463ac146feebaa0905a3c28d9d7e536ee79913e463a5e6fee8cd21e28374"
+  },
+  {
+    "file": "fix-atlas.png",
+    "card": "Local Knows a Shortcut",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "45bc1bef396be30a84613d1836e6eb824f06ec9870150c65666909b74f9c7b31"
+  },
+  {
+    "file": "fix-plows.png",
+    "card": "Clear Skies & Plows",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "ee564a05e6b4d75ea7f0cf85b9549e379811111fa3452c42654f8b77e6ea2d39"
+  },
+  {
+    "file": "fix-jerry.png",
+    "card": "Emergency Jerry Can",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "586ec6d647338996cfba41f87c108703d64eec4ae3954b6a1d5db3529c7dc8d8"
+  },
+  {
+    "file": "fix-detour.png",
+    "card": "Alternate Route",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "93e388bbc4ba39be990234c382114ff1d2b224ead3944801947a53e89291bcf3"
+  },
+  {
+    "file": "fix-help.png",
+    "card": "Roadside Assistance",
+    "kind": "fix",
+    "size": "640x1080",
+    "sha256": "c9ed86431306eac1a4e6d3fd090c37d6be3fd19e199180c82e3c45864ee61c3f"
+  }
+]

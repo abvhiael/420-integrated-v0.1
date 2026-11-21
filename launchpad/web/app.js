@@ -197,6 +197,7 @@ async function loadCampaigns(reset=true){
   try{
     const filters=reset?state.filters:{...state.filters,cursor:state.cursor};
     const p=await state.service.campaigns(filters);
+    if(p.source.chainId.toLowerCase()!==state.config.network.chainId.toLowerCase())throw new Error('Campaign catalogue network mismatch');
     if(!reset&&p.source.blockHash!==state.catalogHash)throw new Error('Campaign snapshot changed. Refresh your search.');
     state.campaigns=reset?(p.items||[]).map(normalizeCampaign):state.campaigns.concat((p.items||[]).map(normalizeCampaign));
     state.cursor=p.nextCursor;state.total=p.total??state.campaigns.length;state.catalogHash=p.source.blockHash;
@@ -216,8 +217,10 @@ async function refreshPosition(){
 async function openCampaign(saleId){
   setBusy(true);status('Loading campaign...');
   try{
-    const p=await state.service.campaign(saleId);state.selected=normalizeCampaign(p.campaign);
-    state.position=null;state.checkout=null;state.quote=null;state.review=null;state.lastTx=null;
+    const p=await state.service.campaign(saleId);
+    if(p.source.chainId.toLowerCase()!==state.config.network.chainId.toLowerCase())throw new Error('Campaign discovery network mismatch');
+    state.selected=normalizeCampaign(p.campaign);
+    state.position=null;state.checkout=null;state.quote=null;state.review=null;$('#review').hidden=true;state.lastTx=null;
     setText('#tx-hash','-');setText('#tx-state','No transaction selected.');restoreIntent();
     if(state.wallet){
       await refreshPosition();
@@ -236,8 +239,13 @@ async function connect(){
   catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
 }
-function showReview(r){
-  state.review=r;$('#review').hidden=false;
+function invalidateReview(){state.review=null;$('#review').hidden=true;actionState();}
+function showReview(r,request,session){
+  if(state.wallet?.account!==session.account||state.wallet?.chainId!==session.chainId||
+    state.selected?.saleId!==session.saleId)throw new Error('WALLET_SESSION_CHANGED');
+  state.review={...r,binding:{kind:r.kind,account:session.account,chainId:session.chainId,
+    saleId:session.saleId,request,preparedAt:Date.now(),quote:state.quote?structuredClone(state.quote):null}};
+  r=state.review;$('#review').hidden=false;
   for(const [s,v] of [['#review-kind',r.kind],['#review-summary',r.summary],['#review-to',r.transaction.to],
     ['#review-value',r.transaction.value||'0x0'],['#review-data',r.transaction.data]])setText(s,v);
   const gate=executionGate({config:state.config,wallet:state.wallet,review:r});
@@ -247,7 +255,9 @@ function showReview(r){
 async function prepare(kind,payload={}){
   if(!state.selected||!state.wallet)return;
   setBusy(true);
-  try{showReview(await state.service.prepare(kind,{saleId:state.selected.saleId,account:state.wallet.account,...payload}));
+  try{const session={saleId:state.selected.saleId,account:state.wallet.account,chainId:state.wallet.chainId};
+    const request={saleId:session.saleId,account:session.account,...payload};
+    showReview(await state.service.prepare(kind,request),request,session);
     status('Transaction prepared. Verify exact address, calldata and terms before approving.');}
   catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
@@ -255,7 +265,27 @@ async function prepare(kind,payload={}){
 async function submit(){
   if(!state.review)return;setBusy(true);
   try{
-    const tx=await submitReviewedTransaction({ethereum:globalThis.ethereum,config:state.config,wallet:state.wallet,review:state.review});
+    const original=state.review;
+    const tx=await submitReviewedTransaction({ethereum:globalThis.ethereum,config:state.config,wallet:state.wallet,review:original,
+      revalidate:async()=>{
+        if(state.review!==original||state.selected?.saleId!==original.binding.saleId)
+          throw new Error('STALE_TRANSACTION_REVIEW');
+        const rt=await state.service.runtime();
+        if(rt.chainId.toLowerCase()!==original.binding.chainId.toLowerCase()||
+          ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress',
+           'saleRegistryAddress','projectRegistryAddress'].some(k=>rt[k]?.toLowerCase()!==state.config.registry[k]?.toLowerCase()))
+          throw new Error('CANONICAL_DEPENDENCY_CHANGED');
+        const fresh=await state.service.prepare(original.kind,original.binding.request);
+        if(fresh.kind!==original.kind||fresh.canonical!==true||
+          fresh.transaction.to.toLowerCase()!==original.transaction.to.toLowerCase()||
+          fresh.transaction.data.toLowerCase()!==original.transaction.data.toLowerCase()||
+          fresh.transaction.value!==original.transaction.value)
+          throw new Error('STALE_TRANSACTION_REVIEW');
+        const pos=await state.service.position(original.binding.saleId,original.binding.account);
+        if(pos.source.chainId.toLowerCase()!==original.binding.chainId.toLowerCase()||
+          pos.sale.projectId.toLowerCase()!==state.selected.projectId.toLowerCase())
+          throw new Error('CANONICAL_CAMPAIGN_CHANGED');
+      }});
     if(!HASH.test(tx))throw new Error('Wallet transaction ID could not be validated; check Wallet activity before retrying.');
     state.lastTx={hash:tx,state:'PENDING'};state.review=null;
     const key='launchpad.tx.'+state.wallet.chainId+'.'+state.wallet.account.toLowerCase()+'.'+state.selected.saleId.toLowerCase();
@@ -303,7 +333,7 @@ async function checkCheckout(){
 function newNonce(){
   if(!globalThis.crypto?.getRandomValues)throw new Error('secure nonce generation unavailable');
   const a=new Uint32Array(2);crypto.getRandomValues(a);const value=(BigInt(a[0])<<32n)|BigInt(a[1]);
-  $('#intent-nonce').value=(value||1n).toString();state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();
+  $('#intent-nonce').value=(value||1n).toString();invalidateReview();state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();
 }
 async function boot(){
   try{
@@ -317,6 +347,7 @@ async function boot(){
     state.config={...state.config,network:{...state.config.network,chainId:rt.chainId},
       registry:{...state.config.registry,launchpadRouterAddress:rt.launchpadRouterAddress,
         allocationRegistryAddress:rt.allocationRegistryAddress,crowdfundingIntegrationAddress:rt.crowdfundingIntegrationAddress,
+        saleRegistryAddress:rt.saleRegistryAddress,projectRegistryAddress:rt.projectRegistryAddress,
         arbitrationCasesAddress:rt.arbitrationCasesAddress}};
     renderRuntime();await loadCampaigns();
   }catch(e){status(e.message||String(e),true);}
@@ -328,20 +359,19 @@ $('#campaign-filters')?.addEventListener('submit',e=>{e.preventDefault();const f
   search:String(f.get('search')||''),mode:String(f.get('mode')||''),state:String(f.get('state')||'')};loadCampaigns(true);});
 $('#refresh-position')?.addEventListener('click',()=>refreshPosition().catch(e=>status(e.message,true)));
 $('#new-intent')?.addEventListener('click',()=>{try{newNonce();}catch(e){status(e.message,true);}});
-$('#contribution-amount')?.addEventListener('input',()=>{state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();});
+$('#contribution-amount')?.addEventListener('input',()=>{invalidateReview();state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();});
 $('#previous-intents')?.addEventListener('change',e=>{const i=Number(e.currentTarget.value),entries=savedIntents();
   if(e.currentTarget.value!==''&&Number.isSafeInteger(i)&&entries[i]){
     $('#contribution-amount').value=entries[i].amount;$('#intent-nonce').value=entries[i].nonce;
-    state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();
+    invalidateReview();state.checkout=null;state.quote=null;renderCheckout();renderQuote();actionState();
   }
 });
-for(const id of ['#pay-input-asset','#pay-market','#pay-max-input','#pay-min-output'])$(id)?.addEventListener('input',()=>{state.quote=null;renderQuote();actionState();});
+for(const id of ['#pay-input-asset','#pay-market','#pay-max-input','#pay-min-output'])$(id)?.addEventListener('input',()=>{invalidateReview();state.quote=null;renderQuote();actionState();});
 $('#get-conversion-quote')?.addEventListener('click',checkConversion);
 $('#approve-conversion')?.addEventListener('click',()=>prepare('approve-conversion',conversionTerms()));
 $('#pay-conversion')?.addEventListener('click',()=>prepare('pay-conversion',conversionTerms()));
-$('#identity-profile')?.addEventListener('input',actionState);
-$('#dispute-claim')?.addEventListener('input',actionState);
-$('#dispute-remedy')?.addEventListener('input',actionState);
+for(const id of ['#identity-profile','#dispute-claim','#dispute-remedy','#dispute-case','#intent-nonce'])
+  $(id)?.addEventListener('input',invalidateReview);
 $('#bind-identity')?.addEventListener('click',()=>prepare('bind-identity',{profileId:$('#identity-profile').value.trim()}));
 $('#register-intent')?.addEventListener('click',()=>prepare('register-intent',{amount:$('#contribution-amount').value,nonce:$('#intent-nonce').value}));
 $('#check-checkout')?.addEventListener('click',checkCheckout);
@@ -354,7 +384,7 @@ $('#link-dispute')?.addEventListener('click',()=>prepare('link-dispute',{caseId:
 $('#publish-outcome')?.addEventListener('click',()=>prepare('publish-outcome',{}));
 $('#submit-review')?.addEventListener('click',submit);
 $('#refresh-tx')?.addEventListener('click',checkTransaction);
-$('#close-review')?.addEventListener('click',()=>{$('#review').hidden=true;state.review=null;actionState();});
+$('#close-review')?.addEventListener('click',invalidateReview);
 
 globalThis.ethereum?.on?.('accountsChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;creatorStudio.clearWallet();renderWallet();renderDetail();actionState();status('Wallet account changed. Reconnect before signing.',true);});
 globalThis.ethereum?.on?.('chainChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;creatorStudio.clearWallet();renderWallet();renderDetail();actionState();status('Wallet chain changed. Reconnect before signing.',true);});

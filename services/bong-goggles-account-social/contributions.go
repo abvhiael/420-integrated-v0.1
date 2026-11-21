@@ -137,12 +137,19 @@ func (x *Contributions) PublishComment(ctx context.Context,subject,postID,body s
  e=tx.QueryRowContext(ctx,`SELECT author FROM bg_account_social.posts
  WHERE id=$1 AND deleted_at IS NULL AND hidden_at IS NULL FOR UPDATE`,postID).Scan(&parentAuthor)
  if errors.Is(e,sql.ErrNoRows){return Comment{},ErrNotFound};if e!=nil{return Comment{},e}
+ // Follow/block updates lock both member rows in stable order. Lock the
+ // same rows before checking block state, otherwise a newly committed block
+ // could race past the uncommitted contribution/XP grant.
+ if subject!=parentAuthor{
+  if e=lockPeerPair(ctx,tx,subject,parentAuthor);e!=nil{return Comment{},e}
+ }else{
+  var member string
+  e=tx.QueryRowContext(ctx,`SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE`,subject).Scan(&member)
+  if errors.Is(e,sql.ErrNoRows){return Comment{},ErrNotFound};if e!=nil{return Comment{},e}
+ }
  blocked,e:=blockedBetween(ctx,tx,subject,parentAuthor)
  if e!=nil{return Comment{},e}
  if blocked{return Comment{},ErrNotFound}
- var member string
- e=tx.QueryRowContext(ctx,`SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE`,subject).Scan(&member)
- if errors.Is(e,sql.ErrNoRows){return Comment{},ErrNotFound};if e!=nil{return Comment{},e}
  id,e:=newID();if e!=nil{return Comment{},e}
  var c Comment
  e=tx.QueryRowContext(ctx,`WITH inserted AS (

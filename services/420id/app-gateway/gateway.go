@@ -9,6 +9,7 @@ import (
  "crypto/aes"
  "crypto/cipher"
  "crypto/rand"
+ "crypto/hmac"
  "crypto/sha256"
  "crypto/subtle"
  "database/sql"
@@ -157,7 +158,6 @@ func decode(v string)([]byte,error){
  return out,nil
 }
 func digest(v []byte)[32]byte{return sha256.Sum256(v)}
-func (g *Gateway) cipher(plain []byte,open bool)([]byte,error){return nil,ErrInvalid} // no accidental unauthenticated cryptography
 func (g *Gateway) seal(plain []byte)([]byte,error){
  block,e:=aes.NewCipher(g.key[:]);if e!=nil{return nil,e}
  aead,e:=cipher.NewGCM(block);if e!=nil{return nil,e}
@@ -201,8 +201,8 @@ func (g *Gateway) allow(ctx context.Context,action,remote string,max int)bool{
  if e!=nil||net.ParseIP(ip)==nil{return false}
  // Never store a source IP, session token or full Authorization header in
  // a rate bucket. App-specific key prevents cross-app correlation.
- raw:=append([]byte(action+":"),[]byte(ip)...)
- mac:=sha256.Sum256(append(g.key[:],raw...))
+ mac:=hmac.New(sha256.New,g.key[:]);_,_=mac.Write([]byte(action+"\x00"+ip))
+ peerDigest:=mac.Sum(nil)
  var count int
  e=g.db.QueryRowContext(ctx,`INSERT INTO app420_sso.rate_buckets(action,peer_digest,requests)
  VALUES($1,$2,1)
@@ -211,7 +211,7 @@ func (g *Gateway) allow(ctx context.Context,action,remote string,max int)bool{
  THEN 1 ELSE app420_sso.rate_buckets.requests+1 END,
  started_at=CASE WHEN app420_sso.rate_buckets.started_at<clock_timestamp()-interval '1 minute'
  THEN clock_timestamp() ELSE app420_sso.rate_buckets.started_at END
- RETURNING requests`,action,mac[:]).Scan(&count)
+ RETURNING requests`,action,peerDigest).Scan(&count)
  return e==nil&&count<=max
 }
 func (g *Gateway) upstream(ctx context.Context,path string,input any,dst any)error{
@@ -259,9 +259,12 @@ func (g *Gateway) validSession(v scopedSession)bool{
 func (g *Gateway) Current(ctx context.Context,r *http.Request)(string,error){
  raw,e:=decode(cookie(r,CookieSession));if e!=nil{return "",ErrNotAuthenticated}
  d:=digest(raw)
+ tx,e:=g.db.BeginTx(ctx,nil)
+ if e!=nil{return "",ErrUnavailable}
+ defer tx.Rollback()
  var sealed []byte;var subject string
- e=g.db.QueryRowContext(ctx,`SELECT token_cipher,subject_id FROM app420_sso.sessions
- WHERE cookie_digest=$1 AND expires_at>clock_timestamp()`,d[:]).Scan(&sealed,&subject)
+ e=tx.QueryRowContext(ctx,`SELECT token_cipher,subject_id FROM app420_sso.sessions
+ WHERE cookie_digest=$1 AND expires_at>clock_timestamp() FOR SHARE`,d[:]).Scan(&sealed,&subject)
  if errors.Is(e,sql.ErrNoRows){return "",ErrNotAuthenticated}
  if e!=nil{return "",ErrUnavailable}
  token,e:=g.open(sealed);if e!=nil{return "",ErrUnavailable}
@@ -270,9 +273,11 @@ func (g *Gateway) Current(ctx context.Context,r *http.Request)(string,error){
  if !response.Active||response.Subject==nil||response.Subject.App!=g.App.ID||
   response.Subject.Sub!=subject||!subjectPattern.MatchString(subject)||
   response.Method!="sso"||!response.ExpiresAt.After(time.Now())||!response.IdleUntil.After(time.Now()){
+  _=tx.Rollback()
   _,_=g.db.ExecContext(ctx,"DELETE FROM app420_sso.sessions WHERE cookie_digest=$1",d[:])
   return "",ErrNotAuthenticated
  }
+ if e=tx.Commit();e!=nil{return "",ErrUnavailable}
  return subject,nil
 }
 
@@ -339,7 +344,7 @@ func (g *Gateway) session(ctx context.Context,w http.ResponseWriter,r *http.Requ
  if e!=nil{deny(w,503);return}
  jsonReply(w,200,map[string]any{
   "authenticated":true,"app":g.App.ID,"subject":subject,
-  "walletLinked":false,"financialAuthority":false,"permissions":[]string{},
+  "financialAuthority":false,"permissions":[]string{},
  })
 }
 func (g *Gateway) logout(ctx context.Context,w http.ResponseWriter,r *http.Request){

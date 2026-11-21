@@ -360,3 +360,38 @@ same-host `/social-api` routing, Render runtime, deployment secrets
 or live end-to-end browser acceptance. XP remains disabled until those
 operator-controlled prerequisites, privacy, moderation, rollback and
 abuse tests are independently qualified.
+
+
+## AUTH-11 — Wallet-free monetization and rewards programme readiness
+
+The existing AUTH-8/9/10 member service stays independently available.
+With `SOCIAL420_MONETIZATION_MODE=restricted-acceptance`, its
+`GET /social-api/v1/monetization` returns only the authenticated user's
+freshly 420ID-introspected participation consent and readiness stage.
+Unknown modes fail startup and the endpoint is 404 when disabled.
+No write/accept/claim/settlement API is installed in the social service.
+
+A confidential backend-only 420ID SSO introspection call rechecks the
+source account and child app session and returns the consent data without
+a wallet address, email, internal account ID, bearer or monetary amount.
+An unconfigured central `monetization-acceptance` mode or unknown field
+values fails closed, rather than trusting cached browser or historical
+permission. The public route `/account/monetization` uses the same-origin
+420ID cookie and a separate default-off `features.accountMonetization`
+flag, gated by `features.accountSocial=true`. No wallet is required to
+read or participate in ordinary community features.
+
+BongGoggles' existing wallet-backed `/rewards` remains the only canonical
+reward lifecycle UI. Post creation, off-chain XP, profile level, free games,
+a 420ID programme opt-in, and a merely linked wallet confer **no** claim
+or payout. Valid canonical source, verifier, funded campaign, accrual,
+beneficiary and separately wallet-confirmed on-chain claim/release remain
+mandatory. Creator monetization requires a separately verified operator
+programme and actual canonical payment source. Do not present `wallet_required`
+as a payment obligation or `canonical_verification_required` as an earned
+reward.
+
+**Not live:** The opted-in 420ID service, social runtime, independent
+database migration/grants, confidential SSO client, reverse proxy and real
+browser integration are external deployment/acceptance boundaries; this
+repository change does not activate accounts, campaigns or payouts.

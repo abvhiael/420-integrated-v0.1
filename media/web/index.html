@@ -24,6 +24,14 @@
     <button id="connect-wallet" type="button">Connect wallet</button>
   </div>
 </header>
+<section class="app420id-panel" data-420id-app="420media" data-420id-enabled="false" aria-label="420Media optional 420ID account" hidden>
+  <strong>420ID account</strong>
+  <p data-420id-status role="status" aria-live="polite">Account status not verified.</p>
+  <a data-420id-login href="/420id-api/auth/start" hidden>Sign in with 420ID</a>
+  <button data-420id-logout type="button" hidden>Sign out of 420Media</button>
+  <button data-420id-refresh type="button">Check account</button>
+  <small>Optional account access only. Wallet permissions, paid features and existing app authorization remain separate.</small>
+</section>
 
 <main id="main">
   <section class="notice" aria-labelledby="runtime-title">
@@ -123,5 +131,6 @@
 </main>
 <footer><strong>420Media</strong><span class="muted">Repository-qualified application surface. Production origin is not claimed until deployment evidence exists.</span></footer>
 <script type="module" src="./app.js"></script>
+<script type="module" src="./420id-client.mjs"></script>
 </body>
 </html>

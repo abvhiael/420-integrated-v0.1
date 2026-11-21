@@ -7,6 +7,7 @@ import {chaosRegionArt} from './chaos-visual-style.js';
 import {chaosMapArt} from './chaos-map-art.js';
 import {CHAOS_VEHICLE_COLORS,chaosVehicle,chaosVehicleHeading} from './chaos-vehicles.js';
 import {renderChaosTableFeedback} from './chaos-table-art.js';
+import {chaosEffectKinds} from './chaos-game-effects.js';
 import {chaosSceneryFeatures,renderChaosScenery} from './chaos-region-scenery.js';
 
 // Keep the current hand visible only while the same human driver continues their turn.
@@ -107,7 +108,23 @@ function vehicle(player,region,seat,count){
   '</g><circle class="ccc-vehicle-number-disc" cx="0" cy="-26" r="12" fill="#17332a" stroke="'+color+'" stroke-width="2.5"/>'+
   '<text class="ccc-map-seat" x="0" y="-21" text-anchor="middle">'+(seat+1)+'</text></g>';
 }
-export function renderChaosHighway(game){
+function renderChaosEffectAuras(game,effects,region){
+ if(!effects?.events?.length)return '';
+ const kinds=new Set(chaosEffectKinds());
+ return '<g class="ccc-game-effect-auras" aria-hidden="true" pointer-events="none">'+
+  effects.events.filter(e=>kinds.has(e.kind)).flatMap(e=>e.seats.map(id=>{
+   const seat=game.players.findIndex(p=>p.id===id);
+   if(seat<0)return '';
+   const pos=chaosRoutePosition(region,game.players[seat].km);
+   const lane=(seat-(game.players.length-1)/2)*15,rad=pos.angle*Math.PI/180;
+   const x=round(pos.x-Math.sin(rad)*lane),y=round(pos.y+Math.cos(rad)*lane);
+   return '<g class="ccc-game-effect-aura ccc-game-effect-aura--'+e.kind+
+    '" transform="translate('+x+' '+y+')">'+
+    '<circle cx="0" cy="0" r="29" class="ccc-aura-ring"/>'+
+    '<path d="M-34-27l5-9m63 7 5-9M-13 32l-5 8" class="ccc-aura-sparks"/></g>';
+  })).join('')+'</g>';
+}
+export function renderChaosHighway(game,{effects=null}={}){
  const leg=LEGS[game.leg],region=leg?.id;
  if(!region||!ROUTES[region])throw new Error('Invalid Cross-Country Chaos regional board.');
  const route=roadCoordinates(region);
@@ -132,7 +149,8 @@ export function renderChaosHighway(game){
   '<path class="ccc-highway-shadow" d="'+route+'"/>'+
   '<path class="ccc-highway-road" d="'+route+'"/>'+
   '<path class="ccc-highway-centre" d="'+route+'"/>'+
-  markers(region)+game.players.map((p,i)=>vehicle(p,region,i,game.players.length)).join('')+
+  renderChaosEffectAuras(game,effects,region)+markers(region)+
+  game.players.map((p,i)=>vehicle(p,region,i,game.players.length)).join('')+
   '</svg><div class="ccc-road-legend">'+game.players.map((p,i)=>
    '<span class="ccc-road-driver"><i aria-hidden="true" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'"></i>'+
     '<strong>'+esc(p.name)+'</strong><small>'+esc(chaosVehicle(p.vehicle,i).name)+'</small> '+p.km.toLocaleString('en-CA')+' km</span>').join('')+'</div></section>';
@@ -174,7 +192,7 @@ function seatMat(p,region,i,current,feedback=null){
   (p.shield?'<p class="ccc-shield"><span class="ccc-shield-emblem" aria-hidden="true">✦</span>Legendary hazard shields: '+p.shield+'</p>':'')+
   '</section></div></section>';
 }
-export function renderChaosTable(game,{revealed=false,feedback=null}={}){
+export function renderChaosTable(game,{revealed=false,feedback=null,effects=null}={}){
  const region=LEGS[game.leg]?.id;
  if(!region)throw new Error('Invalid tabletop stage.');
  const top=game.discard.at(-1);
@@ -182,7 +200,7 @@ export function renderChaosTable(game,{revealed=false,feedback=null}={}){
  const canDraw=Boolean(revealed&&game.phase==='playing'&&game.step==='draw');
  const stockOpen=canDraw?'<button type="button" class="ccc-stock ccc-pile-control" data-chaos-action="draw" data-choice="deck" aria-label="Draw two face-down regional cards">':'<div class="ccc-stock">';
  const discardOpen=canDraw&&top?'<button type="button" class="ccc-discard-public ccc-pile-control" data-chaos-action="draw" data-choice="discard" aria-label="Take the top discard and draw one face-down card">':'<div class="ccc-discard-public">';
- return '<div class="ccc-tabletop ccc-tabletop--road-atlas" data-region="'+region+'">'+renderChaosHighway(game)+
+ return '<div class="ccc-tabletop ccc-tabletop--road-atlas" data-region="'+region+'">'+renderChaosHighway(game,{effects})+
   '<section class="ccc-table-piles" aria-label="Regional decks and played cards">'+
   stockOpen+'<span class="ccc-stock-back" aria-hidden="true"><span class="ccc-stock-symbol">✦</span><span>CCC</span><span>ROAD TRIP</span></span>'+
   '<strong>Regional draw deck</strong><small>'+game.deck.length+' face-down cards</small>'+(canDraw?'<span class="ccc-pile-instruction">Tap to draw two</span>':'')+

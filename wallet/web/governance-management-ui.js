@@ -11,6 +11,8 @@ let context=null;
 let selected=null;
 let busy=false;
 let lifecycleBound=false;
+let eligibleVote=null;
+let sessionEpoch=0;
 const $=(selector)=>document.querySelector(selector);
 const fmt=(value)=>value==null?'—':String(value);
 const pct=(bps)=>`${(Number(bps)/100).toFixed(2)}%`;
@@ -102,15 +104,25 @@ function setTx(title,detail,state='idle'){const el=$('#governance-transaction-st
 function setBusy(value){
   busy=value;
   document.querySelectorAll('#governance-management-panel button').forEach((button)=>{
-    if(button.id==='governance-connect')button.disabled=value;
-    else button.disabled=value||!context||(!selected&&button.id!=='governance-refresh');
+    if(button.id==='governance-connect'){button.disabled=value;return;}
+    if(button.dataset.governanceSupport!==undefined){
+      button.disabled=value||!context||!selected||!eligibleVote||
+        eligibleVote.proposalId!==selected.proposalId||
+        eligibleVote.house!==Number($('#governance-house').value)||
+        eligibleVote.proofData!==($('#governance-proof').value.trim()||'0x')||
+        eligibleVote.epoch!==sessionEpoch;
+      return;
+    }
+    button.disabled=value||!context||(!selected&&button.id!=='governance-refresh');
   });
 }
 function clearDetail(){
   selected=null;
+  eligibleVote=null;
   for(const id of ['#governance-proposal-id','#governance-class-revision','#governance-state','#governance-window','#governance-actions-hash','#governance-required-houses','#governance-community-electorate','#governance-validator-electorate','#governance-community-thresholds','#governance-validator-thresholds','#governance-community-tally','#governance-validator-tally'])$(id).textContent='—';
 }
 function invalidate(reason){
+  sessionEpoch+=1;
   context=null;clearDetail();setAppState('Reload required');setTx('Wallet state changed',reason);
   $('#governance-error-recovery').textContent='Recovery: reconnect and reload canonical Governance state before continuing.';
   setBusy(false);
@@ -129,6 +141,7 @@ function renderTally(tally){
   return `FOR ${tally.forVotes} · AGAINST ${tally.againstVotes} · ABSTAIN ${tally.abstainVotes} · quorum ${tally.quorumMet?'met':'not met'} · approval ${tally.approvalMet?'met':'not met'}`;
 }
 function renderDetail(detail){
+  eligibleVote=null;
   selected=detail;
   $('#governance-proposal-id').textContent=detail.proposalId;
   $('#governance-class-revision').textContent=`${detail.className} · constitution r${detail.frozenRule.constitutionRevision}`;
@@ -145,18 +158,28 @@ function renderDetail(detail){
   setBusy(false);
 }
 async function refreshList(){
+  const requestContext=context, epoch=sessionEpoch;
+  if(!requestContext)throw new Error('Governance account changed; reconnect required');
   const root=$('#governance-proposal-list');root.innerHTML='<p class="muted">Loading canonical proposal state…</p>';
-  const proposals=await context.client.listProposals(100);
+  const proposals=await requestContext.client.listProposals(100);
+  if(context!==requestContext||epoch!==sessionEpoch)throw new Error('Governance account changed during proposal refresh');
   root.replaceChildren();
   if(!proposals.length){root.innerHTML='<p class="muted">No canonical Civic proposals were returned by the Indexer.</p>';return;}
   for(const proposal of proposals){
     const button=document.createElement('button');button.type='button';button.className='governance-proposal-row';
     button.innerHTML=`<strong>${proposal.className} · ${proposal.state}</strong><span>${proposal.proposalId}</span><small>vote blocks ${proposal.voteStart}–${proposal.voteEnd}</small>`;
-    button.addEventListener('click',async()=>withRecovery(button,async()=>renderDetail(await context.client.proposal(proposal.proposalId))));
+    button.addEventListener('click',async()=>withRecovery(button,async()=>{
+      const requestContext=context, epoch=sessionEpoch;
+      if(!requestContext)throw new Error('Governance account changed; reconnect required');
+      const detail=await requestContext.client.proposal(proposal.proposalId);
+      if(context!==requestContext||epoch!==sessionEpoch)throw new Error('Governance account changed during proposal read');
+      renderDetail(detail);
+    }));
     root.append(button);
   }
 }
 async function connect(){
+  const epoch=sessionEpoch;
   if(!globalThis.ethereum)throw new Error('No injected EIP-1193 wallet found');
   const config=await loadRuntime();
   const provider=new InjectedProvider420(globalThis.ethereum);
@@ -167,6 +190,7 @@ async function connect(){
   const indexer=createGovernanceIndexer420({baseUrl:config.governance.indexerUrl});
   const client=createGovernance420Client({provider,chainId:config.network.chainId,account,discovery:config.governance.discovery,indexer});
   await client.verifySession();
+  if(epoch!==sessionEpoch)throw new Error('Governance account changed during connection');
   context=Object.freeze({config,provider,account,client});
   if(!lifecycleBound){
     provider.on('accountsChanged',()=>invalidate('The connected wallet account changed.'));
@@ -178,21 +202,30 @@ async function connect(){
   $('#governance-network').textContent=config.network.name||config.network.chainId;
   setAppState('Verified','passed');setTx('Civic graph verified','Chain, code, identity, version and module bindings passed preflight.','passed');
   await refreshList();
+  if(epoch!==sessionEpoch)throw new Error('Governance account changed during connection');
   setBusy(false);
 }
 async function withRecovery(button,action){
   if(busy)return;setBusy(true);$('#governance-error-recovery').textContent='';
   try{await action();}
   catch(error){
+    eligibleVote=null;
     const classified=classifyGovernance420Error(error);setAppState('Action blocked');setTx('Action blocked',classified.message);
     $('#governance-error-recovery').textContent=`Recovery: ${classified.retryable?'reload current account/network/proposal state and retry. ':''}${classified.message}`;
     button?.focus();
   }finally{setBusy(false);}
 }
 async function checkEligibility(){
-  if(!selected)throw new Error('Select a Governance proposal first');
+  if(!selected||!context)throw new Error('Select a Governance proposal first');
+  eligibleVote=null;
+  const requestContext=context, proposalId=selected.proposalId, epoch=sessionEpoch;
   const house=Number($('#governance-house').value),proofData=$('#governance-proof').value.trim()||'0x';
-  const result=await context.client.eligibility(selected.proposalId,house,proofData);
+  const result=await requestContext.client.eligibility(proposalId,house,proofData);
+  if(context!==requestContext||epoch!==sessionEpoch||selected?.proposalId!==proposalId||
+      house!==Number($('#governance-house').value)||proofData!==($('#governance-proof').value.trim()||'0x')) {
+    throw new Error('Governance account or ballot selection changed during eligibility check');
+  }
+  if(result.eligible)eligibleVote={proposalId,house,proofData,epoch};
   const root=$('#governance-eligibility');
   root.querySelector('strong').textContent=result.eligible?`Eligible · weight ${result.weight}`:'Not eligible';
   root.querySelector('small').textContent=result.eligible?`${GOVERNANCE420_HOUSES[house]} house · frozen snapshot weight`:fmt(result.reason);
@@ -244,8 +277,8 @@ export function installGovernance420Ui(){
   $('#governance-refresh').addEventListener('click',(e)=>withRecovery(e.currentTarget,refreshList));
   $('#governance-check-eligibility').addEventListener('click',(e)=>withRecovery(e.currentTarget,checkEligibility));
   $('#governance-review-actions').addEventListener('click',(e)=>withRecovery(e.currentTarget,reviewActions));
-  $('#governance-house').addEventListener('change',()=>{$('#governance-eligibility').querySelector('strong').textContent='Not checked';document.querySelectorAll('[data-governance-support]').forEach((button)=>button.disabled=true);});
-  $('#governance-proof').addEventListener('input',()=>{document.querySelectorAll('[data-governance-support]').forEach((button)=>button.disabled=true);});
+  $('#governance-house').addEventListener('change',()=>{eligibleVote=null;$('#governance-eligibility').querySelector('strong').textContent='Not checked';document.querySelectorAll('[data-governance-support]').forEach((button)=>button.disabled=true);});
+  $('#governance-proof').addEventListener('input',()=>{eligibleVote=null;document.querySelectorAll('[data-governance-support]').forEach((button)=>button.disabled=true);});
   document.querySelectorAll('[data-governance-support]').forEach((button)=>button.addEventListener('click',(e)=>withRecovery(e.currentTarget,()=>submitVote(e.currentTarget))));
 }
 if(typeof document!=='undefined')installGovernance420Ui();

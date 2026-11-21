@@ -42,6 +42,22 @@ func (m *MonetizationManager) Ready(ctx context.Context)error{
  if e!=nil{return e};if !read||!appendOK||!edit{return ErrUnavailable}
  return nil
 }
+// ReadyRuntime additionally enforces the documented least-privilege
+// separation: owning the table or obtaining DELETE/whole-table UPDATE
+// would let a serving credential rewrite other members' consent records.
+// Operators may use Ready during migrations; public serving uses this gate.
+func (m *MonetizationManager) ReadyRuntime(ctx context.Context)error{
+ if e:=m.Ready(ctx);e!=nil{return e}
+ var unsafe bool
+ e:=m.Sessions.auth.store.db.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('account420.monetization_consents'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('account420.monetization_consents'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('account420.monetization_consents'),'TRUNCATE'),false)
+ OR COALESCE(has_column_privilege(current_user,'account420.monetization_consents','account_id','UPDATE'),false)
+ OR COALESCE(has_column_privilege(current_user,'account420.monetization_consents','app_id','UPDATE'),false)`).Scan(&unsafe)
+ if e!=nil{return e};if unsafe{return ErrUnavailable}
+ return nil
+}
 func (m *MonetizationManager) byAccount(ctx context.Context,q interface{ QueryRowContext(context.Context,string,...any)*sql.Row },id AccountID)(MonetizationStatus,error){
  out:=MonetizationStatus{App:monetizationApp,PolicyVersion:1,Version:0,
   RewardStage:"not_enrolled",CreatorStage:"not_enrolled",Source:"420id-consent-v1"}

@@ -157,6 +157,14 @@ test('CCC-4: bounded execution refuses invalid caps and rejects human turns',()=
  assert.strictEqual(result.game,s);
  assert.deepEqual(result.moves,[]);
 });
+test('CCC-4: invalid all-computer or malformed setup errors remain visible and escaped',()=>{
+ const html=renderChaosGame({error:'Choose at least one human <script>alert(1)</script>'});
+ assert.match(html,/role="alert"/);
+ assert.match(html,/Choose at least one human/);
+ assert.match(html,/&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+ assert.doesNotMatch(html,/<script>alert\(1\)<\/script>/);
+ assert.match(html,/data-chaos-start/);
+});
 test('CCC-4: human setup, bot controls, accessibility and privacy integrate without altering prior media',async()=>{
  const base=resolve(import.meta.dirname,'..');
  const [ui,app,css,gate,rule]=await Promise.all([

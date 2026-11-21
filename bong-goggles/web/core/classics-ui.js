@@ -1,7 +1,7 @@
 import {escapeHtml as esc,card} from './design-system.js';
 import {CLASSIC_COLLECTIONS} from './classics.js';
 import {LEGS,chaosLeaders,chaosActionOptions} from './cross-country-chaos.js';
-import {chaosCardArt,chaosUpgradeArt,chaosLegendaryArt,chaosHazardArt} from './chaos-card-art.js';
+import {chaosCardArt,chaosUpgradeArt,chaosHazardArt} from './chaos-card-art.js';
 const link='<a href="/classics" data-route="classics">← All Classics</a>';
 const badge=s=>'<span class="ccc-badge">'+esc(s)+'</span>';
 export function renderClassicsCatalogue(){
@@ -11,7 +11,7 @@ export function renderClassicsCatalogue(){
 const stats=s=>'<div class="ccc-stats">'+s.players.map(p=>'<div class="ccc-player"><strong>'+esc(p.name)+'</strong><span>'+p.km.toLocaleString('en-CA')+' / 2,500 km</span><span>'+p.score.toLocaleString('en-CA')+' championship km</span><small>'+esc(p.status?.name||'On the road')+(p.detourLoss?' · -'+p.detourLoss+' km detours':'')+'</small></div>').join('')+'</div>';
 const history=s=>'<details class="ccc-history"><summary>Roadside radio / game log</summary><ol>'+s.log.map(entry=>'<li>'+esc(entry)+'</li>').join('')+'</ol></details>';
 const artImage=(path,kind='card')=>path?'<img class="ccc-card-image ccc-card-image--'+esc(kind)+'" src="'+esc(path)+'" width="480" height="810" alt="" loading="lazy" decoding="async">':'';
-const cardArt=(c,leg)=>c.type==='upgrade'?chaosUpgradeArt(c.id):c.type==='legendary'?chaosLegendaryArt(c.id):chaosCardArt(c,leg);
+const cardArt=(card,leg)=>chaosCardArt(card,leg);
 const equipment=(p,legId)=>{
  const upgrades=p.upgrades.map(u=>'<figure class="ccc-equipped-card">'+artImage(chaosUpgradeArt(u.id),'upgrade')+'<figcaption><strong>'+esc(u.name)+'</strong><small>'+(p.used.includes(u.id)?'Used this stage':'Ready')+'</small></figcaption></figure>').join('');
  const mileage=[...p.played].sort((a,b)=>b.km-a.km).map(c=>'<span class="ccc-mileage-stack">'+c.km+' km</span>').join('');

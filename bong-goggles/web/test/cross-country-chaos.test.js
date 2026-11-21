@@ -267,6 +267,16 @@ test('empty regional deck recycles eligible discard cards, retaining the last vi
  assert.equal(s.players[0].hand.length,7);
  assert.equal(s.discard.length,1);assert.equal(s.discard[0].km,500);
 });
+test('fully exhausted stock with an empty hand cannot strand the turn cycle',()=>{
+ let empty=start(2);
+ empty.deck=[];empty.discard=[];empty.players[0].hand=[];empty.step='draw';
+ empty=takeChaosTurn(empty,{player:0,action:'draw',choice:'deck'});
+ assert.equal(empty.players[0].hand.length,0);assert.equal(empty.step,'play');
+ const skipped=takeChaosTurn(empty,{player:0,action:'pass'});
+ assert.equal(skipped.turn,1);
+ assert.equal(skipped.step,'play','other seat still has its unused opening hand');
+ assert.equal(skipped.players[1].hand.length,7);
+});
 test('visible player UI handles draw/discard phases and hides private cards',()=>{
  const s=createChaosGame({names:['<img src=x>','Bob'],seed:3});
  const hidden=renderChaosGame({game:s,revealed:false});

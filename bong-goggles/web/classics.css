@@ -180,6 +180,7 @@
   padding:0 clamp(.2rem,1.5vw,1rem) 2.5rem;
   position:relative;
 }
+.ccc-wrap--roadtrip.ccc-region--east{--ccc-region-accent:#86d5c6;--ccc-region-accent-ink:#17382e}
 .ccc-wrap--roadtrip.ccc-region--ontario{--ccc-region-accent:#b7e3e9;--ccc-region-accent-ink:#153846}
 .ccc-wrap--roadtrip.ccc-region--west{--ccc-region-accent:#f6cd71;--ccc-region-accent-ink:#433017}
 .ccc-wrap--roadtrip h2,.ccc-wrap--roadtrip h3,.ccc-wrap--roadtrip h4{

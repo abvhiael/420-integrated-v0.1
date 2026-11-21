@@ -11,7 +11,7 @@ permissions:
 jobs:
   public-auth:
     runs-on: ubuntu-latest
-    timeout-minutes: 9
+    timeout-minutes: 12
     steps:
       - name: Probe live identity, social ingress, and SSO redirect (no credentials)
         shell: bash
@@ -47,3 +47,23 @@ jobs:
             exit 1
           fi
           echo "SSO initiation is reachable; user consent, callback and authenticated session still require interactive browser acceptance."
+      - name: Check published read-only wake-up recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..24}; do
+            js_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-social-client.js --write-out '%{http_code}' "https://bonggoggles.420integrated.org/core/account-social.js?release=${GITHUB_SHA}" || true)"
+            ctl_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-social-controller.js --write-out '%{http_code}' "https://bonggoggles.420integrated.org/core/account-social-controller.js?release=${GITHUB_SHA}" || true)"
+            if [[ "$js_status" == "200" && "$ctl_status" == "200" ]] &&
+               grep -Fq "if(method==='GET'&&[502,503,504].includes(response.status))" /tmp/bg-social-client.js &&
+               grep -Fq 'const WAKE_RETRY_DELAYS_MS' /tmp/bg-social-controller.js &&
+               grep -Fq 'if(temporaryGateway(me))return this.transient(gen)' /tmp/bg-social-controller.js; then
+              echo "PASS: live BongGoggles serves bounded read-only session/feed recovery."
+              exit 0
+            fi
+            echo "Live recovery attempt $attempt/24: client HTTP $js_status, controller HTTP $ctl_status; waiting for the Pages deploy."
+            [[ "$attempt" -eq 24 ]] && break
+            sleep 15
+          done
+          echo "::error::BongGoggles Pages has not published the verified cold-start fix."
+          exit 1

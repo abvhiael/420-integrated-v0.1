@@ -1,0 +1,92 @@
+name: LAUNCHPAD-REC-5 ecosystem integration qualification
+
+on:
+  push:
+    branches:
+      - 'feature/launchpad-rec-5-*'
+    paths:
+      - 'contracts/test/LaunchpadEcosystem420.t.sol'
+      - 'launchpad/service/**'
+      - 'launchpad/web/**'
+      - 'notifications/replay/**'
+      - 'reputation/interactions/**'
+      - 'explorer/service/**'
+      - '.github/workflows/launchpad-rec-5-ecosystem.yml'
+  pull_request:
+    paths:
+      - 'contracts/test/LaunchpadEcosystem420.t.sol'
+      - 'launchpad/service/**'
+      - 'launchpad/web/**'
+      - 'notifications/replay/**'
+      - 'reputation/interactions/**'
+      - 'explorer/service/**'
+      - '.github/workflows/launchpad-rec-5-ecosystem.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: launchpad-rec5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-local-contracts:
+    name: Real local protocol deployment and settlement
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Pin exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stage only the real ecosystem integration fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p contracts/test/.launchpad-rec5
+          sed -e 's#"../src/#"../../src/#g' -e 's#"./helpers/#"../helpers/#g' \
+            contracts/test/LaunchpadEcosystem420.t.sol > contracts/test/.launchpad-rec5/LaunchpadEcosystem420.t.sol
+          test "$(grep -c '^contract LaunchpadEcosystem420Test' contracts/test/.launchpad-rec5/LaunchpadEcosystem420.t.sol)" -eq 1
+      - name: Compile and execute real Registry/Identity/Pay/Swap/Arbitration/Launchpad graph
+        working-directory: contracts
+        env:
+          FOUNDRY_TEST: test/.launchpad-rec5
+          FOUNDRY_SRC: src/launchpad
+        run: forge test --match-path test/.launchpad-rec5/LaunchpadEcosystem420.t.sol -vvv
+  app-ecosystem:
+    name: Wallet, API and derived-service consumer qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Pin exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Qualify Launchpad Wallet and API integration
+        run: |
+          node --test launchpad/web/test/wallet.test.js launchpad/web/test/service.test.js
+          node --test launchpad/service/test/rpc.test.mjs launchpad/service/test/indexer.test.mjs
+      - name: Exercise 420Reputation and 420Notifications evidence consumers
+        run: go test ./reputation/interactions ./notifications/replay
+      - name: Exercise 420Explorer canonical raw-log views
+        run: go test ./explorer/service -run 'Launchpad|RawLog'

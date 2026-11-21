@@ -1,0 +1,53 @@
+{
+  "schema": "420-launchpad-rec-6-qualification-v1",
+  "task": "LAUNCHPAD-REC-6",
+  "result": "LOCAL_PRETESTNET_QUALIFIED",
+  "authoritative_repository": "abvhiael/420-integrated-v0.1",
+  "baseline_main_sha": "0f7c978a8904303816bd52551ef711355fc9d5e2",
+  "qualified_executable_sha": "9dfa73a81517798dd5b21d0417ae3d46c0fdb303",
+  "workflow": {
+    "name": "LAUNCHPAD-REC-6 final pre-testnet closeout",
+    "run_id": 44852520909,
+    "conclusion": "success",
+    "contract_job_id": 136686996381,
+    "app_service_job_id": 136686995975,
+    "artifact_id": 14685652600,
+    "web_artifact_id": 14685852787
+  },
+  "results": {
+    "clean_builds_compared": 2,
+    "compiled_launchpad_contracts": 6,
+    "artifact_abi_constructor_bytecode_match": true,
+    "frozen_fingerprint_comparison": true,
+    "adversarial_verifier_tests": {
+      "passed": 7,
+      "failed": 0
+    },
+    "local_deployment_tests": {
+      "passed": 3,
+      "failed": 0
+    },
+    "browser_tests": {
+      "passed": 19,
+      "failed": 0
+    },
+    "service_tests": {
+      "passed": 44,
+      "failed": 0
+    },
+    "production_build": true,
+    "source_dist_equality": true,
+    "fail_closed_runtime": true
+  },
+  "frozen_artifact_inventory": "contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json",
+  "readiness": {
+    "repository_qualified": true,
+    "live_testnet_qualified": false,
+    "genesis_ready": false,
+    "production_ready": false
+  },
+  "merge_status": "OPEN_NOT_MERGED",
+  "live_evidence_claim": false,
+  "existing_testnet_step": "LAUNCHPAD-AUDIT-6",
+  "runbook": "docs/apps/launchpad/deployment-operations.md"
+}

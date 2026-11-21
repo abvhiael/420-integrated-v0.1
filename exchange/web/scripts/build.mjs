@@ -32,7 +32,7 @@ function assertHttps(value,label,{ws=false}={}){
 }
 
 clean();
-for(const file of ['index.html','app.js','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css']) copy(file);
+for(const file of ['index.html','app.js','420id-client.mjs','browser-wallet-ui.js','read-only-swap-review-ui.js','styles.css','branding.css']) copy(file);
 copyDir('core');
 const bridgeRuntime=path.join(dist,'core','wallet-bridge-runtime');
 fs.mkdirSync(bridgeRuntime,{recursive:true});

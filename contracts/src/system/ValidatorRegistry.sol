@@ -87,6 +87,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     mapping(bytes32 => bool) public blsPubkeyHashUsed;
     mapping(bytes32 => bool) public slashEvidenceApplied;
 
+    mapping(bytes32 => bool) public originallyFullySponsored;
     mapping(bytes32 => uint256) public pendingProtocolCredit;
     mapping(bytes32 => address) public pendingCreditBeneficiary;
 
@@ -233,6 +234,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             totalSlashed: 0,
             metadataCommitment: metadataCommitment
         });
+        originallyFullySponsored[validatorId] = (msg.value == 0 && credit == EFFECTIVE_BOND);
         ownerValidatorId[msg.sender] = validatorId;
         blsPubkeyHashUsed[pubkeyHash] = true;
         totalOwnedCustody += msg.value;
@@ -458,7 +460,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
         bytes32 id = ownerValidatorId[owner];
         if (id == bytes32(0)) return false;
         Validator storage v = _validators[id];
-        return v.owner == owner && v.protocolCredit == EFFECTIVE_BOND && v.ownedBond == 0
+        return v.owner == owner && originallyFullySponsored[id] && v.protocolCredit != 0
             && v.status != Status.EXITED && v.status != Status.WITHDRAWABLE;
     }
 

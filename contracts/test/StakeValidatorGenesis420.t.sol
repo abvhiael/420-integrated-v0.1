@@ -127,7 +127,12 @@ contract StakeValidatorGenesis420Test {
         v = registry.getValidator(id);
         require(v.ownedBond == 10_000 ether && v.protocolCredit == 32_000 ether, "replacement");
         require(address(reserve).balance == originalReserve - 32_000 ether, "return to community");
-        require(!registry.isFullyProtocolSponsoredOwner(operator), "fully sponsored only while 42k credited");
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor share persists while credit remains");
+        vm.deal(operator, 32_000 ether);
+        vm.prank(operator);
+        registry.replaceProtocolCredit{value: 32_000 ether}(id);
+        require(!registry.isFullyProtocolSponsoredOwner(operator), "share ends when fully self funded");
+        require(address(reserve).balance == originalReserve, "entire sponsor credit returned");
         require(registry.custodyInvariant(), "post-replacement solvency");
     }
 

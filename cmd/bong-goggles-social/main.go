@@ -92,7 +92,7 @@ func main(){
  }
  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
-  if e=store.ReadyXP(ctx);e!=nil{done();log.Fatal("AUTH-10 XP schema/grants unavailable")}
+  if e=store.ReadyXPRuntime(ctx);e!=nil{done();log.Fatal("AUTH-10 XP schema/grants or runtime role unsafe")}
   done()
   xp,e:=social.NewContributions(store);if e!=nil{log.Fatal(e)}
   if e=handler.EnableXP(xp);e!=nil{log.Fatal(e)}

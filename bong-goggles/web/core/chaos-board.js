@@ -141,7 +141,7 @@ function seatMat(p,region,i,current){
   (status?'<figure class="ccc-mini-card ccc-mini-card--hazard">'+image(status,region)+
    '<figcaption>'+esc(status.name)+'</figcaption></figure>':'<p class="ccc-empty-area">Clear highway</p>')+
   ((p.detourLoss||p.slowLoss)?'<p class="ccc-losses">Detours −'+p.detourLoss+' km · Slowdowns −'+p.slowLoss+' km</p>':'')+
-  '</section><section aria-label="Installed upgrades"><h5>Vehicle upgrades</h5>'+
+  '</section><section aria-label="Installed upgrades"><h5>Vehicle equipment · upgrades</h5>'+
   (upgrades?'<div class="ccc-mini-card-row">'+upgrades+'</div>':'<p class="ccc-empty-area">None equipped</p>')+
   (p.shield?'<p class="ccc-shield">Legendary hazard shields: '+p.shield+'</p>':'')+
   '</section></div></section>';

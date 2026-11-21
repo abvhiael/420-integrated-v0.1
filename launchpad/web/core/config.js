@@ -3,7 +3,7 @@ const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 function nullableHttps(value){
   if(value===null)return true;
   if(typeof value!=='string'||!value)return false;
-  try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
+  try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password&&!u.search&&!u.hash;}catch{return false;}
 }
 export function validateRuntimeConfig(config){
   if(!config||config.schema!=='420-launchpad-web-runtime-v1')throw new Error('invalid Launchpad runtime schema');
@@ -12,7 +12,8 @@ export function validateRuntimeConfig(config){
   if(config.network?.chainId!==null&&!HEX_CHAIN.test(config.network.chainId))throw new Error('invalid chainId');
   for(const key of ['rpcUrl','explorerUrl'])if(!nullableHttps(config.network?.[key]))throw new Error('invalid network URL');
   if(!nullableHttps(config.api?.baseUrl))throw new Error('invalid Launchpad API URL');
-  for(const key of ['launchpadRouterAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress','payRouterAddress','approvedInputAsset']){
+  if(config.api?.projectionSchema!=='420-launchpad-projection-v1')throw new Error('invalid projection schema binding');
+  for(const key of ['launchpadRouterAddress','saleRegistryAddress','projectRegistryAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress','payRouterAddress','approvedInputAsset']){
     const v=config.registry?.[key];if(v!=null&&!ADDRESS.test(v))throw new Error('invalid configured contract address');
   }
   return config;

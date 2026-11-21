@@ -49,7 +49,31 @@ def main():
     need(fixed.get("GovernanceTimelock")=="0x0000000000000000000000000000000000000429","Timelock address drift",errors)
     need(fixed.get("Governance420")=="0x0000000000000000000000000000000000000437","Governance420 address drift",errors)
     order="\n".join(deploy.get("initializationOrder",[]))
-    need("five core Civic component IDs plus two electorate-source component IDs" in order,"deployment inventory still describes only five Registry components",errors)
+    core={x.get("name") for x in deploy.get("registryResolvedComponents",[])}
+    sources={x.get("sourceTypePreimage") for x in deploy.get("registryResolvedElectorateSources",[])}
+    need(
+        core=={
+            "CivicConstitution420","CivicProposalRegistry420","CivicElectorateRegistry420",
+            "CivicVoting420","CivicGovernor420"
+        } and len(deploy.get("registryResolvedComponents",[]))==5,
+        "canonical Registry inventory must contain exactly five distinct Civic core components",errors
+    )
+    need(
+        sources=={
+            "420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1",
+            "420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1"
+        } and len(deploy.get("registryResolvedElectorateSources",[]))==2,
+        "canonical Registry inventory must contain exactly two typed electorate sources",errors
+    )
+    need(
+        "scheduleCanonicalCivicBootstrap" in order
+        and "execute fixed Timelock operations 0..18" in order
+        and "register seven Civic components (9-15)" in order
+        and "publish initial COMMUNITY and VALIDATOR checkpoints (17-18)" in order
+        and order.index("scheduleCanonicalCivicBootstrap") < order.index("execute fixed Timelock operations 0..18")
+        and order.index("execute fixed Timelock operations 0..18") < order.index("activate GovernanceTimelock Civic authority last"),
+        "Registry and electorate bootstrap must be scheduled before 19 actual Timelock executions and activation",errors
+    )
 
     index=read("docs/apps/governance/index.md")
     operator=read("docs/apps/governance/operator-guide.md")

@@ -4,6 +4,10 @@ on:
   push:
     paths:
       - .github/workflows/bonggoggles-live-auth-smoke.yml
+      - services/bong-goggles-account-social/bridge.go
+      - services/bong-goggles-account-social/http.go
+      - bong-goggles/web/core/account-social-controller.js
+      - bong-goggles/web/core/account-social.js
 
 permissions:
   contents: read

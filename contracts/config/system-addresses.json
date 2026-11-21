@@ -169,5 +169,6 @@
     "420 reuses go-ethereum's native SystemAddress rather than defining a second pseudo-origin.",
     "Genesis address namespace authority is contracts/config/genesis-address-namespace.json; historical migration proposals are non-authoritative."
   ],
-  "namespace_authority": "contracts/config/genesis-address-namespace.json"
+  "namespace_authority": "contracts/config/genesis-address-namespace.json",
+  "founder_wallet_reservations": "contracts/config/founder-wallet-reservations.json"
 }

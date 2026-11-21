@@ -1,0 +1,58 @@
+{
+  "schema": "420-founder-wallet-reservations-v1",
+  "status": "AWAITING_THREE_INDEPENDENT_WALLET_CLAIMS",
+  "purpose": "Off-namespace founder wallet identities; not EVM predeploy or custody addresses",
+  "modeled_chain_id": 420,
+  "planned_genesis_hash": null,
+  "reserved_system_range": {
+    "start": "0x000000000000000000000000000000000000041f",
+    "end": "0x00000000000000000000000000000000000004ff"
+  },
+  "claim_contract": {
+    "deployment": "REGISTRY_RESOLVED_NOT_DEPLOYED",
+    "address": null
+  },
+  "developer_compensation_splitter": {
+    "deployment": "REGISTRY_RESOLVED_NOT_DEPLOYED",
+    "address": null
+  },
+  "founders": [
+    {
+      "role": "FOUNDING_ADMINISTRATOR",
+      "wallet_address": null,
+      "ownership_status": "UNCLAIMED",
+      "claim_tx": null,
+      "claim_block_hash": null,
+      "developer_compensation_bps": 5000
+    },
+    {
+      "role": "ANDREW",
+      "wallet_address": null,
+      "ownership_status": "UNCLAIMED",
+      "claim_tx": null,
+      "claim_block_hash": null,
+      "developer_compensation_bps": 2500
+    },
+    {
+      "role": "JANET",
+      "wallet_address": null,
+      "ownership_status": "UNCLAIMED",
+      "claim_tx": null,
+      "claim_block_hash": null,
+      "developer_compensation_bps": 2500
+    }
+  ],
+  "approval_policy": {
+    "routine": "FOUNDING_ADMINISTRATOR_ONLY",
+    "exceptional": "ANY_TWO_OF_THREE_VERIFIED_FOUNDERS",
+    "founder_related": "ANY_TWO_OF_THREE_VERIFIED_FOUNDERS"
+  },
+  "rules": [
+    "Never store a private key, mnemonic, seed, password, recovery code, or passkey credential in this repository.",
+    "A reserved founder wallet is a normal founder-controlled 0x address, never a 0x041f-0x04ff system contract.",
+    "Wallet identity is fixed by the signed Genesis authorization record and immutable contract bindings.",
+    "An address is not verified merely by being entered in this file; verify a chain-specific signature or successful claim transaction from that address.",
+    "An unclaimed or null founder address blocks live authorization deployment; testnet and mainnet claims and credentials are independently qualified.",
+    "The three payees' 50/25/25 compensation entitlement is separate from the ten 100,000-token vesting grants; neither is a generic Treasury transfer permission."
+  ]
+}

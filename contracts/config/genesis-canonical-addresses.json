@@ -230,5 +230,6 @@
     "contracts/config/w14-7-address-migration-candidates.json",
     "contracts/config/w14-7-4-global-address-reconciliation.json",
     "contracts/config/wallet-authority-address-reconciliation.json"
-  ]
+  ],
+  "founder_wallet_reservations": "contracts/config/founder-wallet-reservations.json"
 }

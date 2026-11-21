@@ -513,3 +513,26 @@
 .ccc-wrap--roadtrip .ccc-final-round p{margin:.35rem 0 0}
 @media(max-width:650px){.ccc-wrap--roadtrip .ccc-final-round{padding:.65rem}}
 @media(forced-colors:active){.ccc-wrap--roadtrip .ccc-final-round{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}.ccc-wrap--roadtrip .ccc-final-round strong{color:CanvasText!important}}
+
+/* CCC-6: responsive, accessible offline save and resume controls. */
+.ccc-wrap--roadtrip .ccc-save-panel{padding:.85rem;margin-block:1rem;border:2px solid #afc2a8;
+ border-radius:.7rem;background:#213d31;color:#fff1d2;max-inline-size:100%;overflow-wrap:anywhere}
+.ccc-wrap--roadtrip .ccc-save-row,.ccc-wrap--roadtrip .ccc-save-actions{
+ display:flex;align-items:center;justify-content:space-between;gap:.65rem;flex-wrap:wrap}
+.ccc-wrap--roadtrip .ccc-save-panel p{margin:.5rem 0;line-height:1.5}
+.ccc-wrap--roadtrip .ccc-save-panel button,.ccc-wrap--roadtrip .ccc-private button,
+.ccc-wrap--roadtrip .ccc-actions button,.ccc-wrap--roadtrip .ccc-setup button{
+ min-block-size:44px;touch-action:manipulation;max-inline-size:100%;white-space:normal}
+.ccc-wrap--roadtrip .ccc-save-panel button:focus-visible{
+ outline:3px solid #ffdb8d;outline-offset:3px}
+.ccc-wrap--roadtrip .ccc-save-message{font-weight:700}
+@media(max-width:480px){
+ .ccc-wrap--roadtrip .ccc-save-panel{padding:.7rem}
+ .ccc-wrap--roadtrip .ccc-save-actions{flex-direction:column;align-items:stretch}
+ .ccc-wrap--roadtrip .ccc-save-actions button{width:100%}
+ .ccc-wrap--roadtrip .ccc-results-table-scroll{max-inline-size:100%;overflow-x:auto}
+}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-save-panel{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}
+ .ccc-wrap--roadtrip .ccc-save-panel button{border:2px solid ButtonText}
+}

@@ -18,7 +18,9 @@ const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-7 separately reserves +16 KiB for original local results and podium UI.
 // CCC-ART-8 permits +32 KiB strictly for a published and independently verified image manifest.
 // CCC-4 reserves +16 KiB only for local computer decisions and accessible seat UI.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1141*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-6 adds +16 KiB for private, replay-verified offline journal and mobile resume controls.
+// All card/map/vehicle/individual-asset budgets remain unchanged.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1157*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -120,6 +122,22 @@ if(!championshipEngine.includes('chaosFinalRoundProgress(s)')||
  !resultsUi.includes('renderChaosCumulativeStandings(game)')||
  !tabletopCss.includes('ccc-final-round'))
  throw new Error('CCC-5 championship final-round and standings qualification failed');
+// CCC-6 saved game state is reconstructed from canonical moves, not trusted snapshots.
+const saveSource=await readFile(resolve(root,'core/chaos-save.js'),'utf8');
+if(!saveSource.includes('replayChaosJournal(journal)')||
+ !saveSource.includes('chaosActionOptions(s)')||
+ !saveSource.includes('takeChaosTurn(s,')||
+ !saveSource.includes('advanceChaosLeg(s)')||
+ !saveSource.includes('CHAOS_SAVE_MAX_EVENTS=4096')||
+ !app.includes('recordChaosTransition(before,result.game,events)')||
+ !app.includes('refreshChaosRecovery()')||
+ !app.includes('eraseChaosRecovery()')||
+ !resultsUi.includes('data-chaos-action="save-device"')||
+ !resultsUi.includes('data-chaos-action="resume"')||
+ !tabletopCss.includes('min-block-size:44px')||
+ !tabletopCss.includes('ccc-save-panel')||
+ /(?:\bfetch\s*\(|\beval\s*\(|\bwindow\b|https?:\/\/|\.hand\b|\.deck\b)/.test(saveSource.replace(/^\/\/.*$/gm,'')))
+ throw new Error('CCC-6 save/resume and offline mobile release qualification failed');
 // CCC-4 decisions consume only the current hand and public board, never stock order.
 const computerJs=await readFile(resolve(root,'core/chaos-computer.js'),'utf8');
 const classicsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');

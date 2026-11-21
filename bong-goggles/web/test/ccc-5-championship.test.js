@@ -240,5 +240,5 @@ test('CCC-5: source-integrity gate protects threshold latching and local public 
  assert.match(css,/\.ccc-final-round/);
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(gate,/CCC-5 championship final-round and standings qualification failed/);
- assert.match(gate,/baseTotal:1141\*1024/);
+ assert.match(gate,/baseTotal:1157\*1024/);
 });

@@ -29,7 +29,7 @@ test('filtered discovery paginates deterministically and rejects stale cursors a
   assert.throws(()=>store.read(),/invalid campaign projection inventory/);
   data.items.pop();
   for(const invalid of [{raised:'NaN'},{title:'A'.repeat(1200)},{controller:'not-an-address'},
-    {startsAt:1.5},{summary:'Line\\u0000break'}]){
+    {startsAt:1.5},{summary:'Line'+String.fromCharCode(0)+'break'}]){
     data.items[0]={saleId:sale(1),projectId:project(1),title:'Green forest',mode:'REWARD',state:'ACTIVE',...invalid};
     fs.writeFileSync(file,JSON.stringify(data));
     assert.throws(()=>store.read(),/invalid campaign projection inventory/);

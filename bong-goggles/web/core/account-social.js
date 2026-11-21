@@ -60,7 +60,7 @@ export function renderAccountSocial(state,{enabled=false}={}){
  if(!enabled)return card({title:'Account social not activated',eyebrow:'Wallet-independent BongGoggles',body:emptyState({title:'Unavailable',message:'The separate account-social backend and 420ID callback have not been qualified for this deployment. Existing on-chain features remain independent.'})});
  if(!state||state.status==='loading')return card({title:'Loading account social activity',body:'<p role="status">Checking your 420ID sign-in.</p>'});
  if(state.status==='guest')return card({title:'Join BongGoggles without a wallet',eyebrow:'420ID account',body:'<p>Sign in with email or passkey using 420ID. No wallet, blockchain transaction or token balance is required. Posts and interactions are off-chain and separate from the canonical on-chain social feed.</p><a class="ui-button" href="/social-api/auth/start">Sign in with 420ID</a>'});
- if(state.status!=='ready')return card({title:'Account social is unavailable',body:'<p role="status">420ID or the account-social service could not verify your session. No cached or private content is shown.</p><div class="actions"><a class="ui-button ui-button--primary" href="/social-api/auth/start">Sign in again with 420ID</a><button type="button" data-social-action="refresh">Retry session check</button></div>'});
+ if(state.status!=='ready')return card({title:'Account social is unavailable',body:'<p role="status">'+(state.temporary?'The social service is temporarily unreachable and your session will be checked again automatically. ':'')+'420ID or the account-social service could not verify your session. No cached or private content is shown.</p><div class="actions"><a class="ui-button ui-button--primary" href="/social-api/auth/start">Sign in again with 420ID</a><button type="button" data-social-action="refresh">Retry session check</button></div>'});
  const profile=state.profile??{};
  return '<section class="account-social">'+heading('Your BongGoggles community')+
  '<p>Wallet-free conversations are off-chain, app-scoped and visible only to signed-in community members. Nothing here issues rewards or on-chain posts.</p>'+
@@ -88,7 +88,7 @@ export function renderHomeAccountSocial(state,{enabled=false}={}){
   content=emptyState({title:'Sign in to see community posts',message:'The off-chain community feed is available to signed-in BongGoggles members.'})+
    '<a class="ui-button" href="/social-api/auth/start">Sign in with 420ID</a>';
  }else if(state.status!=='ready'){
-  content='<p role="status">Off-chain posts could not be verified. No cached or private content is shown.</p>'+
+  content='<p role="status">'+(state.temporary?'The account service is starting; checking again automatically. ':'')+'Off-chain posts could not be verified. No cached or private content is shown.</p>'+
    '<div class="actions"><a class="ui-button ui-button--primary" href="/social-api/auth/start">Sign in again with 420ID</a><button type="button" data-social-action="refresh">Retry community feed</button></div>';
  }else{
   const profile=state.profile??{};

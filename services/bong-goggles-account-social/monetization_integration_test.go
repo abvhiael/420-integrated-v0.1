@@ -4,7 +4,7 @@ package social
 
 import (
  "context"
- "net/http"
+ "strings"
  "testing"
 )
 
@@ -49,12 +49,6 @@ func TestAUTH11MonetizationBrokerUnavailableFailsClosed(t *testing.T){
  if result:=request(h,"GET","/v1/monetization","",a);result.Code!=404{t.Fatal("disconnected programme exposed",result.Code)}
 }
 func containsAll(haystack string,needles ...string)bool{
- for _,n:=range needles{if !contains(haystack,n){return false}}
+ for _,n:=range needles{if !strings.Contains(haystack,n){return false}}
  return true
 }
-func contains(a,b string)bool{
- // Deliberately simple exact byte match, no optimistic parsing.
- for i:=0;i+len(b)<=len(a);i++{if a[i:i+len(b)]==b{return true}}
- return false
-}
-var _ *http.Cookie

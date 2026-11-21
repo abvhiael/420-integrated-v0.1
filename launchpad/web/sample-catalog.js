@@ -18,7 +18,7 @@ export function filterExamples(list,{query='',category='All'}={}){
 export function parseRoute(hash=''){
   const normalized=decodeURIComponent(hash.replace(/^#\/?/,'')).replace(/^\//,'');
   if(['','home'].includes(normalized))return {page:'home'};
-  if(['discover','creator','overview','live'].includes(normalized))return {page:normalized};
+  if(['discover','creator','dashboard','overview','live'].includes(normalized))return {page:normalized};
   if(normalized.startsWith('campaign/')){
     const slug=normalized.slice('campaign/'.length);
     if(/^[a-z0-9-]{1,60}$/.test(slug)&&bySlug(slug))return {page:'campaign',slug};

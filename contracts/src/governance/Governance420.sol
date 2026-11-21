@@ -39,6 +39,15 @@ interface IProtocolRegistryBootstrap420 {
         uint16 patch;
     }
 
+    function governanceTimelock() external view returns (address);
+    function protocolVersion() external view returns (uint32);
+    function currentVersion(
+        bytes32 serviceId
+    ) external view returns (uint32);
+    function currentComponentRevision(
+        bytes32 componentId
+    ) external view returns (uint32);
+
     function registerComponent(
         bytes32 componentId,
         address implementation,
@@ -242,12 +251,42 @@ contract Governance420 is SystemAccess, I420System {
         CivicMerkleElectorateSource420 community = CivicMerkleElectorateSource420(communitySource_);
         CivicMerkleElectorateSource420 validator = CivicMerkleElectorateSource420(validatorSource_);
         if (
-            communitySource_.code.length == 0 || validatorSource_.code.length == 0
-                || community.governanceTimelock() != governanceTimelock
+            communitySource_ == validatorSource_ || communitySource_.code.length == 0
+                || validatorSource_.code.length == 0 || community.governanceTimelock() != governanceTimelock
                 || validator.governanceTimelock() != governanceTimelock
                 || community.sourceType() != community.COMMUNITY_SOURCE_TYPE()
                 || validator.sourceType() != validator.VALIDATOR_SOURCE_TYPE()
         ) revert InvalidElectorateSource();
+
+        // The Genesis approval commits runtime bytecode, including implementation-specific behavior.
+        // Independently reject wrong protocol versions, Registry identity, and previously initialized
+        // state before the one-shot schedule can be consumed by a candidate that cannot execute.
+        IProtocolRegistryBootstrap420 registry = IProtocolRegistryBootstrap420(PROTOCOL_REGISTRY);
+        if (
+            PROTOCOL_REGISTRY.code.length == 0 || registry.governanceTimelock() != governanceTimelock
+                || registry.protocolVersion() != 4 || constitution.protocolVersion() != 1
+                || proposalsContract.protocolVersion() != 1 || electorates.protocolVersion() != 1
+                || voting.protocolVersion() != 1 || governor.protocolVersion() != 1
+                || proposalsContract.proposalAuthority() != address(0) || electorates.snapshotAuthority() != address(0)
+                || civicGovernor != address(0) || registry.currentVersion(GOVERNANCE_SERVICE_ID) != 0
+        ) revert InvalidBootstrapGraph();
+        for (uint8 i; i < 4; ++i) {
+            if (constitution.ruleFor(CivicIds420.ProposalClass(i)).exists) revert InvalidBootstrapGraph();
+        }
+        if (
+            electorates.sourceFor(CivicIds420.House.COMMUNITY).exists
+                || electorates.sourceFor(CivicIds420.House.VALIDATOR).exists || community.checkpointCount() != 0
+                || validator.checkpointCount() != 0
+        ) revert InvalidBootstrapGraph();
+        if (
+            registry.currentComponentRevision(COMMUNITY_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(PROPOSAL_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(ELECTORATE_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(VOTING_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(GOVERNOR_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(COMMUNITY_SOURCE_COMPONENT_ID) != 0
+                || registry.currentComponentRevision(VALIDATOR_SOURCE_COMPONENT_ID) != 0
+        ) revert InvalidBootstrapGraph();
 
         if (
             initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0 || initialValidatorRoot == bytes32(0)

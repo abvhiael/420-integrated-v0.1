@@ -6,13 +6,15 @@ import {CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
 import {CHAOS_MAP_ASSETS,CHAOS_MAP_DIMENSIONS} from '../core/chaos-map-art.js';
 import {CHAOS_VEHICLE_ASSETS,CHAOS_VEHICLE_SOURCE_SHA} from '../core/chaos-vehicles.js';
 import {CHAOS_SCENERY,CHAOS_SCENERY_COUNT} from '../core/chaos-region-scenery.js';
+import {chaosEffectKinds} from '../core/chaos-game-effects.js';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-5 qualified base: 1,076,369 B. Home's authenticated off-chain feed
 // adds 5,138 B (combined 1,081,507 B). Reserve exactly 5 KiB for this UI;
 // retain unchanged per-file, card, map and vehicle ceilings.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1057*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-ART-6 separately reserves +20 KiB for road motion and event-rendering code.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1077*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -79,6 +81,17 @@ if(CHAOS_SCENERY_COUNT!==8||Object.keys(CHAOS_SCENERY).sort().join(',')!=='east,
   Buffer.byteLength(scenicSource,'utf8')>12*1024||
   /<script|<foreignObject|https?:\/\/|@import/.test(scenicSource))
  throw new Error('CCC-ART-5 inline scenery qualification failed');
+// CCC-ART-6 animated effects are local presentation only. No new published
+// asset URLs, no timers/network/sensitive data, all CSS motion can be suppressed.
+const gameFx=await readFile(resolve(root,'core/chaos-game-effects.js'),'utf8');
+const motionFx=await readFile(resolve(root,'core/chaos-motion.js'),'utf8');
+if(chaosEffectKinds().length!==12||!gameFx.includes('deriveChaosGameEffects')||
+ !motionFx.includes('chaosMotionFrames')||!motionFx.includes('reducedMotion')||
+ !tabletopCss.includes('ccc-finish-celebration')||
+ !tabletopCss.includes('[data-motion="reduce"]')||
+ !tabletopCss.includes('@media(prefers-reduced-motion:reduce)')||
+ /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|eval\s*\()/.test((gameFx+motionFx).replaceAll('http://www.w3.org/2000/svg','')))
+ throw new Error('CCC-ART-6 local animation/privacy/accessibility qualification failed');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}

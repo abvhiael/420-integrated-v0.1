@@ -257,3 +257,133 @@
 @media(forced-colors:active){
  .ccc-wrap--roadtrip .ccc-illustrated-scenery{display:none}
 }
+
+/* CCC-ART-6: single-use feedback. Artwork never changes the rules engine. */
+.ccc-wrap--roadtrip .ccc-effects-rail{
+ display:flex;flex-wrap:wrap;gap:.55rem;align-items:stretch;margin:.7rem 0;
+}
+.ccc-wrap--roadtrip .ccc-game-effect{
+ --ccc-flare:#f3cf8b;
+ position:relative;display:flex;align-items:center;gap:.6rem;min-width:170px;
+ flex:1 1 175px;max-width:360px;overflow:hidden;
+ padding:.52rem .7rem;border:2px solid var(--ccc-flare);border-radius:.6rem;
+ background:linear-gradient(115deg,#1b4132,#244d3d);color:#f9efd5;
+ box-shadow:inset 0 0 0 3px #112b21,0 3px 8px #07170d8c;
+ animation:ccc-effect-enter .52s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-game-effect>div{display:grid;gap:.13rem;min-width:0}
+.ccc-wrap--roadtrip .ccc-game-effect strong{
+ font:900 .85rem/1.3 var(--ccc-sign);letter-spacing:.015em;color:#fff1c0;
+}
+.ccc-wrap--roadtrip .ccc-game-effect span:not(.ccc-effect-symbol){
+ font-size:.73rem;line-height:1.4;color:#f0e8d5;overflow-wrap:anywhere;
+}
+.ccc-wrap--roadtrip .ccc-effect-symbol{
+ flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;
+ border:2px solid var(--ccc-flare);background:#172c24;color:#ffe8ad;
+ font-size:1.55rem;font-weight:900;
+ animation:ccc-effect-pulse .65s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-game-effect--breakdown,
+.ccc-wrap--roadtrip .ccc-game-effect--detour{--ccc-flare:#e8a56e;background:#593529}
+.ccc-wrap--roadtrip .ccc-game-effect--slowdown{--ccc-flare:#ebc176;background:#3e4433}
+.ccc-wrap--roadtrip .ccc-game-effect--repair,
+.ccc-wrap--roadtrip .ccc-game-effect--defended{--ccc-flare:#a6dbb6}
+.ccc-wrap--roadtrip .ccc-game-effect--power,
+.ccc-wrap--roadtrip .ccc-game-effect--legendary,
+.ccc-wrap--roadtrip .ccc-game-effect--shield{--ccc-flare:#dfc8ff;background:#443657}
+.ccc-wrap--roadtrip .ccc-game-effect--checkpoint,
+.ccc-wrap--roadtrip .ccc-game-effect--finish{--ccc-flare:#fbe8a0;background:#5a4128}
+.ccc-wrap--roadtrip .ccc-game-effect-auras{pointer-events:none}
+.ccc-wrap--roadtrip .ccc-game-effect-aura{pointer-events:none;color:#fae1a0}
+.ccc-wrap--roadtrip .ccc-aura-ring{
+ fill:none;stroke:currentColor;stroke-width:3.5;stroke-dasharray:6 5;
+ opacity:.85;animation:ccc-effect-ring .9s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-aura-sparks{
+ fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;
+ animation:ccc-effect-pulse .6s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-game-effect-aura--breakdown,
+.ccc-wrap--roadtrip .ccc-game-effect-aura--detour{color:#e99d62}
+.ccc-wrap--roadtrip .ccc-game-effect-aura--repair,
+.ccc-wrap--roadtrip .ccc-game-effect-aura--defended{color:#b6eec4}
+.ccc-wrap--roadtrip .ccc-game-effect-aura--legendary,
+.ccc-wrap--roadtrip .ccc-game-effect-aura--power{color:#e8d4ff}
+.ccc-wrap--roadtrip .ccc-finish-celebration{
+ position:relative;isolation:isolate;overflow:hidden;
+ display:grid;justify-items:center;gap:.35rem;padding:1.1rem 1rem;margin:.8rem 0;
+ border:3px double #e8d391;border-radius:.9rem;
+ background:radial-gradient(ellipse at center,#64794477,transparent 75%),#253e2c;
+ color:#fff1c9;text-align:center;box-shadow:inset 0 0 0 4px #153025,0 6px 14px #07180da6;
+}
+.ccc-wrap--roadtrip .ccc-finish-celebration strong{
+ z-index:1;font:900 clamp(1rem,2.4vw,1.6rem)/1.2 var(--ccc-display);
+ letter-spacing:.03em;text-shadow:1px 2px #18291a;
+}
+.ccc-wrap--roadtrip .ccc-finish-celebration>span{
+ position:relative;z-index:1;font-weight:800;font-size:.86rem;
+}
+.ccc-wrap--roadtrip .ccc-finish-banner{
+ letter-spacing:1.2rem;color:#ffdb78;font-size:1.4rem!important;
+ animation:ccc-finish-glow .8s ease-out both;
+}
+.ccc-wrap--roadtrip .ccc-finish-confetti{
+ position:absolute;inset:0;pointer-events:none;overflow:hidden;
+}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece{
+ position:absolute;top:-15%;left:calc(6% + (var(--i)*6.5%));
+ width:9px;height:14px;background:#f9d56b;border-radius:1px;
+ animation:ccc-confetti-fall 1.4s ease-in both;
+}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece:nth-child(3n){background:#96ccbd}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece:nth-child(3n + 1){background:#e49e81}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece:nth-child(2n){width:6px;height:10px}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--0{--i:0;animation-delay:0s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--1{--i:1;animation-delay:.12s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--2{--i:2;animation-delay:.21s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--3{--i:3;animation-delay:.08s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--4{--i:4;animation-delay:.19s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--5{--i:5;animation-delay:.28s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--6{--i:6;animation-delay:.03s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--7{--i:7;animation-delay:.13s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--8{--i:8;animation-delay:.27s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--9{--i:9;animation-delay:.06s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--10{--i:10;animation-delay:.24s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--11{--i:11;animation-delay:.17s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--12{--i:12;animation-delay:.03s}
+.ccc-wrap--roadtrip .ccc-finish-confetti-piece--13{--i:13;animation-delay:.3s}
+@keyframes ccc-effect-enter{from{opacity:.3;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ccc-effect-pulse{from{opacity:.2;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes ccc-effect-ring{from{opacity:.7;stroke-width:8}to{opacity:0;stroke-width:2}}
+@keyframes ccc-finish-glow{from{opacity:.3;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes ccc-confetti-fall{from{transform:translate(0,-15px) rotate(0);opacity:1}to{transform:translate(32px,190px) rotate(250deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){
+ .ccc-wrap--roadtrip .ccc-game-effect,
+ .ccc-wrap--roadtrip .ccc-effect-symbol,
+ .ccc-wrap--roadtrip .ccc-aura-ring,
+ .ccc-wrap--roadtrip .ccc-aura-sparks,
+ .ccc-wrap--roadtrip .ccc-finish-banner,
+ .ccc-wrap--roadtrip .ccc-finish-confetti-piece{animation:none!important;transition:none!important}
+ .ccc-wrap--roadtrip .ccc-finish-confetti{display:none}
+}
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-game-effect,
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-effect-symbol,
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-aura-ring,
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-aura-sparks,
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-finish-banner,
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-finish-confetti-piece{
+ animation:none!important;transition:none!important;
+}
+[data-motion="reduce"] .ccc-wrap--roadtrip .ccc-finish-confetti{display:none}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-game-effect,
+ .ccc-wrap--roadtrip .ccc-finish-celebration{
+  background:Canvas;color:CanvasText;border:2px solid CanvasText;box-shadow:none;
+ }
+ .ccc-wrap--roadtrip .ccc-game-effect strong,
+ .ccc-wrap--roadtrip .ccc-game-effect span,
+ .ccc-wrap--roadtrip .ccc-effect-symbol{color:CanvasText}
+ .ccc-wrap--roadtrip .ccc-finish-confetti,
+ .ccc-wrap--roadtrip .ccc-game-effect-auras{display:none}
+}

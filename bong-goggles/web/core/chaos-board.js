@@ -5,6 +5,7 @@ import {chaosCardArt} from './chaos-card-art.js';
 import {escapeHtml as esc} from './design-system.js';
 import {chaosRegionArt} from './chaos-visual-style.js';
 import {chaosMapArt} from './chaos-map-art.js';
+import {CHAOS_VEHICLE_COLORS,chaosVehicle,chaosVehicleHeading} from './chaos-vehicles.js';
 
 // Keep the current hand visible only while the same human driver continues their turn.
 // A new seat or completed stage always returns to the privacy handoff screen.
@@ -14,7 +15,7 @@ export function keepChaosHandRevealed(before,after,wasRevealed){
   before.players?.[before.turn]?.id===after.players?.[after.turn]?.id);
 }
 const WIDTH=960,HEIGHT=415,FINISH=2500;
-const VEHICLE_COLORS=Object.freeze(['#f4bf57','#83d4fc','#ffa3a1','#c7a0ff']);
+const VEHICLE_COLORS=CHAOS_VEHICLE_COLORS;
 const ROUTES=Object.freeze({
  east:Object.freeze({
   landscape:'maritime',title:'Atlantic shorelines, ferry crossing and the St. Lawrence',
@@ -93,19 +94,16 @@ function vehicle(player,region,seat,count){
  const lane=(seat-(count-1)/2)*15;
  const rad=pos.angle*Math.PI/180;
  const x=round(pos.x-Math.sin(rad)*lane),y=round(pos.y+Math.cos(rad)*lane);
- const label=player.name+' — '+player.km.toLocaleString('en-CA')+' of 2,500 km';
- const color=VEHICLE_COLORS[seat];
+ const token=chaosVehicle(player.vehicle,seat),color=VEHICLE_COLORS[seat];
+ const label=player.name+' — '+token.name+' — '+player.km.toLocaleString('en-CA')+' of 2,500 km';
  return '<g class="ccc-map-vehicle ccc-map-vehicle--'+seat+'" transform="translate('+x+' '+y+')">'+
-  '<title>'+esc(label)+'</title><g transform="rotate('+pos.angle+')">'+
-  '<rect x="-19" y="-12" width="38" height="24" rx="7" fill="'+color+'" stroke="#142a22" stroke-width="2.5"/>'+
-  '<rect x="-8" y="-10" width="13" height="20" rx="3" fill="#21423f" opacity=".8"/>'+
-  '<path d="M11 -8v16" stroke="#f2f2d5" stroke-width="2"/>'+
-  '<rect x="-13" y="-15" width="8" height="5" rx="2" fill="#122c25"/>'+
-  '<rect x="8" y="-15" width="8" height="5" rx="2" fill="#122c25"/>'+
-  '<rect x="-13" y="10" width="8" height="5" rx="2" fill="#122c25"/>'+
-  '<rect x="8" y="10" width="8" height="5" rx="2" fill="#122c25"/></g>'+
-  '<circle cx="0" cy="-24" r="12" fill="#17332a" stroke="'+color+'" stroke-width="2"/>'+
-  '<text class="ccc-map-seat" x="0" y="-19" text-anchor="middle">'+(seat+1)+'</text></g>';
+  '<title>'+esc(label)+'</title><g class="ccc-vehicle-direction" data-heading="'+chaosVehicleHeading(pos.angle)+'" transform="rotate('+pos.angle+')">'+
+  '<ellipse class="ccc-vehicle-ground-shadow" cx="2" cy="4" rx="23" ry="13" fill="#0d211d" opacity=".54"/>'+
+  '<ellipse class="ccc-vehicle-seat-halo" cx="0" cy="0" rx="25" ry="18" fill="'+color+'" fill-opacity=".26" stroke="'+color+'" stroke-width="2.5"/>'+
+  '<rect class="ccc-vehicle-fallback" x="-19" y="-11" width="38" height="22" rx="8" fill="'+color+'" stroke="#132d24" stroke-width="2"/>'+
+  '<image class="ccc-vehicle-art" href="'+token.src+'" x="-25" y="-16" width="50" height="32" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
+  '</g><circle class="ccc-vehicle-number-disc" cx="0" cy="-26" r="12" fill="#17332a" stroke="'+color+'" stroke-width="2.5"/>'+
+  '<text class="ccc-map-seat" x="0" y="-21" text-anchor="middle">'+(seat+1)+'</text></g>';
 }
 export function renderChaosHighway(game){
  const leg=LEGS[game.leg],region=leg?.id;
@@ -132,7 +130,7 @@ export function renderChaosHighway(game){
   markers(region)+game.players.map((p,i)=>vehicle(p,region,i,game.players.length)).join('')+
   '</svg><div class="ccc-road-legend">'+game.players.map((p,i)=>
    '<span class="ccc-road-driver"><i aria-hidden="true" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'"></i>'+
-    '<strong>'+esc(p.name)+'</strong> '+p.km.toLocaleString('en-CA')+' km</span>').join('')+'</div></section>';
+    '<strong>'+esc(p.name)+'</strong><small>'+esc(chaosVehicle(p.vehicle,i).name)+'</small> '+p.km.toLocaleString('en-CA')+' km</span>').join('')+'</div></section>';
 }
 const mileageStacks=(p,region)=>{
  const amounts=[...new Set(p.played.map(c=>c.km))].sort((a,b)=>b-a);
@@ -149,7 +147,7 @@ function seatMat(p,region,i,current){
   '<figure class="ccc-mini-card">'+image(u,region)+
   '<figcaption>'+esc(u.name)+' · '+(p.used.includes(u.id)?'Used':'Ready')+'</figcaption></figure>').join('');
  return '<section class="ccc-seat-mat'+(current===p.id?' ccc-seat-mat--active':'')+'" aria-label="'+esc(p.name)+' public playing area">'+
-  '<header><span class="ccc-seat-chip" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'">Car '+(i+1)+'</span>'+
+  '<header><span class="ccc-seat-chip" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'">Car '+(i+1)+' · '+esc(chaosVehicle(p.vehicle,i).name)+'</span>'+
   '<h4>'+esc(p.name)+'</h4><strong>'+p.km.toLocaleString('en-CA')+' km</strong></header>'+
   '<div class="ccc-seat-areas"><section aria-label="Mileage stacks"><h5>Mileage · highest first</h5>'+mileageStacks(p,region)+'</section>'+
   '<section aria-label="Active hazards"><h5>Road conditions</h5>'+

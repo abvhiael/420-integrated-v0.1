@@ -69,7 +69,7 @@ func (s *upstreamState) reply(t *testing.T,app string)transport{
    }}else{result=map[string]any{"active":false}}
   case "/v1/sso/revoke":
    if body["token"]!=strings.Repeat("T",43){t.Error("wrong token revoked")}
-   s.active=false;result=map[string]bool{"revoked":true}
+   s.active=false;result=map[string]any{"revoked":true}
   default:t.Errorf("unknown SSO confidential operation: %s",r.URL.Path)
   }
   raw,_:=json.Marshal(result)

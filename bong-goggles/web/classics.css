@@ -1,0 +1,57 @@
+/* Cross-Country Chaos & BongGoggles Classics: fully local, zero-wager UI. */
+.ccc-wrap{display:grid;gap:1.2rem;max-width:1100px;margin:0 auto;padding-bottom:2rem}
+.ccc-wrap a{color:#a9efb4}
+.ccc-hero{border:1px solid #446d55;border-radius:1.2rem;padding:1.5rem;background:linear-gradient(135deg,#14271e,#17362a 50%,#17261f);color:#e9f9e9}
+.ccc-hero h2{font-size:clamp(1.6rem,3vw,2.5rem);margin:.3rem 0}
+.ccc-hero p{max-width:72ch;line-height:1.6;color:#deebde}
+.ccc-link,.ccc-wrap button{display:inline-block;background:#b5ed7b;color:#122317!important;border:1px solid #d1ffae;border-radius:.65rem;padding:.65rem 1rem;font-weight:750;cursor:pointer;text-decoration:none}
+.ccc-wrap button:hover,.ccc-link:hover{background:#ddffc0}
+.ccc-wrap button:focus-visible,.ccc-wrap a:focus-visible,.ccc-wrap select:focus-visible,.ccc-wrap input:focus-visible{outline:3px solid #f8cc66;outline-offset:3px}
+.ccc-wrap button:disabled{opacity:.6;cursor:not-allowed}
+.ccc-collection{border:1px solid #45634c;border-radius:1rem;padding:1rem}
+.ccc-collection h2{margin:0 0 1rem}
+.ccc-collection-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,215px),1fr));gap:.8rem}
+.ccc-game-tile{border:1px solid #577260;border-radius:.85rem;background:rgba(13,34,25,.7);padding:1rem;display:flex;flex-direction:column;gap:.6rem;color:#f0f5ec}
+.ccc-game-tile h3{margin:0;font-size:1.06rem;color:#f2f7ee}
+.ccc-game-tile p{margin:0;line-height:1.45;color:#d1e5d5;font-size:.9rem}
+.ccc-game-tile .ccc-meta{font-size:.78rem;color:#bbdbad;margin-top:auto}
+.ccc-game-tile .ccc-link{font-size:.86rem;text-align:center}
+.ccc-setup,.ccc-panel,.ccc-standings{border:1px solid #45684e;border-radius:1rem;padding:1.25rem;background:#152920;color:#f3f8ef}
+.ccc-setup h3,.ccc-panel h3{margin-top:0}
+.ccc-names{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.6rem;margin:1rem 0}
+.ccc-wrap label{display:grid;gap:.3rem;font-weight:600}
+.ccc-wrap input:not([type=checkbox]),.ccc-wrap select{width:100%;border-radius:.45rem;border:1px solid #6e9277;padding:.6rem;background:#f7fff8;color:#143224}
+.ccc-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem}
+.ccc-player{display:grid;gap:.3rem;padding:.85rem;background:#1d3a2b;border:1px solid #4f785e;border-radius:.8rem;color:#f0ffee}
+.ccc-player span{font-variant-numeric:tabular-nums}
+.ccc-player small{color:#d5e7cb}
+.ccc-equip{background:#244536;border:1px solid #5c8b70;border-radius:.75rem;padding:1rem;margin:1rem 0}
+.ccc-equip h3{font-size:1rem;margin:0 0 .5rem}
+.ccc-equip p{margin:.5rem 0;color:#e4f5e2}
+.ccc-gear{display:flex;gap:.5rem;flex-wrap:wrap}
+.ccc-gear span{background:#d9eeb6;color:#193221;border-radius:.4rem;padding:.35rem .55rem;font-size:.85rem;font-weight:700}
+.ccc-hand{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));gap:.65rem;margin:1rem 0}
+.ccc-hand-card{display:flex;flex-direction:column;gap:.6rem;min-height:205px;padding:.85rem;border-radius:.75rem;border:2px solid #73957d;background:#e6e8d8;color:#1a3024}
+.ccc-hand-card strong{font-size:1.15rem}
+.ccc-hand-card small{font-weight:800;letter-spacing:.07em}
+.ccc-hand-card span{font-size:.8rem}
+.ccc-hand-card form{display:grid;gap:.5rem;margin-top:auto}
+.ccc-hand-card label{font-size:.82rem}
+.ccc-hand-card select{font-size:.85rem}
+.ccc-hand-card button{font-size:.85rem}
+.ccc-hand-card.ccc-mileage{background:#d1e9d3;border-color:#6dba8c}
+.ccc-hand-card.ccc-hazard{background:#f6dbbe;border-color:#b97945}
+.ccc-hand-card.ccc-fix{background:#d9e2ff;border-color:#7189c0}
+.ccc-boost{display:flex!important;align-items:center;gap:.5rem}
+.ccc-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:1rem}
+.ccc-private{text-align:center;padding:2rem 1rem}
+.ccc-private h3{font-size:1.5rem}
+.ccc-standings{padding:.8rem;margin:.65rem 0}
+.ccc-standings li{padding:.25rem 0}
+.ccc-history{border:1px solid #53745c;border-radius:.75rem;padding:.75rem 1rem;color:inherit}
+.ccc-history summary{cursor:pointer;font-weight:700}
+.ccc-history li{padding:.15rem}
+.ccc-error{padding:.8rem;background:#62322d;border:1px solid #e9b3a8;border-radius:.7rem;color:#fff!important}
+@media(max-width:650px){.ccc-wrap{gap:.85rem}.ccc-hero,.ccc-panel,.ccc-setup{padding:1rem}.ccc-hand{grid-template-columns:repeat(2,minmax(0,1fr))}.ccc-hand-card{padding:.6rem;min-height:190px}.ccc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:365px){.ccc-hand{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.ccc-wrap *{scroll-behavior:auto!important;animation:none!important}}

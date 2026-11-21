@@ -66,11 +66,23 @@ jobs:
           test -f contracts/test/fixtures/cadc/upstream/@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol
           test -f contracts/test/fixtures/cadc/upstream/solidity-bytes-utils/contracts/BytesLib.sol
           grep -F 'FOUNDRY_REMAPPINGS' contracts/scripts/cadc-foundry-env.sh
-      - name: Compile retained CADC LayerZero import closure with shared shard remappings
+      - name: Exercise bounded compiler cache capture with real Governance and CADC imports
         working-directory: contracts
+        env:
+          FOUNDRY_PROFILE: ci
+          FOUNDRY_SPARSE_MODE: 'true'
         run: |
+          set -euo pipefail
           source scripts/cadc-foundry-env.sh
+          mkdir -p ../artifacts/contracts
+          # Two-file compiler-cache integration probe only; NOT full Level 3.
+          printf '%s\n' src/governance/Governance420.sol test/CADCLayerZero420.t.sol > ../artifacts/contracts/primary-inventory-shard-0.txt
+          cp ../artifacts/contracts/primary-inventory-shard-0.txt ../artifacts/contracts/shard-0-targets.txt
+          forge build src/governance/Governance420.sol
+          python3 scripts/coverage-foundry-shard.py --capture-compiled-batch 0 1 0 2
           forge build test/CADCLayerZero420.t.sol
+          python3 scripts/coverage-foundry-shard.py --capture-compiled-batch 0 1 1 2
+          python3 scripts/coverage-foundry-shard.py --snapshot-canonical-graph 0 1
       - name: Clean pinned compiler build
         working-directory: contracts
         run: |

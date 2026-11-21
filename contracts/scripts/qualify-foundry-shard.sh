@@ -8,16 +8,14 @@ if ! [[ "$shard" =~ ^[0-9]+$ && "$count" =~ ^[0-9]+$ ]] || (( count < 1 || shard
   echo "Invalid shard $shard / $count" >&2
   exit 2
 fi
-# CADC provider fixtures include the audited upstream libraries at a retained,
-# content-hashed path rather than NPM/vendor installations. Resolve their canonical
-# import names without downloading dependencies or dropping primary test files.
-# This fixes unrelated LayerZero/OpenZeppelin import failures in clean Level 3 shards.
+# Resolve exact retained CADC upstream dependencies in full Foundry shards.
+# Keep the complete src/test/script inventory and every original assertion.
 for dependency in \
   test/fixtures/cadc/upstream/@openzeppelin/contracts/utils/introspection/IERC165.sol \
   test/fixtures/cadc/upstream/@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol \
   test/fixtures/cadc/upstream/solidity-bytes-utils/contracts/BytesLib.sol; do
   if [[ ! -f "$dependency" ]]; then
-    echo "Missing retained upstream CADC dependency: $dependency" >&2
+    echo "Missing audited upstream dependency: $dependency" >&2
     exit 1
   fi
 done

@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg,chaosLeaders,LEGS} from '../core/cross-country-chaos.js';
 import {renderChaosGame} from '../core/classics-ui.js';
+import {escapeHtml as esc} from '../core/design-system.js';
 import {chaosChampionshipPlacings,renderChaosRegionalResults,renderChaosChampionshipResults,renderChaosResultsHistory} from '../core/chaos-results.js';
 const turn=(s,action,rest={})=>takeChaosTurn(s,{player:s.players[s.turn].id,action,...rest});
 const row=(id,name,place,km,banked,total,winner=false)=>({id,name,place,km,rawKm:km+50,banked,total,winner});
@@ -64,7 +65,7 @@ test('CCC-ART-7: championship podium, history, safe restart and secret hands',()
  for(const marker of ['Joint grand champions','ccc-results-screen--championship','ccc-championship-podium',
  'ccc-result-trophy','Final mileage scoreboard','Stage wins','West stage banked','New championship'])
   assert.ok(html.includes(marker),marker);
- for(const leg of LEGS)assert.ok(html.includes(leg.name));
+ for(const leg of LEGS)assert.ok(html.includes(esc(leg.name)),'regional heading is present and safely HTML-escaped');
  assert.equal((html.match(/ccc-podium-place--champion/g)||[]).length,2);
  assert.doesNotMatch(html,/ccc-hand-card|data-chaos-move|data-chaos-action="draw"/);
  assert.deepEqual(s,before);
@@ -88,6 +89,6 @@ test('CCC-ART-7: production budget, local art, responsive/accessibility guards',
   assert.ok(ui.includes(v),v);
  assert.match(gate,/baseTotal:1093\*1024/);
  assert.match(gate,/CCC-ART-7 local results\/accessibility qualification failed/);
- assert.doesNotMatch(source,/\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|https?:\/\//);
+ assert.doesNotMatch(source.replaceAll('http://www.w3.org/2000/svg',''),/\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|https?:\/\//);
  assert.doesNotMatch(source,/\.hand\b|\.deck\b/);
 });

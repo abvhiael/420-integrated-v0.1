@@ -106,7 +106,7 @@ if(!resultsSource.includes('chaosChampionshipPlacings')||
  !tabletopCss.includes('@media(max-width:660px)')||
  !tabletopCss.includes('[data-motion="reduce"]')||
  !tabletopCss.includes('@media(forced-colors:active)')||
- /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|\beval\s*\()/.test(resultsSource))
+ /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|\beval\s*\()/.test(resultsSource.replaceAll('http://www.w3.org/2000/svg','')))
  throw new Error('CCC-ART-7 local results/accessibility qualification failed');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));

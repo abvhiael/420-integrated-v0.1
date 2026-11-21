@@ -290,9 +290,10 @@ contract CivicGovernor420Test {
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 1, 7 days, 5000, 6000, 0, 0, false);
 
         vm.roll(uint256(type(uint64).max) - 1);
-        bytes32 proposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("last valid start"), keccak256("last valid actions")
-        );
+        bytes32 proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("last valid start"), keccak256("last valid actions")
+            );
         (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(proposalId);
         require(snapshot == type(uint64).max - 2, "last snapshot");
         require(start == type(uint64).max && end == start, "last uint64 voting block");
@@ -316,16 +317,16 @@ contract CivicGovernor420Test {
         s.constitution.setRule(CivicIds420.ProposalClass.G1, type(uint64).max, 7 days, 5000, 6000, 0, 0, false);
         vm.roll(1);
         vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
-        s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("overflow metadata"), keccak256("overflow actions")
-        );
+        s.governor
+            .createProposal(CivicIds420.ProposalClass.G1, keccak256("overflow metadata"), keccak256("overflow actions"));
         require(s.governor.proposerNonces(address(this)) == 0, "overflow must not consume proposal nonce");
 
         vm.prank(address(s.timelock));
         s.constitution.setRule(CivicIds420.ProposalClass.G1, type(uint64).max - 1, 7 days, 5000, 6000, 0, 0, false);
-        bytes32 lastEnd = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("maximum valid period"), keccak256("maximum valid actions")
-        );
+        bytes32 lastEnd = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("maximum valid period"), keccak256("maximum valid actions")
+            );
         (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(lastEnd);
         require(snapshot == 0 && start == 2 && end == type(uint64).max, "largest representable voting window");
 
@@ -333,15 +334,17 @@ contract CivicGovernor420Test {
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 1, 7 days, 5000, 6000, 0, 0, false);
         vm.roll(uint256(type(uint64).max));
         vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
-        s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("next-block overflow"), keccak256("next-block actions")
-        );
+        s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("next-block overflow"), keccak256("next-block actions")
+            );
 
         vm.roll(0);
         vm.expectRevert(CivicGovernor420.BlockNumberOverflow.selector);
-        s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("genesis block invalid"), keccak256("genesis actions")
-        );
+        s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("genesis block invalid"), keccak256("genesis actions")
+            );
         require(s.governor.proposerNonces(address(this)) == 1, "overflow unexpectedly advanced nonce");
     }
 
@@ -358,16 +361,25 @@ contract CivicGovernor420Test {
             CivicIds420.ProposalClass class_ = CivicIds420.ProposalClass(i);
             bool dual = i >= 2;
             vm.prank(address(s.timelock));
-            s.constitution.setRule(
-                class_, periods[i], delays[i], quorums[i], approvals[i],
-                dual ? quorums[i] : 0, dual ? approvals[i] : 0, dual
-            );
+            s.constitution
+                .setRule(
+                    class_,
+                    periods[i],
+                    delays[i],
+                    quorums[i],
+                    approvals[i],
+                    dual ? quorums[i] : 0,
+                    dual ? approvals[i] : 0,
+                    dual
+                );
 
             vm.roll(100 + uint256(i) * 200_000);
-            bytes32 id = s.governor.createProposal(
-                class_, keccak256(abi.encode("genesis class metadata", i)),
-                keccak256(abi.encode("genesis class actions", i))
-            );
+            bytes32 id = s.governor
+                .createProposal(
+                    class_,
+                    keccak256(abi.encode("genesis class metadata", i)),
+                    keccak256(abi.encode("genesis class actions", i))
+                );
             (,,,, uint64 snapshot, uint64 start, uint64 end,,) = s.proposals.proposals(id);
             require(uint256(snapshot) + 1 == block.number, "Genesis class snapshot");
             require(uint256(start) == block.number + 1, "Genesis class vote start");

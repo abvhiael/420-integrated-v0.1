@@ -173,8 +173,7 @@ contract CivicFoundation420Test {
         authority.registerWindow(registry, last, type(uint64).max - 1, type(uint64).max, type(uint64).max);
         (,,,, uint64 lastSnapshot, uint64 lastStart, uint64 lastEnd,, bool lastExists) = registry.proposals(last);
         require(
-            lastExists && lastSnapshot == type(uint64).max - 1 && lastStart == type(uint64).max
-                && lastEnd == lastStart,
+            lastExists && lastSnapshot == type(uint64).max - 1 && lastStart == type(uint64).max && lastEnd == lastStart,
             "last representable one-block registration"
         );
 

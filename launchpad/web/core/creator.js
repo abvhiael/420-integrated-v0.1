@@ -19,6 +19,7 @@ export class CreatorStudio{
     form?.addEventListener('input',()=>this.invalidate());
     $('#creator-add-tier')?.addEventListener('click',()=>{$('#creator-tier-list').append(tier());this.invalidate();});
     $('#creator-mode')?.addEventListener('change',()=>{this.mode();this.invalidate();});
+    $('#creator-tier-list')?.addEventListener('click',e=>{if(e.target.closest('.creator-tier-row button'))this.invalidate();});
     $('#creator-back')?.addEventListener('click',()=>this.show(this.step-1));
     $('#creator-next')?.addEventListener('click',()=>this.next());
     $('#creator-prepare')?.addEventListener('click',()=>this.run(()=>this.prepare()));
@@ -54,7 +55,7 @@ export class CreatorStudio{
   next(){
     const current=document.querySelector('[data-creator-step="'+this.step+'"]');
     for(const input of current.querySelectorAll('[required]'))
-      if(!input.checkValidity()){input.reportValidity();return;}
+      if(!input.closest('[hidden]')&&!input.checkValidity()){input.reportValidity();return;}
     this.show(this.step+1);
   }
   draft(){

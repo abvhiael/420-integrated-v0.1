@@ -1,3 +1,5 @@
+import {classicGameById} from './classics.js';
+
 export const ROUTES=Object.freeze([
   {id:'home',path:'/',label:'Home',icon:'⌂',requiresSession:false},
   {id:'profile',path:'/profile',label:'Profile',icon:'◎',requiresSession:false},
@@ -13,7 +15,7 @@ export const ROUTES=Object.freeze([
   {id:'groups',path:'/groups',label:'Groups',icon:'◍',requiresSession:false},
   {id:'pages',path:'/pages',label:'Pages',icon:'▤',requiresSession:false},
   {id:'events',path:'/events',label:'Events',icon:'◇',requiresSession:false},
-  {id:'games',path:'/games',label:'Games',icon:'✦',requiresSession:true},
+  {id:'games',path:'/games',label:'Games',icon:'✦',requiresSession:false},
   {id:'classics',path:'/classics',label:'Classics',icon:'♠',requiresSession:false},
   {id:'chaos-game',path:'/classics/cross-country-chaos',label:'Cross-Country Chaos',icon:'🚙',requiresSession:false},
   {id:'rewards',path:'/rewards',label:'Rewards',icon:'◈',requiresSession:true},
@@ -23,7 +25,16 @@ export const ROUTES=Object.freeze([
 const BY_PATH=new Map(ROUTES.map(route=>[route.path,route]));
 export function resolveRoute(pathname='/'){
   const normalized=typeof pathname==='string'&&pathname?pathname.replace(/\/+$/,'')||'/':'/';
-  return BY_PATH.get(normalized)??Object.freeze({id:'not-found',path:normalized,label:'Not found',icon:'?',requiresSession:false});
+  const fixed=BY_PATH.get(normalized);
+  if(fixed)return fixed;
+  if(normalized.startsWith('/games/')){
+    const slug=normalized.slice('/games/'.length);
+    if(slug&&!slug.includes('/')){
+      const game=classicGameById(slug);
+      if(game)return Object.freeze({id:'classic-game',path:normalized,label:game.title,gameId:game.id,icon:'✦',requiresSession:false});
+    }
+  }
+  return Object.freeze({id:'not-found',path:normalized,label:'Not found',icon:'?',requiresSession:false});
 }
 export function routeAccess(route,{connected=false,supportedNetwork=true}={}){
   if(!route?.requiresSession)return Object.freeze({allowed:true,mode:'public',reason:null});

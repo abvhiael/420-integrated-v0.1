@@ -205,3 +205,27 @@ body{background:var(--bg);color:var(--text)}
 .account-xp__stats span{font-size:.8rem}
 .account-xp ul{display:grid;gap:.45rem}
 @media(max-width:600px){.account-xp__stats{grid-template-columns:1fr}}
+
+/* BC-0.2: browseable games with explicit unavailable statuses. */
+.games-catalogue{display:grid;gap:22px;min-width:0}
+.games-catalogue__intro,.games-game-page{padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.games-catalogue__intro h2,.games-game-page h2{margin:0 0 10px;color:var(--text)}
+.games-catalogue__intro nav{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.games-catalogue a,.games-game-page a{color:#146137;text-underline-offset:3px}
+.games-catalogue a:focus-visible,.games-game-page a:focus-visible{outline:3px solid #b27c10;outline-offset:3px}
+.games-catalogue__section{min-width:0;scroll-margin-top:110px}
+.games-catalogue__section h2{margin:0 0 12px;color:var(--text)}
+.games-catalogue__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,205px),1fr));gap:12px}
+.games-catalogue__tile{display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-width:0;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.games-catalogue__tile h3{font-size:1.07rem;margin:4px 0 7px}
+.games-catalogue__tile p{font-size:.86rem;line-height:1.5;margin:0;overflow-wrap:anywhere}
+.games-catalogue__phase,.games-catalogue__meta,.games-catalogue__footnote{color:var(--muted);font-size:.82rem}
+.games-catalogue__tile .games-catalogue__meta{padding-top:10px;border-top:1px solid var(--line)}
+.games-game-page{display:grid;gap:14px;max-width:850px}
+.games-game-page__facts{display:flex;flex-wrap:wrap;gap:18px;margin:0}
+.games-game-page__facts div{flex:1;min-width:145px;padding:12px;border:1px solid var(--line);border-radius:10px}
+.games-game-page__facts dt{font-size:.8rem;color:var(--muted)}
+.games-game-page__facts dd{font-weight:700;margin:4px 0 0}
+.games-game-page__notice{padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2)}
+@media(max-width:600px){.games-catalogue__intro,.games-game-page{padding:14px}.games-catalogue__grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,155px),1fr))}}
+@media(forced-colors:active){.games-catalogue__tile,.games-catalogue__intro,.games-game-page,.games-game-page__notice{border:1px solid CanvasText}}

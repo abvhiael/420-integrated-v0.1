@@ -7,7 +7,7 @@ const extra=[["420Travel","https://420travel.420integrated.org/"],["20Mail","htt
 export const NAV_LABELS=Object.freeze({home:'Feed',profile:'My Profile',groups:'Communities',pages:'Pages'});
 export function appIcon(name){const key=Object.hasOwn(APP_ART,name)?APP_ART[name]:APP_ART['More dApps'];return '<img class="ecosystem-icon" src="/assets/apps/'+key+'.webp" width="32" height="32" alt="" decoding="async">';}
 export function topNavigation(nav,active){
- const items=['home','groups','discover','messages','notifications'].map(id=>nav.find(x=>x.id===id));
+ const items=['home','games','groups','discover','messages','notifications'].map(id=>nav.find(x=>x.id===id));
  return '<nav class="dashboard-topnav" aria-label="Primary header">'+items.map(x=>'<a href="'+x.path+'" data-route="'+x.id+'" aria-current="'+(active===x.id?'page':'false')+'"><span aria-hidden="true">'+escapeHtml(x.icon)+'</span>'+escapeHtml(x.id==='home'?'Home':NAV_LABELS[x.id]??x.label)+'</a>').join('')+'</nav>';
 }
 export function profileSummary(wallet,profile,walletHref,accountSocialState=null){

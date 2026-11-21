@@ -5,7 +5,7 @@ import {button,card,emptyState,errorState,skeleton,tabs,canonicalHandoffs,toast}
 import {renderApplicationShell} from '../core/app-shell.js';
 test('BG-19.3 navigation inventory extended with BG-19.10 safety',()=>{
  assert.deepEqual(ROUTES.map(r=>r.id),['home','profile','social','account-messages','account-games','account-xp','account-monetization','friends','messages','notifications','discover','groups','pages','events','games','classics','chaos-game','rewards','safety','settings']);
- assert.equal(resolveRoute('/messages').id,'messages');assert.equal(resolveRoute('/safety').requiresSession,true);assert.equal(resolveRoute('/does-not-exist').id,'not-found');
+ assert.equal(resolveRoute('/games').requiresSession,false);assert.equal(resolveRoute('/messages').id,'messages');assert.equal(resolveRoute('/safety').requiresSession,true);assert.equal(resolveRoute('/does-not-exist').id,'not-found');
 });
 test('AUTH-8 account social is public-route accessible but not writable without separate 420ID session',()=>{const route=resolveRoute('/social');assert.equal(routeAccess(route,{connected:false,supportedNetwork:false}).allowed,true);});
 test('BG-19.3 session guards fail closed for private routes',()=>{const route=resolveRoute('/messages');assert.equal(routeAccess(route,{connected:false}).allowed,false);assert.equal(routeAccess(route,{connected:true,supportedNetwork:false}).allowed,false);assert.equal(routeAccess(route,{connected:true,supportedNetwork:true}).allowed,true);});

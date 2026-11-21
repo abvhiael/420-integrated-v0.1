@@ -27,6 +27,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  ])}),
  Object.freeze({id:'board',title:'Boards & Tiles',games:Object.freeze([
   item('chess','Chess','2','registry','Canonical two-player session registry only.'),
+  item('scrabble','Scrabble','2–4','planned','Word tile board, dictionary and scoring; branding and word-list rights must be resolved before play.'),
   item('checkers','Checkers','2','registry','Canonical two-player session registry only.'),
   item('backgammon','Backgammon','2','registry','Canonical two-player session registry only.'),
   item('dominoes','Dominoes','2–4','registry','Canonical two-player session registry only.'),
@@ -34,8 +35,20 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
   item('mahjong','Four-Player Mahjong','4','planned','Traditional multiplayer Mahjong, not solitaire matching.')
  ])}),
  Object.freeze({id:'dice',title:'Dice Games',games:Object.freeze([
+  item('yahtzee','Yahtzee','2–4','planned','Full five-dice scorecards with 1, 2, 3 or 6 rows; scoring and branding qualification pending.'),
   item('five-dice-one','Five-Dice Scoring — Single Row','2–4','planned','Single-column scorecard.'),
   item('five-dice-six','Five-Dice Scoring — Six Rows','2–4','planned','Six-row variation; scoring to be agreed before implementation.')
  ])})
 ]);
 export const ALL_CLASSICS=Object.freeze(CLASSIC_COLLECTIONS.flatMap(c=>c.games));
+
+// BC-0.2: fixed 25-game order; deliberately separate from seven-type on-chain enum.
+const ROADMAP_IDS=Object.freeze(["cribbage","russian-cribbage","chess","scrabble","checkers","backgammon","dominoes","crazy-eights","euchre","yahtzee","go-fish","hearts","go","mahjong","spades","500","canasta","tarabish","45s","120s","deux-cents","hola","rook","nines","kaiser"]);
+const BY_ID=new Map(ALL_CLASSICS.map(game=>[game.id,game]));
+if(BY_ID.size!==ALL_CLASSICS.length||ROADMAP_IDS.length!==25||
+   new Set(ROADMAP_IDS).size!==25||ROADMAP_IDS.some(id=>!BY_ID.has(id)))
+ throw new Error('Invalid BongGoggles Classics catalogue');
+export const CLASSIC_ROADMAP=Object.freeze(ROADMAP_IDS.map((id,index)=>
+ Object.freeze({...BY_ID.get(id),milestone:'BC-'+(index+1),
+ collection:index<17?'main':'canadian',href:'/games/'+id})));
+export function classicGameById(id){return typeof id==='string'?BY_ID.get(id)??null:null;}

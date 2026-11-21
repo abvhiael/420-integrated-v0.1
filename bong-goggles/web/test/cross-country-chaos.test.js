@@ -325,5 +325,5 @@ test('public local game route remains separate from wallet-only and wager-bearin
  assert.equal(routeAccess(resolveRoute('/classics/cross-country-chaos'),{connected:false}).allowed,true);
  const html=renderApplicationShell({pathname:'/classics/cross-country-chaos',walletView:{connected:false}});
  assert.match(html,/Cross-Country Chaos/);assert.match(html,/Local pass-and-play only/);
- assert.match(renderApplicationShell({pathname:'/games',walletView:{connected:false}}),/Games require 420Wallet/);
+ assert.match(renderApplicationShell({pathname:'/games',walletView:{connected:false}}),/Canadian Classics/);
 });

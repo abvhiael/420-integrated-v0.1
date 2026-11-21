@@ -4,6 +4,7 @@ package social
 
 import (
  "bytes"
+ "context"
  "encoding/json"
  "strings"
  "sync"
@@ -33,6 +34,7 @@ func readGame(t *testing.T,w *httptest.ResponseRecorder)Game{
 }
 func TestAUTH9EncryptedPrivateMessagingAndAudienceBlocks(t *testing.T){
  store,h,broker,a,b:=extras(t)
+ t.Cleanup(func(){if e:=store.Relationship(context.Background(),memberB,memberA,"block",false);e!=nil{t.Error("block cleanup",e)}})
  if w:=request(h,"GET","/v1/messages","");w.Code!=401{t.Fatal("unauthenticated inbox",w.Code)}
  if w:=request(h,"POST","/v1/messages",body(map[string]string{"target":memberB,"body":"private"}));w.Code!=401{t.Fatal("unauthenticated send",w.Code)}
  if w:=request(h,"POST","/v1/messages",body(map[string]string{"target":memberB,"body":"private","sender":extraThird}),a);w.Code!=400{t.Fatal("sender injection accepted",w.Code)}
@@ -66,7 +68,8 @@ func TestAUTH9EncryptedPrivateMessagingAndAudienceBlocks(t *testing.T){
  if w:=request(h,"GET","/v1/messages","",a);w.Code!=503{t.Fatal("provider outage allowed cached messages",w.Code)}
 }
 func TestAUTH9GameInvitationsWinnerAndNoFinancialAuthority(t *testing.T){
- _,h,_,a,b:=extras(t)
+ store,h,_,a,b:=extras(t)
+ t.Cleanup(func(){if e:=store.Relationship(context.Background(),memberB,memberA,"block",false);e!=nil{t.Error("block cleanup",e)}})
  noWallet:=request(h,"GET","/v1/account-games","",a)
  if noWallet.Code!=200||!strings.Contains(noWallet.Body.String(),"\"wager\":false")||!strings.Contains(noWallet.Body.String(),"\"rewards\":false"){t.Fatal("not zero-wager",noWallet.Code)}
  if w:=request(h,"POST","/v1/account-games",body(map[string]any{"target":memberB,"kind":"tic_tac_toe","amount":100}),a);w.Code!=400{t.Fatal("stake injection accepted",w.Code)}

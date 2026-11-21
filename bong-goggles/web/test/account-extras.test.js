@@ -49,7 +49,7 @@ test('account games show actual free turn and never reward or wager',()=>{
  const html=renderAccountExtra('games',{status:'ready',viewer:me,games:games.games,selected:games.games[0]},{enabled:true});
  assert.match(html,/no wager, rewards, on-chain game outcome/i);
  assert.match(html,/data-extra-action="move"/);
- assert.match(html,/expected/i.test(html)?/expected/:/zero-wager/);
+ assert.match(html,/<h2>Zero-wager account games<\/h2>/);
  const invite={...games.games[0],status:'invited',invited:me,nextTurn:''};
  const accept=renderAccountExtra('games',{status:'ready',viewer:me,games:[invite],selected:invite},{enabled:true});
  assert.match(accept,/data-extra-action="accept"/);

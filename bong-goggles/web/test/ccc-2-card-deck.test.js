@@ -10,6 +10,7 @@ import {
 import {
  verifyCardRuleCatalog,verifyChaosCardCatalog
 } from '../scripts/verify-chaos-card-catalog.mjs';
+import {renderChaosGame} from '../core/classics-ui.js';
 
 const names=['Driver 1','Driver 2','Driver 3','Driver 4'];
 const allCards=(game,leg)=>{
@@ -107,4 +108,25 @@ test('CCC-2: named repairs match hazard categories; navigation shortcut never un
   if(matched)assert.equal(canFix(h,{...matched,type:'fix'}),matched.id!=='atlas');
  }
  assert.equal(canFix({category:'navigation',kind:'detour'},{type:'fix',id:'atlas',category:'navigation'}),false);
+});
+
+test('CCC-2: played mileage artwork is stacked highest first and the discard top remains an illustrated face-up card',()=>{
+ const game=createChaosGame({names,seed:85});
+ game.players[0].played=[
+  {type:'mileage',km:100},{type:'mileage',km:500},
+  {type:'mileage',km:100},{type:'mileage',km:250}
+ ];
+ game.discard=[{type:'mileage',km:400},{type:'fix',id:'jerry',name:'Emergency Jerry Can'}];
+ const revealed=renderChaosGame({game,revealed:true});
+ const stacks=revealed.split('<div class="ccc-mileage-played"')[1].split('</div>')[0];
+ assert.match(stacks,/mileage-500\.webp/);
+ assert.match(stacks,/mileage-250\.webp/);
+ assert.match(stacks,/mileage-100\.webp/);
+ assert.ok(stacks.indexOf('mileage-500')<stacks.indexOf('mileage-250'));
+ assert.ok(stacks.indexOf('mileage-250')<stacks.indexOf('mileage-100'));
+ assert.match(stacks,/100 km × 2/);
+ assert.match(revealed,/class="ccc-discard-top"/);
+ assert.match(revealed,/fix-jerry\.webp/);
+ const privateView=renderChaosGame({game,revealed:false});
+ assert.doesNotMatch(privateView,/class="ccc-discard-top"|ccc-mileage-card-stack/);
 });

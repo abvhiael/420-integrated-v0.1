@@ -7,6 +7,7 @@ import {createTelemetrySink} from './core/telemetry.js';
 import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from './core/wallet-session.js';
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
+import {keepChaosHandRevealed} from './core/chaos-board.js';
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
 import {AccountExtrasController} from './core/account-extras.js';
@@ -89,8 +90,10 @@ function bindChaos(){
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
  const apply=move=>{try{
-  chaosGame=takeChaosTurn(chaosGame,{player:chaosGame.players[chaosGame.turn].id,...move});
-  chaosRevealed=false;chaosError=null;renderCurrent();
+  const previous=chaosGame;
+  const updated=takeChaosTurn(previous,{player:previous.players[previous.turn].id,...move});
+  chaosRevealed=keepChaosHandRevealed(previous,updated,chaosRevealed);
+  chaosGame=updated;chaosError=null;renderCurrent();
  }catch(error){chaosError=error.message;renderCurrent(chaosError);}};
  for(const control of root.querySelectorAll('[data-chaos-action]'))control.addEventListener('click',()=>{
   const action=control.dataset.chaosAction;

@@ -118,7 +118,7 @@ test('CCC-2: played mileage artwork is stacked highest first and the discard top
  ];
  game.discard=[{type:'mileage',km:400},{type:'fix',id:'jerry',name:'Emergency Jerry Can'}];
  const revealed=renderChaosGame({game,revealed:true});
- const stacks=revealed.split('<div class="ccc-mileage-played"')[1].split('</div>')[0];
+ const stacks=revealed.split('<div class="ccc-public-miles">')[1].split('</div>')[0];
  assert.match(stacks,/mileage-500\.webp/);
  assert.match(stacks,/mileage-250\.webp/);
  assert.match(stacks,/mileage-100\.webp/);
@@ -128,5 +128,7 @@ test('CCC-2: played mileage artwork is stacked highest first and the discard top
  assert.match(revealed,/class="ccc-discard-top"/);
  assert.match(revealed,/fix-jerry\.webp/);
  const privateView=renderChaosGame({game,revealed:false});
- assert.doesNotMatch(privateView,/class="ccc-discard-top"|ccc-mileage-card-stack/);
+ assert.match(privateView,/ccc-discard-public/,'public discard remains on playing surface');
+ assert.match(privateView,/ccc-mileage-card-stack/,'played mileage stays visible');
+ assert.doesNotMatch(privateView,/ccc-hand-card|data-chaos-move/,'private hand controls are concealed');
 });

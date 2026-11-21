@@ -40,7 +40,7 @@ test('all mileage, fix, upgrade, legendary and regional hazard identities resolv
 test('CCC-1 hand, installed equipment and regional hazards show approved images only after private reveal',()=>{
  const game=createChaosGame({names:['Alice','Bob','Charlie','Dana'],seed:10});
  const hidden=renderChaosGame({game,revealed:false});
- assert.doesNotMatch(hidden,/ccc-card-image/,'hidden hands and powers must not be exposed at player handoff');
+ assert.doesNotMatch(hidden,/ccc-hand-card|data-chaos-move/,'private hand and actions must be concealed during handoff');
  const shown=renderChaosGame({game,revealed:true});
  assert.match(shown,/ccc-card-image/);
  assert.match(shown,/<img[^>]+loading="lazy"[^>]+decoding="async"/);
@@ -58,5 +58,6 @@ test('CCC-1 hand, installed equipment and regional hazards show approved images 
  game.leg=1;
  game.players[0].status={...HAZARDS.ontario[1],type:'hazard'};
  assert.ok(renderChaosGame({game,revealed:true}).includes(chaosHazardArt('ontario','whiteout')));
- assert.doesNotMatch(renderChaosGame({game,revealed:false}),/ccc-card-image/);
+ assert.doesNotMatch(renderChaosGame({game,revealed:false}),/ccc-hand-card|data-chaos-move/);
+ assert.ok(renderChaosGame({game,revealed:false}).includes(chaosHazardArt('ontario','whiteout')),'public hazards remain visible');
 });

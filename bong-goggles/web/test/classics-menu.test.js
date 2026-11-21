@@ -78,10 +78,11 @@ test('BC-0.2 preserves /classics, Cross-Country Chaos and previous unrelated ent
  assert.match(renderApplicationShell({pathname:'/classics/cross-country-chaos'}),/data-chaos-start/);
 });
 test('BC-0.2 unknown and nested game slugs fail closed',()=>{
- for(const path of ['/games/','/games/unknown','/games/cribbage/move','/games/%2e%2e','/games/cribbage%2Fother']){
+ for(const path of ['/games/unknown','/games/cribbage/move','/games/%2e%2e','/games/cribbage%2Fother']){
   assert.equal(resolveRoute(path).id,'not-found',path);
   assert.match(renderApplicationShell({pathname:path}),/Page not found/);
  }
+ assert.equal(resolveRoute('/games/').id,'games');
  assert.equal(resolveRoute('/games/cribbage///').id,'classic-game');
  assert.equal(resolveRoute('/games').id,'games');
 });

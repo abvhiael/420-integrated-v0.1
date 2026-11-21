@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../src/system/ValidatorRegistry.sol";
 import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
+import "../src/treasury/FoundingValidatorSponsorship420.sol";
 import "../src/apps/Stake420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "../src/interfaces/genesis/Types420.sol";
@@ -21,6 +22,11 @@ contract SponsoredOwnerProbe420 {
     function isFullyProtocolSponsoredOwner(address owner) external pure returns (bool) {
         return owner == address(0xABCD);
     }
+}
+
+contract FoundingSponsorRetirementStatus420 {
+    bool public retired;
+    function setRetired(bool value) external { retired = value; }
 }
 
 contract StakeValidatorGenesis420Test {
@@ -107,6 +113,54 @@ contract StakeValidatorGenesis420Test {
         require(rewards.validatorAccrued(rewards.COMMUNITY_REWARD_RESERVE()) == 10 ether,
             "community reward destination accrued");
         require(rewards.grossSecurityIssued() == 150 ether, "no issuance changes");
+    }
+
+    function testFullSponsorshipRequiresAuthenticatedOneShotBindingAndRetirement() public {
+        FoundingSponsorRetirementStatus420 status = new FoundingSponsorRetirementStatus420();
+        FoundingValidatorSponsorship420 sponsor = new FoundingValidatorSponsorship420(
+            address(this), address(status), address(reserve), address(registry)
+        );
+        (bytes32 id, address operator) = _matchedId("approved-sponsor", 97);
+        bytes32 purpose = keccak256("approved-early-validator-partnership");
+
+        // No auto-created owner permission. Until the canonical Timelock installs
+        // an approved Genesis sponsor, the Reserve rejects even a valid proposal.
+        (bool beforeBinding,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!beforeBinding, "unbound sponsor funded validator");
+        reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
+        require(reserve.genesisFoundingSponsorAuthority() == address(sponsor), "binding");
+        (bool rebind,) = address(reserve).call(
+            abi.encodeCall(reserve.bindGenesisFoundingSponsorAuthority, (address(this)))
+        );
+        require(!rebind, "one-shot authority rebind");
+
+        vm.prank(operator);
+        (bool forged,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!forged, "beneficiary could authorize their own sponsorship");
+
+        uint256 before = address(reserve).balance;
+        sponsor.sponsorFully(id, operator, purpose);
+        require(address(reserve).balance == before - 42_000 ether, "reserve funds moved");
+        require(registry.pendingProtocolCredit(id) == 42_000 ether, "actual collateral received");
+        (bool duplicate,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!duplicate, "duplicate sponsorship");
+
+        vm.prank(operator);
+        registry.register{value: 0}(id, _pubkey(97), operator, purpose);
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor on-chain flag");
+        require(registry.custodyInvariant() && reserve.reserveInvariant(), "custody invariant");
+        status.setRetired(true);
+        (bytes32 anotherId, address another) = _matchedId("after-retire", 98);
+        (bool retiredSponsored,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (anotherId, another, purpose))
+        );
+        require(!retiredSponsored, "retired administrator funded validator");
     }
 
     function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {

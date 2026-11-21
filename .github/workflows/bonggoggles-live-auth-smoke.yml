@@ -1,0 +1,49 @@
+name: BongGoggles live 420ID sign-in smoke
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/bonggoggles-live-auth-smoke.yml
+
+permissions:
+  contents: read
+
+jobs:
+  public-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Probe live identity, social ingress, and SSO redirect (no credentials)
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers="$(mktemp)"
+          body="$(mktemp)"
+          trap 'rm -f "$headers" "$body"' EXIT
+          probe() {
+            local name="$1" url="$2" expected="$3" attempt status
+            for attempt in {1..9}; do
+              : > "$headers"
+              status="$(curl --silent --show-error --max-time 25 --max-redirs 0 --dump-header "$headers" --output "$body" --write-out '%{http_code}' "$url" || true)"
+              echo "$name attempt $attempt: HTTP ${status:-network error} (expected $expected)"
+              if [[ "$status" == "$expected" ]]; then
+                return 0
+              fi
+              [[ "$attempt" -eq 9 ]] && break
+              sleep 15
+            done
+            echo "::error::$name remained unavailable after bounded requests. Check Render runtime and Cloudflare route."
+            return 1
+          }
+          probe "420ID health" "https://auth.420integrated.org/healthz" 200
+          probe "BongGoggles social health" "https://bonggoggles.420integrated.org/social-api/healthz" 200
+          probe "BongGoggles login entry" "https://bonggoggles.420integrated.org/social-api/auth/start" 303
+          if ! grep -Eqi '^location:[[:space:]]*https://auth[.]420integrated[.]org/sso/authorize[?]' "$headers"; then
+            echo "::error::Login did not redirect to the canonical 420ID SSO authorize endpoint."
+            exit 1
+          fi
+          if ! grep -Eqi '^set-cookie:[[:space:]]*__Host-bg_social_flow=' "$headers"; then
+            echo "::error::Login redirect did not issue the secure flow cookie."
+            exit 1
+          fi
+          echo "SSO initiation is reachable; user consent, callback and authenticated session still require interactive browser acceptance."

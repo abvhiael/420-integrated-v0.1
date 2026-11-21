@@ -71,6 +71,9 @@ func main(){
  sso,e:=social.NewSignOn(store,broker,key);if e!=nil{log.Fatal(e)}
  handler,e:=social.NewHandler(store,sso,required("SOCIAL420_ORIGIN"));if e!=nil{log.Fatal(e)}
  if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")=="restricted-acceptance"{
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyAccountExtras(ctx);e!=nil{done();log.Fatal("AUTH-9 messaging/game schema or grants unavailable")}
+  done()
   messageKey,e:=base64.RawURLEncoding.Strict().DecodeString(required("SOCIAL420_MESSAGE_KEY"))
   if e!=nil||len(messageKey)!=32{log.Fatal("SOCIAL420_MESSAGE_KEY must be an independent 32-byte base64url secret")}
   if string(messageKey)==string(key){log.Fatal("Message key and session key must be independent")}

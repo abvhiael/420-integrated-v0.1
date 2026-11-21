@@ -87,7 +87,7 @@ test('CCC-ART-7: production budget, local art, responsive/accessibility guards',
   assert.ok(css.includes(v),v);
  for(const v of ['renderChaosRegionalResults(game)','renderChaosChampionshipResults(game)','renderChaosResultsHistory(game)'])
   assert.ok(ui.includes(v),v);
- assert.match(gate,/baseTotal:1141\*1024/);
+ assert.match(gate,/baseTotal:1157\*1024/);
  assert.match(gate,/CCC-ART-7 local results\/accessibility qualification failed/);
  assert.doesNotMatch(source.replaceAll('http://www.w3.org/2000/svg',''),/\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|https?:\/\//);
  assert.doesNotMatch(source,/\.hand\b|\.deck\b/);

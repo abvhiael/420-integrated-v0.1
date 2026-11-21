@@ -148,7 +148,7 @@ test('CCC-ART-5: vectors are transparent, local, self-contained, accessible and 
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
  assert.doesNotMatch(css,/@keyframes ccc-scenery/);
  assert.match(gate,/CHAOS_SCENERY_COUNT!==8/);
- assert.match(gate,/baseTotal:1141\*1024/);
+ assert.match(gate,/baseTotal:1157\*1024/);
  assert.match(build,/CHAOS_MAP_ASSETS/);
  assert.ok(Buffer.byteLength(source)<12*1024);
 });

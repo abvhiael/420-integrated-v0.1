@@ -8,6 +8,7 @@ import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
 import {configureChaosComputerSeats,isChaosComputer,advanceChaosComputerTurns} from './core/chaos-computer.js';
+import {CHAOS_TAB_KEY,CHAOS_DEVICE_KEY,beginChaosJournal,appendChaosJournal,readChaosStorage,writeChaosStorage,removeChaosStorage} from './core/chaos-save.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
 import {deriveChaosTableFeedback} from './core/chaos-table-art.js';
 import {deriveChaosGameEffects} from './core/chaos-game-effects.js';
@@ -27,6 +28,7 @@ let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
 let chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null,chaosEffects=null;
 let chaosComputerScheduled=false,chaosComputerErrorStop=false;
+let chaosJournal=null,chaosDeviceSaving=false,chaosSavedAvailable=false,chaosSavedInvalid=false,chaosSaveNotice=null,chaosGeneration=0;
 function shortAccount(value){return value?`${value.slice(0,6)}…${value.slice(-4)}`:'Not connected';}
 function applyViewPreferences(){document.documentElement.dataset.textSize=viewPreferences.textSize;document.documentElement.dataset.contrast=viewPreferences.contrast;document.documentElement.dataset.motion=viewPreferences.motion;}
 function updateRobots(){let tag=document.querySelector('meta[name="robots"]');if(!tag){tag=document.createElement('meta');tag.name='robots';document.head.append(tag);}tag.content=documentIndexingPolicy(window.location.pathname);}
@@ -84,19 +86,73 @@ async function runExtra(action,details){
 }
 
 
+// CCC-6: all game data stays in this browser. Device persistence is opt-in,
+// because the seed and move journal can reconstruct other drivers' private hands.
+function chaosStorage(kind){
+ try{return kind==='tab'?window.sessionStorage:window.localStorage;}catch{return null;}
+}
+function refreshChaosRecovery(){
+ const tab=readChaosStorage(chaosStorage('tab'),CHAOS_TAB_KEY);
+ const device=readChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY);
+ chaosSavedAvailable=device.status==='ready';
+ chaosSavedInvalid=tab.status==='invalid'||device.status==='invalid';
+ if(tab.status==='ready'){
+  chaosJournal=tab.journal;chaosGame=tab.game;chaosRevealed=false;
+  chaosDeviceSaving=device.status==='ready'&&
+   JSON.stringify(device.journal)===JSON.stringify(tab.journal);
+  chaosSaveNotice='Championship recovered from this tab. Reveal your hand only when it is your turn.';
+ }else if(tab.status==='invalid'){
+  chaosSaveNotice='Previous tab progress is damaged. Resume a verified device save or start over.';
+ }
+}
+function restoreChaosOnGameRoute(){
+ if(window.location.pathname==='/classics/cross-country-chaos'&&!chaosGame&&!chaosJournal)
+  refreshChaosRecovery();
+}
+function eraseChaosRecovery(){
+ const a=removeChaosStorage(chaosStorage('tab'),CHAOS_TAB_KEY);
+ const b=removeChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY);
+ chaosSavedAvailable=false;chaosSavedInvalid=!(a&&b);chaosDeviceSaving=false;
+ return a&&b;
+}
+function recordChaosTransition(before,after,events){
+ if(!chaosJournal)throw Error('Cannot save this untracked championship.');
+ const updated=appendChaosJournal(chaosJournal,before,after,events);
+ chaosJournal=updated;
+ const tab=writeChaosStorage(chaosStorage('tab'),CHAOS_TAB_KEY,updated);
+ let device={ok:true};
+ if(chaosDeviceSaving)device=writeChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY,updated);
+ chaosSavedAvailable=chaosSavedAvailable||chaosDeviceSaving&&device.ok;
+ chaosSaveNotice=!tab.ok?tab.message:!device.ok?device.message:null;
+ if(!device.ok)chaosDeviceSaving=false;
+}
+function saveChaosDisplayInfo(){
+ return {deviceSaving:chaosDeviceSaving,available:chaosSavedAvailable,
+  invalid:chaosSavedInvalid,notice:chaosSaveNotice};
+}
 // Yield between bounded local computer batches. Never reveal a bot's hand.
 function scheduleChaosComputer(){
  if(chaosComputerScheduled||chaosComputerErrorStop||
   window.location.pathname!=='/classics/cross-country-chaos'||
   chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
+ const generation=chaosGeneration;
  chaosComputerScheduled=true;
  window.setTimeout(()=>{
+  if(generation!==chaosGeneration)return;
   chaosComputerScheduled=false;
   if(window.location.pathname!=='/classics/cross-country-chaos'||chaosComputerErrorStop||
    chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
   try{
    const result=advanceChaosComputerTurns(chaosGame,{maxActions:96});
    if(!result.moves.length)throw Error('Computer move made no progress.');
+   const events=[],before=chaosGame;
+   let cursor=before;
+   for(const move of result.moves){
+    const player=cursor.players[cursor.turn].id;
+    events.push({kind:'move',player,move});
+    cursor=takeChaosTurn(cursor,{player,...move});
+   }
+   recordChaosTransition(before,result.game,events);
    chaosGame=result.game;
    chaosRevealed=false;
    chaosRepairCue=deriveChaosTableFeedback(result.lastBefore,result.game,result.lastMove);
@@ -132,8 +188,15 @@ function bindChaos(){
    const seed=window.crypto?.getRandomValues?window.crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*0xffffffff);
    const vehicleIds=Array.from({length:count},(_,i)=>String(data.get('vehicle'+i)||''));
    const controllers=Array.from({length:count},(_,i)=>String(data.get('control'+i)||''));
-   chaosGame=configureChaosComputerSeats(applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds),controllers);
-   chaosComputerErrorStop=false;
+   const plan={names,seed,controllers,vehicles:vehicleIds};
+   const next=configureChaosComputerSeats(
+    applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds),controllers);
+   const journal=beginChaosJournal(plan);
+   chaosGeneration++;chaosComputerScheduled=false;chaosComputerErrorStop=false;
+   eraseChaosRecovery();
+   chaosGame=next;chaosJournal=journal;chaosRevealed=false;
+   const saved=writeChaosStorage(chaosStorage('tab'),CHAOS_TAB_KEY,chaosJournal);
+   chaosSaveNotice=saved.ok?null:saved.message;
    chaosRevealed=false;chaosError=null;chaosRepairCue=null;chaosEffects=null;renderCurrent();
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
@@ -144,15 +207,47 @@ function bindChaos(){
   chaosRepairCue=deriveChaosTableFeedback(previous,updated,move);
   chaosEffects=deriveChaosGameEffects(previous,updated,move);
   chaosRevealed=keepChaosHandRevealed(previous,updated,chaosRevealed);
+  recordChaosTransition(previous,updated,[{kind:'move',player:previous.players[previous.turn].id,move}]);
   chaosGame=updated;chaosError=null;renderCurrent();
  }catch(error){chaosRepairCue=null;chaosEffects=null;chaosError=error.message;renderCurrent(chaosError);}};
  for(const control of root.querySelectorAll('[data-chaos-action]'))control.addEventListener('click',()=>{
   const action=control.dataset.chaosAction;
   try{
+   if(action==='save-device'){
+    if(!chaosGame||!chaosJournal)throw Error('No championship to save.');
+    const saved=writeChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY,chaosJournal);
+    chaosDeviceSaving=saved.ok;chaosSavedAvailable=saved.ok;
+    chaosSaveNotice=saved.ok?'Championship saved on this device. Autosave is active.':saved.message;
+    renderCurrent();return;
+   }
+   if(action==='stop-device-save'){
+    if(!removeChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY))
+     throw Error('The saved device copy could not be deleted.');
+    chaosDeviceSaving=false;chaosSavedAvailable=false;
+    chaosSaveNotice='Device save deleted. This tab still recovers after reload.';
+    renderCurrent();return;
+   }
+   if(action==='resume'){
+    if(chaosGame)throw Error('Finish or restart the current championship first.');
+    const saved=readChaosStorage(chaosStorage('device'),CHAOS_DEVICE_KEY);
+    if(saved.status!=='ready')throw Error('The saved championship could not be verified.');
+    chaosGeneration++;chaosComputerScheduled=false;chaosComputerErrorStop=false;
+    chaosGame=saved.game;chaosJournal=saved.journal;chaosDeviceSaving=true;
+    chaosSavedAvailable=true;chaosSavedInvalid=false;chaosRevealed=false;
+    chaosEffects=null;chaosRepairCue=null;chaosError=null;
+    const tab=writeChaosStorage(chaosStorage('tab'),CHAOS_TAB_KEY,chaosJournal);
+    chaosSaveNotice=tab.ok?'Championship resumed. Private hands stay concealed.':tab.message;
+    renderCurrent();return;
+   }
+   if(action==='delete-save'){
+    if(!eraseChaosRecovery())throw Error('Browser storage prevented deleting the save.');
+    chaosJournal=null;chaosSaveNotice='Saved championship deleted.';
+    chaosError=null;renderCurrent();return;
+   }
    if(action==='reveal'){chaosRevealed=true;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
-   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;chaosComputerErrorStop=false;renderCurrent();return;}
+   if(action==='restart'){chaosGeneration++;chaosComputerScheduled=false;eraseChaosRecovery();chaosJournal=null;chaosGame=null;chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;chaosComputerErrorStop=false;chaosSaveNotice=null;renderCurrent();return;}
    if(action==='retry-cpu'){chaosComputerErrorStop=false;chaosError=null;renderCurrent();return;}
-   if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
+   if(action==='next'){const before=chaosGame,after=advanceChaosLeg(before);recordChaosTransition(before,after,[{kind:'stage'}]);chaosGame=after;chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
    apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card),choice:control.dataset.choice||null});
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
@@ -168,7 +263,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo()});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){
@@ -194,6 +289,7 @@ async function refreshPublicFeed(){
 }
 function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(!image)return;const greeting=selectGreeting();const src=greetingSrc(greeting);if(image.getAttribute('src')!==src){image.src=src;image.alt=greeting.label;}}
 function onRouteChange(){
+ restoreChaosOnGameRoute();
  chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
  monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
@@ -208,5 +304,5 @@ async function start(){render({state:'loading',detail:'Loading canonical applica
  onChange:()=>{if(window.location.pathname==='/account/messages')renderCurrent();}}),
  games:new AccountExtrasController({kind:'games',enabled:runtimeConfig.features.accountGames===true,
  onChange:()=>{if(window.location.pathname==='/account/games')renderCurrent();}})
-};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();renderCurrent();if(publicFeedReader.enabled)void refreshPublicFeed();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
+};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();restoreChaosOnGameRoute();renderCurrent();if(publicFeedReader.enabled)void refreshPublicFeed();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
 window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();

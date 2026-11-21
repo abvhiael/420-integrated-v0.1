@@ -1,0 +1,36 @@
+# CCC-6 — Qualification, crash recovery and BongGoggles deployment readiness
+
+**Scope:** Cross-Country Chaos local championship qualification and release candidate. The canonical CCC-1–5 engine, four legendary cards, regional deck allocation, championship scoring, CCC-ART-1–8 artwork and Account Social/Wallet boundaries remain unchanged.
+
+## Local save and interrupted game recovery
+
+`bong-goggles/web/core/chaos-save.js` introduces the versioned **`ccc-6-offline-journal-v1`** action transcript, never an unvalidated trust-me snapshot. A journal records only the starting names, deterministic shuffle seed, previously selected vehicle/controller roster, and exact player moves or legal regional stage transitions. On restore, the module recreates the initial game using `createChaosGame`, reapplies original vehicle/CPU selections and replays every event through `chaosActionOptions`, `takeChaosTurn` and `advanceChaosLeg`. It therefore reconstructs private cards, discard counts, stock order, hazards and effects, computer-turn progress, score history and final standings without accepting arbitrary client-injected scores, stage IDs or hands. Every new action is checked against its actual pre/post engine state before committing to the journal. Strict format/key/size/event bounds (maximum 4,096 events and 400,000 serialized characters), digest-based accidental-corruption detection and full canonical replay reject malformed, hostile and unsupported versions. The digest is **not encryption, authentication or an anti-cheat boundary**.
+
+**Tab recovery (automatic):** after each valid human or computer action, and each stage transition, a synchronous sessionStorage journal is recorded. On a tab reload in the same browser session, the application attempts to recover it before showing the game. Replay runs only when navigating to the Cross Country Chaos route; unrelated Home, Social and Wallet pages never scan or replay the save. It never reopens a private human hand; the owner must explicitly reveal the hand again. Computer driver batches are replayed as individual valid moves, so a browser interruption cannot silently skip a human turn or inject an unplayed action. If storage is blocked, full, unavailable or corrupted, the UI explains that persistence is unavailable rather than claiming a save succeeded.
+
+**Device save (explicit opt-in):** an in-game **Save on this device** control copies the journal to localStorage, then continues syncing after accepted moves. On a new browser/tab session the setup offers **Resume saved championship**; the restored hand remains concealed. **Stop saving on this device** deletes that persistent copy and leaves optional tab recovery in place. **Delete saved championship** or **New championship** clears the current recovery records; a new game does not revive the previous game's hidden cards. Browser storage is scoped to the current origin and is **not encrypted**; anyone with local device/browser access or another script executing on the same origin may be able to reconstruct hidden cards from the saved seed. Device save is therefore opt-in and explicitly discouraged on shared devices. No credentials, account IDs, Wallet, 420ID session data, server synchronization, cookie, cloud storage, payment state, network request or new external dependency is introduced.
+
+## Playability and mobile
+
+CCC-6 preserves the original local, human-vs-CPU and pass-and-play controls. Each public road and regional scoreboard remains visible without disclosing another driver's cards. Save/resume actions and private hand reveal are explicit, labeled and keyboard-accessible. On narrow mobile viewports, action buttons have at least **44px** touch height, scale within the screen width and prevent game-card or result-table overflow. Focus outlines and forced-colours styling remain available alongside previously qualified reduced-motion styles.
+
+## Adversarial and regression qualification
+
+The focused `test/ccc-6-qualification-release.test.js` covers:
+- reconstructing the initial seeded game and a mid-discard interruption, then drawing again with the correct player and private hand;
+- recording and recovering a bounded three-difficulty CPU batch; human-turn handoff remains concealed;
+- malformed JSON, altered seed/digest, forged moves/targets, premature stage advancement, extra snapshot fields, invalid names/vehicles/controller assignments, oversized payloads, quota/security exceptions and corrupted saves;
+- completing and replaying an actual three-region championship with all regional stage scores, wins, private hands, deck order, completed results and final podium intact;
+- exhausted stock reshuffling eligible discards while retaining the top visible discard, and genuinely empty stock not stranding the next turn;
+- hazard detours at zero, illegal self-targeting and legal-action replay preventing forged card effects;
+- responsive 44px buttons, tab/device persistence opt-in, HTML escaping, hand shielding, built game route accessibility without Wallet and production static-source gate wiring.
+
+Previous CCC-1 through CCC-5 and ART-1 through ART-8 suites, public social HTTP tests and Account Social authorization tests remain unchanged except for literal base-size assertions, which move together with the enforced threshold. Source `scripts/qualify-web.mjs` adds a narrow CCC-6 offline-save/privacy/mobile gate. It reserves **+16 KiB base UI allowance (1,141 → 1,157 KiB)** solely for the local replay journal, UI wiring and responsive controls. Existing published 49-card PNG/WebP, 6 atlas, 6 SVG vehicle, byte-identical image manifest, branding and 256 KiB individual JS/CSS limits are unchanged.
+
+## Deployable artifact and release boundaries
+
+The existing Cloudflare static build remains **`bong-goggles/web` → `npm run build` → `dist/`**, including `_headers`, account-social build-feature options, and no unapproved remote game endpoints. The established `npm run package:deployment` process continues to require `BG_WEB_RUNTIME_CONFIG` and `BG_WEB_DEPLOY_TARGET`, validates non-example URLs and refuses a production configuration with maintenance disabled. It creates a deployment candidate plus hash manifest; it **does not deploy or authorize public launch**. Do not use the example runtime config as the live production configuration.
+
+**Merge/deploy readiness criteria:** exact CCC-6 PR-head GitHub Actions Web Verification (including both feature configurations, original asset/source manifest, static limits and secret scan), 420Docs Qualification, wallet-independent Account Social and any required mainline login smoke checks; clean non-destructive main reconciliation; seven/other existing public-game routes and UI still accessible; no private-hand data in public screenshots/HTML; deployment package can be built using an explicitly supplied, validated target config. Only then mark **ready for authorized merge and deployment**. Actual Cloudflare production deployment, DNS/TLS, manual mobile-browser acceptance and production service smoke require separate observed evidence; this milestone never substitutes passing source tests for that evidence.
+
+**Next canonical roadmap step:** none defined beyond CCC-6 in the inspected Cross-Country Chaos milestones. Do not invent or begin CCC-7 or deploy to production without explicit authorization.

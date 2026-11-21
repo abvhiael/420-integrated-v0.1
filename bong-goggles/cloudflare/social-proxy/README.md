@@ -91,11 +91,15 @@ routing, real SSO browser sign-in, rate/bot rules or production release.
 running on Render Free. Render deliberately suspends a free web service after
 15 minutes without incoming requests and may need approximately one minute
 to wake it. A successful Render deployment or `/social-api/healthz` response
-does not make the service continuously available. The social `/auth/start`
-handler first inserts a short-lived flow into Neon; it does **not** call 420ID
-until the browser has followed the redirect. Consequently, a Render-generated
-502 on `/social-api/auth/start` is **not fixed** by adding frontend login
-buttons or redeploying 420ID.
+does not make the service continuously available. The social `/auth/start` handler now first checks the canonical
+420ID `/healthz` over HTTPS without credentials, then inserts the short-lived
+SSO flow into Neon only if 420ID's database-backed health check reports
+`{"ready":true}`. If either free service is sleeping, the social request
+fails closed with HTTP 503 and the existing Cloudflare Worker presents its
+bounded login-retry page instead of redirecting the browser into 420ID's 502.
+This does not touch one-use callbacks, mutate identity sessions, or promote
+unverified content. The live Worker already handles that 503 and **does not
+require a new code deployment for this backend readiness change**.
 
 This Worker has a **bounded** browser recovery page for only the exact,
 no-query `GET /social-api/auth/start` navigation. If Render returns 502,

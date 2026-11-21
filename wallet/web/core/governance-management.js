@@ -31,6 +31,8 @@ const SELECTORS = Object.freeze({
   castVote: selector('castVote(bytes32,uint8,uint8,bytes)'),
   hashActions: selector('hashActions((address,uint256,bytes)[])'),
   registryResolve: selector('resolve(bytes32)'),
+  registryResolveActive: selector('resolveActive(bytes32)'),
+  registryRuntimeCodeHash: selector('runtimeCodeHash(bytes32)'),
 });
 
 export const GOVERNANCE420_VERSION = 1n;
@@ -39,6 +41,19 @@ export const GOVERNANCE420_CLASSES = Object.freeze(['G1','G2','G3','G4']);
 export const GOVERNANCE420_HOUSES = Object.freeze(['COMMUNITY','VALIDATOR']);
 export const GOVERNANCE420_SUPPORT = Object.freeze(['AGAINST','FOR','ABSTAIN']);
 export const GOVERNANCE420_SERVICE_ID = '420/service/governance/v1';
+
+// IDs and fixed Registry location are frozen by governance-deployment-v1.json.
+// Runtime discovery supplies addresses, never substitutes component identities.
+const REGISTRY_ADDRESS = '0x0000000000000000000000000000000000000434';
+const COMPONENT_PREIMAGES = Object.freeze({
+  constitution: '420/component/governance/civic-constitution/v1',
+  proposalRegistry: '420/component/governance/civic-proposal-registry/v1',
+  electorateRegistry: '420/component/governance/civic-electorate-registry/v1',
+  voting: '420/component/governance/civic-voting/v1',
+  governor: '420/component/governance/civic-governor/v1',
+});
+const COMPONENT_IDS = Object.freeze(Object.fromEntries(Object.entries(COMPONENT_PREIMAGES).map(([key, value]) => [key, keccak256Hex(textBytes(value))])));
+const GOVERNANCE_SERVICE_HASH = keccak256Hex(textBytes(GOVERNANCE420_SERVICE_ID));
 
 const MODULE_NAMES = Object.freeze({
   constitution: 'CivicConstitution420',
@@ -88,7 +103,12 @@ async function call(provider, to, data, from) {
 }
 async function verifyCode(provider, address, label) {
   const code = await provider.request('eth_getCode', [address, 'latest']);
-  if (typeof code !== 'string' || !/^0x[0-9a-fA-F]*$/.test(code) || code === '0x') throw new Error(`${label} has no deployed code`);
+  if (typeof code !== 'string' || !/^0x(?:[0-9a-fA-F]{2})+$/.test(code)) throw new Error(`${label} has no deployed code`);
+  return code.toLowerCase();
+}
+function codeHash(code) {
+  const chunks = code.slice(2).match(/.{2}/g) || [];
+  return keccak256Hex(Uint8Array.from(chunks.map((chunk) => parseInt(chunk, 16))));
 }
 function encodeDynamicBytes(value) {
   const hex = checkedHex(value, 'proof data').slice(2);
@@ -128,11 +148,13 @@ function normalizeDiscovery(discovery) {
     throw new Error('Governance requires canonical ProtocolRegistry discovery');
   }
   const registryAddress = normalizeAddress(discovery.registryAddress);
+  if (registryAddress !== REGISTRY_ADDRESS) throw new Error('Governance ProtocolRegistry address mismatch');
   const modules = {};
   const componentIds = {};
   for (const key of Object.keys(MODULE_NAMES)) {
     modules[key] = normalizeAddress(discovery.modules?.[key]);
     componentIds[key] = normalizeBytes32(discovery.componentIds?.[key]);
+    if (componentIds[key] !== COMPONENT_IDS[key]) throw new Error(`Governance canonical component ID mismatch for ${key}`);
   }
   if (new Set(Object.values(modules)).size !== Object.keys(modules).length) throw new Error('Governance discovery contains duplicate module addresses');
   if (new Set(Object.values(componentIds)).size !== Object.keys(componentIds).length) throw new Error('Governance discovery contains duplicate component IDs');
@@ -224,6 +246,7 @@ export function classifyGovernance420Error(error) {
   if (lower.includes('user rejected') || lower.includes('denied transaction')) return { code:'USER_REJECTED', message:'Wallet approval was rejected. No Governance vote was submitted.', retryable:true };
   if (lower.includes('wrong network') || lower.includes('chain changed')) return { code:'NETWORK_CHANGED', message:'Wallet network changed. Reconnect and reload canonical Governance state.', retryable:true };
   if (lower.includes('account changed') || lower.includes('no longer authorized')) return { code:'ACCOUNT_CHANGED', message:'Wallet account changed. Reconnect and reload proposal eligibility.', retryable:true };
+  if (lower.includes('proposal became stale') || lower.includes('proposal commitment or snapshot changed')) return { code:'STALE_PROPOSAL', message:'Governance proposal changed during preflight. Reload on-chain state before retrying.', retryable:true };
   if (lower.includes('already voted')) return { code:'ALREADY_VOTED', message:'This account already cast a ballot in the selected house.', retryable:false };
   if (lower.includes('no voting weight') || lower.includes('not eligible')) return { code:'INELIGIBLE', message:'The connected account has no voting weight in this frozen electorate.', retryable:false };
   if (lower.includes('no deployed code') || lower.includes('contract identity') || lower.includes('protocol version')) return { code:'DISCOVERY_INVALID', message:'Canonical Governance discovery failed code/identity/version validation.', retryable:true };
@@ -238,12 +261,13 @@ export function createGovernance420Client({ provider, chainId, account, discover
   const modules = canonical.modules;
 
   async function verifyIdentity(address, expectedName) {
-    await verifyCode(provider,address,expectedName);
+    const code = await verifyCode(provider,address,expectedName);
     const name = decodeStringResult(await call(provider,address,`0x${SELECTORS.systemName}`,voter),'system name');
     if (name !== expectedName) throw new Error(`${expectedName} contract identity mismatch`);
     const [versionWord] = resultWords(await call(provider,address,`0x${SELECTORS.protocolVersion}`,voter),1,'protocol version');
     const version = decodeUintWord(versionWord,32);
     if (version !== GOVERNANCE420_VERSION) throw new Error(`${expectedName} unsupported protocol version ${version}`);
+    return code;
   }
 
   async function verifySession() {
@@ -258,6 +282,13 @@ export function createGovernance420Client({ provider, chainId, account, discover
     const [registryVersionWord] = resultWords(await call(provider,canonical.registryAddress,`0x${SELECTORS.protocolVersion}`,voter),1,'registry protocol version');
     if (decodeUintWord(registryVersionWord,32) !== 4n) throw new Error('Governance unsupported ProtocolRegistry protocol version');
 
+    const [activeImplementation, activeVersion] = resultWords(
+      await call(provider, canonical.registryAddress, encodeCall(SELECTORS.registryResolveActive, bytes32Word(GOVERNANCE_SERVICE_HASH)), voter),
+      2, 'active Governance service'
+    );
+    if (decodeAddressWord(activeImplementation) !== modules.governor || decodeUintWord(activeVersion, 32) === 0n) {
+      throw new Error('Governance ProtocolRegistry active service mismatch');
+    }
     for (const key of Object.keys(MODULE_NAMES)) {
       const resolved = decodeAddressWord(resultWords(
         await call(provider,canonical.registryAddress,encodeCall(SELECTORS.registryResolve,bytes32Word(canonical.componentIds[key])),voter),
@@ -267,7 +298,16 @@ export function createGovernance420Client({ provider, chainId, account, discover
       if (resolved !== modules[key]) throw new Error(`Governance ProtocolRegistry resolution mismatch for ${key}`);
     }
 
-    for (const [key,name] of Object.entries(MODULE_NAMES)) await verifyIdentity(modules[key],name);
+    for (const [key,name] of Object.entries(MODULE_NAMES)) {
+      const code = await verifyIdentity(modules[key],name);
+      const [published] = resultWords(
+        await call(provider,canonical.registryAddress,encodeCall(SELECTORS.registryRuntimeCodeHash, bytes32Word(canonical.componentIds[key])),voter),
+        1, 'Registry runtime code hash'
+      );
+      if (decodeBytes32Word(published) !== codeHash(code)) {
+        throw new Error(`Governance ProtocolRegistry runtime code hash mismatch for ${key}`);
+      }
+    }
     const getter = async (address, sel) => decodeAddressWord(resultWords(await call(provider,address,`0x${sel}`,voter),1,'module binding')[0]);
     if (await getter(modules.governor,SELECTORS.governorConstitution) !== modules.constitution) throw new Error('Governance discovered Constitution binding mismatch');
     if (await getter(modules.governor,SELECTORS.governorProposalRegistry) !== modules.proposalRegistry) throw new Error('Governance discovered Proposal Registry binding mismatch');
@@ -278,7 +318,7 @@ export function createGovernance420Client({ provider, chainId, account, discover
     return { chainId: chain, account: voter, discovery: canonical };
   }
 
-  async function proposal(proposalId) {
+  async function readProposal(proposalId) {
     const id = normalizeBytes32(proposalId);
     const p = decodeProposal(resultWords(await call(provider,modules.proposalRegistry,encodeCall(SELECTORS.proposals,bytes32Word(id)),voter),9,'proposal'),id);
     if (!p.exists) throw new Error('Governance proposal does not exist');
@@ -297,12 +337,18 @@ export function createGovernance420Client({ provider, chainId, account, discover
     };
   }
 
+  async function proposal(proposalId) {
+    await verifySession();
+    return readProposal(proposalId);
+  }
+
   async function listProposals(limit = 50) {
+    await verifySession();
     if (!indexer || typeof indexer.listProposalIds !== 'function') throw new Error('Governance proposal list requires non-authoritative Indexer discovery');
     const ids = await indexer.listProposalIds(expectedChain,limit);
     const items = [];
     for (const id of ids) {
-      try { items.push(await proposal(id)); } catch { /* stale/reorged projection: omit, chain is authoritative */ }
+      try { items.push(await readProposal(id)); } catch { /* stale/reorged projection: omit, chain is authoritative */ }
     }
     return items;
   }
@@ -362,6 +408,18 @@ export function createGovernance420Client({ provider, chainId, account, discover
     await provider.request('eth_call',[tx,'latest']);
     const gas = await provider.request('eth_estimateGas',[tx]);
     await verifySession();
+    const updated = await proposal(id);
+    const newBlock = BigInt(await provider.request('eth_blockNumber'));
+    if (updated.state !== 'ACTIVE' || newBlock < updated.voteStart || newBlock > updated.voteEnd) {
+      throw new Error('Governance proposal became stale during vote preflight');
+    }
+    if (updated.actionsHash !== detail.actionsHash || updated.snapshotBlock !== detail.snapshotBlock ||
+        updated.voteStart !== detail.voteStart || updated.voteEnd !== detail.voteEnd ||
+        updated.frozenRule.constitutionRevision !== detail.frozenRule.constitutionRevision ||
+        updated.electorate.community.electorateRoot !== detail.electorate.community.electorateRoot ||
+        updated.electorate.validator.electorateRoot !== detail.electorate.validator.electorateRoot) {
+      throw new Error('Governance proposal commitment or snapshot changed during vote preflight');
+    }
     const fresh = await eligibility(id,h,proofData);
     if (!fresh.eligible || fresh.weight !== preflight.weight) throw new Error('Governance eligibility changed during vote preflight');
     const nonce = await provider.request('eth_getTransactionCount',[voter,'pending']);

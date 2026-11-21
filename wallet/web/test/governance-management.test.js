@@ -17,7 +17,16 @@ const A={
 };
 const ALICE='0x1111111111111111111111111111111111111111';
 const REGISTRY='0x0000000000000000000000000000000000002000';
-const IDS={constitution:'0x'+'01'.repeat(32),proposalRegistry:'0x'+'02'.repeat(32),electorateRegistry:'0x'+'03'.repeat(32),voting:'0x'+'04'.repeat(32),governor:'0x'+'05'.repeat(32)};
+const ID_PREIMAGES={
+  constitution:'420/component/governance/civic-constitution/v1',
+  proposalRegistry:'420/component/governance/civic-proposal-registry/v1',
+  electorateRegistry:'420/component/governance/civic-electorate-registry/v1',
+  voting:'420/component/governance/civic-voting/v1',
+  governor:'420/component/governance/civic-governor/v1',
+};
+const IDS=Object.fromEntries(Object.entries(ID_PREIMAGES).map(([key,value])=>[key,keccak256Hex(new TextEncoder().encode(value))]));
+const SERVICE_HASH=keccak256Hex(new TextEncoder().encode(GOVERNANCE420_SERVICE_ID));
+const REGISTRY_CODE_HASH=keccak256Hex(Uint8Array.from([0x60,0x01]));
 const PROPOSAL='0x'+'aa'.repeat(32);
 const META='0x'+'bb'.repeat(32);
 const ACTIONS='0x'+'cc'.repeat(32);
@@ -52,6 +61,9 @@ class FakeProvider{
     this.state=overrides.state??1n;
     this.actionsHash=overrides.actionsHash??ACTIONS;
     this.computedActionsHash=overrides.computedActionsHash??this.actionsHash;
+    this.serviceGovernor=overrides.serviceGovernor??A.governor;
+    this.serviceVersion=overrides.serviceVersion??1n;
+    this.componentHash=overrides.componentHash??REGISTRY_CODE_HASH;
   }
   async request(method,params=[]){
     this.calls.push({method,params});
@@ -73,6 +85,13 @@ class FakeProvider{
     };
     if(sel===selector('systemName()'))return str(names[to]);
     if(sel===selector('protocolVersion()'))return result(w(to===REGISTRY?4:1));
+    if(to===REGISTRY&&sel===selector('resolveActive(bytes32)')){
+      assert.equal('0x'+data.slice(-64).toLowerCase(),SERVICE_HASH);
+      return result(aw(this.serviceGovernor),w(this.serviceVersion));
+    }
+    if(to===REGISTRY&&sel===selector('runtimeCodeHash(bytes32)')){
+      return result(bw(this.componentHash));
+    }
     if(to===REGISTRY&&sel===selector('resolve(bytes32)')){
       const componentId='0x'+data.slice(-64).toLowerCase();
       const key=Object.keys(IDS).find((name)=>IDS[name]===componentId);
@@ -123,6 +142,7 @@ test('canonical ProtocolRegistry discovery validates code, identity, versions an
   assert.deepEqual(c.modules,A);
   assert.equal(p.calls.filter((x)=>x.method==='eth_getCode').length,6);
   assert.equal(p.calls.filter((x)=>x.method==='eth_call'&&x.params?.[0]?.to===REGISTRY&&x.params?.[0]?.data?.slice(2,10)===selector('resolve(bytes32)')).length,5);
+  assert.equal(p.calls.filter((x)=>x.method==='eth_call'&&x.params?.[0]?.data?.slice(2,10)===selector('runtimeCodeHash(bytes32)')).length,5);
 });
 
 test('discovery fails closed on invented source, wrong chain, missing code, account drift and module mismatch',async()=>{
@@ -263,4 +283,46 @@ test('error classifier gives explicit recovery semantics',()=>{
   assert.equal(classifyGovernance420Error(new Error('chain changed')).code,'NETWORK_CHANGED');
   assert.equal(classifyGovernance420Error(new Error('account changed')).code,'ACCOUNT_CHANGED');
   assert.equal(classifyGovernance420Error(new Error('already voted')).retryable,false);
+});
+
+test('GOV-REC-5 frozen component IDs, Registry address, service activity and runtime hash are enforced',async()=>{
+  const wrongId=discovery(); wrongId.componentIds.governor='0x'+'aa'.repeat(32);
+  assert.throws(()=>client(new FakeProvider(),null,wrongId),/canonical component ID mismatch/);
+  const wrongRegistry=discovery(); wrongRegistry.registryAddress='0x0000000000000000000000000000000000000435';
+  assert.throws(()=>client(new FakeProvider(),null,wrongRegistry),/ProtocolRegistry address mismatch/);
+  await assert.rejects(client(new FakeProvider({serviceGovernor:A.voting})).verifySession(),/active service mismatch/);
+  await assert.rejects(client(new FakeProvider({serviceVersion:0n})).verifySession(),/active service mismatch/);
+  await assert.rejects(client(new FakeProvider({componentHash:'0x'+'44'.repeat(32)})).verifySession(),/runtime code hash mismatch/);
+});
+
+test('GOV-REC-5 listing/details reject stale network, Registry and code after initially verified session',async()=>{
+  const p=new FakeProvider();
+  const c=client(p,{async listProposalIds(){return [PROPOSAL];}});
+  await c.verifySession();
+  p.chain='0x1';
+  await assert.rejects(c.proposal(PROPOSAL),/Wrong network/);
+  await assert.rejects(c.listProposals(),/Wrong network/);
+  p.chain='0x1a4'; p.serviceGovernor=A.voting;
+  await assert.rejects(c.proposal(PROPOSAL),/active service mismatch/);
+  p.serviceGovernor=A.governor; p.componentHash='0x'+'77'.repeat(32);
+  await assert.rejects(c.listProposals(),/runtime code hash mismatch/);
+});
+
+test('GOV-REC-5 changed proposal state and action commitment after gas estimate block vote submission',async()=>{
+  for(const mutation of ['state','actionsHash','block']){
+    const p=new FakeProvider();
+    const original=p.request.bind(p);
+    p.request=async(method,params=[])=>{
+      if(method==='eth_estimateGas'){
+        const gas=await original(method,params);
+        if(mutation==='state')p.state=2n;
+        if(mutation==='actionsHash')p.actionsHash='0x'+'55'.repeat(32);
+        if(mutation==='block')p.block=21n;
+        return gas;
+      }
+      return original(method,params);
+    };
+    await assert.rejects(client(p).sendVote({proposalId:PROPOSAL,house:0,support:1}),/stale|commitment or snapshot changed/);
+    assert.equal(p.sent.length,0,'no vote may broadcast on '+mutation+' drift');
+  }
 });

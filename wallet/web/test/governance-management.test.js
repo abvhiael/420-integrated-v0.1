@@ -16,7 +16,7 @@ const A={
   governor:'0x0000000000000000000000000000000000001005',
 };
 const ALICE='0x1111111111111111111111111111111111111111';
-const REGISTRY='0x0000000000000000000000000000000000002000';
+const REGISTRY='0x0000000000000000000000000000000000000434';
 const ID_PREIMAGES={
   constitution:'420/component/governance/civic-constitution/v1',
   proposalRegistry:'420/component/governance/civic-proposal-registry/v1',

@@ -283,7 +283,7 @@ export function takeChaosTurn(previous,{player,action,index=null,target=null,cho
   log(s,p.name+' spent a turn clearing '+p.status.name+'.');p.status=null;
  }else if(action!=='pass')throw Error('Unsupported action.');
  markFinish(s);
- s.fresh=[];s.step='discard';s.discardsLeft=action==='pass'?2:1;
+ s.fresh=[];s.step='discard';s.discardsLeft=(action==='pass'||action==='recover')?2:1;
  return s;
 }
 export function advanceChaosLeg(previous){

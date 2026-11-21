@@ -2,6 +2,15 @@
 
 **Status baseline:** 2026-09-19. **Active work:** BG-19, production web application and qualified service integration. **Working branch:** `feature/bong-goggles-bg19-web-app`, [PR #350](https://github.com/abvhiael/420-integrated-v0.1/pull/350), open and not merged at this baseline. **Intended public host:** `https://bonggoggles.420integrated.org`. **Next phase after evidenced BG-19 closeout:** BG-20 operational launch hardening.
 
+## BG-CLASSICS — 25-game implementation program (BC-0 through BC-25)
+
+**Canonical execution contract:** [BONG-GOGGLES-CLASSICS-ROADMAP.md](BONG-GOGGLES-CLASSICS-ROADMAP.md) (adopted 2026-11-21). This is an additive implementation workstream and does not reclassify BG-15 legacy ruleset registration or BG-19 game UI shells as complete playable games.
+
+**Fixed order:** BC-0 common games platform; BC-1 Cribbage; BC-2 Russian Cribbage; BC-3 Chess; BC-4 Scrabble/legally usable word-game identity; BC-5 Checkers; BC-6 Backgammon; BC-7 Dominoes; BC-8 Crazy Eights; BC-9 Euchre; BC-10 Yahtzee/five-dice scoring with complete 1/2/3/6-row scorecards; BC-11 Go Fish; BC-12 Hearts; BC-13 Go; BC-14 traditional four-player Mahjong; BC-15 Spades; BC-16 500; BC-17 Canasta; Canadian Classics BC-18 Tarabish, BC-19 45s, BC-20 120s, BC-21 Deux Cents, BC-22 Hola, BC-23 Rook, BC-24 Nines, BC-25 Kaiser.
+
+**Execution guardrails:** Each game requires the rules/scoring engine, Easy/Medium/Hard non-cheating AI, authenticated human and mixed-seat multiplayer, responsive playable UI, saved/reconnectable state, result history/rematches and actual live-browser qualification before marking it Playable or advancing. Off-chain 420ID account matches are wallet-optional and distinct from existing on-chain BG-15 canonical sessions. No wagers or unverified rewards; retain Cross-Country Chaos and other existing games. **Current status: ROADMAP ONLY; BC-0 through BC-25 not completed by adoption.**
+
+---
 ## 1. Product goal and definitions of done
 
 Bong Goggles is the 420 Integrated social application: 420Wallet-based sessions, user profiles, friends/follows, posts and photos, stories and interactions, pages/groups/events, private messaging, discovery/reviews/search, seven zero-wager social games, notifications, rewards, and moderation/safety. The web application presents canonical or qualified projected data and prepares explicitly authorized intents; it does not become a second source of truth for identities, content, permissions, messaging, payments, rewards, moderation, or wallet signatures.

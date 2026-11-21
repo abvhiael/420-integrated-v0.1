@@ -155,3 +155,226 @@
  .ccc-map-stop text{paint-order:normal;stroke:none}
  .ccc-stock-back,.ccc-seat-mat{border:2px solid CanvasText}
 }
+
+/* CCC-ART-1 — The Long Way Home. No remote fonts or images: everything is
+   scoped to the local road-trip game, with readable signage and felt textures.
+   Ink, cream, road-green, enamel-red and caution-gold are the canonical palette. */
+.ccc-wrap--roadtrip{
+  --ccc-ink:#10251f;
+  --ccc-night:#132d25;
+  --ccc-road-green:#20523b;
+  --ccc-deep-green:#173b2e;
+  --ccc-felt:#1d4734;
+  --ccc-cream:#f6efd7;
+  --ccc-paper:#ebe2c7;
+  --ccc-gold:#f6cd71;
+  --ccc-enamel-red:#e37557;
+  --ccc-text-muted:#cddfce;
+  --ccc-region-accent:#86d5c6;
+  --ccc-region-accent-ink:#17382e;
+  --ccc-display:'Trebuchet MS','Arial Narrow',system-ui,sans-serif;
+  --ccc-sign:'Arial Narrow','Franklin Gothic Medium',Arial,sans-serif;
+  font-family:system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--ccc-cream);
+  max-width:1150px;
+  padding:0 clamp(.2rem,1.5vw,1rem) 2.5rem;
+  position:relative;
+}
+.ccc-wrap--roadtrip.ccc-region--ontario{--ccc-region-accent:#b7e3e9;--ccc-region-accent-ink:#153846}
+.ccc-wrap--roadtrip.ccc-region--west{--ccc-region-accent:#f6cd71;--ccc-region-accent-ink:#433017}
+.ccc-wrap--roadtrip h2,.ccc-wrap--roadtrip h3,.ccc-wrap--roadtrip h4{
+  font-family:var(--ccc-display);letter-spacing:-.02em;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip{
+  position:relative;overflow:hidden;isolation:isolate;
+  border:2px solid #688b69;border-radius:1rem;
+  background:
+    radial-gradient(circle at 97% 18%,#d8a75121 0 13%,transparent 35%),
+    linear-gradient(119deg,#122a24 0%,#224e3b 65%,#18382d 100%);
+  box-shadow:inset 0 0 0 4px #142e27,0 7px 22px #07191066;
+  padding:clamp(1.1rem,2.8vw,2rem);
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip::before{
+  content:"";position:absolute;z-index:-1;inset:0;
+  background:repeating-linear-gradient(118deg,transparent 0 19px,#faf6e40a 19px 20px,transparent 20px 39px);
+  pointer-events:none;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip::after{
+  content:"";position:absolute;top:0;left:0;right:0;height:6px;
+  background:repeating-linear-gradient(90deg,var(--ccc-gold) 0 35px,var(--ccc-ink) 35px 43px);
+  pointer-events:none;
+}
+.ccc-road-brand{
+  display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;margin-bottom:.65rem;
+}
+.ccc-highway-shield{
+  display:inline-flex;align-items:center;justify-content:center;gap:.35rem;
+  font:900 .78rem/1 var(--ccc-sign);letter-spacing:.08em;
+  padding:.48rem .7rem;border:3px solid #eff9e3;border-radius:.2rem .2rem .85rem .85rem;
+  color:#fcfff5;background:#1c613c;box-shadow:0 0 0 2px #104126;
+  min-height:41px;
+}
+.ccc-highway-shield b{font-size:1.03rem;letter-spacing:.05em}
+.ccc-road-brandline{
+  color:var(--ccc-gold);font:800 .73rem/1.45 var(--ccc-sign);
+  letter-spacing:.12em;text-transform:uppercase;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip .eyebrow{
+  margin:.75rem 0 .2rem;letter-spacing:.16em;font:800 .76rem var(--ccc-sign);
+  color:var(--ccc-region-accent);text-transform:uppercase;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip h2{
+  font:900 clamp(2rem,5.3vw,3.8rem)/1.07 var(--ccc-display);
+  letter-spacing:-.045em;text-wrap:balance;margin:.2rem 0;
+  color:#fff9e5;text-shadow:2px 3px 0 #0b211b99;
+}
+.ccc-wrap--roadtrip .ccc-hero-quip{
+  font:800 clamp(1.05rem,1.9vw,1.35rem)/1.35 var(--ccc-display);
+  color:var(--ccc-gold);margin:.55rem 0 1.1rem;max-width:56ch;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip>p:not(.ccc-hero-quip):not(.eyebrow){
+  max-width:75ch;color:#e5efdf;
+}
+.ccc-wrap--roadtrip .ccc-hero--roadtrip strong{color:#fff8de}
+.ccc-wrap--roadtrip .ccc-stats{gap:.7rem}
+.ccc-wrap--roadtrip .ccc-player{
+  border:1px solid #8aa67e;border-top:4px solid var(--ccc-region-accent);
+  background:linear-gradient(120deg,#234736,#1d3c2e);
+  box-shadow:inset 0 0 0 2px #142d26;border-radius:.65rem;
+}
+.ccc-wrap--roadtrip .ccc-player strong{font-family:var(--ccc-display);font-size:1.05rem}
+.ccc-wrap--roadtrip .ccc-player span{color:#f9f5df}
+.ccc-wrap--roadtrip .ccc-setup,.ccc-wrap--roadtrip .ccc-panel,
+.ccc-wrap--roadtrip .ccc-standings{
+  background:
+    radial-gradient(circle at 12% 21%,#e4f8d809 0 1px,transparent 2px),
+    repeating-linear-gradient(38deg,#ffffff05 0 1px,transparent 1px 6px),
+    linear-gradient(155deg,#1c4431,#143326);
+  border:1px solid #688870;
+  box-shadow:inset 0 0 0 3px #102a22,0 5px 16px #04151055;
+}
+.ccc-wrap--roadtrip .ccc-hand-card{
+  border-width:2px;border-style:solid;border-color:#a98e5b;
+  border-radius:.6rem;box-shadow:0 4px 0 #0c231d,0 9px 18px #07120b77;
+}
+.ccc-wrap--roadtrip .ccc-hand-card .ccc-card-details{background:#efe8d1}
+.ccc-wrap--roadtrip .ccc-hand-card small{
+  font:800 .73rem/1.4 var(--ccc-sign);letter-spacing:.11em;color:#355448;
+}
+.ccc-wrap--roadtrip .ccc-hand-card strong{font-family:var(--ccc-display)}
+.ccc-wrap--roadtrip .ccc-hand-card.ccc-hazard{border-color:var(--ccc-enamel-red)}
+.ccc-wrap--roadtrip .ccc-hand-card.ccc-legendary{border-color:var(--ccc-gold)}
+.ccc-wrap--roadtrip .ccc-hand-card.ccc-fix{border-color:#86bbcb}
+.ccc-wrap--roadtrip button,.ccc-wrap--roadtrip .ccc-link{
+  font-family:var(--ccc-sign);font-weight:800;letter-spacing:.02em;
+  background:var(--ccc-gold);color:var(--ccc-ink)!important;
+  border:2px solid #fff2c7;box-shadow:0 3px 0 #71582e;
+}
+.ccc-wrap--roadtrip button:hover,.ccc-wrap--roadtrip .ccc-link:hover{
+  background:#fff2c7;box-shadow:0 2px 0 #71582e;
+}
+.ccc-wrap--roadtrip button:focus-visible,.ccc-wrap--roadtrip a:focus-visible,
+.ccc-wrap--roadtrip input:focus-visible,.ccc-wrap--roadtrip select:focus-visible{
+  outline:3px solid #fff3b3;outline-offset:3px;
+}
+.ccc-wrap--roadtrip button:disabled{opacity:.7;box-shadow:none}
+.ccc-wrap--roadtrip .ccc-highway{
+  border:2px solid #d0b675;border-radius:.85rem;
+  box-shadow:0 0 0 3px #10251f,0 12px 25px #07181072;
+}
+.ccc-wrap--roadtrip .ccc-highway-head{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:.8rem;
+  padding:.8rem 1rem;background:
+    repeating-linear-gradient(120deg,#ffffff09 0 2px,transparent 2px 9px),
+    #173f31;border-bottom:3px solid #d4b876;
+}
+.ccc-wayfinding-sign{
+  display:flex;align-items:center;gap:.4rem;
+  background:#21613f;border:2px solid #f1f4dc;border-radius:.35rem;
+  padding:.55rem .7rem;color:#fff;
+  box-shadow:inset 0 0 0 2px #21613f,0 0 0 1px #0d2b1e;
+  font:900 .79rem/1.15 var(--ccc-sign);letter-spacing:.035em;
+  white-space:normal;text-align:center;max-width:180px;
+}
+.ccc-wayfinding-maple{
+  color:#ffe2a0;font-size:1.15rem;line-height:1;flex:none;
+}
+.ccc-highway-titles h3{
+  font:900 clamp(.94rem,1.65vw,1.14rem)/1.2 var(--ccc-display);
+  letter-spacing:.01em;margin:0;color:#fff7d7;
+}
+.ccc-highway-titles p{font-size:.75rem;margin:.2rem 0 0;color:#e1ebd5;line-height:1.35}
+.ccc-wrap--roadtrip .ccc-highway-head>span:last-child{
+  font:800 .7rem/1.3 var(--ccc-sign);color:var(--ccc-gold);max-width:138px;
+  text-align:right;
+}
+.ccc-highway-canvas{fill:#192f2b}
+.ccc-region--east .ccc-highway-canvas{fill:#173936}
+.ccc-region--ontario .ccc-highway-canvas{fill:#193c45}
+.ccc-region--west .ccc-highway-canvas{fill:#3d4232}
+.ccc-wrap--roadtrip .ccc-map-stop circle{fill:var(--ccc-gold);stroke:#223d30}
+.ccc-wrap--roadtrip .ccc-map-stop text{font-family:var(--ccc-sign);letter-spacing:.025em}
+.ccc-wrap--roadtrip .ccc-highway-centre{stroke:var(--ccc-gold)}
+.ccc-wrap--roadtrip .ccc-road-legend{
+  border-top:2px solid #426e53;background:#1b3b2c;
+}
+.ccc-wrap--roadtrip .ccc-road-driver{font-variant-numeric:tabular-nums}
+.ccc-wrap--roadtrip .ccc-table-piles,
+.ccc-wrap--roadtrip .ccc-seat-mat{
+  background:
+    radial-gradient(ellipse at 55% 24%,#d5ffde0b,transparent 70%),
+    repeating-linear-gradient(45deg,#ffffff04 0 1px,transparent 1px 5px),
+    linear-gradient(155deg,var(--ccc-felt),#133326);
+  border:1px solid #789075;box-shadow:inset 0 0 0 3px #0d2a21;
+}
+.ccc-wrap--roadtrip .ccc-seat-mat--active{
+  border-color:var(--ccc-gold);box-shadow:inset 0 0 0 2px #ac8848,0 0 0 2px #fff1a5;
+}
+.ccc-wrap--roadtrip .ccc-seat-areas h5{
+  font:900 .75rem/1.4 var(--ccc-sign);
+  text-transform:uppercase;letter-spacing:.08em;color:#e5f2dd;
+}
+.ccc-wrap--roadtrip .ccc-stock-back{
+  background:
+    repeating-linear-gradient(45deg,#d0cf8d18 0 4px,transparent 4px 9px),
+    linear-gradient(145deg,#245c3f,#102e25);
+  border-color:#ebdca6;
+}
+.ccc-wrap--roadtrip .ccc-stock-back span:first-child{
+  font:900 1.42rem/1 var(--ccc-display);color:#f8eab8;
+}
+.ccc-wrap--roadtrip .ccc-stock-back span:last-child{
+  color:#e1e9d4;letter-spacing:.16em;
+}
+.ccc-wrap--roadtrip .ccc-private{
+  border:2px dashed #e6c783;box-shadow:inset 0 0 0 4px #183728;
+}
+.ccc-wrap--roadtrip .ccc-history{
+  border:1px solid #8ea17d;background:#18372a;
+}
+.ccc-wrap--roadtrip .ccc-standings h3{color:var(--ccc-gold)}
+.ccc-wrap--roadtrip .ccc-error{border-color:#ffb69c;background:#692e26;color:#fff}
+@media(max-width:770px){
+ .ccc-wrap--roadtrip .ccc-highway-head{grid-template-columns:auto minmax(0,1fr)}
+ .ccc-wrap--roadtrip .ccc-highway-head>span:last-child{grid-column:1/-1;text-align:left;max-width:none}
+}
+@media(max-width:450px){
+ .ccc-wrap--roadtrip .ccc-highway-head{display:flex;flex-wrap:wrap;gap:.5rem}
+ .ccc-wayfinding-sign{font-size:.72rem;max-width:100%}
+ .ccc-wrap--roadtrip .ccc-hero--roadtrip{padding:1rem}
+ .ccc-road-brandline{font-size:.65rem}
+}
+@media(prefers-reduced-motion:reduce){
+ .ccc-wrap--roadtrip *, .ccc-wrap--roadtrip *::before,.ccc-wrap--roadtrip *::after{
+  transition:none!important;animation:none!important;
+ }
+}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-hero--roadtrip,.ccc-wrap--roadtrip .ccc-player,
+ .ccc-wrap--roadtrip .ccc-table-piles,.ccc-wrap--roadtrip .ccc-seat-mat,
+ .ccc-wayfinding-sign,.ccc-highway-shield{border:2px solid CanvasText;box-shadow:none}
+ .ccc-wrap--roadtrip .ccc-hero--roadtrip h2,
+ .ccc-wrap--roadtrip .ccc-hero-quip,.ccc-wayfinding-sign{color:CanvasText}
+ .ccc-wrap--roadtrip button{border:2px solid ButtonText;background:ButtonFace;color:ButtonText!important}
+}

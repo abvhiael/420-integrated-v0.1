@@ -63,7 +63,7 @@ jobs:
           python3 scripts/verify-governance-audit-6.py --require-ready
           python3 scripts/verify-governance-audit-4.py
           git diff --exit-code -- contracts/artifacts contracts/config/governance-deployment-v1.json contracts/config/predeploy contracts/config/deployment-manifest.json
-      - name: Frozen Genesis address, electrolyte fixture and authority checks
+      - name: Frozen Genesis address, electorate fixture and authority checks
         run: |
           python3 scripts/test-governance-rec-2-electorates.py
           python3 scripts/build-governance-rec-2-electorates.py --input contracts/test/fixtures/governance-rec-2-members.json --output contracts/test/fixtures/governance-rec-2-vectors.json --check

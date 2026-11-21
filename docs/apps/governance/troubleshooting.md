@@ -49,3 +49,11 @@ That is canonical behavior. Civic v1 has no post-creation cancellation transitio
 Verify the exact module graph, COMMUNITY/VALIDATOR sources, revision-1 G1–G4 rules, Proposal/Electorate Registry authority bindings, Governance420 compatibility pointer, seven Registry component resolutions and active Governance service publication.
 
 If pre-activation state is wrong, discard/redeploy the candidate rather than patching guessed values. After Civic activation, bootstrap rollback is intentionally unavailable.
+
+## GOV-REC-6 candidate missing approval or artifact drift
+
+When `verify-governance-rec-6.py` reports `PENDING_FAIL_CLOSED` in offline mode, **do not treat that as a code failure**: it means authentic chain-specific electorates and a complete approved plan have not been materialized. The strict `--require-activation-ready` form must fail for current five zero-valued fields. A partial configuration, forged fixture, different chain, mismatched actual code hash or wrong predeploy storage slot is a **release integrity failure**, never a reason to override the check.
+
+When exact retained artifacts disagree with a clean compiler rebuild, stop and inspect compiler pin, immutable values, generated ABI/layout, Git source blob SHA and Genesis plan. Reconcile as one source-qualified candidate; never edit only the expected hash. A failed original Timelock operation must be retried only under the original mature operation ID. If that operation cannot succeed under its approved commitment, abandon the unreleased candidate. After Civic activation there is no bootstrap rollback or operator emergency authority.
+
+Refer to [GOV-REC-6 cold-start runbook](cold-start.md) for the exact 19-step execution order and proof requirements.

@@ -47,3 +47,10 @@ The committed `genesisBootstrapCommitment` contains approvedPlanHash and both Co
 ## Merge and subsequent stage
 
 **PR #1299 remains unmerged.** The software closeout status `PRE_TESTNET_SOFTWARE_QUALIFIED` is **NOT ASSERTED** until all required exact-head checks, including protected full Level 3, pass and security findings are closed. Do not change the canonical roadmap to COMPLETE yet. After GOV-REC-6 actually qualifies, the next canonical step is GOV-AUDIT-9 (production-equivalent live testnet deployment qualification); it has not been started here.
+
+## Subsequent branch corrections (2026-11-21)
+
+- The first shard-harness remapping insertion in `1f5e210f684d629acb469a5be374398aab5293a9` was malformed by a shell quoting/insertion error. The dedicated cold-start job [#44935089728](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44935089728), job `136939867534`, **FAILED** during the newly added `bash -n` preflight. This was not a Solidity contract failure.
+- The shared shard script was rebuilt from the unmodified original inventory and compilation loop. **Correction commit `d57c744c18f5df8ae11ed0dbcc6c1726221a07f6`** retains the exact three audited dependency remappings, preserves caller-supplied remappings, and repairs the shell syntax. The isolated replacement fragment passed local `bash -n`; the complete committed script's new exact-head preflight and subsequent CI are being checked under [GOV-REC-6 run #44935259871](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44935259871). Do **not** treat a pending or skipped job as passing.
+- The two original protected-workflow defects have **not** been concealed. The branch restores their manual-only files byte-for-byte. The dedicated focused qualification is not a replacement for the protected full Level 3 dispatch.
+- After the correction, new Governance Solidity, ABI, bytecode, Genesis materialization and constitutional source changes remain **zero**. The live approved Genesis commitment is still absent and the strict release activation gate must fail closed.

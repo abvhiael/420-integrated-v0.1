@@ -145,25 +145,21 @@
     "CivicGovernor420(CivicConstitution420,CivicProposalRegistry420,CivicElectorateRegistry420,CivicVoting420)"
   ],
   "initializationOrder": [
-    "materialize GovernanceTimelock at 0x0429 with explicit bootstrapGovernor",
+    "materialize GovernanceTimelock at 0x0429 with explicit bootstrapGovernor 0x0437",
     "materialize Governance420 at 0x0437 bound to GovernanceTimelock@0x0429",
-    "materialize the chain-specific approved Civic bootstrap plan and initial electorate commitments in Governance420 fixed Genesis storage (zero configuration fails closed)",
-    "deploy CivicConstitution420",
-    "deploy CivicProposalRegistry420",
-    "deploy CivicElectorateRegistry420",
-    "configure COMMUNITY electorate source through GovernanceTimelock",
-    "configure VALIDATOR electorate source through GovernanceTimelock when required by canonical rules",
-    "install canonical initial constitutional rules G1-G4 through GovernanceTimelock",
+    "materialize the chain-specific approved Civic bootstrap plan and both independently evidenced initial electorate commitments in Governance420 fixed Genesis storage; zero configuration fails closed",
+    "deploy CivicConstitution420 with exact GovernanceTimelock authority and no initial rules",
+    "deploy CivicProposalRegistry420 with exact GovernanceTimelock authority and unset proposalAuthority",
+    "deploy CivicElectorateRegistry420 with exact GovernanceTimelock authority and unset house sources/snapshotAuthority",
+    "deploy COMMUNITY and VALIDATOR equal-weight Merkle source contracts with correct types and no initial checkpoints",
     "deploy CivicVoting420 with exact Proposal/Electorate Registry addresses",
     "deploy CivicGovernor420 with exact Constitution/Proposal/Electorate/Voting graph",
-    "bind CivicProposalRegistry420 proposalAuthority to CivicGovernor420 through GovernanceTimelock",
-    "bind CivicElectorateRegistry420 snapshotAuthority to CivicGovernor420 through GovernanceTimelock",
-    "bind Governance420 compatibility civicGovernor pointer to CivicGovernor420 through GovernanceTimelock",
-    "register five core Civic component IDs plus two electorate-source component IDs in ProtocolRegistry with ACTIVE lifecycle and runtime code hashes",
-    "publish governance service profile pointing to CivicGovernor420",
-    "publish both first electorate checkpoints through Timelock and wait for their effective blocks before Civic activation",
-    "activate GovernanceTimelock Civic authority last",
-    "verify scheduler == CivicGovernor420 and civicAuthorityActivated == true"
+    "verify clean uninitialized component graph, exact runtime hashes/versions, empty canonical Registry entries and approved electorate materialization",
+    "permissionlessly call Governance420.scheduleCanonicalCivicBootstrap for only the exact Genesis-approved graph, scheduling 19 fixed G1 Timelock operations atomically",
+    "after G1 delay execute fixed Timelock operations 0..18 through permissionless GovernanceTimelock.execute: configure both house sources (0-1), install revision-1 G1-G4 constitutional rules (2-5), bind the three authorities (6-8), register seven Civic components (9-15), publish Governance service (16), publish initial COMMUNITY and VALIDATOR checkpoints (17-18)",
+    "verify initial electorate checkpoints have correct genesis roots/totals/source revisions and are effective for the prior-block proposal snapshot; no Civic proposal is required to publish them",
+    "activate GovernanceTimelock Civic authority last through Governance420.activateCanonicalCivic, irreversibly retiring bootstrap authority",
+    "verify scheduler == CivicGovernor420 and civicAuthorityActivated == true, then create and vote on a real dual-house proposal"
   ],
   "canonicalInputs": {
     "bootstrapGovernor": {

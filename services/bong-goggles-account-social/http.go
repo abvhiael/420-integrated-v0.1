@@ -25,6 +25,8 @@ type Handler struct{
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
  Origin string
  host string
+ trustedEdgeKey [32]byte
+ trustedEdgeEnabled bool
 }
 func NewHandler(store *Store,sso *SignOn,origin string)(*Handler,error){
  u,e:=url.Parse(origin)
@@ -33,6 +35,18 @@ func NewHandler(store *Store,sso *SignOn,origin string)(*Handler,error){
  store==nil||sso==nil||sso.Store!=store{return nil,ErrInvalid}
  return &Handler{Store:store,SignOn:sso,Origin:strings.TrimSuffix(origin,"/"),host:u.Host},nil
 }
+// ConfigureTrustedWorker admits only the named Render service hostname when a
+// Cloudflare Worker proves possession of a separate 256-bit proxy secret.
+// It does not weaken canonical-host or HTTPS checks for other requests.
+func (h *Handler) ConfigureTrustedWorker(encoded string) error {
+ if h==nil||h.trustedEdgeEnabled{return ErrInvalid}
+ key,e:=base64.RawURLEncoding.Strict().DecodeString(encoded)
+ if e!=nil||len(key)!=32{return ErrInvalid}
+ copy(h.trustedEdgeKey[:],key)
+ h.trustedEdgeEnabled=true
+ return nil
+}
+
 // EnableAccountExtras is opt-in; legacy AUTH-8 behavior has no message or
 // off-chain game authority. Both services must share this authenticated store.
 func (h *Handler) EnableAccountExtras(messages *MessageService,games *AccountGames)error{
@@ -113,9 +127,20 @@ func nextCursor(p Post)string{
  return base64.RawURLEncoding.EncodeToString([]byte(p.CreatedAt.UTC().Format(time.RFC3339Nano)+"|"+p.ID))
 }
 func (h *Handler) allowed(r *http.Request)bool{
- if r.Host!=h.host||r.URL.RawPath!=""||r.URL.ForceQuery{return false}
- // Render must only be reachable through the reviewed Cloudflare/Render TLS
- // ingress. Never trust browser-supplied proxy headers from public ingress.
+ if h==nil||r==nil||r.URL==nil||r.URL.RawPath!=""||r.URL.ForceQuery{return false}
+ // Preserve the exact canonical-host boundary for ordinary requests.
+ // Render routes requests addressed to its own assigned hostname, so the
+ // Cloudflare same-origin Worker authenticates that transport with an
+ // independent shared secret. Never accept forwarded-host headers alone.
+ if r.Host!=h.host{
+  if r.Host!="bonggoggles-social.onrender.com"||!h.trustedEdgeEnabled{return false}
+  values:=r.Header.Values("X-Social420-Edge-Key")
+  if len(values)!=1{return false}
+  provided,e:=base64.RawURLEncoding.Strict().DecodeString(values[0])
+  if e!=nil||len(provided)!=32||!hmac.Equal(provided,h.trustedEdgeKey[:]){return false}
+ }
+ // Render terminates the HTTPS connection. Its HTTPS forward indicator is
+ // required when there is no direct TLS session to the Go server.
  proto:=r.Header.Values("X-Forwarded-Proto")
  return r.TLS!=nil||len(proto)==1&&proto[0]=="https"
 }

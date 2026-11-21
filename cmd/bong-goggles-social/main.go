@@ -77,6 +77,11 @@ func main(){
  if e!=nil{log.Fatal("Unsafe central 420ID client configuration")}
  sso,e:=social.NewSignOn(store,broker,key);if e!=nil{log.Fatal(e)}
  handler,e:=social.NewHandler(store,sso,required("SOCIAL420_ORIGIN"));if e!=nil{log.Fatal(e)}
+ // Optional independent Cloudflare Worker proxy credential. Without it,
+ // direct requests addressed to the Render hostname remain forbidden.
+ if edgeKey:=os.Getenv("SOCIAL420_EDGE_SECRET");edgeKey!=""{
+  if e=handler.ConfigureTrustedWorker(edgeKey);e!=nil{log.Fatal("Invalid SOCIAL420_EDGE_SECRET")}
+ }
  if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
   if e=store.ReadyAccountExtras(ctx);e!=nil{done();log.Fatal("AUTH-9 messaging/game schema or grants unavailable")}

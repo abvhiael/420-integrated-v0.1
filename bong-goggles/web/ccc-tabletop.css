@@ -514,6 +514,8 @@
 @media(max-width:650px){.ccc-wrap--roadtrip .ccc-final-round{padding:.65rem}}
 @media(forced-colors:active){.ccc-wrap--roadtrip .ccc-final-round{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}.ccc-wrap--roadtrip .ccc-final-round strong{color:CanvasText!important}}
 
+/* CCC-6: all game buttons, card actions and dropdowns meet mobile tap sizing. */
+.ccc-wrap--roadtrip button,.ccc-wrap--roadtrip select,.ccc-wrap--roadtrip input{min-block-size:44px;touch-action:manipulation}
 /* CCC-6: responsive, accessible offline save and resume controls. */
 .ccc-wrap--roadtrip .ccc-save-panel{padding:.85rem;margin-block:1rem;border:2px solid #afc2a8;
  border-radius:.7rem;background:#213d31;color:#fff1d2;max-inline-size:100%;overflow-wrap:anywhere}

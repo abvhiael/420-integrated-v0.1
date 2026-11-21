@@ -234,6 +234,7 @@ test('CCC-6: responsive UI and release build ship no hidden hands or auto-enroll
  assert.match(shell,/chaosSaveInfo/);
  assert.match(ui,/data-chaos-action="resume"/);
  assert.match(css,/min-block-size:44px/);
+ assert.match(css,/\.ccc-wrap--roadtrip button,\.ccc-wrap--roadtrip select/);
  assert.match(css,/@media\(max-width:480px\)/);
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(build,/for\(const item of \['index\.html','app\.js'/);

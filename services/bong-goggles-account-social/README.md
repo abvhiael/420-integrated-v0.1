@@ -129,3 +129,119 @@ A simulated in-process broker is NOT a real cross-domain browser sign-in:
 real Render/Cloudflare/Neon/Resend, physical passkey, HTTPS SSO and
 moderation ingress/rollback drills remain externally unqualified.
 Do not claim the public site has been activated based on CI alone.
+
+
+## AUTH-9 — wallet-independent account messages and games
+
+**Scope:** wallet-free AUTH-7 app-scoped social members can have private
+one-to-one conversations and play two explicitly **off-chain**, zero-wager
+turn-based quick games in the same BongGoggles account app. Existing
+`/messages` (canonical 420Messenger) and `/games` (canonical BG-15)
+routes remain **wallet-backed and authoritative for their separate
+protocols**; the new browser routes are `/account/messages` and
+`/account/games`. No transport bridges, account-to-wallet
+auto-associations, canonical Messenger encryption claims, on-chain game
+transactions, tournament scores, token rewards, XP, wagers, payments or
+payouts are created.
+
+### Messaging boundaries
+
+- `POST /social-api/v1/messages` sends from the **freshly validated**
+  420ID-scoped BongGoggles session (never a caller-supplied sender) to
+  another registered social member; both directions of the existing
+  AUTH-8 block graph must permit the send. An atomic member-pair lock
+  serializes sends against follow/block operations.
+- `GET /social-api/v1/messages` returns at most 50 visible conversation
+  peers and last timestamps, **not public message content**.
+  `GET /social-api/v1/messages/{peerSubject}` returns the newest 100
+  messages visible only to the involved viewer, sorted oldest-first
+  within the page. It rechecks blocks and per-side deletion.
+  `DELETE /social-api/v1/messages/item/{messageId}` hides one message
+  from the requesting participant; it never deletes the other
+  participant's copy.
+- Message bodies are encrypted **at rest** using AES-256-GCM with random
+  nonces and AAD bound to message ID, sender and recipient. The separate
+  secret `SOCIAL420_MESSAGE_KEY` must be independently generated from
+  `SOCIAL420_SESSION_KEY`; both remain in backend secret custody.
+  This is **server-side encryption, not end-to-end encryption**:
+  trusted service operators with the message key can decrypt stored
+  messages, unlike the separate 420Messenger encrypted-envelope protocol.
+  The UI states this explicitly. No cleartext message body is stored
+  in PostgreSQL or sent in a push/public feed. Browser results are
+  `no-store`, use only same-origin credentials and never persist
+  private content in localStorage.
+- Revoked, suspended, expired or unavailable AUTH-7 SSO fails closed,
+  as in AUTH-8. All mutation requests enforce exact Origin, TLS host,
+  strict JSON and distributed write limits. Private messages never
+  become on-chain rewards or social posts.
+
+### Zero-wager quick games
+
+- `POST /social-api/v1/account-games` issues an invitation for either
+  `tic_tac_toe` (3×3) or `connect_four` (7×6 gravity). Only the invited
+  account may accept/decline, within 24 hours. The inviter makes
+  the first move, and participants alternate. Game type and player
+  subjects are server-bound; callers cannot submit a winner, wager,
+  score, payout, RNG outcome, blockchain transaction or token fee.
+- `GET /social-api/v1/account-games` returns at most 50 current/past
+  games to a signed-in participant; `GET .../{gameId}` returns only
+  participant-visible board and move history. Both check the block
+  graph and never publicly disclose opponents' histories.
+- `POST .../{gameId}/respond` requires explicit `accept: true|false`.
+  `POST .../{gameId}/move` requires a legal position and the exact
+  `expectedMove` (one higher than the stored move count). The server
+  selects X/O and applies gravity for Connect Four, derives
+  horizontal/vertical/diagonal wins and draws, and atomically records
+  the board, next turn, terminal status and numbered move inside a
+  PostgreSQL row-locked transaction. Concurrent/replayed or
+  out-of-turn moves fail rather than double-spend a turn.
+- Terminal game records are immutable to the app API. These are free
+  off-chain practice/friendly games. They **do not** upgrade a social
+  user to an on-chain BG-15 player, settle a wager, verify canonical
+  rankings or issue tokens. The two supported local quick games
+  are intentionally separate from the seven canonical BG-15 rulesets.
+
+### Activation and schema
+
+Migration `002_account_messages_games.sql` extends the dedicated
+`bg_account_social` schema. It is applied only by the existing
+operator-only `bg-social migrate` command; runtime still has no DDL
+authority. Enable the backend only with
+`SOCIAL420_ACCOUNT_EXTRAS=restricted-acceptance` **and**
+a separate 32-byte Base64url `SOCIAL420_MESSAGE_KEY`.
+Unknown activation values and weak/reused keys fail startup. Default
+(non-activated) AUTH-8 server responds 404 on all AUTH-9 endpoints.
+Frontend `features.accountMessaging` and `features.accountGames`
+default false and require `features.accountSocial=true` in the
+validated configuration; enabling a frontend flag alone cannot create
+backend authorization or deploy a service.
+
+Add least-privilege runtime grants **after** operator migration:
+```sql
+GRANT SELECT, INSERT ON bg_account_social.direct_messages
+ TO bonggoggles_social_runtime;
+GRANT UPDATE(sender_deleted_at,recipient_deleted_at)
+ ON bg_account_social.direct_messages TO bonggoggles_social_runtime;
+GRANT SELECT, INSERT, UPDATE ON bg_account_social.account_games
+ TO bonggoggles_social_runtime;
+GRANT SELECT, INSERT ON bg_account_social.account_game_moves
+ TO bonggoggles_social_runtime;
+```
+Only the operator identity may manage schema, grant roles, inspect reports,
+or change moderation events. Before a public launch, deploy and verify
+the actual 420ID confidential client, Render service and Cloudflare
+same-origin `/social-api/*` ingress, real email/passkey sign-ins,
+key custody, outage/revocation, performance and safety moderation.
+This repository qualification does not establish those live conditions.
+
+### Focused qualification
+
+Go race-enabled PostgreSQL tests cover message ciphertext privacy and AAD
+binding, participant-only access, blocking, one-sided deletion, session
+revocation and provider failure; game invite identity, acceptance/expiry,
+server-calculated winners, ordering, history and concurrency replay,
+Connect Four gravity, terminal immutability and no wager/rewards.
+Node tests cover wallet-free routing, disabled-by-default flags,
+secretless same-origin access, XSS-safe content, game move displays and
+authoritative app-session failures. AUTH-8 account social remains
+previously qualified; only affected regression suites are included.

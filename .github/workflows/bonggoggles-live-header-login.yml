@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - bong-goggles/web/core/app-shell.js
+      - bong-goggles/web/core/account-identity.js
       - bong-goggles/web/dashboard.css
       - .github/workflows/bonggoggles-live-header-login.yml
   workflow_dispatch:
@@ -22,16 +23,20 @@ jobs:
           set -euo pipefail
           for attempt in {1..25}; do
             js_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-shell.js --write-out '%{http_code}' "https://bonggoggles.420integrated.org/core/app-shell.js?deploy=${GITHUB_SHA}" || true)"
+            identity_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-account-identity.js --write-out '%{http_code}' "https://bonggoggles.420integrated.org/core/account-identity.js?deploy=${GITHUB_SHA}" || true)"
             css_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-dashboard.css --write-out '%{http_code}' "https://bonggoggles.420integrated.org/dashboard.css?deploy=${GITHUB_SHA}" || true)"
-            if [[ "$js_status" == "200" && "$css_status" == "200" ]] &&
-               grep -Fq 'Log in with 420ID' /tmp/bg-shell.js &&
-               grep -Fq 'My account:' /tmp/bg-shell.js &&
+            if [[ "$js_status" == "200" && "$identity_status" == "200" && "$css_status" == "200" ]] &&
+               grep -Fq 'renderAccountHeader(accountIdentityState' /tmp/bg-shell.js &&
+               grep -Fq 'Sign In' /tmp/bg-account-identity.js &&
+               grep -Fq 'Log in with 420ID' /tmp/bg-account-identity.js &&
+               grep -Fq 'My account:' /tmp/bg-account-identity.js &&
+               grep -Fq 'data-account-action="logout"' /tmp/bg-account-identity.js &&
                grep -Fq '.app-header .account-auth-link--login{background:#ffdf68' /tmp/bg-dashboard.css &&
                grep -Fq '.app-header .account-auth-link{width:100%;min-height:46px' /tmp/bg-dashboard.css; then
               echo "PASS: Production header exposes obvious login and account actions (including mobile CSS)."
               exit 0
             fi
-            echo "Attempt $attempt/25: JS HTTP $js_status, CSS HTTP $css_status; waiting for Pages publish."
+            echo "Attempt $attempt/25: JS HTTP $js_status, identity JS HTTP $identity_status, CSS HTTP $css_status; waiting for Pages publish."
             [[ "$attempt" -eq 25 ]] && break
             sleep 15
           done

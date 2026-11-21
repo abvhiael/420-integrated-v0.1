@@ -2,13 +2,14 @@ import {card,emptyState,escapeHtml,button} from './design-system.js';
 import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} from './games.js';
 import {CLASSIC_ROADMAP,ALL_CLASSICS,classicGameById} from './classics.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
+import {renderGameAccountPanel} from './account-identity.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
 const statusText=game=>game.status==='local'?'Playable locally':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
 const gameTile=game=>{
  const url='/games/'+game.id;
  return '<article class="games-catalogue__tile"><div><small class="games-catalogue__phase">'+escapeHtml(game.milestone??'More games')+'</small><h3><a href="'+escapeHtml(url)+'" data-route="classic-game">'+escapeHtml(game.title)+'</a></h3><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p></div><p class="games-catalogue__meta">'+escapeHtml(game.players)+' players · '+escapeHtml(statusText(game))+'</p></article>';
 };
-export function renderGameCatalogue(){
+export function renderGameCatalogue({accountIdentityState=null,accountIdentityEnabled=false}={}){
  const main=CLASSIC_ROADMAP.filter(game=>game.collection==='main');
  const canadian=CLASSIC_ROADMAP.filter(game=>game.collection==='canadian');
  const extras=ALL_CLASSICS.filter(game=>!CLASSIC_ROADMAP.some(item=>item.id===game.id));
@@ -16,9 +17,10 @@ export function renderGameCatalogue(){
  return '<div class="games-catalogue"><div class="games-catalogue__intro"><p class="eyebrow">BongGoggles · Free-to-play game night</p><h2>Games</h2><p>Explore all 25 Classics in their development order. Each game has its own page; listed or registered games are not playable until a verified engine and multiplayer service are released.</p><nav aria-label="Games collections"><a href="#main-classics">Main Classics</a><a href="#canadian-classics">Canadian Classics</a><a href="#other-games">Other games</a><a href="/classics" data-route="classics">Classic catalogue</a></nav></div>'+
  section('main-classics','Main Classics',main)+section('canadian-classics','Canadian Classics',canadian)+
  section('other-games','More BongGoggles games',extras)+
+ renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})+
  '<p class="games-catalogue__footnote">No wagers or rewards. Browse without a wallet. For existing wallet-independent two-player quick games, visit <a href="/account/games" data-route="account-games">Account Games</a>. Cross-Country Chaos is playable locally from its game page.</p></div>';
 }
-export function renderClassicGamePage(gameId,{screen='intro',view=null}={}){
+export function renderClassicGamePage(gameId,{screen='intro',view=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
  const game=classicGameById(gameId);
  if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
  const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
@@ -27,11 +29,11 @@ export function renderClassicGamePage(gameId,{screen='intro',view=null}={}){
  const note=game.status==='registry'?'The legacy on-chain session type exists, but no qualified interactive game board or match creation is available.':
   game.status==='local'?'Use the existing Cross-Country Chaos game page; online multiplayer is not implemented.':
   'The game page is available, but the rules engine, computer opponents and online multiplayer are not released.';
- return '<section class="games-game-page"><p><a href="/games" data-route="games">← All Games</a> · <a href="/classics" data-route="classics">Classics catalogue</a></p><p class="eyebrow">BongGoggles · '+escapeHtml(step?.milestone??'Other games')+'</p><h2>'+escapeHtml(game.title)+'</h2><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p><dl class="games-game-page__facts"><div><dt>Players</dt><dd>'+escapeHtml(game.players)+'</dd></div><div><dt>Availability</dt><dd>'+escapeHtml(status)+'</dd></div></dl><p class="games-game-page__notice" role="status">'+escapeHtml(note)+'</p>'+playLink+'<p class="games-catalogue__footnote">Zero-wager game. A wallet is not required to browse. This page does not create a match or claim a finished game engine.</p></section>'+renderSharedGameScreen({game,screen,view});
+ return '<section class="games-game-page"><p><a href="/games" data-route="games">← All Games</a> · <a href="/classics" data-route="classics">Classics catalogue</a></p><p class="eyebrow">BongGoggles · '+escapeHtml(step?.milestone??'Other games')+'</p><h2>'+escapeHtml(game.title)+'</h2><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p><dl class="games-game-page__facts"><div><dt>Players</dt><dd>'+escapeHtml(game.players)+'</dd></div><div><dt>Availability</dt><dd>'+escapeHtml(status)+'</dd></div></dl><p class="games-game-page__notice" role="status">'+escapeHtml(note)+'</p>'+playLink+'<p class="games-catalogue__footnote">Zero-wager game. A wallet is not required to browse. This page does not create a match or claim a finished game engine.</p></section>'+renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})+renderSharedGameScreen({game,screen,view});
 }
 function entries(items,title){return card({title,body:items.length?`<div class="games-list">${items.map(s=>`<a class="games-card" href="${gameLink(s.sessionId)}" data-game-session="${escapeHtml(s.sessionId)}"><strong>${escapeHtml(label(s.gameType))}</strong><span>${escapeHtml(label(s.state))}</span><small>Opponent ${escapeHtml(s.peer)}</small><small>Next move #${s.nextMoveNumber}</small></a>`).join('')}</div>`:emptyState({title:'No games',message:'No canonical sessions are available in this category.'})});}
-export function renderGamesHub({projection=null,viewer=null,walletView=null}={}){
- const catalogue=renderGameCatalogue();
+export function renderGamesHub({projection=null,viewer=null,walletView=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
+ const catalogue=renderGameCatalogue({accountIdentityState,accountIdentityEnabled});
  if(!walletView?.connected||!viewer)return catalogue+card({title:'Wallet-linked game sessions',body:emptyState({title:'420Wallet required for blockchain sessions only',message:'The Classics catalogue is public. Connect 420Wallet on the supported chain to view existing canonical game sessions, separately from free account games.'})});
  if(!projection?.sessions)return catalogue+card({title:'Games service unavailable',body:emptyState({title:'No canonical game data',message:'Wallet-linked session data is unavailable. Bong Goggles will not invent invites, moves, winners or rewards.'})});
  const hub=normalizeGameHub({viewer,sessions:projection.sessions,leaderboards:projection.leaderboards,statistics:projection.statistics});
@@ -48,7 +50,7 @@ export function renderGameDetail({projection=null,viewer=null,walletView=null}={
  const moves=detail.history.length?`<ol class="games-moves">${detail.history.map(m=>`<li>#${m.moveNumber} · ${escapeHtml(m.commitment.slice(0,14))}…</li>`).join('')}</ol>`:emptyState({title:'No verified moves',message:'The qualified games service has not supplied a move history.'});
  return `<div class="games-detail"><p class="games-boundary"><strong>Zero-wager game.</strong> A move is only canonical after registry confirmation. Scores, clocks and local board state do not authorize rewards.</p>${card({eyebrow:label(s.gameType),title:'Game session',body:`<dl class="mini-grid"><div><dt>Opponent</dt><dd>${escapeHtml(s.peer)}</dd></div><div><dt>Status</dt><dd>${escapeHtml(label(s.state))}</dd></div><div><dt>Next canonical move</dt><dd>${s.nextMoveNumber}</dd></div><div><dt>Ruleset</dt><dd>${escapeHtml(s.rulesetHash)}</dd></div><div><dt>Winner</dt><dd>${escapeHtml(s.winner)}</dd></div></dl><div class="games-actions">${actions.map(a=>button({label:label(a.id),action:`game:${a.id}`,disabled:!a.enabled})).join('')}</div>`})}${card({title:'Game board',body:detail.turn?`<p>Verified turn: ${escapeHtml(detail.turn.player)} · move #${s.nextMoveNumber}</p><p>A qualified game engine supplies the interactive board and signed move commitment.</p>`:emptyState({title:'Board unavailable',message:'An active verified ruleset and canonical turn projection are required before an interactive board can be shown.'})})}${card({title:'Verified move history',body:moves})}<a href="/games" data-route="games">Back to games</a></div>`;
 }
-export function renderGamesRoute({projection=null,viewer=null,walletView=null}={}){
+export function renderGamesRoute({projection=null,viewer=null,walletView=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
  if(projection?.detail)return renderGameDetail({projection:projection.detail,viewer,walletView});
- return renderGamesHub({projection,viewer,walletView});
+ return renderGamesHub({projection,viewer,walletView,accountIdentityState,accountIdentityEnabled});
 }

@@ -16,13 +16,14 @@ import {playChaosMotion} from './core/chaos-motion.js';
 import {CHAOS_VEHICLES,applyChaosVehicleSelection} from './core/chaos-vehicles.js';
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
+import {AccountIdentityController} from './core/account-identity.js';
 import {AccountExtrasController} from './core/account-extras.js';
 import {AccountXPController} from './core/account-xp.js';
 import {AccountMonetizationController} from './core/account-monetization.js';
 import {normalizeViewPreferences,DEFAULT_VIEW_PREFERENCES,documentIndexingPolicy} from './core/settings-public.js';
 const root=document.querySelector('#app');
 const telemetry=createTelemetrySink({emit:(event)=>console.info('[bg-web]',event)});
-let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader=null,publicFeedReader=null,socialController=null,accountExtras=null,xpController=null,monetizationController=null;
+let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader=null,publicFeedReader=null,socialController=null,identityController=null,accountExtras=null,xpController=null,monetizationController=null;
 let indexerStatus={status:'checking',data:null};
 let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
@@ -44,9 +45,26 @@ function bindAccountSocial(){
  root.querySelector('[data-social-post]')?.addEventListener('submit',event=>{event.preventDefault();const body=new FormData(event.currentTarget).get('body');void runSocial('post',{body});});
  root.querySelector('[data-social-profile]')?.addEventListener('submit',event=>{event.preventDefault();const data=new FormData(event.currentTarget);void runSocial('profile',{displayName:data.get('displayName'),bio:data.get('bio')});});
  for(const form of root.querySelectorAll('[data-social-comment]'))form.addEventListener('submit',event=>{event.preventDefault();const id=form.dataset.socialComment,body=new FormData(form).get('body');void runSocial('comment',{postID:id,body});});
- for(const button of root.querySelectorAll('[data-social-action]'))button.addEventListener('click',()=>{const action=button.dataset.socialAction;if(action==='refresh'){void socialController.refresh();return;}void runSocial(action,{postID:button.dataset.postId,subjectID:button.dataset.subjectId});});
+ for(const button of root.querySelectorAll('[data-social-action]'))button.addEventListener('click',()=>{const action=button.dataset.socialAction;if(action==='refresh'){void socialController.refresh();return;}if(action==='logout'){void signOut420ID();return;}void runSocial(action,{postID:button.dataset.postId,subjectID:button.dataset.subjectId});});
 }
-async function runSocial(action,details){try{await socialController.act(action,details);}catch{socialController.emit({status:'error'});}}
+async function runSocial(action,details){try{await socialController.act(action,details);if(action==='profile')void identityController?.refresh();}catch{socialController.emit({status:'error'});void identityController?.refresh();}}
+async function signOut420ID(){
+ // Clear the visible account before invalidating other in-memory projections.
+ const pending=identityController.logout();
+ socialController?.invalidate();xpController?.invalidate();monetizationController?.invalidate();
+ for(const c of Object.values(accountExtras??{}))c.invalidate();
+ try{await pending;}catch{renderCurrent('420ID sign-out could not be confirmed. Recheck your session before continuing.');return;}
+ if(isAccountSocialSurface()&&socialController?.client.enabled)void socialController.refresh();
+ const extra=currentAccountExtra();if(extra?.client.enabled)void extra.refresh();
+ if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();
+ if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();
+}
+function bindAccountActions(){
+ for(const control of root.querySelectorAll('[data-account-action]'))control.addEventListener('click',()=>{
+  if(control.dataset.accountAction==='retry'){void identityController?.refresh();return;}
+  if(control.dataset.accountAction==='logout')void signOut420ID();
+ });
+}
 function currentAccountExtra(){
  if(window.location.pathname==='/account/messages')return accountExtras?.messages;
  if(window.location.pathname==='/account/games')return accountExtras?.games;
@@ -259,11 +277,12 @@ function bindChaos(){
 }
 
 function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
+ accountIdentityState:identityController?.state,accountIdentityEnabled:runtimeConfig.features.accountSocial===true,
  accountMessagesState:accountExtras?.messages.state,accountGamesState:accountExtras?.games.state,
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo()});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo()});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountActions();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){
@@ -291,18 +310,19 @@ function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(
 function onRouteChange(){
  restoreChaosOnGameRoute();
  chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
- monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
+ monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();identityController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
  if(window.location.pathname==='/')void refreshPublicFeed();
  if(isAccountSocialSurface()&&socialController?.client.enabled)void socialController.refresh();
+ if(identityController?.client.enabled)void identityController.refresh();
  if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();
  if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();
  const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();
 }
-async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});accountExtras={
+async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});accountExtras={
  messages:new AccountExtrasController({kind:'messages',enabled:runtimeConfig.features.accountMessaging===true,
  onChange:()=>{if(window.location.pathname==='/account/messages')renderCurrent();}}),
  games:new AccountExtrasController({kind:'games',enabled:runtimeConfig.features.accountGames===true,
  onChange:()=>{if(window.location.pathname==='/account/games')renderCurrent();}})
-};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();restoreChaosOnGameRoute();renderCurrent();if(publicFeedReader.enabled)void refreshPublicFeed();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
-window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();
+};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();restoreChaosOnGameRoute();renderCurrent();if(publicFeedReader.enabled)void refreshPublicFeed();if(identityController.client.enabled)void identityController.refresh();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
+window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(identityController?.client.enabled)void identityController.refresh({quiet:true});if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);window.setInterval(()=>{if(!document.hidden&&identityController?.client.enabled)void identityController.refresh({quiet:true});},60_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();identityController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();

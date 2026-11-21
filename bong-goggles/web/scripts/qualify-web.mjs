@@ -52,6 +52,27 @@ const bc02Files=Object.freeze({
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+// BC-0.4: 420ID profile display and authentication boundary, WITHOUT changing
+// the BC-0.1/0.2/0.3 and game-art asset caps. Baselines come from qualified
+// BC-0.3 main source head f17c8e6792df15085b5b17a43ca740bc00851073.
+const bc04Files=Object.freeze({
+ 'core/account-identity.js':Object.freeze({baseline:0,maxAdded:7*1024}),
+ 'app.js':Object.freeze({baseline:28329,maxAdded:2560}),
+ 'core/app-shell.js':Object.freeze({baseline:12953,maxAdded:256}),
+ 'core/games-ui.js':Object.freeze({baseline:9375,maxAdded:768}),
+ 'dashboard.css':Object.freeze({baseline:15267,maxAdded:2048})
+});
+const bc04GrowthByPath=new Map();
+let bc04Growth=0;
+for(const [path,{baseline,maxAdded}] of Object.entries(bc04Files)){
+ const size=regularSizes.get(path);
+ if(!Number.isSafeInteger(size))throw new Error('BC-0.4 published file missing: '+path);
+ const growth=Math.max(0,size-baseline);
+ if(growth>maxAdded)throw new Error('BC-0.4 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
+ bc04GrowthByPath.set(path,growth);
+ bc04Growth+=growth;
+}
+if(bc04Growth>12*1024)throw new Error('BC-0.4 wallet-free auth UI exceeded 12 KiB scoped budget');
 // BC-0.3 is an independently bounded reusable-screen layer. Its source and
 // stylesheet growth are deducted BEFORE checking the frozen BC-0.2 snapshot.
 // This protects the historical 1157 KiB base, exact BC-0.2 allowances and
@@ -68,7 +89,7 @@ let bc03Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc03Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.3 shared screen missing from output: '+path);
- const growth=Math.max(0,size-baseline);
+ const growth=Math.max(0,size-(bc04GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.3 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc03GrowthByPath.set(path,growth);
  bc03Growth+=growth;
@@ -78,14 +99,14 @@ let bc02Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.2 required output missing: '+path);
- const growth=Math.max(0,size-(bc03GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-(bc03GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.2 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024)
- throw new Error('BC-0.3 combined static asset budget exceeded: '+baseTotal);
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth;
+if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024)
+ throw new Error('BC-0.4 combined static asset budget exceeded: '+baseTotal);
+const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth;
 if(legacyBaseTotal>limits.baseTotal)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
@@ -93,6 +114,9 @@ console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
 }));
 console.log('BC-0.3 bounded shared screens asset allowance:',JSON.stringify({
  growthBytes:bc03Growth,limitBytes:16*1024,combinedBytes:baseTotal
+}));
+console.log('BC-0.4 bounded wallet-optional 420ID identity allowance:',JSON.stringify({
+ growthBytes:bc04Growth,limitBytes:12*1024,legacyBaseBytes:legacyBaseTotal,combinedBytes:baseTotal
 }));
 if(cardTotal>limits.cardTotal)throw new Error(`Cross-Country Chaos card budget exceeded: ${cardTotal} > ${limits.cardTotal}`);
 if(CHAOS_CARD_ART_OUTPUTS.length!==49||new Set(CHAOS_CARD_ART_OUTPUTS).size!==49)

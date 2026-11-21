@@ -95,6 +95,7 @@ contract RewardController is ConsensusSystemAccess420, I420System {
             uint256 share = gross * FULL_SPONSOR_COMMUNITY_BPS / 10_000;
             validatorAccrued[owner] += gross - share;
             communityRewardAccrued += share;
+            validatorAccrued[COMMUNITY_REWARD_RESERVE] += share;
             emit SponsoredValidatorRewardAllocated(owner, COMMUNITY_REWARD_RESERVE, gross, share);
         } else {
             validatorAccrued[owner] += gross;

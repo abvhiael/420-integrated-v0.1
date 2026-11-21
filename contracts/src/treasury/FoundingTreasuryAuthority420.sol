@@ -228,8 +228,15 @@ contract FoundingTreasuryAuthority420 {
         Payment storage p = payments[paymentId];
         if (p.recipient == address(0)) revert InvalidPayment();
         if (p.scheduled) revert AlreadyScheduled();
-        if (p.twoFounderRequired && p.approvals < 2) revert ApprovalRequired();
-        if (!p.twoFounderRequired && !paymentApproval[paymentId][foundingAdministrator]) revert ApprovalRequired();
+        // Re-evaluate when scheduled: multiple routine payments can be proposed concurrently.
+        // Once the recipient aggregate crosses the routine ceiling, upgrade permanently to
+        // exceptional authorization and retain the public-notice requirement.
+        bool elevated = p.twoFounderRequired ||
+            (!p.contingency && _rollingRecipient(p.recipient) + p.amount > ROUTINE_MAX);
+        if (elevated) {
+            p.twoFounderRequired = true;
+            if (p.approvals < 2) revert ApprovalRequired();
+        } else if (!paymentApproval[paymentId][foundingAdministrator]) revert ApprovalRequired();
         // Exceptional payments require public notice. All three founders can fast-track ONLY
         // genuine contingency incidents, not an exceptional Operations or related-party transfer.
         if (p.twoFounderRequired && block.timestamp < uint256(p.proposedAt) + EXCEPTIONAL_NOTICE
@@ -241,8 +248,7 @@ contract FoundingTreasuryAuthority420 {
         } else {
             if (operationsCommitted + p.amount > OPERATIONS_ALLOCATION
                 || _rollingTotal(false) + p.amount > OPERATIONS_30_DAY_MAX) revert SpendingLimit();
-            if (!p.twoFounderRequired && _rollingRecipient(p.recipient) + p.amount > ROUTINE_MAX)
-                revert ApprovalRequired();
+
         }
         bytes32 budgetId = p.contingency ? contingencyBudgetId : operationsBudgetId;
         bytes32 actionHash = p.contingency ? contingencyActionHash : operationsActionHash;

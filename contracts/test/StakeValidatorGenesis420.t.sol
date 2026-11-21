@@ -104,6 +104,8 @@ contract StakeValidatorGenesis420Test {
         require(rewards.validatorAccrued(address(0xABCD)) == 90 ether, "operator nets 90 pct");
         require(rewards.validatorAccrued(address(0xBEEF)) == 50 ether, "ordinary validator unaffected");
         require(rewards.communityRewardAccrued() == 10 ether, "community accrues 10 pct");
+        require(rewards.validatorAccrued(rewards.COMMUNITY_REWARD_RESERVE()) == 10 ether,
+            "community reward destination accrued");
         require(rewards.grossSecurityIssued() == 150 ether, "no issuance changes");
     }
 

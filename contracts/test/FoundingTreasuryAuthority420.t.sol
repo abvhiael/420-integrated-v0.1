@@ -131,6 +131,26 @@ contract FoundingTreasuryAuthority420Test {
         require(founder.operationsCommitted() == 110_000 ether, "committed");
     }
 
+    function testConcurrentRoutineProposalsMustEscalateBeforeScheduling() public {
+        // Both were initially below 105k when proposed; the second cannot evade
+        // two-founder approvals merely by being created before the first schedules.
+        vm.prank(ADMIN);
+        bytes32 first = _propose(false, PAYEE, 60_000 ether, FoundingTreasuryAuthority420.Purpose.BOUNTY);
+        vm.prank(ADMIN);
+        bytes32 second = _propose(false, PAYEE, 60_000 ether, FoundingTreasuryAuthority420.Purpose.BOUNTY);
+        vm.prank(ADMIN);
+        founder.schedulePayment(first);
+        vm.prank(ADMIN);
+        (bool bypass,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (second)));
+        require(!bypass, "concurrent over-limit proposal bypass");
+        vm.prank(JANET);
+        founder.approvePayment(second);
+        vm.warp(block.timestamp + 49 hours);
+        vm.prank(ADMIN);
+        founder.schedulePayment(second);
+        require(founder.operationsCommitted() == 120_000 ether, "both commitments counted");
+    }
+
     function testContingencyCannotFundMarketingOrSkipFounderVotes() public {
         vm.prank(ADMIN);
         (bool marketing,) = address(founder).call(abi.encodeCall(

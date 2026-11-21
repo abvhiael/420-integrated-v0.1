@@ -22,9 +22,10 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
     uint256 public totalAssigned;
     uint256 public totalFunded;
 
-    // Genesis materialization ONLY: absence of a sponsor authority fails closed.
-    // Must be authorized by the signed release manifest, never writable after genesis.
+    // One-shot Timelock bind is materialized into the signed Genesis post-init state.
+    // When unset, sponsorship fails closed; there is no founder-controlled setter.
     address public genesisFoundingSponsorAuthority;
+    event GenesisFoundingSponsorAuthorityBound(address indexed sponsor);
 
     event ValidatorRegistryBound(address indexed validatorRegistry);
     event CreditAssigned(bytes32 indexed validatorId, address indexed beneficiary, uint256 amount);
@@ -41,6 +42,18 @@ contract CommunityValidatorReserve is ProtocolTreasury, I420System {
     error ReservedCollateral();
 
     constructor(address timelock_) ProtocolTreasury(timelock_) {}
+
+    /// @notice One-time, canonical Timelock-only binding for Genesis materialization.
+    /// Must be included in the signed Genesis post-init state to permit early sponsorship.
+    /// No founder-facing administrative setter exists; the Timelock cannot replace this authority.
+    function bindGenesisFoundingSponsorAuthority(address sponsor) external onlyGovernance {
+        if (genesisFoundingSponsorAuthority != address(0)) revert AlreadyBound();
+        if (sponsor.code.length == 0) revert ZeroAddress();
+        (bool ok, bytes memory data) = sponsor.staticcall(abi.encodeWithSignature("communityReserve()"));
+        if (!ok || data.length != 32 || abi.decode(data, (address)) != address(this)) revert Unauthorized();
+        genesisFoundingSponsorAuthority = sponsor;
+        emit GenesisFoundingSponsorAuthorityBound(sponsor);
+    }
 
     modifier onlyGovernanceOrFoundingSponsor() {
         if (msg.sender != governanceTimelock) {

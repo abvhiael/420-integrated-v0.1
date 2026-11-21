@@ -258,9 +258,9 @@
       "name": "Governance420",
       "notes": "GOV-AUDIT-6 exact runtime and constructor state materialized from pinned compiler outputs.",
       "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
-      "runtime_code_hash": "0x7fb3b494363d6536c70c65dbcd0885d1b1518d8dd9b1f9b768eb72503214e95e",
+      "runtime_code_hash": "0x5fdbee99f5e06a69b192a5e6d8805fd3564e8f017f7870e1710b6ca430af56f4",
       "source": "governance/Governance420.sol",
-      "source_blob_sha1": "c78aa679425feaf032eabe09a956549ba9251448",
+      "source_blob_sha1": "e3c8197731e8c9e84f6092baf9591e074de0acfc",
       "status": "ARTIFACT_READY"
     },
     {

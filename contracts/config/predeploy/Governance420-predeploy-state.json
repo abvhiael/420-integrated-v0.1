@@ -4,15 +4,25 @@
     "governanceTimelock": "0x0000000000000000000000000000000000000429"
   },
   "contractName": "Governance420",
+  "genesisBootstrapApprovalReady": false,
   "invariants": [
-    "all compatibility/bootstrap mutable state begins zero/false",
+    "bootstrap/compatibility state begins zero/false",
+    "approvedBootstrapPlanHash is supplied only through Genesis materialization; no runtime setter exists",
+    "approved plan commits target chain, seven graph addresses/code hashes and both initial electorate roots/weights",
+    "missing or partially populated commitment fails closed",
     "governanceTimelock immutable is 0x0429",
     "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
   ],
   "runtimeArtifact": "contracts/artifacts/Governance420.json",
-  "runtimeCodeHash": "0x7fb3b494363d6536c70c65dbcd0885d1b1518d8dd9b1f9b768eb72503214e95e",
+  "runtimeCodeHash": "0x5fdbee99f5e06a69b192a5e6d8805fd3564e8f017f7870e1710b6ca430af56f4",
   "schema": "420-governance420-predeploy-state-v1",
   "status": "GOV_AUDIT_6_PREDEPLOY_READY",
-  "storage": {},
-  "storageSlotCount": 0
+  "storage": {
+    "0x0000000000000000000000000000000000000000000000000000000000000004": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000005": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000006": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000007": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000000000000000000000000008": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "storageSlotCount": 5
 }

@@ -70,6 +70,8 @@ export function chaosCardArt(card,leg){
   case 'mileage':return chaosMileageArt(card.km);
   case 'fix':return chaosFixArt(card.id);
   case 'hazard':return chaosHazardArt(leg,card.id);
+  case 'upgrade':return chaosUpgradeArt(card.id);
+  case 'legendary':return chaosLegendaryArt(card.id);
   default:return null;
  }
 }

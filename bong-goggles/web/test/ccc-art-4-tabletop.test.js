@@ -136,7 +136,7 @@ test('CCC-ART-4: the navigation fix shows a +150 km shortcut animation without c
  const game=start(2);const p=game.players[0];
  p.hand[0]=card('fix',{...FIXES.find(f=>f.id==='atlas')});
  p.status=card('hazard',{name:'Fog',id:'fog',category:'weather',kind:'slow',amount:150});
- p.detourLoss=100;p.km=400;
+ p.played=[card('mileage',{km:500})];p.detourLoss=100;p.km=400;
  const after=act(game,'fix',{index:0}),cue=deriveChaosTableFeedback(game,after,{action:'fix',index:0});
  assert.equal(cue.kind,'shortcut');
  assert.equal(after.players[0].km,550);
@@ -146,6 +146,18 @@ test('CCC-ART-4: the navigation fix shows a +150 km shortcut animation without c
  assert.match(html,/ccc-repair-feedback--shortcut/);
  assert.match(html,/Permanent detours remain/);
  assert.doesNotMatch(html,/Roadside repair complete/);
+});
+test('CCC-ART-4: shortcut bonus displays honestly even when detours clamp effective mileage to zero',()=>{
+ const game=start(2);const p=game.players[0];
+ p.hand[0]=card('fix',{...FIXES.find(f=>f.id==='atlas')});
+ p.detourLoss=200;p.km=0;
+ const after=act(game,'fix',{index:0});
+ const cue=deriveChaosTableFeedback(game,after,{action:'fix',index:0});
+ assert.equal(after.players[0].bonusKm,150);
+ assert.equal(after.players[0].detourLoss,200);
+ assert.equal(after.players[0].km,0);
+ assert.equal(cue.kind,'shortcut');
+ assert.match(renderChaosTable(after,{feedback:cue}),/\+150 km card bonus/);
 });
 test('CCC-ART-4: spending an action on emergency recovery signals cleared status and consumes the same action',()=>{
  const game=start(2);game.players[0].status=card('hazard',{...HAZARDS.east[6]});

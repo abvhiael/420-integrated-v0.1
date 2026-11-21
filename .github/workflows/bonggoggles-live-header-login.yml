@@ -1,0 +1,39 @@
+name: BongGoggles live header login
+on:
+  push:
+    branches: [main]
+    paths:
+      - bong-goggles/web/core/app-shell.js
+      - bong-goggles/web/dashboard.css
+      - .github/workflows/bonggoggles-live-header-login.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-published-header:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - name: Verify production delivers prominent 420ID login and mobile account access
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..25}; do
+            js_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-shell.js --write-out '%{http_code}' "https://bonggoggles.420integrated.org/core/app-shell.js?deploy=${GITHUB_SHA}" || true)"
+            css_status="$(curl --silent --show-error --location --max-time 20 --output /tmp/bg-dashboard.css --write-out '%{http_code}' "https://bonggoggles.420integrated.org/dashboard.css?deploy=${GITHUB_SHA}" || true)"
+            if [[ "$js_status" == "200" && "$css_status" == "200" ]] &&
+               grep -Fq 'Log in with 420ID' /tmp/bg-shell.js &&
+               grep -Fq 'My account:' /tmp/bg-shell.js &&
+               grep -Fq '.app-header .account-auth-link--login{background:#ffdf68' /tmp/bg-dashboard.css &&
+               grep -Fq '.app-header .account-auth-link{width:100%;min-height:46px' /tmp/bg-dashboard.css; then
+              echo "PASS: Production header exposes obvious login and account actions (including mobile CSS)."
+              exit 0
+            fi
+            echo "Attempt $attempt/25: JS HTTP $js_status, CSS HTTP $css_status; waiting for Pages publish."
+            [[ "$attempt" -eq 25 ]] && break
+            sleep 15
+          done
+          echo "::error::BongGoggles production does not yet deliver the verified header login changes."
+          exit 1

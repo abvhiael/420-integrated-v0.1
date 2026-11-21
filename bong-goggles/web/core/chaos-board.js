@@ -4,6 +4,7 @@ import {LEGS} from './cross-country-chaos.js';
 import {chaosCardArt} from './chaos-card-art.js';
 import {escapeHtml as esc} from './design-system.js';
 import {chaosRegionArt} from './chaos-visual-style.js';
+import {chaosMapArt} from './chaos-map-art.js';
 
 // Keep the current hand visible only while the same human driver continues their turn.
 // A new seat or completed stage always returns to the privacy handoff screen.
@@ -112,6 +113,7 @@ export function renderChaosHighway(game){
  const route=roadCoordinates(region);
  const caption=ROUTES[region].title;
  const artDirection=chaosRegionArt(region);
+ const mapLayers=chaosMapArt(region);
  return '<section class="ccc-highway ccc-highway--'+region+'" aria-label="'+esc(leg.name)+' highway progress">'+
   '<div class="ccc-highway-head"><div class="ccc-wayfinding-sign" aria-label="Region: '+esc(artDirection.shield)+'"><span class="ccc-wayfinding-maple" aria-hidden="true">✦</span><span>'+esc(artDirection.sign)+'</span></div><div class="ccc-highway-titles"><h3>Trans-Canada Road Trip · Stage '+(game.leg+1)+'/3</h3><p>'+esc(artDirection.caption)+'</p></div>'+
   '<span>0–2,500 game km · schematic, not to scale</span></div>'+
@@ -120,6 +122,10 @@ export function renderChaosHighway(game){
   '<rect x="0" y="0" width="'+WIDTH+'" height="'+HEIGHT+'" class="ccc-highway-canvas"/>'+
   '<path d="M0 107 Q260 -25 480 95 T960 63 L960 0 H0Z" fill="#41634d" opacity=".65"/>'+
   landscape(region)+
+  // Both atlas layers are scenery only, below the unchanged live vector highway.
+  // The old SVG scenery is retained as a fallback if artwork does not load.
+  '<image class="ccc-map-underlay" href="'+mapLayers.underlay.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
+  '<image class="ccc-map-foreground" href="'+mapLayers.foreground.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
   '<path class="ccc-highway-shadow" d="'+route+'"/>'+
   '<path class="ccc-highway-road" d="'+route+'"/>'+
   '<path class="ccc-highway-centre" d="'+route+'"/>'+

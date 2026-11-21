@@ -91,6 +91,19 @@ class GovernanceRec2VectorsTest(unittest.TestCase):
         candidate = module.make_vectors(source)
         self.assertFalse(candidate["fixtureOnly"])
 
+    def test_explicit_weighting_and_wrong_chain_rejected(self):
+        source = copy.deepcopy(self.source)
+        source["houses"]["VALIDATOR"]["members"][0]["weight"] = 10
+        with self.assertRaisesRegex(ValueError, "weighting"):
+            module.make_vectors(source)
+        source = copy.deepcopy(self.source)
+        source["fixtureOnly"] = False
+        source["eligibilitySource"] = {
+            "reference": "verified-reference", "snapshotHash": "0x" + "11" * 32, "chainId": 1
+        }
+        with self.assertRaisesRegex(ValueError, "chain identity mismatch"):
+            module.make_vectors(source)
+
     def test_odd_nodes_and_numerical_address_order(self):
         source = copy.deepcopy(self.source)
         section = source["houses"]["COMMUNITY"]

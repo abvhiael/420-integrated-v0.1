@@ -121,6 +121,8 @@ def make_vectors(source: dict) -> dict:
             or not HASH.fullmatch(str(origin.get("snapshotHash", "")))
         ):
             raise ValueError("missing independently verifiable release eligibility-source reference and snapshot hash")
+        if "chainId" in origin and origin["chainId"] != chain:
+            raise ValueError("eligibility-source chain identity mismatch")
     output = {
         "schema": "420-civic-electorate-vectors-v1",
         "chainId": chain,
@@ -154,6 +156,8 @@ def make_vectors(source: dict) -> dict:
             if not source["fixtureOnly"]:
                 if evidence.get("eligible") is not True or not HASH.fullmatch(str(evidence.get("recordHash", ""))):
                     raise ValueError(f"{house}: unverified eligibility evidence")
+            if "weight" in member and (type(member["weight"]) is not int or member["weight"] != 1):
+                raise ValueError(f"{house}: weighting must be one eligible owner = one vote")
             addresses.append(address)
         if len(set(addresses)) != len(addresses):
             raise ValueError(f"{house}: duplicate eligible address")

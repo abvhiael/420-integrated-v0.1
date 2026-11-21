@@ -26,7 +26,8 @@ export function validateRuntimeConfig(input){
     accountSocial:input.features?.accountSocial===true,
     accountMessaging:input.features?.accountSocial===true&&input.features?.accountMessaging===true,
     accountGames:input.features?.accountSocial===true&&input.features?.accountGames===true,
-    accountXP:input.features?.accountSocial===true&&input.features?.accountXP===true
+    accountXP:input.features?.accountSocial===true&&input.features?.accountXP===true,
+    accountMonetization:input.features?.accountSocial===true&&input.features?.accountMonetization===true
   });
   const socialEnabled=features.publicDiscoverFeed===true;
   const socialApiUrl=input.socialApiUrl==null?null:httpsUrl(input.socialApiUrl,'socialApiUrl',{allowLocalhost});

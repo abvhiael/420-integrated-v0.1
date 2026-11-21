@@ -276,6 +276,28 @@ func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator strin
  if !uuid.MatchString(postID)||(action!="hide"&&action!="restore")||
  !safeText(reason,120,false)||!safeText(operator,100,false){return ErrInvalid}
  tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
+ // A legacy operator cannot hide already awarded content without writing
+ // its compensating journal entries. Require the XP-aware moderation path.
+ // Pre-AUTH-10 operator databases without migration 003 stay compatible.
+ if action=="hide"{
+  var xpTable bool
+  e=tx.QueryRowContext(ctx,"SELECT to_regclass('bg_account_social.contribution_xp_events') IS NOT NULL").Scan(&xpTable)
+  if e!=nil{return e}
+  if xpTable{
+   var outstanding bool
+   e=tx.QueryRowContext(ctx,`SELECT EXISTS(
+   SELECT 1 FROM bg_account_social.contribution_xp_events g
+   WHERE g.action='grant' AND
+   ((g.source_kind='post' AND g.source_id=$1) OR
+    (g.source_kind='comment' AND g.source_id IN
+    (SELECT id FROM bg_account_social.comments WHERE post_id=$1)))
+   AND NOT EXISTS (SELECT 1 FROM bg_account_social.contribution_xp_events v
+    WHERE v.source_kind=g.source_kind AND v.source_id=g.source_id AND v.action='revoke')
+   )`,postID).Scan(&outstanding)
+   if e!=nil{return e}
+   if outstanding{return ErrForbidden}
+  }
+ }
  id,e:=newID();if e!=nil{return e}
  var affected string
  value:=action=="hide"

@@ -18,3 +18,19 @@
 #review dd,#detail dd,.subpanel dd{margin:0;overflow-wrap:anywhere}
 input[readonly]{background:#19221d}
 @media(max-width:720px){.filters{display:grid}.subpanel .actions{display:grid}#review dl,#detail dl,.subpanel dl{grid-template-columns:1fr}}
+
+/* REC-3 creator studio: native controls, bounded scroll and mobile first reporting. */
+#creator-studio .creator-step{border:1px solid #36523d;border-radius:12px;padding:1rem;margin:.8rem 0}
+#creator-studio .creator-step[hidden],#creator-studio [hidden]{display:none!important}
+#creator-studio .creator-step label{display:grid;gap:.4rem;margin:.7rem 0}
+#creator-studio input:not([type=checkbox]),#creator-studio textarea,#creator-studio select{width:100%;max-width:100%;min-width:0}
+#creator-studio input[readonly]{background:#1a261e}
+#creator-studio .creator-tier-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;border:1px solid #36523d;padding:.8rem;border-radius:10px;margin-bottom:.7rem}
+#creator-studio .creator-tier-row button{align-self:end}
+#creator-studio .checkbox-label{display:flex;gap:.65rem;align-items:flex-start}
+#creator-studio .checkbox-label input{margin-top:.3rem}
+#creator-studio .creator-preview{white-space:pre-wrap;overflow-wrap:anywhere;max-height:26rem;overflow-y:auto;font-size:.83rem;line-height:1.4;border:1px solid #36523d;border-radius:8px;padding:1rem;background:#111a14}
+#creator-campaign-list{display:flex;flex-wrap:wrap;gap:.6rem;margin:.5rem 0}
+#creator-campaign-list button{white-space:normal;text-align:left}
+#creator-report-output p,#creator-request-history p{overflow-wrap:anywhere;padding:.35rem 0;border-bottom:1px solid #36523d}
+@media(max-width:680px){#creator-studio .creator-tier-row{grid-template-columns:1fr}}

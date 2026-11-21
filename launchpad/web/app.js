@@ -1,11 +1,13 @@
 import {validateRuntimeConfig,runtimeReadiness} from './core/config.js';
 import {LaunchpadService,normalizeCampaign,progress,remaining} from './core/service.js';
 import {connectWallet,executionGate,submitReviewedTransaction} from './core/wallet.js';
+import {CreatorStudio} from './core/creator.js';
 
 const HASH=/^0x[0-9a-fA-F]{64}$/;
 const state={config:null,service:null,wallet:null,campaigns:[],selected:null,position:null,checkout:null,
   review:null,quote:null,filters:{},cursor:null,total:0,lastTx:null,busy:false};
 const $=s=>document.querySelector(s);
+const creatorStudio=new CreatorStudio(()=>({wallet:state.wallet,service:state.service}));
 const setText=(s,v)=>{const n=$(s);if(n)n.textContent=String(v??'');};
 function status(message,error=false){setText('#status',message);$('#status')?.setAttribute('data-state',error?'error':'ready');}
 function setBusy(b){state.busy=b;for(const el of document.querySelectorAll('button'))el.disabled=b||el.dataset.blocked==='true';}
@@ -229,6 +231,7 @@ async function openCampaign(saleId){
 async function connect(){
   setBusy(true);
   try{state.wallet=await connectWallet(globalThis.ethereum);renderWallet();if(state.selected)await openCampaign(state.selected.saleId);
+    creatorStudio.refresh().catch(e=>status('Creator dashboard: '+e.message,true));
     status('Wallet connected. Review every transaction before signing.');}
   catch(e){status(e.message||String(e),true);}
   finally{setBusy(false);actionState();}
@@ -302,20 +305,6 @@ function newNonce(){
   const a=new Uint32Array(2);crypto.getRandomValues(a);const value=(BigInt(a[0])<<32n)|BigInt(a[1]);
   $('#intent-nonce').value=(value||1n).toString();state.checkout=null;state.quote=null;persistIntent();renderCheckout();renderQuote();actionState();
 }
-const CREATOR=new Set(['setCampaignMode','activate','finalize','cancel']);
-async function creator(event){
-  event.preventDefault();if(!state.wallet)return status('Connect wallet before creator requests.',true);
-  const f=new FormData(event.currentTarget),action=String(f.get('action')||'');
-  if(!CREATOR.has(action))return status('Unsupported creator request.',true);
-  setBusy(true);
-  try{const request=await state.service.creatorRequest({action,account:state.wallet.account,
-    projectId:String(f.get('projectId')||''),saleId:String(f.get('saleId')||''),
-    metadataHash:String(f.get('metadataHash')||''),mode:String(f.get('mode')||'')});
-    setText('#creator-request-state',request.notice);
-    status('Creator governance request prepared. No direct mutation authority was granted.');}
-  catch(e){status(e.message||String(e),true);}
-  finally{setBusy(false);actionState();}
-}
 async function boot(){
   try{
     const r=await fetch('./runtime-config.json',{cache:'no-store'});
@@ -366,7 +355,7 @@ $('#publish-outcome')?.addEventListener('click',()=>prepare('publish-outcome',{}
 $('#submit-review')?.addEventListener('click',submit);
 $('#refresh-tx')?.addEventListener('click',checkTransaction);
 $('#close-review')?.addEventListener('click',()=>{$('#review').hidden=true;state.review=null;actionState();});
-$('#creator-form')?.addEventListener('submit',creator);
-globalThis.ethereum?.on?.('accountsChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;renderWallet();renderDetail();actionState();status('Wallet account changed. Reconnect before signing.',true);});
-globalThis.ethereum?.on?.('chainChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;renderWallet();renderDetail();actionState();status('Wallet chain changed. Reconnect before signing.',true);});
+
+globalThis.ethereum?.on?.('accountsChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;creatorStudio.clearWallet();renderWallet();renderDetail();actionState();status('Wallet account changed. Reconnect before signing.',true);});
+globalThis.ethereum?.on?.('chainChanged',()=>{state.wallet=null;state.position=null;state.checkout=null;state.review=null;state.lastTx=null;creatorStudio.clearWallet();renderWallet();renderDetail();actionState();status('Wallet chain changed. Reconnect before signing.',true);});
 boot();

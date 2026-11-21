@@ -32,3 +32,7 @@ The local deployment test proves the exact constructor graph, both one-shot post
 ## Live boundary
 
 Local Foundry addresses and runtime identities are repository qualification evidence only. Public-testnet chain identity, deployed addresses, deployment transactions, Registry publication transactions, live code hashes and constructor-binding receipts are owned by `LAUNCHPAD-AUDIT-6` and remain unset until that live step.
+
+## Creator review queue and reporting (REC-3)
+
+Configure `LAUNCHPAD_CREATOR_REQUEST_FILE` as an application-writable, persistent, restricted-permission JSONL ledger before accepting signed governance-review requests. Without it submissions fail closed. The service checks personal/EIP-1271 signatures against the canonical chain, reconstructs project/sale calldata and stores review receipts; no backend signing or automatic governance execution occurs. Optionally set `LAUNCHPAD_CREATOR_REPORT_FROM_BLOCK` to an exact deployment start block for bounded historical event scans; otherwise event totals are intentionally unavailable. Back up the review ledger and monitor its capacity; on-chain project status remains authoritative. See [Creator guide](creator-guide.md).

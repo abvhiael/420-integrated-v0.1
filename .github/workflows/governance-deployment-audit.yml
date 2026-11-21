@@ -103,14 +103,9 @@ jobs:
       - name: Build exact Governance and Registry deployment surfaces
         working-directory: contracts
         run: |
-          forge build src/governance/GovernanceTimelock.sol
-          forge build src/governance/Governance420.sol
-          forge build src/governance/CivicConstitution420.sol
-          forge build src/governance/CivicProposalRegistry420.sol
-          forge build src/governance/CivicElectorateRegistry420.sol
-          forge build src/governance/CivicVoting420.sol
-          forge build src/governance/CivicGovernor420.sol
-          forge build src/governance/CivicMerkleElectorateSource420.sol
+          # Use the same compilation unit as governance-audit.yml. Individual source
+          # builds may change storageLayout AST IDs despite identical executable runtime.
+          forge build src/governance
           forge build src/apps/ProtocolRegistry.sol
       - name: Generate and verify retained GOV-AUDIT-6 runtime artifacts
         run: |

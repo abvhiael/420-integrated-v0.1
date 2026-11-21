@@ -173,6 +173,20 @@ body{background:var(--bg);color:var(--text)}
 .social-comments li {white-space:pre-wrap;overflow-wrap:anywhere}
 @media (max-width:650px){.account-social form,.social-post{padding:.75rem}}
 
+/* Home: off-chain community; canonical publishing kept separate. */
+.home-social.ui-card{max-width:none;gap:1rem;background:#153b2a;border-color:#438064}
+.home-social__header,.home-social__actions,.home-social__composer .actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.home-social__header h2{margin:0}
+.home-social__badge{padding:6px 10px;border:1px solid #71b78b;border-radius:20px;color:#dbffe4;font-weight:800}
+.home-social__composer,.home-social__posts .social-post{background:#0d291d;border-color:#4f8866}
+.home-social__posts{display:grid;gap:14px}
+.home-social__posts .social-post__body{margin:0;line-height:1.6}
+.home-canonical{border:1px solid #40634e;border-radius:18px;background:#122b20}
+.home-canonical>summary{cursor:pointer;padding:16px}
+.home-canonical>summary strong,.home-canonical>summary small{display:block}
+.home-canonical__body{display:grid;gap:16px;padding:0 16px 18px}
+.home-canonical>summary:focus-visible{outline:3px solid #f8df79;outline-offset:3px}
+
 /* AUTH-9: separate free, off-chain account quick games. */
 .account-game-board {display:grid;gap:.15rem;max-width:390px;padding:.6rem;border:1px solid var(--border,rgba(255,255,255,.18));border-radius:10px;overflow-x:auto}
 .account-game-board .game-row {display:flex;gap:.15rem}

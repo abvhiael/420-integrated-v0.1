@@ -68,6 +68,41 @@ export function renderAccountSocial(state,{enabled=false}={}){
  '<section aria-label="Community posts">'+(state.posts?.length?state.posts.map(p=>postMarkup(p,profile.subject,state.comments?.[p.id])).join(''):emptyState({title:'No community posts',message:'Only authenticated community posts appear here.'}))+'</section>'+
  (state.nextCursor?'<button type="button" data-social-action="more">Load more</button>':'')+'</section>';
 }
+// Home reuses the verified account-social DTO and post controls. It must never
+// substitute canonical indexer objects or render private data before 420ID
+// has freshly validated the active same-origin session.
+export function renderHomeAccountSocial(state,{enabled=false}={}){
+ const header='<header class="home-social__header"><div><p class="eyebrow">Wallet-free community · off-chain</p><h2>Community feed</h2></div><span class="home-social__badge">OFF-CHAIN</span></header>'+
+  '<p class="home-social__intro">Posts here are stored in BongGoggles Account Social, not on the blockchain. Sign in with 420ID; a wallet is not needed. Blockchain publishing remains separate below.</p>';
+ let content;
+ if(!enabled){
+  content=emptyState({title:'Account Social is not activated',message:'This deployment has not enabled the independent off-chain community feed.'});
+ }else if(!state||state.status==='loading'){
+  content='<p role="status">Checking your 420ID session and loading off-chain community posts…</p>';
+ }else if(state.status==='guest'){
+  content=emptyState({title:'Sign in to see community posts',message:'The off-chain community feed is available to signed-in BongGoggles members.'})+
+   '<a class="ui-button" href="/social-api/auth/start">Sign in with 420ID</a>';
+ }else if(state.status!=='ready'){
+  content='<p role="status">Off-chain posts could not be verified. No cached or private content is shown.</p>'+
+   '<button type="button" data-social-action="refresh">Retry community feed</button>';
+ }else{
+  const profile=state.profile??{};
+  const posts=Array.isArray(state.posts)?state.posts:[];
+  content='<p class="home-social__member">Signed in as <strong>'+escapeHtml(profile.displayName??'Member')+'</strong></p>'+
+   '<form data-social-post class="home-social__composer"><label>Share with the community<textarea name="body" maxlength="2000" required placeholder="What’s happening?"></textarea></label>'+
+   '<div class="actions"><span>Off-chain community post · no wallet approval</span><button type="submit">Publish post</button></div></form>'+
+   (state.notice?'<p role="status">'+escapeHtml(state.notice)+'</p>':'')+
+   '<div class="home-social__actions"><a href="/social" data-route="social">My Account Social profile</a>'+
+   '<button type="button" data-social-action="refresh">Refresh posts</button></div>'+
+   '<section class="home-social__posts" aria-label="Off-chain community posts">'+
+   (posts.length?posts.map(p=>postMarkup(p,profile.subject,state.comments?.[p.id])).join(''):
+    emptyState({title:'No community posts yet',message:'Be the first to share something with the signed-in community.'}))+
+   '</section>'+
+   (state.nextCursor?'<button type="button" data-social-action="more">Load more off-chain posts</button>':'');
+ }
+ return '<section class="account-social home-social ui-card" aria-label="Wallet-free community feed">'+header+content+'</section>';
+}
+
 export function socialInput(value,kind){
  const max=LIMITS[kind];
  if(typeof value!=='string'||!max||value.trim()!==value||value.trim()===''&&kind!=='bio'||

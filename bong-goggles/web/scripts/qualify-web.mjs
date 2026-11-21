@@ -9,7 +9,10 @@ import {CHAOS_SCENERY,CHAOS_SCENERY_COUNT} from '../core/chaos-region-scenery.js
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 const root=resolve(import.meta.dirname,'..','dist');
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1052*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-ART-5 qualified base: 1,076,369 B. Home's authenticated off-chain feed
+// adds 5,138 B (combined 1,081,507 B). Reserve exactly 5 KiB for this UI;
+// retain unchanged per-file, card, map and vehicle ceilings.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1057*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');

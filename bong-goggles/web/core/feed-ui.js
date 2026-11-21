@@ -39,13 +39,13 @@ export function renderComposer({walletView=null,draft=null,publication=null,uplo
   </section>`;
 }
 
-export function renderFeed({page=null,loading=false,error=null}={}){
+export function renderFeed({page=null,loading=false,error=null,title='Home feed'}={}){
   if(loading) return card({title:'Loading feed',body:skeleton({lines:6})});
   if(error) return card({title:'Feed unavailable',body:`<div class="ui-error" role="alert"><p>${escapeHtml(error)}</p></div>`});
-  if(!page) return card({title:'Home feed',body:emptyState({title:'Canonical feed unavailable',message:'Bong Goggles will not synthesize feed entries when the qualified projection transport is unavailable.'})});
+  if(!page) return card({title,body:emptyState({title:'Canonical feed unavailable',message:'Bong Goggles will not synthesize feed entries when the qualified projection transport is unavailable.'})});
   const normalized=normalizeFeedPage(page);
-  if(!normalized.items.length) return card({title:'Home feed',body:emptyState({title:'No posts yet',message:'The canonical feed projection is empty for this snapshot.'})});
-  return `<section class="feed-list" aria-label="Home feed">
+  if(!normalized.items.length) return card({title,body:emptyState({title:'No posts yet',message:'The canonical feed projection is empty for this snapshot.'})});
+  return `<section class="feed-list" aria-label="${escapeHtml(title)}">
     ${normalized.items.map(objectBody).join('')}
     ${normalized.hasMore?button({label:'Load more',action:'feed-more',variant:'secondary'}):''}
     ${normalized.freshness?`<p class="feed-freshness">Indexed block: ${escapeHtml(normalized.freshness.indexedBlock??normalized.snapshotBlock??'—')}</p>`:''}

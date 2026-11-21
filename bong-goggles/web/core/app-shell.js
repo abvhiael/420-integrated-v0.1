@@ -11,13 +11,25 @@ import {renderSettingsRoute} from './settings-ui.js';
 import {NAV_LABELS,topNavigation,profileSummary,welcomeHero,communityRail,ecosystemRail,appIcon} from './dashboard-ui.js';
 import {renderGameCatalogue} from './games-ui.js';
 import {renderClassicsRoute} from './classics-ui.js';
-import {renderAccountSocial} from './account-social.js';
+import {renderAccountSocial,renderHomeAccountSocial} from './account-social.js';
 import {renderAccountExtra} from './account-extras.js';
 import {renderAccountXP} from './account-xp.js';
 import {renderAccountMonetization} from './account-monetization.js';
 function navMarkup(items,activeId,placement){return `<nav class="app-nav app-nav--${placement}" aria-label="${placement==='mobile'?'Primary mobile':'Primary'}">${items.map(item=>`<a href="${item.path}" data-route="${item.id}" aria-current="${item.id===activeId?'page':'false'}" class="app-nav__item ${item.access.allowed?'':'is-locked'}"><span aria-hidden="true">${escapeHtml(item.icon)}</span><span>${escapeHtml(NAV_LABELS[item.id]??item.label)}</span></a>`).join('')}</nav>`;}
 function routePlaceholder(route,access,{profileProjection=null,relationshipProjection=null,relationshipCollection=null,viewer=null,walletView=null,feedProjection=null,storyProjection=null,publication=null,upload=null,communityProjection=null,messagingProjection=null,discoveryProjection=null,gamesProjection=null,notificationsProjection=null,rewardsProjection=null,safetyProjection=null,viewPreferences=null,walletSettingsUrl=null,notificationsSettingsUrl=null,accountSocialState=null,accountSocialEnabled=false,accountMessagesState=null,accountGamesState=null,accountMessagingEnabled=false,accountGamesEnabled=false,accountXPState=null,accountXPEnabled=false,accountMonetizationState=null,accountMonetizationEnabled=false,chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null}={}){
- if(route.id==='home')return `<div class="home-surface">${welcomeHero()}${renderStories({items:storyProjection??[]})}${renderComposer({walletView,publication,upload})}${renderFeed({page:feedProjection})}</div>`;
+ if(route.id==='home'&&!accountSocialEnabled)return `<div class="home-surface">${welcomeHero()}${renderStories({items:storyProjection??[]})}${renderComposer({walletView,publication,upload})}${renderFeed({page:feedProjection})}</div>`;
+ if(route.id==='home')return `<div class="home-surface">${welcomeHero()}
+  ${renderHomeAccountSocial(accountSocialState,{enabled:accountSocialEnabled})}
+  <details class="home-canonical" aria-label="Blockchain publishing and indexed feed">
+   <summary><span><strong>Blockchain publishing &amp; indexed feed</strong><small>Separate from the off-chain community · 420Wallet approval and qualified chain/indexer required</small></span></summary>
+   <div class="home-canonical__body">
+    <p class="home-canonical__notice">This is a separate blockchain-backed publishing system. Off-chain community posts are not submitted to the chain or copied into this feed.</p>
+    ${renderStories({items:storyProjection??[]})}
+    ${renderComposer({walletView,publication,upload})}
+    ${renderFeed({page:feedProjection,title:'Blockchain feed'})}
+   </div>
+  </details>
+ </div>`;
  if(route.id==='discover')return renderDiscoveryRoute({projection:discoveryProjection,walletView});
  if(route.id==='social')return renderAccountSocial(accountSocialState,{enabled:accountSocialEnabled});
  if(route.id==='account-messages')return renderAccountExtra('messages',accountMessagesState,{enabled:accountMessagingEnabled});

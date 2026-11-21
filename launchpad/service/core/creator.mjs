@@ -5,8 +5,8 @@ export const MODES=Object.freeze(['REWARD','DONATION','COMMUNITY_PROJECT','PRODU
 const ZERO='0x'+'0'.repeat(64),U128=(1n<<128n)-1n,ADDRESS_ZERO='0x'+'0'.repeat(40);
 function invalid(message){throw Object.assign(new Error('invalid campaign submission: '+message),{statusCode:400});}
 function string(value,name,max=500,{required=true}={}){
-  if(typeof value!=='string'||value.length>max||/[\u0000-\u001f]/.test(value))invalid(name);
-  const v=value.trim();if(required&&!v)invalid(name);return v;
+  if(typeof value!=='string'||value.length>max||/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(value))invalid(name);
+  const v=value.replace(/\r\n?/g,'\n').trim();if(required&&!v)invalid(name);return v;
 }
 function addr(value,name){try{const v=address(value);if(v===ADDRESS_ZERO)invalid(name);return v;}catch{invalid(name);}}
 function bytes(value,name,{nonzero=true}={}){

@@ -83,3 +83,12 @@
 .ccc-hand-card.ccc-upgrade{background:#f5eabb;border-color:#b5a555}
 .ccc-hand-card.ccc-legendary{background:#eedbc0;border-color:#d6ab53}
 .ccc-actions button,.ccc-hand-card button{min-height:2.75rem}
+
+/* CCC-2 approved card masters: visible mileage is grouped by denomination,
+   highest first, with one artwork face per stack. The discard remains face up. */
+.ccc-mileage-card-stack{display:grid;gap:.3rem;flex:0 0 82px;max-width:100px;margin:0;color:#f4ffe9}
+.ccc-mileage-card-stack .ccc-card-image{width:100%;border-radius:.4rem;box-shadow:0 2px 8px #04130980}
+.ccc-mileage-card-stack figcaption{text-align:center;font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums}
+.ccc-pile-status .ccc-discard-top{display:inline-flex;align-items:center;gap:.6rem;max-width:100%;font-size:.8rem}
+.ccc-pile-status .ccc-discard-top .ccc-card-image{width:42px;max-height:76px;object-fit:contain;border-radius:.25rem}
+@media(max-width:650px){.ccc-mileage-card-stack{flex-basis:68px}.ccc-pile-status .ccc-discard-top .ccc-card-image{width:36px}}

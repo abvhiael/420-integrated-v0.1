@@ -144,6 +144,8 @@ func (a *AccountGames) Respond(ctx context.Context,viewer,id string,accept bool)
  if errors.Is(e,sql.ErrNoRows){return empty,ErrNotFound};if e!=nil{return empty,e}
  if existing.Invited!=viewer{return empty,ErrNotFound}
  if existing.Status!="invited"{return empty,ErrConflict}
+ // Serialize a response with both-direction block/unblock decisions.
+ if e=lockPeerPair(ctx,tx,existing.Inviter,viewer);e!=nil{return empty,e}
  blocked,e:=blockedBetween(ctx,tx,existing.Inviter,viewer);if e!=nil{return empty,e}
  if blocked{return empty,ErrForbidden}
  status,turn:="declined",any(nil)
@@ -163,6 +165,9 @@ func (a *AccountGames) Move(ctx context.Context,viewer,id string,position,expect
  FROM bg_account_social.account_games WHERE id=$1 FOR UPDATE`,id))
  if errors.Is(e,sql.ErrNoRows){return empty,ErrNotFound};if e!=nil{return empty,e}
  if viewer!=existing.Inviter&&viewer!=existing.Invited{return empty,ErrNotFound}
+ // The game row lock prevents concurrent moves; participant row locks
+ // additionally serialize this move against the social block graph.
+ if e=lockPeerPair(ctx,tx,existing.Inviter,existing.Invited);e!=nil{return empty,e}
  blocked,e:=blockedBetween(ctx,tx,existing.Inviter,existing.Invited);if e!=nil{return empty,e}
  if blocked{return empty,ErrForbidden}
  if existing.Status!="active"||existing.NextTurn!=viewer||expected!=existing.Moves+1{return empty,ErrConflict}

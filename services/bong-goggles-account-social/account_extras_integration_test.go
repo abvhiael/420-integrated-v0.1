@@ -140,3 +140,21 @@ func TestAUTH9GameExpiryOutsiderAndRevocation(t *testing.T){
  broker.mu.Lock();broker.tokens=map[string]string{};broker.mu.Unlock()
  if w:=request(h,"GET","/v1/account-games","",a);w.Code!=401{t.Fatal("revoked account session used to read game",w.Code)}
 }
+
+func TestAUTH9GameBlockChangesDenyInvitesAndMoves(t *testing.T){
+ store,h,_,a,b:=extras(t)
+ t.Cleanup(func(){
+  if e:=store.Relationship(context.Background(),memberB,memberA,"block",false);e!=nil{t.Error("game block cleanup",e)}
+ })
+ created:=request(h,"POST","/v1/account-games",body(map[string]string{"target":memberB,"kind":"tic_tac_toe"}),a)
+ if created.Code!=201{t.Fatal("invite",created.Code)}
+ game:=readGame(t,created)
+ if w:=request(h,"PUT","/v1/relationships/block/"+memberA,"{}",b);w.Code!=200{t.Fatal("block",w.Code)}
+ if w:=request(h,"POST","/v1/account-games/"+game.ID+"/respond",body(map[string]bool{"accept":true}),b);w.Code!=403{t.Fatal("blocked invite accepted",w.Code)}
+ if w:=request(h,"DELETE","/v1/relationships/block/"+memberA,"{}",b);w.Code!=200{t.Fatal("unblock",w.Code)}
+ if w:=request(h,"POST","/v1/account-games/"+game.ID+"/respond",body(map[string]bool{"accept":true}),b);w.Code!=200{t.Fatal("unblocked invite rejected",w.Code)}
+ if w:=request(h,"PUT","/v1/relationships/block/"+memberA,"{}",b);w.Code!=200{t.Fatal("reblock",w.Code)}
+ if w:=request(h,"POST","/v1/account-games/"+game.ID+"/move",body(map[string]int{"position":0,"expectedMove":1}),a);w.Code!=403{t.Fatal("blocked game move accepted",w.Code)}
+ if w:=request(h,"DELETE","/v1/relationships/block/"+memberA,"{}",b);w.Code!=200{t.Fatal("second unblock",w.Code)}
+ if w:=request(h,"POST","/v1/account-games/"+game.ID+"/move",body(map[string]int{"position":0,"expectedMove":1}),a);w.Code!=200{t.Fatal("unblocked game move rejected",w.Code)}
+}

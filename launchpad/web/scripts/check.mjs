@@ -1,10 +1,16 @@
 import fs from 'node:fs';import path from 'node:path';
 const root=path.resolve(import.meta.dirname,'..');const errors=[];
-for(const f of ['index.html','app.js','styles.css','runtime-config.json','core/config.js','core/service.js','core/wallet.js','core/creator.js'])if(!fs.existsSync(path.join(root,f)))errors.push('missing '+f);
+for(const f of ['index.html','app.js','showcase.js','sample-catalog.js','styles.css','runtime-config.json','core/config.js','core/service.js','core/wallet.js','core/creator.js'])if(!fs.existsSync(path.join(root,f)))errors.push('missing '+f);
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8'),app=fs.readFileSync(path.join(root,'app.js'),'utf8'),service=fs.readFileSync(path.join(root,'core/service.js'),'utf8'),wallet=fs.readFileSync(path.join(root,'core/wallet.js'),'utf8');
 for(const token of ['campaign-grid','participant-state','creator-form','creator-studio','creator-prepared','creator-report-output','creator-submit','review-gate','aria-live'])if(!html.includes(token))errors.push('UI requirement missing '+token);
 for(const token of ['runtime()','campaigns(','participant(','prepare(','creatorRequest('])if(!service.includes(token))errors.push('service client missing '+token);
 for(const token of ['WRONG_NETWORK','CANONICAL_ADDRESSES_UNRESOLVED','CANONICAL_REVIEW_REQUIRED','UNEXPECTED_TRANSACTION_TARGET'])if(!wallet.includes(token))errors.push('wallet gate missing '+token);
 if(!app.includes('new CreatorStudio(')||!service.includes('creatorSubmit('))errors.push('signed creator governance boundary missing');
 if(/innerHTML\s*=\s*[^'"]/.test(app))errors.push('dynamic innerHTML assignment detected');
+const showcase=fs.readFileSync(path.join(root,'showcase.js'),'utf8');
+const samples=fs.readFileSync(path.join(root,'sample-catalog.js'),'utf8');
+for(const token of ['view-home','view-discover','view-campaign','view-overview','view-creator','view-dashboard','view-live','FICTIONAL EXAMPLE','contributions disabled'])if(!html.includes(token))errors.push('showcase requirement missing '+token);
+for(const token of ['examples','parseRoute','filterExamples'])if(!samples.includes(token))errors.push('sample isolation helper missing '+token);
+if(/eth_sendTransaction|creatorSubmit|fetch\(|localStorage/.test(showcase)||/eth_sendTransaction|fetch\(/.test(samples))errors.push('sample-only showcase must not submit or fetch data');
+if(!html.includes('src="./showcase.js"'))errors.push('showcase module not loaded');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}console.log('420Launchpad web check PASS');

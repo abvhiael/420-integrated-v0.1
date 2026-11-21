@@ -92,7 +92,7 @@ body{background:var(--bg);color:var(--text)}
   .brand small,.header-state .status{display:none}
   .app-layout{display:block;padding:16px 14px 88px}
   .app-sidebar{display:none}
-  .app-nav--mobile{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:max(8px,env(safe-area-inset-bottom)) 6px 8px;border-top:1px solid var(--line);background:rgba(11,11,11,.96);backdrop-filter:blur(12px)}
+  .app-nav--mobile{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;padding:max(8px,env(safe-area-inset-bottom)) 6px 8px;border-top:1px solid var(--line);background:rgba(11,11,11,.96);backdrop-filter:blur(12px)}
   .app-nav--mobile .app-nav__item{flex-direction:column;gap:2px;padding:7px 4px;font-size:.7rem}
 }
 

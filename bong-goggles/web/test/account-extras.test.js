@@ -33,6 +33,14 @@ test('AUTH-9 routes are wallet-independent but explicitly disabled',()=>{
  assert.equal(config.features.accountMessaging,true);
  assert.equal(config.features.accountGames,true);
 });
+test('mobile navigation exposes off-chain Social without hiding canonical wallet Messages',()=>{
+ const html=renderApplicationShell({pathname:'/account/messages',walletView:null});
+ assert.match(html,/app-nav--mobile/);
+ const mobile=html.slice(html.indexOf('app-nav--mobile'));
+ assert.match(mobile,/href="\/social"/);
+ assert.match(mobile,/href="\/messages"/);
+ assert.match(mobile,/href="\/profile"/);
+});
 test('messages render with HTML escaped, no fake E2EE or wallet claims',()=>{
  const html=renderAccountExtra('messages',{status:'ready',viewer:me,peers:messages.peers,peer,thread:[
   {id:msg,sender:peer,recipient:me,body:'Secret <script>alert(1)</script>',createdAt:'2026-11-20T12:00:00Z'}

@@ -274,8 +274,8 @@
     },
     "Governance420": {
       "path": "contracts/artifacts/Governance420.json",
-      "runtimeCodeHash": "0x4ece0bce084d8df74418e7ec6aefb7adce2454976e90b6a6b015f39cae248552",
-      "sourceBlobSha1": "bb92a457f175d9bd12b716599d948d2324cbb6ca"
+      "runtimeCodeHash": "0xf7eb7707e44b888e63b19db85e15f65d485d0852f45e9da05d9800980f80c6b2",
+      "sourceBlobSha1": "0cf9291057d704209562979bdbdc3b4d0b8e92d3"
     },
     "CivicConstitution420": {
       "path": "contracts/artifacts/CivicConstitution420.json",

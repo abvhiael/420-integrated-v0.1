@@ -14,7 +14,8 @@ required=[
 "launchpad/web/scripts/build.mjs","launchpad/web/scripts/check.mjs","launchpad/web/core/creator.js",
 "launchpad/service/package.json","launchpad/service/server.mjs","launchpad/service/core/abi.mjs",
 "launchpad/service/core/rpc.mjs","launchpad/service/core/projection.mjs","launchpad/service/core/planner.mjs","launchpad/service/core/app.mjs",
-"launchpad/service/core/creator.mjs","launchpad/service/core/creator-queue.mjs","launchpad/service/core/creator-report.mjs"
+"launchpad/service/core/creator.mjs","launchpad/service/core/creator-queue.mjs","launchpad/service/core/creator-report.mjs",
+"launchpad/service/core/http.mjs","launchpad/service/core/indexer.mjs","launchpad/service/rebuild.mjs"
 ]
 for p in required: need((ROOT/p).is_file(),f"missing Audit-5 file: {p}")
 
@@ -63,14 +64,20 @@ rpc=read("launchpad/service/core/rpc.mjs")
 planner=read("launchpad/service/core/planner.mjs")
 projection=read("launchpad/service/core/projection.mjs")
 server=read("launchpad/service/server.mjs")
-for token in ("resolveActive(bytes32)","sales()","allocations()","crowdfundingIntegration()","projects()"):
-    need(token in rpc,f"canonical discovery missing: {token}")
+need("resolveActive(bytes32)" in rpc and "getter(router,'sales')" in rpc and
+     "getter(router,'allocations')" in rpc and "getter(allocations,'crowdfundingIntegration')" in rpc and
+     "getter(sales,'projects')" in rpc and "getter(crowdfundingIntegration,'allocations')" in rpc and
+     "Launchpad canonical dependency graph mismatch" in rpc and "eth_getCode" in rpc,
+     "canonical Registry discovery or reverse binding validation missing")
 for token in ("contributed(bytes32,address)","claimed(bytes32,address)","refunded(bytes32,address)","contribute(bytes32,uint128,bytes32)","claim(bytes32,bytes32)","prepareRefund(bytes32)","recordRefund(bytes32,bytes32)"):
     need(token in planner,f"participant workflow binding missing: {token}")
 need("requiresGovernance:true" in planner,"creator request must retain governance authority")
 need("transaction" not in planner.split("export function creatorRequest",1)[1].split("}",1)[0],"creator request unexpectedly exposes direct transaction")
 need("420-launchpad-projection-v1" in projection and "canonical!==true" in projection,"projection provenance enforcement missing")
-need("payload too large" in server,"service request-size bound missing")
+http=read("launchpad/service/core/http.mjs")
+need("serveLaunchpad" in server and "createHttpHandler" in http and
+     "payload too large" in http and "request rate limit exceeded" in http and
+     "origin not permitted" in http,"service ingress resource/origin bounds missing")
 
 webtests=list((ROOT/"launchpad/web/test").glob("*.test.js"))
 svctests=list((ROOT/"launchpad/service/test").glob("*.test.mjs"))

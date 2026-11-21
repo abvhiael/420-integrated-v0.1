@@ -7,7 +7,11 @@ import {prepareCampaignRequest,creatorLifecycle} from './creator.mjs';
 import {creatorReport,creatorCampaigns} from './creator-report.mjs';
 import {CreatorQueue} from './creator-queue.mjs';
 function ok(body,status=200){return {status,body};}
-function fail(error){return {status:error.statusCode||400,body:{error:error.message||String(error)}};}
+function fail(error){
+  const status=Number.isSafeInteger(error?.statusCode)&&[400,403,404,409,413,429].includes(error.statusCode)?
+    error.statusCode:503;
+  return {status,body:{error:status===503?'Launchpad canonical service temporarily unavailable':error.message}};
+}
 const param=(q,key)=>q instanceof URLSearchParams?q.get(key):q?.[key];
 export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.env.LAUNCHPAD_CREATOR_REQUEST_FILE),
   creatorReportFromBlock=process.env.LAUNCHPAD_CREATOR_REPORT_FROM_BLOCK??null,
@@ -17,16 +21,22 @@ export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.
     if(chainId&&actualChainId.toLowerCase()!==chainId.toLowerCase())throw new Error('configured chainId does not match RPC');
     const resolved=await resolveLaunchpad(rpc,{registryAddress});
     const arbitrationCasesAddress=decodeAddress(await rpc.ethCall(resolved.crowdfundingIntegrationAddress,await rpc.selector('arbitrationCases()')));
+    const code=await rpc.call('eth_getCode',[arbitrationCasesAddress,'latest']);
+    if(!/^0x(?:[0-9a-fA-F]{2})+$/.test(code||''))throw new Error('untrusted Arbitration runtime binding');
     return {schema:'420-launchpad-runtime-v1',canonical:true,chainId:actualChainId,...resolved,arbitrationCasesAddress};
   }
   return async function dispatch({method='GET',path='/',query={},body=null}={}){
     try{
       if(method==='GET'&&path==='/v1/launchpad/runtime')return ok(await runtime());
-      if(method==='GET'&&path==='/v1/launchpad/campaigns')return ok(projection.campaigns({
-        search:param(query,'search'),mode:param(query,'mode'),state:param(query,'state'),cursor:param(query,'cursor'),limit:param(query,'limit')||undefined
-      }));
+      if(method==='GET'&&path==='/v1/launchpad/campaigns'){
+        const rt=await runtime(),snapshot=await projection.verify(rpc,rt);
+        return ok(projection.campaigns({
+          search:param(query,'search'),mode:param(query,'mode'),state:param(query,'state'),
+          cursor:param(query,'cursor'),limit:param(query,'limit')||undefined
+        },snapshot));
+      }
       let m=path.match(/^\/v1\/launchpad\/campaigns\/([^/]+)$/);
-      if(method==='GET'&&m)return ok(projection.campaign(decodeURIComponent(m[1])));
+      if(method==='GET'&&m){const rt=await runtime(),snapshot=await projection.verify(rpc,rt);return ok(projection.campaign(decodeURIComponent(m[1]),snapshot));}
       m=path.match(/^\/v1\/launchpad\/campaigns\/(0x[0-9a-fA-F]{64})\/position\/(0x[0-9a-fA-F]{40})$/);
       if(method==='GET'&&m)return ok(await position(rpc,await runtime(),m[1],m[2]));
       m=path.match(/^\/v1\/launchpad\/campaigns\/(0x[0-9a-fA-F]{64})\/checkout$/);
@@ -46,14 +56,15 @@ export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.
         const block=await rpc.call('eth_getBlockByNumber',['latest',false]);
         if(!/^0x[0-9a-fA-F]{64}$/.test(block?.hash||''))throw new Error('unverifiable chain head');
         return ok({schema:'420-launchpad-projection-v1',canonical:true,
-          source:{chainId:rt.chainId,blockHash:block.hash},participant});
+          source:{chainId:rt.chainId,blockNumber:block.number,blockHash:block.hash,
+            saleRegistryAddress:rt.saleRegistryAddress,projectRegistryAddress:rt.projectRegistryAddress},participant});
       }
       m=path.match(/^\/v1\/launchpad\/prepare\/(approve-conversion|pay-conversion)$/);
       if(method==='POST'&&m)return ok(await convertedCheckoutReview(rpc,await runtime(),m[1],body||{}));
       m=path.match(/^\/v1\/launchpad\/prepare\/(contribute|claim|refund|bind-identity|register-intent|open-dispute|link-dispute|publish-outcome|recover-unallocated|reconcile-refund)$/);
       if(method==='POST'&&m)return ok(await prepareParticipant(rpc,await runtime(),m[1],body||{}));
       m=path.match(/^\/v1\/launchpad\/creator\/campaigns\/(0x[0-9a-fA-F]{40})$/);
-      if(method==='GET'&&m)return ok(await creatorCampaigns(rpc,await runtime(),projection,m[1]));
+      if(method==='GET'&&m){const rt=await runtime(),snapshot=await projection.verify(rpc,rt);return ok(await creatorCampaigns(rpc,rt,{read:()=>snapshot},m[1]));}
       m=path.match(/^\/v1\/launchpad\/creator\/report\/(0x[0-9a-fA-F]{40})\/(0x[0-9a-fA-F]{64})$/);
       if(method==='GET'&&m)return ok(await creatorReport(rpc,await runtime(),m[1],m[2],{fromBlock:creatorReportFromBlock}));
       m=path.match(/^\/v1\/launchpad\/creator\/requests\/(0x[0-9a-fA-F]{40})$/);

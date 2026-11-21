@@ -25,6 +25,7 @@ function rpc(){
     async ethCall(to,data){
       const sig=reverse.get(data.slice(0,10));
       if(sig==='resolveActive(bytes32)')return out(A.router,1);
+      if(sig==='getService(bytes32)')return out(A.router,ID,ID,1,100,1);
       if(sig==='sales()')return out(A.sale);
       if(sig==='allocations()')return out(A.allocation);
       if(sig==='crowdfundingIntegration()')return out(A.crowd);
@@ -39,7 +40,7 @@ function rpc(){
       throw Error('unmocked contract '+sig+' at '+to);
     },
     async call(method){
-      if(method==='eth_chainId')return '0x1a4';
+      if(method==='eth_chainId')return '0x1a4';if(method==='eth_getCode')return '0x6001';
       if(method==='web3_sha3')return ID;
       if(method==='eth_getBlockByNumber')return {hash:BLOCK,number:'0x9',timestamp:'0x5'};
       throw Error('unmocked RPC '+method);
@@ -53,8 +54,8 @@ test('creator HTTP dispatch prepares, records signed-review receipt, lists reque
     return {schema:'420-launchpad-governance-receipt-v1',canonical:true,
       status:'RECEIVED_FOR_GOVERNANCE_REVIEW',requestId:prepared.requestId};
   },list(account){return written&&account===WHO?[{requestId:written.prepared.requestId,status:'RECEIVED_FOR_GOVERNANCE_REVIEW'}]:[];}};
-  const projection={read:()=>({schema:'420-launchpad-projection-v1',canonical:true,
-    source:{chainId:'0x1a4',blockHash:BLOCK},items:[{saleId:SALE,projectId:PROJECT,controller:WHO,title:'Owned'}]})};
+  const projection={verify:async()=>projection.read(),read:()=>({schema:'420-launchpad-projection-v1',canonical:true,
+    source:{chainId:'0x1a4',blockHash:BLOCK,blockNumber:'0x9',saleRegistryAddress:A.sale,projectRegistryAddress:A.projects},items:[{saleId:SALE,projectId:PROJECT,controller:WHO,title:'Owned'}]})};
   const app=createApp({rpc:rpc(),projection,creatorQueue:queue,chainId:'0x1a4'});
   const prep=await app({method:'POST',path:'/v1/launchpad/creator/prepare',body:{kind:'CREATE_CAMPAIGN',draft:draft()}});
   assert.equal(prep.status,200);assert.equal(prep.body.requestId,ID);

@@ -17,7 +17,9 @@ export class LaunchpadService {
   _verify(payload){
     if(payload?.schema!==this.expectedSchema)throw new Error('untrusted Launchpad projection schema');
     if(payload?.canonical!==true)throw new Error('projection lacks canonical provenance');
-    if(!HASH.test(payload?.source?.blockHash||'')||!/^0x[0-9a-fA-F]+$/.test(payload?.source?.chainId||''))throw new Error('projection provenance incomplete');
+    if(!HASH.test(payload?.source?.blockHash||'')||!/^0x[0-9a-fA-F]+$/.test(payload?.source?.chainId||'')||
+       !/^0x[0-9a-fA-F]+$/.test(payload?.source?.blockNumber||'')||
+       !ADDRESS.test(payload?.source?.saleRegistryAddress||'')||!ADDRESS.test(payload?.source?.projectRegistryAddress||''))throw new Error('projection provenance incomplete');
     return payload;
   }
   _canonical(result,schema){
@@ -28,9 +30,12 @@ export class LaunchpadService {
   async runtime(){
     const result=await json(this.fetch,this.baseUrl+'/v1/launchpad/runtime',{cache:'no-store'});
     if(result?.schema!=='420-launchpad-runtime-v1'||result?.canonical!==true||
+       result.serviceId!=='420/service/launchpad/v1'||!Number.isSafeInteger(result.version)||result.version<1||
        !/^0x[0-9a-fA-F]+$/.test(result.chainId||''))throw new Error('untrusted Launchpad runtime');
     for(const name of ['launchpadRouterAddress','saleRegistryAddress','projectRegistryAddress','allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress'])
       if(!ADDRESS.test(result[name]||''))throw new Error('incomplete canonical runtime: '+name);
+    if(new Set(['launchpadRouterAddress','saleRegistryAddress','projectRegistryAddress','allocationRegistryAddress','crowdfundingIntegrationAddress'].map(k=>result[k].toLowerCase())).size!==5)
+      throw new Error('untrusted canonical dependency graph');
     return result;
   }
   async campaigns({cursor='',limit=24,search='',mode='',state=''}={}){
@@ -77,9 +82,9 @@ export class LaunchpadService {
     const result=await json(this.fetch,this.baseUrl+'/v1/launchpad/prepare/'+kind,{
       method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)
     });
-    if(result?.schema!=='420-launchpad-transaction-review-v1')throw new Error('untrusted transaction review schema');
+    if(result?.schema!=='420-launchpad-transaction-review-v1'||result.kind!==kind)throw new Error('untrusted transaction review schema');
     if(result?.canonical!==true||!ADDRESS.test(result?.transaction?.to||''))throw new Error('invalid canonical transaction review');
-    if(!/^0x[0-9a-fA-F]*$/.test(result?.transaction?.data||''))throw new Error('invalid transaction calldata');
+    if(!/^0x[0-9a-fA-F]*$/.test(result?.transaction?.data||'')||result?.transaction?.value!=='0x0')throw new Error('invalid transaction calldata or value');
     return result;
   }
   async creatorPrepare(payload){

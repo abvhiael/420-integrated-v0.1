@@ -1,12 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {LaunchpadService,normalizeCampaign,progress} from '../core/service.js';
 function response(body,status=200){return {ok:status>=200&&status<300,status,json:async()=>body};}
 test('service rejects projections without canonical provenance',async()=>{const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response({schema:'420-launchpad-projection-v1',canonical:false})});await assert.rejects(()=>s.campaigns(),/canonical provenance/);});
-test('service accepts canonical discovery and normalizes progress',async()=>{const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response({schema:'420-launchpad-projection-v1',canonical:true,source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32)},items:[]})});assert.equal((await s.campaigns()).items.length,0);const c=normalizeCampaign({saleId:'s',projectId:'p',raised:'50',hardCap:'200'});assert.equal(progress(c),25);});
-test('transaction review must be canonical and have valid target/calldata',async()=>{const good={schema:'420-launchpad-transaction-review-v1',canonical:true,transaction:{to:'0x0000000000000000000000000000000000001002',data:'0x1234'}};const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response(good)});assert.equal((await s.prepare('claim',{})).canonical,true);good.transaction.to='bad';await assert.rejects(()=>s.prepare('claim',{}),/invalid canonical transaction/);});
+test('service accepts canonical discovery and normalizes progress',async()=>{const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response({schema:'420-launchpad-projection-v1',canonical:true,source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32),blockNumber:'0x10',saleRegistryAddress:'0x0000000000000000000000000000000000001002',projectRegistryAddress:'0x0000000000000000000000000000000000001005'},items:[]})});assert.equal((await s.campaigns()).items.length,0);const c=normalizeCampaign({saleId:'s',projectId:'p',raised:'50',hardCap:'200'});assert.equal(progress(c),25);});
+test('transaction review must be canonical and have valid target/calldata',async()=>{const good={schema:'420-launchpad-transaction-review-v1',canonical:true,kind:'claim',transaction:{to:'0x0000000000000000000000000000000000001002',data:'0x1234',value:'0x0'}};const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response(good)});assert.equal((await s.prepare('claim',{})).canonical,true);good.transaction.to='bad';await assert.rejects(()=>s.prepare('claim',{}),/invalid canonical transaction/);});
 
 test('search and pagination query preserves canonical provenance',async()=>{
   const urls=[],fetchImpl=async url=>{urls.push(url);return response({schema:'420-launchpad-projection-v1',canonical:true,
-    source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32)},items:[],nextCursor:'cursor2',total:2});};
+    source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32),blockNumber:'0x10',saleRegistryAddress:'0x0000000000000000000000000000000000001002',projectRegistryAddress:'0x0000000000000000000000000000000000001005'},items:[],nextCursor:'cursor2',total:2});};
   const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl});
   const p=await s.campaigns({search:'green & gold',mode:'REWARD',state:'ACTIVE',limit:1,cursor:'abc'});
   assert.equal(p.total,2);const q=new URL(urls[0]).searchParams;
@@ -15,7 +15,7 @@ test('search and pagination query preserves canonical provenance',async()=>{
 });
 test('checkout rejects untrusted payment origin and incorrect invoice identity',async()=>{
   const sale='0x'+'11'.repeat(32),account='0x000000000000000000000000000000000000a11c';
-  const fixture={schema:'420-launchpad-checkout-v1',canonical:true,source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32)},
+  const fixture={schema:'420-launchpad-checkout-v1',canonical:true,source:{chainId:'0x1a4',blockHash:'0x'+'ab'.repeat(32),blockNumber:'0x10',saleRegistryAddress:'0x0000000000000000000000000000000000001002',projectRegistryAddress:'0x0000000000000000000000000000000000001005'},
     saleId:sale,invoiceId:'0x'+'bb'.repeat(32),checkoutUrl:'https://malicious.invalid/#pay?v=1&kind=invoice&chain=420&id=x'};
   const s=new LaunchpadService({baseUrl:'https://api.example',fetchImpl:async()=>response(fixture)});
   await assert.rejects(()=>s.checkout(sale,account,'42','99'),/untrusted 420Pay/);
@@ -69,4 +69,20 @@ test('creator dashboard and reports enforce on-chain identity and canonical prov
   assert.equal((await s.creatorCampaigns(account)).items.length,0);
   responseBody={schema:'420-launchpad-creator-receipts-v1',items:[]};
   assert.deepEqual(await s.creatorReceipts(account),[]);
+});
+
+test('runtime and transaction reviews refuse malicious service response substitutions',async()=>{
+  const address=x=>'0x'+x.padStart(40,'0');
+  const rt={schema:'420-launchpad-runtime-v1',canonical:true,chainId:'0x1a4',
+    serviceId:'420/service/launchpad/v1',version:1,
+    launchpadRouterAddress:address('1001'),saleRegistryAddress:address('1002'),
+    projectRegistryAddress:address('1005'),allocationRegistryAddress:address('1003'),
+    crowdfundingIntegrationAddress:address('1004'),arbitrationCasesAddress:address('1006')};
+  const svc=new LaunchpadService({baseUrl:'https://launchpad.example',fetchImpl:async()=>response(rt)});
+  assert.equal((await svc.runtime()).version,1);
+  rt.serviceId='420/service/launchpad-crowdfunding/v1';
+  await assert.rejects(()=>svc.runtime(),/untrusted Launchpad runtime/);
+  rt.serviceId='420/service/launchpad/v1';
+  rt.projectRegistryAddress=rt.saleRegistryAddress;
+  await assert.rejects(()=>svc.runtime(),/untrusted canonical dependency graph/);
 });

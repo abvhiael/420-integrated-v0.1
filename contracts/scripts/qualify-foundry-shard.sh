@@ -8,26 +8,8 @@ if ! [[ "$shard" =~ ^[0-9]+$ && "$count" =~ ^[0-9]+$ ]] || (( count < 1 || shard
   echo "Invalid shard $shard / $count" >&2
   exit 2
 fi
-# Reuse the pinned CADC upstream sources rather than downloading new vendor dependencies.
-for dependency in \
-  test/fixtures/cadc/upstream/@openzeppelin/contracts/utils/introspection/IERC165.sol \
-  test/fixtures/cadc/upstream/@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol \
-  test/fixtures/cadc/upstream/solidity-bytes-utils/contracts/BytesLib.sol; do
-  if [[ ! -f "$dependency" ]]; then
-    echo "Missing pinned CADC source: $dependency" >&2
-    exit 1
-  fi
-done
-pinned_remappings="$(printf '%s\n' \
-  '@openzeppelin/=test/fixtures/cadc/upstream/@openzeppelin/' \
-  '@layerzerolabs/=test/fixtures/cadc/upstream/@layerzerolabs/' \
-  'solidity-bytes-utils/=test/fixtures/cadc/upstream/solidity-bytes-utils/')"
-if [[ -n "${FOUNDRY_REMAPPINGS:-}" ]]; then
-  FOUNDRY_REMAPPINGS="$(printf '%s\n%s' "$FOUNDRY_REMAPPINGS" "$pinned_remappings")"
-else
-  FOUNDRY_REMAPPINGS="$pinned_remappings"
-fi
-export FOUNDRY_REMAPPINGS
+# Shared CADC dependency remappings are validated by the focused import-closure CI.
+source scripts/cadc-foundry-env.sh
 mapfile -t all < <(find src test script -type f -name '*.sol' | LC_ALL=C sort)
 if (( ${#all[@]} == 0 )); then echo 'No Solidity primary sources found' >&2; exit 1; fi
 targets=()

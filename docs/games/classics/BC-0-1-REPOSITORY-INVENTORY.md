@@ -124,3 +124,11 @@
 The inventory requirement is met when the BC-0.1 artifact is committed, linked from the canonical roadmap, and verified for the exact main source snapshot above: BG-15 code, 420ID session, off-chain account games/API, web routes, CCC, tests, CI and pending CCC-6 are individually identified. No gameplay code was changed by this task, and existing statuses remain explicitly separated.
 
 **Do not promote BC-0 or any BC-1+ game:** There is not yet a 25-game interactive frontend or multi-seat online account-game backend. Exact deployed SSO/proxy/flag health and 420ID two-account live browser journeys were **not** retested as part of this source inventory. They must be separately verified in their relevant implementation/release gates. The next assigned canonical step, when authorized, is **BC-0.2 — One coherent games menu**; do not start it as part of BC-0.1.
+
+### Verified qualification (2026-11-21)
+
+- **Inventory implementation SHA:** [`e399434763cf07d130d486cc05cfe18ae0d75b4e`](https://github.com/abvhiael/420-integrated-v0.1/commit/e399434763cf07d130d486cc05cfe18ae0d75b4e); the baseline source snapshot is the parent `1cd6ceb5fe5f6bc47ae7662ab2d4b14a776f0eb0`.
+- **Exact-head documentation CI:** [420Docs Qualification run #44948290256](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44948290256) — **completed / success** at `e399434763cf07d130d486cc05cfe18ae0d75b4e`.
+- **Triggered retained media regression:** [Bong Goggles Media Verification run #44948290241](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44948290241) — **completed / success** at `e399434763cf07d130d486cc05cfe18ae0d75b4e`.
+- **Repository structural verification:** 18 critical contract/service/web/auth/test source paths retrieved successfully from `e399434763cf07d130d486cc05cfe18ae0d75b4e`; canonical and master roadmap references to this inventory were fetched and confirmed; all three changed files and their commit verified via GitHub.
+- **Qualification scope:** documentation/source reconciliation only. No new gameplay tests, live multiaccount browser journeys, chain qualification, deployment promotion or CCC-6 merge are claimed. BC-0.1 is **QUALIFIED**; BC-0 remains **IN PROGRESS**, and BC-0.2 is the next unstarted milestone.

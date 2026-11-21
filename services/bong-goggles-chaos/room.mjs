@@ -1,7 +1,7 @@
 // Cross Country Chaos — server-owned, account-scoped multiplayer authority.
 // This module MUST run only on the trusted game service, never as a browser rules host.
 // It reuses the frozen CCC-1–6 engine without forking its rules or random deck logic.
-import {randomBytes,randomUUID} from 'node:crypto';
+import {randomBytes,randomInt,randomUUID} from 'node:crypto';
 import {createChaosGame,chaosActionOptions,takeChaosTurn,advanceChaosLeg} from '../../bong-goggles/web/core/cross-country-chaos.js';
 import {configureChaosComputerSeats,advanceChaosComputerTurns,isChaosComputer} from '../../bong-goggles/web/core/chaos-computer.js';
 import {applyChaosVehicleSelection,CHAOS_VEHICLES} from '../../bong-goggles/web/core/chaos-vehicles.js';
@@ -45,6 +45,20 @@ const normalizeMove=move=>{
  if(useBoost===true)out.useBoost=true;
  return out;
 };
+// A 32-bit deterministic local seed must NEVER determine private online hands.
+// Preserve the frozen region's exact physical inventory, but CSPRNG-redeal
+// hands and stock after each canonical regional setup. Public action random
+// hazards still use the original qualified engine seed.
+function secureRegionalDeal(game){
+ const pool=[...game.players.flatMap(p=>p.hand),...game.deck];
+ for(let i=pool.length-1;i>0;i--){
+  const j=randomInt(i+1),temp=pool[i];
+  pool[i]=pool[j];pool[j]=temp;
+ }
+ for(const p of game.players)p.hand=pool.splice(0,7);
+ game.deck=pool;
+ return game;
+}
 function bots(game){
  let state=game,actions=0;
  while(state.phase==='playing'&&isChaosComputer(state.players[state.turn])){
@@ -89,7 +103,7 @@ export function startRoom(room,actor){
  const names=room.seats.map((s,i)=>String(s.name).slice(0,19)+' #'+(i+1));
  let game=createChaosGame({names,seed});
  game=configureChaosComputerSeats(game,room.seats.map(s=>s.controller==='computer'?s.difficulty:'human'));
- game=applyChaosVehicleSelection(game,room.seats.map(s=>s.vehicle));
+ game=secureRegionalDeal(applyChaosVehicleSelection(game,room.seats.map(s=>s.vehicle)));
  const next=structuredClone(room);
  next.game=bots(game);next.status=next.game.phase;next.revision++;
  next.updatedAt=new Date().toISOString();
@@ -119,7 +133,7 @@ export function continueRoom(room,actor){
  if(room.host!==actor)forbidden();
  if(room.status!=='between'||room.game?.phase!=='between')conflict('Regional results are not ready');
  const next=structuredClone(room);
- next.game=bots(advanceChaosLeg(room.game));next.status=next.game.phase;
+ next.game=bots(secureRegionalDeal(advanceChaosLeg(room.game)));next.status=next.game.phase;
  next.revision++;next.updatedAt=new Date().toISOString();
  return next;
 }

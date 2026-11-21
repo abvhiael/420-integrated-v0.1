@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
+import {readFile} from 'node:fs/promises';
 import {makeRoom,joinRoom,startRoom,moveRoom,continueRoom,projectRoom,summarizeRoom,MatchError} from '../room.mjs';
 import {signature,handleChaos,authenticate} from '../http.mjs';
 
@@ -150,4 +151,21 @@ test('Malicious client-provided seed, hand, winner, score and action fields are 
   {expectedRevision:active.revision,move:{action:'hazard',index:0,target:0}}),e=>e.status===409);
  await assert.rejects(()=>call(repo,alice,movePath,'POST',
   {expectedRevision:active.revision,move:{action:'pass',seed:0}}),e=>e.status===400);
+});
+
+test('Online regional hands are CSPRNG shuffled, independent of the 32-bit event seed',async()=>{
+ const joined=joinRoom(makeRoom(alice,'Alice',{humanSeats:2}),bob,'Bobby');
+ const started=startRoom(joined,alice);
+ const g=started.game;
+ const cards=[...g.deck,...g.players.flatMap(p=>p.hand)];
+ assert.ok(cards.length>50);
+ assert.equal(new Set(cards.map(c=>c.uid)).size,cards.length,'every card is in exactly one hand or stock');
+ assert.ok(g.players.every(p=>p.hand.length===7));
+ const view=projectRoom(started,alice);
+ assert.equal(view.stockCount,g.deck.length);
+ assert.equal(view.hand.length,7);
+ assert.doesNotMatch(JSON.stringify(view),/"seed"|"deck"|"legendaryByLeg"/);
+ const source=await readFile(new URL('../room.mjs',import.meta.url),'utf8');
+ assert.match(source,/randomInt\(i\+1\)/);
+ assert.match(source,/secureRegionalDeal\(advanceChaosLeg\(room\.game\)\)/);
 });

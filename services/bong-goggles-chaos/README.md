@@ -1,6 +1,6 @@
 # Cross Country Chaos — 420ID account multiplayer authority
 
-**New delivery mode:** each human logs into their **own** BongGoggles 420ID account and interacts with a separate authenticated match projection. The browser never owns a canonical stock, RNG seed, score, opponent's hand or bots. The frozen CCC-1–6 engine and CCC-4 bot strategy now run on this trusted Node service. No required 420Wallet, wager, staking, on-chain reward, or change to unrelated social sessions.
+**New delivery mode:** each human logs into their **own** BongGoggles 420ID account and interacts with a separate authenticated match projection. The browser never owns a canonical stock, RNG seed, score, opponent's hand or bots. The frozen CCC-1–6 engine and CCC-4 bot strategy now run on this trusted Node service. Unlike the legacy 32-bit local shuffle, every online regional hand and stock is independently CSPRNG-shuffled with Node crypto after the canonical card inventory has been built, so guessing the engine's hazard seed cannot reveal opponents' private cards. No required 420Wallet, wager, staking, on-chain reward, or change to unrelated social sessions.
 
 ## Boundary and deployment
 

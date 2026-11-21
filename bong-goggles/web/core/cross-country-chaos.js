@@ -148,7 +148,10 @@ function atStartOfTurn(s){
  if(wagon&&p.status?.kind==='block'&&p.status.category==='mechanical'){
   p.used.push(wagon.id);p.status=null;log(s,p.name+' repaired a mechanical breakdown with the Station Wagon.');
  }
- s.step=p.openingTurn?'play':'draw';p.openingTurn=false;s.fresh=[];s.discardsLeft=0;
+ const opening=p.openingTurn;
+ s.step=opening?'play':'draw';p.openingTurn=false;
+ s.fresh=opening?p.hand.filter(c=>c.type==='upgrade'||c.type==='legendary').map(c=>c.uid):[];
+ s.discardsLeft=0;
 }
 function finishStage(s){
  const ranked=[...s.players].sort((a,b)=>b.km-a.km||b.played.reduce((z,c)=>z+c.km,0)-a.played.reduce((z,c)=>z+c.km,0)||a.id-b.id);

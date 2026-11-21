@@ -1,6 +1,6 @@
 
 /* Community dashboard: approved forest-green / warm ivory design direction. */
-:root{color-scheme:light;--bg:#eeeee5;--surface:#fffef9;--surface-2:#f2f3eb;--line:#dce2d5;--text:#172d23;--muted:#52665a;--brand-green:#297c43;--brand-yellow:#ffe070}
+:root{color-scheme:light;--bg:#eeeee5;--surface:#fffef9;--surface-2:#f2f3eb;--line:#dce2d5;--text:#172d23;--muted:#40594a;--brand-green:#297c43;--brand-yellow:#ffe070}
 body{background:var(--bg);color:var(--text)}
 .app-shell{display:flex;flex-direction:column}.app-header{background:#082d24;color:#fff;min-height:78px;gap:16px;padding:10px 22px;border-color:#245543}
 .brand{color:white;flex:none}.brand__mark{width:56px;height:56px;border:0;box-shadow:none}.brand-wordmark strong{font-size:1.8rem;letter-spacing:-.07em;line-height:1}.brand-wordmark small{color:white;font-size:.83rem;font-weight:800;letter-spacing:.24em}
@@ -28,3 +28,32 @@ body{background:var(--bg);color:var(--text)}
 .ecosystem-unavailable{opacity:.85}.ecosystem-unavailable small{display:block;font-size:.66rem;font-weight:400;color:#d4e5d6}
 .sidebar-ecosystem a{display:flex;align-items:center;gap:8px}
 @media(forced-colors:active){.app-sidebar,.ecosystem-rail{background:Canvas;color:CanvasText}.ecosystem-rail a,.ecosystem-rail summary,.ecosystem-unavailable small,.ecosystem-brand small,.ecosystem-note{color:CanvasText}}
+
+/* The dashboard uses dark ink on ivory, but the wallet-free Home feed remains
+   dark green. Restore light foregrounds only inside that off-chain feed;
+   do not change the dashboard or canonical (on-chain) feed theme. */
+.home-social.ui-card{color:#f1faef}
+.home-social.ui-card h2,
+.home-social.ui-card .eyebrow,
+.home-social.ui-card .home-social__intro,
+.home-social.ui-card .home-social__member,
+.home-social.ui-card label,
+.home-social.ui-card .social-post__body,
+.home-social.ui-card .social-comments li{color:#f1faef}
+.home-social.ui-card .social-post header strong{color:#fff}
+.home-social.ui-card .social-post header small,
+.home-social.ui-card .home-social__composer .actions span{color:#c5e2ce}
+.home-social.ui-card a,
+.home-social.ui-card a:visited{color:#b9fac8}
+.home-social.ui-card a:hover{color:#fff}
+.home-social.ui-card .home-social__composer textarea,
+.home-social.ui-card .social-post textarea{background:#fffef9;color:#172d23;border:1px solid #9db5a4}
+.home-social.ui-card textarea::placeholder{color:#40594a}
+.home-social.ui-card a:focus-visible,
+.home-social.ui-card button:focus-visible,
+.home-social.ui-card textarea:focus-visible{outline:3px solid #ffe070;outline-offset:2px}
+@media(forced-colors:active){
+  .home-social.ui-card,.home-social.ui-card .social-post,
+  .home-social.ui-card textarea{color:CanvasText;background:Canvas}
+  .home-social.ui-card a{color:LinkText}
+}

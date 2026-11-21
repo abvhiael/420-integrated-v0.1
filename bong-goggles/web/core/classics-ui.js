@@ -14,7 +14,12 @@ const artImage=(path,kind='card')=>path?'<img class="ccc-card-image ccc-card-ima
 const cardArt=(card,leg)=>chaosCardArt(card,leg);
 const equipment=(p,legId)=>{
  const upgrades=p.upgrades.map(u=>'<figure class="ccc-equipped-card">'+artImage(chaosUpgradeArt(u.id),'upgrade')+'<figcaption><strong>'+esc(u.name)+'</strong><small>'+(p.used.includes(u.id)?'Used this stage':'Ready')+'</small></figcaption></figure>').join('');
- const mileage=[...p.played].sort((a,b)=>b.km-a.km).map(c=>'<span class="ccc-mileage-stack">'+c.km+' km</span>').join('');
+ const miles=[...new Set(p.played.map(c=>c.km))].sort((a,b)=>b-a);
+ const mileage=miles.map(km=>{
+  const count=p.played.filter(c=>c.km===km).length;
+  return '<figure class="ccc-mileage-card-stack">'+artImage(chaosCardArt({type:'mileage',km},legId),'mileage')+
+   '<figcaption>'+km+' km × '+count+'</figcaption></figure>';
+ }).join('');
  return '<section class="ccc-equip"><h3>Vehicle equipment (resets each region)</h3><div class="ccc-gear">'+(upgrades||'<p>No upgrades equipped yet.</p>')+'</div>'
  +'<div class="ccc-conditions">'+(p.status?'<figure class="ccc-equipped-card ccc-equipped-card--hazard">'+artImage(chaosHazardArt(legId,p.status.id),'hazard')+'<figcaption><strong>'+esc(p.status.name)+'</strong><small>Active '+esc(p.status.category)+' hazard</small></figcaption></figure>':'<p>Road condition: Clear</p>')
  +(p.shield?'<p>'+p.shield+' legendary hazard shields remaining</p>':'')+'</div>'
@@ -57,7 +62,7 @@ export function renderChaosGame({game=null,revealed=false,error=null}={}){
  }
  if(!revealed)return top+notice+'<div class="ccc-panel ccc-private"><h3>Pass the device to '+esc(p.name)+'</h3><p>Everyone else should look away. Only '+esc(p.name)+' should reveal their cards.</p><button data-chaos-action="reveal">I am '+esc(p.name)+' — reveal my hand</button></div>'+history(game)+'</div>';
  const options=chaosActionOptions(game),discard=discardTop(game);
- const pile='<div class="ccc-pile-status"><strong>Draw deck: '+game.deck.length+' cards</strong> · <strong>Discard pile: '+game.discard.length+' cards</strong>'+(discard?'<span>Top discard: '+esc(discard.type==='mileage'?discard.km+' km':discard.name)+'</span>':'')+'</div>';
+ const pile='<div class="ccc-pile-status"><strong>Draw deck: '+game.deck.length+' cards</strong> · <strong>Discard pile: '+game.discard.length+' cards</strong>'+(discard?'<span class="ccc-discard-top">'+artImage(cardArt(discard,leg.id),'discard')+'Top discard: '+esc(discard.type==='mileage'?discard.km+' km':discard.name)+'</span>':'')+'</div>';
  if(game.step==='draw')return top+notice+'<div class="ccc-panel"><h3>'+esc(p.name)+' — draw to seven</h3>'+pile+'<p>Take two from the regional deck, or the top discard and one from the deck.</p><div class="ccc-actions"><button data-chaos-action="draw" data-choice="deck">Draw two from deck</button>'+(discard?'<button data-chaos-action="draw" data-choice="discard">Take top discard + draw one</button>':'')+'</div>'+equipment(p,leg.id)+'</div>'+history(game)+'</div>';
  const prompt=game.step==='discard'?'Discard '+game.discardsLeft+' card'+(game.discardsLeft===1?'':'s')+' to end turn':'Play one card or action; free newly drawn powers may be activated first.';
  return top+notice+'<div class="ccc-panel"><h3>'+esc(p.name)+' — '+(game.step==='discard'?'discard phase':'play phase')+'</h3>'+pile+equipment(p,leg.id)+'<p>'+prompt+' Repairs are only allowed on your turn. Detour losses are permanent this stage. Drives over 300 km trigger a regional hazard.</p>'+handCards(p,leg,options,game)+(game.step==='play'?'<div class="ccc-actions">'+(p.status?'<button data-chaos-action="recover">Emergency recovery (spend action)</button>':'')+'<button data-chaos-action="pass">Pass (discard two)</button></div>':'')+'</div>'+history(game)+'</div>';

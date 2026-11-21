@@ -9,7 +9,7 @@ if(!app.includes('new CreatorStudio(')||!service.includes('creatorSubmit('))erro
 if(/innerHTML\s*=\s*[^'"]/.test(app))errors.push('dynamic innerHTML assignment detected');
 const showcase=fs.readFileSync(path.join(root,'showcase.js'),'utf8');
 const samples=fs.readFileSync(path.join(root,'sample-catalog.js'),'utf8');
-for(const token of ['view-home','view-discover','view-campaign','view-overview','view-creator','view-live','FICTIONAL EXAMPLE','contributions disabled'])if(!html.includes(token))errors.push('showcase requirement missing '+token);
+for(const token of ['view-home','view-discover','view-campaign','view-overview','view-creator','view-dashboard','view-live','FICTIONAL EXAMPLE','contributions disabled'])if(!html.includes(token))errors.push('showcase requirement missing '+token);
 for(const token of ['examples','parseRoute','filterExamples'])if(!samples.includes(token))errors.push('sample isolation helper missing '+token);
 if(/eth_sendTransaction|creatorSubmit|fetch\(|localStorage/.test(showcase)||/eth_sendTransaction|fetch\(/.test(samples))errors.push('sample-only showcase must not submit or fetch data');
 if(!html.includes('src="./showcase.js"'))errors.push('showcase module not loaded');

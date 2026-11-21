@@ -25,6 +25,7 @@ interface VmGovernanceRec4 {
     function store(address, bytes32, bytes32) external;
     function prank(address) external;
     function deal(address, uint256) external;
+    function targetContract(address) external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
 }
@@ -494,5 +495,90 @@ contract GovernanceRec4Lifecycle420Test {
         assert(keccak256(abi.encode(actions)) != committed);
         actions[1].value += 1;
         assert(keccak256(abi.encode(actions)) != committed);
+    }
+}
+
+/// @dev Adversarial handler called by Foundry's randomized invariant campaign after Civic handoff.
+/// Every entry point uses an unprivileged identity and must fail without changing authority.
+contract GovRec4UnauthorizedHandler {
+    GovernanceTimelock public immutable timelock;
+    address public immutable governor;
+    bytes32 public lastAttempted;
+
+    constructor(GovernanceTimelock timelock_, address governor_) {
+        timelock = timelock_;
+        governor = governor_;
+    }
+
+    function attemptSchedule(bytes32 id, uint8 class_) external {
+        lastAttempted = id;
+        (bool ok,) = address(timelock).call(
+            abi.encodeCall(GovernanceTimelock.schedule,
+                (id, address(this), uint256(0), bytes(""), GovernanceTimelock.Class(class_ % 4)))
+        );
+        require(!ok, "unauthorized scheduler regained power");
+    }
+
+    function attemptScheduleWithDelay(bytes32 id, uint8 class_, uint64 delay) external {
+        lastAttempted = id;
+        (bool ok,) = address(timelock).call(
+            abi.encodeCall(GovernanceTimelock.scheduleWithDelay,
+                (id, address(this), uint256(0), bytes(""), GovernanceTimelock.Class(class_ % 4), delay))
+        );
+        require(!ok, "unauthorized delayed scheduling");
+    }
+
+    function attemptActivation(address candidate) external {
+        (bool ok,) = address(timelock).call(
+            abi.encodeCall(GovernanceTimelock.activateCivicAuthority, (candidate))
+        );
+        require(!ok, "unprivileged Civic authority replacement");
+    }
+
+    function attemptCancellation(bytes32 id) external {
+        (bool ok,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.cancel, (id)));
+        require(!ok, "retired cancellation authority");
+    }
+
+    function attemptDispatch(bytes32 id, address target) external {
+        (bool ok,) = address(timelock).call(
+            abi.encodeCall(GovernanceTimelock.executeCivicAction, (id, target, bytes("")))
+        );
+        require(!ok, "direct Civic action bypassed execution context");
+    }
+}
+
+/// @notice Stateful invariant campaign against the real authority and Civic module constructor graph.
+/// Unlike the 19-operation fixture above, this focused campaign starts just after the legitimate handoff,
+/// then fuzzes unprivileged calls and requires that neither scheduling nor cancellation authority reappear.
+contract GovernanceRec4PostHandoffInvariant420Test {
+    VmGovernanceRec4 private constant vm =
+        VmGovernanceRec4(address(uint160(uint256(keccak256("hevm cheat code")))));
+
+    GovernanceTimelock private timelock;
+    CivicGovernor420 private governor;
+    GovRec4UnauthorizedHandler private handler;
+
+    function setUp() public {
+        timelock = new GovernanceTimelock(address(this));
+        CivicConstitution420 constitution = new CivicConstitution420(address(timelock));
+        CivicProposalRegistry420 proposals = new CivicProposalRegistry420(address(timelock));
+        CivicElectorateRegistry420 electorates = new CivicElectorateRegistry420(address(timelock));
+        CivicVoting420 voting = new CivicVoting420(address(proposals), address(electorates));
+        governor = new CivicGovernor420(
+            address(constitution), address(proposals), address(electorates), address(voting)
+        );
+        timelock.activateCivicAuthority(address(governor));
+        handler = new GovRec4UnauthorizedHandler(timelock, address(governor));
+        vm.targetContract(address(handler));
+    }
+
+    function invariant_SchedulerAndCivicHandoffNeverRevertToBootstrap() public view {
+        require(timelock.civicAuthorityActivated(), "Civic activation reverted");
+        require(timelock.scheduler() == address(governor), "scheduler authority compromised");
+        require(timelock.bootstrapGovernor() == address(this), "frozen bootstrap identity changed");
+        (address target,,,,,,) = timelock.operations(handler.lastAttempted());
+        require(target == address(0), "unauthorized operation created");
+        require(timelock.executingCivicOperation() == bytes32(0), "execution context leaked");
     }
 }

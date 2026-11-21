@@ -104,8 +104,14 @@ func TestAUTH11OwnerOnlyConsentHTTPAndFailClosedMode(t *testing.T){
  WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint),0)`).Scan(&priorGlobal)
  if e!=nil{t.Fatal(e)}
  t.Cleanup(func(){
-  _,err:=auth.store.db.ExecContext(context.Background(),`UPDATE account420.acceptance_rate
-  SET count=$1 WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint`,priorGlobal)
+  var err error
+  if priorGlobal==0{
+   _,err=auth.store.db.ExecContext(context.Background(),`DELETE FROM account420.acceptance_rate
+   WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint`)
+  }else{
+   _,err=auth.store.db.ExecContext(context.Background(),`UPDATE account420.acceptance_rate
+   SET count=$1 WHERE scope='global' AND bucket=floor(extract(epoch from clock_timestamp())/60)::bigint`,priorGlobal)
+  }
   if err!=nil{t.Error("restore global acceptance counter",err)}
  })
  clients:=auth11Clients()[:1]

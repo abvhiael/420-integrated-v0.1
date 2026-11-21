@@ -7,6 +7,7 @@ import {createTelemetrySink} from './core/telemetry.js';
 import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from './core/wallet-session.js';
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
+import {configureChaosComputerSeats,isChaosComputer,advanceChaosComputerTurns} from './core/chaos-computer.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
 import {deriveChaosTableFeedback} from './core/chaos-table-art.js';
 import {deriveChaosGameEffects} from './core/chaos-game-effects.js';
@@ -25,6 +26,7 @@ let indexerStatus={status:'checking',data:null};
 let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
 let chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null,chaosEffects=null;
+let chaosComputerScheduled=false,chaosComputerErrorStop=false;
 function shortAccount(value){return value?`${value.slice(0,6)}…${value.slice(-4)}`:'Not connected';}
 function applyViewPreferences(){document.documentElement.dataset.textSize=viewPreferences.textSize;document.documentElement.dataset.contrast=viewPreferences.contrast;document.documentElement.dataset.motion=viewPreferences.motion;}
 function updateRobots(){let tag=document.querySelector('meta[name="robots"]');if(!tag){tag=document.createElement('meta');tag.name='robots';document.head.append(tag);}tag.content=documentIndexingPolicy(window.location.pathname);}
@@ -82,12 +84,38 @@ async function runExtra(action,details){
 }
 
 
+// Yield between bounded local computer batches. Never reveal a bot's hand.
+function scheduleChaosComputer(){
+ if(chaosComputerScheduled||chaosComputerErrorStop||
+  window.location.pathname!=='/classics/cross-country-chaos'||
+  chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
+ chaosComputerScheduled=true;
+ window.setTimeout(()=>{
+  chaosComputerScheduled=false;
+  if(window.location.pathname!=='/classics/cross-country-chaos'||chaosComputerErrorStop||
+   chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
+  try{
+   const result=advanceChaosComputerTurns(chaosGame,{maxActions:96});
+   if(!result.moves.length)throw Error('Computer move made no progress.');
+   chaosGame=result.game;
+   chaosRevealed=false;
+   chaosRepairCue=deriveChaosTableFeedback(result.lastBefore,result.game,result.lastMove);
+   chaosEffects=deriveChaosGameEffects(result.lastBefore,result.game,result.lastMove);
+   chaosError=null;renderCurrent();
+  }catch{
+   chaosComputerErrorStop=true;
+   chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
+   chaosError='Computer move could not be completed. Retry this turn.';
+   renderCurrent();
+  }
+ },0);
+}
 function bindChaos(){
  if(window.location.pathname!=='/classics/cross-country-chaos')return;
  const countSelect=root.querySelector('#ccc-count');
  const updateSeats=()=>{
   const count=Number(countSelect?.value||4);
-  for(const row of root.querySelectorAll('[data-chaos-driver]'))row.hidden=Number(row.dataset.chaosDriver)>=count;
+  for(const row of root.querySelectorAll('[data-chaos-seat]'))row.hidden=Number(row.dataset.chaosSeat)>=count;
  };
  countSelect?.addEventListener('change',updateSeats);updateSeats();
  for(const select of root.querySelectorAll('[data-chaos-vehicle-pick]'))select.addEventListener('change',()=>{
@@ -103,12 +131,15 @@ function bindChaos(){
    const names=Array.from({length:count},(_,i)=>String(data.get('player'+i)||'').trim()||'Driver '+(i+1));
    const seed=window.crypto?.getRandomValues?window.crypto.getRandomValues(new Uint32Array(1))[0]:Math.floor(Math.random()*0xffffffff);
    const vehicleIds=Array.from({length:count},(_,i)=>String(data.get('vehicle'+i)||''));
-   chaosGame=applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds);
+   const controllers=Array.from({length:count},(_,i)=>String(data.get('control'+i)||''));
+   chaosGame=configureChaosComputerSeats(applyChaosVehicleSelection(createChaosGame({names,seed}),vehicleIds),controllers);
+   chaosComputerErrorStop=false;
    chaosRevealed=false;chaosError=null;chaosRepairCue=null;chaosEffects=null;renderCurrent();
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
  const apply=move=>{try{
   const previous=chaosGame;
+  if(isChaosComputer(previous.players[previous.turn]))throw Error('Computer drivers use automatic moves.');
   const updated=takeChaosTurn(previous,{player:previous.players[previous.turn].id,...move});
   chaosRepairCue=deriveChaosTableFeedback(previous,updated,move);
   chaosEffects=deriveChaosGameEffects(previous,updated,move);
@@ -119,7 +150,8 @@ function bindChaos(){
   const action=control.dataset.chaosAction;
   try{
    if(action==='reveal'){chaosRevealed=true;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
-   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
+   if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;chaosComputerErrorStop=false;renderCurrent();return;}
+   if(action==='retry-cpu'){chaosComputerErrorStop=false;chaosError=null;renderCurrent();return;}
    if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosEffects=null;chaosRepairCue=null;chaosError=null;renderCurrent();return;}
    apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card),choice:control.dataset.choice||null});
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
@@ -145,6 +177,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
    document.documentElement.dataset.motion==='reduce';
   playChaosMotion(root,effect,chaosGame,{reducedMotion:reduced});
  }
+ scheduleChaosComputer();
 }
 // Re-fetching clears the previous page first: withdrawn/hidden content is not
 // retained after a failed refresh or restored from a browser cache. This is a

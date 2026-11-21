@@ -17,7 +17,8 @@ const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-6 separately reserves +20 KiB for road motion and event-rendering code.
 // CCC-ART-7 separately reserves +16 KiB for original local results and podium UI.
 // CCC-ART-8 permits +32 KiB strictly for a published and independently verified image manifest.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1125*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// CCC-4 reserves +16 KiB only for local computer decisions and accessible seat UI.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1141*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -110,6 +111,17 @@ if(!resultsSource.includes('chaosChampionshipPlacings')||
  !tabletopCss.includes('@media(forced-colors:active)')||
  /(?:https?:\/\/|\bfetch\s*\(|\bsetTimeout\s*\(|\bsetInterval\s*\(|\beval\s*\()/.test(resultsSource.replaceAll('http://www.w3.org/2000/svg','')))
  throw new Error('CCC-ART-7 local results/accessibility qualification failed');
+// CCC-4 decisions consume only the current hand and public board, never stock order.
+const computerJs=await readFile(resolve(root,'core/chaos-computer.js'),'utf8');
+const classicsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');
+if(!computerJs.includes('chaosActionOptions(s)')||
+ !computerJs.includes('takeChaosTurn(old,')||
+ !classicsUi.includes('isChaosComputer(p)')||
+ !app.includes('scheduleChaosComputer()')||
+ !tabletopCss.includes('ccc-controller-picker')||
+ !tabletopCss.includes('ccc-computer-turn')||
+ /(?:\bfetch\s*\(|\beval\s*\(|\bMath\.random\s*\(|\bwindow\b|\.deck\b|\bseed\b)/.test(computerJs.replace(/^\/\/.*$/gm,'')))
+ throw new Error('CCC-4 local computer strategy/privacy qualification failed');
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}

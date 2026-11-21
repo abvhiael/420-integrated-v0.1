@@ -15,10 +15,9 @@ function sampleCard(item){
   a.href='#/campaign/'+item.slug;
   a.setAttribute('aria-label','View example campaign '+item.title);
   const media=element('div','card-media artwork artwork-'+item.art);
-  media.append(element('span','artwork-symbol','✳'));
+  media.setAttribute('role','img');
+  media.setAttribute('aria-label','Fictional '+item.title+' campaign illustration');
   media.append(element('span','media-tag','EXAMPLE · '+artLabels[item.art]));
-  const placeholder=element('small','artwork-placeholder','CAMPAIGN ARTWORK SLOT');
-  media.append(placeholder);
   const content=element('div','card-content'),category=element('div','card-top');
   category.append(element('span','kicker',item.category.toUpperCase()+' · SAMPLE'));
   category.append(element('span','sample-indicator','FICTIONAL'));
@@ -68,6 +67,7 @@ function renderCampaign(slug){
   for(const [selector,value] of Object.entries(textMap))text($(selector),value);
   $('#sample-detail-meter').style.width=percentage(c)+'%';
   $('#sample-detail-art').className='campaign-hero-art artwork artwork-'+c.art;
+  $('#sample-detail-art').setAttribute('aria-label','Fictional '+c.title+' campaign illustration');
   $('#sample-tier-grid').replaceChildren(...(c.tiers.length?c.tiers.map(([name,amount,description])=>{
     const card=element('article','tier-card');
     card.append(element('span','tier-icon','✳'),element('h3','',name),element('strong','tier-price',sampleAmount(amount)+' 420I'),

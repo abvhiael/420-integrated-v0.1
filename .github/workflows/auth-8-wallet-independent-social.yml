@@ -1,4 +1,4 @@
-name: AUTH-8/9 Wallet-Independent BongGoggles Social
+name: AUTH-8/9/10 Wallet-Independent BongGoggles Social
 on:
   pull_request:
     paths:
@@ -68,4 +68,5 @@ jobs:
           node --check bong-goggles/web/core/account-social.js
           node --check bong-goggles/web/core/account-social-controller.js
           node --check bong-goggles/web/core/account-extras.js
-          node --test bong-goggles/web/test/account-social.test.js bong-goggles/web/test/account-extras.test.js
+          node --check bong-goggles/web/core/account-xp.js
+          node --test bong-goggles/web/test/account-social.test.js bong-goggles/web/test/account-extras.test.js bong-goggles/web/test/account-xp.test.js

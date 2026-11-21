@@ -245,3 +245,112 @@ Node tests cover wallet-free routing, disabled-by-default flags,
 secretless same-origin access, XSS-safe content, game move displays and
 authoritative app-session failures. AUTH-8 account social remains
 previously qualified; only affected regression suites are included.
+
+
+## AUTH-10 — community contribution and off-chain XP v1
+
+**Source of truth:** `bg_account_social.contribution_xp_events`, a
+private, append-only PostgreSQL journal indexed by the AUTH-7/8
+BongGoggles-scoped opaque subject. Never use a wallet address, 420ID
+internal subject, email, game score, on-chain rewards projection or
+browser-supplied member identifier to issue XP.
+
+This is **non-economic, non-redeemable, off-chain community recognition**.
+XP does not give a right to 420Token, staking/reward pools, loot, wagers,
+credit, a token discount, a Creator payout or any external privileges.
+It is not the canonical BongGoggles Rewards/ContributionRegistry420
+accounting and cannot be submitted to reward distributors or the
+canonical indexer. It is available only to its authenticated owner.
+Public leaderboards and cross-app XP are deliberately not exposed.
+
+### Frozen, versioned XP policy v1
+
+- Original off-chain **post:** 5 XP when the stored body has at least
+  25 Unicode characters after trimming; maximum **three awarded
+  posts per subject per UTC calendar day** (15 XP per day).
+- Original off-chain **comment on another member's post:** 2 XP when
+  the body has at least 15 Unicode characters after trimming;
+  maximum **ten awarded comments per subject per UTC day** (20 XP/day).
+  A self-reply never earns XP.
+- Each normalized (case-insensitive, trimmed) body may earn XP only
+  **once per subject and source type for all time**, even if copied,
+  restored or submitted concurrently. New posts/comments beyond limits
+  remain valid social content but have zero XP credit. Limits count
+  awarded grants even if later revoked to prevent delete/repost farming.
+- Likes, follows, blocks, report submissions, messages, zero-wager
+  games, wallet sign-in, 420Names and all on-chain events earn **zero
+  XP** from this service. No browser can request an XP amount or a
+  new action type. Unknown policy version/source type fails closed.
+- Account XP = sum of committed grant/revoke journal entries. Level
+  = `floor(max(0,totalXP)/100)+1`. A level has **no separate
+  permissions or financial meaning**. User-facing history lists at most
+  30 recent events; date and daily counters use UTC.
+
+**Atomic issue and reversal:** `PublishPost` and `PublishComment`
+create the social object and (if eligible) the XP grant in one
+PostgreSQL transaction, holding the subject's membership row lock to
+serialize caps across workers. Comment creation also locks the parent
+post and checks the existing bidirectional block graph. The source
+object ID has a **single grant** and at most **one compensating revoke**
+by a uniqueness constraint. Deleting an author's post or hiding it via
+operator moderation atomically reverses the post's award **and the
+awards earned by all contributing commenters on that post**; the
+journal remains append-only. Restoring a hidden post does not issue
+a fresh grant or resurrect a spent daily allowance. No silent
+background/batch recomputation invents rewards. Moderation continues
+to use the private operator credential and appends the same audit trail
+as AUTH-8. Historical contributions created before activation are not
+retroactively credited.
+
+### Explicit activation
+
+The operator-only `bg-social migrate` command now applies
+`003_contributions_xp.sql` after migrations 001–002.
+The existing AUTH-8 and AUTH-9 runtime modes do **not** require the
+new XP grants or query the XP journal. Only
+`SOCIAL420_XP_MODE=restricted-acceptance` enables the issuer,
+private `GET /social-api/v1/xp` endpoint and atomic write paths.
+Unrecognized modes fail startup. When running privileged
+`bg-social moderate ...` with XP mode enabled, that same mode must be
+present so the operator hides content and writes reversals together.
+The operator must never manually hide eligible posts in SQL
+without the XP-aware moderation path; the public runtime account
+cannot update `hidden_at`.
+
+Grant only to the dedicated social runtime role:
+```sql
+GRANT SELECT, INSERT ON bg_account_social.contribution_xp_events
+ TO bonggoggles_social_runtime;
+```
+Do **not** grant UPDATE/DELETE on the journal or direct browser access.
+The operator credential may manage schema, inspect reports and execute
+moderation; no extra app identity, wallet or CORS audience is added.
+
+The web route `/account/xp` and `features.accountXP` are also **off
+by default**. `accountSocial=true` is additionally required before
+the validator permits `accountXP`; enabling the flag alone does not
+activate a live server. The dashboard calls only the same-origin
+`/social-api/v1/me` and `/social-api/v1/xp` endpoints through
+a fresh 420ID browser cookie, never saves point totals or history in
+localStorage, and clears sensitive content on an unavailable/revoked
+session. All totals are presented as off-chain and nonredeemable.
+BongGoggles' canonical wallet-based `/rewards` remains unchanged.
+
+### Qualification and external acceptance limits
+
+Focused PostgreSQL 16 `go test -race` suites must demonstrate atomic
+issuance/revocation, repeat and concurrent submission suppression,
+UTC caps, self-reply exclusion, cross-subject separation, 420ID logout
+and provider-outage denial, a private subject-only read API and
+least-privilege SQL journal grants. Focused Node browser tests must
+exercise disabled flags, authenticated 420ID state, no-wallet access,
+forged totals/subjects and non-economic labels; existing AUTH-8/9
+Go/browser tests stay passing. The dedicated GitHub workflow records
+the exact qualified commit SHA.
+
+This repository task does **not** provision Neon schema, restricted
+runtime DB grants, the 420ID confidential SSO client, Cloudflare
+same-host `/social-api` routing, Render runtime, deployment secrets
+or live end-to-end browser acceptance. XP remains disabled until those
+operator-controlled prerequisites, privacy, moderation, rollback and
+abuse tests are independently qualified.

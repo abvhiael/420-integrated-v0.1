@@ -58,7 +58,13 @@ func (b *HTTPBroker) Ready(ctx context.Context)error{
  response,e:=b.httpClient.Do(request)
  if e!=nil{return ErrUnavailable}
  defer response.Body.Close()
- if response.StatusCode!=http.StatusOK{return ErrUnavailable}
+ if response.StatusCode!=http.StatusOK||!strings.HasPrefix(response.Header.Get("Content-Type"),"application/json"){return ErrUnavailable}
+ // The 420ID health endpoint only returns {"ready":true} after its database
+ // has responded. Reject a stale/intercepted HTML 200 or malformed payload.
+ var status struct{Ready bool `json:"ready"`}
+ dec:=json.NewDecoder(io.LimitReader(response.Body,129))
+ dec.DisallowUnknownFields()
+ if dec.Decode(&status)!=nil||!status.Ready||dec.Decode(&struct{}{})!=io.EOF{return ErrUnavailable}
  return nil
 }
 func (b *HTTPBroker) Authorize(state,challenge string)string{

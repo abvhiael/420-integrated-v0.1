@@ -37,7 +37,7 @@ test('unsigned, wrong-account, malleable or noncanonical signature cannot submit
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'launchpad-creator-'));
   try{
     const q=new CreatorQueue(path.join(dir,'requests.jsonl'));
-    await assert.rejects(()=>q.submit(eoaRpc(),request,'0x1234'),/noncanonical Wallet signature/);
+    await assert.rejects(()=>q.submit(eoaRpc(),request,'0x1234'),/invalid Wallet signature/);
     const wrong={...request,governanceRequest:{...request.governanceRequest,requester:OTHER}};
     await assert.rejects(()=>q.submit(eoaRpc(),wrong,sig),/signature not verified/);
     await assert.rejects(()=>q.submit(eoaRpc(),request,'0x'+'00'.repeat(65)),/noncanonical Wallet signature/);

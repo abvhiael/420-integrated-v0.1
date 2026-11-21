@@ -184,7 +184,10 @@
       "contracts/out/LaunchpadCrowdfundingIntegration420.sol/LaunchpadCrowdfundingIntegration420.json",
       "contracts/out/LaunchpadRouter420.sol/LaunchpadRouter420.json"
     ],
-    "hash_evidence": "REC-6_REPRODUCIBLE_EXACT_HEAD_COMPILER_ABI_CREATION_RUNTIME_TEMPLATE_SHA256_AND_LOCAL_EVM_CONSTRUCTOR_ASSERTIONS"
+    "hash_evidence": "REC-6_REPRODUCIBLE_EXACT_HEAD_COMPILER_ABI_CREATION_RUNTIME_TEMPLATE_SHA256_AND_LOCAL_EVM_CONSTRUCTOR_ASSERTIONS",
+    "frozen_fingerprints": "contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json",
+    "reproduction_verifier": "scripts/verify-launchpad-rec-6.py",
+    "hash_semantics": "SHA256_CANONICAL_ABI_CREATION_BYTES_UNLINKED_RUNTIME_TEMPLATE_BYTES_NOT_EXTCODEHASH"
   },
   "local_evm_qualification": {
     "required": true,

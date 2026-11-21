@@ -180,10 +180,10 @@ export function renderChaosTable(game,{revealed=false,feedback=null}={}){
  const discardOpen=canDraw&&top?'<button type="button" class="ccc-discard-public ccc-pile-control" data-chaos-action="draw" data-choice="discard" aria-label="Take the top discard and draw one face-down card">':'<div class="ccc-discard-public">';
  return '<div class="ccc-tabletop ccc-tabletop--road-atlas" data-region="'+region+'">'+renderChaosHighway(game)+
   '<section class="ccc-table-piles" aria-label="Regional decks and played cards">'+
-  stockOpen+'<div class="ccc-stock-back" aria-hidden="true"><span class="ccc-stock-symbol">✦</span><span>CCC</span><span>ROAD TRIP</span></div>'+
+  stockOpen+'<span class="ccc-stock-back" aria-hidden="true"><span class="ccc-stock-symbol">✦</span><span>CCC</span><span>ROAD TRIP</span></span>'+
   '<strong>Regional draw deck</strong><small>'+game.deck.length+' face-down cards</small>'+(canDraw?'<span class="ccc-pile-instruction">Tap to draw two</span>':'')+
   (canDraw?'</button>':'</div>')+
-  discardOpen+'<div class="ccc-pile-face">'+(top?image(top,region):'<span>Empty discard</span>')+'</div>'+
+  discardOpen+'<span class="ccc-pile-face">'+(top?image(top,region):'<span>Empty discard</span>')+'</span>'+
   '<strong>Face-up discard</strong><small>'+game.discard.length+' cards'+(top?' · '+esc(cardLabel(top)):'')+'</small>'+
   (canDraw&&top?'<span class="ccc-pile-instruction">Take this + draw one</span>':'')+
   (canDraw&&top?'</button>':'</div>')+

@@ -25,6 +25,7 @@ function rpc(){
     async ethCall(to,data){
       const sig=reverse.get(data.slice(0,10));
       if(sig==='resolveActive(bytes32)')return out(A.router,1);
+      if(sig==='getService(bytes32)')return out(A.router,ID,ID,1,100,1);
       if(sig==='sales()')return out(A.sale);
       if(sig==='allocations()')return out(A.allocation);
       if(sig==='crowdfundingIntegration()')return out(A.crowd);

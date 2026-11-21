@@ -1,0 +1,35 @@
+{
+  "schema": "420-launchpad-pretestnet-readiness-v1",
+  "service": "420Launchpad",
+  "service_id": "420/service/launchpad/v1",
+  "phase": "LAUNCHPAD-REC-6",
+  "status": "REPOSITORY_QUALIFIED_PRE_TESTNET",
+  "deployment_status": "NOT_DEPLOYED_PUBLIC_TESTNET",
+  "repository_qualified": true,
+  "live_testnet_qualified": false,
+  "genesis_ready": false,
+  "production_ready": false,
+  "authority": {
+    "custody": false,
+    "minting": false,
+    "dex_execution": false,
+    "payment_execution": false,
+    "arbitration_execution": false,
+    "router_address_policy": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+    "canonical_registry_address": "0x0000000000000000000000000000000000000434",
+    "live_chain_id": null,
+    "live_genesis_hash": null,
+    "live_router_address": null,
+    "live_runtime_code_hashes": {}
+  },
+  "qualification": {
+    "artifact_materialization": "contracts/config/launchpad/launchpad-audit-4-release-materialization.json",
+    "compiler_and_constructor_verifier": "scripts/verify-launchpad-rec-6.py",
+    "exact_head_evidence": "docs/audit/LAUNCHPAD-REC-6-QUALIFICATION.md",
+    "retained_local_integration": "docs/audit/LAUNCHPAD-REC-5-QUALIFICATION.md",
+    "web_runtime": "launchpad/web/runtime-config.json",
+    "default_web_execution": "DISABLED_UNTIL_CANONICAL_RUNTIME_RESOLVED"
+  },
+  "testnet_blocker": "LAUNCHPAD-AUDIT-6 requires an approved running 420 Integrated public testnet and independently retained live chain/genesis, Registry, deployment/receipt, funding, app, recovery, and Notifications/Reputation evidence.",
+  "next_canonical_step": "LAUNCHPAD-AUDIT-6"
+}

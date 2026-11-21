@@ -475,3 +475,34 @@
  .ccc-wrap--roadtrip .ccc-results-ride img{inline-size:min(75px,23vw);block-size:auto;aspect-ratio:25/16}
  .ccc-wrap--roadtrip .ccc-hand-card{min-inline-size:0}
 }
+
+
+/* CCC-4: local computer/human seat controls, accessible on narrow screens. */
+.ccc-wrap--roadtrip .ccc-seat-config{
+ display:grid;gap:.5rem;padding:.45rem;border:1px solid #8aaf90;
+ border-radius:.7rem;background:#1a3529;min-width:0
+}
+.ccc-wrap--roadtrip .ccc-seat-config[hidden]{display:none!important}
+.ccc-wrap--roadtrip .ccc-controller-picker{display:grid;gap:.35rem;font-weight:800;color:#f6efd7}
+.ccc-wrap--roadtrip .ccc-controller-picker select{max-inline-size:100%;min-inline-size:0}
+.ccc-wrap--roadtrip .ccc-computer-turn{
+ border:2px solid #f6cd71;background:linear-gradient(145deg,#203e30,#152d23);
+ color:#f6efd7
+}
+.ccc-wrap--roadtrip .ccc-computer-turn h3{color:#ffe3a1}
+.ccc-wrap--roadtrip .ccc-controller-picker select:focus-visible,
+.ccc-wrap--roadtrip .ccc-computer-turn button:focus-visible{
+ outline:3px solid #f6cd71;outline-offset:3px
+}
+@media(max-width:650px){
+ .ccc-wrap--roadtrip .ccc-seat-config{grid-template-columns:minmax(0,1fr)}
+ .ccc-wrap--roadtrip .ccc-controller-picker{inline-size:100%}
+}
+@media(forced-colors:active){
+ .ccc-wrap--roadtrip .ccc-seat-config,.ccc-wrap--roadtrip .ccc-computer-turn{
+  background:Canvas!important;color:CanvasText!important;border:2px solid CanvasText
+ }
+ .ccc-wrap--roadtrip .ccc-controller-picker,.ccc-wrap--roadtrip .ccc-computer-turn h3{
+  color:CanvasText!important
+ }
+}

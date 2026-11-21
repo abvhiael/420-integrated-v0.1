@@ -7,8 +7,8 @@
 - Repository: `abvhiael/420-integrated-v0.1`
 - Implementation branch: `audit/420governance-rec-4-lifecycle-20261121`
 - **Exact tested implementation SHA:** `e49839854b4055cb946e8194466ddb6831fc4360`
-- Parent GOV-REC-3 implementation: `338cb8a41d60c52e4ef9e7ee791dedc046f1b11a`, open PR #1293
-- GOV-REC-4 pull request: #1294 (open, base GOV-REC-3; **not merged**)
+- Parent GOV-REC-3 implementation: `338cb8a41d60c52e4ef9e7ee791dedc046f1b11a`, PR #1293 subsequently merged into `main` at `009b974617014d453be5ce3015963b708ad4a75e`
+- GOV-REC-4 pull request: #1294 (open, now base `main` after PR #1293 merged; **not merged**)
 - Evidence-only bookkeeping after qualified code head is permitted by `docs/apps/governance/qualification.md`; no new executable code, tests, configuration, artifacts or protocol rules are changed by this document.
 
 ## Authoritative executed qualification
@@ -49,8 +49,8 @@ The clean execution test records actual emitted `CivicProposalRegistered`, `Civi
 
 The two-member Community and Validator fixtures are explicitly **synthetic** test data, never authenticated Genesis electorate lists or a production deployment approval. The retained release approval defaults to zero and intentionally fails closed until independently authorized chain-specific Genesis materialization. Nothing in this qualification asserts that the live testnet exists or that live governance activation has occurred.
 
-The GOV-REC-4 implementation is stacked on open GOV-REC-3 PR #1293. At qualification, `main` advanced from the REC-3 baseline only in BongGoggles web, build, workflow and game documentation files; the eight concurrent main commits observed introduce no overlapping Governance changes. Do not silently merge/rewrite either branch. Merge requires separate explicit user instruction and appropriate prerequisite qualification.
+After the passing implementation run, GOV-REC-3 PR #1293 was independently merged into `main` at `009b974617014d453be5ce3015963b708ad4a75e`. GitHub automatically retargeted open GOV-REC-4 PR #1294 to `main`. The verified comparison shows only the new REC-4 test and its two documentation/evidence files in the PR diff, without conflicts. GOV-REC-4 itself remains unmerged; merging requires separate explicit user instruction.
 
 ## Next gate
 
-Continue with the next explicitly authorized canonical Governance recovery step after GOV-REC-4; **do not** infer that GOV-AUDIT-9 (live testnet) or production/Genesis readiness is satisfied by this repository-only result.
+The next canonical gate is **GOV-AUDIT-9 — production-equivalent testnet qualification**, which requires a live production-equivalent testnet and is **not begun** in this task. Do not infer production/Genesis readiness from repository-only qualification.

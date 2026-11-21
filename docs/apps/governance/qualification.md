@@ -46,6 +46,6 @@ The ordinary Wallet Governance UI remains intentionally limited to discovery, pr
 
 | Step | Status | Durable evidence |
 |---|---|---|
-| GOV-REC-4 — Governance lifecycle and adversarial qualification | **REPOSITORY QUALIFIED (synthetic clean deployment); PR #1294 open and unmerged, dependent on #1293** | `docs/audit/GOV-REC-4-QUALIFICATION.md` — implementation `e49839854b4055cb946e8194466ddb6831fc4360`, passing Governance workflow #44929091486 |
+| GOV-REC-4 — Governance lifecycle and adversarial qualification | **REPOSITORY QUALIFIED (synthetic clean deployment); PR #1294 open against main and unmerged; prerequisite #1293 merged** | `docs/audit/GOV-REC-4-QUALIFICATION.md` — implementation `e49839854b4055cb946e8194466ddb6831fc4360`, passing Governance workflow #44929091486 |
 
 This branch-only result does not establish approved production electorate membership or satisfy **GOV-AUDIT-9 — production-equivalent testnet qualification**. GOV-AUDIT-9 is the next canonical roadmap stage and remains unstarted here.

@@ -123,12 +123,38 @@ func (s *Server) Enable420ID(g *appgateway.Gateway)error{
  s.account420=g
  return nil
 }
+// Only unprivileged off-chain Town content and report endpoints may be
+// used with a 420ID account session. Moderation casework, entitlement,
+// subscription, membership and other authority paths retain existing auth.
+func allow420IDTown(r *http.Request) bool {
+ if r==nil{return false}
+ if r.Method==http.MethodPOST&&r.URL.Path=="/v1/moderation/reports"{return true}
+ prefix:=false
+ switch {
+ case r.Method==http.MethodGET&&strings.HasPrefix(r.URL.Path,"/v1/posts/"):
+  prefix=true
+ case r.Method==http.MethodPOST&&strings.HasPrefix(r.URL.Path,"/v1/communities/")&&strings.HasSuffix(r.URL.Path,"/posts"):
+  prefix=true
+ case r.Method==http.MethodPOST&&strings.HasPrefix(r.URL.Path,"/v1/posts/")&&strings.HasSuffix(r.URL.Path,"/threads"):
+  prefix=true
+ case r.Method==http.MethodPOST&&strings.HasPrefix(r.URL.Path,"/v1/threads/")&&strings.HasSuffix(r.URL.Path,"/comments"):
+  prefix=true
+ case r.Method==http.MethodPOST&&strings.HasPrefix(r.URL.Path,"/v1/posts/")&&strings.HasSuffix(r.URL.Path,"/votes"):
+  prefix=true
+ }
+ if !prefix{return false}
+ // Reject guessed path aliases with extra segments. ServeMux still selects
+ // exact routes; this is defense in depth if consumers call authenticate.
+ segments:=strings.Split(strings.Trim(r.URL.Path,"/"),"/")
+ return len(segments)==3&&(r.Method==http.MethodGET)||
+  len(segments)==4&&r.Method==http.MethodPOST
+}
 func (s *Server) authenticate(r *http.Request)(model.ObjectID,error){
  // Existing bearer/legacy authentication retains priority. An invalid
  // explicit Authorization header cannot be silently rescued by a cookie.
  actor,e:=s.auth.Authenticate(r)
  if e==nil{return actor,nil}
- if s.account420==nil||r.Header.Get("Authorization")!=""{return "",e}
+ if s.account420==nil||r.Header.Get("Authorization")!=""||!allow420IDTown(r){return "",e}
  subject,e:=s.account420.Current(r.Context(),r)
  if e!=nil{return "",ErrAuthRequired}
  return model.ObjectID("420id:"+subject),nil

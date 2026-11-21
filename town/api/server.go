@@ -131,20 +131,20 @@ func allow420IDTown(r *http.Request) bool {
 	if r == nil {
 		return false
 	}
-	if r.Method == http.MethodPOST && r.URL.Path == "/v1/moderation/reports" {
+	if r.Method == http.MethodPost && r.URL.Path == "/v1/moderation/reports" {
 		return true
 	}
 	prefix := false
 	switch {
-	case r.Method == http.MethodGET && strings.HasPrefix(r.URL.Path, "/v1/posts/"):
+	case r.Method == http.MethodGet && strings.HasPrefix(r.URL.Path, "/v1/posts/"):
 		prefix = true
-	case r.Method == http.MethodPOST && strings.HasPrefix(r.URL.Path, "/v1/communities/") && strings.HasSuffix(r.URL.Path, "/posts"):
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/communities/") && strings.HasSuffix(r.URL.Path, "/posts"):
 		prefix = true
-	case r.Method == http.MethodPOST && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/threads"):
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/threads"):
 		prefix = true
-	case r.Method == http.MethodPOST && strings.HasPrefix(r.URL.Path, "/v1/threads/") && strings.HasSuffix(r.URL.Path, "/comments"):
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/threads/") && strings.HasSuffix(r.URL.Path, "/comments"):
 		prefix = true
-	case r.Method == http.MethodPOST && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/votes"):
+	case r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/v1/posts/") && strings.HasSuffix(r.URL.Path, "/votes"):
 		prefix = true
 	}
 	if !prefix {
@@ -153,8 +153,8 @@ func allow420IDTown(r *http.Request) bool {
 	// Reject guessed path aliases with extra segments. ServeMux still selects
 	// exact routes; this is defense in depth if consumers call authenticate.
 	segments := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
-	return len(segments) == 3 && (r.Method == http.MethodGET) ||
-		len(segments) == 4 && r.Method == http.MethodPOST
+	return len(segments) == 3 && (r.Method == http.MethodGet) ||
+		len(segments) == 4 && r.Method == http.MethodPost
 }
 func (s *Server) authenticate(r *http.Request) (model.ObjectID, error) {
 	// Existing bearer/legacy authentication retains priority. An invalid

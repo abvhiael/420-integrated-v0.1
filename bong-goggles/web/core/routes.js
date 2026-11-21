@@ -4,6 +4,7 @@ export const ROUTES=Object.freeze([
   {id:'social',path:'/social',label:'Account Social',icon:'♡',requiresSession:false},
   {id:'account-messages',path:'/account/messages',label:'Account Messages',icon:'✉',requiresSession:false},
   {id:'account-games',path:'/account/games',label:'Free Account Games',icon:'♟',requiresSession:false},
+  {id:'account-xp',path:'/account/xp',label:'Community XP',icon:'✧',requiresSession:false},
   {id:'friends',path:'/friends',label:'Friends',icon:'◌',requiresSession:true},
   {id:'messages',path:'/messages',label:'Messages',icon:'✉',requiresSession:true},
   {id:'notifications',path:'/notifications',label:'Notifications',icon:'◉',requiresSession:true},

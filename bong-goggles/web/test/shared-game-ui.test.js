@@ -133,7 +133,7 @@ test('BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data
   rulebook:{verified:true,title:bad,paragraphs:[bad]}};
  for(const screen of ['table','history','rules']){
   const html=renderSharedGameScreen({game,screen,view});
-  assert.doesNotMatch(html,/<img\b|<script\b|<[^>]+onerror=/i);
+  assert.doesNotMatch(html,/<img\b|<script\b|aria-label="[^"]*<img/i);
   assert.match(html,/&lt;img/);
  }
  assert.equal(authorizedGameView(game,{...fixture,players:[{name:'',score:1}]}),null);

@@ -1,0 +1,73 @@
+/* Canonical 420Launchpad artwork integration.
+   All images live at launchpad/web/assets and are shipped unchanged in dist/assets.
+   Fictional campaign visuals never imply an active or endorsed sale. */
+.site-shell{
+  background-image:linear-gradient(180deg,rgba(3,15,10,.88),rgba(3,18,11,.96) 44%,#03150d 95%),url("./assets/wallpaper-moonlit-hills.webp");
+  background-position:top center;
+  background-size:cover,100% auto;
+  background-repeat:no-repeat;
+}
+.site-shell::before,.site-shell::after{
+  content:"";position:absolute;top:110px;bottom:auto;width:230px;height:350px;
+  z-index:2;pointer-events:none;opacity:.88;transform:none;
+  background-position:top center;background-size:contain;background-repeat:no-repeat;
+}
+.site-shell::before{left:-52px;background-image:url("./assets/border-botanical-left.png")}
+.site-shell::after{right:-52px;left:auto;background-image:url("./assets/border-botanical-right.png")}
+.hero-main{
+  min-height:520px;
+  background-image:linear-gradient(90deg,rgba(3,19,12,.96) 0%,rgba(4,21,14,.87) 29%,rgba(4,21,14,.34) 55%,rgba(4,21,14,.06) 80%),
+    url("./assets/hero-launch.webp");
+  background-size:cover;
+  background-position:center center;
+}
+.hero-main .hero-copy{max-width:660px;text-shadow:0 2px 18px rgba(2,10,5,.75)}
+.hero-main .launch-scene{min-height:340px;filter:none}
+.hero-main .launch-scene::before,.hero-main .launch-scene::after{content:none}
+.hero-compact{
+  background-image:linear-gradient(90deg,rgba(3,25,16,.94),rgba(4,32,20,.73)),url("./assets/wallpaper-moonlit-hills.webp");
+  background-position:center center;background-size:cover;
+}
+#view-creator .hero-compact{isolation:isolate}
+#view-creator .hero-compact::after{
+  content:"";position:absolute;right:7%;bottom:-65px;width:145px;height:280px;
+  background:url("./assets/rocket-420integrated.png") center bottom /contain no-repeat;
+  opacity:.94;pointer-events:none;z-index:0;
+}
+#view-creator .hero-compact > div:first-child{position:relative;z-index:1;max-width:calc(100% - 210px)}
+#view-creator .hero-emblem{visibility:hidden}
+.artwork-greenroots{background-image:linear-gradient(0deg,rgba(3,20,12,.35),transparent 65%),url("./assets/campaign-greenroots.webp")}
+.artwork-aeroleaf{background-image:linear-gradient(0deg,rgba(3,20,12,.35),transparent 65%),url("./assets/campaign-aeroleaf.webp")}
+.artwork-justice{background-image:linear-gradient(0deg,rgba(3,20,12,.35),transparent 65%),url("./assets/campaign-justice-fund.webp")}
+.artwork-hub{background-image:linear-gradient(0deg,rgba(3,20,12,.35),transparent 65%),url("./assets/campaign-innovation-hub.webp")}
+.artwork-sunridge{background-image:linear-gradient(0deg,rgba(3,20,12,.35),transparent 65%),url("./assets/campaign-sunridge.webp")}
+/* Sixth fictional concept uses the shared landscape, not an invented campaign image. */
+.artwork-coop{background-image:linear-gradient(0deg,rgba(3,20,12,.45),transparent 65%),url("./assets/wallpaper-moonlit-hills.webp")}
+.artwork-greenroots,.artwork-aeroleaf,.artwork-justice,.artwork-hub,.artwork-sunridge,.artwork-coop{
+  background-color:#063522;background-position:center;background-size:cover;background-repeat:no-repeat;
+}
+.artwork::before,.artwork::after{content:none}
+.artwork .artwork-symbol,.artwork .artwork-placeholder,.artwork > small{display:none}
+.card-media{min-height:175px}
+.feature-media{background-position:center 52%}
+.feature-card .feature-copy{background:linear-gradient(90deg,#07281dc9,rgba(5,31,19,.25))}
+.campaign-hero-art{background-position:center 54%}
+.media-tag{z-index:2;backdrop-filter:blur(6px);background:rgba(2,18,10,.83)}
+@media(max-width:1280px){
+ .site-shell::before,.site-shell::after{width:138px;height:215px;opacity:.72}
+ .site-shell::before{left:-72px}
+ .site-shell::after{right:-72px}
+}
+@media(max-width:900px){
+ .site-shell::before,.site-shell::after{display:none}
+ .hero-main{background-position:60% center}
+ .hero-main .launch-scene{min-height:105px}
+ .hero-main{min-height:430px}
+}
+@media(max-width:620px){
+ .hero-main{background-image:linear-gradient(90deg,rgba(3,19,12,.91),rgba(3,19,12,.63)),url("./assets/hero-launch.webp");background-position:65% center}
+ .hero-main .launch-scene{min-height:90px}
+ #view-creator .hero-compact::after{width:100px;height:210px;right:0;opacity:.4}
+ #view-creator .hero-compact > div:first-child{max-width:100%}
+ .card-media{min-height:210px}
+}

@@ -9,7 +9,8 @@ import {resolveRoute,routeAccess} from '../core/routes.js';
 import {GAME_TYPES} from '../core/games.js';
 
 const start=(count=4,seed=54)=>createChaosGame({names:['Alice','Bob','Charlie','Dana'].slice(0,count),seed});
-const card=(type,extra={})=>({type,uid:900000+Math.floor(Math.random()*10000),...extra});
+let fixtureUid=900000;
+const card=(type,extra={})=>({type,uid:++fixtureUid,...extra});
 const put=(s,player,c,index=0)=>{s.players[player].hand[index]=c;return s;};
 const discard=(s,idx=0)=>takeChaosTurn(s,{player:s.turn,action:'discard',index:idx});
 const endDiscard=s=>{let result=s;while(result.phase==='playing'&&result.step==='discard')result=discard(result);return result;};

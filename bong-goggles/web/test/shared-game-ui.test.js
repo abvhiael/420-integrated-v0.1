@@ -52,6 +52,7 @@ test('BC-0.3 overview and rules are honest and variants do not masquerade as rul
  const russian=renderClassicGamePage('russian-cribbage',{screen:'rules'});
  assert.match(russian,/Ruleset not yet published/);
  assert.match(russian,/Ruleset to be agreed and versioned/);
+ assert.match(russian,/Active variant: not selected — no verified match/);
  assert.doesNotMatch(russian,/aria-current="page">Play<\/a>/);
  const yahtzee=renderClassicGamePage('yahtzee',{screen:'rules'});
  for(const row of [1,2,3,6])assert.ok(yahtzee.includes(row+' full scoring row'),row);
@@ -80,6 +81,7 @@ test('BC-0.3 local Chaos launches only its existing approved game, not a fake se
  assert.match(local,/save|resume|pass-and-play/i);
  const planned=renderClassicGamePage('cribbage',{screen:'play'});
  assert.match(planned,/disabled aria-disabled="true"/);
+ assert.match(planned,/Resume game/);
  assert.doesNotMatch(planned,/data-game-action="play"/);
 });
 test('BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection',()=>{
@@ -120,6 +122,10 @@ test('BC-0.3 result, history and rematch use verified data but never activate un
  const log=renderSharedGameScreen({game,screen:'history',view:finish});
  assert.match(log,/Move 1/);
  assert.match(log,/North pegged five/);
+ const many={...finish,history:Array.from({length:45},(_,i)=>({sequence:i+1,summary:'Turn '+(i+1)}))};
+ const paged=renderSharedGameScreen({game,screen:'history',view:many});
+ assert.match(paged,/Move 45/);
+ assert.doesNotMatch(paged,/Move 1<\/span>/);
  const rematch=renderSharedGameScreen({game,screen:'rematch',view:finish});
  assert.match(rematch,/Request rematch/);
  assert.match(rematch,/disabled aria-disabled="true"/);
@@ -140,6 +146,9 @@ test('BC-0.3 hostile text cannot inject HTML, URL attributes, extra private data
  assert.equal(authorizedGameView(game,{...fixture,players:[{name:'x',score:Infinity},{name:'y'}]}),null);
  assert.equal(authorizedGameView(game,{...fixture,verified:'true'}),null);
  assert.equal(authorizedGameView(game,{...fixture,phase:'paid'}),null);
+ const versioned=renderSharedGameScreen({game,screen:'rules',view:{...fixture,variant:'<variant-1>',rulebook:{verified:true,title:'Rules',paragraphs:['Versioned scoring']}}});
+ assert.match(versioned,/Active variant: &lt;variant-1&gt;/);
+ assert.doesNotMatch(versioned,/<variant-1>/);
 });
 test('BC-0.3 shared styles and navigation accessibility ship with the web app',async()=>{
  const css=await readFile(resolve(import.meta.dirname,'../styles.css'),'utf8');

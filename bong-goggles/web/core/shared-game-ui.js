@@ -50,7 +50,9 @@ function rules(game,view){
  const content=verified?'<p class="games-screen__meta">Verified rulebook: '+esc(title||'Game rules')+'</p>'+
   '<ol class="games-screen__rules">'+paragraphs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':
   notice('Ruleset not yet published','Game-specific rules and scoring must be versioned and verified before play is enabled.');
- return section('Rules & variants',content+(variants.length?'<h4>Planned configuration</h4><ul>'+
+ return section('Rules & variants','<p class="games-screen__meta">'+
+  (view&&limited(view.variant)?'Active variant: '+esc(limited(view.variant)):
+    'Active variant: not selected — no verified match')+'</p>'+content+(variants.length?'<h4>Planned configuration</h4><ul>'+
   variants.map(v=>'<li>'+esc(v)+'</li>').join('')+'</ul>':'')+
   '<p class="games-screen__footnote">Rules and regional variants are fixed per match. A catalogue description is not a complete rulebook.</p>');
 }
@@ -74,7 +76,8 @@ function play(game){
   'Cross-Country Chaos already has a separate working local pass-and-play experience.':
   'New games require a qualified rules engine, session authority and opponent service.')+'</p>'+
   (local?'<a class="games-screen__play-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos (local)</a>':
-  blockedButton('Play','Game-specific play is not yet enabled'))+
+  blockedButton('Play','Game-specific play is not yet enabled')+
+  blockedButton('Resume game','No qualified persisted match service is connected'))+
   '<p><a href="'+esc(link(game,'setup'))+'" data-route="classic-game">View opponent setup</a></p>');
 }
 function players(view){
@@ -109,7 +112,7 @@ function history(view){
  const entries=Array.isArray(view?.history)?view.history:[];
  if(!view||entries.length===0)return section('History',notice('No verified match history',
   'Moves and past matches are not generated locally. An authorized game service supplies these records.'));
- const items=entries.slice(0,MAX_MOVES).filter(x=>x&&typeof x==='object'&&
+ const items=entries.slice(-MAX_MOVES).filter(x=>x&&typeof x==='object'&&
    numeric(x.sequence,1,100000000)&&limited(x.summary).length>0);
  return section('History','<ol class="games-screen__history">'+items.map(x=>
   '<li><span>Move '+x.sequence+'</span> '+esc(limited(x.summary))+'</li>').join('')+'</ol>'+

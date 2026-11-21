@@ -99,6 +99,14 @@ func main(){
  }else if os.Getenv("SOCIAL420_XP_MODE")!=""&&os.Getenv("SOCIAL420_XP_MODE")!="disabled"{
   log.Fatal("Unrecognized XP activation mode")
  }
+ // AUTH-11 is an independent opt-in. The 420ID server must support
+ // confidential, consent-scoped monetization introspection; no local
+ // entitlements, payouts, invoices or 420Token entries can be created.
+ if os.Getenv("SOCIAL420_MONETIZATION_MODE")=="restricted-acceptance"{
+  if e=handler.EnableMonetization();e!=nil{log.Fatal("AUTH-11 confidential programme unavailable")}
+ }else if os.Getenv("SOCIAL420_MONETIZATION_MODE")!=""&&os.Getenv("SOCIAL420_MONETIZATION_MODE")!="disabled"{
+  log.Fatal("Unrecognized AUTH-11 activation mode")
+ }
  mux:=http.NewServeMux()
  mux.Handle("/social-api/",http.StripPrefix("/social-api",handler))
  port:=os.Getenv("PORT");if port==""{port="10000"}

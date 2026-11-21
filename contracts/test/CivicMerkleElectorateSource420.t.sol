@@ -144,9 +144,8 @@ contract CivicMerkleElectorateSource420Test {
         timelock.execute(id);
         CivicMerkleElectorateSource420.Checkpoint memory cp = source.checkpoint(0);
         require(cp.effectiveBlock == 1001 && cp.totalWeight == 1 && cp.electorateRoot == root, "late checkpoint");
-        (bool before,) = address(source).staticcall(
-            abi.encodeCall(CivicMerkleElectorateSource420.snapshotAt, (uint64(1000)))
-        );
+        (bool before,) =
+            address(source).staticcall(abi.encodeCall(CivicMerkleElectorateSource420.snapshotAt, (uint64(1000))));
         require(!before, "accepted snapshot before effective block");
 
         vm.roll(1001);

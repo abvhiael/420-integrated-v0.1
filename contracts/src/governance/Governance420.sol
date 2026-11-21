@@ -568,8 +568,10 @@ contract Governance420 is SystemAccess, I420System {
             electorates.sourceFor(CivicIds420.House.VALIDATOR);
         if (
             communityConfig.source != communitySource_ || validatorConfig.source != validatorSource_
-                || communityConfig.sourceType != CivicMerkleElectorateSource420(communitySource_).COMMUNITY_SOURCE_TYPE()
-                || validatorConfig.sourceType != CivicMerkleElectorateSource420(validatorSource_).VALIDATOR_SOURCE_TYPE()
+                || communityConfig.sourceType
+                    != CivicMerkleElectorateSource420(communitySource_).COMMUNITY_SOURCE_TYPE()
+                || validatorConfig.sourceType
+                    != CivicMerkleElectorateSource420(validatorSource_).VALIDATOR_SOURCE_TYPE()
                 || communityConfig.revision != 1 || validatorConfig.revision != 1
         ) revert InvalidBootstrapGraph();
 

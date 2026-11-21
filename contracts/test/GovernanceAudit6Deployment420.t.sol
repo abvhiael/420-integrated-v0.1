@@ -667,20 +667,21 @@ contract GovernanceAudit6Deployment420Test {
     }
 
     function _activationAccepted() private returns (bool ok) {
-        (ok,) = address(compatibility).call(
-            abi.encodeCall(
-                Governance420.activateCanonicalCivic,
-                (
-                    address(constitution),
-                    address(proposals),
-                    address(electorates),
-                    address(voting),
-                    address(governor),
-                    address(community),
-                    address(validator)
+        (ok,) = address(compatibility)
+            .call(
+                abi.encodeCall(
+                    Governance420.activateCanonicalCivic,
+                    (
+                        address(constitution),
+                        address(proposals),
+                        address(electorates),
+                        address(voting),
+                        address(governor),
+                        address(community),
+                        address(validator)
+                    )
                 )
-            )
-        );
+            );
     }
 
     function testRec2FreshGenesisFirstRealDualHouseVotesWithProofs() public {
@@ -710,7 +711,9 @@ contract GovernanceAudit6Deployment420Test {
             "first community weight"
         );
         vm.prank(address(0xB0B));
-        voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, _proofFor(address(0xA11CE)));
+        voting.castVote(
+            proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, _proofFor(address(0xA11CE))
+        );
         vm.prank(address(0xCAFE));
         voting.castVote(proposalId, CivicIds420.House.VALIDATOR, CivicVoting420.Support.FOR, _proofFor(address(0xD00D)));
         vm.prank(address(0xD00D));
@@ -719,27 +722,23 @@ contract GovernanceAudit6Deployment420Test {
         require(voting.participation(proposalId, CivicIds420.House.VALIDATOR) == 2, "validator participation");
 
         vm.prank(address(0xA11CE));
-        (bool duplicate,) = address(voting).call(
-            abi.encodeCall(
-                CivicVoting420.castVote,
-                (
-                    proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST,
-                    _proofFor(address(0xB0B))
+        (bool duplicate,) = address(voting)
+            .call(
+                abi.encodeCall(
+                    CivicVoting420.castVote,
+                    (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.AGAINST, _proofFor(address(0xB0B)))
                 )
-            )
-        );
+            );
         require(!duplicate, "duplicate ballot accepted");
 
         vm.prank(address(0xCAFE));
-        (bool badProof,) = address(voting).call(
-            abi.encodeCall(
-                CivicVoting420.castVote,
-                (
-                    proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR,
-                    _proofFor(address(0xD00D))
+        (bool badProof,) = address(voting)
+            .call(
+                abi.encodeCall(
+                    CivicVoting420.castVote,
+                    (proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, _proofFor(address(0xD00D)))
                 )
-            )
-        );
+            );
         require(!badProof, "nonmember proof accepted");
         require(voting.participation(proposalId, CivicIds420.House.COMMUNITY) == 2, "bad ballot affected tally");
     }
@@ -795,20 +794,22 @@ contract GovernanceAudit6Deployment420Test {
     function testRec2UnauthorizedPostActivationCheckpointMutationRejected() public {
         _activateTwoMemberBootstrap();
         vm.prank(address(0xB0B));
-        (bool updated,) = address(community).call(
-            abi.encodeCall(
-                CivicMerkleElectorateSource420.publishCheckpoint,
-                (uint64(block.number + 10), keccak256("malicious root"), uint256(10))
-            )
-        );
+        (bool updated,) = address(community)
+            .call(
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishCheckpoint,
+                    (uint64(block.number + 10), keccak256("malicious root"), uint256(10))
+                )
+            );
         require(!updated, "non-Timelock published checkpoint after activation");
 
         vm.prank(address(0xCAFE));
-        (bool reset,) = address(validator).call(
-            abi.encodeCall(
-                CivicMerkleElectorateSource420.publishInitialCheckpoint, (keccak256("replace"), uint256(1))
-            )
-        );
+        (bool reset,) = address(validator)
+            .call(
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishInitialCheckpoint, (keccak256("replace"), uint256(1))
+                )
+            );
         require(!reset, "non-Timelock rewrote first validator checkpoint");
         require(community.checkpointCount() == 1 && validator.checkpointCount() == 1, "checkpoint history changed");
     }

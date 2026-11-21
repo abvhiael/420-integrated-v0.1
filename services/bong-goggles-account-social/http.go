@@ -70,7 +70,15 @@ func strictJSON(r *http.Request,dst any)error{
  seen:=map[string]bool{}
  for dec.More(){
   token,e:=dec.Token();if e!=nil{return ErrInvalid}
-  name,ok:=token.(string);if !ok||seen[name]{return ErrInvalid}
+  name,ok:=token.(string);if !ok{return ErrInvalid}
+  // encoding/json accepts case-insensitive struct field names. Reject
+  // differently-cased duplicates and Unicode key aliases rather than
+  // letting a later JSON spelling override authorization-sensitive values.
+  for _,ch:=range name{
+   if ch!='_'&&(ch<'A'||ch>'Z')&&(ch<'a'||ch>'z')&&(ch<'0'||ch>'9'){return ErrInvalid}
+  }
+  name=strings.ToLower(name)
+  if seen[name]{return ErrInvalid}
   seen[name]=true
   var v json.RawMessage
   if dec.Decode(&v)!=nil{return ErrInvalid}

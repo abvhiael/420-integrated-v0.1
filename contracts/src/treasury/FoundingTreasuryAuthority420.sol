@@ -46,6 +46,7 @@ contract FoundingTreasuryAuthority420 {
         bool contingency;
         bool twoFounderRequired;
         bool scheduled;
+        bool released;
     }
 
     address public immutable foundingAdministrator;
@@ -69,11 +70,16 @@ contract FoundingTreasuryAuthority420 {
     uint256 public nextPaymentNonce;
     uint256 public operationsCommitted;
     uint256 public contingencyCommitted;
+    uint256 public operationsReleased;
+    uint256 public contingencyReleased;
     mapping(bytes32 => Payment) public payments;
     mapping(bytes32 => mapping(address => bool)) public paymentApproval;
     mapping(uint256 => uint256) public operationsCommittedByDay;
     mapping(uint256 => uint256) public contingencyCommittedByDay;
     mapping(address => mapping(uint256 => uint256)) public recipientCommittedByDay;
+    mapping(uint256 => uint256) public operationsReleasedByDay;
+    mapping(uint256 => uint256) public contingencyReleasedByDay;
+    mapping(address => mapping(uint256 => uint256)) public recipientReleasedByDay;
 
     error InvalidConfiguration();
     error UnauthorizedFounder();
@@ -268,9 +274,32 @@ contract FoundingTreasuryAuthority420 {
         bytes32 paymentId, address executor, bytes32 expectedCommitment
     ) external onlyFounder returns (bytes32 commitment) {
         Payment storage p = payments[paymentId];
-        if (!p.scheduled || p.disbursementId == bytes32(0) || executor.code.length == 0) revert InvalidPayment();
+        if (!p.scheduled || p.released || p.disbursementId == bytes32(0) || executor.code.length == 0)
+            revert InvalidPayment();
         if (TreasuryReleaseExecutor420(executor).operator() != address(this)) revert InvalidConfiguration();
+        if (p.contingency) {
+            if (_rollingReleased(true) + p.amount > CONTINGENCY_30_DAY_MAX) revert SpendingLimit();
+        } else {
+            if (_rollingReleased(false) + p.amount > OPERATIONS_30_DAY_MAX) revert SpendingLimit();
+            if (!p.twoFounderRequired && _rollingRecipientReleased(p.recipient) + p.amount > ROUTINE_MAX)
+                revert ApprovalRequired();
+        }
+        // Consume the exact release quota before the external call. A failed transfer or accounting
+        // proof rolls back these writes with the whole transaction; releases cannot double-spend.
+        p.released = true;
+        uint256 day = block.timestamp / 1 days;
+        if (p.contingency) {
+            contingencyReleased += p.amount;
+            contingencyReleasedByDay[day] += p.amount;
+        } else {
+            operationsReleased += p.amount;
+            operationsReleasedByDay[day] += p.amount;
+            recipientReleasedByDay[p.recipient][day] += p.amount;
+        }
         commitment = TreasuryReleaseExecutor420(executor).execute(p.disbursementId, expectedCommitment);
+        TreasuryDisbursementRegistry420.Disbursement memory d = disbursementRegistry.disbursement(p.disbursementId);
+        if (d.state != TreasuryDisbursementRegistry420.State.EXECUTED || d.vaultReleaseHash != commitment)
+            revert InvalidConfiguration();
         emit FoundingReleaseExecuted(paymentId, p.disbursementId, commitment);
     }
 
@@ -298,6 +327,24 @@ contract FoundingTreasuryAuthority420 {
         // Include day - 30 conservatively, so no boundary manipulation can spend >30-day cap.
         for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
             total += contingency ? contingencyCommittedByDay[day - i] : operationsCommittedByDay[day - i];
+        }
+    }
+
+    function rollingReleased(bool contingency) external view returns (uint256) {
+        return _rollingReleased(contingency);
+    }
+
+    function _rollingReleased(bool contingency) private view returns (uint256 total) {
+        uint256 day = block.timestamp / 1 days;
+        for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
+            total += contingency ? contingencyReleasedByDay[day - i] : operationsReleasedByDay[day - i];
+        }
+    }
+
+    function _rollingRecipientReleased(address recipient) private view returns (uint256 total) {
+        uint256 day = block.timestamp / 1 days;
+        for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
+            total += recipientReleasedByDay[recipient][day - i];
         }
     }
 

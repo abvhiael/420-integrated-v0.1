@@ -56,7 +56,8 @@ export function createApp({rpc,projection,creatorQueue=new CreatorQueue(process.
         const block=await rpc.call('eth_getBlockByNumber',['latest',false]);
         if(!/^0x[0-9a-fA-F]{64}$/.test(block?.hash||''))throw new Error('unverifiable chain head');
         return ok({schema:'420-launchpad-projection-v1',canonical:true,
-          source:{chainId:rt.chainId,blockHash:block.hash},participant});
+          source:{chainId:rt.chainId,blockNumber:block.number,blockHash:block.hash,
+            saleRegistryAddress:rt.saleRegistryAddress,projectRegistryAddress:rt.projectRegistryAddress},participant});
       }
       m=path.match(/^\/v1\/launchpad\/prepare\/(approve-conversion|pay-conversion)$/);
       if(method==='POST'&&m)return ok(await convertedCheckoutReview(rpc,await runtime(),m[1],body||{}));

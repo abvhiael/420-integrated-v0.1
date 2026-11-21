@@ -98,7 +98,7 @@ function bindChaos(){
    if(action==='reveal'){chaosRevealed=true;chaosError=null;renderCurrent();return;}
    if(action==='restart'){chaosGame=null;chaosRevealed=false;chaosError=null;renderCurrent();return;}
    if(action==='next'){chaosGame=advanceChaosLeg(chaosGame);chaosRevealed=false;chaosError=null;renderCurrent();return;}
-   apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card)});
+   apply({action,index:control.dataset.card===undefined?null:Number(control.dataset.card),choice:control.dataset.choice||null});
   }catch(error){chaosError=error.message;renderCurrent(chaosError);}
  });
  for(const form of root.querySelectorAll('[data-chaos-move]'))form.addEventListener('submit',event=>{

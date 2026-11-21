@@ -1,0 +1,130 @@
+name: LAUNCHPAD-REC-6 final pre-testnet closeout
+
+on:
+  push:
+    branches:
+      - 'feature/launchpad-rec-6-*'
+    paths:
+      - 'contracts/config/launchpad/**'
+      - 'contracts/config/420launchpad-genesis.json'
+      - 'scripts/verify-launchpad-rec-6.py'
+      - 'scripts/test_launchpad_rec_6.py'
+      - 'launchpad/web/**'
+      - 'launchpad/service/**'
+      - 'testnet/public-services/launchpad/**'
+      - 'docs/audit/LAUNCHPAD-REC-6-*'
+      - '.github/workflows/launchpad-rec-6-closeout.yml'
+  pull_request:
+    paths:
+      - 'contracts/config/launchpad/**'
+      - 'contracts/config/420launchpad-genesis.json'
+      - 'scripts/verify-launchpad-rec-6.py'
+      - 'launchpad/web/**'
+      - 'launchpad/service/**'
+      - 'testnet/public-services/launchpad/**'
+      - 'docs/audit/LAUNCHPAD-REC-6-*'
+      - '.github/workflows/launchpad-rec-6-closeout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: launchpad-rec6-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deterministic-artifacts:
+    name: Deterministic compiler, ABI, constructor and real local EVM
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      FOUNDRY_PROFILE: pr
+      QUALIFIED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.QUALIFIED_SHA }}
+      - name: Assert actual checked-out commit
+        run: test "$(git rev-parse HEAD)" = "$QUALIFIED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify frozen Audit-4 authority, deployment order and readiness state
+        run: |
+          python3 scripts/verify-launchpad-audit-4-release.py
+          python3 scripts/verify-launchpad-rec-6.py readiness
+      - name: Build six release contracts and attest compiler, constructor, ABI and runtime templates
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge build src/launchpad src/apps/ProtocolRegistry.sol src/system/CapabilityRegistry420.sol
+          cd ..
+          python3 scripts/verify-launchpad-rec-6.py artifacts --sha "$QUALIFIED_SHA" --output /tmp/launchpad-rec6-artifacts-first.json
+      - name: Reject tampered ABI, constructor, compiler and unlinked runtime artifacts
+        run: python3 scripts/test_launchpad_rec_6.py
+      - name: Rebuild clean and compare every artifact identity
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          forge clean
+          forge build src/launchpad src/apps/ProtocolRegistry.sol src/system/CapabilityRegistry420.sol
+          cd ..
+          python3 scripts/verify-launchpad-rec-6.py artifacts --sha "$QUALIFIED_SHA" --output /tmp/launchpad-rec6-artifacts-repeat.json
+          cmp /tmp/launchpad-rec6-artifacts-first.json /tmp/launchpad-rec6-artifacts-repeat.json
+          cp /tmp/launchpad-rec6-artifacts-first.json launchpad-rec6-release-artifacts.json
+      - name: Focused local actual Registry and Launchpad constructor-binding regression
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p test/.launchpad-rec6
+          sed 's#"../src/#"../../src/#g' test/LaunchpadDeploymentBinding420.t.sol > test/.launchpad-rec6/LaunchpadDeploymentBinding420.t.sol
+          FOUNDRY_TEST=test/.launchpad-rec6 FOUNDRY_SRC=src/launchpad forge test --match-path test/.launchpad-rec6/LaunchpadDeploymentBinding420.t.sol -vvv
+      - name: Preserve exact-head reproducibility manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: launchpad-rec6-contract-attestation-${{ env.QUALIFIED_SHA }}
+          path: launchpad-rec6-release-artifacts.json
+          retention-days: 90
+          if-no-files-found: error
+
+  application-and-service:
+    name: Clean standalone production build, service regressions and readiness
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      QUALIFIED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.QUALIFIED_SHA }}
+      - name: Assert actual checked-out commit
+        run: test "$(git rev-parse HEAD)" = "$QUALIFIED_SHA"
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Verify source model, service contract and machine readable readiness
+        run: |
+          python3 scripts/verify-420launchpad-audit.py
+          python3 scripts/verify-launchpad-audit-5-app.py
+          python3 scripts/verify-launchpad-rec-6.py readiness
+      - name: Qualify complete standalone browser application and production build
+        working-directory: launchpad/web
+        run: |
+          npm run check
+          npm test
+          GITHUB_SHA="$QUALIFIED_SHA" npm run build
+      - name: Prove production build exactly matches qualified sources and fails closed
+        run: python3 scripts/verify-launchpad-rec-6.py web --sha "$QUALIFIED_SHA"
+      - name: Qualify complete Launchpad service and local recovery indexer
+        working-directory: launchpad/service
+        run: npm test
+      - name: Preserve production build artifact identity
+        run: python3 scripts/verify-launchpad-rec-6.py web --sha "$QUALIFIED_SHA" --output launchpad-rec6-web-attestation.json
+      - name: Upload retained build attestation
+        uses: actions/upload-artifact@v4
+        with:
+          name: launchpad-rec6-web-attestation-${{ env.QUALIFIED_SHA }}
+          path: launchpad-rec6-web-attestation.json
+          retention-days: 90
+          if-no-files-found: error

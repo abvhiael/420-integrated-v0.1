@@ -309,3 +309,12 @@ Status: **BLOCKED — production stage**
 - independent external security review or documented release exception;
 - post-deployment verification and incident response.
 
+
+
+## LAUNCHPAD-REC-6 — final repository pre-testnet qualification (local closeout)
+
+This assigned remediation is the repository-side final pre-testnet reconciliation, **not** a new canonical testnet milestone and not the LAUNCHPAD-AUDIT-7 Genesis closeout. All production-equivalent funded activity and network-specific publication/operational evidence still belong only to the existing **LAUNCHPAD-AUDIT-6** gate above. See [REC-6 qualification evidence](LAUNCHPAD-REC-6-QUALIFICATION.md), `contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json`, `testnet/public-services/launchpad/readiness.json` and [deployment/recovery operations](../apps/launchpad/deployment-operations.md).
+
+REC-6 checks compiler 0.8.24 / Cancun / optimizer 200 / via-IR, all six constructor input lists, canonical Router/Allocation/Pay/Arbitration/Reputation/Notifications ABI interfaces, creation and runtime-template bytes and reproducible SHA-256 fingerprints from two independent clean Foundry builds. It explicitly distinguishes those **repository templates** from actual deployed runtime EXTCODEHASH. Existing local EVM Registry bindings, controller/integration immutability, standalone production application build, service/Indexer recovery and adversarial missing/modified artifact failures are qualified. `contracts/config/420launchpad-genesis.json`, the Audit-4 materialization manifest and public-services readiness all declare repository-qualified and explicitly live/Genesis/production-unqualified. The old audit inventory and the REC-5 merge description have been corrected. No network, deployment transaction, runtime address or approval is invented.
+
+**Only next step: LAUNCHPAD-AUDIT-6 — BLOCKED, LIVE PUBLIC TESTNET REQUIRED.** LAUNCHPAD-AUDIT-7 and LAUNCHPAD-AUDIT-8 retain their original conditional sequence without reinterpretation.

@@ -1,14 +1,14 @@
 # LAUNCHPAD-REC-5 — ecosystem integration qualification
 
 Status: **COMPLETE — local pre-testnet implementation and exact-head qualification**.
-This is not a public testnet or production acceptance report. No merge was requested.
+This is not a public testnet or production acceptance report. At initial REC-5 qualification no merge was requested; PR #1271 was subsequently explicitly merged to main.
 
 ## Repository authority and exact-head evidence
 
 - Authoritative repository: `abvhiael/420-integrated-v0.1`.
 - Original `main` at execution start and verified base at closeout: `5496b09de8853f0978cb65a34e5d9f7493d1161f`, already containing merged LAUNCHPAD-REC-4.
 - Working branch: `feature/launchpad-rec-5-ecosystem`.
-- PR: [#1271](https://github.com/abvhiael/420-integrated-v0.1/pull/1271), **OPEN / NOT MERGED**, mergeable at closeout.
+- PR: [#1271](https://github.com/abvhiael/420-integrated-v0.1/pull/1271), **MERGED into main** at `0f7c978a8904303816bd52551ef711355fc9d5e2` after exact-head qualification. (It was open at the historical evidence snapshot.)
 - **Exact executable qualification SHA:** `1531a8ada470a3f79e36ca9879502a4a39760ffc`.
 - **Complete focused qualification:** [GitHub Actions run #44849506236](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44849506236), **SUCCESS** on that exact SHA:
   - Real local protocol deployment and settlement: **6/6 Foundry tests passed**, 0 failures or skips. Job `136677254217`.

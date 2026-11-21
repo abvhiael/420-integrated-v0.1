@@ -1,8 +1,8 @@
 {
   "schema": "420-launchpad-audit-4-release-materialization-v1",
   "step": "LAUNCHPAD-AUDIT-4",
-  "status": "REPOSITORY_MATERIALIZATION_PENDING_QUALIFICATION",
-  "repository_ready": false,
+  "status": "REPOSITORY_QUALIFIED_PRE_TESTNET",
+  "repository_ready": true,
   "live_qualified": false,
   "address_policy": {
     "namespace_authority": "contracts/config/genesis-address-namespace.json",
@@ -164,10 +164,10 @@
       "version": 1,
       "active": true,
       "component_type": "SERVICE",
-      "metadata_hash_policy": "keccak256(canonical Launchpad release metadata document)",
-      "manifest_hash_policy": "keccak256(this Audit-4 release materialization canonical payload)",
-      "dependency_root_policy": "keccak256(ordered Launchpad deployment graph, external dependency addresses and deployed runtime code hashes)",
-      "interface_hash_policy": "keccak256(canonical LaunchpadRouter420 ABI/interface descriptor)"
+      "metadata_hash_policy": "LOCAL_FIXTURE_ONLY_keccak256(420/LAUNCHPAD/RELEASE/METADATA/V1); approved live release metadata bytes remain LAUNCHPAD-AUDIT-6",
+      "manifest_hash_policy": "LOCAL_FIXTURE_ONLY_keccak256(420/LAUNCHPAD/AUDIT-4/RELEASE-MATERIALIZATION/V1); not SHA256/Keccak of this JSON payload",
+      "dependency_root_policy": "LOCAL_FIXTURE_keccak256(abi.encode(ordered external and Launchpad deployment addresses plus six deployed runtime code hashes)); real live addresses and code hashes required in LAUNCHPAD-AUDIT-6",
+      "interface_hash_policy": "LOCAL_FIXTURE_ONLY_keccak256(420/LAUNCHPAD/LAUNCHPAD_ROUTER/INTERFACE/V1); canonical ABI hash independently attested at build; approved live interface commitment remains LAUNCHPAD-AUDIT-6"
     }
   ],
   "artifact_identity": {
@@ -184,7 +184,10 @@
       "contracts/out/LaunchpadCrowdfundingIntegration420.sol/LaunchpadCrowdfundingIntegration420.json",
       "contracts/out/LaunchpadRouter420.sol/LaunchpadRouter420.json"
     ],
-    "hash_evidence": "EXACT_HEAD_QUALIFICATION_LOG_AND_DURABLE_AUDIT_EVIDENCE"
+    "hash_evidence": "REC-6_REPRODUCIBLE_EXACT_HEAD_COMPILER_ABI_CREATION_RUNTIME_TEMPLATE_SHA256_AND_LOCAL_EVM_CONSTRUCTOR_ASSERTIONS",
+    "frozen_fingerprints": "contracts/config/launchpad/launchpad-rec-6-artifact-attestation.json",
+    "reproduction_verifier": "scripts/verify-launchpad-rec-6.py",
+    "hash_semantics": "SHA256_CANONICAL_ABI_CREATION_BYTES_UNLINKED_RUNTIME_TEMPLATE_BYTES_NOT_EXTCODEHASH"
   },
   "local_evm_qualification": {
     "required": true,
@@ -208,8 +211,8 @@
     "chain_id": "LOCAL_TEST_CHAIN",
     "genesis_identity": "NOT_LIVE_GENESIS_EVIDENCE",
     "deployed_addresses": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
-    "runtime_code_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS",
-    "artifact_hashes": "RETAINED_IN_EXACT_HEAD_QUALIFICATION_LOGS"
+    "runtime_code_hashes": "LOCAL_EVM_ONLY_VERIFIED_BY_LAUNCHPAD_DEPLOYMENT_BINDING_420_TEST_NOT_A_LIVE_DEPLOYMENT",
+    "artifact_hashes": "REC-6_EXACT_HEAD_GITHUB_ACTIONS_RETAINED_ARTIFACT"
   },
   "live_testnet_evidence": {
     "required_in_step": "LAUNCHPAD-AUDIT-6",

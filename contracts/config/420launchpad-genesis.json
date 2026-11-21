@@ -1,8 +1,13 @@
 {
-  "schema":"420-launchpad-genesis-v1",
-  "status":"IMPLEMENTATION_QUALIFICATION",
-  "boundary":{"custody":false,"minting":false,"dex":false,"payment_execution":false},
-  "invariants":[
+  "schema": "420-launchpad-genesis-v1",
+  "status": "REPOSITORY_QUALIFIED_PRE_TESTNET",
+  "boundary": {
+    "custody": false,
+    "minting": false,
+    "dex": false,
+    "payment_execution": false
+  },
+  "invariants": [
     "LAUNCHPAD-INV-001: project and sale identities are canonical and replay-safe",
     "LAUNCHPAD-INV-002: sale economics are immutable after creation",
     "LAUNCHPAD-INV-003: hard cap and per-wallet cap cannot be exceeded",
@@ -14,5 +19,16 @@
     "LAUNCHPAD-INV-009: sale payment and token delivery are represented by nonzero audit commitments",
     "LAUNCHPAD-INV-010: liquidity commitments do not grant Launchpad unilateral 420Swap authority"
   ],
-  "new_frozen_predeploy_required":false
+  "new_frozen_predeploy_required": false,
+  "readiness": {
+    "repository_qualified": true,
+    "local_contract_qualified": true,
+    "application_build_qualified": true,
+    "live_testnet_qualified": false,
+    "genesis_ready": false,
+    "production_ready": false,
+    "not_a_live_deployment": true,
+    "canonical_next_step": "LAUNCHPAD-AUDIT-6",
+    "evidence": "docs/audit/LAUNCHPAD-REC-6-QUALIFICATION.md"
+  }
 }

@@ -267,6 +267,8 @@ async function submit(){
   try{
     const original=state.review;
     const tx=await submitReviewedTransaction({ethereum:globalThis.ethereum,config:state.config,wallet:state.wallet,review:original,
+      sessionValid:()=>state.review===original&&state.wallet?.account===original.binding.account&&
+        state.wallet?.chainId===original.binding.chainId,
       revalidate:async()=>{
         if(state.review!==original||state.selected?.saleId!==original.binding.saleId)
           throw new Error('STALE_TRANSACTION_REVIEW');
@@ -344,6 +346,12 @@ async function boot(){
     state.service=new LaunchpadService({baseUrl:state.config.api.baseUrl,expectedSchema:state.config.api.projectionSchema});
     const rt=await state.service.runtime();
     if(state.config.network.chainId&&rt.chainId.toLowerCase()!==state.config.network.chainId.toLowerCase())throw new Error('Launchpad service chain mismatch');
+    for(const key of ['launchpadRouterAddress','saleRegistryAddress','projectRegistryAddress',
+      'allocationRegistryAddress','crowdfundingIntegrationAddress','arbitrationCasesAddress']){
+      const expected=state.config.registry[key];
+      if(expected&&expected.toLowerCase()!==rt[key]?.toLowerCase())
+        throw new Error('configured Launchpad contract differs from Registry: '+key);
+    }
     state.config={...state.config,network:{...state.config.network,chainId:rt.chainId},
       registry:{...state.config.registry,launchpadRouterAddress:rt.launchpadRouterAddress,
         allocationRegistryAddress:rt.allocationRegistryAddress,crowdfundingIntegrationAddress:rt.crowdfundingIntegrationAddress,

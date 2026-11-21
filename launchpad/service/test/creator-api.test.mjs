@@ -53,8 +53,8 @@ test('creator HTTP dispatch prepares, records signed-review receipt, lists reque
     return {schema:'420-launchpad-governance-receipt-v1',canonical:true,
       status:'RECEIVED_FOR_GOVERNANCE_REVIEW',requestId:prepared.requestId};
   },list(account){return written&&account===WHO?[{requestId:written.prepared.requestId,status:'RECEIVED_FOR_GOVERNANCE_REVIEW'}]:[];}};
-  const projection={read:()=>({schema:'420-launchpad-projection-v1',canonical:true,
-    source:{chainId:'0x1a4',blockHash:BLOCK},items:[{saleId:SALE,projectId:PROJECT,controller:WHO,title:'Owned'}]})};
+  const projection={verify:async()=>projection.read(),read:()=>({schema:'420-launchpad-projection-v1',canonical:true,
+    source:{chainId:'0x1a4',blockHash:BLOCK,blockNumber:'0x9',saleRegistryAddress:A.sale,projectRegistryAddress:A.projects},items:[{saleId:SALE,projectId:PROJECT,controller:WHO,title:'Owned'}]})};
   const app=createApp({rpc:rpc(),projection,creatorQueue:queue,chainId:'0x1a4'});
   const prep=await app({method:'POST',path:'/v1/launchpad/creator/prepare',body:{kind:'CREATE_CAMPAIGN',draft:draft()}});
   assert.equal(prep.status,200);assert.equal(prep.body.requestId,ID);

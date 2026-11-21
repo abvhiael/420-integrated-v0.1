@@ -15,7 +15,7 @@ func TestAUTH12RejectsAmbiguousAndUnicodeJSONKeys(t *testing.T){
   `{"token":"first","Token":"second"}`,
   `{"consentAccepted":false,"conſentAccepted":true}`,
   `{"consentAccepted":false,"consentAcceptéd":true}`,
-  `{"code":"one","c\\u006fde":"two"}`,
+  `{"code":"one","c\u006fde":"two"}`,
   `{"consentAccepted":true,"consentAccepted":false}`,
   `{"unexpected-identifier":true}`,
   `{"consentAccepted":true}{"consentAccepted":false}`,

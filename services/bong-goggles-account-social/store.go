@@ -62,6 +62,27 @@ func (s *Store) Ready(ctx context.Context)error{
  if !ok{return ErrUnavailable}
  return nil
 }
+// AUTH-12: the serving role may perform user actions but must never
+// inspect private abuse reports or forge operator moderation events, and
+// must not gain unapproved whole-table delete/update capabilities.
+func (s *Store) ReadyRuntime(ctx context.Context)error{
+ if e:=s.Ready(ctx);e!=nil{return e}
+ var unsafe bool
+ e:=s.DB.QueryRowContext(ctx,`SELECT
+ COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'SELECT'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.reports'),'DELETE'),false)
+ OR COALESCE(has_column_privilege(current_user,'bg_account_social.posts','hidden_at','UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'INSERT'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'UPDATE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.moderation_events'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.members'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.comments'),'DELETE'),false)
+ OR COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.posts'),'UPDATE'),false)`).Scan(&unsafe)
+ if e!=nil{return e};if unsafe{return ErrUnavailable}
+ return nil
+}
 func newID()(string,error){
  var b [16]byte
  if _,e:=rand.Read(b[:]);e!=nil{return "",e}

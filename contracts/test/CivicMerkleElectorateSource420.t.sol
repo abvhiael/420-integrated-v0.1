@@ -103,18 +103,16 @@ contract CivicMerkleElectorateSource420Test {
             address(timelock), keccak256("420CIVIC_COMMUNITY_EQUAL_WEIGHT_MERKLE_V1")
         );
         bytes32 root = _leaf(address(this));
-        (bool unauth,) = address(source).call(
-            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1)))
-        );
+        (bool unauth,) = address(source)
+            .call(abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))));
         require(!unauth, "unauthorized checkpoint");
         vm.prank(address(timelock));
         source.publishInitialCheckpoint(root, 1);
         CivicMerkleElectorateSource420.Checkpoint memory cp = source.checkpoint(0);
         require(cp.effectiveBlock == block.number + 1 && cp.electorateRoot == root, "prospective root");
         vm.prank(address(timelock));
-        (bool second,) = address(source).call(
-            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1)))
-        );
+        (bool second,) = address(source)
+            .call(abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (root, uint256(1))));
         require(!second, "initial checkpoint overwritten");
         vm.roll(block.number + 1);
         (bytes32 observed, uint256 total) = source.snapshotAt(uint64(block.number));

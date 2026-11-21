@@ -28,6 +28,7 @@ def load(path):
 
 def main(argv=None):
     require_ready = "--require-ready" in (argv or sys.argv[1:])
+    require_activation_ready = "--require-activation-ready" in (argv or sys.argv[1:])
     errors, blockers = [], []
     try:
         cfg, system, canon, storage = load(CFG), load(SYSTEM), load(CANON), load(STORAGE)
@@ -161,18 +162,41 @@ def main(argv=None):
         if inputs.get("bootstrapGovernor",{}).get("value","").lower() != str(storage.get("bootstrap_governor")).lower():
             errors.append("bootstrap governor authority mismatch")
 
+    genesis_commitment = cfg.get("genesisBootstrapCommitment", {})
+    initial_values = []
+    for key in ("approvedPlanHash", "communityRoot", "communityTotalWeight", "validatorRoot", "validatorTotalWeight"):
+        value = genesis_commitment.get(key)
+        if key.endswith("Weight"):
+            valid = type(value) is int and 0 <= value < 2**256
+            numeric = value if valid else 0
+        else:
+            valid = isinstance(value, str) and re.fullmatch(r"0x[0-9a-fA-F]{64}", value) is not None
+            numeric = int(value, 16) if valid else 0
+        if not valid:
+            errors.append("invalid Genesis bootstrap commitment: " + key)
+        initial_values.append(numeric)
+    genesis_activation_ready = all(initial_values)
+    if any(initial_values) and not genesis_activation_ready:
+        errors.append("partially initialized Genesis bootstrap commitment")
+    if not genesis_activation_ready:
+        blockers.append("Genesis bootstrap plan and eligible electorate commitments pending")
     blockers.extend(sorted(set(unresolved)))
-    ready = not blockers and cfg.get("status") in {
+    # An offline reproducible deployment may be build-ready while real Genesis snapshots are
+    # still pending; do not confuse this with the stricter activation gate.
+    ready = not unresolved and cfg.get("status") in {
         "CANONICAL_INITIALIZATION_INPUTS_RESOLVED_ARTIFACTS_PENDING",
         "READY_FOR_REPRODUCIBLE_DEPLOYMENT",
     }
     if require_ready and not ready:
-        errors.append("canonical initialization inputs unresolved: " + ", ".join(blockers))
+        errors.append("canonical initialization inputs unresolved: " + ", ".join(sorted(set(unresolved))))
+    if require_activation_ready and (not ready or not genesis_activation_ready):
+        errors.append("Genesis bootstrap release commitment unresolved: " + ", ".join(sorted(set(blockers))))
 
     result = {
         "step":"GOV-AUDIT-6",
         "pass": not errors,
         "ready": ready,
+        "genesisActivationReady": genesis_activation_ready,
         "status": cfg.get("status"),
         "structuralErrors": errors,
         "canonicalInputBlockers": blockers,

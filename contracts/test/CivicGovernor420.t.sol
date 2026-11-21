@@ -255,12 +255,14 @@ contract CivicGovernor420Test {
         vm.prank(address(s.timelock));
         s.constitution.setRule(CivicIds420.ProposalClass.G1, 1, 7 days, 5000, 6000, 0, 0, false);
         vm.roll(100);
-        bytes32 proposalId = s.governor.createProposal(
-            CivicIds420.ProposalClass.G1, keccak256("one block metadata"), keccak256("one block actions")
-        );
+        bytes32 proposalId = s.governor
+            .createProposal(
+                CivicIds420.ProposalClass.G1, keccak256("one block metadata"), keccak256("one block actions")
+            );
         (,,,,, uint64 start, uint64 end,,) = s.proposals.proposals(proposalId);
         require(start == 101 && end == 101, "inclusive one-block window");
         vm.roll(101);
+        vm.prank(ALICE);
         s.voting.castVote(proposalId, CivicIds420.House.COMMUNITY, CivicVoting420.Support.FOR, "");
         vm.expectRevert(CivicGovernor420.VotingStillActive.selector);
         s.governor.finalize(proposalId);

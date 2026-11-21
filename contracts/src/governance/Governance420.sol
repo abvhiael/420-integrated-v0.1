@@ -250,8 +250,8 @@ contract Governance420 is SystemAccess, I420System {
         ) revert InvalidElectorateSource();
 
         if (
-            initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0
-                || initialValidatorRoot == bytes32(0) || initialValidatorTotalWeight == 0
+            initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0 || initialValidatorRoot == bytes32(0)
+                || initialValidatorTotalWeight == 0
         ) revert InvalidElectorateSource();
         bytes32 plan = canonicalBootstrapPlanHash(
             constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_
@@ -583,8 +583,7 @@ contract Governance420 is SystemAccess, I420System {
                 || communityInitial.totalWeight != initialCommunityTotalWeight
                 || validatorInitial.electorateRoot != initialValidatorRoot
                 || validatorInitial.totalWeight != initialValidatorTotalWeight
-                || communityInitial.effectiveBlock >= block.number
-                || validatorInitial.effectiveBlock >= block.number
+                || communityInitial.effectiveBlock >= block.number || validatorInitial.effectiveBlock >= block.number
         ) revert InvalidElectorateSource();
 
         GovernanceTimelock(payable(governanceTimelock)).activateCivicAuthority(governor_);

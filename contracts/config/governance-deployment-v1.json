@@ -147,6 +147,7 @@
   "initializationOrder": [
     "materialize GovernanceTimelock at 0x0429 with explicit bootstrapGovernor",
     "materialize Governance420 at 0x0437 bound to GovernanceTimelock@0x0429",
+    "materialize the chain-specific approved Civic bootstrap plan and initial electorate commitments in Governance420 fixed Genesis storage (zero configuration fails closed)",
     "deploy CivicConstitution420",
     "deploy CivicProposalRegistry420",
     "deploy CivicElectorateRegistry420",
@@ -160,6 +161,7 @@
     "bind Governance420 compatibility civicGovernor pointer to CivicGovernor420 through GovernanceTimelock",
     "register five core Civic component IDs plus two electorate-source component IDs in ProtocolRegistry with ACTIVE lifecycle and runtime code hashes",
     "publish governance service profile pointing to CivicGovernor420",
+    "publish both first electorate checkpoints through Timelock and wait for their effective blocks before Civic activation",
     "activate GovernanceTimelock Civic authority last",
     "verify scheduler == CivicGovernor420 and civicAuthorityActivated == true"
   ],
@@ -321,5 +323,17 @@
     },
     "qualificationWorkflowRun": 44582174617,
     "generationNote": "REC-5 exact-source isolated Governance/Treasury closure; test formatting and generated runtime artifacts retained together."
+  },
+  "genesisBootstrapCommitment": {
+    "schema": "420-governance-genesis-bootstrap-approval-v1",
+    "status": "GENESIS_RELEASE_INPUTS_PENDING_FAIL_CLOSED",
+    "approvedPlanHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "communityRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "communityTotalWeight": 0,
+    "validatorRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "validatorTotalWeight": 0,
+    "commitmentFormula": "Governance420.canonicalBootstrapPlanHash over BOOTSTRAP_DOMAIN, chainid, seven graph addresses, seven live extcodehashes, and two Genesis initial Merkle roots and weights",
+    "materialization": "Governance420@0x0437 fixed predeploy state only; no runtime setter",
+    "releaseRequirement": "Replace all five zero fields only with verified chain-specific approved graph and authentic community/active-validator owner electorate snapshot commitments; all-zero is fail-closed"
   }
 }

@@ -268,6 +268,8 @@ func (s *Server) handleGetPost(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		actor = id
+	} else if s.account420 != nil {
+		if member,err:=s.authenticate(r);err==nil{actor=member}
 	}
 
 	id := model.ObjectID(r.PathValue("post"))
@@ -587,7 +589,7 @@ func (s *Server) moderationError(w http.ResponseWriter, err error) {
 }
 
 func (s *Server) requireActor(w http.ResponseWriter, r *http.Request) (model.ObjectID, bool) {
-	id, err := s.auth.Authenticate(r)
+	id, err := s.authenticate(r)
 	if err != nil {
 		s.authFailures.Add(1)
 		s.fail(w, http.StatusUnauthorized, "authentication required")

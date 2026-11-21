@@ -21,6 +21,7 @@ type Handler struct{
  SignOn *SignOn
  Messages *MessageService
  Games *AccountGames
+ XP *Contributions
  Origin string
  host string
 }
@@ -36,6 +37,13 @@ func NewHandler(store *Store,sso *SignOn,origin string)(*Handler,error){
 func (h *Handler) EnableAccountExtras(messages *MessageService,games *AccountGames)error{
  if h==nil||messages==nil||games==nil||messages.Store!=h.Store||games.Store!=h.Store{return ErrInvalid}
  h.Messages=messages;h.Games=games
+ return nil
+}
+// EnableXP is a separate opt-in from AUTH-8/9 and uses this exact 420ID
+// authenticated app Store, never Wallet or a browser-submitted subject.
+func (h *Handler) EnableXP(x *Contributions)error{
+ if h==nil||x==nil||x.Store!=h.Store{return ErrInvalid}
+ h.XP=x
  return nil
 }
 func writeJSON(w http.ResponseWriter,code int,value any){
@@ -156,6 +164,11 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   h.accountExtras(ctx,w,r,viewer);return
  }
  switch{
+ case path=="/v1/xp"&&r.Method=="GET":
+  if h.XP==nil{deny(w,404);return}
+  result,e:=h.XP.Summary(ctx,viewer)
+  if e!=nil{deny(w,503);return}
+  writeJSON(w,200,result);return
  case path=="/v1/me"&&r.Method=="GET":
   m,e:=h.Store.MyProfile(ctx,viewer)
   if e!=nil{deny(w,503);return}
@@ -179,7 +192,9 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
  case path=="/v1/posts"&&r.Method=="POST":
   var x struct{Body string `json:"body"`}
   if strictJSON(r,&x)!=nil{deny(w,400);return}
-  post,e:=h.Store.NewPost(ctx,viewer,x.Body)
+  var post Post
+  var e error
+  if h.XP!=nil{post,e=h.XP.PublishPost(ctx,viewer,x.Body)}else{post,e=h.Store.NewPost(ctx,viewer,x.Body)}
   if errors.Is(e,ErrInvalid){deny(w,400);return}
   if e!=nil{deny(w,503);return}
   writeJSON(w,201,map[string]any{"post":post,"onChain":false});return
@@ -188,7 +203,8 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
   if len(segments)<1||len(segments)>2||!uuid.MatchString(segments[0]){deny(w,404);return}
   id:=segments[0]
   if len(segments)==1&&r.Method=="DELETE"{
-   e:=h.Store.DeletePost(ctx,viewer,id)
+   var e error
+   if h.XP!=nil{e=h.XP.DeletePost(ctx,viewer,id)}else{e=h.Store.DeletePost(ctx,viewer,id)}
    if errors.Is(e,ErrNotFound){deny(w,404);return}
    if e!=nil{deny(w,503);return}
    writeJSON(w,200,map[string]bool{"deleted":true});return
@@ -203,7 +219,9 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
    if r.Method=="POST"{
     var x struct{Body string `json:"body"`}
     if strictJSON(r,&x)!=nil{deny(w,400);return}
-    comment,e:=h.Store.NewComment(ctx,viewer,id,x.Body)
+    var comment Comment
+    var e error
+    if h.XP!=nil{comment,e=h.XP.PublishComment(ctx,viewer,id,x.Body)}else{comment,e=h.Store.NewComment(ctx,viewer,id,x.Body)}
     if errors.Is(e,ErrInvalid){deny(w,400);return}
     if errors.Is(e,ErrNotFound){deny(w,404);return}
     if e!=nil{deny(w,503);return}

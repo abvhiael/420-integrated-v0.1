@@ -180,3 +180,11 @@ body{background:var(--bg);color:var(--text)}
 .game-choices {display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.4rem;max-width:560px}
 .account-social select {box-sizing:border-box;max-width:100%;padding:.5rem}
 .account-social article {overflow-wrap:anywhere}
+
+/* AUTH-10 private off-chain XP, never a token-balance display. */
+.account-xp__stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.account-xp__stats div{display:grid;gap:.3rem;padding:1rem;border:1px solid var(--border,rgba(255,255,255,.18));border-radius:10px}
+.account-xp__stats strong{font-size:1.6rem;font-variant-numeric:tabular-nums}
+.account-xp__stats span{font-size:.8rem}
+.account-xp ul{display:grid;gap:.45rem}
+@media(max-width:600px){.account-xp__stats{grid-template-columns:1fr}}

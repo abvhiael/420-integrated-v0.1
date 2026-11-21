@@ -19,6 +19,7 @@
     "moderation": true,
     "accountSocial": false,
     "accountMessaging": false,
-    "accountGames": false
+    "accountGames": false,
+    "accountXP": false
   }
 }

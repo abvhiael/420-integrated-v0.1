@@ -35,7 +35,7 @@ func Migrate(ctx context.Context,db *sql.DB)error{
  if db==nil{return ErrInvalid}
  tx,e:=db.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
  if _,e=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420000008)");e!=nil{return e}
- for _,path:=range []string{"migrations/001_social.sql","migrations/002_account_messages_games.sql"}{
+ for _,path:=range []string{"migrations/001_social.sql","migrations/002_account_messages_games.sql","migrations/003_contributions_xp.sql"}{
   sqlText,e:=migrations.ReadFile(path);if e!=nil{return e}
   if _,e=tx.ExecContext(ctx,string(sqlText));e!=nil{return e}
  }
@@ -276,6 +276,37 @@ func (s *Store) Moderate(ctx context.Context,postID,action,reason,operator strin
  if !uuid.MatchString(postID)||(action!="hide"&&action!="restore")||
  !safeText(reason,120,false)||!safeText(operator,100,false){return ErrInvalid}
  tx,e:=s.DB.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
+ // Lock the parent before checking any grants: concurrent XP-bearing
+ // comments must commit before the legacy guard checks outstanding awards.
+ if action=="hide"{
+  var parent string
+  e=tx.QueryRowContext(ctx,`SELECT id FROM bg_account_social.posts
+  WHERE id=$1 AND deleted_at IS NULL FOR UPDATE`,postID).Scan(&parent)
+  if errors.Is(e,sql.ErrNoRows){return ErrNotFound}
+  if e!=nil{return e}
+ }
+ // A legacy operator cannot hide already awarded content without writing
+ // its compensating journal entries. Require the XP-aware moderation path.
+ // Pre-AUTH-10 operator databases without migration 003 stay compatible.
+ if action=="hide"{
+  var xpTable bool
+  e=tx.QueryRowContext(ctx,"SELECT to_regclass('bg_account_social.contribution_xp_events') IS NOT NULL").Scan(&xpTable)
+  if e!=nil{return e}
+  if xpTable{
+   var outstanding bool
+   e=tx.QueryRowContext(ctx,`SELECT EXISTS(
+   SELECT 1 FROM bg_account_social.contribution_xp_events g
+   WHERE g.action='grant' AND
+   ((g.source_kind='post' AND g.source_id=$1) OR
+    (g.source_kind='comment' AND g.source_id IN
+    (SELECT id FROM bg_account_social.comments WHERE post_id=$1)))
+   AND NOT EXISTS (SELECT 1 FROM bg_account_social.contribution_xp_events v
+    WHERE v.source_kind=g.source_kind AND v.source_id=g.source_id AND v.action='revoke')
+   )`,postID).Scan(&outstanding)
+   if e!=nil{return e}
+   if outstanding{return ErrForbidden}
+  }
+ }
  id,e:=newID();if e!=nil{return e}
  var affected string
  value:=action=="hide"

@@ -80,10 +80,10 @@ test('CCC-ART-1: branded interface uses scoped colour tokens, local type fallbac
  assert.ok(Buffer.byteLength(css,'utf8')<35000,'visual styling stays lightweight');
 });
 test('CCC-ART-1: road-sign text remains safe and public; hostile names are escaped in art layouts',()=>{
- const s=createChaosGame({names:['<script>alert(1)</script>','Driver B'],seed:70});
+ const s=createChaosGame({names:['<img src=x onerror=x>','Driver B'],seed:70});
  const html=renderChaosGame({game:s,revealed:false});
- assert.doesNotMatch(html,/<script>/);
- assert.match(html,/&lt;script&gt;/);
+ assert.doesNotMatch(html,/<img src=x onerror=x>/);
+ assert.match(html,/&lt;img src=x onerror=x&gt;/);
  assert.match(html,/ccc-wayfinding-sign/);
  assert.match(html,/aria-label="Trans-Canada-inspired road trip"/);
  assert.doesNotMatch(html,/data-chaos-move/);

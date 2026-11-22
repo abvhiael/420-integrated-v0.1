@@ -248,7 +248,7 @@ contract FoundingRetirementVerifier420Test {
             "current dual-house execution proves proposed retirement itself"
         );
         civic.setActiveExecution(false, address(founder));
-        require(!verifier.retirementExecutionAuthorized(), "out-of-context retirement");
+        require(!verifier.retirementExecutionAuthorized(address(founder)), "out-of-context retirement");
         civic.setActiveExecution(true, address(0xBAD));
         require(
             !verifier.retirementExecutionAuthorized(address(founder)),
@@ -257,7 +257,7 @@ contract FoundingRetirementVerifier420Test {
         civic.setActiveExecution(false, address(founder));
         civic.setExecuted(1);
         require(
-            verifier.retirementReady() && !verifier.retirementExecutionAuthorized(),
+            verifier.retirementReady() && !verifier.retirementExecutionAuthorized(address(founder)),
             "past vote cannot substitute for active retirement proposal"
         );
     }

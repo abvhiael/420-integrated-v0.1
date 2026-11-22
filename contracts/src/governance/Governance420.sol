@@ -224,36 +224,10 @@ contract Governance420 is SystemAccess, I420System {
         address communitySource_,
         address validatorSource_
     ) public view returns (bytes32) {
-        // Preserve the historical all-at-Genesis commitment byte-for-byte.
-        // The alternative commitment explicitly binds its authority, enrollment code and chain.
-        if (_postGenesisMode()) {
-            return keccak256(
-                abi.encode(
-                    keccak256("420CIVIC_BOOTSTRAP_POSTGENESIS_V1"),
-                    block.chainid,
-                    constitution_,
-                    proposals_,
-                    electorates_,
-                    voting_,
-                    governor_,
-                    communitySource_,
-                    validatorSource_,
-                    constitution_.codehash,
-                    proposals_.codehash,
-                    electorates_.codehash,
-                    voting_.codehash,
-                    governor_.codehash,
-                    communitySource_.codehash,
-                    validatorSource_.codehash,
-                    approvedInitialEnrollment,
-                    approvedInitialEnrollment.codehash,
-                    approvedInitialElectorateAuthority,
-                    IDENTITY_420.codehash,
-                    VALIDATOR_REGISTRY_420.codehash
-                )
-            );
-        }
-        return keccak256(
+        // Reuse the original Genesis-domain graph hash verbatim (including zero roots
+        // in deferred mode). Only the new branch wraps it in a distinct, chain-bound
+        // authorization domain rather than recompiling a second complete graph encoder.
+        bytes32 baseHash = keccak256(
             abi.encode(
                 BOOTSTRAP_DOMAIN,
                 block.chainid,
@@ -275,6 +249,18 @@ contract Governance420 is SystemAccess, I420System {
                 initialCommunityTotalWeight,
                 initialValidatorRoot,
                 initialValidatorTotalWeight
+            )
+        );
+        if (!_postGenesisMode()) return baseHash;
+        return keccak256(
+            abi.encode(
+                keccak256("420CIVIC_BOOTSTRAP_POSTGENESIS_V1"),
+                baseHash,
+                approvedInitialEnrollment,
+                approvedInitialEnrollment.codehash,
+                approvedInitialElectorateAuthority,
+                IDENTITY_420.codehash,
+                VALIDATOR_REGISTRY_420.codehash
             )
         );
     }

@@ -35,6 +35,7 @@ contract GovRec4Target {
     uint256 public number;
     uint256 public received;
     uint256 public blockedReentries;
+    uint256 public verifiedDualHouseExecutions;
     bytes32 public nestedId;
 
     constructor(GovernanceTimelock timelock_) {
@@ -45,6 +46,13 @@ contract GovRec4Target {
         require(msg.sender == address(timelock), "not timelock");
         number = next;
         received += msg.value;
+    }
+
+    function requireLiveDualHouse(CivicGovernor420 governor) external {
+        require(msg.sender == address(timelock), "not canonical Timelock");
+        require(governor.activeDualHouseExecution() && governor.activeDualHouseProposal() != bytes32(0),
+            "no executing constitutional dual-house proposal");
+        ++verifiedDualHouseExecutions;
     }
 
     function revertAction() external pure {
@@ -353,6 +361,33 @@ contract GovernanceRec4Lifecycle420Test {
         }
         require(registrations == 1 && transitions == 3 && ballots == 4 && queues == 1 && executions == 1,
             "Indexer event stream incomplete");
+    }
+
+    function testRetirementAuthorityContextExistsOnlyDuringRealExecutedDualHouseBatch() public {
+        _deployAndBootstrap();
+        GovRec4Target target = new GovRec4Target(timelock);
+        require(!governor.activeDualHouseExecution() && governor.activeDualHouseProposal() == bytes32(0),
+            "governor offered forged idle retirement authority");
+        CivicGovernor420.Action[] memory actions = new CivicGovernor420.Action[](1);
+        actions[0] = CivicGovernor420.Action(
+            address(target), 0, abi.encodeCall(target.requireLiveDualHouse, (governor))
+        );
+        bytes32 id = _create(CivicIds420.ProposalClass.G3, actions);
+        _pass(id, true);
+        uint64 ready = _queuedDelay(id, CivicIds420.ProposalClass.G3, actions);
+        vm.warp(ready);
+        timelock.execute(id);
+        require(target.verifiedDualHouseExecutions() == 1
+            && !governor.activeDualHouseExecution() && governor.activeDualHouseProposal() == bytes32(0),
+            "dual-house action proof not transient and canonical");
+
+        bytes32 another = _create(CivicIds420.ProposalClass.G1, actions);
+        _pass(another, false);
+        uint64 mature = _queuedDelay(another, CivicIds420.ProposalClass.G1, actions);
+        vm.warp(mature);
+        require(_rejected(TIMELOCK, abi.encodeCall(timelock.execute, (another))),
+            "single-house G1 action forged dual-house retirement context");
+        require(target.verifiedDualHouseExecutions() == 1, "failed single-house action changed state");
     }
 
     function testAllFourFrozenClassDelayFloorsAndDualHouseEligibility() public {

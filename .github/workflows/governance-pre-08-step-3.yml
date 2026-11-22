@@ -41,6 +41,9 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-v4-a/
             ${{ runner.temp }}/govpre08-step3-genesis.json
             ${{ runner.temp }}/govpre08-step3-genesis-source.json
+            ${{ runner.temp }}/govpre08-step3-imports.json
+            ${{ runner.temp }}/govpre08-step3-foundry-*.log
+            ${{ runner.temp }}/govpre08-step3-state-*.json
             ${{ runner.temp }}/govpre08-step3-funding-*.json
             ${{ runner.temp }}/govpre08-step3-local-*.json
             ${{ runner.temp }}/govpre08-step3-recovery-*.json

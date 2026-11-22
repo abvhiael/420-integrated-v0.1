@@ -10,7 +10,8 @@
   },
   "claim_contract": {
     "deployment": "REGISTRY_RESOLVED_NOT_DEPLOYED",
-    "address": null
+    "address": null,
+    "runtime_code_hash": null
   },
   "developer_compensation_splitter": {
     "deployment": "REGISTRY_RESOLVED_NOT_DEPLOYED",
@@ -84,7 +85,10 @@
     "An address is not verified merely by being entered in this file; verify a chain-specific signature or successful claim transaction from that address.",
     "An unclaimed or null founder address blocks live authorization deployment; testnet and mainnet claims and credentials are independently qualified.",
     "The three payees' 50/25/25 compensation entitlement is separate from the three 50/25/25 Genesis founder vesting grants; neither is a generic Treasury transfer permission.",
-    "A valid EIP-191 founder-signed, network-/chain-/Genesis-bound message is required BEFORE deployment; an on-chain claim transaction is possible only AFTER network Genesis."
+    "A valid EIP-191 founder-signed, network-/chain-/Genesis-bound message is required BEFORE deployment; an on-chain claim transaction is possible only AFTER network Genesis.",
+    "Before V4 approval, stage public founder addresses in both address mirrors and the liquid Genesis allocation ledger; never change those authority-input bytes after freeze.",
+    "Only independently obtained EIP-191 signatures, or live code-bound EIP-1271 results against an authenticated target-chain genesis, qualify each founder; never substitute a synthetic signer or one founder for another.",
+    "Claim receipt evidence requires finalized on-chain state, the exact immutable roles and plan commitment, codehash and one canonical claim event for each actual founder."
   ],
   "target_network": null,
   "genesis_founder_allocation": {
@@ -96,5 +100,6 @@
     "interval_days": 14,
     "vesting_days": 182,
     "status": "UNFUNDED_UNCLAIMED_PENDING_GENESIS_V4_APPROVAL"
-  }
+  },
+  "network_genesis_block_hash": null
 }

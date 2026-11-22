@@ -1,0 +1,44 @@
+name: GOV-PRE-06 one-time source formatting
+
+on:
+  push:
+    branches:
+      - 'audit/420governance-gov-pre-06-*'
+    paths:
+      - 'contracts/src/governance/Governance420.sol'
+      - 'contracts/src/governance/CivicInitialElectorateEnrollment420.sol'
+      - 'contracts/test-governance-audit-6/GovPre06Electorate420.t.sol'
+      - '.github/workflows/gov-pre-06-format.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gov-pre-06-format-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Apply canonical forge formatting and retain source
+        run: |
+          cd contracts
+          forge fmt src/governance/Governance420.sol src/governance/CivicInitialElectorateEnrollment420.sol test-governance-audit-6/GovPre06Electorate420.t.sol
+          cd ..
+          git add contracts/src/governance/Governance420.sol contracts/src/governance/CivicInitialElectorateEnrollment420.sol contracts/test-governance-audit-6/GovPre06Electorate420.t.sol
+          if git diff --cached --quiet; then
+            echo "Already formatted"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "style(governance): format GOV-PRE-06 source and focused tests"
+          git push origin HEAD:${{ github.ref_name }}

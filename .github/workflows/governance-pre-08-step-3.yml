@@ -4,6 +4,9 @@ on:
   pull_request:
     paths:
       - 'scripts/gov-pre-08/**'
+      - 'consensus/cmd/certified-producer/**'
+      - 'consensus/signing/**'
+      - 'integration/cmd/settlement-fixture/**'
       - 'contracts/config/candidates/genesis-config-commitment-v4-unsigned.json'
       - 'contracts/src/governance/Founding*.sol'
       - 'contracts/src/treasury/**'
@@ -55,6 +58,19 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 15
+      signing_postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signing
+          POSTGRES_PASSWORD: qualification-only
+          POSTGRES_DB: signing
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U signing -d signing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,6 +104,27 @@ jobs:
           go test ./indexer/rpc -run 'TestBundle(HashOnlyCanonicalLookup|RejectsMalformedHashOnlyTransaction)' -count=1
           go test ./indexer/store -run 'TestPostgresStore' -count=1
           go build -o bin/explorer420 ./explorer/cmd/explorer420
+          go build -tags blst -o bin/certified-producer ./consensus/cmd/certified-producer
+          go build -tags blst -o bin/stake-signer ./consensus/cmd/stake-signer
+          go test -tags blst ./consensus/cmd/certified-producer -count=1
+      - name: Provision separately authenticated TLS PostgreSQL signing witnesses for fifteen live validators
+        env:
+          CONTAINER: ${{ job.services.signing_postgres.id }}
+        run: |
+          set -euo pipefail
+          tls_dir="$RUNNER_TEMP/gov-pre08-signing-pg"
+          mkdir -m 700 -p "$tls_dir"
+          tls_dir="$(realpath "$tls_dir")"
+          openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout "$tls_dir/server.key" -out "$tls_dir/server.crt" -days 1 -subj /CN=localhost -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1' >/dev/null 2>&1
+          chmod 600 "$tls_dir/server.key"
+          docker cp "$tls_dir/server.key" "$CONTAINER:/var/lib/postgresql/data/server.key"
+          docker cp "$tls_dir/server.crt" "$CONTAINER:/var/lib/postgresql/data/server.crt"
+          docker exec -u root "$CONTAINER" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec -u root "$CONTAINER" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "alter system set ssl=on"
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "select pg_reload_conf()"
+          docker exec -i -u postgres "$CONTAINER" psql -U signing -d signing < consensus/signing/witness.sql
+          echo "STAKE_SIGNER_PG_DSN=postgresql://signing:qualification-only@127.0.0.1:5433/signing?sslmode=verify-full&sslrootcert=$tls_dir/server.crt&connect_timeout=5" >> "$GITHUB_ENV"
       - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
         run: |
           python3 scripts/gov-pre-08/qualify-unified-local-node420.py \

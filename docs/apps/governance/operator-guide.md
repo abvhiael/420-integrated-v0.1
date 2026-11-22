@@ -168,3 +168,9 @@ python3 scripts/build-governance-rec-2-electorates.py --input contracts/test/fix
 ```
 
 Both bundled houses have two synthetic members solely to test the first real, authority-correct Governance voting path. No user or developer is required to impersonate the Timelock in that end-to-end test. Neither these fixtures nor offline Foundry passes assert that a public electorate exists.
+
+## GOV-REC-6 strict release-candidate procedure
+
+The detailed [cold-start runbook](cold-start.md) is the operator's execution-order reference for clean pinned build, authenticated electorate approval, all 19 actual Timelock bootstrap operations, checkpoint-effective-block preconditions, irreversible handoff, Wallet/Indexer smoke and recovery. The retained predeploy approval is **not materialized**; both `python3 scripts/verify-governance-rec-6.py --require-activation-ready` and the existing GOV-AUDIT-6 strict activation gate are intentionally expected to fail until real independently approved Genesis inputs exist. The ordinary non-strict verifier checks offline reproducibility, not membership legitimacy.
+
+GOV-REC-6 source/version/security/manifest qualification is owned by `.github/workflows/governance-rec-6.yml` and the unchanged canonical Governance workflows. Do not infer a passing status from skipped/cancelled/non-executed jobs. Maintain exact head, retained Foundry and Indexer evidence, and independent checks of external deployment builds; no amount of local testing makes the current zero-commitment chain activation-ready.

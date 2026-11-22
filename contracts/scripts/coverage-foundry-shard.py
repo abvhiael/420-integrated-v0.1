@@ -121,6 +121,62 @@ def run_context(inventory, targets, shard, count, evidence, candidate, cache):
     return complete
 
 
+def compiled_batch_path(root, shard):
+    return root / f"compiled-cache-shard-{shard}.json"
+
+
+def capture_compiled_batch(root, shard, count, segment, contexts, candidate, profile):
+    """Combine actual Foundry cache records from bounded compilation batches."""
+    inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()
+    targets = (root / f"shard-{shard}-targets.txt").read_text().splitlines()
+    partition(inventory, targets, shard, count)
+    if not (1 <= contexts <= len(targets) and 0 <= segment < contexts):
+        raise ValueError("Invalid compilation batch")
+    selected = targets[segment::contexts]
+    live = json.loads(Path("cache/solidity-files-cache.json").read_text())["files"]
+    if not isinstance(live, dict) or not all(p in live for p in selected):
+        raise ValueError("Actual Foundry cache missing batch primary")
+    for record in live.values():
+        if not isinstance(record, dict) or not isinstance(record.get("imports"), list):
+            raise ValueError("Malformed Foundry compilation graph")
+    path = compiled_batch_path(root, shard)
+    if segment == 0:
+        evidence = {"candidate_sha": candidate, "profile": profile, "shard": shard,
+                    "count": count, "contexts": contexts, "targets": targets,
+                    "completed_segments": [], "files": {}}
+    else:
+        evidence = json.loads(path.read_text())
+    if (evidence["candidate_sha"] != candidate or evidence["profile"] != profile
+            or evidence["shard"] != shard or evidence["count"] != count
+            or evidence["contexts"] != contexts or evidence["targets"] != targets
+            or evidence["completed_segments"] != list(range(segment))):
+        raise ValueError("Wrong candidate, partition, or missing compilation batch")
+    union = evidence["files"]
+    for path_name, record in live.items():
+        if path_name in union and union[path_name]["imports"] != record["imports"]:
+            raise ValueError("Conflicting compiled import graph: " + path_name)
+        union[path_name] = record
+    evidence["completed_segments"].append(segment)
+    path.write_text(json.dumps(evidence, indent=2) + "\n")
+    print(f"COMPILED BATCH {segment + 1}/{contexts}: {len(selected)} primaries; "
+          f"{len(union)} actual compiler-cache records", flush=True)
+
+
+def snapshot_compiled_batches(root, shard, count, candidate, profile):
+    record = json.loads(compiled_batch_path(root, shard).read_text())
+    inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()
+    targets = (root / f"shard-{shard}-targets.txt").read_text().splitlines()
+    partition(inventory, targets, shard, count)
+    if (record["candidate_sha"] != candidate or record["profile"] != profile
+            or record["shard"] != shard or record["count"] != count
+            or record["targets"] != targets
+            or record["completed_segments"] != list(range(record["contexts"]))):
+        raise ValueError("Incomplete, stale, or wrong-SHA compilation sequence")
+    dependency_closure(record["files"], targets)
+    write_graph_snapshot(root / f"compilation-graph-shard-{shard}.json",
+                         record["files"], targets, candidate, shard, count, profile)
+
+
 def main():
     root = Path("../artifacts/contracts")
     if sys.argv[1:] == ["--prepare-main-inventory"]:
@@ -135,15 +191,17 @@ def main():
             (root / f"primary-inventory-shard-{shard}.txt").write_text("\n".join(inventory) + "\n")
             (root / f"shard-{shard}-targets.txt").write_text("\n".join(inventory[shard::4]) + "\n")
         return 0
+    if sys.argv[1:2] == ["--capture-compiled-batch"]:
+        shard, count, segment, contexts = map(int, sys.argv[2:])
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        capture_compiled_batch(root, shard, count, segment, contexts, sha,
+                               os.environ.get("FOUNDRY_PROFILE", "default"))
+        return 0
     if sys.argv[1:2] == ["--snapshot-canonical-graph"]:
         shard, count = map(int, sys.argv[2:])
-        inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()
-        targets = (root / f"shard-{shard}-targets.txt").read_text().splitlines()
-        partition(inventory, targets, shard, count)
-        candidate = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
-        cache = json.loads(Path("cache/solidity-files-cache.json").read_text())["files"]
-        write_graph_snapshot(root / f"compilation-graph-shard-{shard}.json", cache, targets,
-            candidate, shard, count, os.environ.get("FOUNDRY_PROFILE", "default"))
+        sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+        snapshot_compiled_batches(root, shard, count, sha,
+                                  os.environ.get("FOUNDRY_PROFILE", "default"))
         return 0
     shard, count = map(int, sys.argv[1:])
     inventory = (root / f"primary-inventory-shard-{shard}.txt").read_text().splitlines()

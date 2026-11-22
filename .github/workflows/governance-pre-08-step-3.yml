@@ -81,6 +81,7 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-explorer-*.log
             ${{ runner.temp }}/govpre08-step3-explorer-html-*.html
             ${{ runner.temp }}/govpre08-step3-bridge-*.log
+            ${{ runner.temp }}/govpre08-consensus/
             ${{ runner.temp }}/govpre08-step3-local-*.json
             ${{ runner.temp }}/govpre08-step3-recovery-*.json
             ${{ runner.temp }}/govpre08-step3-node-*.log

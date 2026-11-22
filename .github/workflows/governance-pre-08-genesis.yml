@@ -10,6 +10,8 @@ on:
       - 'contracts/src/revenue/DevelopmentCompensationVault420.sol'
       - 'config/genesis-allocations.json'
       - 'contracts/config/founder-wallet-reservations.json'
+      - 'contracts/config/candidates/genesis-config-commitment-v4-unsigned.json'
+      - 'contracts/test/fixtures/gov-pre-08-local-wallets.json'
       - 'contracts/config/founding-genesis-integration-v1.json'
       - '.github/workflows/governance-pre-08-genesis.yml'
   workflow_dispatch:
@@ -39,8 +41,9 @@ jobs:
       - name: Adversarial policy, identity and supply boundaries
         run: |
           set -euo pipefail
-          python3 -m py_compile scripts/gov-pre-08/plan.py scripts/gov-pre-08/test_plan.py
+          python3 -m py_compile scripts/gov-pre-08/plan.py scripts/gov-pre-08/test_plan.py scripts/gov-pre-08/materialize-local-funding.py scripts/gov-pre-08/test_funding.py
           python3 scripts/gov-pre-08/test_plan.py
+          python3 scripts/gov-pre-08/test_funding.py
           python3 scripts/verify-genesis-supply-reconciliation.py
           python3 scripts/verify-founding-genesis-integration.py
       - name: Compile exact founder/Treasury/retirement module sources
@@ -86,6 +89,29 @@ jobs:
           assert x["proposedV4"]["genesisConfigHash"].startswith("0x")
           print("GOV-PRE-08_SOURCE_CANDIDATE=PASS; LIVE_RELEASE=BLOCKED_AS_EXPECTED")
           PY
+      - name: Rehearse deterministic 42m local Genesis funding twice (synthetic identities only)
+        run: |
+          set -euo pipefail
+          for tag in a b; do
+            python3 scripts/gov-pre-08/materialize-local-funding.py \
+              --output "$RUNNER_TEMP/gov-pre-08-local-$tag.json" \
+              --provenance "$RUNNER_TEMP/gov-pre-08-local-$tag-proof.json"
+          done
+          cmp "$RUNNER_TEMP/gov-pre-08-local-a.json" "$RUNNER_TEMP/gov-pre-08-local-b.json"
+          cmp "$RUNNER_TEMP/gov-pre-08-local-a-proof.json" "$RUNNER_TEMP/gov-pre-08-local-b-proof.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          genesis=json.loads((p/"gov-pre-08-local-a.json").read_text())
+          proof=json.loads((p/"gov-pre-08-local-a-proof.json").read_text())
+          assert genesis["config"]["chainId"]==31337
+          assert sum(int(x["balance"]) for x in genesis["alloc"].values())==42_000_000*10**18
+          assert len(genesis["alloc"])==11
+          assert proof["status"]=="SYNTHETIC_UNOWNED_ADDRESSES_NOT_A_RELEASE"
+          assert not proof["genesisFundingBalancesVerifiedOnChain"]
+          print("GOV-PRE-08_SYNTHETIC_BLOCK_ZERO=PASS; AUTHENTIC_APPROVAL=ABSENT")
+          PY
       - name: Preserve exact-head source candidate (never live receipts)
         if: always()
         uses: actions/upload-artifact@v4
@@ -95,4 +121,6 @@ jobs:
             ${{ runner.temp }}/gov-pre-08-candidate-a.json
             ${{ runner.temp }}/gov-pre-08-source-head.txt
             ${{ runner.temp }}/gov-pre-08-release.txt
+            ${{ runner.temp }}/gov-pre-08-local-a.json
+            ${{ runner.temp }}/gov-pre-08-local-a-proof.json
           if-no-files-found: warn

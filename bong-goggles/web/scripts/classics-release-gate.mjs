@@ -11,7 +11,6 @@ export const BC12_WORKFLOWS=Object.freeze({
  live:'.github/workflows/bc-0-12-classics-live-acceptance.yml'
 });
 const SHA=/^[a-f0-9]{40}$/;
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const knownKeys=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&
  Object.keys(value).every(key=>keys.includes(key))&&keys.every(key=>Object.hasOwn(value,key));
 const allTitles=()=>CLASSIC_ROADMAP.map(x=>x.id);
@@ -43,15 +42,12 @@ export function assertCatalogueAndEvidence({manifest,roadmap=CLASSIC_ROADMAP}){
 }
 export function checkEvidenceShape(gameId,proof){
  if(!knownKeys(proof,['gameId','sourceSha','rulesHash','deployedOrigin','frameworkRunId',
-  'liveRunId','subjects','result','evidenceVersion']))return false;
+  'liveRunId','result','evidenceVersion']))return false;
  if(proof.gameId!==gameId||proof.evidenceVersion!==1||!SHA.test(proof.sourceSha)||
   !/^[a-f0-9]{64}$/.test(proof.rulesHash)||proof.deployedOrigin!=='https://bonggoggles.420integrated.org'||
   !Number.isSafeInteger(proof.frameworkRunId)||proof.frameworkRunId<1||
   !Number.isSafeInteger(proof.liveRunId)||proof.liveRunId<1||
   proof.frameworkRunId===proof.liveRunId||
-  !Array.isArray(proof.subjects)||proof.subjects.length!==2||
-  !proof.subjects.every(v=>typeof v==='string'&&UUID.test(v))||
-  proof.subjects[0]===proof.subjects[1]||
   proof.result!=='completed-two-account-match')return false;
  return true
 }

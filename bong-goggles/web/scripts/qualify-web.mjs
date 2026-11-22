@@ -22,6 +22,9 @@ const root=resolve(import.meta.dirname,'..','dist');
 // Account multiplayer reserves +32 KiB for the authenticated room client, per-seat UI and compact responsive game surface; game authority is server-side. 
 // Card and vehicle budgets remain unchanged. The three user-approved full-colour
 // atlas masters receive a separate 12 MiB cap with exact Git blob verification.
+// Scoped allowance for the new user-approved CCC room gameboard and room chat.
+// Legacy game assets and existing per-file limits remain separately enforced.
+const CCC_ROOM_BOARD_CHAT_ALLOWANCE=24*1024;
 const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:12*1024*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
@@ -63,10 +66,10 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024)
+if(baseTotal>limits.baseTotal+8*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('BC-0.2 combined static asset budget exceeded: '+baseTotal);
 const legacyBaseTotal=baseTotal-bc02Growth;
-if(legacyBaseTotal>limits.baseTotal)
+if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
  growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal

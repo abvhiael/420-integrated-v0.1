@@ -274,6 +274,9 @@ def test_codebound_1271():
         proofs["founders"][2]["expected_runtime_code_hash"] = code_hash
         proofs["founders"][2]["signature"] = "0x012345"
         proofs["network_genesis_block_hash"] = GENESIS
+        integration = v.load(root, e.INTEGRATION)
+        integration["genesis"]["networkGenesisBlockHash"] = GENESIS
+        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\\n")
         state = {"genesis": GENESIS, "claim_block": "0x" + "ef"*32,
                  "code": bytecode, "plan": proofs["genesis_plan_commitment"],
                  "wallet_ints": [int(a.address,16) for a in accounts],
@@ -326,6 +329,9 @@ def test_finalized_claim_records():
             }
             rows.append({"role":v.ROLES[i],"wallet_address":account.address,
                          "claim_tx":tx,"claim_block_hash":block_hash})
+        integration = v.load(root, e.INTEGRATION)
+        integration["genesis"]["networkGenesisBlockHash"] = GENESIS
+        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\\n")
         body={"target_network":"testnet","chain_id":420,
               "genesis_plan_commitment":proofs["genesis_plan_commitment"],
               "network_genesis_block_hash":GENESIS,

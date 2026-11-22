@@ -81,6 +81,11 @@ contract GovRec4Target {
             governor.activeDualHouseExecution() && governor.activeDualHouseProposal() != bytes32(0),
             "no executing constitutional dual-house proposal"
         );
+        require(
+            governor.activeDualHouseActionHash()
+                == keccak256(abi.encode(address(this), abi.encodeCall(this.requireLiveDualHouse, (governor)))),
+            "wrong active constitutional action hash"
+        );
         ++verifiedDualHouseExecutions;
     }
 

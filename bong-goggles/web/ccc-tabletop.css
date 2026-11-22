@@ -723,6 +723,7 @@
 .ccc-online-card-select strong{font-size:.9rem;line-height:1.2;overflow-wrap:anywhere}
 .ccc-online-hand .ccc-online-card-actions{display:flex;flex-direction:column;gap:4px;min-height:0;max-height:none;overflow-y:auto}
 .ccc-online-hand .ccc-online-card-actions h4{font-size:1rem;margin:0;color:#ffdb91}
+.ccc-online-hand .ccc-online-card-help{font-size:.98rem;line-height:1.4;color:#fce8c1;margin:4px 0 10px;overflow-wrap:anywhere}
 .ccc-online-hand .ccc-online-card-actions button{font-size:.88rem;min-height:44px;padding:8px}
 .ccc-online-stage-end:empty{display:none}
 .ccc-online-stage-end:not(:empty){position:absolute;inset:auto 12px 14px 12px;z-index:2;pointer-events:none}

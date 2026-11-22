@@ -46,10 +46,9 @@ func TestExecutionGettersPinnedToCanonicalHash(t *testing.T) {
 			json.Unmarshal(q.Params[0], &c)
 			switch c.Data {
 			case ethhash.EventTopic("protocolVersion()")[:10]:
-				v := 2
-				if c.To == Registry {
-					v = 3
-				}
+                // Both canonical ValidatorRegistry and RewardController
+                // are version 3 in the reviewed V4 native issuance candidate.
+                v := 3
 				result = fmt.Sprintf("0x%064x", v)
 			case ethhash.EventTopic("getValidator(bytes32)")[:10] + id[2:]:
 				result = fmt.Sprintf("0x%064x", 32) + strings.Repeat("0", 64) + fmt.Sprintf("%064x", 576) + strings.Repeat("0", 64*17)

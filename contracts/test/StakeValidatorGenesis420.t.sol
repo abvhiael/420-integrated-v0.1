@@ -76,6 +76,9 @@ contract StakeValidatorGenesis420Test {
         rewards.bindConsensusSystemCaller(SYSTEM_CALLER);
         registry.bindCommunityValidatorReserve(address(reserve));
         reserve.bindValidatorRegistry(address(registry));
+        // The predeploy address is a genuine code dependency even for standard
+        // validators; fail closed if the V4 Stake genesis did not materialize it.
+        vm.etch(rewards.VALIDATOR_REGISTRY(),address(registry).code);
         vm.deal(address(reserve), reserve.GENESIS_RESERVE());
         stake = new Stake420(address(registry), address(rewards));
     }

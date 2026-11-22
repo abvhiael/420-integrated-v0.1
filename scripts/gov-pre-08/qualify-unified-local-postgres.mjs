@@ -37,8 +37,10 @@ const transport=new HttpJsonRpcTransport420(sourceUrl);
 const source=new EvmJsonRpcSource420(transport,'gov-pre08-unified-node420');
 need(await source.chainId()===420n,'production Indexer wrong source chain');
 const first=await source.getBlockByNumber(0n);
-const head=await source.getBlockByNumber(1n);
-need(first?.number===0n && head?.hash.toLowerCase()===expected,
+const head=await source.getBlockByNumber(2n);
+const walletHash=opt('expected-tx-hash').toLowerCase();
+need(/^0x[0-9a-f]{64}$/.test(walletHash),'missing locally signed wallet transaction');
+need(first?.number===0n && head?.number===2n && head?.hash.toLowerCase()===expected,
      'PostgreSQL source is not same certified execution head');
 for(const [name,address] of Object.entries(graph.actualProductionConstructorAddresses)){
   const code=await source.getCode(address);
@@ -73,15 +75,25 @@ try{
        new SqlCanonicalHistoryStore420(conn,420n));
   }
   const result=await ingestor(db).runOnce();
-  need(result.processed===2,'cold PostgreSQL ingest did not capture exact 0/1 blocks');
+  need(result.processed===3,'cold PostgreSQL ingest did not capture exact 0/1/2 blocks');
   const checkpoint=new SqlCheckpointStore420(db,420n);
   const cp=await checkpoint.load();
-  need(cp?.blockNumber===1n && cp.blockHash.toLowerCase()===expected,
+  need(cp?.blockNumber===2n && cp.blockHash.toLowerCase()===expected,
        'PostgreSQL checkpoint not same certified execution hash');
   const rows=await db.query('select block_number::text as n,block_hash from idx_blocks where chain_id=$1 order by block_number',['420']);
-  need(rows.rows.length===2 && rows.rows[0].n==='0' &&
-       rows.rows[1].block_hash.toLowerCase()===expected,
+  need(rows.rows.length===3 && rows.rows[0].n==='0' &&
+       rows.rows[2].block_hash.toLowerCase()===expected,
        'PostgreSQL durable blocks are not canonical shared 420 ledger');
+  const transactions=await db.query(
+    'select tx_hash,block_hash from idx_transactions where chain_id=$1',['420']);
+  const receipts=await db.query(
+    'select tx_hash,block_hash from idx_receipts where chain_id=$1',['420']);
+  need(transactions.rows.length===1 && receipts.rows.length===1 &&
+       transactions.rows[0].tx_hash.toLowerCase()===walletHash &&
+       receipts.rows[0].tx_hash.toLowerCase()===walletHash &&
+       transactions.rows[0].block_hash.toLowerCase()===expected &&
+       receipts.rows[0].block_hash.toLowerCase()===expected,
+       'PostgreSQL omitted or duplicated real signed wallet transaction/receipt');
   const replay=await ingestor(db).runOnce();
   need(replay.processed===0,'PostgreSQL replay changed canonical history');
   const http=createIndexerHttpServer420(new IndexerPublicApiAdapter420(
@@ -93,7 +105,7 @@ try{
   try{
     const [ready,wrong,block]=await Promise.all([
       get('/ready?chainId=420'),get('/ready?chainId=31337'),
-      get('/v1/blocks/1?chainId=420')]);
+      get('/v1/blocks/2?chainId=420')]);
     need(ready.status===200 && ready.value.data.ready &&
          wrong.status===503 && !wrong.value.data.ready &&
          block.status===200 && block.value.data.hash.toLowerCase()===expected,
@@ -112,7 +124,8 @@ try{
     realProductionIndexerModules:true,realPostgres16:true,
     coldIngestedBlocks:result.processed,durableCheckpoint:true,
     sameNode420ExecutionSource:true,wrongChainRejected:true,
-    durableRestartIdempotent:true,postGenesisNormalEvmTransactionCount:0,
+    durableRestartIdempotent:true,postGenesisNormalEvmTransactionCount:transactions.rows.length,
+    actualWalletSignedTxHash:walletHash,
     nativeEngineLogAuthority:'certified Go Indexer only; never assigned synthetic Ethereum txHash',
     nativeLogPostgresProjectionQualified:false,
     approvedV4:false,liveTestnetVerified:false

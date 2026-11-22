@@ -146,7 +146,7 @@ contract GOVPRE08CivicLifecycle420Test is GOVPRE08LocalFunding420Test {
                 "Civic vote silently changed Genesis Vault custody");
     }
 
-    function testFailedValidatorHouseCannotMutateTreasuryOrQueue() public {
+    function testValidatorVetoCannotMutateTreasuryOrQueue() public {
         (CivicVoting420 voting, CivicProposalRegistry420 proposals) = _configureActualCivicGraph();
         CivicGovernor420.Action[] memory actions = _actions();
         bytes32 id = _proposal(actions);

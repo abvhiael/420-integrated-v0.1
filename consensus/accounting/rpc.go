@@ -95,7 +95,7 @@ func (s *RPCSource) State(ctx context.Context, a sys.SequenceAnchor, ids, accoun
 			return nil, fmt.Errorf("unqualified accounting contract ABI/version")
 		}
 	}
-	for _, address := range []string{Reward, Registry, CreditReserve, ProtocolReserve} {
+	for _, address := range []string{Reward, Registry, CreditReserve, ProtocolReserve, CommunityReward} {
 		var raw string
 		if err := s.Engine.Call(ctx, "eth_getBalance", []any{address, map[string]any{"blockHash": hex32(a.BlockHash), "requireCanonical": true}}, &raw); err != nil {
 			return nil, err

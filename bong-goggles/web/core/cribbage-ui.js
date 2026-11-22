@@ -1,13 +1,15 @@
 // BC-1.4: usable left-side hand/table, right-side approved leaf score board.
 // Reads only the verified 420ID seat projection. Never renders secret opponent cards.
 import {escapeHtml as esc} from './design-system.js';
+import {renderSharedGameScreen} from './shared-game-ui.js';
+import {classicGameById} from './classics.js';
 import {CRIBBAGE_BOARD_SIZE,CRIBBAGE_BOARD_ART,CRIBBAGE_HOLES,CRIBBAGE_TRACKS,
  cribbageHole,cribbageTeams,cribbageLane,cribbageNewPegs} from './cribbage-board.js';
 import {cribbageCardLabel,cribbageLegalMoves,cribbageCanSubmit} from './cribbage-session.js';
 const back='<a class="cribbage-back" href="/games" data-route="games">← All Games</a>';
 const gameLink=(id,screen)=>'/games/cribbage/'+screen+(id?'?session='+encodeURIComponent(id):'');
-const tabs=['intro','rules','setup','play','results'];
-const tabLabel={intro:'Overview',rules:'How to play',setup:'Find a table',play:'Play',results:'Results'};
+const tabs=['intro','rules','play','setup','table','results','history','rematch'];
+const tabLabel={intro:'Overview',rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',results:'Results',history:'History',rematch:'Rematch'};
 const menu=(screen,id)=>'<nav class="cribbage-nav" aria-label="Cribbage screens">'+
  tabs.map(s=>'<a href="'+gameLink(id,s)+'" data-route="classic-game"'+
  (s===screen?' aria-current="page"':'')+'>'+tabLabel[s]+'</a>').join('')+'</nav>';
@@ -192,18 +194,21 @@ export function renderCribbageRoute({screen='intro',state=null,accountPanel=''}=
   (s.status==='guest'?'<p><a href="/social-api/auth/start">Sign in to 420ID</a> to access your private cards.</p>':'')+
   (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
  const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
- const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Classic Cribbage, made for game night</h3>'+
+ const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
   '<p>Play with two or three individuals or four players in opposite-seat partnerships. Watch the back peg leap past the front peg on every verified scoring award.</p>'+
   '<p>The board counts hands in order, with the dealer’s crib last. Every counted announcement is held for 1.5 seconds before the next scoring event.</p>'+
   '<a class="cribbage-primary" href="/games/cribbage/play" data-route="classic-game">Open a Cribbage table</a></div>'+
   boardPreview+'</div>';
- const details=screen==='rules'?rules():screen==='setup'?zero:
-  screen==='play'||screen==='table'?isLive?playPanel(s):zero:
-  screen==='results'?(isLive?'<div class="cribbage-results">'+
+ const generic=screen=>renderSharedGameScreen({game:classicGameById('cribbage'),screen});
+ const details=screen==='rules'?rules():
+  screen==='setup'?'<div class="cribbage-setup">'+zero+generic('setup')+'</div>':
+  screen==='play'||screen==='table'?isLive?playPanel(s):
+   '<div class="cribbage-restricted">'+zero+generic(screen)+'</div>':
+  screen==='results'?isLive?'<div class="cribbage-results">'+
    '<h3>'+esc(session.status==='finished'?'Confirmed result':'Current verified scores')+'</h3>'+
    renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
-    pegs:s.pegs,settings:s.settings})+'</div>':zero):
-  home;
+    pegs:s.pegs,settings:s.settings})+'</div>':zero+generic('results'):
+  screen==='history'||screen==='rematch'?generic(screen):home;
  return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · Cribbage interface qualified in source only. Real 420ID room activation and public Play remain gated.</p>'+details+settings(s)+
   '<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
 }

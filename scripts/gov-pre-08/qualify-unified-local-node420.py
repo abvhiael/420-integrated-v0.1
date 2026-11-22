@@ -414,12 +414,31 @@ def main():
         # must all agree again after *both* authority processes were killed.
         #
         # This is a disposable local rehearsal, never a testnet recovery claim.
+        # node420 supervises a real separate Geth child. Waiting for the wrapper
+        # after SIGKILL is insufficient: Geth may still own the datadir lock.
+        # Capture the actual kernel child pid while the wrapper is still alive
+        # and wait until it has exited or become a zombie (no open descriptors).
+        childlist=Path("/proc")/str(node.pid)/"task"/str(node.pid)/"children"
+        geth_children=[int(pid) for pid in childlist.read_text().split()]
+        require(len(geth_children)==1 and geth_children[0]!=node.pid,
+                "native cold recovery did not identify exactly one real Geth child")
         for process in (exp,idx,consensus,node):
             require(process.poll() is None,"recovery cannot test an already dead component")
             os.killpg(process.pid,signal.SIGKILL)
             process.wait(timeout=20)
-        # process.wait is required: starting Geth before the old process releases
-        # its datadir lock can intermittently mask a valid cold recovery.
+        for child in geth_children:
+            deadline=time.monotonic()+12
+            while time.monotonic()<deadline:
+                try:
+                    state=(Path("/proc")/str(child)/"stat").read_text().split(") ",1)
+                except FileNotFoundError:
+                    break
+                require(len(state)==2,"malformed actual Geth child process status")
+                if state[1].startswith("Z"):
+                    break
+                time.sleep(.05)
+            else:
+                raise RuntimeError("actual Geth child did not release its datadir after SIGKILL")
         node=launch("node420-cold-recovered",[str(execution),"--geth",str(geth),
              "--datadir",str(execdir),"--jwt-secret",str(args.workdir/"jwt.hex"),
              "--authrpc.port","18781","--http.port","18780","--port","0",

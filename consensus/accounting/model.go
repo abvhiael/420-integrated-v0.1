@@ -17,6 +17,9 @@ const Reward = "0x0000000000000000000000000000000000000420"
 const Registry = "0x0000000000000000000000000000000000000423"
 const ProtocolReserve = "0x0000000000000000000000000000000000000424"
 const CreditReserve = "0x0000000000000000000000000000000000000425"
+const CommunityReward = "0x0000000000000000000000000000000000000426"
+const AttentionTreasury = "0x0000000000000000000000000000000000000421"
+const DevelopmentTreasury = "0x0000000000000000000000000000000000000422"
 const ZeroAddress = "0x0000000000000000000000000000000000000000"
 
 var Addresses = []string{Reward, Registry, ProtocolReserve, CreditReserve}
@@ -30,7 +33,11 @@ type Discrepancy struct {
 	Actual   string `json:"actual"`
 }
 type Issuance struct {
-	GrossScheduled string `json:"grossScheduled"`
+    NativePaid string `json:"nativePaid"`
+    CommunityAccrued string `json:"communityAccrued"`
+    CommunityBacked string `json:"communityBacked"`
+    CommunitySettled string `json:"communitySettled"`
+    GrossScheduled string `json:"grossScheduled"`
 	Realized       string `json:"realized"`
 	NonIssued      string `json:"nonIssued"`
 	Security       string `json:"security"`

@@ -53,7 +53,6 @@ for tag in a b; do
   anvil --init "$RUNNER_TEMP/govpre08-step3-genesis.json" \
     --chain-id 31337 --accounts 1 --balance 0 --gas-price 0 --base-fee 0 \
     --host 127.0.0.1 --port "$port" --silent \
-    --dump-state "$RUNNER_TEMP/govpre08-step3-state-$tag.json" \
     > "$RUNNER_TEMP/govpre08-step3-node-$tag.log" 2>&1 &
   pid=$!
   trap 'kill "$pid" 2>/dev/null || true' EXIT
@@ -70,13 +69,15 @@ for tag in a b; do
     --verify-bundle "$RUNNER_TEMP/govpre08-step3-v4-a" --rpc "$GOV_PRE_08_RPC" \
     --step2-evidence "$GOV_PRE_08_STEP2_EVIDENCE" \
     --local-output "$RUNNER_TEMP/govpre08-step3-local-$tag.json" --probe-reorg
-  kill -INT "$pid" 2>/dev/null || true
+  python3 scripts/gov-pre-08/restart-local-anvil.py \
+    --rpc "$GOV_PRE_08_RPC" --dump "$RUNNER_TEMP/govpre08-step3-state-$tag.json"
+  kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT
   test -s "$RUNNER_TEMP/govpre08-step3-state-$tag.json" || {
     echo "Anvil did not save funded state" >&2; exit 1;
   }
-  anvil --load-state "$RUNNER_TEMP/govpre08-step3-state-$tag.json" \
+  anvil --init "$RUNNER_TEMP/govpre08-step3-genesis.json" \
     --chain-id 31337 --accounts 1 --balance 0 --gas-price 0 --base-fee 0 \
     --host 127.0.0.1 --port "$port" --silent \
     > "$RUNNER_TEMP/govpre08-step3-restarted-$tag.log" 2>&1 &
@@ -88,6 +89,8 @@ for tag in a b; do
     sleep 1
   done
   test "$ready" = true || { cat "$RUNNER_TEMP/govpre08-step3-restarted-$tag.log"; exit 1; }
+  python3 scripts/gov-pre-08/restart-local-anvil.py \
+    --rpc "$GOV_PRE_08_RPC" --restore "$RUNNER_TEMP/govpre08-step3-state-$tag.json"
   python3 scripts/gov-pre-08/verify-local-v4-recovery.py \
     --rpc "$GOV_PRE_08_RPC" --bundle "$RUNNER_TEMP/govpre08-step3-v4-a" \
     --baseline "$RUNNER_TEMP/govpre08-step3-local-$tag.json" \

@@ -97,8 +97,16 @@ def materialize(constructor_rpc_url,genesis_rpc_url,root=ROOT):
         "from":sender,"data":code+args,"gas":hex(12_000_000),
     }])
     receipt=helper.call("eth_getTransactionReceipt",[tx])
-    plan.require(receipt and int(receipt["status"],16)==1,
-                 "real constructor EVM deployment failed")
+    if not receipt or int(receipt["status"],16)!=1:
+        mined=helper.call("eth_getBlockByNumber",[receipt["blockNumber"],False]) if receipt else None
+        raise ValueError("real constructor EVM deployment failed: "+
+                         json.dumps({"tx":tx,
+                                     "gasUsed":receipt.get("gasUsed") if receipt else None,
+                                     "blockTimestamp":mined.get("timestamp") if mined else None,
+                                     "genesisTimestamp":timestamp,
+                                     "helperGenesisTimestamp":block["timestamp"],
+                                     "contractAddress":receipt.get("contractAddress") if receipt else None}))
+
     deployed=receipt["contractAddress"]
     plan.require(plan.ADDRESS.fullmatch(deployed),"missing real local constructor receipt")
     runtime=helper.call("eth_getCode",[deployed,"latest"])

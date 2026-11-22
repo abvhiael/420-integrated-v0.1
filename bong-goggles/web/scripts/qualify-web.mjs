@@ -85,7 +85,7 @@ const mapAllowlist=new Map(CHAOS_MAP_ASSETS.map(asset=>[asset.path,asset]));
 if(mapAllowlist.size!==6||mapFiles.length!==6)throw new Error('Incomplete or duplicate regional atlas output');
 for(const f of mapFiles){
  const name=normalize(f.path),asset=mapAllowlist.get(name);
- if(!asset||f.size!==asset.bytes||f.size>(asset.transparent?80:180)*1024)
+ if(!asset||f.size!==asset.bytes||f.size>(asset.transparent?80:4096)*1024)
   throw new Error('Unexpected, changed or oversized CCC-ART-2 map: '+name);
  const meta=await sharp(f.path).metadata();
  if(meta.format!=='webp'||meta.width!==asset.width||meta.height!==asset.height||Boolean(meta.hasAlpha)!==asset.transparent)

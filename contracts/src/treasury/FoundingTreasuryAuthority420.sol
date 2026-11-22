@@ -11,6 +11,7 @@ import "../governance/IFoundingWalletClaims420.sol";
 
 interface IFoundingRetirementReadiness420 {
     function retirementReady() external view returns (bool);
+    function retirementExecutionAuthorized() external view returns (bool);
 }
 interface IFoundingCivicStatus420 {
     function civicAuthorityActivated() external view returns (bool);
@@ -103,6 +104,7 @@ contract FoundingTreasuryAuthority420 {
     error AlreadyScheduled();
     error InvalidVault();
     error RetirementNotReady();
+    error OutstandingFoundingCommitments();
     error ReleaseExecutorNotBound();
 
     event FoundingBudgetInitialized(bytes32 indexed operationsBudgetId, bytes32 indexed contingencyBudgetId);
@@ -163,7 +165,7 @@ contract FoundingTreasuryAuthority420 {
     /// TreasuryReleaseExecutor instance. Founders cannot nominate their own transfer executor.
     /// The expected runtime hash must be obtained from the approved deployment materialization.
     function bindReleaseExecutor(address candidate, bytes32 expectedRuntimeCodeHash) external {
-        if (msg.sender != genesisConfigurator || foundingReleaseExecutor != address(0)
+        if (retired || msg.sender != genesisConfigurator || foundingReleaseExecutor != address(0)
             || candidate.code.length == 0 || expectedRuntimeCodeHash == bytes32(0)
             || candidate.codehash != expectedRuntimeCodeHash
             || TreasuryReleaseExecutor420(candidate).operator() != address(this))
@@ -180,7 +182,7 @@ contract FoundingTreasuryAuthority420 {
     }
 
     function isActiveFoundingRelease(bytes32 disbursementId, address executor) external view returns (bool) {
-        return disbursementId != bytes32(0) && _activeRelease == disbursementId
+        return !retired && disbursementId != bytes32(0) && _activeRelease == disbursementId
             && executor == foundingReleaseExecutor && executor != address(0)
             && executor.codehash == foundingReleaseExecutorCodeHash;
     }
@@ -385,13 +387,18 @@ contract FoundingTreasuryAuthority420 {
         emit FoundingReleaseExecuted(paymentId, p.disbursementId, commitment);
     }
 
-    /// @notice Retirement evidence must come from an independently qualified, Genesis-pinned
-    /// on-chain verifier: 60 eligible independent validator owners, 15 verified Committee members,
-    /// 30 continuous days, plus completed Civic handoff. Any caller may finalize it once true.
+    /// @notice Retirement itself MUST be an action in the canonical, successful G3/G4
+    /// dual-house Civic execution batch, dispatched by the real GovernanceTimelock.
+    /// Historical unrelated dual-house actions or arbitrary permissionless calls cannot retire.
     function retire() external {
         if (retired) revert Retired();
-        if (!IFoundingCivicStatus420(governanceTimelock).civicAuthorityActivated()
-            || !retirementVerifier.retirementReady()) revert RetirementNotReady();
+        if (msg.sender != governanceTimelock || !IFoundingCivicStatus420(governanceTimelock).civicAuthorityActivated()
+            || !retirementVerifier.retirementExecutionAuthorized()) revert RetirementNotReady();
+        // Previously scheduled founding disbursements are legally committed even if the
+        // VaultAccounting native free balance has not yet reserved them as obligations.
+        // Settle them before changing founding execution authority; no stranded grants.
+        if (operationsCommitted != operationsReleased || contingencyCommitted != contingencyReleased)
+            revert OutstandingFoundingCommitments();
         retired = true;
         emit FoundingAuthorityRetired(msg.sender);
     }

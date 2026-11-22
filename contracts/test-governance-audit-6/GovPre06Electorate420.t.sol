@@ -426,6 +426,33 @@ contract GovPre06Electorate420Test {
         require(!inactive, "non-eligible validator enrolled");
     }
 
+    function testOtherVerifiedIssuerCannotForgeConstitutionalMembership() public {
+        _deploy();
+        bytes32 plan = _scheduleBase();
+        _executeBase(plan);
+
+        // Negative fixture: even an existing independently VERIFIED 420Identity issuer
+        // must not grant constitutional electorate membership by using the public house type.
+        bytes32 outsiderIssuer = keccak256("OTHER_TRUSTED_ISSUER");
+        bytes32 outsiderCredential = keccak256("OTHER_ISSUER_COMMUNITY_BOB");
+        address otherController = address(0xBADD);
+        vm.prank(address(timelock));
+        Identity420(IDENTITY).setIssuer(outsiderIssuer, otherController, keccak256("other-issuer"), true);
+        vm.prank(otherController);
+        Identity420(IDENTITY).issueCredential(
+            outsiderCredential, outsiderIssuer, _profile(BOB),
+            keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"), keccak256("attestation"), 0
+        );
+        require(Identity420(IDENTITY).credentialMeetsTrust(outsiderCredential, 2), "not a valid VERIFIED issuer");
+        vm.prank(BOB);
+        (bool forged,) = address(enrollment).call(abi.encodeCall(
+            CivicInitialElectorateEnrollment420.enroll,
+            (CivicIds420.House.COMMUNITY, _profile(BOB), outsiderCredential)
+        ));
+        require(!forged, "outside issuer granted constitutional membership");
+        _enroll(BOB, CivicIds420.House.COMMUNITY);
+    }
+
     function testCannotCaptureInitialElectorateOrReopenAfterSealing() public {
         _deploy();
         bytes32 plan = _scheduleBase();

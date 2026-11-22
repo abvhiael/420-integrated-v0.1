@@ -85,6 +85,44 @@ try{
     .map(x=>({id:x.id,impact:x.impact,targets:x.nodes.map(n=>n.target.join(' '))}));
   });
   assert(violations.length===0,'axe serious/critical accessibility violations '+JSON.stringify(violations));
+  // Actual DOM events must submit a canonical discard from the authorized
+  // hand: two cards in 2p, exactly one in both 3p and 4p.
+  await page.evaluate(async active=>{
+   const module=await import('/core/cribbage-ui.js');
+   window.__bc14Moves=[];
+   const ctl={
+    client:{enabled:true},
+    state:{status:'ready',session:active,settings:{motion:'standard',stinkhole:false,announcements:true},
+     selection:[],queue:[],submitting:false},
+    emit(delta){
+     this.state={...this.state,...delta};
+     const holder=document.querySelector('#match-root');
+     holder.innerHTML=module.renderCribbageRoute({screen:'play',state:this.state});
+     module.bindCribbageDom(holder,this);
+     return this.state;
+    },
+    async act(move){window.__bc14Moves.push(move);return this.state;},
+    configure(key,value){
+     this.state.settings={...this.state.settings,[key]:value};
+     this.emit({});
+    }
+   };
+   module.bindCribbageDom(document.querySelector('#match-root'),ctl);
+  },match);
+  const expected=match.privateView.hand.slice(0,count===2?2:1);
+  for(const card of expected)await page.locator('[data-cribbage-card="'+card+'"]').click();
+  const discard=page.locator('[data-cribbage-action="discard"]');
+  assert(await discard.isEnabled(),'correct discard selection failed to enable human move');
+  await discard.click();
+  await page.waitForFunction(()=>window.__bc14Moves?.length===1);
+  const received=await page.evaluate(()=>window.__bc14Moves[0]);
+  assert(JSON.stringify(received)===JSON.stringify({type:'discard',cards:expected}),
+   'DOM sent a different crib discard action');
+  // Display preference changes only overlay styling, never the scored state.
+  await page.locator('.cribbage-settings summary').click();
+  await page.locator('[data-cribbage-setting="stinkhole"]').check();
+  assert(await page.locator('.cribbage-stinkhole').count()===(count===3?3:2),
+   'Stinkhole setting should highlight physical hole 120 with no house-rule award');
   console.log('BC-1.4 Chromium '+width+'x'+height+' / '+count+
    ' players: board right/stack correct, '+data.holes+' holes, private hand buttons, artwork and axe PASS');
   await page.close();

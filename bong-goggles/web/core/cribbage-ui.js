@@ -4,7 +4,7 @@ import {escapeHtml as esc} from './design-system.js';
 import {CRIBBAGE_BOARD_SIZE,CRIBBAGE_BOARD_ART,CRIBBAGE_HOLES,CRIBBAGE_TRACKS,
  cribbageHole,cribbageTeams,cribbageLane,cribbageNewPegs} from './cribbage-board.js';
 import {cribbageCardLabel,cribbageLegalMoves,cribbageCanSubmit} from './cribbage-session.js';
-const back='<a class="cribbage-back" href="/games" data-route="games">← Games catalogue</a>';
+const back='<a class="cribbage-back" href="/games" data-route="games">← All Games</a>';
 const gameLink=(id,screen)=>'/games/cribbage/'+screen+(id?'?session='+encodeURIComponent(id):'');
 const tabs=['intro','rules','setup','play','results'];
 const tabLabel={intro:'Overview',rules:'How to play',setup:'Find a table',play:'Play',results:'Results'};
@@ -179,7 +179,7 @@ function settings(state){
   (s.stinkhole?' checked':'')+'> Highlight the 120 “stinkhole” — visual only</label>'+
   '</details>';
 }
-export function renderCribbageRoute({screen='intro',state=null}={}){
+export function renderCribbageRoute({screen='intro',state=null,accountPanel=''}={}){
  const s=state??{status:'idle'},session=s.session,id=session?.id??null;
  const nav=back+menu(screen,id);
  const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
@@ -204,7 +204,7 @@ export function renderCribbageRoute({screen='intro',state=null}={}){
    renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
     pegs:s.pegs,settings:s.settings})+'</div>':zero):
   home;
- return '<section class="cribbage-app" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+details+settings(s)+
+ return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · Cribbage interface qualified in source only. Real 420ID room activation and public Play remain gated.</p>'+details+settings(s)+
   '<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
 }
 // Event handlers bind only data-attribute choices and submit through the

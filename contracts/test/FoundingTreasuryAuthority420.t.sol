@@ -15,7 +15,11 @@ interface VmFounding420 {
 
 contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
     bool public override retirementReady;
-    function setReady(bool value) external { retirementReady = value; }
+    bool public override retirementExecutionAuthorized;
+    function setReady(bool value) external {
+        retirementReady = value;
+        retirementExecutionAuthorized = value;
+    }
 }
 
 contract CivicStatusMockFounding420 is IFoundingCivicStatus420 {
@@ -444,12 +448,29 @@ contract FoundingTreasuryAuthority420Test {
                 "forged execution inflated settled funds");
     }
 
+    function testUnsettledFoundingCommitmentBlocksEvenAuthorizedRetirement() public {
+        civic.setActive(true);
+        readiness.setReady(true);
+        vm.prank(ADMIN);
+        bytes32 id = _propose(false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY);
+        vm.prank(ADMIN);
+        founder.schedulePayment(id);
+        require(founder.operationsCommitted() == 1 ether && founder.operationsReleased() == 0,
+            "unpaid founding obligation");
+        vm.prank(address(civic));
+        (bool retiredWithDebt,) = address(founder).call(abi.encodeCall(founder.retire, ()));
+        require(!retiredWithDebt && !founder.retired(), "unpaid commitment extinguished by retirement");
+    }
+
     function testRetirementIsIrreversibleAndDisablesFoundingWrites() public {
         vm.prank(ADMIN);
         (bool premature,) = address(founder).call(abi.encodeCall(founder.retire, ()));
         require(!premature, "premature");
         civic.setActive(true);
         readiness.setReady(true);
+        (bool unrelated,) = address(founder).call(abi.encodeCall(founder.retire, ()));
+        require(!unrelated, "unrelated caller retired founder without real Timelock");
+        vm.prank(address(civic));
         founder.retire();
         require(founder.retired(), "retired");
         vm.prank(ADMIN);

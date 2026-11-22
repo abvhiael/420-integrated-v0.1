@@ -1,10 +1,10 @@
 # BC-1.4 — Cribbage player-facing frontend qualification
 
 **Milestone:** BC-1.4 source/backend/frontend qualification, **not public Play release**.
-**Qualified implementation source:** `66363f6bfc79ad89b52b0be2bcf8792944fbcf8e` (approved leaf artwork, frontend, backend announcement metadata and corrected shared account/route contracts).
+**Qualified implementation source:** `40d04ed1ac6c802ae7f69fce29a3a2f7d67bf75f` (approved leaf artwork, frontend, backend announcement metadata and corrected shared account/route contracts).
 **Pinned account-game rules:** `bc-cribbage-standard-121@1.0.0` (internal BC-0.7 version `v1.0`, SHA-256 rule identity `6f13bd77568efc5d0836eaa61458ca0cc2c500d1db2d9c38e228b1c668f71e24`), not BG-15 wallet/on-chain Cribbage.
 
-**[Final source BC-1.4 workflow #45064416150](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45064416150) — SUCCESS**. All three targeted jobs completed successfully: Node frontend tests + real asset/web build, Go BC-1.2/BC-1.4 `-race`, and headless Chromium desktop/tablet/mobile with actual card interaction, 420ID-only private-view fixture and axe-core WCAG checks. This qualification reflects the source at `66363f6b...` and the original BC-1.4 changes; this document and the roadmap are audit-only.
+**[Final source BC-1.4 workflow #45065961060](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961060) — SUCCESS**. All three targeted jobs completed successfully: Node frontend tests + real asset/web build, Go BC-1.2/BC-1.4 `-race`, and headless Chromium desktop/tablet/mobile with actual card interaction, 420ID-only private-view fixture and axe-core WCAG checks. This qualification reflects the source at `40d04ed1...` and the original BC-1.4 changes; this document and the roadmap are audit-only.
 
 ## Implemented application artifacts
 
@@ -35,11 +35,14 @@ An announcement is held for `1500 ms` before the next. The now-public `count` re
 
 ## Actual exact-source qualification
 
-- [BC-1.4 targeted three-job workflow #45064416150](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45064416150): **SUCCESS** — 7/7 Node tests, Node build and vetted SVG/stylesheet package, Go BC12/14 race, Chromium 1600×1000 2p / 1180×900 4p / 390×844 3p, no serious/critical WCAG A/AA violations, actual click-enabled legal crib discards and visual-only stinkhole overlay.
-- [BC-0.12 shared Classics release qualification #45064416142](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45064416142): **SUCCESS** — shared rules/bot/room test gates, Chromium multi-account and release-fail-closed guard. All 25 titles remain locked.
-- [BC-1.2 deterministic engine regression #45064416133](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45064416133): **SUCCESS** at the amended award-projection source.
-- [CCC multiplayer #45064416149](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45064416149): **SUCCESS** at the shared app-shell/frontend changes.
-- Broader web, account-social and room CI results are recorded on PR #1336 at the final documentation head. No unrelated passing suite was intentionally rerun outside of automatically triggered repository workflows.
+- [Full two-configuration Bong Goggles web verification #45065961010](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961010): **SUCCESS** — both disabled and account-social-enabled web builds, existing BC-0.2–BC-0.5 per-file budgets unchanged; BC-1.4 six-file pinned allowance 95,904 / 98,304 bytes; approved board Git blob SHA `02b7f8f7b86af3b6fa4bd0833a6785449145a366`; general asset allowlist and release gates passed.
+
+
+- [BC-1.4 targeted three-job workflow #45065961060](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961060): **SUCCESS** — 7/7 Node tests, Node build and vetted SVG/stylesheet package, Go BC12/14 race, Chromium 1600×1000 2p / 1180×900 4p / 390×844 3p, no serious/critical WCAG A/AA violations, actual click-enabled legal crib discards and visual-only stinkhole overlay.
+- [BC-0.12 shared Classics release qualification #45065961176](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961176): **SUCCESS** — shared rules/bot/room test gates, Chromium multi-account and release-fail-closed guard. All 25 titles remain locked.
+- [BC-1.2 deterministic engine regression #45065961145](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961145): **SUCCESS** at the amended award-projection source.
+- [CCC multiplayer #45065961126](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961126): **SUCCESS** at the shared app-shell/frontend changes.
+- Also at exact source: [BC-0.5–0.10 Account Rooms #45065961108](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961108), [AUTH account social #45065961026](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961026), [BC-1.3 bot AI #45065961118](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961118), [BC-1.1 rules #45065961025](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961025), and [420Docs #45065961054](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45065961054) — **SUCCESS**. Existing automated repository workflow triggers are outside BC-1.4's focused test commands.
 
 ## Security / release boundary and next gate
 

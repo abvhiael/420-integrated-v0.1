@@ -107,7 +107,7 @@ def main():
          "frozen ProtocolReserve"),
         ("historical Genesis overwritten", FILES[6],
          lambda d: entry(d, "founder-vesting").update(amount_420=500_000),
-         "historical frozen testnet"),
+         "historical V3 bundle overwritten"),
         ("stale V3 marked V4 without ceremony", FILES[7],
          lambda d: d.update(status="FROZEN_V4"),
          "frozen V3"),

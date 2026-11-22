@@ -7,6 +7,7 @@ import (
  "database/sql"
  "encoding/json"
  "errors"
+ "time"
 )
 
 // BC-1.6: a request creates a fresh *lobby*, never a match or forced seat.
@@ -22,7 +23,14 @@ type ClassicHistoryStats struct {
  Wins int `json:"wins"`
  Losses int `json:"losses"`
 }
+type ClassicPendingInvitation struct {
+ RoomID string `json:"roomId"`
+ Seat int `json:"seat"`
+ Inviter string `json:"inviter"`
+ ExpiresAt string `json:"expiresAt"`
+}
 type ClassicHistory struct {
+ Invitations []ClassicPendingInvitation `json:"invitations"`
  Matches []ClassicHistoryMatch `json:"matches"`
  Stats ClassicHistoryStats `json:"stats"`
 }
@@ -31,7 +39,7 @@ type ClassicHistory struct {
 // full journal verification before extracting *public* scores. No engine
 // state, private hands, seeds or journal contents leave the service.
 func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHistory,error){
- out:=ClassicHistory{Matches:[]ClassicHistoryMatch{}}
+ out:=ClassicHistory{Matches:[]ClassicHistoryMatch{},Invitations:[]ClassicPendingInvitation{}}
  if !uuid.MatchString(viewer){return out,ErrInvalid}
  list,e:=s.List(ctx,viewer);if e!=nil{return out,e}
  for _,summary:=range list{
@@ -56,6 +64,26 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
    }else{out.Stats.Losses++}
   }
  }
+ // Only current unexpired 420ID invitations appear; a block revokes
+ // visibility even before the invite itself can be cancelled.
+ rows,e:=s.Store.DB.QueryContext(ctx,"SELECT i.room_id,i.seat_index,i.inviter,i.expires_at "+
+  "FROM bg_account_social.classic_room_invites i JOIN bg_account_social.classic_rooms r ON r.id=i.room_id "+
+  "WHERE i.target=$1 AND i.status='pending' AND i.expires_at>clock_timestamp() "+
+  "AND r.game_id='cribbage' AND r.status IN ('open','ready') "+
+  "AND NOT EXISTS(SELECT 1 FROM bg_account_social.classic_room_seats rs "+
+  "JOIN bg_account_social.blocks b ON (b.blocker=$1 AND b.blocked=rs.subject) "+
+  "OR (b.blocked=$1 AND b.blocker=rs.subject) "+
+  "WHERE rs.room_id=i.room_id AND rs.subject IS NOT NULL) "+
+  "ORDER BY i.created_at DESC,i.id DESC LIMIT 20",viewer)
+ if e!=nil{return ClassicHistory{},e}
+ for rows.Next(){
+  var v ClassicPendingInvitation
+  var expires time.Time
+  if e=rows.Scan(&v.RoomID,&v.Seat,&v.Inviter,&expires);e!=nil{rows.Close();return ClassicHistory{},e}
+  v.ExpiresAt=expires.UTC().Format(time.RFC3339Nano)
+  out.Invitations=append(out.Invitations,v)
+ }
+ e=rows.Err();rows.Close();if e!=nil{return ClassicHistory{},e}
  return out,nil
 }
 

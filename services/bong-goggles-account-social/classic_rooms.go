@@ -151,7 +151,7 @@ func (c *ClassicRooms) visible(ctx context.Context,viewer string,room ClassicRoo
 func (c *ClassicRooms) List(ctx context.Context,viewer string)([]ClassicRoom,error){
  if !uuid.MatchString(viewer){return nil,ErrInvalid}
  rows,e:=c.Store.DB.QueryContext(ctx,`SELECT `+classicRoomColumns+` FROM bg_account_social.classic_rooms r
- WHERE (r.visibility='public' OR r.host=$1
+ WHERE (r.status<>'cancelled' OR r.host=$1) AND (r.visibility='public' OR r.host=$1
  OR EXISTS(SELECT 1 FROM bg_account_social.classic_room_seats s WHERE s.room_id=r.id AND s.subject=$1)
  OR EXISTS(SELECT 1 FROM bg_account_social.classic_room_invites i WHERE i.room_id=r.id AND i.target=$1 AND i.status='pending' AND i.expires_at>clock_timestamp()))
  AND NOT EXISTS (SELECT 1 FROM bg_account_social.classic_room_seats s

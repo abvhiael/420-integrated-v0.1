@@ -146,7 +146,7 @@ export class ClassicRoomsController{
    if(!view)throw Error('Unverified room update');
    return this.refresh(view.id);
   }catch(error){
-   if(gen===this.generation)this.emit({...current,notice:error.message||'Room action could not be confirmed'});
+   if(gen===this.generation)this.emit({status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'});
    throw error;
   }
  }
@@ -154,7 +154,7 @@ export class ClassicRoomsController{
 const note=message=>'<p class="classic-room__notice" role="status">'+esc(message)+'</p>';
 const roomHref=r=>'/games/rooms/'+r.id;
 const games=CLASSIC_ROADMAP.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.title)+'</option>').join('');
-const teamName=(r,s)=>r.seatCount===4&&new Set(['euchre','spades','canasta','tarabish','120s','deux-cents','rook','kaiser']).has(r.gameId)?
+const teamName=(r,s)=>r.seatCount===4&&new Set(['euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
   'Team '+(s.team===0?'A':'B'):'Player '+(s.index+1);
 function roomSummary(r){
  return '<li><a href="'+roomHref(r)+'" data-route="classic-room"><strong>'+esc(title(r.gameId))+

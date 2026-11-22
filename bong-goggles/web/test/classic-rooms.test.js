@@ -91,6 +91,8 @@ test('BC-0.5 seat controls display team, friend invite and bot difficulty by aut
  assert.doesNotMatch(privateHtml,/data-classic-room-action="invite"/);
  assert.doesNotMatch(privateHtml,/data-classic-room-action="join"/);
  const publicRoom={...room,visibility:'public'};
+ const team500={...room,gameId:'500'};
+ assert.match(shell('/games/rooms/'+roomId,{...ready,selected:team500}),/Seat 3 · Team A/);
  const joinHtml=shell('/games/rooms/'+roomId,{...guest,selected:publicRoom});
  assert.match(joinHtml,/data-classic-room-action="join" data-room-seat="1"/);
  const invitedRoom={...room,seats:room.seats.map((s,i)=>i===1?{index:1,controller:'invited',subject:friend,team:1}:s),
@@ -174,6 +176,18 @@ test('BC-0.5 session and stale response ordering never restore a previous room',
  pending(res(200,{walletRequired:false,profile:{subject:host}}));
  await first;
  assert.deepEqual(client.state,{status:'loading'});
+});
+test('BC-0.5 an unconfirmed room mutation immediately drops cached private room data',async()=>{
+ const client=new ClassicRoomsController({enabled:true,fetchImpl:async(url,opts)=>{
+  if(opts.method==='POST')return res(403,{error:'blocked'});
+  return mock()(url,opts);
+ }});
+ await client.refresh(roomId);
+ assert.equal(client.state.status,'ready');
+ await assert.rejects(client.act('bot',{seat:1,difficulty:'medium'}));
+ assert.equal(client.state.status,'error');
+ assert.equal(client.state.selected,undefined);
+ assert.doesNotMatch(renderClassicRooms(client.state,{enabled:true,roomId}),/Host.*Seat 1/);
 });
 test('BC-0.5 feature flag remains explicit and bound to the existing off-chain account-games gate',()=>{
  const base={environment:'testnet',appOrigin:'https://bonggoggles.420integrated.org',chainId:420420,

@@ -16,6 +16,9 @@ contract RewardController is ConsensusSystemAccess420, I420System {
     address public constant COMMUNITY_REWARD_RESERVE = 0x0000000000000000000000000000000000000426;
     uint256 public constant FULL_SPONSOR_COMMUNITY_BPS = 1000;
     uint256 public communityRewardAccrued;
+    uint256 public communityRewardBackingReceived;
+    uint256 public communityRewardSettled;
+    uint256 private _communitySettlementEntered;
     event SponsoredValidatorRewardAllocated(address indexed owner, address indexed communityFund, uint256 gross, uint256 communityShare);
     address public constant DEVELOPMENT_TREASURY = 0x0000000000000000000000000000000000000422;
     uint256 public constant MAX_ACTIVE_VALIDATORS = 30;
@@ -28,9 +31,17 @@ contract RewardController is ConsensusSystemAccess420, I420System {
     mapping(uint64 => bool) public rewardApplied;
 
     error InvalidRewardBlock();
+    error MissingCommunityAccrual();
+    error UnbackedCommunityReward();
+    error CommunityReserveUnavailable();
+    error CommunityTransferFailed();
+    error CommunitySettlementReentrant();
     error RewardAlreadyApplied();
     error InvalidProposer();
     error InvalidParticipantSet();
+
+    event CommunityRewardBackingReceived(address indexed source, uint256 amount, uint256 backedTotal);
+    event CommunityRewardSettled(address indexed reserve, uint256 amount, uint256 settledTotal);
 
     event RewardApplied(
         uint64 indexed blockNumber,
@@ -87,6 +98,32 @@ contract RewardController is ConsensusSystemAccess420, I420System {
             developmentAmount
         );
     }
+    /// @notice Physically fund the 10% community share using NATIVE $420 in the consensus
+    /// system-caller's actual balance. Accrual alone does not mint or move native value.
+    /// The current v1 zero-value system-call gateway cannot invoke this payable path:
+    /// a separate qualified consensus/execution backing mechanism is mandatory at Genesis.
+    function fundCommunityRewardBacking() external payable onlyConsensusSystem {
+        if (msg.value == 0 || communityRewardBackingReceived + msg.value > communityRewardAccrued)
+            revert MissingCommunityAccrual();
+        communityRewardBackingReceived += msg.value;
+        emit CommunityRewardBackingReceived(msg.sender, msg.value, communityRewardBackingReceived);
+    }
+
+    /// @notice Transfer only already-authenticated and physically funded $420 to the
+    /// immutable CommunityRewardReserve predeploy; no founder or validator may redirect it.
+    function settleCommunityRewards(uint256 amount) external {
+        if (_communitySettlementEntered != 0) revert CommunitySettlementReentrant();
+        if (amount == 0 || amount > communityRewardBackingReceived - communityRewardSettled
+            || amount > address(this).balance) revert UnbackedCommunityReward();
+        if (COMMUNITY_REWARD_RESERVE.code.length == 0) revert CommunityReserveUnavailable();
+        _communitySettlementEntered = 1;
+        communityRewardSettled += amount;
+        (bool ok,) = payable(COMMUNITY_REWARD_RESERVE).call{value: amount}("");
+        if (!ok) revert CommunityTransferFailed();
+        emit CommunityRewardSettled(COMMUNITY_REWARD_RESERVE, amount, communityRewardSettled);
+        _communitySettlementEntered = 0;
+    }
+
     /// @notice Accrual split, never an after-the-fact operator deduction. Actual native
     /// issuance/settlement into CommunityRewardReserve requires consensus reconciliation.
     function _accrueSecurityReward(address owner, uint256 gross) private {

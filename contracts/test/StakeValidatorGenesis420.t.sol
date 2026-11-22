@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 import "../src/system/ValidatorRegistry.sol";
 import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
+import "../src/system/CommunityRewardReserve.sol";
 import "../src/treasury/FoundingValidatorSponsorship420.sol";
 import "../src/apps/Stake420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
@@ -161,6 +162,42 @@ contract StakeValidatorGenesis420Test {
             abi.encodeCall(sponsor.sponsorFully, (anotherId, another, purpose))
         );
         require(!retiredSponsored, "retired administrator funded validator");
+    }
+
+    function testCommunityRewardsPhysicallySettleOnlyWithConsensusBackedNative420() public {
+        SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
+        vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
+        CommunityRewardReserve canonical = new CommunityRewardReserve(address(this));
+        vm.etch(rewards.COMMUNITY_REWARD_RESERVE(), address(canonical).code);
+        vm.roll(1001);
+        address[] memory participants = new address[](0);
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(uint64(block.number), address(0xABCD), participants, 100 ether, 0, 0, 0);
+        require(rewards.communityRewardAccrued() == 10 ether, "community accrual");
+
+        (bool zeroBacking,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (10 ether)));
+        require(!zeroBacking, "virtual unbacked accrual paid out");
+        vm.deal(address(0xBAD), 10 ether);
+        vm.prank(address(0xBAD));
+        (bool spoofedBacking,) = address(rewards).call{value: 10 ether}(
+            abi.encodeCall(rewards.fundCommunityRewardBacking, ())
+        );
+        require(!spoofedBacking, "outsider spoofed consensus funding");
+
+        vm.deal(SYSTEM_CALLER, 10 ether);
+        vm.prank(SYSTEM_CALLER);
+        rewards.fundCommunityRewardBacking{value: 10 ether}();
+        (bool tooMuch,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (11 ether)));
+        require(!tooMuch, "exceeded physically backed accrual");
+        uint256 initialCommunity = rewards.COMMUNITY_REWARD_RESERVE().balance;
+        rewards.settleCommunityRewards(4 ether);
+        rewards.settleCommunityRewards(6 ether);
+        require(rewards.COMMUNITY_REWARD_RESERVE().balance == initialCommunity + 10 ether,
+            "no actual native movement to community");
+        require(address(rewards).balance == 0, "native backing unaccounted");
+        require(rewards.communityRewardSettled() == 10 ether, "settlement accounted");
+        (bool twice,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (1 ether)));
+        require(!twice, "community reward overpaid");
     }
 
     function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {

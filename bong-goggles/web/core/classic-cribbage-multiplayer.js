@@ -107,3 +107,30 @@ export async function discoverCribbageMatches(controller){
   return [];
  }
 }
+
+
+// An explicit second UI confirmation precedes this existing server command.
+export async function resignCribbageMatch(c){
+ const s=c?.state,p=s?.session;
+ if(!c?.client?.enabled||c.busy||s?.status!=='ready'||p?.status!=='active'||
+  !validID(p.id)||!Number.isInteger(p.viewerSeat)||s.queue?.length||c.timer!==null)
+  throw Error('No authorized active Cribbage match to resign');
+ const requestId=globalThis.crypto?.randomUUID?.();
+ if(!validID(requestId))throw Error('Secure request ID unavailable');
+ c.busy=true;const gen=++c.generation;c.emit({submitting:true,resignPending:false});
+ try{
+  const r=await c.client.request('/v1/classic-sessions/'+p.id+'/action',{
+   method:'POST',body:{requestId,action:'resign',expectedSequence:p.sequence+1}});
+  if(gen!==c.generation)return c.state;
+  const n=normalizeCribbageSnapshot(r);
+  if(!n||n.id!==p.id||n.viewerSeat!==p.viewerSeat||
+   n.status!=='resigned'||n.sequence!==p.sequence+1)
+   throw Error('Server did not confirm resignation');
+  return c.emit({status:'ready',session:n,submitting:false,resignPending:false,
+   queue:[],announcement:'',error:null});
+ }catch(e){
+  if(gen===c.generation)c.emit({status:'error',session:null,pegs:[],queue:[],
+   submitting:false,error:'Resignation not confirmed; recheck 420ID session.'});
+  throw e;
+ }finally{if(gen===c.generation)c.busy=false;}
+}

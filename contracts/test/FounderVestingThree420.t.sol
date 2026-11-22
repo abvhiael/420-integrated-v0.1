@@ -54,8 +54,8 @@ contract FounderVestingThree420Test {
         vm.warp(genesisTime + 14 days - 1);
         require(vest.claimable(0) == 0, "no precliff vest");
         vm.warp(genesisTime + 14 days);
-        require(vest.vested(0, block.timestamp) == 250_000 ether / 13, "first 14day installment");
-        require(vest.vested(1, block.timestamp) == 125_000 ether / 13, "first cofounder installment");
+        require(vest.vested(0, block.timestamp) == uint256(250_000 ether) / 13, "first 14day installment");
+        require(vest.vested(1, block.timestamp) == uint256(125_000 ether) / 13, "first cofounder installment");
     }
 
     function testNonBeneficiaryCannotClaimOrRedirectAFounderGrant() public {

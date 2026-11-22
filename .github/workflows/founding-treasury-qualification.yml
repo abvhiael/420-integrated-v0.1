@@ -7,6 +7,12 @@ on:
       - 'contracts/src/treasury/TreasuryBudgetRegistry420.sol'
       - 'contracts/src/treasury/TreasuryPolicyRegistry420.sol'
       - 'contracts/src/treasury/TreasuryDisbursementRegistry420.sol'
+      - 'contracts/src/treasury/TreasuryReleaseExecutor420.sol'
+      - 'contracts/test/FoundingTreasurySettlement420.t.sol'
+      - 'contracts/config/treasury/founding-financial-policy-provisional.json'
+      - 'scripts/verify-founding-financial-policy.py'
+      - 'config/genesis-allocations.json'
+      - 'docs/audit/GOV-PRE-03-QUALIFICATION.md'
       - 'contracts/test/FoundingTreasuryAuthority420.t.sol'
       - '.github/workflows/founding-treasury-qualification.yml'
   workflow_dispatch:
@@ -31,6 +37,10 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify native $420 financial policy and Genesis funding conservation
+        run: |
+          python3 -m py_compile scripts/verify-founding-financial-policy.py
+          python3 scripts/verify-founding-financial-policy.py
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
@@ -45,7 +55,8 @@ jobs:
           from pathlib import Path
           root=Path.cwd().resolve()
           dest=Path(os.environ["FOUNDING_ROOT"])
-          pending=[root/"test/FoundingTreasuryAuthority420.t.sol"]
+          pending=[root/"test/FoundingTreasuryAuthority420.t.sol",
+                   root/"test/FoundingTreasurySettlement420.t.sol"]
           seen=set()
           pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
           while pending:
@@ -67,4 +78,6 @@ jobs:
           PY
           echo "FOUNDING_ROOT=$FOUNDING_ROOT" >> "$GITHUB_ENV"
       - name: Compile and run founding financial authority regressions
-        run: forge test --root "$FOUNDING_ROOT" --match-path test/FoundingTreasuryAuthority420.t.sol -vvv
+        run: |
+          forge test --root "$FOUNDING_ROOT" --match-path test/FoundingTreasuryAuthority420.t.sol -vvv
+          forge test --root "$FOUNDING_ROOT" --match-path test/FoundingTreasurySettlement420.t.sol -vvv

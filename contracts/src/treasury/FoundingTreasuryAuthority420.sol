@@ -41,6 +41,7 @@ contract FoundingTreasuryAuthority420 {
         uint64 notBefore;
         uint64 expiresAt;
         bytes32 evidenceHash;
+        bytes32 purposeHash;
         bytes32 disbursementId;
         Purpose purpose;
         uint8 approvals;
@@ -55,6 +56,10 @@ contract FoundingTreasuryAuthority420 {
     address public immutable founderAndrew;
     address public immutable founderJanet;
     address public immutable governanceTimelock;
+    address public immutable genesisConfigurator;
+    address public foundingReleaseExecutor;
+    bytes32 public foundingReleaseExecutorCodeHash;
+    bytes32 private _activeRelease;
     IFoundingRetirementReadiness420 public immutable retirementVerifier;
     TreasuryBudgetRegistry420 public immutable budgetRegistry;
     TreasuryDisbursementRegistry420 public immutable disbursementRegistry;
@@ -78,6 +83,7 @@ contract FoundingTreasuryAuthority420 {
     mapping(bytes32 => mapping(address => bool)) public paymentApproval;
     mapping(uint256 => uint256) public operationsCommittedByDay;
     mapping(uint256 => uint256) public contingencyCommittedByDay;
+    mapping(bytes32 => uint256) public contingencyCommittedByIncident;
     mapping(address => mapping(uint256 => uint256)) public recipientCommittedByDay;
     mapping(uint256 => uint256) public operationsReleasedByDay;
     mapping(uint256 => uint256) public contingencyReleasedByDay;
@@ -97,6 +103,7 @@ contract FoundingTreasuryAuthority420 {
     error AlreadyScheduled();
     error InvalidVault();
     error RetirementNotReady();
+    error ReleaseExecutorNotBound();
 
     event FoundingBudgetInitialized(bytes32 indexed operationsBudgetId, bytes32 indexed contingencyBudgetId);
     event FoundingPaymentProposed(bytes32 indexed paymentId, address indexed proposer, address indexed recipient, uint256 amount, bool contingency, Purpose purpose);
@@ -104,6 +111,12 @@ contract FoundingTreasuryAuthority420 {
     event FoundingPaymentScheduled(bytes32 indexed paymentId, bytes32 indexed disbursementId, uint256 amount, bool contingency);
     event FoundingReleaseExecuted(bytes32 indexed paymentId, bytes32 indexed disbursementId, bytes32 commitment);
     event FoundingAuthorityRetired(address indexed initiator);
+    event FoundingReleaseExecutorBound(address indexed executor, bytes32 indexed runtimeCodeHash);
+    event FoundingPaymentPurposeBound(bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 purposeHash);
+    event FoundingPaymentNotice(
+        bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 indexed purposeHash,
+        uint64 proposedAt, uint64 notBefore, uint64 expiresAt, bool twoFounderRequired
+    );
 
     constructor(
         address administrator_, address andrew_, address janet_,
@@ -128,6 +141,7 @@ contract FoundingTreasuryAuthority420 {
             || verifiedClaims.janet() != janet_ || verifiedClaims.genesisPlanCommitment() == bytes32(0))
             revert InvalidConfiguration();
         founderWalletClaims = verifiedClaims;
+        genesisConfigurator = msg.sender;
         foundingAdministrator = administrator_;
         founderAndrew = andrew_;
         founderJanet = janet_;
@@ -143,6 +157,32 @@ contract FoundingTreasuryAuthority420 {
         contingencyBudgetId = keccak256(abi.encode("420/FOUNDING/CONTINGENCY/V1", block.chainid, address(this)));
         operationsActionHash = keccak256(abi.encode("420/FOUNDING/OPERATIONS/AUTHORITY/V1", block.chainid, address(this)));
         contingencyActionHash = keccak256(abi.encode("420/FOUNDING/CONTINGENCY/AUTHORITY/V1", block.chainid, address(this)));
+    }
+
+    /// @notice Only the original deployment configurator may bind the independently reviewed
+    /// TreasuryReleaseExecutor instance. Founders cannot nominate their own transfer executor.
+    /// The expected runtime hash must be obtained from the approved deployment materialization.
+    function bindReleaseExecutor(address candidate, bytes32 expectedRuntimeCodeHash) external {
+        if (msg.sender != genesisConfigurator || foundingReleaseExecutor != address(0)
+            || candidate.code.length == 0 || expectedRuntimeCodeHash == bytes32(0)
+            || candidate.codehash != expectedRuntimeCodeHash
+            || TreasuryReleaseExecutor420(candidate).operator() != address(this))
+            revert InvalidConfiguration();
+        foundingReleaseExecutor = candidate;
+        foundingReleaseExecutorCodeHash = expectedRuntimeCodeHash;
+        emit FoundingReleaseExecutorBound(candidate, expectedRuntimeCodeHash);
+    }
+
+    /// @notice Treasury registry consults this during markExecuted. A grant alone cannot
+    /// forge accounting for a founding disbursement without its active, approved release.
+    function isFoundingBudget(bytes32 budgetId) external view returns (bool) {
+        return budgetId == operationsBudgetId || budgetId == contingencyBudgetId;
+    }
+
+    function isActiveFoundingRelease(bytes32 disbursementId, address executor) external view returns (bool) {
+        return disbursementId != bytes32(0) && _activeRelease == disbursementId
+            && executor == foundingReleaseExecutor && executor != address(0)
+            && executor.codehash == foundingReleaseExecutorCodeHash;
     }
 
     modifier onlyFounder() {
@@ -214,18 +254,28 @@ contract FoundingTreasuryAuthority420 {
         p.notBefore = notBefore;
         p.expiresAt = expiresAt;
         p.evidenceHash = evidenceHash;
+        // Commit to the complete reviewed case when the 48-hour NOTICE starts,
+        // rather than disclosing the unique purpose only after scheduling.
+        p.purposeHash = keccak256(abi.encode(
+            keccak256("420/FOUNDING/DISBURSEMENT/PURPOSE/V1"),
+            block.chainid, address(this), paymentId, purpose, contingency, evidenceHash
+        ));
         p.purpose = purpose;
         p.contingency = contingency;
         p.twoFounderRequired = requiresTwo;
         p.approvals = 1;
         paymentApproval[paymentId][msg.sender] = true;
         emit FoundingPaymentProposed(paymentId, msg.sender, recipient, amount, contingency, purpose);
+        emit FoundingPaymentPurposeBound(paymentId, evidenceHash, p.purposeHash);
+        emit FoundingPaymentNotice(
+            paymentId, evidenceHash, p.purposeHash, p.proposedAt, notBefore, expiresAt, requiresTwo
+        );
         emit FoundingPaymentApproved(paymentId, msg.sender, 1);
     }
 
     function approvePayment(bytes32 paymentId) external onlyFounder {
         Payment storage p = payments[paymentId];
-        if (p.recipient == address(0) || p.scheduled) revert InvalidPayment();
+        if (p.recipient == address(0) || p.scheduled || block.timestamp > p.expiresAt) revert InvalidPayment();
         if (paymentApproval[paymentId][msg.sender]) revert AlreadyApproved();
         paymentApproval[paymentId][msg.sender] = true;
         ++p.approvals;
@@ -251,6 +301,8 @@ contract FoundingTreasuryAuthority420 {
             && !(p.contingency && p.approvals == 3)) revert NoticeRequired();
         if (block.timestamp > p.expiresAt || p.notBefore > p.expiresAt) revert InvalidPayment();
         if (p.contingency) {
+            if (contingencyCommittedByIncident[p.evidenceHash] + p.amount > CONTINGENCY_INCIDENT_MAX)
+                revert SpendingLimit();
             if (contingencyCommitted + p.amount > CONTINGENCY_ALLOCATION
                 || _rollingTotal(true) + p.amount > CONTINGENCY_30_DAY_MAX) revert SpendingLimit();
         } else {
@@ -261,8 +313,10 @@ contract FoundingTreasuryAuthority420 {
         bytes32 budgetId = p.contingency ? contingencyBudgetId : operationsBudgetId;
         bytes32 actionHash = p.contingency ? contingencyActionHash : operationsActionHash;
         uint64 notBefore = p.notBefore > block.timestamp ? p.notBefore : uint64(block.timestamp);
+        // The unique purpose was publicly fixed in the original proposal notice,
+        // so the signed review cannot change after the 48-hour observation period.
         disbursementId = disbursementRegistry.canonicalId(
-            budgetId, p.recipient, p.amount, notBefore, p.expiresAt, actionHash, p.evidenceHash
+            budgetId, p.recipient, p.amount, notBefore, p.expiresAt, actionHash, p.purposeHash
         );
         p.scheduled = true;
         p.disbursementId = disbursementId;
@@ -270,6 +324,7 @@ contract FoundingTreasuryAuthority420 {
         if (p.contingency) {
             contingencyCommitted += p.amount;
             contingencyCommittedByDay[day] += p.amount;
+            contingencyCommittedByIncident[p.evidenceHash] += p.amount;
         } else {
             operationsCommitted += p.amount;
             operationsCommittedByDay[day] += p.amount;
@@ -277,7 +332,7 @@ contract FoundingTreasuryAuthority420 {
         }
         disbursementRegistry.schedule(
             disbursementId, budgetId, p.recipient, p.amount, notBefore, p.expiresAt,
-            actionHash, p.evidenceHash
+            actionHash, p.purposeHash
         );
         emit FoundingPaymentScheduled(paymentId, disbursementId, p.amount, p.contingency);
     }
@@ -288,9 +343,20 @@ contract FoundingTreasuryAuthority420 {
         bytes32 paymentId, address executor, bytes32 expectedCommitment
     ) external onlyFounder returns (bytes32 commitment) {
         Payment storage p = payments[paymentId];
-        if (!p.scheduled || p.released || p.disbursementId == bytes32(0) || executor.code.length == 0)
-            revert InvalidPayment();
+        if (!p.scheduled || p.released || p.disbursementId == bytes32(0)
+            || p.purposeHash == bytes32(0)) revert InvalidPayment();
+        if (executor != foundingReleaseExecutor || executor == address(0)
+            || executor.codehash != foundingReleaseExecutorCodeHash)
+            revert ReleaseExecutorNotBound();
+        if (!p.twoFounderRequired && msg.sender != foundingAdministrator) revert UnauthorizedFounder();
         if (TreasuryReleaseExecutor420(executor).operator() != address(this)) revert InvalidConfiguration();
+        TreasuryDisbursementRegistry420.Disbursement memory scheduled =
+            disbursementRegistry.disbursement(p.disbursementId);
+        if (scheduled.state != TreasuryDisbursementRegistry420.State.SCHEDULED
+            || scheduled.recipient != p.recipient || scheduled.amount != p.amount
+            || scheduled.asset != address(0) || scheduled.purposeHash != p.purposeHash
+            || scheduled.expiresAt != p.expiresAt)
+            revert InvalidConfiguration();
         if (p.contingency) {
             if (_rollingReleased(true) + p.amount > CONTINGENCY_30_DAY_MAX) revert SpendingLimit();
         } else {
@@ -310,7 +376,9 @@ contract FoundingTreasuryAuthority420 {
             operationsReleasedByDay[day] += p.amount;
             recipientReleasedByDay[p.recipient][day] += p.amount;
         }
+        _activeRelease = p.disbursementId;
         commitment = TreasuryReleaseExecutor420(executor).execute(p.disbursementId, expectedCommitment);
+        _activeRelease = bytes32(0);
         TreasuryDisbursementRegistry420.Disbursement memory d = disbursementRegistry.disbursement(p.disbursementId);
         if (d.state != TreasuryDisbursementRegistry420.State.EXECUTED || d.vaultReleaseHash != commitment)
             revert InvalidConfiguration();

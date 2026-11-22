@@ -73,8 +73,8 @@
       "name": "GovernanceTimelock",
       "predeploy_state": "contracts/config/predeploy/GovernanceTimelock-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/GovernanceTimelock.json",
-      "runtime_code_hash": "0x01a82218451317dcb3c46cda418d5cfb59aedd62610c7a66a28b9ace74a2d15e",
-      "source_blob_sha1": "7ce176829b42f7785e93fc76150863c85c9163d0"
+      "runtime_code_hash": "0x9f3b61e71f625ee8bc36d62ccfd261aa7d6998bd073e784c1141cb619f777ed4",
+      "source_blob_sha1": "e972f80fc023baa2e48d2a1a938c0edba11e4437"
     },
     {
       "address": "0x000000000000000000000000000000000000042a",
@@ -178,7 +178,7 @@
       "name": "Governance420",
       "predeploy_state": "contracts/config/predeploy/Governance420-predeploy-state.json",
       "runtime_artifact": "contracts/artifacts/Governance420.json",
-      "runtime_code_hash": "0x3f0ba6d9522d957e92f30df09fd861d6e454a04fd2fa769a240fd53e6fd2c45f",
+      "runtime_code_hash": "0xa24c01291937a88fbb95466a97b82def07f30d4a9d405a9ad337cb701a42ff04",
       "source_blob_sha1": "e7f3f4e822f9addf8373aade670f02edf5670072"
     },
     {

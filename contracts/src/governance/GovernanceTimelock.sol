@@ -49,12 +49,16 @@ contract GovernanceTimelock {
         assembly { locked := iszero(iszero(tload(slot))) }
     }
 
-    function _setOperationExecuting(bool executing) private {
+    function _setOperationExecuting(
+        bool executing
+    ) private {
         bytes32 slot = _EXECUTION_LOCK_SLOT;
         assembly { tstore(slot, executing) }
     }
 
-    function _setCivicContext(bytes32 id) private {
+    function _setCivicContext(
+        bytes32 id
+    ) private {
         bytes32 slot = _CIVIC_CONTEXT_SLOT;
         assembly { tstore(slot, id) }
     }

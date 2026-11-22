@@ -159,8 +159,6 @@ const cardImage=(card,leg)=>{
  return url?'<img src="'+escape(url)+'" width="96" height="162" alt="" loading="lazy" decoding="async">':'';
 };
 const cardLabel=c=>c.type==='mileage'?c.km+' km':c.name||c.id||c.type;
- // Presentation-only explanation: both local practice and account multiplayer
- // retain their own legal-action authority and never infer playable moves here.
 export function chaosCardHelp(c){
  if(!c)return '';
  if(c.type==='mileage')return 'Advance '+c.km+' km. Drives over 300 km risk a regional hazard.';

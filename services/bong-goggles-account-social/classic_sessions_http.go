@@ -29,6 +29,17 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   }
   return
  }
+ if path=="/v1/classic-sessions/history"&&r.Method=="GET"{
+  history,e:=h.Sessions.History(ctx,viewer);if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
+ }
+ if path=="/v1/classic-sessions/challenge"&&r.Method=="POST"{
+  var req struct{Target string `json:"target"`;RequestID string `json:"requestId"`}
+  if strictJSON(r,&req)!=nil{deny(w,400);return}
+  room,e:=h.Sessions.Challenge(ctx,viewer,req.Target,req.RequestID)
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
+ }
  if !strings.HasPrefix(path,"/v1/classic-sessions/"){deny(w,404);return}
  parts:=strings.Split(strings.TrimPrefix(path,"/v1/classic-sessions/"),"/")
  if len(parts)<1||len(parts)>2||!uuid.MatchString(parts[0]){deny(w,404);return}
@@ -36,6 +47,13 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
  if len(parts)==1&&r.Method=="GET"{
   state,e:=h.Sessions.Get(ctx,viewer,id);if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"session":state,"onChain":false,"wager":false,"rewards":false});return
+ }
+ if len(parts)==2&&parts[1]=="rematch"&&r.Method=="POST"{
+  var req struct{RequestID string `json:"requestId"`}
+  if strictJSON(r,&req)!=nil{deny(w,400);return}
+  room,e:=h.Sessions.Rematch(ctx,viewer,id,req.RequestID)
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
  }
  if len(parts)==2&&parts[1]=="action"&&r.Method=="POST"{
   var req ClassicSessionAction

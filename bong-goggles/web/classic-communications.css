@@ -1,0 +1,13 @@
+/* BC-0.10: presence and reconnect status for the server-owned Classics room. */
+.classic-room__live{display:grid;gap:.65rem;padding:1rem;border:1px solid var(--line);
+ border-radius:12px;background:var(--surface-2);min-width:0}
+.classic-room__live h3,.classic-room__live p{margin:0}
+.classic-room__live ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));
+ gap:.5rem;padding:0;margin:0;list-style:none}
+.classic-room__live li{padding:.65rem;border:1px solid var(--line);border-radius:8px;
+ background:var(--surface);overflow-wrap:anywhere}
+.classic-room__live [role="status"]{font-weight:700;border-left:4px solid #b27c10;padding:.6rem .8rem;
+ background:var(--surface)}
+.classic-room__live time{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+@media(max-width:600px){.classic-room__live{padding:.75rem}.classic-room__live ul{grid-template-columns:minmax(0,1fr)}}
+@media(forced-colors:active){.classic-room__live,.classic-room__live li,.classic-room__live [role="status"]{border:2px solid CanvasText}}

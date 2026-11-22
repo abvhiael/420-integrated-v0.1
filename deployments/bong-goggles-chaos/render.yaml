@@ -1,0 +1,20 @@
+# Operator-applied Render Blueprint. Select this path explicitly when creating the
+# dedicated CCC service. It does not mutate the existing BongGoggles social service.
+# All credentials are provided through Render's secret environment UI, never Git.
+services:
+  - type: web
+    name: bonggoggles-chaos
+    runtime: node
+    rootDir: services/bong-goggles-chaos
+    buildCommand: npm ci --omit=dev --no-audit --no-fund --ignore-scripts
+    startCommand: node main.mjs
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: CHAOS_MODE
+        value: restricted-acceptance
+      - key: CHAOS_DATABASE_URL
+        sync: false
+      - key: CHAOS_PROXY_KEY
+        sync: false

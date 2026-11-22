@@ -49,7 +49,7 @@ jobs:
           node-version: '22'
       - name: Install isolated game service package
         working-directory: services/bong-goggles-chaos
-        run: npm install --no-audit --no-fund --ignore-scripts
+        run: npm ci --no-audit --no-fund --ignore-scripts
       - name: Check authoritative entrypoint and all JavaScript modules
         working-directory: services/bong-goggles-chaos
         run: |

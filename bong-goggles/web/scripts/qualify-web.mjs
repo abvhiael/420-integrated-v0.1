@@ -63,6 +63,7 @@ const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
 // preserve each previous file, card, atlas, vehicle and combined budget.
 const bc05Files=Object.freeze({
  'core/classic-rooms.js':Object.freeze({baseline:0,maxAdded:16*1024}),
+ 'core/classic-room-bindings.js':Object.freeze({baseline:0,maxAdded:2*1024}),
  'app.js':Object.freeze({baseline:30434,maxAdded:3584}),
  'core/routes.js':Object.freeze({baseline:3368,maxAdded:512}),
  'core/app-shell.js':Object.freeze({baseline:12822,maxAdded:640}),
@@ -132,9 +133,24 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
+if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth;
+// CCC's account-only form wiring belongs to the separately approved roadboard/chat
+// allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
+const onlineBindingsBytes=regularSizes.get('core/chaos-online-bindings.js');
+if(!Number.isSafeInteger(onlineBindingsBytes)||onlineBindingsBytes<1600||onlineBindingsBytes>4*1024)
+ throw new Error('CCC online bindings missing or exceeded independent 4 KiB cap');
+const gameKitSize=regularSizes.get('game-kit.css');
+if(!Number.isSafeInteger(gameKitSize)||gameKitSize<3*1024||gameKitSize>8*1024)
+ throw new Error('BC-0.9 reusable tabletop CSS must be separately bounded to 8 KiB');
+const gameKitLogicSize=regularSizes.get('core/tabletop-components.js');
+if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLogicSize>16*1024)
+ throw new Error('BC-0.9 canonical shared components exceeded independent 16 KiB cap');
+// BC-0.9 has its own 24 KiB ceiling (16 KiB JS + 8 KiB CSS), independent
+// of the frozen BC-0.2 through BC-0.5 and original asset allowances.
+if(gameKitLogicSize+gameKitSize>24*1024)
+ throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
+const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
@@ -182,7 +198,7 @@ const total=baseTotal+cardTotal+mapTotal+vehicleTotal;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');
-if(!html.includes('href="/ccc-tabletop.css"')||!tabletopCss.includes('ccc-tabletop--road-atlas')||
+if(!html.includes('href="/game-kit.css"')||!html.includes('href="/ccc-tabletop.css"')||!tabletopCss.includes('ccc-tabletop--road-atlas')||
   !tabletopCss.includes('prefers-reduced-motion:reduce')||!tabletopCss.includes('forced-colors:active')||
   tabletopCss.includes('@import')||tabletopCss.includes('https://')||tabletopCss.includes('http://'))
  throw new Error('Missing or unsafe CCC-ART-4 tabletop stylesheet');
@@ -255,7 +271,7 @@ if(!shellUi.includes("if(route.id==='chaos-game')return renderChaosOnline")||
  !onlineUi.includes("credentials:'same-origin'")||
  !onlineUi.includes("checkChaosProjection")||
  !app.includes("new ChaosRoomsClient")||
- !app.includes("bindChaosOnline()")||
+ !app.includes("bindChaosOnline(root,chaosOnline,window.location.pathname)")||
  !tabletopCss.includes('.ccc-online-cards')||
  !tabletopCss.includes('.app-shell[data-route="chaos-game"] .app-sidebar'))
  throw new Error('CCC account multiplayer route must not expose pass-and-play');

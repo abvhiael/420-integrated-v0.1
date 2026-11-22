@@ -45,7 +45,7 @@ certified=[s for s in states if s["latest_qc"]["signers"]>=11]
 assert len(certified)>=11, "insufficient actual 11-of-15 quorum certificates"
 assert all(s["latest_qc"]["block_root"] and s["latest_qc"]["signers"]<=15
            for s in certified),"bad quorum source"
-assert all(s["head"]["slot"]>=s["safe"]["slot"]>=s["finalized"]["slot"]
+assert all(s["head"]["Slot"]>=s["safe"]["Slot"]>=s["finalized"]["Slot"]
            for s in states), "invalid head-safe-finality monotonicity"
 assert all(s["next_slot"]>s["latest_qc"]["slot"] for s in certified), "nonpersistent certified slot"
 report={
@@ -53,7 +53,7 @@ report={
   "phase":phase,"chainIdentity":"SIMULATED_CONSENSUS_DEVNET_NOT_CHAIN_420_EXECUTION",
   "runningValidatorProcesses":15,"quorumThreshold":11,"quorumStates":len(certified),
   "minimumNextSlot":min(s["next_slot"] for s in states),
-  "minimumFinalizedSlot":min(s["finalized"]["slot"] for s in states),
+  "minimumFinalizedSlot":min(s["finalized"]["Slot"] for s in states),
   "persistedStateRecovered":phase=="recovered",
   "realExecutionEngineConnected":False,
   "productionBlsRemoteSignerQualified":False,

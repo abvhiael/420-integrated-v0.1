@@ -9,6 +9,7 @@ import (
  "fmt"
  "regexp"
  "strings"
+ "time"
 )
 
 // BC-0.7: trust-boundary contract for independently qualified rules modules.
@@ -47,13 +48,13 @@ type RuleModule interface {
 type RuleDecisionPolicy interface{
  ChooseMove(seatView json.RawMessage,difficulty string,legal []json.RawMessage,budget *RuleBudget)(json.RawMessage,error)
 }
-type RuleBudget struct{remaining int;spent int}
+type RuleBudget struct{remaining int;spent int;deadline time.Time}
 func NewRuleBudget(limit int)*RuleBudget{
  if limit<1||limit>100000{return &RuleBudget{}}
  return &RuleBudget{remaining:limit}
 }
 func (b *RuleBudget)Charge(cost int)error{
- if b==nil||cost<1||cost>b.remaining{return ErrUnavailable}
+ if b==nil||cost<1||cost>b.remaining||(!b.deadline.IsZero()&&!time.Now().Before(b.deadline)){return ErrUnavailable}
  b.remaining-=cost;b.spent+=cost;return nil
 }
 const maxRulesLegal=128
@@ -83,7 +84,16 @@ func (a *RulesAdapter)Initial(room ClassicRoom,seats []ClassicSeat)(json.RawMess
 }
 func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []ClassicSeat)(json.RawMessage,int,error){
  if a==nil||room.GameID!=a.definition.GameID||len(seats)!=room.SeatCount||!classicSeatsValid(room.GameID,room.SeatCount){return nil,0,ErrInvalid}
- for i,s:=range seats{if s.Index!=i||s.Controller!="human"||!uuid.MatchString(s.Subject){return nil,0,ErrUnavailable}}
+ for i,s:=range seats{
+  if s.Index!=i{return nil,0,ErrUnavailable}
+  switch s.Controller{
+  case "human":
+   if !uuid.MatchString(s.Subject)||s.Difficulty!=""{return nil,0,ErrUnavailable}
+  case "bot":
+   if s.Subject!=""||!map[string]bool{"easy":true,"medium":true,"hard":true}[s.Difficulty]{return nil,0,ErrUnavailable}
+  default:return nil,0,ErrUnavailable
+  }
+ }
  first,e:=a.initial(seed,room.SeatCount)
  if e!=nil{return nil,0,e}
  return first,func()int{frame,_:=a.decode(first);return frame.Turn}(),nil

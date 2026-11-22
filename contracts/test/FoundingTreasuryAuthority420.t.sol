@@ -23,13 +23,16 @@ interface VmFounding420 {
 
 contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
     bool public override retirementReady;
-    bool public override retirementExecutionAuthorized;
+    bool public retirementExecutionAuthorizedFlag;
 
     function setReady(
         bool value
     ) external {
         retirementReady = value;
-        retirementExecutionAuthorized = value;
+        retirementExecutionAuthorizedFlag = value;
+    }
+    function retirementExecutionAuthorized(address) external view returns (bool) {
+        return retirementExecutionAuthorizedFlag;
     }
 }
 

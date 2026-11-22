@@ -41,7 +41,6 @@ jobs:
       - name: Install isolated pinned test-only Chromium
         working-directory: bong-goggles/web
         run: |
-          npm ci --ignore-scripts --no-audit --no-fund
           npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
           npx playwright install --with-deps chromium
       - name: Verify separate 420ID accounts, real server completion, recovery and AI tiers

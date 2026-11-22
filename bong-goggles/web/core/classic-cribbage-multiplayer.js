@@ -58,7 +58,7 @@ export function bindCribbageRoomStart(root,rooms,{history,onRouteChange,onRefres
     await onRefresh?.();return;
    }
    if(result.status!==201||!envelope(result))throw Error('Unverified server match start');
-   const s=normalizeCribbageSnapshot(result,actor);
+   const s=normalizeCribbageSnapshot({...result,status:200},actor);
    if(!s||s.gameId!==game||s.roomId!==room.id||s.viewerSeat!==0||
     s.status!=='active'||s.sequence!==1)throw Error('Incorrectly authorized Cribbage match');
    if(await verifiedPrincipal(rooms.client)!==actor)

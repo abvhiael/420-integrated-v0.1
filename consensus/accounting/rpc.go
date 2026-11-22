@@ -86,7 +86,7 @@ var registryScalars = []string{"totalOwnedCustody", "totalProtocolCreditCustody"
 
 func (s *RPCSource) State(ctx context.Context, a sys.SequenceAnchor, ids, accounts []string) (State, error) {
 	out := State{}
-	for _, binding := range []struct{ address, version string }{{Reward, "2"}, {Registry, "3"}, {CreditReserve, "2"}} {
+	for _, binding := range []struct{ address, version string }{{Reward, "3"}, {Registry, "3"}, {CreditReserve, "2"}} {
 		value, err := s.scalar(ctx, a, binding.address, "protocolVersion()", "uint32")
 		if err != nil {
 			return nil, err
@@ -95,7 +95,7 @@ func (s *RPCSource) State(ctx context.Context, a sys.SequenceAnchor, ids, accoun
 			return nil, fmt.Errorf("unqualified accounting contract ABI/version")
 		}
 	}
-	for _, address := range []string{Registry, CreditReserve, ProtocolReserve} {
+	for _, address := range []string{Reward, Registry, CreditReserve, ProtocolReserve} {
 		var raw string
 		if err := s.Engine.Call(ctx, "eth_getBalance", []any{address, map[string]any{"blockHash": hex32(a.BlockHash), "requireCanonical": true}}, &raw); err != nil {
 			return nil, err
@@ -109,7 +109,7 @@ func (s *RPCSource) State(ctx context.Context, a sys.SequenceAnchor, ids, accoun
 	for _, group := range []struct {
 		address string
 		names   []string
-	}{{Registry, registryScalars}, {Reward, []string{"grossSecurityIssued", "grossAttentionIssued", "grossDevelopmentIssued"}}, {CreditReserve, []string{"totalAssigned", "totalFunded"}}} {
+	}{{Registry, registryScalars}, {Reward, []string{"grossSecurityIssued", "grossAttentionIssued", "grossDevelopmentIssued", "nativeRewardPaid", "communityRewardAccrued", "communityRewardBackingReceived", "communityRewardSettled"}}, {CreditReserve, []string{"totalAssigned", "totalFunded"}}} {
 		for _, key := range group.names {
 			value, err := s.scalar(ctx, a, group.address, key+"()", "uint256")
 			if err != nil {

@@ -1,6 +1,6 @@
 {
   "schema": "420-founding-financial-authority-provisional-v1",
-  "status": "CODE_CANDIDATE_NOT_DEPLOYED_GENESIS_ALLOCATION_NOT_FINAL",
+  "status": "CODE_CANDIDATE_UNFUNDED_VAULTS_PENDING_GENESIS_V4",
   "modeledGenesisSupply": "42000000",
   "token": "420",
   "operations": {
@@ -47,5 +47,14 @@
     "unspentFundsDestination": "community_governed_reserve",
     "irreversible": true
   },
-  "codeStatus": "Founding Treasury controller and full-credit sponsor path are contract candidates. 10% sponsor reward is accounted at RewardController accrual only; actual CommunityRewardReserve settlement, Genesis predeploy authorization, 50/25/25 payout deployment and retirement-verifier implementation remain unqualified."
+  "codeStatus": "Founding Treasury controller and full-credit sponsor path are contract candidates. 10% sponsor reward is accounted at RewardController accrual only; actual CommunityRewardReserve settlement, Genesis predeploy authorization, 50/25/25 payout deployment and retirement-verifier operation remain unqualified.",
+  "genesisFunding": {
+    "sourceAllocationId": "protocol-reserve",
+    "sourcePredeploy": "0x0000000000000000000000000000000000000424",
+    "sourceTotal420": 8600000,
+    "foundingOperationsEarmark420": 4200000,
+    "contingencyEarmark420": 840000,
+    "unearmarkedProtocolReserve420": 3560000,
+    "treatment": "NON_ADDITIVE_WITHIN_PROTOCOL_RESERVE_UNFUNDED_VAULTS"
+  }
 }

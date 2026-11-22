@@ -240,7 +240,7 @@ jobs:
           dest=Path(os.environ["GOV_PRE_08_ROOT"])
           pending=[root/"test/GOVPRE08LocalDeployment420.t.sol"]
           seen=set()
-          pat=re.compile(r'\\bimport\\s+(?:[^;]*?\\bfrom\\s+)?["\\x27]([^"\\x27]+)["\\x27]\\s*;')
+          pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
           while pending:
               p=pending.pop().resolve()
               if p in seen: continue
@@ -255,10 +255,10 @@ jobs:
               shutil.copyfile(p,out)
               assert p.read_bytes()==out.read_bytes()
           shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
-          (dest/"remappings.txt").write_text("forge-std/=forge-std/\\n")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
           (Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-import-closure.json").write_text(
               json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
-                          for p in sorted(seen)},sort_keys=True,indent=2)+"\\n")
+                          for p in sorted(seen)},sort_keys=True,indent=2)+"\n")
           print("GOV_PRE_08_IMPORTED_GENUINE_SOURCE_FILES",len(seen))
           PY
       - name: Fully deploy and bind founder/Treasury/sponsor/compensation/retirement graph twice

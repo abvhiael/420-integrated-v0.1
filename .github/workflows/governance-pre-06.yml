@@ -51,6 +51,19 @@ jobs:
       - name: Compile verified electorate graph
         working-directory: contracts
         run: forge build src/governance
+      - name: Enforce EIP-170 deployable bytecode limit
+        working-directory: contracts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("out/Governance420.sol/Governance420.json").read_text())
+          deployed = data["deployedBytecode"]["object"]
+          assert deployed.startswith("0x"), "invalid deployed code"
+          count = (len(deployed) - 2) // 2
+          print("Governance420 deployable runtime bytes:", count)
+          assert count <= 24576, f"EIP-170 cap breached: {count} > 24576"
+          PY
       - name: Qualify post-Genesis real first-electorate, adversarial and Timelock paths
         working-directory: contracts
         run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 forge test --match-path test-governance-audit-6/GovPre06Electorate420.t.sol -vvv

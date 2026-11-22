@@ -65,7 +65,7 @@ for tag in "ab":
     records.append((int(m.group(1)),hashes[0].lower(),hashes[1].lower()))
 for tag in "ab":
     txt=(p/f"govpre08-step3-civic-{tag}.log").read_text()
-    m=re.search(r"(?m)^Ran (\\d+) tests for test/GOVPRE08CivicLifecycle420.t.sol",txt)
+    m=re.search(r"(?m)^Ran (\d+) tests for test/GOVPRE08CivicLifecycle420.t.sol",txt)
     assert m and int(m.group(1))>=2 and "0 failed" in txt and "0 skipped" in txt, "real Civic/Treasury governance lifecycle failed"
 assert records[0]==records[1],"independent Foundry EVM graph/custody changed"
 print("GOV_PRE_08_STEP3_REPEATED_ACTUAL_FOUNDER_TREASURY_VAULT_EVM=PASS",records[0])

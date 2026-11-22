@@ -189,11 +189,11 @@ return '<details class="cribbage-settings"><summary>Display settings</summary>'+
 }
 export function renderCribbageRoute({screen='intro',state=null,accountPanel='',identity=null}={}){
 if(identity)accountPanel=renderGameAccountPanel(identity[0],{enabled:identity[1]});
-const s=state??{status:'idle'},session=s.session,id=session?.id??null;
+const s=state??{status:'idle'},session=s.session,id=session?.id??null,playable=classicGameById('cribbage').status==='playable';
 const nav=back+menu(screen,id);
 const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
 '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
-'<span class="cribbage-status">BC-1.5 · Authenticated rooms</span></header>';
+'<span class="cribbage-status">'+(playable?'Playable':'BC-1.5 · Authenticated rooms')+'</span></header>';
 const isLive=s.status==='ready'&&session?.gameId==='cribbage';
 const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
 '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+
@@ -217,8 +217,8 @@ screen==='results'?isLive?'<div class="cribbage-results">'+
 renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
 pegs:s.pegs,settings:s.settings})+renderCribbageSocial(s.social)+'</div>':renderCribbageSocial(s.social):
 screen==='history'||screen==='rematch'?renderCribbageSocial(s.social):home;
-return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · The interface is implemented, but the live game is not yet playable until real 420ID room activation and the remaining release gates qualify.</p>'+details+settings(s)+
-'<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
+return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">'+(playable?'Playable with 420ID friends and computer opponents. Zero wagers or rewards.':'Zero-wager game · The live game is not yet playable until real 420ID room activation and the remaining release gates qualify.')+'</p>'+details+settings(s)+
+'<p class="cribbage-boundary">'+(playable?'Zero wagers · Server-authorized play · 420ID required for private turns':'Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify')+'</p></section>';
 }
 // Event handlers bind only data-attribute choices and submit through the
 // canonical session controller. No browser-generated scores or deck state.

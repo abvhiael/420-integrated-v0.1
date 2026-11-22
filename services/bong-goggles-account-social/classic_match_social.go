@@ -136,6 +136,14 @@ func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest
    if e!=nil{return "",e}
   }
  }
+ // A rematch with only the human host plus qualified bots has no
+ // outstanding consent, so it must be immediately startable.
+ pending:=false
+ for _,seat:=range seats{if seat.Controller=="invited"{pending=true}}
+ if !pending{
+  _,e=tx.ExecContext(ctx,"UPDATE bg_account_social.classic_rooms SET status='ready',revision=revision+1,updated_at=clock_timestamp() WHERE id=$1",id)
+  if e!=nil{return "",e}
+ }
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_match_requests(actor,request_id,room_id,digest,source_session_id) VALUES($1,$2,$3,$4,$5)",viewer,requestID,id,digest[:],source)
  if e!=nil{return "",e}
  return id,nil

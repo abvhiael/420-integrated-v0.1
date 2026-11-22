@@ -39,8 +39,16 @@ interface VmPre06 {
 
 contract Pre06ValidatorWitness {
     address public immutable governanceTimelock;
-    constructor(address timelock_) { governanceTimelock = timelock_; }
-    function protocolVersion() external pure returns (uint32) { return 3; }
+
+    constructor(
+        address timelock_
+    ) {
+        governanceTimelock = timelock_;
+    }
+
+    function protocolVersion() external pure returns (uint32) {
+        return 3;
+    }
     mapping(address => bytes32) public ownerValidatorId;
     mapping(bytes32 => address) public owner;
     mapping(bytes32 => bool) public eligible;
@@ -242,14 +250,18 @@ contract GovPre06Electorate420Test {
         timelock.execute(compatibility.bootstrapOperationId(plan, 19));
         for (uint256 i; i < 4; ++i) {
             address voter = i == 0 ? ALICE : i == 1 ? BOB : i == 2 ? CAROL : DAVE;
-            bytes32 houseType = i < 2
-                ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1")
-                : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1");
+            bytes32 houseType =
+                i < 2 ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1") : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1");
             vm.prank(AUTHORITY);
-            Identity420(IDENTITY).issueCredential(
-                _credential(voter), compatibility.INITIAL_ELECTORATE_ISSUER(),
-                _profile(voter), houseType, keccak256("independent-membership-attestation"), 0
-            );
+            Identity420(IDENTITY)
+                .issueCredential(
+                    _credential(voter),
+                    compatibility.INITIAL_ELECTORATE_ISSUER(),
+                    _profile(voter),
+                    houseType,
+                    keccak256("independent-membership-attestation"),
+                    0
+                );
         }
     }
 

@@ -1,0 +1,311 @@
+name: GOV-PRE-08 unsigned V4 Genesis candidate qualification
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/gov-pre-08/**'
+      - 'contracts/src/governance/Founding*.sol'
+      - 'contracts/src/treasury/Founding*.sol'
+      - 'contracts/src/revenue/Founding*.sol'
+      - 'contracts/src/revenue/DevelopmentCompensationVault420.sol'
+      - 'config/genesis-allocations.json'
+      - 'contracts/config/founder-wallet-reservations.json'
+      - 'contracts/config/candidates/genesis-config-commitment-v4-unsigned.json'
+      - 'contracts/test/fixtures/gov-pre-08-local-wallets.json'
+      - 'contracts/config/founding-genesis-integration-v1.json'
+      - '.github/workflows/governance-pre-08-genesis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v4-source-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact candidate source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "$EXPECTED_SHA" > "$RUNNER_TEMP/gov-pre-08-source-head.txt"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Adversarial policy, identity and supply boundaries
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/gov-pre-08/plan.py scripts/gov-pre-08/test_plan.py scripts/gov-pre-08/materialize-local-funding.py scripts/gov-pre-08/test_funding.py scripts/gov-pre-08/materialize-local-vesting.py
+          python3 scripts/gov-pre-08/test_plan.py
+          python3 scripts/gov-pre-08/test_funding.py
+          python3 scripts/verify-genesis-supply-reconciliation.py
+          python3 scripts/verify-founding-genesis-integration.py
+      - name: Compile exact founder/Treasury/retirement module sources
+        run: |
+          set -euo pipefail
+          forge build --root contracts \
+            src/governance/FoundingWalletClaims420.sol \
+            src/governance/FoundingCommitteeMembership420.sol \
+            src/governance/FoundingRetirementVerifier420.sol \
+            src/treasury/FoundingTreasuryAuthority420.sol \
+            src/treasury/FoundingValidatorSponsorship420.sol \
+            src/treasury/FoundingCommunityRetirementSweep420.sol \
+            src/revenue/FoundingDeveloperCompensationSplitter420.sol \
+            src/revenue/DevelopmentCompensationVault420.sol \
+            src/treasury/TreasuryAuthorization420.sol \
+            src/treasury/TreasuryPolicyRegistry420.sol \
+            src/treasury/TreasuryBudgetRegistry420.sol \
+            src/treasury/TreasuryDisbursementRegistry420.sol \
+            src/treasury/TreasuryRouter420.sol \
+            src/treasury/TreasuryReleaseExecutor420.sol \
+            src/system/FounderVestingRegistry.sol \
+            --extra-output storageLayout
+      - name: Check reproducible V4 candidate, constructor ABIs, source blobs and missing live receipts
+        run: |
+          set -euo pipefail
+          python3 scripts/gov-pre-08/plan.py --output "$RUNNER_TEMP/gov-pre-08-candidate-a.json"
+          python3 scripts/gov-pre-08/plan.py --output "$RUNNER_TEMP/gov-pre-08-candidate-b.json"
+          cmp "$RUNNER_TEMP/gov-pre-08-candidate-a.json" "$RUNNER_TEMP/gov-pre-08-candidate-b.json"
+          if python3 scripts/gov-pre-08/plan.py --require-release > "$RUNNER_TEMP/gov-pre-08-release.txt" 2>&1; then
+            echo 'ERROR: unsigned V4 was promoted to a signed Genesis release' >&2
+            exit 1
+          fi
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-candidate-a.json").read_text())
+          assert len(x["components"])==14
+          assert all(x["components"][i]["sourceGitBlobSha1"] for i in range(14))
+          assert all(x["components"][i]["storageLayoutSha256"] for i in range(14))
+          assert len(x["consumerIntegrations"])==7
+          assert all(x["components"][i]["deployedAddress"] is None for i in range(14))
+          assert all(x["components"][i]["verifiedRuntimeCodeHash"] is None for i in range(14))
+          assert not x["proposedV4"]["independentlyApproved"]
+          assert x["proposedV4"]["genesisConfigHash"].startswith("0x")
+          print("GOV-PRE-08_SOURCE_CANDIDATE=PASS; LIVE_RELEASE=BLOCKED_AS_EXPECTED")
+          PY
+      - name: Rehearse deterministic 42m local Genesis funding twice (synthetic identities only)
+        run: |
+          set -euo pipefail
+          for tag in a b; do
+            python3 scripts/gov-pre-08/materialize-local-funding.py \
+              --output "$RUNNER_TEMP/gov-pre-08-local-$tag.json" \
+              --provenance "$RUNNER_TEMP/gov-pre-08-local-$tag-proof.json"
+          done
+          cmp "$RUNNER_TEMP/gov-pre-08-local-a.json" "$RUNNER_TEMP/gov-pre-08-local-b.json"
+          cmp "$RUNNER_TEMP/gov-pre-08-local-a-proof.json" "$RUNNER_TEMP/gov-pre-08-local-b-proof.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          genesis=json.loads((p/"gov-pre-08-local-a.json").read_text())
+          proof=json.loads((p/"gov-pre-08-local-a-proof.json").read_text())
+          assert genesis["config"]["chainId"]==31337
+          assert sum(int(x["balance"]) for x in genesis["alloc"].values())==42_000_000*10**18
+          assert len(genesis["alloc"])==11
+          assert proof["status"]=="SYNTHETIC_UNOWNED_ADDRESSES_NOT_A_RELEASE"
+          assert not proof["genesisFundingBalancesVerifiedOnChain"]
+          print("GOV-PRE-08_SYNTHETIC_BLOCK_ZERO=PASS; AUTHENTIC_APPROVAL=ABSENT")
+          PY
+      - name: Verify real Anvil block-zero balances and synthetic chain isolation
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-a.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18545 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-anvil.log" 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18545 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          genesis=json.loads((p/"gov-pre-08-local-a.json").read_text())
+          expected=genesis["alloc"]
+          def rpc(method,params):
+              payload=json.dumps({"jsonrpc":"2.0","id":1,"method":method,"params":params}).encode()
+              request=urllib.request.Request("http://127.0.0.1:18545",data=payload,
+                                             headers={"Content-Type":"application/json"})
+              with urllib.request.urlopen(request,timeout=10) as result:
+                  body=json.loads(result.read())
+              assert "error" not in body,body
+              return body["result"]
+          assert int(rpc("eth_chainId",[]),16)==31337
+          actual={}
+          for address,account in expected.items():
+              amount=int(rpc("eth_getBalance",[address,"latest"]),16)
+              assert amount==int(account["balance"]),(address,amount,account["balance"])
+              actual[address]=amount
+          assert sum(actual.values())==42_000_000*10**18
+          vest="0x0000000000000000000000000000000000000427"
+          assert actual[vest]==500_000*10**18
+          assert rpc("eth_getCode",[vest,"latest"])=="0x", "unmaterialized vesting must not masquerade as deployed"
+          proof=json.loads((p/"gov-pre-08-local-a-proof.json").read_text())
+          proof["genesisFundingBalancesVerifiedOnChain"]=True
+          proof["localBlockZeroBalanceRpc"]="http://127.0.0.1:18545 (ephemeral only)"
+          proof["runtimeAndConstructorStorageVerifiedOnChain"]=False
+          (p/"gov-pre-08-local-anvil-evidence.json").write_text(
+              json.dumps(proof,sort_keys=True,indent=2)+"\n")
+          print("GOV-PRE-08_ANVIL_BALANCES=PASS; SYNTHETIC_31337_ONLY; RUNTIMES_NOT_DEPLOYED")
+          PY
+      - name: Construct and materialize real vesting runtime/storage on funded 0x0427 (local fixture)
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-a.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18545 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-genesis.log" 2>&1 &
+          genesis_pid=$!
+          anvil --chain-id 31337 --accounts 1 --balance 0 --timestamp 1700000000 \
+            --host 127.0.0.1 --port 18546 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-constructor.log" 2>&1 &
+          constructor_pid=$!
+          trap 'kill "$genesis_pid" "$constructor_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18545 >/dev/null 2>&1 && \
+               cast chain-id --rpc-url http://127.0.0.1:18546 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 scripts/gov-pre-08/materialize-local-vesting.py \
+            --genesis-rpc http://127.0.0.1:18545 \
+            --constructor-rpc http://127.0.0.1:18546 \
+            --output "$RUNNER_TEMP/gov-pre-08-vesting-runtime.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-vesting-runtime.json").read_text())
+          assert x["realConstructorExecutedOnDisposableLocalChain"] is True
+          assert x["fixedLocalGenesisPredeploy"]=="0x0000000000000000000000000000000000000427"
+          assert x["nativeVestingBalanceWei"]==str(500_000*10**18)
+          assert not x["signedV4Approved"] and not x["founderWalletOwnershipVerified"]
+          assert not x["mainnetOrTestnetRuntimeVerified"] and not x["foundingTreasuryVaultsFunded"]
+          print("GOV-PRE-08_REAL_VESTING_STORAGE=PASS; UNOWNED_SYNTHETIC_ONLY")
+          PY
+      - name: Re-run independent vesting constructor and compare exact runtime/storage state
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-b.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18547 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-repeat-genesis.log" 2>&1 &
+          genesis_pid=$!
+          anvil --chain-id 31337 --accounts 1 --balance 0 --timestamp 1700000000 \
+            --host 127.0.0.1 --port 18548 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-repeat-constructor.log" 2>&1 &
+          constructor_pid=$!
+          trap 'kill "$genesis_pid" "$constructor_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18547 >/dev/null 2>&1 && \
+               cast chain-id --rpc-url http://127.0.0.1:18548 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 scripts/gov-pre-08/materialize-local-vesting.py \
+            --genesis-rpc http://127.0.0.1:18547 \
+            --constructor-rpc http://127.0.0.1:18548 \
+            --output "$RUNNER_TEMP/gov-pre-08-vesting-runtime-repeat.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          left=json.loads((p/"gov-pre-08-vesting-runtime.json").read_text())
+          right=json.loads((p/"gov-pre-08-vesting-runtime-repeat.json").read_text())
+          for key in ("exactSourceCommit","unsignedV4CandidateHash",
+                      "constructorReceiptAddressLocal","fixedLocalGenesisPredeploy",
+                      "fixedGovernanceTimelockImmutable","syntheticFounderWallets",
+                      "syntheticGenesisTimestamp","runtimeCodeHashKeccak256",
+                      "runtimeCodeBytes","abiSha256","storageLayoutSha256",
+                      "storageWords","storageWordsSha256","nativeVestingBalanceWei"):
+              assert left[key]==right[key],key
+          assert left["realConstructorExecutedOnDisposableLocalChain"]
+          assert right["realConstructorExecutedOnDisposableLocalChain"]
+          print("GOV-PRE-08_CONSTRUCTOR_AND_PREDEPLOY_DETERMINISM=PASS (2 independent local chains)")
+          PY
+      - name: Prepare only GOV-PRE-08 real deployment test import closure
+        working-directory: contracts
+        env:
+          GOV_PRE_08_ROOT: ${{ runner.temp }}/gov-pre-08-foundry
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          dest=Path(os.environ["GOV_PRE_08_ROOT"])
+          pending=[root/"test/GOVPRE08LocalDeployment420.t.sol"]
+          seen=set()
+          pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(root) or not p.is_file():
+                  raise RuntimeError(f"missing GOV-PRE-08 dependency: {p}")
+              seen.add(p)
+              for imported in pat.findall(p.read_text()):
+                  pending.append(p.parent/imported)
+          for p in sorted(seen):
+              out=dest/p.relative_to(root)
+              out.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,out)
+              assert p.read_bytes()==out.read_bytes()
+          shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          (Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-import-closure.json").write_text(
+              json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                          for p in sorted(seen)},sort_keys=True,indent=2)+"\n")
+          print("GOV_PRE_08_IMPORTED_GENUINE_SOURCE_FILES",len(seen))
+          PY
+      - name: Fully deploy and bind founder/Treasury/sponsor/compensation/retirement graph twice
+        run: |
+          set -euo pipefail
+          forge test --root "$RUNNER_TEMP/gov-pre-08-foundry" --match-path test/GOVPRE08LocalDeployment420.t.sol -vv \
+            | tee "$RUNNER_TEMP/gov-pre-08-deployment-graph-a.log"
+          forge test --root "$RUNNER_TEMP/gov-pre-08-foundry" --match-path test/GOVPRE08LocalDeployment420.t.sol -vv \
+            | tee "$RUNNER_TEMP/gov-pre-08-deployment-graph-b.log"
+          python3 - <<'PY'
+          import os,re
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          logs=[(p/f"gov-pre-08-deployment-graph-{tag}.log").read_text() for tag in ("a","b")]
+          proofs=[]
+          for log in logs:
+              assert "4 tests passed" in log, "incomplete local graph tests"
+              hashes=re.findall(r"(?m)^[ \t]*(0x[0-9a-fA-F]{64})[ \t]*$",log)
+              assert len(hashes)==1, "no unique materialized local graph digest"
+              proofs.append(hashes[0].lower())
+          assert proofs[0]==proofs[1], "different runtime graph or deployment identity on second clean Forge EVM"
+          (p/"gov-pre-08-graph-two-runs.txt").write_text(
+              "LOCAL_ONLY=TRUE\nCHAIN_ID=31337\nRUNS=2\nFOCUSED_TESTS_EACH=4\nGRAPH_SHA3="+proofs[0]+"\n"
+          )
+          print("GOV_PRE_08_ALL_14_LOCAL_COMPONENTS_DEPLOYED_REGISTERED_BOTH_RUNS=PASS",proofs[0])
+          PY
+      - name: Preserve exact-head source candidate (never live receipts)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gov-pre-08-unsigned-v4-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/gov-pre-08-import-closure.json
+            ${{ runner.temp }}/gov-pre-08-deployment-graph-a.log
+            ${{ runner.temp }}/gov-pre-08-deployment-graph-b.log
+            ${{ runner.temp }}/gov-pre-08-graph-two-runs.txt
+            ${{ runner.temp }}/gov-pre-08-candidate-a.json
+            ${{ runner.temp }}/gov-pre-08-source-head.txt
+            ${{ runner.temp }}/gov-pre-08-release.txt
+            ${{ runner.temp }}/gov-pre-08-local-a.json
+            ${{ runner.temp }}/gov-pre-08-local-a-proof.json
+            ${{ runner.temp }}/gov-pre-08-local-anvil-evidence.json
+            ${{ runner.temp }}/gov-pre-08-anvil.log
+            ${{ runner.temp }}/gov-pre-08-vesting-runtime.json
+            ${{ runner.temp }}/gov-pre-08-vesting-genesis.log
+            ${{ runner.temp }}/gov-pre-08-vesting-constructor.log
+            ${{ runner.temp }}/gov-pre-08-vesting-runtime-repeat.json
+            ${{ runner.temp }}/gov-pre-08-vesting-repeat-genesis.log
+            ${{ runner.temp }}/gov-pre-08-vesting-repeat-constructor.log
+          if-no-files-found: warn

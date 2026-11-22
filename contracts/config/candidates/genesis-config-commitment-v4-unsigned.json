@@ -1,0 +1,60 @@
+{
+  "schema": "420-genesis-v4-unsigned-source-candidate-v1",
+  "status": "UNAPPROVED_NOT_FOR_GENESIS_EXECUTION",
+  "commitmentAlgorithm": "keccak256",
+  "canonicalization": "UTF-8 JSON of commitmentPayload with sorted object keys, compact separators, arrays in declared order",
+  "commitmentPayload": {
+    "domain": "420/GENESIS/CONFIG/V4",
+    "scope": "GENESIS_RESIDENT_CONTRACT_CONFIGURATION",
+    "initializationVersion": 1,
+    "governanceTimelock": "0x0000000000000000000000000000000000000429",
+    "protocolRegistry": "0x0000000000000000000000000000000000000434",
+    "authorityInputs": [
+      {
+        "path": "contracts/config/genesis-address-namespace.json",
+        "gitBlobSha1": "d9c40056db30513c0445f0c341d261b63dc6a1a5"
+      },
+      {
+        "path": "contracts/config/system-addresses.json",
+        "gitBlobSha1": "b3db3f81bd2464b1f3892de293c8da7c64b564c0"
+      },
+      {
+        "path": "contracts/config/interfaces/genesis-interface-layer.json",
+        "gitBlobSha1": "e5fc64b454dcaca4bbf112b1488986377d711128"
+      },
+      {
+        "path": "config/genesis-applications.json",
+        "gitBlobSha1": "73a24bfe46787f3c2af043adc1de12eea1f456ab"
+      },
+      {
+        "path": "config/genesis-allocations.json",
+        "gitBlobSha1": "ebbadebc7f0add8c7b42d4924145b2cd464941c7"
+      },
+      {
+        "path": "config/ai-genesis.json",
+        "gitBlobSha1": "789c750c7fb2eb2cbd6844122789b6611e91fbb0"
+      },
+      {
+        "path": "contracts/config/founder-wallet-reservations.json",
+        "gitBlobSha1": "9e81aa2293ae20a62c978458b2feaaee9c0cd4bd"
+      },
+      {
+        "path": "contracts/config/founding-genesis-integration-v1.json",
+        "gitBlobSha1": "772ecca3da8e83094a2c155a39551692154f787c"
+      }
+    ]
+  },
+  "genesisConfigHash": "0x4ff311153ce242a487cadd745b53c98172d73f1c188aad1176e9d99566f878f5",
+  "supersedesOnlyAfterIndependentApproval": {
+    "path": "contracts/config/genesis-config-commitment.json",
+    "historicalStatus": "FROZEN_V3",
+    "historicalGenesisConfigHash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d"
+  },
+  "approvals": {
+    "founderProofs": 0,
+    "independentGenesisApproval": false,
+    "exactRuntimeAndStorageMaterialized": false,
+    "liveDeploymentReceiptsVerified": false
+  },
+  "reason": "Candidate source hash deliberately includes still-unclaimed founder and unfunded Genesis integration records. It MUST be regenerated after independently confirmed human founder addresses/signatures and actual predeploy/runtime review; it is not an approved network release."
+}

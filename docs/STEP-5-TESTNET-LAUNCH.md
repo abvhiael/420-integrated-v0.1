@@ -39,3 +39,10 @@ The preflight script fails closed. Missing evidence or placeholder infrastructur
 configuration. A public launch must run `check-chain-id.py` against the live chain registry and freeze
 the decision before genesis. The historical 420-vs-2020 archaeology remains recorded rather than
 silently erased.
+
+
+## GOV-PRE-08 / GOV-AUDIT-9 — Governance and founding Genesis live handoff
+
+The exact deferred founding Governor/Treasury/Genesis requirements are tracked in [420Governance — Testnet Work Roadmap](audit/420GOVERNANCE-TESTNET-WORK-ROADMAP.md). This is an execution handoff to existing GOV-AUDIT-9, **not** a new testnet launch phase or permission to start with an unsigned Genesis. The [GOV-PRE-08 pre-testnet scope](audit/420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md#gov-pre-08--genesis-integration-pre-testnet-work-and-testnet-handoff) must first complete full reproducible local contract/Vault funding and registration, seven-consumer integration, runtime/storage materialization, authentic three-founder wallet proofs, and independently approved/frozen V4 Genesis inputs.
+
+Once the authorized chain is live, collect actual deployed source/code/storage, contract registration, on-chain founder claims, funded Operations/Contingency Vault transfer receipts, live Wallet/Registry/Indexer/Stake/Treasury/Explorer/Governance event and finality reconstruction, and any constitutionally eligible retirement/custody handoff. **Genesis V4 approval occurs before Step 5 startup**; post-launch on-chain receipts occur afterwards. Local fixture receipts never satisfy the latter.

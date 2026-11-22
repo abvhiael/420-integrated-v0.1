@@ -109,3 +109,42 @@ Create and inspect a G3/G4 dual-house proposal through its developer/operator co
 Preserve exact Git SHA, clean-worktree check, toolchain version, eight code hashes, immutable/storage layout records, approved roots/totals/provenance, chain ID, seven addresses and codehashes, all 19 legacy operation IDs (or indices 0–19 for the deferred mode) and receipts, checkpoint effective blocks, source revisions, approval/handoff proof, contract/Wallet/Indexer/Genesis/Treasury/Vault/repository qualification workflow IDs and their **actual** conclusions, and a specific outstanding-finding ledger.
 
 The current seven-field all-zero approval remains deliberately **fail-closed**; this document neither claims public chain launch nor satisfies GOV-AUDIT-9, the next production-equivalent testnet stage.
+
+
+## GOV-PRE-08 — unsigned V4 Genesis candidate preparation
+
+The historical active `FROZEN_V3` commitment is deliberately left intact. The working three-founder ledger has changed two of its original authority-input blobs, so it is **not** valid to run legacy V3 startup/recovery checks as if they qualified the new candidate. `GOV-PRE-08` creates an independently reproducible **unsigned V4 proposal**, not an authorization to launch a chain. No original V3 source file is silently rewritten.
+
+On the exact GOV-PRE-08 commit, with Foundry/cast installed and Solidity 0.8.24/Cancun/optimizer 200/via-IR, run the task-scoped CI workflow or the following:
+
+~~~sh
+python3 scripts/gov-pre-08/test_plan.py
+python3 scripts/verify-genesis-supply-reconciliation.py
+python3 scripts/verify-founding-genesis-integration.py
+forge build --root contracts src/governance/FoundingWalletClaims420.sol src/governance/FoundingCommitteeMembership420.sol src/governance/FoundingRetirementVerifier420.sol src/treasury/FoundingTreasuryAuthority420.sol src/treasury/FoundingValidatorSponsorship420.sol src/treasury/FoundingCommunityRetirementSweep420.sol src/revenue/FoundingDeveloperCompensationSplitter420.sol src/revenue/DevelopmentCompensationVault420.sol src/treasury/TreasuryAuthorization420.sol src/treasury/TreasuryPolicyRegistry420.sol src/treasury/TreasuryBudgetRegistry420.sol src/treasury/TreasuryDisbursementRegistry420.sol src/treasury/TreasuryRouter420.sol src/treasury/TreasuryReleaseExecutor420.sol
+python3 scripts/gov-pre-08/plan.py --output /tmp/gov-pre-08-unsigned.json
+# Must FAIL: no founder approvals, no live deployment receipts, no signed freeze.
+python3 scripts/gov-pre-08/plan.py --require-release
+~~~
+
+The candidate binds 14 real source/artifact/constructor-ABI identities; its dynamic founder, Treasury, sponsorship, compensation and retirement addresses intentionally remain `null`. No `0x04xx` address is claimed for them. The 42m supply is conserved, including 500k locked at the **existing** 0x0427 vesting predeploy and three liquid amounts of 250k/125k/125k whose personal destinations remain null until independently proven. The 8.6m Protocol Reserve retains its **non-additive** 4.2m Operations and 840k Contingency earmarks; **no new Vault balances are recorded** before exact authorized real transfers. The 10% sponsored-validator Community Reward path still targets 0x0426.
+
+Before approving any new V4, obtain the three **real** wallet addresses, public challenge signatures, chain/genesis commitment, source/constructor/immutable/runtime and initial-storage materialization, exact Vault route capabilities and registry bindings, reviewed funding plan and authorized decision/signatures. Freeze V4 only after recalculating authority blobs containing those identities and independently checking them on the exact source SHA. Do not publish a candidate digest as an approved V4 hash. For non-frozen post-Genesis components, deploy the exact artifacts with verified constructor inputs, independently capture finalized contract address/codehash and initialize control-plane and Vault registration in their established dependency order. Compensator Vault funds are authenticated **application revenues only**, never Genesis founder coins.
+
+Genesis validation and cold-start recovery must reject any missing founder or Operations/Contingency/Community Vault, stale V3 authority hash, codehash mismatch, wrong Timelock/Registry address, partial Civic/Stake graph, improperly funded vault, or missing atomic Treasury route receipt. A failure requires discarding the **unreleased** candidate or using the original governance-approved recovery operations. Never edit a historical signed bundle to make a verifier pass.
+
+
+### Local funding-only execution rehearsal (chain 31337, not V4 signoff)
+
+The deterministic sample `contracts/test/fixtures/gov-pre-08-local-wallets.json` consists of **three explicitly unowned synthetic addresses**. `scripts/gov-pre-08/materialize-local-funding.py` reads the unchanged historical execution Genesis and creates an ephemeral, independent 31337 `genesis.json`. It reallocates 500,000 from historical 0x0427 to the 250k/125k/125k **synthetic** founder accounts, retains the other seven original source destinations and 8.6m ProtocolReserve balance, and checks total supply is exactly 42m. Re-run it twice in separate empty output paths to verify byte-identical determinism.
+
+The focused GOV-PRE-08 CI starts an ephemeral Anvil node with `--init`, checks all eleven account balances through actual JSON-RPC `eth_getBalance`, verifies the local chain ID, and requires `eth_getCode(0x0427) == 0x` to make clear this is **funding only**. The separate Solidity candidate fingerprints ABI, runtime templates and compiler storage layouts but **does not claim to run constructors** or deploy the dynamic Registry-resolved Treasury/retirement components. Real V4 fixed predeploy materialization, sponsor route authorization and post-Genesis Vault funding **remain unavailable without independent founder and chain approvals**.
+
+Never copy these synthetic addresses or outputs into `contracts/config/founder-wallet-reservations.json`, `config/genesis-allocations.json`, the system-address table, a signed commitment, or a production recovery snapshot. Their inclusion is restricted to `31337` to make the 42m arithmetic independently observable without falsely claiming an authorized network.
+
+
+### Constructor-bound three-founder vesting rehearsal
+
+The same focused CI additionally compiles `FounderVestingRegistry.sol` and executes its **real Solidity constructor** on a separate, earlier-timestamp disposable Anvil chain using the three unowned addresses. `scripts/gov-pre-08/materialize-local-vesting.py` validates the compiled constructor ABI and storage layout, obtains the **real EVM deployed runtime and static storage**, and applies those bytes using **Anvil-only** `anvil_setCode` / `anvil_setStorageAt` to the *already funded* 0x0427 on the separate 31337 Genesis fixture. RPC readback proves each of the three beneficiary/start-time/claimed triples, immutable Timelock 0x0429, 500k block-zero allocation, 13-step fixed-policy constants, and unchanged locked balance. The tool refuses any non-loopback RPC and writes source-bound evidence without approving V4.
+
+This **actual local constructor and storage materialization** supersedes the funding-only observation that 0x0427 initially has no code; it is not a real signed or delivered 420 network Genesis. The constructor fixture's future epoch is intentional: the real constructor requires a non-backdated `startTime` while direct Genesis predeploy placement is a distinct offline operation. No synthetic address or Anvil dev RPC mutation is admissible as a final network deployment receipt. Final V4 materialization must recompute these bytes for the **independently approved real beneficiaries and actual network Genesis timestamp**, and production node420/Geth genesis-state inspection is still required.

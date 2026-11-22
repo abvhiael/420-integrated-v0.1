@@ -92,6 +92,34 @@ GOV-PRE-04 completes local code/qualification delivery **only**, not GOV-AUDIT-9
 
 ---
 
+## GOV-PRE-08 — Genesis integration: pre-testnet work and testnet handoff
+
+**Status: PARTIALLY IMPLEMENTED; PRE-TESTNET EXIT NOT SATISFIED; NO LIVE V4 APPROVAL.** The original GOV-PRE-08 deliverables and acceptance are unchanged. [Retained implementation/qualification evidence](GOV-PRE-08-QUALIFICATION.md) and [draft PR #1335](https://github.com/abvhiael/420-integrated-v0.1/pull/1335) show a source-bound **unsigned** V4 candidate, real source compilation (14 modules), **26 focused tests**, synthetic 42m Genesis funding verified against local RPC, and reproducible local constructor/runtime/storage for **FounderVestingRegistry at 0x0427 only**. These do **not** satisfy the full deployment, manifest, funding or integration criteria.
+
+### GOV-PRE-08 Step 1 — completed local deployment graph (2026-11-22)
+
+**Status: LOCAL CONTRACT DEPLOYMENT AND AUTHORITY BINDINGS QUALIFIED; FULL GOV-PRE-08 REMAINS OPEN.** At exact qualified executable source `32729091d09cf055f05a242259e961b216a87c19`, [focused Actions #45062812203](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45062812203) **SUCCESS**, [retained evidence](GOV-PRE-08-QUALIFICATION.md#gov-pre-08-pre-testnet-step-1--complete-local-contract-deployment-qualified): all fourteen founder/Treasury/sponsor/compensation/retirement real Solidity constructors deployed on two independently isolated Foundry EVMs; three local Vaults and their policies registered; real one-time permissions/identity/dependency handshakes verified; all fourteen components published on local real ProtocolRegistry with verified runtime codehash; canonical Treasury/Vault/DevelopmentCompensation service IDs resolved; unauthorized mutations and retirement rejected. **4/4 focused tests per run, 8/8 across both runs**, identical deployment-runtime graph digest `0xc337ffd4adc5d87f314979917db1b7c1eb5537e08c0bd0eee9dc9e1691c35dd4`. Testnet, real owner signatures and actual funded Vault balances are not implied; the component IDs generated for this isolated local test are *fixture-only*, and do not establish production component namespace authority.
+
+**The next pre-testnet work is item 2: actually fund and reconcile the complete V4-shaped Genesis/Vault accounting locally.** Items 2–4 below remain open. The GOV-PRE-08 milestone and later GOV-AUDIT-9/10 gates have **not** been marked complete.
+
+### Remaining work that MUST be finished before the testnet is active
+
+1. **Complete the local contract/authority graph.** Deploy and initialize **all** founder claims/committee, Treasury control plane and Vault routing, validator sponsorship, 50/25/25 compensation splitter/Vault, retirement verifier and community sweep contracts on a clean local EVM. Materialize actual constructor storage, immutables, runtime bytecode, ABIs and dependency bindings; register the exact Registry-resolved identities. Preserve frozen Timelock `0x0429` / Registry `0x0434` / vesting `0x0427` and fail closed on absent, duplicate or unauthorized components. **Exit:** two independent local deployments reproduce the complete graph and state, not merely fourteen artifact templates and one materialized contract.
+
+2. **Build and fund the exact local V4-shaped Genesis.** Reconcile 42m total, one million split into 500k three-founder locked vesting and 500k three-founder liquid accounts, appropriate reserve balances, and the **non-additive** 4.2m Operations plus 840k Contingency within the existing 8.6m ProtocolReserve. Actually create/register local Vault IDs and execute authorized **local** transfer/permission/settlement flows, including the 10% fully-sponsored validator Community Reward routing. No mock transfer may count as funded custody. **Exit:** native and applicable ERC20 account/Vault balances, permissions and discharge/sweep constraints reconcile to real local receipts, with no duplicate issuance.
+
+3. **Finish V4 source/materialization and cross-protocol integration.** Generate full canonical manifest, source/ABI/runtime/storage artifacts, deployment scripts, deterministic genesis and startup/recovery runbooks; adapt frozen V3-dependent **active** consumers to a newly approved V4 only through a deliberate, independently reviewed authority migration (preserve historical V3). Execute Wallet, Registry, Indexer, Stake, Treasury, Explorer and Governance end-to-end local operations and negative restart/replay/reorg/cross-network tests. **Exit:** reproducible exact-source cold start and recovery; no guessed address promoted as live.
+
+4. **Close the pre-testnet authority and qualification boundary.** Collect the three authentic off-system founder wallet addresses and independent cryptographic ownership proofs; bind the actual proposed chain/Genesis identity and beneficiary addresses before obtaining authorized **V4 pre-Genesis signoff**. EOA EIP-191 wallet ownership proofs and external V4 approval are **not dependent on the testnet being active**; real EIP-1271 contract-wallet verification, if chosen, requires authenticated deployed target-chain code and must stay fail-closed until that code is available. Where genuine owner credentials or approvals are unavailable, mark a *specific external authorization blocker* rather than deferring executable local work. Rebuild/verify the exact V4 hash **after** final authority inputs, freeze the authorized release candidate, preserve exact-head build/test evidence and update this step only when all pre-testnet exits pass. **Exit:** pretestnet-ready signed, reproducible candidate, not a claim that any live network has started.
+
+### Deferred existing testnet work — GOV-AUDIT-9
+
+See the [420Governance testnet work roadmap](420GOVERNANCE-TESTNET-WORK-ROADMAP.md), under existing GOV-AUDIT-9 and [Step 5 Testnet Launch](../STEP-5-TESTNET-LAUNCH.md), for **real-network** Genesis code/storage attestation, finalized deployed/registered contract addresses and founder claim transactions, authorized live Operations/Contingency/Community Vault funding/receipts, Wallet/Registry/Indexer/Stake/Treasury/Explorer/Governance running-chain qualification, live canonical restart/reorg/finality, and independently authorized Civic activation/constitutional retirement when its 60/15/30-day preconditions are actually met.
+
+**Neither running a testnet nor authentic founder signatures are prerequisites for finishing the local engineering in items 1–3.** Conversely, do not postpone the approved V4 Genesis manifest until after launching the network: the approved manifest is required to start it. The existing GOV-AUDIT-9 / GOV-AUDIT-10 release and closeout acceptance remain unaltered.
+
+---
+
 ## Current audit repairs already staged
 
 The complete audit branch contains two narrow repairs that do not require a new governance decision:

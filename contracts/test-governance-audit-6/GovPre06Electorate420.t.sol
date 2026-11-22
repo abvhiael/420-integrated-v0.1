@@ -227,10 +227,15 @@ contract GovPre06Electorate420Test {
         vm.etch(VALIDATORS, address(new Pre06ValidatorWitness()).code);
         for (uint256 i; i < 4; ++i) {
             address voter = i == 0 ? ALICE : i == 1 ? BOB : i == 2 ? CAROL : DAVE;
-            Pre06IdentityWitness(IDENTITY).configure(
-                voter, _profile(voter), _credential(voter),
-                i < 2 ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1") : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1")
-            );
+            Pre06IdentityWitness(IDENTITY)
+                .configure(
+                    voter,
+                    _profile(voter),
+                    _credential(voter),
+                    i < 2
+                        ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1")
+                        : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1")
+                );
         }
         Pre06ValidatorWitness(VALIDATORS).configure(CAROL, _validatorId(CAROL), true);
         Pre06ValidatorWitness(VALIDATORS).configure(DAVE, _validatorId(DAVE), true);

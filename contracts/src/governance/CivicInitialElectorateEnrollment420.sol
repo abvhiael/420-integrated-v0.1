@@ -171,8 +171,8 @@ contract CivicInitialElectorateEnrollment420 {
         ICivicBootstrapIdentity420 identity = ICivicBootstrapIdentity420(IDENTITY_420);
         (address controller,,,,,, bool active) = identity.profiles(record.profileId);
         (, bytes32 subject, bytes32 credentialType,,,,,) = identity.credentials(record.credentialId);
-        bytes32 expectedType = house == CivicIds420.House.COMMUNITY
-            ? COMMUNITY_MEMBERSHIP_CREDENTIAL : VALIDATOR_MEMBERSHIP_CREDENTIAL;
+        bytes32 expectedType =
+            house == CivicIds420.House.COMMUNITY ? COMMUNITY_MEMBERSHIP_CREDENTIAL : VALIDATOR_MEMBERSHIP_CREDENTIAL;
         if (
             controller != record.voter || !active || subject != record.profileId || credentialType != expectedType
                 || !identity.credentialMeetsTrust(record.credentialId, VERIFIED_TRUST)

@@ -63,6 +63,8 @@ assert records[0]==records[1],"independent Foundry EVM graph/custody changed"
 print("GOV_PRE_08_STEP3_REPEATED_ACTUAL_FOUNDER_TREASURY_VAULT_EVM=PASS",records[0])
 PY
 
+bash scripts/gov-pre-08/qualify-step3-consensus.sh
+
 forge build --root contracts \
   src/governance/FoundingWalletClaims420.sol \
   src/governance/FoundingCommitteeMembership420.sol \

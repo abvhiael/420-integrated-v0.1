@@ -103,6 +103,9 @@ contract StakeValidatorGenesis420Test {
         SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
         vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
         vm.roll(999);
+        CommunityRewardReserve rewardReserve = new CommunityRewardReserve(address(this));
+        vm.etch(rewards.COMMUNITY_REWARD_RESERVE(), address(rewardReserve).code);
+        vm.deal(address(rewards), 150 ether);
         address[] memory participants = new address[](1);
         participants[0] = address(0xBEEF);
         vm.prank(SYSTEM_CALLER);
@@ -115,6 +118,14 @@ contract StakeValidatorGenesis420Test {
         require(rewards.validatorAccrued(rewards.COMMUNITY_REWARD_RESERVE()) == 10 ether,
             "community reward destination accrued");
         require(rewards.grossSecurityIssued() == 150 ether, "no issuance changes");
+        require(address(0xABCD).balance == 90 ether && address(0xBEEF).balance == 50 ether,
+                "native operator gross-to-net payout not settled");
+        require(rewards.COMMUNITY_REWARD_RESERVE().balance == 10 ether,
+                "native community settlement missing");
+        require(rewards.communityRewardBackingReceived() == 10 ether
+                && rewards.communityRewardSettled() == 10 ether
+                && rewards.nativeRewardPaid() == 150 ether
+                && address(rewards).balance == 0, "actual reward issuance conservation");
     }
 
     function testFullSponsorshipRequiresAuthenticatedOneShotBindingAndRetirement() public {
@@ -173,7 +184,7 @@ contract StakeValidatorGenesis420Test {
         require(!retiredSponsored, "retired administrator funded validator");
     }
 
-    function testCommunityRewardsPhysicallySettleOnlyWithConsensusBackedNative420() public {
+    function testActualCommunityRewardsRequireExactNativeBackingAndCannotDoubleSettle() public {
         SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
         vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
         CommunityRewardReserve canonical = new CommunityRewardReserve(address(this));
@@ -181,32 +192,53 @@ contract StakeValidatorGenesis420Test {
         vm.roll(1001);
         address[] memory participants = new address[](0);
         vm.prank(SYSTEM_CALLER);
-        rewards.applyConsensusReward(uint64(block.number), address(0xABCD), participants, 100 ether, 0, 0, 0);
-        require(rewards.communityRewardAccrued() == 10 ether, "community accrual");
-
-        (bool zeroBacking,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (10 ether)));
-        require(!zeroBacking, "virtual unbacked accrual paid out");
-        vm.deal(address(0xBAD), 10 ether);
-        vm.prank(address(0xBAD));
-        (bool spoofedBacking,) = address(rewards).call{value: 10 ether}(
-            abi.encodeCall(rewards.fundCommunityRewardBacking, ())
+        (bool unbacked,) = address(rewards).call(
+            abi.encodeCall(rewards.applyConsensusReward, (
+                uint64(block.number), address(0xABCD), participants,
+                uint256(100 ether), uint256(0), uint256(0), uint256(0)
+            ))
         );
-        require(!spoofedBacking, "outsider spoofed consensus funding");
+        require(!unbacked, "virtual accrual accepted without physical node420 backing");
+        vm.deal(address(rewards), 101 ether);
+        vm.prank(SYSTEM_CALLER);
+        (bool excess,) = address(rewards).call(
+            abi.encodeCall(rewards.applyConsensusReward, (
+                uint64(block.number), address(0xABCD), participants,
+                uint256(100 ether), uint256(0), uint256(0), uint256(0)
+            ))
+        );
+        require(!excess, "surplus unauthorized native reward backing accepted");
+        vm.deal(address(rewards), 100 ether);
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(uint64(block.number), address(0xABCD), participants,
+            100 ether, 0, 0, 0);
+        require(rewards.communityRewardAccrued() == 10 ether &&
+                rewards.communityRewardBackingReceived() == 10 ether &&
+                rewards.communityRewardSettled() == 10 ether,
+                "reserve accrued/physical funds not reconciled");
+        require(address(0xABCD).balance == 90 ether &&
+                rewards.COMMUNITY_REWARD_RESERVE().balance == 10 ether &&
+                address(rewards).balance == 0 && rewards.nativeRewardPaid() == 100 ether,
+                "node420 backing did not atomically pay 90/10");
 
         vm.deal(SYSTEM_CALLER, 10 ether);
         vm.prank(SYSTEM_CALLER);
-        rewards.fundCommunityRewardBacking{value: 10 ether}();
-        (bool tooMuch,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (11 ether)));
-        require(!tooMuch, "exceeded physically backed accrual");
-        uint256 initialCommunity = rewards.COMMUNITY_REWARD_RESERVE().balance;
-        rewards.settleCommunityRewards(4 ether);
-        rewards.settleCommunityRewards(6 ether);
-        require(rewards.COMMUNITY_REWARD_RESERVE().balance == initialCommunity + 10 ether,
-            "no actual native movement to community");
-        require(address(rewards).balance == 0, "native backing unaccounted");
-        require(rewards.communityRewardSettled() == 10 ether, "settlement accounted");
-        (bool twice,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (1 ether)));
-        require(!twice, "community reward overpaid");
+        (bool manual,) = address(rewards).call{value: 10 ether}(
+            abi.encodeCall(rewards.fundCommunityRewardBacking, ())
+        );
+        require(!manual, "obsolete manual consensus-funding route was re-enabled");
+        (bool repeated,) = address(rewards).call(
+            abi.encodeCall(rewards.settleCommunityRewards, (10 ether))
+        );
+        require(!repeated, "second community settlement path permitted double payment");
+        vm.prank(SYSTEM_CALLER);
+        (bool duplicate,) = address(rewards).call(
+            abi.encodeCall(rewards.applyConsensusReward, (
+                uint64(block.number), address(0xABCD), participants,
+                uint256(100 ether), uint256(0), uint256(0), uint256(0)
+            ))
+        );
+        require(!duplicate, "same execution block issued native reward twice");
     }
 
     function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {
@@ -487,6 +519,7 @@ contract StakeValidatorGenesis420Test {
 
     function testConsensusRewardAppliesOncePerExecutionBlock() public {
         vm.roll(100);
+        vm.deal(address(rewards), 21 ether);
         address proposer = address(0x5100);
         address[] memory participants = new address[](2);
         participants[0] = address(0x5101);

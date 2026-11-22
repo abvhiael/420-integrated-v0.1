@@ -12,7 +12,7 @@ const isRoom=value=>value&&typeof value==='object'&&id.test(value.id??'')&&
  !('seed'in value)&&!('deck'in value)&&!('legendaryByLeg'in value)&&
  !(value.players??[]).some(p=>p.hand!==undefined)&&Array.isArray(value.hand??[])&&
  Array.isArray(value.legal??[])&&
- Array.isArray(value.chat??[])&&(value.chat===undefined||value.chat.length<=80)&&
+ Array.isArray(value.chat??[])&&(value.chat===undefined||value.chat?.length<=80)&&
  !(value.chat??[]).some(m=>!m||typeof m!=='object'||!id.test(m.id??'')||
   !Number.isInteger(m.seat)||m.seat<0||m.seat>3||typeof m.text!=='string'||
   !m.text.length||Array.from(m.text).length>280||typeof m.at!=='string'||!Number.isFinite(Date.parse(m.at)));

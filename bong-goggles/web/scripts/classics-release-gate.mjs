@@ -71,8 +71,10 @@ export async function verifyReleaseEvidence(gameId,proof,{fetchImpl=fetch,token=
   const data=await response.json();
   if(!supportedRun(data,proof,BC12_WORKFLOWS[kind]))
    reject('missing, failed or wrong-sha '+kind+' attestation for '+gameId);
-  if(kind==='live'&&data.name!=='BC-0.12 Live Classics Acceptance')
-   reject('live attestation workflow identity mismatch');
+  if(kind==='live'&&(data.name!=='BC-0.12 Live Classics Acceptance'||
+   data.head_branch!=='main'||data.inputs?.game_id!==gameId||
+   data.inputs?.rules_hash!==proof.rulesHash))
+   reject('live attestation game, ruleset, main branch or workflow mismatch');
  }
  return Object.freeze({gameId,sha:proof.sourceSha,verified:true});
 }

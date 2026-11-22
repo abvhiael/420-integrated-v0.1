@@ -75,6 +75,14 @@ func TestGovernanceGenesisRejectsDoubleCountAndCounterfeitEarmarks(t *testing.T)
 		{"kief and token drift", func(l *Ledger) {
 			l.Allocations[0].AmountKief = "1"
 		}},
+		{"unapproved fake V4 commitment", func(l *Ledger) {
+			l.Status = "FROZEN_V4"
+			for i := range l.Allocations {
+				if l.Allocations[i].ID == "protocol-reserve" {
+					l.Allocations[i].Earmarks420 = nil
+				}
+			}
+		}},
 		{"historical freeze wrongly marked release candidate", func(l *Ledger) {
 			l.Status = "FROZEN_V4"
 			for i := range l.Allocations {

@@ -116,7 +116,13 @@
       "amount_420": 8600000,
       "amount_kief": "8600000000000000000000000",
       "destination": "0x0000000000000000000000000000000000000424",
-      "lock_type": "protocol-reserve"
+      "lock_type": "protocol-reserve",
+      "earmarks_420": {
+        "founding_operations": 4200000,
+        "founding_contingency": 840000,
+        "unearmarked_protocol_reserve": 3560000
+      },
+      "earmark_treatment": "NON_ADDITIVE_WITHIN_PROTOCOL_RESERVE_UNFUNDED_VAULTS"
     }
   ],
   "status": "FOUNDING_THREE_AMENDMENT_PENDING_V4_RECOMMIT",

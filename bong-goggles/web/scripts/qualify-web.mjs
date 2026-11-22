@@ -20,8 +20,9 @@ const root=resolve(import.meta.dirname,'..','dist');
 // CCC-4 reserves +16 KiB only for local computer decisions and accessible seat UI.
 // CCC-6 adds +16 KiB for private, replay-verified offline journal and mobile resume controls.
 // Account multiplayer reserves +32 KiB for the authenticated room client, per-seat UI and compact responsive game surface; game authority is server-side. 
-// All card/map/vehicle/individual-asset budgets remain unchanged.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// Card and vehicle budgets remain unchanged. The three user-approved full-colour
+// atlas masters receive a separate 12 MiB cap with exact Git blob verification.
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:12*1024*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');

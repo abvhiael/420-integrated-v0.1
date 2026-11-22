@@ -39,7 +39,7 @@ test('CCC-3: car positions follow cumulative road distance, clamp negative/overs
   const start=chaosRoutePosition(leg.id,0),middle=chaosRoutePosition(leg.id,1250),end=chaosRoutePosition(leg.id,2500);
   assert.deepEqual(chaosRoutePosition(leg.id,-100),start);
   assert.deepEqual(chaosRoutePosition(leg.id,9000),end);
-  assert.ok(start.x<middle.x&&middle.x<end.x,leg.id);
+  assert.ok(start.x>middle.x&&middle.x>end.x,leg.id);
   assert.equal(start.progress,0);assert.equal(middle.progress,.5);assert.equal(end.progress,1);
   assert.ok(Number.isFinite(middle.angle)&&Number.isFinite(middle.y));
   assert.throws(()=>chaosRoutePosition('fake',100),/Unknown highway/);

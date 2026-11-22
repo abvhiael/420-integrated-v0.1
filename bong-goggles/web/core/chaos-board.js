@@ -19,24 +19,27 @@ export function keepChaosHandRevealed(before,after,wasRevealed){
 }
 const WIDTH=960,HEIGHT=415,FINISH=2500;
 const VEHICLE_COLORS=CHAOS_VEHICLE_COLORS;
+// Normalized 960×415 centreline traced over approved atlas art, RIGHT to LEFT.
+// Render-only geometry: the deterministic rules still use a 2,500-km target.
 const ROUTES=Object.freeze({
  east:Object.freeze({
   landscape:'maritime',title:'Atlantic shorelines, ferry crossing and the St. Lawrence',
-  points:[[57,305],[118,287],[160,206],[222,238],[263,319],[309,326],[366,260],[451,287],[530,237],[635,270],[732,205],[834,230],[917,161]],
-  stops:[{name:"St. John's",at:0},{name:'Gander',at:.18},{name:'Port aux Basques',at:.35},
-   {name:'North Sydney',at:.43},{name:'Fredericton',at:.67},{name:'Montréal',at:1}]
+  points:[[873,101],[832,101],[786,112],[756,121],[737,135],[709,141],[682,156],[654,172],[622,180],[593,196],[561,200],[539,207],[511,201],[482,199],[452,210],[414,226],[380,240],[345,244],[312,241],[282,244],[262,255],[233,266],[205,266],[176,260],[148,266],[110,289]],
+  stops:[{name:"St. John's",at:0},{name:'Gander',at:.17},{name:'Port aux Basques',at:.36},
+   {name:'North Sydney',at:.46},{name:'Truro',at:.55},{name:'Fredericton',at:.75},{name:'Montréal',at:1}]
  }),
  ontario:Object.freeze({
   landscape:'lakes',title:'Northern forests, the Great Lakes and long Ontario highways',
-  points:[[57,286],[142,300],[207,223],[301,252],[380,176],[470,202],[553,245],[628,174],[714,208],[803,151],[917,170]],
-  stops:[{name:'Montréal',at:0},{name:'Ottawa',at:.13},{name:'North Bay',at:.3},
-   {name:'Sault Ste. Marie',at:.48},{name:'Wawa',at:.63},{name:'Thunder Bay',at:.79},{name:'Kenora',at:1}]
+  points:[[914,160],[893,163],[875,181],[853,195],[837,198],[807,203],[778,210],[753,209],[723,223],[696,229],[663,218],[642,212],[612,210],[578,197],[548,197],[526,203],[503,216],[471,221],[443,212],[419,209],[387,201],[358,203],[332,201],[299,209],[273,214],[242,207],[214,200],[188,207],[158,209],[135,196],[105,184],[77,178],[44,172]],
+  stops:[{name:'Montréal',at:0},{name:'Toronto',at:.1},{name:'Kingston',at:.19},
+   {name:'Ottawa',at:.29},{name:'North Bay',at:.45},{name:'Sudbury',at:.55},
+   {name:'Sault Ste. Marie',at:.68},{name:'Thunder Bay',at:.82},{name:'Kenora',at:1}]
  }),
  west:Object.freeze({
   landscape:'prairie',title:'Prairie grain elevators, foothills and Rocky Mountain passes',
-  points:[[57,272],[142,269],[229,230],[322,258],[409,222],[482,268],[551,209],[618,227],[693,155],[776,193],[842,252],[917,277]],
-  stops:[{name:'Kenora',at:0},{name:'Winnipeg',at:.15},{name:'Regina',at:.37},
-   {name:'Calgary',at:.57},{name:'Banff',at:.7},{name:'Rogers Pass',at:.8},{name:'Vancouver',at:1}]
+  points:[[908,234],[878,244],[850,244],[818,235],[788,221],[763,220],[727,229],[702,229],[673,221],[642,224],[613,220],[584,220],[550,224],[520,224],[489,216],[453,209],[424,200],[389,196],[359,198],[331,188],[304,184],[267,170],[235,173],[215,172],[190,175],[170,183],[153,200],[129,221],[104,223]],
+  stops:[{name:'Kenora',at:0},{name:'Winnipeg',at:.17},{name:'Regina',at:.34},
+   {name:'Calgary',at:.52},{name:'Banff',at:.7},{name:'Rogers Pass',at:.82},{name:'Vancouver',at:1}]
  })
 });
 
@@ -136,20 +139,18 @@ export function renderChaosHighway(game,{effects=null}={}){
   '<span>0–2,500 game km · schematic, not to scale</span></div>'+
   '<svg class="ccc-highway-svg" viewBox="0 0 '+WIDTH+' '+HEIGHT+'" role="img" aria-label="'+esc(leg.name)+': '+esc(caption)+'">'+
   '<title>'+esc(leg.name)+' — '+esc(caption)+'</title>'+
-  '<desc>Illustrated roadside scenery: '+chaosSceneryFeatures(region).map(f=>esc(f.label)).join(', ')+'. The road, towns and vehicles are live game elements.</desc>'+
+  '<desc>Illustrated roadside scenery: '+chaosSceneryFeatures(region).map(f=>esc(f.label)).join(', ')+'. The road and town names are painted onto the atlas; player vehicles and effect highlights remain live game elements.</desc>'+
   '<rect x="0" y="0" width="'+WIDTH+'" height="'+HEIGHT+'" class="ccc-highway-canvas"/>'+
+  // The obsolete SVG road/stop/scenery is a FALLBACK below the opaque new underlay.
+  // Approved atlas prints the road and labels; its old foreground is not overlaid.
   '<path d="M0 107 Q260 -25 480 95 T960 63 L960 0 H0Z" fill="#41634d" opacity=".65"/>'+
-  landscape(region)+
-  // Both atlas layers are scenery only, below the unchanged live vector highway.
-  // The old SVG scenery is retained as a fallback if artwork does not load.
-  '<image class="ccc-map-underlay" href="'+mapLayers.underlay.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
-  '<image class="ccc-map-foreground" href="'+mapLayers.foreground.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
-  // Eight region-specific vintage roadside features are decorative and noninteractive.
-  renderChaosScenery(region)+
+  landscape(region)+renderChaosScenery(region)+
   '<path class="ccc-highway-shadow" d="'+route+'"/>'+
   '<path class="ccc-highway-road" d="'+route+'"/>'+
   '<path class="ccc-highway-centre" d="'+route+'"/>'+
-  renderChaosEffectAuras(game,effects,region)+markers(region)+
+  markers(region)+
+  '<image class="ccc-map-underlay" href="'+mapLayers.underlay.url+'" width="'+WIDTH+'" height="'+HEIGHT+'" preserveAspectRatio="xMidYMid meet" pointer-events="none" aria-hidden="true"/>'+
+  renderChaosEffectAuras(game,effects,region)+
   game.players.map((p,i)=>vehicle(p,region,i,game.players.length)).join('')+
   '</svg><div class="ccc-road-legend">'+game.players.map((p,i)=>
    '<span class="ccc-road-driver"><i aria-hidden="true" style="--ccc-car-color:'+VEHICLE_COLORS[i]+'"></i>'+

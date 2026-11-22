@@ -1,5 +1,6 @@
 // CCC-ART-2: allowlisted, uploaded vintage Canadian road-atlas scenery.
-// These are decorative source assets; highway and vehicle geometry stay live in chaos-board.js.
+// Printed underlays contain road/town art; only vehicle positions and effects stay live.
+// Historical transparent foregrounds remain source-pinned but are no longer rendered.
 const prefix='assets/games/cross-country-chaos/maps/';
 const board=(region,underlay,foreground)=>Object.freeze({
  region,
@@ -10,11 +11,11 @@ const board=(region,underlay,foreground)=>Object.freeze({
 });
 export const CHAOS_MAP_DIMENSIONS=Object.freeze({width:1920,height:830,svgWidth:960,svgHeight:415});
 export const CHAOS_MAP_ART=Object.freeze({
- east:board('east',{bytes:182536,sha:'928be0ffc351bb21891707e8b87aec95c784b1d0'},
+ east:board('east',{bytes:3393494,sha:'508aa63f621c52430d8583d2152bb4ae927df17d'},
   {bytes:81202,sha:'9cb615c5515687b25f6beda126440546675ee74c'}),
- ontario:board('ontario',{bytes:181884,sha:'ed457416bca064c109e60f22007aca870b631463'},
+ ontario:board('ontario',{bytes:3660605,sha:'6f92f4c032722762143e8a1bdf6fe8cfffec2541'},
   {bytes:81022,sha:'abf96780fa09d691d8509a35b1fa77ced747f0c5'}),
- west:board('west',{bytes:181884,sha:'ecd10c43951bbe66cd81a1fe03701f3604c10150'},
+ west:board('west',{bytes:3646229,sha:'26c5db581aa199a867ef5f9126b717c97490ca4f'},
   {bytes:81802,sha:'51c25fc224ead140b800976a4cd1ef5e56aa900c'})
 });
 export const CHAOS_MAP_ASSETS=Object.freeze(Object.values(CHAOS_MAP_ART).flatMap(x=>[x.underlay,x.foreground]));

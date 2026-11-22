@@ -170,6 +170,79 @@ def check_ledger(ledger, wallets, system, integration):
             "founding Genesis, sponsorship or constitutional policies drift")
     return alloc
 
+
+def check_consumers(root):
+    """Verify seven distinct consumer boundaries from actual canonical configs.
+
+    No consumer is declared live-qualified merely because its config parses.
+    Registry and Indexer remain derived/discovery surfaces, never Civic authority.
+    """
+    wallet=read(root,"contracts/config/420wallet-genesis.json")
+    registry=read(root,"contracts/config/420registry-genesis.json")
+    explorer=read(root,"contracts/config/420explorer-genesis.json")
+    treasury=read(root,"contracts/config/420treasury-genesis.json")
+    stake=read(root,"contracts/config/predeploy/stake-genesis-config-v1.json")
+    governance=read(root,"contracts/config/governance-deployment-v1.json")
+    cross=read(root,"contracts/config/interfaces/governance-cross-protocol-integration.json")
+    indexer=read(root,"420-indexer/package.json")
+    require(wallet["walletCore"]["protocolDiscovery"] == "420Registry / ProtocolRegistry"
+            and not wallet["canonicalStateAuthority"]
+            and wallet["walletCore"]["createsIndependentWalletAuthority"] is False,
+            "Wallet must use Registry discovery without acquiring Governance authority")
+    require(registry["protocolVersion"] == 4
+            and registry["authority"]["publisher"] == "GovernanceTimelock"
+            and registry["authority"]["defaultDeny"]
+            and registry["registration"]["strictPublicationRequiresRuntimeCode"],
+            "Registry publication/runtime authority boundary drift")
+    require(stake["chainId"] == 420
+            and int(stake["addresses"]["validatorRegistry"],16) == 0x423
+            and int(stake["addresses"]["rewardController"],16) == 0x420
+            and int(stake["addresses"]["communityValidatorReserve"],16) == 0x425
+            and stake["committee"]["minBondedEligible"] == 60
+            and stake["committee"]["minActive"] == 15,
+            "Stake source and constitutional owner thresholds drift")
+    require(treasury["new_frozen_predeploy_required"] is False
+            and "420Vault VAULT_TREASURY" in treasury["custody_model"]
+            and treasury["vault_release_evidence_model"]["treasury_verifies_vault_release"] is False,
+            "Treasury cannot claim new fixed address or self-verified custody")
+    require(explorer["indexerConsumer"]["requiredChainId"] == 420
+            and not explorer["canonicalStateAuthority"]
+            and explorer["indexerConsumer"]["independentChainIngestion"] is False,
+            "Explorer must be a derived 420Indexer consumer")
+    require(indexer["name"] == "@420/indexer"
+            and "tsc -p tsconfig.json" in indexer["scripts"]["build"]
+            and (root/"420-indexer/src/protocol-decoder.ts").is_file()
+            and (root/"420-indexer/src/protocol-projections.ts").is_file(),
+            "canonical Indexer decoder or rebuild source missing")
+    compiler=governance["compiler"]
+    require(compiler["solidity"] == "0.8.24"
+            and compiler["evmVersion"] == "cancun"
+            and compiler["optimizer"] and compiler["optimizerRuns"] == 200
+            and compiler["viaIR"]
+            and {int(x["address"],16) for x in governance["fixedPredeploys"]} == {0x429,0x437},
+            "Governance compiler or frozen bootstrap locations drift")
+    require(governance["genesisBootstrapCommitment"]["status"] ==
+            "GENESIS_RELEASE_INPUTS_PENDING_FAIL_CLOSED",
+            "unapproved constitutional bootstrap promoted to live")
+    found={x["name"]:x["classification"] for x in cross["integrations"]}
+    expected={
+        "420Registry":"deployment_and_consumer_discovery",
+        "420Wallet":"transaction_client",
+        "420Indexer":"derived_projection",
+        "420Stake":"electorate_membership_source_only",
+        "420Treasury":"governed_target_not_governance_authority",
+        "420Explorer":"derived_consumer",
+    }
+    require(all(found.get(k) == v for k,v in expected.items()),
+            "Governance cross-protocol authority classifications drift")
+    return [
+        {"name":name,"canonicalSourceBindingsChecked":True,
+         "materializedV4DeploymentVerified":False,
+         "sourceQualifiedOnly":True}
+        for name in ("420Wallet","420Registry","420Indexer","420Stake",
+                     "420Treasury","420Explorer","420Governance")
+    ]
+
 def make_candidate(root=ROOT, with_artifacts=True):
     root = Path(root)
     existing = read(root, FROZEN_CONFIG)
@@ -255,6 +328,7 @@ def make_candidate(root=ROOT, with_artifacts=True):
         "communityRewardReserve":"0x0000000000000000000000000000000000000426",
         "sponsoredRewardCommunityBasisPoints":1000,
         "components":components,
+        "consumerIntegrations":check_consumers(root),
         "registrationsAndCapabilitiesVerified":False,
         "sourceBoundLiveGenesisReceipts":None,
     }

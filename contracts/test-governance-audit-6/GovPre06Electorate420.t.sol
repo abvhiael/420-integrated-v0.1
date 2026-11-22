@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import "../src/apps/ProtocolRegistry.sol";
+import "../src/apps/Identity420.sol";
 import "../src/governance/GovernanceTimelock.sol";
 import "../src/governance/Governance420.sol";
 import "../src/governance/CivicInitialElectorateEnrollment420.sol";
@@ -36,59 +37,10 @@ interface VmPre06 {
     ) external;
 }
 
-contract Pre06IdentityWitness {
-    struct Profile {
-        address controller;
-        address pendingController;
-        bytes32 metadataHash;
-        bytes32 primaryName;
-        uint64 createdAt;
-        uint64 updatedAt;
-        bool active;
-    }
-
-    struct Credential {
-        bytes32 issuerId;
-        bytes32 subjectProfileId;
-        bytes32 credentialType;
-        bytes32 claimHash;
-        uint64 issuedAt;
-        uint64 expiresAt;
-        uint64 revokedAt;
-        bool subjectRejected;
-    }
-    mapping(bytes32 => Profile) public profiles;
-    mapping(bytes32 => Credential) public credentials;
-    mapping(bytes32 => bool) public trusted;
-
-    function configure(
-        address voter,
-        bytes32 profileId,
-        bytes32 credentialId,
-        bytes32 credentialType
-    ) external {
-        profiles[profileId] = Profile(voter, address(0), bytes32(0), bytes32(0), 1, 1, true);
-        credentials[credentialId] =
-            Credential(bytes32(uint256(1)), profileId, credentialType, bytes32(0), 1, 0, 0, false);
-        trusted[credentialId] = true;
-    }
-
-    function setTrusted(
-        bytes32 credentialId,
-        bool value
-    ) external {
-        trusted[credentialId] = value;
-    }
-
-    function credentialMeetsTrust(
-        bytes32 credentialId,
-        uint8 minTrust
-    ) external view returns (bool) {
-        return minTrust == 2 && trusted[credentialId] && profiles[credentials[credentialId].subjectProfileId].active;
-    }
-}
-
 contract Pre06ValidatorWitness {
+    address public immutable governanceTimelock;
+    constructor(address timelock_) { governanceTimelock = timelock_; }
+    function protocolVersion() external pure returns (uint32) { return 3; }
     mapping(address => bytes32) public ownerValidatorId;
     mapping(bytes32 => address) public owner;
     mapping(bytes32 => bool) public eligible;
@@ -223,19 +175,12 @@ contract GovPre06Electorate420Test {
             address(timelock), keccak256("420CIVIC_VALIDATOR_EQUAL_WEIGHT_MERKLE_V1")
         );
         enrollment = new CivicInitialElectorateEnrollment420(address(compatibility));
-        vm.etch(IDENTITY, address(new Pre06IdentityWitness()).code);
-        vm.etch(VALIDATORS, address(new Pre06ValidatorWitness()).code);
+        vm.etch(IDENTITY, address(new Identity420(address(timelock))).code);
+        vm.etch(VALIDATORS, address(new Pre06ValidatorWitness(address(timelock))).code);
         for (uint256 i; i < 4; ++i) {
             address voter = i == 0 ? ALICE : i == 1 ? BOB : i == 2 ? CAROL : DAVE;
-            Pre06IdentityWitness(IDENTITY)
-                .configure(
-                    voter,
-                    _profile(voter),
-                    _credential(voter),
-                    i < 2
-                        ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1")
-                        : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1")
-                );
+            vm.prank(voter);
+            Identity420(IDENTITY).createProfile(_profile(voter), keccak256("post-genesis-profile"));
         }
         Pre06ValidatorWitness(VALIDATORS).configure(CAROL, _validatorId(CAROL), true);
         Pre06ValidatorWitness(VALIDATORS).configure(DAVE, _validatorId(DAVE), true);
@@ -293,6 +238,19 @@ contract GovPre06Electorate420Test {
     ) private {
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
         for (uint8 i; i < 17; ++i) timelock.execute(compatibility.bootstrapOperationId(plan, i));
+        // The fixed one-shot Timelock permission sets up a trusted issuer without any electorate.
+        timelock.execute(compatibility.bootstrapOperationId(plan, 19));
+        for (uint256 i; i < 4; ++i) {
+            address voter = i == 0 ? ALICE : i == 1 ? BOB : i == 2 ? CAROL : DAVE;
+            bytes32 houseType = i < 2
+                ? keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1")
+                : keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1");
+            vm.prank(AUTHORITY);
+            Identity420(IDENTITY).issueCredential(
+                _credential(voter), compatibility.INITIAL_ELECTORATE_ISSUER(),
+                _profile(voter), houseType, keccak256("independent-membership-attestation"), 0
+            );
+        }
     }
 
     function _activate() private {
@@ -327,9 +285,9 @@ contract GovPre06Electorate420Test {
 
     function _live() private {
         _deploy();
-        _enrollAll();
         bytes32 plan = _scheduleBase();
         _executeBase(plan);
+        _enrollAll();
         require(!_canActivate(), "activated before first real electors");
         vm.prank(AUTHORITY);
         compatibility.schedulePostGenesisInitialElectorates();
@@ -412,6 +370,8 @@ contract GovPre06Electorate420Test {
 
     function testUnverifiedDuplicateAndNoneligibleValidatorEnrollmentRejected() public {
         _deploy();
+        bytes32 plan = _scheduleBase();
+        _executeBase(plan);
         vm.prank(address(0xBAD));
         (bool fake,) = address(enrollment)
             .call(
@@ -431,7 +391,8 @@ contract GovPre06Electorate420Test {
                 )
             );
         require(!duplicate, "duplicate enrolled");
-        Pre06IdentityWitness(IDENTITY).setTrusted(_credential(BOB), false);
+        vm.prank(AUTHORITY);
+        Identity420(IDENTITY).revokeCredential(_credential(BOB));
         vm.prank(BOB);
         (bool untrusted,) = address(enrollment)
             .call(
@@ -455,9 +416,9 @@ contract GovPre06Electorate420Test {
 
     function testCannotCaptureInitialElectorateOrReopenAfterSealing() public {
         _deploy();
-        _enroll(ALICE, CivicIds420.House.COMMUNITY);
         bytes32 plan = _scheduleBase();
         _executeBase(plan);
+        _enroll(ALICE, CivicIds420.House.COMMUNITY);
         vm.prank(address(0xBAD));
         (bool unauthorized,) =
             address(compatibility).call(abi.encodeCall(Governance420.schedulePostGenesisInitialElectorates, ()));
@@ -507,21 +468,20 @@ contract GovPre06Electorate420Test {
             );
         require(!wrongChain, "replayed Genesis approval onto other chain");
         vm.chainId(enrollment.deploymentChainId());
-        _enrollAll();
         bytes32 plan = _scheduleBase();
         _executeBase(plan);
+        _enrollAll();
         vm.prank(AUTHORITY);
         compatibility.schedulePostGenesisInitialElectorates();
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
         timelock.execute(compatibility.bootstrapOperationId(plan, 17));
         timelock.execute(compatibility.bootstrapOperationId(plan, 18));
         vm.roll(block.number + 2);
-        Pre06IdentityWitness(IDENTITY).setTrusted(_credential(ALICE), false);
-        require(!_canActivate(), "revoked identity authorized first electorate");
-        Pre06IdentityWitness(IDENTITY).setTrusted(_credential(ALICE), true);
         Pre06ValidatorWitness(VALIDATORS).setEligible(_validatorId(CAROL), false);
         require(!_canActivate(), "withdrawn validator retained voting authority");
         Pre06ValidatorWitness(VALIDATORS).setEligible(_validatorId(CAROL), true);
-        _activate();
+        vm.prank(AUTHORITY);
+        Identity420(IDENTITY).revokeCredential(_credential(ALICE));
+        require(!_canActivate(), "revoked identity authorized first electorate");
     }
 }

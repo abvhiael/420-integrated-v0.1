@@ -11,7 +11,7 @@ python3 scripts/gov-pre-08/test_funding.py
 python3 scripts/gov-pre-08/test_step3.py
 python3 scripts/verify-genesis-supply-reconciliation.py
 
-forge build --root contracts --extra-output storageLayout \
+forge build --root contracts \
   src/governance/FoundingWalletClaims420.sol \
   src/governance/FoundingCommitteeMembership420.sol \
   src/governance/FoundingRetirementVerifier420.sol \
@@ -32,7 +32,8 @@ forge build --root contracts --extra-output storageLayout \
   src/vault/VaultPolicyRegistry420.sol \
   src/vault/VaultRegistry420.sol \
   src/vault/VaultAccounting420.sol \
-  src/vault/AssetVault420.sol
+  src/vault/AssetVault420.sol \
+  --extra-output storageLayout
 
 for tag in a b; do
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \

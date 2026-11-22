@@ -33,6 +33,12 @@ contract GovernanceTimelock {
     /// @notice Operation whose mature Civic batch is currently being dispatched.
     /// @dev Cleared during each external action, restored only to the calling batch.
     bytes32 public executingCivicOperation;
+    // Append-only execution lock: a public execute() callback cannot nest a second
+    // matured G1/G2/G3/G4 operation inside a different Civic house/action context.
+    // Existing scheduler, operation and execution-context storage slots are preserved.
+    bool private _operationExecuting;
+
+    error ReentrantOperation();
 
     event Scheduled(bytes32 indexed id, address indexed target, Class class_, uint64 executeAfter);
     event Executed(bytes32 indexed id);
@@ -126,6 +132,8 @@ contract GovernanceTimelock {
     function execute(
         bytes32 id
     ) external payable returns (bytes memory result) {
+        if (_operationExecuting) revert ReentrantOperation();
+        _operationExecuting = true;
         Operation storage op = operations[id];
         require(op.target != address(0), "unknown");
         require(!op.executed && !op.cancelled, "closed");
@@ -138,6 +146,7 @@ contract GovernanceTimelock {
         (bool ok, bytes memory out) = op.target.call{ value: op.value }(op.data);
         executingCivicOperation = previousOperation;
         require(ok, "execution failed");
+        _operationExecuting = false;
         emit Executed(id);
         return out;
     }

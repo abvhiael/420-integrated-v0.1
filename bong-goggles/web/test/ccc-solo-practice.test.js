@@ -22,7 +22,7 @@ test('solo practice is an explicit, deep-linkable game route, not the shared-acc
  assert.equal(resolveRoute('/classics/cross-country-chaos/other').id,'not-found');
  const solo=renderApplicationShell({pathname:practice,online:{status:'unavailable'}});
  assert.match(solo,/data-chaos-start/);
- assert.match(solo,/Play against computer drivers/);
+ assert.match(solo,/Play against computers/);
  assert.match(solo,/Start the cross-Canada championship/);
  assert.match(solo,/data-chaos-controller-pick="3"/);
  assert.equal((solo.match(/<option value="normal" selected>/g)||[]).length,3);

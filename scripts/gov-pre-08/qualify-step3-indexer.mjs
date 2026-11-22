@@ -92,6 +92,13 @@ for (const [contract,protocol,address,wanted] of candidates) {
       fields:abi.inputs.map((x,i)=>({name:x.name||'arg'+i,kind:x.type,indexed:!!x.indexed}))});
   }
 }
+const descriptorsOutput=args.includes('--descriptors-output') ? flag('--descriptors-output') : null;
+if (descriptorsOutput) writeNew(descriptorsOutput,{
+  schema:'GOV_PRE_08_STEP3_LOCAL_ABI_BOUND_INDEXER_DESCRIPTORS_V1',
+  chainId:31337, sourceGitHead:graph.sourceGitHead,
+  graphSourceDigest:graph.deterministicGraphDigestSha256,
+  descriptors
+});
 const decoders=new ProtocolDecoderRegistry420(descriptors);
 const allLogs=await source.getLogs({fromBlock:0n,toBlock:tip});
 need(allLogs.length>=30,'actual deployed graph produced too few mined logs');

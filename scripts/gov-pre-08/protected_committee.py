@@ -185,7 +185,8 @@ class Committee:
         result=self._exec("certify",plan,proposal=proposal_path,votes=votes_path)
         if result.returncode:raise RuntimeError("15 independently protected votes could not certify native Geth payload: "+result.stderr)
         record=json.loads(result.stdout)
-        assert record["Certificate"]["SignerBitmap"] and len(record["Certificate"]["SignerBitmap"])==2
+        bitmap=__import__("base64").b64decode(record["Certificate"]["SignerBitmap"],validate=True)
+        assert len(bitmap)==2 and sum(byte.bit_count() for byte in bitmap)==15, "QC must use all fifteen independently protected votes"
         assert record["Certificate"]["Slot"]==slot and len(votes)==15
         self.signing_evidence.append({"slot":slot,"proposerSeat":d["ProposerSeat"],
              "protectedProposer":True,"protectedVotes":len(votes),

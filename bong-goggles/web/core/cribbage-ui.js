@@ -188,12 +188,13 @@ export function renderCribbageRoute({screen='intro',state=null,accountPanel='',i
  const nav=back+menu(screen,id);
  const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
   '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
-  '<span class="cribbage-status">BC-1.4 · Private session interface</span></header>';
+  '<span class="cribbage-status">BC-1.5 · Authenticated rooms</span></header>';
  const isLive=s.status==='ready'&&session?.gameId==='cribbage';
  const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
   '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+
   '<p><a class="cribbage-primary" href="/games/rooms" data-route="classic-rooms">Browse Cribbage rooms</a></p>'+
   (s.status==='guest'?'<p><a href="/social-api/auth/start">Sign in to 420ID</a> to access your private cards.</p>':'')+
+  (Array.isArray(s.recoverable)&&s.recoverable.length?'<h4>Your verified matches</h4><ul>'+s.recoverable.map(m=>'<li><a href="/games/cribbage/play?session='+esc(m.id)+'" data-route="classic-game">Resume '+m.seatCount+'-player match · '+esc(m.status)+' · turn '+(m.turnSeat===null?'ended':m.turnSeat+1)+'</a></li>').join('')+'</ul>':'')+
   (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
  const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
  const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+

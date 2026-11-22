@@ -72,8 +72,9 @@ try{
  assert.equal(await page.locator('button:has-text("Start game")').count(),0);
  await page.keyboard.press('Tab');
  assert.equal(await page.evaluate(()=>document.activeElement?.tagName!=='BODY'),true);
- const axeCode=await readFile(resolve(root,'node_modules/axe-core/axe.min.js'),'utf8');
- await page.addScriptTag({content:axeCode});
+ // Load axe from our same-origin test server; keep the actual browser
+ // Content-Security-Policy enforced instead of bypassing it for tests.
+ await page.addScriptTag({url:origin+'/node_modules/axe-core/axe.min.js'});
  const violations=await page.evaluate(async()=>window.axe.run(document,{
   runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}
  }));

@@ -1,0 +1,30 @@
+# BC-1.8 — Cribbage deployed-service release and live acceptance
+
+**Status: IN PROGRESS; public `Playable` NOT authorized.** Source, operator migration and restricted backend activation are separate from a real two-420ID match on BongGoggles. Never use source-only tests or a successful Render health report to set `Playable`.
+
+## Verified production work — 2026-11-22
+
+- Canonical source main: `989fd385f80ce03c26b36e782521672b06af000d` (merged BC-1.7).
+- Render workspace `reefer review`, service `bonggoggles-social` `srv-dc0iijm1egvs7382fkag`, source branch `main`, auto-deploy disabled. The source update `dep-dc1ns79ksfps739dtq40` finished **live** at that exact source.
+- Dedicated Neon project `bonggoggles-social` `patient-night-81272367`, default branch `br-dark-cloud-becyw66f`, database `bonggoggles_social`. In one atomic operator transaction applied canonical migrations `008_classic_communications.sql` and `009_classic_match_requests.sql` (missing beforehand). Granted runtime role `bonggoggles_social_runtime` only SELECT/INSERT on both tables and UPDATE(last_seen) on `classic_room_presence`. Confirmed runtime has **no table-wide UPDATE, DELETE or TRUNCATE** on either, no UPDATE on immutable `classic_match_requests`, and already has the required column-level mutations for rooms/sessions. These changes do not fabricate accounts, matches or release proofs.
+- Render environment update accepted for seven preexisting server-side opt-ins: `SOCIAL420_ACCOUNT_EXTRAS`, `SOCIAL420_CLASSIC_ROOMS`, `SOCIAL420_CLASSIC_SESSIONS`, `SOCIAL420_CLASSIC_RULES`, `SOCIAL420_CLASSIC_COMMUNICATIONS`, `SOCIAL420_CRIBBAGE_MODE`, `SOCIAL420_CRIBBAGE_SOCIAL_MODE`, each exactly `restricted-acceptance`. Deployment `dep-dc1nt48uq40c73clqlg0` was requested to apply these settings; **verify final status and server logs before calling activation complete**.
+- The database had **one registered social member and zero Cribbage rooms/sessions**, so no live two-principal completed match exists in the verified deployment evidence. Do not synthesize a second identity or claim successful game completion.
+- Public Cloudflare Pages `bonggoggles` and Worker `bonggoggles-social-proxy` are separate managed deployments. The source build requires `BG_ACCOUNT_SOCIAL_ACTIVATION=true`, `BG_CLASSIC_ROOMS_ACTIVATION=true` and `BG_CLASSIC_COMMUNICATIONS_ACTIVATION=true`; their **actual deployed bindings and current site content are not verified by a connected Cloudflare management tool**. The site and production `/social-api/*` could not be queried from this execution environment; do not claim publicly enabled features based on a source flag.
+
+## Release qualification to reach the final gate
+
+The frozen rules identity is `v1.0` / `6f13bd77568efc5d0836eaa61458ca0cc2c500d1db2d9c38e228b1c668f71e24`.
+
+1. Observe final Render deployment and confirm that the restricted service starts, remains healthy, the trusted Worker routes /social-api/ to it and browser flags actually expose authenticated rooms.
+2. With **two independent real 420ID accounts**, use the already committed production-only adapter `bong-goggles/web/test/live-classics/cribbage.mjs` through `.github/workflows/bc-0-12-classics-live-acceptance.yml`, dispatched **on main** with `game_id=cribbage`, `rules_hash` equal to the frozen value, and the two existing GitHub protected secrets `BC12_ACCOUNT_A_COOKIE` and `BC12_ACCOUNT_B_COOKIE`. Do not echo or copy cookies into logs, Git, files or chat.
+3. Require a successful main-only live workflow run whose exact `head_sha` matches the deployed backend and browser source. It must prove the authenticated two-account 121-point game, independent seat projections, reload and recovery, 121-point rematch with fresh consent, and genuine Easy/Medium/Hard server-owned bot matches. Retain the non-secret workflow receipt, rules hash and rollback/deployment identifiers.
+4. Only **after** an independent framework workflow and that successful live workflow are both confirmed at the exact same source SHA, populate `docs/games/classics/BC-0-12-RELEASE-EVIDENCE.json` with the `cribbage` entry required by `scripts/classics-release-gate.mjs`, set the Cribbage source descriptor in `web/core/classics.js` to `playable`, run `node scripts/classics-release-gate.mjs --audit`, build, deploy the Cloudflare Pages release and verify the public Games and Cribbage entry reads **Playable**. This is a separate evidence-bound change; leave other 24 Classics locked.
+5. Validate a real public /games -> Cribbage -> Rules -> 420ID lobby -> start -> finish -> history -> rematch journey from desktop and mobile. Record rollback: disable the three public BG_* flags, then server-side Cribbage opt-ins if necessary; do not delete immutable match journals.
+
+## Source qualification
+
+The BC-1.8 release-state implementation accepts `playable` for a canonical Classic **only** with a valid release manifest and independently verified GitHub framework + live workflow, preserving frozen order, zero-wager and other title boundaries. It leaves the current Cribbage catalogue status `registry` and `BC-0-12-RELEASE-EVIDENCE.json` empty rather than manufacturing a passed release.
+
+BC-1.7 previous qualification: [3/3 focused jobs #45080821343](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45080821343) and [Account Social regression rerun #45080821364](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45080821364), source merged `989fd385f80ce03c26b36e782521672b06af000d`.
+
+**No new Classic may be started until BC-1.8 has a fully verified, released Cribbage entry.**

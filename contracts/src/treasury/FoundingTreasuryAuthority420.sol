@@ -387,6 +387,17 @@ contract FoundingTreasuryAuthority420 {
         emit FoundingReleaseExecuted(paymentId, p.disbursementId, commitment);
     }
 
+    /// @notice Actual unsettled Treasury Budget Registry reservations, not historical
+    /// proposal totals. Governance cancellation releases a reservation without
+    /// incrementing the historical operationsReleased/contingencyReleased counters.
+    function outstandingFoundingCommitments() public view returns (bool) {
+        if (!budgetsInitialized) return false;
+        TreasuryBudgetRegistry420.Budget memory operations = budgetRegistry.budget(operationsBudgetId);
+        TreasuryBudgetRegistry420.Budget memory contingency = budgetRegistry.budget(contingencyBudgetId);
+        return operations.committed != operations.executed
+            || contingency.committed != contingency.executed;
+    }
+
     /// @notice Retirement itself MUST be an action in the canonical, successful G3/G4
     /// dual-house Civic execution batch, dispatched by the real GovernanceTimelock.
     /// Historical unrelated dual-house actions or arbitrary permissionless calls cannot retire.
@@ -397,8 +408,7 @@ contract FoundingTreasuryAuthority420 {
         // Previously scheduled founding disbursements are legally committed even if the
         // VaultAccounting native free balance has not yet reserved them as obligations.
         // Settle them before changing founding execution authority; no stranded grants.
-        if (operationsCommitted != operationsReleased || contingencyCommitted != contingencyReleased)
-            revert OutstandingFoundingCommitments();
+        if (outstandingFoundingCommitments()) revert OutstandingFoundingCommitments();
         retired = true;
         emit FoundingAuthorityRetired(msg.sender);
     }

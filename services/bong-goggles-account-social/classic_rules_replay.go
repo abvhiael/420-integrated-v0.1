@@ -3,11 +3,49 @@ package social
 import (
  "bytes"
  "context"
+ "crypto/sha256"
  "database/sql"
  "encoding/hex"
  "encoding/json"
  "errors"
 )
+
+// A per-service, bounded optimization of deterministic replay. This is NOT
+// an authentication cache, a source of game state, or a durable checkpoint.
+// Every access revalidates the entire public journal, the immutable genesis,
+// the complete private move trace/digest, and the current persisted snapshot.
+// The cache can supply only a prefix that previously passed a full replay.
+type verifiedRulePrefix struct{
+ roomID,version,hash,initialHash string
+ seatCount,moves int
+ seed [32]byte
+ digest [32]byte
+ state json.RawMessage
+}
+const maxVerifiedRulePrefixes=128
+func ruleTraceDigest(trace []RuleTrace)([32]byte,error){
+ encoded,e:=json.Marshal(trace)
+ if e!=nil{return [32]byte{},e}
+ return sha256.Sum256(encoded),nil
+}
+func (s *ClassicSessions) verifiedPrefix(id string)(verifiedRulePrefix,bool){
+ s.verifiedMu.Lock();defer s.verifiedMu.Unlock()
+ v,ok:=s.verifiedPrefixes[id]
+ if ok{v.state=append(json.RawMessage(nil),v.state...)}
+ return v,ok
+}
+func (s *ClassicSessions) retainVerifiedPrefix(id string,v verifiedRulePrefix){
+ s.verifiedMu.Lock();defer s.verifiedMu.Unlock()
+ if s.verifiedPrefixes==nil{s.verifiedPrefixes=make(map[string]verifiedRulePrefix)}
+ if _,exists:=s.verifiedPrefixes[id];!exists&&len(s.verifiedPrefixes)>=maxVerifiedRulePrefixes{
+  // Never retain an unbounded number of private sessions. Dropping all
+  // prefixes is safe: the next read reconstructs from durable genesis.
+  clear(s.verifiedPrefixes)
+ }
+ if prior,ok:=s.verifiedPrefixes[id];ok&&prior.moves>v.moves{return}
+ v.state=append(json.RawMessage(nil),v.state...)
+ s.verifiedPrefixes[id]=v
+}
 
 // BC-0.7 private immutable seed and action journal, never in public SSE.
 func (s *Store) ReadyClassicRules(ctx context.Context)error{
@@ -91,8 +129,27 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  e=tx.QueryRowContext(ctx,`SELECT count(*) FROM bg_account_social.classic_session_events
  WHERE session_id=$1 AND kind IN ('move','finished')`,rec.ID).Scan(&moveEvents)
  if e!=nil||moveEvents!=len(trace){return ErrUnavailable}
- replay,e:=adapter.Replay(seed,rec.SeatCount,trace)
- if e!=nil{return ErrUnavailable}
+ // Cache reuse requires a fresh SHA-256 of every previously verified
+ // private move. Modifying, deleting or reordering even one earlier action
+ // invalidates the prefix; a cold replay then proves or rejects the history.
+ // This also works on a new process with an empty cache.
+ var replay json.RawMessage
+ cached,found:=s.verifiedPrefix(rec.ID)
+ usedPrefix:=false
+ if found&&cached.roomID==rec.RoomID&&cached.version==version&&cached.hash==hash&&
+  cached.initialHash==initialHash&&cached.seed==seed&&cached.seatCount==rec.SeatCount&&
+  cached.moves>=0&&cached.moves<=len(trace){
+  fingerprint,err:=ruleTraceDigest(trace[:cached.moves])
+  if err==nil&&fingerprint==cached.digest{
+   replay,e=adapter.replayFromVerified(cached.state,int64(cached.moves)+1,trace[cached.moves:])
+   if e!=nil{return ErrUnavailable}
+   usedPrefix=true
+  }
+ }
+ if !usedPrefix{
+  replay,e=adapter.Replay(seed,rec.SeatCount,trace)
+  if e!=nil{return ErrUnavailable}
+ }
  stored,e:=adapter.decode(rec.State)
  if e!=nil{return ErrUnavailable}
  canonicalSaved,e:=adapter.encode(stored)
@@ -104,6 +161,12 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
    rec.WinnerSeat!=nil&&stored.Winner==nil||
    rec.WinnerSeat!=nil&&stored.Winner!=nil&&*rec.WinnerSeat!=*stored.Winner{return ErrUnavailable}
  }else if stored.Terminal{return ErrUnavailable}
+ digest,e:=ruleTraceDigest(trace)
+ if e!=nil{return ErrUnavailable}
+ s.retainVerifiedPrefix(rec.ID,verifiedRulePrefix{
+  roomID:rec.RoomID,version:version,hash:hash,initialHash:initialHash,
+  seatCount:rec.SeatCount,moves:len(trace),seed:seed,digest:digest,state:replay,
+ })
  return nil
 }
 func (s *ClassicSessions) VerifyRules(ctx context.Context,id string)error{

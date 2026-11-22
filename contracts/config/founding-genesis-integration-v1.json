@@ -66,5 +66,23 @@
     "signedGenesisPlanHash": null,
     "exactHeadQualificationHash": null,
     "independentSecurityReview": false
+  },
+  "founderVesting": {
+    "founderCount": 3,
+    "genesisFounderTotal420": "1000000",
+    "vestingPredeploy": "0x0000000000000000000000000000000000000427",
+    "lockedPredeploy420": "500000",
+    "liquidDirectToFounders420": "500000",
+    "founderSharesBps": [
+      5000,
+      2500,
+      2500
+    ],
+    "releaseCount": 13,
+    "releaseIntervalDays": 14,
+    "vestingCompletesAfterDays": 182,
+    "predeployActuallyFunded": false,
+    "liquidAllocationsActuallyFunded": false,
+    "newFrozenGenesisCommitmentApproved": false
   }
 }

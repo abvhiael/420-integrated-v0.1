@@ -38,6 +38,15 @@ def qualify(strict=False):
     enforce(p["contingency"]["allocation"]==b["contingencyTokens"],"contingency budget disagreement")
     enforce(int(b["operationsTokens"])+int(b["contingencyTokens"])<=int(g["modeledTotalSupply"]),
             "genesis money overallocated")
+    subprocess.run([sys.executable,str(ROOT/"scripts/verify-founder-vesting-three.py")],check=True)
+    vest=m["founderVesting"]
+    enforce(vest["founderCount"]==3 and vest["genesisFounderTotal420"]=="1000000"
+            and vest["lockedPredeploy420"]=="500000"
+            and vest["liquidDirectToFounders420"]=="500000"
+            and vest["vestingPredeploy"]=="0x0000000000000000000000000000000000000427"
+            and vest["founderSharesBps"]==[5000,2500,2500]
+            and [vest["releaseCount"],vest["releaseIntervalDays"],vest["vestingCompletesAfterDays"]]==[13,14,182],
+            "three-founder Genesis vesting policy disagrees with Ledger")
     enforce(m["founderWallets"]["manifest"]=="contracts/config/founder-wallet-reservations.json",
             "wallet enrollment source mismatch")
     enforce([x["developer_compensation_bps"] for x in wallets["founders"]]==[5000,2500,2500],
@@ -56,6 +65,12 @@ def qualify(strict=False):
             "retirement constitutional thresholds drift")
 
     if strict:
+        subprocess.run([sys.executable,str(ROOT/"scripts/verify-founder-vesting-three.py"),
+                        "--require-release"],check=True)
+        enforce(vest["predeployActuallyFunded"]
+                and vest["liquidAllocationsActuallyFunded"]
+                and vest["newFrozenGenesisCommitmentApproved"],
+                "three-founder Genesis liquid/locked funding and new signed freeze unverified")
         subprocess.run([sys.executable,str(ROOT/"scripts/verify-founder-wallet-reservations.py"),
                         "--require-deployment"],check=True)
         enforce(g["network"] in ("mainnet","testnet") and g["chainId"]>0,"target network or chain missing")

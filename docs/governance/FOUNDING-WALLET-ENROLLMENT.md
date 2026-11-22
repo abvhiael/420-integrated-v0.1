@@ -18,7 +18,7 @@ The three **named** wallet reservation slots in `contracts/config/founder-wallet
 ## Scope and release gates
 The public address reservation files do not generate wallets, mint tokens or attest identity. The claim registry and the splitter are **new contract candidates**, neither is included in the immutable 0x04xx predeploy map. They must be deployed/registered as separately resolved services before activation. The existing Development Compensation Vault must be explicitly configured with the splitter address as its immutable `beneficiary` at deployment; redirecting a previously deployed vault is impossible without an approved migration. Testnet and mainnet deployment bindings require separate exact-head audits.
 
-Existing `FounderVestingRegistry` still has **ten 100,000-token grants**; the 50/25/25 *revenue* splitter is independent of those allocations. The 42 million Genesis split remains provisional.
+The updated `FounderVestingRegistry` has **three grants totaling 500,000 locked $420**, vested 50/25/25 for the administrator, Andrew and Janet in the same 13 fortnightly releases through day 182. An additional **500,000 $420** is allocated directly to the three founders at Genesis, giving a total unchanged **1,000,000 $420** Founders allocation. Those Genesis grants are distinct from the separate 50/25/25 ongoing *developer compensation revenue* splitter. All personal wallet addresses remain unverified and the new Genesis allocation requires a fresh commitment.
 
 ### Deployment proof commands
 

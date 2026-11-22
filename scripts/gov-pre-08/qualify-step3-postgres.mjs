@@ -195,8 +195,17 @@ try{
       const tx=await rpc('eth_sendTransaction',[{from:wallet,
          to:graph.sourceFoundersFixtureOnly[1],
          data:'0x'+data,gas:'0x100000',gasPrice:'0x0',value:'0x0'}]);
-      const receipt=await rpc('eth_getTransactionReceipt',[tx]);
-      need(receipt && receipt.status==='0x1','Anvil synthetic message tx not mined');
+      // Anvil JSON-RPC send returns a hash before its auto-miner has always
+      // exposed the receipt. Poll canonical inclusion (as the Python production
+      // witness helper does), not an unjustified immediate receipt assumption.
+      let receipt=null;
+      for(let attempt=0;attempt<60;attempt++){
+        receipt=await rpc('eth_getTransactionReceipt',[tx]);
+        if(receipt)break;
+        await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      need(receipt && receipt.status==='0x1' && receipt.transactionHash.toLowerCase()===tx.toLowerCase(),
+           'Anvil synthetic message not canonically mined: '+JSON.stringify({tx,receipt}));
       return tx;
     };
     try{

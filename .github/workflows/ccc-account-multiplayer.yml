@@ -1,0 +1,74 @@
+name: Bong Goggles CCC Account Multiplayer
+
+on:
+  push:
+    paths:
+      - 'services/bong-goggles-chaos/**'
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'bong-goggles/web/core/chaos-online.js'
+      - 'bong-goggles/web/core/cross-country-chaos.js'
+      - 'bong-goggles/web/core/chaos-computer.js'
+      - '.github/workflows/ccc-account-multiplayer.yml'
+  pull_request:
+    paths:
+      - 'services/bong-goggles-chaos/**'
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'bong-goggles/web/core/chaos-online.js'
+      - 'bong-goggles/web/core/cross-country-chaos.js'
+      - 'bong-goggles/web/core/chaos-computer.js'
+      - '.github/workflows/ccc-account-multiplayer.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  node-and-postgres:
+    name: CCC authoritative rooms, secrecy and PostgreSQL concurrency
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ccc_integration_only
+          POSTGRES_USER: ccc_test
+          POSTGRES_DB: ccc_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ccc_test -d ccc_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CHAOS_TEST_DATABASE_URL: postgres://ccc_test:ccc_integration_only@localhost:5432/ccc_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated game service package
+        working-directory: services/bong-goggles-chaos
+        run: npm install --no-audit --no-fund --ignore-scripts
+      - name: Check authoritative entrypoint and all JavaScript modules
+        working-directory: services/bong-goggles-chaos
+        run: |
+          node --check main.mjs
+          node --check room.mjs
+          node --check postgres.mjs
+          node --check http.mjs
+      - name: Validate two distinct accounts, hidden hands, stale turns, bots and real PostgreSQL row locks
+        working-directory: services/bong-goggles-chaos
+        run: npm test
+  go-account-gateway:
+    name: 420ID-bound zero-wager game gateway
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Compile and test authenticated account game proxy
+        run: go test ./services/bong-goggles-account-social ./cmd/bong-goggles-social

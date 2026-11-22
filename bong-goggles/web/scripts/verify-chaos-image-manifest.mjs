@@ -55,7 +55,7 @@ export function assertChaosImageManifest(m){
  for(let i=0;i<6;i++){
   const a=CHAOS_MAP_ASSETS[i],r=m.maps[i];
   check(r?.id===a.path.slice(mapsDir.length,-5)&&r.gitBlobSha===a.gitBlobSha,'atlas identity');
-  entry(r.export,a.path,'webp',CHAOS_MAP_DIMENSIONS.width,CHAOS_MAP_DIMENSIONS.height,a.transparent);
+  entry(r.export,a.path,'webp',a.width,a.height,a.transparent);
   check(r.export.bytes===a.bytes,'atlas byte length changed');
  }
  for(let i=0;i<6;i++){
@@ -92,11 +92,11 @@ export async function createChaosImageManifest({sourceRoot=root,outputRoot}={}){
  for(const a of CHAOS_MAP_ASSETS){
   const [source,out]=await Promise.all([
    readFile(resolve(sourceRoot,a.path)),readFile(resolve(outputRoot,a.path))]);
-  await inspectChaosRaster(out,{format:'webp',width:1920,height:830,
+  await inspectChaosRaster(out,{format:'webp',width:a.width,height:a.height,
    transparent:a.transparent,label:a.path});
   check(source.equals(out)&&out.length===a.bytes&&gitSha(source)===a.gitBlobSha,
    'modified atlas master or export: '+a.path);
-  maps.push({id:a.path.slice(mapsDir.length,-5),export:image(a.path,'webp',1920,830,a.transparent,out),
+  maps.push({id:a.path.slice(mapsDir.length,-5),export:image(a.path,'webp',a.width,a.height,a.transparent,out),
    gitBlobSha:a.gitBlobSha});
  }
  const vehicles=[];

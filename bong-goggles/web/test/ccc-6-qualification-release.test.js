@@ -228,7 +228,8 @@ test('CCC-6: responsive UI and release build ship no hidden hands or auto-enroll
  assert.doesNotMatch(active,/Save on this device<\/button>/);
  assert.match(app,/refreshChaosRecovery\(\)/);
  assert.match(app,/function restoreChaosOnGameRoute\(\)/);
- assert.match(app,/applyViewPreferences\(\);restoreChaosOnGameRoute\(\);renderCurrent\(\)/);
+ assert.match(app,/applyViewPreferences\(\);renderCurrent\(\);if\(window\.location\.pathname===/);
+ assert.doesNotMatch(app,/applyViewPreferences\(\);restoreChaosOnGameRoute\(\);renderCurrent\(\)/);
  assert.match(app,/recordChaosTransition\(before,result\.game,events\)/);
  assert.match(app,/recordChaosTransition\(previous,updated,/);
  assert.match(app,/recordChaosTransition\(before,after,/);
@@ -241,9 +242,10 @@ test('CCC-6: responsive UI and release build ship no hidden hands or auto-enroll
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(build,/for\(const item of \['index\.html','app\.js'/);
  assert.match(gate,/CCC-6 save\/resume and offline mobile release qualification failed/);
- assert.match(gate,/baseTotal:1157\*1024/);
+ assert.match(gate,/baseTotal:1189\*1024/);
  const shellOutput=renderApplicationShell({pathname:'/classics/cross-country-chaos',
-  walletView:{connected:false},chaosSaveInfo:{available:true}});
- assert.match(shellOutput,/Resume saved championship/);
+  walletView:{connected:false},chaosSaveInfo:{available:true},online:{status:'guest'}});
+ assert.match(shellOutput,/Every human player needs their own 420ID account/);
+ assert.doesNotMatch(shellOutput,/Resume saved championship|Pass the device/);
  assert.doesNotMatch(shellOutput,/Wallet.*required.*Cross-Country Chaos/);
 });

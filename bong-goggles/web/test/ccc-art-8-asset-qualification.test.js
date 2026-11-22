@@ -25,7 +25,7 @@ function fixture(){
   })),
   maps:CHAOS_MAP_ASSETS.map(a=>({
    id:a.path.slice(mapsDir.length,-5),
-   export:{...meta(a.path,'webp',1920,830,a.transparent),bytes:a.bytes},
+   export:{...meta(a.path,'webp',a.width,a.height,a.transparent),bytes:a.bytes},
    gitBlobSha:a.gitBlobSha
   })),
   vehicles:CHAOS_VEHICLE_ASSETS.map(path=>{
@@ -103,7 +103,7 @@ test('CCC-ART-8: source and deployment validation wired into existing GitHub pro
  assert.match(build,/createChaosImageManifest/);
  assert.match(build,/CHAOS_IMAGE_MANIFEST_PATH/);
  assert.match(gate,/verifyChaosPublishedImageManifest/);
- assert.match(gate,/baseTotal:1157\*1024/);
+ assert.match(gate,/baseTotal:1189\*1024/);
  assert.match(gate,/name!==CHAOS_IMAGE_MANIFEST_PATH/);
  assert.match(verifier,/CHAOS_CARD_CATALOG_SHA256/);
  assert.match(verifier,/source\.equals\(out\)/);

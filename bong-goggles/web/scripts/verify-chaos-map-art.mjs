@@ -21,10 +21,12 @@ export function verifyMapRegistry(){
    'non-allowlisted map asset path');
   assert(/^[a-f0-9]{40}$/.test(entry.gitBlobSha),'unverified source identity: '+entry.path);
   assert(Number.isSafeInteger(entry.bytes)&&entry.bytes>10000,'invalid expected source size');
-  assert(entry.bytes<= (entry.transparent?80:180)*1024,'individual map asset exceeds approved budget: '+entry.path);
+  assert(entry.width===CHAOS_MAP_DIMENSIONS.width&&entry.height===CHAOS_MAP_DIMENSIONS.height,
+   'wrong approved native atlas dimensions: '+entry.path);
+  assert(entry.bytes<= (entry.transparent?80*1024:4*1024*1024),'individual map asset exceeds approved budget: '+entry.path);
   total+=entry.bytes;
  }
- assert(total<=780*1024,'aggregate map art exceeds the 780 KiB publication budget');
+ assert(total<=12*1024*1024,'aggregate map art exceeds the 12 MiB publication budget');
  return {regions:3,layers:CHAOS_MAP_ASSETS.length,expectedBytes:total};
 }
 export async function verifyChaosMapArt(){
@@ -40,8 +42,8 @@ export async function verifyChaosMapArt(){
   assert(raw.length===asset.bytes,'uploaded image size changed: '+asset.path);
   assert(blobSha(raw)===asset.gitBlobSha,'uploaded image content differs from GitHub-approved master: '+asset.path);
   const meta=await sharp(raw).metadata();
-  assert(meta.format==='webp'&&meta.width===CHAOS_MAP_DIMENSIONS.width&&
-   meta.height===CHAOS_MAP_DIMENSIONS.height,'incorrect image format or dimensions: '+asset.path);
+  assert(meta.format==='webp'&&meta.width===asset.width&&meta.height===asset.height,
+   'incorrect image format or dimensions: '+asset.path+' (expected '+asset.width+'x'+asset.height+', got '+meta.format+' '+meta.width+'x'+meta.height+')');
   assert(Boolean(meta.hasAlpha)===asset.transparent,
    'opaque underlay / transparent foreground contract violated: '+asset.path);
   bytes+=raw.length;

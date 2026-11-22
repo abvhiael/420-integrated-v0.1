@@ -59,7 +59,9 @@ test('BC-0.2 all 25 and legacy game detail pages survive direct loads without fa
  assert.match(renderClassicGamePage('cribbage'),/no qualified interactive game board/);
  assert.match(renderClassicGamePage('yahtzee'),/1, 2, 3 or 6 rows/);
  assert.match(renderClassicGamePage('scrabble'),/rights must be resolved/);
- assert.match(renderClassicGamePage('cross-country-chaos'),/Play Cross-Country Chaos \(local\)/);
+ assert.match(renderClassicGamePage('cross-country-chaos'),/Play Cross-Country Chaos/);
+ assert.match(renderClassicGamePage('cross-country-chaos'),/separate 420ID accounts/);
+ assert.doesNotMatch(renderClassicGamePage('cross-country-chaos'),/pass-and-play/);
 });
 test('BC-0.2 preserves /classics, Cross-Country Chaos and previous unrelated entries',()=>{
  const group=CLASSIC_COLLECTIONS.find(x=>x.id==='canadian');
@@ -75,7 +77,9 @@ test('BC-0.2 preserves /classics, Cross-Country Chaos and previous unrelated ent
  assert.equal(resolveRoute('/classics').id,'classics');
  assert.equal(resolveRoute('/classics/cross-country-chaos').id,'chaos-game');
  assert.equal(resolveRoute('/account/games').id,'account-games');
- assert.match(renderApplicationShell({pathname:'/classics/cross-country-chaos'}),/data-chaos-start/);
+ const accountView=renderApplicationShell({pathname:'/classics/cross-country-chaos'});
+ assert.match(accountView,/420ID Account multiplayer/);
+ assert.doesNotMatch(accountView,/data-chaos-start|Pass the device/);
 });
 test('BC-0.2 unknown and nested game slugs fail closed',()=>{
  for(const path of ['/games/unknown','/games/cribbage/move','/games/%2e%2e','/games/cribbage%2Fother']){

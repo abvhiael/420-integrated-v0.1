@@ -23,6 +23,7 @@ type Handler struct{
  Games *AccountGames
  Rooms *ClassicRooms
  Sessions *ClassicSessions
+ Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
  Origin string
@@ -228,6 +229,9 @@ func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,
  path:=r.URL.Path
  if path=="/v1/classic-sessions"||strings.HasPrefix(path,"/v1/classic-sessions/"){
   h.classicSessionsHTTP(ctx,w,r,viewer);return
+ }
+ if strings.HasPrefix(path,"/v1/chaos/"){
+  h.chaosAPI(ctx,w,r,viewer);return
  }
  if path=="/v1/classic-rooms"||strings.HasPrefix(path,"/v1/classic-rooms/"){
   h.classicRoomsHTTP(ctx,w,r,viewer);return

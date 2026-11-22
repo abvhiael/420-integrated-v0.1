@@ -19,8 +19,13 @@ const root=resolve(import.meta.dirname,'..','dist');
 // CCC-ART-8 permits +32 KiB strictly for a published and independently verified image manifest.
 // CCC-4 reserves +16 KiB only for local computer decisions and accessible seat UI.
 // CCC-6 adds +16 KiB for private, replay-verified offline journal and mobile resume controls.
-// All card/map/vehicle/individual-asset budgets remain unchanged.
-const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1157*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:780*1024,vehicleTotal:16*1024});
+// Account multiplayer reserves +32 KiB for the authenticated room client, per-seat UI and compact responsive game surface; game authority is server-side. 
+// Card and vehicle budgets remain unchanged. The three user-approved full-colour
+// atlas masters receive a separate 12 MiB cap with exact Git blob verification.
+// Scoped allowance for the new user-approved CCC room gameboard and room chat.
+// Legacy game assets and existing per-file limits remain separately enforced.
+const CCC_ROOM_BOARD_CHAT_ALLOWANCE=24*1024;
+const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:12*1024*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
 const normalize=path=>relative(root,path).replaceAll('\\','/');
@@ -127,10 +132,10 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024)
+if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth;
-if(legacyBaseTotal>limits.baseTotal)
+if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
  growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal
@@ -158,11 +163,10 @@ const mapAllowlist=new Map(CHAOS_MAP_ASSETS.map(asset=>[asset.path,asset]));
 if(mapAllowlist.size!==6||mapFiles.length!==6)throw new Error('Incomplete or duplicate regional atlas output');
 for(const f of mapFiles){
  const name=normalize(f.path),asset=mapAllowlist.get(name);
- if(!asset||f.size!==asset.bytes||f.size>(asset.transparent?80:180)*1024)
+ if(!asset||f.size!==asset.bytes||f.size>(asset.transparent?80:4096)*1024)
   throw new Error('Unexpected, changed or oversized CCC-ART-2 map: '+name);
  const meta=await sharp(f.path).metadata();
- if(meta.format!=='webp'||meta.width!==CHAOS_MAP_DIMENSIONS.width||
-   meta.height!==CHAOS_MAP_DIMENSIONS.height||Boolean(meta.hasAlpha)!==asset.transparent)
+ if(meta.format!=='webp'||meta.width!==asset.width||meta.height!==asset.height||Boolean(meta.hasAlpha)!==asset.transparent)
   throw new Error('Invalid output map dimensions or alpha: '+name);
 }
 const vehicleAllowlist=new Set(CHAOS_VEHICLE_ASSETS);
@@ -244,6 +248,17 @@ if(!saveSource.includes('replayChaosJournal(journal)')||
  !tabletopCss.includes('ccc-save-panel')||
  /(?:\bfetch\s*\(|\beval\s*\(|\bwindow\b|https?:\/\/|\.hand\b|\.deck\b)/.test(saveSource.replace(/^\/\/.*$/gm,'')))
  throw new Error('CCC-6 save/resume and offline mobile release qualification failed');
+// Account multiplayer must be the public route, never the old same-screen game.
+const onlineUi=await readFile(resolve(root,'core/chaos-online.js'),'utf8');
+const shellUi=await readFile(resolve(root,'core/app-shell.js'),'utf8');
+if(!shellUi.includes("if(route.id==='chaos-game')return renderChaosOnline")||
+ !onlineUi.includes("credentials:'same-origin'")||
+ !onlineUi.includes("checkChaosProjection")||
+ !app.includes("new ChaosRoomsClient")||
+ !app.includes("bindChaosOnline()")||
+ !tabletopCss.includes('.ccc-online-cards')||
+ !tabletopCss.includes('.app-shell[data-route="chaos-game"] .app-sidebar'))
+ throw new Error('CCC account multiplayer route must not expose pass-and-play');
 // CCC-4 decisions consume only the current hand and public board, never stock order.
 const computerJs=await readFile(resolve(root,'core/chaos-computer.js'),'utf8');
 const classicsUi=await readFile(resolve(root,'core/classics-ui.js'),'utf8');

@@ -538,3 +538,254 @@
  .ccc-wrap--roadtrip .ccc-save-panel{background:Canvas!important;color:CanvasText!important;border-color:CanvasText}
  .ccc-wrap--roadtrip .ccc-save-panel button{border:2px solid ButtonText}
 }
+
+/* CCC account multiplayer — the public route uses one private hand per account. */
+.app-shell[data-route="chaos-game"] .app-layout{display:block}
+.app-shell[data-route="chaos-game"] .app-sidebar,
+.app-shell[data-route="chaos-game"] .app-rail,
+.app-shell[data-route="chaos-game"] .ecosystem-rail,
+.app-shell[data-route="chaos-game"] .route-heading{display:none!important}
+.app-shell[data-route="chaos-game"] .app-content{width:min(100%,1480px);max-width:1480px;margin:0 auto;padding:12px 18px}
+.ccc-online{--road:#102f26;--gold:#ffd580;--ink:#faf3d9;color:var(--ink);
+ background:linear-gradient(135deg,#102f26,#204635);border:2px solid #8cbba5;
+ border-radius:14px;padding:16px;min-width:0;overflow:hidden}
+.ccc-online *{box-sizing:border-box}
+.ccc-online-header{display:flex;align-items:center;justify-content:space-between;gap:14px;
+ border-bottom:1px solid #7fa28b;padding:0 0 12px}
+.ccc-online-header h2{color:#fff3d2;font-size:clamp(1.45rem,2.4vw,2.5rem);margin:0}
+.ccc-online-header p{margin:3px 0;line-height:1.3}
+.ccc-online button,.ccc-online input,.ccc-online select{min-height:44px;touch-action:manipulation;font:inherit}
+.ccc-online button{cursor:pointer;border:1px solid #f2ce80;border-radius:8px;padding:8px 14px;
+ background:#ffd580;color:#18281f;font-weight:800}
+.ccc-online button:disabled{opacity:.55;cursor:not-allowed}
+.ccc-online button:focus-visible,.ccc-online select:focus-visible,.ccc-online input:focus-visible{
+ outline:3px solid #fff;outline-offset:3px}
+.ccc-online-home{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,1fr) minmax(220px,1fr);
+ gap:14px;margin-top:14px}
+.ccc-online-home>section,.ccc-online-home>form,.ccc-online-lobby,.ccc-online-results,
+.ccc-online-message{border:1px solid #7caa96;padding:14px;border-radius:12px;
+ background:#122e28;min-width:0}
+.ccc-online form label{display:flex;flex-direction:column;gap:5px;margin:8px 0}
+.ccc-online input,.ccc-online select{width:100%;max-width:100%;padding:7px;border-radius:7px}
+.ccc-online-room{border-bottom:1px solid #648a77;padding:8px 0}
+.ccc-online-room p{margin:4px 0}
+.ccc-online-error{background:#552b2b;color:#fff2e9;padding:10px;border-radius:8px}
+.ccc-online-standings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:10px 0}
+.ccc-online-seat{display:flex;flex-direction:column;gap:4px;border:1px solid #7da68a;
+ border-radius:10px;padding:8px;background:#17362e;min-width:0;overflow-wrap:anywhere}
+.ccc-online-seat span{font-weight:700}.ccc-online-seat small{opacity:.9}
+.ccc-online-seat--mine{border-color:#ffd580}
+.ccc-online-seat--turn{box-shadow:inset 0 0 0 2px #ffd580}
+.ccc-online-play{display:grid;grid-template-columns:minmax(200px,250px) minmax(0,1fr);gap:12px}
+.ccc-online-public,.ccc-online-hand{background:#16372d;border:1px solid #78a68b;padding:12px;border-radius:10px;min-width:0}
+.ccc-online-public h3,.ccc-online-hand h3{margin:0 0 8px;color:#fff1cc}
+.ccc-online-discard{display:flex;align-items:center;gap:9px}
+.ccc-online-discard img{width:48px;height:81px;object-fit:contain}
+.ccc-online-finish{color:#ffe29e;font-weight:800}
+.ccc-online-actions{display:grid;gap:7px}
+.ccc-online-cards{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.ccc-online-card{display:flex;flex-direction:column;align-items:center;text-align:center;
+ gap:5px;padding:7px 4px;min-width:0;background:#225142;border:1px solid #789b78;border-radius:8px}
+.ccc-online-card>img{width:100%;max-width:88px;height:130px;object-fit:contain}
+.ccc-online-card strong{font-size:.85rem;line-height:1.2;overflow-wrap:anywhere}
+.ccc-online-card-actions{display:grid;gap:4px;width:100%;max-height:148px;overflow-y:auto}
+.ccc-online-card-actions button{padding:6px 3px;font-size:.75rem;min-height:38px;white-space:normal}
+.ccc-online-log{margin-top:9px;max-height:90px;overflow:auto}
+.ccc-online-results{margin-top:12px}
+@media(min-width:980px){.ccc-online{min-height:calc(100vh - 134px)}}
+@media(max-width:1150px){.ccc-online-cards{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:800px){
+ .app-shell[data-route="chaos-game"] .app-content{padding:7px}
+ .ccc-online{padding:9px}.ccc-online-home{grid-template-columns:1fr}
+ .ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-play{grid-template-columns:1fr}
+ .ccc-online-cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:450px){
+ .ccc-online-header{align-items:flex-start;flex-direction:column}
+ .ccc-online-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-seat{font-size:.9rem}
+}
+@media(forced-colors:active){
+ .ccc-online,.ccc-online>*,.ccc-online-seat,.ccc-online-card,.ccc-online-public,.ccc-online-hand{
+  color:CanvasText!important;background:Canvas!important;border-color:CanvasText!important}
+ .ccc-online button{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}
+}
+
+
+/* The public CCC account game displays the approved printed atlas, with
+   dynamically positioned player vehicles and server-projected exposed tables. */
+.ccc-online-track{display:grid;grid-template-columns:minmax(0,1fr) minmax(208px,245px);gap:10px;align-items:start;margin:10px 0}
+.ccc-online-map{min-width:0}
+.ccc-online-map .ccc-highway-head{padding:5px 8px;gap:4px}
+.ccc-online-map .ccc-highway-head h3{font-size:.86rem}
+.ccc-online-map .ccc-highway-head p{display:none}
+.ccc-online-map .ccc-road-legend{display:none}
+.ccc-online-track>.ccc-online-standings{display:grid;grid-template-columns:1fr;margin:0;gap:6px}
+.ccc-online-track .ccc-online-seat{padding:7px;gap:1px}
+.ccc-online-tables{margin:10px 0;padding:10px;background:#132f28;border:1px solid #719c80;border-radius:10px}
+.ccc-online-tables>h3{margin:0 0 8px;font-size:1rem;color:#ffe1a3}
+.ccc-online-tables>h3 small{font-weight:500;color:#e9dbc3;font-size:.75rem}
+.ccc-online-table-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ccc-online-table{border:1px solid #779b79;border-radius:8px;background:#224538;min-width:0;padding:8px}
+.ccc-online-table--mine{border:2px solid #ffd580}
+.ccc-online-table header{display:flex;justify-content:space-between;align-items:center;gap:5px;flex-wrap:wrap;padding-bottom:5px;border-bottom:1px solid #7f9981}
+.ccc-online-table header strong{font-size:.9rem;overflow-wrap:anywhere}
+.ccc-online-table header span{font-size:.77rem}
+.ccc-online-exposed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:7px}
+.ccc-online-exposed h4{margin:0 0 4px;color:#ffdda0;font-size:.73rem}
+.ccc-online-exposed-card{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;line-height:1.2;margin:0 3px 3px 0;max-width:100%;overflow-wrap:anywhere}
+.ccc-online-exposed-card img{width:26px;height:44px;object-fit:contain;flex-shrink:0}
+.ccc-online-hazard{color:#ffd0af}
+.ccc-online-clear{font-size:.72rem;color:#c5dbca}
+.ccc-online-mileage{display:flex;gap:4px;flex-wrap:wrap}
+.ccc-online-mile-stack{display:inline-flex;flex-direction:column;align-items:center;font-size:.67rem}
+.ccc-online-mile-stack img{width:27px;height:43px;object-fit:contain}
+.ccc-online-mile-stack strong{font-size:.68rem;white-space:nowrap}
+.ccc-online-losses{font-size:.7rem;margin:5px 0 0}
+@media(max-width:1120px){
+ .ccc-online-track{grid-template-columns:minmax(0,1fr) minmax(180px,220px)}
+ .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .ccc-online-track{grid-template-columns:minmax(0,1fr)}
+ .ccc-online-track>.ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:450px){
+ .ccc-online-table-grid{grid-template-columns:minmax(0,1fr)}
+ .ccc-online-exposed{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(forced-colors:active){
+ .ccc-online-tables,.ccc-online-table{background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important}
+}
+
+
+/* CCC room-specific full-screen tabletop: highway / exposed cards + piles /
+   private hand, with a dedicated room-chat rail instead of social widgets. */
+.app-shell[data-route="chaos-game"] .app-content{width:100%;max-width:1920px;margin:0 auto;padding:7px 10px}
+.ccc-online--game{height:calc(100dvh - 100px);min-height:550px;display:flex;flex-direction:column;gap:5px;padding:9px;overflow:hidden}
+.ccc-online--game .ccc-online-header{padding-bottom:5px;flex:none}
+.ccc-online--game .ccc-online-header h2{font-size:1.15rem}
+.ccc-online--game .ccc-online-header p{font-size:.71rem}
+.ccc-online-game{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,305px);gap:9px;min-height:0;flex:1;overflow:hidden}
+.ccc-online-main{display:grid;grid-template-rows:auto minmax(0,1.16fr) minmax(0,.78fr) minmax(0,.62fr);gap:7px;min-height:0;overflow:hidden}
+.ccc-online-stage{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#852e1e;color:#fff3d8;padding:4px 10px;border-radius:7px;min-width:0;font-size:.84rem}
+.ccc-online-stage>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccc-online-stage>span{font-weight:700;white-space:nowrap;font-size:.72rem}
+.ccc-online-track{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:hidden;margin:0}
+.ccc-online-map{min-height:0;flex:1;overflow:hidden}
+.ccc-online-map .ccc-highway{height:100%;display:flex;flex-direction:column;border-radius:8px}
+.ccc-online-map .ccc-highway-head,.ccc-online-map .ccc-road-legend{display:none}
+.ccc-online-map .ccc-highway-svg{height:100%;width:100%;max-height:none;flex:1;min-height:0}
+.ccc-online-track>.ccc-online-standings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;flex:none;margin:0}
+.ccc-online-track .ccc-online-seat{padding:4px 7px;line-height:1.12;gap:2px;font-size:.74rem}
+.ccc-online-track .ccc-online-seat strong{font-size:.85rem}
+.ccc-online-track .ccc-online-seat small{font-size:.67rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ccc-online-middle{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,175px);gap:7px;min-height:0}
+.ccc-online-middle .ccc-online-tables{min-height:0;overflow:auto;margin:0;padding:6px}
+.ccc-online-middle .ccc-online-tables>h3{font-size:.83rem;margin-bottom:4px}
+.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.ccc-online-middle .ccc-online-table{padding:5px;border-radius:6px}
+.ccc-online-middle .ccc-online-table header{gap:2px;padding-bottom:3px}
+.ccc-online-middle .ccc-online-table header strong{font-size:.76rem}
+.ccc-online-middle .ccc-online-table header span{font-size:.68rem}
+.ccc-online-middle .ccc-online-exposed{gap:3px;margin-top:3px}
+.ccc-online-middle .ccc-online-exposed h4{font-size:.66rem;margin:0 0 2px}
+.ccc-online-middle .ccc-online-exposed-card{font-size:.65rem;gap:2px}
+.ccc-online-middle .ccc-online-exposed-card img{width:20px;height:32px}
+.ccc-online-middle .ccc-online-mile-stack img{width:21px;height:32px}
+.ccc-online-middle .ccc-online-mile-stack strong{font-size:.6rem}
+.ccc-online-decks{border:1px solid #9aaf86;border-radius:8px;padding:6px;background:#19382c;min-height:0;overflow-y:auto}
+.ccc-online-decks h3{font-size:.82rem;margin:0 0 5px;color:#ffdfad}
+.ccc-online-piles{display:flex;gap:7px;justify-content:space-around}
+.ccc-online-pile{display:flex;align-items:center;flex-direction:column;gap:2px;min-width:0;flex:1;text-align:center}
+.ccc-online-pile>strong{font-size:.68rem}
+.ccc-online-pile small{font-size:.62rem;line-height:1.12}
+.ccc-online-pile button{min-width:0;min-height:0;padding:0;border:0;background:none}
+.ccc-online-stock-back,.ccc-online-discard-face{width:57px;height:93px;display:flex;align-items:center;justify-content:center;border-radius:5px;border:3px solid #ecdca9;background:#26513b;box-shadow:0 1px 5px #0008;overflow:hidden}
+.ccc-online-stock-back{flex-direction:column;font-size:.53rem;font-weight:bold;color:#fff3cf}
+.ccc-online-stock-back b{font-size:1.55rem}
+.ccc-online-stock-back strong{font-size:1.1rem}
+.ccc-online-discard-face{background:#dbc6a0}
+.ccc-online-discard-face img{width:100%;height:100%;object-fit:contain}
+.ccc-online-pile-actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:5px}
+.ccc-online-pile-actions button{font-size:.69rem;padding:4px 6px;min-height:34px}
+.ccc-online-hand{min-height:0;overflow:hidden;padding:6px 9px;display:flex;flex-direction:column;gap:4px}
+.ccc-online-hand-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:0}
+.ccc-online-hand-head h3{margin:0;font-size:.88rem}
+.ccc-online-hand-head>strong{color:#ffdf99;font-size:.76rem}
+.ccc-online-hand-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,175px);gap:9px;min-height:0;flex:1}
+.ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0;min-height:0;overflow-x:auto}
+.ccc-online-hand .ccc-online-card{display:flex;padding:3px;min-height:0;overflow:hidden}
+.ccc-online-hand .ccc-online-card--selected{border:2px solid #ffd580;box-shadow:inset 0 0 0 1px #fff4c5}
+.ccc-online-card-select{border:0!important;background:transparent!important;color:#fff1d2!important;padding:0!important;min-height:0!important;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.ccc-online-card-select img{display:block;max-width:100%;height:auto;max-height:120px;object-fit:contain}
+.ccc-online-card-select strong{font-size:.68rem;line-height:1.15;overflow-wrap:anywhere}
+.ccc-online-hand .ccc-online-card-actions{display:flex;flex-direction:column;gap:4px;min-height:0;max-height:none;overflow-y:auto}
+.ccc-online-hand .ccc-online-card-actions h4{font-size:.78rem;margin:0;color:#ffdb91}
+.ccc-online-hand .ccc-online-card-actions button{font-size:.72rem;min-height:32px;padding:4px}
+.ccc-online-stage-end:empty{display:none}
+.ccc-online-stage-end:not(:empty){position:absolute;inset:auto 12px 14px 12px;z-index:2;pointer-events:none}
+.ccc-online-stage-end:not(:empty)>*{pointer-events:auto}
+.ccc-online-chat{display:flex;flex-direction:column;gap:7px;min-height:0;background:#122d24;border:1px solid #d0b27a;border-radius:9px;padding:9px;overflow:hidden}
+.ccc-online-chat header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;border-bottom:1px solid #716b4c;padding-bottom:8px}
+.ccc-online-chat header h3{font-size:1.03rem;color:#ffe5ae;margin:0}
+.ccc-online-chat header small{font-size:.72rem;color:#c3dbbe}
+.ccc-online-chat-close,.ccc-online-chat-toggle{display:none}
+.ccc-online-chat-events{flex:none;font-size:.71rem;border-bottom:1px solid #355445;padding-bottom:4px}
+.ccc-online-chat-events ol{margin:4px 0;padding-left:18px;max-height:80px;overflow:auto}
+.ccc-online-chat-log{margin:0;padding:0;list-style:none;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:6px}
+.ccc-online-chat-message{background:#254536;border-radius:7px;padding:7px}
+.ccc-online-chat-message--mine{background:#385443}
+.ccc-online-chat-message>div{display:flex;justify-content:space-between;gap:4px;align-items:center}
+.ccc-online-chat-message strong{font-size:.77rem;color:#ffe2a4}
+.ccc-online-chat-message time{font-size:.67rem;color:#c7d2c7}
+.ccc-online-chat-message p{font-size:.83rem;margin:3px 0;overflow-wrap:anywhere;white-space:pre-wrap}
+.ccc-online-chat-empty{font-size:.8rem;color:#d4e4cf}
+.ccc-online-chat-mutes{display:flex;align-items:center;flex-wrap:wrap;gap:3px;font-size:.66rem}
+.ccc-online-chat-mutes button{min-height:27px;padding:3px 5px;font-size:.66rem}
+.ccc-online-chat-error{font-size:.72rem;color:#ffbda6;margin:0}
+.ccc-online-chat form{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-end}
+.ccc-online-chat form label{flex-basis:100%;font-size:.68rem}
+.ccc-online-chat textarea{flex:1;min-width:0;width:100%;border:1px solid #d5b777;background:#f7ead4;color:#1c3326;border-radius:6px;padding:7px;font:inherit;resize:vertical}
+.ccc-online-chat form button{align-self:stretch;min-height:36px;min-width:68px}
+@media(max-width:1120px){.ccc-online-game{grid-template-columns:minmax(0,1fr) minmax(205px,245px)}.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:790px){
+ .ccc-online--game{height:auto;min-height:calc(100dvh - 85px);overflow:visible}
+ .ccc-online-game{display:block;overflow:visible}
+ .ccc-online-main{display:flex;flex-direction:column;overflow:visible}
+ .ccc-online-track{min-height:240px;overflow:visible}
+ .ccc-online-map{height:auto;aspect-ratio:960/450}
+ .ccc-online-middle{grid-template-columns:minmax(0,1fr);min-height:0}
+ .ccc-online-middle .ccc-online-tables{max-height:260px}
+ .ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-hand{min-height:200px}
+ .ccc-online-chat-toggle{display:block!important;min-height:32px!important;padding:4px 6px!important;font-size:.72rem!important}
+ .ccc-online-chat{display:none;position:fixed;right:0;top:55px;bottom:0;width:min(100vw,370px);z-index:90;box-shadow:-5px 0 25px #071811aa}
+ .ccc-online-chat--open{display:flex}
+ .ccc-online-chat-close{display:inline-flex!important;min-height:32px!important}
+}
+@media(max-width:480px){
+ .ccc-online-stage>span{display:none}
+ .ccc-online-track>.ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ccc-online-hand-content{grid-template-columns:minmax(0,1fr)}
+ .ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(70px,1fr));max-width:100%}
+ .ccc-online-hand .ccc-online-card-actions{display:flex;flex-direction:row;flex-wrap:wrap}
+ .ccc-online-decks{display:block}
+}
+@media(max-height:750px) and (min-width:791px){
+ .ccc-online--game .ccc-online-header h2{font-size:1rem}
+ .ccc-online-main{grid-template-rows:auto minmax(0,1fr) minmax(0,.8fr) minmax(0,.7fr)}
+ .ccc-online-chat-mutes{max-height:48px;overflow:auto}
+ .ccc-online-card-select img{max-height:88px}
+}
+@media(forced-colors:active){
+ .ccc-online-decks,.ccc-online-chat,.ccc-online-stock-back,.ccc-online-chat-message,.ccc-online-card-select{background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important}
+}
+@media(prefers-reduced-motion:reduce){.ccc-online-chat{scroll-behavior:auto}}
+
+/* Report actions remain legible without visually overtaking room conversation. */
+.ccc-online-chat-report{float:right;min-height:30px!important;padding:2px 6px!important;font-size:.64rem!important;background:transparent!important;color:#f2d3a4!important;border:1px solid #867252!important;margin-top:3px}
+.ccc-online-chat-message::after{content:"";display:block;clear:both}
+.ccc-online-chat-notice{margin:0;color:#bce9bf;font-size:.74rem;line-height:1.3}
+.ccc-online-chat-report:focus-visible{outline:3px solid #ffe3a4;outline-offset:1px}

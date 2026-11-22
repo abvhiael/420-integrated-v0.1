@@ -7,6 +7,7 @@ import {createTelemetrySink} from './core/telemetry.js';
 import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from './core/wallet-session.js';
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
+import {ChaosRoomsClient} from './core/chaos-online.js';
 import {configureChaosComputerSeats,isChaosComputer,advanceChaosComputerTurns} from './core/chaos-computer.js';
 import {CHAOS_TAB_KEY,CHAOS_DEVICE_KEY,beginChaosJournal,appendChaosJournal,readChaosStorage,writeChaosStorage,removeChaosStorage} from './core/chaos-save.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
@@ -32,6 +33,7 @@ let viewPreferences=DEFAULT_VIEW_PREFERENCES;
 let chaosGame=null,chaosRevealed=false,chaosError=null,chaosRepairCue=null,chaosEffects=null;
 let chaosComputerScheduled=false,chaosComputerErrorStop=false;
 let chaosJournal=null,chaosDeviceSaving=false,chaosSavedAvailable=false,chaosSavedInvalid=false,chaosSaveNotice=null,chaosGeneration=0;
+let chaosOnline=null;
 function shortAccount(value){return value?`${value.slice(0,6)}…${value.slice(-4)}`:'Not connected';}
 function applyViewPreferences(){document.documentElement.dataset.textSize=viewPreferences.textSize;document.documentElement.dataset.contrast=viewPreferences.contrast;document.documentElement.dataset.motion=viewPreferences.motion;}
 function updateRobots(){let tag=document.querySelector('meta[name="robots"]');if(!tag){tag=document.createElement('meta');tag.name='robots';document.head.append(tag);}tag.content=documentIndexingPolicy(window.location.pathname);}
@@ -166,7 +168,8 @@ function refreshChaosRecovery(){
  }
 }
 function restoreChaosOnGameRoute(){
- if(window.location.pathname==='/classics/cross-country-chaos'&&!chaosGame&&!chaosJournal)
+ // Old same-screen journals cannot authorize an account match.
+ if(window.location.pathname==='/classics/cross-country-chaos/practice'&&!chaosGame&&!chaosJournal)
   refreshChaosRecovery();
 }
 function eraseChaosRecovery(){
@@ -193,14 +196,14 @@ function saveChaosDisplayInfo(){
 // Yield between bounded local computer batches. Never reveal a bot's hand.
 function scheduleChaosComputer(){
  if(chaosComputerScheduled||chaosComputerErrorStop||
-  window.location.pathname!=='/classics/cross-country-chaos'||
+  window.location.pathname!=='/classics/cross-country-chaos/practice'||
   chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
  const generation=chaosGeneration;
  chaosComputerScheduled=true;
  window.setTimeout(()=>{
   if(generation!==chaosGeneration)return;
   chaosComputerScheduled=false;
-  if(window.location.pathname!=='/classics/cross-country-chaos'||chaosComputerErrorStop||
+  if(window.location.pathname!=='/classics/cross-country-chaos/practice'||chaosComputerErrorStop||
    chaosGame?.phase!=='playing'||!isChaosComputer(chaosGame.players[chaosGame.turn]))return;
   try{
    const result=advanceChaosComputerTurns(chaosGame,{maxActions:96});
@@ -318,14 +321,54 @@ function bindChaos(){
  });
 }
 
-function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
+function bindChaosOnline(){
+ if(window.location.pathname!=='/classics/cross-country-chaos'||!chaosOnline)return;
+ root.querySelector('[data-chaos-online-create]')?.addEventListener('submit',event=>{
+  event.preventDefault();const form=new FormData(event.currentTarget);
+  const humanSeats=Number(form.get('humanSeats')),botCount=Number(form.get('botCount'));
+  void chaosOnline.mutate('create',{humanSeats,bots:Array.from({length:botCount},()=>String(form.get('difficulty'))),vehicle:'wagon'}).catch(()=>{});
+ });
+ root.querySelector('[data-chaos-online-join]')?.addEventListener('submit',event=>{
+  event.preventDefault();void chaosOnline.mutate('join',{code:String(new FormData(event.currentTarget).get('code')||'').trim()}).catch(()=>{});
+ });
+ root.querySelector('[data-chaos-online-chat]')?.addEventListener('submit',event=>{
+  event.preventDefault();const input=event.currentTarget.elements.namedItem('text');
+  const text=input?.value?.trim();if(!text)return;
+  input.value='';void chaosOnline.sendChat(text).catch(()=>{
+   const current=root.querySelector('[data-chaos-online-chat] textarea');
+   if(current&&!current.value)current.value=text;
+  });
+ });
+ for(const b of root.querySelectorAll('[data-chaos-online-select]'))b.addEventListener('click',()=>chaosOnline.selectCard(Number(b.dataset.chaosOnlineSelect)));
+ for(const b of root.querySelectorAll('[data-chaos-online-action]'))b.addEventListener('click',()=>{
+  const action=b.dataset.chaosOnlineAction;
+  if(action==='back'){chaosOnline.emit({...chaosOnline.state,room:null,error:null,unreadChat:0,chatError:null});void chaosOnline.refresh();return;}
+  if(action==='chat-toggle'){chaosOnline.toggleChat();return;}
+  if(action==='mute'){chaosOnline.toggleMute(Number(b.dataset.seat));return;}
+  if(action==='chat-report'){void chaosOnline.reportChat(b.dataset.messageId).catch(()=>{});return;}
+  if(action==='refresh'){void chaosOnline.refresh();return;}
+  if(action==='open'){void chaosOnline.open(b.dataset.room);return;}
+  if(action==='move'){try{void chaosOnline.mutate('move',{move:JSON.parse(b.dataset.move)}).catch(()=>{});}catch{}return;}
+  if(action==='start'||action==='next')void chaosOnline.mutate(action).catch(()=>{});
+ });
+}
+function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;const existingInput=root.querySelector('[data-chaos-online-chat] textarea');const draft=existingInput?.value;
+ const focused=existingInput===document.activeElement;const selection=focused?[existingInput.selectionStart,existingInput.selectionEnd]:null;
+ const existingLog=root.querySelector('[data-chaos-chat-log]');
+ const scrolled=existingLog?{top:existingLog.scrollTop,nearBottom:existingLog.scrollHeight-existingLog.scrollTop-existingLog.clientHeight<36}:null;
+ root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
  accountIdentityState:identityController?.state,accountIdentityEnabled:runtimeConfig.features.accountSocial===true,
  classicRoomsState:classicRoomsController?.state,classicRoomsEnabled:runtimeConfig.features.classicRooms===true,
  accountMessagesState:accountExtras?.messages.state,accountGamesState:accountExtras?.games.state,
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo()});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountActions();bindClassicRooms();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaos();
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo(),online:chaosOnline?.state});
+ const nextInput=root.querySelector('[data-chaos-online-chat] textarea');
+ if(nextInput&&draft!==undefined){nextInput.value=draft;if(focused){nextInput.focus({preventScroll:true});if(selection)nextInput.setSelectionRange(...selection);}}
+ const nextLog=root.querySelector('[data-chaos-chat-log]');
+ if(nextLog)nextLog.scrollTop=!scrolled||scrolled.nearBottom?nextLog.scrollHeight:scrolled.top;
+ updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountActions();bindClassicRooms();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){
@@ -355,6 +398,7 @@ function onRouteChange(){
  chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
  monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
+ if(window.location.pathname==='/classics/cross-country-chaos'&&chaosOnline)void chaosOnline.refresh({preserve:false});
  if(window.location.pathname==='/')void refreshPublicFeed();
  if(isAccountSocialSurface()&&socialController?.client.enabled)void socialController.refresh();
  if(identityController?.client.enabled)void identityController.refresh();
@@ -363,10 +407,11 @@ function onRouteChange(){
  if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();
  const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();
 }
-async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});accountExtras={
+async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});chaosOnline=new ChaosRoomsClient({onChange:()=>{if(window.location.pathname==='/classics/cross-country-chaos')renderCurrent();}});accountExtras={
  messages:new AccountExtrasController({kind:'messages',enabled:runtimeConfig.features.accountMessaging===true,
  onChange:()=>{if(window.location.pathname==='/account/messages')renderCurrent();}}),
  games:new AccountExtrasController({kind:'games',enabled:runtimeConfig.features.accountGames===true,
  onChange:()=>{if(window.location.pathname==='/account/games')renderCurrent();}})
-};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();restoreChaosOnGameRoute();renderCurrent();if(publicFeedReader.enabled)void refreshPublicFeed();if(identityController.client.enabled)void identityController.refresh();if(isClassicRoomSurface()&&classicRoomsController.client.enabled)void refreshClassicRooms();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
-window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(identityController?.client.enabled)void identityController.refresh({quiet:true});if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);window.setInterval(()=>{if(!document.hidden&&identityController?.client.enabled)void identityController.refresh({quiet:true});},60_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();
+};const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();renderCurrent();if(window.location.pathname==='/classics/cross-country-chaos')void chaosOnline.refresh({preserve:false});if(publicFeedReader.enabled)void refreshPublicFeed();if(identityController.client.enabled)void identityController.refresh();if(isClassicRoomSurface()&&classicRoomsController.client.enabled)void refreshClassicRooms();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
+window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(identityController?.client.enabled)void identityController.refresh({quiet:true});if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);
+window.setInterval(()=>{if(!document.hidden&&identityController?.client.enabled)void identityController.refresh({quiet:true});},60_000);window.setInterval(()=>{if(!document.hidden&&window.location.pathname==='/classics/cross-country-chaos'&&!chaosOnline?.busy&&chaosOnline?.state.room?.id)void chaosOnline.open(chaosOnline.state.room.id,{silent:true});},4_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();

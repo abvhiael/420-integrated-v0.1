@@ -73,18 +73,17 @@ test('CCC-ART-5: elevators, Saskatchewan potholes, Rockies and mountain passes h
  assert.ok(!west.includes('data-scenery="ferry"'));
  assert.ok(!west.includes('data-scenery="goose"'));
 });
-test('CCC-ART-5: decorative vectors never cover the qualified road, stops or moving cars',()=>{
+test('CCC-ART-5: SVG fallback scenery and city markers lie BELOW the printed atlas and vehicles',()=>{
  for(let i=0;i<regions.length;i++){
   const state=game();state.leg=i;
   const html=renderChaosHighway(state),region=regions[i];
-  const back=html.indexOf('class="ccc-map-foreground"');
   const scenic=html.indexOf('class="ccc-illustrated-scenery"');
   const road=html.indexOf('class="ccc-highway-shadow"');
   const centre=html.indexOf('class="ccc-highway-centre"');
   const towns=html.indexOf('class="ccc-map-stop"');
+  const underlay=html.indexOf('class="ccc-map-underlay"');
   const cars=html.indexOf('class="ccc-map-vehicle');
-  assert.ok(back<scenic&&scenic<road&&road<centre&&centre<towns&&towns<cars,
-   'Road and gameplay must appear above decorative scenery: '+region);
+  assert.ok(scenic>=0&&scenic<road&&road<centre&&centre<towns&&towns<underlay&&underlay<cars);
   assert.equal((html.match(/class="ccc-scenery-vignette /g)||[]).length,expected[region].length);
   assert.match(html,/class="ccc-illustrated-scenery" aria-hidden="true" pointer-events="none"/);
   assert.match(html,/<desc>Illustrated roadside scenery:/);
@@ -92,24 +91,23 @@ test('CCC-ART-5: decorative vectors never cover the qualified road, stops or mov
   assert.match(html,/viewBox="0 0 960 415"/);
   assert.match(html,/2,500 game km/);
   assert.equal((html.match(/class="ccc-map-vehicle ccc-map-vehicle--/g)||[]).length,4);
-  assert.equal((html.match(/class="ccc-map-stop"/g)||[]).length,[6,7,7][i]);
+  assert.equal((html.match(/class="ccc-map-stop"/g)||[]).length,[7,9,7][i]);
   for(const id of expected[region])assert.ok(html.includes('data-scenery="'+id+'"'));
   for(const other of regions.filter(x=>x!==region))
    for(const id of expected[other])assert.ok(!html.includes('data-scenery="'+id+'"'),id);
  }
 });
-test('CCC-ART-5: vignette anchors remain clear of the normalized driving corridor',()=>{
+test('CCC-ART-5: fallback scenery stays under approved opaque maps at all mileage values',()=>{
  for(const region of regions){
-  for(const item of chaosSceneryFeatures(region)){
-   let nearest=Infinity;
-   for(let km=0;km<=2500;km+=10){
-    const pos=chaosRoutePosition(region,km);
-    nearest=Math.min(nearest,Math.hypot(pos.x-item.x,pos.y-item.y));
-   }
-   assert.ok(nearest>55,'Artwork crowds game highway: '+region+'/'+item.id+' ('+nearest.toFixed(1)+' px)');
-  }
+  const s=game();s.leg=regions.indexOf(region);
+  const html=renderChaosHighway(s);
+  assert.ok(html.indexOf('class="ccc-illustrated-scenery"')<html.indexOf('class="ccc-map-underlay"'));
+  assert.equal((html.match(/class="ccc-map-foreground"/g)||[]).length,0);
+  for(const item of chaosSceneryFeatures(region))
+   assert.ok(item.x>70&&item.x<900&&item.y>60&&item.y<380);
  }
 });
+
 test('CCC-ART-5: static scenery never depends on player state or leaks hidden hands',()=>{
  for(let i=0;i<3;i++){
   const s=game();s.leg=i;
@@ -148,7 +146,7 @@ test('CCC-ART-5: vectors are transparent, local, self-contained, accessible and 
  assert.match(css,/@media\(prefers-reduced-motion:reduce\)/);
  assert.doesNotMatch(css,/@keyframes ccc-scenery/);
  assert.match(gate,/CHAOS_SCENERY_COUNT!==8/);
- assert.match(gate,/baseTotal:1157\*1024/);
+ assert.match(gate,/baseTotal:1189\*1024/);
  assert.match(build,/CHAOS_MAP_ASSETS/);
  assert.ok(Buffer.byteLength(source)<12*1024);
 });

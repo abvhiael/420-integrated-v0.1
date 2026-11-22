@@ -29,7 +29,7 @@ Historical **FROZEN_V3** remains intact at `contracts/config/genesis-config-comm
 
 **New committed executable file:** `contracts/test/GOVPRE08LocalDeployment420.t.sol`; **amended CI:** `.github/workflows/governance-pre-08-genesis.yml`.
 
-The test's genuine Solidity 0.8.24/Cancun/via-IR import closure compiled **53 source files** (not unrelated vendored LevelZero test fixtures). On each independent fresh Foundry EVM it executed the real constructors for these **fourteen unmodified production contracts**:
+The test's genuine Solidity 0.8.24/Cancun/via-IR import closure compiled **53 source files** (not unrelated vendored LayerZero test fixtures). On each independent fresh Foundry EVM it executed the real constructors for these **fourteen unmodified production contracts**:
 
 1. `FoundingWalletClaims420`, `FoundingCommitteeMembership420`, `FoundingRetirementVerifier420`;
 2. `FoundingTreasuryAuthority420`, `FoundingValidatorSponsorship420`, `FoundingCommunityRetirementSweep420`;
@@ -63,5 +63,7 @@ No synthetic address, local `anvil_setCode`, mock authority, proposed Keccak has
 
 - `scripts/gov-pre-08/plan.py`, `test_plan.py`, `materialize-local-funding.py`, `test_funding.py`, `materialize-local-vesting.py`.
 - `contracts/config/candidates/genesis-config-commitment-v4-unsigned.json`; `contracts/test/fixtures/gov-pre-08-local-wallets.json`.
-- `.github/workflows/governance-pre-08-genesis.yml`.
+- `.github/workflows/governance-pre-08-genesis.yml`, including local deployment graph replay and exact-source Solidity import closure.
+- `contracts/test/GOVPRE08LocalDeployment420.t.sol` (four new deployment, binding, Registry, and fail-closed tests).
+- `docs/audit/420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md`, `docs/audit/420GOVERNANCE-TESTNET-WORK-ROADMAP.md`, `docs/STEP-5-TESTNET-LAUNCH.md` (pre-testnet/deferred-only scope boundaries).
 - `docs/apps/governance/cold-start.md`; `docs/apps/governance/troubleshooting.md`.

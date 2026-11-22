@@ -79,16 +79,16 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(vault.beneficiary()==address(splitter) && splitter.compensationVault()==address(vault),
                 "immutable vault/splitter deployment handshake");
     }
-    function fundNative(bytes32 reference,uint256 amount) internal {
+    function fundNative(bytes32 revenueRef,uint256 amount) internal {
         // Vault policy BPS 1000: gross=10x net sent to the immutable splitter.
         vault.contributeNative{value:amount}(
-            APP_ID,reference,vault.policyId(),amount*10,1000
+            APP_ID,revenueRef,vault.policyId(),amount*10,1000
         );
     }
-    function fundToken(FounderCompensationTestToken420 token,bytes32 reference,uint256 amount) internal {
+    function fundToken(FounderCompensationTestToken420 token,bytes32 revenueRef,uint256 amount) internal {
         token.mint(address(this),amount);
         token.approve(address(vault),amount);
-        vault.contributeToken(address(token),APP_ID,reference,vault.policyId(),amount*10,1000);
+        vault.contributeToken(address(token),APP_ID,revenueRef,vault.policyId(),amount*10,1000);
     }
 
     function testThreeFoundersClaimIndividuallyNoImpersonationOrDuplicate() public {

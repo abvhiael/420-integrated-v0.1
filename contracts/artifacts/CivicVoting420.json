@@ -320,15 +320,15 @@
   "storageLayout": {
     "storage": [
       {
-        "astId": 4591,
+        "astId": 4621,
         "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
         "label": "proposalRegistry",
         "offset": 0,
         "slot": "0",
-        "type": "t_contract(ICivicProposalRegistryVoting420)4566"
+        "type": "t_contract(ICivicProposalRegistryVoting420)4596"
       },
       {
-        "astId": 4594,
+        "astId": 4624,
         "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
         "label": "electorateRegistry",
         "offset": 0,
@@ -336,20 +336,20 @@
         "type": "t_contract(CivicElectorateRegistry420)947"
       },
       {
-        "astId": 4601,
+        "astId": 4631,
         "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
         "label": "_tallies",
         "offset": 0,
         "slot": "2",
-        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)4580_storage))"
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)4610_storage))"
       },
       {
-        "astId": 4610,
+        "astId": 4640,
         "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
         "label": "_ballots",
         "offset": 0,
         "slot": "3",
-        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4588_storage)))"
+        "type": "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4618_storage)))"
       }
     ],
     "types": {
@@ -373,65 +373,65 @@
         "label": "contract CivicElectorateRegistry420",
         "numberOfBytes": "20"
       },
-      "t_contract(ICivicProposalRegistryVoting420)4566": {
+      "t_contract(ICivicProposalRegistryVoting420)4596": {
         "encoding": "inplace",
         "label": "contract ICivicProposalRegistryVoting420",
         "numberOfBytes": "20"
       },
-      "t_enum(Support)4573": {
+      "t_enum(Support)4603": {
         "encoding": "inplace",
         "label": "enum CivicVoting420.Support",
         "numberOfBytes": "1"
       },
-      "t_mapping(t_address,t_struct(Ballot)4588_storage)": {
+      "t_mapping(t_address,t_struct(Ballot)4618_storage)": {
         "encoding": "mapping",
         "key": "t_address",
         "label": "mapping(address => struct CivicVoting420.Ballot)",
         "numberOfBytes": "32",
-        "value": "t_struct(Ballot)4588_storage"
+        "value": "t_struct(Ballot)4618_storage"
       },
-      "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4588_storage)))": {
+      "t_mapping(t_bytes32,t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4618_storage)))": {
         "encoding": "mapping",
         "key": "t_bytes32",
         "label": "mapping(bytes32 => mapping(uint8 => mapping(address => struct CivicVoting420.Ballot)))",
         "numberOfBytes": "32",
-        "value": "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4588_storage))"
+        "value": "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4618_storage))"
       },
-      "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)4580_storage))": {
+      "t_mapping(t_bytes32,t_mapping(t_uint8,t_struct(Tally)4610_storage))": {
         "encoding": "mapping",
         "key": "t_bytes32",
         "label": "mapping(bytes32 => mapping(uint8 => struct CivicVoting420.Tally))",
         "numberOfBytes": "32",
-        "value": "t_mapping(t_uint8,t_struct(Tally)4580_storage)"
+        "value": "t_mapping(t_uint8,t_struct(Tally)4610_storage)"
       },
-      "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4588_storage))": {
+      "t_mapping(t_uint8,t_mapping(t_address,t_struct(Ballot)4618_storage))": {
         "encoding": "mapping",
         "key": "t_uint8",
         "label": "mapping(uint8 => mapping(address => struct CivicVoting420.Ballot))",
         "numberOfBytes": "32",
-        "value": "t_mapping(t_address,t_struct(Ballot)4588_storage)"
+        "value": "t_mapping(t_address,t_struct(Ballot)4618_storage)"
       },
-      "t_mapping(t_uint8,t_struct(Tally)4580_storage)": {
+      "t_mapping(t_uint8,t_struct(Tally)4610_storage)": {
         "encoding": "mapping",
         "key": "t_uint8",
         "label": "mapping(uint8 => struct CivicVoting420.Tally)",
         "numberOfBytes": "32",
-        "value": "t_struct(Tally)4580_storage"
+        "value": "t_struct(Tally)4610_storage"
       },
-      "t_struct(Ballot)4588_storage": {
+      "t_struct(Ballot)4618_storage": {
         "encoding": "inplace",
         "label": "struct CivicVoting420.Ballot",
         "members": [
           {
-            "astId": 4583,
+            "astId": 4613,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "support",
             "offset": 0,
             "slot": "0",
-            "type": "t_enum(Support)4573"
+            "type": "t_enum(Support)4603"
           },
           {
-            "astId": 4585,
+            "astId": 4615,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "weight",
             "offset": 0,
@@ -439,7 +439,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 4587,
+            "astId": 4617,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "cast",
             "offset": 0,
@@ -449,12 +449,12 @@
         ],
         "numberOfBytes": "96"
       },
-      "t_struct(Tally)4580_storage": {
+      "t_struct(Tally)4610_storage": {
         "encoding": "inplace",
         "label": "struct CivicVoting420.Tally",
         "members": [
           {
-            "astId": 4575,
+            "astId": 4605,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "againstVotes",
             "offset": 0,
@@ -462,7 +462,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 4577,
+            "astId": 4607,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "forVotes",
             "offset": 0,
@@ -470,7 +470,7 @@
             "type": "t_uint256"
           },
           {
-            "astId": 4579,
+            "astId": 4609,
             "contract": "src/governance/CivicVoting420.sol:CivicVoting420",
             "label": "abstainVotes",
             "offset": 0,

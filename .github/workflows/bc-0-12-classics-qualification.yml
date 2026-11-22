@@ -120,7 +120,7 @@ jobs:
       - name: Install pinned test-only browser tooling
         working-directory: bong-goggles/web
         run: |
-          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1 axe-core@4.10.3
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
           npx playwright install --with-deps chromium
       - name: Real Chromium desktop/mobile + axe + two independent 420ID transport fixtures
         working-directory: bong-goggles/web

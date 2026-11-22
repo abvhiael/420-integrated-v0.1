@@ -13,6 +13,17 @@ import "./CivicGovernor420.sol";
 import "./CivicMerkleElectorateSource420.sol";
 import "./CivicInitialElectorateEnrollment420.sol";
 
+interface ICivicBootstrapIdentityIssuer420 {
+    function governanceTimelock() external view returns (address);
+    function protocolVersion() external view returns (uint32);
+    function setIssuer(bytes32 issuerId, address controller, bytes32 metadataHash, bool active) external;
+}
+
+interface ICivicBootstrapValidatorRegistry420 {
+    function governanceTimelock() external view returns (address);
+    function protocolVersion() external view returns (uint32);
+}
+
 interface IProtocolRegistryBootstrap420 {
     enum ComponentType {
         UNSET,
@@ -111,6 +122,10 @@ contract Governance420 is SystemAccess, I420System {
     mapping(bytes32 => Proposal) public proposals;
 
     address public constant PROTOCOL_REGISTRY = 0x0000000000000000000000000000000000000434;
+    address public constant IDENTITY_420 = 0x0000000000000000000000000000000000000436;
+    address public constant VALIDATOR_REGISTRY_420 = 0x0000000000000000000000000000000000000423;
+    bytes32 public constant INITIAL_ELECTORATE_ISSUER = keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/V1");
+    bytes32 public constant INITIAL_ELECTORATE_ISSUER_METADATA = keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/METADATA/V1");
     uint64 public constant ROTATION_BLOCKS = 17_640;
 
     bytes32 public constant COMMUNITY_COMPONENT_ID = keccak256("420/component/governance/civic-constitution/v1");
@@ -226,7 +241,9 @@ contract Governance420 is SystemAccess, I420System {
                     validatorSource_.codehash,
                     approvedInitialEnrollment,
                     approvedInitialEnrollment.codehash,
-                    approvedInitialElectorateAuthority
+                    approvedInitialElectorateAuthority,
+                    IDENTITY_420.codehash,
+                    VALIDATOR_REGISTRY_420.codehash
                 )
             );
         }
@@ -347,6 +364,12 @@ contract Governance420 is SystemAccess, I420System {
             if (
                 approvedInitialEnrollment.code.length == 0 || enrollment.governance() != address(this)
                     || enrollment.deploymentChainId() != block.chainid || enrollment.enrollmentClosed()
+                    || IDENTITY_420.code.length == 0 || VALIDATOR_REGISTRY_420.code.length == 0
+                    || ICivicBootstrapIdentityIssuer420(IDENTITY_420).governanceTimelock() != governanceTimelock
+                    || ICivicBootstrapIdentityIssuer420(IDENTITY_420).protocolVersion() != 3
+                    || ICivicBootstrapValidatorRegistry420(VALIDATOR_REGISTRY_420).governanceTimelock()
+                        != governanceTimelock
+                    || ICivicBootstrapValidatorRegistry420(VALIDATOR_REGISTRY_420).protocolVersion() != 3
             ) {
                 revert InvalidElectorateSource();
             }
@@ -596,6 +619,15 @@ contract Governance420 is SystemAccess, I420System {
                     (initialValidatorRoot, initialValidatorTotalWeight)
                 )
             );
+        }
+
+        // Before Civic has electors, only this exact approved plan can enable trusted
+        // membership issuer setup through the existing seven-day Timelock.
+        if (deferred) {
+            _schedule(timelock, plan, 19, IDENTITY_420,
+                abi.encodeCall(ICivicBootstrapIdentityIssuer420.setIssuer,
+                    (INITIAL_ELECTORATE_ISSUER, approvedInitialElectorateAuthority,
+                    INITIAL_ELECTORATE_ISSUER_METADATA, true)));
         }
 
         emit CivicBootstrapPlanScheduled(plan, governor_);

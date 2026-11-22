@@ -202,7 +202,7 @@ contract FounderWalletClaimsAndCompensation420Test {
             "involuntary native balance accepted as developer revenue");
         (bool forged,)=address(splitter).call(
             abi.encodeCall(splitter.recordVaultTokenCompensation,
-                (address(other),uint256(100),keccak256("fake"))))
+                (address(other),uint256(100),keccak256("fake")))
         );
         require(!forged, "unapproved vault spoofed compensated token accounting");
         // Protocol itself, not beneficiaries, selects the immutable revenue

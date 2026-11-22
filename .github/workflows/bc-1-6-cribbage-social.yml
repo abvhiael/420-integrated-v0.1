@@ -2,6 +2,8 @@ name: BC-1.6 Authenticated Cribbage Challenges and Social
 on:
   pull_request:
     paths:
+      - 'cmd/bong-goggles-social/main.go'
+      - 'services/bong-goggles-account-social/http.go'
       - 'services/bong-goggles-account-social/classic_match_social.go'
       - 'services/bong-goggles-account-social/classic_match_social_integration_test.go'
       - 'services/bong-goggles-account-social/migrations/009_classic_match_requests.sql'

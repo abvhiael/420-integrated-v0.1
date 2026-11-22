@@ -11,3 +11,5 @@ Operator application: migrate 009_classic_match_requests.sql using the migration
 Qualification: bc-1-6-cribbage-social.yml (signed two-account PostgreSQL 16 Go race and focused Node UI privacy/interaction tests). Exact commit and workflow results must be recorded here after execution and before roadmap promotion.
 
 Next canonical milestone: BC-1.7 full Cribbage qualification and E2E; BC-1.8 release separate.
+
+BC-1.6 activation is independently fail-closed: `SOCIAL420_CRIBBAGE_SOCIAL_MODE=restricted-acceptance` requires `ReadyClassicMatchRequests` to pass against the runtime PostgreSQL identity with SELECT+INSERT and no UPDATE, DELETE or TRUNCATE. The default is off with HTTP 404 for all new APIs; BC-1.5 remains usable without 009.

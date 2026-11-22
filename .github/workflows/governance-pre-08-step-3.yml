@@ -69,6 +69,7 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-indexer-*.json
             ${{ runner.temp }}/govpre08-step3-descriptors-*.json
             ${{ runner.temp }}/govpre08-step3-postgres-*.json
+            ${{ runner.temp }}/govpre08-step3-wallet-*.json
             ${{ runner.temp }}/govpre08-step3-local-*.json
             ${{ runner.temp }}/govpre08-step3-recovery-*.json
             ${{ runner.temp }}/govpre08-step3-node-*.log

@@ -30,13 +30,34 @@ contract GovernanceTimelock {
 
     mapping(bytes32 => Operation) public operations;
 
-    /// @notice Operation whose mature Civic batch is currently being dispatched.
-    /// @dev Cleared during each external action, restored only to the calling batch.
-    bytes32 public executingCivicOperation;
-    // Append-only execution lock: a public execute() callback cannot nest a second
-    // matured G1/G2/G3/G4 operation inside a different Civic house/action context.
-    // Existing scheduler, operation and execution-context storage slots are preserved.
-    bool private _operationExecuting;
+    // Historical storage slots are reserved verbatim for predeploy layout compatibility.
+    // Runtime execution context must never depend on restoring persistent state after
+    // calling a foreign action: Cancun EIP-1153 transaction-local slots hold the
+    // live Civic operation and the cross-proposal execution lock instead.
+    bytes32 private _legacyExecutingCivicOperation;
+    bool private _legacyOperationExecuting;
+    bytes32 private constant _CIVIC_CONTEXT_SLOT = keccak256("420/GOV/TIMELOCK/ACTIVE_CIVIC_OPERATION/TRANSIENT/V1");
+    bytes32 private constant _EXECUTION_LOCK_SLOT = keccak256("420/GOV/TIMELOCK/EXECUTION_LOCK/TRANSIENT/V1");
+
+    function executingCivicOperation() public view returns (bytes32 operation) {
+        bytes32 slot = _CIVIC_CONTEXT_SLOT;
+        assembly { operation := tload(slot) }
+    }
+
+    function _operationIsExecuting() private view returns (bool locked) {
+        bytes32 slot = _EXECUTION_LOCK_SLOT;
+        assembly { locked := iszero(iszero(tload(slot))) }
+    }
+
+    function _setOperationExecuting(bool executing) private {
+        bytes32 slot = _EXECUTION_LOCK_SLOT;
+        assembly { tstore(slot, executing) }
+    }
+
+    function _setCivicContext(bytes32 id) private {
+        bytes32 slot = _CIVIC_CONTEXT_SLOT;
+        assembly { tstore(slot, id) }
+    }
 
     error ReentrantOperation();
 
@@ -132,8 +153,8 @@ contract GovernanceTimelock {
     function execute(
         bytes32 id
     ) external payable returns (bytes memory result) {
-        if (_operationExecuting) revert ReentrantOperation();
-        _operationExecuting = true;
+        if (_operationIsExecuting()) revert ReentrantOperation();
+        _setOperationExecuting(true);
         Operation storage op = operations[id];
         require(op.target != address(0), "unknown");
         require(!op.executed && !op.cancelled, "closed");
@@ -141,12 +162,12 @@ contract GovernanceTimelock {
         require(address(this).balance >= op.value, "insufficient balance");
 
         op.executed = true;
-        bytes32 previousOperation = executingCivicOperation;
-        executingCivicOperation = civicAuthorityActivated && op.target == scheduler ? id : bytes32(0);
+        bytes32 previousOperation = executingCivicOperation();
+        _setCivicContext(civicAuthorityActivated && op.target == scheduler ? id : bytes32(0));
         (bool ok, bytes memory out) = op.target.call{ value: op.value }(op.data);
-        executingCivicOperation = previousOperation;
+        _setCivicContext(previousOperation);
         require(ok, "execution failed");
-        _operationExecuting = false;
+        _setOperationExecuting(false);
         emit Executed(id);
         return out;
     }
@@ -160,11 +181,11 @@ contract GovernanceTimelock {
         bytes calldata data
     ) external payable returns (bool success) {
         require(civicAuthorityActivated && msg.sender == scheduler, "unauthorized");
-        require(id != bytes32(0) && executingCivicOperation == id, "not executing civic operation");
+        require(id != bytes32(0) && executingCivicOperation() == id, "not executing civic operation");
         require(target != address(0), "target");
-        executingCivicOperation = bytes32(0);
+        _setCivicContext(bytes32(0));
         (success,) = target.call{ value: msg.value }(data);
-        executingCivicOperation = id;
+        _setCivicContext(id);
     }
 
     function _schedule(

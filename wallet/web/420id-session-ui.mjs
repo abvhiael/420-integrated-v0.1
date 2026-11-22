@@ -9,6 +9,9 @@ let enabled=false;
 let session=null;
 let mounted=null;
 let generation=0;
+let configured=false;
+let bootError=null;
+let bootstrap=Promise.resolve();
 const client=createAppSessionClient({app:APP});
 
 export function wallet420IDSessionState(){
@@ -22,6 +25,9 @@ function invalidate(){
   }
 }
 export async function verifyWallet420IDSession(){
+  await bootstrap;
+  if(bootError)throw new Error('420ID Wallet configuration is not verified',{cause:bootError});
+  if(!configured)throw new Error('420ID Wallet configuration is still unverified');
   if(!enabled)return null; // 420ID is optional; independent Wallet authority remains mandatory.
   const ticket=generation;
   let fresh;
@@ -61,6 +67,7 @@ export function installWallet420IDUi({runtimeConfig,origin=globalThis.location?.
   if(!root||mounted) return mounted;
   if(runtimeConfig?.identitySession?.enabled!==true){
     root.hidden=true;
+    configured=true;
     return {enabled:false};
   }
   if(origin!==WALLET420_ID_ORIGIN){
@@ -70,6 +77,7 @@ export function installWallet420IDUi({runtimeConfig,origin=globalThis.location?.
     throw new Error('420ID Wallet origin does not match the pinned application');
   }
   enabled=true;
+  configured=true;
   root.dataset.app=APP;
   root.dataset.enabled='true';
   mounted=mountAppSession({root,app:APP,enabled:true,origin,
@@ -84,13 +92,19 @@ export function installWallet420IDUi({runtimeConfig,origin=globalThis.location?.
 }
 
 if(typeof document!=='undefined'){
-  void fetch('./runtime-config.json',{cache:'no-store'}).then(async response=>{
+  bootstrap=fetch('./runtime-config.json',{cache:'no-store'}).then(async response=>{
     if(!response.ok)throw new Error('Wallet runtime configuration unavailable');
     const config=await response.json();
     installWallet420IDUi({runtimeConfig:config});
-  }).catch(()=>{
+    configured=true;
+  }).catch(error=>{
     const panel=document.querySelector('#wallet-420id-panel');
     if(panel)panel.hidden=true;
+    bootError=error;
     invalidate();
   });
+}else{
+  // No browser authority is implicit in a Node test process. Tests must
+  // explicitly call installWallet420IDUi with a bound fixture and origin.
+  configured=true;
 }

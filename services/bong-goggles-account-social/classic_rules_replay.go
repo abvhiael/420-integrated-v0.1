@@ -16,6 +16,7 @@ import (
 // the complete private move trace/digest, and the current persisted snapshot.
 // The cache can supply only a prefix that previously passed a full replay.
 type verifiedRulePrefix struct{
+ adapter *RulesAdapter
  roomID,version,hash,initialHash string
  seatCount,moves int
  seed [32]byte
@@ -136,7 +137,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  var replay json.RawMessage
  cached,found:=s.verifiedPrefix(rec.ID)
  usedPrefix:=false
- if found&&cached.roomID==rec.RoomID&&cached.version==version&&cached.hash==hash&&
+ if found&&cached.adapter==adapter&&cached.roomID==rec.RoomID&&cached.version==version&&cached.hash==hash&&
   cached.initialHash==initialHash&&cached.seed==seed&&cached.seatCount==rec.SeatCount&&
   cached.moves>=0&&cached.moves<=len(trace){
   fingerprint,err:=ruleTraceDigest(trace[:cached.moves])
@@ -164,7 +165,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  digest,e:=ruleTraceDigest(trace)
  if e!=nil{return ErrUnavailable}
  s.retainVerifiedPrefix(rec.ID,verifiedRulePrefix{
-  roomID:rec.RoomID,version:version,hash:hash,initialHash:initialHash,
+  adapter:adapter,roomID:rec.RoomID,version:version,hash:hash,initialHash:initialHash,
   seatCount:rec.SeatCount,moves:len(trace),seed:seed,digest:digest,state:replay,
  })
  return nil

@@ -1,6 +1,17 @@
 # BC-0.12 — Classics shared test and release qualification
 
-**Status:** implementation in repository; exact-head CI evidence to be added after successful runs.
+**Status:** QUALIFIED — shared repository test/release infrastructure (no individual game release).
+**Qualified exact-source SHA:** `60ff57c24ba4ee17a146bf694dc342748ba03826` (2026-11-22 UTC).
+
+**Required [BC-0.12 exact-source workflow #44984633921](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44984633921) — SUCCESS, all three jobs:**
+
+- `unit-property-ui` — **30/30 targeted Node tests**, property/fixture release-denial and 25 title/8-screen route smoke; audit yields `{"count":25,"released":0,"locked":25}`.
+- `server-integration-ai-recovery` — PostgreSQL 16 `go test -race`, 420ID account and 12 concurrent retry fixture, deterministically scored terminal match and cold restart, all Easy/Medium/Hard test-only bots, Go vet and service build; SUCCESS.
+- `chromium-accessibility-multiplayer` — actual Chromium desktop, mobile and same-origin axe WCAG2/2.1 A/AA, independent browser contexts with two distinct mocked transport principals, reconnect and privacy, and fail-closed release audit; **SUCCESS**. Source-fixed shared small-label contrast errors (previously 2.73:1 and 4.41:1) by restoring full opacity. Browser fixtures are not a deployed two-account E2E test.
+- [Account Social / AUTH regression #44984633890](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44984633890) — SUCCESS on same source SHA.
+- [Previously qualified BC-0.5–0.11 regression #44984633873](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44984633873) — SUCCESS on same source SHA.
+
+**Release policy:** This proof closes **BC-0.12 shared test infrastructure**. It does not close a single playable game: 25/25 titles remain blocked, and the main-only live production acceptance requires an individual real rules adapter, two genuine independent 420ID account credentials, a completed deployed match and its own exact-source GitHub run. The zero-entry evidence manifest is intentional.
 **Scope:** canonical 25 BC-1…BC-25 game titles, not the separate Cross-Country Chaos platform.
 **No game title was activated or marked playable by this milestone.**
 

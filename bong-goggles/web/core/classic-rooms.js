@@ -2,6 +2,7 @@
 import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
 import {escapeHtml as esc} from './design-system.js';
+import {renderClassicRoomLive} from './classic-communications-ui.js';
 
 export const ROOM_LIMITS=Object.freeze({
  cribbage:[2,4],'russian-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
@@ -46,6 +47,7 @@ function normalizedRoom(r,detail=false){
  if(invites.some(x=>!x))return null;
  return Object.freeze({...normalizedRoom(r),seats:Object.freeze(seats),invites:Object.freeze(invites)});
 }
+export const normalizeClassicRoom=normalizedRoom;
 const verifiedEnvelope=(response,name)=>{
  if(!response||response.status!==200&&response.status!==201||
   response.data?.onChain!==false||response.data?.wager!==false||
@@ -167,7 +169,7 @@ function makeAction(action,seat,label,extra=''){
  return '<form data-classic-room-action="'+action+'" data-room-seat="'+seat+'">'+extra+
  '<button type="submit">'+esc(label)+'</button></form>';
 }
-function roomDetail(r,state){
+function roomDetail(r,state,live=null){
  const isHost=r.host===state.viewer;
  const hasSeat=r.seats.some(s=>s.subject===state.viewer);
  const friendOptions=state.friends.map(f=>'<option value="'+f.subject+'">'+esc(f.displayName)+'</option>').join('');
@@ -199,15 +201,16 @@ function roomDetail(r,state){
  const invites=isHost&&r.invites.length?'<details><summary>Invitation history</summary><ul>'+r.invites.map(i=>
   '<li>Seat '+(i.seat+1)+' · '+esc(state.friends.find(f=>f.subject===i.target)?.displayName??'420ID member')+
   ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
+ const roomLive=renderClassicRoomLive(r,live);
  return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
   '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
   '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
   note(r.status==='ready'?'All seats filled. Game start and turns require BC-0.6; no match has begun.':
    r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
-  '<ol class="classic-room__seats">'+seats+'</ol>'+invites+
+  '<ol class="classic-room__seats">'+seats+'</ol>'+roomLive+invites+
   (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
-export function renderClassicRooms(state,{enabled=false,roomId=null}={}){
+export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){
  const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games" data-route="games">← Games catalogue</a></p>'+
  '<h2>Multiplayer rooms</h2><p>Persistent off-chain rooms for 420ID friends and public groups. No wallet, wagers or token rewards. Lobby seats do not start gameplay.</p>';
  if(!enabled)return start+note('Multiplayer rooms are not activated for this deployment.')+'</section>';
@@ -220,7 +223,10 @@ export function renderClassicRooms(state,{enabled=false,roomId=null}={}){
  if(roomId!=null){
   if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room details are not available.')+
   '<button type="button" data-classic-room-refresh>Refresh rooms</button></section>';
-  return heading+roomDetail(state.selected,state)+'</section>';
+  if(live&&['reconnecting','guest','revoked'].includes(live.status))
+   return heading+note('Connection lost or room access changed. Checking 420ID and the latest authoritative state; cached private room data is hidden.')+
+    '<button type="button" data-classic-room-refresh>Reconnect to room</button></section>';
+  return heading+roomDetail(state.selected,state,live)+'</section>';
  }
  const creation='<section class="classic-room__create"><h3>Create a private or public room</h3>'+
  '<form data-classic-room-create><label>Game<select name="gameId">'+games+'</select></label>'+

@@ -21,6 +21,7 @@
     "accountMessaging": false,
     "accountGames": false,
     "classicRooms": false,
+    "classicCommunications": false,
     "accountXP": false,
     "accountMonetization": false
   }

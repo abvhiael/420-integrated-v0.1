@@ -663,17 +663,17 @@
 /* CCC room-specific full-screen tabletop: highway / exposed cards + piles /
    private hand, with a dedicated room-chat rail instead of social widgets. */
 .app-shell[data-route="chaos-game"] .app-content{width:100%;max-width:1920px;margin:0 auto;padding:7px 10px}
-.ccc-online--game{height:calc(100dvh - 100px);min-height:550px;display:flex;flex-direction:column;gap:5px;padding:9px;overflow:hidden}
+.ccc-online--game{height:auto;min-height:calc(100dvh - 100px);display:flex;flex-direction:column;gap:7px;padding:9px;overflow:visible}
 .ccc-online--game .ccc-online-header{padding-bottom:5px;flex:none}
 .ccc-online--game .ccc-online-header h2{font-size:1.15rem}
 .ccc-online--game .ccc-online-header p{font-size:.71rem}
-.ccc-online-game{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,305px);gap:9px;min-height:0;flex:1;overflow:hidden}
-.ccc-online-main{display:grid;grid-template-rows:auto minmax(0,1.16fr) minmax(0,.78fr) minmax(0,.62fr);gap:7px;min-height:0;overflow:hidden}
+.ccc-online-game{display:grid;grid-template-columns:minmax(0,1fr) minmax(205px,245px);gap:9px;min-height:0;flex:1;overflow:visible}
+.ccc-online-main{display:grid;grid-template-rows:auto auto auto auto;gap:9px;min-width:0;min-height:0;overflow:visible}
 .ccc-online-stage{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#852e1e;color:#fff3d8;padding:4px 10px;border-radius:7px;min-width:0;font-size:.84rem}
 .ccc-online-stage>strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ccc-online-stage>span{font-weight:700;white-space:nowrap;font-size:.72rem}
-.ccc-online-track{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:hidden;margin:0}
-.ccc-online-map{min-height:0;flex:1;overflow:hidden}
+.ccc-online-track{display:flex;flex-direction:column;gap:5px;min-height:0;overflow:visible;margin:0}
+.ccc-online-map{min-height:0;min-width:0;width:100%;aspect-ratio:960/450;flex:none;overflow:hidden}
 .ccc-online-map .ccc-highway{height:100%;display:flex;flex-direction:column;border-radius:8px}
 .ccc-online-map .ccc-highway-head,.ccc-online-map .ccc-road-legend{display:none}
 .ccc-online-map .ccc-highway-svg{height:100%;width:100%;max-height:none;flex:1;min-height:0}
@@ -681,28 +681,28 @@
 .ccc-online-track .ccc-online-seat{padding:4px 7px;line-height:1.12;gap:2px;font-size:.74rem}
 .ccc-online-track .ccc-online-seat strong{font-size:.85rem}
 .ccc-online-track .ccc-online-seat small{font-size:.67rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ccc-online-middle{display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,175px);gap:7px;min-height:0}
-.ccc-online-middle .ccc-online-tables{min-height:0;overflow:auto;margin:0;padding:6px}
-.ccc-online-middle .ccc-online-tables>h3{font-size:.83rem;margin-bottom:4px}
-.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
-.ccc-online-middle .ccc-online-table{padding:5px;border-radius:6px}
+.ccc-online-middle{display:grid;grid-template-columns:minmax(0,1fr) minmax(175px,210px);gap:9px;min-height:220px}
+.ccc-online-middle .ccc-online-tables{min-height:220px;max-height:370px;overflow:auto;margin:0;padding:9px}
+.ccc-online-middle .ccc-online-tables>h3{font-size:1rem;margin-bottom:7px}
+.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.ccc-online-middle .ccc-online-table{padding:8px;border-radius:6px}
 .ccc-online-middle .ccc-online-table header{gap:2px;padding-bottom:3px}
-.ccc-online-middle .ccc-online-table header strong{font-size:.76rem}
-.ccc-online-middle .ccc-online-table header span{font-size:.68rem}
+.ccc-online-middle .ccc-online-table header strong{font-size:.9rem}
+.ccc-online-middle .ccc-online-table header span{font-size:.8rem}
 .ccc-online-middle .ccc-online-exposed{gap:3px;margin-top:3px}
-.ccc-online-middle .ccc-online-exposed h4{font-size:.66rem;margin:0 0 2px}
-.ccc-online-middle .ccc-online-exposed-card{font-size:.65rem;gap:2px}
-.ccc-online-middle .ccc-online-exposed-card img{width:20px;height:32px}
-.ccc-online-middle .ccc-online-mile-stack img{width:21px;height:32px}
-.ccc-online-middle .ccc-online-mile-stack strong{font-size:.6rem}
+.ccc-online-middle .ccc-online-exposed h4{font-size:.8rem;margin:0 0 3px}
+.ccc-online-middle .ccc-online-exposed-card{font-size:.8rem;gap:5px}
+.ccc-online-middle .ccc-online-exposed-card img{width:40px;height:68px}
+.ccc-online-middle .ccc-online-mile-stack img{width:37px;height:62px}
+.ccc-online-middle .ccc-online-mile-stack strong{font-size:.76rem}
 .ccc-online-decks{border:1px solid #9aaf86;border-radius:8px;padding:6px;background:#19382c;min-height:0;overflow-y:auto}
 .ccc-online-decks h3{font-size:.82rem;margin:0 0 5px;color:#ffdfad}
 .ccc-online-piles{display:flex;gap:7px;justify-content:space-around}
 .ccc-online-pile{display:flex;align-items:center;flex-direction:column;gap:2px;min-width:0;flex:1;text-align:center}
-.ccc-online-pile>strong{font-size:.68rem}
-.ccc-online-pile small{font-size:.62rem;line-height:1.12}
+.ccc-online-pile>strong{font-size:.85rem}
+.ccc-online-pile small{font-size:.75rem;line-height:1.2}
 .ccc-online-pile button{min-width:0;min-height:0;padding:0;border:0;background:none}
-.ccc-online-stock-back,.ccc-online-discard-face{width:57px;height:93px;display:flex;align-items:center;justify-content:center;border-radius:5px;border:3px solid #ecdca9;background:#26513b;box-shadow:0 1px 5px #0008;overflow:hidden}
+.ccc-online-stock-back,.ccc-online-discard-face{width:80px;height:132px;display:flex;align-items:center;justify-content:center;border-radius:5px;border:3px solid #ecdca9;background:#26513b;box-shadow:0 1px 5px #0008;overflow:hidden}
 .ccc-online-stock-back{flex-direction:column;font-size:.53rem;font-weight:bold;color:#fff3cf}
 .ccc-online-stock-back b{font-size:1.55rem}
 .ccc-online-stock-back strong{font-size:1.1rem}
@@ -710,20 +710,20 @@
 .ccc-online-discard-face img{width:100%;height:100%;object-fit:contain}
 .ccc-online-pile-actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:5px}
 .ccc-online-pile-actions button{font-size:.69rem;padding:4px 6px;min-height:34px}
-.ccc-online-hand{min-height:0;overflow:hidden;padding:6px 9px;display:flex;flex-direction:column;gap:4px}
+.ccc-online-hand{min-height:285px;overflow:visible;padding:10px;display:flex;flex-direction:column;gap:7px}
 .ccc-online-hand-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:0}
-.ccc-online-hand-head h3{margin:0;font-size:.88rem}
+.ccc-online-hand-head h3{margin:0;font-size:1.1rem}
 .ccc-online-hand-head>strong{color:#ffdf99;font-size:.76rem}
-.ccc-online-hand-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,175px);gap:9px;min-height:0;flex:1}
-.ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0;min-height:0;overflow-x:auto}
-.ccc-online-hand .ccc-online-card{display:flex;padding:3px;min-height:0;overflow:hidden}
+.ccc-online-hand-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(215px,245px);gap:10px;min-height:240px;flex:1}
+.ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(105px,1fr));gap:8px;min-width:0;min-height:240px;overflow-x:auto;overflow-y:hidden}
+.ccc-online-hand .ccc-online-card{display:flex;padding:7px;min-height:235px;overflow:hidden}
 .ccc-online-hand .ccc-online-card--selected{border:2px solid #ffd580;box-shadow:inset 0 0 0 1px #fff4c5}
 .ccc-online-card-select{border:0!important;background:transparent!important;color:#fff1d2!important;padding:0!important;min-height:0!important;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-.ccc-online-card-select img{display:block;max-width:100%;height:auto;max-height:120px;object-fit:contain}
-.ccc-online-card-select strong{font-size:.68rem;line-height:1.15;overflow-wrap:anywhere}
+.ccc-online-card-select img{display:block;max-width:100%;height:auto;max-height:195px;object-fit:contain}
+.ccc-online-card-select strong{font-size:.9rem;line-height:1.2;overflow-wrap:anywhere}
 .ccc-online-hand .ccc-online-card-actions{display:flex;flex-direction:column;gap:4px;min-height:0;max-height:none;overflow-y:auto}
-.ccc-online-hand .ccc-online-card-actions h4{font-size:.78rem;margin:0;color:#ffdb91}
-.ccc-online-hand .ccc-online-card-actions button{font-size:.72rem;min-height:32px;padding:4px}
+.ccc-online-hand .ccc-online-card-actions h4{font-size:1rem;margin:0;color:#ffdb91}
+.ccc-online-hand .ccc-online-card-actions button{font-size:.88rem;min-height:44px;padding:8px}
 .ccc-online-stage-end:empty{display:none}
 .ccc-online-stage-end:not(:empty){position:absolute;inset:auto 12px 14px 12px;z-index:2;pointer-events:none}
 .ccc-online-stage-end:not(:empty)>*{pointer-events:auto}
@@ -749,17 +749,17 @@
 .ccc-online-chat form label{flex-basis:100%;font-size:.68rem}
 .ccc-online-chat textarea{flex:1;min-width:0;width:100%;border:1px solid #d5b777;background:#f7ead4;color:#1c3326;border-radius:6px;padding:7px;font:inherit;resize:vertical}
 .ccc-online-chat form button{align-self:stretch;min-height:36px;min-width:68px}
-@media(max-width:1120px){.ccc-online-game{grid-template-columns:minmax(0,1fr) minmax(205px,245px)}.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1120px){.ccc-online-game{grid-template-columns:minmax(0,1fr) minmax(185px,215px)}.ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:790px){
  .ccc-online--game{height:auto;min-height:calc(100dvh - 85px);overflow:visible}
  .ccc-online-game{display:block;overflow:visible}
  .ccc-online-main{display:flex;flex-direction:column;overflow:visible}
- .ccc-online-track{min-height:240px;overflow:visible}
+ .ccc-online-track{min-height:0;overflow:visible}
  .ccc-online-map{height:auto;aspect-ratio:960/450}
  .ccc-online-middle{grid-template-columns:minmax(0,1fr);min-height:0}
- .ccc-online-middle .ccc-online-tables{max-height:260px}
+ .ccc-online-middle .ccc-online-tables{max-height:none}
  .ccc-online-middle .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- .ccc-online-hand{min-height:200px}
+ .ccc-online-hand{min-height:285px}
  .ccc-online-chat-toggle{display:block!important;min-height:32px!important;padding:4px 6px!important;font-size:.72rem!important}
  .ccc-online-chat{display:none;position:fixed;right:0;top:55px;bottom:0;width:min(100vw,370px);z-index:90;box-shadow:-5px 0 25px #071811aa}
  .ccc-online-chat--open{display:flex}
@@ -769,15 +769,15 @@
  .ccc-online-stage>span{display:none}
  .ccc-online-track>.ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
  .ccc-online-hand-content{grid-template-columns:minmax(0,1fr)}
- .ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(70px,1fr));max-width:100%}
+ .ccc-online-hand .ccc-online-cards{grid-template-columns:repeat(7,minmax(105px,1fr));max-width:100%}
  .ccc-online-hand .ccc-online-card-actions{display:flex;flex-direction:row;flex-wrap:wrap}
  .ccc-online-decks{display:block}
 }
 @media(max-height:750px) and (min-width:791px){
  .ccc-online--game .ccc-online-header h2{font-size:1rem}
- .ccc-online-main{grid-template-rows:auto minmax(0,1fr) minmax(0,.8fr) minmax(0,.7fr)}
+ .ccc-online-main{grid-template-rows:auto auto auto auto}
  .ccc-online-chat-mutes{max-height:48px;overflow:auto}
- .ccc-online-card-select img{max-height:88px}
+ .ccc-online-card-select img{max-height:180px}
 }
 @media(forced-colors:active){
  .ccc-online-decks,.ccc-online-chat,.ccc-online-stock-back,.ccc-online-chat-message,.ccc-online-card-select{background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important}

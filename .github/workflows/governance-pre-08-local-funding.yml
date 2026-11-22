@@ -1,0 +1,182 @@
+name: GOV-PRE-08 Step 2 real local Genesis and Vault custody qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/test/GOVPRE08LocalFunding420.t.sol'
+      - 'contracts/test/GOVPRE08LocalDeployment420.t.sol'
+      - 'scripts/gov-pre-08/**'
+      - 'config/genesis-allocations.json'
+      - 'contracts/config/founding-genesis-integration-v1.json'
+      - '.github/workflows/governance-pre-08-local-funding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-custody:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "$EXPECTED_SHA" > "$RUNNER_TEMP/gov-pre-08-step2-head.txt"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Retain exact Genesis supply and source authority assertions
+        run: |
+          set -euo pipefail
+          python3 scripts/gov-pre-08/test_funding.py
+          python3 scripts/verify-genesis-supply-reconciliation.py
+      - name: Prepare exact production Solidity import closure (no unrelated vendored fixtures)
+        working-directory: contracts
+        env:
+          FUNDING_ROOT: ${{ runner.temp }}/gov-pre-08-step2-foundry
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          dest=Path(os.environ["FUNDING_ROOT"])
+          pending=[root/"test/GOVPRE08LocalFunding420.t.sol"]
+          seen=set()
+          pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(root) or not p.is_file():
+                  raise RuntimeError(f"missing GOV-PRE-08 Step 2 import {p}")
+              seen.add(p)
+              for imported in pat.findall(p.read_text()): pending.append(p.parent/imported)
+          for p in sorted(seen):
+              out=dest/p.relative_to(root)
+              out.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,out)
+              assert p.read_bytes()==out.read_bytes()
+          shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          (Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-step2-imports.json").write_text(
+              json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                          for p in sorted(seen)},sort_keys=True,indent=2)+"\n")
+          print("GOV_PRE_08_STEP2_REAL_SOURCE_CLOSURE",len(seen))
+          PY
+      - name: Execute real local funding, Vault custody, settlement and security tests independently twice
+        run: |
+          set -euo pipefail
+          for tag in a b; do
+            forge test --root "$RUNNER_TEMP/gov-pre-08-step2-foundry" \
+              --match-contract GOVPRE08LocalFunding420Test -vv \
+              | tee "$RUNNER_TEMP/gov-pre-08-step2-$tag.log"
+          done
+          python3 - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])
+          records=[]
+          for tag in ("a","b"):
+              txt=(root/f"gov-pre-08-step2-{tag}.log").read_text()
+              match=re.search(r"(?m)^Ran (\d+) tests for test/GOVPRE08LocalFunding420.t.sol",txt)
+              assert match and int(match.group(1)) >= 10, "not all scoped local funding tests executed"
+              assert "0 failed" in txt and "0 skipped" in txt, "incomplete or failed funding tests"
+              proofs=re.findall(r"(?m)^[ \t]*(0x[0-9a-fA-F]{64})[ \t]*$",txt)
+              assert len(proofs)==2, f"expected whole-graph and after-funding custody digest: {proofs}"
+              records.append({"tests":int(match.group(1)),"deploymentGraphHash":proofs[0].lower(),
+                              "fundedCustodyHash":proofs[1].lower()})
+          assert records[0]==records[1], "independent clean EVM runs disagree on funded custody"
+          (root/"gov-pre-08-step2-evidence.json").write_text(
+              json.dumps({"schema":"GOV_PRE_08_LOCAL_ONLY_UNSIGNED_V4_REAL_CUSTODY",
+                          "sourceHead":(root/"gov-pre-08-step2-head.txt").read_text().strip(),
+                          "independentExecutions":2,"runs":records,"approvedV4":False,
+                          "testnetOrMainnet":False},sort_keys=True,indent=2)+"\n")
+          print("GOV_PRE_08_STEP2_REAL_42M_AND_VAULT_CUSTODY_QUALIFIED",records[0])
+          PY
+
+      - name: Generate exact synthetic chain 31337 V4-shaped block-zero fixture
+        run: |
+          set -euo pipefail
+          python3 scripts/gov-pre-08/materialize-local-funding.py \
+            --output "$RUNNER_TEMP/gov-pre-08-step2-genesis.json" \
+            --provenance "$RUNNER_TEMP/gov-pre-08-step2-genesis-proof.json"
+          forge build --root contracts \
+            src/system/ProtocolReserve.sol \
+            src/system/CapabilityRegistry420.sol \
+            src/vault/VaultAuthorization420.sol \
+            src/vault/VaultPolicyRegistry420.sol \
+            src/vault/VaultRegistry420.sol \
+            src/vault/VaultAccounting420.sol \
+            src/vault/AssetVault420.sol
+      - name: Broadcast two independent exact native reserve-to-Vault transfers and reconcile mined receipts
+        run: |
+          set -euo pipefail
+          for tag in a b; do
+            if [ "$tag" = a ]; then port=18611; else port=18612; fi
+            anvil --init "$RUNNER_TEMP/gov-pre-08-step2-genesis.json" \
+              --chain-id 31337 --accounts 1 --balance 0 --gas-price 0 --base-fee 0 \
+              --host 127.0.0.1 --port "$port" --silent \
+              > "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.log" 2>&1 &
+            pid=$!
+            trap 'kill "$pid" 2>/dev/null || true' EXIT
+            ready=false
+            for attempt in $(seq 1 40); do
+              if cast chain-id --rpc-url "http://127.0.0.1:$port" >/dev/null 2>&1; then ready=true; break; fi
+              sleep 1
+            done
+            test "$ready" = true || { cat "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.log"; exit 1; }
+            python3 scripts/gov-pre-08/materialize-local-vault-funding.py \
+              --rpc "http://127.0.0.1:$port" \
+              --output "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.json"
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            trap - EXIT
+          done
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          a,b=[json.loads((p/f"gov-pre-08-step2-anvil-{tag}.json").read_text())
+               for tag in ("a","b")]
+          keys=("initialNativeSupplyWei","postFundingNativeSupplyWei",
+                "protocolReserveBeforeWei","protocolReserveAfterWei",
+                "operationsVaultBalanceWei","contingencyVaultBalanceWei",
+                "communityVaultBalanceWei","vaultIds","vaultAddresses","fundingReceiptLogCounts",
+                "receiptCount")
+          assert all(a[k]==b[k] for k in keys),"funded Vault state diverged on repeat"
+          assert a["initialNativeSupplyWei"]==a["postFundingNativeSupplyWei"]==str(42_000_000*10**18)
+          assert a["protocolReserveAfterWei"]==str(3_560_000*10**18)
+          assert a["operationsVaultBalanceWei"]==str(4_200_000*10**18)
+          assert a["contingencyVaultBalanceWei"]==str(840_000*10**18)
+          assert a["communityVaultBalanceWei"]=="0"
+          assert all(x["tx"] and x["blockHash"] for x in a["txReceipts"])
+          assert all(x["tx"] and x["blockHash"] for x in b["txReceipts"])
+          assert a["receiptCount"]>10 and not a["signedGenesisV4Approved"]
+          print("GOV_PRE_08_REAL_ANVIL_42M_POST_GENESIS_FUNDED_RECEIPTS=PASS",
+                a["receiptCount"],"actual mined tx receipts each run")
+          PY
+      - name: Archive actual repeatable custody evidence for this exact SHA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gov-pre-08-step2-local-custody-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            ${{ runner.temp }}/gov-pre-08-step2-head.txt
+            ${{ runner.temp }}/gov-pre-08-step2-imports.json
+            ${{ runner.temp }}/gov-pre-08-step2-a.log
+            ${{ runner.temp }}/gov-pre-08-step2-b.log
+            ${{ runner.temp }}/gov-pre-08-step2-evidence.json
+            ${{ runner.temp }}/gov-pre-08-step2-genesis-proof.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-a.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-b.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-a.log
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-b.log
+          if-no-files-found: warn

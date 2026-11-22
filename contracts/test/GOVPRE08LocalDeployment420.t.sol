@@ -45,63 +45,63 @@ interface VmPre08Graph420 {
 }
 
 contract GOVPRE08LocalDeployment420Test {
-    VmPre08Graph420 private constant vm =
+    VmPre08Graph420 internal constant vm =
         VmPre08Graph420(address(uint160(uint256(keccak256("hevm cheat code")))));
 
-    address private constant TIME = 0x0000000000000000000000000000000000000429;
-    address private constant REGISTRY = 0x0000000000000000000000000000000000000434;
-    address private constant VALIDATORS = 0x0000000000000000000000000000000000000423;
-    address private constant COMMUNITY_RESERVE = 0x0000000000000000000000000000000000000425;
-    address private constant BOOTSTRAP_GOVERNOR = 0x0000000000000000000000000000000000000437;
-    address private constant ADMIN = address(0xA01);
-    address private constant ANDREW = address(0xA02);
-    address private constant JANET = address(0xA03);
+    address internal constant TIME = 0x0000000000000000000000000000000000000429;
+    address internal constant REGISTRY = 0x0000000000000000000000000000000000000434;
+    address internal constant VALIDATORS = 0x0000000000000000000000000000000000000423;
+    address internal constant COMMUNITY_RESERVE = 0x0000000000000000000000000000000000000425;
+    address internal constant BOOTSTRAP_GOVERNOR = 0x0000000000000000000000000000000000000437;
+    address internal constant ADMIN = address(0xA01);
+    address internal constant ANDREW = address(0xA02);
+    address internal constant JANET = address(0xA03);
 
-    bytes32 private constant OPS = keccak256("GOV-PRE-08/LOCAL-ONLY/OPERATIONS/VAULT");
-    bytes32 private constant CONT = keccak256("GOV-PRE-08/LOCAL-ONLY/CONTINGENCY/VAULT");
-    bytes32 private constant COMMUNITY = keccak256("GOV-PRE-08/LOCAL-ONLY/COMMUNITY/VAULT");
-    bytes32 private constant AUTH_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/AUTH-POLICY");
-    bytes32 private constant ASSET_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/ASSET-POLICY");
-    bytes32 private constant RELEASE_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/RELEASE-POLICY");
-    bytes32 private constant ACCOUNTING_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/ACCOUNTING-POLICY");
-    bytes32 private constant METADATA = keccak256("GOV-PRE-08/LOCAL-ONLY/METADATA");
-    bytes32 private constant MANIFEST = keccak256("GOV-PRE-08/LOCAL-ONLY/UNSIGNED-V4-REHEARSAL");
-    bytes32 private constant INTERFACE_HASH = keccak256("GOV-PRE-08/LOCAL-ONLY/INTERFACE");
+    bytes32 internal constant OPS = keccak256("GOV-PRE-08/LOCAL-ONLY/OPERATIONS/VAULT");
+    bytes32 internal constant CONT = keccak256("GOV-PRE-08/LOCAL-ONLY/CONTINGENCY/VAULT");
+    bytes32 internal constant COMMUNITY = keccak256("GOV-PRE-08/LOCAL-ONLY/COMMUNITY/VAULT");
+    bytes32 internal constant AUTH_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/AUTH-POLICY");
+    bytes32 internal constant ASSET_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/ASSET-POLICY");
+    bytes32 internal constant RELEASE_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/RELEASE-POLICY");
+    bytes32 internal constant ACCOUNTING_POLICY = keccak256("GOV-PRE-08/LOCAL-ONLY/ACCOUNTING-POLICY");
+    bytes32 internal constant METADATA = keccak256("GOV-PRE-08/LOCAL-ONLY/METADATA");
+    bytes32 internal constant MANIFEST = keccak256("GOV-PRE-08/LOCAL-ONLY/UNSIGNED-V4-REHEARSAL");
+    bytes32 internal constant INTERFACE_HASH = keccak256("GOV-PRE-08/LOCAL-ONLY/INTERFACE");
 
-    ProtocolRegistry private registry;
-    GovernanceTimelock private timelock;
-    CivicGovernor420 private civic;
-    FoundingWalletClaims420 private claims;
-    FoundingCommitteeMembership420 private committee;
-    FoundingRetirementVerifier420 private retirement;
-    FoundingTreasuryAuthority420 private founding;
-    FoundingValidatorSponsorship420 private sponsor;
-    FoundingCommunityRetirementSweep420 private sweep;
-    FoundingDeveloperCompensationSplitter420 private splitter;
-    DevelopmentCompensationVault420 private compensation;
-    TreasuryAuthorization420 private auth;
-    TreasuryPolicyRegistry420 private policy;
-    TreasuryBudgetRegistry420 private budgets;
-    TreasuryDisbursementRegistry420 private disbursements;
-    TreasuryRouter420 private treasuryRouter;
-    TreasuryReleaseExecutor420 private executor;
-    CapabilityRegistry420 private capabilities;
-    VaultAuthorization420 private vaultAuth;
-    VaultPolicyRegistry420 private vaultPolicy;
-    VaultRegistry420 private vaultRegistry;
-    VaultAccounting420 private vaultAccounting;
-    VaultRouter420 private vaultRouter;
-    AssetVault420 private opsVault;
-    AssetVault420 private contingencyVault;
-    AssetVault420 private communityVault;
+    ProtocolRegistry internal registry;
+    GovernanceTimelock internal timelock;
+    CivicGovernor420 internal civic;
+    FoundingWalletClaims420 internal claims;
+    FoundingCommitteeMembership420 internal committee;
+    FoundingRetirementVerifier420 internal retirement;
+    FoundingTreasuryAuthority420 internal founding;
+    FoundingValidatorSponsorship420 internal sponsor;
+    FoundingCommunityRetirementSweep420 internal sweep;
+    FoundingDeveloperCompensationSplitter420 internal splitter;
+    DevelopmentCompensationVault420 internal compensation;
+    TreasuryAuthorization420 internal auth;
+    TreasuryPolicyRegistry420 internal policy;
+    TreasuryBudgetRegistry420 internal budgets;
+    TreasuryDisbursementRegistry420 internal disbursements;
+    TreasuryRouter420 internal treasuryRouter;
+    TreasuryReleaseExecutor420 internal executor;
+    CapabilityRegistry420 internal capabilities;
+    VaultAuthorization420 internal vaultAuth;
+    VaultPolicyRegistry420 internal vaultPolicy;
+    VaultRegistry420 internal vaultRegistry;
+    VaultAccounting420 internal vaultAccounting;
+    VaultRouter420 internal vaultRouter;
+    AssetVault420 internal opsVault;
+    AssetVault420 internal contingencyVault;
+    AssetVault420 internal communityVault;
 
     // All 14 required production component contracts, deployed by genuine constructors.
-    address[14] private components;
-    string[14] private names;
+    address[14] internal components;
+    string[14] internal names;
     bytes32 public graphDigest;
     event log_bytes32(bytes32);
 
-    function setUp() public {
+    function setUp() public virtual {
         vm.warp(1_900_000_000);
         _materializeExistingFrozenAnchors();
         _deployCivicAndValidators();
@@ -112,7 +112,7 @@ contract GOVPRE08LocalDeployment420Test {
         graphDigest = _graphHash();
     }
 
-    function _materializeExistingFrozenAnchors() private {
+    function _materializeExistingFrozenAnchors() internal {
         // Actual constructors, then only local Foundry etch for existing frozen predeploys.
         // No new fixed address is introduced. The Timelock constructor's scheduler
         // is explicitly reconstructed; etching code alone would omit persistent state.
@@ -135,7 +135,7 @@ contract GOVPRE08LocalDeployment420Test {
                 "reserve authority");
     }
 
-    function _deployCivicAndValidators() private {
+    function _deployCivicAndValidators() internal {
         CivicConstitution420 constitution = new CivicConstitution420(TIME);
         CivicProposalRegistry420 proposals = new CivicProposalRegistry420(TIME);
         CivicElectorateRegistry420 electors = new CivicElectorateRegistry420(TIME);
@@ -150,7 +150,7 @@ contract GOVPRE08LocalDeployment420Test {
                 "validator registry dependency");
     }
 
-    function _deployTreasuryAndVaultDependencies() private {
+    function _deployTreasuryAndVaultDependencies() internal {
         capabilities = new CapabilityRegistry420();
         capabilities.registerProtocolComponent(TreasuryIds420.COMPONENT_TREASURY, address(this));
         capabilities.registerProtocolComponent(VaultIds420.COMPONENT_VAULT, address(this));
@@ -177,12 +177,12 @@ contract GOVPRE08LocalDeployment420Test {
         communityVault = _registerVault(COMMUNITY, VaultIds420.VAULT_COMMUNITY);
     }
 
-    function _setVaultPolicy(bytes32 id, bytes32 kind) private {
+    function _setVaultPolicy(bytes32 id, bytes32 kind) internal {
         vm.prank(TIME);
         vaultPolicy.setPolicy(id, kind, id, METADATA, true);
     }
 
-    function _registerVault(bytes32 id, bytes32 kind) private returns (AssetVault420 deployed) {
+    function _registerVault(bytes32 id, bytes32 kind) internal returns (AssetVault420 deployed) {
         deployed = new AssetVault420(
             id, address(vaultRegistry), address(vaultAuth), address(vaultAccounting), address(this)
         );
@@ -193,7 +193,7 @@ contract GOVPRE08LocalDeployment420Test {
         require(vaultRegistry.getVault(id).vaultAddress == address(deployed), "vault registry binding");
     }
 
-    function _deployFoundingAndCompensation() private {
+    function _deployFoundingAndCompensation() internal {
         claims = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, MANIFEST);
         committee = new FoundingCommitteeMembership420(ADMIN, ANDREW, JANET, TIME);
         retirement = new FoundingRetirementVerifier420(VALIDATORS, address(committee), address(civic), TIME);
@@ -226,7 +226,7 @@ contract GOVPRE08LocalDeployment420Test {
         ];
     }
 
-    function _wireOneTimeAuthority() private {
+    function _wireOneTimeAuthority() internal {
         // The real contracts enforce candidate pointer checks and one-shot restrictions.
         // Foundry's TIME prank represents a locally authorized Timelock operation,
         // NOT an on-chain approval or user wallet credential.
@@ -258,7 +258,7 @@ contract GOVPRE08LocalDeployment420Test {
         vm.prank(ADMIN); founding.initializeBudgets();
     }
 
-    function _publishLocalRegistry() private {
+    function _publishLocalRegistry() internal {
         // Namespaced exclusively for local test receipts. NO new production service
         // IDs, no amendment to the frozen Genesis namespace, and no live publication.
         for (uint256 i; i < components.length; ++i) {
@@ -278,7 +278,7 @@ contract GOVPRE08LocalDeployment420Test {
         _publishService(ServiceIds420.DEVELOPMENT_COMPENSATION, address(compensation));
     }
 
-    function _publishService(bytes32 id, address implementation) private {
+    function _publishService(bytes32 id, address implementation) internal {
         vm.prank(TIME);
         registry.publishRegisteredService(
             id, implementation, METADATA, 1, true,
@@ -289,11 +289,11 @@ contract GOVPRE08LocalDeployment420Test {
         require(registry.getService(id).codeHash == implementation.codehash, "service runtime drift");
     }
 
-    function _localComponentId(string memory name) private pure returns (bytes32) {
+    function _localComponentId(string memory name) internal pure returns (bytes32) {
         return keccak256(abi.encode("GOV-PRE-08/LOCAL-ONLY/COMPONENT", name));
     }
 
-    function _graphHash() private view returns (bytes32 hash) {
+    function _graphHash() internal view returns (bytes32 hash) {
         bytes32 rolling = keccak256(abi.encode(block.chainid, MANIFEST, TIME, REGISTRY, VALIDATORS, COMMUNITY_RESERVE));
         for (uint256 i; i < components.length; ++i) {
             rolling = keccak256(abi.encode(rolling, names[i], components[i], components[i].codehash));

@@ -30,12 +30,12 @@ export function assertCatalogueAndEvidence({manifest,roadmap=CLASSIC_ROADMAP}){
  // any later "account" title must possess a separately verified proof.
  for(let i=0;i<roadmap.length;i++){
   const item=roadmap[i];
-  if(!['planned','registry','account'].includes(item.status))reject('unknown game status '+item.id);
-  if(item.status==='account'&&!manifest.games[item.id])reject('game marked playable without evidence '+item.id);
+  if(!['planned','registry','playable'].includes(item.status))reject('unknown game status '+item.id);
+  if(item.status==='playable'&&!manifest.games[item.id])reject('game marked playable without evidence '+item.id);
   if(manifest.games[item.id]&&!checkEvidenceShape(item.id,manifest.games[item.id]))
    reject('unqualified release record '+item.id);
   if(manifest.games[item.id]&&i>0&&roadmap.slice(0,i).some(prev=>
-   prev.status!=='account'||!manifest.games[prev.id]))
+   prev.status!=='playable'||!manifest.games[prev.id]))
    reject('game release out of mandatory roadmap order '+item.id);
  }
  return Object.freeze({count:roadmap.length,released:ids.length,locked:roadmap.length-ids.length});
@@ -81,8 +81,8 @@ export async function verifyReleaseEvidence(gameId,proof,{fetchImpl=fetch,token=
 export async function auditRelease({manifest,fetchImpl=fetch,token=process.env.GITHUB_TOKEN}){
  const summary=assertCatalogueAndEvidence({manifest});
  for(const item of CLASSIC_ROADMAP){
-  if(item.status==='account'||Object.hasOwn(manifest.games,item.id)){
-   if(!manifest.games[item.id]||item.status!=='account')
+  if(item.status==='playable'||Object.hasOwn(manifest.games,item.id)){
+   if(!manifest.games[item.id]||item.status!=='playable')
     reject('release evidence and enabled catalogue must agree: '+item.id);
    await verifyReleaseEvidence(item.id,manifest.games[item.id],{fetchImpl,token});
   }

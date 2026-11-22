@@ -4,6 +4,18 @@
 
 **Predecessor:** [GOV-PRE-08 pre-testnet completion scope](420GOVERNANCE-AUDIT-REMEDIATION-ROADMAP.md#gov-pre-08--genesis-integration-pre-testnet-work-and-testnet-handoff) and [retained partial evidence](GOV-PRE-08-QUALIFICATION.md). **Launch stage:** [Step 5 — Testnet Launch](../STEP-5-TESTNET-LAUNCH.md). Preserve historical V3 commitment and previously qualified GOV-PRE-01 through GOV-PRE-07 evidence.
 
+## Working order: finish engineering first, defer network-only proof
+
+This roadmap has **three distinct gates**. Do not block implementation of (A) on evidence from (C).
+
+**A — NOW: executable pre-testnet engineering.** Reproducible local V4-shaped 42m Genesis/ABI/storage, 14 real constructors and funded Vaults; one truly integrated native `node420` + `fourtwentyd` + PostgreSQL Indexer + Go Explorer + Wallet + Registry + Stake + Treasury + Civic Governance stack; signed simulated-local user transactions; deterministic protocol system calls; full recovery/reorg/finality, adversarial authorization and multi-network isolation; launch automation/observability/rollback. The two separate local qualification jobs **passed** in [GOV-PRE-08 Step 3 #45072161557](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45072161557) at `48aa642e0aede9750136ac2ad23f022087851dfd`; their shared execution-ledger convergence, complete wallet UX and production Indexer/Explorer API path are still open software tasks.
+
+**B — LATER, at launch preparation: external pre-Genesis inputs.** Public addresses independently selected by the three founders, real EOA ownership signatures if EOA method is used, an independent review/approval of the exact chain-420 V4 Genesis source/runtime plan, signed network-specific manifest, real validator identities, bootnode/RPC availability, and deployment release authorization. They require actual participants and infrastructure, **not a running blockchain**. These must not be demanded from developers as local test outputs. However, the final immutable Genesis cannot be launched with `null` founder liquid-beneficiary addresses, placeholder deployer authorities or an unsigned plan; founder wallets can be created without testnet, and their Genesis destinations must be fixed before a production-equivalent network starts. A temporary development chain with explicitly disposable fixture owners is not an approved public testnet.
+
+**C — AFTER authorized testnet Genesis:** real network-bound EIP-1271 (if applicable), independent founder `claimFounderWallet` transactions and finalized proof, live Vault reserve transfers, canonical Indexer/Explorer observations of consensus settlement and fully sponsored 90/10 rewards, actual Civic votes, and network-state attestations. Retirement/custody sweep proof only when the real elected/validator/30-day conditions are met.
+
+The practical next programming target is **(A) complete the one-chain full application harness**, not collecting founder signatures or attempting a production migration without the network. The user authorizes engineering and testing but has not created independent owner signatures or approved a final network plan.
+
 ## Exactly what is deferred until the testnet is active
 
 | Existing GOV-PRE-08 / GOV-AUDIT-9 requirement | Required on-network proof | Why it needs the running testnet |

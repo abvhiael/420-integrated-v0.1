@@ -6,8 +6,11 @@ import "../src/treasury/TreasuryAuthorization420.sol";
 import "../src/governance/FoundingWalletClaims420.sol";
 
 interface VmFounding420 {
+    struct Log { bytes32[] topics; bytes data; address emitter; }
     function prank(address caller) external;
     function warp(uint256 nextTimestamp) external;
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
 }
 
 contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
@@ -200,6 +203,52 @@ contract FoundingTreasuryAuthority420Test {
         vm.prank(ANDREW);
         founder.schedulePayment(incident);
         require(founder.contingencyCommitted() == 200_000 ether, "emergency cap");
+    }
+
+    function testPublicNoticeRevealsImmutablePurposeBeforeFortyEightHours() public {
+        bytes32 caseEvidence = keccak256("independently-reviewed-contract-evidence");
+        uint64 proposed = uint64(block.timestamp);
+        vm.recordLogs();
+        vm.prank(ANDREW);
+        bytes32 paymentId = founder.proposePayment(
+            false, PAYEE, uint128(110_000 ether),
+            FoundingTreasuryAuthority420.Purpose.INFRASTRUCTURE,
+            caseEvidence, proposed, proposed + 10 days
+        );
+        VmFounding420.Log[] memory emitted = vm.getRecordedLogs();
+        bytes32 eventId = keccak256(
+            "FoundingPaymentNotice(bytes32,bytes32,bytes32,uint64,uint64,uint64,bool)"
+        );
+        bytes32 reviewedPurpose;
+        bool found;
+        for (uint256 i; i < emitted.length; ++i) {
+            if (emitted[i].emitter == address(founder) &&
+                emitted[i].topics.length == 4 && emitted[i].topics[0] == eventId) {
+                require(emitted[i].topics[1] == paymentId &&
+                        emitted[i].topics[2] == caseEvidence, "notice identity/evidence mismatch");
+                reviewedPurpose = emitted[i].topics[3];
+                (uint64 whenProposed, uint64 notBefore, uint64 expiry, bool twoRequired) =
+                    abi.decode(emitted[i].data, (uint64, uint64, uint64, bool));
+                require(whenProposed == proposed && notBefore == proposed &&
+                        expiry == proposed + 10 days && twoRequired,
+                        "notice failed to disclose immutable approval window");
+                found = true;
+            }
+        }
+        require(found && reviewedPurpose != bytes32(0),
+                "no public case/purpose notice issued at proposal time");
+        vm.prank(JANET);
+        founder.approvePayment(paymentId);
+        vm.prank(ANDREW);
+        (bool premature,) = address(founder).call(
+            abi.encodeCall(founder.schedulePayment, (paymentId))
+        );
+        require(!premature, "approved exceptional payment bypassed 48-hour notice");
+        vm.warp(uint256(proposed) + 49 hours);
+        vm.prank(ANDREW);
+        bytes32 disbId = founder.schedulePayment(paymentId);
+        require(disb.disbursement(disbId).purposeHash == reviewedPurpose,
+                "scheduled payment replaced public purpose after notice");
     }
 
     function testDuplicateDetailsProduceDistinctPurposeBoundDisbursements() public {

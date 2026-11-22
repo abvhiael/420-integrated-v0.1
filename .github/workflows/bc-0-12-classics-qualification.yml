@@ -1,0 +1,132 @@
+name: BC-0.12 Classics Test and Release Qualification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bc-0-12-classics-qualification.yml'
+      - '.github/workflows/bc-0-12-classics-live-acceptance.yml'
+      - 'services/bong-goggles-account-social/classic_*.go'
+      - 'bong-goggles/web/core/classics.js'
+      - 'bong-goggles/web/core/classic-*.js'
+      - 'bong-goggles/web/core/tabletop-components.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/scripts/classics-release-gate.mjs'
+      - 'bong-goggles/web/test/classics-*.mjs'
+      - 'bong-goggles/web/test/classics-*.test.js'
+      - 'docs/games/classics/BC-0-12-RELEASE-EVIDENCE.json'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bc-0-12-classics-qualification.yml'
+      - '.github/workflows/bc-0-12-classics-live-acceptance.yml'
+      - 'services/bong-goggles-account-social/classic_*.go'
+      - 'bong-goggles/web/core/classics.js'
+      - 'bong-goggles/web/core/classic-*.js'
+      - 'bong-goggles/web/core/tabletop-components.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/scripts/classics-release-gate.mjs'
+      - 'bong-goggles/web/test/classics-*.mjs'
+      - 'bong-goggles/web/test/classics-*.test.js'
+      - 'docs/games/classics/BC-0-12-RELEASE-EVIDENCE.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc12-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  unit-property-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact commit
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify scripts and shell syntax
+        working-directory: bong-goggles/web
+        run: |
+          node --check scripts/classics-release-gate.mjs
+          node --check test/classics-release-qualification.test.js
+          node --check test/classics-browser-qualification.mjs
+          node --check test/classics-live-acceptance.mjs
+      - name: Qualify unit/property, shared UI, turn/recovery and release fail-closed
+        working-directory: bong-goggles/web
+        run: |
+          node --test test/classics-release-qualification.test.js test/classics-menu.test.js \
+            test/tabletop-components.test.js test/classic-communications.test.js
+          node scripts/classics-release-gate.mjs --audit
+  server-integration-ai-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact commit
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Reproduce 420ID two-account, multiplayer/AI, failure injection and recovery
+        run: |
+          go test -race -count=1 -tags account420_integration \
+            -run '^(TestBC12|TestBC11|TestBC08DeterministicBotVersusBotSimulation|TestBC06SessionMovesReplaysPrivacyAndRestart)' \
+            ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Vet and build account-social serving boundary
+        run: |
+          go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+          go build -o /tmp/bc12-social ./cmd/bong-goggles-social
+  chromium-accessibility-multiplayer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact commit
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned test-only browser tooling
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Real Chromium desktop/mobile + axe + two independent 420ID transport fixtures
+        working-directory: bong-goggles/web
+        run: node test/classics-browser-qualification.mjs
+      - name: Fail closed on any published Classic without independently verified live evidence
+        working-directory: bong-goggles/web
+        run: node scripts/classics-release-gate.mjs --audit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

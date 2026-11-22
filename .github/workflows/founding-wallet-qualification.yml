@@ -9,6 +9,11 @@ on:
       - 'contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol'
       - 'contracts/test/FounderWalletClaimsAndCompensation420.t.sol'
       - 'scripts/verify-founder-wallet-reservations.py'
+      - 'scripts/enroll-founder-wallets.py'
+      - 'scripts/test-founder-wallet-enrollment.py'
+      - 'scripts/verify-founding-genesis-integration.py'
+      - 'contracts/test/FoundingTreasuryAuthority420.t.sol'
+      - 'contracts/test/StakeValidatorGenesis420.t.sol'
       - '.github/workflows/founding-wallet-qualification.yml'
   workflow_dispatch:
 permissions:
@@ -30,6 +35,12 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Install pinned EIP-191 cryptography
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-founder-wallets.txt
+      - name: Compile and exercise ephemeral three-founder enrollment and adversarial scenarios
+        run: |
+          python3 -m py_compile scripts/verify-founder-wallet-reservations.py scripts/enroll-founder-wallets.py scripts/test-founder-wallet-enrollment.py
+          python3 scripts/test-founder-wallet-enrollment.py
       - name: Verify public wallet reservation structure
         run: |
           python3 scripts/verify-founder-wallet-reservations.py
@@ -59,7 +70,9 @@ jobs:
           from pathlib import Path
           source=Path.cwd().resolve()
           dest=Path(os.environ["FOUNDERS_ROOT"])
-          pending=[source/"test/FounderWalletClaimsAndCompensation420.t.sol"]
+          pending=[source/"test/FounderWalletClaimsAndCompensation420.t.sol",
+                   source/"test/FoundingTreasuryAuthority420.t.sol",
+                   source/"test/StakeValidatorGenesis420.t.sol"]
           seen=set()
           pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
           while pending:
@@ -80,4 +93,7 @@ jobs:
           PY
           echo "FOUNDERS_ROOT=$FOUNDERS_ROOT" >> "$GITHUB_ENV"
       - name: Execute founder registration and 50/25/25 payouts
-        run: forge test --root "$FOUNDERS_ROOT" --match-path test/FounderWalletClaimsAndCompensation420.t.sol -vvv
+        run: |
+          forge test --root "$FOUNDERS_ROOT" --match-path test/FounderWalletClaimsAndCompensation420.t.sol -vvv
+          forge test --root "$FOUNDERS_ROOT" --match-path test/FoundingTreasuryAuthority420.t.sol -vvv
+          forge test --root "$FOUNDERS_ROOT" --match-path test/StakeValidatorGenesis420.t.sol -vvv

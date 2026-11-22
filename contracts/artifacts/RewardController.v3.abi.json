@@ -5,7 +5,7 @@
   "protocolVersion": 3,
   "source": {
     "path": "contracts/src/system/RewardController.sol",
-    "gitBlobSha": "97e6c2735094f1b3e355e353394589cf0b93d210"
+    "gitBlobSha": "74ba033bfdf0ff4d249d65abf1f3515261ea94d3"
   },
   "abi": [
     {

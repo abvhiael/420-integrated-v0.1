@@ -10,6 +10,7 @@ on:
       - 'contracts/test/FounderWalletClaimsAndCompensation420.t.sol'
       - 'scripts/verify-founder-wallet-reservations.py'
       - 'scripts/enroll-founder-wallets.py'
+      - 'scripts/prepare-founder-claims-deployment.py'
       - 'scripts/test-founder-wallet-enrollment.py'
       - 'scripts/verify-founding-genesis-integration.py'
       - 'contracts/test/FoundingTreasuryAuthority420.t.sol'
@@ -39,8 +40,12 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-founder-wallets.txt
       - name: Compile and exercise ephemeral three-founder enrollment and adversarial scenarios
         run: |
-          python3 -m py_compile scripts/verify-founder-wallet-reservations.py scripts/enroll-founder-wallets.py scripts/test-founder-wallet-enrollment.py
+          python3 -m py_compile scripts/verify-founder-wallet-reservations.py scripts/enroll-founder-wallets.py scripts/prepare-founder-claims-deployment.py scripts/test-founder-wallet-enrollment.py
           python3 scripts/test-founder-wallet-enrollment.py
+          if python3 scripts/prepare-founder-claims-deployment.py; then
+            echo "ERROR: unverified real founder wallets produced a deployment plan" >&2
+            exit 1
+          fi
       - name: Verify public wallet reservation structure
         run: |
           python3 scripts/verify-founder-wallet-reservations.py

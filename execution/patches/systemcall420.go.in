@@ -16,6 +16,7 @@ import (
     "github.com/ethereum/go-ethereum/crypto"
  "github.com/ethereum/go-ethereum/core/types"
  "github.com/ethereum/go-ethereum/ethdb"
+    "github.com/holiman/uint256"
 )
 
 const (
@@ -27,6 +28,97 @@ const (
 )
 
 var GatewayAddress = common.HexToAddress("0x000000000000000000000000000000000000043c")
+
+var RewardControllerAddress = common.HexToAddress("0x0000000000000000000000000000000000000420")
+
+const RewardAction420 = "420/SYSCALL/REWARD/V1"
+
+// A canonical system-call batch fixes an execution reward, but a value in the
+// batch is NOT permission to mint. Independently derive the active-committee
+// reward schedule before crediting native $420 to RewardController.
+var (
+    rewardSelector420 = [4]byte{0xac, 0x11, 0xb5, 0xe1}
+    issuanceInitial420 = big.NewInt(4_200_000_000_000_000_000)
+    issuanceFloor420 = big.NewInt(420_000_000_000_000_000)
+    ErrRewardBacking = errors.New("420 native reward amount mismatches canonical issuance")
+)
+
+func rewardWord420(p []byte,i int) *big.Int {
+    k:=4+i*32
+    return new(big.Int).SetBytes(p[k:k+32])
+}
+func scheduledGross420(block uint64) *big.Int {
+    era:=block/420_000
+    if era>=340 {return new(big.Int).Set(issuanceFloor420)}
+    if era==0 {return new(big.Int).Set(issuanceInitial420)}
+    n:=new(big.Int).Exp(big.NewInt(995_800),new(big.Int).SetUint64(era),nil)
+    d:=new(big.Int).Exp(big.NewInt(1_000_000),new(big.Int).SetUint64(era),nil)
+    gross:=new(big.Int).Mul(new(big.Int).Set(issuanceInitial420),n)
+    gross.Div(gross,d)
+    if gross.Cmp(issuanceFloor420)<0 {return new(big.Int).Set(issuanceFloor420)}
+    return gross
+}
+
+// RewardBackingAmount validates exact ABI encoding and the frozen per-block
+// issuance schedule. Only the ACTUALLY earned validator rewards plus Attention
+// and Development are credited; missing committee reward shares are not minted.
+func RewardBackingAmount(c Call) (*uint256.Int,bool,error) {
+    if c.Action!=RewardAction420 {return nil,false,nil}
+    p:=[]byte(c.Payload)
+    if c.Target!=RewardControllerAddress || len(p)<4+8*32 ||
+       !bytes.Equal(p[:4],rewardSelector420[:]) {return nil,true,ErrRewardBacking}
+    n:=rewardWord420(p,7)
+    if !n.IsUint64() || n.Uint64()>29 {return nil,true,ErrRewardBacking}
+    count:=int(n.Uint64())
+    if len(p)!=4+(8+count)*32 ||
+       rewardWord420(p,0).Cmp(new(big.Int).SetUint64(uint64(c.ExecutionBlock)))!=0 ||
+       rewardWord420(p,2).Cmp(big.NewInt(7*32))!=0 ||
+       rewardWord420(p,1).Sign()==0 || rewardWord420(p,1).BitLen()>160 ||
+       !bytes.Equal(p[4+32:4+32+12],make([]byte,12)) {return nil,true,ErrRewardBacking}
+    proposer:=string(p[4+32+12:4+64])
+    seen:=map[string]bool{proposer:true}
+    for i:=0;i<count;i++ {
+        word:=p[4+(8+i)*32:4+(9+i)*32]
+        addr:=string(word[12:])
+        if !bytes.Equal(word[:12],make([]byte,12)) ||
+           addr==string(make([]byte,20)) || seen[addr] {return nil,true,ErrRewardBacking}
+        seen[addr]=true
+    }
+    proposerAmount:=rewardWord420(p,3)
+    perParticipant:=rewardWord420(p,4)
+    attentionAmount:=rewardWord420(p,5)
+    developmentAmount:=rewardWord420(p,6)
+    gross:=scheduledGross420(uint64(c.ExecutionBlock))
+    valid:=false
+    for active:=uint64(15);active<=30;active++ {
+        if count>int(active)-1 {continue}
+        scale:=uint64(283_446_712_018)+
+            (uint64(500_000_000_000)-283_446_712_018)*(active-15)/15
+        security:=new(big.Int).Mul(new(big.Int).Set(gross),new(big.Int).SetUint64(scale))
+        security.Div(security,big.NewInt(1_000_000_000_000))
+        remainder:=new(big.Int).Sub(new(big.Int).Set(gross),security)
+        attention:=new(big.Int).Div(new(big.Int).Set(remainder),big.NewInt(2))
+        development:=new(big.Int).Sub(remainder,attention)
+        prop:=new(big.Int).Div(new(big.Int).Set(security),big.NewInt(2))
+        pool:=new(big.Int).Sub(security,prop)
+        per:=pool.Div(pool,new(big.Int).SetUint64(active-1))
+        if prop.Cmp(proposerAmount)==0 && per.Cmp(perParticipant)==0 &&
+           attention.Cmp(attentionAmount)==0 &&
+           development.Cmp(developmentAmount)==0 {valid=true;break}
+    }
+    if !valid {return nil,true,ErrRewardBacking}
+    amount:=new(big.Int).Mul(new(big.Int).Set(perParticipant),new(big.Int).SetUint64(uint64(count)))
+    amount.Add(amount,proposerAmount)
+    amount.Add(amount,attentionAmount)
+    amount.Add(amount,developmentAmount)
+    if amount.Sign()==0 || amount.Cmp(gross)>0 || amount.BitLen()>256 {
+        return nil,true,ErrRewardBacking
+    }
+    u,overflow:=uint256.FromBig(amount)
+    if overflow {return nil,true,ErrRewardBacking}
+    return u,true,nil
+}
+
 
 var (
     ErrRoot      = errors.New("420 system-call batch root mismatch")

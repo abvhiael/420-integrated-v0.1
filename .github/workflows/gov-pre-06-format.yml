@@ -31,9 +31,9 @@ jobs:
       - name: Apply canonical forge formatting and retain source
         run: |
           cd contracts
-          forge fmt src/governance/Governance420.sol src/governance/CivicInitialElectorateEnrollment420.sol test-governance-audit-6/GovPre06Electorate420.t.sol
+          forge fmt src/governance test-governance-audit-6/GovPre06Electorate420.t.sol
           cd ..
-          git add contracts/src/governance/Governance420.sol contracts/src/governance/CivicInitialElectorateEnrollment420.sol contracts/test-governance-audit-6/GovPre06Electorate420.t.sol
+          git add contracts/src/governance contracts/test-governance-audit-6/GovPre06Electorate420.t.sol
           if git diff --cached --quiet; then
             echo "Already formatted"
             exit 0

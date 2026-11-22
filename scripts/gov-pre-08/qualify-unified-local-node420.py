@@ -406,6 +406,85 @@ def main():
         require(pg["certifiedBlockHash"].lower()==latest["hash"].lower() and
                 pg["durableRestartIdempotent"] and pg["sameNode420ExecutionSource"],
                 "PostgreSQL Indexer not on the same canonical chain as Go Explorer")
+        # GOV-PRE-08 Step 3: full shared-chain hard-stop and recovery, not
+        # just a warm Indexer/Explorer restart while consensus and Geth survive.
+        # Persisted Geth block state, signed Wallet receipt, BLS-certified
+        # settlement checkpoint, native-log archive and PostgreSQL projections
+        # must all agree again after *both* authority processes were killed.
+        #
+        # This is a disposable local rehearsal, never a testnet recovery claim.
+        for process in (exp,idx,consensus,node):
+            require(process.poll() is None,"recovery cannot test an already dead component")
+            os.killpg(process.pid,signal.SIGKILL)
+            process.wait(timeout=20)
+        # process.wait is required: starting Geth before the old process releases
+        # its datadir lock can intermittently mask a valid cold recovery.
+        node=launch("node420-cold-recovered",[str(execution),"--geth",str(geth),
+             "--datadir",str(execdir),"--jwt-secret",str(args.workdir/"jwt.hex"),
+             "--authrpc.port","18781","--http.port","18780","--port","0",
+             "--","--ipcdisable","--nodiscover","--maxpeers","0"])
+        ready(lambda:rpc("eth_chainId")==hex(420),node,timeout=60)
+        restored=rpc("eth_getBlockByNumber",["latest",False])
+        require(restored["number"]=="0x2" and
+                restored["hash"].lower()==latest["hash"].lower() and
+                restored["extraData"]==batch["batchRoot"],
+                "recovered Geth did not preserve the actual certified canonical head")
+        recoveredReceipt=rpc("eth_getTransactionReceipt",[wallet["txHash"]])
+        require(recoveredReceipt and recoveredReceipt["status"]=="0x1" and
+                recoveredReceipt["blockHash"].lower()==latest["hash"].lower(),
+                "cold Geth recovery lost signed Wallet transaction/receipt")
+        require(int(call(GW,"lastSequence()"),16)==4,
+                "cold Geth recovery rewound or replayed native system calls")
+        require(verifyCustody("after cold Geth restart")==unifiedCustody,
+                "cold Geth restart changed funded Vault or reserve custody")
+        # No untrusted caller may bypass JWT to submit native batches on the
+        # reconstituted Engine endpoint. The protected trusted transport is
+        # tested separately by the exact-head node420 Release Gate.
+        unauthorizedBody=json.dumps({"jsonrpc":"2.0","id":1,
+            "method":"engine420_submitSystemCallsV1","params":[batch]}).encode()
+        try:
+            http_json("http://127.0.0.1:18781",{"content-type":"application/json"},
+                      unauthorizedBody,5)
+        except urllib.error.HTTPError as error:
+            require(error.code in (401,403),"wrong unauthenticated Engine rejection")
+        else:
+            raise AssertionError("unauthenticated native Engine mutation accepted")
+
+        events=queue.Queue()
+        consensus=launch("fourtwentyd-cold-recovered",[str(daemon),
+                      "--certified-settlement","--engine","http://127.0.0.1:18781",
+                      "--jwt-secret",str(args.workdir/"jwt.hex"),
+                      "--settlement-dir",str(args.workdir/"consensus"),
+                      "--settlement-trust",str(trustfile),
+                      "--settlement-trust-sha256",pin],input_stream=True)
+        threading.Thread(target=collect,args=(consensus.stdout,),daemon=True).start()
+        wait_event("settled",2,timeout=60)
+        recoveredCheckpoint=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
+        require(recoveredCheckpoint["Settlement"]["ExecutionBlock"]==2,
+                "certified settlement lost its persisted checkpoint")
+        idx=launch("indexer420-cold-recovered",[str(indexer)],env=env)
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]==2,
+              idx,timeout=60)
+        afterCrash=attestGoPostgres("execution-recovered")
+        require(afterCrash["canonicalBlockHash"].lower()==latest["hash"].lower()
+                and afterCrash["realGoIndexerPostgresDurable"]
+                and afterCrash["authenticNativeLogCount"]==indexed["authenticNativeLogCount"],
+                "Indexer's PostgreSQL/native-log state diverged after Geth and consensus hard-stop")
+        exp=launch("explorer420-cold-recovered",[str(explorer)],env=xenv)
+        ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],
+              exp,timeout=45)
+        code,crashView=getter("http://127.0.0.1:18783","/v1/blocks/2")
+        require(code==200 and crashView["block"]["hash"].lower()==latest["hash"].lower()
+                and crashView["trace"]["certified"],
+                "Explorer lost certified block after whole-stack cold recovery")
+        code,crashTx=getter("http://127.0.0.1:18783","/v1/transactions/"+wallet["txHash"])
+        require(code==200 and crashTx["receipt"]["blockHash"].lower()==latest["hash"].lower(),
+                "Explorer failed to rejoin signed Wallet receipt after whole-stack recovery")
+        wallet_cold=args.workdir/"wallet-cold-recovered.json"
+        subprocess.run(wallet_cmd+["--mode","verify","--tx-hash",wallet["txHash"],
+                               "--output",str(wallet_cold)],cwd=ROOT,check=True)
+        require(verifyCustody("after full shared-chain cold recovery")==unifiedCustody,
+                "cold recovery did not conserve treasury and community reserves")
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
              "chainId":420,"genesisHash":genesisblock["hash"],
@@ -421,6 +500,9 @@ def main():
              "goIndexerCertifiedProducer":True,"goExplorerCertifiedBlock":True,
              "walletRealSignedEip1559ReceiptVerified":True,
              "goIndexerAndExplorerProcessRestartQualified":True,
+              "nativeGethAndCertifiedSettlementHardStopRecoveryQualified":True,
+              "allConsumersRejoinedPersistedCanonicalPostgresAfterHardStop":True,
+              "unauthenticatedEngineMutationRejectedAfterRecovery":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":False,
              "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,
              "sameChainFundedReserveAndVaultReadbacks":unifiedCustody,

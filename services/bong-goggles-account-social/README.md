@@ -632,3 +632,47 @@ PostgreSQL 16 tagged race/integration, Go vet/build and targeted
 browser regressions; the new RuleModule and replay cases are exercised
 through that same focused workflow. Independent whole-web visual
 qualification and real-user production deployment are separate gates.
+
+
+## BC-0.8 — bounded, private-view computer opponents (framework only)
+
+Qualified rules adapters may register explicit game-specific Easy, Medium and
+Hard RuleDecisionPolicy implementations through EnableBots. All three must
+be present. Policies are compiled, operator-controlled Go code; no browser,
+room host, network manifest or arbitrary uploaded script can register one.
+There is no generic substitute for a game-specific strategy or strength test.
+The production server still has **no Classic game rules or bot policies**
+registered, so this infrastructure does not activate playable Chess, Cribbage
+or other unreleased Classics.
+
+For each registered game, a bot sees only the canonical *active seat* View
+and a copied list of legal actions. It never receives the hidden rules frame,
+seed, another player's view or concealed draw order. The rules adapter runs
+each decision twice on independent input copies and rejects inconsistent,
+unmetered, malformed or illegal responses. Easy, Medium and Hard receive
+respectively 1,000/10,000/100,000 cooperative compute units and 50/125/300 ms
+decision deadlines. These limits are enforced on RuleBudget.Charge; policies
+must be qualified, trusted, bounded compiled modules, as Go cannot forcibly
+preempt arbitrary uncooperative code in-process. Never install unreviewed
+policy implementations. Game-specific probability, search and partnership
+strategies are implemented and qualified with their own titles, not fabricated
+here.
+
+RunBotTurn holds the same room-then-session PostgreSQL locks as user actions,
+rechecks the seat controller and difficulty, validates the pinned rules hash
+and full private replay, and writes the bot decision, state, score and public
+turn metadata atomically. A restarted or competing worker does not double
+execute it. SweepBots is a one-at-a-time, eight-session-per-tick worker
+called after the established deadline sweeper. No client may impersonate a bot.
+Human-vs-bot lobbies start only with an explicitly registered qualified
+ruleset and a complete game policy family. Bot-vs-bot matches are available
+as offline deterministic QualifyBotMatch fixtures with fixed seeds, capped
+move counts and verified replay; they are not account games or leaderboards.
+
+The BC-0.8 Go tests exercise legal-only decisions, deterministic
+simulation, each difficulty, missing policies, deadline/compute rejection,
+policy input mutation, nondeterminism, private-view isolation, concurrent
+bot execution, PostgreSQL replay, timeout, bot terminal results, restart
+and public-journal redaction. The existing BC-0.x exact-head workflow runs
+the tagged PostgreSQL 16 race tests, vet/build and relevant web regressions.
+No production service activation, ruleset release, or migration is included.

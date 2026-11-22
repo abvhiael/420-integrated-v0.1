@@ -13,7 +13,7 @@ const sha='a'.repeat(40),hash='b'.repeat(64);
 const one='11111111-1111-4111-8111-111111111111',two='22222222-2222-4222-8222-222222222222';
 const proof=()=>({gameId:'cribbage',sourceSha:sha,rulesHash:hash,
  deployedOrigin:'https://bonggoggles.420integrated.org',
- frameworkRunId:123,liveRunId:124,subjects:[one,two],
+ frameworkRunId:123,liveRunId:124,
  result:'completed-two-account-match',evidenceVersion:1});
 const goodRun=(kind)=>({conclusion:'success',status:'completed',head_sha:sha,
  repository:{full_name:BC12_REPO},path:BC12_REPO+'/'+BC12_WORKFLOWS[kind]+'@refs/heads/main',

@@ -45,6 +45,7 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-foundry-*.log
             ${{ runner.temp }}/govpre08-step3-state-*.json
             ${{ runner.temp }}/govpre08-step3-funding-*.json
+            ${{ runner.temp }}/govpre08-step3-graph-*.json
             ${{ runner.temp }}/govpre08-step3-local-*.json
             ${{ runner.temp }}/govpre08-step3-recovery-*.json
             ${{ runner.temp }}/govpre08-step3-node-*.log

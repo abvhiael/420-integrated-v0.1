@@ -20,6 +20,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Reuse the actual node420 release gate at this identical git HEAD: pinned
+  # patched Geth, authenticated Engine JWT, native RewardController settlement,
+  # consensus certified-settlement, TLS-backed protected signer and recovery.
+  # Its fixture evidence is NOT approval of the independent V4 ceremony.
+  authenticated-node420-settlement:
+    uses: ./.github/workflows/node420-release-gate.yml
+
   materialize-replay-recover:
     runs-on: ubuntu-latest
     timeout-minutes: 30

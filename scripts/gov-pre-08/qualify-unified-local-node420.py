@@ -219,7 +219,7 @@ def main():
             planfile.write_text(json.dumps(plan))
             record=json.loads(subprocess.check_output([str(producer),"--record",
                                                       str(planfile)],text=True))
-            consensus.stdin.write(json.dumps(record)+"\\n")
+            consensus.stdin.write(json.dumps(record)+"\n")
             consensus.stdin.flush()
             wait_event("settled",slot)
             latest=rpc("eth_getBlockByNumber",["latest",False])
@@ -280,18 +280,19 @@ def main():
                  INDEXER_MAX_HEAD_AGE="1000000h",
                  INDEXER_POLL_INTERVAL="1s")
         idx=launch("indexer420",[str(indexer)],env=env)
-        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=1,
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=2,
               idx,timeout=60)
         indexed=json.loads(indexstore.read_text())
         require(indexed["checkpoint"]["indexedHash"]==latest["hash"] and
-                indexed["blocks"]["1"]["producer"]["certified"],
+                indexed["blocks"]["1"]["producer"]["certified"] and
+                indexed["blocks"]["2"]["producer"]["certified"],
                 "Go production Indexer did not consume true BLS/native 420 history")
         xenv=dict(os.environ,EXPLORER_INDEXER_URL="http://127.0.0.1:18782",
                   EXPLORER_LISTEN_ADDR="127.0.0.1:18783",
                   EXPLORER_CHAIN_ID="420",EXPLORER_STALE_AFTER="100000h")
         exp=launch("explorer420",[str(explorer)],env=xenv)
         ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],exp,timeout=45)
-        code,view=getter("http://127.0.0.1:18783","/v1/blocks/1")
+        code,view=getter("http://127.0.0.1:18783","/v1/blocks/2")
         require(code==200 and view["block"]["hash"]==latest["hash"] and
                 view["trace"]["certified"] and view["trace"]["consensusBlockRoot"],
                 "running Go Explorer failed to present canonical certified block")
@@ -305,6 +306,7 @@ def main():
                         "--rpc","http://127.0.0.1:18780",
                         "--graph",str(args.graph.resolve()),
                         "--expected-block-hash",latest["hash"],
+                        "--expected-tx-hash",wallet["txHash"],
                         "--output",str(pg_report)],cwd=ROOT,check=True)
         pg=json.loads(pg_report.read_text())
         require(pg["certifiedBlockHash"].lower()==latest["hash"].lower() and
@@ -313,9 +315,12 @@ def main():
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
              "chainId":420,"genesisHash":genesisblock["hash"],
-             "blockOneHash":latest["hash"],"nativeBatchRoot":batch["batchRoot"],
-             "systemCallCount":len(batch["calls"]),
-             "nativeLogCount":len(archived["logs"]),"consensusExecutionBlock":1,
+             "blockOneHash":block1["hash"],"blockTwoHash":latest["hash"],
+             "signedWalletTxHash":wallet["txHash"],
+             "nativeBatchRoot":batch["batchRoot"],
+             "systemCallCount":len(batch1["calls"])+len(batch["calls"]),
+             "nativeLogCount":len(archived1["logs"])+len(archived["logs"]),
+             "consensusExecutionBlock":2,
              "realProductionContractsAtGenesis":len(graph["actualProductionConstructorAddresses"]),
              "consensusNativeGatewayExecuted":True,
              "realCanonicalValidatorRegistryCalled":True,

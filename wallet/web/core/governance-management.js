@@ -428,19 +428,54 @@ export function createGovernance420Client({ provider, chainId, account, discover
   }
 
   async function confirmVote(submitted, { attempts=120, delayMs=250, replacementLookup=null } = {}) {
+    const transactionHash = checkedHex(submitted?.txHash,'submitted transaction hash',32);
     for (let i=0;i<attempts;i+=1) {
-      const receipt = await provider.request('eth_getTransactionReceipt',[submitted.txHash]);
+      // The account and network may change while a tab waits for inclusion.
+      // No receipt, including a successful one, can bypass that session boundary.
+      const currentChain = checkedChainId(await provider.request('eth_chainId'));
+      if (currentChain !== expectedChain) throw new Error('Governance chain changed during confirmation');
+      const accounts = await provider.request('eth_accounts');
+      if (!Array.isArray(accounts) || !accounts.some((x)=>typeof x==='string' && x.toLowerCase()===voter)) {
+        throw new Error('Governance account changed during confirmation');
+      }
+      const receipt = await provider.request('eth_getTransactionReceipt',[transactionHash]);
       if (receipt) {
-        if (receipt.status !== '0x1') return { state:'failed', txHash:submitted.txHash, receipt };
-        return { state:'confirmed', txHash:submitted.txHash, receipt };
+        if (checkedHex(receipt.transactionHash,'receipt transaction hash',32)!==transactionHash) {
+          throw new Error('Governance transaction receipt hash mismatch');
+        }
+        if (normalizeAddress(receipt.from)!==voter || normalizeAddress(receipt.to)!==modules.voting) {
+          throw new Error('Governance transaction receipt sender or target mismatch');
+        }
+        const status = checkedHex(receipt.status,'receipt status');
+        if (status!=='0x00' && status!=='0x01' && status!=='0x0' && status!=='0x1') {
+          throw new Error('Governance malformed transaction status');
+        }
+        if (typeof receipt.blockNumber!=='string' || !/^0x[0-9a-fA-F]+$/.test(receipt.blockNumber)) {
+          throw new Error('Governance receipt missing canonical block number');
+        }
+        const blockHash = checkedHex(receipt.blockHash,'receipt block hash',32);
+        const canonical = await provider.request('eth_getBlockByNumber',[receipt.blockNumber,false]);
+        if (!canonical || checkedHex(canonical.hash,'canonical block hash',32)!==blockHash) {
+          return { state:'reorged', txHash:transactionHash, receipt };
+        }
+        // Recheck the full canonical component/code graph after the receipt;
+        // a changed Registry or malicious chain switch must never be accepted.
+        await verifySession();
+        if (status==='0x0' || status==='0x00') {
+          return { state:'failed', txHash:transactionHash, receipt };
+        }
+        return { state:'confirmed', txHash:transactionHash, receipt };
       }
       if (typeof replacementLookup === 'function') {
-        const replacement = await replacementLookup({ from:voter, nonce:submitted.nonce, txHash:submitted.txHash });
-        if (replacement?.txHash && replacement.txHash.toLowerCase() !== submitted.txHash) return { state:'replaced', txHash:submitted.txHash, replacementHash:checkedHex(replacement.txHash,'replacement transaction hash',32) };
+        const replacement = await replacementLookup({ from:voter, nonce:submitted.nonce, txHash:transactionHash });
+        if (replacement?.txHash && replacement.txHash.toLowerCase() !== transactionHash) {
+          return { state:'replaced', txHash:transactionHash,
+            replacementHash:checkedHex(replacement.txHash,'replacement transaction hash',32) };
+        }
       }
       if (delayMs > 0) await new Promise((resolve)=>setTimeout(resolve,delayMs));
     }
-    return { state:'pending', txHash:submitted.txHash };
+    return { state:'pending', txHash:transactionHash };
   }
 
   return Object.freeze({ modules, account:voter, discovery:canonical, verifySession, proposal, listProposals, ballot, eligibility, reviewActionBatch, sendVote, confirmVote });

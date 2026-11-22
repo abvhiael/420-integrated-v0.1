@@ -13,18 +13,18 @@ import (
 // Request IDs are immutable and tied to the verified 420ID principal.
 type ClassicHistoryMatch struct {
  ClassicSession
- ViewerSeat int @@json:"viewerSeat"@@
- Scores []int64 @@json:"scores"@@
+ ViewerSeat int `json:"viewerSeat"`
+ Scores []int64 `json:"scores"`
 }
 type ClassicHistoryStats struct {
- SampleSize int @@json:"sampleSize"@@
- Completed int @@json:"completed"@@
- Wins int @@json:"wins"@@
- Losses int @@json:"losses"@@
+ SampleSize int `json:"sampleSize"`
+ Completed int `json:"completed"`
+ Wins int `json:"wins"`
+ Losses int `json:"losses"`
 }
 type ClassicHistory struct {
- Matches []ClassicHistoryMatch @@json:"matches"@@
- Stats ClassicHistoryStats @@json:"stats"@@
+ Matches []ClassicHistoryMatch `json:"matches"`
+ Stats ClassicHistoryStats `json:"stats"`
 }
 
 // History is bounded, per-seat, block-filtered and uses the already-qualified
@@ -40,7 +40,7 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
   v,e:=s.Get(ctx,viewer,summary.ID)
   if errors.Is(e,ErrNotFound){continue} // revoked/blocked between reads
   if e!=nil{return ClassicHistory{},e}
-  var visible struct{Scores []int64 @@json:"scores"@@}
+  var visible struct{Scores []int64 `json:"scores"`}
   if json.Unmarshal(v.PrivateView,&visible)!=nil||len(visible.Scores)!=v.SeatCount{
    return ClassicHistory{},ErrUnavailable
   }

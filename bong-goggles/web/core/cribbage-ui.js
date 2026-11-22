@@ -2,6 +2,7 @@
 // Reads only the verified 420ID seat projection. Never renders secret opponent cards.
 import {escapeHtml as esc} from './design-system.js';
 import {resignCribbageMatch} from './classic-cribbage-multiplayer.js';
+import {renderCribbageSocial} from './classic-cribbage-social.js';
 import {renderGameAccountPanel} from './account-identity.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
 import {classicGameById} from './classics.js';
@@ -192,7 +193,7 @@ const s=state??{status:'idle'},session=s.session,id=session?.id??null;
 const nav=back+menu(screen,id);
 const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
 '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
-'<span class="cribbage-status">BC-1.5 · Authenticated rooms</span></header>';
+'<span class="cribbage-status">BC-1.6 · Authenticated challenges</span></header>';
 const isLive=s.status==='ready'&&session?.gameId==='cribbage';
 const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
 '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+
@@ -214,8 +215,8 @@ screen==='play'||screen==='table'?isLive?playPanel(s):
 screen==='results'?isLive?'<div class="cribbage-results">'+
 '<h3>'+esc(session.status==='finished'?'Confirmed result':'Current verified scores')+'</h3>'+
 renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
-pegs:s.pegs,settings:s.settings})+'</div>':zero+generic('results'):
-screen==='history'||screen==='rematch'?generic(screen):home;
+pegs:s.pegs,settings:s.settings})+renderCribbageSocial(s.social)+'</div>':renderCribbageSocial(s.social):
+screen==='history'||screen==='rematch'?renderCribbageSocial(s.social):home;
 return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · The interface is implemented, but the live game is not yet playable until real 420ID room activation and the remaining release gates qualify.</p>'+details+settings(s)+
 '<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
 }

@@ -1,6 +1,6 @@
 # GOV-REC-6 — Canonical Governance cold-start and recovery
 
-**This is a release operator runbook, not evidence of live approval.** The committed Genesis bootstrap commitment currently has five zero-valued fields and therefore **cannot activate Governance**. Contract/Wallet/Indexer offline fixture tests exercise the identical execution order with synthetic electors; those fixtures are not real eligibility evidence.
+**This is a release operator runbook, not evidence of live approval.** The committed Genesis bootstrap commitment currently has seven zero-valued approval fields and therefore **cannot activate Governance**. Contract/Wallet/Indexer offline fixture tests exercise the identical execution order with synthetic electors; those fixtures are not real eligibility evidence.
 
 ## Fixed identities and build
 
@@ -18,7 +18,7 @@ forge --version
 forge clean
 forge build src/governance
 cd ..
-python3 scripts/generate-governance-audit-6-artifacts.py --check --print
+python3 scripts/generate-governance-audit-6-artifacts.py --check --show
 python3 scripts/verify-governance-rec-6.py
 python3 scripts/verify-governance-audit-6.py --require-ready
 python3 scripts/verify-governance-audit-7.py
@@ -32,7 +32,7 @@ The artifact generator's --check mode is **read-only**. Any runtime/ABI/storage/
 
 ## Authentic Genesis approval (current external blocker)
 
-Before a genuine chain-specific testnet Genesis candidate can be activated, obtain the approved chain/genesis ID and seven graph addresses with their actual runtime hashes; authenticate the eligible Community and active Validator owner rosters **at the same approved snapshot**. Both houses use one unique eligible owner = one vote; balances and stake amounts do not change voting weight. Reject duplicate, zero, ineligible and inactive-owner addresses. Independently corroborate every eligibility record; a self-asserted eligibility flag is not proof.
+Before a genuine chain-specific testnet Genesis candidate can be activated, obtain the approved chain/genesis ID and seven graph addresses with their actual runtime hashes. **Legacy** approval requires authenticated Community and Validator owners at one Genesis snapshot; **GOV-PRE-06 deferred** approval requires independently approved on-chain eligibility sources, enrollment bytecode and constitutional authority, while the initial rosters remain authentically empty until real owners enroll. Both houses use one unique eligible owner = one vote; balances and stake amounts do not change voting weight. Reject duplicate, zero, ineligible and inactive-owner addresses. Independently corroborate every eligibility record; a self-asserted eligibility flag is not proof.
 
 Use the deterministic membership builder **only on independently verified source records**:
 
@@ -44,7 +44,7 @@ python3 scripts/build-governance-rec-2-electorates.py \
 
 Require fixtureOnly=false, a positive and correct chainId, external eligibilitySource reference and snapshotHash, and each member's verifiable record reference/hash. The tool checks shape, Keccak roots and sorted-pair proofs; it does not authenticate external facts. Never substitute contracts/test/fixtures/governance-rec-2-* for live membership evidence.
 
-Compute Governance420.canonicalBootstrapPlanHash from the **exact seven ordered graph addresses**, on the correct chain with actual extcodehashes and both verified roots/totals. Obtain independent approval for the plan hash. Only an authorized Genesis materialization may write the **five fields** together in contracts/config/governance-deployment-v1.json under genesisBootstrapCommitment: approvedPlanHash, communityRoot, communityTotalWeight, validatorRoot, validatorTotalWeight. The generator maps these fields to Governance420's storage layout (no runtime setters). All five absent is an explicitly fail-closed software-only candidate; any partial configuration is forbidden.
+Compute Governance420.canonicalBootstrapPlanHash from the **exact seven ordered graph addresses**, on the correct chain with actual extcodehashes and both verified roots/totals. Obtain independent approval for the plan hash. Only an authorized Genesis materialization may write the **seven fields** together in contracts/config/governance-deployment-v1.json under genesisBootstrapCommitment: approvedPlanHash, communityRoot, communityTotalWeight, validatorRoot, validatorTotalWeight. The generator maps these fields to Governance420's storage layout (no runtime setters). All seven absent is an explicitly fail-closed software-only candidate. Legacy uses the original five fully authenticated fields and two zero authority slots; deferred uses an approved plan hash plus two approved authority/enrollment addresses with all four initial-root/weight fields zero. Mixed and partial configurations are forbidden.
 
 For a genuinely approved release (not for the current zero-valued repository):
 
@@ -58,7 +58,7 @@ Both strict commands are **expected to fail with current committed zero fields**
 
 ## Exact cold-start order
 
-1. Materialize frozen Timelock at 0x0429 with initial scheduler=0x0437, inactive Civic authority; compatibility Governance420 at 0x0437 with the independently approved five storage fields; and Registry at 0x0434 with all seven canonical Civic component revisions and Governance service version initially zero.
+1. Materialize frozen Timelock at 0x0429 with initial scheduler=0x0437, inactive Civic authority; compatibility Governance420 at 0x0437 with the independently approved seven storage fields; and Registry at 0x0434 with all seven canonical Civic component revisions and Governance service version initially zero.
 2. Deploy CivicConstitution420, CivicProposalRegistry420 and CivicElectorateRegistry420 bound to 0x0429, with initially empty rules/sources/authorities. Deploy distinct Community and Validator CivicMerkleElectorateSource420 with their frozen source types and **no checkpoints**.
 3. Deploy CivicVoting420 bound to the exact Proposal/Electorate Registries, followed by CivicGovernor420 bound to the exact Constitution/Proposal/Electorate/Voting graph. Verify five component protocol versions=1, Registry protocol version=4, the actual runtime hashes, no mixed constructors and unchanged canonical predeploy state.
 4. Recompute canonicalBootstrapPlanHash(address,address,address,address,address,address,address) for the ordered addresses (constitution, proposals, electorates, voting, governor, communitySource, validatorSource). It **must** equal the previously materialized approved hash **before** scheduling; a byte-identical module at a different address is not approved.
@@ -69,6 +69,22 @@ Both strict commands are **expected to fail with current committed zero fields**
 9. **Only now** invoke Governance420.activateCanonicalCivic with the same ordered seven graph addresses. Verify Timelock.scheduler==CivicGovernor420, civicAuthorityActivated=true, bootstrapRetired=true. Activation, bootstrap scheduling, cancellation and arbitrary execution cannot be replayed; handoff is irreversible.
 
 On a synthetic local EVM, this order is exercised by contracts/test/GovernanceRec4Lifecycle420.t.sol, especially testCleanDeploymentDualHouseAtomicExecutionAndIndexerEventProjection and the post-handoff stateful invariant. The suite executes actual Timelock operations and G3 dual-house votes, finalizes, queues and atomically executes a committed batch; it is **not** real Genesis approval.
+
+## GOV-PRE-06 — post-Genesis real-electorate cold start (alternative to legacy steps 5–7)
+
+**This is a separate approved Genesis mode, not a runtime escape hatch.** Keep all four initial electorate roots/weights exactly zero at Genesis. Pre-authorize the real chain-bound seven-module plan hash, a nonzero independently audited `CivicInitialElectorateEnrollment420` deployment, and the approved constitutional electorate authority in the new storage slots. The distinct plan hash commits actual codehashes for Identity420 at `0x0436`, ValidatorRegistry at `0x0423`, and the enrollment helper. No third-party caller can set or change these approvals after Genesis.
+
+1. Deploy the exact approved enrollment helper, constructed with Governance420 at `0x0437` on the actual testnet chain ID. Verify its runtime codehash matches the approved plan, and that Identity420 and ValidatorRegistry are real version-3 predeploys bound to Timelock `0x0429`.
+2. Call `scheduleCanonicalCivicBootstrap` once with the seven signed component addresses. In this mode it schedules initialization indices `0..16` and one extra **G1** issuer-authorization operation `19` only. No initial Community/Validator Merkle checkpoint can be scheduled yet.
+3. Wait at least 604800 seconds and execute the unchanged original operations `0..16` plus `19` through `GovernanceTimelock.execute(bootstrapOperationId(plan,index))`. Operation 19 invokes `Identity420.setIssuer` with the fixed `INITIAL_ELECTORATE_ISSUER` ID, controller equal to the approved constitutional electorate authority, and VERIFIED trust. This is the only bootstrap grant for new members; no fabricated wallet is inserted.
+4. Real residents/owners create or use active 420Identity profiles. The independent issuer reviews eligibility and signs two **house-specific** 420Identity credentials (`420/CIVIC/COMMUNITY_ELECTORATE/V1` or `420/CIVIC/VALIDATOR_ELECTORATE/V1`, each Keccak-hashed for `credentialType`). Validator membership additionally requires the live, eligible `ValidatorRegistry.ownerValidatorId` and `retirementOwnerStatus` ownership state. Each account calls `enroll(house, profileId, credentialId)` itself. Capture evidence of actual issuers and member proofs; do not use test fixture owners. Invalid/expired/suspended enrollments can be withdrawn or pruned with on-chain verification **before** sealing.
+5. After both houses have genuine voters, the **approved Genesis electorate authority alone** calls `Governance420.schedulePostGenesisInitialElectorates()`. The one-way enrollment helper verifies each member and computes sorted-address, sorted-pair Merkle commitments. Governance schedules indices `17` and `18` under the **same** G1 Timelock delay. Both roots, totals and snapshot source identities are retained on-chain; no ad-hoc root injection is possible.
+6. Wait the second G1 delay, permissionlessly execute indices `17`/`18`, then advance until both checkpoint effective blocks are included in the preceding-block proposal snapshot. The Community and Validator merkle sources must each have exactly one matching initial checkpoint and positive equal-vote totals. `activateCanonicalCivic` rechecks live credentials/ValidatorRegistry eligibility and atomically transfers Timelock scheduler to CivicGovernor. The helper cannot be reopened or rescheduled after the seal.
+7. Prove a new G3 dual-house vote with independently verified Merkle proofs for both houses, confirm one voter/one ballot and exact frozen rule thresholds, finalize only after voteEnd, then queue and execute the exact committed action batch after its class Timelock delay. Preserve chain receipts, block numbers, roots/proofs and signer evidence.
+
+Recovery: before the seal a registrant may withdraw or any caller may prune a **provably ineligible** record; a new valid independently issued credential can re-enroll that owner. A valid record cannot be censored by arbitrary third parties. After seal, invalidated live credentials prevent activation until release policy is reconciled; there is **no** reopen setter, fake root, Timelock impersonation or shortcut. Never replay operations after activation.
+
+The current repository still has **zero signed plan/authority data**. An offline pass proves capability only and is not permission to release an unapproved chain.
 
 ## Post-handoff smoke and consumer checks
 
@@ -90,6 +106,6 @@ Create and inspect a G3/G4 dual-house proposal through its developer/operator co
 
 ## Evidence required
 
-Preserve exact Git SHA, clean-worktree check, toolchain version, eight code hashes, immutable/storage layout records, approved roots/totals/provenance, chain ID, seven addresses and codehashes, all 19 operation IDs and receipts, checkpoint effective blocks, source revisions, approval/handoff proof, contract/Wallet/Indexer/Genesis/Treasury/Vault/repository qualification workflow IDs and their **actual** conclusions, and a specific outstanding-finding ledger.
+Preserve exact Git SHA, clean-worktree check, toolchain version, eight code hashes, immutable/storage layout records, approved roots/totals/provenance, chain ID, seven addresses and codehashes, all 19 legacy operation IDs (or indices 0–19 for the deferred mode) and receipts, checkpoint effective blocks, source revisions, approval/handoff proof, contract/Wallet/Indexer/Genesis/Treasury/Vault/repository qualification workflow IDs and their **actual** conclusions, and a specific outstanding-finding ledger.
 
-The current all-zero approval remains deliberately **fail-closed**; this document neither claims public chain launch nor satisfies GOV-AUDIT-9, the next production-equivalent testnet stage.
+The current seven-field all-zero approval remains deliberately **fail-closed**; this document neither claims public chain launch nor satisfies GOV-AUDIT-9, the next production-equivalent testnet stage.

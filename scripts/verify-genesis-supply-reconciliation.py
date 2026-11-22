@@ -174,6 +174,13 @@ def verify(root: Path = ROOT) -> dict:
     check(g["modeled_total_genesis_supply_420"] == SUPPLY, "normative modeled supply drift")
     check(g["community_testnet_distribution_420"] == 8_400_000,
           "normative Community/Testnet allocation drift")
+    credit = g["testnet_validator_bond_credit"]
+    check(credit["actual_credit_reserve_420"] == 6_300_000 and
+          credit["actual_credit_reserve_address"] == bindings["CommunityValidatorReserve"] and
+          credit["maximum_matched_credits_from_current_reserve"] == 300 and
+          credit["maximum_fully_sponsored_credits_from_current_reserve"] == 150 and
+          credit["hypothetical_400_credit_capacity_requires_reallocating_reward_reserve"] is True,
+          "validator credit capacity counts the 2.1m community reward allocation twice")
     check(g["founders_core_contributors"]["wallet_count"] == 3 and
           g["founders_core_contributors"]["total_allocation_420"] == 1_000_000,
           "normative founder allocation drift")

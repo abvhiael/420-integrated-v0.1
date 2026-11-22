@@ -120,6 +120,8 @@ def governance_state(rec):
   ("initialCommunityTotalWeight","communityTotalWeight"),
   ("initialValidatorRoot","validatorRoot"),
   ("initialValidatorTotalWeight","validatorTotalWeight"),
+  ("approvedInitialEnrollment","enrollmentContract"),
+  ("approvedInitialElectorateAuthority","electorateAuthority"),
  )
  layout={item["label"]:item for item in rec["storageLayout"]["storage"]}
  encoded={}
@@ -130,7 +132,8 @@ def governance_state(rec):
    if type(raw) is not int or raw<0 or raw>=2**256: fail("invalid Genesis "+key)
    value=raw
   else:
-   if not isinstance(raw,str) or len(raw)!=66 or not raw.startswith("0x"):
+   required_length=42 if key in ("enrollmentContract","electorateAuthority") else 66
+   if not isinstance(raw,str) or len(raw)!=required_length or not raw.startswith("0x"):
     fail("invalid Genesis "+key)
    try: value=int(raw,16)
    except ValueError: fail("invalid Genesis "+key)
@@ -139,8 +142,10 @@ def governance_state(rec):
   slot="0x"+int(item["slot"]).to_bytes(32,"big").hex()
   encoded[slot]="0x"+value.to_bytes(32,"big").hex()
   values.append(value)
- ready=all(values)
- if any(values) and not ready: fail("partial Genesis bootstrap approval")
+ legacy=all(values[:5]) and not any(values[5:])
+ deferred=values[0]!=0 and not any(values[1:5]) and all(values[5:])
+ ready=bool(legacy or deferred)
+ if any(values) and not ready: fail("partial or unapproved Genesis bootstrap approval")
  return {
   "schema":"420-governance420-predeploy-state-v1","status":"GOV_AUDIT_6_PREDEPLOY_READY",
   "contractName":"Governance420","address":GOV420,
@@ -151,7 +156,7 @@ def governance_state(rec):
   "invariants":[
    "bootstrap/compatibility state begins zero/false",
    "approvedBootstrapPlanHash is supplied only through Genesis materialization; no runtime setter exists",
-   "approved plan commits target chain, seven graph addresses/code hashes and both initial electorate roots/weights",
+   "approved plan commits target chain, graph code hashes and either Genesis roots or verified post-Genesis enrollment/authority",
    "missing or partially populated commitment fails closed",
    "governanceTimelock immutable is 0x0429",
    "runtimeCodeHash equals keccak256(materialized deployed bytecode)"

@@ -153,8 +153,7 @@ contract CivicGovernor420 is I420System {
 
     function _activeDualHouseProposalIsQueued() private view returns (bool) {
         if (_activeDualHouseProposal == bytes32(0)) return false;
-        (,,,,,,, CivicIds420.ProposalState state, bool exists) =
-            proposalRegistry.proposals(_activeDualHouseProposal);
+        (,,,,,,, CivicIds420.ProposalState state, bool exists) = proposalRegistry.proposals(_activeDualHouseProposal);
         return exists && state == CivicIds420.ProposalState.QUEUED;
     }
 

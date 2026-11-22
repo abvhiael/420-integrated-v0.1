@@ -585,16 +585,22 @@ contract GovernanceRec4Lifecycle420Test {
         uint64 outerReady = _queuedDelay(outerId, CivicIds420.ProposalClass.G3, outer);
         vm.warp(outerReady);
         timelock.execute(outerId);
-        require(target.blockedReentries() == 1 && target.number() == 0,
-            "nested mature G1 executed while a distinct G3 was authorizing an action");
+        require(
+            target.blockedReentries() == 1 && target.number() == 0,
+            "nested mature G1 executed while a distinct G3 was authorizing an action"
+        );
         (,,,,, bool innerExecuted,) = timelock.operations(innerId);
-        require(!innerExecuted && !governor.activeDualHouseExecution(),
-            "nested cross-proposal execution contaminated Civic state");
+        require(
+            !innerExecuted && !governor.activeDualHouseExecution(),
+            "nested cross-proposal execution contaminated Civic state"
+        );
 
         // The mature G1 is still executable on its own and cannot inherit G3 authority.
         timelock.execute(innerId);
-        require(target.number() == 777 && !governor.activeDualHouseExecution(),
-            "outer G3 improperly consumed independent G1 operation");
+        require(
+            target.number() == 777 && !governor.activeDualHouseExecution(),
+            "outer G3 improperly consumed independent G1 operation"
+        );
     }
 
     function testRetirementAuthorityContextExistsOnlyDuringRealExecutedDualHouseBatch() public {

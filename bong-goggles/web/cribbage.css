@@ -2,6 +2,9 @@
 .cribbage-app{--crib-ink:#f0f4dc;--crib-muted:#bac7a8;--crib-gold:#f9ba58;--crib-green:#8ed659;--crib-panel:#11251e;--crib-border:#45643f;color:var(--crib-ink);background:#071910;border-radius:14px;padding:clamp(.65rem,1.2vw,1.2rem);margin:-.2rem 0 2rem;max-width:1900px}
 .cribbage-app *{box-sizing:border-box}
 .cribbage-app h2{color:#f0f4dc!important}
+.cribbage-app .games-account{background:#13261f!important;color:#eef4d8!important;border-color:#526b44}
+.cribbage-app .games-account :is(h3,p,small,label,strong){color:#eef4d8!important}
+.cribbage-app .games-account a{color:#ebdc98!important}
 .cribbage-app[data-announcements="off"] .cribbage-announcer{background:#12261f;border-color:#45643f}
 .cribbage-app[data-announcements="off"] .cribbage-announcer__time{display:none}
 .cribbage-app button,.cribbage-app a.cribbage-primary{font:inherit;cursor:pointer}

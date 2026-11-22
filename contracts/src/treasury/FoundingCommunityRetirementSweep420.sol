@@ -108,7 +108,8 @@ contract FoundingCommunityRetirementSweep420 {
     /// closure with zero outstanding obligations proves the handoff is complete.
     function custodyHandoffComplete() external view returns (bool) {
         if (!founding.retired()) return false;
-        (AssetVault420 ops, AssetVault420 cont, , ) = _validateGraphFor(false);
+        (AssetVault420 ops,,, ) = _validateGraphFor(false);
+        (AssetVault420 cont,,, ) = _validateGraphFor(true);
         return ops.canClose() && cont.canClose();
     }
 

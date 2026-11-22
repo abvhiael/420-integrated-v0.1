@@ -30,7 +30,7 @@ const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.jso
 const runtimeConfig=withAccountSocialBuildFlags(example,process.env[ACCOUNT_SOCIAL_BUILD_FLAG],process.env[CLASSIC_ROOMS_BUILD_FLAG],process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG]);
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // Only approved dashboard assets and explicitly mapped optimized game cards are published.

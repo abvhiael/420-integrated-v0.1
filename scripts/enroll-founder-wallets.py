@@ -170,7 +170,7 @@ def print_approved_challenges(root):
     for founder in m["founders"]:
         require(founder["pre_genesis_proof"]["signature"] is None,
                 "founding role already has a pre-Genesis signature")
-        print("\\n=== " + founder["role"] + " ===\\n" + verify.challenge(m, founder))
+        print("\n=== " + founder["role"] + " ===\n" + verify.challenge(m, founder))
     return len(m["founders"])
 
 

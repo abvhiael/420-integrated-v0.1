@@ -91,7 +91,7 @@ go test -race -count=1 -tags account420_integration -run '^(TestBC12|TestBC11|Te
 
 Go integration requires the same disposable PostgreSQL 16 database and
 `ACCOUNT420_TEST_DSN` as the retained BC-0.5–0.11 workflow. Chromium
-requires pinned test-only `playwright@1.56.1` and `axe-core@4.10.3`
+requires pinned test-only `playwright@1.65.1` and `axe-core@4.10.3`
 and a locally installed Playwright Chromium. The browser test serves only
 local first-party source; its transport endpoints are explicit test fixtures,
 not evidence of production service availability.

@@ -45,6 +45,10 @@ func TestBC16AuthenticatedChallengeHistoryAndRematch(t *testing.T){
  store,h,a,b:=bc16Fixture(t)
  ctx:=context.Background()
  route:="/v1/classic-sessions/challenge"
+ h.classicMatchSocialEnabled=false
+ if w:=request(h,"GET","/v1/classic-sessions/history","",a);w.Code!=404{t.Fatal("disabled history exposed",w.Code)}
+ if w:=request(h,"POST",route,body(map[string]string{"target":memberB,"requestId":bc06ActionID(t)}),a);w.Code!=404{t.Fatal("disabled challenge exposed",w.Code)}
+ h.classicMatchSocialEnabled=true
  nonce:=bc06ActionID(t)
  if w:=request(h,"POST",route,body(map[string]any{"requestId":nonce,"target":memberB}));w.Code!=401{t.Fatal("guest challenge",w.Code)}
  if code,_:=bc16Send(t,h,a,route,nonce,map[string]any{"target":memberB});code!=403{t.Fatal("nonfriend challenge",code)}

@@ -220,7 +220,7 @@ def receipt_view(rpc, evidence):
     need(set(deployed) == {
         "ProtocolReserve", "CapabilityRegistry420", "VaultAuthorization420",
         "VaultPolicyRegistry420", "VaultRegistry420", "VaultAccounting420", "AssetVault420"
-    }, "actual constructor graph missing") if False else None
+    }, "actual constructor graph missing")
     # Three AssetVault420 constructor receipts share the same tag.
     need(len([t for t in tags if t == "deploy:AssetVault420"]) == 3,
          "three actual Vault constructors required")

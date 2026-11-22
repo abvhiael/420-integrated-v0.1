@@ -71,7 +71,10 @@ export class ClassicCommunicationsController {
   this.onChange=onChange;this.onRoom=onRoom;
   this.generation=0;this.busy=false;this.state={status:this.enabled?'idle':'disabled'};
  }
- emit(x){this.state=Object.freeze(x);this.onChange(this.state);return this.state;}
+ emit(x){
+  if(JSON.stringify(x)===JSON.stringify(this.state))return this.state;
+  this.state=Object.freeze(x);this.onChange(this.state);return this.state;
+ }
  invalidate(){
   this.generation++;
   return this.emit({status:this.enabled?'idle':'disabled'});

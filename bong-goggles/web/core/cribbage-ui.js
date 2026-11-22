@@ -217,7 +217,7 @@ screen==='results'?isLive?'<div class="cribbage-results">'+
 renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
 pegs:s.pegs,settings:s.settings})+renderCribbageSocial(s.social)+'</div>':renderCribbageSocial(s.social):
 screen==='history'||screen==='rematch'?renderCribbageSocial(s.social):home;
-return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">'+(playable?'Playable · 420ID and computers.':'Zero-wager game · Not yet playable until real 420ID room activation.')+'</p>'+details+settings(s)+
+return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">'+(playable?'Playable · 420ID and computers.':'Zero-wager game · It is not yet playable until real 420ID room activation.')+'</p>'+details+settings(s)+
 '<p class="cribbage-boundary">'+(playable?'Zero wagers · 420ID private play':'Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify')+'</p></section>';
 }
 // Event handlers bind only data-attribute choices and submit through the

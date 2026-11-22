@@ -217,7 +217,12 @@ def attest(root, proofs, rpc_url=None):
         proof["verified_at"] = stamp
         member["ownership_status"] = "PREGENESIS_SIGNATURE_VERIFIED"
     if any(e.get("method") == "EIP1271_CODEBOUND" for e in entries):
-        m["network_genesis_block_hash"] = proofs.get("network_genesis_block_hash")
+        confirmed_genesis = integration["genesis"].get("networkGenesisBlockHash")
+        require(isinstance(confirmed_genesis, str) and verify.HASH.fullmatch(confirmed_genesis)
+                and confirmed_genesis.lower() ==
+                str(proofs.get("network_genesis_block_hash", "")).lower(),
+                "EIP-1271 must use a separately approved chain block-zero hash")
+        m["network_genesis_block_hash"] = confirmed_genesis
     m["status"] = "THREE_PREGENESIS_WALLET_PROOFS_VERIFIED_CLAIMS_PENDING"
     init["founder_beneficiaries"] = [f["wallet_address"] for f in m["founders"]]
     integration["genesis"]["network"] = m["target_network"]
@@ -265,8 +270,16 @@ def record_claims(root, receipt_records, rpc_url):
             receipt_records.get("chain_id") == m["modeled_chain_id"] and
             receipt_records.get("genesis_plan_commitment", "").lower() ==
             m["planned_genesis_hash"].lower(), "wrong network or plan for claims")
-    if m.get("network_genesis_block_hash") is None:
-        m["network_genesis_block_hash"] = receipt_records.get("network_genesis_block_hash")
+    independently_approved_genesis = integration["genesis"].get("networkGenesisBlockHash")
+    require(isinstance(independently_approved_genesis, str) and
+            verify.HASH.fullmatch(independently_approved_genesis) and
+            independently_approved_genesis.lower() ==
+            str(receipt_records.get("network_genesis_block_hash", "")).lower(),
+            "claim receipts lack a separately approved canonical network genesis block")
+    require(m.get("network_genesis_block_hash") in
+            (None, independently_approved_genesis),
+            "existing pre-Genesis account proof bound to another chain")
+    m["network_genesis_block_hash"] = independently_approved_genesis
     contract = receipt_records.get("claim_contract", {})
     addr = contract.get("address")
     code_hash = contract.get("runtime_code_hash")
@@ -276,7 +289,7 @@ def record_claims(root, receipt_records, rpc_url):
     require(m["claim_contract"].get("address") in (None, addr),
             "cannot silently replace founder claim deployment")
     m["claim_contract"].update({"address": addr, "runtime_code_hash": code_hash,
-                                "deployment": "REGISTRY_RESOLVED_VERIFIED"})
+                                "deployment": "DEPLOYED_RUNTIME_AND_RECEIPTS_VERIFIED_REGISTRY_PUBLICATION_PENDING"})
     founders = receipt_records.get("founders")
     require(isinstance(founders, list) and len(founders) == 3, "all three receipts needed")
     for i, item in enumerate(founders):
@@ -290,6 +303,7 @@ def record_claims(root, receipt_records, rpc_url):
         member["ownership_status"] = "CLAIMED_AND_VERIFIED"
     m["status"] = "THREE_FINALIZED_FOUNDING_WALLET_CLAIMS_VERIFIED"
     integration["founderWallets"]["claimRegistryAddress"] = addr
+    integration["founderWallets"]["claimRuntimeCodeHash"] = code_hash
     integration["founderWallets"]["allThreeOnChainClaimsVerified"] = True
     import tempfile
     import shutil

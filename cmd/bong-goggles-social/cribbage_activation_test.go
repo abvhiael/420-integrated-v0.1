@@ -27,7 +27,6 @@ func TestBC15CribbageOperatorActivationIsIndependentAndFailClosed(t *testing.T){
  if version!="v1.0"||hash!="6f13bd77568efc5d0836eaa61458ca0cc2c500d1db2d9c38e228b1c668f71e24"{
   t.Fatalf("frozen rules identity changed %s %s",version,hash)
  }
- for _,level:=range []string{"easy","medium","hard"}{
-  if _,err:=s.Bots["cribbage"].policy(level);err!=nil{t.Fatal("level missing",level,err)}
- }
+ bot:=s.Bots["cribbage"]
+ if bot.Easy==nil||bot.Medium==nil||bot.Hard==nil{t.Fatal("missing Cribbage difficulty policy")}
 }

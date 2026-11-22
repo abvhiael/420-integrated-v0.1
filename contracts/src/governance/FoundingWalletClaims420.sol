@@ -21,11 +21,19 @@ contract FoundingWalletClaims420 {
 
     event FounderWalletClaimed(uint8 indexed role, address indexed wallet, bytes32 indexed genesisPlanCommitment);
 
-    constructor(address administrator_, address andrew_, address janet_, bytes32 plan_) {
-        if (administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0)
-            || administrator_ == andrew_ || administrator_ == janet_ || andrew_ == janet_
-            || plan_ == bytes32(0) || _reserved(administrator_) || _reserved(andrew_) || _reserved(janet_))
+    constructor(
+        address administrator_,
+        address andrew_,
+        address janet_,
+        bytes32 plan_
+    ) {
+        if (
+            administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0) || administrator_ == andrew_
+                || administrator_ == janet_ || andrew_ == janet_ || plan_ == bytes32(0) || _reserved(administrator_)
+                || _reserved(andrew_) || _reserved(janet_)
+        ) {
             revert InvalidFounderWallet();
+        }
         administrator = administrator_;
         andrew = andrew_;
         janet = janet_;
@@ -44,7 +52,9 @@ contract FoundingWalletClaims420 {
         emit FounderWalletClaimed(role, msg.sender, genesisPlanCommitment);
     }
 
-    function roleFor(address wallet) public view returns (uint8) {
+    function roleFor(
+        address wallet
+    ) public view returns (uint8) {
         if (wallet == administrator) return 1;
         if (wallet == andrew) return 2;
         if (wallet == janet) return 3;
@@ -55,9 +65,10 @@ contract FoundingWalletClaims420 {
         return claimedCount == 3;
     }
 
-    function _reserved(address wallet) private pure returns (bool) {
+    function _reserved(
+        address wallet
+    ) private pure returns (bool) {
         uint160 addr = uint160(wallet);
-        return addr >= 0x041f && addr <= 0x04ff
-            || uint160(wallet) == type(uint160).max - 1;
+        return addr >= 0x041f && addr <= 0x04ff || uint160(wallet) == type(uint160).max - 1;
     }
 }

@@ -48,6 +48,17 @@
         <button id="connect" class="primary-action" type="button">Connect wallet</button>
       </header>
 
+      <section id="wallet-420id-panel" class="panel" aria-labelledby="wallet-420id-heading" data-420id-app data-420id-enabled="false" hidden>
+        <div class="section-heading"><div><p class="eyebrow">420ID · separate application login</p><h2 id="wallet-420id-heading">Your 420ID session</h2></div></div>
+        <p class="muted">420ID authenticates this browser's application session. It cannot sign, select an on-chain account, authorize Governance votes or spend funds. Every transaction still needs your independently verified wallet and explicit approval.</p>
+        <div class="button-row">
+          <a data-420id-login class="ghost-button">Sign in with 420ID</a>
+          <button data-420id-logout type="button" hidden>Sign out of 420ID</button>
+          <button data-420id-refresh type="button">Recheck 420ID session</button>
+        </div>
+        <p data-420id-status role="status" aria-live="polite">420ID is unavailable until the app's confidential gateway is qualified.</p>
+      </section>
+
       <section id="overview" class="wallet-overview" aria-labelledby="overview-heading">
         <div class="wallet-overview-heading"><div><p class="eyebrow">Account overview</p><h2 id="overview-heading">Smart Account dashboard</h2></div><span class="status-pill" id="dashboard-account-state">Not connected</span></div>
         <div class="wallet-overview-grid">
@@ -264,7 +275,8 @@
   <script type="module" src="./app.js"></script>
   <script type="module" src="./names-management-ui.js"></script>
   <script type="module" src="./identity-management-ui.js"></script>
-  <script type="module" src="./governance-management-ui.js"></script>
+  <script type="module" src="./420id-session-ui.mjs"></script>
+   <script type="module" src="./governance-management-ui.js"></script>
   <script type="module" src="./stake-management-ui.js"></script>
   <script type="module" src="./ui-v1.js"></script>
   <script type="module" src="./wallet-shell.js"></script>

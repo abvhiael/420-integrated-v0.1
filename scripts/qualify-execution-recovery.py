@@ -153,9 +153,34 @@ contract RecoveryCounter {
         raise RuntimeError('execution readiness timeout: ' + str(last_error))
     def stop(abrupt=False):
         nonlocal proc
+        # The wrapper execs a separate real Geth process. wait(wrapper) alone
+        # is NOT a guarantee that Geth released its datadir file lock after a
+        # group SIGKILL. A restart before that release is an intermittent false
+        # failure ('datadir already used by another process'). Keep the real
+        # abrupt-crash test, but wait for the actual recorded Geth process exit.
+        child = None
+        pid_file = out / 'geth.pid'
+        if pid_file.is_file():
+            child = int(pid_file.read_text().strip())
+            assert child > 1 and (proc is None or child != proc.pid), 'invalid Geth child identity'
         if proc and proc.poll() is None:
             os.killpg(proc.pid, signal.SIGKILL if abrupt else signal.SIGTERM)
             proc.wait(timeout=20)
+        if child is not None:
+            deadline = time.monotonic() + 10
+            while True:
+                try:
+                    os.kill(child, 0)
+                    # Linux may temporarily retain an exited child as a zombie;
+                    # it has already closed its datadir descriptors at that point.
+                    info = Path('/proc') / str(child) / 'stat'
+                    if info.is_file() and info.read_text().split(') ', 1)[1].startswith('Z'):
+                        break
+                except ProcessLookupError:
+                    break
+                if time.monotonic() >= deadline:
+                    raise RuntimeError('real Geth failed to exit and release datadir after restart signal')
+                time.sleep(.05)
         proc = None
     def block():
         return rpc('eth_getBlockByNumber', ['latest', False])

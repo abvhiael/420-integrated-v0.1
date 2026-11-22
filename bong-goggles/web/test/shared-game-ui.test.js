@@ -27,10 +27,15 @@ test('BC-0.3 eight screen routes resolve for all 25 games and legacy entries wit
    assert.equal(route.screen,screen);
    assert.equal(routeAccess(route,{connected:false,supportedNetwork:false}).allowed,true);
    const html=renderApplicationShell({pathname:path,walletView:{connected:false,supportedNetwork:false}});
-   assert.ok(html.includes('data-game-screen="'+screen+'"'),path);
-   assert.ok(html.includes('aria-current="page">'+
-    ({rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',
-      results:'Results',history:'History',rematch:'Rematch'})[screen]+'</a>'),path);
+   if(game.id==='cross-country-chaos'){
+    assert.match(html,/Play against computers/);
+    assert.doesNotMatch(html,/New game — not yet available|<fieldset disabled>/);
+   }else{
+    assert.ok(html.includes('data-game-screen="'+screen+'"'),path);
+    assert.ok(html.includes('aria-current="page">'+
+     ({rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',
+       results:'Results',history:'History',rematch:'Rematch'})[screen]+'</a>'),path);
+   }
    assert.match(html,/href="\/games" data-route="games"/);
    assert.match(html,/No game|not yet|Game-specific|server|verified|match|Cross-Country Chaos/i);
   }
@@ -75,9 +80,10 @@ test('BC-0.3 opponent setup exposes seat types and all bot difficulties but cann
  assert.match(renderClassicGamePage('chess',{screen:'setup'}),/Seat 2/);
  assert.doesNotMatch(renderClassicGamePage('chess',{screen:'setup'}),/Seat 3/);
 });
-test('BC-0.3 Chaos launches separate 420ID account rooms instead of local pass-and-play',()=>{
+test('BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game',()=>{
  const game=renderClassicGamePage('cross-country-chaos',{screen:'play'});
- assert.match(game,/href="\/classics\/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos<\/a>/);
+ assert.match(game,/href="\/classics\/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos online<\/a>/);
+ assert.match(game,/href="\/classics\/cross-country-chaos\/practice" data-route="chaos-game">Play against computers<\/a>/);
  assert.match(game,/Separate 420ID accounts|private room/i);
  assert.doesNotMatch(game,/Play Cross-Country Chaos \(local\)|pass-and-play/i);
  const planned=renderClassicGamePage('cribbage',{screen:'play'});

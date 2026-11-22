@@ -267,11 +267,13 @@ if(!saveSource.includes('replayChaosJournal(journal)')||
 // Account multiplayer must be the public route, never the old same-screen game.
 const onlineUi=await readFile(resolve(root,'core/chaos-online.js'),'utf8');
 const shellUi=await readFile(resolve(root,'core/app-shell.js'),'utf8');
-if(!shellUi.includes("if(route.id==='chaos-game')return renderChaosOnline")||
+if(!shellUi.includes("if(route.id==='chaos-game')return route.path.endsWith('/practice')?renderClassicsRoute")||
+ !shellUi.includes('):renderChaosOnline(online);')||
  !onlineUi.includes("credentials:'same-origin'")||
  !onlineUi.includes("checkChaosProjection")||
  !app.includes("new ChaosRoomsClient")||
  !app.includes("bindChaosOnline(root,chaosOnline,window.location.pathname)")||
+ !app.includes("bindChaos();bindChaosOnline(root,chaosOnline,window.location.pathname)")||
  !tabletopCss.includes('.ccc-online-cards')||
  !tabletopCss.includes('.app-shell[data-route="chaos-game"] .app-sidebar'))
  throw new Error('CCC account multiplayer route must not expose pass-and-play');

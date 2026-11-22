@@ -99,13 +99,17 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
  if w:=request(h,"POST","/v1/classic-sessions",body(map[string]string{"roomId":room.ID}),host);w.Code!=201{
   t.Fatal("idempotent host restart",w.Code,w.Body.String())
  }
+ // Each accepted POST returns an independently verified seat projection.
+ // Reusing its signed response for the very next turn avoids an unnecessary
+ // O(N) full-journal replay twice per move. Recheck both actual 420ID cookies
+ // at checkpoints and at finish; the game still runs all the way to 121.
+ current:=match
  for step:=0;step<400;step++{
-  // Session metadata is public to both participants; private projections
-  // are independently fetched under each respective 420ID cookie.
-  current:=bc15Get(t,h,host,match.ID)
-  other:=bc15Get(t,h,peer,match.ID)
-  if current.Sequence!=other.Sequence||current.ViewerSeat!=0||other.ViewerSeat!=1{t.Fatal("cross-account sequence or seat mismatch")}
   if current.Status=="finished"{
+   a:=bc15Get(t,h,host,match.ID);b:=bc15Get(t,h,peer,match.ID)
+   if a.Sequence!=b.Sequence||a.Sequence!=current.Sequence||a.ViewerSeat!=0||b.ViewerSeat!=1||bytes.Equal(a.PrivateView,b.PrivateView){
+    t.Fatal("terminal two-account projection mismatch")
+   }
    if current.WinnerSeat==nil||current.Sequence<30{t.Fatal("invalid terminal 121-point result")}
    if e:=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("full journal replay",e)}
    var moves,events int
@@ -118,7 +122,9 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
   if current.TurnSeat==nil{t.Fatalf("ended unexpectedly at step %d: %s",step,current.Status)}
   turn:=*current.TurnSeat
   actor:=host;if turn==1{actor=peer}
-  view:=current;if turn==1{view=other}
+  view:=current
+  if current.ViewerSeat!=turn{view=bc15Get(t,h,actor,match.ID)}
+  if view.Sequence!=current.Sequence||view.ViewerSeat!=turn{t.Fatal("stale or foreign private turn")}
   move:=bc15Move(t,view)
   if step==0{
    wrong:=peer;if turn==1{wrong=host}
@@ -129,6 +135,11 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
   actionID:=bc06ActionID(t)
   reply:=bc06Act(t,h,actor,match.ID,"move",current.Sequence+1,move,actionID)
   if reply.Code!=200{t.Fatalf("valid human turn %d error %d: %s",step,reply.Code,reply.Body.String())}
+  var completed struct{Session ClassicSessionView}
+  if e:=json.Unmarshal(reply.Body.Bytes(),&completed);e!=nil||completed.Session.Sequence!=current.Sequence+1||
+    completed.Session.ViewerSeat!=turn||completed.Session.RulesHash!=adapter.hash{
+   t.Fatal("invalid server-owned action response",step,e)
+  }
   if step==0{
    retried:=bc06Act(t,h,actor,match.ID,"move",current.Sequence+1,move,actionID)
    if retried.Code!=200{t.Fatal("duplicate request did not recover idempotently",retried.Code)}
@@ -138,17 +149,20 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
     t.Fatal("stale expected sequence accepted",w.Code)
    }
   }
+  current=completed.Session
   if step==10{
-   // Simulate a completely new Render/420ID service process after browser
-   // reload. Its replay uses committed DB history, not local tab memory.
    resumed,e:=NewClassicSessions(store,h.Rooms,func(game string)ClassicRule{
     if game=="cribbage"{return adapter};return nil
    })
    if e!=nil{t.Fatal(e)}
    h.Sessions=resumed
    if e=resumed.EnableBots(map[string]ClassicBotPolicies{"cribbage":NewCribbageBotPolicies()});e!=nil{t.Fatal(e)}
-   again:=bc15Get(t,h,peer,match.ID)
-   if again.Sequence!=current.Sequence+1||again.ViewerSeat!=1{t.Fatal("restart lost peer seat/state")}
+  }
+  if step==10||step%25==0{
+   a:=bc15Get(t,h,host,match.ID);b:=bc15Get(t,h,peer,match.ID)
+   if a.Sequence!=b.Sequence||a.Sequence!=current.Sequence||a.ViewerSeat!=0||b.ViewerSeat!=1||
+     bytes.Equal(a.PrivateView,b.PrivateView){t.Fatal("independent account checkpoint invalid",step)}
+   if e:=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("checkpoint replay",step,e)}
   }
  }
  t.Fatal("two independent 420ID accounts did not complete 121-point Cribbage within 400 legal moves")

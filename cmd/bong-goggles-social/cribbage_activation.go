@@ -4,7 +4,7 @@ import (
  "errors"
  "fmt"
 
- social "github.com/abvhiael/420-integrated-v0.1/services/bong-goggles-account-social"
+ social "github.com/420integrated/420-integrated/services/bong-goggles-account-social"
 )
 
 // BC-1.5: opt in only to the independently qualified, frozen Cribbage

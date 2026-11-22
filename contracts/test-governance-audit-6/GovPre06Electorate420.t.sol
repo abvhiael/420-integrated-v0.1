@@ -497,7 +497,7 @@ contract GovPre06Electorate420Test {
                 )
             );
         require(!wrongChain, "replayed Genesis approval onto other chain");
-        vm.chainId(realChain);
+        vm.chainId(enrollment.deploymentChainId());
         _enrollAll();
         bytes32 plan = _scheduleBase();
         _executeBase(plan);

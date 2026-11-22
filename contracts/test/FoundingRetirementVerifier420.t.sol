@@ -11,11 +11,17 @@ interface VmRetirement420 {
 
 contract CivicTimelockStubRetirement420 {
     bool public civicAuthorityActivated;
+    address public scheduler;
     function setCivic(bool value) external { civicAuthorityActivated = value; }
+    function setScheduler(address value) external { scheduler = value; }
 }
 contract CivicGovernorStubRetirement420 {
     uint256 public dualHouseExecutedCount;
+    address public immutable timelock;
+    bool public activeDualHouseExecution;
+    constructor(address timelock_) { timelock = timelock_; }
     function setExecuted(uint256 value) external { dualHouseExecutedCount = value; }
+    function setActiveExecution(bool value) external { activeDualHouseExecution = value; }
 }
 contract FounderStateStubRetirement420 {
     address public immutable foundingAdministrator;
@@ -70,7 +76,8 @@ contract FoundingRetirementVerifier420Test {
     function setUp() public {
         vm.warp(100 days);
         timelock = new CivicTimelockStubRetirement420();
-        civic = new CivicGovernorStubRetirement420();
+        civic = new CivicGovernorStubRetirement420(address(timelock));
+        timelock.setScheduler(address(civic));
         founder = new FounderStateStubRetirement420(ADMIN);
         validators = new ValidatorEvidenceStubRetirement420();
         committee = new FoundingCommitteeMembership420(ADMIN, ANDREW, JANET, address(timelock));
@@ -110,6 +117,14 @@ contract FoundingRetirementVerifier420Test {
         civic.setExecuted(1);
         vm.prank(address(timelock));
         verifier.publishIndependentValidatorWitnesses(ids, evidence);
+        address[15] memory committeeOwners;
+        bytes32[15] memory committeeEvidence;
+        for (uint256 i; i < 15; ++i) {
+            committeeOwners[i] = address(uint160(0xC000 + i));
+            committeeEvidence[i] = keccak256(abi.encode("independent-community-review", committeeOwners[i]));
+        }
+        vm.prank(address(timelock));
+        verifier.publishIndependentCommitteeWitnesses(committeeOwners, committeeEvidence);
     }
 
     function testEmptyGenesisFailClosedAndNoUntrustedWitnesses() public {
@@ -135,6 +150,45 @@ contract FoundingRetirementVerifier420Test {
         civic.setExecuted(1);
         timelock.setCivic(false);
         require(!verifier.retirementReady(), "civic handoff not active");
+    }
+
+    function testDistinctCommitteeWitnessesRequiredAndCannotBeSelfApproved() public {
+        _prepare();
+        vm.warp(block.timestamp + 30 days);
+        require(verifier.retirementReady(), "complete independent evidence");
+        address[15] memory committeeOwners;
+        bytes32[15] memory proof;
+        for (uint256 i; i < 15; ++i) {
+            committeeOwners[i] = address(uint160(0xC000 + i));
+            proof[i] = keccak256(abi.encode("new independent review", i));
+        }
+        proof[1] = proof[0];
+        vm.prank(address(timelock));
+        (bool repeated,) = address(verifier).call(
+            abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof))
+        );
+        require(!repeated, "duplicate owner evidence accepted");
+        proof[1] = keccak256("separate");
+        vm.prank(address(0xBAD));
+        (bool unauthorized,) = address(verifier).call(
+            abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof))
+        );
+        require(!unauthorized, "unauthorized witness recorder");
+    }
+
+    function testExecutingDualHouseBatchSatisfiesActionProofWithoutUnrelatedPriorVote() public {
+        _prepare();
+        vm.warp(block.timestamp + 30 days);
+        civic.setExecuted(0);
+        require(!verifier.retirementReady(), "historical execution is absent");
+        civic.setActiveExecution(true);
+        require(verifier.retirementReady() && verifier.retirementExecutionAuthorized(),
+            "current dual-house execution proves proposed retirement itself");
+        civic.setActiveExecution(false);
+        require(!verifier.retirementExecutionAuthorized(), "out-of-context retirement");
+        civic.setExecuted(1);
+        require(verifier.retirementReady() && !verifier.retirementExecutionAuthorized(),
+            "past vote cannot substitute for active retirement proposal");
     }
 
     function testValidatorExitImmediatelyResetsEligibility() public {

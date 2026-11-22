@@ -11,6 +11,58 @@ python3 scripts/gov-pre-08/test_funding.py
 python3 scripts/gov-pre-08/test_step3.py
 python3 scripts/verify-genesis-supply-reconciliation.py
 
+# Retain actual production Solidity constructor/authority/custody transactions
+# from the locally qualified Step 2 base, not source-only ABI verification.
+export GOV_PRE_08_STEP3_EVM_CLOSURE="$RUNNER_TEMP/govpre08-step3-foundry"
+python3 - <<'PY'
+import hashlib,json,os,re,shutil
+from pathlib import Path
+root=(Path.cwd()/"contracts").resolve()
+dest=Path(os.environ["GOV_PRE_08_STEP3_EVM_CLOSURE"])
+pending=[root/"test/GOVPRE08LocalFunding420.t.sol"]
+seen=set()
+pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+while pending:
+    p=pending.pop().resolve()
+    if p in seen: continue
+    if not p.is_relative_to(root) or not p.is_file():
+        raise RuntimeError("missing production Step 3 contract import: "+str(p))
+    seen.add(p)
+    for link in pat.findall(p.read_text()):
+        pending.append(p.parent/link)
+for p in sorted(seen):
+    out=dest/p.relative_to(root)
+    out.parent.mkdir(parents=True,exist_ok=True)
+    shutil.copyfile(p,out)
+    assert p.read_bytes()==out.read_bytes()
+shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
+(dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+(Path(os.environ["RUNNER_TEMP"])/"govpre08-step3-imports.json").write_text(
+    json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in sorted(seen)},sort_keys=True,indent=2)+"\n")
+print("GOV_PRE_08_STEP3_PRODUCTION_CONTRACT_IMPORTS",len(seen))
+PY
+for tag in a b; do
+  forge test --root "$GOV_PRE_08_STEP3_EVM_CLOSURE" \
+    --match-contract GOVPRE08LocalFunding420Test -vv \
+    | tee "$RUNNER_TEMP/govpre08-step3-foundry-$tag.log"
+done
+python3 - <<'PY'
+import os,re
+from pathlib import Path
+p=Path(os.environ["RUNNER_TEMP"])
+records=[]
+for tag in "ab":
+    txt=(p/f"govpre08-step3-foundry-{tag}.log").read_text()
+    m=re.search(r"(?m)^Ran (\d+) tests for test/GOVPRE08LocalFunding420.t.sol",txt)
+    assert m and int(m.group(1))>=10 and "0 failed" in txt and "0 skipped" in txt
+    hashes=re.findall(r"(?m)^[ \t]*(0x[0-9a-fA-F]{64})[ \t]*$",txt)
+    assert len(hashes)==2,"real deployment graph and funded custody digests absent"
+    records.append((int(m.group(1)),hashes[0].lower(),hashes[1].lower()))
+assert records[0]==records[1],"independent Foundry EVM graph/custody changed"
+print("GOV_PRE_08_STEP3_REPEATED_ACTUAL_FOUNDER_TREASURY_VAULT_EVM=PASS",records[0])
+PY
+
 forge build --root contracts \
   src/governance/FoundingWalletClaims420.sol \
   src/governance/FoundingCommitteeMembership420.sol \

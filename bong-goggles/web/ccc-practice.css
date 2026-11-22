@@ -2,6 +2,9 @@
    tabletop, private hand and roadside-radio proportions. No network chat. */
 .ccc-online--practice .ccc-practice-exit{flex:none;align-self:center;color:#ffe6b2;font-weight:700}
 .ccc-online--practice .ccc-online-main{position:relative}
+.ccc-online--practice .ccc-practice-effects{position:absolute;top:40px;left:8px;right:8px;z-index:3;pointer-events:none}
+.ccc-online--practice .ccc-practice-effects:empty{display:none}
+.ccc-online--practice .ccc-practice-effects .ccc-effects-rail{max-width:400px;font-size:.78rem}
 .ccc-online--practice .ccc-online-map .ccc-highway-svg{width:100%;height:100%}
 .ccc-online--practice .ccc-online-middle .ccc-online-tables{min-width:0}
 .ccc-online--practice .ccc-online-hand{border:1px solid #b49a61;border-radius:8px;background:#16372a}

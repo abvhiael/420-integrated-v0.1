@@ -48,6 +48,7 @@ contract CivicGovernor420 is I420System {
     GovernanceTimelock public timelock;
 
     uint256 public dualHouseExecutedCount;
+    bytes32 private _activeDualHouseProposal;
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;
     mapping(bytes32 => bytes32) public queuedActionHashes;
@@ -130,6 +131,16 @@ contract CivicGovernor420 is I420System {
         FrozenRule memory rule = _frozenRules[proposalId];
         if (!rule.exists) revert FrozenRuleMissing();
         return rule;
+    }
+
+    /// @notice Nonzero only while the canonical Timelock dispatches a committed,
+    /// passed, dual-house Civic batch; used only as read-only retirement evidence.
+    function activeDualHouseExecution() external view returns (bool) {
+        return _activeDualHouseProposal != bytes32(0);
+    }
+
+    function activeDualHouseProposal() external view returns (bytes32) {
+        return _activeDualHouseProposal;
     }
 
     function hashActions(
@@ -276,6 +287,9 @@ contract CivicGovernor420 is I420System {
         }
         if (msg.value != expectedValue) revert ValueMismatch();
         if (timelock.executingCivicOperation() != proposalId) revert UnauthorizedTimelock();
+        // The separate read-only marker does not restore Timelock authority suspended
+        // during the action callback. A failing batch atomically reverts this marker.
+        if (_frozenRules[proposalId].dualHouseRequired) _activeDualHouseProposal = proposalId;
 
         for (uint256 i = 0; i < actions.length; ++i) {
             bool ok = timelock.executeCivicAction{ value: actions[i].value }(
@@ -288,6 +302,7 @@ contract CivicGovernor420 is I420System {
         // Only a genuinely executed (not merely approved) Civic dual-house batch counts
         // toward retirement readiness. Timelock verifies this execution context.
         if (_frozenRules[proposalId].dualHouseRequired) ++dualHouseExecutedCount;
+        _activeDualHouseProposal = bytes32(0);
         emit CivicProposalExecuted(proposalId, computedHash);
     }
 

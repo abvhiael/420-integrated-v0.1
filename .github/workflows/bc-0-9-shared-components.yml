@@ -1,0 +1,59 @@
+name: BC-0.9 Shared Classic Game Components Qualification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'bong-goggles/web/core/tabletop-components.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/test/tabletop-components.test.js'
+      - 'bong-goggles/web/test/shared-game-ui.test.js'
+      - 'bong-goggles/web/styles.css'
+      - '.github/workflows/bc-0-9-shared-components.yml'
+  pull_request:
+    paths:
+      - 'bong-goggles/web/core/tabletop-components.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/test/tabletop-components.test.js'
+      - 'bong-goggles/web/styles.css'
+      - '.github/workflows/bc-0-9-shared-components.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc-0-9-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify-tabletop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact source SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check shared component and game screen syntax
+        working-directory: bong-goggles/web
+        run: |
+          node --check core/tabletop-components.js
+          node --check core/shared-game-ui.js
+          node --check core/games-ui.js
+      - name: Static security and configuration checks
+        working-directory: bong-goggles/web
+        run: node scripts/check.mjs
+      - name: Qualify accessible shared components, catalogue, game screens and rooms
+        working-directory: bong-goggles/web
+        run: |
+          node --test test/tabletop-components.test.js test/shared-game-ui.test.js \
+            test/classics-menu.test.js test/classic-rooms.test.js test/app-shell.test.js
+      - name: Confirm module is included in the shipped web source imports
+        working-directory: bong-goggles/web
+        run: |
+          grep -F "from './tabletop-components.js'" core/shared-game-ui.js
+          test -s core/tabletop-components.js

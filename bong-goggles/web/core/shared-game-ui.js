@@ -2,6 +2,7 @@
 // This module does not authenticate a caller or assert an outcome. Only an upstream,
 // independently authorized service adapter may supply a verified per-seat view.
 import {escapeHtml as esc} from './design-system.js';
+import {renderGameScoreboard,renderTurnIndicator,renderSharedTabletop} from './tabletop-components.js';
 
 export const GAME_SCREEN_IDS=Object.freeze(['intro','rules','play','setup','table','results','history','rematch']);
 export const GAME_SUBSCREENS=Object.freeze(GAME_SCREEN_IDS.filter(id=>id!=='intro'));
@@ -98,8 +99,9 @@ function table(game,view){
  if(!view||view.phase!=='active')return section('Game table',notice('No verified active table',
   'A real board, turn and score display will appear only after an authorized match is loaded.'));
  return section('Game table','<p class="games-screen__meta">Verified active game · '+esc(limited(view.turn,'Turn information unavailable'))+'</p>'+
-  '<ul class="games-screen__scoreboard">'+players(view)+'</ul>'+publicTable(view)+
-  '<p class="games-screen__footnote">Only public board cells are rendered. Opponents\' concealed hands and private state must never be sent in this projection.</p>');
+  renderTurnIndicator(view.players,view.tabletop?.turnSeat,view.turn)+
+  renderGameScoreboard(view.players)+(view.tabletop===undefined?publicTable(view):renderSharedTabletop(view))+
+  '<p class="games-screen__footnote">Only server-authorized public state and this participant\'s own private projection are rendered. Hidden opponents\' hands and engine state must never be sent to the browser. Controls remain disabled until an authoritative game action transport is connected.</p>');
 }
 function results(view){
  if(!view||view.phase!=='finished')return section('Results',notice('No verified results',

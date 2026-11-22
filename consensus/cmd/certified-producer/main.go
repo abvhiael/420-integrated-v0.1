@@ -9,16 +9,15 @@
 package main
 
 import (
-    "crypto/sha256"
     "encoding/hex"
     "encoding/json"
+    "reflect"
     "flag"
     "fmt"
     "os"
     "strconv"
 
     "github.com/420integrated/420-integrated/consensus/attestation"
-    cc "github.com/420integrated/420-integrated/consensus/crypto"
     "github.com/420integrated/420-integrated/consensus/crypto/bls"
     "github.com/420integrated/420-integrated/consensus/engine"
     "github.com/420integrated/420-integrated/consensus/finality"
@@ -170,7 +169,7 @@ func keys(t recovery.Trust) []ct.BLSPubkey {
 }
 func verifyProposal(d signing.Duty, p signing.Policy, s signedProposal) {
     require(s.Kind=="proposal" && s.Proposal!=nil && d.Proposal!=nil &&
-        *s.Proposal==*d.Proposal && s.Result.PublicKey==p.Identity.PublicKey,
+        reflect.DeepEqual(*s.Proposal,*d.Proposal) && s.Result.PublicKey==p.Identity.PublicKey,
         "missing/mismatched independently signed proposer duty")
     wanted,e:=p.Root(d)
     require(e==nil && s.Result.SigningRoot==wanted &&
@@ -225,17 +224,17 @@ func main(){
         // and consensus-derived Stake outcomes exist; no QC is created here.
         parentHash:=trust.Execution.BlockHash
         previous:=uint64(0)
-        number:=uint64(1)
+        height:=uint64(1)
         if p.Parent!=nil {
             parentHash=root(p.Parent.Payload.BlockHash)
-            number=uint64(numberValue(p.Parent.Payload.BlockNumber)+1)
+            height=number(p.Parent.Payload.BlockNumber)+1
             previous=p.Previous
         }
         require(p.Slot>0 && p.Slot/ct.SlotsPerRotation==trust.Rotation &&
-            number==p.Slot && root(p.Payload.ParentHash)==parentHash,
+            height==p.Slot && root(p.Payload.ParentHash)==parentHash,
             "candidate batch not bound to authenticated native parent")
         batch,err:=sys.BuildStakeBatch(sys.DerivationContext{ChainID:trust.ChainID,
-            ExecutionBlock:number,ParentHash:parentHash},previous,p.Outcomes)
+            ExecutionBlock:height,ParentHash:parentHash},previous,p.Outcomes)
         if err!=nil {fail(err.Error())}
         json.NewEncoder(os.Stdout).Encode(engine.EncodeSystemCallBatch(batch))
         return
@@ -252,6 +251,3 @@ func main(){
     result:=certify(trust,policies,prepared,record,votes.Shares)
     json.NewEncoder(os.Stdout).Encode(result)
 }
-func numberValue(s string) uint64 {return number(s)}
-var _ = sha256.Sum256
-var _ = cc.DomainQC

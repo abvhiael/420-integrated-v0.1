@@ -19,9 +19,6 @@ func TestBC12TwoIndependent420IDAccountsRestartConcurrentMoveAndTerminalReplay(t
  room:=bc06Room(t,h,host,peer)
  match:=bc06Start(t,h,host,room.ID)
  if match.ViewerSeat!=0||match.Sequence!=1{t.Fatal("host not admitted to first seat")}
- for i,cookie:=range []any{host,peer}{
-  _=i;_=cookie
- }
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{
   t.Fatal("unauthed client accessed game",w.Code)
  }

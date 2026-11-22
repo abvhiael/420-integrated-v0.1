@@ -9,6 +9,7 @@ contract FoundingWalletClaims420 {
     address public immutable andrew;
     address public immutable janet;
     bytes32 public immutable genesisPlanCommitment;
+    uint256 public immutable deploymentChainId;
 
     mapping(address => bool) public claimed;
     uint8 public claimedCount;
@@ -16,6 +17,7 @@ contract FoundingWalletClaims420 {
     error InvalidFounderWallet();
     error UnrecognizedFounder();
     error AlreadyClaimed();
+    error WrongDeploymentChain();
 
     event FounderWalletClaimed(uint8 indexed role, address indexed wallet, bytes32 indexed genesisPlanCommitment);
 
@@ -28,9 +30,12 @@ contract FoundingWalletClaims420 {
         andrew = andrew_;
         janet = janet_;
         genesisPlanCommitment = plan_;
+        deploymentChainId = block.chainid;
     }
 
     function claimFounderWallet() external {
+        // Reject a fork/migration that changes chain ID after this Genesis-bound deployment.
+        if (block.chainid != deploymentChainId) revert WrongDeploymentChain();
         uint8 role = roleFor(msg.sender);
         if (role == 0) revert UnrecognizedFounder();
         if (claimed[msg.sender]) revert AlreadyClaimed();

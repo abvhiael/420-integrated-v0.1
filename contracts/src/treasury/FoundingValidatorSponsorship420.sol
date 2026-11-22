@@ -111,8 +111,12 @@ contract FoundingValidatorSponsorship420 {
         IVerifiedSponsorBeneficiary420 id = IVerifiedSponsorBeneficiary420(IDENTITY_420);
         (address controller,,,,,,bool active) = id.profiles(profileId);
         if (controller != beneficiary || !active) revert InvalidVerifiedBeneficiary();
-        (, bytes32 subject, bytes32 credentialType, bytes32 group,,, ,) = id.credentials(credentialId);
-        if (subject != profileId || credentialType != OWNER_CREDENTIAL_TYPE
+        (bytes32 issuerId, bytes32 subject, bytes32 credentialType, bytes32 group,
+            uint64 issuedAt, uint64 expiresAt, uint64 revokedAt, bool subjectRejected
+        ) = id.credentials(credentialId);
+        if (issuerId == bytes32(0) || issuedAt == 0 || revokedAt != 0 || subjectRejected
+            || (expiresAt != 0 && expiresAt <= block.timestamp)
+            || subject != profileId || credentialType != OWNER_CREDENTIAL_TYPE
             || group == bytes32(0) || sponsoredIdentityGroup[group]
             || !id.credentialMeetsTrust(credentialId, MIN_IDENTITY_TRUST))
             revert InvalidVerifiedBeneficiary();

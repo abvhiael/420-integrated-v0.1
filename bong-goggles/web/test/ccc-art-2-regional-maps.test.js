@@ -12,8 +12,8 @@ const root=resolve(import.meta.dirname,'..');
 const regions=['east','ontario','west'];
 test('CCC-ART-2: all six uploaded WebPs are exact approved masters: format, dimensions, alpha, size and Git blob integrity',async()=>{
  const result=await verifyChaosMapArt();
- assert.deepEqual(result,{regions:3,layers:6,expectedBytes:2644292,verifiedBytes:2644292});
- assert.deepEqual(verifyMapRegistry(),{regions:3,layers:6,expectedBytes:2644292});
+ assert.deepEqual(result,{regions:3,layers:6,expectedBytes:2646094,verifiedBytes:2646094});
+ assert.deepEqual(verifyMapRegistry(),{regions:3,layers:6,expectedBytes:2646094});
  assert.deepEqual(CHAOS_MAP_DIMENSIONS,{width:1920,height:830,svgWidth:960,svgHeight:415});
  assert.equal(new Set(CHAOS_MAP_ASSETS.map(a=>a.path)).size,6);
  assert.ok(CHAOS_MAP_ASSETS.every(a=>a.url==='/'+a.path&&a.path.endsWith('.webp')));

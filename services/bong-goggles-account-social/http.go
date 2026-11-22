@@ -23,6 +23,7 @@ type Handler struct{
  Games *AccountGames
  Rooms *ClassicRooms
  Sessions *ClassicSessions
+ ClassicCommunicationsEnabled bool
  Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend

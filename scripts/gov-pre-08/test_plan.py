@@ -75,12 +75,47 @@ class CandidateBoundaries(unittest.TestCase):
         self.mutate_rejected(lambda l,w,s,i: w["founders"][0].__setitem__(
             "genesis_locked_420", 499999))
 
+
+    def test_source_bound_seven_consumer_integrations(self):
+        names=[x["name"] for x in plan.check_consumers(ROOT)]
+        self.assertEqual(names,["420Wallet","420Registry","420Indexer","420Stake",
+                                "420Treasury","420Explorer","420Governance"])
+
+    def test_registry_cannot_disable_codehash_publication(self):
+        original=plan.read
+        def corrupted(root,path):
+            record=original(root,path)
+            if path=="contracts/config/420registry-genesis.json":
+                record["registration"]["strictPublicationRequiresRuntimeCode"]=False
+            return record
+        plan.read=corrupted
+        try:
+            with self.assertRaises(ValueError):
+                plan.check_consumers(ROOT)
+        finally:
+            plan.read=original
+
+    def test_explorer_cannot_claim_independent_chain_authority(self):
+        original=plan.read
+        def corrupted(root,path):
+            record=original(root,path)
+            if path=="contracts/config/420explorer-genesis.json":
+                record["indexerConsumer"]["independentChainIngestion"]=True
+            return record
+        plan.read=corrupted
+        try:
+            with self.assertRaises(ValueError):
+                plan.check_consumers(ROOT)
+        finally:
+            plan.read=original
+
     def test_authoritative_source_candidate_is_unapproved(self):
         candidate=plan.make_candidate(ROOT,with_artifacts=False)
         self.assertEqual(candidate["status"],"UNAPPROVED_SOURCE_CANDIDATE_NOT_DEPLOYED")
         self.assertEqual(candidate["proposedV4"]["commitmentPayload"]["domain"],
                          "420/GENESIS/CONFIG/V4")
         self.assertFalse(candidate["proposedV4"]["independentlyApproved"])
+        self.assertEqual(len(candidate["consumerIntegrations"]),7)
         self.assertIsNone(candidate["proposedV4"]["approvalSignatures"])
         self.assertTrue(all(x["deployedAddress"] is None for x in candidate["components"]))
         self.assertEqual(sum(x["amount420"] for x in candidate["fundingTransfers"]),5040000)

@@ -97,6 +97,8 @@ forge build --root contracts \
   src/governance/CivicGovernor420.sol \
   src/system/CommunityValidatorReserve.sol \
   src/system/ValidatorRegistry.sol \
+  src/system/ConsensusSystemCall420.sol \
+  src/system/RewardController.sol \
   --extra-output storageLayout
 
 for tag in a b; do
@@ -138,6 +140,9 @@ for tag in a b; do
     --output "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  python3 scripts/gov-pre-08/materialize-local-node420-bindings.py \
+    --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-native-bindings-$tag.json"
   node scripts/gov-pre-08/qualify-step3-wallet.mjs \
     --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-wallet-$tag.json"
@@ -158,6 +163,13 @@ for tag in a b; do
     --local-output "$RUNNER_TEMP/govpre08-step3-local-$tag.json" --probe-reorg
   python3 scripts/gov-pre-08/restart-local-anvil.py \
     --rpc "$GOV_PRE_08_RPC" --dump "$RUNNER_TEMP/govpre08-step3-state-$tag.json"
+  if [ "$tag" = a ]; then
+    python3 scripts/gov-pre-08/export-local-node420-genesis.py \
+      --snapshot "$RUNNER_TEMP/govpre08-step3-state-a.json" \
+      --graph "$RUNNER_TEMP/govpre08-step3-graph-a.json" \
+      --genesis "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis.json" \
+      --evidence "$RUNNER_TEMP/govpre08-step3-unified-local-node420-evidence.json"
+  fi
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT

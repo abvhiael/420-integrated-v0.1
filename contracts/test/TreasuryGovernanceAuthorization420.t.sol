@@ -334,7 +334,7 @@ contract TreasuryGovernanceAuthorization420Test {
         bytes32 id;
         bytes memory data;
         (id, data) = _scheduleData(100, keccak256("governed schedule"));
-        _reject(EXECUTOR, address(disb), data, SystemAccess.Unauthorized.selector);
+        _reject(EXECUTOR, address(disb), data, TreasuryDisbursementRegistry420.ExecutionUnauthorized.selector);
         _govern(address(disb), data);
         require(budgets.budget(BUDGET).committed == 100, "schedule accounting");
         _exact(id, 100, 0, 0, 0);

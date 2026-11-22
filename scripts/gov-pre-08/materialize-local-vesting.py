@@ -139,6 +139,22 @@ def materialize(constructor_rpc_url,genesis_rpc_url,root=ROOT):
     assert_call(target,VEST,"totalLockedClaimed()",[],0)
     assert_call(target,VEST,"FOUNDER_COUNT()",[],3)
     assert_call(target,VEST,"TOTAL_LOCKED_ALLOCATION()",[],500000*plan.KIEF)
+    assert_call(target,VEST,"TOTAL_LIQUID_ALLOCATION()",[],500000*plan.KIEF)
+    assert_call(target,VEST,"TOTAL_FOUNDER_ALLOCATION()",[],1000000*plan.KIEF)
+    assert_call(target,VEST,"RELEASES()",[],13)
+    assert_call(target,VEST,"INTERVAL()",[],14*24*3600)
+    for idx in range(3):
+        assert_call(target,VEST,"claimable(uint256)",[idx],0)
+        # A claimant cannot unlock allocation before their first 14-day cliff.
+        try:
+            target.call("eth_call",[{
+                "from":beneficiaries[idx], "to":VEST,
+                "data":signature("claim(uint256)")+encoded_uint(idx),
+            },"latest"])
+        except ValueError:
+            pass
+        else:
+            raise ValueError("unvested Genesis coins were prematurely claimable")
     plan.require(int(target.call("eth_getBalance",[VEST,"latest"]),16)==balanceBefore,
                  "constructor materialization changed funded Genesis balance")
     runtime_hash=subprocess.check_output(["cast","keccak",runtime],text=True).strip().lower()

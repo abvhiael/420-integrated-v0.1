@@ -13,6 +13,7 @@ on:
       - "docs/DEVELOPMENT-COMPENSATION-VAULT.md"
       - "docs/audit/DEVCOMP-*"
       - ".github/workflows/dev-compensation-audit.yml"
+      - "scripts/prepare-devcomp-foundry-scope.py"
   workflow_dispatch:
 
 concurrency:
@@ -47,17 +48,22 @@ jobs:
         working-directory: contracts
         run: forge fmt --check src/revenue/DevelopmentCompensationVault420.sol src/revenue/DevelopmentCompensationIds420.sol test/DevelopmentCompensationVault420.t.sol test/DevelopmentCompensationGenesis420.t.sol
 
+      - name: Stage exact Vault/Genesis Solidity source closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DEVCOMP_SCOPE_ROOT="$RUNNER_TEMP/devcomp-scope"
+          python3 scripts/prepare-devcomp-foundry-scope.py --output "$DEVCOMP_SCOPE_ROOT"
+          echo "DEVCOMP_SCOPE_ROOT=$DEVCOMP_SCOPE_ROOT" >> "$GITHUB_ENV"
+
       - name: Build revenue contract family
-        working-directory: contracts
-        run: forge build src/revenue --sizes
+        run: forge build --root "$DEVCOMP_SCOPE_ROOT" src/revenue --sizes
 
       - name: Run Dev Compensation Vault regressions
-        working-directory: contracts
-        run: forge test --match-path 'test/DevelopmentCompensationVault420.t.sol' -vvvv
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationVault420.t.sol' -vvvv
 
       - name: Run Dev Compensation Genesis registration regression
-        working-directory: contracts
-        run: forge test --match-path 'test/DevelopmentCompensationGenesis420.t.sol' -vvvv
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationGenesis420.t.sol' -vvvv
 
   security:
     runs-on: ubuntu-latest
@@ -77,6 +83,14 @@ jobs:
         with:
           version: stable
 
+      - name: Stage exact Vault/Genesis Solidity source closure
+        shell: bash
+        run: |
+          set -euo pipefail
+          export DEVCOMP_SCOPE_ROOT="$RUNNER_TEMP/devcomp-scope"
+          python3 scripts/prepare-devcomp-foundry-scope.py --output "$DEVCOMP_SCOPE_ROOT"
+          echo "DEVCOMP_SCOPE_ROOT=$DEVCOMP_SCOPE_ROOT" >> "$GITHUB_ENV"
+
       - name: Reject dangerous revenue-vault primitives
         shell: bash
         run: |
@@ -87,16 +101,15 @@ jobs:
           fi
 
       - name: Re-run focused tests under hardening profile
-        working-directory: contracts
         env:
           FOUNDRY_PROFILE: hardening
-        run: forge test --match-path 'test/DevelopmentCompensationVault420.t.sol' -vvvv
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationVault420.t.sol' -vvvv
 
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
 
       - name: Targeted Slither high-severity gate
-        working-directory: contracts
+        working-directory: ${{ env.DEVCOMP_SCOPE_ROOT }}
         shell: bash
         run: |
           set -euo pipefail

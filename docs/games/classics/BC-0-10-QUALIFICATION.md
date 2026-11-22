@@ -1,6 +1,10 @@
 # BC-0.10 — Classic communications qualification
 
-**Status: IMPLEMENTED; source-exact qualification under way.** Do not promote BC-0.10 to QUALIFIED until the actual PostgreSQL/Go race and targeted web tests complete successfully at the implementation SHA. No production Classic game activation.
+**Status: QUALIFIED — shared communications framework in repository only.** Exact-head qualification completed November 22, 2026 UTC. No production Classic game activation or end-to-end live deployment claimed.
+
+**Qualified source SHA:** `6fb1852be6fbe1fe2d7a735fdaeec67300674944`
+
+**Exact-head [BC-0.5–0.10 focused workflow #44979666977](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979666977) — SUCCESS.** PostgreSQL 16 `go test -race -tags account420_integration`, Go vet, restricted Go service build, JS syntax and **58/58 targeted Node tests** (zero failures). Both new BC-0.10 PostgreSQL tests and seven browser communication cases ran with existing room, replay, bot, account and game regressions.
 
 ## Repository changes
 
@@ -16,6 +20,6 @@
 Focused exact-head CI workflow: `.github/workflows/bc-0-5-classic-rooms.yml`.
 Go PostgreSQL 16 race suite (integration build tag `account420_integration`) exercises actual participant presence, spoof denial, block revocation, concurrent same-subject devices, lease expiry, process restart, expired/forward event cursors, immutable public event privacy and pre-existing BC-0.5–0.8 safeguards. Go vet and service build. Node tests cover multi-account synchronization, 420ID rotation, revision conflicts, reconnection snapshots, turn notices, redaction, render safety and activation flags. Static JS syntax checks.
 
-Current whole-web packaging may fail on pre-existing Cross-Country Chaos UI source-size growth in `app.js`: its BC-0.5 historical budget is unchanged; BC-0.10 must not weaken or bypass this gate. No tests assert production deployment or real human-to-human completed game; game-specific rule engines and 420ID live browser E2E remain separately gated.
+**Independent whole-web qualification limitation:** [Bong Goggles Web Verification #44979402532](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979402532) ran **429/429 browser tests** plus **4/4 public-feed tests** successfully, but the BG-19.13 static size check failed on `app.js`: **8,386 bytes growth** against the inherited **3,584 byte** BC-0.5 allowance. Current main's pre-BC-0.10 `app.js` was already 37,061 characters versus the 30,434-byte baseline plus 3,584-byte allowance. Concurrent CCC account multiplayer work expanded that same root file; BC-0.10's room-specific source was split out and kept under the 16 KiB allowance, but the older app-level cap remains failing. This check was neither skipped nor weakened; a successful full-web release is not asserted. No tests assert production deployment or real human-to-human completed game; game-specific rule engines and 420ID live browser E2E remain separately gated.
 
 **Next milestone after qualification:** BC-0.11 — Zero-wager/integrity, *not started*.

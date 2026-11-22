@@ -448,7 +448,10 @@ contract GovPre06Electorate420Test {
                 keccak256("attestation"),
                 0
             );
-        require(Identity420(IDENTITY).credentialMeetsTrust(outsiderCredential, Identity420.TrustClass.VERIFIED), "not a valid VERIFIED issuer");
+        require(
+            Identity420(IDENTITY).credentialMeetsTrust(outsiderCredential, Identity420.TrustClass.VERIFIED),
+            "not a valid VERIFIED issuer"
+        );
         vm.prank(BOB);
         (bool forged,) = address(enrollment)
             .call(

@@ -1,0 +1,40 @@
+name: BongGoggles CCC live readiness (GET only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/bonggoggles-ccc-live-readiness.yml
+permissions:
+  contents: read
+jobs:
+  public-readiness:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wake free-tier services with bounded, noncredentialed GET checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          for endpoint in \
+            https://auth.420integrated.org/healthz \
+            https://bonggoggles.420integrated.org/social-api/healthz \
+            https://bonggoggles-chaos.onrender.com/healthz
+          do
+            ready=0
+            for attempt in {1..10}; do
+              status="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "$endpoint" || true)"
+              echo "Public health attempt $attempt: HTTP ${status:-unavailable}"
+              if [[ "$status" == '200' ]]; then ready=1; break; fi
+              if [[ "$attempt" != '10' ]]; then sleep 15; fi
+            done
+            if [[ "$ready" != '1' ]]; then echo "::error::One or more public health endpoints are unavailable"; exit 1; fi
+          done
+      - name: Verify exact unauthenticated boundary and canonical SSO
+        env:
+          CHAOS_PUBLIC_ORIGIN: https://bonggoggles-chaos.onrender.com
+        run: node services/bong-goggles-chaos/scripts/live-probe.mjs

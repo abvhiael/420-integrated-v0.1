@@ -202,11 +202,12 @@ test('BC-0.5 feature flag remains explicit and bound to the existing off-chain a
 });
 test('BC-0.5 browser forms are actually wired; prior Classic UI and Wallet actions remain intact',async()=>{
  const app=await readFile(new URL('../app.js',import.meta.url),'utf8');
+ const bindings=await readFile(new URL('../core/classic-room-bindings.js',import.meta.url),'utf8');
  const css=await readFile(new URL('../styles.css',import.meta.url),'utf8');
  assert.match(app,/classicRoomsController=new ClassicRoomsController/);
  assert.match(app,/bindClassicRooms\(\)/);
- assert.match(app,/data-classic-room-create/);
- assert.match(app,/data-classic-room-action/);
+ assert.match(bindings,/data-classic-room-create/);
+ assert.match(bindings,/data-classic-room-action/);
  assert.match(app,/classicRoomsController\?\.invalidate\(\)/);
  for(const token of ['classic-room__seats','classic-room__actions','forced-colors:active','focus-visible'])
   assert.ok(css.includes(token),token);

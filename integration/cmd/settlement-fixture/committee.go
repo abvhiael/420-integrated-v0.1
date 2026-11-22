@@ -24,7 +24,7 @@ func provisionProtectedCommittee(dir, genesis, timestamp string) {
     if genesis=="" {panic("real node420 genesis required for local committee provision")}
     hash,err:=ct.ParseRoot(genesis);if err!=nil {panic(err)}
     ts,err:=strconv.ParseUint(strings.TrimPrefix(timestamp,"0x"),16,64)
-    if err!=nil || ts==0 {panic("real native Genesis timestamp required")}
+    if err!=nil {panic("real native Genesis timestamp required")}
     if err=os.Mkdir(dir,0700);err!=nil {panic("private fresh committee directory required: "+err.Error())}
     t,keys:=keys()
     for _,k:=range keys {defer k.Destroy()}

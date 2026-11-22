@@ -196,6 +196,7 @@ contract GOVPRE08LocalFunding420Test is GOVPRE08LocalDeployment420Test {
         return address(0x0000000000000000000000000000000000000421).balance
              + address(0x0000000000000000000000000000000000000422).balance
              + PROTOCOL.balance + COMMUNITY_RESERVE.balance + REWARD_RESERVE.balance
+             + VALIDATORS.balance
              + VESTING.balance + address(0x000000000000000000000000000000000000042A).balance
              + address(0x000000000000000000000000000000000000042E).balance
              + ADMIN.balance + ANDREW.balance + JANET.balance

@@ -248,6 +248,8 @@ async function submitVote(button){
     renderDetail(await context.client.proposal(selected.proposalId));await checkEligibility();
   }else if(outcome.state==='failed'){
     setAppState('Failed');setTx('Vote failed','Transaction reverted. Nothing will be automatically resubmitted.');
+  }else if(outcome.state==='reorged'){
+    setAppState('Reorged','pending');setTx('Vote receipt no longer canonical',`Transaction ${outcome.txHash} was reported in a displaced block. Reload confirmed chain state before retrying; no automatic resubmission.`,'pending');
   }else if(outcome.state==='replaced'){
     setAppState('Replaced','pending');setTx('Vote transaction replaced',`Replacement: ${outcome.replacementHash}. Reload chain state before retrying.`,'pending');
   }else{

@@ -202,6 +202,173 @@ contract FoundingTreasuryAuthority420Test {
         require(founder.contingencyCommitted() == 200_000 ether, "emergency cap");
     }
 
+    function testDuplicateDetailsProduceDistinctPurposeBoundDisbursements() public {
+        // Both proposals have identical recipient/amount/evidence/time boundaries.
+        // Distinct payment IDs must not alias one canonical Treasury disbursement.
+        bytes32 evidence = keccak256("same-purpose-different-approved-payments");
+        uint64 nowTime = uint64(block.timestamp);
+        vm.prank(ADMIN);
+        bytes32 first = founder.proposePayment(
+            false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY,
+            evidence, nowTime, nowTime + 10 days
+        );
+        vm.prank(ADMIN);
+        bytes32 second = founder.proposePayment(
+            false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY,
+            evidence, nowTime, nowTime + 10 days
+        );
+        require(first != second, "duplicate payment ID");
+        vm.prank(ADMIN);
+        bytes32 firstId = founder.schedulePayment(first);
+        vm.prank(ADMIN);
+        bytes32 secondId = founder.schedulePayment(second);
+        require(firstId != secondId, "canonical Treasury disbursement ID collision");
+        require(disb.disbursement(firstId).purposeHash != disb.disbursement(secondId).purposeHash,
+                "case evidence was not bound to unique payments");
+        require(founder.rollingCommitted(false) == 2 ether, "each real payment must be counted");
+    }
+
+    function testContingencySameIncidentCannotSplitAcrossRecipients() public {
+        bytes32 incident = keccak256("shared-security-incident-id");
+        uint64 nowTime = uint64(block.timestamp);
+        vm.prank(ADMIN);
+        bytes32 first = founder.proposePayment(
+            true, PAYEE, uint128(150_000 ether), FoundingTreasuryAuthority420.Purpose.SECURITY,
+            incident, nowTime, nowTime + 10 days
+        );
+        vm.prank(JANET);
+        founder.approvePayment(first);
+        vm.prank(ANDREW);
+        founder.approvePayment(first);
+        vm.prank(ADMIN);
+        founder.schedulePayment(first);
+        require(founder.contingencyCommittedByIncident(incident) == 150_000 ether, "incident principal");
+
+        vm.prank(ADMIN);
+        bytes32 second = founder.proposePayment(
+            true, address(0xB1CE), uint128(60_000 ether),
+            FoundingTreasuryAuthority420.Purpose.SECURITY,
+            incident, nowTime, nowTime + 10 days
+        );
+        vm.prank(JANET);
+        founder.approvePayment(second);
+        vm.prank(ANDREW);
+        founder.approvePayment(second);
+        vm.prank(ADMIN);
+        founder.schedulePayment(second);
+        require(founder.contingencyCommittedByIncident(incident) == 210_000 ether, "incident max");
+
+        vm.prank(ADMIN);
+        bytes32 third = founder.proposePayment(
+            true, address(0xB2CE), uint128(1 ether),
+            FoundingTreasuryAuthority420.Purpose.SECURITY,
+            incident, nowTime, nowTime + 10 days
+        );
+        vm.prank(JANET);
+        founder.approvePayment(third);
+        vm.prank(ANDREW);
+        founder.approvePayment(third);
+        vm.prank(ADMIN);
+        (bool split,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (third)));
+        require(!split, "incident limit bypassed by different recipients");
+        require(founder.contingencyCommittedByIncident(incident) == 210_000 ether,
+                "rejected incident changed accounting");
+    }
+
+    function testSeparateThirtyDayOperationsLimitRejectsEvenDifferentRecipients() public {
+        uint64 nowTime = uint64(block.timestamp);
+        for (uint256 i; i < 2; ++i) {
+            vm.prank(ANDREW);
+            bytes32 paymentId = founder.proposePayment(
+                false, address(uint160(0xB000 + i)), uint128(420_000 ether),
+                FoundingTreasuryAuthority420.Purpose.INFRASTRUCTURE,
+                keccak256(abi.encode("ops", i)), nowTime, nowTime + 10 days
+            );
+            vm.prank(JANET);
+            founder.approvePayment(paymentId);
+            vm.warp(block.timestamp + 49 hours);
+            vm.prank(ANDREW);
+            founder.schedulePayment(paymentId);
+            nowTime = uint64(block.timestamp);
+        }
+        require(founder.rollingCommitted(false) == 840_000 ether, "operations rolling sum");
+        vm.prank(ADMIN);
+        bytes32 extra = _propose(
+            false, address(0xBA77), uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY
+        );
+        vm.prank(ADMIN);
+        (bool overflow,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (extra)));
+        require(!overflow, "operations 30-day cap exceeded through multiple recipients");
+        require(founder.operationsCommitted() == 840_000 ether, "failed operation recorded");
+    }
+
+    function testSeparateThirtyDayContingencyLimitRejectsDifferentIncidents() public {
+        uint64 nowTime = uint64(block.timestamp);
+        for (uint256 i; i < 2; ++i) {
+            vm.prank(ANDREW);
+            bytes32 paymentId = founder.proposePayment(
+                true, address(uint160(0xD000 + i)), uint128(210_000 ether),
+                FoundingTreasuryAuthority420.Purpose.SECURITY,
+                keccak256(abi.encode("incident", i)), nowTime, nowTime + 10 days
+            );
+            vm.prank(JANET);
+            founder.approvePayment(paymentId);
+            vm.prank(ADMIN);
+            founder.approvePayment(paymentId);
+            vm.prank(ANDREW);
+            founder.schedulePayment(paymentId);
+            nowTime = uint64(block.timestamp);
+        }
+        require(founder.rollingCommitted(true) == 420_000 ether, "contingency rolling sum");
+        vm.prank(ADMIN);
+        bytes32 extra = _propose(
+            true, address(0xD777), uint128(1 ether), FoundingTreasuryAuthority420.Purpose.SECURITY
+        );
+        vm.prank(ANDREW);
+        founder.approvePayment(extra);
+        vm.prank(JANET);
+        founder.approvePayment(extra);
+        vm.prank(ADMIN);
+        (bool overflow,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (extra)));
+        require(!overflow, "contingency rolling cap exceeded through multiple incidents");
+        require(founder.contingencyCommitted() == 420_000 ether, "failed contingency accounted");
+    }
+
+    function testExpiredProposalCannotBeApprovedOrScheduled() public {
+        vm.prank(ADMIN);
+        bytes32 id = _propose(false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY);
+        vm.warp(block.timestamp + 11 days);
+        vm.prank(JANET);
+        (bool approved,) = address(founder).call(abi.encodeCall(founder.approvePayment, (id)));
+        require(!approved, "expired payment gained approval");
+        vm.prank(ADMIN);
+        (bool scheduled,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (id)));
+        require(!scheduled, "expired proposal became a Treasury commitment");
+    }
+
+    function testUnboundExecutorAndForgedReleaseMarkerAreRejected() public {
+        vm.prank(ADMIN);
+        bytes32 paymentId = _propose(false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY);
+        vm.prank(ADMIN);
+        bytes32 id = founder.schedulePayment(paymentId);
+        vm.prank(ADMIN);
+        (bool unbound,) = address(founder).call(abi.encodeCall(
+            founder.executeApprovedRelease, (paymentId, address(0xDEAD), keccak256("fake"))
+        ));
+        require(!unbound, "unbound executor permitted a transfer");
+
+        // This call is rejected by the founding settlement guard even before any
+        // capability check, preventing forged executed-state/accounting records.
+        (bool forged,) = address(disb).call(
+            abi.encodeCall(disb.markExecuted, (id, keccak256("forged-vault-release")))
+        );
+        require(!forged, "disbursement forged without verified active founder release");
+        require(disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.SCHEDULED,
+                "forged execution mutated Treasury record");
+        require(budgets.budget(founder.operationsBudgetId()).executed == 0,
+                "forged execution inflated settled funds");
+    }
+
     function testRetirementIsIrreversibleAndDisablesFoundingWrites() public {
         vm.prank(ADMIN);
         (bool premature,) = address(founder).call(abi.encodeCall(founder.retire, ()));

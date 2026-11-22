@@ -174,9 +174,15 @@ contract RecoveryCounter {
                     # Linux may temporarily retain an exited child as a zombie;
                     # it has already closed its datadir descriptors at that point.
                     info = Path('/proc') / str(child) / 'stat'
-                    if info.is_file() and info.read_text().split(') ', 1)[1].startswith('Z'):
+                    # The real Geth child can disappear between kill(pid, 0)
+                    # and opening /proc/pid/stat. ENOENT proves it exited;
+                    # it must not make crash-recovery qualification fail.
+                    status = info.read_text().split(') ', 1)
+                    if len(status) != 2:
+                        raise RuntimeError('malformed live Geth /proc status')
+                    if status[1].startswith('Z'):
                         break
-                except ProcessLookupError:
+                except (ProcessLookupError, FileNotFoundError):
                     break
                 if time.monotonic() >= deadline:
                     raise RuntimeError('real Geth failed to exit and release datadir after restart signal')

@@ -444,6 +444,22 @@ def main():
              "--authrpc.port","18781","--http.port","18780","--port","0",
              "--","--ipcdisable","--nodiscover","--maxpeers","0"])
         ready(lambda:rpc("eth_chainId")==hex(420),node,timeout=60)
+        # Geth intentionally may rewind a state trie on abrupt SIGKILL, even
+        # though the durable certified consensus history contains block 2.
+        # Never trust the un-reconciled Geth head. Production fourtwentyd
+        # recovery.Reconcile() verifies the independently pinned Genesis,
+        # the 11-of-15 BLS certificates, their ancestry and the derived
+        # authentic Stake batches before rebuilding missing Geth payload
+        # state and forkchoice. We must run it BEFORE asserting recovery.
+        events=queue.Queue()
+        consensus=launch("fourtwentyd-cold-recovered",[str(daemon),
+                      "--certified-settlement","--engine","http://127.0.0.1:18781",
+                      "--jwt-secret",str(args.workdir/"jwt.hex"),
+                      "--settlement-dir",str(args.workdir/"consensus"),
+                      "--settlement-trust",str(trustfile),
+                      "--settlement-trust-sha256",pin],input_stream=True)
+        threading.Thread(target=collect,args=(consensus.stdout,),daemon=True).start()
+        wait_event("settled",2,timeout=60)
         restored=rpc("eth_getBlockByNumber",["latest",False])
         require(restored["number"]=="0x2" and
                 restored["hash"].lower()==latest["hash"].lower() and
@@ -470,15 +486,6 @@ def main():
         else:
             raise AssertionError("unauthenticated native Engine mutation accepted")
 
-        events=queue.Queue()
-        consensus=launch("fourtwentyd-cold-recovered",[str(daemon),
-                      "--certified-settlement","--engine","http://127.0.0.1:18781",
-                      "--jwt-secret",str(args.workdir/"jwt.hex"),
-                      "--settlement-dir",str(args.workdir/"consensus"),
-                      "--settlement-trust",str(trustfile),
-                      "--settlement-trust-sha256",pin],input_stream=True)
-        threading.Thread(target=collect,args=(consensus.stdout,),daemon=True).start()
-        wait_event("settled",2,timeout=60)
         recoveredCheckpoint=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
         require(recoveredCheckpoint["Settlement"]["ExecutionBlock"]==2,
                 "certified settlement lost its persisted checkpoint")

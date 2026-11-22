@@ -11,7 +11,7 @@ import "../governance/IFoundingWalletClaims420.sol";
 
 interface IFoundingRetirementReadiness420 {
     function retirementReady() external view returns (bool);
-    function retirementExecutionAuthorized() external view returns (bool);
+    function retirementExecutionAuthorized(address authority) external view returns (bool);
 }
 
 interface IFoundingCivicStatus420 {
@@ -522,7 +522,7 @@ contract FoundingTreasuryAuthority420 {
         if (retired) revert Retired();
         if (
             msg.sender != governanceTimelock || !IFoundingCivicStatus420(governanceTimelock).civicAuthorityActivated()
-                || !retirementVerifier.retirementExecutionAuthorized()
+                || !retirementVerifier.retirementExecutionAuthorized(address(this))
         ) revert RetirementNotReady();
         // Previously scheduled founding disbursements are legally committed even if the
         // VaultAccounting native free balance has not yet reserved them as obligations.

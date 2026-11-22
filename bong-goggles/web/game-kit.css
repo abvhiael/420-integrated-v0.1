@@ -1,0 +1,61 @@
+/* BC-0.9: reusable accessible Classic tabletop widgets. No external asset dependencies. */
+.game-kit{display:grid;gap:.85rem;min-width:0;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr))}
+.game-kit__panel{display:grid;gap:.65rem;align-content:start;min-width:0;padding:.9rem;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--text)}
+.game-kit__panel h4{margin:0;font-size:.95rem}
+.game-kit__panel--private{grid-column:1/-1;border-style:dashed}
+.game-kit__seats,.game-kit__hand,.game-kit__rack,.game-kit__dice{display:flex;gap:.5rem;flex-wrap:wrap;list-style:none;margin:0;padding:0}
+.game-kit__seats{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,165px),1fr));align-items:stretch}
+.game-kit__seat{display:grid;gap:.35rem;min-width:0;padding:.75rem;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);font-size:.85rem}
+.game-kit__seat strong{overflow-wrap:anywhere}
+.game-kit__seat[aria-current=step]{border:2px solid #b27c10;box-shadow:inset 0 0 0 1px var(--surface)}
+.game-kit__seat span{color:var(--muted)}
+.game-kit__scoreboard{grid-column:1/-1}
+.game-kit__turn{display:block;border-left:4px solid #b27c10;padding:.7rem .85rem;background:var(--surface-2);border-radius:7px;overflow-wrap:anywhere}
+.game-kit__deck,.game-kit__discard{display:flex;align-items:center;flex-wrap:wrap;gap:.8rem;min-width:0}
+.game-kit__card-back,.game-kit__card-face{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.25rem;border:2px solid var(--line);border-radius:9px;min-width:3.6rem;min-height:5rem;padding:.45rem;background:var(--surface);color:var(--text);overflow-wrap:anywhere;text-align:center}
+.game-kit__card-back{color:#fff;background:repeating-linear-gradient(35deg,#18503c 0 6px,#215f4b 6px 12px);border:3px double #fff;font-weight:900;letter-spacing:.12em}
+.game-kit__card-face--red{color:#a52136}
+.game-kit__card-face span{font-size:1.45rem}
+.game-kit__hand li{flex:0 0 auto}
+.game-kit__tile{display:grid;align-items:center;justify-items:center;border:2px solid #937643;border-radius:6px;background:#efdfad;color:#29200e;min-width:2.8rem;min-height:2.8rem;padding:.3rem;font-size:1.15rem}
+.game-kit__tile small{font-size:.7rem;justify-self:end}
+.game-kit__board-scroll,.game-kit__scorecard-scroll{overflow-x:auto;max-width:100%;min-width:0}
+.game-kit__board{display:grid;gap:1px;min-width:220px;max-width:550px;width:100%;border:2px solid var(--line);background:var(--line)}
+.game-kit__board [role=row]{display:grid;grid-template-columns:repeat(var(--game-kit-cols),minmax(0,1fr));gap:1px}
+.game-kit__square{aspect-ratio:1;display:grid;place-items:center;min-width:0;background:#e9dfc8;color:#182824;font-size:clamp(.65rem,2.1vw,1.8rem);line-height:1}
+.game-kit__square--dark{background:#66917b;color:#111d18}
+.game-kit__square span{user-select:none;pointer-events:none}
+.game-kit__dice li{display:grid;gap:.1rem;justify-items:center;align-content:center;min-width:3rem;min-height:3rem;padding:.4rem;border:2px solid var(--line);border-radius:8px;background:var(--surface);font-size:2.1rem;line-height:1}
+.game-kit__dice .game-kit__die--held{border-color:#b27c10;box-shadow:inset 0 0 0 2px #b27c10}
+.game-kit__dice small{font-size:.7rem}
+.game-kit__scorecard{width:100%;border-collapse:collapse;font-size:.86rem;text-align:center}
+.game-kit__scorecard caption{text-align:left;padding:.3rem;font-weight:650}
+.game-kit__scorecard th,.game-kit__scorecard td{padding:.45rem;min-width:2.3rem;border:1px solid var(--line)}
+.game-kit__scorecard th[scope=row]{text-align:left;min-width:5rem}
+.game-kit__controls{display:flex;gap:.5rem;flex-wrap:wrap}
+.game-kit__controls button{min-height:44px;opacity:.8;cursor:not-allowed}
+.games-screen__panel .game-kit__panel{margin:0}
+@media(max-width:600px){
+ .game-kit{grid-template-columns:minmax(0,1fr)}
+ .game-kit__panel{padding:.7rem}
+ .game-kit__seats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .game-kit__card-face,.game-kit__card-back{min-width:3rem;min-height:4.4rem}
+ .game-kit__board{max-width:100%}
+}
+@media(forced-colors:active){
+ .game-kit__panel,.game-kit__seat,.game-kit__card-face,.game-kit__card-back,.game-kit__tile,.game-kit__square,.game-kit__dice li{border:2px solid CanvasText;background:Canvas;color:CanvasText}
+ .game-kit__seat[aria-current=step],.game-kit__dice .game-kit__die--held{outline:2px solid Highlight;outline-offset:1px}
+}
+@media(prefers-reduced-motion:reduce){
+ .game-kit *{scroll-behavior:auto;animation:none;transition:none}
+}
+
+/* BC-0.9 server-fed feedback, deadline display and localized public rule snippets. */
+.game-kit__feedback{grid-column:1/-1;border:1px solid var(--line);border-left:4px solid #356e91;border-radius:8px;background:var(--surface-2);padding:.85rem;margin:0;overflow-wrap:anywhere}
+.game-kit__feedback--warning{border-left-color:#b27c10}
+.game-kit__feedback--error{border-left-color:#b12c42}
+.game-kit__deadline time{font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.game-kit__rules ol{padding-inline-start:1.4rem;margin:.2rem 0;display:grid;gap:.55rem}
+.game-kit__rules li{overflow-wrap:anywhere;line-height:1.45}
+.game-kit__seat[data-seat-position]{position:relative}
+@media(forced-colors:active){.game-kit__feedback{border:2px solid CanvasText}}

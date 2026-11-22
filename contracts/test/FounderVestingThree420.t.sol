@@ -97,17 +97,20 @@ contract FounderVestingThree420Test {
 
     function testUniqueNonzeroPersonalWalletsAndReservedSystemAddresses() public {
         address[3] memory dupes = [ADMIN, ADMIN, JANET];
-        try new FounderVestingRegistry(address(this), dupes, genesisTime) {
-            revert("duplicate founder recipients accepted");
-        } catch {}
+        (bool accepted,) = address(this).call(
+            abi.encodeCall(this.tryDeploy, (dupes))
+        );
+        require(!accepted, "duplicate founder recipients accepted");
         address[3] memory zero = [ADMIN, address(0), JANET];
-        try new FounderVestingRegistry(address(this), zero, genesisTime) {
-            revert("empty founder recipient accepted");
-        } catch {}
+        (accepted,) = address(this).call(abi.encodeCall(this.tryDeploy, (zero)));
+        require(!accepted, "empty founder recipient accepted");
         address[3] memory reserved = [ADMIN, address(0x0427), JANET];
-        try new FounderVestingRegistry(address(this), reserved, genesisTime) {
-            revert("predeploy address used as founder signing key");
-        } catch {}
+        (accepted,) = address(this).call(abi.encodeCall(this.tryDeploy, (reserved)));
+        require(!accepted, "predeploy address used as founder signing key");
+    }
+
+    function tryDeploy(address[3] calldata recipients) external returns (address) {
+        return address(new FounderVestingRegistry(address(this), recipients, genesisTime));
     }
 
     function testNoArbitraryIndexOrPostGenesisGrantInsertion() public {

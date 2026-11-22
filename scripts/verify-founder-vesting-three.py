@@ -115,7 +115,7 @@ def verify(release):
         record = next((z for z in fields if z["path"] == "config/genesis-allocations.json"), None)
         require(record is not None, "missing Genesis allocation binding")
         binary = LEDGER.read_bytes()
-        digest = hashlib.sha1(b"blob " + str(len(binary)).encode() + b"\\0" + binary).hexdigest()
+        digest = hashlib.sha1(b"blob " + str(len(binary)).encode() + b"\0" + binary).hexdigest()
         require(record["gitBlobSha1"] == digest, "Genesis signed ledger blob hash mismatch")
         require(H256.fullmatch(committed["genesisConfigHash"]),
                 "missing valid Genesis hash")

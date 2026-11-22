@@ -193,7 +193,7 @@ const s=state??{status:'idle'},session=s.session,id=session?.id??null;
 const nav=back+menu(screen,id);
 const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
 '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
-'<span class="cribbage-status">BC-1.6 · Authenticated challenges</span></header>';
+'<span class="cribbage-status">BC-1.5 · Authenticated rooms</span></header>';
 const isLive=s.status==='ready'&&session?.gameId==='cribbage';
 const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
 '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+

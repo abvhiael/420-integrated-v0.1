@@ -297,7 +297,8 @@ def main():
         wallet=json.loads(wallet_origin.read_text())
         require(wallet["realWalletCoreTreasuryAndGovernanceDiscovered"] and
                 wallet["rawTransactionAcceptedByPatchedGeth"] and
-                wallet["wrongChainSignedTransactionRejected"],
+                wallet["wrongChainSignedTransactionRejected"] and
+                wallet["wrongChainIdentityAndStaleRegistryAndTamperedCodeRejected"],
                 "real locally signed wallet did not pass source-bound user path")
         second,latest,batch,archived=produce(first,2,2)
         require(int(call(GW,"lastSequence()"),16)==4,

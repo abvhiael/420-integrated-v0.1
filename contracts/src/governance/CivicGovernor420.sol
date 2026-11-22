@@ -48,10 +48,11 @@ contract CivicGovernor420 is I420System {
     GovernanceTimelock public timelock;
 
     uint256 public dualHouseExecutedCount;
-    bytes32 private _activeDualHouseProposal;
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;
     mapping(bytes32 => bytes32) public queuedActionHashes;
+    // Append-only transient execution evidence; preserve historical mapping storage slots.
+    bytes32 private _activeDualHouseProposal;
 
     error InvalidModule();
     error InvalidCommitment();

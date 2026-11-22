@@ -341,6 +341,16 @@
         "duplicate_identity_policy": "economic and technical anti-Sybil checks; one matching award per qualified validator identity under launch policy"
       },
       "unawarded_balance_destination": "Community/Testnet Treasury for later contribution rewards; not reallocated automatically"
+    },
+    "founding_financial_source_420": {
+      "source_allocation_id": "protocol-reserve",
+      "source_address": "0x0000000000000000000000000000000000000424",
+      "source_total_420": 8600000,
+      "operations_earmark_420": 4200000,
+      "contingency_earmark_420": 840000,
+      "remaining_unearmarked_420": 3560000,
+      "additional_genesis_issuance_420": 0,
+      "vaults_funded_at_genesis": false
     }
   },
   "step3": {

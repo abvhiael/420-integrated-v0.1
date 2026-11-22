@@ -56,7 +56,8 @@ test('BC-0.10 multi-account same-origin room heartbeat + revision reconciliation
  const seen=[];
  const live=new ClassicCommunicationsController({enabled:true,fetchImpl:srv.fetchImpl,
   onRoom:next=>seen.push(next),onChange:next=>seen.push(next.status)});
- const first=await live.sync({room:room(),viewer:host});
+ srv.state.status='in_game';
+ const first=await live.sync({room:room(2,'in_game'),viewer:host});
  assert.equal(first.status,'connected');
  assert.equal(first.room.revision,2);
  assert.equal(first.presence.seats[0].online,true);

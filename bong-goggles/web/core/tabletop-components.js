@@ -70,7 +70,10 @@ const scoreColumn=c=>shape(c,['label','rows'])&&text(c.label,40)&&
  c.rows.every(scoreRow)&&unique(c.rows,x=>x.id);
 const scorecard=c=>shape(c,['seat','columns'])&&integer(c.seat,0,5)&&
  Array.isArray(c.columns)&&c.columns.length>=1&&c.columns.length<=6&&
- c.columns.every(scoreColumn);
+ c.columns.every(scoreColumn)&&unique(c.columns,x=>x.label)&&
+ c.columns.every(col=>col.rows.length===c.columns[0].rows.length&&
+  col.rows.every((row,i)=>row.id===c.columns[0].rows[i].id&&
+   row.label===c.columns[0].rows[i].label));
 const action=a=>shape(a,['id','label','reason'])&&text(a.id,40)&&
  /^[a-z][a-z0-9-]*$/.test(a.id)&&text(a.label,80)&&optionalText(a.reason,120);
 const deck=d=>shape(d,['count','label'])&&count(d.count)&&optionalText(d.label);

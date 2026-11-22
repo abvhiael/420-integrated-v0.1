@@ -191,6 +191,96 @@ func TestCanonicalReconciliationRestartAndDiscrepancies(t *testing.T) {
 		t.Fatal("machine report", err)
 	}
 }
+func TestSponsoredRewardNativeNinetyTenAndIndexerEvidence(t *testing.T) {
+    reward:=&sys.RewardOutcome{BlockNumber:4200,ActiveCount:15,
+        Proposer:sys.Address{1},Participants:[]sys.Address{{2}}}
+    settlement,err:=sys.DeriveRewardSettlement(*reward)
+    if err!=nil {t.Fatal(err)}
+    proposer:=address(reward.Proposer)
+    participant:=address(reward.Participants[0])
+    share:=new(big.Int).Mul(new(big.Int).Set(settlement.ProposerAmount),big.NewInt(1000))
+    share.Div(share,big.NewInt(10000))
+    net:=new(big.Int).Sub(settlement.ProposerAmount,share)
+    s:=State{"communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+       "communityRewardSettled":"0","nativeRewardPaid":"0",
+       "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+       balance(CommunityReward):"0",accrued(CommunityReward):"0",
+       accrued(proposer):"0",accrued(participant):"0"}
+    pay:=func(recipient,kind,amount string) Event {
+        return Event{Name:"NativeRewardPaid",Fields:map[string]string{
+            "blockNumber":"4200","recipient":recipient,"kind":kind,"amount":amount}}
+    }
+    events:=[]Event{
+        {Name:"SponsoredValidatorRewardAllocated",Fields:map[string]string{
+            "owner":proposer,"communityFund":CommunityReward,
+            "gross":settlement.ProposerAmount.String(),"communityShare":share.String()}},
+        {Name:"CommunityRewardBackingReceived",Fields:map[string]string{
+            "source":Reward,"amount":share.String(),"backedTotal":share.String()}},
+        pay(CommunityReward,"2",share.String()),
+        {Name:"CommunityRewardSettled",Fields:map[string]string{
+            "reserve":CommunityReward,"amount":share.String(),"settledTotal":share.String()}},
+        pay(proposer,"0",net.String()),
+        pay(participant,"1",settlement.PerParticipantAmount.String()),
+        pay(AttentionTreasury,"3",settlement.AttentionAmount.String()),
+        pay(DevelopmentTreasury,"4",settlement.DevelopmentAmount.String()),
+        {Name:"RewardApplied",Fields:map[string]string{
+            "blockNumber":"4200","proposer":proposer,
+            "proposerAmount":settlement.ProposerAmount.String(),
+            "participantAmount":settlement.PerParticipantAmount.String(),
+            "attentionAmount":settlement.AttentionAmount.String(),
+            "developmentAmount":settlement.DevelopmentAmount.String(),
+        }},
+    }
+    for i,event:=range events {
+        // Roundtrip exact ABI topics/data through canonical Indexer decoder.
+        log:=encoded(t,event.Name,event.Fields,4200,hex32([32]byte{42}),uint64(i))
+        decoded,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err:=Apply(s,decoded,4200,reward);err!=nil {
+            t.Fatalf("native sponsor event %d (%s): %v",i,event.Name,err)
+        }
+    }
+    realized:=new(big.Int).Add(new(big.Int).Set(settlement.ProposerAmount),settlement.PerParticipantAmount)
+    realized.Add(realized,settlement.AttentionAmount)
+    realized.Add(realized,settlement.DevelopmentAmount)
+    if s.get(accrued(proposer))!=net.String() || s.get(accrued(participant))!=settlement.PerParticipantAmount.String() ||
+       s.get("communityRewardSettled")!=share.String() ||
+       s.get("communityRewardBackingReceived")!=share.String() ||
+       s.get("communityRewardAccrued")!=share.String() ||
+       s.get(balance(CommunityReward))!=share.String() ||
+       s.get("nativeRewardPaid")!=realized.String() {
+        t.Fatalf("unbacked sponsored native 90/10 payout accepted: %+v",s)
+    }
+    corrupt:=func(name string,index int,mutate func(*Event)){
+        t.Run(name,func(t *testing.T){
+            state:=State{}
+            for k,v:=range map[string]string{
+                "communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+                "communityRewardSettled":"0","nativeRewardPaid":"0",
+                "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+                balance(CommunityReward):"0",accrued(CommunityReward):"0",
+                accrued(proposer):"0",accrued(participant):"0",
+            } {state[k]=v}
+            rejected:=false
+            for i,event:=range events {
+                copy:=Event{Name:event.Name,Fields:map[string]string{}}
+                for k,v:=range event.Fields {copy.Fields[k]=v}
+                if i==index {mutate(&copy)}
+                if err:=Apply(state,copy,4200,reward);err!=nil {
+                    rejected=true;break
+                }
+            }
+            if !rejected {t.Fatal("tampered sponsored native settlement reconciled")}
+        })
+    }
+    corrupt("incorrect-community-share",0,func(e *Event){e.Fields["communityShare"]="1"})
+    corrupt("forged-backing-source",1,func(e *Event){e.Fields["source"]=participant})
+    corrupt("redirected-reserve",3,func(e *Event){e.Fields["reserve"]=proposer})
+    corrupt("missing-native-transfer",4,func(e *Event){e.Fields["amount"]="1"})
+    corrupt("wrong-execution-block",5,func(e *Event){e.Fields["blockNumber"]="4199"})
+    corrupt("extra-native-mint",7,func(e *Event){e.Fields["amount"]="1"})
+}
+
 func TestCreditReplacementSlashingAndWithdrawal(t *testing.T) {
 	id := hex32([32]byte{1})
 	owner := "0x0000000000000000000000000000000000000001"

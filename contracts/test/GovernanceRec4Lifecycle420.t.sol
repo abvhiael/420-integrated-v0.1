@@ -564,6 +564,39 @@ contract GovernanceRec4Lifecycle420Test {
         );
     }
 
+    function testDistinctMatureNestedOperationCannotInheritDualHouseRetirementContext() public {
+        _deployAndBootstrap();
+        GovRec4Target target = new GovRec4Target(timelock);
+
+        // Two separately matured, legitimately passed proposals are public-executable.
+        // An attacker-controlled G3 target must not execute the unrelated G1 *inside*
+        // the G3 callback and inherit its active-dual-house retirement marker.
+        CivicGovernor420.Action[] memory inner = _actions(target, 777);
+        bytes32 innerId = _create(CivicIds420.ProposalClass.G1, inner);
+        _pass(innerId, false);
+        uint64 innerReady = _queuedDelay(innerId, CivicIds420.ProposalClass.G1, inner);
+        vm.warp(innerReady);
+
+        CivicGovernor420.Action[] memory outer = new CivicGovernor420.Action[](1);
+        outer[0] = CivicGovernor420.Action(address(target), 0, abi.encodeCall(target.tryReenter, ()));
+        bytes32 outerId = _create(CivicIds420.ProposalClass.G3, outer);
+        target.configureReentry(innerId);
+        _pass(outerId, true);
+        uint64 outerReady = _queuedDelay(outerId, CivicIds420.ProposalClass.G3, outer);
+        vm.warp(outerReady);
+        timelock.execute(outerId);
+        require(target.blockedReentries() == 1 && target.number() == 0,
+            "nested mature G1 executed while a distinct G3 was authorizing an action");
+        (,,,,, bool innerExecuted,) = timelock.operations(innerId);
+        require(!innerExecuted && !governor.activeDualHouseExecution(),
+            "nested cross-proposal execution contaminated Civic state");
+
+        // The mature G1 is still executable on its own and cannot inherit G3 authority.
+        timelock.execute(innerId);
+        require(target.number() == 777 && !governor.activeDualHouseExecution(),
+            "outer G3 improperly consumed independent G1 operation");
+    }
+
     function testRetirementAuthorityContextExistsOnlyDuringRealExecutedDualHouseBatch() public {
         _deployAndBootstrap();
         GovRec4Target target = new GovRec4Target(timelock);

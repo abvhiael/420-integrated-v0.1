@@ -19,7 +19,8 @@ import hashlib,json,os,re,shutil
 from pathlib import Path
 root=(Path.cwd()/"contracts").resolve()
 dest=Path(os.environ["GOV_PRE_08_STEP3_EVM_CLOSURE"])
-pending=[root/"test/GOVPRE08LocalFunding420.t.sol"]
+pending=[root/"test/GOVPRE08LocalFunding420.t.sol",
+         root/"test/GOVPRE08CivicLifecycle420.t.sol"]
 seen=set()
 pat=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
 while pending:
@@ -46,6 +47,9 @@ for tag in a b; do
   forge test --root "$GOV_PRE_08_STEP3_EVM_CLOSURE" \
     --match-contract GOVPRE08LocalFunding420Test -vv \
     | tee "$RUNNER_TEMP/govpre08-step3-foundry-$tag.log"
+  forge test --root "$GOV_PRE_08_STEP3_EVM_CLOSURE" \
+    --match-contract GOVPRE08CivicLifecycle420Test -vv \
+    | tee "$RUNNER_TEMP/govpre08-step3-civic-$tag.log"
 done
 python3 - <<'PY'
 import os,re
@@ -59,6 +63,10 @@ for tag in "ab":
     hashes=re.findall(r"(?m)^[ \t]*(0x[0-9a-fA-F]{64})[ \t]*$",txt)
     assert len(hashes)==2,"real deployment graph and funded custody digests absent"
     records.append((int(m.group(1)),hashes[0].lower(),hashes[1].lower()))
+for tag in "ab":
+    txt=(p/f"govpre08-step3-civic-{tag}.log").read_text()
+    m=re.search(r"(?m)^Ran (\\d+) tests for test/GOVPRE08CivicLifecycle420.t.sol",txt)
+    assert m and int(m.group(1))>=2 and "0 failed" in txt and "0 skipped" in txt, "real Civic/Treasury governance lifecycle failed"
 assert records[0]==records[1],"independent Foundry EVM graph/custody changed"
 print("GOV_PRE_08_STEP3_REPEATED_ACTUAL_FOUNDER_TREASURY_VAULT_EVM=PASS",records[0])
 PY

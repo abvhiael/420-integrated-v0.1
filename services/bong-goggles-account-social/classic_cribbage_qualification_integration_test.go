@@ -147,7 +147,15 @@ func TestBC17ConcurrentCribbageMoveUsesOneImmutableJournal(t *testing.T){
  room:=bc15Room(t,h,host,peer,2)
  session:=bc06Start(t,h,host,room.ID)
  ctx:=context.Background()
- actionRaw,e:=json.Marshal(bc15Move(t,session));if e!=nil{t.Fatal(e)}
+ if session.TurnSeat==nil{t.Fatal("missing initial server-owned turn")}
+ turn:=*session.TurnSeat
+ actor,other:=memberA,memberB
+ active:=session
+ if turn==1{
+  actor,other=memberB,memberA
+  active=bc15Get(t,h,peer,session.ID)
+ }
+ actionRaw,e:=json.Marshal(bc15Move(t,active));if e!=nil{t.Fatal(e)}
  action:=ClassicSessionAction{RequestID:bc06ActionID(t),ExpectedSequence:session.Sequence+1,Action:"move",Move:actionRaw}
  const n=10
  outcomes:=make(chan error,n)
@@ -156,8 +164,8 @@ func TestBC17ConcurrentCribbageMoveUsesOneImmutableJournal(t *testing.T){
   wg.Add(1)
   go func(){
    defer wg.Done()
-   view,e:=h.Sessions.Act(ctx,memberA,session.ID,action)
-   if e==nil&&(view.Sequence!=2||view.ViewerSeat!=0){e=ErrUnavailable}
+   view,e:=h.Sessions.Act(ctx,actor,session.ID,action)
+   if e==nil&&(view.Sequence!=2||view.ViewerSeat!=turn){e=ErrUnavailable}
    outcomes<-e
   }()
  }
@@ -177,10 +185,10 @@ func TestBC17ConcurrentCribbageMoveUsesOneImmutableJournal(t *testing.T){
  }
  if moves!=1||events!=2||commands!=1{t.Fatalf("duplicate move or journal: %d %d %d",moves,events,commands)}
  if e:=h.Sessions.VerifyRules(ctx,session.ID);e!=nil{t.Fatal("concurrent immutable replay",e)}
- if _,e:=h.Sessions.Act(ctx,memberB,session.ID,action);!errors.Is(e,ErrConflict){
+ if _,e:=h.Sessions.Act(ctx,other,session.ID,action);!errors.Is(e,ErrConflict){
   t.Fatal("other 420ID identity reused request ID",e)
  }
- if _,e:=h.Sessions.Act(ctx,memberA,session.ID,ClassicSessionAction{
+ if _,e:=h.Sessions.Act(ctx,actor,session.ID,ClassicSessionAction{
   RequestID:bc06ActionID(t),ExpectedSequence:session.Sequence+1,Action:"move",Move:actionRaw,
  });!errors.Is(e,ErrConflict){t.Fatal("independent stale move accepted",e)}
 }

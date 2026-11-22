@@ -144,3 +144,38 @@ test('Multiplayer road map and exposed public tables remain visible without oppo
  const noLeak=checkChaosProjection({...tables,hand:[],players:tables.players});
  assert.doesNotMatch(renderChaosOnline({status:'ready',room:noLeak}),/MY_PRIVATE_CARD/);
 });
+
+test('Gameplay layout places highway above public tables, deck and bottom private hand with room chat',()=>{
+ const room={...game,chat:[{id:'30000000-0000-4000-8000-000000000003',seat:0,text:'A moose walks into the chat!',at:'2026-11-21T22:00:00Z'}]};
+ const html=renderChaosOnline({status:'ready',room});
+ for(const key of ['ccc-online-stage','ccc-online-track','ccc-online-middle','ccc-online-decks','ccc-online-hand','ccc-online-chat'])
+  assert.ok(html.includes(key),key);
+ assert.ok(html.indexOf('ccc-online-track')<html.indexOf('ccc-online-middle'));
+ assert.ok(html.indexOf('ccc-online-middle')<html.indexOf('ccc-online-hand'));
+ assert.match(html,/east-atlas-underlay\.webp/);
+ assert.match(html,/Stock: 220 cards/);
+ assert.match(html,/A moose walks into the chat!/);
+ assert.match(html,/data-chaos-online-chat/);
+ assert.match(html,/data-chaos-online-select="0"/);
+ assert.match(html,/aria-label="Your private hand"/);
+ assert.doesNotMatch(html,/Your communities|Upcoming events|Discover people/);
+ const hidden=renderChaosOnline({status:'ready',room:{...room,seat:0,hand:[],legal:[]}});
+ assert.doesNotMatch(hidden,/Roadside help/,'opponent private card stays hidden');
+});
+test('Room chat escapes player markup, supports local mute and server URL allowlist',async()=>{
+ const room={...game,chat:[{id:'30000000-0000-4000-8000-000000000003',seat:0,text:'<img src=x onerror=alert(1)>',at:'2026-11-21T22:00:00Z'}]};
+ const html=renderChaosOnline({status:'ready',room});
+ assert.match(html,/&lt;img src=x onerror=alert\(1\)&gt;/);
+ assert.doesNotMatch(html,/<img src=x onerror/);
+ assert.doesNotMatch(renderChaosOnline({status:'ready',room,mutedSeats:[0]}),/&lt;img src=x/);
+ const seen=[],client=new ChaosRoomsClient({fetchImpl:async(url,opts)=>{
+  seen.push({url,opts});return new Response(JSON.stringify({room}),{status:200});
+ }});
+ client.emit({status:'ready',room,rooms:[],selectedCard:0,chatOpen:false,mutedSeats:[],unreadChat:0});
+ await client.sendChat('just a friendly hello');
+ assert.equal(seen[0].url,'/social-api/v1/chaos/rooms/'+id+'/chat');
+ assert.equal(seen[0].opts.credentials,'same-origin');
+ assert.deepEqual(JSON.parse(seen[0].opts.body),{text:'just a friendly hello'});
+ client.toggleMute(0);
+ assert.deepEqual(client.state.mutedSeats,[0]);
+});

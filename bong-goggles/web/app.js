@@ -271,21 +271,41 @@ function bindChaosOnline(){
  root.querySelector('[data-chaos-online-join]')?.addEventListener('submit',event=>{
   event.preventDefault();void chaosOnline.mutate('join',{code:String(new FormData(event.currentTarget).get('code')||'').trim()}).catch(()=>{});
  });
+ root.querySelector('[data-chaos-online-chat]')?.addEventListener('submit',event=>{
+  event.preventDefault();const input=event.currentTarget.elements.namedItem('text');
+  const text=input?.value?.trim();if(!text)return;
+  input.value='';void chaosOnline.sendChat(text).catch(()=>{
+   const current=root.querySelector('[data-chaos-online-chat] textarea');
+   if(current&&!current.value)current.value=text;
+  });
+ });
+ for(const b of root.querySelectorAll('[data-chaos-online-select]'))b.addEventListener('click',()=>chaosOnline.selectCard(Number(b.dataset.chaosOnlineSelect)));
  for(const b of root.querySelectorAll('[data-chaos-online-action]'))b.addEventListener('click',()=>{
   const action=b.dataset.chaosOnlineAction;
-  if(action==='back'){chaosOnline.emit({...chaosOnline.state,room:null,error:null});void chaosOnline.refresh();return;}
+  if(action==='back'){chaosOnline.emit({...chaosOnline.state,room:null,error:null,unreadChat:0,chatError:null});void chaosOnline.refresh();return;}
+  if(action==='chat-toggle'){chaosOnline.toggleChat();return;}
+  if(action==='mute'){chaosOnline.toggleMute(Number(b.dataset.seat));return;}
   if(action==='refresh'){void chaosOnline.refresh();return;}
   if(action==='open'){void chaosOnline.open(b.dataset.room);return;}
   if(action==='move'){try{void chaosOnline.mutate('move',{move:JSON.parse(b.dataset.move)}).catch(()=>{});}catch{}return;}
   if(action==='start'||action==='next')void chaosOnline.mutate(action).catch(()=>{});
  });
 }
-function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
+function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;const existingInput=root.querySelector('[data-chaos-online-chat] textarea');const draft=existingInput?.value;
+ const focused=existingInput===document.activeElement;const selection=focused?[existingInput.selectionStart,existingInput.selectionEnd]:null;
+ const existingLog=root.querySelector('[data-chaos-chat-log]');
+ const scrolled=existingLog?{top:existingLog.scrollTop,nearBottom:existingLog.scrollHeight-existingLog.scrollTop-existingLog.clientHeight<36}:null;
+ root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
  accountMessagesState:accountExtras?.messages.state,accountGamesState:accountExtras?.games.state,
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
  accountMonetizationState:monetizationController?.state,
- accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo(),online:chaosOnline?.state});updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
+ accountMonetizationEnabled:runtimeConfig.features.accountMonetization===true,chaosGame,chaosRevealed,chaosError,chaosRepairCue,chaosEffects,chaosSaveInfo:saveChaosDisplayInfo(),online:chaosOnline?.state});
+ const nextInput=root.querySelector('[data-chaos-online-chat] textarea');
+ if(nextInput&&draft!==undefined){nextInput.value=draft;if(focused){nextInput.focus({preventScroll:true});if(selection)nextInput.setSelectionRange(...selection);}}
+ const nextLog=root.querySelector('[data-chaos-chat-log]');
+ if(nextLog)nextLog.scrollTop=!scrolled||scrolled.nearBottom?nextLog.scrollHeight:scrolled.top;
+ updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){

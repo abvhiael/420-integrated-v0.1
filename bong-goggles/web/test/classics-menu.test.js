@@ -60,7 +60,7 @@ test('BC-0.2 all 25 and legacy game detail pages survive direct loads without fa
  assert.match(cribbage,/data-game-screen="intro"/);
  assert.match(cribbage,/leaf-board\.svg/);
  assert.match(cribbage,/BC-1\.4 · Private session interface/);
- assert.match(cribbage,/public Play remain gated/);
+ assert.match(cribbage,/not yet playable until real 420ID room activation/);
  assert.doesNotMatch(cribbage,/<button[^>]*>Start game/);
  assert.match(renderClassicGamePage('yahtzee'),/1, 2, 3 or 6 rows/);
  assert.match(renderClassicGamePage('scrabble'),/rights must be resolved/);

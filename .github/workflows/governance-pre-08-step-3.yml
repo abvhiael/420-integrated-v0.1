@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: gov-pre-08-step3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   materialize-replay-recover:
     runs-on: ubuntu-latest

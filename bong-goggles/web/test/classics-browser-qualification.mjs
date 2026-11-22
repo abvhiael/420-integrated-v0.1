@@ -79,7 +79,7 @@ try{
   runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}
  }));
  const blocking=violations.violations.filter(v=>['critical','serious'].includes(v.impact));
- assert.deepEqual(blocking.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length})),[]);
+ assert.deepEqual(blocking.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.map(n=>({target:n.target,html:n.html,summary:n.failureSummary?.slice(0,440)}))})),[]);
  const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
  await mobile.route(/^https:\/\//,route=>route.abort('blockedbyclient'));
  const mp=await mobile.newPage();

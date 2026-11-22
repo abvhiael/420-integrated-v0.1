@@ -18,7 +18,7 @@ test('PostgreSQL room row locks, two account privacy, restart, block and stale m
  await pool.query('CREATE TABLE IF NOT EXISTS bg_account_social.blocks(blocker uuid NOT NULL,blocked uuid NOT NULL,PRIMARY KEY(blocker,blocked))');
  await pool.query('TRUNCATE bg_account_social.blocks');
  await pool.query('INSERT INTO bg_account_social.members(subject) VALUES($1),($2),($3) ON CONFLICT DO NOTHING',[host,peer,outsider]);
- const schema=await readFile(resolve(import.meta.dirname,'../../bong-goggles-account-social/migrations/004_chaos_multiplayer.sql'),'utf8');
+ const schema=await readFile(resolve(import.meta.dirname,'../../bong-goggles-account-social/migrations/007_chaos_multiplayer.sql'),'utf8');
  await pool.query(schema);
  const r=new PostgresRooms(pool);
  const room=makeRoom(host,'Alice',{humanSeats:2,bots:[]});

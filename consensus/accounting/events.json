@@ -562,5 +562,26 @@
         "Indexed": false
       }
     ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000426",
+    "Name": "TreasuryTransfer",
+    "Inputs": [
+      {
+        "Name": "to",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "reason",
+        "Type": "bytes32",
+        "Indexed": true
+      }
+    ]
   }
 ]

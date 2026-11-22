@@ -8,6 +8,7 @@ import (
  "errors"
  "net/http"
  "strings"
+ "sync"
  "testing"
 )
 func bc10Presence(t *testing.T,h *Handler,id string,who *http.Cookie,renew bool)(int,ClassicPresenceView){
@@ -35,6 +36,14 @@ func TestBC10ParticipantPresenceLeaseMultiDeviceRestartAndBlock(t *testing.T){
   v.Seats[1].Online||v.LeaseSeconds!=20{t.Fatal("host presence",status,v)}
  if status,v:=bc10Presence(t,h,room.ID,b,true);status!=200||
   !v.Seats[0].Online||!v.Seats[1].Online{t.Fatal("two-account presence",status,v)}
+ // Independent devices for the same 420ID member renew one account lease.
+ var wg sync.WaitGroup
+ codes:=make(chan int,8)
+ for i:=0;i<8;i++{wg.Add(1);go func(){defer wg.Done()
+  codes<-request(h,"POST","/v1/classic-rooms/"+room.ID+"/presence","{}",a).Code
+ }()}
+ wg.Wait();close(codes)
+ for code:=range codes{if code!=200{t.Fatal("concurrent heartbeat rejected",code)}}
  if w:=request(h,"POST","/v1/classic-rooms/"+room.ID+"/presence",
   body(map[string]any{"subject":memberB,"online":true}),a);w.Code!=400{t.Fatal("spoof accepted",w.Code)}
  _,e:=store.DB.ExecContext(context.Background(),

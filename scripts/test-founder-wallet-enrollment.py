@@ -164,8 +164,8 @@ def test_adversarial():
         wrong = copy.deepcopy(proofs)
         wrong["founders"][1]["method"] = "EIP1271_CODEBOUND"
         wrong["founders"][1]["expected_runtime_code_hash"] = "0x" + "12"*32
-        check_rejected("contract signature faked with EOA", lambda: e.attest(root, wrong),
-                       "RPC")
+        check_rejected("method cannot mutate after founder challenge",
+                       lambda: e.attest(root, wrong), "method changed")
         for bad in (accounts[0].address, "0x0000000000000000000000000000000000000425"):
             duplicate = copy.deepcopy(plan)
             duplicate["founders"][1]["wallet_address"] = bad
@@ -285,6 +285,7 @@ def test_codebound_1271():
         integration = v.load(root, e.INTEGRATION)
         integration["genesis"]["networkGenesisBlockHash"] = GENESIS
         (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\\n")
+        check_rejected("no contract-signature RPC", lambda: e.attest(root, proofs), "RPC")
         state = {"genesis": GENESIS, "claim_block": "0x" + "ef"*32,
                  "code": bytecode, "plan": proofs["genesis_plan_commitment"],
                  "wallet_ints": [int(a.address,16) for a in accounts],

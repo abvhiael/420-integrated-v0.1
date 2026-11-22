@@ -1,9 +1,11 @@
 # BC-0.12 — Classics shared test and release qualification
 
 **Status:** QUALIFIED — shared repository test/release infrastructure (no individual game release).
-**Qualified exact-source SHA:** `60ff57c24ba4ee17a146bf694dc342748ba03826` (2026-11-22 UTC).
+**Qualified exact-source SHA:** `836e8fa4c3ae54cd8e7b793aca9eb555feb1b64f` (2026-11-22 UTC).
 
-**Required [BC-0.12 exact-source workflow #44984633921](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44984633921) — SUCCESS, all three jobs:**
+**Additional attestation hardening:** release run metadata must match the exact game's `game_id`, `rules_hash` and `main` branch. The final-source unit/property suite includes negative cross-game, different-ruleset and non-main workflow proofs.
+
+**Required [BC-0.12 exact-source workflow #44985051985](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44985051985) — SUCCESS, all three jobs:**
 
 - `unit-property-ui` — **30/30 targeted Node tests**, property/fixture release-denial and 25 title/8-screen route smoke; audit yields `{"count":25,"released":0,"locked":25}`.
 - `server-integration-ai-recovery` — PostgreSQL 16 `go test -race`, 420ID account and 12 concurrent retry fixture, deterministically scored terminal match and cold restart, all Easy/Medium/Hard test-only bots, Go vet and service build; SUCCESS.
@@ -68,6 +70,8 @@ browser reload/recovery, authoritative terminal result, distinct private
 seat projections and completed real Easy/Medium/Hard bot games. Any missing
 adapter, authentication, private view, playable engine, production
 deployment or credentials fails closed; **BC-0 supplies no such adapters**.
+
+The manual workflow also requires `rules_hash` as an input; midpoint, reload and terminal server session `gameId`/`rulesHash` must exactly match the dispatched title and rules. The release verifier independently checks successful live GitHub Actions metadata for `inputs.game_id`, `inputs.rules_hash`, `head_branch=main` and the deployed source SHA; a valid run for one title cannot qualify a different one.
 
 The retained receipt contains only game ID, exact source SHA and GitHub run ID.
 No session cookie, concealed hand, 420ID subject or personal access token

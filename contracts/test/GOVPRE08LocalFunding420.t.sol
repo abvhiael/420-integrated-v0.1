@@ -86,7 +86,6 @@ contract GOVPRE08LocalFunding420Test is GOVPRE08LocalDeployment420Test {
     FounderVestingRegistry private vesting;
     RewardController private reward;
 
-    event log_bytes32(bytes32 digest);
 
     function setUp() public override {
         super.setUp();
@@ -250,6 +249,7 @@ contract GOVPRE08LocalFunding420Test is GOVPRE08LocalDeployment420Test {
         require(!ok, "reserve overspent");
         require(PROTOCOL.balance == REMAINING && address(opsVault).balance == OPS_ALLOCATION,
                 "rejected transfer changed custody");
+        vm.prank(ADMIN);
         (ok,) = VESTING.call{value: 1 ether}("");
         require(!ok, "vesting accepted post-genesis funding");
         require(_sumNativeTracked() == TOTAL, "rejected transfer minted or lost currency");

@@ -75,10 +75,11 @@ test('BC-0.3 opponent setup exposes seat types and all bot difficulties but cann
  assert.match(renderClassicGamePage('chess',{screen:'setup'}),/Seat 2/);
  assert.doesNotMatch(renderClassicGamePage('chess',{screen:'setup'}),/Seat 3/);
 });
-test('BC-0.3 local Chaos launches only its existing approved game, not a fake service',()=>{
- const local=renderClassicGamePage('cross-country-chaos',{screen:'play'});
- assert.match(local,/href="\/classics\/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos \(local\)/);
- assert.match(local,/save|resume|pass-and-play/i);
+test('BC-0.3 Chaos launches separate 420ID account rooms instead of local pass-and-play',()=>{
+ const game=renderClassicGamePage('cross-country-chaos',{screen:'play'});
+ assert.match(game,/href="\/classics\/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos<\/a>/);
+ assert.match(game,/Separate 420ID accounts|private room/i);
+ assert.doesNotMatch(game,/Play Cross-Country Chaos \(local\)|pass-and-play/i);
  const planned=renderClassicGamePage('cribbage',{screen:'play'});
  assert.match(planned,/disabled aria-disabled="true"/);
  assert.match(planned,/Resume game/);

@@ -6,11 +6,13 @@ import {
   GOVERNANCE420_SUPPORT,
 } from './core/governance-management.js';
 import { InjectedProvider420 } from './core/provider.js';
+import {guardWallet420IDProvider,verifyWallet420IDSession,wallet420IDSessionState} from './420id-session-ui.mjs';
 
 let context=null;
 let selected=null;
 let busy=false;
-let lifecycleBound=false;
+let lifecycleDetach=[];
+let wallet420IDBound=false;
 let eligibleVote=null;
 let sessionEpoch=0;
 const $=(selector)=>document.querySelector(selector);
@@ -182,7 +184,10 @@ async function connect(){
   const epoch=sessionEpoch;
   if(!globalThis.ethereum)throw new Error('No injected EIP-1193 wallet found');
   const config=await loadRuntime();
-  const provider=new InjectedProvider420(globalThis.ethereum);
+  // 420ID is only the first-party application session: it supplies no
+  // wallet address, signature, gas, voting weight or on-chain rights.
+  await verifyWallet420IDSession();
+  const provider=guardWallet420IDProvider(new InjectedProvider420(globalThis.ethereum));
   let accounts=await provider.request('eth_accounts');
   if(!Array.isArray(accounts)||!accounts.length)accounts=await provider.requestAccounts();
   if(!Array.isArray(accounts)||!accounts.length)throw new Error('No account authorized for 420 Governance');
@@ -190,13 +195,17 @@ async function connect(){
   const indexer=createGovernanceIndexer420({baseUrl:config.governance.indexerUrl});
   const client=createGovernance420Client({provider,chainId:config.network.chainId,account,discovery:config.governance.discovery,indexer});
   await client.verifySession();
+  await verifyWallet420IDSession();
   if(epoch!==sessionEpoch)throw new Error('Governance account changed during connection');
   context=Object.freeze({config,provider,account,client});
-  if(!lifecycleBound){
-    provider.on('accountsChanged',()=>invalidate('The connected wallet account changed.'));
-    provider.on('chainChanged',()=>invalidate('The connected wallet network changed.'));
-    lifecycleBound=true;
-  }
+  for(const detach of lifecycleDetach)detach();
+  lifecycleDetach=[];
+  const onAccountsChanged=()=>invalidate('The connected wallet account changed.');
+  const onChainChanged=()=>invalidate('The connected wallet network changed.');
+  const onDisconnected=()=>invalidate('The wallet provider disconnected.');
+  if(provider.on('accountsChanged',onAccountsChanged))lifecycleDetach.push(()=>provider.removeListener('accountsChanged',onAccountsChanged));
+  if(provider.on('chainChanged',onChainChanged))lifecycleDetach.push(()=>provider.removeListener('chainChanged',onChainChanged));
+  if(provider.on('disconnect',onDisconnected))lifecycleDetach.push(()=>provider.removeListener('disconnect',onDisconnected));
   $('#governance-account').textContent=account;
   $('#governance-governor').textContent=client.modules.governor;
   $('#governance-network').textContent=config.network.name||config.network.chainId;
@@ -220,6 +229,7 @@ async function checkEligibility(){
   eligibleVote=null;
   const requestContext=context, proposalId=selected.proposalId, epoch=sessionEpoch;
   const house=Number($('#governance-house').value),proofData=$('#governance-proof').value.trim()||'0x';
+  await verifyWallet420IDSession();
   const result=await requestContext.client.eligibility(proposalId,house,proofData);
   if(context!==requestContext||epoch!==sessionEpoch||selected?.proposalId!==proposalId||
       house!==Number($('#governance-house').value)||proofData!==($('#governance-proof').value.trim()||'0x')) {
@@ -236,13 +246,20 @@ async function checkEligibility(){
 async function submitVote(button){
   if(!selected)throw new Error('Select a Governance proposal first');
   const support=Number(button.dataset.governanceSupport),house=Number($('#governance-house').value),proofData=$('#governance-proof').value.trim()||'0x';
+  const identityGeneration=wallet420IDSessionState().generation;
+  const requestContext=context,requestEpoch=sessionEpoch;
   const eligibility=await checkEligibility();if(!eligibility.eligible)throw new Error('connected account is not eligible to vote');
   const label=GOVERNANCE420_SUPPORT[support];
   if(globalThis.confirm&&!globalThis.confirm(`Submit ${label} vote in the ${GOVERNANCE420_HOUSES[house]} house with weight ${eligibility.weight}? Wallet will revalidate before approval.`))return;
   setAppState('Submitting','pending');setTx('Preflighting vote','Simulating, estimating gas, and revalidating account/network/weight.','pending');
-  const submitted=await context.client.sendVote({proposalId:selected.proposalId,house,support,proofData});
+  if(requestContext!==context||requestEpoch!==sessionEpoch||identityGeneration!==wallet420IDSessionState().generation)
+    throw new Error('420ID session or connected wallet changed during vote review');
+  const submitted=await requestContext.client.sendVote({proposalId:selected.proposalId,house,support,proofData});
   setAppState('Submitted','pending');setTx('Vote submitted',`${submitted.txHash} · waiting for confirmation`,'pending');
-  const outcome=await context.client.confirmVote(submitted);
+  const outcome=await requestContext.client.confirmVote(submitted);
+  await verifyWallet420IDSession();
+  if(requestContext!==context||requestEpoch!==sessionEpoch||identityGeneration!==wallet420IDSessionState().generation)
+    throw new Error('420ID session or connected wallet changed during vote confirmation');
   if(outcome.state==='confirmed'){
     setAppState('Confirmed','passed');setTx('Vote confirmed',outcome.txHash,'passed');
     renderDetail(await context.client.proposal(selected.proposalId));await checkEligibility();
@@ -271,6 +288,10 @@ function reviewActions(){
   });
 }
 export function installGovernance420Ui(){
+  if(!wallet420IDBound&&typeof window!=='undefined'){
+    window.addEventListener('wallet420id:invalidated',()=>invalidate('The authenticated 420ID browser session changed or was revoked.'));
+    wallet420IDBound=true;
+  }
   if($('#governance-management-panel'))return;
   const main=document.querySelector('main.shell')||document.querySelector('main');if(!main)return;
   const anchor=$('#services-section')||$('#status');const wrapper=document.createElement('div');wrapper.innerHTML=governanceMarkup();

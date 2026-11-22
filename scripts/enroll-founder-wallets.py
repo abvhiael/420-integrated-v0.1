@@ -119,6 +119,17 @@ def stage(root, proposal):
         member["wallet_address"] = addrs[index]
         member["ownership_status"] = "UNCLAIMED"
         member["claim_tx"] = member["claim_block_hash"] = None
+        method = proposal["founders"][index].get("method", "EIP191_PERSONAL_SIGN")
+        require(method in ("EIP191_PERSONAL_SIGN", "EIP1271_CODEBOUND"),
+                "unsupported founder wallet signature method")
+        member["pre_genesis_proof"]["method"] = method
+        if method == "EIP1271_CODEBOUND":
+            codehash = proposal["founders"][index].get("expected_runtime_code_hash")
+            require(isinstance(codehash, str) and verify.HASH.fullmatch(codehash),
+                    "Smart Account requires approved runtime codehash in staging")
+            member["pre_genesis_proof"]["expected_runtime_code_hash"] = codehash
+        else:
+            member["pre_genesis_proof"].pop("expected_runtime_code_hash", None)
         member["pre_genesis_proof"]["signature"] = None
         member["pre_genesis_proof"]["genesis_plan_commitment"] = None
         member["pre_genesis_proof"]["verified_at"] = None
@@ -139,6 +150,28 @@ def stage(root, proposal):
     m["planned_genesis_hash"] = None
     m["status"] = "ADDRESSES_STAGED_AWAITING_APPROVED_V4_AND_THREE_SIGNATURES"
     return {RESERVATIONS: m, SYSTEM: s, MIRROR: c, LEDGER: l}
+
+
+def print_approved_challenges(root):
+    """Read-only three-role challenges AFTER V4 freeze and BEFORE any signatures."""
+    m = load(root, RESERVATIONS)
+    release = load(root, COMMIT)
+    require(release.get("status") == "FROZEN_V4",
+            "cannot sign or print challenges for unsigned V3/candidate Genesis")
+    require(all(f["wallet_address"] for f in m["founders"]),
+            "all three public founder wallets must be staged")
+    require(m.get("planned_genesis_hash") is None,
+            "stage/freeze challenge generation must precede signed enrollment")
+    m["planned_genesis_hash"] = release.get("genesisConfigHash")
+    verify.verify_v4(root, m)
+    unique_addresses(root, [
+        {"role": f["role"], "wallet_address": f["wallet_address"]}
+        for f in m["founders"]])
+    for founder in m["founders"]:
+        require(founder["pre_genesis_proof"]["signature"] is None,
+                "founding role already has a pre-Genesis signature")
+        print("\\n=== " + founder["role"] + " ===\\n" + verify.challenge(m, founder))
+    return len(m["founders"])
 
 
 def attest(root, proofs, rpc_url=None):
@@ -171,13 +204,16 @@ def attest(root, proofs, rpc_url=None):
         require(method in ("EIP191_PERSONAL_SIGN", "EIP1271_CODEBOUND"),
                 "unsupported signer type")
         proof = member["pre_genesis_proof"]
-        proof["method"] = method
+        require(proof["method"] == method, "method changed after founder challenge generation")
         proof["signature"] = entry.get("signature")
         proof["genesis_plan_commitment"] = proof_hash
         if method == "EIP1271_CODEBOUND":
-            proof["expected_runtime_code_hash"] = entry.get("expected_runtime_code_hash")
+            require(proof.get("expected_runtime_code_hash") ==
+                    entry.get("expected_runtime_code_hash"),
+                    "EIP-1271 runtime hash differs from signed challenge")
         else:
-            proof.pop("expected_runtime_code_hash", None)
+            require(entry.get("expected_runtime_code_hash") is None,
+                    "EOA identity cannot inherit unrelated contract proof")
         proof["verified_at"] = stamp
         member["ownership_status"] = "PREGENESIS_SIGNATURE_VERIFIED"
     if any(e.get("method") == "EIP1271_CODEBOUND" for e in entries):
@@ -284,12 +320,16 @@ def main():
     group.add_argument("--stage", type=Path, help="public founder addresses/chain proposal")
     group.add_argument("--attest", type=Path, help="three signed owner proofs against approved V4")
     group.add_argument("--record-claims", type=Path, help="finalized claim transactions and runtime")
+    group.add_argument("--challenges", action="store_true", help="print approved-V4 challenges (read-only)")
     arg.add_argument("--root", type=Path, default=ROOT)
     arg.add_argument("--rpc-url", help="required for Smart Account EIP-1271 or live claims")
     arg.add_argument("--dry-run", action="store_true", help="validate proposal and print changed paths")
     opts = arg.parse_args()
     try:
         root = opts.root.resolve()
+        if opts.challenges:
+            print_approved_challenges(root)
+            return
         if opts.stage:
             changed = stage(root, json.loads(opts.stage.read_text(encoding="utf-8")))
         elif opts.attest:

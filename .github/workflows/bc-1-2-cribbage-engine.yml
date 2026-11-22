@@ -28,13 +28,7 @@ jobs:
       - name: Normalize Go formatting for compile and race qualification
         run: gofmt -w services/bong-goggles-account-social/classic_cribbage.go services/bong-goggles-account-social/classic_cribbage_test.go
       - name: Focused race-qualified 2/3/4-player Cribbage engine and replay
-        run: go test -race -count=1 -timeout=8m -run '^TestBC12(ManifestLockAndVariants|HandScoringCanonicalFixtures|PeggingRules|PrivateProjectionAndIllegalCommands|DeterministicFullMatchesAndReplay) -v ./services/bong-goggles-account-social
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Frozen BC-1.1 rules specification regression
-        run: node --test bong-goggles/web/test/cribbage-rules-spec.test.js
- -v ./services/bong-goggles-account-social
+        run: go test -race -count=1 -timeout=8m -run '^TestBC12(ManifestLockAndVariants|HandScoringCanonicalFixtures|PeggingRules|PrivateProjectionAndIllegalCommands|DeterministicFullMatchesAndReplay|ImmediateWinFromHeelsAndThirtyOne)$' -v ./services/bong-goggles-account-social
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

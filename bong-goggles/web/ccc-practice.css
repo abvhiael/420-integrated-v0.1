@@ -9,23 +9,24 @@
 .ccc-online--practice .ccc-online-middle .ccc-online-tables{min-width:0}
 .ccc-online--practice .ccc-online-hand{border:1px solid #b49a61;border-radius:8px;background:#16372a}
 .ccc-online--practice .ccc-online-stage{padding:6px 10px}
-.ccc-online--practice .ccc-online-hand-content{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(155px,185px);gap:8px;min-height:0;flex:1}
-.ccc-online--practice .ccc-practice-card-list{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0;min-height:0;overflow-x:auto;overflow-y:auto;align-items:stretch}
+.ccc-online--practice .ccc-online-hand-content{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(215px,245px);gap:10px;min-height:255px;flex:1}
+.ccc-online--practice .ccc-practice-card-list{display:grid;grid-template-columns:repeat(7,minmax(105px,1fr));gap:8px;min-width:0;min-height:245px;overflow-x:auto;overflow-y:hidden;align-items:stretch}
 .ccc-online--practice .ccc-practice-hand-card{display:flex;flex-direction:column;min-width:0;min-height:0;border-radius:6px;border:1px solid #8ea083;background:#224536}
 .ccc-online--practice .ccc-practice-card-radio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select{display:flex;flex:1;min-width:0;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:0;padding:3px;color:#fff0c8!important;border:2px solid transparent!important;border-radius:5px;cursor:pointer;text-align:center}
-.ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-width:100%;max-height:118px;min-height:0;height:auto;object-fit:contain}
-.ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select strong{font-size:.66rem;line-height:1.1;overflow-wrap:anywhere}
+.ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-width:100%;max-height:195px;min-height:0;height:auto;object-fit:contain}
+.ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select strong{font-size:.88rem;line-height:1.2;overflow-wrap:anywhere}
 .ccc-online--practice .ccc-practice-card-radio:checked+.ccc-online-card-select{border-color:#ffda88!important;background:#405b3c!important;box-shadow:inset 0 0 0 1px #fff0c5}
 .ccc-online--practice .ccc-practice-card-radio:focus-visible+.ccc-online-card-select{outline:3px solid #fff1ba;outline-offset:-3px}
-.ccc-online--practice .ccc-practice-card-actions{display:none;position:absolute;right:0;top:0;width:185px;max-width:100%;height:100%;overflow-y:auto;padding:5px;border-radius:6px;background:#1d4031;border:1px solid #a88e58;flex-direction:column;gap:4px}
+.ccc-online--practice .ccc-practice-card-actions{display:none;position:absolute;right:0;top:0;width:245px;max-width:100%;height:100%;overflow-y:auto;padding:10px;border-radius:6px;background:#1d4031;border:1px solid #a88e58;flex-direction:column;gap:8px}
 .ccc-online--practice .ccc-practice-card-radio:checked~.ccc-practice-card-actions{display:flex}
-.ccc-online--practice .ccc-practice-card-actions h4{font-size:.8rem;color:#ffe2a4;margin:1px 0 4px}
-.ccc-online--practice .ccc-practice-card-actions small{font-size:.74rem;color:#f1e6c8}
+.ccc-online--practice .ccc-practice-card-actions h4{font-size:1.05rem;color:#ffe2a4;margin:1px 0 4px}
+.ccc-online--practice .ccc-practice-card-actions small{font-size:.88rem;color:#f1e6c8}
+.ccc-online--practice .ccc-online-card-help{font-size:.95rem;line-height:1.4;color:#f8e9c8;margin:2px 0 8px}
 .ccc-online--practice .ccc-practice-card-actions form{display:flex;flex-direction:column;gap:5px}
-.ccc-online--practice .ccc-practice-card-actions button{min-height:36px;font-size:.75rem;padding:5px}
+.ccc-online--practice .ccc-practice-card-actions button{min-height:44px;font-size:.9rem;padding:7px}
 .ccc-online--practice .ccc-practice-card-actions select{max-width:100%;color:#193627;background:#fff3dc}
-.ccc-online--practice .ccc-practice-card-actions label{font-size:.72rem;display:flex;gap:4px;flex-wrap:wrap}
+.ccc-online--practice .ccc-practice-card-actions label{font-size:.9rem;display:flex;gap:4px;flex-wrap:wrap}
 .ccc-online--practice .ccc-practice-hint{font-size:.73rem;color:#f0dfb4;line-height:1.25;margin:0}
 .ccc-online--practice .ccc-online-decks .ccc-practice-hint{margin:5px 0}
 .ccc-online--practice .ccc-practice-privacy{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;flex:1;min-height:0;border:1px dashed #bba071;border-radius:7px}
@@ -41,25 +42,25 @@
 .ccc-online--practice .ccc-practice-final{position:absolute;bottom:7px;left:12px;background:#82301f;color:#ffedcd;border:2px solid #f2cc85;border-radius:6px;padding:4px 8px;z-index:4;font-size:.75rem}
 .ccc-online--practice .ccc-online-card-select{user-select:none}
 @media(max-width:1120px){
- .ccc-online--practice .ccc-practice-card-list{grid-template-columns:repeat(7,minmax(70px,1fr))}
- .ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-height:90px}
+ .ccc-online--practice .ccc-practice-card-list{grid-template-columns:repeat(7,minmax(105px,1fr))}
+ .ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-height:180px}
 }
 @media(max-width:790px){
  .ccc-online--practice{height:auto;min-height:calc(100dvh - 85px);overflow:visible}
  .ccc-online--practice .ccc-online-game{display:flex;flex-direction:column;overflow:visible}
  .ccc-online--practice .ccc-online-main{display:flex;flex-direction:column;overflow:visible}
  .ccc-online--practice .ccc-online-middle .ccc-online-tables{max-height:270px;overflow-y:auto}
- .ccc-online--practice .ccc-practice-card-list{min-height:155px}
- .ccc-online--practice .ccc-practice-hand{min-height:205px}
+ .ccc-online--practice .ccc-practice-card-list{min-height:245px}
+ .ccc-online--practice .ccc-practice-hand{min-height:295px}
  .ccc-online--practice .ccc-practice-radio{display:flex;position:static;width:auto;min-height:190px;max-height:280px}
  .ccc-online--practice .ccc-practice-final{position:static;margin:6px}
 }
 @media(max-width:480px){
  .ccc-online--practice .ccc-practice-hand-content{display:block}
- .ccc-online--practice .ccc-practice-card-list{display:flex;align-items:flex-start;overflow:visible;overflow-x:auto;min-height:195px;padding-bottom:150px}
- .ccc-online--practice .ccc-practice-hand-card{flex:0 0 76px;height:135px}
- .ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-height:93px}
- .ccc-online--practice .ccc-practice-card-actions{top:auto;bottom:0;left:0;right:0;width:100%;height:146px}
+ .ccc-online--practice .ccc-practice-card-list{display:flex;align-items:flex-start;overflow-x:auto;overflow-y:hidden;min-height:405px;padding-bottom:200px}
+ .ccc-online--practice .ccc-practice-hand-card{flex:0 0 118px;height:198px}
+ .ccc-online--practice .ccc-practice-hand-card .ccc-online-card-select img{max-height:162px}
+ .ccc-online--practice .ccc-practice-card-actions{top:auto;bottom:0;left:0;right:0;width:100%;height:195px}
  .ccc-online--practice .ccc-online-stage>span{display:none}
 }
 @media(forced-colors:active){

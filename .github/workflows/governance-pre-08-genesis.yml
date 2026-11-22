@@ -41,7 +41,7 @@ jobs:
       - name: Adversarial policy, identity and supply boundaries
         run: |
           set -euo pipefail
-          python3 -m py_compile scripts/gov-pre-08/plan.py scripts/gov-pre-08/test_plan.py scripts/gov-pre-08/materialize-local-funding.py scripts/gov-pre-08/test_funding.py
+          python3 -m py_compile scripts/gov-pre-08/plan.py scripts/gov-pre-08/test_plan.py scripts/gov-pre-08/materialize-local-funding.py scripts/gov-pre-08/test_funding.py scripts/gov-pre-08/materialize-local-vesting.py
           python3 scripts/gov-pre-08/test_plan.py
           python3 scripts/gov-pre-08/test_funding.py
           python3 scripts/verify-genesis-supply-reconciliation.py
@@ -64,6 +64,7 @@ jobs:
             src/treasury/TreasuryDisbursementRegistry420.sol \
             src/treasury/TreasuryRouter420.sol \
             src/treasury/TreasuryReleaseExecutor420.sol \
+            src/system/FounderVestingRegistry.sol \
             --extra-output storageLayout
       - name: Check reproducible V4 candidate, constructor ABIs, source blobs and missing live receipts
         run: |
@@ -156,6 +157,38 @@ jobs:
               json.dumps(proof,sort_keys=True,indent=2)+"\n")
           print("GOV-PRE-08_ANVIL_BALANCES=PASS; SYNTHETIC_31337_ONLY; RUNTIMES_NOT_DEPLOYED")
           PY
+      - name: Construct and materialize real vesting runtime/storage on funded 0x0427 (local fixture)
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-a.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18545 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-genesis.log" 2>&1 &
+          genesis_pid=$!
+          anvil --chain-id 31337 --accounts 1 --balance 0 --timestamp 1700000000 \
+            --host 127.0.0.1 --port 18546 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-constructor.log" 2>&1 &
+          constructor_pid=$!
+          trap 'kill "$genesis_pid" "$constructor_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18545 >/dev/null 2>&1 && \
+               cast chain-id --rpc-url http://127.0.0.1:18546 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 scripts/gov-pre-08/materialize-local-vesting.py \
+            --genesis-rpc http://127.0.0.1:18545 \
+            --constructor-rpc http://127.0.0.1:18546 \
+            --output "$RUNNER_TEMP/gov-pre-08-vesting-runtime.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-vesting-runtime.json").read_text())
+          assert x["realConstructorExecutedOnDisposableLocalChain"] is True
+          assert x["fixedLocalGenesisPredeploy"]=="0x0000000000000000000000000000000000000427"
+          assert x["nativeVestingBalanceWei"]==str(500_000*10**18)
+          assert not x["signedV4Approved"] and not x["founderWalletOwnershipVerified"]
+          assert not x["mainnetOrTestnetRuntimeVerified"] and not x["foundingTreasuryVaultsFunded"]
+          print("GOV-PRE-08_REAL_VESTING_STORAGE=PASS; UNOWNED_SYNTHETIC_ONLY")
+          PY
       - name: Preserve exact-head source candidate (never live receipts)
         if: always()
         uses: actions/upload-artifact@v4
@@ -169,4 +202,7 @@ jobs:
             ${{ runner.temp }}/gov-pre-08-local-a-proof.json
             ${{ runner.temp }}/gov-pre-08-local-anvil-evidence.json
             ${{ runner.temp }}/gov-pre-08-anvil.log
+            ${{ runner.temp }}/gov-pre-08-vesting-runtime.json
+            ${{ runner.temp }}/gov-pre-08-vesting-genesis.log
+            ${{ runner.temp }}/gov-pre-08-vesting-constructor.log
           if-no-files-found: warn

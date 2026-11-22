@@ -46,18 +46,18 @@ test('private local hand is revealed only after the single human elects to see i
  const game=session(['human','normal','hard']);
  const hidden=renderApplicationShell({pathname:practice,chaosGame:game,chaosRevealed:false});
  assert.match(hidden,/Pass the device to Tester/);
- assert.doesNotMatch(hidden,/ccc-hand-card|data-chaos-move=/);
+ assert.doesNotMatch(hidden,/ccc-practice-card-radio|data-chaos-move=/);
  const revealed=renderApplicationShell({pathname:practice,chaosGame:game,chaosRevealed:true});
- assert.match(revealed,/ccc-hand-card/);
+ assert.match(revealed,/ccc-practice-card-radio/);
  assert.match(revealed,/data-chaos-action="reveal"|data-chaos-action="pass"|data-chaos-move=/);
  const onlineHtml=renderApplicationShell({pathname:online,chaosGame:game,chaosRevealed:true,online:{status:'loading'}});
- assert.doesNotMatch(onlineHtml,/ccc-hand-card|data-chaos-move=|Pass the device/);
+ assert.doesNotMatch(onlineHtml,/ccc-practice-card-radio|data-chaos-move=|Pass the device/);
 });
 test('computer turn never shows its private hand and yields to local human legally',()=>{
  const game=session(['normal','hard','human']);
  const waiting=renderApplicationShell({pathname:practice,chaosGame:game,chaosRevealed:true});
- assert.match(waiting,/Computer driving/);
- assert.doesNotMatch(waiting,/ccc-hand-card|data-chaos-move=/);
+ assert.match(waiting,/COMPUTER TURN/);
+ assert.doesNotMatch(waiting,/ccc-practice-card-radio|data-chaos-move=/);
  const result=advanceChaosComputerTurns(game,{maxActions:96});
  assert.equal(result.pending,false);
  assert.equal(result.game.players[result.game.turn].controller,'human');

@@ -256,7 +256,7 @@ contract GovPre06Electorate420Test {
             Identity420(IDENTITY)
                 .issueCredential(
                     _credential(voter),
-                    compatibility.INITIAL_ELECTORATE_ISSUER(),
+                    keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/V1"),
                     _profile(voter),
                     houseType,
                     keccak256("independent-membership-attestation"),
@@ -485,7 +485,7 @@ contract GovPre06Electorate420Test {
         Identity420(IDENTITY)
             .issueCredential(
                 renewed,
-                compatibility.INITIAL_ELECTORATE_ISSUER(),
+                keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/V1"),
                 _profile(BOB),
                 keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"),
                 keccak256("renewal"),

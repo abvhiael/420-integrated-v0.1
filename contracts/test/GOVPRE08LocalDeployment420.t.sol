@@ -99,6 +99,7 @@ contract GOVPRE08LocalDeployment420Test {
     address[14] private components;
     string[14] private names;
     bytes32 public graphDigest;
+    event log_bytes32(bytes32);
 
     function setUp() public {
         vm.warp(1_900_000_000);
@@ -303,7 +304,8 @@ contract GOVPRE08LocalDeployment420Test {
         ));
     }
 
-    function testAllFourteenRealConstructorsAndRegistryReproducible() public view {
+    function testAllFourteenRealConstructorsAndRegistryReproducible() public {
+        emit log_bytes32(graphDigest);
         require(components.length == 14 && graphDigest == _graphHash(), "source graph drift");
         for (uint256 i; i < components.length; ++i) {
             address deployed = components[i];

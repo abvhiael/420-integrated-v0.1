@@ -493,17 +493,17 @@ Needs explicit testnet freeze, then mainnet review.
 
 ## 22. Exact genesis allocation
 
-Current concepts include:
+Current reconciled candidate, exactly **42,000,000 $420**:
 
-- founders/core contributors: 1,000,000
-- Community/Testnet Treasury: 8,400,000
-- Attention bootstrap
-- Development bootstrap
-- public/liquidity allocation
-- protocol reserve
-- validator/bootstrap state
+- Three founders (250k/125k/125k liquid, matching 500k aggregate vesting): **1,000,000**
+- Validator bootstrap reserve at 0x042e: **3,000,000**
+- Attention and Development bootstrap, 0x0421/0x0422: **4,200,000 each**
+- Community validator-credit reserve 0x0425: **6,300,000**
+- Community/testnet reward reserve 0x0426: **2,100,000** (the two community lines are the existing 8.4M, not another 8.4M)
+- Three public-distribution tranches at 0x042a: **12,600,000** (4.2M each)
+- Existing ProtocolReserve 0x0424: **8,600,000**, internally earmarked 4,200,000 Operations, 840,000 Contingency and 3,560,000 unearmarked.
 
-Need choose exact values summing to 42M.
+**Only the eight aggregated lines above are additive.** The two founding earmarks are *inside* 8.6M, not newly minted or already deposited in Treasury Vaults. Matched-validator capacity is limited to 300 × 21,000 from the 6.3M credit reserve, not 400 from the combined community 8.4M. Exact arithmetic is checked by `scripts/verify-genesis-supply-reconciliation.py`. New Genesis V4 approval and actual funding remain separate release gates.
 
 ---
 
@@ -517,16 +517,7 @@ Janet: 250,000 $420 total (125,000 liquid; 125,000 locked).
 Locked tokens release over 13 installments, one every 14 days, ending at day 182.
 A new signed Genesis configuration commitment is required before materialization.
 
-Need:
-
-- cliff;
-- vesting duration;
-- linear/step vesting;
-- departure treatment;
-- destination of unvested allocation.
-
-Recommended candidate:
-**6-month cliff + 30-month linear vesting**, total 36 months.
+The historical 6-month-cliff/30-month-linear alternative is superseded by the adopted 13-step 14-day schedule. Lost-key recovery, succession and disposition after departure remain separate unresolved constitutional policies; they do not change the three allocations or permit discretionary capture.
 
 ---
 

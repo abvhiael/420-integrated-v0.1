@@ -209,7 +209,7 @@ export function renderCribbageRoute({screen='intro',state=null,accountPanel=''}=
    renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
     pegs:s.pegs,settings:s.settings})+'</div>':zero+generic('results'):
   screen==='history'||screen==='rematch'?generic(screen):home;
- return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · Cribbage interface qualified in source only. Real 420ID room activation and public Play remain gated.</p>'+details+settings(s)+
+ return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · The interface is implemented, but the live game is not yet playable until real 420ID room activation and the remaining release gates qualify.</p>'+details+settings(s)+
   '<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
 }
 // Event handlers bind only data-attribute choices and submit through the

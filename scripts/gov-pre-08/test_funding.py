@@ -13,7 +13,7 @@ class LocalFundingQualification(unittest.TestCase):
     def test_exact_native_conservation_and_founder_split(self):
         genesis, evidence=local.make_local(ROOT)
         self.assertEqual(genesis["config"]["chainId"],31337)
-        self.assertEqual(int(genesis["timestamp"],16),1700000000)
+        self.assertEqual(int(genesis["timestamp"],16),1900000000)
         self.assertEqual(sum(int(a["balance"]) for a in genesis["alloc"].values()),42000000*local.plan.KIEF)
         self.assertEqual(int(genesis["alloc"]["0x0000000000000000000000000000000000000427"]["balance"]),500000*local.plan.KIEF)
         for idx,entry in enumerate(evidence["localWallets"]):

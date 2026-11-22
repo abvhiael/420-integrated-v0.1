@@ -42,6 +42,7 @@ func keys() (rec.Trust, []*bls.SecretKey) {
 }
 func main() {
 	protectedDir := flag.String("provision-protected", "", "LOCAL ONLY: initialize fixture signer policy and validator history")
+	committeeDir := flag.String("provision-protected-committee", "", "LOCAL ONLY: 15 independent public test-only signing identities")
 	protectedConfig := flag.String("protected-config", "", "require production protected seat-zero vote, never fall back")
 	genesis := flag.String("genesis", "", "execution genesis hash for local fixture")
 	timestamp := flag.String("timestamp", "0x0", "genesis timestamp")
@@ -50,6 +51,10 @@ func main() {
 	flag.Parse()
 	if *protectedDir != "" {
 		provisionProtected(*protectedDir)
+		return
+	}
+	if *committeeDir != "" {
+		provisionProtectedCommittee(*committeeDir,*genesis,*timestamp)
 		return
 	}
 	t, keys := keys()

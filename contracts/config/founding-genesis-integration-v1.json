@@ -15,7 +15,11 @@
     "operationsVaultId": null,
     "contingencyVaultId": null,
     "communityVaultId": null,
-    "allThreeFunded": false
+    "allThreeFunded": false,
+    "fundingSourceAllocationId": "protocol-reserve",
+    "fundingSourcePredeploy": "0x0000000000000000000000000000000000000424",
+    "unearmarkedProtocolReserveTokens": "3560000",
+    "ledgerEarmarksReconciled": true
   },
   "founderWallets": {
     "manifest": "contracts/config/founder-wallet-reservations.json",

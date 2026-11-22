@@ -25,7 +25,7 @@ export function renderGameCatalogue({accountIdentityState=null,accountIdentityEn
 export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageState=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
  const game=classicGameById(gameId);
  if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
- if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState});
+ if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState,accountPanel:renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})});
  const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
  const playLink=game.status==='account'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos online</a> <a class="ccc-link" href="/classics/cross-country-chaos/practice" data-route="chaos-game">Play against computers</a>':'';
  const status=game.status==='account'?'Online multiplayer — separate 420ID accounts':statusText(game);

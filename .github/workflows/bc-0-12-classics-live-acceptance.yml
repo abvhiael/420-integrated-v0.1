@@ -1,0 +1,59 @@
+name: BC-0.12 Live Classics Acceptance
+on:
+  workflow_dispatch:
+    inputs:
+      game_id:
+        description: 'Exact canonical BC-1..BC-25 game ID; requires real game adapter and two authorized 420ID accounts'
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: bc12-live-${{ inputs.game_id }}
+  cancel-in-progress: false
+jobs:
+  verify-live-two-account-match:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    # Production tests must never be triggered by a PR or scheduled job.
+    env:
+      BC12_GAME_ID: ${{ inputs.game_id }}
+      BC12_EXPECTED_SHA: ${{ github.sha }}
+      BC12_ACCOUNT_A_COOKIE: ${{ secrets.BC12_ACCOUNT_A_COOKIE }}
+      BC12_ACCOUNT_B_COOKIE: ${{ secrets.BC12_ACCOUNT_B_COOKIE }}
+    steps:
+      - name: Require main, real credentials and production-only dispatch
+        env:
+          REF_NAME: ${{ github.ref }}
+        run: |
+          test "$REF_NAME" = 'refs/heads/main'
+          test -n "$BC12_ACCOUNT_A_COOKIE"
+          test -n "$BC12_ACCOUNT_B_COOKIE"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify exact source
+        run: test "$(git rev-parse HEAD)" = "$BC12_EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated pinned test-only Chromium
+        working-directory: bong-goggles/web
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify separate 420ID accounts, real server completion, recovery and AI tiers
+        working-directory: bong-goggles/web
+        run: node test/classics-live-acceptance.mjs
+      - name: Retain exact-head non-secret acceptance metadata
+        if: success()
+        run: |
+          printf 'game=%s\nsha=%s\nrun=%s\n' "$BC12_GAME_ID" "$BC12_EXPECTED_SHA" "$GITHUB_RUN_ID" > bc12-live-receipt.txt
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: bc12-live-attestation-${{ inputs.game_id }}
+          path: bc12-live-receipt.txt
+          retention-days: 90

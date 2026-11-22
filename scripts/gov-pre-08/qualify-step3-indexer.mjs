@@ -108,10 +108,10 @@ need(relevant.length>=20,'actual 14-graph log source has too few supported event
 const decoded=relevant.map(x=>decoders.decode(x));
 need(decoded.every(x=>x!==null),'deployed log source unexpectedly undecodable');
 const byEvent=(name)=>decoded.filter(x=>x.eventName===name);
-need(byEvent('ComponentRegistered').length===14,
-     'actual ProtocolRegistry did not register exactly 14 source-bound components');
-need(byEvent('ServiceVersionPublished').length===3,
-     'real canonical Registry did not publish exactly three services');
+need(byEvent('ComponentRegistered').length===20,
+     'actual ProtocolRegistry did not register 14 local sources plus six canonical Wallet consumer IDs');
+need(byEvent('ServiceVersionPublished').length===4,
+     'real canonical Registry did not publish exactly four services');
 need(byEvent('FounderWalletClaimed').length===3,
      'actual 31337 founder claims failed log qualification');
 need(byEvent('BudgetCreated').length===2,

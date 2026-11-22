@@ -32,41 +32,55 @@ contract FoundingCommitteeMembership420 {
     event RetirementAuthorityBound(address indexed authority);
     event CommitteeQualifiedSince(uint64 qualifiedSince, uint256 members);
 
-    constructor(address administrator_, address andrew_, address janet_, address timelock_) {
-        if (administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0)
-            || administrator_ == andrew_ || administrator_ == janet_
-            || andrew_ == janet_ || timelock_.code.length == 0) revert InvalidCandidate();
+    constructor(
+        address administrator_,
+        address andrew_,
+        address janet_,
+        address timelock_
+    ) {
+        if (
+            administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0) || administrator_ == andrew_
+                || administrator_ == janet_ || andrew_ == janet_ || timelock_.code.length == 0
+        ) revert InvalidCandidate();
         foundingAdministrator = administrator_;
         andrew = andrew_;
         janet = janet_;
         governanceTimelock = timelock_;
     }
 
-    function isFoundingSeat(address wallet) public view returns (bool) {
+    function isFoundingSeat(
+        address wallet
+    ) public view returns (bool) {
         return wallet == foundingAdministrator || wallet == andrew || wallet == janet;
     }
 
     /// @notice One-shot Timelock installation to link the actual retired flag.
     /// Before binding, founding membership mutations are disabled.
-    function bindRetirementAuthority(address authority) external {
-        if (msg.sender != governanceTimelock || retirementAuthority != address(0)
-            || authority.code.length == 0) revert Unauthorized();
-        (bool ok, bytes memory data) = authority.staticcall(
-            abi.encodeWithSignature("foundingAdministrator()")
-        );
+    function bindRetirementAuthority(
+        address authority
+    ) external {
+        if (msg.sender != governanceTimelock || retirementAuthority != address(0) || authority.code.length == 0) {
+            revert Unauthorized();
+        }
+        (bool ok, bytes memory data) = authority.staticcall(abi.encodeWithSignature("foundingAdministrator()"));
         if (!ok || data.length != 32 || abi.decode(data, (address)) != foundingAdministrator) revert Unauthorized();
         retirementAuthority = authority;
         emit RetirementAuthorityBound(authority);
     }
 
-    function nominate(bytes32 evidence) external {
+    function nominate(
+        bytes32 evidence
+    ) external {
         if (evidence == bytes32(0)) revert InvalidEvidence();
         nominated[msg.sender] = true; // candidate signs from their own wallet
         nominationEvidence[msg.sender] = evidence;
         emit CandidateNominated(msg.sender, evidence);
     }
 
-    function appoint(address wallet, bytes32 evidence) external {
+    function appoint(
+        address wallet,
+        bytes32 evidence
+    ) external {
         _requireAuthority();
         if (!nominated[wallet]) revert NotNominated();
         if (wallet == address(0) || isMember[wallet]) revert InvalidCandidate();
@@ -77,7 +91,10 @@ contract FoundingCommitteeMembership420 {
         emit MemberAppointed(wallet, evidence, isFoundingSeat(wallet));
     }
 
-    function remove(address wallet, bytes32 evidence) external {
+    function remove(
+        address wallet,
+        bytes32 evidence
+    ) external {
         _requireAuthority();
         if (!isMember[wallet]) revert NotMember();
         if (evidence == bytes32(0)) revert InvalidEvidence();
@@ -94,8 +111,9 @@ contract FoundingCommitteeMembership420 {
         if (msg.sender == governanceTimelock) return;
         if (retirementAuthority == address(0)) revert RetirementAuthorityUnbound();
         (bool ok, bytes memory data) = retirementAuthority.staticcall(abi.encodeWithSignature("retired()"));
-        if (msg.sender != foundingAdministrator || !ok || data.length != 32
-            || abi.decode(data, (bool))) revert Unauthorized();
+        if (msg.sender != foundingAdministrator || !ok || data.length != 32 || abi.decode(data, (bool))) {
+            revert Unauthorized();
+        }
     }
 
     function _resetMembershipStableSince() private {

@@ -270,8 +270,8 @@
     },
     "Governance420": {
       "path": "contracts/artifacts/Governance420.json",
-      "runtimeCodeHash": "0x5e85c020c7429ef1b17e9b57c301b890ee2bd9f39b419df91540f946191951cd",
-      "sourceBlobSha1": "4a5adab3d41c4c1fe2d4dda9ff76d16d16c12b06"
+      "runtimeCodeHash": "0x617103b00f34e2d163801580b0feaa2f4eb53ff22c3e9a4438d834e6a2c9340a",
+      "sourceBlobSha1": "e7f3f4e822f9addf8373aade670f02edf5670072"
     },
     "CivicConstitution420": {
       "path": "contracts/artifacts/CivicConstitution420.json",
@@ -295,8 +295,8 @@
     },
     "CivicGovernor420": {
       "path": "contracts/artifacts/CivicGovernor420.json",
-      "runtimeCodeHash": "0x57be820bef64e66a587011f40484a8fdb4da7ced0ede0af999e9b1a704324a67",
-      "sourceBlobSha1": "6f9a19ca711fd9d0eb5bf7a879d0280c2f79ae12"
+      "runtimeCodeHash": "0x3c96fd6d2b96b77ceb7e1c021ee5e11d6db8274df89d4a8c738702809108a90d",
+      "sourceBlobSha1": "f53c12bc0ac416f6309733866f01b890b721fa93"
     },
     "CivicMerkleElectorateSource420": {
       "path": "contracts/artifacts/CivicMerkleElectorateSource420.json",
@@ -328,8 +328,10 @@
     "communityTotalWeight": 0,
     "validatorRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "validatorTotalWeight": 0,
-    "commitmentFormula": "Governance420.canonicalBootstrapPlanHash over BOOTSTRAP_DOMAIN, chainid, seven graph addresses, seven live extcodehashes, and two Genesis initial Merkle roots and weights",
+    "commitmentFormula": "Legacy: original chain-specific seven-component graph, codehashes and both Genesis roots/weights. Post-Genesis: distinct domain with same graph and chainid plus approved enrollment address, runtime codehash and electorate authority, with zero initial roots/weights.",
     "materialization": "Governance420@0x0437 fixed predeploy state only; no runtime setter",
-    "releaseRequirement": "Replace all five zero fields only with verified chain-specific approved graph and authentic community/active-validator owner electorate snapshot commitments; all-zero is fail-closed"
+    "releaseRequirement": "Approved legacy five fields or an independently approved post-Genesis plan hash plus actual enrollment contract and constitutional electorate authority; zero values remain fail-closed, never substitute synthetic voters.",
+    "enrollmentContract": "0x0000000000000000000000000000000000000000",
+    "electorateAuthority": "0x0000000000000000000000000000000000000000"
   }
 }

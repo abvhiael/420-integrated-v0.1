@@ -164,18 +164,21 @@ def main(argv=None):
 
     genesis_commitment = cfg.get("genesisBootstrapCommitment", {})
     initial_values = []
-    for key in ("approvedPlanHash", "communityRoot", "communityTotalWeight", "validatorRoot", "validatorTotalWeight"):
+    for key in ("approvedPlanHash", "communityRoot", "communityTotalWeight", "validatorRoot", "validatorTotalWeight", "enrollmentContract", "electorateAuthority"):
         value = genesis_commitment.get(key)
         if key.endswith("Weight"):
             valid = type(value) is int and 0 <= value < 2**256
             numeric = value if valid else 0
         else:
-            valid = isinstance(value, str) and re.fullmatch(r"0x[0-9a-fA-F]{64}", value) is not None
+            size = 40 if key in ("enrollmentContract", "electorateAuthority") else 64
+            valid = isinstance(value, str) and re.fullmatch(r"0x[0-9a-fA-F]{" + str(size) + "}", value) is not None
             numeric = int(value, 16) if valid else 0
         if not valid:
             errors.append("invalid Genesis bootstrap commitment: " + key)
         initial_values.append(numeric)
-    genesis_activation_ready = all(initial_values)
+    legacy = all(initial_values[:5]) and not any(initial_values[5:])
+    deferred = initial_values[0] != 0 and not any(initial_values[1:5]) and all(initial_values[5:])
+    genesis_activation_ready = bool(legacy or deferred)
     if any(initial_values) and not genesis_activation_ready:
         errors.append("partially initialized Genesis bootstrap commitment")
     if not genesis_activation_ready:

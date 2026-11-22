@@ -11,6 +11,23 @@ import "./CivicElectorateRegistry420.sol";
 import "./CivicVoting420.sol";
 import "./CivicGovernor420.sol";
 import "./CivicMerkleElectorateSource420.sol";
+import "./CivicInitialElectorateEnrollment420.sol";
+
+interface ICivicBootstrapIdentityIssuer420 {
+    function governanceTimelock() external view returns (address);
+    function protocolVersion() external view returns (uint32);
+    function setIssuer(
+        bytes32 issuerId,
+        address controller,
+        bytes32 metadataHash,
+        bool active
+    ) external;
+}
+
+interface ICivicBootstrapValidatorRegistry420 {
+    function governanceTimelock() external view returns (address);
+    function protocolVersion() external view returns (uint32);
+}
 
 interface IProtocolRegistryBootstrap420 {
     enum ComponentType {
@@ -110,6 +127,11 @@ contract Governance420 is SystemAccess, I420System {
     mapping(bytes32 => Proposal) public proposals;
 
     address public constant PROTOCOL_REGISTRY = 0x0000000000000000000000000000000000000434;
+    address public constant IDENTITY_420 = 0x0000000000000000000000000000000000000436;
+    address public constant VALIDATOR_REGISTRY_420 = 0x0000000000000000000000000000000000000423;
+    bytes32 public constant INITIAL_ELECTORATE_ISSUER = keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/V1");
+    bytes32 public constant INITIAL_ELECTORATE_ISSUER_METADATA =
+        keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/METADATA/V1");
     uint64 public constant ROTATION_BLOCKS = 17_640;
 
     bytes32 public constant COMMUNITY_COMPONENT_ID = keccak256("420/component/governance/civic-constitution/v1");
@@ -141,6 +163,17 @@ contract Governance420 is SystemAccess, I420System {
     bytes32 public initialValidatorRoot;
     uint256 public initialValidatorTotalWeight;
 
+    // Genesis-only approval; no setters. Nonzero only for the post-Genesis enrollment route.
+    address public approvedInitialEnrollment;
+    address public approvedInitialElectorateAuthority;
+    address public bootstrapCommunitySource;
+    address public bootstrapValidatorSource;
+    bool public initialEnrollmentScheduled;
+    bytes32 public enrolledCommunityRoot;
+    uint256 public enrolledCommunityTotalWeight;
+    bytes32 public enrolledValidatorRoot;
+    uint256 public enrolledValidatorTotalWeight;
+
     error LegacySurfaceRetired();
     error InvalidCivicGovernor();
     error CivicGovernorAlreadyBound();
@@ -151,6 +184,13 @@ contract Governance420 is SystemAccess, I420System {
     event CivicGovernorBound(address indexed civicGovernor);
     event CivicBootstrapPlanScheduled(bytes32 indexed planHash, address indexed civicGovernor);
     event CivicBootstrapRetired(address indexed civicGovernor);
+    event CivicInitialElectoratesScheduled(
+        bytes32 indexed plan,
+        bytes32 communityRoot,
+        uint256 communityWeight,
+        bytes32 validatorRoot,
+        uint256 validatorWeight
+    );
 
     constructor(
         address timelock_
@@ -184,7 +224,10 @@ contract Governance420 is SystemAccess, I420System {
         address communitySource_,
         address validatorSource_
     ) public view returns (bytes32) {
-        return keccak256(
+        // Reuse the original Genesis-domain graph hash verbatim (including zero roots
+        // in deferred mode). Only the new branch wraps it in a distinct, chain-bound
+        // authorization domain rather than recompiling a second complete graph encoder.
+        bytes32 baseHash = keccak256(
             abi.encode(
                 BOOTSTRAP_DOMAIN,
                 block.chainid,
@@ -206,6 +249,18 @@ contract Governance420 is SystemAccess, I420System {
                 initialCommunityTotalWeight,
                 initialValidatorRoot,
                 initialValidatorTotalWeight
+            )
+        );
+        if (!_postGenesisMode()) return baseHash;
+        return keccak256(
+            abi.encode(
+                keccak256("420CIVIC_BOOTSTRAP_POSTGENESIS_V1"),
+                baseHash,
+                approvedInitialEnrollment,
+                approvedInitialEnrollment.codehash,
+                approvedInitialElectorateAuthority,
+                IDENTITY_420.codehash,
+                VALIDATOR_REGISTRY_420.codehash
             )
         );
     }
@@ -288,10 +343,29 @@ contract Governance420 is SystemAccess, I420System {
                 || registry.currentComponentRevision(VALIDATOR_SOURCE_COMPONENT_ID) != 0
         ) revert InvalidBootstrapGraph();
 
-        if (
-            initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0 || initialValidatorRoot == bytes32(0)
-                || initialValidatorTotalWeight == 0
-        ) revert InvalidElectorateSource();
+        bool deferred = _postGenesisMode();
+        if (!deferred) {
+            if (
+                approvedInitialEnrollment != address(0) || approvedInitialElectorateAuthority != address(0)
+                    || initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0
+                    || initialValidatorRoot == bytes32(0) || initialValidatorTotalWeight == 0
+            ) revert InvalidElectorateSource();
+        } else {
+            CivicInitialElectorateEnrollment420 enrollment =
+                CivicInitialElectorateEnrollment420(approvedInitialEnrollment);
+            if (
+                approvedInitialEnrollment.code.length == 0 || enrollment.governance() != address(this)
+                    || enrollment.deploymentChainId() != block.chainid || enrollment.enrollmentClosed()
+                    || IDENTITY_420.code.length == 0 || VALIDATOR_REGISTRY_420.code.length == 0
+                    || ICivicBootstrapIdentityIssuer420(IDENTITY_420).governanceTimelock() != governanceTimelock
+                    || ICivicBootstrapIdentityIssuer420(IDENTITY_420).protocolVersion() != 3
+                    || ICivicBootstrapValidatorRegistry420(VALIDATOR_REGISTRY_420).governanceTimelock()
+                        != governanceTimelock
+                    || ICivicBootstrapValidatorRegistry420(VALIDATOR_REGISTRY_420).protocolVersion() != 3
+            ) {
+                revert InvalidElectorateSource();
+            }
+        }
         bytes32 plan = canonicalBootstrapPlanHash(
             constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_
         );
@@ -300,6 +374,8 @@ contract Governance420 is SystemAccess, I420System {
         }
         bootstrapPlanHash = plan;
         bootstrapPlanScheduled = true;
+        bootstrapCommunitySource = communitySource_;
+        bootstrapValidatorSource = validatorSource_;
 
         _schedule(
             timelock,
@@ -512,29 +588,95 @@ contract Governance420 is SystemAccess, I420System {
             )
         );
 
-        // Commit both first electorates through the only authorized Timelock before retirement.
-        _schedule(
-            timelock,
-            plan,
-            17,
-            communitySource_,
-            abi.encodeCall(
-                CivicMerkleElectorateSource420.publishInitialCheckpoint,
-                (initialCommunityRoot, initialCommunityTotalWeight)
-            )
-        );
-        _schedule(
-            timelock,
-            plan,
-            18,
-            validatorSource_,
-            abi.encodeCall(
-                CivicMerkleElectorateSource420.publishInitialCheckpoint,
-                (initialValidatorRoot, initialValidatorTotalWeight)
-            )
-        );
+        // Legacy release: both electorates were authenticated at Genesis.
+        // Deferred release: indices 17/18 are scheduled only after post-Genesis eligibility enrollment.
+        if (!deferred) {
+            _schedule(
+                timelock,
+                plan,
+                17,
+                communitySource_,
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                    (initialCommunityRoot, initialCommunityTotalWeight)
+                )
+            );
+            _schedule(
+                timelock,
+                plan,
+                18,
+                validatorSource_,
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                    (initialValidatorRoot, initialValidatorTotalWeight)
+                )
+            );
+        }
+
+        // Before Civic has electors, only this exact approved plan can enable trusted
+        // membership issuer setup through the existing seven-day Timelock.
+        if (deferred) {
+            _schedule(
+                timelock,
+                plan,
+                19,
+                IDENTITY_420,
+                abi.encodeCall(
+                    ICivicBootstrapIdentityIssuer420.setIssuer,
+                    (
+                        INITIAL_ELECTORATE_ISSUER,
+                        approvedInitialElectorateAuthority,
+                        INITIAL_ELECTORATE_ISSUER_METADATA,
+                        true
+                    )
+                )
+            );
+        }
 
         emit CivicBootstrapPlanScheduled(plan, governor_);
+    }
+
+    /// @notice Genesis-authorized one-shot publication of independently verified post-Genesis voters.
+    /// @dev No arbitrary root parameter: both roots are computed from actual verified self-enrollments.
+    /// The Timelock's preexisting G1 floor remains mandatory for indices 17 and 18.
+    function schedulePostGenesisInitialElectorates() external {
+        GovernanceTimelock timelock = GovernanceTimelock(payable(governanceTimelock));
+        if (
+            !_postGenesisMode() || !bootstrapPlanScheduled || bootstrapRetired || initialEnrollmentScheduled
+                || msg.sender != approvedInitialElectorateAuthority || timelock.civicAuthorityActivated()
+                || timelock.scheduler() != address(this) || timelock.bootstrapGovernor() != address(this)
+        ) {
+            revert InvalidBootstrapState();
+        }
+        if (
+            CivicMerkleElectorateSource420(bootstrapCommunitySource).checkpointCount() != 0
+                || CivicMerkleElectorateSource420(bootstrapValidatorSource).checkpointCount() != 0
+        ) {
+            revert InvalidElectorateSource();
+        }
+
+        (bytes32 cRoot, uint256 cWeight, bytes32 vRoot, uint256 vWeight) =
+            CivicInitialElectorateEnrollment420(approvedInitialEnrollment).seal();
+        enrolledCommunityRoot = cRoot;
+        enrolledCommunityTotalWeight = cWeight;
+        enrolledValidatorRoot = vRoot;
+        enrolledValidatorTotalWeight = vWeight;
+        initialEnrollmentScheduled = true;
+        _schedule(
+            timelock,
+            bootstrapPlanHash,
+            17,
+            bootstrapCommunitySource,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (cRoot, cWeight))
+        );
+        _schedule(
+            timelock,
+            bootstrapPlanHash,
+            18,
+            bootstrapValidatorSource,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (vRoot, vWeight))
+        );
+        emit CivicInitialElectoratesScheduled(bootstrapPlanHash, cRoot, cWeight, vRoot, vWeight);
     }
 
     /// @notice Retire bootstrap scheduling and irreversibly hand the Timelock scheduler to CivicGovernor420.
@@ -615,6 +757,18 @@ contract Governance420 is SystemAccess, I420System {
         if (serviceImplementation != governor_ || serviceVersion != 1) revert InvalidBootstrapGraph();
 
         // No proposal can be created until both checkpoints are effective for snapshotBlock = block.number - 1.
+        bool deferred = _postGenesisMode();
+        if (
+            deferred
+                && (!initialEnrollmentScheduled
+                    || !CivicInitialElectorateEnrollment420(approvedInitialEnrollment).verifyClosed())
+        ) {
+            revert InvalidElectorateSource();
+        }
+        bytes32 requiredCommunityRoot = deferred ? enrolledCommunityRoot : initialCommunityRoot;
+        uint256 requiredCommunityWeight = deferred ? enrolledCommunityTotalWeight : initialCommunityTotalWeight;
+        bytes32 requiredValidatorRoot = deferred ? enrolledValidatorRoot : initialValidatorRoot;
+        uint256 requiredValidatorWeight = deferred ? enrolledValidatorTotalWeight : initialValidatorTotalWeight;
         CivicMerkleElectorateSource420 community = CivicMerkleElectorateSource420(communitySource_);
         CivicMerkleElectorateSource420 validator = CivicMerkleElectorateSource420(validatorSource_);
         if (community.checkpointCount() != 1 || validator.checkpointCount() != 1) {
@@ -623,10 +777,10 @@ contract Governance420 is SystemAccess, I420System {
         CivicMerkleElectorateSource420.Checkpoint memory communityInitial = community.checkpoint(0);
         CivicMerkleElectorateSource420.Checkpoint memory validatorInitial = validator.checkpoint(0);
         if (
-            communityInitial.electorateRoot != initialCommunityRoot
-                || communityInitial.totalWeight != initialCommunityTotalWeight
-                || validatorInitial.electorateRoot != initialValidatorRoot
-                || validatorInitial.totalWeight != initialValidatorTotalWeight
+            communityInitial.electorateRoot != requiredCommunityRoot
+                || communityInitial.totalWeight != requiredCommunityWeight
+                || validatorInitial.electorateRoot != requiredValidatorRoot
+                || validatorInitial.totalWeight != requiredValidatorWeight
                 || communityInitial.effectiveBlock >= block.number || validatorInitial.effectiveBlock >= block.number
         ) revert InvalidElectorateSource();
 
@@ -635,13 +789,19 @@ contract Governance420 is SystemAccess, I420System {
         (bytes32 communityRoot, uint256 communityWeight) = community.snapshotAt(uint64(block.number - 1));
         (bytes32 validatorRoot, uint256 validatorWeight) = validator.snapshotAt(uint64(block.number - 1));
         if (
-            communityRoot != initialCommunityRoot || communityWeight != initialCommunityTotalWeight
-                || validatorRoot != initialValidatorRoot || validatorWeight != initialValidatorTotalWeight
+            communityRoot != requiredCommunityRoot || communityWeight != requiredCommunityWeight
+                || validatorRoot != requiredValidatorRoot || validatorWeight != requiredValidatorWeight
         ) revert InvalidElectorateSource();
 
         GovernanceTimelock(payable(governanceTimelock)).activateCivicAuthority(governor_);
         bootstrapRetired = true;
         emit CivicBootstrapRetired(governor_);
+    }
+
+    function _postGenesisMode() private view returns (bool) {
+        return initialCommunityRoot == bytes32(0) && initialCommunityTotalWeight == 0
+            && initialValidatorRoot == bytes32(0) && initialValidatorTotalWeight == 0
+            && approvedInitialEnrollment != address(0) && approvedInitialElectorateAuthority != address(0);
     }
 
     function bootstrapOperationId(

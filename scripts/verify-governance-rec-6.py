@@ -2,7 +2,7 @@
 """GOV-REC-6: independent, read-only retained-artifact / Genesis release-boundary verification.
 
 This check never edits deployment state or authorizes a Genesis electorate. An empty
-five-field Genesis commitment is a valid *offline* fail-closed candidate, not a
+seven-field Genesis commitment is a valid *offline* fail-closed candidate, not a
 live activation approval. Compilation and byte-for-byte generation are separate
 mandatory checks in the qualification workflow.
 """
@@ -33,6 +33,8 @@ APPROVAL_FIELDS = (
     ("communityTotalWeight", "initialCommunityTotalWeight"),
     ("validatorRoot", "initialValidatorRoot"),
     ("validatorTotalWeight", "initialValidatorTotalWeight"),
+    ("enrollmentContract", "approvedInitialEnrollment"),
+    ("electorateAuthority", "approvedInitialElectorateAuthority"),
 )
 EXPECTED_IDS = {
     "CivicConstitution420": "420/component/governance/civic-constitution/v1",
@@ -62,18 +64,23 @@ def bytes32(value):
 
 
 def approval_values(config):
-    """Verify all five materialized inputs before considering any activation."""
+    """Reject mixed, partial or fabricated Genesis electorate approval modes."""
     items = []
     for key, _ in APPROVAL_FIELDS:
         value = config.get(key)
         if key.endswith("Weight"):
             require(type(value) is int and 0 <= value < 2**256, "invalid approved " + key)
             items.append(value)
+        elif key in ("enrollmentContract", "electorateAuthority"):
+            require(address(value), "invalid approved " + key)
+            items.append(int(value, 16))
         else:
             require(bytes32(value), "invalid approved " + key)
             items.append(int(value, 16))
-    require(not any(items) or all(items), "partial Genesis bootstrap approval must fail closed")
-    return dict(zip((key for key, _ in APPROVAL_FIELDS), items)), bool(all(items))
+    legacy = all(items[:5]) and not any(items[5:])
+    deferred = items[0] != 0 and not any(items[1:5]) and all(items[5:])
+    require(not any(items) or legacy or deferred, "partial Genesis bootstrap approval must fail closed")
+    return dict(zip((key for key, _ in APPROVAL_FIELDS), items)), bool(legacy or deferred)
 
 
 def storage_word(layout, label):
@@ -153,7 +160,7 @@ def verify(root=ROOT):
     state = load(PRE / "Governance420-predeploy-state.json")
     layout = artifacts["Governance420"]["storageLayout"]
     require(state["genesisBootstrapApprovalReady"] is ready, "Genesis approval readiness misreported")
-    require(len(state["storage"]) == len(APPROVAL_FIELDS) == 5, "noncanonical Genesis materialization slot count")
+    require(len(state["storage"]) == len(APPROVAL_FIELDS) == 7, "noncanonical Genesis materialization slot count")
     for key, name in APPROVAL_FIELDS:
         slot = storage_word(layout, name)
         expected = "0x" + approval[key].to_bytes(32, "big").hex()

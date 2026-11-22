@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "../src/treasury/FoundingTreasuryAuthority420.sol";
 import "../src/treasury/TreasuryAuthorization420.sol";
+import "../src/governance/FoundingWalletClaims420.sol";
 
 interface VmFounding420 {
     function prank(address caller) external;
@@ -47,6 +48,7 @@ contract FoundingTreasuryAuthority420Test {
     TreasuryBudgetRegistry420 internal budgets;
     TreasuryDisbursementRegistry420 internal disb;
     FoundingTreasuryAuthority420 internal founder;
+    FoundingWalletClaims420 internal claims;
 
     function setUp() public {
         vm.warp(1_000_000);
@@ -57,8 +59,12 @@ contract FoundingTreasuryAuthority420Test {
         TreasuryAuthorization420 auth = new TreasuryAuthorization420(address(0x123));
         disb = new TreasuryDisbursementRegistry420(address(civic), address(auth), address(policy), address(budgets));
         // No mock of the executor: Treasury release must still satisfy the actual two capability grants.
+        claims = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("founding-gov-genesis"));
+        vm.prank(ADMIN); claims.claimFounderWallet();
+        vm.prank(ANDREW); claims.claimFounderWallet();
+        vm.prank(JANET); claims.claimFounderWallet();
         founder = new FoundingTreasuryAuthority420(
-            ADMIN, ANDREW, JANET, address(civic), address(readiness),
+            ADMIN, ANDREW, JANET, address(claims), address(civic), address(readiness),
             address(budgets), address(disb), address(policy),
             address(new VaultListMockFounding420(OPS, CONT)), OPS, CONT
         );
@@ -81,6 +87,26 @@ contract FoundingTreasuryAuthority420Test {
             isContingency, payee, amount, purpose, keccak256(abi.encode(payee, amount, purpose)),
             uint64(block.timestamp), uint64(block.timestamp + 10 days)
         );
+    }
+
+    function testUnclaimedFounderCannotExerciseAuthority() public {
+        // This test uses a fresh claims contract. A registered identity is NOT a claim.
+        FoundingWalletClaims420 pending = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("founding-gov-genesis"));
+        FoundingTreasuryAuthority420 other = new FoundingTreasuryAuthority420(
+            ADMIN, ANDREW, JANET, address(pending), address(civic), address(readiness),
+            address(budgets), address(disb), address(policy),
+            address(new VaultListMockFounding420(OPS, CONT)), OPS, CONT
+        );
+        vm.prank(ADMIN);
+        (bool allowed,) = address(other).call(abi.encodeCall(other.initializeBudgets, ()));
+        require(!allowed, "unclaimed admin initialized budget");
+        vm.prank(ANDREW);
+        (allowed,) = address(other).call(abi.encodeCall(
+            other.proposePayment, (false, PAYEE, uint128(1 ether),
+              FoundingTreasuryAuthority420.Purpose.BOUNTY,
+              keccak256("unclaimed"), uint64(block.timestamp), uint64(block.timestamp+1 days))
+        ));
+        require(!allowed, "unclaimed cofounder proposed");
     }
 
     function testRoutinePaymentSchedulesWithoutVaultAccess() public {

@@ -7,6 +7,7 @@ import "./TreasuryPolicyRegistry420.sol";
 import "./TreasuryReleaseExecutor420.sol";
 import "../vault/VaultRegistry420.sol";
 import "../vault/VaultIds420.sol";
+import "../governance/IFoundingWalletClaims420.sol";
 
 interface IFoundingRetirementReadiness420 {
     function retirementReady() external view returns (bool);
@@ -49,6 +50,7 @@ contract FoundingTreasuryAuthority420 {
         bool released;
     }
 
+    IFoundingWalletClaims420 public immutable founderWalletClaims;
     address public immutable foundingAdministrator;
     address public immutable founderAndrew;
     address public immutable founderJanet;
@@ -105,13 +107,14 @@ contract FoundingTreasuryAuthority420 {
 
     constructor(
         address administrator_, address andrew_, address janet_,
-        address governanceTimelock_, address retirementVerifier_,
+        address founderWalletClaims_, address governanceTimelock_, address retirementVerifier_,
         address budgetRegistry_, address disbursementRegistry_,
         address policyRegistry_, address vaultRegistry_,
         bytes32 operationsVaultId_, bytes32 contingencyVaultId_
     ) {
         if (administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0)
             || administrator_ == andrew_ || administrator_ == janet_ || andrew_ == janet_
+            || founderWalletClaims_.code.length == 0
             || governanceTimelock_.code.length == 0 || retirementVerifier_.code.length == 0
             || budgetRegistry_.code.length == 0 || disbursementRegistry_.code.length == 0
             || policyRegistry_.code.length == 0 || vaultRegistry_.code.length == 0
@@ -120,6 +123,11 @@ contract FoundingTreasuryAuthority420 {
         if (address(TreasuryDisbursementRegistry420(disbursementRegistry_).budgets()) != budgetRegistry_
             || address(TreasuryDisbursementRegistry420(disbursementRegistry_).policy()) != policyRegistry_
             || address(TreasuryBudgetRegistry420(budgetRegistry_).policy()) != policyRegistry_) revert InvalidConfiguration();
+        IFoundingWalletClaims420 verifiedClaims = IFoundingWalletClaims420(founderWalletClaims_);
+        if (verifiedClaims.administrator() != administrator_ || verifiedClaims.andrew() != andrew_
+            || verifiedClaims.janet() != janet_ || verifiedClaims.genesisPlanCommitment() == bytes32(0))
+            revert InvalidConfiguration();
+        founderWalletClaims = verifiedClaims;
         foundingAdministrator = administrator_;
         founderAndrew = andrew_;
         founderJanet = janet_;
@@ -138,7 +146,7 @@ contract FoundingTreasuryAuthority420 {
     }
 
     modifier onlyFounder() {
-        if (!_isFounder(msg.sender)) revert UnauthorizedFounder();
+        if (!_isFounder(msg.sender) || !founderWalletClaims.claimed(msg.sender)) revert UnauthorizedFounder();
         if (retired) revert Retired();
         _;
     }

@@ -6,6 +6,7 @@ import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
 import "../src/system/CommunityRewardReserve.sol";
 import "../src/treasury/FoundingValidatorSponsorship420.sol";
+import "../src/governance/FoundingWalletClaims420.sol";
 import "../src/apps/Stake420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "../src/interfaces/genesis/Types420.sol";
@@ -118,8 +119,11 @@ contract StakeValidatorGenesis420Test {
 
     function testFullSponsorshipRequiresAuthenticatedOneShotBindingAndRetirement() public {
         FoundingSponsorRetirementStatus420 status = new FoundingSponsorRetirementStatus420();
+        FoundingWalletClaims420 walletClaims = new FoundingWalletClaims420(
+            address(this), address(0xA22), address(0xA33), keccak256("approved-genesis")
+        );
         FoundingValidatorSponsorship420 sponsor = new FoundingValidatorSponsorship420(
-            address(this), address(status), address(reserve), address(registry)
+            address(this), address(walletClaims), address(status), address(reserve), address(registry)
         );
         (bytes32 id, address operator) = _matchedId("approved-sponsor", 97);
         bytes32 purpose = keccak256("approved-early-validator-partnership");
@@ -132,6 +136,11 @@ contract StakeValidatorGenesis420Test {
         require(!beforeBinding, "unbound sponsor funded validator");
         reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
         require(reserve.genesisFoundingSponsorAuthority() == address(sponsor), "binding");
+        (bool unclaimed,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!unclaimed, "unclaimed founder sponsored validator");
+        walletClaims.claimFounderWallet();
         (bool rebind,) = address(reserve).call(
             abi.encodeCall(reserve.bindGenesisFoundingSponsorAuthority, (address(this)))
         );

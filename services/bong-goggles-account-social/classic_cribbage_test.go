@@ -155,3 +155,56 @@ func TestBC12DeterministicFullMatchesAndReplay(t *testing.T){
   })
  }
 }
+
+func TestBC12ImmediateWinFromHeelsAndThirtyOne(t *testing.T){
+ a,e:=NewCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
+ jackCutFound:=false
+ for key:=0;key<120&&!jackCutFound;key++{
+  state,e:=a.initial(cribSeed(byte(key)),2);if e!=nil{t.Fatal(e)}
+  for i:=0;i<2;i++{
+   f:=cribFrame(t,a,state)
+   legal,e:=a.LegalActions(state,f.Turn);if e!=nil{t.Fatal(e)}
+   state,_,_,_,e=a.Apply(state,f.Turn,legal[0]);if e!=nil{t.Fatal(e)}
+  }
+  f:=cribFrame(t,a,state);d:=cribData(t,f)
+  if f.Phase!="cut"{t.Fatal("no cut after two discards")}
+  if cribbageRank(d.Deck[d.Drawn])!=11{continue}
+  jackCutFound=true
+  for _,prior:=range []int64{119,120}{
+   clone:=f;clone.Scores=append([]int64(nil),f.Scores...)
+   clone.Scores[d.Dealer]=prior
+   synthetic,e:=json.Marshal(clone);if e!=nil{t.Fatal(e)}
+   next,turn,terminal,winner,e:=a.Apply(synthetic,clone.Turn,json.RawMessage("{\"type\":\"cut\"}"))
+   if e!=nil||!terminal||turn!=-1||winner==nil||*winner!=d.Dealer{t.Fatal("heels must win before pegging",prior,e)}
+   result:=cribFrame(t,a,next)
+   if result.Scores[d.Dealer]!=prior+2||cribData(t,result).Awards[0].Kind!="heels"{t.Fatal("heels double award / failure")}
+  }
+ }
+ if !jackCutFound{t.Fatal("missing deterministic starter jack fixture")}
+ state,e:=a.initial(cribSeed(72),2);if e!=nil{t.Fatal(e)}
+ for step:=0;step<maxRulesMoves;step++{
+  f:=cribFrame(t,a,state)
+  if f.Terminal{break}
+  legal,e:=a.LegalActions(state,f.Turn);if e!=nil{t.Fatal(e)}
+  if f.Phase=="peg"{
+   d:=cribData(t,f)
+   for _,action:=range legal{
+    var m cribbageMove
+    if !strictRuleJSON(action,&m){t.Fatal("malformed legal move")}
+    if m.Type!="play"||m.Card==nil||d.Count+cribbagePips(*m.Card)!=31{continue}
+    clone:=f;clone.Scores=append([]int64(nil),f.Scores...)
+    clone.Scores[f.Turn]=119
+    raw,e:=json.Marshal(clone);if e!=nil{t.Fatal(e)}
+    next,turn,terminal,winner,e:=a.Apply(raw,f.Turn,action)
+    if e!=nil||!terminal||turn!=-1||winner==nil||*winner!=f.Turn{t.Fatal("31 must finish immediately",e)}
+    terminalFrame:=cribFrame(t,a,next);terminalData:=cribData(t,terminalFrame)
+    if terminalData.Count!=31||terminalData.Stage!="peg"||terminalFrame.Scores[f.Turn]<121{
+     t.Fatal("winning 31 lost from terminal state")
+    }
+    return
+   }
+  }
+  state,_,_,_,e=a.Apply(state,f.Turn,legal[0]);if e!=nil{t.Fatal(e)}
+ }
+ t.Fatal("no reachable exact-31 action found")
+}

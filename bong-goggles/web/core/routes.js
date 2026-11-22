@@ -17,6 +17,7 @@ export const ROUTES=Object.freeze([
   {id:'pages',path:'/pages',label:'Pages',icon:'▤',requiresSession:false},
   {id:'events',path:'/events',label:'Events',icon:'◇',requiresSession:false},
   {id:'games',path:'/games',label:'Games',icon:'✦',requiresSession:false},
+  {id:'classic-rooms',path:'/games/rooms',label:'Multiplayer Rooms',icon:'♟',requiresSession:false},
   {id:'classics',path:'/classics',label:'Classics',icon:'♠',requiresSession:false},
   {id:'chaos-game',path:'/classics/cross-country-chaos',label:'Cross-Country Chaos',icon:'🚙',requiresSession:false},
   {id:'rewards',path:'/rewards',label:'Rewards',icon:'◈',requiresSession:true},
@@ -28,6 +29,8 @@ export function resolveRoute(pathname='/'){
   const normalized=typeof pathname==='string'&&pathname?pathname.replace(/\/+$/,'')||'/':'/';
   const fixed=BY_PATH.get(normalized);
   if(fixed)return fixed;
+  if(/^\/games\/rooms\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(normalized))
+    return Object.freeze({id:'classic-room',roomId:normalized.slice('/games/rooms/'.length),path:normalized,label:'Multiplayer room',icon:'♟',requiresSession:false});
   if(normalized.startsWith('/games/')){
     const segments=normalized.slice('/games/'.length).split('/');
     if(segments.length<=2&&segments[0]&&

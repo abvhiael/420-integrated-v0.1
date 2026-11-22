@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {withAccountSocialBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
+import {withAccountSocialBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
 const example=JSON.parse(await readFile(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
@@ -11,6 +11,16 @@ const withoutAccountFlags=features=>Object.fromEntries(
 
 test('Pages account activation flag uses the exact documented variable',()=>{
  assert.equal(ACCOUNT_SOCIAL_BUILD_FLAG,'BG_ACCOUNT_SOCIAL_ACTIVATION');
+});
+
+test('BC-0.5 classic rooms require two explicit activation flags',()=>{
+ assert.equal(CLASSIC_ROOMS_BUILD_FLAG,'BG_CLASSIC_ROOMS_ACTIVATION');
+ for(const v of [undefined,'false'])assert.equal(withAccountSocialBuildFlags(example,'true',v).features.classicRooms,false);
+ const enabled=withAccountSocialBuildFlags(example,'true','true');
+ assert.equal(enabled.features.classicRooms,true);
+ assert.equal(validateRuntimeConfig(enabled).features.classicRooms,true);
+ for(const v of [undefined,'false'])assert.throws(()=>withAccountSocialBuildFlags(example,v,'true'),/require qualified account-social/);
+ for(const bad of ['TRUE','1',false,' true',null])assert.throws(()=>withAccountSocialBuildFlags(example,'true',bad),/BG_CLASSIC_ROOMS_ACTIVATION/);
 });
 
 test('unset and explicit false keep wallet-free features disabled and preserve complete config',()=>{

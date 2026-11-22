@@ -416,3 +416,69 @@ and app-session boundaries remain unchanged. No changes authorize
 paid features, wallet spending, token payout or XP-to-420 conversion.
 
 See `docs/audit/AUTH-12-SECURITY-PRIVACY-QUALIFICATION.md`.
+
+
+## BC-0.5 — opt-in, zero-wager, wallet-free Classic multiplayer rooms
+
+These rooms are persistent 420ID lobbies, not active matches or game
+engines. They have no wallet identity, game moves, score, rewards, stake or
+financial authority. Migration 004_classic_rooms.sql is applied only
+through the existing operator-only bg-social migrate command.
+
+The runtime must use these additional LEAST-PRIVILEGE grants, applied
+only after the migration, on the existing bonggoggles_social_runtime role:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_rooms,
+      bg_account_social.classic_room_seats,
+      bg_account_social.classic_room_invites TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,revision,updated_at) ON
+      bg_account_social.classic_rooms TO bonggoggles_social_runtime;
+    GRANT UPDATE(controller,subject,difficulty) ON
+      bg_account_social.classic_room_seats TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,updated_at) ON
+      bg_account_social.classic_room_invites TO bonggoggles_social_runtime;
+
+Never grant full-table UPDATE/DELETE, permission to rewrite a room
+host/game/visibility/team/seat count or an invitation target, or schema
+DDL to the runtime. ReadyClassicRooms checks required grants and rejects
+unsafe write permissions before activation.
+
+Enable the server ONLY after the existing
+SOCIAL420_ACCOUNT_EXTRAS=restricted-acceptance gate is qualified:
+SOCIAL420_CLASSIC_ROOMS=restricted-acceptance. Any unknown activation
+value fails startup; disabled/absent returns 404 for room routes.
+After the backend is qualified, explicitly enable both Cloudflare Pages
+text build settings BG_ACCOUNT_SOCIAL_ACTIVATION=true and
+BG_CLASSIC_ROOMS_ACTIVATION=true. The latter defaults to false, can be
+rolled back independently, and must not be set before the server is ready.
+Do not change the 420ID SSO cookie or Cloudflare same-origin proxy.
+
+The same-origin, freshly introspected 420ID routes are:
+- GET /social-api/v1/classic-rooms: public/participant/invited rooms (max 50)
+- GET /social-api/v1/classic-rooms/friends: mutual, unblocked 420ID friends
+- POST /social-api/v1/classic-rooms: gameId, visibility, seatCount
+- GET /social-api/v1/classic-rooms/{uuid}: authorized seat/invite detail
+- POST /social-api/v1/classic-rooms/{uuid}/change: action,
+  expectedRevision, seat, and optional target/difficulty.
+
+Room actions: invite a mutual friend, accept, decline, cancel-invite,
+join a public vacant seat, leave, bot, clear-bot, or cancel-room.
+The server binds human seats to the verified 420ID principal, checks
+friendship and bidirectional blocks, enforces canonical 25-game seat
+limits, derives partner teams and supports computer-seat difficulty
+easy/medium/hard. A PostgreSQL row lock and expected revision reject
+concurrent or replayed seat mutations. Only the host can configure
+bots or cancel invitations/rooms. Private room details are not available
+after a member leaves or declines. Complete occupancy means lobby
+status READY, not that a game has started. The zero-wager JSON response
+flags onChain, wager, rewards and playable are all false.
+
+BC-0.6 is still the authoritative match lifecycle/start/turn/score
+boundary; BC-0.7/8 own actual game-specific rules and AI.
+The new 25 Classics remain visibly nonplayable. This stage does not
+claim online Cross-Country Chaos or a running room session in production.
+
+Exact-head workflow: .github/workflows/bc-0-5-classic-rooms.yml
+(PostgreSQL 16 integration, Go race/vet/build and targeted Node tests)
+alongside the unchanged Bong Goggles Web Verification for mobile
+layout, cards/maps/assets, wallet/social and static security gates.

@@ -95,6 +95,15 @@ func main(){
  }else if os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!=""&&os.Getenv("SOCIAL420_ACCOUNT_EXTRAS")!="disabled"{
   log.Fatal("Unrecognized account messaging/game activation mode")
  }
+ if os.Getenv("SOCIAL420_CLASSIC_ROOMS")=="restricted-acceptance"{
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyClassicRooms(ctx);e!=nil{done();log.Fatal("BC-0.5 room schema or least-privilege grants unavailable")}
+  done()
+  rooms,e:=social.NewClassicRooms(store);if e!=nil{log.Fatal(e)}
+  if e=handler.EnableClassicRooms(rooms);e!=nil{log.Fatal("BC-0.5 requires the existing account-game auth service",e)}
+ }else if os.Getenv("SOCIAL420_CLASSIC_ROOMS")!=""&&os.Getenv("SOCIAL420_CLASSIC_ROOMS")!="disabled"{
+  log.Fatal("Unrecognized BC-0.5 room activation mode")
+ }
  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
   if e=store.ReadyXPRuntime(ctx);e!=nil{done();log.Fatal("AUTH-10 XP schema/grants or runtime role unsafe")}

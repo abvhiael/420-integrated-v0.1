@@ -1,5 +1,21 @@
 # GOV-PRE-08 Step 3: unsigned V4 materialization and local integration evidence
 
+## Exact-head pre-testnet engineering status — 2026-11-22
+
+**CONFIRMED PASS, pre-testnet evidence only:** commit `48aa642e0aede9750136ac2ad23f022087851dfd` qualified under [Step 3 CI #45072161557](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45072161557) in **both** jobs, including the real patched `node420` native 90/10 reward/JWT Engine/protected-signing/recovery gate and two independent Anvil + PostgreSQL + running Explorer/Wallet/Registry local applications. The standalone [node420 Release Gate #45072161582](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45072161582) also passed at the same source head. Earlier statements below about the PostgreSQL app and node420 native suite being unrun/untested describe previous interim revisions, not this current passing scope.
+
+**Not yet done, but fully feasible before testnet** (software exit criteria, in priority order):
+
+1. **One actual connected local network:** start patched `node420` and certified `fourtwentyd` on the *same chain ID/Genesis*, execute canonical authenticated Engine system calls in that shared state, and attach real Stake/Registry/Treasury/Indexer/Explorer/Wallet consumers. The two successful CI jobs use different local fixtures; separate PASS does not establish a common 420-chain execution history.
+2. **Complete app actions and Civic lifecycle:** run real Wallet account creation/import/connection, native transactions, guarded Treasury operation, founder-claim fixture, Civic proposal/vote/finalize/schedule/execute with simulated local actors; verify unauthorized signature, disconnection, wrong-chain, stale-Registry and duplicate-operation denials, including the on-chain read model and UI confirmation.
+3. **Production Indexer/Explorer transport parity:** remove the *test-only* PostgreSQL-to-Go Explorer compatibility adapter from the launch path. Connect the actual production 420Indexer API and Go Explorer, with authenticated consensus producer/finality provenance, full Stake/Treasury/Governance routes, durable PostgreSQL projections and rollback/rebuild.
+4. **Hostile-network and recovery qualification:** deliberately restart/crash the paired consensus/execution nodes, indexer, Explorer, wallet session and Postgres; test finality, reorg, checkpoint restoration, split-network isolation, stale source, malformed signatures and mismatched runtimes. Capture reproducible exact-head test results.
+5. **Reproducible V4-shaped release package:** generate exact compiled ABI, bytecode, immutable storage, frozen component/service IDs, 42m $420 supply and Vault funding, expected deployment order, preflight scripts, operational manifests and rollback procedures. Use only clearly synthetic local founders until the launch ceremony, never fabricate owner proof.
+
+**Separate from software, do not chase as pre-testnet implementation:** real founders' independently controlled public addresses and optional EIP-191 proof, independent approval of the exact V4 Genesis commitment, and launch authorization are external *pre-Genesis ceremony* inputs. They cannot be manufactured by CI. The genuine public founder beneficiaries must be known **before** an immutable Genesis containing their liquid allocations and constructor bindings is launched; ordinary EOA address creation and personal signing do **not** require an existing chain. The final on-chain `claimFounderWallet`, code-bound EIP-1271 proof against the real network, live receipts, finalized native reward and actual government/retirement evidence are **post-launch** verification. Defer those live checks without redefining them as code blockers.
+
+**Status:** current *proved local subscopes PASS*; remaining shared-network/full-app software requirements OPEN; real V4 launch/ceremony NOT AUTHORIZED. Do not conflate these three milestones.
+
 ## Authority boundary
 
 Step 2 merged as PR #1337, merge 511680b2a096c59783e77604add7b9dbcd74d185. Historical FROZEN_V3 remains the authoritative frozen history. The source-bound V4 proposal is unsigned and may NOT trigger application migrations or production activation. No local synthetic founder or impersonated Timelock transaction proves genuine governance consent.

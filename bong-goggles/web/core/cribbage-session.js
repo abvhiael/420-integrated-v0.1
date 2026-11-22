@@ -58,6 +58,7 @@ export function normalizeCribbageSnapshot(result,subject=null){
   !Array.isArray(v.lastAwards)||v.lastAwards.length>32||
   !Array.isArray(v.losers)||v.losers.length>n-1||
   !(v.winner===null||Number.isInteger(v.winner)&&v.winner>=0&&v.winner<n))return null;
+ if(s.status==='active'&&v.scores.some(x=>x>=121))return null;
  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++)
   if(teams[i]===teams[j]&&v.scores[i]!==v.scores[j])return null;
  if(v.phase==='discard'&&v.hand.length!==(n===2?6:5)&&!v.discarded[v.seat])return null;
@@ -92,7 +93,7 @@ export function cribbageLegalMoves(s){
  const v=s.privateView,hand=v.hand;
  if(v.phase==='discard'){
   if(v.discarded[v.seat])return [];
-  if(s.seatCount===3)return hand.map(c=>Object.freeze({type:'discard',cards:[c]}));
+  if(s.seatCount!==2)return hand.map(c=>Object.freeze({type:'discard',cards:[c]}));
   const moves=[];
   for(let i=0;i<hand.length;i++)for(let j=i+1;j<hand.length;j++)
    moves.push(Object.freeze({type:'discard',cards:[hand[i],hand[j]]}));

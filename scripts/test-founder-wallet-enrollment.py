@@ -179,10 +179,10 @@ def test_adversarial():
         original_mirror_bytes = (root / e.SYSTEM).read_bytes()
         s = v.load(root, e.SYSTEM)
         s["founder_wallet_slots"][1]["address"] = accounts[2].address
-        (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\\n")
+        (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\n")
         check_rejected("mirror tampering", lambda: v.validate(strict=False, root=root), "mirror")
         # A formatting-only change still invalidates a frozen authority-input blob.
-        (root / e.SYSTEM).write_text(json.dumps(s, separators=(",", ":"))+"\\n")
+        (root / e.SYSTEM).write_text(json.dumps(s, separators=(",", ":"))+"\n")
         check_rejected("V4 source byte drift", lambda: v.validate(strict=True, root=root),
                        "bytes changed")
         (root / e.SYSTEM).write_bytes(original_mirror_bytes)
@@ -284,7 +284,7 @@ def test_codebound_1271():
         proofs["network_genesis_block_hash"] = GENESIS
         integration = v.load(root, e.INTEGRATION)
         integration["genesis"]["networkGenesisBlockHash"] = GENESIS
-        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\\n")
+        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\n")
         check_rejected("no contract-signature RPC", lambda: e.attest(root, proofs), "RPC")
         state = {"genesis": GENESIS, "claim_block": "0x" + "ef"*32,
                  "code": bytecode, "plan": proofs["genesis_plan_commitment"],
@@ -340,7 +340,7 @@ def test_finalized_claim_records():
                          "claim_tx":tx,"claim_block_hash":block_hash})
         integration = v.load(root, e.INTEGRATION)
         integration["genesis"]["networkGenesisBlockHash"] = GENESIS
-        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\\n")
+        (root / e.INTEGRATION).write_text(json.dumps(integration, indent=2)+"\n")
         body={"target_network":"testnet","chain_id":420,
               "genesis_plan_commitment":proofs["genesis_plan_commitment"],
               "network_genesis_block_hash":GENESIS,

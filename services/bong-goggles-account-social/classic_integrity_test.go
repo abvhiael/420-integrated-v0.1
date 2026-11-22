@@ -96,7 +96,7 @@ func TestBC11PublicEventOnlyAcceptsServerLifecycleMetadata(t *testing.T){
   if validClassicPublicEvent(event,2){t.Fatal("accepted forged public event",c.name)}
  }
  rec.Status="finished";rec.TurnSeat=nil;rec.Deadline=nil;rec.FinishedReason="completed"
- valid=ClassicSessionEvent{Sequence:2,Kind:"finished",PublicState:classicPublicState(rec)}
+ valid=ClassicSessionEvent{Sequence:2,Kind:"finished",ActorSeat:&seat,PublicState:classicPublicState(rec)}
  if !validClassicPublicEvent(valid,2){t.Fatal("verified tie result rejected")}
  if strings.Contains(string(valid.PublicState),"hiddenCard"){t.Fatal("private state copied into public projection")}
 }

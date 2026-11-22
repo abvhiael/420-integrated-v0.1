@@ -42,7 +42,7 @@ export function normalizeCribbageSnapshot(result,subject=null){
  const v=s.privateView,n=s.seatCount,teams=cribbageTeams(n);
  if(v.gameId!=='cribbage'||v.variant!==variantFor(n)||!Number.isInteger(v.round)||v.round<1||
   !['discard','cut','peg','finished'].includes(v.phase)||v.seat!==s.viewerSeat||
-  v.turn!==s.turnSeat&&!(s.status!=='active'&&v.turn===-1)||
+  (s.status==='active'?v.turn!==s.turnSeat:!(v.turn===-1||Number.isInteger(v.turn)&&v.turn>=0&&v.turn<n))||
   !Number.isInteger(v.dealer)||v.dealer<0||v.dealer>=n||
   !Array.isArray(v.scores)||v.scores.length!==n||!v.scores.every(score)||
   !ownArray(v.hand,6)||!Array.isArray(v.cardCounts)||v.cardCounts.length!==n||

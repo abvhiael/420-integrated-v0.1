@@ -93,7 +93,7 @@ func TestBC11CorruptPublicJournalFailsClosedAndRecoversAfterRestore(t *testing.T
   RequestID:bc06ActionID(t),Action:"move",ExpectedSequence:2,Move:json.RawMessage(`{"take":1}`)})
  if e!=nil{t.Fatal("initial committed move",e)}
  var before string
- e:=store.DB.QueryRowContext(ctx,`SELECT public_state::text FROM bg_account_social.classic_session_events
+ e=store.DB.QueryRowContext(ctx,`SELECT public_state::text FROM bg_account_social.classic_session_events
  WHERE session_id=$1 AND sequence=2`,game.ID).Scan(&before)
  if e!=nil{t.Fatal(e)}
  // An operator credential can alter a row for this adversarial test; the

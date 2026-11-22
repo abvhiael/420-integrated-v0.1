@@ -19,6 +19,43 @@ Game state (including the secret shuffled stock) is stored only in `bg_account_s
 
 Log into BongGoggles with 420ID; visit `/classics/cross-country-chaos`; create a private 2–4 person room, optionally with Easy/Normal/Hard server computer seats. Share the private invitation code with each other human player. Each person opens that same route from their **own account**, joins the room, and sees **their own** private hand and only their legal move controls. The host starts the first region and continues between regional results. Room state and revision persist across browser closure, server restarts and device changes. The client polls the server for new turns; no shared keyboard/mouse, pass-device prompt, or local game journaling authority is used on the public route.
 
+## Dedicated tabletop and room chat
+
+The authenticated web route uses a compact single-screen tabletop: the stage's
+approved atlas with live vehicle positions at the top, the public player tables
+and face-up discard/face-down stock in the middle, and the current account's
+selectable private cards along the bottom. The public playing area includes
+active hazards, equipment, legendary shields and individual played mileage
+stacks. On desktop, **Roadside Radio** occupies the right rail instead of the
+global community/discovery cards. On mobile it is a collapsible drawer with
+an unread indicator.
+
+Room chat is part of the existing server-authoritative match and uses the same
+420ID-authenticated, HMAC-signed Go-to-Node proxy. Only joined players can read,
+write or report messages. The server derives sender seat/name (not client
+claims), strips whitespace controls, limits messages to 280 characters/1024
+bytes, rate-limits each seat to one message per 1.5 seconds, and retains
+only the latest 80 messages. Messages survive reconnects and region changes.
+Chat writes are row-serialized but **never increment the game revision**, so
+typing during an opponent's turn cannot invalidate their card action.
+Each browser may mute a seat locally; mute is not a global block.
+
+The Report button is available only on another player's message. It stores a
+bounded, deduplicated private `chatReports` record within the restricted
+`chaos_rooms.data` JSONB; neither reports nor reporter UUIDs are included in
+the public room projection. Up to ten submissions per reporter per 24 hours
+are accepted, with at most 100 retained per room. The operator can inspect
+these records using the existing restricted database-operations boundary.
+**A report is a stored flag for manual review, not an automatic ban or an
+implemented moderator dashboard.** Social account block restrictions still
+prevent access to a match. Do not serve raw stored room data to browsers: it
+contains private hands, deck material and private reports.
+
+Public room updates use a four-second no-cache poll while the game is open.
+The client compares game revisions and the latest chat message ID to avoid
+unnecessary re-renders. During necessary updates it preserves a chat draft,
+focus, cursor selection, and the message list's scroll position.
+
 ## Verification & limitations
 
 Run `npm test` for the game service, `go test ./services/bong-goggles-account-social ./cmd/bong-goggles-social`, and BongGoggles Web Verification. Test outsider access, private projections, two distinct verified subjects, share-code join, stale move rejection, adversarial payloads, bot actions, fail-closed service outage, responsive screen, session revocation and block restrictions. Prior to public deployment, run a **real PostgreSQL transaction/race test** and independent browsers signed into **two actual 420ID accounts** across the same canonical origin; verify refresh/restart and Render cold-start/recovery, mobile layout, DNS/TLS, worker proxy, secret separation and rollback. GitHub unit tests alone are not proof of live deployment.

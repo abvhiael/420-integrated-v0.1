@@ -29,6 +29,8 @@ func bc06Fixture(t *testing.T,ip string)(*Store,*Handler,*http.Cookie,*http.Cook
  peer:=bc05Login(t,h,broker,memberB,ip)
  t.Cleanup(func(){
   ctx:=context.Background()
+  _,_=store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_rule_moves WHERE session_id IN (SELECT id FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1))",memberA)
+  _,_=store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_rule_genesis WHERE session_id IN (SELECT id FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1))",memberA)
   _,_=store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_session_commands WHERE session_id IN (SELECT id FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1))",memberA)
   _,_=store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_session_events WHERE session_id IN (SELECT id FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1))",memberA)
   _,_=store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_sessions WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)",memberA)

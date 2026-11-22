@@ -109,13 +109,22 @@ func main(){
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
   if e=store.ReadyClassicSessions(ctx);e!=nil{done();log.Fatal("BC-0.6 session schema or least-privilege grants unavailable")}
   done()
-  // No unqualified rule engine is registered. BC-0.7 supplies one per game.
+  // BC-0.7 adds a versioned contract; no individual Classic ruleset is registered in production.
   sessions,e:=social.NewClassicSessions(store,handler.Rooms,nil)
   if e!=nil{log.Fatal(e)}
   if e=handler.EnableClassicSessions(sessions);e!=nil{log.Fatal("BC-0.6 requires BC-0.5 room activation",e)}
   classicSessionWorker=sessions
  }else if os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!=""&&os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!="disabled"{
   log.Fatal("Unrecognized BC-0.6 session activation mode")
+ }
+ if os.Getenv("SOCIAL420_CLASSIC_RULES")=="restricted-acceptance"{
+  if classicSessionWorker==nil{log.Fatal("BC-0.7 requires activated BC-0.6 sessions")}
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyClassicRules(ctx);e!=nil{done();log.Fatal("BC-0.7 replay schema or least-privilege grants unavailable")}
+  done()
+  // No unqualified game-specific module is enabled by this flag.
+ }else if os.Getenv("SOCIAL420_CLASSIC_RULES")!=""&&os.Getenv("SOCIAL420_CLASSIC_RULES")!="disabled"{
+  log.Fatal("Unrecognized BC-0.7 rules activation mode")
  }
  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)

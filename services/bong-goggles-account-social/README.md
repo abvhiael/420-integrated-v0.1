@@ -556,3 +556,79 @@ The existing BC-0.5/0.6 GitHub workflow tests the PostgreSQL 16 Go
 service with race detection, static analysis, exact-head source and
 targeted Node regressions. The independent web workflow continues
 to protect both builds and established assets/security boundaries.
+
+
+## BC-0.7 — versioned deterministic game-rules framework (no games released)
+
+The rules framework is compiled, server-owned Go code, integrated with BC-0.6
+sessions. **It does not register any of the 25 Classic rule engines in production.**
+Their BC-0.8 AI implementations and per-game launch qualification remain open.
+
+A module implements RuleModule: immutable GameID/version/specification,
+seeded Initial state, Legal action generation, deterministic Step, strict
+saved-state Validate, and View projected for an individual seat. The
+RulesAdapter implements the existing ClassicRule transport contract and
+pins SHA-256(GameID + newline + Version + newline + Specification) to each
+new session. The specification digest binds a rules contract, NOT the
+entire compiled binary; changing a module without versioning its contract
+is forbidden by the retained exact-code qualification process. A recovery
+with a different rules version/hash fails closed.
+
+RuleFrame is a bounded, strict JSON codec: pinned game/version/hash and
+32-byte replay seed, 2–4 player seats, per-seat signed bounded scores,
+round number, named phase, authoritative next turn, terminal/winner, and
+module-defined JSON Data. A module validates its entire game-specific
+payload, including phase, score/round progression and internal concealed
+data. Unknown/duplicate JSON fields, malformed numbers/strings,
+oversized states/actions, forged scores, incorrect terminal flags and
+unqualified action types are rejected. Both Initial and Step must
+produce byte-identical outputs when run twice on the same inputs.
+Legal actions are generated twice and compared; user actions must match
+one of their canonical entries. Modules receive metered RuleBudget
+operations (maximum 100,000); trusted modules must charge their work.
+The framework also exposes deterministic, domain-separated SHA-256
+RuleRandom seeded at game creation, with an explicitly persisted counter
+and rejection-sampled bounded Intn; wall clocks, unseeded random and
+network reads must not affect game rules.
+
+Private, immutable replay material is separate from the public SSE:
+migration 006_classic_rules_replay.sql creates classic_rule_genesis
+(qualified rules hash, seed, initial state/digest) and classic_rule_moves
+(sequence, actor seat, private canonical action, before/after digests).
+The replay path reconstructs from the original seed and every committed
+accepted move. A versioned session checks this history inside a locked
+write transaction and a repeatable-read recovery transaction; its
+persisted snapshot, turn, winner and full move-event count must match.
+Tampered/missing actions, altered digests, changed saved scores/private
+data, mismatched rules versions and stale turns all fail closed.
+Only metadata goes to classic_session_events or SSE. Existing non-BC-0.7
+BC-0.6 test adapters and non-game account flows remain compatible.
+
+Operator migration requires privileged Migrate, then only:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_rule_genesis,
+      bg_account_social.classic_rule_moves TO bonggoggles_social_runtime;
+
+Do not grant DELETE, UPDATE or DDL on those tables. Startup check
+ReadyClassicRules requires exact INSERT/SELECT rights and rejects
+UPDATE/DELETE. Enable SOCIAL420_CLASSIC_RULES=restricted-acceptance
+only after the existing 420ID/BC-0.5/BC-0.6 session activation and
+migration/grants have been verified. Absent/disabled remains off;
+unknown values fail startup. No user-facing Pages feature switch
+can install an unqualified game module.
+
+A bounded RulesAdapter.ChooseMove contract is available for BC-0.8:
+AI policy is passed **only the authorized seat projection, legal action
+list, difficulty and deterministic RuleBudget**; it cannot see other
+players' hidden data and its chosen action must be one of those legal
+options. No autonomous bot runner or gameplay AI is shipped by BC-0.7.
+A small **test-only** counting-round fixture demonstrates score changes,
+round progression, terminal/tie decisions, concealed seat projections,
+deterministic shuffling, replay, source drift rejection and PostgreSQL
+saved-state corruption checks. It must never be represented as real Chess.
+
+Qualification: .github/workflows/bc-0-5-classic-rooms.yml retains
+PostgreSQL 16 tagged race/integration, Go vet/build and targeted
+browser regressions; the new RuleModule and replay cases are exercised
+through that same focused workflow. Independent whole-web visual
+qualification and real-user production deployment are separate gates.

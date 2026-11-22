@@ -60,7 +60,14 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
    if err!=nil{return empty,err};if blocked{return empty,ErrForbidden}
   }
  }
- state,first,e:=rule.Initial(room,seats)
+ var state json.RawMessage
+ var first int
+ var seed [32]byte
+ adapter,versioned:=rule.(*RulesAdapter)
+ if versioned{
+  seed,e=deterministicSeed();if e!=nil{return empty,e}
+  state,first,e=adapter.InitialWithSeed(seed,room,seats)
+ }else{state,first,e=rule.Initial(room,seats)}
  if e!=nil||!validRuleState(state)||first<0||first>=room.SeatCount{return empty,ErrUnavailable}
  version,hash:=rule.Identity()
  id,e:=newID();if e!=nil{return empty,e}
@@ -72,6 +79,9 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
   "VALUES($1,$2,$3,$4,'active',$5,$6,$7,1,$8,$9)",
   id,roomID,room.GameID,room.SeatCount,version,hash,string(state),first,deadline)
  if e!=nil{return empty,e}
+ if versioned{
+  if e=s.saveRuleGenesis(ctx,tx,id,adapter,seed,state);e!=nil{return empty,e}
+ }
  _,e=tx.ExecContext(ctx,"UPDATE bg_account_social.classic_rooms SET status='in_game',"+
   "revision=revision+1,updated_at=clock_timestamp() WHERE id=$1",roomID)
  if e!=nil{return empty,e}
@@ -96,6 +106,11 @@ func (s *ClassicSessions) Expire(ctx context.Context,id string)error{
  r,e:=scanClassicSession(tx.QueryRowContext(ctx,"SELECT "+classicSessionFields+
    " FROM bg_account_social.classic_sessions WHERE id=$1 FOR UPDATE",id))
  if e!=nil{return e}
+ rule,e:=s.rule(r.GameID,r.RulesVersion,r.RulesHash)
+ if e!=nil{return e}
+ if a,ok:=rule.(*RulesAdapter);ok{
+  if e=s.verifyRulesTx(ctx,tx,r,a);e!=nil{return ErrUnavailable}
+ }
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return e}
  if e=s.expireLocked(ctx,tx,&r,now);e!=nil{return e}
@@ -160,16 +175,22 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
  if !errors.Is(e,sql.ErrNoRows){return empty,e}
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return empty,e}
+ rule,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash)
+ if e!=nil{return empty,e}
+ replayAdapter,versioned:=rule.(*RulesAdapter)
+ if versioned{
+  if e=s.verifyRulesTx(ctx,tx,rec,replayAdapter);e!=nil{return empty,ErrUnavailable}
+ }
  if rec.Status=="active"&&rec.Deadline!=nil&&!now.Before(*rec.Deadline){
   if e=s.expireLocked(ctx,tx,&rec,now);e!=nil{return empty,e}
   if e=tx.Commit();e!=nil{return empty,e}
   return empty,ErrConflict
  }
  if rec.Status!="active"||room.Status!="in_game"||action.ExpectedSequence!=rec.Sequence+1{return empty,ErrConflict}
- if _,e=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash);e!=nil{return empty,e}
  kind:=action.Action
  actor:=any(seat)
  var next any;var deadline any;var winner any;var reason any
+ beforeState:=append(json.RawMessage(nil),rec.State...)
  if kind=="move"{
   if rec.TurnSeat==nil||*rec.TurnSeat!=seat{return empty,ErrForbidden}
   engine,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash)
@@ -183,7 +204,7 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
    rec.Status="finished";rec.FinishedReason="completed";rec.WinnerSeat=won;kind="finished"
    reason="completed";if won!=nil{winner=*won}
   }else{
-   if turn<0||turn>=rec.SeatCount||turn==seat{return empty,ErrUnavailable}
+   if turn<0||turn>=rec.SeatCount{return empty,ErrUnavailable} // qualified rules may award extra turns
    var controller string
    e=tx.QueryRowContext(ctx,"SELECT controller FROM bg_account_social.classic_room_seats WHERE room_id=$1 AND seat_index=$2",roomID,turn).Scan(&controller)
    if e!=nil{return empty,e};if controller!="human"{return empty,ErrUnavailable}
@@ -208,6 +229,9 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
   if e!=nil{return empty,e}
  }
  if e=s.publish(ctx,tx,rec,kind,actor);e!=nil{return empty,e}
+ if versioned&&action.Action=="move"{
+  if e=s.saveRuleMove(ctx,tx,id,rec.Sequence,seat,action.Move,beforeState,rec.State,replayAdapter);e!=nil{return empty,e}
+ }
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_session_commands "+
  "(session_id,request_id,actor,digest,sequence) VALUES($1,$2,$3,$4,$5)",
  id,action.RequestID,viewer,digest[:],rec.Sequence)

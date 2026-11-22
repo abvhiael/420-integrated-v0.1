@@ -35,7 +35,7 @@ func Migrate(ctx context.Context,db *sql.DB)error{
  if db==nil{return ErrInvalid}
  tx,e:=db.BeginTx(ctx,nil);if e!=nil{return e};defer tx.Rollback()
  if _,e=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock(420000008)");e!=nil{return e}
- for _,path:=range []string{"migrations/001_social.sql","migrations/002_account_messages_games.sql","migrations/003_contributions_xp.sql","migrations/004_classic_rooms.sql","migrations/005_classic_sessions.sql"}{
+ for _,path:=range []string{"migrations/001_social.sql","migrations/002_account_messages_games.sql","migrations/003_contributions_xp.sql","migrations/004_classic_rooms.sql","migrations/005_classic_sessions.sql","migrations/006_classic_rules_replay.sql"}{
   sqlText,e:=migrations.ReadFile(path);if e!=nil{return e}
   if _,e=tx.ExecContext(ctx,string(sqlText));e!=nil{return e}
  }

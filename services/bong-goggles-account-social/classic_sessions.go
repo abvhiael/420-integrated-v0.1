@@ -140,10 +140,19 @@ func (s *ClassicSessions) Get(ctx context.Context,viewer,id string)(ClassicSessi
  seat,e:=s.participant(ctx,s.Store.DB,record.RoomID,viewer)
  if e!=nil{return empty,e}
  if e=s.Expire(ctx,id);e!=nil{return empty,e}
- record,e=scanClassicSession(s.Store.DB.QueryRowContext(ctx,"SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions WHERE id=$1",id))
+ tx,e:=s.Store.DB.BeginTx(ctx,&sql.TxOptions{ReadOnly:true,Isolation:sql.LevelRepeatableRead})
+ if e!=nil{return empty,e};defer tx.Rollback()
+ record,e=scanClassicSession(tx.QueryRowContext(ctx,"SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions WHERE id=$1",id))
  if e!=nil{return empty,e}
- if _,e=s.participant(ctx,s.Store.DB,record.RoomID,viewer);e!=nil{return empty,e}
- return s.view(record,seat)
+ if _,e=s.participant(ctx,tx,record.RoomID,viewer);e!=nil{return empty,e}
+ rule,e:=s.rule(record.GameID,record.RulesVersion,record.RulesHash)
+ if e!=nil{return empty,e}
+ if adapter,ok:=rule.(*RulesAdapter);ok{
+  if e=s.verifyRulesTx(ctx,tx,record,adapter);e!=nil{return empty,ErrUnavailable}
+ }
+ view,e:=s.view(record,seat);if e!=nil{return empty,e}
+ if e=tx.Commit();e!=nil{return empty,e}
+ return view,nil
 }
 func (s *ClassicSessions) List(ctx context.Context,viewer string)([]ClassicSession,error){
  if !uuid.MatchString(viewer){return nil,ErrInvalid}

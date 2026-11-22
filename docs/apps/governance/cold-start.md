@@ -109,3 +109,26 @@ Create and inspect a G3/G4 dual-house proposal through its developer/operator co
 Preserve exact Git SHA, clean-worktree check, toolchain version, eight code hashes, immutable/storage layout records, approved roots/totals/provenance, chain ID, seven addresses and codehashes, all 19 legacy operation IDs (or indices 0–19 for the deferred mode) and receipts, checkpoint effective blocks, source revisions, approval/handoff proof, contract/Wallet/Indexer/Genesis/Treasury/Vault/repository qualification workflow IDs and their **actual** conclusions, and a specific outstanding-finding ledger.
 
 The current seven-field all-zero approval remains deliberately **fail-closed**; this document neither claims public chain launch nor satisfies GOV-AUDIT-9, the next production-equivalent testnet stage.
+
+
+## GOV-PRE-08 — unsigned V4 Genesis candidate preparation
+
+The historical active \`FROZEN_V3\` commitment is deliberately left intact. The working three-founder ledger has changed two of its original authority-input blobs, so it is **not** valid to run legacy V3 startup/recovery checks as if they qualified the new candidate. \`GOV-PRE-08\` creates an independently reproducible **unsigned V4 proposal**, not an authorization to launch a chain. No original V3 source file is silently rewritten.
+
+On the exact GOV-PRE-08 commit, with Foundry/cast installed and Solidity 0.8.24/Cancun/optimizer 200/via-IR, run the task-scoped CI workflow or the following:
+
+~~~sh
+python3 scripts/gov-pre-08/test_plan.py
+python3 scripts/verify-genesis-supply-reconciliation.py
+python3 scripts/verify-founding-genesis-integration.py
+forge build --root contracts src/governance/FoundingWalletClaims420.sol src/governance/FoundingCommitteeMembership420.sol src/governance/FoundingRetirementVerifier420.sol src/treasury/FoundingTreasuryAuthority420.sol src/treasury/FoundingValidatorSponsorship420.sol src/treasury/FoundingCommunityRetirementSweep420.sol src/revenue/FoundingDeveloperCompensationSplitter420.sol src/revenue/DevelopmentCompensationVault420.sol src/treasury/TreasuryAuthorization420.sol src/treasury/TreasuryPolicyRegistry420.sol src/treasury/TreasuryBudgetRegistry420.sol src/treasury/TreasuryDisbursementRegistry420.sol src/treasury/TreasuryRouter420.sol src/treasury/TreasuryReleaseExecutor420.sol
+python3 scripts/gov-pre-08/plan.py --output /tmp/gov-pre-08-unsigned.json
+# Must FAIL: no founder approvals, no live deployment receipts, no signed freeze.
+python3 scripts/gov-pre-08/plan.py --require-release
+~~~
+
+The candidate binds 14 real source/artifact/constructor-ABI identities; its dynamic founder, Treasury, sponsorship, compensation and retirement addresses intentionally remain \`null\`. No \`0x04xx\` address is claimed for them. The 42m supply is conserved, including 500k locked at the **existing** 0x0427 vesting predeploy and three liquid amounts of 250k/125k/125k whose personal destinations remain null until independently proven. The 8.6m Protocol Reserve retains its **non-additive** 4.2m Operations and 840k Contingency earmarks; **no new Vault balances are recorded** before exact authorized real transfers. The 10% sponsored-validator Community Reward path still targets 0x0426.
+
+Before approving any new V4, obtain the three **real** wallet addresses, public challenge signatures, chain/genesis commitment, source/constructor/immutable/runtime and initial-storage materialization, exact Vault route capabilities and registry bindings, reviewed funding plan and authorized decision/signatures. Freeze V4 only after recalculating authority blobs containing those identities and independently checking them on the exact source SHA. Do not publish a candidate digest as an approved V4 hash. For non-frozen post-Genesis components, deploy the exact artifacts with verified constructor inputs, independently capture finalized contract address/codehash and initialize control-plane and Vault registration in their established dependency order. Compensator Vault funds are authenticated **application revenues only**, never Genesis founder coins.
+
+Genesis validation and cold-start recovery must reject any missing founder or Operations/Contingency/Community Vault, stale V3 authority hash, codehash mismatch, wrong Timelock/Registry address, partial Civic/Stake graph, improperly funded vault, or missing atomic Treasury route receipt. A failure requires discarding the **unreleased** candidate or using the original governance-approved recovery operations. Never edit a historical signed bundle to make a verifier pass.

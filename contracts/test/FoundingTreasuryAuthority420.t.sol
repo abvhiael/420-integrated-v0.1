@@ -346,6 +346,26 @@ contract FoundingTreasuryAuthority420Test {
         require(!scheduled, "expired proposal became a Treasury commitment");
     }
 
+    function testGeneralGovernanceCannotBypassFoundingBudgetSchedulingLimits() public {
+        uint64 nowTime = uint64(block.timestamp);
+        bytes32 purposeHash = keccak256("unapproved-direct-governance-transfer");
+        bytes32 budgetId = founder.operationsBudgetId();
+        bytes32 forgedId = disb.canonicalId(
+            budgetId, PAYEE, uint128(1 ether), nowTime, nowTime + 1 days,
+            founder.operationsActionHash(), purposeHash
+        );
+        // The general GovernanceTimelock can schedule ordinary Civic budgets,
+        // but cannot counterfeit a founding controller's budget commitment.
+        vm.prank(disb.governanceTimelock());
+        (bool bypass,) = address(disb).call(abi.encodeCall(
+            disb.schedule, (forgedId, budgetId, PAYEE, uint128(1 ether), nowTime,
+                nowTime + 1 days, founder.operationsActionHash(), purposeHash)
+        ));
+        require(!bypass, "general Treasury writer bypassed founding approval/rolling limits");
+        require(budgets.budget(budgetId).committed == 0, "forgery reserved founding budget");
+        require(founder.operationsCommitted() == 0, "forgery changed founding usage");
+    }
+
     function testUnboundExecutorAndForgedReleaseMarkerAreRejected() public {
         vm.prank(ADMIN);
         bytes32 paymentId = _propose(false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY);

@@ -46,7 +46,17 @@
     "immutableDevelopmentCompensationBeneficiaryIsSplitter": false,
     "adminBps": 5000,
     "andrewBps": 2500,
-    "janetBps": 2500
+    "janetBps": 2500,
+    "vaultBoundOnChain": false,
+    "actualAuthorizedRevenuePaymentVerifiedOnChain": false,
+    "splitterOnlyCreditsVaultRevenue": true,
+    "tokenCreditRequiresAtomicVaultNotification": true,
+    "genesisFundsNeverCompensationRevenue": true,
+    "deploymentPlan": "scripts/prepare-founder-financial-deployment.py",
+    "governedDeploymentStatus": "UNDEPLOYED_THREE_VERIFIED_WALLETS_V4_REQUIRED",
+    "localVaultSplitAndERC20Qualified": true,
+    "realSourceVaultCodehashAndDeploymentVerified": false,
+    "finalizedPayoutReceiptsVerified": false
   },
   "retirement": {
     "validatorEligibleOwnerMinimum": 60,
@@ -96,6 +106,14 @@
     "vestingCompletesAfterDays": 182,
     "predeployActuallyFunded": false,
     "liquidAllocationsActuallyFunded": false,
-    "newFrozenGenesisCommitmentApproved": false
+    "newFrozenGenesisCommitmentApproved": false,
+    "candidateContractVersion": 2,
+    "genesisRuntimeDepositsForbidden": true,
+    "sourceRejectsBackdatedStartTime": true,
+    "localThirteenReleaseQualified": true,
+    "genesisStartActuallyVerifiedOnChain": false,
+    "totalLockedActuallyPaid420": null,
+    "blockZeroVestingBalanceVerified": false,
+    "blockZeroLiquidBalancesVerified": false
   }
 }

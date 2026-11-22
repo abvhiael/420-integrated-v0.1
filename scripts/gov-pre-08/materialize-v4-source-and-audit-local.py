@@ -186,7 +186,9 @@ def receipt_view(rpc, evidence):
     need(tags.count("fund:OPERATIONS") == 1 and tags.count("fund:CONTINGENCY") == 1,
          "missing exactly-once funding")
     deployed = {}
+    created_vaults = []
     ledger_events = []
+    funding_logs = {}
     for row in txs:
         receipt = rpc.call("eth_getTransactionReceipt", [row["tx"]])
         need(receipt is not None and int(receipt["status"], 16) == 1,
@@ -206,7 +208,10 @@ def receipt_view(rpc, evidence):
                 "runtimeCodeHash": funding.cast("keccak", rpc.code(addr)).lower(),
                 "codeBytes": (len(rpc.code(addr)) - 2)//2,
             }
+            if row["tag"] == "deploy:AssetVault420":
+                created_vaults.append(addr.lower())
         if row["tag"].startswith("fund:"):
+            funding_logs[row["tag"].split(":", 1)[1]] = receipt["logs"]
             need(len(receipt["logs"]) == 3,
                  "unexpected transfer event multiplicity " + row["tag"])
             for log in receipt["logs"]:
@@ -222,8 +227,9 @@ def receipt_view(rpc, evidence):
         "VaultPolicyRegistry420", "VaultRegistry420", "VaultAccounting420", "AssetVault420"
     }, "actual constructor graph missing")
     # Three AssetVault420 constructor receipts share the same tag.
-    need(len([t for t in tags if t == "deploy:AssetVault420"]) == 3,
-         "three actual Vault constructors required")
+    need(len(created_vaults) == 3 and len(set(created_vaults)) == 3
+         and set(created_vaults) == {v.lower() for v in evidence["vaultAddresses"].values()},
+         "three distinct real Vault constructor addresses do not reconcile")
     need(len(ledger_events) == 6 and len({(x["tx"], x["logIndex"]) for x in ledger_events}) == 6,
          "canonical indexer projection has missing/duplicate logs")
     for typ, amount in (("OPERATIONS", 4_200_000*KIEF),
@@ -232,6 +238,31 @@ def receipt_view(rpc, evidence):
         addr = evidence["vaultAddresses"][typ]
         need(rpc.balance(addr) == amount, "onchain Vault custody mismatch " + typ)
         need(rpc.code(addr) != "0x", "Vault has no deployed runtime " + typ)
+        reg = deployed["VaultRegistry420"]["address"]
+        accounting = deployed["VaultAccounting420"]["address"]
+        vault_id = evidence["vaultIds"][typ]
+        need(int(rpc.read(reg, "getVault(bytes32)", vault_id)[2:66], 16) == int(addr,16),
+             "independent Vault Registry resolution failed: " + typ)
+        free = rpc.read(accounting, "freeBalance(bytes32,address)", vault_id, ZERO)
+        need(int(free,16) == amount,
+             "independently read onchain accounting mismatch: " + typ)
+    for name, amount in (("OPERATIONS",4_200_000*KIEF),("CONTINGENCY",840_000*KIEF)):
+        observed = {(log["address"].lower(), log["topics"][0].lower()): log
+                    for log in funding_logs[name]}
+        expected = (
+            (funding.PROTO.lower(), funding.keccak_bytes("TreasuryTransfer(address,uint256,bytes32)")),
+            (evidence["vaultAddresses"][name].lower(), funding.keccak_bytes("NativeDeposited(address,uint256)")),
+            (deployed["VaultAccounting420"]["address"], funding.keccak_bytes("DepositRecorded(bytes32,address,uint256,uint256)")),
+        )
+        need(set(observed) == set(expected),
+             "unexpected event signatures or emitters in actual "+name+" funding receipt")
+        need(int(observed[expected[0]]["data"],16) == amount,
+             "actual TreasuryTransfer amount changed: "+name)
+        recording=observed[expected[2]]["data"][2:]
+        need([int(recording[i:i+64],16) for i in (0,64)] == [amount,amount],
+             "native VaultAccounting DepositRecorded mismatch: "+name)
+    need(int(rpc.read(funding.PROTO, "governanceTimelock()"),16) == int(funding.TIME,16),
+         "predeploy immutable Timelock address drift")
     need(rpc.balance(funding.PROTO) == 3_560_000*KIEF,
          "onchain protocol reserve remainder mismatch")
     need(evidence["initialNativeSupplyWei"] == evidence["postFundingNativeSupplyWei"] ==

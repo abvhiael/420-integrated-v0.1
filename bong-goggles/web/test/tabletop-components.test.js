@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {
- TABLETOP_SUITS,TABLETOP_PIECES,STANDARD_CARD_RANKS,standardCardDeck,
+ TABLETOP_SUITS,TABLETOP_PIECES,TABLETOP_ASSET_MANIFEST,STANDARD_CARD_RANKS,standardCardDeck,
  validTabletopProjection,renderCardDeck,renderCardDiscard,renderCardHand,
  renderTileRack,renderPieceBoard,renderDiceSet,renderScorecards,
  renderPlayerSeats,renderGameScoreboard,renderTurnIndicator,renderGameControls,
- renderSharedTabletop
+ renderSharedTabletop,renderGameFeedback,renderTurnDeadline,renderLocalizedRules
 } from '../core/tabletop-components.js';
 import {renderSharedGameScreen} from '../core/shared-game-ui.js';
 import {classicGameById} from '../core/classics.js';
@@ -183,4 +183,53 @@ test('BC-0.9 responsive and forced-color accessibility skin is packaged with Cla
    'game-kit__controls','forced-colors:active','prefers-reduced-motion:reduce']){
   assert.ok(css.includes(token),token);
  }
+});
+
+
+test('BC-0.9 rule-localization, feedback and server deadline are validated and never invent client time',()=>{
+ const f=fixture();
+ f.tabletop.feedback={message:'Your turn has begun.',tone:'info'};
+ f.tabletop.deadline={at:'2026-11-22T05:00:00Z',label:'Server turn deadline'};
+ f.tabletop.rules={verified:true,locale:'fr-CA',title:'Règles',paragraphs:['Chaque tour suit le serveur.','Le score est officiel.']};
+ assert.equal(validTabletopProjection(f),true);
+ const html=render(f);
+ assert.match(html,/Your turn has begun/);
+ assert.match(html,/Turn timer/);
+ assert.match(html,/<time datetime="2026-11-22T05:00:00Z">/);
+ assert.match(html,/lang="fr-CA"/);
+ assert.match(html,/Règles/);
+ assert.match(html,/Chaque tour suit le serveur/);
+ assert.doesNotMatch(html,/setInterval|Date\\.now\\(|onclick=|<script\\b/);
+ for(const edit of [
+  t=>t.deadline.at='2026-02-31T05:00:00Z',
+  t=>t.deadline.at='tomorrow',
+  t=>t.rules.locale='../../fr',
+  t=>t.rules.verified=false,
+  t=>t.feedback.tone='success',
+  t=>t.feedback.message='X'.repeat(330),
+ ]){
+  const bad=fixture();
+  bad.tabletop.feedback={...f.tabletop.feedback};
+  bad.tabletop.deadline={...f.tabletop.deadline};
+  bad.tabletop.rules={...f.tabletop.rules};
+  edit(bad.tabletop);
+  assert.equal(validTabletopProjection(bad),false);
+  assert.match(render(bad),/Tabletop projection unavailable/);
+ }
+});
+test('BC-0.9 local symbol asset manifest and feedback helpers never fetch unqualified artwork or run controls',()=>{
+ assert.equal(TABLETOP_ASSET_MANIFEST.format,'unicode-glyphs');
+ assert.deepEqual(TABLETOP_ASSET_MANIFEST.externalUrls,[]);
+ assert.equal(TABLETOP_ASSET_MANIFEST.dice.length,7);
+ assert.ok(Object.isFrozen(TABLETOP_ASSET_MANIFEST));
+ const hostile='<svg onload=alert(1)>';
+ const html=renderGameFeedback({message:hostile,tone:'error'})+
+  renderTurnDeadline({at:'2026-11-22T05:00:00Z'})+
+  renderLocalizedRules({verified:true,locale:'en-CA',title:'Help',paragraphs:[hostile]});
+ assert.match(html,/role="alert"/);
+ assert.match(html,/&lt;svg/);
+ assert.match(html,/lang="en-CA"/);
+ assert.doesNotMatch(html,/<svg\\b|<script\\b|<button\\b|onclick="/);
+ assert.equal(renderTurnDeadline({at:'2026-11-22T05:00:00-06:00'}),'');
+ assert.equal(renderLocalizedRules({verified:false,locale:'en-CA',title:'Help',paragraphs:['Text']}),'');
 });

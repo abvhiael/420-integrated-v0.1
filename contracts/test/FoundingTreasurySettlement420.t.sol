@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 // Production Solidity dependencies, never mocked releases or ledger updates.
 // Only the caller identity, unrelated Civic readiness and test funding are fixtures.
 import "../src/treasury/FoundingTreasuryAuthority420.sol";
+import "../src/governance/FoundingWalletClaims420.sol";
 import "../src/system/CapabilityRegistry420.sol";
 import "../src/apps/ProtocolRegistry.sol";
 import "../src/vault/VaultAccounting420.sol";

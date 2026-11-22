@@ -9,10 +9,23 @@ import (
  "testing"
 )
 
+// The actual HTTP rate limiter remains enabled in integration tests.
+// A full 121-point automated match can issue >60 commands in seconds,
+// whereas human turns span multiple real minutes. Advance only the
+// isolated test database's rate-bucket window to model elapsed time;
+// do not change server rate limits, authorization, or application clocks.
+func bc15AdvanceRateWindow(t *testing.T,store *Store){
+ t.Helper()
+ if _,e:=store.DB.Exec(`UPDATE bg_account_social.rate_buckets
+  SET started_at=clock_timestamp()-interval '61 seconds'
+  WHERE action='social-write'`);e!=nil{t.Fatal("test-only rate-window advancement",e)}
+}
+
 // Exercise the optimized path against actual PostgreSQL, HTTP-only 420ID
 // principals, stored opaque state and separately committed immutable journals.
 func TestBC15VerifiedPrefixDetectsHistoricalTamperAndColdRestart(t *testing.T){
  store,h,host,peer,adapter:=bc07Sessions(t,"198.51.100.219")
+ bc15AdvanceRateWindow(t,store)
  room:=bc06Room(t,h,host,peer)
  match:=bc06Start(t,h,host,room.ID)
  for i,move:=range []int{2,1}{

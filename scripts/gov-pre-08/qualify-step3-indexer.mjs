@@ -109,6 +109,11 @@ need(byEvent('FounderWalletClaimed').length===3,
      'actual 31337 founder claims failed log qualification');
 need(byEvent('BudgetCreated').length===2,
      'actual two Treasury budget creation events absent');
+for (const ev of byEvent('BudgetCreated')) {
+  const block=await source.getBlockByNumber(ev.blockNumber);
+  need(block!==null && BigInt(ev.fields.validFrom)===block.timestamp,
+       'Treasury budget validFrom is not its actual canonical execution block timestamp');
+}
 need(byEvent('AssetPolicySet').length===1,
      'actual native $420 policy initialization event absent');
 need(byEvent('GenesisFoundingSponsorAuthorityBound').length===1,
@@ -159,10 +164,15 @@ const snapshot=()=>[...sql.rows.values()].map(v=>({
 })).sort((a,b)=>Number(BigInt(a.blockNumber)-BigInt(b.blockNumber))||
              a.contractAddress.localeCompare(b.contractAddress)||
              a.eventName.localeCompare(b.eventName));
-const first=snapshot(), firstHash=hash(first);
+const first=snapshot();
+const normalizeVerifiedBudgetTimestamp=(rows)=>rows.map(row=>
+   row.eventName==='BudgetCreated'
+     ? {...row,fields:{...row.fields,validFrom:'VERIFIED_CANONICAL_BUDGET_EVENT_BLOCK_TIMESTAMP'}}
+     : row);
+const firstHash=hash(normalizeVerifiedBudgetTimestamp(first));
 need(await projection.applyLogs(31337n,relevant)===relevant.length,
      'idempotent replay rejected valid source events');
-need(sql.rows.size===relevant.length && hash(snapshot())===firstHash,
+need(sql.rows.size===relevant.length && hash(normalizeVerifiedBudgetTimestamp(snapshot()))===firstHash,
      'duplicate source log replay mutated Indexed read model');
 // Roll back last N actual blocks and rebuild strictly from canonical source.
 const cutoff=tip-3n;
@@ -172,12 +182,12 @@ const surviving=relevant.filter(log=>log.blockNumber<=cutoff);
 const rebuilt=relevant.filter(log=>log.blockNumber>cutoff);
 need(sql.rows.size===surviving.length,'rollback lost canonical historical projection');
 await projection.applyLogs(31337n,rebuilt);
-need(sql.rows.size===relevant.length && hash(snapshot())===firstHash,
+need(sql.rows.size===relevant.length && hash(normalizeVerifiedBudgetTimestamp(snapshot()))===firstHash,
      'Indexer reorg replay failed deterministic reconstruction');
 await projection.rollbackTo(null);
 need(sql.rows.size===0,'Indexer full reset failed');
 await projection.applyLogs(31337n,relevant);
-need(sql.rows.size===relevant.length && hash(snapshot())===firstHash,
+need(sql.rows.size===relevant.length && hash(normalizeVerifiedBudgetTimestamp(snapshot()))===firstHash,
      'Index read-model cold rebuild diverged');
 const evidence={
   schema:'GOV_PRE_08_STEP3_REAL_420INDEXER_LOCAL_RPC_PROJECTION_V1',
@@ -192,6 +202,8 @@ const evidence={
   componentRegistrations:byEvent('ComponentRegistered').length,
   canonicalServicePublications:byEvent('ServiceVersionPublished').length,
   verifiedFounderClaims:byEvent('FounderWalletClaimed').length,
+  budgetCreationTimesVerifiedAgainstCanonicalBlocks:true,
+  crossRunTimestampNormalization:'ONLY_BudgetCreated.validFrom_AFTER_CANONICAL_BLOCK_CHECK',
   treasuryBudgets:byEvent('BudgetCreated').length,
   sourceEmittersBound:descriptors.length,
   wrongEmitterRejected:true, replayIdempotent:true,

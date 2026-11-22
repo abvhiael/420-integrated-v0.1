@@ -25,7 +25,9 @@
     "manifest": "contracts/config/founder-wallet-reservations.json",
     "allThreeEip191ProofsVerified": false,
     "claimRegistryAddress": null,
-    "allThreeOnChainClaimsVerified": false
+    "allThreeOnChainClaimsVerified": false,
+    "allThreeOwnershipProofsVerified": false,
+    "claimRuntimeCodeHash": null
   },
   "founderFunding": {
     "treasuryAuthorityAddress": null,

@@ -13,6 +13,8 @@ from pathlib import Path
 import re
 import sys
 import subprocess
+import os
+import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "config/genesis-allocations.json"
@@ -34,6 +36,48 @@ H256 = re.compile(r"^0x[0-9a-fA-F]{64}$")
 def require(ok, why):
     if not ok:
         raise ValueError(why)
+
+
+
+def require_live_genesis_balances(founders, integration):
+    """Independently check the *actual block-zero native state*, not release flags.
+
+    Frozen V4 alone is insufficient: an unfunded 0x0427 or missing liquid wallet
+    allocations must fail even if a signed manifest claims successful funding.
+    """
+    uri=os.environ.get("FOUNDER_GENESIS_RPC_URL")
+    require(bool(uri), "FOUNDER_GENESIS_RPC_URL required for real Genesis vesting/liquid funding evidence")
+    ident=0
+    def rpc(method, params):
+        nonlocal ident
+        ident += 1
+        request=urllib.request.Request(uri,
+            json.dumps({"jsonrpc":"2.0","id":ident,"method":method,"params":params}).encode(),
+            {"Content-Type":"application/json"})
+        with urllib.request.urlopen(request,timeout=15) as response:
+            data=json.load(response)
+        require(data.get("id")==ident and data.get("error") is None and "result" in data,
+                "invalid authenticated Genesis RPC response: "+method)
+        return data["result"]
+
+    chain=int(rpc("eth_chainId",[]),16)
+    require(chain==420 and integration["genesis"]["chainId"]==chain,
+            "founder Genesis funding checked on wrong chain")
+    genesis=rpc("eth_getBlockByNumber",["0x0",False])
+    expected=integration["genesis"]["networkGenesisBlockHash"]
+    require(expected is not None and H256.fullmatch(expected) and genesis
+        and genesis.get("hash","").lower()==expected.lower(),
+        "founder Genesis block hash not independently authenticated")
+    block={"blockHash":expected,"requireCanonical":True}
+    require(rpc("eth_getCode",[PREDEPLOY,block]) not in ("0x","0x0"),
+            "founder vesting contract not materialized at 0x0427")
+    require(int(rpc("eth_getBalance",[PREDEPLOY,block]),16)==500000*ETH,
+            "actual locked FounderVestingRegistry block-zero native balance not 500k")
+    for i, founder in enumerate(founders):
+        bal=int(rpc("eth_getBalance",[founder["wallet_address"],block]),16)
+        require(bal==LIQUID[i]*ETH,
+            "founder wallet block-zero liquid balance disagrees with signed Genesis ledger: "+ROLES[i])
+    return expected
 
 
 def verify(release):
@@ -127,6 +171,7 @@ def verify(release):
                 "founder wallet signature plan does not match approved Genesis")
         require(init["founder_beneficiaries"] == [x["wallet_address"] for x in founders],
                 "predeploy beneficiary storage has not been bound to verified wallets")
+        require_live_genesis_balances(founders, json.loads((ROOT / "contracts/config/founding-genesis-integration-v1.json").read_text()))
     return len(found)
 
 
@@ -136,7 +181,7 @@ if __name__ == "__main__":
     args = cli.parse_args()
     try:
         n = verify(args.require_release)
-    except (AssertionError, ValueError, KeyError, TypeError, AttributeError, subprocess.CalledProcessError) as exc:
+    except (AssertionError, ValueError, KeyError, TypeError, AttributeError, subprocess.CalledProcessError, OSError, TimeoutError) as exc:
         print("FOUNDER GENESIS: FAIL-CLOSED: " + str(exc), file=sys.stderr)
         raise SystemExit(1)
     print(f"FOUNDER GENESIS: structure passes, {n}/3 founder addresses bound; "

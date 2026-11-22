@@ -95,8 +95,17 @@ def get(route):
     with urllib.request.urlopen(req,timeout=5) as resp:
         assert resp.headers["X-420-Canonical-Authority"]=="false"
         return json.load(resp)
-b=get(f"/v1/blocks/{head}")
-assert b["block"]["chainId"]==31337 and b["block"]["number"]==head
+# Go Explorer enforces authentic consensus producer provenance for every
+# NON-genesis block. Synthetic Anvil has none: the correct result is a denial,
+# NOT a manufactured consensus root. Genesis has no producer and is readable.
+b=get("/v1/blocks/0")
+assert b["block"]["chainId"]==31337 and b["block"]["number"]==0 and b["trace"]==None if "trace" in b else b["block"]["number"]==0
+try:
+    get(f"/v1/blocks/{head}")
+    raise AssertionError("unattributed Anvil block incorrectly presented as certified")
+except urllib.error.HTTPError as err:
+    body=err.read().decode()
+    assert err.code>=400 and "historical producer provenance" in body,body
 tx=graph["txReceipts"][0]["tx"]
 t=get("/v1/transactions/"+tx)
 assert t["transaction"]["hash"].lower()==tx.lower()
@@ -112,6 +121,8 @@ out={
  "realGoExplorerProcess":True,"realPostgresIndexerSource":True,
  "actualExplorerHtmlServed":True,"actualIndexedBlocksAndTransactionRead":True,
  "actualRegistryServiceVersionRecovered":True,
+ "nonGenesisWithoutRealConsensusProducerDenied":True,
+ "genesisDetailWithNoProducerAllowed":True,
  "wrongChainBlocked":True,"canonicalAuthority":False,
  "syntheticBftFinality":False,"productionDeploymentApproved":False,
  "explorerIndexedHead":head,

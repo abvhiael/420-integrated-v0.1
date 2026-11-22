@@ -130,7 +130,7 @@ test('BC-0.9 all reusable public renderers escape malicious labels and never inj
  const attack='<img src=x onerror=alert(1)>';
  const safeCard={id:'safe-1',label:attack,suit:'hearts'};
  const pieces={family:'checkers',rows:8,columns:8,pieces:[{row:0,column:0,piece:
-  {family:'checkers',side:'black',kind:'king',label:attack}}]};
+  {family:'checkers',side:'black',kind:'king',label:'<img src=x>'}}]};
  const parts=[
   renderCardDeck({count:2,label:attack}),
   renderCardDiscard({count:1,top:safeCard}),

@@ -93,6 +93,7 @@ func (s *Store) ReadyClassicMatchRequests(ctx context.Context)error{
  COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'SELECT'),false)
  AND COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'INSERT'),false)
  AND NOT COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'UPDATE'),false)
+ AND NOT COALESCE(has_any_column_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'UPDATE'),false)
  AND NOT COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'DELETE'),false)
  AND NOT COALESCE(has_table_privilege(current_user,to_regclass('bg_account_social.classic_match_requests'),'TRUNCATE'),false)`).Scan(&ok)
  if e!=nil{return e};if !ok{return ErrUnavailable};return nil
@@ -112,8 +113,13 @@ func previousMatchRequest(ctx context.Context,tx *sql.Tx,viewer,requestID string
 }
 func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest [32]byte,seats []ClassicSeat,source any)(string,error){
  if len(seats)<2||len(seats)>4||seats[0].Subject!=viewer||seats[0].Controller!="human"{return "",ErrInvalid}
+ // Match ClassicRooms.Create: serialize the active-room quota across
+ // challenge, ordinary create and rematch, even on concurrent workers.
+ var host string
+ e:=tx.QueryRowContext(ctx,"SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE",viewer).Scan(&host)
+ if errors.Is(e,sql.ErrNoRows){return "",ErrNotFound};if e!=nil{return "",e}
  var active int
- e:=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&active)
+ e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&active)
  if e!=nil{return "",e};if active>=10{return "",ErrConflict}
  id,e:=newID();if e!=nil{return "",e}
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count) VALUES($1,$2,'cribbage','private',$3)",id,viewer,len(seats))

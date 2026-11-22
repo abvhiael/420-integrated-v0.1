@@ -91,11 +91,11 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
    if bytes.Contains(view.PrivateView,private){t.Fatal("hidden engine field leaked")}
   }
  }
- if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",nil);w.Code!=401{t.Fatal("guest could view hidden match",w.Code)}
+ if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{t.Fatal("guest could view hidden match",w.Code)}
  if w:=request(h,"POST","/v1/classic-sessions/"+match.ID+"/action",body(map[string]any{
   "action":"move","expectedSequence":2,"requestId":bc06ActionID(t),
   "move":map[string]any{"type":"cut"},
- }),nil);w.Code!=401{t.Fatal("unauthenticated move",w.Code)}
+ }));w.Code!=401{t.Fatal("unauthenticated move",w.Code)}
  if w:=request(h,"POST","/v1/classic-sessions",body(map[string]string{"roomId":room.ID}),host);w.Code!=201{
   t.Fatal("idempotent host restart",w.Code,w.Body.String())
  }
@@ -188,7 +188,7 @@ func TestBC15QualifiedMixed420IDAndComputerSeatPersistence(t *testing.T){
   }
   if botMoves<3{t.Fatal("unqualified bot activity",n,botMoves)}
   if e:=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("mixed seat journal",e)}
-  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",nil);w.Code!=401{t.Fatal("outsider recovered private bot/human match")}
+  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{t.Fatal("outsider recovered private bot/human match")}
   t.Logf("BC-1.5 %d-seat separate 420ID accounts + %d qualified bot turns",n,botMoves)
  }
 }

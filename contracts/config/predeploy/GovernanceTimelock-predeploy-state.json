@@ -13,7 +13,7 @@
     "runtimeCodeHash equals keccak256(materialized deployed bytecode)"
   ],
   "runtimeArtifact": "contracts/artifacts/GovernanceTimelock.json",
-  "runtimeCodeHash": "0x839cd74c4f78cc7b90a6306c9294fc68840a00e9e4950465d2ca2729ee56c65a",
+  "runtimeCodeHash": "0x9f3b61e71f625ee8bc36d62ccfd261aa7d6998bd073e784c1141cb619f777ed4",
   "schema": "420-governance-timelock-predeploy-state-v1",
   "status": "GOV_AUDIT_6_PREDEPLOY_READY",
   "storage": {

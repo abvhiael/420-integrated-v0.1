@@ -51,6 +51,9 @@ contract CivicGovernor420 is I420System {
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;
     mapping(bytes32 => bytes32) public queuedActionHashes;
+    // Append-only transient execution evidence; preserve historical mapping storage slots.
+    bytes32 private _activeDualHouseProposal;
+    bytes32 private _activeDualHouseActionHash;
 
     error InvalidModule();
     error InvalidCommitment();
@@ -130,6 +133,28 @@ contract CivicGovernor420 is I420System {
         FrozenRule memory rule = _frozenRules[proposalId];
         if (!rule.exists) revert FrozenRuleMissing();
         return rule;
+    }
+
+    /// @notice Nonzero only while the canonical Timelock dispatches a committed,
+    /// passed, dual-house Civic batch; used only as read-only retirement evidence.
+    function activeDualHouseExecution() external view returns (bool) {
+        return _activeDualHouseProposalIsQueued();
+    }
+
+    function activeDualHouseProposal() external view returns (bytes32) {
+        return _activeDualHouseProposalIsQueued() ? _activeDualHouseProposal : bytes32(0);
+    }
+
+    /// @notice The *effective* current action is zero after the proposal is executed.
+    /// No callback-sensitive post-call clearing can restore stale authorization.
+    function activeDualHouseActionHash() external view returns (bytes32) {
+        return _activeDualHouseProposalIsQueued() ? _activeDualHouseActionHash : bytes32(0);
+    }
+
+    function _activeDualHouseProposalIsQueued() private view returns (bool) {
+        if (_activeDualHouseProposal == bytes32(0)) return false;
+        (,,,,,,, CivicIds420.ProposalState state, bool exists) = proposalRegistry.proposals(_activeDualHouseProposal);
+        return exists && state == CivicIds420.ProposalState.QUEUED;
     }
 
     function hashActions(
@@ -276,8 +301,15 @@ contract CivicGovernor420 is I420System {
         }
         if (msg.value != expectedValue) revert ValueMismatch();
         if (timelock.executingCivicOperation() != proposalId) revert UnauthorizedTimelock();
+        if (_activeDualHouseProposalIsQueued()) revert UnauthorizedTimelock();
+        // The separate read-only marker does not restore Timelock authority suspended
+        // during the action callback. A failing batch atomically reverts this marker.
+        if (_frozenRules[proposalId].dualHouseRequired) _activeDualHouseProposal = proposalId;
 
         for (uint256 i = 0; i < actions.length; ++i) {
+            if (_activeDualHouseProposal != bytes32(0)) {
+                _activeDualHouseActionHash = keccak256(abi.encode(actions[i].target, actions[i].data));
+            }
             bool ok = timelock.executeCivicAction{ value: actions[i].value }(
                 proposalId, actions[i].target, actions[i].data
             );
@@ -288,6 +320,8 @@ contract CivicGovernor420 is I420System {
         // Only a genuinely executed (not merely approved) Civic dual-house batch counts
         // toward retirement readiness. Timelock verifies this execution context.
         if (_frozenRules[proposalId].dualHouseRequired) ++dualHouseExecutedCount;
+        // Once the immutable proposal moves to EXECUTED, these getters return
+        // zero even though the historical action commitment remains auditable.
         emit CivicProposalExecuted(proposalId, computedHash);
     }
 

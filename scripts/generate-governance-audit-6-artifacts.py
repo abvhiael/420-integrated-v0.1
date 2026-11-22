@@ -112,6 +112,7 @@ def timelock_state(rec):
  }
 
 # GOV-PRE-06: retain both chain-approved electorate modes; never materialize synthetic initial voters.
+# GOV-PRE-07: retain append-only CivicGovernor exact-retirement action metadata at the qualified head.
 def governance_state(rec):
  cfg=json.loads(CFG.read_text())
  candidate=cfg.get("genesisBootstrapCommitment",{})

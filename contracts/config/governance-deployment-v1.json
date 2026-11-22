@@ -265,12 +265,12 @@
   "runtimeArtifacts": {
     "GovernanceTimelock": {
       "path": "contracts/artifacts/GovernanceTimelock.json",
-      "runtimeCodeHash": "0x839cd74c4f78cc7b90a6306c9294fc68840a00e9e4950465d2ca2729ee56c65a",
-      "sourceBlobSha1": "823d82240bda175099e1e5d61f713e3332717234"
+      "runtimeCodeHash": "0x9f3b61e71f625ee8bc36d62ccfd261aa7d6998bd073e784c1141cb619f777ed4",
+      "sourceBlobSha1": "e972f80fc023baa2e48d2a1a938c0edba11e4437"
     },
     "Governance420": {
       "path": "contracts/artifacts/Governance420.json",
-      "runtimeCodeHash": "0x617103b00f34e2d163801580b0feaa2f4eb53ff22c3e9a4438d834e6a2c9340a",
+      "runtimeCodeHash": "0xa24c01291937a88fbb95466a97b82def07f30d4a9d405a9ad337cb701a42ff04",
       "sourceBlobSha1": "e7f3f4e822f9addf8373aade670f02edf5670072"
     },
     "CivicConstitution420": {
@@ -295,8 +295,8 @@
     },
     "CivicGovernor420": {
       "path": "contracts/artifacts/CivicGovernor420.json",
-      "runtimeCodeHash": "0x3c96fd6d2b96b77ceb7e1c021ee5e11d6db8274df89d4a8c738702809108a90d",
-      "sourceBlobSha1": "f53c12bc0ac416f6309733866f01b890b721fa93"
+      "runtimeCodeHash": "0x37fef16e2514b302f5463c48c63f670910c69b673542fab5fd776b6d37902e09",
+      "sourceBlobSha1": "41cb61e4f7935129bff105c833e9c45f753a8981"
     },
     "CivicMerkleElectorateSource420": {
       "path": "contracts/artifacts/CivicMerkleElectorateSource420.json",

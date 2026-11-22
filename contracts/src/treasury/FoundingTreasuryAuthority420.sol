@@ -11,7 +11,11 @@ import "../governance/IFoundingWalletClaims420.sol";
 
 interface IFoundingRetirementReadiness420 {
     function retirementReady() external view returns (bool);
+    function retirementExecutionAuthorized(
+        address authority
+    ) external view returns (bool);
 }
+
 interface IFoundingCivicStatus420 {
     function civicAuthorityActivated() external view returns (bool);
 }
@@ -32,7 +36,15 @@ contract FoundingTreasuryAuthority420 {
     uint64 public constant EXCEPTIONAL_NOTICE = 48 hours;
 
     // Source expenditure classifications; contingency only allows infrastructure, app rescue, or security.
-    enum Purpose { INFRASTRUCTURE, APPLICATION_RECOVERY, BOUNTY, PARTNERSHIP, VALIDATOR_ONBOARDING, SECURITY, COMMUNITY }
+    enum Purpose {
+        INFRASTRUCTURE,
+        APPLICATION_RECOVERY,
+        BOUNTY,
+        PARTNERSHIP,
+        VALIDATOR_ONBOARDING,
+        SECURITY,
+        COMMUNITY
+    }
 
     struct Payment {
         address recipient;
@@ -103,43 +115,71 @@ contract FoundingTreasuryAuthority420 {
     error AlreadyScheduled();
     error InvalidVault();
     error RetirementNotReady();
+    error OutstandingFoundingCommitments();
     error ReleaseExecutorNotBound();
 
     event FoundingBudgetInitialized(bytes32 indexed operationsBudgetId, bytes32 indexed contingencyBudgetId);
-    event FoundingPaymentProposed(bytes32 indexed paymentId, address indexed proposer, address indexed recipient, uint256 amount, bool contingency, Purpose purpose);
+    event FoundingPaymentProposed(
+        bytes32 indexed paymentId,
+        address indexed proposer,
+        address indexed recipient,
+        uint256 amount,
+        bool contingency,
+        Purpose purpose
+    );
     event FoundingPaymentApproved(bytes32 indexed paymentId, address indexed founder, uint8 approvals);
-    event FoundingPaymentScheduled(bytes32 indexed paymentId, bytes32 indexed disbursementId, uint256 amount, bool contingency);
+    event FoundingPaymentScheduled(
+        bytes32 indexed paymentId, bytes32 indexed disbursementId, uint256 amount, bool contingency
+    );
     event FoundingReleaseExecuted(bytes32 indexed paymentId, bytes32 indexed disbursementId, bytes32 commitment);
     event FoundingAuthorityRetired(address indexed initiator);
     event FoundingReleaseExecutorBound(address indexed executor, bytes32 indexed runtimeCodeHash);
     event FoundingPaymentPurposeBound(bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 purposeHash);
     event FoundingPaymentNotice(
-        bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 indexed purposeHash,
-        uint64 proposedAt, uint64 notBefore, uint64 expiresAt, bool twoFounderRequired
+        bytes32 indexed paymentId,
+        bytes32 indexed evidenceHash,
+        bytes32 indexed purposeHash,
+        uint64 proposedAt,
+        uint64 notBefore,
+        uint64 expiresAt,
+        bool twoFounderRequired
     );
 
     constructor(
-        address administrator_, address andrew_, address janet_,
-        address founderWalletClaims_, address governanceTimelock_, address retirementVerifier_,
-        address budgetRegistry_, address disbursementRegistry_,
-        address policyRegistry_, address vaultRegistry_,
-        bytes32 operationsVaultId_, bytes32 contingencyVaultId_
+        address administrator_,
+        address andrew_,
+        address janet_,
+        address founderWalletClaims_,
+        address governanceTimelock_,
+        address retirementVerifier_,
+        address budgetRegistry_,
+        address disbursementRegistry_,
+        address policyRegistry_,
+        address vaultRegistry_,
+        bytes32 operationsVaultId_,
+        bytes32 contingencyVaultId_
     ) {
-        if (administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0)
-            || administrator_ == andrew_ || administrator_ == janet_ || andrew_ == janet_
-            || founderWalletClaims_.code.length == 0
-            || governanceTimelock_.code.length == 0 || retirementVerifier_.code.length == 0
-            || budgetRegistry_.code.length == 0 || disbursementRegistry_.code.length == 0
-            || policyRegistry_.code.length == 0 || vaultRegistry_.code.length == 0
-            || operationsVaultId_ == bytes32(0) || contingencyVaultId_ == bytes32(0)
-            || operationsVaultId_ == contingencyVaultId_) revert InvalidConfiguration();
-        if (address(TreasuryDisbursementRegistry420(disbursementRegistry_).budgets()) != budgetRegistry_
-            || address(TreasuryDisbursementRegistry420(disbursementRegistry_).policy()) != policyRegistry_
-            || address(TreasuryBudgetRegistry420(budgetRegistry_).policy()) != policyRegistry_) revert InvalidConfiguration();
+        if (
+            administrator_ == address(0) || andrew_ == address(0) || janet_ == address(0) || administrator_ == andrew_
+                || administrator_ == janet_ || andrew_ == janet_ || founderWalletClaims_.code.length == 0
+                || governanceTimelock_.code.length == 0 || retirementVerifier_.code.length == 0
+                || budgetRegistry_.code.length == 0 || disbursementRegistry_.code.length == 0
+                || policyRegistry_.code.length == 0 || vaultRegistry_.code.length == 0
+                || operationsVaultId_ == bytes32(0) || contingencyVaultId_ == bytes32(0)
+                || operationsVaultId_ == contingencyVaultId_
+        ) revert InvalidConfiguration();
+        if (
+            address(TreasuryDisbursementRegistry420(disbursementRegistry_).budgets()) != budgetRegistry_
+                || address(TreasuryDisbursementRegistry420(disbursementRegistry_).policy()) != policyRegistry_
+                || address(TreasuryBudgetRegistry420(budgetRegistry_).policy()) != policyRegistry_
+        ) revert InvalidConfiguration();
         IFoundingWalletClaims420 verifiedClaims = IFoundingWalletClaims420(founderWalletClaims_);
-        if (verifiedClaims.administrator() != administrator_ || verifiedClaims.andrew() != andrew_
-            || verifiedClaims.janet() != janet_ || verifiedClaims.genesisPlanCommitment() == bytes32(0))
+        if (
+            verifiedClaims.administrator() != administrator_ || verifiedClaims.andrew() != andrew_
+                || verifiedClaims.janet() != janet_ || verifiedClaims.genesisPlanCommitment() == bytes32(0)
+        ) {
             revert InvalidConfiguration();
+        }
         founderWalletClaims = verifiedClaims;
         genesisConfigurator = msg.sender;
         foundingAdministrator = administrator_;
@@ -155,19 +195,27 @@ contract FoundingTreasuryAuthority420 {
         contingencyVaultId = contingencyVaultId_;
         operationsBudgetId = keccak256(abi.encode("420/FOUNDING/OPERATIONS/V1", block.chainid, address(this)));
         contingencyBudgetId = keccak256(abi.encode("420/FOUNDING/CONTINGENCY/V1", block.chainid, address(this)));
-        operationsActionHash = keccak256(abi.encode("420/FOUNDING/OPERATIONS/AUTHORITY/V1", block.chainid, address(this)));
-        contingencyActionHash = keccak256(abi.encode("420/FOUNDING/CONTINGENCY/AUTHORITY/V1", block.chainid, address(this)));
+        operationsActionHash =
+            keccak256(abi.encode("420/FOUNDING/OPERATIONS/AUTHORITY/V1", block.chainid, address(this)));
+        contingencyActionHash =
+            keccak256(abi.encode("420/FOUNDING/CONTINGENCY/AUTHORITY/V1", block.chainid, address(this)));
     }
 
     /// @notice Only the original deployment configurator may bind the independently reviewed
     /// TreasuryReleaseExecutor instance. Founders cannot nominate their own transfer executor.
     /// The expected runtime hash must be obtained from the approved deployment materialization.
-    function bindReleaseExecutor(address candidate, bytes32 expectedRuntimeCodeHash) external {
-        if (msg.sender != genesisConfigurator || foundingReleaseExecutor != address(0)
-            || candidate.code.length == 0 || expectedRuntimeCodeHash == bytes32(0)
-            || candidate.codehash != expectedRuntimeCodeHash
-            || TreasuryReleaseExecutor420(candidate).operator() != address(this))
+    function bindReleaseExecutor(
+        address candidate,
+        bytes32 expectedRuntimeCodeHash
+    ) external {
+        if (
+            retired || msg.sender != genesisConfigurator || foundingReleaseExecutor != address(0)
+                || candidate.code.length == 0 || expectedRuntimeCodeHash == bytes32(0)
+                || candidate.codehash != expectedRuntimeCodeHash
+                || TreasuryReleaseExecutor420(candidate).operator() != address(this)
+        ) {
             revert InvalidConfiguration();
+        }
         foundingReleaseExecutor = candidate;
         foundingReleaseExecutorCodeHash = expectedRuntimeCodeHash;
         emit FoundingReleaseExecutorBound(candidate, expectedRuntimeCodeHash);
@@ -175,12 +223,17 @@ contract FoundingTreasuryAuthority420 {
 
     /// @notice Treasury registry consults this during markExecuted. A grant alone cannot
     /// forge accounting for a founding disbursement without its active, approved release.
-    function isFoundingBudget(bytes32 budgetId) external view returns (bool) {
+    function isFoundingBudget(
+        bytes32 budgetId
+    ) external view returns (bool) {
         return budgetId == operationsBudgetId || budgetId == contingencyBudgetId;
     }
 
-    function isActiveFoundingRelease(bytes32 disbursementId, address executor) external view returns (bool) {
-        return disbursementId != bytes32(0) && _activeRelease == disbursementId
+    function isActiveFoundingRelease(
+        bytes32 disbursementId,
+        address executor
+    ) external view returns (bool) {
+        return !retired && disbursementId != bytes32(0) && _activeRelease == disbursementId
             && executor == foundingReleaseExecutor && executor != address(0)
             && executor.codehash == foundingReleaseExecutorCodeHash;
     }
@@ -191,7 +244,9 @@ contract FoundingTreasuryAuthority420 {
         _;
     }
 
-    function _isFounder(address a) private view returns (bool) {
+    function _isFounder(
+        address a
+    ) private view returns (bool) {
         return a == foundingAdministrator || a == founderAndrew || a == founderJanet;
     }
 
@@ -208,45 +263,84 @@ contract FoundingTreasuryAuthority420 {
     function initializeBudgets() external onlyFounder {
         if (msg.sender != foundingAdministrator) revert UnauthorizedFounder();
         if (budgetsInitialized) revert AlreadyInitialized();
-        if (budgetRegistry.foundingAuthority() != address(this)
-            || disbursementRegistry.foundingAuthority() != address(this)) revert InvalidConfiguration();
+        if (
+            budgetRegistry.foundingAuthority() != address(this)
+                || disbursementRegistry.foundingAuthority() != address(this)
+        ) revert InvalidConfiguration();
         VaultRegistry420.Vault memory ops = vaultRegistry.getVault(operationsVaultId);
         VaultRegistry420.Vault memory cont = vaultRegistry.getVault(contingencyVaultId);
-        if (ops.vaultType != VaultIds420.VAULT_TREASURY || cont.vaultType != VaultIds420.VAULT_TREASURY
-            || ops.vaultAddress == cont.vaultAddress || ops.state != VaultRegistry420.VaultState.ACTIVE
-            || cont.state != VaultRegistry420.VaultState.ACTIVE) revert InvalidVault();
+        if (
+            ops.vaultType != VaultIds420.VAULT_TREASURY || cont.vaultType != VaultIds420.VAULT_TREASURY
+                || ops.vaultAddress == cont.vaultAddress || ops.state != VaultRegistry420.VaultState.ACTIVE
+                || cont.state != VaultRegistry420.VaultState.ACTIVE
+        ) revert InvalidVault();
         if (!policyRegistry.isAllowed(address(0), EXCEPTIONAL_MAX)) revert InvalidConfiguration();
         budgetsInitialized = true;
         uint64 start = uint64(block.timestamp);
         uint64 end = type(uint64).max;
         budgetRegistry.createBudget(
-            operationsBudgetId, operationsVaultId, TreasuryIds420.BUDGET_ECOSYSTEM, address(0),
-            OPERATIONS_ALLOCATION, start, end, operationsActionHash, keccak256("420/FOUNDING/OPERATIONS/METADATA/V1")
+            operationsBudgetId,
+            operationsVaultId,
+            TreasuryIds420.BUDGET_ECOSYSTEM,
+            address(0),
+            OPERATIONS_ALLOCATION,
+            start,
+            end,
+            operationsActionHash,
+            keccak256("420/FOUNDING/OPERATIONS/METADATA/V1")
         );
         budgetRegistry.createBudget(
-            contingencyBudgetId, contingencyVaultId, TreasuryIds420.BUDGET_EMERGENCY, address(0),
-            CONTINGENCY_ALLOCATION, start, end, contingencyActionHash, keccak256("420/FOUNDING/CONTINGENCY/METADATA/V1")
+            contingencyBudgetId,
+            contingencyVaultId,
+            TreasuryIds420.BUDGET_EMERGENCY,
+            address(0),
+            CONTINGENCY_ALLOCATION,
+            start,
+            end,
+            contingencyActionHash,
+            keccak256("420/FOUNDING/CONTINGENCY/METADATA/V1")
         );
         emit FoundingBudgetInitialized(operationsBudgetId, contingencyBudgetId);
     }
 
     function proposePayment(
-        bool contingency, address recipient, uint128 amount, Purpose purpose, bytes32 evidenceHash,
-        uint64 notBefore, uint64 expiresAt
+        bool contingency,
+        address recipient,
+        uint128 amount,
+        Purpose purpose,
+        bytes32 evidenceHash,
+        uint64 notBefore,
+        uint64 expiresAt
     ) external onlyFounder returns (bytes32 paymentId) {
         if (!budgetsInitialized) revert NotInitialized();
-        if (recipient == address(0) || recipient == address(this) || amount == 0
-            || evidenceHash == bytes32(0) || expiresAt <= notBefore
-            || expiresAt <= block.timestamp || notBefore < block.timestamp) revert InvalidPayment();
+        if (
+            recipient == address(0) || recipient == address(this) || amount == 0 || evidenceHash == bytes32(0)
+                || expiresAt <= notBefore || expiresAt <= block.timestamp || notBefore < block.timestamp
+        ) revert InvalidPayment();
         if (contingency) {
             if (amount > CONTINGENCY_INCIDENT_MAX || !_emergencyPurpose(purpose)) revert InvalidPurpose();
-        } else if (amount > EXCEPTIONAL_MAX) revert SpendingLimit();
+        } else if (amount > EXCEPTIONAL_MAX) {
+            revert SpendingLimit();
+        }
 
         bool requiresTwo = contingency || amount > ROUTINE_MAX || _isFounder(recipient)
             || _rollingRecipient(recipient) + amount > ROUTINE_MAX;
         if (!requiresTwo && msg.sender != foundingAdministrator) revert UnauthorizedFounder();
-        paymentId = keccak256(abi.encode("420/FOUNDING/PAYMENT/V1", block.chainid, address(this),
-            ++nextPaymentNonce, contingency, recipient, amount, purpose, evidenceHash, notBefore, expiresAt));
+        paymentId = keccak256(
+            abi.encode(
+                "420/FOUNDING/PAYMENT/V1",
+                block.chainid,
+                address(this),
+                ++nextPaymentNonce,
+                contingency,
+                recipient,
+                amount,
+                purpose,
+                evidenceHash,
+                notBefore,
+                expiresAt
+            )
+        );
         Payment storage p = payments[paymentId];
         p.recipient = recipient;
         p.amount = amount;
@@ -256,10 +350,17 @@ contract FoundingTreasuryAuthority420 {
         p.evidenceHash = evidenceHash;
         // Commit to the complete reviewed case when the 48-hour NOTICE starts,
         // rather than disclosing the unique purpose only after scheduling.
-        p.purposeHash = keccak256(abi.encode(
-            keccak256("420/FOUNDING/DISBURSEMENT/PURPOSE/V1"),
-            block.chainid, address(this), paymentId, purpose, contingency, evidenceHash
-        ));
+        p.purposeHash = keccak256(
+            abi.encode(
+                keccak256("420/FOUNDING/DISBURSEMENT/PURPOSE/V1"),
+                block.chainid,
+                address(this),
+                paymentId,
+                purpose,
+                contingency,
+                evidenceHash
+            )
+        );
         p.purpose = purpose;
         p.contingency = contingency;
         p.twoFounderRequired = requiresTwo;
@@ -273,7 +374,9 @@ contract FoundingTreasuryAuthority420 {
         emit FoundingPaymentApproved(paymentId, msg.sender, 1);
     }
 
-    function approvePayment(bytes32 paymentId) external onlyFounder {
+    function approvePayment(
+        bytes32 paymentId
+    ) external onlyFounder {
         Payment storage p = payments[paymentId];
         if (p.recipient == address(0) || p.scheduled || block.timestamp > p.expiresAt) revert InvalidPayment();
         if (paymentApproval[paymentId][msg.sender]) revert AlreadyApproved();
@@ -282,33 +385,43 @@ contract FoundingTreasuryAuthority420 {
         emit FoundingPaymentApproved(paymentId, msg.sender, p.approvals);
     }
 
-    function schedulePayment(bytes32 paymentId) external onlyFounder returns (bytes32 disbursementId) {
+    function schedulePayment(
+        bytes32 paymentId
+    ) external onlyFounder returns (bytes32 disbursementId) {
         Payment storage p = payments[paymentId];
         if (p.recipient == address(0)) revert InvalidPayment();
         if (p.scheduled) revert AlreadyScheduled();
         // Re-evaluate when scheduled: multiple routine payments can be proposed concurrently.
         // Once the recipient aggregate crosses the routine ceiling, upgrade permanently to
         // exceptional authorization and retain the public-notice requirement.
-        bool elevated = p.twoFounderRequired ||
-            (!p.contingency && _rollingRecipient(p.recipient) + p.amount > ROUTINE_MAX);
+        bool elevated =
+            p.twoFounderRequired || (!p.contingency && _rollingRecipient(p.recipient) + p.amount > ROUTINE_MAX);
         if (elevated) {
             p.twoFounderRequired = true;
             if (p.approvals < 2) revert ApprovalRequired();
-        } else if (!paymentApproval[paymentId][foundingAdministrator]) revert ApprovalRequired();
+        } else if (!paymentApproval[paymentId][foundingAdministrator]) {
+            revert ApprovalRequired();
+        }
         // Exceptional payments require public notice. All three founders can fast-track ONLY
         // genuine contingency incidents, not an exceptional Operations or related-party transfer.
-        if (p.twoFounderRequired && block.timestamp < uint256(p.proposedAt) + EXCEPTIONAL_NOTICE
-            && !(p.contingency && p.approvals == 3)) revert NoticeRequired();
+        if (
+            p.twoFounderRequired && block.timestamp < uint256(p.proposedAt) + EXCEPTIONAL_NOTICE
+                && !(p.contingency && p.approvals == 3)
+        ) revert NoticeRequired();
         if (block.timestamp > p.expiresAt || p.notBefore > p.expiresAt) revert InvalidPayment();
         if (p.contingency) {
-            if (contingencyCommittedByIncident[p.evidenceHash] + p.amount > CONTINGENCY_INCIDENT_MAX)
+            if (contingencyCommittedByIncident[p.evidenceHash] + p.amount > CONTINGENCY_INCIDENT_MAX) {
                 revert SpendingLimit();
-            if (contingencyCommitted + p.amount > CONTINGENCY_ALLOCATION
-                || _rollingTotal(true) + p.amount > CONTINGENCY_30_DAY_MAX) revert SpendingLimit();
+            }
+            if (
+                contingencyCommitted + p.amount > CONTINGENCY_ALLOCATION
+                    || _rollingTotal(true) + p.amount > CONTINGENCY_30_DAY_MAX
+            ) revert SpendingLimit();
         } else {
-            if (operationsCommitted + p.amount > OPERATIONS_ALLOCATION
-                || _rollingTotal(false) + p.amount > OPERATIONS_30_DAY_MAX) revert SpendingLimit();
-
+            if (
+                operationsCommitted + p.amount > OPERATIONS_ALLOCATION
+                    || _rollingTotal(false) + p.amount > OPERATIONS_30_DAY_MAX
+            ) revert SpendingLimit();
         }
         bytes32 budgetId = p.contingency ? contingencyBudgetId : operationsBudgetId;
         bytes32 actionHash = p.contingency ? contingencyActionHash : operationsActionHash;
@@ -331,8 +444,7 @@ contract FoundingTreasuryAuthority420 {
             recipientCommittedByDay[p.recipient][day] += p.amount;
         }
         disbursementRegistry.schedule(
-            disbursementId, budgetId, p.recipient, p.amount, notBefore, p.expiresAt,
-            actionHash, p.purposeHash
+            disbursementId, budgetId, p.recipient, p.amount, notBefore, p.expiresAt, actionHash, p.purposeHash
         );
         emit FoundingPaymentScheduled(paymentId, disbursementId, p.amount, p.contingency);
     }
@@ -340,29 +452,38 @@ contract FoundingTreasuryAuthority420 {
     /// @notice A scoped Vault release remains conditional on two independent, live Capability
     /// Registry grants to the designated executor. This function cannot issue those grants.
     function executeApprovedRelease(
-        bytes32 paymentId, address executor, bytes32 expectedCommitment
+        bytes32 paymentId,
+        address executor,
+        bytes32 expectedCommitment
     ) external onlyFounder returns (bytes32 commitment) {
         Payment storage p = payments[paymentId];
-        if (!p.scheduled || p.released || p.disbursementId == bytes32(0)
-            || p.purposeHash == bytes32(0)) revert InvalidPayment();
-        if (executor != foundingReleaseExecutor || executor == address(0)
-            || executor.codehash != foundingReleaseExecutorCodeHash)
+        if (!p.scheduled || p.released || p.disbursementId == bytes32(0) || p.purposeHash == bytes32(0)) {
+            revert InvalidPayment();
+        }
+        if (
+            executor != foundingReleaseExecutor || executor == address(0)
+                || executor.codehash != foundingReleaseExecutorCodeHash
+        ) {
             revert ReleaseExecutorNotBound();
+        }
         if (!p.twoFounderRequired && msg.sender != foundingAdministrator) revert UnauthorizedFounder();
         if (TreasuryReleaseExecutor420(executor).operator() != address(this)) revert InvalidConfiguration();
         TreasuryDisbursementRegistry420.Disbursement memory scheduled =
             disbursementRegistry.disbursement(p.disbursementId);
-        if (scheduled.state != TreasuryDisbursementRegistry420.State.SCHEDULED
-            || scheduled.recipient != p.recipient || scheduled.amount != p.amount
-            || scheduled.asset != address(0) || scheduled.purposeHash != p.purposeHash
-            || scheduled.expiresAt != p.expiresAt)
+        if (
+            scheduled.state != TreasuryDisbursementRegistry420.State.SCHEDULED || scheduled.recipient != p.recipient
+                || scheduled.amount != p.amount || scheduled.asset != address(0)
+                || scheduled.purposeHash != p.purposeHash || scheduled.expiresAt != p.expiresAt
+        ) {
             revert InvalidConfiguration();
+        }
         if (p.contingency) {
             if (_rollingReleased(true) + p.amount > CONTINGENCY_30_DAY_MAX) revert SpendingLimit();
         } else {
             if (_rollingReleased(false) + p.amount > OPERATIONS_30_DAY_MAX) revert SpendingLimit();
-            if (!p.twoFounderRequired && _rollingRecipientReleased(p.recipient) + p.amount > ROUTINE_MAX)
+            if (!p.twoFounderRequired && _rollingRecipientReleased(p.recipient) + p.amount > ROUTINE_MAX) {
                 revert ApprovalRequired();
+            }
         }
         // Consume the exact release quota before the external call. A failed transfer or accounting
         // proof rolls back these writes with the whole transaction; releases cannot double-spend.
@@ -380,31 +501,54 @@ contract FoundingTreasuryAuthority420 {
         commitment = TreasuryReleaseExecutor420(executor).execute(p.disbursementId, expectedCommitment);
         _activeRelease = bytes32(0);
         TreasuryDisbursementRegistry420.Disbursement memory d = disbursementRegistry.disbursement(p.disbursementId);
-        if (d.state != TreasuryDisbursementRegistry420.State.EXECUTED || d.vaultReleaseHash != commitment)
+        if (d.state != TreasuryDisbursementRegistry420.State.EXECUTED || d.vaultReleaseHash != commitment) {
             revert InvalidConfiguration();
+        }
         emit FoundingReleaseExecuted(paymentId, p.disbursementId, commitment);
     }
 
-    /// @notice Retirement evidence must come from an independently qualified, Genesis-pinned
-    /// on-chain verifier: 60 eligible independent validator owners, 15 verified Committee members,
-    /// 30 continuous days, plus completed Civic handoff. Any caller may finalize it once true.
+    /// @notice Actual unsettled Treasury Budget Registry reservations, not historical
+    /// proposal totals. Governance cancellation releases a reservation without
+    /// incrementing the historical operationsReleased/contingencyReleased counters.
+    function outstandingFoundingCommitments() public view returns (bool) {
+        if (!budgetsInitialized) return false;
+        TreasuryBudgetRegistry420.Budget memory operations = budgetRegistry.budget(operationsBudgetId);
+        TreasuryBudgetRegistry420.Budget memory contingency = budgetRegistry.budget(contingencyBudgetId);
+        return operations.committed != operations.executed || contingency.committed != contingency.executed;
+    }
+
+    /// @notice Retirement itself MUST be an action in the canonical, successful G3/G4
+    /// dual-house Civic execution batch, dispatched by the real GovernanceTimelock.
+    /// Historical unrelated dual-house actions or arbitrary permissionless calls cannot retire.
     function retire() external {
         if (retired) revert Retired();
-        if (!IFoundingCivicStatus420(governanceTimelock).civicAuthorityActivated()
-            || !retirementVerifier.retirementReady()) revert RetirementNotReady();
+        if (
+            msg.sender != governanceTimelock || !IFoundingCivicStatus420(governanceTimelock).civicAuthorityActivated()
+                || !retirementVerifier.retirementExecutionAuthorized(address(this))
+        ) revert RetirementNotReady();
+        // Previously scheduled founding disbursements are legally committed even if the
+        // VaultAccounting native free balance has not yet reserved them as obligations.
+        // Settle them before changing founding execution authority; no stranded grants.
+        if (outstandingFoundingCommitments()) revert OutstandingFoundingCommitments();
         retired = true;
         emit FoundingAuthorityRetired(msg.sender);
     }
 
-    function rollingCommitted(bool contingency) external view returns (uint256) {
+    function rollingCommitted(
+        bool contingency
+    ) external view returns (uint256) {
         return _rollingTotal(contingency);
     }
 
-    function rollingRecipientCommitted(address recipient) external view returns (uint256) {
+    function rollingRecipientCommitted(
+        address recipient
+    ) external view returns (uint256) {
         return _rollingRecipient(recipient);
     }
 
-    function _rollingTotal(bool contingency) private view returns (uint256 total) {
+    function _rollingTotal(
+        bool contingency
+    ) private view returns (uint256 total) {
         uint256 day = block.timestamp / 1 days;
         // Include day - 30 conservatively, so no boundary manipulation can spend >30-day cap.
         for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
@@ -412,33 +556,43 @@ contract FoundingTreasuryAuthority420 {
         }
     }
 
-    function rollingReleased(bool contingency) external view returns (uint256) {
+    function rollingReleased(
+        bool contingency
+    ) external view returns (uint256) {
         return _rollingReleased(contingency);
     }
 
-    function _rollingReleased(bool contingency) private view returns (uint256 total) {
+    function _rollingReleased(
+        bool contingency
+    ) private view returns (uint256 total) {
         uint256 day = block.timestamp / 1 days;
         for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
             total += contingency ? contingencyReleasedByDay[day - i] : operationsReleasedByDay[day - i];
         }
     }
 
-    function _rollingRecipientReleased(address recipient) private view returns (uint256 total) {
+    function _rollingRecipientReleased(
+        address recipient
+    ) private view returns (uint256 total) {
         uint256 day = block.timestamp / 1 days;
         for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
             total += recipientReleasedByDay[recipient][day - i];
         }
     }
 
-    function _rollingRecipient(address recipient) private view returns (uint256 total) {
+    function _rollingRecipient(
+        address recipient
+    ) private view returns (uint256 total) {
         uint256 day = block.timestamp / 1 days;
         for (uint256 i; i <= ROLLING_DAYS && i <= day; ++i) {
             total += recipientCommittedByDay[recipient][day - i];
         }
     }
 
-    function _emergencyPurpose(Purpose purpose) private pure returns (bool) {
-        return purpose == Purpose.INFRASTRUCTURE || purpose == Purpose.APPLICATION_RECOVERY
-            || purpose == Purpose.SECURITY;
+    function _emergencyPurpose(
+        Purpose purpose
+    ) private pure returns (bool) {
+        return
+            purpose == Purpose.INFRASTRUCTURE || purpose == Purpose.APPLICATION_RECOVERY || purpose == Purpose.SECURITY;
     }
 }

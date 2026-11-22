@@ -328,20 +328,20 @@ contract TreasuryGovernanceAuthorization420Test {
 
     function testRealCivicGovernanceLifecycleAndPrivilegeIsolation() public {
         _reject(address(this), address(policy), _policy(true, 100, 250), SystemAccess.Unauthorized.selector);
-        _reject(EXECUTOR, address(budgets), _budget(), SystemAccess.Unauthorized.selector);
+        _reject(EXECUTOR, address(budgets), _budget(), TreasuryBudgetRegistry420.UnauthorizedCaller.selector);
         _reject(address(governor), address(policy), _policy(true, 100, 250), SystemAccess.Unauthorized.selector);
         _initialize();
         bytes32 id;
         bytes memory data;
         (id, data) = _scheduleData(100, keccak256("governed schedule"));
-        _reject(EXECUTOR, address(disb), data, SystemAccess.Unauthorized.selector);
+        _reject(EXECUTOR, address(disb), data, TreasuryDisbursementRegistry420.ExecutionUnauthorized.selector);
         _govern(address(disb), data);
         require(budgets.budget(BUDGET).committed == 100, "schedule accounting");
         _exact(id, 100, 0, 0, 0);
         // A valid execution grant does not authorize cancellation, policy, budget or raw accounting writes.
         _reject(EXECUTOR, address(disb), abi.encodeCall(disb.cancel, (id)), SystemAccess.Unauthorized.selector);
         _reject(EXECUTOR, address(policy), _policy(false, 100, 250), SystemAccess.Unauthorized.selector);
-        _reject(EXECUTOR, address(budgets), _budget(), SystemAccess.Unauthorized.selector);
+        _reject(EXECUTOR, address(budgets), _budget(), TreasuryBudgetRegistry420.UnauthorizedCaller.selector);
         _reject(
             EXECUTOR,
             address(budgets),

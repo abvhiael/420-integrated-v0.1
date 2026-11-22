@@ -25,7 +25,7 @@ function fixture(){
   })),
   maps:CHAOS_MAP_ASSETS.map(a=>({
    id:a.path.slice(mapsDir.length,-5),
-   export:{...meta(a.path,'webp',1920,830,a.transparent),bytes:a.bytes},
+   export:{...meta(a.path,'webp',a.width,a.height,a.transparent),bytes:a.bytes},
    gitBlobSha:a.gitBlobSha
   })),
   vehicles:CHAOS_VEHICLE_ASSETS.map(path=>{

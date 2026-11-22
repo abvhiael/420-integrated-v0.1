@@ -28,6 +28,8 @@ test('CCC-ART-2: map registry is an immutable region-specific allowlist, never a
   assert.equal(entry.region,region);
   assert.equal(entry.underlay.transparent,false);
   assert.equal(entry.foreground.transparent,true);
+  assert.deepEqual([entry.underlay.width,entry.underlay.height],[1907,825]);
+  assert.deepEqual([entry.foreground.width,entry.foreground.height],[1920,830]);
   assert.equal(entry.underlay.path,'assets/games/cross-country-chaos/maps/'+region+'-atlas-underlay.webp');
   assert.equal(entry.foreground.path,'assets/games/cross-country-chaos/maps/'+region+'-atlas-foreground.webp');
  }

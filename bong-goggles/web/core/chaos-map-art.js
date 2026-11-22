@@ -1,13 +1,14 @@
 // CCC-ART-2: allowlisted, uploaded vintage Canadian road-atlas scenery.
 // Printed underlays contain road/town art; only vehicle positions and effects stay live.
 // Historical transparent foregrounds remain source-pinned but are no longer rendered.
+// Uploaded art is 1907×825; the SVG canvas remains 960×415 (negligible aspect delta).
 const prefix='assets/games/cross-country-chaos/maps/';
 const board=(region,underlay,foreground)=>Object.freeze({
  region,
  underlay:Object.freeze({path:prefix+region+'-atlas-underlay.webp',url:'/'+prefix+region+'-atlas-underlay.webp',
-  bytes:underlay.bytes,gitBlobSha:underlay.sha,transparent:false}),
+  width:1907,height:825,bytes:underlay.bytes,gitBlobSha:underlay.sha,transparent:false}),
  foreground:Object.freeze({path:prefix+region+'-atlas-foreground.webp',url:'/'+prefix+region+'-atlas-foreground.webp',
-  bytes:foreground.bytes,gitBlobSha:foreground.sha,transparent:true})
+  width:1920,height:830,bytes:foreground.bytes,gitBlobSha:foreground.sha,transparent:true})
 });
 export const CHAOS_MAP_DIMENSIONS=Object.freeze({width:1920,height:830,svgWidth:960,svgHeight:415});
 export const CHAOS_MAP_ART=Object.freeze({

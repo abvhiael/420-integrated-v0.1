@@ -88,8 +88,7 @@ for(const f of mapFiles){
  if(!asset||f.size!==asset.bytes||f.size>(asset.transparent?80:180)*1024)
   throw new Error('Unexpected, changed or oversized CCC-ART-2 map: '+name);
  const meta=await sharp(f.path).metadata();
- if(meta.format!=='webp'||meta.width!==CHAOS_MAP_DIMENSIONS.width||
-   meta.height!==CHAOS_MAP_DIMENSIONS.height||Boolean(meta.hasAlpha)!==asset.transparent)
+ if(meta.format!=='webp'||meta.width!==asset.width||meta.height!==asset.height||Boolean(meta.hasAlpha)!==asset.transparent)
   throw new Error('Invalid output map dimensions or alpha: '+name);
 }
 const vehicleAllowlist=new Set(CHAOS_VEHICLE_ASSETS);

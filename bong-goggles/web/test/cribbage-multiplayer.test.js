@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {bindCribbageRoomStart,discoverCribbageMatches} from '../core/classic-cribbage-multiplayer.js';
+import {bindCribbageRoomStart,discoverCribbageMatches,resignCribbageMatch} from '../core/classic-cribbage-multiplayer.js';
 import {normalizeCribbageSnapshot,cribbageLegalMoves,CRIBBAGE_RULES_HASH} from '../core/cribbage-session.js';
 import {renderClassicRooms} from '../core/classic-rooms.js';
+import {renderCribbageRoute} from '../core/cribbage-ui.js';
 
 const host='10000000-1111-4111-8111-111111111111';
 const peer='20000000-2222-4222-8222-222222222222';
@@ -144,4 +145,49 @@ test('BC-1.5 completed/expired verified match is safely viewable but cannot subm
   assert.ok(result,'server timeout state unavailable: '+status);
   assert.deepEqual(cribbageLegalMoves(result),[]);
  }
+});
+
+test('BC-1.5 resignation needs two-step UI confirmation and one verified server action',async()=>{
+ const room=snap(),actions=[];
+ const ctl={state:{status:'ready',session:room,queue:[],settings:{motion:'standard',stinkhole:false}},
+  client:{enabled:true,request:async (path,opt)=>{
+   actions.push({path,opt});
+   const last={...room,status:'resigned',sequence:2,turnSeat:null};
+   return e({session:last});
+  }},generation:0,busy:false,timer:null,
+  emit(delta){this.state={...this.state,...delta};return this.state;}
+ };
+ const html=renderCribbageRoute({screen:'play',state:ctl.state});
+ assert.match(html,/data-cribbage-action="request-resign"/);
+ assert.doesNotMatch(html,/data-cribbage-action="confirm-resign"/);
+ ctl.emit({resignPending:true});
+ const confirming=renderCribbageRoute({screen:'play',state:ctl.state});
+ assert.match(confirming,/data-cribbage-action="confirm-resign"/);
+ assert.match(confirming,/data-cribbage-action="cancel-resign"/);
+ const state=await resignCribbageMatch(ctl);
+ assert.equal(state.session.status,'resigned');
+ assert.equal(state.session.sequence,2);
+ assert.equal(state.resignPending,false);
+ assert.equal(actions.length,1);
+ assert.equal(actions[0].opt.method,'POST');
+ assert.deepEqual({...actions[0].opt.body,requestId:'PINNED'},{
+  requestId:'PINNED',action:'resign',expectedSequence:2});
+ assert.equal(actions[0].path,'/v1/classic-sessions/'+matchID+'/action');
+ assert.deepEqual(cribbageLegalMoves(state.session),[]);
+});
+test('BC-1.5 rejected resignation discards cached private view and cannot be replayed locally',async()=>{
+ const room=snap();
+ let attempts=0;
+ const ctl={state:{status:'ready',session:room,queue:[]},
+  client:{enabled:true,request:async()=>{attempts++;return {status:403,data:null};}},
+  generation:0,busy:false,timer:null,
+  emit(delta){this.state={...this.state,...delta};return this.state;}
+ };
+ await assert.rejects(resignCribbageMatch(ctl));
+ assert.equal(attempts,1);
+ assert.equal(ctl.state.status,'error');
+ assert.equal(ctl.state.session,null);
+ assert.equal(ctl.busy,false);
+ await assert.rejects(resignCribbageMatch(ctl));
+ assert.equal(attempts,1,'denied action was automatically retried');
 });

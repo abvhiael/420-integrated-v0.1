@@ -125,9 +125,9 @@ export function renderChaosPracticeTable({game,revealed=false,error=null,feedbac
   '<span>'+esc(p.name)+(computer?' · CPU':' · HUMAN')+' · '+esc(game.step)+' phase</span></div>'+
   '<section class="ccc-online-track" aria-label="Canadian highway map">'+
   '<div class="ccc-online-map">'+renderChaosHighway(view,{effects})+'</div>'+standings(game)+'</section>'+
-  renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+
+  '<div class="ccc-practice-effects">'+renderChaosGameEffects(effects,{suppressRepairs:Boolean(feedback)})+'</div>'+
   '<div class="ccc-online-middle">'+renderChaosPublicTables(view)+piles(game,active)+'</div>'+
-  hand(game,{revealed,computer})+renderChaosFinishEffects(effects)+'</div>'+
+  hand(game,{revealed,computer})+'<div class="ccc-practice-effects">'+renderChaosFinishEffects(effects)+'</div></div>'+
   roadside(game,error,saveInfo,computer)+'</section>'+
   (finalRound?'<p class="ccc-practice-final" role="status">FINAL ROUND — '+finalRound.turnsRemaining+' driver turns remaining in this stage.</p>':'')+
   '</div>';

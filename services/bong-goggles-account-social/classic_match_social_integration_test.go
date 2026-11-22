@@ -14,6 +14,9 @@ func bc16Fixture(t *testing.T)(*Store,*Handler,*http.Cookie,*http.Cookie){
  store,h,a,b:=bc06Fixture(t,"198.51.100.245")
  adapter,e:=NewCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
  h.Sessions.Rules=func(game string)ClassicRule{if game=="cribbage"{return adapter};return nil}
+ // Test fixture uses a privileged schema owner; real startup performs the
+ // strict runtime grant preflight before enabling these authenticated routes.
+ h.classicMatchSocialEnabled=true
  if e=h.Sessions.EnableBots(map[string]ClassicBotPolicies{"cribbage":NewCribbageBotPolicies()});e!=nil{t.Fatal(e)}
  t.Cleanup(func(){
   _,_=store.DB.Exec("DELETE FROM bg_account_social.classic_match_requests WHERE actor IN ($1,$2)",memberA,memberB)

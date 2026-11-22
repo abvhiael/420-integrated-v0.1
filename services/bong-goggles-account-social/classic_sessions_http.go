@@ -30,10 +30,12 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   return
  }
  if path=="/v1/classic-sessions/history"&&r.Method=="GET"{
+  if !h.classicMatchSocialEnabled{deny(w,404);return}
   history,e:=h.Sessions.History(ctx,viewer);if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
  }
  if path=="/v1/classic-sessions/challenge"&&r.Method=="POST"{
+  if !h.classicMatchSocialEnabled{deny(w,404);return}
   var req struct{Target string `json:"target"`;RequestID string `json:"requestId"`}
   if strictJSON(r,&req)!=nil{deny(w,400);return}
   room,e:=h.Sessions.Challenge(ctx,viewer,req.Target,req.RequestID)
@@ -49,6 +51,7 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   writeJSON(w,200,map[string]any{"session":state,"onChain":false,"wager":false,"rewards":false});return
  }
  if len(parts)==2&&parts[1]=="rematch"&&r.Method=="POST"{
+  if !h.classicMatchSocialEnabled{deny(w,404);return}
   var req struct{RequestID string `json:"requestId"`}
   if strictJSON(r,&req)!=nil{deny(w,400);return}
   room,e:=h.Sessions.Rematch(ctx,viewer,id,req.RequestID)

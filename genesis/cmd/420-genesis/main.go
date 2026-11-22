@@ -109,6 +109,9 @@ func validateAllocationLedger(ledger Ledger) error {
 		return fmt.Errorf("Genesis sum mismatch: %s", actual)
 	}
 	if ledger.Status != "FOUNDING_THREE_AMENDMENT_PENDING_V4_RECOMMIT" {
+		if ledger.Status != "" {
+			return fmt.Errorf("unapproved Genesis ledger status %q: new frozen V4 requires independent authority", ledger.Status)
+		}
 		// Historic V3 bundles are read-only evidence and contain no GOV-PRE-01 earmarks.
 		for _, row := range ledger.Allocations {
 			if len(row.Earmarks420) != 0 {

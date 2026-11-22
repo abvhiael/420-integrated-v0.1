@@ -66,6 +66,38 @@ const bc02Files=Object.freeze({
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+// BC-1.4 publishes exactly six new source-owned assets. This independent
+// 96-KiB limit does NOT widen BC-0.2/0.3/0.4/0.5, CCC, single-file or legacy
+// base budgets: only these identified files are deducted before old checks.
+const bc14Limits=Object.freeze({
+ 'core/cribbage-board.js':6*1024,
+ 'core/cribbage-session.js':15*1024,
+ 'core/cribbage-ui.js':19*1024,
+ 'core/cribbage-route-runtime.js':2*1024,
+ 'cribbage.css':12*1024,
+ 'assets/games/cribbage/leaf-board.svg':44*1024
+});
+const bc14Allowed=new Set(Object.keys(bc14Limits));
+const bc14Actual=regularFiles.filter(f=>{
+ const name=normalize(f.path);
+ return name.startsWith('core/cribbage-')||name.startsWith('assets/games/cribbage/')||name==='cribbage.css';
+});
+if(bc14Actual.length!==bc14Allowed.size||
+ bc14Actual.some(f=>!bc14Allowed.has(normalize(f.path))))
+ throw new Error('BC-1.4 unexpected or absent published Cribbage assets');
+let bc14Bytes=0;
+for(const [path,cap] of Object.entries(bc14Limits)){
+ const size=regularSizes.get(path);
+ if(!Number.isSafeInteger(size)||size<512||size>cap)
+  throw new Error('BC-1.4 asset exceeds exact scope/size: '+path+' '+size+' > '+cap);
+ bc14Bytes+=size;
+}
+if(bc14Bytes>96*1024)throw new Error('BC-1.4 96 KiB frontend allowance exceeded: '+bc14Bytes);
+const leafArt=await readFile(resolve(root,'assets/games/cribbage/leaf-board.svg'));
+const leafGitSHA=createHash('sha1').update(Buffer.from('blob '+leafArt.length+'\0')).update(leafArt).digest('hex');
+if(leafGitSHA!=='02b7f8f7b86af3b6fa4bd0833a6785449145a366')
+ throw new Error('BC-1.4 published leaf board differs from approved source');
+
 // BC-0.5 is a separately scoped 24-KiB multiplayer-room client allowance.
 // Its baselines pin the qualified BC-0.4 source at ae010bdba302dab52313102fb9e875fb9511a9e7.
 // Subtract ONLY this allowance from earlier BC-0.4/0.3/0.2 and original base;
@@ -142,7 +174,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc14Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -159,9 +191,10 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc14Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+console.log('BC-1.4 approved leaf frontend independent allowance:',JSON.stringify({publishedBytes:bc14Bytes,limitBytes:96*1024,approvedBoardSHA:leafGitSHA}));
 console.log('CCC independently bounded solo tabletop:',JSON.stringify({practiceJs,practiceCss,limit:CCC_PRACTICE_ALLOWANCE}));
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
  growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal

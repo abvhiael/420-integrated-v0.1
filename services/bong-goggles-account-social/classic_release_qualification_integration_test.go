@@ -16,16 +16,26 @@ import (
 // behaves across TWO REAL verified cookie subjects, not that Chess is ready.
 func TestBC12TwoIndependent420IDAccountsRestartConcurrentMoveAndTerminalReplay(t *testing.T){
  store,h,host,peer,adapter:=bc07Sessions(t,"198.51.100.186")
- room:=bc06Room(t,h,host,peer)
- match:=bc06Start(t,h,host,room.ID)
- if match.ViewerSeat!=0||match.Sequence!=1{t.Fatal("host not admitted to first seat")}
+ // Construct the test-only game through the existing trusted server
+ // methods. The two real 420ID cookies below are exercised over HTTP GET;
+ // setup must not consume the generic social-write budget shared with the
+ // unrelated auth/moderation rate-limit regression suite.
+ ctx:=context.Background()
+ created,e:=h.Rooms.Create(ctx,memberA,"chess","public",2)
+ if e!=nil{t.Fatal(e)}
+ ready,e:=h.Rooms.Change(ctx,memberB,created.ID,RoomChange{
+  Action:"join",Seat:1,ExpectedRevision:created.Revision})
+ if e!=nil||ready.Status!="ready"{t.Fatal("second human admission",e)}
+ match,e:=h.Sessions.Start(ctx,memberA,ready.ID)
+ if e!=nil||match.ViewerSeat!=0||match.Sequence!=1{t.Fatal("host not admitted to first seat",e)}
+ if reply:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",host);
+  reply.Code!=200{t.Fatal("host cookie was not authorized",reply.Code)}
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{
   t.Fatal("unauthed client accessed game",w.Code)
  }
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",peer);w.Code!=200||
   bytes.Contains(w.Body.Bytes(),[]byte(`"private0"`))||
   bytes.Contains(w.Body.Bytes(),[]byte(`"private1"`)){t.Fatal("wrong 420ID private state",w.Code)}
- ctx:=context.Background()
  start:=time.Now()
  initial:=ClassicSessionAction{RequestID:bc06ActionID(t),Action:"move",ExpectedSequence:2,
   Move:json.RawMessage(`{"take":2}`)}

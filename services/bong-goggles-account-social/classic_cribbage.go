@@ -90,6 +90,9 @@ func (cribbageRules) Definition()RuleDefinition{
    ";2p-individual;3p-individual;4p-opposite-seat-teams;121;auto-count;no-muggins"}
 }
 func NewCribbageRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(cribbageRules{})}
+// 121-point play can require more than the generic 512-command journal.
+// This explicit allowance is still hard bounded and is not global.
+func (cribbageRules) MaxReplayActions()int{return 8192}
 func (cribbageRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error{
  v,e:=cribbageVariantFor(room.SeatCount)
  if e!=nil||room.GameID!="cribbage"||len(seats)!=room.SeatCount{return ErrInvalid}

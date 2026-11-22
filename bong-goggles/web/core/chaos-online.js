@@ -159,6 +159,20 @@ const cardImage=(card,leg)=>{
  return url?'<img src="'+escape(url)+'" width="96" height="162" alt="" loading="lazy" decoding="async">':'';
 };
 const cardLabel=c=>c.type==='mileage'?c.km+' km':c.name||c.id||c.type;
+ // Presentation-only explanation: both local practice and account multiplayer
+ // retain their own legal-action authority and never infer playable moves here.
+export function chaosCardHelp(c){
+ if(!c)return '';
+ if(c.type==='mileage')return 'Advance '+c.km+' km. Drives over 300 km risk a regional hazard.';
+ if(c.type==='hazard')return c.kind==='detour'?'Cause a permanent detour on an eligible opponent.':
+  c.kind==='slow'?'Slow an opponent on their next drive.':
+  'Block an opponent until they repair or recover.';
+ if(c.type==='fix')return c.id==='atlas'?'Take a safe +150 km shortcut.':
+  'Clear a matching active hazard on your vehicle.';
+ if(c.type==='upgrade')return c.description||'Install equipment for a reusable road advantage.';
+ if(c.type==='legendary')return c.description||'Activate a one-of-a-kind championship power.';
+ return 'Select a legal action for this card.';
+}
 const stageNames=['Down East','Ontario','Prairies & Mountains'];
 const formButton=(text,attrs='')=>'<button type="submit" '+attrs+'>'+escape(text)+'</button>';
 function handControls(room,c,index){
@@ -188,7 +202,7 @@ function privateHand(room,selectedCard=0){
    '<button type="button" class="ccc-online-card-select" data-chaos-online-select="'+i+'" aria-pressed="'+(i===index)+'" aria-label="Select '+escape(cardLabel(c))+'">'+
    cardImage(c,room.leg)+'<strong>'+escape(cardLabel(c))+'</strong></button></article>').join('')+
   '</div><div class="ccc-online-card-actions" aria-live="polite"><h4>'+escape(card?cardLabel(card):'Choose a card')+'</h4>'+
-   (card?handControls(room,card,index):'<small>Draw to begin your turn.</small>')+
+   (card?'<p class="ccc-online-card-help">'+escape(chaosCardHelp(card))+'</p>'+handControls(room,card,index):'<small>Draw to begin your turn.</small>')+
   '</div></div></section>';
 }
 function roomSummary(room){

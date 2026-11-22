@@ -179,3 +179,17 @@ test('Room chat escapes player markup, supports local mute and server URL allowl
  client.toggleMute(0);
  assert.deepEqual(client.state.mutedSeats,[0]);
 });
+
+test('Room chat reporting appears for peers and sends an authenticated message ID only',async()=>{
+ const room={...game,chat:[{id:'30000000-0000-4000-8000-000000000003',seat:0,text:'Questionable shortcut',at:'2026-11-21T22:00:00Z'}]};
+ assert.match(renderChaosOnline({status:'ready',room}),/data-chaos-online-action="chat-report"/);
+ assert.doesNotMatch(renderChaosOnline({status:'ready',room:{...room,seat:0}}),/data-chaos-online-action="chat-report"/);
+ const seen=[],client=new ChaosRoomsClient({fetchImpl:async(path,opts)=>{
+  seen.push({path,opts});return new Response(JSON.stringify({reported:true}),{status:200});
+ }});
+ client.emit({status:'ready',room,rooms:[],selectedCard:0});
+ await client.reportChat(room.chat[0].id);
+ assert.equal(seen[0].path,'/social-api/v1/chaos/rooms/'+id+'/chat/report');
+ assert.deepEqual(JSON.parse(seen[0].opts.body),{messageId:room.chat[0].id});
+ assert.match(client.state.chatNotice,/operator review/);
+});

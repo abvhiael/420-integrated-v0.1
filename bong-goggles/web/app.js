@@ -285,6 +285,7 @@ function bindChaosOnline(){
   if(action==='back'){chaosOnline.emit({...chaosOnline.state,room:null,error:null,unreadChat:0,chatError:null});void chaosOnline.refresh();return;}
   if(action==='chat-toggle'){chaosOnline.toggleChat();return;}
   if(action==='mute'){chaosOnline.toggleMute(Number(b.dataset.seat));return;}
+  if(action==='chat-report'){void chaosOnline.reportChat(b.dataset.messageId).catch(()=>{});return;}
   if(action==='refresh'){void chaosOnline.refresh();return;}
   if(action==='open'){void chaosOnline.open(b.dataset.room);return;}
   if(action==='move'){try{void chaosOnline.mutate('move',{move:JSON.parse(b.dataset.move)}).catch(()=>{});}catch{}return;}

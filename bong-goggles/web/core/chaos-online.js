@@ -21,12 +21,12 @@ export class ChaosRoomsClient{
  constructor({fetchImpl=fetch,onChange=()=>{}}={}){
   this.fetchImpl=fetchImpl;this.onChange=onChange;
   this.state={status:'loading',rooms:[],room:null,error:null,selectedCard:0,chatOpen:false,mutedSeats:[],unreadChat:0,chatError:null};
-  this.generation=0;this.busy=false;this.chatBusy=false;
+  this.generation=0;this.busy=false;this.chatBusy=false;this.reportBusy=false;
  }
  emit(next){this.state={...next};this.onChange(this.state);return this.state;}
  invalidate(){this.generation++;this.emit({status:'loading',rooms:[],room:null,error:null,selectedCard:0,chatOpen:false,mutedSeats:[],unreadChat:0,chatError:null});}
  async request(path,{method='GET',data}={}){
-  if(!/^\/v1\/chaos\/rooms(?:\/[a-z0-9-]+)?(?:\/(?:start|move|next|chat))?$/.test(path))
+  if(!/^\/v1\/chaos\/rooms(?:\/[a-z0-9-]+)?(?:\/(?:start|move|next|chat(?:\/report)?))?$/.test(path))
    throw Error('Invalid game API path');
   const response=await this.fetchImpl('/social-api'+path,{
    method,credentials:'same-origin',cache:'no-store',redirect:'error',
@@ -118,6 +118,20 @@ export class ChaosRoomsClient{
   const muted=new Set(this.state.mutedSeats);
   if(muted.has(seat))muted.delete(seat);else muted.add(seat);
   this.emit({...this.state,mutedSeats:[...muted]});
+ }
+ async reportChat(messageId){
+  const room=this.state.room;
+  if(!room||this.reportBusy||!id.test(messageId??''))throw Error('Invalid room chat report');
+  this.reportBusy=true;
+  try{
+   const res=await this.request('/v1/chaos/rooms/'+room.id+'/chat/report',{method:'POST',data:{messageId}});
+   if(res.status!==200||res.data.reported!==true)
+    throw Error(res.status===409?'Already reported.':'Unable to report that message.');
+   if(this.state.room?.id===room.id)this.emit({...this.state,chatNotice:'Report saved privately for operator review.'});
+  }catch(e){
+   if(this.state.room?.id===room.id)this.emit({...this.state,chatError:e.message});
+   throw e;
+  }finally{this.reportBusy=false;}
  }
  async sendChat(text){
   const room=this.state.room;
@@ -243,7 +257,8 @@ function roomChat(room,state={}){
    return '<li class="ccc-online-chat-message'+(mine?' ccc-online-chat-message--mine':'')+'">'+
     '<div><strong>'+escape(name)+'</strong><time datetime="'+escape(m.at)+'">'+
       escape(new Date(m.at).toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'}))+'</time></div>'+
-    '<p>'+escape(m.text)+'</p></li>';
+    '<p>'+escape(m.text)+'</p>'+
+    (mine?'':'<button type="button" class="ccc-online-chat-report" data-chaos-online-action="chat-report" data-message-id="'+escape(m.id)+'" aria-label="Report message by '+escape(name)+'">Report</button>')+'</li>';
   }).join(''):'<li class="ccc-online-chat-empty">Room chat is ready. Be the first to talk trash.</li>')+'</ol>';
  return '<aside class="ccc-online-chat'+(open?' ccc-online-chat--open':'')+'" aria-label="Private match chat">'+
   '<header><div><h3>Roadside radio</h3><small>Private to this room · '+room.seats.filter(s=>s.joined).length+' drivers</small></div>'+
@@ -256,6 +271,7 @@ function roomChat(room,state={}){
     '<button type="button" data-chaos-online-action="mute" data-seat="'+i+'" aria-pressed="'+muted.has(i)+'">'+
      (muted.has(i)?'Unmute ':'Mute ')+escape(s.name)+'</button>').join('')+'</div>'+
   (state.chatError?'<p class="ccc-online-chat-error" role="alert">'+escape(state.chatError)+'</p>':'')+
+  (state.chatNotice?'<p class="ccc-online-chat-notice" role="status">'+escape(state.chatNotice)+'</p>':'')+
   '<form data-chaos-online-chat aria-label="Send room-only message">'+
    '<label for="ccc-online-chat-text">Message to this room</label>'+
    '<textarea id="ccc-online-chat-text" name="text" maxlength="280" rows="2" placeholder="Friendly trash talk…" required></textarea>'+

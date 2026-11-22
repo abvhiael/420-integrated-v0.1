@@ -46,9 +46,12 @@ func TestExecutionGettersPinnedToCanonicalHash(t *testing.T) {
 			json.Unmarshal(q.Params[0], &c)
 			switch c.Data {
 			case ethhash.EventTopic("protocolVersion()")[:10]:
-                // Both canonical ValidatorRegistry and RewardController
-                // are version 3 in the reviewed V4 native issuance candidate.
+                // RewardController and ValidatorRegistry are V3 candidates;
+                // the collateral reserve's ABI remains the frozen V2.
                 v := 3
+                if c.To == CreditReserve {
+                    v = 2
+                }
 				result = fmt.Sprintf("0x%064x", v)
 			case ethhash.EventTopic("getValidator(bytes32)")[:10] + id[2:]:
 				result = fmt.Sprintf("0x%064x", 32) + strings.Repeat("0", 64) + fmt.Sprintf("%064x", 576) + strings.Repeat("0", 64*17)

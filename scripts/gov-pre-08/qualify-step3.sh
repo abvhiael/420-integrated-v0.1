@@ -148,6 +148,7 @@ for tag in a b; do
     --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --descriptors "$RUNNER_TEMP/govpre08-step3-descriptors-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-postgres-initial-$tag.json"
+  bash scripts/gov-pre-08/qualify-step3-explorer.sh "$tag" original
   python3 scripts/gov-pre-08/test_step3.py
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \
     --verify-bundle "$RUNNER_TEMP/govpre08-step3-v4-a" --rpc "$GOV_PRE_08_RPC" \
@@ -189,6 +190,7 @@ for tag in a b; do
     --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --descriptors "$RUNNER_TEMP/govpre08-step3-descriptors-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-postgres-recover-$tag.json"
+  bash scripts/gov-pre-08/qualify-step3-explorer.sh "$tag" recovered
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT
@@ -230,6 +232,15 @@ for init,recovery in zip(pg0,pg1):
     assert init["actualReorgDepthAtLeastOne"] and recovery["reopenedExistingCheckpoint"]
     assert not init["networkConsensusFinalityQualified"] and not recovery["productionMigrationAuthorized"]
 assert pg0[0]["state"]["normalizedReadModelDigest"]==pg0[1]["state"]["normalizedReadModelDigest"], "independent real PostgreSQL protocol projections differ"
+exp=[json.loads((p/f"govpre08-step3-explorer-report-{tag}-{phase}.json").read_text())
+     for tag in "ab" for phase in ("original","recovered")]
+assert all(e["realGoExplorerProcess"] and e["realPostgresIndexerSource"] and
+           e["actualIndexedBlocksAndTransactionRead"] and
+           e["actualRegistryServiceVersionRecovered"] and
+           e["wrongChainBlocked"] and e["canonicalAuthority"]==False and
+           e["syntheticBftFinality"]==False for e in exp)
+assert exp[0]["explorerIndexedHead"]==exp[1]["explorerIndexedHead"]
+assert exp[2]["explorerIndexedHead"]==exp[3]["explorerIndexedHead"]
 assert all(not g["approvedV4"] and not g["authenticFounderOwnersVerified"] for g in graphs)
 for tag in "ab":
     x = json.loads((p / f"govpre08-step3-recovery-{tag}.json").read_text())

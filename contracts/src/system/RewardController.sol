@@ -134,8 +134,11 @@ contract RewardController is ConsensusSystemAccess420, I420System {
 
     function _settleValidator(address owner, uint256 gross, uint8 kind, uint64 blockNumber) private {
         uint256 community;
-        if (VALIDATOR_REGISTRY.code.length > 0 &&
-            IFullSponsoredValidator420(VALIDATOR_REGISTRY).isFullyProtocolSponsoredOwner(owner)) {
+        // The canonical stake registry is not optional: paying 100% to a
+        // sponsored validator while 0x0423 was absent would silently bypass
+        // the mandatory 10% community contribution.
+        if (VALIDATOR_REGISTRY.code.length == 0) revert InvalidNativeRecipient();
+        if (IFullSponsoredValidator420(VALIDATOR_REGISTRY).isFullyProtocolSponsoredOwner(owner)) {
             community = gross * FULL_SPONSOR_COMMUNITY_BPS / 10_000;
             if (community != 0) {
                 // The community reserve must exist as approved immutable predeploy

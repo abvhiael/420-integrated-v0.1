@@ -71,12 +71,16 @@ contract FounderWalletClaimsAndCompensation420Test {
     }
 
     function testRejectReservedAndDuplicatedFounderWallets() public {
+        bool duplicateConstructed;
         try new FoundingWalletClaims420(ADMIN, ADMIN, JANET, bytes32(uint256(1))) {
-            revert("duplicate identities permitted");
+            duplicateConstructed = true;
         } catch {}
+        require(!duplicateConstructed, "duplicate founder identities were deployable");
+        bool systemConstructed;
         try new FoundingWalletClaims420(address(0x0423), ANDREW, JANET, bytes32(uint256(1))) {
-            revert("system identity permitted");
+            systemConstructed = true;
         } catch {}
+        require(!systemConstructed, "reserved predeploy wallet was deployable");
     }
 
     function testNativeSplitIsAccumulativeAndWithdrawableOnlyByEachPayee() public {

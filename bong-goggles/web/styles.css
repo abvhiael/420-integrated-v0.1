@@ -326,3 +326,13 @@ body{background:var(--bg);color:var(--text)}
 @media(prefers-reduced-motion:reduce){
  .game-kit *{scroll-behavior:auto;animation:none;transition:none}
 }
+
+/* BC-0.9 server-fed feedback, deadline display and localized public rule snippets. */
+.game-kit__feedback{grid-column:1/-1;border:1px solid var(--line);border-left:4px solid #356e91;border-radius:8px;background:var(--surface-2);padding:.85rem;margin:0;overflow-wrap:anywhere}
+.game-kit__feedback--warning{border-left-color:#b27c10}
+.game-kit__feedback--error{border-left-color:#b12c42}
+.game-kit__deadline time{font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.game-kit__rules ol{padding-inline-start:1.4rem;margin:.2rem 0;display:grid;gap:.55rem}
+.game-kit__rules li{overflow-wrap:anywhere;line-height:1.45}
+.game-kit__seat[data-seat-position]{position:relative}
+@media(forced-colors:active){.game-kit__feedback{border:2px solid CanvasText}}

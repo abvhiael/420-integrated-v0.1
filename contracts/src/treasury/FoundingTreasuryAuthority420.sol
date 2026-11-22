@@ -113,6 +113,10 @@ contract FoundingTreasuryAuthority420 {
     event FoundingAuthorityRetired(address indexed initiator);
     event FoundingReleaseExecutorBound(address indexed executor, bytes32 indexed runtimeCodeHash);
     event FoundingPaymentPurposeBound(bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 purposeHash);
+    event FoundingPaymentNotice(
+        bytes32 indexed paymentId, bytes32 indexed evidenceHash, bytes32 indexed purposeHash,
+        uint64 proposedAt, uint64 notBefore, uint64 expiresAt, bool twoFounderRequired
+    );
 
     constructor(
         address administrator_, address andrew_, address janet_,
@@ -250,12 +254,22 @@ contract FoundingTreasuryAuthority420 {
         p.notBefore = notBefore;
         p.expiresAt = expiresAt;
         p.evidenceHash = evidenceHash;
+        // Commit to the complete reviewed case when the 48-hour NOTICE starts,
+        // rather than disclosing the unique purpose only after scheduling.
+        p.purposeHash = keccak256(abi.encode(
+            keccak256("420/FOUNDING/DISBURSEMENT/PURPOSE/V1"),
+            block.chainid, address(this), paymentId, purpose, contingency, evidenceHash
+        ));
         p.purpose = purpose;
         p.contingency = contingency;
         p.twoFounderRequired = requiresTwo;
         p.approvals = 1;
         paymentApproval[paymentId][msg.sender] = true;
         emit FoundingPaymentProposed(paymentId, msg.sender, recipient, amount, contingency, purpose);
+        emit FoundingPaymentPurposeBound(paymentId, evidenceHash, p.purposeHash);
+        emit FoundingPaymentNotice(
+            paymentId, evidenceHash, p.purposeHash, p.proposedAt, notBefore, expiresAt, requiresTwo
+        );
         emit FoundingPaymentApproved(paymentId, msg.sender, 1);
     }
 
@@ -299,14 +313,8 @@ contract FoundingTreasuryAuthority420 {
         bytes32 budgetId = p.contingency ? contingencyBudgetId : operationsBudgetId;
         bytes32 actionHash = p.contingency ? contingencyActionHash : operationsActionHash;
         uint64 notBefore = p.notBefore > block.timestamp ? p.notBefore : uint64(block.timestamp);
-        // Distinct payments must never alias an old disbursement even when recipient,
-        // amount, purpose evidence and time window are identical. The Treasury-recorded
-        // purpose is chain-, controller- and payment-bound, while evidenceHash remains
-        // a stable incident/case reference for anti-splitting checks.
-        p.purposeHash = keccak256(abi.encode(
-            keccak256("420/FOUNDING/DISBURSEMENT/PURPOSE/V1"),
-            block.chainid, address(this), paymentId, p.purpose, p.contingency, p.evidenceHash
-        ));
+        // The unique purpose was publicly fixed in the original proposal notice,
+        // so the signed review cannot change after the 48-hour observation period.
         disbursementId = disbursementRegistry.canonicalId(
             budgetId, p.recipient, p.amount, notBefore, p.expiresAt, actionHash, p.purposeHash
         );
@@ -326,7 +334,6 @@ contract FoundingTreasuryAuthority420 {
             disbursementId, budgetId, p.recipient, p.amount, notBefore, p.expiresAt,
             actionHash, p.purposeHash
         );
-        emit FoundingPaymentPurposeBound(paymentId, p.evidenceHash, p.purposeHash);
         emit FoundingPaymentScheduled(paymentId, disbursementId, p.amount, p.contingency);
     }
 

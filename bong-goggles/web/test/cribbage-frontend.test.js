@@ -42,7 +42,7 @@ const tick=()=>{
   flush:()=>{assert.ok(timer,'expected pending announcement timer');const f=timer;timer=null;f();},
   duration:()=>duration,active:()=>!!timer};
 };
-const http=(status,data)=>({status,headers:{get:()=> 'application/json; charset=utf-8'},json:async()=>data});
+const http=(status,data)=>({status,ok:status>=200&&status<300,headers:{get:()=> 'application/json; charset=utf-8'},json:async()=>data});
 
 test('BC-1.4 exactly 120 unique numbered holes per score track, shared 121 and separate 2-peg parks',()=>{
  assert.deepEqual(Object.keys(CRIBBAGE_HOLES),['green','ivory','amber']);
@@ -106,7 +106,7 @@ test('BC-1.4 all moves use the human/server legal alphabet (2p, 3p, 4p, cut, peg
   const state=accepted(n);
   const actions=cribbageLegalMoves(state);
   assert.equal(actions.length,n===2?15:5);
-  assert.ok(actions.every(x=>x.type==='discard'&&x.cards.length===(n===3?1:2)));
+  assert.ok(actions.every(x=>x.type==='discard'&&x.cards.length===(n===2?2:1)));
   assert.ok(actions.every(x=>cribbageCanSubmit(state,x)));
   assert.equal(cribbageCanSubmit(state,{type:'discard',cards:[51,50]}),false);
  }

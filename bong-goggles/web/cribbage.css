@@ -135,3 +135,7 @@
 }
 .cribbage-app[data-motion="reduced"] *{transition-duration:0s!important;animation-duration:0.01ms!important}
 .cribbage-app[data-motion="reduced"] animate{display:none}
+
+/* BC-1.7: history links override generic dark-green game-page ink. */
+.cribbage-app .cribbage-social a{color:#daefbd;text-decoration:underline;text-underline-offset:.15em}
+.cribbage-app .cribbage-social a:focus-visible{outline:3px solid #f9ba58;outline-offset:3px}

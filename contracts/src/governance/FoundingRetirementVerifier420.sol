@@ -172,7 +172,9 @@ contract FoundingRetirementVerifier420 {
 
     /// @notice Called by the founding authority from inside a real Timelock action.
     /// A past unrelated Civic vote is insufficient to authorize retirement.
-    function retirementExecutionAuthorized(address authority) external view returns (bool) {
+    function retirementExecutionAuthorized(
+        address authority
+    ) external view returns (bool) {
         return authority != address(0) && _eligibilityReady() && civicGovernor.activeDualHouseExecution()
             && civicGovernor.activeDualHouseActionHash()
                 == keccak256(abi.encode(authority, abi.encodeWithSignature("retire()")));

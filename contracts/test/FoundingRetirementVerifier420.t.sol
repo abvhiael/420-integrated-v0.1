@@ -48,11 +48,13 @@ contract CivicGovernorStubRetirement420 {
         dualHouseExecutedCount = value;
     }
 
-    function setActiveExecution(bool value, address target) external {
+    function setActiveExecution(
+        bool value,
+        address target
+    ) external {
         activeDualHouseExecution = value;
-        activeDualHouseActionHash = value
-            ? keccak256(abi.encode(target, abi.encodeWithSignature("retire()")))
-            : bytes32(0);
+        activeDualHouseActionHash =
+            value ? keccak256(abi.encode(target, abi.encodeWithSignature("retire()"))) : bytes32(0);
     }
 }
 
@@ -248,8 +250,10 @@ contract FoundingRetirementVerifier420Test {
         civic.setActiveExecution(false, address(founder));
         require(!verifier.retirementExecutionAuthorized(), "out-of-context retirement");
         civic.setActiveExecution(true, address(0xBAD));
-        require(!verifier.retirementExecutionAuthorized(address(founder)),
-            "other verified dual-house action cannot authorize retirement");
+        require(
+            !verifier.retirementExecutionAuthorized(address(founder)),
+            "other verified dual-house action cannot authorize retirement"
+        );
         civic.setActiveExecution(false, address(founder));
         civic.setExecuted(1);
         require(

@@ -31,7 +31,10 @@ contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
         retirementReady = value;
         retirementExecutionAuthorizedFlag = value;
     }
-    function retirementExecutionAuthorized(address) external view returns (bool) {
+
+    function retirementExecutionAuthorized(
+        address
+    ) external view returns (bool) {
         return retirementExecutionAuthorizedFlag;
     }
 }

@@ -33,7 +33,9 @@ contract FoundingSettlementCivic420 is IFoundingCivicStatus420, IFoundingRetirem
         return false;
     }
 
-    function retirementExecutionAuthorized(address) external pure returns (bool) {
+    function retirementExecutionAuthorized(
+        address
+    ) external pure returns (bool) {
         return false;
     }
 }

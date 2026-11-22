@@ -11,7 +11,9 @@ import "../governance/IFoundingWalletClaims420.sol";
 
 interface IFoundingRetirementReadiness420 {
     function retirementReady() external view returns (bool);
-    function retirementExecutionAuthorized(address authority) external view returns (bool);
+    function retirementExecutionAuthorized(
+        address authority
+    ) external view returns (bool);
 }
 
 interface IFoundingCivicStatus420 {

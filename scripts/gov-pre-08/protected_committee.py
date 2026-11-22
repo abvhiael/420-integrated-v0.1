@@ -45,8 +45,8 @@ class Committee:
         self.signing_evidence=[]
         self._setup()
 
-    def _command(self,args,stdin=None):
-        return subprocess.run(args,cwd=self.root,stdin=stdin,check=True,
+    def _command(self,args,input_bytes=None):
+        return subprocess.run(args,cwd=self.root,input=input_bytes,check=True,
                               stdout=subprocess.PIPE,stderr=subprocess.PIPE)
     def _certificates(self):
         tls=self.private/"tls"
@@ -70,7 +70,7 @@ class Committee:
                 "-out",str(base)+".pem","-days","1","-extfile",str(ext)])
             (tls/(name+".key")).chmod(0o600)
             pub=self._command(["openssl","x509","-in",str(base)+".pem","-pubkey","-noout"]).stdout
-            der=self._command(["openssl","pkey","-pubin","-outform","DER"],stdin=pub).stdout
+            der=self._command(["openssl","pkey","-pubin","-outform","DER"],input_bytes=pub).stdout
             return (str(base)+".pem",str(base)+".key",hashlib.sha256(der).hexdigest())
         self.certificates=[]
         for seat in range(15):

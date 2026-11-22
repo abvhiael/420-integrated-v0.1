@@ -6,13 +6,17 @@ Scope: exactly three independently controlled human founder beneficiaries; 500,0
 
 ## Local exact-source qualification
 
-Implementation qualification head `e692609f72ec9b73f2aeecf36f211d44c2addaa7` on PR #1330; any subsequent evidence-only commits do not change Solidity or verifier logic. These are **actual GitHub Actions executions**, not suggested test commands.
+Current exact-source qualification head `191fc3952b2b619107b8c0dee80c02b44e9b1093` on PR #1330. This includes the Vault formatting correction and an import-closure repair to the existing Vault audit workflow; subsequent evidence-only document changes do not alter qualified code. All run links below are **actual GitHub Actions executions** at that source head, not suggested commands.
 
 | Evidence | Observed status |
 |---|---|
-| [GOV-PRE-05 exact-head finance #44991096726](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991096726) | **SUCCESS: 27 Solidity tests passed; 0 failures**: 8 vesting, 10 source-verified founder wallet / compensation, 9 existing DevelopmentCompensationVault behavior |
-| [Three-founder Genesis vesting #44991096692](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991096692) | **SUCCESS**: 8 Genesis vesting / anti-capture tests, canonical 42M supply and 1M grant allocation checks |
-| [Founding wallet claim and compensation #44991096764](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991096764) | Existing exact-head founder signature/enrollment, Treasury and Stake qualification; inspect workflow conclusion independently before asserting success |
+| [GOV-PRE-05 exact-head finance #44991438877](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991438877) | **SUCCESS: 27/27 Foundry tests** (8 vesting, 10 authenticated founder/revenue integration, 9 backward-compatible Vault) and strict fail-closed Genesis/V4 verification |
+| [Three-founder Genesis vesting #44991438933](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991438933) | **SUCCESS:** vesting lifecycle and unmodified Genesis 42M reconciliation |
+| [GOV-PRE-01 canonical supply reconciliation #44991439028](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991439028) | **SUCCESS:** canonical Genesis supply and validator checks |
+| [Development Compensation Vault security + core #44991438871](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991438871) | **SUCCESS:** formatting/build, 9 legacy Vault + 1 Genesis registration tests, 9 hardening-profile tests, targeted Slither with **zero high-severity findings** |
+| [Founding wallet claim & compensation #44991439005](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44991439005) | **IN PROGRESS AT DOCUMENTATION TIME:** existing exact-head founder enrollment, payout and Treasury/Stake qualification; do not imply completion until the workflow reports success |
+
+The former Vault CI failure on an unformatted new callback and its unrelated LayerZero CADC fixture imports was corrected in `contracts/src/revenue/DevelopmentCompensationVault420.sol`, `scripts/prepare-devcomp-foundry-scope.py` and `.github/workflows/dev-compensation-audit.yml`. The repaired audit now compiles copied, byte-verified source/Genesis dependencies only, with no mocks or weakening of checks. No unauthorized code, beneficiary, Genesis release, or economic parameters were changed to make it green.
 
 ## 1. Genesis — exactly 1M $420, NOT application compensation
 

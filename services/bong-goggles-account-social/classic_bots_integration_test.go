@@ -8,7 +8,6 @@ import (
  "errors"
  "sync"
  "testing"
- "time"
 )
 
 func TestBC08MixedBotSessionSerializesReplaysAndKeepsSecrets(t *testing.T){
@@ -111,5 +110,4 @@ func TestBC08RejectMissingPolicyAndExpiredBotTurn(t *testing.T){
  if _,e=restored.RunBotTurn(context.Background(),match.ID);!errors.Is(e,ErrInvalid){
   t.Fatal("unconfigured worker ran",e)
  }
- _=time.Second // retain explicit deadline behavior coverage
 }

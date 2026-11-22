@@ -272,6 +272,18 @@ def make_candidate(root=ROOT, with_artifacts=True):
         "protocolRegistry":"0x0000000000000000000000000000000000000434",
         "authorityInputs":inputs,
     }
+    proposed_hash = keccak(root,payload)
+    v4path = "contracts/config/candidates/genesis-config-commitment-v4-unsigned.json"
+    proposed = read(root,v4path)
+    require(proposed["schema"] == "420-genesis-v4-unsigned-source-candidate-v1"
+            and proposed["status"] == "UNAPPROVED_NOT_FOR_GENESIS_EXECUTION"
+            and proposed["commitmentPayload"] == payload
+            and proposed["genesisConfigHash"].lower() == proposed_hash,
+            "retained V4 candidate is stale, malformed or falsely approved")
+    require(proposed["approvals"]["founderProofs"] == 0
+            and proposed["approvals"]["independentGenesisApproval"] is False
+            and proposed["approvals"]["liveDeploymentReceiptsVerified"] is False,
+            "missing signatures cannot be represented as approved V4")
     components = []
     for name, short in MODULES:
         path = "contracts/src/" + short
@@ -313,10 +325,11 @@ def make_candidate(root=ROOT, with_artifacts=True):
                         "hash":existing["genesisConfigHash"],
                         "gitBlobSha1":gitblob(root,FROZEN_CONFIG)},
         "proposedV4":{"commitmentPayload":payload,
-                      "genesisConfigHash":keccak(root,payload),
+                      "genesisConfigHash":proposed_hash,
                       "approvalSignatures":None,
                       "independentlyApproved":False},
         "sourceDriftFromV3":changed,
+        "retainedUnsignedV4Source":v4path,
         "supply420":42000000,
         "founderFunding":[{"id":role,"amount420":amount,
                            "destination":alloc[role]["destination"],

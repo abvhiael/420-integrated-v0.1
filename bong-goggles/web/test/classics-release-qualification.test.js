@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {performance} from 'node:perf_hooks';
+import {execFileSync} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
 import {CLASSIC_ROADMAP,ALL_CLASSICS} from '../core/classics.js';
 import {renderClassicGamePage} from '../core/games-ui.js';
 import {renderSharedGameScreen} from '../core/shared-game-ui.js';
@@ -24,6 +26,9 @@ test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-
  assert.deepEqual(manifest,{schema:'bc-0-12-release-evidence-v1',games:{}});
  const result=await auditRelease({manifest,fetchImpl:()=>{throw Error('should not call GitHub without release')}});
  assert.deepEqual(result,{count:25,released:0,locked:25});
+ const cli=execFileSync(process.execPath,[fileURLToPath(new URL('../scripts/classics-release-gate.mjs',import.meta.url)),'--audit'],{encoding:'utf8'});
+ assert.match(cli,/BC-0.12 catalogue\/release audit/);
+ assert.match(cli,/"locked":25/);
  const begin=performance.now();
  for(const g of CLASSIC_ROADMAP){
   for(const screen of ['intro','rules','play','setup','table','results','history','rematch']){

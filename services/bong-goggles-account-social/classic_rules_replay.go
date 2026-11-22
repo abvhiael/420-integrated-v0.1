@@ -71,7 +71,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  FROM bg_account_social.classic_rule_moves m
  JOIN bg_account_social.classic_session_events e
  ON e.session_id=m.session_id AND e.sequence=m.sequence
- WHERE m.session_id=$1 ORDER BY m.sequence LIMIT $2`,rec.ID,maxRulesMoves+1)
+ WHERE m.session_id=$1 ORDER BY m.sequence LIMIT $2`,rec.ID,adapter.replayLimit()+1)
  if e!=nil{return e}
  trace:=make([]RuleTrace,0)
  for rows.Next(){
@@ -84,7 +84,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
    rows.Close();return ErrUnavailable
   }
   step.Action=action;trace=append(trace,step)
-  if len(trace)>maxRulesMoves{rows.Close();return ErrUnavailable}
+  if len(trace)>adapter.replayLimit(){rows.Close();return ErrUnavailable}
  }
  e=rows.Err();rows.Close();if e!=nil{return e}
  var moveEvents int

@@ -59,7 +59,7 @@ var classicSeatLimits=map[string][2]int{
  "deux-cents":{4,4},"hola":{2,4},"rook":{4,4},"nines":{3,4},"kaiser":{4,4},
 }
 var classicPartners=map[string]bool{
- "euchre":true,"spades":true,"canasta":true,"tarabish":true,"500":true,
+ "cribbage":true,"euchre":true,"spades":true,"canasta":true,"tarabish":true,"500":true,
  "120s":true,"deux-cents":true,"rook":true,"kaiser":true,
 }
 func classicSeatsValid(game string,count int)bool{

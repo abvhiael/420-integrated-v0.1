@@ -34,6 +34,11 @@ type RuleFrame struct {
  Winner *int `json:"winner"`
  Data json.RawMessage `json:"data"`
 }
+type RuleSeatPolicy interface {
+ ValidateSeats(room ClassicRoom,seats []ClassicSeat)error
+}
+// Non-default replay allowances are compiled into trusted operator modules.
+type RuleReplayCapacity interface { MaxReplayActions()int }
 type RuleModule interface {
  Definition() RuleDefinition
  Initial(seed [32]byte,seatCount int,budget *RuleBudget)(RuleFrame,error)
@@ -104,6 +109,9 @@ func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []Cla
    if s.Subject!=""||!map[string]bool{"easy":true,"medium":true,"hard":true}[s.Difficulty]{return nil,0,ErrUnavailable}
   default:return nil,0,ErrUnavailable
   }
+ }
+ if seatPolicy,ok:=a.module.(RuleSeatPolicy);ok{
+  if e:=seatPolicy.ValidateSeats(room,seats);e!=nil{return nil,0,ErrUnavailable}
  }
  first,e:=a.initial(seed,room.SeatCount)
  if e!=nil{return nil,0,e}
@@ -291,8 +299,16 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
  two,e:=run();if e!=nil||!bytes.Equal(one,two){return nil,ErrUnavailable}
  return one,nil
 }
+func (a *RulesAdapter) replayLimit()int{
+ if a!=nil{
+  if p,ok:=a.module.(RuleReplayCapacity);ok{
+   if cap:=p.MaxReplayActions();cap>=maxRulesMoves&&cap<=8192{return cap}
+  }
+ }
+ return maxRulesMoves
+}
 func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json.RawMessage,error){
- if a==nil||len(trace)>maxRulesMoves{return nil,ErrInvalid}
+ if a==nil||len(trace)>a.replayLimit(){return nil,ErrInvalid}
  state,e:=a.initial(seed,seatCount);if e!=nil{return nil,e}
  prev:=int64(1)
  for _,item:=range trace{

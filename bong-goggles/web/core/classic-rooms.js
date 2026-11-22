@@ -46,6 +46,7 @@ function normalizedRoom(r,detail=false){
  if(invites.some(x=>!x))return null;
  return Object.freeze({...normalizedRoom(r),seats:Object.freeze(seats),invites:Object.freeze(invites)});
 }
+export const normalizeClassicRoom=normalizedRoom;
 const verifiedEnvelope=(response,name)=>{
  if(!response||response.status!==200&&response.status!==201||
   response.data?.onChain!==false||response.data?.wager!==false||

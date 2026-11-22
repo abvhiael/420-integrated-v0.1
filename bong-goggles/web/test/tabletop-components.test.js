@@ -199,7 +199,7 @@ test('BC-0.9 rule-localization, feedback and server deadline are validated and n
  assert.match(html,/lang="fr-CA"/);
  assert.match(html,/Règles/);
  assert.match(html,/Chaque tour suit le serveur/);
- assert.doesNotMatch(html,/setInterval|Date\\.now\\(|onclick=|<script\\b/);
+ assert.doesNotMatch(html,/setInterval|Date\.now\(|onclick=|<script\b/);
  for(const edit of [
   t=>t.deadline.at='2026-02-31T05:00:00Z',
   t=>t.deadline.at='tomorrow',
@@ -229,7 +229,7 @@ test('BC-0.9 local symbol asset manifest and feedback helpers never fetch unqual
  assert.match(html,/role="alert"/);
  assert.match(html,/&lt;svg/);
  assert.match(html,/lang="en-CA"/);
- assert.doesNotMatch(html,/<svg\\b|<script\\b|<button\\b|onclick="/);
+ assert.doesNotMatch(html,/<svg\b|<script\b|<button\b|onclick="/);
  assert.equal(renderTurnDeadline({at:'2026-11-22T05:00:00-06:00'}),'');
  assert.equal(renderLocalizedRules({verified:false,locale:'en-CA',title:'Help',paragraphs:['Text']}),'');
 });

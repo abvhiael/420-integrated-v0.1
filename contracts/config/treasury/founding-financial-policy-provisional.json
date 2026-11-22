@@ -75,6 +75,8 @@
     "vaultRouteExactGrantRequired": true,
     "recipientNativeTransferAndVaultAccountingChecked": true,
     "settlementAccounting": "ATOMIC_SINGLE_USE_RECORDED_BY_TREASURY_BUDGET_DISBURSEMENT_AND_VAULT",
-    "liveVaultsFunded": false
+    "liveVaultsFunded": false,
+    "purposeEvidencePublishedAt": "PROPOSAL_BEFORE_48_HOUR_PUBLIC_NOTICE",
+    "noticeEvent": "FoundingPaymentNotice(bytes32,bytes32,bytes32,uint64,uint64,uint64,bool)"
   }
 }

@@ -243,6 +243,19 @@ def main():
                 "running Go Explorer failed to present canonical certified block")
         code,status=getter("http://127.0.0.1:18783","/v1/status")
         require(code==200 and status["chainId"]==420,"Explorer wrong chain")
+        # The production TypeScript Indexer/PostgreSQL service must ingest this
+        # same node420 block; its normal EVM logs differ deliberately from the
+        # native Engine archive served by the certified Go Indexer.
+        pg_report=args.workdir/"postgres420.json"
+        subprocess.run(["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-local-postgres.mjs"),
+                        "--rpc","http://127.0.0.1:18780",
+                        "--graph",str(args.graph.resolve()),
+                        "--expected-block-hash",latest["hash"],
+                        "--output",str(pg_report)],cwd=ROOT,check=True)
+        pg=json.loads(pg_report.read_text())
+        require(pg["certifiedBlockHash"].lower()==latest["hash"].lower() and
+                pg["durableRestartIdempotent"] and pg["sameNode420ExecutionSource"],
+                "PostgreSQL Indexer not on the same canonical chain as Go Explorer")
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
              "chainId":420,"genesisHash":genesisblock["hash"],
@@ -254,6 +267,7 @@ def main():
              "realCanonicalValidatorRegistryCalled":True,
              "goIndexerCertifiedProducer":True,"goExplorerCertifiedBlock":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":False,
+             "postgresEvmCheckpointOnSameChain":True,
              "fullPostgresSameChainQualified":False,
              "nativeRewardOnSameLedgerQualified":False,
              "liveNetworkQualified":False}

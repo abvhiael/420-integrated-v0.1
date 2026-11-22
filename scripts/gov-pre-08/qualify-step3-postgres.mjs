@@ -163,6 +163,9 @@ try{
                        '007-durable-recovery.sql','008-finalized-recovery.sql']){
       await db.query(await fs.readFile(path.join(root,'420-indexer/sql',name),'utf8'));
     }
+    await db.query(
+      'create table gov_pre08_local_observation (chain_id numeric(78,0) primary key, observed_head_hash text not null, observed_at timestamptz not null, local_scope text not null)'
+    );
     const before=await checkpointStore.load();
     need(before===null,'unexpected checkpoint on cold start');
     const ingestor=makeIngestor();
@@ -248,6 +251,11 @@ try{
       realCanonicalReceiptReconstruction:true,actualHttpIndexer:http,
       chainFinality:'UNFINALIZED_LOCAL_ANVIL_HEAD_ONLY',state};
   }
+  const canonical=await checkpointStore.load();
+  need(canonical && canonical.chainId===31337n,'no verified local canonical checkpoint');
+  await db.query(
+     'insert into gov_pre08_local_observation(chain_id,observed_head_hash,observed_at,local_scope) values ($1,$2,now(),$3) on conflict (chain_id) do update set observed_head_hash=excluded.observed_head_hash,observed_at=excluded.observed_at,local_scope=excluded.local_scope',
+     ['31337',canonical.blockHash,'LOCAL_INDEXER_VERIFIED_NOT_NETWORK_FINALITY']);
   need(!report.productionMigrationAuthorized && report.chainId===31337,
        'production release gate incorrectly opened');
   report.productionMigrationAuthorized=false;

@@ -191,6 +191,16 @@ contract FoundingRetirementVerifier420Test {
             "past vote cannot substitute for active retirement proposal");
     }
 
+    function testReplacedSelfSignedCommitteeNominationInvalidatesIndependentWitness() public {
+        _prepare();
+        vm.warp(block.timestamp + 30 days);
+        require(verifier.retirementReady(), "independent witness baseline");
+        address member = address(0xC000);
+        vm.prank(member);
+        committee.nominate(keccak256("new self-signed commitment"));
+        require(!verifier.retirementReady(), "new nomination reused stale 30-day verification");
+    }
+
     function testValidatorExitImmediatelyResetsEligibility() public {
         bytes32[60] memory ids = _prepare();
         vm.warp(block.timestamp + 30 days);

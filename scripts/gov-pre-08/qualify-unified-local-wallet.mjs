@@ -58,6 +58,40 @@ const gov=createGovernance420Client({provider,chainId:chain,account:fixture.addr
 const session=await gov.verifySession();
 need(session.chainId===420n && session.account.toLowerCase()===fixture.address.toLowerCase(),
      'real Wallet Governance five-component discovery failed on same Geth chain');
+// Run fail-closed 420Wallet authorization checks on the *same* native Geth
+// node as the actual signed transaction. These probes must not broadcast.
+async function deny(action,pattern,label){
+  let refused=false;
+  try{await action();}catch(error){refused=pattern.test(String(error));}
+  need(refused,'missing fail-closed Wallet denial: '+label);
+}
+function adversarialProvider(transform){
+  return {request:async(method,params=[])=>{
+    const replacement=transform(method,params);
+    if(replacement!==undefined)return replacement;
+    return provider.request(method,params);
+  }};
+}
+function civicWith(testProvider,account=fixture.address){
+  return createGovernance420Client({provider:testProvider,chainId:chain,account,
+    discovery:{source:'protocol-registry',serviceId:GOVERNANCE420_SERVICE_ID,
+      registryAddress:registry,revision:1,modules:civic,
+      componentIds:Object.fromEntries(Object.keys(civic).map(k=>[k,ids[k]]))}});
+}
+await deny(()=>civicWith(adversarialProvider((method)=>
+    method==='eth_chainId'?'0x1a5':undefined)).verifySession(),
+    /wrong network/i,'wrong-chain wallet');
+await deny(()=>civicWith(adversarialProvider((method)=>
+    method==='eth_accounts'?[]:undefined)).verifySession(),
+    /no longer authorized/i,'disconnected identity');
+await deny(()=>civicWith(adversarialProvider((method,params)=>
+    method==='eth_getCode'&&params[0]?.toLowerCase()===registry.toLowerCase()
+      ?'0x':undefined)).verifySession(),
+    /no deployed code/i,'vanished canonical Registry runtime');
+await deny(()=>civicWith(adversarialProvider((method,params)=>
+    method==='eth_getCode'&&params[0]?.toLowerCase()===civic.governor.toLowerCase()
+      ?'0x60006000':undefined)).verifySession(),
+    /code hash mismatch|contract identity mismatch/i,'tampered Governor bytecode');
 const prepared=await treasury.prepareGovernedAction({
   kind:'setAssetPolicy',asset:'0x0000000000000000000000000000000000000000',
   allowed:true,maxSingle:'100',maxEpoch:'200',epochSeconds:'86400'});
@@ -93,6 +127,7 @@ if(mode==='sign'){
     signerIsPublicInsecureFixture:true,
     actualNativeRewardBeforeSigningWei:accountBalance.toString(),
     txHash:tx,wrongChainSignedTransactionRejected:true,
+    wrongChainIdentityAndStaleRegistryAndTamperedCodeRejected:true,
     rawTransactionAcceptedByPatchedGeth:true,
     authorizedProductionOwner:false,approvedV4:false,
     unreviewedTreasuryBroadcastCount:0};

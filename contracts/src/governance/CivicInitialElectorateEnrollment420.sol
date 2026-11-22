@@ -81,6 +81,7 @@ contract CivicInitialElectorateEnrollment420 {
     error EmptyElectorate();
 
     event MemberEnrolled(CivicIds420.House indexed house, address indexed voter, bytes32 indexed profileId);
+    event MemberWithdrawn(CivicIds420.House indexed house, address indexed voter, bool invalidated);
     event InitialElectoratesClosed(
         bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight
     );
@@ -129,6 +130,54 @@ contract CivicInitialElectorateEnrollment420 {
         if (house == CivicIds420.House.COMMUNITY) _community.push(record);
         else _validator.push(record);
         emit MemberEnrolled(house, msg.sender, profileId);
+    }
+
+    /// @notice Voters can withdraw/refresh records before the one-way seal.
+    function withdraw(CivicIds420.House house) external {
+        _requireOpen();
+        _remove(house, msg.sender);
+    }
+
+    /// @notice Anyone can eject a credential/status that is provably no longer eligible.
+    /// A verified eligible member can never be removed by a third party.
+    function pruneIneligible(CivicIds420.House house, address voter) external {
+        _requireOpen();
+        if (!enrolled[uint8(house)][voter]) revert Ineligible();
+        (bool valid,) = address(this).staticcall(abi.encodeCall(this.verifyMember, (house, voter)));
+        if (valid) revert Ineligible();
+        _remove(house, voter);
+    }
+
+    function verifyMember(CivicIds420.House house, address voter) external view returns (bool) {
+        Enrollment[] storage records = house == CivicIds420.House.COMMUNITY ? _community : _validator;
+        for (uint256 i; i < records.length; ++i) {
+            if (records[i].voter == voter) {
+                _verify(records[i], house);
+                return true;
+            }
+        }
+        revert Ineligible();
+    }
+
+    function _requireOpen() private view {
+        if (block.chainid != deploymentChainId) revert WrongChain();
+        if (enrollmentClosed) revert EnrollmentClosed();
+    }
+
+    function _remove(CivicIds420.House house, address voter) private {
+        Enrollment[] storage records = house == CivicIds420.House.COMMUNITY ? _community : _validator;
+        uint256 count_ = records.length;
+        for (uint256 i; i < count_; ++i) {
+            if (records[i].voter == voter) {
+                enrolled[uint8(house)][voter] = false;
+                enrolledProfile[uint8(house)][records[i].profileId] = false;
+                if (i != count_ - 1) records[i] = records[count_ - 1];
+                records.pop();
+                emit MemberWithdrawn(house, voter, msg.sender != voter);
+                return;
+            }
+        }
+        revert Ineligible();
     }
 
     /// @notice Only the Genesis-plan-approved Governance compatibility contract can freeze

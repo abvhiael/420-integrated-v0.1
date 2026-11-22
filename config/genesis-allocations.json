@@ -5,10 +5,46 @@
   "allocations": [
     {
       "id": "founder-vesting",
-      "amount_420": 1000000,
-      "amount_kief": "1000000000000000000000000",
+      "amount_420": 500000,
+      "amount_kief": "500000000000000000000000",
       "destination": "0x0000000000000000000000000000000000000427",
-      "lock_type": "founder-vesting-registry"
+      "lock_type": "founder-vesting-registry",
+      "note": "500,000 locked across exactly three verified founders, 13 releases / 182 days",
+      "founder_roles": [
+        "FOUNDING_ADMINISTRATOR",
+        "ANDREW",
+        "JANET"
+      ]
+    },
+    {
+      "id": "founder-admin-liquid",
+      "founder_role": "FOUNDING_ADMINISTRATOR",
+      "amount_420": 250000,
+      "amount_kief": "250000000000000000000000",
+      "destination": null,
+      "destination_source": "contracts/config/founder-wallet-reservations.json",
+      "lock_type": "founder-liquid-at-genesis",
+      "status": "AWAITING_ADDRESS_SIGNATURE"
+    },
+    {
+      "id": "founder-andrew-liquid",
+      "founder_role": "ANDREW",
+      "amount_420": 125000,
+      "amount_kief": "125000000000000000000000",
+      "destination": null,
+      "destination_source": "contracts/config/founder-wallet-reservations.json",
+      "lock_type": "founder-liquid-at-genesis",
+      "status": "AWAITING_ADDRESS_SIGNATURE"
+    },
+    {
+      "id": "founder-janet-liquid",
+      "founder_role": "JANET",
+      "amount_420": 125000,
+      "amount_kief": "125000000000000000000000",
+      "destination": null,
+      "destination_source": "contracts/config/founder-wallet-reservations.json",
+      "lock_type": "founder-liquid-at-genesis",
+      "status": "AWAITING_ADDRESS_SIGNATURE"
     },
     {
       "id": "validator-bootstrap-reserve",
@@ -82,5 +118,7 @@
       "destination": "0x0000000000000000000000000000000000000424",
       "lock_type": "protocol-reserve"
     }
-  ]
+  ],
+  "status": "FOUNDING_THREE_AMENDMENT_PENDING_V4_RECOMMIT",
+  "amendment_note": "Frozen Genesis V3 commitment no longer matches this three-founder candidate. Do not use for signed Genesis before deliberate re-commit; unknown founder addresses fail closed."
 }

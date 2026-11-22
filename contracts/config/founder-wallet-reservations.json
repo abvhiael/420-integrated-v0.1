@@ -29,7 +29,11 @@
         "signature": null,
         "genesis_plan_commitment": null,
         "verified_at": null
-      }
+      },
+      "genesis_founder_allocation_bps": 5000,
+      "genesis_total_420": 500000,
+      "genesis_liquid_420": 250000,
+      "genesis_locked_420": 250000
     },
     {
       "role": "ANDREW",
@@ -43,7 +47,11 @@
         "signature": null,
         "genesis_plan_commitment": null,
         "verified_at": null
-      }
+      },
+      "genesis_founder_allocation_bps": 2500,
+      "genesis_total_420": 250000,
+      "genesis_liquid_420": 125000,
+      "genesis_locked_420": 125000
     },
     {
       "role": "JANET",
@@ -57,7 +65,11 @@
         "signature": null,
         "genesis_plan_commitment": null,
         "verified_at": null
-      }
+      },
+      "genesis_founder_allocation_bps": 2500,
+      "genesis_total_420": 250000,
+      "genesis_liquid_420": 125000,
+      "genesis_locked_420": 125000
     }
   ],
   "approval_policy": {
@@ -71,8 +83,18 @@
     "Wallet identity is fixed by the signed Genesis authorization record and immutable contract bindings.",
     "An address is not verified merely by being entered in this file; verify a chain-specific signature or successful claim transaction from that address.",
     "An unclaimed or null founder address blocks live authorization deployment; testnet and mainnet claims and credentials are independently qualified.",
-    "The three payees' 50/25/25 compensation entitlement is separate from the ten 100,000-token vesting grants; neither is a generic Treasury transfer permission.",
+    "The three payees' 50/25/25 compensation entitlement is separate from the three 50/25/25 Genesis founder vesting grants; neither is a generic Treasury transfer permission.",
     "A valid EIP-191 founder-signed, network-/chain-/Genesis-bound message is required BEFORE deployment; an on-chain claim transaction is possible only AFTER network Genesis."
   ],
-  "target_network": null
+  "target_network": null,
+  "genesis_founder_allocation": {
+    "total_420": 1000000,
+    "liquid_420": 500000,
+    "locked_420": 500000,
+    "vesting_predeploy": "0x0000000000000000000000000000000000000427",
+    "releases": 13,
+    "interval_days": 14,
+    "vesting_days": 182,
+    "status": "UNFUNDED_UNCLAIMED_PENDING_GENESIS_V4_APPROVAL"
+  }
 }

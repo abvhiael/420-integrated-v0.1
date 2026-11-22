@@ -25,6 +25,9 @@ const root=resolve(import.meta.dirname,'..','dist');
 // Scoped allowance for the new user-approved CCC room gameboard and room chat.
 // Legacy game assets and existing per-file limits remain separately enforced.
 const CCC_ROOM_BOARD_CHAT_ALLOWANCE=24*1024;
+// Solo practice reuses multiplayer's atlas/card UI with a separately bounded
+// static stylesheet and local-engine adapter. No BC-0.x budgets are widened.
+const CCC_PRACTICE_ALLOWANCE=20*1024;
 const limits=Object.freeze({singleJs:256*1024,singleCss:256*1024,baseTotal:1189*1024,cardTotal:4*1024*1024,cardSingle:128*1024,mapTotal:12*1024*1024,vehicleTotal:16*1024});
 async function walk(dir){const files=[];for(const entry of await readdir(dir,{withFileTypes:true})){const path=resolve(dir,entry.name);if(entry.isDirectory())files.push(...await walk(path));else if(entry.isFile())files.push({path,size:(await stat(path)).size});}return files;}
 const files=await walk(root);
@@ -37,6 +40,12 @@ const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
 const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix));
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
+const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
+const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
+if(!Number.isSafeInteger(practiceJs)||practiceJs<4000||practiceJs>12*1024||
+ !Number.isSafeInteger(practiceCss)||practiceCss<2000||practiceCss>8*1024||
+ practiceJs+practiceCss>CCC_PRACTICE_ALLOWANCE)
+ throw new Error('CCC practice visual adapter violates its independent 20 KiB limit');
 const cardTotal=cardFiles.reduce((sum,f)=>sum+f.size,0);
 const mapTotal=mapFiles.reduce((sum,f)=>sum+f.size,0);
 const vehicleTotal=vehicleFiles.reduce((sum,f)=>sum+f.size,0);
@@ -133,7 +142,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024)
+if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -150,10 +159,11 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize;
+const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
-console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
+console.log('CCC independently bounded solo tabletop:',JSON.stringify({practiceJs,practiceCss,limit:CCC_PRACTICE_ALLOWANCE}));
+console.log('BC-0.2 bounded menu asset allowance:,JSON.stringify({
  growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal
 }));
 console.log('BC-0.3 bounded shared screens asset allowance:',JSON.stringify({
@@ -198,6 +208,13 @@ const total=baseTotal+cardTotal+mapTotal+vehicleTotal;
 for(const file of files){const name=relative(root,file.path);if(name.endsWith('.js')&&file.size>limits.singleJs)throw new Error(`JavaScript asset budget exceeded: ${name}`);if(name.endsWith('.css')&&file.size>limits.singleCss)throw new Error(`CSS asset budget exceeded: ${name}`);}
 const html=await readFile(resolve(root,'index.html'),'utf8');const app=await readFile(resolve(root,'app.js'),'utf8');const css=await readFile(resolve(root,'styles.css'),'utf8');const branding=await readFile(resolve(root,'branding.css'),'utf8');
 const tabletopCss=await readFile(resolve(root,'ccc-tabletop.css'),'utf8');
+const practiceStyles=await readFile(resolve(root,'ccc-practice.css'),'utf8');
+const practiceSource=await readFile(resolve(root,'core/chaos-practice-table.js'),'utf8');
+if(!html.includes('href="/ccc-practice.css"')||!practiceStyles.includes('.ccc-online--practice')||
+ !practiceStyles.includes('forced-colors:active')||!practiceSource.includes('renderChaosPublicTables')||
+ !practiceSource.includes('chaosActionOptions(game)')||!practiceSource.includes('data-chaos-action="reveal"')||
+ !practiceSource.includes('data-chaos-move="hazard"'))
+ throw new Error('CCC solo practice unified presentation or local legal action gate missing');
 if(!html.includes('href="/game-kit.css"')||!html.includes('href="/ccc-tabletop.css"')||!tabletopCss.includes('ccc-tabletop--road-atlas')||
   !tabletopCss.includes('prefers-reduced-motion:reduce')||!tabletopCss.includes('forced-colors:active')||
   tabletopCss.includes('@import')||tabletopCss.includes('https://')||tabletopCss.includes('http://'))

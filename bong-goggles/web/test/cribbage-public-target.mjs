@@ -30,11 +30,16 @@ const config=JSON.parse(runtime.body);
 assert.equal(config?.appOrigin,origin,'live page origin mismatch');
 const features=config?.features;
 assert.ok(features&&typeof features==='object','live feature flags absent');
+assert.match(health.contentType,/application\/json/i,'worker health did not return JSON');
+const workerReady=JSON.parse(health.body)?.ready===true;
+console.log('BC-1.8 live production signals:',JSON.stringify({origin,
+ responses:paths.map((path,i)=>({path,status:[games,runtime,health][i].status,attempt:[games,runtime,health][i].attempt})),
+ flags:{accountSocial:features.accountSocial===true,classicRooms:features.classicRooms===true,
+ classicCommunications:features.classicCommunications===true},workerReady}));
+assert.equal(workerReady,true,'social Worker->Render service not ready');
 assert.equal(features.accountSocial,true,'420ID account site flag disabled');
 assert.equal(features.classicRooms,true,'Cribbage room browser flag not active');
 assert.equal(features.classicCommunications,true,'Cribbage communications browser flag not active');
-assert.match(health.contentType,/application\/json/i,'worker health did not return JSON');
-assert.equal(JSON.parse(health.body)?.ready,true,'social Worker->Render service not ready');
 console.log('BC-1.8 public target preflight PASS',JSON.stringify({
  origin,paths:paths.map((path,i)=>({path,status:[games,runtime,health][i].status,attempt:[games,runtime,health][i].attempt})),
  flags:{accountSocial:true,classicRooms:true,classicCommunications:true}}));

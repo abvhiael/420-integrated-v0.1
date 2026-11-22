@@ -51,6 +51,7 @@ type cribbageAward struct {
  Team int `json:"team"`
  Kind string `json:"kind"`
  Points int `json:"points"`
+ Count int `json:"count,omitempty"` // public running count at the instant of this award
  Total int64 `json:"total"`
 }
 type cribbageLoss struct {
@@ -253,7 +254,7 @@ func cribbageScore(f *RuleFrame,d *cribbageData,seat,points int,kind string){
  v,_:=cribbageVariantFor(f.SeatCount)
  team:=v.Teams[seat]
  for i,t:=range v.Teams{if t==team{f.Scores[i]+=int64(points)}}
- d.Awards=append(d.Awards,cribbageAward{Seat:seat,Team:team,Kind:kind,Points:points,Total:f.Scores[seat]})
+ d.Awards=append(d.Awards,cribbageAward{Seat:seat,Team:team,Kind:kind,Points:points,Count:d.Count,Total:f.Scores[seat]})
  if f.Scores[seat]<121{return}
  f.Terminal=true;f.Turn=-1;f.Phase="finished"
  winner:=seat;f.Winner=&winner
@@ -457,7 +458,7 @@ func (cribbageRules) Validate(f RuleFrame)error{
   if err!=nil||score!=g.Score{return ErrInvalid}
  }
  for _,a:=range d.Awards{
-  if a.Seat<0||a.Seat>=f.SeatCount||a.Team!=v.Teams[a.Seat]||a.Points<1||a.Points>29||a.Kind==""||a.Total<1{return ErrInvalid}
+  if a.Seat<0||a.Seat>=f.SeatCount||a.Team!=v.Teams[a.Seat]||a.Points<1||a.Points>29||a.Count<0||a.Count>31||a.Kind==""||a.Total<1{return ErrInvalid}
  }
  initialDrawn:=v.Deal*f.SeatCount+v.Extra
  seen:=[52]bool{}

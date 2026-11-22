@@ -9,6 +9,7 @@ import (
  "fmt"
  "regexp"
  "strings"
+ "time"
 )
 
 // BC-0.7: trust-boundary contract for independently qualified rules modules.
@@ -47,13 +48,13 @@ type RuleModule interface {
 type RuleDecisionPolicy interface{
  ChooseMove(seatView json.RawMessage,difficulty string,legal []json.RawMessage,budget *RuleBudget)(json.RawMessage,error)
 }
-type RuleBudget struct{remaining int;spent int}
+type RuleBudget struct{remaining int;spent int;deadline time.Time}
 func NewRuleBudget(limit int)*RuleBudget{
  if limit<1||limit>100000{return &RuleBudget{}}
  return &RuleBudget{remaining:limit}
 }
 func (b *RuleBudget)Charge(cost int)error{
- if b==nil||cost<1||cost>b.remaining{return ErrUnavailable}
+ if b==nil||cost<1||cost>b.remaining||(!b.deadline.IsZero()&&!time.Now().Before(b.deadline)){return ErrUnavailable}
  b.remaining-=cost;b.spent+=cost;return nil
 }
 const maxRulesLegal=128
@@ -83,7 +84,16 @@ func (a *RulesAdapter)Initial(room ClassicRoom,seats []ClassicSeat)(json.RawMess
 }
 func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []ClassicSeat)(json.RawMessage,int,error){
  if a==nil||room.GameID!=a.definition.GameID||len(seats)!=room.SeatCount||!classicSeatsValid(room.GameID,room.SeatCount){return nil,0,ErrInvalid}
- for i,s:=range seats{if s.Index!=i||s.Controller!="human"||!uuid.MatchString(s.Subject){return nil,0,ErrUnavailable}}
+ for i,s:=range seats{
+  if s.Index!=i{return nil,0,ErrUnavailable}
+  switch s.Controller{
+  case "human":
+   if !uuid.MatchString(s.Subject)||s.Difficulty!=""{return nil,0,ErrUnavailable}
+  case "bot":
+   if s.Subject!=""||!map[string]bool{"easy":true,"medium":true,"hard":true}[s.Difficulty]{return nil,0,ErrUnavailable}
+  default:return nil,0,ErrUnavailable
+  }
+ }
  first,e:=a.initial(seed,room.SeatCount)
  if e!=nil{return nil,0,e}
  return first,func()int{frame,_:=a.decode(first);return frame.Turn}(),nil
@@ -227,17 +237,34 @@ func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(j
 }
 // A bot may receive only a seat projection and the legal action list.
 // This contract does not install a bot policy or activate bot matches.
+// ChooseMove is retained for BC-0.7 callers. Production bot execution uses
+// ChooseMoveBounded with difficulty-specific limits and a wall-clock cap.
 func (a *RulesAdapter)ChooseMove(raw json.RawMessage,seat int,difficulty string,policy RuleDecisionPolicy)(json.RawMessage,error){
- if !map[string]bool{"easy":true,"medium":true,"hard":true}[difficulty]||policy==nil{return nil,ErrUnavailable}
+ return a.ChooseMoveBounded(raw,seat,difficulty,policy,100000,time.Time{})
+}
+func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty string,policy RuleDecisionPolicy,limit int,deadline time.Time)(json.RawMessage,error){
+ if !map[string]bool{"easy":true,"medium":true,"hard":true}[difficulty]||policy==nil||
+  limit<1||limit>100000{return nil,ErrUnavailable}
  frame,e:=a.decode(raw);if e!=nil{return nil,e}
  options,e:=a.legal(frame,seat);if e!=nil{return nil,e}
  view,e:=a.View(raw,seat);if e!=nil{return nil,e}
- budget:=NewRuleBudget(100000)
- selected,e:=policy.ChooseMove(view,difficulty,options,budget)
- if e!=nil||budget.spent<1{return nil,ErrUnavailable}
- canon,e:=canonicalRuleAction(selected);if e!=nil{return nil,e}
- for _,legal:=range options{if bytes.Equal(legal,canon){return canon,nil}}
- return nil,ErrForbidden
+ // Run twice on isolated copies to reject nondeterministic decisions and
+ // mutation of the legal action list or the seat projection. Never pass
+ // RuleFrame, the seed or another seat's view to policy code.
+ run:=func()(json.RawMessage,error){
+  budget:=NewRuleBudget(limit);budget.deadline=deadline
+  private:=append(json.RawMessage(nil),view...)
+  candidates:=make([]json.RawMessage,len(options))
+  for i,item:=range options{candidates[i]=append(json.RawMessage(nil),item...)}
+  selected,e:=policy.ChooseMove(private,difficulty,candidates,budget)
+  if e!=nil||budget.spent<1{return nil,ErrUnavailable}
+  canon,e:=canonicalRuleAction(selected);if e!=nil{return nil,e}
+  for _,legal:=range options{if bytes.Equal(legal,canon){return canon,nil}}
+  return nil,ErrForbidden
+ }
+ one,e:=run();if e!=nil{return nil,e}
+ two,e:=run();if e!=nil||!bytes.Equal(one,two){return nil,ErrUnavailable}
+ return one,nil
 }
 func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json.RawMessage,error){
  if a==nil||len(trace)>maxRulesMoves{return nil,ErrInvalid}

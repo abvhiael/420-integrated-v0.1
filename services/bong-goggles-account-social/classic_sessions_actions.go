@@ -50,11 +50,20 @@ func (s *ClassicSessions) Start(ctx context.Context,viewer,roomID string)(Classi
  }
  e=rows.Err();rows.Close();if e!=nil{return empty,e}
  if len(seats)!=room.SeatCount{return empty,ErrConflict}
- // Bots remain eligible in qualified BC-0.5 LOBBIES; only engines that can
- // drive a bot turn may later start them (BC-0.8), not arbitrary browsers.
+ // Only a qualified versioned rules engine and registered three-level AI
+ // may start bot-filled rooms. Human identities and block checks remain
+ // enforced for every human pair; bots have no 420ID identity.
  for i,seat:=range seats{
-  if seat.Index!=i||seat.Controller!="human"||!uuid.MatchString(seat.Subject){return empty,ErrUnavailable}
+  if seat.Index!=i{return empty,ErrUnavailable}
+  if seat.Controller=="bot"{
+   if seat.Subject!=""{return empty,ErrUnavailable}
+   if _,ok:=rule.(*RulesAdapter);!ok{return empty,ErrUnavailable}
+   if _,e=s.botPolicy(room.GameID,seat.Difficulty);e!=nil{return empty,ErrUnavailable}
+   continue
+  }
+  if seat.Controller!="human"||!uuid.MatchString(seat.Subject){return empty,ErrUnavailable}
   for j:=0;j<i;j++{
+   if seats[j].Controller!="human"{continue}
    if e=lockPeerPair(ctx,tx,seats[j].Subject,seat.Subject);e!=nil{return empty,e}
    blocked,err:=blockedBetween(ctx,tx,seats[j].Subject,seat.Subject)
    if err!=nil{return empty,err};if blocked{return empty,ErrForbidden}
@@ -206,8 +215,13 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
   }else{
    if turn<0||turn>=rec.SeatCount{return empty,ErrUnavailable} // qualified rules may award extra turns
    var controller string
-   e=tx.QueryRowContext(ctx,"SELECT controller FROM bg_account_social.classic_room_seats WHERE room_id=$1 AND seat_index=$2",roomID,turn).Scan(&controller)
-   if e!=nil{return empty,e};if controller!="human"{return empty,ErrUnavailable}
+   var difficulty sql.NullString
+   e=tx.QueryRowContext(ctx,"SELECT controller,difficulty FROM bg_account_social.classic_room_seats WHERE room_id=$1 AND seat_index=$2",roomID,turn).Scan(&controller,&difficulty)
+   if e!=nil{return empty,e}
+   if controller=="bot"{
+    if !difficulty.Valid{return empty,ErrUnavailable}
+    if _,e=s.botPolicy(rec.GameID,difficulty.String);e!=nil{return empty,ErrUnavailable}
+   }else if controller!="human"{return empty,ErrUnavailable}
    rec.TurnSeat=&turn;next=turn;d:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&d;deadline=d
   }
  }else{

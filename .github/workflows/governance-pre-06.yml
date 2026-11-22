@@ -8,12 +8,16 @@ on:
       - 'contracts/src/governance/Governance420.sol'
       - 'contracts/src/governance/CivicInitialElectorateEnrollment420.sol'
       - 'contracts/test-governance-audit-6/GovPre06Electorate420.t.sol'
+      - 'scripts/test-governance-rec-6.py'
+      - 'scripts/verify-governance-rec-6.py'
       - '.github/workflows/governance-pre-06.yml'
   pull_request:
     paths:
       - 'contracts/src/governance/Governance420.sol'
       - 'contracts/src/governance/CivicInitialElectorateEnrollment420.sol'
       - 'contracts/test-governance-audit-6/GovPre06Electorate420.t.sol'
+      - 'scripts/test-governance-rec-6.py'
+      - 'scripts/verify-governance-rec-6.py'
       - '.github/workflows/governance-pre-06.yml'
   workflow_dispatch:
 
@@ -42,6 +46,8 @@ jobs:
       - name: Verify modified source and focused tests formatted
         working-directory: contracts
         run: forge fmt --check src/governance/Governance420.sol src/governance/CivicInitialElectorateEnrollment420.sol test-governance-audit-6/GovPre06Electorate420.t.sol
+      - name: Verify both Genesis approval modes and partial-input rejection
+        run: python3 scripts/test-governance-rec-6.py
       - name: Compile verified electorate graph
         working-directory: contracts
         run: forge build src/governance

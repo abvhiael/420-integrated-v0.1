@@ -13,12 +13,17 @@ ZERO = "0x" + "00" * 32
 ROOT_HASH = "0x" + "aa" * 32
 VALIDATOR_HASH = "0x" + "bb" * 32
 PLAN_HASH = "0x" + "cc" * 32
+ZERO_ADDRESS = "0x" + "00" * 20
+ENROLLMENT_ADDRESS = "0x" + "aa" * 20
+AUTHORITY_ADDRESS = "0x" + "bb" * 20
 
 
-def approval(plan=ZERO, community=ZERO, community_weight=0, validator=ZERO, validator_weight=0):
+def approval(plan=ZERO, community=ZERO, community_weight=0, validator=ZERO, validator_weight=0,
+             enrollment=ZERO_ADDRESS, authority=ZERO_ADDRESS):
     return {"approvedPlanHash": plan, "communityRoot": community,
             "communityTotalWeight": community_weight,
-            "validatorRoot": validator, "validatorTotalWeight": validator_weight}
+            "validatorRoot": validator, "validatorTotalWeight": validator_weight,
+            "enrollmentContract": enrollment, "electorateAuthority": authority}
 
 
 class GenesisApprovalBoundary(unittest.TestCase):
@@ -31,6 +36,25 @@ class GenesisApprovalBoundary(unittest.TestCase):
         values, ready = rec6.approval_values(approval(PLAN_HASH, ROOT_HASH, 2, VALIDATOR_HASH, 2))
         self.assertTrue(ready)
         self.assertEqual(values["validatorTotalWeight"], 2)
+
+    def test_post_genesis_mode_has_no_fabricated_initial_members(self):
+        values, ready = rec6.approval_values(
+            approval(plan=PLAN_HASH, enrollment=ENROLLMENT_ADDRESS, authority=AUTHORITY_ADDRESS))
+        self.assertTrue(ready)
+        self.assertEqual(values["communityTotalWeight"], 0)
+        self.assertEqual(values["validatorTotalWeight"], 0)
+
+    def test_missing_authority_or_mixed_electorate_modes_fail_closed(self):
+        for candidate in [
+            approval(plan=PLAN_HASH, enrollment=ENROLLMENT_ADDRESS),
+            approval(plan=PLAN_HASH, authority=AUTHORITY_ADDRESS),
+            approval(enrollment=ENROLLMENT_ADDRESS, authority=AUTHORITY_ADDRESS),
+            approval(plan=PLAN_HASH, community=ROOT_HASH, community_weight=1,
+                     validator=VALIDATOR_HASH, validator_weight=1,
+                     enrollment=ENROLLMENT_ADDRESS, authority=AUTHORITY_ADDRESS),
+        ]:
+            with self.subTest(candidate=candidate), self.assertRaises(ValueError):
+                rec6.approval_values(candidate)
 
     def test_single_and_partial_fields_cannot_enable_genesis(self):
         candidates = [

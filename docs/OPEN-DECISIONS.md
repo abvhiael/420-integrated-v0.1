@@ -58,8 +58,9 @@ These are the next variables we should settle. Do not freeze them merely for aes
 ## F. Founders / core contributors
 
 24. **Founders/core-contributor vesting**
-   - Current allocation: 10 wallets × 100,000 420 = 1,000,000 420 total.
-   - Decide cliff period, vesting duration, whether rewards earned as validators are separate, and whether unvested allocations return to a protocol reserve if a contributor leaves.
+   - Updated candidate: 3 verified founder wallets sharing the unchanged 1,000,000 $420: Administrator 50%, Andrew 25%, Janet 25%.
+   - 50% liquid at Genesis; other 50% releases in 13 fortnightly intervals through day 182. Founder identities and a new signed Genesis freeze remain pending.
+   - Still decide succession if a founder loses their wallet or leaves, and whether validator rewards are separate from founder vesting.
 
 ## G. Validator-set scaling details
 

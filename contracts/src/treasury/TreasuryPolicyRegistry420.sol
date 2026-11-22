@@ -14,6 +14,8 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
     }
 
     mapping(address => AssetPolicy) private _assetPolicies;
+    address public immutable genesisConfigurator;
+    address public foundingAuthority;
 
     error EpochDurationImmutable();
 
@@ -28,7 +30,7 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
 
     constructor(
         address timelock_
-    ) SystemAccess(timelock_) { }
+    ) SystemAccess(timelock_) { genesisConfigurator = msg.sender; }
 
     function systemName() external pure returns (string memory) {
         return "TreasuryPolicyRegistry420";
@@ -36,6 +38,29 @@ contract TreasuryPolicyRegistry420 is I420System, SystemAccess {
 
     function protocolVersion() external pure returns (uint32) {
         return 1;
+    }
+
+    /// @notice Genesis-only founding policy for native $420. This is not a free-form policy setter.
+    function bindFoundingAuthority(address candidate) external {
+        if (msg.sender != genesisConfigurator || foundingAuthority != address(0)
+            || candidate.code.length == 0) revert Unauthorized();
+        (bool ok, bytes memory data) = candidate.staticcall(abi.encodeWithSignature("policyRegistry()"));
+        if (!ok || data.length != 32 || abi.decode(data, (address)) != address(this)) revert Unauthorized();
+        foundingAuthority = candidate;
+    }
+
+    function initializeFoundingNativePolicy() external {
+        if (msg.sender != foundingAuthority || foundingAuthority == address(0)) revert Unauthorized();
+        (bool ok, bytes memory data) = foundingAuthority.staticcall(abi.encodeWithSignature("retired()"));
+        if (!ok || data.length != 32 || abi.decode(data, (bool))) revert Unauthorized();
+        AssetPolicy storage p = _assetPolicies[address(0)];
+        if (p.revision != 0) revert EpochDurationImmutable();
+        p.allowed = true;
+        p.maxSingleDisbursement = 420_000 ether;
+        p.maxEpochDisbursement = 1_260_000 ether;
+        p.epochSeconds = 30 days;
+        p.revision = 1;
+        emit AssetPolicySet(address(0), true, p.maxSingleDisbursement, p.maxEpochDisbursement, p.epochSeconds, 1);
     }
 
     function setAssetPolicy(

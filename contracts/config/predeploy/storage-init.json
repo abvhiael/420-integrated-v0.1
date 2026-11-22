@@ -79,9 +79,12 @@
     "FounderVestingRegistry": {
       "constructor": [
         "governance_timelock",
-        "founder_beneficiaries[10]",
+        "founder_beneficiaries[3]",
         "genesis_time"
-      ]
+      ],
+      "genesis_locked_420": "500000",
+      "genesis_liquid_420": "500000",
+      "founder_allocation_source": "contracts/config/founder-wallet-reservations.json"
     },
     "GenesisDEXFactory": {
       "constructor": [
@@ -185,7 +188,7 @@
       "note": "BRIDGE-AUDIT-12: V3 constructor-materialized frozen gateway starts disabled, with verifier zero, empty qualification and empty storage. Live activation requires existing governance and qualification."
     }
   },
-  "founder_beneficiaries": "UNRESOLVED_DO_NOT_INVENT",
+  "founder_beneficiaries": "UNRESOLVED_THREE_VERIFIED_FOUNDER_WALLETS_DO_NOT_INVENT",
   "genesis_config_commitment": "contracts/config/genesis-config-commitment.json",
   "genesis_config_hash": "0x94321abcd7016ec0494a2c616fdf55bf4e8815dcc0f92d03933b335630e25d6d",
   "genesis_time": "FROM_FROZEN_TESTNET_OR_MAINNET_GENESIS",
@@ -202,5 +205,10 @@
     "genesis_config_hash is frozen by contracts/config/genesis-config-commitment.json and MUST match that record exactly."
   ],
   "schema": "420-predeploy-storage-init-v2",
-  "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac"
+  "stake_genesis_config_hash": "0x7721fafee1f582e819e15ca57ce557bb0b473c584a49759e5d2511f882ff5eac",
+  "founder_beneficiary_roles": [
+    "FOUNDING_ADMINISTRATOR",
+    "ANDREW",
+    "JANET"
+  ]
 }

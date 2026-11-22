@@ -1,63 +1,80 @@
-
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-
 import "./SystemAccess.sol";
 import "../interfaces/I420System.sol";
 
-/// @notice Immutable founder vesting schedule.
-/// Ten grants of 100,000 420 are expected at genesis. Each grant has 50,000 liquid at genesis
-/// outside this contract and 50,000 vested here over 13 releases / 182 days.
-/// Beneficiary addresses are supplied only at deployment/genesis and cannot be changed.
+/// @notice Three founder grants share one million native $420: half liquid directly
+/// at Genesis, half held at this immutable 0x0427 predeploy for 13 biweekly releases.
+/// @dev This contract must hold 500,000 native $420 at Genesis; liquid founder shares
+/// are distributed separately to the same independently verified founder wallets.
 contract FounderVestingRegistry is SystemAccess, I420System {
-    uint256 public constant FOUNDER_COUNT = 10;
-    uint256 public constant LOCKED_PER_FOUNDER = 50_000 ether;
+    uint256 public constant FOUNDER_COUNT = 3;
+    uint256 public constant TOTAL_FOUNDER_ALLOCATION = 1_000_000 ether;
+    uint256 public constant TOTAL_LOCKED_ALLOCATION = 500_000 ether;
+    uint256 public constant TOTAL_LIQUID_ALLOCATION = 500_000 ether;
     uint256 public constant RELEASES = 13;
     uint256 public constant INTERVAL = 14 days;
 
-    struct Grant {
-        address beneficiary;
-        uint64 startTime;
-        uint256 claimed;
-    }
+    struct Grant { address beneficiary; uint64 startTime; uint256 claimed; }
+    Grant[3] public grants;
 
-    Grant[10] public grants;
+    error InvalidFounderWallet();
+    error InvalidFounderIndex();
+    error UnauthorizedBeneficiary();
+    error NothingClaimable();
+    error TransferFailed();
+    event FounderVestClaimed(uint256 indexed index, address indexed beneficiary, uint256 amount, uint256 cumulativeClaimed);
 
-    constructor(address timelock_, address[10] memory beneficiaries, uint64 startTime)
+    constructor(address timelock_, address[3] memory beneficiaries, uint64 startTime)
         SystemAccess(timelock_)
     {
         for (uint256 i; i < FOUNDER_COUNT; ++i) {
-            require(beneficiaries[i] != address(0), "zero beneficiary");
-            grants[i] = Grant(beneficiaries[i], startTime, 0);
+            address wallet = beneficiaries[i];
+            if (wallet == address(0)) revert InvalidFounderWallet();
+            for (uint256 j; j < i; ++j) if (beneficiaries[j] == wallet) revert InvalidFounderWallet();
+            uint160 raw = uint160(wallet);
+            if ((raw >= 0x041f && raw <= 0x04ff) || raw == type(uint160).max - 1)
+                revert InvalidFounderWallet();
+            grants[i] = Grant(wallet, startTime, 0);
         }
     }
 
     receive() external payable {}
-
     function systemName() external pure returns (string memory) { return "FounderVestingRegistry"; }
-    function protocolVersion() external pure returns (uint32) { return 1; }
+    function protocolVersion() external pure returns (uint32) { return 2; }
 
-    function vested(uint256 index, uint256 timestamp) public view returns (uint256) {
-        Grant memory g = grants[index];
-        if (timestamp < g.startTime + INTERVAL) return 0;
-        uint256 elapsedReleases = (timestamp - g.startTime) / INTERVAL;
-        if (elapsedReleases > RELEASES) elapsedReleases = RELEASES;
-        if (elapsedReleases == RELEASES) return LOCKED_PER_FOUNDER;
-        return (LOCKED_PER_FOUNDER / RELEASES) * elapsedReleases;
+    /// @notice 0=administrator (50%), 1=Andrew (25%), 2=Janet (25%).
+    function lockedAllocation(uint256 index) public pure returns (uint256) {
+        if (index >= FOUNDER_COUNT) revert InvalidFounderIndex();
+        return index == 0 ? 250_000 ether : 125_000 ether;
     }
-
+    function liquidGenesisAllocation(uint256 index) external pure returns (uint256) {
+        if (index >= FOUNDER_COUNT) revert InvalidFounderIndex();
+        return index == 0 ? 250_000 ether : 125_000 ether;
+    }
+    function vested(uint256 index, uint256 timestamp) public view returns (uint256) {
+        if (index >= FOUNDER_COUNT) revert InvalidFounderIndex();
+        Grant memory g = grants[index];
+        if (timestamp < uint256(g.startTime) + INTERVAL) return 0;
+        uint256 releases = (timestamp - uint256(g.startTime)) / INTERVAL;
+        uint256 amount = lockedAllocation(index);
+        if (releases >= RELEASES) return amount;
+        return amount * releases / RELEASES;
+    }
     function claimable(uint256 index) public view returns (uint256) {
         uint256 v = vested(index, block.timestamp);
-        return v > grants[index].claimed ? v - grants[index].claimed : 0;
+        uint256 paid = grants[index].claimed;
+        return v > paid ? v - paid : 0;
     }
-
     function claim(uint256 index) external {
+        if (index >= FOUNDER_COUNT) revert InvalidFounderIndex();
         Grant storage g = grants[index];
-        require(msg.sender == g.beneficiary, "beneficiary only");
+        if (msg.sender != g.beneficiary) revert UnauthorizedBeneficiary();
         uint256 amount = claimable(index);
-        require(amount != 0, "nothing claimable");
+        if (amount == 0) revert NothingClaimable();
         g.claimed += amount;
         (bool ok,) = payable(g.beneficiary).call{value: amount}("");
-        require(ok, "transfer failed");
+        if (!ok) revert TransferFailed();
+        emit FounderVestClaimed(index, g.beneficiary, amount, g.claimed);
     }
 }

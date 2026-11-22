@@ -180,8 +180,10 @@ def verify(root):
         errors.append("community validator reserve constant missing")
     fv = (root / "contracts/src/system/FounderVestingRegistry.sol").read_text()
     for token in [
-        "FOUNDER_COUNT = 10",
-        "LOCKED_PER_FOUNDER = 50_000 ether",
+        "FOUNDER_COUNT = 3",
+        "TOTAL_FOUNDER_ALLOCATION = 1_000_000 ether",
+        "TOTAL_LOCKED_ALLOCATION = 500_000 ether",
+        "TOTAL_LIQUID_ALLOCATION = 500_000 ether",
         "RELEASES = 13",
         "INTERVAL = 14 days",
     ]:

@@ -1,0 +1,75 @@
+name: Founding validator credit and reward qualification
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/system/CommunityValidatorReserve.sol'
+      - 'contracts/src/system/ValidatorRegistry.sol'
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/apps/Stake420.sol'
+      - 'contracts/src/treasury/FoundingValidatorSponsorship420.sol'
+      - 'contracts/test/StakeValidatorGenesis420.t.sol'
+      - '.github/workflows/founding-stake-qualification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: founding-sponsor-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Construct real narrow Stake dependency closure
+        working-directory: contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          export SPONSOR_ROOT="$RUNNER_TEMP/founding-sponsor"
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          dest=Path(os.environ["SPONSOR_ROOT"])
+          pending=[
+            root/"test/StakeValidatorGenesis420.t.sol",
+            root/"src/treasury/FoundingValidatorSponsorship420.sol",
+          ]
+          seen=set()
+          pattern=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(root) or not p.is_file(): raise RuntimeError(f"missing real Solidity import: {p}")
+              seen.add(p)
+              for v in pattern.findall(p.read_text()):
+                  pending.append(root/v if v.startswith("forge-std/") else p.parent/v)
+          for p in sorted(seen):
+              q=dest/p.relative_to(root)
+              q.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,q)
+              assert q.read_bytes()==p.read_bytes()
+          shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          echo "SPONSOR_ROOT=$SPONSOR_ROOT" >> "$GITHUB_ENV"
+      - name: Compile true Stake and sponsorship contracts
+        run: forge build --root "$SPONSOR_ROOT"
+      - name: Retain complete Stake lifecycle plus full sponsorship regressions
+        run: forge test --root "$SPONSOR_ROOT" --match-path test/StakeValidatorGenesis420.t.sol -vvv

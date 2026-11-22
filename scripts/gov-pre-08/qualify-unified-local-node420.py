@@ -46,6 +46,7 @@ def main():
     p.add_argument("--genesis",type=Path,required=True)
     p.add_argument("--graph",type=Path,required=True)
     p.add_argument("--bindings",type=Path,required=True)
+    p.add_argument("--funding",type=Path,required=True)
     p.add_argument("--output",type=Path,required=True)
     p.add_argument("--workdir",type=Path,required=True)
     p.add_argument("--geth",type=Path,default=ROOT/"bin/upstream/geth-v1.17.5-420")
@@ -54,12 +55,16 @@ def main():
     args.workdir.mkdir(parents=True)
     graph=json.loads(args.graph.read_text())
     bindings=json.loads(args.bindings.read_text())
+    funding=json.loads(args.funding.read_text())
     genesis=json.loads(args.genesis.read_text())
     require(genesis["config"]["chainId"]==420 and
             graph["chainId"]==bindings["chainId"]==31337 and
             not graph["approvedV4"] and not bindings["approvedV4"],"not isolated unapproved local source")
     source=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
-    require(source==graph["sourceGitHead"]==bindings["sourceGitHead"],"source identity drift")
+    require(source==graph["sourceGitHead"]==bindings["sourceGitHead"]==funding["sourceGitHead"]
+            and funding["chainId"]==31337 and funding["signedGenesisV4Approved"] is False
+            and funding["postFundingNativeSupplyWei"]==str(42_000_000*10**18),
+            "funded Vault custody must originate from identical unapproved actual local source")
     for n,addr in {"Gateway":GW,"RewardController":REWARD,"ValidatorRegistry":VALIDATORS,
                    "Registry":REGISTRY,"Timelock":TIMELOCK}.items():
         require(genesis["alloc"].get(addr,{}).get("code","0x")!="0x",
@@ -130,6 +135,47 @@ def main():
             require(int(rpc("eth_getBalance",[addr,"latest"]),16)==
                     int(genesis["alloc"][addr]["balance"],16),
                     "real node420 Genesis balance mismatch: "+addr)
+        # Verify actual source-funded Reserve/Vault balances and frozen custody
+        # boundaries at Geth block zero, then again after native consensus,
+        # certified EIP-1559 Wallet transfer, and durable Indexer recovery.
+        # The Anvil source tx history was not imported into Geth, so the
+        # source's block-zero custody values, not fictional Geth receipts,
+        # are authoritative expectations for this local fixture.
+        reserve="0x0000000000000000000000000000000000000424"
+        communityValidator="0x0000000000000000000000000000000000000425"
+        communityRewards="0x0000000000000000000000000000000000000426"
+        fundingVaults=funding["vaultAddresses"]
+        require(set(fundingVaults)=={"OPERATIONS","CONTINGENCY","COMMUNITY"}
+                and len({a.lower() for a in fundingVaults.values()})==3,
+                "source funding did not identify three unique real AssetVaults")
+        custody={
+          "ProtocolReserve":(reserve,int(funding["protocolReserveAfterWei"])),
+          "OperationsVault":(fundingVaults["OPERATIONS"],int(funding["operationsVaultBalanceWei"])),
+          "ContingencyVault":(fundingVaults["CONTINGENCY"],int(funding["contingencyVaultBalanceWei"])),
+          "CommunityVault":(fundingVaults["COMMUNITY"],int(funding["communityVaultBalanceWei"])),
+          "CommunityValidatorReserve":(communityValidator,int(genesis["alloc"][communityValidator]["balance"],16)),
+          "CommunityRewardReserve":(communityRewards,int(genesis["alloc"][communityRewards]["balance"],16)),
+        }
+        require(custody["ProtocolReserve"][1]==3_560_000*10**18 and
+                custody["OperationsVault"][1]==4_200_000*10**18 and
+                custody["ContingencyVault"][1]==840_000*10**18 and
+                custody["CommunityVault"][1]==0,
+                "Treasury amounts no longer conserve the source's 8.6m non-additive reserve")
+        def verifyCustody(phase):
+            observed={}
+            for label,(address,expectedBalance) in custody.items():
+                actual=int(rpc("eth_getBalance",[address,"latest"]),16)
+                require(actual==expectedBalance,
+                        phase+" changed unspent native backing "+label+": "+str(actual))
+                require(int(genesis["alloc"][address.lower()]["balance"],16)==expectedBalance,
+                        "source Genesis balance disagrees with the mined funding ledger "+label)
+                observed[label]={"address":address,"balanceWei":str(actual)}
+            for name,address in graph["actualProductionConstructorAddresses"].items():
+                require(rpc("eth_getCode",[address,"latest"]).lower()==
+                        genesis["alloc"][address.lower()]["code"].lower(),
+                        phase+" mutated source-compiled contract code "+name)
+            return observed
+        sourceCustody=verifyCustody("block zero")
         def call(address,signature):
             # ABI method IDs supplied by local Foundry helper, not guessed from a mock
             code={"lastSequence()":"3bc684e9","lastRotationSnapshot()":"8009ce19",
@@ -256,6 +302,7 @@ def main():
         second,latest,batch,archived=produce(first,2,2)
         require(int(call(GW,"lastSequence()"),16)==4,
                 "real gateway did not advance exactly four certified native calls")
+        unifiedCustody=verifyCustody("after certified Stake and Wallet settlement")
         signedReceipt=rpc("eth_getTransactionReceipt",[wallet["txHash"]])
         require(signedReceipt and signedReceipt["status"]=="0x1" and
                 signedReceipt["blockHash"]==latest["hash"],
@@ -354,6 +401,8 @@ def main():
                         "--expected-tx-hash",wallet["txHash"],
                         "--output",str(pg_report)],cwd=ROOT,check=True)
         pg=json.loads(pg_report.read_text())
+        require(verifyCustody("after persistent Go/TypeScript Indexer and Explorer restart")==unifiedCustody,
+                "cross-service restart mutated shared EVM custody")
         require(pg["certifiedBlockHash"].lower()==latest["hash"].lower() and
                 pg["durableRestartIdempotent"] and pg["sameNode420ExecutionSource"],
                 "PostgreSQL Indexer not on the same canonical chain as Go Explorer")
@@ -373,6 +422,9 @@ def main():
              "walletRealSignedEip1559ReceiptVerified":True,
              "goIndexerAndExplorerProcessRestartQualified":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":False,
+             "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,
+             "sameChainFundedReserveAndVaultReadbacks":unifiedCustody,
+             "sameChainSourceCustodyAtGenesis":sourceCustody,
              "postgresEvmCheckpointOnSameChain":True,
              "goIndexerNativeLogPostgresBacking":True,
              "nativeUnspoofedRewardPaidToEOAWallet":True,

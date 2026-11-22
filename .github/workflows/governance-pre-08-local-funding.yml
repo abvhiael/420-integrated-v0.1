@@ -101,6 +101,68 @@ jobs:
                           "testnetOrMainnet":False},sort_keys=True,indent=2)+"\n")
           print("GOV_PRE_08_STEP2_REAL_42M_AND_VAULT_CUSTODY_QUALIFIED",records[0])
           PY
+
+      - name: Generate exact synthetic chain 31337 V4-shaped block-zero fixture
+        run: |
+          set -euo pipefail
+          python3 scripts/gov-pre-08/materialize-local-funding.py \
+            --output "$RUNNER_TEMP/gov-pre-08-step2-genesis.json" \
+            --provenance "$RUNNER_TEMP/gov-pre-08-step2-genesis-proof.json"
+          forge build --root contracts \
+            src/system/ProtocolReserve.sol \
+            src/system/CapabilityRegistry420.sol \
+            src/vault/VaultAuthorization420.sol \
+            src/vault/VaultPolicyRegistry420.sol \
+            src/vault/VaultRegistry420.sol \
+            src/vault/VaultAccounting420.sol \
+            src/vault/AssetVault420.sol
+      - name: Broadcast two independent exact native reserve-to-Vault transfers and reconcile mined receipts
+        run: |
+          set -euo pipefail
+          for tag in a b; do
+            if [ "$tag" = a ]; then port=18611; else port=18612; fi
+            anvil --init "$RUNNER_TEMP/gov-pre-08-step2-genesis.json" \
+              --chain-id 31337 --accounts 1 --balance 0 --gas-price 0 --base-fee 0 \
+              --host 127.0.0.1 --port "$port" --silent \
+              > "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.log" 2>&1 &
+            pid=$!
+            trap 'kill "$pid" 2>/dev/null || true' EXIT
+            ready=false
+            for attempt in $(seq 1 40); do
+              if cast chain-id --rpc-url "http://127.0.0.1:$port" >/dev/null 2>&1; then ready=true; break; fi
+              sleep 1
+            done
+            test "$ready" = true || { cat "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.log"; exit 1; }
+            python3 scripts/gov-pre-08/materialize-local-vault-funding.py \
+              --rpc "http://127.0.0.1:$port" \
+              --output "$RUNNER_TEMP/gov-pre-08-step2-anvil-$tag.json"
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            trap - EXIT
+          done
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          a,b=[json.loads((p/f"gov-pre-08-step2-anvil-{tag}.json").read_text())
+               for tag in ("a","b")]
+          keys=("initialNativeSupplyWei","postFundingNativeSupplyWei",
+                "protocolReserveBeforeWei","protocolReserveAfterWei",
+                "operationsVaultBalanceWei","contingencyVaultBalanceWei",
+                "communityVaultBalanceWei","vaultIds","vaultAddresses","fundingReceiptLogCounts",
+                "receiptCount")
+          assert all(a[k]==b[k] for k in keys),"funded Vault state diverged on repeat"
+          assert a["initialNativeSupplyWei"]==a["postFundingNativeSupplyWei"]==str(42_000_000*10**18)
+          assert a["protocolReserveAfterWei"]==str(3_560_000*10**18)
+          assert a["operationsVaultBalanceWei"]==str(4_200_000*10**18)
+          assert a["contingencyVaultBalanceWei"]==str(840_000*10**18)
+          assert a["communityVaultBalanceWei"]=="0"
+          assert all(x["tx"] and x["blockHash"] for x in a["txReceipts"])
+          assert all(x["tx"] and x["blockHash"] for x in b["txReceipts"])
+          assert a["receiptCount"]>10 and not a["signedGenesisV4Approved"]
+          print("GOV_PRE_08_REAL_ANVIL_42M_POST_GENESIS_FUNDED_RECEIPTS=PASS",
+                a["receiptCount"],"actual mined tx receipts each run")
+          PY
       - name: Archive actual repeatable custody evidence for this exact SHA
         if: always()
         uses: actions/upload-artifact@v4
@@ -112,4 +174,9 @@ jobs:
             ${{ runner.temp }}/gov-pre-08-step2-a.log
             ${{ runner.temp }}/gov-pre-08-step2-b.log
             ${{ runner.temp }}/gov-pre-08-step2-evidence.json
+            ${{ runner.temp }}/gov-pre-08-step2-genesis-proof.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-a.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-b.json
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-a.log
+            ${{ runner.temp }}/gov-pre-08-step2-anvil-b.log
           if-no-files-found: warn

@@ -459,6 +459,57 @@ contract GovPre06Electorate420Test {
         require(!directSeal, "anyone could seal");
     }
 
+    function testInvalidEnrollmentsCanBeReplacedWithoutRestartOrUnauthorizedCensorship() public {
+        _deploy();
+        bytes32 plan = _scheduleBase();
+        _executeBase(plan);
+        _enrollAll();
+
+        vm.prank(address(0xBAD));
+        (bool censorship,) = address(enrollment).call(
+            abi.encodeCall(CivicInitialElectorateEnrollment420.pruneIneligible, (CivicIds420.House.COMMUNITY, ALICE))
+        );
+        require(!censorship, "untrusted caller purged an eligible voter");
+
+        vm.prank(AUTHORITY);
+        Identity420(IDENTITY).revokeCredential(_credential(BOB));
+        vm.prank(address(0xBAD));
+        enrollment.pruneIneligible(CivicIds420.House.COMMUNITY, BOB);
+        require(enrollment.count(CivicIds420.House.COMMUNITY) == 1, "revoked member not removed");
+
+        bytes32 renewed = keccak256("real-Bob-renewed");
+        vm.prank(AUTHORITY);
+        Identity420(IDENTITY).issueCredential(
+            renewed, compatibility.INITIAL_ELECTORATE_ISSUER(), _profile(BOB),
+            keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"), keccak256("renewal"), 0
+        );
+        vm.prank(BOB);
+        enrollment.enroll(CivicIds420.House.COMMUNITY, _profile(BOB), renewed);
+        Pre06ValidatorWitness(VALIDATORS).setEligible(_validatorId(CAROL), false);
+        enrollment.pruneIneligible(CivicIds420.House.VALIDATOR, CAROL);
+        require(enrollment.count(CivicIds420.House.VALIDATOR) == 1, "ineligible validator not pruned");
+        Pre06ValidatorWitness(VALIDATORS).setEligible(_validatorId(CAROL), true);
+        _enroll(CAROL, CivicIds420.House.VALIDATOR);
+
+        vm.prank(AUTHORITY);
+        compatibility.schedulePostGenesisInitialElectorates();
+        require(compatibility.enrolledCommunityTotalWeight() == 2, "restored community weight");
+        require(compatibility.enrolledValidatorTotalWeight() == 2, "restored validator weight");
+
+        vm.prank(BOB);
+        (bool reopened,) = address(enrollment).call(
+            abi.encodeCall(CivicInitialElectorateEnrollment420.withdraw, (CivicIds420.House.COMMUNITY))
+        );
+        require(!reopened, "enrollment reopened after irreversible freeze");
+
+        vm.warp(block.timestamp + timelock.G1_DELAY() + 1);
+        timelock.execute(compatibility.bootstrapOperationId(plan, 17));
+        timelock.execute(compatibility.bootstrapOperationId(plan, 18));
+        vm.roll(block.number + 2);
+        _activate();
+        require(timelock.scheduler() == address(governor), "recovered electorate did not hand off");
+    }
+
     function testRevocationBlocksActivationAndWrongChainCannotStart() public {
         _deploy();
         uint256 realChain = block.chainid;

@@ -321,7 +321,7 @@ contract Governance420 is SystemAccess, I420System {
             CivicInitialElectorateEnrollment420 enrollment =
                 CivicInitialElectorateEnrollment420(approvedInitialEnrollment);
             if (approvedInitialEnrollment.code.length == 0 || enrollment.governance() != address(this)
-                || enrollment.deploymentChainId() != block.chainid || enrollment.sealed())
+                || enrollment.deploymentChainId() != block.chainid || enrollment.enrollmentClosed())
                 revert InvalidElectorateSource();
         }
         bytes32 plan = canonicalBootstrapPlanHash(
@@ -671,7 +671,7 @@ contract Governance420 is SystemAccess, I420System {
         // No proposal can be created until both checkpoints are effective for snapshotBlock = block.number - 1.
         bool deferred = _postGenesisMode();
         if (deferred && (!initialEnrollmentScheduled
-            || !CivicInitialElectorateEnrollment420(approvedInitialEnrollment).verifySealed()))
+            || !CivicInitialElectorateEnrollment420(approvedInitialEnrollment).verifyClosed()))
             revert InvalidElectorateSource();
         bytes32 requiredCommunityRoot = deferred ? enrolledCommunityRoot : initialCommunityRoot;
         uint256 requiredCommunityWeight = deferred ? enrolledCommunityTotalWeight : initialCommunityTotalWeight;

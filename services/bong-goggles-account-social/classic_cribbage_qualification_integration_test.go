@@ -118,7 +118,7 @@ func TestBC17ContestedTerminalRematchCanOnlyCreateOneLobby(t *testing.T){
  if e:=store.DB.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_match_requests WHERE source_session_id=$1",match.ID).Scan(&ledger);e!=nil||ledger!=1{
   t.Fatal("one source produced multiple rematches",ledger,e)
  }
- if w:=request(h,"GET","/v1/classic-rooms/"+winner,"",nil);w.Code!=401{t.Fatal("public lobby privacy",w.Code)}
+ if w:=request(h,"GET","/v1/classic-rooms/"+winner,"");w.Code!=401{t.Fatal("public lobby privacy",w.Code)}
 }
 
 func TestBC17BlockRevokesInviteAndVerifiedHistory(t *testing.T){

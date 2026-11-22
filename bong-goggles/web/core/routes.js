@@ -25,6 +25,7 @@ export const ROUTES=Object.freeze([
   {id:'settings',path:'/settings',label:'Settings',icon:'⚙',requiresSession:true}
 ]);
 const BY_PATH=new Map(ROUTES.map(route=>[route.path,route]));
+const p='/classics/cross-country-chaos/practice';BY_PATH.set(p,Object.freeze({...BY_PATH.get(p.slice(0,-9)),path:p}));
 export function resolveRoute(pathname='/'){
   const normalized=typeof pathname==='string'&&pathname?pathname.replace(/\/+$/,'')||'/':'/';
   const fixed=BY_PATH.get(normalized);

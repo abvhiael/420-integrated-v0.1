@@ -103,11 +103,11 @@ test('Client sends only expected move and server revision; never scores, shuffle
 test('Mobile game is route-scoped, accessible, and does not allow the local engine to become canonical',async()=>{
  const base=resolve(import.meta.dirname,'..');
  const [app,shell,css,gate]=await Promise.all(['app.js','core/app-shell.js','ccc-tabletop.css','scripts/qualify-web.mjs'].map(p=>readFile(resolve(base,p),'utf8')));
- assert.match(shell,/if\(route\.id==='chaos-game'\)return renderChaosOnline/);
+ assert.match(shell,/route\.path\.endsWith\('\/practice'\)\?renderClassicsRoute/);
  assert.match(app,/new ChaosRoomsClient/);
  assert.match(app,/bindChaosOnline\(root,chaosOnline,window\.location\.pathname\)/);
  assert.match(app,/\/classics\/cross-country-chaos\/practice/);
- assert.doesNotMatch(app,/bindAccountMonetization\(\);bindChaos\(\);/);
+ assert.match(app,/bindAccountMonetization\(\);bindChaos\(\);/);
  assert.match(css,/app-shell\[data-route="chaos-game"\] \.app-sidebar/);
  assert.match(css,/grid-template-columns:repeat\(7,minmax\(0,1fr\)\)/);
  assert.match(css,/@media\(max-width:450px\)/);

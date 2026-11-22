@@ -321,7 +321,7 @@ export function renderChaosOnline(state={status:'loading'}){
  state??={status:'loading'};
  const header='<header class="ccc-online-header"><div><p class="eyebrow">420ID Account multiplayer · zero wager</p>'+
   '<h2>Cross-Country Chaos</h2><p>One driver per account. Your hand is private; the server handles the race.</p></div>'+
-  (state.room?'<button type="button" data-chaos-online-action="back">My matches</button>':'')+'</header>';
+  (state.room?'<button type="button" data-chaos-online-action="back">My matches</button>':'')+'<a href="/classics/cross-country-chaos/practice" data-route="chaos-game" class="ui-button">Play against computers</a></header>';
  if(state.status==='guest')return '<div class="ccc-online" data-chaos-online>'+header+
   '<section class="ccc-online-message"><h3>Sign in to play</h3><p>Every human player needs their own 420ID account and browser session. No wallet required.</p>'+
   '<a class="ui-button" href="/social-api/auth/start">Log in with 420ID</a></section></div>';

@@ -509,8 +509,13 @@ Need choose exact values summing to 42M.
 
 ## 23. Founder vesting
 
-Current:
-10 wallets × 100,000 = 1,000,000.
+Current candidate amendment:
+3 verified founder wallets share the unchanged 1,000,000 $420 Founders allocation.
+Founding Administrator: 500,000 $420 total (250,000 liquid Genesis; 250,000 locked).
+Andrew: 250,000 $420 total (125,000 liquid; 125,000 locked).
+Janet: 250,000 $420 total (125,000 liquid; 125,000 locked).
+Locked tokens release over 13 installments, one every 14 days, ending at day 182.
+A new signed Genesis configuration commitment is required before materialization.
 
 Need:
 

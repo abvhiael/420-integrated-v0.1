@@ -123,14 +123,13 @@ All final genesis inputs and hashes will be published before a public network la
 
 The current genesis model reserves:
 
-- **10 founder/core-contributor wallets**
-- **100,000 420 per wallet**
-- **1,000,000 420 total**
-- approximately **2.38095% of the 42,000,000 genesis supply**
+- **3 founder/core-contributor wallets**, independently verified for the Founding Administrator, Andrew and Janet.
+- **1,000,000 $420 total**, unchanged (approximately **2.38095% of the 42,000,000 Genesis supply**).
+- Administrator: **500,000 $420 (50%)**; Andrew and Janet: **250,000 $420 (25%) each**.
+- **500,000 $420 directly liquid** at Genesis (250,000 / 125,000 / 125,000), with the remaining **500,000 $420 locked** in FounderVestingRegistry at `0x0427`.
+- Locked portion follows the same **13 releases at 14-day intervals**, final payment at day 182.
 
-This allocation is intended for people actively building and maintaining the project rather than passive promotional allocations.
-
-The final liquidity/vesting treatment is still undecided. The recommended model is to place these allocations under transparent on-chain vesting or time-lock rules rather than making the full 100,000 420 per wallet immediately liquid at genesis.
+The allocation compensates founding contributors; the separate 50/25/25 Development Compensation revenue routing is independent. This amended distribution remains blocked on founder address signatures and a new signed Genesis V4 configuration commitment.
 
 The allocation must be disclosed in the published genesis manifest, including all addresses, balances, lock rules, and release schedule.
 

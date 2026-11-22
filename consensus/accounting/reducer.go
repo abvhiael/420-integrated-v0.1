@@ -2,6 +2,8 @@ package accounting
 
 import (
 	"fmt"
+	"math/big"
+	"strings"
 	sys "github.com/420integrated/420-integrated/consensus/systemcall"
 	"strconv"
 )
@@ -190,22 +192,116 @@ func Apply(s State, e Event, n uint64, reward *sys.RewardOutcome) error {
 		add("totalOwnedWithdrawn", f["ownedAmount"])
 		add("totalProtocolCreditRecycled", f["recycledCredit"])
 		return debit(balance(Registry), sum(f["ownedAmount"], f["recycledCredit"]))
-	case "RewardApplied":
-		if reward == nil {
+    case "SponsoredValidatorRewardAllocated":
+        owner:=f["owner"]
+        if owner==ZeroAddress || f["communityFund"]!=CommunityReward ||
+           s["sponsor/seen/"+owner]=="1" {return fmt.Errorf("invalid/duplicate sponsored reward evidence")}
+        gross:=money(f["gross"])
+        share:=new(big.Int).Mul(new(big.Int).Set(gross),big.NewInt(1000))
+        share.Div(share,big.NewInt(10000))
+        if share.Sign()==0 || share.String()!=f["communityShare"] {
+            return fmt.Errorf("sponsored community reward must be exactly 10 percent")
+        }
+        s["sponsor/seen/"+owner]="1"
+        s["sponsor/gross/"+owner]=f["gross"]
+        s["sponsor/share/"+owner]=f["communityShare"]
+        add("communityRewardAccrued",f["communityShare"])
+        add(accrued(CommunityReward),f["communityShare"])
+    case "CommunityRewardBackingReceived":
+        if f["source"]!=Reward || f["amount"]=="0" {
+            return fmt.Errorf("wrong reward backing source or empty backing")
+        }
+        add("communityRewardBackingReceived",f["amount"])
+        if s.get("communityRewardBackingReceived")!=f["backedTotal"] {
+            return fmt.Errorf("contradictory backed community reward total")
+        }
+    case "CommunityRewardSettled":
+        if f["reserve"]!=CommunityReward || f["amount"]=="0" ||
+           money(sum(s.get("communityRewardSettled"),f["amount"])).
+             Cmp(money(s.get("communityRewardBackingReceived")))>0 {
+            return fmt.Errorf("unbacked or redirected community reward")
+        }
+        add("communityRewardSettled",f["amount"])
+        if s.get("communityRewardSettled")!=f["settledTotal"] {
+            return fmt.Errorf("contradictory community settlement counter")
+        }
+    case "NativeRewardPaid":
+        if f["blockNumber"]!=strconv.FormatUint(n,10) || f["amount"]=="0" {
+            return fmt.Errorf("native reward not from this canonical execution block")
+        }
+        kind:=f["kind"]
+        recipient:=f["recipient"]
+        if (kind!="0" && kind!="1" && kind!="2" && kind!="3" && kind!="4") ||
+           (kind=="2" && recipient!=CommunityReward) ||
+           (kind=="3" && recipient!=AttentionTreasury) ||
+           (kind=="4" && recipient!=DevelopmentTreasury) {
+            return fmt.Errorf("unknown/redirected native reward category")
+        }
+        add("paid/"+kind+"/"+recipient,f["amount"])
+        add("nativeRewardPaid",f["amount"])
+    case "RewardApplied":
+        if reward == nil {
 			return fmt.Errorf("reward without certified outcome")
 		}
 		settlement, err := sys.DeriveRewardSettlement(*reward)
 		if err != nil {
 			return err
 		}
-		participants := settlement.PerParticipantAmount.String()
-		add(accrued(address(reward.Proposer)), f["proposerAmount"])
-		for _, a := range reward.Participants {
-			add(accrued(address(a)), participants)
-		}
-		add("grossSecurityIssued", sum(f["proposerAmount"], f["participantAmount"]))
-		add("grossAttentionIssued", f["attentionAmount"])
-		add("grossDevelopmentIssued", f["developmentAmount"])
+        credit:=func(owner string,gross *big.Int,kind string) error {
+            share:=money(s.get("sponsor/share/"+owner))
+            if s["sponsor/seen/"+owner]=="1" &&
+               s["sponsor/gross/"+owner]!=gross.String() {
+                return fmt.Errorf("sponsor evidence uses wrong canonical proposer/participant gross")
+            }
+            if share.Cmp(gross)>0 {return fmt.Errorf("community reward exceeds gross")}
+            net:=new(big.Int).Sub(new(big.Int).Set(gross),share)
+            if s.get("paid/"+kind+"/"+owner)!=net.String() {
+                return fmt.Errorf("native operator transfer missing/contradictory: %s",owner)
+            }
+            delete(s,"paid/"+kind+"/"+owner)
+            delete(s,"sponsor/seen/"+owner)
+            delete(s,"sponsor/gross/"+owner)
+            delete(s,"sponsor/share/"+owner)
+            add(accrued(owner),net.String())
+            return nil
+        }
+        if err:=credit(address(reward.Proposer),settlement.ProposerAmount,"0");err!=nil{return err}
+        for _,owner:=range reward.Participants {
+            if err:=credit(address(owner),settlement.PerParticipantAmount,"1");err!=nil{return err}
+        }
+        for _,entry:=range []struct{kind,recipient,amount string}{
+            {"2",CommunityReward,s.get("communityRewardSettled")},
+            {"3",AttentionTreasury,settlement.AttentionAmount.String()},
+            {"4",DevelopmentTreasury,settlement.DevelopmentAmount.String()},
+        } {
+            want:=entry.amount
+            if entry.kind=="2" {
+                // All community settlements from this block are the difference
+                // between cumulative totals before/after this exact RewardApplied.
+                want=s.get("paid/2/"+CommunityReward)
+                if s.get("communityRewardSettled")!=s.get("communityRewardBackingReceived") ||
+                   s.get("communityRewardAccrued")!=s.get("communityRewardSettled") ||
+                   s.get(accrued(CommunityReward))!=s.get("communityRewardSettled") {
+                    return fmt.Errorf("community backing, settlement and accrual diverge")
+                }
+            }
+            if s.get("paid/"+entry.kind+"/"+entry.recipient)!=want {
+                return fmt.Errorf("native Treasury/community transfer missing")
+            }
+            delete(s,"paid/"+entry.kind+"/"+entry.recipient)
+        }
+        for k:=range s {
+            if strings.HasPrefix(k,"paid/") || strings.HasPrefix(k,"sponsor/") {
+                return fmt.Errorf("unexpected native reward or orphaned sponsor evidence: %s",k)
+            }
+        }
+        add("grossSecurityIssued",sum(f["proposerAmount"],f["participantAmount"]))
+        add("grossAttentionIssued",f["attentionAmount"])
+        add("grossDevelopmentIssued",f["developmentAmount"])
+        realized:=sum(sum(s.get("grossSecurityIssued"),s.get("grossAttentionIssued")),s.get("grossDevelopmentIssued"))
+        if s.get("nativeRewardPaid")!=realized {
+            return fmt.Errorf("native reward disbursements do not conserve realized issuance")
+        }
 	case "TreasuryTransfer":
 		if err := debit(balance(e.Log.Address), f["amount"]); err != nil {
 			return err

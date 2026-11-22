@@ -181,8 +181,14 @@ need(await projection.applyLogs(31337n,relevant)===relevant.length,
      'idempotent replay rejected valid source events');
 need(sql.rows.size===relevant.length && hash(normalizeVerifiedBudgetTimestamp(snapshot()))===firstHash,
      'duplicate source log replay mutated Indexed read model');
-// Roll back last N actual blocks and rebuild strictly from canonical source.
-const cutoff=tip-3n;
+// Roll back an actual block containing a qualified protocol event, not
+// merely the latest RPC blocks (which may contain unrelated native gateway
+// binding receipts). This positively demonstrates event deletion/rebuild.
+const lastProjectedBlock=relevant.reduce((highest,log)=>
+  log.blockNumber>highest?log.blockNumber:highest,0n);
+need(lastProjectedBlock>0n && lastProjectedBlock<=tip,
+     'no actual qualified event block available for canonical rollback');
+const cutoff=lastProjectedBlock-1n;
 await projection.rollbackTo(cutoff);
 need(sql.rows.size<relevant.length,'rollback did not delete reverted Indexer records');
 const surviving=relevant.filter(log=>log.blockNumber<=cutoff);

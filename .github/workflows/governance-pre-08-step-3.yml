@@ -9,6 +9,10 @@ on:
       - 'contracts/src/treasury/**'
       - 'contracts/src/revenue/**'
       - 'contracts/src/vault/**'
+      - 'contracts/test/GOVPRE08CivicLifecycle420.t.sol'
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/governance-management-ui.js'
+      - 'wallet/web/test/governance-management.test.js'
       - '.github/workflows/governance-pre-08-step-3.yml'
   workflow_dispatch:
 
@@ -141,6 +145,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23.x'
+      - name: Verify Wallet Civic vote confirmation against canonical chain, code, identity and reorg
+        run: node --test wallet/web/test/governance-management.test.js
       - name: Materialize canonical unsigned V4 and prove local cold-start, replay and recovery
         run: bash scripts/gov-pre-08/qualify-step3.sh
       - name: Retain exact-head unsigned source and local receipt/state witnesses

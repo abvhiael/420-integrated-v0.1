@@ -128,7 +128,7 @@ test('Multiplayer road map and exposed public tables remain visible without oppo
    {...game.players[1],vehicle:'compact',km:400,played:[{type:'mileage',km:400}],
     upgrades:[],status:null,used:[],shield:0}
   ],
-  hand:[{type:'mileage',km:150,name:'MY_PRIVATE_CARD'}]
+  hand:[{type:'fix',id:'help',name:'MY_PRIVATE_CARD'}]
  };
  const html=renderChaosOnline({status:'ready',room:checkChaosProjection(tables)});
  assert.match(html,/east-atlas-underlay.webp/);

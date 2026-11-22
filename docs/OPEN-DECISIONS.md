@@ -10,9 +10,10 @@ These are the next variables we should settle. Do not freeze them merely for aes
    - At current validator parameters, expected active-term subsidy is **5,037.984 420**, or **11.995%** of the 42,000 bond.
    - Still subject to testnet economic stress testing before mainnet freeze.
 
-2. **Genesis supply**
-   - Total native 420 existing at block zero.
-   - Distinguish liquid distribution from contract-locked protocol reserves.
+2. **Genesis supply — 42,000,000 $420 reconciled candidate**
+   - Explicitly preserve 1M three-founder allocation, 3M validator bootstrap, 4.2M Attention, 4.2M Development, 6.3M community validator credit, 2.1M community reward, 12.6M public and 8.6M ProtocolReserve.
+   - Inside the **existing** 8.6M reserve: 4.2M founding Operations, 840K Contingency, 3.56M unearmarked. Internal earmarks are not second Genesis allocations and do not imply funded Vaults.
+   - The frozen V3 bundle is historical; the new Genesis V4 commitment and actual addresses/funding remain gated.
 
 3. **Genesis validator-bond treatment**
    - Are founding bonds protocol-owned bootstrap collateral?

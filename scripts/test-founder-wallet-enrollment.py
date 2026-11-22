@@ -214,8 +214,8 @@ class ChainSimulator(BaseHTTPRequestHandler):
                     ("plan","genesisPlanCommitment()"),("chain","deploymentChainId()"),
                     ("admin","administrator()"),("andrew","andrew()"),("janet","janet()"),
                     ("count","claimedCount()"),("all","allFoundersClaimed()"),
-                    ("claimed","claimed(address)")]}
-                ]
+                    ("claimed","claimed(address)")]
+                }
                 field = sigs[data[2:10]]
                 if field == "claimed":
                     n = int(data[10:], 16)

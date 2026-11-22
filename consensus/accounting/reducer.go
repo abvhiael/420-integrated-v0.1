@@ -239,6 +239,7 @@ func Apply(s State, e Event, n uint64, reward *sys.RewardOutcome) error {
         }
         add("paid/"+kind+"/"+recipient,f["amount"])
         add("nativeRewardPaid",f["amount"])
+        if kind=="2" { add(balance(CommunityReward),f["amount"]) }
     case "RewardApplied":
         if reward == nil {
 			return fmt.Errorf("reward without certified outcome")
@@ -306,7 +307,7 @@ func Apply(s State, e Event, n uint64, reward *sys.RewardOutcome) error {
 		if err := debit(balance(e.Log.Address), f["amount"]); err != nil {
 			return err
 		}
-		for _, a := range []string{Registry, CreditReserve, ProtocolReserve} {
+		for _, a := range []string{Registry, CreditReserve, ProtocolReserve, CommunityReward} {
 			if f["to"] == a {
 				add(balance(a), f["amount"])
 			}

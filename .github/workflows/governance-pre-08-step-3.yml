@@ -81,6 +81,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
           sha256sum -c artifacts/node420-release-gate/unified-local-executables.sha256
           chmod +x bin/node420 bin/upstream/geth-v1.17.5-420 bin/fourtwentyd bin/settlement-fixture bin/indexer420
+          go test ./indexer/rpc -run 'TestBundle(HashOnlyCanonicalLookup|RejectsMalformedHashOnlyTransaction)' -count=1
           go build -o bin/explorer420 ./explorer/cmd/explorer420
       - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
         run: |

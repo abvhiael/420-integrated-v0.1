@@ -31,6 +31,14 @@ Do not replace consensus-visible behavior with an RPC-submitted transaction, a f
 - 96-byte action-domain maximum;
 - 4,096-block staging retention.
 
+### Authenticated native reward backing (GOV-PRE-04 candidate, V4 release gate)
+
+- The existing Geth native system-call gateway remains a **zero-value** call from `params.SystemAddress`; its JWT API never mints or transfers an externally signed reward transaction.
+- For the canonical 0x0420 `420/SYSCALL/REWARD/V1` action only, generated `core/systemcall420/systemcall.go` derives exact eligible realized native issuance independently from the frozen 420,000-block reduction schedule (4.2 initial / 0.42 floor) and active-validator 15–30 allocation, validates every ABI word, destination, selected account uniqueness and block identity, and refuses malformed or inflated payouts.
+- The *same* shared `Process420SystemCalls` path credits the exact realized amount via `StateDB.AddBalance(0x0420, amount, tracing.BalanceIncreaseRewardMineBlock)` before the authenticated RewardController V3 call **both** for payload building and for imported-block validation. Any reward-controller pre-existing native balance, failed EVM reward distribution or post-call residual balance rejects the whole block.
+- Native execution logs are archived under the existing canonical `420-native-logs-v1:<blockhash>` proof, not in invented Ethereum transaction receipts. RewardController's atomic EVM transfers pay canonical operators and 0x0426 Community, 0x0421 Attention and 0x0422 Development. The gross minted increment equals **actual earned** rewards; non-participating validator allocations are not minted. Counter/reward movement is independently checked by the Indexer/accounting reconciliation.
+- Frozen V3 runtime/codehash/Genesis ceremonies are **not** silently changed; this patch candidate requires the exact pinned v1.17.5 Geth release gate and independently signed V4 Genesis/testnet qualification before any live use.
+
 ### P-256 / passkey execution boundary
 
 - native P-256 verification address is `0x0000000000000000000000000000000000000100`;

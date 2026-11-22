@@ -298,6 +298,37 @@ def main():
                 "running Go Explorer failed to present canonical certified block")
         code,status=getter("http://127.0.0.1:18783","/v1/status")
         require(code==200 and status["chainId"]==420,"Explorer wrong chain")
+        # An Explorer consumer may never fabricate a transaction or settle
+        # native rewards: it must read both facts from the identical Go Indexer
+        # that observed the certified system-call archive and signed EVM receipt.
+        code,tx_view=getter("http://127.0.0.1:18783","/v1/transactions/"+wallet["txHash"])
+        require(code==200 and tx_view["transaction"]["hash"].lower()==wallet["txHash"].lower()
+                and tx_view["receipt"]["blockHash"].lower()==latest["hash"].lower(),
+                "real Go Explorer did not join signed Wallet to canonical block")
+        code,receipt_view=getter("http://127.0.0.1:18783","/v1/receipts/"+wallet["txHash"])
+        require(code==200 and receipt_view["receipt"]["transactionHash"].lower()==wallet["txHash"].lower(),
+                "real Go Explorer missing authenticated Wallet receipt")
+
+        # Prove Go Indexer/Explorer process restart on this actual BLS-certified
+        # execution ledger without resetting, bypassing, or reindexing from an
+        # alternate source. Native Geth and fourtwentyd stay running.
+        for process in (exp,idx):
+            os.killpg(process.pid,signal.SIGTERM)
+            process.wait(timeout=15)
+        idx=launch("indexer420-recovered",[str(indexer)],env=env)
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]==2,
+              idx,timeout=60)
+        stored=json.loads(indexstore.read_text())
+        require(stored["checkpoint"]["indexedHash"].lower()==latest["hash"].lower()
+                and stored["blocks"]["2"]["producer"]["certified"],
+                "Go Indexer restarted against different/unverified certified block")
+        exp=launch("explorer420-recovered",[str(explorer)],env=xenv)
+        ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],
+              exp,timeout=45)
+        code,recovered=getter("http://127.0.0.1:18783","/v1/blocks/2")
+        require(code==200 and recovered["block"]["hash"].lower()==latest["hash"].lower()
+                and recovered["trace"]["certified"],
+                "Go Explorer replay/restart lost canonical BLS producer")
         # The production TypeScript Indexer/PostgreSQL service must ingest this
         # same node420 block; its normal EVM logs differ deliberately from the
         # native Engine archive served by the certified Go Indexer.
@@ -325,6 +356,8 @@ def main():
              "consensusNativeGatewayExecuted":True,
              "realCanonicalValidatorRegistryCalled":True,
              "goIndexerCertifiedProducer":True,"goExplorerCertifiedBlock":True,
+             "walletRealSignedEip1559ReceiptVerified":True,
+             "goIndexerAndExplorerProcessRestartQualified":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":False,
              "postgresEvmCheckpointOnSameChain":True,
              "fullPostgresSameChainQualified":False,

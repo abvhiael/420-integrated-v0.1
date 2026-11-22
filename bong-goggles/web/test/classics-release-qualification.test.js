@@ -18,6 +18,8 @@ const proof=()=>({gameId:'cribbage',sourceSha:sha,rulesHash:hash,
 const goodRun=(kind)=>({conclusion:'success',status:'completed',head_sha:sha,
  repository:{full_name:BC12_REPO},path:BC12_REPO+'/'+BC12_WORKFLOWS[kind]+'@refs/heads/main',
  event:kind==='live'?'workflow_dispatch':'pull_request',
+ head_branch:kind==='live'?'main':'feature/bc-0-12',
+ inputs:kind==='live'?{game_id:'cribbage',rules_hash:hash}:null,
  name:kind==='live'?'BC-0.12 Live Classics Acceptance':'BC-0.12 Classics Test and Release Qualification'});
 const noPlay=html=>/data-game-action="(?:create|play|move|rematch)"|data-classic-quick-play|<button[^>]*>Start game<\/button>/i.test(html);
 
@@ -95,7 +97,10 @@ test('BC-0.12 GitHub runs must be successful and independent at exactly the game
  for(const tamper of [
   {head_sha:'c'.repeat(40)}, {status:'queued'}, {conclusion:'failure'},
   {event:'pull_request'}, {path:'evil/.github/workflows/other.yml@refs/heads/main'},
-  {repository:{full_name:'attacker/fork'}}, {name:'Fake Release'}
+  {repository:{full_name:'attacker/fork'}}, {name:'Fake Release'},
+  {head_branch:'attacker'}, {inputs:{game_id:'chess',rules_hash:hash}},
+  {inputs:{game_id:'cribbage',rules_hash:'c'.repeat(64)}},
+  {inputs:null}
  ]){
   await assert.rejects(verifyReleaseEvidence('cribbage',proof(),{token:null,
    fetchImpl:async url=>({ok:true,json:async()=>url.endsWith('/123')?goodRun('framework'):{...goodRun('live'),...tamper}})}),/release denied/);

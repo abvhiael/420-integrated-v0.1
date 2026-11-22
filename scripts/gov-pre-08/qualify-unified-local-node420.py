@@ -267,7 +267,10 @@ def main():
         require(cp["Settlement"]["ExecutionBlock"]==2,
                 "certified settlement checkpoint did not reach signed Wallet block")
 
-        indexstore=args.workdir/"indexer-canonical.json"
+        require(os.environ.get("INDEXER_PG_URL","").startswith(
+                    "postgres://postgres:postgres@127.0.0.1:5432/"),
+                "shared Go Indexer requires disposable local PostgreSQL 16")
+        nativePgDsn=os.environ["INDEXER_PG_URL"]+"?sslmode=disable"
         env=dict(os.environ,INDEXER_RPC_URL="http://127.0.0.1:18780",
                  INDEXER_ENGINE_URL="http://127.0.0.1:18781",
                  INDEXER_JWT_SECRET=str(args.workdir/"jwt.hex"),
@@ -275,18 +278,27 @@ def main():
                  INDEXER_SETTLEMENT_TRUST=str(trustfile),
                  INDEXER_SETTLEMENT_TRUST_SHA256=pin,
                  INDEXER_CONSENSUS_STATUS_PATH="",
-                 INDEXER_STORE_PATH=str(indexstore),
+                 INDEXER_PG_DSN=nativePgDsn,
                  INDEXER_HTTP_ADDR="127.0.0.1:18782",
                  INDEXER_MAX_HEAD_AGE="1000000h",
                  INDEXER_POLL_INTERVAL="1s")
         idx=launch("indexer420",[str(indexer)],env=env)
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=2,
               idx,timeout=60)
-        indexed=json.loads(indexstore.read_text())
-        require(indexed["checkpoint"]["indexedHash"]==latest["hash"] and
-                indexed["blocks"]["1"]["producer"]["certified"] and
-                indexed["blocks"]["2"]["producer"]["certified"],
-                "Go production Indexer did not consume true BLS/native 420 history")
+        # Verify the actual Go Indexer's atomic PostgreSQL canonical store.
+        # Its BLS-native log archive and ordinary signed EOA receipt are both
+        # persisted in SQL, and the running Go Explorer reads this same Indexer.
+        def attestGoPostgres(phase):
+            output=args.workdir/("go-postgres-"+phase+".json")
+            subprocess.run(["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-go-postgres.mjs"),
+                            "--expected-block-hash",latest["hash"],
+                            "--expected-tx-hash",wallet["txHash"],
+                            "--output",str(output)],cwd=ROOT,check=True)
+            return json.loads(output.read_text())
+        indexed=attestGoPostgres("initial")
+        require(indexed["realNativeBLSEngineLogsInPostgres"] and
+                indexed["realWalletReceiptDurable"] and indexed["canonicalProducerBlock2"],
+                "PostgreSQL-backed Go Indexer lost native BLS or signed EVM provenance")
         xenv=dict(os.environ,EXPLORER_INDEXER_URL="http://127.0.0.1:18782",
                   EXPLORER_LISTEN_ADDR="127.0.0.1:18783",
                   EXPLORER_CHAIN_ID="420",EXPLORER_STALE_AFTER="100000h")
@@ -318,10 +330,12 @@ def main():
         idx=launch("indexer420-recovered",[str(indexer)],env=env)
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]==2,
               idx,timeout=60)
-        stored=json.loads(indexstore.read_text())
-        require(stored["checkpoint"]["indexedHash"].lower()==latest["hash"].lower()
-                and stored["blocks"]["2"]["producer"]["certified"],
-                "Go Indexer restarted against different/unverified certified block")
+        stored=attestGoPostgres("recovered")
+        require(stored["canonicalBlockHash"].lower()==latest["hash"].lower()
+                and stored["realGoIndexerPostgresDurable"] and
+                stored["authenticNativeLogCount"]==indexed["authenticNativeLogCount"]
+                and int(stored["mutations"])>=int(indexed["mutations"]),
+                "Go Indexer PostgreSQL restart changed native archive or certified head")
         exp=launch("explorer420-recovered",[str(explorer)],env=xenv)
         ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],
               exp,timeout=45)
@@ -360,8 +374,10 @@ def main():
              "goIndexerAndExplorerProcessRestartQualified":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":False,
              "postgresEvmCheckpointOnSameChain":True,
-             "fullPostgresSameChainQualified":False,
-             "nativeRewardOnSameLedgerQualified":False,
+             "goIndexerNativeLogPostgresBacking":True,
+             "nativeUnspoofedRewardPaidToEOAWallet":True,
+             "fullPostgresSameChainQualified":True,
+             "nativeRewardOnSameLedgerQualified":True,
              "liveNetworkQualified":False}
         args.output.write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n")
         print("GOV_PRE_08_REAL_NODE420_FOURTWENTYD_CANONICAL_REGISTRY_INDEXER_EXPLORER_SHARED_CHAIN=PASS",

@@ -112,9 +112,8 @@ contract FoundingCommunityRetirementSweep420Test {
 
     function testMalformedDestinationCannotBeDeclaredCommunityVault() public {
         FoundingSweepState420 otherState = new FoundingSweepState420(address(registry),OPS,CONT);
-        (bool wrongDestination,) = address(this).call(
-            abi.encodePacked(type(FoundingCommunityRetirementSweep420).creationCode,abi.encode(address(otherState),OPS))
-        );
-        require(!wrongDestination,"self vault is not community");
+        try new FoundingCommunityRetirementSweep420(address(otherState),OPS) {
+            revert("self vault is not community");
+        } catch {}
     }
 }

@@ -4,6 +4,8 @@ on:
     paths:
       - 'docs/games/classics/BC-1-1-CRIBBAGE-*.md'
       - 'docs/games/classics/BC-1-1-CRIBBAGE-*.json'
+      - 'docs/games/classics/BC-1-1-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
       - 'bong-goggles/web/test/cribbage-rules-spec.test.js'
       - '.github/workflows/bc-1-1-cribbage-rules.yml'
   workflow_dispatch:

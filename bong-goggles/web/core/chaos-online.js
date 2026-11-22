@@ -66,7 +66,7 @@ export class ChaosRoomsClient{
    const changed=!sameRoom||before.revision!==next.revision||oldId!==newId;
    // Do not destroy the card selection, chat draft and scrolling on idle polls.
    if(silent&&!changed){this.state={...this.state,room:next};return;}
-   const unseen=sameRoom&&!this.state.chatOpen&&oldId&&oldId!==newId?
+   const unseen=sameRoom&&!this.state.chatOpen&&newId&&oldId!==newId?
     Math.max(1,next.chat.length-(before.chat?.length||0)):0;
    this.emit({...this.state,status:'ready',room:next,error:null,
     selectedCard:sameRoom?this.state.selectedCard:0,
@@ -146,6 +146,7 @@ export class ChaosRoomsClient{
    }
    if(this.state.room?.id!==room.id)return;
    const updated=checkChaosProjection(result.data.room);
+   ++this.generation; // invalidate an older GET that raced the successful chat POST
    this.emit({...this.state,room:updated,chatError:null,unreadChat:0});
   }catch(e){
    if(this.state.room?.id===room.id)this.emit({...this.state,chatError:e.message});

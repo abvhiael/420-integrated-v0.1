@@ -16,6 +16,11 @@ interface IERC20DevelopmentCompensation420 {
     ) external view returns (uint256);
 }
 
+interface IFoundingCompensationReceiver420 {
+    function isFoundingCompensationSplitter420() external view returns (bool);
+    function recordVaultTokenCompensation(address token, uint256 amount, bytes32 contributionId) external;
+}
+
 /// @notice Segregated, non-custodial router for the developer-compensation share of eligible application revenue.
 /// @dev The vault never accepts arbitrary deposits and exposes no owner withdrawal path. Authorized source
 ///      applications submit an exact policy-calculated share, which is forwarded atomically to the immutable
@@ -175,6 +180,20 @@ contract DevelopmentCompensationVault420 is I420System {
                 || afterBeneficiary - beforeBeneficiary != amount
         ) revert UnexpectedTokenDelta();
         // slither-disable-end reentrancy-balance
+        // Only the founder compensation implementation opts in to the exact
+        // token-receipt acknowledgment. Legacy beneficiaries (including EOAs)
+        // continue to receive tokens as before. Callback failure reverts the
+        // entire authorized Vault transfer, including the replay marker.
+        if (beneficiary.code.length != 0) {
+            (bool supported, bytes memory data) = beneficiary.staticcall(
+                abi.encodeCall(IFoundingCompensationReceiver420.isFoundingCompensationSplitter420, ())
+            );
+            if (supported && data.length == 32 && abi.decode(data, (bool))) {
+                IFoundingCompensationReceiver420(beneficiary).recordVaultTokenCompensation(
+                    token, amount, id
+                );
+            }
+        }
 
         emit DevelopmentCompensationForwarded(
             id,

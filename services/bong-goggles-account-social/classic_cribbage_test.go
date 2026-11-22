@@ -47,8 +47,8 @@ func TestBC12HandScoringCanonicalFixtures(t *testing.T){
   {"zero",[4]int{cribCard(1,0),cribCard(3,1),cribCard(7,2),cribCard(9,3)},cribCard(13,0),false,0,0,0,0},
   {"hand-four-flush",[4]int{cribCard(2,2),cribCard(4,2),cribCard(6,2),cribCard(8,2)},cribCard(13,0),false,4,0,4,0},
   {"crib-four-flush-zero",[4]int{cribCard(2,2),cribCard(4,2),cribCard(6,2),cribCard(8,2)},cribCard(13,0),true,0,0,0,0},
-  {"crib-five-flush",[4]int{cribCard(2,2),cribCard(4,2),cribCard(6,2),cribCard(8,2)},cribCard(9,2),true,5,0,5,0},
-  {"nobs",[4]int{cribCard(11,3),cribCard(2,0),cribCard(4,1),cribCard(8,2)},cribCard(9,3),false,1,0,0,1},
+  {"crib-five-flush",[4]int{cribCard(2,2),cribCard(4,2),cribCard(6,2),cribCard(8,2)},cribCard(9,2),true,9,0,5,0},
+  {"nobs",[4]int{cribCard(11,3),cribCard(2,0),cribCard(4,1),cribCard(8,2)},cribCard(9,3),false,3,0,0,1},
  }
  for _,tc:=range cases{t.Run(tc.name,func(t *testing.T){
   p,e:=cribbageCountShow(tc.hand[:],tc.starter,tc.crib)

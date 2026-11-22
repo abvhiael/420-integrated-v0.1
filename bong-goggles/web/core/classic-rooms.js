@@ -207,7 +207,7 @@ function roomDetail(r,state,live=null){
  return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
   '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
   '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
-  note(r.status==='ready'?'All seats filled. The host may start a qualified Cribbage match.':
+  note(r.status==='ready'?(r.gameId==='cribbage'?'All seats filled. The host may start a qualified Cribbage match.':'All seats filled. Game start and turns require BC-0.6; no match has begun.'):
    r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
   '<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.gameId==='cribbage'&&r.status==='ready'?'<form data-cribbage-room-start><button type="submit">Start Cribbage</button></form>':'')+cribbageLink+roomLive+invites+
   (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';

@@ -126,13 +126,16 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         to := systemcall420.GatewayAddress
         minted, isReward, err := systemcall420.RewardBackingAmount(c)
         if err != nil { return err }
+        // An EVM account can receive involuntary ETH via SELFDESTRUCT even if it
+        // lacks a payable receiver. Requiring a zero pre-balance would let that
+        // unrelated forced transfer permanently halt consensus. Instead pin the
+        // exact pre-existing amount and require its preservation after reward
+        // issuance and verified distribution; only minted may be paid this block.
+        priorRewardBalance := new(uint256.Int).Set(evm.StateDB.GetBalance(systemcall420.RewardControllerAddress))
         if isReward {
-            if evm.StateDB.GetBalance(systemcall420.RewardControllerAddress).Sign() != 0 {
+            if _, overflow := new(uint256.Int).AddOverflow(priorRewardBalance, minted); overflow {
                 return systemcall420.ErrRewardBacking
             }
-            // Both imported-block validation and payload assembly use this exact
-            // processor hook. No private signer, RPC transaction or additional
-            // mint path exists; failed EVM settlement invalidates the whole block.
             evm.StateDB.AddBalance(systemcall420.RewardControllerAddress,
                 minted, tracing.BalanceIncreaseRewardMineBlock)
         }
@@ -149,7 +152,7 @@ func Process420SystemCalls(number uint64, parent common.Hash, extra []byte, evm 
         if err != nil {
             return fmt.Errorf("420 system call sequence %d: %w", uint64(c.Sequence), err)
         }
-        if isReward && evm.StateDB.GetBalance(systemcall420.RewardControllerAddress).Sign() != 0 {
+        if isReward && evm.StateDB.GetBalance(systemcall420.RewardControllerAddress).Cmp(priorRewardBalance) != 0 {
             return systemcall420.ErrRewardBacking
         }
         blockAccessList.Merge(local)

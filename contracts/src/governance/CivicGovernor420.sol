@@ -47,6 +47,7 @@ contract CivicGovernor420 is I420System {
     CivicVoting420 public voting;
     GovernanceTimelock public timelock;
 
+    uint256 public dualHouseExecutedCount;
     mapping(address => uint256) public proposerNonces;
     mapping(bytes32 => FrozenRule) private _frozenRules;
     mapping(bytes32 => bytes32) public queuedActionHashes;
@@ -284,6 +285,9 @@ contract CivicGovernor420 is I420System {
         }
 
         proposalRegistry.transition(proposalId, CivicIds420.ProposalState.EXECUTED);
+        // Only a genuinely executed (not merely approved) Civic dual-house batch counts
+        // toward retirement readiness. Timelock verifies this execution context.
+        if (_frozenRules[proposalId].dualHouseRequired) ++dualHouseExecutedCount;
         emit CivicProposalExecuted(proposalId, computedHash);
     }
 

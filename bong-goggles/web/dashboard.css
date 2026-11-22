@@ -80,3 +80,17 @@ body{background:var(--bg);color:var(--text)}
   .app-header .account-auth-link{border:2px solid LinkText;background:Canvas;color:LinkText;box-shadow:none}
   .app-header .account-auth-link:focus-visible{outline:3px solid Highlight}
 }
+
+/* BC-0.4: visible 420ID sign-in, verified identity and independent sign-out. */
+.app-header .account-logout,.app-header .account-auth-retry{min-height:44px;padding:9px 12px;border:2px solid #d2f4dd;border-radius:10px;background:#164736;color:#fff;font-weight:750;cursor:pointer}
+.app-header .account-auth-retry{background:#594a12;border-color:#ffe399}
+.app-header .account-logout:focus-visible,.app-header .account-auth-retry:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.app-header .account-auth-pending{font-size:.86rem;color:#e1f8ed}
+.games-account{display:grid;gap:10px;margin:12px 0;padding:18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.games-account h3,.games-account p{margin:0}
+.games-account__actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.games-account__actions a,.games-account__actions button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 13px;border-radius:10px;border:1px solid var(--line);color:var(--text);text-decoration:none;font-weight:700}
+.games-account__actions .account-auth-link--login{background:#ffdf68;color:#0a2b1d;border:2px solid #856a10}
+.games-account__actions a:focus-visible,.games-account__actions button:focus-visible{outline:3px solid #b27c10;outline-offset:3px}
+@media(max-width:760px){.app-header .account-logout,.app-header .account-auth-retry{width:100%;min-height:46px}.games-account{padding:12px}}
+@media(forced-colors:active){.games-account,.app-header .account-logout,.app-header .account-auth-retry{border:2px solid CanvasText;background:Canvas;color:CanvasText}}

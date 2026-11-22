@@ -9,17 +9,21 @@ const me='12345678-1234-4123-8123-123456789abc';
 const post={id:'34567890-1234-4345-8345-123456789abc',author:me,displayName:'Member',body:'Private post <script>alert(1)</script>',createdAt:'2026-11-21T18:01:41Z',reactions:0};
 const ready={status:'ready',profile:{subject:me,displayName:'Member <script>alert(1)</script>'},posts:[post],comments:{},nextCursor:null};
 const respond=(status,data)=>({status,ok:status>=200&&status<300,headers:{get:()=> 'application/json'},json:async()=>data});
-const shell=(pathname,accountSocialState,enabled=true)=>renderApplicationShell({pathname,accountSocialState,accountSocialEnabled:enabled,walletView:null});
+const shell=(pathname,accountSocialState,enabled=true,accountIdentityState=accountSocialState)=>renderApplicationShell({pathname,accountSocialState,accountSocialEnabled:enabled,accountIdentityState,accountIdentityEnabled:enabled,walletView:null});
 
 test('header exposes a prominent same-origin 420ID login with no Wallet requirement',()=>{
- for(const state of [null,{status:'loading'},{status:'guest'},{status:'error'}]){
+ for(const state of [null,{status:'guest'},{status:'error'}]){
   for(const route of ['/', '/social','/discover']){
    const html=shell(route,state);
-   assert.match(html,/<a class="account-auth-link account-auth-link--login" href="\/social-api\/auth\/start"><span aria-hidden="true" class="account-auth-link__icon">↪<\/span><span>Log in with 420ID<\/span><\/a>/);
+   assert.match(html,/<a class="account-auth-link account-auth-link--login" href="\/social-api\/auth\/start" aria-label="Sign In with 420ID">/);
+   assert.match(html,/Sign In<\/strong> · Log in with 420ID/);
    assert.doesNotMatch(html,/<a class="account-auth-link[^"]*"[^>]*href="https?:/);
    assert.doesNotMatch(html,/Private post &lt;script&gt;/);
   }
  }
+ const loading=shell('/games',{status:'loading'});
+ assert.match(loading,/Checking 420ID sign-in/);
+ assert.doesNotMatch(loading,/data-account-action="logout"/);
  const disabled=shell('/social',{status:'error'},false);
  assert.doesNotMatch(disabled,/account-auth-link/);
  assert.match(disabled,/Account social not activated/);
@@ -50,6 +54,7 @@ test('Home offers login and retry when backend times out; no cached community po
 test('verified 420ID member is not mislabelled as Wallet guest, and untrusted display name is escaped',()=>{
  const html=shell('/social',ready);
  assert.match(html,/class="account-auth-link account-auth-link--account" href="\/social" data-route="social" aria-label="Open your 420ID account"><span aria-hidden="true" class="account-auth-link__icon">●<\/span><span>My account: Member &lt;script&gt;/);
+ assert.match(html,/data-account-action="logout" aria-label="Sign out of 420ID">Sign Out/);
  assert.doesNotMatch(html,/class="account-auth-link account-auth-link--login" href="\/social-api\/auth\/start"/);
  assert.match(html,/420ID account · wallet optional/);
  assert.doesNotMatch(html,/Welcome, guest/);
@@ -101,6 +106,7 @@ test('login and account actions remain obvious and keyboard-accessible at mobile
  assert.match(css,/@media\(forced-colors:active\)/);
  const loggedOut=shell('/',{status:'guest'});
  const loggedIn=shell('/',ready);
+ assert.match(loggedOut,/Sign In/);
  assert.match(loggedOut,/Log in with 420ID/);
  assert.match(loggedIn,/My account:/);
  assert.doesNotMatch(loggedIn,/class="account-auth-link account-auth-link--login"/);

@@ -21,6 +21,8 @@ type Handler struct{
  SignOn *SignOn
  Messages *MessageService
  Games *AccountGames
+ Rooms *ClassicRooms
+ Sessions *ClassicSessions
  Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
@@ -53,6 +55,19 @@ func (h *Handler) ConfigureTrustedWorker(encoded string) error {
 func (h *Handler) EnableAccountExtras(messages *MessageService,games *AccountGames)error{
  if h==nil||messages==nil||games==nil||messages.Store!=h.Store||games.Store!=h.Store{return ErrInvalid}
  h.Messages=messages;h.Games=games
+ return nil
+}
+// EnableClassicRooms is explicit: AUTH-9 must be enabled first, the runtime
+// role must pass ReadyClassicRooms and the UI flag stays off until deployed.
+func (h *Handler) EnableClassicRooms(rooms *ClassicRooms)error{
+ if h==nil||h.Games==nil||rooms==nil||rooms.Store!=h.Store||h.Rooms!=nil{return ErrInvalid}
+ h.Rooms=rooms
+ return nil
+}
+// EnableClassicSessions requires the exact same 420ID-backed room authority.
+func (h *Handler) EnableClassicSessions(s *ClassicSessions)error{
+ if h==nil||h.Rooms==nil||s==nil||s.Store!=h.Store||s.Rooms!=h.Rooms||h.Sessions!=nil{return ErrInvalid}
+ h.Sessions=s
  return nil
 }
 // EnableXP is a separate opt-in from AUTH-8/9 and uses this exact 420ID
@@ -194,7 +209,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
   r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{
    deny(w,403);return
   }
- }else if r.URL.RawQuery!=""&&r.URL.Path!="/v1/feed"{deny(w,400);return}
+ }else if r.URL.RawQuery!=""&&r.URL.Path!="/v1/feed"&&!(strings.HasPrefix(r.URL.Path,"/v1/classic-sessions/")&&strings.HasSuffix(r.URL.Path,"/events")){deny(w,400);return}
  ctx,cancel:=context.WithTimeout(r.Context(),8*time.Second);defer cancel()
  cookie:=getCookie(r,sessionCookieName)
  viewer,e:=h.SignOn.Verify(ctx,cookie)
@@ -212,8 +227,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
 }
 func (h *Handler) api(ctx context.Context,w http.ResponseWriter,r *http.Request,viewer string){
  path:=r.URL.Path
+ if path=="/v1/classic-sessions"||strings.HasPrefix(path,"/v1/classic-sessions/"){
+  h.classicSessionsHTTP(ctx,w,r,viewer);return
+ }
  if strings.HasPrefix(path,"/v1/chaos/"){
   h.chaosAPI(ctx,w,r,viewer);return
+ }
+ if path=="/v1/classic-rooms"||strings.HasPrefix(path,"/v1/classic-rooms/"){
+  h.classicRoomsHTTP(ctx,w,r,viewer);return
  }
  if strings.HasPrefix(path,"/v1/messages")||strings.HasPrefix(path,"/v1/account-games"){
   h.accountExtras(ctx,w,r,viewer);return

@@ -416,3 +416,263 @@ and app-session boundaries remain unchanged. No changes authorize
 paid features, wallet spending, token payout or XP-to-420 conversion.
 
 See `docs/audit/AUTH-12-SECURITY-PRIVACY-QUALIFICATION.md`.
+
+
+## BC-0.5 — opt-in, zero-wager, wallet-free Classic multiplayer rooms
+
+These rooms are persistent 420ID lobbies, not active matches or game
+engines. They have no wallet identity, game moves, score, rewards, stake or
+financial authority. Migration 004_classic_rooms.sql is applied only
+through the existing operator-only bg-social migrate command.
+
+The runtime must use these additional LEAST-PRIVILEGE grants, applied
+only after the migration, on the existing bonggoggles_social_runtime role:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_rooms,
+      bg_account_social.classic_room_seats,
+      bg_account_social.classic_room_invites TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,revision,updated_at) ON
+      bg_account_social.classic_rooms TO bonggoggles_social_runtime;
+    GRANT UPDATE(controller,subject,difficulty) ON
+      bg_account_social.classic_room_seats TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,updated_at) ON
+      bg_account_social.classic_room_invites TO bonggoggles_social_runtime;
+
+Never grant full-table UPDATE/DELETE, permission to rewrite a room
+host/game/visibility/team/seat count or an invitation target, or schema
+DDL to the runtime. ReadyClassicRooms checks required grants and rejects
+unsafe write permissions before activation.
+
+Enable the server ONLY after the existing
+SOCIAL420_ACCOUNT_EXTRAS=restricted-acceptance gate is qualified:
+SOCIAL420_CLASSIC_ROOMS=restricted-acceptance. Any unknown activation
+value fails startup; disabled/absent returns 404 for room routes.
+After the backend is qualified, explicitly enable both Cloudflare Pages
+text build settings BG_ACCOUNT_SOCIAL_ACTIVATION=true and
+BG_CLASSIC_ROOMS_ACTIVATION=true. The latter defaults to false, can be
+rolled back independently, and must not be set before the server is ready.
+Do not change the 420ID SSO cookie or Cloudflare same-origin proxy.
+
+The same-origin, freshly introspected 420ID routes are:
+- GET /social-api/v1/classic-rooms: public/participant/invited rooms (max 50)
+- GET /social-api/v1/classic-rooms/friends: mutual, unblocked 420ID friends
+- POST /social-api/v1/classic-rooms: gameId, visibility, seatCount
+- GET /social-api/v1/classic-rooms/{uuid}: authorized seat/invite detail
+- POST /social-api/v1/classic-rooms/{uuid}/change: action,
+  expectedRevision, seat, and optional target/difficulty.
+
+Room actions: invite a mutual friend, accept, decline, cancel-invite,
+join a public vacant seat, leave, bot, clear-bot, or cancel-room.
+The server binds human seats to the verified 420ID principal, checks
+friendship and bidirectional blocks, enforces canonical 25-game seat
+limits, derives partner teams and supports computer-seat difficulty
+easy/medium/hard. A PostgreSQL row lock and expected revision reject
+concurrent or replayed seat mutations. Only the host can configure
+bots or cancel invitations/rooms. Private room details are not available
+after a member leaves or declines. Complete occupancy means lobby
+status READY, not that a game has started. The zero-wager JSON response
+flags onChain, wager, rewards and playable are all false.
+
+BC-0.6 is still the authoritative match lifecycle/start/turn/score
+boundary; BC-0.7/8 own actual game-specific rules and AI.
+The new 25 Classics remain visibly nonplayable. This stage does not
+claim online Cross-Country Chaos or a running room session in production.
+
+Exact-head workflow: .github/workflows/bc-0-5-classic-rooms.yml
+(PostgreSQL 16 integration, Go race/vet/build and targeted Node tests)
+alongside the unchanged Bong Goggles Web Verification for mobile
+layout, cards/maps/assets, wallet/social and static security gates.
+
+
+## BC-0.6 — authoritative, replayable, wallet-free session backend
+
+Migration 005_classic_sessions.sql adds a one-session-per-room durable
+record, strictly increasing event journal and idempotent command ledger.
+The migration retains all existing BC-0.5 rooms and invitations and is
+applied by the existing operator-only migration command. Grant the
+existing runtime role only these incremental, column-limited permissions:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_sessions,
+      bg_account_social.classic_session_events,
+      bg_account_social.classic_session_commands TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,engine_state,sequence,turn_seat,turn_deadline,
+      winner_seat,finished_reason,updated_at)
+      ON bg_account_social.classic_sessions TO bonggoggles_social_runtime;
+
+Do not grant DELETE on the three tables, UPDATE on event/command journals,
+table-wide UPDATE, or modifications to room_id, game_id, seat_count,
+rules_version or rules_hash. ReadyClassicSessions rejects unsafe grants.
+Room status/revision changes continue through qualified BC-0.5 grants.
+
+The backend accepts SOCIAL420_CLASSIC_SESSIONS=restricted-acceptance only
+after existing Account Social, AUTH-9 and BC-0.5 gates are enabled.
+Unknown settings fail startup; default is disabled. It uses the same
+420ID HttpOnly cookie, same-origin Origin/CSRF, subject-based rate limits,
+bidirectional blocks and trusted Cloudflare Worker identity boundary.
+No new browser secrets, wallet sign-in, user rewards or payments.
+
+All routes are under the existing /social-api prefix:
+
+- GET /v1/classic-sessions: up to 50 participant-only recovery summaries.
+- POST /v1/classic-sessions: host starts a fully seated room using roomId;
+  strict room lock and pinned rule identity prevent duplicate starts.
+- GET /v1/classic-sessions/{uuid}: durable snapshot projected through the
+  registered version/hash-matched rule adapter only for the verified seat.
+- POST /v1/classic-sessions/{uuid}/action: requestId, action,
+  expectedSequence, optional move. Move/resign/cancel are serialized;
+  duplicate request IDs with the same command are idempotent, while
+  changed payload, stale sequence, wrong turn and wrong subject are denied.
+- GET /v1/classic-sessions/{uuid}/events?after=N: ordered append-only
+  events with public lifecycle/turn fields only; a cursor more than 50
+  events behind requires snapshot resynchronization (HTTP 409).
+- GET /v1/classic-sessions/{uuid}/stream: bounded, resumable SSE updates
+  with fresh 420ID authentication and seat/block policy rechecks.
+  Concealed hands and private game engine state are never published.
+
+A fixed 120-second per-turn deadline uses PostgreSQL clock_timestamp,
+with a bounded three-second worker sweep and synchronous read/action
+expiry for correctness across process restarts. Terminal sessions
+freeze previously qualified room seats; an event and each state change
+commit atomically. The browser never provides scores, winners, deadlines
+or a trusted random seed.
+
+Security boundary: BC-0.6 qualifies the generic backend lifecycle,
+authorization, replay, deadlines and publication, not the 25 titles'
+unimplemented BC-0.7 game-specific rules. Production registers no
+ClassicRule adapter and therefore rejects unqualified match starts.
+Tagged tests inject a deterministic, clearly test-only two-seat adapter
+to qualify legal/illegal turns, secret seat views, replay, concurrent
+actions, timeout, resign/cancel and SSE/restore behavior. It must never
+be reported as actual Chess or Cribbage gameplay. BC-0.8 still must
+qualify bot action engines before bot-filled lobbies may start.
+
+Production room/session runtime was NOT enabled by this source change.
+A previous live 420ID Account Social health probe returned HTTP 502 on
+nine attempts (GitHub run #44967121073). Operators must restore ingress,
+apply migration/grants, and explicitly enable the room/session service
+before claiming a working multi-account production session.
+
+The existing BC-0.5/0.6 GitHub workflow tests the PostgreSQL 16 Go
+service with race detection, static analysis, exact-head source and
+targeted Node regressions. The independent web workflow continues
+to protect both builds and established assets/security boundaries.
+
+
+## BC-0.7 — versioned deterministic game-rules framework (no games released)
+
+The rules framework is compiled, server-owned Go code, integrated with BC-0.6
+sessions. **It does not register any of the 25 Classic rule engines in production.**
+Their BC-0.8 AI implementations and per-game launch qualification remain open.
+
+A module implements RuleModule: immutable GameID/version/specification,
+seeded Initial state, Legal action generation, deterministic Step, strict
+saved-state Validate, and View projected for an individual seat. The
+RulesAdapter implements the existing ClassicRule transport contract and
+pins SHA-256(GameID + newline + Version + newline + Specification) to each
+new session. The specification digest binds a rules contract, NOT the
+entire compiled binary; changing a module without versioning its contract
+is forbidden by the retained exact-code qualification process. A recovery
+with a different rules version/hash fails closed.
+
+RuleFrame is a bounded, strict JSON codec: pinned game/version/hash and
+32-byte replay seed, 2–4 player seats, per-seat signed bounded scores,
+round number, named phase, authoritative next turn, terminal/winner, and
+module-defined JSON Data. A module validates its entire game-specific
+payload, including phase, score/round progression and internal concealed
+data. Unknown/duplicate JSON fields, malformed numbers/strings,
+oversized states/actions, forged scores, incorrect terminal flags and
+unqualified action types are rejected. Both Initial and Step must
+produce byte-identical outputs when run twice on the same inputs.
+Legal actions are generated twice and compared; user actions must match
+one of their canonical entries. Modules receive metered RuleBudget
+operations (maximum 100,000); trusted modules must charge their work.
+The framework also exposes deterministic, domain-separated SHA-256
+RuleRandom seeded at game creation, with an explicitly persisted counter
+and rejection-sampled bounded Intn; wall clocks, unseeded random and
+network reads must not affect game rules.
+
+Private, immutable replay material is separate from the public SSE:
+migration 006_classic_rules_replay.sql creates classic_rule_genesis
+(qualified rules hash, seed, initial state/digest) and classic_rule_moves
+(sequence, actor seat, private canonical action, before/after digests).
+The replay path reconstructs from the original seed and every committed
+accepted move. A versioned session checks this history inside a locked
+write transaction and a repeatable-read recovery transaction; its
+persisted snapshot, turn, winner and full move-event count must match.
+Tampered/missing actions, altered digests, changed saved scores/private
+data, mismatched rules versions and stale turns all fail closed.
+Only metadata goes to classic_session_events or SSE. Existing non-BC-0.7
+BC-0.6 test adapters and non-game account flows remain compatible.
+
+Operator migration requires privileged Migrate, then only:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_rule_genesis,
+      bg_account_social.classic_rule_moves TO bonggoggles_social_runtime;
+
+Do not grant DELETE, UPDATE or DDL on those tables. Startup check
+ReadyClassicRules requires exact INSERT/SELECT rights and rejects
+UPDATE/DELETE. Enable SOCIAL420_CLASSIC_RULES=restricted-acceptance
+only after the existing 420ID/BC-0.5/BC-0.6 session activation and
+migration/grants have been verified. Absent/disabled remains off;
+unknown values fail startup. No user-facing Pages feature switch
+can install an unqualified game module.
+
+A bounded RulesAdapter.ChooseMove contract is available for BC-0.8:
+AI policy is passed **only the authorized seat projection, legal action
+list, difficulty and deterministic RuleBudget**; it cannot see other
+players' hidden data and its chosen action must be one of those legal
+options. No autonomous bot runner or gameplay AI is shipped by BC-0.7.
+A small **test-only** counting-round fixture demonstrates score changes,
+round progression, terminal/tie decisions, concealed seat projections,
+deterministic shuffling, replay, source drift rejection and PostgreSQL
+saved-state corruption checks. It must never be represented as real Chess.
+
+Qualification: .github/workflows/bc-0-5-classic-rooms.yml retains
+PostgreSQL 16 tagged race/integration, Go vet/build and targeted
+browser regressions; the new RuleModule and replay cases are exercised
+through that same focused workflow. Independent whole-web visual
+qualification and real-user production deployment are separate gates.
+
+
+## BC-0.8 — bounded, private-view computer opponents (framework only)
+
+Qualified rules adapters may register explicit game-specific Easy, Medium and
+Hard RuleDecisionPolicy implementations through EnableBots. All three must
+be present. Policies are compiled, operator-controlled Go code; no browser,
+room host, network manifest or arbitrary uploaded script can register one.
+There is no generic substitute for a game-specific strategy or strength test.
+The production server still has **no Classic game rules or bot policies**
+registered, so this infrastructure does not activate playable Chess, Cribbage
+or other unreleased Classics.
+
+For each registered game, a bot sees only the canonical *active seat* View
+and a copied list of legal actions. It never receives the hidden rules frame,
+seed, another player's view or concealed draw order. The rules adapter runs
+each decision twice on independent input copies and rejects inconsistent,
+unmetered, malformed or illegal responses. Easy, Medium and Hard receive
+respectively 1,000/10,000/100,000 cooperative compute units and 50/125/300 ms
+decision deadlines. These limits are enforced on RuleBudget.Charge; policies
+must be qualified, trusted, bounded compiled modules, as Go cannot forcibly
+preempt arbitrary uncooperative code in-process. Never install unreviewed
+policy implementations. Game-specific probability, search and partnership
+strategies are implemented and qualified with their own titles, not fabricated
+here.
+
+RunBotTurn holds the same room-then-session PostgreSQL locks as user actions,
+rechecks the seat controller and difficulty, validates the pinned rules hash
+and full private replay, and writes the bot decision, state, score and public
+turn metadata atomically. A restarted or competing worker does not double
+execute it. SweepBots is a one-at-a-time, eight-session-per-tick worker
+called after the established deadline sweeper. No client may impersonate a bot.
+Human-vs-bot lobbies start only with an explicitly registered qualified
+ruleset and a complete game policy family. Bot-vs-bot matches are available
+as offline deterministic QualifyBotMatch fixtures with fixed seeds, capped
+move counts and verified replay; they are not account games or leaderboards.
+
+The BC-0.8 Go tests exercise legal-only decisions, deterministic
+simulation, each difficulty, missing policies, deadline/compute rejection,
+policy input mutation, nondeterminism, private-view isolation, concurrent
+bot execution, PostgreSQL replay, timeout, bot terminal results, restart
+and public-journal redaction. The existing BC-0.x exact-head workflow runs
+the tagged PostgreSQL 16 race tests, vet/build and relevant web regressions.
+No production service activation, ruleset release, or migration is included.

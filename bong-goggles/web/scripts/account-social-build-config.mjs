@@ -2,8 +2,15 @@
 // BongGoggles account UI. This does not authorize wallet/on-chain features,
 // production launch, or account monetization.
 export const ACCOUNT_SOCIAL_BUILD_FLAG = 'BG_ACCOUNT_SOCIAL_ACTIVATION';
+export const CLASSIC_ROOMS_BUILD_FLAG = 'BG_CLASSIC_ROOMS_ACTIVATION';
 
-export function withAccountSocialBuildFlags(example, rawValue) {
+export function withAccountSocialBuildFlags(example, rawValue, roomsValue) {
+  if (roomsValue !== undefined && roomsValue !== 'true' && roomsValue !== 'false') {
+    throw new Error('BG_CLASSIC_ROOMS_ACTIVATION must be exactly true or false');
+  }
+  if (roomsValue === 'true' && rawValue !== 'true') {
+    throw new Error('Classic rooms require qualified account-social activation');
+  }
   if (rawValue !== undefined && rawValue !== 'true' && rawValue !== 'false') {
     throw new Error('BG_ACCOUNT_SOCIAL_ACTIVATION must be exactly true or false');
   }
@@ -20,6 +27,7 @@ export function withAccountSocialBuildFlags(example, rawValue) {
       accountSocial: enabled,
       accountMessaging: enabled,
       accountGames: enabled,
+      classicRooms: enabled && roomsValue === 'true',
       accountXP: enabled,
       accountMonetization: false
     }

@@ -70,3 +70,5 @@ The Governance stack has no privileged owner key and no emergency council overri
 ## Deployment status and limitation
 
 The repository is qualified for reproducible deployment and offline deterministic initialization. Live production-equivalent testnet deployment is a later canonical roadmap gate and is not satisfied by repository simulation.
+
+For offline reproducible deployment, independently authenticated first-electorate approval and the canonical 19-operation activation order, see the [Governance cold-start runbook](cold-start.md). The current five-field Genesis approval is zero and **fails closed**; repository tests do not establish live chain activation.

@@ -1,0 +1,75 @@
+name: BC-0.5–0.8 Account Rooms, Sessions, Rules and Bot Qualification
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/core/routes.js'
+      - 'bong-goggles/web/core/app-shell.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/runtime-config.js'
+      - 'bong-goggles/web/app.js'
+      - 'bong-goggles/web/test/classic-rooms.test.js'
+      - 'bong-goggles/web/scripts/account-social-build-config.mjs'
+      - '.github/workflows/bc-0-5-classic-rooms.yml'
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/**'
+      - 'cmd/bong-goggles-social/**'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/test/classic-rooms.test.js'
+      - '.github/workflows/bc-0-5-classic-rooms.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bc-0-5-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify-rooms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Verify exact qualification SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Qualify rooms, deterministic rules, bounded bot decisions and replay recovery (PostgreSQL 16, race)
+        run: go test -race -tags account420_integration -count=1 ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+      - name: Static analysis and restricted service build
+        run: |
+          go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+          go build -o /tmp/bonggoggles-social ./cmd/bong-goggles-social
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualify targeted room, account and shared-games web regressions
+        run: |
+          node --check bong-goggles/web/core/classic-rooms.js
+          node --check bong-goggles/web/app.js
+          node --test bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/420id-login-ui.test.js bong-goggles/web/test/account-identity.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/account-social-build-config.test.js

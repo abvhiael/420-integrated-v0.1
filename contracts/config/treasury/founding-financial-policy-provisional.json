@@ -1,0 +1,82 @@
+{
+  "schema": "420-founding-financial-authority-provisional-v1",
+  "status": "CODE_CANDIDATE_UNFUNDED_VAULTS_PENDING_GENESIS_V4",
+  "modeledGenesisSupply": "42000000",
+  "token": "420",
+  "operations": {
+    "allocation": "4200000",
+    "singleRoutineLimit": "105000",
+    "exceptionalLimit": "420000",
+    "rolling30DayLimit": "840000",
+    "approval": "founding-administrator routine; any two of three founders exceptional",
+    "exceptionalNoticeHours": 48
+  },
+  "contingency": {
+    "allocation": "840000",
+    "singleIncidentLimit": "210000",
+    "rolling30DayLimit": "420000",
+    "approval": "any two distinct founders; three founders to waive 48-hour notice",
+    "eligiblePurposes": [
+      "infrastructure",
+      "application_recovery",
+      "security"
+    ]
+  },
+  "founderWallets": {
+    "administrator": null,
+    "andrew": null,
+    "janet": null
+  },
+  "developerCompensationSplitBps": {
+    "administrator": 5000,
+    "andrew": 2500,
+    "janet": 2500
+  },
+  "sponsoredValidator": {
+    "protocolOwnedCreditMax": "42000",
+    "fullySponsoredRewardShareToCommunityBps": 1000,
+    "principalReturnDestination": "CommunityValidatorReserve",
+    "sourceOfFunds": "CommunityValidatorReserve"
+  },
+  "retirement": {
+    "minimumEligibleIndependentValidatorOwners": 60,
+    "minimumVerifiedCommitteeMembers": 15,
+    "continuousDays": 30,
+    "onChainVerifier": "PENDING",
+    "civicHandoffRequired": true,
+    "unspentFundsDestination": "community_governed_reserve",
+    "irreversible": true
+  },
+  "codeStatus": "GOV-PRE-03 code candidate: native Treasury budgets, unique case/purpose-bound disbursements, conservative rolling issuance and release caps, per-incident contingency cap, authentic Treasury/Vault exact capability release, rollback and immutable settlement checks. Founder keys remain deferred to testnet. No authorized live V4 funding, codehash-pinned executor deployment, signed founder enrollment, consensus reward settlement or retirement custody sweep claimed.",
+  "genesisFunding": {
+    "sourceAllocationId": "protocol-reserve",
+    "sourcePredeploy": "0x0000000000000000000000000000000000000424",
+    "sourceTotal420": 8600000,
+    "foundingOperationsEarmark420": 4200000,
+    "contingencyEarmark420": 840000,
+    "unearmarkedProtocolReserve420": 3560000,
+    "treatment": "NON_ADDITIVE_WITHIN_PROTOCOL_RESERVE_UNFUNDED_VAULTS"
+  },
+  "enforcement": {
+    "scope": "NATIVE_420_ONLY_PENDING_GENESIS_V4",
+    "routinePaymentMustBeInitiatedAndReleasedBy": "FOUNDING_ADMINISTRATOR",
+    "exceptionalApproval": "ANY_TWO_DISTINCT_VERIFIED_FOUNDERS",
+    "contingencyEmergencyFastTrack": "ALL_THREE_VERIFIED_FOUNDERS",
+    "immutableReleaseExecutorBinding": "GENESIS_CONFIGURATOR_ONE_SHOT_REVIEWED_RUNTIME_CODEHASH",
+    "releaseExecutorDeployment": "NOT_BOUND_NOT_FUNDED",
+    "releaseExecutorAddress": null,
+    "releaseExecutorRuntimeCodeHash": null,
+    "disbursementPurposeCommitment": "keccak256(abi.encode(keccak256('420/FOUNDING/DISBURSEMENT/PURPOSE/V1'), block.chainid, address(foundingAuthority), paymentId, purpose, contingency, evidenceHash))",
+    "caseEvidenceHashUsage": "same incident must use the same independently reviewed evidenceHash across all recipients; source identifier publicly emitted",
+    "contingencyIncidentCumulative420": 210000,
+    "uniqueDisbursementPerPayment": true,
+    "foundingMarkExecutedRequiresActiveControllerRelease": true,
+    "treasuryDisbursementExactGrantRequired": true,
+    "vaultRouteExactGrantRequired": true,
+    "recipientNativeTransferAndVaultAccountingChecked": true,
+    "settlementAccounting": "ATOMIC_SINGLE_USE_RECORDED_BY_TREASURY_BUDGET_DISBURSEMENT_AND_VAULT",
+    "liveVaultsFunded": false,
+    "purposeEvidencePublishedAt": "PROPOSAL_BEFORE_48_HOUR_PUBLIC_NOTICE",
+    "noticeEvent": "FoundingPaymentNotice(bytes32,bytes32,bytes32,uint64,uint64,uint64,bool)"
+  }
+}

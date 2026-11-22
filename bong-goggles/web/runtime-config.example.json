@@ -20,6 +20,7 @@
     "accountSocial": false,
     "accountMessaging": false,
     "accountGames": false,
+    "classicRooms": false,
     "accountXP": false,
     "accountMonetization": false
   }

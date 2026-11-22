@@ -44,8 +44,8 @@ interface IRewardController420 {
 /// in canonical ValidatorRegistry + CommunityValidatorReserve + RewardController system contracts.
 contract Stake420 {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
-    uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
-    uint256 public constant MIN_OWNED_BOND = 21_000 ether;
+    uint256 public constant MAX_PROTOCOL_CREDIT = 42_000 ether;
+    uint256 public constant MIN_OWNED_BOND = 0;
     uint64 public constant ACTIVATION_DELAY_BLOCKS = 17_640;
     uint64 public constant EXIT_NOTICE_ROTATIONS = 1;
     uint64 public constant WITHDRAWAL_DELAY_BLOCKS = 105_840;

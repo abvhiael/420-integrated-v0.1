@@ -1,0 +1,95 @@
+{
+  "schema": "420-founding-genesis-integration-v1",
+  "status": "UNDEPLOYED_FAIL_CLOSED",
+  "genesis": {
+    "modeledTotalSupply": "42000000",
+    "network": null,
+    "chainId": null,
+    "approvedGenesisHash": null,
+    "exactRuntimeManifestHash": null,
+    "networkGenesisBlockHash": null
+  },
+  "budget": {
+    "operationsTokens": "4200000",
+    "contingencyTokens": "840000",
+    "supplyReconciled": false,
+    "operationsVaultId": null,
+    "contingencyVaultId": null,
+    "communityVaultId": null,
+    "allThreeFunded": false,
+    "fundingSourceAllocationId": "protocol-reserve",
+    "fundingSourcePredeploy": "0x0000000000000000000000000000000000000424",
+    "unearmarkedProtocolReserveTokens": "3560000",
+    "ledgerEarmarksReconciled": true
+  },
+  "founderWallets": {
+    "manifest": "contracts/config/founder-wallet-reservations.json",
+    "allThreeEip191ProofsVerified": false,
+    "claimRegistryAddress": null,
+    "allThreeOnChainClaimsVerified": false,
+    "allThreeOwnershipProofsVerified": false,
+    "claimRuntimeCodeHash": null
+  },
+  "founderFunding": {
+    "treasuryAuthorityAddress": null,
+    "communityCommitteeAddress": null,
+    "retirementVerifierAddress": null,
+    "communitySweepAddress": null,
+    "sponsorAuthorityAddress": null,
+    "fullySponsoredRewardBasisPoints": 1000,
+    "sponsorBondPrincipalReserve": "0x0000000000000000000000000000000000000425",
+    "sponsorRewardsDestination": "0x0000000000000000000000000000000000000426"
+  },
+  "developmentCompensation": {
+    "splitterAddress": null,
+    "developmentCompensationVaultAddress": null,
+    "immutableDevelopmentCompensationBeneficiaryIsSplitter": false,
+    "adminBps": 5000,
+    "andrewBps": 2500,
+    "janetBps": 2500
+  },
+  "retirement": {
+    "validatorEligibleOwnerMinimum": 60,
+    "committeeMemberMinimum": 15,
+    "continuousDays": 30,
+    "witnessProofsVerified": false,
+    "civicDualHouseExecutionRequired": true,
+    "communityVaultRouteGrantRegistered": false,
+    "unspentCustodyActuallyTransferred": false,
+    "retirementOperationalEvidence": null
+  },
+  "rewards": {
+    "communityBackingMethod": "CONSENSUS_NATIVE_ISSUANCE_OR_VERIFIED_BACKING_REQUIRED",
+    "consensusGatewaySupportsPayableRewardFunding": false,
+    "actualCommunitySettlementVerified": false,
+    "predeployRuntimeRequalified": false,
+    "consensusIndexerReconciliationRequalified": false
+  },
+  "governance": {
+    "postGenesisInitialElectorateEnrollmentOperational": false,
+    "genesisGraphCommitmentFrozen": false
+  },
+  "signoff": {
+    "signedGenesisPlanHash": null,
+    "exactHeadQualificationHash": null,
+    "independentSecurityReview": false
+  },
+  "founderVesting": {
+    "founderCount": 3,
+    "genesisFounderTotal420": "1000000",
+    "vestingPredeploy": "0x0000000000000000000000000000000000000427",
+    "lockedPredeploy420": "500000",
+    "liquidDirectToFounders420": "500000",
+    "founderSharesBps": [
+      5000,
+      2500,
+      2500
+    ],
+    "releaseCount": 13,
+    "releaseIntervalDays": 14,
+    "vestingCompletesAfterDays": 182,
+    "predeployActuallyFunded": false,
+    "liquidAllocationsActuallyFunded": false,
+    "newFrozenGenesisCommitmentApproved": false
+  }
+}

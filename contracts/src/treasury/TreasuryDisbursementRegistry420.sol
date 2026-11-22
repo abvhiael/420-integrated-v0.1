@@ -34,6 +34,8 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     TreasuryPolicyRegistry420 public immutable policy;
     TreasuryBudgetRegistry420 public immutable budgets;
 
+    address public immutable genesisConfigurator;
+    address public foundingAuthority;
     mapping(bytes32 => Disbursement) private _disbursements;
     mapping(address => mapping(uint256 => uint256)) public epochSpent;
 
@@ -58,6 +60,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     );
     event DisbursementExecuted(bytes32 indexed disbursementId, bytes32 vaultReleaseHash, address indexed executor);
     event DisbursementCancelled(bytes32 indexed disbursementId);
+    event FoundingAuthorityBound(address indexed authority);
 
     constructor(
         address timelock_,
@@ -69,6 +72,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         authorization = TreasuryAuthorization420(authorization_);
         policy = TreasuryPolicyRegistry420(policy_);
         budgets = TreasuryBudgetRegistry420(budgets_);
+        genesisConfigurator = msg.sender;
     }
 
     function systemName() external pure returns (string memory) {
@@ -77,6 +81,24 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
 
     function protocolVersion() external pure returns (uint32) {
         return 1;
+    }
+
+    function bindFoundingAuthority(address candidate) external {
+        if (msg.sender != genesisConfigurator || foundingAuthority != address(0)
+            || candidate.code.length == 0) revert ExecutionUnauthorized();
+        (bool ok, bytes memory data) = candidate.staticcall(abi.encodeWithSignature("disbursementRegistry()"));
+        if (!ok || data.length != 32 || abi.decode(data, (address)) != address(this)) revert ExecutionUnauthorized();
+        foundingAuthority = candidate;
+        emit FoundingAuthorityBound(candidate);
+    }
+
+    modifier onlyGovernanceOrFounding() {
+        if (msg.sender != governanceTimelock) {
+            if (msg.sender != foundingAuthority || foundingAuthority == address(0)) revert ExecutionUnauthorized();
+            (bool ok, bytes memory data) = foundingAuthority.staticcall(abi.encodeWithSignature("retired()"));
+            if (!ok || data.length != 32 || abi.decode(data, (bool))) revert ExecutionUnauthorized();
+        }
+        _;
     }
 
     function canonicalId(
@@ -111,7 +133,7 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         uint64 expiresAt,
         bytes32 civicActionHash,
         bytes32 purposeHash
-    ) external onlyGovernance {
+    ) external onlyGovernanceOrFounding {
         if (
             id == bytes32(0) || recipient == address(0) || amount == 0 || civicActionHash == bytes32(0)
                 || purposeHash == bytes32(0) || expiresAt <= notBefore
@@ -119,6 +141,17 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         ) revert InvalidDisbursement();
         if (_disbursements[id].exists) revert DisbursementExists();
 
+        // Founding budgets are purpose-limited: even general Civic scheduling authority
+        // cannot populate a founding budget with an unapproved payment and bypass its
+        // incident, recipient and rolling commitment checks.
+        if (foundingAuthority != address(0)) {
+            (bool ok, bytes memory response) = foundingAuthority.staticcall(
+                abi.encodeWithSignature("isFoundingBudget(bytes32)", budgetId)
+            );
+            if (!ok || response.length != 32) revert ExecutionUnauthorized();
+            if (abi.decode(response, (bool)) && msg.sender != foundingAuthority)
+                revert ExecutionUnauthorized();
+        }
         TreasuryBudgetRegistry420.Budget memory b = budgets.budget(budgetId);
         if (
             !budgets.isEffective(budgetId) || b.civicActionHash != civicActionHash || notBefore < b.validFrom
@@ -150,6 +183,23 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     ) external {
         Disbursement storage d = _get(id);
         if (d.state != State.SCHEDULED) revert InvalidState();
+        // General Treasury capability grants alone do NOT authorize forging the
+        // execution evidence of founding budgets. A founding budget is settled only
+        // by the pinned release executor while its controller is actively executing
+        // the exact disbursement. Ordinary Civic Treasury budgets are unchanged.
+        if (foundingAuthority != address(0)) {
+            (bool ok, bytes memory result) = foundingAuthority.staticcall(
+                abi.encodeWithSignature("isFoundingBudget(bytes32)", d.budgetId)
+            );
+            if (!ok || result.length != 32) revert ExecutionUnauthorized();
+            if (abi.decode(result, (bool))) {
+                (ok, result) = foundingAuthority.staticcall(
+                    abi.encodeWithSignature("isActiveFoundingRelease(bytes32,address)", id, msg.sender)
+                );
+                if (!ok || result.length != 32 || !abi.decode(result, (bool)))
+                    revert ExecutionUnauthorized();
+            }
+        }
         if (
             block.timestamp < d.notBefore || block.timestamp > d.expiresAt || vaultReleaseHash == bytes32(0)
                 || !budgets.isEffective(d.budgetId) || !policy.isAllowed(d.asset, d.amount)

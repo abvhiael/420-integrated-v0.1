@@ -14,8 +14,8 @@ interface ICommunityValidatorReserve420 {
 /// finality, randomness and slash adjudication. Economic balances here are backed by native 420 custody.
 contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420, I420System {
     uint256 public constant EFFECTIVE_BOND = 42_000 ether;
-    uint256 public constant MAX_PROTOCOL_CREDIT = 21_000 ether;
-    uint256 public constant MIN_OWNED_BOND = 21_000 ether;
+    uint256 public constant MAX_PROTOCOL_CREDIT = 42_000 ether;
+    uint256 public constant MIN_OWNED_BOND = 0;
     address public constant PROTOCOL_RESERVE = 0x0000000000000000000000000000000000000424;
 
     uint64 public constant EPOCH_BLOCKS = 420;
@@ -87,6 +87,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     mapping(bytes32 => bool) public blsPubkeyHashUsed;
     mapping(bytes32 => bool) public slashEvidenceApplied;
 
+    mapping(bytes32 => bool) public originallyFullySponsored;
     mapping(bytes32 => uint256) public pendingProtocolCredit;
     mapping(bytes32 => address) public pendingCreditBeneficiary;
 
@@ -101,6 +102,8 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     uint256 public totalOwnedWithdrawn;
 
     uint256 public eligibleValidatorCount;
+    uint64 public retirementEligiblePoolSince;
+    mapping(bytes32 => uint64) public retirementValidatorEligibleSince;
     uint16 public activeTarget;
     uint16 public pendingActiveTarget;
     uint8 public pendingTargetSnapshots;
@@ -233,6 +236,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             totalSlashed: 0,
             metadataCommitment: metadataCommitment
         });
+        originallyFullySponsored[validatorId] = (msg.value == 0 && credit == EFFECTIVE_BOND);
         ownerValidatorId[msg.sender] = validatorId;
         blsPubkeyHashUsed[pubkeyHash] = true;
         totalOwnedCustody += msg.value;
@@ -309,6 +313,7 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             else --eligibleValidatorCount;
         }
 
+        _updateRetirementEligibility(validatorId, wasEligible, nowEligible);
         v.status = newStatus;
         v.effectiveSlot = effectiveSlot;
         v.activationRotation = activationRotation;
@@ -367,6 +372,8 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
             if (nowEligible) ++eligibleValidatorCount;
             else --eligibleValidatorCount;
         }
+
+        _updateRetirementEligibility(validatorId, wasEligible, nowEligible);
 
         if (ownedSlashed != 0) {
             totalOwnedCustody -= ownedSlashed;
@@ -452,6 +459,38 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
     }
 
     function getValidator(bytes32 validatorId) external view returns (Validator memory) { return _validators[validatorId]; }
+
+    /// @notice Full protocol-funded owner eligibility for consensus reward allocation.
+    function isFullyProtocolSponsoredOwner(address owner) external view returns (bool) {
+        bytes32 id = ownerValidatorId[owner];
+        if (id == bytes32(0)) return false;
+        Validator storage v = _validators[id];
+        return v.owner == owner && originallyFullySponsored[id] && v.protocolCredit != 0
+            && v.status != Status.EXITED && v.status != Status.WITHDRAWABLE;
+    }
+
+    /// @notice On-chain evidence of uninterrupted validator eligibility.
+    /// Losing or changing out of the selectable pool resets the 30-day clock.
+    function retirementOwnerStatus(bytes32 validatorId)
+        external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince)
+    {
+        Validator storage v = _validators[validatorId];
+        owner = v.owner;
+        eligible = _countsAsEligible(v.status);
+        continuouslyEligibleSince = retirementValidatorEligibleSince[validatorId];
+    }
+
+    function _updateRetirementEligibility(bytes32 id, bool wasEligible, bool nowEligible) private {
+        if (wasEligible != nowEligible) {
+            if (nowEligible) retirementValidatorEligibleSince[id] = uint64(block.timestamp);
+            else retirementValidatorEligibleSince[id] = 0;
+        }
+        if (eligibleValidatorCount < MIN_BONDED_ELIGIBLE) {
+            retirementEligiblePoolSince = 0;
+        } else if (retirementEligiblePoolSince == 0) {
+            retirementEligiblePoolSince = uint64(block.timestamp);
+        }
+    }
 
     function custodyInvariant() external view returns (bool) {
         return address(this).balance >= totalOwnedCustody + totalProtocolCreditCustody;

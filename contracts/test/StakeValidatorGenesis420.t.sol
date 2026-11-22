@@ -4,6 +4,9 @@ pragma solidity ^0.8.24;
 import "../src/system/ValidatorRegistry.sol";
 import "../src/system/RewardController.sol";
 import "../src/system/CommunityValidatorReserve.sol";
+import "../src/system/CommunityRewardReserve.sol";
+import "../src/treasury/FoundingValidatorSponsorship420.sol";
+import "../src/governance/FoundingWalletClaims420.sol";
 import "../src/apps/Stake420.sol";
 import "../src/interfaces/genesis/ISystemSafety420.sol";
 import "../src/interfaces/genesis/Types420.sol";
@@ -13,6 +16,19 @@ interface VmStakeValidatorGenesis420 {
     function prank(address msgSender) external;
     function roll(uint256 newHeight) external;
     function deal(address account, uint256 newBalance) external;
+    function etch(address account, bytes calldata code) external;
+}
+
+/// @dev Synthetic canonical 0x0423 owner checker for reward accounting only.
+contract SponsoredOwnerProbe420 {
+    function isFullyProtocolSponsoredOwner(address owner) external pure returns (bool) {
+        return owner == address(0xABCD);
+    }
+}
+
+contract FoundingSponsorRetirementStatus420 {
+    bool public retired;
+    function setRetired(bool value) external { retired = value; }
 }
 
 contract StakeValidatorGenesis420Test {
@@ -49,8 +65,8 @@ contract StakeValidatorGenesis420Test {
 
     function testGenesisBondLifecycleAndDelegationPolicy() public view {
         require(registry.EFFECTIVE_BOND() == 42_000 ether, "effective bond");
-        require(registry.MIN_OWNED_BOND() == 21_000 ether, "owned floor");
-        require(registry.MAX_PROTOCOL_CREDIT() == 21_000 ether, "credit cap");
+        require(registry.MIN_OWNED_BOND() == 0, "owned floor");
+        require(registry.MAX_PROTOCOL_CREDIT() == 42_000 ether, "credit cap");
         require(registry.ACTIVATION_DELAY_BLOCKS() == 17_640, "activation delay");
         require(registry.EXIT_NOTICE_ROTATIONS() == 1, "exit notice");
         require(registry.WITHDRAWAL_DELAY_BLOCKS() == 105_840, "withdrawal delay");
@@ -81,6 +97,145 @@ contract StakeValidatorGenesis420Test {
         require(address(registry).balance == 42_000 ether, "real effective bond");
         require(registry.totalPendingProtocolCredit() == 0, "pending consumed");
         _assertSolvent();
+    }
+
+    function testFullySponsoredRewardCreditsCommunityTenPercent() public {
+        SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
+        vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
+        vm.roll(999);
+        address[] memory participants = new address[](1);
+        participants[0] = address(0xBEEF);
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(
+            uint64(block.number), address(0xABCD), participants, 100 ether, 50 ether, 0, 0
+        );
+        require(rewards.validatorAccrued(address(0xABCD)) == 90 ether, "operator nets 90 pct");
+        require(rewards.validatorAccrued(address(0xBEEF)) == 50 ether, "ordinary validator unaffected");
+        require(rewards.communityRewardAccrued() == 10 ether, "community accrues 10 pct");
+        require(rewards.validatorAccrued(rewards.COMMUNITY_REWARD_RESERVE()) == 10 ether,
+            "community reward destination accrued");
+        require(rewards.grossSecurityIssued() == 150 ether, "no issuance changes");
+    }
+
+    function testFullSponsorshipRequiresAuthenticatedOneShotBindingAndRetirement() public {
+        FoundingSponsorRetirementStatus420 status = new FoundingSponsorRetirementStatus420();
+        FoundingWalletClaims420 walletClaims = new FoundingWalletClaims420(
+            address(this), address(0xA22), address(0xA33), keccak256("approved-genesis")
+        );
+        FoundingValidatorSponsorship420 sponsor = new FoundingValidatorSponsorship420(
+            address(this), address(walletClaims), address(status), address(reserve), address(registry)
+        );
+        (bytes32 id, address operator) = _matchedId("approved-sponsor", 97);
+        bytes32 purpose = keccak256("approved-early-validator-partnership");
+
+        // No auto-created owner permission. Until the canonical Timelock installs
+        // an approved Genesis sponsor, the Reserve rejects even a valid proposal.
+        (bool beforeBinding,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!beforeBinding, "unbound sponsor funded validator");
+        reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
+        require(reserve.genesisFoundingSponsorAuthority() == address(sponsor), "binding");
+        (bool unclaimed,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!unclaimed, "unclaimed founder sponsored validator");
+        walletClaims.claimFounderWallet();
+        (bool rebind,) = address(reserve).call(
+            abi.encodeCall(reserve.bindGenesisFoundingSponsorAuthority, (address(this)))
+        );
+        require(!rebind, "one-shot authority rebind");
+
+        vm.prank(operator);
+        (bool forged,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!forged, "beneficiary could authorize their own sponsorship");
+
+        uint256 before = address(reserve).balance;
+        sponsor.sponsorFully(id, operator, purpose);
+        require(address(reserve).balance == before - 42_000 ether, "reserve funds moved");
+        require(registry.pendingProtocolCredit(id) == 42_000 ether, "actual collateral received");
+        (bool duplicate,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        );
+        require(!duplicate, "duplicate sponsorship");
+
+        vm.prank(operator);
+        registry.register{value: 0}(id, _pubkey(97), operator, purpose);
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor on-chain flag");
+        require(registry.custodyInvariant() && reserve.reserveInvariant(), "custody invariant");
+        status.setRetired(true);
+        (bytes32 anotherId, address another) = _matchedId("after-retire", 98);
+        (bool retiredSponsored,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (anotherId, another, purpose))
+        );
+        require(!retiredSponsored, "retired administrator funded validator");
+    }
+
+    function testCommunityRewardsPhysicallySettleOnlyWithConsensusBackedNative420() public {
+        SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
+        vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);
+        CommunityRewardReserve canonical = new CommunityRewardReserve(address(this));
+        vm.etch(rewards.COMMUNITY_REWARD_RESERVE(), address(canonical).code);
+        vm.roll(1001);
+        address[] memory participants = new address[](0);
+        vm.prank(SYSTEM_CALLER);
+        rewards.applyConsensusReward(uint64(block.number), address(0xABCD), participants, 100 ether, 0, 0, 0);
+        require(rewards.communityRewardAccrued() == 10 ether, "community accrual");
+
+        (bool zeroBacking,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (10 ether)));
+        require(!zeroBacking, "virtual unbacked accrual paid out");
+        vm.deal(address(0xBAD), 10 ether);
+        vm.prank(address(0xBAD));
+        (bool spoofedBacking,) = address(rewards).call{value: 10 ether}(
+            abi.encodeCall(rewards.fundCommunityRewardBacking, ())
+        );
+        require(!spoofedBacking, "outsider spoofed consensus funding");
+
+        vm.deal(SYSTEM_CALLER, 10 ether);
+        vm.prank(SYSTEM_CALLER);
+        rewards.fundCommunityRewardBacking{value: 10 ether}();
+        (bool tooMuch,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (11 ether)));
+        require(!tooMuch, "exceeded physically backed accrual");
+        uint256 initialCommunity = rewards.COMMUNITY_REWARD_RESERVE().balance;
+        rewards.settleCommunityRewards(4 ether);
+        rewards.settleCommunityRewards(6 ether);
+        require(rewards.COMMUNITY_REWARD_RESERVE().balance == initialCommunity + 10 ether,
+            "no actual native movement to community");
+        require(address(rewards).balance == 0, "native backing unaccounted");
+        require(rewards.communityRewardSettled() == 10 ether, "settlement accounted");
+        (bool twice,) = address(rewards).call(abi.encodeCall(rewards.settleCommunityRewards, (1 ether)));
+        require(!twice, "community reward overpaid");
+    }
+
+    function testFullySponsoredValidatorPrincipalIsNeverOwnedByOperator() public {
+        (bytes32 id, address operator) = _matchedId("full-sponsored", 77);
+        uint256 originalReserve = address(reserve).balance;
+        reserve.assignCredit(id, operator, 42_000 ether);
+        reserve.fundCredit(id);
+        vm.prank(operator);
+        registry.register{value: 0}(id, _pubkey(77), operator, keccak256("full-sponsored"));
+        ValidatorRegistry.Validator memory v = registry.getValidator(id);
+        require(v.owner == operator && v.ownedBond == 0 && v.protocolCredit == 42_000 ether, "full credit");
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor identity");
+        require(address(reserve).balance == originalReserve - 42_000 ether, "actual reserve deposit");
+        require(registry.totalProtocolCreditCustody() == 42_000 ether, "custody");
+        require(registry.custodyInvariant(), "solvent");
+
+        vm.deal(operator, 10_000 ether);
+        vm.prank(operator);
+        registry.replaceProtocolCredit{value: 10_000 ether}(id);
+        v = registry.getValidator(id);
+        require(v.ownedBond == 10_000 ether && v.protocolCredit == 32_000 ether, "replacement");
+        require(address(reserve).balance == originalReserve - 32_000 ether, "return to community");
+        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor share persists while credit remains");
+        vm.deal(operator, 32_000 ether);
+        vm.prank(operator);
+        registry.replaceProtocolCredit{value: 32_000 ether}(id);
+        require(!registry.isFullyProtocolSponsoredOwner(operator), "share ends when fully self funded");
+        require(address(reserve).balance == originalReserve, "entire sponsor credit returned");
+        require(registry.custodyInvariant(), "post-replacement solvency");
     }
 
     function testAssignedReserveCollateralCannotBeTreasurySpent() public {

@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+"""GOV-REC-6 fail-closed approval and artifact assertions (offline, no testnet)."""
+import importlib.util
+import pathlib
+import sys
+import unittest
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("gov_rec6", ROOT / "scripts/verify-governance-rec-6.py")
+rec6 = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(rec6)
+ZERO = "0x" + "00" * 32
+ROOT_HASH = "0x" + "aa" * 32
+VALIDATOR_HASH = "0x" + "bb" * 32
+PLAN_HASH = "0x" + "cc" * 32
+
+
+def approval(plan=ZERO, community=ZERO, community_weight=0, validator=ZERO, validator_weight=0):
+    return {"approvedPlanHash": plan, "communityRoot": community,
+            "communityTotalWeight": community_weight,
+            "validatorRoot": validator, "validatorTotalWeight": validator_weight}
+
+
+class GenesisApprovalBoundary(unittest.TestCase):
+    def test_unset_is_valid_for_offline_build_but_not_activation(self):
+        values, ready = rec6.approval_values(approval())
+        self.assertFalse(ready)
+        self.assertEqual(set(values.values()), {0})
+
+    def test_complete_materialization_is_structurally_ready(self):
+        values, ready = rec6.approval_values(approval(PLAN_HASH, ROOT_HASH, 2, VALIDATOR_HASH, 2))
+        self.assertTrue(ready)
+        self.assertEqual(values["validatorTotalWeight"], 2)
+
+    def test_single_and_partial_fields_cannot_enable_genesis(self):
+        candidates = [
+            approval(plan=PLAN_HASH),
+            approval(community=ROOT_HASH, community_weight=2),
+            approval(plan=PLAN_HASH, community=ROOT_HASH, community_weight=2,
+                     validator=VALIDATOR_HASH),
+            approval(plan=PLAN_HASH, community=ROOT_HASH, community_weight=2,
+                     validator_weight=2),
+        ]
+        for candidate in candidates:
+            with self.subTest(candidate=candidate), self.assertRaisesRegex(ValueError, "partial Genesis bootstrap approval"):
+                rec6.approval_values(candidate)
+
+    def test_malformed_hash_and_out_of_range_weight_rejected(self):
+        for candidate in [
+            approval(plan="0xdead"),
+            approval(community_weight=-1),
+            approval(community_weight=2**256),
+            approval(validator_weight=True),
+            approval(plan=PLAN_HASH, community=ROOT_HASH, community_weight=1,
+                     validator=VALIDATOR_HASH, validator_weight=2**256),
+        ]:
+            with self.subTest(candidate=candidate), self.assertRaises(ValueError):
+                rec6.approval_values(candidate)
+
+    def test_storage_layout_must_contain_exact_unpacked_field(self):
+        good = {"storage": [{"label": "approvedBootstrapPlanHash", "offset": 0, "slot": "4"}]}
+        self.assertEqual(rec6.storage_word(good, "approvedBootstrapPlanHash"), "0x" + "00"*31 + "04")
+        for bad in [
+            {"storage": []},
+            {"storage": [good["storage"][0], good["storage"][0]]},
+            {"storage": [{"label": "approvedBootstrapPlanHash", "offset": 1, "slot": "4"}]},
+        ]:
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                rec6.storage_word(bad, "approvedBootstrapPlanHash")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

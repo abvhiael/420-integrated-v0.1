@@ -18,6 +18,11 @@ export const TABLETOP_PIECES=Object.freeze({
 });
 export const TABLETOP_DICE=Object.freeze(['','⚀','⚁','⚂','⚃','⚄','⚅']);
 export const STANDARD_CARD_RANKS=Object.freeze(['A','2','3','4','5','6','7','8','9','10','J','Q','K']);
+// Explicit local visual asset manifest. No remote images or unqualified art.
+export const TABLETOP_ASSET_MANIFEST=Object.freeze({
+ format:'unicode-glyphs',suits:TABLETOP_SUITS,pieces:TABLETOP_PIECES,dice:TABLETOP_DICE,
+ externalUrls:Object.freeze([])
+});
 
 // An ordered data manifest, NOT an authoritative shuffled/dealt deck.
 // Engines decide game-specific card composition and seeded shuffle privately.
@@ -80,6 +85,15 @@ const deck=d=>shape(d,['count','label'])&&count(d.count)&&optionalText(d.label);
 const discard=d=>shape(d,['count','top'])&&count(d.count)&&
  (d.top===undefined||d.top===null||card(d.top))&&
  (d.count===0?!d.top:!d.top||d.count>0);
+const feedback=f=>shape(f,['message','tone'])&&text(f.message,320)&&
+ (f.tone===undefined||['info','warning','error'].includes(f.tone));
+const utcTimestamp=s=>typeof s==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(s)&&
+ Number.isFinite(Date.parse(s))&&new Date(s).toISOString()===s.replace('Z','.000Z');
+const deadline=d=>shape(d,['at','label'])&&utcTimestamp(d.at)&&optionalText(d.label,80);
+const localizedRules=r=>shape(r,['locale','title','paragraphs','verified'])&&r.verified===true&&
+ /^[a-z]{2,3}(?:-[A-Z]{2})?$/.test(r.locale)&&text(r.title,120)&&
+ Array.isArray(r.paragraphs)&&r.paragraphs.length>=1&&r.paragraphs.length<=30&&
+ r.paragraphs.every(s=>text(s,800));
 const PLAYER_KEYS=['name','score','team','controller','handCount','status'];
 const validPlayer=p=>shape(p,PLAYER_KEYS)&&text(p.name,160)&&
  (p.score===undefined||score(p.score))&&
@@ -94,7 +108,7 @@ export function validTabletopProjection(view){
   view.phase!=='active'||!Array.isArray(view.players)||view.players.length<2||
   view.players.length>6||!view.players.every(validPlayer))return false;
  const t=view.tabletop;
- if(!shape(t,['deck','discard','hand','rack','board','dice','scorecards','controls','turnSeat']))return false;
+ if(!shape(t,['deck','discard','hand','rack','board','dice','scorecards','controls','turnSeat','feedback','deadline','rules']))return false;
  const n=view.players.length;
  if(t.turnSeat!==undefined&&!seatIndex(t.turnSeat,n))return false;
  if(t.deck!==undefined&&!deck(t.deck))return false;
@@ -110,6 +124,9 @@ export function validTabletopProjection(view){
    !unique(t.scorecards,c=>c.seat)))return false;
  if(t.controls!==undefined&&(!filled(t.controls,24,action)||
    !unique(t.controls,x=>x.id)))return false;
+ if(t.feedback!==undefined&&!feedback(t.feedback))return false;
+ if(t.deadline!==undefined&&!deadline(t.deadline))return false;
+ if(t.rules!==undefined&&!localizedRules(t.rules))return false;
  return true;
 }
 const panel=(title,body,extra='')=>'<section class="game-kit__panel'+extra+'" aria-label="'+esc(title)+'"><h4>'+esc(title)+'</h4>'+body+'</section>';
@@ -179,7 +196,11 @@ export function renderPlayerSeats(players,turnSeat){
  if(!Array.isArray(players)||players.length<2||players.length>6||
   !players.every(validPlayer))return '';
  return '<ol class="game-kit__seats" aria-label="Player seats">'+players.map((p,i)=>
-  '<li class="game-kit__seat"'+(i===turnSeat?' aria-current="step"':'')+'>'+
+  '<li class="game-kit__seat" data-seat-position="'+
+  esc((players.length===4?['south','west','north','east']:
+   players.length===2?['south','north']:
+   players.length===3?['south','west','east']:[])[i]??'unassigned')+'"'+
+  (i===turnSeat?' aria-current="step"':'')+'>'+
   '<strong>Seat '+(i+1)+': '+esc(p.name)+'</strong>'+
   (p.controller?'<span>'+esc(p.controller==='bot'?'Computer':'Human')+'</span>':'')+
   (p.team===undefined?'':'<span>Team '+(p.team+1)+'</span>')+
@@ -208,6 +229,23 @@ export function renderGameControls(actions=[]){
    esc(a.reason??'Move submission not connected to an authoritative game')+'">'+esc(a.label)+'</button>').join(''):
    '<p>No actions available.</p>')+'</div>');
 }
+export function renderGameFeedback(f){
+ if(!feedback(f))return '';
+ return '<p class="game-kit__feedback game-kit__feedback--'+(f.tone??'info')+
+  '" role="'+(f.tone==='error'?'alert':'status')+'">'+esc(f.message)+'</p>';
+}
+// Server-authored ISO UTC deadline. No browser clock or speculative countdown.
+export function renderTurnDeadline(d){
+ if(!deadline(d))return '';
+ return panel('Turn timer','<p class="game-kit__deadline">'+esc(d.label??'Server deadline')+
+  ': <time datetime="'+esc(d.at)+'">'+esc(d.at.replace('T',' ').replace('Z',' UTC'))+
+  '</time></p>');
+}
+export function renderLocalizedRules(r){
+ if(!localizedRules(r))return '';
+ return panel(r.title,'<div class="game-kit__rules" lang="'+esc(r.locale)+'"><ol>'+
+  r.paragraphs.map(p=>'<li>'+esc(p)+'</li>').join('')+'</ol></div>');
+}
 export function renderSharedTabletop(view){
  if(!validTabletopProjection(view))return '<div class="games-screen__empty" role="status"><strong>Tabletop projection unavailable</strong><p>Only an authorized, seat-safe game projection can display shared components.</p></div>';
  const t=view.tabletop;
@@ -220,5 +258,8 @@ export function renderSharedTabletop(view){
   (t.scorecards?renderScorecards(t.scorecards):'')+
   (t.hand?renderCardHand(t.hand):'')+
   (t.rack?renderTileRack(t.rack):'')+
-  (t.controls?renderGameControls(t.controls):'')+'</div>';
+  (t.controls?renderGameControls(t.controls):'')+
+  (t.feedback?renderGameFeedback(t.feedback):'')+
+  (t.deadline?renderTurnDeadline(t.deadline):'')+
+  (t.rules?renderLocalizedRules(t.rules):'')+'</div>';
 }

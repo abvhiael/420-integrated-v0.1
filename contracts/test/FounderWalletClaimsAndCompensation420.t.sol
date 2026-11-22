@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 import "../src/governance/FoundingWalletClaims420.sol";
 import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
+import "../src/revenue/DevelopmentCompensationVault420.sol";
 
 interface VmFounderWallets420 {
     function prank(address) external;
@@ -13,20 +14,37 @@ contract FounderWalletTestReceiver420 {
     receive() external payable {}
 }
 
+contract FounderCompensationCapabilities420 {
+    address public immutable approvedSource;
+    constructor(address source) { approvedSource = source; }
+    function isAuthorized(address principal, bytes32, bytes32, bytes32, uint256)
+        external view returns (bool) { return principal == approvedSource; }
+}
 contract FounderCompensationTestToken420 {
     mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
     function mint(address to,uint256 amount) external { balanceOf[to]+=amount; }
+    function approve(address spender,uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender]=amount;return true;
+    }
+    function transferFrom(address source,address recipient,uint256 amount) external returns (bool) {
+        require(allowance[source][msg.sender]>=amount && balanceOf[source]>=amount,"insufficient");
+        allowance[source][msg.sender]-=amount;
+        balanceOf[source]-=amount;balanceOf[recipient]+=amount;return true;
+    }
     function transfer(address recipient,uint256 amount) external returns (bool) {
         require(balanceOf[msg.sender]>=amount,"insufficient");
-        balanceOf[msg.sender]-=amount;
-        balanceOf[recipient]+=amount;
-        return true;
+        balanceOf[msg.sender]-=amount;balanceOf[recipient]+=amount;return true;
     }
 }
-
 contract FounderCompensationDishonestToken420 {
     mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
     function mint(address to,uint256 amount) external { balanceOf[to]+=amount; }
+    function approve(address spender,uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender]=amount;return true;
+    }
+    function transferFrom(address,address,uint256) external pure returns (bool) { return true; }
     function transfer(address,uint256) external pure returns (bool) { return true; }
 }
 
@@ -49,9 +67,28 @@ contract FounderWalletClaimsAndCompensation420Test {
 
     FoundingWalletClaims420 internal claims;
     FoundingDeveloperCompensationSplitter420 internal splitter;
+    DevelopmentCompensationVault420 internal vault;
+    FounderCompensationCapabilities420 internal capabilities;
+    bytes32 internal constant APP_ID = keccak256("COMPENSATION_SOURCE_APPLICATION");
     function setUp() public {
         claims = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("signed-genesis-plan"));
         splitter = new FoundingDeveloperCompensationSplitter420(ADMIN, ANDREW, JANET);
+        capabilities = new FounderCompensationCapabilities420(address(this));
+        vault = new DevelopmentCompensationVault420(address(capabilities),address(splitter));
+        splitter.bindCompensationVault(address(vault));
+        require(vault.beneficiary()==address(splitter) && splitter.compensationVault()==address(vault),
+                "immutable vault/splitter deployment handshake");
+    }
+    function fundNative(bytes32 reference,uint256 amount) internal {
+        // Vault policy BPS 1000: gross=10x net sent to the immutable splitter.
+        vault.contributeNative{value:amount}(
+            APP_ID,reference,vault.policyId(),amount*10,1000
+        );
+    }
+    function fundToken(FounderCompensationTestToken420 token,bytes32 reference,uint256 amount) internal {
+        token.mint(address(this),amount);
+        token.approve(address(vault),amount);
+        vault.contributeToken(address(token),APP_ID,reference,vault.policyId(),amount*10,1000);
     }
 
     function testThreeFoundersClaimIndividuallyNoImpersonationOrDuplicate() public {
@@ -84,49 +121,121 @@ contract FounderWalletClaimsAndCompensation420Test {
     }
 
     function testNativeSplitIsAccumulativeAndWithdrawableOnlyByEachPayee() public {
-        vm.deal(address(this), 1001 ether);
-        (bool ok,) = address(splitter).call{value: 1001 ether}("");
-        require(ok, "funding");
-        require(splitter.claimableNative(ADMIN) == 500.5 ether, "admin 50");
-        require(splitter.claimableNative(ANDREW) == 250.25 ether, "andrew 25");
-        require(splitter.claimableNative(JANET) == 250.25 ether, "janet 25");
+        vm.deal(address(this), 1_200 ether);
+        fundNative(keccak256("native-revenue-1"),1001 ether);
+        require(splitter.totalNativeCredited()==1001 ether, "only authenticated native Vault revenue credited");
+        require(splitter.claimableNative(ADMIN)==500.5 ether, "admin 50");
+        require(splitter.claimableNative(ANDREW)==250.25 ether, "andrew 25");
+        require(splitter.claimableNative(JANET)==250.25 ether, "janet 25");
         vm.prank(address(0xBEEF));
-        (bool outsider,) = address(splitter).call(abi.encodeCall(splitter.claimNative, ()));
-        require(!outsider, "outsider withdrew");
-
+        (bool outsider,)=address(splitter).call(abi.encodeCall(splitter.claimNative, ()));
+        require(!outsider, "stranger cannot claim");
         vm.prank(ADMIN); splitter.claimNative();
         vm.prank(ANDREW); splitter.claimNative();
         vm.prank(JANET); splitter.claimNative();
-        require(address(splitter).balance == 0, "fully distributed");
-        vm.deal(address(this), 10 ether);
-        (ok,) = address(splitter).call{value: 10 ether}("");
-        require(ok, "second contribution");
-        require(splitter.claimableNative(ADMIN) == 5 ether, "admin subsequent accrual");
-        require(splitter.claimableNative(ANDREW) == 2.5 ether, "andrew subsequent accrual");
+        require(splitter.totalNativeClaimed()==1001 ether && address(splitter).balance==0,
+                "all compensated native actually paid");
+        fundNative(keccak256("native-revenue-2"),10 ether);
+        require(splitter.claimableNative(ADMIN)==5 ether
+            && splitter.claimableNative(ANDREW)==2.5 ether, "cumulative revenue split");
+        vm.prank(ADMIN);
+        (bool twice,)=address(splitter).call(abi.encodeCall(splitter.claimNative, ()));
+        require(twice, "new earned compensation must be claimable");
+        vm.prank(ADMIN);
+        (bool replay,)=address(splitter).call(abi.encodeCall(splitter.claimNative, ()));
+        require(!replay, "no repeated amount from same credited revenue");
+        require(splitter.administrator()==ADMIN && splitter.andrew()==ANDREW
+            && splitter.janet()==JANET, "beneficiaries immutable");
     }
 
-    function testTokenSplitUsesExactAssetTransfersAndRejectsFakeSuccess() public {
+    function testTokenSplitUsesExactVaultTransfersAndRejectsFakeSuccess() public {
         FounderCompensationTestToken420 token = new FounderCompensationTestToken420();
-        token.mint(address(splitter),101);
+        // Arbitrary token transfers (including possible Genesis grants) do
+        // NOT enter the application-revenue ledger.
+        token.mint(address(splitter),777);
+        require(splitter.claimableToken(address(token),ADMIN)==0, "unapproved token transfer counted");
+        fundToken(token,keccak256("token-revenue-1"),101);
+        require(splitter.totalTokenCredited(address(token))==101, "funded source not reconciled");
         require(splitter.claimableToken(address(token),ADMIN)==50,"admin token share");
         require(splitter.claimableToken(address(token),ANDREW)==25,"andrew token share");
-        require(splitter.claimableToken(address(token),JANET)==26,"janet rounding share");
+        require(splitter.claimableToken(address(token),JANET)==26,"janet remainder");
         vm.prank(ADMIN); splitter.claimToken(address(token));
         vm.prank(ANDREW); splitter.claimToken(address(token));
         vm.prank(JANET); splitter.claimToken(address(token));
         require(token.balanceOf(ADMIN)==50 && token.balanceOf(ANDREW)==25
-            && token.balanceOf(JANET)==26 && token.balanceOf(address(splitter))==0,
-            "three real token deliveries");
-        token.mint(address(splitter),100);
-        require(splitter.claimableToken(address(token),ADMIN)==50,"follow-on accrual");
+            && token.balanceOf(JANET)==26 && token.balanceOf(address(splitter))==777,
+            "only genuine Vault-received token amounts paid");
+        fundToken(token,keccak256("token-revenue-2"),100);
+        require(splitter.claimableToken(address(token),ADMIN)==50,"incremental token entitlement");
         FounderCompensationDishonestToken420 dishonest=new FounderCompensationDishonestToken420();
-        dishonest.mint(address(splitter),100);
+        dishonest.mint(address(this),100);
+        dishonest.approve(address(vault),100);
+        (bool fake,)=address(vault).call(
+            abi.encodeCall(vault.contributeToken,(address(dishonest),APP_ID,
+                keccak256("dishonest-token"),vault.policyId(),1000,1000))
+        );
+        require(!fake && splitter.totalTokenCredited(address(dishonest))==0,
+                "fake-success ERC20 was counted as revenue");
         vm.prank(ADMIN);
-        (bool faked,) = address(splitter).call(
+        (bool stolen,)=address(splitter).call(
             abi.encodeCall(splitter.claimToken,(address(dishonest)))
         );
-        require(!faked,"fake-success token stole developer payout accounting");
-        require(splitter.totalTokenClaimed(address(dishonest))==0,"failed transfer recorded as paid");
+        require(!stolen, "unearned dishonest-token claims");
+    }
+
+    function testVaultImmutableBindingAndDirectDepositsCannotMixGenesisGrants() public {
+        require(splitter.compensationVault()==address(vault),"one-shot vault binding missing");
+        require(vault.beneficiary()==address(splitter),"vault immutable beneficiary wrong");
+        DevelopmentCompensationVault420 other = new DevelopmentCompensationVault420(
+            address(capabilities),address(splitter));
+        (bool rebound,)=address(splitter).call(
+            abi.encodeCall(splitter.bindCompensationVault,(address(other)))
+        );
+        require(!rebound && splitter.compensationVault()==address(vault), "vault address mutable");
+        vm.deal(address(this),5 ether);
+        (bool direct,)=address(splitter).call{value:1 ether}("");
+        require(!direct && splitter.totalNativeCredited()==0,"direct Genesis transfer credited as developer revenue");
+        vm.deal(address(splitter),9 ether);
+        require(splitter.claimableNative(ADMIN)==0
+            && splitter.claimableNative(ANDREW)==0
+            && splitter.claimableNative(JANET)==0,
+            "involuntary native balance accepted as developer revenue");
+        (bool forged,)=address(splitter).call(
+            abi.encodeCall(splitter.recordVaultTokenCompensation,
+                (address(other),uint256(100),keccak256("fake"))))
+        );
+        require(!forged, "unapproved vault spoofed compensated token accounting");
+        // Protocol itself, not beneficiaries, selects the immutable revenue
+        // vault at construction. No founder-only unilateral destination changes.
+        vm.prank(ADMIN);
+        (bool adminRebound,)=address(splitter).call(
+            abi.encodeCall(splitter.bindCompensationVault,(address(other)))
+        );
+        require(!adminRebound, "admin unilaterally replaced vault");
+    }
+
+    function testRevenueContributionReplaysAndTokenCallbackReplaysRevertAtomically() public {
+        vm.deal(address(this),30 ether);
+        bytes32 ref=keccak256("revenue-replay");
+        fundNative(ref,10 ether);
+        (bool replay,)=address(vault).call{value:10 ether}(
+            abi.encodeCall(vault.contributeNative,(APP_ID,ref,vault.policyId(),100 ether,uint16(1000)))
+        );
+        require(!replay && splitter.totalNativeCredited()==10 ether
+            && address(splitter).balance==10 ether,"replayed revenue contribution credited twice");
+        FounderCompensationTestToken420 token=new FounderCompensationTestToken420();
+        fundToken(token,keccak256("token-replay"),100);
+        bytes32 contribution=vault.contributionId(address(this),APP_ID,keccak256("token-replay"));
+        (bool forged,)=address(splitter).call(
+            abi.encodeCall(splitter.recordVaultTokenCompensation,
+                (address(token),uint256(100),contribution))
+        );
+        require(!forged && splitter.totalTokenCredited(address(token))==100,
+                "direct or duplicate token receipt acknowledged");
+        vm.prank(JANET); splitter.claimToken(address(token));
+        vm.prank(JANET);
+        (bool doubleClaim,)=address(splitter).call(abi.encodeCall(splitter.claimToken,(address(token))));
+        require(!doubleClaim,"duplicate token payout");
     }
 
     function testWrongChainRejectedAndNoPrematureClaimState() public {
@@ -196,9 +305,8 @@ contract FounderWalletClaimsAndCompensation420Test {
     }
 
     function testOneWeiRemainderGoesToJanetAndCannotBeReclaimed() public {
-        vm.deal(address(this), 1);
-        (bool ok,) = address(splitter).call{value: 1}("");
-        require(ok, "dust");
+        vm.deal(address(this), 10);
+        fundNative(keccak256("1-wei-revenue"),1);
         require(splitter.claimableNative(ADMIN) == 0 && splitter.claimableNative(ANDREW) == 0, "rounding");
         require(splitter.claimableNative(JANET) == 1, "dust allocation");
         vm.prank(JANET); splitter.claimNative();

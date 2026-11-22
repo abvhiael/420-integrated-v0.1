@@ -90,7 +90,6 @@ func TestBC17ContestedTerminalRematchCanOnlyCreateOneLobby(t *testing.T){
  if r:=bc06Act(t,h,host,match.ID,"resign",match.Sequence+1,nil,bc06ActionID(t));r.Code!=200{
   t.Fatal("terminal match",r.Code,r.Body.String())
  }
- path:="/v1/classic-sessions/"+match.ID+"/rematch"
  const contenders=2
  type outcome struct{roomID string;err error;actor string}
  results:=make(chan outcome,contenders)

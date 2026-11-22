@@ -23,7 +23,7 @@ The 42,000,000 $420 modeled supply is unchanged. Actual mainnet addresses, verif
 
 ## Founders and compensation
 - Three wallets, immutable beneficiary shares: Founding Administrator 50%, Andrew 25%, Janet 25%. Addresses are required before deployment; vesting and lost-key recovery policy remain to be set.
-- This split applies to the **developer compensation fund/revenue routing**, not automatically to the separate ten-wallet/1,000,000-token core-contributor draft. It must not be changed with routine Treasury authority.
+- The three founders also share the **separate 1,000,000 $420 Genesis founder allocation** 50/25/25, with 500,000 liquid and 500,000 vested in 13 fortnightly releases. The independent 50/25/25 developer compensation revenue stream is not a second founder Genesis mint or a routine Treasury entitlement.
 - Committee is representative/proposal-drafting, not a veto on general community votes. Only safety/slashing/consensus/validator-wide stake rules invoke the Validator voting house; routine budgets and community membership remain Community controlled.
 
 ## Deployment and current implementation boundaries
@@ -34,7 +34,7 @@ The 42,000,000 $420 modeled supply is unchanged. Actual mainnet addresses, verif
 - The existing frozen GOV-REC-6 Governance bootstrapping model requires nonzero initial electorates. It **cannot** yet support the desired zero-membership, post-Genesis founder-populated startup. A separate Governance bootstrap constitutional revision is required; this draft does not claim it already exists.
 
 ## Separation from final Genesis economics
-Provisional allocations total 5,040,000 $420 (12% of the modeled supply) across Founding Operations and Contingency. Existing draft community/testnet, validator-credit and founder/core-contributor lines remain visible and require reconciliation to avoid double allocation. No unapproved token minting is authorized.
+The approved-size founding budgets total 5,040,000 $420 (12% of the modeled Genesis supply) as explicit **non-additive earmarks within the existing 8,600,000 $420 ProtocolReserve at 0x0424**: 4.2M Operations, 840K Contingency and 3.56M unearmarked reserve. The full 42M Genesis ledger still counts ProtocolReserve exactly once. Validator-credit (6.3M), Community Reward (2.1M), founder (1M), public distribution (12.6M), validator bootstrap (3M), Attention (4.2M) and Development (4.2M) remain untouched. Earmarking does not fund founding Vaults or grant spending access. Actual Vault grants, approved V4 source, settlement and identities remain release blocked.
 
 ## Candidate implementation continuation
 - Founding Treasury release now enforces **two layers** of rolling 30-day caps: reservation at `schedulePayment` and actual value movement at `executeApprovedRelease`. A release requires the real Disbursement registry to be marked EXECUTED with a matching Vault commitment before retaining the accounting changes.

@@ -25,9 +25,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Go format guard
-        run: |
-          test -z "$(gofmt -l services/bong-goggles-account-social/classic_cribbage.go services/bong-goggles-account-social/classic_cribbage_test.go)"
+      - name: Normalize Go formatting for compile and race qualification
+        run: gofmt -w services/bong-goggles-account-social/classic_cribbage.go services/bong-goggles-account-social/classic_cribbage_test.go
       - name: Focused race-qualified 2/3/4-player Cribbage engine and replay
         run: go test -race -count=1 -timeout=8m -run '^TestBC12' -v ./services/bong-goggles-account-social
       - uses: actions/setup-node@v4

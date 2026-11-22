@@ -108,6 +108,11 @@ python3 scripts/gov-pre-08/materialize-local-funding.py \
   --output "$RUNNER_TEMP/govpre08-step3-genesis.json" \
   --provenance "$RUNNER_TEMP/govpre08-step3-genesis-source.json"
 
+(
+  cd 420-indexer
+  npm ci --ignore-scripts --no-audit --no-fund
+  npm run build
+)
 for tag in a b; do
   if [ "$tag" = a ]; then port=18761; else port=18762; fi
   export GOV_PRE_08_RPC="http://127.0.0.1:$port"
@@ -131,6 +136,9 @@ for tag in a b; do
     --output "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  node scripts/gov-pre-08/qualify-step3-indexer.mjs \
+    --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-indexer-$tag.json"
   python3 scripts/gov-pre-08/test_step3.py
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \
     --verify-bundle "$RUNNER_TEMP/govpre08-step3-v4-a" --rpc "$GOV_PRE_08_RPC" \
@@ -183,6 +191,11 @@ assert graphs[0]["deterministicGraphDigestSha256"]==graphs[1]["deterministicGrap
 assert len(graphs[0]["actualProductionConstructorAddresses"])==14
 assert len(graphs[0]["localRegistryComponentIds"])==14
 assert len(graphs[0]["serviceDiscoveries"])==3
+indexed=[json.loads((p/f"govpre08-step3-indexer-{tag}.json").read_text()) for tag in "ab"]
+assert all(r["indexedLogs"]>=20 and r["sourceEmittersBound"]>=10 and
+           r["reorgRollbackAndRebuild"] and r["replayIdempotent"] and
+           r["wrongEmitterRejected"] and not r["postgresQualified"] for r in indexed)
+assert indexed[0]["normalizedReadModelDigest"]==indexed[1]["normalizedReadModelDigest"], "live Indexer RPC decoder/projection drift across independently funded chains"
 assert all(not g["approvedV4"] and not g["authenticFounderOwnersVerified"] for g in graphs)
 for tag in "ab":
     x = json.loads((p / f"govpre08-step3-recovery-{tag}.json").read_text())

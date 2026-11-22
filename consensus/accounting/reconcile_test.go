@@ -118,6 +118,7 @@ func fixtureReport(t *testing.T) (rec.CertifiedSnapshot, *fixtureSource, Index) 
         "communityRewardAccrued":"0","communityRewardBackingReceived":"0",
         "communityRewardSettled":"0",balance(Reward):"0",
         accrued(CommunityReward):"0",
+        balance(CommunityReward):"0",
         accrued(address(reward.Proposer)):"0",
         accrued(address(reward.Participants[0])):"0",
         accrued(address(reward.Participants[1])):"0",

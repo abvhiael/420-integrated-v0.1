@@ -1,0 +1,37 @@
+name: BC-1.2 Cribbage Deterministic Rules Engine
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_cribbage*.go'
+      - 'docs/games/classics/BC-1-2-*.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-1-2-cribbage-engine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cribbage-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Go format guard
+        run: |
+          test -z "$(gofmt -l services/bong-goggles-account-social/classic_cribbage.go services/bong-goggles-account-social/classic_cribbage_test.go)"
+      - name: Focused race-qualified 2/3/4-player Cribbage engine and replay
+        run: go test -race -count=1 -timeout=8m -run '^TestBC12' -v ./services/bong-goggles-account-social
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Frozen BC-1.1 rules specification regression
+        run: node --test bong-goggles/web/test/cribbage-rules-spec.test.js

@@ -1,0 +1,73 @@
+name: BC-1.6 Authenticated Cribbage Challenges and Social
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_match_social.go'
+      - 'services/bong-goggles-account-social/classic_match_social_integration_test.go'
+      - 'services/bong-goggles-account-social/migrations/009_classic_match_requests.sql'
+      - 'services/bong-goggles-account-social/classic_sessions_http.go'
+      - 'services/bong-goggles-account-social/classic_rooms.go'
+      - 'services/bong-goggles-account-social/store.go'
+      - 'bong-goggles/web/core/classic-cribbage-social.js'
+      - 'bong-goggles/web/core/cribbage-ui.js'
+      - 'bong-goggles/web/core/cribbage-route-runtime.js'
+      - 'bong-goggles/web/test/cribbage-social.test.js'
+      - 'docs/games/classics/BC-1-6-QUALIFICATION.md'
+      - '.github/workflows/bc-1-6-cribbage-social.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  social-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact head and focused Cribbage UI
+        working-directory: bong-goggles/web
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check core/classic-cribbage-social.js
+          node --check core/cribbage-route-runtime.js
+          node --check core/cribbage-ui.js
+          node --test test/cribbage-social.test.js test/cribbage-multiplayer.test.js test/cribbage-frontend.test.js
+  authenticated-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check exact head, schema and signed two-account 420ID flows
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -tags account420_integration -timeout=10m -run '^TestBC16' -v ./services/bong-goggles-account-social
+          go vet ./services/bong-goggles-account-social

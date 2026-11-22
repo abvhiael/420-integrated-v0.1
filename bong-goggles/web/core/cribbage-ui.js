@@ -93,7 +93,7 @@ function hand(v,session,state){
  const selected=new Set(state.selection??[]),legal=cribbageLegalMoves(session),turn=session.turnSeat===session.viewerSeat;
  const validPlay=new Set(legal.filter(x=>x.type==='play').map(x=>x.card));
  const discard=v.phase==='discard';
- const count=session.seatCount===3?1:2;
+ const count=session.seatCount===2?2:1;
  const ready=discard&&selected.size===count&&cribbageCanSubmit(session,{
   type:'discard',cards:v.hand.filter(id=>selected.has(id))
  });
@@ -221,7 +221,7 @@ export function bindCribbageDom(root,controller){
    return;
   }
   if(v.phase!=='discard')return;
-  const selected=new Set(controller.state.selection??[]),required=session.seatCount===3?1:2;
+  const selected=new Set(controller.state.selection??[]),required=session.seatCount===2?2:1;
   if(selected.has(id))selected.delete(id);else if(selected.size<required)selected.add(id);
   controller.emit({selection:[...selected]});
  });

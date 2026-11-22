@@ -80,7 +80,9 @@ game route or expose the Node hostname as a trusted login entry.
 ## 5. Acceptance and rollback
 
 Run the authoritative Node+real PostgreSQL workflow, Go Account Social tests,
-BongGoggles Web Verification and the uncredentialed live probe script.
+BongGoggles Web Verification and the uncredentialed live probe:
+`CHAOS_PUBLIC_ORIGIN=https://<the-verified-game-service>.onrender.com npm run smoke:live`
+from `services/bong-goggles-chaos` on a trusted operator machine.
 Then, with **two real, different 420ID accounts in different browsers**,
 create/join a private room, confirm per-account hidden hands and legal actions,
 test reconnect, 409 stale turn, 403 block, chat/report/mute, bot seat,

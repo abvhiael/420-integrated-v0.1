@@ -154,9 +154,15 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
  if !uuid.MatchString(viewer)||!uuid.MatchString(target)||!uuid.MatchString(requestID)||viewer==target{return empty,ErrInvalid}
  if _,e:=s.rule("cribbage","","");e!=nil{return empty,e}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
- if e=lockPeerPair(ctx,tx,viewer,target);e!=nil{return empty,e}
  digest:=matchRequestDigest("challenge",target)
+ // A reused request ID with changed intent must conflict even when the
+ // newly supplied target no longer exists. Recheck after the peer lock to
+ // serialize still-uncommitted concurrent first submissions.
  prior,e:=previousMatchRequest(ctx,tx,viewer,requestID,digest)
+ if e!=nil{return empty,e}
+ if prior!=""{_ = tx.Rollback();return s.Rooms.Get(ctx,viewer,prior)}
+ if e=lockPeerPair(ctx,tx,viewer,target);e!=nil{return empty,e}
+ prior,e=previousMatchRequest(ctx,tx,viewer,requestID,digest)
  if e!=nil{return empty,e}
  if prior!=""{_ = tx.Rollback();return s.Rooms.Get(ctx,viewer,prior)}
  blocked,e:=blockedBetween(ctx,tx,viewer,target)

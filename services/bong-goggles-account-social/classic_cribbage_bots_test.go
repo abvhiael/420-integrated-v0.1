@@ -152,3 +152,59 @@ func TestBC13MixedSeatSetupsAndFullBotMatches(t *testing.T){
   t.Logf("%d-seat bot match: actions=%d, winner=%d, scores=%v",n,len(result.Trace),*result.Winner,result.Scores)
  }
 }
+
+func TestBC13HumanSeatVersusComputerOpponentsToVictory(t *testing.T){
+ adapter:=bc13Adapter(t)
+ policies:=NewCribbageBotPolicies()
+ difficulties:=[]string{"easy","medium","hard"}
+ for _,count:=range []int{2,3,4}{
+  variant,_:=cribbageVariantFor(count)
+  seed:=bc13Seed(700+count)
+  room:=ClassicRoom{GameID:"cribbage",SeatCount:count}
+  seats:=make([]ClassicSeat,count)
+  seats[0]=ClassicSeat{
+   Index:0,Controller:"human",
+   Subject:"10000000-1111-4111-8111-111111111111",Team:variant.Teams[0],
+  }
+  for i:=1;i<count;i++{
+   seats[i]=ClassicSeat{Index:i,Controller:"bot",
+    Difficulty:difficulties[(i-1)%len(difficulties)],Team:variant.Teams[i]}
+  }
+  state,_,e:=adapter.InitialWithSeed(seed,room,seats)
+  if e!=nil{t.Fatal("mixed-room init",count,e)}
+  trace:=[]RuleTrace{}
+  observedBots:=map[int]bool{}
+  for step:=0;step<adapter.replayLimit();step++{
+   frame:=cribFrame(t,adapter,state)
+   if frame.Terminal{
+    replay,err:=adapter.Replay(seed,count,trace)
+    if err!=nil||!bytes.Equal(replay,state)||frame.Winner==nil||frame.Scores[*frame.Winner]<121{
+     t.Fatal("mixed human/bot replay or victory invalid",count,err)
+    }
+    if len(observedBots)!=count-1{t.Fatal("not all bot seats took turns",count,observedBots)}
+    t.Logf("mixed human/bot %d-seat match: %d accepted actions, winner=%d",count,len(trace),*frame.Winner)
+    break
+   }
+   legal,err:=adapter.LegalActions(state,frame.Turn)
+   if err!=nil||len(legal)<1{t.Fatal("missing legal action",count,err)}
+   choice:=legal[0] // Human may submit any action enumerated by the same rules adapter.
+   if frame.Turn!=0{
+    level:=seats[frame.Turn].Difficulty
+    policy,err:=policies.policy(level);if err!=nil{t.Fatal(err)}
+    limit,_,err:=botLimits(level);if err!=nil{t.Fatal(err)}
+    choice,err=adapter.ChooseMoveBounded(state,frame.Turn,level,policy,limit,time.Now().Add(1*time.Second))
+    if err!=nil{t.Fatal("bot failed legal decision",count,level,err)}
+    found:=false
+    for _,allowed:=range legal{if bytes.Equal(choice,allowed){found=true}}
+    if !found{t.Fatal("bot bypassed human legal action list")}
+    observedBots[frame.Turn]=true
+   }
+   next,_,_,_,err:=adapter.Apply(state,frame.Turn,choice)
+   if err!=nil{t.Fatal("mixed-session legal move rejected",count,err)}
+   trace=append(trace,RuleTrace{Sequence:int64(len(trace)+2),Seat:frame.Turn,
+    Action:choice,BeforeHash:RuleHash(state),AfterHash:RuleHash(next)})
+   state=next
+   if step==adapter.replayLimit()-1{t.Fatal("mixed match exceeded replay bound")}
+  }
+ }
+}

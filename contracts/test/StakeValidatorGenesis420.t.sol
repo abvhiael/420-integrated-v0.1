@@ -126,6 +126,24 @@ contract StakeValidatorGenesis420Test {
         _assertSolvent();
     }
 
+    function testInitialBondCompositionCannotArbitrarilyMixProtocolCredit() public {
+        (bytes32 id,address operator)=_matchedId("unapproved-credit-composition",146);
+        reserve.assignCredit(id,operator,40_000 ether);
+        reserve.fundCredit(id);
+        vm.deal(operator,2_000 ether);
+        vm.prank(operator);
+        (bool bypass,) = address(registry).call{value:2_000 ether}(
+            abi.encodeCall(registry.register,(id,_pubkey(146),operator,keccak256("not-21-21")))
+        );
+        require(!bypass,"unapproved 2K personal/40K matched credit created validator");
+        require(registry.pendingProtocolCredit(id)==40_000 ether,
+                "rejected registration consumed protocol-owned collateral");
+        require(registry.ownerValidatorId(operator)==bytes32(0),
+                "rejected composition reserved beneficiary identity");
+        registry.getValidator(id); // no registration side effects
+        _assertSolvent();
+    }
+
     function testFullySponsoredRewardCreditsCommunityTenPercent() public {
         SponsoredOwnerProbe420 probe = new SponsoredOwnerProbe420();
         vm.etch(address(0x0000000000000000000000000000000000000423), address(probe).code);

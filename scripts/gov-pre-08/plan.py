@@ -289,7 +289,13 @@ def make_candidate(root=ROOT, with_artifacts=True):
             require(all(isinstance(b,str) and b.startswith("0x") and len(b) > 4 and
                         re.fullmatch(r"0x[0-9a-fA-F]+",b) for b in (creation,runtime)),
                     "invalid unlinked Solidity artifact: " + name)
+            layout=artifact.get("storageLayout")
+            require(isinstance(layout,dict) and isinstance(layout.get("storage"),list)
+                    and isinstance(layout.get("types"),dict),
+                    "compiled storageLayout missing: "+name)
             item.update({
+                "storageLayoutSha256":digest(layout),
+                "constructorStorageVerified":False,
                 "creationTemplateSha256":hashlib.sha256(bytes.fromhex(creation[2:])).hexdigest(),
                 "runtimeTemplateSha256":hashlib.sha256(bytes.fromhex(runtime[2:])).hexdigest(),
                 "abiSha256":digest(artifact["abi"]),

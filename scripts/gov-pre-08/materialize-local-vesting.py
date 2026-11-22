@@ -15,6 +15,7 @@ import json
 import re
 import subprocess
 import urllib.request
+import time
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -96,7 +97,11 @@ def materialize(constructor_rpc_url,genesis_rpc_url,root=ROOT):
     tx=helper.call("eth_sendTransaction",[{
         "from":sender,"data":code+args,"gas":hex(12_000_000),
     }])
-    receipt=helper.call("eth_getTransactionReceipt",[tx])
+    receipt=None
+    for attempt in range(80):
+        receipt=helper.call("eth_getTransactionReceipt",[tx])
+        if receipt is not None: break
+        time.sleep(0.1)
     if not receipt or int(receipt["status"],16)!=1:
         mined=helper.call("eth_getBlockByNumber",[receipt["blockNumber"],False]) if receipt else None
         raise ValueError("real constructor EVM deployment failed: "+

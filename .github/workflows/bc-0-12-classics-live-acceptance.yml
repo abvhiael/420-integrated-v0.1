@@ -6,6 +6,10 @@ on:
         description: 'Exact canonical BC-1..BC-25 game ID; requires real game adapter and two authorized 420ID accounts'
         required: true
         type: string
+      rules_hash:
+        description: 'Exact 64-character deployed ruleset hash for this game'
+        required: true
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -18,6 +22,7 @@ jobs:
     # Production tests must never be triggered by a PR or scheduled job.
     env:
       BC12_GAME_ID: ${{ inputs.game_id }}
+      BC12_EXPECTED_RULES_HASH: ${{ inputs.rules_hash }}
       BC12_EXPECTED_SHA: ${{ github.sha }}
       BC12_ACCOUNT_A_COOKIE: ${{ secrets.BC12_ACCOUNT_A_COOKIE }}
       BC12_ACCOUNT_B_COOKIE: ${{ secrets.BC12_ACCOUNT_B_COOKIE }}
@@ -29,6 +34,7 @@ jobs:
           test "$REF_NAME" = 'refs/heads/main'
           test -n "$BC12_ACCOUNT_A_COOKIE"
           test -n "$BC12_ACCOUNT_B_COOKIE"
+          [[ "$BC12_EXPECTED_RULES_HASH" =~ ^[a-f0-9]{64}$ ]]
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}

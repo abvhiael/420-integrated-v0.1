@@ -49,6 +49,41 @@ func encoded(t *testing.T, name string, fields map[string]string, n uint64, hash
 	return model.LogRecord{}
 }
 
+// The accepted Geth native log archive supplies actual, order-sensitive payments;
+// none of these records are fabricated Ethereum transaction receipts.
+func rewardFixtureLogs(t *testing.T, reward *sys.RewardOutcome, hash string) []model.LogRecord {
+    t.Helper()
+    settlement, err := sys.DeriveRewardSettlement(*reward)
+    if err != nil { t.Fatal(err) }
+    out := []model.LogRecord{}
+    add := func(name string, fields map[string]string) {
+        out = append(out, encoded(t,name,fields,reward.BlockNumber,hash,uint64(len(out))))
+    }
+    pay := func(recipient,amount,kind string) {
+        if money(amount).Sign() != 0 {
+            add("NativeRewardPaid",map[string]string{
+                "blockNumber":fmt.Sprint(reward.BlockNumber),"recipient":recipient,
+                "kind":kind,"amount":amount,
+            })
+        }
+    }
+    pay(address(reward.Proposer),settlement.ProposerAmount.String(),"0")
+    for _,participant:=range reward.Participants {
+        pay(address(participant),settlement.PerParticipantAmount.String(),"1")
+    }
+    pay(AttentionTreasury,settlement.AttentionAmount.String(),"3")
+    pay(DevelopmentTreasury,settlement.DevelopmentAmount.String(),"4")
+    participantTotal:=new(big.Int).Mul(settlement.PerParticipantAmount,big.NewInt(int64(len(reward.Participants))))
+    add("RewardApplied",map[string]string{
+        "blockNumber":fmt.Sprint(reward.BlockNumber),"proposer":address(reward.Proposer),
+        "proposerAmount":settlement.ProposerAmount.String(),
+        "participantAmount":participantTotal.String(),
+        "attentionAmount":settlement.AttentionAmount.String(),
+        "developmentAmount":settlement.DevelopmentAmount.String(),
+    })
+    return out
+}
+
 type fixtureSource struct {
 	logs           []model.LogRecord
 	initial, final State
@@ -76,27 +111,30 @@ func fixtureReport(t *testing.T) (rec.CertifiedSnapshot, *fixtureSource, Index) 
 	root := [32]byte{3}
 	reward := &sys.RewardOutcome{BlockNumber: 1, ActiveCount: 15, Proposer: sys.Address{1}, Participants: []sys.Address{{2}, {3}}}
 	out := sys.FinalizedStakeOutcomes{Reward: reward}
-	ex, err := expected(out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log := encoded(t, "RewardApplied", ex[0].fields, 1, hex32(h), 0)
-	initial := State{"grossSecurityIssued": "0", "grossAttentionIssued": "0", "grossDevelopmentIssued": "0", "rewardAppliedCurrent": "0", accrued(address(reward.Proposer)): "0", accrued(address(reward.Participants[0])): "0", accrued(address(reward.Participants[1])): "0"}
+    logs:=rewardFixtureLogs(t,reward,hex32(h))
+    initial := State{
+        "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+        "rewardAppliedCurrent":"0","nativeRewardPaid":"0",
+        "communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+        "communityRewardSettled":"0",balance(Reward):"0",
+        accrued(CommunityReward):"0",
+        accrued(address(reward.Proposer)):"0",
+        accrued(address(reward.Participants[0])):"0",
+        accrued(address(reward.Participants[1])):"0",
+    }
 	final := State{}
 	for k, v := range initial {
 		final[k] = v
 	}
-	e, err := Decode(log)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = Apply(final, e, 1, reward); err != nil {
-		t.Fatal(err)
-	}
+    for _,log:=range logs {
+        e,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err=Apply(final,e,1,reward);err!=nil {t.Fatal(err)}
+    }
 	final["rewardAppliedCurrent"] = "1"
 	snap := rec.CertifiedSnapshot{Trust: rec.Trust{ChainID: 420, Execution: sys.SequenceAnchor{ChainID: 420, BlockHash: g}}, Anchor: sys.SequenceAnchor{ChainID: 420, ExecutionBlock: 1, BlockHash: h}, Head: ct.Checkpoint{Root: root}, Finalized: ct.Checkpoint{Root: [32]byte{7}}, Canonical: []rec.Record{{Consensus: ct.ConsensusBlockEnvelope{Header: ct.ConsensusBlock{ExecutionPayloadHash: h}}, Outcomes: out, Payload: eng.ExecutionPayloadV3{BlockNumber: "0x1", BlockHash: eng.Hash32(hex32(h))}}}}
-	index := Index{ChainID: 420, Height: 1, Hash: hex32(h), FinalizedHash: hex32(g), Blocks: map[uint64]string{0: hex32(g), 1: hex32(h)}, Logs: []model.LogRecord{log}}
-	return snap, &fixtureSource{logs: []model.LogRecord{log}, initial: initial, final: final}, index
+	index := Index{ChainID: 420, Height: 1, Hash: hex32(h), FinalizedHash: hex32(g), Blocks: map[uint64]string{0: hex32(g), 1: hex32(h)}, Logs: logs}
+	return snap, &fixtureSource{logs: logs, initial: initial, final: final}, index
 }
 func has(r Report, code string) bool {
 	for _, d := range r.Discrepancies {
@@ -203,19 +241,16 @@ func TestReplacementAccountingEqualsCleanCanonicalRebuild(t *testing.T) {
 	replacement.Canonical[0].Consensus.Header.ExecutionPayloadHash = hash
 	reward := replacement.Canonical[0].Outcomes.Reward
 	reward.Participants = reward.Participants[:1]
-	expectedEvents, err := expected(replacement.Canonical[0].Outcomes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	source.logs = []model.LogRecord{encoded(t, "RewardApplied", expectedEvents[0].fields, 1, hex32(hash), 0)}
+	source.logs = rewardFixtureLogs(t,reward,hex32(hash))
 	source.final = State{}
 	for k, v := range source.initial {
 		source.final[k] = v
 	}
-	e, _ := Decode(source.logs[0])
-	if err = Apply(source.final, e, 1, reward); err != nil {
-		t.Fatal(err)
-	}
+    for _,log:=range source.logs {
+        e,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err=Apply(source.final,e,1,reward);err!=nil {t.Fatal(err)}
+    }
 	source.final["rewardAppliedCurrent"] = "1"
 	index.Hash = hex32(hash)
 	index.Blocks[1] = hex32(hash)

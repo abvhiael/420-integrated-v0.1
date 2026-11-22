@@ -43,6 +43,14 @@ func (h *Handler) classicRoomsHTTP(ctx context.Context,w http.ResponseWriter,r *
   room,e:=h.Rooms.Get(ctx,viewer,id);if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
  }
+ if len(parts)==2&&parts[1]=="presence"{
+  if !h.ClassicCommunicationsEnabled{deny(w,404);return}
+  if r.Method!="GET"&&r.Method!="POST"{deny(w,405);return}
+  if r.Method=="POST"&&strictJSON(r,&struct{}{})!=nil{deny(w,400);return}
+  state,e:=h.Rooms.Presence(ctx,viewer,id,r.Method=="POST")
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"presence":state,"onChain":false,"wager":false,"rewards":false,"playable":false});return
+ }
  if len(parts)==2&&parts[1]=="change"&&r.Method=="POST"{
   var req RoomChange
   if strictJSON(r,&req)!=nil{deny(w,400);return}

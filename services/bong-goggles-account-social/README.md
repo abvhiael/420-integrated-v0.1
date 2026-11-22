@@ -676,3 +676,49 @@ bot execution, PostgreSQL replay, timeout, bot terminal results, restart
 and public-journal redaction. The existing BC-0.x exact-head workflow runs
 the tagged PostgreSQL 16 race tests, vet/build and relevant web regressions.
 No production service activation, ruleset release, or migration is included.
+
+## BC-0.10 — 420ID Classic room communications (opt-in)
+
+Migration 008_classic_communications.sql adds the shared PostgreSQL classic_room_presence
+lease table, keyed by authoritative room and authenticated 420ID subject. Only
+the serving process stamps last_seen; the 20-second expiry uses database time,
+so presence works across devices, replicas and service restarts. Presence
+cannot authorize a match, a move, a result or access to hidden cards.
+
+Apply the operator-only migration via SOCIAL420_MIGRATION_DATABASE_URL,
+then grant only these runtime privileges:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_room_presence TO bonggoggles_social_runtime;
+    GRANT UPDATE(last_seen) ON bg_account_social.classic_room_presence TO bonggoggles_social_runtime;
+
+Do not grant whole-table UPDATE, DELETE, DDL or room/subject column updates.
+ReadyClassicCommunications checks these least-privilege grants for
+SOCIAL420_CLASSIC_COMMUNICATIONS=restricted-acceptance. The server
+requires BC-0.5 rooms and BC-0.6 sessions to be activated already.
+Unknown activation values fail startup. The independent Cloudflare flag
+BG_CLASSIC_COMMUNICATIONS_ACTIVATION=true requires both
+BG_ACCOUNT_SOCIAL_ACTIVATION=true and BG_CLASSIC_ROOMS_ACTIVATION=true.
+Both server and browser switches default to disabled.
+
+A currently seated human participant may read GET
+/v1/classic-rooms/:roomId/presence or renew with POST to that route using
+an empty JSON object. Every request checks the authoritative 420ID cookie,
+host/same-origin, CSRF on writes and live block/seat policy. The reply
+includes only human seat indices and online booleans, not account IDs,
+device identifiers, source IPs or concealed game state. Public visitors,
+unaccepted invitees and blocked participants receive no presence details.
+
+The visible-tab browser uses five-second authenticated polling as a
+proxy-safe equivalent to push and reconciles the room revision with the
+durable Classic session sequence. BC-0.6 authenticated session snapshots,
+public /events?after=N journal and bounded /stream SSE already support
+replay and resumable transport. Cursor gaps recover from a verified
+per-seat snapshot; all notifications depend on committed server turn state.
+Reconnecting suppresses cached private room details and resumes after a
+network recovery, refresh or tab return. These are in-app turn notices,
+not operating-system push notifications. The browser discards the
+privateView payload after deriving authorized turn metadata.
+
+Game-specific legal moves, scoring, real AI and live 420ID play-to-completion
+remain separate release gates. No token, wager, fabricated result, wallet
+dependency or production games activation is introduced by BC-0.10.

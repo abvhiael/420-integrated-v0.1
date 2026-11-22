@@ -10,6 +10,7 @@ import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-countr
 import {ChaosRoomsClient} from './core/chaos-online.js';
 import {bindChaosOnline} from './core/chaos-online-bindings.js';
 import {bindClassicRoomsDom} from './core/classic-room-bindings.js';
+import {cc} from './core/classic-live-bindings.js';
 import {configureChaosComputerSeats,isChaosComputer,advanceChaosComputerTurns} from './core/chaos-computer.js';
 import {CHAOS_TAB_KEY,CHAOS_DEVICE_KEY,beginChaosJournal,appendChaosJournal,readChaosStorage,writeChaosStorage,removeChaosStorage} from './core/chaos-save.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
@@ -28,7 +29,7 @@ import {AccountMonetizationController} from './core/account-monetization.js';
 import {normalizeViewPreferences,DEFAULT_VIEW_PREFERENCES,documentIndexingPolicy} from './core/settings-public.js';
 const root=document.querySelector('#app');
 const telemetry=createTelemetrySink({emit:(event)=>console.info('[bg-web]',event)});
-let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader=null,publicFeedReader=null,socialController=null,identityController=null,classicRoomsController=null,accountExtras=null,xpController=null,monetizationController=null;
+let runtimeConfig=null,walletController=null,walletView=null,indexerStatusReader=null,publicFeedReader=null,socialController=null,identityController=null,classicRoomsController=null,classicLive=null,accountExtras=null,xpController=null,monetizationController=null;
 let indexerStatus={status:'checking',data:null};
 let publicFeedProjection=null,publicFeedNotice=null;
 let viewPreferences=DEFAULT_VIEW_PREFERENCES;
@@ -59,7 +60,7 @@ async function signOut420ID(){
  const pending=identityController.logout();
  socialController?.invalidate();xpController?.invalidate();monetizationController?.invalidate();
  for(const c of Object.values(accountExtras??{}))c.invalidate();
- classicRoomsController?.invalidate();
+ classicRoomsController?.invalidate();classicLive?.invalidate();
  try{await pending;}catch{renderCurrent('420ID sign-out could not be confirmed. Recheck your session before continuing.');return;}
  if(isAccountSocialSurface()&&socialController?.client.enabled)void socialController.refresh();
  if(isClassicRoomSurface()&&classicRoomsController?.client.enabled)void refreshClassicRooms();
@@ -75,7 +76,7 @@ function bindAccountActions(){
 }
 function roomRoute(){return resolveRoute(window.location.pathname);}
 function isClassicRoomSurface(){return ['classic-rooms','classic-room'].includes(roomRoute().id);}
-function refreshClassicRooms(){return classicRoomsController?.refresh(roomRoute().roomId??null);}
+function refreshClassicRooms(){return classicLive?.refresh(roomRoute().roomId??null)??classicRoomsController?.refresh(roomRoute().roomId??null);}
 function bindClassicRooms(){bindClassicRoomsDom(root,classicRoomsController,{isSurface:isClassicRoomSurface(),onRefresh:refreshClassicRooms,onRouteChange,history:window.history});}
 function currentAccountExtra(){
  if(window.location.pathname==='/account/messages')return accountExtras?.messages;
@@ -295,7 +296,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
  const scrolled=existingLog?{top:existingLog.scrollTop,nearBottom:existingLog.scrollHeight-existingLog.scrollTop-existingLog.clientHeight<36}:null;
  root.innerHTML=renderApplicationShell({pathname:window.location.pathname,walletView,bootstrapState:bootstrap.state,appOrigin:runtimeConfig.appOrigin,walletHref,explorerHref:runtimeConfig?.explorerUrl??null,announcement:message??(window.location.pathname==='/'&&runtimeConfig.features.accountSocial===true?null:((window.location.pathname==='/'?publicFeedNotice:null)??indexerNotice())),feedProjection:window.location.pathname==='/'?publicFeedProjection:null,viewPreferences,walletSettingsUrl:runtimeConfig.walletUrl,accountSocialState:socialController?.state,accountSocialEnabled:runtimeConfig.features.accountSocial===true,
  accountIdentityState:identityController?.state,accountIdentityEnabled:runtimeConfig.features.accountSocial===true,
- classicRoomsState:classicRoomsController?.state,classicRoomsEnabled:runtimeConfig.features.classicRooms===true,
+ classicRoomsState:classicRoomsController?.state,classicRoomsEnabled:runtimeConfig.features.classicRooms===true,classicCommunicationsState:classicLive?.state,
  accountMessagesState:accountExtras?.messages.state,accountGamesState:accountExtras?.games.state,
  accountMessagingEnabled:runtimeConfig.features.accountMessaging===true,accountGamesEnabled:runtimeConfig.features.accountGames===true,
  accountXPState:xpController?.state,accountXPEnabled:runtimeConfig.features.accountXP===true,
@@ -333,7 +334,7 @@ function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(
 function onRouteChange(){
  restoreChaosOnGameRoute();
  chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
- monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
+ monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();classicLive?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
  publicFeedReader?.invalidate();publicFeedProjection=null;publicFeedNotice=null;renderCurrent();
  if(window.location.pathname==='/classics/cross-country-chaos'&&chaosOnline)void chaosOnline.refresh({preserve:false});
  if(window.location.pathname==='/')void refreshPublicFeed();
@@ -344,11 +345,11 @@ function onRouteChange(){
  if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();
  const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();
 }
-async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});chaosOnline=new ChaosRoomsClient({onChange:()=>{if(window.location.pathname==='/classics/cross-country-chaos')renderCurrent();}});accountExtras={
+async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});classicLive=cc({rooms:classicRoomsController,enabled:runtimeConfig.features.classicCommunications,route:roomRoute,onChange:renderCurrent,windowObject:window,documentObject:document});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});chaosOnline=new ChaosRoomsClient({onChange:()=>{if(window.location.pathname==='/classics/cross-country-chaos')renderCurrent();}});accountExtras={
  messages:new AccountExtrasController({kind:'messages',enabled:runtimeConfig.features.accountMessaging===true,
  onChange:()=>{if(window.location.pathname==='/account/messages')renderCurrent();}}),
  games:new AccountExtrasController({kind:'games',enabled:runtimeConfig.features.accountGames===true,
  onChange:()=>{if(window.location.pathname==='/account/games')renderCurrent();}})
 };const provider=discover420Wallet(window);if(provider){walletController=new WalletSessionController420({provider,expectedChainId:runtimeConfig.chainId,storage:window.sessionStorage,onChange:(next)=>{walletView=next;}});try{walletView=await walletController.snapshot();}catch(error){telemetry.event('wallet_snapshot_failed',{code:error?.code,message:error?.message});}}const view=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});telemetry.event('bootstrap',{state:view.state,environment:runtimeConfig.environment});applyViewPreferences();restoreChaosOnGameRoute();renderCurrent();if(window.location.pathname==='/classics/cross-country-chaos')void chaosOnline.refresh({preserve:false});if(publicFeedReader.enabled)void refreshPublicFeed();if(identityController.client.enabled)void identityController.refresh();if(isClassicRoomSurface()&&classicRoomsController.client.enabled)void refreshClassicRooms();if(isAccountSocialSurface()&&socialController.client.enabled)void socialController.refresh();if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void xpController.refresh();if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();void indexerStatusReader.read().then(result=>{if(result.status==='stale')return;indexerStatus=result;telemetry.event('indexer_http_diagnostic',{status:result.status});renderCurrent();});}catch(error){telemetry.event('bootstrap_error',{message:error?.message});render({state:'degraded',detail:'Bong Goggles could not load a safe runtime configuration.'});}}
 window.addEventListener('error',(event)=>telemetry.event('window_error',{message:event.message}));window.addEventListener('unhandledrejection',(event)=>telemetry.event('unhandled_rejection',{reason:String(event.reason)}));root.addEventListener('click',(event)=>{navigateWithoutReload(event,{windowObject:window,onNavigate:onRouteChange});});window.addEventListener('popstate',onRouteChange);window.addEventListener('visibilitychange',()=>{if(!document.hidden){refreshGreeting();if(identityController?.client.enabled)void identityController.refresh({quiet:true});if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}});window.setInterval(()=>{if(!document.hidden){refreshGreeting();if(publicFeedReader?.enabled&&!socialController?.client.enabled)void refreshPublicFeed();}},15_000);
-window.setInterval(()=>{if(!document.hidden&&identityController?.client.enabled)void identityController.refresh({quiet:true});},60_000);window.setInterval(()=>{if(!document.hidden&&window.location.pathname==='/classics/cross-country-chaos'&&!chaosOnline?.busy&&chaosOnline?.state.room?.id)void chaosOnline.open(chaosOnline.state.room.id,{silent:true});},4_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();
+window.setInterval(()=>{if(!document.hidden&&identityController?.client.enabled)void identityController.refresh({quiet:true});},60_000);window.setInterval(()=>{if(!document.hidden&&window.location.pathname==='/classics/cross-country-chaos'&&!chaosOnline?.busy&&chaosOnline?.state.room?.id)void chaosOnline.open(chaosOnline.state.room.id,{silent:true});},4_000);window.addEventListener('beforeunload',()=>{publicFeedReader?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();classicLive?.destroy();xpController?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();indexerStatusReader?.invalidate();walletController?.destroy();});start();

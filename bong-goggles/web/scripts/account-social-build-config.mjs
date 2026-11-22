@@ -3,8 +3,13 @@
 // production launch, or account monetization.
 export const ACCOUNT_SOCIAL_BUILD_FLAG = 'BG_ACCOUNT_SOCIAL_ACTIVATION';
 export const CLASSIC_ROOMS_BUILD_FLAG = 'BG_CLASSIC_ROOMS_ACTIVATION';
+export const CLASSIC_COMMUNICATIONS_BUILD_FLAG = 'BG_CLASSIC_COMMUNICATIONS_ACTIVATION';
 
-export function withAccountSocialBuildFlags(example, rawValue, roomsValue) {
+export function withAccountSocialBuildFlags(example, rawValue, roomsValue, communicationsValue) {
+  if (communicationsValue !== undefined && communicationsValue !== 'true' && communicationsValue !== 'false')
+    throw new Error('BG_CLASSIC_COMMUNICATIONS_ACTIVATION must be exactly true or false');
+  if (communicationsValue === 'true' && (rawValue !== 'true' || roomsValue !== 'true'))
+    throw new Error('Classic communications require active 420ID rooms');
   if (roomsValue !== undefined && roomsValue !== 'true' && roomsValue !== 'false') {
     throw new Error('BG_CLASSIC_ROOMS_ACTIVATION must be exactly true or false');
   }
@@ -28,6 +33,7 @@ export function withAccountSocialBuildFlags(example, rawValue, roomsValue) {
       accountMessaging: enabled,
       accountGames: enabled,
       classicRooms: enabled && roomsValue === 'true',
+      classicCommunications: enabled && roomsValue === 'true' && communicationsValue === 'true',
       accountXP: enabled,
       accountMonetization: false
     }

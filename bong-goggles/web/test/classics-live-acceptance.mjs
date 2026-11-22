@@ -10,8 +10,10 @@ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const cookie=/^([A-Za-z0-9_-]{1,80})=([^;\s]{1,4096})$/;
 const game=process.env.BC12_GAME_ID;
 const sha=process.env.BC12_EXPECTED_SHA;
-if(!CLASSIC_ROADMAP.some(x=>x.id===game)||!/^[a-f0-9]{40}$/.test(sha||''))
- throw Error('BC-0.12 live denied: unknown game or unpinned source SHA');
+const rulesHash=process.env.BC12_EXPECTED_RULES_HASH;
+if(!CLASSIC_ROADMAP.some(x=>x.id===game)||!/^[a-f0-9]{40}$/.test(sha||'')||
+ !/^[a-f0-9]{64}$/.test(rulesHash||''))
+ throw Error('BC-0.12 live denied: unknown game, unpinned source or ruleset hash');
 const values=[process.env.BC12_ACCOUNT_A_COOKIE,process.env.BC12_ACCOUNT_B_COOKIE];
 const keys=values.map(value=>cookie.exec(value??''));
 if(keys.some(x=>!x)||keys[0][1]!==keys[1][1]||keys[0][2]===keys[1][2])
@@ -62,21 +64,24 @@ try{
  for(let i=0;i<2;i++){
   const result=await request(pages[i],'/social-api/v1/classic-sessions/'+mid.sessionId);
   if(result.status!==200||result.data?.session?.sequence!==mid.sequence||
-     result.data.session.viewerSeat!==i||result.data.session.status!=='active')
+     result.data.session.viewerSeat!==i||result.data.session.status!=='active'||
+     result.data.session.gameId!==game||result.data.session.rulesHash!==rulesHash)
    throw Error('BC-0.12 live denied: unverified per-seat midgame snapshot');
  }
  // Actual page reload and cold per-seat server resumption, not local mocks.
  for(const page of pages){
   await page.reload({waitUntil:'domcontentloaded',timeout:30_000});
   const s=await request(page,'/social-api/v1/classic-sessions/'+mid.sessionId);
-  if(s.status!==200||s.data?.session?.sequence!==mid.sequence||s.data.session.status!=='active')
+  if(s.status!==200||s.data?.session?.sequence!==mid.sequence||s.data.session.status!=='active'||
+   s.data.session.gameId!==game||s.data.session.rulesHash!==rulesHash)
    throw Error('BC-0.12 live denied: session did not survive device reload');
  }
  await adapter.finishAfterReload({...io,sessionId:mid.sessionId,expectedSequence:mid.sequence});
  const final=[];
  for(const page of pages){
   const r=await request(page,'/social-api/v1/classic-sessions/'+mid.sessionId);
-  if(r.status!==200||r.data?.session?.status!=='finished'||r.data?.session?.sequence<=mid.sequence)
+  if(r.status!==200||r.data?.session?.status!=='finished'||r.data?.session?.sequence<=mid.sequence||
+   r.data.session.gameId!==game||r.data.session.rulesHash!==rulesHash)
    throw Error('BC-0.12 live denied: no authoritative terminal match');
   final.push(r.data.session);
  }
@@ -89,5 +94,5 @@ try{
    throw Error('BC-0.12 live denied: incomplete server-side '+difficulty+' AI match');
  }
  console.log('BC-0.12 LIVE VERIFIED two authenticated separate accounts, desktop/mobile, reload, terminal, three AI tiers',JSON.stringify({
-  game,sourceSha:sha,terminalSequence:final[0].sequence,botLevels:3}));
+  game,sourceSha:sha,rulesHash,terminalSequence:final[0].sequence,botLevels:3}));
 }finally{for(const c of contexts)await c.close();await browser.close()}

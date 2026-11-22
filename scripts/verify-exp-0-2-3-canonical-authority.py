@@ -91,13 +91,7 @@ def main():
     # Compare ALL frozen system address fields, reject any unrecognized metadata,
     # and independently bind every annotated founder slot to its reserved manifest.
     founder_annotations = {"founder_wallet_reservations", "founder_wallet_slots"}
-    extra = set(addr_b) - set(addr_a)
-    missing = set(addr_a) - set(addr_b)
-    system_maps_match = (
-        not missing
-        and extra == founder_annotations
-        and all(addr_a[key] == addr_b[key] for key in addr_a)
-    )
+    system_maps_match = addr_a == addr_b
     if not system_maps_match:
         errors.append("frozen system-address maps diverge")
     reservations_path = addr_b.get("founder_wallet_reservations")

@@ -138,7 +138,13 @@ for tag in a b; do
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   node scripts/gov-pre-08/qualify-step3-indexer.mjs \
     --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
-    --output "$RUNNER_TEMP/govpre08-step3-indexer-$tag.json"
+    --output "$RUNNER_TEMP/govpre08-step3-indexer-$tag.json" \
+    --descriptors-output "$RUNNER_TEMP/govpre08-step3-descriptors-$tag.json"
+  node scripts/gov-pre-08/qualify-step3-postgres.mjs \
+    --mode initial --tag "$tag" --rpc "$GOV_PRE_08_RPC" \
+    --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --descriptors "$RUNNER_TEMP/govpre08-step3-descriptors-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-postgres-initial-$tag.json"
   python3 scripts/gov-pre-08/test_step3.py
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \
     --verify-bundle "$RUNNER_TEMP/govpre08-step3-v4-a" --rpc "$GOV_PRE_08_RPC" \
@@ -172,6 +178,11 @@ for tag in a b; do
     --output "$RUNNER_TEMP/govpre08-step3-recovery-$tag.json"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  node scripts/gov-pre-08/qualify-step3-postgres.mjs \
+    --mode recover --tag "$tag" --rpc "$GOV_PRE_08_RPC" \
+    --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --descriptors "$RUNNER_TEMP/govpre08-step3-descriptors-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-postgres-recover-$tag.json"
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT
@@ -196,6 +207,16 @@ assert all(r["indexedLogs"]>=20 and r["sourceEmittersBound"]>=10 and
            r["reorgRollbackAndRebuild"] and r["replayIdempotent"] and
            r["wrongEmitterRejected"] and not r["postgresQualified"] for r in indexed)
 assert indexed[0]["normalizedReadModelDigest"]==indexed[1]["normalizedReadModelDigest"], "live Indexer RPC decoder/projection drift across independently funded chains"
+pg0=[json.loads((p/f"govpre08-step3-postgres-initial-{tag}.json").read_text()) for tag in "ab"]
+pg1=[json.loads((p/f"govpre08-step3-postgres-recover-{tag}.json").read_text()) for tag in "ab"]
+for init,recovery in zip(pg0,pg1):
+    assert init["phase"]=="INITIAL_COLD_START_REORG" and recovery["phase"]=="PROCESS_AND_ANVIL_STATE_RECOVERY"
+    assert init["state"]["normalizedReadModelDigest"]==recovery["state"]["normalizedReadModelDigest"]
+    assert init["state"]["checkpoint"]==recovery["state"]["checkpoint"], "PostgreSQL durable checkpoint drifted after Anvil restart"
+    assert init["actualHttpIndexer"]["wrongChainReadyHTTP"]==503 and recovery["actualHttpIndexer"]["wrongChainReadyHTTP"]==503
+    assert init["actualReorgDepthAtLeastOne"] and recovery["reopenedExistingCheckpoint"]
+    assert not init["networkConsensusFinalityQualified"] and not recovery["productionMigrationAuthorized"]
+assert pg0[0]["state"]["normalizedReadModelDigest"]==pg0[1]["state"]["normalizedReadModelDigest"], "independent real PostgreSQL protocol projections differ"
 assert all(not g["approvedV4"] and not g["authenticFounderOwnersVerified"] for g in graphs)
 for tag in "ab":
     x = json.loads((p / f"govpre08-step3-recovery-{tag}.json").read_text())

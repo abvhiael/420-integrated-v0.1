@@ -145,7 +145,9 @@ test('BC-0.9 all reusable public renderers escape malicious labels and never inj
   renderGameControls([{id:'pass',label:attack,reason:attack}])
  ];
  for(const [i,html] of parts.entries()){
-  assert.doesNotMatch(html,/<img\b|onerror=|onclick=|javascript:|data-game-action/i,'injection '+i);
+  // Attribute-like words inside HTML-escaped text are harmless; detect
+  // executable tags, URI attributes and actual action handlers instead.
+  assert.doesNotMatch(html,/<img\b|<script\b|<a\b[^>]*href="javascript:|\sonclick="|<button\b[^>]*data-game-action/i,'injection '+i);
   if(i!==5)assert.match(html,/&lt;img|&lt;/,'escaped '+i);
  }
  assert.equal(renderCardDeck({count:-4}),'');

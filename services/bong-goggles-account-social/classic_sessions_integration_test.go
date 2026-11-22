@@ -89,7 +89,7 @@ func TestBC06SessionMovesReplaysPrivacyAndRestart(t *testing.T){
   t.Fatal("private opponent view",w.Code,w.Body.String())
  }
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{t.Fatal("guest resumed match",w.Code)}
- if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",nil);w.Code!=401{t.Fatal("missing cookie",w.Code)}
+ if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",&http.Cookie{Name:sessionCookieName,Value:"forged-session"});w.Code!=401{t.Fatal("forged cookie",w.Code)}
  if w:=request(h,"GET","/v1/classic-sessions", "",a);w.Code!=200||!strings.Contains(w.Body.String(),match.ID){t.Fatal("resume list",w.Code)}
  id:=bc06ActionID(t)
  if w:=bc06Act(t,h,b,match.ID,"move",2,map[string]int{"take":1},bc06ActionID(t));w.Code!=403{

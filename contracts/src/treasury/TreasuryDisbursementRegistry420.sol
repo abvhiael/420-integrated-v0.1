@@ -141,6 +141,17 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
         ) revert InvalidDisbursement();
         if (_disbursements[id].exists) revert DisbursementExists();
 
+        // Founding budgets are purpose-limited: even general Civic scheduling authority
+        // cannot populate a founding budget with an unapproved payment and bypass its
+        // incident, recipient and rolling commitment checks.
+        if (foundingAuthority != address(0)) {
+            (bool ok, bytes memory response) = foundingAuthority.staticcall(
+                abi.encodeWithSignature("isFoundingBudget(bytes32)", budgetId)
+            );
+            if (!ok || response.length != 32) revert ExecutionUnauthorized();
+            if (abi.decode(response, (bool)) && msg.sender != foundingAuthority)
+                revert ExecutionUnauthorized();
+        }
         TreasuryBudgetRegistry420.Budget memory b = budgets.budget(budgetId);
         if (
             !budgets.isEffective(budgetId) || b.civicActionHash != civicActionHash || notBefore < b.validFrom

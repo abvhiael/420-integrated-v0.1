@@ -27,6 +27,58 @@ jobs:
   authenticated-node420-settlement:
     uses: ./.github/workflows/node420-release-gate.yml
 
+  # The third job does not replay independent simulations. It imports the
+  # actually funded local contract state into patched Geth and observes an
+  # authenticated BLS-certified 420 block through real indexer/Explorer APIs.
+  unified-native-application-chain:
+    needs: [materialize-replay-recover, authenticated-node420-settlement]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - name: Download exact-head funded local V4-shaped contract state
+        uses: actions/download-artifact@v4
+        with:
+          name: govpre08-step3-unsigned-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/govpre08-source
+      - name: Download already-qualified patched native binaries (no second Geth rebuild)
+        uses: actions/download-artifact@v4
+        with:
+          name: govpre08-native-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .
+      - name: Prove signed source head and binary SHA before execution
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          sha256sum -c artifacts/node420-release-gate/unified-local-executables.sha256
+          chmod +x bin/node420 bin/upstream/geth-v1.17.5-420 bin/fourtwentyd bin/settlement-fixture bin/indexer420
+          go build -o bin/explorer420 ./explorer/cmd/explorer420
+      - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
+        run: |
+          python3 scripts/gov-pre-08/qualify-unified-local-node420.py \
+            --genesis "$RUNNER_TEMP/govpre08-source/govpre08-step3-unified-local-node420-genesis.json" \
+            --graph "$RUNNER_TEMP/govpre08-source/govpre08-step3-graph-a.json" \
+            --bindings "$RUNNER_TEMP/govpre08-source/govpre08-step3-native-bindings-a.json" \
+            --workdir "$RUNNER_TEMP/govpre08-unified-chain-420" \
+            --output "$RUNNER_TEMP/govpre08-unified-local-report.json"
+      - name: Retain exact-head authentic local-chain receipts, native logs and service checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govpre08-unified-local-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/govpre08-unified-local-report.json
+            ${{ runner.temp }}/govpre08-unified-chain-420/*.json
+            ${{ runner.temp }}/govpre08-unified-chain-420/*.log
+            ${{ runner.temp }}/govpre08-unified-chain-420/consensus/*.json
+
   materialize-replay-recover:
     runs-on: ubuntu-latest
     timeout-minutes: 30

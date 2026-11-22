@@ -85,6 +85,16 @@ forge build --root contracts \
   src/vault/VaultRegistry420.sol \
   src/vault/VaultAccounting420.sol \
   src/vault/AssetVault420.sol \
+  src/vault/VaultRouter420.sol \
+  src/apps/ProtocolRegistry.sol \
+  src/governance/GovernanceTimelock.sol \
+  src/governance/CivicConstitution420.sol \
+  src/governance/CivicProposalRegistry420.sol \
+  src/governance/CivicElectorateRegistry420.sol \
+  src/governance/CivicVoting420.sol \
+  src/governance/CivicGovernor420.sol \
+  src/system/CommunityValidatorReserve.sol \
+  src/system/ValidatorRegistry.sol \
   --extra-output storageLayout
 
 for tag in a b; do
@@ -116,6 +126,11 @@ for tag in a b; do
   test "$ready" = true || { cat "$RUNNER_TEMP/govpre08-step3-node-$tag.log"; exit 1; }
   python3 scripts/gov-pre-08/materialize-local-vault-funding.py \
     --rpc "$GOV_PRE_08_RPC" --output "$GOV_PRE_08_STEP2_EVIDENCE"
+  python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
+    --rpc "$GOV_PRE_08_RPC" --deploy-from-step2 "$GOV_PRE_08_STEP2_EVIDENCE" \
+    --output "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
+    --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   python3 scripts/gov-pre-08/test_step3.py
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \
     --verify-bundle "$RUNNER_TEMP/govpre08-step3-v4-a" --rpc "$GOV_PRE_08_RPC" \
@@ -147,6 +162,8 @@ for tag in a b; do
     --rpc "$GOV_PRE_08_RPC" --bundle "$RUNNER_TEMP/govpre08-step3-v4-a" \
     --baseline "$RUNNER_TEMP/govpre08-step3-local-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-recovery-$tag.json"
+  python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
+    --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT
@@ -161,6 +178,12 @@ for key in ("stateDigestSha256", "sourceManifestSha256", "constructorCode",
             "vaultIds", "vaults", "vaultBalancesWei", "protocolReserveAfterWei"):
     assert a[key] == b[key], "independent V4-shaped runtime drift: " + key
 assert a["reorgProbe"] == b["reorgProbe"]
+graphs=[json.loads((p/f"govpre08-step3-graph-{tag}.json").read_text()) for tag in "ab"]
+assert graphs[0]["deterministicGraphDigestSha256"]==graphs[1]["deterministicGraphDigestSha256"], "actual 14-constructor graph differed across two independent chains"
+assert len(graphs[0]["actualProductionConstructorAddresses"])==14
+assert len(graphs[0]["localRegistryComponentIds"])==14
+assert len(graphs[0]["serviceDiscoveries"])==3
+assert all(not g["approvedV4"] and not g["authenticFounderOwnersVerified"] for g in graphs)
 for tag in "ab":
     x = json.loads((p / f"govpre08-step3-recovery-{tag}.json").read_text())
     assert x["processRestartStateRecovered"] and x["nativeGenesisSupplyWei"] == str(42_000_000*10**18)

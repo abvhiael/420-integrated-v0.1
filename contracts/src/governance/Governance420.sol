@@ -16,7 +16,12 @@ import "./CivicInitialElectorateEnrollment420.sol";
 interface ICivicBootstrapIdentityIssuer420 {
     function governanceTimelock() external view returns (address);
     function protocolVersion() external view returns (uint32);
-    function setIssuer(bytes32 issuerId, address controller, bytes32 metadataHash, bool active) external;
+    function setIssuer(
+        bytes32 issuerId,
+        address controller,
+        bytes32 metadataHash,
+        bool active
+    ) external;
 }
 
 interface ICivicBootstrapValidatorRegistry420 {
@@ -125,7 +130,8 @@ contract Governance420 is SystemAccess, I420System {
     address public constant IDENTITY_420 = 0x0000000000000000000000000000000000000436;
     address public constant VALIDATOR_REGISTRY_420 = 0x0000000000000000000000000000000000000423;
     bytes32 public constant INITIAL_ELECTORATE_ISSUER = keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/V1");
-    bytes32 public constant INITIAL_ELECTORATE_ISSUER_METADATA = keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/METADATA/V1");
+    bytes32 public constant INITIAL_ELECTORATE_ISSUER_METADATA =
+        keccak256("420/CIVIC/INITIAL_ELECTORATE_ISSUER/METADATA/V1");
     uint64 public constant ROTATION_BLOCKS = 17_640;
 
     bytes32 public constant COMMUNITY_COMPONENT_ID = keccak256("420/component/governance/civic-constitution/v1");
@@ -624,10 +630,21 @@ contract Governance420 is SystemAccess, I420System {
         // Before Civic has electors, only this exact approved plan can enable trusted
         // membership issuer setup through the existing seven-day Timelock.
         if (deferred) {
-            _schedule(timelock, plan, 19, IDENTITY_420,
-                abi.encodeCall(ICivicBootstrapIdentityIssuer420.setIssuer,
-                    (INITIAL_ELECTORATE_ISSUER, approvedInitialElectorateAuthority,
-                    INITIAL_ELECTORATE_ISSUER_METADATA, true)));
+            _schedule(
+                timelock,
+                plan,
+                19,
+                IDENTITY_420,
+                abi.encodeCall(
+                    ICivicBootstrapIdentityIssuer420.setIssuer,
+                    (
+                        INITIAL_ELECTORATE_ISSUER,
+                        approvedInitialElectorateAuthority,
+                        INITIAL_ELECTORATE_ISSUER_METADATA,
+                        true
+                    )
+                )
+            );
         }
 
         emit CivicBootstrapPlanScheduled(plan, governor_);

@@ -159,6 +159,11 @@ def verify_v4(root, m):
     h = release.get("genesisConfigHash")
     need(isinstance(h, str) and HASH.fullmatch(h) and int(h, 16) != 0,
          "invalid approved Genesis V4 plan hash")
+    from eth_utils import keccak
+    payload = release["commitmentPayload"]
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    need("0x" + keccak(text=canonical).hex() == h.lower(),
+         "Genesis V4 configuration hash is not derived from canonical approved payload")
     need(m["planned_genesis_hash"].lower() == h.lower(),
          "founder proof does not bind the approved Genesis plan")
     inputs = release["commitmentPayload"]["authorityInputs"]

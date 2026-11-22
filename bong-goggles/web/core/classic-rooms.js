@@ -159,7 +159,7 @@ export class ClassicRoomsController{
 const note=message=>'<p class="classic-room__notice" role="status">'+esc(message)+'</p>';
 const roomHref=r=>'/games/rooms/'+r.id;
 const games=CLASSIC_ROADMAP.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.title)+'</option>').join('');
-const teamName=(r,s)=>r.seatCount===4&&new Set(['euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
+const teamName=(r,s)=>r.seatCount===4&&new Set(['cribbage','euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
   'Team '+(s.team===0?'A':'B'):'Player '+(s.index+1);
 function roomSummary(r){
  return '<li><a href="'+roomHref(r)+'" data-route="classic-room"><strong>'+esc(title(r.gameId))+
@@ -202,12 +202,14 @@ function roomDetail(r,state,live=null){
   '<li>Seat '+(i.seat+1)+' · '+esc(state.friends.find(f=>f.subject===i.target)?.displayName??'420ID member')+
   ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
  const roomLive=renderClassicRoomLive(r,live);
+ const cribbageLink=r.gameId==='cribbage'&&live?.status==='connected'&&live.session?.id&&live.session?.roomId===r.id?
+  '<p><a class="ui-button" href="/games/cribbage/play?session='+esc(live.session.id)+'" data-route="classic-game">Open your private Cribbage table</a></p>':'';
  return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
   '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
   '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
   note(r.status==='ready'?'All seats filled. Game start and turns require BC-0.6; no match has begun.':
    r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
-  '<ol class="classic-room__seats">'+seats+'</ol>'+roomLive+invites+
+  '<ol class="classic-room__seats">'+seats+'</ol>'+cribbageLink+roomLive+invites+
   (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){

@@ -2,6 +2,7 @@
 // A successful test against a mock transport is never production acceptance.
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
+import {resolve} from 'node:path';
 import {CLASSIC_ROADMAP} from '../core/classics.js';
 
 export const BC12_REPO='abvhiael/420-integrated-v0.1';
@@ -93,7 +94,7 @@ export async function auditRelease({manifest,fetchImpl=fetch,token=process.env.G
 export async function loadReleaseEvidence(){
  return JSON.parse(await readFile(fileURLToPath(new URL('../../../docs/games/classics/BC-0-12-RELEASE-EVIDENCE.json',import.meta.url)),'utf8'));
 }
-if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1]){
+if(process.argv[1]&&fileURLToPath(import.meta.url)===resolve(process.argv[1])){
  const action=process.argv[2];
  if(action!=='--audit')reject('use --audit; live acceptance is a separate authoritative workflow');
  auditRelease({manifest:await loadReleaseEvidence()}).then(x=>{

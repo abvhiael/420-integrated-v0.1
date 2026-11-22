@@ -226,6 +226,8 @@ function publicTables(room){
 }
 
 
+// One public, privacy-safe presentation for online rooms and local CPU practice.
+export {publicTables as renderChaosPublicTables};
 function drawPiles(room){
  const deck=room.legal.find(o=>o.action==='draw'&&o.choice==='deck');
  const discard=room.legal.find(o=>o.action==='draw'&&o.choice==='discard');

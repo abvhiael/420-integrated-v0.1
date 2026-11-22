@@ -90,6 +90,15 @@ func (cribbageRules) Definition()RuleDefinition{
    ";2p-individual;3p-individual;4p-opposite-seat-teams;121;auto-count;no-muggins"}
 }
 func NewCribbageRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(cribbageRules{})}
+func (cribbageRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error{
+ v,e:=cribbageVariantFor(room.SeatCount)
+ if e!=nil||room.GameID!="cribbage"||len(seats)!=room.SeatCount{return ErrInvalid}
+ for i,seat:=range seats{
+  if seat.Index!=i||seat.Team!=v.Teams[i]{return ErrInvalid}
+ }
+ return nil
+}
+
 func cribbageRank(card int)int{return card%13+1}
 func cribbageSuit(card int)int{return card/13}
 func cribbagePips(card int)int{r:=cribbageRank(card);if r>10{return 10};return r}

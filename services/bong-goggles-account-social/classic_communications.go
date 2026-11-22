@@ -42,7 +42,7 @@ func (h *Handler) EnableClassicCommunications()error{
 func (c *ClassicRooms) Presence(ctx context.Context,viewer,id string,renew bool)(ClassicPresenceView,error){
  var out ClassicPresenceView
  if c==nil||c.Store==nil||!uuid.MatchString(viewer)||!uuid.MatchString(id){return out,ErrInvalid}
- tx,e:=c.Store.DB.BeginTx(ctx,&sql.TxOptions{Isolation:sql.LevelRepeatableRead})
+ tx,e:=c.Store.DB.BeginTx(ctx,nil)
  if e!=nil{return out,e};defer tx.Rollback()
  room,e:=scanClassicRoom(tx.QueryRowContext(ctx,"SELECT "+classicRoomColumns+" FROM bg_account_social.classic_rooms WHERE id=$1",id))
  if errors.Is(e,sql.ErrNoRows){return out,ErrNotFound};if e!=nil{return out,e}
@@ -56,7 +56,8 @@ func (c *ClassicRooms) Presence(ctx context.Context,viewer,id string,renew bool)
  JOIN bg_account_social.blocks blocked ON
  (blocked.blocker=$2 AND blocked.blocked=other.subject) OR
  (blocked.blocked=$2 AND blocked.blocker=other.subject)
- WHERE other.room_id=$1 AND other.subject IS NOT NULL)`,id,viewer).Scan(&ownSeat)
+ WHERE other.room_id=$1 AND other.subject IS NOT NULL)
+ FOR SHARE OF own`,id,viewer).Scan(&ownSeat)
  if errors.Is(e,sql.ErrNoRows){return out,ErrNotFound};if e!=nil{return out,e}
  if renew{
   result,e:=tx.ExecContext(ctx,`INSERT INTO bg_account_social.classic_room_presence(room_id,subject,last_seen)

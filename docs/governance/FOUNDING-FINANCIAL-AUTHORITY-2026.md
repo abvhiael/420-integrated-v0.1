@@ -22,7 +22,7 @@ The 42,000,000 $420 modeled supply is unchanged. Actual mainnet addresses, verif
 - Issuing a full sponsorship must be separately constrained by verified beneficiary and validator ID, remaining reserve balance, sponsorship limits, purpose and independent anti-concentration checks. General Treasury approval does not grant that power by default.
 
 ## Founders and compensation
-- Three wallets, immutable beneficiary shares: Founding Administrator 50%, Andrew 25%, Janet 25%. Addresses are required before deployment; vesting and lost-key recovery policy remain to be set.
+- Three wallets, immutable beneficiary shares: Founding Administrator 50%, Andrew 25%, Janet 25%. Addresses are required before deployment; the existing 13-step fortnightly vesting is fixed, while lost-key recovery and succession remain separate release decisions.
 - The three founders also share the **separate 1,000,000 $420 Genesis founder allocation** 50/25/25, with 500,000 liquid and 500,000 vested in 13 fortnightly releases. The independent 50/25/25 developer compensation revenue stream is not a second founder Genesis mint or a routine Treasury entitlement.
 - Committee is representative/proposal-drafting, not a veto on general community votes. Only safety/slashing/consensus/validator-wide stake rules invoke the Validator voting house; routine budgets and community membership remain Community controlled.
 

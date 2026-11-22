@@ -96,7 +96,8 @@ contract NativeSponsorProbe420 {
     genesis["alloc"][REWARD]={"balance":"0x1","code":runtime(rc),
         "storage":{ZERO:f"0x{verified_binding:064x}"}}
     genesis["alloc"][REGISTRY]={"balance":"0x0","code":runtime(probe)}
-    old_reserve=int(genesis["alloc"][COMMUNITY]["balance"],16)
+    initial_reserve_literal=genesis["alloc"][COMMUNITY]["balance"]
+    old_reserve=int(initial_reserve_literal,16) if initial_reserve_literal.startswith("0x") else int(initial_reserve_literal)
     genesis["alloc"][COMMUNITY]["code"]=runtime(treasury)
     (out/"genesis.json").write_text(json.dumps(genesis))
     jwt=os.urandom(32)

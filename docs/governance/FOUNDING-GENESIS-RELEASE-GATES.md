@@ -32,3 +32,7 @@ The `contracts/config/founding-genesis-integration-v1.json` file is explicit rel
 **Post-Genesis electorate bootstrap remains a separate contract revision.** The existing `Governance420` requires nonzero initial Community and Validator electorate roots to be committed at Genesis, so the founding Committee module does not by itself solve a zero-community initial launch. Do not claim that first-testnet Governance can be activated later without this revision, or imply a second testnet is required solely because this candidate records empty role placeholders. This is a pre-Genesis deployment gate.
 
 No founder addresses, actual wallet claims, token mint, real mainnet/testnet receipts, or external review have been invented.
+
+## Three-founder Genesis allocation amendment
+
+The 10x100,000 model is superseded by 500,000/250,000/250,000 in `config/genesis-allocations.json` and `contracts/config/founder-wallet-reservations.json`. The existing `FounderVestingRegistry` at `0x0427` receives only the locked 500,000 $420; three separately verified personal wallets receive the liquid 500,000 at Genesis. These are distinct from the 50/25/25 *application revenue* compensation splitter. Frozen V3 Genesis configuration hash no longer authenticates this revised canonical working ledger. A signed new commitment and source-bound runtime/storage regeneration are hard release gates.

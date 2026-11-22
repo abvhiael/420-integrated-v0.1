@@ -1,16 +1,9 @@
 label,address,liquid_420,bonded_420,locked_420,category,notes
 Attention Treasury,,,,,protocol,TBD bootstrap reserve
 Development Treasury,,,,,protocol,TBD bootstrap reserve
-Founder/Core Contributor 01,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 02,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 03,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 04,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 05,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 06,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 07,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 08,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 09,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
-Founder/Core Contributor 10,,TBD,0,100000,founder_core_contributor,"100,000 420 allocation; vesting/time-lock schedule TBD"
+Founder — Founding Administrator,,250000,0,250000,founder_core_contributor,"50% of 1m Founders allocation; verified public address required; 250k liquid and 250k vested over 13 fortnightly releases"
+Founder — Andrew,,125000,0,125000,founder_core_contributor,"25% of 1m Founders allocation; verified public address required; 125k liquid and 125k vested over 13 fortnightly releases"
+Founder — Janet,,125000,0,125000,founder_core_contributor,"25% of 1m Founders allocation; verified public address required; 125k liquid and 125k vested over 13 fortnightly releases"
 Validator 01,,0,42000,0,validator,provisional bootstrap/bond treatment
 Validator 02,,0,42000,0,validator,provisional bootstrap/bond treatment
 Validator 03,,0,42000,0,validator,provisional bootstrap/bond treatment

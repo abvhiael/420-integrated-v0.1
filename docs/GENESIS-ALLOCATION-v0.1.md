@@ -1,42 +1,18 @@
-# Genesis Allocation — Working Draft
+# Genesis Allocation — Three Founders Amendment (Working Draft)
 
-Modeled total genesis supply: **42,000,000 420**
+Modeled Genesis supply: **42,000,000 $420**. The existing Founders/Core Contributors allocation remains **1,000,000 $420** (2.380952% of supply). The three beneficiaries replace the earlier ten; no additional coins are created.
 
-## Founders / Core Contributors
+| Founder role | Share | Total $420 | Directly liquid at Genesis | Locked in 0x0427 |
+| --- | ---: | ---: | ---: | ---: |
+| Founding Administrator | 50% | 500,000 | 250,000 | 250,000 |
+| Andrew | 25% | 250,000 | 125,000 | 125,000 |
+| Janet | 25% | 250,000 | 125,000 | 125,000 |
+| **Total** | **100%** | **1,000,000** | **500,000** | **500,000** |
 
-- Wallets: 10
-- Allocation per wallet: 100,000 420
-- Total: 1,000,000 420
-- Share of genesis supply: 2.380952%
+**Unchanged vesting rules:** 13 installments at 14-day intervals, starting 14 days after the Genesis timestamp and completing at day 182. Each beneficiary claims from their own verified wallet; there is no administrator bypass or changeable beneficiary slot. Fractional smallest-unit rounding is included in the final payout.
 
-These wallets are intended for people actively working on 420 Integrated.
+**Genesis delivery:** allocate 500,000 native $420 to the existing FounderVestingRegistry predeploy at `0x0427`, and distribute the other 500,000 directly to the three role-bound personal wallets. The personal wallet addresses remain unknown and cannot be invented. Founder verification and per-network Genesis commitments are required before deployment.
 
-### Recommended treatment
+**Frozen configuration gate:** This change to the canonical `config/genesis-allocations.json` is a **candidate amendment**, and no longer matches the preserved signed `FROZEN_V3` `contracts/config/genesis-config-commitment.json`. Mainnet/testnet must obtain an explicit new Genesis configuration commitment and regenerate the exact predeploy runtime/storage and alloc records. Do not reuse historical V3 qualification to authorize this candidate.
 
-Do not make the entire 1,000,000 420 immediately liquid at block zero.
-
-A transparent on-chain vesting contract should be used. Variables still to decide:
-
-- cliff duration;
-- total vesting duration;
-- linear vs stepped vesting;
-- treatment if a contributor leaves;
-- whether unvested 420 returns to Development Treasury or Protocol Reserve;
-- whether validator rewards are independent from founder vesting.
-
-All founder/core-contributor wallet addresses and vesting rules should be published in the genesis allocation manifest before mainnet.
-
-
-## Community / Testnet
-
-Current allocation: **8,400,000 420**
-
-Initial flagship program:
-
-- 42-day public testnet
-- 21,000 420 earned validator match
-- participant contributes 21,000 420
-- 42,000 420 resulting validator bond
-- maximum 400 full matches
-
-Matched 420 is deposited into the validator bond at launch rather than issued as immediately liquid currency.
+Community rewards, Treasury Operations, Contingency, validator-credit funding, and the separate recurring 50/25/25 developer revenue splitter remain distinct and are not silently debited from the Founders allocation.

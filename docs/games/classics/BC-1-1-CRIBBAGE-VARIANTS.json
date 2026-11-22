@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "gameId": "cribbage",
+  "rulesetId": "bc-cribbage-standard-121",
+  "rulesetVersion": "1.0.0",
+  "scope": "offchain-account-classics-only",
+  "reference": "BC-1-1-CRIBBAGE-RULES.md",
+  "targetScore": 121,
+  "deck": { "cards": 52, "jokers": 0, "aces": "low", "faceCardValue": 10 },
+  "defaultVariantId": "standard-2p",
+  "variants": [
+    {
+      "id": "standard-2p",
+      "displayName": "Two players — individual",
+      "seatCount": 2,
+      "teamBySeat": [0, 1],
+      "cardsDealtPerSeat": 6,
+      "discardsPerSeat": 2,
+      "extraCribCards": 0,
+      "cardsRetainedPerSeat": 4,
+      "cribCardCount": 4,
+      "dealerOwnsCrib": true
+    },
+    {
+      "id": "standard-3p",
+      "displayName": "Three players — individual",
+      "seatCount": 3,
+      "teamBySeat": [0, 1, 2],
+      "cardsDealtPerSeat": 5,
+      "discardsPerSeat": 1,
+      "extraCribCards": 1,
+      "cardsRetainedPerSeat": 4,
+      "cribCardCount": 4,
+      "dealerOwnsCrib": true
+    },
+    {
+      "id": "standard-4p-partners",
+      "displayName": "Four players — opposite-seat partnerships",
+      "seatCount": 4,
+      "teamBySeat": [0, 1, 0, 1],
+      "cardsDealtPerSeat": 5,
+      "discardsPerSeat": 1,
+      "extraCribCards": 0,
+      "cardsRetainedPerSeat": 4,
+      "cribCardCount": 4,
+      "dealerOwnsCrib": true
+    }
+  ],
+  "scoring": {
+    "pegging": { "exact15": 2, "exact31": 2, "pair": 2, "triple": 6, "quadruple": 12, "runPointsPerCard": 1, "goOrFinalCardBelow31": 1 },
+    "show": { "fifteenPerSubset": 2, "pairPerCombination": 2, "runPerCard": 1, "handFlushFour": 4, "handFlushFive": 5, "cribFlushFiveOnly": 5, "nobs": 1 },
+    "heelsJackStarter": 2,
+    "skunkIfLoserAtMost": 90,
+    "doubleSkunkIfLoserAtMost": 60,
+    "autoCount": true,
+    "muggins": false,
+    "scoreDisplayCap": 121
+  },
+  "policies": {
+    "firstDealer": "lowest-cut-rank-recut-ties",
+    "dealRotation": "clockwise-one-seat",
+    "playDirection": "clockwise-from-dealer-left",
+    "showOrder": "clockwise-from-dealer-left-dealer-last-crib-last",
+    "starter": "one-public-cut-card-after-crib-discards-not-played",
+    "countReset": "exact31-or-no-eligible-seat-can-play",
+    "sequenceLeadAfterReset": "next-clockwise-seat-with-cards-after-last-card-player",
+    "winner": "first-team-or-seat-reaching-at-least-121-at-point-award",
+    "tieBreaker": "no-ties-first-award-wins",
+    "timeouts": "qualified-account-games-match-forfeit-no-skunk",
+    "reconnect": "resume-authoritative-state-no-redeal",
+    "regionalRules": "not-selectable-in-v1"
+  },
+  "unsupportedVariants": [
+    "five-card-cribbage", "61-point-short-game", "four-player-individual-cutthroat",
+    "six-player-partnership", "muggins-manual-claims", "no-cut-house-rule",
+    "alternate-skunk-game-point-multipliers", "russian-cribbage"
+  ]
+}

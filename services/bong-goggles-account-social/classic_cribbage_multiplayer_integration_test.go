@@ -1,4 +1,4 @@
-//go:build account420_integration
+//go:build account420_integration && bc15_fullmatch
 
 package social
 

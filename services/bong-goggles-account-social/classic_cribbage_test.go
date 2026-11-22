@@ -232,3 +232,23 @@ func TestBC12RoomSeatTeamsEnforced(t *testing.T){
   if _,_,e=a.InitialWithSeed(cribSeed(byte(count)),room,seats);e==nil{t.Fatal("wrong teams admitted",count)}
  }
 }
+
+func TestBC12BoundedLongMatchReplayCapacity(t *testing.T){
+ crib,e:=NewCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
+ legacy:=bc07Adapter(t)
+ if crib.replayLimit()!=8192||legacy.replayLimit()!=maxRulesMoves||maxRulesMoves!=512{
+  t.Fatal("rules-specific replay cap changed legacy rules budget")
+ }
+ // The >512 case must advance to sequence validation rather than reject
+ // a legitimate game's length; never accept a forged sequence.
+ oversizedForLegacy:=make([]RuleTrace,maxRulesMoves+1)
+ if _,e=legacy.Replay(cribSeed(1),2,oversizedForLegacy);e!=ErrInvalid{
+  t.Fatal("legacy shared replay limit was weakened",e)
+ }
+ if _,e=crib.Replay(cribSeed(1),2,oversizedForLegacy);e!=ErrConflict{
+  t.Fatal("cribbage rejected capacity or accepted invalid sequence",e)
+ }
+ if _,e=crib.Replay(cribSeed(1),2,make([]RuleTrace,8193));e!=ErrInvalid{
+  t.Fatal("unbounded cribbage journal accepted",e)
+ }
+}

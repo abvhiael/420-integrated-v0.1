@@ -10,7 +10,7 @@ export const BC12_WORKFLOWS=Object.freeze({
  live:'.github/workflows/bc-0-12-classics-live-acceptance.yml'
 });
 const SHA=/^[a-f0-9]{40}$/;
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const knownKeys=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&
  Object.keys(value).every(key=>keys.includes(key))&&keys.every(key=>Object.hasOwn(value,key));
 const allTitles=()=>CLASSIC_ROADMAP.map(x=>x.id);

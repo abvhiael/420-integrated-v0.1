@@ -34,6 +34,7 @@ contract CivicGovernorStubRetirement420 {
     uint256 public dualHouseExecutedCount;
     address public immutable timelock;
     bool public activeDualHouseExecution;
+    bytes32 public activeDualHouseActionHash;
 
     constructor(
         address timelock_
@@ -47,10 +48,11 @@ contract CivicGovernorStubRetirement420 {
         dualHouseExecutedCount = value;
     }
 
-    function setActiveExecution(
-        bool value
-    ) external {
+    function setActiveExecution(bool value, address target) external {
         activeDualHouseExecution = value;
+        activeDualHouseActionHash = value
+            ? keccak256(abi.encode(target, abi.encodeWithSignature("retire()")))
+            : bytes32(0);
     }
 }
 
@@ -238,13 +240,17 @@ contract FoundingRetirementVerifier420Test {
         vm.warp(block.timestamp + 30 days);
         civic.setExecuted(0);
         require(!verifier.retirementReady(), "historical execution is absent");
-        civic.setActiveExecution(true);
+        civic.setActiveExecution(true, address(founder));
         require(
-            verifier.retirementReady() && verifier.retirementExecutionAuthorized(),
+            verifier.retirementReady() && verifier.retirementExecutionAuthorized(address(founder)),
             "current dual-house execution proves proposed retirement itself"
         );
-        civic.setActiveExecution(false);
+        civic.setActiveExecution(false, address(founder));
         require(!verifier.retirementExecutionAuthorized(), "out-of-context retirement");
+        civic.setActiveExecution(true, address(0xBAD));
+        require(!verifier.retirementExecutionAuthorized(address(founder)),
+            "other verified dual-house action cannot authorize retirement");
+        civic.setActiveExecution(false, address(founder));
         civic.setExecuted(1);
         require(
             verifier.retirementReady() && !verifier.retirementExecutionAuthorized(),

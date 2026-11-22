@@ -189,6 +189,44 @@ jobs:
           assert not x["mainnetOrTestnetRuntimeVerified"] and not x["foundingTreasuryVaultsFunded"]
           print("GOV-PRE-08_REAL_VESTING_STORAGE=PASS; UNOWNED_SYNTHETIC_ONLY")
           PY
+      - name: Re-run independent vesting constructor and compare exact runtime/storage state
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-b.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18547 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-repeat-genesis.log" 2>&1 &
+          genesis_pid=$!
+          anvil --chain-id 31337 --accounts 1 --balance 0 --timestamp 1700000000 \
+            --host 127.0.0.1 --port 18548 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-vesting-repeat-constructor.log" 2>&1 &
+          constructor_pid=$!
+          trap 'kill "$genesis_pid" "$constructor_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18547 >/dev/null 2>&1 && \
+               cast chain-id --rpc-url http://127.0.0.1:18548 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 scripts/gov-pre-08/materialize-local-vesting.py \
+            --genesis-rpc http://127.0.0.1:18547 \
+            --constructor-rpc http://127.0.0.1:18548 \
+            --output "$RUNNER_TEMP/gov-pre-08-vesting-runtime-repeat.json"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          left=json.loads((p/"gov-pre-08-vesting-runtime.json").read_text())
+          right=json.loads((p/"gov-pre-08-vesting-runtime-repeat.json").read_text())
+          for key in ("exactSourceCommit","unsignedV4CandidateHash",
+                      "constructorReceiptAddressLocal","fixedLocalGenesisPredeploy",
+                      "fixedGovernanceTimelockImmutable","syntheticFounderWallets",
+                      "syntheticGenesisTimestamp","runtimeCodeHashKeccak256",
+                      "runtimeCodeBytes","abiSha256","storageLayoutSha256",
+                      "storageWords","storageWordsSha256","nativeVestingBalanceWei"):
+              assert left[key]==right[key],key
+          assert left["realConstructorExecutedOnDisposableLocalChain"]
+          assert right["realConstructorExecutedOnDisposableLocalChain"]
+          print("GOV-PRE-08_CONSTRUCTOR_AND_PREDEPLOY_DETERMINISM=PASS (2 independent local chains)")
+          PY
       - name: Preserve exact-head source candidate (never live receipts)
         if: always()
         uses: actions/upload-artifact@v4
@@ -205,4 +243,7 @@ jobs:
             ${{ runner.temp }}/gov-pre-08-vesting-runtime.json
             ${{ runner.temp }}/gov-pre-08-vesting-genesis.log
             ${{ runner.temp }}/gov-pre-08-vesting-constructor.log
+            ${{ runner.temp }}/gov-pre-08-vesting-runtime-repeat.json
+            ${{ runner.temp }}/gov-pre-08-vesting-repeat-genesis.log
+            ${{ runner.temp }}/gov-pre-08-vesting-repeat-constructor.log
           if-no-files-found: warn

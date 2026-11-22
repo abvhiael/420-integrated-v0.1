@@ -234,7 +234,8 @@ contract StakeValidatorGenesis420Test {
 
         status.setRetired(true);
         (bytes32 nextId,address other) = _matchedId("retired-sponsor",98);
-        bytes32 secondProfile=keccak256("retired-profile"), secondCredential=keccak256("retired-credential");
+        bytes32 secondProfile=keccak256("retired-profile");
+        bytes32 secondCredential=keccak256("retired-credential");
         bytes32 secondGroup=keccak256("independent-group");
         canonical.configure(secondProfile,other,secondCredential,secondGroup,true);
         (bool retiredSponsor,) = address(sponsor).call(
@@ -261,7 +262,8 @@ contract StakeValidatorGenesis420Test {
         reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
 
         (bytes32 id,address owner)=_matchedId("proof-one",131);
-        bytes32 profile=keccak256("proof-one-profile"),cred=keccak256("proof-one-cred");
+        bytes32 profile=keccak256("proof-one-profile");
+        bytes32 cred=keccak256("proof-one-cred");
         bytes32 group=keccak256("common-owner-group");
         canonical.configure(profile,owner,cred,group,false);
         bytes32 purpose=sponsor.purposeFor(id,owner,profile,cred,group);
@@ -277,7 +279,8 @@ contract StakeValidatorGenesis420Test {
         sponsor.sponsorFullyVerified(id,owner,profile,cred,purpose);
 
         (bytes32 id2,address aliasOwner)=_matchedId("proof-alias",132);
-        bytes32 profile2=keccak256("alias-profile"),cred2=keccak256("alias-cred");
+        bytes32 profile2=keccak256("alias-profile");
+        bytes32 cred2=keccak256("alias-cred");
         canonical.configure(profile2,aliasOwner,cred2,group,true);
         (bool sharedGroup,) =address(sponsor).call(
             abi.encodeCall(sponsor.sponsorFullyVerified,(id2,aliasOwner,profile2,cred2,

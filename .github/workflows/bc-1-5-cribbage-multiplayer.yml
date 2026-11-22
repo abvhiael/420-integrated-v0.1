@@ -1,0 +1,109 @@
+name: BC-1.5 Cribbage Authenticated Multiplayer and Recovery
+on:
+  pull_request:
+    paths:
+      - 'cmd/bong-goggles-social/cribbage_activation*.go'
+      - 'cmd/bong-goggles-social/main.go'
+      - 'services/bong-goggles-account-social/classic_cribbage_multiplayer_integration_test.go'
+      - 'services/bong-goggles-account-social/classic_rules_*.go'
+      - 'services/bong-goggles-account-social/classic_sessions.go'
+      - 'bong-goggles/web/core/classic-cribbage-multiplayer.js'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/core/classic-room-bindings.js'
+      - 'bong-goggles/web/core/cribbage-*.js'
+      - 'bong-goggles/web/test/cribbage-multiplayer.test.js'
+      - 'bong-goggles/web/test/cribbage-live-browser.mjs'
+      - 'bong-goggles/web/scripts/qualify-web.mjs'
+      - 'docs/games/classics/BC-1-5-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-1-5-cribbage-multiplayer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend-room-and-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source head
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify host-only start, authenticated resume and previously qualified frontend
+        working-directory: bong-goggles/web
+        run: |
+          node --check core/classic-cribbage-multiplayer.js
+          node --test test/cribbage-multiplayer.test.js test/cribbage-frontend.test.js
+  startup-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test fail-closed frozen Cribbage startup and runtime build
+        run: |
+          go test -race -count=1 -run '^TestBC15CribbageOperatorActivation' ./cmd/bong-goggles-social
+          go vet ./cmd/bong-goggles-social
+          go build -o /tmp/bc15-social ./cmd/bong-goggles-social
+  distinct-browser-accounts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source head
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned headless Chrome
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Verify distinct 420ID cookie contexts, host start, private cards and reload
+        working-directory: bong-goggles/web
+        run: node test/cribbage-live-browser.mjs
+  two-account-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify two-account authenticated real PostgreSQL/420ID session, recovery and mixed AI
+        run: go test -race -count=1 -tags account420_integration,bc15_fullmatch -timeout=16m -run '^TestBC15' -v ./services/bong-goggles-account-social

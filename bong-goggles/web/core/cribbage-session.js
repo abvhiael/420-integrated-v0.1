@@ -42,7 +42,7 @@ export function normalizeCribbageSnapshot(result,subject=null){
  const v=s.privateView,n=s.seatCount,teams=cribbageTeams(n);
  if(v.gameId!=='cribbage'||v.variant!==variantFor(n)||!Number.isInteger(v.round)||v.round<1||
   !['discard','cut','peg','finished'].includes(v.phase)||v.seat!==s.viewerSeat||
-  v.turn!==s.turnSeat&&!(s.status!=='active'&&v.turn===-1)||
+  (s.status==='active'?v.turn!==s.turnSeat:!(v.turn===-1||Number.isInteger(v.turn)&&v.turn>=0&&v.turn<n))||
   !Number.isInteger(v.dealer)||v.dealer<0||v.dealer>=n||
   !Array.isArray(v.scores)||v.scores.length!==n||!v.scores.every(score)||
   !ownArray(v.hand,6)||!Array.isArray(v.cardCounts)||v.cardCounts.length!==n||
@@ -205,7 +205,7 @@ export class CribbageSessionController{
    const pegs=existing&&replay&&queue.length?
     this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount);
    if(!replay){this.cancelTimer();}
-   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,
+   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,
     announcement:replay?'':this.state.announcement??'',
     showing:null,notice:existing&&session.sequence>existing.sequence+1?
      'Resynchronized to verified scores; missed announcements were not invented.':''});
@@ -238,7 +238,7 @@ export class CribbageSessionController{
    if(!session||session.id!==current.id||session.viewerSeat!==current.viewerSeat||
     session.sequence!==current.sequence+1)throw Error('Move was not confirmed by the match server');
    const queue=cribbageAnnouncementQueue(current,session);
-   this.emit({status:'ready',session,submitting:false,queue,announcement:'',
+   this.emit({status:'ready',session,submitting:false,resignPending:false,queue,announcement:'',
     notice:'',pegs:queue.length?this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount)});
    if(queue.length)this.advance();
    return this.state;

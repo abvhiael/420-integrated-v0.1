@@ -49,7 +49,7 @@ func main(){
   db,e:=postgres(required("SOCIAL420_MIGRATION_DATABASE_URL"));if e!=nil{log.Fatal(e)};defer db.Close()
   store,e:=social.NewStore(db);if e!=nil{log.Fatal(e)}
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second);defer done()
-  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
+ if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
    xp,e:=social.NewContributions(store);if e!=nil{log.Fatal(e)}
    if e=store.ReadyXP(ctx);e!=nil{log.Fatal("AUTH-10 schema/grants unavailable")}
    e=xp.Moderate(ctx,os.Args[2],os.Args[3],os.Args[4],required("SOCIAL420_OPERATOR_REF"))
@@ -134,6 +134,15 @@ func main(){
   // No unqualified game-specific module is enabled by this flag.
  }else if os.Getenv("SOCIAL420_CLASSIC_RULES")!=""&&os.Getenv("SOCIAL420_CLASSIC_RULES")!="disabled"{
   log.Fatal("Unrecognized BC-0.7 rules activation mode")
+ }
+  // The first qualified game is independently opt-in. An operator must have
+ // already activated room/session/replay/presence dependencies; requests
+ // cannot select arbitrary game rules or force production Play activation.
+ if err:=configureCribbage(os.Getenv("SOCIAL420_CRIBBAGE_MODE"),classicSessionWorker,
+  os.Getenv("SOCIAL420_CLASSIC_ROOMS")=="restricted-acceptance",
+  os.Getenv("SOCIAL420_CLASSIC_RULES")=="restricted-acceptance",
+  os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")=="restricted-acceptance");err!=nil{
+  log.Fatal("BC-1.5 Cribbage activation unavailable: ",err)
  }
  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)

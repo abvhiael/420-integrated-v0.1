@@ -1,0 +1,30 @@
+name: GOV-PRE-07 canonical Solidity formatting
+on:
+  push:
+    branches: ['audit/420governance-gov-pre-07-*']
+    paths:
+      - '.github/workflows/gov-pre-07-format-temporary.yml'
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Canonically format only directly modified Solidity sources and lifecycle regression
+        run: |
+          cd contracts
+          forge fmt src/governance/GovernanceTimelock.sol src/governance/CivicGovernor420.sol test/GovernanceRec4Lifecycle420.t.sol
+          cd ..
+          git add contracts/src/governance/GovernanceTimelock.sol contracts/src/governance/CivicGovernor420.sol contracts/test/GovernanceRec4Lifecycle420.t.sol
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "style(governance): canonical format GOV-PRE-07 Timelock and action-context fixes"
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"

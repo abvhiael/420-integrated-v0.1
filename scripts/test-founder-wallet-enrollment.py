@@ -33,12 +33,14 @@ def module(path, name):
 
 v = module("scripts/verify-founder-wallet-reservations.py", "test_founder_v")
 e = module("scripts/enroll-founder-wallets.py", "test_founder_e")
+prepare = module("scripts/prepare-founder-claims-deployment.py", "test_founder_prepare")
 
 REQUIRED = (e.RESERVATIONS, e.SYSTEM, e.MIRROR, e.LEDGER, e.COMMIT,
             e.INIT, e.INTEGRATION, e.POLICY,
             "contracts/config/genesis-address-namespace.json",
             "contracts/config/interfaces/genesis-interface-layer.json",
-            "config/genesis-applications.json", "config/ai-genesis.json")
+            "config/genesis-applications.json", "config/ai-genesis.json",
+            "contracts/src/governance/FoundingWalletClaims420.sol")
 GENESIS = "0x" + "ab" * 32
 
 
@@ -118,6 +120,12 @@ def test_own_signatures():
     try:
         e.apply_files(root, e.attest(root, proofs))
         assert v.validate(strict=True, root=root) == 3
+        plan = prepare.manifest(root)
+        assert plan["status"] == "VERIFIED_CONSTRUCTOR_INPUTS_NOT_BROADCAST"
+        assert plan["chainId"] == 420 and len(plan["constructorArgs"]) == 4
+        assert plan["constructorArgs"][:3] == [a.address for a in accounts]
+        assert plan["genesisPlanCommitment"] == proofs["genesis_plan_commitment"]
+        assert not plan["deployedAddress"] and not plan["authorizedToWithdrawTreasuryAssets"]
         m = v.load(root, e.RESERVATIONS)
         assert all(p["ownership_status"] == "PREGENESIS_SIGNATURE_VERIFIED"
                    for p in m["founders"])
@@ -366,6 +374,8 @@ def main():
     assert v.validate(strict=False) == 0, "real founder reservation files must stay unclaimed"
     check_rejected("real unsigned founders cannot be enrolled",
                    lambda: v.validate(strict=True),"target network")
+    check_rejected("unverified founder deployment constructor must not exist",
+                   lambda: prepare.manifest(ROOT), "target network")
     test_own_signatures()
     test_adversarial()
     test_codebound_1271()

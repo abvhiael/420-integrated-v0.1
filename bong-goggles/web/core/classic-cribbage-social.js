@@ -159,3 +159,21 @@ export function bindCribbageSocial(root,controller,navigate){
    void controller.invite('rematch',button.dataset.cribbageRematch).then(room=>{if(room)navigate(room);});
   });
 }
+
+// Route binding stays in this independently bounded BC-1.6 module; never
+// increase the frozen BC-1.4 two-kilobyte route-runtime asset budget.
+export function createCribbageSocialRoute({enabled,windowObject,onChange}){
+ const controller=new CribbageSocialController({enabled,onChange});
+ let lastRefresh=0;
+ return Object.freeze({
+  get state(){return controller.state;},
+  refresh(force=false){
+   if(!/\/(history|rematch|results)$/.test(windowObject.location.pathname))return;
+   if(force||Date.now()-lastRefresh>=15000){
+    lastRefresh=Date.now();void controller.refresh();
+   }
+  },
+  bind(root){bindCribbageSocial(root,controller,id=>windowObject.location.assign('/games/rooms/'+id));},
+  invalidate(){lastRefresh=0;controller.invalidate();}
+ });
+}

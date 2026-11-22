@@ -107,7 +107,10 @@ def qualify(strict=False):
                 and t["unspentCustodyActuallyTransferred"] and t["retirementOperationalEvidence"],
                 "retirement custody and witnesses incomplete")
         rewards=m["rewards"]
-        enforce(rewards["consensusGatewaySupportsPayableRewardFunding"]
+        enforce(not rewards["consensusGatewaySupportsPayableRewardFunding"]
+                and rewards["communityBackingMethod"] == "GETH_CONSENSUS_STATE_CREDIT_EXACT_REALIZED_BEFORE_ZERO_VALUE_SYSTEM_CALL"
+                and rewards["nativeIssuerPatchVerified"]
+                and rewards["nativeRewardPayoutsVerifiedOnTestnet"]
                 and rewards["actualCommunitySettlementVerified"]
                 and rewards["predeployRuntimeRequalified"]
                 and rewards["consensusIndexerReconciliationRequalified"],

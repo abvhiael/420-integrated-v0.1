@@ -1,0 +1,148 @@
+{
+  "schema": "420-retained-abi-artifact-v1",
+  "contractName": "RewardController",
+  "protocol": "420Stake",
+  "protocolVersion": 3,
+  "source": {
+    "path": "contracts/src/system/RewardController.sol",
+    "gitBlobSha": "28971c6363d97c2418c213f9f91107ee22a34f49"
+  },
+  "abi": [
+    {
+      "type": "event",
+      "name": "RewardApplied",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "blockNumber",
+          "type": "uint64",
+          "indexed": true
+        },
+        {
+          "name": "proposer",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "proposerAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "participantAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "attentionAmount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "developmentAmount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "SponsoredValidatorRewardAllocated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "owner",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "communityFund",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "gross",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "communityShare",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "CommunityRewardBackingReceived",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "backedTotal",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "CommunityRewardSettled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "reserve",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        },
+        {
+          "name": "settledTotal",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "name": "NativeRewardPaid",
+      "anonymous": false,
+      "inputs": [
+        {
+          "name": "blockNumber",
+          "type": "uint64",
+          "indexed": true
+        },
+        {
+          "name": "recipient",
+          "type": "address",
+          "indexed": true
+        },
+        {
+          "name": "kind",
+          "type": "uint8",
+          "indexed": true
+        },
+        {
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false
+        }
+      ]
+    }
+  ],
+  "authority": "abi_only_no_bytecode_or_live_deployment_claim"
+}

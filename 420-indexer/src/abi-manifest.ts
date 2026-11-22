@@ -339,18 +339,18 @@ export const STAKE_RELEASE_DESCRIPTOR_ARTIFACTS_420 = Object.freeze({
   ValidatorRegistry: Object.freeze({
     address: '0x0000000000000000000000000000000000000423' as Hex,
     protocolVersion: 3,
-    path: 'contracts/artifacts/ValidatorRegistry.abi.json',
-    gitBlobSha: '0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391',
+    path: 'contracts/artifacts/ValidatorRegistry.govpre04.abi.json',
+    gitBlobSha: 'adce03428228e49621cbacd900ea32ca75af1484',
     sourcePath: 'contracts/src/system/ValidatorRegistry.sol',
-    sourceBlobSha: 'e534624f007024d65fcbb9e0f730bafbb8077767'
+    sourceBlobSha: '247cfc718064b51cc3a8fb92c79858fc9bdc13a3'
   }),
   RewardController: Object.freeze({
     address: '0x0000000000000000000000000000000000000420' as Hex,
-    protocolVersion: 2,
-    path: 'contracts/artifacts/RewardController.abi.json',
-    gitBlobSha: '9423d01d4277764837a1cb60edca3ae906260f4c',
+    protocolVersion: 3,
+    path: 'contracts/artifacts/RewardController.v3.abi.json',
+    gitBlobSha: 'd03a376e93a638a394baada274cbf1e0517c3476',
     sourcePath: 'contracts/src/system/RewardController.sol',
-    sourceBlobSha: '012c9e24b4e7a37ca89aad1c887529a19c70bb16'
+    sourceBlobSha: '28971c6363d97c2418c213f9f91107ee22a34f49'
   })
 });
 

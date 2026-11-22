@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/420integrated/420-integrated/indexer/model"
+	ethhash "github.com/420integrated/420-integrated/execution/storage"
 )
 
 const (
@@ -44,6 +45,36 @@ var stakeTopics = map[string]stakeEventShape{
 	"0x26090c8bdf2134c571fcd01b9d0e5ac59083cd9d7591f9912edda3bd4a280f48": {name: "RotationSnapshotApplied"},
 	"0x5a8bf2ea9c2349faa82225b3694a047a85e7c1976f705d009facaeeae6e58858": {name: "ActiveTargetChanged"},
 	"0xae18fd01a17597538ecc00e53160b731f191d8172d52086d7ad0ca16a76816ef": {name: "RewardApplied", addressTopics: []int{2}},
+}
+
+// RewardController V3 native events are canonical system-call logs rather than
+// synthetic transaction receipts. Derive topics from retained event signatures
+// to avoid trusting hand-entered topic literals.
+func init() {
+    for _, spec:=range []struct {signature string; shape stakeEventShape}{
+        {"SponsoredValidatorRewardAllocated(address,address,uint256,uint256)",
+            stakeEventShape{name:"SponsoredValidatorRewardAllocated",addressTopics:[]int{1,2}}},
+        {"CommunityRewardBackingReceived(address,uint256,uint256)",
+            stakeEventShape{name:"CommunityRewardBackingReceived",addressTopics:[]int{1}}},
+        {"CommunityRewardSettled(address,uint256,uint256)",
+            stakeEventShape{name:"CommunityRewardSettled",addressTopics:[]int{1}}},
+        {"NativeRewardPaid(uint64,address,uint8,uint256)",
+            stakeEventShape{name:"NativeRewardPaid",addressTopics:[]int{2}}},
+    } {
+        topic:=strings.ToLower(ethhash.EventTopic(spec.signature))
+        if _,exists:=stakeTopics[topic];exists {
+            panic("GOV-PRE-04 duplicate native reward event topic")
+        }
+        stakeTopics[topic]=spec.shape
+    }
+}
+func isRewardActivity(name string) bool {
+    switch name {
+    case "RewardApplied","SponsoredValidatorRewardAllocated",
+         "CommunityRewardBackingReceived","CommunityRewardSettled","NativeRewardPaid":
+        return true
+    }
+    return false
 }
 
 type StakeActivityPage struct {
@@ -100,7 +131,7 @@ func (b *StoreBackend) StakeActivity(validatorID, address string, limit uint32) 
 			continue
 		}
 		expected := StakeValidatorRegistryAddress
-		if shape.name == "RewardApplied" {
+		if isRewardActivity(shape.name) {
 			expected = StakeRewardControllerAddress
 		}
 		if !strings.EqualFold(lg.Address, expected) {

@@ -49,6 +49,41 @@ func encoded(t *testing.T, name string, fields map[string]string, n uint64, hash
 	return model.LogRecord{}
 }
 
+// The accepted Geth native log archive supplies actual, order-sensitive payments;
+// none of these records are fabricated Ethereum transaction receipts.
+func rewardFixtureLogs(t *testing.T, reward *sys.RewardOutcome, hash string) []model.LogRecord {
+    t.Helper()
+    settlement, err := sys.DeriveRewardSettlement(*reward)
+    if err != nil { t.Fatal(err) }
+    out := []model.LogRecord{}
+    add := func(name string, fields map[string]string) {
+        out = append(out, encoded(t,name,fields,reward.BlockNumber,hash,uint64(len(out))))
+    }
+    pay := func(recipient,amount,kind string) {
+        if money(amount).Sign() != 0 {
+            add("NativeRewardPaid",map[string]string{
+                "blockNumber":fmt.Sprint(reward.BlockNumber),"recipient":recipient,
+                "kind":kind,"amount":amount,
+            })
+        }
+    }
+    pay(address(reward.Proposer),settlement.ProposerAmount.String(),"0")
+    for _,participant:=range reward.Participants {
+        pay(address(participant),settlement.PerParticipantAmount.String(),"1")
+    }
+    pay(AttentionTreasury,settlement.AttentionAmount.String(),"3")
+    pay(DevelopmentTreasury,settlement.DevelopmentAmount.String(),"4")
+    participantTotal:=new(big.Int).Mul(settlement.PerParticipantAmount,big.NewInt(int64(len(reward.Participants))))
+    add("RewardApplied",map[string]string{
+        "blockNumber":fmt.Sprint(reward.BlockNumber),"proposer":address(reward.Proposer),
+        "proposerAmount":settlement.ProposerAmount.String(),
+        "participantAmount":participantTotal.String(),
+        "attentionAmount":settlement.AttentionAmount.String(),
+        "developmentAmount":settlement.DevelopmentAmount.String(),
+    })
+    return out
+}
+
 type fixtureSource struct {
 	logs           []model.LogRecord
 	initial, final State
@@ -76,27 +111,31 @@ func fixtureReport(t *testing.T) (rec.CertifiedSnapshot, *fixtureSource, Index) 
 	root := [32]byte{3}
 	reward := &sys.RewardOutcome{BlockNumber: 1, ActiveCount: 15, Proposer: sys.Address{1}, Participants: []sys.Address{{2}, {3}}}
 	out := sys.FinalizedStakeOutcomes{Reward: reward}
-	ex, err := expected(out)
-	if err != nil {
-		t.Fatal(err)
-	}
-	log := encoded(t, "RewardApplied", ex[0].fields, 1, hex32(h), 0)
-	initial := State{"grossSecurityIssued": "0", "grossAttentionIssued": "0", "grossDevelopmentIssued": "0", "rewardAppliedCurrent": "0", accrued(address(reward.Proposer)): "0", accrued(address(reward.Participants[0])): "0", accrued(address(reward.Participants[1])): "0"}
+    logs:=rewardFixtureLogs(t,reward,hex32(h))
+    initial := State{
+        "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+        "rewardAppliedCurrent":"0","nativeRewardPaid":"0",
+        "communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+        "communityRewardSettled":"0",balance(Reward):"0",
+        accrued(CommunityReward):"0",
+        balance(CommunityReward):"0",
+        accrued(address(reward.Proposer)):"0",
+        accrued(address(reward.Participants[0])):"0",
+        accrued(address(reward.Participants[1])):"0",
+    }
 	final := State{}
 	for k, v := range initial {
 		final[k] = v
 	}
-	e, err := Decode(log)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err = Apply(final, e, 1, reward); err != nil {
-		t.Fatal(err)
-	}
+    for _,log:=range logs {
+        e,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err=Apply(final,e,1,reward);err!=nil {t.Fatal(err)}
+    }
 	final["rewardAppliedCurrent"] = "1"
 	snap := rec.CertifiedSnapshot{Trust: rec.Trust{ChainID: 420, Execution: sys.SequenceAnchor{ChainID: 420, BlockHash: g}}, Anchor: sys.SequenceAnchor{ChainID: 420, ExecutionBlock: 1, BlockHash: h}, Head: ct.Checkpoint{Root: root}, Finalized: ct.Checkpoint{Root: [32]byte{7}}, Canonical: []rec.Record{{Consensus: ct.ConsensusBlockEnvelope{Header: ct.ConsensusBlock{ExecutionPayloadHash: h}}, Outcomes: out, Payload: eng.ExecutionPayloadV3{BlockNumber: "0x1", BlockHash: eng.Hash32(hex32(h))}}}}
-	index := Index{ChainID: 420, Height: 1, Hash: hex32(h), FinalizedHash: hex32(g), Blocks: map[uint64]string{0: hex32(g), 1: hex32(h)}, Logs: []model.LogRecord{log}}
-	return snap, &fixtureSource{logs: []model.LogRecord{log}, initial: initial, final: final}, index
+	index := Index{ChainID: 420, Height: 1, Hash: hex32(h), FinalizedHash: hex32(g), Blocks: map[uint64]string{0: hex32(g), 1: hex32(h)}, Logs: logs}
+	return snap, &fixtureSource{logs: logs, initial: initial, final: final}, index
 }
 func has(r Report, code string) bool {
 	for _, d := range r.Discrepancies {
@@ -128,7 +167,7 @@ func TestCanonicalReconciliationRestartAndDiscrepancies(t *testing.T) {
 		{"missing", "MISSING_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = nil }},
 		{"duplicate", "DUPLICATE_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = append(i.Logs, i.Logs[0]) }},
 		{"orphan", "ORPHANED_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].BlockHash = hex32([32]byte{9}) }},
-		{"contradictory", "CONTRADICTORY_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].Data = "0x" + strings.Repeat("0", 256) }},
+		{"contradictory", "CONTRADICTORY_ACCOUNTING_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].Data = "0x" + strings.Repeat("0", 256) }},
 		{"state", "EXECUTION_STATE_MISMATCH", func(s *fixtureSource, i *Index) { s.final["grossSecurityIssued"] = "1" }},
 		{"missing native", "MISSING_CONSENSUS_EVENT", func(s *fixtureSource, i *Index) { s.logs = nil }},
 		{"duplicated execution", "DUPLICATE_EXECUTION_EVENT", func(s *fixtureSource, i *Index) { s.logs = append(s.logs, s.logs[0]) }},
@@ -152,6 +191,96 @@ func TestCanonicalReconciliationRestartAndDiscrepancies(t *testing.T) {
 		t.Fatal("machine report", err)
 	}
 }
+func TestSponsoredRewardNativeNinetyTenAndIndexerEvidence(t *testing.T) {
+    reward:=&sys.RewardOutcome{BlockNumber:4200,ActiveCount:15,
+        Proposer:sys.Address{1},Participants:[]sys.Address{{2}}}
+    settlement,err:=sys.DeriveRewardSettlement(*reward)
+    if err!=nil {t.Fatal(err)}
+    proposer:=address(reward.Proposer)
+    participant:=address(reward.Participants[0])
+    share:=new(big.Int).Mul(new(big.Int).Set(settlement.ProposerAmount),big.NewInt(1000))
+    share.Div(share,big.NewInt(10000))
+    net:=new(big.Int).Sub(settlement.ProposerAmount,share)
+    s:=State{"communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+       "communityRewardSettled":"0","nativeRewardPaid":"0",
+       "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+       balance(CommunityReward):"0",accrued(CommunityReward):"0",
+       accrued(proposer):"0",accrued(participant):"0"}
+    pay:=func(recipient,kind,amount string) Event {
+        return Event{Name:"NativeRewardPaid",Fields:map[string]string{
+            "blockNumber":"4200","recipient":recipient,"kind":kind,"amount":amount}}
+    }
+    events:=[]Event{
+        {Name:"SponsoredValidatorRewardAllocated",Fields:map[string]string{
+            "owner":proposer,"communityFund":CommunityReward,
+            "gross":settlement.ProposerAmount.String(),"communityShare":share.String()}},
+        {Name:"CommunityRewardBackingReceived",Fields:map[string]string{
+            "source":Reward,"amount":share.String(),"backedTotal":share.String()}},
+        pay(CommunityReward,"2",share.String()),
+        {Name:"CommunityRewardSettled",Fields:map[string]string{
+            "reserve":CommunityReward,"amount":share.String(),"settledTotal":share.String()}},
+        pay(proposer,"0",net.String()),
+        pay(participant,"1",settlement.PerParticipantAmount.String()),
+        pay(AttentionTreasury,"3",settlement.AttentionAmount.String()),
+        pay(DevelopmentTreasury,"4",settlement.DevelopmentAmount.String()),
+        {Name:"RewardApplied",Fields:map[string]string{
+            "blockNumber":"4200","proposer":proposer,
+            "proposerAmount":settlement.ProposerAmount.String(),
+            "participantAmount":settlement.PerParticipantAmount.String(),
+            "attentionAmount":settlement.AttentionAmount.String(),
+            "developmentAmount":settlement.DevelopmentAmount.String(),
+        }},
+    }
+    for i,event:=range events {
+        // Roundtrip exact ABI topics/data through canonical Indexer decoder.
+        log:=encoded(t,event.Name,event.Fields,4200,hex32([32]byte{42}),uint64(i))
+        decoded,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err:=Apply(s,decoded,4200,reward);err!=nil {
+            t.Fatalf("native sponsor event %d (%s): %v",i,event.Name,err)
+        }
+    }
+    realized:=new(big.Int).Add(new(big.Int).Set(settlement.ProposerAmount),settlement.PerParticipantAmount)
+    realized.Add(realized,settlement.AttentionAmount)
+    realized.Add(realized,settlement.DevelopmentAmount)
+    if s.get(accrued(proposer))!=net.String() || s.get(accrued(participant))!=settlement.PerParticipantAmount.String() ||
+       s.get("communityRewardSettled")!=share.String() ||
+       s.get("communityRewardBackingReceived")!=share.String() ||
+       s.get("communityRewardAccrued")!=share.String() ||
+       s.get(balance(CommunityReward))!=share.String() ||
+       s.get("nativeRewardPaid")!=realized.String() {
+        t.Fatalf("unbacked sponsored native 90/10 payout accepted: %+v",s)
+    }
+    corrupt:=func(name string,index int,mutate func(*Event)){
+        t.Run(name,func(t *testing.T){
+            state:=State{}
+            for k,v:=range map[string]string{
+                "communityRewardAccrued":"0","communityRewardBackingReceived":"0",
+                "communityRewardSettled":"0","nativeRewardPaid":"0",
+                "grossSecurityIssued":"0","grossAttentionIssued":"0","grossDevelopmentIssued":"0",
+                balance(CommunityReward):"0",accrued(CommunityReward):"0",
+                accrued(proposer):"0",accrued(participant):"0",
+            } {state[k]=v}
+            rejected:=false
+            for i,event:=range events {
+                copy:=Event{Name:event.Name,Fields:map[string]string{}}
+                for k,v:=range event.Fields {copy.Fields[k]=v}
+                if i==index {mutate(&copy)}
+                if err:=Apply(state,copy,4200,reward);err!=nil {
+                    rejected=true;break
+                }
+            }
+            if !rejected {t.Fatal("tampered sponsored native settlement reconciled")}
+        })
+    }
+    corrupt("incorrect-community-share",0,func(e *Event){e.Fields["communityShare"]="1"})
+    corrupt("forged-backing-source",1,func(e *Event){e.Fields["source"]=participant})
+    corrupt("redirected-reserve",3,func(e *Event){e.Fields["reserve"]=proposer})
+    corrupt("missing-native-transfer",4,func(e *Event){e.Fields["amount"]="1"})
+    corrupt("wrong-execution-block",5,func(e *Event){e.Fields["blockNumber"]="4199"})
+    corrupt("extra-native-mint",7,func(e *Event){e.Fields["amount"]="1"})
+}
+
 func TestCreditReplacementSlashingAndWithdrawal(t *testing.T) {
 	id := hex32([32]byte{1})
 	owner := "0x0000000000000000000000000000000000000001"
@@ -203,19 +332,16 @@ func TestReplacementAccountingEqualsCleanCanonicalRebuild(t *testing.T) {
 	replacement.Canonical[0].Consensus.Header.ExecutionPayloadHash = hash
 	reward := replacement.Canonical[0].Outcomes.Reward
 	reward.Participants = reward.Participants[:1]
-	expectedEvents, err := expected(replacement.Canonical[0].Outcomes)
-	if err != nil {
-		t.Fatal(err)
-	}
-	source.logs = []model.LogRecord{encoded(t, "RewardApplied", expectedEvents[0].fields, 1, hex32(hash), 0)}
+	source.logs = rewardFixtureLogs(t,reward,hex32(hash))
 	source.final = State{}
 	for k, v := range source.initial {
 		source.final[k] = v
 	}
-	e, _ := Decode(source.logs[0])
-	if err = Apply(source.final, e, 1, reward); err != nil {
-		t.Fatal(err)
-	}
+    for _,log:=range source.logs {
+        e,err:=Decode(log)
+        if err!=nil {t.Fatal(err)}
+        if err=Apply(source.final,e,1,reward);err!=nil {t.Fatal(err)}
+    }
 	source.final["rewardAppliedCurrent"] = "1"
 	index.Hash = hex32(hash)
 	index.Blocks[1] = hex32(hash)

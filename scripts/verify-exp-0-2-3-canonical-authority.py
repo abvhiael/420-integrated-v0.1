@@ -84,8 +84,37 @@ def main():
     if indexing.get("finalizedHistoryImmutable") is not True:
         errors.append("finalized history immutability disabled")
 
-    if addr_a != addr_b:
+    # Founder-wallet reservations are not extra system addresses. GOV-PRE-02
+    # maintains these separate, non-additive annotations only in contracts/config;
+    # comparing the entire JSON documents incorrectly treats legitimately
+    # unclaimed founder slots as a changed 0x0420–0x04ff address assignment.
+    # Compare ALL frozen system address fields, reject any unrecognized metadata,
+    # and independently bind every annotated founder slot to its reserved manifest.
+    founder_annotations = {"founder_wallet_reservations", "founder_wallet_slots"}
+    system_maps_match = addr_a == addr_b
+    if not system_maps_match:
         errors.append("frozen system-address maps diverge")
+    reservations_path = addr_b.get("founder_wallet_reservations")
+    if reservations_path != "contracts/config/founder-wallet-reservations.json":
+        errors.append("unexpected founder reservation manifest reference")
+    else:
+        founder_manifest = load(ROOT / reservations_path)
+        reserved = addr_b.get("founder_wallet_slots")
+        canonical_founders = founder_manifest.get("founders", [])
+        if not isinstance(reserved, list) or len(reserved) != 3 or len(canonical_founders) != 3:
+            errors.append("founder reservation slot count mismatch")
+        else:
+            derived = [
+                {
+                    "role": founder["role"],
+                    "address": founder["wallet_address"],
+                    "status": founder["ownership_status"],
+                    "compensation_bps": founder["developer_compensation_bps"],
+                }
+                for founder in canonical_founders
+            ]
+            if reserved != derived:
+                errors.append("founder reservation annotations differ from independent manifest")
     assignments=addr_a.get("assignments",[])
     by_name={x.get("name"):x.get("address") for x in assignments}
     if by_name.get("ProtocolRegistry")!="0x0000000000000000000000000000000000000434":
@@ -139,7 +168,7 @@ def main():
         "milestone":"EXP-0.2.3",
         "authority_domains":len(auth),
         "profile_invariants":len(inv_ids),
-        "system_address_maps_match":addr_a==addr_b,
+        "system_address_maps_match":system_maps_match,
         "protocol_registry_address":by_name.get("ProtocolRegistry"),
         "required_chain_id":consumer.get("requiredChainId"),
         "canonical_state_authority":profile.get("canonicalStateAuthority"),

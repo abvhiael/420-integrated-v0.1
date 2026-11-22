@@ -13,8 +13,8 @@ import { indexerEventEnvelope420 } from '../src/event-stream.js';
 import { IndexerEventCanonicality420 } from '../src/event-canonicality.js';
 
 const manifest = JSON.parse(readFileSync('descriptors/stake420-v3.json','utf8')) as StakeReleaseDescriptor420;
-const validatorArtifact = JSON.parse(readFileSync('../contracts/artifacts/ValidatorRegistry.abi.json','utf8')) as RetainedAbiArtifact420;
-const rewardArtifact = JSON.parse(readFileSync('../contracts/artifacts/RewardController.abi.json','utf8')) as RetainedAbiArtifact420;
+const validatorArtifact = JSON.parse(readFileSync('../contracts/artifacts/ValidatorRegistry.govpre04.abi.json','utf8')) as RetainedAbiArtifact420;
+const rewardArtifact = JSON.parse(readFileSync('../contracts/artifacts/RewardController.v3.abi.json','utf8')) as RetainedAbiArtifact420;
 const artifacts = new Map<string, RetainedAbiArtifact420>([
   ['ValidatorRegistry', validatorArtifact],
   ['RewardController', rewardArtifact],
@@ -45,10 +45,10 @@ function log(signature: string, address: Hex, block: bigint, topics: Hex[], data
 
 test('pinned 420Stake descriptor is exact and retains canonical lifecycle/reward event set', () => {
   const descriptors = descriptorsFromStakeRelease420(manifest, artifacts);
-  assert.equal(descriptors.length, 13);
+  assert.equal(descriptors.length, 17);
   assert.deepEqual(descriptors.map((d) => d.signature).sort(), [...manifest.requiredEvents].sort());
   for (const d of descriptors) {
-    if (d.signature === 'RewardApplied(uint64,address,uint256,uint256,uint256,uint256)') {
+    if (['RewardApplied','SponsoredValidatorRewardAllocated','CommunityRewardBackingReceived','CommunityRewardSettled','NativeRewardPaid'].includes(d.eventName)) {
       assert.equal(d.contractAddress, '0x0000000000000000000000000000000000000420');
     } else {
       assert.equal(d.contractAddress, '0x0000000000000000000000000000000000000423');
@@ -169,6 +169,17 @@ test('matching canonical Stake topic from the wrong contract is rejected', () =>
 test('Go Stake activity classifier is pinned to the same descriptor topics', () => {
   const goSource = readFileSync('../indexer/api/stake.go','utf8');
   for (const descriptor of descriptorsFromStakeRelease420(manifest, artifacts)) {
-    assert.equal(goSource.includes(descriptor.topic0), true, 'Go Stake classifier missing topic '+descriptor.signature);
+    const runtimeTopics = new Set([
+      'SponsoredValidatorRewardAllocated(address,address,uint256,uint256)',
+      'CommunityRewardBackingReceived(address,uint256,uint256)',
+      'CommunityRewardSettled(address,uint256,uint256)',
+      'NativeRewardPaid(uint64,address,uint8,uint256)'
+    ]);
+    assert.equal(runtimeTopics.has(descriptor.signature)
+      ? goSource.includes('{"'+descriptor.signature+'"') &&
+        goSource.includes('ethhash.EventTopic(spec.signature)') &&
+        goSource.includes('isRewardActivity(shape.name)')
+      : goSource.includes(descriptor.topic0), true,
+      'Go Stake classifier missing authoritative topic or issuer '+descriptor.signature);
   }
 });

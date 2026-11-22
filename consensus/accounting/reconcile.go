@@ -87,7 +87,7 @@ func compare(r *Report, n uint64, want, actual State) {
 // verified canonical path. Restarts cannot duplicate counters; replacements do
 // not inherit orphaned balances. No source is mutated and no cache is authority.
 func Reconcile(ctx context.Context, snapshot rec.CertifiedSnapshot, source Source, index Index) (r Report) {
-	r = Report{Schema: "420-stake-accounting-reconciliation-v1", ChainID: snapshot.Trust.ChainID, Block: snapshot.Anchor.ExecutionBlock, BlockHash: hex32(snapshot.Anchor.BlockHash), ConsensusRoot: hex32(snapshot.Head.Root), FinalizedRoot: hex32(snapshot.Finalized.Root), Status: "DISCREPANCY", State: State{}, Discrepancies: []Discrepancy{}, Issuance: Issuance{GrossScheduled: "0", Basis: "canonical RewardController accrual accounting; native supply/minting is not inferred"}}
+	r = Report{Schema: "420-stake-accounting-reconciliation-v1", ChainID: snapshot.Trust.ChainID, Block: snapshot.Anchor.ExecutionBlock, BlockHash: hex32(snapshot.Anchor.BlockHash), ConsensusRoot: hex32(snapshot.Head.Root), FinalizedRoot: hex32(snapshot.Finalized.Root), Status: "DISCREPANCY", State: State{}, Discrepancies: []Discrepancy{}, Issuance: Issuance{GrossScheduled:"0", NativePaid:"0", CommunityAccrued:"0", CommunityBacked:"0", CommunitySettled:"0", Basis:"certified native node420 issuance, canonical RewardController payouts and historical execution state"}}
 	defer func() {
 		if p := recover(); p != nil {
 			r.Status = "DISCREPANCY"
@@ -136,7 +136,7 @@ func Reconcile(ctx context.Context, snapshot rec.CertifiedSnapshot, source Sourc
 			if id := e.Fields["validatorId"]; id != "" {
 				ids[id] = true
 			}
-			for _, key := range []string{"owner", "withdrawal", "beneficiary", "proposer"} {
+			for _, key := range []string{"owner", "withdrawal", "beneficiary", "proposer", "recipient"} {
 				if a := e.Fields[key]; a != "" {
 					accounts[a] = true
 				}
@@ -153,6 +153,7 @@ func Reconcile(ctx context.Context, snapshot rec.CertifiedSnapshot, source Sourc
 			ids[hex32(v.ValidatorID)] = true
 		}
 		if reward := record.Outcomes.Reward; reward != nil {
+			accounts[CommunityReward] = true
 			accounts[address(reward.Proposer)] = true
 			for _, a := range reward.Participants {
 				accounts[address(a)] = true
@@ -317,10 +318,24 @@ func Reconcile(ctx context.Context, snapshot rec.CertifiedSnapshot, source Sourc
 			r.issue("MISSING_INDEXER_EVENT", log.BlockNumber, key, "present", "absent")
 		}
 	}
+	r.Issuance.NativePaid=r.State.get("nativeRewardPaid")
+    r.Issuance.CommunityAccrued=r.State.get("communityRewardAccrued")
+    r.Issuance.CommunityBacked=r.State.get("communityRewardBackingReceived")
+    r.Issuance.CommunitySettled=r.State.get("communityRewardSettled")
+    if r.Issuance.CommunityAccrued!=r.Issuance.CommunitySettled ||
+       r.Issuance.CommunityBacked!=r.Issuance.CommunitySettled {
+        r.issue("COMMUNITY_REWARD_UNSETTLED",r.Block,"community","equal accrual backing and physical settlement",fmt.Sprintf("%s/%s/%s",r.Issuance.CommunityAccrued,r.Issuance.CommunityBacked,r.Issuance.CommunitySettled))
+    }
+    if r.State.get(balance(Reward))!="0" {
+        r.issue("REWARD_CONTROLLER_RESIDUAL_NATIVE",r.Block,"rewardBalance","0",r.State.get(balance(Reward)))
+    }
 	r.Issuance.Security = r.State.get("grossSecurityIssued")
 	r.Issuance.Attention = r.State.get("grossAttentionIssued")
 	r.Issuance.Development = r.State.get("grossDevelopmentIssued")
 	r.Issuance.Realized = sum(sum(r.Issuance.Security, r.Issuance.Attention), r.Issuance.Development)
+	if r.Issuance.NativePaid!=r.Issuance.Realized {
+        r.issue("UNBACKED_REALIZED_ISSUANCE",r.Block,"nativeIssued",r.Issuance.Realized,r.Issuance.NativePaid)
+    }
 	nonIssued := new(big.Int).Sub(money(r.Issuance.GrossScheduled), money(r.Issuance.Realized))
 	if nonIssued.Sign() < 0 {
 		r.issue("ISSUANCE_EXCEEDS_SCHEDULE", r.Block, "issuance", r.Issuance.GrossScheduled, r.Issuance.Realized)

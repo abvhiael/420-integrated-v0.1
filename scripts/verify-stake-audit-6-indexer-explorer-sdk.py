@@ -23,24 +23,28 @@ EXPECTED_EVENTS = {
     "RotationSnapshotApplied(uint64,uint256,uint16,uint16)",
     "ActiveTargetChanged(uint16,uint16,uint64,bool)",
     "RewardApplied(uint64,address,uint256,uint256,uint256,uint256)",
+    "SponsoredValidatorRewardAllocated(address,address,uint256,uint256)",
+    "CommunityRewardBackingReceived(address,uint256,uint256)",
+    "CommunityRewardSettled(address,uint256,uint256)",
+    "NativeRewardPaid(uint64,address,uint8,uint256)",
 }
 
 EXPECTED = {
     "ValidatorRegistry": {
         "address": "0x0000000000000000000000000000000000000423",
-        "artifact": "contracts/artifacts/ValidatorRegistry.abi.json",
-        "artifact_blob": "0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391",
+        "artifact": "contracts/artifacts/ValidatorRegistry.govpre04.abi.json",
+        "artifact_blob": "adce03428228e49621cbacd900ea32ca75af1484",
         "source": "contracts/src/system/ValidatorRegistry.sol",
-        "source_blob": "e534624f007024d65fcbb9e0f730bafbb8077767",
+        "source_blob": "247cfc718064b51cc3a8fb92c79858fc9bdc13a3",
         "protocol_version": 3,
     },
     "RewardController": {
         "address": "0x0000000000000000000000000000000000000420",
-        "artifact": "contracts/artifacts/RewardController.abi.json",
-        "artifact_blob": "9423d01d4277764837a1cb60edca3ae906260f4c",
+        "artifact": "contracts/artifacts/RewardController.v3.abi.json",
+        "artifact_blob": "d03a376e93a638a394baada274cbf1e0517c3476",
         "source": "contracts/src/system/RewardController.sol",
-        "source_blob": "012c9e24b4e7a37ca89aad1c887529a19c70bb16",
-        "protocol_version": 2,
+        "source_blob": "28971c6363d97c2418c213f9f91107ee22a34f49",
+        "protocol_version": 3,
     },
 }
 

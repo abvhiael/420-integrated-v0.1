@@ -468,5 +468,120 @@
         "Indexed": true
       }
     ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000420",
+    "Name": "SponsoredValidatorRewardAllocated",
+    "Inputs": [
+      {
+        "Name": "owner",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "communityFund",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "gross",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "communityShare",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000420",
+    "Name": "CommunityRewardBackingReceived",
+    "Inputs": [
+      {
+        "Name": "source",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "backedTotal",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000420",
+    "Name": "CommunityRewardSettled",
+    "Inputs": [
+      {
+        "Name": "reserve",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "settledTotal",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000420",
+    "Name": "NativeRewardPaid",
+    "Inputs": [
+      {
+        "Name": "blockNumber",
+        "Type": "uint64",
+        "Indexed": true
+      },
+      {
+        "Name": "recipient",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "kind",
+        "Type": "uint8",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      }
+    ]
+  },
+  {
+    "Address": "0x0000000000000000000000000000000000000426",
+    "Name": "TreasuryTransfer",
+    "Inputs": [
+      {
+        "Name": "to",
+        "Type": "address",
+        "Indexed": true
+      },
+      {
+        "Name": "amount",
+        "Type": "uint256",
+        "Indexed": false
+      },
+      {
+        "Name": "reason",
+        "Type": "bytes32",
+        "Indexed": true
+      }
+    ]
   }
 ]

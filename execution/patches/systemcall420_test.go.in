@@ -2,6 +2,7 @@ package systemcall420
 
 import (
     "testing"
+    "math/big"
  "github.com/ethereum/go-ethereum/core/rawdb"
  "github.com/ethereum/go-ethereum/core/types"
 
@@ -143,3 +144,80 @@ func TestNativeLogArchiveIntegrity(t *testing.T) {
  if _,err=ReadNativeLogs(db,hash);err==nil{t.Fatal("corrupt archive accepted")}
  logs[0].BlockHash=other;WriteNativeLogs(db,hash,logs);if _,err=ReadNativeLogs(db,hash);err==nil{t.Fatal("orphan provenance accepted")}
 }
+
+func rewardFixture420(t *testing.T) (Call,*big.Int) {
+    t.Helper()
+    b:=testBatch()
+    c:=b.Calls[0]
+    c.Action=RewardAction420
+    c.Target=RewardControllerAddress
+    // For a 15-seat active committee, proposer receives half of the security
+    // pool; only two participating validators earn their equal pool share.
+    gross:=scheduledGross420(uint64(c.ExecutionBlock))
+    security:=new(big.Int).Mul(new(big.Int).Set(gross),big.NewInt(283_446_712_018))
+    security.Div(security,big.NewInt(1_000_000_000_000))
+    remainder:=new(big.Int).Sub(gross,security)
+    attention:=new(big.Int).Div(new(big.Int).Set(remainder),big.NewInt(2))
+    development:=new(big.Int).Sub(remainder,attention)
+    proposer:=new(big.Int).Div(new(big.Int).Set(security),big.NewInt(2))
+    pool:=new(big.Int).Sub(security,proposer)
+    per:=new(big.Int).Div(pool,big.NewInt(14))
+    toWord:=func(n *big.Int) []byte {
+        out:=make([]byte,32)
+        b:=n.Bytes()
+        copy(out[32-len(b):],b)
+        return out
+    }
+    u:=func(n uint64) []byte {return toWord(new(big.Int).SetUint64(n))}
+    raw:=[]byte{0xac,0x11,0xb5,0xe1}
+    raw=append(raw,u(uint64(c.ExecutionBlock))...)
+    raw=append(raw,u(0x1234)...) // canonical proposer padded to address
+    raw=append(raw,u(7*32)...)
+    for _,n:=range []*big.Int{proposer,per,attention,development} {
+        raw=append(raw,toWord(n)...)
+    }
+    raw=append(raw,u(2)...)
+    raw=append(raw,u(0x1235)...)
+    raw=append(raw,u(0x1236)...)
+    c.Payload=hexutil.Bytes(raw)
+    earned:=new(big.Int).Mul(new(big.Int).Set(per),big.NewInt(2))
+    earned.Add(earned,proposer)
+    earned.Add(earned,attention)
+    earned.Add(earned,development)
+    return c,earned
+}
+
+func TestNativeRewardBackingExactScheduleAndNoUnauthorizedIssuance420(t *testing.T) {
+    c,want:=rewardFixture420(t)
+    got,qualifies,err:=RewardBackingAmount(c)
+    if !qualifies||err!=nil||got.ToBig().Cmp(want)!=0 {
+        t.Fatalf("realized issuance mismatch: valid=%v reward=%v err=%v want=%v",qualifies,got,err,want)
+    }
+    negative:=func(name string,change func(*Call)){
+        t.Run(name,func(t *testing.T){
+            bad:=c
+            bad.Payload=append(hexutil.Bytes(nil),c.Payload...)
+            change(&bad)
+            if amount,qualified,err:=RewardBackingAmount(bad);!qualified||err==nil||amount!=nil {
+                t.Fatalf("forged native backing accepted: qualified=%v amount=%v err=%v",qualified,amount,err)
+            }
+        })
+    }
+    negative("reward-target",func(x *Call){x.Target=GatewayAddress})
+    negative("reward-selector",func(x *Call){x.Payload[0]^=0x01})
+    negative("execution-block",func(x *Call){x.Payload[4+31]^=0x01})
+    negative("gross-plus-1-wei",func(x *Call){x.Payload[4+3*32+31]^=0x01})
+    negative("participant-duplicate",func(x *Call){copy(x.Payload[len(x.Payload)-32:],x.Payload[len(x.Payload)-64:len(x.Payload)-32])})
+    negative("noncanonical-participant",func(x *Call){x.Payload[4+8*32]=0x01})
+    negative("truncated-payload",func(x *Call){x.Payload=x.Payload[:len(x.Payload)-1]})
+    negative("extra-participant",func(x *Call){x.Payload=append(x.Payload,make([]byte,32)...);x.Payload[4+7*32+31]=3})
+    negative("attention-double-mint",func(x *Call){x.Payload[4+5*32+31]^=0x01})
+    negative("noncanonical-proposer",func(x *Call){x.Payload[4+32]=0x01})
+    negative("wrong-dynamic-offset",func(x *Call){x.Payload[4+2*32+31]=0x01})
+    other:=c
+    other.Action="420/SYSCALL/VALIDATOR_STATE/V1"
+    if amount,isReward,err:=RewardBackingAmount(other);amount!=nil||isReward||err!=nil {
+        t.Fatalf("non-reward call minted funds: %v %v %v",amount,isReward,err)
+    }
+}
+

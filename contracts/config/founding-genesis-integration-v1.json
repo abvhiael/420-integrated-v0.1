@@ -59,11 +59,17 @@
     "retirementOperationalEvidence": null
   },
   "rewards": {
-    "communityBackingMethod": "CONSENSUS_NATIVE_ISSUANCE_OR_VERIFIED_BACKING_REQUIRED",
+    "communityBackingMethod": "GETH_CONSENSUS_STATE_CREDIT_EXACT_REALIZED_BEFORE_ZERO_VALUE_SYSTEM_CALL",
     "consensusGatewaySupportsPayableRewardFunding": false,
     "actualCommunitySettlementVerified": false,
     "predeployRuntimeRequalified": false,
-    "consensusIndexerReconciliationRequalified": false
+    "consensusIndexerReconciliationRequalified": false,
+    "nativeIssuerPatchVerified": false,
+    "patchedGethUpstreamTag": "v1.17.5",
+    "rewardControllerCandidateProtocolVersion": 3,
+    "communityRewardReserve": "0x0000000000000000000000000000000000000426",
+    "nativeRewardPayoutsVerifiedOnTestnet": false,
+    "genesisV4DeploymentRequired": true
   },
   "governance": {
     "postGenesisInitialElectorateEnrollmentOperational": false,

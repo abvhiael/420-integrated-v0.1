@@ -596,6 +596,16 @@ contract ValidatorRegistry is ConsensusSystemAccess420, StakeDependencyAccess420
         if (protocolCredit > MAX_PROTOCOL_CREDIT || ownedBond < MIN_OWNED_BOND) revert InvalidBondComposition();
         uint256 effective = ownedBond + protocolCredit;
         if (effective > EFFECTIVE_BOND || (requireEffective && effective != EFFECTIVE_BOND)) revert InvalidBondComposition();
+        if (requireEffective) {
+            // Only the frozen self-funded 42K model, approved standard 21K/21K
+            // match, or separately qualified full 42K sponsor may enter.
+            // Partial replacement AFTER registration remains legitimate and
+            // does not call this initial-registration composition validator.
+            bool selfFunded = ownedBond == EFFECTIVE_BOND && protocolCredit == 0;
+            bool matched = ownedBond == 21_000 ether && protocolCredit == 21_000 ether;
+            bool fullSponsored = ownedBond == 0 && protocolCredit == EFFECTIVE_BOND;
+            if (!selfFunded && !matched && !fullSponsored) revert InvalidBondComposition();
+        }
     }
 
     /// @dev Eligible pool means currently selectable/serving validator population.

@@ -8,17 +8,17 @@
       "protocolVersion": 3,
       "canonicalAddress": "0x0000000000000000000000000000000000000423",
       "artifact": {
-        "path": "contracts/artifacts/ValidatorRegistry.abi.json",
-        "gitBlobSha": "0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391"
+        "path": "contracts/artifacts/ValidatorRegistry.govpre04.abi.json",
+        "gitBlobSha": "adce03428228e49621cbacd900ea32ca75af1484"
       }
     },
     {
       "contractName": "RewardController",
-      "protocolVersion": 2,
+      "protocolVersion": 3,
       "canonicalAddress": "0x0000000000000000000000000000000000000420",
       "artifact": {
-        "path": "contracts/artifacts/RewardController.abi.json",
-        "gitBlobSha": "9423d01d4277764837a1cb60edca3ae906260f4c"
+        "path": "contracts/artifacts/RewardController.v3.abi.json",
+        "gitBlobSha": "d03a376e93a638a394baada274cbf1e0517c3476"
       }
     }
   ],
@@ -35,7 +35,11 @@
     "SlashApplied(bytes32,uint8,uint8,uint256,uint256,bytes32,uint8)",
     "RotationSnapshotApplied(uint64,uint256,uint16,uint16)",
     "ActiveTargetChanged(uint16,uint16,uint64,bool)",
-    "RewardApplied(uint64,address,uint256,uint256,uint256,uint256)"
+    "RewardApplied(uint64,address,uint256,uint256,uint256,uint256)",
+    "SponsoredValidatorRewardAllocated(address,address,uint256,uint256)",
+    "CommunityRewardBackingReceived(address,uint256,uint256)",
+    "NativeRewardPaid(uint64,address,uint8,uint256)",
+    "CommunityRewardSettled(address,uint256,uint256)"
   ],
   "authority": "repository_descriptor_only_not_live_stake_authority"
 }

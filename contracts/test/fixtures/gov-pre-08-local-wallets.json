@@ -1,0 +1,24 @@
+{
+  "schema": "420-gov-pre-08-synthetic-wallets-v1",
+  "network": "UNOWNED_LOCAL_REHEARSAL_ONLY",
+  "chainId": 31337,
+  "wallets": [
+    {
+      "role": "FOUNDING_ADMINISTRATOR",
+      "address": "0x0000000000000000000000000000000000000a01"
+    },
+    {
+      "role": "ANDREW",
+      "address": "0x0000000000000000000000000000000000000a02"
+    },
+    {
+      "role": "JANET",
+      "address": "0x0000000000000000000000000000000000000a03"
+    }
+  ],
+  "rules": [
+    "These addresses are deterministic unowned synthetic rehearsal fixtures, not founder addresses or signatures.",
+    "Never use this fixture to populate live founder reservations, production Genesis allocations, constructor immutables or signed authorization.",
+    "Used only for ephemeral chain ID 31337 local Genesis supply rehearsal."
+  ]
+}

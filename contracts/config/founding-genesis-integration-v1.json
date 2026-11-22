@@ -53,7 +53,10 @@
     "tokenCreditRequiresAtomicVaultNotification": true,
     "genesisFundsNeverCompensationRevenue": true,
     "deploymentPlan": "scripts/prepare-founder-financial-deployment.py",
-    "governedDeploymentStatus": "UNDEPLOYED_THREE_VERIFIED_WALLETS_V4_REQUIRED"
+    "governedDeploymentStatus": "UNDEPLOYED_THREE_VERIFIED_WALLETS_V4_REQUIRED",
+    "localVaultSplitAndERC20Qualified": true,
+    "realSourceVaultCodehashAndDeploymentVerified": false,
+    "finalizedPayoutReceiptsVerified": false
   },
   "retirement": {
     "validatorEligibleOwnerMinimum": 60,
@@ -105,9 +108,12 @@
     "liquidAllocationsActuallyFunded": false,
     "newFrozenGenesisCommitmentApproved": false,
     "candidateContractVersion": 2,
-    "genesisStartPinnedToNetworkEpoch": true,
     "genesisRuntimeDepositsForbidden": true,
-    "lockedAmountActuallyClaimed420": "0",
-    "thirteenReleaseLocalQualificationPending": true
+    "sourceRejectsBackdatedStartTime": true,
+    "localThirteenReleaseQualified": true,
+    "genesisStartActuallyVerifiedOnChain": false,
+    "totalLockedActuallyPaid420": null,
+    "blockZeroVestingBalanceVerified": false,
+    "blockZeroLiquidBalancesVerified": false
   }
 }

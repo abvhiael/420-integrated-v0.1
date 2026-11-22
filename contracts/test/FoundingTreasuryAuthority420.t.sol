@@ -276,25 +276,31 @@ contract FoundingTreasuryAuthority420Test {
     }
 
     function testSeparateThirtyDayOperationsLimitRejectsEvenDifferentRecipients() public {
-        uint64 nowTime = uint64(block.timestamp);
+        uint64 proposalTime = uint64(block.timestamp);
+        bytes32[2] memory authorized;
+        // Foundry warp can cause an optimized block.timestamp within one test
+        // function to be cached; authorize both payments before advancing time.
         for (uint256 i; i < 2; ++i) {
             vm.prank(ANDREW);
-            bytes32 paymentId = founder.proposePayment(
+            authorized[i] = founder.proposePayment(
                 false, address(uint160(0xB000 + i)), uint128(420_000 ether),
                 FoundingTreasuryAuthority420.Purpose.INFRASTRUCTURE,
-                keccak256(abi.encode("ops", i)), nowTime, nowTime + 10 days
+                keccak256(abi.encode("ops", i)), proposalTime, proposalTime + 10 days
             );
             vm.prank(JANET);
-            founder.approvePayment(paymentId);
-            vm.warp(block.timestamp + 49 hours);
+            founder.approvePayment(authorized[i]);
+        }
+        vm.warp(uint256(proposalTime) + 49 hours);
+        for (uint256 i; i < 2; ++i) {
             vm.prank(ANDREW);
-            founder.schedulePayment(paymentId);
-            nowTime = uint64(block.timestamp);
+            founder.schedulePayment(authorized[i]);
         }
         require(founder.rollingCommitted(false) == 840_000 ether, "operations rolling sum");
         vm.prank(ADMIN);
-        bytes32 extra = _propose(
-            false, address(0xBA77), uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY
+        bytes32 extra = founder.proposePayment(
+            false, address(0xBA77), uint128(1 ether),
+            FoundingTreasuryAuthority420.Purpose.BOUNTY, keccak256("extra-ops"),
+            proposalTime + 49 hours, proposalTime + 10 days
         );
         vm.prank(ADMIN);
         (bool overflow,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (extra)));

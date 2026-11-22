@@ -4,7 +4,7 @@
 
 **CODE / LOCAL GETH + SOLIDITY + CONSENSUS + INDEXER QUALIFIED. NOT A SIGNED GENESIS V4, TESTNET-DEPLOYED, FOUNDER-CLAIMED OR PRODUCTION RELEASE.**
 
-Source-qualified candidate head prior to filing this retained evidence: `dfa3f687f1d9fa190d74063357117298b517c09d`. This retained document is evidence about the candidate, not a substitute for the following CI and code artifacts; further documentation-only commits do not rewrite the source-qualified evidence.
+Actual native reward source is identical to passing run `75c8c77e3c426a1285206bdc9c2524fea9b8ac01`; full frozen-address mirror and Indexer qualification were later proven against source/config head `c024073a1cf68abf6b78702b6bc1b958e31c6f42`. The PR's subsequent documentation-only commits do not modify those qualified implementation sources. This retained document is evidence about the candidate, not a substitute for the following CI and code artifacts; further documentation-only commits do not rewrite the source-qualified evidence.
 
 | Exact-source qualification | GitHub Actions result |
 |---|---|
@@ -13,7 +13,7 @@ Source-qualified candidate head prior to filing this retained evidence: `dfa3f68
 | Canonical source/retained ABI/Indexer, Explorer, SDK provenance | [420Stake STAKE-AUDIT-6 #44979206629](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206629) — SUCCESS |
 | Pinned upstream Geth v1.17.5 patch build, node420 wrapper, native issuer vectors, system-call/canonical execution recovery and local integrated consensus | [node420 Release Gate #44978720430](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44978720430) — SUCCESS at identical execution-source version; [#44979206397](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206397) additionally dispatched after verification-script-only update |
 | Governance/Genesis and source documentation qualification | [420Docs Qualification #44979206458](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206458) — SUCCESS |
-| Full monorepo 420Indexer workflow, beyond focused Stake Audit-6 and Go API tests | [420Indexer #44979206587](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206587) — additional in-flight coverage; not silently asserted green |
+| Full monorepo 420Indexer strict authority, TS/Go Indexer, PostgreSQL/reorg, Explorer EXP-0/EXP-1 and evidence upload | [420Indexer #44983618213](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44983618213) — **rerun SUCCESS**, source/config SHA `c024073a1cf68abf6b78702b6bc1b958e31c6f42`, qualification job `137089749613`, **99 successful job steps, 0 failures** |
 
 Previous diagnostic runs deliberately preserved: an early Foundry fixture used illegal comma-separated Solidity declarations (corrected); early Go fixtures used V2 RewardController in an expected V3 RPC test and incorrectly V3-valued CommunityValidatorReserve (still V2), plus an old contradiction error string (corrected without skipping tests); an Indexer PostgreSQL recovery fixture referenced the frozen historical V2 ABI while the candidate descriptor used exact V3 source hashes (corrected); the strict Stake Audit-6 retained descriptor validator was updated with the real new hashes and event set and **passed**. Old CI runs must not be cited as passing. The final source/test Git blobs are the authoritative ones and can be inspected in PR #1321.
 

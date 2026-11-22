@@ -18,7 +18,11 @@ interface IERC20DevelopmentCompensation420 {
 
 interface IFoundingCompensationReceiver420 {
     function isFoundingCompensationSplitter420() external view returns (bool);
-    function recordVaultTokenCompensation(address token, uint256 amount, bytes32 contributionId) external;
+    function recordVaultTokenCompensation(
+        address token,
+        uint256 amount,
+        bytes32 contributionId
+    ) external;
 }
 
 /// @notice Segregated, non-custodial router for the developer-compensation share of eligible application revenue.
@@ -189,9 +193,7 @@ contract DevelopmentCompensationVault420 is I420System {
                 abi.encodeCall(IFoundingCompensationReceiver420.isFoundingCompensationSplitter420, ())
             );
             if (supported && data.length == 32 && abi.decode(data, (bool))) {
-                IFoundingCompensationReceiver420(beneficiary).recordVaultTokenCompensation(
-                    token, amount, id
-                );
+                IFoundingCompensationReceiver420(beneficiary).recordVaultTokenCompensation(token, amount, id);
             }
         }
 

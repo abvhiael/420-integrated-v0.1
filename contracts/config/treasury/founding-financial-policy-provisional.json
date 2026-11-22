@@ -47,7 +47,7 @@
     "unspentFundsDestination": "community_governed_reserve",
     "irreversible": true
   },
-  "codeStatus": "Founding Treasury controller and full-credit sponsor path are contract candidates. 10% sponsor reward is accounted at RewardController accrual only; actual CommunityRewardReserve settlement, Genesis predeploy authorization, 50/25/25 payout deployment and retirement-verifier operation remain unqualified.",
+  "codeStatus": "GOV-PRE-03 code candidate: native Treasury budgets, unique case/purpose-bound disbursements, conservative rolling issuance and release caps, per-incident contingency cap, authentic Treasury/Vault exact capability release, rollback and immutable settlement checks. Founder keys remain deferred to testnet. No authorized live V4 funding, codehash-pinned executor deployment, signed founder enrollment, consensus reward settlement or retirement custody sweep claimed.",
   "genesisFunding": {
     "sourceAllocationId": "protocol-reserve",
     "sourcePredeploy": "0x0000000000000000000000000000000000000424",
@@ -56,5 +56,25 @@
     "contingencyEarmark420": 840000,
     "unearmarkedProtocolReserve420": 3560000,
     "treatment": "NON_ADDITIVE_WITHIN_PROTOCOL_RESERVE_UNFUNDED_VAULTS"
+  },
+  "enforcement": {
+    "scope": "NATIVE_420_ONLY_PENDING_GENESIS_V4",
+    "routinePaymentMustBeInitiatedAndReleasedBy": "FOUNDING_ADMINISTRATOR",
+    "exceptionalApproval": "ANY_TWO_DISTINCT_VERIFIED_FOUNDERS",
+    "contingencyEmergencyFastTrack": "ALL_THREE_VERIFIED_FOUNDERS",
+    "immutableReleaseExecutorBinding": "GENESIS_CONFIGURATOR_ONE_SHOT_REVIEWED_RUNTIME_CODEHASH",
+    "releaseExecutorDeployment": "NOT_BOUND_NOT_FUNDED",
+    "releaseExecutorAddress": null,
+    "releaseExecutorRuntimeCodeHash": null,
+    "disbursementPurposeCommitment": "keccak256(abi.encode(keccak256('420/FOUNDING/DISBURSEMENT/PURPOSE/V1'), block.chainid, address(foundingAuthority), paymentId, purpose, contingency, evidenceHash))",
+    "caseEvidenceHashUsage": "same incident must use the same independently reviewed evidenceHash across all recipients; source identifier publicly emitted",
+    "contingencyIncidentCumulative420": 210000,
+    "uniqueDisbursementPerPayment": true,
+    "foundingMarkExecutedRequiresActiveControllerRelease": true,
+    "treasuryDisbursementExactGrantRequired": true,
+    "vaultRouteExactGrantRequired": true,
+    "recipientNativeTransferAndVaultAccountingChecked": true,
+    "settlementAccounting": "ATOMIC_SINGLE_USE_RECORDED_BY_TREASURY_BUDGET_DISBURSEMENT_AND_VAULT",
+    "liveVaultsFunded": false
   }
 }

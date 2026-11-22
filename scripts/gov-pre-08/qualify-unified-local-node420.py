@@ -174,45 +174,99 @@ def main():
                     return v
             raise TimeoutError("certified settlement never reached block "+str(slot))
         wait_event("settled",0)
-        plan={"Parent":None,"Previous":0,"Slot":1,
-              "Outcomes":{"Rotation":{"Rotation":1,"EligibleSnapshot":0}},
-              "Beacon":ZERO,
-              "Payload":{"parentHash":genesisblock["hash"],"blockNumber":"0x1"}}
-        planfile=args.workdir/"certified-plan.json"
-        planfile.write_text(json.dumps(plan))
-        batch=json.loads(subprocess.check_output([str(producer),"--batch","--record",str(planfile)],text=True))
-        require(batch["chainId"]=="0x1a4" and len(batch["calls"])==1 and
-                batch["calls"][0]["target"].lower()==VALIDATORS,
-                "producer did not certify actual ValidatorRegistry native call")
-        stage=rpc("engine420_submitSystemCallsV1",[batch],auth=True)
-        require(stage["status"]=="ACCEPTED" and stage["batchRoot"]==batch["batchRoot"],
-                "native batch not authenticated and staged")
-        choice={"headBlockHash":genesisblock["hash"],"safeBlockHash":genesisblock["hash"],
-                "finalizedBlockHash":genesisblock["hash"]}
-        attrs={"timestamp":hex(int(genesisblock["timestamp"],16)+12),
-               "prevRandao":batch["batchRoot"],"suggestedFeeRecipient":VALIDATORS,
-               "withdrawals":[],"parentBeaconBlockRoot":ZERO}
-        fcu=rpc("engine_forkchoiceUpdatedV3",[choice,attrs],auth=True)
-        require(fcu["payloadStatus"]["status"]=="VALID" and fcu.get("payloadId"),
-                "patched Geth rejected certified block construction")
-        payload=rpc("engine_getPayloadV3",[fcu["payloadId"]],auth=True)["executionPayload"]
-        require(payload["extraData"]==batch["batchRoot"] and payload["parentHash"]==genesisblock["hash"],
-                "native consensus commitment mismatched execution header")
-        plan["Payload"]=payload
-        planfile.write_text(json.dumps(plan))
-        record=json.loads(subprocess.check_output([str(producer),"--record",str(planfile)],text=True))
-        consensus.stdin.write(json.dumps(record)+"\n");consensus.stdin.flush()
-        wait_event("settled",1)
-        latest=rpc("eth_getBlockByNumber",["latest",False])
-        require(latest["hash"]==payload["blockHash"] and latest["extraData"]==batch["batchRoot"],
-                "certified execution head not advanced")
-        require(int(call(GW,"lastSequence()"),16)==1,
-                "real native gateway did not execute certified consensus instruction")
-        archived=rpc("engine420_getSystemCallLogsV1",[latest["hash"]],auth=True)
-        require(archived["batchRoot"]==batch["batchRoot"] and archived["logs"],
-                "native consensus logs missing or detached from canonical block")
+        # Real reward issuance pays the known PUBLIC test-only EOA (key 0x01)
+        # directly from authenticated native Geth settlement, allowing that
+        # wallet to pay its own gas on this same chain. No Genesis faucet,
+        # unfunded account impersonation or reserve balance override is used.
+        proposer="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
+        initialProposer=int(rpc("eth_getBalance",[proposer,"latest"]),16)
+        require(initialProposer==0,"fixture wallet already holds unearned Genesis funds")
+        def produce(parent,previous,slot):
+            parenthash=parent["Payload"]["blockHash"] if parent else genesisblock["hash"]
+            outcomes={"Rotation":{"Rotation":slot,"EligibleSnapshot":0},
+                      "Reward":{"BlockNumber":slot,
+                                "Proposer":list(bytes.fromhex(proposer[2:])),
+                                "Participants":[],"ActiveCount":15}}
+            plan={"Parent":parent,"Previous":previous,"Slot":slot,
+                  "Outcomes":outcomes,"Beacon":ZERO,
+                  "Payload":{"parentHash":parenthash,"blockNumber":hex(slot)}}
+            planfile=args.workdir/f"certified-plan-{slot}.json"
+            planfile.write_text(json.dumps(plan))
+            batch=json.loads(subprocess.check_output([str(producer),"--batch","--record",
+                                                        str(planfile)],text=True))
+            require(batch["chainId"]=="0x1a4" and len(batch["calls"])==2 and
+                    batch["calls"][0]["target"].lower()==VALIDATORS and
+                    batch["calls"][1]["target"].lower()==REWARD,
+                    "certified batch not bound to actual Stake and native RewardController")
+            stage=rpc("engine420_submitSystemCallsV1",[batch],auth=True)
+            require(stage["status"]=="ACCEPTED" and stage["batchRoot"]==batch["batchRoot"],
+                    "native Stake/reward batch not authenticated")
+            finalized=rpc("eth_getBlockByNumber",["finalized",False])
+            choice={"headBlockHash":parenthash,"safeBlockHash":parenthash,
+                    "finalizedBlockHash":finalized["hash"] if finalized else genesisblock["hash"]}
+            attrs={"timestamp":hex(int(genesisblock["timestamp"],16)+slot*12),
+                   "prevRandao":batch["batchRoot"],"suggestedFeeRecipient":VALIDATORS,
+                   "withdrawals":[],"parentBeaconBlockRoot":ZERO}
+            fcu=rpc("engine_forkchoiceUpdatedV3",[choice,attrs],auth=True)
+            require(fcu["payloadStatus"]["status"]=="VALID" and fcu.get("payloadId"),
+                    "patched Geth rejected canonical certified payload build")
+            payload=rpc("engine_getPayloadV3",[fcu["payloadId"]],auth=True)["executionPayload"]
+            require(payload["extraData"]==batch["batchRoot"] and
+                    payload["parentHash"]==parenthash and
+                    int(payload["blockNumber"],16)==slot,
+                    "certified batch root/parent/block number not in execution header")
+            plan["Payload"]=payload
+            planfile.write_text(json.dumps(plan))
+            record=json.loads(subprocess.check_output([str(producer),"--record",
+                                                      str(planfile)],text=True))
+            consensus.stdin.write(json.dumps(record)+"\\n")
+            consensus.stdin.flush()
+            wait_event("settled",slot)
+            latest=rpc("eth_getBlockByNumber",["latest",False])
+            require(latest["hash"]==payload["blockHash"] and
+                    latest["extraData"]==batch["batchRoot"],
+                    "real certified 420 execution head not advanced atomically")
+            archived=rpc("engine420_getSystemCallLogsV1",[latest["hash"]],auth=True)
+            require(archived["batchRoot"]==batch["batchRoot"] and len(archived["logs"])>=3,
+                    "native 420 system call and real reward logs not archived")
+            return record,latest,batch,archived
+
+        first,block1,batch1,archived1=produce(None,0,1)
+        require(int(call(GW,"lastSequence()"),16)==2,
+                "real native Stake and RewardController two-call batch did not settle")
+        rewardedBalance=int(rpc("eth_getBalance",[proposer,"latest"]),16)
+        require(rewardedBalance>initialProposer,
+                "actual native 420 reward not paid to deterministic local Wallet signer")
+
+        # Run the real Wallet Treasury/Governance clients, sign an EIP-1559
+        # transfer using the earned native reward, and submit RAW tx bytes.
+        # The second BLS-certified execution payload must include that exact
+        # transaction and its canonical receipt; no eth_sendTransaction shortcut.
+        wallet_origin=args.workdir/"wallet-signed.json"
+        wallet_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-local-wallet.mjs"),
+                    "--rpc","http://127.0.0.1:18780",
+                    "--graph",str(args.graph.resolve())]
+        subprocess.run(wallet_cmd+["--mode","sign","--output",str(wallet_origin)],
+                       cwd=ROOT,check=True)
+        wallet=json.loads(wallet_origin.read_text())
+        require(wallet["realWalletCoreTreasuryAndGovernanceDiscovered"] and
+                wallet["rawTransactionAcceptedByPatchedGeth"] and
+                wallet["wrongChainSignedTransactionRejected"],
+                "real locally signed wallet did not pass source-bound user path")
+        second,latest,batch,archived=produce(first,2,2)
+        require(int(call(GW,"lastSequence()"),16)==4,
+                "real gateway did not advance exactly four certified native calls")
+        signedReceipt=rpc("eth_getTransactionReceipt",[wallet["txHash"]])
+        require(signedReceipt and signedReceipt["status"]=="0x1" and
+                signedReceipt["blockHash"]==latest["hash"],
+                "actual signed Wallet EOA tx missing from certified block two")
+        wallet_final=args.workdir/"wallet-confirmed.json"
+        subprocess.run(wallet_cmd+["--mode","verify","--tx-hash",wallet["txHash"],
+                                "--output",str(wallet_final)],cwd=ROOT,check=True)
         cp=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
-        require(cp["Settlement"]["ExecutionBlock"]==1,"consensus checkpoint not canonical")
+        require(cp["Settlement"]["ExecutionBlock"]==2,
+                "certified settlement checkpoint did not reach signed Wallet block")
+
         indexstore=args.workdir/"indexer-canonical.json"
         env=dict(os.environ,INDEXER_RPC_URL="http://127.0.0.1:18780",
                  INDEXER_ENGINE_URL="http://127.0.0.1:18781",

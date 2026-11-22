@@ -57,12 +57,13 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          data = json.loads(Path("out/Governance420.sol/Governance420.json").read_text())
-          deployed = data["deployedBytecode"]["object"]
-          assert deployed.startswith("0x"), "invalid deployed code"
-          count = (len(deployed) - 2) // 2
-          print("Governance420 deployable runtime bytes:", count)
-          assert count <= 24576, f"EIP-170 cap breached: {count} > 24576"
+          for contract in ("Governance420", "CivicInitialElectorateEnrollment420"):
+              data = json.loads(Path(f"out/{contract}.sol/{contract}.json").read_text())
+              deployed = data["deployedBytecode"]["object"]
+              assert deployed.startswith("0x"), f"invalid deployed code: {contract}"
+              count = (len(deployed) - 2) // 2
+              print(f"{contract} deployable runtime bytes:", count)
+              assert count <= 24576, f"EIP-170 cap breached: {contract}: {count} > 24576"
           PY
       - name: Qualify post-Genesis real first-electorate, adversarial and Timelock paths
         working-directory: contracts

@@ -90,6 +90,7 @@ jobs:
             --genesis "$RUNNER_TEMP/govpre08-source/govpre08-step3-unified-local-node420-genesis.json" \
             --graph "$RUNNER_TEMP/govpre08-source/govpre08-step3-graph-a.json" \
             --bindings "$RUNNER_TEMP/govpre08-source/govpre08-step3-native-bindings-a.json" \
+            --funding "$RUNNER_TEMP/govpre08-source/govpre08-step3-funding-a.json" \
             --workdir "$RUNNER_TEMP/govpre08-unified-chain-420" \
             --output "$RUNNER_TEMP/govpre08-unified-local-report.json"
       - name: Retain exact-head authentic local-chain receipts, native logs and service checks

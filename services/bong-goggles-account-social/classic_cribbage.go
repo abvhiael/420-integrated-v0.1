@@ -485,7 +485,8 @@ func (cribbageRules) Validate(f RuleFrame)error{
   total:=0;for _,card:=range d.Pile{total+=cribbagePips(card)}
   if total!=d.Count||(d.Count==0)!=(len(d.Pile)==0)||
    (d.Count==0&&d.Last!=-1)||(d.Count>0&&d.Last==-1){return ErrInvalid}
-  if d.Count==31{return ErrInvalid}
+  // A winning 31 ends immediately before the normal sequence reset.
+  if d.Count==31&&!f.Terminal{return ErrInvalid}
   if !f.Terminal{
    if cribbageAllPlayed(d)||len(d.Remaining[f.Turn])==0||d.Go[f.Turn]{return ErrInvalid}
   }

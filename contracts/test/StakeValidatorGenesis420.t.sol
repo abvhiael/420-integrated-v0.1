@@ -285,16 +285,10 @@ contract StakeValidatorGenesis420Test {
             ))
         );
         require(!unbacked, "virtual accrual accepted without physical node420 backing");
+        // One unsolicited native unit simulates forced ETH (SELFDESTRUCT). Geth
+        // verifies that the exact 100 newly issued units are distributed and
+        // the pre-existing unit remains unspent, rather than halting consensus.
         vm.deal(address(rewards), 101 ether);
-        vm.prank(SYSTEM_CALLER);
-        (bool excess,) = address(rewards).call(
-            abi.encodeCall(rewards.applyConsensusReward, (
-                uint64(block.number), address(0xABCD), participants,
-                uint256(100 ether), uint256(0), uint256(0), uint256(0)
-            ))
-        );
-        require(!excess, "surplus unauthorized native reward backing accepted");
-        vm.deal(address(rewards), 100 ether);
         vm.prank(SYSTEM_CALLER);
         rewards.applyConsensusReward(uint64(block.number), address(0xABCD), participants,
             100 ether, 0, 0, 0);
@@ -304,7 +298,7 @@ contract StakeValidatorGenesis420Test {
                 "reserve accrued/physical funds not reconciled");
         require(address(0xABCD).balance == 90 ether &&
                 rewards.COMMUNITY_REWARD_RESERVE().balance == 10 ether &&
-                address(rewards).balance == 0 && rewards.nativeRewardPaid() == 100 ether,
+                address(rewards).balance == 1 ether && rewards.nativeRewardPaid() == 100 ether,
                 "node420 backing did not atomically pay 90/10");
 
         vm.deal(SYSTEM_CALLER, 10 ether);

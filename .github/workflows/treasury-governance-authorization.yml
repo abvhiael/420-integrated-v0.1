@@ -90,8 +90,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p contracts/out
-          cp -R "$REC5_ROOT/out/." contracts/out/
+          # The isolated REC-5 test closure is compiled independently for test
+          # execution. Its AST/metadata IDs are not the canonical GOV-AUDIT-6
+          # compilation unit and must not overwrite the retained artifact input.
+          # Build from the identical source and settings as GOV-AUDIT-6, then
+          # still enforce byte-for-byte retained runtime, ABI and storage parity.
+          (
+            cd contracts
+            forge build src/governance
+            forge build src/apps/ProtocolRegistry.sol
+          )
           python3 scripts/generate-governance-audit-6-artifacts.py --check --print
       - name: Verify canonical deployment and Treasury release commitments
         run: |

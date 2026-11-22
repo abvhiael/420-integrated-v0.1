@@ -8,6 +8,8 @@ import {discover420Wallet,WalletSessionController420,buildWalletHandoffUrl} from
 import {renderApplicationShell,navigateWithoutReload} from './core/app-shell.js';
 import {createChaosGame,takeChaosTurn,advanceChaosLeg} from './core/cross-country-chaos.js';
 import {ChaosRoomsClient} from './core/chaos-online.js';
+import {bindChaosOnline} from './core/chaos-online-bindings.js';
+import {bindClassicRoomsDom} from './core/classic-room-bindings.js';
 import {configureChaosComputerSeats,isChaosComputer,advanceChaosComputerTurns} from './core/chaos-computer.js';
 import {CHAOS_TAB_KEY,CHAOS_DEVICE_KEY,beginChaosJournal,appendChaosJournal,readChaosStorage,writeChaosStorage,removeChaosStorage} from './core/chaos-save.js';
 import {keepChaosHandRevealed} from './core/chaos-board.js';
@@ -18,7 +20,7 @@ import {CHAOS_VEHICLES,applyChaosVehicleSelection} from './core/chaos-vehicles.j
 import {selectGreeting,greetingSrc} from './core/dashboard-art.js';
 import {AccountSocialController} from './core/account-social-controller.js';
 import {AccountIdentityController} from './core/account-identity.js';
-import {ClassicRoomsController,ROOM_LIMITS} from './core/classic-rooms.js';
+import {ClassicRoomsController} from './core/classic-rooms.js';
 import {resolveRoute} from './core/routes.js';
 import {AccountExtrasController} from './core/account-extras.js';
 import {AccountXPController} from './core/account-xp.js';
@@ -74,41 +76,7 @@ function bindAccountActions(){
 function roomRoute(){return resolveRoute(window.location.pathname);}
 function isClassicRoomSurface(){return ['classic-rooms','classic-room'].includes(roomRoute().id);}
 function refreshClassicRooms(){return classicRoomsController?.refresh(roomRoute().roomId??null);}
-function bindClassicRooms(){
- if(!isClassicRoomSurface()||!classicRoomsController?.client.enabled)return;
- root.querySelector('[data-classic-room-refresh]')?.addEventListener('click',()=>void refreshClassicRooms());
- const create=root.querySelector('[data-classic-room-create]');
- if(create){
-  const syncSeats=()=>{
-   const game=create.elements.namedItem('gameId')?.value,range=ROOM_LIMITS[game];
-   const select=create.elements.namedItem('seatCount');
-   if(!select||!range)return;
-   for(const option of select.options)option.disabled=Number(option.value)<range[0]||Number(option.value)>range[1];
-   if(select.selectedOptions[0]?.disabled)select.value=String(range[0]);
-  };
-  create.elements.namedItem('gameId')?.addEventListener('change',syncSeats);syncSeats();
-  create.addEventListener('submit',async event=>{
-   event.preventDefault();const data=new FormData(create);
-   try{
-    const next=await classicRoomsController.act('create',{
-     gameId:data.get('gameId'),visibility:data.get('visibility'),
-     seatCount:Number(data.get('seatCount'))
-    });
-    if(next.status==='ready'&&next.selected?.id){
-     window.history.pushState({},'','/games/rooms/'+next.selected.id);
-     onRouteChange();
-    }
-   }catch{ /* controller supplies a visible, bounded error notice */ }
-  });
- }
- for(const form of root.querySelectorAll('[data-classic-room-action]'))form.addEventListener('submit',event=>{
-  event.preventDefault();const data=new FormData(form);
-  void classicRoomsController.act(form.dataset.classicRoomAction,{
-   seat:Number(form.dataset.roomSeat),target:data.get('target')??null,
-   difficulty:data.get('difficulty')??null
-  }).catch(()=>{ /* already displayed by controller */ });
- });
-}
+function bindClassicRooms(){bindClassicRoomsDom(root,classicRoomsController,{isSurface:isClassicRoomSurface(),onRefresh:refreshClassicRooms,onRouteChange,history:window.history});}
 function currentAccountExtra(){
  if(window.location.pathname==='/account/messages')return accountExtras?.messages;
  if(window.location.pathname==='/account/games')return accountExtras?.games;
@@ -321,37 +289,6 @@ function bindChaos(){
  });
 }
 
-function bindChaosOnline(){
- if(window.location.pathname!=='/classics/cross-country-chaos'||!chaosOnline)return;
- root.querySelector('[data-chaos-online-create]')?.addEventListener('submit',event=>{
-  event.preventDefault();const form=new FormData(event.currentTarget);
-  const humanSeats=Number(form.get('humanSeats')),botCount=Number(form.get('botCount'));
-  void chaosOnline.mutate('create',{humanSeats,bots:Array.from({length:botCount},()=>String(form.get('difficulty'))),vehicle:'wagon'}).catch(()=>{});
- });
- root.querySelector('[data-chaos-online-join]')?.addEventListener('submit',event=>{
-  event.preventDefault();void chaosOnline.mutate('join',{code:String(new FormData(event.currentTarget).get('code')||'').trim()}).catch(()=>{});
- });
- root.querySelector('[data-chaos-online-chat]')?.addEventListener('submit',event=>{
-  event.preventDefault();const input=event.currentTarget.elements.namedItem('text');
-  const text=input?.value?.trim();if(!text)return;
-  input.value='';void chaosOnline.sendChat(text).catch(()=>{
-   const current=root.querySelector('[data-chaos-online-chat] textarea');
-   if(current&&!current.value)current.value=text;
-  });
- });
- for(const b of root.querySelectorAll('[data-chaos-online-select]'))b.addEventListener('click',()=>chaosOnline.selectCard(Number(b.dataset.chaosOnlineSelect)));
- for(const b of root.querySelectorAll('[data-chaos-online-action]'))b.addEventListener('click',()=>{
-  const action=b.dataset.chaosOnlineAction;
-  if(action==='back'){chaosOnline.emit({...chaosOnline.state,room:null,error:null,unreadChat:0,chatError:null});void chaosOnline.refresh();return;}
-  if(action==='chat-toggle'){chaosOnline.toggleChat();return;}
-  if(action==='mute'){chaosOnline.toggleMute(Number(b.dataset.seat));return;}
-  if(action==='chat-report'){void chaosOnline.reportChat(b.dataset.messageId).catch(()=>{});return;}
-  if(action==='refresh'){void chaosOnline.refresh();return;}
-  if(action==='open'){void chaosOnline.open(b.dataset.room);return;}
-  if(action==='move'){try{void chaosOnline.mutate('move',{move:JSON.parse(b.dataset.move)}).catch(()=>{});}catch{}return;}
-  if(action==='start'||action==='next')void chaosOnline.mutate(action).catch(()=>{});
- });
-}
 function renderCurrent(message=null){const bootstrap=deriveBootstrapState({config:runtimeConfig,connectedChainId:walletView?.chainId??null});if(bootstrap.state==='maintenance'){publicFeedReader?.invalidate();publicFeedProjection=null;render({state:bootstrap.state,detail:'Bong Goggles is temporarily in maintenance mode.'});return;}const walletHref=runtimeConfig?buildWalletHandoffUrl(runtimeConfig.walletUrl,{action:'connect',returnUrl:window.location.href}):null;root.dataset.state=bootstrap.state;const existingInput=root.querySelector('[data-chaos-online-chat] textarea');const draft=existingInput?.value;
  const focused=existingInput===document.activeElement;const selection=focused?[existingInput.selectionStart,existingInput.selectionEnd]:null;
  const existingLog=root.querySelector('[data-chaos-chat-log]');
@@ -368,7 +305,7 @@ function renderCurrent(message=null){const bootstrap=deriveBootstrapState({confi
  if(nextInput&&draft!==undefined){nextInput.value=draft;if(focused){nextInput.focus({preventScroll:true});if(selection)nextInput.setSelectionRange(...selection);}}
  const nextLog=root.querySelector('[data-chaos-chat-log]');
  if(nextLog)nextLog.scrollTop=!scrolled||scrolled.nearBottom?nextLog.scrollHeight:scrolled.top;
- updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountActions();bindClassicRooms();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline();
+ updateRobots();bindWalletActions();bindSettings();bindAccountSocial();bindAccountActions();bindClassicRooms();bindAccountExtras();bindAccountXP();bindAccountMonetization();bindChaosOnline(root,chaosOnline,window.location.pathname);
  const effect=chaosEffects;
  chaosEffects=null;chaosRepairCue=null;
  if(effect&&window.location.pathname==='/classics/cross-country-chaos'){

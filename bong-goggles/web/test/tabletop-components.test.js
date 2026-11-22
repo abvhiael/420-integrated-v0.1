@@ -177,7 +177,7 @@ test('BC-0.9 chess/checkers and 9, 13, 19 Go boards render bounded, accessible s
  }
 });
 test('BC-0.9 responsive and forced-color accessibility skin is packaged with Classics',async()=>{
- const css=await readFile(resolve(import.meta.dirname,'../styles.css'),'utf8');
+ const css=await readFile(resolve(import.meta.dirname,'../game-kit.css'),'utf8');
  for(const token of ['game-kit__card-face','game-kit__rack','game-kit__board',
    'game-kit__dice','game-kit__scorecard','game-kit__seats','game-kit__turn',
    'game-kit__controls','forced-colors:active','prefers-reduced-motion:reduce']){

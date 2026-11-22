@@ -783,3 +783,9 @@
  .ccc-online-decks,.ccc-online-chat,.ccc-online-stock-back,.ccc-online-chat-message,.ccc-online-card-select{background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important}
 }
 @media(prefers-reduced-motion:reduce){.ccc-online-chat{scroll-behavior:auto}}
+
+/* Report actions remain legible without visually overtaking room conversation. */
+.ccc-online-chat-report{float:right;min-height:30px!important;padding:2px 6px!important;font-size:.64rem!important;background:transparent!important;color:#f2d3a4!important;border:1px solid #867252!important;margin-top:3px}
+.ccc-online-chat-message::after{content:"";display:block;clear:both}
+.ccc-online-chat-notice{margin:0;color:#bce9bf;font-size:.74rem;line-height:1.3}
+.ccc-online-chat-report:focus-visible{outline:3px solid #ffe3a4;outline-offset:1px}

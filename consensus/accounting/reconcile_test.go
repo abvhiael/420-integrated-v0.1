@@ -167,7 +167,7 @@ func TestCanonicalReconciliationRestartAndDiscrepancies(t *testing.T) {
 		{"missing", "MISSING_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = nil }},
 		{"duplicate", "DUPLICATE_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs = append(i.Logs, i.Logs[0]) }},
 		{"orphan", "ORPHANED_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].BlockHash = hex32([32]byte{9}) }},
-		{"contradictory", "CONTRADICTORY_INDEXER_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].Data = "0x" + strings.Repeat("0", 256) }},
+		{"contradictory", "CONTRADICTORY_ACCOUNTING_EVENT", func(s *fixtureSource, i *Index) { i.Logs[0].Data = "0x" + strings.Repeat("0", 256) }},
 		{"state", "EXECUTION_STATE_MISMATCH", func(s *fixtureSource, i *Index) { s.final["grossSecurityIssued"] = "1" }},
 		{"missing native", "MISSING_CONSENSUS_EVENT", func(s *fixtureSource, i *Index) { s.logs = nil }},
 		{"duplicated execution", "DUPLICATE_EXECUTION_EVENT", func(s *fixtureSource, i *Index) { s.logs = append(s.logs, s.logs[0]) }},

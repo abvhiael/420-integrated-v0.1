@@ -4,7 +4,7 @@
 // The 3-player variant uses a visible virtual amber middle track. In 4-player
 // cribbage the two opposite-seat teams share the two physical tracks.
 export const CRIBBAGE_BOARD_SIZE=Object.freeze({width:1448,height:1086});
-export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/leaf-board.webp';
+export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/leaf-board.svg';
 export const CRIBBAGE_TRACKS=Object.freeze(['green','ivory','amber']);
 export const CRIBBAGE_FINISH=Object.freeze({x:704,y:893,number:121});
 

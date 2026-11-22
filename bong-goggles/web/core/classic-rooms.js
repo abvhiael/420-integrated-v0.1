@@ -109,6 +109,7 @@ export class ClassicRoomsController{
    throw Error('420ID room session required');
   const gen=++this.generation;
   const current=this.state;
+  let submitted=false;
   try{
    let path,body;
    if(action==='create'){
@@ -130,6 +131,7 @@ export class ClassicRoomsController{
      body.difficulty=data.difficulty;
     }
    }
+   submitted=true;
    const response=await this.client.request(path,{method:'POST',body});
    if(gen!==this.generation)return this.state;
    if(response.status===401)return this.emit({status:'guest'});
@@ -146,7 +148,8 @@ export class ClassicRoomsController{
    if(!view)throw Error('Unverified room update');
    return this.refresh(view.id);
   }catch(error){
-   if(gen===this.generation)this.emit({status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'});
+   if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'}:
+    {...current,notice:'Invalid room request. No action was submitted.'});
    throw error;
   }
  }

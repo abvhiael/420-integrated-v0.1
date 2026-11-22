@@ -147,6 +147,7 @@ test('BC-0.5 invitation target and bot difficulty are validated before one-shot 
  await assert.rejects(client.act('invite',{seat:1,target:'50000000-5555-4555-8555-555555555555'}));
  await assert.rejects(client.act('bot',{seat:1,difficulty:'unlimited'}));
  await assert.rejects(client.act('start',{seat:0}));
+ assert.equal(client.state.status,'ready','Local invalid forms must not erase a verified room');
  assert.equal(calls.filter(c=>c.opts.method==='POST').length,0);
  await client.act('invite',{seat:1,target:friend});
  const submit=calls.find(c=>c.opts.method==='POST');

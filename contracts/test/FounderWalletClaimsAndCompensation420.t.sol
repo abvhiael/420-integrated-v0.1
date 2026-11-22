@@ -12,6 +12,23 @@ contract FounderWalletTestReceiver420 {
     receive() external payable {}
 }
 
+contract FounderCompensationTestToken420 {
+    mapping(address => uint256) public balanceOf;
+    function mint(address to,uint256 amount) external { balanceOf[to]+=amount; }
+    function transfer(address recipient,uint256 amount) external returns (bool) {
+        require(balanceOf[msg.sender]>=amount,"insufficient");
+        balanceOf[msg.sender]-=amount;
+        balanceOf[recipient]+=amount;
+        return true;
+    }
+}
+
+contract FounderCompensationDishonestToken420 {
+    mapping(address => uint256) public balanceOf;
+    function mint(address to,uint256 amount) external { balanceOf[to]+=amount; }
+    function transfer(address,uint256) external pure returns (bool) { return true; }
+}
+
 contract FounderWalletClaimsAndCompensation420Test {
     VmFounderWallets420 private constant vm = VmFounderWallets420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address internal constant ADMIN = address(0xAA11);
@@ -70,6 +87,30 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(ok, "second contribution");
         require(splitter.claimableNative(ADMIN) == 5 ether, "admin subsequent accrual");
         require(splitter.claimableNative(ANDREW) == 2.5 ether, "andrew subsequent accrual");
+    }
+
+    function testTokenSplitUsesExactAssetTransfersAndRejectsFakeSuccess() public {
+        FounderCompensationTestToken420 token = new FounderCompensationTestToken420();
+        token.mint(address(splitter),101);
+        require(splitter.claimableToken(address(token),ADMIN)==50,"admin token share");
+        require(splitter.claimableToken(address(token),ANDREW)==25,"andrew token share");
+        require(splitter.claimableToken(address(token),JANET)==26,"janet rounding share");
+        vm.prank(ADMIN); splitter.claimToken(address(token));
+        vm.prank(ANDREW); splitter.claimToken(address(token));
+        vm.prank(JANET); splitter.claimToken(address(token));
+        require(token.balanceOf(ADMIN)==50 && token.balanceOf(ANDREW)==25
+            && token.balanceOf(JANET)==26 && token.balanceOf(address(splitter))==0,
+            "three real token deliveries");
+        token.mint(address(splitter),100);
+        require(splitter.claimableToken(address(token),ADMIN)==50,"follow-on accrual");
+        FounderCompensationDishonestToken420 dishonest=new FounderCompensationDishonestToken420();
+        dishonest.mint(address(splitter),100);
+        vm.prank(ADMIN);
+        (bool faked,) = address(splitter).call(
+            abi.encodeCall(splitter.claimToken,(address(dishonest)))
+        );
+        require(!faked,"fake-success token stole developer payout accounting");
+        require(splitter.totalTokenClaimed(address(dishonest))==0,"failed transfer recorded as paid");
     }
 
     function testOneWeiRemainderGoesToJanetAndCannotBeReclaimed() public {

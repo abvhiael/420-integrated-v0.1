@@ -76,6 +76,7 @@ func bc15Move(t *testing.T,session ClassicSessionView)map[string]any{
 }
 func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
  store,h,host,peer,adapter:=bc15Fixture(t,"198.51.100.215")
+ bc15AdvanceRateWindow(t,store)
  room:=bc15Room(t,h,host,peer,2)
  if w:=request(h,"POST","/v1/classic-sessions",body(map[string]string{"roomId":room.ID}),peer);w.Code!=404{
   t.Fatal("nonhost started independent 420ID match",w.Code)
@@ -105,6 +106,7 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
  // at checkpoints and at finish; the game still runs all the way to 121.
  current:=match
  for step:=0;step<400;step++{
+  if step>0&&step%30==0{bc15AdvanceRateWindow(t,store)}
   if current.Status=="finished"{
    a:=bc15Get(t,h,host,match.ID);b:=bc15Get(t,h,peer,match.ID)
    if a.Sequence!=b.Sequence||a.Sequence!=current.Sequence||a.ViewerSeat!=0||b.ViewerSeat!=1||bytes.Equal(a.PrivateView,b.PrivateView){
@@ -169,13 +171,15 @@ func TestBC15TwoIndependent420IDAccountsPlayAndColdResume(t *testing.T){
 }
 func TestBC15QualifiedMixed420IDAndComputerSeatPersistence(t *testing.T){
  store,h,host,peer,_:=bc15Fixture(t,"198.51.100.216")
- _=store
+ bc15AdvanceRateWindow(t,store)
  for _,n:=range []int{3,4}{
+  bc15AdvanceRateWindow(t,store)
   room:=bc15Room(t,h,host,peer,n)
   match:=bc06Start(t,h,host,room.ID)
   if match.TurnSeat==nil{t.Fatal("no turn")}
   botMoves:=0
   for step:=0;step<80;step++{
+   if step>0&&step%20==0{bc15AdvanceRateWindow(t,store)}
    current:=bc15Get(t,h,host,match.ID)
    if current.Status!="active"{break}
    seat:=*current.TurnSeat

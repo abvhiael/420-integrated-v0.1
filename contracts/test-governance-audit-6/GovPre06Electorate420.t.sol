@@ -439,16 +439,24 @@ contract GovPre06Electorate420Test {
         vm.prank(address(timelock));
         Identity420(IDENTITY).setIssuer(outsiderIssuer, otherController, keccak256("other-issuer"), true);
         vm.prank(otherController);
-        Identity420(IDENTITY).issueCredential(
-            outsiderCredential, outsiderIssuer, _profile(BOB),
-            keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"), keccak256("attestation"), 0
-        );
+        Identity420(IDENTITY)
+            .issueCredential(
+                outsiderCredential,
+                outsiderIssuer,
+                _profile(BOB),
+                keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"),
+                keccak256("attestation"),
+                0
+            );
         require(Identity420(IDENTITY).credentialMeetsTrust(outsiderCredential, 2), "not a valid VERIFIED issuer");
         vm.prank(BOB);
-        (bool forged,) = address(enrollment).call(abi.encodeCall(
-            CivicInitialElectorateEnrollment420.enroll,
-            (CivicIds420.House.COMMUNITY, _profile(BOB), outsiderCredential)
-        ));
+        (bool forged,) = address(enrollment)
+            .call(
+                abi.encodeCall(
+                    CivicInitialElectorateEnrollment420.enroll,
+                    (CivicIds420.House.COMMUNITY, _profile(BOB), outsiderCredential)
+                )
+            );
         require(!forged, "outside issuer granted constitutional membership");
         _enroll(BOB, CivicIds420.House.COMMUNITY);
     }

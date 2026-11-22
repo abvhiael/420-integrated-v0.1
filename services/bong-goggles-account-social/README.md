@@ -785,3 +785,16 @@ exact-head `.github/workflows/bc-1-5-cribbage-multiplayer.yml`.
 Production Render workspace selection, operator environment changes,
 actual external 420ID account cookies, deployment and real cross-device
 live acceptance must be verified separately before any public release.
+
+
+## BC-1.6 — authenticated Cribbage challenges and private match history
+
+The operator-only migration 009_classic_match_requests.sql adds an immutable per-principal request ledger and prevents duplicate rematches of a terminal session. After migration, grant only:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_match_requests TO bonggoggles_social_runtime;
+
+Never grant UPDATE, DELETE, TRUNCATE or table-wide modifications. ReadyClassicMatchRequests performs an opt-in strict privilege check. Existing 420ID session/room activation is still required; do not add another public login, wallet signature or reward claim.
+
+Signed 420ID endpoints: GET /v1/classic-sessions/history (at most 20 verified cribbage per-seat result summaries and recent wins/losses, plus unexpired blocked-filtered invitations); POST /v1/classic-sessions/challenge (requestId,target; mutual unblocked friends only); POST /v1/classic-sessions/{uuid}/rematch (requestId; terminal participant only). Creation returns a private, non-started room with invited seats. Every human opponent must accept; the qualified host starts a fresh authoritative match. Outcomes are off-chain, zero-wager, and not a leaderboard or on-chain reward entitlement. Neither opponent cards nor private state are published. This is a source-level restricted-acceptance feature, not evidence of deployment or public release.
+
+Enable only after the grants and BC-1.5 prerequisites are actually deployed, with `SOCIAL420_CRIBBAGE_SOCIAL_MODE=restricted-acceptance`. A missing, empty or `disabled` value leaves BC-1.6 GET/POST endpoints at HTTP 404 while BC-1.5 games continue unchanged. Unknown values fail startup; an unsafe runtime role or missing migration fails the operator activation preflight. Browser results remain clearly off-chain and do not assert live deployment.

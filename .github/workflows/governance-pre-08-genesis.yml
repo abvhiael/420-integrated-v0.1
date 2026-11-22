@@ -227,12 +227,46 @@ jobs:
           assert right["realConstructorExecutedOnDisposableLocalChain"]
           print("GOV-PRE-08_CONSTRUCTOR_AND_PREDEPLOY_DETERMINISM=PASS (2 independent local chains)")
           PY
+      - name: Prepare only GOV-PRE-08 real deployment test import closure
+        working-directory: contracts
+        env:
+          GOV_PRE_08_ROOT: ${{ runner.temp }}/gov-pre-08-foundry
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,re,shutil
+          from pathlib import Path
+          root=Path.cwd().resolve()
+          dest=Path(os.environ["GOV_PRE_08_ROOT"])
+          pending=[root/"test/GOVPRE08LocalDeployment420.t.sol"]
+          seen=set()
+          pat=re.compile(r'\\bimport\\s+(?:[^;]*?\\bfrom\\s+)?["\\x27]([^"\\x27]+)["\\x27]\\s*;')
+          while pending:
+              p=pending.pop().resolve()
+              if p in seen: continue
+              if not p.is_relative_to(root) or not p.is_file():
+                  raise RuntimeError(f"missing GOV-PRE-08 dependency: {p}")
+              seen.add(p)
+              for imported in pat.findall(p.read_text()):
+                  pending.append(p.parent/imported)
+          for p in sorted(seen):
+              out=dest/p.relative_to(root)
+              out.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(p,out)
+              assert p.read_bytes()==out.read_bytes()
+          shutil.copyfile(root/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\\n")
+          (Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-import-closure.json").write_text(
+              json.dumps({str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest()
+                          for p in sorted(seen)},sort_keys=True,indent=2)+"\\n")
+          print("GOV_PRE_08_IMPORTED_GENUINE_SOURCE_FILES",len(seen))
+          PY
       - name: Fully deploy and bind founder/Treasury/sponsor/compensation/retirement graph twice
         run: |
           set -euo pipefail
-          forge test --root contracts --match-contract GOVPRE08LocalDeployment420Test -vv \
+          forge test --root "$RUNNER_TEMP/gov-pre-08-foundry" --match-path test/GOVPRE08LocalDeployment420.t.sol -vv \
             | tee "$RUNNER_TEMP/gov-pre-08-deployment-graph-a.log"
-          forge test --root contracts --match-contract GOVPRE08LocalDeployment420Test -vv \
+          forge test --root "$RUNNER_TEMP/gov-pre-08-foundry" --match-path test/GOVPRE08LocalDeployment420.t.sol -vv \
             | tee "$RUNNER_TEMP/gov-pre-08-deployment-graph-b.log"
           python3 - <<'PY'
           import os,re
@@ -257,6 +291,7 @@ jobs:
         with:
           name: gov-pre-08-unsigned-v4-${{ github.event.pull_request.head.sha || github.sha }}
           path: |
+            ${{ runner.temp }}/gov-pre-08-import-closure.json
             ${{ runner.temp }}/gov-pre-08-deployment-graph-a.log
             ${{ runner.temp }}/gov-pre-08-deployment-graph-b.log
             ${{ runner.temp }}/gov-pre-08-graph-two-runs.txt

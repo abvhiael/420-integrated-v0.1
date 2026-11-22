@@ -205,7 +205,7 @@ export class CribbageSessionController{
    const pegs=existing&&replay&&queue.length?
     this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount);
    if(!replay){this.cancelTimer();}
-   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,
+   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,
     announcement:replay?'':this.state.announcement??'',
     showing:null,notice:existing&&session.sequence>existing.sequence+1?
      'Resynchronized to verified scores; missed announcements were not invented.':''});
@@ -238,7 +238,7 @@ export class CribbageSessionController{
    if(!session||session.id!==current.id||session.viewerSeat!==current.viewerSeat||
     session.sequence!==current.sequence+1)throw Error('Move was not confirmed by the match server');
    const queue=cribbageAnnouncementQueue(current,session);
-   this.emit({status:'ready',session,submitting:false,queue,announcement:'',
+   this.emit({status:'ready',session,submitting:false,resignPending:false,queue,announcement:'',
     notice:'',pegs:queue.length?this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount)});
    if(queue.length)this.advance();
    return this.state;

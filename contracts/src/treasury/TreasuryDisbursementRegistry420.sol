@@ -172,6 +172,23 @@ contract TreasuryDisbursementRegistry420 is I420System, SystemAccess {
     ) external {
         Disbursement storage d = _get(id);
         if (d.state != State.SCHEDULED) revert InvalidState();
+        // General Treasury capability grants alone do NOT authorize forging the
+        // execution evidence of founding budgets. A founding budget is settled only
+        // by the pinned release executor while its controller is actively executing
+        // the exact disbursement. Ordinary Civic Treasury budgets are unchanged.
+        if (foundingAuthority != address(0)) {
+            (bool ok, bytes memory result) = foundingAuthority.staticcall(
+                abi.encodeWithSignature("isFoundingBudget(bytes32)", d.budgetId)
+            );
+            if (!ok || result.length != 32) revert ExecutionUnauthorized();
+            if (abi.decode(result, (bool))) {
+                (ok, result) = foundingAuthority.staticcall(
+                    abi.encodeWithSignature("isActiveFoundingRelease(bytes32,address)", id, msg.sender)
+                );
+                if (!ok || result.length != 32 || !abi.decode(result, (bool)))
+                    revert ExecutionUnauthorized();
+            }
+        }
         if (
             block.timestamp < d.notBefore || block.timestamp > d.expiresAt || vaultReleaseHash == bytes32(0)
                 || !budgets.isEffective(d.budgetId) || !policy.isAllowed(d.asset, d.amount)

@@ -29,9 +29,10 @@ function pegHtml(peg,lane){
   return '<g class="cribbage-peg cribbage-peg--'+lane+'" role="img" aria-label="'+
    esc('Team '+(peg.team+1)+', '+name.toUpperCase()+' peg on '+(peg[name]||'start'))+'">'+
    '<circle cx="'+pos.x+'" cy="'+pos.y+'" r="10" class="cribbage-peg__glow"/>'+
-   '<circle cx="'+pos.x+'" cy="'+pos.y+'" r="6" class="cribbage-peg__head"/>'+
+   '<circle cx="'+pos.x+'" cy="'+pos.y+'" r="6" class="cribbage-peg__head">'+
    (from?'<animate attributeName="cx" from="'+from.x+'" to="'+pos.x+'" dur="1.2s" fill="freeze"/>'+
     '<animate attributeName="cy" from="'+from.y+'" to="'+pos.y+'" dur="1.2s" fill="freeze"/>':'')+
+   '</circle>'+
    '</g>';
  }).join('');
 }

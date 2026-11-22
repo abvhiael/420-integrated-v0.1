@@ -72,9 +72,7 @@ func NewRulesAdapter(module RuleModule)(*RulesAdapter,error){
   strings.TrimSpace(d.Specification)!=d.Specification{
   return nil,ErrInvalid
  }
- h:=sha256.Sum256([]byte(d.GameID+"
-"+d.Version+"
-"+d.Specification))
+ h:=sha256.Sum256([]byte(d.GameID+string([]byte{10})+d.Version+string([]byte{10})+d.Specification))
  return &RulesAdapter{module:module,definition:d,hash:hex.EncodeToString(h[:])},nil
 }
 func (a *RulesAdapter)Identity()(string,string){return a.definition.Version,a.hash}

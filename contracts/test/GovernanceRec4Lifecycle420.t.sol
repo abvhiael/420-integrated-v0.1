@@ -11,6 +11,11 @@ import "../src/governance/CivicElectorateRegistry420.sol";
 import "../src/governance/CivicVoting420.sol";
 import "../src/governance/CivicGovernor420.sol";
 import "../src/governance/CivicMerkleElectorateSource420.sol";
+import "../src/governance/FoundingRetirementVerifier420.sol";
+import "../src/governance/FoundingCommitteeMembership420.sol";
+import "../src/governance/FoundingWalletClaims420.sol";
+import "../src/treasury/FoundingTreasuryAuthority420.sol";
+import "../src/treasury/TreasuryAuthorization420.sol";
 
 interface VmGovernanceRec4 {
     struct Log {
@@ -68,6 +73,42 @@ contract GovRec4Target {
         (bool ok,) = address(timelock).call(abi.encodeCall(GovernanceTimelock.execute, (nestedId)));
         require(!ok, "reentrant operation succeeded");
         ++blockedReentries;
+    }
+}
+
+contract GovRec4ValidatorRetirementEvidence420 {
+    uint256 public eligibleValidatorCount;
+    uint64 public retirementEligiblePoolSince;
+    mapping(bytes32 => address) public owners;
+    mapping(bytes32 => uint64) public ownerSince;
+    mapping(address => bytes32) public ownerValidatorId;
+
+    function seed(bytes32 id, address owner, uint64 since) external {
+        require(owners[id] == address(0) && ownerValidatorId[owner] == bytes32(0), "same owner");
+        owners[id] = owner;
+        ownerSince[id] = since;
+        ownerValidatorId[owner] = id;
+        ++eligibleValidatorCount;
+        if (eligibleValidatorCount == 60) retirementEligiblePoolSince = since;
+    }
+
+    function retirementOwnerStatus(bytes32 id)
+        external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince)
+    {
+        return (owners[id], ownerSince[id] != 0, ownerSince[id]);
+    }
+}
+
+contract GovRec4RetirementVaultList420 {
+    bytes32 public immutable ops;
+    bytes32 public immutable contingency;
+    constructor(bytes32 ops_, bytes32 contingency_) { ops = ops_; contingency = contingency_; }
+    function getVault(bytes32 id) external view returns (VaultRegistry420.Vault memory v) {
+        require(id == ops || id == contingency, "foreign founding vault");
+        v.vaultAddress = id == ops ? address(0x1234) : address(0x5678);
+        v.vaultType = VaultIds420.VAULT_TREASURY;
+        v.state = VaultRegistry420.VaultState.ACTIVE;
+        v.exists = true;
     }
 }
 
@@ -388,6 +429,111 @@ contract GovernanceRec4Lifecycle420Test {
         require(_rejected(TIMELOCK, abi.encodeCall(timelock.execute, (another))),
             "single-house G1 action forged dual-house retirement context");
         require(target.verifiedDualHouseExecutions() == 1, "failed single-house action changed state");
+    }
+
+    function testRealCivicWitnessProposalThirtyDaysThenConstitutionalRetirement() public {
+        _deployAndBootstrap();
+        address admin = address(0xAAAA);
+        address andrew = address(0xBBBB);
+        address janet = address(0xCCCC);
+        FoundingCommitteeMembership420 committee =
+            new FoundingCommitteeMembership420(admin, andrew, janet, TIMELOCK);
+        GovRec4ValidatorRetirementEvidence420 validatorState = new GovRec4ValidatorRetirementEvidence420();
+        FoundingRetirementVerifier420 verifier = new FoundingRetirementVerifier420(
+            address(validatorState), address(committee), address(governor), TIMELOCK
+        );
+        TreasuryPolicyRegistry420 policy = new TreasuryPolicyRegistry420(TIMELOCK);
+        TreasuryBudgetRegistry420 budgets = new TreasuryBudgetRegistry420(TIMELOCK, address(policy));
+        TreasuryAuthorization420 treasuryAuth = new TreasuryAuthorization420(address(0x123));
+        TreasuryDisbursementRegistry420 disbursements =
+            new TreasuryDisbursementRegistry420(TIMELOCK, address(treasuryAuth), address(policy), address(budgets));
+        bytes32 opsId = keccak256("real-retirement-operations");
+        bytes32 contId = keccak256("real-retirement-contingency");
+        FoundingWalletClaims420 claims = new FoundingWalletClaims420(admin, andrew, janet, keccak256("retirement-plan"));
+        FoundingTreasuryAuthority420 founding = new FoundingTreasuryAuthority420(
+            admin, andrew, janet, address(claims), TIMELOCK, address(verifier),
+            address(budgets), address(disbursements), address(policy),
+            address(new GovRec4RetirementVaultList420(opsId, contId)), opsId, contId
+        );
+        // Fixture-only bind; membership and 60 owner records must still be genuine for
+        // the *live* verifier. Retirement proposal/approval/execution below is not mocked.
+        vm.prank(TIMELOCK);
+        committee.bindRetirementAuthority(address(founding));
+
+        address[15] memory members;
+        bytes32[15] memory committeeProofs;
+        for (uint256 i; i < 15; ++i) {
+            address member = address(uint160(0xC000 + i));
+            members[i] = member;
+            bytes32 nomination = keccak256(abi.encode("signed-opt-in", member));
+            committeeProofs[i] = keccak256(abi.encode("reviewed-independent-member", member));
+            vm.prank(member);
+            committee.nominate(nomination);
+            vm.prank(admin);
+            committee.appoint(member, nomination);
+        }
+        bytes32[60] memory ids;
+        bytes32[60] memory ownerProofs;
+        for (uint256 i; i < 60; ++i) {
+            ids[i] = bytes32(uint256(i + 1));
+            address owner = address(uint160(0xD000 + i));
+            validatorState.seed(ids[i], owner, uint64(block.timestamp - 31 days));
+            ownerProofs[i] = keccak256(abi.encode("independent-ownership", ids[i], owner));
+        }
+
+        // Witnesses must themselves be published by a real executed dual-house Civic
+        // proposal. The two actions are bound atomically to the G3 Timelock batch.
+        CivicGovernor420.Action[] memory witnesses = new CivicGovernor420.Action[](2);
+        witnesses[0] = CivicGovernor420.Action(
+            address(verifier), 0,
+            abi.encodeCall(verifier.publishIndependentValidatorWitnesses, (ids, ownerProofs))
+        );
+        witnesses[1] = CivicGovernor420.Action(
+            address(verifier), 0,
+            abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (members, committeeProofs))
+        );
+        bytes32 witnessProposal = _create(CivicIds420.ProposalClass.G3, witnesses);
+        _pass(witnessProposal, true);
+        uint64 witnessMatures = _queuedDelay(witnessProposal, CivicIds420.ProposalClass.G3, witnesses);
+        vm.warp(witnessMatures);
+        timelock.execute(witnessProposal);
+        require(verifier.witnessRevision() == 1 && verifier.committeeWitnessRevision() == 1,
+            "real dual-house witness publication failed");
+        require(!verifier.retirementReady(), "30-day witness clock not enforced");
+        vm.warp(block.timestamp + 30 days);
+        require(verifier.retirementReady(), "60/15/30 independently verified retirement evidence");
+
+        vm.prank(admin);
+        require(_rejected(address(founding), abi.encodeCall(founding.retire, ())),
+            "founder bypassed Civic retirement action");
+        vm.prank(TIMELOCK);
+        require(_rejected(address(founding), abi.encodeCall(founding.retire, ())),
+            "forged Timelock call without live dual-house context");
+
+        CivicGovernor420.Action[] memory retirement = new CivicGovernor420.Action[](1);
+        retirement[0] = CivicGovernor420.Action(address(founding), 0, abi.encodeCall(founding.retire, ()));
+        // A single-house G1 proposal can execute but is never allowed to retire
+        // founders, even after another dual-house proposal was executed.
+        bytes32 singleHouse = _create(CivicIds420.ProposalClass.G1, retirement);
+        _pass(singleHouse, false);
+        uint64 singleMatures = _queuedDelay(singleHouse, CivicIds420.ProposalClass.G1, retirement);
+        vm.warp(singleMatures);
+        require(_rejected(TIMELOCK, abi.encodeCall(timelock.execute, (singleHouse))),
+            "single-house action retired founders");
+        require(!founding.retired() && !governor.activeDualHouseExecution(),
+            "failed G1 action leaked authorization state");
+
+        bytes32 approved = _create(CivicIds420.ProposalClass.G3, retirement);
+        _pass(approved, true);
+        uint64 retirementMatures = _queuedDelay(approved, CivicIds420.ProposalClass.G3, retirement);
+        vm.warp(retirementMatures);
+        timelock.execute(approved);
+        require(founding.retired() && governor.dualHouseExecutedCount() == 2,
+            "G3 retirement did not settle and finalize atomically");
+        require(!governor.activeDualHouseExecution() && governor.activeDualHouseProposal() == bytes32(0),
+            "retirement authorization leaked after execution");
+        require(_rejected(TIMELOCK, abi.encodeCall(timelock.execute, (approved))),
+            "retirement proposal replay accepted");
     }
 
     function testAllFourFrozenClassDelayFloorsAndDualHouseEligibility() public {

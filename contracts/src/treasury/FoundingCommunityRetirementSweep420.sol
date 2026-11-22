@@ -15,6 +15,7 @@ interface IFoundingTreasurySweepState420 {
     function contingencyReleased() external view returns (uint256);
     function operationsCommitted() external view returns (uint256);
     function contingencyCommitted() external view returns (uint256);
+    function outstandingFoundingCommitments() external view returns (bool);
     function OPERATIONS_ALLOCATION() external view returns (uint128);
     function CONTINGENCY_ALLOCATION() external view returns (uint128);
 }
@@ -201,8 +202,7 @@ contract FoundingCommunityRetirementSweep420 {
     }
 
     function _noUnsettledFoundingCommitments() private view returns (bool) {
-        return founding.operationsCommitted() == founding.operationsReleased()
-            && founding.contingencyCommitted() == founding.contingencyReleased();
+        return !founding.outstandingFoundingCommitments();
     }
 
     function _requireNoUnsettledFoundingCommitments() private view {

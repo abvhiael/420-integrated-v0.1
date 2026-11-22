@@ -38,7 +38,7 @@ contract CivicInitialElectorateEnrollment420 {
 
     address public immutable governance;
     uint256 public immutable deploymentChainId;
-    bool public sealed;
+    bool public enrollmentClosed;
     Enrollment[] private _community;
     Enrollment[] private _validator;
     mapping(uint8 => mapping(address => bool)) public enrolled;
@@ -52,7 +52,7 @@ contract CivicInitialElectorateEnrollment420 {
     error EmptyElectorate();
 
     event MemberEnrolled(CivicIds420.House indexed house, address indexed voter, bytes32 indexed profileId);
-    event InitialElectoratesSealed(bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight);
+    event InitialElectoratesClosed(bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight);
 
     constructor(address governance_) {
         if (governance_ == address(0)) revert Unauthorized();
@@ -72,7 +72,7 @@ contract CivicInitialElectorateEnrollment420 {
     /// enrollment additionally requires consensus-maintained eligible validator ownership.
     function enroll(CivicIds420.House house, bytes32 profileId, bytes32 credentialId) external {
         if (block.chainid != deploymentChainId) revert WrongChain();
-        if (sealed) revert EnrollmentClosed();
+        if (enrollmentClosed) revert EnrollmentClosed();
         uint8 h = uint8(house);
         if (msg.sender == address(0) || profileId == bytes32(0) || credentialId == bytes32(0)) revert Ineligible();
         if (enrolled[h][msg.sender] || enrolledProfile[h][profileId]) revert DuplicateEnrollment();
@@ -94,17 +94,17 @@ contract CivicInitialElectorateEnrollment420 {
     function seal() external returns (bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight) {
         if (msg.sender != governance) revert Unauthorized();
         if (block.chainid != deploymentChainId) revert WrongChain();
-        if (sealed) revert EnrollmentClosed();
+        if (enrollmentClosed) revert EnrollmentClosed();
         if (_community.length == 0 || _validator.length == 0) revert EmptyElectorate();
         (communityRoot, communityWeight) = _root(_community, CivicIds420.House.COMMUNITY);
         (validatorRoot, validatorWeight) = _root(_validator, CivicIds420.House.VALIDATOR);
-        sealed = true;
-        emit InitialElectoratesSealed(communityRoot, communityWeight, validatorRoot, validatorWeight);
+        enrollmentClosed = true;
+        emit InitialElectoratesClosed(communityRoot, communityWeight, validatorRoot, validatorWeight);
     }
 
     /// @notice Recheck genuine live eligibility at the irreversible Timelock handoff.
-    function verifySealed() external view returns (bool) {
-        if (!sealed || block.chainid != deploymentChainId) revert EnrollmentClosed();
+    function verifyClosed() external view returns (bool) {
+        if (!enrollmentClosed || block.chainid != deploymentChainId) revert EnrollmentClosed();
         for (uint256 i; i < _community.length; ++i) _verify(_community[i], CivicIds420.House.COMMUNITY);
         for (uint256 i; i < _validator.length; ++i) _verify(_validator[i], CivicIds420.House.VALIDATOR);
         return true;

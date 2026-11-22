@@ -10,6 +10,9 @@ on:
       - 'contracts/src/treasury/TreasuryReleaseExecutor420.sol'
       - 'contracts/test/FoundingTreasurySettlement420.t.sol'
       - 'contracts/config/treasury/founding-financial-policy-provisional.json'
+      - 'scripts/verify-founding-financial-policy.py'
+      - 'config/genesis-allocations.json'
+      - 'docs/audit/GOV-PRE-03-QUALIFICATION.md'
       - 'contracts/test/FoundingTreasuryAuthority420.t.sol'
       - '.github/workflows/founding-treasury-qualification.yml'
   workflow_dispatch:
@@ -34,6 +37,10 @@ jobs:
         env:
           EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Verify native $420 financial policy and Genesis funding conservation
+        run: |
+          python3 -m py_compile scripts/verify-founding-financial-policy.py
+          python3 scripts/verify-founding-financial-policy.py
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable

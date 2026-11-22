@@ -136,7 +136,9 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(!alternateChain, "foreign chain ID accepted founder claim");
         require(claims.claimedCount() == 0 && !claims.claimed(ADMIN),
                 "foreign chain altered founder claim state");
-        vm.chainId(deployedOn);
+        // Read the immutable via an external call: Solidity may re-read block.chainid
+        // after the vm.chainId cheatcode when optimizing local expressions.
+        vm.chainId(claims.deploymentChainId());
         vm.prank(ADMIN);
         claims.claimFounderWallet();
         require(claims.claimedCount() == 1, "authorized chain not restored");

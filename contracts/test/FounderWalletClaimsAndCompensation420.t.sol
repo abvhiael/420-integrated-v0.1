@@ -6,6 +6,7 @@ import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
 interface VmFounderWallets420 {
     function prank(address) external;
     function deal(address,uint256) external;
+    function chainId(uint256) external;
 }
 
 contract FounderWalletTestReceiver420 {
@@ -27,6 +28,17 @@ contract FounderCompensationDishonestToken420 {
     mapping(address => uint256) public balanceOf;
     function mint(address to,uint256 amount) external { balanceOf[to]+=amount; }
     function transfer(address,uint256) external pure returns (bool) { return true; }
+}
+
+/// @dev A claimant smart account must originate the on-chain call itself;
+/// an EOA signature is never misrepresented as this contract's own public address.
+contract FounderOwnerRoutedSmartAccount420 {
+    address public immutable owner;
+    constructor(address owner_) { owner = owner_; }
+    function claim(address registry) external {
+        require(msg.sender == owner, "not smart account owner");
+        FoundingWalletClaims420(registry).claimFounderWallet();
+    }
 }
 
 contract FounderWalletClaimsAndCompensation420Test {
@@ -111,6 +123,70 @@ contract FounderWalletClaimsAndCompensation420Test {
         );
         require(!faked,"fake-success token stole developer payout accounting");
         require(splitter.totalTokenClaimed(address(dishonest))==0,"failed transfer recorded as paid");
+    }
+
+    function testWrongChainRejectedAndNoPrematureClaimState() public {
+        uint256 deployedOn = block.chainid;
+        require(claims.deploymentChainId() == deployedOn, "deployment chain invariant");
+        vm.chainId(deployedOn + 1000);
+        vm.prank(ADMIN);
+        (bool alternateChain,) = address(claims).call(
+            abi.encodeCall(claims.claimFounderWallet, ())
+        );
+        require(!alternateChain, "foreign chain ID accepted founder claim");
+        require(claims.claimedCount() == 0 && !claims.claimed(ADMIN),
+                "foreign chain altered founder claim state");
+        vm.chainId(deployedOn);
+        vm.prank(ADMIN);
+        claims.claimFounderWallet();
+        require(claims.claimedCount() == 1, "authorized chain not restored");
+    }
+
+    function testLostFounderKeyCannotBeReplacedOrClaimedByUnrelatedWallet() public {
+        // The administrator is an original beneficiary but does not sign anything.
+        // Another account cannot claim their seat or invoke a beneficiary change.
+        address outsider = address(0x0F1234);
+        vm.prank(outsider);
+        (bool forgedClaim,) = address(claims).call(
+            abi.encodeCall(claims.claimFounderWallet, ())
+        );
+        require(!forgedClaim, "third party claimed lost-key founder slot");
+        vm.prank(outsider);
+        (bool seized,) = address(claims).call(
+            abi.encodeWithSignature("replaceFounder(address,address)", ADMIN, outsider)
+        );
+        require(!seized, "foreign wallet rotated immutable founder slot");
+        require(claims.administrator() == ADMIN && !claims.claimed(ADMIN)
+                && claims.claimedCount() == 0, "lost-key seat modified");
+    }
+
+    function testSmartAccountOwnerCallsFromOwnContractAndCannotBeImpersonated() public {
+        address owner = address(0xA55);
+        FounderOwnerRoutedSmartAccount420 smart = new FounderOwnerRoutedSmartAccount420(owner);
+        FoundingWalletClaims420 smartClaims = new FoundingWalletClaims420(
+            address(smart), ANDREW, JANET, keccak256("smart-verified-plan")
+        );
+        vm.prank(owner);
+        (bool eoaImpersonation,) = address(smartClaims).call(
+            abi.encodeCall(smartClaims.claimFounderWallet, ())
+        );
+        require(!eoaImpersonation, "EOA owner claimed in place of smart account");
+        vm.prank(address(0xBAD));
+        (bool outsider,) = address(smart).call(
+            abi.encodeCall(smart.claim, (address(smartClaims)))
+        );
+        require(!outsider, "unrelated address directed smart account claim");
+        require(!smartClaims.claimed(address(smart)), "early smart claim");
+        vm.prank(owner);
+        smart.claim(address(smartClaims));
+        require(smartClaims.claimed(address(smart)), "smart account did not claim own seat");
+        require(smartClaims.claimedCount() == 1 && smartClaims.roleFor(address(smart)) == 1,
+                "smart account founder role inconsistent");
+        vm.prank(owner);
+        (bool duplicate,) = address(smart).call(
+            abi.encodeCall(smart.claim, (address(smartClaims)))
+        );
+        require(!duplicate, "smart account double claim");
     }
 
     function testOneWeiRemainderGoesToJanetAndCannotBeReclaimed() public {

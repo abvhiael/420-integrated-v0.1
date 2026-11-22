@@ -111,6 +111,7 @@ def timelock_state(rec):
                 "civicAuthorityActivated begins false","runtimeCodeHash equals keccak256(materialized deployed bytecode)"]
  }
 
+# GOV-PRE-06: retain both chain-approved electorate modes; never materialize synthetic initial voters.
 def governance_state(rec):
  cfg=json.loads(CFG.read_text())
  candidate=cfg.get("genesisBootstrapCommitment",{})

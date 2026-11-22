@@ -3,7 +3,10 @@ import type { ChainSource420, Hex, IndexerBlock, IndexerLog } from '../../src/ch
 import type { RetainedAbiArtifact420, StakeReleaseDescriptor420 } from '../../src/abi-manifest.js';
 import { descriptorsFromStakeRelease420 } from '../../src/abi-manifest.js';
 export const manifest = JSON.parse(readFileSync('descriptors/stake420-v3.json','utf8')) as StakeReleaseDescriptor420;
-export const artifacts = new Map<string, RetainedAbiArtifact420>(['ValidatorRegistry','RewardController'].map(name => [name, JSON.parse(readFileSync(`../contracts/artifacts/${name}.abi.json`,'utf8'))]));
+export const artifacts = new Map<string, RetainedAbiArtifact420>([
+ ['ValidatorRegistry', 'ValidatorRegistry.govpre04.abi.json'],
+ ['RewardController', 'RewardController.v3.abi.json']
+].map(([name,filename]) => [name, JSON.parse(readFileSync(`../contracts/artifacts/${filename}`,'utf8'))]));
 const descriptors = descriptorsFromStakeRelease420(manifest, artifacts);
 export const h = (n: number): Hex => `0x${n.toString(16).padStart(64,'0')}`;
 const data = (...n: number[]): Hex => `0x${n.map(v=>h(v).slice(2)).join('')}`;

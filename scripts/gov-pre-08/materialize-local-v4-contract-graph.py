@@ -290,18 +290,57 @@ def bootstrap(rpc,base):
              "registered code hash is not actual deployment "+name)
         need(int(rpc.read(REGISTRY,"currentComponentRevision(bytes32)",componentId),16)==1,
              "not a fresh component revision for "+name)
+    # Canonical Wallet-facing component identities are already established in
+    # wallet/web/core/{treasury-client,governance-management}.js. Register only
+    # these *existing* IDs in this disposable local source graph; the unrelated
+    # local 14-component materialization namespace remains separate.
+    civic_modules={
+        "constitution":const, "proposalRegistry":prop,
+        "electorateRegistry":elect, "voting":voting, "governor":civic
+    }
+    canonicalBindings={
+        "TREASURY_ROUTER":("420/APP/420TREASURY/TREASURY_ROUTER",d["TreasuryRouter420"]),
+        "constitution":("420/component/governance/civic-constitution/v1",const),
+        "proposalRegistry":("420/component/governance/civic-proposal-registry/v1",prop),
+        "electorateRegistry":("420/component/governance/civic-electorate-registry/v1",elect),
+        "voting":("420/component/governance/civic-voting/v1",voting),
+        "governor":("420/component/governance/civic-governor/v1",civic),
+    }
+    canonicalIds={}
+    for name,(preimage,target) in canonicalBindings.items():
+        canonicalId=keccak(preimage)
+        canonicalIds[name]=canonicalId
+        call_send(rpc,TIME,REGISTRY,
+             "registerComponent(bytes32,address,(uint16,uint16,uint16),uint8)",
+             canonicalId,target,"(1,0,0)",2,
+             tag="register:wallet:"+name,receipts=receipts)
+        need(read_address(rpc,REGISTRY,"resolve(bytes32)",canonicalId)==addr(target)
+             and rpc.read(REGISTRY,"runtimeCodeHash(bytes32)",canonicalId).lower()==hcode(rpc,target),
+             "Wallet canonical component ID or real code hash not registered "+name)
+    # Exactly the dependency-root commitment verified by production Wallet
+    # Treasury discovery. Never fabricate a root based on a placeholder name.
+    deps=[caps,d["TreasuryAuthorization420"],d["TreasuryPolicyRegistry420"],
+          d["TreasuryBudgetRegistry420"],d["TreasuryDisbursementRegistry420"],
+          d["TreasuryRouter420"]]
+    hashTuple="0x"+"".join(format(int(a,16),"064x") for a in deps)+\
+        "".join(hcode(rpc,a)[2:] for a in deps[1:])
+    treasuryDependencyRoot=funding.cast("keccak",hashTuple).lower()
+    need(len(treasuryDependencyRoot)==66,"real Treasury dependency root invalid")
     services={}
     for name,signature,target in (
         ("TREASURY","420/service/treasury/v1",d["TreasuryRouter420"]),
         ("VAULT","420/service/vault/v1",vaultRouter),
         ("DEVELOPMENT_COMPENSATION","420/service/development-compensation/v1",
          d["DevelopmentCompensationVault420"]),
+        ("GOVERNANCE","420/service/governance/v1",civic),
     ):
         id_=keccak(signature)
         call_send(rpc,TIME,REGISTRY,
                   "publishRegisteredService(bytes32,address,bytes32,uint32,bool,uint8,bytes32,bytes32,bytes32)",
                   id_,target,keccak("GOVPRE08/LOCAL/METADATA"),1,"true",3,
-                  localManifest,keccak("GOVPRE08/LOCAL/GRAPH"),keccak("GOVPRE08/LOCAL/INTERFACE"),
+                  localManifest,
+                  treasuryDependencyRoot if name=="TREASURY" else keccak("GOVPRE08/LOCAL/GRAPH"),
+                  keccak("GOVPRE08/LOCAL/INTERFACE"),
                   tag="publish:"+name,receipts=receipts)
         data=rpc.read(REGISTRY,"resolveActive(bytes32)",id_)
         need(addr(data[2:66])==addr(target) and int(data[66:130],16)==1,
@@ -364,6 +403,9 @@ def bootstrap(rpc,base):
         "actualProductionConstructorAddresses":d,
         "actualProductionConstructorRuntimeHashes":{name:hcode(rpc,target) for name,target in d.items()},
         "localRegistryComponentIds":ids,
+        "walletCanonicalComponentIds":canonicalIds,
+        "walletCivicModuleAddresses":civic_modules,
+        "walletTreasuryDependencyRoot":treasuryDependencyRoot,
         "serviceDiscoveries":services,
         "genesisAnchorCodeHashes":{key:hcode(rpc,location) for key,location in
            (("GovernanceTimelock",TIME),("ProtocolRegistry",REGISTRY),
@@ -409,6 +451,30 @@ def verify(rpc,e):
              "Registry code hash not recovered: "+name)
         need(int(rpc.read(REGISTRY,"currentComponentRevision(bytes32)",component),16)==1,
              "component revision drift: "+name)
+    expectedWalletTargets={
+        "TREASURY_ROUTER":e["actualProductionConstructorAddresses"]["TreasuryRouter420"],
+        **e["walletCivicModuleAddresses"]
+    }
+    need(set(e["walletCanonicalComponentIds"])==set(expectedWalletTargets),
+         "five Civic Wallet components plus Treasury Router are not source-bound")
+    for name,target in expectedWalletTargets.items():
+        cid=e["walletCanonicalComponentIds"][name]
+        need(read_address(rpc,REGISTRY,"resolve(bytes32)",cid)==addr(target)
+             and rpc.read(REGISTRY,"runtimeCodeHash(bytes32)",cid).lower()==hcode(rpc,target),
+             "Wallet canonical component failed recovery: "+name)
+    deps=[e["actualProductionConstructorAddresses"][k] for k in (
+          "TreasuryAuthorization420","TreasuryPolicyRegistry420","TreasuryBudgetRegistry420",
+          "TreasuryDisbursementRegistry420","TreasuryRouter420")]
+    cap=read_address(rpc,deps[0],"capabilityRegistry()")
+    enc="0x"+"".join(format(int(a,16),"064x") for a in [cap,*deps])+\
+        "".join(hcode(rpc,a)[2:] for a in deps)
+    actualRoot=funding.cast("keccak",enc).lower()
+    need(e["walletTreasuryDependencyRoot"]==actualRoot,
+         "Wallet Treasury genuine deployment dependency root not recoverable")
+    serviceId=e["serviceDiscoveries"]["TREASURY"]["id"]
+    profile=rpc.read(REGISTRY,"getRegistrationProfile(bytes32,uint32)",serviceId,"1")
+    need("0x"+profile[130:194].lower()==actualRoot,
+         "Wallet Treasury published service profile dependency root is invalid")
     for name,s in e["serviceDiscoveries"].items():
         data=rpc.read(REGISTRY,"resolveActive(bytes32)",s["id"])
         need(addr(data[2:66])==addr(s["address"]) and int(data[66:130],16)==1,

@@ -109,6 +109,35 @@ class CandidateBoundaries(unittest.TestCase):
         finally:
             plan.read=original
 
+
+    def test_tampered_signed_v4_candidate_is_rejected(self):
+        original=plan.read
+        def corrupted(root,path):
+            record=original(root,path)
+            if path=="contracts/config/candidates/genesis-config-commitment-v4-unsigned.json":
+                record["approvals"]["independentGenesisApproval"]=True
+            return record
+        plan.read=corrupted
+        try:
+            with self.assertRaises(ValueError):
+                plan.make_candidate(ROOT,with_artifacts=False)
+        finally:
+            plan.read=original
+
+    def test_v4_candidate_hash_drift_is_rejected(self):
+        original=plan.read
+        def corrupted(root,path):
+            record=original(root,path)
+            if path=="contracts/config/candidates/genesis-config-commitment-v4-unsigned.json":
+                record["genesisConfigHash"]="0x"+"00"*32
+            return record
+        plan.read=corrupted
+        try:
+            with self.assertRaises(ValueError):
+                plan.make_candidate(ROOT,with_artifacts=False)
+        finally:
+            plan.read=original
+
     def test_authoritative_source_candidate_is_unapproved(self):
         candidate=plan.make_candidate(ROOT,with_artifacts=False)
         self.assertEqual(candidate["status"],"UNAPPROVED_SOURCE_CANDIDATE_NOT_DEPLOYED")

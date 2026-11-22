@@ -3,7 +3,7 @@
 import {LEGS,chaosActionOptions,chaosFinalRoundProgress} from './cross-country-chaos.js';
 import {chaosCardArt} from './chaos-card-art.js';
 import {renderChaosHighway} from './chaos-board.js';
-import {renderChaosPublicTables} from './chaos-online.js';
+import {renderChaosPublicTables,chaosCardHelp} from './chaos-online.js';
 import {renderChaosGameEffects,renderChaosFinishEffects} from './chaos-game-effects.js';
 import {isChaosComputer} from './chaos-computer.js';
 
@@ -90,7 +90,8 @@ function hand(game,{revealed,computer}){
    ' aria-label="Select '+esc(label(c))+'">'+
    '<label for="ccc-practice-card-'+i+'" class="ccc-online-card-select">'+image(c,region)+
    '<strong>'+esc(label(c))+'</strong></label>'+
-   '<div class="ccc-practice-card-actions"><h4>'+esc(label(c))+'</h4>'+
+   '<div class="ccc-practice-card-actions"><h4>'+esc(label(c))+'</h4>'+ 
+   '<p class="ccc-online-card-help">'+esc(chaosCardHelp(c))+'</p>'+
    (game.step==='draw'?'<small>Draw from a pile above to continue.</small>':actions(game,c,i,options))+
    '</div></div>').join('')+'</div></div>'+
   '<p class="ccc-practice-hint">'+(game.step==='discard'?'Discard '+game.discardsLeft+' card(s) to end the turn.':

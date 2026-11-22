@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {renderChaosOnline,checkChaosProjection,ChaosRoomsClient} from '../core/chaos-online.js';
+import {renderChaosOnline,checkChaosProjection,ChaosRoomsClient,chaosCardHelp} from '../core/chaos-online.js';
 import {renderApplicationShell} from '../core/app-shell.js';
 const id='10000000-0000-4000-8000-000000000001';
 const other='20000000-0000-4000-8000-000000000002';
@@ -193,4 +193,14 @@ test('Room chat reporting appears for peers and sends an authenticated message I
  assert.equal(seen[0].path,'/social-api/v1/chaos/rooms/'+id+'/chat/report');
  assert.deepEqual(JSON.parse(seen[0].opts.body),{messageId:room.chat[0].id});
  assert.match(client.state.chatNotice,/operator review/);
+});
+
+test('multiplayer selected card explains its effect without revealing other hands',()=>{
+ const state={...game,hand:[{type:'mileage',km:400},{type:'hazard',id:'fog',kind:'slow',name:'Fog'}]};
+ const html=renderChaosOnline({status:'ready',room:checkChaosProjection(state),selectedCard:0});
+ assert.match(html,/ccc-online-card-help/);
+ assert.match(html,/Advance 400 km\. Drives over 300 km risk a regional hazard/);
+ assert.match(renderChaosOnline({status:'ready',room:state,selectedCard:1}),/Slow an opponent on their next drive/);
+ assert.equal(chaosCardHelp({type:'fix',id:'atlas'}),'Take a safe +150 km shortcut.');
+ assert.doesNotMatch(html,/data-chaos-practice|Pass the device/);
 });

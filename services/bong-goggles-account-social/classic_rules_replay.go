@@ -49,6 +49,7 @@ func (s *ClassicSessions) saveRuleMove(ctx context.Context,tx *sql.Tx,id string,
 // Reconstruct from initial seed + every committed private action. Reject
 // missing/extra public move entries, broken digests and invalid state.
 func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec classicSessionRecord,adapter *RulesAdapter)error{
+ if e:=s.verifyClassicJournalTx(ctx,tx,rec);e!=nil{return ErrUnavailable}
  var version,hash,seedText string
  var initial json.RawMessage
  var initialHash string

@@ -145,7 +145,6 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
  var empty ClassicRoomView
  if !uuid.MatchString(viewer)||!uuid.MatchString(target)||!uuid.MatchString(requestID)||viewer==target{return empty,ErrInvalid}
  if _,e:=s.rule("cribbage","","");e!=nil{return empty,e}
- if e:=s.Store.ReadyClassicMatchRequests(ctx);e!=nil{return empty,e}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
  if e=lockPeerPair(ctx,tx,viewer,target);e!=nil{return empty,e}
  digest:=matchRequestDigest("challenge",target)
@@ -170,7 +169,6 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
 func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID string)(ClassicRoomView,error){
  var empty ClassicRoomView
  if !uuid.MatchString(viewer)||!uuid.MatchString(oldID)||!uuid.MatchString(requestID){return empty,ErrInvalid}
- if e:=s.Store.ReadyClassicMatchRequests(ctx);e!=nil{return empty,e}
  previous,e:=s.Get(ctx,viewer,oldID)
  if e!=nil{return empty,e}
  if previous.GameID!="cribbage"||previous.Status!="finished"&&previous.Status!="resigned"&&previous.Status!="timed_out"{

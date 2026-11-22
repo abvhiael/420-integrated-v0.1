@@ -1,5 +1,5 @@
 /* BC-1.4 / BongGoggles Cribbage. Scoped to avoid CCC or Social regressions. */
-.cribbage-app{--crib-ink:#f0f4dc;--crib-muted:#bac7a8;--crib-gold:#f9ba58;--crib-green:#8ed659;--crib-panel:#11251e;--crib-border:#45643f;color:var(--crib-ink);margin:-.2rem 0 2rem;max-width:1900px}
+.cribbage-app{--crib-ink:#f0f4dc;--crib-muted:#bac7a8;--crib-gold:#f9ba58;--crib-green:#8ed659;--crib-panel:#11251e;--crib-border:#45643f;color:var(--crib-ink);background:#071910;border-radius:14px;padding:clamp(.65rem,1.2vw,1.2rem);margin:-.2rem 0 2rem;max-width:1900px}
 .cribbage-app *{box-sizing:border-box}
 .cribbage-app button,.cribbage-app a.cribbage-primary{font:inherit;cursor:pointer}
 .cribbage-app button:disabled{cursor:not-allowed;opacity:.52}

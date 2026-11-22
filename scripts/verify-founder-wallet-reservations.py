@@ -324,6 +324,16 @@ def validate(strict=False, print_challenges=False, root=ROOT, rpc_url=None, requ
              "founder vesting storage beneficiaries not bound to signed identities")
         integration = load(root, "contracts/config/founding-genesis-integration-v1.json")
         genesis = integration["genesis"]
+        if m.get("network_genesis_block_hash") is not None:
+            need(genesis.get("networkGenesisBlockHash") and
+                 genesis["networkGenesisBlockHash"].lower() ==
+                 m["network_genesis_block_hash"].lower(),
+                 "founder proof does not match separately approved chain block-zero hash")
+        binding = integration["founderWallets"]
+        need(binding.get("claimRegistryAddress") == m["claim_contract"].get("address") and
+             binding.get("claimRuntimeCodeHash") == m["claim_contract"].get("runtime_code_hash"),
+             "founder claim contract address/runtime binding disagreement")
+        genesis = integration["genesis"]
         need(genesis["network"] == m["target_network"] and
              genesis["chainId"] == m["modeled_chain_id"] and
              genesis["approvedGenesisHash"].lower() == m["planned_genesis_hash"].lower(),

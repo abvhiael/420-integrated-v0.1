@@ -33,6 +33,10 @@ test('PostgreSQL room row locks, two account privacy, restart, block and stale m
  await assert.rejects(()=>r.join(outsider,room.code,'Eve'),e=>e.status===409);
  const said=await r.chat(room.id,host,'Ready for the road?');
  assert.equal(said.revision,1,'chat cannot invalidate pending legal move');
+ assert.equal(await r.reportChat(room.id,peer,said.chat[0].id),true);
+ assert.equal((await r.get(room.id,host)).revision,1);
+ assert.equal((await r.get(room.id,host)).chatReports.length,1);
+ assert.equal(JSON.stringify(projectRoom(await r.get(room.id,host),host)).includes('chatReports'),false);
  assert.equal((await r.get(room.id,peer)).chat[0].text,'Ready for the road?');
  await assert.rejects(()=>r.chat(room.id,outsider,'intruder'),e=>e.status===404);
  await assert.rejects(()=>r.chat(room.id,host,'flood'),e=>e.status===429);

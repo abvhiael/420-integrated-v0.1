@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
-import {makeRoom,joinRoom,startRoom,moveRoom,continueRoom,appendChaosChat,projectRoom,summarizeRoom,MatchError} from '../room.mjs';
+import {makeRoom,joinRoom,startRoom,moveRoom,continueRoom,appendChaosChat,reportChaosChat,projectRoom,summarizeRoom,MatchError} from '../room.mjs';
 import {signature,handleChaos,authenticate} from '../http.mjs';
 
 const alice='10000000-0000-4000-8000-000000000001';
@@ -36,6 +36,7 @@ class TestRooms{
  }
  async join(actor,code,name){return projectRoom(await this.mutate(null,actor,null,room=>joinRoom(room,actor,name),{code}),actor);}
  async chat(id,actor,text){const updated=appendChaosChat(await this.get(id,actor),actor,text);this.rooms.set(id,updated);return updated;}
+ async reportChat(id,actor,messageId){const updated=reportChaosChat(await this.get(id,actor),actor,messageId);this.rooms.set(id,updated);return true;}
 }
 const call=(repository,subject,path,method,data,name)=>
  handleChaos(req(subject,path,method,data,name),{repo:repository,key});
@@ -201,4 +202,21 @@ test('Chat blocks forged payloads, markup control characters, flood and untruste
  const url=path+'/'+r.id+'/chat';
  await assert.rejects(()=>call(repo,alice,url,'POST',{text:'hi',subject:eve}),e=>e.status===400);
  await assert.rejects(()=>call(repo,alice,url,'POST',{message:'hi'}),e=>e.status===400);
+});
+
+test('Chat reports are member-only, persisted privately, deduplicated and revision-neutral',async()=>{
+ const repo=new TestRooms(),room=joinRoom(makeRoom(alice,'A',{humanSeats:2}),bob,'B');
+ repo.rooms.set(room.id,room);
+ const chat=(await call(repo,alice,path+'/'+room.id+'/chat','POST',{text:'Questionable shortcut!'})).room;
+ const messageId=chat.chat[0].id,url=path+'/'+room.id+'/chat/report';
+ assert.deepEqual(await call(repo,bob,url,'POST',{messageId}),{reported:true,onChain:false});
+ const record=await repo.get(room.id,bob);
+ assert.equal(record.revision,room.revision);
+ assert.equal(record.chatReports[0].reporter,bob);
+ assert.equal(record.chatReports[0].messageId,messageId);
+ assert.equal(JSON.stringify(projectRoom(record,alice)).includes('chatReports'),false);
+ assert.equal(JSON.stringify(projectRoom(record,alice)).includes(bob),false);
+ await assert.rejects(()=>call(repo,eve,url,'POST',{messageId}),e=>e.status===404);
+ await assert.rejects(()=>call(repo,alice,url,'POST',{messageId}),e=>e.status===400);
+ await assert.rejects(()=>call(repo,bob,url,'POST',{messageId}),e=>e.status===409);
 });

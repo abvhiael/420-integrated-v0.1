@@ -80,7 +80,7 @@ export function makeRoom(actor,name,{humanSeats=2,bots:computer=[],vehicle='wago
   ...computer.map((difficulty,i)=>({subject:null,name:['Easy','Normal','Hard'].find(v=>v.toLowerCase()===difficulty)+' computer '+(i+1),
     controller:'computer',difficulty,vehicle:CHAOS_VEHICLES[(humanSeats+i)%CHAOS_VEHICLES.length].id}))];
  return {id:randomUUID(),code:randomBytes(24).toString('base64url'),ruleset:CHAOS_ROOM_RULESET,
-  chat:[],
+  chat:[],chatReports:[],
   host:actor,seats,status:'lobby',revision:0,game:null,createdAt:now,updatedAt:now};
 }
 export function joinRoom(room,actor,name){
@@ -151,6 +151,22 @@ export function appendChaosChat(room,actor,value,{now=Date.now()}={}){
  if(previous&&now-Date.parse(previous.at)<1500)throw new MatchError(429,'Please slow down before sending another message');
  const next=structuredClone(room);
  next.chat=[...chat,{id:randomUUID(),seat,text,at:new Date(now).toISOString()}].slice(-80);
+ next.updatedAt=new Date(now).toISOString();
+ return next;
+}
+// Moderation reports stay inside the restricted room record, never projections.
+export function reportChaosChat(room,actor,messageId,{now=Date.now()}={}){
+ member(room,actor);
+ if(!uid.test(messageId??''))invalid('Invalid reported message');
+ const seat=ownerSeat(room,actor),message=(room.chat||[]).find(m=>m.id===messageId);
+ if(!message||message.seat===seat)invalid('Message cannot be reported');
+ const reports=Array.isArray(room.chatReports)?room.chatReports:[];
+ if(reports.some(r=>r.reporter===actor&&r.messageId===messageId))throw new MatchError(409,'Message already reported');
+ if(reports.filter(r=>r.reporter===actor&&now-Date.parse(r.at)<86400000).length>=10)
+  throw new MatchError(429,'Too many chat reports');
+ const next=structuredClone(room);
+ next.chatReports=[...reports,{id:randomUUID(),reporter:actor,messageId,authorSeat:message.seat,
+  at:new Date(now).toISOString(),reason:'abusive-chat'}].slice(-100);
  next.updatedAt=new Date(now).toISOString();
  return next;
 }

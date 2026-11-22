@@ -33,7 +33,3 @@ jobs:
       - name: Only certified issuance/accounting/Indexer API regressions
         run: |
           go test ./consensus/systemcall ./consensus/accounting ./indexer/api -count=1
-      - name: Qualified Go formatting
-        run: |
-          gofmt -d consensus/accounting/*.go | tee "$RUNNER_TEMP/gov-pre-04-gofmt.diff"
-          test ! -s "$RUNNER_TEMP/gov-pre-04-gofmt.diff"

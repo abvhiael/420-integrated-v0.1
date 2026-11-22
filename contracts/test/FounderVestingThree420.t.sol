@@ -88,6 +88,7 @@ contract FounderVestingThree420Test {
             (bool twice,) = address(vest).call(abi.encodeCall(vest.claim, (0)));
             require(!twice, "double release within same interval");
         }
+        require(vest.totalLockedClaimed()==500_000 ether, "all three locked grants booked exactly once");
         require(address(vest).balance == 0, "entire 500k locked supply delivered");
         require(ADMIN.balance + ANDREW.balance + JANET.balance == 500_000 ether, "conservation");
         vm.warp(uint256(genesisTime) + 365 days);
@@ -107,6 +108,31 @@ contract FounderVestingThree420Test {
         address[3] memory reserved = [ADMIN, address(0x0427), JANET];
         (accepted,) = address(this).call(abi.encodeCall(this.tryDeploy, (reserved)));
         require(!accepted, "predeploy address used as founder signing key");
+    }
+
+    function testGenesisEpochCannotBeBackdatedOrInvented() public {
+        address[3] memory recipients=[ADMIN,ANDREW,JANET];
+        (bool zero,)=address(this).call(
+            abi.encodeCall(this.tryDeployWithStart,(recipients,uint64(0)))
+        );
+        require(!zero,"zero vesting epoch accepted");
+        vm.warp(uint256(genesisTime)+21 days);
+        (bool backdated,)=address(this).call(
+            abi.encodeCall(this.tryDeployWithStart,(recipients,genesisTime))
+        );
+        require(!backdated,"backdated genesis allowed premature liquid vesting");
+        require(vest.claimable(0)>0,"legitimate immutable genesis has still vested");
+    }
+    function testDirectRevenueCannotBeDepositedIntoGenesisVesting() public {
+        vm.deal(address(this),100 ether);
+        (bool mixed,)=address(vest).call{value:100 ether}("");
+        require(!mixed,"developer compensation could be mixed with immutable Genesis grant");
+        require(address(vest).balance==500_000 ether
+            && vest.totalLockedClaimed()==0, "original locked grant corrupted");
+    }
+    function tryDeployWithStart(address[3] calldata recipients,uint64 start)
+        external returns(address) {
+        return address(new FounderVestingRegistry(address(this),recipients,start));
     }
 
     function tryDeploy(address[3] calldata recipients) external returns (address) {

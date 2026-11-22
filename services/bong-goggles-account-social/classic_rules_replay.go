@@ -180,6 +180,10 @@ func (s *ClassicSessions) VerifyRules(ctx context.Context,id string)error{
  rule,e:=s.rule(rec.GameID,rec.RulesVersion,rec.RulesHash)
  if e!=nil{return e}
  adapter,ok:=rule.(*RulesAdapter);if !ok{return ErrUnavailable}
- if e=s.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return e}
+ // Standalone qualification is deliberately independent of any hot
+ // service prefix: reconstruct all moves from the immutable database
+ // journal and genesis on every explicit audit invocation.
+ auditor:=&ClassicSessions{Store:s.Store,Rooms:s.Rooms,Rules:s.Rules}
+ if e=auditor.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return e}
  return tx.Commit()
 }

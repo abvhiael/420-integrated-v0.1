@@ -1,0 +1,48 @@
+name: GOV-PRE-08 Step 3 unsigned V4 materialization and local recovery
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/gov-pre-08/**'
+      - 'contracts/config/candidates/genesis-config-commitment-v4-unsigned.json'
+      - 'contracts/src/governance/Founding*.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/revenue/**'
+      - 'contracts/src/vault/**'
+      - '.github/workflows/governance-pre-08-step-3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize-replay-recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Materialize canonical unsigned V4 and prove local cold-start, replay and recovery
+        run: bash scripts/gov-pre-08/qualify-step3.sh
+      - name: Retain exact-head unsigned source and local receipt/state witnesses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govpre08-step3-unsigned-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/govpre08-step3-v4-a/
+            ${{ runner.temp }}/govpre08-step3-genesis.json
+            ${{ runner.temp }}/govpre08-step3-genesis-source.json
+            ${{ runner.temp }}/govpre08-step3-funding-*.json
+            ${{ runner.temp }}/govpre08-step3-local-*.json
+            ${{ runner.temp }}/govpre08-step3-recovery-*.json
+            ${{ runner.temp }}/govpre08-step3-node-*.log
+            ${{ runner.temp }}/govpre08-step3-restarted-*.log

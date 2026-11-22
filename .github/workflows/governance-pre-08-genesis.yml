@@ -46,7 +46,7 @@ jobs:
       - name: Compile exact founder/Treasury/retirement module sources
         run: |
           set -euo pipefail
-          forge build --root contracts \
+          forge build --root contracts --extra-output storageLayout \
             src/governance/FoundingWalletClaims420.sol \
             src/governance/FoundingCommitteeMembership420.sol \
             src/governance/FoundingRetirementVerifier420.sol \
@@ -77,6 +77,8 @@ jobs:
           x=json.loads((Path(os.environ["RUNNER_TEMP"])/"gov-pre-08-candidate-a.json").read_text())
           assert len(x["components"])==14
           assert all(x["components"][i]["sourceGitBlobSha1"] for i in range(14))
+          assert all(x["components"][i]["storageLayoutSha256"] for i in range(14))
+          assert len(x["consumerIntegrations"])==7
           assert all(x["components"][i]["deployedAddress"] is None for i in range(14))
           assert all(x["components"][i]["verifiedRuntimeCodeHash"] is None for i in range(14))
           assert not x["proposedV4"]["independentlyApproved"]

@@ -55,6 +55,8 @@ contract CivicInitialElectorateEnrollment420 {
     address public constant IDENTITY_420 = 0x0000000000000000000000000000000000000436;
     address public constant VALIDATORS_420 = 0x0000000000000000000000000000000000000423;
     uint8 public constant VERIFIED_TRUST = 2;
+    bytes32 public constant COMMUNITY_MEMBERSHIP_CREDENTIAL = keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1");
+    bytes32 public constant VALIDATOR_MEMBERSHIP_CREDENTIAL = keccak256("420/CIVIC/VALIDATOR_ELECTORATE/V1");
 
     struct Enrollment {
         address voter;
@@ -168,9 +170,11 @@ contract CivicInitialElectorateEnrollment420 {
         if (IDENTITY_420.code.length == 0) revert Ineligible();
         ICivicBootstrapIdentity420 identity = ICivicBootstrapIdentity420(IDENTITY_420);
         (address controller,,,,,, bool active) = identity.profiles(record.profileId);
-        (, bytes32 subject,,,,,,) = identity.credentials(record.credentialId);
+        (, bytes32 subject, bytes32 credentialType,,,,,) = identity.credentials(record.credentialId);
+        bytes32 expectedType = house == CivicIds420.House.COMMUNITY
+            ? COMMUNITY_MEMBERSHIP_CREDENTIAL : VALIDATOR_MEMBERSHIP_CREDENTIAL;
         if (
-            controller != record.voter || !active || subject != record.profileId
+            controller != record.voter || !active || subject != record.profileId || credentialType != expectedType
                 || !identity.credentialMeetsTrust(record.credentialId, VERIFIED_TRUST)
         ) revert Ineligible();
 

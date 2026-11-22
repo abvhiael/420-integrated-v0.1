@@ -7,6 +7,8 @@ or credentials; the real repository's slots remain null/unclaimed.
 from __future__ import annotations
 
 import copy
+import io
+import contextlib
 import importlib.util
 import json
 import shutil
@@ -101,6 +103,12 @@ def signed_fixture():
     check_rejected("unverified staged addresses", lambda: v.validate(strict=True, root=root),
                    "approved")
     h = approve_fixture_v4(root)
+    capture = io.StringIO()
+    with contextlib.redirect_stdout(capture):
+        assert e.print_approved_challenges(root) == 3
+    messages = capture.getvalue()
+    assert h in messages and all(role in messages for role in v.ROLES)
+    assert v.load(root, e.RESERVATIONS)["planned_genesis_hash"] is None
     proof = make_proofs(root, accounts, h)
     return ctx, root, accounts, plan, proof
 
@@ -248,15 +256,20 @@ def server(state):
 
 
 def test_codebound_1271():
-    ctx, root, accounts, plan, proofs = signed_fixture()
+    # Contract signer identity/codehash is staged before the approved V4 commitment.
+    ctx, root, accounts, plan = fixture()
     try:
         bytecode = "0x6000600055"
         code_hash = "0x" + keccak(bytes.fromhex(bytecode[2:])).hex()
-        m = v.load(root, e.RESERVATIONS)
-        m["planned_genesis_hash"] = proofs["genesis_plan_commitment"]
-        member = m["founders"][2]
-        member["pre_genesis_proof"]["method"] = "EIP1271_CODEBOUND"
-        member["pre_genesis_proof"]["expected_runtime_code_hash"] = code_hash
+        plan["founders"][2]["method"] = "EIP1271_CODEBOUND"
+        plan["founders"][2]["expected_runtime_code_hash"] = code_hash
+        e.apply_files(root, e.stage(root, plan))
+        h = approve_fixture_v4(root)
+        capture = io.StringIO()
+        with contextlib.redirect_stdout(capture):
+            e.print_approved_challenges(root)
+        assert code_hash in capture.getvalue() and h in capture.getvalue()
+        proofs = make_proofs(root, accounts, h)
         proofs["founders"][2]["method"] = "EIP1271_CODEBOUND"
         proofs["founders"][2]["expected_runtime_code_hash"] = code_hash
         proofs["founders"][2]["signature"] = "0x012345"

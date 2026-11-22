@@ -13,7 +13,7 @@ const keys=(o,allowed)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o
 const ownArray=(a,max)=>Array.isArray(a)&&a.length<=max&&a.every(card)&&new Set(a).size===a.length;
 const scoreFields=['fifteens','pairs','runs','flush','nobs','total'];
 const showFields=['seat','isCrib','cards','starter','score'];
-const awardFields=['seat','team','kind','points','total'];
+const awardFields=['seat','team','kind','points','count','total'];
 const viewFields=['gameId','variant','round','phase','dealer','turn','seat','scores','hand',
  'cardCounts','cribCount','discarded','starter','pegCount','pegPile','pegged','saidGo',
  'lastShow','lastAwards','losers','winner'];
@@ -75,7 +75,9 @@ export function normalizeCribbageSnapshot(result,subject=null){
   if(!keys(entry,awardFields)||!Number.isInteger(entry.seat)||entry.seat<0||entry.seat>=n||
    entry.team!==teams[entry.seat]||typeof entry.kind!=='string'||
    !/^[a-z+-]{1,40}$/.test(entry.kind)||!Number.isInteger(entry.points)||
-   entry.points<1||entry.points>29||!score(entry.total))return null;
+   entry.points<1||entry.points>29||
+   !(entry.count===undefined||Number.isInteger(entry.count)&&entry.count>=0&&entry.count<=31)||
+   !score(entry.total))return null;
  }
  if(!v.losers.every(x=>keys(x,['team','score','classification'])&&
   Number.isInteger(x.team)&&x.team>=0&&x.team<n&&score(x.score)&&
@@ -110,7 +112,7 @@ export function cribbageAwardAnnouncement(award,view){
  const n=view.scores.length,name='Player '+(award.seat+1);
  if(award.kind==='heels')return {label:name+': his heels for '+award.points,team:award.team,total:award.total};
  if(award.kind==='go'||award.kind==='last-card')return {label:name+': '+(award.kind==='go'?'Go':'Last card')+' for '+award.points,team:award.team,total:award.total};
- const count=award.kind.includes('fifteen')?15:award.kind.includes('thirty-one')?31:view.pegCount;
+ const count=award.kind.includes('fifteen')?15:award.kind.includes('thirty-one')?31:award.count??view.pegCount;
  const detail=award.kind.includes('quadruple')?'four of a kind':award.kind.includes('triple')?'three of a kind':
   award.kind.includes('pair')?'a pair':award.kind.includes('run')?'a run':'';
  return {label:name+': '+count+' for '+award.points+(detail?', '+detail:''),team:award.team,total:award.total};
@@ -192,6 +194,11 @@ export class CribbageSessionController{
    const session=normalizeCribbageSnapshot(result,me.data.profile.subject);
    if(!session||session.id!==id||existing&&session.sequence<existing.sequence)
     throw Error('Unverified Cribbage snapshot; no private cards were displayed');
+   // A normal heartbeat cannot restart announcements or reset back pegs.
+   if(existing&&session.sequence===existing.sequence)return this.state;
+   // Preserve the 1.5-second per-award sequence; the next poll will catch
+   // up once the score presentation has completed.
+   if(existing&&(this.timer!==null||this.state.queue?.length))return this.state;
    const replay=existing&&session.sequence===existing.sequence+1;
    const queue=replay?cribbageAnnouncementQueue(existing,session):[];
    const pegs=existing&&replay&&queue.length?

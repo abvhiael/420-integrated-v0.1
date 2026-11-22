@@ -1,0 +1,30 @@
+name: BC-1.1 Cribbage Rules Specification
+on:
+  pull_request:
+    paths:
+      - 'docs/games/classics/BC-1-1-CRIBBAGE-*.md'
+      - 'docs/games/classics/BC-1-1-CRIBBAGE-*.json'
+      - 'bong-goggles/web/test/cribbage-rules-spec.test.js'
+      - '.github/workflows/bc-1-1-cribbage-rules.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  rules-spec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact tested source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify BC-1.1 machine rules contract and variant fixtures
+        run: node --test bong-goggles/web/test/cribbage-rules-spec.test.js

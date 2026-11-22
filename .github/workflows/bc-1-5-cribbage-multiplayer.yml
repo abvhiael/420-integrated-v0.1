@@ -5,6 +5,8 @@ on:
       - 'cmd/bong-goggles-social/cribbage_activation*.go'
       - 'cmd/bong-goggles-social/main.go'
       - 'services/bong-goggles-account-social/classic_cribbage_multiplayer_integration_test.go'
+      - 'services/bong-goggles-account-social/classic_rules_*.go'
+      - 'services/bong-goggles-account-social/classic_sessions.go'
       - 'bong-goggles/web/core/classic-cribbage-multiplayer.js'
       - 'bong-goggles/web/core/classic-rooms.js'
       - 'bong-goggles/web/core/classic-room-bindings.js'

@@ -219,8 +219,29 @@ def main():
             errors.append(f"invariant statement drift: {iid}")
 
     # Frozen address authority.
-    if addr_a != addr_b:
+    # GOV-PRE-02 founder reservation annotations are not additions to the
+    # frozen 0x0420-0x04ff system-address map. Reject any real assignment
+    # disagreement while independently proving these three approved slots
+    # match their authoritative (still UNCLAIMED) founder-wallet manifest.
+    founder_annotations = {"founder_wallet_reservations", "founder_wallet_slots"}
+    system_maps_match = (set(addr_b)-set(addr_a) == founder_annotations
+        and not (set(addr_a)-set(addr_b))
+        and all(addr_a[key] == addr_b[key] for key in addr_a))
+    if not system_maps_match:
         errors.append("frozen system-address maps diverge")
+    reservations_path = addr_b.get("founder_wallet_reservations")
+    if reservations_path != "contracts/config/founder-wallet-reservations.json":
+        errors.append("founder reservation manifest drift")
+    else:
+        canonical_founders = load(ROOT / reservations_path).get("founders", [])
+        derived = [
+            {"role": person["role"], "address": person["wallet_address"],
+             "status": person["ownership_status"],
+             "compensation_bps": person["developer_compensation_bps"]}
+            for person in canonical_founders
+        ]
+        if len(derived) != 3 or addr_b.get("founder_wallet_slots") != derived:
+            errors.append("founder reservation annotations contradict canonical wallet manifest")
     assignments = {x.get("name"): x.get("address") for x in addr_a.get("assignments", [])}
     if assignments.get("ProtocolRegistry") != "0x0000000000000000000000000000000000000434":
         errors.append("ProtocolRegistry frozen address drift")
@@ -260,7 +281,7 @@ def main():
         "required_views": len(view_reqs),
         "required_endpoints": len(ep_reqs),
         "source_invariants": len(invariants),
-        "system_address_maps_match": addr_a == addr_b,
+        "system_address_maps_match": system_maps_match,
         "protocol_registry_address": assignments.get("ProtocolRegistry"),
         "governance_scope_conflict_recorded": bool(governance_in_purpose and not governance_required),
         "errors": errors,

@@ -193,7 +193,8 @@ func (s *ClassicSessions) Act(ctx context.Context,viewer,id string,action Classi
   if kind=="cancel"&&viewer!=room.Host{return empty,ErrForbidden}
   if kind=="resign"{rec.Status="resigned";rec.FinishedReason="resigned";reason="resigned"
    if rec.SeatCount==2{other:=(seat+1)%2;rec.WinnerSeat=&other;winner=other}
-  }else{rec.Status="cancelled";rec.FinishedReason="cancelled";reason="cancelled"}
+   kind="resigned"
+  }else{rec.Status="cancelled";rec.FinishedReason="cancelled";reason="cancelled";kind="cancelled"}
  }
  rec.Sequence=action.ExpectedSequence
  if rec.Status!="active"{rec.TurnSeat=nil;rec.Deadline=nil}

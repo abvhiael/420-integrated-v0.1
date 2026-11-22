@@ -143,6 +143,8 @@ func TestBC06TimeoutSweepResignationAndBlocks(t *testing.T){
   !strings.Contains(w.Body.String(),`"status":"resigned"`){t.Fatal("resign denied",w.Code,w.Body.String())}
  if w:=request(h,"GET","/v1/classic-sessions/"+game2.ID,"",a);w.Code!=200||
   !strings.Contains(w.Body.String(),`"winnerSeat":0`){t.Fatal("two-seat forfeit winner",w.Code)}
+ if w:=request(h,"GET","/v1/classic-sessions/"+game2.ID+"/events?after=1","",a);w.Code!=200||
+  !strings.Contains(w.Body.String(),`"kind":"resigned"`){t.Fatal("schema-qualified resignation event",w.Code,w.Body.String())}
 }
 func TestBC06ConcurrentMovesSEEDeliveryAndFailClosedRules(t *testing.T){
  _,h,a,b:=bc06Fixture(t,"198.51.100.113")
@@ -187,4 +189,6 @@ func TestBC06ConcurrentMovesSEEDeliveryAndFailClosedRules(t *testing.T){
  }
  if w:=bc06Act(t,h,a,match.ID,"cancel",3,nil,bc06ActionID(t));w.Code!=200||
   !strings.Contains(w.Body.String(),`"status":"cancelled"`){t.Fatal("host cancellation denied",w.Code,w.Body.String())}
+ if w:=request(h,"GET","/v1/classic-sessions/"+match.ID+"/events?after=2","",b);w.Code!=200||
+  !strings.Contains(w.Body.String(),`"kind":"cancelled"`){t.Fatal("schema-qualified cancellation event",w.Code,w.Body.String())}
 }

@@ -163,7 +163,13 @@ contract Governance420 is SystemAccess, I420System {
     event CivicGovernorBound(address indexed civicGovernor);
     event CivicBootstrapPlanScheduled(bytes32 indexed planHash, address indexed civicGovernor);
     event CivicBootstrapRetired(address indexed civicGovernor);
-    event CivicInitialElectoratesScheduled(bytes32 indexed plan, bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight);
+    event CivicInitialElectoratesScheduled(
+        bytes32 indexed plan,
+        bytes32 communityRoot,
+        uint256 communityWeight,
+        bytes32 validatorRoot,
+        uint256 validatorWeight
+    );
 
     constructor(
         address timelock_
@@ -200,13 +206,29 @@ contract Governance420 is SystemAccess, I420System {
         // Preserve the historical all-at-Genesis commitment byte-for-byte.
         // The alternative commitment explicitly binds its authority, enrollment code and chain.
         if (_postGenesisMode()) {
-            return keccak256(abi.encode(
-                keccak256("420CIVIC_BOOTSTRAP_POSTGENESIS_V1"), block.chainid,
-                constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_,
-                constitution_.codehash, proposals_.codehash, electorates_.codehash, voting_.codehash,
-                governor_.codehash, communitySource_.codehash, validatorSource_.codehash,
-                approvedInitialEnrollment, approvedInitialEnrollment.codehash, approvedInitialElectorateAuthority
-            ));
+            return keccak256(
+                abi.encode(
+                    keccak256("420CIVIC_BOOTSTRAP_POSTGENESIS_V1"),
+                    block.chainid,
+                    constitution_,
+                    proposals_,
+                    electorates_,
+                    voting_,
+                    governor_,
+                    communitySource_,
+                    validatorSource_,
+                    constitution_.codehash,
+                    proposals_.codehash,
+                    electorates_.codehash,
+                    voting_.codehash,
+                    governor_.codehash,
+                    communitySource_.codehash,
+                    validatorSource_.codehash,
+                    approvedInitialEnrollment,
+                    approvedInitialEnrollment.codehash,
+                    approvedInitialElectorateAuthority
+                )
+            );
         }
         return keccak256(
             abi.encode(
@@ -314,15 +336,20 @@ contract Governance420 is SystemAccess, I420System {
 
         bool deferred = _postGenesisMode();
         if (!deferred) {
-            if (approvedInitialEnrollment != address(0) || approvedInitialElectorateAuthority != address(0)
-                || initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0
-                || initialValidatorRoot == bytes32(0) || initialValidatorTotalWeight == 0) revert InvalidElectorateSource();
+            if (
+                approvedInitialEnrollment != address(0) || approvedInitialElectorateAuthority != address(0)
+                    || initialCommunityRoot == bytes32(0) || initialCommunityTotalWeight == 0
+                    || initialValidatorRoot == bytes32(0) || initialValidatorTotalWeight == 0
+            ) revert InvalidElectorateSource();
         } else {
             CivicInitialElectorateEnrollment420 enrollment =
                 CivicInitialElectorateEnrollment420(approvedInitialEnrollment);
-            if (approvedInitialEnrollment.code.length == 0 || enrollment.governance() != address(this)
-                || enrollment.deploymentChainId() != block.chainid || enrollment.enrollmentClosed())
+            if (
+                approvedInitialEnrollment.code.length == 0 || enrollment.governance() != address(this)
+                    || enrollment.deploymentChainId() != block.chainid || enrollment.enrollmentClosed()
+            ) {
                 revert InvalidElectorateSource();
+            }
         }
         bytes32 plan = canonicalBootstrapPlanHash(
             constitution_, proposals_, electorates_, voting_, governor_, communitySource_, validatorSource_
@@ -550,14 +577,24 @@ contract Governance420 is SystemAccess, I420System {
         // Deferred release: indices 17/18 are scheduled only after post-Genesis eligibility enrollment.
         if (!deferred) {
             _schedule(
-                timelock, plan, 17, communitySource_,
-                abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint,
-                    (initialCommunityRoot, initialCommunityTotalWeight))
+                timelock,
+                plan,
+                17,
+                communitySource_,
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                    (initialCommunityRoot, initialCommunityTotalWeight)
+                )
             );
             _schedule(
-                timelock, plan, 18, validatorSource_,
-                abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint,
-                    (initialValidatorRoot, initialValidatorTotalWeight))
+                timelock,
+                plan,
+                18,
+                validatorSource_,
+                abi.encodeCall(
+                    CivicMerkleElectorateSource420.publishInitialCheckpoint,
+                    (initialValidatorRoot, initialValidatorTotalWeight)
+                )
             );
         }
 
@@ -569,13 +606,19 @@ contract Governance420 is SystemAccess, I420System {
     /// The Timelock's preexisting G1 floor remains mandatory for indices 17 and 18.
     function schedulePostGenesisInitialElectorates() external {
         GovernanceTimelock timelock = GovernanceTimelock(payable(governanceTimelock));
-        if (!_postGenesisMode() || !bootstrapPlanScheduled || bootstrapRetired || initialEnrollmentScheduled
-            || msg.sender != approvedInitialElectorateAuthority || timelock.civicAuthorityActivated()
-            || timelock.scheduler() != address(this) || timelock.bootstrapGovernor() != address(this))
+        if (
+            !_postGenesisMode() || !bootstrapPlanScheduled || bootstrapRetired || initialEnrollmentScheduled
+                || msg.sender != approvedInitialElectorateAuthority || timelock.civicAuthorityActivated()
+                || timelock.scheduler() != address(this) || timelock.bootstrapGovernor() != address(this)
+        ) {
             revert InvalidBootstrapState();
-        if (CivicMerkleElectorateSource420(bootstrapCommunitySource).checkpointCount() != 0
-            || CivicMerkleElectorateSource420(bootstrapValidatorSource).checkpointCount() != 0)
+        }
+        if (
+            CivicMerkleElectorateSource420(bootstrapCommunitySource).checkpointCount() != 0
+                || CivicMerkleElectorateSource420(bootstrapValidatorSource).checkpointCount() != 0
+        ) {
             revert InvalidElectorateSource();
+        }
 
         (bytes32 cRoot, uint256 cWeight, bytes32 vRoot, uint256 vWeight) =
             CivicInitialElectorateEnrollment420(approvedInitialEnrollment).seal();
@@ -584,10 +627,20 @@ contract Governance420 is SystemAccess, I420System {
         enrolledValidatorRoot = vRoot;
         enrolledValidatorTotalWeight = vWeight;
         initialEnrollmentScheduled = true;
-        _schedule(timelock, bootstrapPlanHash, 17, bootstrapCommunitySource,
-            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (cRoot, cWeight)));
-        _schedule(timelock, bootstrapPlanHash, 18, bootstrapValidatorSource,
-            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (vRoot, vWeight)));
+        _schedule(
+            timelock,
+            bootstrapPlanHash,
+            17,
+            bootstrapCommunitySource,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (cRoot, cWeight))
+        );
+        _schedule(
+            timelock,
+            bootstrapPlanHash,
+            18,
+            bootstrapValidatorSource,
+            abi.encodeCall(CivicMerkleElectorateSource420.publishInitialCheckpoint, (vRoot, vWeight))
+        );
         emit CivicInitialElectoratesScheduled(bootstrapPlanHash, cRoot, cWeight, vRoot, vWeight);
     }
 
@@ -670,9 +723,13 @@ contract Governance420 is SystemAccess, I420System {
 
         // No proposal can be created until both checkpoints are effective for snapshotBlock = block.number - 1.
         bool deferred = _postGenesisMode();
-        if (deferred && (!initialEnrollmentScheduled
-            || !CivicInitialElectorateEnrollment420(approvedInitialEnrollment).verifyClosed()))
+        if (
+            deferred
+                && (!initialEnrollmentScheduled
+                    || !CivicInitialElectorateEnrollment420(approvedInitialEnrollment).verifyClosed())
+        ) {
             revert InvalidElectorateSource();
+        }
         bytes32 requiredCommunityRoot = deferred ? enrolledCommunityRoot : initialCommunityRoot;
         uint256 requiredCommunityWeight = deferred ? enrolledCommunityTotalWeight : initialCommunityTotalWeight;
         bytes32 requiredValidatorRoot = deferred ? enrolledValidatorRoot : initialValidatorRoot;

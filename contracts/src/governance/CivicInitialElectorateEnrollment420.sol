@@ -4,21 +4,48 @@ pragma solidity ^0.8.24;
 import "./CivicIds420.sol";
 
 interface ICivicBootstrapIdentity420 {
-    function profiles(bytes32 profileId) external view returns (
-        address controller, address pendingController, bytes32 metadataHash, bytes32 primaryName,
-        uint64 createdAt, uint64 updatedAt, bool active
-    );
-    function credentials(bytes32 credentialId) external view returns (
-        bytes32 issuerId, bytes32 subjectProfileId, bytes32 credentialType, bytes32 claimHash,
-        uint64 issuedAt, uint64 expiresAt, uint64 revokedAt, bool subjectRejected
-    );
-    function credentialMeetsTrust(bytes32 credentialId, uint8 minTrust) external view returns (bool);
+    function profiles(
+        bytes32 profileId
+    )
+        external
+        view
+        returns (
+            address controller,
+            address pendingController,
+            bytes32 metadataHash,
+            bytes32 primaryName,
+            uint64 createdAt,
+            uint64 updatedAt,
+            bool active
+        );
+    function credentials(
+        bytes32 credentialId
+    )
+        external
+        view
+        returns (
+            bytes32 issuerId,
+            bytes32 subjectProfileId,
+            bytes32 credentialType,
+            bytes32 claimHash,
+            uint64 issuedAt,
+            uint64 expiresAt,
+            uint64 revokedAt,
+            bool subjectRejected
+        );
+    function credentialMeetsTrust(
+        bytes32 credentialId,
+        uint8 minTrust
+    ) external view returns (bool);
 }
 
 interface ICivicBootstrapValidators420 {
-    function ownerValidatorId(address owner) external view returns (bytes32);
-    function retirementOwnerStatus(bytes32 validatorId)
-        external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince);
+    function ownerValidatorId(
+        address owner
+    ) external view returns (bytes32);
+    function retirementOwnerStatus(
+        bytes32 validatorId
+    ) external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince);
 }
 
 /// @notice One-way, independently verified first-electorate enrollment before Civic activation.
@@ -52,25 +79,38 @@ contract CivicInitialElectorateEnrollment420 {
     error EmptyElectorate();
 
     event MemberEnrolled(CivicIds420.House indexed house, address indexed voter, bytes32 indexed profileId);
-    event InitialElectoratesClosed(bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight);
+    event InitialElectoratesClosed(
+        bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight
+    );
 
-    constructor(address governance_) {
+    constructor(
+        address governance_
+    ) {
         if (governance_ == address(0)) revert Unauthorized();
         governance = governance_;
         deploymentChainId = block.chainid;
     }
 
-    function count(CivicIds420.House house) external view returns (uint256) {
+    function count(
+        CivicIds420.House house
+    ) external view returns (uint256) {
         return house == CivicIds420.House.COMMUNITY ? _community.length : _validator.length;
     }
 
-    function member(CivicIds420.House house, uint256 index) external view returns (Enrollment memory) {
+    function member(
+        CivicIds420.House house,
+        uint256 index
+    ) external view returns (Enrollment memory) {
         return house == CivicIds420.House.COMMUNITY ? _community[index] : _validator[index];
     }
 
     /// @notice Self-enrollment requires active issuer-trusted VERIFIED identity; validator
     /// enrollment additionally requires consensus-maintained eligible validator ownership.
-    function enroll(CivicIds420.House house, bytes32 profileId, bytes32 credentialId) external {
+    function enroll(
+        CivicIds420.House house,
+        bytes32 profileId,
+        bytes32 credentialId
+    ) external {
         if (block.chainid != deploymentChainId) revert WrongChain();
         if (enrollmentClosed) revert EnrollmentClosed();
         uint8 h = uint8(house);
@@ -91,7 +131,10 @@ contract CivicInitialElectorateEnrollment420 {
 
     /// @notice Only the Genesis-plan-approved Governance compatibility contract can freeze
     /// both first electorates. Reverts atomically if any member became ineligible.
-    function seal() external returns (bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight) {
+    function seal()
+        external
+        returns (bytes32 communityRoot, uint256 communityWeight, bytes32 validatorRoot, uint256 validatorWeight)
+    {
         if (msg.sender != governance) revert Unauthorized();
         if (block.chainid != deploymentChainId) revert WrongChain();
         if (enrollmentClosed) revert EnrollmentClosed();
@@ -110,32 +153,43 @@ contract CivicInitialElectorateEnrollment420 {
         return true;
     }
 
-    function _validatorId(address voter) private view returns (bytes32 id) {
+    function _validatorId(
+        address voter
+    ) private view returns (bytes32 id) {
         if (VALIDATORS_420.code.length == 0) revert Ineligible();
         id = ICivicBootstrapValidators420(VALIDATORS_420).ownerValidatorId(voter);
         if (id == bytes32(0)) revert Ineligible();
     }
 
-    function _verify(Enrollment memory record, CivicIds420.House house) private view {
+    function _verify(
+        Enrollment memory record,
+        CivicIds420.House house
+    ) private view {
         if (IDENTITY_420.code.length == 0) revert Ineligible();
         ICivicBootstrapIdentity420 identity = ICivicBootstrapIdentity420(IDENTITY_420);
         (address controller,,,,,, bool active) = identity.profiles(record.profileId);
         (, bytes32 subject,,,,,,) = identity.credentials(record.credentialId);
-        if (controller != record.voter || !active || subject != record.profileId ||
-            !identity.credentialMeetsTrust(record.credentialId, VERIFIED_TRUST)) revert Ineligible();
+        if (
+            controller != record.voter || !active || subject != record.profileId
+                || !identity.credentialMeetsTrust(record.credentialId, VERIFIED_TRUST)
+        ) revert Ineligible();
 
         if (house == CivicIds420.House.VALIDATOR) {
-            if (record.validatorId == bytes32(0) || _validatorId(record.voter) != record.validatorId) revert Ineligible();
-            (address owner, bool eligible,) = ICivicBootstrapValidators420(VALIDATORS_420).retirementOwnerStatus(record.validatorId);
+            if (record.validatorId == bytes32(0) || _validatorId(record.voter) != record.validatorId) {
+                revert Ineligible();
+            }
+            (address owner, bool eligible,) =
+                ICivicBootstrapValidators420(VALIDATORS_420).retirementOwnerStatus(record.validatorId);
             if (owner != record.voter || !eligible) revert Ineligible();
         }
     }
 
     /// @dev Numeric address order, keccak256(abi.encode(address)) leaves, sorted-pair
     /// hashing and unpaired-node promotion exactly match the retained Civic proof generator.
-    function _root(Enrollment[] storage records, CivicIds420.House house)
-        private view returns (bytes32 root, uint256 totalWeight)
-    {
+    function _root(
+        Enrollment[] storage records,
+        CivicIds420.House house
+    ) private view returns (bytes32 root, uint256 totalWeight) {
         totalWeight = records.length;
         address[] memory voters = new address[](totalWeight);
         for (uint256 i; i < totalWeight; ++i) {
@@ -158,8 +212,9 @@ contract CivicInitialElectorateEnrollment420 {
         while (width > 1) {
             uint256 nextWidth;
             for (uint256 i; i < width; i += 2) {
-                if (i + 1 == width) nodes[nextWidth++] = nodes[i];
-                else {
+                if (i + 1 == width) {
+                    nodes[nextWidth++] = nodes[i];
+                } else {
                     bytes32 a = nodes[i];
                     bytes32 b = nodes[i + 1];
                     nodes[nextWidth++] = a <= b ? keccak256(abi.encodePacked(a, b)) : keccak256(abi.encodePacked(b, a));

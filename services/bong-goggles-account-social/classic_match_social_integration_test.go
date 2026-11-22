@@ -117,3 +117,23 @@ func TestBC16RematchReusesMixedBotSeatsWithoutConsentBypass(t *testing.T){
   t.Fatal("mixed roster not preserved",code,replay)
  }
 }
+
+func TestBC16BotOnlyRematchReadyForAuthorizedHost(t *testing.T){
+ _,h,a,_:=bc16Fixture(t)
+ room:=bc05Create(t,h,a,"cribbage","private",2)
+ code,room:=bc05Change(t,h,a,room.ID,room.Revision,1,"bot",map[string]any{"difficulty":"hard"})
+ if code!=200||room.Status!="ready"{t.Fatal("original bot room not ready",code,room)}
+ game:=bc06Start(t,h,a,room.ID)
+ if w:=bc06Act(t,h,a,game.ID,"resign",game.Sequence+1,nil,bc06ActionID(t));w.Code!=200{
+  t.Fatal("resign",w.Code)
+ }
+ code,rematch:=bc16Send(t,h,a,"/v1/classic-sessions/"+game.ID+"/rematch",bc06ActionID(t),nil)
+ if code!=201||rematch.Status!="ready"||rematch.Seats[1].Controller!="bot"||
+  rematch.Seats[1].Difficulty!="hard"||len(rematch.Invites)!=0{
+  t.Fatal("bot rematch should be ready without human invitations",code,rematch)
+ }
+ next:=bc06Start(t,h,a,rematch.ID)
+ if next.ID==game.ID||next.RulesHash!=game.RulesHash||next.Sequence!=1{
+  t.Fatal("new rules-owned session not established",next)
+ }
+}

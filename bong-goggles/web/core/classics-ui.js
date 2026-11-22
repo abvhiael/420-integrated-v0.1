@@ -8,6 +8,7 @@ import {CHAOS_VEHICLES,chaosVehicle} from './chaos-vehicles.js';
 import {renderChaosGameEffects,renderChaosFinishEffects} from './chaos-game-effects.js';
 import {renderChaosRegionalResults,renderChaosChampionshipResults,renderChaosResultsHistory,renderChaosCumulativeStandings} from './chaos-results.js';
 import {isChaosComputer} from './chaos-computer.js';
+import {renderChaosPracticeTable} from './chaos-practice-table.js';
 const link='<a href="/classics" data-route="classics">← All Classics</a>';
 const badge=s=>'<span class="ccc-badge">'+esc(s)+'</span>';
 export function renderClassicsCatalogue(){
@@ -86,5 +87,7 @@ export function renderChaosGame({game=null,revealed=false,error=null,feedback=nu
  return top+notice+'<div class="ccc-panel"><h3>'+esc(p.name)+' — '+(game.step==='discard'?'discard phase':'play phase')+'</h3>'+pile+'<p>'+prompt+' Repairs are only allowed on your turn. Detour losses are permanent this stage. Drives over 300 km trigger a regional hazard.</p>'+handCards(p,leg,options,game)+(game.step==='play'?'<div class="ccc-actions">'+(p.status?'<button data-chaos-action="recover">Emergency recovery (spend action)</button>':'')+'<button data-chaos-action="pass">Pass (discard two)</button></div>':'')+'</div>'+history(game)+'</div>';
 }
 export function renderClassicsRoute({pathname,game,revealed,error,feedback,effects,saveInfo}={}){
- return pathname==='/classics/cross-country-chaos/practice'?renderChaosGame({game,revealed,error,feedback,effects,saveInfo}):renderClassicsCatalogue();
+ return pathname==='/classics/cross-country-chaos/practice'?
+  (game?.phase==='playing'?renderChaosPracticeTable({game,revealed,error,feedback,effects,saveInfo}):
+   renderChaosGame({game,revealed,error,feedback,effects,saveInfo})):renderClassicsCatalogue();
 }

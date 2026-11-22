@@ -346,11 +346,11 @@ export const STAKE_RELEASE_DESCRIPTOR_ARTIFACTS_420 = Object.freeze({
   }),
   RewardController: Object.freeze({
     address: '0x0000000000000000000000000000000000000420' as Hex,
-    protocolVersion: 2,
-    path: 'contracts/artifacts/RewardController.abi.json',
-    gitBlobSha: '9423d01d4277764837a1cb60edca3ae906260f4c',
+    protocolVersion: 3,
+    path: 'contracts/artifacts/RewardController.v3.abi.json',
+    gitBlobSha: 'a6ecf3e1896f1f3232b6f543a96e158de7cac99c',
     sourcePath: 'contracts/src/system/RewardController.sol',
-    sourceBlobSha: '012c9e24b4e7a37ca89aad1c887529a19c70bb16'
+    sourceBlobSha: '97e6c2735094f1b3e355e353394589cf0b93d210'
   })
 });
 

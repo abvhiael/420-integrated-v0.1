@@ -115,3 +115,32 @@ test('Mobile game is route-scoped, accessible, and does not allow the local engi
  assert.match(gate,/CCC account multiplayer route must not expose pass-and-play/);
  assert.match(gate,/baseTotal:1189\*1024/);
 });
+
+
+test('Multiplayer road map and exposed public tables remain visible without opponents private hands',()=>{
+ const tables={
+  ...game,
+  players:[
+   {...game.players[0],vehicle:'wagon',km:700,played:[{type:'mileage',km:200},{type:'mileage',km:200}],
+    upgrades:[{type:'upgrade',id:'winter-tires',name:'Canadian Winter Tires'}],
+    status:{type:'hazard',id:'fog',name:'Fog Thicker Than Pea Soup',kind:'slow'},
+    used:['winter-tires'],shield:2},
+   {...game.players[1],vehicle:'compact',km:400,played:[{type:'mileage',km:400}],
+    upgrades:[],status:null,used:[],shield:0}
+  ],
+  hand:[{type:'mileage',km:150,name:'MY_PRIVATE_CARD'}]
+ };
+ const html=renderChaosOnline({status:'ready',room:checkChaosProjection(tables)});
+ assert.match(html,/east-atlas-underlay.webp/);
+ assert.equal((html.match(/class="ccc-map-vehicle ccc-map-vehicle--/g)||[]).length,2);
+ assert.match(html,/Visible cards only/);
+ assert.match(html,/200 km × 2/);
+ assert.match(html,/400 km × 1/);
+ assert.match(html,/Fog Thicker Than Pea Soup/);
+ assert.match(html,/Canadian Winter Tires · USED/);
+ assert.match(html,/2 shields/);
+ assert.match(html,/MY_PRIVATE_CARD/);
+ assert.doesNotMatch(html,/class="ccc-map-foreground"/);
+ const noLeak=checkChaosProjection({...tables,hand:[],players:tables.players});
+ assert.doesNotMatch(renderChaosOnline({status:'ready',room:noLeak}),/MY_PRIVATE_CARD/);
+});

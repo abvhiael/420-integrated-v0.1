@@ -1,6 +1,7 @@
 // Account-owned CCC room client. Never constructs or mutates game rules/decks.
 // All private cards and legal choices come from an authenticated server projection.
 import {chaosCardArt} from './chaos-card-art.js';
+import {renderChaosHighway} from './chaos-board.js';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const id=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const isRoom=value=>value&&typeof value==='object'&&id.test(value.id??'')&&
@@ -122,6 +123,35 @@ function roomSummary(room){
  '</strong><p>'+escape(room.status)+' · '+escape(room.seats.map(s=>s.name).join(', '))+'</p>'+
  '<button type="button" data-chaos-online-action="open" data-room="'+escape(room.id)+'">Open match</button></article>';
 }
+
+function publicTables(room){
+ if(!Array.isArray(room.players)||!room.players.length)return '';
+ return '<section class="ccc-online-tables" aria-label="Exposed player tables">'+
+  '<h3>On the table <small>Visible cards only · private hands stay hidden</small></h3>'+
+  '<div class="ccc-online-table-grid">'+room.players.map((p,i)=>{
+   const played=(p.played||[]).filter(c=>c.type==='mileage'&&Number.isSafeInteger(c.km));
+   const mileage=[...new Set(played.map(c=>c.km))].sort((a,b)=>b-a);
+   const total=played.reduce((n,c)=>n+c.km,0);
+   const upgrades=(p.upgrades||[]).map(c=>
+    '<span class="ccc-online-exposed-card">'+cardImage(c,room.leg)+
+    '<span>'+escape(cardLabel(c))+(p.used?.includes(c.id)?' · USED':' · READY')+'</span></span>').join('');
+   const hazard=p.status?'<span class="ccc-online-exposed-card ccc-online-hazard">'+cardImage(p.status,room.leg)+
+    '<span>'+escape(cardLabel(p.status))+'</span></span>':'<span class="ccc-online-clear">Clear road</span>';
+   const stacks=mileage.map(km=>'<span class="ccc-online-mile-stack" aria-label="'+
+    played.filter(c=>c.km===km).length+' played '+km+' kilometre cards">'+
+    cardImage({type:'mileage',km},room.leg)+'<strong>'+km+' km × '+played.filter(c=>c.km===km).length+'</strong></span>').join('');
+   return '<article class="ccc-online-table'+(room.seat===i?' ccc-online-table--mine':'')+'">'+
+    '<header><strong>'+escape(p.name)+'</strong><span>'+Number(p.km||0).toLocaleString('en-CA')+' / 2,500 km</span></header>'+
+    '<div class="ccc-online-exposed"><div><h4>Active hazard</h4>'+hazard+'</div>'+
+    '<div><h4>Upgrades</h4>'+(upgrades||'<span class="ccc-online-clear">None equipped</span>')+'</div>'+
+    '<div><h4>Legendary protection</h4><strong>'+Number(p.shield||0)+' shield'+(p.shield===1?'':'s')+'</strong></div>'+
+    '<div><h4>Mileage cards · '+total.toLocaleString('en-CA')+' played</h4>'+
+     '<div class="ccc-online-mileage">'+(stacks||'<span class="ccc-online-clear">No mileage cards</span>')+'</div></div></div>'+
+    ((p.slowLoss||p.detourLoss)?'<p class="ccc-online-losses">Slowdowns −'+Number(p.slowLoss||0)+
+      ' km · Detours −'+Number(p.detourLoss||0)+' km</p>':'')+'</article>';
+  }).join('')+'</div></section>';
+}
+
 function roomDetails(room){
  const lobby=room.status==='lobby';
  const ready=room.seats.every(s=>s.joined);
@@ -150,7 +180,8 @@ function roomDetails(room){
   '<section class="ccc-online-results"><h3>Stage complete</h3><p>Scores are banked. All regional hazards and equipment reset for the next stage.</p>'+
   (room.host?'<button type="button" data-chaos-online-action="next">Start next region</button>':
    '<p>Waiting for host to continue.</p>')+'</section>':'';
- return '<section class="ccc-online-game">'+board+
+ return '<section class="ccc-online-game"><div class="ccc-online-track"><div class="ccc-online-map">'+
+  renderChaosHighway({leg:room.leg,players:room.players})+'</div>'+board+'</div>'+publicTables(room)+
   '<div class="ccc-online-play"><div class="ccc-online-public"><h3>On the road</h3>'+
   '<p>'+escape(room.stageName)+' · Stage '+(room.leg+1)+' of 3</p>'+
   '<p>Stock: '+room.stockCount+' cards · Discard: '+room.discardCount+'</p>'+

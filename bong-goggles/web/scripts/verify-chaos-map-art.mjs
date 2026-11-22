@@ -21,7 +21,7 @@ export function verifyMapRegistry(){
    'non-allowlisted map asset path');
   assert(/^[a-f0-9]{40}$/.test(entry.gitBlobSha),'unverified source identity: '+entry.path);
   assert(Number.isSafeInteger(entry.bytes)&&entry.bytes>10000,'invalid expected source size');
-  assert(entry.width===(entry.transparent?1920:1907)&&entry.height===(entry.transparent?830:825),
+  assert(entry.width===CHAOS_MAP_DIMENSIONS.width&&entry.height===CHAOS_MAP_DIMENSIONS.height,
    'wrong approved native atlas dimensions: '+entry.path);
   assert(entry.bytes<= (entry.transparent?80*1024:4*1024*1024),'individual map asset exceeds approved budget: '+entry.path);
   total+=entry.bytes;

@@ -611,3 +611,50 @@
   color:CanvasText!important;background:Canvas!important;border-color:CanvasText!important}
  .ccc-online button{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}
 }
+
+
+/* The public CCC account game displays the approved printed atlas, with
+   dynamically positioned player vehicles and server-projected exposed tables. */
+.ccc-online-track{display:grid;grid-template-columns:minmax(0,1fr) minmax(208px,245px);gap:10px;align-items:start;margin:10px 0}
+.ccc-online-map{min-width:0}
+.ccc-online-map .ccc-highway-head{padding:5px 8px;gap:4px}
+.ccc-online-map .ccc-highway-head h3{font-size:.86rem}
+.ccc-online-map .ccc-highway-head p{display:none}
+.ccc-online-map .ccc-road-legend{display:none}
+.ccc-online-track>.ccc-online-standings{display:grid;grid-template-columns:1fr;margin:0;gap:6px}
+.ccc-online-track .ccc-online-seat{padding:7px;gap:1px}
+.ccc-online-tables{margin:10px 0;padding:10px;background:#132f28;border:1px solid #719c80;border-radius:10px}
+.ccc-online-tables>h3{margin:0 0 8px;font-size:1rem;color:#ffe1a3}
+.ccc-online-tables>h3 small{font-weight:500;color:#e9dbc3;font-size:.75rem}
+.ccc-online-table-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ccc-online-table{border:1px solid #779b79;border-radius:8px;background:#224538;min-width:0;padding:8px}
+.ccc-online-table--mine{border:2px solid #ffd580}
+.ccc-online-table header{display:flex;justify-content:space-between;align-items:center;gap:5px;flex-wrap:wrap;padding-bottom:5px;border-bottom:1px solid #7f9981}
+.ccc-online-table header strong{font-size:.9rem;overflow-wrap:anywhere}
+.ccc-online-table header span{font-size:.77rem}
+.ccc-online-exposed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:7px}
+.ccc-online-exposed h4{margin:0 0 4px;color:#ffdda0;font-size:.73rem}
+.ccc-online-exposed-card{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;line-height:1.2;margin:0 3px 3px 0;max-width:100%;overflow-wrap:anywhere}
+.ccc-online-exposed-card img{width:26px;height:44px;object-fit:contain;flex-shrink:0}
+.ccc-online-hazard{color:#ffd0af}
+.ccc-online-clear{font-size:.72rem;color:#c5dbca}
+.ccc-online-mileage{display:flex;gap:4px;flex-wrap:wrap}
+.ccc-online-mile-stack{display:inline-flex;flex-direction:column;align-items:center;font-size:.67rem}
+.ccc-online-mile-stack img{width:27px;height:43px;object-fit:contain}
+.ccc-online-mile-stack strong{font-size:.68rem;white-space:nowrap}
+.ccc-online-losses{font-size:.7rem;margin:5px 0 0}
+@media(max-width:1120px){
+ .ccc-online-track{grid-template-columns:minmax(0,1fr) minmax(180px,220px)}
+ .ccc-online-table-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .ccc-online-track{grid-template-columns:minmax(0,1fr)}
+ .ccc-online-track>.ccc-online-standings{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:450px){
+ .ccc-online-table-grid{grid-template-columns:minmax(0,1fr)}
+ .ccc-online-exposed{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(forced-colors:active){
+ .ccc-online-tables,.ccc-online-table{background:Canvas!important;color:CanvasText!important;border-color:CanvasText!important}
+}

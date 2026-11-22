@@ -20,11 +20,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
-          cache-dependency-path: bong-goggles/web/package-lock.json
       - name: Install pinned Sharp conversion dependency
         working-directory: bong-goggles/web
-        run: npm ci --no-audit --no-fund
+        run: npm install --no-audit --no-fund
       - name: Convert exact three approved PNG-masquerading-as-WebP uploads
         working-directory: bong-goggles/web
         run: |

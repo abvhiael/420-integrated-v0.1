@@ -53,6 +53,7 @@ contract CivicGovernor420 is I420System {
     mapping(bytes32 => bytes32) public queuedActionHashes;
     // Append-only transient execution evidence; preserve historical mapping storage slots.
     bytes32 private _activeDualHouseProposal;
+    bytes32 private _activeDualHouseActionHash;
 
     error InvalidModule();
     error InvalidCommitment();
@@ -142,6 +143,12 @@ contract CivicGovernor420 is I420System {
 
     function activeDualHouseProposal() external view returns (bytes32) {
         return _activeDualHouseProposal;
+    }
+
+    /// @notice Hash of the exact current action (target and calldata), committed by
+    /// the live dual-house proposal, cleared between actions and after the batch.
+    function activeDualHouseActionHash() external view returns (bytes32) {
+        return _activeDualHouseActionHash;
     }
 
     function hashActions(
@@ -293,10 +300,14 @@ contract CivicGovernor420 is I420System {
         if (_frozenRules[proposalId].dualHouseRequired) _activeDualHouseProposal = proposalId;
 
         for (uint256 i = 0; i < actions.length; ++i) {
+            if (_activeDualHouseProposal != bytes32(0)) {
+                _activeDualHouseActionHash = keccak256(abi.encode(actions[i].target, actions[i].data));
+            }
             bool ok = timelock.executeCivicAction{ value: actions[i].value }(
                 proposalId, actions[i].target, actions[i].data
             );
             if (!ok) revert ActionExecutionFailed(i);
+            _activeDualHouseActionHash = bytes32(0);
         }
 
         proposalRegistry.transition(proposalId, CivicIds420.ProposalState.EXECUTED);
@@ -304,6 +315,7 @@ contract CivicGovernor420 is I420System {
         // toward retirement readiness. Timelock verifies this execution context.
         if (_frozenRules[proposalId].dualHouseRequired) ++dualHouseExecutedCount;
         _activeDualHouseProposal = bytes32(0);
+        _activeDualHouseActionHash = bytes32(0);
         emit CivicProposalExecuted(proposalId, computedHash);
     }
 

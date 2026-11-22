@@ -53,7 +53,7 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
    return ClassicHistory{},ErrUnavailable
   }
   scores:=append([]int64(nil),visible.Scores...)
-  for _,score:=range scores{if score<0||score>121{return ClassicHistory{},ErrUnavailable}}
+  for _,score:=range scores{if score<0||score>10000{return ClassicHistory{},ErrUnavailable}}
   out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores})
   if v.Status=="active"{continue}
   out.Stats.SampleSize++

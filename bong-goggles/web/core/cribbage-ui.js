@@ -30,7 +30,8 @@ function pegHtml(peg,lane){
    esc('Team '+(peg.team+1)+', '+name.toUpperCase()+' peg on '+(peg[name]||'start'))+'">'+
    '<circle cx="'+pos.x+'" cy="'+pos.y+'" r="10" class="cribbage-peg__glow"/>'+
    '<circle cx="'+pos.x+'" cy="'+pos.y+'" r="6" class="cribbage-peg__head"/>'+
-   (from?'<animate attributeName="opacity" from="0.3" to="1" dur="1.2s" fill="freeze"/>':'')+
+   (from?'<animate attributeName="cx" from="'+from.x+'" to="'+pos.x+'" dur="1.2s" fill="freeze"/>'+
+    '<animate attributeName="cy" from="'+from.y+'" to="'+pos.y+'" dur="1.2s" fill="freeze"/>':'')+
    '</g>';
  }).join('');
 }
@@ -202,7 +203,7 @@ export function renderCribbageRoute({screen='intro',state=null}={}){
    renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
     pegs:s.pegs,settings:s.settings})+'</div>':zero):
   home;
- return '<section class="cribbage-app">'+nav+heading+details+settings(s)+
+ return '<section class="cribbage-app" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+details+settings(s)+
   '<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
 }
 // Event handlers bind only data-attribute choices and submit through the

@@ -26,6 +26,33 @@ contract SponsoredOwnerProbe420 {
     }
 }
 
+/// @dev Only a test-double for the reserved canonical 0x0436 identity interface.
+/// Production must query the actual governance-approved Identity420 credential issuer.
+contract SponsorshipIdentity420Mock {
+    mapping(bytes32 => address) public ownerOf;
+    mapping(bytes32 => bytes32) public subjectOf;
+    mapping(bytes32 => bytes32) public groupOf;
+    mapping(bytes32 => bool) public trustOf;
+    function configure(bytes32 profileId,address beneficiary,bytes32 credentialId,
+                       bytes32 beneficialOwnerGroup,bool valid) external {
+        ownerOf[profileId]=beneficiary;
+        subjectOf[credentialId]=profileId;
+        groupOf[credentialId]=beneficialOwnerGroup;
+        trustOf[credentialId]=valid;
+    }
+    function profiles(bytes32 profileId) external view returns (
+        address,address,bytes32,bytes32,uint64,uint64,bool
+    ) {return (ownerOf[profileId],address(0),bytes32(0),bytes32(0),1,1,ownerOf[profileId]!=address(0));}
+    function credentials(bytes32 credentialId) external view returns (
+        bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint64,bool
+    ) {return (keccak256("governance-attested-issuer"),subjectOf[credentialId],
+               keccak256("420/STAKE/FULL_SPONSOR_BENEFICIAL_OWNER/V1"),
+               groupOf[credentialId],1,0,0,false);}
+    function credentialMeetsTrust(bytes32 credentialId,uint8 minimum) external view returns (bool) {
+        return trustOf[credentialId] && minimum==2;
+    }
+}
+
 contract FoundingSponsorRetirementStatus420 {
     bool public retired;
     function setRetired(bool value) external { retired = value; }
@@ -136,52 +163,111 @@ contract StakeValidatorGenesis420Test {
         FoundingValidatorSponsorship420 sponsor = new FoundingValidatorSponsorship420(
             address(this), address(walletClaims), address(status), address(reserve), address(registry)
         );
-        (bytes32 id, address operator) = _matchedId("approved-sponsor", 97);
-        bytes32 purpose = keccak256("approved-early-validator-partnership");
+        SponsorshipIdentity420Mock identity = new SponsorshipIdentity420Mock();
+        vm.etch(sponsor.IDENTITY_420(), address(identity).code);
+        SponsorshipIdentity420Mock canonical = SponsorshipIdentity420Mock(sponsor.IDENTITY_420());
 
-        // No auto-created owner permission. Until the canonical Timelock installs
-        // an approved Genesis sponsor, the Reserve rejects even a valid proposal.
+        (bytes32 id,address operator) = _matchedId("approved-sponsor",97);
+        bytes32 profile = keccak256("independent-beneficiary-profile");
+        bytes32 credential = keccak256("issuer-verified-one-beneficial-owner");
+        bytes32 group = keccak256("one-real-control-group");
+        canonical.configure(profile,operator,credential,group,true);
+        bytes32 purpose = sponsor.purposeFor(id,operator,profile,credential,group);
+
+        (bool legacy,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFully, (id,operator,purpose))
+        );
+        require(!legacy,"unverified legacy sponsorship bypassed identity credential");
         (bool beforeBinding,) = address(sponsor).call(
-            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,operator,profile,credential,purpose))
         );
-        require(!beforeBinding, "unbound sponsor funded validator");
+        require(!beforeBinding,"unbound sponsor funded validator");
         reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
-        require(reserve.genesisFoundingSponsorAuthority() == address(sponsor), "binding");
         (bool unclaimed,) = address(sponsor).call(
-            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,operator,profile,credential,purpose))
         );
-        require(!unclaimed, "unclaimed founder sponsored validator");
+        require(!unclaimed,"unclaimed founder sponsored validator");
         walletClaims.claimFounderWallet();
         (bool rebind,) = address(reserve).call(
-            abi.encodeCall(reserve.bindGenesisFoundingSponsorAuthority, (address(this)))
+            abi.encodeCall(reserve.bindGenesisFoundingSponsorAuthority,(address(this)))
         );
-        require(!rebind, "one-shot authority rebind");
+        require(!rebind,"one-shot authority rebound");
 
         vm.prank(operator);
-        (bool forged,) = address(sponsor).call(
-            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+        (bool selfApproved,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,operator,profile,credential,purpose))
         );
-        require(!forged, "beneficiary could authorize their own sponsorship");
+        require(!selfApproved,"beneficiary authorized own sponsorship");
 
         uint256 before = address(reserve).balance;
-        sponsor.sponsorFully(id, operator, purpose);
-        require(address(reserve).balance == before - 42_000 ether, "reserve funds moved");
-        require(registry.pendingProtocolCredit(id) == 42_000 ether, "actual collateral received");
+        sponsor.sponsorFullyVerified(id,operator,profile,credential,purpose);
+        require(address(reserve).balance==before-42_000 ether,"community reserve not debited");
+        require(registry.pendingProtocolCredit(id)==42_000 ether,"real collateral not received");
+        require(sponsor.sponsoredIdentityGroup(group) && sponsor.sponsorCount()==1,
+                "independently attested control group not reserved");
         (bool duplicate,) = address(sponsor).call(
-            abi.encodeCall(sponsor.sponsorFully, (id, operator, purpose))
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,operator,profile,credential,purpose))
         );
-        require(!duplicate, "duplicate sponsorship");
-
+        require(!duplicate,"replayed sponsored validator funding");
         vm.prank(operator);
-        registry.register{value: 0}(id, _pubkey(97), operator, purpose);
-        require(registry.isFullyProtocolSponsoredOwner(operator), "sponsor on-chain flag");
-        require(registry.custodyInvariant() && reserve.reserveInvariant(), "custody invariant");
+        registry.register{value:0}(id,_pubkey(97),operator,purpose);
+        require(registry.isFullyProtocolSponsoredOwner(operator),"sponsored reward-origin flag");
+        require(registry.custodyInvariant() && reserve.reserveInvariant(),"collateral insolvency");
+
         status.setRetired(true);
-        (bytes32 anotherId, address another) = _matchedId("after-retire", 98);
-        (bool retiredSponsored,) = address(sponsor).call(
-            abi.encodeCall(sponsor.sponsorFully, (anotherId, another, purpose))
+        (bytes32 nextId,address other) = _matchedId("retired-sponsor",98);
+        bytes32 secondProfile=keccak256("retired-profile"), secondCredential=keccak256("retired-credential");
+        bytes32 secondGroup=keccak256("independent-group");
+        canonical.configure(secondProfile,other,secondCredential,secondGroup,true);
+        (bool retiredSponsor,) = address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFullyVerified,(
+                nextId,other,secondProfile,secondCredential,
+                sponsor.purposeFor(nextId,other,secondProfile,secondCredential,secondGroup)
+            ))
         );
-        require(!retiredSponsored, "retired administrator funded validator");
+        require(!retiredSponsor,"retired founder sponsored validator");
+    }
+
+    function testSponsorshipRejectsForgedIdentityWrongPurposeAndSharedBeneficialOwner() public {
+        FoundingSponsorRetirementStatus420 status=new FoundingSponsorRetirementStatus420();
+        FoundingWalletClaims420 claims=new FoundingWalletClaims420(
+            address(this),address(0xA22),address(0xA33),keccak256("approved-genesis")
+        );
+        FoundingValidatorSponsorship420 sponsor=new FoundingValidatorSponsorship420(
+            address(this),address(claims),address(status),address(reserve),address(registry)
+        );
+        SponsorshipIdentity420Mock identity=new SponsorshipIdentity420Mock();
+        vm.etch(sponsor.IDENTITY_420(),address(identity).code);
+        SponsorshipIdentity420Mock canonical=SponsorshipIdentity420Mock(sponsor.IDENTITY_420());
+        claims.claimFounderWallet();
+        reserve.bindGenesisFoundingSponsorAuthority(address(sponsor));
+
+        (bytes32 id,address owner)=_matchedId("proof-one",131);
+        bytes32 profile=keccak256("proof-one-profile"),cred=keccak256("proof-one-cred");
+        bytes32 group=keccak256("common-owner-group");
+        canonical.configure(profile,owner,cred,group,false);
+        bytes32 purpose=sponsor.purposeFor(id,owner,profile,cred,group);
+        (bool untrusted,) =address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,owner,profile,cred,purpose))
+        );
+        require(!untrusted,"untrusted identity sponsor approved");
+        canonical.configure(profile,owner,cred,group,true);
+        (bool forgedPurpose,) =address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id,owner,profile,cred,keccak256("fake-purpose")))
+        );
+        require(!forgedPurpose,"unbound purpose approved");
+        sponsor.sponsorFullyVerified(id,owner,profile,cred,purpose);
+
+        (bytes32 id2,address aliasOwner)=_matchedId("proof-alias",132);
+        bytes32 profile2=keccak256("alias-profile"),cred2=keccak256("alias-cred");
+        canonical.configure(profile2,aliasOwner,cred2,group,true);
+        (bool sharedGroup,) =address(sponsor).call(
+            abi.encodeCall(sponsor.sponsorFullyVerified,(id2,aliasOwner,profile2,cred2,
+                sponsor.purposeFor(id2,aliasOwner,profile2,cred2,group)))
+        );
+        require(!sharedGroup,"second wallet of same beneficial owner received full sponsorship");
+        require(sponsor.sponsorCount()==1 && registry.pendingProtocolCredit(id2)==0,
+                "rejected identity sponsor altered reserve funds");
     }
 
     function testActualCommunityRewardsRequireExactNativeBackingAndCannotDoubleSettle() public {

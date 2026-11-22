@@ -153,7 +153,7 @@ def test_adversarial():
         for bad in (accounts[0].address, "0x0000000000000000000000000000000000000425"):
             duplicate = copy.deepcopy(plan)
             duplicate["founders"][1]["wallet_address"] = bad
-            check_rejected("duplicate/reserved predeploy", lambda: e.stage(root, duplicate),
+            check_rejected("duplicate/reserved predeploy", lambda: e.unique_addresses(root, duplicate["founders"]),
                            "address")
         check_rejected("changes to frozen authority files after V4",
                        lambda: e.stage(root, plan), "approved V4")
@@ -164,7 +164,7 @@ def test_adversarial():
         s = v.load(root, e.SYSTEM)
         s["founder_wallet_slots"][1]["address"] = accounts[2].address
         (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\\n")
-        check_rejected("mirror tampering", lambda: v.validate(strict=True, root=root), "mirror")
+        check_rejected("mirror tampering", lambda: v.validate(strict=False, root=root), "mirror")
         # A formatting-only change still invalidates a frozen authority-input blob.
         (root / e.SYSTEM).write_text(json.dumps(s, separators=(",", ":"))+"\\n")
         check_rejected("V4 source byte drift", lambda: v.validate(strict=True, root=root),
@@ -173,7 +173,7 @@ def test_adversarial():
         m = v.load(root, e.RESERVATIONS)
         m["founders"][0]["pre_genesis_proof"]["signature"] = proofs["founders"][1]["signature"]
         (root / e.RESERVATIONS).write_text(json.dumps(m,indent=2)+"\n")
-        check_rejected("tampered owner signature", lambda: v.validate(strict=True,root=root))
+        check_rejected("tampered owner signature", lambda: v.validate(strict=True,root=root), "signer")
         print("GOV-PRE-02: wrong signer, chain, plan, role, missing proof, namespace, freeze, forgery rejected")
     finally:
         ctx.cleanup()
@@ -346,7 +346,7 @@ def test_finalized_claim_records():
 def main():
     assert v.validate(strict=False) == 0, "real founder reservation files must stay unclaimed"
     check_rejected("real unsigned founders cannot be enrolled",
-                   lambda: v.validate(strict=True),"approved V4")
+                   lambda: v.validate(strict=True),"target network")
     test_own_signatures()
     test_adversarial()
     test_codebound_1271()

@@ -1,6 +1,6 @@
 # BC-1.7 — Cribbage final repository qualification and acceptance
 
-**Status: implementation under exact-head qualification. BC-1.8 production release not authorized.**
+**Status: REPOSITORY QUALIFIED on 2026-11-22 at exact source `2ce243ce3e5db365e101ed461a4b690150cfafec`. BC-1.8 deployed production acceptance and public Play are NOT qualified or authorized.**
 
 ## Mandatory BC-1.7 gates
 
@@ -12,7 +12,13 @@
 
 ## Evidence register
 
-Exact-head workflow: `.github/workflows/bc-1-7-cribbage-qualification.yml`. All three jobs must succeed against the same head. Record exact commit, run IDs and any verified external acceptance limitations here when results are available.
+Exact-head workflow [#45080232054](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45080232054) **SUCCESS (3/3 jobs)** on `2ce243ce3e5db365e101ed461a4b690150cfafec`:
+
+- **signed-postgres-concurrency** (job `137386497705`): Go `-race` and `go vet` with real PostgreSQL 16, 420ID session fixtures and frozen Cribbage rules. **4/4 TestBC17 PASS**, covering 12 concurrent same-request challenges, 16 concurrent different-request quota attempts, single surviving rematch from competing players, block/consent revocation and exactly one immutable move/event/command from 10 simultaneous requests. No relaxed throttles or assertions.
+- **browser-privacy-accessibility** (job `137386497443`): **17/17 Node regression PASS** plus actual Chromium desktop/mobile with two independent HTTP-only 420ID cookie jars, keyboard-only challenge and rematch POST, separate account invitation/history recovery and logout/outage privacy scrubbing. **No axe WCAG 2.1 AA serious/critical violations**; corrected new history link contrast within the original `cribbage.css` 12-KiB cap.
+- **release-separation** (job `137386497237`): **5/5 release-gate tests PASS**; 25 catalogue entries locked and **0** games falsely promoted to public Play.
+
+**Not asserted:** The new real-service `live-classics/cribbage.mjs` adapter was syntax-checked but the existing main-only, manually dispatched `bc-0-12-classics-live-acceptance.yml` was NOT executed. Deployed 420ID credentials, independent real-production two-account completions, per-difficulty production bot completion, operational rollout/rollback and public playable flag remain BC-1.8 release requirements.
 
 Pre-existing independently qualified evidence: [BC-1.2](BC-1-2-QUALIFICATION.md), [BC-1.3](BC-1-3-QUALIFICATION.md), [BC-1.4](BC-1-4-QUALIFICATION.md), [BC-1.5](BC-1-5-QUALIFICATION.md), [BC-1.6](BC-1-6-QUALIFICATION.md).
 

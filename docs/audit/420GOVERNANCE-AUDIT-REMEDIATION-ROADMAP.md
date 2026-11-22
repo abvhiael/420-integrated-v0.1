@@ -32,6 +32,22 @@ The testnet acceptance requirements still include independently controlled found
 
 ---
 
+
+## GOV-PRE-04 — full-credit validator identity and native community-reward settlement
+
+**Status: CODE-QUALIFIED LOCAL CONSENSUS / EXECUTION / INDEXER CANDIDATE; LIVE GENESIS AND TESTNET SETTLEMENT UNQUALIFIED.** [Retained GOV-PRE-04 qualification](GOV-PRE-04-QUALIFICATION.md) binds the source changes and focused proof runs. Previous accepted GOV-PRE-01 through GOV-PRE-03 financial, wallet and reserved-address policy remains unchanged, with real founder identities expressly deferred to testnet.
+
+- ValidatorRegistry permits exactly 42K self-funded, 21K personal / 21K protocol matched, and separately authenticated 42K fully protocol-owned initial bonds. Matching and sponsorship draw one CommunityValidatorReserve 6.3M pool; the fixed 0x0425 reserve owns and recovers principal, including replacement and permitted slash/exit. No extra Genesis issuance or 2K/40K arbitrary mix is allowed.
+- Full founding 42K sponsorship requires a real claimed founding Administrator wallet, canonical active 420Identity beneficiary/issuer-trusted VERIFIED economic-owner credential, one-time immutable reserve sponsorship binding, unique validator/beneficiary/economic-owner group and chain/contract/validator/beneficiary/purpose-bound 42K authorization. False aliases sharing an identity group and unsupported old three-argument sponsor selector fail closed.
+- Geth's native node420 system-call processor independently validates the frozen reward schedule and consensus-endorsed, exact ABI/payload/identity/block before issuing *only the realized rewards* into RewardController. The same block immediately delivers a 90% operator / 10% 0x0426 CommunityRewardReserve share for full-sponsor-origin validators **until all remaining protocol credit is repaid**, plus actual ordinary validator, Attention and Development payouts. A separate manual funding or double-settlement route is forbidden. Existing forced native balance cannot inflate rewards or deny consensus.
+- The consensus/Indexer reconciliation now requires canonical native reward payout logs and source/recipient/actual-balance equality, pinned Geth state getters, reward-supply conservation, exact validator accrual net-versus-gross and explicit community backing/settlement equality. The retained V3 ABI files and full Stake Audit-6 verifier bind exact candidate source blob identities; frozen historical V2 archives remain intact.
+- **Scoped evidence:** [Founding validator #44979206601](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206601) passed the 28-Test Solidity positive/adversarial lifecycle; [Go native accounting #44979206327](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206327) passed certified issuance/consensus/accounting/Indexer API regressions; [Stake Audit-6 #44979206629](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44979206629) passed retained source/ABI, Indexer descriptor/Explorer/SDK verification; and [node420 release gate #44978720430](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44978720430) passed the identical execution-source pinned upstream Geth, recovery and consensus build.
+- **Release blockers:** 3 real independently verified founder wallets/claims (deferred to testnet), independently attested real 420Identity sponsorship owner groups, approved signed Genesis V4, exact new validator/reward predeploy runtime/storage, actual collateral and native-reward funding/deployment, final canonical testnet reward receipts and supply/reorg/Indexer reconstruction, and independent security/governance qualification. Neither an all-green local suite nor a GitHub merge proves live payment or unlocks Genesis.
+
+GOV-PRE-04 completes local code/qualification delivery **only**, not GOV-AUDIT-9 production-equivalent testnet qualification or GOV-AUDIT-10 final Genesis/production closeout. The next canonical release step is the existing **GOV-AUDIT-9** testnet deployment qualification, without beginning it here.
+
+---
+
 ## Current audit repairs already staged
 
 The complete audit branch contains two narrow repairs that do not require a new governance decision:

@@ -15,8 +15,12 @@ interface IValidatorRetirementEvidence420 {
 interface ICommitteeRetirementEvidence420 {
     function memberCount() external view returns (uint256);
     function committeeQualifiedSince() external view returns (uint64);
-    function isMember(address member) external view returns (bool);
-    function nominationEvidence(address member) external view returns (bytes32);
+    function isMember(
+        address member
+    ) external view returns (bool);
+    function nominationEvidence(
+        address member
+    ) external view returns (bytes32);
 }
 
 interface ICivicRetirementEvidence420 {
@@ -125,9 +129,11 @@ contract FoundingRetirementVerifier420 {
         address prior;
         for (uint256 i; i < MIN_VERIFIED_COMMITTEE_MEMBERS; ++i) {
             address member = members[i];
-            if (uint160(member) <= uint160(prior) || evidence[i] == bytes32(0)
-                || !committee.isMember(member) || committee.nominationEvidence(member) == bytes32(0)
-                || evidence[i] == committee.nominationEvidence(member)) revert InvalidWitnessSet();
+            if (
+                uint160(member) <= uint160(prior) || evidence[i] == bytes32(0) || !committee.isMember(member)
+                    || committee.nominationEvidence(member) == bytes32(0)
+                    || evidence[i] == committee.nominationEvidence(member)
+            ) revert InvalidWitnessSet();
             for (uint256 j; j < i; ++j) {
                 if (evidence[i] == evidence[j]) revert InvalidWitnessSet();
             }
@@ -143,7 +149,9 @@ contract FoundingRetirementVerifier420 {
         );
     }
 
-    function witnessedCommitteeMember(uint256 i) external view returns (address) {
+    function witnessedCommitteeMember(
+        uint256 i
+    ) external view returns (address) {
         return _witnessCommittee[i];
     }
 
@@ -173,25 +181,27 @@ contract FoundingRetirementVerifier420 {
             !governanceTimelock.civicAuthorityActivated() || governanceTimelock.scheduler() != address(civicGovernor)
                 || civicGovernor.timelock() != address(governanceTimelock)
                 || validators.eligibleValidatorCount() < MIN_ELIGIBLE_VALIDATOR_OWNERS
-                || committee.memberCount() < MIN_VERIFIED_COMMITTEE_MEMBERS
-                || witnessRevision == 0 || committeeWitnessRevision == 0
-                || !_stable(validators.retirementEligiblePoolSince(), nowTime)
-                || !_stable(committee.committeeQualifiedSince(), nowTime)
-                || !_stable(witnessQualifiedSince, nowTime)
+                || committee.memberCount() < MIN_VERIFIED_COMMITTEE_MEMBERS || witnessRevision == 0
+                || committeeWitnessRevision == 0 || !_stable(validators.retirementEligiblePoolSince(), nowTime)
+                || !_stable(committee.committeeQualifiedSince(), nowTime) || !_stable(witnessQualifiedSince, nowTime)
                 || !_stable(committeeWitnessQualifiedSince, nowTime)
         ) return false;
         for (uint256 i; i < MIN_ELIGIBLE_VALIDATOR_OWNERS; ++i) {
             bytes32 id = _witnessValidators[i];
             (address owner, bool eligible, uint64 since) = validators.retirementOwnerStatus(id);
-            if (owner == address(0) || !eligible || independentOwnershipEvidence[id] == bytes32(0)
-                || validators.ownerValidatorId(owner) != id || !_stable(since, nowTime)) return false;
+            if (
+                owner == address(0) || !eligible || independentOwnershipEvidence[id] == bytes32(0)
+                    || validators.ownerValidatorId(owner) != id || !_stable(since, nowTime)
+            ) return false;
         }
         for (uint256 i; i < MIN_VERIFIED_COMMITTEE_MEMBERS; ++i) {
             address member = _witnessCommittee[i];
-            if (member == address(0) || !committee.isMember(member)
-                || committee.nominationEvidence(member) == bytes32(0)
-                || independentCommitteeEvidence[member] == bytes32(0)
-                || committee.nominationEvidence(member) != witnessedCommitteeNomination[member]) return false;
+            if (
+                member == address(0) || !committee.isMember(member)
+                    || committee.nominationEvidence(member) == bytes32(0)
+                    || independentCommitteeEvidence[member] == bytes32(0)
+                    || committee.nominationEvidence(member) != witnessedCommitteeNomination[member]
+            ) return false;
         }
         return true;
     }

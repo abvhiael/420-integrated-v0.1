@@ -6,9 +6,17 @@ import "../src/treasury/TreasuryAuthorization420.sol";
 import "../src/governance/FoundingWalletClaims420.sol";
 
 interface VmFounding420 {
-    struct Log { bytes32[] topics; bytes data; address emitter; }
-    function prank(address caller) external;
-    function warp(uint256 nextTimestamp) external;
+    struct Log {
+        bytes32[] topics;
+        bytes data;
+        address emitter;
+    }
+    function prank(
+        address caller
+    ) external;
+    function warp(
+        uint256 nextTimestamp
+    ) external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
 }
@@ -16,7 +24,10 @@ interface VmFounding420 {
 contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
     bool public override retirementReady;
     bool public override retirementExecutionAuthorized;
-    function setReady(bool value) external {
+
+    function setReady(
+        bool value
+    ) external {
         retirementReady = value;
         retirementExecutionAuthorized = value;
     }
@@ -24,14 +35,29 @@ contract ReadinessMockFounding420 is IFoundingRetirementReadiness420 {
 
 contract CivicStatusMockFounding420 is IFoundingCivicStatus420 {
     bool public override civicAuthorityActivated;
-    function setActive(bool value) external { civicAuthorityActivated = value; }
+
+    function setActive(
+        bool value
+    ) external {
+        civicAuthorityActivated = value;
+    }
 }
 
 contract VaultListMockFounding420 {
     bytes32 public immutable operations;
     bytes32 public immutable contingency;
-    constructor(bytes32 o, bytes32 c) { operations = o; contingency = c; }
-    function getVault(bytes32 id) external view returns (VaultRegistry420.Vault memory v) {
+
+    constructor(
+        bytes32 o,
+        bytes32 c
+    ) {
+        operations = o;
+        contingency = c;
+    }
+
+    function getVault(
+        bytes32 id
+    ) external view returns (VaultRegistry420.Vault memory v) {
         require(id == operations || id == contingency, "unknown");
         v.vaultAddress = id == operations ? address(0x1234) : address(0x5678);
         v.vaultType = VaultIds420.VAULT_TREASURY;
@@ -67,13 +93,25 @@ contract FoundingTreasuryAuthority420Test {
         disb = new TreasuryDisbursementRegistry420(address(civic), address(auth), address(policy), address(budgets));
         // No mock of the executor: Treasury release must still satisfy the actual two capability grants.
         claims = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("founding-gov-genesis"));
-        vm.prank(ADMIN); claims.claimFounderWallet();
-        vm.prank(ANDREW); claims.claimFounderWallet();
-        vm.prank(JANET); claims.claimFounderWallet();
+        vm.prank(ADMIN);
+        claims.claimFounderWallet();
+        vm.prank(ANDREW);
+        claims.claimFounderWallet();
+        vm.prank(JANET);
+        claims.claimFounderWallet();
         founder = new FoundingTreasuryAuthority420(
-            ADMIN, ANDREW, JANET, address(claims), address(civic), address(readiness),
-            address(budgets), address(disb), address(policy),
-            address(new VaultListMockFounding420(OPS, CONT)), OPS, CONT
+            ADMIN,
+            ANDREW,
+            JANET,
+            address(claims),
+            address(civic),
+            address(readiness),
+            address(budgets),
+            address(disb),
+            address(policy),
+            address(new VaultListMockFounding420(OPS, CONT)),
+            OPS,
+            CONT
         );
         budgets.bindFoundingAuthority(address(founder));
         disb.bindFoundingAuthority(address(founder));
@@ -88,31 +126,59 @@ contract FoundingTreasuryAuthority420Test {
     }
 
     function _propose(
-        bool isContingency, address payee, uint128 amount, FoundingTreasuryAuthority420.Purpose purpose
+        bool isContingency,
+        address payee,
+        uint128 amount,
+        FoundingTreasuryAuthority420.Purpose purpose
     ) internal returns (bytes32 id) {
         id = founder.proposePayment(
-            isContingency, payee, amount, purpose, keccak256(abi.encode(payee, amount, purpose)),
-            uint64(block.timestamp), uint64(block.timestamp + 10 days)
+            isContingency,
+            payee,
+            amount,
+            purpose,
+            keccak256(abi.encode(payee, amount, purpose)),
+            uint64(block.timestamp),
+            uint64(block.timestamp + 10 days)
         );
     }
 
     function testUnclaimedFounderCannotExerciseAuthority() public {
         // This test uses a fresh claims contract. A registered identity is NOT a claim.
-        FoundingWalletClaims420 pending = new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("founding-gov-genesis"));
+        FoundingWalletClaims420 pending =
+            new FoundingWalletClaims420(ADMIN, ANDREW, JANET, keccak256("founding-gov-genesis"));
         FoundingTreasuryAuthority420 other = new FoundingTreasuryAuthority420(
-            ADMIN, ANDREW, JANET, address(pending), address(civic), address(readiness),
-            address(budgets), address(disb), address(policy),
-            address(new VaultListMockFounding420(OPS, CONT)), OPS, CONT
+            ADMIN,
+            ANDREW,
+            JANET,
+            address(pending),
+            address(civic),
+            address(readiness),
+            address(budgets),
+            address(disb),
+            address(policy),
+            address(new VaultListMockFounding420(OPS, CONT)),
+            OPS,
+            CONT
         );
         vm.prank(ADMIN);
         (bool allowed,) = address(other).call(abi.encodeCall(other.initializeBudgets, ()));
         require(!allowed, "unclaimed admin initialized budget");
         vm.prank(ANDREW);
-        (allowed,) = address(other).call(abi.encodeCall(
-            other.proposePayment, (false, PAYEE, uint128(1 ether),
-              FoundingTreasuryAuthority420.Purpose.BOUNTY,
-              keccak256("unclaimed"), uint64(block.timestamp), uint64(block.timestamp+1 days))
-        ));
+        (allowed,) = address(other)
+            .call(
+                abi.encodeCall(
+                    other.proposePayment,
+                    (
+                        false,
+                        PAYEE,
+                        uint128(1 ether),
+                        FoundingTreasuryAuthority420.Purpose.BOUNTY,
+                        keccak256("unclaimed"),
+                        uint64(block.timestamp),
+                        uint64(block.timestamp + 1 days)
+                    )
+                )
+            );
         require(!allowed, "unclaimed cofounder proposed");
     }
 
@@ -186,11 +252,21 @@ contract FoundingTreasuryAuthority420Test {
 
     function testContingencyCannotFundMarketingOrSkipFounderVotes() public {
         vm.prank(ADMIN);
-        (bool marketing,) = address(founder).call(abi.encodeCall(
-            founder.proposePayment,
-            (true, PAYEE, uint128(100_000 ether), FoundingTreasuryAuthority420.Purpose.PARTNERSHIP,
-             keccak256("campaign"), uint64(block.timestamp), uint64(block.timestamp + 10 days))
-        ));
+        (bool marketing,) = address(founder)
+            .call(
+                abi.encodeCall(
+                    founder.proposePayment,
+                    (
+                        true,
+                        PAYEE,
+                        uint128(100_000 ether),
+                        FoundingTreasuryAuthority420.Purpose.PARTNERSHIP,
+                        keccak256("campaign"),
+                        uint64(block.timestamp),
+                        uint64(block.timestamp + 10 days)
+                    )
+                )
+            );
         require(!marketing, "marketing from contingency");
         vm.prank(JANET);
         bytes32 incident = _propose(true, PAYEE, 200_000 ether, FoundingTreasuryAuthority420.Purpose.SECURITY);
@@ -215,44 +291,50 @@ contract FoundingTreasuryAuthority420Test {
         vm.recordLogs();
         vm.prank(ANDREW);
         bytes32 paymentId = founder.proposePayment(
-            false, PAYEE, uint128(110_000 ether),
+            false,
+            PAYEE,
+            uint128(110_000 ether),
             FoundingTreasuryAuthority420.Purpose.INFRASTRUCTURE,
-            caseEvidence, proposed, proposed + 10 days
+            caseEvidence,
+            proposed,
+            proposed + 10 days
         );
         VmFounding420.Log[] memory emitted = vm.getRecordedLogs();
-        bytes32 eventId = keccak256(
-            "FoundingPaymentNotice(bytes32,bytes32,bytes32,uint64,uint64,uint64,bool)"
-        );
+        bytes32 eventId = keccak256("FoundingPaymentNotice(bytes32,bytes32,bytes32,uint64,uint64,uint64,bool)");
         bytes32 reviewedPurpose;
         bool found;
         for (uint256 i; i < emitted.length; ++i) {
-            if (emitted[i].emitter == address(founder) &&
-                emitted[i].topics.length == 4 && emitted[i].topics[0] == eventId) {
-                require(emitted[i].topics[1] == paymentId &&
-                        emitted[i].topics[2] == caseEvidence, "notice identity/evidence mismatch");
+            if (
+                emitted[i].emitter == address(founder) && emitted[i].topics.length == 4
+                    && emitted[i].topics[0] == eventId
+            ) {
+                require(
+                    emitted[i].topics[1] == paymentId && emitted[i].topics[2] == caseEvidence,
+                    "notice identity/evidence mismatch"
+                );
                 reviewedPurpose = emitted[i].topics[3];
                 (uint64 whenProposed, uint64 notBefore, uint64 expiry, bool twoRequired) =
                     abi.decode(emitted[i].data, (uint64, uint64, uint64, bool));
-                require(whenProposed == proposed && notBefore == proposed &&
-                        expiry == proposed + 10 days && twoRequired,
-                        "notice failed to disclose immutable approval window");
+                require(
+                    whenProposed == proposed && notBefore == proposed && expiry == proposed + 10 days && twoRequired,
+                    "notice failed to disclose immutable approval window"
+                );
                 found = true;
             }
         }
-        require(found && reviewedPurpose != bytes32(0),
-                "no public case/purpose notice issued at proposal time");
+        require(found && reviewedPurpose != bytes32(0), "no public case/purpose notice issued at proposal time");
         vm.prank(JANET);
         founder.approvePayment(paymentId);
         vm.prank(ANDREW);
-        (bool premature,) = address(founder).call(
-            abi.encodeCall(founder.schedulePayment, (paymentId))
-        );
+        (bool premature,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (paymentId)));
         require(!premature, "approved exceptional payment bypassed 48-hour notice");
         vm.warp(uint256(proposed) + 49 hours);
         vm.prank(ANDREW);
         bytes32 disbId = founder.schedulePayment(paymentId);
-        require(disb.disbursement(disbId).purposeHash == reviewedPurpose,
-                "scheduled payment replaced public purpose after notice");
+        require(
+            disb.disbursement(disbId).purposeHash == reviewedPurpose,
+            "scheduled payment replaced public purpose after notice"
+        );
     }
 
     function testDuplicateDetailsProduceDistinctPurposeBoundDisbursements() public {
@@ -262,13 +344,23 @@ contract FoundingTreasuryAuthority420Test {
         uint64 nowTime = uint64(block.timestamp);
         vm.prank(ADMIN);
         bytes32 first = founder.proposePayment(
-            false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY,
-            evidence, nowTime, nowTime + 10 days
+            false,
+            PAYEE,
+            uint128(1 ether),
+            FoundingTreasuryAuthority420.Purpose.BOUNTY,
+            evidence,
+            nowTime,
+            nowTime + 10 days
         );
         vm.prank(ADMIN);
         bytes32 second = founder.proposePayment(
-            false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY,
-            evidence, nowTime, nowTime + 10 days
+            false,
+            PAYEE,
+            uint128(1 ether),
+            FoundingTreasuryAuthority420.Purpose.BOUNTY,
+            evidence,
+            nowTime,
+            nowTime + 10 days
         );
         require(first != second, "duplicate payment ID");
         vm.prank(ADMIN);
@@ -276,8 +368,10 @@ contract FoundingTreasuryAuthority420Test {
         vm.prank(ADMIN);
         bytes32 secondId = founder.schedulePayment(second);
         require(firstId != secondId, "canonical Treasury disbursement ID collision");
-        require(disb.disbursement(firstId).purposeHash != disb.disbursement(secondId).purposeHash,
-                "case evidence was not bound to unique payments");
+        require(
+            disb.disbursement(firstId).purposeHash != disb.disbursement(secondId).purposeHash,
+            "case evidence was not bound to unique payments"
+        );
         require(founder.rollingCommitted(false) == 2 ether, "each real payment must be counted");
     }
 
@@ -286,8 +380,13 @@ contract FoundingTreasuryAuthority420Test {
         uint64 nowTime = uint64(block.timestamp);
         vm.prank(ADMIN);
         bytes32 first = founder.proposePayment(
-            true, PAYEE, uint128(150_000 ether), FoundingTreasuryAuthority420.Purpose.SECURITY,
-            incident, nowTime, nowTime + 10 days
+            true,
+            PAYEE,
+            uint128(150_000 ether),
+            FoundingTreasuryAuthority420.Purpose.SECURITY,
+            incident,
+            nowTime,
+            nowTime + 10 days
         );
         vm.prank(JANET);
         founder.approvePayment(first);
@@ -299,9 +398,13 @@ contract FoundingTreasuryAuthority420Test {
 
         vm.prank(ADMIN);
         bytes32 second = founder.proposePayment(
-            true, address(0xB1CE), uint128(60_000 ether),
+            true,
+            address(0xB1CE),
+            uint128(60_000 ether),
             FoundingTreasuryAuthority420.Purpose.SECURITY,
-            incident, nowTime, nowTime + 10 days
+            incident,
+            nowTime,
+            nowTime + 10 days
         );
         vm.prank(JANET);
         founder.approvePayment(second);
@@ -313,9 +416,13 @@ contract FoundingTreasuryAuthority420Test {
 
         vm.prank(ADMIN);
         bytes32 third = founder.proposePayment(
-            true, address(0xB2CE), uint128(1 ether),
+            true,
+            address(0xB2CE),
+            uint128(1 ether),
             FoundingTreasuryAuthority420.Purpose.SECURITY,
-            incident, nowTime, nowTime + 10 days
+            incident,
+            nowTime,
+            nowTime + 10 days
         );
         vm.prank(JANET);
         founder.approvePayment(third);
@@ -324,8 +431,9 @@ contract FoundingTreasuryAuthority420Test {
         vm.prank(ADMIN);
         (bool split,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (third)));
         require(!split, "incident limit bypassed by different recipients");
-        require(founder.contingencyCommittedByIncident(incident) == 210_000 ether,
-                "rejected incident changed accounting");
+        require(
+            founder.contingencyCommittedByIncident(incident) == 210_000 ether, "rejected incident changed accounting"
+        );
     }
 
     function testSeparateThirtyDayOperationsLimitRejectsEvenDifferentRecipients() public {
@@ -336,9 +444,13 @@ contract FoundingTreasuryAuthority420Test {
         for (uint256 i; i < 2; ++i) {
             vm.prank(ANDREW);
             authorized[i] = founder.proposePayment(
-                false, address(uint160(0xB000 + i)), uint128(420_000 ether),
+                false,
+                address(uint160(0xB000 + i)),
+                uint128(420_000 ether),
                 FoundingTreasuryAuthority420.Purpose.INFRASTRUCTURE,
-                keccak256(abi.encode("ops", i)), proposalTime, proposalTime + 10 days
+                keccak256(abi.encode("ops", i)),
+                proposalTime,
+                proposalTime + 10 days
             );
             vm.prank(JANET);
             founder.approvePayment(authorized[i]);
@@ -351,9 +463,13 @@ contract FoundingTreasuryAuthority420Test {
         require(founder.rollingCommitted(false) == 840_000 ether, "operations rolling sum");
         vm.prank(ADMIN);
         bytes32 extra = founder.proposePayment(
-            false, address(0xBA77), uint128(1 ether),
-            FoundingTreasuryAuthority420.Purpose.BOUNTY, keccak256("extra-ops"),
-            proposalTime + 49 hours, proposalTime + 10 days
+            false,
+            address(0xBA77),
+            uint128(1 ether),
+            FoundingTreasuryAuthority420.Purpose.BOUNTY,
+            keccak256("extra-ops"),
+            proposalTime + 49 hours,
+            proposalTime + 10 days
         );
         vm.prank(ADMIN);
         (bool overflow,) = address(founder).call(abi.encodeCall(founder.schedulePayment, (extra)));
@@ -366,9 +482,13 @@ contract FoundingTreasuryAuthority420Test {
         for (uint256 i; i < 2; ++i) {
             vm.prank(ANDREW);
             bytes32 paymentId = founder.proposePayment(
-                true, address(uint160(0xD000 + i)), uint128(210_000 ether),
+                true,
+                address(uint160(0xD000 + i)),
+                uint128(210_000 ether),
                 FoundingTreasuryAuthority420.Purpose.SECURITY,
-                keccak256(abi.encode("incident", i)), nowTime, nowTime + 10 days
+                keccak256(abi.encode("incident", i)),
+                nowTime,
+                nowTime + 10 days
             );
             vm.prank(JANET);
             founder.approvePayment(paymentId);
@@ -380,9 +500,7 @@ contract FoundingTreasuryAuthority420Test {
         }
         require(founder.rollingCommitted(true) == 420_000 ether, "contingency rolling sum");
         vm.prank(ADMIN);
-        bytes32 extra = _propose(
-            true, address(0xD777), uint128(1 ether), FoundingTreasuryAuthority420.Purpose.SECURITY
-        );
+        bytes32 extra = _propose(true, address(0xD777), uint128(1 ether), FoundingTreasuryAuthority420.Purpose.SECURITY);
         vm.prank(ANDREW);
         founder.approvePayment(extra);
         vm.prank(JANET);
@@ -410,16 +528,27 @@ contract FoundingTreasuryAuthority420Test {
         bytes32 purposeHash = keccak256("unapproved-direct-governance-transfer");
         bytes32 budgetId = founder.operationsBudgetId();
         bytes32 forgedId = disb.canonicalId(
-            budgetId, PAYEE, uint128(1 ether), nowTime, nowTime + 1 days,
-            founder.operationsActionHash(), purposeHash
+            budgetId, PAYEE, uint128(1 ether), nowTime, nowTime + 1 days, founder.operationsActionHash(), purposeHash
         );
         // The general GovernanceTimelock can schedule ordinary Civic budgets,
         // but cannot counterfeit a founding controller's budget commitment.
         vm.prank(disb.governanceTimelock());
-        (bool bypass,) = address(disb).call(abi.encodeCall(
-            disb.schedule, (forgedId, budgetId, PAYEE, uint128(1 ether), nowTime,
-                nowTime + 1 days, founder.operationsActionHash(), purposeHash)
-        ));
+        (bool bypass,) = address(disb)
+            .call(
+                abi.encodeCall(
+                    disb.schedule,
+                    (
+                        forgedId,
+                        budgetId,
+                        PAYEE,
+                        uint128(1 ether),
+                        nowTime,
+                        nowTime + 1 days,
+                        founder.operationsActionHash(),
+                        purposeHash
+                    )
+                )
+            );
         require(!bypass, "general Treasury writer bypassed founding approval/rolling limits");
         require(budgets.budget(budgetId).committed == 0, "forgery reserved founding budget");
         require(founder.operationsCommitted() == 0, "forgery changed founding usage");
@@ -431,21 +560,19 @@ contract FoundingTreasuryAuthority420Test {
         vm.prank(ADMIN);
         bytes32 id = founder.schedulePayment(paymentId);
         vm.prank(ADMIN);
-        (bool unbound,) = address(founder).call(abi.encodeCall(
-            founder.executeApprovedRelease, (paymentId, address(0xDEAD), keccak256("fake"))
-        ));
+        (bool unbound,) = address(founder)
+            .call(abi.encodeCall(founder.executeApprovedRelease, (paymentId, address(0xDEAD), keccak256("fake"))));
         require(!unbound, "unbound executor permitted a transfer");
 
         // This call is rejected by the founding settlement guard even before any
         // capability check, preventing forged executed-state/accounting records.
-        (bool forged,) = address(disb).call(
-            abi.encodeCall(disb.markExecuted, (id, keccak256("forged-vault-release")))
-        );
+        (bool forged,) = address(disb).call(abi.encodeCall(disb.markExecuted, (id, keccak256("forged-vault-release"))));
         require(!forged, "disbursement forged without verified active founder release");
-        require(disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.SCHEDULED,
-                "forged execution mutated Treasury record");
-        require(budgets.budget(founder.operationsBudgetId()).executed == 0,
-                "forged execution inflated settled funds");
+        require(
+            disb.disbursement(id).state == TreasuryDisbursementRegistry420.State.SCHEDULED,
+            "forged execution mutated Treasury record"
+        );
+        require(budgets.budget(founder.operationsBudgetId()).executed == 0, "forged execution inflated settled funds");
     }
 
     function testUnsettledFoundingCommitmentBlocksEvenAuthorizedRetirement() public {
@@ -464,9 +591,11 @@ contract FoundingTreasuryAuthority420Test {
         // historical commitment counter intentionally remains an audit record.
         vm.prank(address(civic));
         disb.cancel(disbursementId);
-        require(!founder.outstandingFoundingCommitments()
-            && founder.operationsCommitted() == 1 ether && founder.operationsReleased() == 0,
-            "canceled payment was incorrectly still counted as an obligation");
+        require(
+            !founder.outstandingFoundingCommitments() && founder.operationsCommitted() == 1 ether
+                && founder.operationsReleased() == 0,
+            "canceled payment was incorrectly still counted as an obligation"
+        );
         vm.prank(address(civic));
         founder.retire();
         require(founder.retired(), "legitimate cancellation permanently blocked retirement");
@@ -484,18 +613,39 @@ contract FoundingTreasuryAuthority420Test {
         founder.retire();
         require(founder.retired(), "retired");
         vm.prank(ADMIN);
-        (bool proposal,) = address(founder).call(abi.encodeCall(
-            founder.proposePayment,
-            (false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY,
-             keccak256("nope"), uint64(block.timestamp), uint64(block.timestamp + 100))
-        ));
+        (bool proposal,) = address(founder)
+            .call(
+                abi.encodeCall(
+                    founder.proposePayment,
+                    (
+                        false,
+                        PAYEE,
+                        uint128(1 ether),
+                        FoundingTreasuryAuthority420.Purpose.BOUNTY,
+                        keccak256("nope"),
+                        uint64(block.timestamp),
+                        uint64(block.timestamp + 100)
+                    )
+                )
+            );
         require(!proposal, "founder still writes");
-        (bool direct,) = address(budgets).call(abi.encodeCall(
-            budgets.createBudget,
-            (keccak256("intrusion"), OPS, TreasuryIds420.BUDGET_ECOSYSTEM, address(0),
-             uint128(1 ether), uint64(block.timestamp), uint64(block.timestamp + 100),
-             keccak256("test"), keccak256("test"))
-        ));
+        (bool direct,) = address(budgets)
+            .call(
+                abi.encodeCall(
+                    budgets.createBudget,
+                    (
+                        keccak256("intrusion"),
+                        OPS,
+                        TreasuryIds420.BUDGET_ECOSYSTEM,
+                        address(0),
+                        uint128(1 ether),
+                        uint64(block.timestamp),
+                        uint64(block.timestamp + 100),
+                        keccak256("test"),
+                        keccak256("test")
+                    )
+                )
+            );
         require(!direct, "unprivileged write");
     }
 }

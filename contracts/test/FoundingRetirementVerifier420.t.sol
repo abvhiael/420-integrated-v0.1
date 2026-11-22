@@ -5,30 +5,72 @@ import "../src/governance/FoundingCommitteeMembership420.sol";
 import "../src/governance/FoundingRetirementVerifier420.sol";
 
 interface VmRetirement420 {
-    function prank(address who) external;
-    function warp(uint256 timestamp) external;
+    function prank(
+        address who
+    ) external;
+    function warp(
+        uint256 timestamp
+    ) external;
 }
 
 contract CivicTimelockStubRetirement420 {
     bool public civicAuthorityActivated;
     address public scheduler;
-    function setCivic(bool value) external { civicAuthorityActivated = value; }
-    function setScheduler(address value) external { scheduler = value; }
+
+    function setCivic(
+        bool value
+    ) external {
+        civicAuthorityActivated = value;
+    }
+
+    function setScheduler(
+        address value
+    ) external {
+        scheduler = value;
+    }
 }
+
 contract CivicGovernorStubRetirement420 {
     uint256 public dualHouseExecutedCount;
     address public immutable timelock;
     bool public activeDualHouseExecution;
-    constructor(address timelock_) { timelock = timelock_; }
-    function setExecuted(uint256 value) external { dualHouseExecutedCount = value; }
-    function setActiveExecution(bool value) external { activeDualHouseExecution = value; }
+
+    constructor(
+        address timelock_
+    ) {
+        timelock = timelock_;
+    }
+
+    function setExecuted(
+        uint256 value
+    ) external {
+        dualHouseExecutedCount = value;
+    }
+
+    function setActiveExecution(
+        bool value
+    ) external {
+        activeDualHouseExecution = value;
+    }
 }
+
 contract FounderStateStubRetirement420 {
     address public immutable foundingAdministrator;
     bool public retired;
-    constructor(address admin) { foundingAdministrator = admin; }
-    function setRetired(bool value) external { retired = value; }
+
+    constructor(
+        address admin
+    ) {
+        foundingAdministrator = admin;
+    }
+
+    function setRetired(
+        bool value
+    ) external {
+        retired = value;
+    }
 }
+
 contract ValidatorEvidenceStubRetirement420 {
     uint256 public eligibleValidatorCount;
     uint64 public retirementEligiblePoolSince;
@@ -36,27 +78,45 @@ contract ValidatorEvidenceStubRetirement420 {
     mapping(bytes32 => uint64) public since;
     mapping(address => bytes32) public ownerValidatorId;
 
-    function setup(bytes32 id, address owner, uint64 from) external {
+    function setup(
+        bytes32 id,
+        address owner,
+        uint64 from
+    ) external {
         require(owners[id] == address(0) && ownerValidatorId[owner] == bytes32(0), "duplicate");
         owners[id] = owner;
         ownerValidatorId[owner] = id;
         since[id] = from;
         ++eligibleValidatorCount;
     }
-    function setPoolSince(uint64 from) external { retirementEligiblePoolSince = from; }
-    function pause(bytes32 id) external {
+
+    function setPoolSince(
+        uint64 from
+    ) external {
+        retirementEligiblePoolSince = from;
+    }
+
+    function pause(
+        bytes32 id
+    ) external {
         require(since[id] != 0, "not eligible");
         since[id] = 0;
         --eligibleValidatorCount;
         retirementEligiblePoolSince = 0;
     }
-    function reinstate(bytes32 id) external {
+
+    function reinstate(
+        bytes32 id
+    ) external {
         require(since[id] == 0, "already eligible");
         since[id] = uint64(block.timestamp);
         ++eligibleValidatorCount;
         if (eligibleValidatorCount == 60) retirementEligiblePoolSince = uint64(block.timestamp);
     }
-    function retirementOwnerStatus(bytes32 id) external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince) {
+
+    function retirementOwnerStatus(
+        bytes32 id
+    ) external view returns (address owner, bool eligible, uint64 continuouslyEligibleSince) {
         return (owners[id], since[id] != 0, since[id]);
     }
 }
@@ -131,9 +191,8 @@ contract FoundingRetirementVerifier420Test {
         require(!verifier.retirementReady(), "empty electorate retired");
         bytes32[60] memory ids;
         bytes32[60] memory evidence;
-        (bool untrusted,) = address(verifier).call(abi.encodeCall(
-            verifier.publishIndependentValidatorWitnesses, (ids, evidence)
-        ));
+        (bool untrusted,) =
+            address(verifier).call(abi.encodeCall(verifier.publishIndependentValidatorWitnesses, (ids, evidence)));
         require(!untrusted, "non-Civic witness published");
         require(committee.memberCount() == 0, "fabricated committee");
     }
@@ -164,15 +223,13 @@ contract FoundingRetirementVerifier420Test {
         }
         proof[1] = proof[0];
         vm.prank(address(timelock));
-        (bool repeated,) = address(verifier).call(
-            abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof))
-        );
+        (bool repeated,) = address(verifier)
+            .call(abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof)));
         require(!repeated, "duplicate owner evidence accepted");
         proof[1] = keccak256("separate");
         vm.prank(address(0xBAD));
-        (bool unauthorized,) = address(verifier).call(
-            abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof))
-        );
+        (bool unauthorized,) = address(verifier)
+            .call(abi.encodeCall(verifier.publishIndependentCommitteeWitnesses, (committeeOwners, proof)));
         require(!unauthorized, "unauthorized witness recorder");
     }
 
@@ -182,13 +239,17 @@ contract FoundingRetirementVerifier420Test {
         civic.setExecuted(0);
         require(!verifier.retirementReady(), "historical execution is absent");
         civic.setActiveExecution(true);
-        require(verifier.retirementReady() && verifier.retirementExecutionAuthorized(),
-            "current dual-house execution proves proposed retirement itself");
+        require(
+            verifier.retirementReady() && verifier.retirementExecutionAuthorized(),
+            "current dual-house execution proves proposed retirement itself"
+        );
         civic.setActiveExecution(false);
         require(!verifier.retirementExecutionAuthorized(), "out-of-context retirement");
         civic.setExecuted(1);
-        require(verifier.retirementReady() && !verifier.retirementExecutionAuthorized(),
-            "past vote cannot substitute for active retirement proposal");
+        require(
+            verifier.retirementReady() && !verifier.retirementExecutionAuthorized(),
+            "past vote cannot substitute for active retirement proposal"
+        );
     }
 
     function testReplacedSelfSignedCommitteeNominationInvalidatesIndependentWitness() public {
@@ -226,22 +287,22 @@ contract FoundingRetirementVerifier420Test {
         vm.prank(ADMIN);
         committee.appoint(ANDREW, keccak256("founding-seat"));
         vm.prank(ADMIN);
-        (bool removeFounder,) = address(committee).call(
-            abi.encodeCall(committee.remove, (ANDREW, keccak256("unilateral")))
-        );
+        (bool removeFounder,) =
+            address(committee).call(abi.encodeCall(committee.remove, (ANDREW, keccak256("unilateral"))));
         require(!removeFounder, "founding seat unilaterally removed");
     }
 
     function testRetirementRevokesFounderCommitteeAppointmentsAndPermitsCivic() public {
         bytes32 evidence = keccak256("candidate");
         address candidate = address(0xDADA);
-        vm.prank(candidate); committee.nominate(evidence);
+        vm.prank(candidate);
+        committee.nominate(evidence);
         founder.setRetired(true);
         vm.prank(ADMIN);
-        (bool result,) = address(committee).call(abi.encodeCall(committee.appoint, (candidate,evidence)));
+        (bool result,) = address(committee).call(abi.encodeCall(committee.appoint, (candidate, evidence)));
         require(!result, "retired founder still appoints");
         vm.prank(address(timelock));
-        committee.appoint(candidate,evidence);
+        committee.appoint(candidate, evidence);
         require(committee.isMember(candidate), "civic not able to appoint");
     }
 }

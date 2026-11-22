@@ -105,7 +105,7 @@ test('Mobile game is route-scoped, accessible, and does not allow the local engi
  const [app,shell,css,gate]=await Promise.all(['app.js','core/app-shell.js','ccc-tabletop.css','scripts/qualify-web.mjs'].map(p=>readFile(resolve(base,p),'utf8')));
  assert.match(shell,/if\(route\.id==='chaos-game'\)return renderChaosOnline/);
  assert.match(app,/new ChaosRoomsClient/);
- assert.match(app,/bindChaosOnline\(\)/);
+ assert.match(app,/bindChaosOnline\(root,chaosOnline,window\.location\.pathname\)/);
  assert.match(app,/\/classics\/cross-country-chaos\/practice/);
  assert.doesNotMatch(app,/bindAccountMonetization\(\);bindChaos\(\);/);
  assert.match(css,/app-shell\[data-route="chaos-game"\] \.app-sidebar/);
@@ -114,6 +114,7 @@ test('Mobile game is route-scoped, accessible, and does not allow the local engi
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(gate,/CCC account multiplayer route must not expose pass-and-play/);
  assert.match(gate,/baseTotal:1189\*1024/);
+ assert.match(gate,/onlineBindingsBytes>4\*1024/);
 });
 
 

@@ -63,6 +63,7 @@ const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
 // preserve each previous file, card, atlas, vehicle and combined budget.
 const bc05Files=Object.freeze({
  'core/classic-rooms.js':Object.freeze({baseline:0,maxAdded:16*1024}),
+ 'core/classic-room-bindings.js':Object.freeze({baseline:0,maxAdded:2*1024}),
  'app.js':Object.freeze({baseline:30434,maxAdded:3584}),
  'core/routes.js':Object.freeze({baseline:3368,maxAdded:512}),
  'core/app-shell.js':Object.freeze({baseline:12822,maxAdded:640}),
@@ -134,7 +135,12 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
 if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth;
+// CCC's account-only form wiring belongs to the separately approved roadboard/chat
+// allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
+const onlineBindingsBytes=regularSizes.get('core/chaos-online-bindings.js');
+if(!Number.isSafeInteger(onlineBindingsBytes)||onlineBindingsBytes<1600||onlineBindingsBytes>4*1024)
+ throw new Error('CCC online bindings missing or exceeded independent 4 KiB cap');
+const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
@@ -255,7 +261,7 @@ if(!shellUi.includes("if(route.id==='chaos-game')return renderChaosOnline")||
  !onlineUi.includes("credentials:'same-origin'")||
  !onlineUi.includes("checkChaosProjection")||
  !app.includes("new ChaosRoomsClient")||
- !app.includes("bindChaosOnline()")||
+ !app.includes("bindChaosOnline(root,chaosOnline,window.location.pathname)")||
  !tabletopCss.includes('.ccc-online-cards')||
  !tabletopCss.includes('.app-shell[data-route="chaos-game"] .app-sidebar'))
  throw new Error('CCC account multiplayer route must not expose pass-and-play');

@@ -1,0 +1,88 @@
+name: BC-1.4 Cribbage Player Frontend
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/core/cribbage-*.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/app-shell.js'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/app.js'
+      - 'bong-goggles/web/index.html'
+      - 'bong-goggles/web/cribbage.css'
+      - 'bong-goggles/web/assets/games/cribbage/**'
+      - 'bong-goggles/web/scripts/build.mjs'
+      - 'bong-goggles/web/test/cribbage-*'
+      - 'services/bong-goggles-account-social/classic_cribbage*.go'
+      - 'docs/games/classics/BC-1-4-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-1-4-cribbage-frontend.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  frontend-unit-asset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify immutable checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test board, privacy, sequential scoring and legal UI controls
+        working-directory: bong-goggles/web
+        run: node --test test/cribbage-frontend.test.js
+      - name: Build the actual approved board asset and page shell
+        working-directory: bong-goggles/web
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          node scripts/check.mjs
+          npm run build
+          test -s dist/assets/games/cribbage/leaf-board.svg
+          test -s dist/cribbage.css
+  server-score-events:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify immutable checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Preserve BC-1.2 deterministic engine and exact public score award metadata
+        run: go test -race -count=1 -timeout=8m -run '^(TestBC12|TestBC14)' ./services/bong-goggles-account-social
+  chromium-accessibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify immutable checked-out SHA
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser tooling and the pinned frontend library
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Accept real Chromium 2p/3p/4p desktop, tablet and mobile view
+        working-directory: bong-goggles/web
+        run: node test/cribbage-browser-qualification.mjs

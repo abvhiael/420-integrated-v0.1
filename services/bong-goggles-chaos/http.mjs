@@ -54,11 +54,15 @@ export async function handleChaos(req,{repo,key}){
   const data=unpack(raw,['code']);
   return {room:await repo.join(actor.subject,data.code,actor.displayName),onChain:false};
  }
- const match=path.match(/^\/v1\/chaos\/rooms\/([a-f0-9-]{36})(?:\/(start|move|next))?$/);
+ const match=path.match(/^\/v1\/chaos\/rooms\/([a-f0-9-]{36})(?:\/(start|move|next|chat))?$/);
  if(!match||!UUID.test(match[1]))throw new MatchError(404,'Match not found');
  const id=match[1],action=match[2];
  if(!action&&req.method==='GET')return {room:projectRoom(await repo.get(id,actor.subject),actor.subject),onChain:false};
  if(req.method!=='POST'||!action)throw new MatchError(405,'Unsupported match operation');
+ if(action==='chat'){
+  const data=unpack(raw,['text']);
+  return {room:projectRoom(await repo.chat(id,actor.subject,data.text),actor.subject),onChain:false};
+ }
  const data=unpack(raw,action==='move'?['expectedRevision','move']:['expectedRevision']);
  const rev=revision(data.expectedRevision);
  let room;

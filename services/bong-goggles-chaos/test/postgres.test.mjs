@@ -31,6 +31,11 @@ test('PostgreSQL room row locks, two account privacy, restart, block and stale m
  assert.equal(joined.joinCode,null);
  assert.equal((await r.list(peer)).length,1);
  await assert.rejects(()=>r.join(outsider,room.code,'Eve'),e=>e.status===409);
+ const said=await r.chat(room.id,host,'Ready for the road?');
+ assert.equal(said.revision,1,'chat cannot invalidate pending legal move');
+ assert.equal((await r.get(room.id,peer)).chat[0].text,'Ready for the road?');
+ await assert.rejects(()=>r.chat(room.id,outsider,'intruder'),e=>e.status===404);
+ await assert.rejects(()=>r.chat(room.id,host,'flood'),e=>e.status===429);
  const started=await r.mutate(room.id,host,1,x=>startRoom(x,host));
  assert.equal(started.status,'playing');
  const before=await r.get(room.id,peer);
@@ -46,6 +51,7 @@ test('PostgreSQL room row locks, two account privacy, restart, block and stale m
  assert.equal(bad.reason.status,409);
  const restarted=new PostgresRooms(pool);
  const persisted=await restarted.get(room.id,peer);
+ assert.equal(persisted.chat[0].text,'Ready for the road?');
  assert.equal(persisted.revision,started.revision+1);
  assert.equal(projectRoom(persisted,peer).legal.length,0);
  await pool.query('INSERT INTO bg_account_social.blocks(blocker,blocked) VALUES($1,$2)',[peer,host]);

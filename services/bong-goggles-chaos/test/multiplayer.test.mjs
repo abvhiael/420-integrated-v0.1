@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomBytes} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
-import {makeRoom,joinRoom,startRoom,moveRoom,continueRoom,projectRoom,summarizeRoom,MatchError} from '../room.mjs';
+import {makeRoom,joinRoom,startRoom,moveRoom,continueRoom,appendChaosChat,projectRoom,summarizeRoom,MatchError} from '../room.mjs';
 import {signature,handleChaos,authenticate} from '../http.mjs';
 
 const alice='10000000-0000-4000-8000-000000000001';
@@ -35,6 +35,7 @@ class TestRooms{
   const next=apply(room);this.rooms.set(room.id,next);return next;
  }
  async join(actor,code,name){return projectRoom(await this.mutate(null,actor,null,room=>joinRoom(room,actor,name),{code}),actor);}
+ async chat(id,actor,text){const updated=appendChaosChat(await this.get(id,actor),actor,text);this.rooms.set(id,updated);return updated;}
 }
 const call=(repository,subject,path,method,data,name)=>
  handleChaos(req(subject,path,method,data,name),{repo:repository,key});
@@ -168,4 +169,36 @@ test('Online regional hands are CSPRNG shuffled, independent of the 32-bit event
  const source=await readFile(new URL('../room.mjs',import.meta.url),'utf8');
  assert.match(source,/randomInt\(i\+1\)/);
  assert.match(source,/secureRegionalDeal\(advanceChaosLeg\(room\.game\)\)/);
+});
+
+test('Account-only chat persists across turns and legs without changing game revision or leaking identities',async()=>{
+ const repo=new TestRooms(),lobby=joinRoom(makeRoom(alice,'Alice',{humanSeats:2}),bob,'Bobby');
+ repo.rooms.set(lobby.id,lobby);
+ const url=path+'/'+lobby.id+'/chat';
+ const original=lobby.revision;
+ const sent=(await call(repo,alice,url,'POST',{text:'The ferry is NEVER on time!'})).room;
+ assert.equal(sent.revision,original);
+ assert.equal(sent.chat.length,1);
+ assert.equal(sent.chat[0].seat,0);
+ assert.equal(sent.chat[0].text,'The ferry is NEVER on time!');
+ assert.equal(JSON.stringify(sent.chat).includes(alice),false);
+ assert.equal((await call(repo,bob,path+'/'+lobby.id)).room.chat[0].text,sent.chat[0].text);
+ await assert.rejects(()=>call(repo,eve,url,'POST',{text:'Intrusion'}),e=>e.status===404);
+});
+test('Chat blocks forged payloads, markup control characters, flood and untrusted account claims',async()=>{
+ const r=joinRoom(makeRoom(alice,'A',{humanSeats:2}),bob,'B');
+ const time=Date.now();
+ assert.throws(()=>appendChaosChat(r,eve,'Hi'),e=>e.status===404);
+ for(const input of ['', '  ','x'.repeat(281),'<img>\u0000',123])
+  assert.throws(()=>appendChaosChat(r,alice,input),e=>e.status===400);
+ const one=appendChaosChat(r,alice,'<script>alert(1)</script>',{now:time});
+ assert.equal(one.revision,r.revision);
+ assert.equal(one.chat[0].seat,0);
+ assert.throws(()=>appendChaosChat(one,alice,'spam',{now:time+500}),e=>e.status===429);
+ const two=appendChaosChat(one,bob,'nice try',{now:time+500});
+ assert.equal(two.chat.length,2);
+ const repo=new TestRooms();repo.rooms.set(r.id,r);
+ const url=path+'/'+r.id+'/chat';
+ await assert.rejects(()=>call(repo,alice,url,'POST',{text:'hi',subject:eve}),e=>e.status===400);
+ await assert.rejects(()=>call(repo,alice,url,'POST',{message:'hi'}),e=>e.status===400);
 });

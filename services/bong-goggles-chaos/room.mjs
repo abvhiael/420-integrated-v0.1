@@ -80,6 +80,7 @@ export function makeRoom(actor,name,{humanSeats=2,bots:computer=[],vehicle='wago
   ...computer.map((difficulty,i)=>({subject:null,name:['Easy','Normal','Hard'].find(v=>v.toLowerCase()===difficulty)+' computer '+(i+1),
     controller:'computer',difficulty,vehicle:CHAOS_VEHICLES[(humanSeats+i)%CHAOS_VEHICLES.length].id}))];
  return {id:randomUUID(),code:randomBytes(24).toString('base64url'),ruleset:CHAOS_ROOM_RULESET,
+  chat:[],
   host:actor,seats,status:'lobby',revision:0,game:null,createdAt:now,updatedAt:now};
 }
 export function joinRoom(room,actor,name){
@@ -137,6 +138,22 @@ export function continueRoom(room,actor){
  next.revision++;next.updatedAt=new Date().toISOString();
  return next;
 }
+// Server-authored, bounded chat lives with the room so reconnects and legs share
+// the same history. It never consumes a game revision or touches private hands.
+export function appendChaosChat(room,actor,value,{now=Date.now()}={}){
+ member(room,actor);
+ if(!Number.isFinite(now)||now<0||typeof value!=='string')invalid('Invalid room message');
+ const text=value.replace(/\s+/gu,' ').trim();
+ if(!text||Array.from(text).length>280||Buffer.byteLength(text,'utf8')>1024||
+    /[\u0000-\u001f\u007f-\u009f]/u.test(text))invalid('Message must contain 1–280 visible characters');
+ const seat=ownerSeat(room,actor),chat=Array.isArray(room.chat)?room.chat:[];
+ const previous=[...chat].reverse().find(m=>m.seat===seat);
+ if(previous&&now-Date.parse(previous.at)<1500)throw new MatchError(429,'Please slow down before sending another message');
+ const next=structuredClone(room);
+ next.chat=[...chat,{id:randomUUID(),seat,text,at:new Date(now).toISOString()}].slice(-80);
+ next.updatedAt=new Date(now).toISOString();
+ return next;
+}
 export function projectRoom(room,actor){
  const seat=ownerSeat(room,actor);
  if(seat<0)forbidden();
@@ -144,7 +161,8 @@ export function projectRoom(room,actor){
   status:room.status,host:room.host===actor,seat,
   seats:room.seats.map((s,i)=>({seat:i,name:s.name??'Open seat',joined:s.controller==='computer'||Boolean(s.subject),
    controller:s.controller,difficulty:s.difficulty,vehicle:s.vehicle})),
-  joinCode:room.status==='lobby'&&room.host===actor?room.code:null};
+  joinCode:room.status==='lobby'&&room.host===actor?room.code:null,
+  chat:(Array.isArray(room.chat)?room.chat:[]).slice(-80).map(m=>({id:m.id,seat:m.seat,text:m.text,at:m.at}))};
  if(!room.game)return base;
  const g=room.game;
  return {...base,leg:g.leg,stageName:['The Down East Disaster','The Never-Ending Ontario','Prairie Madness & Mountain Mayhem'][g.leg],

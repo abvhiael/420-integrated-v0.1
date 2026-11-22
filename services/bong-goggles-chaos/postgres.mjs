@@ -1,7 +1,7 @@
 // Durable, transaction-serialized PostgreSQL room storage. The server role needs
 // only SELECT/INSERT/UPDATE on chaos_rooms and SELECT/INSERT on chaos_room_members.
 // No user tokens, 420ID email, wallet addresses, wagers, or server secrets are stored.
-import {assertRoomShape,joinRoom,summarizeRoom,projectRoom,validateRevision,MatchError} from './room.mjs';
+import {assertRoomShape,joinRoom,summarizeRoom,projectRoom,validateRevision,appendChaosChat,MatchError} from './room.mjs';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 export class PostgresRooms{
  constructor(pool){this.pool=pool;}
@@ -62,6 +62,26 @@ export class PostgresRooms{
    const updated=await c.query('UPDATE bg_account_social.chaos_rooms SET data=$2::jsonb,revision=$3,status=$4,updated_at=clock_timestamp() WHERE id=$1 AND revision=$5',[next.id,JSON.stringify(next),next.revision,next.status,previous.revision]);
    if(updated.rowCount!==1)throw new MatchError(409,'Match revision has changed');
    await c.query('COMMIT');return next;
+  }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
+ }
+ // Chat is serialized on the room row but does not advance game revisions.
+ // This prevents messages from invalidating an otherwise legal gameplay move.
+ async chat(id,actor,text){
+  if(!UUID.test(id))throw new MatchError(404,'Match not found');
+  const c=await this.pool.connect();
+  try{
+   await c.query('BEGIN');
+   const member=await c.query('SELECT 1 FROM bg_account_social.chaos_room_members WHERE room_id=$1 AND subject=$2',[id,actor]);
+   if(member.rowCount!==1)throw new MatchError(404,'Match not found');
+   const r=await c.query('SELECT data FROM bg_account_social.chaos_rooms WHERE id=$1 FOR UPDATE',[id]);
+   if(r.rowCount!==1)throw new MatchError(404,'Match not found');
+   const previous=assertRoomShape(r.rows[0].data);
+   await this.guarded(actor,previous);
+   const next=appendChaosChat(previous,actor,text);
+   const saved=await c.query('UPDATE bg_account_social.chaos_rooms SET data=$2::jsonb,updated_at=clock_timestamp() WHERE id=$1 AND revision=$3',[id,JSON.stringify(next),previous.revision]);
+   if(saved.rowCount!==1)throw new MatchError(409,'Match revision has changed');
+   await c.query('COMMIT');
+   return next;
   }catch(e){await c.query('ROLLBACK');throw e;}finally{c.release();}
  }
  async join(actor,code,name,revision){

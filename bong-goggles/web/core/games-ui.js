@@ -3,6 +3,7 @@ import {GAME_TYPES,normalizeGameHub,normalizeGameDetail,gameActions,gameLink} fr
 import {CLASSIC_ROADMAP,ALL_CLASSICS,classicGameById} from './classics.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
 import {renderGameAccountPanel} from './account-identity.js';
+import {renderCribbageRoute} from './cribbage-ui.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
 const statusText=game=>game.status==='account'?'Account multiplayer':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
 const gameTile=game=>{
@@ -21,9 +22,10 @@ export function renderGameCatalogue({accountIdentityState=null,accountIdentityEn
  '<p class="games-catalogue__footnote"><a href="/games/rooms" data-route="classic-rooms">Browse multiplayer rooms</a> to create private/public 420ID lobbies and choose human or computer seats. No match starts until its game rules are qualified.</p>'+
  '<p class="games-catalogue__footnote">No wagers or rewards. Browse without a wallet. For existing wallet-independent two-player quick games, visit <a href="/account/games" data-route="account-games">Account Games</a>. Cross-Country Chaos uses private 420ID account rooms.</p></div>';
 }
-export function renderClassicGamePage(gameId,{screen='intro',view=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
+export function renderClassicGamePage(gameId,{screen='intro',view=null,cribbageState=null,accountIdentityState=null,accountIdentityEnabled=false}={}){
  const game=classicGameById(gameId);
  if(!game)return card({title:'Game unavailable',body:emptyState({title:'Game not found',message:'Choose a title from the Games catalogue.'})});
+ if(game.id==='cribbage')return renderCribbageRoute({screen,state:cribbageState});
  const step=CLASSIC_ROADMAP.find(item=>item.id===gameId);
  const playLink=game.status==='account'?'<a class="ccc-link" href="/classics/cross-country-chaos" data-route="chaos-game">Play Cross-Country Chaos online</a> <a class="ccc-link" href="/classics/cross-country-chaos/practice" data-route="chaos-game">Play against computers</a>':'';
  const status=game.status==='account'?'Online multiplayer — separate 420ID accounts':statusText(game);

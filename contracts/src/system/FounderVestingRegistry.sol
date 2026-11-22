@@ -17,8 +17,11 @@ contract FounderVestingRegistry is SystemAccess, I420System {
 
     struct Grant { address beneficiary; uint64 startTime; uint256 claimed; }
     Grant[3] public grants;
+    uint256 public totalLockedClaimed;
 
     error InvalidFounderWallet();
+    error InvalidGenesisStartTime();
+    error DirectDepositDisabled();
     error InvalidFounderIndex();
     error UnauthorizedBeneficiary();
     error NothingClaimable();
@@ -28,6 +31,10 @@ contract FounderVestingRegistry is SystemAccess, I420System {
     constructor(address timelock_, address[3] memory beneficiaries, uint64 startTime)
         SystemAccess(timelock_)
     {
+        // A forgotten or backdated start would allow funds to unlock before
+        // the actual 182-day Genesis vesting window. The release verifier
+        // additionally pins this timestamp to the signed network Genesis.
+        if (startTime == 0 || uint256(startTime) < block.timestamp) revert InvalidGenesisStartTime();
         for (uint256 i; i < FOUNDER_COUNT; ++i) {
             address wallet = beneficiaries[i];
             if (wallet == address(0)) revert InvalidFounderWallet();
@@ -39,7 +46,9 @@ contract FounderVestingRegistry is SystemAccess, I420System {
         }
     }
 
-    receive() external payable {}
+    // Genesis funding is an allocation at the exact 0x0427 predeploy, not an
+    // application-revenue deposit. Runtime native contributions fail closed.
+    receive() external payable { revert DirectDepositDisabled(); }
     function systemName() external pure returns (string memory) { return "FounderVestingRegistry"; }
     function protocolVersion() external pure returns (uint32) { return 2; }
 
@@ -73,6 +82,7 @@ contract FounderVestingRegistry is SystemAccess, I420System {
         uint256 amount = claimable(index);
         if (amount == 0) revert NothingClaimable();
         g.claimed += amount;
+        totalLockedClaimed += amount;
         (bool ok,) = payable(g.beneficiary).call{value: amount}("");
         if (!ok) revert TransferFailed();
         emit FounderVestClaimed(index, g.beneficiary, amount, g.claimed);

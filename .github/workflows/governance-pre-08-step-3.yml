@@ -155,6 +155,7 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-genesis-source.json
             ${{ runner.temp }}/govpre08-step3-imports.json
             ${{ runner.temp }}/govpre08-step3-foundry-*.log
+            ${{ runner.temp }}/govpre08-step3-civic-*.log
             ${{ runner.temp }}/govpre08-step3-state-*.json
             ${{ runner.temp }}/govpre08-step3-native-bindings-*.json
             ${{ runner.temp }}/govpre08-step3-unified-local-node420-*.json

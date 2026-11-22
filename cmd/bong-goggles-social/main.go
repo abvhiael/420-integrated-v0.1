@@ -162,6 +162,7 @@ func main(){
    for{select{case <-ctxServer.Done():return;case <-ticker.C:
     ctx,done:=context.WithTimeout(ctxServer,5*time.Second)
     if _,e:=classicSessionWorker.Sweep(ctx);e!=nil{log.Print("BC-0.6 deadline sweep unavailable")}
+    if _,e:=classicSessionWorker.SweepBots(ctx);e!=nil{log.Print("BC-0.8 bot worker unavailable: ",e)}
     done()
    }}
   }()

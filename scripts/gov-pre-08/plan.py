@@ -92,6 +92,34 @@ def check_ledger(ledger, wallets, system, integration):
     require(sum(x["amount_420"] for x in allocation) == 42000000,
             "Genesis supply is not conserved")
     alloc = {x["id"]: x for x in allocation}
+    expected = {
+        "founder-vesting":500000,
+        "founder-admin-liquid":250000,
+        "founder-andrew-liquid":125000,
+        "founder-janet-liquid":125000,
+        "validator-bootstrap-reserve":3000000,
+        "attention-bootstrap":4200000,
+        "development-bootstrap":4200000,
+        "community-validator-credit-reserve":6300000,
+        "community-testnet-reward-reserve":2100000,
+        "public-distribution-genesis-tranche":4200000,
+        "public-distribution-day180-tranche":4200000,
+        "public-distribution-day365-tranche":4200000,
+        "protocol-reserve":8600000,
+    }
+    require({key: row["amount_420"] for key,row in alloc.items()} == expected,
+            "canonical 13-tranche distribution changed")
+    for key, slot in (
+        ("validator-bootstrap-reserve",0x42e),
+        ("attention-bootstrap",0x421), ("development-bootstrap",0x422),
+        ("community-validator-credit-reserve",0x425),
+        ("community-testnet-reward-reserve",0x426),
+        ("public-distribution-genesis-tranche",0x42a),
+        ("public-distribution-day180-tranche",0x42a),
+        ("public-distribution-day365-tranche",0x42a),
+    ):
+        require(int(alloc[key]["destination"],16) == slot,
+                "canonical tranche destination changed: "+key)
     require(alloc["founder-vesting"]["amount_420"] == 500000 and
             int(alloc["founder-vesting"]["destination"], 16) == 0x427,
             "locked founder allocation drift")

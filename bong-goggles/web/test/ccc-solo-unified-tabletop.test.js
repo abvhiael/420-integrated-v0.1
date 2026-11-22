@@ -6,6 +6,7 @@ import {createChaosGame,takeChaosTurn,chaosActionOptions} from '../core/cross-co
 import {configureChaosComputerSeats} from '../core/chaos-computer.js';
 import {renderChaosGame,renderClassicsRoute} from '../core/classics-ui.js';
 import {renderApplicationShell} from '../core/app-shell.js';
+import {chaosCardHelp} from '../core/chaos-online.js';
 
 const route='/classics/cross-country-chaos/practice';
 const make=()=>configureChaosComputerSeats(createChaosGame({names:['Alice','CPU Driver'],seed:1972}),['human','normal']);
@@ -136,4 +137,35 @@ test('production build carries independently bounded, mobile/keyboard safe solo 
  assert.match(css,/@media\(forced-colors:active\)/);
  assert.match(css, /:focus-visible/);
  assert.match(ui,/game\?\.phase==='playing'\?renderChaosPracticeTable/);
+});
+
+test('readable card effects remain presentation-only and never disclose rival hands',()=>{
+ const game=make();
+ game.players[0].hand[0]={type:'mileage',km:400,uid:222};
+ game.players[1].hand[0]={type:'fix',id:'help',name:'PRIVATE_OTHER_DRIVER',uid:223};
+ const visible=page(game,true),hidden=page(game,false);
+ assert.match(visible,/Advance 400 km\. Drives over 300 km risk a regional hazard\./);
+ assert.match(visible,/ccc-online-card-help/);
+ assert.doesNotMatch(visible,/PRIVATE_OTHER_DRIVER/);
+ assert.doesNotMatch(hidden,/Advance 400 km|PRIVATE_OTHER_DRIVER|ccc-online-card-help/);
+ assert.match(chaosCardHelp({type:'hazard',kind:'block'}),/Block an opponent/);
+ assert.match(chaosCardHelp({type:'fix',id:'atlas'}),/150 km shortcut/);
+ assert.match(chaosCardHelp({type:'upgrade',description:'Prevents bad weather'}),/Prevents bad weather/);
+ assert.match(chaosCardHelp({type:'legendary',description:'One-time rescue'}),/One-time rescue/);
+ assert.equal(game.players[0].hand[0].km,400);
+});
+
+test('map stays wide and player cards are large and readable on desktop and mobile',async()=>{
+ const dir=resolve(import.meta.dirname,'..');
+ const [common,solo]=await Promise.all(['ccc-tabletop.css','ccc-practice.css'].map(name=>readFile(resolve(dir,name),'utf8')));
+ assert.match(common,/\.ccc-online-map\{[^}]*aspect-ratio:960\/450/);
+ assert.match(common,/\.ccc-online-main\{[^}]*grid-template-rows:auto auto auto auto/);
+ assert.match(common,/\.ccc-online-hand \.ccc-online-cards\{[^}]*minmax\(105px,1fr\)/);
+ assert.match(common,/\.ccc-online-card-select img\{[^}]*max-height:195px/);
+ assert.match(common,/\.ccc-online-middle \.ccc-online-exposed-card img\{width:40px;height:68px\}/);
+ assert.match(common,/\.ccc-online-stock-back,\.ccc-online-discard-face\{width:80px;height:132px/);
+ assert.match(solo,/\.ccc-online--practice \.ccc-practice-hand-card \.ccc-online-card-select img\{[^}]*max-height:195px/);
+ assert.match(solo,/@media\(max-width:480px\)\{[\s\S]*?\.ccc-online--practice \.ccc-practice-hand-card\{flex:0 0 118px;height:198px\}/);
+ assert.match(solo,/\.ccc-online--practice \.ccc-online-card-help\{font-size:\.95rem/);
+ assert.match(common,/@media\(forced-colors:active\)/);
 });

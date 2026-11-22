@@ -23,6 +23,31 @@ Historical **FROZEN_V3** remains intact at `contracts/config/genesis-config-comm
 
 `scripts/gov-pre-08/materialize-local-vesting.py` deployed the **real** `FounderVestingRegistry` constructor on a separate earlier-time disposable Anvil chain, captured actual compiler-bound runtime and storage, and used **Anvil-only** state-setup APIs to materialize that actual runtime/slot state at the already-funded synthetic 0x0427. Readbacks established immutable 0x0429 Timelock, 3 distinct beneficiaries, the synthetic Genesis start time, zero claimed amounts, 13 fortnightly releases, 50/25/25 allocations, and rejection of premature founder claims. A **second pair of independent fresh Anvil chains reproduced exactly the code hash, constructor address, ABI/layout digest, all materialized storage slots, all three recipients and 500k funding** in the same workflow. This is a legitimate local constructor/predeploy rehearsal, **not** a transaction authorized by a founder, a real Geth block-zero deployment, a live signature or a completed new V4 Genesis.
 
+## GOV-PRE-08 pre-testnet Step 1 — complete local contract deployment qualified
+
+**Step 1 locally complete; full GOV-PRE-08 remains OPEN.** This step was added on [draft PR #1335](https://github.com/abvhiael/420-integrated-v0.1/pull/1335) without modifying any of the frozen V3 release inputs, real founder identities, policy constants or prior passing evidence. The **exact qualified executable source and CI workflow HEAD** is `32729091d09cf055f05a242259e961b216a87c19`. The scoped [workflow #45062812203](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45062812203), job `137332282391`, completed **SUCCESS**; artifact `gov-pre-08-unsigned-v4-32729091d09cf055f05a242259e961b216a87c19` (ID `14770431526`, 15,860 bytes) contains exact-head and source import closure fingerprints, both actual Foundry deployment logs, matched graph hash, Genesis/vesting rehearsals and the existing source candidate. Earlier workflow [#45062589098](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45062589098) had **all eight actual Foundry test executions PASS** but failed on the log extraction parser; the final passing SHA corrects solely that parser.
+
+**New committed executable file:** `contracts/test/GOVPRE08LocalDeployment420.t.sol`; **amended CI:** `.github/workflows/governance-pre-08-genesis.yml`.
+
+The test's genuine Solidity 0.8.24/Cancun/via-IR import closure compiled **53 source files** (not unrelated vendored LevelZero test fixtures). On each independent fresh Foundry EVM it executed the real constructors for these **fourteen unmodified production contracts**:
+
+1. `FoundingWalletClaims420`, `FoundingCommitteeMembership420`, `FoundingRetirementVerifier420`;
+2. `FoundingTreasuryAuthority420`, `FoundingValidatorSponsorship420`, `FoundingCommunityRetirementSweep420`;
+3. `FoundingDeveloperCompensationSplitter420`, `DevelopmentCompensationVault420`;
+4. `TreasuryAuthorization420`, `TreasuryPolicyRegistry420`, `TreasuryBudgetRegistry420`, `TreasuryDisbursementRegistry420`, `TreasuryRouter420`, `TreasuryReleaseExecutor420`.
+
+Real dependency contracts were also constructed: full Civic Governor/Proposal/Electorate/Voting/Constitution graph, `CapabilityRegistry420`, Vault authorization/policy/registry/accounting/router, and three registered `AssetVault420` instances (Operations, Contingency, Community). The local runtime from real constructors was placed at **existing frozen predeploy identities only**, Timelock `0x0429`, ProtocolRegistry `0x0434`, ValidatorRegistry `0x0423`, and CommunityValidatorReserve `0x0425`, with the Timelock scheduler constructor state locally materialized; no additional permanent address was reserved. Real Treasury/budget/disbursement one-shot handshakes, GovernanceTimelock controller, release executor hash/operator, retirement committee, ValidatorReserve/ValidatorRegistry/sponsor, and compensation Vault/splitter beneficiary handshakes all passed actual EVM readback. The three *synthetic* founders claimed *only on the disposable local fixture*, allowing actual bounded founding Treasury native policy and real 4.2m/840k budget-ceiling initialization.
+
+All fourteen were registered through **the real ProtocolRegistry contract's codehash-verifying component registration**, using explicitly local-only `GOV-PRE-08/LOCAL-ONLY/COMPONENT` IDs rather than inventing unapproved production component IDs. The established canonical **Treasury, Vault and Development Compensation service IDs** were published with real deployed runtime hashes, registration profiles and resolution readbacks via authentic Timelock-only call-context simulation. These are local service registrations, not signed or network-finalized governance execution.
+
+**Tests and reproducibility:** `4 passed / 0 failed / 0 skipped` in each of **two independent** Foundry EVM runs, for **8/8 actual test executions**, and the isolated exact-source graph digest matched in both:
+
+`0xc337ffd4adc5d87f314979917db1b7c1eb5537e08c0bd0eee9dc9e1691c35dd4`
+
+The tests require all fourteen deployed code addresses, exact component resolution/codehash, one-shot founder/Treasury/Vault/sponsor/splitter bindings, canonical service resolution, valid founder-split constants and budget ceilings, absence of unsolicited capability grants, failed pre-retirement sweep, and rejection of unauthorized re-binding or Registry publication.
+
+**Scope boundary:** This qualifies Step 1's **local EVM deployment graph**, not an Anvil multi-process launch, live governance vote, owner-signed founder claims, approved canonical V4 component ID catalogue, paid vault balances, approved V4 Genesis, or any public testnet deployment. Local pseudo-Timelock calls and the synthetic founders are explicitly fixture operations; cannot be released. Actual Vault funding and authorized payment/settlement belongs to **pre-testnet Step 2** and remains OPEN.
+
 ## Current GOV-PRE-08 acceptance: not met
 
 The task is **not eligible for full qualification, roadmap closeout, or merge** because the following genuine release inputs/evidence are absent:

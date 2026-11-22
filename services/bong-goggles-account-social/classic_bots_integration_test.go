@@ -6,6 +6,8 @@ import (
  "bytes"
  "context"
  "errors"
+ "encoding/json"
+ "time"
  "sync"
  "testing"
 )
@@ -94,7 +96,14 @@ func TestBC08RejectMissingPolicyAndExpiredBotTurn(t *testing.T){
  if w:=bc06Act(t,h,host,match.ID,"move",2,map[string]any{"take":1},bc06ActionID(t));w.Code!=200{
   t.Fatal("host move to bot",w.Code,w.Body.String())
  }
- if _,e:=store.DB.Exec("UPDATE bg_account_social.classic_sessions SET turn_deadline=clock_timestamp()-interval '5 seconds' WHERE id=$1",match.ID);e!=nil{t.Fatal(e)}
+ // Synthetic expiry must adjust the last public journal metadata too:
+ // BC-0.11 rejects a manually altered deadline that disagrees with history.
+ tx,e:=store.DB.BeginTx(context.Background(),nil);if e!=nil{t.Fatal(e)}
+ var due time.Time
+ if e=tx.QueryRow("UPDATE bg_account_social.classic_sessions SET turn_deadline=clock_timestamp()-interval '5 seconds' WHERE id=$1 RETURNING turn_deadline",match.ID).Scan(&due);e!=nil{tx.Rollback();t.Fatal(e)}
+ encoded,e:=json.Marshal(due);if e!=nil{tx.Rollback();t.Fatal(e)}
+ if _,e=tx.Exec("UPDATE bg_account_social.classic_session_events SET public_state=jsonb_set(public_state,'{deadline}',$2::jsonb) WHERE session_id=$1 AND sequence=2",match.ID,string(encoded));e!=nil{tx.Rollback();t.Fatal(e)}
+ if e=tx.Commit();e!=nil{t.Fatal(e)}
  moved,e:=h.Sessions.RunBotTurn(context.Background(),match.ID)
  if e!=nil||moved{t.Fatal("expired bot executed action",moved,e)}
  final,e:=h.Sessions.Get(context.Background(),memberA,match.ID)

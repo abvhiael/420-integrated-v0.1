@@ -169,22 +169,45 @@ func (s *ClassicSessions) List(ctx context.Context,viewer string)([]ClassicSessi
  for rows.Next(){r,e:=scanClassicSession(rows);if e!=nil{return nil,e};out=append(out,r.ClassicSession)}
  return out,rows.Err()
 }
+// Public event reads use one repeatable-read transaction for authorization,
+// high-water sequence, journal integrity and the entire returned batch.
 func (s *ClassicSessions) Events(ctx context.Context,viewer,id string,after int64)([]ClassicSessionEvent,int64,error){
  if !uuid.MatchString(viewer)||!uuid.MatchString(id)||after<0{return nil,0,ErrInvalid}
- r,e:=scanClassicSession(s.Store.DB.QueryRowContext(ctx,"SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions WHERE id=$1",id))
+ rec,e:=scanClassicSession(s.Store.DB.QueryRowContext(ctx,
+  "SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions WHERE id=$1",id))
  if errors.Is(e,sql.ErrNoRows){return nil,0,ErrNotFound};if e!=nil{return nil,0,e}
- if _,e=s.participant(ctx,s.Store.DB,r.RoomID,viewer);e!=nil{return nil,0,e}
+ if _,e=s.participant(ctx,s.Store.DB,rec.RoomID,viewer);e!=nil{return nil,0,e}
  if e=s.Expire(ctx,id);e!=nil{return nil,0,e}
- var max int64
- if e=s.Store.DB.QueryRowContext(ctx,"SELECT sequence FROM bg_account_social.classic_sessions WHERE id=$1",id).Scan(&max);e!=nil{return nil,0,e}
- if after>max||max-after>50{return nil,max,ErrConflict}
- rows,e:=s.Store.DB.QueryContext(ctx,"SELECT sequence,kind,actor_seat,public_state,created_at "+
- "FROM bg_account_social.classic_session_events WHERE session_id=$1 AND sequence>$2 ORDER BY sequence LIMIT 50",id,after)
- if e!=nil{return nil,0,e};defer rows.Close()
+ tx,e:=s.Store.DB.BeginTx(ctx,&sql.TxOptions{ReadOnly:true,Isolation:sql.LevelRepeatableRead})
+ if e!=nil{return nil,0,e};defer tx.Rollback()
+ rec,e=scanClassicSession(tx.QueryRowContext(ctx,
+  "SELECT "+classicSessionFields+" FROM bg_account_social.classic_sessions WHERE id=$1",id))
+ if e!=nil{return nil,0,e}
+ if _,e=s.participant(ctx,tx,rec.RoomID,viewer);e!=nil{return nil,0,e}
+ if e=s.verifyClassicJournalTx(ctx,tx,rec);e!=nil{return nil,0,ErrUnavailable}
+ high:=rec.Sequence
+ if after>high||high-after>50{return nil,high,ErrConflict}
+ rows,e:=tx.QueryContext(ctx,"SELECT sequence,kind,actor_seat,public_state,created_at "+
+ "FROM bg_account_social.classic_session_events WHERE session_id=$1 AND sequence>$2 "+
+ "ORDER BY sequence LIMIT 50",id,after)
+ if e!=nil{return nil,0,e}
  out:=[]ClassicSessionEvent{}
- for rows.Next(){var item ClassicSessionEvent;var actor sql.NullInt64
-  if e=rows.Scan(&item.Sequence,&item.Kind,&actor,&item.PublicState,&item.OccurredAt);e!=nil{return nil,0,e}
-  if actor.Valid{n:=int(actor.Int64);item.ActorSeat=&n};out=append(out,item)
+ next:=after
+ for rows.Next(){
+  var item ClassicSessionEvent
+  var actor sql.NullInt64
+  if e=rows.Scan(&item.Sequence,&item.Kind,&actor,&item.PublicState,&item.OccurredAt);e!=nil{
+   rows.Close();return nil,0,e
+  }
+  if actor.Valid{n:=int(actor.Int64);item.ActorSeat=&n}
+  if item.Sequence!=next+1||!validClassicPublicEvent(item,rec.SeatCount){
+   rows.Close();return nil,0,ErrUnavailable
+  }
+  next=item.Sequence
+  out=append(out,item)
  }
- return out,max,rows.Err()
+ e=rows.Err();rows.Close()
+ if e!=nil||next!=high{return nil,0,ErrUnavailable}
+ if e=tx.Commit();e!=nil{return nil,0,e}
+ return out,high,nil
 }

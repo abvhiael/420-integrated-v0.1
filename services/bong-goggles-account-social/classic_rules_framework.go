@@ -65,6 +65,17 @@ const maxRuleScore=int64(1_000_000_000)
 var ruleVersionPattern=regexp.MustCompile(`^v[0-9]{1,4}(?:\.[0-9]{1,3})?$`)
 var rulePhasePattern=regexp.MustCompile(`^[a-z][a-z0-9_-]{0,31}$`)
 type RulesAdapter struct{module RuleModule;definition RuleDefinition;hash string}
+
+// Module callbacks must never share mutable state with the trusted snapshot
+// or with one another. A shallow Go struct copy still aliases scores, hidden
+// JSON bytes and the winner pointer; always make a full boundary copy.
+func cloneRuleFrame(frame RuleFrame)RuleFrame{
+ out:=frame
+ out.Scores=append([]int64(nil),frame.Scores...)
+ out.Data=append(json.RawMessage(nil),frame.Data...)
+ if frame.Winner!=nil{winner:=*frame.Winner;out.Winner=&winner}
+ return out
+}
 func NewRulesAdapter(module RuleModule)(*RulesAdapter,error){
  if module==nil{return nil,ErrInvalid}
  d:=module.Definition()
@@ -126,7 +137,7 @@ func (a *RulesAdapter)decode(raw json.RawMessage)(RuleFrame,error){
  seed,e:=hex.DecodeString(frame.Seed)
  if e!=nil||len(seed)!=32{return frame,ErrInvalid}
  for _,score:=range frame.Scores{if score< -maxRuleScore||score>maxRuleScore{return frame,ErrInvalid}}
- if e=a.module.Validate(frame);e!=nil{return frame,ErrInvalid}
+ if e=a.module.Validate(cloneRuleFrame(frame));e!=nil{return frame,ErrInvalid}
  return frame,nil
 }
 func (a *RulesAdapter)encode(frame RuleFrame)(json.RawMessage,error){
@@ -186,7 +197,7 @@ func (a *RulesAdapter)legal(frame RuleFrame,seat int)([]json.RawMessage,error){
  if frame.Terminal||frame.Turn!=seat{return nil,ErrForbidden}
  run:=func()([]json.RawMessage,error){
   budget:=NewRuleBudget(100000)
-  legal,e:=a.module.Legal(frame,seat,budget)
+  legal,e:=a.module.Legal(cloneRuleFrame(frame),seat,budget)
   if e!=nil||budget.spent<1||len(legal)<1||len(legal)>maxRulesLegal{return nil,ErrUnavailable}
   out:=make([]json.RawMessage,0,len(legal));seen:=map[string]bool{}
   for _,item:=range legal{
@@ -209,9 +220,23 @@ func (a *RulesAdapter)ValidateSaved(raw json.RawMessage)error{
 }
 func (a *RulesAdapter)View(raw json.RawMessage,seat int)(json.RawMessage,error){
  frame,e:=a.decode(raw);if e!=nil||seat<0||seat>=frame.SeatCount{return nil,ErrUnavailable}
- view,e:=a.module.View(frame,seat)
- if e!=nil||!validViewerState(view)||!noDuplicateJSON(view){return nil,ErrUnavailable}
- return view,nil
+ // A per-seat view may contain that seat's cards, never the raw rule
+ // snapshot or seed. Repeat with fresh clones: non-deterministic or mutable
+ // projections cannot become authoritative browser-visible state.
+ run:=func()(json.RawMessage,error){
+  view,e:=a.module.View(cloneRuleFrame(frame),seat)
+  if e!=nil||!validViewerState(view)||!noDuplicateJSON(view){return nil,ErrUnavailable}
+  var root map[string]json.RawMessage
+  if json.Unmarshal(view,&root)!=nil||root==nil{return nil,ErrUnavailable}
+  for _,secret:=range []string{"seed","rulesHash","engineState","initialState","opponentHand","allHands"}{
+   if _,ok:=root[secret];ok{return nil,ErrUnavailable}
+  }
+  if bytes.Contains(view,[]byte(frame.Seed))||bytes.Equal(view,raw){return nil,ErrUnavailable}
+  return append(json.RawMessage(nil),view...),nil
+ }
+ first,e:=run();if e!=nil{return nil,e}
+ second,e:=run();if e!=nil||!bytes.Equal(first,second){return nil,ErrUnavailable}
+ return first,nil
 }
 func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(json.RawMessage,int,bool,*int,error){
  frame,e:=a.decode(raw);if e!=nil{return nil,0,false,nil,e}
@@ -221,7 +246,7 @@ func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(j
  if !allowed{return nil,0,false,nil,ErrInvalid}
  run:=func()(json.RawMessage,error){
   budget:=NewRuleBudget(100000)
-  next,e:=a.module.Step(frame,seat,chosen,budget)
+  next,e:=a.module.Step(cloneRuleFrame(frame),seat,append(json.RawMessage(nil),chosen...),budget)
   if e!=nil{return nil,e}
   if budget.spent<1||next.GameID!=frame.GameID||next.Version!=frame.Version||
    next.RulesHash!=frame.RulesHash||next.Seed!=frame.Seed||next.SeatCount!=frame.SeatCount||
@@ -271,7 +296,7 @@ func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json
  state,e:=a.initial(seed,seatCount);if e!=nil{return nil,e}
  prev:=int64(1)
  for _,item:=range trace{
-  if item.Sequence<=prev||item.Sequence>1000000{return nil,ErrConflict}
+  if item.Sequence!=prev+1||item.Sequence>1000000{return nil,ErrConflict}
   before:=sha256.Sum256(state)
   if item.BeforeHash!=hex.EncodeToString(before[:]){return nil,ErrConflict}
   updated,_,_,_,e:=a.Apply(state,item.Seat,item.Action)

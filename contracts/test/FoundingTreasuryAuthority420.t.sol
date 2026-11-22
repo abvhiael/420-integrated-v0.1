@@ -454,12 +454,22 @@ contract FoundingTreasuryAuthority420Test {
         vm.prank(ADMIN);
         bytes32 id = _propose(false, PAYEE, uint128(1 ether), FoundingTreasuryAuthority420.Purpose.BOUNTY);
         vm.prank(ADMIN);
-        founder.schedulePayment(id);
-        require(founder.operationsCommitted() == 1 ether && founder.operationsReleased() == 0,
-            "unpaid founding obligation");
+        bytes32 disbursementId = founder.schedulePayment(id);
+        require(founder.outstandingFoundingCommitments(), "unpaid founding obligation");
         vm.prank(address(civic));
         (bool retiredWithDebt,) = address(founder).call(abi.encodeCall(founder.retire, ()));
         require(!retiredWithDebt && !founder.retired(), "unpaid commitment extinguished by retirement");
+
+        // A genuine Civic cancellation removes the active budget reservation; the
+        // historical commitment counter intentionally remains an audit record.
+        vm.prank(address(civic));
+        disb.cancel(disbursementId);
+        require(!founder.outstandingFoundingCommitments()
+            && founder.operationsCommitted() == 1 ether && founder.operationsReleased() == 0,
+            "canceled payment was incorrectly still counted as an obligation");
+        vm.prank(address(civic));
+        founder.retire();
+        require(founder.retired(), "legitimate cancellation permanently blocked retirement");
     }
 
     function testRetirementIsIrreversibleAndDisablesFoundingWrites() public {

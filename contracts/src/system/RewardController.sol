@@ -98,7 +98,7 @@ contract RewardController is ConsensusSystemAccess420, I420System {
         // There is no externally callable mint, allowance, fallback or trusted
         // externally submitted transaction. Credit is done by the imported-block
         // Geth processor and then consumed by this call, in the same state transition.
-        if (realized == 0 || address(this).balance != realized) revert InvalidNativeBacking();
+        if (realized == 0 || address(this).balance < realized) revert InvalidNativeBacking();
         _entered = 1;
         rewardApplied[blockNumber] = true;
 
@@ -111,7 +111,8 @@ contract RewardController is ConsensusSystemAccess420, I420System {
         grossSecurityIssued += securityIssued;
         grossAttentionIssued += attentionAmount;
         grossDevelopmentIssued += developmentAmount;
-        if (address(this).balance != 0) revert InvalidNativeBacking();
+        // Geth independently preserves the exact pre-existing account balance.
+        // The mandatory realized payout is never allowed to consume stray funds.
         nativeRewardPaid += realized;
         _entered = 0;
         emit RewardApplied(

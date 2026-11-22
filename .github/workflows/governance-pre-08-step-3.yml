@@ -29,6 +29,11 @@ jobs:
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
       - name: Materialize canonical unsigned V4 and prove local cold-start, replay and recovery
         run: bash scripts/gov-pre-08/qualify-step3.sh
       - name: Retain exact-head unsigned source and local receipt/state witnesses
@@ -46,6 +51,7 @@ jobs:
             ${{ runner.temp }}/govpre08-step3-state-*.json
             ${{ runner.temp }}/govpre08-step3-funding-*.json
             ${{ runner.temp }}/govpre08-step3-graph-*.json
+            ${{ runner.temp }}/govpre08-step3-indexer-*.json
             ${{ runner.temp }}/govpre08-step3-local-*.json
             ${{ runner.temp }}/govpre08-step3-recovery-*.json
             ${{ runner.temp }}/govpre08-step3-node-*.log

@@ -320,6 +320,28 @@ def bootstrap(rpc,base):
     fail_call(rpc,creator,d["TreasuryBudgetRegistry420"],"setController(address)",creator)
     need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==0,
          "local fixture falsely activated Civic Timelock")
+    # Real Civic/Timelock opt-in activation is rehearsed on a disposable branch,
+    # NEVER committed as production authority. The test is not a Civic vote.
+    fail_call(rpc,creator,TIME,"activateCivicAuthority(address)",civic)
+    snapshot=rpc.call("evm_snapshot",[])
+    need(snapshot is not None,"local Civic governance snapshot absent")
+    rpc.call("anvil_impersonateAccount",[BOOTSTRAP])
+    try:
+        activation=rpc.send(BOOTSTRAP,TIME,
+            funding.calldata("activateCivicAuthority(address)",civic),
+            tag="probe:impersonated_bootstrap_governor_Civic")
+        need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==1
+             and read_address(rpc,TIME,"scheduler()")==addr(civic),
+             "actual Civic/Timelock authority handoff did not execute")
+        need(rpc.call("evm_revert",[snapshot]) is True,
+             "synthetic Civic authority could not be rolled back")
+        need(rpc.call("eth_getTransactionReceipt",[activation["tx"]]) is None,
+             "orphaned synthetic Timelock authorization persisted")
+        need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==0
+             and read_address(rpc,TIME,"scheduler()")==addr(BOOTSTRAP),
+             "synthetic Civic activation contaminated source Genesis")
+    finally:
+        rpc.call("anvil_stopImpersonatingAccount",[BOOTSTRAP])
     for typ,amount in (("OPERATIONS",4_200_000*WAD),
                        ("CONTINGENCY",840_000*WAD),("COMMUNITY",0)):
         need(rpc.balance(base["vaultAddresses"][typ])==amount,
@@ -355,6 +377,7 @@ def bootstrap(rpc,base):
         "localFounderImpersonationOnly":True,
         "locallyPublishedServiceIdsOnly":True,
         "budgetAndFounderClaimsMined":True,
+        "disposableCivicTimelockActivationThenReverted":True,
         "totalNativeSupplyWei":str(42_000_000*WAD),
         "fullApplicationRuntimeQualified":False,
         "realConsensusQualified":False,

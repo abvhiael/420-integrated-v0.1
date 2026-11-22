@@ -1,6 +1,7 @@
 // BC-1.4: usable left-side hand/table, right-side approved leaf score board.
 // Reads only the verified 420ID seat projection. Never renders secret opponent cards.
 import {escapeHtml as esc} from './design-system.js';
+import {renderGameAccountPanel} from './account-identity.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
 import {classicGameById} from './classics.js';
 import {CRIBBAGE_BOARD_SIZE,CRIBBAGE_BOARD_ART,CRIBBAGE_HOLES,CRIBBAGE_TRACKS,
@@ -181,7 +182,8 @@ function settings(state){
   (s.stinkhole?' checked':'')+'> Highlight the 120 “stinkhole” — visual only</label>'+
   '</details>';
 }
-export function renderCribbageRoute({screen='intro',state=null,accountPanel=''}={}){
+export function renderCribbageRoute({screen='intro',state=null,accountPanel='',identity=null}={}){
+ if(identity)accountPanel=renderGameAccountPanel(identity[0],{enabled:identity[1]});
  const s=state??{status:'idle'},session=s.session,id=session?.id??null;
  const nav=back+menu(screen,id);
  const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+

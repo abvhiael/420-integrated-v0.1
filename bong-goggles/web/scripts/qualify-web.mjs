@@ -163,7 +163,7 @@ const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onli
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('CCC independently bounded solo tabletop:',JSON.stringify({practiceJs,practiceCss,limit:CCC_PRACTICE_ALLOWANCE}));
-console.log('BC-0.2 bounded menu asset allowance:,JSON.stringify({
+console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
  growthBytes:bc02Growth,priorBaseBytes:legacyBaseTotal,legacyLimit:limits.baseTotal
 }));
 console.log('BC-0.3 bounded shared screens asset allowance:',JSON.stringify({

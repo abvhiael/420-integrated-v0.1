@@ -208,3 +208,27 @@ func TestBC12ImmediateWinFromHeelsAndThirtyOne(t *testing.T){
  }
  t.Fatal("no reachable exact-31 action found")
 }
+
+func TestBC12RoomSeatTeamsEnforced(t *testing.T){
+ a,e:=NewCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
+ subjects:=[]string{
+  "10000000-1111-4111-8111-111111111111",
+  "20000000-2222-4222-8222-222222222222",
+  "30000000-3333-4333-8333-333333333333",
+  "40000000-4444-4444-8444-444444444444",
+ }
+ for _,count:=range []int{2,3,4}{
+  v,_:=cribbageVariantFor(count)
+  room:=ClassicRoom{GameID:"cribbage",SeatCount:count}
+  seats:=make([]ClassicSeat,count)
+  for i:=0;i<count;i++{
+   if actual:=classicTeam("cribbage",count,i);actual!=v.Teams[i]{
+    t.Fatal("lobby team diverges from ruleset",count,i,actual,v.Teams[i])
+   }
+   seats[i]=ClassicSeat{Index:i,Controller:"human",Subject:subjects[i],Team:v.Teams[i]}
+  }
+  if _,_,e=a.InitialWithSeed(cribSeed(byte(count)),room,seats);e!=nil{t.Fatal("valid canonical lobby denied",count,e)}
+  seats[count-1].Team=99
+  if _,_,e=a.InitialWithSeed(cribSeed(byte(count)),room,seats);e==nil{t.Fatal("wrong teams admitted",count)}
+ }
+}

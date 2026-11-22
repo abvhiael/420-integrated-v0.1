@@ -13,7 +13,7 @@ import { indexerEventEnvelope420 } from '../src/event-stream.js';
 import { IndexerEventCanonicality420 } from '../src/event-canonicality.js';
 
 const manifest = JSON.parse(readFileSync('descriptors/stake420-v3.json','utf8')) as StakeReleaseDescriptor420;
-const validatorArtifact = JSON.parse(readFileSync('../contracts/artifacts/ValidatorRegistry.abi.json','utf8')) as RetainedAbiArtifact420;
+const validatorArtifact = JSON.parse(readFileSync('../contracts/artifacts/ValidatorRegistry.govpre04.abi.json','utf8')) as RetainedAbiArtifact420;
 const rewardArtifact = JSON.parse(readFileSync('../contracts/artifacts/RewardController.v3.abi.json','utf8')) as RetainedAbiArtifact420;
 const artifacts = new Map<string, RetainedAbiArtifact420>([
   ['ValidatorRegistry', validatorArtifact],

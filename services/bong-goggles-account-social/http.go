@@ -216,7 +216,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  viewer,e:=h.SignOn.Verify(ctx,cookie)
  if errors.Is(e,ErrForbidden)||errors.Is(e,ErrInvalid){deny(w,401);return}
  if e!=nil{deny(w,503);return}
- if r.Method!="GET"&&!h.rate(ctx,r.URL.Path,viewer,60){deny(w,429);return}
+ // BC-0.10: polling heartbeats are still rate limited, but must not
+ // consume the generic social-write budget used by posts, chats or moves.
+ rateKey:=r.URL.Path
+ if r.Method=="POST"&&strings.HasPrefix(r.URL.Path,"/v1/classic-rooms/")&&
+    strings.HasSuffix(r.URL.Path,"/presence"){rateKey="classic-presence"}
+ if r.Method!="GET"&&!h.rate(ctx,rateKey,viewer,60){deny(w,429);return}
  if r.URL.Path=="/auth/logout"&&r.Method=="POST"{
   if strictJSON(r,&struct{}{})!=nil{deny(w,400);return}
   e=h.SignOn.Logout(ctx,cookie)

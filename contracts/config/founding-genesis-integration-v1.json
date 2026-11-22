@@ -6,7 +6,8 @@
     "network": null,
     "chainId": null,
     "approvedGenesisHash": null,
-    "exactRuntimeManifestHash": null
+    "exactRuntimeManifestHash": null,
+    "networkGenesisBlockHash": null
   },
   "budget": {
     "operationsTokens": "4200000",

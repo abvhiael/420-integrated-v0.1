@@ -171,6 +171,10 @@ def verify(release):
                 "founder wallet signature plan does not match approved Genesis")
         require(init["founder_beneficiaries"] == [x["wallet_address"] for x in founders],
                 "predeploy beneficiary storage has not been bound to verified wallets")
+        subprocess.run([sys.executable,str(ROOT/"scripts/verify-founder-wallet-reservations.py"),
+                        "--require-deployment"],check=True)
+        # Actual signed wallets are necessary but not sufficient; independently
+        # verify each liquid grant and the escrow balance at finalized block zero.
         require_live_genesis_balances(founders, json.loads((ROOT / "contracts/config/founding-genesis-integration-v1.json").read_text()))
     return len(found)
 

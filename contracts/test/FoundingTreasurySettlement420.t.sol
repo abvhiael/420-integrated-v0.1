@@ -20,6 +20,7 @@ interface VmFoundingSettlement420 {
 contract FoundingSettlementCivic420 is IFoundingCivicStatus420, IFoundingRetirementReadiness420 {
     function civicAuthorityActivated() external pure returns (bool) { return false; }
     function retirementReady() external pure returns (bool) { return false; }
+    function retirementExecutionAuthorized() external pure returns (bool) { return false; }
 }
 
 contract FoundingTreasurySettlement420Test {

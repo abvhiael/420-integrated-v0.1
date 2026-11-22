@@ -48,6 +48,7 @@ contract FoundingRetirementVerifier420 {
     address[15] private _witnessCommittee;
     mapping(bytes32 => bytes32) public independentOwnershipEvidence;
     mapping(address => bytes32) public independentCommitteeEvidence;
+    mapping(address => bytes32) public witnessedCommitteeNomination;
     uint64 public witnessQualifiedSince;
     uint32 public witnessRevision;
     uint64 public committeeWitnessQualifiedSince;
@@ -131,6 +132,7 @@ contract FoundingRetirementVerifier420 {
                 if (evidence[i] == evidence[j]) revert InvalidWitnessSet();
             }
             independentCommitteeEvidence[member] = evidence[i];
+            witnessedCommitteeNomination[member] = committee.nominationEvidence(member);
             prior = member;
         }
         _witnessCommittee = members;
@@ -188,7 +190,8 @@ contract FoundingRetirementVerifier420 {
             address member = _witnessCommittee[i];
             if (member == address(0) || !committee.isMember(member)
                 || committee.nominationEvidence(member) == bytes32(0)
-                || independentCommitteeEvidence[member] == bytes32(0)) return false;
+                || independentCommitteeEvidence[member] == bytes32(0)
+                || committee.nominationEvidence(member) != witnessedCommitteeNomination[member]) return false;
         }
         return true;
     }

@@ -54,6 +54,11 @@ func TestBC16AuthenticatedChallengeHistoryAndRematch(t *testing.T){
  if e:=store.Relationship(ctx,memberB,memberA,"block",true);e!=nil{t.Fatal(e)}
  if code,_:=bc16Send(t,h,a,route,nonce,map[string]any{"target":memberB});code!=403{t.Fatal("blocked challenge",code)}
  if e:=store.Relationship(ctx,memberB,memberA,"block",false);e!=nil{t.Fatal(e)}
+ // Blocking intentionally deletes the mutual-friend edge; consent must be
+ // explicitly restored by both accounts before another challenge.
+ for _,pair:=range [][2]string{{memberA,memberB},{memberB,memberA}}{
+  if e:=store.Relationship(ctx,pair[0],pair[1],"follow",true);e!=nil{t.Fatal(e)}
+ }
  code,invited:=bc16Send(t,h,a,route,nonce,map[string]any{"target":memberB})
  if code!=201||invited.Host!=memberA||invited.Status!="open"||invited.Visibility!="private"||
   invited.Seats[1].Controller!="invited"||invited.Seats[1].Subject!=memberB||len(invited.Invites)!=1{

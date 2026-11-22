@@ -328,8 +328,10 @@
     "communityTotalWeight": 0,
     "validatorRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "validatorTotalWeight": 0,
-    "commitmentFormula": "Governance420.canonicalBootstrapPlanHash over BOOTSTRAP_DOMAIN, chainid, seven graph addresses, seven live extcodehashes, and two Genesis initial Merkle roots and weights",
+    "commitmentFormula": "Legacy: original chain-specific seven-component graph, codehashes and both Genesis roots/weights. Post-Genesis: distinct domain with same graph and chainid plus approved enrollment address, runtime codehash and electorate authority, with zero initial roots/weights.",
     "materialization": "Governance420@0x0437 fixed predeploy state only; no runtime setter",
-    "releaseRequirement": "Replace all five zero fields only with verified chain-specific approved graph and authentic community/active-validator owner electorate snapshot commitments; all-zero is fail-closed"
+    "releaseRequirement": "Approved legacy five fields or an independently approved post-Genesis plan hash plus actual enrollment contract and constitutional electorate authority; zero values remain fail-closed, never substitute synthetic voters.",
+    "enrollmentContract": "0x0000000000000000000000000000000000000000",
+    "electorateAuthority": "0x0000000000000000000000000000000000000000"
   }
 }

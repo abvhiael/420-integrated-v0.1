@@ -446,7 +446,7 @@ export function createGovernance420Client({ provider, chainId, account, discover
         if (normalizeAddress(receipt.from)!==voter || normalizeAddress(receipt.to)!==modules.voting) {
           throw new Error('Governance transaction receipt sender or target mismatch');
         }
-        const status = checkedHex(receipt.status,'receipt status');
+        const status = typeof receipt.status === 'string' ? receipt.status.toLowerCase() : '';
         if (status!=='0x00' && status!=='0x01' && status!=='0x0' && status!=='0x1') {
           throw new Error('Governance malformed transaction status');
         }

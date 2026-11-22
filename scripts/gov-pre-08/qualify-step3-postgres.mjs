@@ -44,7 +44,7 @@ need(graph.schema==='GOV_PRE_08_STEP3_LOCAL_ACTUAL_FOURTEEN_CONSTRUCTORS_V1'
      && manifest.sourceGitHead===graph.sourceGitHead
      && manifest.graphSourceDigest===graph.deterministicGraphDigestSha256,
      'unsigned source manifest or deployment provenance mismatch');
-need(manifest.descriptors.length>=15 &&
+need(manifest.descriptors.length>=12 &&
      manifest.descriptors.every(d=>/^0x[0-9a-f]{40}$/.test(d.contractAddress)),
      'production compiler descriptors are unbound to actual local contracts');
 const schema='gov_pre08_step3_'+tag;

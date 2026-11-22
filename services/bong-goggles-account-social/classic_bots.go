@@ -193,7 +193,7 @@ func QualifyBotMatch(adapter *RulesAdapter,seed [32]byte,levels []string,p Class
  state,_,e:=adapter.InitialWithSeed(seed,ClassicRoom{GameID:adapter.definition.GameID,SeatCount:len(seats)},seats)
  if e!=nil{return result,e}
  trace:=make([]RuleTrace,0,32)
- for i:=0;i<maxRulesMoves;i++{
+ for i:=0;i<adapter.replayLimit();i++{
   frame,e:=adapter.decode(state);if e!=nil{return result,e}
   if frame.Terminal{
    replay,e:=adapter.Replay(seed,len(levels),trace)

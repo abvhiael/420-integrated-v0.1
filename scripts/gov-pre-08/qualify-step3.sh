@@ -136,6 +136,9 @@ for tag in a b; do
     --output "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  node scripts/gov-pre-08/qualify-step3-wallet.mjs \
+    --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-wallet-$tag.json"
   node scripts/gov-pre-08/qualify-step3-indexer.mjs \
     --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-indexer-$tag.json" \
@@ -178,6 +181,9 @@ for tag in a b; do
     --output "$RUNNER_TEMP/govpre08-step3-recovery-$tag.json"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
     --rpc "$GOV_PRE_08_RPC" --verify "$RUNNER_TEMP/govpre08-step3-graph-$tag.json"
+  node scripts/gov-pre-08/qualify-step3-wallet.mjs \
+    --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --output "$RUNNER_TEMP/govpre08-step3-wallet-recovered-$tag.json"
   node scripts/gov-pre-08/qualify-step3-postgres.mjs \
     --mode recover --tag "$tag" --rpc "$GOV_PRE_08_RPC" \
     --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
@@ -201,7 +207,14 @@ graphs=[json.loads((p/f"govpre08-step3-graph-{tag}.json").read_text()) for tag i
 assert graphs[0]["deterministicGraphDigestSha256"]==graphs[1]["deterministicGraphDigestSha256"], "actual 14-constructor graph differed across two independent chains"
 assert len(graphs[0]["actualProductionConstructorAddresses"])==14
 assert len(graphs[0]["localRegistryComponentIds"])==14
-assert len(graphs[0]["serviceDiscoveries"])==3
+assert len(graphs[0]["serviceDiscoveries"])==4
+assert len(graphs[0]["walletCanonicalComponentIds"])==6
+wallet=[json.loads((p/f"govpre08-step3-wallet-{tag}.json").read_text()) for tag in "ab"]
+recovered_wallet=[json.loads((p/f"govpre08-step3-wallet-recovered-{tag}.json").read_text()) for tag in "ab"]
+assert all(x["treasuryCanonicalDiscovery"] and x["governanceFiveModulesVerified"] and
+           x["wrongChainRejected"] and x["accountDisconnectedRejected"] and
+           x["staleRegistryRejected"] and x["unapprovedProductionTransactionsSent"]==0
+           for x in wallet+recovered_wallet)
 indexed=[json.loads((p/f"govpre08-step3-indexer-{tag}.json").read_text()) for tag in "ab"]
 assert all(r["indexedLogs"]>=20 and r["sourceEmittersBound"]>=10 and
            r["reorgRollbackAndRebuild"] and r["replayIdempotent"] and

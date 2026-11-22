@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Step 3 negative tests: bytecode integrity, local chain, provenance and replay."""
+"""Step 3 negative tests for bytecode integrity and real local receipt provenance."""
 import copy
 import importlib.util
-import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -48,11 +48,13 @@ class ArtifactBoundaries(unittest.TestCase):
 class LiveReceiptBoundaries(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if len(sys.argv) != 3 or sys.argv[1] != "--rpc":
-            raise unittest.SkipTest("live negative tests require --rpc and witness")
-        cls.rpc = stage.funding.Rpc(sys.argv[2])
-        cls.witness = stage.read(Path(__import__("os").environ["GOV_PRE_08_STEP2_EVIDENCE"]))
-        cls.assert_good = stage.receipt_view(cls.rpc, cls.witness)
+        rpc_url = os.environ.get("GOV_PRE_08_RPC")
+        receipt_path = os.environ.get("GOV_PRE_08_STEP2_EVIDENCE")
+        if not rpc_url or not receipt_path:
+            raise unittest.SkipTest("live negative tests need loopback Anvil + evidence")
+        cls.rpc = stage.funding.Rpc(rpc_url)
+        cls.witness = stage.read(Path(receipt_path))
+        cls.baseline = stage.receipt_view(cls.rpc, cls.witness)
 
     def mutated(self, mutate):
         data = copy.deepcopy(self.witness)
@@ -61,8 +63,8 @@ class LiveReceiptBoundaries(unittest.TestCase):
             stage.receipt_view(self.rpc, data)
 
     def test_unchanged_local_receipts_rebuild(self):
-        self.assertEqual(self.assert_good["receipts"], 18)
-        self.assertEqual(self.assert_good["fundingEvents"], 6)
+        self.assertEqual(self.baseline["receipts"], 18)
+        self.assertEqual(self.baseline["fundingEvents"], 6)
 
     def test_reject_forged_approval(self):
         self.mutated(lambda x: x.__setitem__("signedGenesisV4Approved", True))
@@ -85,16 +87,4 @@ class LiveReceiptBoundaries(unittest.TestCase):
         self.mutated(lambda x: x.__setitem__("postFundingNativeSupplyWei", str(47_040_000 * stage.KIEF)))
 
 if __name__ == "__main__":
-    # The second CLI argument is a loopback RPC, not a remote public endpoint.
-    if len(sys.argv) == 3 and sys.argv[1] == "--rpc":
-        sys.argv[:] = [sys.argv[0]]
-        # Restore the URL to the test class without leaking it into unittest.
-        LiveReceiptBoundaries.setUpClass = classmethod(
-            lambda cls, rpc_url=__import__("os").environ.get("GOV_PRE_08_RPC"):
-            _initialize_live(cls, rpc_url))
     unittest.main(verbosity=2)
-
-def _initialize_live(cls, rpc_url):
-    cls.rpc = stage.funding.Rpc(rpc_url)
-    cls.witness = stage.read(Path(__import__("os").environ["GOV_PRE_08_STEP2_EVIDENCE"]))
-    cls.assert_good = stage.receipt_view(cls.rpc, cls.witness)

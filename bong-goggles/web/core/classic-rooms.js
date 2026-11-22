@@ -16,7 +16,7 @@ const id=x=>typeof x==='string'&&UUID.test(x);
 const title=game=>CLASSIC_ROADMAP.find(g=>g.id===game)?.title??'Unknown game';
 const limited=x=>typeof x==='string'&&x.length<=80&&x.trim()===x;
 const types=new Set(['empty','invited','human','bot']);
-const modes=new Set(['open','ready','cancelled']);
+const modes=new Set(['open','ready','in_game','completed','cancelled']);
 const difficulties=new Set(['easy','medium','hard']);
 const validCount=(game,n)=>Object.hasOwn(ROOM_LIMITS,game)&&Number.isSafeInteger(n)&&
  n>=ROOM_LIMITS[game][0]&&n<=ROOM_LIMITS[game][1];
@@ -182,7 +182,7 @@ function roomDetail(r,state){
    s.controller==='human'?(s.subject===state.viewer?'You':state.friends.find(f=>f.subject===s.subject)?.displayName??'420ID member'):
    s.controller==='invited'?'Invitation pending':'Empty seat';
   let actions='';
-  if(r.status!=='cancelled'){
+  if(r.status==='open'||r.status==='ready'){
    if(s.index!==0&&s.controller==='empty'&&isHost)actions=invite(s.index)+bot(s.index);
    else if(s.index!==0&&s.controller==='empty'&&r.visibility==='public'&&!hasSeat)
     actions=makeAction('join',s.index,'Join this seat');
@@ -203,9 +203,9 @@ function roomDetail(r,state){
   '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
   '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
   note(r.status==='ready'?'All seats filled. Game start and turns require BC-0.6; no match has begun.':
-   r.status==='cancelled'?'This room was cancelled.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
+   r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
   '<ol class="classic-room__seats">'+seats+'</ol>'+invites+
-  (isHost&&r.status!=='cancelled'?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
+  (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null}={}){
  const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games" data-route="games">← Games catalogue</a></p>'+

@@ -1,4 +1,4 @@
-name: BC-0.5 Multiplayer Rooms Qualification
+name: BC-0.5/0.6 Account Rooms and Sessions Qualification
 on:
   push:
     branches: [main]
@@ -59,7 +59,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Qualify persistent rooms and existing 420ID Account Social (PostgreSQL 16, race)
+      - name: Qualify persisted rooms, session recovery and 420ID Account Social (PostgreSQL 16, race)
         run: go test -race -tags account420_integration -count=1 ./services/bong-goggles-account-social ./cmd/bong-goggles-social
       - name: Static analysis and restricted service build
         run: |

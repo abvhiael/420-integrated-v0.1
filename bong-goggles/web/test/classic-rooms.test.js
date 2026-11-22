@@ -218,3 +218,14 @@ test('BC-0.5 browser forms are actually wired; prior Classic UI and Wallet actio
  assert.match(game,/\/games\/rooms/);
  assert.match(game,/not yet playable|not released/i);
 });
+
+test('BC-0.6 active/completed rooms lock seats and omit lobby actions',()=>{
+ const started={...room,status:'in_game'};
+ const state={status:'ready',viewer:host,rooms:[bare],friends:friendList,selected:started,notice:''};
+ const running=shell('/games/rooms/'+roomId,state);
+ assert.match(running,/server-owned session/);
+ assert.doesNotMatch(running,/data-classic-room-action/);
+ const ended=shell('/games/rooms/'+roomId,{...state,selected:{...started,status:'completed'}});
+ assert.match(ended,/session has ended/);
+ assert.doesNotMatch(ended,/data-classic-room-action/);
+});

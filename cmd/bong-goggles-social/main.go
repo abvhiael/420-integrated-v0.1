@@ -104,6 +104,19 @@ func main(){
  }else if os.Getenv("SOCIAL420_CLASSIC_ROOMS")!=""&&os.Getenv("SOCIAL420_CLASSIC_ROOMS")!="disabled"{
   log.Fatal("Unrecognized BC-0.5 room activation mode")
  }
+ var classicSessionWorker *social.ClassicSessions
+ if os.Getenv("SOCIAL420_CLASSIC_SESSIONS")=="restricted-acceptance"{
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyClassicSessions(ctx);e!=nil{done();log.Fatal("BC-0.6 session schema or least-privilege grants unavailable")}
+  done()
+  // No unqualified rule engine is registered. BC-0.7 supplies one per game.
+  sessions,e:=social.NewClassicSessions(store,handler.Rooms,nil)
+  if e!=nil{log.Fatal(e)}
+  if e=handler.EnableClassicSessions(sessions);e!=nil{log.Fatal("BC-0.6 requires BC-0.5 room activation",e)}
+  classicSessionWorker=sessions
+ }else if os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!=""&&os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!="disabled"{
+  log.Fatal("Unrecognized BC-0.6 session activation mode")
+ }
  if os.Getenv("SOCIAL420_XP_MODE")=="restricted-acceptance"{
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
   if e=store.ReadyXPRuntime(ctx);e!=nil{done();log.Fatal("AUTH-10 XP schema/grants or runtime role unsafe")}
@@ -135,6 +148,15 @@ func main(){
    done()
   }
  }}()
+ if classicSessionWorker!=nil{
+  go func(){ticker:=time.NewTicker(3*time.Second);defer ticker.Stop()
+   for{select{case <-ctxServer.Done():return;case <-ticker.C:
+    ctx,done:=context.WithTimeout(ctxServer,5*time.Second)
+    if _,e:=classicSessionWorker.Sweep(ctx);e!=nil{log.Print("BC-0.6 deadline sweep unavailable")}
+    done()
+   }}
+  }()
+ }
  go func(){<-ctxServer.Done();ctx,done:=context.WithTimeout(context.Background(),8*time.Second);defer done();_ = server.Shutdown(ctx)}()
  log.Print("Restricted wallet-independent social listener started")
  if e=server.ListenAndServe();e!=nil&&!errors.Is(e,http.ErrServerClosed){log.Fatal("Social listener failed")}

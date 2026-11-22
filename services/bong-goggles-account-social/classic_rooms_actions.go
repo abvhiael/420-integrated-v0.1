@@ -16,7 +16,7 @@ func (c *ClassicRooms) Change(ctx context.Context,viewer,id string,x RoomChange)
  tx,e:=c.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
  r,e:=scanClassicRoom(tx.QueryRowContext(ctx,"SELECT "+classicRoomColumns+" FROM bg_account_social.classic_rooms WHERE id=$1 FOR UPDATE",id))
  if errors.Is(e,sql.ErrNoRows){return empty,ErrNotFound};if e!=nil{return empty,e}
- if r.Status=="cancelled"||r.Revision!=x.ExpectedRevision{return empty,ErrConflict}
+ if (r.Status!="open"&&r.Status!="ready")||r.Revision!=x.ExpectedRevision{return empty,ErrConflict}
  if x.Seat>=r.SeatCount{return empty,ErrInvalid}
  var seat ClassicSeat;var occupant,difficulty sql.NullString
  e=tx.QueryRowContext(ctx,`SELECT seat_index,controller,subject,difficulty,team

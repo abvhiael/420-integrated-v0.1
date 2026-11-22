@@ -482,3 +482,77 @@ Exact-head workflow: .github/workflows/bc-0-5-classic-rooms.yml
 (PostgreSQL 16 integration, Go race/vet/build and targeted Node tests)
 alongside the unchanged Bong Goggles Web Verification for mobile
 layout, cards/maps/assets, wallet/social and static security gates.
+
+
+## BC-0.6 — authoritative, replayable, wallet-free session backend
+
+Migration 005_classic_sessions.sql adds a one-session-per-room durable
+record, strictly increasing event journal and idempotent command ledger.
+The migration retains all existing BC-0.5 rooms and invitations and is
+applied by the existing operator-only migration command. Grant the
+existing runtime role only these incremental, column-limited permissions:
+
+    GRANT SELECT,INSERT ON bg_account_social.classic_sessions,
+      bg_account_social.classic_session_events,
+      bg_account_social.classic_session_commands TO bonggoggles_social_runtime;
+    GRANT UPDATE(status,engine_state,sequence,turn_seat,turn_deadline,
+      winner_seat,finished_reason,updated_at)
+      ON bg_account_social.classic_sessions TO bonggoggles_social_runtime;
+
+Do not grant DELETE on the three tables, UPDATE on event/command journals,
+table-wide UPDATE, or modifications to room_id, game_id, seat_count,
+rules_version or rules_hash. ReadyClassicSessions rejects unsafe grants.
+Room status/revision changes continue through qualified BC-0.5 grants.
+
+The backend accepts SOCIAL420_CLASSIC_SESSIONS=restricted-acceptance only
+after existing Account Social, AUTH-9 and BC-0.5 gates are enabled.
+Unknown settings fail startup; default is disabled. It uses the same
+420ID HttpOnly cookie, same-origin Origin/CSRF, subject-based rate limits,
+bidirectional blocks and trusted Cloudflare Worker identity boundary.
+No new browser secrets, wallet sign-in, user rewards or payments.
+
+All routes are under the existing /social-api prefix:
+
+- GET /v1/classic-sessions: up to 50 participant-only recovery summaries.
+- POST /v1/classic-sessions: host starts a fully seated room using roomId;
+  strict room lock and pinned rule identity prevent duplicate starts.
+- GET /v1/classic-sessions/{uuid}: durable snapshot projected through the
+  registered version/hash-matched rule adapter only for the verified seat.
+- POST /v1/classic-sessions/{uuid}/action: requestId, action,
+  expectedSequence, optional move. Move/resign/cancel are serialized;
+  duplicate request IDs with the same command are idempotent, while
+  changed payload, stale sequence, wrong turn and wrong subject are denied.
+- GET /v1/classic-sessions/{uuid}/events?after=N: ordered append-only
+  events with public lifecycle/turn fields only; a cursor more than 50
+  events behind requires snapshot resynchronization (HTTP 409).
+- GET /v1/classic-sessions/{uuid}/stream: bounded, resumable SSE updates
+  with fresh 420ID authentication and seat/block policy rechecks.
+  Concealed hands and private game engine state are never published.
+
+A fixed 120-second per-turn deadline uses PostgreSQL clock_timestamp,
+with a bounded three-second worker sweep and synchronous read/action
+expiry for correctness across process restarts. Terminal sessions
+freeze previously qualified room seats; an event and each state change
+commit atomically. The browser never provides scores, winners, deadlines
+or a trusted random seed.
+
+Security boundary: BC-0.6 qualifies the generic backend lifecycle,
+authorization, replay, deadlines and publication, not the 25 titles'
+unimplemented BC-0.7 game-specific rules. Production registers no
+ClassicRule adapter and therefore rejects unqualified match starts.
+Tagged tests inject a deterministic, clearly test-only two-seat adapter
+to qualify legal/illegal turns, secret seat views, replay, concurrent
+actions, timeout, resign/cancel and SSE/restore behavior. It must never
+be reported as actual Chess or Cribbage gameplay. BC-0.8 still must
+qualify bot action engines before bot-filled lobbies may start.
+
+Production room/session runtime was NOT enabled by this source change.
+A previous live 420ID Account Social health probe returned HTTP 502 on
+nine attempts (GitHub run #44967121073). Operators must restore ingress,
+apply migration/grants, and explicitly enable the room/session service
+before claiming a working multi-account production session.
+
+The existing BC-0.5/0.6 GitHub workflow tests the PostgreSQL 16 Go
+service with race detection, static analysis, exact-head source and
+targeted Node regressions. The independent web workflow continues
+to protect both builds and established assets/security boundaries.

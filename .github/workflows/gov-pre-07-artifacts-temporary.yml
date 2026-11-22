@@ -1,0 +1,36 @@
+name: GOV-PRE-07 canonical runtime artifact refresh
+on:
+  push:
+    branches: ['audit/420governance-gov-pre-07-*']
+    paths:
+      - '.github/workflows/gov-pre-07-artifacts-temporary.yml'
+permissions:
+  contents: write
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Rebuild exact canonical Governance and Registry compilation units
+        working-directory: contracts
+        run: |
+          forge build src/governance
+          forge build src/apps/ProtocolRegistry.sol
+      - name: Generate and verify real GOV-AUDIT-6 materialization
+        run: python3 scripts/generate-governance-audit-6-artifacts.py --write --check --print
+      - name: Commit only generated canonical materialization, never frozen V3 signatures
+        run: |
+          git add contracts/artifacts/GovernanceTimelock.json contracts/artifacts/Governance420.json contracts/artifacts/CivicConstitution420.json contracts/artifacts/CivicProposalRegistry420.json contracts/artifacts/CivicElectorateRegistry420.json contracts/artifacts/CivicVoting420.json contracts/artifacts/CivicGovernor420.json contracts/artifacts/CivicMerkleElectorateSource420.json contracts/config/predeploy/GovernanceTimelock-predeploy-state.json contracts/config/predeploy/Governance420-predeploy-state.json contracts/config/governance-deployment-v1.json contracts/config/predeploy/predeploy-plan.json contracts/config/deployment-manifest.json
+          if git diff --cached --quiet; then echo "Artifact materialization already exact"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "build(governance): retain reentrancy-safe GOV-PRE-07 deployed runtime artifacts"
+          git fetch origin "${{ github.ref_name }}"
+          git rebase "origin/${{ github.ref_name }}"
+          git push origin "HEAD:${{ github.ref_name }}"

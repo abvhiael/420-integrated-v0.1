@@ -36,7 +36,18 @@
     "protocolOwnedCreditMax": "42000",
     "fullySponsoredRewardShareToCommunityBps": 1000,
     "principalReturnDestination": "CommunityValidatorReserve",
-    "sourceOfFunds": "CommunityValidatorReserve"
+    "sourceOfFunds": "CommunityValidatorReserve",
+    "fullSponsorCollateral420": 42000,
+    "standardMatchedPersonal420": 21000,
+    "standardMatchedProtocol420": 21000,
+    "economicOwnerCredentialType": "420/STAKE/FULL_SPONSOR_BENEFICIAL_OWNER/V1",
+    "identityContractAddress": "0x0000000000000000000000000000000000000436",
+    "minCredentialTrust": "VERIFIED",
+    "maxLifetimeDistinctBeneficialOwnerGroups": 150,
+    "rewardShareAppliesUntil": "ORIGINALLY_FULLY_FUNDED_AND_ANY_PROTOCOL_CREDIT_REMAINS",
+    "nativeIssuerBackingMode": "NODE420_GETH_EXACT_REALIZED_FROM_FROZEN_REWARD_SCHEDULE",
+    "nativeRewardReserve": "0x0000000000000000000000000000000000000426",
+    "nativeSettlementStatus": "CODE_CANDIDATE_UNFUNDED_V4_AND_REAL_WALLET_TESTNET_PENDING"
   },
   "retirement": {
     "minimumEligibleIndependentValidatorOwners": 60,

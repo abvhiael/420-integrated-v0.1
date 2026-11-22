@@ -94,7 +94,7 @@ contract NativeSponsorProbe420 {
     # deployed code. Verify it through real RPC getters before reward settlement.
     verified_binding=(1<<160)+int(GATEWAY,16)
     genesis["alloc"][REWARD]={"balance":"0x1","code":runtime(rc),
-        "storage":{ZERO:hex(verified_binding)}}
+        "storage":{ZERO:f"0x{verified_binding:064x}"}}
     genesis["alloc"][REGISTRY]={"balance":"0x0","code":runtime(probe)}
     old_reserve=int(genesis["alloc"][COMMUNITY]["balance"],16)
     genesis["alloc"][COMMUNITY]["code"]=runtime(treasury)

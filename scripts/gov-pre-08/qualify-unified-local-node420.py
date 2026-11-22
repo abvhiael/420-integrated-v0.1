@@ -4,7 +4,7 @@
 
 The EVM Genesis is derived from the actual independent funded Anvil fixture;
 all contracts, wallets and services now read the SAME node420 execution state.
-Only disposable validator BLS fixture keys enter this harness.
+Local-only BLS keys enter only independent protected signer processes.
 """
 from __future__ import annotations
 import argparse
@@ -21,6 +21,8 @@ import threading
 import time
 import urllib.error
 import urllib.request
+
+from protected_committee import Committee
 
 ROOT=Path(__file__).resolve().parents[2]
 ZERO="0x"+"00"*32
@@ -184,19 +186,19 @@ def main():
             return rpc("eth_call",[{"to":address,"data":"0x"+code[signature]},"latest"])
         # Exact addresses/code are checked above, not fabricated REST projections.
         require(int(call(GW,"lastSequence()"),16)==0,"nonzero native sequence at imported Genesis")
-        # Build real BLS fixture/trust (11 of 15 signatures). Public consensus
-        # validator keys, not synthetic founder keys, are supplied to fourtwentyd.
-        producer=ROOT/"bin/settlement-fixture"
+        # All native quorum shares originate in independent mTLS-protected
+        # validator and remote signer processes, never a fixture QC producer.
         daemon=ROOT/"bin/fourtwentyd"
         indexer=ROOT/"bin/indexer420"
         explorer=ROOT/"bin/explorer420"
-        for name,path in (("producer",producer),("consensus",daemon),("indexer",indexer),("explorer",explorer)):
-            require(path.is_file(),"missing running production binary: "+name)
-        trust=json.loads(subprocess.check_output([str(producer),"--genesis",genesisblock["hash"],
-                          "--timestamp",genesisblock["timestamp"]],text=True))
-        trustfile=args.workdir/"trust.json"
-        trustfile.write_text(json.dumps(trust))
-        pin=hashlib.sha256(trustfile.read_bytes()).hexdigest()
+        for name,path in (("consensus",daemon),("indexer",indexer),("explorer",explorer),
+                          ("producer",ROOT/"bin/certified-producer"),
+                          ("signer",ROOT/"bin/stake-signer"),
+                          ("provisioner",ROOT/"bin/settlement-fixture")):
+            require(path.is_file(),"missing keyless production runtime or local-only provisioner: "+name)
+        committee=Committee(ROOT,args.workdir,genesisblock["hash"],genesisblock["timestamp"],launch)
+        trustfile=committee.trust
+        pin=committee.pin
         events=queue.Queue()
         def collect(stream):
             for line in stream:
@@ -238,8 +240,7 @@ def main():
                   "Payload":{"parentHash":parenthash,"blockNumber":hex(slot)}}
             planfile=args.workdir/f"certified-plan-{slot}.json"
             planfile.write_text(json.dumps(plan))
-            batch=json.loads(subprocess.check_output([str(producer),"--batch","--record",
-                                                        str(planfile)],text=True))
+            batch=committee.batch(planfile)
             require(batch["chainId"]=="0x1a4" and len(batch["calls"])==2 and
                     batch["calls"][0]["target"].lower()==VALIDATORS and
                     batch["calls"][1]["target"].lower()==REWARD,
@@ -262,9 +263,19 @@ def main():
                     int(payload["blockNumber"],16)==slot,
                     "certified batch root/parent/block number not in execution header")
             plan["Payload"]=payload
+            # Local-only explicit state witness anchored to actual Geth state;
+            # its derivation is not a frozen production consensus state policy.
+            parentConsensus=(parent["Certificate"]["BlockRoot"] if parent
+                             else committee.trustdata["Genesis"]["Root"])
+            commitment=hashlib.sha256(json.dumps({
+                "schema":"GOV_PRE_08_LOCAL_CONSENSUS_STATE_WITNESS_V1",
+                "parent":parentConsensus,"slot":slot,
+                "committee":committee.trustdata["CommitteeRoot"],
+                "executionState":payload["stateRoot"]
+            },sort_keys=True,separators=(",",":")).encode()).digest()
+            plan["ConsensusStateRoot"]=list(commitment)
             planfile.write_text(json.dumps(plan))
-            record=json.loads(subprocess.check_output([str(producer),"--record",
-                                                      str(planfile)],text=True))
+            record=committee.certify(planfile,slot,args.workdir)
             consensus.stdin.write(json.dumps(record)+"\n")
             consensus.stdin.flush()
             wait_event("settled",slot)
@@ -525,6 +536,10 @@ def main():
              "consensusNativeGatewayExecuted":True,
              "realCanonicalValidatorRegistryCalled":True,
              "goIndexerCertifiedProducer":True,"goExplorerCertifiedBlock":True,
+             "fifteenProtectedValidatorProcesses":True,
+             "fifteenIndependentRemoteBLSSignerProcesses":True,
+             "noFixtureProducedCertificates":True,
+             "verifiedSignedProposalAndQuorumReceipts":committee.signing_evidence,
              "walletRealSignedEip1559ReceiptVerified":True,
              "goIndexerAndExplorerProcessRestartQualified":True,
               "nativeGethAndCertifiedSettlementHardStopRecoveryQualified":True,

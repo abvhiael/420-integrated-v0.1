@@ -9,14 +9,50 @@ import (
  "sync"
  "testing"
  "net/http"
+ "net/http/httptest"
+ "net/url"
+ "bytes"
 )
 
+// Use a distinct documented test IP for this suite's three named scenarios.
+// This preserves the production distributed login/callback rate limits and
+// keeps old AUTH-8/9 rate-limit tests independent of new BC-0.5 logins.
+func bc05Login(t *testing.T,h *Handler,b *fakeBroker,subject,ip string)*http.Cookie{
+ t.Helper()
+ raw,e:=random32();if e!=nil{t.Fatal(e)}
+ code:=encodeToken(raw)
+ b.mu.Lock();b.codes[code]=subject;b.mu.Unlock()
+ req:=httptest.NewRequest("GET","https://bonggoggles.420integrated.org/auth/start",nil)
+ req.RemoteAddr=ip+":24567"
+ req.Header.Set("X-Forwarded-Proto","https")
+ start:=httptest.NewRecorder();h.ServeHTTP(start,req)
+ if start.Code!=303{t.Fatal("room login",start.Code,start.Body.String())}
+ cookies:=start.Result().Cookies()
+ if len(cookies)!=1||cookies[0].Name!=flowCookieName{t.Fatal("missing flow cookie")}
+ target,e:=url.Parse(start.Header().Get("Location"));if e!=nil{t.Fatal(e)}
+ finish:=request(h,"GET","/auth/callback?state="+target.Query().Get("state")+"&code="+code,"",cookies[0])
+ if finish.Code!=303{t.Fatal("room callback",finish.Code,finish.Body.String())}
+ for _,cookie:=range finish.Result().Cookies(){if cookie.Name==sessionCookieName{
+  if !cookie.HttpOnly||!cookie.Secure||cookie.Domain!=""{t.Fatal("unsafe room cookie")}
+  return cookie
+ }}
+ t.Fatal("missing room session");return nil
+}
 func bc05Fixture(t *testing.T)(*Store,*Handler,*http.Cookie,*http.Cookie,*http.Cookie){
  t.Helper()
- store,h,broker,a,b:=extras(t)
+ store,broker,_,h:=fixture(t)
+ key:=bytes.Repeat([]byte{44},32)
+ messages,e:=NewMessageService(store,key);if e!=nil{t.Fatal(e)}
+ games,e:=NewAccountGames(store);if e!=nil{t.Fatal(e)}
+ if e=h.EnableAccountExtras(messages,games);e!=nil{t.Fatal(e)}
  rooms,e:=NewClassicRooms(store);if e!=nil{t.Fatal(e)}
  if e=h.EnableClassicRooms(rooms);e!=nil{t.Fatal(e)}
- third:=login(t,h,broker,extraThird)
+ ip:="198.51.100.91"
+ switch t.Name(){case "TestBC05PublicJoinTeamsBlocksAndCAS":ip="198.51.100.92"
+ case "TestBC05ConcurrentSeatAdmissionAndRoomQuota":ip="198.51.100.93"}
+ a:=bc05Login(t,h,broker,memberA,ip)
+ b:=bc05Login(t,h,broker,memberB,ip)
+ third:=bc05Login(t,h,broker,extraThird,ip)
  t.Cleanup(func(){
   // Isolate this test's durable rooms from the suite's shared PostgreSQL DB.
   _,_=store.DB.Exec("DELETE FROM bg_account_social.classic_room_invites WHERE room_id IN (SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)",memberA)
@@ -91,7 +127,7 @@ func TestBC05PrivateFriendsSeatsDeclineAndCancel(t *testing.T){
  if status!=200||bot.Status!="ready"||bot.Seats[1].Controller!="bot"||bot.Seats[1].Difficulty!="hard"{
   t.Fatal("mixed lobby missing",status,bot)
  }
- if status,_:=bc05Change(t,h,b,r.ID,bot.Revision,1,"clear-bot",nil);status!=403{t.Fatal("guest removed bot",status)}
+ if status,_:=bc05Change(t,h,b,r.ID,bot.Revision,1,"clear-bot",nil);status!=404{t.Fatal("private outsider learned room seat",status)}
  status,empty:=bc05Change(t,h,a,r.ID,bot.Revision,1,"clear-bot",nil)
  if status!=200||empty.Status!="open"{t.Fatal("bot removal",status,empty)}
  if status,_:=bc05Change(t,h,a,r.ID,empty.Revision,1,"bot",map[string]any{"difficulty":"cheat"});status!=400{t.Fatal("invalid bot difficulty",status)}

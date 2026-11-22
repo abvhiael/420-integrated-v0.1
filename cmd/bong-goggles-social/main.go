@@ -117,6 +117,15 @@ func main(){
  }else if os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!=""&&os.Getenv("SOCIAL420_CLASSIC_SESSIONS")!="disabled"{
   log.Fatal("Unrecognized BC-0.6 session activation mode")
  }
+ if os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")=="restricted-acceptance"{
+  if handler.Rooms==nil||handler.Sessions==nil{log.Fatal("BC-0.10 requires room and session services")}
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if e=store.ReadyClassicCommunications(ctx);e!=nil{done();log.Fatal("BC-0.10 presence schema or runtime grants unavailable")}
+  done()
+  if e=handler.EnableClassicCommunications();e!=nil{log.Fatal(e)}
+ }else if os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")!=""&&os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")!="disabled"{
+  log.Fatal("Unrecognized BC-0.10 communications activation mode")
+ }
  if os.Getenv("SOCIAL420_CLASSIC_RULES")=="restricted-acceptance"{
   if classicSessionWorker==nil{log.Fatal("BC-0.7 requires activated BC-0.6 sessions")}
   ctx,done:=context.WithTimeout(context.Background(),10*time.Second)

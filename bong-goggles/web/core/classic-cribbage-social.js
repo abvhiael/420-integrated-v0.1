@@ -98,7 +98,8 @@ export class CribbageSocialController{
     throw Error('Invitation was not confirmed');
    const room=normalizeClassicRoom(response.data.room,true);
    if(!room||room.gameId!=='cribbage'||room.host!==actor||room.visibility!=='private'||
-    room.status!=='open'||room.seats[0]?.subject!==actor||
+    !['open','ready'].includes(room.status)||room.seats[0]?.subject!==actor||
+    (action==='challenge'&&room.status!=='open')||
     action==='challenge'&&(room.seatCount!==2||room.seats[1]?.subject!==id||
      room.seats[1]?.controller!=='invited'))throw Error('Unverified room');
    const check=await this.client.request('/v1/me');

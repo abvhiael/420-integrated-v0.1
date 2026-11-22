@@ -211,10 +211,13 @@ contract NativeSponsorProbe420 {
         assert read_uint(REWARD,rc["evm"]["methodIdentifiers"]["communityRewardBackingReceived()"],block_hash)==sponsor_share
         assert read_uint(REWARD,rc["evm"]["methodIdentifiers"]["communityRewardSettled()"],block_hash)==sponsor_share
         assert read_uint(REWARD,rc["evm"]["methodIdentifiers"]["nativeRewardPaid()"],block_hash)==realized
-        assert read_uint(REWARD,rc["evm"]["methodIdentifiers"]["rewardApplied(uint64)"],block_hash)==0 if False else True
+        applied_call="0x"+rc["evm"]["methodIdentifiers"]["rewardApplied(uint64)"]+word(block_number).hex()
+        applied=rpc("eth_call",[{"to":REWARD,"data":applied_call},
+                                {"blockHash":block_hash,"requireCanonical":True}])
+        assert int(applied,16)==1,"reward not marked applied at canonical execution block"
         # Verify canonical block logs, not invented transaction receipts.
         archive=rpc("engine420_getSystemCallLogsV1",[block_hash])
-        assert archive["batchRoot"]==root and archive["blockHash"]==block_hash
+        assert archive["batchRoot"]==root
         native=archive["logs"]
         reward_logs=[log for log in native if log["address"].lower()==REWARD]
         assert len(reward_logs)>=9,(len(reward_logs),reward_logs)

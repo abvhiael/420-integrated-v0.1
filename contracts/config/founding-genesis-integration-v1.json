@@ -6,7 +6,8 @@
     "network": null,
     "chainId": null,
     "approvedGenesisHash": null,
-    "exactRuntimeManifestHash": null
+    "exactRuntimeManifestHash": null,
+    "networkGenesisBlockHash": null
   },
   "budget": {
     "operationsTokens": "4200000",
@@ -25,7 +26,9 @@
     "manifest": "contracts/config/founder-wallet-reservations.json",
     "allThreeEip191ProofsVerified": false,
     "claimRegistryAddress": null,
-    "allThreeOnChainClaimsVerified": false
+    "allThreeOnChainClaimsVerified": false,
+    "allThreeOwnershipProofsVerified": false,
+    "claimRuntimeCodeHash": null
   },
   "founderFunding": {
     "treasuryAuthorityAddress": null,

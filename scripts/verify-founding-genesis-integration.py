@@ -86,7 +86,13 @@ def qualify(strict=False):
         enforce(all([b["supplyReconciled"],b["allThreeFunded"],
             b["operationsVaultId"],b["contingencyVaultId"],b["communityVaultId"]]),
             "founding/contingency/community vaults not reconciled and funded")
-        enforce(m["founderWallets"]["allThreeEip191ProofsVerified"]
+        # Validate actual finalized on-chain ownership, not an untrusted JSON boolean.
+        import os
+        rpc_url=os.environ.get("FOUNDER_CLAIM_RPC_URL")
+        enforce(bool(rpc_url),"FOUNDER_CLAIM_RPC_URL required for authenticated on-chain founder claims")
+        subprocess.run([sys.executable,str(ROOT/"scripts/verify-founder-wallet-reservations.py"),
+                        "--require-claims","--rpc-url",rpc_url],check=True)
+        enforce(m["founderWallets"]["allThreeOwnershipProofsVerified"]
                 and m["founderWallets"]["claimRegistryAddress"]
                 and m["founderWallets"]["allThreeOnChainClaimsVerified"],
                 "actual founder claims unavailable")

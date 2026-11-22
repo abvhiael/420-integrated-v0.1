@@ -34,6 +34,9 @@ type RuleFrame struct {
  Winner *int `json:"winner"`
  Data json.RawMessage `json:"data"`
 }
+type RuleSeatPolicy interface {
+ ValidateSeats(room ClassicRoom,seats []ClassicSeat)error
+}
 type RuleModule interface {
  Definition() RuleDefinition
  Initial(seed [32]byte,seatCount int,budget *RuleBudget)(RuleFrame,error)
@@ -104,6 +107,9 @@ func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []Cla
    if s.Subject!=""||!map[string]bool{"easy":true,"medium":true,"hard":true}[s.Difficulty]{return nil,0,ErrUnavailable}
   default:return nil,0,ErrUnavailable
   }
+ }
+ if seatPolicy,ok:=a.module.(RuleSeatPolicy);ok{
+  if e:=seatPolicy.ValidateSeats(room,seats);e!=nil{return nil,0,ErrUnavailable}
  }
  first,e:=a.initial(seed,room.SeatCount)
  if e!=nil{return nil,0,e}

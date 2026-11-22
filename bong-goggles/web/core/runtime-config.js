@@ -27,6 +27,7 @@ export function validateRuntimeConfig(input){
     accountMessaging:input.features?.accountSocial===true&&input.features?.accountMessaging===true,
     accountGames:input.features?.accountSocial===true&&input.features?.accountGames===true,
     classicRooms:input.features?.accountSocial===true&&input.features?.accountGames===true&&input.features?.classicRooms===true,
+    classicCommunications:input.features?.accountSocial===true&&input.features?.accountGames===true&&input.features?.classicRooms===true&&input.features?.classicCommunications===true,
     accountXP:input.features?.accountSocial===true&&input.features?.accountXP===true,
     accountMonetization:input.features?.accountSocial===true&&input.features?.accountMonetization===true
   });

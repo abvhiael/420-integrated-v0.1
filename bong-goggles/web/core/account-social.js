@@ -5,7 +5,8 @@ const LIMITS={post:2000,comment:500,displayName:80,bio:500};
 export function createAccountSocialClient({enabled=false,fetchImpl=fetch}={}){
  if(enabled!==true)return Object.freeze({enabled:false});
  async function request(path,{method='GET',body,signal}={}){
-  if(!(path==='/auth/logout'||/^\/v1\/[a-z0-9/_-]+(?:\?cursor=[A-Za-z0-9_-]+)?$/.test(path))||
+  if(!(path==='/auth/logout'||/^\/v1\/[a-z0-9/_-]+(?:\?cursor=[A-Za-z0-9_-]+)?$/.test(path)||
+    /^\/v1\/classic-sessions\/[0-9a-f-]{36}\/events\?after=(0|[1-9][0-9]{0,17})$/.test(path))||
    path.startsWith('//')||path.includes('..'))throw new Error('Invalid account-social route');
   const response=await fetchImpl('/social-api'+path,{
    method,credentials:'same-origin',cache:'no-store',redirect:'error',signal,

@@ -170,5 +170,25 @@
     "Genesis address namespace authority is contracts/config/genesis-address-namespace.json; historical migration proposals are non-authoritative."
   ],
   "namespace_authority": "contracts/config/genesis-address-namespace.json",
-  "founder_wallet_reservations": "contracts/config/founder-wallet-reservations.json"
+  "founder_wallet_reservations": "contracts/config/founder-wallet-reservations.json",
+  "founder_wallet_slots": [
+    {
+      "role": "FOUNDING_ADMINISTRATOR",
+      "address": null,
+      "status": "UNCLAIMED",
+      "compensation_bps": 5000
+    },
+    {
+      "role": "ANDREW",
+      "address": null,
+      "status": "UNCLAIMED",
+      "compensation_bps": 2500
+    },
+    {
+      "role": "JANET",
+      "address": null,
+      "status": "UNCLAIMED",
+      "compensation_bps": 2500
+    }
+  ]
 }

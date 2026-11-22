@@ -23,7 +23,13 @@
       "ownership_status": "UNCLAIMED",
       "claim_tx": null,
       "claim_block_hash": null,
-      "developer_compensation_bps": 5000
+      "developer_compensation_bps": 5000,
+      "pre_genesis_proof": {
+        "method": "EIP191_PERSONAL_SIGN",
+        "signature": null,
+        "genesis_plan_commitment": null,
+        "verified_at": null
+      }
     },
     {
       "role": "ANDREW",
@@ -31,7 +37,13 @@
       "ownership_status": "UNCLAIMED",
       "claim_tx": null,
       "claim_block_hash": null,
-      "developer_compensation_bps": 2500
+      "developer_compensation_bps": 2500,
+      "pre_genesis_proof": {
+        "method": "EIP191_PERSONAL_SIGN",
+        "signature": null,
+        "genesis_plan_commitment": null,
+        "verified_at": null
+      }
     },
     {
       "role": "JANET",
@@ -39,7 +51,13 @@
       "ownership_status": "UNCLAIMED",
       "claim_tx": null,
       "claim_block_hash": null,
-      "developer_compensation_bps": 2500
+      "developer_compensation_bps": 2500,
+      "pre_genesis_proof": {
+        "method": "EIP191_PERSONAL_SIGN",
+        "signature": null,
+        "genesis_plan_commitment": null,
+        "verified_at": null
+      }
     }
   ],
   "approval_policy": {
@@ -53,6 +71,8 @@
     "Wallet identity is fixed by the signed Genesis authorization record and immutable contract bindings.",
     "An address is not verified merely by being entered in this file; verify a chain-specific signature or successful claim transaction from that address.",
     "An unclaimed or null founder address blocks live authorization deployment; testnet and mainnet claims and credentials are independently qualified.",
-    "The three payees' 50/25/25 compensation entitlement is separate from the ten 100,000-token vesting grants; neither is a generic Treasury transfer permission."
-  ]
+    "The three payees' 50/25/25 compensation entitlement is separate from the ten 100,000-token vesting grants; neither is a generic Treasury transfer permission.",
+    "A valid EIP-191 founder-signed, network-/chain-/Genesis-bound message is required BEFORE deployment; an on-chain claim transaction is possible only AFTER network Genesis."
+  ],
+  "target_network": null
 }

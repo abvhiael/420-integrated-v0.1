@@ -2,6 +2,7 @@
 import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
 import {escapeHtml as esc} from './design-system.js';
+import {renderClassicRoomLive} from './classic-communications-ui.js';
 
 export const ROOM_LIMITS=Object.freeze({
  cribbage:[2,4],'russian-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
@@ -200,21 +201,7 @@ function roomDetail(r,state,live=null){
  const invites=isHost&&r.invites.length?'<details><summary>Invitation history</summary><ul>'+r.invites.map(i=>
   '<li>Seat '+(i.seat+1)+' · '+esc(state.friends.find(f=>f.subject===i.target)?.displayName??'420ID member')+
   ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
- const roomLive=live?.status==='connected'&&live.room?.id===r.id?
-  '<section class="classic-room__live" aria-label="Live participant status"><h3>Live room status</h3>'+
-  '<ul>'+r.seats.map(seat=>'<li>Seat '+(seat.index+1)+': '+
-   esc(seat.controller==='human'?
-    (live.presence?.seats.find(p=>p.seat===seat.index)?.online?'Online':'Offline or reconnecting'):
-    seat.controller==='bot'?'Computer':seat.controller==='invited'?'Invited':'Unoccupied')+
-   '</li>').join('')+'</ul>'+
-  (live.session?'<p role="status">'+esc(live.session.status==='active'?
-   (live.session.turnSeat===live.session.viewerSeat?'Your turn':'Waiting for another player'):
-   'Session '+live.session.status)+' · sequence '+live.session.sequence+'</p>'+
-   (live.session.deadline?'<p>Server turn deadline: <time datetime="'+esc(live.session.deadline)+'">'+
-   esc(live.session.deadline)+'</time></p>':''):'')+
-  (live.notice?note(live.notice):'')+
-  '<p>Updates are reconciled from the server; no local turn or win is authoritative.</p></section>':
-  (live?.status==='disabled'?note('Live room communications are not activated on this server.'):'');
+ const roomLive=renderClassicRoomLive(r,live);
  return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
   '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
   '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+

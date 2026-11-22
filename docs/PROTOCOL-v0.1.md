@@ -148,7 +148,7 @@ A participant who successfully completes the testnet qualification may receive:
 
 The protocol match is not intended to become immediately liquid. At mainnet launch it is deposited directly into the participant's validator bond.
 
-Because 8,400,000 / 21,000 = 400, the Community/Testnet allocation can support a maximum of **400 full matched-bond awards** if the entire allocation is ultimately used for that purpose.
+The existing Community/Testnet **8,400,000 $420** is divided between the **6,300,000 $420 CommunityValidatorReserve** and the **2,100,000 $420 CommunityRewardReserve**. With only the 6.3M validator-credit reserve eligible for sponsorship, it supports a maximum of **300 matched 21,000 $420 credits** or **150 fully sponsored 42,000 $420 credits**, before principal recycling and slashing; both programs share that reserve. The older 400-credit figure was a hypothetical use of all 8.4M and is **not the funded program capacity**.
 
 ### Current qualification draft
 
@@ -164,6 +164,12 @@ A full match requires:
 The purpose is to reward actual network operation, not wallet possession or passive registration.
 
 Any unused allocation remains in the Community/Testnet Treasury for later community contribution and validator-decentralization programs unless governance later approves another use under the treasury rules.
+
+## 8C. Founding Operations and Contingency — non-additive Genesis earmarks
+
+The existing **8,600,000 $420 ProtocolReserve** predeploy at `0x0424` is the sole nominated source for the founding-authority proposals. Within that single Genesis allocation, **4,200,000** is earmarked for Founding Operations, **840,000** for independent Contingency, and **3,560,000** remains unearmarked. These sums already sit inside the 42M Genesis supply: they cannot be minted again, drawn from CommunityValidatorReserve, or double-counted as separate genesis accounts.
+
+The earmarks are **not yet funded Treasury Vaults**. Release into registered Operations and Contingency Vaults requires an approved V4 Genesis plan, authentic grants, actual transactions and conservation evidence. Neither the frozen 0x04xx address table nor the previously frozen V3 Genesis bundle is altered by this accounting decision.
 
 ## 9. Open principles
 

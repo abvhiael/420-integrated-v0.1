@@ -1,0 +1,64 @@
+name: GOV-PRE-04 real native reward Geth settlement
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/gov-pre-04-real-geth.yml'
+      - 'scripts/qualify-gov-pre-04-native-geth.py'
+      - 'execution/patches/**'
+      - 'execution/genesis/execution-genesis.json'
+      - 'contracts/src/system/RewardController.sol'
+      - 'contracts/src/system/CommunityRewardReserve.sol'
+      - 'contracts/src/system/ConsensusSystemCall420.sol'
+      - 'contracts/src/system/ConsensusSystemAccess420.sol'
+      - 'contracts/src/system/SystemAccess.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gov-pre-04-real-geth-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-realized-disbursement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify candidate identity
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+          cache: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile exact native reward Geth integration harness
+        run: python3 -m py_compile scripts/qualify-gov-pre-04-native-geth.py
+      - name: Compile pinned Geth with actual native reward issuance patch
+        run: bash scripts/build-node420-upstream.sh
+      - name: Compile the real node420 gateway wrapper
+        run: |
+          go build -o bin/node420 ./execution/cmd/node420
+          ./bin/node420 --geth ./bin/upstream/geth-v1.17.5-420 --verify-geth
+      - name: Fetch independently hashed Solidity compiler
+        run: |
+          curl -fL https://github.com/ethereum/solidity/releases/download/v0.8.24/solc-static-linux -o "$RUNNER_TEMP/solc-0.8.24"
+          echo "fb03a29a517452b9f12bcf459ef37d0a543765bb3bbc911e70a87d6a37c30d5f  $RUNNER_TEMP/solc-0.8.24" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/solc-0.8.24"
+      - name: Prove real Geth 90/10 payout, community balance, physical supply delta and native archive
+        run: |
+          python3 scripts/qualify-gov-pre-04-native-geth.py \
+            --solc "$RUNNER_TEMP/solc-0.8.24" \
+            --output "$RUNNER_TEMP/gov-pre-04-native-geth"
+      - name: Retain exact-head native execution evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gov-pre-04-real-native-geth-evidence
+          path: ${{ runner.temp }}/gov-pre-04-native-geth/
+          retention-days: 7
+          if-no-files-found: error

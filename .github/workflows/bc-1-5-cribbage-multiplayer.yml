@@ -104,4 +104,4 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify two-account authenticated real PostgreSQL/420ID session, recovery and mixed AI
-        run: go test -race -count=1 -tags account420_integration -timeout=16m -run '^TestBC15' -v ./services/bong-goggles-account-social
+        run: go test -race -count=1 -tags account420_integration,bc15_fullmatch -timeout=16m -run '^TestBC15' -v ./services/bong-goggles-account-social

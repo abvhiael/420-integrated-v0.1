@@ -133,7 +133,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
+if(baseTotal>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -143,7 +143,14 @@ if(!Number.isSafeInteger(onlineBindingsBytes)||onlineBindingsBytes<1600||onlineB
 const gameKitSize=regularSizes.get('game-kit.css');
 if(!Number.isSafeInteger(gameKitSize)||gameKitSize<3*1024||gameKitSize>8*1024)
  throw new Error('BC-0.9 reusable tabletop CSS must be separately bounded to 8 KiB');
-const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize;
+const gameKitLogicSize=regularSizes.get('core/tabletop-components.js');
+if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLogicSize>16*1024)
+ throw new Error('BC-0.9 canonical shared components exceeded independent 16 KiB cap');
+// BC-0.9 has its own 24 KiB ceiling (16 KiB JS + 8 KiB CSS), independent
+// of the frozen BC-0.2 through BC-0.5 and original asset allowances.
+if(gameKitLogicSize+gameKitSize>24*1024)
+ throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
+const legacyBaseTotal=baseTotal-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({

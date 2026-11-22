@@ -30,6 +30,9 @@ contract FoundingSweepState420 is IFoundingTreasurySweepState420 {
     function OPERATIONS_ALLOCATION() external pure returns (uint128) { return 4_200_000 ether; }
     function CONTINGENCY_ALLOCATION() external pure returns (uint128) { return 840_000 ether; }
     function setRetired() external { retired = true; }
+    function outstandingFoundingCommitments() external view returns (bool) {
+        return operationsCommitted != operationsReleased || contingencyCommitted != contingencyReleased;
+    }
 }
 
 contract ExactRetirementToken420 {

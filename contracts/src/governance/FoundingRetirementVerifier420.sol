@@ -26,6 +26,7 @@ interface ICommitteeRetirementEvidence420 {
 interface ICivicRetirementEvidence420 {
     function dualHouseExecutedCount() external view returns (uint256);
     function activeDualHouseExecution() external view returns (bool);
+    function activeDualHouseActionHash() external view returns (bytes32);
     function timelock() external view returns (address);
 }
 
@@ -171,8 +172,10 @@ contract FoundingRetirementVerifier420 {
 
     /// @notice Called by the founding authority from inside a real Timelock action.
     /// A past unrelated Civic vote is insufficient to authorize retirement.
-    function retirementExecutionAuthorized() external view returns (bool) {
-        return _eligibilityReady() && civicGovernor.activeDualHouseExecution();
+    function retirementExecutionAuthorized(address authority) external view returns (bool) {
+        return authority != address(0) && _eligibilityReady() && civicGovernor.activeDualHouseExecution()
+            && civicGovernor.activeDualHouseActionHash()
+                == keccak256(abi.encode(authority, abi.encodeWithSignature("retire()")));
     }
 
     function _eligibilityReady() private view returns (bool) {

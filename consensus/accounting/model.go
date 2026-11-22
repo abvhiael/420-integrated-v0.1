@@ -22,7 +22,7 @@ const AttentionTreasury = "0x0000000000000000000000000000000000000421"
 const DevelopmentTreasury = "0x0000000000000000000000000000000000000422"
 const ZeroAddress = "0x0000000000000000000000000000000000000000"
 
-var Addresses = []string{Reward, Registry, ProtocolReserve, CreditReserve}
+var Addresses = []string{Reward, Registry, ProtocolReserve, CreditReserve, CommunityReward}
 
 type State map[string]string
 type Discrepancy struct {

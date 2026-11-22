@@ -160,17 +160,16 @@ def test_adversarial():
         assert v.validate(strict=False, root=root) == 3
         e.apply_files(root, e.attest(root, proofs))
         # Replacing an approved address or beneficiary after signing must fail.
+        original_mirror_bytes = (root / e.SYSTEM).read_bytes()
         s = v.load(root, e.SYSTEM)
         s["founder_wallet_slots"][1]["address"] = accounts[2].address
-        (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\n")
+        (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\\n")
         check_rejected("mirror tampering", lambda: v.validate(strict=True, root=root), "mirror")
-        s["founder_wallet_slots"][1]["address"] = accounts[1].address
-        (root / e.SYSTEM).write_text(json.dumps(s, indent=2)+"\n")
-        # JSON formatting change after V4 is itself a source-commitment change.
+        # A formatting-only change still invalidates a frozen authority-input blob.
+        (root / e.SYSTEM).write_text(json.dumps(s, separators=(",", ":"))+"\\n")
         check_rejected("V4 source byte drift", lambda: v.validate(strict=True, root=root),
                        "bytes changed")
-        # Re-establish the exact staged source bytes, then attempt an invalid signed proof.
-        e.apply_files(root, {e.SYSTEM: v.load(root, e.SYSTEM)})  # remains invalid by design
+        (root / e.SYSTEM).write_bytes(original_mirror_bytes)
         m = v.load(root, e.RESERVATIONS)
         m["founders"][0]["pre_genesis_proof"]["signature"] = proofs["founders"][1]["signature"]
         (root / e.RESERVATIONS).write_text(json.dumps(m,indent=2)+"\n")
@@ -347,7 +346,7 @@ def test_finalized_claim_records():
 def main():
     assert v.validate(strict=False) == 0, "real founder reservation files must stay unclaimed"
     check_rejected("real unsigned founders cannot be enrolled",
-                   lambda: v.validate(strict=True),"not approved")
+                   lambda: v.validate(strict=True),"approved V4")
     test_own_signatures()
     test_adversarial()
     test_codebound_1271()

@@ -722,3 +722,66 @@ privateView payload after deriving authorized turn metadata.
 Game-specific legal moves, scoring, real AI and live 420ID play-to-completion
 remain separate release gates. No token, wager, fabricated result, wallet
 dependency or production games activation is introduced by BC-0.10.
+
+
+## BC-1.5 — restricted 420ID Cribbage session activation and cold recovery
+
+The production account-social service still defaults to **no runnable Classic game rules**.
+To enable only the independently frozen standard Cribbage adapter and its
+Easy / Medium / Hard computer players, the serving operator must explicitly
+set `SOCIAL420_CRIBBAGE_MODE=restricted-acceptance` **after** these existing
+restricted-acceptance prerequisites are complete:
+
+- `SOCIAL420_ACCOUNT_EXTRAS=restricted-acceptance`
+- `SOCIAL420_CLASSIC_ROOMS=restricted-acceptance`
+- `SOCIAL420_CLASSIC_SESSIONS=restricted-acceptance`
+- `SOCIAL420_CLASSIC_RULES=restricted-acceptance`
+- `SOCIAL420_CLASSIC_COMMUNICATIONS=restricted-acceptance`
+
+The service already validates the relevant room, session, deterministic
+rule-replay and presence schemas/grants before registering the Cribbage
+engine. The exact Cribbage rule identity is `v1.0` with SHA-256
+`6f13bd77568efc5d0836eaa61458ca0cc2c500d1db2d9c38e228b1c668f71e24`.
+Missing prerequisites, another rules hash, unknown mode or an incomplete
+bot policy fail closed at startup; the other 24 Classic titles remain
+unregistered. No browser request can change this registration.
+
+The frontend requires the existing verified `BG_ACCOUNT_SOCIAL_ACTIVATION`,
+`BG_CLASSIC_ROOMS_ACTIVATION` and
+`BG_CLASSIC_COMMUNICATIONS_ACTIVATION` flags. The same-origin,
+HttpOnly-cookie 420ID room owner can then press **Start Cribbage** in a
+fully occupied, **ready** Cribbage room. This calls the existing
+`POST /social-api/v1/classic-sessions` with only the verified room ID.
+The server locks the room, pins the adapter, checks authenticated
+human seats/blocks and bot policies, generates a private shuffle seed,
+saves a replay-verifiable genesis, and returns a seat-limited match
+snapshot. Each human submits a legal move with a fresh idempotency UUID
+and expected sequence; the server checks 420ID ownership, room/turn
+locks, deadline, replay and the move. Every award and result remains
+server-owned, off-chain and zero-wager.
+
+**Resume:** opening the Cribbage Play page without a session identifier
+reads only the principal's own `GET /v1/classic-sessions` listing;
+a selected match loads a new authorized `GET /v1/classic-sessions/{id}`
+snapshot. Tab return, network restoration, and in-game polling
+reconcile against that snapshot. No client-local deck, secret seed,
+other-seat hand, cached authentication or score is used as an authority.
+403, 404, 401 and changed 420ID principals discard private projections.
+Public session events remain metadata-only; browser account separation
+is covered by BC-1.5 test fixtures and the server integration tests.
+
+**Rollback:** set `SOCIAL420_CRIBBAGE_MODE=disabled` or unset it, then
+deploy the previous approved runtime. This stops new starts and new
+Cribbage rule resolution; do not delete or rewrite existing immutable
+game journals or grant the runtime migration privileges. Restore the
+same pinned rule adapter only after requalification if resumption is
+required. Browser flags can be disabled independently to hide live room
+features. This step does not mark the public Classics catalogue
+`playable`, enable wagers/rewards, or supply the later game-specific
+browser-to-production release attestation.
+
+**Evidence:** `docs/games/classics/BC-1-5-QUALIFICATION.md` and the
+exact-head `.github/workflows/bc-1-5-cribbage-multiplayer.yml`.
+Production Render workspace selection, operator environment changes,
+actual external 420ID account cookies, deployment and real cross-device
+live acceptance must be verified separately before any public release.

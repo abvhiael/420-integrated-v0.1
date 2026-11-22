@@ -339,10 +339,10 @@ export const STAKE_RELEASE_DESCRIPTOR_ARTIFACTS_420 = Object.freeze({
   ValidatorRegistry: Object.freeze({
     address: '0x0000000000000000000000000000000000000423' as Hex,
     protocolVersion: 3,
-    path: 'contracts/artifacts/ValidatorRegistry.abi.json',
-    gitBlobSha: '0c2e65d38a5eb322bf3baba9c6ee9cd8ee771391',
+    path: 'contracts/artifacts/ValidatorRegistry.govpre04.abi.json',
+    gitBlobSha: 'adce03428228e49621cbacd900ea32ca75af1484',
     sourcePath: 'contracts/src/system/ValidatorRegistry.sol',
-    sourceBlobSha: 'e534624f007024d65fcbb9e0f730bafbb8077767'
+    sourceBlobSha: '247cfc718064b51cc3a8fb92c79858fc9bdc13a3'
   }),
   RewardController: Object.freeze({
     address: '0x0000000000000000000000000000000000000420' as Hex,

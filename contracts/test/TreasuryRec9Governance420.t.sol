@@ -210,12 +210,17 @@ contract TreasuryRec9Governance420Test {
         _mature(outerId);
         _mature(inner);
         lock.execute(outerId);
-        require(callback.executed(), "callback not invoked");
-        require(policy.assetPolicy(ASSET).revision == 2 && policy.isAllowed(ASSET, 120), "nested ordering");
+        require(callback.executed(), "callback did not verify blocked nested execution");
+        require(policy.assetPolicy(ASSET).revision == 1 && policy.isAllowed(ASSET, 120),
+            "outer action must not include unrelated matured inner");
         require(lock.executingCivicOperation() == bytes32(0), "context leak");
         (,,,,, bool innerDone,) = lock.operations(inner);
         (,,,,, bool outerDone,) = lock.operations(outerId);
-        require(innerDone && outerDone, "operation finalization");
+        require(!innerDone && outerDone, "nested mature operation inherited outer Civic context");
+        // The independently queued G1 remains available through a separate transaction.
+        lock.execute(inner);
+        require(policy.assetPolicy(ASSET).revision == 2 && policy.isAllowed(ASSET, 100),
+            "separate mature G1 cannot execute after outer G1");
         _reject(ATTACKER, address(lock), abi.encodeCall(lock.execute, (inner)), bytes4(0));
         _reject(ATTACKER, address(lock), abi.encodeCall(lock.execute, (outerId)), bytes4(0));
         _reject(address(governor), address(lock),
@@ -258,7 +263,8 @@ contract TreasuryRec9Callback420 {
     function executeInner() external {
         require(msg.sender == address(lock), "caller");
         require(lock.executingCivicOperation() == bytes32(0), "outer context exposed");
-        lock.execute(inner);
+        (bool nestedSucceeded,) = address(lock).call(abi.encodeCall(lock.execute, (inner)));
+        require(!nestedSucceeded, "distinct mature operation borrowed enclosing Civic context");
         require(lock.executingCivicOperation() == bytes32(0), "inner context exposed");
         executed = true;
     }

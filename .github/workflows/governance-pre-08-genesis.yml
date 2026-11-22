@@ -242,12 +242,12 @@ jobs:
           proofs=[]
           for log in logs:
               assert "4 tests passed" in log, "incomplete local graph tests"
-              hashes=re.findall(r"log_bytes32:\\s*(0x[0-9a-fA-F]{64})",log)
+              hashes=re.findall(r"log_bytes32:\s*(0x[0-9a-fA-F]{64})",log)
               assert len(hashes)==1, "no unique materialized local graph digest"
               proofs.append(hashes[0].lower())
           assert proofs[0]==proofs[1], "different runtime graph or deployment identity on second clean Forge EVM"
           (p/"gov-pre-08-graph-two-runs.txt").write_text(
-              "LOCAL_ONLY=TRUE\\nCHAIN_ID=31337\\nRUNS=2\\nFOCUSED_TESTS_EACH=4\\nGRAPH_SHA3="+proofs[0]+"\\n"
+              "LOCAL_ONLY=TRUE\nCHAIN_ID=31337\nRUNS=2\nFOCUSED_TESTS_EACH=4\nGRAPH_SHA3="+proofs[0]+"\n"
           )
           print("GOV_PRE_08_ALL_14_LOCAL_COMPONENTS_DEPLOYED_REGISTERED_BOTH_RUNS=PASS",proofs[0])
           PY

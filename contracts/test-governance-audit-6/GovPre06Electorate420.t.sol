@@ -466,9 +466,12 @@ contract GovPre06Electorate420Test {
         _enrollAll();
 
         vm.prank(address(0xBAD));
-        (bool censorship,) = address(enrollment).call(
-            abi.encodeCall(CivicInitialElectorateEnrollment420.pruneIneligible, (CivicIds420.House.COMMUNITY, ALICE))
-        );
+        (bool censorship,) = address(enrollment)
+            .call(
+                abi.encodeCall(
+                    CivicInitialElectorateEnrollment420.pruneIneligible, (CivicIds420.House.COMMUNITY, ALICE)
+                )
+            );
         require(!censorship, "untrusted caller purged an eligible voter");
 
         vm.prank(AUTHORITY);
@@ -479,10 +482,15 @@ contract GovPre06Electorate420Test {
 
         bytes32 renewed = keccak256("real-Bob-renewed");
         vm.prank(AUTHORITY);
-        Identity420(IDENTITY).issueCredential(
-            renewed, compatibility.INITIAL_ELECTORATE_ISSUER(), _profile(BOB),
-            keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"), keccak256("renewal"), 0
-        );
+        Identity420(IDENTITY)
+            .issueCredential(
+                renewed,
+                compatibility.INITIAL_ELECTORATE_ISSUER(),
+                _profile(BOB),
+                keccak256("420/CIVIC/COMMUNITY_ELECTORATE/V1"),
+                keccak256("renewal"),
+                0
+            );
         vm.prank(BOB);
         enrollment.enroll(CivicIds420.House.COMMUNITY, _profile(BOB), renewed);
         Pre06ValidatorWitness(VALIDATORS).setEligible(_validatorId(CAROL), false);
@@ -497,9 +505,8 @@ contract GovPre06Electorate420Test {
         require(compatibility.enrolledValidatorTotalWeight() == 2, "restored validator weight");
 
         vm.prank(BOB);
-        (bool reopened,) = address(enrollment).call(
-            abi.encodeCall(CivicInitialElectorateEnrollment420.withdraw, (CivicIds420.House.COMMUNITY))
-        );
+        (bool reopened,) = address(enrollment)
+            .call(abi.encodeCall(CivicInitialElectorateEnrollment420.withdraw, (CivicIds420.House.COMMUNITY)));
         require(!reopened, "enrollment reopened after irreversible freeze");
 
         vm.warp(block.timestamp + timelock.G1_DELAY() + 1);

@@ -133,14 +133,19 @@ contract CivicInitialElectorateEnrollment420 {
     }
 
     /// @notice Voters can withdraw/refresh records before the one-way seal.
-    function withdraw(CivicIds420.House house) external {
+    function withdraw(
+        CivicIds420.House house
+    ) external {
         _requireOpen();
         _remove(house, msg.sender);
     }
 
     /// @notice Anyone can eject a credential/status that is provably no longer eligible.
     /// A verified eligible member can never be removed by a third party.
-    function pruneIneligible(CivicIds420.House house, address voter) external {
+    function pruneIneligible(
+        CivicIds420.House house,
+        address voter
+    ) external {
         _requireOpen();
         if (!enrolled[uint8(house)][voter]) revert Ineligible();
         (bool valid,) = address(this).staticcall(abi.encodeCall(this.verifyMember, (house, voter)));
@@ -148,7 +153,10 @@ contract CivicInitialElectorateEnrollment420 {
         _remove(house, voter);
     }
 
-    function verifyMember(CivicIds420.House house, address voter) external view returns (bool) {
+    function verifyMember(
+        CivicIds420.House house,
+        address voter
+    ) external view returns (bool) {
         Enrollment[] storage records = house == CivicIds420.House.COMMUNITY ? _community : _validator;
         for (uint256 i; i < records.length; ++i) {
             if (records[i].voter == voter) {
@@ -164,7 +172,10 @@ contract CivicInitialElectorateEnrollment420 {
         if (enrollmentClosed) revert EnrollmentClosed();
     }
 
-    function _remove(CivicIds420.House house, address voter) private {
+    function _remove(
+        CivicIds420.House house,
+        address voter
+    ) private {
         Enrollment[] storage records = house == CivicIds420.House.COMMUNITY ? _community : _validator;
         uint256 count_ = records.length;
         for (uint256 i; i < count_; ++i) {

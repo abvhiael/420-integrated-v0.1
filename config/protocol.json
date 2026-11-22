@@ -321,7 +321,12 @@
       "credit_protocol_owned": true,
       "credit_recycles_on_normal_exit": true,
       "maximum_concurrent_credits_if_full_8_4m_reserved": 400,
-      "general_liquid_testnet_rewards": "supported as separate contribution track; exact schedule/allocation TBD"
+      "general_liquid_testnet_rewards": "supported as separate contribution track; exact schedule/allocation TBD",
+      "actual_credit_reserve_420": 6300000,
+      "actual_credit_reserve_address": "0x0000000000000000000000000000000000000425",
+      "maximum_matched_credits_from_current_reserve": 300,
+      "maximum_fully_sponsored_credits_from_current_reserve": 150,
+      "hypothetical_400_credit_capacity_requires_reallocating_reward_reserve": true
     },
     "historical_draft_testnet_validator_match": {
       "testnet_duration_days": 42,
@@ -341,6 +346,16 @@
         "duplicate_identity_policy": "economic and technical anti-Sybil checks; one matching award per qualified validator identity under launch policy"
       },
       "unawarded_balance_destination": "Community/Testnet Treasury for later contribution rewards; not reallocated automatically"
+    },
+    "founding_financial_source_420": {
+      "source_allocation_id": "protocol-reserve",
+      "source_address": "0x0000000000000000000000000000000000000424",
+      "source_total_420": 8600000,
+      "operations_earmark_420": 4200000,
+      "contingency_earmark_420": 840000,
+      "remaining_unearmarked_420": 3560000,
+      "additional_genesis_issuance_420": 0,
+      "vaults_funded_at_genesis": false
     }
   },
   "step3": {

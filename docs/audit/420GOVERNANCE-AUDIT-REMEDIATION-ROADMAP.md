@@ -10,6 +10,16 @@ Repository truth overrides prior conversation. No step may silently redefine gov
 
 Each step must retain exact-head evidence. Ordinary steps use focused qualification for what changed. Broader repository/global qualification is reserved for milestone/phase closeout unless a shared change materially requires it earlier.
 
+## Supplemental founding Genesis accounting — GOV-PRE-01
+
+**Status: CANONICAL 42M CANDIDATE POLICY AND SUPPLY RECONCILIATION QUALIFIED, NOT LIVE GENESIS RELEASE.** [Retained GOV-PRE-01 qualification](GOV-PRE-01-QUALIFICATION.md) and [focused exact-head CI](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44971227517).
+
+The existing 8.6M ProtocolReserve at 0x0424 remains the single on-ledger Genesis source for non-additive 4.2M Founding Operations and 840K Contingency earmarks, leaving 3.56M unearmarked. The founder, validator-credit, Community Reward, public distribution, Attention, Development and validator bootstrap allocations stay within exactly 42M supply. Dedicated Python/Go validators reject duplicate issuances and false Vault funding. No frozen predeploy address, V3 ceremony output, emission schedule or existing allocation was silently changed.
+
+This qualification covers modeled source attribution only. Actual Treasury Vault funding, founder wallet proofs, signed Genesis V4 and on-chain release remain blocked by their distinct approvals and technical workstreams. GOV-AUDIT-9 and GOV-AUDIT-10 remain separate, unstarted release milestones; GOV-PRE-02 (founder wallet enrollment) is the next *founding* workstream, not a claim of audited deployment.
+
+---
+
 ## Current audit repairs already staged
 
 The complete audit branch contains two narrow repairs that do not require a new governance decision:

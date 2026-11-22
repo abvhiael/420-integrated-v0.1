@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER = ROOT / "config/genesis-allocations.json"
@@ -36,6 +37,8 @@ def require(ok, why):
 
 
 def verify(release):
+    subprocess.run([sys.executable, str(ROOT / "scripts/verify-genesis-supply-reconciliation.py")],
+                   check=True, stdout=subprocess.DEVNULL)
     ledger = json.loads(LEDGER.read_text())
     wallets = json.loads(WALLETS.read_text())
     init = json.loads(INIT.read_text())
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     args = cli.parse_args()
     try:
         n = verify(args.require_release)
-    except (AssertionError, ValueError, KeyError, TypeError, AttributeError) as exc:
+    except (AssertionError, ValueError, KeyError, TypeError, AttributeError, subprocess.CalledProcessError) as exc:
         print("FOUNDER GENESIS: FAIL-CLOSED: " + str(exc), file=sys.stderr)
         raise SystemExit(1)
     print(f"FOUNDER GENESIS: structure passes, {n}/3 founder addresses bound; "

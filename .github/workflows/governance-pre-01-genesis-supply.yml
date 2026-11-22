@@ -1,0 +1,69 @@
+name: GOV-PRE-01 Canonical Genesis Supply Reconciliation
+on:
+  push:
+    branches: ['feature/gov-pre-01-*']
+    paths:
+      - 'config/genesis-allocations.json'
+      - 'config/protocol.json'
+      - 'contracts/config/founding-genesis-integration-v1.json'
+      - 'contracts/config/treasury/founding-financial-policy-provisional.json'
+      - 'genesis/cmd/420-genesis/**'
+      - 'scripts/verify-genesis-supply-reconciliation.py'
+      - 'scripts/test-genesis-supply-reconciliation.py'
+      - 'scripts/verify-founder-vesting-three.py'
+      - 'scripts/verify-founding-genesis-integration.py'
+      - '.github/workflows/governance-pre-01-genesis-supply.yml'
+  pull_request:
+    paths:
+      - 'config/genesis-allocations.json'
+      - 'config/protocol.json'
+      - 'contracts/config/founding-genesis-integration-v1.json'
+      - 'contracts/config/treasury/founding-financial-policy-provisional.json'
+      - 'genesis/cmd/420-genesis/**'
+      - 'scripts/verify-genesis-supply-reconciliation.py'
+      - 'scripts/test-genesis-supply-reconciliation.py'
+      - 'scripts/verify-founder-vesting-three.py'
+      - 'scripts/verify-founding-genesis-integration.py'
+      - '.github/workflows/governance-pre-01-genesis-supply.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gov-pre-01-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  supply-and-validator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source commit
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED"
+      - name: Compile actual Python verifiers
+        run: |
+          python3 -m py_compile scripts/verify-genesis-supply-reconciliation.py scripts/test-genesis-supply-reconciliation.py scripts/verify-founder-vesting-three.py scripts/verify-founding-genesis-integration.py
+      - name: Qualify 42m conservation, 5.04m earmarks and 15 adversarial changes
+        run: |
+          python3 scripts/verify-genesis-supply-reconciliation.py
+          python3 scripts/test-genesis-supply-reconciliation.py
+          python3 scripts/verify-founder-vesting-three.py
+          python3 scripts/verify-founding-genesis-integration.py
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Qualify native Go Genesis validator
+        run: |
+          go test ./genesis/cmd/420-genesis -count=1 -v
+          go run ./genesis/cmd/420-genesis -allocations config/genesis-allocations.json -ai-genesis config/ai-genesis.json
+      - name: Ensure unavailable founder signatures and V4 approval still fail closed
+        run: |
+          if python3 scripts/verify-founder-vesting-three.py --require-release; then
+            echo 'ERROR: unverified wallets or frozen V3 were accepted as live V4 release' >&2
+            exit 1
+          fi
+          echo 'Expected V4 release block preserved'

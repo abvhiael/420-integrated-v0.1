@@ -35,6 +35,11 @@ def qualify(strict=False):
     enforce(b["operationsTokens"]=="4200000" and b["contingencyTokens"]=="840000",
             "founding allocations are not the adopted provisional values")
     enforce(p["operations"]["allocation"]==b["operationsTokens"],"Operations budget disagreement")
+    enforce(b["fundingSourceAllocationId"]=="protocol-reserve" and
+            b["fundingSourcePredeploy"]=="0x0000000000000000000000000000000000000424" and
+            b["unearmarkedProtocolReserveTokens"]=="3560000" and
+            b["ledgerEarmarksReconciled"] is True,
+            "founding Genesis earmark source not reconciled")
     enforce(p["contingency"]["allocation"]==b["contingencyTokens"],"contingency budget disagreement")
     enforce(int(b["operationsTokens"])+int(b["contingencyTokens"])<=int(g["modeledTotalSupply"]),
             "genesis money overallocated")

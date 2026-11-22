@@ -32,6 +32,27 @@ Previous diagnostic runs deliberately preserved: an early Foundry fixture used i
 - `RewardController` V3 immediately distributes native assets: unsponsored proposers and participants get their earned gross amounts; **fully sponsored-origin** validators with remaining protocol principal get **90% net** while the remaining **10% is paid natively to 0x0426 CommunityRewardReserve** in the same state transition. Attention 0x0421 and Development 0x0422 receive their actual consensus-selected amounts. The system emits individual `NativeRewardPaid` events and independent `SponsoredValidatorRewardAllocated`, `CommunityRewardBackingReceived`, `CommunityRewardSettled` and `RewardApplied` commitments. The legacy separate `fundCommunityRewardBacking` and `settleCommunityRewards` methods are deliberately disabled to prevent post hoc transfers, double counting, or unbacked rewards.
 - The live Geth state transition is still **not** a stand-alone Ethereum transaction: source evidence is the pinned native system-call batch and canonical execution block/log archive. No invented normal transaction hash or mainnet settlement receipt is used.
 
+## Independently executed native Geth settlement — exact positive acceptance
+
+[Real patched node420 Geth reward settlement workflow #44982950548](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44982950548) — **SUCCESS**, exact source-candidate SHA `75c8c77e3c426a1285206bdc9c2524fea9b8ac01` (RewardController/Registry/Geth source identical to this report). [Repeated local native qualification #44983289990](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/44983289990) also succeeded. The pinned Geth v1.17.5-420 binary was built, verified, and ran `scripts/qualify-gov-pre-04-native-geth.py` against real source-compiled RewardController V3, CommunityRewardReserve, and canonical ConsensusSystemCall420 runtimes in a fresh local Chain 420 Genesis. The sponsoring origin query was an **explicit local stub only**; the real ValidatorRegistry bond and sponsor-identity behavior is separately exercised in the successful 28/28 Foundry tests.
+
+The canonical block-one state transition (native Engine system call, **not** a fabricated Ethereum transaction) produced these **actually queried** native balances and decoded source-accounted records, all amounts in wei:
+
+| Authority / evidence | Native movement (wei) |
+|---|---:|
+| Sponsored proposer earned gross | 595238095237800000 |
+| **Sponsored operator net, actually received** | **535714285714020000** |
+| **CommunityRewardReserve 0x0426 actual native increase** | **59523809523780000** |
+| Ordinary second selected validator received | 42517006802700000 |
+| Attention 0x0421 received | 1504761904762200000 |
+| Development 0x0422 received | 1504761904762200000 |
+| **Exact realized native issuance from patched Geth** | **3647278911564900000** |
+| **Actually observed native total supply increase** | **3647278911564900000** |
+
+The CommunityRewardReserve's native balance increased from **2100000000000000000000000** to **2100000059523809523780000** wei, verifying **actual balance change**, not a bookkeeping counter. The canonical Engine archival endpoint returned **10 system-call logs and 5 distinct NativeRewardPaid movements**, each correlated to the source-pinned native execution block. The reward-controller native balance remained exactly **1 wei before and after** successful settlement, proving that unrelated forced pre-existing native funds were not counted or spent as new issuance. Matching `communityRewardBackingReceived()`, `communityRewardSettled()`, `nativeRewardPaid()`, and `rewardApplied(1)` contract state was also verified at the exact final block hash. Raw local genesis, Geth logs and machine-readable `report.json` are retained as the workflow artifact.
+
+The positive native receipt is a **real local Geth event archive and final state transition**, not an Ethereum transaction hash and not a deployed testnet/mainnet payout. Existing real-vs-testnet distinction and V4 deployment gates below remain fully enforced.
+
 ## Execution/Indexer/net-supply reconciliation
 
 - The Go consensus accounting reducer decodes and independently checks each native payout by recipient, kind and exact block, the identity-specific sponsored-share floor arithmetic, zero duplicates, gross versus net, the backing/settled/accrued equality, actual CommunityRewardReserve native balance movement, absence of double community settlement, and `nativeRewardPaid == realizedIssued` after the certified reward. It compares reconstructed values to exact, canonical, block-hash-pinned Geth state getters and inherited Genesis balances.

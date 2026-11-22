@@ -1,0 +1,91 @@
+name: GOV-PRE-05 three-founder vesting and developer compensation
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/system/FounderVestingRegistry.sol'
+      - 'contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol'
+      - 'contracts/src/revenue/DevelopmentCompensationVault420.sol'
+      - 'contracts/test/FounderVestingThree420.t.sol'
+      - 'contracts/test/FounderWalletClaimsAndCompensation420.t.sol'
+      - 'contracts/test/DevelopmentCompensationVault420.t.sol'
+      - 'contracts/config/founding-genesis-integration-v1.json'
+      - 'contracts/config/founder-wallet-reservations.json'
+      - 'config/genesis-allocations.json'
+      - 'scripts/verify-founder-vesting-three.py'
+      - 'scripts/prepare-founder-financial-deployment.py'
+      - '.github/workflows/gov-pre-05-qualification.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gov-pre-05-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  exact-three-founders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Validate Genesis allocations, frozen 42M supply and fail-closed founder enrollment
+        run: |
+          set -euo pipefail
+          python3 scripts/verify-founder-vesting-three.py
+          python3 scripts/verify-founding-genesis-integration.py
+          python3 -m py_compile scripts/prepare-founder-financial-deployment.py
+          if python3 scripts/verify-founder-vesting-three.py --require-release; then
+            echo "FAIL: unsigned or unfunded Genesis qualified" >&2
+            exit 1
+          fi
+          if python3 scripts/prepare-founder-financial-deployment.py; then
+            echo "FAIL: unsigned founder wallets produced deployable vault or vesting artifacts" >&2
+            exit 1
+          fi
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Preserve exact Solidity import closure for affected tests
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          export GOV_PRE05_ROOT="$RUNNER_TEMP/gov-pre-05"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,re,shutil
+          source=Path.cwd().resolve()
+          dest=Path(os.environ["GOV_PRE05_ROOT"])
+          pending=[source/"test/FounderVestingThree420.t.sol",
+                   source/"test/FounderWalletClaimsAndCompensation420.t.sol",
+                   source/"test/DevelopmentCompensationVault420.t.sol"]
+          seen=set()
+          regex=re.compile(r'\bimport\s+(?:[^;]*?\bfrom\s+)?["\x27]([^"\x27]+)["\x27]\s*;')
+          while pending:
+              path=pending.pop().resolve()
+              if path in seen:continue
+              if not path.is_relative_to(source) or not path.is_file():raise RuntimeError(f"missing scope source: {path}")
+              seen.add(path)
+              for name in regex.findall(path.read_text()):
+                  pending.append(source/name if name.startswith("forge-std/") else path.parent/name)
+          for path in sorted(seen):
+              target=dest/path.relative_to(source)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              shutil.copyfile(path,target)
+              assert path.read_bytes()==target.read_bytes()
+          shutil.copyfile(source/"foundry.toml",dest/"foundry.toml")
+          (dest/"remappings.txt").write_text("forge-std/=forge-std/\n")
+          print(json.dumps({str(p.relative_to(source)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(seen)},sort_keys=True))
+          PY
+          echo "GOV_PRE05_ROOT=$GOV_PRE05_ROOT" >> "$GITHUB_ENV"
+      - name: Exercise all 13 vesting releases and anti-capture
+        run: forge test --root "$GOV_PRE05_ROOT" --match-path test/FounderVestingThree420.t.sol -vvv
+      - name: Exercise native/ERC20 actual Vault compensation and replay
+        run: forge test --root "$GOV_PRE05_ROOT" --match-path test/FounderWalletClaimsAndCompensation420.t.sol -vvv
+      - name: Preserve pre-existing DevelopmentCompensationVault invariants
+        run: forge test --root "$GOV_PRE05_ROOT" --match-path test/DevelopmentCompensationVault420.t.sol -vvv

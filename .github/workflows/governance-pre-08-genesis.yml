@@ -112,6 +112,50 @@ jobs:
           assert not proof["genesisFundingBalancesVerifiedOnChain"]
           print("GOV-PRE-08_SYNTHETIC_BLOCK_ZERO=PASS; AUTHENTIC_APPROVAL=ABSENT")
           PY
+      - name: Verify real Anvil block-zero balances and synthetic chain isolation
+        run: |
+          set -euo pipefail
+          anvil --init "$RUNNER_TEMP/gov-pre-08-local-a.json" --chain-id 31337 \
+            --accounts 1 --balance 0 --host 127.0.0.1 --port 18545 --silent \
+            > "$RUNNER_TEMP/gov-pre-08-anvil.log" 2>&1 &
+          pid=$!
+          trap 'kill "$pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 40); do
+            if cast chain-id --rpc-url http://127.0.0.1:18545 >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          python3 - <<'PY'
+          import json,os,urllib.request
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])
+          genesis=json.loads((p/"gov-pre-08-local-a.json").read_text())
+          expected=genesis["alloc"]
+          def rpc(method,params):
+              payload=json.dumps({"jsonrpc":"2.0","id":1,"method":method,"params":params}).encode()
+              request=urllib.request.Request("http://127.0.0.1:18545",data=payload,
+                                             headers={"Content-Type":"application/json"})
+              with urllib.request.urlopen(request,timeout=10) as result:
+                  body=json.loads(result.read())
+              assert "error" not in body,body
+              return body["result"]
+          assert int(rpc("eth_chainId",[]),16)==31337
+          actual={}
+          for address,account in expected.items():
+              amount=int(rpc("eth_getBalance",[address,"latest"]),16)
+              assert amount==int(account["balance"]),(address,amount,account["balance"])
+              actual[address]=amount
+          assert sum(actual.values())==42_000_000*10**18
+          vest="0x0000000000000000000000000000000000000427"
+          assert actual[vest]==500_000*10**18
+          assert rpc("eth_getCode",[vest,"latest"])=="0x", "unmaterialized vesting must not masquerade as deployed"
+          proof=json.loads((p/"gov-pre-08-local-a-proof.json").read_text())
+          proof["genesisFundingBalancesVerifiedOnChain"]=True
+          proof["localBlockZeroBalanceRpc"]="http://127.0.0.1:18545 (ephemeral only)"
+          proof["runtimeAndConstructorStorageVerifiedOnChain"]=False
+          (p/"gov-pre-08-local-anvil-evidence.json").write_text(
+              json.dumps(proof,sort_keys=True,indent=2)+"\n")
+          print("GOV-PRE-08_ANVIL_BALANCES=PASS; SYNTHETIC_31337_ONLY; RUNTIMES_NOT_DEPLOYED")
+          PY
       - name: Preserve exact-head source candidate (never live receipts)
         if: always()
         uses: actions/upload-artifact@v4
@@ -123,4 +167,6 @@ jobs:
             ${{ runner.temp }}/gov-pre-08-release.txt
             ${{ runner.temp }}/gov-pre-08-local-a.json
             ${{ runner.temp }}/gov-pre-08-local-a-proof.json
+            ${{ runner.temp }}/gov-pre-08-local-anvil-evidence.json
+            ${{ runner.temp }}/gov-pre-08-anvil.log
           if-no-files-found: warn

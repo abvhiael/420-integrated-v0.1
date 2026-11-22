@@ -1,0 +1,50 @@
+name: GOV-PRE-06 verified post-Genesis electorate qualification
+
+on:
+  push:
+    branches:
+      - 'audit/420governance-gov-pre-06-*'
+    paths:
+      - 'contracts/src/governance/Governance420.sol'
+      - 'contracts/src/governance/CivicInitialElectorateEnrollment420.sol'
+      - 'contracts/test-governance-audit-6/GovPre06Electorate420.t.sol'
+      - '.github/workflows/governance-pre-06.yml'
+  pull_request:
+    paths:
+      - 'contracts/src/governance/Governance420.sol'
+      - 'contracts/src/governance/CivicInitialElectorateEnrollment420.sol'
+      - 'contracts/test-governance-audit-6/GovPre06Electorate420.t.sol'
+      - '.github/workflows/governance-pre-06.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gov-pre-06-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  genuine-electorates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify modified source and focused tests formatted
+        working-directory: contracts
+        run: forge fmt --check src/governance/Governance420.sol src/governance/CivicInitialElectorateEnrollment420.sol test-governance-audit-6/GovPre06Electorate420.t.sol
+      - name: Compile verified electorate graph
+        working-directory: contracts
+        run: forge build src/governance
+      - name: Qualify post-Genesis real first-electorate, adversarial and Timelock paths
+        working-directory: contracts
+        run: FOUNDRY_SRC=src/governance FOUNDRY_TEST=test-governance-audit-6 forge test --match-path test-governance-audit-6/GovPre06Electorate420.t.sol -vvv

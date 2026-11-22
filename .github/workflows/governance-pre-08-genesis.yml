@@ -46,7 +46,7 @@ jobs:
       - name: Compile exact founder/Treasury/retirement module sources
         run: |
           set -euo pipefail
-          forge build --root contracts --extra-output storageLayout \
+          forge build --root contracts \
             src/governance/FoundingWalletClaims420.sol \
             src/governance/FoundingCommitteeMembership420.sol \
             src/governance/FoundingRetirementVerifier420.sol \
@@ -60,7 +60,8 @@ jobs:
             src/treasury/TreasuryBudgetRegistry420.sol \
             src/treasury/TreasuryDisbursementRegistry420.sol \
             src/treasury/TreasuryRouter420.sol \
-            src/treasury/TreasuryReleaseExecutor420.sol
+            src/treasury/TreasuryReleaseExecutor420.sol \
+            --extra-output storageLayout
       - name: Check reproducible V4 candidate, constructor ABIs, source blobs and missing live receipts
         run: |
           set -euo pipefail

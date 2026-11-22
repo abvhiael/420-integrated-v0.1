@@ -18,7 +18,7 @@ forge --version
 forge clean
 forge build src/governance
 cd ..
-python3 scripts/generate-governance-audit-6-artifacts.py --check --show
+python3 scripts/generate-governance-audit-6-artifacts.py --check --print
 python3 scripts/verify-governance-rec-6.py
 python3 scripts/verify-governance-audit-6.py --require-ready
 python3 scripts/verify-governance-audit-7.py

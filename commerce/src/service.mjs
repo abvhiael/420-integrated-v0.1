@@ -437,7 +437,8 @@ export class CommerceService {
     const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
     requireThat(dispute?.arbitration_remedy_hash&&dispute.requester===wallet(actor),'arbitration_plan_required',409);
     const order=await source.order(bytes32(attempt.order_id));
-    requireThat(String(order.status)==='6'&&order.disputeHash===dispute.dispute_hash,'market_dispute_not_finalized',409);
+    requireThat(String(order.status)==='6'&&order.disputeHash===dispute.dispute_hash
+      &&wallet(order.seller)===wallet(actor),'market_dispute_not_finalized',409);
     const caseRecord=await source.arbitration.getCase(request.caseId);
     requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&wallet(caseRecord.respondent)===wallet(order.buyer)&&caseRecord.domainId===MARKET_ARBITRATION_DOMAIN&&caseRecord.originComponentId===MARKET_ORIGIN_COMPONENT&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash&&caseRecord.requestedRemedyHash===dispute.arbitration_remedy_hash,'arbitration_case_mismatch',503);
     this.mutate(actor,storeId,'arbitration_bind',attempt.order_id,()=>{
@@ -456,8 +457,21 @@ export class CommerceService {
     requireThat(attempt,'not_found',404);
     const dispute=this.db.get('SELECT * FROM dispute_requests WHERE store_id=? AND order_id=?',storeId,attempt.order_id);
     requireThat(dispute?.arbitration_case_id&&dispute.requester===wallet(actor),'arbitration_case_unbound',409);
+    // A stored case ID is a correlation key, never a durable authorization.
+    // Revalidate the original Market dispute and both parties at the same
+    // canonical finalized snapshot as the Arbitration case before each action.
+    const order=await source.order(bytes32(attempt.order_id));
+    requireThat(String(order.status)==='6'&&order.disputeHash===dispute.dispute_hash
+      &&wallet(order.seller)===wallet(actor),'market_dispute_not_finalized',409);
     const caseRecord=await source.arbitration.getCase(dispute.arbitration_case_id);
-    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)&&caseRecord.domainId===MARKET_ARBITRATION_DOMAIN&&caseRecord.originComponentId===MARKET_ORIGIN_COMPONENT&&caseRecord.originObjectId===attempt.order_id&&caseRecord.claimHash===dispute.dispute_hash&&caseRecord.requestedRemedyHash===dispute.arbitration_remedy_hash,'arbitration_case_mismatch',503);
+    requireThat(caseRecord.exists===true&&wallet(caseRecord.claimant)===wallet(actor)
+      &&wallet(caseRecord.respondent)===wallet(order.buyer)
+      &&caseRecord.domainId===MARKET_ARBITRATION_DOMAIN
+      &&caseRecord.originComponentId===MARKET_ORIGIN_COMPONENT
+      &&caseRecord.originObjectId===attempt.order_id
+      &&caseRecord.claimHash===dispute.dispute_hash
+      &&caseRecord.requestedRemedyHash===dispute.arbitration_remedy_hash,
+      'arbitration_case_mismatch',503);
     let args;
     if(action==='submitEvidence'){
       keys(request,['evidenceHash']);bytes32(request.evidenceHash);

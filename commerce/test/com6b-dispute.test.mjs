@@ -106,8 +106,22 @@ test('COM-6B fail closed on absent service, forged Arbitration identity, unautho
  record.respondent=attacker.address.toLowerCase();
  await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)}),e=>e.code==='arbitration_case_mismatch');
  record.respondent=buyer.address.toLowerCase();
+ order.seller=attacker.address.toLowerCase();
+ await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)}),e=>e.code==='market_dispute_not_finalized');
+ order.seller=seller.address.toLowerCase();
  await f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)});
  await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(704)}),e=>e.code==='arbitration_case_conflict');
+ // A previously bound case must never authorize a new action when a party,
+ // canonical Market dispute, or origin identity changes.
+ record.respondent=attacker.address.toLowerCase();
+ await assert.rejects(()=>f.service.merchantArbitrationAction(seller.address,store.store_id,attempt.attemptId,'submitEvidence',{evidenceHash:b32(709)}),e=>e.code==='arbitration_case_mismatch');
+ record.respondent=buyer.address.toLowerCase();
+ record.originObjectId=b32(777);
+ await assert.rejects(()=>f.service.merchantArbitrationAction(seller.address,store.store_id,attempt.attemptId,'submitEvidence',{evidenceHash:b32(709)}),e=>e.code==='arbitration_case_mismatch');
+ record.originObjectId=attempt.orderId;
+ order.status='7';
+ await assert.rejects(()=>f.service.merchantArbitrationAction(seller.address,store.store_id,attempt.attemptId,'submitEvidence',{evidenceHash:b32(709)}),e=>e.code==='market_dispute_not_finalized');
+ order.status='6';
  record.state='3';
  f.source.arbitration.getRuling=async()=>({exists:true,outcomeCode:'1',resolver:buyer.address.toLowerCase(),rulingHash:b32(707),remedyCommitment:b32(708)});
  await assert.rejects(()=>f.service.merchantDisputes(seller.address,store.store_id),e=>e.code==='arbitration_ruling_invalid');

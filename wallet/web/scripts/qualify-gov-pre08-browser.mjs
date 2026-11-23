@@ -51,7 +51,7 @@ if(mode!=='propose'){
    .find(x=>x?.name==='CivicProposalCreated');
  assert.ok(found,'real Geth proposal receipt missing Civic event');
  proposalId=found.args.proposalId.toLowerCase();
- assert.equal(found.args.voteStart,3n);
+ assert.equal(found.args.voteStart,4n);
 }
 
 let currentAccount=wallet.address.toLowerCase(),chainChanged=false;

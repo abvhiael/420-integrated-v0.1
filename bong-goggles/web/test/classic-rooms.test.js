@@ -230,3 +230,31 @@ test('BC-0.6 active/completed rooms lock seats and omit lobby actions',()=>{
  assert.match(ended,/session has ended/);
  assert.doesNotMatch(ended,/data-classic-room-action/);
 });
+
+test('Cribbage room link resolves only same-420ID rule-bound match and returns to My Games',async()=>{
+ const game={...room,gameId:'cribbage',seatCount:2,status:'in_game',revision:4,
+  seats:[{index:0,controller:'human',subject:host,team:0},
+   {index:1,controller:'bot',difficulty:'easy',team:1}],invites:[]};
+ const match={id:'40000000-4444-4444-8444-444444444444',roomId,gameId:'cribbage',
+  seatCount:2,status:'active',rulesHash:'6f13bd77568efc5d0836eaa61458ca0cc2c500d1db2d9c38e228b1c668f71e24'};
+ const requests=[];
+ const client=new ClassicRoomsController({enabled:true,fetchImpl:async(url,opts)=>{
+  requests.push(url);
+  if(url==='/social-api/v1/classic-rooms/'+roomId)return res(200,env({room:game}));
+  if(url==='/social-api/v1/classic-sessions')return res(200,env({sessions:[match]}));
+  return mock()(url,opts);
+ }});
+ const state=await client.refresh(roomId);
+ assert.equal(state.status,'ready');
+ assert.equal(state.gameSession?.id,match.id);
+ assert.ok(requests.some(x=>x.endsWith('/v1/classic-sessions')));
+ const html=renderClassicRooms(state,{enabled:true,roomId,live:{status:'reconnecting'}});
+ assert.match(html,/Resume active Cribbage game/);
+ assert.match(html,new RegExp('games/cribbage/play\\?session='+match.id));
+ assert.match(html,/href="\/games\/cribbage\/history"/);
+ assert.doesNotMatch(html,/Connection lost or room access changed/);
+ const revoked={...state,gameSession:null};
+ const fallback=renderClassicRooms(revoked,{enabled:true,roomId});
+ assert.match(fallback,/Find this game in My Games/);
+ assert.doesNotMatch(fallback,/play\\?session=/);
+});

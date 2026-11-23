@@ -209,7 +209,7 @@ export class ArbitrationHistoryReadModel420 {
   const canonical=await this.source.getBlockByNumber(n);
   const head=await this.source.blockNumber();
   const status:ArbitrationCanonicality420=!canonical||canonical.hash.toLowerCase()!==hashValue?'reorganized':
-   head>n+64n?'stale':head>n?'pending':'confirmed';
+   head>n+64n?'stale':head>n||r[0]!.finalized_number===null||r[0]!.finalized_number===undefined||uint(r[0]!.finalized_number,'finalized')<n?'pending':'confirmed';
   return {number:n,hash:hashValue,observedHead:head,status,
    finalized:r[0]!.finalized_number===null?null:
     r[0]!.finalized_number===undefined?null:uint(r[0]!.finalized_number,'finalized number')};

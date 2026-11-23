@@ -741,6 +741,55 @@ contract LaunchpadCrowdfundingIntegration420Test {
         );
     }
 
+    function testPublicationRechecksCanonicalOriginAndRejectsStaleRound() public {
+        bytes32 caseId = keccak256("case/recheck");
+        bytes32 domain = integration.CROWDFUNDING_DOMAIN();
+        bytes32 component = keccak256("420/COMPONENT/LAUNCHPAD/V1");
+        bytes32 rulingHash = keccak256("ruling/recheck");
+        bytes32 remedy = keccak256("remedy/recheck");
+        cases.setCase(caseId, ALICE, address(this), domain, component, saleId, 1, 0);
+        vm.prank(ALICE);
+        integration.linkDispute(saleId, caseId);
+
+        // A ruled but nonfinal case must not publish an outcome.
+        rulings.setRuling(caseId, 0, 1, rulingHash, remedy);
+        cases.setCase(caseId, ALICE, address(this), domain, component, saleId, 2, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+
+        // Wrong origin, domain, respondent and claimant must each fail at the
+        // consumption boundary, even if the case was previously linked.
+        cases.setCase(caseId, ALICE, address(this), domain, component, keccak256("wrong-sale"), 3, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        cases.setCase(caseId, ALICE, address(this), keccak256("wrong-domain"), component, saleId, 3, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        cases.setCase(caseId, ALICE, BOB, domain, component, saleId, 3, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        cases.setCase(caseId, BOB, address(this), domain, component, saleId, 3, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        cases.setCase(caseId, ALICE, address(this), domain, keccak256("wrong-component"), saleId, 3, 0);
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+
+        cases.setCase(caseId, ALICE, address(this), domain, component, saleId, 3, 1);
+        // Ruling for round zero is stale following an appeal.
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+
+        rulings.setRuling(caseId, 1, 1, rulingHash, bytes32(0));
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        rulings.setRuling(caseId, 1, 1, rulingHash, remedy);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+        require(integration.publishedDisputeOutcome(caseId), "current finalized round published");
+        vm.expectRevert(LaunchpadCrowdfundingIntegration420.DisputeOutcomeUnavailable.selector);
+        integration.publishFinalizedDisputeOutcome(saleId, ALICE);
+    }
+
     function testRegisteredCampaignInvoiceCannotBeSubstituted() public {
         bytes32 other = sales.canonicalId(
             projectId, PAYMENT_ASSET, RECEIVER, 500, 1000, 600, 10000, 10, 20, 30, ELIGIBILITY, bytes32(uint256(9))

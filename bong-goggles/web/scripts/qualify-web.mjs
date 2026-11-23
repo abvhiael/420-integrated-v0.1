@@ -85,6 +85,35 @@ const bc24Modified=Object.freeze({
  'core/classic-room-bindings.js':Object.freeze({baseline:2032,maxAdded:768}),
  'index.html':Object.freeze({baseline:1519,maxAdded:128})
 });
+// Exact-source inherited modules are already present, byte-for-byte, on
+// authoritative main e4020bb and our BC-2.3 parent 5884ba2. They were not
+// added by BC-2.4 and were never part of the frozen BC-0.2/0.3/0.4/0.5 base.
+// Charge them to their EXISTING independent, name+Git-blob pinned scopes.
+// This changes no older caps, and forbids using that allowance for new growth.
+const pinnedInherited=Object.freeze({
+ 'core/account-extras.js':Object.freeze({size:10392,git:'5d68f8a76babdae71f236a42c797e7b5bd6ae469'}),
+ 'core/account-monetization.js':Object.freeze({size:5651,git:'f2f69f242b19b72e656b5b20c57b5c696f78f969'}),
+ 'core/account-xp.js':Object.freeze({size:5240,git:'35683e11ad35d26b7a34810806eddc692009d5a3'}),
+ 'core/classic-communications-ui.js':Object.freeze({size:1411,git:'61dba6125ccff945466313041d60be00ab2c9b3b'}),
+ 'core/classic-communications.js':Object.freeze({size:9105,git:'b50d140b8f84b0aa49ae6633dd1f5e5aed66d2fc'}),
+ 'core/classic-live-bindings.js':Object.freeze({size:1435,git:'c31bf8f6c6541bf4831502b9141cfac1a7feec92'}),
+ // The same isolated BC-2.1 reference now has a v2 325-point target;
+ // its identity and score tests are qualified independently of browser Play.
+ 'core/labyrinth-cribbage-rules.js':Object.freeze({size:8981,git:'84ab617415cc9602e3ed5dac86011ee4a630c3c1'})
+});
+let pinnedInheritedBytes=0;
+for(const [name,expected] of Object.entries(pinnedInherited)){
+ const size=regularSizes.get(name);
+ if(size!==expected.size)throw Error('Existing separate module changed bytes: '+name);
+ const bytes=await readFile(resolve(root,name));
+ const git=createHash('sha1').update(Buffer.from('blob '+bytes.length+'\0')).update(bytes).digest('hex');
+ if(git!==expected.git)throw Error('Existing separately scoped module identity changed: '+name);
+ pinnedInheritedBytes+=size;
+}
+if(pinnedInheritedBytes>44*1024)throw Error('Existing independent modules exceeded pinned 44-KiB allowance');
+// Existing module checks are exact file hashes; none of their bytes can be used
+// to offset unrelated growth in the existing historical base.
+
 const bc24GrowthByPath=new Map();let bc24Growth=0;
 for(const [path,cap] of Object.entries(bc24New)){
  const size=regularSizes.get(path);
@@ -234,7 +263,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc24Growth-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc24Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -251,9 +280,10 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc24Growth-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc24Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));
 console.log('BC-2.4 independent board and UI allowance:',JSON.stringify({uiBytes:bc24Growth,cap:40*1024,originalArtPresent:labyrinthArtFiles.length===1}));
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));

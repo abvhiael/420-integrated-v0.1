@@ -24,7 +24,8 @@ TIME="0x0000000000000000000000000000000000000429"
 REGISTRY="0x0000000000000000000000000000000000000434"
 VALIDATORS="0x0000000000000000000000000000000000000423"
 COMMUNITY_RESERVE="0x0000000000000000000000000000000000000425"
-BOOTSTRAP="0x0000000000000000000000000000000000000437"
+# Public EOA key 0x01, funded by native rewards only on the isolated node420 ledger.
+BOOTSTRAP="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
 
 def module(alias,filename):
     spec=importlib.util.spec_from_file_location(alias,HERE/filename)
@@ -253,7 +254,7 @@ def bootstrap(rpc,base):
     # an explicitly synthetic equal-weight electorate. This authority is
     # impersonated only in the disposable Anvil 31337 preparation, then the
     # actual resulting account trie is imported as isolated node420 Genesis.
-    browserVoter="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
+    browserVoter=BOOTSTRAP
     changedAccount="0x2b5ad5c4795c026514f8317c7a215e218dccd6cf"
     localBrowserSources={}
     for house in ("COMMUNITY","VALIDATOR"):
@@ -388,28 +389,8 @@ def bootstrap(rpc,base):
     fail_call(rpc,creator,d["TreasuryBudgetRegistry420"],"setController(address)",creator)
     need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==0,
          "local fixture falsely activated Civic Timelock")
-    # Real Civic/Timelock opt-in activation is rehearsed on a disposable branch,
-    # NEVER committed as production authority. The test is not a Civic vote.
+    # Activation must be a signed transaction on the imported native ledger.
     fail_call(rpc,creator,TIME,"activateCivicAuthority(address)",civic)
-    snapshot=rpc.call("evm_snapshot",[])
-    need(snapshot is not None,"local Civic governance snapshot absent")
-    rpc.call("anvil_impersonateAccount",[BOOTSTRAP])
-    try:
-        activation=rpc.send(BOOTSTRAP,TIME,
-            funding.calldata("activateCivicAuthority(address)",civic),
-            tag="probe:impersonated_bootstrap_governor_Civic")
-        need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==1
-             and read_address(rpc,TIME,"scheduler()")==addr(civic),
-             "actual Civic/Timelock authority handoff did not execute")
-        need(rpc.call("evm_revert",[snapshot]) is True,
-             "synthetic Civic authority could not be rolled back")
-        need(rpc.call("eth_getTransactionReceipt",[activation["tx"]]) is None,
-             "orphaned synthetic Timelock authorization persisted")
-        need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==0
-             and read_address(rpc,TIME,"scheduler()")==addr(BOOTSTRAP),
-             "synthetic Civic activation contaminated source Genesis")
-    finally:
-        rpc.call("anvil_stopImpersonatingAccount",[BOOTSTRAP])
     for typ,amount in (("OPERATIONS",4_200_000*WAD),
                        ("CONTINGENCY",840_000*WAD),("COMMUNITY",0)):
         need(rpc.balance(base["vaultAddresses"][typ])==amount,
@@ -452,7 +433,7 @@ def bootstrap(rpc,base):
         "localFounderImpersonationOnly":True,
         "locallyPublishedServiceIdsOnly":True,
         "budgetAndFounderClaimsMined":True,
-        "disposableCivicTimelockActivationThenReverted":True,
+        "localCivicTimelockInactiveAtSource":True,
         "totalNativeSupplyWei":str(42_000_000*WAD),
         "fullApplicationRuntimeQualified":False,
         "realConsensusQualified":False,

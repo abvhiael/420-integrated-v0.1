@@ -121,7 +121,8 @@ function setBusy(value){
         eligibleVote.epoch!==sessionEpoch;
       return;
     }
-    button.disabled=value||!context||(!selected&&button.id!=='governance-refresh');
+    const requiresProposal=button.id!=='governance-refresh'&&!button.classList.contains('governance-proposal-row');
+    button.disabled=value||!context||(requiresProposal&&!selected);
   });
 }
 function clearDetail(){

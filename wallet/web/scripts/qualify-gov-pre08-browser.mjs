@@ -18,6 +18,8 @@ const arg=(key,optional=false)=>{
  return options[pos+1];
 };
 const mode=arg('mode'),rpcUrl=arg('rpc'),output=arg('output');
+const indexerOrigin=arg('indexer');
+assert.match(indexerOrigin,/^http:\/\/127\.0\.0\.1:\d+$/);
 assert.ok(['propose','vote','recovered'].includes(mode));
 assert.match(rpcUrl,/^http:\/\/127\.0\.0\.1:\d+$/);
 const graph=JSON.parse(await fs.readFile(arg('graph'),'utf8'));
@@ -117,7 +119,8 @@ await page.route('https://wallet.420integrated.org/**',async route=>{
    identity={authenticated:false};return route.fulfill({json:{signedOut:true}});
  }
  if(request.pathname==='/v1/protocols/events'){
-   return route.fulfill({json:{items:proposalId?[{eventName:'CivicProposalRegistered',fields:{proposalId}}]:[]}});
+   const response=await fetch(indexerOrigin+request.pathname+request.search);
+   return route.fulfill({status:response.status,body:await response.text(),contentType:'application/json'});
  }
  const relative=path.normalize(decodeURIComponent(request.pathname==='/'?'/index.html':request.pathname)).replace(/^\/+/, '');
  const base=path.resolve(ROOT,'wallet/web');
@@ -171,15 +174,16 @@ try{
    const policy=graph.actualProductionConstructorAddresses.TreasuryPolicyRegistry420;
    const action=new Interface(['function setAssetPolicy(address,bool,uint128,uint128,uint64)'])
       .encodeFunctionData('setAssetPolicy',['0x000000000000000000000000000000000000d00d',true,123,456,86400]);
+   const actions=[[policy,'0',action]];
    const actionsHash=keccak256(AbiCoder.defaultAbiCoder().encode(
-      ['tuple(address,uint256,bytes)[]'],[[[policy,0,action]]]));
+      ['tuple(address,uint256,bytes)[]'],[actions]));
    const metadataHash=keccak256(toUtf8Bytes('GOV-PRE08/BROWSER/LOCAL-ONLY'));
    const call=abi.encodeFunctionData('createProposal',[0,metadataHash,actionsHash]);
    const hash=await page.evaluate(tx=>window.ethereum.request({
       method:'eth_sendTransaction',params:[tx]}),
       {from:wallet.address,to:civic.governor,data:call,value:'0x0'});
    assert.ok(transactions.some(tx=>tx.txHash===hash&&tx.to.toLowerCase()===civic.governor.toLowerCase()));
-   proof={...proof,proposalTxHash:hash,realNativeWalletSignedCivicProposal:true};
+   proof={...proof,proposalTxHash:hash,actions,realNativeWalletSignedCivicProposal:true};
  }else{
    await page.locator('#governance-proposal-list .governance-proposal-row').first().click();
    await page.locator('#governance-state').getByText('ACTIVE').waitFor({timeout:18000});

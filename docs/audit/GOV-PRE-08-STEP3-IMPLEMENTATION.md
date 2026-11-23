@@ -1,5 +1,32 @@
 # GOV-PRE-08 Step 3: unsigned V4 materialization and local integration evidence
 
+## Latest qualification status
+
+**Step 3 remains open.** At `094f613f93d00242605a504c07acbe1c943da80f`,
+[run 45097295264](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45097295264)
+passed source materialization and protected native settlement. The unified job
+advanced to a real Chromium-signed proposal after checking synchronous Wallet
+invalidation and the subsequent shell reload. A disabled proposal row blocked
+the following ballot journey. Its diagnostic log and protected signing evidence
+are in [artifact 14784386233](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45097295264/artifacts/14784386233).
+
+The continuation fixes initial proposal selection and reads the proposal list
+through the running TypeScript Indexer on the same native ledger. The unified
+workflow also rehearses pausing five protected validator processes and restoring
+quorum, signed voting in both houses, bootstrap cancellation, signed Civic
+activation, on-chain finalization and queueing, and a mined early-execution
+revert. These cases require exact-head CI before they count as qualified.
+
+The native settlement verifier pins a single committee rotation. At 12 seconds
+per slot and 17,640 slots per rotation, that trust window is shorter than the
+frozen seven-day G1 Timelock floor. The Foundry test exercises post-delay
+execution against real contracts. The shared native network still needs a
+verified committee transition before it can exercise the same lifecycle across
+the full delay. This is local engineering work. The unified browser 420ID
+gateway path, full fault matrix and independent operational cold-start
+reproduction also remain open.
+
+
 ## QUALIFIED — one real local chain-420 execution state (2026-11-22)
 
 **Exactly qualified executable source:** `d7399faffe11899b9e0b53f9e5ff474838c25034`. [GOV-PRE-08 Step 3 #45077808181](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45077808181) **SUCCESS**, all three jobs: actual Step 2 funded source graph materialization, patched Geth/native reward/real execution crash and protected BLS settlement, and **one jointly observed chain-420 native/application run**. Separate [node420 Release Gate #45077808158](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45077808158) also **SUCCESS** at the same executable SHA. Retained combined local witness `govpre08-unified-local-d7399faffe11899b9e0b53f9e5ff474838c25034`, artifact ID **14776046654**; native and source manifests are in the same successful workflow.

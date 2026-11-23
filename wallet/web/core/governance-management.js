@@ -228,7 +228,8 @@ export function createGovernanceIndexer420({ baseUrl, fetchImpl = globalThis.fet
       const response = await fetchImpl(request);
       if (!response.ok) throw new Error(`Governance Indexer HTTP ${response.status}`);
       const payload = await response.json();
-      const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
+      const page = payload?.data ?? payload;
+      const items = Array.isArray(page?.items) ? page.items : Array.isArray(page) ? page : [];
       const ids = [];
       for (const item of items) {
         if (item?.eventName !== 'CivicProposalRegistered') continue;

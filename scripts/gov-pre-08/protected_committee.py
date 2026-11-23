@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import signal
 import socket
 import subprocess
 import threading
@@ -150,18 +151,15 @@ class Committee:
             raise RuntimeError("protected validator produced no authentic signed duty: "+str(seat))
         return response
 
-    def certify(self,plan,slot,workdir):
+    def certify(self,plan,slot,workdir,on_quorum_loss=None):
         prepared=self._exec("duties",plan)
         if prepared.returncode:raise RuntimeError("cannot prepare pinned native proposer: "+prepared.stderr)
         d=json.loads(prepared.stdout)
         assert len(d["Votes"])==15 and d["ProposerSeat"] in range(15)
         proposer=self._sign(d["ProposerSeat"],d["Proposal"])
-        votes=[self._sign(i,d["Votes"][i]) for i in range(15)]
-        assert all(p.poll() is None for p in [*self.servers,*self.processes])
         proposal_path=Path(workdir)/f"protected-proposal-{slot}.json"
         votes_path=Path(workdir)/f"protected-votes-{slot}.json"
         proposal_path.write_text(json.dumps(proposer))
-        votes_path.write_text(json.dumps({"Shares":votes}))
         # Exercise fail-closed QC acceptance *without* submitting mutations to
         # execution. Exactly ten authentic seats do not constitute quorum.
         if slot==1:
@@ -174,7 +172,24 @@ class Committee:
                     pr.write_text(json.dumps(override_proposer))
                 result=self._exec("certify",plan,proposal=pr,votes=bad)
                 assert result.returncode!=0 and not result.stdout, "invalid QC/producer proof escaped"
-            denied(votes[:10])
+            assert on_quorum_loss is not None
+            stopped_seats=[i for i in range(15) if i!=d["ProposerSeat"]][:5]
+            paused=[self.processes[i] for i in stopped_seats]
+            for proc in paused:
+                proc.send_signal(signal.SIGSTOP)
+            try:
+                for proc in paused:
+                    state=os.waitid(os.P_PID,proc.pid,os.WSTOPPED)
+                    assert state.si_status==signal.SIGSTOP, "validator did not pause"
+                shares={i:self._sign(i,d["Votes"][i]) for i in range(15) if i not in stopped_seats}
+                assert len(shares)==10
+                denied(list(shares.values()))
+                on_quorum_loss()
+            finally:
+                for proc in paused:
+                    proc.send_signal(signal.SIGCONT)
+            shares.update({i:self._sign(i,d["Votes"][i]) for i in stopped_seats})
+            votes=[shares[i] for i in range(15)]
             denied(votes[:11]+[votes[1]])
             corrupt=copy.deepcopy(votes)
             corrupt[0]["Result"]["Signature"][0]^=1
@@ -182,6 +197,10 @@ class Committee:
             forged=copy.deepcopy(proposer)
             forged["Proposal"]["Slot"]+=1
             denied(votes,forged)
+        else:
+            votes=[self._sign(i,d["Votes"][i]) for i in range(15)]
+        assert all(p.poll() is None for p in [*self.servers,*self.processes])
+        votes_path.write_text(json.dumps({"Shares":votes}))
         result=self._exec("certify",plan,proposal=proposal_path,votes=votes_path)
         if result.returncode:raise RuntimeError("15 independently protected votes could not certify native Geth payload: "+result.stderr)
         record=json.loads(result.stdout)
@@ -190,6 +209,7 @@ class Committee:
         assert record["Certificate"]["Slot"]==slot and len(votes)==15
         self.signing_evidence.append({"slot":slot,"proposerSeat":d["ProposerSeat"],
              "protectedProposer":True,"protectedVotes":len(votes),
+             "liveFiveValidatorInterruptionRestored":slot==1,
              "remoteSignerProcesses":len(self.servers),
              "validatorProcesses":len(self.processes),
              "aggregateVerifiedByProductionCollector":True})

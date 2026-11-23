@@ -275,7 +275,14 @@ def main():
             },sort_keys=True,separators=(",",":")).encode()).digest()
             plan["ConsensusStateRoot"]=list(commitment)
             planfile.write_text(json.dumps(plan))
-            record=committee.certify(planfile,slot,args.workdir)
+            def preserve_authority_during_quorum_loss():
+                require(rpc("eth_getBlockByNumber",["latest",False])["hash"]==parenthash
+                        and int(call(GW,"lastSequence()"),16)==previous,
+                        "quorum loss advanced native execution or settlement sequence")
+                checkpoint=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
+                require(checkpoint["Settlement"]["ExecutionBlock"]==slot-1,
+                        "quorum loss advanced the durable consensus checkpoint")
+            record=committee.certify(planfile,slot,args.workdir,preserve_authority_during_quorum_loss)
             consensus.stdin.write(json.dumps(record)+"\n")
             consensus.stdin.flush()
             wait_event("settled",slot)
@@ -461,7 +468,7 @@ def main():
         # though the durable certified consensus history contains block 2.
         # Never trust the un-reconciled Geth head. Production fourtwentyd
         # recovery.Reconcile() verifies the independently pinned Genesis,
-        # the 11-of-15 BLS certificates, their ancestry and the derived
+        # the independently sourced BLS certificates, their ancestry and the derived
         # authentic Stake batches before rebuilding missing Geth payload
         # state and forkchoice. We must run it BEFORE asserting recovery.
         events=queue.Queue()
@@ -530,8 +537,19 @@ def main():
         # actual proposal block 3 and an empty block 4 (the voteStart), then
         # its independently signed ballot is included in certified block 5.
         # This preserves exact previous block-2 transaction cardinality.
+        ts_worker_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-local-postgres.mjs"),
+                       "--serve","--rpc","http://127.0.0.1:18780",
+                       "--graph",str(args.graph.resolve()),"--genesis",str(args.genesis.resolve()),
+                       "--expected-block-hash",latest["hash"],"--expected-tx-hash",wallet["txHash"]]
+        ts_origin="http://127.0.0.1:18784"
+        def await_ts_block(height,expected):
+            return ready(lambda:getter(ts_origin,f"/v1/blocks/{height}?chainId=420")[1]
+                         ["data"]["hash"].lower()==expected.lower(),ts_idx,timeout=60)
+        ts_idx=launch("typescript-indexer420",ts_worker_cmd)
+        await_ts_block(2,latest["hash"])
         browser_cmd=["node",str(ROOT/"wallet/web/scripts/qualify-gov-pre08-browser.mjs"),
-                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780"]
+                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780",
+                     "--indexer",ts_origin]
         browser_proposal_path=args.workdir/"browser-proposal.json"
         subprocess.run(browser_cmd+["--mode","propose","--output",str(browser_proposal_path)],
                        cwd=ROOT,check=True,timeout=65)
@@ -549,6 +567,7 @@ def main():
                 and browser_proposal_receipt["logs"],
                 "real injected Wallet Civic proposal not mined in native certified block 3")
         fourth,block4,batch4,archive4=produce(third,6,4)
+        await_ts_block(4,block4["hash"])
         vote_pending=args.workdir/"browser-vote-pending.json"
         vote_output=args.workdir/"browser-vote-confirmed.json"
         vote_proc=launch("browser-vote",browser_cmd+["--mode","vote",
@@ -596,7 +615,8 @@ def main():
         geth_children=[int(pid) for pid in childlist.read_text().split()]
         require(len(geth_children)==1 and geth_children[0]!=node.pid,
                 "second cold recovery did not identify the real Geth child")
-        for process in (exp,idx,consensus,node):
+        await_ts_block(5,block5["hash"])
+        for process in (exp,idx,ts_idx,consensus,node):
             require(process.poll() is None,"native browser recovery requires live service")
             os.killpg(process.pid,signal.SIGKILL)
             process.wait(timeout=20)
@@ -640,6 +660,8 @@ def main():
         require(code==200 and recoveredBallot["block"]["hash"].lower()==block5["hash"].lower()
                 and recoveredBallot["trace"]["certified"],
                 "Explorer lost browser vote after full stack cold recovery")
+        ts_idx=launch("typescript-indexer420-browser-vote-cold-recovered",ts_worker_cmd)
+        await_ts_block(5,block5["hash"])
         browser_recovered=args.workdir/"browser-recovered-vote.json"
         subprocess.run(browser_cmd+["--mode","recovered",
                        "--proposal-tx",browser_proposal["proposalTxHash"],
@@ -649,6 +671,53 @@ def main():
                 and recoveredBrowser["accountChangedInvalidatesMountedGovernance"]
                 and recoveredBrowser["appSSORevocationInvalidatesMountedGovernance"],
                 "new real Chromium session failed to read recovered on-chain ballot")
+        # Exercise authorized scheduling and on-chain denial while the
+        # immutable delay is running. The pinned single-rotation settlement
+        # trust expires before the production G1 delay can elapse.
+        civic_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-native-civic.mjs"),
+                   "http://127.0.0.1:18780",str(args.graph.resolve()),str(browser_proposal_path)]
+        def civic(stage):
+            result=subprocess.check_output([*civic_cmd,stage],cwd=ROOT,text=True,timeout=30)
+            return json.loads(result)
+        civic_receipts={}
+        record=fifth
+        for height,stage in enumerate(("validator-ballot","cancel","activate","finalize","queue"),6):
+            submission=civic(stage)
+            record,civic_block,_,_=produce(record,(height-1)*2,height)
+            receipts=[rpc("eth_getTransactionReceipt",[tx]) for tx in submission["hashes"]]
+            require(receipts and all(receipt and receipt["status"]=="0x1" and
+                    receipt["blockHash"]==civic_block["hash"] and receipt["logs"] for receipt in receipts),
+                    "missing canonical successful signed Civic receipt(s): "+stage)
+            civic_receipts[stage]=receipts
+        operation=civic("delay")
+        require(operation["executeAfter"]-int(civic_block["timestamp"],16)==7*86400,
+                "Civic queued operation did not preserve the frozen G1 delay")
+        _,denial_block,_,_=produce(record,20,11)
+        denied=rpc("eth_getTransactionReceipt",[operation["hashes"][0]])
+        require(denied and denied["status"]=="0x0" and denied["blockHash"]==denial_block["hash"]
+                and not denied["logs"],"early Timelock attempt was not a canonical revert")
+        require(civic("verify-delay")["proposalId"]==operation["proposalId"],
+                "failed execution changed the queued Civic operation")
+        require(verifyCustody("after native Civic Timelock denial")==unifiedCustody,
+                "Civic activation or denied execution diverted funded native reserves")
+        await_ts_block(11,denial_block["hash"])
+        _,governance_events=getter(ts_origin,"/v1/protocols/events?chainId=420&protocol=420Governance")
+        require(any(row["eventName"]=="CivicProposalStateChanged"
+                    and row["fields"].get("proposalId","").lower()==operation["proposalId"].lower()
+                    and str(row["fields"].get("newState"))=="4"
+                    for row in governance_events["data"]["items"]),
+                "TypeScript Indexer omitted the queued Civic proposal transition")
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=11,
+              idx,timeout=60)
+        code,civic_view=getter("http://127.0.0.1:18783","/v1/transactions/"+denied["transactionHash"])
+        require(code==200 and civic_view["receipt"]["blockHash"].lower()==denial_block["hash"].lower(),
+                "Go Explorer missed the canonical rejected Civic execution")
+        (args.workdir/"native-civic-lifecycle.json").write_text(json.dumps({
+            "proposalId":operation["proposalId"],"executeAfter":operation["executeAfter"],
+            "canonicalReceipts":civic_receipts,"typescriptGovernanceEvents":governance_events,
+            "preDelayDeniedReceipt":denied,"goExplorerDeniedExecution":civic_view,
+            "nativePostDelayExecutionQualified":False,
+        },indent=2,sort_keys=True)+"\n")
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
              "chainId":420,"genesisHash":genesisblock["hash"],
@@ -680,6 +749,8 @@ def main():
              "browserNativeConsensusCheckpointAfterRecovery":5,
              "browserCivicVoteCanonicalExplorerPostgresRecovered":True,
              "browserFinalNativeCertifiedExecutionBlock":5,
+             "civicTimelockDeniedEarlyExecutionBlock":11,
+             "civicTimelockNativePostDelayExecutionQualified":False,
              "browserRealEIP1193SignedGovernanceVote":True,
              "browserAccountSwitchAndRevocationRejected":True,
              "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,

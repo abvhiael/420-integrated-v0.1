@@ -208,11 +208,11 @@ test('Indexer proposal enumeration accepts only canonical CivicProposalRegistere
   let requested;
   const indexer=createGovernanceIndexer420({
     baseUrl:'https://indexer.example',
-    async fetchImpl(url){requested=url;return {ok:true,async json(){return {items:[
+    async fetchImpl(url){requested=url;return {ok:true,async json(){return {data:{items:[
       {eventName:'CivicProposalRegistered',fields:{proposalId:PROPOSAL}},
       {eventName:'CivicProposalRegistered',fields:{proposalId:PROPOSAL.toUpperCase().replace('0X','0x')}},
       {eventName:'CivicProposalCreated',fields:{proposalId:'0x'+'11'.repeat(32)}},
-    ]};}};}
+    ]}};}};}
   });
   const ids=await indexer.listProposalIds(420n);
   assert.deepEqual(ids,[PROPOSAL]);

@@ -7,9 +7,10 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { once } from 'node:events';
+import {setTimeout as delay} from 'node:timers/promises';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const requireIndexer=createRequire(path.join(root,'420-indexer/package.json'));
-const {keccak256}=requireIndexer('ethers');
+const {id,keccak256}=requireIndexer('ethers');
 const {PostgresSql420}=await import('../../420-indexer/dist/src/postgres.js');
 const {EvmJsonRpcSource420,HttpJsonRpcTransport420}=await import('../../420-indexer/dist/src/rpc-source.js');
 const {ProtocolDecoderRegistry420}=await import('../../420-indexer/dist/src/protocol-decoder.js');
@@ -23,6 +24,7 @@ const {createIndexerHttpServer420}=await import('../../420-indexer/dist/src/http
 function need(x,m){if(!x)throw Error('GOV-PRE-08 unified PostgreSQL: '+m);}
 const a=process.argv.slice(2);
 function opt(k){let i=a.indexOf('--'+k);need(i>=0 && a[i+1],k+' required');return a[i+1];}
+const serve=a.includes('--serve');
 const sourceUrl=opt('rpc'),expected=opt('expected-block-hash').toLowerCase();
 need(/^http:\/\/127\.0\.0\.1:\d{3,5}$/.test(sourceUrl),'only loopback execution permitted');
 need(/^0x[0-9a-f]{64}$/.test(expected),'missing exact native source head');
@@ -52,16 +54,43 @@ const schema='gov_pre08_unified_chain420';
 const admin=new PostgresSql420({connectionString:dsn});
 let db=new PostgresSql420({connectionString:dsn,options:'-c search_path='+schema});
 try{
-  await admin.query('drop schema if exists '+schema+' cascade');
-  await admin.query('create schema '+schema);
-  for(const name of ['001-core-projections.sql','003-genesis-projections.sql',
-                     '007-durable-recovery.sql','008-finalized-recovery.sql']){
-    await db.query(await fs.readFile(path.join(root,'420-indexer/sql',name),'utf8'));
+  if(!serve){
+    await admin.query('drop schema if exists '+schema+' cascade');
+    await admin.query('create schema '+schema);
+    for(const name of ['001-core-projections.sql','003-genesis-projections.sql',
+                       '005-genesis-state-views.sql','007-durable-recovery.sql','008-finalized-recovery.sql']){
+      await db.query(await fs.readFile(path.join(root,'420-indexer/sql',name),'utf8'));
+    }
   }
   // Contracts were imported into Genesis, hence old Anvil transaction receipts
   // do NOT exist in this new chain's transaction trie. ABI decoder starts empty
   // for those events; producing imaginary transaction hashes is prohibited.
   const descriptors=new ProtocolDecoderRegistry420([]);
+  if(serve){
+    const genesis=JSON.parse(await fs.readFile(opt('genesis'),'utf8'));
+    const deployments={
+      CivicConstitution420:graph.walletCivicModuleAddresses.constitution,
+      CivicProposalRegistry420:graph.walletCivicModuleAddresses.proposalRegistry,
+      CivicElectorateRegistry420:graph.walletCivicModuleAddresses.electorateRegistry,
+      CivicVoting420:graph.walletCivicModuleAddresses.voting,
+      CivicGovernor420:graph.walletCivicModuleAddresses.governor,
+      ...graph.actualProductionConstructorAddresses
+    };
+    for(const filename of ['governance-civic-v1.json','treasury420-v1.json']){
+      const manifest=JSON.parse(await fs.readFile(path.join(root,'420-indexer/descriptors',filename),'utf8'));
+      for(const contract of manifest.contracts){
+        const address=deployments[contract.contractName]?.toLowerCase();
+        if(!address)continue;
+        const runtime=genesis.alloc[address]?.code;
+        need(runtime && (await source.getCode(address)).toLowerCase()===runtime.toLowerCase(),
+             'protocol decoder emitter code drift: '+contract.contractName);
+        for(const event of contract.events){
+          descriptors.register({protocol:manifest.protocol,eventName:event.name,topic0:id(event.signature),
+            contractAddress:address,fields:event.inputs.map(({name,type,indexed})=>({name,kind:type,indexed}))});
+        }
+      }
+    }
+  }
   function ingestor(conn){
     const protocol=new ProtocolProjection420(conn,descriptors);
     const consumer=new CoreProjectionConsumer420(conn,protocol,420n);
@@ -73,6 +102,20 @@ try{
     return new IndexerIngestor420(chainSource,new SqlCheckpointStore420(conn,420n),
        consumer,{finality:{mode:'head'},startBlock:0n,maxBlocksPerRun:32,maxReorgDepth:12},
        new SqlCanonicalHistoryStore420(conn,420n));
+  }
+  if(serve){
+    const worker=ingestor(db);
+    await worker.runOnce();
+    const http=createIndexerHttpServer420(new IndexerPublicApiAdapter420(
+         new IndexerQueryService420(db),{mode:'head'}));
+    http.listen(18784,'127.0.0.1');
+    await once(http,'listening');
+    try{
+      while(true){
+        await delay(250);
+        await worker.runOnce();
+      }
+    }finally{await new Promise(resolve=>http.close(resolve));}
   }
   const result=await ingestor(db).runOnce();
   need(result.processed===3,'cold PostgreSQL ingest did not capture exact 0/1/2 blocks');

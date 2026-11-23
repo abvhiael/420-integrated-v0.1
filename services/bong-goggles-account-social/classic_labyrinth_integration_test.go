@@ -3,7 +3,6 @@
 package social
 
 import (
- "bytes"
  "context"
  "encoding/json"
  "net/http"
@@ -64,8 +63,10 @@ func TestBC22AuthenticatedTwoAccountEngineAndColdResume(t *testing.T){
   if response.Code!=200{t.Fatalf("authenticated read failed %d: %s",response.Code,response.Body.String())}
   var value struct{Session ClassicSessionView}
   if json.Unmarshal(response.Body.Bytes(),&value)!=nil{t.Fatal("invalid projection")}
-  for _,needle:=range [][]byte{[]byte(`"deck"`),[]byte(`"seed"`),[]byte(`"crib"`),[]byte(`"kept"`),[]byte(`"allHands"`)}{
-   if bytes.Contains(value.Session.PrivateView,needle){t.Fatal("hidden engine state leaked")}
+  var fields map[string]json.RawMessage
+  if e:=json.Unmarshal(value.Session.PrivateView,&fields);e!=nil{t.Fatal("invalid seat-view JSON",e)}
+  for _,hidden:=range []string{"deck","seed","crib","kept","allHands","engineState","opponentHand","initialState"}{
+   if _,exists:=fields[hidden];exists{t.Fatal("hidden engine field leaked",hidden)}
   }
   return value.Session
  }

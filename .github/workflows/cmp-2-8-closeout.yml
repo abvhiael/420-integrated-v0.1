@@ -1,0 +1,39 @@
+name: CMP-2.8 Phase Closeout Trigger
+
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/compute-market/cmp-2.8-phase-closeout.json'
+      - 'docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-2-8-phase-closeout.py'
+      - '.github/workflows/cmp-2-8-closeout.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/config/compute-market/cmp-2.8-phase-closeout.json'
+      - 'docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-2-8-phase-closeout.py'
+      - '.github/workflows/cmp-2-8-closeout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cmp-2-8-closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify CMP-2.8 inventory and retained Level 3 ownership
+        run: python scripts/verify-cmp-2-8-phase-closeout.py

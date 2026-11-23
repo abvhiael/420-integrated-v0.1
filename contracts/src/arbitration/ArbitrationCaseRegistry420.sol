@@ -113,6 +113,12 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
                 || originObjectId == bytes32(0) || claimHash == bytes32(0) || requestedRemedyHash == bytes32(0)
         ) revert InvalidCase();
 
+        // Case deadlines are persisted as uint64. Reject a window that cannot
+        // be represented instead of trapping in an arithmetic panic or
+        // silently truncating a future consensus timestamp.
+        if (block.timestamp > type(uint64).max || p.evidenceWindow > type(uint64).max - block.timestamp) {
+            revert InvalidCase();
+        }
         uint256 nonce = nextNonce++;
         caseId = keccak256(
             abi.encode(
@@ -177,6 +183,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
             revert AppealUnavailable();
         }
 
+        if (block.timestamp > type(uint64).max || c.evidenceWindow > type(uint64).max - block.timestamp) {
+            revert AppealUnavailable();
+        }
         c.round += 1;
         c.state = State.OPEN;
         c.evidenceDeadline = uint64(block.timestamp) + c.evidenceWindow;
@@ -192,6 +201,9 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
         if (!c.exists) revert UnknownCase();
         if (c.state != State.OPEN) revert CaseNotOpen();
 
+        if (block.timestamp > type(uint64).max || c.appealWindow > type(uint64).max - block.timestamp) {
+            revert InvalidCase();
+        }
         c.state = State.RULED;
         c.appealDeadline = uint64(block.timestamp) + c.appealWindow;
         emit CaseRuled(caseId, c.round, c.appealDeadline);

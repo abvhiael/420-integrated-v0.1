@@ -1,0 +1,99 @@
+name: 420Arbitration ARB-PRE-08 adversarial security
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/arbitration/**'
+      - 'contracts/test/Arbitration*.t.sol'
+      - 'wallet/web/core/arbitration-*.js'
+      - 'wallet/web/test/arbitration-*.test.js'
+      - 'execution/storage/arbitration_evidence_access*.go'
+      - '420-indexer/src/arbitration-*.ts'
+      - '420-indexer/test/arbitration-*.test.ts'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-08-SECURITY.md'
+      - '.github/workflows/420arbitration-pre08-security.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arb-pre08-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  application-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Wallet, malicious RPC, lifecycle, privacy and session security
+        run: |
+          node --test \
+            wallet/web/test/arbitration-runtime.test.js \
+            wallet/web/test/arbitration-verified.test.js \
+            wallet/web/test/arbitration-application.test.js \
+            wallet/web/test/arbitration-evidence.test.js \
+            wallet/web/test/arbitration-evidence-workspace.test.js \
+            wallet/web/test/arbitration-storage420.test.js \
+            wallet/web/test/arbitration-storage-bridge.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test case-bound private evidence gateway authorization
+        run: go test ./execution/storage -run '^(TestDeveloperHTTP|TestArbitrationEvidenceStorage|TestGateway)' -count=1
+
+  historical-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arbitration
+          POSTGRES_PASSWORD: localtestonly
+          POSTGRES_DB: indexer_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U arbitration -d indexer_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      INDEXER_PG_URL: postgresql://arbitration:localtestonly@localhost:5432/indexer_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact historical-security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Install locked Indexer dependencies
+        working-directory: 420-indexer
+        run: npm ci --ignore-scripts
+      - name: Build shared Indexer
+        working-directory: 420-indexer
+        run: npm run build
+      - name: Qualify malicious receipt, reorg and PostgreSQL recovery paths
+        working-directory: 420-indexer
+        run: node --test dist/test/arbitration-*.test.js
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify event ABI against actual five-contract source
+        working-directory: contracts
+        run: forge build src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol
+      - name: Verify Foundry event parity without skipping
+        working-directory: 420-indexer
+        env:
+          ARBITRATION_FOUNDRY_ARTIFACTS: ../contracts/out
+        run: node --test dist/test/arbitration-indexer.test.js

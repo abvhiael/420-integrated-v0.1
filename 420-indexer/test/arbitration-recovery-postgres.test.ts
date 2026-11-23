@@ -101,6 +101,19 @@ test('shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupt
  assert.equal((await checkpoint())?.blockNumber,7n);
  assert.equal((await protocolRows(db)).length,10);
  assert.equal((await (await start()).runOnce()).processed,0,'restart idempotent');
+ // Distinguish an old but canonical checkpoint from an actively indexed head.
+ source.head=80n;
+ const stale=await model().history(ARB_CASE_ID_420,{limit:1});
+ assert.equal(stale.canonicality,'stale');
+ assert.equal(stale.case?.canonicality,'stale');
+ source.head=7n;
+ // Finality is obtained from the source, not inferred from elapsed blocks.
+ source.finalizedBlockNumber=async()=>7n;
+ await (await start()).runOnce();
+ const confirmed=await model().case(ARB_CASE_ID_420);
+ assert.equal(confirmed?.canonicality,'confirmed');
+ source.finalizedBlockNumber=undefined;
+
 
  const detail=await model().history(ARB_CASE_ID_420,{limit:3});
  assert.equal(detail.case?.state,'FINALIZED');

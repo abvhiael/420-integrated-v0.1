@@ -167,8 +167,8 @@ async function main(){
   const dependencyHashes=keys.map(k=>hashes[k]);
   const dependencyRoot=keccak256(AbiCoder.defaultAbiCoder().encode(
     [...keys.map(()=>'address'),...keys.map(()=>'bytes32')],[...dependencies,...dependencyHashes]));
-  const metadataHash=keccak256(readFileSync(manifestFile));
-  const manifestHash=keccak256(Buffer.from(JSON.stringify(sourceManifest.deployment_order)));
+  const metadataHash=keccak256(readFileSync(resolve(contracts,'config/arbitration/arb-pre-09-local-release-metadata.json')));
+  const manifestHash=keccak256(readFileSync(manifestFile));
   const interfaceHash=keccak256(Buffer.from(JSON.stringify(artifact('ArbitrationRouter420').abi)));
   await reject('unauthorized component registration',async()=>registry.connect(observer).registerComponent.staticCall(
     cid,await router.getAddress(),[1,0,0],2));

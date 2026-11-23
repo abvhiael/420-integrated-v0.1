@@ -122,7 +122,8 @@ test('Storage retrieval must recheck same chain log and provide scoped grant',as
     }},
     authenticate:async()=>({account:a(100),caseId:ctx.caseId,round:0,chainId:420,
       caseRegistry:ctx.caseRegistry,expiresAt:Date.now()+5000,
-      authorization:'420ID-private-scoped-authenticated-session'})});
+      authorization:'420ID-private-scoped-authenticated-session',capability:'read',storageObject:object,
+      storageSubject:'test-scoped-subject',storageSessionId:'test-private-session-12345678'})});
   const result=await workspace.retrieve({caseId:ctx.caseId,round:0,submitter:a(100),
     commitment:sealed.commitment,object,recoveryKey:sealed.recoveryKey});
   assert.deepEqual(result.bytes,document);

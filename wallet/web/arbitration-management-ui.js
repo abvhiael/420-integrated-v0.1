@@ -343,12 +343,10 @@ async function connect(){
   const state=await c.dashboard();
   context=c;connectedIdentity=identity;
   for(const d of info.domains){const option=e('option',null,d.name);option.value=d.id;one('#arbitration-domain').append(option);}
-  const verified=await c.detail?.bind(c); // avoid assuming case detail before an ID is known
-  void verified;
+  const verified=await c.verify();
   setText('#arbitration-account',c.account);setText('#arbitration-chain',config.network.chainId);
   // The authoritative Router is returned by verified discovery, not by a caller field.
-  const evidence=await c.verify?.();
-  if(evidence)setText('#arbitration-router',evidence.binding.router);
+  setText('#arbitration-router',verified.binding.router);
   for(const item of state.cases)cases.set(item.id,item);
   cursor=state.nextBefore;renderList();updateButtons();
   setStatus('Arbitration verified. '+info.domains.length+' active domains available.');

@@ -129,7 +129,7 @@ export function renderLabyrinthSocial(state){
      (state.submitting?' disabled':'')+'>Invite rematch</button>':'')+'</li>';
  }).join('');
  return '<section class="lab-social" aria-label="420ID Labyrinth history and notifications">'+
-  '<h3>Labyrinth Cribbage · My 420ID matches</h3><p>Verified private account results. <a href="/profile">Profile</a> · <a href="/games/rooms">Rooms</a>. Off-chain; no wagers or rewards.</p>'+
+  '<h3>Labyrinth Cribbage · My 420ID matches</h3><p>420ID profile '+esc(viewer.slice(0,8))+' · <a href="/social">Your 420ID profile</a> · <a href="/games/rooms">Rooms</a>. Verified private account results; off-chain, no wagers or rewards.</p>'+
   '<p role="status">'+history.invitations.length+' pending invitation'+(history.invitations.length===1?'':'s')+
   ' · '+history.matches.filter(m=>m.status==='active'&&m.turnSeat===m.viewerSeat).length+' matches awaiting your turn</p>'+
   (state.notice?'<p role="status">'+esc(state.notice)+'</p>':'')+

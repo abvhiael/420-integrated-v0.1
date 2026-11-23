@@ -58,6 +58,12 @@ func NewDeveloperHTTPHandler(api DeveloperResourceAPI) DeveloperHTTPHandler {
 }
 
 func (h DeveloperHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// Private Storage traffic must never be cached, including denied requests,
+	// partial content and conditional responses. Public v1 caching is unchanged.
+	if strings.EqualFold(strings.TrimSpace(r.Header.Get(DeveloperHeaderAccessMode)), string(DeveloperAccessPrivate)) {
+		w.Header().Set("Cache-Control", "private, no-store")
+		w.Header().Set("Pragma", "no-cache")
+	}
 	policy := h.Policy
 	if policy.RequestTimeout <= 0 || policy.MaxRequestURIBytes <= 0 || policy.MaxHeaderBytes <= 0 {
 		policy = DefaultDeveloperHTTPPolicy()

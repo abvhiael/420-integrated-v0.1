@@ -274,7 +274,13 @@ export function createGovernance420Client({ provider, chainId, account, discover
     const chain = checkedChainId(await provider.request('eth_chainId'));
     if (chain !== expectedChain) throw new Error(`Wrong network: expected 0x${expectedChain.toString(16)}, received 0x${chain.toString(16)}`);
     const accounts = await provider.request('eth_accounts');
-    if (!Array.isArray(accounts) || !accounts.some((x) => typeof x === 'string' && x.toLowerCase() === voter)) throw new Error('Governance connected account is no longer authorized');
+    // EIP-1193 eth_accounts is ordered by the currently selected account.
+    // A previously authorized secondary account is NOT the active signer.
+    // Keeping it in the permission list must not let a stale tab vote for it.
+    if (!Array.isArray(accounts) || typeof accounts[0] !== 'string' ||
+        normalizeAddress(accounts[0]) !== voter) {
+      throw new Error('Governance connected account is no longer authorized or active');
+    }
 
     await verifyCode(provider,canonical.registryAddress,'ProtocolRegistry');
     const registryName = decodeStringResult(await call(provider,canonical.registryAddress,`0x${SELECTORS.systemName}`,voter),'registry system name');
@@ -423,6 +429,9 @@ export function createGovernance420Client({ provider, chainId, account, discover
     const fresh = await eligibility(id,h,proofData);
     if (!fresh.eligible || fresh.weight !== preflight.weight) throw new Error('Governance eligibility changed during vote preflight');
     const nonce = await provider.request('eth_getTransactionCount',[voter,'pending']);
+    // Last authorization boundary immediately before opening the wallet
+    // approval dialogue. Rejected/changed accounts cannot reach the signer.
+    await verifySession();
     const txHash = checkedHex(await provider.request('eth_sendTransaction',[tx]),'transaction hash',32);
     return { state:'submitted', txHash, nonce:BigInt(nonce), gas:BigInt(gas), proposalId:id, house:h, support:s, weight:fresh.weight };
   }
@@ -435,7 +444,8 @@ export function createGovernance420Client({ provider, chainId, account, discover
       const currentChain = checkedChainId(await provider.request('eth_chainId'));
       if (currentChain !== expectedChain) throw new Error('Governance chain changed during confirmation');
       const accounts = await provider.request('eth_accounts');
-      if (!Array.isArray(accounts) || !accounts.some((x)=>typeof x==='string' && x.toLowerCase()===voter)) {
+      if (!Array.isArray(accounts) || typeof accounts[0] !== 'string' ||
+          normalizeAddress(accounts[0]) !== voter) {
         throw new Error('Governance account changed during confirmation');
       }
       const receipt = await provider.request('eth_getTransactionReceipt',[transactionHash]);

@@ -59,7 +59,7 @@ jobs:
           python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
           python3 scripts/test-reg-audit-4-genesis-address-namespace.py
       - name: Run Wallet Arbitration runtime qualification
-        run: node --test wallet/web/test/arbitration-runtime.test.js
+        run: node --test wallet/web/test/arbitration-runtime.test.js wallet/web/test/genesis-app-catalog.test.js
       - name: Run Arbitration Foundry qualification
         working-directory: contracts
         run: forge test --match-path 'test/Arbitration*.t.sol' --skip 'test/fixtures/cadc/upstream/' -vvv

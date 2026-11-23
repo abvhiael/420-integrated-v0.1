@@ -101,6 +101,9 @@ Exit: auditable go/no-go and known blocker list; no production credit or reward 
 
 ### G-01 — Chain/source and asset feasibility (GO/NO-GO)
 
+**Current assessment: PROVISIONAL NO-GO; independent live-node and governance evidence outstanding.** [G-01 evidence and feasibility review](CMP-G01-GRIDCOIN-FEASIBILITY.md). No Gridcoin bridge, custody or 420Exchange market is authorized by this research gate.
+
+
 Independently confirm current Gridcoin network genesis/network ID, address encoding, chain/transaction model, current consensus/finality and reorganization/security characteristics, node RPC/indexing availability, signing/custody capabilities, required confirmations, maintenance status, denomination/precision and bridge-policy constraints. Verify any permission/license, supported custodial gateway model, contract/verifier feasibility, liquidity and risk appetite using primary network documentation and live nodes. Do not copy Curecoin's PoS assumptions, genesis constants or verifier. Document whether trust-minimized proof verification is feasible or whether a federated/custodial gateway would be necessary. If no credible two-way verified settlement path exists, stop bridge approval.
 
 ### G-02 — Bridge threat model and route architecture

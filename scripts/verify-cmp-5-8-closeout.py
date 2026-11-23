@@ -9,13 +9,14 @@ CLOSEOUT=ROOT/"docs/compute-market/CMP-5.8-PHASE-CLOSEOUT.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 GENESIS=ROOT/".github/workflows/genesis-address-authority.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
+SCOPED=ROOT/".github/workflows/cmp-phase-closeouts.yml"
 DOCS=ROOT/".github/workflows/docs-qualify.yml"
 COMPUTE=ROOT/".github/workflows/compute-market.yml"
 
 def fail(msg):
     raise SystemExit("CMP-5.8 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,SCOPED,DOCS,COMPUTE):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
@@ -52,9 +53,14 @@ gw=GENESIS.read_text()
 if "Canonical full Foundry qualification is owned once by Solidity Contracts" not in gw:
     fail("Genesis duplication boundary missing")
 
+# CI-GUARD-02 prohibits implicit execution of the complete integrated Level 3
+# suite. Verify scoped automatic triggers plus the retained global dispatch.
 qw=QUAL.read_text()
-for token in ("contracts/config/compute-market/cmp-5.8-phase-closeout.json","docs/compute-market/CMP-5.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-5-8-closeout.py"):
-    if qw.count(token)<2: fail(f"global qualification push/PR trigger missing {token}")
+if "\n  workflow_dispatch:" not in qw or any("\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+    fail("global Level 3 qualification must remain manual-only")
+sw=SCOPED.read_text()
+for token in ("pull_request:","push:","Verify exact head","contracts/config/compute-market/cmp-5.8-phase-closeout.json","docs/compute-market/CMP-5.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-5-8-closeout.py","run: python scripts/verify-cmp-5-8-closeout.py"):
+    if token not in sw: fail(f"scoped closeout qualification trigger missing {token}")
 
 dw=DOCS.read_text()
 if "docs/**" not in dw:

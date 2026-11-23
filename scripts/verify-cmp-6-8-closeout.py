@@ -9,6 +9,7 @@ CLOSEOUT=ROOT/"docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 GENESIS=ROOT/".github/workflows/genesis-address-authority.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
+SCOPED=ROOT/".github/workflows/cmp-phase-closeouts.yml"
 DOCS=ROOT/".github/workflows/docs-qualify.yml"
 COMPUTE=ROOT/".github/workflows/compute-market.yml"
 HARDENING=ROOT/".github/workflows/contracts-hardening.yml"
@@ -16,7 +17,7 @@ HARDENING=ROOT/".github/workflows/contracts-hardening.yml"
 def fail(msg):
     raise SystemExit("CMP-6.8 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE,HARDENING):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,GENESIS,QUAL,SCOPED,DOCS,COMPUTE,HARDENING):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
@@ -58,12 +59,19 @@ for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-6.8-phase-closeout.jso
 gw=GENESIS.read_text()
 if "Canonical full Foundry qualification is owned once by Solidity Contracts" not in gw:
     fail("Genesis duplication boundary missing")
-if "contracts/config/**" not in gw:
-    fail("Genesis closeout trigger coverage missing")
+# CI-GUARD-02 owns the Genesis owner's manual-only Level 3 boundary.
+# CMP closeout config changes are automatically checked by SCOPED instead.
+if "\n  workflow_dispatch:" not in gw or any("\n  "+event in gw for event in ("pull_request:","push:","schedule:")):
+    fail("Genesis closeout Level 3 manual dispatch boundary drift")
 
+# CI-GUARD-02 prohibits implicit execution of the complete integrated Level 3
+# suite. Verify scoped automatic triggers plus the retained global dispatch.
 qw=QUAL.read_text()
-for token in ("contracts/config/compute-market/cmp-6.8-phase-closeout.json","docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-6-8-closeout.py"):
-    if qw.count(token)<2: fail(f"global qualification push/PR trigger missing {token}")
+if "\n  workflow_dispatch:" not in qw or any("\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+    fail("global Level 3 qualification must remain manual-only")
+sw=SCOPED.read_text()
+for token in ("pull_request:","push:","Verify exact head","contracts/config/compute-market/cmp-6.8-phase-closeout.json","docs/compute-market/CMP-6.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-6-8-closeout.py","run: python scripts/verify-cmp-6-8-closeout.py"):
+    if token not in sw: fail(f"scoped closeout qualification trigger missing {token}")
 
 dw=DOCS.read_text()
 if "docs/**" not in dw:

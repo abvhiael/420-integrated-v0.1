@@ -8,12 +8,13 @@ ROADMAP=ROOT/"docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md"
 CLOSEOUT=ROOT/"docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
+SCOPED=ROOT/".github/workflows/cmp-phase-closeouts.yml"
 COMPUTE=ROOT/".github/workflows/compute-market.yml"
 
 def fail(msg):
     raise SystemExit("CMP-4.10 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL,COMPUTE):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL,SCOPED,COMPUTE):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
@@ -39,9 +40,14 @@ if "LEVEL 3 CLOSEOUT CANDIDATE" not in road and "COMPLETE — Level 3 exact-head
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-4.10-phase-closeout.json","qualify-foundry-shard.sh"):
     if token not in fw: fail(f"Foundry Level 3 ownership missing {token}")
+# CI-GUARD-02 prohibits implicit execution of the complete integrated Level 3
+# suite. Verify scoped automatic triggers plus the retained global dispatch.
 qw=QUAL.read_text()
-for token in ("contracts/config/compute-market/cmp-4.10-phase-closeout.json","docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md","scripts/verify-cmp-4-10-closeout.py"):
-    if qw.count(token)<2: fail(f"global qualification push/PR trigger missing {token}")
+if "\n  workflow_dispatch:" not in qw or any("\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+    fail("global Level 3 qualification must remain manual-only")
+sw=SCOPED.read_text()
+for token in ("pull_request:","push:","Verify exact head","contracts/config/compute-market/cmp-4.10-phase-closeout.json","docs/compute-market/CMP-4.10-PHASE-CLOSEOUT.md","scripts/verify-cmp-4-10-closeout.py","run: python scripts/verify-cmp-4-10-closeout.py"):
+    if token not in sw: fail(f"scoped closeout qualification trigger missing {token}")
 cw=COMPUTE.read_text()
 for i in range(1,11):
     token=f"verify-cmp-4-{i}-"

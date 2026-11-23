@@ -10,6 +10,7 @@ on:
       - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
       - 'scripts/verify-cmp-*.py'
       - 'scripts/test-cmp-*.py'
+      - 'scripts/qualify-compute-solidity.sh'
       - '.github/workflows/compute-market.yml'
   push:
     branches: [ main ]
@@ -21,6 +22,7 @@ on:
       - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
       - 'scripts/verify-cmp-*.py'
       - 'scripts/test-cmp-*.py'
+      - 'scripts/qualify-compute-solidity.sh'
       - '.github/workflows/compute-market.yml'
   workflow_dispatch:
 
@@ -32,9 +34,9 @@ permissions:
   contents: read
 
 jobs:
-  fast-qualification:
+  solidity-qualification:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -60,7 +62,28 @@ jobs:
 
       - name: Run retained Compute Market Solidity suite
         working-directory: contracts
-        run: forge test --match-path 'test/Compute*.t.sol' -vvv
+        # Stage every Compute*.t.sol test and original Foundry settings in an
+        # isolated workspace. Avoid discovery of unrelated CADC fixture contracts.
+        run: bash ../scripts/qualify-compute-solidity.sh
+
+
+  evidence-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Compile Compute Market verification scripts
         shell: bash

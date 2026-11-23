@@ -9,6 +9,7 @@ import {verifyChaosVehicleArt} from './verify-chaos-vehicle-art.mjs';
 import {CHAOS_IMAGE_MANIFEST_PATH,createChaosImageManifest} from './verify-chaos-image-manifest.mjs';
 import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
+import {LABYRINTH_HOLE_CENTERS} from '../core/labyrinth-hole-survey.js';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags,resolveClassicBuildFlags} from './account-social-build-config.mjs';
@@ -107,6 +108,13 @@ try{
  if(gitBlob!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2'||
     image.format!=='png'||image.width!==1254||image.height!==1254)
    throw Error('BC-2.4 user-approved GitHub board blob/dimensions mismatch');
+ // Validate the *pixel geometry*, not the PNG encoding: the independently
+ // surveyed 652 dark circles must still occupy the approved coordinates.
+ const {data:grey,info:geometry}=await sharp(bytes).removeAlpha().greyscale()
+   .raw().toBuffer({resolveWithObject:true});
+ if(geometry.channels!==1||LABYRINTH_HOLE_CENTERS.length!==652||
+    LABYRINTH_HOLE_CENTERS.some(({x,y})=>grey[y*geometry.width+x]>75))
+   throw Error('BC-2.4 uploaded board does not align with the 652 surveyed holes');
  const target=resolve(out,labyrinthOriginal);
  await mkdir(dirname(target),{recursive:true});
  await cp(labyrinthOriginalPath,target);

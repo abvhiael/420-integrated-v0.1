@@ -147,3 +147,31 @@ func TestArbitrationEvidenceStorageExistingDeveloperGatewayDenyWithoutIssuer(t *
 		t.Fatalf("denied private response must be no-store: %v",w.Header())
 	}
 }
+
+func TestArbitrationEvidenceStoragePublicHeaderDowngradeDenied(t *testing.T) {
+	payload:=[]byte("private-evidence-ciphertext")
+	object:=developerObjectRef(payload)
+	policy,_,_,_,_:=arbitrationAccessFixture420()
+	handler:=NewDeveloperHTTPHandler(GatewayDeveloperAPI{Router:GatewayRouter{
+		Cache:[]GatewaySource{developerGatewaySourceStub{payload:payload}},
+		Authorizer:policy,
+	}})
+	for _,mode:=range []string{"",string(DeveloperAccessPublic)}{
+		r:=httptest.NewRequest(http.MethodGet,developerHTTPURL(object),nil)
+		if mode!="" {r.Header.Set(DeveloperHeaderAccessMode,mode)}
+		w:=httptest.NewRecorder()
+		handler.ServeHTTP(w,r)
+		if w.Code!=http.StatusForbidden || w.Body.String()==string(payload) {
+			t.Fatalf("public mode %q bypassed private-only policy: status=%d",mode,w.Code)
+		}
+	}
+	publicHandler:=NewDeveloperHTTPHandler(GatewayDeveloperAPI{Router:GatewayRouter{
+		Cache:[]GatewaySource{developerGatewaySourceStub{payload:payload}},
+	}})
+	r:=httptest.NewRequest(http.MethodGet,developerHTTPURL(object),nil)
+	w:=httptest.NewRecorder()
+	publicHandler.ServeHTTP(w,r)
+	if w.Code!=http.StatusOK || w.Body.String()!=string(payload) {
+		t.Fatalf("ordinary public Storage router was unexpectedly restricted: status=%d",w.Code)
+	}
+}

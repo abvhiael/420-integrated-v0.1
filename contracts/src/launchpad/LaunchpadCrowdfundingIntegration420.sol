@@ -653,12 +653,23 @@ contract LaunchpadCrowdfundingIntegration420 is I420System {
             revert DisputeOutcomeUnavailable();
         }
 
-        (,,,,, uint8 state) = arbitrationCases.caseOrigin(caseId);
-        if (state != ARBITRATION_STATE_FINALIZED) revert DisputeOutcomeUnavailable();
+        // Recheck the canonical case at consumption time. A linked case and a
+        // derived/previously observed projection cannot authorize an outcome.
+        // This publishes evidence only; no custody or refund transition occurs.
+        (address claimant, address respondent, bytes32 domainId,
+            bytes32 originComponentId, bytes32 originObjectId, uint8 state) =
+            arbitrationCases.caseOrigin(caseId);
+        LaunchpadSaleRegistry420.Sale memory sale_ = sales.sale(saleId);
+        LaunchpadProjectRegistry420.Project memory project_ = projects.project(sale_.projectId);
+        if (state != ARBITRATION_STATE_FINALIZED || claimant != participant
+            || respondent != project_.controller || domainId != CROWDFUNDING_DOMAIN
+            || originComponentId != LaunchpadIds420.COMPONENT_LAUNCHPAD
+            || originObjectId != saleId) revert DisputeOutcomeUnavailable();
 
         uint8 round = arbitrationCases.caseRound(caseId);
         ILaunchpadArbitrationRulings420.Ruling memory ruling = arbitrationRulings.getRuling(caseId, round);
-        if (!ruling.exists || ruling.outcomeCode == 0 || ruling.rulingHash == bytes32(0)) {
+        if (!ruling.exists || ruling.outcomeCode == 0 || ruling.rulingHash == bytes32(0)
+            || ruling.remedyCommitment == bytes32(0)) {
             revert DisputeOutcomeUnavailable();
         }
 

@@ -31,6 +31,11 @@ import type { FinalityPolicy420 } from './indexing.js';
 import type { QueryRow420 } from './query-service.js';
 import { IndexerQueryService420 } from './query-service.js';
 import type { IndexerRuntimeState420 } from './runtime-state.js';
+import type {ChainSource420} from './chain-source.js';
+import type {ArbitrationIndexerDeployment420} from './arbitration-indexer.js';
+import {ArbitrationHistoryReadModel420,
+ type ArbitrationCaseProjection420,type ArbitrationCaseDetail420,
+ type ArbitrationCaseFilters420} from './arbitration-read-model.js';
 import {
   aiProviderState420, aiProviders420, aiModelState420, aiModels420,
   aiModelVersionState420, aiModelVersions420, aiDeploymentState420, aiDeployments420,
@@ -86,6 +91,7 @@ export interface SearchResult420 {
 
 export interface IndexerPublicApiOperationalOptions420 {
   tokenDeployment?: string;
+  arbitration?: {source:ChainSource420;deployment:ArbitrationIndexerDeployment420};
   runtimeState?: IndexerRuntimeState420;
   aiExpectedChainId?: bigint;
   maxIngestStaleMs?: number;
@@ -107,6 +113,10 @@ export interface IndexerPublicApi420 {
   assetTransfers(chainId: bigint, request?: AssetTransferPageRequest420): Promise<QueryPage420<AssetTransferDto420>>;
   protocolEvents(chainId: bigint, request?: ProtocolEventPageRequest420): Promise<QueryPage420<ProtocolEventDto420>>;
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null>;
+  arbitrationAvailable?():boolean;
+  arbitrationCases?(chainId:bigint,request?:ArbitrationCaseFilters420):Promise<QueryPage420<ArbitrationCaseProjection420>>;
+  arbitrationCase?(chainId:bigint,caseId:string):Promise<ArbitrationCaseProjection420|null>;
+  arbitrationHistory?(chainId:bigint,caseId:string,request?:PageRequest420):Promise<ArbitrationCaseDetail420>;
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null>;
   tokenDeployment?(chainId: bigint, token: string): Promise<TokenDeployment420|null>;
   treasuryAssetPolicy?(chainId: bigint, asset: string): Promise<TreasuryAssetPolicyState420 | null>;
@@ -162,11 +172,17 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
   readonly version = INDEXER_API_VERSION_420;
 
   private readonly tokenBinding?: TokenBinding420;
+  private readonly arbitration?: ArbitrationHistoryReadModel420;
   constructor(
     readonly service: IndexerQueryService420,
     readonly finalityPolicy: FinalityPolicy420 = { mode: 'head' },
     readonly operational: IndexerPublicApiOperationalOptions420 = {}
-  ) { const raw=operational.tokenDeployment ?? process.env.INDEXER_TOKEN_DEPLOYMENT; if(raw) this.tokenBinding=parseTokenBinding420(raw); }
+  ) {
+    const raw=operational.tokenDeployment ?? process.env.INDEXER_TOKEN_DEPLOYMENT;
+    if(raw)this.tokenBinding=parseTokenBinding420(raw);
+    if(operational.arbitration)this.arbitration=new ArbitrationHistoryReadModel420(
+      service.db,operational.arbitration.source,operational.arbitration.deployment);
+  }
 
   private operationalContext(): IndexerOperationalContext420 {
     if (!this.operational.runtimeState) return {};
@@ -234,6 +250,25 @@ export class IndexerPublicApiAdapter420 implements IndexerPublicApi420 {
 
   protocolObject(chainId: bigint, protocol: string, objectKey: string): Promise<ProtocolObjectStateDto420 | null> {
     return protocolObjectState420(this.service, chainId, protocol, objectKey);
+  }
+
+  arbitrationAvailable():boolean{return this.arbitration!==undefined;}
+  private arbitrationChecked(chainId:bigint):ArbitrationHistoryReadModel420{
+    if(!this.arbitration)throw Error('Arbitration verified Indexer deployment not configured');
+    if(this.arbitration.binding.chainId!==chainId)
+      throw Error('Arbitration chain does not match the verified Indexer deployment');
+    return this.arbitration;
+  }
+  arbitrationCases(chainId:bigint,request:ArbitrationCaseFilters420={}):
+    Promise<QueryPage420<ArbitrationCaseProjection420>>{
+    return this.arbitrationChecked(chainId).cases(request);
+  }
+  arbitrationCase(chainId:bigint,caseId:string):Promise<ArbitrationCaseProjection420|null>{
+    return this.arbitrationChecked(chainId).case(caseId);
+  }
+  arbitrationHistory(chainId:bigint,caseId:string,request:PageRequest420={}):
+    Promise<ArbitrationCaseDetail420>{
+    return this.arbitrationChecked(chainId).history(caseId,request);
   }
 
   treasuryBudget(chainId: bigint, budgetId: string): Promise<TreasuryBudgetState420 | null> {

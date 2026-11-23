@@ -31,7 +31,7 @@ test('BC-2.4 separates 325 rules and authentic user-art path from the 121-point 
  assert.match(LABYRINTH_MANIFEST_SHA,/^[0-9a-f]{64}$/);
  assert.equal(LABYRINTH_BOARD_SRC,'/assets/games/labyrinth-cribbage/labyrinth.png');
  assert.equal(LABYRINTH_BOARD_SHA256,'4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5');
- const manifest=JSON.parse(await readFile(new URL('../../../../docs/games/classics/BC-2-1-LABYRINTH-CRIBBAGE-VARIANTS.json',import.meta.url),'utf8'));
+ const manifest=JSON.parse(await readFile(new URL('../../../docs/games/classics/BC-2-1-LABYRINTH-CRIBBAGE-VARIANTS.json',import.meta.url),'utf8'));
  assert.equal(manifest.board.scoringHolesPerRun,324);
  assert.equal(manifest.board.finishHole,325);
  assert.equal(manifest.targetScore,325);
@@ -91,7 +91,7 @@ test('BC-2.4 explicit Play selected card, 31/Go/cut and no unauthorized action c
  let moves=labyrinthLegalMoves(v);
  assert.equal(moves.length,v.hand.filter(c=>Math.min(10,c%13+1)+23<=31).length);
  assert.ok(verifyLabyrinthProjection(v));
- let html=renderLabyrinthTable({view:v,selection:[5]});
+ let html=renderLabyrinthTable({view:v,selection:[9]});
  assert.match(html,/data-lab-action="play"/);
  assert.match(html,/Play selected card/);
  assert.match(html,/data-lab-action="play" disabled/,'invalid selected peg does not authorize action');

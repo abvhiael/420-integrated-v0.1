@@ -51,6 +51,10 @@ test('420Storage integration remains disabled without live authority, but local 
   assert.equal(bridge.online,false);
   const sealed=await bridge.workspace.prepare({caseId:ctx.caseId,data:plaintext});
   assert.match(sealed.commitment,/^0x[0-9a-f]{64}$/);
+  // A canonical evidence event is required before any storage operation.
+  // This test specifically verifies that Storage remains disabled afterward.
+  record.history=[{kind:'evidence',caseId:ctx.caseId,round:0,actor:ctx.submitter,
+    details:{evidenceHash:sealed.commitment},blockNumber:2n,transactionHash:h(111)}];
   await assert.rejects(bridge.workspace.upload({caseId:ctx.caseId,round:0,
     submitter:ctx.submitter,commitment:sealed.commitment,
     encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey}),
@@ -145,7 +149,7 @@ test('untrusted 420ID app login alone grants neither Wallet identity nor Storage
   });
   await assert.rejects(bridge.workspace.retrieve({caseId:ctx.caseId,round:0,
     submitter:ctx.submitter,commitment:sealed.commitment,object,recoveryKey:sealed.recoveryKey}),
-    /Approved private 420Storage session unavailable/);
+    /private evidence authorization required/);
   assert.deepEqual(events,[]);
 });
 

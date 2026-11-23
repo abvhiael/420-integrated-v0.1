@@ -57,7 +57,7 @@ jobs:
           set -euo pipefail
           regex='^(BetCasinoConvergence420|BetCasinoEmergencyConvergence420|BetCasinoSolvencyConvergence420|BetCasinoSettlementInvariant420|BetCasinoResultAdapter420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCrashV1420|BetMinesV1420|BetRouletteV1420|BetBlackjackV1420|BetKenoV1420|BetPlinkoV1420|BetReferenceSlotV1420|BetDiceV1420)Test$'
           set +e
-          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/cross-game-level2.json" 2> "$RUNNER_TEMP/cross-game-level2.stderr"
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract "$regex" --json > "$RUNNER_TEMP/cross-game-level2.json" 2> "$RUNNER_TEMP/cross-game-level2.stderr"
           forge_status=$?
           set -e
           if [ "$forge_status" -ne 0 ]; then

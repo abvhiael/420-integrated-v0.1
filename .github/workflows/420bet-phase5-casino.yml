@@ -1,0 +1,49 @@
+name: BET Phase 5 Casino V2 and Adversarial Qualification
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/bet/**'
+      - 'contracts/test/BetPlinkoV2VerticalSlice420.t.sol'
+      - 'contracts/test/BetWagerAcceptance420.t.sol'
+      - 'docs/bet/BET-PLINKO-V2-16-ROWS.md'
+      - '.github/workflows/420bet-phase5-casino.yml'
+      - 'scripts/qualify-bet-foundry.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  plinko-v2-and-video-poker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact-head identity and test inventory
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test -s contracts/test/BetPlinkoV2VerticalSlice420.t.sol
+          test -s contracts/src/bet/PlinkoV2420.sol
+          test -s contracts/src/bet/PlinkoPaytableAuthorityV2420.sol
+          test -s contracts/src/bet/PlinkoV2View420.sol
+          test -s contracts/src/bet/VideoPokerV1420.sol
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile canonical Plinko V2 and Video Poker acceptance/settlement
+        working-directory: contracts
+        run: forge build src/bet/WagerRouter420.sol src/bet/SettlementEngine420.sol src/bet/PlinkoV2420.sol src/bet/PlinkoPaytableAuthorityV2420.sol src/bet/PlinkoV2View420.sol
+      - name: Execute Plinko V2 exact payout, schedule, replay and liability regressions
+        working-directory: contracts
+        run: bash ../scripts/qualify-bet-foundry.sh test/BetPlinkoV2VerticalSlice420.t.sol -- --match-path 'test/BetPlinkoV2VerticalSlice420.t.sol' -vv
+      - name: Execute Video Poker acceptance, collateralization and settlement regressions
+        working-directory: contracts
+        run: |
+          bash ../scripts/qualify-bet-foundry.sh test/BetWagerAcceptance420.t.sol -- --match-test 'testVideoPoker*' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/BetSettlementEngine420.t.sol -- --match-test 'testVideoPoker*' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/BetVideoPokerSecureDraw.t.sol -- --match-contract 'BetVideoPokerSecureDrawTest' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/BetVideoPokerPaytable54.t.sol -- --match-contract 'BetVideoPokerPaytable54Test' -vv

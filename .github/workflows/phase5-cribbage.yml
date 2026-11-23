@@ -1,0 +1,76 @@
+name: Phase 5 BongGoggles Labyrinth Cribbage Qualification
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/core/cribbage-*.js'
+      - 'bong-goggles/web/core/classic-cribbage*.js'
+      - 'bong-goggles/web/assets/games/cribbage/**'
+      - 'bong-goggles/web/test/cribbage-*'
+      - '.github/workflows/phase5-cribbage.yml'
+      - 'docs/games/classics/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  front-end-session-and-board:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head and immutable source artwork
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test -s bong-goggles/web/assets/games/cribbage/board-cannabis-leaf.png
+          git hash-object bong-goggles/web/assets/games/cribbage/board-cannabis-leaf.png
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Explicit Play Card, selection, stable table, resume and privacy regression
+        working-directory: bong-goggles/web
+        run: |
+          node --test test/cribbage-rules-spec.test.js test/cribbage-frontend.test.js test/cribbage-multiplayer.test.js test/cribbage-social.test.js test/cribbage-practice.test.js test/labyrinth-cribbage-rules.test.js
+      - name: Full browser test dependencies
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Real Chromium authenticated two-principal reload, gameboard, room resume
+        working-directory: bong-goggles/web
+        run: |
+          node test/cribbage-live-browser.mjs
+          node test/cribbage-final-browser.mjs
+  server-rules-and-state:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Confirm exact implementation head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Canonical rules, game state, and authenticated multiplayer isolation
+        run: |
+          go test -race -count=1 -timeout=15m -run '^(TestBC11|TestBC12|TestBC14|TestBC15|TestBC17|TestBC21)' ./services/bong-goggles-account-social
+          go test -race -count=1 -tags account420_integration,bc15_fullmatch -timeout=16m -run '^(TestBC15|TestBC17)' ./services/bong-goggles-account-social

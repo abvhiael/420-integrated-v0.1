@@ -1,0 +1,60 @@
+name: BET Phase 5 Cannabis Cowboy M8 Candidate Certification
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/qualification/m8/**'
+      - 'clients/420bet-lobby/scripts/cannabis-cowboy-m8-*.mjs'
+      - '.github/workflows/420bet-phase5-cowboy-m8.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  candidate-mechanics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin exact test head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Check isolated feature mechanics and canonical accounting
+        run: node --test clients/420bet-lobby/qualification/m8/cannabis-cowboy-m8.test.mjs
+      - name: Confirm conditional RTP sample and cap evidence (practice candidate only)
+        run: |
+          cd clients/420bet-lobby
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 100000 --feature3 30000 --feature4 5000 --feature5 1000 --feature6 500 --seed 7654321 --bet 20 --output artifacts/cannabis-cowboy-m8/candidate-bet20.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bet-phase5-m8-candidate-mechanics
+          path: clients/420bet-lobby/artifacts/cannabis-cowboy-m8/
+  minimum-wager-statistical-certification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin exact test head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - name: Independently certify 10-credit 95–96% RTP before applying any candidate changes
+        working-directory: clients/420bet-lobby
+        run: |
+          node scripts/cannabis-cowboy-m8-stratified.mjs --base 2000000 --feature3 2000000 --feature4 320000 --feature5 64000 --feature6 16000 --seed 7654321 --bet 10 --output artifacts/cannabis-cowboy-m8/candidate-bet10.json
+          node --input-type=module -e "import {readFileSync} from 'node:fs'; const r=JSON.parse(readFileSync('artifacts/cannabis-cowboy-m8/candidate-bet10.json')); console.log('BET10_RTP',r.expected.totalRtp,'CI95',r.expected.ci95,'REJECTIONS',r.rejections); if(!r.qualified)process.exitCode=1;"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bet-phase5-m8-minbet-certification
+          path: clients/420bet-lobby/artifacts/cannabis-cowboy-m8/

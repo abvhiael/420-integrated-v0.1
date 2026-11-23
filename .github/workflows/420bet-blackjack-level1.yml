@@ -63,7 +63,7 @@ jobs:
         run: |
           set -euo pipefail
           regex='^(BetBlackjackV1420|BetBlackjackV1View420|BetBlackjackVerticalSlice420|BetBlackjackHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
-          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/blackjack-level1.json"
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract "$regex" --json > "$RUNNER_TEMP/blackjack-level1.json"
           python3 - "$RUNNER_TEMP/blackjack-level1.json" <<'PY'
           import json, sys
           names = ["BetBlackjackV1420","BetBlackjackV1View420","BetBlackjackVerticalSlice420","BetBlackjackHardening420","BetWagerAcceptance420","BetRandomness420","BetRandomnessTerminal420","BetSettlementEngine420","BetBankrollRisk420","BetTerminalPathInvariant420","BetCasinoSettlementInvariant420","BetCasinoSolvencyConvergence420"]

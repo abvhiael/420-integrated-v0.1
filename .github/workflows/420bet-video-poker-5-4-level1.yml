@@ -35,6 +35,6 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
-          forge test --match-contract 'BetVideoPokerPaytable54Test' -vv
-          forge test --match-contract 'BetVideoPokerEconomicsTest' -vv
-          forge test --match-contract 'BetVideoPokerSecureDrawTest' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract 'BetVideoPokerPaytable54Test' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract 'BetVideoPokerEconomicsTest' -vv
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract 'BetVideoPokerSecureDrawTest' -vv

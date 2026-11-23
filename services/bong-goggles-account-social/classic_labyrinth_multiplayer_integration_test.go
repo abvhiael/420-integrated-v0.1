@@ -94,8 +94,22 @@ func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
  if e=h.Sessions.VerifyRules(context.Background(),replay.ID);e!=nil{
   t.Fatal("rematch canonical replay",e)
  }
- // Database clock, not client time, expires the turn exactly once.
- if _,e:=store.DB.Exec("UPDATE bg_account_social.classic_sessions SET turn_deadline=clock_timestamp()-interval '1 second' WHERE id=$1",replay.ID);e!=nil{t.Fatal(e)}
+ // Use the production expiration transition with an injected instant just
+ // past the persisted deadline. Do NOT mutate turn_deadline directly: the
+ // immutable "started" journal must continue to match its snapshot.
+ ctx:=context.Background()
+ tx,e:=store.DB.BeginTx(ctx,nil);if e!=nil{t.Fatal(e)}
+ var lockedRoom string
+ if e=tx.QueryRowContext(ctx,"SELECT status FROM bg_account_social.classic_rooms WHERE id=$1 FOR UPDATE",next.ID).Scan(&lockedRoom);e!=nil{_ =tx.Rollback();t.Fatal(e)}
+ rec,e:=scanClassicSession(tx.QueryRowContext(ctx,"SELECT "+classicSessionFields+
+  " FROM bg_account_social.classic_sessions WHERE id=$1 FOR UPDATE",replay.ID))
+ if e!=nil{_ =tx.Rollback();t.Fatal(e)}
+ if rec.Status!="active"||rec.Deadline==nil||lockedRoom!="in_game"{
+  _=tx.Rollback();t.Fatal("active timeout fixture invalid")
+ }
+ if e=h.Sessions.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{_ =tx.Rollback();t.Fatal("cannot verify pre-expiration journal",e)}
+ if e=h.Sessions.expireLocked(ctx,tx,&rec,rec.Deadline.Add(1));e!=nil{_ =tx.Rollback();t.Fatal("expired transition failed",e)}
+ if e=tx.Commit();e!=nil{t.Fatal(e)}
  first:=request(h,"GET","/v1/classic-sessions/"+replay.ID,"",host)
  if first.Code!=200{t.Fatal("authoritative expiration unavailable",first.Code,first.Body.String())}
  var terminal struct{Session ClassicSessionView}

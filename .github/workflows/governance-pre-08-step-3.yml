@@ -4,6 +4,12 @@ on:
   pull_request:
     paths:
       - 'scripts/gov-pre-08/**'
+      - 'wallet/web/scripts/qualify-gov-pre08-browser.mjs'
+      - 'wallet/web/420id-session-ui.mjs'
+      - 'wallet/web/420id-client.mjs'
+      - 'wallet/web/governance-management-ui.js'
+      - 'services/420id/app-gateway/client.mjs'
+      - 'contracts/test/fixtures/GOVPRE08BrowserElectorate420.sol'
       - 'consensus/cmd/certified-producer/**'
       - 'consensus/signing/**'
       - 'integration/cmd/settlement-fixture/**'
@@ -125,6 +131,11 @@ jobs:
           docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "select pg_reload_conf()"
           docker exec -i -u postgres "$CONTAINER" psql -U signing -d signing < consensus/signing/witness.sql
           echo "STAKE_SIGNER_PG_DSN=postgresql://signing:qualification-only@127.0.0.1:5433/signing?sslmode=verify-full&sslrootcert=$tls_dir/server.crt&connect_timeout=5" >> "$GITHUB_ENV"
+      - name: Install only the Chromium browser dependencies for native injected-Wallet qualification
+        working-directory: wallet/web
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
       - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
         run: |
           python3 scripts/gov-pre-08/qualify-unified-local-node420.py \

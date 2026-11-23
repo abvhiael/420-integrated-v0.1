@@ -1,4 +1,5 @@
 import {renderRiderLanding} from './rider-landing.mjs';
+import {renderDriverLanding} from './driver-landing.mjs';
 import {mountOperatorConsole} from './operator-console.mjs';
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
@@ -68,7 +69,15 @@ function renderDecision(decision) {
     if (focusAfterNavigation) { focusAfterNavigation = false; root.focus(); }
     return;
   }
-  root.classList.remove("rider-landing-root");
+  if (decision.kind === "public" && decision.path === "/drive") {
+    root.classList.remove("rider-landing-root");
+    root.classList.add("driver-landing-root");
+    root.append(renderDriverLanding());
+    document.title = "Drive with LIFTd — arrive higher";
+    if (focusAfterNavigation) { focusAfterNavigation = false; root.focus(); }
+    return;
+  }
+  root.classList.remove("rider-landing-root", "driver-landing-root");
   const panel = node("section", undefined, "panel");
   panel.append(node("h1", decision.title));
   if (decision.kind === "public") {

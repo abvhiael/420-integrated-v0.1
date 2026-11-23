@@ -29,7 +29,7 @@ const hash = (value) => {
   return value.toLowerCase();
 };
 const wordAddress = (word) => {
-  check(BigInt(word)<(1n<<160n),'malformed Arbitration ABI address');
+  check(BigInt('0x'+word)<(1n<<160n),'malformed Arbitration ABI address');
   return address('0x'+word.slice(24));
 };
 const exactWords = (value,count) => {

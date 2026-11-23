@@ -296,13 +296,24 @@ contract ArbitrationProtocolQualification420Test {
         require(router.getPolicy(DOMAIN).maxAppeals == 3, "router policy");
 
         bytes32 id = _open(12);
-        (address claimant, address respondent, bytes32 domain, bytes32 origin, bytes32 objectId, ArbitrationCaseRegistry420.State state) =
-            cases.caseOrigin(id);
+        (
+            address claimant,
+            address respondent,
+            bytes32 domain,
+            bytes32 origin,
+            bytes32 objectId,
+            ArbitrationCaseRegistry420.State state
+        ) = cases.caseOrigin(id);
         require(claimant == CLAIMANT && respondent == RESPONDENT && domain == DOMAIN, "origin parties/domain");
         require(origin == ORIGIN && objectId == bytes32(uint256(13)), "origin object");
         require(state == ArbitrationCaseRegistry420.State.OPEN, "case origin state");
-        (bytes32 readDomain, address resolver, uint8 round, ArbitrationCaseRegistry420.State readState, uint64 deadline) =
-            cases.rulingContext(id);
+        (
+            bytes32 readDomain,
+            address resolver,
+            uint8 round,
+            ArbitrationCaseRegistry420.State readState,
+            uint64 deadline
+        ) = cases.rulingContext(id);
         require(readDomain == DOMAIN && resolver == address(this), "resolver context");
         require(round == 0 && readState == ArbitrationCaseRegistry420.State.OPEN && deadline == 0, "open context");
         _rule(id, 1);

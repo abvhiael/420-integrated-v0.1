@@ -10,6 +10,7 @@ on:
       - '420-indexer/src/arbitration-*.ts'
       - '420-indexer/test/arbitration-*.test.ts'
       - 'docs/audit/420ARBITRATION-ARB-PRE-08-SECURITY.md'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
       - '.github/workflows/420arbitration-pre08-security.yml'
   workflow_dispatch:
 permissions:

@@ -52,7 +52,7 @@ for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-2.8-phase-closeout.jso
 # The scoped CMP-2.8 workflow is the automatic inventory trigger and must
 # continue to bind to the exact PR head and the retained verifier.
 qw=QUAL.read_text()
-if "\\n  workflow_dispatch:" not in qw or any("\\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+if "\n  workflow_dispatch:" not in qw or any("\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
     fail("global Level 3 qualification must remain explicit dispatch only")
 sw=SCOPED.read_text()
 for token in ("pull_request:","push:","contracts/config/compute-market/cmp-2.8-phase-closeout.json","docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-2-8-phase-closeout.py","run: python scripts/verify-cmp-2-8-phase-closeout.py","Verify exact head"):

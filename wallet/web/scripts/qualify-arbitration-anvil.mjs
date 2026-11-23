@@ -224,8 +224,17 @@ try{
   });
   await inspect.locator('[name="recoveryKey"]').fill(recoveryKey);
   await inspect.locator('button[type="submit"]').click();
-  await page.waitForFunction(()=>document.querySelector('#arbitration-inspection-status')?.textContent?.includes('Private bytes verified'),
-    null,{timeout:15000});
+  await page.waitForFunction(()=>{
+    const status=document.querySelector('#arbitration-inspection-status')?.textContent||'';
+    const error=document.querySelector('#arbitration-error')?.textContent||'';
+    return status.includes('Private bytes verified')||error.trim().length>0;
+  },null,{timeout:15000});
+  const privateInspectionState=await page.evaluate(()=>({
+    verified:document.querySelector('#arbitration-inspection-status')?.textContent?.includes('Private bytes verified'),
+    error:document.querySelector('#arbitration-error')?.textContent||''
+  }));
+  assert.equal(privateInspectionState.verified,true,
+    'Private evidence inspection rejected: '+privateInspectionState.error);
   const verifiedDownloadPromise=page.waitForEvent('download');
   await page.locator('#arbitration-export-verified').click();
   const verifiedDownload=await verifiedDownloadPromise;

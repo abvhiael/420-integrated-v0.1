@@ -2,26 +2,27 @@
 
 ## Latest qualification status
 
-The last retained full Step 3 workflow is [run 45102757830](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45102757830)
-at source `e85033c1e91253ab9c86fa0714587eff3aab8d11`.
-[Unified artifact 14786237166](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45102757830/artifacts/14786237166)
-records the mature seven-day G1 execution, 42,000 $420 sponsor collateral movement,
-native sponsored 90/10 reward, Treasury policy and cancellation parity, certified
-reward replacement, and both PostgreSQL recoveries. At that source, the protected
-committee had the same membership across both boundaries. The Treasury payout
-and TypeScript native reward projection had yet to be exercised.
-
+**GOV-PRE-08 Step 3 local engineering qualified.**
 [PR #1338](https://github.com/abvhiael/420-integrated-v0.1/pull/1338)
-adds three cases to the same required workflow. Their qualification depends on a
-passing unified job at the exact source head and the retained evidence below.
+passed all three jobs in [run 45108109535](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45108109535)
+at executable source `a8f133d7869f6784e40671b1c5a3c8f3ff672051`.
+The [unified evidence](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45108109535/artifacts/14788074524)
+and [source and recovery evidence](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45108109535/artifacts/14788577328)
+record the same-chain results. The PR records the final rerun and its artifacts.
 
-| Case | Evidence required in the unified job |
+| Case | Retained result |
 |---|---|
-| Protected committee handoff | Fifteen independently protected validators per committee. Three explicitly pinned rotation seat maps authorize the original roster, a disjoint replacement roster, and the original roster again. Each handoff carries the prior roster's exact certified parent and uses the new roster's quorum. Signer policies constrain the permitted rotation. |
-| Native Treasury payout | The mature Civic operation sets the exact budget, disbursement and two narrowly scoped grants. A subsequent signed EIP-1559 transaction calls the commitment-bound release executor. The receipt, exact recipient increase, Operations Vault decrease and replay denial must reconcile with the executed budget/disbursement in both Indexers and Go Explorer. |
-| TypeScript native Stake ingestion | The Indexer reads the authenticated Engine archive against the canonical execution hash, number and batch root. The retained Stake ABI decodes the logs. Both PostgreSQL-backed paths and Explorer must agree on the native reward position, and the TypeScript amounts must match the ledger's 90/10 movement across reorganization and recovery. |
+| Genesis and protected committee handoff | Two source materializations produced identical funded Genesis bytes with 42,000,000 $420. Fifteen protected validators per active roster certified the original roster, the disjoint replacement roster at slot 17,640, and the returning original roster at slot 35,280. Each replacement used the exact prior parent QC. |
+| Civic and Treasury | Real Chromium and 420ID signed the proposal and ballot. The G1 operation denied execution before the frozen seven-day delay and executed at height 14. At height 15 a signed EIP-1559 transaction released 1 $420 from the Operations Vault using two narrowly scoped grants, rejected replay, and left 4,199,999 $420 in the Vault. Both Indexers and Go Explorer reconstructed the same payout and commitment. |
+| Stake and PostgreSQL recovery | Civic funded 42,000 $420 in sponsored collateral. The two native sponsored allocations each paid 535714285714020000 wei to the operator and 59523809523780000 wei to the community reserve. Both Indexers and Go Explorer agreed before and after the certified reward-tip replacement. A corrupt Go snapshot and a corrupt TypeScript finalized checkpoint were rejected. Reconstruction and bounded tip replay preserved the finalized payout, balances, and canonical projections. |
 
-Use [the exact-head workflow](../../.github/workflows/governance-pre-08-step-3.yml)
+Two independent native cold starts also reproduced identical Genesis,
+consensus history, checkpoint, public trust, and financial result files.
+The release workflow pins its staging toolchain and copies fork-system
+accounts only from the target Genesis configuration. The 31337 staging block,
+beacon, and request history stays on the staging network.
+
+Use [the exact-head workflow](https://github.com/abvhiael/420-integrated-v0.1/blob/main/.github/workflows/governance-pre-08-step-3.yml)
 for cold start and evidence collection. The unified job captures signed proposals
 and quorum receipts, execution receipts and archives, PostgreSQL recovery logs
 and consumer projections in `govpre08-unified-local-<source SHA>`. To enable
@@ -33,7 +34,7 @@ durable checkpoint and compare the canonical receipts and Stake evidence.
 The committee schedule authorizes only the isolated local chain in the rehearsal.
 Independent founder ownership and exact V4 approval remain pre-Genesis ceremony
 prerequisites. Live claims, finalized network receipts, reward observations and
-governance retirement remain in [GOV-AUDIT-9](420GOVERNANCE-TESTNET-WORK-ROADMAP.md#network-only-gov-audit-9-evidence--not-local-step-3-acceptance).
+governance retirement remain in [GOV-AUDIT-9](420GOVERNANCE-TESTNET-WORK-ROADMAP.md#network-only-gov-audit-9-evidence-not-local-step-3-acceptance).
 
 ## QUALIFIED — one real local chain-420 execution state (2026-11-22)
 

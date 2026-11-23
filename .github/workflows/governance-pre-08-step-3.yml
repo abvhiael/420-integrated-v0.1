@@ -201,7 +201,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: stable
+          version: v1.10.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

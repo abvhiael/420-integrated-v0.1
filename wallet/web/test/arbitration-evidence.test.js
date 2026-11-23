@@ -19,9 +19,10 @@ const open=(sealed,options={})=>verifyPrivateEvidence420({encrypted:sealed.encry
   cryptoImpl:webcrypto,...options});
 const record={id:context.caseId,round:0,claimant:alice,respondent:bob,
   resolver,appealResolver:a(103)};
-const grant=(viewer,expiry=Date.now()+60000)=>({account:viewer,caseId:context.caseId,
+const grant=(viewer,expiry=Date.now()+60000,capability='read',storageObject=object)=>({account:viewer,caseId:context.caseId,
   round:0,chainId:420,caseRegistry:context.caseRegistry,expiresAt:expiry,
-  authorization:'420ID-verified-private-authorization-123'});
+  authorization:'420ID-verified-private-authorization-123',capability,storageObject,
+  storageSubject:'test-scoped-subject',storageSessionId:'test-private-session-12345678'});
 const object={object_id:'obj1',manifest_id:'manifest1',shard_index:0,
   shard_root:h(4),size_bytes:320,commitment_id:'storage-commit1'};
 const storageObjectFor=async sealed=>{
@@ -124,7 +125,7 @@ test('storage prepared/ingested ciphertext only after exact scoped authorization
     async prepare(args){calls.push(['prepare',args]);return {upload_id:'u1'};},
     async ingest(args){calls.push(['ingest',args]);return {object:storageObject,visibility:'private'};}
   };
-  const store=createPrivateEvidenceStore420({storage,authenticate:async()=>grant(alice)});
+  const store=createPrivateEvidenceStore420({storage,authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
   const receipt=await store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,
     viewer:alice,object:storageObject,retentionMs:3600000});
   assert.equal(receipt.visibility,'private');assert.equal(calls.length,2);
@@ -140,13 +141,13 @@ test('interrupted upload and provider errors never constitute successful storage
     async prepare(){calls.push('prepare');controller.abort();return {upload_id:'u1'};},
     async ingest(){calls.push('ingest');return {object:storageObject,visibility:'private'};}
   };
-  const store=createPrivateEvidenceStore420({storage,authenticate:async()=>grant(alice)});
+  const store=createPrivateEvidenceStore420({storage,authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
   await assert.rejects(store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,viewer:alice,
     object:storageObject,retentionMs:5000,signal:controller.signal}),/unavailable or interrupted/);
   assert.deepEqual(calls,['prepare']);
   const corrupt=createPrivateEvidenceStore420({storage:{
     async prepare(){return {upload_id:'u1'};},async ingest(){return {object:storageObject,visibility:'public'};}
-  },authenticate:async()=>grant(alice)});
+  },authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
   await assert.rejects(corrupt.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,viewer:alice,
     object:storageObject,retentionMs:5000}),/unavailable or interrupted/);
 });
@@ -155,7 +156,7 @@ test('upload refuses corrupted ciphertext or false Storage size/SHA root before 
   const store=createPrivateEvidenceStore420({storage:{
     async prepare(){calls.push('prepare');return {upload_id:'p1'};},
     async ingest(){calls.push('ingest');return {object:storageObject,visibility:'private'};}
-  },authenticate:async()=>grant(alice),cryptoImpl:webcrypto});
+  },authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object),cryptoImpl:webcrypto});
   const tampered={...sealed.encrypted,ciphertext:flipLastByte(sealed.encrypted.ciphertext)};
   await assert.rejects(store.upload({encrypted:tampered,recoveryKey:sealed.recoveryKey,
     context,record,viewer:alice,object:storageObject,retentionMs:5000}),/Private evidence unavailable/);
@@ -169,7 +170,7 @@ test('storage retrieval validates private object identity and ciphertext then de
   const sealed=await prep(),calls=[];
   const storage={async retrieve(args){calls.push(args);return {visibility:'private',object,
     bytes:new TextEncoder().encode(JSON.stringify(sealed.encrypted))};}};
-  const store=createPrivateEvidenceStore420({storage,authenticate:async()=>grant(alice)});
+  const store=createPrivateEvidenceStore420({storage,authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
   const result=await store.retrieve({context,record,viewer:alice,object,
     expectedCommitment:sealed.commitment,recoveryKey:sealed.recoveryKey});
   assert.deepEqual(result,data);
@@ -185,12 +186,12 @@ test('unavailable, expired, wrong-object, public or corrupted retrieval fails se
     {visibility:'private',object,bytes:new TextEncoder().encode(JSON.stringify({...sealed.encrypted,commitment:h(99)}))}
   ]){
     const store=createPrivateEvidenceStore420({storage:{retrieve:async()=>response},
-      authenticate:async()=>grant(alice)});
+      authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
     await assert.rejects(store.retrieve({context,record,viewer:alice,object,
       expectedCommitment:sealed.commitment,recoveryKey:sealed.recoveryKey}),/Private evidence unavailable/);
   }
   const expired=createPrivateEvidenceStore420({storage:{retrieve:async()=>{throw Error('should not reach');}},
-    authenticate:async()=>grant(alice,Date.now()-1000)});
+    authenticate:async({capability,object})=>grant(alice,Date.now()-1000,capability,object)});
   await assert.rejects(expired.retrieve({context,record,viewer:alice,object,
     expectedCommitment:sealed.commitment,recoveryKey:sealed.recoveryKey}),/authorization required/);
 });
@@ -199,7 +200,7 @@ test('storage errors do not disclose private payload content or credentials',asy
   const store=createPrivateEvidenceStore420({storage:{
     async retrieve(){throw Error('Highly confidential arbitration evidence secret authorization='+
       '420ID-verified-private-authorization-123');}
-  },authenticate:async()=>grant(alice)});
+  },authenticate:async({capability,object})=>grant(alice,Date.now()+60000,capability,object)});
   await assert.rejects(store.retrieve({context,record,viewer:alice,object,
     expectedCommitment:sealed.commitment,recoveryKey:sealed.recoveryKey}),e=>
       !String(e.message).includes('Highly confidential')&&

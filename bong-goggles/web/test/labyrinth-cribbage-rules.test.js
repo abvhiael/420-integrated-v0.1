@@ -16,20 +16,20 @@ const bytes=await readFile(new URL('BC-2-1-LABYRINTH-CRIBBAGE-VARIANTS.json',ref
 const manifest=JSON.parse(bytes.toString('utf8'));
 const rules=await readFile(new URL('BC-2-1-LABYRINTH-CRIBBAGE-RULES.md',ref),'utf8');
 
-test('BC-2.1 is a dedicated versioned 241-point account ruleset',()=>{
+test('BC-2.1 is a dedicated versioned 325-point account ruleset',()=>{
  assert.equal(manifest.schemaVersion,1);
  assert.equal(manifest.gameId,'labyrinth-cribbage');
- assert.equal(manifest.rulesetId,'bc-labyrinth-cribbage-241');
- assert.equal(manifest.rulesetVersion,'1.0.0');
+ assert.equal(manifest.rulesetId,'bc-labyrinth-cribbage-325');
+ assert.equal(manifest.rulesetVersion,'2.0.0');
  assert.equal(manifest.scope,'offchain-account-classics-only');
  assert.equal(manifest.targetScore,LABYRINTH_CRIBBAGE_TARGET);
  assert.equal(manifest.reference,'BC-2-1-LABYRINTH-CRIBBAGE-RULES.md');
  assert.match(createHash('sha256').update(bytes).digest('hex'),/^[a-f0-9]{64}$/);
- assert.ok(rules.includes('bc-labyrinth-cribbage-241@1.0.0'));
+ assert.ok(rules.includes('bc-labyrinth-cribbage-325@2.0.0'));
  assert.match(rules,/must not enable Play/i);
  assert.equal(manifest.defaultFourPlayerVariantId,'labyrinth-4p-partners');
- assert.equal(manifest.board.scoringHolesPerRun,240);
- assert.equal(manifest.board.finishHole,241);
+ assert.equal(manifest.board.scoringHolesPerRun,324);
+ assert.equal(manifest.board.finishHole,325);
  assert.equal(manifest.board.startingScore,0);
 });
 test('BC-2.1 deals and discards conserve 52 cards, with exactly six retained and six in crib',()=>{
@@ -141,23 +141,23 @@ test('BC-2.1 Jack starter, legal Go and last-card conditions never double-score 
  assert.throws(()=>labyrinthCribbageSequenceEnd(2,2,20,false),RangeError);
 });
 
-test('BC-2.1 shared teams and independent four-seat scores win at award 241',()=>{
- const two=labyrinthCribbageAward([239,0,239,0],'labyrinth-4p-partners',2,2);
- assert.deepEqual(two.scores,[241,0,241,0]);
+test('BC-2.1 shared teams and independent four-seat scores win at award 325',()=>{
+ const two=labyrinthCribbageAward([323,0,323,0],'labyrinth-4p-partners',2,2);
+ assert.deepEqual(two.scores,[325,0,325,0]);
  assert.equal(two.winningTeam,0);
  assert.equal(two.winnerSeat,2);
  assert.equal(two.losers[0].classification,'double-skunk');
- const four=labyrinthCribbageAward([240,0,1,2],'labyrinth-4p-individual',0,1);
- assert.deepEqual(four.scores,[241,0,1,2]);
+ const four=labyrinthCribbageAward([324,0,1,2],'labyrinth-4p-individual',0,1);
+ assert.deepEqual(four.scores,[325,0,1,2]);
  assert.equal(four.winningTeam,0);
  assert.equal(four.losers.length,3);
- assert.deepEqual([120,121,180,181,240].map(labyrinthCribbageClassify),
+ assert.deepEqual([162,163,243,244,324].map(labyrinthCribbageClassify),
   ['double-skunk','skunk','skunk','ordinary','ordinary']);
  const ongoing=labyrinthCribbageAward([100,101],'labyrinth-2p',0,15);
  assert.equal(ongoing.winningTeam,null);
  assert.deepEqual(ongoing.scores,[115,101]);
  assert.throws(()=>labyrinthCribbageAward([121,110,122,110],'labyrinth-4p-partners',2,1),RangeError);
- assert.throws(()=>labyrinthCribbageAward([241,0],'labyrinth-2p',0,1),RangeError);
+ assert.throws(()=>labyrinthCribbageAward([325,0],'labyrinth-2p',0,1),RangeError);
 });
 test('BC-2.1 declares no unauthorized regional/muggins/online release',()=>{
  assert.deepEqual(manifest.scoring.pegging,{exact15:2,exact31:2,pair:2,triple:6,
@@ -165,10 +165,10 @@ test('BC-2.1 declares no unauthorized regional/muggins/online release',()=>{
  assert.equal(manifest.scoring.autoCount,true);
  assert.equal(manifest.scoring.muggins,false);
  assert.equal(manifest.scoring.heelsJackStarter,2);
- assert.equal(manifest.scoring.scoreDisplayCap,241);
+ assert.equal(manifest.scoring.scoreDisplayCap,325);
  assert.equal(manifest.policies.fourPlayerDefault,'partners');
  assert.equal(manifest.policies.regionalRules,'none-selectable-in-v1');
- for(const phrase of ['Go','31','241','six-card','six retained','partner',
+ for(const phrase of ['Go','31','325','six-card','six retained','partner',
   'individual','starter','nobs','heels','reconnect','hidden','Muggins',
-  '120','180','after all','the dealer'])assert.match(rules,new RegExp(phrase,'i'));
+  '162','243','after all','the dealer'])assert.match(rules,new RegExp(phrase,'i'));
 });

@@ -9,8 +9,8 @@ import (
 
 // BC-2.2: server-only deterministic Labyrinth Cribbage rules engine.
 // No production activation or bot policy is implied by this module.
-const labyrinthManifestSHA256 = "5c2f863b99dfc6430c4a75715d07fcdcff9e2ccebbd3bd2ac4be6c3beb466aa0"
-const labyrinthProductRuleset = "bc-labyrinth-cribbage-241@1.0.0"
+const labyrinthManifestSHA256 = "8391ad4de516f8767208e584b183ff618c209648767e6a92387cd177db41cc13"
+const labyrinthProductRuleset = "bc-labyrinth-cribbage-325@2.0.0"
 type labyrinthRules struct{}
 
 func labyrinthVariantFor(count int,id string)(cribbageVariant,error){
@@ -57,9 +57,9 @@ func (r labyrinthRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error
  _,e:=r.VariantForSeats(room,seats);return e
 }
 func (labyrinthRules) Definition()RuleDefinition{
- return RuleDefinition{GameID:"labyrinth-cribbage",Version:"v1.0",
+ return RuleDefinition{GameID:"labyrinth-cribbage",Version:"v2.0",
   Specification:labyrinthProductRuleset+";manifest-sha256="+labyrinthManifestSHA256+
-   ";six-retained;six-crib;four-players-partners-or-individual;241;auto-count;no-muggins"}
+   ";six-retained;six-crib;four-players-partners-or-individual;325;auto-count;no-muggins"}
 }
 func NewLabyrinthCribbageRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(labyrinthRules{})}
 func (labyrinthRules) MaxReplayActions()int{return 8192}
@@ -150,8 +150,8 @@ func (labyrinthRules) Legal(f RuleFrame,seat int,b *RuleBudget)([]json.RawMessag
 }
 
 func labyrinthClassify(score int64)string{
- if score<=120{return "double-skunk"}
- if score<=180{return "skunk"}
+ if score<=162{return "double-skunk"}
+ if score<=243{return "skunk"}
  return "ordinary"
 }
 func labyrinthScore(f *RuleFrame,d *cribbageData,seat,points int,kind string){
@@ -160,7 +160,7 @@ func labyrinthScore(f *RuleFrame,d *cribbageData,seat,points int,kind string){
  team:=v.Teams[seat]
  for i,t:=range v.Teams{if t==team{f.Scores[i]+=int64(points)}}
  d.Awards=append(d.Awards,cribbageAward{Seat:seat,Team:team,Kind:kind,Points:points,Count:d.Count,Total:f.Scores[seat]})
- if f.Scores[seat]<241{return}
+ if f.Scores[seat]<325{return}
  f.Terminal=true;f.Turn=-1;f.Phase="finished"
  winner:=seat;f.Winner=&winner
  seen:=map[int]bool{team:true}
@@ -331,9 +331,9 @@ func (labyrinthRules) Validate(f RuleFrame)error{
   if team==other&&f.Scores[i]!=f.Scores[j]{return ErrInvalid}
  }}
  sawWin:=false
- for _,score:=range f.Scores{if score<0{return ErrInvalid};if score>=241{sawWin=true}}
+ for _,score:=range f.Scores{if score<0{return ErrInvalid};if score>=325{sawWin=true}}
  if f.Terminal!=sawWin||f.Terminal!=(f.Phase=="finished")||
-  (f.Terminal&&f.Winner==nil)||(f.Terminal&&(f.Scores[*f.Winner]<241))||
+  (f.Terminal&&f.Winner==nil)||(f.Terminal&&(f.Scores[*f.Winner]<325))||
   (!f.Terminal&&f.Winner!=nil){return ErrInvalid}
  if !f.Terminal&&len(d.Losers)!=0{return ErrInvalid}
  if !f.Terminal&&(f.Phase!=d.Stage||f.Turn<0){return ErrInvalid}
@@ -396,7 +396,7 @@ func (labyrinthRules) Validate(f RuleFrame)error{
  if f.Terminal{
   groups:=map[int]bool{v.Teams[*f.Winner]:true}
   for _,l:=range d.Losers{
-   if l.Team<0||l.Team>=f.SeatCount||groups[l.Team]||l.Score<0||l.Score>=241||l.Classification!=labyrinthClassify(l.Score){return ErrInvalid}
+   if l.Team<0||l.Team>=f.SeatCount||groups[l.Team]||l.Score<0||l.Score>=325||l.Classification!=labyrinthClassify(l.Score){return ErrInvalid}
    groups[l.Team]=true
   }
   if len(groups)!=func()int{m:=map[int]bool{};for _,t:=range v.Teams{m[t]=true};return len(m)}(){return ErrInvalid}

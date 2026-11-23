@@ -55,7 +55,7 @@ func TestBC22AuthenticatedTwoAccountEngineAndColdResume(t *testing.T){
  code,joined:=bc05Change(t,h,peer,room.ID,room.Revision,1,"join",nil)
  if code!=200||joined.Status!="ready"{t.Fatal("opponent admission",code)}
  match:=bc06Start(t,h,host,joined.ID)
- if match.RulesHash!=adapter.hash||match.RulesVersion!="v1.0"||
+ if match.RulesHash!=adapter.hash||match.RulesVersion!="v2.0"||
   match.Status!="active"||match.Sequence!=1{t.Fatal("wrong server identity",match)}
  if w:=request(h,"GET","/v1/classic-sessions/"+match.ID,"");w.Code!=401{t.Fatal("guest gained access")}
  read:=func(who *http.Cookie)ClassicSessionView{
@@ -118,7 +118,7 @@ func TestBC22AuthenticatedTwoAccountEngineAndColdResume(t *testing.T){
  recovered,e:=NewClassicSessions(store,h.Rooms,resolver);if e!=nil{t.Fatal(e)}
  h.Sessions=recovered
  restored:=read(peer)
- if restored.Sequence!=int64(step+1)||restored.RulesHash!=adapter.hash||restored.RulesVersion!="v1.0"{
+ if restored.Sequence!=int64(step+1)||restored.RulesHash!=adapter.hash||restored.RulesVersion!="v2.0"{
   t.Fatal("cold restart changed authenticated match identity",restored)
  }
  if e=recovered.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("cold recovery replay",e)}

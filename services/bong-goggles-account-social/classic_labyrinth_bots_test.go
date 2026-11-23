@@ -134,10 +134,10 @@ func TestBC23RejectHiddenAndForgedViewsActionsAndBudget(t *testing.T){
   t.Fatal("deadline disabled by Labyrinth bot")
  }
 }
-func TestBC23MediumHardTakeCertainFifteenAndImmediate241(t *testing.T){
+func TestBC23MediumHardTakeCertainFifteenAndImmediate325(t *testing.T){
  v:=cribbageBotView{
   GameID:"labyrinth-cribbage",Variant:"labyrinth-2p",
-  Round:1,Phase:"peg",Dealer:1,Turn:0,Seat:0,Scores:[]int64{239,230},
+  Round:1,Phase:"peg",Dealer:1,Turn:0,Seat:0,Scores:[]int64{323,230},
   Hand:[]int{cribCard(5,0),cribCard(9,1),cribCard(2,2)},
   CardCounts:[]int{3,5},Discarded:[]bool{true,true},
   Starter:cribCard(7,3),PegCount:10,PegPile:[]int{cribCard(10,1)},
@@ -155,7 +155,7 @@ func TestBC23MediumHardTakeCertainFifteenAndImmediate241(t *testing.T){
   if e!=nil{t.Fatal("policy denied tactical opportunity",level,e)}
   var selected cribbageMove
   if !strictRuleJSON(move,&selected)||selected.Card==nil||*selected.Card!=cribCard(5,0){
-   t.Fatal("bot failed guaranteed 241-point pegging win",level,string(move))
+   t.Fatal("bot failed guaranteed 325-point pegging win",level,string(move))
   }
  }
  // Dealer's teammate owns the crib in partnerships; individual play does not.
@@ -196,7 +196,7 @@ func TestBC23FullBotAndMixedHumanMatchesEveryFormat(t *testing.T){
     for step:=0;step<a.replayLimit();step++{
      f,e:=a.decode(state);if e!=nil{t.Fatal("frame",step,e)}
      if f.Terminal{
-      if f.Winner==nil||f.Scores[*f.Winner]<241||len(trace)==0||!sawShow{
+      if f.Winner==nil||f.Scores[*f.Winner]<325||len(trace)==0||!sawShow{
        t.Fatal("bot match failed to finish",n,trace,f)
       }
       if mixHuman&&!sawHuman{t.Fatal("human did not get a legal turn")}

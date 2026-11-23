@@ -42,7 +42,7 @@ func labyrinthBotReadView(raw json.RawMessage)(cribbageBotView,cribbageVariant,e
  variant,e:=labyrinthVariantFor(len(v.Scores),v.Variant)
  if e!=nil{return v,cribbageVariant{},ErrInvalid}
  for i,team:=range variant.Teams {
-  if v.Scores[i]<0||v.Scores[i]>=241{return v,variant,ErrInvalid}
+  if v.Scores[i]<0||v.Scores[i]>=325{return v,variant,ErrInvalid}
   for j,other:=range variant.Teams {
    if team==other&&v.Scores[i]!=v.Scores[j]{return v,variant,ErrInvalid}
   }
@@ -270,7 +270,7 @@ func labyrinthBotPegEV(v cribbageBotView,variant cribbageVariant,move cribbageMo
  pile:=append(append([]int(nil),v.PegPile...),*move.Card)
  _,earned:=cribbagePegPoints(pile,count)
  value:=float64(earned)*11
- if v.Scores[v.Seat]+int64(earned)>=241{return 1_000_000+value,nil}
+ if v.Scores[v.Seat]+int64(earned)>=325{return 1_000_000+value,nil}
  if level=="medium"{
   if count==5||count==10{value-=3}
   if count==21{value-=1.2}

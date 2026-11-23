@@ -33,7 +33,7 @@ func TestBC22ManifestAndImmutableRoomVariants(t *testing.T){
  digest:=sha256.Sum256(raw)
  if hex.EncodeToString(digest[:])!=labyrinthManifestSHA256{t.Fatal("manifest changed without independent engine requalification")}
  a:=labAdapter(t)
- if a.definition.GameID!="labyrinth-cribbage"||a.definition.Version!="v1.0"||
+ if a.definition.GameID!="labyrinth-cribbage"||a.definition.Version!="v2.0"||
  !strings.Contains(a.definition.Specification,labyrinthProductRuleset){t.Fatal(a.definition)}
  scenarios:=[]struct{n int;format,id string;deal,discard,extra int;teams []int}{
   {2,"","labyrinth-2p",9,3,0,[]int{0,1}},
@@ -108,8 +108,8 @@ func TestBC22SevenCardShowFlushRunsAndPegging(t *testing.T){
  if e!=nil||multiples.Runs!=18{t.Fatal("multiplicity in 7 cards",multiples,e)}
  if _,e:=labyrinthCountShow([]int{0,1,2,3,4,5},5,false);e==nil{t.Fatal("duplicate starter accepted")}
  if _,e:=labyrinthCountShow([]int{0,1,2,3,4},5,false);e==nil{t.Fatal("5-card count accepted")}
- if labyrinthClassify(120)!="double-skunk"||labyrinthClassify(121)!="skunk"||
- labyrinthClassify(180)!="skunk"||labyrinthClassify(181)!="ordinary"{t.Fatal("wrong 241 skunk thresholds")}
+ if labyrinthClassify(162)!="double-skunk"||labyrinthClassify(163)!="skunk"||
+ labyrinthClassify(243)!="skunk"||labyrinthClassify(244)!="ordinary"{t.Fatal("wrong 325 skunk thresholds")}
  if _,n:=cribbagePegPoints([]int{0,1,2,3,4},15);n!=7{t.Fatal("15 plus 5-run scoring")}
  standard,e:=cribbageCountShow([]int{4,17,30,49},43,false)
  if e!=nil||standard.Total!=29{t.Fatal("standard 121 counting was modified",standard,e)}
@@ -127,7 +127,7 @@ func TestBC22DeterministicFullGamesAndSealedReplay(t *testing.T){
   for step:=0;step<2500;step++{
    frame,e:=a.decode(state);if e!=nil{t.Fatal("invalid saved state",step,e)}
    if frame.Terminal{
-    if frame.Winner==nil||frame.Scores[*frame.Winner]<241{t.Fatal("invalid winner")}
+    if frame.Winner==nil||frame.Scores[*frame.Winner]<325{t.Fatal("invalid winner")}
     final,e:=a.ReplayConfigured(seed,c.count,c.variant,trace)
     if e!=nil||!bytes.Equal(state,final){t.Fatal("full cold replay mismatch",e)}
     if c.variant=="labyrinth-4p-individual"{
@@ -158,10 +158,10 @@ func TestBC22DeterministicFullGamesAndSealedReplay(t *testing.T){
     BeforeHash:RuleHash(before),AfterHash:RuleHash(next)})
    state=next
   }
-  t.Fatal("241-point match exceeded bounded replay actions")
+  t.Fatal("325-point match exceeded bounded replay actions")
  })}
 }
-func TestBC22HeelsCanImmediatelyWin241(t *testing.T){
+func TestBC22HeelsCanImmediatelyWin325(t *testing.T){
  a:=labAdapter(t)
  for n:=0;n<180;n++{
   seed:=labSeed(byte(n))
@@ -175,11 +175,11 @@ func TestBC22HeelsCanImmediatelyWin241(t *testing.T){
   data,e:=cribbageDecode(frame);if e!=nil{t.Fatal(e)}
   if frame.Phase!="cut"||data.Drawn>=52{t.Fatal("cut unavailable")}
   if cribbageRank(data.Deck[data.Drawn])!=11{continue}
-  frame.Scores[data.Dealer]=239
+  frame.Scores[data.Dealer]=323
   raw,_:=json.Marshal(frame)
   next,_,done,winner,e:=a.Apply(raw,frame.Turn,json.RawMessage(`{"type":"cut"}`))
-  if e!=nil||!done||winner==nil||*winner!=data.Dealer{t.Fatal("heels failed to stop at 241",e)}
-  terminal,e:=a.decode(next);if e!=nil||terminal.Scores[data.Dealer]!=241{t.Fatal("heels awarded incorrectly",e)}
+  if e!=nil||!done||winner==nil||*winner!=data.Dealer{t.Fatal("heels failed to stop at 325",e)}
+  terminal,e:=a.decode(next);if e!=nil||terminal.Scores[data.Dealer]!=325{t.Fatal("heels awarded incorrectly",e)}
   return
  }
  t.Fatal("no deterministic Jack-starter fixture found")

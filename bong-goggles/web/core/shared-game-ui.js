@@ -51,7 +51,7 @@ function rules(game,view){
  const content=verified?'<p class="games-screen__meta">Verified rulebook: '+esc(title||'Game rules')+'</p>'+
   '<ol class="games-screen__rules">'+paragraphs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':
   game.id==='labyrinth-cribbage'?notice('BC-2.1 rules documented; play not qualified',
-    'Labyrinth Cribbage: 241 points, six retained cards and six-card crib. Four-player partnerships (default) or individual scoring; live matches are not yet enabled.'):
+    'Labyrinth Cribbage: 325 points, six retained cards and six-card crib. Four-player partnerships (default) or individual scoring; live matches are not yet enabled.'):
   notice('Ruleset not yet published','Game-specific rules and scoring must be versioned and verified before play is enabled.');
  return section('Rules & variants','<p class="games-screen__meta">'+
   (view&&limited(view.variant)?'Active variant: '+esc(limited(view.variant)):

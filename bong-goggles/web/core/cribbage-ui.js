@@ -204,7 +204,7 @@ practice(pState)+'<p><a class="cribbage-primary" href="/games/rooms" data-route=
 (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
 const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
 const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
-'<p>Play 2–4 player Cribbage. Watch the back peg leapfrog on scoring.</p>'+
+'<p>Play 2–4 players. Watch pegging and scoring.</p>'+
 '<p>The board counts hands in order, with the dealer’s crib last. Every counted announcement is held for 1.5 seconds before the next scoring event.</p>'+
 '<a class="cribbage-primary" href="/games/cribbage/play" data-route="classic-game">Open a Cribbage table</a></div>'+
 boardPreview+'</div>'+practice(pState);

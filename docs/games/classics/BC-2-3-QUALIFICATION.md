@@ -20,4 +20,22 @@
 
 **Release boundary:** BC-2.3 is source qualification only. No deployed production bot activation, gameboard/UI approval or public release. **Next canonical step upon successful qualification:** BC-2.4 (Labyrinth player UI and board integration).
 
-**Qualification evidence:** Pending exact-head CI.
+## Qualification evidence (verified)
+
+**Qualified source SHA:** `81af513f53a95fdc55051b4e557ce5a906fbf28b` (authoritative PR #1347 branch).  
+**Exact-code GitHub Actions:** [BC-2.3 run #45109141526](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45109141526), both jobs **SUCCESS**.
+- Job `137477244132`, `private-bots-and-full-replay`: all six dedicated BC-2.3 Go race test groups passed; 1,400 shuffled seven-card hands × hand/crib cross-checked against the authoritative scorer; 56 opening deals over four formats assessed all three skill levels, with 49 Easy/Medium disagreements, 25 Medium/Hard and 48 Easy/Hard; malformed/hidden inputs rejected, forced 241 win chosen correctly. Full 241-point bot-only and mixed human/bot games **all eight completed and cold-replayed** with verified scores, including independent four-player and partner-shared outcome. Frozen standard Cribbage BC-1.3 tactics and BC-2.2 room manifest regressions passed; Go vet passed.
+- Job `137477243873`, `postgres-signed-human-bot`: PostgreSQL 16, 420ID-authenticated human room turns with operator-authorized bot turns and immutable scores for all four variants; session sequence checks, private views and cold-restart replay passed. This is **test-service** evidence, not a deployed production match.
+
+| Format | Bot-only moves / winner | Mixed human/bot moves / winner |
+| --- | --- | --- |
+| 2-player individual | 100 / seat 1 (251) | 97 / seat 1 (246) |
+| 3-player individual | 232 / seat 0 (243) | 242 / seat 2 (246) |
+| 4-player partnerships | 180 / seat 2, team 0 (243) | 229 / seat 2, team 0 (241) |
+| 4-player individual | 377 / seat 3 (260) | 356 / seat 3 (242) |
+
+**Corrected test coverage:** the earlier [run #45108909974](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45108909974) was successful for the tests it ran but the full-match test mistakenly returned after bot-only games; fixed in the qualified code SHA above, rerun proving both configurations for every variant. No skipped or weakened assertions.
+
+**Disposition:** BC-2.3 **repository source-qualified**, layered on qualified-but-unmerged [BC-2.2 PR #1346](https://github.com/abvhiael/420-integrated-v0.1/pull/1346). Existing frozen 121-point Cribbage and live production resolver unchanged. **No public activation or deployment is claimed.** PR #1347 remains unmerged pending explicit authorization. The subsequent documentation-only head requires its own exact-head checks before review-ready status.
+
+**Next roadmap milestone:** BC-2.4 — Labyrinth player board and UX integration; not begun.

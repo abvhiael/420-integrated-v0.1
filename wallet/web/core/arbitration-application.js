@@ -81,11 +81,11 @@ function parseRuling(w,round){
 function parseEvent(log){
   check(log&&typeof log==='object'&&Array.isArray(log.topics),'malformed Arbitration event');
   const kind=EVENT_BY_TOPIC.get(lower(log.topics[0]||''));
-  check(kind&&log.topics.length===3+(kind==='opened'||kind==='evidence'||kind==='appealed'||kind==='ruling'?1:0),
+  check(kind&&log.topics.length===(['opened','evidence','appealed','ruling'].includes(kind)?4:3),
     'unexpected Arbitration event topics');
   const id=hash(log.topics[1],'case identifier'),roundTopic=kind==='opened'?null:num(words(log.topics[2],1)[0],8);
-  const indexedActor=kind==='opened'?decodeAddress(words(log.topics[3],1)[0]):
-    ['evidence','appealed','ruling'].includes(kind)?decodeAddress(words(log.topics[3],1)[0]):null;
+  const indexedActor=['evidence','appealed','ruling'].includes(kind)?decodeAddress(words(log.topics[3],1)[0]):
+    kind==='opened'?decodeAddress(words(log.topics[3],1)[0]):null;
   const expected={opened:3,evidence:1,ruled:1,appealed:1,finalized:0,ruling:4,rulingFinalized:2}[kind];
   const w=words(log.data,expected);
   return Object.freeze({kind,caseId:id,round:roundTopic===null?0:Number(roundTopic),

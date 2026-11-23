@@ -298,6 +298,23 @@ export function createArbitrationApplication420({provider,release,account,domain
     received.set(txHash,result);
     return result;
   }
+  async function restore(transaction) {
+    const txHash=hash(transaction?.txHash,'transaction identifier');
+    const to=address(transaction?.to);
+    const chainId=transaction?.chainId;
+    check(Number(chainId)===Number(release.chainId)&&transaction.from===user,
+      'Arbitration pending transaction belongs to another Wallet or network');
+    const current=await verified();
+    check([current.binding.dependencies.cases.address,current.binding.dependencies.rulings.address].includes(to),
+      'Arbitration pending transaction target no longer canonical');
+    const tx=await rpc('eth_getTransactionByHash',[txHash]);
+    check(tx&&address(tx.from)===user&&address(tx.to)===to,'Arbitration pending transaction identity mismatch');
+    check(tx.input&&HEX.test(tx.input)&&tx.input.length>=10,'Arbitration pending calldata missing');
+    const selectors=Object.values(actionTypes).map(x=>tokenReadCall420(x.sig).slice(0,10));
+    check(selectors.includes(tx.input.slice(0,10).toLowerCase()),'Arbitration pending action selector mismatch');
+    received.set(txHash,Object.freeze({txHash,to,from:user,chainId}));
+    return Object.freeze({txHash,to,from:user,chainId});
+  }
   async function status(transaction){
     const txHash=hash(transaction?.txHash,'transaction identifier');
     check(received.has(txHash),'unknown Arbitration transaction for this session');
@@ -315,6 +332,6 @@ export function createArbitrationApplication420({provider,release,account,domain
     generation+=1;verifier.invalidate();proposals.clear?.();
   }
   function dispose(){generation+=1;verifier.dispose();received.clear();}
-  return Object.freeze({account:user,domains:Object.freeze(supplied),policies,dashboard,detail,review,submit,status,
+  return Object.freeze({account:user,domains:Object.freeze(supplied),policies,dashboard,detail,review,submit,restore,status,
     invalidate,dispose});
 }

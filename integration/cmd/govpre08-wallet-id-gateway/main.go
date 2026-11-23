@@ -86,10 +86,13 @@ func (a *authority) RoundTrip(r *http.Request)(*http.Response,error){
   Body:io.NopCloser(bytes.NewReader(raw))},nil
 }
 func main(){
- dsn:=flag.String("dsn","","private LOCAL qualification database, never a production 420ID DB")
+ dsn:=flag.String("dsn","","private LOCAL administrator database only for schema setup")
+ runtimeDSN:=flag.String("runtime-dsn","","least-privilege application runtime database credential")
  listen:=flag.String("listen","127.0.0.1:18789","local browser gateway address")
  flag.Parse()
  if !strings.Contains(*dsn,"accountwallet_local") || !strings.Contains(*dsn,"127.0.0.1:5434") ||
+  !strings.Contains(*runtimeDSN,"accountwallet_local") || !strings.Contains(*runtimeDSN,"127.0.0.1:5434") ||
+  *runtimeDSN==*dsn ||
   !strings.HasPrefix(*listen,"127.0.0.1:") ||
   os.Getenv("GOVPRE08_INSECURE_LOCAL_BROWSER_ONLY")!="1"{
   fmt.Fprintln(os.Stderr,"GOV_PRE08_LOCAL_420ID_GATEWAY_REFUSES_UNPINNED_DATABASE_OR_NETWORK")
@@ -100,9 +103,12 @@ func main(){
  ctx,cancel:=context.WithTimeout(context.Background(),15*time.Second);defer cancel()
  if e=db.PingContext(ctx);e!=nil{panic(e)}
  if e=appgateway.Migrate(ctx,db);e!=nil{panic(e)}
+ runtimeDB,e:=sql.Open("postgres",*runtimeDSN)
+ if e!=nil{panic(e)};defer runtimeDB.Close()
+ if e=runtimeDB.PingContext(ctx);e!=nil{panic(e)}
  source:=&authority{active:true}
  gateway,e:=appgateway.New(appgateway.Config{
-  AppID:app,DB:db,ClientSecret:bytes.Repeat([]byte{23},32),
+  AppID:app,DB:runtimeDB,ClientSecret:bytes.Repeat([]byte{23},32),
   SessionKey:bytes.Repeat([]byte{31},32),
   Client:&http.Client{Transport:source},TrustedTLSProxy:true,
  })

@@ -40,6 +40,7 @@ test('BC-2.4 maintain private table and reject replay after stale or rejected mo
  let server=wire(),auth=true;
  const fake=async(url,options={})=>{
   const u=new URL(url,'https://fake.local');
+  u.pathname=u.pathname.replace(/^\/social-api(?=\/v1\/)/,'');
   requests.push({path:u.pathname,method:options.method||'GET',body:options.body});
   if(u.pathname==='/v1/me')return new Response(JSON.stringify(auth?{
    walletRequired:false,profile:{subject:member}}:{}),{status:auth?200:401,headers:{'Content-Type':'application/json'}});
@@ -78,7 +79,7 @@ test('BC-2.4 My Games only lists verified 325-point matching sessions, no hidden
   {id:'50000000-5555-4555-8555-555555555555',roomId:room,gameId:'cribbage',
    rulesVersion:'v2.0',rulesHash:LABYRINTH_RULES_HASH,status:'active',sequence:1}];
  const fake=async(url)=>{
-  const p=new URL(url,'https://fake.local').pathname;
+  const p=new URL(url,'https://fake.local').pathname.replace(/^\/social-api(?=\/v1\/)/,'');
   const data=p==='/v1/me'?{walletRequired:false,profile:{subject:member}}:
    {onChain:false,wager:false,rewards:false,sessions};
   return new Response(JSON.stringify(data),{status:200,headers:{'Content-Type':'application/json'}});

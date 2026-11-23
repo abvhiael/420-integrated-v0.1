@@ -77,6 +77,8 @@ const bc24New=Object.freeze({
  'core/labyrinth-hole-survey.js':5*1024,
  'core/labyrinth-peg-overlay.js':5*1024,
  'core/labyrinth-printed-guides.js':2*1024,
+ // Two complete 326-hole sequences, explicitly measured: <5 KiB structured data.
+ 'core/labyrinth-peg-map.json':5*1024,
  'labyrinth.css':4*1024
 });
 const bc24Modified=Object.freeze({

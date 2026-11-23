@@ -7,6 +7,8 @@ on:
       - 'wallet/web/test/arbitration-evidence*.test.js'
       - 'wallet/web/core/arbitration-storage420.js'
       - 'wallet/web/test/arbitration-storage420.test.js'
+      - 'wallet/web/core/arbitration-storage-bridge.js'
+      - 'wallet/web/test/arbitration-storage-bridge.test.js'
       - 'wallet/web/arbitration-management-ui.js'
       - 'wallet/web/arbitration-management.css'
       - 'docs/apps/arbitration/**'
@@ -36,10 +38,11 @@ jobs:
         with:
           node-version: '22'
       - name: Exercise only private evidence privacy and case-bound integrity tests
-        run: node --test wallet/web/test/arbitration-evidence.test.js wallet/web/test/arbitration-evidence-workspace.test.js wallet/web/test/arbitration-storage420.test.js
+        run: node --test wallet/web/test/arbitration-evidence.test.js wallet/web/test/arbitration-evidence-workspace.test.js wallet/web/test/arbitration-storage420.test.js wallet/web/test/arbitration-storage-bridge.test.js
       - name: Parse Wallet private evidence and UI scripts
         run: |
           node --check wallet/web/core/arbitration-evidence.js
           node --check wallet/web/core/arbitration-evidence-workspace.js
           node --check wallet/web/core/arbitration-storage420.js
+          node --check wallet/web/core/arbitration-storage-bridge.js
           node --check wallet/web/arbitration-management-ui.js

@@ -97,3 +97,58 @@ jobs:
         env:
           ARBITRATION_FOUNDRY_ARTIFACTS: ../contracts/out
         run: node --test dist/test/arbitration-indexer.test.js
+
+  commerce-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact Commerce security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: commerce/package-lock.json
+      - name: Install locked Commerce dependencies
+        working-directory: commerce
+        run: npm ci --ignore-scripts
+      - name: Reject forged case/role, cross-order, stale ruling and unauthorized remedy
+        working-directory: commerce
+        run: node --test test/com6b-dispute.test.mjs test/arbitration-adapter.test.mjs
+
+  launchpad-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact Launchpad security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stage real isolated Launchpad consumer tests and helpers
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p test/.arb-pre08-consumers
+          for source in test/LaunchpadCrowdfundingIntegration420.t.sol test/LaunchpadEcosystem420.t.sol; do
+            sed -e 's#"../src/#"../../src/#g' -e 's#"./helpers/#"../helpers/#g' "$source" > "test/.arb-pre08-consumers/${source##*/}"
+          done
+      - name: Verify cross-domain/object/appeal replay and real finalized consumption
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/launchpad
+          FOUNDRY_TEST: test/.arb-pre08-consumers
+        run: |
+          forge test --match-path 'test/.arb-pre08-consumers/Launchpad*420.t.sol' --match-test 'test(PublicationRechecksCanonicalOriginAndRejectsStaleRound|FinalizedDisputeOutcomePublishesOnceWithoutExecutingRemedy|DisputeMustMatchCanonicalArbitrationOriginAndProjectController|RealArbitrationFinalityAndNotificationBoundary)' -vvv

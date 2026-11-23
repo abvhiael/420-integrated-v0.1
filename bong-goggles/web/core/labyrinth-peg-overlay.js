@@ -4,6 +4,10 @@ import {LABYRINTH_HOLE_CENTERS,LABYRINTH_HOLE_COUNT,LABYRINTH_BOARD_SHA256} from
 import {LABYRINTH_PRINTED_GUIDES} from './labyrinth-printed-guides.js';
 
 const integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
+// The 652-hole topological proof is expensive and immutable for a given atlas.
+// Freeze verified input before caching so live move renders cannot reuse a
+// validation result after score-to-hole mutation.
+const verifiedAtlases=new WeakSet();
 const segmentsCross=(a,b,c,d)=>{
  const orient=(u,v,w)=>(v.x-u.x)*(w.y-u.y)-(v.y-u.y)*(w.x-u.x);
  return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0;
@@ -14,6 +18,7 @@ export function validateLabyrinthPegAtlas(atlas){
     atlas.artSHA256!==LABYRINTH_BOARD_SHA256||
     !Array.isArray(atlas.tracks)||atlas.tracks.length!==2||
     LABYRINTH_HOLE_CENTERS.length!==LABYRINTH_HOLE_COUNT)return false;
+ if(verifiedAtlases.has(atlas))return true;
  const used=new Set();
  for(const track of atlas.tracks){
   if(!Array.isArray(track)||track.length!==326)return false;
@@ -68,6 +73,15 @@ export function validateLabyrinthPegAtlas(atlas){
    if(closest>60)return false;
   }
  }
+ for(const track of atlas.tracks)Object.freeze(track);
+ Object.freeze(atlas.tracks);
+ for(const guide of Object.values(atlas.guideAnchors)){
+  for(const p of guide)Object.freeze(p);
+  Object.freeze(guide);
+ }
+ Object.freeze(atlas.guideAnchors);
+ Object.freeze(atlas);
+ verifiedAtlases.add(atlas);
  return true;
 }
 

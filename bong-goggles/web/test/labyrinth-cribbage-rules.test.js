@@ -167,7 +167,7 @@ test('BC-2.1 declares no unauthorized regional/muggins/online release',()=>{
  assert.equal(manifest.scoring.heelsJackStarter,2);
  assert.equal(manifest.scoring.scoreDisplayCap,325);
  assert.equal(manifest.policies.fourPlayerDefault,'partners');
- assert.equal(manifest.policies.regionalRules,'none-selectable-in-v1');
+ assert.equal(manifest.policies.regionalRules,'none-selectable-in-v2');
  for(const phrase of ['Go','31','325','six-card','six retained','partner',
   'individual','starter','nobs','heels','reconnect','hidden','Muggins',
   '162','243','after all','the dealer'])assert.match(rules,new RegExp(phrase,'i'));

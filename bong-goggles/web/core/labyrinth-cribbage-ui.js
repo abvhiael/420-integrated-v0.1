@@ -67,8 +67,8 @@ export function verifyLabyrinthProjection(view){
  if(view.variant!==variant.id||view.cardCounts[view.viewerSeat]!==view.hand.length)return null;
  for(let i=0;i<variant.seatCount;i++)for(let j=i+1;j<variant.seatCount;j++)
   if(variant.teams[i]===variant.teams[j]&&view.scores[i]!==view.scores[j])return null;
- if(view.phase==='discard'&&(!number(view.hand.length,6,variant.deal)||view.starter!==-1||
-  view.discarded[view.viewerSeat]))return null;
+ if(view.phase==='discard'&&(view.hand.length!==(view.discarded[view.viewerSeat]?6:variant.deal)||
+  view.starter!==-1))return null;
  if(view.phase==='cut'&&(view.starter!==-1||view.hand.length!==6))return null;
  if(view.phase==='peg'&&(view.starter<0||view.hand.length>6))return null;
  if(view.lastShow.some(show=>!noUnknown(show,['seat','isCrib','cards','starter','score'])||

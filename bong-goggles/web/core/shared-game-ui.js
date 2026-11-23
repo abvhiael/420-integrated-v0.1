@@ -3,6 +3,7 @@
 // independently authorized service adapter may supply a verified per-seat view.
 import {escapeHtml as esc} from './design-system.js';
 import {renderGameScoreboard,renderTurnIndicator,renderSharedTabletop} from './tabletop-components.js';
+import {renderLabyrinthScreen} from './labyrinth-cribbage-ui.js';
 
 export const GAME_SCREEN_IDS=Object.freeze(['intro','rules','play','setup','table','results','history','rematch']);
 export const GAME_SUBSCREENS=Object.freeze(GAME_SCREEN_IDS.filter(id=>id!=='intro'));
@@ -131,6 +132,10 @@ function rematch(view){
 }
 export function renderSharedGameScreen({game,screen='intro',view=null}={}){
  if(!game||typeof game.id!=='string'||!GAME_SCREEN_IDS.includes(screen))throw new Error('Unsupported game screen');
+ // The 325-point Labyrinth has a separate private-seat schema and original
+ // approved board; never render it on the standard 121-point leaf board.
+ if(game.id==='labyrinth-cribbage')return '<div class="games-screen" data-game-screen="'+esc(screen)+'">'+
+  nav(game,screen)+renderLabyrinthScreen({screen,view})+'</div>';
  const authorized=authorizedGameView(game,view);
  const screens={intro,rules,play,setup,table,results,history,rematch};
  const body=screen==='rules'?rules(game,authorized):screen==='play'?play(game):

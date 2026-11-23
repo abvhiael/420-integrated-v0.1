@@ -143,6 +143,16 @@ test('Wallet rejection, gas quote drift and session switching cannot submit',asy
   app.dispose();
 });
 
+test('case permissions changing during device approval fail closed before broadcast',async()=>{
+  const f=arbitrationAppFixture420(),app=createArbitrationApplication420(f);
+  const q=await app.review('submitEvidence',{caseId:CASE_ID,evidenceHash:h(565)});
+  await assert.rejects(app.submit(q,async()=>{
+    f.state.record.state='FINALIZED';return true;
+  }),/evidence unavailable|target or permissions changed/);
+  assert.equal(f.state.sendCount,0);
+  app.dispose();
+});
+
 test('invalid outcomes and expired ruling states reject; unsupported action cannot be prepared',async()=>{
   const f=arbitrationAppFixture420(ADDR.resolver),app=createArbitrationApplication420(f);
   await assert.rejects(app.review('submitRuling',{caseId:CASE_ID,outcomeCode:0,

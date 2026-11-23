@@ -26,6 +26,14 @@ The contract-generated case ID is discovered from canonical `CaseOpened` logs af
 - **Appeal ruling** appears only for claimant/respondent while the ruling is RULED, the appeal deadline has not passed and the snapshot appeal limit has not been exhausted. The original policy snapshot remains binding across later governance changes. The active resolver switches to the snapshotted appeal resolver for the next round.
 - **Finalize ruling** appears only after the latest ruling's appeal deadline has passed. Finalization is permissionless once the window closes; it permanently ends the case. The previous rounds and their ruling commitments remain readable.
 
+## Private evidence files
+
+The **Submit evidence** action also offers an optional private-file workflow. Select a local file (maximum 8 MiB) and click **Encrypt file and generate commitment**. The locally generated, salted hash fills the public commitment field; the file itself is never broadcast. Before submitting, explicitly download the encrypted evidence capsule and reveal/store the separate private recovery key. Without both, the private file cannot be recovered from the chain.
+
+The **Verify private evidence against this case** form accepts a locally selected encrypted capsule, its separately provided recovery key and the exact on-chain commitment, original submitter and evidence round. The app checks the canonical evidence event before decrypting, validates the original digest and case-bound authenticated encryption, and offers a separate explicit download of verified bytes. No private file is rendered or uploaded automatically.
+
+Remote approved 420Storage retrieval/upload is optional and default-deny. Without a qualified private Storage service and authenticated, scoped access grant, local encrypted export/inspection remains available but remote storage does not. See [Evidence privacy, access and retention](./evidence-privacy.md).
+
 ## Receipt tracking, recovery and errors
 
 - The application reports **submitted/pending** separately from **canonically confirmed**. A rejected Wallet request, reverted transaction, reorganized receipt or RPC failure never displays a successful case mutation.

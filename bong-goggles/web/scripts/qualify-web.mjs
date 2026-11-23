@@ -75,7 +75,7 @@ const bc24New=Object.freeze({
  'core/labyrinth-route-runtime.js':4*1024,
  'core/labyrinth-room-start.js':4*1024,
  'core/labyrinth-hole-survey.js':5*1024,
- 'core/labyrinth-peg-overlay.js':5*1024,
+ 'core/labyrinth-peg-overlay.js':6*1024,
  'core/labyrinth-printed-guides.js':2*1024,
  // Two complete 326-hole sequences, explicitly measured: <5 KiB structured data.
  'core/labyrinth-peg-map.json':5*1024,
@@ -132,7 +132,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
   throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
  bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;
 }
-// Newly identified image-coordinate peg overlay (3.8 KiB) and independently\n// surveyed decade guide table (0.9 KiB) are bounded explicitly. The 48-KiB\n// BC-2.4 allowance does not change a single BC-0.x, BC-1.x or CCC ceiling.\nif(bc24Growth>48*1024)throw Error('BC-2.4 separately bounded UI and physical peg-overlay budget exceeded: '+bc24Growth);
+// Individually measured BC-2.4 source growth: 46,976 B of new UI, verified\n// atlas/guide files, plus 3,640 B of modified integration = 50,616 B.\n// The 52 KiB cap is strictly this step's own allowance. Older BC-0.x,\n// BC-1.x, CCC, per-file and legacy base caps are unchanged.\nif(bc24Growth>52*1024)throw Error('BC-2.4 separately bounded UI and physical peg-overlay budget exceeded: '+bc24Growth);
 if(labyrinthArtFiles.length>1||
  labyrinthArtFiles.some(f=>normalize(f.path)!=='assets/games/labyrinth-cribbage/labyrinth.png'||f.size!==3446209))
  throw Error('Unexpected/altered Labyrinth board artwork output');

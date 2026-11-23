@@ -117,7 +117,8 @@ export function renderLabyrinthBoard({scores=[],teams=[],viewerSeat=0}={}){
   '</span><small>Track '+(team+1)+'</small></li>').join('');
  return '<figure class="lab-board" aria-label="Original wood-slice Labyrinth Cribbage board">'+
   '<div class="lab-board-art"><img src="'+LABYRINTH_BOARD_SRC+
-  '" width="1254" height="1254" alt="User-approved labyrinth wood-slice board with printed score guides, shown without alteration" loading="lazy" decoding="async"></div>'+
+  '" width="1254" height="1254" alt="User-approved labyrinth wood-slice board with printed score guides, shown without alteration" loading="lazy" decoding="async">'+
+  '<p hidden data-lab-art-missing role="status">The exact source board image is not installed on this deployment; no substitute artwork is shown.</p></div>'+
   '<figcaption>Approved original artwork · 325-point finish. Peg placement is withheld until the physical hole sequence is independently verified.</figcaption>'+
   '<ol class="lab-board-scores" aria-label="Authoritative scores">'+rows+'</ol></figure>';
 }
@@ -135,19 +136,21 @@ const previewSetup='<fieldset disabled aria-disabled="true"><legend>Game configu
  '<label>Four-player format <select name="format"><option selected>Partnerships (default)</option><option>Individual free-for-all</option></select></label>'+
  '<label>Computer strength <select name="difficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></label>'+
  '<button type="button" disabled>Start a verified 325-point match</button></fieldset>';
-export function renderLabyrinthScreen({screen='intro',view=null,selection=[]}={}){
+export function renderLabyrinthScreen({screen='intro',view=null,selection=[],recoverable=[],sessionError=null}={}){
  const v=verifyLabyrinthProjection(view);
  const start='<section class="labyrinth-game" data-labyrinth-screen="'+esc(screen)+'"><header>'+
  '<h2>Labyrinth Cribbage</h2><p>325 points · original wood-slice labyrinth board</p></header>';
+ const recovery=Array.isArray(recoverable)&&recoverable.length?'<nav aria-label="My Labyrinth games"><h3>My Games</h3><ol>'+recoverable.filter(m=>/^[0-9a-f-]{36}$/.test(m.id)).slice(0,25).map(m=>'<li><a href="/games/labyrinth-cribbage/play?session='+esc(m.id)+'" data-route="classic-game">Resume '+esc(m.status)+' match #'+esc(m.id.slice(0,8))+'</a></li>').join('')+'</ol></nav>':'';
+ const error=sessionError?'<p role="alert">'+esc(String(sessionError).slice(0,160))+'</p>':'';
  const board=renderLabyrinthBoard({scores:v?.scores??[0,0],teams:v?
   labyrinthCribbageVariant(v.seatCount,v.variant==='labyrinth-4p-individual'?'individual':'partnerships').teams:
   [0,1],viewerSeat:v?.viewerSeat??0});
- if(screen==='intro')return start+'<p>Browse the approved board and rules. Live Play remains gated.</p>'+board+'</section>';
+ if(screen==='intro')return start+'<p>Browse the approved board and rules. Live Play remains gated.</p>'+error+recovery+board+'</section>';
  if(screen==='rules')return start+'<section aria-label="325-point Labyrinth rules">'+ruleContent+'</section>'+board+'</section>';
  if(screen==='setup')return start+'<form class="labyrinth-setup">'+previewSetup+'</form>'+board+'</section>';
- if(screen==='play')return start+(v?renderLabyrinthTable({view:v,selection}):
+ if(screen==='play')return start+error+recovery+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">No verified 420ID Labyrinth session. Do not expose a playable table or private cards.</p>')+'</section>';
- if(screen==='table')return start+(v?renderLabyrinthTable({view:v,selection}):
+ if(screen==='table')return start+error+recovery+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">A server-authorized Labyrinth session is required to display a private hand.</p>')+'</section>';
  if(screen==='results')return start+(v?.status==='finished'?
   '<h3>Match complete · winner seat '+(v.winnerSeat+1)+'</h3>'+board:

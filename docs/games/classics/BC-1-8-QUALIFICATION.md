@@ -28,3 +28,9 @@ The BC-1.8 release-state implementation accepts `playable` for a canonical Class
 BC-1.7 previous qualification: [3/3 focused jobs #45080821343](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45080821343) and [Account Social regression rerun #45080821364](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45080821364), source merged `989fd385f80ce03c26b36e782521672b06af000d`.
 
 **No new Classic may be started until BC-1.8 has a fully verified, released Cribbage entry.**
+
+## Direct computer-opponent test setup
+
+The Cribbage intro, Setup and Play-without-a-session surfaces now render an accessible computer difficulty selector (Easy/Medium/Hard). From one authenticated 420ID account, this controller creates a **private** two-seat server room, assigns a verified computer seat with selected difficulty and revision, then starts an authoritative frozen-rules match; it verifies the returned private seat, game hash and 420ID identity before navigation. No locally fabricated deck, score or bot turn, no cross-account bypass, and no retries of unconfirmed POST commands. The selector visibly disables starting when the deployed Classic rooms feature is off.
+
+The live Cloudflare Pages runtime previously reported `features.classicRooms:false`; the new source cannot itself change that deployed Pages setting. This is a restricted test-facing addition, **not** a public release authorization. Its new module has a separate 6 KiB asset allowance; all earlier caps and catalogue release proofs remain unchanged.

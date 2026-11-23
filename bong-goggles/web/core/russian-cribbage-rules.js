@@ -137,6 +137,28 @@ export function russianCribbagePegPoints(pile){
  }
  return Object.freeze({count,points,pairCount:equal,run,exact15:count===15,exact31:count===31});
 }
+// These primitives allow the future authoritative adapter to apply heels and
+// distinguish an ordinary Go from the final card without double-crediting 31.
+export function russianCribbageHeels(starter){
+ if(!validCard(starter))throw new RangeError('Invalid starter');
+ return rank(starter)===11?2:0;
+}
+export function russianCribbageCanPlay(hand,count){
+ if(!Array.isArray(hand)||hand.length>6||!Number.isInteger(count)||
+  count<0||count>31)throw new RangeError('Invalid pegging hand or count');
+ validateCards(hand,hand.length);
+ return hand.some(c=>pips(c)+count<=31);
+}
+export function russianCribbageSequenceEnd(lastSeat,seatCount,count,allHandsExhausted){
+ russianCribbageVariant(seatCount);
+ if(!Number.isInteger(lastSeat)||lastSeat<0||lastSeat>=seatCount||
+  !Number.isInteger(count)||count<1||count>31||
+  typeof allHandsExhausted!=='boolean')
+  throw new RangeError('Invalid sequence completion');
+ // The last play has already scored exactly 31. Do not add Go or last-card.
+ if(count===31)return null;
+ return Object.freeze({seat:lastSeat,kind:allHandsExhausted?'last-card':'go',points:1});
+}
 export function russianCribbageClassify(score){
  if(!Number.isSafeInteger(score)||score<0||score>=241)throw new RangeError('Invalid losing score');
  return score<=120?'double-skunk':score<=180?'skunk':'ordinary';

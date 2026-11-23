@@ -1,0 +1,84 @@
+name: BC-1.8 post-merge public frontend and Worker verification
+on:
+  push:
+    branches:
+      - feature/bc-1-8-release-activation-and-live-evidence
+    paths:
+      - '.github/workflows/bc-1-8-postmerge-live-check.yml'
+permissions:
+  contents: read
+jobs:
+  public-frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require live Cloudflare production flags and actual computer code on BongGoggles
+        shell: bash
+        run: |
+          for attempt in $(seq 1 20); do
+            if node --input-type=module - <<'NODE'
+          import assert from 'node:assert/strict';
+          const origin='https://bonggoggles.420integrated.org';
+          const get=async path=>{
+            const response=await fetch(origin+path+(path.includes('?')?'&':'?')+'probe='+Date.now(),{
+              signal:AbortSignal.timeout(12000),cache:'no-store',redirect:'error'
+            });
+            if(!response.ok)throw Error(path+' HTTP '+response.status);
+            return {response,body:await response.text()};
+          };
+          const cfg=await get('/runtime-config.json');
+          const data=JSON.parse(cfg.body);
+          assert.equal(data.appOrigin,origin);
+          assert.equal(data.features?.accountSocial,true);
+          assert.equal(data.features?.classicRooms,true);
+          assert.equal(data.features?.classicCommunications,true);
+          assert.equal(data.features?.accountMonetization,false);
+          const asset=await get('/core/classic-cribbage-practice.js');
+          assert.match(asset.body,/startCribbagePractice/);
+          assert.match(asset.body,/easy/);
+          assert.match(asset.body,/medium/);
+          assert.match(asset.body,/hard/);
+          const ui=await get('/core/cribbage-ui.js');
+          assert.match(ui.body,/Play against the computer|bindCribbagePractice/);
+          console.log('BC-1.8 public BongGoggles frontend VERIFIED: HTTP 200, account/rooms/communications flags true, computer-opponent module and binding present, no monetization');
+          NODE
+            then exit 0; fi
+            echo "BongGoggles production publication not verified on attempt $attempt/20"
+            if [ "$attempt" -lt 20 ]; then sleep 8; fi
+          done
+          exit 1
+  worker-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independently probe cold-start-aware Social Worker health (GET only)
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import {setTimeout as wait} from 'node:timers/promises';
+          let last='unavailable';
+          for(let i=1;i<=18;i++){
+            try{
+              const response=await fetch('https://bonggoggles.420integrated.org/social-api/healthz?cb='+Date.now(),
+                {signal:AbortSignal.timeout(12000),cache:'no-store',redirect:'error'});
+              const d=await response.json().catch(()=>null);
+              if(response.status===200&&d?.ready===true){
+                console.log('BC-1.8 same-origin Worker and Render health HTTP 200 ready=true, attempt='+i);
+                process.exit(0);
+              }
+              last='HTTP '+response.status;
+            }catch(error){last=error?.name==='TimeoutError'?'timeout':String(error?.message).slice(0,90);}
+            if(i<18)await wait(8_000);
+          }
+          console.error('BC-1.8 Worker/Render health NOT verified after bounded cold-start retries: '+last);
+          process.exit(1);
+          NODE

@@ -51,6 +51,7 @@ def read_manifest(filename):
         "policySnapshotFrozen": True,
         "unauthorizedRejected": True,
         "deprecationAndGovernedRecovery": True,
+        "realChainReorganization": True,
     }, "full local standard/appeal/cap/policy/recovery scenario matrix incomplete")
     require(d["canonicalPredeploys"] == {
         "governanceTimelock": PREDEPLOYS["GovernanceTimelock"],
@@ -121,6 +122,7 @@ def read_manifest(filename):
         "finalization replay", "observer cannot appeal",
         "policy deactivation blocks new case", "finalized case cannot accept evidence",
         "appeal cap reached", "appeal finalized maximum case",
+        "orphaned case inaccessible after reorg",
     ]
     require(set(expected).issubset(d["negativeTests"]), "negative-case security coverage missing")
     reproducible = Path(filename).with_name(Path(filename).stem + ".reproducible.json")

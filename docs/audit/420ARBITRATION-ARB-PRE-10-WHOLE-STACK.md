@@ -1,8 +1,8 @@
 # ARB-PRE-10 — Assembled-system qualification and scenario traceability
 
-**Status:** **REPOSITORY-QUALIFIED / LOCAL ASSEMBLED SYSTEM**, subject to a final documentation-head check. This is not an independent production-security certification, live testnet deployment, or unconditional custody/remedy authority.
+**Status:** **REPOSITORY-QUALIFIED / LOCAL ASSEMBLED SYSTEM; MERGED TO MAIN** at `e2116fc2bf8ae0c84bbf5851664a68734f3518b1`. This is not an independent production-security certification, live testnet deployment, or unconditional custody/remedy authority.
 
-**Authoritative baseline:** ARB-PRE-08 merged to `main@34c1dea99f400a39f4cca2d27d255d5810e978b1`. ARB-PRE-09 remains independently qualified but unmerged in [PR #1372](https://github.com/abvhiael/420-integrated-v0.1/pull/1372) at `f6de3550c1dd7e0b94f40bb81d937d4bfc2843fd`. ARB-PRE-10 is stacked on that branch to preserve the approved local deployment graph **without implicitly merging ARB-PRE-09**. No frozen Genesis parameter, fixed Arbitration predeploy or deployment namespace was changed.
+**Qualification provenance:** The original ARB-PRE-10 source was tested on top of independently qualified ARB-PRE-09 source `f6de3550c1dd7e0b94f40bb81d937d4bfc2843fd`. Both phases are **now merged to main**: ARB-PRE-09 [PR #1372](https://github.com/abvhiael/420-integrated-v0.1/pull/1372) merge `ecf2a73f2de354cd2fa8f2127125628021c69bd5`; ARB-PRE-10 [PR #1373](https://github.com/abvhiael/420-integrated-v0.1/pull/1373) merge `e2116fc2bf8ae0c84bbf5851664a68734f3518b1`. The historic exact-head test runs below remain source evidence. No fixed Genesis address or parameter changed. No frozen Genesis parameter, fixed Arbitration predeploy or deployment namespace was changed.
 
 ## Actual qualification boundaries
 
@@ -39,7 +39,7 @@ The existing `420arbitration-audit.yml`, `420arbitration-pre09-genesis.yml`, `42
 - [ARB-PRE-10 whole-stack workflow **45286735212**](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45286735212): **SUCCESS** (four exact-head jobs). Actual Chromium/Anvil complete Wallet UI flow passed, including two ruling rounds, encrypted/private evidence, read-only event history, receipt confirmation, viewport layouts, **zero axe accessibility violations**; browser screenshots retained as artifact `arbitration-pre10-browser-982e6cb2d815c073f17a556c64f1c2d8c7fa088b`. **73/73** Node Wallet/private evidence cases and Go Gateway authorization passed. Indexer PostgreSQL ingest/reorg/restart tests **7/7 executable**, with one first-pass conditional artifact check skipped until Foundry output existed; then **5/5** compiled-contract ABI parity tests passed with zero skips. Commerce **7/7** cases and real Launchpad origin/ruling/refund conservation/replay **7/7** Foundry tests passed.
 - [Arbitration audit run **45286734719**](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45286734719): **SUCCESS**, preserving contract/compiler/security baseline at the same head.
 - An unrelated BongGoggles push workflow failure must not be reported as Arbitration qualification failure or repaired within this task.
-- Parent PR **#1372** (ARB-PRE-09) remains unmerged. The ARB-PRE-10 feature branch is stacked against that retained qualification head; it does not assert deployment on `main` or authorize merging either PR. Concurrent `main` advancement was compared for Arbitration/Registry/Indexer/consumer overlap and found **none** among its changed paths.
+- **Merge follow-through completed:** ARB-PRE-09 PR **#1372** and ARB-PRE-10 PR **#1373** have both been merged to main in the order listed above. This is a repository merge, not a public-testnet deployment. Historical merge restrictions in this document described the pre-merge qualification state; current live network status remains unqualified.
 
 ## Limitations deliberately not misrepresented
 

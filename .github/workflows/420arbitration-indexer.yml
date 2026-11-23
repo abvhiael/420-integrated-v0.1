@@ -62,5 +62,5 @@ jobs:
       - name: Verify RPC derived route TypeScript
         run: |
           cd 420-rpc
-          npm ci --ignore-scripts
+          npm install --no-save --no-package-lock --ignore-scripts
           npm run build

@@ -79,7 +79,8 @@ The runner flushes stage start/run/pass/fail messages so GitHub Actions output r
 `scripts/selftest-documentation-ci.py` executes deterministic pass/fail fixtures against production validator code. It proves representative acceptance and fail-closed behavior for front matter, malformed policy input, internal links/anchors and troubleshooting secret-safety language.
 
 - [DOC-12 coverage audit](coverage-audit.md) — audited corpus coverage, self-test scope, fail-closed rules, deliberate exclusions and non-goals.
-- [Universal qualification execution policy](universal-qualification-policy.md) — cross-app preflight, frozen SHA and scoped CI ownership.
+- [Universal qualification execution policy](universal-qualification-policy.md)
+- [Phase 2 canonical Foundry qualification owner](PHASE2-FOUNDRY-QUALIFICATION-OWNER.md) — unified full-shard and scoped test ownership; older SOL-01/SOL-02 qualification reconciliation. — cross-app preflight, frozen SHA and scoped CI ownership.
 - [Documentation qualification contract](qualification-contract.md) — scope, authority, deterministic stage order, exit codes and failure ownership.
 - [DOC-12 documentation CI roadmap](DOC-12-ROADMAP.md) — DOC-12.1 through DOC-12.10 implementation and closeout.
 

@@ -1,0 +1,30 @@
+name: Phase 2 Canonical Foundry CI Coherence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/contracts-foundry.yml'
+      - '.github/workflows/reusable-scoped-foundry.yml'
+      - 'contracts/scripts/qualify-foundry-shard.sh'
+      - 'contracts/scripts/coverage-foundry-shard.py'
+      - 'contracts/scripts/merge-coverage.py'
+      - 'docs/ci/UNIVERSAL-SCOPED-QUALIFICATION-POLICY.md'
+      - 'scripts/ci/verify-phase2-foundry-coherence.py'
+      - '.github/workflows/phase2-foundry-coherence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Validate exact SHA and run bounded positive/negative invariants
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          python3 scripts/ci/verify-phase2-foundry-coherence.py

@@ -19,7 +19,7 @@ type ClassicRule interface {
  View(json.RawMessage,int)(json.RawMessage,error)
 }
 type ClassicRuleResolver func(string)ClassicRule
-type ClassicSessions struct{Store *Store;Rooms *ClassicRooms;Rules ClassicRuleResolver;Bots map[string]ClassicBotPolicies;botMu sync.Mutex}
+type ClassicSessions struct{Store *Store;Rooms *ClassicRooms;Rules ClassicRuleResolver;Bots map[string]ClassicBotPolicies;botMu sync.Mutex;verifiedMu sync.Mutex;verifiedPrefixes map[string]verifiedRulePrefix}
 const classicTurnSeconds=120
 const classicMaxStateBytes=16384
 const classicMaxActionBytes=4096

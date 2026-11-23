@@ -538,7 +538,8 @@ def main():
         browser_proposal=json.loads(browser_proposal_path.read_text())
         require(browser_proposal["realNativeWalletSignedCivicProposal"]
                 and browser_proposal["accountChangedInvalidatesMountedGovernance"]
-                and browser_proposal["appSSORevocationInvalidatesMountedGovernance"],
+                and browser_proposal["appSSORevocationInvalidatesMountedGovernance"]
+                and browser_proposal["chainChangeAndDisconnectInvalidateMountedGovernance"],
                 "real browser could not independently propose and revoke on chain 420")
         third,block3,batch3,archive3=produce(second,4,3)
         browser_proposal_receipt=rpc("eth_getTransactionReceipt",[browser_proposal["proposalTxHash"]])
@@ -567,6 +568,7 @@ def main():
                 and browser_vote["realOnchainEvent"]
                 and browser_vote["accountChangedInvalidatesMountedGovernance"]
                 and browser_vote["appSSORevocationInvalidatesMountedGovernance"]
+                and browser_vote["chainChangeAndDisconnectInvalidateMountedGovernance"]
                 and browser_vote["realVoteReceiptHash"]==ballot_intent["txHash"]
                 and receipt and receipt["status"]=="0x1"
                 and receipt["blockHash"]==block5["hash"]

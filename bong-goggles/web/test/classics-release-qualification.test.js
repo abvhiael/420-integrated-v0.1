@@ -43,6 +43,7 @@ test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-
  assert.ok(performance.now()-begin<12_000,'bounded 25-title/8-screen smoke exceeded 12 seconds');
  assert.equal(ALL_CLASSICS.filter(x=>x.status==='account').length,1);
  assert.equal(ALL_CLASSICS.find(x=>x.status==='account')?.id,'cross-country-chaos');
+ assert.equal(CLASSIC_ROADMAP.filter(x=>x.status==='playable').length,0,'no fabricated BC-1.8 release');
 });
 test('BC-0.12 seeded property probes reject all altered title order, statuses and unauthorized proofs',()=>{
  let seed=0x812420;
@@ -53,7 +54,7 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
   const items=CLASSIC_ROADMAP.map(x=>({...x}));
   const choice=next()%6;
   if(choice===0)items[index].id='unknown-'+i;
-  if(choice===1)items[index].status='account';
+  if(choice===1)items[index].status='playable';
   if(choice===2)items[index].milestone='BC-999';
   if(choice===3)items[index].collection='counterfeit';
   if(choice===4)items[index].status='wager';
@@ -61,13 +62,13 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
   assert.throws(()=>assertCatalogueAndEvidence({manifest,roadmap:items}),/release denied/);
  }
  const released=CLASSIC_ROADMAP.map(g=>({...g}));
- released[0].status='account';
+ released[0].status='playable';
  const good={schema:'bc-0-12-release-evidence-v1',games:{cribbage:proof()}};
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,1);
- released[1].status='account';
+ released[1].status='playable';
  good.games['russian-cribbage']={...proof(),gameId:'russian-cribbage'};
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,2);
- released[3].status='account';
+ released[3].status='playable';
  good.games.scrabble={...proof(),gameId:'scrabble'};
  assert.throws(()=>assertCatalogueAndEvidence({manifest:good,roadmap:released}),/order/);
 });
@@ -127,4 +128,18 @@ test('BC-0.12 public rule previews and local fixture projections never grant an 
  });
  assert.equal(config.features.classicRooms,false);
  assert.equal(config.features.classicCommunications,false);
+});
+
+test('BC-1.8 Playable is exclusive to validated release evidence, not a registry/account label',()=>{
+ const empty={schema:'bc-0-12-release-evidence-v1',games:{}};
+ const draft=CLASSIC_ROADMAP.map(x=>({...x}));
+ draft[0].status='playable';
+ assert.throws(()=>assertCatalogueAndEvidence({manifest:empty,roadmap:draft}),/without evidence/);
+ const withProof={schema:empty.schema,games:{cribbage:proof()}};
+ assert.equal(assertCatalogueAndEvidence({manifest:withProof,roadmap:draft}).released,1);
+ draft[1].status='playable';
+ assert.throws(()=>assertCatalogueAndEvidence({manifest:withProof,roadmap:draft}),/without evidence/);
+ const legacy=CLASSIC_ROADMAP.map(x=>({...x}));
+ legacy[0].status='account';
+ assert.throws(()=>assertCatalogueAndEvidence({manifest:withProof,roadmap:legacy}),/unknown game status/);
 });

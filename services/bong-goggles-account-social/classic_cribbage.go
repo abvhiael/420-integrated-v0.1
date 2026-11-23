@@ -51,6 +51,7 @@ type cribbageAward struct {
  Team int `json:"team"`
  Kind string `json:"kind"`
  Points int `json:"points"`
+ Count int `json:"count,omitempty"` // public running count at the instant of this award
  Total int64 `json:"total"`
 }
 type cribbageLoss struct {
@@ -253,7 +254,7 @@ func cribbageScore(f *RuleFrame,d *cribbageData,seat,points int,kind string){
  v,_:=cribbageVariantFor(f.SeatCount)
  team:=v.Teams[seat]
  for i,t:=range v.Teams{if t==team{f.Scores[i]+=int64(points)}}
- d.Awards=append(d.Awards,cribbageAward{Seat:seat,Team:team,Kind:kind,Points:points,Total:f.Scores[seat]})
+ d.Awards=append(d.Awards,cribbageAward{Seat:seat,Team:team,Kind:kind,Points:points,Count:d.Count,Total:f.Scores[seat]})
  if f.Scores[seat]<121{return}
  f.Terminal=true;f.Turn=-1;f.Phase="finished"
  winner:=seat;f.Winner=&winner
@@ -457,7 +458,7 @@ func (cribbageRules) Validate(f RuleFrame)error{
   if err!=nil||score!=g.Score{return ErrInvalid}
  }
  for _,a:=range d.Awards{
-  if a.Seat<0||a.Seat>=f.SeatCount||a.Team!=v.Teams[a.Seat]||a.Points<1||a.Points>29||a.Kind==""||a.Total<1{return ErrInvalid}
+  if a.Seat<0||a.Seat>=f.SeatCount||a.Team!=v.Teams[a.Seat]||a.Points<1||a.Points>29||a.Count<0||a.Count>31||a.Kind==""||a.Total<1{return ErrInvalid}
  }
  initialDrawn:=v.Deal*f.SeatCount+v.Extra
  seen:=[52]bool{}
@@ -521,6 +522,16 @@ func (cribbageRules) View(f RuleFrame,seat int)(json.RawMessage,error){
  d,e:=cribbageDecode(f);if e!=nil{return nil,e}
  private:=d.Hands[seat]
  if d.Stage=="peg"||d.Stage=="show"{private=d.Remaining[seat]}
+ // A nil Go slice marshals as JSON null, while the frozen browser privacy
+ // contract requires arrays, including empty pegging piles and award lists.
+ // Materialize only the participant's existing projection, never game state.
+ hand:=append([]int{},private...)
+ pegPile:=append([]int{},d.Pile...)
+ pegged:=make([][]int,len(d.Played))
+ for i,played:=range d.Played{pegged[i]=append([]int{},played...)}
+ lastShow:=append([]cribbageShow{},d.LastShow...)
+ lastAwards:=append([]cribbageAward{},d.Awards...)
+ losers:=append([]cribbageLoss{},d.Losers...)
  publicCounts:=make([]int,f.SeatCount)
  for i:=range publicCounts{
   if d.Stage=="discard"||d.Stage=="cut"{publicCounts[i]=len(d.Hands[i])
@@ -550,9 +561,9 @@ func (cribbageRules) View(f RuleFrame,seat int)(json.RawMessage,error){
   Winner *int `json:"winner"`
  }{GameID:"cribbage",Variant:d.Variant,Round:f.Round,Phase:f.Phase,
   Dealer:d.Dealer,Turn:f.Turn,Seat:seat,Scores:f.Scores,
-  Hand:append([]int(nil),private...),CardCounts:publicCounts,CribCount:len(d.Crib),
-  Discarded:d.Discarded,Starter:d.Starter,PegCount:d.Count,PegPile:d.Pile,Pegged:d.Played,
-  SaidGo:d.Go,LastShow:d.LastShow,LastAwards:d.Awards,Losers:d.Losers,Winner:f.Winner}
+  Hand:hand,CardCounts:publicCounts,CribCount:len(d.Crib),
+  Discarded:d.Discarded,Starter:d.Starter,PegCount:d.Count,PegPile:pegPile,Pegged:pegged,
+  SaidGo:d.Go,LastShow:lastShow,LastAwards:lastAwards,Losers:losers,Winner:f.Winner}
  raw,e:=json.Marshal(view)
  if e!=nil||len(raw)>classicMaxActionBytes{return nil,ErrUnavailable}
  return raw,nil

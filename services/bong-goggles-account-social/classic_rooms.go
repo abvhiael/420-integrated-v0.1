@@ -120,7 +120,7 @@ func (c *ClassicRooms) Create(ctx context.Context,viewer,game,visibility string,
  e=tx.QueryRowContext(ctx,"SELECT subject FROM bg_account_social.members WHERE subject=$1 FOR UPDATE",viewer).Scan(&host)
  if errors.Is(e,sql.ErrNoRows){return empty,ErrNotFound};if e!=nil{return empty,e}
  var countActive int
- e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status<>'cancelled'",viewer).Scan(&countActive)
+ e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&countActive)
  if e!=nil{return empty,e};if countActive>=10{return empty,ErrConflict}
  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms (id,host,game_id,visibility,seat_count) VALUES($1,$2,$3,$4,$5)",id,viewer,game,visibility,count)
  if e!=nil{return empty,e}

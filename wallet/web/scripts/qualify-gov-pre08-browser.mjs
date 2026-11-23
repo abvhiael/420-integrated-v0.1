@@ -62,7 +62,7 @@ const transactions=[];
 let approvals=0;
 const pending=arg('pending-output',true);
 async function providerRequest(method,params=[]){
- if(['eth_accounts','eth_requestAccounts'].includes(method))return [currentAccount];
+ if(['eth_accounts','eth_requestAccounts'].includes(method))return currentAccount ? [currentAccount] : [];
  if(method==='eth_chainId'&&chainChanged)return '0x1a5';
  if(method!=='eth_sendTransaction')return rpc(method,params);
  const tx=params[0];
@@ -132,6 +132,32 @@ await page.route('https://wallet.420integrated.org/**',async route=>{
  }catch{return route.fulfill({status:404})}
 });
 
+async function assertProviderInvalidation(event, value) {
+ // The Wallet shell intentionally reloads on provider changes. Read the old
+ // document in the same browser task as dispatch, then verify the new document.
+ const navigation=page.waitForEvent('framenavigated',{
+   predicate:frame=>frame===page.mainFrame(),timeout:12000
+ });
+ const [snapshot]=await Promise.all([
+   page.evaluate(({event,value})=>{
+     const listeners=window.__walletEvent(event,value);
+     return {
+       listeners,
+       status:document.querySelector('#governance-app-state').textContent,
+       account:document.querySelector('#governance-account').textContent,
+       voteDisabled:[...document.querySelectorAll('[data-governance-support]')].every(button=>button.disabled)
+     };
+   },{event,value}),
+   navigation
+ ]);
+ assert.ok(snapshot.listeners>0,`No listeners for EIP-1193 ${event}`);
+ assert.equal(snapshot.status,'Reload required',`Governance did not synchronously invalidate on ${event}`);
+ assert.equal(snapshot.account,'—');
+ assert.equal(snapshot.voteDisabled,true);
+ await page.locator('#governance-app-state').filter({hasText:/^Not connected$/}).waitFor();
+ assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+}
+
 try{
  await page.goto('https://wallet.420integrated.org/',{waitUntil:'domcontentloaded',timeout:30000});
  await page.locator('#wallet-420id-panel').waitFor({state:'visible',timeout:15000});
@@ -185,24 +211,42 @@ try{
      proof={...proof,canonicalCivicBallotRecoveredAfterHardStop:true};
    }
  }
- // Real EIP-1193 account changes must invalidate the MOUNTED Governance UI.
- // An EIP-1193 account change updates *both* the selected account and
- // accountsChanged listeners. Do not inject an inconsistent event-only state.
+ const before=transactions.length;
  assert.match(graph.localBrowserChangedAccount,/^0x[0-9a-fA-F]{40}$/);
  currentAccount=graph.localBrowserChangedAccount.toLowerCase();
- const listenerCount=await page.evaluate(value=>window.__walletEvent('accountsChanged',[value]),currentAccount);
- assert.ok(listenerCount>0,'connected real Governance browser did not subscribe to accountsChanged');
- const actualState=await page.locator('#governance-app-state').textContent();
- assert.equal(actualState,'Reload required','Governance did not synchronously invalidate on EIP-1193 account switch');
+ await assertProviderInvalidation('accountsChanged',[currentAccount]);
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state[data-state="passed"]').waitFor();
+ assert.equal((await page.locator('#governance-account').textContent()).toLowerCase(),currentAccount);
+
+ chainChanged=true;
+ await assertProviderInvalidation('chainChanged','0x1a5');
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
+ assert.match(await page.locator('#governance-error-recovery').textContent(),/network|chain/i);
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
- const before=transactions.length;
- // Logout updates the app-scoped browser session, not the EVM account.
+
+ chainChanged=false;
+ currentAccount=wallet.address.toLowerCase();
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state[data-state="passed"]').waitFor();
+ currentAccount=null;
+ await assertProviderInvalidation('disconnect',{code:4900,message:'Provider disconnected'});
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
+ assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+
+ currentAccount=wallet.address.toLowerCase();
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state[data-state="passed"]').waitFor();
  await page.locator('[data-420id-logout]').click();
- await page.waitForFunction(()=>document.querySelector('#governance-transaction-state')?.textContent?.includes('420ID'),null,{timeout:12000});
+ await page.locator('#governance-app-state').filter({hasText:/^Reload required$/}).waitFor();
+ assert.match(await page.locator('#governance-transaction-state').textContent(),/420ID/);
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
- assert.equal(transactions.length,before,'account switch or logout submitted unauthorized transaction');
+ assert.equal(transactions.length,before,'provider changes or logout submitted an unauthorized transaction');
  proof={...proof,accountChangedInvalidatesMountedGovernance:true,
    appSSORevocationInvalidatesMountedGovernance:true,
+   chainChangeAndDisconnectInvalidateMountedGovernance:true,
    signedEOATransactions:transactions,explicitDeviceApprovals:approvals};
  await fs.writeFile(output,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
  console.log('GOV_PRE_08_CHROMIUM_420ID_NATIVE_GETH_EIP1193='+mode.toUpperCase()+'_PASS');

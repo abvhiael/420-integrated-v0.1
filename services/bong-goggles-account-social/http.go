@@ -24,6 +24,7 @@ type Handler struct{
  Rooms *ClassicRooms
  Sessions *ClassicSessions
  ClassicCommunicationsEnabled bool
+ classicMatchSocialEnabled bool
  Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
@@ -73,6 +74,16 @@ func (h *Handler) EnableClassicSessions(s *ClassicSessions)error{
 }
 // EnableXP is a separate opt-in from AUTH-8/9 and uses this exact 420ID
 // authenticated app Store, never Wallet or a browser-submitted subject.
+// BC-1.6 is a separate operator-only activation. BC-1.5 stays available
+// without a new migration, extra grants or public invitation endpoints.
+func (h *Handler) EnableClassicMatchSocial(ctx context.Context) error {
+ if h==nil||h.Store==nil||h.Sessions==nil||h.Rooms==nil||h.Sessions.Rooms!=h.Rooms||
+  h.Sessions.Store!=h.Store{return ErrInvalid}
+ if _,e:=h.Sessions.rule("cribbage","","");e!=nil{return e}
+ if e:=h.Store.ReadyClassicMatchRequests(ctx);e!=nil{return e}
+ h.classicMatchSocialEnabled=true
+ return nil
+}
 func (h *Handler) EnableXP(x *Contributions)error{
  if h==nil||x==nil||x.Store!=h.Store{return ErrInvalid}
  h.XP=x

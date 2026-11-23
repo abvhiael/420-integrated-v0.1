@@ -252,3 +252,33 @@ func TestBC12BoundedLongMatchReplayCapacity(t *testing.T){
   t.Fatal("unbounded cribbage journal accepted",e)
  }
 }
+
+func TestBC18CribbageInitialLiveProjectionUsesEmptyJSONArrays(t *testing.T){
+ a,e:=NewCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
+ for _,n:=range []int{2,3,4}{
+  raw,e:=a.initial(cribSeed(byte(91+n)),n);if e!=nil{t.Fatal(e)}
+  for seat:=0;seat<n;seat++{
+   v,e:=a.View(raw,seat);if e!=nil{t.Fatal(e)}
+   var doc map[string]json.RawMessage
+   if e=json.Unmarshal(v,&doc);e!=nil{t.Fatal(e)}
+   for _,key:=range []string{"hand","cardCounts","scores","discarded",
+    "pegPile","pegged","saidGo","lastShow","lastAwards","losers"}{
+    field:=bytes.TrimSpace(doc[key])
+    if len(field)==0||field[0]!='['{t.Fatalf("initial %d-seat projection for seat %d returned %s=%s, expected JSON array",n,seat,key,field)}
+   }
+   var pegged [][]int
+   if e=json.Unmarshal(doc["pegged"],&pegged);e!=nil||len(pegged)!=n{t.Fatalf("missing per-seat pegging arrays: %v",e)}
+   for player,cards:=range pegged{
+    if cards==nil{t.Fatalf("seat %d pegged array is null",player)}
+   }
+   if bytes.Contains(v,[]byte(`"deck"`))||bytes.Contains(v,[]byte(`"crib"`))||
+    bytes.Contains(v,[]byte(`"remaining"`))||bytes.Contains(v,[]byte(`"hands"`)){
+    t.Fatal("secret Cribbage state leaked")
+   }
+   var hand []int
+   if e=json.Unmarshal(doc["hand"],&hand);e!=nil||len(hand)!=(map[int]int{2:6,3:5,4:5})[n]{
+    t.Fatalf("wrong private hand for %d-seat view: %d %v",n,len(hand),e)
+   }
+  }
+ }
+}

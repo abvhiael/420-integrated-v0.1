@@ -307,10 +307,13 @@ func (a *RulesAdapter) replayLimit()int{
  }
  return maxRulesMoves
 }
-func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json.RawMessage,error){
- if a==nil||len(trace)>a.replayLimit(){return nil,ErrInvalid}
- state,e:=a.initial(seed,seatCount);if e!=nil{return nil,e}
- prev:=int64(1)
+// ReplayFromVerified continues only the suffix of a prefix that the server
+// has already fully replayed and tied to the immutable private journal.
+// Every new action still runs the exact same legal/determinism and
+// before/after-hash verification as a cold full replay.
+func (a *RulesAdapter) replayFromVerified(state json.RawMessage,prev int64,trace []RuleTrace)(json.RawMessage,error){
+ if a==nil||prev<1||len(trace)>a.replayLimit(){return nil,ErrInvalid}
+ state=append(json.RawMessage(nil),state...)
  for _,item:=range trace{
   if item.Sequence!=prev+1||item.Sequence>1000000{return nil,ErrConflict}
   before:=sha256.Sum256(state)
@@ -322,6 +325,11 @@ func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json
   state=updated;prev=item.Sequence
  }
  return state,nil
+}
+func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json.RawMessage,error){
+ if a==nil||len(trace)>a.replayLimit(){return nil,ErrInvalid}
+ state,e:=a.initial(seed,seatCount);if e!=nil{return nil,e}
+ return a.replayFromVerified(state,1,trace)
 }
 type RuleTrace struct {
  Sequence int64

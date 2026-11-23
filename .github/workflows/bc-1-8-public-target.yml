@@ -1,0 +1,33 @@
+name: BC-1.8 Real BongGoggles Public Target Preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bc-1-8-public-target.yml'
+      - 'bong-goggles/web/test/cribbage-public-target.mjs'
+      - 'bong-goggles/web/core/classics.js'
+      - 'bong-goggles/web/core/cribbage-ui.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/scripts/classics-release-gate.mjs'
+      - 'docs/games/classics/BC-1-8-QUALIFICATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-public-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and bounded public BongGoggles preflight — no auth secrets
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check bong-goggles/web/test/cribbage-public-target.mjs
+          node bong-goggles/web/test/cribbage-public-target.mjs

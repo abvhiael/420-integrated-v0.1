@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {withAccountSocialBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
+import {withAccountSocialBuildFlags,resolveClassicBuildFlags,ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG} from '../scripts/account-social-build-config.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 
 const example=JSON.parse(await readFile(new URL('../runtime-config.example.json',import.meta.url),'utf8'));
@@ -59,4 +59,26 @@ test('build refuses incomplete or malformed runtime configuration',()=>{
  for(const value of [null,{},[],{features:null},{features:[]},{features:'enabled'}]){
   assert.throws(()=>withAccountSocialBuildFlags(value,'true'),/Full BongGoggles runtime config/);
  }
+});
+
+// BC-1.8: Pages production-only source activation leaves the independent
+// opt-in parser unchanged and always respects explicit operator rollback.
+test('BC-1.8 production Pages main activates Classic rooms and messages only with active 420ID',()=>{
+ const set=(props)=>resolveClassicBuildFlags(props);
+ assert.deepEqual(set({account:'true',pages:'1',branch:'main'}),{rooms:'true',communications:'true'});
+ for(const p of [
+  {account:'false',pages:'1',branch:'main'},
+  {account:'true',pages:'1',branch:'feature/bc-1-8-release-activation-and-live-evidence'},
+  {account:'true',pages:'0',branch:'main'},
+  {account:'true',branch:'main'},
+  {account:'true',pages:'1',branch:'preview'}
+ ])assert.deepEqual(set(p),{rooms:undefined,communications:undefined});
+ assert.deepEqual(set({account:'true',pages:'1',branch:'main',rooms:'false'}),
+  {rooms:'false',communications:undefined});
+ assert.deepEqual(set({account:'true',pages:'1',branch:'main',rooms:'true',communications:'false'}),
+  {rooms:'true',communications:'false'});
+ const enabled=set({account:'true',pages:'1',branch:'main'});
+ assert.equal(withAccountSocialBuildFlags(example,'true',enabled.rooms,enabled.communications).features.classicCommunications,true);
+ const disabled=set({account:'true',pages:'1',branch:'main',rooms:'false',communications:'false'});
+ assert.equal(withAccountSocialBuildFlags(example,'true',disabled.rooms,disabled.communications).features.classicCommunications,false);
 });

@@ -1,0 +1,95 @@
+name: BC-1.7 Cribbage Integrity Accessibility and E2E Qualification
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bc-1-7-cribbage-qualification.yml'
+      - 'services/bong-goggles-account-social/classic_cribbage_qualification_integration_test.go'
+      - 'bong-goggles/web/test/cribbage-final-browser.mjs'
+      - 'bong-goggles/web/test/live-classics/cribbage.mjs'
+      - 'docs/games/classics/BC-1-7-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  signed-postgres-concurrency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exact-head race detector, real PostgreSQL and two signed 420ID principals
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -tags account420_integration,bc15_fullmatch -timeout=10m -run '^TestBC17' -v ./services/bong-goggles-account-social
+          go vet -tags account420_integration,bc15_fullmatch ./services/bong-goggles-account-social
+  browser-privacy-accessibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact head and live adapter source boundary
+        working-directory: bong-goggles/web
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check test/cribbage-final-browser.mjs
+          node --check test/live-classics/cribbage.mjs
+          node --test test/cribbage-social.test.js test/cribbage-multiplayer.test.js test/cribbage-frontend.test.js
+      - name: Install pinned browser + accessibility tools
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
+          npx playwright install --with-deps chromium
+      - name: Two independent 420ID browser sessions, keyboard, WCAG and history/rematch regression
+        working-directory: bong-goggles/web
+        run: node test/cribbage-final-browser.mjs
+  release-separation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject premature public Play and external credentials in PR qualification
+        working-directory: bong-goggles/web
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node scripts/classics-release-gate.mjs --audit
+          node --test test/classics-release-qualification.test.js

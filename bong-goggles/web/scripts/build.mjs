@@ -10,7 +10,7 @@ import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
-import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags} from './account-social-build-config.mjs';
+import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags,resolveClassicBuildFlags} from './account-social-build-config.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
@@ -27,10 +27,14 @@ await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
-const runtimeConfig=withAccountSocialBuildFlags(example,process.env[ACCOUNT_SOCIAL_BUILD_FLAG],process.env[CLASSIC_ROOMS_BUILD_FLAG],process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG]);
+const accountFlag=process.env[ACCOUNT_SOCIAL_BUILD_FLAG];
+const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLASSIC_ROOMS_BUILD_FLAG],
+ communications:process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG],pages:process.env.CF_PAGES,
+ branch:process.env.CF_PAGES_BRANCH});
+const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // Only approved dashboard assets and explicitly mapped optimized game cards are published.
@@ -71,6 +75,21 @@ for(const asset of CHAOS_VEHICLE_ASSETS){
  await mkdir(dirname(target),{recursive:true});
  await cp(resolve(root,asset),target);
 }
+// BC-1.4: publish only the creator-approved, self-contained leaf board.
+// Its embedded optimized WebP is source-owned; no remote images are trusted.
+const cribbageLeafRelative='assets/games/cribbage/leaf-board.svg';
+const cribbageLeafSource=resolve(root,cribbageLeafRelative);
+const cribbageLeaf=await readFile(cribbageLeafSource,'utf8');
+const embeddedArt=cribbageLeaf.match(/data:image\/webp;base64,([A-Za-z0-9+/]+=*)/);
+if(!cribbageLeaf.startsWith('<svg ')||!cribbageLeaf.includes('viewBox="0 0 1448 1086"')||
+   !cribbageLeaf.trimEnd().endsWith('</svg>')||!embeddedArt||
+   embeddedArt[1].length<12000||embeddedArt[1].length>90000||
+   cribbageLeaf.includes('<script')||cribbageLeaf.includes('https:')||
+   (await stat(cribbageLeafSource)).size>100*1024)
+ throw Error('Invalid approved Cribbage gameboard asset');
+await mkdir(dirname(resolve(out,cribbageLeafRelative)),{recursive:true});
+await cp(cribbageLeafSource,resolve(out,cribbageLeafRelative));
+
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.
 const variants=[

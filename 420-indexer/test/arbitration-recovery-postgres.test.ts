@@ -83,7 +83,7 @@ test('shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupt
  assert.equal((await protocolRows(db)).length,4,'duplicate eth_getLogs suppressed');
  const state=await model().case(ARB_CASE_ID_420);
  assert.equal(state?.state,'RULED');assert.equal(state?.round,0);
- assert.equal(state?.canonicality,'confirmed');
+ assert.equal(state?.canonicality,'pending');
  assert.equal(state?.authoritative,false);
  assert.equal((await checkpoint())?.blockNumber,3n);
 

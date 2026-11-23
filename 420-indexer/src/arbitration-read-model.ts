@@ -81,7 +81,7 @@ function publicFields(value:unknown):ArbitrationPublicFields420{
  return out;
 }
 function event(row:SqlRow420,binding:ArbitrationIndexerDeployment420):ArbitrationHistoryEntry420{
- const eventName=required(row.event_name,'eventName');
+ const eventName=String(row.event_name??'');
  if(!EVENT_NAMES.includes(eventName as any))throw Error('unexpected Arbitration event type');
  const contractAddress=hex(row.contract_address,'emitter','address');
  const expected=CASE_NAMES.has(eventName)?
@@ -110,6 +110,7 @@ export function replayArbitrationCase420(events:readonly ArbitrationHistoryEntry
  if(!events.length)return null;
  const sorted=[...events].sort(before);
  const seen=new Map<string,string>();
+ const evidenceKeys=new Set<string>();
  let state:CaseState420|null=null,round=0,appeals=0,evidenceCount=0;
  let id='',domain='',claimant='',respondent='',component='',object='';
  let outcomeCode:string|null=null,rulingHash:string|null=null,remedyCommitment:string|null=null;
@@ -146,10 +147,9 @@ export function replayArbitrationCase420(events:readonly ArbitrationHistoryEntry
     if(state!=='OPEN'||e.round!==round||
      ![claimant,respondent].includes(hex(f.submitter,'submitter','address'))||
      !hex(f.evidenceHash,'evidenceHash'))throw Error('Arbitration evidence case/round/participant invalid');
-    const sameCommitment=sorted.filter(v=>v.eventName==='EvidenceCommitted'&&
-     v.caseId===id&&v.round===round&&v.fields.evidenceHash===f.evidenceHash);
-    if(sameCommitment.length!==1)throw Error('Arbitration duplicate evidence commitment in round');
-    evidenceCount++;
+    const evidenceKey=round+':'+hex(f.evidenceHash,'evidenceHash');
+    if(evidenceKeys.has(evidenceKey))throw Error('Arbitration duplicate evidence commitment in round');
+    evidenceKeys.add(evidenceKey);evidenceCount++;
    }else if(e.eventName==='CaseRuled'){
     if(state!=='OPEN'||e.round!==round||ruledTx||finalTx)throw Error('Arbitration invalid ruled transition');
     appealDeadline=uint(f.appealDeadline,'appealDeadline',(1n<<64n)-1n).toString();

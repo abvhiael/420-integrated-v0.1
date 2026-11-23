@@ -62,6 +62,9 @@ def query_params(route_id: str) -> str:
         "ai-policy": "chainId; path: policyId",
         "ai-reputations": "chainId, cursor?, limit?, direction?",
         "ai-reputation": "chainId; path: providerId",
+        "arbitration-cases": "chainId, claimant?, respondent?, domainId?, status?, round?, cursor?, limit?, direction?",
+        "arbitration-case": "chainId; path: caseId",
+        "arbitration-history": "chainId; path: caseId; cursor?, limit?, direction?",
         "search": "chainId, q, limit?",
     }
     if route_id not in params:

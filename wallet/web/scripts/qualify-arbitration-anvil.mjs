@@ -161,6 +161,10 @@ async function reviewAndSubmit(page){
   await panel.locator('#arbitration-check-receipt').click();
   await page.waitForFunction(()=>document.querySelector('#arbitration-tx-status')?.textContent?.includes('Canonically confirmed'),
     null,{timeout:15000});
+  // A confirmed receipt is not the end of the asynchronous case/history refresh.
+  // No next user action should run while the application still owns that operation.
+  await page.waitForFunction(()=>document.querySelector('#arbitration-refresh')?.disabled===false,
+    null,{timeout:15000});
 }
 async function selectCase(page,id){
   await page.locator('[data-arbitration-view="details"]').click();

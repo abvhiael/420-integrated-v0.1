@@ -94,7 +94,11 @@ await page.addInitScript(()=>{
    on(name,fn){if(!handlers.has(name))handlers.set(name,new Set());handlers.get(name).add(fn)},
    removeListener(name,fn){handlers.get(name)?.delete(fn)}
  };
- window.__walletEvent=(name,value)=>{for(const handler of handlers.get(name)||[])handler(value)};
+ window.__walletEvent=(name,value)=>{
+   const listeners=[...(handlers.get(name)||[])];
+   for(const handler of listeners)handler(value);
+   return listeners.length;
+ };
 });
 const runtime={
  schema:'420-wallet-runtime-config-v1',
@@ -182,8 +186,14 @@ try{
    }
  }
  // Real EIP-1193 account changes must invalidate the MOUNTED Governance UI.
- await page.evaluate(value=>window.__walletEvent('accountsChanged',[value]),graph.localBrowserChangedAccount);
- await page.waitForFunction(()=>document.querySelector('#governance-app-state')?.textContent==='Reload required',null,{timeout:10000});
+ // An EIP-1193 account change updates *both* the selected account and
+ // accountsChanged listeners. Do not inject an inconsistent event-only state.
+ assert.match(graph.localBrowserChangedAccount,/^0x[0-9a-fA-F]{40}$/);
+ currentAccount=graph.localBrowserChangedAccount.toLowerCase();
+ const listenerCount=await page.evaluate(value=>window.__walletEvent('accountsChanged',[value]),currentAccount);
+ assert.ok(listenerCount>0,'connected real Governance browser did not subscribe to accountsChanged');
+ const actualState=await page.locator('#governance-app-state').textContent();
+ assert.equal(actualState,'Reload required','Governance did not synchronously invalidate on EIP-1193 account switch');
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
  const before=transactions.length;
  // Logout updates the app-scoped browser session, not the EVM account.

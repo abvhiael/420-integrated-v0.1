@@ -74,4 +74,5 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Real 420ID room format persistence and fail-closed API
-        run: go test -race -count=1 -tags account420_integration -timeout=12m -run '^TestBC22RoomFormatPersistsAcrossAPIReads$' -v ./services/bong-goggles-account-social
+        run: go test -race -count=1 -tags account420_integration -timeout=12m -run '^TestBC22(RoomFormatPersistsAcrossAPIReads|AuthenticatedTwoAccountEngineAndColdResume) -v ./services/bong-goggles-account-social
+ -v ./services/bong-goggles-account-social

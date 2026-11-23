@@ -15,7 +15,7 @@
 - 2/3/4-seat six-card retained hands and six-card crib; 2-seat triple discards C(9,3)=84; 3-seat double discards C(8,2)=28; 4-seat one-card discards C(7,1)=7 and two direct crib cards.
 - All valid seven-card fifteen subsets, longest-run multiplicity, pairs, the accepted 6/7 flush distinction, heels, Go/last-card, standard 31, cumulative scores and immediate 241 terminal transition.
 - 2, 3 and both 4-player formats: deterministic complete matches, private views, replay from immutable genesis and a deliberately corrupt journal rejected. No 121-point Cribbage regression.
-- Room creation persists teams via PostgreSQL 16 and returns `variantId`; old `russian-cribbage` rooms remain readable but cannot be newly created.
+- Room creation persists teams via PostgreSQL 16 and returns `variantId`; test-only registered Labyrinth rules execute 420ID-authenticated two-account API commands, reject duplicate request tampering and recover cold immutable journal replay; old `russian-cribbage` rooms remain readable but cannot be newly created.
 - Required exact-head CI: `.github/workflows/bc-2-2-labyrinth-engine.yml` (Go 1.23 with race + Node 22 + PostgreSQL 16). The canonical roadmap must remain unqualified until exact-head checks pass.
 
 **Results:** Pending exact-head workflow evidence.

@@ -158,11 +158,18 @@ export function normalizePrivateEvidenceReceipt420(receipt,expected){
 // unconfigured backend never falls back to public URLs or a local mock.
 export function createPrivateEvidenceStore420({storage=null,authenticate,clock=now,cryptoImpl=globalThis.crypto}={}) {
   check(typeof authenticate==='function','trusted private evidence session verifier required');
-  const authenticated=async(context,viewer,record)=>{
+  const authenticated=async(context,viewer,record,capability,object)=>{
     let grant;
-    try{grant=await authenticate({context,viewer,record});}
+    try{grant=await authenticate({context,viewer,record,capability,object});}
     catch{throw new EvidencePrivacyError420('private evidence authorization required');}
     authorizeEvidenceViewer420({context,viewer,record,grant,nowMs:clock()});
+    const fields=['object_id','manifest_id','shard_index','shard_root','size_bytes','commitment_id'];
+    check(grant.capability===capability&&
+      grant.storageObject&&object&&fields.every(k=>
+        Object.hasOwn(grant.storageObject,k)&&String(grant.storageObject[k])===String(object[k]))&&
+      typeof grant.storageSubject==='string'&&grant.storageSubject.length>0&&
+      typeof grant.storageSessionId==='string'&&grant.storageSessionId.length>20,
+      'private evidence object/capability authorization required');
     return grant;
   };
   async function upload({encrypted,recoveryKey,context,record,viewer,object,retentionMs,
@@ -172,7 +179,7 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
     check(authorizationRequired===true,'private evidence access restrictions required');
     check(Number.isSafeInteger(retentionMs)&&retentionMs>0&&
       retentionMs<=ARBITRATION_EVIDENCE_MAX_RETENTION_MS_420,'invalid evidence retention');
-    const ctx=normalizeEvidenceContext420(context),grant=await authenticated(ctx,viewer,record);
+    const ctx=normalizeEvidenceContext420(context),grant=await authenticated(ctx,viewer,record,'write',object);
     check(!signal?.aborted,'private evidence operation interrupted');
     check(encrypted?.schema==='420-arbitration-private-evidence-v1'&&
       contextsEqual(normalizeEvidenceContext420(encrypted.context),ctx),'evidence context mismatch');
@@ -207,7 +214,7 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
   async function retrieve({context,record,viewer,object,expectedCommitment,recoveryKey,signal}){
     check(storage&&typeof storage.retrieve==='function',
       'approved private evidence storage unavailable');
-    const ctx=normalizeEvidenceContext420(context),grant=await authenticated(ctx,viewer,record);
+    const ctx=normalizeEvidenceContext420(context),grant=await authenticated(ctx,viewer,record,'read',object);
     check(!signal?.aborted,'private evidence operation interrupted');
     try {
       const result=await storage.retrieve({object,grant,signal,mode:'private'});

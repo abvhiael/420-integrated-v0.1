@@ -13,7 +13,9 @@ const assets = {
   '/service-worker.js': ['service-worker.js', 'text/javascript'],
   '/manifest.webmanifest': ['manifest.webmanifest', 'application/manifest+json'],
   '/icons/pay-192.png': ['icons/pay-192.png', 'image/png'],
-  '/icons/pay-512.png': ['icons/pay-512.png', 'image/png']
+  '/icons/pay-512.png': ['icons/pay-512.png', 'image/png'],
+  '/icons/pay-brand.webp': ['icons/pay-brand.webp', 'image/webp'],
+  '/icons/pay-favicon.png': ['icons/pay-favicon.png', 'image/png']
 };
 
 export async function qualifyPwa(chromium, channel) {
@@ -61,6 +63,12 @@ export async function qualifyPwa(chromium, channel) {
     await page.reload();
     await page.getByRole('heading', { name: 'Your account' }).waitFor();
     await page.locator('#offline-notice').waitFor();
+    await page.waitForFunction(() => [...document.querySelectorAll('.brand-image')].length === 2 &&
+      [...document.querySelectorAll('.brand-image')].every(img => img.complete && img.naturalWidth === 352));
+    assert.equal(await page.evaluate(async () => {
+      const response = await fetch(document.querySelector('link[rel="icon"]').href);
+      return response.ok && response.headers.get('content-type') === 'image/png';
+    }), true);
     assert.equal(await page.locator('#history li').count(), 0);
     assert.equal(await page.getByRole('button', { name: 'Connect 420 Wallet' }).isDisabled(), true);
     assert.equal(await page.evaluate(async () => {

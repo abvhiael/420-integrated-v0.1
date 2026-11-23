@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 
-const icons = ['icons/pay-192.png', 'icons/pay-512.png'];
+const icons = ['icons/pay-192.png', 'icons/pay-512.png', 'icons/pay-brand.webp', 'icons/pay-favicon.png'];
 const shell = ['index.html', 'app.js', '420id-client.mjs', 'style.css', 'manifest.webmanifest', ...icons];
 await mkdir('dist/icons', { recursive: true });
 await Promise.all([

@@ -28,7 +28,7 @@ const latest = { blockHash: blocks.hash, requireCanonical: true };
 const paymentId = hash('d');
 const invoiceId = hash('e');
 const topic = digest('PaymentSet(bytes32,bytes32,uint8)');
-const mime = { 'checkout-embed.html': 'text/html', 'checkout-embed.js': 'text/javascript', 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css' };
+const mime = { 'checkout-embed.html': 'text/html', 'checkout-embed.js': 'text/javascript', 'index.html': 'text/html', 'app.js': 'text/javascript', 'style.css': 'text/css', 'icons/pay-brand.webp': 'image/webp', 'icons/pay-favicon.png': 'image/png' };
 let status = 5;
 let finalizedStatus = 1;
 let businessRegistered = false;
@@ -207,6 +207,16 @@ try {
   await embed.close();
 
   await page.goto(origin);
+  await page.waitForFunction(() => [...document.querySelectorAll('.brand-image')].length === 2 &&
+    [...document.querySelectorAll('.brand-image')].every(img => img.complete && img.naturalWidth === 352 && img.naturalHeight === 139));
+  assert.equal(await page.getByRole('banner').getByRole('link', {name: '420Pay home'}).getAttribute('href'), './');
+  assert.equal(await page.getByRole('contentinfo').getByRole('img', {name: '420Pay'}).count(), 1);
+  assert.equal(await page.locator('link[rel="icon"]').getAttribute('href'), './icons/pay-favicon.png');
+  assert.equal(await page.evaluate(async () => {
+    const response = await fetch(document.querySelector('link[rel="icon"]').href);
+    const icon = await createImageBitmap(await response.blob());
+    return response.ok && response.headers.get('content-type') === 'image/png' && icon.width === 48 && icon.height === 48;
+  }), true);
   await page.keyboard.press('Tab');
   assert.equal(await page.locator(':focus').innerText(), 'Skip to account');
   await page.keyboard.press('Enter');

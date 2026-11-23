@@ -19,7 +19,8 @@ SOURCES = (
 )
 WEB_FILES = (
     "app.js", "checkout-embed.html", "checkout-embed.js", "deployment.json",
-    "icons/pay-192.png", "icons/pay-512.png", "index.html", "manifest.webmanifest",
+    "icons/pay-192.png", "icons/pay-512.png", "icons/pay-brand.webp", "icons/pay-favicon.png",
+    "index.html", "manifest.webmanifest",
     "service-worker.js", "style.css",
 )
 

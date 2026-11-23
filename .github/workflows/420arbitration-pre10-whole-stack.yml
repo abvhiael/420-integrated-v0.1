@@ -1,0 +1,184 @@
+name: 420Arbitration ARB-PRE-10 whole-stack qualification
+on:
+  pull_request:
+    paths:
+      - 'scripts/qualify-arbitration-pre09-local-genesis.mjs'
+      - 'scripts/verify-arbitration-pre09-local-genesis.py'
+      - '.github/workflows/420arbitration-pre10-whole-stack.yml'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-10-WHOLE-STACK.md'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'wallet/web/core/arbitration-*.js'
+      - 'wallet/web/scripts/qualify-arbitration-anvil.mjs'
+      - '420-indexer/src/arbitration-*.ts'
+      - '420-indexer/test/arbitration-*.test.ts'
+      - 'commerce/src/arbitration.mjs'
+      - 'commerce/src/service.mjs'
+      - 'contracts/src/arbitration/**'
+      - 'contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arb-pre10-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  full-browser-local-evm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile canonical Registry and Arbitration contract graph
+        working-directory: contracts
+        run: forge build src/apps/ProtocolRegistry.sol src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol
+      - name: Install local-only full application dependencies
+        working-directory: wallet/web
+        run: npm install --no-save --no-package-lock playwright axe-core ethers
+      - name: Install Chromium browser
+        working-directory: wallet/web
+        run: npx playwright install --with-deps chromium
+      - name: Exercise actual browser Wallet claimant/appeal resolver against Anvil contracts
+        working-directory: wallet/web
+        run: node scripts/qualify-arbitration-anvil.mjs
+      - name: Retain actual browser runtime screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arbitration-pre10-browser-${{ github.event.pull_request.head.sha || github.sha }}
+          path: wallet/web/browser-qualification-artifacts/arbitration-anvil-*.png
+          if-no-files-found: ignore
+          retention-days: 30
+
+  indexer-api-reorg:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arbitration
+          POSTGRES_PASSWORD: localtestonly
+          POSTGRES_DB: indexer_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U arbitration -d indexer_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      INDEXER_PG_URL: postgresql://arbitration:localtestonly@localhost:5432/indexer_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Restore pinned Indexer dependencies
+        working-directory: 420-indexer
+        run: npm ci --ignore-scripts
+      - name: Compile complete shared Indexer API
+        working-directory: 420-indexer
+        run: npm run build
+      - name: Verify canonical service identity, interrupted ingestion, PostgreSQL rollback and API rebuild
+        working-directory: 420-indexer
+        run: node --test dist/test/arbitration-*.test.js
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile real Solidity contract event ABI
+        working-directory: contracts
+        run: forge build src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol
+      - name: Reject divergence between canonical ABI and Indexer descriptor
+        working-directory: 420-indexer
+        env:
+          ARBITRATION_FOUNDRY_ARTIFACTS: ../contracts/out
+        run: node --test dist/test/arbitration-indexer.test.js
+
+  consumer-remedy-accounting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: commerce/package-lock.json
+      - name: Restore Commerce locked dependencies
+        working-directory: commerce
+        run: npm ci --ignore-scripts
+      - name: Verify Market caller identity, one-shot dispute and no fabricated remedy authority
+        working-directory: commerce
+        run: node --test test/com6b-dispute.test.mjs test/arbitration-adapter.test.mjs
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stage only real Launchpad source and consumer integration tests
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p test/.arb-pre10-consumers
+          for source in test/LaunchpadCrowdfundingIntegration420.t.sol test/LaunchpadEcosystem420.t.sol; do
+            sed -e 's#"../src/#"../../src/#g' -e 's#"./helpers/#"../helpers/#g' "$source" > "test/.arb-pre10-consumers/${source##*/}"
+          done
+      - name: Verify exact real-EVM finalized ruling consumption, replay and original accounting
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/launchpad
+          FOUNDRY_TEST: test/.arb-pre10-consumers
+        run: |
+          forge test --match-path 'test/.arb-pre10-consumers/Launchpad*420.t.sol' --match-test 'test(PublicationRechecksCanonicalOriginAndRejectsStaleRound|FinalizedDisputeOutcomePublishesOnceWithoutExecutingRemedy|DisputeMustMatchCanonicalArbitrationOriginAndProjectController|RealArbitrationFinalityAndNotificationBoundary|CanonicalRefundBatchRequiredBeforeLaunchpadRefundRecord|RefundAuthorizedAfterSuccessCannotAlsoClaim|FuzzDeliveredRefundPrincipalConservation)' -vvv
+
+  wallet-session-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reject malicious RPC, stale Registry, Wallet switches and forged evidence
+        run: |
+          node --test \
+            wallet/web/test/arbitration-runtime.test.js \
+            wallet/web/test/arbitration-verified.test.js \
+            wallet/web/test/arbitration-application.test.js \
+            wallet/web/test/arbitration-evidence.test.js \
+            wallet/web/test/arbitration-evidence-workspace.test.js \
+            wallet/web/test/arbitration-storage420.test.js \
+            wallet/web/test/arbitration-storage-bridge.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify private Storage Gateway authorization and interrupted access
+        run: go test ./execution/storage -run '^(TestDeveloperHTTP|TestArbitrationEvidenceStorage|TestGateway)' -count=1

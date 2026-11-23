@@ -52,6 +52,7 @@
   },
   "treasury": null,
   "token": null,
+  "arbitration": null,
   "identitySession": {
     "app": "420wallet",
     "enabled": false,

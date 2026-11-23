@@ -44,6 +44,21 @@ Status authority: repository evidence on `audit/420arbitration-complete-20261004
 - Exercise Wallet/runtime discovery plus indexer/reorg/rebuild/finality behavior.
 - Retain transactions, receipts, logs, block hashes, addresses and code hashes.
 
+### Deferred 420Storage private evidence activation — TESTNET ONLY (ARB-PRE-05)
+
+Repository-side connection now composes the **existing 420Storage v1** private retrieval transport and prepare/ingest interface through `wallet/web/core/arbitration-storage-bridge.js`; canonical CaseRegistry events, case/round/resolver permissions, read/write capability, exact six-field object identity, authenticated issuer, bounded retention and encrypted-capsule verification are enforced in the application code. This does **not** create a second storage network, public evidence repository, 420ID wallet privilege or an unconditional private-access token.
+
+**Defer ONLY the following live-environment operations until the public testnet is operational:**
+   - Configure a **private-only** existing 420Storage GatewayRouter with `ArbitrationEvidenceAccess420` for the Arbitration evidence object namespace; its optional public-read guard rejects missing/private-mode downgrade. Keep ordinary public Gateway routers separate and unchanged.
+1. Deploy and independently qualify the existing 420Storage/420Store Resource Protocol and private 420Gateway endpoints; pin the authorized HTTPS host, Genesis/Registry identities and code hashes. Do not fabricate a live endpoint or claim an active service now.
+   - Wire the already-implemented `execution/storage/ArbitrationEvidenceAccess420` authorizer into the approved `GatewayRouter.Authorizer`, supplying the real on-chain canonical case/evidence reader and app-private verified Wallet-controller session verifier. Neither the Go authorizer nor the browser may issue a session merely from a 420ID app profile; require real Wallet-controller authentication, object/capability scope, short-lived expiry and revocation.
+2. Provision the app-private 420Identity/Wallet gateway integration and server-side **Wallet-controller authenticated session issuer**; 420ID application login alone is not a Wallet proof or permission. Recheck the current canonical case, round, participant/resolver, explicit private Storage object and requested `read` or `write` capability before every short-lived grant.
+3. Fund/authorize the actual Storage agreement, capacity reservation, commitment and idempotency preconditions for uploads; install the approved 420Storage v1 `prepare`/`ingest` adapter. The browser must never invent canonical agreements or upload via a public fallback.
+4. Connect the approved `X-420-Access-Mode: private`, `X-420-Subject`, `X-420-Session-ID`, `X-420-Capability` retrieval route; enforce object/permission matching, server-side expiry/revocation, no-store responses, max 90-day retention, deletion and outage/recovery operations.
+5. Execute and retain **real testnet** authorized claimant/respondent/resolver, unauthorized observer/wrong-case/expired/revoked grant, corrupted/missing data, upload interruption, private non-disclosure, finality/reorg and evidence lifecycle tests; preserve redacted transaction and storage receipts without secrets.
+
+**Do not mark the live 420Storage integration or ARBITRATION-AUDIT-5 complete before these verified deployments and tests.** Local cryptographic and authorization qualification is separate. Local encrypted capsule export and on-chain evidence commitments remain available even when the remote service is disabled.
+
 ## ARBITRATION-AUDIT-6 — Genesis/production security and release closeout — BLOCKED ON AUDIT-5
 - Reconcile all prior evidence to the exact release candidate.
 - Complete resolver/operator key-custody, monitoring, incident-response and recovery procedures.

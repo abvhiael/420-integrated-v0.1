@@ -1,0 +1,59 @@
+name: 420Arbitration ARB-PRE-05 private evidence qualification
+
+on:
+  pull_request:
+    paths:
+      - 'wallet/web/core/arbitration-evidence*.js'
+      - 'wallet/web/test/arbitration-evidence*.test.js'
+      - 'wallet/web/core/arbitration-storage420.js'
+      - 'wallet/web/test/arbitration-storage420.test.js'
+      - 'wallet/web/core/arbitration-storage-bridge.js'
+      - 'execution/storage/developer_http.go'
+      - 'execution/storage/developer_http_test.go'
+      - 'execution/storage/gateway.go'
+      - 'execution/storage/arbitration_evidence_access.go'
+      - 'execution/storage/arbitration_evidence_access_test.go'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'wallet/web/test/arbitration-storage-bridge.test.js'
+      - 'wallet/web/arbitration-management-ui.js'
+      - 'wallet/web/arbitration-management.css'
+      - 'docs/apps/arbitration/**'
+      - '.github/workflows/420arbitration-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arbitration-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise only private evidence privacy and case-bound integrity tests
+        run: node --test wallet/web/test/arbitration-evidence.test.js wallet/web/test/arbitration-evidence-workspace.test.js wallet/web/test/arbitration-storage420.test.js wallet/web/test/arbitration-storage-bridge.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Verify existing 420Storage private Gateway no-store and auth regression
+        run: go test ./execution/storage -run '^(TestDeveloperHTTP|TestArbitrationEvidenceStorage|TestGateway)' -count=1
+      - name: Parse Wallet private evidence and UI scripts
+        run: |
+          node --check wallet/web/core/arbitration-evidence.js
+          node --check wallet/web/core/arbitration-evidence-workspace.js
+          node --check wallet/web/core/arbitration-storage420.js
+          node --check wallet/web/core/arbitration-storage-bridge.js
+          node --check wallet/web/arbitration-management-ui.js

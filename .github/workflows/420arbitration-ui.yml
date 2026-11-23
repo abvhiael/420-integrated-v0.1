@@ -1,0 +1,61 @@
+name: 420Arbitration ARB-PRE-04 browser and local EVM
+
+on:
+  pull_request:
+    paths:
+      - 'wallet/web/core/arbitration-*.js'
+      - 'wallet/web/arbitration-management-ui.js'
+      - 'wallet/web/arbitration-management.css'
+      - 'wallet/web/scripts/qualify-arbitration-anvil.mjs'
+      - 'wallet/web/index.html'
+      - 'wallet/web/test/arbitration-*.test.js'
+      - 'wallet/web/test/arbitration-app-fixture.js'
+      - '.github/workflows/420arbitration-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arbitration-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-anvil:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile only canonical Arbitration / Registry deployment graph
+        working-directory: contracts
+        run: |
+          forge build src/apps/ProtocolRegistry.sol src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol --sizes
+      - name: Install local browser / EVM integration dependencies
+        working-directory: wallet/web
+        run: npm install --no-save --no-package-lock playwright axe-core ethers
+      - name: Install Chromium
+        working-directory: wallet/web
+        run: npx playwright install --with-deps chromium
+      - name: Exercise full Arbitration UI on deterministic local Anvil EVM
+        working-directory: wallet/web
+        run: node scripts/qualify-arbitration-anvil.mjs
+      - name: Upload Arbitration desktop and mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arbitration-anvil-browser-${{ github.sha }}
+          path: wallet/web/browser-qualification-artifacts/arbitration-anvil-*.png
+          if-no-files-found: ignore
+          retention-days: 14

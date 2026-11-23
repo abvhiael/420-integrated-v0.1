@@ -43,6 +43,14 @@ type GatewayAccessAuthorizer interface {
 	AuthorizeGatewayAccess(context.Context, GatewayAccess, GatewayRequest) error
 }
 
+// GatewayPublicAccessGuard is an optional fail-closed check invoked before
+// public-mode routing. Dedicated private evidence Gateways implement it to
+// prohibit an anonymous caller from bypassing private authorization simply
+// by omitting the private access header. Existing public routers are unchanged.
+type GatewayPublicAccessGuard interface {
+	AuthorizeGatewayPublicRead(context.Context, GatewayRequest) error
+}
+
 type GatewaySource interface {
 	FetchGatewayObject(context.Context, GatewayRequest) ([]byte, error)
 }
@@ -201,6 +209,11 @@ func (g GatewayRouter) authorize(ctx context.Context, req GatewayRequest) error 
 		mode = GatewayAccessPublic
 	}
 	if mode == GatewayAccessPublic {
+		if guard, ok := g.Authorizer.(GatewayPublicAccessGuard); ok {
+			if err := guard.AuthorizeGatewayPublicRead(ctx, req); err != nil {
+				return fmt.Errorf("%w: public object policy denied", ErrGatewayUnauthorized)
+			}
+		}
 		return nil
 	}
 	if mode != GatewayAccessPrivate {

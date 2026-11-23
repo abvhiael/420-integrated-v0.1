@@ -1,5 +1,6 @@
 import { GENESIS_APP_SERVICES } from './genesis-app-catalog.js';
 import { normalizeTokenWalletConfig420 } from './token-discovery.js';
+import { normalizeArbitrationRelease420 } from './arbitration-verified.js';
 
 export const DEFAULT_NETWORK = Object.freeze({
   name: '420 Integrated',
@@ -46,6 +47,21 @@ export function validateRuntimeConfig(config) {
   if (config.smartAccount.salt != null && !/^0x[0-9a-fA-F]{64}$/.test(config.smartAccount.salt)) throw new Error('smartAccount.salt must be bytes32');
   validateGasQuoteConfig420(config.gasQuote);
   normalizeTokenWalletConfig420(config);
+  if (config.arbitration != null) {
+    const release=normalizeArbitrationRelease420(config.arbitration);
+    if (BigInt(config.network.chainId||0)!==BigInt(release.chainId))
+      throw new Error('Arbitration release chain ID differs from Wallet network');
+    if (!Array.isArray(config.arbitration.domains) || config.arbitration.domains.length>32)
+      throw new Error('Arbitration requires a bounded trusted domain catalogue');
+    const seen=new Set();
+    for (const domain of config.arbitration.domains) {
+      if (!domain || typeof domain.name!=='string' || !domain.name.trim() || domain.name.length>120 ||
+        typeof domain.id!=='string' || !/^0x[0-9a-fA-F]{64}$/.test(domain.id) ||
+        /^0x0{64}$/i.test(domain.id) || seen.has(domain.id.toLowerCase()))
+        throw new Error('Invalid or duplicated Arbitration domain');
+      seen.add(domain.id.toLowerCase());
+    }
+  }
   if (config.treasury != null) {
     if (!config.network.chainId || typeof config.treasury !== 'object' || Array.isArray(config.treasury) ||
         !/^0x[0-9a-fA-F]{64}$/.test(config.treasury.registryCodeHash || '') || /^0x0{64}$/i.test(config.treasury.registryCodeHash))

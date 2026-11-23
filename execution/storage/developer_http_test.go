@@ -229,3 +229,72 @@ func TestDeveloperHTTPServiceRejectsUnsafePublicBind(t *testing.T) {
 		t.Fatalf("expected public bind rejection, service=%v err=%v", service, err)
 	}
 }
+
+func TestDeveloperHTTPPrivateRetrievalNoStore(t *testing.T) {
+	payload := []byte("private-ciphertext-capsule")
+	result := developerHTTPResult(payload)
+	handler := NewDeveloperHTTPHandler(developerResourceAPIStub{result: result})
+	for _, method := range []string{http.MethodGet, http.MethodHead} {
+		for _, conditional := range []bool{false, true} {
+			r := httptest.NewRequest(method, developerHTTPURL(result.Object), nil)
+			r.Header.Set(DeveloperHeaderAccessMode, string(DeveloperAccessPrivate))
+			r.Header.Set(DeveloperHeaderSubject, "verified-subject")
+			r.Header.Set(DeveloperHeaderSessionID, "approved-private-session-123456")
+			r.Header.Set(DeveloperHeaderCapability, GatewayAccessRead)
+			if conditional {
+				r.Header.Set("If-None-Match", developerObjectETag(result.Object))
+			}
+			w := httptest.NewRecorder()
+			handler.ServeHTTP(w, r)
+			expected := http.StatusOK
+			if conditional {
+				expected = http.StatusNotModified
+			}
+			if w.Code != expected {
+				t.Fatalf("%s conditional=%t status=%d", method, conditional, w.Code)
+			}
+			if got := w.Header().Get("Cache-Control"); got != "private, no-store" {
+				t.Fatalf("%s conditional=%t missing private no-store: %q", method, conditional, got)
+			}
+			if got := w.Header().Get("Pragma"); got != "no-cache" {
+				t.Fatalf("missing legacy no-cache header: %q", got)
+			}
+		}
+	}
+	r := httptest.NewRequest(http.MethodGet, developerHTTPURL(result.Object), nil)
+	r.Header.Set(DeveloperHeaderAccessMode, string(DeveloperAccessPrivate))
+	r.Header.Set(DeveloperHeaderSubject, "verified-subject")
+	r.Header.Set(DeveloperHeaderSessionID, "approved-private-session-123456")
+	r.Header.Set(DeveloperHeaderCapability, GatewayAccessRead)
+	r.Header.Set("Range", "bytes=0-3")
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, r)
+	if w.Code != http.StatusPartialContent || w.Header().Get("Cache-Control") != "private, no-store" {
+		t.Fatalf("private partial response was cacheable: status=%d headers=%v", w.Code, w.Header())
+	}
+}
+
+func TestDeveloperHTTPPrivateErrorsNoStorePublicUnchanged(t *testing.T) {
+	payload := []byte("unavailable-private-object")
+	object := developerObjectRef(payload)
+	denied := NewDeveloperHTTPHandler(GatewayDeveloperAPI{Router: GatewayRouter{
+		Cache: []GatewaySource{developerGatewaySourceStub{payload: payload}},
+	}})
+	r := httptest.NewRequest(http.MethodGet, developerHTTPURL(object), nil)
+	r.Header.Set(DeveloperHeaderAccessMode, string(DeveloperAccessPrivate))
+	r.Header.Set(DeveloperHeaderSubject, "subject")
+	r.Header.Set(DeveloperHeaderSessionID, "unrecognized-session")
+	r.Header.Set(DeveloperHeaderCapability, GatewayAccessRead)
+	w := httptest.NewRecorder()
+	denied.ServeHTTP(w, r)
+	if w.Code != http.StatusForbidden || w.Header().Get("Cache-Control") != "private, no-store" {
+		t.Fatalf("private denied response was cacheable: status=%d headers=%v", w.Code, w.Header())
+	}
+	public := NewDeveloperHTTPHandler(developerResourceAPIStub{result: developerHTTPResult(payload)})
+	r = httptest.NewRequest(http.MethodGet, developerHTTPURL(object), nil)
+	w = httptest.NewRecorder()
+	public.ServeHTTP(w, r)
+	if w.Code != http.StatusOK || w.Header().Get("Cache-Control") == "private, no-store" {
+		t.Fatalf("public response unexpectedly changed: status=%d headers=%v", w.Code, w.Header())
+	}
+}

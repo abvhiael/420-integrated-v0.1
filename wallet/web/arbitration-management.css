@@ -1,0 +1,82 @@
+/* 420Arbitration is an integral Wallet surface and inherits its restrained dark theme. */
+.arbitration-app { min-width:0; }
+.arbitration-app [hidden] { display:none!important; }
+.arbitration-toolbar,.arbitration-connected,.arbitration-stats,.arbitration-search,.arbitration-form {
+  display:grid; gap:12px; min-width:0;
+}
+.arbitration-toolbar { display:flex; flex-wrap:wrap; margin:20px 0; }
+.arbitration-toolbar button { min-height:44px; }
+.arbitration-toolbar [aria-pressed="true"] { border-color:var(--wallet-accent,var(--accent)); color:var(--wallet-accent,var(--accent)); background:rgba(184,255,79,.06); }
+.arbitration-connected { grid-template-columns:minmax(0,1fr) minmax(0,.45fr) minmax(0,1fr) auto; align-items:center; padding:16px; background:var(--wallet-surface-raised,#141c17); border:1px solid var(--border); border-radius:14px; }
+.arbitration-connected>div { display:grid; gap:7px; min-width:0; }
+.arbitration-connected strong { overflow-wrap:anywhere; }
+.arbitration-connected button { min-height:44px; }
+.arbitration-view { min-width:0; margin:20px 0; padding:18px; background:var(--wallet-surface-raised,#141c17); border:1px solid var(--border); border-radius:14px; }
+.arbitration-view h3 { margin-top:0; }
+.arbitration-view .section-heading { flex-wrap:wrap; }
+.arbitration-stats { grid-template-columns:repeat(3,minmax(0,1fr)); margin:14px 0; }
+.arbitration-stats div { min-width:0; padding:16px; border:1px solid var(--border); border-radius:12px; color:var(--muted); }
+.arbitration-stats strong { display:block; margin-top:7px; color:var(--wallet-text,#fff); font-size:1.7rem; }
+.arbitration-list { display:grid; gap:10px; min-width:0; }
+.arbitration-case-row { display:grid; gap:7px; background:var(--wallet-surface,#101713); border:1px solid var(--border); color:var(--wallet-text,#fff); text-align:left; min-width:0; min-height:55px; }
+.arbitration-case-row strong,.arbitration-case-row span { overflow-wrap:anywhere; }
+.arbitration-case-row span { font-size:.87rem; color:var(--muted); font-weight:500; }
+.arbitration-form { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.arbitration-form label,.arbitration-search label,.arbitration-workform label { display:grid; gap:7px; min-width:0; color:var(--wallet-text-secondary,var(--muted)); font-weight:600; }
+.arbitration-form input,.arbitration-form select,.arbitration-search input,.arbitration-workform input {
+  width:100%; min-height:44px; min-width:0; border-radius:10px; border:1px solid var(--border);
+  background:var(--wallet-surface,#101713); color:var(--wallet-text,#fff); padding:10px;
+}
+.arbitration-form>button { justify-self:start; }
+.arbitration-search { grid-template-columns:minmax(0,1fr) auto; align-items:end; margin-bottom:15px; }
+.arbitration-detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; min-width:0; margin:14px 0; }
+.arbitration-detail-grid>div { display:grid; align-content:start; gap:5px; min-width:0; padding:10px; background:var(--wallet-surface,#101713); border:1px solid var(--border); border-radius:10px; }
+.arbitration-detail-grid dt { margin:0; color:var(--muted); }
+.arbitration-detail-grid dd { margin:0; overflow-wrap:anywhere; line-height:1.6; }
+.arbitration-break { word-break:break-all; }
+.arbitration-workform,.arbitration-review,.arbitration-recovery { margin:18px 0; padding:16px; background:var(--wallet-surface-raised,#141c17); border:1px solid var(--border); border-radius:14px; min-width:0; }
+.arbitration-workform form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:end; }
+.arbitration-workform form button { justify-self:start; }
+.arbitration-ruling-item { border:1px solid var(--border); background:var(--wallet-surface,#101713); padding:14px; border-radius:12px; min-width:0; }
+.arbitration-ruling-item p { margin:8px 0 0; overflow-wrap:anywhere; font-size:.9rem; }
+.arbitration-timeline { display:grid; gap:12px; padding-left:22px; }
+.arbitration-timeline-item { padding:12px; border:1px solid var(--border); background:var(--wallet-surface,#101713); border-radius:12px; }
+.arbitration-timeline-item strong,.arbitration-timeline-item span { display:block; overflow-wrap:anywhere; margin-bottom:5px; }
+.arbitration-review { border-color:var(--wallet-accent,var(--accent)); }
+.arbitration-review button { min-height:44px; }
+.arbitration-app :is(button,input,select):focus-visible { outline:3px solid var(--wallet-accent,var(--accent)); outline-offset:3px; }
+.arbitration-app #arbitration-error:not(:empty) { color:var(--wallet-danger,var(--danger)); }
+.arbitration-app #arbitration-message { overflow-wrap:anywhere; }
+@media(max-width:920px) {
+  .arbitration-connected { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+  .arbitration-connected,.arbitration-stats,.arbitration-form,.arbitration-search,
+  .arbitration-detail-grid,.arbitration-workform form { grid-template-columns:minmax(0,1fr); }
+  .arbitration-view,.arbitration-recovery,.arbitration-workform,.arbitration-review { padding:12px; }
+  .arbitration-toolbar button { flex:1 1 130px; }
+  .arbitration-connected button,.arbitration-search button,.arbitration-form>button { width:100%; }
+}
+@media(prefers-reduced-motion:reduce) { .arbitration-app * { scroll-behavior:auto!important; transition:none!important; } }
+
+/* Private evidence is deliberately a local-only, opt-in UI. Never render file bytes
+   or recovery keys in public timeline, logs, status, tooltips or analytics. */
+.arbitration-private-evidence { min-width:0; padding:16px; margin:16px 0;
+  border:1px solid var(--border); border-radius:14px;
+  background:var(--wallet-surface-raised,#141c17); display:grid; gap:11px; }
+.arbitration-private-evidence label { display:grid; gap:7px; min-width:0; }
+.arbitration-private-evidence input { max-width:100%; min-width:0; width:100%; min-height:44px;
+  border:1px solid var(--border); border-radius:10px; background:var(--wallet-surface,#101713);
+  color:var(--wallet-text,#fff); padding:10px; }
+.arbitration-private-evidence button { justify-self:start; min-height:44px; }
+.arbitration-private-evidence #arbitration-inspection-form { display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:end; }
+.arbitration-private-evidence #arbitration-inspection-form button { grid-column:1/-1; }
+.arbitration-private-evidence [hidden] { display:none!important; }
+.arbitration-private-evidence :is(input,button):focus-visible {
+  outline:3px solid var(--wallet-accent,var(--accent)); outline-offset:3px; }
+@media(max-width:600px) {
+  .arbitration-private-evidence { padding:12px; }
+  .arbitration-private-evidence #arbitration-inspection-form { grid-template-columns:minmax(0,1fr); }
+  .arbitration-private-evidence button { width:100%; }
+}

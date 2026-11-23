@@ -2,7 +2,7 @@
 // publish private evidence, claim settlement, or render a tx successful before receipt.
 import {InjectedProvider420} from './core/provider.js';
 import {createArbitrationApplication420} from './core/arbitration-application.js';
-import {createArbitrationEvidenceWorkspace420} from './core/arbitration-evidence-workspace.js';
+import {createArbitration420StorageBridge420} from './core/arbitration-storage-bridge.js';
 import {ARBITRATION_EVIDENCE_MAX_BYTES_420} from './core/arbitration-evidence.js';
 
 const $=q=>document.querySelector(q);
@@ -83,6 +83,7 @@ export function arbitrationMarkup420(){
           <p class="muted">Choose a file (maximum 8 MiB) to create a random-salted, case/round-bound evidence commitment. The contents never enter chain calldata. Keep the encrypted capsule and recovery key separately; losing either prevents decryption.</p>
           <label>Private evidence file<input id="arbitration-private-file" type="file" autocomplete="off"/></label>
           <button id="arbitration-seal-file" type="button">Encrypt file and generate commitment</button>
+          <p id="arbitration-storage-status" role="status" aria-live="polite">420Storage remote access is disabled until the testnet Storage and authenticated-session services are ready.</p>
           <p id="arbitration-seal-status" role="status" aria-live="polite">No private file prepared.</p>
           <button type="button" id="arbitration-export-sealed" disabled>Download encrypted evidence capsule</button>
           <button type="button" id="arbitration-show-secret" disabled>Reveal private recovery key</button>
@@ -472,7 +473,14 @@ async function connect(){
   const info=await c.policies();
   const state=await c.dashboard();
   context=c;connectedIdentity=identity;
-  evidenceWorkspace=createArbitrationEvidenceWorkspace420({app:c});
+  // ARB-PRE-05: the live issuer/Storage port is intentionally absent until
+  // testnet. This uses the 420Storage bridge (not a parallel evidence backend)
+  // and preserves fully functional local encrypted export and inspection.
+  const privateStorage=createArbitration420StorageBridge420({app:c});
+  evidenceWorkspace=privateStorage.workspace;
+  setText('#arbitration-storage-status',privateStorage.online?
+    'Approved private 420Storage session and case access verified.':
+    '420Storage v1 is integrated locally; online storage/permission issuer activates at testnet. Encrypted file export and verification work now.');
   for(const d of info.domains){const option=e('option',null,d.name);option.value=d.id;one('#arbitration-domain').append(option);}
   const verified=await c.verify();
   setText('#arbitration-account',c.account);setText('#arbitration-chain',config.network.chainId);

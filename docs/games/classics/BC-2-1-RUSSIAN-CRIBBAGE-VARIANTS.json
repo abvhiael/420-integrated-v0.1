@@ -137,5 +137,11 @@
     "alternate-pegging-targets",
     "no-cut-house-rule",
     "six-player-partnership"
-  ]
+  ],
+  "board": {
+    "scoringHolesPerRun": 240,
+    "finishHole": 241,
+    "startingScore": 0,
+    "scorePaths": "one independently readable score per player or partnership"
+  }
 }

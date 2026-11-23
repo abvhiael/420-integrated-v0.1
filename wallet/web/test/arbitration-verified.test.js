@@ -111,7 +111,7 @@ test('reject unknown, deprecated, replaced service and mismatched release identi
   for(const [change,message] of [
     [s=>s.version=0,/inactive/],[s=>s.active=false,/inactive/],
     [s=>s.version=2,/version changed/],
-    [s=>s.router=addr(500),/code hash|runtime|component/],
+    [s=>s.router=addr(500),/unexpected ABI read/],
     [s=>s.routerCodeHash=h(444),/runtime|component/],
     [s=>s.metadataHash=h(600),/metadata/],
     [s=>s.manifestHash=h(601),/profile/],
@@ -132,7 +132,7 @@ test('reject missing and tampered contract code, alias and incorrect immutable b
     [s=>s.links.cases.policies=addr(991),/immutable/],
     [s=>s.links.cases.rulingRegistry=addr(991),/immutable/],
     [s=>s.links.rulings.cases=addr(991),/immutable/],
-    [s=>s.links.router.rulings=addr(991),/immutable/],
+    [s=>s.links.router.rulings=addr(991),/code missing/],
     [s=>s.links.cases.governanceTimelock=addr(991),/governance/]
   ]){const {client,state}=fixture();change(state);await assert.rejects(client().discover(),message);}
 });

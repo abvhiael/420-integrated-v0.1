@@ -42,6 +42,16 @@ def read_manifest(filename):
             "fixed Arbitration address introduced")
     require(HEX32.fullmatch(d["genesisHash"]), "missing real genesis hash")
     require(d["caseFinalized"] is True and d["appealRound"] == 1, "incomplete case lifecycle")
+    whole = d.get("scenarioCoverage", {})
+    require(whole == {
+        "standardFinalized": True,
+        "appealedFinalized": True,
+        "maximumAppeals": 2,
+        "maximumAppealsFinalized": True,
+        "policySnapshotFrozen": True,
+        "unauthorizedRejected": True,
+        "deprecationAndGovernedRecovery": True,
+    }, "full local standard/appeal/cap/policy/recovery scenario matrix incomplete")
     require(d["canonicalPredeploys"] == {
         "governanceTimelock": PREDEPLOYS["GovernanceTimelock"],
         "protocolRegistry": PREDEPLOYS["ProtocolRegistry"],
@@ -108,7 +118,9 @@ def read_manifest(filename):
         "deprecated service resolution", "incorrect-recovery-revision",
         "observer submits evidence", "wrong resolver initial ruling",
         "initial resolver cannot rule on appeal", "ruling finalization before deadline",
-        "finalization replay",
+        "finalization replay", "observer cannot appeal",
+        "policy deactivation blocks new case", "finalized case cannot accept evidence",
+        "appeal cap reached", "appeal finalized maximum case",
     ]
     require(set(expected).issubset(d["negativeTests"]), "negative-case security coverage missing")
     reproducible = Path(filename).with_name(Path(filename).stem + ".reproducible.json")
@@ -117,6 +129,7 @@ def read_manifest(filename):
     require(normalized["addresses"] == addresses and normalized["runtimeCodeHashes"] == hashes,
             "reproducible bytecode identity drift")
     require(normalized["registration"] == registration, "reproducible commitment drift")
+    require(normalized.get("scenarioCoverage") == whole, "reproducible scenario matrix drift")
     return d, normalized
 
 

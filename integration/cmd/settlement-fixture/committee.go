@@ -31,8 +31,10 @@ func provisionProtectedCommittee(dir, genesis, timestamp string, replacement boo
     t,keys:=keys()
     for _,k:=range keys {defer k.Destroy()}
     offset := 0
+    rotations := []uint64{0, 2}
     if replacement {
         offset = 15
+        rotations = []uint64{1}
         t.CommitteeRoot = sha256.Sum256([]byte("420/recovery/LOCAL-TEST-REPLACEMENT-COMMITTEE"))
         for seat := range t.Members {
             seed := sha256.Sum256([]byte(fmt.Sprintf("INSECURE-LOCAL-RECOVERY-KEY-%d", seat+offset)))
@@ -63,7 +65,7 @@ func provisionProtectedCommittee(dir, genesis, timestamp string, replacement boo
         p:=signing.Policy{Identity:slashing.HistoryIdentity{
             ChainID:420,Genesis:t.Genesis.Root,ValidatorID:uint64(96+i+offset),
             PublicKey:t.Members[i].PublicKey},ProtocolVersion:1,CommitteeRoot:t.CommitteeRoot,
-            Seat:uint16(i)}
+            Seat:uint16(i),Rotations:rotations}
         if e:=p.Validate();e!=nil {panic(e)}
         policies[i]=p
         write(filepath.Join(remote,"policy.json"),p)

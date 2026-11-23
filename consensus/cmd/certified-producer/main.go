@@ -84,7 +84,7 @@ func trustPolicies(t recovery.Trust, policies []signing.Policy, rotation uint64)
     seen:=map[ct.BLSPubkey]bool{}
     ids:=map[uint64]bool{}
     for seat,p:=range policies {
-        require(p.Validate()==nil && int(p.Seat)==seat &&
+        require(p.Validate()==nil && p.AllowsRotation(rotation) && int(p.Seat)==seat &&
             p.Identity.PublicKey==members[seat].PublicKey &&
             p.Identity.Genesis==t.Genesis.Root && p.Identity.ChainID==t.ChainID &&
             p.ProtocolVersion==t.ProtocolVersion && p.CommitteeRoot==committeeRoot &&

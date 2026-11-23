@@ -875,8 +875,18 @@ def main():
             _,ts_stake=getter(ts_origin,"/v1/protocols/events?chainId=420&protocol=420Stake")
             rewards=[row for row in ts_stake["data"]["items"] if row["eventName"]=="SponsoredValidatorRewardAllocated"]
             require(len(rewards)==1 and rewards[0]["blockHash"].lower()==reward_block["hash"].lower()
-                    and rewards[0]["transactionHash"]=="0x"+"0"*64,
-                    "TypeScript native Stake projection omitted canonical evidence or retained an orphan")
+                    and rewards[0]["transactionHash"]=="0x"+"0"*64
+                    and int(rewards[0]["fields"]["gross"])==community_share+operator_share
+                    and int(rewards[0]["fields"]["communityShare"])==community_share
+                    and rewards[0]["fields"]["owner"].lower()==proposer
+                    and rewards[0]["fields"]["communityFund"].lower()==community,
+                    "TypeScript native Stake projection disagrees with canonical reward accounting")
+            go_reward=next(row for row in stake[0] if row["eventName"]=="SponsoredValidatorRewardAllocated"
+                           and row["blockHash"].lower()==reward_block["hash"].lower())
+            require(go_reward["logIndex"]==rewards[0]["logIndex"]
+                    and go_reward["transactionHash"]==rewards[0]["transactionHash"]
+                    and go_reward["contractAddress"].lower()==rewards[0]["contractAddress"].lower(),
+                    "Go, Explorer and TypeScript Stake consumers disagree on reward provenance")
             return {"treasury":policies,"treasuryLifecycle":projections,"stake":stake[0],
                     "typescriptNativeStake":rewards,"treasuryPayout":payout_projections}
         original_reward_block=reward_block["hash"]

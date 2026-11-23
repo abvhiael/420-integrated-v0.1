@@ -14,6 +14,7 @@ const {id,keccak256}=requireIndexer('ethers');
 const {PostgresSql420}=await import('../../420-indexer/dist/src/postgres.js');
 const {Node420EngineSource,HttpJsonRpcTransport420}=await import('../../420-indexer/dist/src/rpc-source.js');
 const {ProtocolDecoderRegistry420}=await import('../../420-indexer/dist/src/protocol-decoder.js');
+const {descriptorsFromStakeRelease420}=await import('../../420-indexer/dist/src/abi-manifest.js');
 const {ProtocolProjection420}=await import('../../420-indexer/dist/src/protocol-projections.js');
 const {CoreProjectionConsumer420}=await import('../../420-indexer/dist/src/core-projections.js');
 const {IndexerIngestor420}=await import('../../420-indexer/dist/src/ingestor.js');
@@ -74,15 +75,17 @@ try{
   const descriptors=new ProtocolDecoderRegistry420([]);
   {
     const genesis=JSON.parse(await fs.readFile(opt('genesis'),'utf8'));
-    const reward='0x0000000000000000000000000000000000000420';
-    need(genesis.alloc[reward]?.code && (await source.getCode(reward)).toLowerCase()===
-         genesis.alloc[reward].code.toLowerCase(),'native reward emitter code mismatch');
-    for(const [eventName,params] of [
-      ['SponsoredValidatorRewardAllocated',[['owner','address',true],['communityFund','address',true],['gross','uint256',false],['communityShare','uint256',false]]],
-      ['NativeRewardPaid',[['blockNumber','uint64',true],['recipient','address',true],['kind','uint8',true],['amount','uint256',false]]]
-    ]){
-      descriptors.register({protocol:'420Stake',eventName,topic0:id(eventName+'('+params.map(p=>p[1]).join(',')+')'),
-        contractAddress:reward,fields:params.map(([name,kind,indexed])=>({name,kind,indexed}))});
+    const stakeManifest=JSON.parse(await fs.readFile(path.join(root,'420-indexer/descriptors/stake420-v3.json'),'utf8'));
+    const stakeArtifacts=new Map();
+    for(const contract of stakeManifest.contracts){
+      const address=contract.canonicalAddress.toLowerCase();
+      need(genesis.alloc[address]?.code && (await source.getCode(address)).toLowerCase()===
+           genesis.alloc[address].code.toLowerCase(),'Stake emitter code mismatch: '+contract.contractName);
+      stakeArtifacts.set(contract.contractName,
+        JSON.parse(await fs.readFile(path.join(root,contract.artifact.path),'utf8')));
+    }
+    for(const descriptor of descriptorsFromStakeRelease420(stakeManifest,stakeArtifacts)){
+      descriptors.register(descriptor);
     }
     const deployments={
       CivicConstitution420:graph.walletCivicModuleAddresses.constitution,

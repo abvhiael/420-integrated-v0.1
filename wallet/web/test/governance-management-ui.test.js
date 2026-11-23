@@ -87,7 +87,7 @@ test('browser Civic invalidation discards prior account/contract data and retain
     "'#governance-network'",
     "'#governance-proposal-list'",
     "pendingVoteHash=submitted.txHash",
-    "Check its canonical receipt and current ballot before any retry",
+    "Inspect its canonical receipt and current ballot before any retry",
     "never resubmit automatically",
   ]) assert.ok(source.includes(token),'missing revocation or uncertain receipt guard: '+token);
 });

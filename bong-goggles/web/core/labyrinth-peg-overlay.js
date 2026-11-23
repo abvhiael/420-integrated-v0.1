@@ -1,6 +1,7 @@
 // BC-2.4 peg overlay: only a validated, numbered physical hole atlas may
 // drive a peg. The unsequenced survey is never interpreted as score order.
 import {LABYRINTH_HOLE_CENTERS,LABYRINTH_HOLE_COUNT,LABYRINTH_BOARD_SHA256} from './labyrinth-hole-survey.js';
+import {LABYRINTH_PRINTED_GUIDES} from './labyrinth-printed-guides.js';
 
 const integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
 export function validateLabyrinthPegAtlas(atlas){
@@ -28,9 +29,12 @@ export function validateLabyrinthPegAtlas(atlas){
     Object.keys(atlas.guideAnchors).length!==32)return false;
  for(let score=10;score<=320;score+=10){
   const anchors=atlas.guideAnchors[String(score)];
+  const printed=LABYRINTH_PRINTED_GUIDES[score];
+  if(!printed||printed.length!==2)return false;
   if(!Array.isArray(anchors)||anchors.length!==2)return false;
   for(const anchor of anchors){
-   if(!anchor||!integer(anchor.x,0,1253)||!integer(anchor.y,0,1253))return false;
+   if(!anchor||!integer(anchor.x,0,1253)||!integer(anchor.y,0,1253)||
+      Math.hypot(anchor.x-printed[0],anchor.y-printed[1])>90)return false;
   }
   for(const track of atlas.tracks){
    const p=LABYRINTH_HOLE_CENTERS[track[score]];

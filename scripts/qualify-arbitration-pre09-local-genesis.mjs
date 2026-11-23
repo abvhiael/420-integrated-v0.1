@@ -212,6 +212,18 @@ async function main(){
   await reject('observer submits evidence',()=>cases.connect(observer).submitEvidence.staticCall(caseId,id('EVIL')));
   await track('user:claimant-evidence',await cases.connect(claimant).submitEvidence(caseId,id('CLAIMANT/EVIDENCE')));
   await track('user:respondent-evidence',await cases.connect(respondent).submitEvidence(caseId,id('RESPONDENT/EVIDENCE')));
+  // Scenario E: original case snapshots remain authoritative after a real G1
+  // policy change even if all *new* cases must fail while policy is disabled.
+  const originalPolicy={resolver:record.resolver,appealResolver:record.appealResolver,
+    evidenceWindow:record.evidenceWindow,appealWindow:record.appealWindow,maxAppeals:record.maxAppeals};
+  await execute(timelock,governor,await policies.getAddress(),policies.interface,'setPolicy',
+    [domain,await observer.getAddress(),await observer.getAddress(),1,1,0,false],
+    'disable-and-mutate-domain-policy');
+  await reject('policy deactivation blocks new case',()=>cases.connect(claimant).openCase.staticCall(
+    ...caseArgs.slice(0,3),id('NEW/SALE'),id('NEW/CLAIM'),id('NEW/REMEDY')));
+  record=await cases.getCase(caseId);
+  for(const [key,value] of Object.entries(originalPolicy))
+    assert.equal(record[key],value,'Existing case policy snapshot changed: '+key);
   await reject('duplicate evidence commitment',()=>cases.connect(respondent).submitEvidence.staticCall(
     caseId,id('CLAIMANT/EVIDENCE')));
   await reject('wrong resolver initial ruling',()=>rulings.connect(appealResolver).submitRuling.staticCall(
@@ -220,6 +232,7 @@ async function main(){
     id('LOCAL/RULING/0'),id('LOCAL/REMEDY/0'),ZeroHash));
   assert.equal((await cases.getCase(caseId)).state,2n);
   await reject('ruling finalization before deadline',()=>rulings.finalizeRuling.staticCall(caseId));
+  await reject('observer cannot appeal',()=>cases.connect(observer).appeal.staticCall(caseId));
   await track('user:appeal',await cases.connect(respondent).appeal(caseId));
   record=await cases.getCase(caseId);assert.equal(record.round,1n);assert.equal(record.state,1n);
   await reject('initial resolver cannot rule on appeal',()=>rulings.connect(resolver).submitRuling.staticCall(
@@ -232,6 +245,63 @@ async function main(){
   assert.equal((await rulings.getRuling(caseId,0)).outcomeCode,1n);
   assert.equal((await rulings.getRuling(caseId,1)).outcomeCode,2n);
   await reject('finalization replay',()=>rulings.finalizeRuling.staticCall(caseId));
+  await reject('finalized case cannot accept evidence',()=>cases.connect(claimant).submitEvidence.staticCall(
+    caseId,id('POST/FINAL')));
+  // Scenario A: independently exercise a non-appealed dispute to finality.
+  // Scenario C: fully exhaust two appeals of a *new* case, rejecting the third.
+  await execute(timelock,governor,await policies.getAddress(),policies.interface,'setPolicy',
+    [domain,resolverAddress,appealAddress,100,100,2,true],'restore-policy-for-standard-and-cap');
+  const openArgs=(name)=>[domain,respondentAddress,origin,id('LOCAL/SALE/'+name),
+    id('LOCAL/CLAIM/'+name),id('LOCAL/REMEDY/'+name)];
+  const standard=await cases.connect(claimant).openCase.staticCall(...openArgs('STANDARD'));
+  await track('standard:open',await cases.connect(claimant).openCase(...openArgs('STANDARD')));
+  await track('standard:claimant-evidence',await cases.connect(claimant).submitEvidence(
+    standard,id('STANDARD/CLAIMANT/EVIDENCE')));
+  await track('standard:respondent-evidence',await cases.connect(respondent).submitEvidence(
+    standard,id('STANDARD/RESPONDENT/EVIDENCE')));
+  await track('standard:ruling',await rulings.connect(resolver).submitRuling(
+    standard,3,id('STANDARD/RULING'),id('STANDARD/REMEDY'),ZeroHash));
+  await rpc('evm_increaseTime',[101]);await rpc('evm_mine',[]);
+  await track('standard:finalize',await rulings.connect(claimant).finalizeRuling(standard));
+  assert.equal((await cases.getCase(standard)).state,3n,'Standard dispute not finalized');
+  assert.equal((await rulings.getRuling(standard,0)).outcomeCode,3n);
+  const capped=await cases.connect(claimant).openCase.staticCall(...openArgs('MAX-APPEALS'));
+  await track('max:open',await cases.connect(claimant).openCase(...openArgs('MAX-APPEALS')));
+  await track('max:ruling-0',await rulings.connect(resolver).submitRuling(
+    capped,1,id('MAX/RULING/0'),id('MAX/REMEDY/0'),ZeroHash));
+  for(let round=1;round<=2;round++){
+    await track('max:appeal-'+round,await cases.connect(respondent).appeal(capped));
+    assert.equal((await cases.getCase(capped)).round,BigInt(round));
+    await track('max:ruling-'+round,await rulings.connect(appealResolver).submitRuling(
+      capped,round+1,id('MAX/RULING/'+round),id('MAX/REMEDY/'+round),ZeroHash));
+  }
+  await reject('appeal cap reached',()=>cases.connect(claimant).appeal.staticCall(capped));
+  assert.equal((await cases.getCase(capped)).round,2n);
+  for(let round=0;round<=2;round++)
+    assert.equal((await rulings.getRuling(capped,round)).outcomeCode,BigInt(round+1),
+      'Missing historical ruling at appeal cap');
+  await rpc('evm_increaseTime',[101]);await rpc('evm_mine',[]);
+  await track('max:finalize',await rulings.connect(respondent).finalizeRuling(capped));
+  await reject('appeal finalized maximum case',()=>cases.connect(claimant).appeal.staticCall(capped));
+  assert.equal((await cases.getCase(capped)).state,3n);
+  // Scenario H: an actual local EVM canonical reorganization. The orphaned
+  // transaction and its case must be invisible before re-ingesting an
+  // alternative canonical block; no fabricated Indexer finality is involved.
+  const reorgArgs=openArgs('UNFINALIZED-REORG');
+  const snapshot=await rpc('evm_snapshot',[]);
+  const orphaned=await cases.connect(claimant).openCase.staticCall(...reorgArgs);
+  const orphanTx=await cases.connect(claimant).openCase(...reorgArgs);
+  const orphanReceipt=await orphanTx.wait();
+  assert.equal(orphanReceipt.status,1);
+  assert.equal((await cases.getCase(orphaned)).state,1n);
+  assert.equal(await rpc('evm_revert',[snapshot]),true,'Anvil snapshot rollback failed');
+  assert.equal(await rpc('eth_getTransactionReceipt',[orphanReceipt.hash]),null,
+    'Orphaned case receipt remained canonical after reorg');
+  await reject('orphaned case inaccessible after reorg',()=>cases.getCase(orphaned));
+  const restored=await cases.connect(claimant).openCase.staticCall(...reorgArgs);
+  assert.equal(restored,orphaned,'Canonical CaseRegistry nonce not restored after reorg');
+  await track('reorg:canonical-reopen',await cases.connect(claimant).openCase(...reorgArgs));
+  assert.equal((await cases.getCase(restored)).state,1n);
   await execute(timelock,governor,registryAddress,registry.interface,'deprecateService',[sid],'deprecate-service');
   await reject('deprecated service resolution',()=>registry.resolveActive(sid));
   assert.equal((await registry.getService(sid)).active,false);
@@ -269,13 +339,18 @@ async function main(){
     addresses,runtimeCodeHashes:hashes,
     registration:{serviceId:sid,componentId:cid,metadataHash,manifestHash,interfaceHash,dependencyRoot,
       publishedVersions:[1,2],activeVersion:2},
-    caseId,caseFinalized:true,appealRound:1,negativeTests:evidence,
+    caseId,caseFinalized:true,appealRound:1,
+    scenarioCoverage:{standardFinalized:true,appealedFinalized:true,maximumAppeals:2,
+      maximumAppealsFinalized:true,policySnapshotFrozen:true,unauthorizedRejected:true,
+      deprecationAndGovernedRecovery:true,realChainReorganization:true},
+    negativeTests:evidence,
     transactions:receiptOrder};
   mkdirSync(dirname(output),{recursive:true});
   writeFileSync(output,JSON.stringify(result,null,2)+'\n');
   const reproducible={schema:result.schema,compiler:result.compiler,
     canonicalPredeploys:result.canonicalPredeploys,addresses:result.addresses,
     runtimeCodeHashes:result.runtimeCodeHashes,registration:result.registration,
+    scenarioCoverage:result.scenarioCoverage,
     steps:result.transactions.map(x=>({step:x.step,created:x.created,from:x.from,to:x.to}))};
   writeFileSync(output.replace(/\.json$/,'.reproducible.json'),
     JSON.stringify(reproducible,null,2)+'\n');

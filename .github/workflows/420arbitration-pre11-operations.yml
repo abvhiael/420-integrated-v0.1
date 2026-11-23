@@ -1,0 +1,83 @@
+name: 420Arbitration ARB-PRE-11 operations and testnet handoff
+on:
+  pull_request:
+    paths:
+      - 'contracts/config/arbitration/arb-pre-11-testnet-handoff-template.json'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-11-OPERATIONS-TESTNET-HANDOFF.md'
+      - 'scripts/verify-arbitration-pre11-handoff.py'
+      - 'scripts/tests/test_arbitration_pre11_handoff.py'
+      - '.github/workflows/420arbitration-pre11-operations.yml'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
+      - 'contracts/config/420arbitration-genesis.json'
+      - 'contracts/config/arbitration/arbitration-audit-4-release-materialization.json'
+      - 'contracts/config/genesis-address-namespace.json'
+      - 'scripts/qualify-arbitration-pre09-local-genesis.mjs'
+      - 'scripts/verify-arbitration-pre09-local-genesis.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arb-pre11-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  template-and-runbook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact branch-head evidence
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check empty live evidence and preserved frozen source
+        run: python3 scripts/verify-arbitration-pre11-handoff.py --template
+      - name: Check operator runbook and executable references
+        run: python3 scripts/verify-arbitration-pre11-handoff.py --runbook
+      - name: Negative-proof live evidence and source-drift tests
+        run: python3 -m unittest discover -v -s scripts/tests -p 'test_arbitration_pre11_handoff.py'
+      - name: Verify existing Genesis address and canonical deployment ownership
+        run: |
+          python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
+          python3 scripts/verify-arbitration-audit-4-release.py
+  local-governance-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact local recovery head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile approved GovernanceTimelock Registry Arbitration graph
+        working-directory: contracts
+        run: |
+          forge build src/governance/GovernanceTimelock.sol src/apps/ProtocolRegistry.sol src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol
+      - name: Install standalone local deployment dependencies
+        run: npm install --prefix scripts --no-save --no-package-lock --ignore-scripts ethers@6
+      - name: Execute genuine local governance, deprecation and recovery twice
+        run: |
+          node scripts/qualify-arbitration-pre09-local-genesis.mjs artifacts/arbitration/arb-pre-11/first.json
+          node scripts/qualify-arbitration-pre09-local-genesis.mjs artifacts/arbitration/arb-pre-11/second.json
+          cmp artifacts/arbitration/arb-pre-11/first.reproducible.json artifacts/arbitration/arb-pre-11/second.reproducible.json
+          python3 scripts/verify-arbitration-pre09-local-genesis.py artifacts/arbitration/arb-pre-11/first.json artifacts/arbitration/arb-pre-11/second.json
+      - name: Store local-only governance and recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arbitration-pre11-operations-local-${{ github.event.pull_request.head.sha || github.sha }}
+          path: artifacts/arbitration/arb-pre-11/*.json
+          retention-days: 30
+          if-no-files-found: ignore

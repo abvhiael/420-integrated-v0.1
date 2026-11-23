@@ -3,6 +3,9 @@ on:
   pull_request:
     paths:
       - 'services/bong-goggles-account-social/classic_match_social.go'
+      - 'cmd/bong-goggles-social/labyrinth_activation.go'
+      - 'cmd/bong-goggles-social/labyrinth_activation_test.go'
+      - 'cmd/bong-goggles-social/main.go'
       - 'services/bong-goggles-account-social/classic_labyrinth_multiplayer_integration_test.go'
       - 'bong-goggles/web/core/labyrinth-session.js'
       - 'bong-goggles/web/core/labyrinth-route-runtime.js'
@@ -66,4 +69,6 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           go test -race -count=1 -tags account420_integration -timeout=15m -run '^TestBC25|^TestBC16AuthenticatedChallengeHistoryAndRematch$' -v ./services/bong-goggles-account-social
-          go vet ./services/bong-goggles-account-social
+          go test -race -count=1 -run '^TestBC25OperatorActivationPreservesCribbageAndFailsClosed$|^TestBC15CribbageOperatorActivationIsIndependentAndFailClosed
+ ./cmd/bong-goggles-social
+          go vet ./services/bong-goggles-account-social ./cmd/bong-goggles-social

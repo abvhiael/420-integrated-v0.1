@@ -46,6 +46,12 @@ Risk: private evidence is leaked by a frontend, evidence host, resolver or diagn
 
 Mitigation: only commitments belong on chain. Encryption, access control, retention and key management remain explicit off-chain responsibilities.
 
+### Off-chain evidence leakage, substitution and storage outages
+
+The Wallet seals user-selected private files locally using randomized, case/round/submitter-bound commitments and authenticated AES-256-GCM envelopes. Plaintext, keys and private storage grants never belong in case calldata, analytics, logs or public Indexer projections. Private inspection must match the exact canonical evidence event and on-chain submitter/round before any decryption; changing case, chain, registry, sender or round invalidates authenticated decryption.
+
+Remote upload/retrieval is denied when a qualified 420Storage v1 transport and trusted, case-scoped authenticated session are missing. Expired grants, mismatched object identity, corrupted ciphertext and interrupted uploads fail without rewriting a canonical evidence event or ruling. Holding a copied recovery key/plaintext creates residual disclosure risk that cannot be revoked by on-chain state; confidential recipients and host retention must be controlled operationally. See [ARB-PRE-05 privacy/storage requirements](./evidence-privacy.md).
+
 ## Accepted design risks
 
 - Governance controls future domain policy.
@@ -56,7 +62,7 @@ Mitigation: only commitments belong on chain. Encryption, access control, retent
 
 ## Unresolved release risks
 
-- no canonical Registry-resolved Arbitration service endpoint/address authority is defined;
+- Registry resolution is qualified for Wallet against a trusted release, but no production service deployment or public testnet authority is claimed;
 - no production-equivalent testnet deployment evidence exists;
 - no live resolver key-custody/rotation operating procedure is qualified;
 - no independent external security review is retained for a production release.

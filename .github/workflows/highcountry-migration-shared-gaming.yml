@@ -1,0 +1,32 @@
+name: HighCountry migration shared Genesis gaming boundary qualification
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/highcountry-migration-shared-gaming.yml'
+      - 'services/420-gaming-player-profile/**'
+      - 'packages/420-gaming-sdk/**'
+jobs:
+  shared-sdk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Shared 420Gaming SDK integrity and HighCountry transport compatibility
+        run: npm test --prefix packages/420-gaming-sdk
+  shared-profile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test shared profile, identity, finality, claims and abuse boundaries
+        run: node --test services/420-gaming-player-profile/test/*.test.js

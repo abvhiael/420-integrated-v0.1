@@ -1,0 +1,62 @@
+name: 420Arbitration ARB-PRE-09 local Genesis deployment qualification
+on:
+  pull_request:
+    paths:
+      - 'scripts/qualify-arbitration-pre09-local-genesis.mjs'
+      - 'scripts/verify-arbitration-pre09-local-genesis.py'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-09-LOCAL-GENESIS.md'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
+      - '.github/workflows/420arbitration-pre09-genesis.yml'
+      - 'contracts/config/arbitration/**'
+      - 'contracts/src/arbitration/**'
+      - 'contracts/src/governance/GovernanceTimelock.sol'
+      - 'contracts/src/apps/ProtocolRegistry.sol'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arbitration-pre09-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  local-genesis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualified revision
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify frozen address namespace and prior release sequence
+        run: |
+          python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
+          python3 scripts/verify-arbitration-audit-4-release.py
+      - name: Build only canonical dependency graph under approved compiler
+        working-directory: contracts
+        run: |
+          forge build src/governance/GovernanceTimelock.sol src/apps/ProtocolRegistry.sol src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol
+      - name: Install local-only deployment driver dependencies
+        run: npm install --prefix scripts --no-save --no-package-lock --ignore-scripts ethers@6
+      - name: Execute real Timelock, registry publication, user and resolver lifecycle twice
+        run: |
+          node scripts/qualify-arbitration-pre09-local-genesis.mjs artifacts/arbitration/arb-pre-09/first.json
+          node scripts/qualify-arbitration-pre09-local-genesis.mjs artifacts/arbitration/arb-pre-09/second.json
+          cmp artifacts/arbitration/arb-pre-09/first.reproducible.json artifacts/arbitration/arb-pre-09/second.reproducible.json
+      - name: Validate manifest, transaction ordering and frozen settings
+        run: python3 scripts/verify-arbitration-pre09-local-genesis.py artifacts/arbitration/arb-pre-09/first.json artifacts/arbitration/arb-pre-09/second.json
+      - name: Preserve local deployment receipts and code identity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arbitration-pre09-local-genesis-${{ github.sha }}
+          path: artifacts/arbitration/arb-pre-09/*.json
+          if-no-files-found: ignore
+          retention-days: 30

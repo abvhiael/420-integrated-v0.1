@@ -1,0 +1,11 @@
+{
+  "schema": "420-arbitration-local-deployment-metadata-v1",
+  "scope": "LOCAL_GENESIS_QUALIFICATION_ONLY",
+  "step": "ARB-PRE-09",
+  "serviceId": "420/service/arbitration/v1",
+  "componentId": "420/component/arbitration/v1",
+  "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+  "releaseMaterialization": "contracts/config/arbitration/arbitration-audit-4-release-materialization.json",
+  "runtime": "ArbitrationRouter420",
+  "liveDeployment": false
+}

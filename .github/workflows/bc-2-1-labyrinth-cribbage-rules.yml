@@ -17,6 +17,7 @@ on:
       - 'docs/BONG-GOGGLES-ROADMAP.md'
       - 'docs/BONG-GOGGLES-BG-15.md'
       - 'services/bong-goggles-account-social/classic_rooms.go'
+      - 'services/bong-goggles-account-social/store.go'
       - 'services/bong-goggles-account-social/classic_rooms_test.go'
       - 'services/bong-goggles-account-social/migrations/010_labyrinth_cribbage_name.sql'
       - 'bong-goggles/web/test/labyrinth-cribbage-rules.test.js'

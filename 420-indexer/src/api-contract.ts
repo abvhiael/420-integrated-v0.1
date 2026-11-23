@@ -42,6 +42,9 @@ export const INDEXER_V1_ROUTES_420: readonly IndexerApiRoute420[] = [
   { id: 'ai-policy', method: 'GET', path: '/v1/ai/policies/:policyId', scope: 'chain', paged: false, description: 'AI policy projection by id' },
   { id: 'ai-reputations', method: 'GET', path: '/v1/ai/reputation', scope: 'chain', paged: true, description: 'paged AI Trust-evidence counters' },
   { id: 'ai-reputation', method: 'GET', path: '/v1/ai/reputation/:providerId', scope: 'chain', paged: false, description: 'AI Trust-evidence counters by provider' },
+  { id: 'arbitration-cases', method: 'GET', path: '/v1/arbitration/cases', scope: 'chain', paged: true, description: 'paged non-authoritative Arbitration case projection' },
+  { id: 'arbitration-case', method: 'GET', path: '/v1/arbitration/cases/:caseId', scope: 'chain', paged: false, description: 'canonicality-checked Arbitration case projection' },
+  { id: 'arbitration-history', method: 'GET', path: '/v1/arbitration/cases/:caseId/history', scope: 'chain', paged: true, description: 'bounded canonical case/ruling/appeal event history' },
   { id: 'search', method: 'GET', path: '/v1/search', scope: 'chain', paged: false, description: 'bounded deterministic index search' }
 ] as const;
 

@@ -99,12 +99,13 @@ def read_manifest(filename):
             "canonical deployment/consumer/recovery order violated")
     steps = {t["step"] for t in transactions}
     require("schedule-negative:invalid-binding" in steps and
-            "schedule-negative:duplicate-binding" in steps,
+            "schedule-negative:duplicate-binding" in steps and
+            "schedule-negative:incorrect-recovery-revision" in steps,
             "negative governance binding cases not executed")
     expected = [
         "unauthorized ruling binding", "invalid-binding", "duplicate-binding",
         "unauthorized component registration", "unauthorized service publication",
-        "deprecated service resolution", "recover with incorrect revision",
+        "deprecated service resolution", "incorrect-recovery-revision",
         "observer submits evidence", "wrong resolver initial ruling",
         "initial resolver cannot rule on appeal", "ruling finalization before deadline",
         "finalization replay",

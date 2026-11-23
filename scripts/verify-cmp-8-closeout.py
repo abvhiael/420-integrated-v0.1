@@ -10,6 +10,7 @@ CLOSEOUT=ROOT/"docs/compute-market/CMP-8-PHASE-CLOSEOUT.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 GENESIS=ROOT/".github/workflows/genesis-address-authority.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
+SCOPED=ROOT/".github/workflows/cmp-phase-closeouts.yml"
 DOCS=ROOT/".github/workflows/docs-qualify.yml"
 COMPUTE=ROOT/".github/workflows/compute-market.yml"
 APP=ROOT/".github/workflows/420compute-app.yml"
@@ -19,7 +20,7 @@ HARDENING=ROOT/".github/workflows/contracts-hardening.yml"
 
 def fail(msg): raise SystemExit("CMP-8 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,SPEC,CLOSEOUT,FOUNDRY,GENESIS,QUAL,DOCS,COMPUTE,APP,IDX_DIRECT,IDX_SHARED,HARDENING):
+for p in (LEDGER,ROADMAP,SPEC,CLOSEOUT,FOUNDRY,GENESIS,QUAL,SCOPED,DOCS,COMPUTE,APP,IDX_DIRECT,IDX_SHARED,HARDENING):
     if not p.is_file(): fail("missing "+str(p.relative_to(ROOT)))
 
 d=json.loads(LEDGER.read_text())
@@ -49,9 +50,14 @@ for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-8-phase-closeout.json"
 gw=GENESIS.read_text()
 if "Canonical full Foundry qualification is owned once by Solidity Contracts" not in gw: fail("Genesis duplication boundary missing")
 if "contracts/config/**" not in gw: fail("Genesis config trigger coverage missing")
+# CI-GUARD-02 prohibits implicit execution of the complete integrated Level 3
+# suite. Verify scoped automatic triggers plus the retained global dispatch.
 qw=QUAL.read_text()
-for token in ("contracts/config/compute-market/cmp-8-phase-closeout.json","docs/compute-market/CMP-8-PHASE-CLOSEOUT.md","scripts/verify-cmp-8-closeout.py"):
-    if qw.count(token)<2: fail("global qualification push/PR trigger missing "+token)
+if "\n  workflow_dispatch:" not in qw or any("\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+    fail("global Level 3 qualification must remain manual-only")
+sw=SCOPED.read_text()
+for token in ("pull_request:","push:","Verify exact head","contracts/config/compute-market/cmp-8-phase-closeout.json","docs/compute-market/CMP-8-PHASE-CLOSEOUT.md","scripts/verify-cmp-8-closeout.py","run: python scripts/verify-cmp-8-closeout.py"):
+    if token not in sw: fail(f"scoped closeout qualification trigger missing {token}")
 if "docs/**" not in DOCS.read_text(): fail("Docs global ownership missing")
 if "verify-cmp-8-closeout.py" not in COMPUTE.read_text(): fail("Compute closeout verifier ownership missing")
 aw=APP.read_text()

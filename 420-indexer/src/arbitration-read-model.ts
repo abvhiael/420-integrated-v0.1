@@ -19,7 +19,7 @@ type CaseState420='OPEN'|'RULED'|'FINALIZED';
 export type ArbitrationCanonicality420='confirmed'|'pending'|'stale'|'reorganized';
 export type ArbitrationPublicFields420=Record<string,string>;
 export interface ArbitrationHistoryEntry420 {
- eventName:string;caseId:string;round:number;fields:ArbitrationPublicFields;
+ eventName:string;caseId:string;round:number;fields:ArbitrationPublicFields420;
  blockNumber:string;blockHash:string;transactionHash:string;
  transactionIndex:number;logIndex:number;contractAddress:string;
 }

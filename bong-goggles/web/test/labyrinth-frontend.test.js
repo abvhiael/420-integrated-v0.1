@@ -160,9 +160,9 @@ test('BC-2.4 room deep link reopens the exact authorized Labyrinth match, not a 
 
 test('BC-2.4 source-budget reconciliation pins inherited blobs without changing historical BC-0.2 limits',async()=>{
  const src=await readFile(new URL('../scripts/qualify-web.mjs',import.meta.url),'utf8');
- assert.match(src,/baseTotal:1189\\*1024/);
+ assert.match(src,/baseTotal:1189\*1024/);
  assert.match(src,/maxAdded:1204/);
- assert.match(src,/pinnedInheritedBytes>44\\*1024/);
+ assert.match(src,/pinnedInheritedBytes>44\*1024/);
  assert.match(src,/BC-2.4 independent board and UI allowance/);
- assert.match(src,/createHash\\('sha1'\\)/);
+ assert.match(src,/createHash\('sha1'\)/);
 });

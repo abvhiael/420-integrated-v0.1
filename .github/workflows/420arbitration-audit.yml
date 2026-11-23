@@ -16,7 +16,9 @@ on:
       - 'scripts/verify-420arbitration-audit.py'
       - 'scripts/verify-arbitration-audit-4-release.py'
       - 'wallet/web/core/arbitration-runtime.js'
+      - 'wallet/web/core/arbitration-verified.js'
       - 'wallet/web/test/arbitration-runtime.test.js'
+      - 'wallet/web/test/arbitration-verified.test.js'
       - '.github/workflows/420arbitration-audit.yml'
   workflow_dispatch:
 
@@ -59,7 +61,7 @@ jobs:
           python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
           python3 scripts/test-reg-audit-4-genesis-address-namespace.py
       - name: Run Wallet Arbitration runtime qualification
-        run: node --test wallet/web/test/arbitration-runtime.test.js wallet/web/test/genesis-app-catalog.test.js
+        run: node --test wallet/web/test/arbitration-runtime.test.js wallet/web/test/arbitration-verified.test.js wallet/web/test/genesis-app-catalog.test.js
       - name: Run Arbitration Foundry qualification
         working-directory: contracts
         run: |

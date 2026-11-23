@@ -108,6 +108,9 @@ forge build --root contracts \
   src/system/ConsensusSystemCall420.sol \
   src/system/RewardController.sol \
   --extra-output storageLayout
+# Compile the isolated browser-voting electorate test fixture in the same
+# actual Foundry artifact set used by the Anvil -> Geth Genesis export.
+forge build --root contracts test/fixtures/GOVPRE08BrowserElectorate420.sol
 
 for tag in a b; do
   python3 scripts/gov-pre-08/materialize-v4-source-and-audit-local.py \

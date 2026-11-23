@@ -162,6 +162,27 @@ try{
    const actions=[[policy,'0',action],
      [reserve,'0',credit.encodeFunctionData('assignCredit',[id,wallet.address,42000n*10n**18n])],
      [reserve,'0',credit.encodeFunctionData('fundCredit',[id])]];
+   const funding=JSON.parse(await fs.readFile(arg('funding'),'utf8'));
+   const budget=graph.actualProductionConstructorAddresses.TreasuryBudgetRegistry420;
+   const disbursement=graph.actualProductionConstructorAddresses.TreasuryDisbursementRegistry420;
+   const label=name=>keccak256(toUtf8Bytes('GOV-PRE-08 '+name));
+   const budgetId=label('Civic budget');
+   const civicAction=label('Civic Treasury commitment');
+   const purpose=label('Civic disbursement purpose');
+   const expiry=BigInt((await rpc('eth_getBlockByNumber',['0x0',false])).timestamp)+14n*86400n;
+   const amount=100n;
+   const request=[budgetId,wallet.address,amount,0,expiry,civicAction,purpose];
+   const disbursementId=keccak256(AbiCoder.defaultAbiCoder().encode(
+      ['bytes32','bytes32','address','uint128','uint64','uint64','bytes32','bytes32'],
+      [keccak256(toUtf8Bytes('420/TREASURY/DISBURSEMENT/V1')),...request]));
+   const budgeting=new Interface(['function createBudget(bytes32,bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32)']);
+   const payouts=new Interface(['function schedule(bytes32,bytes32,address,uint128,uint64,uint64,bytes32,bytes32)',
+     'function cancel(bytes32)']);
+   actions.push([budget,'0',budgeting.encodeFunctionData('createBudget',[
+      budgetId,funding.vaultIds.OPERATIONS,label('Civic Treasury category'),
+      '0x000000000000000000000000000000000000d00d',456,0,expiry,civicAction,label('Civic Treasury metadata')])],
+      [disbursement,'0',payouts.encodeFunctionData('schedule',[disbursementId,...request])],
+      [disbursement,'0',payouts.encodeFunctionData('cancel',[disbursementId])]);
    const actionsHash=keccak256(AbiCoder.defaultAbiCoder().encode(
       ['tuple(address,uint256,bytes)[]'],[actions]));
    const metadataHash=keccak256(toUtf8Bytes('GOV-PRE08/BROWSER/LOCAL-ONLY'));
@@ -170,7 +191,7 @@ try{
       method:'eth_sendTransaction',params:[tx]}),
       {from:wallet.address,to:civic.governor,data:call,value:'0x0'});
    assert.ok(transactions.some(tx=>tx.txHash===hash&&tx.to.toLowerCase()===civic.governor.toLowerCase()));
-   proof={...proof,proposalTxHash:hash,actions,realNativeWalletSignedCivicProposal:true};
+   proof={...proof,proposalTxHash:hash,actions,budgetId,disbursementId,realNativeWalletSignedCivicProposal:true};
  }else{
    await page.locator('#governance-proposal-list .governance-proposal-row').first().click();
    await page.locator('#governance-state').getByText('ACTIVE').waitFor({timeout:18000});

@@ -34,7 +34,7 @@ const asset='0x000000000000000000000000000000000000d00d';
 const empty='0x'+'00'.repeat(32);
 const cancelled=keccak256(toUtf8Bytes('GOV-PRE-08/native/local/bootstrap-cancellation'));
 const actions=proposal.actions;
-assert.equal(actions.length,3);
+assert.equal(actions.length,6);
 assert.equal(actions[0][0].toLowerCase(),policy.toLowerCase());
 
 const abi=new Interface([
@@ -80,7 +80,7 @@ async function send(to,name,args){
   const tx=transaction(to,name,args);
   const nonce=await rpc('eth_getTransactionCount',[wallet.address,'pending']);
   const raw=await wallet.signTransaction({chainId:420,type:2,to,data:tx.data,nonce,
-    gasLimit:1_000_000n,maxPriorityFeePerGas:1_000_000_000n,maxFeePerGas:2_000_000_000n});
+    gasLimit:3_000_000n,maxPriorityFeePerGas:1_000_000_000n,maxFeePerGas:2_000_000_000n});
   const hash=await rpc('eth_sendRawTransaction',[raw]);
   assert.equal(hash,keccak256(raw));
   return hash;

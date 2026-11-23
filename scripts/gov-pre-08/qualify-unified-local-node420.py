@@ -602,7 +602,7 @@ def main():
                 return json.load(response)["ready"]
         ready(identity_ready,identity,timeout=60)
         browser_cmd=["node",str(ROOT/"wallet/web/scripts/qualify-gov-pre08-browser.mjs"),
-                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780"]
+                     "--graph",str(args.graph.resolve()),"--funding",str(args.funding.resolve()),"--rpc","http://127.0.0.1:18780"]
         browser_proposal_path=args.workdir/"browser-proposal.json"
         subprocess.run(browser_cmd+["--mode","propose","--output",str(browser_proposal_path)],
                        cwd=ROOT,check=True,timeout=65)
@@ -818,12 +818,29 @@ def main():
                         and row["allowed"] and int(row["maxSingleDisbursement"])==123
                         and int(row["maxEpochDisbursement"])==456 and int(row["revision"])==1,
                         "Treasury consumer disagrees with the mature Civic execution")
+            projections={}
+            for kind,key in (("budgets","budgetId"),("disbursements","disbursementId")):
+                route=f'/v1/treasury/{kind}/{browser_proposal[key]}?chainId=420'
+                records=[getter(origin,route)[1]["data"] for origin in
+                         (ts_origin,"http://127.0.0.1:18782","http://127.0.0.1:18783")]
+                for row in records:
+                    require(row["blockHash"].lower()==execution_block["hash"].lower()
+                            and row["transactionHash"].lower()==executed["transactionHash"].lower()
+                            and row[key]==browser_proposal[key] and row["authoritative"] is False,
+                            "Treasury consumer has a stale or noncanonical "+kind+" projection")
+                    if kind=="budgets":
+                        require(int(row["committed"])==int(row["executed"])==0
+                                and int(row["ceiling"])==456,"Treasury budget commitment did not unwind")
+                    else:
+                        require(row["state"]=="CANCELLED" and int(row["amount"])==100,
+                                "Treasury disbursement cancellation was not reconstructed")
+                projections[kind]=records
             stake=[getter(origin,stake_path)[1]["records"]
                    for origin in ("http://127.0.0.1:18782","http://127.0.0.1:18783")]
             require(stake[0]==stake[1] and any(row["eventName"]=="SponsoredValidatorRewardAllocated"
                     and row["blockHash"].lower()==reward_block["hash"].lower() for row in stake[0]),
                     "Stake consumers omitted or disagreed on the sponsored reward")
-            return {"treasury":policies,"stake":stake[0]}
+            return {"treasury":policies,"treasuryLifecycle":projections,"stake":stake[0]}
         original_reward_block=reward_block["hash"]
         read_consumer_parity()
         _,reward_block,_,reward_archive=settle(replacement)

@@ -2,43 +2,38 @@
 
 ## Latest qualification status
 
-**Step 3 remains open.** At `094f613f93d00242605a504c07acbe1c943da80f`,
-[run 45097295264](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45097295264)
-passed source materialization and protected native settlement. The unified job
-advanced to a real Chromium-signed proposal after checking synchronous Wallet
-invalidation and the subsequent shell reload. A disabled proposal row blocked
-the following ballot journey. Its diagnostic log and protected signing evidence
-are in [artifact 14784386233](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45097295264/artifacts/14784386233).
+[PR #1338](https://github.com/abvhiael/420-integrated-v0.1/pull/1338)
+continues the shared native rehearsal from the
+[exact-head block-11 baseline](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45100406040).
 
-At `27f44b855903f7fa95577f2631cb51ce92508c83`, [run 45098171187](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45098171187)
-passed native source materialization and the release gate. It demonstrated actual
-Chromium proposal selection through the TypeScript Indexer, a confirmed native
-ballot, and restoration of protected quorum after pausing five validators.
-The Go Indexer stalled on an optional future proposer schedule during its next
-poll. The [retained run artifact](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45098171187/artifacts/14784482614)
-contains the signed proposal, ballot, certificates and failure logs. The
-continuation validates certified history for ingestion and preserves authority
-checks on the separate future-schedule endpoint.
+The continuation pins the same protected committee to three explicitly allowed
+rotations. The verifier requires a certificate chained to the previous
+authenticated block at each consecutive rotation boundary. The producer derives
+the schedule for each rotation and keeps consensus slots independent of execution
+heights. The local runner crosses both boundaries, then executes the signed G1
+operation at the first slot that satisfies the unchanged seven-day delay.
 
-The browser now serves the actual 420ID consent page and Wallet gateway over
-loopback TLS with the real PostgreSQL stores. The login fixture uses a verified
-disposable mailbox. The same-origin browser checks, UTF-8 JSON exchange and
-minimal database grants were exercised against this path in a focused local
-Chromium diagnostic. Unified native qualification is still pending. The unified
-workflow also rehearses pausing five protected validator processes and restoring
-quorum, signed voting in both houses, bootstrap cancellation, signed Civic
-activation, on-chain finalization and queueing, and a mined early-execution
-revert. These cases require exact-head CI before they count as qualified.
+The operation enables the Treasury asset policy, rehearses budget and disbursement
+commitments, and funds 42,000 $420 of fully sponsored collateral from the Community
+Validator Reserve. A new signed transaction registers the operator against the
+real ValidatorRegistry. RewardController settles the sponsored 90/10 split to
+the operator and the source-compiled Community Reward Reserve. Both Treasury
+Indexers and Go Explorer check canonical policy, budget and disbursement
+projections. The Go Indexer and Explorer also compare native Stake events.
 
-The native settlement verifier pins a single committee rotation. At 12 seconds
-per slot and 17,640 slots per rotation, that trust window is shorter than the
-frozen seven-day G1 Timelock floor. The Foundry test exercises post-delay
-execution against real contracts. The shared native network still needs a
-verified committee transition before it can exercise the same lifecycle across
-the full delay. This is local engineering work. The unified 420ID and Civic
-recovery run, same-ledger sponsored 90/10 evidence, the full fault matrix and
-independent operational cold-start reproduction also remain open.
+The harness observes one reward block through PostgreSQL-backed consumers before
+replacing it with a separately certified sibling above the finalized boundary.
+It verifies that the replaced block disappears from the canonical read path
+and that reward and custody balances agree after replacement. It then injects
+a bad Go snapshot version and an invalid TypeScript checkpoint hash and
+compares the rebuilt and replayed projections with the canonical receipts.
 
+This rehearsal pins committee continuity for the exact unsigned local chain.
+General committee membership changes and native reward ingestion by the
+TypeScript Indexer require separate evidence. The production Genesis and
+seven-day delay retain their original parameters. Founder ownership and V4
+approval remain pre-Genesis requirements. Live deployment and retirement
+evidence remain in GOV-AUDIT-9.
 
 ## QUALIFIED — one real local chain-420 execution state (2026-11-22)
 

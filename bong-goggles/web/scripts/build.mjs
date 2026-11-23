@@ -100,10 +100,13 @@ let labyrinthOriginalPresent=false;
 try{
  const bytes=await readFile(labyrinthOriginalPath);
  const image=await sharp(bytes).metadata();
- if(createHash('sha256').update(bytes).digest('hex')!==
-    '4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5'||
-    image.format!=='png'||image.width!==1254||image.height!==1254||
-    bytes.length!==4236478)throw Error('BC-2.4 player artwork hash/dimensions mismatch');
+ // GitHub's committed user-approved artwork may use different PNG encoding
+ // from the source used to identify the hole centers. Pin the exact uploaded
+ // Git blob, not the earlier source's PNG-byte SHA-256.
+ const gitBlob=createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
+ if(gitBlob!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2'||
+    image.format!=='png'||image.width!==1254||image.height!==1254)
+   throw Error('BC-2.4 user-approved GitHub board blob/dimensions mismatch');
  const target=resolve(out,labyrinthOriginal);
  await mkdir(dirname(target),{recursive:true});
  await cp(labyrinthOriginalPath,target);

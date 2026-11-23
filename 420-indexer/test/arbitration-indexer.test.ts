@@ -54,6 +54,21 @@ export function sampleHistory420():ArbitrationHistoryEntry420[]{
   row('RulingFinalized',{...base,round:'1',rulingHash:h(17),remedyCommitment:h(18)},7,1)
  ];
 }
+test('Foundry-compiled real Arbitration contract ABI matches required descriptor without manual guesses',
+ {skip:!process.env.ARBITRATION_FOUNDRY_ARTIFACTS},()=>{
+  const base=process.env.ARBITRATION_FOUNDRY_ARTIFACTS!;
+  const compiled=new Map<string,Artifact420>();
+  for(const {contractName} of arbitrationManifestFixture420.contracts){
+   const artifact=JSON.parse(readFileSync(base+'/'+contractName+'.sol/'+contractName+'.json','utf8'));
+   compiled.set(contractName,{contractName,abi:artifact.abi});
+  }
+  const descriptors=arbitrationDescriptorsFromManifest420(arbitrationManifestFixture420,
+   compiled,arbitrationDeploymentFixture420);
+  assert.equal(descriptors.length,7);
+  assert.deepEqual(descriptors.map(x=>x.topic0).sort(),
+   arbitrationEventsFixture420.map(x=>x.topic0).sort());
+});
+
 test('exact Arbitration descriptor contains seven ABI-verified canonical events only',()=>{
  assert.equal(arbitrationEventsFixture420.length,7);
  assert.deepEqual(arbitrationManifestFixture420.contracts.map(c=>c.events.length),[5,2]);

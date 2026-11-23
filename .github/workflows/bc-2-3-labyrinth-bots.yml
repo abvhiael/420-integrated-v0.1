@@ -1,0 +1,65 @@
+name: BC-2.3 Labyrinth Cribbage Private Computer Opponents
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_labyrinth_bots*.go'
+      - 'services/bong-goggles-account-social/classic_labyrinth_bot_integration_test.go'
+      - 'docs/games/classics/BC-2-3-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-2-3-labyrinth-bots.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-bots-and-full-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Fast EV cross-check, privacy, difficulty separation and eight complete mixed/full matches
+        run: go test -race -count=1 -timeout=20m -run '^TestBC23(FastShowMatchesAuthoritativeSevenCardScoring|StrategiesAllVariantsDeterministicLegalAndDistinct|RejectHiddenAndForgedViewsActionsAndBudget|MediumHardTakeCertainFifteenAndImmediate241|FullBotAndMixedHumanMatchesEveryFormat|PolicyHasNoOpponentCardKnowledge)$' -v ./services/bong-goggles-account-social
+      - name: Preserve frozen 121-point baseline and compiler safety
+        run: |
+          go test -count=1 -run '^TestBC13MediumPrefersKnownPeggingPoints$|^TestBC22ManifestAndImmutableRoomVariants$' ./services/bong-goggles-account-social
+          go vet ./services/bong-goggles-account-social
+  postgres-signed-human-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Real PostgreSQL 16 420ID session with operator-registered private bots and cold recovery
+        run: go test -race -count=1 -tags account420_integration -timeout=16m -run '^TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats$' -v ./services/bong-goggles-account-social

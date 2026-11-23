@@ -1,6 +1,8 @@
 import {resolveRoute} from './routes.js';
 import {LabyrinthSessionController} from './labyrinth-session.js';
-import {bindLabyrinthTable} from './labyrinth-cribbage-ui.js';
+import {bindLabyrinthTable,verifyLabyrinthProjection} from './labyrinth-cribbage-ui.js';
+import {labyrinthCribbageVariant} from './labyrinth-cribbage-rules.js';
+import {validateLabyrinthPegAtlas,renderLabyrinthPegOverlay} from './labyrinth-peg-overlay.js';
 
 // Only currently visited Labyrinth routes poll the authenticated session;
 // the controller retains the same table state through every accepted move.
@@ -11,8 +13,22 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
   onChange:()=>{if(active())onChange();}});
  const matchId=()=>new URLSearchParams(windowObject.location.search).get('session');
  let lastList=0;
+ let pegMap=null,pegMapRequested=false;
+ const loadPegMap=async()=>{
+  if(pegMapRequested)return;
+  pegMapRequested=true;
+  try{
+   const response=await fetchImpl('/core/labyrinth-peg-map.json',{cache:'no-store'});
+   if(!response.ok)return;
+   const candidate=await response.json();
+   if(!validateLabyrinthPegAtlas(candidate))return;
+   pegMap=candidate;
+   if(active())onChange();
+  }catch{/* Missing or invalid map cannot authorize physical pegs. */}
+ };
  const refresh=(force=false)=>{
   if(!active()||!controller.client.enabled)return;
+  void loadPegMap();
   const id=matchId();
   if(id)void controller.open(id,{quiet:true});
   else if(force||Date.now()-lastList>=15000){
@@ -29,6 +45,15 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
    onSelection:x=>controller.select(x),
    onMove:m=>{void controller.act(m).catch(()=>{});}
   });
+  const view=verifyLabyrinthProjection(controller.state.view);
+  if(view&&pegMap){
+   const teams=labyrinthCribbageVariant(view.seatCount,
+    view.variant==='labyrinth-4p-individual'?'individual':'partnerships').teams;
+   const overlay=renderLabyrinthPegOverlay({scores:view.scores,teams},pegMap);
+   if(overlay)for(const art of root.querySelectorAll('.lab-board-art')){
+    if(!art.querySelector('.lab-peg-overlay'))art.insertAdjacentHTML('beforeend',overlay);
+   }
+  }
   for(const img of root.querySelectorAll('.lab-board-art img')){
    img.addEventListener('error',()=>{
     img.hidden=true;

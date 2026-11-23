@@ -64,3 +64,30 @@ test('GOV-REC-5 in-flight account/network changes invalidate asynchronous propos
     'ballot selection changed during eligibility check', 'eligibleVote=null'
   ])assert.ok(source.includes(marker),marker);
 });
+
+
+test('browser Civic approval is tied to immutable Wallet/420ID identity across every asynchronous stage',()=>{
+  for(const token of [
+    'function requireLive(captured,epoch,identityGeneration)',
+    'context!==captured',
+    'identityGeneration!==wallet420IDSessionState().generation',
+    'requireLive(captured,epoch,identityGeneration)',
+    'const captured=context,epoch=sessionEpoch,proposal=selected',
+    "if(originalEpoch!==sessionEpoch)return",
+    "window.addEventListener('focus'",
+    "document.addEventListener('visibilitychange'",
+  ]) assert.ok(source.includes(token),'missing account/session invalidation barrier: '+token);
+});
+
+test('browser Civic invalidation discards prior account/contract data and retains uncertain native vote hash for manual recovery',()=>{
+  for(const token of [
+    "let pendingVoteHash=null",
+    "'#governance-account'",
+    "'#governance-governor'",
+    "'#governance-network'",
+    "'#governance-proposal-list'",
+    "pendingVoteHash=submitted.txHash",
+    "Check its canonical receipt and current ballot before any retry",
+    "never resubmit automatically",
+  ]) assert.ok(source.includes(token),'missing revocation or uncertain receipt guard: '+token);
+});

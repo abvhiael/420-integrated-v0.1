@@ -52,8 +52,9 @@ function artifact(name){
   assert(existsSync(path),'Missing verified Foundry artifact: '+path);
   const raw=JSON.parse(readFileSync(path,'utf8'));
   assert(raw.bytecode?.object && raw.abi,'Compiled artifact missing: '+name);
-  assert.equal(raw.metadata?JSON.parse(raw.metadata).compiler.version.startsWith('0.8.24'):true,true,
-    'incorrect compiler '+name);
+  const metadata=typeof raw.metadata==='string'?JSON.parse(raw.metadata):raw.metadata;
+  if(metadata?.compiler?.version)
+    assert(metadata.compiler.version.startsWith('0.8.24'),'incorrect compiler '+name);
   return raw;
 }
 async function codehash(address){
@@ -76,14 +77,16 @@ async function track(label,tx,contractAddress=null){
   hashesByStep[label]=mined.hash;
   return mined;
 }
-async function deploy(name,signer,args,label){
+async function deploy(name,signer,args,label,record=true){
   const a=artifact(name);
   const instance=await new ContractFactory(a.abi,a.bytecode.object,signer).deploy(...args);
   const receipt=await track(label,instance.deploymentTransaction(),await instance.getAddress());
   assert.equal(receipt.contractAddress?.toLowerCase(),(await instance.getAddress()).toLowerCase());
   await instance.waitForDeployment();
-  addresses[name]=await instance.getAddress();
-  hashes[name]=await codehash(addresses[name]);
+  if(record){
+    addresses[name]=await instance.getAddress();
+    hashes[name]=await codehash(addresses[name]);
+  }
   return instance;
 }
 async function reject(description,action){
@@ -147,9 +150,9 @@ async function main(){
   assert.equal(await rulings.cases(),await cases.getAddress());
   await reject('unauthorized ruling binding',async()=>cases.connect(claimant).bindRulingRegistry.staticCall(await rulings.getAddress()));
   const wrong=await deploy('ArbitrationCaseRegistry420',governor,[timelockAddress,await policies.getAddress()],
-    'negative:foreign-case');
+    'negative:foreign-case',false);
   const foreign=await deploy('ArbitrationRulingRegistry420',governor,[await wrong.getAddress()],
-    'negative:foreign-ruling');
+    'negative:foreign-ruling',false);
   await executeExpectFailure(timelock,governor,await cases.getAddress(),cases.interface,
     'bindRulingRegistry',[await foreign.getAddress()],'invalid-binding');
   await execute(timelock,governor,await cases.getAddress(),cases.interface,'bindRulingRegistry',

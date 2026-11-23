@@ -244,8 +244,8 @@ const heading=start+(state.notice?note(state.notice):'');
 if(roomId!=null){
 if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room unavailable.')+
 '<button type="button" data-classic-room-refresh>Refresh rooms</button></section>';
-if(live&&['guest','revoked'].includes(live.status))
-return heading+note('Room access changed; recheck 420ID. Private room data hidden.')+
+if(live&&['reconnecting','guest','revoked'].includes(live.status))
+return heading+note('Room connection lost; cached private room data is hidden.')+
 '<button type="button" data-classic-room-refresh>Reconnect to room</button></section>';
 return heading+roomDetail(state.selected,state,live)+'</section>';
 }

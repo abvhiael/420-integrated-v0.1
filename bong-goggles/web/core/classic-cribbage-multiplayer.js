@@ -99,7 +99,7 @@ export async function discoverCribbageMatches(controller){
   if(token!==epoch())return [];
   if(await verifiedPrincipal(controller.client)!==actor)throw Error('420ID account switched');
   if(token===epoch())controller.emit({
-  ...(controller.state?.session||controller.busy?{}:{status:'idle',error:null}),recoverable:matches,recoverError:null
+  ...(controller.state?.session||controller.busy?{}:{status:'idle',session:null,error:null}),recoverable:matches,recoverError:null
  });
   return matches;
  }catch{

@@ -248,11 +248,14 @@ test('Cribbage room link resolves only same-420ID rule-bound match and returns t
  assert.equal(state.status,'ready');
  assert.equal(state.gameSession?.id,match.id);
  assert.ok(requests.some(x=>x.endsWith('/v1/classic-sessions')));
- const html=renderClassicRooms(state,{enabled:true,roomId,live:{status:'reconnecting'}});
+ const html=renderClassicRooms(state,{enabled:true,roomId});
  assert.match(html,/Resume active Cribbage game/);
  assert.match(html,new RegExp('games/cribbage/play\\?session='+match.id));
  assert.match(html,/href="\/games\/cribbage\/history"/);
- assert.doesNotMatch(html,/Connection lost or room access changed/);
+ const reconnect=renderClassicRooms(state,{enabled:true,roomId,live:{status:'reconnecting'}});
+ assert.match(reconnect,/cached private room data is hidden/);
+ assert.doesNotMatch(reconnect,/Seat 1 ·/);
+ assert.match(reconnect,/href="\/games\/cribbage\/history"/);
  const revoked={...state,gameSession:null};
  const fallback=renderClassicRooms(revoked,{enabled:true,roomId});
  assert.match(fallback,/Find this game in My Games/);

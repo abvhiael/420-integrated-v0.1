@@ -59,7 +59,8 @@ test('BC-0.2 all 25 and legacy game detail pages survive direct loads without fa
  // BC-1.4 has a real private-session frontend, but no public Play activation.
  const cribbage=renderClassicGamePage('cribbage');
  assert.match(cribbage,/data-game-screen="intro"/);
- assert.match(cribbage,/leaf-board\.svg/);
+ assert.match(cribbage,/board-cannabis-leaf\.png/);
+ assert.doesNotMatch(cribbage,/leaf-board\.svg/);
  assert.match(cribbage,/BC-1\.5 · Authenticated rooms/);
  assert.match(cribbage,/not yet playable until real 420ID room activation/);
  assert.doesNotMatch(cribbage,/<button[^>]*>Start game/);

@@ -34,7 +34,7 @@ test('BC-0.3 eight screen routes resolve for all 25 games and legacy entries wit
     assert.ok(html.includes('data-game-screen="'+screen+'"'),path);
     assert.ok(html.includes('aria-current="page">'+
      ({rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',
-       results:'Results',history:'History',rematch:'Rematch'})[screen]+'</a>'),path);
+       results:'Results',history:game.id==='cribbage'?'My Games':'History',rematch:'Rematch'})[screen]+'</a>'),path);
    }
    assert.match(html,/href="\/games" data-route="games"/);
    assert.match(html,/No game|not yet|Game-specific|server|verified|match|Cross-Country Chaos/i);
@@ -64,7 +64,7 @@ test('BC-0.3 overview and rules are honest and variants do not masquerade as rul
  assert.match(renderClassicGamePage('go',{screen:'rules'}),/19×19 board/);
 });
 test('BC-0.3 opponent setup exposes seat types and all bot difficulties but cannot submit',()=>{
- for(const gameId of ['cribbage','kaiser','mahjong','yahtzee']){
+ for(const gameId of ['kaiser','mahjong','yahtzee']){
   const html=renderClassicGamePage(gameId,{screen:'setup'});
   assert.match(html,/Opponent setup/);
   assert.match(html,/New game — not yet available/);
@@ -77,6 +77,12 @@ test('BC-0.3 opponent setup exposes seat types and all bot difficulties but cann
   assert.match(html,/disabled aria-disabled="true"/);
   assert.doesNotMatch(html,/data-game-action="create"/);
  }
+ const crib=renderClassicGamePage('cribbage',{screen:'setup'});
+ assert.match(crib,/Play against the computer/);
+ assert.match(crib,/data-cribbage-practice/);
+ assert.match(crib,/Start against computer/);
+ assert.match(crib,/type="submit" disabled/);
+ assert.doesNotMatch(crib,/data-game-action="create"/);
  assert.match(renderClassicGamePage('chess',{screen:'setup'}),/Seat 2/);
  assert.doesNotMatch(renderClassicGamePage('chess',{screen:'setup'}),/Seat 3/);
 });
@@ -87,8 +93,9 @@ test('BC-0.3 Chaos separates 420ID online rooms from an explicit local CPU game'
  assert.match(game,/Separate 420ID accounts|private room/i);
  assert.doesNotMatch(game,/Play Cross-Country Chaos \(local\)|pass-and-play/i);
  const planned=renderClassicGamePage('cribbage',{screen:'play'});
- assert.match(planned,/disabled aria-disabled="true"/);
- assert.match(planned,/Resume game/);
+ assert.match(planned,/My Games/);
+ assert.match(planned,/Start against computer/);
+ assert.match(planned,/type="submit" disabled/);
  assert.doesNotMatch(planned,/data-game-action="play"/);
 });
 test('BC-0.3 table, results, history and rematch stay fail-closed without an authenticated projection',()=>{

@@ -2,7 +2,14 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const get=p=>fs.readFileSync(p,'utf8');
 const data=JSON.parse(get('docs/migration/MIG-4-verified-source-cleanup.json'));
-assert.equal(data.removed.length,92);
+assert.equal(data.removed.length,99);
+assert.deepEqual(data.retainedPendingPathOrDependencyProof, []);
+assert.equal(data.budtenderRegressionDestination.exactTests.length,7);
+assert.match(data.budtenderRegressionDestination.commit,/^[a-f0-9]{40}$/);
+for(const t of data.budtenderRegressionDestination.exactTests) { assert.equal(fs.existsSync(t.path),false); assert.ok(data.removed.some(x=>x.path===t.path&&x.sha===t.sha)); }
+assert.equal(data.genesisOwnedRetainedAuthorityProof.length,1);
+assert.equal(data.genesisOwnedRetainedAuthorityProof[0].path,'scripts/arcade/verify-arc-0-3.mjs');
+assert.equal(fs.existsSync('scripts/arcade/verify-arc-0-3.mjs'),true);
 for(const f of data.removed) {
  assert.match(f.sha,/^[a-f0-9]{40}$/);
  assert.equal(fs.existsSync(f.path),false,'external file still in Genesis: '+f.path);

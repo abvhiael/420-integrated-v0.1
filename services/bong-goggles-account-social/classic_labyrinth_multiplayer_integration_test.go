@@ -21,6 +21,9 @@ func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
  h.classicMatchSocialEnabled=true
  room:=bc05Create(t,h,host,"labyrinth-cribbage","private",2)
  if room.VariantID!="labyrinth-2p"{t.Fatal("wrong immutable variant")}
+ for _,pair:=range [][2]string{{memberA,memberB},{memberB,memberA}}{
+  if e:=h.Rooms.Store.Relationship(context.Background(),pair[0],pair[1],"follow",true);e!=nil{t.Fatal(e)}
+ }
  // Private room is invisible to non-invited peers; invite explicitly.
  if w:=request(h,"GET","/v1/classic-rooms/"+room.ID,"",peer);w.Code!=404{
   t.Fatal("private lobby exposed to non-invited peer",w.Code)

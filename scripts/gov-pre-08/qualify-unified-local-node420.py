@@ -311,28 +311,9 @@ def main():
                 wallet["wrongChainSignedTransactionRejected"] and
                 wallet["wrongChainIdentityAndStaleRegistryAndTamperedCodeRejected"],
                 "real locally signed wallet did not pass source-bound user path")
-        # This real Chromium instance connects to the existing 420Wallet UI,
-        # verifies the app-scoped local 420ID login and injected EIP-1193,
-        # and broadcasts its own signed G1 Civic proposal to Geth's mempool.
-        # The original wallet transaction (nonce 0) and proposal (nonce 1)
-        # are mined TOGETHER in the existing independently certified block 2.
-        browser_cmd=["node",str(ROOT/"wallet/web/scripts/qualify-gov-pre08-browser.mjs"),
-                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780"]
-        browser_proposal_path=args.workdir/"browser-proposal.json"
-        subprocess.run(browser_cmd+["--mode","propose","--output",str(browser_proposal_path)],
-                       cwd=ROOT,check=True,timeout=65)
-        browser_proposal=json.loads(browser_proposal_path.read_text())
-        require(browser_proposal["realNativeWalletSignedCivicProposal"]
-                and browser_proposal["accountChangedInvalidatesMountedGovernance"]
-                and browser_proposal["appSSORevocationInvalidatesMountedGovernance"],
-                "real browser could not independently propose and revoke on chain 420")
+        # Keep the previous single-Wallet-transaction canonical block 2
+        # invariant and its independently qualified SQL replay unchanged.
         second,latest,batch,archived=produce(first,2,2)
-        browser_proposal_receipt=rpc("eth_getTransactionReceipt",[browser_proposal["proposalTxHash"]])
-        require(browser_proposal_receipt and browser_proposal_receipt["status"]=="0x1"
-                and browser_proposal_receipt["blockHash"]==latest["hash"]
-                and browser_proposal_receipt["to"].lower()==graph["walletCivicModuleAddresses"]["governor"].lower()
-                and browser_proposal_receipt["logs"],
-                "real injected Wallet Civic proposal not mined in native certified block 2")
         require(int(call(GW,"lastSequence()"),16)==4,
                 "real gateway did not advance exactly four certified native calls")
         unifiedCustody=verifyCustody("after certified Stake and Wallet settlement")
@@ -544,11 +525,29 @@ def main():
                                "--output",str(wallet_cold)],cwd=ROOT,check=True)
         require(verifyCustody("after full shared-chain cold recovery")==unifiedCustody,
                 "cold recovery did not conserve treasury and community reserves")
-        # Voting starts only in the next block after the proposal. Certify
-        # block 3 first; then let Chromium sign the ballot in the real Geth
-        # mempool for block 4. This preserves every previously proven block-2
-        # Indexer/Explorer hard-stop recovery invariant.
+        # AFTER the pre-existing block-2 Indexer/PostgreSQL and hard-stop
+        # regressions, Chromium signs the Civic proposal at nonce 1. Certify
+        # actual proposal block 3 and an empty block 4 (the voteStart), then
+        # its independently signed ballot is included in certified block 5.
+        # This preserves exact previous block-2 transaction cardinality.
+        browser_cmd=["node",str(ROOT/"wallet/web/scripts/qualify-gov-pre08-browser.mjs"),
+                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780"]
+        browser_proposal_path=args.workdir/"browser-proposal.json"
+        subprocess.run(browser_cmd+["--mode","propose","--output",str(browser_proposal_path)],
+                       cwd=ROOT,check=True,timeout=65)
+        browser_proposal=json.loads(browser_proposal_path.read_text())
+        require(browser_proposal["realNativeWalletSignedCivicProposal"]
+                and browser_proposal["accountChangedInvalidatesMountedGovernance"]
+                and browser_proposal["appSSORevocationInvalidatesMountedGovernance"],
+                "real browser could not independently propose and revoke on chain 420")
         third,block3,batch3,archive3=produce(second,4,3)
+        browser_proposal_receipt=rpc("eth_getTransactionReceipt",[browser_proposal["proposalTxHash"]])
+        require(browser_proposal_receipt and browser_proposal_receipt["status"]=="0x1"
+                and browser_proposal_receipt["blockHash"]==block3["hash"]
+                and browser_proposal_receipt["to"].lower()==graph["walletCivicModuleAddresses"]["governor"].lower()
+                and browser_proposal_receipt["logs"],
+                "real injected Wallet Civic proposal not mined in native certified block 3")
+        fourth,block4,batch4,archive4=produce(third,6,4)
         vote_pending=args.workdir/"browser-vote-pending.json"
         vote_output=args.workdir/"browser-vote-confirmed.json"
         vote_proc=launch("browser-vote",browser_cmd+["--mode","vote",
@@ -558,7 +557,7 @@ def main():
         ballot_intent=json.loads(vote_pending.read_text())
         require(ballot_intent["proposalId"] and ballot_intent["txHash"],
                 "Chromium signed no actual Civic ballot in native Geth mempool")
-        fourth,block4,batch4,archive4=produce(third,6,4)
+        fifth,block5,batch5,archive5=produce(fourth,8,5)
         vote_proc.wait(timeout=65)
         require(vote_proc.returncode==0 and vote_output.exists(),
                 "Chromium Wallet Civic vote was not confirmed by the native chain")
@@ -570,26 +569,26 @@ def main():
                 and browser_vote["appSSORevocationInvalidatesMountedGovernance"]
                 and browser_vote["realVoteReceiptHash"]==ballot_intent["txHash"]
                 and receipt and receipt["status"]=="0x1"
-                and receipt["blockHash"]==block4["hash"]
+                and receipt["blockHash"]==block5["hash"]
                 and receipt["from"].lower()==graph["localBrowserSigner"].lower()
                 and receipt["to"].lower()==graph["walletCivicModuleAddresses"]["voting"].lower(),
                 "real injected Chromium ballot was not authenticated and settled")
-        require(int(call(GW,"lastSequence()"),16)==8,
+        require(int(call(GW,"lastSequence()"),16)==10,
                 "browser-certified native reward/gateway sequence changed unexpectedly")
         require(verifyCustody("after native browser Civic vote")==unifiedCustody,
                 "browser ballot diverted funded Genesis reserves")
-        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=4,
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=5,
               idx,timeout=60)
-        code,view=getter("http://127.0.0.1:18783","/v1/blocks/4")
-        require(code==200 and view["block"]["hash"].lower()==block4["hash"].lower()
+        code,view=getter("http://127.0.0.1:18783","/v1/blocks/5")
+        require(code==200 and view["block"]["hash"].lower()==block5["hash"].lower()
                 and view["trace"]["certified"],
                 "Go Indexer and Explorer missed the real signed Civic vote block")
         # Reconcile the ACTUAL browser ballot through another complete hard
         # stop of patched Geth, certified settlement, Indexer and Explorer.
-        # Never replace block 4 from an unauthenticated RPC head or replay the
+        # Never replace block 5 from an unauthenticated RPC head or replay the
         # UI vote: recover only pinned BLS-certified history and Geth receipts.
-        checkpoint4=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
-        require(checkpoint4["Settlement"]["ExecutionBlock"]==4,
+        checkpoint5=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
+        require(checkpoint5["Settlement"]["ExecutionBlock"]==5,
                 "browser's certified vote is not in the durable consensus high water")
         childlist=Path("/proc")/str(node.pid)/"task"/str(node.pid)/"children"
         geth_children=[int(pid) for pid in childlist.read_text().split()]
@@ -619,8 +618,8 @@ def main():
              "--settlement-trust",str(trustfile),"--settlement-trust-sha256",pin],
              input_stream=True)
         threading.Thread(target=collect,args=(consensus.stdout,),daemon=True).start()
-        wait_event("settled",4,timeout=60)
-        require(rpc("eth_getBlockByNumber",["latest",False])["hash"].lower()==block4["hash"].lower(),
+        wait_event("settled",5,timeout=60)
+        require(rpc("eth_getBlockByNumber",["latest",False])["hash"].lower()==block5["hash"].lower(),
                 "recovered Geth did not restore the BLS-certified browser vote block")
         replayReceipt=rpc("eth_getTransactionReceipt",[ballot_intent["txHash"]])
         require(replayReceipt and replayReceipt["status"]=="0x1"
@@ -676,8 +675,9 @@ def main():
              "browserActualGethVoteTx":ballot_intent["txHash"],
              "browserNativeCivicVoteBlockHash":block4["hash"],
              "browserCivicVoteAfterSecondGethHardStopRecovered":True,
-             "browserNativeConsensusCheckpointAfterRecovery":4,
+             "browserNativeConsensusCheckpointAfterRecovery":5,
              "browserCivicVoteCanonicalExplorerPostgresRecovered":True,
+             "browserFinalNativeCertifiedExecutionBlock":5,
              "browserRealEIP1193SignedGovernanceVote":True,
              "browserAccountSwitchAndRevocationRejected":True,
              "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,

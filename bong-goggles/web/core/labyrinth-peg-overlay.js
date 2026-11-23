@@ -40,20 +40,29 @@ export function validateLabyrinthPegAtlas(atlas){
  return true;
 }
 
-export function labyrinthPegPositions({scores=[],teams=[]}={},atlas){
- if(!validateLabyrinthPegAtlas(atlas)||!Array.isArray(scores)||
-    !Array.isArray(teams)||scores.length!==teams.length)return [];
+// Score-to-lane policy is tested independently from artwork availability.
+export function labyrinthPhysicalLaneScores({scores=[],teams=[]}={}){
+ if(!Array.isArray(scores)||!Array.isArray(teams)||scores.length!==teams.length)
+  return [];
  const distinct=[...new Set(teams)];
- // The original artwork has two physical pegging lanes. Independent 3/4-seat
- // formats display separate authoritative virtual scores beside the board.
- if(distinct.length>2)return [];
- return distinct.map((team,lane)=>{
+ // Two physical rails only: 3/4 independent players retain distinct, visible
+ // virtual score displays, without falsely reusing another player's rail.
+ if(distinct.length<1||distinct.length>2)return [];
+ const result=[];
+ for(const [lane,team] of distinct.entries()){
   const seat=teams.indexOf(team),score=scores[seat];
   if(!integer(score,0,325)||teams.some((t,i)=>t===team&&scores[i]!==score))
-   return null;
-  const hole=LABYRINTH_HOLE_CENTERS[atlas.tracks[lane][score]];
-  return {team,lane,score,x:hole.x,y:hole.y};
- }).filter(Boolean);
+   return [];
+  result.push({team,lane,score});
+ }
+ return result;
+}
+export function labyrinthPegPositions(state={},atlas){
+ if(!validateLabyrinthPegAtlas(atlas))return [];
+ return labyrinthPhysicalLaneScores(state).map(p=>{
+  const hole=LABYRINTH_HOLE_CENTERS[atlas.tracks[p.lane][p.score]];
+  return {...p,x:hole.x,y:hole.y};
+ });
 }
 
 // Content is constructed strictly from integer validated coordinates and

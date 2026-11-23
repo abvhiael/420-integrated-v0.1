@@ -3,7 +3,7 @@ import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
 import {escapeHtml as esc} from './design-system.js';
 import {renderClassicRoomLive} from './classic-communications-ui.js';
-import {CRIBBAGE_RULES_HASH} from './cribbage-session.js';
+import {findCribbageRoomMatch,cribbageRoomEntry} from './cribbage-room-resume.js';
 
 export const ROOM_LIMITS=Object.freeze({
 cribbage:[2,4],'russian-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
@@ -100,20 +100,10 @@ selected=normalizedRoom(verifiedEnvelope(detail,'room'),true);
 if(!selected||selected.id!==roomId)throw Error('Unverified room detail');
 }
 }
-let gameSession=null;
-if(selected?.gameId==='cribbage'&&['in_game','completed'].includes(selected.status)){
- const r=await this.client.request('/v1/classic-sessions');
- if(gen!==this.generation)return this.state;
- if(r.status===401)return this.emit({status:'guest'});
- const list=r.data?.sessions;
- if(r.status===200&&r.data.onChain===false&&r.data.wager===false&&r.data.rewards===false&&
- Array.isArray(list)&&list.length<=50){
- const m=list.find(x=>x.roomId===selected.id&&x.gameId==='cribbage'&&id(x.id)&&
- x.rulesHash===CRIBBAGE_RULES_HASH&&x.seatCount===selected.seatCount&&
- ['active','finished','resigned','timed_out','cancelled'].includes(x.status));
- if(m)gameSession={id:m.id,roomId:m.roomId};
- }
-}
+const found=await findCribbageRoomMatch(this.client,selected);
+if(gen!==this.generation)return this.state;
+if(found.status===401)return this.emit({status:'guest'});
+const gameSession=found.session;
 return this.emit({status:'ready',viewer:me.data.profile.subject,
 rooms:safeRooms,friends,selected,gameSession,notFound,notice:''});
 }catch{
@@ -217,12 +207,7 @@ const invites=isHost&&r.invites.length?'<details><summary>Invitation history</su
 '<li>Seat '+(i.seat+1)+' · '+esc(state.friends.find(f=>f.subject===i.target)?.displayName??'420ID member')+
 ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
 const roomLive=renderClassicRoomLive(r,live);
-const verified=state.gameSession?.roomId===r.id?state.gameSession:
- live?.status==='connected'&&live.session?.roomId===r.id?live.session:null;
-const cribbageLink=r.gameId==='cribbage'&&['in_game','completed'].includes(r.status)?
- '<p><a class="ui-button" href="'+(verified?'/games/cribbage/play?session='+esc(verified.id):
- '/games/cribbage/history')+'" data-route="classic-game">'+
- (verified?'Resume active Cribbage game':'Find this game in My Games')+'</a></p>':'';
+const cribbageLink=cribbageRoomEntry(r,state.gameSession,live);
 return '<section class="classic-room__detail"><p><a href="'+(r.gameId==='cribbage'?'/games/cribbage/history':'/games/rooms')+'" data-route="'+(r.gameId==='cribbage'?'classic-game':'classic-rooms')+'">← '+(r.gameId==='cribbage'?'Cribbage · My Games':'All rooms')+'</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
 '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+

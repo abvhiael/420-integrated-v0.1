@@ -87,6 +87,9 @@ const bc14Limits=Object.freeze({
  'cribbage.css':12*1024,
  'assets/games/cribbage/leaf-board.svg':44*1024
 });
+const cribbageResumeBytes=regularSizes.get('core/cribbage-room-resume.js');
+if(!Number.isSafeInteger(cribbageResumeBytes)||cribbageResumeBytes<1000||cribbageResumeBytes>3*1024)
+ throw new Error('Cribbage room session resolver exceeds its independent 3 KiB cap');
 const cribbageViewBytes=regularSizes.get('core/cribbage-live-view.js');
 if(!Number.isSafeInteger(cribbageViewBytes)||cribbageViewBytes<350||cribbageViewBytes>2*1024)
  throw new Error('Cribbage live panel binding exceeds independent 2 KiB limit');
@@ -107,7 +110,7 @@ if(!Number.isSafeInteger(bc15Bytes)||bc15Bytes<4500||bc15Bytes>7*1024)
 const bc14Allowed=new Set(Object.keys(bc14Limits));
 const bc14Actual=regularFiles.filter(f=>{
  const name=normalize(f.path);
- return name.startsWith('core/cribbage-')&&name!=='core/cribbage-live-view.js'||name.startsWith('assets/games/cribbage/')&&name!==originalCribbageArt||name==='cribbage.css';
+ return name.startsWith('core/cribbage-')&&name!=='core/cribbage-live-view.js'&&name!=='core/cribbage-room-resume.js'||name.startsWith('assets/games/cribbage/')&&name!==originalCribbageArt||name==='cribbage.css';
 });
 if(bc14Actual.length!==bc14Allowed.size||
  bc14Actual.some(f=>!bc14Allowed.has(normalize(f.path))))
@@ -201,7 +204,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -218,7 +221,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));

@@ -116,6 +116,7 @@ function renderDecision(decision) {
     clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
   }
   if (decision.kind === "protected" && decision.role === "driver") {
+    clearDriverOnboarding = mountDriverOnboarding(root, session, createDriverOnboardingApi(globalThis.LIFTdSessionAdapter));
     clearDriverAvailability = mountDriverAvailability(root, session, createDriverAvailabilityApi(globalThis.LIFTdSessionAdapter));
     const panel = mountDriverTrip(root, session, createDriverTripApi(globalThis.LIFTdSessionAdapter), {
       navigationCapability:globalThis.LIFTdNavigationCapability,

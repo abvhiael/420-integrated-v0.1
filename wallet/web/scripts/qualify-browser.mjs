@@ -387,6 +387,16 @@ try{
    });
    await token.getByRole('button',{name:'Refresh availability'}).click();
    await token.locator('button[data-template="ERC1155_MULTI"]:enabled').waitFor();
+   // Newly enabled template actions must have full-contrast text immediately,
+   // not while fading in from disabled opacity.
+   const templateActivation=await token.locator('button[data-template="ERC1155_MULTI"]').evaluate(button=>{
+     const css=getComputedStyle(button);
+     return {opacity:Number(css.opacity),
+       transitions:css.transitionProperty.split(',').map(x=>x.trim())};
+   });
+   assert.equal(templateActivation.opacity,1,'Enabled template text must have full contrast immediately');
+   assert.ok(!templateActivation.transitions.includes('opacity')&&!templateActivation.transitions.includes('all'),
+     'Enabling a template must not animate low-contrast disabled opacity');
    console.log(JSON.stringify({width,erc1155Wizard:'PASS',exactURI:true,clientSubstitution:true,emptyURI:true,sharedURI:true,
      invalidURIRejected:true,zeroInitialBalances:true,draftInvalidated:true,governanceDisabled:true,keyboard:true,multiOverflow,
      axe:multiAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
@@ -430,7 +440,7 @@ try{
    const catalogueOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(catalogueOverflow.scroll<=catalogueOverflow.client+1,'open Token catalogue horizontal overflow');
    const tokenAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-template-catalogue'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
-   for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact);
+   for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact+' '+v.nodes.slice(0,8).map(n=>n.target.join(' ')+': '+n.failureSummary).join(' | '));
    assert.equal(tokenAxe.violations.length,0,'Token accessibility violations: '+tokenAxe.violations.map(v=>v.id).join(', '));
    await page.screenshot({path:resolve(artifacts,'token-catalogue-'+width+'.png'),fullPage:true});
    await token.locator('button[data-template="ERC20_MINTABLE"]').focus();

@@ -148,13 +148,13 @@ export class CribbageSessionController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}={}){
   this.client=createAccountSocialClient({enabled,fetchImpl});
   this.onChange=onChange;this.setTimer=setTimer;this.clearTimer=clearTimer;
-  this.generation=0;this.timer=null;this.busy=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
+  this.generation=0;this.authGeneration=0;this.timer=null;this.busy=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
   this.state={status:enabled?'idle':'disabled',settings:this.settings};
  }
  emit(delta){this.state=Object.freeze({...this.state,...delta,settings:{...this.settings}});
   this.onChange(this.state);return this.state;}
  cancelTimer(){if(this.timer!==null){this.clearTimer(this.timer);this.timer=null;}}
- invalidate(){this.generation++;this.cancelTimer();this.busy=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
+ invalidate(){this.generation++;this.authGeneration++;this.cancelTimer();this.busy=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
  configure(key,value){
   if(key==='motion'&&['standard','reduced'].includes(value))this.settings.motion=value;
   else if(key==='announcements'&&typeof value==='boolean')this.settings.announcements=value;
@@ -196,7 +196,10 @@ export class CribbageSessionController{
    if(!session||session.id!==id||existing&&session.sequence<existing.sequence)
     throw Error('Unverified Cribbage snapshot; no private cards were displayed');
    // A normal heartbeat cannot restart announcements or reset back pegs.
-   if(existing&&session.sequence===existing.sequence)return this.state;
+   if(existing&&session.sequence===existing.sequence){
+ if(this.state.status!=='ready')return this.emit({status:'ready',session,submitting:false,error:null,notice:'',selection:[]});
+ return this.state;
+}
    // Preserve the 1.5-second per-award sequence; the next poll will catch
    // up once the score presentation has completed.
    if(existing&&(this.timer!==null||this.state.queue?.length))return this.state;
@@ -205,7 +208,7 @@ export class CribbageSessionController{
    const pegs=existing&&replay&&queue.length?
     this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount);
    if(!replay){this.cancelTimer();}
-   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,
+   this.emit({status:'ready',session,pegs,queue:replay?queue:[],error:null,resignPending:false,selection:[],submitting:false,
     announcement:replay?'':this.state.announcement??'',
     showing:null,notice:existing&&session.sequence>existing.sequence+1?
      'Resynchronized to verified scores; missed announcements were not invented.':''});
@@ -238,12 +241,13 @@ export class CribbageSessionController{
    if(!session||session.id!==current.id||session.viewerSeat!==current.viewerSeat||
     session.sequence!==current.sequence+1)throw Error('Move was not confirmed by the match server');
    const queue=cribbageAnnouncementQueue(current,session);
-   this.emit({status:'ready',session,submitting:false,resignPending:false,queue,announcement:'',
+   this.emit({status:'ready',session,selection:[],submitting:false,resignPending:false,queue,announcement:'',
     notice:'',pegs:queue.length?this.state.pegs:cribbageNewPegs(session.privateView.scores,session.seatCount)});
    if(queue.length)this.advance();
    return this.state;
   }catch(e){
-   if(generation===this.generation)this.emit({status:'error',error:e.message,submitting:false});
+   if(generation===this.generation)this.emit({status:'error',error:e.message,submitting:false,
+ notice:'Move unconfirmed. Refresh this game before trying another move.'});
    throw e;
   }finally{if(generation===this.generation)this.busy=false;}
  }

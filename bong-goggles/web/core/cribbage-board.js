@@ -1,16 +1,11 @@
-// BC-1.4. The 120 scoring holes follow the two bands in the approved
-// hole-free cannabis-leaf board image (1448 x 1086 pixels). Image and overlay
-// use the same intrinsic viewBox; resizing cannot move a peg off its hole.
-// The 3-player variant uses a visible virtual amber middle track. In 4-player
-// cribbage the two opposite-seat teams share the two physical tracks.
+// Draw moving pegs over the exact 1448x1086 user-supplied board image.
+// The image already has all holes, numbers, start and finishing marks.
 export const CRIBBAGE_BOARD_SIZE=Object.freeze({width:1448,height:1086});
-export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/leaf-board.svg';
+export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/board-cannabis-leaf.png';
 export const CRIBBAGE_TRACKS=Object.freeze(['green','ivory','amber']);
 export const CRIBBAGE_FINISH=Object.freeze({x:704,y:893,number:121});
 
-// Surveyed centerline control points through the two original color bands,
-// ordered from the START to 120. Catmull-Rom + equal arc-length sampling
-// produces exactly 12 groups of 10 holes, with no fabricated scoring steps.
+// Peg interpolation retains the qualified ordinal scoring map.
 const WAYPOINTS=Object.freeze([
  [680,838],[560,767],[427,727],[275,685],[155,657],[107,624],
  [103,577],[139,556],[242,572],[336,607],[388,600],[410,548],
@@ -73,9 +68,9 @@ function survey(){
 }
 export const CRIBBAGE_HOLES=survey();
 export const CRIBBAGE_PARKS=Object.freeze({
- green:Object.freeze([{x:447,y:783},{x:487,y:783}]),
- ivory:Object.freeze([{x:447,y:822},{x:487,y:822}]),
- amber:Object.freeze([{x:447,y:804},{x:487,y:804}])
+ green:Object.freeze([{x:460,y:804},{x:498,y:804}]),
+ ivory:Object.freeze([{x:460,y:842},{x:498,y:842}]),
+ amber:Object.freeze([{x:460,y:822},{x:498,y:822}])
 });
 export function cribbageHole(lane,score,peg=0){
  if(!CRIBBAGE_TRACKS.includes(lane)||!Number.isInteger(score)||score<0)return null;

@@ -191,3 +191,26 @@ test('BC-1.5 rejected resignation discards cached private view and cannot be rep
  await assert.rejects(resignCribbageMatch(ctl));
  assert.equal(attempts,1,'denied action was automatically retried');
 });
+
+test('Background My Games listing preserves a live match when its own poll generation advances',async()=>{
+ let releaseList;
+ const pending=new Promise(resolve=>{releaseList=resolve;});
+ const active={id:matchID,privateView:{hand:[0,1,2,3]}};
+ const controller={generation:3,authGeneration:0,state:{status:'ready',session:active,selection:[1]},
+  client:{enabled:true,request:async path=>{
+   if(path==='/v1/me')return profile(host);
+   assert.equal(path,'/v1/classic-sessions');
+   return pending;
+  }},
+  emit(delta){this.state={...this.state,...delta};},invalidate(){this.authGeneration++;}};
+ const discover=discoverCribbageMatches(controller);
+ controller.generation=4;
+ releaseList(e({sessions:[{id:matchID,roomId:roomID,gameId:'cribbage',seatCount:2,
+  status:'active',rulesVersion:'v1.0',rulesHash:CRIBBAGE_RULES_HASH,sequence:3,turnSeat:1}]}));
+ const matches=await discover;
+ assert.equal(matches.length,1);
+ assert.equal(controller.state.session,active);
+ assert.deepEqual(controller.state.selection,[1]);
+ assert.equal(controller.state.status,'ready');
+ assert.equal(controller.state.recoverable?.[0]?.id,matchID);
+});

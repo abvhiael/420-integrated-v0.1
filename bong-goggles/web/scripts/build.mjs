@@ -1,4 +1,5 @@
 import {cp,mkdir,rm,readFile,writeFile,stat} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 import {resolve,dirname} from 'node:path';
 import {DASHBOARD_ASSETS} from '../core/dashboard-art.js';
 import {CHAOS_CARD_ART_SOURCES,CHAOS_CARD_ART_OUTPUTS} from '../core/chaos-card-art.js';
@@ -89,6 +90,16 @@ if(!cribbageLeaf.startsWith('<svg ')||!cribbageLeaf.includes('viewBox="0 0 1448 
  throw Error('Invalid approved Cribbage gameboard asset');
 await mkdir(dirname(resolve(out,cribbageLeafRelative)),{recursive:true});
 await cp(cribbageLeafSource,resolve(out,cribbageLeafRelative));
+// The player's original uploaded board is the one and only displayed art.
+// Pin it to the committed Git blob and copy its actual bytes without edits.
+const exactBoard='assets/games/cribbage/board-cannabis-leaf.png';
+const canonical=await readFile(resolve(root,exactBoard));
+const canonicalSha=createHash('sha1').update(Buffer.from('blob '+canonical.length+'\0')).update(canonical).digest('hex');
+if(canonical.length!==2698098||canonicalSha!=='4c358c6cc77b2a6f6dd33865dbf7654de2b60cc0'||
+ canonical.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+ canonical.readUInt32BE(16)!==1448||canonical.readUInt32BE(20)!==1086)
+ throw Error('Supplied Cribbage board is missing or altered');
+await cp(resolve(root,exactBoard),resolve(out,exactBoard));
 
 // The exact approved PNG stays in the source tree as the master; do not publish
 // its 1.5 MB original to the static site. All variants derive from that same file.

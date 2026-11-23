@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CRIBBAGE_HOLES,CRIBBAGE_FINISH,cribbageHole,cribbageLane,cribbageTeams,
+import {CRIBBAGE_BOARD_ART,CRIBBAGE_PARKS,CRIBBAGE_HOLES,CRIBBAGE_FINISH,cribbageHole,cribbageLane,cribbageTeams,
  cribbageNewPegs,cribbageLeap} from '../core/cribbage-board.js';
 import {CRIBBAGE_RULES_HASH,CRIBBAGE_ANNOUNCE_MS,cribbageLegalMoves,cribbageCanSubmit,
  normalizeCribbageSnapshot,cribbageAwardAnnouncement,cribbageAnnouncementQueue,
  CribbageSessionController} from '../core/cribbage-session.js';
-import {renderCribbageRoute,renderCribbageBoard} from '../core/cribbage-ui.js';
+import {renderCribbageRoute,renderCribbageBoard,bindCribbageDom} from '../core/cribbage-ui.js';
+import {updateCribbageView} from '../core/cribbage-live-view.js';
 import {renderClassicGamePage} from '../core/games-ui.js';
 
 const id='10000000-1111-4111-8111-111111111111',
@@ -45,6 +46,9 @@ const tick=()=>{
 const http=(status,data)=>({status,ok:status>=200&&status<300,headers:{get:()=> 'application/json; charset=utf-8'},json:async()=>data});
 
 test('BC-1.4 exactly 120 unique numbered holes per score track, shared 121 and separate 2-peg parks',()=>{
+ assert.equal(CRIBBAGE_BOARD_ART,'/assets/games/cribbage/board-cannabis-leaf.png');
+ assert.deepEqual(CRIBBAGE_PARKS.green,[{x:460,y:804},{x:498,y:804}]);
+ assert.deepEqual(CRIBBAGE_PARKS.ivory,[{x:460,y:842},{x:498,y:842}]);
  assert.deepEqual(Object.keys(CRIBBAGE_HOLES),['green','ivory','amber']);
  for(const lane of Object.keys(CRIBBAGE_HOLES)){
   const holes=CRIBBAGE_HOLES[lane];
@@ -156,8 +160,8 @@ test('BC-1.4 renders real artwork/holes without opponent hand or hidden crib, an
   assert.match(html,/cribbage-layout/);
   assert.match(html,/cribbage-left/);
   assert.match(html,/cribbage-right/);
-  assert.match(html,/leaf-board\.svg/);
-  assert.equal((html.match(/data-hole="/g)||[]).length,n===3?360:240);
+  assert.match(html,/board-cannabis-leaf\.png/);
+  assert.doesNotMatch(html,/leaf-board\.svg|class="cribbage-number"|data-hole="/);
   assert.match(html,/data-cribbage-card="0"/);
   assert.match(html,/Send (1|2) to crib/);
   assert.doesNotMatch(html,/opponentHand|allHands|seed|engineState|privateView/);
@@ -216,4 +220,56 @@ test('BC-1.4 authenticated session posts only a validated server move and holds 
  timer.flush();
  assert.equal(controller.state.announcement,'');
  controller.destroy();
+});
+
+test('Card click selects only; separate Play selected card submits exactly one authorized move',async()=>{
+ const session=accepted(2,'peg'),moves=[];
+ const controller={client:{enabled:true},state:{status:'ready',session,selection:[],queue:[]},
+  emit(delta){this.state={...this.state,...delta};},
+  async act(move){moves.push(move);return this.state;},configure(){}};
+ let cardClick,actionClick;
+ const card={dataset:{cribbageCard:'0'},addEventListener:(name,fn)=>{if(name==='click')cardClick=fn;}};
+ const action={dataset:{cribbageAction:'play'},addEventListener:(name,fn)=>{if(name==='click')actionClick=fn;}};
+ const root={querySelector:()=>null,querySelectorAll:selector=>
+   selector==='[data-cribbage-card]'?[card]:
+   selector==='[data-cribbage-action]'?[action]:[]};
+ bindCribbageDom(root,controller);
+ cardClick();
+ assert.deepEqual(controller.state.selection,[0]);
+ assert.deepEqual(moves,[],'selecting a card must never submit its move');
+ actionClick();
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.deepEqual(moves,[{type:'play',card:0}]);
+});
+test('An errored or paused session keeps its table and refresh control; no generic disabled Play/Resume',()=>{
+ const session=accepted(2,'peg');
+ const state={status:'ready',session,selection:[],pegs:cribbageNewPegs([0,0],2),settings:{motion:'standard'}};
+ const html=renderCribbageRoute({screen:'play',state});
+ assert.match(html,/data-cribbage-action="play" disabled/);
+ assert.match(html,/Play selected card/);
+ assert.doesNotMatch(html,/Resume game<\/button>|Play<\/button>/);
+ const selected=renderCribbageRoute({screen:'play',state:{...state,selection:[0]}});
+ assert.match(selected,/data-cribbage-action="play">Play selected card/);
+ assert.match(selected,/aria-pressed="true"/);
+ const paused=renderCribbageRoute({screen:'play',state:{...state,status:'error',error:'Network unavailable'}});
+ assert.match(paused,/cribbage-layout/);
+ assert.match(paused,/Refresh this game/);
+ assert.doesNotMatch(paused,/data-cribbage-action="play">Play selected card/);
+ const empty=renderCribbageRoute({screen:'play',state:{status:'idle',recoverable:[]}});
+ assert.match(empty,/My Games/);
+ assert.doesNotMatch(empty,/Resume game<\/button>/);
+});
+test('In-place Cribbage updates retain the outer shell and its current match route',()=>{
+ const state={status:'ready',session:accepted(2,'peg'),selection:[0],pegs:cribbageNewPegs([0,0],2),
+  settings:{motion:'standard'}};
+ const element={outerHTML:'original'},root={querySelector:()=>element};
+ let bound=0;
+ const route={state,bind(){bound++;}};
+ assert.equal(updateCribbageView(root,route,null,false,'/games/cribbage/play'),true);
+ assert.match(element.outerHTML,/Play selected card/);
+ assert.match(element.outerHTML,/board-cannabis-leaf\.png/);
+ assert.equal(bound,1);
+ element.outerHTML='sentinel';
+ assert.equal(updateCribbageView(root,route,null,false,'/games/rooms'),false);
+ assert.equal(element.outerHTML,'sentinel');
 });

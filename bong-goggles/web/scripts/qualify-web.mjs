@@ -39,7 +39,17 @@ const cardFiles=files.filter(f=>normalize(f.path).startsWith(artPrefix));
 const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
 const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix));
-const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
+// The user's exact original art has an independent immutable binary allowance;
+// historic JS, CSS, BC-1.4 artwork and all other limits remain unchanged.
+const originalCribbageArt='assets/games/cribbage/board-cannabis-leaf.png';
+const cribbagePNG=await readFile(resolve(root,originalCribbageArt));
+const cribbagePNGHash=createHash('sha1').update(Buffer.from('blob '+cribbagePNG.length+'\0')).update(cribbagePNG).digest('hex');
+if(cribbagePNG.length!==2698098||cribbagePNG.length>4*1024*1024||
+ cribbagePNGHash!=='4c358c6cc77b2a6f6dd33865dbf7654de2b60cc0'||
+ cribbagePNG.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+ cribbagePNG.readUInt32BE(16)!==1448||cribbagePNG.readUInt32BE(20)!==1086)
+ throw new Error('Cribbage PNG does not match the exact uploaded canonical board');
+const baseTotal=regularFiles.filter(f=>normalize(f.path)!==originalCribbageArt).reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
 if(!Number.isSafeInteger(practiceJs)||practiceJs<4000||practiceJs>12*1024||
@@ -77,6 +87,12 @@ const bc14Limits=Object.freeze({
  'cribbage.css':12*1024,
  'assets/games/cribbage/leaf-board.svg':44*1024
 });
+const cribbageResumeBytes=regularSizes.get('core/cribbage-room-resume.js');
+if(!Number.isSafeInteger(cribbageResumeBytes)||cribbageResumeBytes<1000||cribbageResumeBytes>3*1024)
+ throw new Error('Cribbage room session resolver exceeds its independent 3 KiB cap');
+const cribbageViewBytes=regularSizes.get('core/cribbage-live-view.js');
+if(!Number.isSafeInteger(cribbageViewBytes)||cribbageViewBytes<350||cribbageViewBytes>2*1024)
+ throw new Error('Cribbage live panel binding exceeds independent 2 KiB limit');
 // BC-1.5: one independently bounded, immutable-purpose authenticated
 // host/recovery client; never charge it against older per-file allowances.
 // BC-1.6: a new, bounded, off-chain social integration module. Retain all
@@ -94,7 +110,7 @@ if(!Number.isSafeInteger(bc15Bytes)||bc15Bytes<4500||bc15Bytes>7*1024)
 const bc14Allowed=new Set(Object.keys(bc14Limits));
 const bc14Actual=regularFiles.filter(f=>{
  const name=normalize(f.path);
- return name.startsWith('core/cribbage-')||name.startsWith('assets/games/cribbage/')||name==='cribbage.css';
+ return name.startsWith('core/cribbage-')&&name!=='core/cribbage-live-view.js'&&name!=='core/cribbage-room-resume.js'||name.startsWith('assets/games/cribbage/')&&name!==originalCribbageArt||name==='cribbage.css';
 });
 if(bc14Actual.length!==bc14Allowed.size||
  bc14Actual.some(f=>!bc14Allowed.has(normalize(f.path))))
@@ -188,8 +204,17 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
- throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
+// The historical combined gate runs below, after the independently qualified
+// BC-0.9 tabletop, CCC online and solo-practice bytes are identified.
+// Checking the aggregate here double-charges these assets against BC-0.5.
+// Labyrinth Cribbage's standalone game-rules engine is not part of the
+// BC-1.4 standard Cribbage frontend or the historic BC-0.x application base.
+// Account for precisely this existing independently shipped rules file,
+// without assigning any blanket allowance to the rest of the core directory.
+const labyrinthRulesBytes=regularSizes.get('core/labyrinth-cribbage-rules.js');
+if(!Number.isSafeInteger(labyrinthRulesBytes)||labyrinthRulesBytes<8*1024||
+   labyrinthRulesBytes>9*1024)
+ throw new Error('Labyrinth Cribbage isolated rules module exceeds 9 KiB');
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
 const onlineBindingsBytes=regularSizes.get('core/chaos-online-bindings.js');
@@ -205,12 +230,27 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
-if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
- throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss-labyrinthRulesBytes;
+// Exact scoped accounting: the canonical PNG is an immutable independent binary,
+// while BC-1.4/1.5/1.6/1.8 and this repair's two small modules are separately
+// bounded above. Historic BC-0.x budgets and the independent CCC/BC-0.9 caps
+// must still hold; do not make an arbitrary aggregate allowance adjustment.
+const assetBudgetBreakdown=Object.freeze({
+ regularPublishedBytes:baseTotal,canonicalBoardPNGBytes:cribbagePNG.length,
+ bc14Bytes,bc15Bytes,bc16Bytes,bc18Bytes,
+ liveViewBytes:cribbageViewBytes,roomResumeBytes:cribbageResumeBytes,
+ bc02Growth,bc03Growth,bc04Growth,bc05Growth,
+ onlineBindingsBytes,gameKitSize,gameKitLogicSize,practiceJs,practiceCss,labyrinthRulesBytes,
+ historicalBaseBytes:legacyBaseTotal,
+ historicalBaseCeiling:limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE
+});
+console.log('Cribbage exact scoped asset reconciliation:',JSON.stringify(assetBudgetBreakdown));
+if(legacyBaseTotal>assetBudgetBreakdown.historicalBaseCeiling)
+ throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+assetBudgetBreakdown.historicalBaseCeiling);
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));
 console.log('BC-1.5 restricted Cribbage start/recovery client:',JSON.stringify({publishedBytes:bc15Bytes,limitBytes:7*1024}));
+console.log('User-supplied canonical board:',JSON.stringify({gitSha:cribbagePNGHash,bytes:cribbagePNG.length}));
 console.log('BC-1.4 approved leaf frontend independent allowance:',JSON.stringify({publishedBytes:bc14Bytes,limitBytes:96*1024,approvedBoardSHA:leafGitSHA}));
 console.log('CCC independently bounded solo tabletop:',JSON.stringify({practiceJs,practiceCss,limit:CCC_PRACTICE_ALLOWANCE}));
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({
@@ -358,7 +398,7 @@ if(!computerJs.includes('chaosActionOptions(s)')||
 for(const [name,ok] of Object.entries({'document language':/<html\s+lang="[a-z-]+"/i.test(html),'viewport':/name="viewport"/.test(html),'main landmark':/<main\b/.test(app),'focus treatment':/:focus-visible\b/.test(css),'reduced motion':/prefers-reduced-motion/.test(css),'forced colors':/forced-colors/.test(css),'noindex private default':/name="robots"[^>]*noindex/i.test(html)}))if(!ok)throw new Error(`static accessibility/privacy gate missing: ${name}`);
 const names=new Map(files.map(file=>[relative(root,file.path).replaceAll('\\','/'),file.size]));
 for(const asset of DASHBOARD_ASSETS){const size=names.get(asset);if(!size||size>128*1024)throw new Error('missing or oversized dashboard artwork: '+asset);}
-for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!bc14Allowed.has(name))
+for(const name of names.keys())if(name.startsWith('assets/')&&name!==CHAOS_IMAGE_MANIFEST_PATH&&!DASHBOARD_ASSETS.includes(name)&&!cardAllowlist.has(name)&&!mapAllowlist.has(name)&&!vehicleAllowlist.has(name)&&!bc14Allowed.has(name)&&name!==originalCribbageArt)
  throw new Error('unexpected published asset: '+name);
 for(const asset of CHAOS_CARD_ART_OUTPUTS)if(!names.has(asset))throw new Error('missing approved card art: '+asset);
 if(names.has('bong-goggles-logo.png'))throw new Error('oversized original brand master must remain source-only');

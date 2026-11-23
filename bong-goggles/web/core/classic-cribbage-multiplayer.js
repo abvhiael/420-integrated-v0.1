@@ -78,11 +78,14 @@ export function bindCribbageRoomStart(root,rooms,{history,onRouteChange,onRefres
 // NEVER the hidden opponent hands, crib, private journal or an auth secret.
 export async function discoverCribbageMatches(controller){
  if(!controller?.client?.enabled)return [];
- const token=++controller.generation;
+ if(controller.listBusy)return [];
+ controller.listBusy=true;
+ const epoch=()=>controller.authGeneration??controller.generation;
+ const token=epoch();
  try{
   const actor=await verifiedPrincipal(controller.client);
   const list=await controller.client.request('/v1/classic-sessions');
-  if(token!==controller.generation)return [];
+  if(token!==epoch())return [];
   if(list.status===401){controller.invalidate();controller.emit({status:'guest',recoverable:[]});return [];}
   if(list.status!==200||!envelope(list)||!Array.isArray(list.data.sessions)||
    list.data.sessions.length>50)throw Error('Session listing unavailable');
@@ -93,19 +96,20 @@ export async function discoverCribbageMatches(controller){
    if(!safe)throw Error('Untrusted Cribbage session summary');
    matches.push(safe);
   }
-  if(token!==controller.generation)return [];
+  if(token!==epoch())return [];
   if(await verifiedPrincipal(controller.client)!==actor)throw Error('420ID account switched');
-  if(token===controller.generation)controller.emit({status:'idle',session:null,
-   recoverable:matches,pegs:[],queue:[],announcement:'',error:null});
+  if(token===epoch())controller.emit({
+  ...(controller.state?.session||controller.busy?{}:{status:'idle',session:null,error:null}),recoverable:matches,recoverError:null
+ });
   return matches;
  }catch{
-  if(token===controller.generation){
-   controller.invalidate();
-   controller.emit({status:'unavailable',recoverable:[],session:null,
+  if(token===epoch()){
+   if(controller.state?.session)controller.emit({recoverError:'My Games could not be updated.'});
+   else controller.emit({status:'unavailable',recoverable:[],session:null,
     error:'Could not verify your 420ID sessions; no cached hands are shown.'});
   }
   return [];
- }
+ }finally{controller.listBusy=false;}
 }
 
 

@@ -54,21 +54,22 @@ try{
    const boxB=board?.getBoundingClientRect(),boxH=hand?.getBoundingClientRect();
    const image=document.querySelector('.cribbage-leaf image');
    const asset=await fetch(image.getAttribute('href'));
-   const source=await asset.text();
+   const art=await asset.arrayBuffer(),bytes=new Uint8Array(art),header=new DataView(art);
    const holes=document.querySelectorAll('.cribbage-hole');
    const buttons=document.querySelectorAll('[data-cribbage-card]');
    const large=window.innerWidth>1120;
    return {board:boxB?.toJSON?.(),hand:boxH?.toJSON?.(),
     holes:holes.length,buttons:buttons.length,large,
     noOverflow:document.documentElement.scrollWidth<=window.innerWidth+2,
-    imageStatus:asset.status,embeddedArt:source.includes('data:image/webp;base64,'),
+    imageStatus:asset.status,png:bytes.length===2698098&&bytes[0]===137&&bytes[1]===80&&
+      header.getUint32(16)===1448&&header.getUint32(20)===1086,
     btnName:buttons[0]?.getAttribute('aria-label'),
     transparent:document.body.innerHTML.includes('opponentHand')};
   });
-  assert(data.holes===(count===3?360:240),'wrong rendered scoring hole count');
+  assert(data.holes===0,'board artwork must not be overwritten by duplicated pegholes');
   assert(data.buttons===(count===2?6:5),'missing playable cards');
   assert(data.noOverflow,'mobile or desktop horizontal overflow at '+width);
-  assert(data.imageStatus===200&&data.embeddedArt,'approved image missing/unsafely linked');
+  assert(data.imageStatus===200&&data.png,'exact user-supplied PNG was not served');
   assert(!data.transparent,'opponent secret present in DOM');
   assert(data.btnName?.startsWith('Select '),'card buttons not accessible');
   assert(data.board&&data.hand,'board and hand layout missing');
@@ -124,7 +125,7 @@ try{
   assert(await page.locator('.cribbage-stinkhole').count()===(count===3?3:2),
    'Stinkhole setting should highlight physical hole 120 with no house-rule award');
   console.log('BC-1.4 Chromium '+width+'x'+height+' / '+count+
-   ' players: board right/stack correct, '+data.holes+' holes, private hand buttons, artwork and axe PASS');
+   ' players: exact PNG, no duplicated holes, private hand buttons and axe PASS');
   await page.close();
  }
  console.log('BC-1.4 Chromium desktop/tablet/mobile acceptance PASSED');

@@ -7,17 +7,16 @@ import {renderCribbagePractice as practice,bindCribbagePractice as bindPractice}
 import {renderGameAccountPanel} from './account-identity.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
 import {classicGameById} from './classics.js';
-import {CRIBBAGE_BOARD_SIZE,CRIBBAGE_BOARD_ART,CRIBBAGE_HOLES,CRIBBAGE_TRACKS,
+import {CRIBBAGE_BOARD_SIZE,CRIBBAGE_BOARD_ART,
 cribbageHole,cribbageTeams,cribbageLane,cribbageNewPegs} from './cribbage-board.js';
 import {cribbageCardLabel,cribbageLegalMoves,cribbageCanSubmit} from './cribbage-session.js';
 const back='<a class="cribbage-back" href="/games" data-route="games">← All Games</a>';
 const gameLink=(id,screen)=>'/games/cribbage/'+screen+(id?'?session='+encodeURIComponent(id):'');
 const tabs=['intro','rules','play','setup','table','results','history','rematch'];
-const tabLabel={intro:'Overview',rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',results:'Results',history:'History',rematch:'Rematch'};
+const tabLabel={intro:'Overview',rules:'Rules',play:'Play',setup:'Opponents',table:'Game table',results:'Results',history:'My Games',rematch:'Rematch'};
 const menu=(screen,id)=>'<nav class="cribbage-nav" aria-label="Cribbage screens">'+
 tabs.map(s=>'<a href="'+gameLink(id,s)+'" data-route="classic-game"'+
 (s===screen?' aria-current="page"':'')+'>'+tabLabel[s]+'</a>').join('')+'</nav>';
-const ranks=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
 function cardFace(id,selected=false,disabled=false){
 const name=cribbageCardLabel(id),suit=name.at(-1),rank=name.slice(0,-1);
 const red=suit==='♥'||suit==='♦';
@@ -43,21 +42,9 @@ esc('Team '+(peg.team+1)+', '+name.toUpperCase()+' peg on '+(peg[name]||'start')
 }).join('');
 }
 export function renderCribbageBoard({scores=[0,0],seatCount=2,pegs=null,settings={}}={}){
-const actual=pegs??cribbageNewPegs(scores,seatCount),teams=cribbageTeams(seatCount);
-const distinct=[...new Set(teams)];
-const holes=distinct.map(team=>{
-const lane=cribbageLane(team,seatCount);
-return CRIBBAGE_HOLES[lane].map(p=>
-'<circle class="cribbage-hole cribbage-hole--'+lane+'" cx="'+p.x+'" cy="'+p.y+
-'" r="'+(seatCount===3?4.2:4.8)+'" data-hole="'+p.number+'" data-lane="'+lane+'">'+
-'<title>'+esc('Team '+(team+1)+': '+p.number)+'</title></circle>').join('');
-}).join('');
-const decade=CRIBBAGE_HOLES.ivory.filter(p=>p.number%10===0).map(p=>
-'<text class="cribbage-number" x="'+p.x+'" y="'+(p.y-14)+'" text-anchor="middle">'+p.number+'</text>').join('');
-const end='<circle class="cribbage-finish-hole" cx="704" cy="893" r="9"/>'+
-'<text class="cribbage-finish-label" x="704" y="861" text-anchor="middle">121</text>';
-const stinkhole=settings.stinkhole?distinct.map(team=>{
-const lane=cribbageLane(team,seatCount),p=cribbageHole(lane,120);
+const actual=pegs??cribbageNewPegs(scores,seatCount);
+const mark=settings.stinkhole?[...new Set(cribbageTeams(seatCount))].map(t=>{
+const p=cribbageHole(cribbageLane(t,seatCount),120);
 return '<circle class="cribbage-stinkhole" cx="'+p.x+'" cy="'+p.y+'" r="12"/>';
 }).join(''):'';
 const tokens=actual.map(p=>pegHtml(p,cribbageLane(p.team,seatCount))).join('');
@@ -68,8 +55,8 @@ return '<figure class="cribbage-leaf" aria-label="Cannabis-leaf cribbage scoring
 '<svg viewBox="0 0 '+CRIBBAGE_BOARD_SIZE.width+' '+CRIBBAGE_BOARD_SIZE.height+
 '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Leaf-shaped 121-point cribbage board">'+
 '<image href="'+CRIBBAGE_BOARD_ART+'" x="0" y="0" width="1448" height="1086" preserveAspectRatio="none"/>'+
-'<g class="cribbage-holes">'+holes+'</g><g aria-hidden="true">'+decade+end+stinkhole+'</g>'+
-'<g class="cribbage-pegs">'+tokens+'</g></svg>'+
+
+'<g aria-hidden="true">'+mark+'</g><g class="cribbage-pegs">'+tokens+'</g></svg>'+
 '<figcaption><ol class="cribbage-board-totals">'+table+
 '</ol><p>Two pegs leapfrog as the server awards points. '+(seatCount===4?
 'Partners share a track.':seatCount===3?'Amber is the additional third-player virtual track.':
@@ -103,29 +90,35 @@ const count=session.seatCount===2?2:1;
 const ready=discard&&selected.size===count&&cribbageCanSubmit(session,{
 type:'discard',cards:v.hand.filter(id=>selected.has(id))
 });
+const readyPlay=v.phase==='peg'&&selected.size===1&&validPlay.has([...selected][0])&&
+ cribbageCanSubmit(session,{type:'play',card:[...selected][0]});
 const cards=v.hand.map(id=>{
-const active=turn&&(discard||validPlay.has(id));
+const active=turn&&state.status==='ready'&&!state.submitting&&(discard||validPlay.has(id));
 return '<button type="button" class="cribbage-card-button" data-cribbage-card="'+id+'"'+
 (active?'':' disabled')+' aria-pressed="'+(selected.has(id)?'true':'false')+
-'" aria-label="'+esc((discard?'Select ':'Play ')+cribbageCardLabel(id))+'">'+
+'" aria-label="'+esc('Select '+cribbageCardLabel(id))+'">'+
 cardFace(id,selected.has(id),!active)+'</button>';
 }).join('');
 const note=discard?'Select '+count+' card'+(count===1?'':'s')+' to put in the dealer’s crib.':
-v.phase==='peg'?'Choose a playable card. The running count may not exceed 31.':
+v.phase==='peg'?'Select a card, then press Play selected card. Count cannot exceed 31.':
 v.phase==='cut'?'One legal cut reveals the shared starter.':
 'Your next hand is being prepared.';
 const action=discard?
 '<button class="cribbage-primary" type="button" data-cribbage-action="discard"'+
-(ready?'':' disabled')+'>Send '+count+' to crib</button>':
+(ready&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Send '+count+' to crib</button>':
 v.phase==='cut'&&turn?
-'<button class="cribbage-primary" type="button" data-cribbage-action="cut">Cut the deck</button>':
+'<button class="cribbage-primary" type="button" data-cribbage-action="cut"'+(state.status==='ready'?'':' disabled')+'>Cut the deck</button>':
+v.phase==='peg'&&turn&&validPlay.size?
+'<button class="cribbage-primary" type="button" data-cribbage-action="play"'+
+(readyPlay&&state.status==='ready'&&!state.submitting?'':' disabled')+'>Play selected card</button>':
 v.phase==='peg'&&turn&&legal.some(x=>x.type==='go')?
-'<button class="cribbage-primary" type="button" data-cribbage-action="go">Say “Go”</button>':
+'<button class="cribbage-primary" type="button" data-cribbage-action="go"'+
+(state.status==='ready'?'':' disabled')+'>Say “Go”</button>':
 '';
 return '<section class="cribbage-hand-area" aria-label="Your private hand">'+
 '<div class="cribbage-section-title"><h3>Your hand</h3><span>'+v.hand.length+' cards</span></div>'+
 '<p>'+esc(note)+'</p><div class="cribbage-hand-cards">'+cards+'</div>'+
-'<div class="cribbage-actions">'+action+(discard&&selected.size?
+'<div class="cribbage-actions">'+action+(selected.size?
 '<button type="button" data-cribbage-action="clear">Clear selection</button>':'')+'</div></section>';
 }
 function playPanel(state){
@@ -161,7 +154,9 @@ return '<div class="cribbage-layout">'+
 '<section class="cribbage-opponents"><div class="cribbage-section-title"><h3>Seats · round '+v.round+'</h3>'+
 '<span>Dealer P'+(v.dealer+1)+'</span></div>'+opponents(v,session.seatCount)+'</section>'+
 pile+show+end+(active?hand(v,session,state)+
-'<div class="cribbage-actions" role="group" aria-label="Match controls">'+(state.resignPending?
+'<div class="cribbage-actions" role="group" aria-label="Match controls">'+
+(state.status!=='ready'?'<button type="button" data-cribbage-action="refresh">Refresh this game</button>':'')+
+(state.resignPending?
 '<button type="button" data-cribbage-action="confirm-resign">Confirm resignation</button><button type="button" data-cribbage-action="cancel-resign">Keep playing</button>':
 '<button type="button" data-cribbage-action="request-resign">Resign match</button>')+'</div>':'')+'</div>'+
 '<div class="cribbage-right">'+renderCribbageBoard({scores:v.scores,
@@ -195,12 +190,17 @@ const nav=back+menu(screen,id);
 const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
 '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
 '<span class="cribbage-status">'+(playable?'Playable':'BC-1.5 · Authenticated rooms')+'</span></header>';
-const isLive=s.status==='ready'&&session?.gameId==='cribbage';
+const isLive=!!session&&session.gameId==='cribbage'&&['ready','error','loading'].includes(s.status);
+const myGames='<section class="cribbage-matches" aria-label="My Games"><h3>My Games</h3>'+
+(Array.isArray(s.recoverable)&&s.recoverable.length?'<ul>'+s.recoverable.map(m=>
+'<li><a href="/games/cribbage/play?session='+esc(m.id)+'" data-route="classic-game">'+
+(m.status==='active'?'Resume game':'View match')+' · '+m.seatCount+' players · '+esc(m.status)+'</a></li>').join('')+'</ul>':
+'<p>No verified matches yet. Start a match or refresh 420ID.</p>')+'</section>';
 const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
 '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+
 practice(pState)+'<p><a class="cribbage-primary" href="/games/rooms" data-route="classic-rooms">Browse Cribbage rooms</a></p>'+
 (s.status==='guest'?'<p><a href="/social-api/auth/start">Sign in to 420ID</a> to access your private cards.</p>':'')+
-(Array.isArray(s.recoverable)&&s.recoverable.length?'<h4>Your verified matches</h4><ul>'+s.recoverable.map(m=>'<li><a href="/games/cribbage/play?session='+esc(m.id)+'" data-route="classic-game">Resume '+m.seatCount+'-player match · '+esc(m.status)+' · turn '+(m.turnSeat===null?'ended':m.turnSeat+1)+'</a></li>').join('')+'</ul>':'')+
+myGames+
 (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
 const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
 const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
@@ -210,14 +210,15 @@ const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h
 boardPreview+'</div>'+practice(pState);
 const generic=screen=>renderSharedGameScreen({game:classicGameById('cribbage'),screen});
 const details=screen==='rules'?rules():
-screen==='setup'?'<div class="cribbage-setup">'+zero+generic('setup')+'</div>':
+screen==='setup'?'<div class="cribbage-setup">'+zero+'</div>':
 screen==='play'||screen==='table'?isLive?playPanel(s):
-'<div class="cribbage-restricted">'+zero+generic(screen)+'</div>':
+'<div class="cribbage-restricted">'+zero+'</div>':
 screen==='results'?isLive?'<div class="cribbage-results">'+
 '<h3>'+esc(session.status==='finished'?'Confirmed result':'Current verified scores')+'</h3>'+
 renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
 pegs:s.pegs,settings:s.settings})+renderCribbageSocial(s.social)+'</div>':renderCribbageSocial(s.social):
-screen==='history'||screen==='rematch'?renderCribbageSocial(s.social):home;
+screen==='history'?myGames+renderCribbageSocial(s.social):
+screen==='rematch'?renderCribbageSocial(s.social):home;
 return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">'+(playable?'Playable · 420ID and computers.':'Zero-wager game · It is not yet playable until real 420ID room activation.')+'</p>'+details+settings(s)+
 '<p class="cribbage-boundary">'+(playable?'Zero wagers · 420ID private play':'Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify')+'</p></section>';
 }
@@ -229,12 +230,8 @@ for(const button of root.querySelectorAll('[data-cribbage-card]'))button.addEven
 if(!session||state.submitting||state.queue?.length)return;
 const id=Number(button.dataset.cribbageCard),v=controller.state.session?.privateView;
 if(!v||!v.hand.includes(id))return;
-if(v.phase==='peg'){
-void controller.act({type:'play',card:id}).catch(()=>{});
-return;
-}
-if(v.phase!=='discard')return;
-const selected=new Set(controller.state.selection??[]),required=session.seatCount===2?2:1;
+if(v.phase!=='discard'&&v.phase!=='peg')return;
+const selected=new Set(controller.state.selection??[]),required=v.phase==='discard'?(session.seatCount===2?2:1):1;
 if(selected.has(id))selected.delete(id);else if(selected.size<required)selected.add(id);
 controller.emit({selection:[...selected]});
 });
@@ -244,13 +241,18 @@ if(action==='request-resign'){controller.emit({resignPending:true});return;}
 if(action==='cancel-resign'){controller.emit({resignPending:false});return;}
 if(action==='confirm-resign'){void resignCribbageMatch(controller).catch(()=>{});return;}
 if(action==='clear'){controller.emit({selection:[]});return;}
+if(action==='refresh'){if(controller.state.session)void controller.open(controller.state.session.id,{quiet:true});return;}
 if(!v)return;
 let move=null;
 if(action==='discard')move={type:'discard',cards:v.hand.filter(id=>(controller.state.selection??[]).includes(id))};
+else if(action==='play'){
+const cards=(controller.state.selection??[]).filter(id=>v.hand.includes(id));
+if(cards.length===1)move={type:'play',card:cards[0]};
+}
 else if(action==='cut')move={type:'cut'};
 else if(action==='go')move={type:'go'};
 if(move&&cribbageCanSubmit(controller.state.session,move))
-void controller.act(move).then(()=>controller.emit({selection:[]})).catch(()=>{});
+void controller.act(move).catch(()=>{});
 });
 for(const setting of root.querySelectorAll('[data-cribbage-setting]'))setting.addEventListener('change',()=>{
 const key=setting.dataset.cribbageSetting;

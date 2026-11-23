@@ -1,0 +1,168 @@
+{
+  "schema": "420-arbitration-audit-5-testnet-evidence-v1",
+  "phase": "ARBITRATION-AUDIT-5",
+  "status": "PREPARED_NOT_DEPLOYED_NOT_QUALIFIED",
+  "liveQualified": false,
+  "addressModel": "REGISTRY_RESOLVED_NO_FIXED_GENESIS_ADDRESS",
+  "sourceAuthority": {
+    "genesisConfig": "contracts/config/420arbitration-genesis.json",
+    "frozenAddressNamespace": "contracts/config/genesis-address-namespace.json",
+    "releaseMaterialization": "contracts/config/arbitration/arbitration-audit-4-release-materialization.json",
+    "operationalRunbook": "docs/audit/420ARBITRATION-ARB-PRE-11-OPERATIONS-TESTNET-HANDOFF.md",
+    "compiler": "0.8.24",
+    "evmVersion": "cancun",
+    "optimizer": true,
+    "optimizerRuns": 200,
+    "viaIR": true,
+    "serviceIdPreimage": "420/service/arbitration/v1",
+    "componentIdPreimage": "420/component/arbitration/v1"
+  },
+  "localQualification": {
+    "status": "REPOSITORY_ONLY",
+    "pre09": {
+      "commit": "f6de3550c1dd7e0b94f40bb81d937d4bfc2843fd",
+      "workflowRunId": 45283599236
+    },
+    "pre10": {
+      "commit": "4652fe0680e407469c03c861054da0b988fa815d",
+      "wholeStackRunId": 45287229109,
+      "localGenesisRunId": 45287227293
+    },
+    "mergedBaselineCommit": "e2116fc2bf8ae0c84bbf5851664a68734f3518b1"
+  },
+  "live": {
+    "releaseCommit": null,
+    "deploymentCommit": null,
+    "chainId": null,
+    "genesisHash": null,
+    "rpcEndpointRedacted": null,
+    "networkName": null,
+    "observedAtUtc": null,
+    "evidenceBlockNumber": null,
+    "evidenceBlockHash": null,
+    "finalizedBlockNumber": null,
+    "governanceTimelockAddress": null,
+    "protocolRegistryAddress": null,
+    "governanceVerification": {
+      "scheduler": null,
+      "bootstrapGovernor": null,
+      "civicAuthorityActivated": null,
+      "g1DelaySeconds": null,
+      "transactionHash": null
+    },
+    "deployedContracts": {
+      "ArbitrationPolicyRegistry420": {
+        "address": null,
+        "constructorArguments": null,
+        "deploymentTransaction": null,
+        "deploymentBlockHash": null,
+        "runtimeCodeHash": null
+      },
+      "ArbitrationCaseRegistry420": {
+        "address": null,
+        "constructorArguments": null,
+        "deploymentTransaction": null,
+        "deploymentBlockHash": null,
+        "runtimeCodeHash": null
+      },
+      "ArbitrationRulingRegistry420": {
+        "address": null,
+        "constructorArguments": null,
+        "deploymentTransaction": null,
+        "deploymentBlockHash": null,
+        "runtimeCodeHash": null
+      },
+      "ArbitrationRouter420": {
+        "address": null,
+        "constructorArguments": null,
+        "deploymentTransaction": null,
+        "deploymentBlockHash": null,
+        "runtimeCodeHash": null
+      }
+    },
+    "oneTimeBinding": {
+      "transactionHash": null,
+      "blockHash": null,
+      "caseRegistry": null,
+      "rulingRegistry": null,
+      "verified": false
+    },
+    "registryPublication": {
+      "componentId": null,
+      "serviceId": null,
+      "componentRegistrationTransaction": null,
+      "componentRuntimeCodeHash": null,
+      "servicePublicationTransaction": null,
+      "serviceVersion": null,
+      "serviceActive": null,
+      "resolvedImplementation": null,
+      "metadataHash": null,
+      "manifestHash": null,
+      "dependencyRoot": null,
+      "interfaceHash": null,
+      "immutableGraphVerified": false
+    },
+    "deploymentTransactionOrder": [],
+    "policyConfigurationReceipts": [],
+    "resolverOnboardingReceipts": [],
+    "testScenarios": {
+      "standardDispute": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "appealedDispute": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "maximumAppeals": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "unauthorizedActions": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "governancePolicySnapshot": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "registryDeprecationRecovery": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "rpcWalletApiIndexerInterruption": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "reorganizationRebuild": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "originRemedyAccounting": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      },
+      "privateStorageAuthorization": {
+        "passed": null,
+        "transactions": [],
+        "evidenceBlockHashes": []
+      }
+    },
+    "evidenceArtifacts": [],
+    "workflowEvidence": [],
+    "nodeAndIndexerReconciliation": null,
+    "storageGatewayAndIssuerVerified": false,
+    "independentSecurityReview": null,
+    "operatorSignoff": null,
+    "verifiedAtUtc": null
+  }
+}

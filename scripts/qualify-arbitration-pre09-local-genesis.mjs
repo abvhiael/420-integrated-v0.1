@@ -235,8 +235,11 @@ async function main(){
   await execute(timelock,governor,registryAddress,registry.interface,'deprecateService',[sid],'deprecate-service');
   await reject('deprecated service resolution',()=>registry.resolveActive(sid));
   assert.equal((await registry.getService(sid)).active,false);
-  await reject('recover with incorrect revision',()=>registry.publishRegisteredService.staticCall(
-    sid,await router.getAddress(),metadataHash,1,true,3,manifestHash,dependencyRoot,interfaceHash));
+  // Exercise bad revision *as the actual Timelock*, not as a rejected EOA.
+  await executeExpectFailure(timelock,governor,registryAddress,registry.interface,
+    'publishRegisteredService',
+    [sid,await router.getAddress(),metadataHash,1,true,3,manifestHash,dependencyRoot,interfaceHash],
+    'incorrect-recovery-revision');
   await execute(timelock,governor,registryAddress,registry.interface,'publishRegisteredService',
     [sid,await router.getAddress(),metadataHash,2,true,3,manifestHash,dependencyRoot,interfaceHash],
     'recover-service-v2');

@@ -1,0 +1,38 @@
+name: MIG-4 Phase 2 Exact-Source Retirement
+on:
+  pull_request:
+    paths:
+      - 'clients/greenroad-access-v1/**'
+      - 'clients/smoke-chrome-access-v1/**'
+      - 'packages/mad-buds-kush-krusher/**'
+      - 'docs/migration/MIG-4-phase2-819-ledger.json'
+      - 'scripts/migration/verify-mig-4.mjs'
+      - '.github/workflows/mig-4-phase2-retirement.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ownership-and-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact SHA and 1,199 original source dispositions
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          node scripts/migration/verify-mig-4.mjs
+          node scripts/migration/verify-mig-4-level2.mjs
+      - name: Stage verified standalone game consumers by exact commit SHA
+        run: bash scripts/migration/stage-mig-4-game-consumers.sh
+      - name: Verify gaming hardening and shared cross-game security
+        run: |
+          npm test --prefix packages/420-gaming-client-hardening
+          npm test --prefix packages/420-gaming-cross-game-qualification

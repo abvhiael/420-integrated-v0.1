@@ -10,6 +10,7 @@ let session=null;
 let mounted=null;
 let generation=0;
 let configured=false;
+let requiresReconnect=false;
 let bootError=null;
 let bootstrap=Promise.resolve();
 const client=createAppSessionClient({app:APP});
@@ -19,6 +20,7 @@ export function wallet420IDSessionState(){
 }
 function invalidate(){
   session=null;
+  if(enabled)requiresReconnect=true;
   generation++;
   if(typeof window!=='undefined'){
     window.dispatchEvent(new Event('wallet420id:invalidated'));
@@ -29,6 +31,10 @@ export async function verifyWallet420IDSession(){
   if(bootError)throw new Error('420ID Wallet configuration is not verified',{cause:bootError});
   if(!configured)throw new Error('420ID Wallet configuration is still unverified');
   if(!enabled)return null; // 420ID is optional; independent Wallet authority remains mandatory.
+  // Once a 420ID session is lost or its subject changes, a newly minted
+  // session must never inherit an already connected wallet/provider context.
+  // A full page reload explicitly reconstructs account and chain authority.
+  if(requiresReconnect)throw new Error('420ID session revoked or changed; reload Wallet and reconnect');
   const ticket=generation;
   let fresh;
   try{fresh=await client.session();}

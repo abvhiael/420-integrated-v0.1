@@ -124,7 +124,7 @@ export class CoreProjectionConsumer420 implements BlockConsumer420, DurableBlock
       }
       await this.applyBlockTx420(tx, batch);
       if (this.chainId !== undefined && batch.chainId !== this.chainId) throw new Error('projection chain mismatch');
-      if (this.protocols) await this.protocols.applyLogsTx(batch.chainId, batch.logs, tx);
+      if (this.protocols) await this.protocols.applyLogsTx(batch.chainId, [...batch.logs, ...(batch.nativeLogs ?? [])], tx);
       await writeRecoveryMetadata420(tx, checkpoint);
     });
   }

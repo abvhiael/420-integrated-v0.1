@@ -35,6 +35,7 @@ const SOURCE='0x2222222222222222222222222222222222222222';
 const TYPE='0x'+'ee'.repeat(32);
 const TX='0x'+'99'.repeat(32);
 const REPLACEMENT='0x'+'98'.repeat(32);
+const BLOCK_HASH='0x'+'44'.repeat(32);
 
 const selector=(signature)=>keccak256Hex(new TextEncoder().encode(signature)).slice(2,10);
 const w=(value)=>BigInt(value).toString(16).padStart(64,'0');
@@ -53,7 +54,10 @@ class FakeProvider{
     this.accounts=overrides.accounts??[ALICE];
     this.code=overrides.code??'0x6001';
     this.block=overrides.block??15n;
-    this.receipt=Object.prototype.hasOwnProperty.call(overrides,'receipt')?overrides.receipt:{status:'0x1',transactionHash:TX};
+    const baseReceipt={status:'0x1',transactionHash:TX,from:ALICE,to:A.voting,
+      blockHash:BLOCK_HASH,blockNumber:'0xf'};
+    this.receipt=overrides.receipt===null?null:{...baseReceipt,...(overrides.receipt??{})};
+    this.canonicalBlock=overrides.canonicalBlock??{number:'0xf',hash:BLOCK_HASH};
     this.sent=[];
     this.calls=[];
     this.voted=overrides.voted??false;
@@ -75,6 +79,7 @@ class FakeProvider{
     if(method==='eth_estimateGas')return '0x5208';
     if(method==='eth_sendTransaction'){this.sent.push(params[0]);return TX;}
     if(method==='eth_getTransactionReceipt')return this.receipt;
+    if(method==='eth_getBlockByNumber')return this.canonicalBlock;
     if(method!=='eth_call')throw new Error('unexpected '+method);
     const [{to,data}]=params;
     const sel=data.slice(2,10);
@@ -203,11 +208,11 @@ test('Indexer proposal enumeration accepts only canonical CivicProposalRegistere
   let requested;
   const indexer=createGovernanceIndexer420({
     baseUrl:'https://indexer.example',
-    async fetchImpl(url){requested=url;return {ok:true,async json(){return {items:[
+    async fetchImpl(url){requested=url;return {ok:true,async json(){return {data:{items:[
       {eventName:'CivicProposalRegistered',fields:{proposalId:PROPOSAL}},
       {eventName:'CivicProposalRegistered',fields:{proposalId:PROPOSAL.toUpperCase().replace('0X','0x')}},
       {eventName:'CivicProposalCreated',fields:{proposalId:'0x'+'11'.repeat(32)}},
-    ]};}};}
+    ]}};}};}
   });
   const ids=await indexer.listProposalIds(420n);
   assert.deepEqual(ids,[PROPOSAL]);
@@ -263,6 +268,43 @@ test('vote fails closed on inactive/out-of-window/account/network changes and sa
   const voted=new FakeProvider({voted:true});
   await assert.rejects(client(voted).sendVote({proposalId:PROPOSAL,house:0,support:1}),/already voted/);
   assert.equal(voted.sent.length,0);
+});
+
+test('receipt confirmation binds canonical block, original account, Registry code and actual Civic voting target',async()=>{
+  const reorged=client(new FakeProvider({canonicalBlock:{number:'0xf',hash:REPLACEMENT}}));
+  assert.equal((await reorged.confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0})).state,'reorged');
+
+  const missing=client(new FakeProvider({canonicalBlock:null}));
+  // A missing canonical block is not success.
+  const missingProvider=new FakeProvider();
+  missingProvider.canonicalBlock=null;
+  assert.equal((await client(missingProvider).confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0})).state,'reorged');
+
+  for(const altered of [
+    {transactionHash:REPLACEMENT}, {to:A.governor}, {from:SOURCE},
+    {status:'0x2'}, {blockHash:'0xdead'}, {blockNumber:null}
+  ]){
+    await assert.rejects(
+      client(new FakeProvider({receipt:altered})).confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),
+      /receipt|Governance|invalid|canonical|malformed/i);
+  }
+
+  await assert.rejects(
+    client(new FakeProvider({chain:'0x1a5'})).confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),
+    /chain changed/);
+  await assert.rejects(
+    client(new FakeProvider({accounts:[]})).confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),
+    /account changed/);
+  const replacedCode=new FakeProvider();
+  let servedReceipt=false;
+  const original=replacedCode.request.bind(replacedCode);
+  replacedCode.request=async(method,params=[])=>{
+    if(method==='eth_getTransactionReceipt')servedReceipt=true;
+    if(servedReceipt&&method==='eth_getCode')return '0x6002';
+    return original(method,params);
+  };
+  await assert.rejects(client(replacedCode).confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),
+    /code hash mismatch/);
 });
 
 test('transaction state reports confirmed failed pending and replaced without auto-resubmission',async()=>{
@@ -325,4 +367,28 @@ test('GOV-REC-5 changed proposal state and action commitment after gas estimate 
     await assert.rejects(client(p).sendVote({proposalId:PROPOSAL,house:0,support:1}),/stale|commitment or snapshot changed/);
     assert.equal(p.sent.length,0,'no vote may broadcast on '+mutation+' drift');
   }
+});
+
+
+test('previously authorized secondary account cannot sign or confirm after the active Wallet account switches',async()=>{
+  const BOB='0x3333333333333333333333333333333333333333';
+  const provider=new FakeProvider({accounts:[BOB,ALICE]});
+  const c=client(provider);
+  await assert.rejects(c.verifySession(),/no longer authorized or active/);
+  await assert.rejects(c.sendVote({proposalId:PROPOSAL,house:0,support:1}),/no longer authorized or active/);
+  assert.equal(provider.sent.length,0,'secondary previously authorized EOA cannot submit a ballot');
+  await assert.rejects(c.confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),/account changed/);
+});
+
+test('revoked active signer after nonce retrieval prevents Governance wallet approval',async()=>{
+  const BOB='0x3333333333333333333333333333333333333333';
+  const provider=new FakeProvider();
+  const original=provider.request.bind(provider);
+  provider.request=async(method,params=[])=>{
+    const result=await original(method,params);
+    if(method==='eth_getTransactionCount')provider.accounts=[BOB,ALICE];
+    return result;
+  };
+  await assert.rejects(client(provider).sendVote({proposalId:PROPOSAL,house:0,support:1}),/no longer authorized or active/);
+  assert.equal(provider.sent.length,0,'revoked account reached eth_sendTransaction');
 });

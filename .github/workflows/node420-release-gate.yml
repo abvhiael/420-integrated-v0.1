@@ -1,6 +1,7 @@
 name: node420 Release Gate
 
 on:
+  workflow_call:
   workflow_dispatch:
   pull_request:
     paths:
@@ -77,6 +78,9 @@ jobs:
       - name: Real execution crash, reconstruction and batch atomicity
         run: python3 scripts/qualify-execution-recovery.py --solc "$RUNNER_TEMP/solc-0.8.24" --output "$RUNNER_TEMP/execution-recovery"
 
+      - name: Verify real source-compiled 90/10 native reward issuance and settlement on patched node420
+        run: python3 scripts/qualify-gov-pre-04-native-geth.py --solc "$RUNNER_TEMP/solc-0.8.24" --output "$RUNNER_TEMP/gov-pre04-native-settlement"
+
       - name: Configure authenticated TLS witness fixture
         env:
           CONTAINER: ${{ job.services.postgres.id }}
@@ -113,6 +117,10 @@ jobs:
           for evidence in "$RUNNER_TEMP"/execution-recovery/*.json "$RUNNER_TEMP"/execution-recovery/*.log; do
             [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/recovery/
           done
+          mkdir -p artifacts/node420-release-gate/native-settlement
+          for evidence in "$RUNNER_TEMP"/gov-pre04-native-settlement/*.json "$RUNNER_TEMP"/gov-pre04-native-settlement/*.log; do
+            [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/native-settlement/
+          done
           mkdir -p artifacts/node420-release-gate/consensus-recovery
           for evidence in "$RUNNER_TEMP"/consensus-recovery/*.json "$RUNNER_TEMP"/consensus-recovery/*.log; do
             [ ! -f "$evidence" ] || cp "$evidence" artifacts/node420-release-gate/consensus-recovery/
@@ -123,6 +131,27 @@ jobs:
               cp "$RUNNER_TEMP/consensus-recovery/$state/"*.json "artifacts/node420-release-gate/consensus-recovery/$state/"
             fi
           done
+
+      - name: Bind shared-local-network runtime binaries to exact source build
+        if: success()
+        run: |
+          mkdir -p artifacts/node420-release-gate
+          sha256sum bin/node420 bin/upstream/geth-v1.17.5-420 bin/fourtwentyd bin/settlement-fixture bin/indexer420 > artifacts/node420-release-gate/unified-local-executables.sha256
+
+      - name: Upload exact-head native binaries for single-chain GOV-PRE-08 integration
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govpre08-native-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          compression-level: 0
+          if-no-files-found: error
+          path: |
+            bin/node420
+            bin/upstream/geth-v1.17.5-420
+            bin/fourtwentyd
+            bin/settlement-fixture
+            bin/indexer420
+            artifacts/node420-release-gate/unified-local-executables.sha256
 
       - name: Upload release-gate evidence
         if: always()

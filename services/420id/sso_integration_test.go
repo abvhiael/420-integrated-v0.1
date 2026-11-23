@@ -17,7 +17,7 @@ import (
 
 func ssoIntegrationAuth(t *testing.T,db *sql.DB)(*Auth,*testMailer,*SessionManager){
  t.Helper()
- store,e:=NewStore(db,[]string{"bong-goggles","doobtube","420town"})
+ store,e:=NewStore(db,[]string{"bong-goggles","doobtube","420town","420wallet"})
  if e!=nil{t.Fatal(e)}
  mail:=&testMailer{}
  auth,e:=NewAuth(store,mail,testOrigin,testRP);if e!=nil{t.Fatal(e)}
@@ -27,6 +27,7 @@ func ssoIntegrationAuth(t *testing.T,db *sql.DB)(*Auth,*testMailer,*SessionManag
 func ssoIntegrationClients()[]SSOClient{return []SSOClient{
  {App:"doobtube",Name:"DoobTube",RedirectURI:"https://doobtube.420integrated.org/auth/420id/callback",Secret:encodeBytes([]byte(strings.Repeat("x",32)))},
  {App:"420town",Name:"420Town",RedirectURI:"https://town.420integrated.org/auth/420id/callback",Secret:encodeBytes([]byte(strings.Repeat("y",32)))},
+ {App:"420wallet",Name:"420Wallet",RedirectURI:"https://wallet.420integrated.org/420id-api/auth/callback",Secret:encodeBytes([]byte(strings.Repeat("w",32)))},
 }}
 func ssoCode(t *testing.T,redirect string)string{
  t.Helper()
@@ -155,4 +156,35 @@ func TestSSOExpiredAndInvalidCodeNoSession(t *testing.T){
  if _,e=s.Exchange(ctx,client,code,verifier,client.redirect);!errors.Is(e,ErrAuthentication){t.Fatal("expired authorization code redeemed",e)}
  var count int
  if e=db.QueryRowContext(ctx,"SELECT count(*) FROM account420.sessions WHERE app_id='doobtube' AND account_id=$1",freshEmailAccountID(t,a,mail,id+"@example.org")).Scan(&count);e!=nil||count!=0{t.Fatal("expired code created session",e,count)}
+}
+
+func TestWalletRealVerifiedEmailSSOGrantAndParentSessionRevocation(t *testing.T){
+ ctx:=context.Background();db:=sessionDB(t)
+ auth,mail,source:=ssoIntegrationAuth(t,db)
+ s,e:=NewSSOManager(source,ssoIntegrationClients());if e!=nil{t.Fatal(e)}
+ wallet,e:=s.CheckClient("420wallet",ssoIntegrationClients()[2].Secret);if e!=nil{t.Fatal(e)}
+ emailID,_:=newID()
+ central:=mustIssueSession(t,source,freshEmail(t,auth,mail,emailID+"@example.org").Proof)
+ request,pkce:=ssoUnitRequest(t,wallet)
+ if _,e=s.Authorize(ctx,central.Token,request,false,mustRandom(t));!errors.Is(e,ErrInvalid){
+  t.Fatal("Wallet SSO without explicit central consent granted",e)
+ }
+ authorized,e:=s.Authorize(ctx,central.Token,request,true,mustRandom(t));if e!=nil{t.Fatal(e)}
+ session,e:=s.Exchange(ctx,wallet,ssoCode(t,authorized.RedirectURI),pkce,wallet.redirect)
+ if e!=nil||session.Session.Method!="sso"||session.Session.Subject.App!="420wallet"||
+  session.Session.Subject.ID==central.Session.Subject.ID||session.AccessToken==central.Token{
+  t.Fatal("Wallet did not receive independent real 420ID app-scoped identity",e)
+ }
+ if _,e=s.Exchange(ctx,wallet,ssoCode(t,authorized.RedirectURI),pkce,wallet.redirect);!errors.Is(e,ErrAuthentication){
+  t.Fatal("SSO one-time authorization replay accepted",e)
+ }
+ active,e:=s.Introspect(ctx,wallet,session.AccessToken)
+ if e!=nil||!active.Active||active.Subject==nil||active.Subject.App!="420wallet"{
+  t.Fatal("real wallet SSO introspection failed",active,e)
+ }
+ if e=s.LogoutAll(ctx,central.Token);e!=nil{t.Fatal(e)}
+ revoked,e:=s.Introspect(ctx,wallet,session.AccessToken)
+ if e!=nil||revoked.Active||revoked.Subject!=nil{
+  t.Fatal("source-session global revocation did not invalidate Wallet SSO",revoked,e)
+ }
 }

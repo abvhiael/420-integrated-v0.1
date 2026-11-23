@@ -124,6 +124,9 @@ func TestCertifiedHistoryAttributionReplacementAndFailClosed(t *testing.T) {
 		if _, ok, err = p.ProducerForBlock(string(old.Payload.BlockHash)); err != nil || ok {
 			t.Fatal("orphan attribution", err)
 		}
+		if err = p.ValidateIngestion(); err != nil {
+			t.Fatal("verified history must support ingestion without a future schedule", err)
+		}
 		if _, err = p.Consensus(); err == nil {
 			t.Fatal("invented future schedule")
 		}

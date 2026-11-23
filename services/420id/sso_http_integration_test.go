@@ -13,7 +13,7 @@ import (
 )
 func TestSSOHTTPConsentBackendIsolationAndLogout(t *testing.T){
  db:=sessionDB(t)
- store,e:=NewStore(db,[]string{"bong-goggles","doobtube","420town"});if e!=nil{t.Fatal(e)}
+ store,e:=NewStore(db,[]string{"bong-goggles","doobtube","420town","420wallet"});if e!=nil{t.Fatal(e)}
  mail:=&testMailer{}
  auth,e:=NewAuth(store,mail,testOrigin,testRP);if e!=nil{t.Fatal(e)}
  id,_:=newID();email:=id+"@example.org"

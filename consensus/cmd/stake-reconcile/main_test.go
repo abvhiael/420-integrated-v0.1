@@ -126,7 +126,7 @@ func TestAccountingCommandProcess(t *testing.T) {
 			}
 			if call.Data == ethhash.EventTopic("protocolVersion()")[:10] {
 				v := 2
-				if call.To == accounting.Registry {
+				if call.To == accounting.Registry || call.To == accounting.Reward {
 					v = 3
 				}
 				result = fmt.Sprintf("0x%064x", v)

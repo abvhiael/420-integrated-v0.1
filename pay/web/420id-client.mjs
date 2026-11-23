@@ -8,7 +8,8 @@ const ORIGINS=Object.freeze({
  '420grow':'https://grow.420integrated.org',
  '420pay':'https://420pay.420integrated.org',
  '420exchange':'https://420exchange.420integrated.org',
- '420launchpad':'https://launchpad.420integrated.org'
+ '420launchpad':'https://launchpad.420integrated.org',
+ '420wallet':'https://wallet.420integrated.org'
 });
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -46,7 +47,7 @@ export function createAppSessionClient({app,fetchImpl=fetch}={}){
 }
 export function mountAppSession({root,app,enabled=false,
  fetchImpl=fetch,origin=globalThis.location?.origin,
- visibilityDocument=globalThis.document}={}){
+ visibilityDocument=globalThis.document,onSessionChange=null}={}){
  if(!root)throw new Error('Missing 420ID panel');
  root.hidden=true;
  if(!enabled)return {enabled:false,invalidate(){}};
@@ -69,6 +70,7 @@ export function mountAppSession({root,app,enabled=false,
  };
  const invalidate=()=>{
   ++epoch;
+  if(typeof onSessionChange==='function')onSessionChange(null);
   display('420ID session not verified.');
  };
  async function read(){
@@ -78,11 +80,15 @@ export function mountAppSession({root,app,enabled=false,
   try{
    const state=await client.session();
    if(ticket!==epoch)return;
+   if(typeof onSessionChange==='function')onSessionChange(state.authenticated?state:null);
    display(state.authenticated?
     'Signed in to this app with 420ID. Wallet and paid permissions are separate.':
     'Not signed in. Public browsing remains available.',state.authenticated);
   }catch{
-   if(ticket===epoch)display('420ID status unavailable. No prior account is trusted.');
+   if(ticket===epoch){
+    if(typeof onSessionChange==='function')onSessionChange(null);
+    display('420ID status unavailable. No prior account is trusted.');
+   }
   }finally{busy=false}
  }
  async function signOut(){
@@ -92,6 +98,7 @@ export function mountAppSession({root,app,enabled=false,
   loggingOut=true;invalidate();busy=true;
   try{
    await client.logout();
+   if(typeof onSessionChange==='function')onSessionChange(null);
    display('Signed out of this app. Other application sessions are unchanged.');
   }catch{
    display('Sign-out could not be verified. Refresh your account status.');

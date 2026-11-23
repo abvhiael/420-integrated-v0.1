@@ -31,9 +31,10 @@ func TestAUTH13PinnedCatalogueAndAppSeparation(t *testing.T){
   actual,e:=ApprovedApp(a.ID)
   if e!=nil||actual!=a{t.Fatal("pinned app lookup failed",a.ID,e)}
   if !strings.HasSuffix(a.Origin,".420integrated.org"){t.Fatal("untrusted origin",a.Origin)}
+  if a.ID=="420wallet" && (a.Origin!="https://wallet.420integrated.org"||a.Capability!="account-only-no-signing-authority"){t.Fatal("Wallet 420ID app must remain account-only",a)}
   if a.Capability==""{t.Fatal("undefined authority boundary",a.ID)}
  }
- for _,id:=range []string{"evil","BONG-GOGGLES","", "../420pay","420wallet"}{
+ for _,id:=range []string{"evil","BONG-GOGGLES","", "../420pay","420unknown"}{
   if _,e=ApprovedApp(id);!errors.Is(e,ErrInvalid){t.Fatal("unapproved app accepted",id,e)}
  }
 }
@@ -84,7 +85,7 @@ func TestAUTH13ConfidentialProviderBoundary(t *testing.T){
    req.Header.Get("Cookie")!=""||req.Header.Get("Origin")!=""{t.Fatal("bad confidential request",req.URL)}
   user,secret,ok:=req.BasicAuth()
   if !ok||user!="doobtube"||secret!=base64.RawURLEncoding.EncodeToString(cfg.ClientSecret){t.Fatal("bad app client")}
-  return &http.Response{StatusCode:200,Header:http.Header{"Content-Type":[]string{"application/json"}},Body:io.NopCloser(strings.NewReader(`{"active":false}`))},nil
+  return &http.Response{StatusCode:200,Header:http.Header{"Content-Type":[]string{"application/json; charset=utf-8"}},Body:io.NopCloser(strings.NewReader(`{"active":false}`))},nil
  })}
  g,e:=New(cfg);if e!=nil{t.Fatal(e)}
  var state introspection

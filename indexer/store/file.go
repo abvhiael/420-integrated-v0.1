@@ -23,6 +23,10 @@ type FileStore struct {
 	data      fileState
 	committed []byte
 	failed    error
+	// PostgreSQL backend hooks reuse the exact bundle/rollback/finality logic.
+	// Only the atomic durable commit changes. Nil hooks retain file semantics.
+	persistFn func([]byte) error
+	closeFn   func() error
 }
 
 type fileState struct {
@@ -54,8 +58,17 @@ func NewFileStore(path string) (*FileStore, error) {
 	if err := json.Unmarshal(b, &s.data); err != nil {
 		return nil, fmt.Errorf("decode indexer store: %w", err)
 	}
+	if err := s.validateLoadedState(); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+// validateLoadedState applies the same finality and native-log identity
+// checks when reopening a file or PostgreSQL-backed canonical snapshot.
+func (s *FileStore) validateLoadedState() error {
 	if s.data.Version != 1 {
-		return nil, fmt.Errorf("unsupported indexer store version %d", s.data.Version)
+		return fmt.Errorf("unsupported indexer store version %d", s.data.Version)
 	}
 	if s.data.Blocks == nil {
 		s.data.Blocks = map[uint64]model.BlockRecord{}
@@ -75,7 +88,7 @@ func NewFileStore(path string) (*FileStore, error) {
 	for _, entry := range s.data.Logs {
 		key := logKey(entry)
 		if _, exists := normalized[key]; exists {
-			return nil, errors.New("duplicate durable log identity")
+			return errors.New("duplicate durable log identity")
 		}
 		normalized[key] = entry
 	}
@@ -89,17 +102,17 @@ func NewFileStore(path string) (*FileStore, error) {
 	if cp := s.data.Checkpoint; cp != nil {
 		block, ok := s.data.Blocks[cp.IndexedHeight]
 		if !ok || block.Hash != cp.IndexedHash || block.ChainID != cp.ChainID || cp.FinalizedHeight > cp.IndexedHeight {
-			return nil, errors.New("indexer checkpoint does not match durable canonical history")
+			return errors.New("indexer checkpoint does not match durable canonical history")
 		}
 		if cp.FinalizedHash != "" {
 			finalized, ok := s.data.Blocks[cp.FinalizedHeight]
 			if !ok || finalized.Hash != cp.FinalizedHash {
-				return nil, ErrFinalizedMutation
+				return ErrFinalizedMutation
 			}
 		}
 	}
 	s.committed, _ = json.Marshal(s.data)
-	return s, nil
+	return nil
 }
 
 func emptyFileState() fileState {
@@ -118,6 +131,13 @@ func (s *FileStore) persistLocked() (err error) {
 	}()
 	if s.failed != nil {
 		return s.failed
+	}
+	if s.persistFn != nil {
+		b, marshalErr := json.Marshal(s.data)
+		if marshalErr != nil { return marshalErr }
+		if err := s.persistFn(b); err != nil { return err }
+		s.committed = append([]byte(nil), b...)
+		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(s.path), 0o755); err != nil {
 		return err
@@ -439,4 +459,13 @@ func logKey(lg model.LogRecord) string {
 }
 func assetTransferKey(t model.AssetTransferRecord) string {
 	return fmt.Sprintf("%s:%d:%s:%s:%s:%s", strings.ToLower(t.TransactionHash), t.LogIndex, strings.ToLower(t.AssetKey), strings.ToLower(t.From), strings.ToLower(t.To), t.Amount)
+}
+
+// Close safely releases an optional PostgreSQL connection. File-based stores
+// remain compatible and require no explicit close operation.
+func (s *FileStore) Close() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closeFn != nil { return s.closeFn() }
+	return nil
 }

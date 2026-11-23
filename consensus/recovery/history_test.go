@@ -54,7 +54,7 @@ func certified(t *testing.T, trust Trust, keys []*bls.SecretKey, parent *Record,
 	if e != nil {
 		t.Fatal(e)
 	}
-	h := ct.ConsensusBlock{Slot: slot, ParentConsensusRoot: pr, CommitteeRoot: trust.CommitteeRoot, LatestQC: pq, ExecutionPayloadHash: [32]byte{hash}, SystemCallBatchRoot: b.Root()}
+	h := ct.ConsensusBlock{Slot: slot, Rotation: slot / ct.SlotsPerRotation, ParentConsensusRoot: pr, CommitteeRoot: trust.CommitteeRoot, LatestQC: pq, ExecutionPayloadHash: [32]byte{hash}, SystemCallBatchRoot: b.Root()}
 	qc := ct.QuorumCertificate{Slot: slot, BlockRoot: h.HashTreeRoot(), ParentRoot: pr, CommitteeRoot: trust.CommitteeRoot, ProtocolVersion: 1, SignerBitmap: []byte{255, 7}}
 	root := cc.SigningRoot(cc.DomainQC, 420, 1, qc.SigningDataRoot())
 	var sigs []ct.BLSSignature
@@ -192,5 +192,76 @@ func TestHistoryStrictJSON(t *testing.T) {
 		if e := Decode([]byte(raw), &h); e == nil {
 			t.Fatalf("accepted %s", raw)
 		}
+	}
+}
+
+func TestCertifiedRotationHandoffRequiresPinnedConsecutiveBoundary(t *testing.T) {
+	trust, keys := fixture(t)
+	trust.LastRotation = 2
+	sig, _ := ProductionSignatures()
+	v := newView(trust)
+	first := certified(t, trust, keys, nil, 0, 1, 20)
+	if _, _, err := v.add(trust, sig, first); err != nil {
+		t.Fatal(err)
+	}
+	for _, slot := range []uint64{ct.SlotsPerRotation + 1, 2 * ct.SlotsPerRotation} {
+		record := certified(t, trust, keys, &first, 1, slot, 21)
+		if _, _, err := v.add(trust, sig, record); err == nil {
+			t.Fatalf("unauthenticated rotation jump accepted at slot %d", slot)
+		}
+	}
+	handoff := certified(t, trust, keys, &first, 1, ct.SlotsPerRotation, 22)
+	single := trust
+	single.LastRotation = 0
+	if _, _, err := v.add(single, sig, handoff); err == nil {
+		t.Fatal("single-rotation trust accepted a later rotation")
+	}
+	if _, _, err := v.add(trust, sig, handoff); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCertifiedRotationChangesAuthorizedSigners(t *testing.T) {
+	trust, keys := fixture(t)
+	trust.LastRotation = 1
+	next := trust
+	next.CommitteeRoot = ct.Root{4}
+	next.Members = append([]Member(nil), trust.Members...)
+	nextKeys := append([]*bls.SecretKey(nil), keys...)
+	seed := sha256.Sum256([]byte("independent incoming validator"))
+	sk, pk, err := bls.SecretFromIKM(seed[:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	pop, err := sk.ProofOfPossession(pk)
+	if err != nil {
+		t.Fatal(err)
+	}
+	next.Members[0] = Member{PublicKey: pk, Proof: pop}
+	nextKeys[0] = sk
+	trust.Committees = []RotationCommittee{{Rotation: 1, Root: next.CommitteeRoot, Members: next.Members}}
+	sig, err := ProductionSignatures()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := trust.Validate(sig); err != nil {
+		t.Fatal(err)
+	}
+	v := newView(trust)
+	first := certified(t, trust, keys, nil, 0, 1, 20)
+	if _, _, err := v.add(trust, sig, first); err != nil {
+		t.Fatal(err)
+	}
+	for _, retired := range []Record{
+		certified(t, trust, keys, &first, 1, ct.SlotsPerRotation, 21),
+		certified(t, next, keys, &first, 1, ct.SlotsPerRotation, 22),
+	} {
+		if _, _, err := v.add(trust, sig, retired); err == nil {
+			t.Fatal("accepted retired signer or retired committee")
+		}
+	}
+	handoff := certified(t, next, nextKeys, &first, 1, ct.SlotsPerRotation, 23)
+	if _, _, err := v.add(trust, sig, handoff); err != nil {
+		t.Fatal(err)
 	}
 }

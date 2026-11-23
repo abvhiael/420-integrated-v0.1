@@ -49,8 +49,10 @@ func (s *upstreamState) reply(t *testing.T,app string)transport{
   result:=map[string]any{}
   switch r.URL.Path{
   case "/v1/sso/token":
+   approved,approvalError:=ApprovedApp(app)
+   if approvalError!=nil{t.Error("unapproved central SSO app",approvalError)}
    if body["code"]!=encode(bytes.Repeat([]byte{67},32))||len(body["codeVerifier"])!=43||
-    body["redirectUri"]!="https://town.420integrated.org/420id-api/auth/callback"{
+    body["redirectUri"]!=approved.Origin+APIPath+"auth/callback"{
     t.Error("invalid exchange binding")
    }
    result=map[string]any{"accessToken":encode(bytes.Repeat([]byte{84},32)),"tokenType":"Bearer",
@@ -190,5 +192,61 @@ func TestAUTH13InvalidPeerAndOriginFailBeforeProvider(t *testing.T){
   if tc.origin!=""{req.Header.Set("Origin",tc.origin)}
   w:=httptest.NewRecorder();g.ServeHTTP(w,req)
   if w.Code!=tc.want{t.Fatal(tc.path,w.Code,tc.want)}
+ }
+}
+
+func TestWalletRealBrowserSSOSessionRevocationAndBackendIntrospection(t *testing.T){
+ db:=integrationDB(t)
+ state:=&upstreamState{active:true,requests:map[string]int{}}
+ cfg:=sampleConfig("420wallet");cfg.DB=db
+ cfg.Client=&http.Client{Transport:state.reply(t,"420wallet")}
+ first,e:=New(cfg);if e!=nil{t.Fatal(e)}
+ second,e:=New(cfg);if e!=nil{t.Fatal(e)}
+ request:=func(method,path string)*http.Request{
+  r:=httptest.NewRequest(method,"https://wallet.420integrated.org"+path,nil)
+  r.TLS=nil;r.RemoteAddr="198.51.100.251:32001"
+  r.Header.Set("X-Forwarded-Proto","https")
+  return r
+ }
+ begin:=httptest.NewRecorder()
+ first.ServeHTTP(begin,request("GET",APIPath+"auth/start"))
+ if begin.Code!=303{t.Fatal("wallet SSO did not start",begin.Code,begin.Body.String())}
+ redirected,e:=url.Parse(begin.Header().Get("Location"));if e!=nil{t.Fatal(e)}
+ if redirected.Query().Get("app")!="420wallet"||
+  redirected.Query().Get("redirect_uri")!="https://wallet.420integrated.org/420id-api/auth/callback"||
+  redirected.Query().Get("code_challenge_method")!="S256"||redirected.Query().Get("code_challenge")==""{
+  t.Fatal("wallet SSO redirect not confined to verified Wallet origin",redirected)
+ }
+ flow:=begin.Result().Cookies()
+ if len(flow)!=1||!flow[0].HttpOnly||!flow[0].Secure{t.Fatal("missing private SSO browser flow cookie")}
+ callback:=APIPath+"auth/callback?code="+encode(bytes.Repeat([]byte{67},32))+"&state="+redirected.Query().Get("state")
+ cb:=request("GET",callback);cb.AddCookie(flow[0])
+ finish:=httptest.NewRecorder();second.ServeHTTP(finish,cb)
+ if finish.Code!=303||finish.Header().Get("Location")!="https://wallet.420integrated.org/"{
+  t.Fatal("no confidential Wallet SSO token exchange",finish.Code,finish.Body.String())
+ }
+ var appCookie *http.Cookie
+ for _,cookie:=range finish.Result().Cookies(){if cookie.Name==CookieSession{appCookie=cookie}}
+ if appCookie==nil||!appCookie.HttpOnly||!appCookie.Secure||appCookie.SameSite!=http.SameSiteLaxMode{
+  t.Fatal("missing HttpOnly Wallet SSO cookie")
+ }
+ sessionRequest:=request("GET",APIPath+"auth/session");sessionRequest.AddCookie(appCookie)
+ verified:=httptest.NewRecorder();first.ServeHTTP(verified,sessionRequest)
+ if verified.Code!=200||!strings.Contains(verified.Body.String(),`"app":"420wallet"`)||
+   !strings.Contains(verified.Body.String(),`"authenticated":true`)||
+   !strings.Contains(verified.Body.String(),`"financialAuthority":false`)||
+   strings.Contains(verified.Body.String(),encode(bytes.Repeat([]byte{84},32))){
+  t.Fatal("Wallet app SSO session leaked or was not validated",verified.Code,verified.Body.String())
+ }
+ // Source revocation (including global sign-out/passkey recovery) is checked
+ // live by the confidential gateway. Old cookies never survive introspection.
+ state.mu.Lock();state.active=false;state.mu.Unlock()
+ withdrawn:=httptest.NewRecorder();second.ServeHTTP(withdrawn,sessionRequest)
+ if withdrawn.Code!=200||!strings.Contains(withdrawn.Body.String(),`"authenticated":false`){
+  t.Fatal("revoked central Wallet SSO session remains usable",withdrawn.Code,withdrawn.Body.String())
+ }
+ repeat:=httptest.NewRecorder();first.ServeHTTP(repeat,sessionRequest)
+ if repeat.Code!=200||!strings.Contains(repeat.Body.String(),`"authenticated":false`){
+  t.Fatal("revocation did not propagate across Wallet gateway instances")
  }
 }

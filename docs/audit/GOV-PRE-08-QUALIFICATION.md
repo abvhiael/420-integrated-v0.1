@@ -2,6 +2,16 @@
 
 **Scope:** founder/Treasury/sponsorship/compensation/retirement integration, funding allocation, V4 Genesis proposal, seven dependent consumers and cold-start/recovery. **This is not a completed GOV-PRE-08 release or a replacement of the signed Genesis authority.**
 
+## GOV-PRE-08 Step 3 local integration qualified
+
+[PR #1338](https://github.com/abvhiael/420-integrated-v0.1/pull/1338)
+closed the same-ledger payout, native Stake Indexer and protected committee
+handoff cases. The [Step 3 implementation and qualification ledger](GOV-PRE-08-STEP3-IMPLEMENTATION.md#latest-qualification-status)
+identifies the exact-head source, retained qualification artifacts, cold-start
+reproduction and financial reconciliation. Earlier sections retain their
+historical evidence. The [testnet roadmap](420GOVERNANCE-TESTNET-WORK-ROADMAP.md#network-only-gov-audit-9-evidence-not-local-step-3-acceptance)
+owns the genuinely network-dependent verification.
+
 ## Source and actual runs
 
 - Authoritative repository: `abvhiael/420-integrated-v0.1`.

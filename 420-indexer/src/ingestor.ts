@@ -11,6 +11,7 @@ export interface IndexedBlockBatch420 {
   transactions: IndexerTransaction[];
   receipts: IndexerReceipt[];
   logs: IndexerLog[];
+  nativeLogs?: IndexerLog[];
 }
 export interface BlockConsumer420 { applyBlock(batch: IndexedBlockBatch420): Promise<void>; rollbackTo?(blockNumber: bigint | null): Promise<void>; }
 export interface DurableBlockConsumer420 extends BlockConsumer420 {
@@ -112,7 +113,8 @@ export class IndexerIngestor420 {
         receipts.push(receipt);
       }
       const logs = normalizeLogs420(await this.source.getLogs({ fromBlock: blockNumber, toBlock: blockNumber }));
-      for (const row of [...transactions, ...receipts, ...logs]) {
+      const nativeLogs = await this.source.getNativeLogs?.(block);
+      for (const row of [...transactions, ...receipts, ...logs, ...(nativeLogs ?? [])]) {
         if (row.blockNumber !== block.number || row.blockHash.toLowerCase() !== block.hash.toLowerCase()) throw new Error('mixed canonical block bundle');
       }
       const canonical = await this.source.getBlockByNumber(blockNumber);
@@ -126,7 +128,7 @@ export class IndexerIngestor420 {
         nextCheckpoint.finalizedNumber = block.number;
         nextCheckpoint.finalizedHash = block.hash;
       }
-      const batch = { chainId, block, transactions, receipts, logs };
+      const batch = { chainId, block, transactions, receipts, logs, ...(nativeLogs ? { nativeLogs } : {}) };
       if (durable) {
         await durable.applyBlockDurably(batch, nextCheckpoint);
       } else {

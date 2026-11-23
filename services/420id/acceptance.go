@@ -15,6 +15,8 @@ import (
  "net/http"
  "strings"
  "time"
+
+ "github.com/420integrated/420-integrated/services/420id/internal/browserorigin"
 )
 
 //go:embed browser.mjs acceptance.html acceptance.mjs acceptance.css session.html session.mjs profile.html profile-session.mjs profile-ui.mjs wallet.html wallet-session.mjs wallet-ui.mjs identity.html identity-session.mjs identity-ui.mjs sso.html sso-session.mjs sso-ui.mjs monetization.html monetization-ui.mjs
@@ -178,7 +180,7 @@ func (h *AcceptanceHandler) ServeHTTP(w http.ResponseWriter,r *http.Request){
  case "/v1/monetization/status","/v1/monetization/consent":if h.monetization==nil{deny(w,404);return}
  default:deny(w,404);return}
  // Exact Origin, no credentialed CORS, no alternate host or cross-site POST.
- if len(r.Header.Values("Origin"))!=1||r.Header.Get("Origin")!=h.auth.origin||r.Header.Get("Sec-Fetch-Site")!=""&&r.Header.Get("Sec-Fetch-Site")!="same-origin"{deny(w,403);return}
+ if !browserorigin.SameOrigin(r,h.auth.origin){deny(w,403);return}
  typ,params,e:=mime.ParseMediaType(r.Header.Get("Content-Type"));if e!=nil||typ!="application/json"||len(params)!=0&&!(len(params)==1&&strings.EqualFold(params["charset"],"utf-8"))||r.Header.Get("Content-Encoding")!=""{deny(w,415);return}
  digest,e:=browserDigest(r);if e!=nil{deny(w,403);return}
  ctx,cancel:=context.WithTimeout(r.Context(),15*time.Second);defer cancel()

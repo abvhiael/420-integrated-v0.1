@@ -1,0 +1,247 @@
+name: GOV-PRE-08 Step 3 unsigned V4 materialization and local recovery
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/gov-pre-08/**'
+      - 'wallet/web/scripts/qualify-gov-pre08-browser.mjs'
+      - 'services/420id/**'
+      - 'indexer/consensusview/**'
+      - 'indexer/cmd/indexer420/**'
+      - 'wallet/web/420id-session-ui.mjs'
+      - 'wallet/web/420id-client.mjs'
+      - 'wallet/web/governance-management-ui.js'
+      - 'services/420id/app-gateway/client.mjs'
+      - 'contracts/test/fixtures/GOVPRE08BrowserElectorate420.sol'
+      - 'consensus/cmd/certified-producer/**'
+      - 'consensus/signing/**'
+      - 'integration/cmd/settlement-fixture/**'
+      - 'contracts/config/candidates/genesis-config-commitment-v4-unsigned.json'
+      - 'contracts/src/governance/Founding*.sol'
+      - 'contracts/src/treasury/**'
+      - 'contracts/src/revenue/**'
+      - 'contracts/src/vault/**'
+      - 'contracts/test/GOVPRE08CivicLifecycle420.t.sol'
+      - 'wallet/web/core/governance-management.js'
+      - 'wallet/web/governance-management-ui.js'
+      - 'wallet/web/test/governance-management.test.js'
+      - '.github/workflows/governance-pre-08-step-3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gov-pre-08-step3-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Reuse the actual node420 release gate at this identical git HEAD: pinned
+  # patched Geth, authenticated Engine JWT, native RewardController settlement,
+  # consensus certified-settlement, TLS-backed protected signer and recovery.
+  # Its fixture evidence is NOT approval of the independent V4 ceremony.
+  authenticated-node420-settlement:
+    uses: ./.github/workflows/node420-release-gate.yml
+
+  # The third job does not replay independent simulations. It imports the
+  # actually funded local contract state into patched Geth and observes an
+  # authenticated BLS-certified 420 block through real indexer/Explorer APIs.
+  unified-native-application-chain:
+    needs: [materialize-replay-recover, authenticated-node420-settlement]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      INDEXER_PG_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+      signing_postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signing
+          POSTGRES_PASSWORD: qualification-only
+          POSTGRES_DB: signing
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U signing -d signing"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.x'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Build real PostgreSQL Indexer for the single certified chain
+        run: |
+          (cd 420-indexer && npm ci --ignore-scripts --no-audit --no-fund && npm run build)
+      - name: Download exact-head funded local V4-shaped contract state
+        uses: actions/download-artifact@v4
+        with:
+          name: govpre08-step3-unsigned-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/govpre08-source
+      - name: Download already-qualified patched native binaries (no second Geth rebuild)
+        uses: actions/download-artifact@v4
+        with:
+          name: govpre08-native-runtime-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .
+      - name: Prove signed source head and binary SHA before execution
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          sha256sum -c artifacts/node420-release-gate/unified-local-executables.sha256
+          chmod +x bin/node420 bin/upstream/geth-v1.17.5-420 bin/fourtwentyd bin/settlement-fixture bin/indexer420
+          go test ./indexer/rpc -run 'TestBundle(HashOnlyCanonicalLookup|RejectsMalformedHashOnlyTransaction)' -count=1
+          go test ./indexer/store -run 'TestPostgresStore' -count=1
+          go test -tags blst ./indexer/consensusview ./indexer/cmd/indexer420
+          go build -o bin/explorer420 ./explorer/cmd/explorer420
+          go build -tags blst -o bin/certified-producer ./consensus/cmd/certified-producer
+          go build -tags blst -o bin/stake-signer ./consensus/cmd/stake-signer
+          go test -tags blst ./consensus/cmd/certified-producer -count=1
+      - name: Provision separately authenticated TLS PostgreSQL signing witnesses for fifteen live validators
+        env:
+          CONTAINER: ${{ job.services.signing_postgres.id }}
+        run: |
+          set -euo pipefail
+          tls_dir="$RUNNER_TEMP/gov-pre08-signing-pg"
+          mkdir -m 700 -p "$tls_dir"
+          tls_dir="$(realpath "$tls_dir")"
+          openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout "$tls_dir/server.key" -out "$tls_dir/server.crt" -days 1 -subj /CN=localhost -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1' >/dev/null 2>&1
+          chmod 600 "$tls_dir/server.key"
+          docker cp "$tls_dir/server.key" "$CONTAINER:/var/lib/postgresql/data/server.key"
+          docker cp "$tls_dir/server.crt" "$CONTAINER:/var/lib/postgresql/data/server.crt"
+          docker exec -u root "$CONTAINER" chown postgres:postgres /var/lib/postgresql/data/server.key /var/lib/postgresql/data/server.crt
+          docker exec -u root "$CONTAINER" chmod 600 /var/lib/postgresql/data/server.key
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "alter system set ssl=on"
+          docker exec -u postgres "$CONTAINER" psql -U signing -d signing -c "select pg_reload_conf()"
+          docker exec -i -u postgres "$CONTAINER" psql -U signing -d signing < consensus/signing/witness.sql
+          echo "STAKE_SIGNER_PG_DSN=postgresql://signing:qualification-only@127.0.0.1:5433/signing?sslmode=verify-full&sslrootcert=$tls_dir/server.crt&connect_timeout=5" >> "$GITHUB_ENV"
+      - name: Install only the Chromium browser dependencies for native injected-Wallet qualification
+        working-directory: wallet/web
+        run: |
+          npm install --no-save --no-package-lock playwright
+          npx playwright install --with-deps chromium
+      - name: Provision the isolated 420ID and Wallet gateway database
+        env:
+          INDEXER_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i -u postgres "$INDEXER_POSTGRES_CONTAINER" psql -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE govpre08_wallet LOGIN PASSWORD 'qualification-only';
+          CREATE DATABASE account420_test;
+          SQL
+          echo 'ACCOUNT420_TEST_DSN=postgres://postgres:postgres@127.0.0.1:5432/account420_test?sslmode=disable' >> "$GITHUB_ENV"
+          echo 'GOVPRE08_WALLET_DATABASE_URL=postgres://govpre08_wallet:qualification-only@127.0.0.1:5432/account420_test?sslmode=disable' >> "$GITHUB_ENV"
+          echo 'GOVPRE08_BROWSER_IDENTITY=local-only' >> "$GITHUB_ENV"
+          go test -tags account420_integration -c -o "$RUNNER_TEMP/govpre08-browser-identity" ./services/420id
+          echo "GOVPRE08_BROWSER_IDENTITY_BIN=$RUNNER_TEMP/govpre08-browser-identity" >> "$GITHUB_ENV"
+      - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
+        run: |
+          python3 scripts/gov-pre-08/qualify-unified-local-node420.py \
+            --genesis "$RUNNER_TEMP/govpre08-source/govpre08-step3-unified-local-node420-genesis.json" \
+            --graph "$RUNNER_TEMP/govpre08-source/govpre08-step3-graph-a.json" \
+            --bindings "$RUNNER_TEMP/govpre08-source/govpre08-step3-native-bindings-a.json" \
+            --funding "$RUNNER_TEMP/govpre08-source/govpre08-step3-funding-a.json" \
+            --workdir "$RUNNER_TEMP/govpre08-unified-chain-420" \
+            --output "$RUNNER_TEMP/govpre08-unified-local-report.json"
+      - name: Retain exact-head authentic local-chain receipts, native logs and service checks
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govpre08-unified-local-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/govpre08-unified-local-report.json
+            ${{ runner.temp }}/govpre08-unified-chain-420/*.json
+            ${{ runner.temp }}/govpre08-unified-chain-420/*.log
+            ${{ runner.temp }}/govpre08-unified-chain-420/consensus/*.json
+
+  materialize-replay-recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      FOUNDRY_PROFILE: pr
+      EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+      INDEXER_PG_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: v1.10.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Verify Wallet Civic vote confirmation against canonical chain, code, identity and reorg
+        run: node --test wallet/web/test/governance-management.test.js
+      - name: Materialize canonical unsigned V4 and prove local cold-start, replay and recovery
+        run: bash scripts/gov-pre-08/qualify-step3.sh
+      - name: Retain exact-head unsigned source and local receipt/state witnesses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: govpre08-step3-unsigned-${{ github.event.pull_request.head.sha || github.sha }}
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/govpre08-step3-v4-a/
+            ${{ runner.temp }}/govpre08-step3-genesis.json
+            ${{ runner.temp }}/govpre08-step3-genesis-source.json
+            ${{ runner.temp }}/govpre08-step3-imports.json
+            ${{ runner.temp }}/govpre08-step3-foundry-*.log
+            ${{ runner.temp }}/govpre08-step3-civic-*.log
+            ${{ runner.temp }}/govpre08-step3-state-*.json
+            ${{ runner.temp }}/govpre08-step3-native-bindings-*.json
+            ${{ runner.temp }}/govpre08-step3-unified-local-node420-*.json
+            ${{ runner.temp }}/govpre08-step3-funding-*.json
+            ${{ runner.temp }}/govpre08-step3-graph-*.json
+            ${{ runner.temp }}/govpre08-step3-indexer-*.json
+            ${{ runner.temp }}/govpre08-step3-descriptors-*.json
+            ${{ runner.temp }}/govpre08-step3-postgres-*.json
+            ${{ runner.temp }}/govpre08-step3-wallet-*.json
+            ${{ runner.temp }}/govpre08-step3-explorer-*.json
+            ${{ runner.temp }}/govpre08-step3-explorer-*.log
+            ${{ runner.temp }}/govpre08-step3-explorer-html-*.html
+            ${{ runner.temp }}/govpre08-step3-bridge-*.log
+            ${{ runner.temp }}/govpre08-consensus/
+            ${{ runner.temp }}/govpre08-step3-local-*.json
+            ${{ runner.temp }}/govpre08-step3-recovery-*.json
+            ${{ runner.temp }}/govpre08-step3-node-*.log
+            ${{ runner.temp }}/govpre08-step3-restarted-*.log

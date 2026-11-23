@@ -15,6 +15,7 @@ import (
  "database/sql"
  "embed"
  "encoding/base64"
+ "encoding/binary"
  "encoding/json"
  "errors"
  "io"
@@ -25,6 +26,8 @@ import (
  "regexp"
  "strings"
  "time"
+
+ "github.com/420integrated/420-integrated/services/420id/internal/browserorigin"
 )
 
 const (
@@ -158,6 +161,9 @@ func decode(v string)([]byte,error){
  return out,nil
 }
 func digest(v []byte)[32]byte{return sha256.Sum256(v)}
+// Session locks serialize status and logout across gateway instances while
+// keeping UPDATE privileges off the cookie sessions table.
+func sessionLockKey(digest [32]byte)int64{return int64(binary.BigEndian.Uint64(digest[:8]))}
 func (g *Gateway) seal(plain []byte)([]byte,error){
  block,e:=aes.NewCipher(g.key[:]);if e!=nil{return nil,e}
  aead,e:=cipher.NewGCM(block);if e!=nil{return nil,e}
@@ -177,8 +183,7 @@ func (g *Gateway) secure(r *http.Request)bool{
  return r.Host==u.Host&&(r.TLS!=nil||g.proxy&&len(r.Header.Values("X-Forwarded-Proto"))==1&&r.Header.Get("X-Forwarded-Proto")=="https")&&r.URL.RawPath==""&&!r.URL.ForceQuery
 }
 func (g *Gateway) sameOrigin(r *http.Request)bool{
- return len(r.Header.Values("Origin"))==1&&r.Header.Get("Origin")==g.App.Origin&&
- (r.Header.Get("Sec-Fetch-Site")==""||r.Header.Get("Sec-Fetch-Site")=="same-origin")
+ return browserorigin.SameOrigin(r,g.App.Origin)
 }
 func cookie(r *http.Request,name string)string{
  n:=0;value:=""
@@ -224,7 +229,9 @@ func (g *Gateway) upstream(ctx context.Context,path string,input any,dst any)err
  resp,e:=g.httpClient.Do(req);if e!=nil{return ErrUnavailable}
  defer resp.Body.Close()
  typ,params,e:=mime.ParseMediaType(resp.Header.Get("Content-Type"))
- if e!=nil||typ!="application/json"||len(params)!=0||resp.StatusCode!=200{return ErrUnavailable}
+ if e!=nil||typ!="application/json"||
+  len(params)!=0&&(len(params)!=1||!strings.EqualFold(params["charset"],"utf-8"))||
+  resp.StatusCode!=200{return ErrUnavailable}
  body,e:=io.ReadAll(io.LimitReader(resp.Body,8193));if e!=nil||len(body)>8192{return ErrUnavailable}
  dec:=json.NewDecoder(bytes.NewReader(body));dec.DisallowUnknownFields()
  if dec.Decode(dst)!=nil||dec.Decode(&struct{}{})!=io.EOF{return ErrUnavailable}
@@ -267,9 +274,10 @@ func (g *Gateway) Current(ctx context.Context,r *http.Request)(string,error){
  tx,e:=g.db.BeginTx(ctx,nil)
  if e!=nil{return "",ErrUnavailable}
  defer tx.Rollback()
+ if _,e=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock_shared($1)",sessionLockKey(d));e!=nil{return "",ErrUnavailable}
  var sealed []byte;var subject string
  e=tx.QueryRowContext(ctx,`SELECT token_cipher,subject_id FROM app420_sso.sessions
- WHERE cookie_digest=$1 AND expires_at>clock_timestamp() FOR SHARE`,d[:]).Scan(&sealed,&subject)
+ WHERE cookie_digest=$1 AND expires_at>clock_timestamp()`,d[:]).Scan(&sealed,&subject)
  if errors.Is(e,sql.ErrNoRows){return "",ErrNotAuthenticated}
  if e!=nil{return "",ErrUnavailable}
  token,e:=g.open(sealed);if e!=nil{return "",ErrUnavailable}
@@ -360,11 +368,15 @@ func (g *Gateway) logout(ctx context.Context,w http.ResponseWriter,r *http.Reque
  clearCookie(w,CookieSession)
  raw,e:=decode(old);if e!=nil{jsonReply(w,200,map[string]bool{"signedOut":true});return}
  d:=digest(raw)
+ tx,e:=g.db.BeginTx(ctx,nil)
+ if e!=nil{deny(w,503);return}
+ defer tx.Rollback()
+ if _,e=tx.ExecContext(ctx,"SELECT pg_advisory_xact_lock($1)",sessionLockKey(d));e!=nil{deny(w,503);return}
  var sealed []byte
- e=g.db.QueryRowContext(ctx,`DELETE FROM app420_sso.sessions
+ e=tx.QueryRowContext(ctx,`DELETE FROM app420_sso.sessions
  WHERE cookie_digest=$1 RETURNING token_cipher`,d[:]).Scan(&sealed)
  if errors.Is(e,sql.ErrNoRows){jsonReply(w,200,map[string]bool{"signedOut":true});return}
- if e!=nil{deny(w,503);return}
+ if e!=nil||tx.Commit()!=nil{deny(w,503);return}
  token,e:=g.open(sealed);if e!=nil{deny(w,503);return}
  var result struct{Revoked bool `json:"revoked"`}
  if e=g.upstream(ctx,"/v1/sso/revoke",map[string]string{"token":string(token)},&result);e!=nil||!result.Revoked{

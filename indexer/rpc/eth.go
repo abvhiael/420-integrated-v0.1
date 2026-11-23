@@ -2,6 +2,8 @@ package rpc
 
 import (
 	"context"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"strings"
@@ -15,11 +17,13 @@ type rpcBlock struct {
 	Hash         string           `json:"hash"`
 	ParentHash   string           `json:"parentHash"`
 	Timestamp    string           `json:"timestamp"`
-	Transactions []rpcTransaction `json:"transactions"`
+	Transactions []json.RawMessage `json:"transactions"`
 }
 
 type rpcTransaction struct {
 	Hash             string `json:"hash"`
+	BlockHash        string `json:"blockHash"`
+	BlockNumber      string `json:"blockNumber"`
 	TransactionIndex string `json:"transactionIndex"`
 	From             string `json:"from"`
 	To               string `json:"to"`
@@ -105,10 +109,57 @@ func (c *Client) BundleByNumber(ctx context.Context, chainID uint64, number uint
 		return Bundle{}, err
 	}
 	bundle := Bundle{Block: model.BlockRecord{ChainID: chainID, Number: rn, Hash: raw.Hash, ParentHash: raw.ParentHash, Timestamp: ts, Finality: finality, SchemaVersion: schemaVersion}}
-	for _, tx := range raw.Transactions {
+	for position, wire := range raw.Transactions {
+		var tx rpcTransaction
+		if len(wire) == 0 {
+			return Bundle{}, fmt.Errorf("block %d contains empty transaction", number)
+		}
+		if wire[0] == '"' {
+			// Some authenticated Engine implementations return transaction hashes
+			// even when eth_getBlockByNumber(..., true) requests expanded objects.
+			// Resolve that hash through the SAME authenticated execution endpoint;
+			// do not treat missing or conflicting payloads as canonical records.
+			var txHash string
+			if err := json.Unmarshal(wire, &txHash); err != nil {
+				return Bundle{}, fmt.Errorf("decode block transaction hash: %w", err)
+			}
+			if len(txHash) != 66 || !strings.HasPrefix(txHash, "0x") {
+				return Bundle{}, fmt.Errorf("invalid block transaction hash at index %d", position)
+			}
+			if _, err := hex.DecodeString(txHash[2:]); err != nil {
+				return Bundle{}, fmt.Errorf("invalid block transaction hash hex: %w", err)
+			}
+			if err := c.executionCall(ctx, "eth_getTransactionByHash", []interface{}{txHash}, &tx); err != nil {
+				return Bundle{}, fmt.Errorf("fetch canonical transaction %s: %w", txHash, err)
+			}
+			if !strings.EqualFold(tx.Hash, txHash) {
+				return Bundle{}, fmt.Errorf("transaction hash lookup disagrees with block listing")
+			}
+		} else if wire[0] == '{' {
+			if err := json.Unmarshal(wire, &tx); err != nil {
+				return Bundle{}, fmt.Errorf("decode expanded block transaction: %w", err)
+			}
+		} else {
+			return Bundle{}, fmt.Errorf("unrecognized block transaction wire type")
+		}
+		if tx.Hash == "" || tx.From == "" || tx.TransactionIndex == "" {
+			return Bundle{}, fmt.Errorf("missing required transaction identity")
+		}
+		if tx.BlockHash != "" && !strings.EqualFold(tx.BlockHash, raw.Hash) {
+			return Bundle{}, fmt.Errorf("transaction lookup has wrong canonical block hash")
+		}
+		if tx.BlockNumber != "" {
+			blockHeight, err := parseHexUint64(tx.BlockNumber)
+			if err != nil || blockHeight != rn {
+				return Bundle{}, fmt.Errorf("transaction lookup has wrong canonical height")
+			}
+		}
 		ti, err := parseHexUint64(tx.TransactionIndex)
 		if err != nil {
 			return Bundle{}, err
+		}
+		if ti != uint64(position) {
+			return Bundle{}, fmt.Errorf("transaction index does not match block ordering")
 		}
 		valueWei, err := hexQuantityDecimal(tx.Value)
 		if err != nil {

@@ -7,6 +7,7 @@ import (
 	cc "github.com/420integrated/420-integrated/consensus/crypto"
 	"github.com/420integrated/420-integrated/consensus/slashing"
 	ct "github.com/420integrated/420-integrated/consensus/types"
+	"slices"
 )
 
 type Policy struct {
@@ -14,6 +15,7 @@ type Policy struct {
 	ProtocolVersion uint32
 	CommitteeRoot   ct.Root
 	Seat            uint16
+	Rotations       []uint64 `json:",omitempty"`
 }
 type Duty struct {
 	ChainID         uint64
@@ -34,7 +36,17 @@ func (p Policy) Validate() error {
 	if p.Identity.ChainID != ct.ChainID || p.Identity.Genesis == (ct.Root{}) || p.Identity.PublicKey == (ct.BLSPubkey{}) || p.ProtocolVersion != 1 || p.CommitteeRoot == (ct.Root{}) || p.Seat >= 30 {
 		return fmt.Errorf("invalid protected signing policy")
 	}
+	for i, rotation := range p.Rotations {
+		if i > 0 && rotation <= p.Rotations[i-1] {
+			return fmt.Errorf("protected signing rotations must be strictly increasing")
+		}
+	}
 	return nil
+}
+
+// AllowsRotation limits policies with an explicit activation schedule.
+func (p Policy) AllowsRotation(rotation uint64) bool {
+	return len(p.Rotations) == 0 || slices.Contains(p.Rotations, rotation)
 }
 
 // Root derives the signing root from a complete typed duty. Callers cannot
@@ -49,13 +61,13 @@ func (p Policy) Root(d Duty) (ct.Root, error) {
 	switch d.Kind {
 	case "proposal":
 		b := d.Proposal
-		if b == nil || d.Vote != nil || b.Slot == 0 || b.ProposerSeat != p.Seat || b.ProposerRank > 2 || b.CommitteeRoot != p.CommitteeRoot || b.ParentConsensusRoot == (ct.Root{}) || b.ExecutionPayloadHash == (ct.Root{}) || b.ConsensusStateRoot == (ct.Root{}) || b.SystemCallBatchRoot == (ct.Root{}) {
+		if b == nil || d.Vote != nil || b.Slot == 0 || b.ProposerSeat != p.Seat || b.ProposerRank > 2 || b.CommitteeRoot != p.CommitteeRoot || !p.AllowsRotation(b.Slot/ct.SlotsPerRotation) || (len(p.Rotations) > 0 && b.Rotation != b.Slot/ct.SlotsPerRotation) || b.ParentConsensusRoot == (ct.Root{}) || b.ExecutionPayloadHash == (ct.Root{}) || b.ConsensusStateRoot == (ct.Root{}) || b.SystemCallBatchRoot == (ct.Root{}) {
 			return ct.Root{}, slashing.ErrInvalidDuty
 		}
 		return cc.SigningRoot(cc.DomainBlockProposal, d.ChainID, d.ProtocolVersion, b.HashTreeRoot()), nil
 	case "attestation", "qc-vote":
 		v := d.Vote
-		if v == nil || d.Proposal != nil || v.Source.Slot >= v.Target.Slot || v.Target.Slot > v.Slot || v.BlockRoot == (ct.Root{}) || v.ParentRoot == (ct.Root{}) || v.Source.Root == (ct.Root{}) || v.Target.Root == (ct.Root{}) {
+		if v == nil || d.Proposal != nil || v.Source.Slot >= v.Target.Slot || v.Target.Slot > v.Slot || !p.AllowsRotation(v.Slot/ct.SlotsPerRotation) || v.BlockRoot == (ct.Root{}) || v.ParentRoot == (ct.Root{}) || v.Source.Root == (ct.Root{}) || v.Target.Root == (ct.Root{}) {
 			return ct.Root{}, slashing.ErrInvalidDuty
 		}
 		if d.Kind == "attestation" {

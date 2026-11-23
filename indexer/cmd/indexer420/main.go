@@ -55,7 +55,11 @@ func run() error {
 	}
 
 	storePath := os.Getenv("INDEXER_STORE_PATH")
-	if storePath == "" {
+	pgDSN := os.Getenv("INDEXER_PG_DSN")
+	if pgDSN != "" {
+		// Never print or retain credentials in operational status artifacts.
+		storePath = "POSTGRESQL_ATOMIC_V1"
+	} else if storePath == "" {
 		storePath = "./var/420indexer/index.json"
 	}
 
@@ -102,10 +106,16 @@ func run() error {
 	})
 	fmt.Println(string(out))
 
-	durable, err := store.NewFileStore(storePath)
+	var durable *store.FileStore
+	if pgDSN != "" {
+		durable, err = store.NewPostgresStore(pgDSN)
+	} else {
+		durable, err = store.NewFileStore(storePath)
+	}
 	if err != nil {
 		return err
 	}
+	defer durable.Close()
 	if rebuild {
 		if err := durable.Reset(); err != nil {
 			return fmt.Errorf("reset rebuildable index: %w", err)
@@ -178,7 +188,7 @@ func run() error {
 				fmt.Fprintf(os.Stderr, "420Indexer runtime source qualification failed: %v\n", err)
 				continue
 			}
-			if _, err := consensusProvider.Consensus(); err != nil {
+			if err := consensusProvider.ValidateIngestion(); err != nil {
 				runtimeHealth.MarkFailure("CONSENSUS_PROVIDER_UNAVAILABLE")
 				fmt.Fprintf(os.Stderr, "420Indexer consensus qualification failed: %v\n", err)
 				continue

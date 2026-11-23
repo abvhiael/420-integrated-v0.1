@@ -228,7 +228,8 @@ export function createGovernanceIndexer420({ baseUrl, fetchImpl = globalThis.fet
       const response = await fetchImpl(request);
       if (!response.ok) throw new Error(`Governance Indexer HTTP ${response.status}`);
       const payload = await response.json();
-      const items = Array.isArray(payload?.items) ? payload.items : Array.isArray(payload) ? payload : [];
+      const page = payload?.data ?? payload;
+      const items = Array.isArray(page?.items) ? page.items : Array.isArray(page) ? page : [];
       const ids = [];
       for (const item of items) {
         if (item?.eventName !== 'CivicProposalRegistered') continue;
@@ -274,7 +275,13 @@ export function createGovernance420Client({ provider, chainId, account, discover
     const chain = checkedChainId(await provider.request('eth_chainId'));
     if (chain !== expectedChain) throw new Error(`Wrong network: expected 0x${expectedChain.toString(16)}, received 0x${chain.toString(16)}`);
     const accounts = await provider.request('eth_accounts');
-    if (!Array.isArray(accounts) || !accounts.some((x) => typeof x === 'string' && x.toLowerCase() === voter)) throw new Error('Governance connected account is no longer authorized');
+    // EIP-1193 eth_accounts is ordered by the currently selected account.
+    // A previously authorized secondary account is NOT the active signer.
+    // Keeping it in the permission list must not let a stale tab vote for it.
+    if (!Array.isArray(accounts) || typeof accounts[0] !== 'string' ||
+        normalizeAddress(accounts[0]) !== voter) {
+      throw new Error('Governance connected account is no longer authorized or active');
+    }
 
     await verifyCode(provider,canonical.registryAddress,'ProtocolRegistry');
     const registryName = decodeStringResult(await call(provider,canonical.registryAddress,`0x${SELECTORS.systemName}`,voter),'registry system name');
@@ -423,24 +430,63 @@ export function createGovernance420Client({ provider, chainId, account, discover
     const fresh = await eligibility(id,h,proofData);
     if (!fresh.eligible || fresh.weight !== preflight.weight) throw new Error('Governance eligibility changed during vote preflight');
     const nonce = await provider.request('eth_getTransactionCount',[voter,'pending']);
+    // Last authorization boundary immediately before opening the wallet
+    // approval dialogue. Rejected/changed accounts cannot reach the signer.
+    await verifySession();
     const txHash = checkedHex(await provider.request('eth_sendTransaction',[tx]),'transaction hash',32);
     return { state:'submitted', txHash, nonce:BigInt(nonce), gas:BigInt(gas), proposalId:id, house:h, support:s, weight:fresh.weight };
   }
 
   async function confirmVote(submitted, { attempts=120, delayMs=250, replacementLookup=null } = {}) {
+    const transactionHash = checkedHex(submitted?.txHash,'submitted transaction hash',32);
     for (let i=0;i<attempts;i+=1) {
-      const receipt = await provider.request('eth_getTransactionReceipt',[submitted.txHash]);
+      // The account and network may change while a tab waits for inclusion.
+      // No receipt, including a successful one, can bypass that session boundary.
+      const currentChain = checkedChainId(await provider.request('eth_chainId'));
+      if (currentChain !== expectedChain) throw new Error('Governance chain changed during confirmation');
+      const accounts = await provider.request('eth_accounts');
+      if (!Array.isArray(accounts) || typeof accounts[0] !== 'string' ||
+          normalizeAddress(accounts[0]) !== voter) {
+        throw new Error('Governance account changed during confirmation');
+      }
+      const receipt = await provider.request('eth_getTransactionReceipt',[transactionHash]);
       if (receipt) {
-        if (receipt.status !== '0x1') return { state:'failed', txHash:submitted.txHash, receipt };
-        return { state:'confirmed', txHash:submitted.txHash, receipt };
+        if (checkedHex(receipt.transactionHash,'receipt transaction hash',32)!==transactionHash) {
+          throw new Error('Governance transaction receipt hash mismatch');
+        }
+        if (normalizeAddress(receipt.from)!==voter || normalizeAddress(receipt.to)!==modules.voting) {
+          throw new Error('Governance transaction receipt sender or target mismatch');
+        }
+        const status = typeof receipt.status === 'string' ? receipt.status.toLowerCase() : '';
+        if (status!=='0x00' && status!=='0x01' && status!=='0x0' && status!=='0x1') {
+          throw new Error('Governance malformed transaction status');
+        }
+        if (typeof receipt.blockNumber!=='string' || !/^0x[0-9a-fA-F]+$/.test(receipt.blockNumber)) {
+          throw new Error('Governance receipt missing canonical block number');
+        }
+        const blockHash = checkedHex(receipt.blockHash,'receipt block hash',32);
+        const canonical = await provider.request('eth_getBlockByNumber',[receipt.blockNumber,false]);
+        if (!canonical || checkedHex(canonical.hash,'canonical block hash',32)!==blockHash) {
+          return { state:'reorged', txHash:transactionHash, receipt };
+        }
+        // Recheck the full canonical component/code graph after the receipt;
+        // a changed Registry or malicious chain switch must never be accepted.
+        await verifySession();
+        if (status==='0x0' || status==='0x00') {
+          return { state:'failed', txHash:transactionHash, receipt };
+        }
+        return { state:'confirmed', txHash:transactionHash, receipt };
       }
       if (typeof replacementLookup === 'function') {
-        const replacement = await replacementLookup({ from:voter, nonce:submitted.nonce, txHash:submitted.txHash });
-        if (replacement?.txHash && replacement.txHash.toLowerCase() !== submitted.txHash) return { state:'replaced', txHash:submitted.txHash, replacementHash:checkedHex(replacement.txHash,'replacement transaction hash',32) };
+        const replacement = await replacementLookup({ from:voter, nonce:submitted.nonce, txHash:transactionHash });
+        if (replacement?.txHash && replacement.txHash.toLowerCase() !== transactionHash) {
+          return { state:'replaced', txHash:transactionHash,
+            replacementHash:checkedHex(replacement.txHash,'replacement transaction hash',32) };
+        }
       }
       if (delayMs > 0) await new Promise((resolve)=>setTimeout(resolve,delayMs));
     }
-    return { state:'pending', txHash:submitted.txHash };
+    return { state:'pending', txHash:transactionHash };
   }
 
   return Object.freeze({ modules, account:voter, discovery:canonical, verifySession, proposal, listProposals, ballot, eligibility, reviewActionBatch, sendVote, confirmVote });

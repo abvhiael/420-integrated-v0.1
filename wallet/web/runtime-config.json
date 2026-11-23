@@ -51,5 +51,11 @@
     "rewardControllerAddress": null
   },
   "treasury": null,
-  "token": null
+  "token": null,
+  "identitySession": {
+    "app": "420wallet",
+    "enabled": false,
+    "gatewayPath": "/420id-api",
+    "authority": "confidential-app-gateway-only"
+  }
 }

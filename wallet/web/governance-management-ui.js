@@ -6,13 +6,21 @@ import {
   GOVERNANCE420_SUPPORT,
 } from './core/governance-management.js';
 import { InjectedProvider420 } from './core/provider.js';
+import {guardWallet420IDProvider,verifyWallet420IDSession,wallet420IDSessionState} from './420id-session-ui.mjs';
 
 let context=null;
 let selected=null;
 let busy=false;
-let lifecycleBound=false;
+let lifecycleDetach=[];
+let wallet420IDBound=false;
 let eligibleVote=null;
 let sessionEpoch=0;
+let pendingVoteHash=null;
+function requireLive(captured,epoch,identityGeneration){
+  if(!captured||context!==captured||sessionEpoch!==epoch||
+     identityGeneration!==wallet420IDSessionState().generation)
+    throw new Error('420ID session or connected wallet changed during browser operation; reconnect required');
+}
 const $=(selector)=>document.querySelector(selector);
 const fmt=(value)=>value==null?'—':String(value);
 const pct=(bps)=>`${(Number(bps)/100).toFixed(2)}%`;
@@ -113,7 +121,8 @@ function setBusy(value){
         eligibleVote.epoch!==sessionEpoch;
       return;
     }
-    button.disabled=value||!context||(!selected&&button.id!=='governance-refresh');
+    const requiresProposal=button.id!=='governance-refresh'&&!button.classList.contains('governance-proposal-row');
+    button.disabled=value||!context||(requiresProposal&&!selected);
   });
 }
 function clearDetail(){
@@ -123,8 +132,17 @@ function clearDetail(){
 }
 function invalidate(reason){
   sessionEpoch+=1;
-  context=null;clearDetail();setAppState('Reload required');setTx('Wallet state changed',reason);
-  $('#governance-error-recovery').textContent='Recovery: reconnect and reload canonical Governance state before continuing.';
+  context=null;clearDetail();
+  $('#governance-account').textContent='—';
+  $('#governance-governor').textContent='—';
+  $('#governance-network').textContent='—';
+  $('#governance-proposal-list').replaceChildren();
+  const pending=pendingVoteHash?
+    ' A transaction may already have been broadcast: '+pendingVoteHash+
+    '. Inspect its canonical receipt and current ballot before any retry; never resubmit automatically.':'';
+  pendingVoteHash=null;
+  setAppState('Reload required');setTx('Wallet authorization changed',reason+pending,'pending');
+  $('#governance-error-recovery').textContent='Recovery: reconnect and reload canonical Governance state before continuing.'+pending;
   setBusy(false);
 }
 async function loadRuntime(){
@@ -182,7 +200,10 @@ async function connect(){
   const epoch=sessionEpoch;
   if(!globalThis.ethereum)throw new Error('No injected EIP-1193 wallet found');
   const config=await loadRuntime();
-  const provider=new InjectedProvider420(globalThis.ethereum);
+  // 420ID is only the first-party application session: it supplies no
+  // wallet address, signature, gas, voting weight or on-chain rights.
+  await verifyWallet420IDSession();
+  const provider=guardWallet420IDProvider(new InjectedProvider420(globalThis.ethereum));
   let accounts=await provider.request('eth_accounts');
   if(!Array.isArray(accounts)||!accounts.length)accounts=await provider.requestAccounts();
   if(!Array.isArray(accounts)||!accounts.length)throw new Error('No account authorized for 420 Governance');
@@ -190,13 +211,18 @@ async function connect(){
   const indexer=createGovernanceIndexer420({baseUrl:config.governance.indexerUrl});
   const client=createGovernance420Client({provider,chainId:config.network.chainId,account,discovery:config.governance.discovery,indexer});
   await client.verifySession();
+  await verifyWallet420IDSession();
   if(epoch!==sessionEpoch)throw new Error('Governance account changed during connection');
+  pendingVoteHash=null;
   context=Object.freeze({config,provider,account,client});
-  if(!lifecycleBound){
-    provider.on('accountsChanged',()=>invalidate('The connected wallet account changed.'));
-    provider.on('chainChanged',()=>invalidate('The connected wallet network changed.'));
-    lifecycleBound=true;
-  }
+  for(const detach of lifecycleDetach)detach();
+  lifecycleDetach=[];
+  const onAccountsChanged=()=>invalidate('The connected wallet account changed.');
+  const onChainChanged=()=>invalidate('The connected wallet network changed.');
+  const onDisconnected=()=>invalidate('The wallet provider disconnected.');
+  if(provider.on('accountsChanged',onAccountsChanged))lifecycleDetach.push(()=>provider.removeListener('accountsChanged',onAccountsChanged));
+  if(provider.on('chainChanged',onChainChanged))lifecycleDetach.push(()=>provider.removeListener('chainChanged',onChainChanged));
+  if(provider.on('disconnect',onDisconnected))lifecycleDetach.push(()=>provider.removeListener('disconnect',onDisconnected));
   $('#governance-account').textContent=account;
   $('#governance-governor').textContent=client.modules.governor;
   $('#governance-network').textContent=config.network.name||config.network.chainId;
@@ -205,10 +231,24 @@ async function connect(){
   if(epoch!==sessionEpoch)throw new Error('Governance account changed during connection');
   setBusy(false);
 }
+async function reverifyBrowserSession(){
+  const captured=context,epoch=sessionEpoch,identityGeneration=wallet420IDSessionState().generation;
+  if(!captured)return;
+  try{
+    await verifyWallet420IDSession();
+    await captured.client.verifySession();
+    requireLive(captured,epoch,identityGeneration);
+  }catch{
+    if(context===captured&&sessionEpoch===epoch)invalidate('The wallet, 420ID session, network or canonical contract identity could not be reverified.');
+  }
+}
 async function withRecovery(button,action){
-  if(busy)return;setBusy(true);$('#governance-error-recovery').textContent='';
+  if(busy)return;
+  const originalEpoch=sessionEpoch;
+  setBusy(true);$('#governance-error-recovery').textContent='';
   try{await action();}
   catch(error){
+    if(originalEpoch!==sessionEpoch)return;
     eligibleVote=null;
     const classified=classifyGovernance420Error(error);setAppState('Action blocked');setTx('Action blocked',classified.message);
     $('#governance-error-recovery').textContent=`Recovery: ${classified.retryable?'reload current account/network/proposal state and retry. ':''}${classified.message}`;
@@ -220,6 +260,7 @@ async function checkEligibility(){
   eligibleVote=null;
   const requestContext=context, proposalId=selected.proposalId, epoch=sessionEpoch;
   const house=Number($('#governance-house').value),proofData=$('#governance-proof').value.trim()||'0x';
+  await verifyWallet420IDSession();
   const result=await requestContext.client.eligibility(proposalId,house,proofData);
   if(context!==requestContext||epoch!==sessionEpoch||selected?.proposalId!==proposalId||
       house!==Number($('#governance-house').value)||proofData!==($('#governance-proof').value.trim()||'0x')) {
@@ -234,21 +275,43 @@ async function checkEligibility(){
   return result;
 }
 async function submitVote(button){
-  if(!selected)throw new Error('Select a Governance proposal first');
+  const captured=context,epoch=sessionEpoch,proposal=selected;
+  const identityGeneration=wallet420IDSessionState().generation;
+  requireLive(captured,epoch,identityGeneration);
+  if(!proposal)throw new Error('Select a Governance proposal first');
   const support=Number(button.dataset.governanceSupport),house=Number($('#governance-house').value),proofData=$('#governance-proof').value.trim()||'0x';
-  const eligibility=await checkEligibility();if(!eligibility.eligible)throw new Error('connected account is not eligible to vote');
+  const eligibility=await checkEligibility();
+  requireLive(captured,epoch,identityGeneration);
+  if(selected!==proposal||!eligibility.eligible)throw new Error('Governance account or proposal eligibility changed');
   const label=GOVERNANCE420_SUPPORT[support];
   if(globalThis.confirm&&!globalThis.confirm(`Submit ${label} vote in the ${GOVERNANCE420_HOUSES[house]} house with weight ${eligibility.weight}? Wallet will revalidate before approval.`))return;
+  requireLive(captured,epoch,identityGeneration);
   setAppState('Submitting','pending');setTx('Preflighting vote','Simulating, estimating gas, and revalidating account/network/weight.','pending');
-  const submitted=await context.client.sendVote({proposalId:selected.proposalId,house,support,proofData});
+  const submitted=await captured.client.sendVote({proposalId:proposal.proposalId,house,support,proofData});
+  // Authorization can change inside a wallet approval prompt after a tx
+  // broadcast. Do not claim a confirmation or repeat an uncertain transaction.
+  pendingVoteHash=submitted.txHash;
+  requireLive(captured,epoch,identityGeneration);
   setAppState('Submitted','pending');setTx('Vote submitted',`${submitted.txHash} · waiting for confirmation`,'pending');
-  const outcome=await context.client.confirmVote(submitted);
+  const outcome=await captured.client.confirmVote(submitted);
+  await verifyWallet420IDSession();
+  requireLive(captured,epoch,identityGeneration);
   if(outcome.state==='confirmed'){
+    pendingVoteHash=null;
     setAppState('Confirmed','passed');setTx('Vote confirmed',outcome.txHash,'passed');
-    renderDetail(await context.client.proposal(selected.proposalId));await checkEligibility();
+    const detail=await captured.client.proposal(proposal.proposalId);
+    requireLive(captured,epoch,identityGeneration);
+    renderDetail(detail);
+    await checkEligibility();
+    requireLive(captured,epoch,identityGeneration);
   }else if(outcome.state==='failed'){
+    pendingVoteHash=null;
     setAppState('Failed');setTx('Vote failed','Transaction reverted. Nothing will be automatically resubmitted.');
+  }else if(outcome.state==='reorged'){
+    pendingVoteHash=null;
+    setAppState('Reorged','pending');setTx('Vote receipt no longer canonical',`Transaction ${outcome.txHash} was reported in a displaced block. Reload confirmed chain state before retrying; no automatic resubmission.`,'pending');
   }else if(outcome.state==='replaced'){
+    pendingVoteHash=null;
     setAppState('Replaced','pending');setTx('Vote transaction replaced',`Replacement: ${outcome.replacementHash}. Reload chain state before retrying.`,'pending');
   }else{
     setAppState('Pending','pending');setTx('Confirmation uncertain',`${outcome.txHash} is still pending. Do not resubmit until chain state is reloaded.`,'pending');
@@ -257,7 +320,11 @@ async function submitVote(button){
 function reviewActions(){
   if(!selected)throw new Error('Select a Governance proposal first');
   let actions;try{actions=JSON.parse($('#governance-actions-json').value);}catch{throw new Error('Action batch must be valid JSON');}
-  return context.client.reviewActionBatch(selected.proposalId,actions,context.config.governance.abiMetadata||{}).then((review)=>{
+  const captured=context,epoch=sessionEpoch,proposal=selected,identityGeneration=wallet420IDSessionState().generation;
+  requireLive(captured,epoch,identityGeneration);
+  return captured.client.reviewActionBatch(proposal.proposalId,actions,captured.config.governance.abiMetadata||{}).then((review)=>{
+    requireLive(captured,epoch,identityGeneration);
+    if(selected!==proposal)throw new Error('Governance proposal changed during action review');
     const root=$('#governance-action-review');root.replaceChildren();
     const summary=document.createElement('p');summary.className='muted';summary.textContent=review.fullyDecoded?'Commitment matched and all actions decoded with qualified ABI metadata.':'Commitment matched, but one or more actions lack ABI metadata. Review remains read-only and explicitly undecoded.';
     root.append(summary);
@@ -269,6 +336,15 @@ function reviewActions(){
   });
 }
 export function installGovernance420Ui(){
+  if(!wallet420IDBound&&typeof window!=='undefined'){
+    window.addEventListener('wallet420id:invalidated',()=>invalidate('The authenticated 420ID browser session changed or was revoked.'));
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='hidden'&&context)invalidate('The browser was backgrounded; reverify authorization after return.');
+      else if(document.visibilityState==='visible')void reverifyBrowserSession();
+    });
+    window.addEventListener('focus',()=>{if(context)void reverifyBrowserSession();});
+    wallet420IDBound=true;
+  }
   if($('#governance-management-panel'))return;
   const main=document.querySelector('main.shell')||document.querySelector('main');if(!main)return;
   const anchor=$('#services-section')||$('#status');const wrapper=document.createElement('div');wrapper.innerHTML=governanceMarkup();

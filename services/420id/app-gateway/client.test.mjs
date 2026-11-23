@@ -106,6 +106,26 @@ test('AUTH-13 hidden-tab invalidation clears private status before delayed reply
  assert.equal(elements.get('logout').hidden,true);
  assert.doesNotMatch(elements.get('status').textContent,/Signed in to this app/);
 });
+test('420Wallet SSO client is the audited confidential app-only client; wallet session is not signing authority',async()=>{
+ const wallet=await readFile(new URL('../../../wallet/web/420id-client.mjs',import.meta.url),'utf8');
+ assert.equal(wallet,await readFile(new URL('./client.mjs',import.meta.url),'utf8'));
+ const html=await readFile(new URL('../../../wallet/web/index.html',import.meta.url),'utf8');
+ assert.match(html,/data-420id-enabled="false"/);
+ assert.match(html,/src="\.\/420id-session-ui\.mjs"/);
+ const app='420wallet';
+ const validWallet={authenticated:true,app,subject,financialAuthority:false,permissions:[]};
+ const client=createAppSessionClient({app,fetchImpl:async()=>response(validWallet)});
+ assert.deepEqual(await client.session(),{authenticated:true,app,subject});
+ for(const forged of [
+   {...validWallet,app:'420pay'},
+   {...validWallet,subject:'0x'+'0'.repeat(40)},
+   {...validWallet,financialAuthority:true},
+   {...validWallet,permissions:['governance-vote']},
+ ]){
+   assert.throws(()=>validateAppSession(forged,app));
+ }
+});
+
 test('AUTH-13 every packaged web client is identical and starts disabled',async()=>{
  const expected=await readFile(new URL('./client.mjs',import.meta.url),'utf8');
  for(const dir of ['town','doobtube','mail','grow','pay','exchange','media']){

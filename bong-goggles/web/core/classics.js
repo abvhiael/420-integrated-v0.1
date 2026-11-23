@@ -14,7 +14,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([
   item('cribbage','Cribbage','2–4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
-  item('russian-cribbage','Russian Cribbage','Variant-dependent','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
+  item('russian-cribbage','Russian Cribbage','2–4','registry','BC-2.1: 241 points and six-card hands. Four-player partnerships (default) or individual. Rules specified; live play not yet qualified.'),
   item('crazy-eights','Crazy Eights','2–4'),
   item('euchre','Euchre','4'),
   item('go-fish','Go Fish','2–4'),

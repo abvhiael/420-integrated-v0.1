@@ -33,7 +33,7 @@ export function verifyLabyrinthProjection(view){
   view.source!=='qualified-account-games'||view.gameId!=='labyrinth-cribbage'||
   view.rulesVersion!==LABYRINTH_RULES_VERSION||
   view.manifestHash!==LABYRINTH_MANIFEST_SHA||
-  !['active','finished'].includes(view.status)||
+  !['active','finished','resigned','timed_out','cancelled'].includes(view.status)||
   !number(view.sequence,1,100000000)||!number(view.seatCount,2,4)||
   !number(view.viewerSeat,0,view.seatCount-1)||
   !number(view.dealer,0,view.seatCount-1)||!number(view.round,1,100000)||
@@ -137,7 +137,7 @@ const previewSetup='<fieldset disabled aria-disabled="true"><legend>Game configu
  '<label>Four-player format <select name="format"><option selected>Partnerships (default)</option><option>Individual free-for-all</option></select></label>'+
  '<label>Computer strength <select name="difficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></label>'+
  '<button type="button" disabled>Start a verified 325-point match</button></fieldset>';
-export function renderLabyrinthScreen({screen='intro',view=null,selection=[],recoverable=[],sessionError=null}={}){
+export function renderLabyrinthScreen({screen='intro',view=null,session=null,selection=[],recoverable=[],sessionError=null}={}){
  const v=verifyLabyrinthProjection(view);
  const start='<section class="labyrinth-game" data-labyrinth-screen="'+esc(screen)+'"><header>'+
  '<h2>Labyrinth Cribbage</h2><p>325 points · original wood-slice labyrinth board</p></header>';
@@ -146,17 +146,28 @@ export function renderLabyrinthScreen({screen='intro',view=null,selection=[],rec
  const board=renderLabyrinthBoard({scores:v?.scores??[0,0],teams:v?
   labyrinthCribbageVariant(v.seatCount,v.variant==='labyrinth-4p-individual'?'individual':'partnerships').teams:
   [0,1],viewerSeat:v?.viewerSeat??0});
+ const canManage=v&&session?.id===v.sessionId&&session.status===v.status;
+ const ended=canManage&&session.status!=='active';
+ const matchControls=canManage?'<section class="lab-match-controls" aria-label="420ID human match controls">'+
+  '<p role="status">Server match '+esc(session.status)+' · verified sequence '+session.sequence+
+  (session.status==='active'&&session.deadline?' · turn deadline '+esc(new Date(session.deadline).toLocaleString()):'')+'</p>'+
+  '<p>Account-authorized human seats · server-owned scores and moves · reconnect from My Games.</p>'+
+  (session.status==='active'?'<button type="button" data-lab-lifecycle="resign">Resign match</button>':'')+
+  (ended?'<button type="button" data-lab-rematch>Invite rematch</button>':'')+
+  '</section>':'';
+ const outcome=ended?'<p role="status">Match ended: '+esc(session.finishedReason||session.status)+
+  (session.winnerSeat===null?' · no declared winner':' · winner seat '+(session.winnerSeat+1))+'</p>':'';
  if(screen==='intro')return start+'<p>Browse the approved board and rules. Live Play remains gated.</p>'+error+recovery+board+'</section>';
  if(screen==='rules')return start+'<section aria-label="325-point Labyrinth rules">'+ruleContent+'</section>'+board+'</section>';
  if(screen==='setup')return start+'<form class="labyrinth-setup">'+previewSetup+'</form>'+board+'</section>';
- if(screen==='play')return start+error+recovery+(v?renderLabyrinthTable({view:v,selection}):
+ if(screen==='play')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">No verified 420ID Labyrinth session. Do not expose a playable table or private cards.</p>')+'</section>';
- if(screen==='table')return start+error+recovery+(v?renderLabyrinthTable({view:v,selection}):
+ if(screen==='table')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">A server-authorized Labyrinth session is required to display a private hand.</p>')+'</section>';
- if(screen==='results')return start+(v?.status==='finished'?
-  '<h3>Match complete · winner seat '+(v.winnerSeat+1)+'</h3>'+board:
+ if(screen==='results')return start+error+recovery+outcome+matchControls+(ended?
+  board:
   '<p>No verified finished Labyrinth match.</p>')+'</section>';
- return start+'<p>Verified history and rematches will appear with account-session activation.</p></section>';
+ return start+error+recovery+outcome+matchControls+'<p>Open My Games to reconnect to a verified human match.</p></section>';
 }
 export function renderLabyrinthTable({view,selection=[]}={}){
  const v=verifyLabyrinthProjection(view);
@@ -172,7 +183,7 @@ export function renderLabyrinthTable({view,selection=[]}={}){
  const cardButtons=v.hand.map(c=>'<button type="button" data-lab-card="'+c+
   '" aria-pressed="'+(selected.has(c)?'true':'false')+'"'+
   (!turn||v.phase==='peg'&&!playable.has(c)?' disabled':'')+'>'+cardFace(c)+'</button>').join('');
- const action=v.phase==='discard'?'<button type="button" data-lab-action="discard"'+
+ const action=v.status!=='active'?'':v.phase==='discard'?'<button type="button" data-lab-action="discard"'+
   (discard?'':' disabled')+'>Send '+count+' card'+(count===1?'':'s')+' to crib</button>':
   v.phase==='peg'?'<button type="button" data-lab-action="play"'+
   (!(turn&&selected.size===1&&playable.has([...selected][0]))?' disabled':'')+'>Play selected card</button>'+
@@ -183,7 +194,7 @@ export function renderLabyrinthTable({view,selection=[]}={}){
   (i===v.dealer?' · dealer':'')+'</li>').join('');
  const cards=v.pegPile.map(cardFace).join('');
  return '<div class="lab-table"><div class="lab-table-main">'+
-  '<p role="status">Round '+v.round+' · '+esc(v.phase)+' · '+(turn?'Your turn':'Waiting for seat '+((v.turnSeat??0)+1))+'</p>'+
+  '<p role="status">Round '+v.round+' · '+esc(v.phase)+' · '+(v.status!=='active'?'Match '+esc(v.status):turn?'Your turn':'Waiting for seat '+((v.turnSeat??0)+1))+'</p>'+
   '<ol aria-label="Player seats">'+seats+'</ol>'+
   '<section aria-label="Public pegging count"><h3>Count '+v.pegCount+' / 31</h3><div>'+cards+'</div>'+
   '<p>Starter: '+(v.starter<0?'Face down':cardFace(v.starter))+
@@ -198,7 +209,7 @@ export function renderLabyrinthTable({view,selection=[]}={}){
 export function bindLabyrinthTable(root,{view,selection=[],onSelection=()=>{},onMove=null}={}){
  const v=verifyLabyrinthProjection(view);if(!v)return;
  const choose=id=>{
-  if(!v.hand.includes(id)||v.turnSeat!==v.viewerSeat)return;
+  if(v.status!=='active'||!v.hand.includes(id)||v.turnSeat!==v.viewerSeat)return;
   const next=new Set(selection.filter(card));
   if(next.has(id))next.delete(id);else if(v.phase==='peg'){next.clear();next.add(id)
   }else if(v.phase==='discard'){

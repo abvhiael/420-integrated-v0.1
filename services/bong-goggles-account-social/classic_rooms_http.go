@@ -22,9 +22,10 @@ func (h *Handler) classicRoomsHTTP(ctx context.Context,w http.ResponseWriter,r *
     GameID string `json:"gameId"`
     Visibility string `json:"visibility"`
     SeatCount int `json:"seatCount"`
+    Format string `json:"format,omitempty"`
    }
    if strictJSON(r,&req)!=nil{deny(w,400);return}
-   room,e:=h.Rooms.Create(ctx,viewer,req.GameID,req.Visibility,req.SeatCount)
+   room,e:=h.Rooms.CreateWithFormat(ctx,viewer,req.GameID,req.Visibility,req.SeatCount,req.Format)
    if e!=nil{classicRoomError(w,e);return}
    writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
   }

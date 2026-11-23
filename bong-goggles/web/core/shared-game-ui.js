@@ -3,6 +3,7 @@
 // independently authorized service adapter may supply a verified per-seat view.
 import {escapeHtml as esc} from './design-system.js';
 import {renderGameScoreboard,renderTurnIndicator,renderSharedTabletop} from './tabletop-components.js';
+import {renderLabyrinthScreen} from './labyrinth-cribbage-ui.js';
 
 export const GAME_SCREEN_IDS=Object.freeze(['intro','rules','play','setup','table','results','history','rematch']);
 export const GAME_SUBSCREENS=Object.freeze(GAME_SCREEN_IDS.filter(id=>id!=='intro'));
@@ -51,7 +52,7 @@ function rules(game,view){
  const content=verified?'<p class="games-screen__meta">Verified rulebook: '+esc(title||'Game rules')+'</p>'+
   '<ol class="games-screen__rules">'+paragraphs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':
   game.id==='labyrinth-cribbage'?notice('BC-2.1 rules documented; play not qualified',
-    'Labyrinth Cribbage: 241 points, six retained cards and six-card crib. Four-player partnerships (default) or individual scoring; live matches are not yet enabled.'):
+    'Labyrinth Cribbage: 325 points, six retained cards and six-card crib. Four-player partnerships (default) or individual scoring; live matches are not yet enabled.'):
   notice('Ruleset not yet published','Game-specific rules and scoring must be versioned and verified before play is enabled.');
  return section('Rules & variants','<p class="games-screen__meta">'+
   (view&&limited(view.variant)?'Active variant: '+esc(limited(view.variant)):
@@ -129,8 +130,12 @@ function rematch(view){
   blockedButton('Request rematch','Rematch invitations are not connected to an authorized service')+
   '<p><a href="/games" data-route="games">Back to Games</a></p>');
 }
-export function renderSharedGameScreen({game,screen='intro',view=null}={}){
+export function renderSharedGameScreen({game,screen='intro',view=null,labyrinthState=null}={}){
  if(!game||typeof game.id!=='string'||!GAME_SCREEN_IDS.includes(screen))throw new Error('Unsupported game screen');
+ // The 325-point Labyrinth has a separate private-seat schema and original
+ // approved board; never render it on the standard 121-point leaf board.
+ if(game.id==='labyrinth-cribbage')return '<div class="games-screen" data-game-screen="'+esc(screen)+'">'+
+  nav(game,screen)+renderLabyrinthScreen({screen,view:labyrinthState?.view??view,selection:labyrinthState?.selection??[],recoverable:labyrinthState?.recoverable??[],sessionError:labyrinthState?.error??null})+'</div>';
  const authorized=authorizedGameView(game,view);
  const screens={intro,rules,play,setup,table,results,history,rematch};
  const body=screen==='rules'?rules(game,authorized):screen==='play'?play(game):

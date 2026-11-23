@@ -1,0 +1,31 @@
+/* BC-2.4: dedicated responsive Labyrinth table without changing original PNG. */
+.labyrinth-game{padding:1rem;max-width:1500px;margin:auto}
+.labyrinth-game header h2{font-size:clamp(1.5rem,3vw,2.2rem);margin:0}
+.lab-table{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,1.25fr);gap:1.25rem;align-items:start}
+.lab-table-main{display:grid;gap:1rem;min-width:0}
+.lab-table-main section{border:1px solid var(--border,#5f6b58);border-radius:14px;padding:1rem}
+.lab-board{margin:0;min-width:0;max-width:100%}
+.lab-board-art{position:relative;width:100%;aspect-ratio:1;overflow:hidden;border-radius:14px;background:#352417}
+.lab-board-art img{display:block;width:100%;height:100%;object-fit:contain}
+/* SVG viewBox matches the immutable 1254-square image, so pegs remain aligned
+   at any mobile or desktop width; overlays never modify source pixels. */
+.lab-peg-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.lab-physical-peg{fill:#d92c29;stroke:#ffe0c1;stroke-width:2;filter:drop-shadow(0 2px 3px #16100b)}
+.lab-physical-peg--1{fill:#3cbb66;stroke:#e3ffdc}
+
+.lab-board figcaption{font-size:.88rem;padding:.55rem 0;line-height:1.4}
+.lab-board-scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:.4rem;padding:0;margin:.5rem 0;list-style:none}
+.lab-board-score{padding:.7rem;border:1px solid #655443;border-radius:10px;display:grid;gap:.2rem}
+.lab-board-score--you{outline:2px solid #d5b15a}
+.lab-board-score span{font-weight:700;font-variant-numeric:tabular-nums}
+.lab-cards{display:flex;flex-wrap:wrap;gap:.5rem}
+.lab-cards button{padding:.25rem;border-radius:9px;border:2px solid transparent;background:#163b35;color:#fff;min-width:3rem}
+.lab-cards button[aria-pressed="true"]{border-color:#efc46f;transform:translateY(-3px)}
+.lab-cards button:focus-visible,.lab-actions button:focus-visible{outline:3px solid #f6c56a;outline-offset:3px}
+.lab-card{display:inline-flex;align-items:center;justify-content:center;min-width:2.2rem;min-height:3.5rem;border-radius:.3rem;background:#fff4dc;color:#131a19;font-size:1.1rem;font-weight:700}
+.lab-card--red{color:#b12e2e}
+.lab-actions{display:flex;flex-wrap:wrap;gap:.65rem;margin-top:.6rem}
+.lab-actions button{min-height:44px;padding:.6rem .8rem}
+.lab-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:900px){.lab-table{grid-template-columns:1fr}.lab-board{max-width:780px;margin:0 auto}}
+@media(prefers-reduced-motion:reduce){.lab-cards button[aria-pressed="true"]{transform:none}}

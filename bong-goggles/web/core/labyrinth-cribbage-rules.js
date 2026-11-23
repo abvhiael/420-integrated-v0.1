@@ -4,7 +4,7 @@
 const define=(id,seatCount,teams,deal,discard,extra)=>Object.freeze({
  id,seatCount,teams:Object.freeze(teams),deal,discard,extra,retain:6,crib:6
 });
-export const LABYRINTH_CRIBBAGE_TARGET=241;
+export const LABYRINTH_CRIBBAGE_TARGET=325;
 export const LABYRINTH_CRIBBAGE_VARIANTS=Object.freeze({
  'labyrinth-2p':define('labyrinth-2p',2,[0,1],9,3,0),
  'labyrinth-3p':define('labyrinth-3p',3,[0,1,2],8,2,0),
@@ -160,13 +160,13 @@ export function labyrinthCribbageSequenceEnd(lastSeat,seatCount,count,allHandsEx
  return Object.freeze({seat:lastSeat,kind:allHandsExhausted?'last-card':'go',points:1});
 }
 export function labyrinthCribbageClassify(score){
- if(!Number.isSafeInteger(score)||score<0||score>=241)throw new RangeError('Invalid losing score');
- return score<=120?'double-skunk':score<=180?'skunk':'ordinary';
+ if(!Number.isSafeInteger(score)||score<0||score>=LABYRINTH_CRIBBAGE_TARGET)throw new RangeError('Invalid losing score');
+ return score<=162?'double-skunk':score<=243?'skunk':'ordinary';
 }
 export function labyrinthCribbageAward(scores,variantId,seat,points){
  const v=LABYRINTH_CRIBBAGE_VARIANTS[variantId];
  if(!v||!Array.isArray(scores)||scores.length!==v.seatCount||
-   !scores.every(s=>Number.isSafeInteger(s)&&s>=0&&s<241)||
+   !scores.every(s=>Number.isSafeInteger(s)&&s>=0&&s<LABYRINTH_CRIBBAGE_TARGET)||
    !Number.isInteger(seat)||seat<0||seat>=v.seatCount||
    !Number.isSafeInteger(points)||points<1)
   throw new RangeError('Invalid score award');
@@ -174,7 +174,7 @@ export function labyrinthCribbageAward(scores,variantId,seat,points){
   if(v.teams.some((t,j)=>j<i&&t===v.teams[i]&&scores[i]!==scores[j]))
    throw new RangeError('Inconsistent partnership scores');
  const team=v.teams[seat],next=scores.map((score,i)=>score+(v.teams[i]===team?points:0));
- const winner=next[seat]>=241?team:null,losses=[];
+ const winner=next[seat]>=LABYRINTH_CRIBBAGE_TARGET?team:null,losses=[];
  if(winner!==null)for(const other of new Set(v.teams)){
   if(other===team)continue;
   const otherSeat=v.teams.indexOf(other),score=next[otherSeat];

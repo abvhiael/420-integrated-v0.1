@@ -67,7 +67,7 @@ test('Arbitration Registry/deployment identity verified before event ingestion',
   const malicious=new ArbitrationChainFixture420();
   malicious[key]=true;
   await assert.rejects(verifyArbitrationIndexerDeployment420(malicious,ARB_PINS_420),
-   /mismatch|drift|invalid|noncanonical|aliased/);
+   /mismatch|drift|invalid|noncanonical|aliased|missing Arbitration deployed code/);
  }
  await assert.rejects(verifyArbitrationIndexerDeployment420(source,{...ARB_PINS_420,chainId:421n}),
   /chain mismatch/);

@@ -492,16 +492,16 @@ try{
    await arbitration.getByRole('button',{name:'Check canonical receipt'}).click();
    await page.waitForFunction(()=>document.querySelector('#arbitration-tx-status')?.textContent?.includes('Canonically confirmed'),
      null,{timeout:10000});
-   const layout=await page.evaluate(()=>({client:document.documentElement.clientWidth,
+   const arbitrationLayout=await page.evaluate(()=>({client:document.documentElement.clientWidth,
      scroll:document.documentElement.scrollWidth}));
-   assert.ok(layout.scroll<=layout.client+1,'Arbitration panel horizontal overflow');
+   assert.ok(arbitrationLayout.scroll<=arbitrationLayout.client+1,'Arbitration panel horizontal overflow');
    const arbAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#arbitration-management-panel'),
      {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
    assert.equal(arbAxe.violations.length,0,'Arbitration accessibility violations: '+
      arbAxe.violations.map(v=>v.id).join(', '));
    await page.screenshot({path:resolve(artifacts,'arbitration-'+width+'.png'),fullPage:true});
    console.log(JSON.stringify({width,arbitration:'PASS',canonicalCase:true,reviewedEvidence:true,
-     walletSubmittedOnlyAfterApproval:true,canonicalReceipt:true,axeViolations:arbAxe.violations.length,layout}));
+     walletSubmittedOnlyAfterApproval:true,canonicalReceipt:true,axeViolations:arbAxe.violations.length,arbitrationLayout}));
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

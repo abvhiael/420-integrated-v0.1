@@ -10,6 +10,8 @@ on:
       - 'wallet/web/core/arbitration-storage-bridge.js'
       - 'execution/storage/developer_http.go'
       - 'execution/storage/developer_http_test.go'
+      - 'execution/storage/arbitration_evidence_access.go'
+      - 'execution/storage/arbitration_evidence_access_test.go'
       - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
       - 'wallet/web/test/arbitration-storage-bridge.test.js'
       - 'wallet/web/arbitration-management-ui.js'
@@ -46,7 +48,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Verify existing 420Storage private Gateway no-store and auth regression
-        run: go test ./execution/storage -run '^TestDeveloperHTTP' -count=1
+        run: go test ./execution/storage -run '^(TestDeveloperHTTP|TestArbitrationEvidenceStorage)' -count=1
       - name: Parse Wallet private evidence and UI scripts
         run: |
           node --check wallet/web/core/arbitration-evidence.js

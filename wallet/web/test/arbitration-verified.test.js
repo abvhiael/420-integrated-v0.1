@@ -72,7 +72,7 @@ function fixture(){
       throw Error('unexpected ABI read '+key+' '+signature);
     }
   };
-  const release={chainId:420,version:1,genesisHash,registry:{address:ADDR.registry,codeHash:codeHash(CODE.registry)},
+  const release={serviceId:ARBITRATION_SERVICE_ID,chainId:420,version:1,genesisHash,registry:{address:ADDR.registry,codeHash:codeHash(CODE.registry)},
     metadataHash:metadata,manifestHash:manifest,interfaceHash};
   return {state,provider,release,client:()=>createVerifiedArbitrationWallet420({provider,release,account:addr(100)})};
 }
@@ -80,6 +80,7 @@ function fixture(){
 test('trusted release pins canonical Registry and complete commitments',()=>{
   const {release}=fixture();
   assert.equal(normalizeArbitrationRelease420(release).registry.address,ARBITRATION_REGISTRY_420);
+  assert.throws(()=>normalizeArbitrationRelease420({...release,serviceId:'420/service/other/v1'}),/service id mismatch/);
   assert.throws(()=>normalizeArbitrationRelease420({...release,registry:{address:addr(100),codeHash:h(1)}}),/noncanonical/);
   assert.throws(()=>normalizeArbitrationRelease420({...release,manifestHash:h(0)}),/invalid Arbitration hash/);
 });
@@ -206,4 +207,22 @@ test('reject malicious RPC mutation between initial service and final service re
     return undefined;
   };
   await assert.rejects(client().discover(),/changed while verifying/);
+});
+
+test('provider chain/account events invalidate even if a Wallet returns to the original chain',async()=>{
+  const {client,provider}=fixture();
+  const handlers=new Map();
+  provider.on=(event,handler)=>handlers.set(event,handler);
+  provider.removeListener=(event,handler)=>{
+    if(handlers.get(event)===handler)handlers.delete(event);
+  };
+  const wallet=client();
+  const token=await wallet.prepare('openCase');
+  handlers.get('chainChanged')('0x1');
+  await assert.rejects(wallet.confirm(token,{authorize:async()=>true}),/stale/);
+  const second=await wallet.prepare('openCase');
+  handlers.get('accountsChanged')([]);
+  await assert.rejects(wallet.confirm(second,{authorize:async()=>true}),/stale/);
+  wallet.dispose();
+  assert.equal(handlers.size,0);
 });

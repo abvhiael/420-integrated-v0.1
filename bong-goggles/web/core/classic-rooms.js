@@ -3,6 +3,7 @@ import {createAccountSocialClient,isSubjectID} from './account-social.js';
 import {CLASSIC_ROADMAP} from './classics.js';
 import {escapeHtml as esc} from './design-system.js';
 import {renderClassicRoomLive} from './classic-communications-ui.js';
+import {CRIBBAGE_RULES_HASH} from './cribbage-session.js';
 
 export const ROOM_LIMITS=Object.freeze({
 cribbage:[2,4],'russian-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
@@ -99,8 +100,22 @@ selected=normalizedRoom(verifiedEnvelope(detail,'room'),true);
 if(!selected||selected.id!==roomId)throw Error('Unverified room detail');
 }
 }
+let gameSession=null;
+if(selected?.gameId==='cribbage'&&['in_game','completed'].includes(selected.status)){
+ const r=await this.client.request('/v1/classic-sessions');
+ if(gen!==this.generation)return this.state;
+ if(r.status===401)return this.emit({status:'guest'});
+ const list=r.data?.sessions;
+ if(r.status===200&&r.data.onChain===false&&r.data.wager===false&&r.data.rewards===false&&
+ Array.isArray(list)&&list.length<=50){
+ const m=list.find(x=>x.roomId===selected.id&&x.gameId==='cribbage'&&id(x.id)&&
+ x.rulesHash===CRIBBAGE_RULES_HASH&&x.seatCount===selected.seatCount&&
+ ['active','finished','resigned','timed_out','cancelled'].includes(x.status));
+ if(m)gameSession={id:m.id,roomId:m.roomId};
+ }
+}
 return this.emit({status:'ready',viewer:me.data.profile.subject,
-rooms:safeRooms,friends,selected,notFound,notice:''});
+rooms:safeRooms,friends,selected,gameSession,notFound,notice:''});
 }catch{
 if(gen===this.generation)return this.emit({status:'error'});
 }
@@ -150,7 +165,7 @@ const view=normalizedRoom(returned,true);
 if(!view)throw Error('Unverified room update');
 return this.refresh(view.id);
 }catch(error){
-if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'}:
+if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action unconfirmed. Refresh 420ID.'}:
 {...current,notice:'Invalid room request. No action was submitted.'});
 throw error;
 }
@@ -174,7 +189,7 @@ const isHost=r.host===state.viewer;
 const hasSeat=r.seats.some(s=>s.subject===state.viewer);
 const friendOptions=state.friends.map(f=>'<option value="'+f.subject+'">'+esc(f.displayName)+'</option>').join('');
 const invite=(index)=>friendOptions?makeAction('invite',index,'Invite friend',
-'<label>Mutual friend<select name="target">'+friendOptions+'</select></label>'):'<small>Mutual 420ID friends required before sending an invitation.</small>';
+'<label>Mutual friend<select name="target">'+friendOptions+'</select></label>'):'<small>Mutual friends required.</small>';
 const bot=(index,value='medium')=>makeAction('bot',index,'Set computer seat',
 '<label>Computer strength<select name="difficulty">'+['easy','medium','hard'].map(d=>
 '<option value="'+d+'"'+(d===value?' selected':'')+'>'+esc(d[0].toUpperCase()+d.slice(1))+'</option>').join('')+'</select></label>');
@@ -202,9 +217,13 @@ const invites=isHost&&r.invites.length?'<details><summary>Invitation history</su
 '<li>Seat '+(i.seat+1)+' · '+esc(state.friends.find(f=>f.subject===i.target)?.displayName??'420ID member')+
 ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
 const roomLive=renderClassicRoomLive(r,live);
-const cribbageLink=r.gameId==='cribbage'&&live?.status==='connected'&&live.session?.id&&live.session?.roomId===r.id?
-'<p><a class="ui-button" href="/games/cribbage/play?session='+esc(live.session.id)+'" data-route="classic-game">Open your private Cribbage table</a></p>':'';
-return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
+const verified=state.gameSession?.roomId===r.id?state.gameSession:
+ live?.status==='connected'&&live.session?.roomId===r.id?live.session:null;
+const cribbageLink=r.gameId==='cribbage'&&['in_game','completed'].includes(r.status)?
+ '<p><a class="ui-button" href="'+(verified?'/games/cribbage/play?session='+esc(verified.id):
+ '/games/cribbage/history')+'" data-route="classic-game">'+
+ (verified?'Resume active Cribbage game':'Find this game in My Games')+'</a></p>':'';
+return '<section class="classic-room__detail"><p><a href="'+(r.gameId==='cribbage'?'/games/cribbage/history':'/games/rooms')+'" data-route="'+(r.gameId==='cribbage'?'classic-game':'classic-rooms')+'">← '+(r.gameId==='cribbage'?'Cribbage · My Games':'All rooms')+'</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
 '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
 note(r.status==='ready'?(r.gameId==='cribbage'?'All seats filled. The host may start a qualified Cribbage match.':'All seats filled. Game start and turns require BC-0.6; no match has begun.'):
@@ -213,8 +232,8 @@ r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is 
 (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){
-const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games" data-route="games">← Games catalogue</a></p>'+
-'<h2>Multiplayer rooms</h2><p>Persistent off-chain rooms for 420ID friends and public groups. No wallet, wagers or token rewards. Lobby seats do not start gameplay.</p>';
+const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games/cribbage/history" data-route="classic-game">← Cribbage · My Games</a> · <a href="/games" data-route="games">Games catalogue</a></p>'+
+'<h2>Multiplayer rooms</h2><p>No-wager 420ID rooms. Lobby seats do not start gameplay.</p>';
 if(!enabled)return start+note('Multiplayer rooms are not activated for this deployment.')+'</section>';
 if(!state||state.status==='loading')return start+note('Checking your 420ID session and room access…')+'</section>';
 if(state.status==='guest')return start+note('Sign in with 420ID to browse, create or join rooms.')+
@@ -223,10 +242,10 @@ if(state.status!=='ready')return start+note('420ID room service or account verif
 '<button type="button" data-classic-room-refresh>Retry room check</button></section>';
 const heading=start+(state.notice?note(state.notice):'');
 if(roomId!=null){
-if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room details are not available.')+
+if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room unavailable.')+
 '<button type="button" data-classic-room-refresh>Refresh rooms</button></section>';
-if(live&&['reconnecting','guest','revoked'].includes(live.status))
-return heading+note('Connection lost or room access changed. Checking 420ID and the latest authoritative state; cached private room data is hidden.')+
+if(live&&['guest','revoked'].includes(live.status))
+return heading+note('Room access changed; recheck 420ID. Private room data hidden.')+
 '<button type="button" data-classic-room-refresh>Reconnect to room</button></section>';
 return heading+roomDetail(state.selected,state,live)+'</section>';
 }
@@ -237,6 +256,6 @@ const creation='<section class="classic-room__create"><h3>Create a private or pu
 '<button type="submit">Create room</button></form></section>';
 return heading+creation+'<section><h3>Available rooms and invitations</h3>'+
 (state.rooms.length?'<ul class="classic-room__list">'+state.rooms.map(roomSummary).join('')+'</ul>':
-note('No visible rooms yet. Create a room to invite mutual friends or let others join publicly.'))+
+note('No visible rooms yet. Create or join a room.'))+
 '<button type="button" data-classic-room-refresh>Refresh rooms</button></section></section>';
 }

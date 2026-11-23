@@ -18,6 +18,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parents[2]
 WEI = 10 ** 18
 ADDRESS = re.compile(r"0x[0-9a-fA-F]{40}\Z")
+ANVIL_BLOCK_HISTORY = "0x0000f90827f1c53a10cb7a02335b175320002935"
 HEX = re.compile(r"0x(?:[0-9a-fA-F]{2})*\Z")
 REQUIRED_ANCHORS = {
     "ProtocolRegistry": "0x0000000000000000000000000000000000000434",
@@ -80,6 +81,12 @@ def convert(snapshot: dict, graph: dict, base_genesis: dict, source_head: str):
                 "malformed account bytecode")
         balance = normalize_quantity(record.get("balance", "0x0"))
         nonce = normalize_quantity(record.get("nonce", "0x0"))
+        # Anvil's block-history system account records the staging network.
+        # Keep only the target network's original allocation, when present.
+        if addr == ANVIL_BLOCK_HISTORY:
+            require(int(balance, 16) == 0 and int(nonce, 16) == 0,
+                    "staging block history unexpectedly holds funds or nonce")
+            continue
         entry = {"balance": balance, "nonce": nonce}
         if code != "0x": entry["code"] = code.lower()
         storage = normalize_storage(record.get("storage", {}))
@@ -98,6 +105,9 @@ def convert(snapshot: dict, graph: dict, base_genesis: dict, source_head: str):
     for name, address in graph["walletCivicModuleAddresses"].items():
         require(address.lower() in alloc and len(alloc[address.lower()].get("code", "")) > 4,
                 "missing deployed Civic runtime: " + name)
+    for address, account in base_genesis["alloc"].items():
+        if address.lower() == ANVIL_BLOCK_HISTORY:
+            alloc[ANVIL_BLOCK_HISTORY] = account
     original = sorted(base_genesis["alloc"])
     # All original fixed native allocations must remain represented, even if
     # spent into on-chain Vault balances by the qualified native funding path.

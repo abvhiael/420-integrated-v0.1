@@ -878,23 +878,32 @@ def main():
             require(stake[0]==stake[1] and any(row["eventName"]=="SponsoredValidatorRewardAllocated"
                     and row["blockHash"].lower()==reward_block["hash"].lower() for row in stake[0]),
                     "Stake consumers omitted or disagreed on the sponsored reward")
-            _,ts_stake=getter(ts_origin,"/v1/protocols/events?chainId=420&protocol=420Stake")
-            rewards=[row for row in ts_stake["data"]["items"] if row["eventName"]=="SponsoredValidatorRewardAllocated"]
-            require(len(rewards)==1 and rewards[0]["blockHash"].lower()==reward_block["hash"].lower()
-                    and rewards[0]["transactionHash"]=="0x"+"0"*64
-                    and int(rewards[0]["fields"]["gross"])==community_share+operator_share
-                    and int(rewards[0]["fields"]["communityShare"])==community_share
-                    and rewards[0]["fields"]["owner"].lower()==proposer
-                    and rewards[0]["fields"]["communityFund"].lower()==community,
-                    "TypeScript native Stake projection disagrees with canonical reward accounting")
-            go_reward=next(row for row in stake[0] if row["eventName"]=="SponsoredValidatorRewardAllocated"
-                           and row["blockHash"].lower()==reward_block["hash"].lower())
-            require(go_reward["logIndex"]==rewards[0]["logIndex"]
-                    and go_reward["transactionHash"]==rewards[0]["transactionHash"]
-                    and go_reward["contractAddress"].lower()==rewards[0]["contractAddress"].lower(),
-                    "Go, Explorer and TypeScript Stake consumers disagree on reward provenance")
+            _,ts_stake=getter(ts_origin,"/v1/protocols/events?chainId=420&protocol=420Stake&limit=100")
+            def by_position(rows):
+                return {(row["blockHash"].lower(),row["logIndex"]):row for row in rows
+                        if row["eventName"]=="SponsoredValidatorRewardAllocated"}
+            rewards=by_position(ts_stake["data"]["items"])
+            go_rewards=by_position(stake[0])
+            require(rewards.keys()==go_rewards.keys() and len(rewards)==2
+                    and {block for block,_ in rewards}=={registration_block["hash"].lower(),reward_block["hash"].lower()},
+                    "Stake projections disagree on canonical sponsored reward positions: "
+                    + repr({"typescript":list(rewards),"go":list(go_rewards)}))
+            for position,row in rewards.items():
+                go_row=go_rewards[position]
+                data=go_row["data"]
+                fields=row["fields"]
+                require(row["transactionHash"]==go_row["transactionHash"]=="0x"+"0"*64
+                        and row["contractAddress"].lower()==go_row["contractAddress"].lower()
+                        and fields["owner"].lower()==proposer and fields["communityFund"].lower()==community
+                        and len(data)==130 and int(fields["gross"])==int(data[2:66],16)
+                        and int(fields["communityShare"])==int(data[66:],16),
+                        "TypeScript native Stake projection disagrees with canonical archive fields: "+repr(row))
+                if position[0]==reward_block["hash"].lower():
+                    require(int(fields["gross"])==community_share+operator_share
+                            and int(fields["communityShare"])==community_share,
+                            "TypeScript sponsored reward projection disagrees with actual balance deltas")
             return {"treasury":policies,"treasuryLifecycle":projections,"stake":stake[0],
-                    "typescriptNativeStake":rewards,"treasuryPayout":payout_projections}
+                    "typescriptNativeStake":list(rewards.values()),"treasuryPayout":payout_projections}
         original_reward_block=reward_block["hash"]
         read_consumer_parity()
         _,reward_block,_,reward_archive=settle(replacement)

@@ -145,6 +145,8 @@ for tag in a b; do
     sleep 1
   done
   test "$ready" = true || { cat "$RUNNER_TEMP/govpre08-step3-node-$tag.log"; exit 1; }
+  # Deterministic block time for actual constructor and Registry storage writes.
+  cast rpc --rpc-url "$GOV_PRE_08_RPC" anvil_setBlockTimestampInterval 1
   python3 scripts/gov-pre-08/materialize-local-vault-funding.py \
     --rpc "$GOV_PRE_08_RPC" --output "$GOV_PRE_08_STEP2_EVIDENCE"
   python3 scripts/gov-pre-08/materialize-local-v4-contract-graph.py \
@@ -155,6 +157,14 @@ for tag in a b; do
   python3 scripts/gov-pre-08/materialize-local-node420-bindings.py \
     --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-native-bindings-$tag.json"
+  # Capture the funded deployment before the staging-only reorganization drills.
+  python3 scripts/gov-pre-08/restart-local-anvil.py \
+    --rpc "$GOV_PRE_08_RPC" --dump "$RUNNER_TEMP/govpre08-step3-state-native-$tag.json"
+  python3 scripts/gov-pre-08/export-local-node420-genesis.py \
+    --snapshot "$RUNNER_TEMP/govpre08-step3-state-native-$tag.json" \
+    --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
+    --genesis "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis-$tag.json" \
+    --evidence "$RUNNER_TEMP/govpre08-step3-unified-local-node420-evidence-$tag.json"
   node scripts/gov-pre-08/qualify-step3-wallet.mjs \
     --rpc "$GOV_PRE_08_RPC" --graph "$RUNNER_TEMP/govpre08-step3-graph-$tag.json" \
     --output "$RUNNER_TEMP/govpre08-step3-wallet-$tag.json"
@@ -175,13 +185,6 @@ for tag in a b; do
     --local-output "$RUNNER_TEMP/govpre08-step3-local-$tag.json" --probe-reorg
   python3 scripts/gov-pre-08/restart-local-anvil.py \
     --rpc "$GOV_PRE_08_RPC" --dump "$RUNNER_TEMP/govpre08-step3-state-$tag.json"
-  if [ "$tag" = a ]; then
-    python3 scripts/gov-pre-08/export-local-node420-genesis.py \
-      --snapshot "$RUNNER_TEMP/govpre08-step3-state-a.json" \
-      --graph "$RUNNER_TEMP/govpre08-step3-graph-a.json" \
-      --genesis "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis.json" \
-      --evidence "$RUNNER_TEMP/govpre08-step3-unified-local-node420-evidence.json"
-  fi
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   trap - EXIT
@@ -221,6 +224,13 @@ for tag in a b; do
   wait "$pid" 2>/dev/null || true
   trap - EXIT
 done
+
+cmp "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis-a.json" \
+    "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis-b.json"
+cp "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis-a.json" \
+   "$RUNNER_TEMP/govpre08-step3-unified-local-node420-genesis.json"
+cp "$RUNNER_TEMP/govpre08-step3-unified-local-node420-evidence-a.json" \
+   "$RUNNER_TEMP/govpre08-step3-unified-local-node420-evidence.json"
 
 python3 - <<'PY'
 import json, os

@@ -53,7 +53,7 @@ A production-equivalent deployment must retain:
 
 ## Indexing boundary
 
-No dedicated canonical Arbitration Indexer descriptor existed when AUDIT-4 was materialized, so this step does not invent a new indexing authority. Case/evidence/ruling/finalization projection remains reconstructable from canonical events and state. Same-deployment address/code-identity binding, reorg/rebuild behavior and live projection qualification belong to ARBITRATION-AUDIT-5.
+At AUDIT-4 materialization, an Arbitration-specific descriptor was absent. ARB-PRE-06 now adds `420-indexer/descriptors/arbitration420-v1.json`, strict `420Arbitration` event decoding, Registry/ABI/runtime verified indexer binding, and deterministic case/evidence/ruling/appeal/finalization reconstruction using the **existing** PostgreSQL per-block atomic checkpoint and canonical rollback infrastructure. The shared Indexer remains non-authoritative; the live contract controls cases, permissions, finality and remedies. Public read-only routes are `GET /v1/arbitration/cases`, `/v1/arbitration/cases/:caseId`, and `/v1/arbitration/cases/:caseId/history`, all chain-scoped, bounded and unavailable without a qualified deployment binding. On-chain case state/round are checked before presenting indexed state. Live deployment addresses, signed release identity, finality/reorg exercise against testnet and real Indexer consumer activation remain ARBITRATION-AUDIT-5 requirements; no production address has been fabricated.
 
 ## Recovery
 

@@ -200,6 +200,12 @@ def main():
         committee=Committee(ROOT,args.workdir,genesisblock["hash"],genesisblock["timestamp"],launch)
         trustfile=committee.trust
         pin=committee.pin
+        (args.workdir/"settlement-trust-public.json").write_bytes(trustfile.read_bytes())
+        (args.workdir/"protected-policies-public.json").write_text(json.dumps({
+            "settlementTrustSha256":pin,
+            "originalRoster":committee.public,
+            "replacementRoster":committee.replacement.public,
+        },indent=2,sort_keys=True)+"\n")
         events=queue.Queue()
         def collect(stream):
             for line in stream:
@@ -768,7 +774,7 @@ def main():
             parent_qc=record["Certificate"]
             record,_,_,_=produce(record,(height-1)*2,height,consensus_slot=rotation*17640)
             require(record["Certificate"]["CommitteeRoot"]!=parent_qc["CommitteeRoot"]
-                    and record["Consensus"]["Header"]["LatestQC"]==parent_qc,
+                    and record["Consensus"]["header"]["LatestQC"]==parent_qc,
                     "rotation failed to change signer membership across the authenticated parent")
         maturity_slot=(operation["executeAfter"]-int(genesisblock["timestamp"],16)+11)//12
         execution=civic("execute")
@@ -918,19 +924,35 @@ def main():
         idx=launch("indexer420-postgres-rebuilt",[str(indexer)],env=env)
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=16,
               idx,timeout=90)
+        finalized=rpc("eth_getBlockByNumber",["finalized",False])
+        require(finalized and int(finalized["number"],16)==15
+                and finalized["hash"]==registration_block["hash"],
+                "replacement failed to preserve the finalized Treasury payout")
+        postgres("UPDATE gov_pre08_unified_chain420.idx_checkpoints "
+                 "SET finalized_hash='0x"+("cc"*32)+"' WHERE chain_id=420 AND finalized_number=15")
+        ts_corrupt=launch("typescript-indexer420-corrupted-finality",ts_worker_cmd)
+        require(ts_corrupt.wait(timeout=25)!=0 and "source conflicts with finalized history" in
+                (args.workdir/"typescript-indexer420-corrupted-finality.log").read_text(),
+                "TypeScript Indexer accepted corrupted finalized state")
+        postgres("UPDATE gov_pre08_unified_chain420.idx_checkpoints SET finalized_hash='"
+                 +finalized["hash"]+"' WHERE chain_id=420 AND finalized_number=15")
         postgres("UPDATE gov_pre08_unified_chain420.idx_checkpoints "
                  "SET block_hash='0x"+("ee"*32)+"' WHERE chain_id=420 AND block_number=16")
         ts_idx=launch("typescript-indexer420-postgres-reopened",ts_worker_cmd)
         await_ts_block(16,reward_block["hash"])
         exp=launch("explorer420-postgres-rebuilt",[str(explorer)],env=xenv)
         ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],exp,timeout=60)
-        require(read_consumer_parity()==parity,"PostgreSQL recovery changed Treasury or Stake projections")
+        require(read_consumer_parity()==parity
+                and verifyCustody("after PostgreSQL recovery",sponsored_balances)==sponsored_custody
+                and int(rpc("eth_getBalance",[recipient,"latest"]),16)==recipient_before+payout_amount,
+                "PostgreSQL recovery changed canonical Treasury or Stake evidence")
         (args.workdir/"native-civic-lifecycle.json").write_text(json.dumps({
             "proposalId":operation["proposalId"],"executeAfter":operation["executeAfter"],
             "canonicalReceipts":civic_receipts,"typescriptGovernanceEvents":governance_events,
             "preDelayDeniedReceipt":denied,"goExplorerDeniedExecution":civic_view,
             "nativePostDelayExecutionQualified":True,"matureExecutionReceipt":executed,
             "treasuryPayoutReceipt":payout_receipt,"sponsoredRegistrationReceipt":receipt,"sponsoredRewardBlock":reward_block["hash"],
+            "retainedFinalizedPayoutBlock":finalized["hash"],"typescriptPostgresFinalityCorruptionRejected":True,
             "orphanedRewardBlock":original_reward_block,"consumerParity":parity,"goPostgresCorruptionRejectedAndRebuilt":True,
             "sponsoredRewardArchive":reward_archive,"communityShareWei":str(community_share),
             "operatorShareWei":str(operator_share),"sponsoredCustody":sponsored_custody,

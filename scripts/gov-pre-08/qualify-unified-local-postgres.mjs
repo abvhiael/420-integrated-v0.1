@@ -113,12 +113,7 @@ try{
   function ingestor(conn){
     const protocol=new ProtocolProjection420(conn,descriptors);
     const consumer=new CoreProjectionConsumer420(conn,protocol,420n);
-    const chainSource=new Proxy(source,{get(obj,key){
-      if(key==='finalizedBlockNumber')return undefined;
-      const v=Reflect.get(obj,key,obj);
-      return typeof v==='function'?v.bind(obj):v;
-    }});
-    return new IndexerIngestor420(chainSource,new SqlCheckpointStore420(conn,420n),
+    return new IndexerIngestor420(source,new SqlCheckpointStore420(conn,420n),
        consumer,{finality:{mode:'head'},startBlock:0n,maxBlocksPerRun:32,maxReorgDepth:12},
        new SqlCanonicalHistoryStore420(conn,420n));
   }

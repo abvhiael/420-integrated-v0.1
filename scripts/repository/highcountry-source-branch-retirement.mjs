@@ -1,7 +1,7 @@
 import {writeFile,appendFile} from 'node:fs/promises';
 const repo=process.env.GITHUB_REPOSITORY,token=process.env.GH_TOKEN;
 if(repo!=='abvhiael/420-integrated-v0.1'||!token)throw Error('wrong source repository or missing GitHub token');
-const ids=[932,931,930,929,928,917,913,909,900,896,895,893,891,890,885,881,879,878,877,872,859,856,855,853,852,851,849,845,843,839,833,811,803,643,642,641,640,639,638,637,636,635];
+const ids=[932,931,930,929,928,917,913,909,900,896,895,893,891,890,885,881,879,878,877,872,859,856,855,853,852,851,849,845,843,839,833,811,803,796,790,789,786,781,778,777,643,642,641,640,639,638,637,636,635,627,626,625,624,623,622,619,618,617,615,613,612,611,610];
 const base='https://api.github.com/repos/'+repo;
 const headers={authorization:'Bearer '+token,accept:'application/vnd.github+json','x-github-api-version':'2022-11-28'};
 async function api(url,init={}){

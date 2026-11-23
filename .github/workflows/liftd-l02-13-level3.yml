@@ -6,9 +6,7 @@ permissions:
   contents: read
 jobs:
   retained-l02-phase:
-    # Playwright 1.56.1 Chromium is not compatible with ubuntu-26.04.
-    # Pin a supported runner to retain real browser accessibility coverage.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     services:
       postgres:

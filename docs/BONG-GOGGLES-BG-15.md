@@ -15,7 +15,7 @@ BG-15 builds the production Bong Goggles social-games application over the canon
 ## Supported V1 games
 
 1. Cribbage
-2. Russian Cribbage
+2. Labyrinth Cribbage (legacy `RUSSIAN_CRIBBAGE` protocol type)
 3. Chess
 4. Word Game
 5. Checkers

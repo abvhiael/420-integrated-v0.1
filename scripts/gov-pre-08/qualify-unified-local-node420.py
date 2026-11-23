@@ -164,13 +164,13 @@ def main():
                 custody["ContingencyVault"][1]==840_000*10**18 and
                 custody["CommunityVault"][1]==0,
                 "Treasury amounts no longer conserve the source's 8.6m non-additive reserve")
-        def verifyCustody(phase):
+        def verifyCustody(phase, expected=None):
             observed={}
-            for label,(address,expectedBalance) in custody.items():
+            for label,(address,expectedBalance) in (custody if expected is None else expected).items():
                 actual=int(rpc("eth_getBalance",[address,"latest"]),16)
                 require(actual==expectedBalance,
                         phase+" changed unspent native backing "+label+": "+str(actual))
-                require(int(genesis["alloc"][address.lower()]["balance"],16)==expectedBalance,
+                require(int(genesis["alloc"][address.lower()]["balance"],16)==custody[label][1],
                         "source Genesis balance disagrees with the mined funding ledger "+label)
                 observed[label]={"address":address,"balanceWei":str(actual)}
             for name,address in graph["actualProductionConstructorAddresses"].items():
@@ -230,7 +230,7 @@ def main():
         proposer="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
         initialProposer=int(rpc("eth_getBalance",[proposer,"latest"]),16)
         require(initialProposer==0,"fixture wallet already holds unearned Genesis funds")
-        def produce(parent,previous,slot,expected_transactions=(), *, consensus_slot=None):
+        def produce(parent,previous,slot,expected_transactions=(), *, consensus_slot=None, defer_settlement=False):
             height=slot
             slot=height if consensus_slot is None else consensus_slot
             parenthash=parent["Payload"]["blockHash"] if parent else genesisblock["hash"]
@@ -300,6 +300,11 @@ def main():
                 checkpoint=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
                 require(checkpoint["Settlement"]["ExecutionBlock"]==height-1,
                         "quorum loss advanced the durable consensus checkpoint")
+            candidate=(planfile,slot,height,payload,batch,preserve_authority_during_quorum_loss)
+            return candidate if defer_settlement else settle(candidate)
+
+        def settle(candidate):
+            planfile,slot,height,payload,batch,preserve_authority_during_quorum_loss=candidate
             record=committee.certify(planfile,slot,args.workdir,preserve_authority_during_quorum_loss)
             consensus.stdin.write(json.dumps(record)+"\n")
             consensus.stdin.flush()
@@ -782,15 +787,17 @@ def main():
         community=custody["CommunityRewardReserve"][0]
         before_share=int(rpc("eth_getBalance",[community,"latest"]),16)
         before_operator=int(rpc("eth_getBalance",[proposer,"latest"]),16)
+        replacement=produce(record,30,16,consensus_slot=maturity_slot+3,defer_settlement=True)
         _,reward_block,_,reward_archive=produce(record,30,16,consensus_slot=maturity_slot+2)
         community_share=int(rpc("eth_getBalance",[community,"latest"]),16)-before_share
         operator_share=int(rpc("eth_getBalance",[proposer,"latest"]),16)-before_operator
         require(community_share>0 and (community_share+operator_share)//10==community_share,
                 "protected native settlement did not pay the exact sponsored 90/10 split")
-        custody["CommunityValidatorReserve"]=(custody["CommunityValidatorReserve"][0],
-                                             custody["CommunityValidatorReserve"][1]-credit)
-        custody["CommunityRewardReserve"]=(community,before_share+community_share)
-        sponsored_custody=verifyCustody("after sponsored reward settlement")
+        sponsored_balances=dict(custody,
+            CommunityValidatorReserve=(custody["CommunityValidatorReserve"][0],
+                                      custody["CommunityValidatorReserve"][1]-credit),
+            CommunityRewardReserve=(community,before_share+community_share))
+        sponsored_custody=verifyCustody("after sponsored reward settlement",sponsored_balances)
         await_ts_block(16,reward_block["hash"])
         await_ts_block(14,execution_block["hash"])
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=14,
@@ -817,6 +824,16 @@ def main():
                     and row["blockHash"].lower()==reward_block["hash"].lower() for row in stake[0]),
                     "Stake consumers omitted or disagreed on the sponsored reward")
             return {"treasury":policies,"stake":stake[0]}
+        original_reward_block=reward_block["hash"]
+        read_consumer_parity()
+        _,reward_block,_,reward_archive=settle(replacement)
+        require(reward_block["hash"]!=original_reward_block,"certified replacement did not change block identity")
+        require(verifyCustody("after certified reward replacement",sponsored_balances)==sponsored_custody
+                and int(rpc("eth_getBalance",[proposer,"latest"]),16)==before_operator+operator_share,
+                "reward replacement duplicated issuance or changed reserve custody")
+        await_ts_block(16,reward_block["hash"])
+        ready(lambda:getter("http://127.0.0.1:18783","/v1/blocks/16")[1]["block"]["hash"]
+              .lower()==reward_block["hash"].lower(),exp,timeout=60)
         parity=read_consumer_parity()
         def postgres(statement):
             command=["node","--input-type=module","--eval",
@@ -836,6 +853,8 @@ def main():
         idx=launch("indexer420-postgres-rebuilt",[str(indexer)],env=env)
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=16,
               idx,timeout=90)
+        postgres("UPDATE gov_pre08_unified_chain420.idx_checkpoints "
+                 "SET block_hash='0x"+("ee"*32)+"' WHERE chain_id=420 AND block_number=16")
         ts_idx=launch("typescript-indexer420-postgres-reopened",ts_worker_cmd)
         await_ts_block(16,reward_block["hash"])
         exp=launch("explorer420-postgres-rebuilt",[str(explorer)],env=xenv)
@@ -847,7 +866,7 @@ def main():
             "preDelayDeniedReceipt":denied,"goExplorerDeniedExecution":civic_view,
             "nativePostDelayExecutionQualified":True,"matureExecutionReceipt":executed,
             "sponsoredRegistrationReceipt":receipt,"sponsoredRewardBlock":reward_block["hash"],
-            "consumerParity":parity,"goPostgresCorruptionRejectedAndRebuilt":True,
+            "orphanedRewardBlock":original_reward_block,"consumerParity":parity,"goPostgresCorruptionRejectedAndRebuilt":True,
             "sponsoredRewardArchive":reward_archive,"communityShareWei":str(community_share),
             "operatorShareWei":str(operator_share),"sponsoredCustody":sponsored_custody,
         },indent=2,sort_keys=True)+"\n")

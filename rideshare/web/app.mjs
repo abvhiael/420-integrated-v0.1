@@ -1,4 +1,5 @@
 import {renderRiderLanding} from './rider-landing.mjs';
+import {renderDriverLanding} from './driver-landing.mjs';
 import {mountOperatorConsole} from './operator-console.mjs';
 import { ROUTES, AVAILABILITY, routeDecision, sanitizeReturnPath } from "./route-policy.mjs";
 import { mountRiderAccount } from "./rider-account.mjs";
@@ -62,13 +63,22 @@ function renderDecision(decision) {
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   if (decision.kind === "public" && decision.path === "/") {
+    root.classList.remove("driver-landing-root");
     root.classList.add("rider-landing-root");
     root.append(renderRiderLanding());
     document.title = "LIFTd — arrive higher";
     if (focusAfterNavigation) { focusAfterNavigation = false; root.focus(); }
     return;
   }
-  root.classList.remove("rider-landing-root");
+  if (decision.kind === "public" && decision.path === "/drive") {
+    root.classList.remove("rider-landing-root");
+    root.classList.add("driver-landing-root");
+    root.append(renderDriverLanding());
+    document.title = "Drive with LIFTd — arrive higher";
+    if (focusAfterNavigation) { focusAfterNavigation = false; root.focus(); }
+    return;
+  }
+  root.classList.remove("rider-landing-root", "driver-landing-root");
   const panel = node("section", undefined, "panel");
   panel.append(node("h1", decision.title));
   if (decision.kind === "public") {
@@ -106,6 +116,7 @@ function renderDecision(decision) {
     clearPickupView = mountPickupView(root, session, createLocationProviders(globalThis.LIFTdSessionAdapter, {search:globalThis.LIFTdPlaceSearchProvider,resolveAddress:globalThis.LIFTdAddressResolver}), route => quotePanel?.showRoute(route));
   }
   if (decision.kind === "protected" && decision.role === "driver") {
+    clearDriverOnboarding = mountDriverOnboarding(root, session, createDriverOnboardingApi(globalThis.LIFTdSessionAdapter));
     clearDriverAvailability = mountDriverAvailability(root, session, createDriverAvailabilityApi(globalThis.LIFTdSessionAdapter));
     const panel = mountDriverTrip(root, session, createDriverTripApi(globalThis.LIFTdSessionAdapter), {
       navigationCapability:globalThis.LIFTdNavigationCapability,

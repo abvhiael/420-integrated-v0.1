@@ -9,7 +9,9 @@ permissions:
   contents: read
 jobs:
   integrated-journeys:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 Chromium is not compatible with ubuntu-26.04.
+    # Pin a supported runner to retain real browser accessibility coverage.
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     services:
       postgres:

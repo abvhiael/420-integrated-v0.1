@@ -156,7 +156,7 @@ export function normalizePrivateEvidenceReceipt420(receipt,expected){
 // Explicit adapter seam for the qualified 420Storage v1 prepare/ingest/retrieve
 // service. A caller must supply an already-authorized transport/session; an
 // unconfigured backend never falls back to public URLs or a local mock.
-export function createPrivateEvidenceStore420({storage=null,authenticate,clock=now}={}) {
+export function createPrivateEvidenceStore420({storage=null,authenticate,clock=now,cryptoImpl=globalThis.crypto}={}) {
   check(typeof authenticate==='function','trusted private evidence session verifier required');
   const authenticated=async(context,viewer,record)=>{
     let grant;
@@ -165,7 +165,7 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
     authorizeEvidenceViewer420({context,viewer,record,grant,nowMs:clock()});
     return grant;
   };
-  async function upload({encrypted,context,record,viewer,object,retentionMs,
+  async function upload({encrypted,recoveryKey,context,record,viewer,object,retentionMs,
     signal,authorizationRequired=true}){
     check(storage&&typeof storage.prepare==='function'&&typeof storage.ingest==='function',
       'approved private evidence storage unavailable');
@@ -178,6 +178,16 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
       contextsEqual(normalizeEvidenceContext420(encrypted.context),ctx),'evidence context mismatch');
     check(evidenceCommitment420(ctx,encrypted.digest,encrypted.nonce)===encrypted.commitment,
       'evidence commitment mismatch');
+    // A matching metadata hash alone does NOT prove the sealed ciphertext still
+    // decrypts to the committed bytes. Verify before any remote upload.
+    const checked=await verifyPrivateEvidence420({encrypted,recoveryKey,context:ctx,
+      expectedCommitment:encrypted.commitment,cryptoImpl});
+    checked.fill(0);
+    const payload=new TextEncoder().encode(JSON.stringify(encrypted));
+    const digest=hex(new Uint8Array(await ensureCrypto(cryptoImpl).subtle.digest('SHA-256',payload)));
+    check(object&&Number(object.size_bytes)===payload.length&&
+      typeof object.shard_root==='string'&&object.shard_root.toLowerCase()===digest,
+      'private storage object identity mismatch');
     const metadata=Object.freeze({context:ctx,commitment:encrypted.commitment,
       visibility:'private',expiresAt:clock()+retentionMs});
     // Client-side contract: provider must enforce authorization/expiration,
@@ -187,7 +197,6 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
     try {
       prepared=await storage.prepare({object,metadata,grant,signal});
       check(!signal?.aborted&&prepared,'private evidence upload interrupted');
-      const payload=new TextEncoder().encode(JSON.stringify(encrypted));
       const receipt=await storage.ingest({prepared,object,bytes:payload,metadata,grant,signal});
       check(!signal?.aborted,'private evidence upload interrupted');
       return normalizePrivateEvidenceReceipt420(receipt,object);

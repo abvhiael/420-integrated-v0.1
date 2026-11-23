@@ -71,6 +71,7 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED"
           go test -race -count=1 -tags account420_integration -timeout=15m -run '^TestBC25|^TestBC16AuthenticatedChallengeHistoryAndRematch$' -v ./services/bong-goggles-account-social
-          go test -race -count=1 -run '^TestBC25OperatorActivationPreservesCribbageAndFailsClosed$|^TestBC15CribbageOperatorActivationIsIndependentAndFailClosed
+          go test -race -count=1 -run '^(TestBC25OperatorActivationPreservesCribbageAndFailsClosed|TestBC15CribbageOperatorActivationIsIndependentAndFailClosed)
+          go vet ./services/bong-goggles-account-social ./cmd/bong-goggles-social
  ./cmd/bong-goggles-social
           go vet ./services/bong-goggles-account-social ./cmd/bong-goggles-social

@@ -192,6 +192,7 @@ func TestBC23FullBotAndMixedHumanMatchesEveryFormat(t *testing.T){
     state,_,e:=a.InitialWithSeed(seed,room,seats);if e!=nil{t.Fatal("mixed seats invalid",e)}
     trace:=[]RuleTrace{}
     sawBot:=map[int]bool{};sawHuman:=false;sawShow:=false
+    completed:=false
     for step:=0;step<a.replayLimit();step++{
      f,e:=a.decode(state);if e!=nil{t.Fatal("frame",step,e)}
      if f.Terminal{
@@ -208,7 +209,8 @@ func TestBC23FullBotAndMixedHumanMatchesEveryFormat(t *testing.T){
        if _,e=a.Replay(seed,n,trace);e==nil{t.Fatal("individual was mis-replayed as partnership")}
       }
       t.Logf("%s human=%v, moves=%d, winner=%d, scores=%v",c.variant,mixHuman,len(trace),*f.Winner,f.Scores)
-      return
+      completed=true
+      break
      }
      legal,e:=a.LegalActions(state,f.Turn)
      if e!=nil||len(legal)==0{t.Fatal("no canonical legal moves",step,e)}
@@ -225,7 +227,7 @@ func TestBC23FullBotAndMixedHumanMatchesEveryFormat(t *testing.T){
       BeforeHash:RuleHash(state),AfterHash:RuleHash(next)})
      state=next
     }
-    t.Fatal("bot match hit bounded replay cap",c.variant,mixHuman)
+    if !completed{t.Fatal("bot match hit bounded replay cap",c.variant,mixHuman)}
    }
   })
  }

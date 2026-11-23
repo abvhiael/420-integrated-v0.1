@@ -60,7 +60,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          arch: arm64
+          arch: arm64-v8a
           profile: pixel_6
           working-directory: wallet/mobile/android
           script: python3 scripts/capture-screens.py

@@ -63,7 +63,7 @@ jobs:
           set -euo pipefail
           mkdir -p test/.arb-consumer-ci
           for source in test/LaunchpadCrowdfundingIntegration420.t.sol test/LaunchpadEcosystem420.t.sol; do
-            sed 's#"../src/#"../../src/#g' "$source" > "test/.arb-consumer-ci/${source##*/}"
+            sed -e 's#"../src/#"../../src/#g' -e 's#"./helpers/#"../helpers/#g' "$source" > "test/.arb-consumer-ci/${source##*/}"
           done
       - name: Qualify origin/round/replay and real Arbitration-to-Launchpad integration
         working-directory: contracts

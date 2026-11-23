@@ -1,0 +1,213 @@
+{
+  "schema": "420-arbitration-artifact-descriptor-v1",
+  "descriptorVersion": 1,
+  "protocol": "420Arbitration",
+  "protocolVersion": 1,
+  "authority": "artifact_abi_and_verified_registry_release_only_no_live_address_claim",
+  "contracts": [
+    {
+      "contractName": "ArbitrationCaseRegistry420",
+      "sourcePath": "contracts/src/arbitration/ArbitrationCaseRegistry420.sol",
+      "events": [
+        {
+          "name": "CaseOpened",
+          "signature": "CaseOpened(bytes32,bytes32,address,address,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "domainId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "claimant",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "respondent",
+              "type": "address",
+              "indexed": false
+            },
+            {
+              "name": "originComponentId",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "originObjectId",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "EvidenceCommitted",
+          "signature": "EvidenceCommitted(bytes32,uint8,address,bytes32)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "submitter",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "evidenceHash",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CaseRuled",
+          "signature": "CaseRuled(bytes32,uint8,uint64)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "appealDeadline",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CaseAppealed",
+          "signature": "CaseAppealed(bytes32,uint8,address,uint64)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "appellant",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "evidenceDeadline",
+              "type": "uint64",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "CaseFinalized",
+          "signature": "CaseFinalized(bytes32,uint8)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "contractName": "ArbitrationRulingRegistry420",
+      "sourcePath": "contracts/src/arbitration/ArbitrationRulingRegistry420.sol",
+      "events": [
+        {
+          "name": "RulingSubmitted",
+          "signature": "RulingSubmitted(bytes32,uint8,address,uint32,bytes32,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "resolver",
+              "type": "address",
+              "indexed": true
+            },
+            {
+              "name": "outcomeCode",
+              "type": "uint32",
+              "indexed": false
+            },
+            {
+              "name": "rulingHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "remedyCommitment",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "panelCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        },
+        {
+          "name": "RulingFinalized",
+          "signature": "RulingFinalized(bytes32,uint8,bytes32,bytes32)",
+          "inputs": [
+            {
+              "name": "caseId",
+              "type": "bytes32",
+              "indexed": true
+            },
+            {
+              "name": "round",
+              "type": "uint8",
+              "indexed": true
+            },
+            {
+              "name": "rulingHash",
+              "type": "bytes32",
+              "indexed": false
+            },
+            {
+              "name": "remedyCommitment",
+              "type": "bytes32",
+              "indexed": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

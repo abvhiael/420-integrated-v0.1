@@ -43,7 +43,8 @@ while queue:
         target.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(original,target)
         if target.suffix=='.sol':queue.append(target)
-print('Bet Solidity isolated test/dependency inventory:',len(seen))
+import sys
+print('Bet Solidity isolated test/dependency inventory:',len(seen),file=sys.stderr)
 PY
 # Retain non-Solidity fixture data; never compile vendored fixture contracts.
 if [[ -d test/fixtures ]]; then
@@ -53,5 +54,5 @@ if [[ -d test/fixtures ]]; then
  done < <(find test/fixtures -type f ! -name '*.sol' -print0)
 fi
 for f in "${files[@]}"; do test -f "$stage/$f"; done
-echo "Running all ${#files[@]} caller-required Bet tests in a scoped Foundry workspace"
+echo "Running all ${#files[@]} caller-required Bet tests in a scoped Foundry workspace" >&2
 (cd "$stage" && FOUNDRY_SRC=src/bet FOUNDRY_TEST=test forge test "$@")

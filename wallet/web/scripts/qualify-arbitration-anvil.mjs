@@ -192,10 +192,46 @@ try{
   await selectCase(page,caseId);
   assert.equal(await page.getByRole('button',{name:'Submit evidence'}).count(),1);
   await page.getByRole('button',{name:'Submit evidence'}).click();
-  await page.locator('#arbitration-evidence-form input').fill(id('private evidence 1'));
+  const secret=Buffer.from('Private case-specific testimony; must never appear in logs or calldata.');
+  await page.locator('#arbitration-private-file').setInputFiles({
+    name:'private-testimony.txt',mimeType:'text/plain',buffer:secret
+  });
+  await page.locator('#arbitration-seal-file').click();
+  await page.waitForFunction(()=>document.querySelector('#arbitration-seal-status')?.textContent?.includes('Encrypted privately'),
+    null,{timeout:15000});
+  const evidenceHash=await page.locator('#arbitration-evidence-form [name="evidenceHash"]').inputValue();
+  assert.match(evidenceHash,/^0x[0-9a-f]{64}$/);
+  await page.locator('#arbitration-show-secret').click();
+  const recoveryKey=await page.locator('#arbitration-private-recovery').inputValue();
+  assert.match(recoveryKey,/^0x[0-9a-f]{64}$/);
+  const encryptedDownloadPromise=page.waitForEvent('download');
+  await page.locator('#arbitration-export-sealed').click();
+  const encryptedDownload=await encryptedDownloadPromise;
+  const encryptedData=readFileSync(await encryptedDownload.path());
+  assert(!encryptedData.toString('utf8').includes(secret.toString('utf8')),
+    'No plaintext content may appear in exported encrypted evidence');
   await page.getByRole('button',{name:'Simulate and review evidence'}).click();
   await reviewAndSubmit(page);
   assert.equal((await caseContract.getCase(caseId)).round,0n);
+  assert.equal(await caseContract.evidenceCommitted(caseId,0,evidenceHash),true);
+  // Inspect only after the exact case/round/submitter/commitment is canonical.
+  const inspect=page.locator('#arbitration-inspection-form');
+  await inspect.locator('[name="commitment"]').fill(evidenceHash);
+  await inspect.locator('[name="submitter"]').fill(addresses.claimant);
+  await inspect.locator('[name="round"]').fill('0');
+  await inspect.locator('[name="capsule"]').setInputFiles({
+    name:'private-evidence.json',mimeType:'application/json',buffer:encryptedData
+  });
+  await inspect.locator('[name="recoveryKey"]').fill(recoveryKey);
+  await inspect.locator('button[type="submit"]').click();
+  await page.waitForFunction(()=>document.querySelector('#arbitration-inspection-status')?.textContent?.includes('Private bytes verified'),
+    null,{timeout:15000});
+  const verifiedDownloadPromise=page.waitForEvent('download');
+  await page.locator('#arbitration-export-verified').click();
+  const verifiedDownload=await verifiedDownloadPromise;
+  assert.deepEqual(readFileSync(await verifiedDownload.path()),secret,
+    'Only verified original plaintext may be explicitly downloaded');
+  assert.equal(await page.locator('#arbitration-export-verified').isDisabled(),true);
   await switchWallet(page,addresses.resolver,release);
   await selectCase(page,caseId);
   await page.getByRole('button',{name:'Submit ruling'}).click();
@@ -244,7 +280,7 @@ try{
     {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
   assert.equal(violations.violations.length,0,'Arbitration accessibility '+violations.violations.map(v=>v.id).join(', '));
   console.log(JSON.stringify({result:'PASS',localEVM:true,network:31337,caseId,
-    opened:1,evidence:1,rulings:2,appeals:1,finalized:true,history:true,viewport:[1440,390,320],
+    opened:1,evidence:1,encryptedEvidence:true,privateInspection:true,plaintextNeverBroadcast:true,rulings:2,appeals:1,finalized:true,history:true,viewport:[1440,390,320],
     axeViolations:0,contractSource:'canonical Arbitration Genesis graph'}));
 }finally{
   await browser?.close();

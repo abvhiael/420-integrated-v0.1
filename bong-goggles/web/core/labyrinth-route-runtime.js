@@ -52,6 +52,8 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
    const overlay=renderLabyrinthPegOverlay({scores:view.scores,teams},pegMap);
    if(overlay)for(const art of root.querySelectorAll('.lab-board-art')){
     if(!art.querySelector('.lab-peg-overlay'))art.insertAdjacentHTML('beforeend',overlay);
+    const caption=art.closest('.lab-board')?.querySelector('figcaption');
+    if(caption)caption.textContent='Verified physical peg positions · first to 325 points wins.';
    }
   }
   for(const img of root.querySelectorAll('.lab-board-art img')){

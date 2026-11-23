@@ -2,6 +2,8 @@
 // publish private evidence, claim settlement, or render a tx successful before receipt.
 import {InjectedProvider420} from './core/provider.js';
 import {createArbitrationApplication420} from './core/arbitration-application.js';
+import {createArbitrationEvidenceWorkspace420} from './core/arbitration-evidence-workspace.js';
+import {ARBITRATION_EVIDENCE_MAX_BYTES_420} from './core/arbitration-evidence.js';
 
 const $=q=>document.querySelector(q);
 const full=(x)=>x==null?'—':String(x);
@@ -76,7 +78,19 @@ export function arbitrationMarkup420(){
       <div class="button-row" id="arbitration-action-buttons" role="group" aria-label="Case actions"></div>
       <div id="arbitration-evidence" class="arbitration-workform" hidden>
         <h4>Submit evidence commitment</h4><p class="muted">Evidence payloads stay off-chain. Only the 32-byte hash is committed. Only case parties may submit within the round window.</p>
-        <form id="arbitration-evidence-form"><label>Evidence commitment (bytes32)<input name="evidenceHash" required spellcheck="false" placeholder="0x…"/></label>
+        <div class="arbitration-private-evidence">
+          <p class="eyebrow">Private file · local encryption only</p>
+          <p class="muted">Choose a file (maximum 8 MiB) to create a random-salted, case/round-bound evidence commitment. The contents never enter chain calldata. Keep the encrypted capsule and recovery key separately; losing either prevents decryption.</p>
+          <label>Private evidence file<input id="arbitration-private-file" type="file" autocomplete="off"/></label>
+          <button id="arbitration-seal-file" type="button">Encrypt file and generate commitment</button>
+          <p id="arbitration-seal-status" role="status" aria-live="polite">No private file prepared.</p>
+          <button type="button" id="arbitration-export-sealed" disabled>Download encrypted evidence capsule</button>
+          <button type="button" id="arbitration-show-secret" disabled>Reveal private recovery key</button>
+          <label id="arbitration-recovery-label" hidden>Private recovery key — copy and store securely, never share publicly
+            <input id="arbitration-private-recovery" type="text" readonly autocomplete="off" spellcheck="false"/>
+          </label>
+        </div>
+        <form id="arbitration-evidence-form"><label>Public evidence commitment (bytes32)<input name="evidenceHash" required spellcheck="false" placeholder="0x…"/></label>
           <button type="submit" class="primary-action">Simulate and review evidence</button></form>
       </div>
       <div id="arbitration-ruling" class="arbitration-workform" hidden>
@@ -89,6 +103,20 @@ export function arbitrationMarkup420(){
           <button type="submit" class="primary-action">Simulate and review ruling</button>
         </form>
       </div>
+      <section class="arbitration-private-evidence" aria-labelledby="arbitration-inspect-heading">
+        <h4 id="arbitration-inspect-heading">Verify private evidence against this case</h4>
+        <p class="muted">The capsule stays local. Inspection requires the exact on-chain evidence commitment, case, round and original submitter. Private contents are never displayed or fetched automatically.</p>
+        <form id="arbitration-inspection-form">
+          <label>Committed evidence hash (bytes32)<input name="commitment" required spellcheck="false"/></label>
+          <label>Original evidence submitter (address)<input name="submitter" required spellcheck="false"/></label>
+          <label>Evidence round<input name="round" type="number" min="0" max="3" required/></label>
+          <label>Encrypted evidence capsule (JSON)<input name="capsule" type="file" accept=".json,application/json" required/></label>
+          <label>Private recovery key<input name="recoveryKey" type="password" autocomplete="off" required spellcheck="false"/></label>
+          <button type="submit" class="primary-action">Verify case binding and decrypt locally</button>
+        </form>
+        <p id="arbitration-inspection-status" role="status" aria-live="polite">No private evidence opened.</p>
+        <button type="button" id="arbitration-export-verified" disabled>Download verified private evidence</button>
+      </section>
       <section aria-label="Rulings and appeals"><h4>Rulings and appeal eligibility</h4>
         <div id="arbitration-rulings" class="arbitration-list">No case selected.</div></section>
     </section>
@@ -122,6 +150,7 @@ export function arbitrationMarkup420(){
 }
 
 let context=null,current=null,cases=new Map(),cursor=null,quote=null,pending=null,busy=false,serial=0,view='dashboard';
+let evidenceWorkspace=null,sealedEvidence=null,inspectedEvidence=null;
 let connectedIdentity=null;
 const one=q=>$(q);
 const setText=(selector,text)=>{const node=one(selector);if(node)node.textContent=String(text);};
@@ -150,6 +179,17 @@ function clearQuote(){
 function reset(reason){
   ++serial;
   if(context){context.dispose();context=null;}
+  evidenceWorkspace=null;sealedEvidence=null;
+  if(inspectedEvidence){inspectedEvidence.fill(0);inspectedEvidence=null;}
+  one('#arbitration-private-recovery').value='';
+  one('#arbitration-recovery-label').hidden=true;
+  one('#arbitration-private-file').value='';
+  one('#arbitration-inspection-form').reset();
+  one('#arbitration-export-sealed').disabled=true;
+  one('#arbitration-show-secret').disabled=true;
+  one('#arbitration-export-verified').disabled=true;
+  setText('#arbitration-seal-status','No private file prepared.');
+  setText('#arbitration-inspection-status','No private evidence opened.');
   current=null;cases.clear();cursor=null;clearQuote();busy=false;connectedIdentity=null;
   setText('#arbitration-account','Not connected');setText('#arbitration-router','—');
   setText('#arbitration-chain','—');setText('#arbitration-case-list','No verified cases loaded.');
@@ -258,6 +298,15 @@ function renderDetails(data){
     button.addEventListener('click',()=>setAction(action));actions.append(button);
   }
   one('#arbitration-evidence').hidden=true;one('#arbitration-ruling').hidden=true;
+  if(inspectedEvidence){inspectedEvidence.fill(0);inspectedEvidence=null;}
+  one('#arbitration-export-verified').disabled=true;
+  one('#arbitration-inspection-form').reset();
+  setText('#arbitration-inspection-status','No private evidence opened.');
+  sealedEvidence=null;
+  one('#arbitration-recovery-label').hidden=true;
+  one('#arbitration-private-recovery').value='';
+  one('#arbitration-export-sealed').disabled=true;
+  one('#arbitration-show-secret').disabled=true;
 }
 function setAction(action){
   clearQuote();
@@ -278,6 +327,70 @@ async function selectCase(id){
 function formRecord(form){
   return Object.fromEntries(new FormData(form).entries());
 }
+function exportLocalEvidence(value,name,type='application/json'){
+  const blob=new Blob([value],{type});
+  const url=URL.createObjectURL(blob);
+  try{
+    const anchor=e('a');anchor.href=url;anchor.download=name;
+    anchor.style.display='none';document.body.append(anchor);anchor.click();anchor.remove();
+  }finally{setTimeout(()=>URL.revokeObjectURL(url),1000);}
+}
+async function sealPrivateFile(){
+  if(!current||!evidenceWorkspace)throw Error('Select a verified case first');
+  if(!current.permissions.evidence)throw Error('Evidence window or party authorization unavailable');
+  const file=one('#arbitration-private-file').files?.[0];
+  if(!file||file.size<1||file.size>ARBITRATION_EVIDENCE_MAX_BYTES_420)
+    throw Error('Select a private evidence file no larger than 8 MiB');
+  const raw=new Uint8Array(await file.arrayBuffer());
+  try{sealedEvidence=await evidenceWorkspace.prepare({caseId:current.id,data:raw});}
+  finally{raw.fill(0);}
+  one('#arbitration-evidence-form [name="evidenceHash"]').value=sealedEvidence.commitment;
+  one('#arbitration-export-sealed').disabled=false;
+  one('#arbitration-show-secret').disabled=false;
+  one('#arbitration-recovery-label').hidden=true;
+  one('#arbitration-private-recovery').value='';
+  setText('#arbitration-seal-status','Encrypted privately. Public commitment: '+sealedEvidence.commitment+
+    '. Download the private capsule and separately save the recovery key before submitting the Wallet transaction.');
+}
+function exportSealedEvidence(){
+  if(!sealedEvidence||!current)throw Error('No private evidence prepared');
+  exportLocalEvidence(JSON.stringify(sealedEvidence.encrypted),
+    'arbitration-private-'+current.id.slice(2,14)+'-r'+current.round+'.json');
+}
+function revealRecoveryKey(){
+  if(!sealedEvidence)throw Error('No private evidence prepared');
+  one('#arbitration-private-recovery').value=sealedEvidence.recoveryKey;
+  one('#arbitration-recovery-label').hidden=false;
+  one('#arbitration-private-recovery').focus();
+}
+async function inspectEvidenceFile(form){
+  if(!current||!evidenceWorkspace)throw Error('Select a verified case first');
+  const fields=formRecord(form),file=form.querySelector('[name="capsule"]').files?.[0];
+  if(!file||file.size<1||file.size>ARBITRATION_EVIDENCE_MAX_BYTES_420+1024)
+    throw Error('Select a bounded encrypted evidence capsule');
+  if(inspectedEvidence){inspectedEvidence.fill(0);inspectedEvidence=null;}
+  one('#arbitration-export-verified').disabled=true;
+  const key=fields.recoveryKey;
+  form.querySelector('[name="recoveryKey"]').value='';
+  let envelope;
+  try{envelope=JSON.parse(await file.text());}catch{throw Error('Private evidence unavailable or failed integrity verification');}
+  const verified=await evidenceWorkspace.inspectLocal({caseId:current.id,
+    round:Number(fields.round),submitter:fields.submitter,commitment:fields.commitment,
+    encrypted:envelope,recoveryKey:key});
+  inspectedEvidence=verified.bytes;
+  one('#arbitration-export-verified').disabled=false;
+  setText('#arbitration-inspection-status','Private bytes verified against canonical evidence for case '+
+    current.id+' at round '+fields.round+'. No content was published or displayed.');
+}
+function exportVerifiedEvidence(){
+  if(!inspectedEvidence||!current)throw Error('No verified private evidence available');
+  exportLocalEvidence(inspectedEvidence,'arbitration-verified-'+current.id.slice(2,14)+'.bin',
+    'application/octet-stream');
+  inspectedEvidence.fill(0);inspectedEvidence=null;
+  one('#arbitration-export-verified').disabled=true;
+  setText('#arbitration-inspection-status','Verified evidence downloaded; working bytes cleared.');
+}
+
 async function prepare(action,fields){
   if(!context)throw Error('Connect and verify Wallet first');
   clearQuote();
@@ -342,6 +455,7 @@ async function connect(){
   const info=await c.policies();
   const state=await c.dashboard();
   context=c;connectedIdentity=identity;
+  evidenceWorkspace=createArbitrationEvidenceWorkspace420({app:c});
   for(const d of info.domains){const option=e('option',null,d.name);option.value=d.id;one('#arbitration-domain').append(option);}
   const verified=await c.verify();
   setText('#arbitration-account',c.account);setText('#arbitration-chain',config.network.chainId);
@@ -385,6 +499,12 @@ function install(){
     void operation(()=>prepare('openCase',formRecord(event.currentTarget)));});
   one('#arbitration-lookup-form').addEventListener('submit',event=>{event.preventDefault();
     void operation(()=>selectCase(one('#arbitration-case-lookup').value.trim()));});
+  one('#arbitration-seal-file').addEventListener('click',()=>operation(sealPrivateFile));
+  one('#arbitration-export-sealed').addEventListener('click',()=>operation(exportSealedEvidence));
+  one('#arbitration-show-secret').addEventListener('click',()=>operation(revealRecoveryKey));
+  one('#arbitration-inspection-form').addEventListener('submit',event=>{event.preventDefault();
+    void operation(()=>inspectEvidenceFile(event.currentTarget));});
+  one('#arbitration-export-verified').addEventListener('click',()=>operation(exportVerifiedEvidence));
   one('#arbitration-evidence-form').addEventListener('submit',event=>{event.preventDefault();
     void operation(()=>prepare('submitEvidence',{caseId:current?.id,...formRecord(event.currentTarget)}));});
   one('#arbitration-ruling-form').addEventListener('submit',event=>{event.preventDefault();

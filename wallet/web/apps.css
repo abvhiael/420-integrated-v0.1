@@ -128,6 +128,11 @@
 .token-catalogue-body h4,.token-catalogue-body h5,.token-catalogue-body h6 { color:var(--wallet-text); line-height:1.35; }
 .token-catalogue-body h6 { font-size:1rem; margin:0; }
 .token-catalogue-body button,.token-catalogue-body input,.token-catalogue-body select { box-sizing:border-box; max-width:100%; min-height:44px; font-size:1rem; }
+/* Disabled template/actions become enabled during Registry refresh. An opacity
+   transition briefly renders newly enabled text at disabled contrast, producing
+   genuine WCAG 1.4.3 failures until the 150ms fade finishes. Apply opacity
+   immediately while retaining harmless movement/border transitions. */
+.token-catalogue-body button { transition-property:transform,border-color; }
 .token-catalogue-body button { white-space:normal; overflow-wrap:anywhere; line-height:1.35; }
 .token-catalogue-body input,.token-catalogue-body select { width:100%; min-width:0; }
 .token-catalogue-body :is(button,input,select,summary,[tabindex="-1"]):focus-visible { outline:3px solid var(--wallet-accent); outline-offset:3px; scroll-margin-block:16px; }

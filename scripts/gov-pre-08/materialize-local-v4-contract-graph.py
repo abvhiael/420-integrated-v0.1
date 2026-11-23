@@ -249,6 +249,35 @@ def bootstrap(rpc,base):
          addr(COMMUNITY_RESERVE),
          "ValidatorRegistry community reserve not bound")
 
+    # LOCAL BROWSER ONLY: configure authentic Civic runtime contracts with
+    # an explicitly synthetic equal-weight electorate. This authority is
+    # impersonated only in the disposable Anvil 31337 preparation, then the
+    # actual resulting account trie is imported as isolated node420 Genesis.
+    browserVoter="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
+    changedAccount="0x2b5ad5c4795c026514f8317c7a215e218dccd6cf"
+    localBrowserSources={}
+    for house in ("COMMUNITY","VALIDATOR"):
+        syntheticRoot=keccak("GOV-PRE-08/LOCAL-BROWSER/"+house)
+        syntheticType=keccak("GOV-PRE-08/LOCAL-BROWSER-SOURCE/"+house)
+        source=deploy(rpc,creator,"GOVPRE08BrowserElectorate420",
+            "constructor(bytes32,bytes32,address,uint256,address,uint256)",
+            [syntheticType,syntheticRoot,browserVoter,1,changedAccount,0],receipts)
+        localBrowserSources[house]=source
+        call_send(rpc,TIME,elect,"setHouseSource(uint8,address)",
+                  "0" if house=="COMMUNITY" else "1",source,
+                  tag="browser:electorate:"+house,receipts=receipts)
+    call_send(rpc,TIME,const,"setRule(uint8,uint64,uint64,uint16,uint16,uint16,uint16,bool)",
+              "0","5",str(7*86400),"5000","6000","5000","6000","true",
+              tag="browser:constitutional_G1",receipts=receipts)
+    call_send(rpc,TIME,prop,"bindProposalAuthority(address)",civic,
+              tag="browser:proposalAuthority",receipts=receipts)
+    call_send(rpc,TIME,elect,"bindSnapshotAuthority(address)",civic,
+              tag="browser:snapshotAuthority",receipts=receipts)
+    need(read_address(rpc,prop,"proposalAuthority()")==addr(civic)
+         and read_address(rpc,elect,"snapshotAuthority()")==addr(civic),
+         "native browser proposal authority not bound to the actual Civic Governor")
+    # The real Timelock is NOT activated; this grants no treasury authority.
+
     # These synthetic unowned fixture senders are impersonated ONLY on chain 31337.
     fail_call(rpc,creator,d["FoundingWalletClaims420"],"claimFounderWallet()")
     fail_call(rpc,admin,d["FoundingTreasuryAuthority420"],"initializeBudgets()")
@@ -405,6 +434,10 @@ def bootstrap(rpc,base):
         "localRegistryComponentIds":ids,
         "walletCanonicalComponentIds":canonicalIds,
         "walletCivicModuleAddresses":civic_modules,
+        "localBrowserElectorateSources":localBrowserSources,
+        "localBrowserSigner":browserVoter,
+        "localBrowserChangedAccount":changedAccount,
+        "localBrowserRuleConfigured":True,
         "walletTreasuryDependencyRoot":treasuryDependencyRoot,
         "serviceDiscoveries":services,
         "genesisAnchorCodeHashes":{key:hcode(rpc,location) for key,location in
@@ -506,6 +539,15 @@ def verify(rpc,e):
          addr(d["FoundingValidatorSponsorship420"])
          and read_address(rpc,VALIDATORS,"communityValidatorReserve()")==addr(COMMUNITY_RESERVE),
          "Stake/Founding cross-protocol binding not recovered")
+    need(e.get("localBrowserRuleConfigured") is True
+         and set(e["localBrowserElectorateSources"])=={"COMMUNITY","VALIDATOR"} and
+         read_address(rpc,e["walletCivicModuleAddresses"]["proposalRegistry"],
+                      "proposalAuthority()")==addr(e["walletCivicModuleAddresses"]["governor"]) and
+         read_address(rpc,e["walletCivicModuleAddresses"]["electorateRegistry"],
+                      "snapshotAuthority()")==addr(e["walletCivicModuleAddresses"]["governor"]),
+         "local Civic browser authority was not recovered")
+    for who in e["localBrowserElectorateSources"].values():
+        need(rpc.code(who)!="0x","local synthetic browser electorate runtime lost")
     need(int(rpc.read(TIME,"civicAuthorityActivated()"),16)==0,
          "unapproved Civic authority unexpectedly activated")
     return True

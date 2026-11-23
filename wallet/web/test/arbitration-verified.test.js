@@ -112,7 +112,7 @@ test('reject unknown, deprecated, replaced service and mismatched release identi
     [s=>s.version=0,/inactive/],[s=>s.active=false,/inactive/],
     [s=>s.version=2,/version changed/],
     [s=>s.router=addr(500),/unexpected ABI read/],
-    [s=>s.routerCodeHash=h(444),/runtime|component/],
+    [s=>s.routerCodeHash=h(444),/router code hash mismatch/],
     [s=>s.metadataHash=h(600),/metadata/],
     [s=>s.manifestHash=h(601),/profile/],
     [s=>s.interfaceHash=h(602),/profile/],

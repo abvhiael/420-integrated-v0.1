@@ -341,9 +341,14 @@ async function sealPrivateFile(){
   const file=one('#arbitration-private-file').files?.[0];
   if(!file||file.size<1||file.size>ARBITRATION_EVIDENCE_MAX_BYTES_420)
     throw Error('Select a private evidence file no larger than 8 MiB');
+  const expectedContext=context,caseId=current.id,epoch=serial;
   const raw=new Uint8Array(await file.arrayBuffer());
-  try{sealedEvidence=await evidenceWorkspace.prepare({caseId:current.id,data:raw});}
+  let prepared;
+  try{prepared=await evidenceWorkspace.prepare({caseId,data:raw});}
   finally{raw.fill(0);}
+  if(context!==expectedContext||current?.id!==caseId||serial!==epoch)
+    throw Error('Wallet or evidence case changed; prepare the private file again');
+  sealedEvidence=prepared;
   one('#arbitration-evidence-form [name="evidenceHash"]').value=sealedEvidence.commitment;
   one('#arbitration-export-sealed').disabled=false;
   one('#arbitration-show-secret').disabled=false;
@@ -374,9 +379,14 @@ async function inspectEvidenceFile(form){
   form.querySelector('[name="recoveryKey"]').value='';
   let envelope;
   try{envelope=JSON.parse(await file.text());}catch{throw Error('Private evidence unavailable or failed integrity verification');}
-  const verified=await evidenceWorkspace.inspectLocal({caseId:current.id,
+  const expectedContext=context,caseId=current.id,epoch=serial;
+  const verified=await evidenceWorkspace.inspectLocal({caseId,
     round:Number(fields.round),submitter:fields.submitter,commitment:fields.commitment,
     encrypted:envelope,recoveryKey:key});
+  if(context!==expectedContext||current?.id!==caseId||serial!==epoch){
+    verified.bytes.fill(0);
+    throw Error('Wallet or evidence case changed; private evidence inspection cancelled');
+  }
   inspectedEvidence=verified.bytes;
   one('#arbitration-export-verified').disabled=false;
   setText('#arbitration-inspection-status','Private bytes verified against canonical evidence for case '+

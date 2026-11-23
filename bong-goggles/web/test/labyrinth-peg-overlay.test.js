@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {LABYRINTH_PRINTED_GUIDES} from '../core/labyrinth-printed-guides.js';
 import {validateLabyrinthPegAtlas,labyrinthPhysicalLaneScores,labyrinthPegPositions,renderLabyrinthPegOverlay} from '../core/labyrinth-peg-overlay.js';
 
 const blank=Object.freeze({schemaVersion:1,scoreTarget:325,
@@ -34,4 +35,14 @@ test('BC-2.4 partnered scoring shares one physical peg while independent players
  assert.deepEqual(labyrinthPhysicalLaneScores({scores:[11,22,33],teams:[0,1,2]}),[]);
  assert.deepEqual(labyrinthPhysicalLaneScores({scores:[11,22,33,44],teams:[0,1,2,3]}),[]);
  assert.deepEqual(labyrinthPhysicalLaneScores({scores:[-1,22],teams:[0,1]}),[]);
+});
+
+test('BC-2.4 all 32 decade markers are independently located on the supplied original board',()=>{
+ const entries=Object.entries(LABYRINTH_PRINTED_GUIDES);
+ assert.equal(entries.length,32);
+ for(let n=10;n<=320;n+=10){
+  const p=LABYRINTH_PRINTED_GUIDES[n];
+  assert.equal(p?.length,2,'missing printed numeral '+n);
+  assert.ok(p.every(x=>Number.isInteger(x)&&x>=0&&x<1254));
+ }
 });

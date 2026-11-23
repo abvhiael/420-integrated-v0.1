@@ -9,9 +9,11 @@ const root=resolve(import.meta.dirname,'..');
 const fail=msg=>{throw Error('BC-2.4 original board peg-map qualification: '+msg)};
 const art=resolve(root,'assets/games/labyrinth-cribbage/labyrinth.png');
 const binary=await readFile(art).catch(()=>fail('approved original PNG absent'));
-if(binary.length!==4236478||
- createHash('sha256').update(binary).digest('hex')!==LABYRINTH_BOARD_SHA256)
- fail('the source PNG bytes were changed or replaced');
+// The creator approved the GitHub-uploaded PNG independently of the earlier
+// survey export's binary encoding. Pin its committed Git object identity.
+const blobSHA=createHash('sha1').update('blob '+binary.length+'\\0').update(binary).digest('hex');
+if(blobSHA!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2')
+ fail('the GitHub-approved board file was changed or replaced');
 const source=resolve(root,'core/labyrinth-peg-map.json');
 const raw=await readFile(source,'utf8').catch(()=>fail('exact numbered 0–325 track atlas is absent'));
 let atlas;try{atlas=JSON.parse(raw)}catch{fail('invalid track atlas JSON')}

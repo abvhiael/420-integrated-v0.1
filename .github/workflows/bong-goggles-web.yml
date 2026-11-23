@@ -51,6 +51,15 @@ jobs:
         run: |
           npm run build
           node scripts/verify-account-social-output.mjs enabled
+      - name: Main-branch Pages production activation build (dashboard variables absent)
+        working-directory: bong-goggles/web
+        env:
+          CF_PAGES: "1"
+          CF_PAGES_BRANCH: main
+          BG_ACCOUNT_SOCIAL_ACTIVATION: "true"
+        run: |
+          npm run build
+          node scripts/verify-account-social-output.mjs enabled
       - name: BG-19.13 static asset and accessibility qualification
         working-directory: bong-goggles/web
         run: node scripts/qualify-web.mjs

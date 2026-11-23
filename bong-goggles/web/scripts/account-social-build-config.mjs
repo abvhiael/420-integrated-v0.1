@@ -39,3 +39,13 @@ export function withAccountSocialBuildFlags(example, rawValue, roomsValue, commu
     }
   };
 }
+
+// BC-1.8 explicit source-controlled activation for the production Pages
+// branch only. Operator-supplied true/false always takes precedence; a
+// preview build, missing account approval or ordinary npm build stays off.
+export function resolveClassicBuildFlags({account,rooms,communications,pages,branch}={}){
+ const approved=pages==='1'&&branch==='main'&&account==='true';
+ const roomFlag=rooms??(approved?'true':undefined);
+ const communicationFlag=communications??(approved&&roomFlag==='true'?'true':undefined);
+ return Object.freeze({rooms:roomFlag,communications:communicationFlag});
+}

@@ -1,10 +1,5 @@
 name: BC-1.8 BongGoggles restricted Cloudflare Pages activation and production deployment
 on:
-  push:
-    branches:
-      - feature/bc-1-8-release-activation-and-live-evidence
-    paths:
-      - '.github/workflows/bc-1-8-pages-deploy.yml'
   workflow_dispatch:
 permissions:
   contents: read

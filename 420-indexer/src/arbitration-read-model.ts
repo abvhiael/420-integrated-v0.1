@@ -162,7 +162,8 @@ export function replayArbitrationCase420(events:readonly ArbitrationHistoryEntry
     if(outcomeCode==='0')throw Error('Arbitration empty ruling outcome');
     rulingHash=hex(f.rulingHash,'rulingHash');
     remedyCommitment=hex(f.remedyCommitment,'remedyCommitment');
-    hex(f.panelCommitment,'panelCommitment');
+    if(typeof f.panelCommitment!=='string'||!HASH.test(f.panelCommitment))
+     throw Error('Arbitration ruling panel commitment malformed');
     rulingForRound.set(round,{rulingHash,remedyCommitment});
     ruledTx=null;
    }else if(e.eventName==='CaseAppealed'){
@@ -275,6 +276,7 @@ export class ArbitrationHistoryReadModel420 {
    indexedHead:snap.number.toString(),observedHead:snap.observedHead.toString()
   };}
   const direction=request.direction??'asc',limit=normalizeLimit420(request.limit);
+  if(direction!=='asc'&&direction!=='desc')throw Error('Arbitration history ordering invalid');
   const all=await this.raw(caseId);
   if(request.cursor){
    const cursor=decodePositionCursor420(request.cursor);
@@ -304,6 +306,7 @@ export class ArbitrationHistoryReadModel420 {
   if(!snap||snap.status==='reorganized')return {items:[],nextCursor:null};
   const limit=normalizeLimit420(filters.limit);
   const dir=filters.direction??'desc';
+  if(dir!=='asc'&&dir!=='desc')throw Error('Arbitration case ordering invalid');
   const params:unknown[]=[this.binding.chainId.toString(),
    this.binding.addresses.ArbitrationCaseRegistry420];
   const predicates=["e.chain_id=$1","e.protocol='420Arbitration'",

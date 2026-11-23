@@ -73,6 +73,7 @@ const bc24New=Object.freeze({
  'core/labyrinth-cribbage-ui.js':20*1024,
  'core/labyrinth-session.js':12*1024,
  'core/labyrinth-route-runtime.js':4*1024,
+ 'core/labyrinth-room-start.js':4*1024,
  'core/labyrinth-hole-survey.js':5*1024,
  'labyrinth.css':4*1024
 });

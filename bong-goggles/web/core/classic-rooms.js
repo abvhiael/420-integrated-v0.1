@@ -232,7 +232,11 @@ return '<section class="classic-room__detail"><p><a href="/games/rooms" data-rou
  (r.gameId==='labyrinth-cribbage'?' · '+esc(r.variantId==='labyrinth-4p-individual'?'Individual scores':r.variantId==='labyrinth-4p-partners'?'Opposite-seat partnerships (default)':'Individual scores'):'')+'</p>'+
 note(r.status==='ready'?(r.gameId==='cribbage'?'All seats filled. The host may start a qualified Cribbage match.':'All seats filled. Game start and turns require BC-0.6; no match has begun.'):
 r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
-'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.gameId==='cribbage'&&r.status==='ready'?'<form data-cribbage-room-start><button type="submit">Start Cribbage</button></form>':'')+cribbageLink+labyrinthLink+roomLive+invites+
+'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.status==='ready'&&
+ ['cribbage','labyrinth-cribbage'].includes(r.gameId)?
+ '<form '+(r.gameId==='cribbage'?'data-cribbage-room-start':'data-labyrinth-room-start')+
+ '><button type="submit">Start '+esc(title(r.gameId))+'</button></form>':'')+
+ cribbageLink+labyrinthLink+roomLive+invites+
 (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){

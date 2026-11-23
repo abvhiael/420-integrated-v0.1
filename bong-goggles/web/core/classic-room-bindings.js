@@ -1,10 +1,12 @@
 import {bindCribbageRoomStart as b} from './classic-cribbage-multiplayer.js';
+import {bindLabyrinthRoomStart} from './labyrinth-room-start.js';
 // Account classic-room form wiring; controller owns validation and server state.
 import {ROOM_LIMITS} from './classic-rooms.js';
 export function bindClassicRoomsDom(root,classicRoomsController,{isSurface,onRefresh,onRouteChange,history}){
  if(!isSurface||!classicRoomsController?.client.enabled)return;
  root.querySelector('[data-classic-room-refresh]')?.addEventListener('click',()=>void onRefresh());
  b(root,classicRoomsController,{history,onRouteChange,onRefresh});
+ bindLabyrinthRoomStart(root,classicRoomsController,{history,onRouteChange,onRefresh});
  const create=root.querySelector('[data-classic-room-create]');
  if(create){
   const syncSeats=()=>{

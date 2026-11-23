@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {LabyrinthSessionController,normalizeLabyrinthSession,LABYRINTH_RULES_HASH} from '../core/labyrinth-session.js';
 import {LABYRINTH_MANIFEST_SHA,LABYRINTH_RULES_VERSION} from '../core/labyrinth-cribbage-ui.js';
+import {bindLabyrinthRoomStart} from '../core/labyrinth-room-start.js';
 const id='10000000-1111-4111-8111-111111111111',room='20000000-2222-4222-8222-222222222222';
 const member='30000000-3333-4333-8333-333333333333';
 const hash=createHash('sha256').update('labyrinth-cribbage\nv2.0\n'+
@@ -89,4 +90,54 @@ test('BC-2.4 My Games only lists verified 325-point matching sessions, no hidden
  assert.equal(c.state.recoverable.length,1);
  assert.equal(c.state.recoverable[0].id,id);
  assert.deepEqual(Object.keys(c.state.recoverable[0]).sort(),['id','roomId','sequence','status']);
+});
+
+test('BC-2.4 ready-room host start confirms signed v2 session before opening table',async()=>{
+ const host=member,gameRoom={id:room,host:member,gameId:'labyrinth-cribbage',
+  status:'ready',seatCount:2,variantId:'labyrinth-2p',
+  seats:[{index:0,controller:'human',subject:host},{index:1,controller:'bot'}]};
+ let handler=null,changes=0,notice='',startCalls=0;
+ const button={setAttribute:()=>{},removeAttribute:()=>{}};
+ const form={dataset:{},querySelector:()=>button,addEventListener:(kind,cb)=>{if(kind==='submit')handler=cb}};
+ const root={querySelector:()=>form};
+ const client={enabled:true,request:async(path,opts)=>{
+  if(path==='/v1/me')return {status:200,data:{walletRequired:false,profile:{subject:host}}};
+  if(path==='/v1/classic-sessions'){
+   startCalls++;
+   assert.equal(opts.method,'POST');
+   assert.deepEqual(opts.body,{roomId:room});
+   return {...wire(),status:201};
+  }
+  throw Error('unexpected endpoint: '+path);
+ }};
+ const controller={client,state:{status:'ready',viewer:host,selected:gameRoom},
+  emit:x=>{controller.state=x;notice=x.notice}};
+ const history={pushState:(_,__,path)=>{assert.equal(path,'/games/labyrinth-cribbage/play?session='+id);changes++}};
+ bindLabyrinthRoomStart(root,controller,{history,onRouteChange:()=>changes++});
+ assert.equal(typeof handler,'function');
+ await handler({preventDefault:()=>{}});
+ assert.equal(startCalls,1);
+ assert.equal(changes,2);
+ assert.equal(notice,'');
+ assert.equal(form.dataset.busy,undefined);
+});
+test('BC-2.4 does not navigate after unverified or unavailable host start',async()=>{
+ const roomSeat={id:room,host:member,gameId:'labyrinth-cribbage',status:'ready',
+  variantId:'labyrinth-2p',seatCount:2,
+  seats:[{index:0,controller:'human',subject:member},{index:1,controller:'bot'}]};
+ for(const invalidResponse of [{...wire(),status:201,data:{...wire().data,
+   session:{...wire().data.session,rulesVersion:'v1.0'}}},
+  {status:404,data:{}}]){
+  let handler,notice='',navigated=0;
+  const form={dataset:{},querySelector:()=>null,addEventListener:(kind,cb)=>handler=cb};
+  const ctrl={client:{enabled:true,request:async path=>path==='/v1/me'?
+   {status:200,data:{walletRequired:false,profile:{subject:member}}}:invalidResponse},
+   state:{status:'ready',viewer:member,selected:roomSeat},
+   emit:s=>{ctrl.state=s;notice=s.notice}};
+  bindLabyrinthRoomStart({querySelector:()=>form},ctrl,{
+   history:{pushState:()=>navigated++},onRouteChange:()=>navigated++});
+  await handler({preventDefault:()=>{}});
+  assert.equal(navigated,0);
+  assert.match(notice,/not confirmed/);
+ }
 });

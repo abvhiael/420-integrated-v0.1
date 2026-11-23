@@ -64,7 +64,7 @@ jobs:
           set -euo pipefail
           regex='^(BetCrashV1420|BetCrashProgression420|BetCrashSettlementAdapter420|BetCrashViewAdapter420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
           set +e
-          forge test --match-contract "$regex" --json > "$RUNNER_TEMP/crash-level1.json" 2> "$RUNNER_TEMP/crash-level1.stderr"
+          bash ../scripts/qualify-bet-foundry.sh test/Bet*.t.sol -- --match-contract "$regex" --json > "$RUNNER_TEMP/crash-level1.json" 2> "$RUNNER_TEMP/crash-level1.stderr"
           forge_status=$?
           set -e
           if [ "$forge_status" -ne 0 ]; then

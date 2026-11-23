@@ -584,6 +584,70 @@ def main():
         require(code==200 and view["block"]["hash"].lower()==block4["hash"].lower()
                 and view["trace"]["certified"],
                 "Go Indexer and Explorer missed the real signed Civic vote block")
+        # Reconcile the ACTUAL browser ballot through another complete hard
+        # stop of patched Geth, certified settlement, Indexer and Explorer.
+        # Never replace block 4 from an unauthenticated RPC head or replay the
+        # UI vote: recover only pinned BLS-certified history and Geth receipts.
+        checkpoint4=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
+        require(checkpoint4["Settlement"]["ExecutionBlock"]==4,
+                "browser's certified vote is not in the durable consensus high water")
+        childlist=Path("/proc")/str(node.pid)/"task"/str(node.pid)/"children"
+        geth_children=[int(pid) for pid in childlist.read_text().split()]
+        require(len(geth_children)==1 and geth_children[0]!=node.pid,
+                "second cold recovery did not identify the real Geth child")
+        for process in (exp,idx,consensus,node):
+            require(process.poll() is None,"native browser recovery requires live service")
+            os.killpg(process.pid,signal.SIGKILL)
+            process.wait(timeout=20)
+        for child in geth_children:
+            until=time.monotonic()+12
+            while time.monotonic()<until:
+                try: state=(Path("/proc")/str(child)/"stat").read_text().split(") ",1)
+                except FileNotFoundError: break
+                if len(state)==2 and state[1].startswith("Z"):break
+                time.sleep(.05)
+            else:raise RuntimeError("browser-recovery Geth process retained locked datadir")
+        node=launch("node420-browser-vote-cold-recovered",
+            [str(execution),"--geth",str(geth),"--datadir",str(execdir),
+             "--jwt-secret",str(args.workdir/"jwt.hex"),"--authrpc.port","18781",
+             "--http.port","18780","--port","0","--","--ipcdisable","--nodiscover","--maxpeers","0"])
+        ready(lambda:rpc("eth_chainId")==hex(420),node,timeout=60)
+        events=queue.Queue()
+        consensus=launch("fourtwentyd-browser-vote-cold-recovered",
+            [str(daemon),"--certified-settlement","--engine","http://127.0.0.1:18781",
+             "--jwt-secret",str(args.workdir/"jwt.hex"),"--settlement-dir",str(args.workdir/"consensus"),
+             "--settlement-trust",str(trustfile),"--settlement-trust-sha256",pin],
+             input_stream=True)
+        threading.Thread(target=collect,args=(consensus.stdout,),daemon=True).start()
+        wait_event("settled",4,timeout=60)
+        require(rpc("eth_getBlockByNumber",["latest",False])["hash"].lower()==block4["hash"].lower(),
+                "recovered Geth did not restore the BLS-certified browser vote block")
+        replayReceipt=rpc("eth_getTransactionReceipt",[ballot_intent["txHash"]])
+        require(replayReceipt and replayReceipt["status"]=="0x1"
+                and replayReceipt["blockHash"].lower()==block4["hash"].lower(),
+                "Geth+consensus cold restart lost actual Chromium vote receipt")
+        require(int(call(GW,"lastSequence()"),16)==8,
+                "actual native reward/Gateway sequence drifted after browser vote recovery")
+        require(verifyCustody("after recovered browser ballot")==unifiedCustody,
+                "native browser ballot recovery modified funded Genesis custody")
+        idx=launch("indexer420-browser-vote-cold-recovered",[str(indexer)],env=env)
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=4,
+              idx,timeout=60)
+        exp=launch("explorer420-browser-vote-cold-recovered",[str(explorer)],env=xenv)
+        ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],exp,timeout=60)
+        code,recoveredBallot=getter("http://127.0.0.1:18783","/v1/blocks/4")
+        require(code==200 and recoveredBallot["block"]["hash"].lower()==block4["hash"].lower()
+                and recoveredBallot["trace"]["certified"],
+                "Explorer lost browser vote after full stack cold recovery")
+        browser_recovered=args.workdir/"browser-recovered-vote.json"
+        subprocess.run(browser_cmd+["--mode","recovered",
+                       "--proposal-tx",browser_proposal["proposalTxHash"],
+                       "--output",str(browser_recovered)],cwd=ROOT,check=True,timeout=65)
+        recoveredBrowser=json.loads(browser_recovered.read_text())
+        require(recoveredBrowser["canonicalCivicBallotRecoveredAfterHardStop"]
+                and recoveredBrowser["accountChangedInvalidatesMountedGovernance"]
+                and recoveredBrowser["appSSORevocationInvalidatesMountedGovernance"],
+                "new real Chromium session failed to read recovered on-chain ballot")
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
              "chainId":420,"genesisHash":genesisblock["hash"],
@@ -611,6 +675,9 @@ def main():
              "browserActualGethProposalTx":browser_proposal["proposalTxHash"],
              "browserActualGethVoteTx":ballot_intent["txHash"],
              "browserNativeCivicVoteBlockHash":block4["hash"],
+             "browserCivicVoteAfterSecondGethHardStopRecovered":True,
+             "browserNativeConsensusCheckpointAfterRecovery":4,
+             "browserCivicVoteCanonicalExplorerPostgresRecovered":True,
              "browserRealEIP1193SignedGovernanceVote":True,
              "browserAccountSwitchAndRevocationRejected":True,
              "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,

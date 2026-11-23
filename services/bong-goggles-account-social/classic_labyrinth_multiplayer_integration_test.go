@@ -4,7 +4,6 @@ package social
 
 import (
  "context"
- "net/http"
  "testing"
 )
 

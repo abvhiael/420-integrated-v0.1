@@ -1,0 +1,66 @@
+name: GOV-PRE-08 Step 3 browser 420ID authenticated wallet
+on:
+  pull_request:
+    paths:
+      - 'services/420id/sso_integration_test.go'
+      - 'services/420id/app-gateway/**'
+      - 'wallet/web/420id-*'
+      - 'wallet/web/governance-management-ui.js'
+      - 'wallet/web/index.html'
+      - 'wallet/web/test/420id-browser-session.test.js'
+      - 'wallet/web/test/governance-management-ui.test.js'
+      - '.github/workflows/governance-pre-08-browser-id.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gov-pre-08-browser-id-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  real-420id-postgres-sso-and-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Qualify real verified-email and PKCE Wallet 420ID source issuance/revocation
+        run: go test -race -tags account420_integration -count=1 -v -run 'TestWalletRealVerifiedEmailSSOGrantAndParentSessionRevocation' ./services/420id
+      - name: Qualify real Wallet HTTP SSO cookie, confidential exchange and cross-instance session loss
+        run: go test -race -tags account420_integration -count=1 -v -run 'TestWalletRealBrowserSSOSessionRevocationAndBackendIntrospection' ./services/420id/app-gateway
+      - name: Check allowlist and backend package binding
+        run: go test ./services/420id/app-gateway
+  browser-session-and-governance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticated 420ID Wallet session, account/revocation and real Governance UI core regressions
+        run: |
+          node --test wallet/web/test/420id-browser-session.test.js wallet/web/test/governance-management.test.js wallet/web/test/governance-management-ui.test.js
+          node --test services/420id/app-gateway/client.test.mjs
+          cmp wallet/web/420id-client.mjs services/420id/app-gateway/client.mjs

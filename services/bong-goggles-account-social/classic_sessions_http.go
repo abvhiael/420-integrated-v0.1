@@ -34,6 +34,20 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   history,e:=h.Sessions.History(ctx,viewer);if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
  }
+ if path=="/v1/classic-sessions/history-labyrinth"&&r.Method=="GET"{
+  if !h.classicLabyrinthMatchEnabled{deny(w,404);return}
+  history,e:=h.Sessions.HistoryForGame(ctx,viewer,"labyrinth-cribbage")
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
+ }
+ if path=="/v1/classic-sessions/challenge-labyrinth"&&r.Method=="POST"{
+  if !h.classicLabyrinthMatchEnabled{deny(w,404);return}
+  var req struct{Target string `json:"target"`;RequestID string `json:"requestId"`}
+  if strictJSON(r,&req)!=nil{deny(w,400);return}
+  room,e:=h.Sessions.ChallengeForGame(ctx,viewer,req.Target,req.RequestID,"labyrinth-cribbage")
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
+ }
  if path=="/v1/classic-sessions/challenge"&&r.Method=="POST"{
   if !h.classicMatchSocialEnabled{deny(w,404);return}
   var req struct{Target string `json:"target"`;RequestID string `json:"requestId"`}

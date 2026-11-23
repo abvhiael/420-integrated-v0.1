@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'services/bong-goggles-account-social/classic_match_social.go'
+      - 'services/bong-goggles-account-social/classic_sessions_http.go'
+      - 'services/bong-goggles-account-social/http.go'
       - 'cmd/bong-goggles-social/labyrinth_activation.go'
       - 'cmd/bong-goggles-social/labyrinth_activation_test.go'
       - 'cmd/bong-goggles-social/main.go'

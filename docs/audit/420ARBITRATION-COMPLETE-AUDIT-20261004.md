@@ -305,4 +305,4 @@ The **repository-side 420Arbitration audit is finished through ARBITRATION-AUDIT
 
 All work that can be honestly completed before a live production-equivalent public testnet is available has been implemented and qualified. ARBITRATION-AUDIT-5 is now the next canonical step and is blocked by live testnet availability, not by unfinished repository implementation.
 
-PR #509 remains open and unmerged. Merge/reconciliation is a separate action and is not performed by this audit closeout.
+Historical audit-time statement (2026-10-04): PR #509 was open when this original closeout text was drafted. **Subsequent reconciliation (2026-11-22): PR #509 is CLOSED/MERGED, merged 2026-10-04 at 22:29:22 UTC.** The historical AUDIT-4 CI applies only to the stated qualified SHAs; current-main qualification requires independent evidence.

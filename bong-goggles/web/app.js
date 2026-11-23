@@ -23,6 +23,7 @@ import {AccountSocialController} from './core/account-social-controller.js';
 import {AccountIdentityController} from './core/account-identity.js';
 import {ClassicRoomsController} from './core/classic-rooms.js';
 import {createCribbageRouteRuntime} from './core/cribbage-route-runtime.js';
+import {updateCribbageView} from './core/cribbage-live-view.js';
 import {resolveRoute} from './core/routes.js';
 import {AccountExtrasController} from './core/account-extras.js';
 import {AccountXPController} from './core/account-xp.js';
@@ -46,7 +47,6 @@ function walletMarkup(){const providerAvailable=Boolean(discover420Wallet(window
 function bindWalletActions(){root.querySelector('[data-action="connect"]')?.addEventListener('click',async()=>{try{walletView=await walletController.connect();telemetry.event('wallet_connected',{chainId:walletView.chainId});renderCurrent();}catch(error){telemetry.event('wallet_connect_failed',{code:error?.code,message:error?.message});renderCurrent('Wallet connection was not approved.');}});root.querySelector('[data-action="switch-network"]')?.addEventListener('click',async()=>{try{walletView=await walletController.requestSupportedNetwork();telemetry.event('wallet_network_changed',{chainId:walletView.chainId});renderCurrent();}catch(error){telemetry.event('wallet_network_change_failed',{code:error?.code,message:error?.message});renderCurrent(error?.message||'Network change was not completed.');}});root.querySelector('[data-action="sign-out"]')?.addEventListener('click',async()=>{walletView=await walletController.signOut();renderCurrent();});for(const link of root.querySelectorAll('[data-wallet-handoff]')){const action=link.dataset.walletHandoff;try{link.href=buildWalletHandoffUrl(runtimeConfig.walletUrl,{action,returnUrl:window.location.href});link.rel='noopener noreferrer';}catch{link.hidden=true;}}}
 function render(view){root.dataset.state=view.state;root.innerHTML=`<main class="bootstrap-shell" aria-live="polite"><section class="bootstrap-card"><p class="eyebrow">420 Integrated</p><h1>Bong Goggles</h1><p class="status">${view.state}</p><p class="detail">${view.detail}</p>${runtimeConfig?walletMarkup():''}</section></main>`;if(runtimeConfig)bindWalletActions();updateRobots();}
 function indexerNotice(){if(indexerStatus.status==='ready'){const head=indexerStatus.data.indexedHead??'not yet indexed';return `420Indexer HTTP diagnostic: indexed head ${head} (${indexerStatus.data.finality}). Social projections and write authority remain unverified.`;}if(indexerStatus.status==='unavailable')return '420Indexer HTTP status unavailable. Social projections and writes remain unverified.';return null;}
-// Both Home and Account Social use one verified, fail-closed 420ID session.
 const isAccountSocialSurface=()=>window.location.pathname==='/'||window.location.pathname==='/social';
 function bindAccountSocial(){
 if(!isAccountSocialSurface()||!socialController?.client.enabled)return;
@@ -57,7 +57,6 @@ for(const button of root.querySelectorAll('[data-social-action]'))button.addEven
 }
 async function runSocial(action,details){try{await socialController.act(action,details);if(action==='profile')void identityController?.refresh();}catch{socialController.emit({status:'error'});void identityController?.refresh();}}
 async function signOut420ID(){
-// Clear the visible account before invalidating other in-memory projections.
 const pending=identityController.logout();
 socialController?.invalidate();xpController?.invalidate();monetizationController?.invalidate();
 for(const c of Object.values(accountExtras??{}))c.invalidate();
@@ -118,8 +117,6 @@ try{await controller.act(action,details);}catch{controller.emit({status:'error'}
 }
 
 
-// CCC-6: all game data stays in this browser. Device persistence is opt-in,
-// because the seed and move journal can reconstruct other drivers' private hands.
 function chaosStorage(kind){
 try{return kind==='tab'?window.sessionStorage:window.localStorage;}catch{return null;}
 }
@@ -138,7 +135,6 @@ chaosSaveNotice='Previous tab progress is damaged. Resume a verified device save
 }
 }
 function restoreChaosOnGameRoute(){
-// Old same-screen journals cannot authorize an account match.
 if(window.location.pathname==='/classics/cross-country-chaos/practice'&&!chaosGame&&!chaosJournal)
 refreshChaosRecovery();
 }
@@ -163,7 +159,6 @@ function saveChaosDisplayInfo(){
 return {deviceSaving:chaosDeviceSaving,available:chaosSavedAvailable,
 invalid:chaosSavedInvalid,notice:chaosSaveNotice};
 }
-// Yield between bounded local computer batches. Never reveal a bot's hand.
 function scheduleChaosComputer(){
 if(chaosComputerScheduled||chaosComputerErrorStop||
 window.location.pathname!=='/classics/cross-country-chaos/practice'||
@@ -333,7 +328,10 @@ telemetry.event('public_discover_read',{status:result.status});renderCurrent();
 }
 function refreshGreeting(){const image=root.querySelector('[data-greeting]');if(!image)return;const greeting=selectGreeting();const src=greetingSrc(greeting);if(image.getAttribute('src')!==src){image.src=src;image.alt=greeting.label;}}
 function onRouteChange(){
-cribbageRuntime?.invalidate();
+const route=resolveRoute(window.location.pathname),id=new URLSearchParams(window.location.search).get('session');
+const current=cribbageRuntime?.state?.session?.id;
+if(route.gameId!=='cribbage'||current&&id!==current&&(id||['play','table'].includes(route.screen)))
+ cribbageRuntime?.invalidate();
 restoreChaosOnGameRoute();
 chaosRevealed=false;chaosRepairCue=null;chaosEffects=null;
 monetizationController?.invalidate();xpController?.invalidate();socialController?.invalidate();identityController?.invalidate();classicRoomsController?.invalidate();classicLive?.invalidate();for(const c of Object.values(accountExtras??{}))c.invalidate();
@@ -348,7 +346,7 @@ if(window.location.pathname==='/account/xp'&&xpController?.client.enabled)void x
 if(window.location.pathname==='/account/monetization'&&monetizationController?.client.enabled)void monetizationController.refresh();
 const extras=currentAccountExtra();if(extras?.client.enabled)void extras.refresh();
 }
-async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});cribbageRuntime=createCribbageRouteRuntime({enabled:runtimeConfig.features.classicRooms===true,onChange:renderCurrent});classicLive=cc({rooms:classicRoomsController,enabled:runtimeConfig.features.classicCommunications,route:roomRoute,onChange:renderCurrent,windowObject:window,documentObject:document});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});chaosOnline=new ChaosRoomsClient({onChange:()=>{if(window.location.pathname==='/classics/cross-country-chaos')renderCurrent();}});accountExtras={
+async function start(){render({state:'loading',detail:'Loading canonical application configuration…'});try{runtimeConfig=await loadRuntimeConfig();const services=createBongGogglesServices(runtimeConfig);indexerStatusReader=createIndexerStatusReader({service:services.indexer,chainId:runtimeConfig.chainId});publicFeedReader=createPublicDiscoverFeedReader({config:runtimeConfig});identityController=new AccountIdentityController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>renderCurrent()});classicRoomsController=new ClassicRoomsController({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(isClassicRoomSurface())renderCurrent();}});cribbageRuntime=createCribbageRouteRuntime({enabled:runtimeConfig.features.classicRooms===true,onChange:()=>{if(!updateCribbageView(root,cribbageRuntime,identityController?.state,runtimeConfig.features.accountSocial===true,window.location.pathname))renderCurrent();}});classicLive=cc({rooms:classicRoomsController,enabled:runtimeConfig.features.classicCommunications,route:roomRoute,onChange:renderCurrent,windowObject:window,documentObject:document});socialController=new AccountSocialController({enabled:runtimeConfig.features.accountSocial===true,onChange:()=>{if(isAccountSocialSurface())renderCurrent();}});xpController=new AccountXPController({enabled:runtimeConfig.features.accountXP===true,onChange:()=>{if(window.location.pathname==='/account/xp')renderCurrent();}});monetizationController=new AccountMonetizationController({enabled:runtimeConfig.features.accountMonetization===true,onChange:()=>{if(window.location.pathname==='/account/monetization')renderCurrent();}});chaosOnline=new ChaosRoomsClient({onChange:()=>{if(window.location.pathname==='/classics/cross-country-chaos')renderCurrent();}});accountExtras={
 messages:new AccountExtrasController({kind:'messages',enabled:runtimeConfig.features.accountMessaging===true,
 onChange:()=>{if(window.location.pathname==='/account/messages')renderCurrent();}}),
 games:new AccountExtrasController({kind:'games',enabled:runtimeConfig.features.accountGames===true,

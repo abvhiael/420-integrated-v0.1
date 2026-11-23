@@ -110,11 +110,12 @@ const cardFace=id=>'<span class="lab-card '+([1,2].includes(Math.floor(id/13))?'
  '">'+esc(cribbageCardLabel(id))+'</span>';
 export function renderLabyrinthBoard({scores=[],teams=[],viewerSeat=0}={}){
  const parts=teams.length?teams.map((team,seat)=>({team,seat,score:scores[seat]})):[];
+ const hasVirtualTracks=new Set(teams).size>2;
  const rows=parts.map(({team,seat,score})=>'<li class="lab-board-score'+
   (seat===viewerSeat?' lab-board-score--you':'')+'"><strong>'+
   (seat===viewerSeat?'You':'Seat '+(seat+1))+'</strong><span>'+
   esc(String(number(score,0,10000)?score:'—'))+' / '+LABYRINTH_CRIBBAGE_TARGET+
-  '</span><small>Track '+(team+1)+'</small></li>').join('');
+  '</span><small>'+(hasVirtualTracks?'Virtual individual score':'Physical lane '+(team+1))+'</small></li>').join('');
  return '<figure class="lab-board" aria-label="Original wood-slice Labyrinth Cribbage board">'+
   '<div class="lab-board-art"><img src="'+LABYRINTH_BOARD_SRC+
   '" width="1254" height="1254" alt="User-approved labyrinth wood-slice board with printed score guides, shown without alteration" loading="lazy" decoding="async">'+

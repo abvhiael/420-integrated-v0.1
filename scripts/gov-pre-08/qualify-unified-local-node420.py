@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import queue
 import signal
+import ssl
 import subprocess
 import threading
 import time
@@ -547,9 +548,35 @@ def main():
                          ["data"]["hash"].lower()==expected.lower(),ts_idx,timeout=60)
         ts_idx=launch("typescript-indexer420",ts_worker_cmd)
         await_ts_block(2,latest["hash"])
+        identity_binary=Path(os.environ["GOVPRE08_BROWSER_IDENTITY_BIN"]).resolve()
+        require(identity_binary.is_file(),"source-compiled local 420ID gateway harness required")
+        browser_runtime=args.workdir/"wallet-browser-runtime.json"
+        civic_graph=graph["walletCivicModuleAddresses"]
+        browser_runtime.write_text(json.dumps({
+            "schema":"420-wallet-runtime-config-v1",
+            "network":{"name":"GOV-PRE-08 local chain420","chainId":"0x1a4","rpcUrl":"http://127.0.0.1:18780"},
+            "identitySession":{"app":"420wallet","enabled":True,"gatewayPath":"/420id-api",
+                               "authority":"confidential-app-gateway-only"},
+            "governance":{"indexerUrl":"https://wallet.420integrated.org",
+                "discovery":{"source":"protocol-registry","serviceId":"420/service/governance/v1",
+                             "revision":1,"registryAddress":REGISTRY,"modules":civic_graph,
+                             "componentIds":{key:graph["walletCanonicalComponentIds"][key]
+                                             for key in civic_graph}}},
+        }))
+        identity=launch("wallet-420id",
+                        [str(identity_binary),"-test.run=^TestServeGOVPRE08WalletIdentity$","-test.timeout=15m"],
+                        env=dict(os.environ,GOVPRE08_WALLET_WEB_ROOT=str(ROOT/"wallet/web"),
+                                 GOVPRE08_WALLET_CONFIG=str(browser_runtime.resolve())))
+        def identity_ready():
+            request=urllib.request.Request("https://127.0.0.1:18785/420id-api/healthz",
+                                           headers={"Host":"wallet.420integrated.org"})
+            transport=urllib.request.build_opener(urllib.request.ProxyHandler({}),
+                urllib.request.HTTPSHandler(context=ssl._create_unverified_context()))
+            with transport.open(request,timeout=5) as response:
+                return json.load(response)["ready"]
+        ready(identity_ready,identity,timeout=60)
         browser_cmd=["node",str(ROOT/"wallet/web/scripts/qualify-gov-pre08-browser.mjs"),
-                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780",
-                     "--indexer",ts_origin]
+                     "--graph",str(args.graph.resolve()),"--rpc","http://127.0.0.1:18780"]
         browser_proposal_path=args.workdir/"browser-proposal.json"
         subprocess.run(browser_cmd+["--mode","propose","--output",str(browser_proposal_path)],
                        cwd=ROOT,check=True,timeout=65)
@@ -585,6 +612,7 @@ def main():
         receipt=rpc("eth_getTransactionReceipt",[ballot_intent["txHash"]])
         require(browser_vote["actualSourceCompiledCivicVote"]
                 and browser_vote["realOnchainEvent"]
+                and browser_vote["real420IDCentralConsentAndPKCE"]
                 and browser_vote["accountChangedInvalidatesMountedGovernance"]
                 and browser_vote["appSSORevocationInvalidatesMountedGovernance"]
                 and browser_vote["chainChangeAndDisconnectInvalidateMountedGovernance"]
@@ -741,7 +769,7 @@ def main():
               "allConsumersRejoinedPersistedCanonicalPostgresAfterHardStop":True,
               "unauthenticatedEngineMutationRejectedAfterRecovery":True,
              "singleCanonicalLedger":True,"walletBrowserTransactionQualified":True,
-             "browserRealAccountOnlySSOFixture":True,
+             "browserReal420IDCentralAndWalletGateway":True,
              "browserActualGethProposalTx":browser_proposal["proposalTxHash"],
              "browserActualGethVoteTx":ballot_intent["txHash"],
              "browserNativeCivicVoteBlockHash":block5["hash"],

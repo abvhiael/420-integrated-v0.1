@@ -30,6 +30,11 @@ func containsSeat(seats []uint16, seat uint16) bool {
 	return false
 }
 
+func (p *Provider) ValidateIngestion() error {
+	_, err := p.Consensus()
+	return err
+}
+
 func (p *Provider) Consensus() (model.ConsensusStatus, error) {
 	st, ok, err := p.store.Load()
 	if err != nil { return model.ConsensusStatus{}, err }

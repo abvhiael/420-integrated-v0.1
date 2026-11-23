@@ -7,6 +7,7 @@ import (
 )
 
 type runtimeConsensusProvider interface {
+	ValidateIngestion() error
 	Consensus() (model.ConsensusStatus, error)
 	ProducerForBlock(string) (model.BlockProducer, bool, error)
 }

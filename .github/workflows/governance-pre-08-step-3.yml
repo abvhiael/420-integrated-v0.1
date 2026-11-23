@@ -5,6 +5,9 @@ on:
     paths:
       - 'scripts/gov-pre-08/**'
       - 'wallet/web/scripts/qualify-gov-pre08-browser.mjs'
+      - 'services/420id/**'
+      - 'indexer/consensusview/**'
+      - 'indexer/cmd/indexer420/**'
       - 'wallet/web/420id-session-ui.mjs'
       - 'wallet/web/420id-client.mjs'
       - 'wallet/web/governance-management-ui.js'
@@ -109,6 +112,7 @@ jobs:
           chmod +x bin/node420 bin/upstream/geth-v1.17.5-420 bin/fourtwentyd bin/settlement-fixture bin/indexer420
           go test ./indexer/rpc -run 'TestBundle(HashOnlyCanonicalLookup|RejectsMalformedHashOnlyTransaction)' -count=1
           go test ./indexer/store -run 'TestPostgresStore' -count=1
+          go test -tags blst ./indexer/consensusview ./indexer/cmd/indexer420
           go build -o bin/explorer420 ./explorer/cmd/explorer420
           go build -tags blst -o bin/certified-producer ./consensus/cmd/certified-producer
           go build -tags blst -o bin/stake-signer ./consensus/cmd/stake-signer
@@ -136,6 +140,19 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright
           npx playwright install --with-deps chromium
+      - name: Provision the isolated 420ID and Wallet gateway database
+        env:
+          INDEXER_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: |
+          docker exec -i -u postgres "$INDEXER_POSTGRES_CONTAINER" psql -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE govpre08_wallet LOGIN PASSWORD 'qualification-only';
+          CREATE DATABASE account420_test;
+          SQL
+          echo 'ACCOUNT420_TEST_DSN=postgres://postgres:postgres@127.0.0.1:5432/account420_test?sslmode=disable' >> "$GITHUB_ENV"
+          echo 'GOVPRE08_WALLET_DATABASE_URL=postgres://govpre08_wallet:qualification-only@127.0.0.1:5432/account420_test?sslmode=disable' >> "$GITHUB_ENV"
+          echo 'GOVPRE08_BROWSER_IDENTITY=local-only' >> "$GITHUB_ENV"
+          go test -tags account420_integration -c -o "$RUNNER_TEMP/govpre08-browser-identity" ./services/420id
+          echo "GOVPRE08_BROWSER_IDENTITY_BIN=$RUNNER_TEMP/govpre08-browser-identity" >> "$GITHUB_ENV"
       - name: Certify one actual node420 execution ledger across founder/Treasury/Registry/Stake/consensus/Indexer/Explorer
         run: |
           python3 scripts/gov-pre-08/qualify-unified-local-node420.py \

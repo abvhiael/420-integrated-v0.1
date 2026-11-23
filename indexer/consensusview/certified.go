@@ -58,6 +58,16 @@ func (p *CertifiedProvider) ProducerForBlock(hash string) (model.BlockProducer, 
 	}
 	return model.BlockProducer{}, false, nil
 }
+// ValidateIngestion verifies the independently pinned history required for
+// producer attribution. An optional schedule must agree with that history.
+func (p *CertifiedProvider) ValidateIngestion() error {
+	if p.status != nil {
+		_, err := p.Consensus()
+		return err
+	}
+	_, err := rec.ReadCertifiedSnapshot(p.trust, p.dir)
+	return err
+}
 func (p *CertifiedProvider) Consensus() (model.ConsensusStatus, error) {
 	// Signed settlement history certifies previous outcomes, not a future proposer
 	// schedule. An optional operational status projection must match that history.

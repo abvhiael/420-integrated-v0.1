@@ -1,6 +1,5 @@
 // Real Chromium EIP-1193 Wallet Governance against the *running* chain420.
-// All wallet keys and SSO account responses in this harness are disposable
-// LOCAL qualification fixtures. Live 420ID is tested in the Go SSO suite.
+// The Wallet key and verified 420ID mailbox are disposable local fixtures.
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -18,8 +17,6 @@ const arg=(key,optional=false)=>{
  return options[pos+1];
 };
 const mode=arg('mode'),rpcUrl=arg('rpc'),output=arg('output');
-const indexerOrigin=arg('indexer');
-assert.match(indexerOrigin,/^http:\/\/127\.0\.0\.1:\d+$/);
 assert.ok(['propose','vote','recovered'].includes(mode));
 assert.match(rpcUrl,/^http:\/\/127\.0\.0\.1:\d+$/);
 const graph=JSON.parse(await fs.readFile(arg('graph'),'utf8'));
@@ -57,9 +54,6 @@ if(mode!=='propose'){
 }
 
 let currentAccount=wallet.address.toLowerCase(),chainChanged=false;
-let identity={authenticated:true,app:'420wallet',
- subject:'12345678-1234-4123-8123-123456789abc',
- financialAuthority:false,permissions:[]};
 const transactions=[];
 let approvals=0;
 const pending=arg('pending-output',true);
@@ -84,8 +78,11 @@ async function providerRequest(method,params=[]){
  return txHash;
 }
 
-const browser=await chromium.launch({headless:true});
-const context=await browser.newContext({viewport:{width:1280,height:900}});
+const browser=await chromium.launch({headless:true,args:[
+ '--no-proxy-server',
+ '--host-resolver-rules=MAP auth.420integrated.org 127.0.0.1:18785, MAP wallet.420integrated.org 127.0.0.1:18785'
+]});
+const context=await browser.newContext({viewport:{width:1280,height:900},ignoreHTTPSErrors:true});
 const page=await context.newPage();
 page.on('dialog',dialog=>dialog.accept());
 await page.exposeBinding('nativeWallet420',(_,method,params)=>providerRequest(method,params));
@@ -102,39 +99,6 @@ await page.addInitScript(()=>{
    return listeners.length;
  };
 });
-const runtime={
- schema:'420-wallet-runtime-config-v1',
- network:{name:'GOV-PRE-08 local chain420',chainId:'0x1a4',rpcUrl},
- identitySession:{app:'420wallet',enabled:true,gatewayPath:'/420id-api',authority:'confidential-app-gateway-only'},
- governance:{indexerUrl:'https://wallet.420integrated.org',
-   discovery:{source:'protocol-registry',serviceId:'420/service/governance/v1',revision:1,
-   registryAddress:'0x0000000000000000000000000000000000000434',
-   modules:civic,componentIds:Object.fromEntries(Object.keys(civic).map(x=>[x,graph.walletCanonicalComponentIds[x]]))}}
-};
-await page.route('https://wallet.420integrated.org/**',async route=>{
- const request=new URL(route.request().url());
- if(request.pathname==='/runtime-config.json')return route.fulfill({json:runtime});
- if(request.pathname==='/420id-api/auth/session')return route.fulfill({json:identity});
- if(request.pathname==='/420id-api/auth/logout'){
-   identity={authenticated:false};return route.fulfill({json:{signedOut:true}});
- }
- if(request.pathname==='/v1/protocols/events'){
-   const response=await fetch(indexerOrigin+request.pathname+request.search);
-   return route.fulfill({status:response.status,body:await response.text(),contentType:'application/json'});
- }
- const relative=path.normalize(decodeURIComponent(request.pathname==='/'?'/index.html':request.pathname)).replace(/^\/+/, '');
- const base=path.resolve(ROOT,'wallet/web');
- const file=path.resolve(base,relative);
- if(!file.startsWith(base+path.sep))return route.fulfill({status:403});
- try{
-   const bytes=await fs.readFile(file);
-   return route.fulfill({body:bytes,contentType:{
-     '.html':'text/html','.js':'text/javascript','.mjs':'text/javascript',
-     '.css':'text/css','.json':'application/json','.svg':'image/svg+xml',
-     '.png':'image/png'}[path.extname(file)]||'application/octet-stream'});
- }catch{return route.fulfill({status:404})}
-});
-
 async function assertProviderInvalidation(event, value) {
  // The Wallet shell intentionally reloads on provider changes. Read the old
  // document in the same browser task as dispatch, then verify the new document.
@@ -162,14 +126,27 @@ async function assertProviderInvalidation(event, value) {
 }
 
 try{
- await page.goto('https://wallet.420integrated.org/',{waitUntil:'domcontentloaded',timeout:30000});
- await page.locator('#wallet-420id-panel').waitFor({state:'visible',timeout:15000});
+ await page.goto('https://auth.420integrated.org/__qualification/session',{waitUntil:'domcontentloaded',timeout:15000});
+ await page.goto('https://wallet.420integrated.org/',{waitUntil:'domcontentloaded',timeout:15000});
+ await page.locator('[data-420id-status]').filter({hasText:/Not signed in/}).waitFor();
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
+ assert.match(await page.locator('#governance-error-recovery').textContent(),/420ID/);
+ assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+ await page.locator('[data-420id-login]').click();
+ await page.waitForURL('https://auth.420integrated.org/sso/authorize?*');
+ await page.locator('#sso-approve').click();
+ await page.waitForURL('https://wallet.420integrated.org/');
+ await page.locator('[data-420id-logout]').waitFor({state:'visible'});
+ const appCookie=(await context.cookies('https://wallet.420integrated.org')).find(cookie=>
+   cookie.name==='__Host-app420_session');
+ assert.ok(appCookie?.httpOnly&&appCookie.secure&&appCookie.sameSite==='Lax');
  await page.locator('#governance-connect').click();
  await page.locator('#governance-app-state[data-state="passed"]').waitFor({timeout:30000});
  assert.equal((await page.locator('#governance-account').textContent()).toLowerCase(),wallet.address.toLowerCase());
  let proof={mode,chainId:420,localOnly:true,realChromium:true,
     actualNativeGeth:true,realRegistryAndCivicCodeVerified:true,
-    local420IDBrowserGatewayResponse:true,real420IDBackendQualifiedSeparately:true};
+    real420IDBrowserGateway:true,real420IDCentralConsentAndPKCE:true,privateSessionCookieVerified:true};
  if(mode==='propose'){
    const policy=graph.actualProductionConstructorAddresses.TreasuryPolicyRegistry420;
    const action=new Interface(['function setAssetPolicy(address,bool,uint128,uint128,uint64)'])
@@ -244,7 +221,10 @@ try{
  await page.locator('#governance-connect').click();
  await page.locator('#governance-app-state[data-state="passed"]').waitFor();
  await page.locator('[data-420id-logout]').click();
+ await page.locator('[data-420id-status]').filter({hasText:/Signed out of this app/}).waitFor();
  await page.locator('#governance-app-state').filter({hasText:/^Reload required$/}).waitFor();
+ assert.equal((await context.cookies('https://wallet.420integrated.org')).some(cookie=>
+   cookie.name==='__Host-app420_session'),false);
  assert.match(await page.locator('#governance-transaction-state').textContent(),/420ID/);
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
  assert.equal(transactions.length,before,'provider changes or logout submitted an unauthorized transaction');

@@ -14,7 +14,10 @@ function state(){
  get('signed-in').textContent=current?'Signed in · idle expiry '+new Date(current.idleUntil).toLocaleString()+' · absolute expiry '+new Date(current.expiresAt).toLocaleString():'Signed out';
 }
 async function post(path,body){
- const response=await fetch(path,{method:'POST',credentials:'same-origin',cache:'no-store',redirect:'error',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ // Keep the same-origin POST's Origin header without sending the SSO query
+ // (including its state and PKCE challenge) in the Referer.
+ const response=await fetch(path,{method:'POST',credentials:'same-origin',cache:'no-store',redirect:'error',
+  referrerPolicy:'strict-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
  if(!response.ok)throw new Error(response.status===429?'Too many requests. Try again later.':response.status===409?'Sign out before signing in or recovering.':'Request could not be completed. Refresh status or restart verification.');
  return response.json();
 }

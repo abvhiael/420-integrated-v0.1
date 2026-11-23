@@ -85,7 +85,7 @@ func TestAUTH13ConfidentialProviderBoundary(t *testing.T){
    req.Header.Get("Cookie")!=""||req.Header.Get("Origin")!=""{t.Fatal("bad confidential request",req.URL)}
   user,secret,ok:=req.BasicAuth()
   if !ok||user!="doobtube"||secret!=base64.RawURLEncoding.EncodeToString(cfg.ClientSecret){t.Fatal("bad app client")}
-  return &http.Response{StatusCode:200,Header:http.Header{"Content-Type":[]string{"application/json"}},Body:io.NopCloser(strings.NewReader(`{"active":false}`))},nil
+  return &http.Response{StatusCode:200,Header:http.Header{"Content-Type":[]string{"application/json; charset=utf-8"}},Body:io.NopCloser(strings.NewReader(`{"active":false}`))},nil
  })}
  g,e:=New(cfg);if e!=nil{t.Fatal(e)}
  var state introspection

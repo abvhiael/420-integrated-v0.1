@@ -188,7 +188,7 @@ func run() error {
 				fmt.Fprintf(os.Stderr, "420Indexer runtime source qualification failed: %v\n", err)
 				continue
 			}
-			if _, err := consensusProvider.Consensus(); err != nil {
+			if err := consensusProvider.ValidateIngestion(); err != nil {
 				runtimeHealth.MarkFailure("CONSENSUS_PROVIDER_UNAVAILABLE")
 				fmt.Fprintf(os.Stderr, "420Indexer consensus qualification failed: %v\n", err)
 				continue

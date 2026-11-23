@@ -10,8 +10,21 @@ invalidation and the subsequent shell reload. A disabled proposal row blocked
 the following ballot journey. Its diagnostic log and protected signing evidence
 are in [artifact 14784386233](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45097295264/artifacts/14784386233).
 
-The continuation fixes initial proposal selection and reads the proposal list
-through the running TypeScript Indexer on the same native ledger. The unified
+At `27f44b855903f7fa95577f2631cb51ce92508c83`, [run 45098171187](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45098171187)
+passed native source materialization and the release gate. It demonstrated actual
+Chromium proposal selection through the TypeScript Indexer, a confirmed native
+ballot, and restoration of protected quorum after pausing five validators.
+The Go Indexer stalled on an optional future proposer schedule during its next
+poll. The [retained run artifact](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45098171187/artifacts/14784482614)
+contains the signed proposal, ballot, certificates and failure logs. The
+continuation validates certified history for ingestion and preserves authority
+checks on the separate future-schedule endpoint.
+
+The browser now serves the actual 420ID consent page and Wallet gateway over
+loopback TLS with the real PostgreSQL stores. The login fixture uses a verified
+disposable mailbox. The same-origin browser checks, UTF-8 JSON exchange and
+minimal database grants were exercised against this path in a focused local
+Chromium diagnostic. Unified native qualification is still pending. The unified
 workflow also rehearses pausing five protected validator processes and restoring
 quorum, signed voting in both houses, bootstrap cancellation, signed Civic
 activation, on-chain finalization and queueing, and a mined early-execution
@@ -22,9 +35,9 @@ per slot and 17,640 slots per rotation, that trust window is shorter than the
 frozen seven-day G1 Timelock floor. The Foundry test exercises post-delay
 execution against real contracts. The shared native network still needs a
 verified committee transition before it can exercise the same lifecycle across
-the full delay. This is local engineering work. The unified browser 420ID
-gateway path, full fault matrix and independent operational cold-start
-reproduction also remain open.
+the full delay. This is local engineering work. The unified 420ID and Civic
+recovery run, same-ledger sponsored 90/10 evidence, the full fault matrix and
+independent operational cold-start reproduction also remain open.
 
 
 ## QUALIFIED — one real local chain-420 execution state (2026-11-22)

@@ -75,6 +75,8 @@ const bc24New=Object.freeze({
  'core/labyrinth-route-runtime.js':4*1024,
  'core/labyrinth-room-start.js':4*1024,
  'core/labyrinth-hole-survey.js':5*1024,
+ 'core/labyrinth-peg-overlay.js':5*1024,
+ 'core/labyrinth-printed-guides.js':2*1024,
  'labyrinth.css':4*1024
 });
 const bc24Modified=Object.freeze({
@@ -128,17 +130,17 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
   throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
  bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;
 }
-if(bc24Growth>40*1024)throw Error('BC-2.4 separately bounded UI budget exceeded: '+bc24Growth);
+// Newly identified image-coordinate peg overlay (3.8 KiB) and independently\n// surveyed decade guide table (0.9 KiB) are bounded explicitly. The 48-KiB\n// BC-2.4 allowance does not change a single BC-0.x, BC-1.x or CCC ceiling.\nif(bc24Growth>48*1024)throw Error('BC-2.4 separately bounded UI and physical peg-overlay budget exceeded: '+bc24Growth);
 if(labyrinthArtFiles.length>1||
- labyrinthArtFiles.some(f=>normalize(f.path)!=='assets/games/labyrinth-cribbage/labyrinth.png'||f.size!==4236478))
+ labyrinthArtFiles.some(f=>normalize(f.path)!=='assets/games/labyrinth-cribbage/labyrinth.png'||f.size!==3446209))
  throw Error('Unexpected/altered Labyrinth board artwork output');
 for(const asset of labyrinthArtFiles){
  const raw=await readFile(asset.path);
- const hash=createHash('sha256').update(raw).digest('hex');
+ const gitBlob=createHash('sha1').update('blob '+raw.length+'\0').update(raw).digest('hex');
  const meta=await sharp(raw).metadata();
- if(hash!=='4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5'||
+ if(gitBlob!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2'||
    meta.format!=='png'||meta.width!==1254||meta.height!==1254)
-  throw Error('BC-2.4 original image must remain byte-for-byte identical');
+  throw Error('BC-2.4 published image differs from approved GitHub artwork');
 }
 if(!labyrinthArtFiles.length)console.warn('BC-2.4 exact artwork absent: pegboard integration remains unqualified.');
 

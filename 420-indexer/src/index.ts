@@ -53,3 +53,6 @@ export * from './bridge-descriptors.js';
 export * from './treasury-indexer.js';
 
 export * from './token-read-model.js';
+
+export * from './arbitration-indexer.js';
+export * from './arbitration-read-model.js';

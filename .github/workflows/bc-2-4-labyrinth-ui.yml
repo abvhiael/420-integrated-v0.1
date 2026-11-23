@@ -1,0 +1,111 @@
+name: BC-2.4 Labyrinth 325-Point Interface and Source Art Gate
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/core/labyrinth-*.js'
+      - 'bong-goggles/web/test/labyrinth-*.test.js'
+      - 'bong-goggles/web/test/labyrinth-browser-qualification.mjs'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/core/classic-room-bindings.js'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/app-shell.js'
+      - 'bong-goggles/web/app.js'
+      - 'bong-goggles/web/index.html'
+      - 'bong-goggles/web/labyrinth.css'
+      - 'bong-goggles/web/scripts/verify-labyrinth-peg-map.mjs'
+      - 'bong-goggles/web/core/labyrinth-peg-map.json'
+      - 'bong-goggles/web/assets/games/labyrinth-cribbage/labyrinth.png'
+      - 'bong-goggles/web/scripts/build.mjs'
+      - 'bong-goggles/web/scripts/qualify-web.mjs'
+      - 'docs/games/classics/BC-2-4-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-2-4-labyrinth-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-interface-and-rule-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact branch head
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped 325-point UI, selection, privacy, original art survey and session continuity
+        run: node --test bong-goggles/web/test/labyrinth-peg-overlay.test.js bong-goggles/web/test/labyrinth-frontend.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Retain full v2 Labyrinth scorer and immediate terminal tests
+        run: go test -race -count=1 -timeout=14m -run '^TestBC22(ManifestAndImmutableRoomVariants|SevenCardShowFlushRunsAndPegging|HeelsCanImmediatelyWin325)$' ./services/bong-goggles-account-social
+      - name: Node syntax, 325-point rules and legacy game isolation
+        run: |
+          node --check bong-goggles/web/core/labyrinth-route-runtime.js
+          node --check bong-goggles/web/core/labyrinth-session.js
+          node --check bong-goggles/web/core/labyrinth-cribbage-ui.js
+  original-art-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify uploaded original must be identical before public qualification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha1
+          source=Path('bong-goggles/web/assets/games/labyrinth-cribbage/labyrinth.png')
+          assert source.is_file(), 'BLOCKED: approved board not committed to BC-2.4'
+          data=source.read_bytes()
+          git_blob=sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+          assert git_blob=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2', 'committed board differs from user-approved upload'
+          PY
+  ordered-physical-peg-map:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    needs: original-art-provenance
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify both 326-position peg paths and printed numerical guides
+        run: node bong-goggles/web/scripts/verify-labyrinth-peg-map.mjs
+
+  browser-board-device-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact branch head
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser fixture tooling without changing locked project dependencies
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Real Chromium desktop/mobile approved source board and navigation
+        working-directory: bong-goggles/web
+        run: node test/labyrinth-browser-qualification.mjs

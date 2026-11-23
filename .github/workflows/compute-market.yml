@@ -60,7 +60,7 @@ jobs:
 
       - name: Run retained Compute Market Solidity suite
         working-directory: contracts
-        run: forge test --match-path 'test/Compute*.t.sol' -vvv
+        # Restrict compilation to the retained Compute suite. The vendored CADC/LayerZero\n        # upstream fixture tree is unrelated to Compute and has external imports not\n        # supplied to this owner workflow. Do not skip any Compute*.t.sol tests.\n        run: forge test --match-path 'test/Compute*.t.sol' --skip 'test/fixtures/cadc/upstream/**' -vvv
 
       - name: Compile Compute Market verification scripts
         shell: bash

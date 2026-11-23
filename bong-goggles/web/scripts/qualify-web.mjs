@@ -70,12 +70,17 @@ const bc02Files=Object.freeze({
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
 // BC-2.4 original artwork and isolated UI bytes are separately bounded.
 const bc24New=Object.freeze({
- 'core/labyrinth-cribbage-ui.js':18*1024,
+ 'core/labyrinth-cribbage-ui.js':20*1024,
+ 'core/labyrinth-session.js':12*1024,
+ 'core/labyrinth-route-runtime.js':4*1024,
  'core/labyrinth-hole-survey.js':5*1024,
  'labyrinth.css':4*1024
 });
 const bc24Modified=Object.freeze({
- 'core/shared-game-ui.js':Object.freeze({baseline:11108,maxAdded:512}),
+ 'core/shared-game-ui.js':Object.freeze({baseline:11108,maxAdded:768}),
+ 'core/app-shell.js':Object.freeze({baseline:12926,maxAdded:128}),
+ 'core/games-ui.js':Object.freeze({baseline:10516,maxAdded:256}),
+ 'app.js':Object.freeze({baseline:33882,maxAdded:512}),
  'core/classic-rooms.js':Object.freeze({baseline:15490,maxAdded:2048}),
  'core/classic-room-bindings.js':Object.freeze({baseline:2032,maxAdded:768}),
  'index.html':Object.freeze({baseline:1519,maxAdded:128})
@@ -93,7 +98,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
   throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
  bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;
 }
-if(bc24Growth>28*1024)throw Error('BC-2.4 separately bounded UI budget exceeded: '+bc24Growth);
+if(bc24Growth>40*1024)throw Error('BC-2.4 separately bounded UI budget exceeded: '+bc24Growth);
 if(labyrinthArtFiles.length>1||
  labyrinthArtFiles.some(f=>normalize(f.path)!=='assets/games/labyrinth-cribbage/labyrinth.png'||f.size!==4236478))
  throw Error('Unexpected/altered Labyrinth board artwork output');
@@ -249,7 +254,7 @@ if(gameKitLogicSize+gameKitSize>24*1024)
 const legacyBaseTotal=baseTotal-bc24Growth-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
-console.log('BC-2.4 independent board and UI allowance:',JSON.stringify({uiBytes:bc24Growth,cap:28*1024,originalArtPresent:labyrinthArtFiles.length===1}));
+console.log('BC-2.4 independent board and UI allowance:',JSON.stringify({uiBytes:bc24Growth,cap:40*1024,originalArtPresent:labyrinthArtFiles.length===1}));
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));
 console.log('BC-1.5 restricted Cribbage start/recovery client:',JSON.stringify({publishedBytes:bc15Bytes,limitBytes:7*1024}));

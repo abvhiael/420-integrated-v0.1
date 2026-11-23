@@ -1,0 +1,67 @@
+name: BET Phase 5 Ecosystem Source and Trust Qualification
+on:
+  pull_request:
+    paths:
+      - 'clients/420bet-lobby/server/**'
+      - 'clients/420bet-lobby/tests/**'
+      - 'notifications/betconsent/**'
+      - 'notifications/betdelivery/**'
+      - 'integration/betaudit7/**'
+      - 'mail/auth_actor_test.go'
+      - '.github/workflows/420bet-phase5-ecosystem.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ecosystem-identity-indexer-registry-notify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact implementation commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked lobby dependencies
+        run: npm ci --prefix clients/420bet-lobby --ignore-scripts --no-audit --no-fund
+      - name: Canonical signed ownership, consent, finalized indexer and delivery replay suites
+        run: |
+          node --test \
+            clients/420bet-lobby/tests/ecosystem.test.mjs \
+            clients/420bet-lobby/tests/indexer-event-reader.test.mjs \
+            clients/420bet-lobby/tests/wallet-identity-integration.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-http.test.mjs \
+            clients/420bet-lobby/tests/wallet-session-worker.test.mjs \
+            clients/420bet-lobby/tests/identity-authority-provider.test.mjs \
+            clients/420bet-lobby/tests/identity-runtime.test.mjs \
+            clients/420bet-lobby/tests/registry-verifier.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-integration.test.mjs \
+            clients/420bet-lobby/tests/reorg-compensation.test.mjs \
+            clients/420bet-lobby/tests/notifications-reorg-runtime.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-source.test.mjs \
+            clients/420bet-lobby/tests/notifications-mail-runtime.test.mjs \
+            clients/420bet-lobby/tests/delivery-worker.test.mjs \
+            clients/420bet-lobby/tests/mail-auth-broker.test.mjs \
+            clients/420bet-lobby/tests/ownership-resolver.test.mjs \
+            clients/420bet-lobby/tests/ownership-authority.test.mjs \
+            clients/420bet-lobby/tests/consent-enrollment-broker.test.mjs \
+            clients/420bet-lobby/tests/consent-web-proxy.test.mjs \
+            clients/420bet-lobby/tests/delivery-large-history-replay.test.mjs \
+            clients/420bet-lobby/tests/delivery-recovery-operations.test.mjs \
+            clients/420bet-lobby/tests/notifications-consent-authority.test.mjs \
+            clients/420bet-lobby/tests/notifications-revocation-consumer.test.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: false
+      - name: Canonical provider-side authorization, receipt and integration suites
+        run: |
+          go test -count=1 -timeout=180s ./notifications/betconsent ./notifications/betdelivery ./integration/betaudit7 ./mail
+          go vet ./notifications/betconsent ./notifications/betdelivery ./integration/betaudit7 ./mail
+      - name: Qualify standalone production lobby build
+        run: npm run build --prefix clients/420bet-lobby

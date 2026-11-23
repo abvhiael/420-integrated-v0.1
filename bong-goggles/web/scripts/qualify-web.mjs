@@ -207,6 +207,14 @@ if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget')
 // The historical combined gate runs below, after the independently qualified
 // BC-0.9 tabletop, CCC online and solo-practice bytes are identified.
 // Checking the aggregate here double-charges these assets against BC-0.5.
+// Labyrinth Cribbage's standalone game-rules engine is not part of the
+// BC-1.4 standard Cribbage frontend or the historic BC-0.x application base.
+// Account for precisely this existing independently shipped rules file,
+// without assigning any blanket allowance to the rest of the core directory.
+const labyrinthRulesBytes=regularSizes.get('core/labyrinth-cribbage-rules.js');
+if(!Number.isSafeInteger(labyrinthRulesBytes)||labyrinthRulesBytes<8*1024||
+   labyrinthRulesBytes>9*1024)
+ throw new Error('Labyrinth Cribbage isolated rules module exceeds 9 KiB');
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
 const onlineBindingsBytes=regularSizes.get('core/chaos-online-bindings.js');
@@ -222,7 +230,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss-labyrinthRulesBytes;
 // Exact scoped accounting: the canonical PNG is an immutable independent binary,
 // while BC-1.4/1.5/1.6/1.8 and this repair's two small modules are separately
 // bounded above. Historic BC-0.x budgets and the independent CCC/BC-0.9 caps
@@ -232,7 +240,7 @@ const assetBudgetBreakdown=Object.freeze({
  bc14Bytes,bc15Bytes,bc16Bytes,bc18Bytes,
  liveViewBytes:cribbageViewBytes,roomResumeBytes:cribbageResumeBytes,
  bc02Growth,bc03Growth,bc04Growth,bc05Growth,
- onlineBindingsBytes,gameKitSize,gameKitLogicSize,practiceJs,practiceCss,
+ onlineBindingsBytes,gameKitSize,gameKitLogicSize,practiceJs,practiceCss,labyrinthRulesBytes,
  historicalBaseBytes:legacyBaseTotal,
  historicalBaseCeiling:limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE
 });

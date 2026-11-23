@@ -23,6 +23,12 @@ const grant=(viewer,expiry=Date.now()+60000)=>({account:viewer,caseId:context.ca
   authorization:'420ID-verified-private-authorization-123'});
 const object={object_id:'obj1',manifest_id:'manifest1',shard_index:0,
   shard_root:h(4),size_bytes:320,commitment_id:'storage-commit1'};
+const storageObjectFor=async sealed=>{
+  const raw=new TextEncoder().encode(JSON.stringify(sealed.encrypted));
+  const digest=new Uint8Array(await webcrypto.subtle.digest('SHA-256',raw));
+  return {...object,size_bytes:raw.length,
+    shard_root:'0x'+Array.from(digest,x=>x.toString(16).padStart(2,'0')).join('')};
+};
 test('domain-separated salted commitment is deterministic for identical exact context, digest, salt',async()=>{
   const digest=await hashPrivateEvidence420(data,{cryptoImpl:webcrypto}),salt=h(300);
   const commitment=evidenceCommitment420(context,digest,salt);
@@ -112,14 +118,14 @@ test('missing storage provider and authorization fail without producing network 
   assert.throws(()=>createPrivateEvidenceStore420(),/session verifier/);
 });
 test('storage prepared/ingested ciphertext only after exact scoped authorization',async()=>{
-  const sealed=await prep(),calls=[];
+  const sealed=await prep(),storageObject=await storageObjectFor(sealed),calls=[];
   const storage={
     async prepare(args){calls.push(['prepare',args]);return {upload_id:'u1'};},
-    async ingest(args){calls.push(['ingest',args]);return {object,visibility:'private'};}
+    async ingest(args){calls.push(['ingest',args]);return {object:storageObject,visibility:'private'};}
   };
   const store=createPrivateEvidenceStore420({storage,authenticate:async()=>grant(alice)});
-  const receipt=await store.upload({encrypted:sealed.encrypted,context,record,
-    viewer:alice,object,retentionMs:3600000});
+  const receipt=await store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,
+    viewer:alice,object:storageObject,retentionMs:3600000});
   assert.equal(receipt.visibility,'private');assert.equal(calls.length,2);
   const payload=new TextDecoder().decode(calls[1][1].bytes);
   assert.equal(JSON.parse(payload).commitment,sealed.commitment);
@@ -128,20 +134,35 @@ test('storage prepared/ingested ciphertext only after exact scoped authorization
   assert.equal(calls[1][1].metadata.visibility,'private');
 });
 test('interrupted upload and provider errors never constitute successful storage or chain state',async()=>{
-  const sealed=await prep(),controller=new AbortController(),calls=[];
+  const sealed=await prep(),storageObject=await storageObjectFor(sealed),controller=new AbortController(),calls=[];
   const storage={
     async prepare(){calls.push('prepare');controller.abort();return {upload_id:'u1'};},
-    async ingest(){calls.push('ingest');return {object,visibility:'private'};}
+    async ingest(){calls.push('ingest');return {object:storageObject,visibility:'private'};}
   };
   const store=createPrivateEvidenceStore420({storage,authenticate:async()=>grant(alice)});
-  await assert.rejects(store.upload({encrypted:sealed.encrypted,context,record,viewer:alice,
-    object,retentionMs:5000,signal:controller.signal}),/unavailable or interrupted/);
+  await assert.rejects(store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,viewer:alice,
+    object:storageObject,retentionMs:5000,signal:controller.signal}),/unavailable or interrupted/);
   assert.deepEqual(calls,['prepare']);
   const corrupt=createPrivateEvidenceStore420({storage:{
-    async prepare(){return {upload_id:'u1'};},async ingest(){return {object,visibility:'public'};}
+    async prepare(){return {upload_id:'u1'};},async ingest(){return {object:storageObject,visibility:'public'};}
   },authenticate:async()=>grant(alice)});
-  await assert.rejects(corrupt.upload({encrypted:sealed.encrypted,context,record,viewer:alice,
-    object,retentionMs:5000}),/unavailable or interrupted/);
+  await assert.rejects(corrupt.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,context,record,viewer:alice,
+    object:storageObject,retentionMs:5000}),/unavailable or interrupted/);
+});
+test('upload refuses corrupted ciphertext or false Storage size/SHA root before provider prepare',async()=>{
+  const sealed=await prep(),storageObject=await storageObjectFor(sealed),calls=[];
+  const store=createPrivateEvidenceStore420({storage:{
+    async prepare(){calls.push('prepare');return {upload_id:'p1'};},
+    async ingest(){calls.push('ingest');return {object:storageObject,visibility:'private'};}
+  },authenticate:async()=>grant(alice),cryptoImpl:webcrypto});
+  const tampered={...sealed.encrypted,ciphertext:sealed.encrypted.ciphertext.slice(0,-2)+'ff'};
+  await assert.rejects(store.upload({encrypted:tampered,recoveryKey:sealed.recoveryKey,
+    context,record,viewer:alice,object:storageObject,retentionMs:5000}),/Private evidence unavailable/);
+  await assert.rejects(store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,
+    context,record,viewer:alice,object:{...storageObject,shard_root:h(7)},retentionMs:5000}),/identity mismatch/);
+  await assert.rejects(store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,
+    context,record,viewer:alice,object:{...storageObject,size_bytes:100},retentionMs:5000}),/identity mismatch/);
+  assert.deepEqual(calls,[],'remote provider must not be contacted for invalid evidence');
 });
 test('storage retrieval validates private object identity and ciphertext then decrypts',async()=>{
   const sealed=await prep(),calls=[];

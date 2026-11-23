@@ -16,6 +16,7 @@ type ClassicHistoryMatch struct {
  ClassicSession
  ViewerSeat int `json:"viewerSeat"`
  Scores []int64 `json:"scores"`
+ VariantID string `json:"variantId,omitempty"`
 }
 type ClassicHistoryStats struct {
  SampleSize int `json:"sampleSize"`
@@ -62,7 +63,17 @@ func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)
   }
   scores:=append([]int64(nil),visible.Scores...)
   for _,score:=range scores{if score<0||score>10000{return ClassicHistory{},ErrUnavailable}}
-  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores})
+  variantID:=""
+  if game=="labyrinth-cribbage"{
+   switch visible.Variant{
+   case "labyrinth-2p":if v.SeatCount!=2{return ClassicHistory{},ErrUnavailable}
+   case "labyrinth-3p":if v.SeatCount!=3{return ClassicHistory{},ErrUnavailable}
+   case "labyrinth-4p-partners","labyrinth-4p-individual":if v.SeatCount!=4{return ClassicHistory{},ErrUnavailable}
+   default:return ClassicHistory{},ErrUnavailable
+   }
+   variantID=visible.Variant
+  }
+  out.Matches=append(out.Matches,ClassicHistoryMatch{ClassicSession:v.ClassicSession,ViewerSeat:v.ViewerSeat,Scores:scores,VariantID:variantID})
   if v.Status=="active"{continue}
   out.Stats.SampleSize++
   if v.Status=="finished" {out.Stats.Completed++}

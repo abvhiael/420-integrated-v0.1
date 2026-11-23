@@ -115,4 +115,12 @@ func (a ArbitrationEvidenceAccess420) AuthorizeGatewayAccess(ctx context.Context
 	return nil
 }
 
+// This policy is installed on a dedicated private-only 420Storage v1 Gateway
+// router. It must never serve public content. A caller cannot downgrade an
+// Arbitration evidence read by removing X-420-Access-Mode: private.
+func (a ArbitrationEvidenceAccess420) AuthorizeGatewayPublicRead(_ context.Context, _ GatewayRequest) error {
+	return ErrGatewayUnauthorized
+}
+
+var _ GatewayPublicAccessGuard = ArbitrationEvidenceAccess420{}
 var _ GatewayAccessAuthorizer = ArbitrationEvidenceAccess420{}

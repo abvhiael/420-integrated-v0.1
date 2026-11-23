@@ -22,7 +22,15 @@ var stakeExplorerEvents = map[string]bool{
 	"SlashApplied":true,
 	"RotationSnapshotApplied":true,
 	"ActiveTargetChanged":true,
-	"RewardApplied":true,
+
+}
+
+var stakeExplorerRewardEvents = map[string]bool{
+	"RewardApplied":                     true,
+	"SponsoredValidatorRewardAllocated": true,
+	"CommunityRewardBackingReceived":    true,
+	"CommunityRewardSettled":            true,
+	"NativeRewardPaid":                  true,
 }
 
 type stakeIndexerReader interface {
@@ -56,11 +64,12 @@ func (s *Service) StakeActivity(ctx context.Context, validatorID, address string
 		if record.BlockNumber > page.Meta.SnapshotHeight {
 			return StakeActivityView{}, errors.New("420Indexer returned Stake event beyond snapshot")
 		}
-		if !stakeExplorerEvents[record.EventName] {
+		reward := stakeExplorerRewardEvents[record.EventName]
+		if !stakeExplorerEvents[record.EventName] && !reward {
 			return StakeActivityView{}, errors.New("420Indexer returned unknown Stake event")
 		}
 		expectedAddress := indexerapi.StakeValidatorRegistryAddress
-		if record.EventName == "RewardApplied" { expectedAddress = indexerapi.StakeRewardControllerAddress }
+		if reward { expectedAddress = indexerapi.StakeRewardControllerAddress }
 		if !strings.EqualFold(record.ContractAddress, expectedAddress) {
 			return StakeActivityView{}, errors.New("420Indexer returned Stake event from wrong canonical contract")
 		}

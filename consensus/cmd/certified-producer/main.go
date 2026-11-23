@@ -95,7 +95,8 @@ func trustPolicies(t recovery.Trust, policies []signing.Policy) {
     }
 }
 func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) (duties, recovery.Record, sys.Batch) {
-    require(p.Slot>0 && p.Slot/ct.SlotsPerRotation==t.Rotation &&
+    rotation:=p.Slot/ct.SlotsPerRotation
+    require(p.Slot>0 && t.AllowsRotation(rotation) &&
         p.ConsensusStateRoot!=(ct.Root{}), "slot, rotation or consensus state missing")
     var parentRoot ct.Root = t.Genesis.Root
     parentHash:=t.Execution.BlockHash
@@ -114,6 +115,10 @@ func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) 
             pr.Consensus.Header.Slot<p.Slot && parentNumber>0 &&
             finality.VerifyQC(pr.Certificate,keys(t),t.ChainID,bls.ProductionVerifier{})==nil,
             "unauthenticated or out-of-order certified parent")
+        parentRotation:=pr.Consensus.Header.Slot/ct.SlotsPerRotation
+        require(pr.Consensus.Header.Rotation==parentRotation && t.AllowsRotation(parentRotation) &&
+            (rotation==parentRotation || (rotation>parentRotation && rotation-parentRotation==1 &&
+                p.Slot%ct.SlotsPerRotation==0)), "missing consecutive certified rotation handoff")
         lastQC=pr.Certificate
         expectedPrevious:=uint64(0)
         for _,call:=range pr.Consensus.Body.SystemCalls {
@@ -137,12 +142,12 @@ func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) 
         root(p.Payload.PrevRandao)==batch.Root(), "execution payload not bound to finalized Stake batch")
     seats:=make([]uint16,15)
     for i:=range seats {seats[i]=uint16(i)}
-    schedule,e:=proposer.GenerateRotationSchedule(seats,seed,t.Rotation)
+    schedule,e:=proposer.GenerateRotationSchedule(seats,seed,rotation)
     if e!=nil {fail("cannot derive pinned proposer schedule: "+e.Error())}
     scheduled:=schedule[p.Slot%ct.SlotsPerRotation].Primary
     block:=ct.ConsensusBlock{Slot:p.Slot,ProposerSeat:scheduled,ProposerRank:0,
         ParentConsensusRoot:parentRoot,ExecutionPayloadHash:root(p.Payload.BlockHash),
-        ConsensusStateRoot:p.ConsensusStateRoot,CommitteeRoot:t.CommitteeRoot,Rotation:t.Rotation,
+        ConsensusStateRoot:p.ConsensusStateRoot,CommitteeRoot:t.CommitteeRoot,Rotation:rotation,
         LatestQC:lastQC,RandomnessContext:root(p.Payload.PrevRandao),SystemCallBatchRoot:batch.Root()}
     blockRoot:=block.HashTreeRoot()
     vote:=ct.AttestationData{Slot:p.Slot,BlockRoot:blockRoot,ParentRoot:parentRoot,
@@ -230,8 +235,8 @@ func main(){
             height=number(p.Parent.Payload.BlockNumber)+1
             previous=p.Previous
         }
-        require(p.Slot>0 && p.Slot/ct.SlotsPerRotation==trust.Rotation &&
-            height==p.Slot && root(p.Payload.ParentHash)==parentHash,
+        require(p.Slot>0 && trust.AllowsRotation(p.Slot/ct.SlotsPerRotation) &&
+            number(p.Payload.BlockNumber)==height && root(p.Payload.ParentHash)==parentHash,
             "candidate batch not bound to authenticated native parent")
         batch,err:=sys.BuildStakeBatch(sys.DerivationContext{ChainID:trust.ChainID,
             ExecutionBlock:height,ParentHash:parentHash},previous,p.Outcomes)

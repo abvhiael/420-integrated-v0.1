@@ -36,7 +36,8 @@ def main():
     sender=rpc.call("eth_accounts",[])[0]
     graph.need(rpc.balance(sender)==0,"native constructor signer introduced supply")
     receipts=[]
-    for name,dest in (("ConsensusSystemCall420",GW),("RewardController",REWARD)):
+    for name,dest in (("ConsensusSystemCall420",GW),("RewardController",REWARD),
+                       ("CommunityRewardReserve","0x0000000000000000000000000000000000000426")):
         deployed=graph.deploy(rpc,sender,name,"constructor(address)",[graph.TIME],receipts)
         actual=rpc.code(deployed)
         graph.need(actual!="0x" and rpc.code(dest)=="0x",

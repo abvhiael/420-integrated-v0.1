@@ -29,6 +29,7 @@ func provisionProtectedCommittee(dir, genesis, timestamp string) {
     t,keys:=keys()
     for _,k:=range keys {defer k.Destroy()}
     t.Timestamp=ts
+    t.LastRotation=2
     t.Execution.ChainID=420
     t.Execution.BlockHash=hash
     policies:=make([]signing.Policy,15)

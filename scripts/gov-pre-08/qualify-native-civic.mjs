@@ -34,11 +34,13 @@ const asset='0x000000000000000000000000000000000000d00d';
 const empty='0x'+'00'.repeat(32);
 const cancelled=keccak256(toUtf8Bytes('GOV-PRE-08/native/local/bootstrap-cancellation'));
 const actions=proposal.actions;
-assert.equal(actions.length,1);
+assert.equal(actions.length,3);
 assert.equal(actions[0][0].toLowerCase(),policy.toLowerCase());
 
 const abi=new Interface([
   'event CivicProposalCreated(bytes32 indexed proposalId,address indexed proposer,uint8 indexed class_,bytes32 metadataHash,bytes32 actionsHash,uint64 snapshotBlock,uint64 voteStart,uint64 voteEnd,uint32 constitutionRevision)',
+  'function register(bytes32,bytes,address,bytes32)',
+  'function isFullyProtocolSponsoredOwner(address) view returns(bool)',
   'function createProposal(uint8,bytes32,bytes32)',
   'function castVote(bytes32,uint8,uint8,bytes)',
   'function ballot(bytes32,uint8,address) view returns(uint8,uint256,bool)',
@@ -136,6 +138,31 @@ case 'verify-delay':
   assert.equal((await read(timelock,'operations',[proposalId]))[5],false);
   assert.equal((await read(timelock,'operations',[cancelled]))[6],true);
   await rejects(civic.governor,'finalize',[proposalId]);
+  break;
+case 'execute':
+  hashes.push(await send(timelock,'execute',[proposalId]));
+  break;
+case 'verify-execution': {
+  const [, ,data]=actions[0];
+  const [targetAsset,allowed,maxSingle,maxEpoch,epochSeconds]=abi.decodeFunctionData('setAssetPolicy',data);
+  assert.equal(targetAsset.toLowerCase(),asset.toLowerCase());
+  assert.deepEqual(Array.from(await read(policy,'assetPolicy',[asset])),[allowed,maxSingle,maxEpoch,epochSeconds,1n]);
+  assert.equal((await read(timelock,'operations',[proposalId]))[5],true);
+  assert.equal((await read(civic.proposalRegistry,'proposals',[proposalId]))[7],5n);
+  await rejects(timelock,'execute',[proposalId]);
+  break;
+}
+case 'register-sponsor': {
+  const validator='0x0000000000000000000000000000000000000423';
+  const id=keccak256(toUtf8Bytes('GOV-PRE-08 sponsored validator'));
+  const pubkey=process.env.GOVPRE08_SPONSOR_PUBKEY;
+  assert.match(pubkey,/^0x[0-9a-f]{96}$/);
+  hashes.push(await send(validator,'register',[id,pubkey,wallet.address,id]));
+  break;
+}
+case 'verify-sponsor':
+  assert.equal((await read('0x0000000000000000000000000000000000000423',
+    'isFullyProtocolSponsoredOwner',[wallet.address]))[0],true);
   break;
 default:
   throw new Error('Unknown Civic qualification stage');

@@ -156,7 +156,12 @@ try{
    const policy=graph.actualProductionConstructorAddresses.TreasuryPolicyRegistry420;
    const action=new Interface(['function setAssetPolicy(address,bool,uint128,uint128,uint64)'])
       .encodeFunctionData('setAssetPolicy',['0x000000000000000000000000000000000000d00d',true,123,456,86400]);
-   const actions=[[policy,'0',action]];
+   const reserve='0x0000000000000000000000000000000000000425';
+   const id=keccak256(toUtf8Bytes('GOV-PRE-08 sponsored validator'));
+   const credit=new Interface(['function assignCredit(bytes32,address,uint256)','function fundCredit(bytes32)']);
+   const actions=[[policy,'0',action],
+     [reserve,'0',credit.encodeFunctionData('assignCredit',[id,wallet.address,42000n*10n**18n])],
+     [reserve,'0',credit.encodeFunctionData('fundCredit',[id])]];
    const actionsHash=keccak256(AbiCoder.defaultAbiCoder().encode(
       ['tuple(address,uint256,bytes)[]'],[actions]));
    const metadataHash=keccak256(toUtf8Bytes('GOV-PRE08/BROWSER/LOCAL-ONLY'));

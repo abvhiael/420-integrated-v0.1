@@ -39,6 +39,7 @@ type Trust struct {
 	Execution       csys.SequenceAnchor
 	Timestamp       uint64
 	Rotation        uint64
+	LastRotation    uint64 `json:",omitempty"`
 	CommitteeRoot   ct.Root
 	Members         []Member
 }
@@ -167,6 +168,11 @@ func atomicWrite(path string, data []byte) error {
 	defer d.Close()
 	return d.Sync()
 }
+// AllowsRotation pins the same committee to an explicit inclusive rotation range.
+func (t Trust) AllowsRotation(rotation uint64) bool {
+	return rotation == t.Rotation || (rotation > t.Rotation && rotation <= t.LastRotation)
+}
+
 func (t Trust) validate(sig Signatures) error {
 	if sig == nil || t.ChainID != ct.ChainID || t.ProtocolVersion != 1 || t.Genesis.Root == (ct.Root{}) || t.Genesis.Slot != 0 || t.Execution.ChainID != t.ChainID || t.Execution.ExecutionBlock != 0 || t.Execution.LastSequence != 0 || t.Execution.BlockHash == ([32]byte{}) || t.CommitteeRoot == (ct.Root{}) || len(t.Members) < 15 || len(t.Members) > 30 {
 		return fmt.Errorf("invalid pinned settlement trust")
@@ -219,7 +225,16 @@ func (v *view) add(t Trust, sig Signatures, r Record) (csys.Batch, csys.Sequence
 		parentSlot = pr.Consensus.Header.Slot
 		parentQC = pr.Certificate
 	}
-	if h.Slot <= parentSlot || h.Slot < st.Head.Slot || h.Slot/ct.SlotsPerRotation != t.Rotation || h.Rotation != t.Rotation || h.CommitteeRoot != t.CommitteeRoot || int(h.ProposerSeat) >= len(t.Members) || h.ProposerRank > 2 {
+	rotation := h.Slot / ct.SlotsPerRotation
+	parentRotation := t.Rotation
+	if pr, ok := v.records[h.ParentConsensusRoot]; ok {
+		parentRotation = pr.Consensus.Header.Rotation
+	}
+	if rotation < parentRotation || (rotation > parentRotation &&
+		(rotation-parentRotation != 1 || h.Slot%ct.SlotsPerRotation != 0)) {
+		return csys.Batch{}, zero, fmt.Errorf("missing consecutive certified rotation handoff")
+	}
+	if h.Slot <= parentSlot || h.Slot < st.Head.Slot || !t.AllowsRotation(rotation) || h.Rotation != rotation || h.CommitteeRoot != t.CommitteeRoot || int(h.ProposerSeat) >= len(t.Members) || h.ProposerRank > 2 {
 		return csys.Batch{}, zero, fmt.Errorf("invalid certified consensus context")
 	}
 	if hashJSON(h.LatestQC) != hashJSON(parentQC) {

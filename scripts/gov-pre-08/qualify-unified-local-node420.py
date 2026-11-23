@@ -230,15 +230,17 @@ def main():
         proposer="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
         initialProposer=int(rpc("eth_getBalance",[proposer,"latest"]),16)
         require(initialProposer==0,"fixture wallet already holds unearned Genesis funds")
-        def produce(parent,previous,slot,expected_transactions=()):
+        def produce(parent,previous,slot,expected_transactions=(), *, consensus_slot=None):
+            height=slot
+            slot=height if consensus_slot is None else consensus_slot
             parenthash=parent["Payload"]["blockHash"] if parent else genesisblock["hash"]
-            outcomes={"Rotation":{"Rotation":slot,"EligibleSnapshot":0},
-                      "Reward":{"BlockNumber":slot,
+            outcomes={"Rotation":{"Rotation":height,"EligibleSnapshot":0},
+                      "Reward":{"BlockNumber":height,
                                 "Proposer":list(bytes.fromhex(proposer[2:])),
                                 "Participants":[],"ActiveCount":15}}
             plan={"Parent":parent,"Previous":previous,"Slot":slot,
                   "Outcomes":outcomes,"Beacon":ZERO,
-                  "Payload":{"parentHash":parenthash,"blockNumber":hex(slot)}}
+                  "Payload":{"parentHash":parenthash,"blockNumber":hex(height)}}
             planfile=args.workdir/f"certified-plan-{slot}.json"
             planfile.write_text(json.dumps(plan))
             batch=committee.batch(planfile)
@@ -265,7 +267,7 @@ def main():
             payload=rpc("engine_getPayloadV3",[fcu["payloadId"]],auth=True)["executionPayload"]
             require(payload["extraData"]==batch["batchRoot"] and
                     payload["parentHash"]==parenthash and
-                    int(payload["blockNumber"],16)==slot,
+                    int(payload["blockNumber"],16)==height,
                     "certified batch root/parent/block number not in execution header")
             require(len(payload["transactions"])==len(expected_transactions),
                     "candidate payload transaction count differs from signed submissions")
@@ -296,12 +298,12 @@ def main():
                         and int(call(GW,"lastSequence()"),16)==previous,
                         "quorum loss advanced native execution or settlement sequence")
                 checkpoint=json.loads((args.workdir/"consensus"/"checkpoint.json").read_text())
-                require(checkpoint["Settlement"]["ExecutionBlock"]==slot-1,
+                require(checkpoint["Settlement"]["ExecutionBlock"]==height-1,
                         "quorum loss advanced the durable consensus checkpoint")
             record=committee.certify(planfile,slot,args.workdir,preserve_authority_during_quorum_loss)
             consensus.stdin.write(json.dumps(record)+"\n")
             consensus.stdin.flush()
-            wait_event("settled",slot)
+            wait_event("settled",height)
             latest=rpc("eth_getBlockByNumber",["latest",False])
             require(latest["hash"]==payload["blockHash"] and
                     latest["extraData"]==batch["batchRoot"],
@@ -366,6 +368,10 @@ def main():
                  INDEXER_HTTP_ADDR="127.0.0.1:18782",
                  INDEXER_MAX_HEAD_AGE="1000000h",
                  INDEXER_POLL_INTERVAL="1s")
+        env["INDEXER_TREASURY_DEPLOYMENT"]=json.dumps({
+            "chainId":420,"genesisHash":genesisblock["hash"],
+            "addresses":{name:graph["actualProductionConstructorAddresses"][name] for name in
+                         ("TreasuryPolicyRegistry420","TreasuryBudgetRegistry420","TreasuryDisbursementRegistry420")}})
         idx=launch("indexer420",[str(indexer)],env=env)
         ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=2,
               idx,timeout=60)
@@ -711,12 +717,12 @@ def main():
                 and recoveredBrowser["real420IDCentralConsentAndPKCE"],
                 "new real Chromium session failed to read recovered on-chain ballot")
         # Exercise authorized scheduling and on-chain denial while the
-        # immutable delay is running. The pinned single-rotation settlement
-        # trust expires before the production G1 delay can elapse.
+        # immutable delay is running, then certify both rotation boundaries.
         civic_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-native-civic.mjs"),
                    "http://127.0.0.1:18780",str(args.graph.resolve()),str(browser_proposal_path)]
         def civic(stage):
-            result=subprocess.check_output([*civic_cmd,stage],cwd=ROOT,text=True,timeout=30)
+            result=subprocess.check_output([*civic_cmd,stage],cwd=ROOT,text=True,timeout=30,
+                env=dict(os.environ,GOVPRE08_SPONSOR_PUBKEY="0x"+bytes(committee.trustdata["Members"][0]["PublicKey"]).hex()))
             return json.loads(result)
         civic_receipts={}
         record=fifth
@@ -731,7 +737,7 @@ def main():
         operation=civic("delay")
         require(operation["executeAfter"]-int(civic_block["timestamp"],16)==7*86400,
                 "Civic queued operation did not preserve the frozen G1 delay")
-        _,denial_block,_,_=produce(record,20,11,operation["hashes"])
+        record,denial_block,_,_=produce(record,20,11,operation["hashes"])
         denied=rpc("eth_getTransactionReceipt",[operation["hashes"][0]])
         require(denied and denied["status"]=="0x0" and denied["blockHash"]==denial_block["hash"]
                 and not denied["logs"],"early Timelock attempt was not a canonical revert")
@@ -751,11 +757,99 @@ def main():
         code,civic_view=getter("http://127.0.0.1:18783","/v1/transactions/"+denied["transactionHash"])
         require(code==200 and civic_view["receipt"]["blockHash"].lower()==denial_block["hash"].lower(),
                 "Go Explorer missed the canonical rejected Civic execution")
+        for rotation in (1,2):
+            height=11+rotation
+            record,_,_,_=produce(record,(height-1)*2,height,consensus_slot=rotation*17640)
+        maturity_slot=(operation["executeAfter"]-int(genesisblock["timestamp"],16)+11)//12
+        execution=civic("execute")
+        record,execution_block,_,_=produce(record,26,14,execution["hashes"],consensus_slot=maturity_slot)
+        executed=rpc("eth_getTransactionReceipt",[execution["hashes"][0]])
+        require(executed and executed["status"]=="0x1" and executed["blockHash"]==execution_block["hash"]
+                and int(execution_block["timestamp"],16)>=operation["executeAfter"],
+                "mature Timelock execution missing from certified chain")
+        civic("verify-execution")
+        credit=42000*10**18
+        require(int(rpc("eth_getBalance",[custody["CommunityValidatorReserve"][0],"latest"]),16)
+                ==custody["CommunityValidatorReserve"][1]-credit
+                and int(rpc("eth_getBalance",[VALIDATORS,"latest"]),16)>=credit,
+                "approved Civic funding did not move the exact sponsored collateral")
+        registration=civic("register-sponsor")
+        record,registration_block,_,_=produce(record,28,15,registration["hashes"],consensus_slot=maturity_slot+1)
+        receipt=rpc("eth_getTransactionReceipt",[registration["hashes"][0]])
+        require(receipt and receipt["status"]=="0x1" and receipt["blockHash"]==registration_block["hash"],
+                "signed sponsored validator registration failed")
+        civic("verify-sponsor")
+        community=custody["CommunityRewardReserve"][0]
+        before_share=int(rpc("eth_getBalance",[community,"latest"]),16)
+        before_operator=int(rpc("eth_getBalance",[proposer,"latest"]),16)
+        _,reward_block,_,reward_archive=produce(record,30,16,consensus_slot=maturity_slot+2)
+        community_share=int(rpc("eth_getBalance",[community,"latest"]),16)-before_share
+        operator_share=int(rpc("eth_getBalance",[proposer,"latest"]),16)-before_operator
+        require(community_share>0 and (community_share+operator_share)//10==community_share,
+                "protected native settlement did not pay the exact sponsored 90/10 split")
+        custody["CommunityValidatorReserve"]=(custody["CommunityValidatorReserve"][0],
+                                             custody["CommunityValidatorReserve"][1]-credit)
+        custody["CommunityRewardReserve"]=(community,before_share+community_share)
+        sponsored_custody=verifyCustody("after sponsored reward settlement")
+        await_ts_block(16,reward_block["hash"])
+        await_ts_block(14,execution_block["hash"])
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=14,
+              idx,timeout=60)
+        code,executed_view=getter("http://127.0.0.1:18783","/v1/transactions/"+executed["transactionHash"])
+        require(code==200 and executed_view["receipt"]["blockHash"].lower()==execution_block["hash"].lower(),
+                "Explorer missed the mature Civic execution")
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=16,
+              idx,timeout=60)
+        treasury_path="/v1/treasury/asset-policies/0x000000000000000000000000000000000000d00d?chainId=420"
+        stake_path="/v1/stake/activity?address="+proposer+"&limit=100"
+        def read_consumer_parity():
+            policies=[getter(origin,treasury_path)[1]["data"]
+                      for origin in (ts_origin,"http://127.0.0.1:18782","http://127.0.0.1:18783")]
+            for row in policies:
+                require(row["blockHash"].lower()==execution_block["hash"].lower()
+                        and row["transactionHash"].lower()==executed["transactionHash"].lower()
+                        and row["allowed"] and int(row["maxSingleDisbursement"])==123
+                        and int(row["maxEpochDisbursement"])==456 and int(row["revision"])==1,
+                        "Treasury consumer disagrees with the mature Civic execution")
+            stake=[getter(origin,stake_path)[1]["records"]
+                   for origin in ("http://127.0.0.1:18782","http://127.0.0.1:18783")]
+            require(stake[0]==stake[1] and any(row["eventName"]=="SponsoredValidatorRewardAllocated"
+                    and row["blockHash"].lower()==reward_block["hash"].lower() for row in stake[0]),
+                    "Stake consumers omitted or disagreed on the sponsored reward")
+            return {"treasury":policies,"stake":stake[0]}
+        parity=read_consumer_parity()
+        def postgres(statement):
+            command=["node","--input-type=module","--eval",
+                     "import pg from 'pg'; const pool=new pg.Pool({connectionString:process.env.INDEXER_PG_URL}); "
+                     "try { await pool.query(process.argv[1]); } finally { await pool.end(); }",statement]
+            subprocess.run(command,cwd=ROOT/"420-indexer",check=True,timeout=20)
+        for process in (exp,idx,ts_idx):
+            os.killpg(process.pid,signal.SIGTERM)
+            process.wait(timeout=20)
+        postgres("UPDATE idx_go_canonical_state_v1 SET snapshot=jsonb_set(snapshot,'{version}','999') WHERE singleton=1")
+        corrupted=launch("indexer420-corrupted-snapshot",[str(indexer)],env=env)
+        require(corrupted.wait(timeout=25)!=0,"Go Indexer accepted a corrupted PostgreSQL snapshot")
+        require("validate canonical PostgreSQL snapshot" in
+                (args.workdir/"indexer420-corrupted-snapshot.log").read_text(),
+                "Go Indexer did not reject the corrupt durable state explicitly")
+        postgres("DELETE FROM idx_go_canonical_state_v1 WHERE singleton=1")
+        idx=launch("indexer420-postgres-rebuilt",[str(indexer)],env=env)
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=16,
+              idx,timeout=90)
+        ts_idx=launch("typescript-indexer420-postgres-reopened",ts_worker_cmd)
+        await_ts_block(16,reward_block["hash"])
+        exp=launch("explorer420-postgres-rebuilt",[str(explorer)],env=xenv)
+        ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],exp,timeout=60)
+        require(read_consumer_parity()==parity,"PostgreSQL recovery changed Treasury or Stake projections")
         (args.workdir/"native-civic-lifecycle.json").write_text(json.dumps({
             "proposalId":operation["proposalId"],"executeAfter":operation["executeAfter"],
             "canonicalReceipts":civic_receipts,"typescriptGovernanceEvents":governance_events,
             "preDelayDeniedReceipt":denied,"goExplorerDeniedExecution":civic_view,
-            "nativePostDelayExecutionQualified":False,
+            "nativePostDelayExecutionQualified":True,"matureExecutionReceipt":executed,
+            "sponsoredRegistrationReceipt":receipt,"sponsoredRewardBlock":reward_block["hash"],
+            "consumerParity":parity,"goPostgresCorruptionRejectedAndRebuilt":True,
+            "sponsoredRewardArchive":reward_archive,"communityShareWei":str(community_share),
+            "operatorShareWei":str(operator_share),"sponsoredCustody":sponsored_custody,
         },indent=2,sort_keys=True)+"\n")
         evidence={"schema":"GOV_PRE_08_REAL_ONE_CHAIN_NODE420_BLS_INDEXER_EXPLORER_V1",
              "sourceGitHead":source,"approvedV4":False,"realFounderSignatures":False,
@@ -789,7 +883,7 @@ def main():
              "browserCivicVoteCanonicalExplorerPostgresRecovered":True,
              "browserFinalNativeCertifiedExecutionBlock":5,
              "civicTimelockDeniedEarlyExecutionBlock":11,
-             "civicTimelockNativePostDelayExecutionQualified":False,
+             "civicTimelockNativePostDelayExecutionQualified":True,
              "browserRealEIP1193SignedGovernanceVote":True,
              "browserAccountSwitchAndRevocationRejected":True,
              "fundedNativeCustodyPreservedAfterConsensusAndSignedWalletTx":True,

@@ -104,6 +104,7 @@ forge build --root contracts \
   src/governance/CivicVoting420.sol \
   src/governance/CivicGovernor420.sol \
   src/system/CommunityValidatorReserve.sol \
+  src/system/CommunityRewardReserve.sol \
   src/system/ValidatorRegistry.sol \
   src/system/ConsensusSystemCall420.sol \
   src/system/RewardController.sol \

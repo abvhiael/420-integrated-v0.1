@@ -78,7 +78,9 @@ export function bindCribbageRoomStart(root,rooms,{history,onRouteChange,onRefres
 // NEVER the hidden opponent hands, crib, private journal or an auth secret.
 export async function discoverCribbageMatches(controller){
  if(!controller?.client?.enabled)return [];
- const token=++controller.generation;
+ if(controller.listBusy)return [];
+ controller.listBusy=true;
+ const token=controller.generation;
  try{
   const actor=await verifiedPrincipal(controller.client);
   const list=await controller.client.request('/v1/classic-sessions');
@@ -95,17 +97,18 @@ export async function discoverCribbageMatches(controller){
   }
   if(token!==controller.generation)return [];
   if(await verifiedPrincipal(controller.client)!==actor)throw Error('420ID account switched');
-  if(token===controller.generation)controller.emit({status:'idle',session:null,
-   recoverable:matches,pegs:[],queue:[],announcement:'',error:null});
+  if(token===controller.generation)controller.emit({
+  ...(controller.state.session?{}:{status:'idle',error:null}),recoverable:matches,recoverError:null
+ });
   return matches;
  }catch{
   if(token===controller.generation){
-   controller.invalidate();
-   controller.emit({status:'unavailable',recoverable:[],session:null,
+   if(controller.state.session)controller.emit({recoverError:'My Games could not be updated.'});
+   else controller.emit({status:'unavailable',recoverable:[],session:null,
     error:'Could not verify your 420ID sessions; no cached hands are shown.'});
   }
   return [];
- }
+ }finally{controller.listBusy=false;}
 }
 
 

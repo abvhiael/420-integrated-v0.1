@@ -18,7 +18,7 @@ export function createCribbageRouteRuntime({enabled=false,onChange=()=>{},window
   social.refresh(force);
   const id=matchId();
   if(id)void controller.open(id,{quiet:true});
-  else if(force||Date.now()-lastDiscovery>=15000){
+  if(force||Date.now()-lastDiscovery>=15000){
    lastDiscovery=Date.now();
    void discoverCribbageMatches(controller);
   }
@@ -28,8 +28,7 @@ export function createCribbageRouteRuntime({enabled=false,onChange=()=>{},window
  windowObject.addEventListener('online',onOnline);
  documentObject.addEventListener('visibilitychange',onVisible);
  const bind=root=>{if(isCribbage()){bindCribbageDom(root,controller);social.bind(root);}};
- // Headless, idle and hidden sessions need no unnecessary session traffic.
- const interval=windowObject.setInterval(()=>{
+  const interval=windowObject.setInterval(()=>{
   if(!documentObject.hidden)refresh();
  },3500);
  return Object.freeze({

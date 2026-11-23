@@ -454,7 +454,7 @@ try{
    // viewport. RPC is deterministic, while user interaction uses the real DOM.
    const arbitration=page.locator('#arbitration-management-panel');
    assert.equal(await arbitration.count(),1,'Arbitration Wallet panel must be mounted');
-   assert.equal(await arbitration.getByRole('button',{name:'Simulate and review opening case'}).isDisabled(),true,
+   assert.equal(await arbitration.locator('#arbitration-open-form button[type="submit"]').isDisabled(),true,
      'Arbitration cannot submit without verified service');
    await page.evaluate(async()=>{
      const {arbitrationAppFixture420}=await import('./test/arbitration-app-fixture.js');

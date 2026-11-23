@@ -172,7 +172,7 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
       'private evidence object/capability authorization required');
     return grant;
   };
-  async function upload({encrypted,recoveryKey,context,record,viewer,object,retentionMs,
+  async function upload({encrypted,recoveryKey,context,record,viewer,object,preconditions,retentionMs,
     signal,authorizationRequired=true}){
     check(storage&&typeof storage.prepare==='function'&&typeof storage.ingest==='function',
       'approved private evidence storage unavailable');
@@ -195,6 +195,15 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
     check(object&&Number(object.size_bytes)===payload.length&&
       typeof object.shard_root==='string'&&object.shard_root.toLowerCase()===digest,
       'private storage object identity mismatch');
+    // These are the existing 420Storage v1 canonical upload prerequisites.
+    // Never invent an agreement, capacity allocation or Storage commitment.
+    const name=x=>typeof x==='string'&&x.length>0&&x.length<=256&&
+      /^[a-zA-Z0-9:_-]+$/.test(x);
+    check(preconditions&&name(preconditions.agreement_id)&&
+      name(preconditions.capacity_reservation_id)&&
+      name(preconditions.idempotency_key)&&
+      String(preconditions.commitment_id)===String(object.commitment_id),
+      'canonical 420Storage upload prerequisites required');
     const metadata=Object.freeze({context:ctx,commitment:encrypted.commitment,
       visibility:'private',expiresAt:clock()+retentionMs});
     // Client-side contract: provider must enforce authorization/expiration,
@@ -202,7 +211,8 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
     // and never publish the submitted ciphertext through public delivery routes.
     let prepared;
     try {
-      prepared=await storage.prepare({object,metadata,grant,signal});
+      prepared=await storage.prepare({object,preconditions:Object.freeze({...preconditions}),
+        metadata,grant,signal});
       check(!signal?.aborted&&prepared,'private evidence upload interrupted');
       const receipt=await storage.ingest({prepared,object,bytes:payload,metadata,grant,signal});
       check(!signal?.aborted,'private evidence upload interrupted');

@@ -66,6 +66,32 @@ try{
    'Labyrinth preview must not cause horizontal overflow');
   assert.equal(await page.locator('.lab-peg-overlay').count(),0,
    'no physical peg without independently verified numbered map');
+  // Verify the actual user-approved numbered atlas in Chromium: score 0 and
+  // finish 325 must remain pixel-aligned at both desktop and mobile widths.
+  const pegGeometry=await page.evaluate(async()=>{
+   const {validateLabyrinthPegAtlas,renderLabyrinthPegOverlay}=await import('/core/labyrinth-peg-overlay.js');
+   const atlas=await(await fetch('/core/labyrinth-peg-map.json')).json();
+   if(!validateLabyrinthPegAtlas(atlas))throw Error('physical atlas rejected in browser');
+   const art=document.querySelector('.lab-board-art');
+   art.insertAdjacentHTML('beforeend',renderLabyrinthPegOverlay({
+    scores:[0,325],teams:[0,1]
+   },atlas));
+   const image=art.querySelector('img'),svg=art.querySelector('svg');
+   const imageRect=image.getBoundingClientRect();
+   const pegs=[...svg.querySelectorAll('circle')].map(circle=>{
+    const x=Number(circle.getAttribute('cx')),y=Number(circle.getAttribute('cy'));
+    const actual=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM());
+    const expected={x:imageRect.left+x*imageRect.width/1254,
+     y:imageRect.top+y*imageRect.height/1254};
+    return {score:circle.dataset.pegScore,
+     error:Math.hypot(actual.x-expected.x,actual.y-expected.y)};
+   });
+   svg.remove();
+   return pegs;
+  });
+  assert.deepEqual(pegGeometry.map(p=>p.score),['0','325']);
+  assert.ok(pegGeometry.every(p=>p.error<2),
+   'peg circles must scale with 1254px board, not viewport coordinates');
   assert.equal(await page.locator('[data-lab-art-missing]:visible').count(),0);
   assert.equal(await page.locator('.labyrinth-setup button:not([disabled])').count(),0);
   assert.deepEqual(errors,[]);

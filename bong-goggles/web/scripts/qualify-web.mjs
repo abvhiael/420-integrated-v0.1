@@ -128,15 +128,35 @@ if(pinnedInheritedBytes>44*1024)throw Error('Existing independent modules exceed
 // Existing module checks are exact file hashes; none of their bytes can be used
 // to offset unrelated growth in the existing historical base.
 
+// BC-2.5 is a separately source-baselined change to four exact existing files.
+// BC-2.4's original 52-KiB cap and all original per-file ceilings are unchanged.
+// Only positive growth over the qualified BC-2.4 main bytes is charged here.
+const bc25Files=Object.freeze({
+ 'core/labyrinth-session.js':Object.freeze({baseline:8954,maxAdded:4096}),
+ 'core/labyrinth-cribbage-ui.js':Object.freeze({baseline:15169,maxAdded:2048}),
+ 'core/labyrinth-route-runtime.js':Object.freeze({baseline:3471,maxAdded:1024}),
+ 'core/shared-game-ui.js':Object.freeze({baseline:11678,maxAdded:128})
+});
+const bc25GrowthByPath=new Map();let bc25Growth=0;
+for(const [name,{baseline,maxAdded}] of Object.entries(bc25Files)){
+ const size=regularSizes.get(name);
+ if(!Number.isSafeInteger(size)||size<baseline||size-baseline>maxAdded)
+  throw Error('BC-2.5 independent human multiplayer growth outside approved source scope: '+name+' '+size);
+ const growth=size-baseline;
+ bc25GrowthByPath.set(name,growth);bc25Growth+=growth;
+}
+if(bc25Growth>6*1024)throw Error('BC-2.5 human multiplayer UI exceeded independent 6 KiB allowance: '+bc25Growth);
+console.log('BC-2.5 human multiplayer exact source growth:',JSON.stringify({bytes:bc25Growth,limitBytes:6*1024}));
+
 const bc24GrowthByPath=new Map();let bc24Growth=0;
 for(const [path,cap] of Object.entries(bc24New)){
- const size=regularSizes.get(path);
+ const size=regularSizes.get(path)-(bc25GrowthByPath.get(path)??0);
  if(!Number.isSafeInteger(size)||size<256||size>cap)
   throw Error('BC-2.4 new independent frontend budget or missing file: '+path+' '+size+' > '+cap);
  bc24GrowthByPath.set(path,size);bc24Growth+=size;
 }
 for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
- const size=regularSizes.get(path);
+ const size=regularSizes.get(path)-(bc25GrowthByPath.get(path)??0);
  if(!Number.isSafeInteger(size)||size<baseline||size-baseline>maxAdded)
   throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
  bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;
@@ -227,7 +247,7 @@ let bc05Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc05Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.5 room asset missing: '+path);
- const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-((bc24GrowthByPath.get(path)??0)+(bc25GrowthByPath.get(path)??0))-baseline);
  if(growth>maxAdded)throw new Error('BC-0.5 file exceeded scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc05GrowthByPath.set(path,growth);bc05Growth+=growth;
 }
@@ -247,7 +267,7 @@ let bc04Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc04Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.4 published file missing: '+path);
- const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-((bc24GrowthByPath.get(path)??0)+(bc25GrowthByPath.get(path)??0))-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.4 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc04GrowthByPath.set(path,growth);
  bc04Growth+=growth;
@@ -269,7 +289,7 @@ let bc03Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc03Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.3 shared screen missing from output: '+path);
- const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-((bc24GrowthByPath.get(path)??0)+(bc25GrowthByPath.get(path)??0))-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.3 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc03GrowthByPath.set(path,growth);
  bc03Growth+=growth;
@@ -279,12 +299,12 @@ let bc02Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.2 required output missing: '+path);
- const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc03GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-((bc24GrowthByPath.get(path)??0)+(bc25GrowthByPath.get(path)??0))-(bc03GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.2 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc24Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc24Growth-bc25Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -301,7 +321,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc24Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc24Growth-bc25Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));

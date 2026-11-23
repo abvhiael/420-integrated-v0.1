@@ -186,7 +186,7 @@ test('reorganization rollback, safe visibility, fully deterministic replay, RPC 
  assert.equal(ancestor.length,6,'no partial unverified replacement-block events');
  source.missingLogsAt=null;
  source.wrongReceipt=true;
- await assert.rejects((await start()).runOnce(),/RPC transaction\\/receipt canonicality disagreement|omitted canonical receipt/);
+ await assert.rejects((await start()).runOnce(),/RPC transaction.*receipt canonicality disagreement|omitted canonical receipt/);
  assert.equal((await checkpoint())?.blockNumber,5n);
  assert.deepEqual(await protocolRows(db),ancestor,'RPC disagreement cannot change durable canonical ancestor');
 });

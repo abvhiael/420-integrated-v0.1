@@ -105,7 +105,7 @@ test('strict canonical decoder recovers exact indexed and non-indexed ABI and re
   assert.equal(descriptor.topic0,encoded.topics[0]);
   assert.throws(()=>decoders.decode({...log,address:a(900)}),/contract mismatch/);
   assert.throws(()=>decoders.decode({...log,topics:encoded.topics.slice(0,2) as Hex[]}),/malformed canonical Arbitration log/);
-  assert.throws(()=>decoders.decode({...log,data:'0x' as Hex}),/malformed canonical Arbitration log/);
+  if(encoded.data!=='0x')assert.throws(()=>decoders.decode({...log,data:'0x' as Hex}),/malformed canonical Arbitration log/);
  }
 });
 test('deterministic full canonical history reconstruction and repeated duplicate delivery',()=>{
@@ -152,7 +152,7 @@ test('reject missing, corrupted, contradictory or cross-case canonical event tim
  conflicting.fields.evidenceHash=h(777);
  assert.throws(()=>replayArbitrationCase420([...events,conflicting]),/conflicting duplicate/);
  const substitute=structuredClone(events[1]!);
- substitute.blockNumber='10';substitute.blockHash=h(1010);
- substitute.transactionHash=h(2010);substitute.logIndex=0;
+ substitute.blockNumber='2';substitute.blockHash=h(1002);
+ substitute.transactionHash=h(2002);substitute.logIndex=1;
  assert.throws(()=>replayArbitrationCase420([...events,substitute]),/duplicate evidence/);
 });

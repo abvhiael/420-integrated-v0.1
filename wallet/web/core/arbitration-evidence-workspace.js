@@ -56,10 +56,10 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
     return Object.freeze({bytes:plaintext,context:bound.context,commitment:bound.commitment,
       chainTransaction:bound.transactionHash});
   }
-  async function upload({caseId,round,submitter,commitment,encrypted,object,retentionMs,signal}){
+  async function upload({caseId,round,submitter,commitment,encrypted,recoveryKey,object,retentionMs,signal}){
     const bound=await verifyCommitted({caseId,round,submitter,commitment});
     if(!external)fail('approved private evidence storage unavailable');
-    const receipt=await external.upload({encrypted,context:bound.context,record:bound.detail,
+    const receipt=await external.upload({encrypted,recoveryKey,context:bound.context,record:bound.detail,
       viewer:app.account,object,retentionMs,signal});
     await verifyCommitted({caseId,round,submitter,commitment});
     return receipt;

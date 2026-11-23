@@ -17,7 +17,7 @@ func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
   if game=="labyrinth-cribbage"{return adapter}
   return nil
  }
- h.classicMatchSocialEnabled=true
+ h.classicLabyrinthMatchEnabled=true
  t.Cleanup(func(){
   ctx:=context.Background()
   for _,hostID:=range []string{memberA,memberB}{

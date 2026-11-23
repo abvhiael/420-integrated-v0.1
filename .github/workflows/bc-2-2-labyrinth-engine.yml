@@ -31,8 +31,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Deterministic 241-point engine, isolation, room format and cold replay
-        run: go test -race -count=1 -timeout=12m -run '^TestBC22(ManifestAndImmutableRoomVariants|SevenCardShowFlushRunsAndPegging|DeterministicFullGamesAndSealedReplay|HeelsCanImmediatelyWin241)$|^TestBC12ManifestLockAndVariants$|^TestBC05RoomSeatLimitsAndTeams$' -v ./services/bong-goggles-account-social
+      - name: Deterministic 325-point engine, isolation, room format and cold replay
+        run: go test -race -count=1 -timeout=12m -run '^TestBC22(ManifestAndImmutableRoomVariants|SevenCardShowFlushRunsAndPegging|DeterministicFullGamesAndSealedReplay|HeelsCanImmediatelyWin325)$|^TestBC12ManifestLockAndVariants$|^TestBC05RoomSeatLimitsAndTeams$' -v ./services/bong-goggles-account-social
       - name: Vet compiled authoritative engine
         run: go vet ./services/bong-goggles-account-social
       - uses: actions/setup-node@v4

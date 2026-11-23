@@ -27,7 +27,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Fast EV cross-check, privacy, difficulty separation and eight complete mixed/full matches
-        run: go test -race -count=1 -timeout=20m -run '^TestBC23(FastShowMatchesAuthoritativeSevenCardScoring|StrategiesAllVariantsDeterministicLegalAndDistinct|RejectHiddenAndForgedViewsActionsAndBudget|MediumHardTakeCertainFifteenAndImmediate241|FullBotAndMixedHumanMatchesEveryFormat|PolicyHasNoOpponentCardKnowledge)$' -v ./services/bong-goggles-account-social
+        run: go test -race -count=1 -timeout=20m -run '^TestBC23(FastShowMatchesAuthoritativeSevenCardScoring|StrategiesAllVariantsDeterministicLegalAndDistinct|RejectHiddenAndForgedViewsActionsAndBudget|MediumHardTakeCertainFifteenAndImmediate325|FullBotAndMixedHumanMatchesEveryFormat|PolicyHasNoOpponentCardKnowledge)$' -v ./services/bong-goggles-account-social
       - name: Preserve frozen 121-point baseline and compiler safety
         run: |
           go test -count=1 -run '^TestBC13MediumPrefersKnownPeggingPoints$|^TestBC22ManifestAndImmutableRoomVariants$' ./services/bong-goggles-account-social

@@ -63,11 +63,12 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          from hashlib import sha256
+          from hashlib import sha1
           source=Path('bong-goggles/web/assets/games/labyrinth-cribbage/labyrinth.png')
-          assert source.is_file(), 'BLOCKED: source PNG is absent from GitHub; approved image cannot be claimed live'
+          assert source.is_file(), 'BLOCKED: approved board not committed to BC-2.4'
           data=source.read_bytes()
-          assert len(data)==4236478 and sha256(data).hexdigest()=='4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5', 'source art not byte-identical'
+          git_blob=sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+          assert git_blob=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2', 'committed board differs from user-approved upload'
           PY
       - uses: actions/setup-node@v4
         with:

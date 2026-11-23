@@ -79,7 +79,19 @@ test('App rechecks canonical history after decrypt; a reorg cannot bless a stale
     if(reads>=2)result.history=[];return result;};
   await assert.rejects(workspace.inspectLocal({caseId:ctx.caseId,round:0,submitter:ctx.submitter,
     commitment:sealed.commitment,encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey}),
-    /not recorded/);
+    /authorization or chain history changed/);
+});
+test('Observer cannot inspect or upload evidence even when holding ciphertext and a recovery key',async()=>{
+  const {app,state}=fixture();
+  const sealed=await preparePrivateEvidence420({data:document,context:ctx,cryptoImpl:webcrypto});
+  state.history.push(receipt(sealed));
+  app.account=a(999);
+  const outsider=createArbitrationEvidenceWorkspace420({app,cryptoImpl:webcrypto});
+  await assert.rejects(outsider.inspectLocal({caseId:ctx.caseId,round:0,submitter:ctx.submitter,
+    commitment:sealed.commitment,encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey}),
+    /authorization required/);
+  await assert.rejects(outsider.upload({caseId:ctx.caseId,round:0,submitter:ctx.submitter,
+    commitment:sealed.commitment,encrypted:sealed.encrypted}),/authorization required/);
 });
 test('Missing approved storage rejects upload/download without altering case record',async()=>{
   const {workspace,state}=fixture(),sealed=await workspace.prepare({caseId:ctx.caseId,data:document});

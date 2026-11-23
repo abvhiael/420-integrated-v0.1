@@ -12,6 +12,9 @@ on:
       - 'bong-goggles/web/app.js'
       - 'bong-goggles/web/index.html'
       - 'bong-goggles/web/labyrinth.css'
+      - 'bong-goggles/web/scripts/verify-labyrinth-peg-map.mjs'
+      - 'bong-goggles/web/core/labyrinth-peg-map.json'
+      - 'bong-goggles/web/assets/games/labyrinth-cribbage/labyrinth.png'
       - 'bong-goggles/web/scripts/build.mjs'
       - 'bong-goggles/web/scripts/qualify-web.mjs'
       - 'docs/games/classics/BC-2-4-QUALIFICATION.md'
@@ -51,7 +54,6 @@ jobs:
   original-art-provenance:
     runs-on: ubuntu-latest
     timeout-minutes: 3
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,3 +69,9 @@ jobs:
           data=source.read_bytes()
           assert len(data)==4236478 and sha256(data).hexdigest()=='4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5', 'source art not byte-identical'
           PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify both 326-position peg paths and printed numerical guides
+        run: node bong-goggles/web/scripts/verify-labyrinth-peg-map.mjs
+

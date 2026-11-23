@@ -9,7 +9,7 @@ import (
  "math/rand"
 )
 
-// BC-2.3 is a separate, operator-compiled policy for the frozen 241-point
+// BC-2.3 is a separate, operator-compiled policy for the versioned 325-point
 // Labyrinth rules. It is not installed in the production resolver at this
 // milestone. All inputs are the acting seat's public/private projection and
 // the rules engine's canonical legal actions; no deck, seed or hidden crib.

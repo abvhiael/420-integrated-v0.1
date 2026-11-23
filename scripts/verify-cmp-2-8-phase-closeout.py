@@ -8,11 +8,12 @@ ROADMAP=ROOT/"docs/compute-market/COMPUTE-MARKET-POST-CMP1-ROADMAP.md"
 CLOSEOUT=ROOT/"docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md"
 FOUNDRY=ROOT/".github/workflows/contracts-foundry.yml"
 QUAL=ROOT/".github/workflows/qualification.yml"
+SCOPED=ROOT/".github/workflows/cmp-2-8-closeout.yml"
 
 def fail(msg):
     raise SystemExit("CMP-2.8 closeout verification failed: "+msg)
 
-for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL):
+for p in (LEDGER,ROADMAP,CLOSEOUT,FOUNDRY,QUAL,SCOPED):
     if not p.is_file(): fail(f"missing {p.relative_to(ROOT)}")
 
 d=json.loads(LEDGER.read_text())
@@ -47,9 +48,15 @@ if "## CMP-2.8 — Phase closeout" not in road or "Level 3 comprehensive qualifi
 fw=FOUNDRY.read_text()
 for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-2.8-phase-closeout.json","qualify-foundry-shard.sh"):
     if token not in fw: fail(f"full Foundry ownership/trigger missing {token}")
+# CI-GUARD-02 requires the full global Level 3 workflow to stay manual-only.
+# The scoped CMP-2.8 workflow is the automatic inventory trigger and must
+# continue to bind to the exact PR head and the retained verifier.
 qw=QUAL.read_text()
-for token in ("contracts/config/compute-market/cmp-2.8-phase-closeout.json","docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-2-8-phase-closeout.py"):
-    if token not in qw: fail(f"global qualification trigger missing {token}")
+if "\\n  workflow_dispatch:" not in qw or any("\\n  "+event in qw for event in ("pull_request:","push:","schedule:")):
+    fail("global Level 3 qualification must remain explicit dispatch only")
+sw=SCOPED.read_text()
+for token in ("pull_request:","push:","contracts/config/compute-market/cmp-2.8-phase-closeout.json","docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md","scripts/verify-cmp-2-8-phase-closeout.py","run: python scripts/verify-cmp-2-8-phase-closeout.py","Verify exact head"):
+    if token not in sw: fail(f"scoped CMP-2.8 qualification trigger missing {token}")
 close=CLOSEOUT.read_text()
 for heading in ("## Canonical definition","## Reconciliation baseline","## Phase inventory","## Prerequisite disposition","## Authority and security boundaries","## Client/service reconciliation","## Repository qualification versus live deployment","## Level 3 qualification gate","## Full Solidity ownership","## Completion"):
     if heading not in close: fail(f"missing heading {heading}")

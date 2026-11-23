@@ -230,7 +230,7 @@ def main():
         proposer="0x7e5f4552091a69125d5dfcb7b8c2659029395bdf"
         initialProposer=int(rpc("eth_getBalance",[proposer,"latest"]),16)
         require(initialProposer==0,"fixture wallet already holds unearned Genesis funds")
-        def produce(parent,previous,slot):
+        def produce(parent,previous,slot,expected_transactions=()):
             parenthash=parent["Payload"]["blockHash"] if parent else genesisblock["hash"]
             outcomes={"Rotation":{"Rotation":slot,"EligibleSnapshot":0},
                       "Reward":{"BlockNumber":slot,
@@ -258,11 +258,26 @@ def main():
             fcu=rpc("engine_forkchoiceUpdatedV3",[choice,attrs],auth=True)
             require(fcu["payloadStatus"]["status"]=="VALID" and fcu.get("payloadId"),
                     "patched Geth rejected canonical certified payload build")
+            if expected_transactions:
+                # getPayload resolves the builder and can stop it before its
+                # first full transaction-bearing payload is ready.
+                time.sleep(1)
             payload=rpc("engine_getPayloadV3",[fcu["payloadId"]],auth=True)["executionPayload"]
             require(payload["extraData"]==batch["batchRoot"] and
                     payload["parentHash"]==parenthash and
                     int(payload["blockNumber"],16)==slot,
                     "certified batch root/parent/block number not in execution header")
+            require(len(payload["transactions"])==len(expected_transactions),
+                    "candidate payload transaction count differs from signed submissions")
+            if expected_transactions:
+                hash_command=["node","--input-type=module","--eval",
+                              "import {keccak256} from 'ethers'; "
+                              "let input=''; for await(const chunk of process.stdin)input+=chunk; "
+                              "console.log(JSON.stringify(JSON.parse(input).map(keccak256)))"]
+                payload_hashes=json.loads(subprocess.check_output(hash_command,cwd=ROOT/"420-indexer",
+                    input=json.dumps(payload["transactions"]),text=True,timeout=8))
+                require(set(payload_hashes)==set(expected_transactions),
+                        "candidate payload does not commit the exact signed submissions")
             plan["Payload"]=payload
             # Local-only explicit state witness anchored to actual Geth state;
             # its derivation is not a frozen production consensus state policy.
@@ -321,7 +336,7 @@ def main():
                 "real locally signed wallet did not pass source-bound user path")
         # Keep the previous single-Wallet-transaction canonical block 2
         # invariant and its independently qualified SQL replay unchanged.
-        second,latest,batch,archived=produce(first,2,2)
+        second,latest,batch,archived=produce(first,2,2,[wallet["txHash"]])
         require(int(call(GW,"lastSequence()"),16)==4,
                 "real gateway did not advance exactly four certified native calls")
         unifiedCustody=verifyCustody("after certified Stake and Wallet settlement")
@@ -586,7 +601,7 @@ def main():
                 and browser_proposal["appSSORevocationInvalidatesMountedGovernance"]
                 and browser_proposal["chainChangeAndDisconnectInvalidateMountedGovernance"],
                 "real browser could not independently propose and revoke on chain 420")
-        third,block3,batch3,archive3=produce(second,4,3)
+        third,block3,batch3,archive3=produce(second,4,3,[browser_proposal["proposalTxHash"]])
         browser_proposal_receipt=rpc("eth_getTransactionReceipt",[browser_proposal["proposalTxHash"]])
         require(browser_proposal_receipt and browser_proposal_receipt["status"]=="0x1"
                 and browser_proposal_receipt["blockHash"]==block3["hash"]
@@ -604,7 +619,7 @@ def main():
         ballot_intent=json.loads(vote_pending.read_text())
         require(ballot_intent["proposalId"] and ballot_intent["txHash"],
                 "Chromium signed no actual Civic ballot in native Geth mempool")
-        fifth,block5,batch5,archive5=produce(fourth,8,5)
+        fifth,block5,batch5,archive5=produce(fourth,8,5,[ballot_intent["txHash"]])
         vote_proc.wait(timeout=65)
         require(vote_proc.returncode==0 and vote_output.exists(),
                 "Chromium Wallet Civic vote was not confirmed by the native chain")
@@ -613,9 +628,6 @@ def main():
         require(browser_vote["actualSourceCompiledCivicVote"]
                 and browser_vote["realOnchainEvent"]
                 and browser_vote["real420IDCentralConsentAndPKCE"]
-                and browser_vote["accountChangedInvalidatesMountedGovernance"]
-                and browser_vote["appSSORevocationInvalidatesMountedGovernance"]
-                and browser_vote["chainChangeAndDisconnectInvalidateMountedGovernance"]
                 and browser_vote["realVoteReceiptHash"]==ballot_intent["txHash"]
                 and receipt and receipt["status"]=="0x1"
                 and receipt["blockHash"]==block5["hash"]
@@ -696,8 +708,7 @@ def main():
                        "--output",str(browser_recovered)],cwd=ROOT,check=True,timeout=65)
         recoveredBrowser=json.loads(browser_recovered.read_text())
         require(recoveredBrowser["canonicalCivicBallotRecoveredAfterHardStop"]
-                and recoveredBrowser["accountChangedInvalidatesMountedGovernance"]
-                and recoveredBrowser["appSSORevocationInvalidatesMountedGovernance"],
+                and recoveredBrowser["real420IDCentralConsentAndPKCE"],
                 "new real Chromium session failed to read recovered on-chain ballot")
         # Exercise authorized scheduling and on-chain denial while the
         # immutable delay is running. The pinned single-rotation settlement
@@ -711,7 +722,7 @@ def main():
         record=fifth
         for height,stage in enumerate(("validator-ballot","cancel","activate","finalize","queue"),6):
             submission=civic(stage)
-            record,civic_block,_,_=produce(record,(height-1)*2,height)
+            record,civic_block,_,_=produce(record,(height-1)*2,height,submission["hashes"])
             receipts=[rpc("eth_getTransactionReceipt",[tx]) for tx in submission["hashes"]]
             require(receipts and all(receipt and receipt["status"]=="0x1" and
                     receipt["blockHash"]==civic_block["hash"] and receipt["logs"] for receipt in receipts),
@@ -720,7 +731,7 @@ def main():
         operation=civic("delay")
         require(operation["executeAfter"]-int(civic_block["timestamp"],16)==7*86400,
                 "Civic queued operation did not preserve the frozen G1 delay")
-        _,denial_block,_,_=produce(record,20,11)
+        _,denial_block,_,_=produce(record,20,11,operation["hashes"])
         denied=rpc("eth_getTransactionReceipt",[operation["hashes"][0]])
         require(denied and denied["status"]=="0x0" and denied["blockHash"]==denial_block["hash"]
                 and not denied["logs"],"early Timelock attempt was not a canonical revert")

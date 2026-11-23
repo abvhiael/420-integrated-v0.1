@@ -162,3 +162,34 @@ Reproduced from [GOV-PRE-08 qualification](../../audit/GOV-PRE-08-QUALIFICATION.
 
 Recovery: no partial post-genesis failure may be labeled a complete settlement. A failed receipt, unexpected issuer, stale Registry codehash, wrong policy, or unbalanced Vault inventory invalidates the local run: discard the disposable chain and regenerate from the untouched source files. Do not alter the signed V3 historical bundle or reuse synthetic receipt hashes as authority. For a future signed chain, owner-verified V4 plan, immutable system predeploy bytes/slots, genuine Timelock decisions, 420Identity sponsorship credentials, deployment receipt finality, native reward issuance and multi-protocol recovery remain separate external qualification gates.
 
+
+
+## GOV-PRE-08 Step 3 local native rehearsal
+
+Use the three jobs in `.github/workflows/governance-pre-08-step-3.yml` on a
+clean checkout of the same source SHA. The materialization job emits the
+unsigned source package, the two funding and graph witnesses, and the imported
+chain-420 Genesis. The release gate produces pinned node420, fourtwentyd and
+Indexer binaries with a SHA-256 manifest. The unified job checks the executable
+hashes and the source SHA in each input witness before starting any node.
+
+For a local cold start, use a fresh working directory, disposable PostgreSQL
+for Indexers and 420ID, and a separate TLS-verified PostgreSQL instance for
+the protected signing witnesses. Follow the workflow's service and database
+configuration. Run `scripts/gov-pre-08/qualify-unified-local-node420.py` with
+the native Genesis, graph, funding and gateway binding files from that exact
+materialization run. The harness starts local execution and the protected
+committee before the Indexers, Explorer and TLS Wallet/420ID fixture. Inspect
+the signed duties, transaction receipts, browser reports and on-chain custody
+in the unified artifact.
+
+For recovery, keep the existing Geth datadir, certified settlement journal,
+signer witnesses and durable Indexer stores. Recover the execution child and
+certified settlement against the original pinned trust before accepting
+consumer readiness. Verify the recovered checkpoint and canonical receipt in
+both the Indexer and Explorer. To independently reconstruct, start with a
+fresh working directory and repeat the jobs from the original source and
+Genesis. Preserve the original registers and logs for comparison. Treat an
+unverifiable state, mismatched checkpoint or divergence as a failed
+rehearsal. Step 3 remains open until its required local acceptance results are
+recorded in the qualification ledger.

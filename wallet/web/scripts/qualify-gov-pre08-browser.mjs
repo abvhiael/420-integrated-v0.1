@@ -85,6 +85,11 @@ const browser=await chromium.launch({headless:true,args:[
 const context=await browser.newContext({viewport:{width:1280,height:900},ignoreHTTPSErrors:true});
 const page=await context.newPage();
 page.on('dialog',dialog=>dialog.accept());
+page.on('response',response=>{
+ const {hostname,pathname}=new URL(response.url());
+ if(response.status()>=400 && (hostname==='auth.420integrated.org'||pathname.startsWith('/420id-api/')))
+   console.error('420ID qualification HTTP',response.status(),pathname);
+});
 await page.exposeBinding('nativeWallet420',(_,method,params)=>providerRequest(method,params));
 await page.addInitScript(()=>{
  const handlers=new Map();
@@ -193,47 +198,59 @@ try{
    }
  }
  const before=transactions.length;
- assert.match(graph.localBrowserChangedAccount,/^0x[0-9a-fA-F]{40}$/);
- currentAccount=graph.localBrowserChangedAccount.toLowerCase();
- await assertProviderInvalidation('accountsChanged',[currentAccount]);
- await page.locator('#governance-connect').click();
- await page.locator('#governance-app-state[data-state="passed"]').waitFor();
- assert.equal((await page.locator('#governance-account').textContent()).toLowerCase(),currentAccount);
+ // Provider lifecycle coverage runs on the proposal journey. The separate
+ // ballot and recovery sessions preserve the actual 420ID client rate limits.
+ if(mode==='propose'){
+  assert.match(graph.localBrowserChangedAccount,/^0x[0-9a-fA-F]{40}$/);
+  currentAccount=graph.localBrowserChangedAccount.toLowerCase();
+  await assertProviderInvalidation('accountsChanged',[currentAccount]);
+  await page.locator('#governance-connect').click();
+  await page.locator('#governance-app-state[data-state="passed"]').waitFor();
+  assert.equal((await page.locator('#governance-account').textContent()).toLowerCase(),currentAccount);
 
- chainChanged=true;
- await assertProviderInvalidation('chainChanged','0x1a5');
- await page.locator('#governance-connect').click();
- await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
- assert.match(await page.locator('#governance-error-recovery').textContent(),/network|chain/i);
- assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+  chainChanged=true;
+  await assertProviderInvalidation('chainChanged','0x1a5');
+  await page.locator('#governance-connect').click();
+  await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
+  assert.match(await page.locator('#governance-error-recovery').textContent(),/network|chain/i);
+  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
 
- chainChanged=false;
- currentAccount=wallet.address.toLowerCase();
- await page.locator('#governance-connect').click();
- await page.locator('#governance-app-state[data-state="passed"]').waitFor();
- currentAccount=null;
- await assertProviderInvalidation('disconnect',{code:4900,message:'Provider disconnected'});
- await page.locator('#governance-connect').click();
- await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
- assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+  chainChanged=false;
+  currentAccount=wallet.address.toLowerCase();
+  await page.locator('#governance-connect').click();
+  await page.locator('#governance-app-state[data-state="passed"]').waitFor();
+  currentAccount=null;
+  await assertProviderInvalidation('disconnect',{code:4900,message:'Provider disconnected'});
+  await page.locator('#governance-connect').click();
+  await page.locator('#governance-app-state').filter({hasText:/^Action blocked$/}).waitFor();
+  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
 
- currentAccount=wallet.address.toLowerCase();
- await page.locator('#governance-connect').click();
- await page.locator('#governance-app-state[data-state="passed"]').waitFor();
- await page.locator('[data-420id-logout]').click();
- await page.locator('[data-420id-status]').filter({hasText:/Signed out of this app/}).waitFor();
- await page.locator('#governance-app-state').filter({hasText:/^Reload required$/}).waitFor();
- assert.equal((await context.cookies('https://wallet.420integrated.org')).some(cookie=>
-   cookie.name==='__Host-app420_session'),false);
- assert.match(await page.locator('#governance-transaction-state').textContent(),/420ID/);
- assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+  currentAccount=wallet.address.toLowerCase();
+  await page.locator('#governance-connect').click();
+  await page.locator('#governance-app-state[data-state="passed"]').waitFor();
+   await page.locator('[data-420id-logout]').click();
+   await page.locator('[data-420id-status]').filter({hasText:/Signed out of this app/}).waitFor();
+   await page.locator('#governance-app-state').filter({hasText:/^Reload required$/}).waitFor();
+   assert.equal((await context.cookies('https://wallet.420integrated.org')).some(cookie=>
+     cookie.name==='__Host-app420_session'),false);
+   assert.match(await page.locator('#governance-transaction-state').textContent(),/420ID/);
+   assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+   proof={...proof,accountChangedInvalidatesMountedGovernance:true,
+     chainChangeAndDisconnectInvalidateMountedGovernance:true,
+     appSSORevocationInvalidatesMountedGovernance:true};
+ }
  assert.equal(transactions.length,before,'provider changes or logout submitted an unauthorized transaction');
- proof={...proof,accountChangedInvalidatesMountedGovernance:true,
-   appSSORevocationInvalidatesMountedGovernance:true,
-   chainChangeAndDisconnectInvalidateMountedGovernance:true,
-   signedEOATransactions:transactions,explicitDeviceApprovals:approvals};
+ proof={...proof,signedEOATransactions:transactions,explicitDeviceApprovals:approvals};
  await fs.writeFile(output,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
  console.log('GOV_PRE_08_CHROMIUM_420ID_NATIVE_GETH_EIP1193='+mode.toUpperCase()+'_PASS');
+}catch(error){
+ if(page.url()==='https://wallet.420integrated.org/'){
+   const governance=await page.locator('#governance-management-panel').count();
+   if(governance)console.error('Governance on failure:',
+     await page.locator('#governance-app-state').textContent(),
+     await page.locator('#governance-error-recovery').textContent());
+ }
+ throw error;
 }finally{
  await browser.close();
 }

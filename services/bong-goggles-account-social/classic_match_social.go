@@ -111,8 +111,11 @@ func previousMatchRequest(ctx context.Context,tx *sql.Tx,viewer,requestID string
  if !bytes.Equal(saved,digest[:]){return "",ErrConflict}
  return roomID,nil
 }
-func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest [32]byte,seats []ClassicSeat,source any)(string,error){
- if len(seats)<2||len(seats)>4||seats[0].Subject!=viewer||seats[0].Controller!="human"{return "",ErrInvalid}
+func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest [32]byte,game string,seats []ClassicSeat,source any)(string,error){
+ if (game!="cribbage"&&game!="labyrinth-cribbage")||len(seats)<2||len(seats)>4||seats[0].Subject!=viewer||seats[0].Controller!="human"{return "",ErrInvalid}
+ format:=""
+ if game=="labyrinth-cribbage"&&len(seats)==4&&seats[0].Team!=seats[2].Team{format="individual"}
+ if game=="labyrinth-cribbage"&&len(seats)==4&&format==""{format="partnerships"}
  // Match ClassicRooms.Create: serialize the active-room quota across
  // challenge, ordinary create and rematch, even on concurrent workers.
  var host string
@@ -122,10 +125,10 @@ func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest
  e=tx.QueryRowContext(ctx,"SELECT count(*) FROM bg_account_social.classic_rooms WHERE host=$1 AND status IN ('open','ready','in_game')",viewer).Scan(&active)
  if e!=nil{return "",e};if active>=10{return "",ErrConflict}
  id,e:=newID();if e!=nil{return "",e}
- _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count) VALUES($1,$2,'cribbage','private',$3)",id,viewer,len(seats))
+ _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_rooms(id,host,game_id,visibility,seat_count) VALUES($1,$2,$3,'private',$4)",id,viewer,game,len(seats))
  if e!=nil{return "",e}
  for index,seat:=range seats{
-  if seat.Index!=index||seat.Team!=classicTeam("cribbage",len(seats),index){return "",ErrInvalid}
+  if seat.Index!=index||seat.Team!=classicRoomTeam(game,len(seats),index,format){return "",ErrInvalid}
   var subject,difficulty any
   if seat.Controller=="human"&&index==0&&seat.Subject==viewer{subject=viewer
   }else if seat.Controller=="invited"&&index>0&&uuid.MatchString(seat.Subject){subject=seat.Subject
@@ -180,7 +183,7 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
   {Index:0,Controller:"human",Subject:viewer,Team:0},
   {Index:1,Controller:"invited",Subject:target,Team:1},
  }
- id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,seats,nil)
+ id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,"cribbage",seats,nil)
  if e!=nil{return empty,e}
  if e=tx.Commit();e!=nil{return empty,e}
  return s.Rooms.Get(ctx,viewer,id)
@@ -191,7 +194,7 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
  if !uuid.MatchString(viewer)||!uuid.MatchString(oldID)||!uuid.MatchString(requestID){return empty,ErrInvalid}
  previous,e:=s.Get(ctx,viewer,oldID)
  if e!=nil{return empty,e}
- if previous.GameID!="cribbage"||previous.Status!="finished"&&previous.Status!="resigned"&&previous.Status!="timed_out"{
+ if previous.GameID!="cribbage"&&previous.GameID!="labyrinth-cribbage"||previous.Status!="finished"&&previous.Status!="resigned"&&previous.Status!="timed_out"{
   return empty,ErrConflict
  }
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
@@ -221,9 +224,13 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
  }
  e=rows.Err();rows.Close();if e!=nil{return empty,e}
  if len(old)!=rec.SeatCount{return empty,ErrUnavailable}
+ format:=""
+ if rec.GameID=="labyrinth-cribbage"&&rec.SeatCount==4{
+  if old[0].Team==old[2].Team{format="partnerships"}else{format="individual"}
+ }
  index:=-1
  for i,seat:=range old{
-  if seat.Index!=i||seat.Team!=classicTeam("cribbage",rec.SeatCount,i){return empty,ErrUnavailable}
+  if seat.Index!=i||seat.Team!=classicRoomTeam(rec.GameID,rec.SeatCount,i,format){return empty,ErrUnavailable}
   if seat.Controller=="human"&&seat.Subject==viewer{index=i}
  }
  if index<0{return empty,ErrForbidden}
@@ -231,7 +238,7 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
  human:=[]string{}
  for i:=range seats{
   orig:=old[(i+index)%len(old)]
-  next:=ClassicSeat{Index:i,Team:classicTeam("cribbage",rec.SeatCount,i),Difficulty:orig.Difficulty}
+  next:=ClassicSeat{Index:i,Team:classicRoomTeam(rec.GameID,rec.SeatCount,i,format),Difficulty:orig.Difficulty}
   if orig.Controller=="human"&&uuid.MatchString(orig.Subject){
    next.Subject=orig.Subject;next.Controller="invited"
    if i==0{next.Controller="human"}
@@ -248,7 +255,7 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
   blocked,err:=blockedBetween(ctx,tx,human[i],human[j])
   if err!=nil{return empty,err};if blocked{return empty,ErrForbidden}
  }}
- id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,seats,oldID)
+ id,e:=newMatchLobby(ctx,tx,viewer,requestID,digest,rec.GameID,seats,oldID)
  if e!=nil{return empty,e}
  if e=tx.Commit();e!=nil{return empty,e}
  return s.Rooms.Get(ctx,viewer,id)

@@ -46,7 +46,7 @@ jobs:
           version: stable
       - name: Check Arbitration formatting
         working-directory: contracts
-        run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol
+        run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol test/ArbitrationProtocolQualification420.t.sol
       - name: Build Arbitration graph
         working-directory: contracts
         run: forge build src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol test/ArbitrationProtocolQualification420.t.sol --sizes

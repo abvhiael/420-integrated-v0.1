@@ -1,0 +1,77 @@
+name: BC-2.2 Labyrinth Cribbage Authoritative Engine
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_labyrinth*.go'
+      - 'services/bong-goggles-account-social/classic_rules_framework.go'
+      - 'services/bong-goggles-account-social/classic_rules_replay.go'
+      - 'services/bong-goggles-account-social/classic_rooms.go'
+      - 'services/bong-goggles-account-social/classic_rooms_http.go'
+      - 'services/bong-goggles-account-social/classic_rooms_test.go'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/test/classic-rooms.test.js'
+      - 'docs/games/classics/BC-2-2-QUALIFICATION.md'
+      - '.github/workflows/bc-2-2-labyrinth-engine.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  go-rules-and-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact source
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Deterministic 325-point engine, isolation, room format and cold replay
+        run: go test -race -count=1 -timeout=12m -run '^TestBC22(ManifestAndImmutableRoomVariants|SevenCardShowFlushRunsAndPegging|DeterministicFullGamesAndSealedReplay|HeelsCanImmediatelyWin325)$|^TestBC12ManifestLockAndVariants$|^TestBC05RoomSeatLimitsAndTeams$' -v ./services/bong-goggles-account-social
+      - name: Vet compiled authoritative engine
+        run: go vet ./services/bong-goggles-account-social
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lock existing front-end room bounds and BC-2.1 scoring contract
+        run: |
+          node --check bong-goggles/web/core/classic-rooms.js
+          node --test bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/labyrinth-cribbage-rules.test.js
+  postgres-room-variant:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Pin exact source
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Real 420ID room format persistence and fail-closed API
+        run: go test -race -count=1 -tags account420_integration -timeout=12m -run '^TestBC22(RoomFormatPersistsAcrossAPIReads|AuthenticatedTwoAccountEngineAndColdResume)$' -v ./services/bong-goggles-account-social

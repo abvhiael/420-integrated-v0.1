@@ -4,6 +4,7 @@ on:
     paths:
       - 'bong-goggles/web/core/labyrinth-*.js'
       - 'bong-goggles/web/test/labyrinth-*.test.js'
+      - 'bong-goggles/web/test/labyrinth-browser-qualification.mjs'
       - 'bong-goggles/web/core/shared-game-ui.js'
       - 'bong-goggles/web/core/classic-room-bindings.js'
       - 'bong-goggles/web/core/classic-rooms.js'
@@ -76,3 +77,26 @@ jobs:
       - name: Verify both 326-position peg paths and printed numerical guides
         run: node bong-goggles/web/scripts/verify-labyrinth-peg-map.mjs
 
+  browser-board-device-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact branch head
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser fixture tooling without changing locked project dependencies
+        working-directory: bong-goggles/web
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1
+          npx playwright install --with-deps chromium
+      - name: Real Chromium desktop/mobile approved source board and navigation
+        working-directory: bong-goggles/web
+        run: node test/labyrinth-browser-qualification.mjs

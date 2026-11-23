@@ -19,8 +19,46 @@ mkdir -p "$workspace/test"
 # Preserve original Foundry profiles, fuzz/invariant bounds, and import paths.
 cp foundry.toml "$workspace/foundry.toml"
 cp -a src "$workspace/src"
-cp -a test/helpers "$workspace/test/helpers"
 cp -a "${compute_tests[@]}" "$workspace/test/"
+
+# Stage any local test helpers explicitly imported by the retained Compute
+# tests (recursively). ComputeEscrowFunding420, for example, imports Vault420.
+# Never discover or compile unrelated test trees merely for convenience.
+COMPUTE_SOURCE_ROOT="$contracts_root" COMPUTE_WORKSPACE="$workspace" python3 - <<'PY'
+import os
+from pathlib import Path
+import re
+import shutil
+
+root = Path(os.environ["COMPUTE_SOURCE_ROOT"])
+staged = Path(os.environ["COMPUTE_WORKSPACE"])
+pattern = re.compile(r"""\bimport\s+(?:[^;"']*?\s+from\s+)?["']([^"']+)["']\s*;""", re.S)
+queue = list((staged / "test").glob("Compute*.t.sol"))
+seen = set()
+while queue:
+    file = queue.pop()
+    if file in seen:
+        continue
+    seen.add(file)
+    for imported in pattern.findall(file.read_text()):
+        if not imported.startswith("."):
+            continue
+        dep = Path(os.path.normpath(str(file.parent / imported)))
+        if not dep.is_relative_to(staged):
+            raise SystemExit(f"Illegal import outside scoped workspace: {file}: {imported}")
+        if dep.exists():
+            if dep.is_relative_to(staged / "test") and dep.suffix == ".sol":
+                queue.append(dep)
+            continue
+        source = root / dep.relative_to(staged)
+        if not source.is_file():
+            raise SystemExit(f"Missing required Compute test dependency: {source}")
+        dep.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, dep)
+        if dep.suffix == ".sol":
+            queue.append(dep)
+print(f"Staged {len(seen)} Compute test and explicitly imported local dependency files")
+PY
 
 # Include non-Solidity fixture data without pulling in unrelated vendored
 # Solidity test fixtures that triggered the 909-file compilation.

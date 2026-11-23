@@ -161,7 +161,7 @@ try{
      await forButton.click();
      // The parent Python harness waits for a real signed tx in the live Geth
      // mempool, then mines it in the NEXT independently BLS-certified block.
-     await page.locator('#governance-app-state[data-state="passed"]').waitFor({timeout:60000});
+     await page.getByText('Vote confirmed',{exact:true}).waitFor({timeout:60000});
      assert.match(await page.locator('#governance-transaction-state').textContent(),/Vote confirmed/);
      const submission=transactions.find(tx=>tx.to.toLowerCase()===civic.voting.toLowerCase());
      assert.ok(submission,'browser supplied no real typed EVM ballot');
@@ -177,18 +177,18 @@ try{
        actualSourceCompiledCivicVote:true,realOnchainEvent:true,
        actualNativeBlockNumber:Number(BigInt(receipt.blockNumber))};
    }else{
-     await page.locator('#governance-community-tally').getByText(/FOR 1/).waitFor({timeout:16000});
+     await page.waitForFunction(()=>document.querySelector('#governance-community-tally')?.textContent?.includes('FOR 1'),null,{timeout:16000});
      proof={...proof,canonicalCivicBallotRecoveredAfterHardStop:true};
    }
  }
  // Real EIP-1193 account changes must invalidate the MOUNTED Governance UI.
  await page.evaluate(value=>window.__walletEvent('accountsChanged',[value]),graph.localBrowserChangedAccount);
- await page.locator('#governance-app-state').getByText(/Reload required/).waitFor({timeout:10000});
+ await page.waitForFunction(()=>document.querySelector('#governance-app-state')?.textContent==='Reload required',null,{timeout:10000});
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
  const before=transactions.length;
  // Logout updates the app-scoped browser session, not the EVM account.
  await page.locator('[data-420id-logout]').click();
- await page.locator('#governance-transaction-state').getByText(/420ID/).waitFor({timeout:12000});
+ await page.waitForFunction(()=>document.querySelector('#governance-transaction-state')?.textContent?.includes('420ID'),null,{timeout:12000});
  assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
  assert.equal(transactions.length,before,'account switch or logout submitted unauthorized transaction');
  proof={...proof,accountChangedInvalidatesMountedGovernance:true,

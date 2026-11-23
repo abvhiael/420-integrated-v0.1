@@ -1,15 +1,15 @@
-// BC-2.1: isolated, deterministic Russian Cribbage rules reference.
+// BC-2.1: isolated, deterministic Labyrinth Cribbage rules reference.
 // Pure functions only. This is NOT the production server match engine and
 // must not be used to trust browser-side scores or reveal another seat's cards.
 const define=(id,seatCount,teams,deal,discard,extra)=>Object.freeze({
  id,seatCount,teams:Object.freeze(teams),deal,discard,extra,retain:6,crib:6
 });
-export const RUSSIAN_CRIBBAGE_TARGET=241;
-export const RUSSIAN_CRIBBAGE_VARIANTS=Object.freeze({
- 'russian-2p':define('russian-2p',2,[0,1],9,3,0),
- 'russian-3p':define('russian-3p',3,[0,1,2],8,2,0),
- 'russian-4p-partners':define('russian-4p-partners',4,[0,1,0,1],7,1,2),
- 'russian-4p-individual':define('russian-4p-individual',4,[0,1,2,3],7,1,2)
+export const LABYRINTH_CRIBBAGE_TARGET=241;
+export const LABYRINTH_CRIBBAGE_VARIANTS=Object.freeze({
+ 'labyrinth-2p':define('labyrinth-2p',2,[0,1],9,3,0),
+ 'labyrinth-3p':define('labyrinth-3p',3,[0,1,2],8,2,0),
+ 'labyrinth-4p-partners':define('labyrinth-4p-partners',4,[0,1,0,1],7,1,2),
+ 'labyrinth-4p-individual':define('labyrinth-4p-individual',4,[0,1,2,3],7,1,2)
 });
 const validCard=c=>Number.isInteger(c)&&c>=0&&c<52;
 const rank=c=>c%13+1;
@@ -19,15 +19,15 @@ function validateCards(cards,length){
  if(!Array.isArray(cards)||cards.length!==length||!cards.every(validCard)||
     new Set(cards).size!==length)throw new RangeError('Invalid or repeated playing card');
 }
-export function russianCribbageVariant(seatCount,format='partnerships'){
- if(seatCount===2)return RUSSIAN_CRIBBAGE_VARIANTS['russian-2p'];
- if(seatCount===3)return RUSSIAN_CRIBBAGE_VARIANTS['russian-3p'];
- if(seatCount===4&&format==='partnerships')return RUSSIAN_CRIBBAGE_VARIANTS['russian-4p-partners'];
- if(seatCount===4&&format==='individual')return RUSSIAN_CRIBBAGE_VARIANTS['russian-4p-individual'];
- throw new RangeError('Unsupported Russian Cribbage player count or format');
+export function labyrinthCribbageVariant(seatCount,format='partnerships'){
+ if(seatCount===2)return LABYRINTH_CRIBBAGE_VARIANTS['labyrinth-2p'];
+ if(seatCount===3)return LABYRINTH_CRIBBAGE_VARIANTS['labyrinth-3p'];
+ if(seatCount===4&&format==='partnerships')return LABYRINTH_CRIBBAGE_VARIANTS['labyrinth-4p-partners'];
+ if(seatCount===4&&format==='individual')return LABYRINTH_CRIBBAGE_VARIANTS['labyrinth-4p-individual'];
+ throw new RangeError('Unsupported Labyrinth Cribbage player count or format');
 }
-export function russianCribbageShowOrder(seatCount,dealer){
- russianCribbageVariant(seatCount);
+export function labyrinthCribbageShowOrder(seatCount,dealer){
+ labyrinthCribbageVariant(seatCount);
  if(!Number.isInteger(dealer)||dealer<0||dealer>=seatCount)throw new RangeError('Invalid dealer');
  return Object.freeze([...Array.from({length:seatCount},(_,i)=>Object.freeze({
   seat:(dealer+i+1)%seatCount,isCrib:false
@@ -35,8 +35,8 @@ export function russianCribbageShowOrder(seatCount,dealer){
 }
 // Shuffling is deliberately supplied by a separate secure server process.
 // The test/reference deal cannot certify randomness or authorize live play.
-export function russianCribbageDeal(deck,seatCount,dealer,format='partnerships'){
- const v=russianCribbageVariant(seatCount,format);
+export function labyrinthCribbageDeal(deck,seatCount,dealer,format='partnerships'){
+ const v=labyrinthCribbageVariant(seatCount,format);
  validateCards(deck,52);
  if(!Number.isInteger(dealer)||dealer<0||dealer>=seatCount)throw new RangeError('Invalid dealer');
  const hands=Array.from({length:seatCount},()=>[]);
@@ -50,8 +50,8 @@ export function russianCribbageDeal(deck,seatCount,dealer,format='partnerships')
   hands:Object.freeze(hands.map(h=>Object.freeze(h))),
   crib:Object.freeze(crib),stock:Object.freeze(deck.slice(cursor))});
 }
-export function russianCribbageFinishDeal(dealt,discardsBySeat){
- const v=RUSSIAN_CRIBBAGE_VARIANTS[dealt?.variantId];
+export function labyrinthCribbageFinishDeal(dealt,discardsBySeat){
+ const v=LABYRINTH_CRIBBAGE_VARIANTS[dealt?.variantId];
  if(!v||dealt?.seatCount!==v.seatCount||!Number.isInteger(dealt?.dealer)||
   dealt.dealer<0||dealt.dealer>=v.seatCount||
   !Array.isArray(dealt.hands)||dealt.hands.length!==v.seatCount||
@@ -92,7 +92,7 @@ function scoreRuns(all){
  }
  return 0;
 }
-export function russianCribbageScoreShow(hand,starter,{crib=false}={}){
+export function labyrinthCribbageScoreShow(hand,starter,{crib=false}={}){
  validateCards(hand,6);
  if(!validCard(starter)||hand.includes(starter)||typeof crib!=='boolean')
   throw new RangeError('Invalid starter or scoring context');
@@ -114,7 +114,7 @@ export function russianCribbageScoreShow(hand,starter,{crib=false}={}){
  return Object.freeze({fifteens,pairs,runs,flush,nobs,
   total:fifteens+pairs+runs+flush+nobs});
 }
-export function russianCribbagePegPoints(pile){
+export function labyrinthCribbagePegPoints(pile){
  if(!Array.isArray(pile)||pile.length<1||pile.length>24)
   throw new RangeError('Invalid peg sequence');
  validateCards(pile,pile.length);
@@ -139,18 +139,18 @@ export function russianCribbagePegPoints(pile){
 }
 // These primitives allow the future authoritative adapter to apply heels and
 // distinguish an ordinary Go from the final card without double-crediting 31.
-export function russianCribbageHeels(starter){
+export function labyrinthCribbageHeels(starter){
  if(!validCard(starter))throw new RangeError('Invalid starter');
  return rank(starter)===11?2:0;
 }
-export function russianCribbageCanPlay(hand,count){
+export function labyrinthCribbageCanPlay(hand,count){
  if(!Array.isArray(hand)||hand.length>6||!Number.isInteger(count)||
   count<0||count>31)throw new RangeError('Invalid pegging hand or count');
  validateCards(hand,hand.length);
  return hand.some(c=>pips(c)+count<=31);
 }
-export function russianCribbageSequenceEnd(lastSeat,seatCount,count,allHandsExhausted){
- russianCribbageVariant(seatCount);
+export function labyrinthCribbageSequenceEnd(lastSeat,seatCount,count,allHandsExhausted){
+ labyrinthCribbageVariant(seatCount);
  if(!Number.isInteger(lastSeat)||lastSeat<0||lastSeat>=seatCount||
   !Number.isInteger(count)||count<1||count>31||
   typeof allHandsExhausted!=='boolean')
@@ -159,12 +159,12 @@ export function russianCribbageSequenceEnd(lastSeat,seatCount,count,allHandsExha
  if(count===31)return null;
  return Object.freeze({seat:lastSeat,kind:allHandsExhausted?'last-card':'go',points:1});
 }
-export function russianCribbageClassify(score){
+export function labyrinthCribbageClassify(score){
  if(!Number.isSafeInteger(score)||score<0||score>=241)throw new RangeError('Invalid losing score');
  return score<=120?'double-skunk':score<=180?'skunk':'ordinary';
 }
-export function russianCribbageAward(scores,variantId,seat,points){
- const v=RUSSIAN_CRIBBAGE_VARIANTS[variantId];
+export function labyrinthCribbageAward(scores,variantId,seat,points){
+ const v=LABYRINTH_CRIBBAGE_VARIANTS[variantId];
  if(!v||!Array.isArray(scores)||scores.length!==v.seatCount||
    !scores.every(s=>Number.isSafeInteger(s)&&s>=0&&s<241)||
    !Number.isInteger(seat)||seat<0||seat>=v.seatCount||
@@ -178,7 +178,7 @@ export function russianCribbageAward(scores,variantId,seat,points){
  if(winner!==null)for(const other of new Set(v.teams)){
   if(other===team)continue;
   const otherSeat=v.teams.indexOf(other),score=next[otherSeat];
-  losses.push(Object.freeze({team:other,score,classification:russianCribbageClassify(score)}));
+  losses.push(Object.freeze({team:other,score,classification:labyrinthCribbageClassify(score)}));
  }
  return Object.freeze({scores:Object.freeze(next),winningTeam:winner,
   winnerSeat:winner!==null?seat:null,losers:Object.freeze(losses)});

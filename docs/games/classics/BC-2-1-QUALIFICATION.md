@@ -1,13 +1,13 @@
-# BC-2.1 — Russian Cribbage rules and variants: qualification record
+# BC-2.1 — Labyrinth Cribbage rules and variants: qualification record
 
 **Scope:** Versioned player-approved rules and deterministic testable reference functions only. **Not a release qualification for an online match or bot engine.**
 
-**Authoritative rules ID:** `bc-russian-cribbage-241@1.0.0`  
-**Rules manifest:** `BC-2-1-RUSSIAN-CRIBBAGE-VARIANTS.json`  
-**Written rules:** `BC-2-1-RUSSIAN-CRIBBAGE-RULES.md`  
-**Reference implementation:** `bong-goggles/web/core/russian-cribbage-rules.js`  
-**Dedicated tests:** `bong-goggles/web/test/russian-cribbage-rules.test.js`  
-**CI:** `.github/workflows/bc-2-1-russian-cribbage-rules.yml` (runs Node 22, rule unit tests, BC-1.1 standard-rule isolation, syntax and static-security checks).
+**Authoritative rules ID:** `bc-labyrinth-cribbage-241@1.0.0`  
+**Rules manifest:** `BC-2-1-LABYRINTH-CRIBBAGE-VARIANTS.json`  
+**Written rules:** `BC-2-1-LABYRINTH-CRIBBAGE-RULES.md`  
+**Reference implementation:** `bong-goggles/web/core/labyrinth-cribbage-rules.js`  
+**Dedicated tests:** `bong-goggles/web/test/labyrinth-cribbage-rules.test.js`  
+**CI:** `.github/workflows/bc-2-1-labyrinth-cribbage-rules.yml` (runs Node 22, rule unit tests, BC-1.1 standard-rule isolation, syntax and static-security checks).
 
 ## Locked player decisions
 
@@ -31,6 +31,6 @@
 
 ## Safety boundary and remaining BC-2 delivery gates
 
-The existing production Cribbage engine is `cribbage` with four-card hands and 121 points. This BC-2.1 work **does not replace it**, register a public 241-point engine, enable additional Russian room sizes on the live server, or expose playable 241-point controls. For BC-2.2 and later: implement server-authoritative Go adapter and immutable four-player variant selection stored on the room/session; adapt live UI/board for 241 points; integrate bot policy, room selection, reconnect, results and anti-cheat; test migration and replay, and qualify production deployment before enabling Play. BC-1.8 release remains independently governed.
+The existing production Cribbage engine is `cribbage` with four-card hands and 121 points. This BC-2.1 work **does not replace it**, register a public 241-point engine, enable additional Russian room sizes on the live server, or expose playable 241-point controls. The old `russian-cribbage` two-seat room key and `RUSSIAN_CRIBBAGE` protocol enum remain for existing records; an additive database migration permits new canonical room IDs without enabling live matches. For BC-2.2 and later: implement server-authoritative Go adapter and immutable four-player variant selection stored on the room/session; adapt live UI/board for 241 points; integrate bot policy, room selection, reconnect, results and anti-cheat; test migration and replay, and qualify production deployment before enabling Play. BC-1.8 release remains independently governed.
 
 **Verification status:** PR branch contains the source and dedicated CI; only an observed successful exact-head run may be recorded as PASS. A code review or a successful unit test does not qualify the full playable game.

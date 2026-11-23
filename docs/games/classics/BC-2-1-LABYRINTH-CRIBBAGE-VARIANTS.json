@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "gameId": "russian-cribbage",
-  "rulesetId": "bc-russian-cribbage-241",
+  "gameId": "labyrinth-cribbage",
+  "rulesetId": "bc-labyrinth-cribbage-241",
   "rulesetVersion": "1.0.0",
   "scope": "offchain-account-classics-only",
-  "reference": "BC-2-1-RUSSIAN-CRIBBAGE-RULES.md",
+  "reference": "BC-2-1-LABYRINTH-CRIBBAGE-RULES.md",
   "targetScore": 241,
   "deck": {
     "cards": 52,
@@ -12,11 +12,11 @@
     "aces": "low",
     "faceCardValue": 10
   },
-  "defaultVariantId": "russian-2p",
-  "defaultFourPlayerVariantId": "russian-4p-partners",
+  "defaultVariantId": "labyrinth-2p",
+  "defaultFourPlayerVariantId": "labyrinth-4p-partners",
   "variants": [
     {
-      "id": "russian-2p",
+      "id": "labyrinth-2p",
       "displayName": "Two players — individual",
       "seatCount": 2,
       "teamBySeat": [
@@ -31,7 +31,7 @@
       "dealerOwnsCrib": true
     },
     {
-      "id": "russian-3p",
+      "id": "labyrinth-3p",
       "displayName": "Three players — individual",
       "seatCount": 3,
       "teamBySeat": [
@@ -47,7 +47,7 @@
       "dealerOwnsCrib": true
     },
     {
-      "id": "russian-4p-partners",
+      "id": "labyrinth-4p-partners",
       "displayName": "Four players — opposite-seat partnerships (default)",
       "seatCount": 4,
       "teamBySeat": [
@@ -64,7 +64,7 @@
       "dealerOwnsCrib": true
     },
     {
-      "id": "russian-4p-individual",
+      "id": "labyrinth-4p-individual",
       "displayName": "Four players — individual free-for-all",
       "seatCount": 4,
       "teamBySeat": [

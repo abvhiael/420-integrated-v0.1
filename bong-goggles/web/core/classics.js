@@ -14,7 +14,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([
   item('cribbage','Cribbage','2–4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
-  item('russian-cribbage','Russian Cribbage','2–4','registry','BC-2.1: 241 points and six-card hands. Four-player partnerships (default) or individual. Rules specified; live play not yet qualified.'),
+  item('labyrinth-cribbage','Labyrinth Cribbage','2–4','registry','BC-2.1: 241 points and six-card hands. Four-player partnerships (default) or individual. Rules specified; live play not yet qualified.'),
   item('crazy-eights','Crazy Eights','2–4'),
   item('euchre','Euchre','4'),
   item('go-fish','Go Fish','2–4'),
@@ -43,7 +43,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
 export const ALL_CLASSICS=Object.freeze(CLASSIC_COLLECTIONS.flatMap(c=>c.games));
 
 // BC-0.2: fixed 25-game order; deliberately separate from seven-type on-chain enum.
-const ROADMAP_IDS=Object.freeze(["cribbage","russian-cribbage","chess","scrabble","checkers","backgammon","dominoes","crazy-eights","euchre","yahtzee","go-fish","hearts","go","mahjong","spades","500","canasta","tarabish","45s","120s","deux-cents","hola","rook","nines","kaiser"]);
+const ROADMAP_IDS=Object.freeze(["cribbage","labyrinth-cribbage","chess","scrabble","checkers","backgammon","dominoes","crazy-eights","euchre","yahtzee","go-fish","hearts","go","mahjong","spades","500","canasta","tarabish","45s","120s","deux-cents","hola","rook","nines","kaiser"]);
 const BY_ID=new Map(ALL_CLASSICS.map(game=>[game.id,game]));
 if(BY_ID.size!==ALL_CLASSICS.length||ROADMAP_IDS.length!==25||
    new Set(ROADMAP_IDS).size!==25||ROADMAP_IDS.some(id=>!BY_ID.has(id)))
@@ -51,4 +51,5 @@ if(BY_ID.size!==ALL_CLASSICS.length||ROADMAP_IDS.length!==25||
 export const CLASSIC_ROADMAP=Object.freeze(ROADMAP_IDS.map((id,index)=>
  Object.freeze({...BY_ID.get(id),milestone:'BC-'+(index+1),
  collection:index<17?'main':'canadian',href:'/games/'+id})));
-export function classicGameById(id){return typeof id==='string'?BY_ID.get(id)??null:null;}
+// Existing Russian Cribbage deep links resolve to the canonical renamed game.
+export function classicGameById(id){return typeof id==='string'?BY_ID.get(id==='russian-cribbage'?'labyrinth-cribbage':id)??null:null;}

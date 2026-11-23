@@ -10,6 +10,8 @@ func TestBC05RoomSeatLimitsAndTeams(t *testing.T){
    if classicSeatsValid(id,n)!=want{t.Fatalf("invalid seat contract %s: %d",id,n)}
   }
  }
+ if !classicSeatsValid("labyrinth-cribbage",2)||classicSeatsValid("labyrinth-cribbage",4)||
+ !classicSeatsValid("russian-cribbage",2)||classicSeatsValid("russian-cribbage",3){t.Fatal("BC-2.1 room compatibility or premature multiplayer activation")}
  if classicSeatsValid("cross-country-chaos",4)||classicSeatsValid("roulette",2)||classicSeatsValid("cribbage",5){t.Fatal("unsupported/off-chain or over-cap title")}
  for _,id:=range []string{"kaiser","tarabish","euchre","spades","rook","deux-cents"}{
   if classicTeam(id,4,0)!=0||classicTeam(id,4,1)!=1||classicTeam(id,4,2)!=0||classicTeam(id,4,3)!=1{t.Fatal("partner teams wrong",id)}

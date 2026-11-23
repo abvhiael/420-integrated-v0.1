@@ -66,7 +66,7 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
  const good={schema:'bc-0-12-release-evidence-v1',games:{cribbage:proof()}};
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,1);
  released[1].status='playable';
- good.games['russian-cribbage']={...proof(),gameId:'russian-cribbage'};
+ good.games['labyrinth-cribbage']={...proof(),gameId:'labyrinth-cribbage'};
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,2);
  released[3].status='playable';
  good.games.scrabble={...proof(),gameId:'scrabble'};

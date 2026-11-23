@@ -5,7 +5,7 @@ import {escapeHtml as esc} from './design-system.js';
 import {renderClassicRoomLive} from './classic-communications-ui.js';
 
 export const ROOM_LIMITS=Object.freeze({
-cribbage:[2,4],'russian-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
+cribbage:[2,4],'labyrinth-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
 checkers:[2,2],backgammon:[2,2],dominoes:[2,4],'crazy-eights':[2,4],
 euchre:[4,4],yahtzee:[2,4],'go-fish':[2,4],hearts:[3,4],
 go:[2,2],mahjong:[4,4],spades:[4,4],'500':[3,4],
@@ -14,13 +14,14 @@ canasta:[2,4],tarabish:[4,4],'45s':[2,4],'120s':[4,4],
 });
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const id=x=>typeof x==='string'&&UUID.test(x);
-const title=game=>CLASSIC_ROADMAP.find(g=>g.id===game)?.title??'Unknown game';
+const title=game=>CLASSIC_ROADMAP.find(g=>g.id===(game==='russian-cribbage'?'labyrinth-cribbage':game))?.title??'Unknown game';
 const limited=x=>typeof x==='string'&&x.length<=80&&x.trim()===x;
 const types=new Set(['empty','invited','human','bot']);
 const modes=new Set(['open','ready','in_game','completed','cancelled']);
 const difficulties=new Set(['easy','medium','hard']);
-const validCount=(game,n)=>Object.hasOwn(ROOM_LIMITS,game)&&Number.isSafeInteger(n)&&
-n>=ROOM_LIMITS[game][0]&&n<=ROOM_LIMITS[game][1];
+const validCount=(game,n)=>Number.isSafeInteger(n)&&
+(game==='russian-cribbage'?n===2:Object.hasOwn(ROOM_LIMITS,game)&&
+ n>=ROOM_LIMITS[game][0]&&n<=ROOM_LIMITS[game][1]);
 function normalizedRoom(r,detail=false){
 if(!r||typeof r!=='object'||!id(r.id)||!id(r.host)||!validCount(r.gameId,r.seatCount)||
 !['public','private'].includes(r.visibility)||!modes.has(r.status)||

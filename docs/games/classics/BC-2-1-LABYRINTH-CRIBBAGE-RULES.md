@@ -1,9 +1,10 @@
-# BC-2.1 — Russian Cribbage: locked rules and variant specification
+# BC-2.1 — Labyrinth Cribbage: locked rules and variant specification
 
-**Rules identity:** `bc-russian-cribbage-241@1.0.0`  
-**Game ID:** `russian-cribbage` (separate from `cribbage` and BG-15 wallet/on-chain games)  
-**Authority:** Player-approved BongGoggles house rules, 22 November 2026. This named ruleset is *not* represented as an independently verified universal Russian Cribbage standard.  
-**Machine manifest:** `BC-2-1-RUSSIAN-CRIBBAGE-VARIANTS.json` (SHA-256 must be pinned by the eventual server adapter).  
+**Rules identity:** `bc-labyrinth-cribbage-241@1.0.0`  
+**Game ID:** `labyrinth-cribbage` (legacy `russian-cribbage` room links remain compatible; distinct from standard `cribbage`)  
+**Authority:** Player-approved BongGoggles house rules, 22 November 2026. These player-approved BongGoggles house rules define Labyrinth Cribbage; no universal cribbage standard is claimed.  
+**Machine manifest:** `BC-2-1-LABYRINTH-CRIBBAGE-VARIANTS.json` (SHA-256 must be pinned by the eventual server adapter).  
+**Compatibility:** Existing `RUSSIAN_CRIBBAGE` protocol enum and `russian-cribbage-standard` legacy engine hashes remain unchanged.  
 **Release boundary:** BC-2.1 specifies the rules; server-authoritative matches, AI, browser UI and production rollout require subsequent BC-2 implementation/qualification gates. A registry entry or this manifest alone MUST NOT enable Play.
 
 ## Game and objective

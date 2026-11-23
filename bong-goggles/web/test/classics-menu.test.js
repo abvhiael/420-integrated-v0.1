@@ -6,7 +6,7 @@ import {renderGameCatalogue,renderClassicGamePage,renderGamesHub,renderGamesRout
 import {renderClassicsCatalogue} from '../core/classics-ui.js';
 import {renderApplicationShell,navigateWithoutReload} from '../core/app-shell.js';
 
-const main=['Cribbage','Russian Cribbage','Chess','Scrabble','Checkers','Backgammon','Dominoes','Crazy Eights','Euchre','Yahtzee','Go Fish','Hearts','Go','Four-Player Mahjong','Spades','500','Canasta'];
+const main=['Cribbage','Labyrinth Cribbage','Chess','Scrabble','Checkers','Backgammon','Dominoes','Crazy Eights','Euchre','Yahtzee','Go Fish','Hearts','Go','Four-Player Mahjong','Spades','500','Canasta'];
 const canadian=['Tarabish','Forty-Fives (45s)','120s','Deux Cents (200)','Hola','Rook','Nines','Kaiser'];
 
 test('BC-0.2 maintains the exact 25-game order, category and public deep links',()=>{
@@ -124,4 +124,12 @@ test('BC-0.2 wallet-based sessions remain separately protected and do not create
  const user='0x'+'1'.repeat(40);
  assert.match(renderGamesRoute({walletView:wallet,viewer:user}),/Games service unavailable/);
  assert.match(renderGamesRoute({walletView:wallet,viewer:user}),/Main Classics/);
+});
+
+test('BC-2.1 canonical Labyrinth title, URL and legacy deep links',()=>{
+ assert.equal(classicGameById('labyrinth-cribbage')?.title,'Labyrinth Cribbage');
+ assert.equal(resolveRoute('/games/labyrinth-cribbage').gameId,'labyrinth-cribbage');
+ assert.equal(resolveRoute('/games/russian-cribbage').gameId,'labyrinth-cribbage');
+ assert.equal(classicGameById('russian-cribbage')?.title,'Labyrinth Cribbage');
+ assert.equal(CLASSIC_ROADMAP[1].href,'/games/labyrinth-cribbage');
 });

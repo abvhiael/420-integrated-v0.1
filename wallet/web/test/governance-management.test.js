@@ -368,3 +368,27 @@ test('GOV-REC-5 changed proposal state and action commitment after gas estimate 
     assert.equal(p.sent.length,0,'no vote may broadcast on '+mutation+' drift');
   }
 });
+
+
+test('previously authorized secondary account cannot sign or confirm after the active Wallet account switches',async()=>{
+  const BOB='0x3333333333333333333333333333333333333333';
+  const provider=new FakeProvider({accounts:[BOB,ALICE]});
+  const c=client(provider);
+  await assert.rejects(c.verifySession(),/no longer authorized or active/);
+  await assert.rejects(c.sendVote({proposalId:PROPOSAL,house:0,support:1}),/no longer authorized or active/);
+  assert.equal(provider.sent.length,0,'secondary previously authorized EOA cannot submit a ballot');
+  await assert.rejects(c.confirmVote({txHash:TX,nonce:5n},{attempts:1,delayMs:0}),/account changed/);
+});
+
+test('revoked active signer after nonce retrieval prevents Governance wallet approval',async()=>{
+  const BOB='0x3333333333333333333333333333333333333333';
+  const provider=new FakeProvider();
+  const original=provider.request.bind(provider);
+  provider.request=async(method,params=[])=>{
+    const result=await original(method,params);
+    if(method==='eth_getTransactionCount')provider.accounts=[BOB,ALICE];
+    return result;
+  };
+  await assert.rejects(client(provider).sendVote({proposalId:PROPOSAL,house:0,support:1}),/no longer authorized or active/);
+  assert.equal(provider.sent.length,0,'revoked account reached eth_sendTransaction');
+});

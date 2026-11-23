@@ -19,12 +19,16 @@ import "./KenoV1420.sol";
 import "./KenoPaytableAuthority420.sol";
 import "./PlinkoV1420.sol";
 import "./PlinkoPaytableAuthority420.sol";
+import "./PlinkoV2420.sol";
+import "./PlinkoPaytableAuthorityV2420.sol";
 import "./ReferenceSlotV1420.sol";
 import "./ReferenceSlotTermsAuthority420.sol";
 import "./RouletteV1420.sol";
 import "./BlackjackV1420.sol";
 import "./MinesV1420.sol";
 import "./CrashV1420.sol";
+import "./VideoPokerV1420.sol";
+import "./VideoPokerJacksOrBetter420.sol";
 
 contract WagerRouter420 is I420System {
     struct AcceptanceRequest {
@@ -56,6 +60,8 @@ contract WagerRouter420 is I420System {
     bytes32 private constant PLINKO_GAME_ID = keccak256("420BET.GAME.PLINKO");
     mapping(bytes32 => address) public plinkoAuthority;
     mapping(bytes32 => address) public plinkoResolver;
+    mapping(bytes32 => address) public plinkoV2Authority;
+    mapping(bytes32 => address) public plinkoV2Resolver;
     bytes32 private constant SLOT_GAME_ID = keccak256("420BET.GAME.SLOT");
     mapping(bytes32 => address) public slotTermsAuthority;
     mapping(bytes32 => address) public slotResolver;
@@ -67,6 +73,8 @@ contract WagerRouter420 is I420System {
     mapping(bytes32 => address) public minesResolver;
     bytes32 private constant CRASH_GAME_ID = keccak256("420BET.GAME.CRASH");
     mapping(bytes32 => address) public crashResolver;
+    bytes32 private constant VIDEO_POKER_GAME_ID = keccak256("420BET.GAME.VIDEO_POKER");
+    mapping(bytes32 => address) public videoPokerModule;
 
     mapping(address => uint256) public nextNonce;
     uint256 private _entered;
@@ -94,6 +102,8 @@ contract WagerRouter420 is I420System {
     error MinesResolverAlreadyBound();
     error CrashCanonicalWagerRequired();
     error CrashResolverAlreadyBound();
+    error VideoPokerCanonicalWagerRequired();
+    error VideoPokerModuleAlreadyBound();
     error Reentrancy();
     error EmergencyAlreadyBound();
     error EmergencyHalted(BetTypes420.EmergencyDomain domain, bytes32 subject);
@@ -198,7 +208,7 @@ contract WagerRouter420 is I420System {
     function bindPlinkoPaytable(bytes32 gameVersionId, address resolver, address verifier) external {
         if (gameVersionId == bytes32(0) || resolver == address(0) || verifier == address(0))
             revert InvalidRequest();
-        if (plinkoAuthority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
+        if (plinkoAuthority[gameVersionId] != address(0) || plinkoV2Authority[gameVersionId] != address(0)) revert PlinkoAuthorityAlreadyBound();
         BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
         if (g.gameId != PLINKO_GAME_ID ||
             modules.getModule(g.moduleVersionId).implementation != resolver ||
@@ -224,6 +234,66 @@ contract WagerRouter420 is I420System {
         if (verifier == address(0)) revert PlinkoAuthorityRequired();
         PlinkoPaytableAuthority420(verifier).verify(request.stake, request.maxGrossPayout,
             request.paramsHash, params, plinkoResolver[request.gameVersionId]);
+        return _placeWager(request);
+    }
+
+    /// @notice Separately authorized version-2 Plinko schedule and resolver.
+    function bindPlinkoV2Paytable(bytes32 gameVersionId, address resolver, address verifier) external {
+        if (gameVersionId == bytes32(0) || resolver == address(0) || verifier == address(0)) revert InvalidRequest();
+        if (plinkoAuthority[gameVersionId] != address(0) || plinkoV2Authority[gameVersionId] != address(0))
+            revert PlinkoAuthorityAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(gameVersionId);
+        PlinkoV2420 p = PlinkoV2420(resolver);
+        PlinkoPaytableAuthorityV2420 a = PlinkoPaytableAuthorityV2420(verifier);
+        if (g.gameId != PLINKO_GAME_ID || modules.getModule(g.moduleVersionId).implementation != resolver ||
+            p.gameId() != PLINKO_GAME_ID || p.gameVersionId() != gameVersionId ||
+            p.rulesetId() != g.rulesetId || address(p.wagerRegistry()) != address(betRegistry) ||
+            a.gameVersionId() != gameVersionId || a.rulesetId() != g.rulesetId) revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, gameVersionId), 0)) revert Unauthorized();
+        plinkoV2Authority[gameVersionId] = verifier;
+        plinkoV2Resolver[gameVersionId] = resolver;
+    }
+
+    function placePlinkoV2Wager(AcceptanceRequest calldata request, PlinkoV2420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != PLINKO_GAME_ID) revert InvalidRequest();
+        address verifier = plinkoV2Authority[request.gameVersionId];
+        if (verifier == address(0)) revert PlinkoAuthorityRequired();
+        PlinkoPaytableAuthorityV2420(verifier).verify(
+            request.stake, request.maxGrossPayout, request.paramsHash,
+            params, plinkoV2Resolver[request.gameVersionId]);
+        return _placeWager(request);
+    }
+
+    /// @notice Version-bound Video Poker acceptance before escrow or risk mutation.
+    function bindVideoPokerModule(bytes32 versionId, address module) external {
+        if (versionId == bytes32(0) || module == address(0)) revert InvalidRequest();
+        if (videoPokerModule[versionId] != address(0)) revert VideoPokerModuleAlreadyBound();
+        BetGameRegistry420.GameVersion memory g = games.getGame(versionId);
+        VideoPokerV1420 poker = VideoPokerV1420(module);
+        if (g.gameId != VIDEO_POKER_GAME_ID || modules.getModule(g.moduleVersionId).implementation != module ||
+            poker.gameId() != VIDEO_POKER_GAME_ID || poker.gameVersionId() != versionId ||
+            poker.rulesetId() != g.rulesetId || address(poker.wagerRegistry()) != address(betRegistry))
+            revert InvalidRequest();
+        if (!authorization.isAuthorized(msg.sender, BetIds420.ACTION_GAME_REGISTER,
+            authorization.scopeForGame(g.gameId, versionId), 0)) revert Unauthorized();
+        videoPokerModule[versionId] = module;
+    }
+
+    function placeVideoPokerWager(AcceptanceRequest calldata request, VideoPokerV1420.Params calldata params)
+        external payable nonReentrant returns (bytes32 wagerId, uint256 reservedLiability)
+    {
+        BetGameRegistry420.GameVersion memory g = games.getGame(request.gameVersionId);
+        if (g.gameId != VIDEO_POKER_GAME_ID) revert InvalidRequest();
+        address module = videoPokerModule[request.gameVersionId];
+        if (module == address(0)) revert VideoPokerCanonicalWagerRequired();
+        if (params.paytableId != VideoPokerJacksOrBetter420.PAYTABLE_ID ||
+            VideoPokerV1420(module).hashParams(params) != request.paramsHash ||
+            VideoPokerJacksOrBetter420.maximumGross(request.stake, params.credits) != request.maxGrossPayout)
+            revert InvalidRequest();
         return _placeWager(request);
     }
 
@@ -395,6 +465,7 @@ contract WagerRouter420 is I420System {
         if (gameId == BLACKJACK_GAME_ID) revert BlackjackCanonicalWagerRequired();
         if (gameId == MINES_GAME_ID) revert MinesCanonicalWagerRequired();
         if (gameId == CRASH_GAME_ID) revert CrashCanonicalWagerRequired();
+        if (gameId == VIDEO_POKER_GAME_ID) revert VideoPokerCanonicalWagerRequired();
         return _placeWager(request);
     }
 

@@ -10,6 +10,10 @@
 
 Use one shuffled standard 52-card deck, no jokers; Aces low, J/Q/K count 10 when making fifteen or pegging. Win by being the **first player or partnership to reach or exceed 241 points**. An award can win immediately during heels, pegging or hand/crib counting. Stop at the winning award, do not award further points, finish a round, count another hand or declare a tie. Scores are individual for 2 and 3 players, or four-player free-for-all. Opposite-seat partners (seats 0+2 and seats 1+3) use **one shared team score** in four-player partnerships.
 
+## 241-point pegboard
+
+The playing board must track **240 scoring pegholes per active run**, plus the **241st winning hole** and parked starting pegs at zero. A match must never reuse the 121-point board's position/finish calculation. A four-player partnership game uses two shared scores; four-player free-for-all must display four **independent** scores, even where the approved physical board artwork provides only two parallel runs (supplementary virtual indicators may be needed). The physical labyrinth design and its peghole geometry must be qualified separately before launch, without invented holes or substituted artwork.
+
 ## Deal, crib and four-player options
 
 | Players | Format | Initial deal per seat | Discards per seat | Directly dealt to crib | Retained per seat | Crib before starter |

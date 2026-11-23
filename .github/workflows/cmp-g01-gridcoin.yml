@@ -1,0 +1,22 @@
+name: CMP G-01 Gridcoin Feasibility
+on:
+  pull_request:
+    paths:
+      - 'compute/ingestion/**'
+      - '.github/workflows/cmp-g01-gridcoin.yml'
+  workflow_dispatch:
+jobs:
+  feasibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Confirm exact SHA
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: G-01 feasibility gate and retained ingestion suite
+        working-directory: compute/ingestion
+        run: npm run qualify

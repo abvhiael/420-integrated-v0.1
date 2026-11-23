@@ -3,6 +3,22 @@
 name: 420 Integrated Qualification
 
 on:
+  # CMP-2.8 is a Level 3 global qualification owner. Keep its evidence and
+  # configuration changes wired to the actual global workflow, not just
+  # referenced by a static verifier.
+  pull_request:
+    paths:
+      - 'contracts/config/compute-market/cmp-2.8-phase-closeout.json'
+      - 'docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-2-8-phase-closeout.py'
+      - '.github/workflows/qualification.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'contracts/config/compute-market/cmp-2.8-phase-closeout.json'
+      - 'docs/compute-market/CMP-2.8-PHASE-CLOSEOUT.md'
+      - 'scripts/verify-cmp-2-8-phase-closeout.py'
+      - '.github/workflows/qualification.yml'
   workflow_dispatch:
 
 concurrency:

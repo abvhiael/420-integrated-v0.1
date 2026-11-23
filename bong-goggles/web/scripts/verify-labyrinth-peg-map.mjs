@@ -5,6 +5,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {LABYRINTH_HOLE_CENTERS as holes,LABYRINTH_BOARD_SHA256} from '../core/labyrinth-hole-survey.js';
+import {LABYRINTH_PRINTED_GUIDES} from '../core/labyrinth-printed-guides.js';
 const root=resolve(import.meta.dirname,'..');
 const fail=msg=>{throw Error('BC-2.4 original board peg-map qualification: '+msg)};
 const art=resolve(root,'assets/games/labyrinth-cribbage/labyrinth.png');
@@ -44,10 +45,14 @@ if(!atlas.guideAnchors||typeof atlas.guideAnchors!=='object'||
  Object.keys(atlas.guideAnchors).length!==targets.length)fail('printed guide anchors 10–320 incomplete');
 for(const n of targets){
  const guide=atlas.guideAnchors[String(n)];
+ const print=LABYRINTH_PRINTED_GUIDES[n];
+ if(!print)fail('independent original-art printed numeral '+n+' is not surveyed');
  if(!Array.isArray(guide)||guide.length!==2||
   !guide.every(p=>p&&Number.isInteger(p.x)&&p.x>=0&&p.x<1254&&
    Number.isInteger(p.y)&&p.y>=0&&p.y<1254))
   fail('printed numeric guide '+n+' missing mapped image location');
+ if(guide.some(p=>Math.hypot(p.x-print[0],p.y-print[1])>90))
+  fail('guide '+n+' does not match independently surveyed printed location');
  for(const track of atlas.tracks){
   const hole=holes[track[n]],distance=Math.hypot(hole.x-guide[0].x,hole.y-guide[0].y);
   const other=Math.hypot(hole.x-guide[1].x,hole.y-guide[1].y);

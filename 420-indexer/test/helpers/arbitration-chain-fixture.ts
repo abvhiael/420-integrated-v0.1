@@ -66,7 +66,7 @@ export class ArbitrationChainFixture420 implements ChainSource420{
  head=7n;fork=false;duplicate=false;interruptAt:number|null=null;
  wrongEmitter=false;wrongVersion=false;wrongReceipt=false;missingLogsAt:number|null=null;
  wrongGenesis=false;wrongRegistryCode=false;wrongBinding=false;rpcDisagree=false;
- finalized:bigint|null=null;
+ finalizedBlockNumber?:()=>Promise<bigint>;
  readonly events=new Map<string,Interface>(ARB_MANIFEST_420.contracts.flatMap(c=>
   c.events.map(e=>[e.name,new Interface([{type:'event',name:e.name,inputs:e.inputs}]) ])));
  chainId():Promise<bigint>{return Promise.resolve(420n);}

@@ -25,6 +25,7 @@ type Handler struct{
  Sessions *ClassicSessions
  ClassicCommunicationsEnabled bool
  classicMatchSocialEnabled bool
+ classicLabyrinthMatchEnabled bool
  Chaos *ChaosProxy
  XP *Contributions
  MonetizationEnabled bool // AUTH-11: disabled until explicit confidential 420ID opt-in backend
@@ -82,6 +83,19 @@ func (h *Handler) EnableClassicMatchSocial(ctx context.Context) error {
  if _,e:=h.Sessions.rule("cribbage","","");e!=nil{return e}
  if e:=h.Store.ReadyClassicMatchRequests(ctx);e!=nil{return e}
  h.classicMatchSocialEnabled=true
+ return nil
+}
+// BC-2.5 enables rematch consent only for a qualified Labyrinth ruleset.
+// Standard Cribbage challenge/history features remain separately opted in.
+func (h *Handler) EnableClassicLabyrinthMatchSocial(ctx context.Context) error {
+ if h==nil||h.Store==nil||h.Sessions==nil||h.Rooms==nil||
+   h.Sessions.Rooms!=h.Rooms||h.Sessions.Store!=h.Store{return ErrInvalid}
+ rule,e:=h.Sessions.rule("labyrinth-cribbage","","")
+ if e!=nil{return e}
+ version,hash:=rule.Identity()
+ if version!="v2.0"||hash!="9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791"{return ErrUnavailable}
+ if e=h.Store.ReadyClassicMatchRequests(ctx);e!=nil{return e}
+ h.classicLabyrinthMatchEnabled=true
  return nil
 }
 func (h *Handler) EnableXP(x *Contributions)error{

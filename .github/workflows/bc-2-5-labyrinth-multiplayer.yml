@@ -1,0 +1,77 @@
+name: BC-2.5 Labyrinth Authenticated Human Multiplayer
+on:
+  pull_request:
+    paths:
+      - 'services/bong-goggles-account-social/classic_match_social.go'
+      - 'services/bong-goggles-account-social/classic_sessions_http.go'
+      - 'services/bong-goggles-account-social/http.go'
+      - 'cmd/bong-goggles-social/labyrinth_activation.go'
+      - 'cmd/bong-goggles-social/labyrinth_activation_test.go'
+      - 'cmd/bong-goggles-social/main.go'
+      - 'services/bong-goggles-account-social/classic_labyrinth_multiplayer_integration_test.go'
+      - 'bong-goggles/web/core/labyrinth-session.js'
+      - 'bong-goggles/web/core/labyrinth-route-runtime.js'
+      - 'bong-goggles/web/core/labyrinth-cribbage-ui.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/test/labyrinth-human-multiplayer.test.js'
+      - 'docs/games/classics/BC-2-5-QUALIFICATION.md'
+      - '.github/workflows/bc-2-5-labyrinth-multiplayer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-human-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact source, signed session terminal and rematch controls
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          node --check bong-goggles/web/core/labyrinth-session.js
+          node --check bong-goggles/web/core/labyrinth-route-runtime.js
+          node --check bong-goggles/web/core/labyrinth-cribbage-ui.js
+          node --test bong-goggles/web/test/labyrinth-human-multiplayer.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-frontend.test.js
+  two-account-durable-consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: account420_test
+          POSTGRES_USER: account420_test
+          POSTGRES_PASSWORD: local_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U account420_test -d account420_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      ACCOUNT420_TEST_DSN: postgres://account420_test:local_test_only@127.0.0.1:5432/account420_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Exact source, 420ID two-account rematch, consent, replay and legacy Cribbage parity
+        env:
+          EXPECTED: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          go test -race -count=1 -tags account420_integration -timeout=15m -run '^TestBC25|^TestBC16AuthenticatedChallengeHistoryAndRematch$' -v ./services/bong-goggles-account-social
+          go test -race -count=1 -run '^(TestBC25OperatorActivationPreservesCribbageAndFailsClosed|TestBC15CribbageOperatorActivationIsIndependentAndFailClosed)
+          go vet ./services/bong-goggles-account-social ./cmd/bong-goggles-social
+ ./cmd/bong-goggles-social
+          go vet ./services/bong-goggles-account-social ./cmd/bong-goggles-social

@@ -45,6 +45,27 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
    onSelection:x=>controller.select(x),
    onMove:m=>{void controller.act(m).catch(()=>{});}
   });
+  for(const button of root.querySelectorAll('[data-lab-lifecycle]')){
+   button.addEventListener('click',()=>{
+    const action=button.dataset.labLifecycle;
+    if(action!=='resign'||controller.state.submitting)return;
+    button.disabled=true;
+    void controller.lifecycle(action).catch(()=>{button.disabled=false;});
+   });
+  }
+  for(const button of root.querySelectorAll('[data-lab-rematch]')){
+   button.addEventListener('click',()=>{
+    if(controller.state.submitting)return;
+    button.disabled=true;
+    void controller.rematch().then(roomId=>{
+     if(!roomId)return;
+     windowObject.history.pushState({},'','/games/rooms/'+encodeURIComponent(roomId));
+     controller.invalidate();
+     onChange();
+     windowObject.dispatchEvent(new Event('popstate'));
+    }).catch(()=>{button.disabled=false;});
+   });
+  }
   const view=verifyLabyrinthProjection(controller.state.view);
   if(view&&pegMap){
    const teams=labyrinthCribbageVariant(view.seatCount,

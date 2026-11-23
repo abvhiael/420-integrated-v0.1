@@ -51,7 +51,15 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   writeJSON(w,200,map[string]any{"session":state,"onChain":false,"wager":false,"rewards":false});return
  }
  if len(parts)==2&&parts[1]=="rematch"&&r.Method=="POST"{
-  if !h.classicMatchSocialEnabled{deny(w,404);return}
+  if !h.classicMatchSocialEnabled&&!h.classicLabyrinthMatchEnabled{deny(w,404);return}
+  // Enforce consent-mode ownership against the *authenticated and verified*
+  // source session, not a browser-supplied game ID. A Labyrinth-only opt-in
+  // never activates standard Cribbage challenges or rematches.
+  source,e:=h.Sessions.Get(ctx,viewer,id)
+  if e!=nil{classicRoomError(w,e);return}
+  if source.GameID=="cribbage"&&!h.classicMatchSocialEnabled||
+     source.GameID=="labyrinth-cribbage"&&!h.classicLabyrinthMatchEnabled||
+     source.GameID!="cribbage"&&source.GameID!="labyrinth-cribbage"{deny(w,404);return}
   var req struct{RequestID string `json:"requestId"`}
   if strictJSON(r,&req)!=nil{deny(w,400);return}
   room,e:=h.Sessions.Rematch(ctx,viewer,id,req.RequestID)

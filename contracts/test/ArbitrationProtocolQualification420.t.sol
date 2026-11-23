@@ -8,11 +8,19 @@ import "../src/arbitration/ArbitrationRulingRegistry420.sol";
 import "../src/arbitration/ArbitrationRouter420.sol";
 
 interface VmArbPre02 {
-    function prank(address) external;
-    function warp(uint256) external;
-    function expectRevert(bytes4) external;
+    function prank(
+        address
+    ) external;
+    function warp(
+        uint256
+    ) external;
+    function expectRevert(
+        bytes4
+    ) external;
     function expectRevert() external;
-    function assume(bool) external;
+    function assume(
+        bool
+    ) external;
 }
 
 contract ArbitrationProtocolQualification420Test {
@@ -38,13 +46,27 @@ contract ArbitrationProtocolQualification420Test {
         router = new ArbitrationRouter420(address(policies), address(cases), address(rulings));
     }
 
-    function _open(uint256 nonce) internal returns (bytes32 id) {
+    function _open(
+        uint256 nonce
+    ) internal returns (bytes32 id) {
         vm.prank(CLAIMANT);
-        id = cases.openCase(DOMAIN, RESPONDENT, ORIGIN, bytes32(nonce + 1), keccak256(abi.encode(nonce)), keccak256(abi.encode("remedy", nonce)));
+        id = cases.openCase(
+            DOMAIN,
+            RESPONDENT,
+            ORIGIN,
+            bytes32(nonce + 1),
+            keccak256(abi.encode(nonce)),
+            keccak256(abi.encode("remedy", nonce))
+        );
     }
 
-    function _rule(bytes32 id, uint32 outcome) internal {
-        rulings.submitRuling(id, outcome, keccak256(abi.encode("ruling", outcome)), keccak256(abi.encode("remedy", outcome)), bytes32(0));
+    function _rule(
+        bytes32 id,
+        uint32 outcome
+    ) internal {
+        rulings.submitRuling(
+            id, outcome, keccak256(abi.encode("ruling", outcome)), keccak256(abi.encode("remedy", outcome)), bytes32(0)
+        );
     }
 
     function testPolicyStartsInactiveAndRejectsUnknown() public {
@@ -53,7 +75,9 @@ contract ArbitrationProtocolQualification420Test {
         policies.setPolicy(bytes32(uint256(9)), address(this), address(0), 1, 1, 0, false);
         vm.prank(CLAIMANT);
         vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
-        cases.openCase(bytes32(uint256(9)), RESPONDENT, ORIGIN, bytes32(uint256(1)), bytes32(uint256(2)), bytes32(uint256(3)));
+        cases.openCase(
+            bytes32(uint256(9)), RESPONDENT, ORIGIN, bytes32(uint256(1)), bytes32(uint256(2)), bytes32(uint256(3))
+        );
     }
 
     function testPolicyRejectsInvalidBoundaries() public {
@@ -272,10 +296,16 @@ contract ArbitrationProtocolQualification420Test {
         rulings.getRuling(id, 0);
     }
 
-    function testFuzzCaseNonceAndSnapshot(uint64 origin, uint64 claim, uint64 remedy) public {
+    function testFuzzCaseNonceAndSnapshot(
+        uint64 origin,
+        uint64 claim,
+        uint64 remedy
+    ) public {
         vm.assume(origin != 0 && claim != 0 && remedy != 0);
         vm.prank(CLAIMANT);
-        bytes32 id = cases.openCase(DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(origin)), bytes32(uint256(claim)), bytes32(uint256(remedy)));
+        bytes32 id = cases.openCase(
+            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(origin)), bytes32(uint256(claim)), bytes32(uint256(remedy))
+        );
         ArbitrationCaseRegistry420.CaseRecord memory c = router.getCase(id);
         require(c.originObjectId == bytes32(uint256(origin)), "fuzz origin");
         require(c.claimHash == bytes32(uint256(claim)), "fuzz claim");
@@ -283,7 +313,11 @@ contract ArbitrationProtocolQualification420Test {
         require(c.resolver == address(this) && c.maxAppeals == 3, "fuzz snapshot");
     }
 
-    function testFuzzPolicyWindows(uint32 evidence, uint32 appealWindow, uint8 maximum) public {
+    function testFuzzPolicyWindows(
+        uint32 evidence,
+        uint32 appealWindow,
+        uint8 maximum
+    ) public {
         vm.assume(evidence > 0 && appealWindow > 0 && maximum <= 3);
         policies.setPolicy(DOMAIN, address(this), APPEAL, evidence, appealWindow, maximum, true);
         bytes32 id = _open(9);

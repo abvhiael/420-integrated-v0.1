@@ -100,10 +100,11 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
  seedBytes,e:=hex.DecodeString(seedText)
  if e!=nil||len(seedBytes)!=32{return ErrUnavailable}
  var seed [32]byte;copy(seed[:],seedBytes)
- original,e:=adapter.initial(seed,rec.SeatCount)
- if e!=nil{return ErrUnavailable}
- // PostgreSQL jsonb canonicalizes nested JSON key ordering.
+ // PostgreSQL jsonb canonicalizes nested JSON key ordering. The immutable
+ // initial frame also pins any selected variant for deterministic replay.
  initialFrame,e:=adapter.decode(initial);if e!=nil{return ErrUnavailable}
+ original,e:=adapter.initialConfigured(seed,rec.SeatCount,initialFrame.Variant)
+ if e!=nil{return ErrUnavailable}
  canonicalInitial,e:=adapter.encode(initialFrame)
  if e!=nil||RuleHash(canonicalInitial)!=initialHash||!bytes.Equal(original,canonicalInitial){return ErrUnavailable}
  rows,e:=tx.QueryContext(ctx,`SELECT m.sequence,m.actor_seat,m.action,m.before_hash,m.after_hash,e.kind,e.actor_seat
@@ -148,7 +149,7 @@ func (s *ClassicSessions) verifyRulesTx(ctx context.Context,tx *sql.Tx,rec class
   }
  }
  if !usedPrefix{
-  replay,e=adapter.Replay(seed,rec.SeatCount,trace)
+  replay,e=adapter.ReplayConfigured(seed,rec.SeatCount,initialFrame.Variant,trace)
   if e!=nil{return ErrUnavailable}
  }
  stored,e:=adapter.decode(rec.State)

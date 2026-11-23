@@ -4,6 +4,10 @@ import {LABYRINTH_HOLE_CENTERS,LABYRINTH_HOLE_COUNT,LABYRINTH_BOARD_SHA256} from
 import {LABYRINTH_PRINTED_GUIDES} from './labyrinth-printed-guides.js';
 
 const integer=(v,min,max)=>Number.isInteger(v)&&v>=min&&v<=max;
+const segmentsCross=(a,b,c,d)=>{
+ const orient=(u,v,w)=>(v.x-u.x)*(w.y-u.y)-(v.y-u.y)*(w.x-u.x);
+ return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0;
+};
 export function validateLabyrinthPegAtlas(atlas){
  if(!atlas||typeof atlas!=='object'||Array.isArray(atlas)||
     atlas.schemaVersion!==1||atlas.scoreTarget!==325||
@@ -25,6 +29,19 @@ export function validateLabyrinthPegAtlas(atlas){
   }
  }
  if(used.size!==LABYRINTH_HOLE_COUNT)return false;
+ // Neither lane may self-intersect or cross the other through an inner turn.
+ for(let lane=0;lane<2;lane++){
+  const path=atlas.tracks[lane],other=atlas.tracks[1-lane];
+  for(let i=0;i<325;i++){
+   const a=LABYRINTH_HOLE_CENTERS[path[i]],b=LABYRINTH_HOLE_CENTERS[path[i+1]];
+   for(let j=i+2;j<325;j++)
+    if(segmentsCross(a,b,LABYRINTH_HOLE_CENTERS[path[j]],LABYRINTH_HOLE_CENTERS[path[j+1]]))
+     return false;
+   if(lane===0)for(let j=0;j<325;j++)
+    if(segmentsCross(a,b,LABYRINTH_HOLE_CENTERS[other[j]],LABYRINTH_HOLE_CENTERS[other[j+1]]))
+     return false;
+  }
+ }
  if(!atlas.guideAnchors||typeof atlas.guideAnchors!=='object'||
     Object.keys(atlas.guideAnchors).length!==32)return false;
  for(let score=10;score<=320;score+=10){
@@ -36,9 +53,19 @@ export function validateLabyrinthPegAtlas(atlas){
    if(!anchor||!integer(anchor.x,0,1253)||!integer(anchor.y,0,1253)||
       Math.hypot(anchor.x-printed[0],anchor.y-printed[1])>90)return false;
   }
+  // Printed labels sit alongside rails, commonly 1–4 holes after a decade.
+  // Require the actual score segment and an independently observed nearby hole.
   for(const track of atlas.tracks){
    const p=LABYRINTH_HOLE_CENTERS[track[score]];
-   if(Math.min(...anchors.map(a=>Math.hypot(p.x-a.x,p.y-a.y)))>70)return false;
+   if(Math.hypot(p.x-printed[0],p.y-printed[1])>135)return false;
+   let closest=Infinity;
+   for(let offset=-4;offset<=4;offset++){
+    const index=score+offset;
+    if(!integer(index,0,325))continue;
+    const q=LABYRINTH_HOLE_CENTERS[track[index]];
+    closest=Math.min(closest,Math.hypot(q.x-printed[0],q.y-printed[1]));
+   }
+   if(closest>60)return false;
   }
  }
  return true;

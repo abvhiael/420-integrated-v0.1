@@ -59,8 +59,10 @@ for token in ("matrix:\n        shard: [0, 1, 2, 3]","cmp-6.8-phase-closeout.jso
 gw=GENESIS.read_text()
 if "Canonical full Foundry qualification is owned once by Solidity Contracts" not in gw:
     fail("Genesis duplication boundary missing")
-if "contracts/config/**" not in gw:
-    fail("Genesis closeout trigger coverage missing")
+# CI-GUARD-02 owns the Genesis owner's manual-only Level 3 boundary.
+# CMP closeout config changes are automatically checked by SCOPED instead.
+if "\n  workflow_dispatch:" not in gw or any("\n  "+event in gw for event in ("pull_request:","push:","schedule:")):
+    fail("Genesis closeout Level 3 manual dispatch boundary drift")
 
 # CI-GUARD-02 prohibits implicit execution of the complete integrated Level 3
 # suite. Verify scoped automatic triggers plus the retained global dispatch.

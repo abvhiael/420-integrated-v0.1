@@ -31,6 +31,10 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
   async function verifyCommitted({caseId,round,submitter,commitment}){
     if(!validHash(commitment))fail('invalid evidence commitment');
     const {detail,context}=await contextFor(caseId,round,submitter);
+    const resolver=context.round===0?detail.resolver:detail.appealResolver;
+    const permitted=[detail.claimant,detail.respondent,resolver]
+      .some(identity=>identity?.toLowerCase()===app.account.toLowerCase());
+    if(!permitted)fail('private evidence authorization required');
     const match=detail.history.find(item=>item.kind==='evidence'&&
       item.caseId===context.caseId&&item.round===context.round&&
       item.actor===context.submitter&&item.details.evidenceHash===commitment.toLowerCase());
@@ -44,7 +48,9 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
     const plaintext=await verifyPrivateEvidence420({encrypted,recoveryKey,
       context:bound.context,expectedCommitment:bound.commitment,cryptoImpl});
     // Recheck canonical history on return so a chain reorg cannot bless stale evidence.
-    await verifyCommitted({caseId,round,submitter,commitment});
+    // If that recheck fails, erase the decrypted working buffer before propagating.
+    try{await verifyCommitted({caseId,round,submitter,commitment});}
+    catch{plaintext.fill(0);fail('private evidence case authorization or chain history changed');}
     return Object.freeze({bytes:plaintext,context:bound.context,commitment:bound.commitment,
       chainTransaction:bound.transactionHash});
   }
@@ -61,7 +67,8 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
     if(!external)fail('approved private evidence storage unavailable');
     const bytes=await external.retrieve({context:bound.context,record:bound.detail,
       viewer:app.account,object,recoveryKey,expectedCommitment:bound.commitment,signal});
-    await verifyCommitted({caseId,round,submitter,commitment});
+    try{await verifyCommitted({caseId,round,submitter,commitment});}
+    catch{bytes.fill(0);fail('private evidence case authorization or chain history changed');}
     return Object.freeze({bytes,context:bound.context,commitment:bound.commitment});
   }
   return Object.freeze({contextFor,prepare,verifyCommitted,inspectLocal,upload,retrieve});

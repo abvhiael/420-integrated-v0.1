@@ -21,24 +21,26 @@ try {
  await page.locator('#primary-content').waitFor({state:'visible'});
  await page.locator('#dashboard').waitFor({state:'visible'});
  await page.screenshot({path:resolve(folder,'extension-01-idle.png'),fullPage:true});
- const exampleId='visual-example-only';
- await page.evaluate(async ({key,id})=>{
-   await chrome.storage.local.set({[key]:{[id]:{
-     request:{method:'eth_requestAccounts',availableAccounts:['0x1111111111111111111111111111111111111111']},
-     context:{origin:'https://example.test'}
-   }}});
- },{key:'420-wallet-pending-approvals-v1',id:exampleId});
- await page.goto(url+'?approval='+exampleId,{waitUntil:'load'});
- await page.locator('#approve').waitFor({state:'visible'});
+ // The actual extension renders synthetic *visual fixtures* only; no approval is created.
+ // Directly reveal the existing approval view, with action controls disabled.
+ const showExample=async (method,description)=>{
+   await page.evaluate(({method,description})=>{
+     document.querySelectorAll('.view').forEach(view=>{view.hidden=view.id!=='approval-view';});
+     document.querySelector('#bottom-nav').hidden=true;
+     document.querySelector('#status').textContent='Example request — visual-only, not actionable';
+     document.querySelector('#request').hidden=false;
+     document.querySelector('#actions').hidden=false;
+     document.querySelector('#kind').textContent=method;
+     document.querySelector('#origin').textContent='https://example.test (synthetic)';
+     document.querySelector('#details').textContent=description;
+     document.querySelector('#approve').disabled=true;
+     document.querySelector('#reject').disabled=true;
+   },{method,description});
+   await page.locator('#approval-view').waitFor({state:'visible'});
+ };
+ await showExample('eth_requestAccounts','Example account: 0x1111111111111111111111111111111111111111');
  await page.screenshot({path:resolve(folder,'extension-02-connect-example.png'),fullPage:true});
- await page.evaluate(async ({key,id})=>{
-   await chrome.storage.local.set({[key]:{[id]:{
-     request:{method:'personal_sign',params:['0x48656c6c6f','0x1111111111111111111111111111111111111111']},
-     context:{origin:'https://example.test'}
-   }}});
- },{key:'420-wallet-pending-approvals-v1',id:exampleId});
- await page.reload();
- await page.locator('#approve').waitFor({state:'visible'});
+ await showExample('personal_sign','Example message: Hello (not signed)');
  await page.screenshot({path:resolve(folder,'extension-03-sign-example.png'),fullPage:true});
  console.log('Saved three real extension popup screenshots; example requests are synthetic, no approval submitted.');
 }finally{await context.close();}

@@ -623,19 +623,19 @@ def main():
                 "recovered Geth did not restore the BLS-certified browser vote block")
         replayReceipt=rpc("eth_getTransactionReceipt",[ballot_intent["txHash"]])
         require(replayReceipt and replayReceipt["status"]=="0x1"
-                and replayReceipt["blockHash"].lower()==block4["hash"].lower(),
+                and replayReceipt["blockHash"].lower()==block5["hash"].lower(),
                 "Geth+consensus cold restart lost actual Chromium vote receipt")
-        require(int(call(GW,"lastSequence()"),16)==8,
+        require(int(call(GW,"lastSequence()"),16)==10,
                 "actual native reward/Gateway sequence drifted after browser vote recovery")
         require(verifyCustody("after recovered browser ballot")==unifiedCustody,
                 "native browser ballot recovery modified funded Genesis custody")
         idx=launch("indexer420-browser-vote-cold-recovered",[str(indexer)],env=env)
-        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=4,
+        ready(lambda:getter("http://127.0.0.1:18782","/v1/health")[1]["health"]["indexedHeight"]>=5,
               idx,timeout=60)
         exp=launch("explorer420-browser-vote-cold-recovered",[str(explorer)],env=xenv)
         ready(lambda:getter("http://127.0.0.1:18783","/v1/ready")[1]["ready"],exp,timeout=60)
-        code,recoveredBallot=getter("http://127.0.0.1:18783","/v1/blocks/4")
-        require(code==200 and recoveredBallot["block"]["hash"].lower()==block4["hash"].lower()
+        code,recoveredBallot=getter("http://127.0.0.1:18783","/v1/blocks/5")
+        require(code==200 and recoveredBallot["block"]["hash"].lower()==block5["hash"].lower()
                 and recoveredBallot["trace"]["certified"],
                 "Explorer lost browser vote after full stack cold recovery")
         browser_recovered=args.workdir/"browser-recovered-vote.json"
@@ -673,7 +673,7 @@ def main():
              "browserRealAccountOnlySSOFixture":True,
              "browserActualGethProposalTx":browser_proposal["proposalTxHash"],
              "browserActualGethVoteTx":ballot_intent["txHash"],
-             "browserNativeCivicVoteBlockHash":block4["hash"],
+             "browserNativeCivicVoteBlockHash":block5["hash"],
              "browserCivicVoteAfterSecondGethHardStopRecovered":True,
              "browserNativeConsensusCheckpointAfterRecovery":5,
              "browserCivicVoteCanonicalExplorerPostgresRecovered":True,

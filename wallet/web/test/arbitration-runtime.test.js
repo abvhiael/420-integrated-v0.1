@@ -47,3 +47,10 @@ test('Arbitration runtime rejects aliased dependency identities and unsupported 
   assert.throws(() => validateArbitrationRuntime(aliased), /dependency alias/);
   assert.throws(() => arbitrationActionTarget(binding(), 'seizeFunds'), /unsupported arbitration action/);
 });
+
+test('Arbitration action routing rejects inherited Object prototype properties', () => {
+  for (const action of ['constructor', 'toString', 'hasOwnProperty', '__proto__']) {
+    assert.throws(() => arbitrationActionTarget(binding(), action), /unsupported arbitration action/);
+  }
+  assert.equal(arbitrationActionTarget(binding(), 'finalizeRuling'), addr(4));
+});

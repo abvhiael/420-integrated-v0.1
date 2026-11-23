@@ -7,7 +7,8 @@ import {
  RUSSIAN_CRIBBAGE_TARGET,RUSSIAN_CRIBBAGE_VARIANTS,russianCribbageVariant,
  russianCribbageShowOrder,russianCribbageDeal,russianCribbageFinishDeal,
  russianCribbageScoreShow,russianCribbagePegPoints,russianCribbageClassify,
- russianCribbageAward
+ russianCribbageAward,russianCribbageHeels,russianCribbageCanPlay,
+ russianCribbageSequenceEnd
 } from '../core/russian-cribbage-rules.js';
 
 const ref=new URL('../../../docs/games/classics/',import.meta.url);
@@ -120,6 +121,23 @@ test('BC-2.1 ordinary pegging awards 15, 31, pairs and only longest suffix runs'
  assert.throws(()=>russianCribbagePegPoints([12,25,10,0,1]),RangeError);
  assert.throws(()=>russianCribbagePegPoints([0,0]),RangeError);
 });
+test('BC-2.1 Jack starter, legal Go and last-card conditions never double-score 31',()=>{
+ assert.equal(russianCribbageHeels(10),2);
+ assert.equal(russianCribbageHeels(23),2);
+ assert.equal(russianCribbageHeels(9),0);
+ assert.equal(russianCribbageCanPlay([12,0],30),true);
+ assert.equal(russianCribbageCanPlay([12,25],30),false);
+ assert.equal(russianCribbageCanPlay([],22),false);
+ assert.deepEqual(russianCribbageSequenceEnd(2,4,30,false),
+  {seat:2,kind:'go',points:1});
+ assert.deepEqual(russianCribbageSequenceEnd(0,3,30,true),
+  {seat:0,kind:'last-card',points:1});
+ assert.equal(russianCribbageSequenceEnd(1,2,31,true),null);
+ assert.equal(russianCribbageSequenceEnd(1,2,31,false),null);
+ assert.throws(()=>russianCribbageCanPlay([0],32),RangeError);
+ assert.throws(()=>russianCribbageSequenceEnd(2,2,20,false),RangeError);
+});
+
 test('BC-2.1 shared teams and independent four-seat scores win at award 241',()=>{
  const two=russianCribbageAward([239,0,239,0],'russian-4p-partners',2,2);
  assert.deepEqual(two.scores,[241,0,241,0]);

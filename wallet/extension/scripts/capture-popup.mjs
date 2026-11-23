@@ -18,7 +18,8 @@ try {
  const page=await context.newPage();
  const url='chrome-extension://'+extensionId+'/popup.html';
  await page.goto(url,{waitUntil:'load'});
- await page.locator('#status').waitFor();
+ await page.locator('#primary-content').waitFor({state:'visible'});
+ await page.locator('#dashboard').waitFor({state:'visible'});
  await page.screenshot({path:resolve(folder,'extension-01-idle.png'),fullPage:true});
  const exampleId='visual-example-only';
  await page.evaluate(async ({key,id})=>{

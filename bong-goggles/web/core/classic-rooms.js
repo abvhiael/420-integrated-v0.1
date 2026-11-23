@@ -6,7 +6,7 @@ import {renderClassicRoomLive} from './classic-communications-ui.js';
 import {findCribbageRoomMatch,cribbageRoomEntry} from './cribbage-room-resume.js';
 
 export const ROOM_LIMITS=Object.freeze({
-cribbage:[2,4],'labyrinth-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
+cribbage:[2,4],'labyrinth-cribbage':[2,4],chess:[2,2],scrabble:[2,4],
 checkers:[2,2],backgammon:[2,2],dominoes:[2,4],'crazy-eights':[2,4],
 euchre:[4,4],yahtzee:[2,4],'go-fish':[2,4],hearts:[3,4],
 go:[2,2],mahjong:[4,4],spades:[4,4],'500':[3,4],
@@ -47,7 +47,16 @@ if(!v||!id(v.id)||!id(v.target)||!Number.isSafeInteger(v.seat)||v.seat<1||v.seat
 return Object.freeze({id:v.id,seat:v.seat,target:v.target,status:v.status});
 });
 if(invites.some(x=>!x))return null;
-return Object.freeze({...normalizedRoom(r),seats:Object.freeze(seats),invites:Object.freeze(invites)});
+const variantId=r.gameId==='labyrinth-cribbage'?r.variantId:null;
+if(variantId!=null){
+ const expected=r.seatCount===2?'labyrinth-2p':r.seatCount===3?'labyrinth-3p':
+ r.seats[2].team===0?'labyrinth-4p-partners':'labyrinth-4p-individual';
+ if(variantId!==expected)return null;
+ const teams=r.seatCount===4&&variantId==='labyrinth-4p-partners'?[0,1,0,1]:
+ Array.from({length:r.seatCount},(_,i)=>i);
+ if(seats.some((s,i)=>s.team!==teams[i]))return null;
+}
+return Object.freeze({...normalizedRoom(r),variantId,seats:Object.freeze(seats),invites:Object.freeze(invites)});
 }
 export const normalizeClassicRoom=normalizedRoom;
 const verifiedEnvelope=(response,name)=>{
@@ -123,6 +132,11 @@ let path,body;
 if(action==='create'){
 if(!validCount(data.gameId,Number(data.seatCount))||!['private','public'].includes(data.visibility))throw Error('Invalid room configuration');
 path='/v1/classic-rooms';body={gameId:data.gameId,seatCount:Number(data.seatCount),visibility:data.visibility};
+if(data.gameId==='labyrinth-cribbage'){
+ if(!['individual','partnerships',''].includes(data.format??''))throw Error('Invalid Labyrinth scoring format');
+ if(data.seatCount===4)body.format=data.format||'partnerships';
+ else if(data.format&&data.format!=='individual')throw Error('Only four seats support partnerships');
+}else if(data.format)throw Error('Format is not allowed for this game');
 }else{
 if(!current.selected||!id(current.selected.id)||!Number.isSafeInteger(data.seat)||data.seat<0||
 data.seat>=current.selected.seatCount)throw Error('No qualified room and seat');
@@ -156,7 +170,7 @@ const view=normalizedRoom(returned,true);
 if(!view)throw Error('Unverified room update');
 return this.refresh(view.id);
 }catch(error){
-if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action unconfirmed. Refresh 420ID.'}:
+if(gen===this.generation)this.emit(submitted?{status:'error',notice:'Room action not confirmed; recheck 420ID and room policy before retrying.'}:
 {...current,notice:'Invalid room request. No action was submitted.'});
 throw error;
 }
@@ -166,7 +180,9 @@ const note=message=>'<p class="classic-room__notice" role="status">'+esc(message
 const roomHref=r=>'/games/rooms/'+r.id;
 const games=CLASSIC_ROADMAP.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.title)+'</option>').join('');
 const teamName=(r,s)=>r.seatCount===4&&new Set(['cribbage','euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
-'Team '+(s.team===0?'A':'B'):'Player '+(s.index+1);
+'Team '+(s.team===0?'A':'B'):r.gameId==='labyrinth-cribbage'&&
+ r.variantId==='labyrinth-4p-partners'?'Team '+(s.team===0?'A':'B'):
+ 'Player '+(s.index+1);
 function roomSummary(r){
 return '<li><a href="'+roomHref(r)+'" data-route="classic-room"><strong>'+esc(title(r.gameId))+
 '</strong> · '+esc(r.visibility)+' · '+r.seatCount+' seats · '+esc(r.status)+'</a></li>';
@@ -180,7 +196,7 @@ const isHost=r.host===state.viewer;
 const hasSeat=r.seats.some(s=>s.subject===state.viewer);
 const friendOptions=state.friends.map(f=>'<option value="'+f.subject+'">'+esc(f.displayName)+'</option>').join('');
 const invite=(index)=>friendOptions?makeAction('invite',index,'Invite friend',
-'<label>Mutual friend<select name="target">'+friendOptions+'</select></label>'):'<small>Mutual friends required.</small>';
+'<label>Mutual friend<select name="target">'+friendOptions+'</select></label>'):'<small>Mutual 420ID friends required before sending an invitation.</small>';
 const bot=(index,value='medium')=>makeAction('bot',index,'Set computer seat',
 '<label>Computer strength<select name="difficulty">'+['easy','medium','hard'].map(d=>
 '<option value="'+d+'"'+(d===value?' selected':'')+'>'+esc(d[0].toUpperCase()+d.slice(1))+'</option>').join('')+'</select></label>');
@@ -209,17 +225,27 @@ const invites=isHost&&r.invites.length?'<details><summary>Invitation history</su
 ' · '+esc(i.status)+'</li>').join('')+'</ul></details>':'';
 const roomLive=renderClassicRoomLive(r,live);
 const cribbageLink=cribbageRoomEntry(r,state.gameSession,live);
+const labyrinthLink=r.gameId==='labyrinth-cribbage'&&live?.status==='connected'&&
+ live.session?.gameId===r.gameId&&live.session?.id&&live.session?.roomId===r.id&&
+ ['active','finished'].includes(live.session.status)?
+ '<p><a class="ui-button" href="/games/labyrinth-cribbage/play?session='+
+ esc(live.session.id)+'" data-route="classic-game">Resume your private Labyrinth table</a></p>':'';
 return '<section class="classic-room__detail"><p><a href="'+(r.gameId==='cribbage'?'/games/cribbage/history':'/games/rooms')+'" data-route="'+(r.gameId==='cribbage'?'classic-game':'classic-rooms')+'">← '+(r.gameId==='cribbage'?'Cribbage · My Games':'All rooms')+'</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
-'<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+'</p>'+
+'<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+
+ (r.gameId==='labyrinth-cribbage'?' · '+esc(r.variantId==='labyrinth-4p-individual'?'Individual scores':r.variantId==='labyrinth-4p-partners'?'Opposite-seat partnerships (default)':'Individual scores'):'')+'</p>'+
 note(r.status==='ready'?(r.gameId==='cribbage'?'All seats filled. The host may start a qualified Cribbage match.':'All seats filled. Game start and turns require BC-0.6; no match has begun.'):
 r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
-'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.gameId==='cribbage'&&r.status==='ready'?'<form data-cribbage-room-start><button type="submit">Start Cribbage</button></form>':'')+cribbageLink+roomLive+invites+
+'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.status==='ready'&&
+ ['cribbage','labyrinth-cribbage'].includes(r.gameId)?
+ '<form '+(r.gameId==='cribbage'?'data-cribbage-room-start':'data-labyrinth-room-start')+
+ '><button type="submit">Start '+esc(title(r.gameId))+'</button></form>':'')+
+ cribbageLink+labyrinthLink+roomLive+invites+
 (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){
 const start='<section class="classic-room" aria-label="420ID multiplayer rooms"><p><a href="/games/cribbage/history" data-route="classic-game">← Cribbage · My Games</a> · <a href="/games" data-route="games">Games catalogue</a></p>'+
-'<h2>Multiplayer rooms</h2><p>No-wager 420ID rooms. Lobby seats do not start gameplay.</p>';
+'<h2>Multiplayer rooms</h2><p>Persistent off-chain rooms for 420ID friends and public groups. No wallet, wagers or token rewards. Lobby seats do not start gameplay.</p>';
 if(!enabled)return start+note('Multiplayer rooms are not activated for this deployment.')+'</section>';
 if(!state||state.status==='loading')return start+note('Checking your 420ID session and room access…')+'</section>';
 if(state.status==='guest')return start+note('Sign in with 420ID to browse, create or join rooms.')+
@@ -228,10 +254,10 @@ if(state.status!=='ready')return start+note('420ID room service or account verif
 '<button type="button" data-classic-room-refresh>Retry room check</button></section>';
 const heading=start+(state.notice?note(state.notice):'');
 if(roomId!=null){
-if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room unavailable.')+
+if(!state.selected)return heading+note(state.notFound?'Room not found or access denied.':'Room details are not available.')+
 '<button type="button" data-classic-room-refresh>Refresh rooms</button></section>';
 if(live&&['reconnecting','guest','revoked'].includes(live.status))
-return heading+note('Room connection lost; cached private room data is hidden.')+
+return heading+note('Connection lost or room access changed. Checking 420ID and the latest authoritative state; cached private room data is hidden.')+
 '<button type="button" data-classic-room-refresh>Reconnect to room</button></section>';
 return heading+roomDetail(state.selected,state,live)+'</section>';
 }
@@ -239,9 +265,10 @@ const creation='<section class="classic-room__create"><h3>Create a private or pu
 '<form data-classic-room-create><label>Game<select name="gameId">'+games+'</select></label>'+
 '<label>Visibility<select name="visibility"><option value="private">Private — invited friends only</option><option value="public">Public — visible to other members</option></select></label>'+
 '<label>Number of players<select name="seatCount"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>'+
+'<label data-labyrinth-room-format hidden>Labyrinth four-player scoring<select name="format"><option value="partnerships" selected>Partnerships (default)</option><option value="individual">Individual free-for-all</option></select></label>'+
 '<button type="submit">Create room</button></form></section>';
 return heading+creation+'<section><h3>Available rooms and invitations</h3>'+
 (state.rooms.length?'<ul class="classic-room__list">'+state.rooms.map(roomSummary).join('')+'</ul>':
-note('No visible rooms yet. Create or join a room.'))+
+note('No visible rooms yet. Create a room to invite mutual friends or let others join publicly.'))+
 '<button type="button" data-classic-room-refresh>Refresh rooms</button></section></section>';
 }

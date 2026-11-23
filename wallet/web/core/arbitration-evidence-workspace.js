@@ -35,10 +35,12 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
     const permitted=[detail.claimant,detail.respondent,resolver]
       .some(identity=>identity?.toLowerCase()===app.account.toLowerCase());
     if(!permitted)fail('private evidence authorization required');
-    const match=detail.history.find(item=>item.kind==='evidence'&&
+    const matches=detail.history.filter(item=>item.kind==='evidence'&&
       item.caseId===context.caseId&&item.round===context.round&&
       item.actor===context.submitter&&item.details.evidenceHash===commitment.toLowerCase());
-    if(!match)fail('evidence commitment not recorded on this case and round');
+    if(!matches.length)fail('evidence commitment not recorded on this case and round');
+    if(matches.length!==1)fail('ambiguous duplicate evidence commitment');
+    const match=matches[0];
     return Object.freeze({context,detail,commitment:commitment.toLowerCase(),
       blockNumber:match.blockNumber,transactionHash:match.transactionHash});
   }

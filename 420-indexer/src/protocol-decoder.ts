@@ -103,7 +103,7 @@ export class ProtocolDecoderRegistry420 {
     if (descriptor.protocol === '420Bridge' || strict) {
       const indexed = descriptor.fields.filter(field => field.indexed).length;
       const dataWords = descriptor.fields.length - indexed;
-      if (log.topics.length !== indexed + 1 || !/^0x[0-9a-fA-F]*$/.test(log.data) || log.data.length !== 2 + dataWords * 64) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad log' : strictTreasury ? strictArbitration ? 'malformed canonical Arbitration log' : 'malformed canonical Treasury log' : 'malformed canonical bridge log');
+      if (log.topics.length !== indexed + 1 || !/^0x[0-9a-fA-F]*$/.test(log.data) || log.data.length !== 2 + dataWords * 64) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad log' : strictArbitration ? 'malformed canonical Arbitration log' : strictTreasury ? 'malformed canonical Treasury log' : 'malformed canonical bridge log');
     }
     const fields: Record<string, string | bigint | boolean> = {};
     let indexedIndex = 1;
@@ -112,10 +112,10 @@ export class ProtocolDecoderRegistry420 {
       const encoded = field.indexed ? log.topics[indexedIndex++] : word(log.data, dataIndex++);
       if (!encoded || encoded.length !== 66) throw new Error(`malformed ${descriptor.protocol}.${descriptor.eventName} log`);
       if (descriptor.protocol === '420Bridge' || strict) {
-        if (!/^0x[0-9a-fA-F]{64}$/.test(encoded)) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad word' : strictTreasury ? strictArbitration ? 'malformed canonical Arbitration word' : 'malformed canonical Treasury word' : 'malformed canonical bridge word');
-        if (field.kind === 'bool' && BigInt(encoded) > 1n) throw new Error(strictLaunchpad ? 'noncanonical Launchpad boolean' : strictTreasury ? strictArbitration ? 'noncanonical Arbitration boolean' : 'noncanonical Treasury boolean' : 'noncanonical bridge boolean');
-        if (field.kind.startsWith('uint') && BigInt(encoded) >= (1n << BigInt(field.kind.slice(4)))) throw new Error(strictLaunchpad ? 'noncanonical Launchpad integer' : strictTreasury ? strictArbitration ? 'noncanonical Arbitration integer' : 'noncanonical Treasury integer' : 'noncanonical bridge integer');
-        if (field.kind === 'address' && BigInt(encoded) >= (1n << 160n)) throw new Error(strictLaunchpad ? 'noncanonical Launchpad address' : strictTreasury ? strictArbitration ? 'noncanonical Arbitration address' : 'noncanonical Treasury address' : 'noncanonical bridge address');
+        if (!/^0x[0-9a-fA-F]{64}$/.test(encoded)) throw new Error(strictLaunchpad ? 'malformed canonical Launchpad word' : strictArbitration ? 'malformed canonical Arbitration word' : strictTreasury ? 'malformed canonical Treasury word' : 'malformed canonical bridge word');
+        if (field.kind === 'bool' && BigInt(encoded) > 1n) throw new Error(strictLaunchpad ? 'noncanonical Launchpad boolean' : strictArbitration ? 'noncanonical Arbitration boolean' : strictTreasury ? 'noncanonical Treasury boolean' : 'noncanonical bridge boolean');
+        if (field.kind.startsWith('uint') && BigInt(encoded) >= (1n << BigInt(field.kind.slice(4)))) throw new Error(strictLaunchpad ? 'noncanonical Launchpad integer' : strictArbitration ? 'noncanonical Arbitration integer' : strictTreasury ? 'noncanonical Treasury integer' : 'noncanonical bridge integer');
+        if (field.kind === 'address' && BigInt(encoded) >= (1n << 160n)) throw new Error(strictLaunchpad ? 'noncanonical Launchpad address' : strictArbitration ? 'noncanonical Arbitration address' : strictTreasury ? 'noncanonical Treasury address' : 'noncanonical bridge address');
       }
       fields[field.name] = decodeValue420(field.kind, encoded);
     }

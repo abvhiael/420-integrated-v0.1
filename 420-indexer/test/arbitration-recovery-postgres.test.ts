@@ -179,7 +179,7 @@ test('reorganization rollback, safe visibility, fully deterministic replay, RPC 
  // The shared Indexer may durably roll back the former canonical fork to its
  // common ancestor, but must not commit either unverified replacement block.
  source.fork=false;
- source.missingLogsAt=6;source.fork=true;
+ source.missingLogsAt=6;
  await assert.rejects((await start()).runOnce(),/omitted canonical receipt event/);
  assert.equal((await checkpoint())?.blockNumber,5n);
  const ancestor=await protocolRows(db);

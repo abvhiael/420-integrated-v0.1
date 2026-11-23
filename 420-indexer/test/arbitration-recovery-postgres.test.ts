@@ -138,7 +138,7 @@ test('shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupt
  const unconfigured=new IndexerPublicApiAdapter420(new IndexerQueryService420(db));
  assert.equal((await routeIndexerHttp420(unconfigured,'GET',
   'http://indexer/v1/arbitration/cases?chainId=420')).status,503);
- await assert.rejects(api.arbitrationCase(421n,ARB_CASE_ID_420),/chain does not match/);
+ assert.throws(()=>api.arbitrationCase(421n,ARB_CASE_ID_420),/chain does not match/);
  assert.equal((await protocolRows(db)).length,10,'API read does not change canonical projection');
 });
 test('reorganization rollback, safe visibility, fully deterministic replay, RPC disagreement and missing events',
@@ -176,13 +176,17 @@ test('reorganization rollback, safe visibility, fully deterministic replay, RPC 
  source.rpcDisagree=false;
 
  // A fabricated empty eth_getLogs response cannot suppress receipt-proven events.
- source.fork=false;await (await start()).runOnce();
+ // The shared Indexer may durably roll back the former canonical fork to its
+ // common ancestor, but must not commit either unverified replacement block.
+ source.fork=false;
  source.missingLogsAt=6;source.fork=true;
- const unchanged=await protocolRows(db);
  await assert.rejects((await start()).runOnce(),/omitted canonical receipt event/);
- assert.deepEqual(await protocolRows(db),unchanged);
+ assert.equal((await checkpoint())?.blockNumber,5n);
+ const ancestor=await protocolRows(db);
+ assert.equal(ancestor.length,6,'no partial unverified replacement-block events');
  source.missingLogsAt=null;
  source.wrongReceipt=true;
- await assert.rejects((await start()).runOnce(),/RPC transaction\/receipt canonicality disagreement|omitted canonical receipt/);
- assert.deepEqual(await protocolRows(db),unchanged);
+ await assert.rejects((await start()).runOnce(),/RPC transaction\\/receipt canonicality disagreement|omitted canonical receipt/);
+ assert.equal((await checkpoint())?.blockNumber,5n);
+ assert.deepEqual(await protocolRows(db),ancestor,'RPC disagreement cannot change durable canonical ancestor');
 });

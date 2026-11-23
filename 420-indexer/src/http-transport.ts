@@ -114,6 +114,38 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       return receipt ? ok420(receipt) : error420(404, 'not_found', 'receipt not found');
     }
 
+
+    // Arbitration reads are optional until the verified deployment is configured.
+    // All payloads are explicitly derived, never a replacement for CaseRegistry.
+    if(path==='/v1/arbitration/cases'){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationCases)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      const round=optionalBigint420(url,'round');
+      if(round!==undefined&&round>3n)return error420(400,'invalid_request','round must be 0..3');
+      const status=url.searchParams.get('status')??undefined;
+      if(status!==undefined&&!['OPEN','RULED','FINALIZED'].includes(status))
+        return error420(400,'invalid_request','status must be OPEN, RULED or FINALIZED');
+      return ok420(await api.arbitrationCases(chainId,{...pageRequest420(url),
+        claimant:url.searchParams.get('claimant')??undefined,
+        respondent:url.searchParams.get('respondent')??undefined,
+        domainId:url.searchParams.get('domainId')??undefined,
+        ...(round===undefined?{}:{round:Number(round)}),
+        ...(status===undefined?{}:{status:status as 'OPEN'|'RULED'|'FINALIZED'})}));
+    }
+    const arbitrationHistoryId=pathParam420(path,/^\/v1\/arbitration\/cases\/([^/]+)\/history$/);
+    if(arbitrationHistoryId!==null){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationHistory)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      return ok420(await api.arbitrationHistory(chainId,arbitrationHistoryId,pageRequest420(url)));
+    }
+    const arbitrationCaseId=pathParam420(path,/^\/v1\/arbitration\/cases\/([^/]+)$/);
+    if(arbitrationCaseId!==null){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationCase)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      const value=await api.arbitrationCase(chainId,arbitrationCaseId);
+      return value?ok420(value):error420(404,'not_found','Arbitration case not found');
+    }
+
     const protocolObjectParams = pathParams420(path, /^\/v1\/protocols\/([^/]+)\/objects\/([^/]+)$/);
     if (protocolObjectParams !== null) {
       const [protocol, objectKey] = protocolObjectParams;

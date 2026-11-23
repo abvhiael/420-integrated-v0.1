@@ -53,7 +53,18 @@ Current stable error behavior includes:
 | GET | `/v1/assets/transfers?chainId=` | normalized asset transfers |
 | GET | `/v1/protocols/events?chainId=` | typed protocol-event journal |
 | GET | `/v1/protocols/:protocol/objects/:key?chainId=` | latest typed protocol-object projection |
+| GET | `/v1/arbitration/cases?chainId=` | paged Arbitration case list, claimant/respondent/domainId/status/round filters |
+| GET | `/v1/arbitration/cases/:caseId?chainId=` | non-authoritative case state, verified against on-chain CaseRegistry at the indexed checkpoint |
+| GET | `/v1/arbitration/cases/:caseId/history?chainId=` | bounded case/evidence/ruling/appeal/finalization history with transaction/block/log provenance |
 | GET | `/v1/search?chainId=&q=` | bounded deterministic search |
+
+## Arbitration historical read model
+
+These three routes are served by the **existing shared 420Indexer**, not an independent arbitration database or evidence host. The Indexer is instantiated only after ProtocolRegistry service publication, Genesis hash, contract runtime-code hashes and the Case/Ruling bindings are independently verified against a trusted release. Unconfigured endpoints return `503 unavailable`; source-controlled descriptor files alone do not prove a live address or authorize writes. Case and history DTOs expose `authoritative: false` and chain/block/transaction/log provenance. No plaintext evidence, storage key or access token is indexed or returned.
+
+Case-list filters: `claimant`, `respondent`, `domainId`, `status` (`OPEN`, `RULED`, `FINALIZED`), and `round` (0–3). All list/history pagination uses `cursor`, `limit` (1–200) and `direction` (`asc`, `desc`). Out-of-range queries fail, and a page can legitimately be empty when status/round filtering removes all candidate cases. Status flags are `confirmed` (indexed checkpoint finalized), `pending` (unfinalized or lagging), `stale` (over 64 blocks behind), or `reorganized` (checkpoint no longer canonical). The Indexer checks the contract's current **state and round at the indexed block**, and fails closed on disagreement. Never use a projected status for resolver permission, finalization, access-grant approval or remedy execution. In particular, a stable Indexer response is not a substitute for a current on-chain call.
+
+ARB-PRE-06 builds on the existing Indexer durable PostgreSQL checkpoint, interruption-safe rollback/replay and finalized boundary. Testnet live address/Registry identity, finality and post-rollback qualification belong to ARBITRATION-AUDIT-5.
 
 ## Chain scoping
 

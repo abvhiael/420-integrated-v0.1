@@ -7,7 +7,7 @@ import {dirname,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {JsonRpcProvider,Contract,ContractFactory,AbiCoder,keccak256,id,ZeroHash} from 'ethers';
 
-const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const contracts=resolve(root,'contracts');
 const artifactDir=resolve(root,'artifacts/arbitration/arb-pre-09');
 const output=resolve(root,process.argv[2]||'artifacts/arbitration/arb-pre-09/local-genesis.json');
@@ -145,19 +145,18 @@ async function main(){
   assert.equal(await cases.governanceTimelock(),timelockAddress);
   assert.equal(await cases.policies(),await policies.getAddress());
   assert.equal(await rulings.cases(),await cases.getAddress());
-  await reject('unauthorized ruling binding',()=>cases.connect(claimant).bindRulingRegistry.staticCall(awaitAddress(rulings)));
-  await reject('incorrect case/ruling reciprocal binding',async()=>{
-    const wrong=await deploy('ArbitrationCaseRegistry420',governor,[timelockAddress,await policies.getAddress()],
-      'negative:foreign-case');
-    const foreign=await deploy('ArbitrationRulingRegistry420',governor,[await wrong.getAddress()],
-      'negative:foreign-ruling');
-    await executeExpectFailure(timelock,governor,await cases.getAddress(),cases.interface,
-      'bindRulingRegistry',[await foreign.getAddress()],'invalid-binding');
-  });
+  await reject('unauthorized ruling binding',async()=>cases.connect(claimant).bindRulingRegistry.staticCall(await rulings.getAddress()));
+  const wrong=await deploy('ArbitrationCaseRegistry420',governor,[timelockAddress,await policies.getAddress()],
+    'negative:foreign-case');
+  const foreign=await deploy('ArbitrationRulingRegistry420',governor,[await wrong.getAddress()],
+    'negative:foreign-ruling');
+  await executeExpectFailure(timelock,governor,await cases.getAddress(),cases.interface,
+    'bindRulingRegistry',[await foreign.getAddress()],'invalid-binding');
   await execute(timelock,governor,await cases.getAddress(),cases.interface,'bindRulingRegistry',
     [await rulings.getAddress()],'one-time-ruling-binding');
   assert.equal(await cases.rulingRegistry(),await rulings.getAddress());
-  await reject('second ruling binding',()=>cases.connect(claimant).bindRulingRegistry.staticCall(awaitAddress(rulings)));
+  await executeExpectFailure(timelock,governor,await cases.getAddress(),cases.interface,
+    'bindRulingRegistry',[await rulings.getAddress()],'duplicate-binding');
   const router=await deploy('ArbitrationRouter420',governor,
     [await policies.getAddress(),await cases.getAddress(),await rulings.getAddress()],'deploy:router');
   for(const [method,target] of [['policies',policies],['cases',cases],['rulings',rulings]])
@@ -171,16 +170,16 @@ async function main(){
   const metadataHash=keccak256(readFileSync(manifestFile));
   const manifestHash=keccak256(Buffer.from(JSON.stringify(sourceManifest.deployment_order)));
   const interfaceHash=keccak256(Buffer.from(JSON.stringify(artifact('ArbitrationRouter420').abi)));
-  await reject('unauthorized component registration',()=>registry.connect(observer).registerComponent.staticCall(
-    cid,awaitAddress(router),[1,0,0],2));
+  await reject('unauthorized component registration',async()=>registry.connect(observer).registerComponent.staticCall(
+    cid,await router.getAddress(),[1,0,0],2));
   await execute(timelock,governor,registryAddress,registry.interface,'registerComponent',
     [cid,await router.getAddress(),[1,0,0],2],'register-component');
   const component=await registry.component(cid);
   assert.equal(component.implementation,await router.getAddress());
   assert.equal(component.runtimeCodeHash,hashes.ArbitrationRouter420);
   assert.equal(await registry.resolve(cid),await router.getAddress());
-  await reject('unauthorized service publication',()=>registry.connect(observer).publishRegisteredService.staticCall(
-    sid,awaitAddress(router),metadataHash,1,true,3,manifestHash,dependencyRoot,interfaceHash));
+  await reject('unauthorized service publication',async()=>registry.connect(observer).publishRegisteredService.staticCall(
+    sid,await router.getAddress(),metadataHash,1,true,3,manifestHash,dependencyRoot,interfaceHash));
   await execute(timelock,governor,registryAddress,registry.interface,'publishRegisteredService',
     [sid,await router.getAddress(),metadataHash,1,true,3,manifestHash,dependencyRoot,interfaceHash],
     'publish-service-v1');
@@ -278,7 +277,6 @@ async function main(){
     transactions:receiptOrder.length,contractHashCount:Object.keys(hashes).length,
     negativeTests:evidence.length,caseFinalized:true,appealRound:1,serviceRecovered:true}));
 }
-async function awaitAddress(contract){return contract.getAddress();}
 async function executeExpectFailure(timelock,governor,target,iface,method,args,label){
   const data=iface.encodeFunctionData(method,args);
   const key=id('420/arb-pre-09/negative/'+label);

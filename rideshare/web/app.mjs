@@ -63,6 +63,7 @@ function renderDecision(decision) {
   root.replaceChildren();
   root.setAttribute("aria-busy", "false");
   if (decision.kind === "public" && decision.path === "/") {
+    root.classList.remove("driver-landing-root");
     root.classList.add("rider-landing-root");
     root.append(renderRiderLanding());
     document.title = "LIFTd — arrive higher";

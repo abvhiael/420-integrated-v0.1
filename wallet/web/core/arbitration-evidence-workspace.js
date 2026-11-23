@@ -11,7 +11,7 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
   authenticate=null}={}){
   if(!app||typeof app.detail!=='function'||typeof app.verify!=='function'||!app.account)
     fail('verified Arbitration Wallet application required');
-  const external=authenticate?createPrivateEvidenceStore420({storage,authenticate}):null;
+  const external=authenticate?createPrivateEvidenceStore420({storage,authenticate,cryptoImpl}):null;
   async function contextFor(caseId,round=null,submitter=app.account){
     const [detail,verified]=await Promise.all([app.detail(caseId),app.verify()]);
     const r=round===null?detail.round:round;
@@ -56,10 +56,10 @@ export function createArbitrationEvidenceWorkspace420({app,cryptoImpl=globalThis
     return Object.freeze({bytes:plaintext,context:bound.context,commitment:bound.commitment,
       chainTransaction:bound.transactionHash});
   }
-  async function upload({caseId,round,submitter,commitment,encrypted,recoveryKey,object,retentionMs,signal}){
+  async function upload({caseId,round,submitter,commitment,encrypted,recoveryKey,object,preconditions,retentionMs,signal}){
     const bound=await verifyCommitted({caseId,round,submitter,commitment});
     if(!external)fail('approved private evidence storage unavailable');
-    const receipt=await external.upload({encrypted,recoveryKey,context:bound.context,record:bound.detail,
+    const receipt=await external.upload({encrypted,recoveryKey,preconditions,context:bound.context,record:bound.detail,
       viewer:app.account,object,retentionMs,signal});
     await verifyCommitted({caseId,round,submitter,commitment});
     return receipt;

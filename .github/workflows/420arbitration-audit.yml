@@ -59,10 +59,15 @@ jobs:
           python3 scripts/verify-reg-audit-4-genesis-address-namespace.py
           python3 scripts/test-reg-audit-4-genesis-address-namespace.py
       - name: Run Wallet Arbitration runtime qualification
-        run: node --test wallet/web/test/arbitration-runtime.test.js
+        run: node --test wallet/web/test/arbitration-runtime.test.js wallet/web/test/genesis-app-catalog.test.js
       - name: Run Arbitration Foundry qualification
         working-directory: contracts
-        run: forge test --match-path 'test/Arbitration*.t.sol' -vvv
+        run: |
+          set -euo pipefail
+          mkdir -p arbitration-audit-tests
+          trap 'rm -rf arbitration-audit-tests' EXIT
+          cp test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol arbitration-audit-tests/
+          FOUNDRY_SRC=src/arbitration FOUNDRY_TEST=arbitration-audit-tests forge test --match-path 'arbitration-audit-tests/Arbitration*.t.sol' -vvv
       - name: Reject dangerous Arbitration primitives
         run: |
           set -euo pipefail
@@ -89,7 +94,12 @@ jobs:
           version: stable
       - name: Run Arbitration hardening suite
         working-directory: contracts
-        run: forge test --match-path 'test/Arbitration*.t.sol' -vvv
+        run: |
+          set -euo pipefail
+          mkdir -p arbitration-audit-tests
+          trap 'rm -rf arbitration-audit-tests' EXIT
+          cp test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol arbitration-audit-tests/
+          FOUNDRY_SRC=src/arbitration FOUNDRY_TEST=arbitration-audit-tests forge test --match-path 'arbitration-audit-tests/Arbitration*.t.sol' -vvv
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer
       - name: Targeted Arbitration Slither high-severity gate

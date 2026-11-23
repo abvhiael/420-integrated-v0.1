@@ -78,3 +78,11 @@ test('W14.5 catalogue has unique ids and service IDs', () => {
   assert.equal(new Set(ids).size, ids.length);
   assert.equal(new Set(serviceIds).size, serviceIds.length);
 });
+
+test('420Arbitration catalogue requires verified Registry binding before launch', () => {
+  const app = GENESIS_APP_SERVICES.find((entry) => entry.id === 'arbitration');
+  assert.equal(app?.serviceId, '420/service/arbitration/v1');
+  assert.equal(app?.classification, 'GENESIS_PROTOCOL_AND_USER_APP');
+  assert.equal(app?.requiresVerifiedRegistry, true);
+  assert.equal(app?.walletIntegrated, undefined, 'do not claim a complete interactive Wallet client');
+});

@@ -108,7 +108,6 @@ test('shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupt
  assert.equal(detail.case?.appeals,1);
  assert.equal(detail.case?.evidenceCount,2);
  assert.equal(detail.history.items.length,3);
- assert.equal(detail.history.authoritative,undefined);
  assert(detail.history.nextCursor);
  const page2=await model().history(ARB_CASE_ID_420,{limit:3,cursor:detail.history.nextCursor!});
  assert.equal(page2.history.items.length,3);

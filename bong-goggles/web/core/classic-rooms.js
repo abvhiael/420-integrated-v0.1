@@ -221,13 +221,18 @@ const invites=isHost&&r.invites.length?'<details><summary>Invitation history</su
 const roomLive=renderClassicRoomLive(r,live);
 const cribbageLink=r.gameId==='cribbage'&&live?.status==='connected'&&live.session?.id&&live.session?.roomId===r.id?
 '<p><a class="ui-button" href="/games/cribbage/play?session='+esc(live.session.id)+'" data-route="classic-game">Open your private Cribbage table</a></p>':'';
+const labyrinthLink=r.gameId==='labyrinth-cribbage'&&live?.status==='connected'&&
+ live.session?.gameId===r.gameId&&live.session?.id&&live.session?.roomId===r.id&&
+ ['active','finished'].includes(live.session.status)?
+ '<p><a class="ui-button" href="/games/labyrinth-cribbage/play?session='+
+ esc(live.session.id)+'" data-route="classic-game">Resume your private Labyrinth table</a></p>':'';
 return '<section class="classic-room__detail"><p><a href="/games/rooms" data-route="classic-rooms">← All rooms</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+
 '<p>'+r.seatCount+' seats · '+esc(r.status)+' · revision '+r.revision+
  (r.gameId==='labyrinth-cribbage'?' · '+esc(r.variantId==='labyrinth-4p-individual'?'Individual scores':r.variantId==='labyrinth-4p-partners'?'Opposite-seat partnerships (default)':'Individual scores'):'')+'</p>'+
 note(r.status==='ready'?(r.gameId==='cribbage'?'All seats filled. The host may start a qualified Cribbage match.':'All seats filled. Game start and turns require BC-0.6; no match has begun.'):
 r.status==='cancelled'?'This room was cancelled.':r.status==='in_game'?'Room is now in a server-owned session. Seats are locked.':r.status==='completed'?'The server session has ended.':'Lobby only — no wagers, rewards or playable match until its game engine is qualified.')+
-'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.gameId==='cribbage'&&r.status==='ready'?'<form data-cribbage-room-start><button type="submit">Start Cribbage</button></form>':'')+cribbageLink+roomLive+invites+
+'<ol class="classic-room__seats">'+seats+'</ol>'+(isHost&&r.gameId==='cribbage'&&r.status==='ready'?'<form data-cribbage-room-start><button type="submit">Start Cribbage</button></form>':'')+cribbageLink+labyrinthLink+roomLive+invites+
 (isHost&&(r.status==='open'||r.status==='ready')?makeAction('cancel-room',0,'Cancel room'):'')+'</section>';
 }
 export function renderClassicRooms(state,{enabled=false,roomId=null,live=null}={}){

@@ -8,6 +8,7 @@ import {verifyLabyrinthProjection,labyrinthLegalMoves,renderLabyrinthScreen,
  LABYRINTH_BOARD_SRC,LABYRINTH_MANIFEST_SHA,LABYRINTH_RULES_VERSION} from '../core/labyrinth-cribbage-ui.js';
 import {LABYRINTH_HOLE_CENTERS,LABYRINTH_HOLE_COUNT,LABYRINTH_BOARD_SHA256} from '../core/labyrinth-hole-survey.js';
 import {LABYRINTH_CRIBBAGE_TARGET} from '../core/labyrinth-cribbage-rules.js';
+import {renderClassicRooms} from '../core/classic-rooms.js';
 
 const cards=(count)=>Array.from({length:count},(_,i)=>i+1);
 const config={2:{id:'labyrinth-2p',deal:9,discard:3,crib:0},
@@ -135,4 +136,24 @@ test('BC-2.4 CSS and room format controls exist and do not accidentally activate
  assert.match(bindings,/format:data.get\('gameId'\)==='labyrinth-cribbage'/);
  assert.match(renderLabyrinthScreen({screen:'setup'}),/<fieldset disabled/);
  assert.match(renderLabyrinthScreen({screen:'play'}),/No verified 420ID Labyrinth session/);
+});
+
+test('BC-2.4 room deep link reopens the exact authorized Labyrinth match, not a standard Cribbage route',()=>{
+ const id='30000000-3333-4333-8333-333333333333';
+ const host='10000000-1111-4111-8111-111111111111';
+ const match='40000000-4444-4444-8444-444444444444';
+ const room={id,host,gameId:'labyrinth-cribbage',seatCount:4,visibility:'private',
+  status:'in_game',revision:3,variantId:'labyrinth-4p-partners',
+  seats:[0,1,2,3].map(i=>({index:i,controller:i===0?'human':'bot',team:i%2,
+    subject:i===0?host:'',difficulty:i===0?'':'medium'})),invites:[]};
+ const state={status:'ready',viewer:host,selected:room,rooms:[room],friends:[],notice:''};
+ const live={status:'connected',room:{id},session:{id:match,roomId:id,gameId:'labyrinth-cribbage',
+  status:'active',sequence:9,turnSeat:0,viewerSeat:0},presence:{seats:[{seat:0,online:true}]}};
+ const html=renderClassicRooms(state,{enabled:true,roomId:id,live});
+ assert.match(html,RegExp('/games/labyrinth-cribbage/play\\?session='+match));
+ assert.match(html,/Resume your private Labyrinth table/);
+ assert.doesNotMatch(html,/Open your private Cribbage table/);
+ const forged=renderClassicRooms(state,{enabled:true,roomId:id,live:{...live,
+  session:{...live.session,roomId:'50000000-5555-4555-8555-555555555555'}}});
+ assert.doesNotMatch(forged,/Resume your private Labyrinth table/);
 });

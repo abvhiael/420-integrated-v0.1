@@ -72,6 +72,21 @@ test('private retrieval refuses public cache, changed bytes, wrong SHA, denied/e
     await assert.rejects(store.retrieve({object,grant,mode:'private'}),/unavailable/);
   }
 });
+test('a malicious oversized streaming response is rejected at the byte limit',async()=>{
+  const {object,grant}=await fixture();
+  let delivered=0;
+  const store=createPrivate420StorageRetrieval420({
+    endpoint:'https://private-storage.example.test',cryptoImpl:webcrypto,
+    fetchImpl:async()=>new Response(new ReadableStream({
+      pull(controller){delivered++;
+        controller.enqueue(new Uint8Array(object.size_bytes+1));
+        controller.close();
+      }
+    }),{status:200,headers:{'cache-control':'private, no-store'}})
+  });
+  await assert.rejects(store.retrieve({object,grant,mode:'private'}),/unavailable/);
+  assert.equal(delivered,1,'overflow stops after first excess chunk');
+});
 test('storage provider error text and access credentials never leak through application errors',async()=>{
   const {object,grant}=await fixture();
   const store=createPrivate420StorageRetrieval420({endpoint:'https://private-storage.example.test',

@@ -1,6 +1,6 @@
 // Approved 420Storage v1 private retrieval transport. Never route confidential
 // Arbitration files through public Storage, a redirect, untrusted host or cache.
-import {EvidencePrivacyError420,ARBITRATION_EVIDENCE_MAX_BYTES_420} from './arbitration-evidence.js';
+import {EvidencePrivacyError420,ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420} from './arbitration-evidence.js';
 const fail=()=>{throw new EvidencePrivacyError420('approved private storage retrieval unavailable');};
 const FIELDS=['object_id','manifest_id','shard_index','shard_root','size_bytes','commitment_id'];
 const SHA=/^0x[0-9a-fA-F]{64}$/;
@@ -31,7 +31,7 @@ export function createPrivate420StorageRetrieval420({endpoint,fetchImpl=globalTh
     }
     assert(SHA.test(String(object.shard_root))&&
       Number.isSafeInteger(Number(object.size_bytes))&&Number(object.size_bytes)>0&&
-      Number(object.size_bytes)<=ARBITRATION_EVIDENCE_MAX_BYTES_420+1024);
+      Number(object.size_bytes)<=ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420);
     try{
       const response=await fetchImpl(url.toString(),{
         method:'GET',mode:'cors',redirect:'error',cache:'no-store',credentials:'omit',

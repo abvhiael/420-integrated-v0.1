@@ -58,3 +58,25 @@
   .arbitration-connected button,.arbitration-search button,.arbitration-form>button { width:100%; }
 }
 @media(prefers-reduced-motion:reduce) { .arbitration-app * { scroll-behavior:auto!important; transition:none!important; } }
+
+/* Private evidence is deliberately a local-only, opt-in UI. Never render file bytes
+   or recovery keys in public timeline, logs, status, tooltips or analytics. */
+.arbitration-private-evidence { min-width:0; padding:16px; margin:16px 0;
+  border:1px solid var(--border); border-radius:14px;
+  background:var(--wallet-surface-raised,#141c17); display:grid; gap:11px; }
+.arbitration-private-evidence label { display:grid; gap:7px; min-width:0; }
+.arbitration-private-evidence input { max-width:100%; min-width:0; width:100%; min-height:44px;
+  border:1px solid var(--border); border-radius:10px; background:var(--wallet-surface,#101713);
+  color:var(--wallet-text,#fff); padding:10px; }
+.arbitration-private-evidence button { justify-self:start; min-height:44px; }
+.arbitration-private-evidence #arbitration-inspection-form { display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:end; }
+.arbitration-private-evidence #arbitration-inspection-form button { grid-column:1/-1; }
+.arbitration-private-evidence [hidden] { display:none!important; }
+.arbitration-private-evidence :is(input,button):focus-visible {
+  outline:3px solid var(--wallet-accent,var(--accent)); outline-offset:3px; }
+@media(max-width:600px) {
+  .arbitration-private-evidence { padding:12px; }
+  .arbitration-private-evidence #arbitration-inspection-form { grid-template-columns:minmax(0,1fr); }
+  .arbitration-private-evidence button { width:100%; }
+}

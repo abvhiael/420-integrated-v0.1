@@ -126,3 +126,7 @@ Track GRC/CURE balances only from appropriately authenticated independent chain/
 ## Qualification and evidence rules
 
 Every implementation slice records step/level, actual base/main, exact implementation SHA, changed paths, owning workflow/run/job, tests including negatives, external provider/environment identity, secret redaction and current blockers. Evidence-only bookkeeping may inherit the qualified implementation SHA. Do not declare a public network, approved Gridcoin route, exchange listing, production-ready bridge, external attestation or funded payout without actual independent deployment/source evidence. All future contract/bridge implementation changes use dedicated PR and user-approved merge policy.
+
+## Phase 3 Gridcoin G-01 reconciliation (2026-11-23)
+
+The historical [G-01 fail-closed feasibility gate](CMP-G01-GRIDCOIN-FEASIBILITY.md) and [qualification evidence](CMP-G01-QUALIFICATION-EVIDENCE.md) are restored from PR #590 in the canonical ingestion suite. This is a **research-only NO-GO** and does not grant an adapter, listed GRC market, wrapped asset, validator entitlement, custody authority, or 420Bridge gateway. Any conditional live-node corroboration, independent source proof, redemption economics, reorg/finality qualification, governance approval, and funded bidirectional testnet exercise remain in the canonical testnet roadmap. A passing local G-01 unit test proves only default-deny behavior; it does not close external science or Gridcoin feasibility gates.

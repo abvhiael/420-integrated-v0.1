@@ -28,7 +28,7 @@ function invalidate(){
 }
 export async function verifyWallet420IDSession(){
   await bootstrap;
-  if(bootError)throw new Error('420ID Wallet configuration is not verified',{cause:bootError});
+  if(bootError)throw new Error('420ID Wallet configuration unverified',{cause:bootError});
   if(!configured)throw new Error('420ID Wallet configuration is still unverified');
   if(!enabled)return null; // 420ID is optional; independent Wallet authority remains mandatory.
   // Once a 420ID session is lost or its subject changes, a newly minted

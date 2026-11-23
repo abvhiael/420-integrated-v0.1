@@ -71,7 +71,6 @@ export class ArbitrationChainFixture420 implements ChainSource420{
   c.events.map(e=>[e.name,new Interface([{type:'event',name:e.name,inputs:e.inputs}]) ])));
  chainId():Promise<bigint>{return Promise.resolve(420n);}
  blockNumber():Promise<bigint>{return Promise.resolve(this.head);}
- finalizedBlockNumber():Promise<bigint>{return Promise.resolve(this.finalized??0n);}
  blockHash(n:number):Hex{return n===0?(this.wrongGenesis?h(99):h(1)):h(1000+n+(this.fork&&n>=6?1000:0));}
  getBlockByNumber(n:bigint):Promise<IndexerBlock|null>{
   if(n<0n||n>this.head)return Promise.resolve(null);

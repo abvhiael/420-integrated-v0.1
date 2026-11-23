@@ -19,6 +19,25 @@ func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
   return nil
  }
  h.classicMatchSocialEnabled=true
+ t.Cleanup(func(){
+  ctx:=context.Background()
+  for _,hostID:=range []string{memberA,memberB}{
+   scope:="(SELECT id FROM bg_account_social.classic_rooms WHERE host=$1)"
+   sessions:="(SELECT id FROM bg_account_social.classic_sessions WHERE room_id IN "+scope+")"
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_rule_moves WHERE session_id IN "+sessions,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_rule_genesis WHERE session_id IN "+sessions,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_session_commands WHERE session_id IN "+sessions,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_session_events WHERE session_id IN "+sessions,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_match_requests WHERE actor=$1",hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_room_presence WHERE room_id IN "+scope,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_sessions WHERE room_id IN "+scope,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_room_invites WHERE room_id IN "+scope,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_room_seats WHERE room_id IN "+scope,hostID)
+   _,_=h.Rooms.Store.DB.ExecContext(ctx,"DELETE FROM bg_account_social.classic_rooms WHERE host=$1",hostID)
+  }
+  _=h.Rooms.Store.Relationship(ctx,memberA,memberB,"follow",false)
+  _=h.Rooms.Store.Relationship(ctx,memberB,memberA,"follow",false)
+ })
  room:=bc05Create(t,h,host,"labyrinth-cribbage","private",2)
  if room.VariantID!="labyrinth-2p"{t.Fatal("wrong immutable variant")}
  for _,pair:=range [][2]string{{memberA,memberB},{memberB,memberA}}{

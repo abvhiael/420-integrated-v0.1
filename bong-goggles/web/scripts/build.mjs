@@ -9,6 +9,7 @@ import {verifyChaosVehicleArt} from './verify-chaos-vehicle-art.mjs';
 import {CHAOS_IMAGE_MANIFEST_PATH,createChaosImageManifest} from './verify-chaos-image-manifest.mjs';
 import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
+import {LABYRINTH_HOLE_CENTERS} from '../core/labyrinth-hole-survey.js';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
 import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags,resolveClassicBuildFlags} from './account-social-build-config.mjs';
@@ -35,7 +36,7 @@ const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLAS
 const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // Only approved dashboard assets and explicitly mapped optimized game cards are published.
@@ -90,6 +91,40 @@ if(!cribbageLeaf.startsWith('<svg ')||!cribbageLeaf.includes('viewBox="0 0 1448 
  throw Error('Invalid approved Cribbage gameboard asset');
 await mkdir(dirname(resolve(out,cribbageLeafRelative)),{recursive:true});
 await cp(cribbageLeafSource,resolve(out,cribbageLeafRelative));
+// BC-2.4 original-board publication: never substitute or recompress the
+// exact player-supplied PNG, and never widen the frozen BC-1.4 leaf allowance.
+// Source is optional until this separate source-art upload is complete;
+// an absent original MUST NOT be treated as board qualification.
+const labyrinthOriginal='assets/games/labyrinth-cribbage/labyrinth.png';
+const labyrinthOriginalPath=resolve(root,labyrinthOriginal);
+let labyrinthOriginalPresent=false;
+try{
+ const bytes=await readFile(labyrinthOriginalPath);
+ const image=await sharp(bytes).metadata();
+ // GitHub's committed user-approved artwork may use different PNG encoding
+ // from the source used to identify the hole centers. Pin the exact uploaded
+ // Git blob, not the earlier source's PNG-byte SHA-256.
+ const gitBlob=createHash('sha1').update('blob '+bytes.length+'\0').update(bytes).digest('hex');
+ if(gitBlob!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2'||
+    image.format!=='png'||image.width!==1254||image.height!==1254)
+   throw Error('BC-2.4 user-approved GitHub board blob/dimensions mismatch');
+ // Validate the *pixel geometry*, not the PNG encoding: the independently
+ // surveyed 652 dark circles must still occupy the approved coordinates.
+ const {data:grey,info:geometry}=await sharp(bytes).removeAlpha().greyscale()
+   .raw().toBuffer({resolveWithObject:true});
+ if(geometry.channels!==1||LABYRINTH_HOLE_CENTERS.length!==652||
+    LABYRINTH_HOLE_CENTERS.some(({x,y})=>grey[y*geometry.width+x]>75))
+   throw Error('BC-2.4 uploaded board does not align with the 652 surveyed holes');
+ const target=resolve(out,labyrinthOriginal);
+ await mkdir(dirname(target),{recursive:true});
+ await cp(labyrinthOriginalPath,target);
+ labyrinthOriginalPresent=true;
+}catch(e){
+ if(e?.code!=='ENOENT')throw e;
+ console.warn('BC-2.4 original wood-board PNG is not installed; public Play remains disabled, no alternate image published.');
+}
+
+
 // The player's original uploaded board is the one and only displayed art.
 // Pin it to the committed Git blob and copy its actual bytes without edits.
 const exactBoard='assets/games/cribbage/board-cannabis-leaf.png';
@@ -120,4 +155,5 @@ await writeFile(resolve(out,CHAOS_IMAGE_MANIFEST_PATH),JSON.stringify(imageManif
 // The build retains illustrative service origins from the example config.
 // Off-chain account opt-in does not authorize a production or on-chain release.
 await writeFile(resolve(out,'runtime-config.json'),JSON.stringify(runtimeConfig,null,2)+'\n');
+console.log('BC-2.4 original board published:',labyrinthOriginalPresent);
 console.log('Bong Goggles web build created dist/ (approved branding, 49 optimized game cards, 6 verified atlas layers and 6 vehicle tokens; accountSocial='+runtimeConfig.features.accountSocial+'; example service origins; NOT a release authorization)');

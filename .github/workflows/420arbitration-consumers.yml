@@ -1,0 +1,74 @@
+name: 420Arbitration ARB-PRE-07 consumer qualification
+on:
+  pull_request:
+    paths:
+      - 'commerce/src/service.mjs'
+      - 'commerce/src/arbitration.mjs'
+      - 'commerce/test/com6b-dispute.test.mjs'
+      - 'commerce/test/arbitration-adapter.test.mjs'
+      - 'contracts/src/launchpad/LaunchpadCrowdfundingIntegration420.sol'
+      - 'contracts/test/LaunchpadCrowdfundingIntegration420.t.sol'
+      - 'contracts/test/LaunchpadEcosystem420.t.sol'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-07-CONSUMER-INTEGRATION.md'
+      - '.github/workflows/420arbitration-consumers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arb-pre07-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  commerce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: commerce/package-lock.json
+      - name: Install locked Commerce dependencies
+        working-directory: commerce
+        run: npm ci --ignore-scripts
+      - name: Qualify Market dispute, canonical Arbitration binding and action revalidation
+        working-directory: commerce
+        run: node --test test/com6b-dispute.test.mjs test/arbitration-adapter.test.mjs
+
+  launchpad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact source commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stage only the real Launchpad consumer and local EVM integration tests
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p test/.arb-consumer-ci
+          for source in test/LaunchpadCrowdfundingIntegration420.t.sol test/LaunchpadEcosystem420.t.sol; do
+            sed 's#"../src/#"../../src/#g' "$source" > "test/.arb-consumer-ci/${source##*/}"
+          done
+      - name: Qualify origin/round/replay and real Arbitration-to-Launchpad integration
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/launchpad
+          FOUNDRY_TEST: test/.arb-consumer-ci
+        run: |
+          forge test --match-path 'test/.arb-consumer-ci/Launchpad*420.t.sol' --match-test 'test(PublicationRechecksCanonicalOriginAndRejectsStaleRound|FinalizedDisputeOutcomePublishesOnceWithoutExecutingRemedy|DisputeMustMatchCanonicalArbitrationOriginAndProjectController|RealArbitrationFinalityAndNotificationBoundary)' -vvv

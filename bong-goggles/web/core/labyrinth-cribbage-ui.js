@@ -153,7 +153,7 @@ export function renderLabyrinthScreen({screen='intro',view=null,session=null,sel
   (session.status==='active'&&session.deadline?' · turn deadline '+esc(new Date(session.deadline).toLocaleString()):'')+'</p>'+
   '<p>Account-authorized human seats · server-owned scores and moves · reconnect from My Games.</p>'+
   (session.status==='active'?'<button type="button" data-lab-lifecycle="resign">Resign match</button>':'')+
-  (ended?'<button type="button" data-lab-rematch>Invite rematch</button>':'')+
+  (ended&&session.status!=='cancelled'?'<button type="button" data-lab-rematch>Invite rematch</button>':'')+
   '</section>':'';
  const outcome=ended?'<p role="status">Match ended: '+esc(session.finishedReason||session.status)+
   (session.winnerSeat===null?' · no declared winner':' · winner seat '+(session.winnerSeat+1))+'</p>':'';

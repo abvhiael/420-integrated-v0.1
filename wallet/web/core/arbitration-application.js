@@ -332,6 +332,6 @@ export function createArbitrationApplication420({provider,release,account,domain
     generation+=1;verifier.invalidate();proposals.clear?.();
   }
   function dispose(){generation+=1;verifier.dispose();received.clear();}
-  return Object.freeze({account:user,domains:Object.freeze(supplied),policies,dashboard,detail,review,submit,restore,status,
+  return Object.freeze({account:user,domains:Object.freeze(supplied),verify:verified,policies,dashboard,detail,review,submit,restore,status,
     invalidate,dispose});
 }

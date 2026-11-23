@@ -101,7 +101,7 @@ try{
   const reply=(body,status=200)=>new Response(JSON.stringify(body),{
    status,headers:{'Content-Type':'application/json'}});
   const mock=async(url,options={})=>{
-   const p=new URL(url,location.origin).pathname.replace(/^\\/social-api(?=\\/v1\\/)/,'');
+   const p=new URL(url,location.origin).pathname.replace(/^\/social-api(?=\/v1\/)/,'');
    if(!authorized)return reply({error:'not_authorized'},403);
    if(p==='/v1/me')return reply({walletRequired:false,profile:{subject}});
    if(p==='/v1/classic-sessions')return reply({onChain:false,wager:false,

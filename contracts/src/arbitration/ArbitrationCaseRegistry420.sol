@@ -49,6 +49,7 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
     error AppealUnavailable();
     error RulingRegistryAlreadyBound();
     error OnlyRulingRegistry();
+    error InvalidRulingRegistry();
 
     event RulingRegistryBound(address indexed rulingRegistry);
     event CaseOpened(
@@ -87,6 +88,13 @@ contract ArbitrationCaseRegistry420 is I420System, SystemAccess {
     ) external onlyGovernance {
         if (registry == address(0)) revert ZeroAddress();
         if (rulingRegistry != address(0)) revert RulingRegistryAlreadyBound();
+        // Prevent a one-time governance binding to an EOA, unbuilt contract, or
+        // a ruling registry referencing a different case ledger.
+        if (registry.code.length == 0) revert InvalidRulingRegistry();
+        (bool ok, bytes memory result) = registry.staticcall(abi.encodeWithSignature("cases()"));
+        if (!ok || result.length != 32 || abi.decode(result, (address)) != address(this)) {
+            revert InvalidRulingRegistry();
+        }
         rulingRegistry = registry;
         emit RulingRegistryBound(registry);
     }

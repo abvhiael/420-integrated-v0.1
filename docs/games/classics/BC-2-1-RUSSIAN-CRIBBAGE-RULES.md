@@ -36,7 +36,7 @@ Show each of the six retained cards together with the same public starter (seven
 - **Crib:** All six crib cards **and** the starter must share the same suit to award **7 points**. Six matching crib cards with a nonmatching starter score **0 flush points**.
 - A hand's flush, fifteens, pairs, runs and nobs are cumulative. There is no maximum 29-point limit: a seven-card count can exceed the ordinary five-card hand maximum. Test exhaustive subsets, not standard cribbage's hardcoded five-card combinator.
 
-After every pegging card has been played, score hands **clockwise from dealer's left**, counting the dealer's hand last, followed by the dealer's six-card crib. Show the crib only when legitimately counted; don't leak opponent hands or crib cards before show. A zero-point hand is counted but does not advance the pegs. If any point award reaches 241, stop counting immediately.
+After every pegging card has been played, score hands **clockwise from dealer's left**, counting the dealer's hand last, followed by the dealer's six-card crib. Show the crib only when legitimately counted; don't leak hidden opponent hands or hidden crib cards before show. A zero-point hand is counted but does not advance the pegs. If any point award reaches 241, stop counting immediately.
 
 ## Loss classification and display
 

@@ -49,7 +49,7 @@ jobs:
         run: forge fmt --check src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol
       - name: Build Arbitration graph
         working-directory: contracts
-        run: forge build src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol --sizes
+        run: forge build src/arbitration test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol test/ArbitrationProtocolQualification420.t.sol --sizes
       - name: Verify Arbitration repository contract
         run: python3 scripts/verify-420arbitration-audit.py
       - name: Verify ARBITRATION-AUDIT-4 release materialization
@@ -66,7 +66,7 @@ jobs:
           set -euo pipefail
           mkdir -p arbitration-audit-tests
           trap 'rm -rf arbitration-audit-tests' EXIT
-          cp test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol arbitration-audit-tests/
+          cp test/Arbitration*.t.sol arbitration-audit-tests/
           FOUNDRY_SRC=src/arbitration FOUNDRY_TEST=arbitration-audit-tests forge test --match-path 'arbitration-audit-tests/Arbitration*.t.sol' -vvv
       - name: Reject dangerous Arbitration primitives
         run: |
@@ -98,7 +98,7 @@ jobs:
           set -euo pipefail
           mkdir -p arbitration-audit-tests
           trap 'rm -rf arbitration-audit-tests' EXIT
-          cp test/ArbitrationGenesis420.t.sol test/ArbitrationDeploymentBinding420.t.sol arbitration-audit-tests/
+          cp test/Arbitration*.t.sol arbitration-audit-tests/
           FOUNDRY_SRC=src/arbitration FOUNDRY_TEST=arbitration-audit-tests forge test --match-path 'arbitration-audit-tests/Arbitration*.t.sol' -vvv
       - name: Install Slither
         run: python -m pip install --disable-pip-version-check slither-analyzer

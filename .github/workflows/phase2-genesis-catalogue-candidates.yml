@@ -1,0 +1,30 @@
+name: Phase 2 Genesis Candidate Catalogue Preservation
+on:
+  pull_request:
+    paths:
+      - 'config/genesis-application-decision-2.json'
+      - 'config/genesis-applications.json'
+      - 'scripts/migration/verify-phase2-genesis-candidates.mjs'
+      - 'docs/genesis/PHASE2-GENESIS-CATALOGUE-RECONCILIATION.md'
+      - '.github/workflows/phase2-genesis-catalogue-candidates.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact commit and release-disabled catalogue boundaries
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          node scripts/migration/verify-phase2-genesis-candidates.mjs

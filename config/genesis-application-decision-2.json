@@ -1,0 +1,329 @@
+{
+  "schema": "420-genesis-expansion-decision-v1",
+  "decision_id": "GENESIS_APPLICATION_DECISION_2",
+  "owner_authorized_at": "2026-10-18",
+  "baseline_main_sha": "733d087aad67bd97abebeca0d0ba171cf8d19e24",
+  "status": "CATALOG_INCLUSION_AUTHORIZED_RELEASE_GATED",
+  "immutable_prior_catalog_entries": 22,
+  "principles": [
+    "Catalog inclusion is not deployment, production release, on-chain authority or legal approval",
+    "All existing 22 catalog entries remain unchanged and retain their original order",
+    "No contract, address, token economic, protocol or validator authorization granted",
+    "Shared services retain their original authoritative source; public faces cannot duplicate custody, rights, moderation or registry authority",
+    "Regulated features remain disabled until independent approvals and live evidence"
+  ],
+  "groups": {
+    "core": [
+      "420Media",
+      "420Mail",
+      "420Reputation",
+      "420Location",
+      "420Pay",
+      "420Rights",
+      "420Treasury",
+      "420Grants"
+    ],
+    "public": [
+      "420Exchange",
+      "BongGoggles",
+      "420Launchpad",
+      "TownSquare",
+      "PuffBuddies",
+      "ReeferReview",
+      "DoobTube",
+      "420Hz",
+      "420Grow",
+      "HighStreetMarket",
+      "420BnB",
+      "420Travel",
+      "420Events",
+      "420Calendar",
+      "420Classifieds",
+      "420Learn",
+      "420University",
+      "420Freelance"
+    ],
+    "regulated": [
+      "DOOBr",
+      "LIFTd",
+      "420Bet"
+    ]
+  },
+  "entries": [
+    {
+      "name": "420Exchange",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420 Swap",
+      "readiness": "release_gated",
+      "scope": "Exchange trading client; no independent swap or custody authority",
+      "release_enabled": false
+    },
+    {
+      "name": "BongGoggles",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Media / 420 Gaming Protocol",
+      "readiness": "release_gated",
+      "scope": "Gaming and media experience; unresolved BG-19 production web/moderation gates",
+      "release_enabled": false
+    },
+    {
+      "name": "420Launchpad",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420 Launchpad protocol / 420Pay",
+      "readiness": "release_gated",
+      "scope": "Crowdfunding frontend; on-chain campaign authority remains canonical",
+      "release_enabled": false
+    },
+    {
+      "name": "420Mail",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Messenger / 420Storage / 420Identity",
+      "readiness": "external_only",
+      "scope": "Identity-addressed private inbox with external SMTP disabled",
+      "release_enabled": false
+    },
+    {
+      "name": "TownSquare",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Town Community Boards",
+      "readiness": "release_gated",
+      "scope": "Public community front end over canonical 420Town moderation and state",
+      "release_enabled": false
+    },
+    {
+      "name": "420Media",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Media service",
+      "readiness": "external_only",
+      "scope": "Media publishing/streaming service frontend; no duplicate media authority",
+      "release_enabled": false
+    },
+    {
+      "name": "PuffBuddies",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420 Gaming Protocol",
+      "readiness": "release_gated",
+      "scope": "Independent game experience, optional wallet only",
+      "release_enabled": false
+    },
+    {
+      "name": "ReeferReview",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "Reefer Review Publishing",
+      "readiness": "external_only",
+      "scope": "Editorial/publication frontend with provenance and moderated visibility",
+      "release_enabled": false
+    },
+    {
+      "name": "DoobTube",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Media",
+      "readiness": "release_gated",
+      "scope": "Public creator/video frontend over 420Media; no second Media protocol",
+      "release_enabled": false
+    },
+    {
+      "name": "420Hz",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Media / 420Rights / 420AI",
+      "readiness": "release_gated",
+      "scope": "Music foundation at launch; planned Generate/Community/Awards expansion not yet accepted",
+      "release_enabled": false
+    },
+    {
+      "name": "420Grow",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Location / 420Compliance",
+      "readiness": "release_gated",
+      "scope": "Cultivation management application with jurisdictional restrictions",
+      "release_enabled": false
+    },
+    {
+      "name": "HighStreetMarket",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420 Market / 420Pay",
+      "readiness": "external_only",
+      "scope": "420Commerce marketplace frontend; canonical order/settlement remain protocol-owned",
+      "release_enabled": false
+    },
+    {
+      "name": "420BnB",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Travel / 420Pay / 420Compliance",
+      "readiness": "release_gated",
+      "scope": "Lodging discovery; booking and settlement disabled until authorized",
+      "release_enabled": false
+    },
+    {
+      "name": "420Travel",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Travel consumer service",
+      "readiness": "external_only",
+      "scope": "Travel discovery and trip planning",
+      "release_enabled": false
+    },
+    {
+      "name": "420Events",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Events consumer service",
+      "readiness": "release_gated",
+      "scope": "Events discovery and participation",
+      "release_enabled": false
+    },
+    {
+      "name": "420Calendar",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Calendar consumer service",
+      "readiness": "release_gated",
+      "scope": "Calendaring and scheduling thin UI",
+      "release_enabled": false
+    },
+    {
+      "name": "420Classifieds",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Classifieds consumer service",
+      "readiness": "release_gated",
+      "scope": "Non-commerce classifieds and moderated local discovery",
+      "release_enabled": false
+    },
+    {
+      "name": "420Learn",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Learn + 420Knowledge consumer service",
+      "readiness": "release_gated",
+      "scope": "Education and knowledge frontend",
+      "release_enabled": false
+    },
+    {
+      "name": "420University",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420University umbrella shell",
+      "readiness": "release_gated",
+      "scope": "Education umbrella without self-issued credential authority",
+      "release_enabled": false
+    },
+    {
+      "name": "420Freelance",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Freelance consumer service",
+      "readiness": "release_gated",
+      "scope": "Professional services listings; consumer registry still marks POST_GENESIS_APP_GENESIS_SCHEMA",
+      "release_enabled": false,
+      "classification_note": "Explicit owner-authorized public catalog inclusion updates former post-Genesis launch classification; service implementation evidence still required"
+    },
+    {
+      "name": "420Reputation",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Reputation consumer service",
+      "readiness": "release_gated",
+      "scope": "Non-authoritative trust/reputation reader",
+      "release_enabled": false
+    },
+    {
+      "name": "420Location",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Location consumer service",
+      "readiness": "release_gated",
+      "scope": "Privacy-scoped maps and location client",
+      "release_enabled": false
+    },
+    {
+      "name": "420Pay",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "existing_authority": "420Pay canonical protocol",
+      "readiness": "release_gated",
+      "scope": "Payment interface without parallel payment custody",
+      "release_enabled": false
+    },
+    {
+      "name": "420Rights",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "existing_authority": "420Rights canonical protocol",
+      "readiness": "release_gated",
+      "scope": "Rights and provenance interface without separate ownership authority",
+      "release_enabled": false
+    },
+    {
+      "name": "420Treasury",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "existing_authority": "420Treasury canonical protocol",
+      "readiness": "release_gated",
+      "scope": "Public transparent treasury interface",
+      "release_enabled": false
+    },
+    {
+      "name": "420Grants",
+      "class": "GENESIS_PROTOCOL_AND_USER_APP",
+      "contracts_required": true,
+      "existing_authority": "420Grants canonical protocol",
+      "readiness": "release_gated",
+      "scope": "Grants participation/disbursement interface",
+      "release_enabled": false
+    },
+    {
+      "name": "DOOBr",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Compliance / 420Pay / 420Location",
+      "readiness": "regulated",
+      "scope": "Delivery interface; disabled until jurisdiction/operator approval",
+      "release_enabled": false
+    },
+    {
+      "name": "LIFTd",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Compliance / 420Location / 420Pay",
+      "readiness": "regulated",
+      "scope": "Rideshare interface; disabled pending transport and insurance approval",
+      "release_enabled": false
+    },
+    {
+      "name": "420Bet",
+      "class": "GENESIS_USER_APP",
+      "contracts_required": false,
+      "existing_authority": "420Randomness / 420Pay / 420Compliance",
+      "readiness": "regulated",
+      "scope": "Gaming interface; wagering disabled until independent RNG/economic/legal approvals",
+      "release_enabled": false
+    }
+  ],
+  "release_classes": {
+    "external_only": "Repository-side phase reported substantially complete; still requires independent exact release/deployment checks",
+    "release_gated": "Outstanding local or external release work; do not claim launch readiness",
+    "regulated": "Off until required independent legal, operator, funding, safety and jurisdiction authorization"
+  },
+  "remaining_protocol_only": [
+    "420Randomness",
+    "420Oracle",
+    "420Storage / 420ResourceProtocol",
+    "420ComputeMarket",
+    "420Messenger"
+  ],
+  "inventory_note": "420Search and 420AppStore are already in the 22-entry frozen baseline, so not added again."
+}

@@ -139,3 +139,11 @@
 /* BC-1.7: history links override generic dark-green game-page ink. */
 .cribbage-app .cribbage-social a{color:#daefbd;text-decoration:underline;text-underline-offset:.15em}
 .cribbage-app .cribbage-social a:focus-visible{outline:3px solid #f9ba58;outline-offset:3px}
+
+.cribbage-practice{margin:1rem;padding:1rem;border:1px solid #64886c;border-radius:12px;background:#143528;color:#e1f5db}
+.cribbage-practice form{display:flex;flex-wrap:wrap;align-items:end;gap:.8rem}
+.cribbage-practice label{display:grid;gap:.35rem}
+.cribbage-practice select,.cribbage-practice button{padding:.7rem;border-radius:8px;font:inherit}
+.cribbage-practice button{background:#c2edac;color:#143321;border:2px solid #a8d291}
+.cribbage-practice button:disabled{opacity:.6}
+.cribbage-practice :focus-visible{outline:3px solid #ffd773}

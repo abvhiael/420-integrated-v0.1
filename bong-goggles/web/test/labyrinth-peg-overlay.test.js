@@ -46,3 +46,16 @@ test('BC-2.4 all 32 decade markers are independently located on the supplied ori
   assert.ok(p.every(x=>Number.isInteger(x)&&x>=0&&x<1254));
  }
 });
+
+test('BC-2.4 every winning score 0..325 is preserved on the correct physical lane',()=>{
+ for(let score=0;score<=325;score++){
+  assert.deepEqual(labyrinthPhysicalLaneScores({scores:[score,325-score],teams:[0,1]}),[
+   {team:0,lane:0,score},{team:1,lane:1,score:325-score}]);
+  assert.deepEqual(labyrinthPhysicalLaneScores({scores:[score,22,score,22],teams:[0,1,0,1]}),[
+   {team:0,lane:0,score},{team:1,lane:1,score:22}]);
+ }
+ // Authoritative scores can overshoot during a scoring award: the physical
+ // finish peg stops at hole 325, without modifying the true reported score.
+ assert.deepEqual(labyrinthPhysicalLaneScores({scores:[327,4],teams:[0,1]}),[
+  {team:0,lane:0,score:325},{team:1,lane:1,score:4}]);
+});

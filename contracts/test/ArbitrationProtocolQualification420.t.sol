@@ -292,8 +292,7 @@ contract ArbitrationProtocolQualification420Test {
         vm.prank(CLAIMANT);
         vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
         cases.openCase(
-            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(71)), keccak256("overflow-claim"),
-            keccak256("overflow-remedy")
+            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(71)), keccak256("overflow-claim"), keccak256("overflow-remedy")
         );
         require(cases.nextNonce() == beforeNonce, "overflow consumed case nonce");
 
@@ -301,8 +300,7 @@ contract ArbitrationProtocolQualification420Test {
         vm.prank(CLAIMANT);
         vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
         cases.openCase(
-            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(72)), keccak256("cast-claim"),
-            keccak256("cast-remedy")
+            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(72)), keccak256("cast-claim"), keccak256("cast-remedy")
         );
         require(cases.nextNonce() == beforeNonce, "timestamp cast consumed nonce");
     }
@@ -321,9 +319,7 @@ contract ArbitrationProtocolQualification420Test {
 
     function testAppealedEvidenceDeadlineOverflowRetainsOriginalRound() public {
         vm.warp(1);
-        policies.setPolicy(
-            DOMAIN, address(this), APPEAL, type(uint64).max - 500, type(uint64).max - 500, 3, true
-        );
+        policies.setPolicy(DOMAIN, address(this), APPEAL, type(uint64).max - 500, type(uint64).max - 500, 3, true);
         bytes32 id = _open(74);
         _rule(id, 1);
         vm.warp(type(uint64).max - 500);

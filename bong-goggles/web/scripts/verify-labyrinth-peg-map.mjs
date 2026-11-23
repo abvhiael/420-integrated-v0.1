@@ -12,7 +12,7 @@ const art=resolve(root,'assets/games/labyrinth-cribbage/labyrinth.png');
 const binary=await readFile(art).catch(()=>fail('approved original PNG absent'));
 // The creator approved the GitHub-uploaded PNG independently of the earlier
 // survey export's binary encoding. Pin its committed Git object identity.
-const blobSHA=createHash('sha1').update('blob '+binary.length+'\\0').update(binary).digest('hex');
+const blobSHA=createHash('sha1').update('blob '+binary.length+'\0').update(binary).digest('hex');
 if(blobSHA!=='db3f4e88a87bdb1ce9c6f202484bacfbb653cdc2')
  fail('the GitHub-approved board file was changed or replaced');
 const source=resolve(root,'core/labyrinth-peg-map.json');

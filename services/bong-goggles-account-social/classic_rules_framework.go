@@ -123,7 +123,8 @@ func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []Cla
  }
  variant:=""
  if configured,ok:=a.module.(RuleVariantModule);ok{
-  variant,e=configured.VariantForSeats(room,seats);if e!=nil{return nil,0,ErrInvalid}
+  selected,e:=configured.VariantForSeats(room,seats);if e!=nil{return nil,0,ErrInvalid}
+  variant=selected
  }
  first,e:=a.initialConfigured(seed,room.SeatCount,variant)
  if e!=nil{return nil,0,e}

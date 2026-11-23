@@ -73,6 +73,10 @@ func classicTeam(game string,count,seat int)int{
  if count==4&&classicPartners[game]{return seat%2}
  return seat
 }
+func classicRoomTeam(game string,count,seat int,format string)int{
+ if game=="labyrinth-cribbage"&&count==4&&format=="individual"{return seat}
+ return classicTeam(game,count,seat)
+}
 func NewClassicRooms(store *Store)(*ClassicRooms,error){
  if store==nil||store.DB==nil{return nil,ErrInvalid}
  return &ClassicRooms{Store:store},nil
@@ -141,10 +145,7 @@ func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibili
  for seat:=0;seat<count;seat++{
   controller:="empty";var occupant any
   if seat==0{controller="human";occupant=viewer}
-  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_room_seats (room_id,seat_index,controller,subject,team) VALUES($1,$2,$3,$4,$5)",id,seat,controller,occupant,func()int{
-    if game=="labyrinth-cribbage"&&count==4&&format=="individual"{return seat}
-    return classicTeam(game,count,seat)
-   }())
+  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_room_seats (room_id,seat_index,controller,subject,team) VALUES($1,$2,$3,$4,$5)",id,seat,controller,occupant,classicRoomTeam(game,count,seat,format))
   if e!=nil{return empty,e}
  }
  if e=tx.Commit();e!=nil{return empty,e}

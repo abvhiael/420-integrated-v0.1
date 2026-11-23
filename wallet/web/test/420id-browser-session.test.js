@@ -26,7 +26,7 @@ async function fixture(t,active=verified){
     addEventListener(key,fn){this.events.set(key,fn)},
     click(){this.events.get('click')?.()}
   }]));
-  const root={hidden:true,dataset:{},querySelector(s)=>elements[s.match(/\[data-420id-(.*?)\]/)?.[1]]};
+  const root={hidden:true,dataset:{},querySelector:(s)=>elements[s.match(/\[data-420id-(.*?)\]/)?.[1]]};
   t.after(()=>{
     globalThis.fetch=originalFetch;
     if(originalWindow===undefined)delete globalThis.window;else globalThis.window=originalWindow;

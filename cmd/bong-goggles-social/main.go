@@ -151,6 +151,13 @@ func main(){
   os.Getenv("SOCIAL420_CLASSIC_COMMUNICATIONS")=="restricted-acceptance");err!=nil{
   log.Fatal("BC-2.5 Labyrinth activation unavailable: ",err)
  }
+ if os.Getenv("SOCIAL420_LABYRINTH_MODE")=="restricted-acceptance"{
+  ctx,done:=context.WithTimeout(context.Background(),10*time.Second)
+  if err:=handler.EnableClassicLabyrinthMatchSocial(ctx);err!=nil{
+   done();log.Fatal("BC-2.5 Labyrinth rematch preflight unavailable: ",err)
+  }
+  done()
+ }
  // BC-1.6 requires its own migration/grants and never silently enables
  // social operations in an already-qualified BC-1.5 deployment.
  if os.Getenv("SOCIAL420_CRIBBAGE_SOCIAL_MODE")=="restricted-acceptance"{

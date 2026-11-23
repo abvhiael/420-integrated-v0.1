@@ -43,6 +43,10 @@ esc('Team '+(peg.team+1)+', '+name.toUpperCase()+' peg on '+(peg[name]||'start')
 }
 export function renderCribbageBoard({scores=[0,0],seatCount=2,pegs=null,settings={}}={}){
 const actual=pegs??cribbageNewPegs(scores,seatCount);
+const mark=settings.stinkhole?[...new Set(cribbageTeams(seatCount))].map(t=>{
+const p=cribbageHole(cribbageLane(t,seatCount),120);
+return '<circle class="cribbage-stinkhole" cx="'+p.x+'" cy="'+p.y+'" r="12"/>';
+}).join(''):'';
 const tokens=actual.map(p=>pegHtml(p,cribbageLane(p.team,seatCount))).join('');
 const table=actual.map(p=>'<li class="cribbage-team cribbage-team--'+cribbageLane(p.team,seatCount)+
 '"><span>Team '+(p.team+1)+'</span><strong>'+Math.min(121,p.score)+
@@ -52,7 +56,7 @@ return '<figure class="cribbage-leaf" aria-label="Cannabis-leaf cribbage scoring
 '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Leaf-shaped 121-point cribbage board">'+
 '<image href="'+CRIBBAGE_BOARD_ART+'" x="0" y="0" width="1448" height="1086" preserveAspectRatio="none"/>'+
 
-'<g class="cribbage-pegs">'+tokens+'</g></svg>'+
+'<g aria-hidden="true">'+mark+'</g><g class="cribbage-pegs">'+tokens+'</g></svg>'+
 '<figcaption><ol class="cribbage-board-totals">'+table+
 '</ol><p>Two pegs leapfrog as the server awards points. '+(seatCount===4?
 'Partners share a track.':seatCount===3?'Amber is the additional third-player virtual track.':

@@ -28,6 +28,9 @@ test('BC-2.1 is a dedicated versioned 241-point account ruleset',()=>{
  assert.ok(rules.includes('bc-russian-cribbage-241@1.0.0'));
  assert.match(rules,/must not enable Play/i);
  assert.equal(manifest.defaultFourPlayerVariantId,'russian-4p-partners');
+ assert.equal(manifest.board.scoringHolesPerRun,240);
+ assert.equal(manifest.board.finishHole,241);
+ assert.equal(manifest.board.startingScore,0);
 });
 test('BC-2.1 deals and discards conserve 52 cards, with exactly six retained and six in crib',()=>{
  const scenarios=[

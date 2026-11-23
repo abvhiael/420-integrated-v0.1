@@ -55,9 +55,12 @@ export function labyrinthPhysicalLaneScores({scores=[],teams=[]}={}){
  const result=[];
  for(const [lane,team] of distinct.entries()){
   const seat=teams.indexOf(team),score=scores[seat];
-  if(!integer(score,0,325)||teams.some((t,i)=>t===team&&scores[i]!==score))
+  // The authoritative seven-card scorer may award more than the winning
+  // threshold. Keep the reported score intact outside this renderer, but
+  // physically place the winning peg at the terminal hole 325.
+  if(!integer(score,0,10000)||teams.some((t,i)=>t===team&&scores[i]!==score))
    return [];
-  result.push({team,lane,score});
+  result.push({team,lane,score:Math.min(score,325)});
  }
  return result;
 }

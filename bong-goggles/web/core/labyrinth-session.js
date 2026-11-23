@@ -6,7 +6,7 @@ import {LABYRINTH_RULES_VERSION,LABYRINTH_MANIFEST_SHA,verifyLabyrinthProjection
 export const LABYRINTH_RULES_HASH='9eed3af244d95dd1757b2ce82c1f66d85581a9b0656e0f36eba825cf8ddbc791';
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const statuses=new Set(['active','finished','resigned','timed_out','cancelled']);
-const terminal=new Set(['finished','resigned','timed_out','cancelled']);
+const terminal=new Set(['finished','resigned','timed_out']);
 const arrays=['scores','hand','cardCounts','discarded','pegPile','pegged','saidGo','lastShow','lastAwards','losers'];
 const allowed=['gameId','variant','round','phase','dealer','turn','seat','scores','hand',
  'cardCounts','cribCount','discarded','starter','pegCount','pegPile','pegged','saidGo',

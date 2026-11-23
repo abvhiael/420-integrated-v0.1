@@ -1,0 +1,42 @@
+name: 420Arbitration ARB-PRE-05 private evidence qualification
+
+on:
+  pull_request:
+    paths:
+      - 'wallet/web/core/arbitration-evidence*.js'
+      - 'wallet/web/test/arbitration-evidence*.test.js'
+      - 'wallet/web/arbitration-management-ui.js'
+      - 'wallet/web/arbitration-management.css'
+      - 'docs/apps/arbitration/**'
+      - '.github/workflows/420arbitration-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arbitration-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exercise only private evidence privacy and case-bound integrity tests
+        run: node --test wallet/web/test/arbitration-evidence.test.js wallet/web/test/arbitration-evidence-workspace.test.js
+      - name: Parse Wallet private evidence and UI scripts
+        run: |
+          node --check wallet/web/core/arbitration-evidence.js
+          node --check wallet/web/core/arbitration-evidence-workspace.js
+          node --check wallet/web/arbitration-management-ui.js

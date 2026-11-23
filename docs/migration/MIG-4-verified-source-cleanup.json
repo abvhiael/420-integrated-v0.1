@@ -39,10 +39,6 @@
       "sha": "c13014580f18a5ce566d6491dddd30caea7057ab"
     },
     {
-      "path": "apps/arcade-web/src/UniversalGamePanel.tsx",
-      "sha": "d1e2189691b933fa5b742ace330406db47c33387"
-    },
-    {
       "path": "apps/arcade-web/src/casualAdapter.tsx",
       "sha": "56555154b9f71170c8293602d695597a4ce77a60"
     },
@@ -53,6 +49,10 @@
     {
       "path": "apps/arcade-web/src/style.css",
       "sha": "31e722178a21ccbb1db5862a2557ac3f730e4063"
+    },
+    {
+      "path": "apps/arcade-web/src/UniversalGamePanel.tsx",
+      "sha": "d1e2189691b933fa5b742ace330406db47c33387"
     },
     {
       "path": "apps/arcade-web/test/asset-recovery.test.mjs",
@@ -107,10 +107,6 @@
       "sha": "05f7fe197735bb86962126ec51359a49ca016d1b"
     },
     {
-      "path": "clients/budtender-web-v1/README.md",
-      "sha": "67df9f4acd0022440ec45a4c034d10b78acf191c"
-    },
-    {
       "path": "clients/budtender-web-v1/deployment.runtime.json",
       "sha": "525568b4fdf9b6050baefb64a31bb0abebe42caa"
     },
@@ -141,6 +137,10 @@
     {
       "path": "clients/budtender-web-v1/public/styles.css",
       "sha": "d8831dbabbd78ba08a840c9fa11514e8761ef2a5"
+    },
+    {
+      "path": "clients/budtender-web-v1/README.md",
+      "sha": "67df9f4acd0022440ec45a4c034d10b78acf191c"
     },
     {
       "path": "clients/budtender-web-v1/scripts/asset-qualification.mjs",
@@ -373,17 +373,82 @@
     {
       "path": "src/budtender/StoreProgression.ts",
       "sha": "a6887e9332b824ae7e3152fab4778467f7e1d8ce"
+    },
+    {
+      "path": "test/budtender/BudtenderApplicationService.spec.ts",
+      "sha": "1ff1a2ddf2d78a0b1b097a64f58fc93a4f528dac"
+    },
+    {
+      "path": "test/budtender/BudtenderCustomers.spec.ts",
+      "sha": "0e7aac4b32d3fb702fb2bc68c8816d2e5af503cf"
+    },
+    {
+      "path": "test/budtender/BudtenderIntegration.spec.ts",
+      "sha": "65559f4a09ac49d2a4acf4acbc2aa4c14231b5a7"
+    },
+    {
+      "path": "test/budtender/BudtenderStore.spec.ts",
+      "sha": "4a4eba8487f98174d2b9dbac2d7fcdbf5f21c894"
+    },
+    {
+      "path": "test/budtender/OfflineProgression.spec.ts",
+      "sha": "1491ad7c93469050030a0006d54fe82447f38d25"
+    },
+    {
+      "path": "test/budtender/ProductInventory.spec.ts",
+      "sha": "ad6029609e28a2b3d1932868663cc9c29738f8bd"
+    },
+    {
+      "path": "test/budtender/StoreProgression.spec.ts",
+      "sha": "5bf6567fafb5908673156f06a84a99b09b2d57d7"
     }
   ],
-  "retainedPendingPathOrDependencyProof": [
-    "scripts/arcade/verify-arc-0-3.mjs",
-    "test/budtender/BudtenderApplicationService.spec.ts",
-    "test/budtender/BudtenderCustomers.spec.ts",
-    "test/budtender/BudtenderIntegration.spec.ts",
-    "test/budtender/BudtenderStore.spec.ts",
-    "test/budtender/OfflineProgression.spec.ts",
-    "test/budtender/ProductInventory.spec.ts",
-    "test/budtender/StoreProgression.spec.ts"
-  ],
-  "note": "MIG-4 incomplete until remaining mixed consumer dependencies are reconciled; no testnet claims."
+  "retainedPendingPathOrDependencyProof": [],
+  "note": "MIG-4 local source and test custody reconciled; Genesis shared Gaming Protocol/Arcade catalogue authority retains its own verifiers. Real testnet/integration gates remain separate and unclaimed.",
+  "budtenderRegressionDestination": {
+    "repository": "abvhiael/420-budtender",
+    "commit": "1e1d8c352abc0382dc788bcc94811016c5a846f8",
+    "exactTests": [
+      {
+        "path": "test/budtender/BudtenderApplicationService.spec.ts",
+        "sha": "1ff1a2ddf2d78a0b1b097a64f58fc93a4f528dac"
+      },
+      {
+        "path": "test/budtender/BudtenderCustomers.spec.ts",
+        "sha": "0e7aac4b32d3fb702fb2bc68c8816d2e5af503cf"
+      },
+      {
+        "path": "test/budtender/BudtenderIntegration.spec.ts",
+        "sha": "65559f4a09ac49d2a4acf4acbc2aa4c14231b5a7"
+      },
+      {
+        "path": "test/budtender/BudtenderStore.spec.ts",
+        "sha": "4a4eba8487f98174d2b9dbac2d7fcdbf5f21c894"
+      },
+      {
+        "path": "test/budtender/OfflineProgression.spec.ts",
+        "sha": "1491ad7c93469050030a0006d54fe82447f38d25"
+      },
+      {
+        "path": "test/budtender/ProductInventory.spec.ts",
+        "sha": "ad6029609e28a2b3d1932868663cc9c29738f8bd"
+      },
+      {
+        "path": "test/budtender/StoreProgression.spec.ts",
+        "sha": "5bf6567fafb5908673156f06a84a99b09b2d57d7"
+      }
+    ],
+    "qualificationRuns": [
+      45119335512,
+      45119335465,
+      45119335454
+    ]
+  },
+  "genesisOwnedRetainedAuthorityProof": [
+    {
+      "path": "scripts/arcade/verify-arc-0-3.mjs",
+      "sha": "ae2b6621f8a1d32752f92e5d84eff6461b789128",
+      "role": "Genesis application catalogue owner amendment regression (not game runtime)"
+    }
+  ]
 }

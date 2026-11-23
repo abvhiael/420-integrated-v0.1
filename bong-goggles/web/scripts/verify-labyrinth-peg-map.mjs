@@ -53,10 +53,38 @@ for(const n of targets){
   fail('printed numeric guide '+n+' missing mapped image location');
  if(guide.some(p=>Math.hypot(p.x-print[0],p.y-print[1])>90))
   fail('guide '+n+' does not match independently surveyed printed location');
+ // Numeric labels are printed alongside a stretch of up to four adjacent
+ // score holes, not centered on the exact n-th physical hole.
  for(const track of atlas.tracks){
-  const hole=holes[track[n]],distance=Math.hypot(hole.x-guide[0].x,hole.y-guide[0].y);
-  const other=Math.hypot(hole.x-guide[1].x,hole.y-guide[1].y);
-  if(Math.min(distance,other)>70)fail('number '+n+' not aligned with physical hole track');
+  const hole=holes[track[n]];
+  if(Math.hypot(hole.x-print[0],hole.y-print[1])>135)
+   fail('number '+n+' track is disconnected from its printed decade');
+  let near=Infinity;
+  for(let delta=-4;delta<=4;delta++){
+   const at=n+delta;
+   if(at<0||at>325)continue;
+   const p=holes[track[at]];
+   near=Math.min(near,Math.hypot(p.x-print[0],p.y-print[1]));
+  }
+  if(near>60)fail('number '+n+' does not border its real printed numeral');
+ }
+}
+// Check segment topology at the actual surveyed coordinates. A nearest-neighbour
+// chain that jumps between carved lanes must fail even when all 652 holes appear.
+const crossing=(a,b,c,d)=>{
+ const orient=(u,v,w)=>(v.x-u.x)*(w.y-u.y)-(v.y-u.y)*(w.x-u.x);
+ return orient(a,b,c)*orient(a,b,d)<0&&orient(c,d,a)*orient(c,d,b)<0;
+};
+for(let lane=0;lane<2;lane++){
+ const path=atlas.tracks[lane],other=atlas.tracks[1-lane];
+ for(let i=0;i<325;i++){
+  const a=holes[path[i]],b=holes[path[i+1]];
+  for(let j=i+2;j<325;j++)
+   if(crossing(a,b,holes[path[j]],holes[path[j+1]]))
+    fail('self-crossing at lane '+lane+', score '+i+'/'+j);
+  if(lane===0)for(let j=0;j<325;j++)
+   if(crossing(a,b,holes[other[j]],holes[other[j+1]]))
+    fail('physical rails cross near score '+i+'/'+j);
  }
 }
 // Manual visual validation of source numerals and path direction remains mandatory:

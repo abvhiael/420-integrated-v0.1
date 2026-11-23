@@ -20,7 +20,7 @@
 | #658 | The short-lived signed-session messaging prototype is superseded by the PT-05 canonical Messenger integration and stricter post-await trust checks on main. No self-issued transport credentials or premature live messaging. |
 | #657 | Driver availability/offers and role/assignment/revocation tests retained in canonical L02 implementation, with explicit server-authoritative acceptance/decline. |
 | #656 | M-L02-A signed-session, PostgreSQL and rider/driver integration retained in main with milestone evidence. |
-| #655 | Private driver onboarding, evidence-reference metadata and reviewer separation retained; no self-approval or public document bytes. |
+| #655 | Private driver onboarding, evidence-reference metadata and reviewer separation retained; **this replacement additionally restores the missing protected onboarding panel mounting** alongside the existing driver availability and trip controls. No self-approval or public document bytes. |
 | #653 | Rider confirmed-trip, cancellation and safety flows retained in main. |
 | #652 | Quote-expiry, full fare disclosure, hash/amount explicit consent and idempotent ride commands retained. |
 | #651 | Permissioned/manual pickup and destination, privacy-preserving provider route preview and stale-response rejection retained. |
@@ -30,6 +30,8 @@
 | #633 | Foundation authorization, location privacy, idempotent trip/dispatch, quote/consent, payment/refund/finality, conserved financial projections and safety retained through merged #661 and later revisions. |
 
 ## Qualification and release limits
+
+The protected `/driver` route now mounts the retained driver onboarding/remediation UI with the independently authenticated session adapter; a missing adapter displays an unavailable state and cannot grant approval. The existing teardown clears this UI on role/session changes. A regression test pins the protected mounting and prevents a disconnected onboarding panel from lingering.
 
 The public `/drive` route is **marketing only**; it does not create driver applications, invoke a recruitment service, grant any driver session, accept ride requests or dispatch, or authorize Pay/Wallet movement. Verify `rideshare/web/package.json` `npm run check` through the dedicated LIFTd web Level 1 owner on the replacement exact SHA; preserve all existing rider and protected driver route regressions. PT-06 is evidence only and does not make independent security, privacy or regulator acceptance PASS.
 

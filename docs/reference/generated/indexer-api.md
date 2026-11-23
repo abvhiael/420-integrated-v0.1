@@ -49,6 +49,9 @@ version: current
 | `/v1/ai/policies/:policyId` | `GET` | `chain` | false | `chainId; path: policyId` | AI policy projection by id |
 | `/v1/ai/reputation` | `GET` | `chain` | true | `chainId, cursor?, limit?, direction?` | paged AI Trust-evidence counters |
 | `/v1/ai/reputation/:providerId` | `GET` | `chain` | false | `chainId; path: providerId` | AI Trust-evidence counters by provider |
+| `/v1/arbitration/cases` | `GET` | `chain` | true | `chainId, claimant?, respondent?, domainId?, status?, round?, cursor?, limit?, direction?` | paged non-authoritative Arbitration case projection |
+| `/v1/arbitration/cases/:caseId` | `GET` | `chain` | false | `chainId; path: caseId` | canonicality-checked Arbitration case projection |
+| `/v1/arbitration/cases/:caseId/history` | `GET` | `chain` | true | `chainId; path: caseId; cursor?, limit?, direction?` | bounded canonical case/ruling/appeal event history |
 | `/v1/search` | `GET` | `chain` | false | `chainId, q, limit?` | bounded deterministic index search |
 
 ## Envelopes

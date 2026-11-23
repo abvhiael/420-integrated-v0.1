@@ -1,6 +1,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { INDEXER_API_VERSION_420, type IndexerPublicApi420 } from './api-surface.js';
 import type { QueryDirection420 } from './query-layer.js';
+import {ArbitrationProjectionUnavailable420} from './arbitration-read-model.js';
 
 export interface HttpJsonResponse420 {
   status: number;
@@ -112,6 +113,58 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     if (receiptHash !== null) {
       const receipt = await api.receipt(chainId, receiptHash);
       return receipt ? ok420(receipt) : error420(404, 'not_found', 'receipt not found');
+    }
+
+
+    const arbitrationAddressParam=(name:'claimant'|'respondent')=>{
+      const raw=url.searchParams.get(name);
+      if(raw===null)return undefined;
+      if(!/^0x[0-9a-fA-F]{40}$/.test(raw)||BigInt(raw)===0n)
+        invalidRequest420(name+' must be a nonzero 20-byte address');
+      return raw.toLowerCase();
+    };
+    const arbitrationHashParam=(name:'domainId')=>{
+      const raw=url.searchParams.get(name);
+      if(raw===null)return undefined;
+      if(!/^0x[0-9a-fA-F]{64}$/.test(raw)||BigInt(raw)===0n)
+        invalidRequest420(name+' must be a nonzero 32-byte hash');
+      return raw.toLowerCase();
+    };
+    const validateArbitrationCaseId=(value:string)=>{
+      if(!/^0x[0-9a-fA-F]{64}$/.test(value)||BigInt(value)===0n)
+        invalidRequest420('caseId must be a nonzero 32-byte identifier');
+      return value.toLowerCase();
+    };
+
+    // Arbitration reads are optional until the verified deployment is configured.
+    // All payloads are explicitly derived, never a replacement for CaseRegistry.
+    if(path==='/v1/arbitration/cases'){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationCases)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      const round=optionalBigint420(url,'round');
+      if(round!==undefined&&round>3n)return error420(400,'invalid_request','round must be 0..3');
+      const status=url.searchParams.get('status')??undefined;
+      if(status!==undefined&&!['OPEN','RULED','FINALIZED'].includes(status))
+        return error420(400,'invalid_request','status must be OPEN, RULED or FINALIZED');
+      return ok420(await api.arbitrationCases(chainId,{...pageRequest420(url),
+        claimant:arbitrationAddressParam('claimant'),
+        respondent:arbitrationAddressParam('respondent'),
+        domainId:arbitrationHashParam('domainId'),
+        ...(round===undefined?{}:{round:Number(round)}),
+        ...(status===undefined?{}:{status:status as 'OPEN'|'RULED'|'FINALIZED'})}));
+    }
+    const arbitrationHistoryId=pathParam420(path,/^\/v1\/arbitration\/cases\/([^/]+)\/history$/);
+    if(arbitrationHistoryId!==null){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationHistory)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      return ok420(await api.arbitrationHistory(chainId,validateArbitrationCaseId(arbitrationHistoryId),pageRequest420(url)));
+    }
+    const arbitrationCaseId=pathParam420(path,/^\/v1\/arbitration\/cases\/([^/]+)$/);
+    if(arbitrationCaseId!==null){
+      if(!api.arbitrationAvailable?.()||!api.arbitrationCase)
+        return error420(503,'unavailable','verified Arbitration Indexer deployment unavailable');
+      const value=await api.arbitrationCase(chainId,validateArbitrationCaseId(arbitrationCaseId));
+      return value?ok420(value):error420(404,'not_found','Arbitration case not found');
     }
 
     const protocolObjectParams = pathParams420(path, /^\/v1\/protocols\/([^/]+)\/objects\/([^/]+)$/);
@@ -280,6 +333,7 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
     return error420(404, 'not_found', 'route not found');
   } catch (error) {
     if (error instanceof InvalidRequest420) return error420(400, 'invalid_request', error.message);
+    if (error instanceof ArbitrationProjectionUnavailable420) return error420(503,'unavailable','Arbitration canonical projection unavailable or reorganized');
     return error420(500, 'internal_error', 'internal server error');
   }
 }

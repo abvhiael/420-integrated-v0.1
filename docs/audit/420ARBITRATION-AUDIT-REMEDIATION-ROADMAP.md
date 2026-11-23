@@ -37,6 +37,15 @@ Status authority: repository evidence on `audit/420arbitration-complete-20261004
 - Durable evidence: `docs/audit/420ARBITRATION-AUDIT-4-QUALIFICATION.md`.
 - Formal disposition: **COMPLETE; no repository-local Audit-4 work remains.**
 
+### ARB-PRE-06 — Shared Arbitration Indexer/History/API — REPOSITORY-QUALIFIED
+
+- Implemented the versioned, exact seven-event `420Arbitration` descriptor at `420-indexer/descriptors/arbitration420-v1.json`, checked against actual Foundry-compiled CaseRegistry/RulingRegistry ABIs. No public fixed Arbitration predeploy or independent ledger is invented.
+- `createArbitrationIndexer420` verifies the trusted chain/genesis/Registry published service version, metadata/manifest/interface pins, Case and Ruling emitter addresses, runtime bytecode hashes and immutable binding. It rejects an unverified release, RPC log/receipt mismatches, missing canonical events, wrong emitter and release drift.
+- Existing 420Indexer atomic PostgreSQL protocol event/checkpoint/canonical-history infrastructure performs interruption-safe ingestion, duplicate suppression, restart, rollback, reorg reconciliation and deterministic fresh rebuild. Case/round/ruling/finalization reconstruction validates exact event order and matching transaction provenance and refuses cross-case substitution.
+- Versioned `/v1/arbitration/cases`, `/v1/arbitration/cases/:caseId`, and `/v1/arbitration/cases/:caseId/history` provide bounded, case-scoped read-only history, filters and cursor pagination; DTOs are non-authoritative and mark pending, stale or reorganized checkpoints. Live `caseState`/`caseRound` at the indexed checkpoint must agree before a projection is returned.
+- Exact-head implementation qualification at commit `70604207059f703aae824ef4445c6f206a80e81c`: [ARB-PRE-06 workflow run 45273198624](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45273198624), **SUCCESS** — 7/7 runnable focused tests passed (1 intentional pre-Foundry ABI check deferred within first pass), then **5/5** actual Foundry ABI parity tests passed, 420Indexer and 420RPC TypeScript builds passed. PostgreSQL test executed fresh ingest, duplicate, interrupted checkpoint, restart, same-height reorg rollback, canonical rebuild and missing/mismatched RPC evidence.
+- **Repository exit met.** Live testnet same-release publication, runtime identifiers, finality/reorg and API operational deployment remain **ARBITRATION-AUDIT-5**, not a repository-indexer defect. Never authorize rulings, evidence access or remedy execution from Indexer results.
+
 ## ARBITRATION-AUDIT-5 — Production-equivalent public testnet qualification — NEXT / BLOCKED ON LIVE TESTNET
 - Deploy the exact qualified release.
 - Verify chain identity, runtime hashes, governance and one-time registry bindings.

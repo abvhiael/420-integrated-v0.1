@@ -12,6 +12,9 @@ export type RpcDerivedResource420 =
   | 'asset-transfers'
   | 'protocol-events'
   | 'protocol-object'
+  | 'arbitration-cases'
+  | 'arbitration-case'
+  | 'arbitration-history'
   | 'search';
 
 export interface RpcDerivedDefinition420 {
@@ -33,6 +36,9 @@ export const RPC8_DERIVED_RESOURCES_420: readonly RpcDerivedDefinition420[] = [
   { resource: 'asset-transfers', route: '/v1/assets/transfers', paged: true, requiredParams: [] },
   { resource: 'protocol-events', route: '/v1/protocols/events', paged: true, requiredParams: [] },
   { resource: 'protocol-object', route: '/v1/protocols/:protocol/objects/:key', paged: false, requiredParams: ['protocol', 'key'] },
+  { resource: 'arbitration-cases', route: '/v1/arbitration/cases', paged: true, requiredParams: [] },
+  { resource: 'arbitration-case', route: '/v1/arbitration/cases/:caseId', paged: false, requiredParams: ['caseId'] },
+  { resource: 'arbitration-history', route: '/v1/arbitration/cases/:caseId/history', paged: true, requiredParams: ['caseId'] },
   { resource: 'search', route: '/v1/search', paged: false, requiredParams: ['q'] },
 ] as const;
 

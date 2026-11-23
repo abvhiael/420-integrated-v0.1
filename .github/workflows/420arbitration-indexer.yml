@@ -1,0 +1,77 @@
+name: 420Arbitration ARB-PRE-06 Indexer and API Qualification
+on:
+  pull_request:
+    paths:
+      - '420-indexer/src/arbitration-*.ts'
+      - '420-indexer/src/api-surface.ts'
+      - '420-indexer/src/http-transport.ts'
+      - '420-indexer/src/api-contract.ts'
+      - '420-indexer/src/protocol-decoder.ts'
+      - '420-indexer/src/index.ts'
+      - '420-indexer/test/arbitration-*.test.ts'
+      - '420-indexer/descriptors/arbitration420-v1.json'
+      - '420-rpc/src/indexer-reads.ts'
+      - 'docs/apps/arbitration/**'
+      - 'docs/developers/indexer-api.md'
+      - '.github/workflows/420arbitration-indexer.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arbitration-pre06-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  indexer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arbitration
+          POSTGRES_PASSWORD: localtestonly
+          POSTGRES_DB: indexer_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U arbitration -d indexer_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      INDEXER_PG_URL: postgresql://arbitration:localtestonly@localhost:5432/indexer_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact commit
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Install existing Indexer dependencies
+        working-directory: 420-indexer
+        run: npm ci --ignore-scripts
+      - name: Build full shared Indexer TypeScript
+        working-directory: 420-indexer
+        run: npm run build
+      - name: Exercise focused Arbitration descriptor, recovery and HTTP API tests
+        working-directory: 420-indexer
+        run: node --test dist/test/arbitration-*.test.js
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Compile actual retained Arbitration contract graph for descriptor ABI parity
+        working-directory: contracts
+        run: forge build src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol
+      - name: Check exact real Foundry event ABI against indexed descriptor
+        working-directory: 420-indexer
+        env:
+          ARBITRATION_FOUNDRY_ARTIFACTS: ../contracts/out
+        run: node --test dist/test/arbitration-indexer.test.js
+      - name: Verify RPC derived route TypeScript
+        run: |
+          cd 420-rpc
+          npm install --no-save --no-package-lock --ignore-scripts
+          npm run build

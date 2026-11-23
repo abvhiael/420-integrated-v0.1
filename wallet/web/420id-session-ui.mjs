@@ -80,7 +80,11 @@ export function installWallet420IDUi({runtimeConfig,origin=globalThis.location?.
     // The 420ID app gateway is pinned to wallet.420integrated.org; no
     // localhost/alternate host silently substitutes a privileged 420ID session.
     root.hidden=true;
-    throw new Error('420ID Wallet origin does not match the pinned application');
+    configured=true;
+    enabled=true;
+    bootError=new Error('420ID Wallet origin does not match the pinned application');
+    invalidate();
+    throw bootError;
   }
   enabled=true;
   configured=true;

@@ -430,7 +430,7 @@ try{
    const catalogueOverflow=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
    assert.ok(catalogueOverflow.scroll<=catalogueOverflow.client+1,'open Token catalogue horizontal overflow');
    const tokenAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#token-template-catalogue'),{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
-   for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact);
+   for(const v of tokenAxe.violations.filter(v=>['serious','critical'].includes(v.impact)))failures.push(width+': Token catalogue '+v.id+' '+v.impact+' '+v.nodes.slice(0,8).map(n=>n.target.join(' ')+': '+n.failureSummary).join(' | '));
    assert.equal(tokenAxe.violations.length,0,'Token accessibility violations: '+tokenAxe.violations.map(v=>v.id).join(', '));
    await page.screenshot({path:resolve(artifacts,'token-catalogue-'+width+'.png'),fullPage:true});
    await token.locator('button[data-template="ERC20_MINTABLE"]').focus();

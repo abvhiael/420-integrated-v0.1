@@ -1,0 +1,69 @@
+name: BC-2.4 Labyrinth 325-Point Interface and Source Art Gate
+on:
+  pull_request:
+    paths:
+      - 'bong-goggles/web/core/labyrinth-*.js'
+      - 'bong-goggles/web/test/labyrinth-*.test.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/core/classic-room-bindings.js'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/core/games-ui.js'
+      - 'bong-goggles/web/core/app-shell.js'
+      - 'bong-goggles/web/app.js'
+      - 'bong-goggles/web/index.html'
+      - 'bong-goggles/web/labyrinth.css'
+      - 'bong-goggles/web/scripts/build.mjs'
+      - 'bong-goggles/web/scripts/qualify-web.mjs'
+      - 'docs/games/classics/BC-2-4-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - '.github/workflows/bc-2-4-labyrinth-ui.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-interface-and-rule-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Exact branch head
+        env:
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scoped 325-point UI, selection, privacy, original art survey and session continuity
+        run: node --test bong-goggles/web/test/labyrinth-frontend.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Retain full v2 Labyrinth scorer and immediate terminal tests
+        run: go test -race -count=1 -timeout=14m -run '^TestBC22(ManifestAndImmutableRoomVariants|SevenCardShowFlushRunsAndPegging|HeelsCanImmediatelyWin325)$' ./services/bong-goggles-account-social
+      - name: Node syntax, 325-point rules and legacy game isolation
+        run: |
+          node --check bong-goggles/web/core/labyrinth-route-runtime.js
+          node --check bong-goggles/web/core/labyrinth-session.js
+          node --check bong-goggles/web/core/labyrinth-cribbage-ui.js
+  original-art-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify uploaded original must be identical before public qualification
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          source=Path('bong-goggles/web/assets/games/labyrinth-cribbage/labyrinth.png')
+          assert source.is_file(), 'BLOCKED: source PNG is absent from GitHub; approved image cannot be claimed live'
+          data=source.read_bytes()
+          assert len(data)==4236478 and sha256(data).hexdigest()=='4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5', 'source art not byte-identical'
+          PY

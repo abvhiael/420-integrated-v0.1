@@ -47,6 +47,6 @@ export function arbitrationActionTarget(runtime, action) {
     submitRuling: verified.dependencies.rulings.address,
     finalizeRuling: verified.dependencies.rulings.address,
   };
-  if (!(action in targets)) throw new Error('unsupported arbitration action');
+  if (!Object.hasOwn(targets, action)) throw new Error('unsupported arbitration action');
   return targets[action];
 }

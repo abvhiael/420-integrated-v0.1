@@ -39,7 +39,17 @@ const cardFiles=files.filter(f=>normalize(f.path).startsWith(artPrefix));
 const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
 const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix));
-const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
+// The user's exact original art has an independent immutable binary allowance;
+// historic JS, CSS, BC-1.4 artwork and all other limits remain unchanged.
+const originalCribbageArt='assets/games/cribbage/board-cannabis-leaf.png';
+const cribbagePNG=await readFile(resolve(root,originalCribbageArt));
+const cribbagePNGHash=createHash('sha1').update(Buffer.from('blob '+cribbagePNG.length+'\0')).update(cribbagePNG).digest('hex');
+if(cribbagePNG.length!==2698098||cribbagePNG.length>4*1024*1024||
+ cribbagePNGHash!=='4c358c6cc77b2a6f6dd33865dbf7654de2b60cc0'||
+ cribbagePNG.subarray(0,8).toString('hex')!=='89504e470d0a1a0a'||
+ cribbagePNG.readUInt32BE(16)!==1448||cribbagePNG.readUInt32BE(20)!==1086)
+ throw new Error('Cribbage PNG does not match the exact uploaded canonical board');
+const baseTotal=regularFiles.filter(f=>normalize(f.path)!==originalCribbageArt).reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
 if(!Number.isSafeInteger(practiceJs)||practiceJs<4000||practiceJs>12*1024||
@@ -94,7 +104,7 @@ if(!Number.isSafeInteger(bc15Bytes)||bc15Bytes<4500||bc15Bytes>7*1024)
 const bc14Allowed=new Set(Object.keys(bc14Limits));
 const bc14Actual=regularFiles.filter(f=>{
  const name=normalize(f.path);
- return name.startsWith('core/cribbage-')||name.startsWith('assets/games/cribbage/')||name==='cribbage.css';
+ return name.startsWith('core/cribbage-')||name.startsWith('assets/games/cribbage/')&&name!==originalCribbageArt||name==='cribbage.css';
 });
 if(bc14Actual.length!==bc14Allowed.size||
  bc14Actual.some(f=>!bc14Allowed.has(normalize(f.path))))
@@ -211,6 +221,7 @@ if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));
 console.log('BC-1.5 restricted Cribbage start/recovery client:',JSON.stringify({publishedBytes:bc15Bytes,limitBytes:7*1024}));
+console.log('User-supplied canonical board:',JSON.stringify({gitSha:cribbagePNGHash,bytes:cribbagePNG.length}));
 console.log('BC-1.4 approved leaf frontend independent allowance:',JSON.stringify({publishedBytes:bc14Bytes,limitBytes:96*1024,approvedBoardSHA:leafGitSHA}));
 console.log('CCC independently bounded solo tabletop:',JSON.stringify({practiceJs,practiceCss,limit:CCC_PRACTICE_ALLOWANCE}));
 console.log('BC-0.2 bounded menu asset allowance:',JSON.stringify({

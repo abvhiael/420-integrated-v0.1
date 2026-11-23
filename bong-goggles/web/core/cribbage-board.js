@@ -1,10 +1,9 @@
-// BC-1.4. The 120 scoring holes follow the two bands in the approved
-// hole-free cannabis-leaf board image (1448 x 1086 pixels). Image and overlay
-// use the same intrinsic viewBox; resizing cannot move a peg off its hole.
+// Draw moving pegs over the exact 1448x1086 user-supplied board image.
+// The image already has all holes, numbers, start and finishing marks.
 // The 3-player variant uses a visible virtual amber middle track. In 4-player
 // cribbage the two opposite-seat teams share the two physical tracks.
 export const CRIBBAGE_BOARD_SIZE=Object.freeze({width:1448,height:1086});
-export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/leaf-board.svg';
+export const CRIBBAGE_BOARD_ART='/assets/games/cribbage/board-cannabis-leaf.png';
 export const CRIBBAGE_TRACKS=Object.freeze(['green','ivory','amber']);
 export const CRIBBAGE_FINISH=Object.freeze({x:704,y:893,number:121});
 
@@ -73,9 +72,9 @@ function survey(){
 }
 export const CRIBBAGE_HOLES=survey();
 export const CRIBBAGE_PARKS=Object.freeze({
- green:Object.freeze([{x:447,y:783},{x:487,y:783}]),
- ivory:Object.freeze([{x:447,y:822},{x:487,y:822}]),
- amber:Object.freeze([{x:447,y:804},{x:487,y:804}])
+ green:Object.freeze([{x:460,y:804},{x:498,y:804}]),
+ ivory:Object.freeze([{x:460,y:842},{x:498,y:842}]),
+ amber:Object.freeze([{x:460,y:822},{x:498,y:822}])
 });
 export function cribbageHole(lane,score,peg=0){
  if(!CRIBBAGE_TRACKS.includes(lane)||!Number.isInteger(score)||score<0)return null;

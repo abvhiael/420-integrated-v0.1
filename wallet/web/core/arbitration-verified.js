@@ -59,6 +59,7 @@ const count = (value,bits=256) => {
 // The dependency root is independently reconstructed from observed code and bindings.
 export function normalizeArbitrationRelease420(pins) {
   check(pins && typeof pins==='object','trusted Arbitration release required');
+  check(pins.serviceId===ARBITRATION_SERVICE_ID,'Arbitration release service id mismatch');
   const chainId=uint(pins.chainId,53),version=uint(pins.version,32);
   check(chainId>0&&version>0,'invalid Arbitration release identity');
   const registry=address(pins.registry?.address);
@@ -75,6 +76,13 @@ export function createVerifiedArbitrationWallet420({provider,release,account}) {
   const selected=address(account);
   let generation=0;
   const prepared=new WeakMap();
+  const invalidate=()=>{ generation+=1; };
+  // An EIP-1193 provider may emit a transition and return to the same chain/account
+  // before confirmation. Invalidate prepared handles even if the final values match.
+  if(typeof provider.on==='function') {
+    provider.on('chainChanged',invalidate);
+    provider.on('accountsChanged',invalidate);
+  }
   const rpc=(method,params=[])=>provider.request(method,params);
   const session=async()=>{
     await assertWalletChain420(provider,approved.chainId);
@@ -162,7 +170,6 @@ export function createVerifiedArbitrationWallet420({provider,release,account}) {
     return Object.freeze({binding,block,blockHash,version:service.version,registry:approved.registry.address,
       account:selected,generation:epoch,approvedRelease:approved});
   }
-  function invalidate() { generation+=1; }
   async function prepare(action) {
     const epoch=generation;
     const snapshot=await discover();
@@ -199,5 +206,12 @@ export function createVerifiedArbitrationWallet420({provider,release,account}) {
         && a.binding.dependencies[k].codeHash===b.binding.dependencies[k].codeHash)
       && a.registry===b.registry && a.approvedRelease.genesisHash===b.approvedRelease.genesisHash;
   }
-  return Object.freeze({discover,prepare,confirm,invalidate,release:approved});
+  function dispose() {
+    invalidate();
+    if(typeof provider.removeListener==='function') {
+      provider.removeListener('chainChanged',invalidate);
+      provider.removeListener('accountsChanged',invalidate);
+    }
+  }
+  return Object.freeze({discover,prepare,confirm,invalidate,dispose,release:approved});
 }

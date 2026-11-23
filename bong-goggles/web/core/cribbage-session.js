@@ -148,13 +148,13 @@ export class CribbageSessionController{
  constructor({enabled=false,fetchImpl=fetch,onChange=()=>{},setTimer=setTimeout,clearTimer=clearTimeout}={}){
   this.client=createAccountSocialClient({enabled,fetchImpl});
   this.onChange=onChange;this.setTimer=setTimer;this.clearTimer=clearTimer;
-  this.generation=0;this.timer=null;this.busy=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
+  this.generation=0;this.authGeneration=0;this.timer=null;this.busy=false;this.settings={motion:'standard',announcements:true,stinkhole:false};
   this.state={status:enabled?'idle':'disabled',settings:this.settings};
  }
  emit(delta){this.state=Object.freeze({...this.state,...delta,settings:{...this.settings}});
   this.onChange(this.state);return this.state;}
  cancelTimer(){if(this.timer!==null){this.clearTimer(this.timer);this.timer=null;}}
- invalidate(){this.generation++;this.cancelTimer();this.busy=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
+ invalidate(){this.generation++;this.authGeneration++;this.cancelTimer();this.busy=false;this.state={status:this.client.enabled?'idle':'disabled',settings:{...this.settings}};this.onChange(this.state);}
  configure(key,value){
   if(key==='motion'&&['standard','reduced'].includes(value))this.settings.motion=value;
   else if(key==='announcements'&&typeof value==='boolean')this.settings.announcements=value;

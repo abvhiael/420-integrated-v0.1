@@ -39,3 +39,21 @@ The user provided a **1254 × 1254 PNG, named `labyrinth.png`**, depicting a bar
 ## BC-2.4 inherited asset-budget diagnosis (23 November 2026)
 
 The general web build exceeded its **frozen earlier base** by 33,516 bytes, even after the independently measured BC-2.4 UI changes were subtracted. Comparison against authoritative `main` (`e4020bbab3ce9fc31cd08490486f806fce43f9db`) and the BC-2.3 parent (`5884ba2884cd5c19126247feba3190879a4681bf`) found seven already-present, individually identifiable modules: Account Extras (10,392 B), Monetization (5,651 B), XP (5,240 B), Classic Communications (9,105 B), Communications UI (1,411 B), Room Live Bindings (1,435 B), and the BC-2.1 Labyrinth reference rules (v2 8,981 B). The first six have **identical Git blobs on main and the parent**, and the isolated Labyrinth reference rules have an independently versioned 325-point replacement. The build now measures and hashes each file, caps the combined pre-existing scope at 44 KiB, and removes only those exact module bytes from the legacy bucket. No prior allowance, CCC asset count, frozen 121-point Cribbage limit, per-file cap or original base total was increased. Any unexpected content change causes qualification failure. The approved board image and numeric hole-path validation remain **hard-failing blockers**, unrelated to this accounting correction.
+
+## Exact code-head verification after interrupted delivery (23 November 2026)
+
+**Verified code head:** `60550f6e873c449379c3f42dedc6879fd2214aea`, PR [#1359](https://github.com/abvhiael/420-integrated-v0.1/pull/1359); stacked on unmerged BC-2.3. Every code suite below was run with this exact source:
+
+| Workflow | Run | Actual result |
+| --- | --- | --- |
+| Bong Goggles Web Verification | [#45248162074](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45248162074) | **SUCCESS** (browser tests, static size accounting and build checks) |
+| BC-2.2 v2 325-point authoritative engine | [#45248162333](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45248162333) | **SUCCESS**, Go race/scoring/replay and PostgreSQL room-variant jobs both green |
+| BC-2.3 v2 325-point private bots | [#45248162284](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45248162284) | **SUCCESS**, complete match/replay and signed PostgreSQL mixed-seat jobs green |
+| 420Docs Qualification | [#45248162351](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45248162351) | **SUCCESS** |
+| BC-2.4 interface and original-source check | [#45248162573](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45248162573) | **FAIL (required)**: scoped UI/replay job **SUCCESS**, original-art-provenance job **FAIL** on missing source |
+
+The original 4,236,478-byte PNG remains mounted in the user's conversation and is available unchanged in the previous attached download archive, but **is not present anywhere in this PR's full 17,558-entry Git tree**. Computed original Git blob SHA-1: `106d4741dd159aa63088f473cd522cdd9777ae59`; no tree entry matched it. Image SHA-256 is `4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5`. The existing GitHub connector requires a complete content string/base64 blob while the original bytes are accessible only in the disconnected container; it cannot receive a file reference. No GitHub upload is claimed.
+
+**Unqualified physical track:** There are 652 surveyed pixel centers but no verified mapping of the two physical lanes to their ordered 0–325 positions and printed numerical guides. Earlier exploratory nearest-neighbor traces crossed bands or skipped holes and were not committed as a purported canonical atlas. `verify-labyrinth-peg-map.mjs` must fail until there is an independently checked exact `labyrinth-peg-map.json`, and actual peg animations/visual acceptance remain disabled.
+
+**Disposition:** BC-2.4 remains **IN PROGRESS / DRAFT**, not source-art, peg path or production qualified. The current change is evidence-only and must retain those hard failure gates. No merge to `main` and no public Play activation. The next canonical milestone remains completion of **BC-2.4**, not BC-2.5.

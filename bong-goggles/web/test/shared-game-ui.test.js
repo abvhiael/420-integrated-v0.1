@@ -54,11 +54,11 @@ test('BC-0.3 overview and rules are honest and variants do not masquerade as rul
  assert.match(crib,/data-game-screen="intro"/);
  assert.match(crib,/Introduction/);
  assert.match(crib,/Zero-wager game/);
- const russian=renderClassicGamePage('russian-cribbage',{screen:'rules'});
- assert.match(russian,/Ruleset not yet published/);
- assert.match(russian,/Ruleset to be agreed and versioned/);
- assert.match(russian,/Active variant: not selected — no verified match/);
- assert.doesNotMatch(russian,/aria-current="page">Play<\/a>/);
+ const labyrinth=renderClassicGamePage('labyrinth-cribbage',{screen:'rules'});
+ assert.match(labyrinth,/BC-2.1 rules documented; play not qualified/);
+ assert.match(labyrinth,/Four-player partnerships \(default\)/);
+ assert.match(labyrinth,/Active variant: not selected — no verified match/);
+ assert.doesNotMatch(labyrinth,/aria-current="page">Play<\/a>/);
  const yahtzee=renderClassicGamePage('yahtzee',{screen:'rules'});
  for(const row of [1,2,3,6])assert.ok(yahtzee.includes(row+' full scoring row'),row);
  assert.match(renderClassicGamePage('go',{screen:'rules'}),/19×19 board/);

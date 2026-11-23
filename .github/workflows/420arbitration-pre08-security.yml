@@ -1,0 +1,155 @@
+name: 420Arbitration ARB-PRE-08 adversarial security
+on:
+  pull_request:
+    paths:
+      - 'contracts/src/arbitration/**'
+      - 'contracts/test/Arbitration*.t.sol'
+      - 'wallet/web/core/arbitration-*.js'
+      - 'wallet/web/test/arbitration-*.test.js'
+      - 'execution/storage/arbitration_evidence_access*.go'
+      - '420-indexer/src/arbitration-*.ts'
+      - '420-indexer/test/arbitration-*.test.ts'
+      - 'docs/audit/420ARBITRATION-ARB-PRE-08-SECURITY.md'
+      - 'docs/audit/420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md'
+      - '.github/workflows/420arbitration-pre08-security.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arb-pre08-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  application-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run Wallet, malicious RPC, lifecycle, privacy and session security
+        run: |
+          node --test \
+            wallet/web/test/arbitration-runtime.test.js \
+            wallet/web/test/arbitration-verified.test.js \
+            wallet/web/test/arbitration-application.test.js \
+            wallet/web/test/arbitration-evidence.test.js \
+            wallet/web/test/arbitration-evidence-workspace.test.js \
+            wallet/web/test/arbitration-storage420.test.js \
+            wallet/web/test/arbitration-storage-bridge.test.js
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Test case-bound private evidence gateway authorization
+        run: go test ./execution/storage -run '^(TestDeveloperHTTP|TestArbitrationEvidenceStorage|TestGateway)' -count=1
+
+  historical-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: arbitration
+          POSTGRES_PASSWORD: localtestonly
+          POSTGRES_DB: indexer_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U arbitration -d indexer_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      INDEXER_PG_URL: postgresql://arbitration:localtestonly@localhost:5432/indexer_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact historical-security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: 420-indexer/package-lock.json
+      - name: Install locked Indexer dependencies
+        working-directory: 420-indexer
+        run: npm ci --ignore-scripts
+      - name: Build shared Indexer
+        working-directory: 420-indexer
+        run: npm run build
+      - name: Qualify malicious receipt, reorg and PostgreSQL recovery paths
+        working-directory: 420-indexer
+        run: node --test dist/test/arbitration-*.test.js
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Verify event ABI against actual five-contract source
+        working-directory: contracts
+        run: forge build src/arbitration/ArbitrationPolicyRegistry420.sol src/arbitration/ArbitrationCaseRegistry420.sol src/arbitration/ArbitrationRulingRegistry420.sol src/arbitration/ArbitrationRouter420.sol
+      - name: Verify Foundry event parity without skipping
+        working-directory: 420-indexer
+        env:
+          ARBITRATION_FOUNDRY_ARTIFACTS: ../contracts/out
+        run: node --test dist/test/arbitration-indexer.test.js
+
+  commerce-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact Commerce security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: commerce/package-lock.json
+      - name: Install locked Commerce dependencies
+        working-directory: commerce
+        run: npm ci --ignore-scripts
+      - name: Reject forged case/role, cross-order, stale ruling and unauthorized remedy
+        working-directory: commerce
+        run: node --test test/com6b-dispute.test.mjs test/arbitration-adapter.test.mjs
+
+  launchpad-adversarial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FOUNDRY_PROFILE: pr
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Verify exact Launchpad security head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+      - name: Stage real isolated Launchpad consumer tests and helpers
+        working-directory: contracts
+        run: |
+          set -euo pipefail
+          mkdir -p test/.arb-pre08-consumers
+          for source in test/LaunchpadCrowdfundingIntegration420.t.sol test/LaunchpadEcosystem420.t.sol; do
+            sed -e 's#"../src/#"../../src/#g' -e 's#"./helpers/#"../helpers/#g' "$source" > "test/.arb-pre08-consumers/${source##*/}"
+          done
+      - name: Verify cross-domain/object/appeal replay and real finalized consumption
+        working-directory: contracts
+        env:
+          FOUNDRY_SRC: src/launchpad
+          FOUNDRY_TEST: test/.arb-pre08-consumers
+        run: |
+          forge test --match-path 'test/.arb-pre08-consumers/Launchpad*420.t.sol' --match-test 'test(PublicationRechecksCanonicalOriginAndRejectsStaleRound|FinalizedDisputeOutcomePublishesOnceWithoutExecutingRemedy|DisputeMustMatchCanonicalArbitrationOriginAndProjectController|RealArbitrationFinalityAndNotificationBoundary)' -vvv

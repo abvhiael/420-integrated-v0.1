@@ -286,6 +286,64 @@ contract ArbitrationProtocolQualification420Test {
         cases.appeal(id);
     }
 
+    function testTimestampOverflowRejectsCaseWithoutNonceConsumption() public {
+        uint256 beforeNonce = cases.nextNonce();
+        vm.warp(type(uint64).max - 50);
+        vm.prank(CLAIMANT);
+        vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
+        cases.openCase(
+            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(71)), keccak256("overflow-claim"), keccak256("overflow-remedy")
+        );
+        require(cases.nextNonce() == beforeNonce, "overflow consumed case nonce");
+
+        vm.warp(uint256(type(uint64).max) + 1);
+        vm.prank(CLAIMANT);
+        vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
+        cases.openCase(
+            DOMAIN, RESPONDENT, ORIGIN, bytes32(uint256(72)), keccak256("cast-claim"), keccak256("cast-remedy")
+        );
+        require(cases.nextNonce() == beforeNonce, "timestamp cast consumed nonce");
+    }
+
+    function testRulingDeadlineOverflowAtomicallyRejectsCommitment() public {
+        vm.warp(10);
+        policies.setPolicy(DOMAIN, address(this), APPEAL, 100, type(uint64).max - 100, 1, true);
+        bytes32 id = _open(73);
+        vm.warp(200);
+        vm.expectRevert(ArbitrationCaseRegistry420.InvalidCase.selector);
+        _rule(id, 1);
+        require(cases.caseState(id) == ArbitrationCaseRegistry420.State.OPEN, "failed ruling advanced case");
+        vm.expectRevert(ArbitrationRulingRegistry420.InvalidRuling.selector);
+        rulings.getRuling(id, 0);
+    }
+
+    function testAppealedEvidenceDeadlineOverflowRetainsOriginalRound() public {
+        vm.warp(1);
+        policies.setPolicy(DOMAIN, address(this), APPEAL, type(uint64).max - 500, type(uint64).max - 500, 3, true);
+        bytes32 id = _open(74);
+        _rule(id, 1);
+        vm.warp(type(uint64).max - 500);
+        vm.prank(CLAIMANT);
+        vm.expectRevert(ArbitrationCaseRegistry420.AppealUnavailable.selector);
+        cases.appeal(id);
+        require(cases.caseRound(id) == 0, "failed appeal advanced round");
+        require(cases.caseState(id) == ArbitrationCaseRegistry420.State.RULED, "failed appeal changed state");
+        require(rulings.getRuling(id, 0).exists, "original ruling lost");
+    }
+
+    function testRulingDeadlineExactUint64Boundary() public {
+        vm.warp(type(uint64).max - 200);
+        bytes32 id = _open(75);
+        vm.warp(type(uint64).max - 100);
+        _rule(id, 1);
+        require(cases.getCase(id).appealDeadline == type(uint64).max, "exact uint64 boundary");
+        vm.expectRevert(ArbitrationRulingRegistry420.AppealWindowOpen.selector);
+        rulings.finalizeRuling(id);
+        vm.warp(uint256(type(uint64).max) + 1);
+        rulings.finalizeRuling(id);
+        require(cases.caseState(id) == ArbitrationCaseRegistry420.State.FINALIZED, "post-boundary finality");
+    }
+
     function testCanonicalIntrospectionAndReadOnlyRouterViews() public {
         require(policies.protocolVersion() == 1 && cases.protocolVersion() == 1, "policy/case version");
         require(rulings.protocolVersion() == 1 && router.protocolVersion() == 1, "ruling/router version");

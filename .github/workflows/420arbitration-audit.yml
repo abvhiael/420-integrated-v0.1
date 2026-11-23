@@ -161,9 +161,21 @@ jobs:
               if detector.get("impact") == "High":
                   high.append(item)
           print(json.dumps({"arbitrationFindings": findings, "highSeverity": high}, indent=2))
-          medium_unused = [x for x in findings if x.get("impact") == "Medium" and x.get("check") == "unused-return"]
-          if high:
-              raise SystemExit("High-severity Slither finding in Arbitration source")
-          if medium_unused:
-              raise SystemExit("Undispositioned Medium unused-return finding in Arbitration source")
+          # All currently identified medium findings have been corrected, not waived.
+          # Reject *any* new medium/critical, not just the former unused-return class.
+          medium = [x for x in findings if x.get("impact") == "Medium"]
+          critical = [x for x in findings if x.get("impact") == "Critical"]
+          # Low dispositions are source-specific: consensus timestamp deadlines
+          # and events after immutable, one-way CaseRegistry transitions only.
+          reviewed_low = {"timestamp", "reentrancy-events"}
+          unreviewed_low = [
+              x for x in findings
+              if x.get("impact") == "Low" and x.get("check") not in reviewed_low
+          ]
+          if high or critical:
+              raise SystemExit("Critical/High Arbitration Slither finding requires remediation")
+          if medium:
+              raise SystemExit("New Medium Arbitration Slither finding requires explicit remediation")
+          if unreviewed_low:
+              raise SystemExit("New Low Arbitration Slither class requires source-level disposition")
           PY

@@ -32,9 +32,9 @@ permissions:
   contents: read
 
 jobs:
-  fast-qualification:
+  solidity-qualification:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     steps:
       - name: Checkout exact qualification head
         uses: actions/checkout@v4
@@ -64,6 +64,25 @@ jobs:
         # upstream fixture tree is unrelated to Compute and has external imports not
         # supplied to this owner workflow. Do not skip any Compute*.t.sol tests.
         run: forge test --match-path 'test/Compute*.t.sol' --skip 'test/fixtures/cadc/upstream/**' -vvv
+
+
+  evidence-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact qualification head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact qualification head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Compile Compute Market verification scripts
         shell: bash

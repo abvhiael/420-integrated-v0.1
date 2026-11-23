@@ -56,6 +56,12 @@ test('Committed evidence can be inspected by its original submitter with exact c
   assert.equal(opened.context.caseRegistry,ctx.caseRegistry);
   opened.bytes.fill(0);
 });
+test('a duplicated commitment in canonical history fails closed instead of selecting an ambiguous event',async()=>{
+  const {workspace,state}=fixture(),sealed=await workspace.prepare({caseId:ctx.caseId,data:document});
+  state.history.push(receipt(sealed),{...receipt(sealed),transactionHash:h(71)});
+  await assert.rejects(workspace.verifyCommitted({caseId:ctx.caseId,round:0,
+    submitter:ctx.submitter,commitment:sealed.commitment}),/ambiguous duplicate/);
+});
 test('Cross-case and wrong-round or wrong-user log spoofing is rejected',async()=>{
   for(const change of [
     s=>s.history.push({...receipt(s.sealed),caseId:h(903)}),

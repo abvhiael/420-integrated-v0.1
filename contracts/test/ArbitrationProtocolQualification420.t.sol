@@ -286,6 +286,38 @@ contract ArbitrationProtocolQualification420Test {
         cases.appeal(id);
     }
 
+    function testCanonicalIntrospectionAndReadOnlyRouterViews() public {
+        require(policies.protocolVersion() == 1 && cases.protocolVersion() == 1, "policy/case version");
+        require(rulings.protocolVersion() == 1 && router.protocolVersion() == 1, "ruling/router version");
+        require(keccak256(bytes(policies.systemName())) == keccak256("ArbitrationPolicyRegistry420"), "policy name");
+        require(keccak256(bytes(cases.systemName())) == keccak256("ArbitrationCaseRegistry420"), "case name");
+        require(keccak256(bytes(rulings.systemName())) == keccak256("ArbitrationRulingRegistry420"), "ruling name");
+        require(keccak256(bytes(router.systemName())) == keccak256("ArbitrationRouter420"), "router name");
+        require(router.getPolicy(DOMAIN).maxAppeals == 3, "router policy");
+
+        bytes32 id = _open(12);
+        (address claimant, address respondent, bytes32 domain, bytes32 origin, bytes32 objectId, ArbitrationCaseRegistry420.State state) =
+            cases.caseOrigin(id);
+        require(claimant == CLAIMANT && respondent == RESPONDENT && domain == DOMAIN, "origin parties/domain");
+        require(origin == ORIGIN && objectId == bytes32(uint256(13)), "origin object");
+        require(state == ArbitrationCaseRegistry420.State.OPEN, "case origin state");
+        (bytes32 readDomain, address resolver, uint8 round, ArbitrationCaseRegistry420.State readState, uint64 deadline) =
+            cases.rulingContext(id);
+        require(readDomain == DOMAIN && resolver == address(this), "resolver context");
+        require(round == 0 && readState == ArbitrationCaseRegistry420.State.OPEN && deadline == 0, "open context");
+        _rule(id, 1);
+        (uint8 finalRound, ArbitrationCaseRegistry420.State finalState, uint64 appealDeadline) =
+            cases.finalizationContext(id);
+        require(finalRound == 0 && finalState == ArbitrationCaseRegistry420.State.RULED, "final context");
+        vm.warp(appealDeadline);
+        vm.expectRevert(ArbitrationRulingRegistry420.AppealWindowOpen.selector);
+        rulings.finalizeRuling(id);
+        vm.warp(uint256(appealDeadline) + 1);
+        rulings.finalizeRuling(id);
+        require(router.getCase(id).state == ArbitrationCaseRegistry420.State.FINALIZED, "router final view");
+        require(router.getRuling(id, 0).outcomeCode == 1, "router ruling view");
+    }
+
     function testUnknownCaseAndRulingReadsFailClosed() public {
         bytes32 id = keccak256("missing");
         vm.expectRevert(ArbitrationCaseRegistry420.UnknownCase.selector);

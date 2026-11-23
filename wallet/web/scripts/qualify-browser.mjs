@@ -450,6 +450,58 @@ try{
    assert.equal(await token.locator('.token-fee-review:visible').count(),0);
    assert.equal(await page.evaluate(()=>document.activeElement?.id),'token-catalogue-status');
    console.log(JSON.stringify({width,tokenAccessibility:'PASS',fieldErrors:true,focusRestoration:true,actionableErrors:true,networkRecovery:true,disabledUnavailable:true,liveRegions:true,controlHeight44:true,keyboardFocus:true,zoom200:width===1440,axe:tokenAxe.violations.length,overflow:layout}));
+   // ARB-PRE-04: exercise the actual mounted Arbitration screen at every responsive
+   // viewport. RPC is deterministic, while user interaction uses the real DOM.
+   const arbitration=page.locator('#arbitration-management-panel');
+   assert.equal(await arbitration.count(),1,'Arbitration Wallet panel must be mounted');
+   assert.equal(await arbitration.getByRole('button',{name:'Simulate and review opening case'}).isDisabled(),true,
+     'Arbitration cannot submit without verified service');
+   await page.evaluate(async()=>{
+     const {arbitrationAppFixture420}=await import('./test/arbitration-app-fixture.js');
+     const f=arbitrationAppFixture420();
+     window.__arbitrationBrowserFixture=f;
+     window.ethereum={
+       request:({method,params})=>f.provider.request(method,params||[]),
+       on:(name,callback)=>f.provider.on(name,callback),
+       removeListener:(name,callback)=>f.provider.removeListener(name,callback)
+     };
+     window.confirm=()=>true;
+     document.dispatchEvent(new CustomEvent('wallet:verification-state',{detail:{
+       config:{network:{chainId:'0x1a4'},arbitration:{...f.release,domains:f.domains}},
+       controller:f.account,network:{chainMismatch:false},phase:'ready'
+     }}));
+   });
+   await arbitration.getByRole('button',{name:'Verify Arbitration'}).click();
+   await page.waitForFunction(()=>document.querySelector('#arbitration-runtime-state')?.textContent==='Verified',
+     null,{timeout:15000});
+   assert.match(await arbitration.locator('#arbitration-router').textContent(),/^0x[0-9a-f]{40}$/);
+   const caseButton=arbitration.locator('#arbitration-case-list button').first();
+   await caseButton.focus();await page.keyboard.press('Enter');
+   await arbitration.locator('#arbitration-case-details dd').first().waitFor({state:'visible'});
+   assert.match(await arbitration.locator('#arbitration-case-details').textContent(),/Claimant/);
+   await arbitration.getByRole('button',{name:'Submit evidence'}).click();
+   await arbitration.locator('#arbitration-evidence-form input[name="evidenceHash"]').fill('0x'+(950).toString(16).padStart(64,'0'));
+   await arbitration.getByRole('button',{name:'Simulate and review evidence'}).click();
+   await arbitration.getByRole('heading',{name:'Review Wallet transaction'}).waitFor();
+   assert.match(await arbitration.locator('#arbitration-review-details').textContent(),/Estimated network cost/);
+   await arbitration.getByRole('button',{name:'Confirm review and request Wallet approval'}).click();
+   await page.waitForFunction(()=>document.querySelector('#arbitration-tx-status')?.textContent?.includes('Pending canonical confirmation'),
+     null,{timeout:10000});
+   assert.equal(await page.evaluate(()=>window.__arbitrationBrowserFixture.state.sendCount),1);
+   await page.evaluate(()=>window.__arbitrationBrowserFixture.submitReceipt());
+   await arbitration.getByRole('button',{name:'Check canonical receipt'}).click();
+   await page.waitForFunction(()=>document.querySelector('#arbitration-tx-status')?.textContent?.includes('Canonically confirmed'),
+     null,{timeout:10000});
+   const layout=await page.evaluate(()=>({client:document.documentElement.clientWidth,
+     scroll:document.documentElement.scrollWidth}));
+   assert.ok(layout.scroll<=layout.client+1,'Arbitration panel horizontal overflow');
+   const arbAxe=await page.evaluate(()=>window.axe.run(document.querySelector('#arbitration-management-panel'),
+     {runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']}}));
+   assert.equal(arbAxe.violations.length,0,'Arbitration accessibility violations: '+
+     arbAxe.violations.map(v=>v.id).join(', '));
+   await page.screenshot({path:resolve(artifacts,'arbitration-'+width+'.png'),fullPage:true});
+   console.log(JSON.stringify({width,arbitration:'PASS',canonicalCase:true,reviewedEvidence:true,
+     walletSubmittedOnlyAfterApproval:true,canonicalReceipt:true,axeViolations:arbAxe.violations.length,layout}));
    console.log(JSON.stringify({width,tokenCatalogue:'PASS',profiles:8,verified:8,governanceDisabled:1,
      staleSelectionRejected:true,disconnectInvalidated:true,catalogueOverflow,axe:tokenAxe.violations.map(v=>({id:v.id,impact:v.impact,nodes:v.nodes.length}))}));
 

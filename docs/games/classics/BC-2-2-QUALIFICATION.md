@@ -18,4 +18,13 @@
 - Room creation persists teams via PostgreSQL 16 and returns `variantId`; test-only registered Labyrinth rules execute 420ID-authenticated two-account API commands, reject duplicate request tampering and recover cold immutable journal replay; old `russian-cribbage` rooms remain readable but cannot be newly created.
 - Required exact-head CI: `.github/workflows/bc-2-2-labyrinth-engine.yml` (Go 1.23 with race + Node 22 + PostgreSQL 16). The canonical roadmap must remain unqualified until exact-head checks pass.
 
-**Results:** Pending exact-head workflow evidence.
+## Exact-source qualification evidence
+
+**Code head:** `f934ddddb009261f95e2ae59861c541ab6da9203` (all engine, tests, room API and variant-journal changes).  
+**Dedicated CI:** [GitHub Actions run #45104998030](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45104998030), both jobs **SUCCESS** at this code head:
+- `go-rules-and-replay`, job `137464128708`: Go race tests for full deterministic 241-point 2/3/4-player matches including both four-seat variants, 6/7 flush scoring and 121-point isolation, deterministic replay and tamper rejection; Go vet; targeted JS rules and room regressions all passed.
+- `postgres-room-variant`, job `137464128897`: PostgreSQL 16, authenticated 420ID room creation for default four-player partnerships and individual four-player format, durable variant/team mapping; two signed accounts taking moves in the test-only registered authoritative Labyrinth engine, idempotent command replay, private-seat view restrictions and cold session/journal recovery, all passed.
+
+**Earlier qualification:** [Run #45104389253](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45104389253) both jobs PASS before the added authenticated session regression; retained only as historical evidence. The intervening workflow syntax and test assertion defects were repaired; failed superseded runs are not qualification evidence.
+
+**Disposition:** BC-2.2 authoritative implementation **QUALIFIED in repository source**, not merged or deployed at evidence capture. Production resolver remains unmodified and does not advertise Labyrinth as playable; no Easy/Medium/Hard policy is registered. The next canonical milestone is **BC-2.3** (bot strategies), not a release authorization. The evidence-documentation-only commit following this verification must also pass its own exact-head CI before PR readiness.

@@ -522,6 +522,16 @@ func (cribbageRules) View(f RuleFrame,seat int)(json.RawMessage,error){
  d,e:=cribbageDecode(f);if e!=nil{return nil,e}
  private:=d.Hands[seat]
  if d.Stage=="peg"||d.Stage=="show"{private=d.Remaining[seat]}
+ // A nil Go slice marshals as JSON null, while the frozen browser privacy
+ // contract requires arrays, including empty pegging piles and award lists.
+ // Materialize only the participant's existing projection, never game state.
+ hand:=append([]int{},private...)
+ pegPile:=append([]int{},d.Pile...)
+ pegged:=make([][]int,len(d.Played))
+ for i,played:=range d.Played{pegged[i]=append([]int{},played...)}
+ lastShow:=append([]cribbageShow{},d.LastShow...)
+ lastAwards:=append([]cribbageAward{},d.Awards...)
+ losers:=append([]cribbageLoss{},d.Losers...)
  publicCounts:=make([]int,f.SeatCount)
  for i:=range publicCounts{
   if d.Stage=="discard"||d.Stage=="cut"{publicCounts[i]=len(d.Hands[i])
@@ -551,9 +561,9 @@ func (cribbageRules) View(f RuleFrame,seat int)(json.RawMessage,error){
   Winner *int `json:"winner"`
  }{GameID:"cribbage",Variant:d.Variant,Round:f.Round,Phase:f.Phase,
   Dealer:d.Dealer,Turn:f.Turn,Seat:seat,Scores:f.Scores,
-  Hand:append([]int(nil),private...),CardCounts:publicCounts,CribCount:len(d.Crib),
-  Discarded:d.Discarded,Starter:d.Starter,PegCount:d.Count,PegPile:d.Pile,Pegged:d.Played,
-  SaidGo:d.Go,LastShow:d.LastShow,LastAwards:d.Awards,Losers:d.Losers,Winner:f.Winner}
+  Hand:hand,CardCounts:publicCounts,CribCount:len(d.Crib),
+  Discarded:d.Discarded,Starter:d.Starter,PegCount:d.Count,PegPile:pegPile,Pegged:pegged,
+  SaidGo:d.Go,LastShow:lastShow,LastAwards:lastAwards,Losers:losers,Winner:f.Winner}
  raw,e:=json.Marshal(view)
  if e!=nil||len(raw)>classicMaxActionBytes{return nil,ErrUnavailable}
  return raw,nil

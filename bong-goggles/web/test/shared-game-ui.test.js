@@ -55,9 +55,10 @@ test('BC-0.3 overview and rules are honest and variants do not masquerade as rul
  assert.match(crib,/Introduction/);
  assert.match(crib,/Zero-wager game/);
  const labyrinth=renderClassicGamePage('labyrinth-cribbage',{screen:'rules'});
- assert.match(labyrinth,/BC-2.1 rules documented; play not qualified/);
- assert.match(labyrinth,/Four-player partnerships \(default\)/);
- assert.match(labyrinth,/Active variant: not selected — no verified match/);
+ assert.match(labyrinth,/325 points to win/);
+ assert.match(labyrinth,/Four-player partnerships/);
+ assert.match(labyrinth,/Approved original artwork/);
+ assert.doesNotMatch(labyrinth,/data-lab-card/);
  assert.doesNotMatch(labyrinth,/aria-current="page">Play<\/a>/);
  const yahtzee=renderClassicGamePage('yahtzee',{screen:'rules'});
  for(const row of [1,2,3,6])assert.ok(yahtzee.includes(row+' full scoring row'),row);

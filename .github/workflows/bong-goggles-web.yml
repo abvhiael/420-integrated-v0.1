@@ -46,6 +46,8 @@ jobs:
         working-directory: bong-goggles/web
         env:
           BG_ACCOUNT_SOCIAL_ACTIVATION: "true"
+          BG_CLASSIC_ROOMS_ACTIVATION: "true"
+          BG_CLASSIC_COMMUNICATIONS_ACTIVATION: "true"
         run: |
           npm run build
           node scripts/verify-account-social-output.mjs enabled

@@ -11,6 +11,8 @@ const root=resolve(import.meta.dirname,'..');
 const source=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
 const generated=JSON.parse(await readFile(resolve(root,'dist/runtime-config.json'),'utf8'));
 const enabled=mode==='enabled';
+const rooms=enabled&&process.env.BG_CLASSIC_ROOMS_ACTIVATION==='true';
+const communications=rooms&&process.env.BG_CLASSIC_COMMUNICATIONS_ACTIVATION==='true';
 const expected={
  ...source,
  features:{
@@ -19,9 +21,13 @@ const expected={
   accountMessaging:enabled,
   accountGames:enabled,
   accountXP:enabled,
+  classicRooms:rooms,
+  classicCommunications:communications,
   accountMonetization:false
  }
 };
 assert.deepEqual(generated,expected,'Built runtime config modified another feature or source field');
 assert.equal(validateRuntimeConfig(generated).features.accountSocial,enabled);
+assert.equal(validateRuntimeConfig(generated).features.classicRooms,rooms);
+assert.equal(validateRuntimeConfig(generated).features.classicCommunications,communications);
 console.log('Actual BongGoggles dist/runtime-config.json verified:',mode);

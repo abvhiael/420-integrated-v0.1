@@ -35,7 +35,7 @@ test('BC-0.5 canonical 25-game catalogue and strict seat limits are pinned witho
  assert.deepEqual(ROOM_LIMITS.kaiser,[4,4]);
  assert.deepEqual(ROOM_LIMITS.hearts,[3,4]);
  assert.deepEqual(ROOM_LIMITS.cribbage,[2,4]);
- assert.deepEqual(ROOM_LIMITS['labyrinth-cribbage'],[2,2]); // Do not activate unqualified 3/4-player rooms.
+ assert.deepEqual(ROOM_LIMITS['labyrinth-cribbage'],[2,4]); // 2-4 player rooms; Play remains separately gated.
  assert.equal(ROOM_LIMITS['russian-cribbage'],undefined);
  assert.equal(ROOM_LIMITS['cross-country-chaos'],undefined);
 });

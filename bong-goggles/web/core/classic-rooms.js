@@ -5,7 +5,7 @@ import {escapeHtml as esc} from './design-system.js';
 import {renderClassicRoomLive} from './classic-communications-ui.js';
 
 export const ROOM_LIMITS=Object.freeze({
-cribbage:[2,4],'labyrinth-cribbage':[2,2],chess:[2,2],scrabble:[2,4],
+cribbage:[2,4],'labyrinth-cribbage':[2,4],chess:[2,2],scrabble:[2,4],
 checkers:[2,2],backgammon:[2,2],dominoes:[2,4],'crazy-eights':[2,4],
 euchre:[4,4],yahtzee:[2,4],'go-fish':[2,4],hearts:[3,4],
 go:[2,2],mahjong:[4,4],spades:[4,4],'500':[3,4],

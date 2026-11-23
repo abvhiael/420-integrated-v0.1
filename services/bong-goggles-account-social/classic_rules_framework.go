@@ -24,6 +24,7 @@ type RuleFrame struct {
  GameID string `json:"gameId"`
  Version string `json:"version"`
  RulesHash string `json:"rulesHash"`
+ Variant string `json:"variant,omitempty"`
  Seed string `json:"seed"`
  SeatCount int `json:"seatCount"`
  Round int `json:"round"`
@@ -33,6 +34,13 @@ type RuleFrame struct {
  Terminal bool `json:"terminal"`
  Winner *int `json:"winner"`
  Data json.RawMessage `json:"data"`
+}
+// Optional sealed variant initialization. Seat configuration is persisted via
+// immutable room team rows and the selected variant in RuleFrame/genesis.
+type RuleVariantModule interface {
+ DefaultVariant(seatCount int)(string,error)
+ VariantForSeats(room ClassicRoom,seats []ClassicSeat)(string,error)
+ InitialVariant(seed [32]byte,seatCount int,variant string,budget *RuleBudget)(RuleFrame,error)
 }
 type RuleSeatPolicy interface {
  ValidateSeats(room ClassicRoom,seats []ClassicSeat)error
@@ -113,16 +121,31 @@ func (a *RulesAdapter)InitialWithSeed(seed [32]byte,room ClassicRoom,seats []Cla
  if seatPolicy,ok:=a.module.(RuleSeatPolicy);ok{
   if e:=seatPolicy.ValidateSeats(room,seats);e!=nil{return nil,0,ErrUnavailable}
  }
- first,e:=a.initial(seed,room.SeatCount)
+ variant:=""
+ if configured,ok:=a.module.(RuleVariantModule);ok{
+  variant,e=configured.VariantForSeats(room,seats);if e!=nil{return nil,0,ErrInvalid}
+ }
+ first,e:=a.initialConfigured(seed,room.SeatCount,variant)
  if e!=nil{return nil,0,e}
  return first,func()int{frame,_:=a.decode(first);return frame.Turn}(),nil
 }
 func (a *RulesAdapter)initial(seed [32]byte,count int)(json.RawMessage,error){
+ variant:=""
+ if configured,ok:=a.module.(RuleVariantModule);ok{
+  var e error;variant,e=configured.DefaultVariant(count);if e!=nil{return nil,e}
+ }
+ return a.initialConfigured(seed,count,variant)
+}
+func (a *RulesAdapter)initialConfigured(seed [32]byte,count int,variant string)(json.RawMessage,error){
  if count<2||count>4{return nil,ErrInvalid}
+ configured,hasVariants:=a.module.(RuleVariantModule)
+ if !hasVariants&&variant!=""{return nil,ErrInvalid}
  run:=func()(json.RawMessage,error){
   budget:=NewRuleBudget(100000)
-  frame,e:=a.module.Initial(seed,count,budget)
-  if e!=nil||budget.spent<1{return nil,ErrUnavailable}
+  var frame RuleFrame;var e error
+  if hasVariants{frame,e=configured.InitialVariant(seed,count,variant,budget)
+  }else{frame,e=a.module.Initial(seed,count,budget)}
+  if e!=nil||budget.spent<1||frame.Variant!=variant{return nil,ErrUnavailable}
   frame.GameID=a.definition.GameID;frame.Version=a.definition.Version;frame.RulesHash=a.hash
   frame.Seed=hex.EncodeToString(seed[:])
   if frame.Round!=1||frame.Terminal||frame.Winner!=nil||frame.SeatCount!=count{return nil,ErrUnavailable}
@@ -257,7 +280,7 @@ func (a *RulesAdapter)Apply(raw json.RawMessage,seat int,move json.RawMessage)(j
   next,e:=a.module.Step(cloneRuleFrame(frame),seat,append(json.RawMessage(nil),chosen...),budget)
   if e!=nil{return nil,e}
   if budget.spent<1||next.GameID!=frame.GameID||next.Version!=frame.Version||
-   next.RulesHash!=frame.RulesHash||next.Seed!=frame.Seed||next.SeatCount!=frame.SeatCount||
+   next.RulesHash!=frame.RulesHash||next.Seed!=frame.Seed||next.Variant!=frame.Variant||next.SeatCount!=frame.SeatCount||
    next.Round<frame.Round||next.Round>frame.Round+1{
    return nil,ErrUnavailable
   }
@@ -329,6 +352,13 @@ func (a *RulesAdapter) replayFromVerified(state json.RawMessage,prev int64,trace
 func (a *RulesAdapter)Replay(seed [32]byte,seatCount int,trace []RuleTrace)(json.RawMessage,error){
  if a==nil||len(trace)>a.replayLimit(){return nil,ErrInvalid}
  state,e:=a.initial(seed,seatCount);if e!=nil{return nil,e}
+ return a.replayFromVerified(state,1,trace)
+}
+// ReplayConfigured reconstructs an immutable selected rules variant from its
+// sealed genesis. A later room mutation cannot reinterpret completed actions.
+func (a *RulesAdapter)ReplayConfigured(seed [32]byte,seatCount int,variant string,trace []RuleTrace)(json.RawMessage,error){
+ if a==nil||len(trace)>a.replayLimit(){return nil,ErrInvalid}
+ state,e:=a.initialConfigured(seed,seatCount,variant);if e!=nil{return nil,e}
  return a.replayFromVerified(state,1,trace)
 }
 type RuleTrace struct {

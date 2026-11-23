@@ -37,6 +37,7 @@ type ClassicInvite struct {
 type ClassicRoomView struct {
  ClassicRoom
  Seats []ClassicSeat `json:"seats"`
+ VariantID string `json:"variantId,omitempty"`
  Invites []ClassicInvite `json:"invites"`
 }
 type ClassicFriend struct {
@@ -51,7 +52,7 @@ type RoomChange struct {
  Difficulty string `json:"difficulty,omitempty"`
 }
 var classicSeatLimits=map[string][2]int{
- "cribbage":{2,4},"labyrinth-cribbage":{2,2},"chess":{2,2},"scrabble":{2,4},
+ "cribbage":{2,4},"labyrinth-cribbage":{2,4},"chess":{2,2},"scrabble":{2,4},
  "checkers":{2,2},"backgammon":{2,2},"dominoes":{2,4},"crazy-eights":{2,4},
  "euchre":{4,4},"yahtzee":{2,4},"go-fish":{2,4},"hearts":{3,4},
  "go":{2,2},"mahjong":{4,4},"spades":{4,4},"500":{3,4},
@@ -59,7 +60,7 @@ var classicSeatLimits=map[string][2]int{
  "deux-cents":{4,4},"hola":{2,4},"rook":{4,4},"nines":{3,4},"kaiser":{4,4},
 }
 var classicPartners=map[string]bool{
- "cribbage":true,"euchre":true,"spades":true,"canasta":true,"tarabish":true,"500":true,
+ "cribbage":true,"labyrinth-cribbage":true,"euchre":true,"spades":true,"canasta":true,"tarabish":true,"500":true,
  "120s":true,"deux-cents":true,"rook":true,"kaiser":true,
 }
 func classicSeatsValid(game string,count int)bool{
@@ -113,7 +114,18 @@ func (s *Store) ReadyClassicRooms(ctx context.Context)error{
  return nil
 }
 func (c *ClassicRooms) Create(ctx context.Context,viewer,game,visibility string,count int)(ClassicRoomView,error){
+ return c.CreateWithFormat(ctx,viewer,game,visibility,count,"")
+}
+// Format is encoded once into immutable seat-team rows; session genesis
+// independently seals the corresponding rules variant for replay.
+func (c *ClassicRooms) CreateWithFormat(ctx context.Context,viewer,game,visibility string,count int,format string)(ClassicRoomView,error){
  var empty ClassicRoomView
+ if game=="russian-cribbage"{return empty,ErrInvalid} // legacy IDs may be read but not newly created
+ if game=="labyrinth-cribbage"{
+  if count==4{
+   if format!=""&&format!="partnerships"&&format!="individual"{return empty,ErrInvalid}
+  }else if format!=""&&format!="individual"{return empty,ErrInvalid}
+ }else if format!=""{return empty,ErrInvalid}
  if !uuid.MatchString(viewer)||!classicSeatsValid(game,count)||(visibility!="private"&&visibility!="public"){return empty,ErrInvalid}
  id,e:=newID();if e!=nil{return empty,e}
  tx,e:=c.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
@@ -129,7 +141,10 @@ func (c *ClassicRooms) Create(ctx context.Context,viewer,game,visibility string,
  for seat:=0;seat<count;seat++{
   controller:="empty";var occupant any
   if seat==0{controller="human";occupant=viewer}
-  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_room_seats (room_id,seat_index,controller,subject,team) VALUES($1,$2,$3,$4,$5)",id,seat,controller,occupant,classicTeam(game,count,seat))
+  _,e=tx.ExecContext(ctx,"INSERT INTO bg_account_social.classic_room_seats (room_id,seat_index,controller,subject,team) VALUES($1,$2,$3,$4,$5)",id,seat,controller,occupant,func()int{
+    if game=="labyrinth-cribbage"&&count==4&&format=="individual"{return seat}
+    return classicTeam(game,count,seat)
+   }())
   if e!=nil{return empty,e}
  }
  if e=tx.Commit();e!=nil{return empty,e}
@@ -197,6 +212,11 @@ func (c *ClassicRooms) Get(ctx context.Context,viewer,id string)(ClassicRoomView
   out.Seats=append(out.Seats,seat)
  }
  e=rows.Err();rows.Close();if e!=nil{return ClassicRoomView{},e}
+ if room.GameID=="labyrinth-cribbage"{
+  variant,e:=(labyrinthRules{}).VariantForSeats(room,out.Seats)
+  if e!=nil{return ClassicRoomView{},ErrUnavailable}
+  out.VariantID=variant
+ }
  inv,e:=c.Store.DB.QueryContext(ctx,`SELECT id,seat_index,target,
  CASE WHEN status='pending' AND expires_at<=clock_timestamp() THEN 'expired' ELSE status END,expires_at
  FROM bg_account_social.classic_room_invites WHERE room_id=$1 AND (target=$2 OR $2=$3)

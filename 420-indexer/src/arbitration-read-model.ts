@@ -9,6 +9,9 @@ import {decodePositionCursor420,encodePositionCursor420,normalizeLimit420,type Q
 const HASH=/^0x[0-9a-fA-F]{64}$/;
 const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
 const MAX_EVENTS_PER_CASE=20000;
+export class ArbitrationProjectionUnavailable420 extends Error{
+ constructor(){super('Arbitration canonical Indexer checkpoint unavailable or reorganized');}
+}
 const EVENT_NAMES=[
  'CaseOpened','EvidenceCommitted','CaseRuled','RulingSubmitted',
  'CaseAppealed','CaseFinalized','RulingFinalized'
@@ -253,7 +256,7 @@ export class ArbitrationHistoryReadModel420 {
  }
  async case(caseId:string):Promise<ArbitrationCaseProjection420|null>{
   const snap=await this.checkpoint();
-  if(!snap||snap.status==='reorganized')return null;
+  if(!snap||snap.status==='reorganized')throw new ArbitrationProjectionUnavailable420();
   const events=await this.raw(caseId);
   if(!events.length){await this.stable(snap);return null;}
   const result=replayArbitrationCase420(events);
@@ -303,7 +306,7 @@ export class ArbitrationHistoryReadModel420 {
  }
  async cases(filters:ArbitrationCaseFilters420={}):Promise<QueryPage420<ArbitrationCaseProjection420>>{
   const snap=await this.checkpoint();
-  if(!snap||snap.status==='reorganized')return {items:[],nextCursor:null};
+  if(!snap||snap.status==='reorganized')throw new ArbitrationProjectionUnavailable420();
   const limit=normalizeLimit420(filters.limit);
   const dir=filters.direction??'desc';
   if(dir!=='asc'&&dir!=='desc')throw Error('Arbitration case ordering invalid');

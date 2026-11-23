@@ -106,6 +106,9 @@ test('COM-6B fail closed on absent service, forged Arbitration identity, unautho
  record.respondent=attacker.address.toLowerCase();
  await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)}),e=>e.code==='arbitration_case_mismatch');
  record.respondent=buyer.address.toLowerCase();
+ order.seller=attacker.address.toLowerCase();
+ await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)}),e=>e.code==='market_dispute_not_finalized');
+ order.seller=seller.address.toLowerCase();
  await f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(703)});
  await assert.rejects(()=>f.service.merchantArbitrationBind(seller.address,store.store_id,attempt.attemptId,{caseId:b32(704)}),e=>e.code==='arbitration_case_conflict');
  // A previously bound case must never authorize a new action when a party,

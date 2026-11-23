@@ -4,13 +4,14 @@ package social
 
 import (
  "context"
+ "encoding/json"
  "testing"
 )
 
 // BC-2.5: two independent authenticated 420ID principals, fresh consent,
 // durable original session, idempotent terminal command and rematch privacy.
 func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
- _,h,host,peer:=bc06Fixture(t,"198.51.100.229")
+ store,h,host,peer:=bc06Fixture(t,"198.51.100.229")
  adapter,e:=NewLabyrinthCribbageRulesAdapter()
  if e!=nil{t.Fatal(e)}
  h.Sessions.Rules=func(game string) ClassicRule {
@@ -92,6 +93,26 @@ func TestBC25LabyrinthHumanInviteResignAndRematch(t *testing.T) {
  replay.ID==active.ID||replay.Status!="active"{t.Fatal("rematch did not start fresh 325-point game",replay)}
  if e=h.Sessions.VerifyRules(context.Background(),replay.ID);e!=nil{
   t.Fatal("rematch canonical replay",e)
+ }
+ // Database clock, not client time, expires the turn exactly once.
+ if _,e:=store.DB.Exec("UPDATE bg_account_social.classic_sessions SET turn_deadline=clock_timestamp()-interval '1 second' WHERE id=$1",replay.ID);e!=nil{t.Fatal(e)}
+ first:=request(h,"GET","/v1/classic-sessions/"+replay.ID,"",host)
+ if first.Code!=200{t.Fatal("authoritative expiration unavailable",first.Code,first.Body.String())}
+ var terminal struct{Session ClassicSessionView}
+ if e:=json.Unmarshal(first.Body.Bytes(),&terminal);e!=nil{t.Fatal(e)}
+ if terminal.Session.Status!="timed_out"||terminal.Session.Sequence!=replay.Sequence+1||
+   terminal.Session.TurnSeat!=nil||terminal.Session.Deadline!=nil{
+  t.Fatal("timeout did not commit exactly once",terminal.Session)
+ }
+ again:=request(h,"GET","/v1/classic-sessions/"+replay.ID,"",peer)
+ if again.Code!=200{t.Fatal("peer timeout view",again.Code)}
+ var second struct{Session ClassicSessionView}
+ if e:=json.Unmarshal(again.Body.Bytes(),&second);e!=nil{t.Fatal(e)}
+ if second.Session.Sequence!=terminal.Session.Sequence||second.Session.Status!="timed_out"{
+  t.Fatal("timeout raced or double-awarded",second.Session)
+ }
+ if w:=bc06Act(t,h,host,replay.ID,"resign",terminal.Session.Sequence+1,nil,bc06ActionID(t));w.Code!=409{
+  t.Fatal("expired turn accepted a move or resignation",w.Code)
  }
 }
 

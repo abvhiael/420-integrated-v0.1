@@ -292,6 +292,13 @@ export function createArbitrationApplication420({provider,release,account,domain
       'Arbitration confirmation/session changed');
     const tx={from:user,to:approved.to,data:saved.summary.data,value:'0x0'};
     await rpc('eth_call',[tx,'latest']);
+    // Last on-chain authority boundary after all asynchronous simulations and
+    // after the explicit Wallet review, immediately before opening device signing.
+    const last=await verifier.discover();
+    check(saved.epoch===generation,'Arbitration Wallet session changed before submission');
+    const lastPayload=await build(saved.summary.action,saved.fields,last,await clock(last));
+    check(lastPayload.to===approved.to&&lastPayload.data===saved.summary.data&&
+      lastPayload.context===saved.payload.context,'Arbitration target or permissions changed before submission');
     const txHash=hash(await rpc('eth_sendTransaction',[tx]),'submitted transaction');
     const result=Object.freeze({txHash,action:saved.summary.action,to:approved.to,from:user,
       chainId:approved.chainId,submittedAt:Date.now(),status:'pending'});

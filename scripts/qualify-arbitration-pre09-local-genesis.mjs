@@ -284,6 +284,24 @@ async function main(){
   await track('max:finalize',await rulings.connect(respondent).finalizeRuling(capped));
   await reject('appeal finalized maximum case',()=>cases.connect(claimant).appeal.staticCall(capped));
   assert.equal((await cases.getCase(capped)).state,3n);
+  // Scenario H: an actual local EVM canonical reorganization. The orphaned
+  // transaction and its case must be invisible before re-ingesting an
+  // alternative canonical block; no fabricated Indexer finality is involved.
+  const reorgArgs=openArgs('UNFINALIZED-REORG');
+  const snapshot=await rpc('evm_snapshot',[]);
+  const orphaned=await cases.connect(claimant).openCase.staticCall(...reorgArgs);
+  const orphanTx=await cases.connect(claimant).openCase(...reorgArgs);
+  const orphanReceipt=await orphanTx.wait();
+  assert.equal(orphanReceipt.status,1);
+  assert.equal((await cases.getCase(orphaned)).state,1n);
+  assert.equal(await rpc('evm_revert',[snapshot]),true,'Anvil snapshot rollback failed');
+  assert.equal(await rpc('eth_getTransactionReceipt',[orphanReceipt.hash]),null,
+    'Orphaned case receipt remained canonical after reorg');
+  await reject('orphaned case inaccessible after reorg',()=>cases.getCase(orphaned));
+  const restored=await cases.connect(claimant).openCase.staticCall(...reorgArgs);
+  assert.equal(restored,orphaned,'Canonical CaseRegistry nonce not restored after reorg');
+  await track('reorg:canonical-reopen',await cases.connect(claimant).openCase(...reorgArgs));
+  assert.equal((await cases.getCase(restored)).state,1n);
   await execute(timelock,governor,registryAddress,registry.interface,'deprecateService',[sid],'deprecate-service');
   await reject('deprecated service resolution',()=>registry.resolveActive(sid));
   assert.equal((await registry.getService(sid)).active,false);
@@ -324,7 +342,7 @@ async function main(){
     caseId,caseFinalized:true,appealRound:1,
     scenarioCoverage:{standardFinalized:true,appealedFinalized:true,maximumAppeals:2,
       maximumAppealsFinalized:true,policySnapshotFrozen:true,unauthorizedRejected:true,
-      deprecationAndGovernedRecovery:true},
+      deprecationAndGovernedRecovery:true,realChainReorganization:true},
     negativeTests:evidence,
     transactions:receiptOrder};
   mkdirSync(dirname(output),{recursive:true});

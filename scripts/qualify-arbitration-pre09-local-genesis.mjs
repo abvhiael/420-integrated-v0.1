@@ -332,6 +332,7 @@ async function main(){
   const reproducible={schema:result.schema,compiler:result.compiler,
     canonicalPredeploys:result.canonicalPredeploys,addresses:result.addresses,
     runtimeCodeHashes:result.runtimeCodeHashes,registration:result.registration,
+    scenarioCoverage:result.scenarioCoverage,
     steps:result.transactions.map(x=>({step:x.step,created:x.created,from:x.from,to:x.to}))};
   writeFileSync(output.replace(/\.json$/,'.reproducible.json'),
     JSON.stringify(reproducible,null,2)+'\n');

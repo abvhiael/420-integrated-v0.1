@@ -109,3 +109,54 @@ func TestBC25LabyrinthTeamMapForRematch(t *testing.T){
   }
  }
 }
+
+func TestBC25RematchPreservesFourSeatPartnershipAndIndividualFormats(t *testing.T){
+ cases:=[]struct{format,variant string;teams [4]int}{
+  {"partnerships","labyrinth-4p-partners",[4]int{0,1,0,1}},
+  {"individual","labyrinth-4p-individual",[4]int{0,1,2,3}},
+ }
+ for i,tc:=range cases{t.Run(tc.format,func(t *testing.T){
+  store,h,host,_:=bc06Fixture(t,[]string{"198.51.100.235","198.51.100.236"}[i])
+  adapter,e:=NewLabyrinthCribbageRulesAdapter();if e!=nil{t.Fatal(e)}
+  h.Sessions.Rules=func(game string)ClassicRule{
+   if game=="labyrinth-cribbage"{return adapter}
+   return nil
+  }
+  h.classicLabyrinthMatchEnabled=true
+  if e:=h.Sessions.EnableBots(map[string]ClassicBotPolicies{
+   "labyrinth-cribbage":NewLabyrinthCribbageBotPolicies(),
+  });e!=nil{t.Fatal(e)}
+  t.Cleanup(func(){
+   _,_=store.DB.Exec("DELETE FROM bg_account_social.classic_match_requests WHERE actor=$1",memberA)
+  })
+  req:=map[string]any{"gameId":"labyrinth-cribbage","visibility":"private","seatCount":4,"format":tc.format}
+  created:=request(h,"POST","/v1/classic-rooms",body(req),host)
+  if created.Code!=201{t.Fatal("four seat room",created.Code,created.Body.String())}
+  room:=bc05Read(t,created.Body.Bytes())
+  for seat:=1;seat<4;seat++{
+   code,updated:=bc05Change(t,h,host,room.ID,room.Revision,seat,"bot",map[string]any{"difficulty":[]string{"easy","medium","hard"}[seat-1]})
+   if code!=200{t.Fatal("bot consent",code)}
+   room=updated
+  }
+  if room.VariantID!=tc.variant||room.Status!="ready"{t.Fatal("immutable starting team variant",room)}
+  match:=bc06Start(t,h,host,room.ID)
+  if w:=bc06Act(t,h,host,match.ID,"resign",match.Sequence+1,nil,bc06ActionID(t));w.Code!=200{
+   t.Fatal("four seat resignation",w.Code,w.Body.String())
+  }
+  code,next:=bc16Send(t,h,host,"/v1/classic-sessions/"+match.ID+"/rematch",bc06ActionID(t),nil)
+  if code!=201||next.GameID!="labyrinth-cribbage"||next.VariantID!=tc.variant||
+    next.SeatCount!=4||next.Status!="ready"{t.Fatal("rematch variant or ready lobby",code,next)}
+  for seat,expected:=range tc.teams{
+   if next.Seats[seat].Team!=expected{t.Fatal("rematch teams drifted",seat)}
+  }
+  for seat:=1;seat<4;seat++{
+   if next.Seats[seat].Controller!="bot"||next.Seats[seat].Difficulty!=room.Seats[seat].Difficulty{
+    t.Fatal("rematch bot difficulty or ownership changed",seat)
+   }
+  }
+  started:=bc06Start(t,h,host,next.ID)
+  if started.ID==match.ID||started.RulesHash!=adapter.hash||started.Sequence!=1{
+   t.Fatal("rematch was not a fresh authoritative 325-point session",started)
+  }
+ })}
+}

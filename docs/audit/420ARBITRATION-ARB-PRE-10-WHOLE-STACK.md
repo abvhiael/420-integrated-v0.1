@@ -1,6 +1,6 @@
 # ARB-PRE-10 — Assembled-system qualification and scenario traceability
 
-**Status:** Repository-local qualification in progress. Do not treat this document or a passing individual suite as an independent release, live testnet deployment, or unconditional production authority.
+**Status:** **REPOSITORY-QUALIFIED / LOCAL ASSEMBLED SYSTEM**, subject to a final documentation-head check. This is not an independent production-security certification, live testnet deployment, or unconditional custody/remedy authority.
 
 **Authoritative baseline:** ARB-PRE-08 merged to `main@34c1dea99f400a39f4cca2d27d255d5810e978b1`. ARB-PRE-09 remains independently qualified but unmerged in [PR #1372](https://github.com/abvhiael/420-integrated-v0.1/pull/1372) at `f6de3550c1dd7e0b94f40bb81d937d4bfc2843fd`. ARB-PRE-10 is stacked on that branch to preserve the approved local deployment graph **without implicitly merging ARB-PRE-09**. No frozen Genesis parameter, fixed Arbitration predeploy or deployment namespace was changed.
 
@@ -31,6 +31,15 @@ The existing `420arbitration-audit.yml`, `420arbitration-pre09-genesis.yml`, `42
 - The Indexer qualification compiles its TypeScript, uses PostgreSQL service state rather than in-memory stand-in, runs canonical reorg/API recovery suites, then verifies real compiled Foundry event ABI against the versioned descriptor.
 - Consumer tests run actual local Foundry contracts with unchanged property/negative assertions, alongside locked Commerce service test dependencies.
 - On a passing exact-head run, capture workflow run IDs, HEAD SHA, actual test counts, any skipped tests, and local-manifest artifact references **before** updating the canonical `420ARBITRATION-AUDIT-REMEDIATION-ROADMAP.md` to claim ARB-PRE-10 repository completion.
+
+## Retained exact implementation-head qualification
+
+- **Implementation and scenario evidence SHA:** `982e6cb2d815c073f17a556c64f1c2d8c7fa088b`.
+- [ARB-PRE-09 real local Genesis run **45286734816**](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45286734816): **SUCCESS**. Two clean actual Anvil instances; **47 mined transactions each**, **36 negative/replay/security checks each**, six runtime bytecode hashes, executed seven-day G1 Timelock, snapshotted policy churn, standard case, two-appeal cap, actual orphaned-receipt rollback, sequential Registry version-2 recovery, matching canonical reproducible manifests. Saved artifact: `arbitration-pre09-local-genesis-c404f1067390361f2f5240fc4c05f46f8be9f976`.
+- [ARB-PRE-10 whole-stack workflow **45286735212**](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45286735212): **SUCCESS** (four exact-head jobs). Actual Chromium/Anvil complete Wallet UI flow passed, including two ruling rounds, encrypted/private evidence, read-only event history, receipt confirmation, viewport layouts, **zero axe accessibility violations**; browser screenshots retained as artifact `arbitration-pre10-browser-982e6cb2d815c073f17a556c64f1c2d8c7fa088b`. **73/73** Node Wallet/private evidence cases and Go Gateway authorization passed. Indexer PostgreSQL ingest/reorg/restart tests **7/7 executable**, with one first-pass conditional artifact check skipped until Foundry output existed; then **5/5** compiled-contract ABI parity tests passed with zero skips. Commerce **7/7** cases and real Launchpad origin/ruling/refund conservation/replay **7/7** Foundry tests passed.
+- [Arbitration audit run **45286734719**](https://github.com/abvhiael/420-integrated-v0.1/actions/runs/45286734719): **SUCCESS**, preserving contract/compiler/security baseline at the same head.
+- An unrelated BongGoggles push workflow failure must not be reported as Arbitration qualification failure or repaired within this task.
+- Parent PR **#1372** (ARB-PRE-09) remains unmerged. The ARB-PRE-10 feature branch is stacked against that retained qualification head; it does not assert deployment on `main` or authorize merging either PR. Concurrent `main` advancement was compared for Arbitration/Registry/Indexer/consumer overlap and found **none** among its changed paths.
 
 ## Limitations deliberately not misrepresented
 

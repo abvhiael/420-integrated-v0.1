@@ -1,3 +1,10 @@
+---
+title: Phase 2 Foundry Qualification Owner
+status: active
+category: contributing
+version: current
+---
+
 # Phase 2 — Solidity CI runner consolidation (#884, #888)
 
 The historic **SOL-01 change-aware scope selector** (PR #884) and **CI-SOL-02 dependency-aware group planner** (PR #888) are incompatible older qualification approaches, not two independent mandatory CI runners. Their older exact-head CI had failures on the full Foundry or summary jobs. Neither implementation is to overwrite the later Foundry runner.

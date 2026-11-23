@@ -11,7 +11,7 @@ const HEADINGS=Object.freeze({intro:'Overview',rules:'Rules',play:'Play',setup:'
 const VARIANTS=Object.freeze({
  yahtzee:Object.freeze(['1 full scoring row','2 full scoring rows','3 full scoring rows','6 full scoring rows']),
  go:Object.freeze(['9×9 board','13×13 board','19×19 board']),
- 'russian-cribbage':Object.freeze(['Ruleset to be agreed and versioned']),
+ 'labyrinth-cribbage':Object.freeze(['Two-player individual (9 dealt, discard 3)','Three-player individual (8 dealt, discard 2)','Four-player partnerships (default)','Four-player individual free-for-all']),
  mahjong:Object.freeze(['Traditional four-player Mahjong; regional ruleset pending'])
 });
 const MAX_PLAYERS=6,MAX_MOVES=40;
@@ -50,6 +50,8 @@ function rules(game,view){
    paragraphs.length<=20&&paragraphs.every(p=>typeof p==='string'&&p.length>0&&p.length<=800));
  const content=verified?'<p class="games-screen__meta">Verified rulebook: '+esc(title||'Game rules')+'</p>'+
   '<ol class="games-screen__rules">'+paragraphs.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ol>':
+  game.id==='labyrinth-cribbage'?notice('BC-2.1 rules documented; play not qualified',
+    'Labyrinth Cribbage: 241 points, six retained cards and six-card crib. Four-player partnerships (default) or individual scoring; live matches are not yet enabled.'):
   notice('Ruleset not yet published','Game-specific rules and scoring must be versioned and verified before play is enabled.');
  return section('Rules & variants','<p class="games-screen__meta">'+
   (view&&limited(view.variant)?'Active variant: '+esc(limited(view.variant)):

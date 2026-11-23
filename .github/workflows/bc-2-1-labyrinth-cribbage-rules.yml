@@ -1,0 +1,57 @@
+name: BC-2.1 Labyrinth Cribbage Rules Specification
+on:
+  pull_request:
+    paths:
+      - 'docs/games/classics/BC-2-1-LABYRINTH-CRIBBAGE-*.md'
+      - 'docs/games/classics/BC-2-1-LABYRINTH-CRIBBAGE-*.json'
+      - 'docs/games/classics/BC-2-1-QUALIFICATION.md'
+      - 'docs/BONG-GOGGLES-CLASSICS-ROADMAP.md'
+      - 'bong-goggles/web/core/labyrinth-cribbage-rules.js'
+      - 'bong-goggles/web/core/classics.js'
+      - 'bong-goggles/web/core/classic-rooms.js'
+      - 'bong-goggles/web/core/shared-game-ui.js'
+      - 'bong-goggles/web/test/classics-menu.test.js'
+      - 'bong-goggles/web/test/dashboard-ui.test.js'
+      - 'bong-goggles/web/test/shared-game-ui.test.js'
+      - 'bong-goggles/web/test/classic-rooms.test.js'
+      - 'bong-goggles/web/test/classics-release-qualification.test.js'
+      - 'docs/BONG-GOGGLES-ROADMAP.md'
+      - 'docs/BONG-GOGGLES-BG-15.md'
+      - 'services/bong-goggles-account-social/classic_rooms.go'
+      - 'services/bong-goggles-account-social/store.go'
+      - 'services/bong-goggles-account-social/classic_rooms_test.go'
+      - 'services/bong-goggles-account-social/migrations/010_labyrinth_cribbage_name.sql'
+      - 'bong-goggles/web/test/labyrinth-cribbage-rules.test.js'
+      - '.github/workflows/bc-2-1-labyrinth-cribbage-rules.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  labyrinth-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact tested source
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test BC-2.1 Labyrinth Cribbage and BC-1.1 standard isolation
+        run: node --test bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/cribbage-rules-spec.test.js bong-goggles/web/test/classics-menu.test.js bong-goggles/web/test/dashboard-ui.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/classics-release-qualification.test.js
+      - name: Validate standalone source syntax and static security
+        run: |
+          node --check bong-goggles/web/core/labyrinth-cribbage-rules.js
+          node bong-goggles/web/scripts/check.mjs
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Verify account-room identity compatibility
+        run: go test ./services/bong-goggles-account-social -run '^TestBC05RoomSeatLimitsAndTeams
+ -count=1

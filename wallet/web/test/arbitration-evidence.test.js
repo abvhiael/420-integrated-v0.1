@@ -13,6 +13,7 @@ const context={chainId:420,caseRegistry:a(301),caseId:h(901),round:0,submitter:a
 const alice=a(100),bob=a(101),resolver=a(102);
 const data=new TextEncoder().encode('Highly confidential arbitration evidence');
 const prep=()=>preparePrivateEvidence420({data,context,cryptoImpl:webcrypto});
+const flipLastByte=value=>value.slice(0,-2)+(Number.parseInt(value.slice(-2),16)^1).toString(16).padStart(2,'0');
 const open=(sealed,options={})=>verifyPrivateEvidence420({encrypted:sealed.encrypted,
   recoveryKey:sealed.recoveryKey,context,expectedCommitment:sealed.commitment,
   cryptoImpl:webcrypto,...options});
@@ -62,7 +63,7 @@ test('successful local decryption verifies exact file bytes, SHA256 and case AAD
 test('tampered ciphertext, IV, digest, wrong key and changed commitment all fail closed',async()=>{
   const sealed=await prep();
   for(const mutation of [
-    p=>({...p,ciphertext:p.ciphertext.slice(0,-2)+'aa'}),
+    p=>({...p,ciphertext:flipLastByte(p.ciphertext)}),
     p=>({...p,iv:'0x'+'ab'.repeat(12)}),
     p=>({...p,digest:h(44)}),
     p=>({...p,commitment:h(80)}),
@@ -155,7 +156,7 @@ test('upload refuses corrupted ciphertext or false Storage size/SHA root before 
     async prepare(){calls.push('prepare');return {upload_id:'p1'};},
     async ingest(){calls.push('ingest');return {object:storageObject,visibility:'private'};}
   },authenticate:async()=>grant(alice),cryptoImpl:webcrypto});
-  const tampered={...sealed.encrypted,ciphertext:sealed.encrypted.ciphertext.slice(0,-2)+'ff'};
+  const tampered={...sealed.encrypted,ciphertext:flipLastByte(sealed.encrypted.ciphertext)};
   await assert.rejects(store.upload({encrypted:tampered,recoveryKey:sealed.recoveryKey,
     context,record,viewer:alice,object:storageObject,retentionMs:5000}),/Private evidence unavailable/);
   await assert.rejects(store.upload({encrypted:sealed.encrypted,recoveryKey:sealed.recoveryKey,

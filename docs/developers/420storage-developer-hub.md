@@ -103,6 +103,10 @@ Successful responses support ETag/`If-None-Match`, byte `Range` requests and `HE
 
 Those headers describe the route that served the request. They are not canonical proof of placement, ownership, availability or settlement.
 
+### Arbitration private evidence integration (pre-testnet code)
+
+The existing developer HTTP route now returns `Cache-Control: private, no-store` and `Pragma: no-cache` for all private-mode responses, including errors, HEAD, Range and conditional results; public v1 behavior is preserved. `ArbitrationEvidenceAccess420` implements the existing `GatewayAccessAuthorizer` interface and requires independent canonical Arbitration case/evidence and confidential Wallet-controller session verification. It cannot be activated by public headers or a browser-only 420ID login. The Wallet composes this same 420Storage v1 retrieval interface and the approved prepare/ingest port through `wallet/web/core/arbitration-storage-bridge.js`. Real authenticated session issuance, contract-backed object agreements and private Storage endpoints are deferred until testnet deployment.
+
 ### Private retrieval
 
 Private reads are default-deny. The request must carry explicit 420 authorization metadata:

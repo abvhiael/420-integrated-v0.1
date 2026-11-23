@@ -45,8 +45,25 @@ export function createPrivate420StorageRetrieval420({endpoint,fetchImpl=globalTh
       assert(response?.ok&&response.status===200&&!signal?.aborted);
       const cacheControl=response.headers?.get?.('cache-control')||'';
       assert(/\bno-store\b/i.test(cacheControl)&&!/\bpublic\b/i.test(cacheControl));
-      const data=new Uint8Array(await response.arrayBuffer());
-      assert(data.length===Number(object.size_bytes)&&!signal?.aborted);
+      const expected=Number(object.size_bytes),lengthHeader=response.headers?.get?.('content-length');
+      if(lengthHeader!=null)assert(/^\d+$/.test(lengthHeader)&&Number(lengthHeader)===expected);
+      // Enforce the bounded object limit WHILE reading, not after an untrusted
+      // origin has already forced an arbitrary-size arrayBuffer allocation.
+      const reader=response.body?.getReader?.();assert(reader);
+      const chunks=[];let length=0;
+      try{
+        for(;;){
+          const chunk=await reader.read();
+          if(chunk.done)break;
+          assert(chunk.value instanceof Uint8Array&&!signal?.aborted);
+          length+=chunk.value.length;
+          assert(length<=expected);
+          chunks.push(chunk.value);
+        }
+      }finally{reader.releaseLock();}
+      assert(length===expected&&!signal?.aborted);
+      const data=new Uint8Array(length);let offset=0;
+      for(const chunk of chunks){data.set(chunk,offset);offset+=chunk.length;}
       const digest=toHex(new Uint8Array(await cryptoImpl.subtle.digest('SHA-256',data)));
       assert(digest.toLowerCase()===String(object.shard_root).toLowerCase());
       return Object.freeze({visibility:'private',object:Object.freeze({...object}),bytes:data});

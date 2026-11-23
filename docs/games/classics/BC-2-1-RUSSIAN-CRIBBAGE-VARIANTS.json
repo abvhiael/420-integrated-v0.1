@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "gameId": "russian-cribbage",
+  "rulesetId": "bc-russian-cribbage-241",
+  "rulesetVersion": "1.0.0",
+  "scope": "offchain-account-classics-only",
+  "reference": "BC-2-1-RUSSIAN-CRIBBAGE-RULES.md",
+  "targetScore": 241,
+  "deck": {
+    "cards": 52,
+    "jokers": 0,
+    "aces": "low",
+    "faceCardValue": 10
+  },
+  "defaultVariantId": "russian-2p",
+  "defaultFourPlayerVariantId": "russian-4p-partners",
+  "variants": [
+    {
+      "id": "russian-2p",
+      "displayName": "Two players — individual",
+      "seatCount": 2,
+      "teamBySeat": [
+        0,
+        1
+      ],
+      "cardsDealtPerSeat": 9,
+      "discardsPerSeat": 3,
+      "extraCribCards": 0,
+      "cardsRetainedPerSeat": 6,
+      "cribCardCount": 6,
+      "dealerOwnsCrib": true
+    },
+    {
+      "id": "russian-3p",
+      "displayName": "Three players — individual",
+      "seatCount": 3,
+      "teamBySeat": [
+        0,
+        1,
+        2
+      ],
+      "cardsDealtPerSeat": 8,
+      "discardsPerSeat": 2,
+      "extraCribCards": 0,
+      "cardsRetainedPerSeat": 6,
+      "cribCardCount": 6,
+      "dealerOwnsCrib": true
+    },
+    {
+      "id": "russian-4p-partners",
+      "displayName": "Four players — opposite-seat partnerships (default)",
+      "seatCount": 4,
+      "teamBySeat": [
+        0,
+        1,
+        0,
+        1
+      ],
+      "cardsDealtPerSeat": 7,
+      "discardsPerSeat": 1,
+      "extraCribCards": 2,
+      "cardsRetainedPerSeat": 6,
+      "cribCardCount": 6,
+      "dealerOwnsCrib": true
+    },
+    {
+      "id": "russian-4p-individual",
+      "displayName": "Four players — individual free-for-all",
+      "seatCount": 4,
+      "teamBySeat": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "cardsDealtPerSeat": 7,
+      "discardsPerSeat": 1,
+      "extraCribCards": 2,
+      "cardsRetainedPerSeat": 6,
+      "cribCardCount": 6,
+      "dealerOwnsCrib": true
+    }
+  ],
+  "scoring": {
+    "pegging": {
+      "exact15": 2,
+      "exact31": 2,
+      "pair": 2,
+      "triple": 6,
+      "quadruple": 12,
+      "runPointsPerCard": 1,
+      "goOrFinalCardBelow31": 1
+    },
+    "show": {
+      "fifteenPerSubset": 2,
+      "pairPerCombination": 2,
+      "runPerCard": 1,
+      "handFlushSix": 6,
+      "handFlushSeven": 7,
+      "cribFlushSevenOnly": 7,
+      "nobs": 1
+    },
+    "heelsJackStarter": 2,
+    "skunkIfLoserAtMost": 180,
+    "doubleSkunkIfLoserAtMost": 120,
+    "autoCount": true,
+    "muggins": false,
+    "scoreDisplayCap": 241
+  },
+  "policies": {
+    "firstDealer": "lowest-cut-rank-recut-ties",
+    "dealRotation": "clockwise-one-seat",
+    "playDirection": "clockwise-from-dealer-left",
+    "fourPlayerDefault": "partners",
+    "showOrder": "clockwise-from-dealer-left-dealer-last-crib-last",
+    "starter": "one-public-cut-card-after-all-discards-not-played",
+    "extraCribCards": "four-player-deal-two-face-down-direct-to-dealer-crib",
+    "countReset": "exact31-or-no-eligible-seat-can-play",
+    "sequenceLeadAfterReset": "next-clockwise-seat-with-cards-after-last-card-player",
+    "winningScore": "first-team-or-seat-reaching-at-least-241-at-point-award",
+    "tieBreaker": "no-ties-first-award-wins",
+    "timeouts": "qualified-account-games-match-forfeit-no-skunk",
+    "reconnect": "resume-authoritative-state-no-redeal",
+    "regionalRules": "none-selectable-in-v1",
+    "variantImmutability": "chosen-before-deal-and-pinned-for-entire-match"
+  },
+  "optional": {
+    "muggins": "not-enabled-in-v1",
+    "skunkClassification": "display-only-not-additional-peg-points",
+    "manualCount": "not-enabled-in-v1"
+  },
+  "unsupportedVariants": [
+    "standard-121-cribbage",
+    "manual-muggins-claims",
+    "five-card-hand",
+    "61-point-short-game",
+    "alternate-pegging-targets",
+    "no-cut-house-rule",
+    "six-player-partnership"
+  ]
+}

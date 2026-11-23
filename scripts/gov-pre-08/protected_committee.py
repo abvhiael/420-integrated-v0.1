@@ -19,9 +19,12 @@ import threading
 import time
 
 class Committee:
-    def __init__(self, root, directory, genesis, timestamp, launch):
+    def __init__(self, root, directory, genesis, timestamp, launch, replacement=False):
         self.root=Path(root)
-        self.private=Path(directory)/"protected-committee"
+        self.private=Path(directory)/("replacement-committee" if replacement else "protected-committee")
+        self.port=18840 if replacement else 18820
+        self.label="replacement" if replacement else "protected"
+        self.replacement=None
         self.launch=launch
         self.fixture=self.root/"bin/settlement-fixture"
         self.producer=self.root/"bin/certified-producer"
@@ -30,8 +33,11 @@ class Committee:
         self.witness=os.environ.get("STAKE_SIGNER_PG_DSN","")
         if not self.witness.startswith("postgresql://signing:") or "sslmode=verify-full" not in self.witness:
             raise AssertionError("independently authenticated TLS signing-witness PostgreSQL is mandatory")
-        subprocess.run([str(self.fixture),"--provision-protected-committee",str(self.private),
-                        "--genesis",genesis,"--timestamp",timestamp],
+        provisioning=[str(self.fixture),"--provision-protected-committee",str(self.private),
+                      "--genesis",genesis,"--timestamp",timestamp]
+        if replacement:
+            provisioning.append("--replacement-committee")
+        subprocess.run(provisioning,
                        cwd=self.root,check=True)
         self.trust=self.private/"trust.json"
         self.policies=self.private/"policies.json"
@@ -45,6 +51,21 @@ class Committee:
         self.queues=[]
         self.signing_evidence=[]
         self._setup()
+        if not replacement:
+            incoming=Committee(root,directory,genesis,timestamp,launch,replacement=True)
+            self.replacement=incoming
+            assert not ({bytes(p["Identity"]["PublicKey"]) for p in self.public} &
+                        {bytes(p["Identity"]["PublicKey"]) for p in incoming.public})
+            self.trustdata["Committees"]=[{
+                "Rotation":1,"Root":incoming.trustdata["CommitteeRoot"],
+                "Members":incoming.trustdata["Members"]}]
+            self.trust.write_text(json.dumps(self.trustdata)+"\n")
+            self.pin=hashlib.sha256(self.trust.read_bytes()).hexdigest()
+            incoming.trust=self.trust
+            incoming.pin=self.pin
+
+    def for_slot(self,slot):
+        return self.replacement if self.replacement and slot//17640==1 else self
 
     def _command(self,args,input_bytes=None):
         return subprocess.run(args,cwd=self.root,input=input_bytes,check=True,
@@ -88,7 +109,7 @@ class Committee:
             (remote/"witness.dsn").chmod(0o600)
             policy_hash=hashlib.sha256((remote/"policy.json").read_bytes()).hexdigest()
             cert_server,cert_client=self.certificates[seat]
-            address=f"127.0.0.1:{18820+seat}"
+            address=f"127.0.0.1:{self.port+seat}"
             arguments=["--policy",str(remote/"policy.json"),"--policy-sha256",policy_hash,
                 "--history",str(remote/"history.json"),"--bls-ikm",str(remote/"bls.hex"),
                 "--witness-dsn",str(remote/"witness.dsn"),
@@ -99,14 +120,14 @@ class Committee:
             # One-time provision of an *unused* remote BLS identity into its
             # own local history and independent, durable SQL witness row.
             self._command([str(self.signer),*arguments,"--provision-never-used-key"])
-            server=self.launch(f"protected-signer-{seat:02d}",[str(self.signer),*arguments],
+            server=self.launch(f"{self.label}-signer-{seat:02d}",[str(self.signer),*arguments],
                                env=signing_env)
             self.servers.append(server)
             until=time.monotonic()+15
             while time.monotonic()<until:
                 if server.poll() is not None: raise RuntimeError("protected signer exited: "+str(seat))
                 try:
-                    with socket.create_connection(("127.0.0.1",18820+seat),timeout=.2):break
+                    with socket.create_connection(("127.0.0.1",self.port+seat),timeout=.2):break
                 except OSError:time.sleep(.04)
             else:raise RuntimeError("protected signer not ready: "+str(seat))
             signing_env["STAKE_VALIDATOR_HEALTH_FILE"]=str(local/"health.json")
@@ -116,7 +137,7 @@ class Committee:
                  "--signing-history",str(local/"history.json"),
                  "--signer-client-cert",cert_client[0],"--signer-client-key",cert_client[1],
                  "--signer-ca",str(tls/"ca.pem"),"--signer-spki-sha256",cert_server[2]]
-            proc=self.launch(f"protected-validator-{seat:02d}",cmd,env=signing_env,input_stream=True)
+            proc=self.launch(f"{self.label}-validator-{seat:02d}",cmd,env=signing_env,input_stream=True)
             self.processes.append(proc)
             responses=queue.Queue()
             self.queues.append(responses)
@@ -129,7 +150,8 @@ class Committee:
         assert all(p.poll() is None for p in [*self.servers,*self.processes])
 
     def _exec(self,mode,plan,**extra):
-        args=[str(self.producer),"--trust",str(self.trust),"--policies",str(self.policies),
+        active=self.for_slot(json.loads(Path(plan).read_text())["Slot"])
+        args=[str(self.producer),"--trust",str(self.trust),"--policies",str(active.policies),
               "--rotation-seed",self.seed,"--plan",str(plan),"--mode",mode]
         for key,val in extra.items():args+=["--"+key,str(val)]
         return subprocess.run(args,cwd=self.root,text=True,capture_output=True,timeout=35)
@@ -152,6 +174,11 @@ class Committee:
         return response
 
     def certify(self,plan,slot,workdir,on_quorum_loss=None):
+        active=self.for_slot(slot)
+        if active is not self:
+            record=active.certify(plan,slot,workdir,on_quorum_loss)
+            self.signing_evidence.append(active.signing_evidence[-1])
+            return record
         prepared=self._exec("duties",plan)
         if prepared.returncode:raise RuntimeError("cannot prepare pinned native proposer: "+prepared.stderr)
         d=json.loads(prepared.stdout)
@@ -208,7 +235,7 @@ class Committee:
         assert len(bitmap)==2 and sum(byte.bit_count() for byte in bitmap)==15, "QC must use all fifteen independently protected votes"
         assert record["Certificate"]["Slot"]==slot and len(votes)==15
         self.signing_evidence.append({"slot":slot,"proposerSeat":d["ProposerSeat"],
-             "protectedProposer":True,"protectedVotes":len(votes),
+             "committeeRoot":record["Certificate"]["CommitteeRoot"],"protectedProposer":True,"protectedVotes":len(votes),
              "liveFiveValidatorInterruptionRestored":slot==1,
              "remoteSignerProcesses":len(self.servers),
              "validatorProcesses":len(self.processes),

@@ -5,6 +5,7 @@ export interface IndexerBlock {
   hash: Hex;
   parentHash: Hex;
   timestamp: bigint;
+  extraData?: Hex;
 }
 
 export interface IndexerTransaction {
@@ -48,6 +49,7 @@ export interface LogFilter420 {
 }
 
 export interface ChainSource420 {
+  getNativeLogs?(block: IndexerBlock): Promise<IndexerLog[]>;
   readonly sourceId: string;
   chainId(): Promise<bigint>;
   blockNumber(): Promise<bigint>;

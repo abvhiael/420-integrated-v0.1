@@ -34,11 +34,15 @@ const asset='0x000000000000000000000000000000000000d00d';
 const empty='0x'+'00'.repeat(32);
 const cancelled=keccak256(toUtf8Bytes('GOV-PRE-08/native/local/bootstrap-cancellation'));
 const actions=proposal.actions;
-assert.equal(actions.length,6);
+assert.equal(actions.length,10);
+const release=graph.localCivicReleaseExecutor;
+assert.equal(keccak256(await rpc('eth_getCode',[release.address,'latest'])),release.runtimeHash);
 assert.equal(actions[0][0].toLowerCase(),policy.toLowerCase());
 
 const abi=new Interface([
   'event CivicProposalCreated(bytes32 indexed proposalId,address indexed proposer,uint8 indexed class_,bytes32 metadataHash,bytes32 actionsHash,uint64 snapshotBlock,uint64 voteStart,uint64 voteEnd,uint32 constitutionRevision)',
+  'function preview(bytes32) view returns(bytes,bytes32)',
+  'function execute(bytes32,bytes32)',
   'function register(bytes32,bytes,address,bytes32)',
   'function isFullyProtocolSponsoredOwner(address) view returns(bool)',
   'function createProposal(uint8,bytes32,bytes32)',
@@ -88,6 +92,7 @@ async function send(to,name,args){
 
 const hashes=[];
 let executeAfter;
+let payoutCommitment;
 switch(stage){
 case 'validator-ballot':
   assert.equal((await read(timelock,'bootstrapGovernor'))[0].toLowerCase(),wallet.address.toLowerCase());
@@ -108,7 +113,7 @@ case 'cancel':
   hashes.push(await send(timelock,'cancel',[cancelled]));
   break;
 case 'activate':
-  await rejects(timelock,'execute',[cancelled]);
+  await rejects(timelock,'execute(bytes32)',[cancelled]);
   hashes.push(await send(timelock,'activateCivicAuthority',[civic.governor]));
   break;
 case 'finalize':
@@ -127,10 +132,10 @@ case 'queue':
 case 'delay':
   assert.equal((await read(civic.proposalRegistry,'proposals',[proposalId]))[7],4n);
   assert.equal((await read(policy,'assetPolicy',[asset]))[4],0n);
-  await rejects(timelock,'execute',[proposalId]);
+  await rejects(timelock,'execute(bytes32)',[proposalId]);
   await rejects(civic.governor,'queue',[proposalId,actions]);
   executeAfter=Number((await read(timelock,'operations',[proposalId]))[3]);
-  hashes.push(await send(timelock,'execute',[proposalId]));
+  hashes.push(await send(timelock,'execute(bytes32)',[proposalId]));
   break;
 case 'verify-delay':
   assert.equal((await read(civic.proposalRegistry,'proposals',[proposalId]))[7],4n);
@@ -140,7 +145,7 @@ case 'verify-delay':
   await rejects(civic.governor,'finalize',[proposalId]);
   break;
 case 'execute':
-  hashes.push(await send(timelock,'execute',[proposalId]));
+  hashes.push(await send(timelock,'execute(bytes32)',[proposalId]));
   break;
 case 'verify-execution': {
   const [, ,data]=actions[0];
@@ -149,9 +154,21 @@ case 'verify-execution': {
   assert.deepEqual(Array.from(await read(policy,'assetPolicy',[asset])),[allowed,maxSingle,maxEpoch,epochSeconds,1n]);
   assert.equal((await read(timelock,'operations',[proposalId]))[5],true);
   assert.equal((await read(civic.proposalRegistry,'proposals',[proposalId]))[7],5n);
-  await rejects(timelock,'execute',[proposalId]);
+  await rejects(timelock,'execute(bytes32)',[proposalId]);
   break;
 }
+case 'pay-treasury': {
+  const [,commitment]=await read(release.address,'preview',[proposal.payoutId]);
+  await rejects(release.address,'execute(bytes32,bytes32)',[proposal.payoutId,commitment],proposal.recipient);
+  await rejects(release.address,'execute(bytes32,bytes32)',[proposal.payoutId,empty]);
+  payoutCommitment=commitment;
+  hashes.push(await send(release.address,'execute(bytes32,bytes32)',[proposal.payoutId,commitment]));
+  break;
+}
+case 'verify-payout':
+  assert.match(process.env.GOVPRE08_PAYOUT_COMMITMENT,/^0x[0-9a-f]{64}$/);
+  await rejects(release.address,'execute(bytes32,bytes32)',[proposal.payoutId,process.env.GOVPRE08_PAYOUT_COMMITMENT]);
+  break;
 case 'register-sponsor': {
   const validator='0x0000000000000000000000000000000000000423';
   const id=keccak256(toUtf8Bytes('GOV-PRE-08 sponsored validator'));
@@ -167,4 +184,4 @@ case 'verify-sponsor':
 default:
   throw new Error('Unknown Civic qualification stage');
 }
-console.log(JSON.stringify({proposalId,hashes,executeAfter}));
+console.log(JSON.stringify({proposalId,hashes,executeAfter,payoutCommitment}));

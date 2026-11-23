@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Actual production TS Indexer + durable PostgreSQL against the SAME patched
-// node420 chain consumed by the BLS-certified Go Indexer/Explorer. Native
-// engine420 system-call logs are indexed by Go; do not fabricate user tx hashes.
+// node420 chain consumed by the BLS-certified Go Indexer/Explorer.
 import fs from 'node:fs/promises';
+import {createHmac} from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -12,7 +12,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const requireIndexer=createRequire(path.join(root,'420-indexer/package.json'));
 const {id,keccak256}=requireIndexer('ethers');
 const {PostgresSql420}=await import('../../420-indexer/dist/src/postgres.js');
-const {EvmJsonRpcSource420,HttpJsonRpcTransport420}=await import('../../420-indexer/dist/src/rpc-source.js');
+const {Node420EngineSource,HttpJsonRpcTransport420}=await import('../../420-indexer/dist/src/rpc-source.js');
 const {ProtocolDecoderRegistry420}=await import('../../420-indexer/dist/src/protocol-decoder.js');
 const {ProtocolProjection420}=await import('../../420-indexer/dist/src/protocol-projections.js');
 const {CoreProjectionConsumer420}=await import('../../420-indexer/dist/src/core-projections.js');
@@ -35,8 +35,14 @@ need(graph.chainId===31337 && graph.approvedV4===false &&
 const dsn=process.env.INDEXER_PG_URL;
 need(/^postgres(?:ql)?:\/\/[^@]+@127\.0\.0\.1:5432\/[a-z0-9_]+$/i.test(dsn||''),
      'real isolated local PostgreSQL required');
-const transport=new HttpJsonRpcTransport420(sourceUrl);
-const source=new EvmJsonRpcSource420(transport,'gov-pre08-unified-node420');
+const secret=(await fs.readFile(opt('jwt-secret'),'utf8')).trim();
+need(/^[0-9a-f]{64}$/i.test(secret),'invalid Engine secret');
+const transport=new HttpJsonRpcTransport420(sourceUrl,()=>{
+  const token=Buffer.from('{"alg":"HS256","typ":"JWT"}').toString('base64url')+'.'+
+    Buffer.from(JSON.stringify({iat:Math.floor(Date.now()/1000)})).toString('base64url');
+  return {Authorization:'Bearer '+token+'.'+createHmac('sha256',Buffer.from(secret,'hex')).update(token).digest('base64url')};
+});
+const source=new Node420EngineSource(transport,'gov-pre08-unified-node420');
 need(await source.chainId()===420n,'production Indexer wrong source chain');
 const first=await source.getBlockByNumber(0n);
 const head=await source.getBlockByNumber(2n);
@@ -66,8 +72,18 @@ try{
   // do NOT exist in this new chain's transaction trie. ABI decoder starts empty
   // for those events; producing imaginary transaction hashes is prohibited.
   const descriptors=new ProtocolDecoderRegistry420([]);
-  if(serve){
+  {
     const genesis=JSON.parse(await fs.readFile(opt('genesis'),'utf8'));
+    const reward='0x0000000000000000000000000000000000000420';
+    need(genesis.alloc[reward]?.code && (await source.getCode(reward)).toLowerCase()===
+         genesis.alloc[reward].code.toLowerCase(),'native reward emitter code mismatch');
+    for(const [eventName,params] of [
+      ['SponsoredValidatorRewardAllocated',[['owner','address',true],['communityFund','address',true],['gross','uint256',false],['communityShare','uint256',false]]],
+      ['NativeRewardPaid',[['blockNumber','uint64',true],['recipient','address',true],['kind','uint8',true],['amount','uint256',false]]]
+    ]){
+      descriptors.register({protocol:'420Stake',eventName,topic0:id(eventName+'('+params.map(p=>p[1]).join(',')+')'),
+        contractAddress:reward,fields:params.map(([name,kind,indexed])=>({name,kind,indexed}))});
+    }
     const deployments={
       CivicConstitution420:graph.walletCivicModuleAddresses.constitution,
       CivicProposalRegistry420:graph.walletCivicModuleAddresses.proposalRegistry,
@@ -169,8 +185,7 @@ try{
     sameNode420ExecutionSource:true,wrongChainRejected:true,
     durableRestartIdempotent:true,postGenesisNormalEvmTransactionCount:transactions.rows.length,
     actualWalletSignedTxHash:walletHash,
-    nativeEngineLogAuthority:'certified Go Indexer only; never assigned synthetic Ethereum txHash',
-    nativeLogPostgresProjectionQualified:false,
+    nativeEngineLogAuthority:'authenticated node420 Engine archive bound to canonical batch commitment',
     approvedV4:false,liveTestnetVerified:false
   };
   await fs.writeFile(opt('output'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});

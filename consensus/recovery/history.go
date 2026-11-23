@@ -42,7 +42,16 @@ type Trust struct {
 	LastRotation    uint64 `json:",omitempty"`
 	CommitteeRoot   ct.Root
 	Members         []Member
+	Committees      []RotationCommittee `json:",omitempty"`
 }
+
+// RotationCommittee replaces the baseline seat map for exactly one pinned rotation.
+type RotationCommittee struct {
+	Rotation uint64
+	Root     ct.Root
+	Members  []Member
+}
+
 type Signatures interface {
 	finality.AggregateVerifier
 	VerifyProof(ct.BLSPubkey, ct.BLSSignature) bool
@@ -168,17 +177,60 @@ func atomicWrite(path string, data []byte) error {
 	defer d.Close()
 	return d.Sync()
 }
-// AllowsRotation pins the same committee to an explicit inclusive rotation range.
+
+// AllowsRotation bounds the rotations authorized by the pinned trust.
 func (t Trust) AllowsRotation(rotation uint64) bool {
 	return rotation == t.Rotation || (rotation > t.Rotation && rotation <= t.LastRotation)
+}
+
+// CommitteeAt returns the seat map authorized by the pinned trust for rotation.
+func (t Trust) CommitteeAt(rotation uint64) (ct.Root, []Member) {
+	if !t.AllowsRotation(rotation) {
+		return ct.Root{}, nil
+	}
+	for _, committee := range t.Committees {
+		if committee.Rotation == rotation {
+			return committee.Root, committee.Members
+		}
+	}
+	return t.CommitteeRoot, t.Members
+}
+
+func (t Trust) Validate(sig Signatures) error {
+	return t.validate(sig)
 }
 
 func (t Trust) validate(sig Signatures) error {
 	if sig == nil || t.ChainID != ct.ChainID || t.ProtocolVersion != 1 || t.Genesis.Root == (ct.Root{}) || t.Genesis.Slot != 0 || t.Execution.ChainID != t.ChainID || t.Execution.ExecutionBlock != 0 || t.Execution.LastSequence != 0 || t.Execution.BlockHash == ([32]byte{}) || t.CommitteeRoot == (ct.Root{}) || len(t.Members) < 15 || len(t.Members) > 30 {
 		return fmt.Errorf("invalid pinned settlement trust")
 	}
+	if err := validateMembers(t.Members, sig); err != nil {
+		return err
+	}
+	roots := map[ct.Root][]Member{t.CommitteeRoot: t.Members}
+	last := t.Rotation
+	for _, committee := range t.Committees {
+		if committee.Rotation <= last || !t.AllowsRotation(committee.Rotation) || committee.Root == (ct.Root{}) {
+			return fmt.Errorf("invalid pinned rotation committee")
+		}
+		if previous, ok := roots[committee.Root]; ok && hashJSON(previous) != hashJSON(committee.Members) {
+			return fmt.Errorf("committee root reused for a different seat map")
+		}
+		if err := validateMembers(committee.Members, sig); err != nil {
+			return err
+		}
+		roots[committee.Root] = committee.Members
+		last = committee.Rotation
+	}
+	return nil
+}
+
+func validateMembers(members []Member, sig Signatures) error {
+	if len(members) < 15 || len(members) > 30 {
+		return fmt.Errorf("invalid pinned committee size")
+	}
 	seen := map[ct.BLSPubkey]bool{}
-	for _, m := range t.Members {
+	for _, m := range members {
 		if seen[m.PublicKey] || !sig.VerifyProof(m.PublicKey, m.Proof) {
 			return fmt.Errorf("invalid/duplicate committee key or proof of possession")
 		}
@@ -234,18 +286,19 @@ func (v *view) add(t Trust, sig Signatures, r Record) (csys.Batch, csys.Sequence
 		(rotation-parentRotation != 1 || h.Slot%ct.SlotsPerRotation != 0)) {
 		return csys.Batch{}, zero, fmt.Errorf("missing consecutive certified rotation handoff")
 	}
-	if h.Slot <= parentSlot || h.Slot < st.Head.Slot || !t.AllowsRotation(rotation) || h.Rotation != rotation || h.CommitteeRoot != t.CommitteeRoot || int(h.ProposerSeat) >= len(t.Members) || h.ProposerRank > 2 {
+	committeeRoot, members := t.CommitteeAt(rotation)
+	if h.Slot <= parentSlot || h.Slot < st.Head.Slot || !t.AllowsRotation(rotation) || h.Rotation != rotation || h.CommitteeRoot != committeeRoot || int(h.ProposerSeat) >= len(members) || h.ProposerRank > 2 {
 		return csys.Batch{}, zero, fmt.Errorf("invalid certified consensus context")
 	}
 	if hashJSON(h.LatestQC) != hashJSON(parentQC) {
 		return csys.Batch{}, zero, fmt.Errorf("parent QC mismatch")
 	}
 	qc := r.Certificate
-	if qc.BlockRoot != root || qc.ParentRoot != h.ParentConsensusRoot || qc.Slot != h.Slot || qc.CommitteeRoot != t.CommitteeRoot || qc.ProtocolVersion != t.ProtocolVersion {
+	if qc.BlockRoot != root || qc.ParentRoot != h.ParentConsensusRoot || qc.Slot != h.Slot || qc.CommitteeRoot != committeeRoot || qc.ProtocolVersion != t.ProtocolVersion {
 		return csys.Batch{}, zero, fmt.Errorf("QC/header context mismatch")
 	}
-	pks := make([]ct.BLSPubkey, len(t.Members))
-	for i, m := range t.Members {
+	pks := make([]ct.BLSPubkey, len(members))
+	for i, m := range members {
 		pks[i] = m.PublicKey
 	}
 	if err := finality.VerifyQC(qc, pks, t.ChainID, sig); err != nil {

@@ -288,7 +288,7 @@ def main():
             commitment=hashlib.sha256(json.dumps({
                 "schema":"GOV_PRE_08_LOCAL_CONSENSUS_STATE_WITNESS_V1",
                 "parent":parentConsensus,"slot":slot,
-                "committee":committee.trustdata["CommitteeRoot"],
+                "committee":committee.for_slot(slot).trustdata["CommitteeRoot"],
                 "executionState":payload["stateRoot"]
             },sort_keys=True,separators=(",",":")).encode()).digest()
             plan["ConsensusStateRoot"]=list(commitment)
@@ -443,7 +443,8 @@ def main():
         # native Engine archive served by the certified Go Indexer.
         pg_report=args.workdir/"postgres420.json"
         subprocess.run(["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-local-postgres.mjs"),
-                        "--rpc","http://127.0.0.1:18780",
+                        "--rpc","http://127.0.0.1:18781",
+                        "--jwt-secret",str(args.workdir/"jwt.hex"),"--genesis",str(args.genesis.resolve()),
                         "--graph",str(args.graph.resolve()),
                         "--expected-block-hash",latest["hash"],
                         "--expected-tx-hash",wallet["txHash"],
@@ -565,7 +566,7 @@ def main():
         # its independently signed ballot is included in certified block 5.
         # This preserves exact previous block-2 transaction cardinality.
         ts_worker_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-unified-local-postgres.mjs"),
-                       "--serve","--rpc","http://127.0.0.1:18780",
+                       "--serve","--rpc","http://127.0.0.1:18781","--jwt-secret",str(args.workdir/"jwt.hex"),
                        "--graph",str(args.graph.resolve()),"--genesis",str(args.genesis.resolve()),
                        "--expected-block-hash",latest["hash"],"--expected-tx-hash",wallet["txHash"]]
         ts_origin="http://127.0.0.1:18784"
@@ -725,9 +726,9 @@ def main():
         # immutable delay is running, then certify both rotation boundaries.
         civic_cmd=["node",str(ROOT/"scripts/gov-pre-08/qualify-native-civic.mjs"),
                    "http://127.0.0.1:18780",str(args.graph.resolve()),str(browser_proposal_path)]
-        def civic(stage):
+        def civic(stage, **variables):
             result=subprocess.check_output([*civic_cmd,stage],cwd=ROOT,text=True,timeout=30,
-                env=dict(os.environ,GOVPRE08_SPONSOR_PUBKEY="0x"+bytes(committee.trustdata["Members"][0]["PublicKey"]).hex()))
+                env=dict(os.environ,**variables,GOVPRE08_SPONSOR_PUBKEY="0x"+bytes(committee.trustdata["Members"][0]["PublicKey"]).hex()))
             return json.loads(result)
         civic_receipts={}
         record=fifth
@@ -764,7 +765,11 @@ def main():
                 "Go Explorer missed the canonical rejected Civic execution")
         for rotation in (1,2):
             height=11+rotation
+            parent_qc=record["Certificate"]
             record,_,_,_=produce(record,(height-1)*2,height,consensus_slot=rotation*17640)
+            require(record["Certificate"]["CommitteeRoot"]!=parent_qc["CommitteeRoot"]
+                    and record["Consensus"]["Header"]["LatestQC"]==parent_qc,
+                    "rotation failed to change signer membership across the authenticated parent")
         maturity_slot=(operation["executeAfter"]-int(genesisblock["timestamp"],16)+11)//12
         execution=civic("execute")
         record,execution_block,_,_=produce(record,26,14,execution["hashes"],consensus_slot=maturity_slot)
@@ -778,8 +783,19 @@ def main():
                 ==custody["CommunityValidatorReserve"][1]-credit
                 and int(rpc("eth_getBalance",[VALIDATORS,"latest"]),16)>=credit,
                 "approved Civic funding did not move the exact sponsored collateral")
+        recipient=browser_proposal["recipient"]
+        recipient_before=int(rpc("eth_getBalance",[recipient,"latest"]),16)
+        payout_amount=int(browser_proposal["payoutAmount"])
         registration=civic("register-sponsor")
-        record,registration_block,_,_=produce(record,28,15,registration["hashes"],consensus_slot=maturity_slot+1)
+        payout=civic("pay-treasury")
+        record,registration_block,_,_=produce(record,28,15,registration["hashes"]+payout["hashes"],
+                                              consensus_slot=maturity_slot+1)
+        payout_receipt=rpc("eth_getTransactionReceipt",[payout["hashes"][0]])
+        require(payout_receipt and payout_receipt["status"]=="0x1"
+                and payout_receipt["blockHash"]==registration_block["hash"]
+                and int(rpc("eth_getBalance",[recipient,"latest"]),16)==recipient_before+payout_amount,
+                "signed Treasury release did not pay the exact native recipient on the certified ledger")
+        civic("verify-payout",GOVPRE08_PAYOUT_COMMITMENT=payout["payoutCommitment"])
         receipt=rpc("eth_getTransactionReceipt",[registration["hashes"][0]])
         require(receipt and receipt["status"]=="0x1" and receipt["blockHash"]==registration_block["hash"],
                 "signed sponsored validator registration failed")
@@ -794,6 +810,7 @@ def main():
         require(community_share>0 and (community_share+operator_share)//10==community_share,
                 "protected native settlement did not pay the exact sponsored 90/10 split")
         sponsored_balances=dict(custody,
+            OperationsVault=(custody["OperationsVault"][0],custody["OperationsVault"][1]-payout_amount),
             CommunityValidatorReserve=(custody["CommunityValidatorReserve"][0],
                                       custody["CommunityValidatorReserve"][1]-credit),
             CommunityRewardReserve=(community,before_share+community_share))
@@ -835,12 +852,33 @@ def main():
                         require(row["state"]=="CANCELLED" and int(row["amount"])==100,
                                 "Treasury disbursement cancellation was not reconstructed")
                 projections[kind]=records
+            payout_projections={}
+            for kind,key,expected in (("budgets","payoutBudgetId","executed"),
+                                      ("disbursements","payoutId","amount")):
+                route=f'/v1/treasury/{kind}/{browser_proposal[key]}?chainId=420'
+                records=[getter(origin,route)[1]["data"] for origin in
+                         (ts_origin,"http://127.0.0.1:18782","http://127.0.0.1:18783")]
+                for row in records:
+                    require(row["blockHash"].lower()==registration_block["hash"].lower()
+                            and row["transactionHash"].lower()==payout_receipt["transactionHash"].lower()
+                            and int(row[expected])==payout_amount,
+                            "Treasury consumer omitted the certified native payout")
+                    if kind=="disbursements":
+                        require(row["state"]=="EXECUTED" and row["vaultReleaseHash"].lower()==payout["payoutCommitment"].lower(),
+                                "Treasury payout has no terminal Vault commitment")
+                payout_projections[kind]=records
             stake=[getter(origin,stake_path)[1]["records"]
                    for origin in ("http://127.0.0.1:18782","http://127.0.0.1:18783")]
             require(stake[0]==stake[1] and any(row["eventName"]=="SponsoredValidatorRewardAllocated"
                     and row["blockHash"].lower()==reward_block["hash"].lower() for row in stake[0]),
                     "Stake consumers omitted or disagreed on the sponsored reward")
-            return {"treasury":policies,"treasuryLifecycle":projections,"stake":stake[0]}
+            _,ts_stake=getter(ts_origin,"/v1/protocols/events?chainId=420&protocol=420Stake")
+            rewards=[row for row in ts_stake["data"]["items"] if row["eventName"]=="SponsoredValidatorRewardAllocated"]
+            require(len(rewards)==1 and rewards[0]["blockHash"].lower()==reward_block["hash"].lower()
+                    and rewards[0]["transactionHash"]=="0x"+"0"*64,
+                    "TypeScript native Stake projection omitted canonical evidence or retained an orphan")
+            return {"treasury":policies,"treasuryLifecycle":projections,"stake":stake[0],
+                    "typescriptNativeStake":rewards,"treasuryPayout":payout_projections}
         original_reward_block=reward_block["hash"]
         read_consumer_parity()
         _,reward_block,_,reward_archive=settle(replacement)
@@ -882,7 +920,7 @@ def main():
             "canonicalReceipts":civic_receipts,"typescriptGovernanceEvents":governance_events,
             "preDelayDeniedReceipt":denied,"goExplorerDeniedExecution":civic_view,
             "nativePostDelayExecutionQualified":True,"matureExecutionReceipt":executed,
-            "sponsoredRegistrationReceipt":receipt,"sponsoredRewardBlock":reward_block["hash"],
+            "treasuryPayoutReceipt":payout_receipt,"sponsoredRegistrationReceipt":receipt,"sponsoredRewardBlock":reward_block["hash"],
             "orphanedRewardBlock":original_reward_block,"consumerParity":parity,"goPostgresCorruptionRejectedAndRebuilt":True,
             "sponsoredRewardArchive":reward_archive,"communityShareWei":str(community_share),
             "operatorShareWei":str(operator_share),"sponsoredCustody":sponsored_custody,

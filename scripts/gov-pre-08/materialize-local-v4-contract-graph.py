@@ -277,7 +277,13 @@ def bootstrap(rpc,base):
     need(read_address(rpc,prop,"proposalAuthority()")==addr(civic)
          and read_address(rpc,elect,"snapshotAuthority()")==addr(civic),
          "native browser proposal authority not bound to the actual Civic Governor")
-    # The real Timelock is NOT activated; this grants no treasury authority.
+    # Isolated source only. The signed Civic operation must create the exact
+    # release grants on chain 420 after the frozen Timelock delay.
+    localRelease=deploy(rpc,creator,"TreasuryReleaseExecutor420",
+        "constructor(address,address)",[REGISTRY,browserVoter],receipts)
+    for name,component in (("TREASURY","420/TREASURY/COMPONENT/V1"),("VAULT","420/COMPONENT/VAULT/V1")):
+        call_send(rpc,creator,caps,"updateProtocolComponentAuthority(bytes32,address)",
+                  keccak(component),TIME,tag="browser:releaseAuthority:"+name,receipts=receipts)
 
     # These synthetic unowned fixture senders are impersonated ONLY on chain 31337.
     fail_call(rpc,creator,d["FoundingWalletClaims420"],"claimFounderWallet()")
@@ -417,6 +423,8 @@ def bootstrap(rpc,base):
         "walletCivicModuleAddresses":civic_modules,
         "localBrowserElectorateSources":localBrowserSources,
         "localBrowserSigner":browserVoter,
+        "localCivicReleaseExecutor":{"address":localRelease,"runtimeHash":hcode(rpc,localRelease),
+                                     "capabilityRegistry":caps},
         "localBrowserChangedAccount":changedAccount,
         "localBrowserRuleConfigured":True,
         "walletTreasuryDependencyRoot":treasuryDependencyRoot,

@@ -183,6 +183,33 @@ try{
       '0x000000000000000000000000000000000000d00d',456,0,expiry,civicAction,label('Civic Treasury metadata')])],
       [disbursement,'0',payouts.encodeFunctionData('schedule',[disbursementId,...request])],
       [disbursement,'0',payouts.encodeFunctionData('cancel',[disbursementId])]);
+   const release=graph.localCivicReleaseExecutor;
+   const native='0x'+'00'.repeat(20);
+   const recipient=graph.localBrowserChangedAccount;
+   const payoutAmount=10n**18n;
+   const payoutBudgetId=label('Civic native payout budget');
+   const payoutRequest=[payoutBudgetId,recipient,payoutAmount,0,expiry,civicAction,purpose];
+   const coder=AbiCoder.defaultAbiCoder();
+   const payoutId=keccak256(coder.encode(
+      ['bytes32','bytes32','address','uint128','uint64','uint64','bytes32','bytes32'],
+      [labelFor('420/TREASURY/DISBURSEMENT/V1'),...payoutRequest]));
+   function labelFor(value){return keccak256(toUtf8Bytes(value));}
+   const grant=new Interface(['function createGrant(bytes32,address,bytes32,bytes32,bytes32,uint256,uint256,uint64,uint64,uint64)']);
+   const withdraw=labelFor('420/VAULT/ACTION/WITHDRAW/V1');
+   actions.push([budget,'0',budgeting.encodeFunctionData('createBudget',[
+     payoutBudgetId,funding.vaultIds.OPERATIONS,label('Civic native Treasury category'),
+     native,payoutAmount,0,expiry,civicAction,label('Civic native Treasury metadata')])],
+     [disbursement,'0',payouts.encodeFunctionData('schedule',[payoutId,...payoutRequest])]);
+   const scopes=[
+     ['420/TREASURY/COMPONENT/V1',labelFor('420/TREASURY/ACTION/EXECUTE_DISBURSEMENT/V1'),
+       keccak256(coder.encode(['bytes32'],[payoutId]))],
+     ['420/COMPONENT/VAULT/V1',withdraw,keccak256(coder.encode(
+       ['bytes32','address','address','bytes32'],[funding.vaultIds.OPERATIONS,native,recipient,withdraw]))]
+   ];
+   for(const [component,capability,scope] of scopes){
+     actions.push([release.capabilityRegistry,'0',grant.encodeFunctionData('createGrant',[
+       label(component+' payout'),release.address,labelFor(component),capability,scope,payoutAmount,0,0,0,expiry])]);
+   }
    const actionsHash=keccak256(AbiCoder.defaultAbiCoder().encode(
       ['tuple(address,uint256,bytes)[]'],[actions]));
    const metadataHash=keccak256(toUtf8Bytes('GOV-PRE08/BROWSER/LOCAL-ONLY'));
@@ -191,7 +218,7 @@ try{
       method:'eth_sendTransaction',params:[tx]}),
       {from:wallet.address,to:civic.governor,data:call,value:'0x0'});
    assert.ok(transactions.some(tx=>tx.txHash===hash&&tx.to.toLowerCase()===civic.governor.toLowerCase()));
-   proof={...proof,proposalTxHash:hash,actions,budgetId,disbursementId,realNativeWalletSignedCivicProposal:true};
+   proof={...proof,proposalTxHash:hash,actions,budgetId,disbursementId,payoutBudgetId,payoutId,payoutAmount:payoutAmount.toString(),recipient,realNativeWalletSignedCivicProposal:true};
  }else{
    await page.locator('#governance-proposal-list .governance-proposal-row').first().click();
    await page.locator('#governance-state').getByText('ACTIVE').waitFor({timeout:18000});

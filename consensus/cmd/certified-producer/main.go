@@ -74,21 +74,22 @@ func number(v string) uint64 {
     if e!=nil {fail("invalid execution quantity")}
     return n
 }
-func trustPolicies(t recovery.Trust, policies []signing.Policy) {
+func trustPolicies(t recovery.Trust, policies []signing.Policy, rotation uint64) {
+    committeeRoot,members:=t.CommitteeAt(rotation)
     require(t.ChainID==ct.ChainID && t.ProtocolVersion==1 && t.Genesis.Slot==0 &&
-        t.Genesis.Root!=(ct.Root{}) && t.CommitteeRoot!=(ct.Root{}) &&
+        t.Genesis.Root!=(ct.Root{}) && committeeRoot!=(ct.Root{}) &&
         t.Execution.ChainID==ct.ChainID && t.Execution.ExecutionBlock==0 &&
-        t.Execution.BlockHash!=(ct.Root{}) && len(t.Members)==15 && len(policies)==15,
+        t.Execution.BlockHash!=(ct.Root{}) && len(members)==15 && len(policies)==15,
         "exact 15-seat pinned trust and policy required")
     seen:=map[ct.BLSPubkey]bool{}
     ids:=map[uint64]bool{}
     for seat,p:=range policies {
         require(p.Validate()==nil && int(p.Seat)==seat &&
-            p.Identity.PublicKey==t.Members[seat].PublicKey &&
+            p.Identity.PublicKey==members[seat].PublicKey &&
             p.Identity.Genesis==t.Genesis.Root && p.Identity.ChainID==t.ChainID &&
-            p.ProtocolVersion==t.ProtocolVersion && p.CommitteeRoot==t.CommitteeRoot &&
+            p.ProtocolVersion==t.ProtocolVersion && p.CommitteeRoot==committeeRoot &&
             !seen[p.Identity.PublicKey] && !ids[p.Identity.ValidatorID] &&
-            bls.VerifyProofOfPossession(t.Members[seat].PublicKey,t.Members[seat].Proof),
+            bls.VerifyProofOfPossession(members[seat].PublicKey,members[seat].Proof),
             "untrusted, duplicate or misbound validator identity/PoP")
         seen[p.Identity.PublicKey]=true
         ids[p.Identity.ValidatorID]=true
@@ -96,6 +97,7 @@ func trustPolicies(t recovery.Trust, policies []signing.Policy) {
 }
 func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) (duties, recovery.Record, sys.Batch) {
     rotation:=p.Slot/ct.SlotsPerRotation
+    committeeRoot,_:=t.CommitteeAt(rotation)
     require(p.Slot>0 && t.AllowsRotation(rotation) &&
         p.ConsensusStateRoot!=(ct.Root{}), "slot, rotation or consensus state missing")
     var parentRoot ct.Root = t.Genesis.Root
@@ -109,13 +111,14 @@ func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) 
         parentHash=root(pr.Payload.BlockHash)
         parentNumber=number(pr.Payload.BlockNumber)
         source=ct.Checkpoint{Slot:pr.Consensus.Header.Slot,Root:parentRoot}
-        require(pr.Certificate.BlockRoot==parentRoot && pr.Certificate.ParentRoot==pr.Consensus.Header.ParentConsensusRoot &&
-            pr.Certificate.Slot==pr.Consensus.Header.Slot && pr.Certificate.CommitteeRoot==t.CommitteeRoot &&
-            pr.Certificate.ProtocolVersion==1 && pr.Consensus.Header.CommitteeRoot==t.CommitteeRoot &&
-            pr.Consensus.Header.Slot<p.Slot && parentNumber>0 &&
-            finality.VerifyQC(pr.Certificate,keys(t),t.ChainID,bls.ProductionVerifier{})==nil,
-            "unauthenticated or out-of-order certified parent")
         parentRotation:=pr.Consensus.Header.Slot/ct.SlotsPerRotation
+        parentCommittee,_:=t.CommitteeAt(parentRotation)
+        require(pr.Certificate.BlockRoot==parentRoot && pr.Certificate.ParentRoot==pr.Consensus.Header.ParentConsensusRoot &&
+            pr.Certificate.Slot==pr.Consensus.Header.Slot && pr.Certificate.CommitteeRoot==parentCommittee &&
+            pr.Certificate.ProtocolVersion==1 && pr.Consensus.Header.CommitteeRoot==parentCommittee &&
+            pr.Consensus.Header.Slot<p.Slot && parentNumber>0 &&
+            finality.VerifyQC(pr.Certificate,keys(t,parentRotation),t.ChainID,bls.ProductionVerifier{})==nil,
+            "unauthenticated or out-of-order certified parent")
         require(pr.Consensus.Header.Rotation==parentRotation && t.AllowsRotation(parentRotation) &&
             (rotation==parentRotation || (rotation>parentRotation && rotation-parentRotation==1 &&
                 p.Slot%ct.SlotsPerRotation==0)), "missing consecutive certified rotation handoff")
@@ -147,7 +150,7 @@ func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) 
     scheduled:=schedule[p.Slot%ct.SlotsPerRotation].Primary
     block:=ct.ConsensusBlock{Slot:p.Slot,ProposerSeat:scheduled,ProposerRank:0,
         ParentConsensusRoot:parentRoot,ExecutionPayloadHash:root(p.Payload.BlockHash),
-        ConsensusStateRoot:p.ConsensusStateRoot,CommitteeRoot:t.CommitteeRoot,Rotation:rotation,
+        ConsensusStateRoot:p.ConsensusStateRoot,CommitteeRoot:committeeRoot,Rotation:rotation,
         LatestQC:lastQC,RandomnessContext:root(p.Payload.PrevRandao),SystemCallBatchRoot:batch.Root()}
     blockRoot:=block.HashTreeRoot()
     vote:=ct.AttestationData{Slot:p.Slot,BlockRoot:blockRoot,ParentRoot:parentRoot,
@@ -167,9 +170,10 @@ func prepare(t recovery.Trust, policies []signing.Policy, seed ct.Root, p plan) 
         ParentBeaconBlockRoot:p.Beacon}
     return result,record,batch
 }
-func keys(t recovery.Trust) []ct.BLSPubkey {
-    result:=make([]ct.BLSPubkey,len(t.Members))
-    for i,m:=range t.Members {result[i]=m.PublicKey}
+func keys(t recovery.Trust, rotation uint64) []ct.BLSPubkey {
+    _,members:=t.CommitteeAt(rotation)
+    result:=make([]ct.BLSPubkey,len(members))
+    for i,m:=range members {result[i]=m.PublicKey}
     return result
 }
 func verifyProposal(d signing.Duty, p signing.Policy, s signedProposal) {
@@ -198,9 +202,9 @@ func certify(t recovery.Trust, policies []signing.Policy, prepared duties, r rec
         if e=collector.Add(share.Attestation);e!=nil {fail("repeated/invalid validator vote: "+e.Error())}
     }
     require(collector.HasQuorum(),"11/15 genuine independent protected signatures required")
-    qc,e:=collector.AssembleQC(1,t.CommitteeRoot,aggregator{})
+    qc,e:=collector.AssembleQC(1,r.Consensus.Header.CommitteeRoot,aggregator{})
     if e!=nil {fail("QC aggregation failed: "+e.Error())}
-    if e=finality.VerifyQC(qc,keys(t),t.ChainID,bls.ProductionVerifier{});e!=nil {
+    if e=finality.VerifyQC(qc,keys(t,r.Consensus.Header.Rotation),t.ChainID,bls.ProductionVerifier{});e!=nil {
         fail("aggregated BLS verification failed: "+e.Error())
     }
     r.Certificate=qc
@@ -219,11 +223,13 @@ func main(){
     flag.Parse()
     var trust recovery.Trust;load(*trustPath,&trust)
     var policies []signing.Policy;load(*policiesPath,&policies)
-    trustPolicies(trust,policies)
+    signatures,signatureErr:=recovery.ProductionSignatures()
+    require(signatureErr==nil && trust.Validate(signatures)==nil,"invalid pinned settlement trust")
     seedRaw,e:=hex.DecodeString(*seedText)
     require(e==nil && len(seedRaw)==32,"32-byte pinned rotation seed required")
     var seed ct.Root;copy(seed[:],seedRaw)
     var p plan;load(*planPath,&p)
+    trustPolicies(trust,policies,p.Slot/ct.SlotsPerRotation)
     if *mode=="batch" {
         // Prior to payload construction only the authenticated parent context
         // and consensus-derived Stake outcomes exist; no QC is created here.

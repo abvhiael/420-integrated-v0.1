@@ -55,12 +55,12 @@ func TestRealIndependentBLSSharesAggregateOnlyUnderPinnedCommittee(t *testing.T)
             Attestation:ct.Attestation{Seat:uint16(seat),Data:data,Signature:sig},
             Result:signing.Result{PublicKey:pk,SigningRoot:signingRoot,Signature:sig}}
     }
-    trustPolicies(trust,policy)
+    trustPolicies(trust,policy,trust.Rotation)
     for _,size:=range []int{11,15} {
-        r:=certify(trust,policy,prepared,recovery.Record{},shares[:size])
+        r:=certify(trust,policy,prepared,recovery.Record{Consensus:ct.ConsensusBlockEnvelope{Header:ct.ConsensusBlock{CommitteeRoot:trust.CommitteeRoot}}},shares[:size])
         count,err:=finality.CountSigners(r.Certificate.SignerBitmap,15)
         if err!=nil || count!=size {t.Fatalf("wrong signer quorum: %d %v",count,err)}
-        if err=finality.VerifyQC(r.Certificate,keys(trust),420,bls.ProductionVerifier{});err!=nil {
+        if err=finality.VerifyQC(r.Certificate,keys(trust,trust.Rotation),420,bls.ProductionVerifier{});err!=nil {
             t.Fatalf("assembled independently signed QC not cryptographically valid: %v",err)
         }
         if r.Certificate.BlockRoot!=block || r.Certificate.ParentRoot!=parent {

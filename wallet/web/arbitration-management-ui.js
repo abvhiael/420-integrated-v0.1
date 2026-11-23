@@ -214,6 +214,13 @@ function updateButtons(){
   one('#arbitration-check-receipt').disabled=busy||!context||!pending;
   one('#arbitration-open-form button[type=submit]').disabled=busy||!context||!one('#arbitration-domain').options.length;
   one('#arbitration-lookup-form button[type=submit]').disabled=busy||!context;
+  one('#arbitration-evidence-form button[type=submit]').disabled=busy||!context||!current?.permissions.evidence;
+  one('#arbitration-ruling-form button[type=submit]').disabled=busy||!context||!current?.permissions.rule;
+  one('#arbitration-inspection-form button[type=submit]').disabled=busy||!context||!current;
+  one('#arbitration-seal-file').disabled=busy||!evidenceWorkspace||!current?.permissions.evidence;
+  one('#arbitration-export-sealed').disabled=busy||!sealedEvidence;
+  one('#arbitration-show-secret').disabled=busy||!sealedEvidence;
+  one('#arbitration-export-verified').disabled=busy||!inspectedEvidence;
   one('#arbitration-authorize').disabled=busy||!quote;
   for(const button of one('#arbitration-action-buttons').querySelectorAll('button'))button.disabled=busy;
 }

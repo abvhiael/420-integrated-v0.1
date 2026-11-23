@@ -34,7 +34,8 @@ test('BC-2.5 server terminal snapshots remain verifiable without inventing a fin
   assert.equal(verifyLabyrinthProjection(normalized.view)?.status,status);
   const html=renderLabyrinthScreen({screen:'play',session:normalized.session,view:normalized.view});
   assert.match(html,new RegExp('Match ended: '+status));
-  assert.match(html,/data-lab-rematch/);
+  if(status==='cancelled')assert.doesNotMatch(html,/data-lab-rematch/);
+  else assert.match(html,/data-lab-rematch/);
   assert.doesNotMatch(html,/data-lab-action="play"|data-lab-action="cut"|data-lab-action="discard"|data-lab-lifecycle="resign"/);
  }
  assert.equal(normalizeLabyrinthSession({...wire('resigned',2),data:{...wire('resigned',2).data,wager:true}},host),null);

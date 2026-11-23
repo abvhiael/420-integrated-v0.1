@@ -29,7 +29,11 @@ contract ArbitrationRouter420 is I420System {
         ArbitrationCaseRegistry420 c = ArbitrationCaseRegistry420(caseRegistry_);
         ArbitrationRulingRegistry420 r = ArbitrationRulingRegistry420(rulingRegistry_);
 
-        if (address(c.policies()) != policyRegistry_ || address(r.cases()) != caseRegistry_) {
+        if (
+            policyRegistry_.code.length == 0 || caseRegistry_.code.length == 0
+                || rulingRegistry_.code.length == 0 || address(c.policies()) != policyRegistry_
+                || address(r.cases()) != caseRegistry_ || c.rulingRegistry() != rulingRegistry_
+        ) {
             revert DependencyMismatch();
         }
 

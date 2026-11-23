@@ -35,10 +35,12 @@ const normalize=path=>relative(root,path).replaceAll('\\','/');
 const artPrefix='assets/games/cross-country-chaos/cards/';
 const mapPrefix='assets/games/cross-country-chaos/maps/';
 const vehiclePrefix='assets/games/cross-country-chaos/vehicles/';
+const labyrinthArtPrefix='assets/games/labyrinth-cribbage/';
 const cardFiles=files.filter(f=>normalize(f.path).startsWith(artPrefix));
 const mapFiles=files.filter(f=>normalize(f.path).startsWith(mapPrefix));
 const vehicleFiles=files.filter(f=>normalize(f.path).startsWith(vehiclePrefix));
-const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix));
+const labyrinthArtFiles=files.filter(f=>normalize(f.path).startsWith(labyrinthArtPrefix));
+const regularFiles=files.filter(f=>!normalize(f.path).startsWith(artPrefix)&&!normalize(f.path).startsWith(mapPrefix)&&!normalize(f.path).startsWith(vehiclePrefix)&&!normalize(f.path).startsWith(labyrinthArtPrefix));
 const baseTotal=regularFiles.reduce((sum,f)=>sum+f.size,0);
 const practiceJs=regularFiles.find(f=>normalize(f.path)==='core/chaos-practice-table.js')?.size;
 const practiceCss=regularFiles.find(f=>normalize(f.path)==='ccc-practice.css')?.size;
@@ -66,6 +68,45 @@ const bc02Files=Object.freeze({
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+// BC-2.4 original artwork and isolated UI bytes are separately bounded.
+const bc24New=Object.freeze({
+ 'core/labyrinth-cribbage-ui.js':18*1024,
+ 'core/labyrinth-hole-survey.js':5*1024,
+ 'labyrinth.css':4*1024
+});
+const bc24Modified=Object.freeze({
+ 'core/shared-game-ui.js':Object.freeze({baseline:11108,maxAdded:512}),
+ 'core/classic-rooms.js':Object.freeze({baseline:15490,maxAdded:2048}),
+ 'core/classic-room-bindings.js':Object.freeze({baseline:2032,maxAdded:768}),
+ 'index.html':Object.freeze({baseline:1519,maxAdded:128})
+});
+const bc24GrowthByPath=new Map();let bc24Growth=0;
+for(const [path,cap] of Object.entries(bc24New)){
+ const size=regularSizes.get(path);
+ if(!Number.isSafeInteger(size)||size<256||size>cap)
+  throw Error('BC-2.4 new independent frontend budget or missing file: '+path+' '+size+' > '+cap);
+ bc24GrowthByPath.set(path,size);bc24Growth+=size;
+}
+for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
+ const size=regularSizes.get(path);
+ if(!Number.isSafeInteger(size)||size<baseline||size-baseline>maxAdded)
+  throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
+ bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;
+}
+if(bc24Growth>28*1024)throw Error('BC-2.4 separately bounded UI budget exceeded: '+bc24Growth);
+if(labyrinthArtFiles.length>1||
+ labyrinthArtFiles.some(f=>normalize(f.path)!=='assets/games/labyrinth-cribbage/labyrinth.png'||f.size!==4236478))
+ throw Error('Unexpected/altered Labyrinth board artwork output');
+for(const asset of labyrinthArtFiles){
+ const raw=await readFile(asset.path);
+ const hash=createHash('sha256').update(raw).digest('hex');
+ const meta=await sharp(raw).metadata();
+ if(hash!=='4634051491e6bcadec3f7e065ed61b8cbf92ca4ef3f3f488da1811730f91f5f5'||
+   meta.format!=='png'||meta.width!==1254||meta.height!==1254)
+  throw Error('BC-2.4 original image must remain byte-for-byte identical');
+}
+if(!labyrinthArtFiles.length)console.warn('BC-2.4 exact artwork absent: pegboard integration remains unqualified.');
+
 // BC-1.4 publishes exactly six new source-owned assets. This independent
 // 96-KiB limit does NOT widen BC-0.2/0.3/0.4/0.5, CCC, single-file or legacy
 // base budgets: only these identified files are deducted before old checks.
@@ -131,7 +172,7 @@ let bc05Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc05Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.5 room asset missing: '+path);
- const growth=Math.max(0,size-baseline);
+ const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.5 file exceeded scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc05GrowthByPath.set(path,growth);bc05Growth+=growth;
 }
@@ -151,7 +192,7 @@ let bc04Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc04Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.4 published file missing: '+path);
- const growth=Math.max(0,size-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.4 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc04GrowthByPath.set(path,growth);
  bc04Growth+=growth;
@@ -173,7 +214,7 @@ let bc03Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc03Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.3 shared screen missing from output: '+path);
- const growth=Math.max(0,size-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.3 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc03GrowthByPath.set(path,growth);
  bc03Growth+=growth;
@@ -183,12 +224,12 @@ let bc02Growth=0;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  const size=regularSizes.get(path);
  if(!Number.isSafeInteger(size))throw new Error('BC-0.2 required output missing: '+path);
- const growth=Math.max(0,size-(bc03GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
+ const growth=Math.max(0,size-(bc24GrowthByPath.get(path)??0)-(bc03GrowthByPath.get(path)??0)-(bc04GrowthByPath.get(path)??0)-(bc05GrowthByPath.get(path)??0)-baseline);
  if(growth>maxAdded)throw new Error('BC-0.2 file exceeds scoped allowance: '+path+' '+growth+' > '+maxAdded);
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc24Growth-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -205,9 +246,10 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc24Growth-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+console.log('BC-2.4 independent board and UI allowance:',JSON.stringify({uiBytes:bc24Growth,cap:28*1024,originalArtPresent:labyrinthArtFiles.length===1}));
 console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));
 console.log('BC-1.5 restricted Cribbage start/recovery client:',JSON.stringify({publishedBytes:bc15Bytes,limitBytes:7*1024}));

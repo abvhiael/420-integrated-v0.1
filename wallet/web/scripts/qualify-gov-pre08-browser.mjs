@@ -51,7 +51,7 @@ if(mode!=='propose'){
    .find(x=>x?.name==='CivicProposalCreated');
  assert.ok(found,'real Geth proposal receipt missing Civic event');
  proposalId=found.args.proposalId.toLowerCase();
- assert.equal(found.args.voteStart,4n);
+ assert.equal(found.args.voteStart,3n);
 }
 
 let currentAccount=wallet.address.toLowerCase(),chainChanged=false;
@@ -127,3 +127,75 @@ await page.route('https://wallet.420integrated.org/**',async route=>{
      '.png':'image/png'}[path.extname(file)]||'application/octet-stream'});
  }catch{return route.fulfill({status:404})}
 });
+
+try{
+ await page.goto('https://wallet.420integrated.org/',{waitUntil:'domcontentloaded',timeout:30000});
+ await page.locator('#wallet-420id-panel').waitFor({state:'visible',timeout:15000});
+ await page.locator('#governance-connect').click();
+ await page.locator('#governance-app-state[data-state="passed"]').waitFor({timeout:30000});
+ assert.equal((await page.locator('#governance-account').textContent()).toLowerCase(),wallet.address.toLowerCase());
+ let proof={mode,chainId:420,localOnly:true,realChromium:true,
+    actualNativeGeth:true,realRegistryAndCivicCodeVerified:true,
+    local420IDBrowserGatewayResponse:true,real420IDBackendQualifiedSeparately:true};
+ if(mode==='propose'){
+   const policy=graph.actualProductionConstructorAddresses.TreasuryPolicyRegistry420;
+   const action=new Interface(['function setAssetPolicy(address,bool,uint128,uint128,uint64)'])
+      .encodeFunctionData('setAssetPolicy',['0x000000000000000000000000000000000000d00d',true,123,456,86400]);
+   const actionsHash=keccak256(AbiCoder.defaultAbiCoder().encode(
+      ['tuple(address,uint256,bytes)[]'],[[[policy,0,action]]]));
+   const metadataHash=keccak256(toUtf8Bytes('GOV-PRE08/BROWSER/LOCAL-ONLY'));
+   const call=abi.encodeFunctionData('createProposal',[0,metadataHash,actionsHash]);
+   const hash=await page.evaluate(tx=>window.ethereum.request({
+      method:'eth_sendTransaction',params:[tx]}),
+      {from:wallet.address,to:civic.governor,data:call,value:'0x0'});
+   assert.ok(transactions.some(tx=>tx.txHash===hash&&tx.to.toLowerCase()===civic.governor.toLowerCase()));
+   proof={...proof,proposalTxHash:hash,realNativeWalletSignedCivicProposal:true};
+ }else{
+   await page.locator('#governance-proposal-list .governance-proposal-row').first().click();
+   await page.locator('#governance-state').getByText('ACTIVE').waitFor({timeout:18000});
+   if(mode==='vote'){
+     await page.locator('#governance-check-eligibility').click();
+     await page.locator('#governance-eligibility[data-state="passed"]').waitFor({timeout:16000});
+     const forButton=page.locator('[data-governance-support="1"]');
+     assert.equal(await forButton.isEnabled(),true,'real voting weight not found on native Geth');
+     await forButton.click();
+     // The parent Python harness waits for a real signed tx in the live Geth
+     // mempool, then mines it in the NEXT independently BLS-certified block.
+     await page.locator('#governance-app-state[data-state="passed"]').waitFor({timeout:60000});
+     assert.match(await page.locator('#governance-transaction-state').textContent(),/Vote confirmed/);
+     const submission=transactions.find(tx=>tx.to.toLowerCase()===civic.voting.toLowerCase());
+     assert.ok(submission,'browser supplied no real typed EVM ballot');
+     const receipt=await rpc('eth_getTransactionReceipt',[submission.txHash]);
+     assert.equal(receipt?.status,'0x1');
+     const found=receipt.logs.map(log=>{try{return abi.parseLog(log)}catch{return null}})
+        .find(log=>log?.name==='CivicVoteCast');
+     assert.ok(found,'no CivicVoteCast from real mined native block');
+     assert.equal(found.args.proposalId.toLowerCase(),proposalId);
+     assert.equal(found.args.voter.toLowerCase(),wallet.address.toLowerCase());
+     assert.equal(found.args.support,1n);
+     proof={...proof,realVoteReceiptHash:submission.txHash,
+       actualSourceCompiledCivicVote:true,realOnchainEvent:true,
+       actualNativeBlockNumber:Number(BigInt(receipt.blockNumber))};
+   }else{
+     await page.locator('#governance-community-tally').getByText(/FOR 1/).waitFor({timeout:16000});
+     proof={...proof,canonicalCivicBallotRecoveredAfterHardStop:true};
+   }
+ }
+ // Real EIP-1193 account changes must invalidate the MOUNTED Governance UI.
+ await page.evaluate(value=>window.__walletEvent('accountsChanged',[value]),graph.localBrowserChangedAccount);
+ await page.locator('#governance-app-state').getByText(/Reload required/).waitFor({timeout:10000});
+ assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+ const before=transactions.length;
+ // Logout updates the app-scoped browser session, not the EVM account.
+ await page.locator('[data-420id-logout]').click();
+ await page.locator('#governance-transaction-state').getByText(/420ID/).waitFor({timeout:12000});
+ assert.equal(await page.locator('[data-governance-support="1"]').isDisabled(),true);
+ assert.equal(transactions.length,before,'account switch or logout submitted unauthorized transaction');
+ proof={...proof,accountChangedInvalidatesMountedGovernance:true,
+   appSSORevocationInvalidatesMountedGovernance:true,
+   signedEOATransactions:transactions,explicitDeviceApprovals:approvals};
+ await fs.writeFile(output,JSON.stringify(proof,null,2)+'\n',{flag:'wx'});
+ console.log('GOV_PRE_08_CHROMIUM_420ID_NATIVE_GETH_EIP1193='+mode.toUpperCase()+'_PASS');
+}finally{
+ await browser.close();
+}

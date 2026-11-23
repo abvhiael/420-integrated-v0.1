@@ -148,6 +148,15 @@ test('shared PostgreSQL fresh ingestion, duplicate suppression, atomic interrupt
  const invalid=await routeIndexerHttp420(api,'GET',
   'http://indexer/v1/arbitration/cases?chainId=420&limit=201');
  assert.equal(invalid.status,400);
+ const invalidCase=await routeIndexerHttp420(api,'GET',
+  'http://indexer/v1/arbitration/cases/not-a-valid-case?chainId=420');
+ assert.equal(invalidCase.status,400,'malformed Arbitration case ID must not be reported as 404/500');
+ const invalidAddress=await routeIndexerHttp420(api,'GET',
+  'http://indexer/v1/arbitration/cases?chainId=420&claimant=not-an-address');
+ assert.equal(invalidAddress.status,400);
+ const invalidDomain=await routeIndexerHttp420(api,'GET',
+  'http://indexer/v1/arbitration/cases?chainId=420&domainId=0x0');
+ assert.equal(invalidDomain.status,400);
  const unconfigured=new IndexerPublicApiAdapter420(new IndexerQueryService420(db));
  assert.equal((await routeIndexerHttp420(unconfigured,'GET',
   'http://indexer/v1/arbitration/cases?chainId=420')).status,503);
@@ -165,6 +174,16 @@ test('reorganization rollback, safe visibility, fully deterministic replay, RPC 
  assert.equal(reorg.canonicality,'reorganized');
  assert.equal(reorg.case,null);
  assert.deepEqual(reorg.history.items,[]);
+ // A reorganized source must never pretend that a previously existing case
+ // vanished (404) or that the case-list is permanently empty.
+ const api=new IndexerPublicApiAdapter420(new IndexerQueryService420(db),{mode:'head'},
+  {arbitration:{source,deployment:(await verifyArbitrationIndexerDeployment420(source,ARB_PINS_420))}});
+ const reorgCase=await routeIndexerHttp420(api,'GET',
+  'http://indexer/v1/arbitration/cases/'+ARB_CASE_ID_420+'?chainId=420');
+ assert.equal(reorgCase.status,503);
+ const reorgList=await routeIndexerHttp420(api,'GET',
+  'http://indexer/v1/arbitration/cases?chainId=420');
+ assert.equal(reorgList.status,503);
  const recovered=await (await start()).runOnce();
  assert.equal(recovered.recoveredReorgDepth,2);
  const replay=await protocolRows(db);

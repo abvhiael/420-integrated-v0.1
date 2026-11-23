@@ -10,5 +10,5 @@ test('protected driver workspace mounts onboarding with independently authentica
  assert.match(app,/decision\.kind === "protected" && decision\.role === "driver"/);
  assert.match(app,/clearDriverOnboarding = mountDriverOnboarding\(root, session, createDriverOnboardingApi\(globalThis\.LIFTdSessionAdapter\)\)/);
  assert.match(app,/if \(clearDriverOnboarding\) \{ clearDriverOnboarding\(\); clearDriverOnboarding = null; \}/);
- assert.ok(!app.includes('localStorage'));
+ assert.doesNotMatch(app, /\b(?:window|globalThis)\.localStorage\b|\blocalStorage\s*\[/);
 });

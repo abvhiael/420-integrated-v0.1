@@ -209,6 +209,9 @@ async function main(){
   assert.equal(record.claimant,claimantAddress);assert.equal(record.respondent,respondentAddress);
   assert.equal(record.resolver,resolverAddress);assert.equal(record.appealResolver,appealAddress);
   assert.equal(record.originComponentId,origin);assert.equal(record.round,0n);
+  await reject('observer submits evidence',()=>cases.connect(observer).submitEvidence.staticCall(caseId,id('EVIL')));
+  await track('user:claimant-evidence',await cases.connect(claimant).submitEvidence(caseId,id('CLAIMANT/EVIDENCE')));
+  await track('user:respondent-evidence',await cases.connect(respondent).submitEvidence(caseId,id('RESPONDENT/EVIDENCE')));
   // Scenario E: original case snapshots remain authoritative after a real G1
   // policy change even if all *new* cases must fail while policy is disabled.
   const originalPolicy={resolver:record.resolver,appealResolver:record.appealResolver,
@@ -221,9 +224,6 @@ async function main(){
   record=await cases.getCase(caseId);
   for(const [key,value] of Object.entries(originalPolicy))
     assert.equal(record[key],value,'Existing case policy snapshot changed: '+key);
-  await reject('observer submits evidence',()=>cases.connect(observer).submitEvidence.staticCall(caseId,id('EVIL')));
-  await track('user:claimant-evidence',await cases.connect(claimant).submitEvidence(caseId,id('CLAIMANT/EVIDENCE')));
-  await track('user:respondent-evidence',await cases.connect(respondent).submitEvidence(caseId,id('RESPONDENT/EVIDENCE')));
   await reject('duplicate evidence commitment',()=>cases.connect(respondent).submitEvidence.staticCall(
     caseId,id('CLAIMANT/EVIDENCE')));
   await reject('wrong resolver initial ruling',()=>rulings.connect(appealResolver).submitRuling.staticCall(

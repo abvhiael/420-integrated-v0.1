@@ -3,7 +3,7 @@
 import {InjectedProvider420} from './core/provider.js';
 import {createArbitrationApplication420} from './core/arbitration-application.js';
 import {createArbitration420StorageBridge420} from './core/arbitration-storage-bridge.js';
-import {ARBITRATION_EVIDENCE_MAX_BYTES_420} from './core/arbitration-evidence.js';
+import {ARBITRATION_EVIDENCE_MAX_BYTES_420,ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420} from './core/arbitration-evidence.js';
 
 const $=q=>document.querySelector(q);
 const full=(x)=>x==null?'—':String(x);
@@ -379,7 +379,7 @@ function revealRecoveryKey(){
 async function inspectEvidenceFile(form){
   if(!current||!evidenceWorkspace)throw Error('Select a verified case first');
   const fields=formRecord(form),file=form.querySelector('[name="capsule"]').files?.[0];
-  if(!file||file.size<1||file.size>ARBITRATION_EVIDENCE_MAX_BYTES_420+1024)
+  if(!file||file.size<1||file.size>ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420)
     throw Error('Select a bounded encrypted evidence capsule');
   if(inspectedEvidence){inspectedEvidence.fill(0);inspectedEvidence=null;}
   one('#arbitration-export-verified').disabled=true;

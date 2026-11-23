@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: '22'
       - name: Scoped 325-point UI, selection, privacy, original art survey and session continuity
-        run: node --test bong-goggles/web/test/labyrinth-frontend.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js
+        run: node --test bong-goggles/web/test/labyrinth-peg-overlay.test.js bong-goggles/web/test/labyrinth-frontend.test.js bong-goggles/web/test/labyrinth-session.test.js bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod

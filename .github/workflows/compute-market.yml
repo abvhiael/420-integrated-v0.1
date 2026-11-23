@@ -10,6 +10,7 @@ on:
       - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
       - 'scripts/verify-cmp-*.py'
       - 'scripts/test-cmp-*.py'
+      - 'scripts/qualify-compute-solidity.sh'
       - '.github/workflows/compute-market.yml'
   push:
     branches: [ main ]
@@ -21,6 +22,7 @@ on:
       - 'docs/420-COMPUTE-MARKET-V1-ARCHITECTURE.md'
       - 'scripts/verify-cmp-*.py'
       - 'scripts/test-cmp-*.py'
+      - 'scripts/qualify-compute-solidity.sh'
       - '.github/workflows/compute-market.yml'
   workflow_dispatch:
 
@@ -60,10 +62,9 @@ jobs:
 
       - name: Run retained Compute Market Solidity suite
         working-directory: contracts
-        # Restrict compilation to the retained Compute suite. The vendored CADC/LayerZero
-        # upstream fixture tree is unrelated to Compute and has external imports not
-        # supplied to this owner workflow. Do not skip any Compute*.t.sol tests.
-        run: forge test --match-path 'test/Compute*.t.sol' --skip 'test/fixtures/cadc/upstream/**' -vvv
+        # Stage every Compute*.t.sol test and original Foundry settings in an
+        # isolated workspace. Avoid discovery of unrelated CADC fixture contracts.
+        run: bash ../scripts/qualify-compute-solidity.sh
 
 
   evidence-qualification:

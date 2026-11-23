@@ -223,7 +223,32 @@ export async function createArbitrationIndexer420(
    return pins.chainId;
   };
   if(property==='getLogs')return async(filter:LogFilter420)=>{
+   // A provider can omit logs from eth_getLogs while returning otherwise
+   // authentic headers. Independently enumerate transaction receipts from each
+   // canonical block; require *every* Arbitration log in the receipt to appear
+   // identically in the RPC log response. This is required, not optional.
+   check(typeof target.getBlockTransactionsByNumber==='function',
+    'Arbitration requires full canonical transaction enumeration');
+   check(filter.toBlock===filter.fromBlock,
+    'Arbitration ingestion requires bounded one-block receipt reconciliation');
    const logs=await target.getLogs(filter);
+   const transactions=await target.getBlockTransactionsByNumber(filter.fromBlock);
+   for(const tx of transactions){
+    const receipt=await target.getTransactionReceipt(tx.hash);
+    check(receipt&&receipt.status===1||receipt&&receipt.status===0,
+     'Arbitration canonical transaction receipt unavailable');
+    if(!receipt||receipt.status!==1)continue;
+    const block=await target.getBlockByNumber(tx.blockNumber);
+    check(block&&block.hash.toLowerCase()===receipt.blockHash.toLowerCase()&&
+     receipt.transactionHash.toLowerCase()===tx.hash.toLowerCase(),
+     'Arbitration transaction receipt disagrees with canonical block');
+    for(const expected of receipt.logs){
+     if(!topics.has(expected.topics[0]?.toLowerCase()??''))continue;
+     check(decoder.decode(expected),'unrecognized canonical Arbitration receipt event');
+     check(logs.some(actual=>canonicalLog(expected,actual)),
+      'Arbitration RPC omitted canonical receipt event');
+    }
+   }
    for(const log of logs){
     if(log.removed||!topics.has(log.topics[0]?.toLowerCase()??''))continue;
     check(decoder.decode(log),'unqualified Arbitration log emitter');

@@ -6,6 +6,7 @@ import (
  "bytes"
  "context"
  "encoding/json"
+ "net/http"
  "testing"
 )
 

@@ -50,9 +50,21 @@ func TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats(t *testing.T){
   if room.Status!="ready"{t.Fatal("mixed room not ready")}
   match:=bc06Start(t,h,host,room.ID)
   if match.RulesHash!=adapter.hash||match.Sequence!=1{t.Fatal("unqualified Labyrinth session",match)}
+  get:=func(who *http.Cookie)ClassicSessionView{
+   response:=request(h,"GET","/v1/classic-sessions/"+match.ID,"",who)
+   if response.Code!=200{t.Fatalf("authenticated private session read failed: %d %s",response.Code,response.Body.String())}
+   var payload struct{Session ClassicSessionView}
+   if e:=json.Unmarshal(response.Body.Bytes(),&payload);e!=nil{t.Fatal(e)}
+   var visible map[string]json.RawMessage
+   if e:=json.Unmarshal(payload.Session.PrivateView,&visible);e!=nil{t.Fatal(e)}
+   for _,field:=range []string{"deck","crib","seed","engineState","allHands","opponentHand"}{
+    if _,ok:=visible[field];ok{t.Fatal("hidden state leaked through bot session",field)}
+   }
+   return payload.Session
+  }
   botsSeen:=map[int]bool{};humansSeen:=map[int]bool{}
   for step:=0;step<22;step++{
-   current:=bc15Get(t,h,host,match.ID)
+   current:=get(host)
    if current.Status!="active"||current.TurnSeat==nil{t.Fatal("premature mixed match termination",step)}
    seat:=*current.TurnSeat
    before:=current.Sequence
@@ -62,7 +74,7 @@ func TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats(t *testing.T){
     botsSeen[seat]=true
    }else{
     actor:=host;if seat==1{actor=peer}
-    private:=current;if seat!=0{private=bc15Get(t,h,peer,match.ID)}
+    private:=current;if seat!=0{private=get(peer)}
     var view struct{
      Phase string `json:"phase"`
      Hand []int `json:"hand"`
@@ -92,17 +104,17 @@ func TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats(t *testing.T){
     if result.Code!=200{t.Fatal("signed human turn failed",seat,result.Code,result.Body.String())}
     humansSeen[seat]=true
    }
-   after:=bc15Get(t,h,host,match.ID)
+   after:=get(host)
    if after.Sequence!=before+1{t.Fatal("bot or human turn not serialized once",after.Sequence,before)}
   }
   if len(botsSeen)==0||len(humansSeen)==0{t.Fatal("incomplete human/bot authoritative exercise",botsSeen,humansSeen)}
-  peerView:=bc15Get(t,h,peer,match.ID)
-  hostView:=bc15Get(t,h,host,match.ID)
-  if tc.count>2&&peerView.ViewerSeat!=1{t.Fatal("wrong opponent projection")}
-  if tc.count==2{ // sole human host; no second account joined the match
-   _=peerView
-  }else if hostView.Sequence!=peerView.Sequence{
-   t.Fatal("recovery divergent between human principals")
+  hostView:=get(host)
+  if tc.count>2{
+   peerView:=get(peer)
+   if peerView.ViewerSeat!=1||hostView.Sequence!=peerView.Sequence||
+    string(peerView.PrivateView)==string(hostView.PrivateView){
+    t.Fatal("two 420ID accounts received identical or divergent game projections")
+   }
   }
   if e=h.Sessions.VerifyRules(context.Background(),match.ID);e!=nil{
    t.Fatal("operator bot journal cannot replay",e)
@@ -112,12 +124,9 @@ func TestBC23SignedHumanAndOperatorBotTurnsAcrossAllFormats(t *testing.T){
    "labyrinth-cribbage":NewLabyrinthCribbageBotPolicies(),
   });e!=nil{t.Fatal(e)}
   h.Sessions=restarted
-  result:=bc15Get(t,h,host,match.ID)
+  result:=get(host)
   if result.Sequence!=23||result.RulesHash!=adapter.hash{t.Fatal("cold resume lost bot actions")}
   if e=restarted.VerifyRules(context.Background(),match.ID);e!=nil{t.Fatal("restart journal mismatch",e)}
  })}
 }
 
-// Suppress accidental widening of HTTP/guest access via the bot registration
-// API: policies are operator-owned and not exposed as client actions.
-var _ *http.Cookie

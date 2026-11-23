@@ -5,7 +5,7 @@ import {renderSharedGameScreen} from './shared-game-ui.js';
 import {renderGameAccountPanel} from './account-identity.js';
 import {renderCribbageRoute} from './cribbage-ui.js';
 const label=x=>String(x).replaceAll('_',' ').toLowerCase();
-const statusText=game=>game.status==='account'?'Account multiplayer':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
+const statusText=game=>game.status==='playable'?'Playable · 420ID':game.status==='account'?'Account multiplayer':game.status==='registry'?'Registry only — not yet playable':'Planned — not yet playable';
 const gameTile=game=>{
 const url='/games/'+game.id;
 return '<article class="games-catalogue__tile"><div><small class="games-catalogue__phase">'+escapeHtml(game.milestone??'More games')+'</small><h3><a href="'+escapeHtml(url)+'" data-route="classic-game">'+escapeHtml(game.title)+'</a></h3><p>'+escapeHtml(game.description||'Traditional tabletop game.')+'</p></div><p class="games-catalogue__meta">'+escapeHtml(game.players)+' players · '+escapeHtml(statusText(game))+'</p></article>';
@@ -15,7 +15,7 @@ const main=CLASSIC_ROADMAP.filter(game=>game.collection==='main');
 const canadian=CLASSIC_ROADMAP.filter(game=>game.collection==='canadian');
 const extras=ALL_CLASSICS.filter(game=>!CLASSIC_ROADMAP.some(item=>item.id===game.id));
 const section=(id,title,games)=>'<section class="games-catalogue__section" id="'+id+'" aria-labelledby="'+id+'-heading"><h2 id="'+id+'-heading">'+title+'</h2><div class="games-catalogue__grid">'+games.map(gameTile).join('')+'</div></section>';
-return '<div class="games-catalogue"><div class="games-catalogue__intro"><p class="eyebrow">BongGoggles · Free-to-play game night</p><h2>Games</h2><p>Explore the 25 Classics in order. Games unlock only after verified engine and multiplayer qualification.</p><nav aria-label="Games collections"><a href="#main-classics">Main Classics</a><a href="#canadian-classics">Canadian Classics</a><a href="#other-games">Other games</a><a href="/games/rooms" data-route="classic-rooms">Multiplayer rooms</a><a href="/classics" data-route="classics">Classic catalogue</a></nav></div>'+
+return '<div class="games-catalogue"><div class="games-catalogue__intro"><p class="eyebrow">BongGoggles · Free-to-play game night</p><h2>Games</h2><p>Explore the 25 Classics. Only released, verified games are Playable.</p><nav aria-label="Games collections"><a href="#main-classics">Main Classics</a><a href="#canadian-classics">Canadian Classics</a><a href="#other-games">Other games</a><a href="/games/rooms" data-route="classic-rooms">Multiplayer rooms</a><a href="/classics" data-route="classics">Classic catalogue</a></nav></div>'+
 section('main-classics','Main Classics',main)+section('canadian-classics','Canadian Classics',canadian)+
 section('other-games','More BongGoggles games',extras)+
 renderGameAccountPanel(accountIdentityState,{enabled:accountIdentityEnabled})+

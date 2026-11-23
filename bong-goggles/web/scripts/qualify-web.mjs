@@ -81,6 +81,10 @@ const bc14Limits=Object.freeze({
 // host/recovery client; never charge it against older per-file allowances.
 // BC-1.6: a new, bounded, off-chain social integration module. Retain all
 // earlier per-file BC-1.4, BC-1.5 and BC-0.x limits exactly as qualified.
+// BC-1.8: independent computer setup; all prior file/bundle caps unchanged.
+const bc18Bytes=regularSizes.get('core/classic-cribbage-practice.js');
+if(!Number.isSafeInteger(bc18Bytes)||bc18Bytes<2500||bc18Bytes>6*1024)
+ throw new Error('BC-1.8 computer practice module exceeds independent 6 KiB cap');
 const bc16Bytes=regularSizes.get('core/classic-cribbage-social.js');
 if(!Number.isSafeInteger(bc16Bytes)||bc16Bytes<9000||bc16Bytes>12*1024)
  throw new Error('BC-1.6 authenticated social module outside its own 12 KiB budget');
@@ -184,7 +188,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -201,9 +205,10 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
+console.log('BC-1.8 computer practice module:',JSON.stringify({bytes:bc18Bytes,cap:6*1024}));
 console.log('BC-1.6 authenticated social module:',JSON.stringify({publishedBytes:bc16Bytes,limitBytes:12*1024}));
 console.log('BC-1.5 restricted Cribbage start/recovery client:',JSON.stringify({publishedBytes:bc15Bytes,limitBytes:7*1024}));
 console.log('BC-1.4 approved leaf frontend independent allowance:',JSON.stringify({publishedBytes:bc14Bytes,limitBytes:96*1024,approvedBoardSHA:leafGitSHA}));

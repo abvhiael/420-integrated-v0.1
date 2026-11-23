@@ -3,6 +3,7 @@
 import {escapeHtml as esc} from './design-system.js';
 import {resignCribbageMatch} from './classic-cribbage-multiplayer.js';
 import {renderCribbageSocial} from './classic-cribbage-social.js';
+import {renderCribbagePractice as practice,bindCribbagePractice as bindPractice} from './classic-cribbage-practice.js';
 import {renderGameAccountPanel} from './account-identity.js';
 import {renderSharedGameScreen} from './shared-game-ui.js';
 import {classicGameById} from './classics.js';
@@ -189,24 +190,24 @@ return '<details class="cribbage-settings"><summary>Display settings</summary>'+
 }
 export function renderCribbageRoute({screen='intro',state=null,accountPanel='',identity=null}={}){
 if(identity)accountPanel=renderGameAccountPanel(identity[0],{enabled:identity[1]});
-const s=state??{status:'idle'},session=s.session,id=session?.id??null;
+const s=state??{status:'idle'},pState=state??{status:'disabled'},session=s.session,id=session?.id??null,playable=classicGameById('cribbage').status==='playable';
 const nav=back+menu(screen,id);
 const heading='<header class="cribbage-heading"><div><span class="eyebrow">BONGGOGGLES · CLASSICS</span>'+
 '<h2>Cribbage</h2><p>121 points. A green-leaf board. A proper count.</p></div>'+
-'<span class="cribbage-status">BC-1.5 · Authenticated rooms</span></header>';
+'<span class="cribbage-status">'+(playable?'Playable':'BC-1.5 · Authenticated rooms')+'</span></header>';
 const isLive=s.status==='ready'&&session?.gameId==='cribbage';
 const zero='<section class="cribbage-empty" role="status"><h3>Choose a verified table</h3>'+
 '<p>Browse the 420ID rooms, join a real Cribbage seat, then open its authenticated match. No cards or scores appear without a server-authorized per-seat snapshot.</p>'+
-'<p><a class="cribbage-primary" href="/games/rooms" data-route="classic-rooms">Browse Cribbage rooms</a></p>'+
+practice(pState)+'<p><a class="cribbage-primary" href="/games/rooms" data-route="classic-rooms">Browse Cribbage rooms</a></p>'+
 (s.status==='guest'?'<p><a href="/social-api/auth/start">Sign in to 420ID</a> to access your private cards.</p>':'')+
 (Array.isArray(s.recoverable)&&s.recoverable.length?'<h4>Your verified matches</h4><ul>'+s.recoverable.map(m=>'<li><a href="/games/cribbage/play?session='+esc(m.id)+'" data-route="classic-game">Resume '+m.seatCount+'-player match · '+esc(m.status)+' · turn '+(m.turnSeat===null?'ended':m.turnSeat+1)+'</a></li>').join('')+'</ul>':'')+
 (s.error?'<p role="alert">'+esc(s.error)+'</p>':'')+'</section>';
 const boardPreview=renderCribbageBoard({scores:[0,0],seatCount:2,settings:s.settings??{}});
 const home='<div class="cribbage-intro-grid"><div class="cribbage-intro-copy"><h3>Introduction · Classic Cribbage, made for game night</h3>'+
-'<p>Play with two or three individuals or four players in opposite-seat partnerships. Watch the back peg leap past the front peg on every verified scoring award.</p>'+
+'<p>Play 2–4 players. Watch pegging and scoring.</p>'+
 '<p>The board counts hands in order, with the dealer’s crib last. Every counted announcement is held for 1.5 seconds before the next scoring event.</p>'+
 '<a class="cribbage-primary" href="/games/cribbage/play" data-route="classic-game">Open a Cribbage table</a></div>'+
-boardPreview+'</div>';
+boardPreview+'</div>'+practice(pState);
 const generic=screen=>renderSharedGameScreen({game:classicGameById('cribbage'),screen});
 const details=screen==='rules'?rules():
 screen==='setup'?'<div class="cribbage-setup">'+zero+generic('setup')+'</div>':
@@ -217,13 +218,12 @@ screen==='results'?isLive?'<div class="cribbage-results">'+
 renderCribbageBoard({scores:session.privateView.scores,seatCount:session.seatCount,
 pegs:s.pegs,settings:s.settings})+renderCribbageSocial(s.social)+'</div>':renderCribbageSocial(s.social):
 screen==='history'||screen==='rematch'?renderCribbageSocial(s.social):home;
-return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">Zero-wager game · The interface is implemented, but the live game is not yet playable until real 420ID room activation and the remaining release gates qualify.</p>'+details+settings(s)+
-'<p class="cribbage-boundary">Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify</p></section>';
+return '<section class="games-game-page cribbage-app" data-game-screen="'+esc(screen)+'" data-motion="'+esc(s.settings?.motion??'standard')+'" data-announcements="'+(s.settings?.announcements===false?'off':'on')+'">'+nav+heading+accountPanel+'<p class="games-game-page__notice" role="status">'+(playable?'Playable · 420ID and computers.':'Zero-wager game · It is not yet playable until real 420ID room activation.')+'</p>'+details+settings(s)+
+'<p class="cribbage-boundary">'+(playable?'Zero wagers · 420ID private play':'Zero wagers · Server-authorized moves · No public Play activation until the remaining game release gates qualify')+'</p></section>';
 }
-// Event handlers bind only data-attribute choices and submit through the
-// canonical session controller. No browser-generated scores or deck state.
 export function bindCribbageDom(root,controller){
 if(!controller?.client.enabled)return;
+bindPractice(root,controller);
 const state=controller.state,session=state.session;
 for(const button of root.querySelectorAll('[data-cribbage-card]'))button.addEventListener('click',()=>{
 if(!session||state.submitting||state.queue?.length)return;

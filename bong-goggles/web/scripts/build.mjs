@@ -10,7 +10,7 @@ import {verifyChaosMapArt} from './verify-chaos-map-art.mjs';
 import sharp from 'sharp';
 import {verifyChaosCardCatalog} from './verify-chaos-card-catalog.mjs';
 import {validateRuntimeConfig} from '../core/runtime-config.js';
-import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags} from './account-social-build-config.mjs';
+import {ACCOUNT_SOCIAL_BUILD_FLAG,CLASSIC_ROOMS_BUILD_FLAG,CLASSIC_COMMUNICATIONS_BUILD_FLAG,withAccountSocialBuildFlags,resolveClassicBuildFlags} from './account-social-build-config.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
@@ -27,7 +27,11 @@ await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
 const example=JSON.parse(await readFile(resolve(root,'runtime-config.example.json'),'utf8'));
-const runtimeConfig=withAccountSocialBuildFlags(example,process.env[ACCOUNT_SOCIAL_BUILD_FLAG],process.env[CLASSIC_ROOMS_BUILD_FLAG],process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG]);
+const accountFlag=process.env[ACCOUNT_SOCIAL_BUILD_FLAG];
+const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLASSIC_ROOMS_BUILD_FLAG],
+ communications:process.env[CLASSIC_COMMUNICATIONS_BUILD_FLAG],pages:process.env.CF_PAGES,
+ branch:process.env.CF_PAGES_BRANCH});
+const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 validateRuntimeConfig(runtimeConfig);
 
 for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','welcome-landscape.svg','core','_headers']){

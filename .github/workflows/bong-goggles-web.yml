@@ -46,6 +46,17 @@ jobs:
         working-directory: bong-goggles/web
         env:
           BG_ACCOUNT_SOCIAL_ACTIVATION: "true"
+          BG_CLASSIC_ROOMS_ACTIVATION: "true"
+          BG_CLASSIC_COMMUNICATIONS_ACTIVATION: "true"
+        run: |
+          npm run build
+          node scripts/verify-account-social-output.mjs enabled
+      - name: Main-branch Pages production activation build (dashboard variables absent)
+        working-directory: bong-goggles/web
+        env:
+          CF_PAGES: "1"
+          CF_PAGES_BRANCH: main
+          BG_ACCOUNT_SOCIAL_ACTIVATION: "true"
         run: |
           npm run build
           node scripts/verify-account-social-output.mjs enabled

@@ -5,6 +5,8 @@ import {tokenHashText420,tokenHashHex420,tokenWord420,tokenAddressWord420} from 
 
 export const ARBITRATION_EVIDENCE_DOMAIN_420 = tokenHashText420('420/arbitration/evidence/private-envelope/v1');
 export const ARBITRATION_EVIDENCE_MAX_BYTES_420 = 8*1024*1024;
+// Envelope ciphertext is hex encoded (2 chars per byte), plus bounded metadata.
+export const ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420 = 2*ARBITRATION_EVIDENCE_MAX_BYTES_420+4096;
 export const ARBITRATION_EVIDENCE_MAX_RETENTION_MS_420 = 90*24*60*60*1000;
 const HEX32=/^0x[0-9a-fA-F]{64}$/;
 const ADDRESS=/^0x[0-9a-fA-F]{40}$/;
@@ -18,10 +20,10 @@ const addr=(value)=>{
   check(typeof value==='string'&&ADDRESS.test(value)&&BigInt(value)!==0n,'invalid evidence participant');
   return value.toLowerCase();
 };
-const bytes=(value,label='evidence')=>{
+const bytes=(value,label='evidence',max=ARBITRATION_EVIDENCE_MAX_BYTES_420)=>{
   check(value instanceof Uint8Array||value instanceof ArrayBuffer,'invalid '+label+' bytes');
   const copy=value instanceof Uint8Array?new Uint8Array(value):new Uint8Array(value.slice(0));
-  check(copy.length>0&&copy.length<=ARBITRATION_EVIDENCE_MAX_BYTES_420,'invalid evidence size');
+  check(copy.length>0&&copy.length<=max,'invalid evidence size');
   return copy;
 };
 const isBytes=(x,length)=>x instanceof Uint8Array&&x.length===length;
@@ -230,7 +232,7 @@ export function createPrivateEvidenceStore420({storage=null,authenticate,clock=n
       const result=await storage.retrieve({object,grant,signal,mode:'private'});
       check(!signal?.aborted&&result?.visibility==='private','private evidence retrieval unavailable');
       normalizePrivateEvidenceReceipt420(result,object);
-      const data=bytes(result.bytes,'private encrypted payload');
+      const data=bytes(result.bytes,'private encrypted payload',ARBITRATION_EVIDENCE_MAX_CAPSULE_BYTES_420);
       const envelope=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(data));
       return await verifyPrivateEvidence420({encrypted:envelope,recoveryKey,context:ctx,
         expectedCommitment});

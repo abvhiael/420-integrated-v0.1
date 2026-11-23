@@ -61,7 +61,7 @@ export function renderCribbagePractice(s={}){
  '<p>Choose Easy, Medium or Hard. Real 121-point scoring; no wagers.</p>'+
  '<form data-cribbage-practice><label>Computer difficulty <select name="difficulty" required>'+
  opts+'</select></label><button type="submit"'+(off||guest||busy?' disabled':'')+'>'+
- (busy?'Starting…':'Start game')+'</button></form>'+
+ (busy?'Starting…':'Start against computer')+'</button></form>'+
  (off?'<p role="status">Classic rooms are not activated for this deployment.</p>':
  guest?'<p><a href="/social-api/auth/start">Sign in with 420ID</a> to play.</p>':
  '<p>420ID sign-in required. The computer never sees your hidden cards.</p>')+

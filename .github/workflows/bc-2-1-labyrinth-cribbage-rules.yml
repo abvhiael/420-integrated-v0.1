@@ -11,6 +11,7 @@ on:
       - 'bong-goggles/web/core/classic-rooms.js'
       - 'bong-goggles/web/core/shared-game-ui.js'
       - 'bong-goggles/web/test/classics-menu.test.js'
+      - 'bong-goggles/web/test/dashboard-ui.test.js'
       - 'bong-goggles/web/test/shared-game-ui.test.js'
       - 'bong-goggles/web/test/classic-rooms.test.js'
       - 'bong-goggles/web/test/classics-release-qualification.test.js'
@@ -43,7 +44,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test BC-2.1 Labyrinth Cribbage and BC-1.1 standard isolation
-        run: node --test bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/cribbage-rules-spec.test.js bong-goggles/web/test/classics-menu.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/classics-release-qualification.test.js
+        run: node --test bong-goggles/web/test/labyrinth-cribbage-rules.test.js bong-goggles/web/test/cribbage-rules-spec.test.js bong-goggles/web/test/classics-menu.test.js bong-goggles/web/test/dashboard-ui.test.js bong-goggles/web/test/shared-game-ui.test.js bong-goggles/web/test/classic-rooms.test.js bong-goggles/web/test/classics-release-qualification.test.js
       - name: Validate standalone source syntax and static security
         run: |
           node --check bong-goggles/web/core/labyrinth-cribbage-rules.js

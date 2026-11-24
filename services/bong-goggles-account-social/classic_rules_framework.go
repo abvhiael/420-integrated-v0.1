@@ -247,7 +247,7 @@ func (a *RulesAdapter)legal(frame RuleFrame,seat int)([]json.RawMessage,error){
   var legal []json.RawMessage;var e error
   if nonTurn{legal,e=policy.NonTurnLegal(cloneRuleFrame(frame),seat,budget)}else{legal,e=a.module.Legal(cloneRuleFrame(frame),seat,budget)}
   if e!=nil||budget.spent<1||len(legal)>a.legalCapacity(){return nil,ErrUnavailable}
-  if len(legal)==0{return nil,ErrForbidden}
+  if len(legal)==0{if nonTurn{return nil,ErrForbidden};return nil,ErrUnavailable}
   out:=make([]json.RawMessage,0,len(legal));seen:=map[string]bool{}
   for _,item:=range legal{
    b,e:=canonicalRuleAction(item);if e!=nil||seen[string(b)]{return nil,ErrUnavailable}

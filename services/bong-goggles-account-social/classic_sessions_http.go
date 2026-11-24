@@ -80,6 +80,15 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
  }
+ if len(parts)==2&&parts[1]=="chess-actions"&&r.Method=="GET"{
+  state,e:=h.Sessions.Get(ctx,viewer,id);if e!=nil{classicRoomError(w,e);return}
+  if state.GameID!="chess"{deny(w,404);return}
+  // Get has already authenticated the seat and verified the durable journal.
+  // Reconstruct the legal list from the same revision, not browser input.
+  actions,e:=h.Sessions.ChessActions(ctx,viewer,id,state.Sequence)
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"sequence":state.Sequence,"actions":actions,"onChain":false,"wager":false,"rewards":false});return
+ }
  if len(parts)==2&&parts[1]=="action"&&r.Method=="POST"{
   var req ClassicSessionAction
   if strictJSON(r,&req)!=nil{deny(w,400);return}

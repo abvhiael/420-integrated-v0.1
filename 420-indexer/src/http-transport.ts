@@ -304,9 +304,14 @@ export async function routeIndexerHttp420(api: IndexerPublicApi420, method: stri
       }));
     }
     if (path === '/v1/protocols/events') {
+      const transactionHash = url.searchParams.get('transactionHash') ?? undefined;
+      if (transactionHash !== undefined && !/^0x[0-9a-f]{64}$/i.test(transactionHash)) {
+        invalidRequest420('transactionHash must be a 32-byte hash');
+      }
       return ok420(await api.protocolEvents(chainId, {
         ...pageRequest420(url),
         protocol: url.searchParams.get('protocol') ?? undefined,
+        transactionHash,
         objectKey: url.searchParams.get('objectKey') ?? undefined
       }));
     }

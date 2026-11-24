@@ -173,6 +173,24 @@ contract FantasyDisputeController420 {
         entered = 0;
     }
 
+    struct SettlementStatus {
+        PoolState state;
+        uint256 correctionEnd;
+        uint256 challengeEnd;
+        uint256 deadline;
+        uint256 pending;
+        bytes32 candidate;
+        bool invalidated;
+    }
+
+    function settlementStatus(bytes32 id) external view returns (SettlementStatus memory) {
+        Pool storage pool = pools[id];
+        return SettlementStatus(
+            pool.state, pool.correctionEnd, pool.challengeEnd, pool.deadline,
+            pool.pending, pool.candidate, pool.invalidated
+        );
+    }
+
     function poolOf(bytes32 id) external view returns (Pool memory) {
         return pools[id];
     }

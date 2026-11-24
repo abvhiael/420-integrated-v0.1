@@ -240,6 +240,8 @@ contract DevelopmentCompensationVault420 is I420System {
     /// @notice Separately authorized, fixed 3% Fantasy entry allocation. The basis is
     /// cumulative finalized eligible entries for one pool, never general net protocol revenue.
     /// The caller must be a specifically granted canonical Fantasy settlement contract.
+    /// The forwarding event reports the increase in the pool's eligible basis.
+    /// Amount is the increase in the rounded fee on the cumulative basis.
     function contributeFantasy(
         address token,
         bytes32 pool,
@@ -261,13 +263,14 @@ contract DevelopmentCompensationVault420 is I420System {
             revert UnauthorizedSource();
         }
         fantasyGross[key] = cumulativeGross;
+        uint256 incrementalGross = cumulativeGross - previous;
         bytes32 revenueRef = keccak256(abi.encode(fantasyPolicyId, token, pool, cumulativeGross));
         if (token == address(0)) {
             if (msg.value != amount) revert IncorrectContributionAmount();
-            _forwardNative(fantasyApplicationId, revenueRef, fantasyPolicyId, cumulativeGross, 300, amount);
+            _forwardNative(fantasyApplicationId, revenueRef, fantasyPolicyId, incrementalGross, 300, amount);
         } else {
             if (msg.value != 0) revert IncorrectContributionAmount();
-            _forwardToken(token, fantasyApplicationId, revenueRef, fantasyPolicyId, cumulativeGross, 300, amount);
+            _forwardToken(token, fantasyApplicationId, revenueRef, fantasyPolicyId, incrementalGross, 300, amount);
         }
     }
 

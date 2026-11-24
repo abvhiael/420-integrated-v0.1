@@ -16,6 +16,8 @@ type chessRuleData struct{
  LastSAN string `json:"lastSAN"`
  Offer int `json:"offer"`
  Reason string `json:"reason"`
+ Loser *int `json:"loser,omitempty"`
+ ClaimMove string `json:"claimMove,omitempty"`
 }
 type chessCommand struct{
  Type string `json:"type"`
@@ -54,19 +56,6 @@ func chessNext(d chessRuleData,m chessMove)(chessRuleData,int,error){
  h,n,e:=d.Repetition.record(key,d.Board.Half==0||old.Castle!=d.Board.Castle);d.Repetition=h
  return d,n,e
 }
-// A conservative, exact-for-these-material-classes predicate. More general
-// dead-position and individual mating-possibility adjudication belongs to
-// BC-3.2.2; do not claim these material checks exhaust the FIDE definition.
-func chessMaterialDead(p chessBoard)bool{
- n,b:=0,0;colors:=map[int]bool{}
- for i,v:=range p.Squares{switch chessKind(v){case '.', 'K':case 'N':n++;case 'B':b++;colors[(i/8+i%8)%2]=true;default:return false}}
- return n+b<=1||(n==0&&len(colors)<=1)
-}
-func chessCanMateMaterial(p chessBoard,seat int)bool{
- own,other:=0,0;minor:=false
- for _,v:=range p.Squares{if v=='.'||chessKind(v)=='K'{continue};if chessColor(v)==seat{own++;minor=chessKind(v)=='B'||chessKind(v)=='N'}else{other++}}
- return own>0&&!(own==1&&minor&&other==0)&&!chessMaterialDead(p)
-}
 func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
  scores,e:=chessResultScores(winner);if e!=nil{return e}
  f.Terminal=true;f.Phase="finished";f.Turn=-1;f.Winner=winner;f.Scores=scores;d.Reason=reason;d.Offer=-1
@@ -74,7 +63,7 @@ func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
 }
 func chessAutomatic(p chessBoard,repeats int)(string,*int){
  if len(p.legal())==0{if p.check(p.Turn){w:=1-p.Turn;return "checkmate",&w};return "stalemate",nil}
- if chessMaterialDead(p){return "dead-position",nil}
+ if chessDeadPosition(p){return "dead-position",nil}
  if repeats>=5{return "fivefold",nil}
  if p.Half>=150{return "75-move",nil}
  return "",nil
@@ -128,11 +117,12 @@ func(r chessRules) Step(f RuleFrame,seat int,raw json.RawMessage,b *RuleBudget)(
  if !found{return RuleFrame{},ErrInvalid}
  switch cmd.Type{
  case "resign":
-  w:=1-seat;var winner *int;if chessCanMateMaterial(d.Board,w){winner=&w}
+  winner,err:=chessAdjudicateLoss(d.Board,seat);if err!=nil{return RuleFrame{},err}
+  d.Loser=&seat
   e=chessFinish(&f,&d,"resigned",winner)
  case "accept-draw":e=chessFinish(&f,&d,"agreement",nil)
  case "reject-draw":d.Offer=-1
- case "claim-draw":e=chessFinish(&f,&d,"claimed-draw",nil)
+ case "claim-draw":d.ClaimMove=cmd.UCI;e=chessFinish(&f,&d,"claimed-draw",nil)
  case "move","move-offer":
   for _,m:=range d.Board.legal(){if m.UCI()!=cmd.UCI{continue}
    var repeats int;d,repeats,e=chessNext(d,m);if e!=nil{return RuleFrame{},e}
@@ -174,14 +164,27 @@ func(chessRules) Validate(f RuleFrame)error{
  }
  reason,winner:=chessAutomatic(p,chessOccurrences(d.Repetition,k))
  if !f.Terminal{
-  if f.Phase!="play"||f.Turn!=p.Turn||f.Winner!=nil||f.Scores[0]!=0||f.Scores[1]!=0||d.Reason!=""||reason!=""||(d.Offer!=-1&&d.Offer==p.Turn){return ErrInvalid}
+  if d.Loser!=nil||d.ClaimMove!=""||f.Phase!="play"||f.Turn!=p.Turn||f.Winner!=nil||f.Scores[0]!=0||f.Scores[1]!=0||d.Reason!=""||reason!=""||(d.Offer!=-1&&d.Offer==p.Turn){return ErrInvalid}
  }else{
   if f.Phase!="finished"||f.Turn!=-1||d.Offer!=-1{return ErrInvalid}
   scores,e:=chessResultScores(f.Winner);if e!=nil||scores[0]!=f.Scores[0]||scores[1]!=f.Scores[1]{return ErrInvalid}
   if reason!=""{
    if d.Reason!=reason||(winner==nil)!=(f.Winner==nil)||(winner!=nil&&*winner!=*f.Winner){return ErrInvalid}
   }else{
-   switch d.Reason{case "agreement","claimed-draw":if f.Winner!=nil{return ErrInvalid};case "resigned":default:return ErrInvalid}
+   switch d.Reason{
+   case "agreement":if f.Winner!=nil||d.Loser!=nil||d.ClaimMove!=""||p.Full<2{return ErrInvalid}
+   case "claimed-draw":
+    if f.Winner!=nil||d.Loser!=nil{return ErrInvalid}
+    if d.ClaimMove==""{if !chessClaim(d){return ErrInvalid}}else{
+     valid:=false
+     for _,m:=range p.legal(){if m.UCI()!=d.ClaimMove{continue};q:=p.apply(m);key,err:=q.identity();if err!=nil{return err};valid=q.Half>=100||(p.Castle==q.Castle&&q.Half!=0&&chessOccurrences(d.Repetition,key)>=2)}
+     if !valid{return ErrInvalid}
+    }
+   case "resigned","flag-fall":
+    if d.Loser==nil||*d.Loser<0||*d.Loser>1||d.ClaimMove!=""||(d.Reason=="flag-fall"&&*d.Loser!=p.Turn){return ErrInvalid}
+    w,err:=chessAdjudicateLoss(p,*d.Loser);if err!=nil||(w==nil)!=(f.Winner==nil)||(w!=nil&&*w!=*f.Winner){return ErrInvalid}
+   default:return ErrInvalid
+   }
   }
  }
  return nil

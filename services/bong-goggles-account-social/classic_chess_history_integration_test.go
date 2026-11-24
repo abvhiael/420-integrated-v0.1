@@ -43,8 +43,12 @@ func TestBC36ChessHistoryProfileStatistics(t *testing.T){
  win:=start()
  if w:=bc06Act(t,h,b,win.ID,"move",2,map[string]string{"type":"resign"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
  draw:=start()
- if w:=bc06Act(t,h,a,draw.ID,"move",2,map[string]string{"type":"move-offer","uci":"e2e4"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
- if w:=bc06Act(t,h,b,draw.ID,"move",3,map[string]string{"type":"accept-draw"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
+ // The canonical Chess adapter prohibits an offer before both players
+ // have made a move. Prove rejection without advancing the journal.
+ if w:=bc06Act(t,h,a,draw.ID,"move",2,map[string]string{"type":"move-offer","uci":"e2e4"},bc06ActionID(t));w.Code!=400{t.Fatal("opening offer must be rejected",w.Code,w.Body.String())}
+ if w:=bc06Act(t,h,a,draw.ID,"move",2,map[string]string{"type":"move","uci":"e2e4"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
+ if w:=bc06Act(t,h,b,draw.ID,"move",3,map[string]string{"type":"move-offer","uci":"e7e5"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
+ if w:=bc06Act(t,h,a,draw.ID,"move",4,map[string]string{"type":"accept-draw"},bc06ActionID(t));w.Code!=200{t.Fatal(w.Code,w.Body.String())}
  active:=start()
  for i,c:=range []*http.Cookie{a,b}{
   history:=read(c);stats:=history.Stats

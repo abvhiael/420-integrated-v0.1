@@ -52,6 +52,9 @@ on:
       - 'scripts/verify-420bet-poker-5a-4-state-model.py'
       - 'clients/420bet-poker/crypto/**'
       - 'clients/420bet-poker/zkshuffle/**'
+      - 'scripts/bet/unpack-poker-5c5-evidence.py'
+      - 'scripts/bet/unpack-poker-5c6-evidence.py'
+      - 'scripts/bet/unpack-poker-5c7-evidence.py'
       - '.github/workflows/420bet-poker-5a-4-level1.yml'
 permissions:
   contents: read
@@ -160,6 +163,16 @@ jobs:
         with:
           go-version: '1.24'
           cache: false
+      - name: Materialize and verify all committed tournament proof evidence
+        if: steps.cryptoscope.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          python3 scripts/bet/unpack-poker-5c5-evidence.py
+          python3 scripts/bet/unpack-poker-5c6-evidence.py
+          python3 scripts/bet/unpack-poker-5c7-evidence.py
+          test -s clients/420bet-poker/zkshuffle/fixtures/tournament-5c5/balance/tableA/WS8AggregateProof.bin
+          test -s clients/420bet-poker/zkshuffle/fixtures/tournament-5c6/rebuy/final/WS8AggregateProof.bin
+          test -s clients/420bet-poker/zkshuffle/fixtures/tournament-5c7/free/final/WS8AggregateProof.bin
       - name: Real Groth16 52-card permutation circuit qualification
         if: steps.cryptoscope.outputs.changed == 'true'
         env:

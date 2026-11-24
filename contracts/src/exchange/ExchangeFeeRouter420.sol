@@ -17,7 +17,7 @@ interface IERC20ExchangeFee420 {
 contract ExchangeFeeRouter420 is SystemAccess {
     uint16 private constant BPS_DENOMINATOR = 10_000;
     bytes32 public constant SOURCE_APPLICATION_ID = keccak256("420/EXCHANGE/APPLICATION/V1");
-    bytes32 public constant REVENUE_POLICY_REF = keccak256("420/APPLICATION_REVENUE_POLICY/V1");
+    bytes32 public constant REVENUE_POLICY_REF = DevelopmentCompensationIds420.POLICY_APPLICATION_REVENUE_V1;
 
     ExchangeFeePolicy420 public immutable feePolicy;
     mapping(address => bool) public authorizedCollector;

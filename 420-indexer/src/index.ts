@@ -56,3 +56,6 @@ export * from './token-read-model.js';
 
 export * from './arbitration-indexer.js';
 export * from './arbitration-read-model.js';
+
+export * from './compensation-descriptors.js';
+export * from './compensation-indexer.js';

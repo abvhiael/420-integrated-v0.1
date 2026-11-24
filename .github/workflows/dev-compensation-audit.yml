@@ -8,6 +8,9 @@ on:
       - "contracts/test/DevelopmentCompensationVault420.t.sol"
       - "contracts/test/DevelopmentCompensationAdversarial420.t.sol"
       - "contracts/test/DevelopmentCompensationGenesis420.t.sol"
+      - "contracts/test/DevelopmentCompensationEcosystem420.t.sol"
+      - "contracts/test/ExchangeFeeSettlement420.t.sol"
+      - "contracts/src/exchange/**"
       - "contracts/test/FounderWalletClaimsAndCompensation420.t.sol"
       - "contracts/src/revenue/FoundingDeveloperCompensationSplitter420.sol"
       - "contracts/src/governance/FoundingWalletClaims420.sol"
@@ -103,6 +106,12 @@ jobs:
 
       - name: Run Dev Compensation Genesis registration regression
         run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationGenesis420.t.sol' -vvvv
+
+      - name: Run actual Exchange fee settlement with real compensation contracts
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/ExchangeFeeSettlement420.t.sol' -vv
+
+      - name: Run local ecosystem discovery and receipt qualification
+        run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/DevelopmentCompensationEcosystem420.t.sol' -vv
 
       - name: Run founder claims and compensation lifecycle regressions
         run: forge test --root "$DEVCOMP_SCOPE_ROOT" --match-path 'test/FounderWalletClaimsAndCompensation420.t.sol' -vvvv

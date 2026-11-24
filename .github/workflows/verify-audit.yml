@@ -73,8 +73,10 @@ jobs:
 
           assert data["schema"] == "420-testnet-verify-readiness-v1"
           assert data["audit"]["pr"] == 503
-          assert data["audit"]["current_step"] == "VERIFY-AUDIT-8"
-          assert data["audit"]["final_exact_head_qualification_required"] is True
+          assert data["audit"]["current_step"] == "PUBLIC_TESTNET_DEPLOYMENT"
+          assert data["audit"]["final_exact_head_qualification_required"] is False
+          assert data["implementation_status"] == "REPOSITORY_AUDIT_COMPLETE_TESTNET_DEPLOYMENT_PENDING"
+          assert data["audit"]["merged_pr"] == 503
           assert data["public_endpoint_deployment_claimed"] is False
           assert data["backend"]["status"] == "PENDING_DEPLOYMENT"
           assert data["frontend"]["status"] == "PENDING_DEPLOYMENT"

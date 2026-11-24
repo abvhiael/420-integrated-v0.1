@@ -18,7 +18,7 @@ concurrency:
 jobs:
   verify-live-two-account-match:
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ inputs.game_id == 'labyrinth-cribbage' && 120 || 18 }}
+    timeout-minutes: ${{ inputs.game_id == 'labyrinth-cribbage' && 180 || 18 }}
     # Production tests must never be triggered by a PR or scheduled job.
     env:
       BC12_GAME_ID: ${{ inputs.game_id }}

@@ -35,6 +35,11 @@ jobs:
         working-directory: contracts
         run: |
           set -euo pipefail
-          forge test --match-path 'test/BetSettlementEngine420.t.sol' --match-test 'testVideoPoker*' -vv
+          scope="$(mktemp -d "$PWD/.video-poker-liability.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          cp test/BetSettlementEngine420.t.sol test/BetVideoPoker*.t.sol "$scope/"
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
+          forge test --match-path "$scope/BetSettlementEngine420.t.sol" --match-test 'testVideoPoker*' -vv
           forge test --match-contract 'BetVideoPokerSecureDrawTest' -vv
           forge test --match-contract 'BetVideoPokerPaytable54Test' -vv

@@ -60,7 +60,7 @@ test('BC-2.4 retains all 652 actual source-image hole centers without inventing 
  const board=renderLabyrinthBoard({scores:[0,324],teams:[0,1]});
  assert.match(board,/325-point finish/);
  assert.doesNotMatch(board,/data-peg-hole|data-scored-hole/);
- assert.match(board,/Peg placement is withheld until/);
+ assert.match(board,/red and green peg routes/);
 });
 test('BC-2.4 formats generate exact authoritative discard combinations and private hands',()=>{
  for(const n of [2,3,4]){

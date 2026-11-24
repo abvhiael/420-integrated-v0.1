@@ -18,6 +18,7 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  let lastSocial=0;
  let lastList=0;
  let pegMap=null,pegMapRequested=false;
+ let pegMatch=null,pegScores=null,previousPegScores=null;
  const loadPegMap=async()=>{
   if(pegMapRequested)return;
   pegMapRequested=true;
@@ -31,8 +32,9 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
   }catch{/* Missing or invalid map cannot authorize physical pegs. */}
  };
  const refresh=(force=false)=>{
-  if(!active()||!controller.client.enabled)return;
+  if(!active())return;
   void loadPegMap();
+  if(!controller.client.enabled)return;
   if(socialScreen()&&(force||Date.now()-lastSocial>=15000)){
    lastSocial=Date.now();void social.refresh();
   }
@@ -75,16 +77,28 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
    });
   }
   const view=verifyLabyrinthProjection(controller.state.view);
+  if(!view){pegMatch=null;pegScores=null;previousPegScores=null;}
   if(view&&pegMap){
+   const key=view.sessionId+':'+view.viewerSeat;
+   if(pegMatch!==key){pegMatch=key;pegScores=[...view.scores];previousPegScores=view.scores.map(s=>s===0?0:null);}
+   else if(pegScores){for(let i=0;i<view.scores.length;i++){
+    if(view.scores[i]>pegScores[i])previousPegScores[i]=pegScores[i];
+    else if(view.scores[i]<pegScores[i])previousPegScores[i]=null;
+   }pegScores=[...view.scores];}
    const teams=labyrinthCribbageVariant(view.seatCount,
     view.variant==='labyrinth-4p-individual'?'individual':'partnerships').teams;
-   const overlay=renderLabyrinthPegOverlay({scores:view.scores,teams},pegMap);
+   const overlay=renderLabyrinthPegOverlay({scores:view.scores,teams,previousScores:previousPegScores},pegMap);
    if(overlay)for(const art of root.querySelectorAll('.lab-board-art')){
-    if(!art.querySelector('.lab-peg-overlay'))art.insertAdjacentHTML('beforeend',overlay);
+    art.querySelector('.lab-peg-overlay')?.remove();
+    art.insertAdjacentHTML('beforeend',overlay);
     const caption=art.closest('.lab-board')?.querySelector('figcaption');
-    if(caption)caption.textContent='Verified physical peg positions · first to 325 points wins.';
+    if(caption)caption.textContent='Owner-traced peg routes · first to 325 points wins.';
    }
   }
+  if(!view&&pegMap){for(const art of root.querySelectorAll('.lab-board-art')){
+   const overlay=renderLabyrinthPegOverlay({scores:[0,0],teams:[0,1],previousScores:[0,0]},pegMap);
+   if(overlay&&!art.querySelector('.lab-peg-overlay'))art.insertAdjacentHTML('beforeend',overlay);
+  }}
   for(const img of root.querySelectorAll('.lab-board-art img')){
    img.addEventListener('error',()=>{
     img.hidden=true;
@@ -97,7 +111,7 @@ export function createLabyrinthRouteRuntime({enabled=false,onChange=()=>{},
  return Object.freeze({
   get state(){return {...controller.state,social:social.state};},
   bind,refresh,
-  invalidate:()=>{controller.invalidate();social.invalidate();lastSocial=0;},
+  invalidate:()=>{pegMatch=null;pegScores=null;previousPegScores=null;controller.invalidate();social.invalidate();lastSocial=0;},
   destroy:()=>{
    windowObject.clearInterval(interval);
    windowObject.removeEventListener('online',online);

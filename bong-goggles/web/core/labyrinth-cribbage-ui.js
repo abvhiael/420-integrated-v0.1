@@ -137,8 +137,14 @@ const previewSetup='<fieldset disabled aria-disabled="true"><legend>Game configu
  '<label>Four-player format <select name="format"><option selected>Partnerships (default)</option><option>Individual free-for-all</option></select></label>'+
  '<label>Computer strength <select name="difficulty"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></label>'+
  '<button type="button" disabled>Start a verified 325-point match</button></fieldset>';
-export function renderLabyrinthScreen({screen='intro',view=null,session=null,selection=[],recoverable=[],sessionError=null}={}){
+export function renderLabyrinthScreen({screen='intro',view=null,session=null,selection=[],recoverable=[],sessionError=null,computerEnabled=false}={}){
  const v=verifyLabyrinthProjection(view);
+ const computerSetup='<form class="labyrinth-setup" data-lab-computer-start><fieldset'+(computerEnabled?'':' disabled')+'><legend>Computer Opponents</legend>'+
+ '<label>Players <select name="players"><option value="2">2 players</option><option value="3">3 players</option><option value="4">4 players</option></select></label>'+
+ '<label>Four-player format <select name="format"><option value="partnerships">Partnerships (default)</option><option value="individual">Individual free-for-all</option></select></label>'+
+ '<label>Computer strength <select name="difficulty"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></label>'+
+ '<button type="submit">Start Game</button><p role="status" data-lab-computer-status></p></fieldset></form>';
+ const playLink=computerEnabled?'<p><a href="/games/labyrinth-cribbage/setup" data-route="classic-game">Play Labyrinth Cribbage — Computer Opponents</a> · <a href="/games/rooms" data-route="classic-rooms">Multiplayer rooms</a></p>':'';
  const start='<section class="labyrinth-game" data-labyrinth-screen="'+esc(screen)+'"><header>'+
  '<h2>Labyrinth Cribbage</h2><p>325 points · original wood-slice labyrinth board</p></header>';
  const recovery=Array.isArray(recoverable)&&recoverable.length?'<nav aria-label="My Labyrinth games"><h3>My Games</h3><ol>'+recoverable.filter(m=>/^[0-9a-f-]{36}$/.test(m.id)).slice(0,25).map(m=>'<li><a href="/games/labyrinth-cribbage/play?session='+esc(m.id)+'" data-route="classic-game">Resume '+esc(m.status)+' match #'+esc(m.id.slice(0,8))+'</a></li>').join('')+'</ol></nav>':'';
@@ -157,11 +163,11 @@ export function renderLabyrinthScreen({screen='intro',view=null,session=null,sel
   '</section>':'';
  const outcome=ended?'<p role="status">Match ended: '+esc(session.finishedReason||session.status)+
   (session.winnerSeat===null?' · no declared winner':' · winner seat '+(session.winnerSeat+1))+'</p>':'';
- if(screen==='intro')return start+'<p>Browse the approved board and rules. Live Play remains gated.</p>'+error+recovery+board+'</section>';
+ if(screen==='intro')return start+'<p>Browse the approved board and rules.</p>'+playLink+error+recovery+board+'</section>';
  if(screen==='rules')return start+'<section aria-label="325-point Labyrinth rules">'+ruleContent+'</section>'+board+'</section>';
- if(screen==='setup')return start+'<form class="labyrinth-setup">'+previewSetup+'</form>'+board+'</section>';
+ if(screen==='setup')return start+(computerEnabled?computerSetup:'<form class="labyrinth-setup">'+previewSetup+'</form>')+board+'</section>';
  if(screen==='play')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
-  '<p role="status">No verified 420ID Labyrinth session. Do not expose a playable table or private cards.</p>')+'</section>';
+  '<p role="status">No verified 420ID Labyrinth session.</p>'+playLink+(computerEnabled?computerSetup:''))+'</section>';
  if(screen==='table')return start+error+recovery+outcome+matchControls+(v?renderLabyrinthTable({view:v,selection}):
   '<p role="status">A server-authorized Labyrinth session is required to display a private hand.</p>')+'</section>';
  if(screen==='results')return start+error+recovery+outcome+matchControls+(ended?

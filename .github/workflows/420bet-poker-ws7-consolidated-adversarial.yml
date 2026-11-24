@@ -2,7 +2,11 @@ name: 420Bet Poker WS7 Consolidated Adversarial Security
 on:
   pull_request:
     paths:
-      - 'contracts/src/bet/**'
+      - 'contracts/src/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
+      - 'contracts/test/**'
       - 'contracts/test/BetPoker*.t.sol'
       - 'clients/420bet-poker/crypto/**'
       - 'clients/420bet-poker/zkshuffle/**'

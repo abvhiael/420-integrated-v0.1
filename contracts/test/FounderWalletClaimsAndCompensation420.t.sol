@@ -59,6 +59,48 @@ contract FounderOwnerRoutedSmartAccount420 {
     }
 }
 
+
+contract FounderCallbackToken420 {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+    FoundingDeveloperCompensationSplitter420 public splitter;
+    address public otherToken;
+    uint256 public mode;
+    uint256 public blocked;
+    function configure(FoundingDeveloperCompensationSplitter420 s, address other, uint256 m) external {
+        splitter = s; otherToken = other; mode = m;
+    }
+    function mint(address to, uint256 amount) external { balanceOf[to] += amount; }
+    function approve(address spender, uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount; return true;
+    }
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+        allowance[from][msg.sender] -= amount;
+        balanceOf[from] -= amount; balanceOf[to] += amount; return true;
+    }
+    function claim() external { splitter.claimToken(address(this)); }
+    function claimOther() external { splitter.claimToken(otherToken); }
+    function claimNative() external { splitter.claimNative(); }
+    receive() external payable {}
+    function transfer(address to, uint256 amount) external returns (bool) {
+        require(msg.sender == address(splitter), "unexpected source");
+        _blocked(abi.encodeCall(splitter.claimToken, (address(this))));
+        _blocked(abi.encodeCall(splitter.claimToken, (otherToken)));
+        _blocked(abi.encodeCall(splitter.claimNative, ()));
+        _blocked(abi.encodeCall(splitter.recordVaultTokenCompensation, (address(this), 1, bytes32(uint256(1)))));
+        if (mode == 1) return true; // dishonest success, no movement
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += mode == 2 ? amount - 1 : amount;
+        return true;
+    }
+    function _blocked(bytes memory data) private {
+        (bool ok, bytes memory reason) = address(splitter).call(data);
+        require(!ok && reason.length == 4, "callback not rejected");
+        require(bytes4(reason) == FoundingDeveloperCompensationSplitter420.Reentrancy.selector, "wrong callback error");
+        blocked++;
+    }
+}
+
 contract FounderWalletClaimsAndCompensation420Test {
     VmFounderWallets420 private constant vm = VmFounderWallets420(address(uint160(uint256(keccak256("hevm cheat code")))));
     address internal constant ADMIN = address(0xAA11);
@@ -341,5 +383,47 @@ contract FounderWalletClaimsAndCompensation420Test {
         require(token.balanceOf(ADMIN) == 2 && token.balanceOf(ANDREW) == 1
             && token.balanceOf(JANET) == 1, "token 50/25/25");
         require(address(splitter).balance == 0 && token.balanceOf(address(splitter)) == 0, "no unpaid liability");
+    }
+
+    function testMaliciousFounderTokenCallbacksAndExactTransferRollback() public {
+        FounderCallbackToken420 malicious = new FounderCallbackToken420();
+        FounderCompensationTestToken420 other = new FounderCompensationTestToken420();
+        splitter = new FoundingDeveloperCompensationSplitter420(address(malicious), ANDREW, JANET);
+        vault = new DevelopmentCompensationVault420(address(capabilities), address(splitter));
+        splitter.bindCompensationVault(address(vault));
+        malicious.configure(splitter, address(other), 0);
+        malicious.mint(address(this), 100);
+        malicious.approve(address(vault), 100);
+        vault.contributeToken(address(malicious), APP_ID, keccak256("callback-token"), vault.policyId(), 1000, 1000);
+        fundToken(other, keccak256("callback-other"), 100);
+        vm.deal(address(this), 100);
+        fundNative(keccak256("callback-native"), 100);
+        for (uint256 mode = 1; mode <= 2; mode++) {
+            malicious.configure(splitter, address(other), mode);
+            (bool ok, bytes memory reason) = address(malicious).call(abi.encodeCall(malicious.claim, ()));
+            require(!ok && reason.length == 4
+                && bytes4(reason) == FoundingDeveloperCompensationSplitter420.TransferFailed.selector,
+                "non-exact transfer must revert");
+            require(splitter.totalTokenClaimed(address(malicious)) == 0
+                && splitter.tokenClaimed(address(malicious), address(malicious)) == 0
+                && malicious.balanceOf(address(splitter)) == 100
+                && malicious.balanceOf(address(malicious)) == 0 && malicious.blocked() == 0,
+                "failed payout did not roll back");
+        }
+        malicious.configure(splitter, address(other), 0);
+        malicious.claim();
+        require(malicious.blocked() == 4 && malicious.balanceOf(address(malicious)) == 50
+            && malicious.balanceOf(address(splitter)) == 50
+            && splitter.totalTokenClaimed(address(malicious)) == 50, "exact payout or callback protection failed");
+        require(splitter.totalNativeClaimed() == 0 && splitter.totalTokenClaimed(address(other)) == 0,
+            "cross-asset callback changed accounting");
+        malicious.claimOther();
+        malicious.claimNative();
+        require(other.balanceOf(address(malicious)) == 50 && address(malicious).balance == 50,
+            "lock not released for legitimate subsequent claims");
+        vm.prank(ANDREW); splitter.claimToken(address(malicious));
+        vm.prank(JANET); splitter.claimToken(address(malicious));
+        require(splitter.totalTokenClaimed(address(malicious)) == 100
+            && malicious.balanceOf(address(splitter)) == 0, "final token conservation");
     }
 }

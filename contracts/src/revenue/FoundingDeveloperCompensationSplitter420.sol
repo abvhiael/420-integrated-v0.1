@@ -83,7 +83,7 @@ contract FoundingDeveloperCompensationSplitter420 {
 
     function isFoundingCompensationSplitter420() external pure returns (bool) { return true; }
 
-    receive() external payable {
+    receive() external payable nonReentrant {
         if (msg.sender != compensationVault || msg.value == 0) revert UnauthorizedRevenueSource();
         totalNativeCredited += msg.value;
         emit FounderCompensationDeposited(msg.sender, msg.value);
@@ -138,6 +138,12 @@ contract FoundingDeveloperCompensationSplitter420 {
         amount = claimableToken(token, msg.sender);
         if (amount == 0) revert NothingClaimable();
         IFounderCompensationToken420 asset = IFounderCompensationToken420(token);
+        // Both balance snapshots deliberately span an external transfer. All credit
+        // and claim entry points share the lock, including native receipt; claim
+        // effects precede the transfer and a failed delta rolls them back.
+        // The callback regression exercises same-asset, cross-asset and native
+        // reentry with a malicious token which is itself an entitled founder.
+        // slither-disable-start reentrancy-balance
         uint256 beforeSource = asset.balanceOf(address(this));
         uint256 beforeRecipient = asset.balanceOf(msg.sender);
         tokenClaimed[token][msg.sender] += amount;
@@ -148,6 +154,7 @@ contract FoundingDeveloperCompensationSplitter420 {
         if (afterSource > beforeSource || beforeSource - afterSource != amount
             || afterRecipient < beforeRecipient || afterRecipient - beforeRecipient != amount)
             revert TransferFailed();
+        // slither-disable-end reentrancy-balance
         emit FounderCompensationClaimed(msg.sender, token, amount);
     }
 

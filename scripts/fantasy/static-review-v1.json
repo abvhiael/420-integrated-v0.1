@@ -20,7 +20,7 @@
     "contracts/src/interfaces/genesis/IIdentityCredential420.sol": "74f96b43758ee97d3124e112d669e9ba9bccf9ce63be1e6c7dee8e1948f4f978",
     "contracts/src/interfaces/genesis/Types420.sol": "bee557da20b6ab622fc2e9cb779c27bb9efecfb9f7bc5d73f646446bab17f5ff",
     "contracts/src/revenue/DevelopmentCompensationIds420.sol": "5a7c4b05901c16194fc84c5f279ef2ea22e81a537516ccd156fe5e6f7feecdd3",
-    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "4f7ac84e5e8d3d68ab388eca8094673d1481154e4a6e813ec8a953ce76914228",
+    "contracts/src/revenue/DevelopmentCompensationVault420.sol": "45efdb4ca0073460ba9804f61cc3290cede19eb9b3b1a7ff7af7b467037a7d4c",
     "contracts/src/system/SystemAccess.sol": "22cbbfabb8ecef4cae12d5617968996a00ae223988f1a55f1265886f1aa56223"
   },
   "dispositions": {

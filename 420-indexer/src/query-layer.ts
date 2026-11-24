@@ -122,7 +122,7 @@ export function logsQuery420(chainId: bigint, opts: { address?: string; cursor?:
   return { text: `select * from idx_logs where ${predicates.join(' and ')} order by block_number ${order(direction)}, tx_index ${order(direction)}, log_index ${order(direction)} limit $${params.length}`, params };
 }
 
-export function protocolEventsQuery420(chainId: bigint, opts: { protocol?: string; objectKey?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): SqlQuery420 {
+export function protocolEventsQuery420(chainId: bigint, opts: { protocol?: string; objectKey?: string; transactionHash?: string; cursor?: string; limit?: number; direction?: QueryDirection420 } = {}): SqlQuery420 {
   const direction = opts.direction ?? 'desc';
   const isCompensation = opts.protocol === '420DevelopmentCompensation';
   const table = isCompensation ? 'idx_protocol_events' : 'idx_protocol_object_events';
@@ -133,6 +133,10 @@ export function protocolEventsQuery420(chainId: bigint, opts: { protocol?: strin
   const predicates = ['chain_id = $1'];
   if (opts.protocol) { params.push(opts.protocol); predicates.push(`protocol = $${params.length}`); }
   if (opts.objectKey) { params.push(opts.objectKey); predicates.push(`${objectKey} = $${params.length}`); }
+  if (opts.transactionHash) {
+    params.push(opts.transactionHash.toLowerCase());
+    predicates.push(`tx_hash = $${params.length}`);
+  }
   if (opts.cursor) {
     const cursor = decodePositionCursor420(opts.cursor);
     params.push(cursor.blockNumber.toString(), cursor.txIndex, cursor.logIndex);

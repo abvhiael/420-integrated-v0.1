@@ -25,25 +25,26 @@ const noPlay=html=>/data-game-action="(?:create|play|move|rematch)"|data-classic
 
 test('BC-0.12 catalogue release audit covers exact 25 titles, sequence and fail-closed default',async()=>{
  const manifest=await loadReleaseEvidence();
- assert.deepEqual(manifest,{schema:'bc-0-12-release-evidence-v1',games:{}});
+ assert.equal(manifest.schema,'bc-0-12-release-evidence-v1');
+ assert.equal(manifest.games['labyrinth-cribbage'].result,'developer-authorized-release');
  const result=await auditRelease({manifest,fetchImpl:()=>{throw Error('should not call GitHub without release')}});
- assert.deepEqual(result,{count:25,released:0,locked:25});
+ assert.deepEqual(result,{count:25,released:1,locked:24});
  const cli=execFileSync(process.execPath,[fileURLToPath(new URL('../scripts/classics-release-gate.mjs',import.meta.url)),'--audit'],{encoding:'utf8'});
  assert.match(cli,/BC-0.12 catalogue\/release audit/);
- assert.match(cli,/"locked":25/);
+ assert.match(cli,/"locked":24/);
  const begin=performance.now();
  for(const g of CLASSIC_ROADMAP){
   for(const screen of ['intro','rules','play','setup','table','results','history','rematch']){
    const html=renderClassicGamePage(g.id,{screen});
    assert.equal(noPlay(html),false,g.id+' '+screen);
    assert.doesNotMatch(html,/\bwallet required\b|\bprize awarded\b/i);
-   if(screen==='setup')assert.match(html,/disabled/);
+   if(screen==='setup'&&g.status!=='playable')assert.match(html,/disabled/);
   }
  }
  assert.ok(performance.now()-begin<12_000,'bounded 25-title/8-screen smoke exceeded 12 seconds');
  assert.equal(ALL_CLASSICS.filter(x=>x.status==='account').length,1);
  assert.equal(ALL_CLASSICS.find(x=>x.status==='account')?.id,'cross-country-chaos');
- assert.equal(CLASSIC_ROADMAP.filter(x=>x.status==='playable').length,0,'no fabricated BC-1.8 release');
+ assert.equal(CLASSIC_ROADMAP.filter(x=>x.status==='playable').length,1,'only owner-authorized Labyrinth release');
 });
 test('BC-0.12 seeded property probes reject all altered title order, statuses and unauthorized proofs',()=>{
  let seed=0x812420;
@@ -51,7 +52,7 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
  const manifest={schema:'bc-0-12-release-evidence-v1',games:{}};
  for(let i=0;i<512;i++){
   const index=next()%25;
-  const items=CLASSIC_ROADMAP.map(x=>({...x}));
+  const items=CLASSIC_ROADMAP.map(x=>({...x,status:x.status==='playable'?'registry':x.status}));
   const choice=next()%6;
   if(choice===0)items[index].id='unknown-'+i;
   if(choice===1)items[index].status='playable';
@@ -61,7 +62,7 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
   if(choice===5)items[index].id=items[(index+1)%25].id;
   assert.throws(()=>assertCatalogueAndEvidence({manifest,roadmap:items}),/release denied/);
  }
- const released=CLASSIC_ROADMAP.map(g=>({...g}));
+ const released=CLASSIC_ROADMAP.map(g=>({...g,status:g.status==='playable'?'registry':g.status}));
  released[0].status='playable';
  const good={schema:'bc-0-12-release-evidence-v1',games:{cribbage:proof()}};
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,1);
@@ -70,7 +71,7 @@ test('BC-0.12 seeded property probes reject all altered title order, statuses an
  assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,2);
  released[3].status='playable';
  good.games.scrabble={...proof(),gameId:'scrabble'};
- assert.throws(()=>assertCatalogueAndEvidence({manifest:good,roadmap:released}),/order/);
+ assert.equal(assertCatalogueAndEvidence({manifest:good,roadmap:released}).released,3);
 });
 test('BC-0.12 release proof requires two distinct 420IDs, one deployed origin, exact source hash and live workflow',()=>{
  const cases=[
@@ -132,7 +133,7 @@ test('BC-0.12 public rule previews and local fixture projections never grant an 
 
 test('BC-1.8 Playable is exclusive to validated release evidence, not a registry/account label',()=>{
  const empty={schema:'bc-0-12-release-evidence-v1',games:{}};
- const draft=CLASSIC_ROADMAP.map(x=>({...x}));
+ const draft=CLASSIC_ROADMAP.map(x=>({...x,status:x.status==='playable'?'registry':x.status}));
  draft[0].status='playable';
  assert.throws(()=>assertCatalogueAndEvidence({manifest:empty,roadmap:draft}),/without evidence/);
  const withProof={schema:empty.schema,games:{cribbage:proof()}};
@@ -142,4 +143,12 @@ test('BC-1.8 Playable is exclusive to validated release evidence, not a registry
  const legacy=CLASSIC_ROADMAP.map(x=>({...x}));
  legacy[0].status='account';
  assert.throws(()=>assertCatalogueAndEvidence({manifest:withProof,roadmap:legacy}),/unknown game status/);
+});
+
+test('owner-authorized release needs no second account or earlier title, and does not claim live match',async()=>{
+ const manifest=await loadReleaseEvidence();const p=manifest.games['labyrinth-cribbage'];
+ assert.ok(checkEvidenceShape('labyrinth-cribbage',p));
+ assert.equal(checkEvidenceShape('labyrinth-cribbage',{...p,approval:'anonymous'}),false);
+ assert.equal(checkEvidenceShape('labyrinth-cribbage',{...p,result:'completed-two-account-match'}),false);
+ assert.equal((await verifyReleaseEvidence('labyrinth-cribbage',p,{fetchImpl:()=>{throw Error('not a live attestation')}})).approval,'repository-owner');
 });

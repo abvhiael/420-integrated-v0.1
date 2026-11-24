@@ -6,23 +6,34 @@ import (
  "strings"
 )
 
-const chessProductRuleset = "bc-chess-standard@1.0.0"
-const chessRuleSpecification = chessProductRuleset+";orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;FIDE-2023"
+const chessProductRuleset = "bc-chess-standard@1.1.0"
+const chessRuleSpecification = chessProductRuleset+";orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;material-only-dead-position-and-flag-fall;resignation-is-loss"
 type chessRules struct{chessRuleCapacity}
 type chessRuleData struct{
+ Timing *chessTimedState `json:"timing,omitempty"`
  Board chessBoard `json:"board"`
  Repetition chessRepetition `json:"repetition"`
  LastMove string `json:"lastMove"`
  LastSAN string `json:"lastSAN"`
  Offer int `json:"offer"`
  Reason string `json:"reason"`
+ Loser *int `json:"loser,omitempty"`
+ ClaimMove string `json:"claimMove,omitempty"`
 }
 type chessCommand struct{
  Type string `json:"type"`
  UCI string `json:"uci,omitempty"`
 }
+// Identify the actual versioned Chess adapter, even when a fixture shares its
+// catalogue identifier.
+func isClassicChess(rule ClassicRule) bool {
+ adapter,ok:=rule.(*RulesAdapter)
+ if !ok||adapter==nil{return false}
+ _,ok=adapter.module.(chessRules)
+ return ok
+}
 func NewChessRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(chessRules{})}
-func(chessRules) Definition()RuleDefinition{return RuleDefinition{GameID:"chess",Version:"v1.0",Specification:chessRuleSpecification}}
+func(chessRules) Definition()RuleDefinition{return RuleDefinition{GameID:"chess",Version:"v1.1",Specification:chessRuleSpecification}}
 func(chessRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error{
  if room.GameID!="chess"||room.SeatCount!=2||len(seats)!=2||seats[0].Index!=0||seats[1].Index!=1{return ErrInvalid}
  if seats[0].Controller=="human"&&seats[1].Controller=="human"&&seats[0].Subject==seats[1].Subject{return ErrInvalid}
@@ -54,19 +65,6 @@ func chessNext(d chessRuleData,m chessMove)(chessRuleData,int,error){
  h,n,e:=d.Repetition.record(key,d.Board.Half==0||old.Castle!=d.Board.Castle);d.Repetition=h
  return d,n,e
 }
-// A conservative, exact-for-these-material-classes predicate. More general
-// dead-position and individual mating-possibility adjudication belongs to
-// BC-3.2.2; do not claim these material checks exhaust the FIDE definition.
-func chessMaterialDead(p chessBoard)bool{
- n,b:=0,0;colors:=map[int]bool{}
- for i,v:=range p.Squares{switch chessKind(v){case '.', 'K':case 'N':n++;case 'B':b++;colors[(i/8+i%8)%2]=true;default:return false}}
- return n+b<=1||(n==0&&len(colors)<=1)
-}
-func chessCanMateMaterial(p chessBoard,seat int)bool{
- own,other:=0,0;minor:=false
- for _,v:=range p.Squares{if v=='.'||chessKind(v)=='K'{continue};if chessColor(v)==seat{own++;minor=chessKind(v)=='B'||chessKind(v)=='N'}else{other++}}
- return own>0&&!(own==1&&minor&&other==0)&&!chessMaterialDead(p)
-}
 func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
  scores,e:=chessResultScores(winner);if e!=nil{return e}
  f.Terminal=true;f.Phase="finished";f.Turn=-1;f.Winner=winner;f.Scores=scores;d.Reason=reason;d.Offer=-1
@@ -74,7 +72,7 @@ func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
 }
 func chessAutomatic(p chessBoard,repeats int)(string,*int){
  if len(p.legal())==0{if p.check(p.Turn){w:=1-p.Turn;return "checkmate",&w};return "stalemate",nil}
- if chessMaterialDead(p){return "dead-position",nil}
+ if chessDeadPosition(p){return "dead-position",nil}
  if repeats>=5{return "fivefold",nil}
  if p.Half>=150{return "75-move",nil}
  return "",nil
@@ -128,11 +126,12 @@ func(r chessRules) Step(f RuleFrame,seat int,raw json.RawMessage,b *RuleBudget)(
  if !found{return RuleFrame{},ErrInvalid}
  switch cmd.Type{
  case "resign":
-  w:=1-seat;var winner *int;if chessCanMateMaterial(d.Board,w){winner=&w}
+  winner,err:=chessAdjudicateLoss(d.Board,seat,"resigned");if err!=nil{return RuleFrame{},err}
+  d.Loser=&seat
   e=chessFinish(&f,&d,"resigned",winner)
  case "accept-draw":e=chessFinish(&f,&d,"agreement",nil)
  case "reject-draw":d.Offer=-1
- case "claim-draw":e=chessFinish(&f,&d,"claimed-draw",nil)
+ case "claim-draw":d.ClaimMove=cmd.UCI;e=chessFinish(&f,&d,"claimed-draw",nil)
  case "move","move-offer":
   for _,m:=range d.Board.legal(){if m.UCI()!=cmd.UCI{continue}
    var repeats int;d,repeats,e=chessNext(d,m);if e!=nil{return RuleFrame{},e}
@@ -164,6 +163,12 @@ func chessBoardValid(p chessBoard)bool{
 func(chessRules) Validate(f RuleFrame)error{
  d,e:=chessDecode(f);if e!=nil{return e}
  p:=d.Board
+ if d.Timing!=nil{
+  initial,err:=chessClockForProfile(d.Timing.Profile)
+  if err!=nil||d.Timing.At<=0||d.Timing.At>253402300799999||!d.Timing.Clock.Timed||
+   d.Timing.Clock.Increment!=initial.Increment{return ErrInvalid}
+  for _,balance:=range d.Timing.Clock.Remaining{if balance<0||balance>chessMaxClockMillis{return ErrInvalid}}
+ }
  if f.SeatCount!=2||f.Variant!=""||len(f.Scores)!=2||f.Round!=p.Full||!chessBoardValid(p)||!d.Repetition.valid()||len(d.Repetition.Positions)<68||len(d.Repetition.Positions)/68>p.Half+1||d.Offer< -1||d.Offer>1{return ErrInvalid}
  k,e:=p.identity();if e!=nil||!strings.HasSuffix(d.Repetition.Positions,hex.EncodeToString(k[:])){return ErrInvalid}
  if len(d.LastMove)>5||len(d.LastSAN)>16||(d.LastMove=="")!=(d.LastSAN==""){return ErrInvalid}
@@ -174,14 +179,27 @@ func(chessRules) Validate(f RuleFrame)error{
  }
  reason,winner:=chessAutomatic(p,chessOccurrences(d.Repetition,k))
  if !f.Terminal{
-  if f.Phase!="play"||f.Turn!=p.Turn||f.Winner!=nil||f.Scores[0]!=0||f.Scores[1]!=0||d.Reason!=""||reason!=""||(d.Offer!=-1&&d.Offer==p.Turn){return ErrInvalid}
+  if d.Loser!=nil||d.ClaimMove!=""||f.Phase!="play"||f.Turn!=p.Turn||f.Winner!=nil||f.Scores[0]!=0||f.Scores[1]!=0||d.Reason!=""||reason!=""||(d.Offer!=-1&&d.Offer==p.Turn){return ErrInvalid}
  }else{
   if f.Phase!="finished"||f.Turn!=-1||d.Offer!=-1{return ErrInvalid}
   scores,e:=chessResultScores(f.Winner);if e!=nil||scores[0]!=f.Scores[0]||scores[1]!=f.Scores[1]{return ErrInvalid}
   if reason!=""{
    if d.Reason!=reason||(winner==nil)!=(f.Winner==nil)||(winner!=nil&&*winner!=*f.Winner){return ErrInvalid}
   }else{
-   switch d.Reason{case "agreement","claimed-draw":if f.Winner!=nil{return ErrInvalid};case "resigned":default:return ErrInvalid}
+   switch d.Reason{
+   case "agreement":if f.Winner!=nil||d.Loser!=nil||d.ClaimMove!=""||p.Full<2{return ErrInvalid}
+   case "claimed-draw":
+    if f.Winner!=nil||d.Loser!=nil{return ErrInvalid}
+    if d.ClaimMove==""{if !chessClaim(d){return ErrInvalid}}else{
+     valid:=false
+     for _,m:=range p.legal(){if m.UCI()!=d.ClaimMove{continue};q:=p.apply(m);key,err:=q.identity();if err!=nil{return err};valid=q.Half>=100||(p.Castle==q.Castle&&q.Half!=0&&chessOccurrences(d.Repetition,key)>=2)}
+     if !valid{return ErrInvalid}
+    }
+   case "resigned","flag-fall":
+    if d.Loser==nil||*d.Loser<0||*d.Loser>1||d.ClaimMove!=""||(d.Reason=="flag-fall"&&*d.Loser!=p.Turn){return ErrInvalid}
+    w,err:=chessAdjudicateLoss(p,*d.Loser,d.Reason);if err!=nil||(w==nil)!=(f.Winner==nil)||(w!=nil&&*w!=*f.Winner){return ErrInvalid}
+   default:return ErrInvalid
+   }
   }
  }
  return nil
@@ -190,7 +208,7 @@ func(r chessRules) View(f RuleFrame,seat int)(json.RawMessage,error){
  if seat<0||seat>1{return nil,ErrForbidden}
  if e:=r.Validate(f);e!=nil{return nil,e};d,e:=chessDecode(f);if e!=nil{return nil,e}
  color:="white";if seat==1{color="black"}
- return json.Marshal(map[string]any{"gameId":"chess","ruleset":chessProductRuleset,"seat":seat,"color":color,"whiteSeat":0,"blackSeat":1,"board":string(d.Board.Squares[:]),"turn":f.Turn,"phase":f.Phase,"round":f.Round,"scores":f.Scores,"winner":f.Winner,"terminal":f.Terminal,"reason":d.Reason,"lastMove":d.LastMove,"lastSAN":d.LastSAN,"castling":d.Board.Castle,"enPassant":d.Board.EP,"halfmove":d.Board.Half,"check":d.Board.check(d.Board.Turn),"drawOffer":d.Offer})
+ return json.Marshal(map[string]any{"gameId":"chess","ruleset":chessProductRuleset,"seat":seat,"color":color,"whiteSeat":0,"blackSeat":1,"board":string(d.Board.Squares[:]),"turn":f.Turn,"phase":f.Phase,"round":f.Round,"scores":f.Scores,"winner":f.Winner,"terminal":f.Terminal,"reason":d.Reason,"lastMove":d.LastMove,"lastSAN":d.LastSAN,"castling":d.Board.Castle,"enPassant":d.Board.EP,"halfmove":d.Board.Half,"check":d.Board.check(d.Board.Turn),"drawOffer":d.Offer,"timing":d.Timing})
 }
 var _ RuleModule=chessRules{}
 var _ RuleSeatPolicy=chessRules{}

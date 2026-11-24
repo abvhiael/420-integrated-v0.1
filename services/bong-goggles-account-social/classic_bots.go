@@ -99,14 +99,23 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
  if e=s.verifyRulesTx(ctx,tx,rec,adapter);e!=nil{return false,ErrUnavailable}
  var now time.Time
  if e=tx.QueryRowContext(ctx,"SELECT clock_timestamp()").Scan(&now);e!=nil{return false,e}
- if rec.Deadline==nil||!now.Before(*rec.Deadline){
+ chess:=isClassicChess(adapter)
+ if rec.Deadline==nil&&!chess||rec.Deadline!=nil&&!now.Before(*rec.Deadline){
   if e=s.expireLocked(ctx,tx,&rec,now);e!=nil{return false,e}
   return false,tx.Commit()
  }
  limit,duration,e:=botLimits(difficulty.String);if e!=nil{return false,e}
  move,e:=adapter.ChooseMoveBounded(rec.State,seat,difficulty.String,policy,limit,time.Now().Add(duration))
  if e!=nil{return false,e}
- next,turn,finished,won,e:=adapter.Apply(rec.State,seat,move)
+ var next json.RawMessage
+ var turn int
+ var finished bool
+ var won *int
+ if chess&&rec.Deadline!=nil{
+  event:=chessTimedEvent{At:now.UnixMilli(),Move:move}
+  next,turn,finished,won,e=adapter.applyChessTime(rec.State,seat,event)
+  if e==nil{move,e=json.Marshal(event)}
+ }else{next,turn,finished,won,e=adapter.Apply(rec.State,seat,move)}
  if e!=nil||!validRuleState(next){return false,ErrUnavailable}
  before:=rec.State
  rec.State=next;rec.Sequence++
@@ -125,7 +134,12 @@ func (s *ClassicSessions) RunBotTurn(ctx context.Context,id string)(bool,error){
   if e!=nil{return false,e}
   if nextController!="human"&&nextController!="bot"{return false,ErrUnavailable}
   rec.TurnSeat=&turn;nextSeat=turn
-  due:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&due;deadline=due
+  if !chess{due:=now.Add(classicTurnSeconds*time.Second);rec.Deadline=&due;deadline=due
+  }else if rec.Deadline!=nil{
+   frame,err:=adapter.decode(next);if err!=nil{return false,err}
+   data,err:=chessDecode(frame);if err!=nil{return false,err}
+   rec.Deadline=data.Timing.deadline(turn);deadline=rec.Deadline
+  }
  }
  _,e=tx.ExecContext(ctx,"UPDATE bg_account_social.classic_sessions SET engine_state=$2,"+
   "sequence=$3,status=$4,turn_seat=$5,turn_deadline=$6,winner_seat=$7,finished_reason=$8,"+

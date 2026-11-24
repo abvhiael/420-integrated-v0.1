@@ -111,9 +111,25 @@ jobs:
           # same relative depth; all source dependencies remain canonical.
           scope="$(mktemp -d "$PWD/.dice-level1.XXXXXX")"
           trap 'rm -rf "$scope"' EXIT
-          for suite in "${suites[@]}"; do
-            cp "test/${suite}.t.sol" "$scope/"
-          done
+          # Copy the roots and their relative test-helper closure verbatim.
+          python3 - "$scope" "${suites[@]}" <<'PY'
+          import pathlib, re, shutil, sys
+          source = pathlib.Path("test").resolve()
+          dest = pathlib.Path(sys.argv[1])
+          seen = set()
+          def copy(relative):
+              if relative in seen:
+                  return
+              seen.add(relative)
+              src = source / relative
+              target = dest / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(src, target)
+              for dep in re.findall(r'import\s+(?:[^;]*?\s+from\s+)?["\x27](\./[^"\x27]+)["\x27]\s*;', src.read_text()):
+                  copy((src.parent / dep).resolve().relative_to(source))
+          for suite in sys.argv[2:]:
+              copy(pathlib.Path(suite + ".t.sol"))
+          PY
           export FOUNDRY_SRC="$scope/empty-src"
           export FOUNDRY_TEST="$scope"
           export FOUNDRY_SCRIPT="$scope/empty-script"

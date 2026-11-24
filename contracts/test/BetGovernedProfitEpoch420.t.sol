@@ -2,9 +2,15 @@
 pragma solidity ^0.8.24;
 
 import "../src/bet/BetGovernedProfitEpoch420.sol";
+import {BetFantasyProfitEpochSource420} from "../src/bet/BetFantasyProfitEpochSource420.sol";
+import {DevelopmentCompensationVault420} from "../src/revenue/DevelopmentCompensationVault420.sol";
+import {FoundingDeveloperCompensationSplitter420} from "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
+import {CapabilityRegistry420} from "../src/system/CapabilityRegistry420.sol";
+import {DevelopmentCompensationIds420} from "../src/revenue/DevelopmentCompensationIds420.sol";
 
 interface VmProfitEpoch420 {
     function warp(uint256 timestamp) external;
+    function deal(address account, uint256 balance) external;
     function prank(address sender) external;
     function expectRevert(bytes4 selector) external;
 }
@@ -44,6 +50,50 @@ contract BetGovernedProfitEpoch420Test {
         vm.warp(epoch.nextClose());
         (, BetGovernedProfitEpoch420.Epoch memory second) = epoch.finalize();
         require(second.eligibleRevenue == 0 && epoch.accountedRevenue() == 80, "reused receipts");
+    }
+
+    function testActualFantasyVaultForwardIsExcludedExactlyOnce() public {
+        CapabilityRegistry420 capabilities = new CapabilityRegistry420();
+        FoundingDeveloperCompensationSplitter420 splitter =
+            new FoundingDeveloperCompensationSplitter420(address(this), address(0xA), address(0xB));
+        DevelopmentCompensationVault420 vault = new DevelopmentCompensationVault420(
+            address(capabilities), payable(address(splitter))
+        );
+        splitter.bindCompensationVault(address(vault));
+        bytes32 component = DevelopmentCompensationIds420.COMPONENT_DEVELOPMENT_COMPENSATION;
+        capabilities.registerProtocolComponent(component, address(this));
+        capabilities.createGrant(
+            keccak256("fantasy"), address(this), component, vault.fantasyContributionAction(),
+            DevelopmentCompensationIds420.scopeSource(vault.fantasyApplicationId()), 0, 0, 0, 0, 0
+        );
+
+        BetGovernedProfitEpoch420.Source[] memory inventory = new BetGovernedProfitEpoch420.Source[](7);
+        for (uint256 i; i < inventory.length; ++i) {
+            inventory[i] = BetGovernedProfitEpoch420.Source(BetGovernedProfitEpoch420.Kind(i), fixtures[i]);
+        }
+        BetFantasyProfitEpochSource420 source =
+            new BetFantasyProfitEpochSource420(address(0), vault, address(vault).codehash);
+        inventory[uint256(BetGovernedProfitEpoch420.Kind.Fantasy)].adapter = source;
+        BetGovernedProfitEpoch420 realEpoch =
+            new BetGovernedProfitEpoch420(address(this), address(0), 1 days, inventory);
+
+        vm.deal(address(this), 6);
+        bytes32 pool = keccak256("final-pool");
+        vault.contributeFantasy{value: 3}(address(0), pool, 101);
+        vault.contributeFantasy{value: 3}(address(0), pool, 200);
+        require(vault.fantasyForwardedAmount(address(0)) == 6, "forwarded compensation");
+        require(splitter.totalNativeCredited() == 6, "splitter credit");
+        IBetProfitEpochSource420.Totals memory totals = source.profitTotals();
+        require(totals.retainedReceipts == 200 && totals.separatelyRoutedBasis == 200, "vault basis");
+        require(totals.freeProtocolCash == 0, "splitter funds cannot back another reserve");
+
+        fixtures[0].set(IBetProfitEpochSource420.Totals(50, 0, 0, 0, 50, true));
+        vm.warp(realEpoch.nextClose());
+        (, BetGovernedProfitEpoch420.Epoch memory first) = realEpoch.finalize();
+        require(first.eligibleRevenue == 50 && first.developerReserve == 5, "Fantasy charged twice");
+        vm.warp(realEpoch.nextClose());
+        (, BetGovernedProfitEpoch420.Epoch memory second) = realEpoch.finalize();
+        require(second.eligibleRevenue == 0 && realEpoch.accountedRevenue() == 50, "counter reused");
     }
 
     function testLossCarryAndRollbackWhenCashIsUnavailable() public {

@@ -5,6 +5,9 @@ import "../src/revenue/FoundingDeveloperCompensationSplitter420.sol";
 import "../src/revenue/DevelopmentCompensationVault420.sol";
 
 interface VmFounderWallets420 {
+    struct Log { bytes32[] topics; bytes data; address emitter; }
+    function recordLogs() external;
+    function getRecordedLogs() external returns (Log[] memory);
     function prank(address) external;
     function deal(address,uint256) external;
     function chainId(uint256) external;
@@ -131,6 +134,59 @@ contract FounderWalletClaimsAndCompensation420Test {
         token.mint(address(this),amount);
         token.approve(address(vault),amount);
         vault.contributeToken(address(token),APP_ID,revenueRef,vault.policyId(),amount*10,1000);
+    }
+
+    function testFantasyCumulativeRoundingAndAuthenticatedFounderCredits() public {
+        vm.deal(address(this), 12);
+        bytes32 pool = keccak256("fantasy-pool");
+        vault.contributeFantasy{value:3}(address(0),pool,101);
+        vault.contributeFantasy{value:3}(address(0),pool,200);
+        require(splitter.totalNativeCredited()==6, "cumulative fee");
+        require(splitter.claimableNative(ADMIN)==3, "native founder credit");
+        (bool replay,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeFantasy,(address(0),pool,200)));
+        require(!replay,"replay");
+        FounderCompensationTestToken420 token = new FounderCompensationTestToken420();
+        token.mint(address(this), 12);
+        token.approve(address(vault),12);
+        vault.contributeFantasy(address(token),pool,400);
+        require(splitter.claimableToken(address(token),ADMIN)==6,"token admin");
+        require(splitter.claimableToken(address(token),ANDREW)==3,"token Andrew");
+        require(splitter.claimableToken(address(token),JANET)==3,"token Janet");
+        vm.prank(address(0xBAD));
+        (bool unauthorized,) = address(vault).call(abi.encodeCall(vault.contributeFantasy,(address(token),pool,400)));
+        require(!unauthorized,"unauthorized source");
+        (bool wrongPolicy,) = address(vault).call{value:3}(abi.encodeCall(vault.contributeNative,(vault.fantasyApplicationId(),pool,vault.fantasyPolicyId(),100,uint16(300))));
+        require(!wrongPolicy,"general policy must not accept Fantasy policy");
+        require(vault.fantasyForwardedBasis(address(0)) == 200, "isolated native basis");
+        require(vault.fantasyForwardedAmount(address(0)) == 6, "isolated native amount");
+        require(vault.fantasyForwardedBasis(address(token)) == 400, "isolated token basis");
+        require(vault.fantasyForwardedAmount(address(token)) == 12, "isolated token amount");
+    }
+
+    function testFantasyEventsReportIncrementalRevenueAndCumulativeRounding() public {
+        vm.deal(address(this), 3);
+        bytes32 pool = keccak256("incremental-fantasy-basis");
+        vm.recordLogs();
+        vault.contributeFantasy{value: 1}(address(0), pool, 34);
+        vault.contributeFantasy{value: 2}(address(0), pool, 100);
+        VmFounderWallets420.Log[] memory logs = vm.getRecordedLogs();
+        bytes32 topic = keccak256(
+            "DevelopmentCompensationForwarded(bytes32,bytes32,bytes32,address,address,address,uint256,uint16,uint256,bytes32)"
+        );
+        uint256 totalBasis;
+        uint256 totalFee;
+        uint256 forwards;
+        for (uint256 i; i < logs.length; ++i) {
+            if (logs[i].emitter != address(vault) || logs[i].topics[0] != topic) continue;
+            (,,, uint256 basis, uint16 bps, uint256 fee, bytes32 policy) =
+                abi.decode(logs[i].data, (address, address, address, uint256, uint16, uint256, bytes32));
+            require(bps == 300 && policy == vault.fantasyPolicyId(), "Fantasy policy");
+            require(basis == (forwards == 0 ? 34 : 66), "incremental basis per contribution");
+            totalBasis += basis;
+            totalFee += fee;
+            ++forwards;
+        }
+        require(forwards == 2 && totalBasis == 100 && totalFee == 3, "basis and fee conservation");
     }
 
     function testThreeFoundersClaimIndividuallyNoImpersonationOrDuplicate() public {

@@ -1,6 +1,6 @@
 # BC-3.2 Chess backend
 
-The Chess adapter implements orthodox play under `bc-chess-standard@1.0.0`.
+The Chess adapter implements orthodox play under `bc-chess-standard@1.1.0`.
 White is seat 0 and Black is seat 1. Placement, side to move, castling
 rights and legal en-passant availability determine repetition identity.
 Scores use integer half-points. Terminal frames retain the canonical
@@ -30,13 +30,12 @@ supply a canonical preset such as `3+2`. The first successful start freezes the
 profile. The private journal records server timestamps in integer milliseconds.
 Cold replay reconstructs the balances and deadline from genesis and checks
 the result against the committed session. Expiration uses the Chess rules
-adapter and journals flag fall atomically with the final board and clocks
-when the mating disposition can be resolved.
+adapter and journals flag fall atomically with the final board and clocks.
 
 ## Qualification scope
 
 `TestBC32` in the Classics qualification workflow includes initial-position and
-reference perft, notation, terminal and claim rules, checkpoint verification,
+reference perft, notation, terminal and claim rules, material-policy fixtures,
 and untimed and timed PostgreSQL matches, including resume and PGN after a fresh
 session service is instantiated. Run locally with PostgreSQL 16:
 
@@ -45,12 +44,8 @@ go test -race -tags account420_integration -run '^TestBC32' ./services/bong-gogg
 go vet -tags account420_integration ./services/bong-goggles-account-social ./cmd/bong-goggles-social
 ```
 
-The conditional exact search and cooperative witnesses prove some positions.
-The synchronous bounded scan and standalone resumable search share the
-same traversal. A node capacity cutoff retains the unexpanded position
-and leaves the result unknown. The checkpoint verifier replays the
-traversal from its root before accepting a restored result. An arbitrary position
-can still exhaust the synchronous search, and there is no durable session
-handoff to the checkpoint solver. These constraints leave automatic dead
-position and loss-on-resignation or flag-fall adjudication unqualified in the
-general case. The full BC-3.2 release gate stays open.
+The approved digital rule uses material exclusions for automatic dead-position
+draws and flag-fall draws. Resignation awards a win to the opponent.
+All three decisions are synchronous and replay from the same board and
+recorded action. The adapter version and rules hash distinguish this policy
+from earlier development builds. Public Chess release is gated separately.

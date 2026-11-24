@@ -13,7 +13,7 @@ func bc321Adapter(t *testing.T)(*RulesAdapter,json.RawMessage){
 }
 func TestBC321ChessAdapter(t *testing.T){
  a,state:=bc321Adapter(t)
- v,h:=a.Identity();if v!="v1.0"||len(h)!=64||a.Manifest().Specification!=chessRuleSpecification{t.Fatal("identity")}
+ v,h:=a.Identity();if v!="v1.1"||len(h)!=64||a.Manifest().Specification!=chessRuleSpecification{t.Fatal("identity")}
  if _,e:=a.initial([32]byte{},3);e==nil{t.Fatal("three seats")}
  opts,e:=a.LegalActions(state,0);if e!=nil{t.Fatal(e)}
  moves:=0;for _,raw:=range opts{var cmd chessCommand;if !strictRuleJSON(raw,&cmd){t.Fatal(raw)};if cmd.Type=="move"{moves++}}

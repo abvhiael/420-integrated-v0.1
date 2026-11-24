@@ -6,8 +6,8 @@ import (
  "strings"
 )
 
-const chessProductRuleset = "bc-chess-standard@1.0.0"
-const chessRuleSpecification = chessProductRuleset+";orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;FIDE-2023"
+const chessProductRuleset = "bc-chess-standard@1.1.0"
+const chessRuleSpecification = chessProductRuleset+";orthodox;seat-0-white;seat-1-black;uci;san;exact-repetition;half-point-units;material-only-dead-position-and-flag-fall;resignation-is-loss"
 type chessRules struct{chessRuleCapacity}
 type chessRuleData struct{
  Timing *chessTimedState `json:"timing,omitempty"`
@@ -33,7 +33,7 @@ func isClassicChess(rule ClassicRule) bool {
  return ok
 }
 func NewChessRulesAdapter()(*RulesAdapter,error){return NewRulesAdapter(chessRules{})}
-func(chessRules) Definition()RuleDefinition{return RuleDefinition{GameID:"chess",Version:"v1.0",Specification:chessRuleSpecification}}
+func(chessRules) Definition()RuleDefinition{return RuleDefinition{GameID:"chess",Version:"v1.1",Specification:chessRuleSpecification}}
 func(chessRules) ValidateSeats(room ClassicRoom,seats []ClassicSeat)error{
  if room.GameID!="chess"||room.SeatCount!=2||len(seats)!=2||seats[0].Index!=0||seats[1].Index!=1{return ErrInvalid}
  if seats[0].Controller=="human"&&seats[1].Controller=="human"&&seats[0].Subject==seats[1].Subject{return ErrInvalid}
@@ -60,12 +60,10 @@ func chessOccurrences(h chessRepetition,key chessPositionIdentity)int{
  return n
 }
 func chessNext(d chessRuleData,m chessMove)(chessRuleData,int,error){
- old:=d.Board
- position,count,err:=(chessReachPosition{Board:old,History:d.Repetition}).after(m)
- if err!=nil{return d,0,err}
- d.LastMove=m.UCI();d.LastSAN=old.san(m);d.Board=position.Board;d.Offer=-1
- d.Repetition=position.History
- return d,count,nil
+ old:=d.Board;d.LastMove=m.UCI();d.LastSAN=old.san(m);d.Board=old.apply(m);d.Offer=-1
+ key,e:=d.Board.identity();if e!=nil{return d,0,e}
+ h,n,e:=d.Repetition.record(key,d.Board.Half==0||old.Castle!=d.Board.Castle);d.Repetition=h
+ return d,n,e
 }
 func chessFinish(f *RuleFrame,d *chessRuleData,reason string,winner *int)error{
  scores,e:=chessResultScores(winner);if e!=nil{return e}
@@ -128,7 +126,7 @@ func(r chessRules) Step(f RuleFrame,seat int,raw json.RawMessage,b *RuleBudget)(
  if !found{return RuleFrame{},ErrInvalid}
  switch cmd.Type{
  case "resign":
-  winner,err:=chessAdjudicateLoss(d.Board,seat);if err!=nil{return RuleFrame{},err}
+  winner,err:=chessAdjudicateLoss(d.Board,seat,"resigned");if err!=nil{return RuleFrame{},err}
   d.Loser=&seat
   e=chessFinish(&f,&d,"resigned",winner)
  case "accept-draw":e=chessFinish(&f,&d,"agreement",nil)
@@ -199,7 +197,7 @@ func(chessRules) Validate(f RuleFrame)error{
     }
    case "resigned","flag-fall":
     if d.Loser==nil||*d.Loser<0||*d.Loser>1||d.ClaimMove!=""||(d.Reason=="flag-fall"&&*d.Loser!=p.Turn){return ErrInvalid}
-    w,err:=chessAdjudicateLoss(p,*d.Loser);if err!=nil||(w==nil)!=(f.Winner==nil)||(w!=nil&&*w!=*f.Winner){return ErrInvalid}
+    w,err:=chessAdjudicateLoss(p,*d.Loser,d.Reason);if err!=nil||(w==nil)!=(f.Winner==nil)||(w!=nil&&*w!=*f.Winner){return ErrInvalid}
    default:return ErrInvalid
    }
   }

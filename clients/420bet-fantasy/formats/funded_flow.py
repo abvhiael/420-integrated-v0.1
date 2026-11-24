@@ -319,6 +319,13 @@ class FundedFormats(LocalFixture):
                     expected_credit[self.accounts[8]]=expected['fee']
             for account in self.accounts:
                 if host.functions.credit(account).call()-before[account]!=expected_credit.get(account,0)-c.get('precredited',{}).get(account,0):raise AssertionError('independent beneficiary/fee/refund allocation mismatch '+c['label'])
+            developer = self.accounts[8]
+            fee = expected_credit.get(developer, 0)
+            if fee:
+                balance_before = self.token.functions.balanceOf(developer).call()
+                self.tx(host.functions.forwardDevelopment())
+                if self.token.functions.balanceOf(developer).call() - balance_before != fee:
+                    raise AssertionError('independent per-pool developer delivery mismatch '+c['label'])
             self.outcomes.append({'case':c['label'],'kind':c['kind'],'entries':c['users'],'pool':'0x'+c['pool'].hex(),'host':host.address,'candidateAuthenticated':True})
             c['custodian'].close()
         for host in (self.peer,self.house):

@@ -179,10 +179,11 @@
         "TreasuryRouter420.sol",
         "DevelopmentCompensationIds420.sol",
         "DevelopmentCompensationVault420.sol",
+        "FoundingDeveloperCompensationSplitter420.sol",
         "ApplicationRevenueIds420.sol",
         "ApplicationRevenueRegistry420.sol"
       ],
-      "note": "Application Revenue Policy V1 routes the authorized lead-developer share of eligible first-party net protocol revenue through DevelopmentCompensationVault420 to the immutable deployment-configured 420 Integrated Labs beneficiary. ApplicationRevenueRegistry420 separately records protocol-recognized creatorTreasury profiles for first-party and third-party applications without custody or split-execution authority; no block rewards, validator rewards, user principal, bridge backing, escrow or LP principal are eligible revenue."
+      "note": "Application Revenue Policy V1 routes the authorized lead-developer share of eligible first-party net protocol revenue through DevelopmentCompensationVault420 to the immutable deployment-configured 420 Integrated Labs beneficiary, canonically FoundingDeveloperCompensationSplitter420 for the three-founder Genesis deployment; the bound splitter credits authenticated revenue and enables individual native/ERC-20 claims at 50/25/25, separately from Genesis founder grants. ApplicationRevenueRegistry420 separately records protocol-recognized creatorTreasury profiles for first-party and third-party applications without custody or split-execution authority; no block rewards, validator rewards, user principal, bridge backing, escrow or LP principal are eligible revenue."
     },
     {
       "dapp": "420 Grants",

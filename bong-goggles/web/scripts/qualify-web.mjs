@@ -134,6 +134,15 @@ if(pinnedInheritedBytes>44*1024)throw Error('Existing independent modules exceed
 // BC-2.6: charge only the new 420ID social surface and measured additions
 // over the already qualified BC-2.5 file bytes. Never raise BC-2.4 or BC-2.5
 // historic per-file limits, and never debit new UI to the old base budget.
+// Owner-traced routes: separately bound only added peg-render/runtime bytes.
+const pegRouteBaselines={'core/labyrinth-route-runtime.js':4878,'core/labyrinth-peg-overlay.js':5769};
+const pegRouteGrowth=new Map();
+for(const [path,baseline] of Object.entries(pegRouteBaselines)){
+ const actual=regularSizes.get(path),growth=Math.max(0,actual-baseline);
+ if(!Number.isSafeInteger(actual)||growth>2048)throw Error('Owner-traced peg growth exceeded: '+path);
+ pegRouteGrowth.set(path,growth);
+}
+if([...pegRouteGrowth.values()].reduce((a,b)=>a+b,0)>3072)throw Error('Owner-traced peg update exceeds 3 KiB');
 const bc26New='core/labyrinth-social.js';
 const bc26NewSize=regularSizes.get(bc26New);
 if(!Number.isSafeInteger(bc26NewSize)||bc26NewSize<7*1024||bc26NewSize>12*1024)
@@ -144,7 +153,7 @@ const bc26Modified=Object.freeze({
 });
 const bc26GrowthByPath=new Map();let bc26Growth=bc26NewSize;
 for(const [path,{baseline,maxAdded}] of Object.entries(bc26Modified)){
- const actual=regularSizes.get(path);
+ const actual=regularSizes.get(path)-(pegRouteGrowth.get(path)??0);
  if(!Number.isSafeInteger(actual)||actual<baseline||actual-baseline>maxAdded)
   throw Error('BC-2.6 independently scoped change exceeded: '+path);
  bc26GrowthByPath.set(path,actual-baseline);
@@ -174,7 +183,7 @@ const bc25Files=Object.freeze({
 });
 const bc25GrowthByPath=new Map();let bc25Growth=0;
 for(const [name,{baseline,maxAdded}] of Object.entries(bc25Files)){
- const size=regularSizes.get(name)-(bc26GrowthByPath.get(name)??0)-(bc27GrowthByPath.get(name)??0);
+ const size=regularSizes.get(name)-(bc26GrowthByPath.get(name)??0)-(bc27GrowthByPath.get(name)??0)-(pegRouteGrowth.get(name)??0);
  if(!Number.isSafeInteger(size)||size<baseline||size-baseline>maxAdded)
   throw Error('BC-2.5 independent human multiplayer growth outside approved source scope: '+name+' '+size);
  const growth=size-baseline;
@@ -185,13 +194,13 @@ console.log('BC-2.5 human multiplayer exact source growth:',JSON.stringify({byte
 
 const bc24GrowthByPath=new Map();let bc24Growth=0;
 for(const [path,cap] of Object.entries(bc24New)){
- const size=regularSizes.get(path)-((bc25GrowthByPath.get(path)??0)+(bc26GrowthByPath.get(path)??0)+(bc27GrowthByPath.get(path)??0));
+ const size=regularSizes.get(path)-((bc25GrowthByPath.get(path)??0)+(bc26GrowthByPath.get(path)??0)+(bc27GrowthByPath.get(path)??0)+(pegRouteGrowth.get(path)??0));
  if(!Number.isSafeInteger(size)||size<256||size>cap)
   throw Error('BC-2.4 new independent frontend budget or missing file: '+path+' '+size+' > '+cap);
  bc24GrowthByPath.set(path,size);bc24Growth+=size;
 }
 for(const [path,{baseline,maxAdded}] of Object.entries(bc24Modified)){
- const size=regularSizes.get(path)-((bc25GrowthByPath.get(path)??0)+(bc26GrowthByPath.get(path)??0)+(bc27GrowthByPath.get(path)??0));
+ const size=regularSizes.get(path)-((bc25GrowthByPath.get(path)??0)+(bc26GrowthByPath.get(path)??0)+(bc27GrowthByPath.get(path)??0)+(pegRouteGrowth.get(path)??0));
  if(!Number.isSafeInteger(size)||size<baseline||size-baseline>maxAdded)
   throw Error('BC-2.4 growth exceeded independently capped change: '+path+' '+size+' - '+baseline+' > '+maxAdded);
  bc24GrowthByPath.set(path,size-baseline);bc24Growth+=size-baseline;

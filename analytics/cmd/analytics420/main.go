@@ -21,6 +21,7 @@ import (
 type config struct {
 	ListenAddr      string
 	IndexerURL      string
+	CompensationIndexerURL string
 	RequiredChainID uint64
 	StaleAfter      time.Duration
 	IndexerTimeout  time.Duration
@@ -81,6 +82,7 @@ func loadConfig(getenv func(string) string) (config, error) {
 		IndexerTimeout:10*time.Second, RefreshInterval:15*time.Second, ShutdownTimeout:10*time.Second,
 	}
 	cfg.IndexerURL = strings.TrimSpace(getenv("ANALYTICS_INDEXER_URL"))
+	cfg.CompensationIndexerURL = strings.TrimSpace(getenv("ANALYTICS_COMPENSATION_INDEXER_URL"))
 	if cfg.IndexerURL == "" { return config{}, errors.New("ANALYTICS_INDEXER_URL is required") }
 	if value := strings.TrimSpace(getenv("ANALYTICS_LISTEN_ADDR")); value != "" { cfg.ListenAddr = value }
 	if value := strings.TrimSpace(getenv("ANALYTICS_CHAIN_ID")); value != "" {
@@ -115,6 +117,12 @@ func newHTTPServer(cfg config) (*http.Server, *analyticsruntime.Service, error) 
 	dashboard, err := api.DashboardHandler()
 	if err != nil { return nil, nil, err }
 	mux := http.NewServeMux()
+	reportClient := client
+	if cfg.CompensationIndexerURL != "" {
+		reportClient, err = indexerclient.New(cfg.CompensationIndexerURL, cfg.RequiredChainID, cfg.IndexerTimeout, cfg.StaleAfter)
+		if err != nil { return nil, nil, err }
+	}
+	mux.HandleFunc("GET /v1/development-compensation", compensationHandler(reportClient))
 	mux.Handle("GET /v1/", api.Handler())
 	mux.Handle("GET /health", api.Handler())
 	mux.Handle("GET /ready", api.Handler())

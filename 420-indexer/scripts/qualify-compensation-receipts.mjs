@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { qualifyConsumers } from './qualify-compensation-consumers.mjs';
 import { readFile } from 'node:fs/promises';
 import {
   ContractFactory,
@@ -37,9 +38,9 @@ const founders = await Promise.all(
   [1, 2, 3].map(async (n) => (await provider.getSigner(n)).getAddress())
 );
 const artifacts = new Map();
-const deploy = async (name, args) => {
+const deploy = async (name, args, source = name + ".sol") => {
   const raw = JSON.parse(
-    await readFile(join(artifactsPath, name + '.sol', name + '.json'), 'utf8')
+    await readFile(join(artifactsPath, source, name + '.json'), 'utf8')
   );
   artifacts.set(name, { contractName: name, abi: raw.abi });
   const c = await new ContractFactory(
@@ -160,12 +161,63 @@ const recipients = await Promise.all(
 await (
   await exchangePolicy.setRecipients([...recipients, vaultAddress])
 ).wait();
-await (await exchange.setCollector(author, true)).wait();
-await (await wrapped.deposit({ value: 800n })).wait();
-await (await wrapped.approve(exchangeAddress, 800n)).wait();
+await (await exchangePolicy.setExchangeFee(100)).wait();
+
+// Deterministic liquidity behind the production atomic router and fee router.
+const fixture = 'ExchangeFeeSettlement420.t.sol';
+const input = await deploy('FeeSettlementToken420', ['Input', 'IN'], fixture);
+const caps = await deploy('FeeSettlementCaps420', [], fixture);
+const oracle = await deploy('FeeSettlementOracle420', [], fixture);
+const adapter = await deploy('FeeSettlementAdapter420', [], fixture);
+const adapterAddress = await adapter.getAddress();
+const authorization = await deploy('ExchangeAuthorization420', [await caps.getAddress()]);
+const emergency = await deploy('ExchangeEmergencyControl420', [author]);
+const guard = await deploy('ExchangeOracleGuard420', [author]);
+const assets = await deploy('ExchangeAssetRegistry420', [author]);
+const inputId = id('fixture-input');
+const wrappedId = id('fixture-wrapped');
+const markets = await deploy('ExchangeMarketRegistry420', [author, await assets.getAddress(), wrappedId]);
+const routes = await deploy('ExchangeRouteRegistry420', [author]);
+const router = await deploy('ExchangeAtomicRouter420', [
+  await markets.getAddress(), await assets.getAddress(), await routes.getAddress(),
+  await authorization.getAddress(), await emergency.getAddress(), await guard.getAddress(),
+  wrappedAddress, exchangeAddress
+]);
+const routerAddress = await router.getAddress();
+const inputAddress = await input.getAddress();
+for (const [assetId, address] of [[inputId, inputAddress], [wrappedId, wrappedAddress]]) {
+  await (await assets.configureAsset(
+    assetId, assetId.slice(0, 34), id('fixture-chain'), assetId, address,
+    9, 3, id('fixture-verification'), id('fixture-metadata')
+  )).wait();
+}
+const marketId = id('input-wrapped');
+const routeId = id('fixture-route');
+await (await markets.configureMarket(
+  marketId, inputId, wrappedId, id('fixture-market'), adapterAddress, 3, id('fixture-market-metadata')
+)).wait();
+await (await routes.configureRoute(
+  routeId, id('420SWAP'), adapterAddress, adapterAddress, id('fixture-route-metadata'), true
+)).wait();
+await (await guard.configureGuard(marketId, await oracle.getAddress(), 86400, 500, true)).wait();
+await (await exchange.setCollector(routerAddress, true)).wait();
+await (await caps.setPrincipal(author)).wait();
+await (await wrapped.deposit({ value: 80000n })).wait();
+await (await wrapped.transfer(adapterAddress, 80000n)).wait();
+await (await input.mint(author, 80000n)).wait();
+await (await input.approve(adapterAddress, 80000n)).wait();
+const hops = [[marketId, routeId, wrappedAddress, 79200n, '0x']];
+const path = await router.hashPath(inputAddress, 80000n, author, hops);
 const tokenContribution = await (
-  await exchange.routeTokenFee(id('canonical-token'), wrappedAddress, 800n)
+  await router.swapExactInputPath(inputAddress, 80000n, 79200n, author, path, hops)
 ).wait();
+assert.equal(await input.balanceOf(author), 0n);
+assert.equal(await input.balanceOf(await adapter.sink()), 80000n);
+assert.equal(await wrapped.balanceOf(adapterAddress), 0n);
+assert.equal(await wrapped.balanceOf(author), 79200n);
+for (const address of [routerAddress, exchangeAddress, vaultAddress]) {
+  assert.equal(await wrapped.balanceOf(address), 0n);
+}
 for (const [recipient, expected] of recipients.map((recipient, index) => [
   recipient,
   [240n, 200n, 160n, 120n][index]
@@ -288,6 +340,41 @@ try {
       (event) => event.transactionHash === claim.hash
     )
   );
+  process.env.INDEXER_COMPENSATION_REPORT_BINDING = JSON.stringify({
+    chainId: '420', vault: vaultAddress, splitter: splitterAddress, founders
+  });
+  const report = await routeIndexerHttp420(new IndexerPublicApiAdapter420(service), 'GET',
+    '/v1/protocols/development-compensation/report?chainId=420&from=0&to=9999999999');
+  assert.equal(report.status, 200);
+  const { contributions, entitlements } = report.body.data;
+  const native = '0x' + '0'.repeat(40);
+  const token = wrappedAddress.toLowerCase();
+  assert.equal(contributions.find(row => row.asset === native).compensation, '140');
+  assert.equal(contributions.find(row => row.asset === native).eligibleRevenue, '1400');
+  assert.equal(contributions.find(row => row.asset === token).compensation, '80');
+  assert.equal(contributions.find(row => row.asset === token).eligibleRevenue, '800');
+  assert.equal(entitlements.filter(row => row.asset === native).reduce((sum, row) => sum + BigInt(row.claimed), 0n), 0n);
+  assert.equal(entitlements.filter(row => row.asset === token).reduce((sum, row) => sum + BigInt(row.claimed), 0n), 20n);
+  assert.equal(entitlements.filter(row => row.asset === token).reduce((sum, row) => sum + BigInt(row.outstanding), 0n), 60n);
+  const lookup = async (hash) => {
+    const response = await routeIndexerHttp420(
+      new IndexerPublicApiAdapter420(service), 'GET',
+      '/v1/protocols/events?chainId=420&protocol=420DevelopmentCompensation&transactionHash=' + hash
+    );
+    assert.equal(response.status, 200);
+    assert(response.body.data.items.every(event => event.transactionHash === hash));
+    return response.body.data.items;
+  };
+  const exchangeEvents = await lookup(tokenContribution.hash);
+  assert(exchangeEvents.some(event => event.eventName === 'DevelopmentCompensationForwarded'));
+  assert(exchangeEvents.some(event => event.eventName === 'FounderTokenCompensationCredited'));
+  assert((await lookup(tokenClaim.hash)).some(event => event.eventName === 'FounderCompensationClaimed'));
+  assert.deepEqual(await lookup(claim.hash), []);
+  if (process.env.DEVCOMP_EXPLORER_BIN || process.env.DEVCOMP_ANALYTICS_BIN) {
+    assert(process.env.DEVCOMP_EXPLORER_BIN && process.env.DEVCOMP_ANALYTICS_BIN);
+    await qualifyConsumers({ api: new IndexerPublicApiAdapter420(service), db, provider,
+      contribution: tokenContribution, claim: tokenClaim, orphan: claim, asset: token });
+  }
   rebuild = await open(rebuildSchema);
   await (
     await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)

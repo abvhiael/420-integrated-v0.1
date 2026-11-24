@@ -21,6 +21,7 @@ var ErrIndexerAuthorityViolation = errors.New("420Indexer response claimed canon
 // Client is 420Explorer's only chain-index data dependency. 420Explorer does
 // not connect to node420 JSON-RPC or maintain an independent ingestion loop.
 type Client struct {
+	compensation *Client
 	baseURL string
 	http    *http.Client
 }

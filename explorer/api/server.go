@@ -30,6 +30,7 @@ func (s *Server) routes(){
 	s.mux.HandleFunc("GET /v1/blocks/{number}",s.handleBlock)
 	s.mux.HandleFunc("GET /v1/blocks/{number}/trace",s.handleBlockTrace)
 	s.mux.HandleFunc("GET /v1/transactions/{hash}",s.handleTransaction)
+	s.mux.HandleFunc("GET /v1/transactions/{hash}/compensation",s.handleCompensation)
 	s.mux.HandleFunc("GET /v1/receipts/{hash}",s.handleReceipt)
 	s.mux.HandleFunc("GET /v1/addresses/{address}",s.handleAddress)
 	s.mux.HandleFunc("GET /v1/contracts/{address}",s.handleContract)

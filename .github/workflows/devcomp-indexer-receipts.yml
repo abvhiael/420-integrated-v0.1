@@ -3,6 +3,11 @@ on:
   pull_request:
     paths:
       - '420-indexer/**'
+      - 'explorer/**'
+      - 'analytics/**'
+      - 'go.mod'
+      - 'go.sum'
+      - 'contracts/test/ExchangeFeeSettlement420.t.sol'
       - 'contracts/src/revenue/**'
       - 'contracts/src/exchange/**'
       - 'contracts/src/apps/ProtocolRegistry.sol'
@@ -38,6 +43,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
       - uses: foundry-rs/foundry-toolchain@v1
         with:
           version: v1.8.6
@@ -49,18 +57,22 @@ jobs:
           python scripts/prepare-devcomp-foundry-scope.py --output "$RUNNER_TEMP/devcomp-receipts" --include-exchange
           mkdir -p "$RUNNER_TEMP/devcomp-receipts/src/exchange"
           cp contracts/src/exchange/Wrapped420.sol "$RUNNER_TEMP/devcomp-receipts/src/exchange/"
-          forge build --root "$RUNNER_TEMP/devcomp-receipts" --skip test
+          forge build --root "$RUNNER_TEMP/devcomp-receipts"
+          go build -buildvcs=false -o "$RUNNER_TEMP/devcomp-explorer" ./explorer/cmd/explorer420
+          go build -buildvcs=false -o "$RUNNER_TEMP/devcomp-analytics" ./analytics/cmd/analytics420
           npm --prefix 420-indexer ci
           npm --prefix 420-indexer run build
           cd 420-indexer
-          node --test dist/test/compensation-indexer.test.js
-      - name: Ingest real vault and splitter receipts and recover a reorganization
+          node --test dist/test/compensation-indexer.test.js dist/test/compensation-report.test.js
+      - name: Run the Exchange swap through both consumers and recover a reorganization
         env:
           DEVCOMP_LOCAL_RPC: http://127.0.0.1:18548
           INDEXER_PG_URL: postgresql://postgres:postgres@127.0.0.1:5432/indexer420
         run: |
           set -euo pipefail
           export DEVCOMP_FOUNDRY_OUT="$RUNNER_TEMP/devcomp-receipts/out"
+          export DEVCOMP_EXPLORER_BIN="$RUNNER_TEMP/devcomp-explorer"
+          export DEVCOMP_ANALYTICS_BIN="$RUNNER_TEMP/devcomp-analytics"
           anvil --host 127.0.0.1 --port 18548 --chain-id 420 --slots-in-an-epoch 32 --silent &
           anvil_pid=$!
           trap 'kill "$anvil_pid" 2>/dev/null || true' EXIT

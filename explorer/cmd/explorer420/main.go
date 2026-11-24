@@ -21,6 +21,7 @@ import (
 type config struct {
 	ListenAddr      string
 	IndexerURL      string
+	CompensationIndexerURL string
 	RequiredChainID uint64
 	StaleAfter      time.Duration
 	IndexerTimeout  time.Duration
@@ -96,6 +97,7 @@ func loadConfig(getenv func(string) string) (config, error) {
 		ShutdownTimeout: 10 * time.Second,
 	}
 	cfg.IndexerURL = strings.TrimSpace(getenv("EXPLORER_INDEXER_URL"))
+	cfg.CompensationIndexerURL = strings.TrimSpace(getenv("EXPLORER_COMPENSATION_INDEXER_URL"))
 	if cfg.IndexerURL == "" {
 		return config{}, errors.New("EXPLORER_INDEXER_URL is required")
 	}
@@ -138,6 +140,9 @@ func newHTTPServer(cfg config) (*http.Server, error) {
 	client, err := indexerclient.New(cfg.IndexerURL, cfg.IndexerTimeout)
 	if err != nil {
 		return nil, err
+	}
+	if cfg.CompensationIndexerURL != "" {
+		if err := client.WithCompensationIndexer(cfg.CompensationIndexerURL); err != nil { return nil, err }
 	}
 	svc, err := explorerservice.New(client, cfg.RequiredChainID, cfg.StaleAfter)
 	if err != nil {

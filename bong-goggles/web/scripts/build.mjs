@@ -36,7 +36,7 @@ const flags=resolveClassicBuildFlags({account:accountFlag,rooms:process.env[CLAS
 const runtimeConfig=withAccountSocialBuildFlags(example,accountFlag,flags.rooms,flags.communications);
 validateRuntimeConfig(runtimeConfig);
 
-for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','welcome-landscape.svg','core','_headers']){
+for(const item of ['index.html','app.js','styles.css','game-kit.css','classic-communications.css','settings.css','branding.css','feed-branding.css','dashboard.css','classics.css','ccc-tabletop.css','ccc-practice.css','cribbage.css','labyrinth.css','chess.css','welcome-landscape.svg','core','_headers']){
   await cp(resolve(root,item),resolve(out,item),{recursive:true});
 }
 // Only approved dashboard assets and explicitly mapped optimized game cards are published.

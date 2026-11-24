@@ -68,6 +68,24 @@ const bc02Files=Object.freeze({
  'styles.css':Object.freeze({baseline:14537,maxAdded:2197})
 });
 const regularSizes=new Map(regularFiles.map(f=>[normalize(f.path),f.size]));
+// BC-3.4 independently bounded additions over merged BC-3.3. Historical
+// allowances see the exact pre-Chess sizes, never a widened older ceiling.
+const chessBaselines={"app.js":34748,"core/app-shell.js":13025,"core/games-ui.js":10740,"core/classic-rooms.js":17765,"core/runtime-config.js":3856,"index.html":1569};
+let chessBytes=0;
+for(const [name,baseline] of Object.entries(chessBaselines)){
+ const size=regularSizes.get(name);
+ const growth=size-baseline;
+ if(!Number.isSafeInteger(size)||growth<0||growth>3072)throw Error('BC-3.4 shared integration growth outside scope: '+name);
+ chessBytes+=growth;regularSizes.set(name,baseline);
+}
+for(const [name,cap] of Object.entries({'core/chess-session.js':12288,'core/chess-runtime.js':12288,'core/chess-ui.js':16384,'chess.css':4096})){
+ const size=regularSizes.get(name);
+ if(!Number.isSafeInteger(size)||size<256||size>cap)throw Error('BC-3.4 missing or oversized module: '+name);
+ chessBytes+=size;
+}
+if(chessBytes>48*1024)throw Error('BC-3.4 scoped static allowance exceeded');
+console.log('BC-3.4 scoped bytes:',chessBytes);
+
 // Retain the exact separately bounded original BC-1.4 canonical PNG on current main.
 const originalCribbageArt='assets/games/cribbage/board-cannabis-leaf.png';
 const cribbagePNG=await readFile(resolve(root,originalCribbageArt));
@@ -348,7 +366,7 @@ for(const [path,{baseline,maxAdded}] of Object.entries(bc02Files)){
  bc02Growth+=growth;
 }
 if(bc02Growth>8*1024)throw new Error('BC-0.2 menu exceeded 8 KiB scoped budget');
-if(baseTotal-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
+if(baseTotal-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes>limits.baseTotal+8*1024+16*1024+12*1024+24*1024+CCC_ROOM_BOARD_CHAT_ALLOWANCE+24*1024+CCC_PRACTICE_ALLOWANCE)
  throw new Error('BC-0.5 combined static asset budget exceeded: '+baseTotal);
 // CCC's account-only form wiring belongs to the separately approved roadboard/chat
 // allowance, not to the frozen BC-0.2 through BC-0.5 per-file limits.
@@ -365,7 +383,7 @@ if(!Number.isSafeInteger(gameKitLogicSize)||gameKitLogicSize<12*1024||gameKitLog
 // of the frozen BC-0.2 through BC-0.5 and original asset allowances.
 if(gameKitLogicSize+gameKitSize>24*1024)
  throw new Error('BC-0.9 combined tabletop allowance exceeded 24 KiB');
-const legacyBaseTotal=baseTotal-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
+const legacyBaseTotal=baseTotal-chessBytes-bc24Growth-bc25Growth-bc26Growth-bc27Growth-pinnedInheritedBytes-bc14Bytes-bc15Bytes-bc16Bytes-bc18Bytes-cribbageViewBytes-cribbageResumeBytes-bc02Growth-bc03Growth-bc04Growth-bc05Growth-onlineBindingsBytes-gameKitSize-gameKitLogicSize-practiceJs-practiceCss;
 if(legacyBaseTotal>limits.baseTotal+CCC_ROOM_BOARD_CHAT_ALLOWANCE)
  throw new Error('Previously qualified base asset budget exceeded: '+legacyBaseTotal+' > '+limits.baseTotal);
 console.log('Inherited independent source-bound modules:',JSON.stringify({bytes:pinnedInheritedBytes,cap:44*1024,source:'main e4020bb + BC-2.1 v2'}));

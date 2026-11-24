@@ -15,6 +15,7 @@ PINNED_COMMIT = '95a83a961286701b6e8c064de1deccad10f41fd7'
 CLIENT = ROOT / 'explorer/indexerclient'
 SERVICE = ROOT / 'explorer/service'
 INDEXER_SERVER = ROOT / 'indexer/api/server.go'
+PROTOCOL_SERVER = ROOT / '420-indexer/src/http-transport.ts'
 GENESIS = ROOT / 'contracts/config/420explorer-genesis.json'
 
 # method -> (owning client file, Indexer endpoint, corresponding service boundary)
@@ -34,6 +35,7 @@ READS = {
     'Service': ('registry.go', '/v1/services/{service}', 'registryIndexerReader'),
     'TreasuryRead': ('treasury.go', '/v1/treasury/{kind}/{id}', 'treasuryIndexerReader'),
     'StakeActivity': ('stake.go', '/v1/stake/activity', 'stakeIndexerReader'),
+    'CompensationEvents': ('compensation.go', '/v1/protocols/events', 'compensationReader'),
     'TokenDeployment': ('token.go', '/v1/token/deployments/{token}', 'tokenIndexerReader'),
 }
 
@@ -46,6 +48,7 @@ SERVICE_FILES = {
     'registryIndexerReader': 'registryviews.go',
     'treasuryIndexerReader': 'treasury.go',
     'stakeIndexerReader': 'stakeviews.go',
+    'compensationReader': 'compensation.go',
     'tokenIndexerReader': 'token.go',
 }
 
@@ -65,7 +68,7 @@ def main() -> None:
         if 'http.MethodPost' in text or 'http.MethodPut' in text or 'http.MethodDelete' in text:
             errors.append(f'{name}: mutating HTTP method found')
     # Constructor and generic get are not indexed resource reads.
-    unexpected = found_methods - set(READS) - {'get'}
+    unexpected = found_methods - set(READS) - {'get', 'WithCompensationIndexer'}
     if unexpected:
         errors.append(f'new client read/operation needs mapping: {sorted(unexpected)}')
     missing = set(READS) - found_methods
@@ -75,15 +78,18 @@ def main() -> None:
         text = files[client_file]
         if re.search(r'func\s+\(c\s+\*Client\)\s+' + method + r'\s*\(', text) is None:
             errors.append(f'{client_file}: missing {method}')
-        if f'mux.HandleFunc("GET {route}"' not in server:
+        if method == 'CompensationEvents':
+            if f"path === '{route}'" not in PROTOCOL_SERVER.read_text() or route not in text:
+                errors.append(f'authenticated Indexer GET route missing: {route}')
+        elif f'mux.HandleFunc("GET {route}"' not in server:
             errors.append(f'Indexer GET route registration missing: {route}')
         service_text = (SERVICE / SERVICE_FILES[interface]).read_text()
         if f'type {interface} interface' not in service_text:
             errors.append(f'missing interface {interface}')
         if re.search(r'\b' + method + r'\s*\(', service_text) is None:
             errors.append(f'{interface} missing {method}')
-    if len(READS) != 16 or sum(v[2] == 'IndexerReader' for v in READS.values()) != 7:
-        errors.append('must account for 7 core and 9 additional reads')
+    if len(READS) != 17 or sum(v[2] == 'IndexerReader' for v in READS.values()) != 7:
+        errors.append('must account for 7 core and 10 additional reads')
     required = set(genesis.get('indexerConsumer', {}).get('requiredEndpoints', []))
     if not required.issubset({v[1] for v in READS.values()}):
         errors.append(f'Genesis required routes not in actual client: {sorted(required - {v[1] for v in READS.values()})}')
@@ -104,7 +110,7 @@ def main() -> None:
     output = {
         'milestone': 'EXP-0.1.2', 'audited_commit': PINNED_COMMIT,
         'client_reads': len(READS), 'core_reader_methods': 7,
-        'additional_capability_methods': 9, 'route_matches': len(READS) if not errors else None,
+        'additional_capability_methods': 10, 'route_matches': len(READS) if not errors else None,
         'source_level_accounting_pass': not errors,
         'runtime_or_testnet_qualified': False, 'errors': errors,
     }

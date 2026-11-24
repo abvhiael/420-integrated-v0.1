@@ -6,6 +6,10 @@ import "../../apps/Identity420.sol";
 import "../../interfaces/IOracle420.sol";
 import "./IFantasyDisputeHost420.sol";
 
+interface IERC20FantasyApproval420 {
+    function approve(address spender, uint256 amount) external returns (bool);
+}
+
 interface IFantasyBondToken420 {
     function balanceOf(address) external view returns (uint256);
     function transfer(address, uint256) external returns (bool);

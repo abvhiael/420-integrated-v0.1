@@ -26,6 +26,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     BetAuthorization420 public immutable authorization;
     address public immutable asset;
     address public immutable devFund;
+
     uint256 public totalLiability;
     uint256 private entered;
     enum State {
@@ -121,6 +122,39 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     event Invitation(bytes32 indexed pool, bytes32 indexed subject, bool allowed);
     event ConflictRecorded(bytes32 indexed pool, bytes32 indexed subject);
 
+    // Fees remain segregated until permissionless delivery; no beneficiary can
+    // bypass the vault. Each pool retains its own cumulative rounding basis.
+    DevelopmentCompensationVault420 public immutable developmentVault;
+    mapping(bytes32 => uint256) private deliveredGross;
+    uint256 private reservedDevelopment;
+    function _forwardFantasy(bytes32 id, uint256 gross) private {
+        uint256 prior = deliveredGross[id];
+        uint256 amount = (gross / 100) * 3 + (gross % 100) * 3 / 100
+            - ((prior / 100) * 3 + (prior % 100) * 3 / 100);
+        if (amount == 0) revert InvalidState();
+        deliveredGross[id] = gross;
+        credit[devFund] -= amount;
+        reservedDevelopment -= amount;
+        totalLiability -= amount;
+        if (asset == address(0)) {
+            developmentVault.contributeFantasy{value: amount}(asset, id, gross);
+        } else {
+            IERC20FantasyApproval420 token = IERC20FantasyApproval420(asset);
+            if (!token.approve(address(developmentVault), 0) || !token.approve(address(developmentVault), amount)) revert InvalidState();
+            developmentVault.contributeFantasy(asset, id, gross);
+            if (!token.approve(address(developmentVault), 0)) revert InvalidState();
+        }
+    }
+    bytes32[] private developmentQueue;
+    uint256 private developmentCursor;
+    function _forwardNextDevelopment() private {
+        while (developmentCursor < developmentQueue.length) {
+            bytes32 id = developmentQueue[developmentCursor++];
+            _forwardFantasy(id, pools[id].gross);
+            return;
+        }
+        revert InvalidState();
+    }
     constructor(
         address disputes_,
         address slates_,
@@ -140,6 +174,7 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
         authorization = disputes.authorization();
         asset = disputes.asset();
         DevelopmentCompensationVault420 vault = DevelopmentCompensationVault420(payable(dev_));
+        developmentVault = vault;
         if (address(vault.capabilityRegistry()) != address(authorization.capabilityRegistry())) revert InvalidInput();
         address beneficiary = vault.beneficiary();
         if (beneficiary == address(0) || beneficiary == address(this)) revert InvalidInput();
@@ -524,7 +559,8 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
             revert InvalidState();
         }
         p.state = State.SETTLED;
-        credit[devFund] += p.fee;
+        credit[devFund] += p.fee; reservedDevelopment += p.fee;
+        if (p.fee != 0) developmentQueue.push(id);
         emit PoolSettled(id, dp.candidate, p.netPrize, p.fee);
     }
 
@@ -559,18 +595,19 @@ contract FantasyContestEngine420 is IFantasyDisputeHost420 {
     }
 
     function withdrawCredit() external nonReentrant {
-        _withdraw(msg.sender);
+        if (msg.sender == devFund && credit[msg.sender] == reservedDevelopment) _forwardNextDevelopment();
+        else _withdraw(msg.sender);
     }
 
     /// Permissionless delivery, exclusively to the canonical fixed beneficiary.
     function forwardDevelopment() external nonReentrant {
-        _withdraw(devFund);
+        _forwardNextDevelopment();
     }
 
     function _withdraw(address beneficiary) private {
-        uint256 amount = credit[beneficiary];
+        uint256 amount = credit[beneficiary] - (beneficiary == devFund ? reservedDevelopment : 0);
         if (amount == 0) revert InvalidState();
-        credit[beneficiary] = 0;
+        credit[beneficiary] -= amount;
         totalLiability -= amount;
         _sendExact(beneficiary, amount);
         emit Withdrawn(beneficiary, amount);

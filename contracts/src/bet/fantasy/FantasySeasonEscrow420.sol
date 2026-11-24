@@ -41,11 +41,42 @@ contract FantasySeasonEscrow420 is IFantasyDisputeHost420,IFantasySeasonCorrecti
     event Funded(bytes32 indexed id,uint8 indexed member,bytes32 subject,address beneficiary);
     event RandomDraft(bytes32 indexed id,bytes32 indexed request,bytes32 purpose);
     event Closed(bytes32 indexed id,bool canceled);
+    // Fees remain segregated until permissionless delivery; no beneficiary can
+    // bypass the vault. Each pool retains its own cumulative rounding basis.
+    DevelopmentCompensationVault420 public immutable developmentVault;
+    mapping(bytes32 => uint256) private deliveredGross;
+    uint256 private reservedDevelopment;
+    function _forwardFantasy(bytes32 id, uint256 gross) private {
+        uint256 prior = deliveredGross[id];
+        uint256 amount = (gross / 100) * 3 + (gross % 100) * 3 / 100
+            - ((prior / 100) * 3 + (prior % 100) * 3 / 100);
+        if (amount == 0) revert Invalid();
+        deliveredGross[id] = gross;
+        credit[devFund] -= amount;
+        reservedDevelopment -= amount;
+        totalLiability -= amount;
+        if (asset == address(0)) {
+            developmentVault.contributeFantasy{value: amount}(asset, id, gross);
+        } else {
+            IERC20FantasyApproval420 token = IERC20FantasyApproval420(asset);
+            if (!token.approve(address(developmentVault), 0) || !token.approve(address(developmentVault), amount)) revert Invalid();
+            developmentVault.contributeFantasy(asset, id, gross);
+            if (!token.approve(address(developmentVault), 0)) revert Invalid();
+        }
+    }
+    bytes32[] private developmentQueue;
+    uint256 private developmentCursor;
+    function forwardDevelopment() external guarded { _forwardNextDevelopment(); }
+    function _forwardNextDevelopment() private {
+        if (developmentCursor >= developmentQueue.length) revert Invalid();
+        bytes32 id = developmentQueue[developmentCursor++];
+        _forwardFantasy(id, pools[id].gross);
+    }
     constructor(address data_,address roster_,address scores_,address disputes_,address admission_,address random_,address dev_,address actions_){
         data=FantasySeasonData420(data_);roster=FantasySeasonRoster420(roster_);scores=FantasySeasonScores420(scores_);disputes=FantasyDisputeController420(disputes_);admission=FantasyAdmission420(admission_);randomness=IRandomnessRouter420(random_);
         if(address(roster.data())!=data_||address(scores.data())!=data_||address(scores.roster())!=roster_||address(data.authorization())!=address(disputes.authorization())||address(data.oracle())!=address(disputes.oracle())||address(admission.identities())!=address(disputes.identities())||random_.code.length==0)revert Invalid();
         asset=disputes.asset();if(asset==address(0))revert Invalid();
-        DevelopmentCompensationVault420 vault=DevelopmentCompensationVault420(payable(dev_));if(address(vault.capabilityRegistry())!=address(disputes.authorization().capabilityRegistry()))revert Invalid();devFund=vault.beneficiary();
+        DevelopmentCompensationVault420 vault=DevelopmentCompensationVault420(payable(dev_));developmentVault=vault;if(address(vault.capabilityRegistry())!=address(disputes.authorization().capabilityRegistry()))revert Invalid();devFund=vault.beneficiary();
         if(devFund==address(0)||devFund==address(this))revert Invalid();rankings=new FantasyRankingBook420(address(this));payouts=new FantasyPayoutPolicy420(address(this));actions=FantasySeasonActions420(actions_);transactions=actions.transactions();if(address(actions.data())!=data_||address(actions.roster())!=roster_||address(actions.admission())!=admission_)revert Invalid();
     }
     modifier guarded(){if(entered!=0)revert Invalid();entered=1;_;entered=0;}
@@ -133,7 +164,7 @@ contract FantasySeasonEscrow420 is IFantasyDisputeHost420,IFantasySeasonCorrecti
         if(pools[id].state!=State.REVIEW)revert Invalid();FantasyDisputeController420.Candidate memory c=finalCandidate(id);pools[id].candidate=keccak256(abi.encode(DOMAIN,block.chainid,address(this),id,pools[id].manifest,c));
     }
     function settle(bytes32 id) external guarded{
-        Pool storage p=pools[id];if(p.state!=State.REVIEW||data.seasonCanceled(id)||p.candidate==0||!_allFinal(id))revert Invalid();p.state=State.SETTLED;credit[devFund]+=p.fee;emit Closed(id,false);
+        Pool storage p=pools[id];if(p.state!=State.REVIEW||data.seasonCanceled(id)||p.candidate==0||!_allFinal(id))revert Invalid();p.state=State.SETTLED;credit[devFund]+=p.fee;reservedDevelopment+=p.fee;if(p.fee!=0)developmentQueue.push(id);emit Closed(id,false);
     }
     function _cancel(bytes32 id,bytes32 reason) private{
         Pool storage p=pools[id];if(p.state==State.NONE||p.state==State.CANCELED||p.state==State.SETTLED)revert Invalid();p.state=State.CANCELED;
@@ -166,7 +197,8 @@ contract FantasySeasonEscrow420 is IFantasyDisputeHost420,IFantasySeasonCorrecti
         if(d.state==FantasyDisputeController420.PoolState.REGISTERED||d.state==FantasyDisputeController420.PoolState.REVIEW)disputes.cancelByHost(child,keccak256("SEASON_CANCELED"));
     }
     function withdrawCredit() external guarded{
-        uint256 amount=credit[msg.sender];if(amount==0)revert Invalid();credit[msg.sender]=0;totalLiability-=amount;uint256 before_=IFantasyBondToken420(asset).balanceOf(msg.sender);
+        if(msg.sender==devFund&&credit[msg.sender]==reservedDevelopment){_forwardNextDevelopment();return;}
+        uint256 amount=credit[msg.sender]-(msg.sender==devFund?reservedDevelopment:0);if(amount==0)revert Invalid();credit[msg.sender]-=amount;totalLiability-=amount;uint256 before_=IFantasyBondToken420(asset).balanceOf(msg.sender);
         if(!IFantasyBondToken420(asset).transfer(msg.sender,amount)||IFantasyBondToken420(asset).balanceOf(msg.sender)!=before_+amount)revert Invalid();
     }
 }

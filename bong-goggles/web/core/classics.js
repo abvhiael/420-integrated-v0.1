@@ -13,7 +13,7 @@ export const CLASSIC_COLLECTIONS=Object.freeze([
  ])}),
  Object.freeze({id:'cards',title:'Card Games',games:Object.freeze([
   item('cribbage','Cribbage','2–4','registry','Canonical two-player session registry only; interactive ruleset not enabled.'),
-  item('labyrinth-cribbage','Labyrinth Cribbage','2–4','registry','325 points; six-card hands; partnerships default; Play gated.'),
+  item('labyrinth-cribbage','Labyrinth Cribbage','2–4','playable','325 points; six-card hands; partnerships default; developer-authorized release.'),
   item('crazy-eights','Crazy Eights','2–4'),
   item('euchre','Euchre','4'),
   item('go-fish','Go Fish','2–4'),

@@ -64,8 +64,8 @@ try{
    'board image must occupy the responsive square');
   assert.ok(metrics.document<=metrics.viewport+2,
    'Labyrinth preview must not cause horizontal overflow');
-  assert.equal(await page.locator('.lab-peg-overlay').count(),0,
-   'no physical peg without independently verified numbered map');
+  await page.locator('.lab-board-art .lab-peg-overlay').first().waitFor({timeout:10000});
+  assert.equal(await page.locator('.lab-board-art .lab-peg-overlay circle').count(),4,'two resting pegs per colour');
   // Verify the actual user-approved numbered atlas in Chromium: score 0 and
   // finish 325 must remain pixel-aligned at both desktop and mobile widths.
   const pegGeometry=await page.evaluate(async()=>{
@@ -73,6 +73,7 @@ try{
    const atlas=await(await fetch('/core/labyrinth-peg-map.json')).json();
    if(!validateLabyrinthPegAtlas(atlas))throw Error('physical atlas rejected in browser');
    const art=document.querySelector('.lab-board-art');
+   art.querySelector('.lab-peg-overlay')?.remove();
    art.insertAdjacentHTML('beforeend',renderLabyrinthPegOverlay({
     scores:[0,325],teams:[0,1]
    },atlas));

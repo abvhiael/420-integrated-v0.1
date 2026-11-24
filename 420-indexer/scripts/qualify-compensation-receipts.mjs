@@ -122,28 +122,38 @@ const send = async (ref, value) =>
     )
   ).wait();
 const first = await send('canonical', 100n);
+const wrapped = await deploy('Wrapped420', []);
+const wrappedAddress = await wrapped.getAddress();
+await (await wrapped.deposit({ value: 80n })).wait();
+await (await wrapped.approve(vaultAddress, 80n)).wait();
+const tokenContribution = await (
+  await vault.contributeToken(wrappedAddress, app, id('canonical-token'), await vault.policyId(), 800n, 1000)
+).wait();
+const tokenClaim = await (await splitter.connect(await provider.getSigner(2)).claimToken(wrappedAddress)).wait();
+assert.equal(await wrapped.balanceOf(founders[1]), 20n);
 const snapshot = await provider.send('evm_snapshot', []);
 const claim = await (
   await splitter.connect(await provider.getSigner(1)).claimNative()
 ).wait();
 const schema = 'devcomp_receipts_' + process.pid;
+const rebuildSchema = schema + '_rebuild';
 const admin = new PostgresSql420({ connectionString });
-await admin.query(`create schema ${schema}`);
-const db = new PostgresSql420({
-  connectionString,
-  options: `-c search_path=${schema}`
-});
-try {
-  for (const name of [
+const open = async (name) => {
+  await admin.query(`create schema ${name}`);
+  const store = new PostgresSql420({ connectionString, options: `-c search_path=${name}` });
+  for (const file of [
     '001-core-projections.sql',
     '003-genesis-projections.sql',
     '007-durable-recovery.sql',
     '008-finalized-recovery.sql'
   ]) {
-    await db.query(
-      await readFile(new URL('../sql/' + name, import.meta.url), 'utf8')
-    );
+    await store.query(await readFile(new URL('../sql/' + file, import.meta.url), 'utf8'));
   }
+  return store;
+};
+const db = await open(schema);
+let rebuild;
+try {
   const service = new IndexerQueryService420(db);
   const opts = { finality: { mode: 'head' } };
   const run = async () =>
@@ -161,7 +171,7 @@ try {
     (await read()).filter(
       (r) => r.event_name === 'DevelopmentCompensationForwarded'
     ).length,
-    1
+    2
   );
   assert(
     (await read()).some(
@@ -176,7 +186,12 @@ try {
   const reorg = await run();
   assert.equal(reorg.recoveredReorgDepth, 1);
   const events = await read();
-  assert(!events.some((r) => r.event_name === 'FounderCompensationClaimed'));
+  assert(!events.some((r) => r.tx_hash === claim.hash));
+  assert(events.some((r) => r.event_name === 'FounderCompensationClaimed' && r.tx_hash === tokenClaim.hash));
+  assert(events.some((r) =>
+    r.event_name === 'FounderTokenCompensationCredited' && r.tx_hash === tokenContribution.hash
+    && r.fields.token.toLowerCase() === wrappedAddress.toLowerCase() && r.fields.amount === '80'
+  ));
   assert(
     events.some(
       (r) =>
@@ -191,18 +206,27 @@ try {
         r.tx_hash === replacement.hash
     )
   );
+  rebuild = await open(rebuildSchema);
+  await (await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)).runOnce();
+  assert.deepEqual(
+    (await new IndexerQueryService420(rebuild).protocolEvents(420n, { protocol: '420DevelopmentCompensation' })).items,
+    events
+  );
   console.log(
     JSON.stringify({
       first: first.hash,
       orphanedClaim: claim.hash,
       replacement: replacement.hash,
+      tokenContribution: tokenContribution.hash,
+      tokenClaim: tokenClaim.hash,
       eventCount: events.length,
       recoveredDepth: reorg.recoveredReorgDepth
     })
   );
 } finally {
   await db.close();
-  await admin.query(`drop schema ${schema} cascade`);
+  await rebuild?.close();
+  await admin.query(`drop schema if exists ${schema}, ${rebuildSchema} cascade`);
   await admin.close();
   provider.destroy();
 }

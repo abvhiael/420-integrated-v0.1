@@ -5,6 +5,14 @@ on:
     paths:
       - '.github/workflows/420bet-roulette-level1.yml'
       - 'contracts/src/bet/**'
+      - 'contracts/src/interfaces/**'
+      - 'contracts/src/libraries/**'
+      - 'contracts/src/system/**'
+      - 'contracts/foundry.toml'
+      - 'contracts/remappings.txt'
+      - 'contracts/lib/**'
+      - 'scripts/bet/scope-foundry-suites.py'
+      - 'contracts/test/Bet*.t.sol'
       - 'contracts/test/BetRoulette*.t.sol'
       - 'contracts/test/BetWagerAcceptance420.t.sol'
       - 'contracts/test/BetRandomness420.t.sol'
@@ -63,6 +71,11 @@ jobs:
         run: |
           set -euo pipefail
           regex='^(BetRouletteV1420|BetRouletteV1View420|BetRouletteVerticalSlice420|BetRouletteHardening420|BetWagerAcceptance420|BetRandomness420|BetRandomnessTerminal420|BetSettlementEngine420|BetBankrollRisk420|BetTerminalPathInvariant420|BetCasinoSettlementInvariant420|BetCasinoSolvencyConvergence420)Test$'
+          scope="$(mktemp -d "$PWD/.bet-qualification.XXXXXX")"
+          trap 'rm -rf "$scope"' EXIT
+          python3 ../scripts/bet/scope-foundry-suites.py "$scope" BetRouletteV1420 BetRouletteV1View420 BetRouletteVerticalSlice420 BetRouletteHardening420 BetWagerAcceptance420 BetRandomness420 BetRandomnessTerminal420 BetSettlementEngine420 BetBankrollRisk420 BetTerminalPathInvariant420 BetCasinoSettlementInvariant420 BetCasinoSolvencyConvergence420
+          export FOUNDRY_SRC="$scope/empty-src" FOUNDRY_TEST="$scope" FOUNDRY_SCRIPT="$scope/empty-script"
+          mkdir -p "$FOUNDRY_SRC" "$FOUNDRY_SCRIPT"
           forge test --match-contract "$regex" --json > "$RUNNER_TEMP/roulette-level1.json"
           python3 - "$RUNNER_TEMP/roulette-level1.json" <<'PY'
           import json, sys
@@ -76,7 +89,7 @@ jobs:
               if not tests:
                   continue
               for name in names:
-                  if f"test/{name}.t.sol:" in key:
+                  if key.endswith(f"/{name}.t.sol:{name}Test"):
                       seen.add(name)
               for test_name, result in tests.items():
                   total += 1

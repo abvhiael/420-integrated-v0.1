@@ -139,8 +139,9 @@ try{
  await a.waitForFunction(()=>window.__bc27.ctl.state.session?.sequence===2);
  assert.equal(await privateCards(a),6,'confirmed live move removes exactly 3 cards');
  await b.evaluate(async id=>{await window.__bc27.ctl.open(id);window.__bc27.paint()},match);
- assert.equal(await b.locator('[data-lab-action="discard"]').isDisabled(),true===false,
-  'server-advanced turn must grant seat 1 action');
+ for(const card of ['13','14','15'])await b.locator('[data-lab-card="'+card+'"]').click();
+ assert.equal(await b.locator('[data-lab-action="discard"]').isDisabled(),false,
+  'server-advanced turn and legal private selection must enable seat 1 action');
  // Browser reload must recover the same server-owned sequence and private hand.
  await b.reload({waitUntil:'domcontentloaded'});
  await b.evaluate(async id=>{

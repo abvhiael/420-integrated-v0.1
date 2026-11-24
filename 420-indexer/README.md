@@ -139,3 +139,23 @@ its lifecycle history/state to the retained canonical evidence before serving it
 `INDEXER_REBUILD=1` is the existing Go rebuild action; it does not authorize a
 consensus rollback. Stake query projections never settle rewards, slashes,
 withdrawals or validator membership.
+
+### Compensation reporting
+
+Configure `INDEXER_COMPENSATION_REPORT_BINDING` on the authenticated compensation
+Indexer with JSON containing decimal-string `chainId`, `vault`, `splitter`, and
+`founders` in administrator, Andrew, Janet order. Use the immutable identities
+from the verified deployment. Keep complete canonical compensation projection
+history for this binding.
+
+Query `/v1/protocols/development-compensation/report?chainId=420&from=0&to=2000000000`
+with a half-open Unix-second period. Analytics exposes the same report at
+`/v1/development-compensation?from=0&to=2000000000`. Set
+`ANALYTICS_COMPENSATION_INDEXER_URL` if that Indexer is on a separate origin.
+
+Amounts are decimal strings in asset base units. Eligible revenue reflects the
+basis recorded by canonical vault forwards. Paired splitter receipts validate
+those forwards. Period credits follow the splitter's cumulative allocation
+cycle. Claims consume pooled founder entitlements by asset, so application,
+source and policy apply to contributions and newly credited entitlement.
+Outstanding entitlement includes all history before the requested period end.

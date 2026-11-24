@@ -288,6 +288,20 @@ try {
       (event) => event.transactionHash === claim.hash
     )
   );
+  const lookup = async (hash) => {
+    const response = await routeIndexerHttp420(
+      new IndexerPublicApiAdapter420(service), 'GET',
+      '/v1/protocols/events?chainId=420&protocol=420DevelopmentCompensation&transactionHash=' + hash
+    );
+    assert.equal(response.status, 200);
+    assert(response.body.data.items.every(event => event.transactionHash === hash));
+    return response.body.data.items;
+  };
+  const exchangeEvents = await lookup(tokenContribution.hash);
+  assert(exchangeEvents.some(event => event.eventName === 'DevelopmentCompensationForwarded'));
+  assert(exchangeEvents.some(event => event.eventName === 'FounderTokenCompensationCredited'));
+  assert((await lookup(tokenClaim.hash)).some(event => event.eventName === 'FounderCompensationClaimed'));
+  assert.deepEqual(await lookup(claim.hash), []);
   rebuild = await open(rebuildSchema);
   await (
     await createCompensationIndexer420(source, rebuild, pins, artifacts, opts)

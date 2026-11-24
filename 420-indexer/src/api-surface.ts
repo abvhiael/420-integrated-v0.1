@@ -81,6 +81,7 @@ export interface AssetTransferPageRequest420 extends PageRequest420 {
 export interface ProtocolEventPageRequest420 extends PageRequest420 {
   protocol?: string;
   objectKey?: string;
+  transactionHash?: string;
 }
 
 export interface SearchResult420 {

@@ -19,6 +19,7 @@ type Service struct {
 	cfg   Config
 	probe ChainProbe
 	ready atomic.Bool
+	qualified atomic.Bool
 }
 
 func NewService(cfg Config, probe ChainProbe) (*Service, error) {
@@ -46,6 +47,7 @@ func (s *Service) Qualify(ctx context.Context) error {
 		return fmt.Errorf("canonical bytecode unavailable: %w", err)
 	}
 	s.ready.Store(true)
+	s.qualified.Store(true)
 	return nil
 }
 
@@ -59,7 +61,7 @@ func (s *Service) Handler() http.Handler {
 		})
 	})
 	mux.HandleFunc("GET /readyz", func(w http.ResponseWriter, r *http.Request) {
-		if !s.ready.Load() {
+		if !s.qualified.Load() {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]any{
 				"service": "420Verify",
 				"ready":   false,

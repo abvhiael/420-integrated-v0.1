@@ -44,6 +44,12 @@ contract PokerSeatLedger420 {
     mapping(bytes32=>mapping(address=>uint64)) public lastExitAt;
     mapping(bytes32=>mapping(address=>uint64)) public lastSitOutAt;
     mapping(bytes32=>bytes32) public abusePolicyHash;
+    // Aggregate custody and finalized rake, keyed by actual asset and recipient.
+    mapping(address=>uint256) public assetPlayerChips;
+    mapping(address=>uint256) public assetDeposits;
+    mapping(address=>uint256) public assetWithdrawals;
+    mapping(address=>uint256) public assetRake;
+    mapping(address=>mapping(address=>uint256)) public rakePaidTo;
     error AbuseBindingInvalid();
     event AbuseControlsBound(bytes32 indexed tableId,address controls,bytes32 policyHash,bytes32 codeHash);
     event HandAbuseAdmissionRecorded(bytes32 indexed tableId,bytes32 indexed handId,bytes32 admissionRoot);
@@ -279,7 +285,12 @@ contract PokerSeatLedger420 {
         }
         totalChips[id]-=rake;
         _unlock(id,handId);
-        if(rake!=0)_withdraw(t.config.asset,rakeDestination[id],rake);
+        if(rake!=0){
+            assetPlayerChips[t.config.asset]-=rake;
+            assetRake[t.config.asset]+=rake;
+            rakePaidTo[t.config.asset][rakeDestination[id]]+=rake;
+            _withdraw(t.config.asset,rakeDestination[id],rake);
+        }
         emit HandSettled(id,handId,rake,total);
     }
     function _checkLockedCaller(bytes32 id,bytes32 handId) private view {
@@ -326,6 +337,8 @@ contract PokerSeatLedger420 {
         totalChips[id] += amount;
         // All escrow accounting effects precede token interaction; any
         // failed or fee-on-transfer token move reverts the entire transaction.
+        assetPlayerChips[t.config.asset]+=amount;
+        assetDeposits[t.config.asset]+=amount;
         _deposit(t.config.asset, amount);
         emit Seated(id, seat, msg.sender, amount, epoch);
     }
@@ -342,6 +355,8 @@ contract PokerSeatLedger420 {
         if(address(gate)!=address(0))gate.checkDeposit(id,msg.sender,plusOne-1);
         s.chips += amount;
         totalChips[id] += amount;
+        assetPlayerChips[t.config.asset]+=amount;
+        assetDeposits[t.config.asset]+=amount;
         _deposit(t.config.asset, amount);
         emit TopUp(id, plusOne - 1, amount, s.chips);
     }
@@ -377,6 +392,8 @@ contract PokerSeatLedger420 {
         ++seatingEpoch[id];
         lastExitAt[id][player]=uint64(block.timestamp);
         totalChips[id] -= amount;
+        assetPlayerChips[asset]-=amount;
+        assetWithdrawals[asset]+=amount;
         if(amount!=0)_withdraw(asset,player,amount);
         emit Left(id,seat,player,amount);
     }

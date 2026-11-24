@@ -1,3 +1,4 @@
+import {renderChessSocial} from './chess-social.js';
 import {navigationItems,resolveRoute,routeAccess} from './routes.js';
 import {card,emptyState,canonicalHandoffs,escapeHtml,skeleton} from './design-system.js';
 import {renderProfileView,renderRelationshipLists} from './profile-ui.js';
@@ -33,9 +34,9 @@ function routePlaceholder(route,access,{profileProjection=null,relationshipProje
   </details>
  </div>`;
  if(route.id==='discover')return renderDiscoveryRoute({projection:discoveryProjection,walletView});
- if(route.id==='social')return renderAccountSocial(accountSocialState,{enabled:accountSocialEnabled});
+ if(route.id==='social')return renderAccountSocial(accountSocialState,{enabled:accountSocialEnabled})+(accountSocialEnabled&&accountSocialState?.status==='ready'&&accountSocialState.profile?.subject===chessState?.social?.viewer?renderChessSocial(chessState.social):'');
  if(route.id==='account-messages')return renderAccountExtra('messages',accountMessagesState,{enabled:accountMessagingEnabled});
- if(route.id==='account-games')return renderAccountExtra('games',accountGamesState,{enabled:accountGamesEnabled});
+ if(route.id==='account-games')return renderAccountExtra('games',accountGamesState,{enabled:accountGamesEnabled})+(accountGamesEnabled&&accountIdentityState?.profile?.subject===chessState?.social?.viewer&&chessState?.social?.status==='ready'?renderChessSocial(chessState.social):'');
  if(route.id==='account-xp')return renderAccountXP(accountXPState,{enabled:accountXPEnabled});
  if(route.id==='account-monetization')return renderAccountMonetization(accountMonetizationState,{enabled:accountMonetizationEnabled});
  if(route.id==='settings')return renderSettingsRoute({walletView,preferences:viewPreferences,walletUrl:walletSettingsUrl,notificationsUrl:notificationsSettingsUrl,accountSocialState,accountSocialEnabled});

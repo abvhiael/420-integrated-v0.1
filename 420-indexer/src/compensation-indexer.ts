@@ -19,7 +19,6 @@ const events = {
     'DevelopmentCompensationForwarded(bytes32,bytes32,bytes32,address,address,address,uint256,uint16,uint256,bytes32)'
   ],
   FoundingDeveloperCompensationSplitter420: [
-    'CompensationVaultBound(address)',
     'FounderCompensationDeposited(address,uint256)',
     'FounderTokenCompensationCredited(address,address,bytes32,uint256)',
     'FounderCompensationClaimed(address,address,uint256)'
@@ -139,6 +138,6 @@ export async function createCompensationIndexer420(
   });
   const projection = new ProtocolProjection420(db, decoders);
   return new IndexerIngestor420(pinned, new SqlCheckpointStore420(db, chainId),
-    new CoreProjectionConsumer420(db, projection, chainId), { startBlock: deploymentBlock, ...options },
+    new CoreProjectionConsumer420(db, projection, chainId), options,
     new SqlCanonicalHistoryStore420(db, chainId));
 }

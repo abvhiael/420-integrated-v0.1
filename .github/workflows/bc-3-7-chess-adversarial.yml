@@ -38,8 +38,8 @@ jobs:
         run: |
           npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.65.1 axe-core@4.10.3
           npx playwright install --with-deps chromium
-      - name: Chess real-browser history, profiles, multiplayer and accessibility qualification
-        run: node test/chess-browser-qualification.mjs && node test/chess-multiplayer-browser.mjs && node test/chess-history-browser.mjs
+      - name: Chess real-browser history, profiles, multiplayer, accessibility and network recovery qualification
+        run: node test/chess-browser-qualification.mjs && node test/chess-multiplayer-browser.mjs && node test/chess-history-browser.mjs && node test/chess-disconnection-browser.mjs
       - name: Preserve public release lock
         run: node scripts/classics-release-gate.mjs --audit
         env:

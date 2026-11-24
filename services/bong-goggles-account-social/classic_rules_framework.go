@@ -70,6 +70,7 @@ func NewRuleBudget(limit int)*RuleBudget{
  if limit<1||limit>100000{return &RuleBudget{}}
  return &RuleBudget{remaining:limit}
 }
+func (b *RuleBudget)expired()bool{return b!=nil&&!b.deadline.IsZero()&&!time.Now().Before(b.deadline)}
 func (b *RuleBudget)Charge(cost int)error{
  if b==nil||cost<1||cost>b.remaining||(!b.deadline.IsZero()&&!time.Now().Before(b.deadline)){return ErrUnavailable}
  b.remaining-=cost;b.spent+=cost;return nil
@@ -333,13 +334,14 @@ func (a *RulesAdapter)ChooseMoveBounded(raw json.RawMessage,seat int,difficulty 
   candidates:=make([]json.RawMessage,len(options))
   for i,item:=range options{candidates[i]=append(json.RawMessage(nil),item...)}
   selected,e:=policy.ChooseMove(private,difficulty,candidates,budget)
-  if e!=nil||budget.spent<1{return nil,ErrUnavailable}
+  if budget.expired(){return nil,fmt.Errorf("%w: bot decision deadline",ErrUnavailable)}
+  if e!=nil||budget.spent<1{return nil,fmt.Errorf("%w: bot policy rejected decision",ErrUnavailable)}
   canon,e:=canonicalRuleAction(selected);if e!=nil{return nil,e}
   for _,legal:=range options{if bytes.Equal(legal,canon){return canon,nil}}
   return nil,ErrForbidden
  }
  one,e:=run();if e!=nil{return nil,e}
- two,e:=run();if e!=nil||!bytes.Equal(one,two){return nil,ErrUnavailable}
+ two,e:=run();if e!=nil{return nil,e};if !bytes.Equal(one,two){return nil,fmt.Errorf("%w: bot deterministic decision mismatch",ErrUnavailable)}
  return one,nil
 }
 func (a *RulesAdapter) replayLimit()int{

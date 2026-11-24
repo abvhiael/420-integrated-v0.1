@@ -49,6 +49,9 @@ contract MockCasinoEmergencyVault420 {
     uint256 public payout;
     constructor(bytes32 vaultId_, address asset_) { vaultId = vaultId_; asset = asset_; }
     // Mirror BankrollVault420.resolveWager return ABI so the engine can decode the call.
+    // SettlementEngine classifies equal payouts after resolving custody.
+    function classifyEqualReturn(bytes32, bool) external pure {}
+
     function resolveWager(bytes32, uint256 grossPayout) external returns (uint256 stake, uint256 stakeAbsorbed, uint256 bankrollOutflow) {
         require(!resolved, "resolved"); resolved = true; payout = grossPayout;
         stake = 100 ether;

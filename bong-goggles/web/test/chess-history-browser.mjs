@@ -39,7 +39,7 @@ try{
    if(outage&&seat||!cookie.includes('bc34_actor='+subject)){await r.fulfill({status:401,json:{error:'Unauthorized'}});return;}
    let status=200,data;
    if(p==='/v1/me')data={walletRequired:false,profile:{subject,displayName:seat?'Black friend':'White friend',bio:''}};
-   else if(p==='/v1/feed')data={posts:[],nextCursor:null,onChain:false};
+   else if(p==='/v1/feed')data={source:'bonggoggles-account-social',posts:[],nextCursor:null,onChain:false};
    else if(p==='/v1/classic-sessions/history-chess'){const m={...session(seat),updatedAt:new Date().toISOString()};if(finished)m.chessReason='resigned';delete m.privateView;data=envelope({history:{stats:{sampleSize:finished?1:0,completed:finished?1:0,wins:finished&&seat?1:0,losses:finished&&!seat?1:0,draws:0},matches:[m],invitations:invited&&seat?[{roomId,inviter:actor,seat:1,expiresAt:'2099-01-01T00:00:00Z'}]:[]}}).data;}
    else if(p==='/v1/classic-rooms/friends')data={onChain:false,friends:[{subject:seat?actor:peer,displayName:seat?'White friend':'Black friend'}]};
    else if(p==='/v1/classic-sessions/challenge-chess'||p==='/v1/classic-sessions/'+id+'/rematch'){const body=r.request().postDataJSON();assert.ok(body.requestId);if(p.endsWith('challenge-chess')){assert.equal(body.target,seat?actor:peer);invited=true;}else{assert.ok(finished);rematch=true;}status=201;data=envelope({playable:false,room:{id:roomId,host:subject,gameId:'chess',seatCount:2,visibility:'private',status:'open',revision:1,seats:[{index:0,controller:'human',subject,team:0},{index:1,controller:'invited',subject:seat?actor:peer,team:1}],invites:[]}}).data;}

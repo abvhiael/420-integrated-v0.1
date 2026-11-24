@@ -86,12 +86,26 @@ contract BetSharedPoolsProfitEpochSource420 is BetPinnedCustodySource420 {
     }
 }
 
+/// @notice Dedicated immutable receipt custody. Only exact canonical ledger
+/// transfers are recognized by the adapter; donations never increase basis.
+/// No payout authority is introduced by accounting qualification.
+contract BetPokerProtocolRakeCustody420 {
+    address public immutable asset;
+    address public immutable ledger;
+    constructor(address token,address canonicalLedger){
+        require(token.code.length!=0&&canonicalLedger.code.length!=0);
+        asset=token;ledger=canonicalLedger;
+    }
+}
+
 contract BetPokerRakeProfitEpochSource420 is BetPinnedCustodySource420 {
     address public immutable protocolRecipient;
     bytes32 public immutable recipientCodeHash;
     constructor(address token,address ledger,bytes32 expectedHash,address recipient,bytes32 recipientHash)
         BetPinnedCustodySource420(token,ledger,expectedHash){
         if(token==address(0)||recipient==ledger||recipient.code.length==0||recipient.codehash!=recipientHash)revert InvalidBinding();
+        if(BetPokerProtocolRakeCustody420(recipient).asset()!=token||
+            BetPokerProtocolRakeCustody420(recipient).ledger()!=ledger)revert InvalidBinding();
         protocolRecipient=recipient;recipientCodeHash=recipientHash;
     }
     function profitTotals() external view override returns(Totals memory t){
@@ -101,10 +115,11 @@ contract BetPokerRakeProfitEpochSource420 is BetPinnedCustodySource420 {
         uint256 paid=l.rakePaidTo(asset,protocolRecipient);
         t.reconciled=paid<=rake&&_balance(custody)==l.assetPlayerChips(asset)
             &&l.assetDeposits(asset)==l.assetWithdrawals(asset)+rake+l.assetPlayerChips(asset);
-        // Recipient may have unrelated funds or obligations: count only
-        // verified receipts and never claim free cash based on its balance.
-        // The dedicated protocol receipt owner must reconcile spendable cash.
+        // Dedicated receipt custody has no transfer authority. Count only
+        // canonical ledger receipts, not unrelated donations.
         t.retainedReceipts=paid;
+        t.freeProtocolCash=paid;
+        t.reconciled=t.reconciled&&_balance(protocolRecipient)>=paid;
     }
 }
 

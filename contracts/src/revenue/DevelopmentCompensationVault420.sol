@@ -272,8 +272,8 @@ contract DevelopmentCompensationVault420 is I420System {
     }
 
     function _fantasyFee(
-        uint256 gross) private pure returns (uint256
-    ) {
+        uint256 gross
+    ) private pure returns (uint256) {
         return (gross / 100) * 3 + (gross % 100) * 3 / 100;
     }
 

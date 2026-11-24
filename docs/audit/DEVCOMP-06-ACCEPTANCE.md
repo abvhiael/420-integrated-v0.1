@@ -7,6 +7,7 @@ Live deployment and complete production-route reconciliation remain open.
 
 - Integrated local runtime tests used commit `519f8930a34bdfb1d5950c87fe29e1b2e29281dc`, tree `4a93f0c21008578a9625b5f6d04f6717707c56f7`.
 - The local tree combines main `d7bb43e1fa14ea5a1e20ef91886026477392c083`, Analytics local source commit `3f6715b6`, and Explorer local source commit `8103c036`. Both sets of receipt assertions were retained when resolving the overlap in the qualification script.
+- Daily Fantasy Level 1 and 2 passed on local commit `ee9a6c43c3cca499427b649cc7ce18aa49738060` with 146 native and 24 client tests. This qualifies the contest path and independent trace replay.
 - The Explorer dependency verifier passed with 17 mapped reads at local commit `379168ca89d00ebe89cd1634eb301f6513c5978b`. The corresponding published fix is `3c3285f3b2fe05bafafffa3a047392855e0d96a1` on PR #1401.
 
 ## Route and component acceptance

@@ -8,7 +8,23 @@ interface VmProfit420 {
     function prank(address) external;
     function expectRevert(bytes4) external;
 }
-contract BetProfitAccounting420Test {
+interface IProfitSettlementFixture420 {
+    function settleForInvariant(uint256 vaultIndex, uint256 stake, uint256 payout) external;
+}
+
+contract ProfitSettlementHandler420 {
+    IProfitSettlementFixture420 private immutable fixture;
+
+    constructor(IProfitSettlementFixture420 fixture_) {
+        fixture = fixture_;
+    }
+
+    function settle(uint256 vaultIndex, uint256 stake, uint256 payout) external {
+        fixture.settleForInvariant(vaultIndex, stake, payout);
+    }
+}
+
+contract BetProfitAccounting420Test is IProfitSettlementFixture420 {
     VmProfit420 constant vm = VmProfit420(address(uint160(uint256(keccak256("hevm cheat code")))));
     CapabilityRegistry420 caps;
     BetAuthorization420 auth;
@@ -25,6 +41,24 @@ contract BetProfitAccounting420Test {
     address constant PROTOCOL = address(0x5678);
     address constant OPERATOR = address(0x9012);
     uint256 nonce;
+    ProfitSettlementHandler420 private handler;
+    int256 private expectedResult;
+
+    function targetContracts() external view returns (address[] memory targets) {
+        targets = new address[](1);
+        targets[0] = address(handler);
+    }
+
+    function settleForInvariant(uint256 vaultIndex, uint256 stake, uint256 payout) external {
+        require(msg.sender == address(handler), "handler only");
+        BankrollVault420 vault = vaultIndex % 2 == 0 ? v1 : v2;
+        stake = stake % 1 ether + 1;
+        payout %= 2 ether;
+        bytes32 id = keccak256(abi.encode("invariant settlement", ++nonce));
+        settle(vault, id, stake, payout);
+        if (stake == payout) vault.classifyEqualReturn(id, false);
+        expectedResult += int256(stake) - int256(payout);
+    }
     receive() external payable {}
     function grant(address who,bytes32 action,bytes32 scope) private {
         caps.createGrant(keccak256(abi.encode(++nonce)),who,BetIds420.COMPONENT_BET,action,scope,type(uint128).max,0,0,0,0);
@@ -70,6 +104,7 @@ contract BetProfitAccounting420Test {
         BetEconomics420[] memory e = new BetEconomics420[](1);
         e[0]=economics;
         casino = new BetCasinoProfitAccounting420(address(0),v,e);
+        handler = new ProfitSettlementHandler420(this);
     }
     function settle(BankrollVault420 v,bytes32 id,uint256 stake,uint256 payout) private {
         v.escrowWagerStakeNative{value:stake}(id,PLAYER);
@@ -144,5 +179,6 @@ contract BetProfitAccounting420Test {
         BetCasinoProfitAccounting420.Report memory r=casino.report();
         require(r.reconciled && r.eligibleRevenue==0,"conservation");
         require(r.lpEquity==r.genesisEquity+r.otherLpEquity,"LP equity");
+        require(r.gamingResult == expectedResult, "realized settlement result");
     }
 }

@@ -226,6 +226,13 @@ class FundedSeasons(FundedFormats):
         ranking=contract(self.w3,self.build,'FantasyRankingBook420',self.season.functions.rankings().call());self.tx(ranking.functions.walk(id,1,64));self.tx(ranking.functions.allocate(id,1,64))
         self.tx(self.season.functions.publishFinal(id));self.tx(self.season.functions.settle(id))
         for m in range(1,5):self.tx(self.season.functions.collect(id,m));self.reject(c['label']+' duplicate final claim',self.season.functions.collect(id,m))
+        fee = 3 * c['stake'] * c['users'] // 100
+        if fee:
+            developer = self.accounts[8]
+            balance_before = self.token.functions.balanceOf(developer).call()
+            self.tx(self.season.functions.forwardDevelopment())
+            if self.token.functions.balanceOf(developer).call() - balance_before != fee:
+                raise AssertionError('independent per-season developer delivery mismatch '+c['label'])
         self.outcomes.append({'case':c['label'],'mode':c['mode'],'users':4,'weeklyCanonicalFinality':True,'randomnessRequest':'0x'+c['request'].hex(),'pool':'0x'+id.hex()});c['custodian'].close()
 
     def collect_refunds(self,c,reason):

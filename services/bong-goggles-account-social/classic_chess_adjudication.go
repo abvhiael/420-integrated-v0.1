@@ -150,6 +150,7 @@ var chessOpeningMates = [2][][]string{
  {
   {"f2f3","e7e5","g2g4","d8h4"},
   {"e2e4","e7e5","h2h3","f8c5","a2a3","d8h4","a3a4","h4f2"},
+  {"e2e4","c7c5","g1f3","e7e5","f3g1","c5c4","h2h3","f8c5","a2a3","d8h4","a3a4","h4f2"},
  },
 }
 

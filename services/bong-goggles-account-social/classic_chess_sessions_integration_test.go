@@ -99,6 +99,11 @@ func TestBC32TimedChessSession(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer tx.Rollback()
+	var roomStatus string
+	if err := tx.QueryRowContext(ctx, "SELECT status FROM bg_account_social.classic_rooms WHERE id=$1 FOR UPDATE",
+		room.ID).Scan(&roomStatus); err != nil {
+		t.Fatal(err)
+	}
 	rec, err := scanClassicSession(tx.QueryRowContext(ctx, "SELECT "+classicSessionFields+
 		" FROM bg_account_social.classic_sessions WHERE id=$1 FOR UPDATE", match.ID))
 	if err != nil || rec.Sequence != 2 || rec.Deadline == nil {
@@ -112,12 +117,26 @@ func TestBC32TimedChessSession(t *testing.T) {
 	if err != nil || data.Timing.Clock.Remaining[0] <= 180000 || data.Timing.Clock.Remaining[1] != 180000 {
 		t.Fatalf("balances: %+v %v", data.Timing, err)
 	}
+	// A resignation submitted while the timeout transaction owns the
+	// authoritative session revision cannot record a second terminal event.
+	resignID := bc06ActionID(t)
+	resignation := make(chan error, 1)
+	go func() {
+		_, err := handler.Sessions.Act(ctx, memberB, match.ID, ClassicSessionAction{
+			RequestID: resignID, Action: "resign", ExpectedSequence: 3,
+		})
+		resignation <- err
+	}()
 	if err := handler.Sessions.expireLocked(ctx, tx, &rec, *rec.Deadline); err != nil {
 		t.Fatal(err)
 	}
 	if err := tx.Commit(); err != nil {
 		t.Fatal(err)
 	}
+	if err := <-resignation; err != ErrConflict {
+		t.Fatalf("concurrent resignation after flag fall: %v", err)
+	}
+
 	if err := handler.Sessions.VerifyRules(ctx, match.ID); err != nil {
 		t.Fatal(err)
 	}

@@ -73,3 +73,49 @@ func TestBC32OpeningPrefixResignation(t *testing.T) {
 		}
 	}
 }
+
+func TestBC32ReachabilitySlicingMatchesSingleBatch(t *testing.T) {
+	board, err := parseChessFEN("7k/8/5KQ1/8/8/8/8/8 w - - 0 1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sliced, err := newChessReachabilityJob(board, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	whole, err := newChessReachabilityJob(board, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result, err := whole.advance(128); err != nil || result != chessMatePossible {
+		t.Fatalf("whole search: %v %v", result, err)
+	}
+	for sliced.Cursor < whole.Cursor {
+		if _, err := sliced.advance(1); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want, err := whole.checkpoint()
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := sliced.checkpoint()
+	if err != nil || string(got) != string(want) {
+		t.Fatal("single-step traversal changed the checkpoint", err)
+	}
+}
+
+func TestBC32SicilianResignation(t *testing.T) {
+	adapter, state := bc321Adapter(t)
+	for i, uci := range []string{"e2e4", "c7c5", "g1f3"} {
+		next, _, _, _, err := adapter.Apply(state, i%2, chessAction("move", uci))
+		if err != nil {
+			t.Fatal(uci, err)
+		}
+		state = next
+	}
+	_, _, done, winner, err := adapter.Apply(state, 0, chessAction("resign", ""))
+	if err != nil || !done || winner == nil || *winner != 1 {
+		t.Fatalf("White resignation: %v %v %v", done, winner, err)
+	}
+}

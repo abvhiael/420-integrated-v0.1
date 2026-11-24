@@ -89,6 +89,25 @@ func TestServiceBecomesReadyOnlyAfterQualification(t *testing.T) {
 	assertReadyStatus(t, svc, http.StatusOK)
 }
 
+func TestReadyRechecksCanonicalChainAfterStartup(t *testing.T) {
+	probe := &fakeProbe{chainID: 420}
+	svc, err := NewService(validConfig(), probe)
+	if err != nil { t.Fatal(err) }
+	if err := svc.Qualify(context.Background()); err != nil { t.Fatal(err) }
+	assertReadyStatus(t, svc, http.StatusOK)
+
+	probe.chainID = 421
+	assertReadyStatus(t, svc, http.StatusServiceUnavailable)
+	probe.chainID = 420
+	probe.codeErr = errors.New("RPC disconnected")
+	// The failed probe must not be cached as healthy.
+	assertReadyStatus(t, svc, http.StatusServiceUnavailable)
+	probe.codeErr = nil
+	// A restored RPC requires a successful fresh qualification.
+	if err := svc.Qualify(context.Background()); err != nil { t.Fatal(err) }
+	assertReadyStatus(t, svc, http.StatusOK)
+}
+
 func TestHealthDoesNotClaimCanonicalAuthority(t *testing.T) {
 	svc, err := NewService(validConfig(), fakeProbe{chainID: 420})
 	if err != nil {

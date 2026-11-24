@@ -108,3 +108,20 @@ test('BC-2.4 every printed decade is tied to both real route segments',()=>{
  const forged={...atlas,tracks:[atlas.tracks[0],atlas.tracks[0]]};
  assert.equal(validateLabyrinthPegAtlas(forged),false);
 });
+
+
+test('owner-traced lanes retain distinct homes and share the actual central finish; leapfrog uses confirmed previous scores',()=>{
+ assert.deepEqual(atlas.tracks.map(t=>t.slice(0,3)),[[650,648,647],[651,649,646]]);
+ const out=renderLabyrinthPegOverlay({scores:[5,0],teams:[0,1],previousScores:[2,0]},atlas);
+ assert.equal((out.match(/data-peg-role="previous"/g)||[]).length,2);
+ assert.equal((out.match(/data-peg-role="current"/g)||[]).length,2);
+ assert.match(out,/data-peg-role="previous" data-peg-score="2"/);
+ const start=renderLabyrinthPegOverlay({scores:[0,0],teams:[0,1],previousScores:[0,0]},atlas);
+ assert.match(start,/cx="672" cy="1021"/);
+ assert.match(start,/cx="671" cy="993"/);
+ const first=renderLabyrinthPegOverlay({scores:[1,1],teams:[0,1]},atlas);
+ assert.match(first,/cx="670" cy="859"/);
+ assert.match(first,/cx="647" cy="859"/);
+ const win=renderLabyrinthPegOverlay({scores:[325,325],teams:[0,1]},atlas);
+ assert.equal((win.match(/cx="608" cy="621"/g)||[]).length,2);
+});

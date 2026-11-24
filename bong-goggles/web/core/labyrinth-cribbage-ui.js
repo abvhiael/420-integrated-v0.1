@@ -120,7 +120,7 @@ export function renderLabyrinthBoard({scores=[],teams=[],viewerSeat=0}={}){
   '<div class="lab-board-art"><img src="'+LABYRINTH_BOARD_SRC+
   '" width="1254" height="1254" alt="User-approved labyrinth wood-slice board with printed score guides, shown without alteration" loading="lazy" decoding="async">'+
   '<p hidden data-lab-art-missing role="status">The exact source board image is not installed on this deployment; no substitute artwork is shown.</p></div>'+
-  '<figcaption>Approved original artwork · 325-point finish. Peg placement is withheld until the physical hole sequence is independently verified.</figcaption>'+
+  '<figcaption>Approved original artwork · red and green peg routes · 325-point finish.</figcaption>'+
   '<ol class="lab-board-scores" aria-label="Authoritative scores">'+rows+'</ol></figure>';
 }
 

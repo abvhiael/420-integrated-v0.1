@@ -47,6 +47,7 @@ if(!v||!id(v.id)||!id(v.target)||!Number.isSafeInteger(v.seat)||v.seat<1||v.seat
 return Object.freeze({id:v.id,seat:v.seat,target:v.target,status:v.status});
 });
 if(invites.some(x=>!x))return null;
+if(r.gameId==='chess'&&(r.seatCount!==2||seats.some((s,i)=>s.team!==i)))return null;
 const variantId=r.gameId==='labyrinth-cribbage'?r.variantId:null;
 if(variantId!=null){
  const expected=r.seatCount===2?'labyrinth-2p':r.seatCount===3?'labyrinth-3p':
@@ -179,7 +180,7 @@ throw error;
 const note=message=>'<p class="classic-room__notice" role="status">'+esc(message)+'</p>';
 const roomHref=r=>'/games/rooms/'+r.id;
 const games=CLASSIC_ROADMAP.map(g=>'<option value="'+esc(g.id)+'">'+esc(g.title)+'</option>').join('');
-const teamName=(r,s)=>r.seatCount===4&&new Set(['cribbage','euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
+const teamName=(r,s)=>r.gameId==='chess'?(s.index===0?'White':'Black'):r.seatCount===4&&new Set(['cribbage','euchre','spades','canasta','tarabish','500','120s','deux-cents','rook','kaiser']).has(r.gameId)?
 'Team '+(s.team===0?'A':'B'):r.gameId==='labyrinth-cribbage'&&
  r.variantId==='labyrinth-4p-partners'?'Team '+(s.team===0?'A':'B'):
  'Player '+(s.index+1);
@@ -230,7 +231,7 @@ const labyrinthLink=r.gameId==='labyrinth-cribbage'&&live?.status==='connected'&
  ['active','finished'].includes(live.session.status)?
  '<p><a class="ui-button" href="/games/labyrinth-cribbage/play?session='+
  esc(live.session.id)+'" data-route="classic-game">Resume your private Labyrinth table</a></p>':'';
-const chessLink=chessEnabled&&r.gameId==='chess'&&hasSeat&&live?.session?.gameId==='chess'&&live.session.roomId===r.id&&/^[0-9a-f-]{36}$/.test(live.session.id)?'<p><a class="ui-button" data-route="classic-game" href="/games/chess/play?session='+esc(live.session.id)+'">Resume Chess</a></p>':'';
+const chessLink=chessEnabled&&r.gameId==='chess'&&r.seats.some(s=>s.controller==='human'&&s.subject===state.viewer)&&live?.status==='connected'&&live?.session?.gameId==='chess'&&live.session.roomId===r.id&&/^[0-9a-f-]{36}$/.test(live.session.id)?'<p><a class="ui-button" data-route="classic-game" href="/games/chess/play?session='+esc(live.session.id)+'">Resume Chess</a></p>':'';
 const chessStart=chessEnabled&&r.gameId==='chess'&&isHost&&r.status==='ready'?'<form data-chess-room-start><label>Clock <select name="clockProfile">'+['untimed','1+0','2+1','3+0','3+2','5+0','5+3','10+0','15+10','30+0','30+30','60+0'].map(x=>'<option>'+x+'</option>').join('')+'</select></label><button type="submit">Start Chess</button></form>':'';
 return '<section class="classic-room__detail"><p><a href="'+(r.gameId==='cribbage'?'/games/cribbage/history':'/games/rooms')+'" data-route="'+(r.gameId==='cribbage'?'classic-game':'classic-rooms')+'">← '+(r.gameId==='cribbage'?'Cribbage · My Games':'All rooms')+'</a></p>'+
 '<h2>'+esc(title(r.gameId))+' · '+esc(r.visibility)+' room</h2>'+

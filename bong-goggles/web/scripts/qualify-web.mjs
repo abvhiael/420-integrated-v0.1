@@ -78,7 +78,7 @@ for(const [name,baseline] of Object.entries(chessBaselines)){
  if(!Number.isSafeInteger(size)||growth<0||growth>3072)throw Error('BC-3.4 shared integration growth outside scope: '+name);
  chessBytes+=growth;regularSizes.set(name,baseline);
 }
-for(const [name,cap] of Object.entries({'core/chess-session.js':12288,'core/chess-runtime.js':12288,'core/chess-ui.js':16384,'chess.css':4096})){
+for(const [name,cap] of Object.entries({'core/chess-social.js':12288,'core/chess-session.js':12288,'core/chess-runtime.js':12288,'core/chess-ui.js':16384,'chess.css':4096})){
  const size=regularSizes.get(name);
  if(!Number.isSafeInteger(size)||size<256||size>cap)throw Error('BC-3.4 missing or oversized module: '+name);
  chessBytes+=size;

@@ -34,6 +34,19 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   history,e:=h.Sessions.History(ctx,viewer);if e!=nil{classicRoomError(w,e);return}
   writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
  }
+ if path=="/v1/classic-sessions/history-chess"&&r.Method=="GET"{
+  rule,e:=h.Sessions.rule("chess","","");if e!=nil||!isClassicChess(rule){deny(w,404);return}
+  history,e:=h.Sessions.HistoryForGame(ctx,viewer,"chess");if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,200,map[string]any{"history":history,"onChain":false,"wager":false,"rewards":false});return
+ }
+ if path=="/v1/classic-sessions/challenge-chess"&&r.Method=="POST"{
+  rule,e:=h.Sessions.rule("chess","","");if e!=nil||!isClassicChess(rule){deny(w,404);return}
+  var req struct{Target string `json:"target"`;RequestID string `json:"requestId"`}
+  if strictJSON(r,&req)!=nil{deny(w,400);return}
+  room,e:=h.Sessions.ChallengeForGame(ctx,viewer,req.Target,req.RequestID,"chess")
+  if e!=nil{classicRoomError(w,e);return}
+  writeJSON(w,201,map[string]any{"room":room,"onChain":false,"wager":false,"rewards":false,"playable":false});return
+ }
  if path=="/v1/classic-sessions/history-labyrinth"&&r.Method=="GET"{
   if !h.classicLabyrinthMatchEnabled{deny(w,404);return}
   history,e:=h.Sessions.HistoryForGame(ctx,viewer,"labyrinth-cribbage")
@@ -65,7 +78,6 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   writeJSON(w,200,map[string]any{"session":state,"onChain":false,"wager":false,"rewards":false});return
  }
  if len(parts)==2&&parts[1]=="rematch"&&r.Method=="POST"{
-  if !h.classicMatchSocialEnabled&&!h.classicLabyrinthMatchEnabled{deny(w,404);return}
   // Enforce consent-mode ownership against the *authenticated and verified*
   // source session, not a browser-supplied game ID. A Labyrinth-only opt-in
   // never activates standard Cribbage challenges or rematches.
@@ -73,7 +85,7 @@ func (h *Handler) classicSessionsHTTP(ctx context.Context,w http.ResponseWriter,
   if e!=nil{classicRoomError(w,e);return}
   if source.GameID=="cribbage"&&!h.classicMatchSocialEnabled||
      source.GameID=="labyrinth-cribbage"&&!h.classicLabyrinthMatchEnabled||
-     source.GameID!="cribbage"&&source.GameID!="labyrinth-cribbage"{deny(w,404);return}
+     source.GameID!="cribbage"&&source.GameID!="labyrinth-cribbage"&&source.GameID!="chess"{deny(w,404);return}
   var req struct{RequestID string `json:"requestId"`}
   if strictJSON(r,&req)!=nil{deny(w,400);return}
   room,e:=h.Sessions.Rematch(ctx,viewer,id,req.RequestID)

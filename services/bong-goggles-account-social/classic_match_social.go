@@ -46,7 +46,7 @@ func (s *ClassicSessions) History(ctx context.Context,viewer string)(ClassicHist
 // separate 325-point account-only history and private invitation inbox.
 func (s *ClassicSessions) HistoryForGame(ctx context.Context,viewer,game string)(ClassicHistory,error){
  out:=ClassicHistory{Matches:[]ClassicHistoryMatch{},Invitations:[]ClassicPendingInvitation{}}
- if !uuid.MatchString(viewer)||(game!="cribbage"&&game!="labyrinth-cribbage"){return out,ErrInvalid}
+ if !uuid.MatchString(viewer)||(game!="cribbage"&&game!="labyrinth-cribbage"&&game!="chess"){return out,ErrInvalid}
  list,e:=s.List(ctx,viewer);if e!=nil{return out,e}
  for _,summary:=range list{
   if summary.GameID!=game{continue}
@@ -141,7 +141,8 @@ func previousMatchRequest(ctx context.Context,tx *sql.Tx,viewer,requestID string
  return roomID,nil
 }
 func newMatchLobby(ctx context.Context,tx *sql.Tx,viewer,requestID string,digest [32]byte,game string,seats []ClassicSeat,source any)(string,error){
- if (game!="cribbage"&&game!="labyrinth-cribbage")||len(seats)<2||len(seats)>4||seats[0].Subject!=viewer||seats[0].Controller!="human"{return "",ErrInvalid}
+ if (game!="cribbage"&&game!="labyrinth-cribbage"&&game!="chess")||len(seats)<2||len(seats)>4||seats[0].Subject!=viewer||seats[0].Controller!="human"{return "",ErrInvalid}
+ if game=="chess"&&len(seats)!=2{return "",ErrInvalid}
  format:=""
  if game=="labyrinth-cribbage"&&len(seats)==4&&seats[0].Team!=seats[2].Team{format="individual"}
  if game=="labyrinth-cribbage"&&len(seats)==4&&format==""{format="partnerships"}
@@ -195,11 +196,12 @@ func (s *ClassicSessions) Challenge(ctx context.Context,viewer,target,requestID 
 func (s *ClassicSessions) ChallengeForGame(ctx context.Context,viewer,target,requestID,game string)(ClassicRoomView,error){
  var empty ClassicRoomView
  if !uuid.MatchString(viewer)||!uuid.MatchString(target)||!uuid.MatchString(requestID)||viewer==target||
-  (game!="cribbage"&&game!="labyrinth-cribbage"){return empty,ErrInvalid}
+  (game!="cribbage"&&game!="labyrinth-cribbage"&&game!="chess"){return empty,ErrInvalid}
  if _,e:=s.rule(game,"","");e!=nil{return empty,e}
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
  kind:="challenge"
  if game=="labyrinth-cribbage"{kind="labyrinth-challenge"}
+ if game=="chess"{kind="chess-challenge"}
  digest:=matchRequestDigest(kind,target)
  // A reused request ID with changed intent must conflict even when the
  // newly supplied target no longer exists. Recheck after the peer lock to
@@ -231,7 +233,7 @@ func (s *ClassicSessions) Rematch(ctx context.Context,viewer,oldID,requestID str
  if !uuid.MatchString(viewer)||!uuid.MatchString(oldID)||!uuid.MatchString(requestID){return empty,ErrInvalid}
  previous,e:=s.Get(ctx,viewer,oldID)
  if e!=nil{return empty,e}
- if previous.GameID!="cribbage"&&previous.GameID!="labyrinth-cribbage"||previous.Status!="finished"&&previous.Status!="resigned"&&previous.Status!="timed_out"{
+ if previous.GameID!="cribbage"&&previous.GameID!="labyrinth-cribbage"&&previous.GameID!="chess"||previous.Status!="finished"&&previous.Status!="resigned"&&previous.Status!="timed_out"{
   return empty,ErrConflict
  }
  tx,e:=s.Store.DB.BeginTx(ctx,nil);if e!=nil{return empty,e};defer tx.Rollback()
